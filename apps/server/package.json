@@ -1,0 +1,21 @@
+{
+  "name": "@weishan/server",
+  "version": "1.7.08",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "check": "node --check src/server.js && node --check src/emailRisk.js && node --check src/smoke-test.js",
+    "smoke": "node src/smoke-test.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "imapflow": "^1.0.0",
+    "mailparser": "^3.9.8",
+    "resend": "^4.1.2"
+  },
+  "description": "weishan local API server"
+}

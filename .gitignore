@@ -1,0 +1,41 @@
+node_modules/
+dist/
+build/
+.next/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+logs/
+*.db
+*.sqlite
+.DS_Store
+._*
+
+# weishan local patch / backup files
+*.bak
+*.bak-*
+.weishan-backup-*/
+weishan_v1_*/
+remove_duplicate_*.py
+test_clean.py
+
+# old local experiments / temporary files
+*.bak*
+apps/desktop/src/email_account_connect_hook.js
+apps/desktop/src/mail_module/
+apps/server/src/v17/
+docs/v1.7.0-gmail-oauth.md
+
+# weishan local mail credentials
+apps/server/.weishan-mail-account.local.json
+.weishan-mail-account.local.json
+
+.weishan-mail-sync.local.json
+
+# local real mail data - never commit
+.weishan-mail-account.local.json
+.weishan-mail-sync.local.json
+apps/server/.weishan-mail-account.local.json
+apps/server/.weishan-mail-sync.local.json

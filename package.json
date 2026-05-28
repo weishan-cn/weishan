@@ -1,0 +1,29 @@
+{
+  "name": "weishan-desktop",
+  "version": "1.7.08",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix apps/server && npm install --prefix apps/desktop",
+    "dev": "node scripts/dev.js",
+    "dev:server": "npm run dev --prefix apps/server",
+    "dev:desktop": "npm run dev --prefix apps/desktop",
+    "start:server": "npm run start --prefix apps/server",
+    "check": "node scripts/check.js",
+    "healthcheck": "node scripts/healthcheck.js",
+    "secrets:scan": "node scripts/secret-scan.js",
+    "verify": "node scripts/verify.js core",
+    "verify:all": "node scripts/verify.js all",
+    "verify:e2e": "node scripts/verify.js e2e",
+    "test:e2e": "playwright test",
+    "test:e2e:local": "playwright test tests/e2e/local-workflows.spec.js",
+    "test:e2e:security": "playwright test tests/e2e/security-audit.spec.js",
+    "test:e2e:smoke": "playwright test tests/e2e/smoke.spec.js",
+    "smoke": "npm run smoke --prefix apps/server",
+    "build:mac": "npm run build:mac --prefix apps/desktop",
+    "build:win": "npm run build:win --prefix apps/desktop"
+  },
+  "description": "weishan desktop MVP with local-first Electron client and local API server.",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}

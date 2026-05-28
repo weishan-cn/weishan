@@ -1,0 +1,30 @@
+name: weishan check
+
+on:
+  push:
+    branches:
+      - v2.0.6-nav-brain-status-stable
+  pull_request:
+    branches:
+      - v2.0.6-nav-brain-status-stable
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify
+        run: npm run verify

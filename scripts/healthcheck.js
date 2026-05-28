@@ -1,0 +1,166 @@
+const { existsSync, readFileSync, readdirSync, statSync } = require("fs");
+const { join, relative } = require("path");
+const { runSecretScan } = require("./secret-scan");
+
+const root = join(__dirname, "..");
+
+function readText(file) {
+  try {
+    return readFileSync(join(root, file), "utf8");
+  } catch (_) {
+    return "";
+  }
+}
+
+function result(name, status, detail, suggestion) {
+  return { name, status, detail, suggestion: suggestion || "" };
+}
+
+function hasFile(file) {
+  return existsSync(join(root, file));
+}
+
+function statusRank(status) {
+  if (status === "fail") return 3;
+  if (status === "warn") return 2;
+  return 1;
+}
+
+function overall(results) {
+  if (results.some((item) => item.status === "fail")) return "FAIL";
+  if (results.some((item) => item.status === "warn")) return "WARN";
+  return "PASS";
+}
+
+function checkFiles() {
+  const files = [
+    "apps/desktop/src/main.js",
+    "apps/desktop/src/preload.js",
+    "apps/desktop/src/renderer/main.js",
+    "apps/desktop/src/renderer/routes/HomePage.js",
+    "apps/desktop/src/renderer/routes/MailPage.js",
+    "apps/desktop/src/renderer/routes/CrawlerPage.js",
+    "apps/desktop/src/renderer/routes/BuilderPage.js",
+    "apps/desktop/src/renderer/routes/ProjectsPage.js",
+    "apps/desktop/src/renderer/routes/MemoryPage.js",
+    "apps/desktop/src/renderer/routes/HistoryPage.js",
+    "apps/desktop/src/renderer/routes/AuditPage.js",
+    "apps/desktop/src/renderer/routes/SecurityPage.js",
+    "apps/desktop/src/renderer/core/enterpriseSecurity.js",
+    "apps/desktop/src/renderer/core/taskProtocol.js"
+  ];
+  return files.map((file) => result("file:" + file, hasFile(file) ? "pass" : "fail", hasFile(file) ? "exists" : "missing", "Restore the expected project file."));
+}
+
+function checkPackageScripts() {
+  const pkg = JSON.parse(readText("package.json") || "{}");
+  const scripts = pkg.scripts || {};
+  return ["check", "dev:desktop", "healthcheck", "secrets:scan", "test:e2e", "test:e2e:smoke"].map((script) => {
+    const ok = Boolean(scripts[script]);
+    const status = ok ? "pass" : (script === "healthcheck" ? "warn" : "fail");
+    return result("script:" + script, status, ok ? scripts[script] : "missing", "Add the missing package script.");
+  });
+}
+
+function marker(file, pattern, name, required) {
+  const text = readText(file);
+  const ok = pattern.test(text);
+  return result(name, ok ? "pass" : (required ? "fail" : "warn"), ok ? "found" : "not found", "Check module integration markers.");
+}
+
+function checkMarkers() {
+  return [
+    marker("apps/desktop/src/renderer/core/taskProtocol.js", /createTaskRecord|addTaskArtifact|TASK_PROTOCOL_VERSION/, "marker:task protocol helper", true),
+    marker("apps/desktop/src/renderer/modules/history/historyApi.js", /window\.HistoryApi|function record/, "marker:HistoryApi", true),
+    marker("apps/desktop/src/renderer/routes/HistoryPage.js", /artifact|history-artifact-download|URL\.createObjectURL/, "marker:artifact download", false),
+    marker("apps/desktop/src/renderer/core/enterpriseSecurity.js", /WeishanEnterpriseSecurity|canDownload|createSecurityAuditPayload/, "marker:enterprise security", true),
+    marker("apps/desktop/src/renderer/routes/AuditPage.js", /audit\.export|risk|HistoryApi\.list/, "marker:audit actions", false),
+    marker("apps/desktop/src/renderer/core/enterpriseSecurity.js", /canInviteOrganization|createCollaborationAuditPayload|getEnterpriseOrgCatalog/, "marker:collaboration invite audit", true),
+    marker("playwright.config.js", /testDir:\s*["']\.\/tests\/e2e["']|reporter|trace/, "marker:playwright config", false),
+    marker("tests/e2e/smoke.spec.js", /app launches|home page visible|crawler page visible/, "marker:playwright smoke", false)
+  ];
+}
+
+function walk(dir, files) {
+  if (!existsSync(dir)) return files;
+  readdirSync(dir).forEach((entry) => {
+    const full = join(dir, entry);
+    const stat = statSync(full);
+    if (stat.isDirectory()) {
+      if (entry !== "node_modules" && entry !== "dist" && entry !== "build") walk(full, files);
+    } else if (/\.(js|html|json)$/.test(entry) && !/package-lock\.json$/.test(entry)) {
+      files.push(full);
+    }
+  });
+  return files;
+}
+
+function checkSecretWords() {
+  const scan = runSecretScan();
+  const status = scan.status === "FAIL" ? "fail" : (scan.status === "WARN" ? "warn" : "pass");
+  return [
+    result("secret scan available", "pass", "scripts/secret-scan.js"),
+    result(
+      "secret scan result",
+      status,
+      "scannedFiles=" + scan.scannedFiles + ", warn=" + (scan.counts.warn || 0) + ", fail=" + (scan.counts.fail || 0),
+      "Remove literal secrets, use Secure Storage or environment variables, and rotate exposed keys."
+    )
+  ];
+}
+
+function buildResults() {
+  return []
+    .concat(checkFiles())
+    .concat(checkPackageScripts())
+    .concat(checkMarkers())
+    .concat(checkSecretWords());
+}
+
+function markdown(results) {
+  const state = overall(results);
+  const counts = results.reduce((acc, item) => {
+    acc[item.status] = (acc[item.status] || 0) + 1;
+    return acc;
+  }, {});
+  return [
+    "# weishan 自检报告",
+    "",
+    "检测时间：" + new Date().toISOString(),
+    "总体状态：" + state,
+    "通过：" + (counts.pass || 0) + "，警告：" + (counts.warn || 0) + "，失败：" + (counts.fail || 0),
+    "",
+    "## 检测结果",
+    "",
+    "| 项目 | 状态 | 说明 | 修复建议 |",
+    "| --- | --- | --- | --- |",
+    ...results.map((item) => "| " + item.name + " | " + item.status + " | " + item.detail + " | " + (item.suggestion || "-") + " |"),
+    "",
+    "## 未覆盖",
+    "",
+    "- Playwright E2E",
+    "- PocketBase 真实连接",
+    "- Wasabi 真实连接",
+    "- Gitleaks 深度密钥扫描",
+    "- GitHub Actions"
+  ].join("\n");
+}
+
+function printList(results) {
+  results
+    .slice()
+    .sort((a, b) => statusRank(b.status) - statusRank(a.status) || a.name.localeCompare(b.name))
+    .forEach((item) => {
+      console.log("[" + item.status.toUpperCase() + "] " + item.name + " - " + item.detail);
+    });
+  console.log("HEALTHCHECK " + overall(results));
+}
+
+const results = buildResults();
+if (process.argv.includes("--markdown")) {
+  console.log(markdown(results));
+} else {
+  printList(results);
+}
+
+if (overall(results) === "FAIL") process.exitCode = 1;
