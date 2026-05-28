@@ -3,10 +3,10 @@ name: weishan check
 on:
   push:
     branches:
-      - v2.0.6-nav-brain-status-stable
+      - main
   pull_request:
     branches:
-      - v2.0.6-nav-brain-status-stable
+      - main
 
 jobs:
   check:
