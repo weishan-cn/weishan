@@ -325,6 +325,105 @@
     const checks=window.SecurityApi.checks();
     return checks.map(c=>`<div class="ws-card"><h3>${label(c.name)}</h3><b>${label(c.status)}</b><p>${label(c.detail)}</p></div>`).join("");
   }
+  function repairCenter(){ return window.WeishanRepairCenter || null; }
+  function repairIssues(){
+    const repair = repairCenter();
+    return repair && repair.listRepairIssues ? repair.listRepairIssues() : [];
+  }
+  function latestRepairIssue(){ return repairIssues()[0] || null; }
+  function repairCounts(){
+    const items = repairIssues();
+    return {
+      total:items.length,
+      telemetryReady:items.filter((item) => item && item.telemetryReady).length,
+      latest:items[0] || null
+    };
+  }
+  function downloadRepairArtifact(artifact){
+    if (!artifact || typeof artifact.content !== "string") return;
+    const blob = new Blob([artifact.content], { type:artifact.mimeType || "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = artifact.filename || "weishan-repair-report.md";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+  function renderRepairCenter(){
+    const repair = repairCenter();
+    if (!repair) {
+      return `<div class="ws-card"><h3>修护中心</h3><p class="ws-muted">修护中心正在加载，请稍后刷新本页。</p></div>`;
+    }
+    const c = repairCounts();
+    const latest = c.latest;
+    return `<div class="ws-card" id="repairCenter">
+      <h3>修护中心</h3>
+      <p class="ws-muted">记录运行错误和修护结果。默认只生成本地脱敏报告，不上传源码、密钥、prompt、邮件或文件内容。</p>
+      <div class="ws-row">
+        <span class="tag">记录 ${esc(c.total)}</span>
+        <span class="tag">待上传 payload ${esc(c.telemetryReady)}</span>
+        ${latest ? `<span class="tag">最近：${esc(latest.errorName)} · ${esc(latest.status)}</span>` : `<span class="tag">暂无问题</span>`}
+      </div>
+      ${latest ? `<p class="ws-muted">最近摘要：${esc(latest.errorMessageSummary)}</p><p class="ws-muted">指纹：${esc(latest.fingerprint)}</p>` : ""}
+      <div class="ws-row">
+        <button id="createRepairTest" type="button" class="ws-btn">生成测试修护记录</button>
+        <button id="markRepairSuggested" type="button" class="ws-btn gray">标记为已建议修护</button>
+        <button id="markRepairVerified" type="button" class="ws-btn gray">标记为已验证</button>
+        <button id="downloadRepairReport" type="button" class="ws-btn gray">下载修护报告</button>
+        <button id="cleanupRepairE2E" type="button" class="ws-btn gray">清理 E2E 修护测试记录</button>
+      </div>
+    </div>`;
+  }
+  function refreshRepairCenter(){
+    const node = document.getElementById("repairCenterHost");
+    if (node) node.innerHTML = renderRepairCenter();
+    bindRepairButtons();
+  }
+  function bindRepairButtons(){
+    const repair = repairCenter();
+    if (!repair) return;
+    const createBtn = document.getElementById("createRepairTest");
+    const suggestedBtn = document.getElementById("markRepairSuggested");
+    const verifiedBtn = document.getElementById("markRepairVerified");
+    const downloadBtn = document.getElementById("downloadRepairReport");
+    const cleanupBtn = document.getElementById("cleanupRepairE2E");
+    if (createBtn) createBtn.addEventListener("click", () => {
+      repair.createManualRepairIssue({
+        module:"security",
+        action:"repairCenterTest",
+        errorName:"RepairCenterTestIssue",
+        errorMessageSummary:"本地修护中心测试记录，不包含用户内容。",
+        stackSummary:"SecurityPage.js:repairCenterTest",
+        source:"manual",
+        severity:"low",
+        runId:window.__WEISHAN_E2E_REPAIR_RUN_ID || "manual-repair-test"
+      });
+      refreshRepairCenter();
+    });
+    if (suggestedBtn) suggestedBtn.addEventListener("click", () => {
+      const latest = latestRepairIssue();
+      if (latest) repair.markRepairSuggested(latest.repairId, "建议修护：保留脱敏指纹，人工确认模块入口和复现步骤。");
+      refreshRepairCenter();
+    });
+    if (verifiedBtn) verifiedBtn.addEventListener("click", () => {
+      const latest = latestRepairIssue();
+      if (latest) repair.markRepairVerified(latest.repairId, "验证通过：本地记录、报告和历史留痕均已生成。");
+      refreshRepairCenter();
+    });
+    if (downloadBtn) downloadBtn.addEventListener("click", () => {
+      const latest = latestRepairIssue();
+      if (!latest) return;
+      const artifact = repair.createRepairReportArtifact(latest, "markdown");
+      downloadRepairArtifact(artifact);
+      refreshRepairCenter();
+    });
+    if (cleanupBtn) cleanupBtn.addEventListener("click", () => {
+      repair.cleanupE2ERepairIssues("E2EREPAIR");
+      refreshRepairCenter();
+    });
+  }
   function mount(host){
     host.innerHTML=`<section class="ws-page">
       <div class="ws-card">
@@ -341,6 +440,7 @@
         <p class="ws-muted">PocketBase / Wasabi / Playwright / Gitleaks 为后续检测项，本轮未接入。</p>
       </div>
       <div id="selfCheckResult">${renderDiagnostics(lastDiagnostics)}</div>
+      <div id="repairCenterHost">${renderRepairCenter()}</div>
       <div class="card-list">${renderSecurityChecks()}</div>
     </section>`;
     document.getElementById("runSelfCheck").addEventListener("click", async () => {
@@ -353,6 +453,7 @@
       document.getElementById("selfCheckResult").innerHTML = renderDiagnostics(data);
       downloadArtifact(data.artifacts && data.artifacts[0]);
     });
+    bindRepairButtons();
   }
   window.SecurityPage = { mount };
 })();

@@ -53,6 +53,7 @@ function runE2e() {
     runStep("E2E smoke", "npm", ["run", "test:e2e:smoke"]);
     runStep("E2E local workflows", "npm", ["run", "test:e2e:local"]);
     runStep("E2E security audit", "npm", ["run", "test:e2e:security"]);
+    runStep("E2E repair center", "npm", ["run", "test:e2e:repair"]);
   } finally {
     cleanupPlaywrightArtifacts();
   }

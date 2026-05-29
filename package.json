@@ -16,6 +16,7 @@
     "verify:e2e": "node scripts/verify.js e2e",
     "test:e2e": "playwright test",
     "test:e2e:local": "playwright test tests/e2e/local-workflows.spec.js",
+    "test:e2e:repair": "playwright test tests/e2e/repair-center.spec.js",
     "test:e2e:security": "playwright test tests/e2e/security-audit.spec.js",
     "test:e2e:smoke": "playwright test tests/e2e/smoke.spec.js",
     "smoke": "npm run smoke --prefix apps/server",

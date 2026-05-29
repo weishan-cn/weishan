@@ -47,6 +47,7 @@ function checkFiles() {
     "apps/desktop/src/renderer/routes/AuditPage.js",
     "apps/desktop/src/renderer/routes/SecurityPage.js",
     "apps/desktop/src/renderer/core/enterpriseSecurity.js",
+    "apps/desktop/src/renderer/core/repairCenter.js",
     "apps/desktop/src/renderer/core/taskProtocol.js"
   ];
   return files.map((file) => result("file:" + file, hasFile(file) ? "pass" : "fail", hasFile(file) ? "exists" : "missing", "Restore the expected project file."));
@@ -55,7 +56,7 @@ function checkFiles() {
 function checkPackageScripts() {
   const pkg = JSON.parse(readText("package.json") || "{}");
   const scripts = pkg.scripts || {};
-  return ["check", "dev:desktop", "healthcheck", "secrets:scan", "test:e2e", "test:e2e:smoke"].map((script) => {
+  return ["check", "dev:desktop", "healthcheck", "secrets:scan", "test:e2e", "test:e2e:smoke", "test:e2e:repair"].map((script) => {
     const ok = Boolean(scripts[script]);
     const status = ok ? "pass" : (script === "healthcheck" ? "warn" : "fail");
     return result("script:" + script, status, ok ? scripts[script] : "missing", "Add the missing package script.");
@@ -76,6 +77,10 @@ function checkMarkers() {
     marker("apps/desktop/src/renderer/core/enterpriseSecurity.js", /WeishanEnterpriseSecurity|canDownload|createSecurityAuditPayload/, "marker:enterprise security", true),
     marker("apps/desktop/src/renderer/routes/AuditPage.js", /audit\.export|risk|HistoryApi\.list/, "marker:audit actions", false),
     marker("apps/desktop/src/renderer/core/enterpriseSecurity.js", /canInviteOrganization|createCollaborationAuditPayload|getEnterpriseOrgCatalog/, "marker:collaboration invite audit", true),
+    marker("apps/desktop/src/renderer/core/repairCenter.js", /WeishanRepairCenter|recordRuntimeError|installRepairErrorCapture/, "marker:repair center core", true),
+    marker("apps/desktop/src/renderer/core/repairCenter.js", /sanitizeRepairText|sanitizeStack|createSafeTelemetryPayload/, "marker:repair telemetry sanitizer", true),
+    marker("apps/desktop/src/renderer/core/repairCenter.js", /repair\.bugDetected|repair\.suggested|repair\.verified|repair\.reportExported/, "marker:repair history actions", true),
+    marker("apps/desktop/src/renderer/core/repairCenter.js", /pending_manual_or_cloud_opt_in|clientMode:\s*["']local["']/, "marker:repair upload safety", true),
     marker("playwright.config.js", /testDir:\s*["']\.\/tests\/e2e["']|reporter|trace/, "marker:playwright config", false),
     marker("tests/e2e/smoke.spec.js", /app launches|home page visible|crawler page visible/, "marker:playwright smoke", false)
   ];
