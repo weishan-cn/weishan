@@ -19,6 +19,8 @@ class MetadataAdapter {
   async getStorageAllocation() { throw new Error("Not implemented"); }
   async createStorageAllocation() { throw new Error("Not implemented"); }
   async getStorageUsage() { throw new Error("Not implemented"); }
+  async listOrganizationMembers() { throw new Error("Not implemented"); }
+  async createOrganizationMember() { throw new Error("Not implemented"); }
   async recordFileIndex() { throw new Error("Not implemented"); }
   async recordAuditLog() { throw new Error("Not implemented"); }
   async testConnection() { throw new Error("Not implemented"); }
@@ -29,11 +31,17 @@ class LocalMockMetadataAdapter extends MetadataAdapter {
     super(Object.assign({}, config, { provider:"local_mock" }));
     this.provider = "local_mock";
     this.plans = [
-      { planId:"free_local", name:"Free Local", quotaGb:0, cloudEnabled:false },
-      { planId:"personal_cloud_mock", name:"Personal Cloud Mock", quotaGb:20, cloudEnabled:true },
-      { planId:"enterprise_cloud_mock", name:"Enterprise Cloud Mock 1TB", quotaGb:1024, cloudEnabled:true }
+      { planId:"free_local", planType:"personal", region:"local", name:"Free Local", storageQuotaGb:0, quotaGb:0, memberLimit:1, cloudEnabled:false, localStorageWarning:"免费个人用户默认 local only，本地数据仅保存在当前设备。" },
+      { planId:"personal_cloud_mock", planType:"personal", region:"mock", name:"Personal Cloud Mock", storageQuotaGb:20, quotaGb:20, memberLimit:1, cloudEnabled:true },
+      { planId:"enterprise_basic_cn", planType:"enterprise", region:"cn", name:"企业基础版 中国区", storageQuotaGb:300, quotaGb:300, memberLimit:5, cloudEnabled:true },
+      { planId:"enterprise_standard_cn", planType:"enterprise", region:"cn", name:"企业标准版 中国区", storageQuotaGb:1024, quotaGb:1024, memberLimit:20, cloudEnabled:true },
+      { planId:"enterprise_advanced_cn", planType:"enterprise", region:"cn", name:"企业高级版 中国区", storageQuotaGb:5120, quotaGb:5120, memberLimit:50, cloudEnabled:true },
+      { planId:"enterprise_basic_global", planType:"enterprise", region:"global", name:"Enterprise Basic Global", storageQuotaGb:300, quotaGb:300, memberLimit:5, cloudEnabled:true },
+      { planId:"enterprise_standard_global", planType:"enterprise", region:"global", name:"Enterprise Standard Global", storageQuotaGb:1024, quotaGb:1024, memberLimit:20, cloudEnabled:true },
+      { planId:"enterprise_advanced_global", planType:"enterprise", region:"global", name:"Enterprise Advanced Global", storageQuotaGb:5120, quotaGb:5120, memberLimit:50, cloudEnabled:true }
     ];
     this.allocations = new Map();
+    this.organizationMembers = new Map();
     this.fileIndex = [];
     this.auditLogs = [];
   }
@@ -69,6 +77,8 @@ class LocalMockMetadataAdapter extends MetadataAdapter {
       planId:input.planId || "",
       provider:input.provider || "local_mock",
       quotaGb:Number(input.quotaGb || 0),
+      storageQuotaGb:Number(input.storageQuotaGb || input.quotaGb || 0),
+      memberLimit:Number(input.memberLimit || 0),
       pathPrefix:input.pathPrefix || "",
       createdAt:new Date().toISOString()
     };
@@ -78,6 +88,29 @@ class LocalMockMetadataAdapter extends MetadataAdapter {
 
   async getStorageUsage({ storageId } = {}) {
     return { ok:true, storageId:storageId || "", usedBytes:0, fileCount:0 };
+  }
+
+  async listOrganizationMembers({ organizationId } = {}) {
+    const key = organizationId || "local-organization";
+    return (this.organizationMembers.get(key) || []).slice();
+  }
+
+  async createOrganizationMember(input = {}) {
+    const organizationId = input.organizationId || "local-organization";
+    const members = this.organizationMembers.get(organizationId) || [];
+    const member = {
+      memberId:input.memberId || "member-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6),
+      organizationId,
+      email:input.email || "",
+      name:input.name || "",
+      role:input.role || "member",
+      status:input.status || "invited",
+      createdAt:new Date().toISOString(),
+      updatedAt:new Date().toISOString()
+    };
+    members.push(member);
+    this.organizationMembers.set(organizationId, members);
+    return member;
   }
 
   async recordFileIndex(input = {}) {
@@ -112,6 +145,8 @@ class PocketBaseMetadataAdapterSkeleton extends MetadataAdapter {
   async getStorageAllocation() { throw this.notConfigured(); }
   async createStorageAllocation() { throw this.notConfigured(); }
   async getStorageUsage() { throw this.notConfigured(); }
+  async listOrganizationMembers() { throw this.notConfigured(); }
+  async createOrganizationMember() { throw this.notConfigured(); }
   async recordFileIndex() { throw this.notConfigured(); }
   async recordAuditLog() { throw this.notConfigured(); }
 
@@ -135,6 +170,8 @@ class UnsupportedMetadataAdapter extends MetadataAdapter {
   async getStorageAllocation() { throw this.notConfigured(); }
   async createStorageAllocation() { throw this.notConfigured(); }
   async getStorageUsage() { throw this.notConfigured(); }
+  async listOrganizationMembers() { throw this.notConfigured(); }
+  async createOrganizationMember() { throw this.notConfigured(); }
   async recordFileIndex() { throw this.notConfigured(); }
   async recordAuditLog() { throw this.notConfigured(); }
 

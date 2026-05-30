@@ -2,7 +2,15 @@ import { createStorageAdapter } from "./storageAdapter.js";
 import { createMetadataAdapter } from "./metadataAdapter.js";
 
 const PERSONAL_CLOUD_MOCK_QUOTA_GB = 20;
-const ENTERPRISE_CLOUD_MOCK_QUOTA_GB = 1024;
+const DEFAULT_ENTERPRISE_PLAN_ID = "enterprise_standard_cn";
+const ENTERPRISE_PLAN_FALLBACKS = {
+  enterprise_basic_cn:{ storageQuotaGb:300, quotaGb:300, memberLimit:5, region:"cn" },
+  enterprise_standard_cn:{ storageQuotaGb:1024, quotaGb:1024, memberLimit:20, region:"cn" },
+  enterprise_advanced_cn:{ storageQuotaGb:5120, quotaGb:5120, memberLimit:50, region:"cn" },
+  enterprise_basic_global:{ storageQuotaGb:300, quotaGb:300, memberLimit:5, region:"global" },
+  enterprise_standard_global:{ storageQuotaGb:1024, quotaGb:1024, memberLimit:20, region:"global" },
+  enterprise_advanced_global:{ storageQuotaGb:5120, quotaGb:5120, memberLimit:50, region:"global" }
+};
 
 function normalizeOwnerType(ownerType) {
   return ownerType === "organization" ? "organization" : "user";
@@ -18,14 +26,42 @@ function bytesFromGb(gb) {
   return Number(gb || 0) * 1024 * 1024 * 1024;
 }
 
-function defaultQuotaGbFor(ownerType, planId) {
-  if (ownerType === "organization" || planId === "enterprise_cloud_mock") return ENTERPRISE_CLOUD_MOCK_QUOTA_GB;
-  if (planId === "personal_cloud_mock") return PERSONAL_CLOUD_MOCK_QUOTA_GB;
-  return 0;
+async function plansFor(ctx) {
+  const plans = await ctx.metadata.getPlans();
+  return Array.isArray(plans) ? plans : [];
+}
+
+function planFromFallback(planId, ownerType) {
+  const id = planId || defaultPlanIdFor(ownerType);
+  if (ENTERPRISE_PLAN_FALLBACKS[id]) {
+    return Object.assign({ planId:id, planType:"enterprise", cloudEnabled:true }, ENTERPRISE_PLAN_FALLBACKS[id]);
+  }
+  if (id === "personal_cloud_mock") {
+    return { planId:id, planType:"personal", storageQuotaGb:PERSONAL_CLOUD_MOCK_QUOTA_GB, quotaGb:PERSONAL_CLOUD_MOCK_QUOTA_GB, memberLimit:1, cloudEnabled:true };
+  }
+  return { planId:"free_local", planType:"personal", storageQuotaGb:0, quotaGb:0, memberLimit:1, cloudEnabled:false, localStorageWarning:"免费个人用户默认 local only，本地数据仅保存在当前设备。" };
+}
+
+async function planById(ctx, planId, ownerType) {
+  const id = planId || defaultPlanIdFor(ownerType);
+  const plans = await plansFor(ctx);
+  return plans.find((plan) => plan && plan.planId === id) || planFromFallback(id, ownerType);
 }
 
 function defaultPlanIdFor(ownerType) {
-  return ownerType === "organization" ? "enterprise_cloud_mock" : "free_local";
+  return ownerType === "organization" ? DEFAULT_ENTERPRISE_PLAN_ID : "free_local";
+}
+
+function storageQuotaFor(plan) {
+  return Number((plan && (plan.storageQuotaGb || plan.quotaGb)) || 0);
+}
+
+function memberLimitFor(plan) {
+  return Number((plan && plan.memberLimit) || 1);
+}
+
+function activeMembers(members) {
+  return (members || []).filter((member) => member && member.status === "active");
 }
 
 function usageWarning(usedBytes, quotaBytes) {
@@ -50,11 +86,14 @@ async function ensureAllocation(ctx, input = {}) {
   const ownerId = input.ownerId || (ownerType === "organization" ? "local-organization" : "local-user");
   let allocation = await ctx.metadata.getStorageAllocation({ ownerType, ownerId });
   if (!allocation && input.createIfMissing) {
+    const plan = await planById(ctx, input.planId, ownerType);
     allocation = await ctx.metadata.createStorageAllocation({
       ownerType,
       ownerId,
-      planId:input.planId || defaultPlanIdFor(ownerType),
-      quotaGb:Number(input.quotaGb || defaultQuotaGbFor(ownerType, input.planId)),
+      planId:plan.planId,
+      quotaGb:Number(input.quotaGb || storageQuotaFor(plan)),
+      storageQuotaGb:Number(input.storageQuotaGb || input.quotaGb || storageQuotaFor(plan)),
+      memberLimit:memberLimitFor(plan),
       provider:input.provider || ctx.config.defaultProvider || "local_mock",
       pathPrefix:pathPrefixFor(ownerType, ownerId)
     });
@@ -90,14 +129,92 @@ async function allocateStorage(input = {}, context) {
   const ctx = context || createCloudContext();
   const ownerType = normalizeOwnerType(input.ownerType);
   const ownerId = input.ownerId || (ownerType === "organization" ? "local-organization" : "local-user");
+  const plan = await planById(ctx, input.planId, ownerType);
   return ctx.metadata.createStorageAllocation({
     ownerType,
     ownerId,
-    planId:input.planId || defaultPlanIdFor(ownerType),
-    quotaGb:Number(input.quotaGb || defaultQuotaGbFor(ownerType, input.planId)),
+    planId:plan.planId,
+    quotaGb:Number(input.quotaGb || storageQuotaFor(plan)),
+    storageQuotaGb:Number(input.storageQuotaGb || input.quotaGb || storageQuotaFor(plan)),
+    memberLimit:memberLimitFor(plan),
     provider:input.provider || "local_mock",
     pathPrefix:pathPrefixFor(ownerType, ownerId)
   });
+}
+
+async function getPlans(context) {
+  const ctx = context || createCloudContext();
+  return {
+    ok:true,
+    plans:await plansFor(ctx),
+    localStorageWarning:"免费个人用户默认 local only，本地数据仅保存在当前设备；注册/登录后仍需明确启用云套餐。"
+  };
+}
+
+async function getOrganizationStatus(input = {}, context) {
+  const ctx = context || createCloudContext();
+  const organizationId = input.organizationId || input.ownerId || "local-organization";
+  const plan = await planById(ctx, input.planId, "organization");
+  let allocation = await ctx.metadata.getStorageAllocation({ ownerType:"organization", ownerId:organizationId });
+  if (!allocation) {
+    allocation = await allocateStorage({
+      ownerType:"organization",
+      ownerId:organizationId,
+      planId:plan.planId,
+      provider:input.provider || "local_mock"
+    }, ctx);
+  }
+  const members = await ctx.metadata.listOrganizationMembers({ organizationId });
+  const active = activeMembers(members);
+  return {
+    ok:true,
+    organizationId,
+    planId:allocation.planId || plan.planId,
+    planType:"enterprise",
+    region:plan.region || "",
+    quotaGb:Number(allocation.quotaGb || storageQuotaFor(plan)),
+    quotaBytes:bytesFromGb(allocation.quotaGb || storageQuotaFor(plan)),
+    memberLimit:Number(allocation.memberLimit || memberLimitFor(plan)),
+    activeMemberCount:active.length,
+    totalMemberRecords:members.length,
+    pathPrefix:allocation.pathPrefix || pathPrefixFor("organization", organizationId),
+    provider:allocation.provider || "local_mock",
+    cloudEnabled:true,
+    storageExpansionAvailable:true
+  };
+}
+
+async function inviteOrganizationMember(input = {}, context) {
+  const ctx = context || createCloudContext();
+  const organizationId = input.organizationId || input.ownerId || "local-organization";
+  const status = await getOrganizationStatus(input, ctx);
+  if (status.activeMemberCount >= status.memberLimit) {
+    return {
+      ok:false,
+      code:"MEMBER_LIMIT_REACHED",
+      message:"active 成员数量已达到套餐上限，请升级企业套餐或购买更多席位。",
+      organizationId,
+      planId:status.planId,
+      memberLimit:status.memberLimit,
+      activeMemberCount:status.activeMemberCount,
+      ignoredStatuses:["invited", "removed", "rejected", "expired"]
+    };
+  }
+  const member = await ctx.metadata.createOrganizationMember({
+    organizationId,
+    email:String(input.email || "").trim(),
+    name:String(input.name || "").trim(),
+    role:input.role || "member",
+    status:"invited"
+  });
+  return {
+    ok:true,
+    organizationId,
+    result:"invited",
+    member,
+    memberLimit:status.memberLimit,
+    activeMemberCount:status.activeMemberCount
+  };
 }
 
 async function createUploadUrl(input = {}, context) {
@@ -159,10 +276,13 @@ export {
   createCloudContext,
   getStorageStatus,
   allocateStorage,
+  getPlans,
+  getOrganizationStatus,
+  inviteOrganizationMember,
   createUploadUrl,
   deleteObject,
   testCloudServices,
   pathPrefixFor,
   usageWarning,
-  ENTERPRISE_CLOUD_MOCK_QUOTA_GB
+  DEFAULT_ENTERPRISE_PLAN_ID
 };

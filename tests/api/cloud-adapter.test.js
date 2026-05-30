@@ -18,7 +18,10 @@ async function main() {
     allocateStorage,
     createCloudContext,
     createUploadUrl,
-    getStorageStatus
+    getOrganizationStatus,
+    getPlans,
+    getStorageStatus,
+    inviteOrganizationMember
   } = await import("../../apps/server/src/cloud/cloudService.js");
   const adapter = createStorageAdapter({ provider:"local_mock" });
   assert.equal(adapter.provider, "local_mock");
@@ -74,6 +77,25 @@ async function main() {
   assert.equal(health.checks.some((item) => item.name === "storageAdapter" && item.status === "pass"), true);
   assert.equal(health.checks.some((item) => item.name === "storageProviderSwitchable"), true);
 
+  const planContext = createCloudContext();
+  const plansResult = await getPlans(planContext);
+  assert.equal(plansResult.ok, true);
+  assert.match(plansResult.localStorageWarning, /local only|本地/i);
+  const plansById = Object.fromEntries(plansResult.plans.map((plan) => [plan.planId, plan]));
+  assert.equal(plansById.enterprise_basic_cn.storageQuotaGb, 300);
+  assert.equal(plansById.enterprise_basic_cn.memberLimit, 5);
+  assert.equal(plansById.enterprise_standard_cn.storageQuotaGb, 1024);
+  assert.equal(plansById.enterprise_standard_cn.memberLimit, 20);
+  assert.equal(plansById.enterprise_advanced_cn.storageQuotaGb, 5120);
+  assert.equal(plansById.enterprise_advanced_cn.memberLimit, 50);
+  assert.equal(plansById.enterprise_basic_global.storageQuotaGb, 300);
+  assert.equal(plansById.enterprise_standard_global.storageQuotaGb, 1024);
+  assert.equal(plansById.enterprise_advanced_global.storageQuotaGb, 5120);
+
+  const freeStatus = await getStorageStatus({ ownerType:"user", ownerId:"free-user" }, planContext);
+  assert.equal(freeStatus.localOnly, true);
+  assert.equal(freeStatus.quotaBytes, 0);
+
   const context = createCloudContext();
   await allocateStorage({
     ownerType:"user",
@@ -96,10 +118,12 @@ async function main() {
   const enterpriseAllocation = await allocateStorage({
     ownerType:"organization",
     ownerId:"local-company",
+    planId:"enterprise_standard_cn",
     provider:"local_mock"
   }, enterpriseContext);
-  assert.equal(enterpriseAllocation.planId, "enterprise_cloud_mock");
+  assert.equal(enterpriseAllocation.planId, "enterprise_standard_cn");
   assert.equal(enterpriseAllocation.quotaGb, 1024);
+  assert.equal(enterpriseAllocation.memberLimit, 20);
   assert.equal(enterpriseAllocation.pathPrefix, "organizations/local-company/");
 
   const enterpriseStatus = await getStorageStatus({
@@ -119,6 +143,70 @@ async function main() {
   assert.equal(enterpriseUploadUrl.ok, true);
   assert.equal(enterpriseUploadUrl.objectKey, "organizations/local-company/reports/enterprise.txt");
   assert.equal(/secret|access.?key|token|password|authorization/i.test(JSON.stringify(enterpriseUploadUrl)), false);
+
+  const basicContext = createCloudContext();
+  const basicStatus = await getOrganizationStatus({
+    organizationId:"basic-company",
+    planId:"enterprise_basic_cn"
+  }, basicContext);
+  assert.equal(basicStatus.quotaGb, 300);
+  assert.equal(basicStatus.memberLimit, 5);
+  assert.equal(basicStatus.pathPrefix, "organizations/basic-company/");
+
+  for (let i = 0; i < 5; i += 1) {
+    await basicContext.metadata.createOrganizationMember({
+      organizationId:"basic-company",
+      email:"active" + i + "@example.test",
+      status:"active"
+    });
+  }
+  for (const status of ["invited", "removed", "rejected", "expired"]) {
+    await basicContext.metadata.createOrganizationMember({
+      organizationId:"basic-company",
+      email:status + "@example.test",
+      status
+    });
+  }
+  const fullStatus = await getOrganizationStatus({
+    organizationId:"basic-company",
+    planId:"enterprise_basic_cn"
+  }, basicContext);
+  assert.equal(fullStatus.activeMemberCount, 5);
+  assert.equal(fullStatus.totalMemberRecords, 9);
+  const rejectedInvite = await inviteOrganizationMember({
+    organizationId:"basic-company",
+    planId:"enterprise_basic_cn",
+    email:"new@example.test"
+  }, basicContext);
+  assert.equal(rejectedInvite.ok, false);
+  assert.equal(rejectedInvite.code, "MEMBER_LIMIT_REACHED");
+  assert.equal(rejectedInvite.activeMemberCount, 5);
+  assert.deepEqual(rejectedInvite.ignoredStatuses, ["invited", "removed", "rejected", "expired"]);
+
+  const standardContext = createCloudContext();
+  const invited = await inviteOrganizationMember({
+    organizationId:"standard-company",
+    planId:"enterprise_standard_global",
+    email:"invitee@example.test",
+    name:"Invitee"
+  }, standardContext);
+  assert.equal(invited.ok, true);
+  assert.equal(invited.result, "invited");
+  assert.equal(invited.member.status, "invited");
+  const standardStatus = await getOrganizationStatus({
+    organizationId:"standard-company",
+    planId:"enterprise_standard_global"
+  }, standardContext);
+  assert.equal(standardStatus.quotaGb, 1024);
+  assert.equal(standardStatus.memberLimit, 20);
+  assert.equal(standardStatus.activeMemberCount, 0);
+
+  const advancedStatus = await getOrganizationStatus({
+    organizationId:"advanced-company",
+    planId:"enterprise_advanced_global"
+  }, createCloudContext());
+  assert.equal(advancedStatus.quotaGb, 5120);
+  assert.equal(advancedStatus.memberLimit, 50);
 
   console.log("CLOUD_ADAPTER_TEST PASS");
 }

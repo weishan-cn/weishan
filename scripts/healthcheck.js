@@ -98,6 +98,10 @@ function checkMarkers() {
     marker("apps/server/src/cloud/metadataAdapter.js", /LocalMockMetadataAdapter|getStorageAllocation|recordFileIndex/, "marker:local mock metadata adapter", true),
     marker("apps/server/src/cloud/metadataAdapter.js", /PocketBaseMetadataAdapterSkeleton|provider:"pocketbase"|not_configured_in_mvp/, "marker:pocketbase metadata provider skeleton", true),
     marker("apps/server/src/cloud/cloudService.js", /createCloudContext|createUploadUrl|pathPrefixFor/, "marker:cloud service core", true),
+    marker("apps/server/src/cloud/metadataAdapter.js", /enterprise_basic_cn|enterprise_standard_cn|enterprise_advanced_cn|storageQuotaGb|memberLimit/, "marker:enterprise plans mock", true),
+    marker("apps/server/src/cloud/cloudService.js", /planById|storageQuotaFor|DEFAULT_ENTERPRISE_PLAN_ID/, "marker:enterprise quota by plan", true),
+    marker("apps/server/src/cloud/cloudService.js", /inviteOrganizationMember|MEMBER_LIMIT_REACHED|activeMembers/, "marker:organization member limit", true),
+    marker("apps/server/src/cloud/metadataAdapter.js", /localStorageWarning|local only|Free Local/, "marker:local storage warning", true),
     marker("apps/server/src/cloud/cloudHealthcheck.js", /runCloudHealthcheck|storageProviderSwitchable|metadataProviderSwitchable/, "marker:cloud provider switchable", true),
     marker("playwright.config.js", /testDir:\s*["']\.\/tests\/e2e["']|reporter|trace/, "marker:playwright config", false),
     marker("tests/e2e/smoke.spec.js", /app launches|home page visible|crawler page visible/, "marker:playwright smoke", false)

@@ -4,8 +4,10 @@ import {
   createCloudContext,
   createUploadUrl,
   deleteObject,
-  ENTERPRISE_CLOUD_MOCK_QUOTA_GB,
-  getStorageStatus
+  getOrganizationStatus,
+  getPlans,
+  getStorageStatus,
+  inviteOrganizationMember
 } from "../cloud/cloudService.js";
 import { runCloudHealthcheck } from "../cloud/cloudHealthcheck.js";
 
@@ -21,6 +23,28 @@ function mountCloudRoutes(app) {
     res.json(await runCloudHealthcheck());
   });
 
+  router.get("/plans", async (_req, res) => {
+    res.json(await getPlans(context));
+  });
+
+  router.get("/organization/status", async (req, res) => {
+    res.json(await getOrganizationStatus({
+      organizationId:req.query.organizationId || req.query.ownerId || "local-organization",
+      planId:req.query.planId || ""
+    }, context));
+  });
+
+  router.post("/organization/invite", async (req, res) => {
+    const body = req.body || {};
+    res.json(await inviteOrganizationMember({
+      organizationId:body.organizationId || body.ownerId || "local-organization",
+      planId:body.planId || "",
+      email:body.email || "",
+      name:body.name || "",
+      role:body.role || "member"
+    }, context));
+  });
+
   router.get("/storage/status", async (req, res) => {
     const ownerType = req.query.ownerType || "user";
     const ownerId = req.query.ownerId || "local-user";
@@ -29,15 +53,21 @@ function mountCloudRoutes(app) {
 
   router.post("/storage/allocate", async (req, res) => {
     const body = req.body || {};
+    const allocation = await allocateStorage({
+      ownerType:body.ownerType || "user",
+      ownerId:body.ownerId || "local-user",
+      planId:body.planId || "",
+      quotaGb:Number(body.quotaGb || 0),
+      provider:body.provider || "local_mock"
+    }, context);
     res.json({
       ok:true,
-      allocation:await allocateStorage({
-        ownerType:body.ownerType || "user",
-        ownerId:body.ownerId || "local-user",
-        planId:body.planId || (body.ownerType === "organization" ? "enterprise_cloud_mock" : "manual_mock"),
-        quotaGb:Number(body.quotaGb || (body.ownerType === "organization" ? ENTERPRISE_CLOUD_MOCK_QUOTA_GB : 1)),
-        provider:body.provider || "local_mock"
-      }, context)
+      mock:true,
+      quotaGb:Number(allocation.quotaGb || 0),
+      quotaBytes:Number(allocation.quotaGb || 0) * 1024 * 1024 * 1024,
+      pathPrefix:allocation.pathPrefix || "",
+      provider:allocation.provider || "local_mock",
+      allocation
     });
   });
 
