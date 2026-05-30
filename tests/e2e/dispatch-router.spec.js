@@ -54,15 +54,16 @@ test.describe.serial("dispatch router", () => {
     await expectHistory(page, runId, /codex|Codex 精确指令/);
   });
 
-  test("mail dispatch opens mail page with safe prefill", async () => {
+  test("mail dispatch confirms and runs local mock execution without reading mailbox", async () => {
     const command = runId + " 帮我总结最近的重要邮件并提取待办";
     await submitHomeCommand(page, command);
     await expect(page.getByText(/来自首页调度中心的邮件任务/).first()).toBeVisible();
     await expect(page.getByText(/邮件接管任务|提取邮件待办|不会自动读取邮箱/).first()).toBeVisible();
     await expect(page.locator("#mailDispatchConfirm")).toBeVisible();
     await page.locator("#mailDispatchConfirm").click();
-    await expect(page.getByText(/状态：confirmed|confirmed/).first()).toBeVisible();
-    await expectHistory(page, runId, /dispatch\.confirmed|mail\.extractTodos|邮件接管/);
+    await expect(page.getByText(/状态：executed|executed/).first()).toBeVisible();
+    await expect(page.getByText(/本地模拟邮件任务结果|realExecution=false|未读取真实邮箱/).first()).toBeVisible();
+    await expectHistory(page, runId, /mail\.executed|dispatch\.executed|dispatch\.confirmed|mail\.extractTodos/);
   });
 
   test("crawler dispatch confirms and runs local mock execution without fetching", async () => {
@@ -89,12 +90,12 @@ test.describe.serial("dispatch router", () => {
   });
 
   test("dispatch bridge can be cancelled without executing module work", async () => {
-    const command = runId + " 抓取 https://example.net 并整理成摘要";
+    const command = runId + " 帮我翻译邮件";
     await submitHomeCommand(page, command);
-    await expect(page.locator("#crawlUrl")).toHaveValue("https://example.net");
-    await page.locator("#crawlerDispatchCancel").click();
+    await expect(page.getByText(/来自首页调度中心的邮件任务/).first()).toBeVisible();
+    await page.locator("#mailDispatchCancel").click();
     await expect(page.getByText(/状态：cancelled|cancelled/).first()).toBeVisible();
-    await expectHistory(page, runId, /dispatch\.cancelled|cancelled|example\.net/);
+    await expectHistory(page, runId, /dispatch\.cancelled|cancelled|mail\.translate|邮件/);
   });
 
   test("coordination dispatch does not fetch and records involved modules", async () => {

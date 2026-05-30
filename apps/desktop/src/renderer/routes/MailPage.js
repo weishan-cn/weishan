@@ -27,7 +27,8 @@
     const prefill = payload.prefill || {};
     const status = payload.status || "pending";
     const canAct = status === "pending" || status === "prefilled";
-    return `<div class="mail-card" data-dispatch-prefill="mail"><h2>来自首页调度中心的邮件任务</h2><p class="mail-muted">${esc(prefill.taskTitle || "邮件接管任务")}</p><p><b>${esc(prefill.suggestedAction || payload.action || "")}</b></p><p class="mail-muted">${esc(prefill.taskDescription || payload.inputSummary || "")}</p><p class="mail-muted">状态：<b data-dispatch-status>${esc(status)}</b></p><p class="mail-muted">不会自动读取邮箱、生成回复或调用邮件 AI；请确认后在邮件接管模块内继续选择具体操作。</p><div class="mail-button-row"><button class="mail-primary" id="mailDispatchConfirm" ${canAct ? "" : "disabled"}>确认执行</button><button class="mail-gray" id="mailDispatchCancel" ${canAct ? "" : "disabled"}>取消任务</button></div></div>`;
+    const result = payload.outputSummary ? `<p class="mail-muted"><b>本地模拟邮件任务结果：</b>${esc(payload.outputSummary)}</p>` : "";
+    return `<div class="mail-card" data-dispatch-prefill="mail"><h2>来自首页调度中心的邮件任务</h2><p class="mail-muted">${esc(prefill.taskTitle || "邮件接管任务")}</p><p><b>${esc(prefill.suggestedAction || payload.action || "")}</b></p><p class="mail-muted">${esc(prefill.taskDescription || payload.inputSummary || "")}</p><p class="mail-muted">状态：<b data-dispatch-status>${esc(status)}</b> · realExecution=false</p>${result}<p class="mail-muted">不会自动读取邮箱、生成回复、发送邮件或调用 Mail AI；用户确认后只生成本地模拟邮件任务结果。</p><div class="mail-button-row"><button class="mail-primary" id="mailDispatchConfirm" ${canAct ? "" : "disabled"}>确认执行</button><button class="mail-gray" id="mailDispatchCancel" ${canAct ? "" : "disabled"}>取消任务</button></div></div>`;
   }
   function confirmDispatch(payload){
     const router = window.WeishanDispatchRouter;
@@ -42,6 +43,67 @@
       executionMode:"cancelled_by_user",
       outputSummary:"邮件调度任务已取消。"
     }) : null;
+  }
+  function sanitizeDispatchSummary(text, maxLength){
+    const router = window.WeishanDispatchRouter;
+    if (router && router.summarizeDispatchText) return router.summarizeDispatchText(text, maxLength || 240);
+    return String(text || "").replace(/\s+/g, " ").trim().slice(0, maxLength || 240);
+  }
+  function mailDispatchResult(payload){
+    const action = payload && payload.action || "";
+    if (action === "mail.summarize") return "本地模拟邮件摘要任务已创建。未读取真实邮箱，未调用 Mail AI。";
+    if (action === "mail.extractTodos") return "本地模拟待办提取任务已创建。未读取真实邮箱，未调用 Mail AI。";
+    if (action === "mail.draftReply") return "本地模拟回复草稿任务已创建。未生成真实回复，未发送邮件。";
+    if (action === "mail.translate") return "本地模拟翻译任务已创建。未读取邮件正文，未调用 Mail AI。";
+    return "已确认进入邮件接管模块。未读取真实邮箱，realExecution=false。";
+  }
+  function mailDispatchHistoryPayload(payload, extra){
+    const detail = extra || {};
+    const now = new Date().toISOString();
+    return {
+      schemaVersion:"weishan.task.v1",
+      module:"mail",
+      action:detail.action || payload && payload.action || "mail.open",
+      status:detail.status || payload && payload.status || "",
+      dispatchId:payload && payload.dispatchId || "",
+      targetRoute:payload && payload.targetRoute || "mail",
+      inputSummary:sanitizeDispatchSummary(payload && payload.inputSummary || "", 240),
+      outputSummary:sanitizeDispatchSummary(detail.outputSummary || "", 240),
+      executionMode:sanitizeDispatchSummary(detail.executionMode || "mail_mock_safe_execution", 120),
+      realExecution:detail.realExecution === true,
+      createdAt:detail.createdAt || now,
+      updatedAt:now
+    };
+  }
+  function recordMailDispatch(type, payload, extra){
+    if (window.HistoryApi && typeof window.HistoryApi.record === "function") {
+      window.HistoryApi.record(type, mailDispatchHistoryPayload(payload, extra || {}));
+    }
+  }
+  function executeDispatchMail(payload){
+    const confirmed = confirmDispatch(payload);
+    if (!confirmed) return null;
+    const outputSummary = mailDispatchResult(confirmed);
+    recordMailDispatch("mail.executionRequested", confirmed, {
+      status:"confirmed",
+      executionMode:"mail_confirm_requested",
+      realExecution:false,
+      outputSummary:"用户已在邮件接管模块确认邮件调度任务。"
+    });
+    recordMailDispatch("mail.executed", confirmed, {
+      status:"executed",
+      executionMode:"mail_mock_safe_execution",
+      realExecution:false,
+      outputSummary
+    });
+    if (window.WeishanDispatchRouter && window.WeishanDispatchRouter.markPendingExecuted) {
+      return window.WeishanDispatchRouter.markPendingExecuted(confirmed.dispatchId, {
+        executionMode:"mail_mock_safe_execution",
+        realExecution:false,
+        outputSummary
+      });
+    }
+    return confirmed;
   }
   function createMailPerf(featureAction){
     return window.WeishanPerf && window.WeishanPerf.createPerfMeta ? window.WeishanPerf.createPerfMeta(featureAction) : { enabled:false, traceId:"", featureAction };
@@ -1295,7 +1357,7 @@
 
     function rerender(){ window.MailPage.mount(host); }
     const mailDispatchConfirm = host.querySelector("#mailDispatchConfirm");
-    if (mailDispatchConfirm && dispatchPayload) mailDispatchConfirm.addEventListener("click", () => { confirmDispatch(dispatchPayload); rerender(); });
+    if (mailDispatchConfirm && dispatchPayload) mailDispatchConfirm.addEventListener("click", () => { executeDispatchMail(dispatchPayload); rerender(); });
     const mailDispatchCancel = host.querySelector("#mailDispatchCancel");
     if (mailDispatchCancel && dispatchPayload) mailDispatchCancel.addEventListener("click", () => { cancelDispatch(dispatchPayload); rerender(); });
     function setStatus(text, c){

@@ -139,10 +139,10 @@
       inputSummary:summarizeDispatchText(cleanInput, 240),
       source:"home",
       url,
-      executionMode:intent.module === DISPATCH_MODULES.crawler ? "module_confirm_required" : "dispatch_plan",
+      executionMode:intent.routeMode === "module" ? "module_confirm_required" : "dispatch_plan",
       realExecution:false,
       requiresUserConfirmation:intent.routeMode === "module",
-      mockSafeExecutionAllowed:intent.module === DISPATCH_MODULES.crawler && /^https?:\/\/(example\.com|e2e-local|mock\.local)(?:[/:?#]|$)/i.test(url || ""),
+      mockSafeExecutionAllowed:intent.module === DISPATCH_MODULES.mail || (intent.module === DISPATCH_MODULES.crawler && /^https?:\/\/(example\.com|e2e-local|mock\.local)(?:[/:?#]|$)/i.test(url || "")),
       createdAt:new Date().toISOString()
     });
     if (plan.module === DISPATCH_MODULES.coordination) plan.stepQueue = createCoordinationStepQueue(plan.modules, cleanInput);
@@ -353,6 +353,8 @@
   function markPendingExecuted(dispatchIdValue, extra){
     const next = updatePendingPayload(dispatchIdValue, {
       status:DISPATCH_STATUS.executed,
+      executionMode:extra && extra.executionMode || "module_confirmed_execution",
+      outputSummary:extra && extra.outputSummary || "",
       realExecution:!!(extra && extra.realExecution),
       requiresUserConfirmation:true
     });
@@ -369,6 +371,8 @@
   function markPendingFailed(dispatchIdValue, extra){
     const next = updatePendingPayload(dispatchIdValue, {
       status:DISPATCH_STATUS.failed,
+      executionMode:extra && extra.executionMode || "module_confirmed_execution",
+      outputSummary:extra && extra.outputSummary || "",
       realExecution:false,
       requiresUserConfirmation:true
     });
