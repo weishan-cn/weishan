@@ -5,7 +5,13 @@
     running:"running",
     done:"done",
     failed:"failed",
-    canceled:"canceled"
+    canceled:"canceled",
+    dispatchPending:"dispatch.pending",
+    dispatchPrefilled:"dispatch.prefilled",
+    dispatchConfirmed:"dispatch.confirmed",
+    dispatchExecuted:"dispatch.executed",
+    dispatchFailed:"dispatch.failed",
+    dispatchCancelled:"dispatch.cancelled"
   };
   const TASK_MODULE = {
     home:"home",

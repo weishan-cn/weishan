@@ -25,7 +25,23 @@
   function dispatchNoticeHtml(payload){
     if (!payload) return "";
     const prefill = payload.prefill || {};
-    return `<div class="mail-card" data-dispatch-prefill="mail"><h2>来自首页调度中心的任务</h2><p class="mail-muted">${esc(prefill.taskTitle || "邮件接管任务")}</p><p><b>${esc(prefill.suggestedAction || payload.action || "")}</b></p><p class="mail-muted">${esc(prefill.taskDescription || payload.inputSummary || "")}</p><p class="mail-muted">需要用户确认后再执行；不会自动读取邮箱或调用邮件 AI。</p></div>`;
+    const status = payload.status || "pending";
+    const canAct = status === "pending" || status === "prefilled";
+    return `<div class="mail-card" data-dispatch-prefill="mail"><h2>来自首页调度中心的邮件任务</h2><p class="mail-muted">${esc(prefill.taskTitle || "邮件接管任务")}</p><p><b>${esc(prefill.suggestedAction || payload.action || "")}</b></p><p class="mail-muted">${esc(prefill.taskDescription || payload.inputSummary || "")}</p><p class="mail-muted">状态：<b data-dispatch-status>${esc(status)}</b></p><p class="mail-muted">不会自动读取邮箱、生成回复或调用邮件 AI；请确认后在邮件接管模块内继续选择具体操作。</p><div class="mail-button-row"><button class="mail-primary" id="mailDispatchConfirm" ${canAct ? "" : "disabled"}>确认执行</button><button class="mail-gray" id="mailDispatchCancel" ${canAct ? "" : "disabled"}>取消任务</button></div></div>`;
+  }
+  function confirmDispatch(payload){
+    const router = window.WeishanDispatchRouter;
+    return router && router.confirmPendingPayload ? router.confirmPendingPayload(payload.dispatchId, {
+      executionMode:"mail_manual_continue",
+      outputSummary:"邮件调度任务已确认；未自动读取邮箱或调用邮件 AI。"
+    }) : null;
+  }
+  function cancelDispatch(payload){
+    const router = window.WeishanDispatchRouter;
+    return router && router.cancelPendingPayload ? router.cancelPendingPayload(payload.dispatchId, {
+      executionMode:"cancelled_by_user",
+      outputSummary:"邮件调度任务已取消。"
+    }) : null;
   }
   function createMailPerf(featureAction){
     return window.WeishanPerf && window.WeishanPerf.createPerfMeta ? window.WeishanPerf.createPerfMeta(featureAction) : { enabled:false, traceId:"", featureAction };
@@ -1278,6 +1294,10 @@
     `;
 
     function rerender(){ window.MailPage.mount(host); }
+    const mailDispatchConfirm = host.querySelector("#mailDispatchConfirm");
+    if (mailDispatchConfirm && dispatchPayload) mailDispatchConfirm.addEventListener("click", () => { confirmDispatch(dispatchPayload); rerender(); });
+    const mailDispatchCancel = host.querySelector("#mailDispatchCancel");
+    if (mailDispatchCancel && dispatchPayload) mailDispatchCancel.addEventListener("click", () => { cancelDispatch(dispatchPayload); rerender(); });
     function setStatus(text, c){
       const el = host.querySelector("#mailStatus");
       el.textContent = text;

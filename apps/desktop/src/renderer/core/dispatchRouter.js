@@ -26,6 +26,21 @@
     chatAnswer:"chat.answer",
     coordinationPlan:"coordination.plan"
   };
+  const DISPATCH_STATUS = {
+    pending:"pending",
+    prefilled:"prefilled",
+    confirmed:"confirmed",
+    executed:"executed",
+    failed:"failed",
+    cancelled:"cancelled"
+  };
+  const DISPATCH_HISTORY_ACTIONS = {
+    pending:"dispatch.pending",
+    confirmed:"dispatch.confirmed",
+    executed:"dispatch.executed",
+    failed:"dispatch.failed",
+    cancelled:"dispatch.cancelled"
+  };
   const PENDING_DISPATCH_KEY = "weishan:dispatch:pending:v1";
 
   const MODULE_KEYWORDS = [
@@ -203,16 +218,19 @@
 
   function createPendingPayload(plan, text){
     const safePlan = plan || {};
+    const now = new Date().toISOString();
     return {
       schemaVersion:"weishan.dispatch.pending.v1",
       dispatchId:dispatchId(),
-      createdAt:new Date().toISOString(),
+      createdAt:now,
+      updatedAt:now,
       source:"home",
       targetModule:safePlan.module || "unknown",
       targetRoute:safePlan.targetRoute || "home",
       action:safePlan.action || "",
       inputSummary:summarizeDispatchText(text, 240),
       prefill:prefillForPlan(safePlan, text),
+      status:DISPATCH_STATUS.pending,
       realExecution:false,
       requiresUserConfirmation:true
     };
@@ -251,6 +269,112 @@
       window.WeishanDispatchPayload = null;
     }
     return true;
+  }
+
+  function updatePendingPayload(dispatchIdValue, patch){
+    const current = readPendingPayload();
+    if (!current || (dispatchIdValue && current.dispatchId !== dispatchIdValue)) return null;
+    const next = Object.assign({}, current, patch || {}, {
+      dispatchId:current.dispatchId,
+      schemaVersion:current.schemaVersion,
+      prefill:Object.assign({}, current.prefill || {}, patch && patch.prefill || {}),
+      realExecution:patch && Object.prototype.hasOwnProperty.call(patch, "realExecution") ? !!patch.realExecution : false,
+      requiresUserConfirmation:patch && Object.prototype.hasOwnProperty.call(patch, "requiresUserConfirmation") ? !!patch.requiresUserConfirmation : true,
+      updatedAt:new Date().toISOString()
+    });
+    savePendingPayload(next);
+    return next;
+  }
+
+  function createDispatchHistoryPayload(payload, historyAction, extra){
+    const data = payload || {};
+    const detail = extra || {};
+    return {
+      schemaVersion:"weishan.task.v1",
+      module:"dispatch",
+      action:String(historyAction || "").replace(/^dispatch\./, "") || "event",
+      status:detail.status || data.status || "",
+      dispatchId:data.dispatchId || "",
+      targetModule:data.targetModule || "",
+      targetRoute:data.targetRoute || "",
+      inputSummary:summarizeDispatchText(data.inputSummary || "", 240),
+      outputSummary:summarizeDispatchText(detail.outputSummary || "", 240),
+      executionMode:summarizeDispatchText(detail.executionMode || "manual_confirmation_only", 120),
+      realExecution:detail.realExecution === true,
+      createdAt:detail.createdAt || new Date().toISOString()
+    };
+  }
+
+  function recordDispatchHistory(historyAction, payload, extra){
+    if (!window.HistoryApi || typeof window.HistoryApi.record !== "function") return null;
+    return window.HistoryApi.record(historyAction, createDispatchHistoryPayload(payload, historyAction, extra));
+  }
+
+  function confirmPendingPayload(dispatchIdValue, extra){
+    const next = updatePendingPayload(dispatchIdValue, {
+      status:DISPATCH_STATUS.confirmed,
+      realExecution:false,
+      requiresUserConfirmation:true
+    });
+    if (next) {
+      recordDispatchHistory(DISPATCH_HISTORY_ACTIONS.confirmed, next, Object.assign({
+        status:DISPATCH_STATUS.confirmed,
+        executionMode:"manual_confirmation_only",
+        realExecution:false,
+        outputSummary:"用户已确认首页调度任务，等待模块内继续执行。"
+      }, extra || {}));
+    }
+    return next;
+  }
+
+  function cancelPendingPayload(dispatchIdValue, extra){
+    const next = updatePendingPayload(dispatchIdValue, {
+      status:DISPATCH_STATUS.cancelled,
+      realExecution:false,
+      requiresUserConfirmation:true
+    });
+    if (next) {
+      recordDispatchHistory(DISPATCH_HISTORY_ACTIONS.cancelled, next, Object.assign({
+        status:DISPATCH_STATUS.cancelled,
+        executionMode:"cancelled_by_user",
+        realExecution:false,
+        outputSummary:"用户已取消首页调度任务。"
+      }, extra || {}));
+    }
+    return next;
+  }
+
+  function markPendingExecuted(dispatchIdValue, extra){
+    const next = updatePendingPayload(dispatchIdValue, {
+      status:DISPATCH_STATUS.executed,
+      realExecution:!!(extra && extra.realExecution),
+      requiresUserConfirmation:true
+    });
+    if (next) {
+      recordDispatchHistory(DISPATCH_HISTORY_ACTIONS.executed, next, Object.assign({
+        status:DISPATCH_STATUS.executed,
+        executionMode:"module_confirmed_execution",
+        outputSummary:"模块已执行确认后的调度任务。"
+      }, extra || {}));
+    }
+    return next;
+  }
+
+  function markPendingFailed(dispatchIdValue, extra){
+    const next = updatePendingPayload(dispatchIdValue, {
+      status:DISPATCH_STATUS.failed,
+      realExecution:false,
+      requiresUserConfirmation:true
+    });
+    if (next) {
+      recordDispatchHistory(DISPATCH_HISTORY_ACTIONS.failed, next, Object.assign({
+        status:DISPATCH_STATUS.failed,
+        executionMode:"module_confirmed_execution",
+        realExecution:false,
+        outputSummary:"调度任务执行失败。"
+      }, extra || {}));
+    }
+    return next;
   }
 
   function createCoordinationStepQueue(modules, text){
@@ -496,6 +620,8 @@
   window.WeishanDispatchRouter = {
     DISPATCH_MODULES,
     DISPATCH_ACTIONS,
+    DISPATCH_STATUS,
+    DISPATCH_HISTORY_ACTIONS,
     classifyCommand,
     createDispatchPlan,
     buildDocumentDraft,
@@ -507,6 +633,13 @@
     savePendingPayload,
     readPendingPayload,
     clearPendingPayload,
+    updatePendingPayload,
+    confirmPendingPayload,
+    cancelPendingPayload,
+    markPendingExecuted,
+    markPendingFailed,
+    createDispatchHistoryPayload,
+    recordDispatchHistory,
     createCoordinationStepQueue,
     sanitizeDispatchText,
     summarizeDispatchText,
