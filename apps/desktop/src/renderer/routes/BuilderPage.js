@@ -14,7 +14,8 @@
     const prefill = payload.prefill || {};
     const status = payload.status || "pending";
     const canAct = status === "pending" || status === "prefilled";
-    return `<div class="ws-card" data-dispatch-prefill="softwareFactory"><h3>${esc(label("来自首页调度中心的软件工厂任务", "Software Factory task from Home dispatch center"))}</h3><p class="ws-muted">${esc(prefill.taskTitle || "软件工厂任务")}</p><p class="ws-muted">${esc(prefill.taskDescription || payload.inputSummary || "")}</p><p><b>${esc(prefill.suggestedAction || payload.action || "")}</b></p><p class="ws-muted">${esc(label("状态", "Status"))}：<b data-dispatch-status>${esc(status)}</b></p><p class="ws-muted">${esc(label("需求草案已预填；点击确认只会标记任务，不会自动调用 AI。确认后仍需手动点击生成软件方案。", "The requirement draft was prefilled. Confirm only marks the task; no AI call runs automatically. Click generate manually to continue."))}</p><div class="ws-row"><button id="builderDispatchConfirm" class="ws-btn" ${canAct ? "" : "disabled"}>${esc(label("确认生成", "Confirm generation"))}</button><button id="builderDispatchCancel" class="ws-btn gray" ${canAct ? "" : "disabled"}>${esc(label("取消任务", "Cancel task"))}</button></div></div>`;
+    const result = payload.outputSummary ? `<p class="ws-muted"><b>${esc(label("本地模拟软件工厂任务结果", "Local mock Software Factory result"))}：</b>${esc(payload.outputSummary)}</p>` : "";
+    return `<div class="ws-card" data-dispatch-prefill="softwareFactory"><h3>${esc(label("来自首页调度中心的软件工厂任务", "Software Factory task from Home dispatch center"))}</h3><p class="ws-muted">${esc(prefill.taskTitle || "软件工厂任务")}</p><p class="ws-muted">${esc(prefill.taskDescription || payload.inputSummary || "")}</p><p><b>${esc(prefill.suggestedAction || payload.action || "")}</b></p><p class="ws-muted">${esc(label("需求草案", "Requirement draft"))}：${esc(prefill.draftRequirement || "")}</p><p class="ws-muted">${esc(label("状态", "Status"))}：<b data-dispatch-status>${esc(status)}</b> · realExecution=false</p>${result}<p class="ws-muted">${esc(label("不会自动生成软件、不会调用 AI、不会创建项目文件；用户确认后只生成本地模拟软件工厂任务结果。", "No software is generated automatically, no AI is called, and no project files are created. Confirmation only creates a local mock Software Factory result."))}</p><div class="ws-row"><button id="builderDispatchConfirm" class="ws-btn" ${canAct ? "" : "disabled"}>${esc(label("确认生成", "Confirm generation"))}</button><button id="builderDispatchCancel" class="ws-btn gray" ${canAct ? "" : "disabled"}>${esc(label("取消任务", "Cancel task"))}</button></div></div>`;
   }
   function confirmDispatch(payload){
     const router = window.WeishanDispatchRouter;
@@ -29,6 +30,99 @@
       executionMode:"cancelled_by_user",
       outputSummary:"软件工厂调度任务已取消。"
     }) : null;
+  }
+  function dispatchSummary(text, maxLength){
+    const router = window.WeishanDispatchRouter;
+    if (router && router.summarizeDispatchText) return router.summarizeDispatchText(text, maxLength || 240);
+    return summarize(text, maxLength || 240);
+  }
+  function buildMockSoftwareFactoryResult(payload){
+    const prefill = payload && payload.prefill || {};
+    const requirement = dispatchSummary(prefill.draftRequirement || prefill.taskDescription || payload && payload.inputSummary || "", 360);
+    const name = requirement ? requirement.replace(/[，。；,.!?！？]/g, " ").split(/\s+/).filter(Boolean).slice(0, 4).join(" ") : "本地优先软件方案";
+    return [
+      "# 本地模拟软件工厂任务结果",
+      "",
+      "## 软件名称建议",
+      (name || "本地优先软件方案") + " MVP",
+      "",
+      "## 功能模块草案",
+      "- 需求录入与任务确认",
+      "- 核心数据管理",
+      "- 列表、搜索与筛选",
+      "- 本地导出与备份",
+      "- 设置与权限预留",
+      "",
+      "## 数据结构草案",
+      "- Project：id、name、description、createdAt、updatedAt",
+      "- Record：id、projectId、title、status、metadata、createdAt、updatedAt",
+      "- ExportJob：id、projectId、format、filename、createdAt",
+      "",
+      "## 页面 / 窗口草案",
+      "- 仪表盘：展示关键指标与最近任务",
+      "- 录入页：创建和编辑核心数据",
+      "- 列表页：搜索、筛选、查看详情",
+      "- 设置页：本地存储、导出和安全选项",
+      "",
+      "## 验收标准",
+      "- 可以完成一条核心记录的新增、编辑和删除",
+      "- 可以按关键词检索记录",
+      "- 可以生成本地导出结果",
+      "- 应用重启后本地数据仍可读取",
+      "- 不创建真实项目目录，不写入代码文件，realExecution=false",
+      "",
+      "## 下一步建议",
+      "请在软件工厂模块内继续确认生成。"
+    ].join("\n");
+  }
+  function softwareDispatchHistoryPayload(payload, extra){
+    const detail = extra || {};
+    const now = nowIso();
+    return {
+      schemaVersion:"weishan.task.v1",
+      module:"softwareFactory",
+      action:detail.action || payload && payload.action || "softwareFactory.generatePlan",
+      status:detail.status || payload && payload.status || "",
+      dispatchId:payload && payload.dispatchId || "",
+      targetRoute:payload && payload.targetRoute || "builder",
+      inputSummary:dispatchSummary(payload && payload.inputSummary || "", 240),
+      outputSummary:dispatchSummary(detail.outputSummary || "", 240),
+      executionMode:dispatchSummary(detail.executionMode || "software_factory_mock_safe_execution", 120),
+      realExecution:detail.realExecution === true,
+      createdAt:detail.createdAt || now,
+      updatedAt:now
+    };
+  }
+  function recordSoftwareDispatch(type, payload, extra){
+    if (window.HistoryApi && typeof window.HistoryApi.record === "function") {
+      window.HistoryApi.record(type, softwareDispatchHistoryPayload(payload, extra || {}));
+    }
+  }
+  function executeDispatchSoftwareFactory(payload){
+    const confirmed = confirmDispatch(payload);
+    if (!confirmed) return null;
+    const result = buildMockSoftwareFactoryResult(confirmed);
+    const outputSummary = label("已生成本地模拟软件工厂任务结果。未调用 AI，未创建项目文件，realExecution=false。", "Local mock Software Factory result generated. No AI call, no project files created. realExecution=false.");
+    recordSoftwareDispatch("softwareFactory.executionRequested", confirmed, {
+      status:"confirmed",
+      executionMode:"software_factory_confirm_requested",
+      realExecution:false,
+      outputSummary:"用户已在软件工厂模块确认生成任务。"
+    });
+    recordSoftwareDispatch("softwareFactory.executed", confirmed, {
+      status:"executed",
+      executionMode:"software_factory_mock_safe_execution",
+      realExecution:false,
+      outputSummary
+    });
+    if (window.WeishanDispatchRouter && window.WeishanDispatchRouter.markPendingExecuted) {
+      window.WeishanDispatchRouter.markPendingExecuted(confirmed.dispatchId, {
+        executionMode:"software_factory_mock_safe_execution",
+        realExecution:false,
+        outputSummary
+      });
+    }
+    return { status:"executed", message:outputSummary, plan:result };
   }
   function nowIso(){ return new Date().toISOString(); }
   function taskProtocol(){ return window.WeishanTaskProtocol || null; }
@@ -343,7 +437,11 @@
     const prefill = dispatchPayload && dispatchPayload.prefill || {};
     host.innerHTML=`<section class="ws-page">${dispatchNoticeHtml(dispatchPayload)}<div class="ws-card"><h2>${t("builder")}</h2><p class="ws-muted">${t("softwareDesc")}</p><label>${esc(label("软件类型", "Software type"))}</label><select id="softwareType" class="ws-select"><option>Web 应用</option><option>桌面工具</option><option>自动化脚本</option><option>文档模板</option><option>暂不确定</option></select><textarea id="softwareGoal" class="ws-textarea" placeholder="${t("softwarePlaceholder")}">${esc(prefill.draftRequirement || prefill.taskDescription || "")}</textarea><div class="ws-row"><button id="createPlan" class="ws-btn">${esc(label("生成软件方案", "Generate software plan"))}</button><button id="reportBug" class="ws-btn gray">${t("reportBug")}</button></div></div><div id="softwareResult"></div><div class="card-list" id="softwarePlans">${renderPlans()}</div></section>`;
     const builderDispatchConfirm = document.getElementById("builderDispatchConfirm");
-    if (builderDispatchConfirm && dispatchPayload) builderDispatchConfirm.addEventListener("click", () => { confirmDispatch(dispatchPayload); mount(host); });
+    if (builderDispatchConfirm && dispatchPayload) builderDispatchConfirm.addEventListener("click", () => {
+      const result = executeDispatchSoftwareFactory(dispatchPayload);
+      mount(host);
+      if (result) updateResult(result.status, result.message, result.plan);
+    });
     const builderDispatchCancel = document.getElementById("builderDispatchCancel");
     if (builderDispatchCancel && dispatchPayload) builderDispatchCancel.addEventListener("click", () => { cancelDispatch(dispatchPayload); mount(host); });
     document.getElementById("createPlan").addEventListener("click", async ()=>{

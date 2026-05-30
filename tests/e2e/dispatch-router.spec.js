@@ -78,24 +78,26 @@ test.describe.serial("dispatch router", () => {
     await expectHistory(page, runId, /crawler\.executed|dispatch\.executed|dispatch\.confirmed|https:\/\/example\.com/);
   });
 
-  test("software factory dispatch opens builder page and pre-fills requirement without generating", async () => {
+  test("software factory dispatch confirms and runs local mock execution without generating files", async () => {
     const command = runId + " 帮我做一个客户管理软件方案";
     await submitHomeCommand(page, command);
     await expect(page.getByText(/来自首页调度中心的软件工厂任务/).first()).toBeVisible();
     await expect(page.locator("#softwareGoal")).toHaveValue(/客户管理软件方案/);
-    await expect(page.getByText(/不会自动调用 AI|需要手动点击生成软件方案|确认生成/).first()).toBeVisible();
+    await expect(page.getByText(/不会自动生成软件|不会调用 AI|确认生成/).first()).toBeVisible();
     await page.locator("#builderDispatchConfirm").click();
-    await expect(page.getByText(/状态：confirmed|confirmed/).first()).toBeVisible();
-    await expectHistory(page, runId, /dispatch\.confirmed|softwareFactory\.generatePlan|客户管理软件方案/);
+    await expect(page.getByText(/状态：executed|executed/).first()).toBeVisible();
+    await expect(page.getByText(/本地模拟软件工厂任务结果|realExecution=false|未调用 AI/).first()).toBeVisible();
+    await expect(page.getByText(/功能模块草案|验收标准|下一步建议/).first()).toBeVisible();
+    await expectHistory(page, runId, /softwareFactory\.executed|dispatch\.executed|dispatch\.confirmed|客户管理软件方案/);
   });
 
   test("dispatch bridge can be cancelled without executing module work", async () => {
-    const command = runId + " 帮我翻译邮件";
+    const command = runId + " 帮我生成一个账本软件";
     await submitHomeCommand(page, command);
-    await expect(page.getByText(/来自首页调度中心的邮件任务/).first()).toBeVisible();
-    await page.locator("#mailDispatchCancel").click();
+    await expect(page.getByText(/来自首页调度中心的软件工厂任务/).first()).toBeVisible();
+    await page.locator("#builderDispatchCancel").click();
     await expect(page.getByText(/状态：cancelled|cancelled/).first()).toBeVisible();
-    await expectHistory(page, runId, /dispatch\.cancelled|cancelled|mail\.translate|邮件/);
+    await expectHistory(page, runId, /dispatch\.cancelled|cancelled|softwareFactory\.generatePlan|账本软件/);
   });
 
   test("coordination dispatch does not fetch and records involved modules", async () => {

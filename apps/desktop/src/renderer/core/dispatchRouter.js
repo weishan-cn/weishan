@@ -142,7 +142,7 @@
       executionMode:intent.routeMode === "module" ? "module_confirm_required" : "dispatch_plan",
       realExecution:false,
       requiresUserConfirmation:intent.routeMode === "module",
-      mockSafeExecutionAllowed:intent.module === DISPATCH_MODULES.mail || (intent.module === DISPATCH_MODULES.crawler && /^https?:\/\/(example\.com|e2e-local|mock\.local)(?:[/:?#]|$)/i.test(url || "")),
+      mockSafeExecutionAllowed:intent.module === DISPATCH_MODULES.mail || intent.module === DISPATCH_MODULES.softwareFactory || (intent.module === DISPATCH_MODULES.crawler && /^https?:\/\/(example\.com|e2e-local|mock\.local)(?:[/:?#]|$)/i.test(url || "")),
       createdAt:new Date().toISOString()
     });
     if (plan.module === DISPATCH_MODULES.coordination) plan.stepQueue = createCoordinationStepQueue(plan.modules, cleanInput);

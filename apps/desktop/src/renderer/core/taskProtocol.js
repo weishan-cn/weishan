@@ -15,6 +15,9 @@
     crawlerExecutionRequested:"crawler.executionRequested",
     crawlerExecuted:"crawler.executed",
     crawlerFailed:"crawler.failed",
+    softwareFactoryExecutionRequested:"softwareFactory.executionRequested",
+    softwareFactoryExecuted:"softwareFactory.executed",
+    softwareFactoryFailed:"softwareFactory.failed",
     dispatchExecuted:"dispatch.executed",
     dispatchFailed:"dispatch.failed",
     dispatchCancelled:"dispatch.cancelled"
