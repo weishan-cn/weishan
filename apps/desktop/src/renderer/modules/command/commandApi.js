@@ -1,4 +1,8 @@
 (function(){
+  if (!window.WeishanDispatchRouter && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/dispatchRouter.js?v=2.0.5"></scr' + 'ipt>');
+  }
+
   const QUEUE_KEY = "command.queue.v205";
   const HISTORY_KEY = "command.history.v205";
   const MAX_HISTORY = 80;
@@ -12,6 +16,10 @@
 
   function taskProtocol(){
     return window.WeishanTaskProtocol || null;
+  }
+
+  function dispatchRouter(){
+    return window.WeishanDispatchRouter || null;
   }
 
   function taskSummary(text, maxLength){
@@ -96,6 +104,18 @@
       content,
       meta:{ kind:"home-ai-output", source:"home.taskDispatch" }
     });
+  }
+
+  function attachDispatchArtifact(task, plan, answer){
+    const tp = taskProtocol();
+    const router = dispatchRouter();
+    if (!tp || !tp.addTaskArtifact || !router || !router.createDispatchArtifact || !task || task.status !== "done") return task;
+    const artifacts = Array.isArray(task.artifacts) ? task.artifacts : [];
+    if (artifacts.some(a => a && a.meta && a.meta.kind === "home-dispatch")) return task;
+    const artifact = router.createDispatchArtifact(plan, answer);
+    return tp.addTaskArtifact(task, Object.assign({}, artifact, {
+      taskId:task.taskId || task.id || ""
+    }));
   }
 
   function perfStart(meta, stage, extra){
@@ -328,6 +348,20 @@
       return { route:"memory.save", label:"记忆模块", action:"saveMemory" };
     }
 
+    const router = dispatchRouter();
+    if (router && typeof router.createDispatchPlan === "function") {
+      const plan = router.createDispatchPlan(t);
+      if (plan && plan.module && plan.module !== "chat") {
+        return {
+          route:"dispatch." + plan.module,
+          label:"首页调度中心",
+          action:plan.action,
+          target:plan.targetRoute || "home",
+          dispatchPlan:plan
+        };
+      }
+    }
+
     return { route:"ai.chat", label:"AI 大脑", action:"chat" };
   }
 
@@ -410,6 +444,14 @@
       mail:"邮件接管",
       settings:"设置中心"
     }[target] || target;
+  }
+
+  function executeDispatchPlan(text, plan){
+    const router = dispatchRouter();
+    if (!router || typeof router.resultForPlan !== "function") {
+      return "首页调度中心尚未加载，请稍后重试。";
+    }
+    return router.resultForPlan(plan, text);
   }
 
   function brainLabel(){
@@ -497,6 +539,17 @@
     perfEnd(meta, "renderer.prepare.done", routeStartedAt, { inputChars:String(active.text || "").length });
     active = patchTask(active.id, (t) => {
       t.route = intent.route;
+      if (intent.dispatchPlan) {
+        t.module = intent.dispatchPlan.module;
+        t.action = intent.dispatchPlan.action;
+        t.routeMode = intent.dispatchPlan.routeMode || "console";
+        t.target = { type:intent.dispatchPlan.routeMode === "module" ? "module" : "console", module:intent.dispatchPlan.module };
+        t.meta = Object.assign({}, t.meta || {}, {
+          dispatchModule:intent.dispatchPlan.module,
+          dispatchAction:intent.dispatchPlan.action,
+          dispatchTargetRoute:intent.dispatchPlan.targetRoute || "home"
+        });
+      }
       return addLog(t, "route", "路由判断：" + intent.label);
     });
 
@@ -517,6 +570,13 @@
       } else if (intent.route === "memory.save") {
         answer = await saveMemory(active.text);
         active = patchTask(active.id, (t) => addLog(t, "memory", answer));
+      } else if (intent.route.indexOf("dispatch.") === 0) {
+        const plan = intent.dispatchPlan || {};
+        answer = executeDispatchPlan(active.text, plan);
+        active = patchTask(active.id, (t) => {
+          t = addLog(t, "dispatch", "已生成调度计划：" + (plan.module || "unknown") + " / " + (plan.action || "unknown"));
+          return putAnswerLog(t, answer, false);
+        });
       } else {
         active = patchTask(active.id, (t) => addLog(t, "ai", "调用 AI 大脑：" + brainLabel()));
         const aiStartedAt = perfStart(meta, "renderer.ai.call.start", { inputChars:String(active.text || "").length });
@@ -556,7 +616,8 @@
       active = patchTask(active.id, (t) => {
         t = transitionTask(t, "done", { outputSummary:taskSummary(answer, 240) });
         t.answer = answer;
-        t = attachHomeTextArtifact(t);
+        if (intent.route.indexOf("dispatch.") === 0) t = attachDispatchArtifact(t, intent.dispatchPlan || {}, answer);
+        else t = attachHomeTextArtifact(t);
         return addLog(t, "done", "状态：已完成。");
       });
     } catch (err) {

@@ -55,6 +55,7 @@ function runE2e() {
     runStep("E2E local workflows", "npm", ["run", "test:e2e:local"]);
     runStep("E2E security audit", "npm", ["run", "test:e2e:security"]);
     runStep("E2E repair center", "npm", ["run", "test:e2e:repair"]);
+    runStep("E2E dispatch router", "npm", ["run", "test:e2e:dispatch"]);
   } finally {
     cleanupPlaywrightArtifacts();
   }

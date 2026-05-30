@@ -66,9 +66,13 @@ async function cleanupE2EData(page, runId) {
     const memoryKey = "weishan:memory:v1";
     const projectKey = "weishan:projects:v1";
     const historyKey = "weishan.v2.history.items";
+    const commandQueueKey = "command.queue.v205";
+    const commandHistoryKey = "command.history.v205";
     safeWrite(memoryKey, safeRead(memoryKey, []).filter((item) => !hasRunId(item)));
     safeWrite(projectKey, safeRead(projectKey, []).filter((item) => !hasRunId(item)));
     safeWrite(historyKey, safeRead(historyKey, []).filter((item) => !hasRunId(item)));
+    safeWrite(commandQueueKey, safeRead(commandQueueKey, []).filter((item) => !hasRunId(item)));
+    safeWrite(commandHistoryKey, safeRead(commandHistoryKey, []).filter((item) => !hasRunId(item)));
   }, runId);
 }
 

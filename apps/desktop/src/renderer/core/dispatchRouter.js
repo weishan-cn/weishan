@@ -1,0 +1,363 @@
+(function(){
+  const DISPATCH_MODULES = {
+    mail:"mail",
+    crawler:"crawler",
+    softwareFactory:"softwareFactory",
+    document:"document",
+    ppt:"ppt",
+    codex:"codex",
+    chat:"chat",
+    coordination:"coordination"
+  };
+
+  const DISPATCH_ACTIONS = {
+    mailOpen:"mail.open",
+    mailSummarize:"mail.summarize",
+    mailDraftReply:"mail.draftReply",
+    mailExtractTodos:"mail.extractTodos",
+    mailTranslate:"mail.translate",
+    crawlerOpen:"crawler.open",
+    crawlerWebFetch:"crawler.webFetch",
+    softwareFactoryOpen:"softwareFactory.open",
+    softwareFactoryGeneratePlan:"softwareFactory.generatePlan",
+    documentGenerateDraft:"document.generateDraft",
+    pptGenerateOutline:"ppt.generateOutline",
+    codexGenerateInstruction:"codex.generateInstruction",
+    chatAnswer:"chat.answer",
+    coordinationPlan:"coordination.plan"
+  };
+
+  const MODULE_KEYWORDS = [
+    { module:"mail", keywords:[/邮件|邮箱|收件箱|回复邮件|总结邮件|提取待办|翻译邮件/i, /\b(mail|email|inbox|reply)\b/i] },
+    { module:"crawler", keywords:[/抓取|网页|网址|链接|爬取/i, /\b(URL|crawler|fetch|scrape)\b/i, /https?:\/\//i] },
+    { module:"softwareFactory", keywords:[/软件|工具|系统|桌面工具|生成软件|软件工厂|应用/i, /\b(software|factory|app)\b/i] },
+    { module:"ppt", keywords:[/PPT|幻灯片|演示|路演/i, /\b(slide|slides|presentation|deck)\b/i] },
+    { module:"codex", keywords:[/Codex|给\s*Codex|精确指令|开发指令|修复指令|测试指令/i] },
+    { module:"document", keywords:[/文档|合同|协议|报告|说明书|计划书|合作协议/i, /\b(memo|document|doc|report|proposal)\b/i] }
+  ];
+
+  function redactDispatchText(text){
+    return String(text || "")
+      .replace(/(bearer|authorization|api[-_ ]?key|token|password|secret|cookie|providerBody|provider body)\s*[:=]\s*[^,\s;]+/gi, "$1=[redacted]")
+      .replace(/sk-[A-Za-z0-9._-]+/g, "sk-[redacted]");
+  }
+
+  function sanitizeDispatchText(text){
+    return redactDispatchText(text)
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function summarizeDispatchText(text, maxLength){
+    const clean = sanitizeDispatchText(text);
+    const max = Number(maxLength || 160);
+    return clean.length > max ? clean.slice(0, max).trim() + "..." : clean;
+  }
+
+  function hasKeyword(text, item){
+    return item.keywords.some((pattern) => pattern.test(text));
+  }
+
+  function detectModules(text){
+    return MODULE_KEYWORDS.filter((item) => hasKeyword(text, item)).map((item) => item.module);
+  }
+
+  function extractUrl(text){
+    const match = String(text || "").match(/https?:\/\/[^\s，。；,;]+/i);
+    return match ? match[0] : "";
+  }
+
+  function mailAction(text){
+    if (/回复|draft\s*reply/i.test(text)) return DISPATCH_ACTIONS.mailDraftReply;
+    if (/待办|todo/i.test(text)) return DISPATCH_ACTIONS.mailExtractTodos;
+    if (/翻译|translate/i.test(text)) return DISPATCH_ACTIONS.mailTranslate;
+    if (/总结|摘要|summary|summarize/i.test(text)) return DISPATCH_ACTIONS.mailSummarize;
+    return DISPATCH_ACTIONS.mailOpen;
+  }
+
+  function classifyCommand(text){
+    const raw = String(text || "");
+    const modules = detectModules(raw);
+    const uniqueModules = Array.from(new Set(modules));
+
+    if (uniqueModules.includes("codex") && /给\s*Codex|Codex.*(指令|修复|开发|测试)/i.test(raw)) {
+      return {
+        module:DISPATCH_MODULES.codex,
+        action:DISPATCH_ACTIONS.codexGenerateInstruction,
+        routeMode:"console",
+        modules:[DISPATCH_MODULES.codex],
+        targetRoute:"home",
+        confidence:"rule"
+      };
+    }
+
+    if (uniqueModules.length > 1) {
+      return {
+        module:DISPATCH_MODULES.coordination,
+        action:DISPATCH_ACTIONS.coordinationPlan,
+        routeMode:"console",
+        modules:uniqueModules,
+        confidence:"rule",
+        targetRoute:"home"
+      };
+    }
+
+    const module = uniqueModules[0] || DISPATCH_MODULES.chat;
+    if (module === "mail") return { module, action:mailAction(raw), routeMode:"module", modules:[module], targetRoute:"mail", confidence:"rule" };
+    if (module === "crawler") return { module, action:extractUrl(raw) ? DISPATCH_ACTIONS.crawlerWebFetch : DISPATCH_ACTIONS.crawlerOpen, routeMode:"module", modules:[module], targetRoute:"crawler", confidence:"rule" };
+    if (module === "softwareFactory") return { module, action:DISPATCH_ACTIONS.softwareFactoryGeneratePlan, routeMode:"module", modules:[module], targetRoute:"builder", confidence:"rule" };
+    if (module === "document") return { module, action:DISPATCH_ACTIONS.documentGenerateDraft, routeMode:"console", modules:[module], targetRoute:"home", confidence:"rule" };
+    if (module === "ppt") return { module, action:DISPATCH_ACTIONS.pptGenerateOutline, routeMode:"console", modules:[module], targetRoute:"home", confidence:"rule" };
+    if (module === "codex") return { module, action:DISPATCH_ACTIONS.codexGenerateInstruction, routeMode:"console", modules:[module], targetRoute:"home", confidence:"rule" };
+    return { module:DISPATCH_MODULES.chat, action:DISPATCH_ACTIONS.chatAnswer, routeMode:"console", modules:[DISPATCH_MODULES.chat], targetRoute:"home", confidence:"fallback" };
+  }
+
+  function createDispatchPlan(text){
+    const intent = classifyCommand(text);
+    const cleanInput = sanitizeDispatchText(text);
+    const title = summarizeDispatchText(cleanInput, 80) || "weishan dispatch task";
+    const url = extractUrl(cleanInput);
+    return Object.assign({}, intent, {
+      schemaVersion:"weishan.dispatch.v1",
+      title,
+      inputSummary:summarizeDispatchText(cleanInput, 240),
+      source:"home",
+      url,
+      createdAt:new Date().toISOString()
+    });
+  }
+
+  function buildDocumentDraft(text, intent){
+    const topic = summarizeDispatchText(text, 120) || "文档";
+    return [
+      "# 文档草稿",
+      "",
+      "## 1. 标题",
+      topic,
+      "",
+      "## 2. 背景",
+      "本草稿基于首页调度中心的本地规则生成，适合作为后续人工完善的初稿。",
+      "",
+      "## 3. 目标",
+      "- 明确文档目的",
+      "- 梳理关键信息",
+      "- 形成可继续编辑的结构",
+      "",
+      "## 4. 主要内容",
+      "- 事项概述：" + topic,
+      "- 适用对象：待补充",
+      "- 关键条款 / 要点：待人工确认",
+      "",
+      "## 5. 下一步",
+      "- 补充具体事实和数据",
+      "- 检查法律、财务或业务边界",
+      "- 交由相关负责人确认"
+    ].join("\n");
+  }
+
+  function buildPptOutline(text){
+    const topic = summarizeDispatchText(text, 120) || "PPT";
+    return [
+      "# PPT 大纲",
+      "",
+      "## 封面",
+      "- 标题：" + topic,
+      "- 副标题：本地生成的大纲草案",
+      "",
+      "## 目录",
+      "1. 核心问题",
+      "2. 目标用户",
+      "3. 方案概览",
+      "4. 执行步骤",
+      "5. 风险与对策",
+      "6. 总结",
+      "",
+      "## 核心问题",
+      "- 当前要解决什么问题",
+      "- 为什么现在需要解决",
+      "",
+      "## 方案",
+      "- 方案一：本地优先执行",
+      "- 方案二：模块化协作",
+      "- 方案三：历史记录与产物沉淀",
+      "",
+      "## 执行步骤",
+      "- 明确输入",
+      "- 分配模块",
+      "- 生成结果",
+      "- 验证并沉淀历史",
+      "",
+      "## 风险与对策",
+      "- 信息不足：用待确认问题补齐",
+      "- 执行范围过大：拆分阶段",
+      "- 数据敏感：只保留安全摘要",
+      "",
+      "## 总结",
+      "- 本大纲为 Markdown 文本产物，不是真实 PPTX。"
+    ].join("\n");
+  }
+
+  function buildCodexInstruction(text){
+    const goal = summarizeDispatchText(text, 180) || "请完成指定代码任务";
+    return [
+      "# Codex 精确指令",
+      "",
+      "工作目录：",
+      "cd ~/Downloads/weishan-clean-release",
+      "",
+      "修改目标：",
+      goal,
+      "",
+      "允许修改文件：",
+      "- 根据任务相关模块小范围修改",
+      "- 优先修改最接近问题的文件",
+      "",
+      "禁止修改文件：",
+      "- 不要修改无关业务页面",
+      "- 不要修改 package-lock.json",
+      "- 不要写入真实密钥、token、cookie、password",
+      "",
+      "检查命令：",
+      "- npm run verify",
+      "- git diff --check",
+      "",
+      "安全边界：",
+      "- 不读取或输出 AI key、prompt、messages、provider body",
+      "- 不上传用户文件或源码",
+      "",
+      "提交要求：",
+      "- 不 commit",
+      "- 不 push"
+    ].join("\n");
+  }
+
+  function buildCoordinationPlan(text, modules){
+    const clean = summarizeDispatchText(text, 180);
+    const steps = (modules || []).map((module, index) => (index + 1) + ". " + module + "：准备并执行对应模块任务");
+    return [
+      "# 多模块协调计划",
+      "",
+      "## 用户目标",
+      clean,
+      "",
+      "## 涉及模块",
+      (modules || []).map((module) => "- " + module).join("\n"),
+      "",
+      "## 执行顺序",
+      steps.join("\n"),
+      "",
+      "## v1 边界",
+      "- 首页仅生成协调计划，不真实跨模块执行。",
+      "- 抓取任务不会在首页访问外网。",
+      "- PPT / 文档产物为 Markdown 文本，不是真实 PPTX / DOCX。"
+    ].join("\n");
+  }
+
+  function buildSoftwareFactoryPlan(text){
+    const clean = summarizeDispatchText(text, 180);
+    return [
+      "# 软件工厂调度草案",
+      "",
+      "## 识别结果",
+      "已识别为软件工厂任务。",
+      "",
+      "## 可复制需求",
+      clean,
+      "",
+      "## 建议下一步",
+      "- 打开软件工厂模块",
+      "- 粘贴上述需求",
+      "- 生成正式软件方案文档",
+      "",
+      "本调度计划不会直接调用软件工厂业务函数。"
+    ].join("\n");
+  }
+
+  function buildModuleDispatchPlan(plan, text){
+    if (plan.module === "mail") {
+      return "已识别为邮件接管任务，可从邮件接管模块继续执行：总结、回复、待办或翻译。本轮首页不直接调用 Mail AI。";
+    }
+    if (plan.module === "crawler") {
+      return [
+        "已识别为抓取中心任务。",
+        plan.url ? "URL：" + plan.url : "未识别到明确 URL。",
+        "请进入抓取中心执行真实抓取；本轮首页不会访问外网。"
+      ].join("\n");
+    }
+    if (plan.module === "softwareFactory") return buildSoftwareFactoryPlan(text);
+    return "已生成模块调度计划。";
+  }
+
+  function buildLocalAnswer(text){
+    return [
+      "# 本地回答",
+      "",
+      "已收到你的问题：",
+      summarizeDispatchText(text, 240),
+      "",
+      "v1 首页调度优先使用本地规则。如果这是普通问答，可继续在已配置 AI 的情况下沿用原 Home chat 逻辑。"
+    ].join("\n");
+  }
+
+  function resultForPlan(plan, text){
+    if (plan.module === "document") return buildDocumentDraft(text, plan);
+    if (plan.module === "ppt") return buildPptOutline(text, plan);
+    if (plan.module === "codex") return buildCodexInstruction(text, plan);
+    if (plan.module === "coordination") return buildCoordinationPlan(text, plan.modules);
+    if (plan.module === "softwareFactory" || plan.module === "mail" || plan.module === "crawler") return buildModuleDispatchPlan(plan, text);
+    return buildLocalAnswer(text);
+  }
+
+  function timestamp(){
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + "-" + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
+  }
+
+  function filenameForPlan(plan){
+    const ts = timestamp();
+    if (plan.module === "document") return "weishan-document-draft-" + ts + ".md";
+    if (plan.module === "ppt") return "weishan-ppt-outline-" + ts + ".md";
+    if (plan.module === "codex") return "weishan-codex-instruction-" + ts + ".md";
+    if (plan.module === "coordination") return "weishan-coordination-plan-" + ts + ".md";
+    return "weishan-" + plan.module + "-dispatch-plan-" + ts + ".md";
+  }
+
+  function byteSize(text){
+    const value = String(text || "");
+    try { return new Blob([value]).size; } catch (_) { return value.length; }
+  }
+
+  function createDispatchArtifact(plan, result){
+    const content = redactDispatchText(result).trim();
+    return {
+      type:"markdown",
+      title:(plan.module === "coordination" ? "多模块协调计划" : plan.module + " dispatch artifact"),
+      filename:filenameForPlan(plan),
+      mimeType:"text/markdown;charset=utf-8",
+      sizeBytes:byteSize(content),
+      content,
+      meta:{
+        kind:"home-dispatch",
+        module:plan.module,
+        action:plan.action,
+        source:"home.dispatchRouter"
+      }
+    };
+  }
+
+  window.WeishanDispatchRouter = {
+    DISPATCH_MODULES,
+    DISPATCH_ACTIONS,
+    classifyCommand,
+    createDispatchPlan,
+    buildDocumentDraft,
+    buildPptOutline,
+    buildCodexInstruction,
+    buildCoordinationPlan,
+    createDispatchArtifact,
+    sanitizeDispatchText,
+    summarizeDispatchText,
+    resultForPlan
+  };
+})();

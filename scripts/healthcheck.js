@@ -47,6 +47,7 @@ function checkFiles() {
     "apps/desktop/src/renderer/routes/AuditPage.js",
     "apps/desktop/src/renderer/routes/SecurityPage.js",
     "apps/desktop/src/renderer/core/enterpriseSecurity.js",
+    "apps/desktop/src/renderer/core/dispatchRouter.js",
     "apps/desktop/src/renderer/core/repairCenter.js",
     "apps/desktop/src/renderer/core/taskProtocol.js",
     "apps/server/src/cloud/storageAdapter.js",
@@ -62,7 +63,7 @@ function checkFiles() {
 function checkPackageScripts() {
   const pkg = JSON.parse(readText("package.json") || "{}");
   const scripts = pkg.scripts || {};
-  return ["check", "dev:desktop", "healthcheck", "secrets:scan", "test:api", "test:e2e", "test:e2e:smoke", "test:e2e:repair"].map((script) => {
+  return ["check", "dev:desktop", "healthcheck", "secrets:scan", "test:api", "test:e2e", "test:e2e:smoke", "test:e2e:repair", "test:e2e:dispatch"].map((script) => {
     const ok = Boolean(scripts[script]);
     const status = ok ? "pass" : (script === "healthcheck" ? "warn" : "fail");
     return result("script:" + script, status, ok ? scripts[script] : "missing", "Add the missing package script.");
@@ -78,6 +79,9 @@ function marker(file, pattern, name, required) {
 function checkMarkers() {
   return [
     marker("apps/desktop/src/renderer/core/taskProtocol.js", /createTaskRecord|addTaskArtifact|TASK_PROTOCOL_VERSION/, "marker:task protocol helper", true),
+    marker("apps/desktop/src/renderer/core/dispatchRouter.js", /WeishanDispatchRouter|classifyCommand|createDispatchPlan/, "marker:dispatch router exists", true),
+    marker("apps/desktop/src/renderer/core/dispatchRouter.js", /mail|crawler|softwareFactory|document|ppt|codex|chat|coordination/, "marker:dispatch router module coverage", true),
+    marker("apps/desktop/src/renderer/modules/command/commandApi.js", /dispatch\.|createDispatchPlan|home-dispatch/, "marker:command center dispatch", true),
     marker("apps/desktop/src/renderer/modules/history/historyApi.js", /window\.HistoryApi|function record/, "marker:HistoryApi", true),
     marker("apps/desktop/src/renderer/routes/HistoryPage.js", /artifact|history-artifact-download|URL\.createObjectURL/, "marker:artifact download", false),
     marker("apps/desktop/src/renderer/core/enterpriseSecurity.js", /WeishanEnterpriseSecurity|canDownload|createSecurityAuditPayload/, "marker:enterprise security", true),
