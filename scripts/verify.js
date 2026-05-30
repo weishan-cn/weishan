@@ -44,6 +44,7 @@ function cleanupPlaywrightArtifacts() {
 function runCore() {
   runStep("Secret scan", "npm", ["run", "secrets:scan"]);
   runStep("Healthcheck", "npm", ["run", "healthcheck"]);
+  runStep("API tests", "npm", ["run", "test:api"]);
   runStep("Project check", "npm", ["run", "check"]);
   runStep("Git diff check", "git", ["diff", "--check"]);
 }

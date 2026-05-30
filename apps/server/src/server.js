@@ -16,10 +16,12 @@ import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { validateEmailRisk } from "./emailRisk.js";
+import { mountCloudRoutes } from "./routes/cloudRoutes.js";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+mountCloudRoutes(app);
 
 const PORT = process.env.PORT || 8787;
 const VERSION = "1.7.08";

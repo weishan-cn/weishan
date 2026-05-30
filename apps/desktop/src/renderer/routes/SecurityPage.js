@@ -159,10 +159,11 @@
     addCheck(items, "projects", localStorageReadable("weishan:projects:v1") ? "pass" : "warn", localStorageReadable("weishan:projects:v1") ? "项目任务本地 key 可读取。" : "项目任务本地 key 暂无或不可读取。", "如需验证项目数据，可先新增一条项目任务。");
     addCheck(items, "artifact", window.HistoryPage ? "pass" : "fail", window.HistoryPage ? "HistoryPage artifact 下载入口可用。" : "HistoryPage 未加载，artifact 下载不可确认。", "确认 HistoryPage 已加载。");
     addCheck(items, "paidModuleGuard", window.WeishanEnterpriseSecurity && window.WeishanEnterpriseSecurity.canAccessModule ? "pass" : "fail", window.WeishanEnterpriseSecurity && window.WeishanEnterpriseSecurity.canAccessModule ? "付费模块访问策略 helper 可用。" : "付费模块访问策略缺失。", "确认 enterpriseSecurity.js 中 paid module guard 已加载。");
+    addCheck(items, "Cloud API / StorageAdapter", "warn", "本地 mock 架构已预留；真实 Metadata provider / S3-compatible object storage provider 未启用。", "后续通过 weishan API 接入可替换云供应商，前端不直接接触对象存储密钥。");
     const secretScan = await runSecretScanCheck();
     addCheck(items, "Secret Scan", secretScan.status, secretScan.detail, secretScan.suggestion);
     items[items.length - 1].secretScan = secretScan;
-    addCheck(items, "futureChecks", "warn", "PocketBase / Wasabi / Playwright / Gitleaks 为后续检测项，本轮未接入。", "后续可接入真实服务探测和 E2E。");
+    addCheck(items, "futureChecks", "warn", "Metadata provider / S3-compatible object storage / Playwright / Gitleaks 为后续检测项，本轮未接入真实服务。", "后续可接入真实服务探测和 E2E。");
     return items;
   }
   function counts(items){
@@ -225,8 +226,8 @@
       "## 未覆盖",
       "",
       "- Playwright E2E",
-      "- PocketBase 真实连接",
-      "- Wasabi 真实连接",
+      "- Metadata provider / database adapter 真实连接",
+      "- S3-compatible / object storage provider 真实连接",
       "- Gitleaks 深度密钥扫描",
       "- GitHub Actions",
       "",
@@ -437,7 +438,7 @@
           <button id="runSelfCheck" type="button" class="ws-btn">运行自检</button>
           <button id="downloadSelfCheck" type="button" class="ws-btn gray">导出自检报告</button>
         </div>
-        <p class="ws-muted">PocketBase / Wasabi / Playwright / Gitleaks 为后续检测项，本轮未接入。</p>
+        <p class="ws-muted">Metadata provider / S3-compatible object storage / Playwright / Gitleaks 为后续检测项，本轮未接入真实服务。</p>
       </div>
       <div id="selfCheckResult">${renderDiagnostics(lastDiagnostics)}</div>
       <div id="repairCenterHost">${renderRepairCenter()}</div>

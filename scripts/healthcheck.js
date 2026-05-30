@@ -48,7 +48,13 @@ function checkFiles() {
     "apps/desktop/src/renderer/routes/SecurityPage.js",
     "apps/desktop/src/renderer/core/enterpriseSecurity.js",
     "apps/desktop/src/renderer/core/repairCenter.js",
-    "apps/desktop/src/renderer/core/taskProtocol.js"
+    "apps/desktop/src/renderer/core/taskProtocol.js",
+    "apps/server/src/cloud/storageAdapter.js",
+    "apps/server/src/cloud/providers/localMockStorageAdapter.js",
+    "apps/server/src/cloud/providers/s3CompatibleStorageAdapter.js",
+    "apps/server/src/cloud/metadataAdapter.js",
+    "apps/server/src/cloud/cloudService.js",
+    "apps/server/src/cloud/cloudHealthcheck.js"
   ];
   return files.map((file) => result("file:" + file, hasFile(file) ? "pass" : "fail", hasFile(file) ? "exists" : "missing", "Restore the expected project file."));
 }
@@ -56,7 +62,7 @@ function checkFiles() {
 function checkPackageScripts() {
   const pkg = JSON.parse(readText("package.json") || "{}");
   const scripts = pkg.scripts || {};
-  return ["check", "dev:desktop", "healthcheck", "secrets:scan", "test:e2e", "test:e2e:smoke", "test:e2e:repair"].map((script) => {
+  return ["check", "dev:desktop", "healthcheck", "secrets:scan", "test:api", "test:e2e", "test:e2e:smoke", "test:e2e:repair"].map((script) => {
     const ok = Boolean(scripts[script]);
     const status = ok ? "pass" : (script === "healthcheck" ? "warn" : "fail");
     return result("script:" + script, status, ok ? scripts[script] : "missing", "Add the missing package script.");
@@ -81,6 +87,14 @@ function checkMarkers() {
     marker("apps/desktop/src/renderer/core/repairCenter.js", /sanitizeRepairText|sanitizeStack|createSafeTelemetryPayload/, "marker:repair telemetry sanitizer", true),
     marker("apps/desktop/src/renderer/core/repairCenter.js", /repair\.bugDetected|repair\.suggested|repair\.verified|repair\.reportExported/, "marker:repair history actions", true),
     marker("apps/desktop/src/renderer/core/repairCenter.js", /pending_manual_or_cloud_opt_in|clientMode:\s*["']local["']/, "marker:repair upload safety", true),
+    marker("apps/server/src/cloud/storageAdapter.js", /class StorageAdapter|createStorageAdapter|s3_compatible/, "marker:storage adapter interface", true),
+    marker("apps/server/src/cloud/providers/localMockStorageAdapter.js", /LocalMockStorageAdapter|mock:\/\/storage|getUsage/, "marker:local mock storage adapter", true),
+    marker("apps/server/src/cloud/providers/s3CompatibleStorageAdapter.js", /S3CompatibleStorageAdapter|object storage|not_enabled_in_mvp/, "marker:s3 compatible storage adapter skeleton", true),
+    marker("apps/server/src/cloud/metadataAdapter.js", /class MetadataAdapter|createMetadataAdapter|Metadata provider/, "marker:metadata adapter interface", true),
+    marker("apps/server/src/cloud/metadataAdapter.js", /LocalMockMetadataAdapter|getStorageAllocation|recordFileIndex/, "marker:local mock metadata adapter", true),
+    marker("apps/server/src/cloud/metadataAdapter.js", /PocketBaseMetadataAdapterSkeleton|provider:"pocketbase"|not_configured_in_mvp/, "marker:pocketbase metadata provider skeleton", true),
+    marker("apps/server/src/cloud/cloudService.js", /createCloudContext|createUploadUrl|pathPrefixFor/, "marker:cloud service core", true),
+    marker("apps/server/src/cloud/cloudHealthcheck.js", /runCloudHealthcheck|storageProviderSwitchable|metadataProviderSwitchable/, "marker:cloud provider switchable", true),
     marker("playwright.config.js", /testDir:\s*["']\.\/tests\/e2e["']|reporter|trace/, "marker:playwright config", false),
     marker("tests/e2e/smoke.spec.js", /app launches|home page visible|crawler page visible/, "marker:playwright smoke", false)
   ];
@@ -144,8 +158,8 @@ function markdown(results) {
     "## 未覆盖",
     "",
     "- Playwright E2E",
-    "- PocketBase 真实连接",
-    "- Wasabi 真实连接",
+    "- Metadata provider / database adapter 真实连接",
+    "- S3-compatible / object storage provider 真实连接",
     "- Gitleaks 深度密钥扫描",
     "- GitHub Actions"
   ].join("\n");

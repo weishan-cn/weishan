@@ -14,6 +14,7 @@
     "verify": "node scripts/verify.js core",
     "verify:all": "node scripts/verify.js all",
     "verify:e2e": "node scripts/verify.js e2e",
+    "test:api": "node tests/api/cloud-adapter.test.js",
     "test:e2e": "playwright test",
     "test:e2e:local": "playwright test tests/e2e/local-workflows.spec.js",
     "test:e2e:repair": "playwright test tests/e2e/repair-center.spec.js",
