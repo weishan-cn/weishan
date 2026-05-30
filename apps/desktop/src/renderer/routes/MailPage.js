@@ -18,6 +18,15 @@
     return String(s || "").replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; });
   }
   function t(key){ return window.I18n.t(key); }
+  function pendingDispatch(){
+    const router = window.WeishanDispatchRouter;
+    return router && typeof router.readPendingPayload === "function" ? router.readPendingPayload("mail") : null;
+  }
+  function dispatchNoticeHtml(payload){
+    if (!payload) return "";
+    const prefill = payload.prefill || {};
+    return `<div class="mail-card" data-dispatch-prefill="mail"><h2>来自首页调度中心的任务</h2><p class="mail-muted">${esc(prefill.taskTitle || "邮件接管任务")}</p><p><b>${esc(prefill.suggestedAction || payload.action || "")}</b></p><p class="mail-muted">${esc(prefill.taskDescription || payload.inputSummary || "")}</p><p class="mail-muted">需要用户确认后再执行；不会自动读取邮箱或调用邮件 AI。</p></div>`;
+  }
   function createMailPerf(featureAction){
     return window.WeishanPerf && window.WeishanPerf.createPerfMeta ? window.WeishanPerf.createPerfMeta(featureAction) : { enabled:false, traceId:"", featureAction };
   }
@@ -1213,11 +1222,13 @@
     const s = window.MailApi.state();
     const active = window.MailApi.activeAccount();
     const filtered = messagesForTab(active, activeWorkspaceTab);
+    const dispatchPayload = pendingDispatch();
     if (selectedIndex >= filtered.length) selectedIndex = 0;
 
     host.innerHTML = `
       <section class="mail-v204-page">
         <div class="mail-left">
+          ${dispatchNoticeHtml(dispatchPayload)}
           <div class="mail-card" id="mailWorkspace">
             ${workspaceHtml(active)}
           </div>

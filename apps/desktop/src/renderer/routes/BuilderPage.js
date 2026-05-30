@@ -5,6 +5,15 @@
   function t(key){ return window.I18n.t(key); }
   function isEn(){ return window.I18n && window.I18n.getLang && window.I18n.getLang() === "en"; }
   function label(zh, en){ return isEn() ? en : zh; }
+  function pendingDispatch(){
+    const router = window.WeishanDispatchRouter;
+    return router && typeof router.readPendingPayload === "function" ? router.readPendingPayload("softwareFactory") : null;
+  }
+  function dispatchNoticeHtml(payload){
+    if (!payload) return "";
+    const prefill = payload.prefill || {};
+    return `<div class="ws-card" data-dispatch-prefill="softwareFactory"><h3>${esc(label("来自首页调度中心的任务", "Task from Home dispatch center"))}</h3><p class="ws-muted">${esc(prefill.taskDescription || payload.inputSummary || "")}</p><p><b>${esc(prefill.suggestedAction || payload.action || "")}</b></p><p class="ws-muted">${esc(label("需求草案已预填；需要手动点击生成软件方案，不会自动调用 AI。", "The requirement draft was prefilled. Click manually to generate; no AI call runs automatically."))}</p></div>`;
+  }
   function nowIso(){ return new Date().toISOString(); }
   function taskProtocol(){ return window.WeishanTaskProtocol || null; }
   function summarize(text, maxLength){
@@ -314,7 +323,9 @@
     if (list) list.innerHTML = renderPlans();
   }
   function mount(host){
-    host.innerHTML=`<section class="ws-page"><div class="ws-card"><h2>${t("builder")}</h2><p class="ws-muted">${t("softwareDesc")}</p><label>${esc(label("软件类型", "Software type"))}</label><select id="softwareType" class="ws-select"><option>Web 应用</option><option>桌面工具</option><option>自动化脚本</option><option>文档模板</option><option>暂不确定</option></select><textarea id="softwareGoal" class="ws-textarea" placeholder="${t("softwarePlaceholder")}"></textarea><div class="ws-row"><button id="createPlan" class="ws-btn">${esc(label("生成软件方案", "Generate software plan"))}</button><button id="reportBug" class="ws-btn gray">${t("reportBug")}</button></div></div><div id="softwareResult"></div><div class="card-list" id="softwarePlans">${renderPlans()}</div></section>`;
+    const dispatchPayload = pendingDispatch();
+    const prefill = dispatchPayload && dispatchPayload.prefill || {};
+    host.innerHTML=`<section class="ws-page">${dispatchNoticeHtml(dispatchPayload)}<div class="ws-card"><h2>${t("builder")}</h2><p class="ws-muted">${t("softwareDesc")}</p><label>${esc(label("软件类型", "Software type"))}</label><select id="softwareType" class="ws-select"><option>Web 应用</option><option>桌面工具</option><option>自动化脚本</option><option>文档模板</option><option>暂不确定</option></select><textarea id="softwareGoal" class="ws-textarea" placeholder="${t("softwarePlaceholder")}">${esc(prefill.draftRequirement || prefill.taskDescription || "")}</textarea><div class="ws-row"><button id="createPlan" class="ws-btn">${esc(label("生成软件方案", "Generate software plan"))}</button><button id="reportBug" class="ws-btn gray">${t("reportBug")}</button></div></div><div id="softwareResult"></div><div class="card-list" id="softwarePlans">${renderPlans()}</div></section>`;
     document.getElementById("createPlan").addEventListener("click", async ()=>{
       const btn = document.getElementById("createPlan");
       btn.disabled = true;

@@ -22,6 +22,15 @@
     return window.WeishanDispatchRouter || null;
   }
 
+  function saveDispatchPrefill(text, plan){
+    const router = dispatchRouter();
+    if (!router || !router.createPendingPayload || !router.savePendingPayload || !plan) return null;
+    if (plan.routeMode !== "module") return null;
+    const payload = router.createPendingPayload(plan, text);
+    router.savePendingPayload(payload);
+    return payload;
+  }
+
   function taskSummary(text, maxLength){
     const tp = taskProtocol();
     return tp && tp.summarizeTextSafe ? tp.summarizeTextSafe(text, maxLength) : String(text || "").replace(/\s+/g, " ").trim().slice(0, maxLength || 160);
@@ -441,6 +450,8 @@
       projects:"项目管理",
       memory:"记忆大脑",
       history:"历史记录",
+      crawler:"抓取中心",
+      builder:"软件工厂",
       mail:"邮件接管",
       settings:"设置中心"
     }[target] || target;
@@ -573,8 +584,18 @@
       } else if (intent.route.indexOf("dispatch.") === 0) {
         const plan = intent.dispatchPlan || {};
         answer = executeDispatchPlan(active.text, plan);
+        const pendingPayload = saveDispatchPrefill(active.text, plan);
+        if (pendingPayload && pendingPayload.targetRoute && pendingPayload.targetRoute !== "home") {
+          answer += "\n\n调度预填已准备：" + pendingPayload.targetModule + " / " + pendingPayload.action + "。";
+          answer += "\nrealExecution=false；requiresUserConfirmation=true。";
+          answer += "\n正在打开：" + routeName(pendingPayload.targetRoute) + "。";
+          setTimeout(function(){
+            try { openRoute(pendingPayload.targetRoute); } catch (_) {}
+          }, 0);
+        }
         active = patchTask(active.id, (t) => {
           t = addLog(t, "dispatch", "已生成调度计划：" + (plan.module || "unknown") + " / " + (plan.action || "unknown"));
+          if (pendingPayload) t = addLog(t, "dispatch", "已写入模块预填参数：" + pendingPayload.targetRoute + "，realExecution=false。");
           return putAnswerLog(t, answer, false);
         });
       } else {

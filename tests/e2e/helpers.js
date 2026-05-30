@@ -68,11 +68,18 @@ async function cleanupE2EData(page, runId) {
     const historyKey = "weishan.v2.history.items";
     const commandQueueKey = "command.queue.v205";
     const commandHistoryKey = "command.history.v205";
+    const dispatchPendingKey = "weishan:dispatch:pending:v1";
     safeWrite(memoryKey, safeRead(memoryKey, []).filter((item) => !hasRunId(item)));
     safeWrite(projectKey, safeRead(projectKey, []).filter((item) => !hasRunId(item)));
     safeWrite(historyKey, safeRead(historyKey, []).filter((item) => !hasRunId(item)));
     safeWrite(commandQueueKey, safeRead(commandQueueKey, []).filter((item) => !hasRunId(item)));
     safeWrite(commandHistoryKey, safeRead(commandHistoryKey, []).filter((item) => !hasRunId(item)));
+    const pending = safeRead(dispatchPendingKey, null);
+    if (pending && hasRunId(pending)) window.localStorage.removeItem(dispatchPendingKey);
+    try {
+      const sessionPending = window.sessionStorage && window.sessionStorage.getItem(dispatchPendingKey);
+      if (sessionPending && sessionPending.includes(id)) window.sessionStorage.removeItem(dispatchPendingKey);
+    } catch (_) {}
   }, runId);
 }
 

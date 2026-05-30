@@ -8,6 +8,15 @@
   function t(key){ return window.I18n.t(key); }
   function isEn(){ return window.I18n && window.I18n.getLang && window.I18n.getLang() === "en"; }
   function label(zh, en){ return isEn() ? en : zh; }
+  function pendingDispatch(){
+    const router = window.WeishanDispatchRouter;
+    return router && typeof router.readPendingPayload === "function" ? router.readPendingPayload("crawler") : null;
+  }
+  function dispatchNoticeHtml(payload){
+    if (!payload) return "";
+    const prefill = payload.prefill || {};
+    return `<div class="ws-card" data-dispatch-prefill="crawler"><h3>${esc(label("来自首页调度中心的任务", "Task from Home dispatch center"))}</h3><p class="ws-muted">${esc(prefill.taskDescription || payload.inputSummary || "")}</p><p><b>${esc(prefill.suggestedAction || payload.action || "")}</b></p><p class="ws-muted">${esc(label("URL 已作为文本预填；需要手动点击开始抓取，不会自动访问外网。", "The URL was prefilled as text. Click manually to fetch; no external request runs automatically."))}</p></div>`;
+  }
   function nowIso(){ return new Date().toISOString(); }
   function taskProtocol(){ return window.WeishanTaskProtocol || null; }
   function cleanAiText(text){
@@ -249,7 +258,9 @@
     if (list) list.innerHTML = renderJobs();
   }
   function mount(host){
-    host.innerHTML=`<section class="ws-page"><div class="ws-card"><h2>${t("crawler")}</h2><p class="ws-muted">${t("crawlerDesc")}</p><div class="ws-row"><input id="crawlUrl" class="ws-input" placeholder="${t("crawlerPlaceholder")}"><button id="createCrawl" class="ws-btn">${t("createCrawler")}</button></div></div><div id="crawlerResult"></div><div class="card-list" id="crawlerJobs">${renderJobs()}</div></section>`;
+    const dispatchPayload = pendingDispatch();
+    const prefill = dispatchPayload && dispatchPayload.prefill || {};
+    host.innerHTML=`<section class="ws-page">${dispatchNoticeHtml(dispatchPayload)}<div class="ws-card"><h2>${t("crawler")}</h2><p class="ws-muted">${t("crawlerDesc")}</p><div class="ws-row"><input id="crawlUrl" class="ws-input" placeholder="${t("crawlerPlaceholder")}" value="${esc(prefill.url || "")}"><button id="createCrawl" class="ws-btn">${t("createCrawler")}</button></div></div><div id="crawlerResult"></div><div class="card-list" id="crawlerJobs">${renderJobs()}</div></section>`;
     document.getElementById("createCrawl").addEventListener("click", async ()=>{
       const btn = document.getElementById("createCrawl");
       const input = document.getElementById("crawlUrl");

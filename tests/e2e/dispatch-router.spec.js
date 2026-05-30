@@ -54,10 +54,37 @@ test.describe.serial("dispatch router", () => {
     await expectHistory(page, runId, /codex|Codex 精确指令/);
   });
 
+  test("mail dispatch opens mail page with safe prefill", async () => {
+    const command = runId + " 帮我总结最近的重要邮件并提取待办";
+    await submitHomeCommand(page, command);
+    await expect(page.getByText("来自首页调度中心的任务").first()).toBeVisible();
+    await expect(page.getByText(/邮件接管任务|提取邮件待办|不会自动读取邮箱/).first()).toBeVisible();
+    await expectHistory(page, runId, /mail\.extractTodos|邮件接管|提取邮件待办/);
+  });
+
+  test("crawler dispatch opens crawler page and pre-fills URL without fetching", async () => {
+    const command = runId + " 抓取 https://example.com 并整理成摘要";
+    await submitHomeCommand(page, command);
+    await expect(page.getByText("来自首页调度中心的任务").first()).toBeVisible();
+    await expect(page.locator("#crawlUrl")).toHaveValue("https://example.com");
+    await expect(page.getByText(/不会自动访问外网|需要手动点击/).first()).toBeVisible();
+    await expectHistory(page, runId, /crawler\.webFetch|https:\/\/example\.com|抓取中心/);
+  });
+
+  test("software factory dispatch opens builder page and pre-fills requirement without generating", async () => {
+    const command = runId + " 帮我做一个客户管理软件方案";
+    await submitHomeCommand(page, command);
+    await expect(page.getByText("来自首页调度中心的任务").first()).toBeVisible();
+    await expect(page.locator("#softwareGoal")).toHaveValue(/客户管理软件方案/);
+    await expect(page.getByText(/不会自动调用 AI|需要手动点击生成软件方案/).first()).toBeVisible();
+    await expectHistory(page, runId, /softwareFactory\.generatePlan|客户管理软件方案|软件工厂/);
+  });
+
   test("coordination dispatch does not fetch and records involved modules", async () => {
     const command = runId + " 抓取 https://example.com 后生成软件方案并做 PPT 大纲";
     await submitHomeCommand(page, command);
     await expect(page.getByText(/多模块协调计划|coordination|crawler|softwareFactory|ppt/).first()).toBeVisible();
+    await expect(page.getByText(/Step Queue|realExecution=false/).first()).toBeVisible();
     await expectHistory(page, runId, /coordination|crawler|softwareFactory|ppt/);
   });
 });

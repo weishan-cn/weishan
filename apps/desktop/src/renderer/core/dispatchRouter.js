@@ -26,6 +26,7 @@
     chatAnswer:"chat.answer",
     coordinationPlan:"coordination.plan"
   };
+  const PENDING_DISPATCH_KEY = "weishan:dispatch:pending:v1";
 
   const MODULE_KEYWORDS = [
     { module:"mail", keywords:[/邮件|邮箱|收件箱|回复邮件|总结邮件|提取待办|翻译邮件/i, /\b(mail|email|inbox|reply)\b/i] },
@@ -117,7 +118,7 @@
     const cleanInput = sanitizeDispatchText(text);
     const title = summarizeDispatchText(cleanInput, 80) || "weishan dispatch task";
     const url = extractUrl(cleanInput);
-    return Object.assign({}, intent, {
+    const plan = Object.assign({}, intent, {
       schemaVersion:"weishan.dispatch.v1",
       title,
       inputSummary:summarizeDispatchText(cleanInput, 240),
@@ -125,6 +126,148 @@
       url,
       createdAt:new Date().toISOString()
     });
+    if (plan.module === DISPATCH_MODULES.coordination) plan.stepQueue = createCoordinationStepQueue(plan.modules, cleanInput);
+    return plan;
+  }
+
+  function dispatchId(){
+    return "dispatch-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+  }
+
+  function storage(){
+    try {
+      if (window.sessionStorage) return window.sessionStorage;
+    } catch (_) {}
+    try {
+      if (window.localStorage) return window.localStorage;
+    } catch (_) {}
+    return null;
+  }
+
+  function actionLabel(action){
+    const map = {
+      "mail.open":"打开邮件接管",
+      "mail.summarize":"总结邮件",
+      "mail.draftReply":"生成回复草稿",
+      "mail.extractTodos":"提取邮件待办",
+      "mail.translate":"翻译邮件",
+      "crawler.open":"打开抓取中心",
+      "crawler.webFetch":"抓取网页",
+      "softwareFactory.open":"打开软件工厂",
+      "softwareFactory.generatePlan":"生成软件方案",
+      "document.generateDraft":"生成文档草稿",
+      "ppt.generateOutline":"生成 PPT 大纲",
+      "codex.generateInstruction":"生成 Codex 指令",
+      "coordination.plan":"生成多模块协调计划"
+    };
+    return map[action] || action || "调度任务";
+  }
+
+  function prefillForPlan(plan, text){
+    const summary = summarizeDispatchText(text, 240);
+    if (plan.module === "crawler") {
+      return {
+        url:plan.url || extractUrl(text),
+        taskTitle:"抓取中心任务",
+        taskDescription:summary,
+        draftRequirement:"",
+        suggestedAction:actionLabel(plan.action)
+      };
+    }
+    if (plan.module === "softwareFactory") {
+      return {
+        url:"",
+        taskTitle:"软件工厂任务",
+        taskDescription:summary,
+        draftRequirement:summarizeDispatchText(text, 700),
+        suggestedAction:actionLabel(plan.action)
+      };
+    }
+    if (plan.module === "mail") {
+      return {
+        url:"",
+        taskTitle:"邮件接管任务",
+        taskDescription:summary,
+        draftRequirement:"",
+        suggestedAction:actionLabel(plan.action)
+      };
+    }
+    return {
+      url:"",
+      taskTitle:plan.title || "首页调度任务",
+      taskDescription:summary,
+      draftRequirement:"",
+      suggestedAction:actionLabel(plan.action)
+    };
+  }
+
+  function createPendingPayload(plan, text){
+    const safePlan = plan || {};
+    return {
+      schemaVersion:"weishan.dispatch.pending.v1",
+      dispatchId:dispatchId(),
+      createdAt:new Date().toISOString(),
+      source:"home",
+      targetModule:safePlan.module || "unknown",
+      targetRoute:safePlan.targetRoute || "home",
+      action:safePlan.action || "",
+      inputSummary:summarizeDispatchText(text, 240),
+      prefill:prefillForPlan(safePlan, text),
+      realExecution:false,
+      requiresUserConfirmation:true
+    };
+  }
+
+  function savePendingPayload(payload){
+    const s = storage();
+    if (!s || !payload) return payload;
+    try { s.setItem(PENDING_DISPATCH_KEY, JSON.stringify(payload)); } catch (_) {}
+    window.WeishanDispatchPayload = payload;
+    return payload;
+  }
+
+  function readPendingPayload(targetModule){
+    let payload = window.WeishanDispatchPayload || null;
+    if (!payload) {
+      const s = storage();
+      try {
+        const raw = s && s.getItem(PENDING_DISPATCH_KEY);
+        payload = raw ? JSON.parse(raw) : null;
+      } catch (_) {
+        payload = null;
+      }
+    }
+    if (!payload || payload.schemaVersion !== "weishan.dispatch.pending.v1") return null;
+    if (targetModule && payload.targetModule !== targetModule) return null;
+    return payload;
+  }
+
+  function clearPendingPayload(dispatchIdValue){
+    const current = readPendingPayload();
+    if (dispatchIdValue && current && current.dispatchId !== dispatchIdValue) return false;
+    const s = storage();
+    try { if (s) s.removeItem(PENDING_DISPATCH_KEY); } catch (_) {}
+    if (!dispatchIdValue || (window.WeishanDispatchPayload && window.WeishanDispatchPayload.dispatchId === dispatchIdValue)) {
+      window.WeishanDispatchPayload = null;
+    }
+    return true;
+  }
+
+  function createCoordinationStepQueue(modules, text){
+    return (modules || []).map((module, index) => ({
+      stepId:"step-" + (index + 1),
+      module,
+      action:module === "crawler" ? DISPATCH_ACTIONS.crawlerWebFetch :
+        module === "softwareFactory" ? DISPATCH_ACTIONS.softwareFactoryGeneratePlan :
+        module === "ppt" ? DISPATCH_ACTIONS.pptGenerateOutline :
+        module === "document" ? DISPATCH_ACTIONS.documentGenerateDraft :
+        module === "mail" ? DISPATCH_ACTIONS.mailOpen :
+        module + ".open",
+      status:"planned",
+      inputSummary:summarizeDispatchText(text, 180),
+      realExecution:false,
+      requiresUserConfirmation:true
+    }));
   }
 
   function buildDocumentDraft(text, intent){
@@ -233,7 +376,8 @@
 
   function buildCoordinationPlan(text, modules){
     const clean = summarizeDispatchText(text, 180);
-    const steps = (modules || []).map((module, index) => (index + 1) + ". " + module + "：准备并执行对应模块任务");
+    const queue = createCoordinationStepQueue(modules, text);
+    const steps = queue.map((step, index) => (index + 1) + ". " + step.module + "：准备模块任务，等待用户确认后执行。realExecution=false");
     return [
       "# 多模块协调计划",
       "",
@@ -245,6 +389,9 @@
       "",
       "## 执行顺序",
       steps.join("\n"),
+      "",
+      "## Step Queue",
+      queue.map((step) => "- " + step.stepId + " · " + step.module + " · " + step.action + " · " + step.status + " · realExecution=false").join("\n"),
       "",
       "## v1 边界",
       "- 首页仅生成协调计划，不真实跨模块执行。",
@@ -356,6 +503,11 @@
     buildCodexInstruction,
     buildCoordinationPlan,
     createDispatchArtifact,
+    createPendingPayload,
+    savePendingPayload,
+    readPendingPayload,
+    clearPendingPayload,
+    createCoordinationStepQueue,
     sanitizeDispatchText,
     summarizeDispatchText,
     resultForPlan
