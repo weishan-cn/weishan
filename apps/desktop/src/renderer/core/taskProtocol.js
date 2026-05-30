@@ -18,6 +18,9 @@
     softwareFactoryExecutionRequested:"softwareFactory.executionRequested",
     softwareFactoryExecuted:"softwareFactory.executed",
     softwareFactoryFailed:"softwareFactory.failed",
+    chatAnswered:"chat.answered",
+    modelSelected:"model.selected",
+    modelStatusViewed:"model.statusViewed",
     dispatchExecuted:"dispatch.executed",
     dispatchFailed:"dispatch.failed",
     dispatchCancelled:"dispatch.cancelled"
@@ -31,6 +34,8 @@
     crawler:"crawler",
     softwareFactory:"softwareFactory",
     document:"document",
+    chat:"chat",
+    model:"model",
     codex:"codex",
     coordination:"coordination",
     storage:"storage",

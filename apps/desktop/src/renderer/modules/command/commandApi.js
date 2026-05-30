@@ -127,6 +127,32 @@
     }));
   }
 
+  function recordHomeDispatchAction(plan, inputText, answer){
+    if (!window.HistoryApi || typeof window.HistoryApi.record !== "function" || !plan) return null;
+    const type = plan.action === "model.status" ? "model.statusViewed" :
+      plan.action === "model.select" ? "model.selected" :
+      plan.action === "chat.answer" ? "chat.answered" : "";
+    if (!type) return null;
+    const payload = {
+      schemaVersion:"weishan.task.v1",
+      module:plan.module === "model" ? "model" : "chat",
+      action:type.replace(/^(model|chat)\./, ""),
+      selectedModelId:plan.selectedModelId || "",
+      selectedModelName:"",
+      inputSummary:taskSummary(inputText, 240),
+      outputSummary:taskSummary(answer, 240),
+      executionMode:"mock_safe",
+      realExecution:false,
+      createdAt:nowIso()
+    };
+    const router = dispatchRouter();
+    if (router && router.modelById) {
+      const model = router.modelById(plan.selectedModelId || (router.selectedModelId && router.selectedModelId()));
+      if (model) payload.selectedModelName = model.name;
+    }
+    return window.HistoryApi.record(type, payload);
+  }
+
   function perfStart(meta, stage, extra){
     return window.WeishanPerf && meta && meta.enabled ? window.WeishanPerf.perfStart(meta.traceId, meta.featureAction, stage, extra || {}) : 0;
   }
@@ -360,7 +386,7 @@
     const router = dispatchRouter();
     if (router && typeof router.createDispatchPlan === "function") {
       const plan = router.createDispatchPlan(t);
-      if (plan && plan.module && plan.module !== "chat") {
+      if (plan && plan.module) {
         return {
           route:"dispatch." + plan.module,
           label:"首页调度中心",
@@ -584,6 +610,7 @@
       } else if (intent.route.indexOf("dispatch.") === 0) {
         const plan = intent.dispatchPlan || {};
         answer = executeDispatchPlan(active.text, plan);
+        recordHomeDispatchAction(plan, active.text, answer);
         const pendingPayload = saveDispatchPrefill(active.text, plan);
         if (pendingPayload && pendingPayload.targetRoute && pendingPayload.targetRoute !== "home") {
           answer += "\n\n调度预填已准备：" + pendingPayload.targetModule + " / " + pendingPayload.action + "。";

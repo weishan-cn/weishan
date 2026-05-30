@@ -165,6 +165,7 @@
 
   function modulePanel(){
     return `
+      ${modelPanel()}
       <div class="cmd-side-card compact">
         <h3>${t("homeModulesTitle")}</h3>
         <p>${t("homeModulesList")}</p>
@@ -174,6 +175,31 @@
         <p>${t("homeBoundaryText")}</p>
       </div>
     `;
+  }
+
+  function modelInfo(){
+    const router = window.WeishanDispatchRouter || {};
+    const models = Array.isArray(router.AVAILABLE_MODELS) ? router.AVAILABLE_MODELS : [];
+    const selectedId = router.selectedModelId ? router.selectedModelId() : "weishan-auto";
+    const selected = router.modelById ? router.modelById(selectedId) : models.find((model) => model.id === selectedId);
+    return {
+      models,
+      selected:selected || models[0] || { id:"weishan-auto", name:"weishan 自动选择", mode:"mock", description:"当前为本地模拟。" }
+    };
+  }
+
+  function modelPanel(){
+    const data = modelInfo();
+    const options = data.models.length ? data.models : [data.selected];
+    return `
+      <div class="cmd-side-card compact" data-home-model-selector="true">
+        <h3>模型选择</h3>
+        <p class="cmd-history-meta">当前模型：${esc(data.selected.name)} · ${esc(data.selected.mode || "mock")}</p>
+        <select id="homeModelSelect" class="ws-select">
+          ${options.map((model) => `<option value="${esc(model.id)}" ${model.id === data.selected.id ? "selected" : ""}>${esc(model.name)}</option>`).join("")}
+        </select>
+        <p class="cmd-history-meta">模型由 weishan 后端统一管理，客户端不保存 provider key。当前为本地 mock-safe 模式，未接真实模型。</p>
+      </div>`;
   }
 
   function render(host){
@@ -254,6 +280,29 @@
       window.CommandApi.clearFinished();
       render(host);
     });
+
+    const modelSelect = host.querySelector("#homeModelSelect");
+    if (modelSelect) {
+      modelSelect.addEventListener("change", function(){
+        const router = window.WeishanDispatchRouter || {};
+        const model = router.selectModel ? router.selectModel(modelSelect.value) : null;
+        if (window.HistoryApi && typeof window.HistoryApi.record === "function") {
+          window.HistoryApi.record("model.selected", {
+            schemaVersion:"weishan.task.v1",
+            module:"model",
+            action:"selected",
+            selectedModelId:model && model.id || modelSelect.value,
+            selectedModelName:model && model.name || modelSelect.value,
+            inputSummary:"首页模型选择",
+            outputSummary:"已切换模型；当前为 mock-safe 模式，未接真实模型。",
+            executionMode:"mock_safe",
+            realExecution:false,
+            createdAt:new Date().toISOString()
+          });
+        }
+        render(host);
+      });
+    }
 
     const uploadBtn = host.querySelector("#uploadBtn");
     uploadBtn.addEventListener("click", async function(){

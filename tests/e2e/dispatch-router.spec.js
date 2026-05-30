@@ -15,7 +15,7 @@ async function expectHistory(page, query, pattern) {
   await expect(page.locator("#historySearch")).toBeVisible();
   await page.locator("#historySearch").fill(query);
   await expect(page.locator("#historyList")).toBeVisible();
-  await expect(page.getByText(pattern).first()).toBeVisible();
+  await expect(page.locator("#historyList")).toContainText(pattern);
 }
 
 test.describe.serial("dispatch router", () => {
@@ -30,6 +30,39 @@ test.describe.serial("dispatch router", () => {
   test.afterAll(async () => {
     if (page) await cleanupE2EData(page, runId);
     if (app) await app.close();
+  });
+
+  test("model status shows local model gateway options without provider keys", async () => {
+    const command = runId + " 有哪些模型可以用？";
+    await submitHomeCommand(page, command);
+    await expect(page.getByText(/模型状态|weishan 自动选择|GPT-compatible|Claude-compatible|Gemini-compatible|本地模型/).first()).toBeVisible();
+    await expect(page.getByText(/客户端不保存 provider key|未接真实模型/).first()).toBeVisible();
+    await expectHistory(page, runId, /model\.statusViewed|模型状态|weishan 自动选择/);
+  });
+
+  test("model select stores a mock-safe selected model without real provider calls", async () => {
+    const command = runId + " 切换到 GPT-compatible";
+    await submitHomeCommand(page, command);
+    await expect(page.getByText(/已切换到 GPT-compatible|mock-safe 模式|未调用真实模型/).first()).toBeVisible();
+    await expectHistory(page, runId, /model\.selected|GPT-compatible/);
+  });
+
+  test("chat answer explains model gateway limits without promising bypass", async () => {
+    const command = runId + " 在中国 GPT 又要 VPN 又要付款，有 weishan 在用户是不是可以直接选择模型聊天？";
+    await submitHomeCommand(page, command);
+    await expect(page.getByText(/统一模型入口|后端模型网关|用户在 weishan 内选择可用模型/).first()).toBeVisible();
+    await expect(page.getByText(/客户端不保存 provider API key|不承诺绕过法律/).first()).toBeVisible();
+    await expect(page.locator("body")).not.toContainText("绕过法律限制");
+    await expect(page.locator("body")).not.toContainText("真实 API key");
+    await expectHistory(page, runId, /chat\.answered|统一模型入口|后端模型网关/);
+  });
+
+  test("plain module advice stays in chat answer without jumping modules", async () => {
+    const command = runId + " 今天适合先优化哪个模块？";
+    await submitHomeCommand(page, command);
+    await expect(page.getByText(/普通聊天|本地 mock-safe 回答|realExecution=false/).first()).toBeVisible();
+    await expect(page.getByText(/来自首页调度中心的邮件任务|来自首页调度中心的抓取任务|来自首页调度中心的软件工厂任务/)).toHaveCount(0);
+    await expectHistory(page, runId, /chat\.answered|普通聊天|问答/);
   });
 
   test("document dispatch creates a local document draft record", async () => {

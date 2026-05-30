@@ -6,6 +6,7 @@
     document:"document",
     ppt:"ppt",
     codex:"codex",
+    model:"model",
     chat:"chat",
     coordination:"coordination"
   };
@@ -24,8 +25,50 @@
     pptGenerateOutline:"ppt.generateOutline",
     codexGenerateInstruction:"codex.generateInstruction",
     chatAnswer:"chat.answer",
+    chatMockAnswer:"chat.mockAnswer",
+    chatAnswered:"chat.answered",
+    modelStatus:"model.status",
+    modelSelect:"model.select",
     coordinationPlan:"coordination.plan"
   };
+  const MODEL_SELECTION_KEY = "weishan:model:selected:v1";
+  const AVAILABLE_MODELS = [
+    {
+      id:"weishan-auto",
+      name:"weishan 自动选择",
+      provider:"weishan",
+      mode:"mock",
+      description:"由 weishan 根据任务类型选择合适模型或模块，本轮为本地模拟。"
+    },
+    {
+      id:"gpt-compatible",
+      name:"GPT-compatible",
+      provider:"model_gateway",
+      mode:"not_connected",
+      description:"未来可由 weishan API 层接入，客户端不保存 API key。"
+    },
+    {
+      id:"claude-compatible",
+      name:"Claude-compatible",
+      provider:"model_gateway",
+      mode:"not_connected",
+      description:"未来可由 weishan API 层接入，客户端不保存 API key。"
+    },
+    {
+      id:"gemini-compatible",
+      name:"Gemini-compatible",
+      provider:"model_gateway",
+      mode:"not_connected",
+      description:"未来可由 weishan API 层接入，客户端不保存 API key。"
+    },
+    {
+      id:"local-model",
+      name:"本地模型",
+      provider:"local",
+      mode:"not_connected",
+      description:"未来可接本地模型服务。"
+    }
+  ];
   const DISPATCH_STATUS = {
     pending:"pending",
     prefilled:"prefilled",
@@ -78,6 +121,47 @@
     return MODULE_KEYWORDS.filter((item) => hasKeyword(text, item)).map((item) => item.module);
   }
 
+  function modelKeyword(text){
+    return /模型|GPT|Claude|Gemini|DeepSeek|Qwen|通义|Kimi|本地模型|切换模型|选择模型|\bmodel\b/i.test(String(text || ""));
+  }
+
+  function modelAction(text){
+    const raw = String(text || "");
+    if (/切换|选择|使用|换到|switch|select|use/i.test(raw)) return DISPATCH_ACTIONS.modelSelect;
+    return DISPATCH_ACTIONS.modelStatus;
+  }
+
+  function selectedModelId(){
+    try {
+      return (window.localStorage && window.localStorage.getItem(MODEL_SELECTION_KEY)) || "weishan-auto";
+    } catch (_) {
+      return "weishan-auto";
+    }
+  }
+
+  function modelById(id){
+    const target = String(id || "").toLowerCase();
+    return AVAILABLE_MODELS.find((model) => model.id.toLowerCase() === target || model.name.toLowerCase() === target) || null;
+  }
+
+  function inferModelId(text){
+    const raw = String(text || "").toLowerCase();
+    if (/claude/.test(raw)) return "claude-compatible";
+    if (/gemini/.test(raw)) return "gemini-compatible";
+    if (/本地|local/.test(raw)) return "local-model";
+    if (/gpt|openai/.test(raw)) return "gpt-compatible";
+    if (/deepseek|qwen|通义|kimi/.test(raw)) return "weishan-auto";
+    return selectedModelId();
+  }
+
+  function selectModel(modelId){
+    const model = modelById(modelId) || modelById("weishan-auto");
+    try {
+      if (window.localStorage) window.localStorage.setItem(MODEL_SELECTION_KEY, model.id);
+    } catch (_) {}
+    return model;
+  }
+
   function extractUrl(text){
     const match = String(text || "").match(/https?:\/\/[^\s，。；,;]+/i);
     return match ? match[0] : "";
@@ -118,6 +202,18 @@
       };
     }
 
+    if (modelKeyword(raw) && !/(VPN|付款|支付|地区|网络).*(怎么|如何|是不是|为什么|解决)|(?:怎么|如何|是不是|为什么|解决).*(VPN|付款|支付|地区|网络)/i.test(raw)) {
+      return {
+        module:DISPATCH_MODULES.model,
+        action:modelAction(raw),
+        routeMode:"console",
+        modules:[DISPATCH_MODULES.model],
+        targetRoute:"home",
+        confidence:"rule",
+        selectedModelId:inferModelId(raw)
+      };
+    }
+
     const module = uniqueModules[0] || DISPATCH_MODULES.chat;
     if (module === "mail") return { module, action:mailAction(raw), routeMode:"module", modules:[module], targetRoute:"mail", confidence:"rule" };
     if (module === "crawler") return { module, action:extractUrl(raw) ? DISPATCH_ACTIONS.crawlerWebFetch : DISPATCH_ACTIONS.crawlerOpen, routeMode:"module", modules:[module], targetRoute:"crawler", confidence:"rule" };
@@ -145,6 +241,9 @@
       mockSafeExecutionAllowed:intent.module === DISPATCH_MODULES.mail || intent.module === DISPATCH_MODULES.softwareFactory || (intent.module === DISPATCH_MODULES.crawler && /^https?:\/\/(example\.com|e2e-local|mock\.local)(?:[/:?#]|$)/i.test(url || "")),
       createdAt:new Date().toISOString()
     });
+    if (intent.module === DISPATCH_MODULES.model) {
+      plan.selectedModelId = intent.selectedModelId || inferModelId(cleanInput);
+    }
     if (plan.module === DISPATCH_MODULES.coordination) plan.stepQueue = createCoordinationStepQueue(plan.modules, cleanInput);
     return plan;
   }
@@ -177,6 +276,9 @@
       "document.generateDraft":"生成文档草稿",
       "ppt.generateOutline":"生成 PPT 大纲",
       "codex.generateInstruction":"生成 Codex 指令",
+      "model.status":"查看模型状态",
+      "model.select":"选择模型",
+      "chat.answer":"普通问答",
       "coordination.plan":"生成多模块协调计划"
     };
     return map[action] || action || "调度任务";
@@ -570,13 +672,56 @@
   }
 
   function buildLocalAnswer(text){
+    const clean = summarizeDispatchText(text, 240);
+    if (/中国|VPN|付款|付费|支付|地区|网络|模型入口|GPT|Claude|Gemini/i.test(clean)) {
+      return [
+        "# 本地回答",
+        "",
+        "weishan 的设计方向是提供统一模型入口和后端模型网关，减少用户在客户端处理不同模型账号、付款、网络和 API key 配置的复杂度。",
+        "",
+        "- 用户在 weishan 内选择可用模型或自动选择模式。",
+        "- 客户端不保存 provider API key，也不直接暴露模型供应商密钥。",
+        "- 真实可用模型取决于账户、地区、服务配置和合规策略。",
+        "- weishan 不承诺绕过法律、地区限制或服务条款。",
+        "",
+        "当前为本地 mock-safe 回答，未调用真实模型。realExecution=false"
+      ].join("\n");
+    }
     return [
       "# 本地回答",
       "",
       "已收到你的问题：",
-      summarizeDispatchText(text, 240),
+      clean,
       "",
-      "v1 首页调度优先使用本地规则。如果这是普通问答，可继续在已配置 AI 的情况下沿用原 Home chat 逻辑。"
+      "首页调度中心已将这条输入识别为普通聊天 / 问答。本轮使用本地 mock-safe 回答，未调用真实模型。realExecution=false"
+    ].join("\n");
+  }
+
+  function buildModelStatus(){
+    const selected = modelById(selectedModelId()) || modelById("weishan-auto");
+    return [
+      "# 模型状态",
+      "",
+      "当前模型：" + selected.name + "（" + selected.mode + "）",
+      "",
+      "## 可用模型入口",
+      AVAILABLE_MODELS.map((model) => "- " + model.name + " · " + model.provider + " · " + model.mode + " · " + model.description).join("\n"),
+      "",
+      "客户端不保存 provider key。真实模型调用需后端模型网关配置；当前为本地 mock-safe 模式，未接真实模型。"
+    ].join("\n");
+  }
+
+  function buildModelSelect(plan){
+    const selected = selectModel(plan && plan.selectedModelId || "weishan-auto");
+    return [
+      "# 模型选择",
+      "",
+      "已切换到 " + selected.name + "。",
+      "",
+      "模式：" + selected.mode,
+      "说明：" + selected.description,
+      "",
+      "当前为 mock-safe 模式，真实调用需后端模型网关配置。客户端不保存 provider key，未调用真实模型。realExecution=false"
     ].join("\n");
   }
 
@@ -584,6 +729,8 @@
     if (plan.module === "document") return buildDocumentDraft(text, plan);
     if (plan.module === "ppt") return buildPptOutline(text, plan);
     if (plan.module === "codex") return buildCodexInstruction(text, plan);
+    if (plan.module === "model" && plan.action === DISPATCH_ACTIONS.modelSelect) return buildModelSelect(plan);
+    if (plan.module === "model") return buildModelStatus();
     if (plan.module === "coordination") return buildCoordinationPlan(text, plan.modules);
     if (plan.module === "softwareFactory" || plan.module === "mail" || plan.module === "crawler") return buildModuleDispatchPlan(plan, text);
     return buildLocalAnswer(text);
@@ -600,6 +747,8 @@
     if (plan.module === "document") return "weishan-document-draft-" + ts + ".md";
     if (plan.module === "ppt") return "weishan-ppt-outline-" + ts + ".md";
     if (plan.module === "codex") return "weishan-codex-instruction-" + ts + ".md";
+    if (plan.module === "model") return "weishan-model-status-" + ts + ".md";
+    if (plan.module === "chat") return "weishan-chat-answer-" + ts + ".md";
     if (plan.module === "coordination") return "weishan-coordination-plan-" + ts + ".md";
     return "weishan-" + plan.module + "-dispatch-plan-" + ts + ".md";
   }
@@ -632,6 +781,8 @@
     DISPATCH_ACTIONS,
     DISPATCH_STATUS,
     DISPATCH_HISTORY_ACTIONS,
+    MODEL_SELECTION_KEY,
+    AVAILABLE_MODELS,
     classifyCommand,
     createDispatchPlan,
     buildDocumentDraft,
@@ -650,6 +801,9 @@
     markPendingFailed,
     createDispatchHistoryPayload,
     recordDispatchHistory,
+    selectedModelId,
+    selectModel,
+    modelById,
     createCoordinationStepQueue,
     sanitizeDispatchText,
     summarizeDispatchText,
