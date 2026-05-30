@@ -41,7 +41,7 @@
     if (isReservedAdminEmail(email)) {
       return {
         ok:false,
-        error:"这个邮箱是 PocketBase 后台管理员账号，不用于客户端普通用户登录。请换一个普通用户邮箱注册。"
+        error:"这个邮箱是后台管理员账号，不用于客户端普通用户登录。请换一个普通用户邮箱注册。"
       };
     }
 
@@ -147,7 +147,7 @@
     if (!email) return { ok:false, error:"请输入邮箱。" };
 
     if (isReservedAdminEmail(email)) {
-      return { ok:false, error:"后台管理员账号不在客户端找回。请到 PocketBase 后台处理。" };
+      return { ok:false, error:"后台管理员账号不在客户端找回。请到后台管理服务处理。" };
     }
 
     const saved = profile(email);

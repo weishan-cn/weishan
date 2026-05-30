@@ -33,12 +33,12 @@ class LocalMockMetadataAdapter extends MetadataAdapter {
     this.plans = [
       { planId:"free_local", planType:"personal", region:"local", name:"Free Local", storageQuotaGb:0, quotaGb:0, memberLimit:1, cloudEnabled:false, localStorageWarning:"免费个人用户默认 local only，本地数据仅保存在当前设备。" },
       { planId:"personal_cloud_mock", planType:"personal", region:"mock", name:"Personal Cloud Mock", storageQuotaGb:20, quotaGb:20, memberLimit:1, cloudEnabled:true },
-      { planId:"enterprise_basic_cn", planType:"enterprise", region:"cn", name:"企业基础版 中国区", storageQuotaGb:300, quotaGb:300, memberLimit:5, cloudEnabled:true },
-      { planId:"enterprise_standard_cn", planType:"enterprise", region:"cn", name:"企业标准版 中国区", storageQuotaGb:1024, quotaGb:1024, memberLimit:20, cloudEnabled:true },
-      { planId:"enterprise_advanced_cn", planType:"enterprise", region:"cn", name:"企业高级版 中国区", storageQuotaGb:5120, quotaGb:5120, memberLimit:50, cloudEnabled:true },
-      { planId:"enterprise_basic_global", planType:"enterprise", region:"global", name:"Enterprise Basic Global", storageQuotaGb:300, quotaGb:300, memberLimit:5, cloudEnabled:true },
-      { planId:"enterprise_standard_global", planType:"enterprise", region:"global", name:"Enterprise Standard Global", storageQuotaGb:1024, quotaGb:1024, memberLimit:20, cloudEnabled:true },
-      { planId:"enterprise_advanced_global", planType:"enterprise", region:"global", name:"Enterprise Advanced Global", storageQuotaGb:5120, quotaGb:5120, memberLimit:50, cloudEnabled:true }
+      { planId:"CN_ENTERPRISE_BASIC", planType:"enterprise", region:"cn", name:"企业基础版 中国区", storageQuotaGb:300, quotaGb:300, memberLimit:5, cloudEnabled:true },
+      { planId:"CN_ENTERPRISE_STANDARD", planType:"enterprise", region:"cn", name:"企业标准版 中国区", storageQuotaGb:1024, quotaGb:1024, memberLimit:20, cloudEnabled:true },
+      { planId:"CN_ENTERPRISE_PRO", planType:"enterprise", region:"cn", name:"企业高级版 中国区", storageQuotaGb:5120, quotaGb:5120, memberLimit:50, cloudEnabled:true },
+      { planId:"GLOBAL_ENTERPRISE_BASIC", planType:"enterprise", region:"global", name:"Enterprise Basic Global", storageQuotaGb:300, quotaGb:300, memberLimit:5, cloudEnabled:true },
+      { planId:"GLOBAL_ENTERPRISE_STANDARD", planType:"enterprise", region:"global", name:"Enterprise Standard Global", storageQuotaGb:1024, quotaGb:1024, memberLimit:20, cloudEnabled:true },
+      { planId:"GLOBAL_ENTERPRISE_PRO", planType:"enterprise", region:"global", name:"Enterprise Advanced Global", storageQuotaGb:5120, quotaGb:5120, memberLimit:50, cloudEnabled:true }
     ];
     this.allocations = new Map();
     this.organizationMembers = new Map();

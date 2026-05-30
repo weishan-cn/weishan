@@ -331,7 +331,7 @@
         <div class="ws-grid-2">
           <div class="ws-card">
             <h2>${t("cloudReserved")}</h2>
-            <p>${t("baseUrl")}：${esc(window.WeishanConfig.backend.pocketbaseBaseUrl)}</p>
+            <p>${t("baseUrl")}：${esc(window.WeishanConfig.backend.metadataBaseUrl || window.WeishanConfig.backend.pocketbaseBaseUrl || "local metadata mock")}</p>
             <p>${t("collections")}：${esc(window.WeishanConfig.backend.collections.join(" / "))}</p>
             <p class="danger-text">${t("secretsWarning")}</p>
           </div>

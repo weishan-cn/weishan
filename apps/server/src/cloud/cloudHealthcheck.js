@@ -39,7 +39,7 @@ async function runCloudHealthcheck(config = {}) {
   checks.push({
     name:"metadataProviderSwitchable",
     status:metadataProviderStatus && metadataProviderStatus.reason === "not_configured_in_mvp" ? "pass" : "warn",
-    message:"PocketBase can be a metadata provider option; backend metadata provider remains replaceable."
+    message:"PocketBase is an optional metadata provider skeleton; backend metadata provider remains replaceable."
   });
   checks.push({
     name:"secretSafety",

@@ -2,14 +2,23 @@ import { createStorageAdapter } from "./storageAdapter.js";
 import { createMetadataAdapter } from "./metadataAdapter.js";
 
 const PERSONAL_CLOUD_MOCK_QUOTA_GB = 20;
-const DEFAULT_ENTERPRISE_PLAN_ID = "enterprise_standard_cn";
+const DEFAULT_ENTERPRISE_PLAN_ID = "CN_ENTERPRISE_BASIC";
 const ENTERPRISE_PLAN_FALLBACKS = {
-  enterprise_basic_cn:{ storageQuotaGb:300, quotaGb:300, memberLimit:5, region:"cn" },
-  enterprise_standard_cn:{ storageQuotaGb:1024, quotaGb:1024, memberLimit:20, region:"cn" },
-  enterprise_advanced_cn:{ storageQuotaGb:5120, quotaGb:5120, memberLimit:50, region:"cn" },
-  enterprise_basic_global:{ storageQuotaGb:300, quotaGb:300, memberLimit:5, region:"global" },
-  enterprise_standard_global:{ storageQuotaGb:1024, quotaGb:1024, memberLimit:20, region:"global" },
-  enterprise_advanced_global:{ storageQuotaGb:5120, quotaGb:5120, memberLimit:50, region:"global" }
+  CN_ENTERPRISE_BASIC:{ storageQuotaGb:300, quotaGb:300, memberLimit:5, region:"cn" },
+  CN_ENTERPRISE_STANDARD:{ storageQuotaGb:1024, quotaGb:1024, memberLimit:20, region:"cn" },
+  CN_ENTERPRISE_PRO:{ storageQuotaGb:5120, quotaGb:5120, memberLimit:50, region:"cn" },
+  GLOBAL_ENTERPRISE_BASIC:{ storageQuotaGb:300, quotaGb:300, memberLimit:5, region:"global" },
+  GLOBAL_ENTERPRISE_STANDARD:{ storageQuotaGb:1024, quotaGb:1024, memberLimit:20, region:"global" },
+  GLOBAL_ENTERPRISE_PRO:{ storageQuotaGb:5120, quotaGb:5120, memberLimit:50, region:"global" }
+};
+const PLAN_ID_ALIASES = {
+  enterprise_basic_cn:"CN_ENTERPRISE_BASIC",
+  enterprise_standard_cn:"CN_ENTERPRISE_STANDARD",
+  enterprise_advanced_cn:"CN_ENTERPRISE_PRO",
+  enterprise_basic_global:"GLOBAL_ENTERPRISE_BASIC",
+  enterprise_standard_global:"GLOBAL_ENTERPRISE_STANDARD",
+  enterprise_advanced_global:"GLOBAL_ENTERPRISE_PRO",
+  enterprise_cloud_mock:DEFAULT_ENTERPRISE_PLAN_ID
 };
 
 function normalizeOwnerType(ownerType) {
@@ -26,13 +35,18 @@ function bytesFromGb(gb) {
   return Number(gb || 0) * 1024 * 1024 * 1024;
 }
 
+function normalizePlanId(planId, ownerType) {
+  const id = String(planId || defaultPlanIdFor(ownerType));
+  return PLAN_ID_ALIASES[id] || id;
+}
+
 async function plansFor(ctx) {
   const plans = await ctx.metadata.getPlans();
   return Array.isArray(plans) ? plans : [];
 }
 
 function planFromFallback(planId, ownerType) {
-  const id = planId || defaultPlanIdFor(ownerType);
+  const id = normalizePlanId(planId, ownerType);
   if (ENTERPRISE_PLAN_FALLBACKS[id]) {
     return Object.assign({ planId:id, planType:"enterprise", cloudEnabled:true }, ENTERPRISE_PLAN_FALLBACKS[id]);
   }
@@ -43,7 +57,7 @@ function planFromFallback(planId, ownerType) {
 }
 
 async function planById(ctx, planId, ownerType) {
-  const id = planId || defaultPlanIdFor(ownerType);
+  const id = normalizePlanId(planId, ownerType);
   const plans = await plansFor(ctx);
   return plans.find((plan) => plan && plan.planId === id) || planFromFallback(id, ownerType);
 }
