@@ -17,7 +17,7 @@
     const prefill = payload.prefill || {};
     const status = payload.status || "pending";
     const canAct = status === "pending" || status === "prefilled";
-    return `<div class="ws-card" data-dispatch-prefill="crawler"><h3>${esc(label("来自首页调度中心的抓取任务", "Crawl task from Home dispatch center"))}</h3><p class="ws-muted">${esc(prefill.taskDescription || payload.inputSummary || "")}</p><p><b>${esc(prefill.suggestedAction || payload.action || "")}</b></p><p class="ws-muted">${esc(label("状态", "Status"))}：<b data-dispatch-status>${esc(status)}</b></p><p class="ws-muted">${esc(label("URL 已作为文本预填；点击确认只会标记任务，不会自动访问外网。确认后仍需手动点击开始抓取。", "The URL was prefilled as text. Confirm only marks the task; no external request runs automatically. Click the crawler button manually to fetch."))}</p><div class="ws-row"><button id="crawlerDispatchConfirm" class="ws-btn" ${canAct ? "" : "disabled"}>${esc(label("确认抓取", "Confirm crawl"))}</button><button id="crawlerDispatchCancel" class="ws-btn gray" ${canAct ? "" : "disabled"}>${esc(label("取消任务", "Cancel task"))}</button></div></div>`;
+    return `<div class="ws-card" data-dispatch-prefill="crawler"><h3>${esc(label("来自首页调度中心的抓取任务", "Crawl task from Home dispatch center"))}</h3><p class="ws-muted">${esc(prefill.taskDescription || payload.inputSummary || "")}</p><p><b>${esc(prefill.suggestedAction || payload.action || "")}</b></p><p class="ws-muted">${esc(label("URL", "URL"))}：${esc(prefill.url || "")}</p><p class="ws-muted">${esc(label("状态", "Status"))}：<b data-dispatch-status>${esc(status)}</b> · realExecution=false</p><p class="ws-muted">${esc(label("用户确认后才继续。示例 / mock URL 只生成本地模拟抓取结果；真实 URL 仍需在抓取中心手动继续确认。", "User confirmation is required. Example/mock URLs only create a local mock crawler result; real URLs still require manual confirmation in Crawler."))}</p><div class="ws-row"><button id="crawlerDispatchConfirm" class="ws-btn" ${canAct ? "" : "disabled"}>${esc(label("确认抓取", "Confirm crawl"))}</button><button id="crawlerDispatchCancel" class="ws-btn gray" ${canAct ? "" : "disabled"}>${esc(label("取消任务", "Cancel task"))}</button></div></div>`;
   }
   function confirmDispatch(payload){
     const router = window.WeishanDispatchRouter;
@@ -32,6 +32,113 @@
       executionMode:"cancelled_by_user",
       outputSummary:"抓取调度任务已取消。"
     }) : null;
+  }
+  function dispatchHistoryPayload(payload, extra){
+    const prefill = payload && payload.prefill || {};
+    const detail = extra || {};
+    const now = nowIso();
+    return {
+      schemaVersion:"weishan.task.v1",
+      module:"crawler",
+      action:detail.action || payload && payload.action || "crawler.webFetch",
+      status:detail.status || payload && payload.status || "",
+      dispatchId:payload && payload.dispatchId || "",
+      targetRoute:payload && payload.targetRoute || "crawler",
+      urlSummary:summarize(prefill.url || "", 240),
+      inputSummary:summarize(payload && payload.inputSummary || prefill.taskDescription || "", 240),
+      outputSummary:summarize(detail.outputSummary || "", 240),
+      executionMode:summarize(detail.executionMode || "crawler_manual_continue", 120),
+      realExecution:detail.realExecution === true,
+      createdAt:detail.createdAt || now,
+      updatedAt:now
+    };
+  }
+  function recordCrawlerDispatch(type, payload, extra){
+    if (window.HistoryApi && typeof window.HistoryApi.record === "function") {
+      window.HistoryApi.record(type, dispatchHistoryPayload(payload, extra || {}));
+    }
+  }
+  function isMockSafeCrawlerUrl(input){
+    try {
+      const parsed = validateUrl(input);
+      const host = parsed.hostname.toLowerCase();
+      return host === "example.com" || host === "e2e-local" || host === "mock.local";
+    } catch (_) {
+      return false;
+    }
+  }
+  function buildMockCrawlerPage(rawUrl){
+    const parsed = validateUrl(rawUrl);
+    const host = parsed.hostname.toLowerCase();
+    return {
+      url:parsed.href,
+      title:host === "example.com" ? "Example Domain" : "Mock Crawler Result",
+      text:[
+        "本地模拟抓取结果。",
+        "该结果由首页调度确认桥生成，用于验证 CrawlerPage 用户确认后的安全执行路径。",
+        "没有访问外网，也没有读取真实网页正文。",
+        "realExecution=false"
+      ].join("\n")
+    };
+  }
+  async function executeDispatchCrawler(payload){
+    const confirmed = confirmDispatch(payload);
+    if (!confirmed) return { status:"failed", message:label("无法确认调度任务。", "Unable to confirm dispatch task.") };
+    const prefill = confirmed.prefill || payload.prefill || {};
+    const rawUrl = prefill.url || "";
+    recordCrawlerDispatch("crawler.executionRequested", confirmed, {
+      status:"confirmed",
+      executionMode:"crawler_confirm_requested",
+      realExecution:false,
+      outputSummary:"用户已在抓取中心确认抓取任务。"
+    });
+    if (!isMockSafeCrawlerUrl(rawUrl)) {
+      return {
+        status:"confirmed",
+        message:label("真实 URL 已确认，但本轮不会自动访问外网。请在抓取中心继续手动确认真实抓取。", "The real URL was confirmed, but this version does not auto-fetch external pages. Continue manually in Crawler."),
+        page:null,
+        summary:""
+      };
+    }
+    try {
+      const page = buildMockCrawlerPage(rawUrl);
+      let task = createTask(page.url);
+      task = transition(task, "running", { title:summarize(page.title, 80), inputSummary:summarize(page.url, 240), meta:{ sourceUrl:page.url, mockSafeExecution:true } });
+      const outputSummary = label("已生成本地模拟抓取结果。未访问外网，realExecution=false。", "Local mock crawler result generated. No external network access. realExecution=false.");
+      task = transition(task, "done", { title:summarize(page.title, 80), outputSummary:summarize(outputSummary, 240), meta:{ sourceUrl:page.url, mockSafeExecution:true, realExecution:false } });
+      const finalJob = Object.assign({}, task, { sourceUrl:page.url, pageTitle:page.title });
+      upsertJob(finalJob);
+      recordCrawlerDispatch("crawler.executed", confirmed, {
+        status:"executed",
+        executionMode:"crawler_mock_safe_execution",
+        realExecution:false,
+        outputSummary
+      });
+      if (window.WeishanDispatchRouter && window.WeishanDispatchRouter.markPendingExecuted) {
+        window.WeishanDispatchRouter.markPendingExecuted(confirmed.dispatchId, {
+          executionMode:"crawler_mock_safe_execution",
+          realExecution:false,
+          outputSummary
+        });
+      }
+      return { status:"executed", message:outputSummary, page, summary:outputSummary };
+    } catch (err) {
+      const msg = safeError(err);
+      recordCrawlerDispatch("crawler.failed", confirmed, {
+        status:"failed",
+        executionMode:"crawler_mock_safe_execution",
+        realExecution:false,
+        outputSummary:"本地模拟抓取失败：" + msg
+      });
+      if (window.WeishanDispatchRouter && window.WeishanDispatchRouter.markPendingFailed) {
+        window.WeishanDispatchRouter.markPendingFailed(confirmed.dispatchId, {
+          executionMode:"crawler_mock_safe_execution",
+          realExecution:false,
+          outputSummary:"本地模拟抓取失败：" + msg
+        });
+      }
+      return { status:"failed", message:msg, page:null, summary:"" };
+    }
   }
   function nowIso(){ return new Date().toISOString(); }
   function taskProtocol(){ return window.WeishanTaskProtocol || null; }
@@ -278,7 +385,12 @@
     const prefill = dispatchPayload && dispatchPayload.prefill || {};
     host.innerHTML=`<section class="ws-page">${dispatchNoticeHtml(dispatchPayload)}<div class="ws-card"><h2>${t("crawler")}</h2><p class="ws-muted">${t("crawlerDesc")}</p><div class="ws-row"><input id="crawlUrl" class="ws-input" placeholder="${t("crawlerPlaceholder")}" value="${esc(prefill.url || "")}"><button id="createCrawl" class="ws-btn">${t("createCrawler")}</button></div></div><div id="crawlerResult"></div><div class="card-list" id="crawlerJobs">${renderJobs()}</div></section>`;
     const crawlerDispatchConfirm = document.getElementById("crawlerDispatchConfirm");
-    if (crawlerDispatchConfirm && dispatchPayload) crawlerDispatchConfirm.addEventListener("click", () => { confirmDispatch(dispatchPayload); mount(host); });
+    if (crawlerDispatchConfirm && dispatchPayload) crawlerDispatchConfirm.addEventListener("click", async () => {
+      crawlerDispatchConfirm.disabled = true;
+      const result = await executeDispatchCrawler(dispatchPayload);
+      mount(host);
+      updateResult(result.status || "confirmed", result.message || "", result.page, result.summary);
+    });
     const crawlerDispatchCancel = document.getElementById("crawlerDispatchCancel");
     if (crawlerDispatchCancel && dispatchPayload) crawlerDispatchCancel.addEventListener("click", () => { cancelDispatch(dispatchPayload); mount(host); });
     document.getElementById("createCrawl").addEventListener("click", async ()=>{

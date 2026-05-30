@@ -9,6 +9,9 @@
     dispatchPending:"dispatch.pending",
     dispatchPrefilled:"dispatch.prefilled",
     dispatchConfirmed:"dispatch.confirmed",
+    crawlerExecutionRequested:"crawler.executionRequested",
+    crawlerExecuted:"crawler.executed",
+    crawlerFailed:"crawler.failed",
     dispatchExecuted:"dispatch.executed",
     dispatchFailed:"dispatch.failed",
     dispatchCancelled:"dispatch.cancelled"

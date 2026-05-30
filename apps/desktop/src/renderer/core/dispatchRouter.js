@@ -139,6 +139,10 @@
       inputSummary:summarizeDispatchText(cleanInput, 240),
       source:"home",
       url,
+      executionMode:intent.module === DISPATCH_MODULES.crawler ? "module_confirm_required" : "dispatch_plan",
+      realExecution:false,
+      requiresUserConfirmation:intent.routeMode === "module",
+      mockSafeExecutionAllowed:intent.module === DISPATCH_MODULES.crawler && /^https?:\/\/(example\.com|e2e-local|mock\.local)(?:[/:?#]|$)/i.test(url || ""),
       createdAt:new Date().toISOString()
     });
     if (plan.module === DISPATCH_MODULES.coordination) plan.stepQueue = createCoordinationStepQueue(plan.modules, cleanInput);
@@ -231,6 +235,8 @@
       inputSummary:summarizeDispatchText(text, 240),
       prefill:prefillForPlan(safePlan, text),
       status:DISPATCH_STATUS.pending,
+      executionMode:safePlan.executionMode || "module_confirm_required",
+      mockSafeExecutionAllowed:safePlan.mockSafeExecutionAllowed === true,
       realExecution:false,
       requiresUserConfirmation:true
     };

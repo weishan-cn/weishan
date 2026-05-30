@@ -65,15 +65,16 @@ test.describe.serial("dispatch router", () => {
     await expectHistory(page, runId, /dispatch\.confirmed|mail\.extractTodos|邮件接管/);
   });
 
-  test("crawler dispatch opens crawler page and pre-fills URL without fetching", async () => {
+  test("crawler dispatch confirms and runs local mock execution without fetching", async () => {
     const command = runId + " 抓取 https://example.com 并整理成摘要";
     await submitHomeCommand(page, command);
     await expect(page.getByText(/来自首页调度中心的抓取任务/).first()).toBeVisible();
     await expect(page.locator("#crawlUrl")).toHaveValue("https://example.com");
-    await expect(page.getByText(/不会自动访问外网|需要手动点击|确认抓取/).first()).toBeVisible();
+    await expect(page.getByText(/确认抓取|realExecution=false|用户确认/).first()).toBeVisible();
     await page.locator("#crawlerDispatchConfirm").click();
-    await expect(page.getByText(/状态：confirmed|confirmed/).first()).toBeVisible();
-    await expectHistory(page, runId, /dispatch\.confirmed|crawler\.webFetch|https:\/\/example\.com/);
+    await expect(page.getByText(/状态：executed|executed/).first()).toBeVisible();
+    await expect(page.getByText(/本地模拟抓取结果|realExecution=false|未访问外网/).first()).toBeVisible();
+    await expectHistory(page, runId, /crawler\.executed|dispatch\.executed|dispatch\.confirmed|https:\/\/example\.com/);
   });
 
   test("software factory dispatch opens builder page and pre-fills requirement without generating", async () => {
