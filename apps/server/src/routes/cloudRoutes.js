@@ -4,6 +4,7 @@ import {
   createCloudContext,
   createUploadUrl,
   deleteObject,
+  ENTERPRISE_CLOUD_MOCK_QUOTA_GB,
   getStorageStatus
 } from "../cloud/cloudService.js";
 import { runCloudHealthcheck } from "../cloud/cloudHealthcheck.js";
@@ -33,8 +34,8 @@ function mountCloudRoutes(app) {
       allocation:await allocateStorage({
         ownerType:body.ownerType || "user",
         ownerId:body.ownerId || "local-user",
-        planId:body.planId || "manual_mock",
-        quotaGb:Number(body.quotaGb || 1),
+        planId:body.planId || (body.ownerType === "organization" ? "enterprise_cloud_mock" : "manual_mock"),
+        quotaGb:Number(body.quotaGb || (body.ownerType === "organization" ? ENTERPRISE_CLOUD_MOCK_QUOTA_GB : 1)),
         provider:body.provider || "local_mock"
       }, context)
     });

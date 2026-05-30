@@ -31,7 +31,7 @@ class LocalMockMetadataAdapter extends MetadataAdapter {
     this.plans = [
       { planId:"free_local", name:"Free Local", quotaGb:0, cloudEnabled:false },
       { planId:"personal_cloud_mock", name:"Personal Cloud Mock", quotaGb:20, cloudEnabled:true },
-      { planId:"enterprise_cloud_mock", name:"Enterprise Cloud Mock", quotaGb:300, cloudEnabled:true }
+      { planId:"enterprise_cloud_mock", name:"Enterprise Cloud Mock 1TB", quotaGb:1024, cloudEnabled:true }
     ];
     this.allocations = new Map();
     this.fileIndex = [];
@@ -66,6 +66,7 @@ class LocalMockMetadataAdapter extends MetadataAdapter {
       storageId:input.storageId || "storage-" + Date.now().toString(36),
       ownerType,
       ownerId,
+      planId:input.planId || "",
       provider:input.provider || "local_mock",
       quotaGb:Number(input.quotaGb || 0),
       pathPrefix:input.pathPrefix || "",

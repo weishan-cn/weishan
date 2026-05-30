@@ -1,6 +1,9 @@
 import { createStorageAdapter } from "./storageAdapter.js";
 import { createMetadataAdapter } from "./metadataAdapter.js";
 
+const PERSONAL_CLOUD_MOCK_QUOTA_GB = 20;
+const ENTERPRISE_CLOUD_MOCK_QUOTA_GB = 1024;
+
 function normalizeOwnerType(ownerType) {
   return ownerType === "organization" ? "organization" : "user";
 }
@@ -13,6 +16,16 @@ function pathPrefixFor(ownerType, ownerId) {
 
 function bytesFromGb(gb) {
   return Number(gb || 0) * 1024 * 1024 * 1024;
+}
+
+function defaultQuotaGbFor(ownerType, planId) {
+  if (ownerType === "organization" || planId === "enterprise_cloud_mock") return ENTERPRISE_CLOUD_MOCK_QUOTA_GB;
+  if (planId === "personal_cloud_mock") return PERSONAL_CLOUD_MOCK_QUOTA_GB;
+  return 0;
+}
+
+function defaultPlanIdFor(ownerType) {
+  return ownerType === "organization" ? "enterprise_cloud_mock" : "free_local";
 }
 
 function usageWarning(usedBytes, quotaBytes) {
@@ -40,8 +53,8 @@ async function ensureAllocation(ctx, input = {}) {
     allocation = await ctx.metadata.createStorageAllocation({
       ownerType,
       ownerId,
-      planId:input.planId || "free_local",
-      quotaGb:Number(input.quotaGb || 0),
+      planId:input.planId || defaultPlanIdFor(ownerType),
+      quotaGb:Number(input.quotaGb || defaultQuotaGbFor(ownerType, input.planId)),
       provider:input.provider || ctx.config.defaultProvider || "local_mock",
       pathPrefix:pathPrefixFor(ownerType, ownerId)
     });
@@ -80,8 +93,8 @@ async function allocateStorage(input = {}, context) {
   return ctx.metadata.createStorageAllocation({
     ownerType,
     ownerId,
-    planId:input.planId || "manual_mock",
-    quotaGb:Number(input.quotaGb || 0),
+    planId:input.planId || defaultPlanIdFor(ownerType),
+    quotaGb:Number(input.quotaGb || defaultQuotaGbFor(ownerType, input.planId)),
     provider:input.provider || "local_mock",
     pathPrefix:pathPrefixFor(ownerType, ownerId)
   });
@@ -150,5 +163,6 @@ export {
   deleteObject,
   testCloudServices,
   pathPrefixFor,
-  usageWarning
+  usageWarning,
+  ENTERPRISE_CLOUD_MOCK_QUOTA_GB
 };

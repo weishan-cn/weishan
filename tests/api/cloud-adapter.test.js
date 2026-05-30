@@ -17,7 +17,8 @@ async function main() {
   const {
     allocateStorage,
     createCloudContext,
-    createUploadUrl
+    createUploadUrl,
+    getStorageStatus
   } = await import("../../apps/server/src/cloud/cloudService.js");
   const adapter = createStorageAdapter({ provider:"local_mock" });
   assert.equal(adapter.provider, "local_mock");
@@ -90,6 +91,34 @@ async function main() {
   assert.equal(uploadUrl.ok, true);
   const json = JSON.stringify(uploadUrl);
   assert.equal(/secret|access.?key|token|password|authorization/i.test(json), false);
+
+  const enterpriseContext = createCloudContext();
+  const enterpriseAllocation = await allocateStorage({
+    ownerType:"organization",
+    ownerId:"local-company",
+    provider:"local_mock"
+  }, enterpriseContext);
+  assert.equal(enterpriseAllocation.planId, "enterprise_cloud_mock");
+  assert.equal(enterpriseAllocation.quotaGb, 1024);
+  assert.equal(enterpriseAllocation.pathPrefix, "organizations/local-company/");
+
+  const enterpriseStatus = await getStorageStatus({
+    ownerType:"organization",
+    ownerId:"local-company"
+  }, enterpriseContext);
+  assert.equal(enterpriseStatus.localOnly, false);
+  assert.equal(enterpriseStatus.quotaBytes, 1024 * 1024 * 1024 * 1024);
+  assert.equal(enterpriseStatus.pathPrefix, "organizations/local-company/");
+
+  const enterpriseUploadUrl = await createUploadUrl({
+    ownerType:"organization",
+    ownerId:"local-company",
+    objectKey:"reports/enterprise.txt",
+    fileSizeBytes:1024
+  }, enterpriseContext);
+  assert.equal(enterpriseUploadUrl.ok, true);
+  assert.equal(enterpriseUploadUrl.objectKey, "organizations/local-company/reports/enterprise.txt");
+  assert.equal(/secret|access.?key|token|password|authorization/i.test(JSON.stringify(enterpriseUploadUrl)), false);
 
   console.log("CLOUD_ADAPTER_TEST PASS");
 }
