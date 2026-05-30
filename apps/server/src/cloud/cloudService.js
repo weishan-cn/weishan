@@ -74,6 +74,19 @@ function memberLimitFor(plan) {
   return Number((plan && plan.memberLimit) || 1);
 }
 
+function storageStatusFor(allocation, usage) {
+  const quotaGb = Number((allocation && (allocation.storageQuotaGb || allocation.quotaGb)) || 0);
+  const quotaBytes = bytesFromGb(quotaGb);
+  const usedBytes = Number((usage && usage.usedBytes) || 0);
+  return {
+    mode:quotaGb ? "mock_cloud_allocated" : "local_only",
+    quotaGb,
+    quotaBytes,
+    usedBytes,
+    warning:usageWarning(usedBytes, quotaBytes)
+  };
+}
+
 function activeMembers(members) {
   return (members || []).filter((member) => member && member.status === "active");
 }
@@ -180,6 +193,7 @@ async function getOrganizationStatus(input = {}, context) {
   }
   const members = await ctx.metadata.listOrganizationMembers({ organizationId });
   const active = activeMembers(members);
+  const storageStatus = storageStatusFor(allocation, { usedBytes:0 });
   return {
     ok:true,
     organizationId,
@@ -187,12 +201,15 @@ async function getOrganizationStatus(input = {}, context) {
     planType:"enterprise",
     region:plan.region || "",
     quotaGb:Number(allocation.quotaGb || storageQuotaFor(plan)),
+    storageQuotaGb:Number(allocation.storageQuotaGb || allocation.quotaGb || storageQuotaFor(plan)),
     quotaBytes:bytesFromGb(allocation.quotaGb || storageQuotaFor(plan)),
     memberLimit:Number(allocation.memberLimit || memberLimitFor(plan)),
     activeMemberCount:active.length,
     totalMemberRecords:members.length,
     pathPrefix:allocation.pathPrefix || pathPrefixFor("organization", organizationId),
     provider:allocation.provider || "local_mock",
+    storageMode:"local_mock",
+    storageStatus,
     cloudEnabled:true,
     storageExpansionAvailable:true
   };
@@ -206,7 +223,7 @@ async function inviteOrganizationMember(input = {}, context) {
     return {
       ok:false,
       code:"MEMBER_LIMIT_REACHED",
-      message:"active 成员数量已达到套餐上限，请升级企业套餐或购买更多席位。",
+      message:"当前企业套餐最多支持 " + status.memberLimit + " 名成员。如需继续邀请，请升级企业套餐。",
       organizationId,
       planId:status.planId,
       memberLimit:status.memberLimit,

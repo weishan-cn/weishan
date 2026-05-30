@@ -295,6 +295,276 @@
     };
   }
 
+  const LOCAL_STORAGE_WARNING = "当前使用本地存储模式，数据仅保存在本地电脑。若电脑损坏、丢失、卸载或清理缓存，数据可能无法恢复；但不影响其他本地功能使用。可在设置中开启云备份或自有云。";
+
+  function safeJson(value, fallback){
+    try { return JSON.parse(value); } catch (_) { return fallback; }
+  }
+
+  function enterprisePlansFallback(){
+    if (window.PlansData && window.PlansData.byType) return window.PlansData.byType("enterprise");
+    return [
+      { plan_id:"CN_ENTERPRISE_BASIC", plan_name:"中国区企业基础版", region:"CN", storage_quota_gb:300, member_limit:5, monthly_price:299, yearly_price:2999, currency:"CNY" },
+      { plan_id:"CN_ENTERPRISE_STANDARD", plan_name:"中国区企业标准版", region:"CN", storage_quota_gb:1024, member_limit:20, monthly_price:699, yearly_price:6999, currency:"CNY" },
+      { plan_id:"CN_ENTERPRISE_PRO", plan_name:"中国区企业高级版", region:"CN", storage_quota_gb:5120, member_limit:50, monthly_price:1999, yearly_price:19999, currency:"CNY" },
+      { plan_id:"GLOBAL_ENTERPRISE_BASIC", plan_name:"Global Enterprise Basic", region:"GLOBAL", storage_quota_gb:300, member_limit:5, monthly_price:49, yearly_price:499, currency:"USD" },
+      { plan_id:"GLOBAL_ENTERPRISE_STANDARD", plan_name:"Global Enterprise Standard", region:"GLOBAL", storage_quota_gb:1024, member_limit:20, monthly_price:99, yearly_price:999, currency:"USD" },
+      { plan_id:"GLOBAL_ENTERPRISE_PRO", plan_name:"Global Enterprise Pro", region:"GLOBAL", storage_quota_gb:5120, member_limit:50, monthly_price:299, yearly_price:2999, currency:"USD" }
+    ];
+  }
+
+  function planByIdFallback(planId){
+    return enterprisePlansFallback().find(function(plan){ return (plan.plan_id || plan.planId) === planId; }) || enterprisePlansFallback()[0];
+  }
+
+  function cloudState(){
+    return window.WeishanStore.read("cloud.settings.mock.v1", {
+      organizationId:"local-company",
+      allocation:null,
+      members:[]
+    });
+  }
+
+  function writeCloudState(next){
+    window.WeishanStore.write("cloud.settings.mock.v1", next);
+  }
+
+  function activeMemberCount(members){
+    return (members || []).filter(function(member){ return member && member.status === "active"; }).length;
+  }
+
+  function mockOrganizationStatus(planId){
+    const state = cloudState();
+    const plan = planByIdFallback(planId || (state.allocation && state.allocation.planId) || "CN_ENTERPRISE_BASIC");
+    const quotaGb = Number(plan.storage_quota_gb || plan.storageQuotaGb || 0);
+    return {
+      ok:true,
+      organizationId:state.organizationId,
+      planId:plan.plan_id || plan.planId,
+      memberLimit:Number(plan.member_limit || plan.memberLimit || 0),
+      activeMemberCount:activeMemberCount(state.members),
+      storageQuotaGb:quotaGb,
+      quotaGb,
+      quotaBytes:quotaGb * 1024 * 1024 * 1024,
+      pathPrefix:"organizations/" + state.organizationId + "/",
+      provider:"local_mock",
+      storageMode:"local_mock",
+      storageStatus:{ mode:state.allocation ? "mock_cloud_allocated" : "local_only", quotaGb }
+    };
+  }
+
+  function mockAllocateStorage(planId){
+    const state = cloudState();
+    const plan = planByIdFallback(planId || "CN_ENTERPRISE_BASIC");
+    const quotaGb = Number(plan.storage_quota_gb || plan.storageQuotaGb || 0);
+    const allocation = {
+      ok:true,
+      mock:true,
+      planId:plan.plan_id || plan.planId,
+      quotaGb,
+      quotaBytes:quotaGb * 1024 * 1024 * 1024,
+      pathPrefix:"organizations/" + state.organizationId + "/",
+      provider:"local_mock",
+      storageMode:"local_mock"
+    };
+    writeCloudState(Object.assign({}, state, { allocation }));
+    return allocation;
+  }
+
+  function mockInviteMember(input){
+    const state = cloudState();
+    const status = mockOrganizationStatus(input.planId || "CN_ENTERPRISE_BASIC");
+    if (status.activeMemberCount >= status.memberLimit) {
+      return {
+        ok:false,
+        code:"MEMBER_LIMIT_REACHED",
+        message:"当前企业套餐最多支持 " + status.memberLimit + " 名成员。如需继续邀请，请升级企业套餐。",
+        memberLimit:status.memberLimit,
+        activeMemberCount:status.activeMemberCount,
+        ignoredStatuses:["invited", "removed", "rejected", "expired"]
+      };
+    }
+    const member = {
+      memberId:"mock-member-" + Date.now().toString(36),
+      email:String(input.email || "").trim(),
+      role:input.role || "member",
+      status:"invited",
+      createdAt:new Date().toISOString()
+    };
+    writeCloudState(Object.assign({}, state, { members:(state.members || []).concat(member) }));
+    return { ok:true, result:"invited", member, memberLimit:status.memberLimit, activeMemberCount:status.activeMemberCount };
+  }
+
+  async function cloudRequest(path, options, fallback){
+    const apiBase = (window.WeishanAPI && window.WeishanAPI.apiBase) || "http://127.0.0.1:8787";
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(function(){ controller.abort(); }, 900);
+      const res = await fetch(apiBase + path, Object.assign({ signal:controller.signal }, options || {}));
+      clearTimeout(timer);
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return await res.json();
+    } catch (_) {
+      return fallback();
+    }
+  }
+
+  function cloudHistory(type, payload){
+    if (!window.HistoryApi || !window.HistoryApi.record) return;
+    const safe = Object.assign({
+      schemaVersion:"weishan.task.v1",
+      module:"cloud",
+      createdAt:new Date().toISOString()
+    }, payload || {});
+    window.HistoryApi.record(type, safe);
+  }
+
+  function cloudEnterprisePanel(){
+    return `
+      <div class="ws-card" id="cloudEnterpriseSettings">
+        <h2>云服务与企业空间</h2>
+        <p class="ws-muted">当前存储模式：<b id="cloudStorageMode">本地存储</b> / weishan 云存储 / 自有云</p>
+        <p class="danger-text">${LOCAL_STORAGE_WARNING}</p>
+        <p class="ws-muted">Metadata provider / Storage provider 当前为 local mock。PocketBase 和 S3-compatible 仅作为可替换 provider skeleton，不是默认供应商。</p>
+        <div class="ws-row">
+          <button class="ws-btn" id="loadCloudPlans">读取企业套餐</button>
+          <button class="ws-btn green" id="loadCloudStatus">读取企业空间状态</button>
+          <button class="ws-btn gray" id="allocateCloudStorage">分配企业云空间 mock</button>
+        </div>
+        <div class="ws-item" id="cloudPlanList">企业套餐待读取。</div>
+        <div class="ws-item" id="cloudStatusBox">企业空间状态待读取。</div>
+        <div class="ws-row">
+          <input class="ws-input" id="cloudInviteEmail" placeholder="成员邮箱，例如 e2e-cloud@example.com">
+          <select class="ws-input" id="cloudInviteRole">
+            <option value="member">Member</option>
+            <option value="admin">Admin</option>
+            <option value="viewer">Viewer</option>
+          </select>
+          <button class="ws-btn" id="cloudInviteMember">邀请成员 mock</button>
+        </div>
+        <div class="ws-item" id="cloudInviteResult">成员邀请结果待执行。</div>
+        <p class="ws-muted">扩容入口预留：云空间不够时未来可单独购买扩容包，本轮不接真实付款。</p>
+      </div>`;
+  }
+
+  function renderCloudPlans(host, plans){
+    const box = host.querySelector("#cloudPlanList");
+    const enterprise = (plans || []).filter(function(plan){
+      return String(plan.plan_type || plan.planType || "").toLowerCase() === "enterprise" || /ENTERPRISE/.test(String(plan.plan_id || plan.planId || ""));
+    });
+    box.innerHTML = enterprise.map(function(plan){
+      const id = plan.plan_id || plan.planId;
+      const name = plan.plan_name || plan.planName || plan.name || id;
+      const quota = plan.storage_quota_gb || plan.storageQuotaGb || plan.quotaGb || 0;
+      const limit = plan.member_limit || plan.memberLimit || 0;
+      return `<div><b>${esc(name)}</b> · ${esc(id)} · ${esc(plan.region || "")} · ${esc(quota)}GB · ${esc(limit)}人 · ${esc(plan.monthly_price || "-")}/${esc(plan.yearly_price || "-")} ${esc(plan.currency || "")}</div>`;
+    }).join("") || "暂无企业套餐。";
+  }
+
+  function renderCloudStatus(host, status){
+    const box = host.querySelector("#cloudStatusBox");
+    box.innerHTML = [
+      "plan_id: " + esc(status.planId || ""),
+      "member_limit: " + esc(status.memberLimit),
+      "active_member_count: " + esc(status.activeMemberCount),
+      "storage_quota_gb: " + esc(status.storageQuotaGb || status.quotaGb || 0),
+      "storage_status: " + esc((status.storageStatus && status.storageStatus.mode) || status.storageMode || "local_mock"),
+      "pathPrefix: " + esc(status.pathPrefix || ""),
+      "provider: " + esc(status.provider || "local_mock")
+    ].join("<br>");
+  }
+
+  function mountCloudPanel(host){
+    const plansBtn = host.querySelector("#loadCloudPlans");
+    const statusBtn = host.querySelector("#loadCloudStatus");
+    const allocateBtn = host.querySelector("#allocateCloudStorage");
+    const inviteBtn = host.querySelector("#cloudInviteMember");
+    if (!plansBtn || !statusBtn || !allocateBtn || !inviteBtn) return;
+
+    plansBtn.addEventListener("click", async function(){
+      const result = await cloudRequest("/api/plans", {}, function(){ return { ok:true, plans:enterprisePlansFallback(), localStorageWarning:LOCAL_STORAGE_WARNING }; });
+      renderCloudPlans(host, result.plans || []);
+      cloudHistory("cloud.plansViewed", {
+        action:"plansViewed",
+        status:"done",
+        storageMode:"local_mock",
+        provider:"local_mock",
+        inputSummary:"读取企业套餐 mock",
+        outputSummary:"已读取企业套餐 " + ((result.plans || []).length) + " 项。"
+      });
+    });
+
+    statusBtn.addEventListener("click", async function(){
+      const result = await cloudRequest("/api/organization/status?organizationId=local-company", {}, function(){ return mockOrganizationStatus("CN_ENTERPRISE_BASIC"); });
+      renderCloudStatus(host, result);
+      cloudHistory("cloud.organizationStatusViewed", {
+        action:"organizationStatusViewed",
+        status:"done",
+        planId:result.planId,
+        quotaGb:result.storageQuotaGb || result.quotaGb,
+        memberLimit:result.memberLimit,
+        activeMemberCount:result.activeMemberCount,
+        storageMode:result.storageMode,
+        provider:result.provider,
+        ownerType:"organization",
+        ownerId:"local-company",
+        inputSummary:"读取企业空间状态 mock",
+        outputSummary:"企业空间 " + result.planId + "，" + (result.storageQuotaGb || result.quotaGb || 0) + "GB / " + result.memberLimit + " 人。"
+      });
+    });
+
+    allocateBtn.addEventListener("click", async function(){
+      const body = { ownerType:"organization", ownerId:"local-company", planId:"CN_ENTERPRISE_BASIC" };
+      const result = await cloudRequest("/api/storage/allocate", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify(body)
+      }, function(){ return mockAllocateStorage(body.planId); });
+      host.querySelector("#cloudStorageMode").textContent = "weishan 云存储（mock）";
+      renderCloudStatus(host, Object.assign({ memberLimit:5, activeMemberCount:0, storageQuotaGb:result.quotaGb }, result));
+      cloudHistory("cloud.storageAllocated", {
+        action:"storageAllocated",
+        status:"done",
+        planId:body.planId,
+        quotaGb:result.quotaGb,
+        memberLimit:5,
+        activeMemberCount:0,
+        storageMode:result.storageMode || "local_mock",
+        provider:result.provider || "local_mock",
+        ownerType:body.ownerType,
+        ownerId:body.ownerId,
+        inputSummary:"分配企业云空间 mock",
+        outputSummary:"已分配 " + result.quotaGb + "GB，路径 " + result.pathPrefix
+      });
+    });
+
+    inviteBtn.addEventListener("click", async function(){
+      const email = String(host.querySelector("#cloudInviteEmail").value || "").trim();
+      const role = String(host.querySelector("#cloudInviteRole").value || "member");
+      const body = { organizationId:"local-company", planId:"CN_ENTERPRISE_BASIC", email, role };
+      const result = await cloudRequest("/api/organization/invite", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify(body)
+      }, function(){ return mockInviteMember(body); });
+      const type = result.ok ? "cloud.organizationInvite" : "cloud.organizationInviteRejected";
+      host.querySelector("#cloudInviteResult").textContent = result.ok ? "邀请已记录：" + email : (result.code || "invite_failed") + " · " + (result.message || "邀请失败");
+      cloudHistory(type, {
+        action:result.ok ? "organizationInvite" : "organizationInviteRejected",
+        status:result.ok ? "done" : "failed",
+        planId:body.planId,
+        memberLimit:result.memberLimit,
+        activeMemberCount:result.activeMemberCount,
+        storageMode:"local_mock",
+        provider:"local_mock",
+        ownerType:"organization",
+        ownerId:"local-company",
+        inputSummary:"邀请企业成员 mock：" + email,
+        outputSummary:result.ok ? "成员邀请已记录。" : (result.message || "成员数量达到套餐上限。")
+      });
+    });
+  }
+
   function renderStatus(host, c){
     const st = statusView(c);
     const box = host.querySelector("#connectorStatus");
@@ -341,6 +611,7 @@
             <p>free/pro → A；team/enterprise/institution → B。</p>
           </div>
         </div>
+        ${cloudEnterprisePanel()}
       </section>`;
 
     function accountInput(){
@@ -386,6 +657,8 @@
     if (authBtn) authBtn.addEventListener("click", function(){
       alert(t("authenticatorReserved"));
     });
+
+    mountCloudPanel(host);
 
     if (!acc.loggedIn) return;
 

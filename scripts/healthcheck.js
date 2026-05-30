@@ -63,7 +63,7 @@ function checkFiles() {
 function checkPackageScripts() {
   const pkg = JSON.parse(readText("package.json") || "{}");
   const scripts = pkg.scripts || {};
-  return ["check", "dev:desktop", "healthcheck", "secrets:scan", "test:api", "test:e2e", "test:e2e:smoke", "test:e2e:repair", "test:e2e:dispatch"].map((script) => {
+  return ["check", "dev:desktop", "healthcheck", "secrets:scan", "test:api", "test:e2e", "test:e2e:smoke", "test:e2e:repair", "test:e2e:dispatch", "test:e2e:cloud"].map((script) => {
     const ok = Boolean(scripts[script]);
     const status = ok ? "pass" : (script === "healthcheck" ? "warn" : "fail");
     return result("script:" + script, status, ok ? scripts[script] : "missing", "Add the missing package script.");
@@ -102,6 +102,12 @@ function checkMarkers() {
     marker("apps/server/src/cloud/cloudService.js", /planById|storageQuotaFor|DEFAULT_ENTERPRISE_PLAN_ID/, "marker:enterprise quota by plan", true),
     marker("apps/server/src/cloud/cloudService.js", /inviteOrganizationMember|MEMBER_LIMIT_REACHED|activeMembers/, "marker:organization member limit", true),
     marker("apps/server/src/cloud/metadataAdapter.js", /localStorageWarning|local only|Free Local/, "marker:local storage warning", true),
+    marker("apps/desktop/src/renderer/routes/SettingsPage.js", /云服务与企业空间|loadCloudPlans|cloudEnterpriseSettings/, "marker:cloud settings ui", true),
+    marker("apps/desktop/src/renderer/routes/SettingsPage.js", /当前使用本地存储模式|LOCAL_STORAGE_WARNING/, "marker:local storage warning ui", true),
+    marker("apps/desktop/src/renderer/routes/SettingsPage.js", /CN_ENTERPRISE_BASIC|CN_ENTERPRISE_STANDARD|CN_ENTERPRISE_PRO|GLOBAL_ENTERPRISE_STANDARD/, "marker:enterprise plans visible", true),
+    marker("apps/desktop/src/renderer/routes/SettingsPage.js", /allocateCloudStorage|cloud\.storageAllocated/, "marker:cloud mock allocation", true),
+    marker("apps/desktop/src/renderer/routes/SettingsPage.js", /cloudInviteMember|MEMBER_LIMIT_REACHED|cloud\.organizationInviteRejected/, "marker:organization invite limit", true),
+    marker("apps/desktop/src/renderer/routes/SettingsPage.js", /cloud\.plansViewed|cloud\.organizationStatusViewed|cloud\.organizationInvite/, "marker:cloud history actions", true),
     marker("apps/server/src/cloud/cloudHealthcheck.js", /runCloudHealthcheck|storageProviderSwitchable|metadataProviderSwitchable/, "marker:cloud provider switchable", true),
     marker("playwright.config.js", /testDir:\s*["']\.\/tests\/e2e["']|reporter|trace/, "marker:playwright config", false),
     marker("tests/e2e/smoke.spec.js", /app launches|home page visible|crawler page visible/, "marker:playwright smoke", false)

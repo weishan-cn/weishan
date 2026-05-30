@@ -67,6 +67,7 @@ function mountCloudRoutes(app) {
       quotaBytes:Number(allocation.quotaGb || 0) * 1024 * 1024 * 1024,
       pathPrefix:allocation.pathPrefix || "",
       provider:allocation.provider || "local_mock",
+      storageMode:"local_mock",
       allocation
     });
   });

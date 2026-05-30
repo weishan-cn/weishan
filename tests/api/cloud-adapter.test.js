@@ -82,6 +82,9 @@ async function main() {
   assert.equal(plansResult.ok, true);
   assert.match(plansResult.localStorageWarning, /local only|本地/i);
   const plansById = Object.fromEntries(plansResult.plans.map((plan) => [plan.planId, plan]));
+  const enterprisePlans = plansResult.plans.filter((plan) => plan.planType === "enterprise");
+  assert.equal(enterprisePlans.length, 6);
+  assert.equal(plansById.CN_ENTERPRISE_BASIC.plan_name, "中国区企业基础版");
   assert.equal(plansById.CN_ENTERPRISE_BASIC.storageQuotaGb, 300);
   assert.equal(plansById.CN_ENTERPRISE_BASIC.memberLimit, 5);
   assert.equal(plansById.CN_ENTERPRISE_STANDARD.storageQuotaGb, 1024);
@@ -133,6 +136,21 @@ async function main() {
   assert.equal(enterpriseStatus.localOnly, false);
   assert.equal(enterpriseStatus.quotaBytes, 1024 * 1024 * 1024 * 1024);
   assert.equal(enterpriseStatus.pathPrefix, "organizations/local-company/");
+
+  const cnBasicAllocation = await allocateStorage({
+    ownerType:"organization",
+    ownerId:"cn-basic-company",
+    planId:"CN_ENTERPRISE_BASIC",
+    provider:"local_mock"
+  }, createCloudContext());
+  assert.equal(cnBasicAllocation.quotaGb, 300);
+  const cnProAllocation = await allocateStorage({
+    ownerType:"organization",
+    ownerId:"cn-pro-company",
+    planId:"CN_ENTERPRISE_PRO",
+    provider:"local_mock"
+  }, createCloudContext());
+  assert.equal(cnProAllocation.quotaGb, 5120);
 
   const enterpriseUploadUrl = await createUploadUrl({
     ownerType:"organization",
