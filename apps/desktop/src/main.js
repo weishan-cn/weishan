@@ -109,11 +109,8 @@ async function withPerf(meta, stage, fn, extra) {
 
 function iconPath() {
   const candidates = [
-    path.join(__dirname, "assets/weishan-icon-rounded.png"),
-    path.join(__dirname, "assets/weishan-icon.png"),
-    path.join(__dirname, "assets/weishan-icon.jpeg"),
     path.join(__dirname, "assets/ws-logo.png"),
-    path.join(__dirname, "../build/weishan-icon.png")
+    path.join(__dirname, "assets/WS-logo.icns")
   ];
   return candidates.find((p) => fs.existsSync(p)) || candidates[0];
 }

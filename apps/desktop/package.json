@@ -24,18 +24,18 @@
       "target": [
         "dmg"
       ],
-      "icon": "src/assets/weishan-icon-rounded.png"
+      "icon": "src/assets/WS-logo.icns"
     },
     "win": {
       "target": [
         "nsis"
       ],
-      "icon": "src/assets/weishan-icon-rounded.png"
+      "icon": "src/assets/ws-logo.png"
     },
     "directories": {
       "output": "dist"
     },
-    "icon": "src/assets/weishan-icon-rounded.png"
+    "icon": "src/assets/WS-logo.icns"
   },
   "description": "weishan desktop client",
   "productName": "weishan"

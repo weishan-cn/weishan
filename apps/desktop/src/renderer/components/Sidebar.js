@@ -20,7 +20,7 @@
     let currentSection = "";
     const collapsed = isCollapsed();
     const toggleLabel = window.I18n.t(collapsed ? "expandSidebar" : "collapseSidebar");
-    return `<aside class="sidebar"><div class="brand"><div class="brand-logo">ws</div><div class="brand-name">weishan</div><button class="sidebar-toggle" id="sidebarToggle" title="${toggleLabel}" aria-label="${toggleLabel}" aria-expanded="${collapsed ? "false" : "true"}">${collapsed ? "›" : "‹"}</button></div><nav>` + modules.map(m => {
+    return `<aside class="sidebar"><div class="brand"><div class="brand-logo"><img src="assets/ws-logo.png" alt="weishan logo"></div><div class="brand-name">weishan</div><button class="sidebar-toggle" id="sidebarToggle" title="${toggleLabel}" aria-label="${toggleLabel}" aria-expanded="${collapsed ? "false" : "true"}">${collapsed ? "›" : "‹"}</button></div><nav>` + modules.map(m => {
       const section = m.section !== currentSection ? (currentSection = m.section, `<div class="nav-section">${window.I18n.t(m.section)}</div>`) : "";
       const locked = m.paid && !window.WeishanPermissions.canUse(m.id);
       const label = window.I18n.t(m.id);
