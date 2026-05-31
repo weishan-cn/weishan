@@ -1,4 +1,4 @@
-# weishan desktop v1.7.0
+# weishan desktop v2.06
 
 This is the current clean baseline for the weishan desktop MVP.
 
@@ -68,7 +68,7 @@ This clean package removes historical `.bak-*` patch files and macOS metadata. T
 - `apps/server/src/emailRisk.js`
 
 
-## v1.7.0 Email Takeover
+## Email Takeover
 
 Lightweight email takeover adds one desktop entry: `邮件接管`.
 
@@ -83,7 +83,7 @@ Available actions require separate user authorization every time:
 Email isolation rule: `accountId + provider + mailboxEmail + messageId`. Blank lines are treated as body content, not as message ownership boundaries.
 
 
-## v1.7.0b 邮箱账号接管
+## 邮箱账号接管
 
 主流程：邮件接管 → 连接邮箱 → 输入邮箱地址与授权码/App Password → 自动读取最近邮件 → 单独授权执行整理、草稿、改写、待办、标重要。
 

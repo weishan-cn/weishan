@@ -1,7 +1,7 @@
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 
-// === weishan v1.7.08h debug exception guard ===
+// === weishan v2.06h debug exception guard ===
 process.on("uncaughtException", (err) => {
   console.error("[weishan-mail uncaughtException]", err && err.stack || err);
 });
@@ -24,7 +24,7 @@ app.use(express.json());
 mountCloudRoutes(app);
 
 const PORT = process.env.PORT || 8787;
-const VERSION = "1.7.08";
+const VERSION = "2.0.6";
 const SERVICE_NAME = "weishan";
 const SITE_URL = process.env.SITE_URL || "https://reset.weishan.ai";
 const supabaseAdmin = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -144,6 +144,25 @@ app.get("/health", (_req, res) => {
     supabaseConfigured: Boolean(supabasePublic),
     auditConfigured: Boolean(supabaseAdmin),
     emailProviderConfigured: Boolean(resend)
+  });
+});
+
+app.get("/api/ai/status", (_req, res) => {
+  res.json({
+    ok: true,
+    configured: false,
+    provider: "model_gateway",
+    model: null,
+    supportsSearch: false,
+    message: "AI gateway is not configured on this local server."
+  });
+});
+
+app.post("/api/ai/chat", (_req, res) => {
+  res.status(503).json({
+    ok: false,
+    code: "AI_GATEWAY_NOT_CONFIGURED",
+    message: "当前 AI 网关未接通，无法可靠回答。"
   });
 });
 
@@ -911,7 +930,7 @@ function simpleMailWorkspaceTranslate(text, targetLang = "zh") {
 }
 
 
-// === weishan v1.7.08h real inbox flow begin ===
+// === weishan v2.06h real inbox flow begin ===
 const fs1708h = require("fs");
 const path1708h = require("path");
 let ImapFlow1708h = null;
@@ -1097,7 +1116,7 @@ async function listInbox1708h(body, limit) {
       out.reverse();
       return {
         ok: true,
-        version: "1.7.08",
+        version: "2.0.6",
         provider: cfg.provider,
         imap: { host: cfg.host, port: cfg.port, secure: cfg.secure },
         mailbox: { total, unseen: Number(status.unseen || 0) },
@@ -1185,7 +1204,7 @@ function safeMailError1708h(e) {
   app.post("/v1/email/connect/auto", (req, res) => {
     const email = cleanMail1708h(req.body && req.body.email);
     const provider = detectMailProvider1708h(email);
-    res.json({ ok: true, version: "1.7.08", provider, imap: { host: provider.host, port: provider.port, secure: provider.secure } });
+    res.json({ ok: true, version: "2.0.6", provider, imap: { host: provider.host, port: provider.port, secure: provider.secure } });
   });
 
   app.post("/v1/email/connect/imap-test", async (req, res) => {
@@ -1218,7 +1237,7 @@ function safeMailError1708h(e) {
       });
       res.json({
         ok: true,
-        version: "1.7.08",
+        version: "2.0.6",
         message: "账号元数据已保存，授权码不会写入普通本地文件。",
         account: { email: saved.email, provider: saved.provider, host: saved.host, port: saved.port, secure: saved.secure },
         mailbox: test.mailbox,
@@ -1254,16 +1273,16 @@ function safeMailError1708h(e) {
     const saved = accountWithRuntimeSecret1708h(loadAccount1708h(), {});
     res.json({
       ok: true,
-      version: "1.7.08",
+      version: "2.0.6",
       saved: !!saved,
       account: saved ? { email: saved.email, provider: saved.provider, host: saved.host, port: saved.port, secure: saved.secure, savedAt: saved.savedAt } : null
     });
   });
 })();
-// === weishan v1.7.08h real inbox flow end ===
+// === weishan v2.06h real inbox flow end ===
 
 
-// === weishan v1.7.08h sync index begin ===
+// === weishan v2.06h sync index begin ===
 const MAIL_SYNC_INDEX_FILE_1708h = path1708h.join(process.cwd(), ".weishan-mail-sync.local.json");
 
 function classifyMail1708h(mail) {
@@ -1362,7 +1381,7 @@ async function indexAllHeaders1708h(account, limit) {
 
       const data = {
         ok: true,
-        version: "1.7.08",
+        version: "2.0.6",
         mode: "header-index",
         account: { email: cfg.email, provider: cfg.provider },
         mailbox: { total, unseen: Number(status.unseen || 0) },
@@ -1406,7 +1425,7 @@ app.post("/v1/email/sync/index", async (req, res) => {
 
     res.json({
       ok: true,
-      version: "1.7.08",
+      version: "2.0.6",
       mode: data.mode,
       mailbox: data.mailbox,
       indexed: data.indexed,
@@ -1421,10 +1440,10 @@ app.post("/v1/email/sync/index", async (req, res) => {
 
 app.get("/v1/email/sync/status", (req, res) => {
   const data = loadSyncIndex1708h();
-  if (!data) return res.json({ ok:true, version:"1.7.08", synced:false });
+  if (!data) return res.json({ ok:true, version:"2.0.6", synced:false });
   res.json({
     ok: true,
-    version: "1.7.08",
+    version: "2.0.6",
     synced: true,
     mode: data.mode,
     mailbox: data.mailbox,
@@ -1436,7 +1455,7 @@ app.get("/v1/email/sync/status", (req, res) => {
 
 app.get("/v1/email/sync/messages", (req, res) => {
   const data = loadSyncIndex1708h();
-  if (!data) return res.json({ ok:true, version:"1.7.08", messages:[] });
+  if (!data) return res.json({ ok:true, version:"2.0.6", messages:[] });
 
   const category = String(req.query.category || "").trim();
   let messages = data.messages || [];
@@ -1444,15 +1463,15 @@ app.get("/v1/email/sync/messages", (req, res) => {
 
   res.json({
     ok: true,
-    version: "1.7.08",
+    version: "2.0.6",
     total: messages.length,
     messages
   });
 });
-// === weishan v1.7.08h sync index end ===
+// === weishan v2.06h sync index end ===
 
 
-// === weishan v1.7.08h body sync batch begin ===
+// === weishan v2.06h body sync batch begin ===
 function cleanBodyForSync1708h(v) {
   return String(v || "")
     .replace(/\r/g, "\n")
@@ -1595,7 +1614,7 @@ app.post("/v1/email/sync/body-step", async (req, res) => {
 
     res.json({
       ok: true,
-      version: "1.7.08",
+      version: "2.0.6",
       processed: candidates.length,
       okCount,
       failCount,
@@ -1648,7 +1667,7 @@ app.post("/v1/email/sync/body/:uid", async (req, res) => {
 
     res.json({
       ok: true,
-      version: "1.7.08",
+      version: "2.0.6",
       uid,
       message: Object.assign({}, idx >= 0 ? data.messages[idx] : data.messages[0], { bodyHtml: full.bodyHtml || "" }),
       updatedAt: data.updatedAt
@@ -1658,10 +1677,10 @@ app.post("/v1/email/sync/body/:uid", async (req, res) => {
     res.status(400).json(safeMailError1708h(e));
   }
 });
-// === weishan v1.7.08h body sync batch end ===
+// === weishan v2.06h body sync batch end ===
 
 
-// === weishan v1.7.08h one click sync all begin ===
+// === weishan v2.06h one click sync all begin ===
 function sleep1708h(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -1742,7 +1761,7 @@ app.post("/v1/email/sync/run-all", async (req, res) => {
 
     res.json({
       ok: true,
-      version: "1.7.08",
+      version: "2.0.6",
       mode: "one-click-sync-all",
       indexed: data.messages.length,
       processedOk: totalOk,
@@ -1758,4 +1777,4 @@ app.post("/v1/email/sync/run-all", async (req, res) => {
     res.status(400).json(safeMailError1708h(e));
   }
 });
-// === weishan v1.7.08h one click sync all end ===
+// === weishan v2.06h one click sync all end ===

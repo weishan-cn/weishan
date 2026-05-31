@@ -1,11 +1,12 @@
 (function(){
   if (!window.WeishanDispatchRouter && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/dispatchRouter.js?v=2.0.5"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/dispatchRouter.js?v=2.0.6"></scr' + 'ipt>');
   }
 
   const QUEUE_KEY = "command.queue.v205";
   const HISTORY_KEY = "command.history.v205";
   const MAX_HISTORY = 80;
+  const AI_GATEWAY_BASE = "http://127.0.0.1:8787";
 
   let processing = false;
   const taskPerf = {};
@@ -151,6 +152,141 @@
       if (model) payload.selectedModelName = model.name;
     }
     return window.HistoryApi.record(type, payload);
+  }
+
+  function recordChatHistory(type, inputText, answer, extra){
+    if (!window.HistoryApi || typeof window.HistoryApi.record !== "function") return null;
+    const detail = extra || {};
+    return window.HistoryApi.record(type, {
+      schemaVersion:"weishan.task.v1",
+      module:"chat",
+      action:String(type || "chat.event").replace(/^chat\./, ""),
+      selectedModelId:detail.selectedModelId || "",
+      selectedModelName:detail.selectedModelName || "",
+      inputSummary:taskSummary(inputText, 240),
+      outputSummary:taskSummary(answer, 240),
+      executionMode:detail.executionMode || "gateway_required",
+      realExecution:detail.realExecution === true,
+      createdAt:nowIso()
+    });
+  }
+
+  function isRealtimeQuestion(text){
+    return /天气|气温|下雨|空气质量|新闻|今天|现在|实时|价格|票价|航班|火车|汇率|股价|政策|限行|路线|最便宜|最经济/i.test(String(text || ""));
+  }
+
+  async function aiGatewayStatus(){
+    try {
+      const res = await fetch(AI_GATEWAY_BASE + "/api/ai/status", { cache:"no-store" });
+      const data = await res.json();
+      return {
+        ok:!!(data && data.ok),
+        configured:!!(data && data.configured),
+        provider:String(data && data.provider || "model_gateway"),
+        model:data && data.model || null,
+        supportsSearch:!!(data && data.supportsSearch),
+        message:String(data && data.message || "")
+      };
+    } catch (_) {
+      return {
+        ok:false,
+        configured:false,
+        provider:"model_gateway",
+        model:null,
+        supportsSearch:false,
+        message:"AI gateway status is unavailable."
+      };
+    }
+  }
+
+  function selectedModel(){
+    const router = dispatchRouter();
+    if (!router || !router.modelById) return null;
+    const idValue = router.selectedModelId ? router.selectedModelId() : "weishan-auto";
+    return router.modelById(idValue);
+  }
+
+  function unavailableAnswer(text, status){
+    const realtime = isRealtimeQuestion(text);
+    const reason = realtime && !(status && status.supportsSearch)
+      ? "这个问题需要实时信息或联网搜索能力。当前 AI 网关未启用联网搜索，我不能给出可靠实时结果。"
+      : "AI 网关未接通，无法可靠回答。";
+    return [
+      reason,
+      "",
+      "你仍可继续使用本地调度能力：",
+      "- 文档草稿",
+      "- PPT 大纲",
+      "- Codex 指令",
+      "- 邮件接管",
+      "- 抓取中心",
+      "- 软件工厂",
+      "- coordination step queue",
+      "",
+      "客户端不保存 provider key，也不会把完整 prompt/messages/provider body 写入 History。"
+    ].join("\n");
+  }
+
+  async function answerChatWithGateway(text, meta, onDelta){
+    const status = await aiGatewayStatus();
+    const model = selectedModel();
+    if (!status.configured) {
+      const answer = unavailableAnswer(text, status);
+      recordChatHistory("chat.unavailable", text, answer, {
+        selectedModelId:model && model.id || "",
+        selectedModelName:model && model.name || "",
+        executionMode:"gateway_unavailable",
+        realExecution:false
+      });
+      return answer;
+    }
+    if (isRealtimeQuestion(text) && !status.supportsSearch) {
+      const answer = unavailableAnswer(text, status);
+      recordChatHistory("chat.unavailable", text, answer, {
+        selectedModelId:model && model.id || "",
+        selectedModelName:model && model.name || "",
+        executionMode:"gateway_search_unavailable",
+        realExecution:false
+      });
+      return answer;
+    }
+
+    recordChatHistory("chat.aiRequested", text, "已请求 AI 网关回答。", {
+      selectedModelId:model && model.id || "",
+      selectedModelName:model && model.name || "",
+      executionMode:"gateway_requested",
+      realExecution:true
+    });
+
+    const res = await fetch(AI_GATEWAY_BASE + "/api/ai/chat", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        input:String(text || ""),
+        selectedModelId:model && model.id || "",
+        stream:false
+      })
+    });
+    const data = await res.json();
+    if (!res.ok || !data || !data.ok) {
+      const answer = String(data && data.message || "当前 AI 网关未接通，无法可靠回答。");
+      recordChatHistory("chat.unavailable", text, answer, {
+        selectedModelId:model && model.id || "",
+        selectedModelName:model && model.name || "",
+        executionMode:"gateway_unavailable",
+        realExecution:false
+      });
+      return answer;
+    }
+    const answer = String(data.content || data.message || "");
+    if (typeof onDelta === "function") onDelta(answer);
+    recordChatHistory("chat.answered", text, answer, {
+      selectedModelId:model && model.id || "",
+      selectedModelName:model && model.name || "",
+      executionMode:"gateway",
+      realExecution:true
+    });
+    return answer || "AI 网关已返回空内容。";
   }
 
   function perfStart(meta, stage, extra){
@@ -492,16 +628,8 @@
   }
 
   function brainLabel(){
-    try {
-      const c = window.WeishanAPI && window.WeishanAPI.connector ? window.WeishanAPI.connector() : null;
-      if (!c || (!c.baseUrl && !c.chatModel)) return "AI 未配置 · 用户自选模型";
-      if (!c.chatModel) return "AI 已保存 · 模型未填写";
-      if (c.testStatus === "success") return "AI 已连接 · " + c.chatModel;
-      if (c.testStatus === "failed") return "AI 连接失败 · " + c.chatModel;
-      return "AI 已保存未测试 · " + c.chatModel;
-    } catch (_) {
-      return "AI 未配置 · 用户自选模型";
-    }
+    const model = selectedModel();
+    return "AI 网关未接通 · " + (model && model.name || "weishan 自动选择");
   }
 
   function aiErrorMessage(res){
@@ -609,8 +737,16 @@
         active = patchTask(active.id, (t) => addLog(t, "memory", answer));
       } else if (intent.route.indexOf("dispatch.") === 0) {
         const plan = intent.dispatchPlan || {};
-        answer = executeDispatchPlan(active.text, plan);
-        recordHomeDispatchAction(plan, active.text, answer);
+        if (plan.module === "chat") {
+          active = patchTask(active.id, (t) => addLog(t, "ai", "准备调用 AI 网关：" + brainLabel()));
+          const aiStartedAt = perfStart(meta, "renderer.ai.gateway.start", { inputChars:String(active.text || "").length });
+          answer = await answerChatWithGateway(active.text, meta);
+          perfEnd(meta, "renderer.ai.gateway.done", aiStartedAt, { inputChars:String(active.text || "").length, outputChars:String(answer || "").length });
+          active = patchTask(active.id, (t) => putAnswerLog(t, answer, false));
+        } else {
+          answer = executeDispatchPlan(active.text, plan);
+        }
+        if (plan.module !== "chat") recordHomeDispatchAction(plan, active.text, answer);
         const pendingPayload = saveDispatchPrefill(active.text, plan);
         if (pendingPayload && pendingPayload.targetRoute && pendingPayload.targetRoute !== "home") {
           answer += "\n\n调度预填已准备：" + pendingPayload.targetModule + " / " + pendingPayload.action + "。";

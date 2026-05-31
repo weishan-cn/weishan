@@ -157,7 +157,7 @@
 .mail-raw-body pre{white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto;color:#475569;font-size:12px;line-height:1.45}
 @media (max-width:1280px){.mail-v204-page{grid-template-columns:320px 1fr}.mail-reader{grid-column:1 / -1}}
 
-/* v2.0.5 command router clean */
+/* v2.06 command router clean */
 .home-v205-page{
   display:grid;
   grid-template-columns:minmax(520px, 1fr) minmax(360px, 420px);

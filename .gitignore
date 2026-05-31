@@ -26,7 +26,6 @@ test_clean.py
 apps/desktop/src/email_account_connect_hook.js
 apps/desktop/src/mail_module/
 apps/server/src/v17/
-docs/v1.7.0-gmail-oauth.md
 
 # weishan local mail credentials
 apps/server/.weishan-mail-account.local.json

@@ -37,29 +37,29 @@
       id:"weishan-auto",
       name:"weishan 自动选择",
       provider:"weishan",
-      mode:"mock",
-      description:"由 weishan 根据任务类型选择合适模型或模块，本轮为本地模拟。"
+      mode:"gateway_required",
+      description:"由 weishan 根据任务类型选择合适模型或模块；普通问答需要后端 AI 网关接通。"
     },
     {
       id:"gpt-compatible",
       name:"GPT-compatible",
       provider:"model_gateway",
       mode:"not_connected",
-      description:"未来可由 weishan API 层接入，客户端不保存 API key。"
+      description:"未来可由 weishan API 层接入，客户端不保存 provider key。"
     },
     {
       id:"claude-compatible",
       name:"Claude-compatible",
       provider:"model_gateway",
       mode:"not_connected",
-      description:"未来可由 weishan API 层接入，客户端不保存 API key。"
+      description:"未来可由 weishan API 层接入，客户端不保存 provider key。"
     },
     {
       id:"gemini-compatible",
       name:"Gemini-compatible",
       provider:"model_gateway",
       mode:"not_connected",
-      description:"未来可由 weishan API 层接入，客户端不保存 API key。"
+      description:"未来可由 weishan API 层接入，客户端不保存 provider key。"
     },
     {
       id:"local-model",
@@ -671,43 +671,21 @@
     return "已生成模块调度计划。";
   }
 
-  function buildLocalAnswer(text){
-    const clean = summarizeDispatchText(text, 240);
-    if (/中国|VPN|付款|付费|支付|地区|网络|模型入口|GPT|Claude|Gemini/i.test(clean)) {
-      return [
-        "# 本地回答",
-        "",
-        "weishan 的设计方向是提供统一模型入口和后端模型网关，减少用户在客户端处理不同模型账号、付款、网络和 API key 配置的复杂度。",
-        "",
-        "- 用户在 weishan 内选择可用模型或自动选择模式。",
-        "- 客户端不保存 provider API key，也不直接暴露模型供应商密钥。",
-        "- 真实可用模型取决于账户、地区、服务配置和合规策略。",
-        "- weishan 不承诺绕过法律、地区限制或服务条款。",
-        "",
-        "当前为本地 mock-safe 回答，未调用真实模型。realExecution=false"
-      ].join("\n");
-    }
-    return [
-      "# 本地回答",
-      "",
-      "已收到你的问题：",
-      clean,
-      "",
-      "首页调度中心已将这条输入识别为普通聊天 / 问答。本轮使用本地 mock-safe 回答，未调用真实模型。realExecution=false"
-    ].join("\n");
-  }
-
-  function buildModelStatus(){
+  function buildModelStatus(gatewayStatus){
     const selected = modelById(selectedModelId()) || modelById("weishan-auto");
+    const status = gatewayStatus || {};
+    const configuredText = status.configured ? "已接通" : "未接通";
     return [
       "# 模型状态",
       "",
       "当前模型：" + selected.name + "（" + selected.mode + "）",
+      "AI 网关：" + configuredText,
+      "联网搜索能力：" + (status.supportsSearch ? "已启用" : "未启用"),
       "",
       "## 可用模型入口",
       AVAILABLE_MODELS.map((model) => "- " + model.name + " · " + model.provider + " · " + model.mode + " · " + model.description).join("\n"),
       "",
-      "客户端不保存 provider key。真实模型调用需后端模型网关配置；当前为本地 mock-safe 模式，未接真实模型。"
+      "客户端不保存 provider key。真实模型调用需后端模型网关配置；未接通时无法可靠回答普通问答。"
     ].join("\n");
   }
 
@@ -721,7 +699,7 @@
       "模式：" + selected.mode,
       "说明：" + selected.description,
       "",
-      "当前为 mock-safe 模式，真实调用需后端模型网关配置。客户端不保存 provider key，未调用真实模型。realExecution=false"
+      "已保存模型偏好。真实调用需后端模型网关接通。客户端不保存 provider key，未调用真实模型。realExecution=false"
     ].join("\n");
   }
 
@@ -733,7 +711,7 @@
     if (plan.module === "model") return buildModelStatus();
     if (plan.module === "coordination") return buildCoordinationPlan(text, plan.modules);
     if (plan.module === "softwareFactory" || plan.module === "mail" || plan.module === "crawler") return buildModuleDispatchPlan(plan, text);
-    return buildLocalAnswer(text);
+    return "AI 网关未接通，无法可靠回答。你仍可使用本地调度：文档草稿、PPT 大纲、Codex 指令、邮件接管、抓取中心、软件工厂和 coordination step queue。";
   }
 
   function timestamp(){

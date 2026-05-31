@@ -10,6 +10,10 @@ async function submitHomeCommand(page, text) {
   await page.locator("#runBtn").click();
 }
 
+function currentTaskLogs(page) {
+  return page.locator(".cmd-log-list").first();
+}
+
 async function expectHistory(page, query, pattern) {
   await gotoRoute(page, "history");
   await expect(page.locator("#historySearch")).toBeVisible();
@@ -36,33 +40,34 @@ test.describe.serial("dispatch router", () => {
     const command = runId + " 有哪些模型可以用？";
     await submitHomeCommand(page, command);
     await expect(page.getByText(/模型状态|weishan 自动选择|GPT-compatible|Claude-compatible|Gemini-compatible|本地模型/).first()).toBeVisible();
-    await expect(page.getByText(/客户端不保存 provider key|未接真实模型/).first()).toBeVisible();
+    await expect(page.getByText(/客户端不保存 provider key|AI 网关：未接通|无法可靠回答/).first()).toBeVisible();
     await expectHistory(page, runId, /model\.statusViewed|模型状态|weishan 自动选择/);
   });
 
   test("model select stores a mock-safe selected model without real provider calls", async () => {
     const command = runId + " 切换到 GPT-compatible";
     await submitHomeCommand(page, command);
-    await expect(page.getByText(/已切换到 GPT-compatible|mock-safe 模式|未调用真实模型/).first()).toBeVisible();
+    await expect(page.getByText(/已切换到 GPT-compatible|真实调用需后端模型网关接通|未调用真实模型/).first()).toBeVisible();
     await expectHistory(page, runId, /model\.selected|GPT-compatible/);
   });
 
-  test("chat answer explains model gateway limits without promising bypass", async () => {
-    const command = runId + " 在中国 GPT 又要 VPN 又要付款，有 weishan 在用户是不是可以直接选择模型聊天？";
+  test("realtime chat requires AI gateway or search instead of fake local answers", async () => {
+    const command = runId + " 成都到北京最经济的方式是什么？";
     await submitHomeCommand(page, command);
-    await expect(page.getByText(/统一模型入口|后端模型网关|用户在 weishan 内选择可用模型/).first()).toBeVisible();
-    await expect(page.getByText(/客户端不保存 provider API key|不承诺绕过法律/).first()).toBeVisible();
-    await expect(page.locator("body")).not.toContainText("绕过法律限制");
-    await expect(page.locator("body")).not.toContainText("真实 API key");
-    await expectHistory(page, runId, /chat\.answered|统一模型入口|后端模型网关/);
+    await expect(page.getByText(/AI 网关未接通|需要实时信息|联网搜索能力|无法可靠回答/).first()).toBeVisible();
+    await expect(currentTaskLogs(page)).not.toContainText("# 本地回答");
+    await expect(currentTaskLogs(page)).not.toContainText("硬座");
+    await expect(currentTaskLogs(page)).not.toContainText("机票");
+    await expectHistory(page, runId, /chat\.unavailable|AI 网关未接通|实时信息/);
   });
 
-  test("plain module advice stays in chat answer without jumping modules", async () => {
-    const command = runId + " 今天适合先优化哪个模块？";
+  test("general chat unavailable state lists local capabilities without awkward mock answers", async () => {
+    const command = runId + " weishan 能做什么？";
     await submitHomeCommand(page, command);
-    await expect(page.getByText(/普通聊天|本地 mock-safe 回答|realExecution=false/).first()).toBeVisible();
+    await expect(page.getByText(/AI 网关未接通|文档草稿|PPT 大纲|Codex 指令|邮件接管|抓取中心|软件工厂/).first()).toBeVisible();
+    await expect(currentTaskLogs(page)).not.toContainText("# 本地回答");
     await expect(page.getByText(/来自首页调度中心的邮件任务|来自首页调度中心的抓取任务|来自首页调度中心的软件工厂任务/)).toHaveCount(0);
-    await expectHistory(page, runId, /chat\.answered|普通聊天|问答/);
+    await expectHistory(page, runId, /chat\.unavailable|AI 网关未接通|文档草稿/);
   });
 
   test("document dispatch creates a local document draft record", async () => {

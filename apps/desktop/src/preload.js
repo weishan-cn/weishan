@@ -1,7 +1,7 @@
 const { contextBridge, ipcRenderer, shell } = require("electron");
 
 contextBridge.exposeInMainWorld("weishan", {
-  version: "2.0.5",
+  version: "2.0.6",
   productName: "weishan",
   apiBase: process.env.WEISHAN_API_BASE || "http://127.0.0.1:8787",
   openExternal: (url) => shell.openExternal(url),

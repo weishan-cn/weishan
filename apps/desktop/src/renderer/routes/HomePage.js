@@ -198,7 +198,7 @@
         <select id="homeModelSelect" class="ws-select">
           ${options.map((model) => `<option value="${esc(model.id)}" ${model.id === data.selected.id ? "selected" : ""}>${esc(model.name)}</option>`).join("")}
         </select>
-        <p class="cmd-history-meta">模型由 weishan 后端统一管理，客户端不保存 provider key。当前为本地 mock-safe 模式，未接真实模型。</p>
+        <p class="cmd-history-meta">模型由 weishan 后端统一管理，客户端不保存 provider key。当前 AI 网关未接通，普通问答无法可靠回答。</p>
       </div>`;
   }
 
