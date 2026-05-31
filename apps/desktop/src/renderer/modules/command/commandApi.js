@@ -37,9 +37,29 @@
     return tp && tp.summarizeTextSafe ? tp.summarizeTextSafe(text, maxLength) : String(text || "").replace(/\s+/g, " ").trim().slice(0, maxLength || 160);
   }
 
-  function createHomeTaskRecord(text){
+  function normalizeAttachments(items){
+    return (Array.isArray(items) ? items : []).slice(0, 8).map((item) => ({
+      attachmentId:String(item && item.attachmentId || "").slice(0, 80),
+      name:taskSummary(item && item.name || "attachment", 120),
+      type:taskSummary(item && item.type || "file", 80),
+      size:Number(item && item.size || 0)
+    })).filter((item) => item.name);
+  }
+
+  function attachmentMeta(attachments){
+    const safe = normalizeAttachments(attachments);
+    return {
+      attachmentCount:safe.length,
+      attachmentNames:safe.map((item) => item.name),
+      attachmentTypes:safe.map((item) => item.type),
+      attachments:safe
+    };
+  }
+
+  function createHomeTaskRecord(text, attachments){
     const tp = taskProtocol();
     if (!tp || !tp.createTaskRecord) return null;
+    const files = attachmentMeta(attachments);
     return tp.createTaskRecord({
       module:"home",
       action:"taskDispatch",
@@ -50,7 +70,7 @@
       executor:{ type:"ai", id:"home.command", label:"Home Command Center" },
       source:{ type:"console", module:"home" },
       target:{ type:"console", module:"home" },
-      meta:{ inputChars:String(text || "").length }
+      meta:Object.assign({ inputChars:String(text || "").length }, files)
     });
   }
 
@@ -444,6 +464,12 @@
       inputSummary:taskSummary(normalized.inputSummary || normalized.text || "", 240),
       outputSummary:taskSummary(normalized.outputSummary || normalized.answer || "", 240)
     };
+    const meta = normalized.meta || {};
+    if (Number(meta.attachmentCount || 0) > 0) {
+      payload.attachmentCount = Number(meta.attachmentCount || 0);
+      payload.attachmentNames = Array.isArray(meta.attachmentNames) ? meta.attachmentNames.map((name) => taskSummary(name, 120)) : [];
+      payload.attachmentTypes = Array.isArray(meta.attachmentTypes) ? meta.attachmentTypes.map((type) => taskSummary(type, 80)) : [];
+    }
     if (Array.isArray(normalized.artifacts) && normalized.artifacts.length) {
       payload.artifacts = normalized.artifacts.map((artifact) => ({
         artifactId:artifact && artifact.artifactId || "",
@@ -512,16 +538,19 @@
     return patched;
   }
 
-  function enqueue(text){
+  function enqueue(text, options){
     const clean = String(text || "").trim();
     if (!clean) return null;
+    const attachments = normalizeAttachments(options && options.attachments);
+    const files = attachmentMeta(attachments);
     const meta = createPerfMeta();
     const startedAt = perfStart(meta, "renderer.action.start", { inputChars:clean.length });
-    const record = createHomeTaskRecord(clean);
+    const record = createHomeTaskRecord(clean, attachments);
 
     const task = Object.assign({}, record || {}, {
       id:(record && record.taskId) || id(),
       text:clean,
+      attachments,
       status:"queued",
       route:"pending",
       answer:"",
@@ -532,8 +561,9 @@
       updatedAt:(record && record.updatedAt) || nowIso(),
       logs:[
         entry("received", "收到指令：" + clean),
+        files.attachmentCount ? entry("attachment", "已挂载附件 metadata：" + files.attachmentNames.join(", ") + "；未读取完整内容，未上传云。") : null,
         entry("queued", "已加入执行队列，等待调度。")
-      ]
+      ].filter(Boolean)
     });
 
     const items = queue();

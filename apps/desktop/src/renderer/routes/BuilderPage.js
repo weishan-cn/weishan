@@ -39,40 +39,69 @@
   function buildMockSoftwareFactoryResult(payload){
     const prefill = payload && payload.prefill || {};
     const requirement = dispatchSummary(prefill.draftRequirement || prefill.taskDescription || payload && payload.inputSummary || "", 360);
-    const name = requirement ? requirement.replace(/[，。；,.!?！？]/g, " ").split(/\s+/).filter(Boolean).slice(0, 4).join(" ") : "本地优先软件方案";
+    const ledgerLike = /账|财务|记账|账本|收支|发票|凭证|ledger|finance|account/i.test(requirement);
+    const genericName = requirement ? requirement.replace(/[，。；,.!?！？]/g, " ").split(/\s+/).filter(Boolean).slice(0, 4).join(" ") : "本地优先软件方案";
+    const names = ledgerLike
+      ? ["企业记账助手", "企业账本管理系统", "Weishan Ledger Lite"]
+      : [(genericName || "本地优先软件方案") + " MVP", "Weishan Local App Kit", "轻量业务管理系统"];
     return [
       "# 本地模拟软件工厂任务结果",
       "",
       "## 软件名称建议",
-      (name || "本地优先软件方案") + " MVP",
+      "- " + names.join("\n- "),
       "",
-      "## 功能模块草案",
-      "- 需求录入与任务确认",
-      "- 核心数据管理",
-      "- 列表、搜索与筛选",
-      "- 本地导出与备份",
-      "- 设置与权限预留",
+      "## 产品定位",
+      ledgerLike
+        ? "面向小微企业、独立团队和项目负责人，用本地优先的方式管理收入、支出、凭证、项目和月度经营报表，降低企业日常记账与审计追踪成本。"
+        : "面向需要快速落地内部工具的个人或团队，用本地优先的方式完成核心业务录入、统计、导出和审计追踪，先交付可演示的 MVP，再逐步扩展云协作能力。",
+      "",
+      "## 核心功能模块",
+      "- 账目录入：记录收入、支出、转账、退款和备注。",
+      "- 收入/支出分类：维护业务分类、默认科目和统计口径。",
+      "- 发票/凭证附件：挂载附件 metadata，后续可接入本地文件索引或云备份。",
+      "- 项目/客户维度：把账目关联到项目、客户、合同或成本中心。",
+      "- 月度报表：按月份、分类、项目和成员生成汇总。",
+      "- 权限与成员：区分所有者、财务、录入者、查看者。",
+      "- 数据导出：导出 CSV / Markdown / JSON，便于交给会计或归档。",
+      "- 审计日志：记录新增、修改、删除、导出等关键动作。",
       "",
       "## 数据结构草案",
-      "- Project：id、name、description、createdAt、updatedAt",
-      "- Record：id、projectId、title、status、metadata、createdAt、updatedAt",
-      "- ExportJob：id、projectId、format、filename、createdAt",
+      "- accounts：accountId、name、type、currency、openingBalance、createdAt、updatedAt。",
+      "- transactions：transactionId、accountId、categoryId、projectId、amount、direction、occurredAt、note、createdBy、updatedAt。",
+      "- categories：categoryId、name、direction、parentId、color、sortOrder、enabled。",
+      "- attachments：attachmentId、transactionId、filename、mimeType、sizeBytes、localRef、createdAt。",
+      "- projects：projectId、customerId、name、status、budgetAmount、ownerId、createdAt。",
+      "- members：memberId、displayName、role、status、permissionScope、createdAt。",
+      "- audit_logs：auditId、actorId、action、targetType、targetId、summary、createdAt。",
       "",
-      "## 页面 / 窗口草案",
-      "- 仪表盘：展示关键指标与最近任务",
-      "- 录入页：创建和编辑核心数据",
-      "- 列表页：搜索、筛选、查看详情",
-      "- 设置页：本地存储、导出和安全选项",
+      "## 页面/窗口草案",
+      "- 首页仪表盘：展示本月收入、支出、结余、待补凭证和最近账目。",
+      "- 新增账目：录入金额、日期、分类、项目、客户、凭证附件 metadata。",
+      "- 账目列表：按月份、分类、项目、金额区间和关键词筛选。",
+      "- 分类管理：维护收入/支出分类、颜色和启用状态。",
+      "- 报表中心：查看月度收支、项目成本、分类占比和导出入口。",
+      "- 成员权限：配置角色、查看范围和操作权限。",
+      "- 设置与导出：管理本地存储、备份、导出和后续云同步入口。",
+      "",
+      "## 用户流程",
+      "登录或进入本地模式 → 创建账本 → 录入收支 → 挂载凭证附件 metadata → 选择分类与项目 → 查看月度报表 → 导出 CSV / Markdown → 审计日志留痕。",
+      "",
+      "## MVP 范围",
+      "- 第一版做：本地账目录入、分类、列表筛选、月度统计、CSV/Markdown 导出、审计日志、基础成员角色。",
+      "- 第一版不做：真实银行接口、自动发票识别、真实云同步、复杂审批流、多币种汇兑自动计算、真实会计凭证生成。",
       "",
       "## 验收标准",
-      "- 可以完成一条核心记录的新增、编辑和删除",
-      "- 可以按关键词检索记录",
-      "- 可以生成本地导出结果",
-      "- 应用重启后本地数据仍可读取",
-      "- 不创建真实项目目录，不写入代码文件，realExecution=false",
+      "- 能新增一条收入记录和一条支出记录，并在账目列表中看到。",
+      "- 能按月份统计收入、支出和结余。",
+      "- 能按分类查看统计结果。",
+      "- 能为账目挂载凭证附件 metadata，但不上传文件内容。",
+      "- 能导出 CSV 或 Markdown 报表。",
+      "- 能查看新增、修改、删除、导出等审计日志。",
+      "- 不同成员角色看到的操作入口不同。",
+      "- 不创建真实项目目录，不写入代码文件，realExecution=false。",
       "",
       "## 下一步建议",
-      "请在软件工厂模块内继续确认生成。"
+      "这是本地 mock-safe 软件工厂方案。真实生成代码或创建项目文件，需要用户在软件工厂模块内再次确认。"
     ].join("\n");
   }
   function softwareDispatchHistoryPayload(payload, extra){

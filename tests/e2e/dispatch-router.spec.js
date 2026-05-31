@@ -54,6 +54,12 @@ async function setMockSettingsAi(page, connected) {
   }, connected);
 }
 
+async function mockChooseFiles(page, file) {
+  await page.evaluate((item) => {
+    window.__WEISHAN_TEST_CHOOSE_FILES__ = async () => ({ ok:true, files:[item] });
+  }, file);
+}
+
 test.describe.serial("dispatch router", () => {
   let app;
   let page;
@@ -154,17 +160,47 @@ test.describe.serial("dispatch router", () => {
     await expectHistory(page, runId, /crawler\.executed|dispatch\.executed|dispatch\.confirmed|https:\/\/example\.com/);
   });
 
-  test("software factory dispatch confirms and runs local mock execution without generating files", async () => {
-    const command = runId + " 帮我做一个客户管理软件方案";
+  test("software factory dispatch confirms with a professional local mock plan without generating files", async () => {
+    const command = runId + " 帮我生成一个企业记账 app";
     await submitHomeCommand(page, command);
     await expect(page.getByText(/来自首页调度中心的软件工厂任务/).first()).toBeVisible();
-    await expect(page.locator("#softwareGoal")).toHaveValue(/客户管理软件方案/);
+    await expect(page.locator("#softwareGoal")).toHaveValue(/企业记账 app/);
     await expect(page.getByText(/不会自动生成软件|不会调用 AI|确认生成/).first()).toBeVisible();
     await page.locator("#builderDispatchConfirm").click();
     await expect(page.getByText(/状态：executed|executed/).first()).toBeVisible();
     await expect(page.getByText(/本地模拟软件工厂任务结果|realExecution=false|未调用 AI/).first()).toBeVisible();
-    await expect(page.getByText(/功能模块草案|验收标准|下一步建议/).first()).toBeVisible();
-    await expectHistory(page, runId, /softwareFactory\.executed|dispatch\.executed|dispatch\.confirmed|客户管理软件方案/);
+    await expect(page.getByText(/软件名称建议|核心功能模块|数据结构草案|页面\/窗口草案/).first()).toBeVisible();
+    await expect(page.getByText(/MVP 范围|验收标准|下一步建议|accounts|transactions|audit_logs/).first()).toBeVisible();
+    await expectHistory(page, runId, /softwareFactory\.executed|dispatch\.executed|dispatch\.confirmed|企业记账 app/);
+  });
+
+  test("home upload stages attachment metadata before command without auto execution", async () => {
+    const filename = runId + "-attachment-fixture.txt";
+    await gotoRoute(page, "home");
+    await mockChooseFiles(page, { name:filename, type:"text/plain", size:128 });
+    await page.locator("#uploadBtn").click();
+    await expect(page.locator("[data-attachment-stage]")).toBeVisible();
+    await expect(page.locator("[data-attachment-stage]")).toContainText(filename);
+    await expect(page.locator("[data-attachment-stage]")).toContainText(/不会自动执行|不会上传云|不会读取完整文件内容/);
+    await expect(page.locator("#cmdQueue")).not.toContainText(filename);
+    await expect(page.locator("#cmdHistory")).not.toContainText(filename);
+    await page.locator("#commandInput").fill(runId + " 继续输入文字说明");
+    await expect(page.locator("#commandInput")).toHaveValue(/继续输入文字说明/);
+  });
+
+  test("home command executes after attachment plus text with metadata only", async () => {
+    const filename = runId + "-analysis-fixture.txt";
+    await gotoRoute(page, "home");
+    await mockChooseFiles(page, { name:filename, type:"text/plain", size:256 });
+    await page.locator("#uploadBtn").click();
+    await expect(page.locator("[data-attachment-stage]")).toContainText(filename);
+    await page.locator("#commandInput").fill(runId + " 帮我分析这个附件");
+    await page.locator("#runBtn").click();
+    await expect(currentTaskLogs(page)).toContainText("已挂载附件 metadata");
+    await expect(currentTaskLogs(page)).toContainText(filename);
+    await expect(currentTaskLogs(page)).toContainText(/未读取完整内容|未上传云/);
+    await expect(page.locator("[data-attachment-stage]")).toHaveCount(0);
+    await expectHistory(page, runId, /attachmentCount|attachmentNames|analysis-fixture|chat\.unavailable|chat\.answered/);
   });
 
   test("dispatch bridge can be cancelled without executing module work", async () => {

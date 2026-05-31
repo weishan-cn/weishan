@@ -1,10 +1,48 @@
 (function(){
   let selectedHistoryId = "";
+  let stagedAttachments = [];
 
   function esc(s){
     return String(s || "").replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; });
   }
   function t(key){ return window.I18n.t(key); }
+
+  function formatSize(size){
+    const value = Number(size || 0);
+    if (!value) return "0 B";
+    if (value < 1024) return value + " B";
+    if (value < 1024 * 1024) return Math.round(value / 1024) + " KB";
+    return (value / 1024 / 1024).toFixed(1) + " MB";
+  }
+
+  function attachmentType(file){
+    const name = String(file && file.name || "");
+    const ext = (name.split(".").pop() || "").toLowerCase();
+    if (/^(png|jpg|jpeg|gif|webp|svg)$/.test(ext)) return "image/" + ext.replace("jpg", "jpeg");
+    if (/^(md|txt|csv|json|pdf|docx|pptx|xlsx)$/.test(ext)) return ext;
+    return "file";
+  }
+
+  function normalizeAttachment(file){
+    const name = String(file && file.name || "attachment").replace(/[<>]/g, "").slice(0, 120);
+    return {
+      attachmentId:"att-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8),
+      name,
+      type:String(file && file.type || attachmentType(file)).slice(0, 80),
+      size:Number(file && file.size || 0)
+    };
+  }
+
+  function attachmentPanel(){
+    if (!stagedAttachments.length) return "";
+    return `<div class="cmd-attachment-stage" data-attachment-stage="true">
+      ${stagedAttachments.map((file, idx) => `<span class="cmd-pill">
+        ${esc(file.name)} · ${esc(file.type)} · ${esc(formatSize(file.size))}
+        <button class="cmd-history-back" type="button" data-remove-attachment="${idx}">×</button>
+      </span>`).join("")}
+      <p class="cmd-history-meta">附件已挂载，仅保存 metadata；不会自动执行、不会上传云、不会读取完整文件内容。</p>
+    </div>`;
+  }
 
   function cleanAiDisplay(text){
     const raw = String(text || "");
@@ -191,6 +229,7 @@
               <h3>${t("homeInputTitle")}</h3>
               <span>${t("homeInputHint")}</span>
             </div>
+            ${attachmentPanel()}
             <textarea id="commandInput" class="cmd-input" placeholder="${t("homePlaceholder")}"></textarea>
             <div class="cmd-actions">
               <button class="cmd-btn gray" id="uploadBtn">${t("uploadAttachment")}</button>
@@ -223,10 +262,13 @@
     const runBtn = host.querySelector("#runBtn");
 
     function submit(){
-      const text = input.value.trim();
-      if (!text) return;
-      window.CommandApi.enqueue(text);
+      let text = input.value.trim();
+      if (!text && stagedAttachments.length) text = t("processAttachment") + stagedAttachments.map((file) => file.name).join(", ");
+      if (!text && !stagedAttachments.length) return;
+      const attachments = stagedAttachments.slice();
+      window.CommandApi.enqueue(text, { attachments });
       input.value = "";
+      stagedAttachments = [];
       input.focus();
       render(host);
     }
@@ -248,15 +290,28 @@
 
     const uploadBtn = host.querySelector("#uploadBtn");
     uploadBtn.addEventListener("click", async function(){
-      if (window.weishan && typeof window.weishan.chooseFiles === "function") {
-        const res = await window.weishan.chooseFiles();
+      const chooseFiles = typeof window.__WEISHAN_TEST_CHOOSE_FILES__ === "function"
+        ? window.__WEISHAN_TEST_CHOOSE_FILES__
+        : window.weishan && typeof window.weishan.chooseFiles === "function"
+          ? window.weishan.chooseFiles
+          : null;
+      if (chooseFiles) {
+        const res = await chooseFiles();
         if (res && res.ok && res.files && res.files.length) {
-          window.CommandApi.enqueue(t("processAttachment") + res.files.map((f) => f.name).join(", "));
+          stagedAttachments = stagedAttachments.concat(res.files.map(normalizeAttachment)).slice(0, 8);
           render(host);
         }
       } else {
         alert(t("attachmentReserved"));
       }
+    });
+
+    Array.from(host.querySelectorAll("[data-remove-attachment]")).forEach((btn) => {
+      btn.addEventListener("click", function(){
+        const idx = Number(btn.getAttribute("data-remove-attachment"));
+        stagedAttachments = stagedAttachments.filter((_, current) => current !== idx);
+        render(host);
+      });
     });
 
     const recordBtn = host.querySelector("#recordBtn");
