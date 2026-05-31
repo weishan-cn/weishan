@@ -165,6 +165,8 @@
       selectedModelName:detail.selectedModelName || "",
       inputSummary:taskSummary(inputText, 240),
       outputSummary:taskSummary(answer, 240),
+      provider:detail.provider || "",
+      model:detail.model || "",
       executionMode:detail.executionMode || "gateway_required",
       realExecution:detail.realExecution === true,
       createdAt:nowIso()
@@ -230,63 +232,64 @@
   async function answerChatWithGateway(text, meta, onDelta){
     const status = await aiGatewayStatus();
     const model = selectedModel();
-    if (!status.configured) {
-      const answer = unavailableAnswer(text, status);
-      recordChatHistory("chat.unavailable", text, answer, {
-        selectedModelId:model && model.id || "",
-        selectedModelName:model && model.name || "",
-        executionMode:"gateway_unavailable",
-        realExecution:false
-      });
-      return answer;
-    }
-    if (isRealtimeQuestion(text) && !status.supportsSearch) {
-      const answer = unavailableAnswer(text, status);
-      recordChatHistory("chat.unavailable", text, answer, {
-        selectedModelId:model && model.id || "",
-        selectedModelName:model && model.name || "",
-        executionMode:"gateway_search_unavailable",
-        realExecution:false
-      });
-      return answer;
-    }
-
     recordChatHistory("chat.aiRequested", text, "已请求 AI 网关回答。", {
       selectedModelId:model && model.id || "",
       selectedModelName:model && model.name || "",
+      provider:status.provider || "model_gateway",
+      model:status.model || "",
       executionMode:"gateway_requested",
       realExecution:true
     });
 
-    const res = await fetch(AI_GATEWAY_BASE + "/api/ai/chat", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        input:String(text || ""),
+    try {
+      const res = await fetch(AI_GATEWAY_BASE + "/api/ai/chat", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({
+          input:String(text || ""),
+          selectedModelId:model && model.id || "",
+          realtime:isRealtimeQuestion(text),
+          stream:false
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data || !data.ok) {
+        const answer = unavailableAnswer(text, Object.assign({}, status, {
+          message:String(data && data.message || status.message || "")
+        }));
+        recordChatHistory("chat.unavailable", text, answer, {
+          selectedModelId:model && model.id || "",
+          selectedModelName:model && model.name || "",
+          provider:data && data.provider || status.provider || "model_gateway",
+          model:data && data.model || status.model || "",
+          executionMode:"gateway_unavailable",
+          realExecution:false
+        });
+        return answer;
+      }
+      const answer = String(data.answer || data.content || data.message || "");
+      if (typeof onDelta === "function") onDelta(answer);
+      recordChatHistory("chat.answered", text, answer, {
         selectedModelId:model && model.id || "",
-        stream:false
-      })
-    });
-    const data = await res.json();
-    if (!res.ok || !data || !data.ok) {
-      const answer = String(data && data.message || "当前 AI 网关未接通，无法可靠回答。");
+        selectedModelName:model && model.name || "",
+        provider:data.provider || status.provider || "model_gateway",
+        model:data.model || status.model || "",
+        executionMode:"gateway",
+        realExecution:true
+      });
+      return answer || "AI 网关已返回空内容。";
+    } catch (_) {
+      const answer = unavailableAnswer(text, status);
       recordChatHistory("chat.unavailable", text, answer, {
         selectedModelId:model && model.id || "",
         selectedModelName:model && model.name || "",
+        provider:status.provider || "model_gateway",
+        model:status.model || "",
         executionMode:"gateway_unavailable",
         realExecution:false
       });
       return answer;
     }
-    const answer = String(data.content || data.message || "");
-    if (typeof onDelta === "function") onDelta(answer);
-    recordChatHistory("chat.answered", text, answer, {
-      selectedModelId:model && model.id || "",
-      selectedModelName:model && model.name || "",
-      executionMode:"gateway",
-      realExecution:true
-    });
-    return answer || "AI 网关已返回空内容。";
   }
 
   function perfStart(meta, stage, extra){
@@ -418,7 +421,7 @@
     const next = Object.assign({}, task);
     const logs = Array.isArray(next.logs) ? next.logs.slice() : [];
     const idx = logs.findIndex((log) => log && log.streamingAnswer);
-    const item = entry("answer", "AI 已回答：" + String(answer || ""), { streamingAnswer:!!streaming });
+    const item = entry("answer", "回答结果：" + String(answer || ""), { streamingAnswer:!!streaming });
     if (idx >= 0) logs[idx] = item;
     else logs.push(item);
     next.logs = logs;

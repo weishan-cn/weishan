@@ -14,6 +14,13 @@ function currentTaskLogs(page) {
   return page.locator(".cmd-log-list").first();
 }
 
+async function expectHomeStaticCardsRemoved(page) {
+  await gotoRoute(page, "home");
+  await expect(page.locator("#homeModelSelect")).toHaveCount(0);
+  await expect(page.locator("[data-home-model-selector]")).toHaveCount(0);
+  await expect(page.getByText("可调度模块", { exact: true })).toHaveCount(0);
+}
+
 async function expectHistory(page, query, pattern) {
   await gotoRoute(page, "history");
   await expect(page.locator("#historySearch")).toBeVisible();
@@ -37,6 +44,7 @@ test.describe.serial("dispatch router", () => {
   });
 
   test("model status shows local model gateway options without provider keys", async () => {
+    await expectHomeStaticCardsRemoved(page);
     const command = runId + " 有哪些模型可以用？";
     await submitHomeCommand(page, command);
     await expect(page.getByText(/模型状态|weishan 自动选择|GPT-compatible|Claude-compatible|Gemini-compatible|本地模型/).first()).toBeVisible();

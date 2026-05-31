@@ -147,23 +147,88 @@ app.get("/health", (_req, res) => {
   });
 });
 
+function aiGatewayConfig() {
+  const gatewayUrl = process.env.WEISHAN_AI_GATEWAY_URL || "";
+  const gatewayKey = process.env.WEISHAN_AI_GATEWAY_KEY || "";
+  return {
+    gatewayUrl,
+    gatewayKey,
+    configured:Boolean(gatewayUrl && gatewayKey),
+    provider:process.env.WEISHAN_AI_PROVIDER || "model_gateway",
+    model:process.env.WEISHAN_AI_MODEL || null,
+    supportsSearch:process.env.WEISHAN_AI_GATEWAY_SEARCH === "true"
+  };
+}
+
+function summarizeAiInput(value) {
+  return String(value || "")
+    .replace(/(apiKey|authorization|bearer|password|token|secret|cookie)\s*[:=]\s*["']?[^"'\s]+/gi, "$1=[redacted]")
+    .replace(/sk-[A-Za-z0-9_-]{8,}/g, "sk-****")
+    .slice(0, 12000);
+}
+
 app.get("/api/ai/status", (_req, res) => {
+  const config = aiGatewayConfig();
   res.json({
     ok: true,
-    configured: false,
-    provider: "model_gateway",
-    model: null,
-    supportsSearch: false,
-    message: "AI gateway is not configured on this local server."
+    configured: config.configured,
+    provider: config.provider,
+    model: config.model,
+    clientKeyStored: false,
+    supportsSearch: config.supportsSearch,
+    message: config.configured ? "AI gateway configured on server." : "AI gateway not configured."
   });
 });
 
-app.post("/api/ai/chat", (_req, res) => {
-  res.status(503).json({
-    ok: false,
-    code: "AI_GATEWAY_NOT_CONFIGURED",
-    message: "当前 AI 网关未接通，无法可靠回答。"
-  });
+app.post("/api/ai/chat", async (req, res) => {
+  const config = aiGatewayConfig();
+  if (!config.configured) {
+    return res.status(503).json({
+      ok: false,
+      code: "AI_GATEWAY_NOT_CONFIGURED",
+      provider: config.provider,
+      model: config.model,
+      message: "AI 网关未接通，无法可靠回答。"
+    });
+  }
+  try {
+    const upstream = await fetch(config.gatewayUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${config.gatewayKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: config.model,
+        input: summarizeAiInput(req.body?.input)
+      })
+    });
+    const data = await upstream.json().catch(() => ({}));
+    if (!upstream.ok) {
+      return res.status(502).json({
+        ok: false,
+        code: "AI_GATEWAY_FAILED",
+        provider: config.provider,
+        model: config.model,
+        message: "AI 网关调用失败，请检查后端配置。"
+      });
+    }
+    res.json({
+      ok: true,
+      answer: String(data.answer || data.content || data.message || ""),
+      provider: config.provider,
+      model: config.model,
+      source: "server_ai_gateway"
+    });
+  } catch (_err) {
+    res.status(502).json({
+      ok: false,
+      code: "AI_GATEWAY_FAILED",
+      provider: config.provider,
+      model: config.model,
+      message: "AI 网关调用失败，请检查后端配置。"
+    });
+  }
 });
 
 app.get("/v1/email/actions", (_req, res) => {
