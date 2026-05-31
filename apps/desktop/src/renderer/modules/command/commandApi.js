@@ -174,7 +174,26 @@
   }
 
   function isRealtimeQuestion(text){
-    return /天气|气温|下雨|空气质量|新闻|今天|现在|实时|价格|票价|航班|火车|汇率|股价|政策|限行|路线|最便宜|最经济/i.test(String(text || ""));
+    const raw = String(text || "");
+    return /实时|当前|现在.*(天气|气温|航班|火车|票价|价格|汇率|股价|政策|限行)|今天.*(天气|气温|航班|火车|票价|价格|汇率|股价|政策|限行)|准确票价|当前航班状态|实时股价|实时汇率|实时天气/i.test(raw);
+  }
+
+  function settingsAiStatus(){
+    const api = window.WeishanAPI || null;
+    if (!api || typeof api.connector !== "function") {
+      return { connected:false, provider:"", model:"", label:"AI 未接通", connector:null };
+    }
+    const connector = api.connector() || {};
+    const status = typeof api.connectorStatus === "function" ? api.connectorStatus(connector) : "";
+    const provider = connector.providerType || connector.provider || "model_gateway";
+    const model = connector.chatModel || "";
+    return {
+      connected:status === "success",
+      provider,
+      model,
+      label:status === "success" ? "AI 已连接 · " + provider + (model ? " / " + model : "") : "AI 未接通",
+      connector
+    };
   }
 
   async function aiGatewayStatus(){
@@ -230,8 +249,59 @@
   }
 
   async function answerChatWithGateway(text, meta, onDelta){
-    const status = await aiGatewayStatus();
+    const settingsStatus = settingsAiStatus();
     const model = selectedModel();
+    if (settingsStatus.connected && window.WeishanAPI && typeof window.WeishanAPI.chat === "function") {
+      recordChatHistory("chat.aiRequested", text, "已请求设置中心 AI 服务回答。", {
+        selectedModelId:model && model.id || "",
+        selectedModelName:model && model.name || "",
+        provider:settingsStatus.provider,
+        model:settingsStatus.model,
+        executionMode:"settings_ai_gateway_requested",
+        realExecution:true
+      });
+      try {
+        const res = await window.WeishanAPI.chat([{ role:"user", content:String(text || "") }], {
+          __perf:meta && meta.enabled ? meta : undefined
+        });
+        if (res && res.ok) {
+          const answer = String(res.content || res.answer || "");
+          if (typeof onDelta === "function") onDelta(answer);
+          recordChatHistory("chat.answered", text, answer, {
+            selectedModelId:model && model.id || "",
+            selectedModelName:model && model.name || "",
+            provider:settingsStatus.provider,
+            model:settingsStatus.model,
+            executionMode:"settings_ai_gateway",
+            realExecution:true
+          });
+          return answer || "AI 已返回空内容。";
+        }
+        const answer = String(res && (res.error || res.message) || "AI 调用失败，请检查设置中心 AI 配置。");
+        recordChatHistory("chat.unavailable", text, answer, {
+          selectedModelId:model && model.id || "",
+          selectedModelName:model && model.name || "",
+          provider:settingsStatus.provider,
+          model:settingsStatus.model,
+          executionMode:"settings_ai_gateway_failed",
+          realExecution:false
+        });
+        return answer;
+      } catch (_) {
+        const answer = "AI 调用失败，请检查设置中心 AI 配置。";
+        recordChatHistory("chat.unavailable", text, answer, {
+          selectedModelId:model && model.id || "",
+          selectedModelName:model && model.name || "",
+          provider:settingsStatus.provider,
+          model:settingsStatus.model,
+          executionMode:"settings_ai_gateway_failed",
+          realExecution:false
+        });
+        return answer;
+      }
+    }
+
+    const status = await aiGatewayStatus();
     recordChatHistory("chat.aiRequested", text, "已请求 AI 网关回答。", {
       selectedModelId:model && model.id || "",
       selectedModelName:model && model.name || "",
@@ -631,8 +701,7 @@
   }
 
   function brainLabel(){
-    const model = selectedModel();
-    return "AI 网关未接通 · " + (model && model.name || "weishan 自动选择");
+    return settingsAiStatus().label;
   }
 
   function aiErrorMessage(res){

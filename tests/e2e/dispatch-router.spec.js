@@ -29,6 +29,31 @@ async function expectHistory(page, query, pattern) {
   await expect(page.locator("#historyList")).toContainText(pattern);
 }
 
+async function setMockSettingsAi(page, connected) {
+  await page.evaluate((isConnected) => {
+    if (!window.WeishanAPI) return;
+    window.WeishanAPI.connector = () => isConnected ? {
+      providerType:"OpenRouter",
+      chatModel:"aion-labs/aion-1.0-mini",
+      hasApiKey:true,
+      testStatus:"success"
+    } : {
+      providerType:"",
+      chatModel:"",
+      hasApiKey:false,
+      testStatus:"empty"
+    };
+    window.WeishanAPI.connectorStatus = () => isConnected ? "success" : "empty";
+    window.WeishanAPI.chat = async () => {
+      if (!isConnected) return { ok:false, error:"AI Key 未配置。" };
+      return {
+        ok:true,
+        content:"从常规交通成本看，成都到上海通常优先比较高铁、飞机和长途客车。高铁时间稳定、总成本可控；飞机速度快但价格波动大；长途客车耗时较长。实时票价以实际查询为准。"
+      };
+    };
+  }, connected);
+}
+
 test.describe.serial("dispatch router", () => {
   let app;
   let page;
@@ -59,19 +84,24 @@ test.describe.serial("dispatch router", () => {
     await expectHistory(page, runId, /model\.selected|GPT-compatible/);
   });
 
-  test("realtime chat requires AI gateway or search instead of fake local answers", async () => {
-    const command = runId + " 成都到北京最经济的方式是什么？";
+  test("traffic advice uses connected settings AI instead of refusing as realtime", async () => {
+    await setMockSettingsAi(page, true);
+    await gotoRoute(page, "home");
+    await expect(page.getByText(/AI 已连接 · OpenRouter \/ aion-labs\/aion-1\.0-mini/).first()).toBeVisible();
+    const command = runId + " 成都到上海怎么最经济？";
     await submitHomeCommand(page, command);
-    await expect(page.getByText(/AI 网关未接通|需要实时信息|联网搜索能力|无法可靠回答/).first()).toBeVisible();
+    await expect(page.getByText(/高铁|飞机|实时票价以实际查询为准/).first()).toBeVisible();
+    await expect(currentTaskLogs(page)).not.toContainText("AI 网关未接通");
+    await expect(currentTaskLogs(page)).not.toContainText("不能给出可靠实时结果");
     await expect(currentTaskLogs(page)).not.toContainText("# 本地回答");
-    await expect(currentTaskLogs(page)).not.toContainText("硬座");
-    await expect(currentTaskLogs(page)).not.toContainText("机票");
-    await expectHistory(page, runId, /chat\.unavailable|AI 网关未接通|实时信息/);
+    await expectHistory(page, runId, /chat\.answered|OpenRouter|aion-labs\/aion-1\.0-mini|高铁/);
   });
 
   test("general chat unavailable state lists local capabilities without awkward mock answers", async () => {
+    await setMockSettingsAi(page, false);
     const command = runId + " weishan 能做什么？";
     await submitHomeCommand(page, command);
+    await expect(page.getByText(/AI 未接通/).first()).toBeVisible();
     await expect(page.getByText(/AI 网关未接通|文档草稿|PPT 大纲|Codex 指令|邮件接管|抓取中心|软件工厂/).first()).toBeVisible();
     await expect(currentTaskLogs(page)).not.toContainText("# 本地回答");
     await expect(page.getByText(/来自首页调度中心的邮件任务|来自首页调度中心的抓取任务|来自首页调度中心的软件工厂任务/)).toHaveCount(0);
