@@ -82,7 +82,7 @@ function checkMarkers() {
     marker("apps/desktop/src/renderer/core/dispatchRouter.js", /WeishanDispatchRouter|classifyCommand|createDispatchPlan/, "marker:dispatch router exists", true),
     marker("apps/desktop/src/renderer/core/dispatchRouter.js", /mail|crawler|softwareFactory|document|ppt|codex|chat|coordination/, "marker:dispatch router module coverage", true),
     marker("apps/desktop/src/renderer/modules/command/commandApi.js", /dispatch\.|createDispatchPlan|home-dispatch/, "marker:command center dispatch", true),
-    marker("apps/desktop/src/renderer/routes/HomePage.js", /cmd-brain|AI 网关/, "marker:home ai gateway status", true),
+    marker("apps/desktop/src/renderer/routes/HomePage.js", /homeAiStatus|AI 未连接|AI 已连接/, "marker:home ai gateway status", true),
     marker("apps/desktop/src/renderer/modules/command/commandApi.js", /answerChatWithGateway|chat\.unavailable|AI 网关未接通/, "marker:home chat answer gateway required", true),
     marker("apps/desktop/src/renderer/core/dispatchRouter.js", /客户端不保存 provider key|model_gateway|AVAILABLE_MODELS/, "marker:model gateway client key forbidden", true),
     marker("apps/desktop/src/renderer/modules/command/commandApi.js", /model\.selected|model\.statusViewed|recordHomeDispatchAction/, "marker:model selection history", true),

@@ -51,6 +51,7 @@ async function setMockSettingsAi(page, connected) {
         content:"从常规交通成本看，成都到上海通常优先比较高铁、飞机和长途客车。高铁时间稳定、总成本可控；飞机速度快但价格波动大；长途客车耗时较长。实时票价以实际查询为准。"
       };
     };
+    window.dispatchEvent(new CustomEvent("weishan:command"));
   }, connected);
 }
 

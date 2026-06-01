@@ -205,8 +205,40 @@
     return "";
   }
 
+  function syncHomeTopbar(snapshot){
+    const topbar = document.querySelector(".topbar");
+    if (!topbar) return;
+    const title = topbar.querySelector("h1");
+    const subtitle = topbar.querySelector("p");
+    const actions = topbar.querySelector(".top-actions");
+    const lang = topbar.querySelector("#langSelect");
+    if (title) title.textContent = "首页总调度";
+    if (subtitle) subtitle.textContent = "本地优先 · 模块隔离 · A/B 模式";
+    if (!actions || !lang) return;
+    let status = actions.querySelector("#homeAiStatus");
+    if (!status) {
+      status = document.createElement("span");
+      status.id = "homeAiStatus";
+      status.className = "home-ai-status";
+      actions.insertBefore(status, lang);
+    }
+    const label = String(snapshot && snapshot.brain || "");
+    const connected = /^AI 已连接/.test(label);
+    status.className = "home-ai-status " + (connected ? "is-connected" : "is-disconnected");
+    status.textContent = connected ? label : "AI 未连接";
+  }
+
+  function syncHomeTopbarSoon(snapshot){
+    syncHomeTopbar(snapshot);
+    if (typeof requestAnimationFrame === "function") {
+      requestAnimationFrame(function(){ syncHomeTopbar(snapshot); });
+    }
+    setTimeout(function(){ syncHomeTopbar(snapshot); }, 30);
+  }
+
   function render(host){
     const snap = window.CommandApi.snapshot();
+    syncHomeTopbarSoon(snap);
 
     host.innerHTML = `
       <section class="home-v205-page">
@@ -214,10 +246,9 @@
           <div class="cmd-card cmd-console-card">
             <div class="cmd-card-title">
               <div>
-                <h2>${t("homeTitle")}</h2>
-                <p>${t("homeSubtitle")}</p>
+                <h2>首页总调度</h2>
+                <p>本地优先 · 模块隔离 · A/B 模式</p>
               </div>
-              <span class="cmd-brain">${esc(snap.brain)}</span>
             </div>
             <div class="cmd-console" id="cmdConsole">
               ${mainLogs(snap)}
