@@ -629,3 +629,219 @@
   border-top:1px solid #e5e7eb;
   background:#ffffff;
 }
+
+/* v2.06 Codex-style home command center */
+.page-host:has(.home-v205-page){
+  background:#f7f8fa;
+  padding:14px 20px 18px 12px;
+}
+.home-v205-page{
+  height:calc(100vh - 108px);
+  grid-template-columns:minmax(520px, 1fr) minmax(320px, 360px);
+  gap:20px;
+  background:transparent;
+}
+.home-v205-main{
+  gap:0;
+  background:transparent;
+  border:0;
+  border-radius:0;
+  overflow:visible;
+  box-shadow:none;
+}
+.cmd-card,
+.cmd-side-card{
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  background:transparent;
+}
+.cmd-console-card{
+  min-height:0;
+  border-bottom:1px solid #e5e7eb;
+  background:#ffffff;
+}
+.cmd-console{
+  background:#ffffff;
+  border-radius:0;
+}
+.cmd-empty{
+  min-height:100%;
+  align-content:center;
+  padding:28px;
+}
+.cmd-empty b{
+  font-size:15px;
+  font-weight:850;
+}
+.cmd-empty span{
+  font-size:13px;
+  color:#8a95a3;
+}
+.cmd-current-head{
+  padding:14px 18px;
+  background:#ffffff;
+}
+.cmd-current-head b{
+  font-size:13px;
+}
+.cmd-current-head span{
+  font-size:12px;
+}
+.cmd-pill{
+  border-radius:8px;
+  padding:4px 8px;
+  font-size:11px;
+}
+.cmd-log-list{
+  gap:7px;
+  padding:16px 18px 20px;
+}
+.cmd-log-line{
+  grid-template-columns:64px 1fr;
+}
+.cmd-text{
+  font-size:13px;
+  line-height:1.6;
+}
+.cmd-input-card{
+  border-top:0;
+  background:#ffffff;
+}
+.cmd-card-title{
+  min-height:42px;
+  padding:12px 18px 6px;
+  border-bottom:0;
+}
+.cmd-card-title.small-title{
+  min-height:38px;
+}
+.cmd-card-title h3{
+  font-size:13px;
+  font-weight:850;
+  color:#475569;
+}
+.cmd-input{
+  min-height:112px;
+  padding:10px 18px 16px;
+  border-top:0;
+  border-bottom:1px solid #e5e7eb;
+  font-size:15px;
+}
+.cmd-input:focus{
+  box-shadow:none;
+}
+.cmd-actions{
+  padding:12px 18px;
+  gap:8px;
+}
+.cmd-btn{
+  height:34px;
+  border-radius:8px;
+  padding:0 12px;
+  font-size:13px;
+  font-weight:850;
+}
+.cmd-btn.primary{
+  background:#111827;
+  color:#fff;
+}
+.cmd-btn.gray,
+.cmd-btn.danger,
+.cmd-history-back{
+  background:#f3f4f6;
+  color:#374151;
+  border:1px solid #e5e7eb;
+}
+.cmd-attachment-stage{
+  border-top:1px solid #e5e7eb;
+  padding:8px 18px 4px;
+}
+.cmd-attachment-stage .cmd-history-meta{
+  margin:6px 0 0;
+}
+.home-v205-side{
+  grid-template-rows:auto minmax(0, 1fr);
+  gap:14px;
+}
+.cmd-side-card{
+  padding:0;
+}
+.cmd-side-card h3{
+  margin:0 0 8px;
+  font-size:13px;
+  font-weight:850;
+  color:#475569;
+}
+.cmd-mini-empty{
+  border:0;
+  border-top:1px solid #e5e7eb;
+  border-radius:0;
+  padding:12px 0;
+  color:#94a3b8;
+}
+.cmd-mini-task{
+  border:0;
+  border-top:1px solid #e5e7eb;
+  border-radius:0;
+  padding:10px 0;
+  margin:0;
+}
+.cmd-mini-index{
+  background:#f3f4f6;
+  color:#4b5563;
+}
+.cmd-history-item{
+  padding:10px 0;
+}
+.cmd-history-item:hover b{
+  color:#111827;
+}
+.cmd-history-item small{
+  display:none;
+}
+.cmd-history-full{
+  border-color:#e5e7eb;
+  background:#ffffff;
+}
+@media (max-width: 1180px){
+  .home-v205-page{
+    height:auto;
+    grid-template-columns:1fr;
+  }
+}
+
+/* v2.06 remove remaining outer frame from Home command surface */
+.page-host:has(.home-v205-page){
+  background:#ffffff;
+  padding:8px 18px 18px 4px;
+}
+.home-v205-page{
+  height:calc(100vh - 102px);
+  background:transparent;
+}
+.home-v205-main,
+.home-v205-main .cmd-card,
+.home-v205-main .cmd-console-card,
+.home-v205-main .cmd-console,
+.home-v205-main .cmd-input-card{
+  background:transparent !important;
+  border:0 !important;
+  outline:0 !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+}
+.home-v205-main,
+.home-v205-main .cmd-card{
+  overflow:visible !important;
+}
+.home-v205-main .cmd-console-card{
+  min-height:0;
+}
+.home-v205-main .cmd-input-card{
+  border-top:1px solid rgba(229,231,235,.72) !important;
+}
+.home-v205-main .cmd-input{
+  background:transparent;
+  border-top:0;
+}

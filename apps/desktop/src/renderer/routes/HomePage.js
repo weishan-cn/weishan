@@ -244,12 +244,6 @@
       <section class="home-v205-page">
         <div class="home-v205-main">
           <div class="cmd-card cmd-console-card">
-            <div class="cmd-card-title">
-              <div>
-                <h2>首页总调度</h2>
-                <p>本地优先 · 模块隔离 · A/B 模式</p>
-              </div>
-            </div>
             <div class="cmd-console" id="cmdConsole">
               ${mainLogs(snap)}
             </div>
@@ -258,7 +252,6 @@
           <div class="cmd-card cmd-input-card">
             <div class="cmd-card-title small-title">
               <h3>${t("homeInputTitle")}</h3>
-              <span>${t("homeInputHint")}</span>
             </div>
             ${attachmentPanel()}
             <textarea id="commandInput" class="cmd-input" placeholder="${t("homePlaceholder")}"></textarea>
