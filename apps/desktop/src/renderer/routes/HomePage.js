@@ -225,14 +225,27 @@
     if (!queue || !Array.isArray(queue.steps) || !queue.steps.length) return "";
     const risk = queue.riskLevel || "low";
     const realOpenEnabled = realOpenAppEnabled();
-    const openSteps = queue.steps.filter((step) => step && (step.action === "openApp" || step.action === "focusApp") && step.appId && step.status !== "blocked" && step.status !== "realExecuted");
-    const canShowRealOpen = realOpenEnabled && openSteps.length > 0 && desktopAssistantSession().enabled === true;
-    const realOpenNotice = openSteps.length && !canShowRealOpen
-      ? `<p class="cmd-history-meta">当前仅干跑模拟。若要真实打开白名单 App，请到设置中心开启“允许真实打开白名单 App”，并本次开启桌面助手。</p>`
-      : "";
+    const api = desktopAssistantApi();
+    const settings = api && api.getDesktopAssistantSettings ? api.getDesktopAssistantSettings() : {};
+    const session = desktopAssistantSession();
+    const openStates = queue.steps
+      .filter((step) => step && (step.action === "openApp" || step.action === "focusApp") && step.status !== "realExecuted")
+      .map((step) => api && api.getRealOpenAppState ? api.getRealOpenAppState(step, settings, session) : { status:"realOpenDisabled", outputSummary:"当前仅干跑模拟。", canExecute:false });
+    const canShowRealOpen = openStates.some((state) => state.canExecute === true);
+    const hasSessionRequired = openStates.some((state) => state.status === "sessionRequired");
+    const hasRealOpenDisabled = openStates.some((state) => state.status === "realOpenDisabled");
+    const hasAppNotAllowed = openStates.some((state) => state.status === "appNotAllowed");
+    const hasRiskNotAllowed = openStates.some((state) => state.status === "riskNotAllowed");
+    const realOpenNotice = [
+      hasSessionRequired ? `<p class="cmd-history-meta">桌面助手未开启，本次任务只能生成计划。请先点击“本次开启桌面助手”。</p>` : "",
+      hasRealOpenDisabled ? `<p class="cmd-history-meta">真实打开白名单 App 当前关闭。当前仅模拟执行，不会真实打开 App。</p>` : "",
+      canShowRealOpen ? `<p class="cmd-history-meta">确认真实打开仅打开或聚焦白名单 App，不点击、不输入、不读屏。</p>` : "",
+      hasAppNotAllowed ? `<p class="desktop-risk-high">该 App 不在白名单，已阻断。</p>` : "",
+      hasRiskNotAllowed ? `<p class="cmd-history-meta">中风险/高风险或非 openApp / focusApp 步骤继续 dry-run，不会真实执行。</p>` : ""
+    ].filter(Boolean).join("");
     const rows = queue.steps.map((step) => `<li class="desktop-queue-step desktop-risk-${esc(step.riskLevel || "low")}">
       <b>${esc(step.title)}</b>
-      <span>${esc(step.description)} · ${esc(step.riskLevel)} · ${esc(step.approvalState || "allowed")} · ${esc(step.status)} · realExecution=${step.realExecution === true ? "true" : "false"}${step.appName ? " · " + esc(step.appName) : ""}</span>
+      <span>${esc(step.description)} · ${esc(step.riskLevel)} · ${esc(step.approvalState || "allowed")} · ${esc(step.status)} · realExecution=${step.realExecution === true ? "true" : "false"}${step.appName ? " · " + esc(step.appName) : ""}${step.outputSummary ? " · " + esc(step.outputSummary) : ""}</span>
     </li>`).join("");
     return `<div class="desktop-execution-queue desktop-risk-${esc(risk)}" data-desktop-execution-queue="true">
       <div class="desktop-execution-head">
@@ -504,12 +517,13 @@
       const steps = Array.isArray(queue && queue.steps) ? queue.steps : [];
       const step = steps.find((item) => api && api.canRealOpenApp && api.canRealOpenApp(item, settings, session) && item.status !== "realExecuted");
       if (!step) {
+        const state = steps.map((item) => api && api.getRealOpenAppState ? api.getRealOpenAppState(item, settings, session) : null).filter(Boolean)[0];
         realOpenAppHistory("desktopAssistant.realOpenAppDenied", {
           appId:"",
           appName:"",
           realExecution:false,
           inputSummary:queue && queue.inputSummary || "打开白名单 App",
-          outputSummary:"真实打开条件未满足。"
+          outputSummary:state && state.outputSummary || "真实打开条件未满足。"
         });
         render(host);
         return;
@@ -548,10 +562,17 @@
           outputSummary:"已真实打开白名单 App：" + (result.appName || request.appName || request.appId)
         }));
       } else {
+        if (api && api.markRealOpenAppFailed && api.saveDesktopExecutionQueue) {
+          const failedStep = api.markRealOpenAppFailed(step, result || {});
+          api.saveDesktopExecutionQueue(Object.assign({}, queue, {
+            status:"realOpenAppFailed",
+            steps:steps.map((item) => item.stepId === step.stepId ? failedStep : item)
+          }));
+        }
         realOpenAppHistory("desktopAssistant.realOpenAppFailed", Object.assign({}, request, result || {}, {
           realExecution:false,
           inputSummary:queue && queue.inputSummary || "打开白名单 App",
-          outputSummary:result && result.message || "打开白名单 App 失败。"
+          outputSummary:"打开白名单 App 失败：" + (result && (result.message || result.code) || "系统打开失败")
         }));
       }
       render(host);

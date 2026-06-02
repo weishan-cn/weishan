@@ -145,7 +145,7 @@ async function openWhitelistedDesktopApp(appId) {
   const key = String(appId || "").trim().toLowerCase();
   const candidates = desktopAssistantAppCandidates(key);
   if (!candidates) {
-    return { ok:false, code:"APP_NOT_ALLOWED", message:"App is not in the desktop assistant whitelist.", realExecution:false };
+    return { ok:false, code:"APP_NOT_ALLOWED", message:"该 App 不在桌面助手白名单，已阻断。", realExecution:false };
   }
   let last = null;
   for (const appName of candidates) {
@@ -158,7 +158,7 @@ async function openWhitelistedDesktopApp(appId) {
   return {
     ok:false,
     code:last && last.code || "APP_OPEN_FAILED",
-    message:last && last.message || "Failed to open whitelisted App.",
+    message:last && last.message || "系统打开白名单 App 失败。",
     appId:key,
     appName:candidates[0],
     realExecution:false

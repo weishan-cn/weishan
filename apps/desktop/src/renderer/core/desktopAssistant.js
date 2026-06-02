@@ -187,6 +187,61 @@
       !!desktopAppById(item.appId);
   }
 
+  function getRealOpenAppState(step, settings, session){
+    const item = markStepPolicy(step || {});
+    const currentSettings = Object.assign({}, getDesktopAssistantSettings(), settings || {});
+    const currentSession = Object.assign({}, getDesktopAssistantSession(), session || {});
+    const app = desktopAppById(item.appId);
+    if (!isOpenAppStep(item)) {
+      return {
+        status:"riskNotAllowed",
+        outputSummary:"该步骤不是 openApp / focusApp，保持干跑模拟。",
+        canExecute:false,
+        realExecution:false
+      };
+    }
+    if (!app) {
+      return {
+        status:"appNotAllowed",
+        outputSummary:"该 App 不在白名单，已阻断。",
+        canExecute:false,
+        realExecution:false
+      };
+    }
+    if (item.riskLevel !== "low" || item.approvalState !== "allowed") {
+      return {
+        status:"riskNotAllowed",
+        outputSummary:"该步骤不是低风险白名单打开操作，不能真实执行。",
+        canExecute:false,
+        realExecution:false
+      };
+    }
+    if (currentSession.enabled !== true) {
+      return {
+        status:"sessionRequired",
+        outputSummary:"桌面助手未开启，本次任务只能生成计划。",
+        canExecute:false,
+        realExecution:false
+      };
+    }
+    if (currentSettings.enabled !== true || currentSettings.allowRealOpenApp !== true) {
+      return {
+        status:"realOpenDisabled",
+        outputSummary:"真实打开白名单 App 当前关闭。",
+        canExecute:false,
+        realExecution:false
+      };
+    }
+    return {
+      status:"realOpenAvailable",
+      outputSummary:"可以在用户确认后真实打开白名单 App：" + app.appName,
+      canExecute:true,
+      appId:app.appId,
+      appName:app.appName,
+      realExecution:false
+    };
+  }
+
   function createRealOpenAppRequest(step){
     const item = markStepPolicy(step || {});
     const app = desktopAppById(item.appId);
@@ -208,6 +263,18 @@
       appId:app.appId || item.appId || "",
       appName:result && result.appName || app.appName || item.appName || "",
       realExecution:true,
+      outputSummary:"已真实打开白名单 App：" + (result && result.appName || app.appName || item.appName || item.appId || ""),
+      updatedAt:nowIso()
+    });
+  }
+
+  function markRealOpenAppFailed(step, result){
+    const item = markStepPolicy(step || {});
+    return Object.assign({}, item, {
+      status:"failed",
+      lifecycleStatus:"realOpenAppFailed",
+      realExecution:false,
+      outputSummary:"打开白名单 App 失败：" + summarize(result && (result.message || result.code) || "系统打开失败", 120),
       updatedAt:nowIso()
     });
   }
@@ -540,8 +607,10 @@
     getRealOpenAppEnabled,
     setRealOpenAppEnabled,
     canRealOpenApp,
+    getRealOpenAppState,
     createRealOpenAppRequest,
     markRealOpenAppExecuted,
+    markRealOpenAppFailed,
     createRealOpenAppHistoryPayload,
     getDesktopAssistantSession,
     setDesktopAssistantSession,

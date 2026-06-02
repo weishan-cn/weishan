@@ -498,7 +498,15 @@
         <div class="desktop-real-open-app" data-real-open-app-setting="true">
           <h3>真实低风险操作</h3>
           <label><input type="checkbox" id="desktopAssistantRealOpenApp"${checked(settings.allowRealOpenApp)}> 允许真实打开白名单 App</label>
-          <p class="ws-muted">开启后，weishan 只允许在你本次开启桌面助手并确认后，真实打开或聚焦白名单 App。不会点击鼠标，不会输入键盘，不会读取屏幕，不会删除、发送、上传、付款或提交表单。</p>
+          <p class="ws-muted">开启后，weishan 只能在你本次开启桌面助手并点击“确认真实打开”后，打开或聚焦白名单 App。不会点击鼠标、不会输入键盘、不会读取屏幕、不会删除/发送/上传/付款/提交表单。</p>
+          <p class="ws-muted">当前白名单：Chrome / Safari / Finder / WPS / Notes / Preview。</p>
+          <ul class="desktop-policy-list">
+            <li>只允许 openApp / focusApp。</li>
+            <li>只允许白名单 App。</li>
+            <li>不允许任意命令。</li>
+            <li>不允许任意路径。</li>
+            <li>不允许 URL 自动打开。</li>
+          </ul>
           <div class="desktop-risk-note desktop-risk-medium">真实打开 App 属于低风险操作，但仍需要用户确认。</div>
         </div>
         <div class="desktop-risk-note desktop-risk-medium">中风险提醒：点击按钮、填写表单、保存/下载/移动文件或修改文档内容，需要用户继续确认。</div>

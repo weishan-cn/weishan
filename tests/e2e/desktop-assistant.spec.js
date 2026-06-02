@@ -9,6 +9,7 @@ async function resetDesktopAssistantSession(page) {
       window.sessionStorage.removeItem("weishan:desktopAssistant:session:v1");
       window.sessionStorage.removeItem("weishan:desktopAssistant:executionQueue:v1");
       window.localStorage.removeItem("weishan:desktopAssistant:realOpenApp:v1");
+      window.localStorage.removeItem("weishan:desktopAssistant:v1");
       if (window.WeishanDesktopAssistant && window.WeishanDesktopAssistant.stopDesktopAssistantSession) {
         window.WeishanDesktopAssistant.stopDesktopAssistantSession();
       }
@@ -55,6 +56,8 @@ test.describe.serial("desktop assistant permission framework", () => {
     await expect(page.getByText(/Automation|自动化/).first()).toBeVisible();
     await expect(page.getByText(/Input Monitoring|输入监控/).first()).toBeVisible();
     await expect(page.getByText(/不申请系统权限|不读取屏幕|不控制鼠标键盘/).first()).toBeVisible();
+    await expect(page.getByText(/Chrome \/ Safari \/ Finder \/ WPS \/ Notes \/ Preview/).first()).toBeVisible();
+    await expect(page.getByText(/只允许 openApp \/ focusApp|不允许任意命令|不允许 URL 自动打开/).first()).toBeVisible();
   });
 
   test("default closed state asks user to enable before desktop plan confirmation", async () => {
@@ -63,6 +66,7 @@ test.describe.serial("desktop assistant permission framework", () => {
     await submitHomeCommand(page, runId + " 打开 Chrome 搜索 weishan");
     await expect(page.getByText(/桌面助手：关闭|需要先点击首页“桌面助手：本次开启”|realExecution=false/).first()).toBeVisible();
     await expect(page.getByText(/打开 Chrome|计划步骤/).first()).toBeVisible();
+    await expect(page.locator("#desktopQueueRealOpen")).toHaveCount(0);
   });
 
   test("session enabled queues and simulates low risk desktop steps without real control", async () => {
@@ -108,7 +112,7 @@ test.describe.serial("desktop assistant permission framework", () => {
     await page.locator("#desktopAssistantEnable").click();
     await submitHomeCommand(page, runId + " 打开 Chrome");
     await page.locator("#desktopPlanConfirm").click();
-    await expect(page.getByText(/当前仅干跑模拟|允许真实打开白名单 App/).first()).toBeVisible();
+    await expect(page.getByText(/真实打开白名单 App 当前关闭|当前仅模拟执行/).first()).toBeVisible();
     await expect(page.locator("#desktopQueueRealOpen")).toHaveCount(0);
   });
 
@@ -130,6 +134,7 @@ test.describe.serial("desktop assistant permission framework", () => {
     await submitHomeCommand(page, runId + " 打开 Chrome");
     await page.locator("#desktopPlanConfirm").click();
     await expect(page.locator("#desktopQueueRealOpen")).toBeVisible();
+    await expect(page.getByText(/仅打开或聚焦白名单 App，不点击、不输入、不读屏/).first()).toBeVisible();
     await page.locator("#desktopQueueRealOpen").click();
     await expect(page.getByText(/realExecuted|realExecution=true|Google Chrome/).first()).toBeVisible();
     await expect.poll(async () => page.evaluate(() => (window.__DA_OPEN_APP_CALLS__ || []).join(","))).toContain("chrome");
@@ -142,7 +147,7 @@ test.describe.serial("desktop assistant permission framework", () => {
     await gotoRoute(page, "home");
     await page.locator("#desktopAssistantEnable").click();
     await submitHomeCommand(page, runId + " 打开软件 终端 执行命令");
-    await expect(page.getByText(/高风险|blocked|必须二次确认/).first()).toBeVisible();
+    await expect(page.getByText(/高风险|blocked|必须二次确认|该 App 不在白名单，已阻断/).first()).toBeVisible();
     await page.locator("#desktopPlanConfirm").click();
     await expect(page.getByText(/blocked|高风险/).first()).toBeVisible();
     await expect(page.locator("#desktopQueueRealOpen")).toHaveCount(0);

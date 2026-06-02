@@ -934,6 +934,13 @@
   border:1px solid #e5e7eb;
   font-size:13px;
 }
+.desktop-policy-list{
+  margin:8px 0 0;
+  padding-left:18px;
+  color:#475569;
+  font-size:13px;
+  line-height:1.7;
+}
 .desktop-execution-queue{
   margin:8px 18px 20px;
   padding:12px;
