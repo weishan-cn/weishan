@@ -57,6 +57,25 @@ async function installCommerceSearchMock(page, candidates) {
   }, candidates);
 }
 
+async function installOpenRouterModelsMock(page, payload, options = {}) {
+  await page.evaluate(async ({ data, fail }) => {
+    if (!window.WeishanCommerceSearch) {
+      await new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceSearch.js?v=2.0.15";
+        script.onload = resolve;
+        document.head.appendChild(script);
+      });
+    }
+    window.WeishanOpenRouterModelsProvider = {
+      fetchModels: async () => {
+        if (fail) throw new Error("mock openrouter unavailable");
+        return data;
+      }
+    };
+  }, { data:payload, fail:options.fail === true });
+}
+
 test.describe.serial("commerce agent workbench", () => {
   let app;
   let page;
@@ -68,8 +87,10 @@ test.describe.serial("commerce agent workbench", () => {
 
   test.afterAll(async () => {
     if (page) {
-      await page.evaluate((id) => {
+    await page.evaluate((id) => {
         try {
+          delete window.WeishanOpenRouterModelsProvider;
+          delete window.WeishanCommerceSearchProvider;
           const keys = ["weishan:commerceAgent:lastPlan:v1", "weishan:commerceAgent:tasks:v1", "weishan:commerceSearch:settings:v1"];
           for (const key of keys) {
             const raw = window.localStorage.getItem(key);
@@ -88,7 +109,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.getByRole("heading", { name:"全球采购" })).toBeVisible();
     await expect(page.locator(".commerce-hero h1")).toHaveText("全球采购");
     await expect(page.getByText("搜索、比价、推荐、执行前确认")).toBeVisible();
-    await expect(page.getByText("不真实搜索、不下单、不付款、不提交订单")).toBeVisible();
+    await expect(page.getByText("当前只搜索和展示候选方案，不下单、不付款、不提交订单")).toBeVisible();
   });
 
   test("home commerce summary stays compact and links to workbench detail", async () => {
@@ -132,13 +153,53 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).not.toContainText("taskId");
   });
 
-  test("missing search provider does not show fake live prices", async () => {
+  test("OpenRouter provider mock renders model prices and recommendation", async () => {
+    await installOpenRouterModelsMock(page, {
+      data:[
+        {
+          id:"provider/model-a",
+          name:"Model A",
+          pricing:{ prompt:"0.0000002", completion:"0.0000008" },
+          context_length:128000,
+          description:"fast text model"
+        },
+        {
+          id:"provider/model-b",
+          name:"Model B",
+          pricing:{ prompt:"0.0000001", completion:"0.0000004" },
+          context_length:32000,
+          description:"low cost text model"
+        }
+      ]
+    });
     const command = runId + " 帮我比较 OpenRouter 和其他 AI 模型平台价格";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("搜索源未配置，无法返回真实价格");
     await page.locator("#commerceViewPlanBtn").click();
-    await expect(page.getByText("搜索源未配置，无法返回真实价格").first()).toBeVisible();
-    await expect(page.getByRole("button", { name:"搜索源未配置" }).first()).toBeDisabled();
+    await page.getByRole("button", { name:"搜索 OpenRouter 模型价格" }).first().click();
+    await expect(page.locator(".commerce-detail")).toContainText("OpenRouter");
+    await expect(page.locator(".commerce-detail")).toContainText("Model A");
+    await expect(page.locator(".commerce-detail")).toContainText("provider/model-a");
+    await expect(page.locator(".commerce-detail")).toContainText("输入价格");
+    await expect(page.locator(".commerce-detail")).toContainText("输出价格");
+    await expect(page.locator(".commerce-detail")).toContainText("USD");
+    await expect(page.locator(".commerce-detail")).toContainText("$0.1 / 1M tokens");
+    await expect(page.locator(".commerce-detail")).toContainText("$0.4 / 1M tokens");
+    await expect(page.locator(".commerce-detail")).toContainText("当前结果中的输入/输出综合成本排序");
+    await expect(page.locator(".commerce-detail")).toContainText("价格可能变化");
+    await expect(page.locator(".commerce-booking-link").first()).toHaveText("打开模型页");
+    await expect(page.locator(".commerce-booking-link").first()).toHaveAttribute("href", /https:\/\/openrouter\.ai\/models\//);
+    await gotoRoute(page, "home");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已找到 2 个候选模型");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前较低价格模型 Model B");
+  });
+
+  test("OpenRouter provider failure does not show fake prices", async () => {
+    await installOpenRouterModelsMock(page, { data:[] }, { fail:true });
+    const command = runId + " 帮我比较 OpenRouter 和其他 AI 模型平台价格";
+    await submitHomeCommand(page, command);
+    await page.locator("#commerceViewPlanBtn").click();
+    await page.getByRole("button", { name:"搜索 OpenRouter 模型价格" }).first().click();
+    await expect(page.locator(".commerce-detail")).toContainText("OpenRouter 搜索源不可用，无法返回真实价格");
     await expect(page.locator(".commerce-detail")).not.toContainText("¥999");
     await expect(page.locator(".commerce-detail")).not.toContainText("$123");
     await expect(page.locator(".commerce-detail")).not.toContainText("已找到最低价");
@@ -206,6 +267,27 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("最低价格 CNY 860");
   });
 
+  test("OpenRouter unparsable pricing and unsafe model links are blocked", async () => {
+    await installOpenRouterModelsMock(page, {
+      data:[
+        {
+          id:"provider/model-unknown-price",
+          name:"Unknown Price Model",
+          pricing:{ prompt:"unknown", completion:"unknown" },
+          context_length:8192,
+          canonical_url:"javascript:alert(1)"
+        }
+      ]
+    });
+    const command = runId + " 帮我比较 OpenRouter 和其他 AI 模型平台价格";
+    await submitHomeCommand(page, command);
+    await page.locator("#commerceViewPlanBtn").click();
+    await page.getByRole("button", { name:"搜索 OpenRouter 模型价格" }).first().click();
+    await expect(page.locator(".commerce-detail")).toContainText("Unknown Price Model");
+    await expect(page.locator(".commerce-detail")).toContainText("价格字段不可解析");
+    await expect(page.locator(".commerce-detail")).toContainText("模型页链接不是 https 或不属于 openrouter.ai，已阻断打开");
+  });
+
   test("ai model pricing plan uses candidate schema without fake live prices", async () => {
     const command = runId + " 帮我比较 OpenRouter 和其他 AI 模型平台价格";
     await submitHomeCommand(page, command);
@@ -215,7 +297,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.getByText("候选方案字段模板")).toBeVisible();
     await expect(page.getByText(/计费单位|上下文\/额度|调用稳定性/).first()).toBeVisible();
     await expect(page.getByText("不填真实价格，不伪造实时库存或可用性")).toBeVisible();
-    await expect(page.locator(".commerce-detail")).not.toContainText("已找到");
+    await expect(page.locator(".commerce-detail")).not.toContainText("已找到最低价");
   });
 
   test("direct order and payment request remains blocked and plan-only", async () => {
@@ -235,7 +317,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("该请求涉及下单 / 付款，已阻断");
     await expect(page.locator(".commerce-detail")).toContainText("不会下单、付款或提交订单");
     await expect(page.getByRole("button", { name:/付款|下单|提交订单/ })).toHaveCount(0);
-    await expect(page.locator(".commerce-safety")).toContainText("当前为计划与推荐阶段，不真实搜索、不下单、不付款、不提交订单");
+    await expect(page.locator(".commerce-safety")).toContainText("当前只搜索和展示候选方案，不下单、不付款、不提交订单");
   });
 
   test("home dispatch record keeps commerce entries compact", async () => {

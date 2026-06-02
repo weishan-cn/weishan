@@ -126,7 +126,8 @@
     const detail = api && api.createCommercePlanDetail ? api.createCommercePlanDetail(task) : {};
     const request = search && search.createCommerceSearchRequest ? search.createCommerceSearchRequest(task) : { missingFields:task.missingFields || [] };
     const settings = search && search.getCommerceSearchSettings ? search.getCommerceSearchSettings() : {};
-    const hasProvider = !!(search && search.hasCommerceSearchProvider && search.hasCommerceSearchProvider(settings));
+    const isModelPricing = task.category === "aiModelPricing";
+    const hasProvider = isModelPricing || !!(search && search.hasCommerceSearchProvider && search.hasCommerceSearchProvider(settings));
     const category = detail.categoryLabel || task.categoryLabel || task.category || "全球采购";
     if (task.status === "blocked") {
       return `<div class="commerce-detail commerce-detail-compact" data-commerce-detail="${esc(task.taskId)}">
@@ -182,11 +183,16 @@
   function searchStatusHtml(task, settings, hasProvider){
     const missingFields = Array.isArray(task && task.missingFields) && task.missingFields.length ? task.missingFields : [];
     const disabled = !hasProvider || missingFields.length > 0;
+    const isModelPricing = task && task.category === "aiModelPricing";
+    const providerLabel = isModelPricing ? "OpenRouter" : hasProvider ? settings.providerName || "commerceProvider" : "未配置";
+    const failedMessage = task && task.searchStatus === "failed" ? task.searchErrorMessage || (isModelPricing ? "OpenRouter 搜索源不可用，无法返回真实价格。" : "搜索失败，无法返回真实价格。") : "";
+    const buttonLabel = isModelPricing ? "搜索 OpenRouter 模型价格" : missingFields.length ? "搜索真实价格" : hasProvider ? "搜索真实价格" : "搜索源未配置";
     return `<div class="commerce-search-panel">
-      <p><b>${hasProvider ? "已配置：" : "未配置："}</b>${hasProvider ? "可以搜索真实候选方案。" : "搜索源未配置，无法返回真实价格。"}</p>
-      <p class="commerce-muted">Provider：${esc(hasProvider ? settings.providerName || "commerceProvider" : "未配置")}</p>
+      <p><b>${hasProvider ? "已配置：" : "未配置："}</b>${isModelPricing ? (hasProvider ? "OpenRouter provider 可用于模型价格搜索。" : "OpenRouter provider 不可用。") : hasProvider ? "可以搜索真实候选方案。" : "搜索源未配置，无法返回真实价格。"}</p>
+      <p class="commerce-muted">Provider：${esc(providerLabel)}</p>
+      ${failedMessage ? `<p class="commerce-warning">${esc(failedMessage)}</p>` : ""}
       ${missingFields.length ? `<p class="commerce-warning">请补充${esc(missingFields.join("、"))}，否则不搜索价格。</p>` : ""}
-      <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${missingFields.length ? "搜索真实价格" : hasProvider ? "搜索真实价格" : "搜索源未配置"}</button>
+      <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${esc(disabled && !missingFields.length && !isModelPricing ? "搜索源未配置" : buttonLabel)}</button>
       <p class="commerce-muted">价格只来自已配置 provider 返回数据；未配置时不会显示假价格。</p>
     </div>`;
   }
@@ -208,20 +214,28 @@
     if (!candidates.length) {
       return `<p class="commerce-muted">暂无候选方案。搜索源未配置或尚未执行真实搜索时，不显示任何价格。</p>`;
     }
+    const isModelPricing = task && task.category === "aiModelPricing";
     return `<div class="commerce-candidates">
       ${candidates.map((item) => `<article class="commerce-candidate-card">
         <div class="commerce-candidate-head">
           <div>
             <b>${esc(item.title)}</b>
-            <span>${esc(item.sourceName)} · ${esc(item.collectedAt)}</span>
+            <span>${esc(item.sourceName)}${item.modelId ? " · " + esc(item.modelId) : ""} · ${esc(item.collectedAt)}</span>
           </div>
           <strong>${esc(item.priceLabel || (item.currency + " " + item.price))}</strong>
         </div>
+        ${isModelPricing ? `<dl class="commerce-model-pricing">
+          <div><dt>模型 ID</dt><dd>${esc(item.modelId || item.candidateId)}</dd></div>
+          <div><dt>输入价格</dt><dd>${esc(item.inputPriceLabel || "价格字段不可解析")}</dd></div>
+          <div><dt>输出价格</dt><dd>${esc(item.outputPriceLabel || "价格字段不可解析")}</dd></div>
+          <div><dt>上下文长度</dt><dd>${esc(item.contextLength || "未提供")}</dd></div>
+          <div><dt>币种</dt><dd>USD</dd></div>
+        </dl>` : ""}
         <div class="commerce-candidate-meta">
           ${chips([item.departTime && item.arriveTime ? item.departTime + " → " + item.arriveTime : "", item.duration, item.conditions, item.refundPolicySummary, item.riskSummary, item.hiddenFeeNote].filter(Boolean))}
         </div>
         <p class="commerce-muted">推荐理由：${esc(item.recommendationReason || "按价格、条件和风险排序后进入候选。")}</p>
-        ${item.bookingUrl ? `<p class="commerce-booking-note">将打开预订页面。weishan 不会下单、付款或提交订单。</p><a class="cmd-btn gray commerce-booking-link" href="${esc(item.bookingUrl)}" target="_blank" rel="noopener noreferrer">打开预订页</a>` : `<p class="commerce-warning">预订链接不是 https，已阻断打开。</p>`}
+        ${item.bookingUrl ? `<p class="commerce-booking-note">${isModelPricing ? "将打开 OpenRouter 模型页。weishan 不会下单、付款或提交订单。" : "将打开预订页面。weishan 不会下单、付款或提交订单。"}</p><a class="cmd-btn gray commerce-booking-link" href="${esc(item.bookingUrl)}" target="_blank" rel="noopener noreferrer">${isModelPricing ? "打开模型页" : "打开预订页"}</a>` : `<p class="commerce-warning">${isModelPricing ? "模型页链接不是 https 或不属于 openrouter.ai，已阻断打开。" : "预订链接不是 https，已阻断打开。"}</p>`}
       </article>`).join("")}
     </div>`;
   }
@@ -233,7 +247,7 @@
       <b>${esc(rec.title)}</b>
       <p>${esc(rec.reason || "")}</p>
       <p class="commerce-muted">主要风险：${esc(rec.riskSummary || "价格可能变化，仍需用户确认。")}</p>
-      <p class="commerce-warning">价格可能变化；预订、下单或付款前必须再次确认。</p>
+      <p class="commerce-warning">价格可能变化；最终以 OpenRouter 页面和实际结算为准。预订、下单或付款前必须再次确认。</p>
     </div>`;
   }
 
@@ -266,7 +280,7 @@
       </div>
 
       <div class="commerce-safety">
-        当前为计划与推荐阶段，不真实搜索、不下单、不付款、不提交订单。
+        当前只搜索和展示候选方案，不下单、不付款、不提交订单。
       </div>
 
       <div class="commerce-toolbar">
@@ -339,19 +353,25 @@
         const taskId = button.getAttribute("data-task-id") || "";
         const target = tasks.find((task) => task.taskId === taskId);
         if (!target) return;
+        const isModelPricing = target.category === "aiModelPricing";
         button.disabled = true;
-        recordSearch("commerceAgent.searchRequested", Object.assign({}, target, { resultStatus:"requested" }));
+        recordSearch(isModelPricing ? "commerceAgent.openRouterSearchRequested" : "commerceAgent.searchRequested", Object.assign({}, target, {
+          providerName:isModelPricing ? "OpenRouter" : target.searchProviderName || "",
+          resultStatus:"requested"
+        }));
         const result = await search.searchCommerceCandidates(target);
         if (!result.ok) {
           const status = result.code === "COMMERCE_MISSING_FIELDS" ? "missingFields" : result.code === "COMMERCE_PROVIDER_NOT_CONFIGURED" ? "providerMissing" : "failed";
           const updated = api.updateCommerceTask(taskId, {
             searchStatus:status,
             missingFields:result.request && result.request.missingFields || target.missingFields || [],
-            searchProviderName:result.providerName || "",
+            searchProviderName:result.providerName || (isModelPricing ? "OpenRouter" : ""),
+            searchErrorMessage:result.message || "",
             searchResultSummary:{ candidateCount:0 },
             updatedAt:new Date().toISOString()
           });
-          recordSearch(status === "providerMissing" ? "commerceAgent.searchProviderMissing" : "commerceAgent.searchFailed", Object.assign({}, updated || target, {
+          recordSearch(isModelPricing ? "commerceAgent.openRouterSearchFailed" : status === "providerMissing" ? "commerceAgent.searchProviderMissing" : "commerceAgent.searchFailed", Object.assign({}, updated || target, {
+            providerName:result.providerName || (isModelPricing ? "OpenRouter" : ""),
             resultStatus:status,
             outputSummary:result.message || "搜索失败。"
           }));
@@ -371,16 +391,18 @@
             candidateCount:sorted.length,
             lowestPrice:first.price || "",
             currency:first.currency || "",
+            lowestPromptPricePerMillion:first.promptPricePerMillion || "",
+            lowestCompletionPricePerMillion:first.completionPricePerMillion || "",
             recommendationTitle:recommendation && recommendation.title || ""
           },
           updatedAt:new Date().toISOString()
         });
-        recordSearch("commerceAgent.searchCompleted", Object.assign({}, updated || target, {
+        recordSearch(isModelPricing ? "commerceAgent.openRouterSearchCompleted" : "commerceAgent.searchCompleted", Object.assign({}, updated || target, {
           providerName:result.providerName,
           candidates:sorted,
           resultStatus:"completed"
         }));
-        recordSearch("commerceAgent.candidatesRendered", Object.assign({}, updated || target, {
+        recordSearch(isModelPricing ? "commerceAgent.openRouterCandidatesRendered" : "commerceAgent.candidatesRendered", Object.assign({}, updated || target, {
           providerName:result.providerName,
           candidates:sorted,
           resultStatus:"rendered"

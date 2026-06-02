@@ -362,7 +362,17 @@
     const summaryData = stored.searchResultSummary || {};
     const lowest = summaryData.lowestPrice || recommendation.price || "";
     const currency = summaryData.currency || recommendation.currency || "";
+    const isModelPricing = stored.category === "aiModelPricing";
+    const modelInput = summaryData.lowestPromptPricePerMillion || recommendation.promptPricePerMillion || "";
+    const modelOutput = summaryData.lowestCompletionPricePerMillion || recommendation.completionPricePerMillion || "";
+    const modelPriceSummary = isModelPricing && candidates.length ? [
+      "已找到 " + candidates.length + " 个候选模型",
+      recommendation.title ? "当前较低价格模型 " + recommendation.title : "",
+      modelInput !== "" ? "输入 USD " + Number(modelInput).toFixed(6).replace(/0+$/, "").replace(/\.$/, "") + " / 1M tokens" : "",
+      modelOutput !== "" ? "输出 USD " + Number(modelOutput).toFixed(6).replace(/0+$/, "").replace(/\.$/, "") + " / 1M tokens" : ""
+    ].filter(Boolean).join(" · ") : "";
     const providerMissing = stored.searchStatus === "providerMissing";
+    const providerFailed = stored.searchStatus === "failed";
     const missingFields = Array.isArray(stored.missingFields) ? stored.missingFields : [];
     return `<div class="commerce-home-card ${blocked ? "is-blocked" : ""}" data-commerce-home-summary="true">
       <div class="commerce-home-card-main">
@@ -372,8 +382,9 @@
         <p><b>状态：</b>${blocked ? "已阻断" : "计划已生成"}</p>
         ${blocked ? `<p><b>原因：</b>涉及下单 / 付款</p>` : ""}
         ${!blocked && providerMissing ? `<p><b>搜索源：</b>搜索源未配置，无法返回真实价格</p>` : ""}
+        ${!blocked && providerFailed ? `<p><b>搜索源：</b>${esc(stored.searchErrorMessage || "搜索源不可用，无法返回真实价格")}</p>` : ""}
         ${!blocked && missingFields.length ? `<p><b>待补充：</b>${esc(missingFields.join("、"))}</p>` : ""}
-        ${!blocked && candidates.length ? `<p><b>搜索结果：</b>已找到 ${candidates.length} 个候选方案${lowest ? " · 最低价格 " + esc(currency ? currency + " " + lowest : lowest) : ""}${recommendation.title ? " · 推荐 " + esc(recommendation.title) : ""}</p>` : ""}
+        ${!blocked && candidates.length ? `<p><b>搜索结果：</b>${isModelPricing ? esc(modelPriceSummary) : `已找到 ${candidates.length} 个候选方案${lowest ? " · 最低价格 " + esc(currency ? currency + " " + lowest : lowest) : ""}${recommendation.title ? " · 推荐 " + esc(recommendation.title) : ""}`}</p>` : ""}
         <p><b>安全边界：</b>${blocked ? "不会下单、付款或提交订单" : candidates.length ? "仅展示候选方案，未下单、未付款、未提交订单" : "未搜索、未下单、未付款、未提交订单"}</p>
       </div>
       <button class="cmd-btn primary commerce-view-plan-button" id="commerceViewPlanBtn" type="button">查看全球采购计划</button>

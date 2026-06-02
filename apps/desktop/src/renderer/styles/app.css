@@ -1471,6 +1471,22 @@
 .commerce-candidate-meta .commerce-chip-list{
   gap:6px;
 }
+.commerce-model-pricing{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:8px 12px;
+  margin:2px 0;
+}
+.commerce-model-pricing dt{
+  color:#64748b;
+  font-size:11px;
+}
+.commerce-model-pricing dd{
+  color:#0f172a;
+  font-size:12px;
+  margin:2px 0 0;
+  overflow-wrap:anywhere;
+}
 .commerce-booking-note{
   margin:0;
 }

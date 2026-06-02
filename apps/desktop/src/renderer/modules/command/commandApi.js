@@ -240,9 +240,10 @@
     if (search && search.createCommerceSearchRequest && search.hasCommerceSearchProvider) {
       const request = search.createCommerceSearchRequest(commercePlan);
       const hasProvider = search.hasCommerceSearchProvider(search.getCommerceSearchSettings && search.getCommerceSearchSettings());
+      const usesOpenRouter = commercePlan.category === "aiModelPricing";
       commercePlan.missingFields = request.missingFields || commercePlan.missingFields || [];
-      commercePlan.searchStatus = commercePlan.status === "blocked" ? "blocked" : commercePlan.missingFields.length ? "missingFields" : hasProvider ? "ready" : "providerMissing";
-      commercePlan.searchProviderName = hasProvider && search.getCommerceSearchSettings ? search.getCommerceSearchSettings().providerName || "commerceProvider" : "";
+      commercePlan.searchStatus = commercePlan.status === "blocked" ? "blocked" : commercePlan.missingFields.length ? "missingFields" : usesOpenRouter || hasProvider ? "ready" : "providerMissing";
+      commercePlan.searchProviderName = usesOpenRouter ? "OpenRouter" : hasProvider && search.getCommerceSearchSettings ? search.getCommerceSearchSettings().providerName || "commerceProvider" : "";
     }
     const savedPlan = api.addCommerceTask ? api.addCommerceTask(commercePlan) : (api.saveCommercePlan ? api.saveCommercePlan(commercePlan) : commercePlan);
     const status = savedPlan.status || "planned";

@@ -1,5 +1,6 @@
 (function(){
   const COMMERCE_SEARCH_SETTINGS_KEY = "weishan:commerceSearch:settings:v1";
+  const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
 
   function nowIso(){
     return new Date().toISOString();
@@ -43,7 +44,7 @@
     const next = Object.assign(defaultSettings(), settings || {}, { lastCheckedAt:nowIso() });
     next.enabled = next.enabled === true;
     next.apiKeyConfigured = next.apiKeyConfigured === true;
-    next.providerMode = /^(customEndpoint|manualProvider)$/.test(next.providerMode) ? next.providerMode : "disabled";
+    next.providerMode = /^(customEndpoint|manualProvider|openRouterModels)$/.test(next.providerMode) ? next.providerMode : "disabled";
     next.providerName = sanitizeText(next.providerName || "", 80);
     next.endpointUrl = sanitizeText(next.endpointUrl || "", 240);
     const s = storage();
@@ -60,7 +61,12 @@
     if (next.providerMode === "customEndpoint") {
       return /^https:\/\//i.test(next.endpointUrl || "") && next.apiKeyConfigured === true;
     }
+    if (next.providerMode === "openRouterModels") return true;
     return false;
+  }
+
+  function isAiModelPricingTask(taskOrRequest){
+    return String(taskOrRequest && taskOrRequest.category || "") === "aiModelPricing";
   }
 
   function missingFieldsForTask(task){
@@ -90,15 +96,16 @@
 
   function createCommerceSearchRequest(task){
     const route = parseRoute(task && task.inputSummary);
+    const category = String(task && task.category || "generalProcurement");
     return {
       taskId:String(task && task.taskId || ""),
-      category:String(task && task.category || "generalProcurement"),
+      category,
       query:sanitizeText(task && task.inputSummary || "", 240),
       origin:route.origin,
       destination:route.destination,
       date:parseDate(task && task.inputSummary || ""),
       passengers:1,
-      currency:"CNY",
+      currency:category === "aiModelPricing" ? "USD" : "CNY",
       locale:"zh-CN",
       missingFields:missingFieldsForTask(task)
     };
@@ -113,6 +120,95 @@
     }
   }
 
+  function validateOpenRouterModelUrl(url){
+    const parsed = validateBookingUrl(url);
+    if (!parsed) return null;
+    return parsed.host === "openrouter.ai" || parsed.host.endsWith(".openrouter.ai") ? parsed : null;
+  }
+
+  function parseTokenPrice(value){
+    if (value === null || value === undefined || value === "") return null;
+    const num = Number(value);
+    return Number.isFinite(num) && num >= 0 ? num : null;
+  }
+
+  function pricePerMillionValue(value){
+    const num = parseTokenPrice(value);
+    return num === null ? null : num * 1000000;
+  }
+
+  function compactUsd(value){
+    const num = Number(value);
+    if (!Number.isFinite(num)) return "";
+    return "$" + num.toFixed(num >= 1 ? 4 : 6).replace(/0+$/, "").replace(/\.$/, "");
+  }
+
+  function pricePerMillionLabel(value){
+    const num = pricePerMillionValue(value);
+    return num === null ? "价格字段不可解析" : compactUsd(num) + " / 1M tokens";
+  }
+
+  function openRouterModelUrl(modelId, rawUrl){
+    if (rawUrl) {
+      const explicit = validateOpenRouterModelUrl(rawUrl);
+      return explicit ? explicit.href : "";
+    }
+    const explicit = validateOpenRouterModelUrl(rawUrl);
+    if (explicit) return explicit.href;
+    const safeId = String(modelId || "").trim();
+    if (!safeId) return "";
+    return "https://openrouter.ai/models/" + encodeURIComponent(safeId);
+  }
+
+  function normalizeOpenRouterModel(model){
+    const item = model && typeof model === "object" ? model : {};
+    const modelId = sanitizeText(item.id || item.slug || "", 120);
+    const name = sanitizeText(item.name || modelId || "OpenRouter model", 140);
+    const pricing = item.pricing && typeof item.pricing === "object" ? item.pricing : {};
+    const promptToken = parseTokenPrice(pricing.prompt);
+    const completionToken = parseTokenPrice(pricing.completion);
+    const promptMillion = pricePerMillionValue(pricing.prompt);
+    const completionMillion = pricePerMillionValue(pricing.completion);
+    const hasParsedPricing = promptMillion !== null || completionMillion !== null;
+    const price = hasParsedPricing ? (promptMillion || 0) + (completionMillion || 0) : null;
+    const contextLength = Number(item.context_length || item.contextLength || 0);
+    const bookingUrl = openRouterModelUrl(modelId, item.canonical_url || item.href || item.bookingUrl);
+    const parsedUrl = validateOpenRouterModelUrl(bookingUrl);
+    const description = sanitizeText(item.description || item.architecture && item.architecture.modality || "", 180);
+    return {
+      candidateId:modelId || ("openrouterModel-" + Math.random().toString(36).slice(2, 8)),
+      sourceName:"OpenRouter",
+      title:name,
+      modelId,
+      category:"aiModelPricing",
+      price,
+      currency:"USD",
+      priceLabel:hasParsedPricing ? "输入：" + pricePerMillionLabel(pricing.prompt) + " · 输出：" + pricePerMillionLabel(pricing.completion) : "价格字段不可解析",
+      promptPricePerToken:promptToken === null ? "" : String(promptToken),
+      completionPricePerToken:completionToken === null ? "" : String(completionToken),
+      promptPricePerMillion:promptMillion === null ? "" : promptMillion,
+      completionPricePerMillion:completionMillion === null ? "" : completionMillion,
+      inputPriceLabel:pricePerMillionLabel(pricing.prompt),
+      outputPriceLabel:pricePerMillionLabel(pricing.completion),
+      contextLength:Number.isFinite(contextLength) && contextLength > 0 ? contextLength : "",
+      departTime:"",
+      arriveTime:"",
+      duration:"",
+      conditions:[description, contextLength ? "上下文长度 " + contextLength : ""].filter(Boolean).join(" · "),
+      refundPolicySummary:"模型调用按平台计费规则结算；无下单或付款动作。",
+      rating:"",
+      reputation:"OpenRouter 模型目录",
+      riskSummary:hasParsedPricing ? "模型价格可能变化，实际调用费用以平台结算为准。" : "价格字段不可解析，未生成价格结论。",
+      hiddenFeeNote:"实际成本可能受路由、缓存、最小计费单位或平台规则影响。",
+      bookingUrl:parsedUrl ? parsedUrl.href : "",
+      bookingUrlHost:parsedUrl ? parsedUrl.host : "",
+      recommendationReason:hasParsedPricing ? "按当前结果中的输入/输出综合成本排序；不能视为绝对最优。" : "缺少可解析 pricing 字段，仅展示模型信息，不生成价格推荐。",
+      collectedAt:nowIso(),
+      isLiveResult:true,
+      realExecution:false
+    };
+  }
+
   function sanitizeCommerceCandidate(candidate, context){
     const item = candidate && typeof candidate === "object" ? candidate : {};
     const parsedUrl = validateBookingUrl(item.bookingUrl);
@@ -121,10 +217,18 @@
       candidateId:sanitizeText(item.candidateId || ("commerceCandidate-" + Math.random().toString(36).slice(2, 8)), 80),
       sourceName:sanitizeText(item.sourceName || item.provider || "搜索源", 80),
       title:sanitizeText(item.title || "候选方案", 120),
+      modelId:sanitizeText(item.modelId || "", 120),
       category:sanitizeText(item.category || context && context.category || "", 60),
       price:Number.isFinite(price) && price >= 0 ? price : null,
       currency:sanitizeText(item.currency || context && context.currency || "CNY", 12),
-      priceLabel:sanitizeText(item.priceLabel || (Number.isFinite(price) && price >= 0 ? String(item.currency || context && context.currency || "CNY") + " " + price : ""), 80),
+      priceLabel:sanitizeText(item.priceLabel || (Number.isFinite(price) && price >= 0 ? String(item.currency || context && context.currency || "CNY") + " " + price : ""), 120),
+      promptPricePerToken:item.promptPricePerToken === undefined ? "" : sanitizeText(item.promptPricePerToken, 40),
+      completionPricePerToken:item.completionPricePerToken === undefined ? "" : sanitizeText(item.completionPricePerToken, 40),
+      promptPricePerMillion:item.promptPricePerMillion === undefined || item.promptPricePerMillion === "" ? "" : Number(item.promptPricePerMillion),
+      completionPricePerMillion:item.completionPricePerMillion === undefined || item.completionPricePerMillion === "" ? "" : Number(item.completionPricePerMillion),
+      inputPriceLabel:sanitizeText(item.inputPriceLabel || "", 80),
+      outputPriceLabel:sanitizeText(item.outputPriceLabel || "", 80),
+      contextLength:item.contextLength === undefined || item.contextLength === "" ? "" : Number(item.contextLength),
       departTime:sanitizeText(item.departTime || "", 80),
       arriveTime:sanitizeText(item.arriveTime || "", 80),
       duration:sanitizeText(item.duration || "", 80),
@@ -147,7 +251,7 @@
     const source = raw && raw.candidates ? raw.candidates : raw;
     const candidates = (Array.isArray(source) ? source : [])
       .map((item) => sanitizeCommerceCandidate(item, context || {}))
-      .filter((item) => item.price !== null);
+      .filter((item) => item.price !== null || isAiModelPricingTask(context) && item.modelId);
     return {
       ok:true,
       providerName:sanitizeText(raw && raw.providerName || context && context.providerName || "", 80),
@@ -156,8 +260,22 @@
     };
   }
 
+  function modelCost(candidate){
+    const prompt = Number.isFinite(Number(candidate && candidate.promptPricePerMillion)) ? Number(candidate.promptPricePerMillion) : Number.POSITIVE_INFINITY;
+    const completion = Number.isFinite(Number(candidate && candidate.completionPricePerMillion)) ? Number(candidate.completionPricePerMillion) : Number.POSITIVE_INFINITY;
+    return prompt + completion;
+  }
+
   function sortCommerceCandidates(candidates){
     return (Array.isArray(candidates) ? candidates.slice() : []).sort((a, b) => {
+      if (String(a && a.category || b && b.category || "") === "aiModelPricing") {
+        const costA = modelCost(a);
+        const costB = modelCost(b);
+        if (costA !== costB) return costA - costB;
+        const ctxA = Number.isFinite(Number(a && a.contextLength)) ? Number(a.contextLength) : 0;
+        const ctxB = Number.isFinite(Number(b && b.contextLength)) ? Number(b.contextLength) : 0;
+        if (ctxA !== ctxB) return ctxB - ctxA;
+      }
       const priceA = Number.isFinite(Number(a && a.price)) ? Number(a.price) : Number.POSITIVE_INFINITY;
       const priceB = Number.isFinite(Number(b && b.price)) ? Number(b.price) : Number.POSITIVE_INFINITY;
       if (priceA !== priceB) return priceA - priceB;
@@ -183,7 +301,11 @@
       price:top.price,
       currency:top.currency,
       priceLabel:top.priceLabel,
-      reason:top.recommendationReason || "按当前 provider 返回数据排序，该方案价格最低，同时保留退改、风险和隐性费用复核。",
+      promptPricePerMillion:top.promptPricePerMillion || "",
+      completionPricePerMillion:top.completionPricePerMillion || "",
+      inputPriceLabel:top.inputPriceLabel || "",
+      outputPriceLabel:top.outputPriceLabel || "",
+      reason:top.recommendationReason || (top.category === "aiModelPricing" ? "按当前结果中的输入/输出综合成本排序；不能视为绝对最优。" : "按当前 provider 返回数据排序，该方案价格最低，同时保留退改、风险和隐性费用复核。"),
       riskSummary:top.riskSummary || "价格可能变化，预订前仍需用户确认。",
       priceMayChange:true
     };
@@ -203,6 +325,8 @@
       inputSummary:sanitizeText(data.inputSummary || data.query || "", 240),
       candidateCount:candidates.length,
       lowestPrice:lowest.price || "",
+      lowestPromptPricePerMillion:lowest.promptPricePerMillion || "",
+      lowestCompletionPricePerMillion:lowest.completionPricePerMillion || "",
       currency:lowest.currency || data.currency || "",
       providerName:sanitizeText(data.providerName || "", 80),
       resultStatus:sanitizeText(data.resultStatus || "", 80),
@@ -211,9 +335,62 @@
     };
   }
 
+  function normalizeOpenRouterModelsResponse(raw){
+    const source = raw && Array.isArray(raw.data) ? raw.data : raw && Array.isArray(raw.models) ? raw.models : Array.isArray(raw) ? raw : [];
+    const candidates = source.map(normalizeOpenRouterModel).filter((item) => item.modelId);
+    return {
+      ok:true,
+      providerName:"OpenRouter",
+      candidates,
+      collectedAt:nowIso()
+    };
+  }
+
+  async function fetchOpenRouterModels(){
+    if (window.WeishanOpenRouterModelsProvider && typeof window.WeishanOpenRouterModelsProvider.fetchModels === "function") {
+      return window.WeishanOpenRouterModelsProvider.fetchModels();
+    }
+    if (window.WeishanOpenRouterModelsProvider && typeof window.WeishanOpenRouterModelsProvider.search === "function") {
+      return window.WeishanOpenRouterModelsProvider.search();
+    }
+    if (typeof fetch !== "function") throw new Error("OpenRouter models fetch is unavailable.");
+    const res = await fetch(OPENROUTER_MODELS_URL, {
+      method:"GET",
+      headers:{ "Accept":"application/json" }
+    });
+    if (!res || !res.ok) throw new Error("OpenRouter models API unavailable.");
+    return res.json();
+  }
+
+  async function searchOpenRouterModels(request){
+    try {
+      const raw = await fetchOpenRouterModels();
+      const normalized = normalizeOpenRouterModelsResponse(raw);
+      const candidates = sortCommerceCandidates(normalized.candidates);
+      return {
+        ok:true,
+        providerName:"OpenRouter",
+        request,
+        candidates,
+        recommendation:createRecommendationFromCandidates(candidates),
+        realExecution:false
+      };
+    } catch (_) {
+      return {
+        ok:false,
+        code:"OPENROUTER_MODELS_UNAVAILABLE",
+        message:"OpenRouter 搜索源不可用，无法返回真实价格。",
+        providerName:"OpenRouter",
+        request,
+        candidates:[]
+      };
+    }
+  }
+
   async function searchCommerceCandidates(task){
     const settings = getCommerceSearchSettings();
     const request = createCommerceSearchRequest(task);
+    if (isAiModelPricingTask(request)) return searchOpenRouterModels(request);
     if (!hasCommerceSearchProvider(settings)) {
       return {
         ok:false,
@@ -264,7 +441,10 @@
     sortCommerceCandidates,
     createRecommendationFromCandidates,
     validateBookingUrl,
+    validateOpenRouterModelUrl,
     sanitizeCommerceCandidate,
+    normalizeOpenRouterModel,
+    normalizeOpenRouterModelsResponse,
     createCommerceSearchHistoryPayload,
     searchCommerceCandidates
   };
