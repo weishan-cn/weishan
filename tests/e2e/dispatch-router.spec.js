@@ -71,7 +71,24 @@ test.describe.serial("dispatch router", () => {
   });
 
   test.afterAll(async () => {
-    if (page) await cleanupE2EData(page, runId);
+    if (page) {
+      await page.evaluate((id) => {
+        try {
+          const keys = ["weishan:commerceAgent:lastPlan:v1", "weishan:commerceAgent:tasks:v1"];
+          for (const key of keys) {
+            const raw = window.localStorage.getItem(key);
+            if (!raw || !raw.includes(id)) continue;
+            if (key.endsWith(":tasks:v1")) {
+              const tasks = JSON.parse(raw);
+              window.localStorage.setItem(key, JSON.stringify((Array.isArray(tasks) ? tasks : []).filter((item) => !JSON.stringify(item).includes(id))));
+            } else {
+              window.localStorage.removeItem(key);
+            }
+          }
+        } catch (_) {}
+      }, runId);
+      await cleanupE2EData(page, runId);
+    }
     if (app) await app.close();
   });
 
@@ -137,6 +154,16 @@ test.describe.serial("dispatch router", () => {
     await expect(page.getByText(/Codex 精确指令|允许修改文件|禁止修改文件/).first()).toBeVisible();
     await expect(page.getByText(/npm run check|不 commit|不 push/).first()).toBeVisible();
     await expectHistory(page, runId, /codex|Codex 精确指令/);
+  });
+
+  test("commerce purchase demand routes to commerce agent instead of chat", async () => {
+    const command = runId + " 帮我买一台性价比高的 MacBook";
+    await submitHomeCommand(page, command);
+    await expect(currentTaskLogs(page)).toContainText("路由判断：全球采购");
+    await expect(currentTaskLogs(page)).toContainText("commerceAgent.plan");
+    await expect(currentTaskLogs(page)).toContainText("realExecution=false");
+    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
+    await expectHistory(page, runId, /commerceAgent\.taskCreated|全球采购|MacBook/);
   });
 
   test("mail dispatch confirms and runs local mock execution without reading mailbox", async () => {

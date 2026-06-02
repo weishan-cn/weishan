@@ -222,14 +222,14 @@
 
   function commerceAgentAnswer(text, plan){
     const api = commerceAgent();
-    if (!api || !api.createCommercePlan) {
+    if (!api || !api.createCommerceTask && !api.createCommercePlan) {
       return {
         answer:"全球采购模块尚未加载。本轮不会真实搜索、下单、付款或提交订单。realExecution=false",
         commercePlan:null
       };
     }
-    const commercePlan = plan && plan.commercePlan || api.createCommercePlan(text);
-    if (api.saveCommercePlan) api.saveCommercePlan(commercePlan);
+    const commercePlan = plan && plan.commercePlan || (api.createCommerceTask ? api.createCommerceTask(text) : api.createCommercePlan(text));
+    const savedPlan = api.addCommerceTask ? api.addCommerceTask(commercePlan) : (api.saveCommercePlan ? api.saveCommercePlan(commercePlan) : commercePlan);
     const scope = (commercePlan.searchScope || []).slice(0, 4).join(" / ");
     const criteria = (commercePlan.decisionCriteria || []).slice(0, 6).join(" / ");
     const answer = [
@@ -238,15 +238,16 @@
       "realExecution=false",
       "当前仅生成搜索与推荐计划，未下单、未付款、未提交订单。",
       "",
-      "需求：" + commercePlan.inputSummary,
-      "分类：" + commercePlan.category,
+      "需求：" + savedPlan.inputSummary,
+      "分类：" + (savedPlan.categoryLabel || savedPlan.category),
+      "状态：" + (savedPlan.status || "planned"),
       "搜索范围：" + scope,
       "比较维度：" + criteria,
       "决策目标：同等条件下价格最低，同时综合评分、信誉、售后、退改政策、时效、地区限制、风险和隐性费用。",
       "执行边界：不真实搜索外部网站；不下单、不付款、不提交订单；最终执行必须用户确认。",
       "下一步：进入全球采购模块查看完整计划。"
     ].join("\n");
-    return { answer, commercePlan };
+    return { answer, commercePlan:savedPlan };
   }
 
   function desktopAssistantAnswer(text, plan){
@@ -964,15 +965,16 @@
           const commerceResult = commerceAgentAnswer(active.text, plan);
           answer = commerceResult.answer;
           const commercePlan = commerceResult.commercePlan;
-          recordCommerceAgentHistory("commerceAgent.planCreated", commercePlan, {
+          recordCommerceAgentHistory("commerceAgent.taskCreated", commercePlan, {
             inputSummary:taskSummary(active.text, 240),
-            outputSummary:"已生成全球采购搜索与推荐计划；未搜索、未下单、未付款。",
+            outputSummary:"已写入全球采购任务列表；未搜索、未下单、未付款、未提交订单。",
             realExecution:false
           });
           active = patchTask(active.id, (t) => {
             t.meta = Object.assign({}, t.meta || {}, {
               commerceTaskId:commercePlan && commercePlan.taskId || "",
               commerceCategory:commercePlan && commercePlan.category || "",
+              commerceStatus:commercePlan && commercePlan.status || "planned",
               realExecution:false
             });
             return putAnswerLog(t, answer, false);

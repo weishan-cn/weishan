@@ -32,7 +32,7 @@ async function setMockSettingsAi(page) {
   });
 }
 
-test.describe.serial("commerce agent", () => {
+test.describe.serial("commerce agent workbench", () => {
   let app;
   let page;
 
@@ -45,9 +45,11 @@ test.describe.serial("commerce agent", () => {
     if (page) {
       await page.evaluate((id) => {
         try {
-          const key = "weishan:commerceAgent:lastPlan:v1";
-          const raw = window.localStorage.getItem(key);
-          if (raw && raw.includes(id)) window.localStorage.removeItem(key);
+          const keys = ["weishan:commerceAgent:lastPlan:v1", "weishan:commerceAgent:tasks:v1"];
+          for (const key of keys) {
+            const raw = window.localStorage.getItem(key);
+            if (raw && raw.includes(id)) window.localStorage.removeItem(key);
+          }
         } catch (_) {}
       }, runId);
       await cleanupE2EData(page, runId);
@@ -55,34 +57,66 @@ test.describe.serial("commerce agent", () => {
     if (app) await app.close();
   });
 
-  test("sidebar entry opens the commerce agent page", async () => {
+  test("global commerce workbench entry shows safety boundary", async () => {
     await expect(page.locator('.nav-item[data-route="commerce"]')).toBeVisible();
     await page.locator('.nav-item[data-route="commerce"]').click();
     await expect(page.getByRole("heading", { name:"全球采购" })).toBeVisible();
     await expect(page.getByText("搜索、比价、推荐、执行前确认")).toBeVisible();
+    await expect(page.getByText("不真实搜索、不下单、不付款、不提交订单")).toBeVisible();
   });
 
-  test("home routes purchase demand to commerce agent plan", async () => {
+  test("home creates commerce task and workbench shows plan detail", async () => {
     const command = runId + " 帮我找成都到上海最便宜机票";
     await submitHomeCommand(page, command);
     await expect(currentTaskLogs(page)).toContainText("路由判断：全球采购");
     await expect(currentTaskLogs(page)).toContainText("commerceAgent.plan");
     await expect(currentTaskLogs(page)).toContainText("realExecution=false");
-    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
     await expect(currentTaskLogs(page)).toContainText(/未下单|未付款|未提交订单/);
+    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
+
+    await page.locator('.nav-item[data-route="commerce"]').click();
+    await expect(page.locator(".commerce-task-list")).toContainText(runId + " 帮我找成都到上海最便宜机票");
+    await page.getByRole("button", { name:"查看计划" }).first().click();
+    await expect(page.getByRole("heading", { name:"需求理解" })).toBeVisible();
+    await expect(page.getByRole("heading", { name:"搜索范围" })).toBeVisible();
+    await expect(page.getByRole("heading", { name:"比较维度" })).toBeVisible();
+    await expect(page.getByRole("heading", { name:"决策规则" })).toBeVisible();
+    await expect(page.getByRole("heading", { name:"执行边界" })).toBeVisible();
   });
 
-  test("commerce plan includes search scope criteria and boundaries", async () => {
+  test("ai model pricing plan uses candidate schema without fake live prices", async () => {
     const command = runId + " 帮我比较 OpenRouter 和其他 AI 模型平台价格";
     await submitHomeCommand(page, command);
-    await expect(currentTaskLogs(page)).toContainText("搜索范围");
-    await expect(currentTaskLogs(page)).toContainText("比较维度");
-    await expect(currentTaskLogs(page)).toContainText("决策目标");
-    await expect(currentTaskLogs(page)).toContainText("执行边界");
-    await expect(currentTaskLogs(page)).toContainText(/未下单|未付款/);
     await page.locator('.nav-item[data-route="commerce"]').click();
-    await expect(page.getByText(/来自首页总调度的采购任务/).first()).toBeVisible();
-    await expect(page.getByText(/搜索范围|比较维度|推荐规则|执行边界/).first()).toBeVisible();
+    await expect(page.getByText(/AI 模型价格|全球采购/).first()).toBeVisible();
+    await page.getByRole("button", { name:"查看计划" }).first().click();
+    await expect(page.getByText("候选方案字段模板")).toBeVisible();
+    await expect(page.getByText(/计费单位|上下文\/额度|调用稳定性/).first()).toBeVisible();
+    await expect(page.getByText("当前不填真实价格，不伪造实时库存或可用性")).toBeVisible();
+    await expect(page.locator(".commerce-detail")).not.toContainText("已找到");
+  });
+
+  test("direct order and payment request remains blocked and plan-only", async () => {
+    const command = runId + " 帮我直接下单并付款";
+    await submitHomeCommand(page, command);
+    await expect(currentTaskLogs(page)).toContainText("commerceAgent.plan");
+    await expect(currentTaskLogs(page)).toContainText("realExecution=false");
+    await expect(currentTaskLogs(page)).toContainText(/未下单|未付款|未提交订单|最终执行必须用户确认/);
+    await page.locator('.nav-item[data-route="commerce"]').click();
+    await expect(page.getByText("已阻断").first()).toBeVisible();
+    await expect(page.locator(".commerce-safety")).toContainText("当前为计划与推荐阶段，不真实搜索、不下单、不付款、不提交订单");
+  });
+
+  test("clears a commerce plan from the workbench", async () => {
+    const command = runId + " 帮我买一台性价比高的 MacBook";
+    await submitHomeCommand(page, command);
+    await page.locator('.nav-item[data-route="commerce"]').click();
+    await expect(page.locator(".commerce-task-list")).toContainText(command);
+    await page.getByRole("button", { name:"清理此计划" }).first().click();
+    await expect(page.locator(".commerce-task-list")).not.toContainText(command);
+    await gotoRoute(page, "history");
+    await page.locator("#historySearch").fill(runId);
+    await expect(page.locator("#historyList")).toContainText(/commerceAgent\.taskCleared|taskCleared/);
   });
 
   test("ordinary travel advice remains chat instead of commerce when no buying intent is present", async () => {
@@ -92,13 +126,5 @@ test.describe.serial("commerce agent", () => {
     await expect(currentTaskLogs(page)).toContainText(/准备调用 AI 网关|高铁|飞机|实时票价/);
     await expect(currentTaskLogs(page)).not.toContainText("commerceAgent.plan");
     await expect(currentTaskLogs(page)).not.toContainText("路由判断：全球采购");
-  });
-
-  test("direct order and payment request stays plan-only with confirmation boundary", async () => {
-    const command = runId + " 帮我直接下单并付款";
-    await submitHomeCommand(page, command);
-    await expect(currentTaskLogs(page)).toContainText("commerceAgent.plan");
-    await expect(currentTaskLogs(page)).toContainText("realExecution=false");
-    await expect(currentTaskLogs(page)).toContainText(/未下单|未付款|未提交订单|最终执行必须用户确认/);
   });
 });
