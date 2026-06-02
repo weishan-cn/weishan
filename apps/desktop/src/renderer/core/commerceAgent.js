@@ -12,6 +12,8 @@
     ticketing:"门票 / 票务",
     serviceBooking:"服务预约",
     domain:"域名",
+    cruise:"邮轮",
+    privateJet:"公务机",
     generalProcurement:"全球采购"
   };
 
@@ -48,6 +50,8 @@
 
   function getCommerceCategory(text){
     const raw = String(text || "");
+    if (/邮轮|游轮|cruise|cruise ship|邮轮票|邮轮旅行|邮轮航线|邮轮舱房|皇家加勒比|歌诗达|MSC\s*邮轮|地中海邮轮/i.test(raw)) return "cruise";
+    if (/公务机|私人飞机|私人飞机包机|包机|private jet|charter flight|jet charter|商务包机|包机服务/i.test(raw)) return "privateJet";
     if (/酒店|民宿|住宿|Hotel/i.test(raw)) return "hotel";
     if (/机票|航班|飞机票|flight/i.test(raw)) return "flight";
     if (/火车票|高铁票|动车票|train/i.test(raw)) return "train";
@@ -69,6 +73,8 @@
       ticketing:["官方票务渠道", "授权代理平台", "二级市场风险提示", "退票与实名规则"],
       serviceBooking:["服务平台", "商家官网", "评价与履约记录", "售后与取消政策"],
       domain:["域名注册商", "品牌官网", "续费与转移政策", "隐私保护与地区限制"],
+      cruise:["邮轮公司官网", "邮轮代理平台", "旅行平台", "港口出发地", "航线日期", "舱型", "餐饮/服务", "退改政策"],
+      privateJet:["公务机包机平台", "航空服务商", "固定基地运营商 FBO", "包机经纪商", "起降机场", "机型", "航程", "服务条款"],
       generalProcurement:["全球采购平台", "品牌与官方渠道", "价格比较渠道", "风险与售后信息"]
     };
     return map[category] || map.generalProcurement;
@@ -80,16 +86,18 @@
     if (category === "hotel") return base.concat(["位置", "清洁度", "取消政策"]);
     if (category === "aiModelPricing") return base.concat(["计费单位", "上下文/额度", "稳定性", "合规策略"]);
     if (category === "domain") return base.concat(["首年费用", "续费价格", "转移限制", "隐私保护"]);
+    if (category === "cruise") return ["总价", "人均价", "舱型", "出发港", "航线天数", "停靠港口", "餐饮和服务", "签证/登船要求", "退改政策", "隐性费用", "评价和信誉"];
+    if (category === "privateJet") return ["包机报价", "飞行小时成本", "机型", "航程能力", "机场可用性", "服务商资质", "取消政策", "附加费用", "安全记录", "响应速度", "合同条款风险"];
     return base;
   }
 
   function classifyCommerceIntent(text){
     const raw = String(text || "");
     const category = getCommerceCategory(raw);
-    const purchaseWords = /全球采购|采购代理|自动采购|比价|价格比较|平台比较|最便宜方案|性价比最高|帮我买|帮我订|帮我比较|我想买|订下周|直接下单|下单|付款|采购|买|订|找最便宜|最便宜.*(?:机票|酒店|域名|方案|API|平台|商品)|OpenRouter.*价格|模型平台.*价格/i;
-    const assistedSearchPurchase = /帮我找.*(?:机票|酒店|火车票|高铁票|航班|商品|MacBook|域名|ChatGPT API|API 方案|模型平台|采购渠道|最便宜|性价比)/i.test(raw);
-    const directOrderRisk = /直接下单|下单并付款|提交订单|付款/i.test(raw);
-    const categoryWords = /酒店|机票|火车票|高铁票|航班|电商|商品|SaaS|AI 模型|模型平台|API|门票|票务|服务预约|域名|MacBook|ChatGPT API|采购渠道/i;
+    const purchaseWords = /全球采购|采购代理|自动采购|比价|价格比较|平台比较|最便宜方案|性价比最高|帮我买|帮我订|帮我比较|我想买|订下周|直接下单|下单|付款|采购|买|订|找最便宜|最便宜.*(?:机票|酒店|域名|方案|API|平台|商品|邮轮|游轮|公务机|包机)|OpenRouter.*价格|模型平台.*价格/i;
+    const assistedSearchPurchase = /帮我找.*(?:机票|酒店|火车票|高铁票|航班|商品|MacBook|域名|ChatGPT API|API 方案|模型平台|采购渠道|最便宜|性价比|邮轮|游轮|公务机|包机|私人飞机)/i.test(raw);
+    const directOrderRisk = /直接下单|下单并付款|提交订单|付款|提交.*询价表|提交.*询价|上传.*护照|护照.*预订/i.test(raw);
+    const categoryWords = /酒店|机票|火车票|高铁票|航班|电商|商品|SaaS|AI 模型|模型平台|API|门票|票务|服务预约|域名|MacBook|ChatGPT API|采购渠道|邮轮|游轮|cruise|公务机|私人飞机|包机|private jet|charter flight/i;
     const isCommerceIntent = directOrderRisk || ((purchaseWords.test(raw) || assistedSearchPurchase) && (categoryWords.test(raw) || category !== "generalProcurement" || /全球采购|采购代理|自动采购|比价|平台比较|价格比较/i.test(raw)));
     return {
       isCommerceIntent,
@@ -139,7 +147,9 @@
       hotel:["位置", "房型", "取消政策"],
       train:["车次", "席别", "中转方案"],
       aiModelPricing:["计费单位", "上下文/额度", "调用稳定性"],
-      domain:["首年费用字段", "续费价格字段", "转移规则"]
+      domain:["首年费用字段", "续费价格字段", "转移规则"],
+      cruise:["邮轮公司", "航线名称", "出发港", "目的地/停靠港", "出发日期", "天数", "舱型", "总价", "人均价", "费用包含", "费用不含", "退改政策", "预订链接", "风险备注"],
+      privateJet:["服务商", "机型", "起飞机场", "到达机场", "预计飞行时间", "报价", "币种", "可乘人数", "行李限制", "取消政策", "附加费用", "合规/安全说明", "询价链接", "风险备注"]
     };
     return uniqueList(common.concat(extras[category] || []));
   }
@@ -157,7 +167,9 @@
         "退改/售后条件",
         "执行前需要用户确认的事项",
         category === "aiModelPricing" ? "计费口径与合规说明" : "",
-        category === "flight" ? "行李/中转/改签说明" : ""
+        category === "flight" ? "行李/中转/改签说明" : "",
+        category === "cruise" ? "航线、舱型、登船要求与退改说明" : "",
+        category === "privateJet" ? "询价口径、机型、机场、服务条款与安全资质说明" : ""
       ])
     };
   }
@@ -184,7 +196,7 @@
   }
 
   function taskStatusFromText(text){
-    return /直接下单|下单并付款|支付|付款|提交订单/i.test(String(text || "")) ? "blocked" : "planned";
+    return /直接下单|下单并付款|支付|付款|提交订单|提交.*询价表|提交.*询价|上传.*护照|护照.*预订/i.test(String(text || "")) ? "blocked" : "planned";
   }
 
   function createCommerceTask(input){

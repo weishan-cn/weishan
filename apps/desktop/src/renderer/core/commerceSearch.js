@@ -73,9 +73,10 @@
     const category = String(task && task.category || "");
     const text = String(task && task.inputSummary || "");
     const fields = [];
-    if (/^(flight|train|hotel)$/.test(category) && !/(\d{4}[-/]\d{1,2}[-/]\d{1,2}|今天|明天|后天|下周|周[一二三四五六日天])/.test(text)) {
+    if (/^(flight|train|hotel|cruise)$/.test(category) && !/(\d{4}[-/]\d{1,2}[-/]\d{1,2}|今天|明天|后天|下周|周[一二三四五六日天])/.test(text)) {
       fields.push(category === "hotel" ? "入住日期" : "出行日期");
     }
+    if (category === "privateJet" && !/(飞|到|起飞|机场|from|to)/i.test(text)) fields.push("起降机场");
     return fields;
   }
 

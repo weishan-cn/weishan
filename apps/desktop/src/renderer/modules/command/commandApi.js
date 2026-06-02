@@ -258,7 +258,7 @@
       blocked ? "原因：涉及下单 / 付款。" : "",
       missing,
       !blocked && providerMissing ? "搜索源未配置，无法返回真实价格。" : "",
-      "安全边界：" + (blocked ? "不会下单、付款或提交订单。" : "未搜索、未下单、未付款、未提交订单。"),
+      "安全边界：" + (blocked ? "不会下单、付款、提交订单、上传护照或提交询价表。" : "未搜索、未下单、未付款、未提交订单。"),
       "下一步：查看全球采购计划。"
     ].filter(Boolean).join("\n");
     return { answer, commercePlan:savedPlan };

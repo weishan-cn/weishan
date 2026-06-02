@@ -140,7 +140,7 @@
         </div>
         <div class="commerce-risk commerce-risk-strong">
           <b>该请求涉及下单 / 付款，已阻断。</b>
-          <span>不会下单、付款或提交订单。</span>
+          <span>不会下单、付款或提交订单，也不会上传护照或提交询价表。</span>
         </div>
         ${section("需求理解", `<dl class="commerce-facts">
           <div><dt>用户需求</dt><dd>${esc(detail.demandUnderstanding || task.inputSummary)}</dd></div>
@@ -184,12 +184,16 @@
     const missingFields = Array.isArray(task && task.missingFields) && task.missingFields.length ? task.missingFields : [];
     const disabled = !hasProvider || missingFields.length > 0;
     const isModelPricing = task && task.category === "aiModelPricing";
+    const isCruise = task && task.category === "cruise";
+    const isPrivateJet = task && task.category === "privateJet";
     const providerLabel = isModelPricing ? "OpenRouter" : hasProvider ? settings.providerName || "commerceProvider" : "未配置";
     const failedMessage = task && task.searchStatus === "failed" ? task.searchErrorMessage || (isModelPricing ? "OpenRouter 搜索源不可用，无法返回真实价格。" : "搜索失败，无法返回真实价格。") : "";
     const buttonLabel = isModelPricing ? "搜索 OpenRouter 模型价格" : missingFields.length ? "搜索真实价格" : hasProvider ? "搜索真实价格" : "搜索源未配置";
     return `<div class="commerce-search-panel">
       <p><b>${hasProvider ? "已配置：" : "未配置："}</b>${isModelPricing ? (hasProvider ? "OpenRouter provider 可用于模型价格搜索。" : "OpenRouter provider 不可用。") : hasProvider ? "可以搜索真实候选方案。" : "搜索源未配置，无法返回真实价格。"}</p>
       <p class="commerce-muted">Provider：${esc(providerLabel)}</p>
+      ${isCruise ? `<p class="commerce-warning">邮轮价格受航线、舱型、日期和人数影响较大。当前未接入真实搜索源时不显示价格。</p>` : ""}
+      ${isPrivateJet ? `<p class="commerce-warning">公务机属于高价值定制服务，价格通常需要询价确认。当前仅生成搜索和询价计划，不自动提交询价、不付款、不签约。</p>` : ""}
       ${failedMessage ? `<p class="commerce-warning">${esc(failedMessage)}</p>` : ""}
       ${missingFields.length ? `<p class="commerce-warning">请补充${esc(missingFields.join("、"))}，否则不搜索价格。</p>` : ""}
       <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${esc(disabled && !missingFields.length && !isModelPricing ? "搜索源未配置" : buttonLabel)}</button>
