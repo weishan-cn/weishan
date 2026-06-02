@@ -61,6 +61,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator('.nav-item[data-route="commerce"]')).toBeVisible();
     await page.locator('.nav-item[data-route="commerce"]').click();
     await expect(page.getByRole("heading", { name:"全球采购" })).toBeVisible();
+    await expect(page.locator(".commerce-hero h1")).toHaveText("全球采购");
     await expect(page.getByText("搜索、比价、推荐、执行前确认")).toBeVisible();
     await expect(page.getByText("不真实搜索、不下单、不付款、不提交订单")).toBeVisible();
   });
@@ -88,12 +89,21 @@ test.describe.serial("commerce agent workbench", () => {
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.getByRole("heading", { name:"全球采购" })).toBeVisible();
     await expect(page.locator(".commerce-task-list")).toContainText(runId + " 帮我找成都到上海最便宜机票");
+    await expect(page.locator(".commerce-task-list")).toContainText("机票");
+    await expect(page.locator(".commerce-task-list")).toContainText("计划中");
+    await expect(page.locator(".commerce-task-list")).not.toContainText("realExecution=false");
+    await expect(page.locator(".commerce-task-list")).not.toContainText("commerceTask-");
     await page.getByRole("button", { name:"查看计划" }).first().click();
     await expect(page.getByRole("heading", { name:"需求理解" })).toBeVisible();
     await expect(page.getByRole("heading", { name:"搜索范围" })).toBeVisible();
     await expect(page.getByRole("heading", { name:"比较维度" })).toBeVisible();
     await expect(page.getByRole("heading", { name:"决策规则" })).toBeVisible();
+    await expect(page.getByRole("heading", { name:"推荐输出格式" })).toBeVisible();
+    await expect(page.getByRole("heading", { name:"候选方案字段模板" })).toBeVisible();
     await expect(page.getByRole("heading", { name:"执行边界" })).toBeVisible();
+    await expect(page.getByRole("heading", { name:"下一步建议" })).toBeVisible();
+    await expect(page.locator(".commerce-detail")).not.toContainText("realExecution=false");
+    await expect(page.locator(".commerce-detail")).not.toContainText("taskId");
   });
 
   test("ai model pricing plan uses candidate schema without fake live prices", async () => {
@@ -104,7 +114,7 @@ test.describe.serial("commerce agent workbench", () => {
     await page.getByRole("button", { name:"查看计划" }).first().click();
     await expect(page.getByText("候选方案字段模板")).toBeVisible();
     await expect(page.getByText(/计费单位|上下文\/额度|调用稳定性/).first()).toBeVisible();
-    await expect(page.getByText("当前不填真实价格，不伪造实时库存或可用性")).toBeVisible();
+    await expect(page.getByText("不填真实价格，不伪造实时库存或可用性")).toBeVisible();
     await expect(page.locator(".commerce-detail")).not.toContainText("已找到");
   });
 
@@ -121,6 +131,10 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(currentTaskLogs(page)).not.toContainText("决策目标：同等条件下价格最低");
     await page.locator('.nav-item[data-route="commerce"]').click();
     await expect(page.getByText("已阻断").first()).toBeVisible();
+    await page.getByRole("button", { name:"查看计划" }).first().click();
+    await expect(page.locator(".commerce-detail")).toContainText("该请求涉及下单 / 付款，已阻断");
+    await expect(page.locator(".commerce-detail")).toContainText("不会下单、付款或提交订单");
+    await expect(page.getByRole("button", { name:/付款|下单|提交订单/ })).toHaveCount(0);
     await expect(page.locator(".commerce-safety")).toContainText("当前为计划与推荐阶段，不真实搜索、不下单、不付款、不提交订单");
   });
 
@@ -140,7 +154,7 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, command);
     await page.locator('.nav-item[data-route="commerce"]').click();
     await expect(page.locator(".commerce-task-list")).toContainText(command);
-    await page.getByRole("button", { name:"清理此计划" }).first().click();
+    await page.getByRole("button", { name:"清理计划" }).first().click();
     await expect(page.locator(".commerce-task-list")).not.toContainText(command);
     await gotoRoute(page, "history");
     await page.locator("#historySearch").fill(runId);

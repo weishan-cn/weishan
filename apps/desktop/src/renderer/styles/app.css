@@ -1173,6 +1173,10 @@
   background:#fff;
   padding:14px;
 }
+.commerce-empty{
+  display:grid;
+  gap:8px;
+}
 .commerce-input{
   min-height:74px;
 }
@@ -1262,7 +1266,7 @@
   margin-top:10px;
   border:1px solid #edf2f7;
   border-radius:8px;
-  padding:10px;
+  padding:11px;
   display:grid;
   gap:8px;
   background:#fff;
@@ -1283,6 +1287,9 @@
 .commerce-task-main span{
   color:#64748b;
   font-size:12px;
+}
+.commerce-task-meta{
+  justify-content:flex-start;
 }
 .commerce-task-actions{
   justify-content:flex-start;
@@ -1323,9 +1330,20 @@
   display:grid;
   gap:12px;
 }
+.commerce-detail{
+  display:grid;
+  gap:12px;
+}
+.commerce-detail-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
 .commerce-section{
-  padding-top:10px;
-  border-top:1px solid #f1f5f9;
+  border:1px solid #eef2f7;
+  border-radius:9px;
+  padding:11px;
+  background:#fff;
 }
 .commerce-section h3{
   margin:0 0 6px;
@@ -1341,6 +1359,46 @@
   margin:0;
   padding-left:18px;
 }
+.commerce-section-tight{
+  min-height:112px;
+}
+.commerce-facts{
+  margin:0;
+  display:grid;
+  gap:8px;
+}
+.commerce-facts div{
+  display:grid;
+  grid-template-columns:72px minmax(0, 1fr);
+  gap:10px;
+}
+.commerce-facts dt{
+  color:#64748b;
+  font-size:12px;
+  font-weight:900;
+}
+.commerce-facts dd{
+  margin:0;
+  color:#334155;
+  line-height:1.45;
+}
+.commerce-chip-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+}
+.commerce-chip{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:0 8px;
+  border-radius:999px;
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  color:#334155;
+  font-size:12px;
+  font-weight:800;
+}
 .commerce-safe{
   color:#047857 !important;
   font-weight:800;
@@ -1355,6 +1413,10 @@
   line-height:1.5;
   font-weight:800;
 }
+.commerce-risk b,
+.commerce-risk span{
+  display:block;
+}
 .commerce-risk-strong{
   border-color:#fecaca;
   background:#fef2f2;
@@ -1366,6 +1428,9 @@
 }
 @media (max-width: 980px){
   .commerce-layout{
+    grid-template-columns:1fr;
+  }
+  .commerce-detail-grid{
     grid-template-columns:1fr;
   }
   .commerce-task-list{

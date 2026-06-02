@@ -33,8 +33,12 @@
     return `<ul class="${esc(className || "commerce-list")}">${(items || []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>`;
   }
 
-  function section(title, body){
-    return `<section class="commerce-section">
+  function chips(items){
+    return `<div class="commerce-chip-list">${(items || []).map((item) => `<span class="commerce-chip">${esc(item)}</span>`).join("")}</div>`;
+  }
+
+  function section(title, body, className){
+    return `<section class="commerce-section ${esc(className || "")}">
       <h3>${esc(title)}</h3>
       ${body}
     </section>`;
@@ -44,8 +48,8 @@
     const map = {
       planned:"计划中",
       comparing:"比较中",
-      recommended:"已形成推荐结构",
-      waitingConfirmation:"等待确认",
+      recommended:"已生成推荐框架",
+      waitingConfirmation:"待确认",
       blocked:"已阻断",
       cleared:"已清理"
     };
@@ -56,23 +60,26 @@
     if (!tasks.length) {
       return `<div class="commerce-empty">
         <b>暂无采购计划。</b>
-        <span>你可以在首页输入：帮我找成都到上海最便宜机票。</span>
+        <span>可在首页输入：</span>
+        <span>帮我找成都到上海最便宜机票</span>
+        <span>帮我比较 OpenRouter 和其他 AI 模型平台价格</span>
+        <button class="cmd-btn gray" id="commerceEmptyBackHome" type="button">返回首页总调度</button>
       </div>`;
     }
     return tasks.map((task) => {
       const active = task.taskId === selectedTaskId ? " active" : "";
+      const category = task.categoryLabel || task.category || "全球采购";
       return `<article class="commerce-task-card${active}" data-commerce-task-id="${esc(task.taskId)}">
         <div class="commerce-task-main">
           <strong>${esc(task.inputSummary || "全球采购任务")}</strong>
-          <span>${esc(task.categoryLabel || task.category)} · ${esc(timeLabel(task.createdAt))}</span>
+          <span>${esc(category)} · ${esc(timeLabel(task.createdAt))}</span>
         </div>
         <div class="commerce-task-meta">
           <span class="commerce-status ${esc(task.status)}">${esc(taskStatusLabel(task.status))}</span>
-          <span class="commerce-mini">realExecution=false</span>
         </div>
         <div class="commerce-task-actions">
           <button class="cmd-btn gray commerce-view-task" type="button" data-task-id="${esc(task.taskId)}">查看计划</button>
-          <button class="cmd-btn gray commerce-clear-task" type="button" data-task-id="${esc(task.taskId)}">清理此计划</button>
+          <button class="cmd-btn gray commerce-clear-task" type="button" data-task-id="${esc(task.taskId)}">清理计划</button>
         </div>
       </article>`;
     }).join("");
@@ -87,6 +94,29 @@
       </div>`;
     }
     const detail = api && api.createCommercePlanDetail ? api.createCommercePlanDetail(task) : {};
+    const category = detail.categoryLabel || task.categoryLabel || task.category || "全球采购";
+    if (task.status === "blocked") {
+      return `<div class="commerce-detail commerce-detail-compact" data-commerce-detail="${esc(task.taskId)}">
+        <div class="commerce-detail-head">
+          <div>
+            <h2>计划详情</h2>
+            <p>${esc(task.inputSummary)}</p>
+          </div>
+          <span class="commerce-status blocked">已阻断</span>
+        </div>
+        <div class="commerce-risk commerce-risk-strong">
+          <b>该请求涉及下单 / 付款，已阻断。</b>
+          <span>不会下单、付款或提交订单。</span>
+        </div>
+        ${section("需求理解", `<dl class="commerce-facts">
+          <div><dt>用户需求</dt><dd>${esc(detail.demandUnderstanding || task.inputSummary)}</dd></div>
+          <div><dt>类目</dt><dd>${esc(category)}</dd></div>
+          <div><dt>当前状态</dt><dd>已阻断</dd></div>
+        </dl>`)}
+        ${section("执行边界", `<div class="commerce-risk">当前为计划阶段：不真实搜索、不下单、不付款、不提交订单。</div>${chips(["不访问外部网站", "不填写订单", "不保存支付或身份信息", "最终执行必须用户确认"])}`)}
+        ${section("下一步建议", list(["移除直接下单、付款或提交订单要求。", "补充预算、时间、地区限制后重新生成计划。"]))}
+      </div>`;
+    }
     return `<div class="commerce-detail" data-commerce-detail="${esc(task.taskId)}">
       <div class="commerce-detail-head">
         <div>
@@ -95,16 +125,20 @@
         </div>
         <span class="commerce-status ${esc(task.status)}">${esc(taskStatusLabel(task.status))}</span>
       </div>
-      ${task.status === "blocked" ? `<div class="commerce-risk commerce-risk-strong">该请求包含直接下单或付款意图。当前已阻断真实执行，只保留计划边界。</div>` : ""}
-      ${section("需求理解", `<p>${esc(detail.demandUnderstanding || task.inputSummary)}</p>`)}
-      ${section("类目", `<p>${esc(detail.categoryLabel || task.categoryLabel || task.category)}</p>`)}
-      ${section("搜索范围", list(detail.searchScope))}
-      ${section("比较维度", list(detail.comparisonDimensions))}
-      ${section("决策规则", `<p>${esc(detail.decisionRule)}</p>`)}
-      ${section("候选方案字段模板", `<p class="commerce-muted">字段模板用于后续真实搜索后填充；当前不填真实价格，不伪造实时库存或可用性。</p>${list(detail.candidateSchema, "commerce-schema-list")}`)}
-      ${section("推荐输出格式", `<p>${esc(detail.recommendationTemplate && detail.recommendationTemplate.note)}</p>${list(detail.recommendationTemplate && detail.recommendationTemplate.fields)}`)}
-      ${section("执行边界", `<div class="commerce-risk">当前为计划与推荐阶段，不真实搜索、不下单、不付款、不提交订单。</div>${list(detail.executionBoundary)}`)}
-      ${section("下一步建议", list(detail.nextSteps))}
+      <div class="commerce-detail-grid">
+        ${section("需求理解", `<dl class="commerce-facts">
+          <div><dt>用户需求</dt><dd>${esc(detail.demandUnderstanding || task.inputSummary)}</dd></div>
+          <div><dt>类目</dt><dd>${esc(category)}</dd></div>
+          <div><dt>当前状态</dt><dd>${esc(taskStatusLabel(task.status))}</dd></div>
+        </dl>`)}
+        ${section("搜索范围", chips(detail.searchScope), "commerce-section-tight")}
+        ${section("比较维度", chips(detail.comparisonDimensions), "commerce-section-tight")}
+        ${section("决策规则", `<p>${esc(detail.decisionRule)}</p>`)}
+        ${section("推荐输出格式", `<p class="commerce-muted">后续真实搜索后会生成：</p>${chips(detail.recommendationTemplate && detail.recommendationTemplate.fields)}`)}
+        ${section("候选方案字段模板", `<p class="commerce-muted">仅展示字段结构，不填真实价格，不伪造实时库存或可用性。</p>${chips(detail.candidateSchema)}`)}
+        ${section("执行边界", `<div class="commerce-risk">当前为计划阶段：不真实搜索、不下单、不付款、不提交订单。</div>${chips(["不访问外部网站", "不填写订单", "不保存支付或身份信息", "最终执行必须用户确认"])}`)}
+        ${section("下一步建议", list(["补充预算、时间、地区限制。", "后续接入真实搜索插件后填入候选方案。", "下单或付款前必须再次确认。"]))}
+      </div>
     </div>`;
   }
 
@@ -160,6 +194,8 @@
     if (input) input.addEventListener("input", () => { draftText = input.value; });
     const back = host.querySelector("#commerceBackHome");
     if (back) back.addEventListener("click", () => window.WeishanRouter && window.WeishanRouter.setRoute("home"));
+    const emptyBack = host.querySelector("#commerceEmptyBackHome");
+    if (emptyBack) emptyBack.addEventListener("click", () => window.WeishanRouter && window.WeishanRouter.setRoute("home"));
     const generate = host.querySelector("#commerceGenerate");
     if (generate) generate.addEventListener("click", () => {
       if (!api || !api.createCommerceTask || !api.addCommerceTask) return;
