@@ -305,8 +305,20 @@
       <div class="cmd-log-list">
         ${(latest.logs || []).map(logLine).join("")}
       </div>
+      ${commercePlanActions(latest)}
       ${desktopPlanActions(latest)}
       ${desktopExecutionQueuePanel()}`;
+  }
+
+  function commercePlanActions(task){
+    const meta = task && task.meta || {};
+    const answer = String(task && task.answer || "");
+    const isCommerce = meta.commerceTaskId || meta.commerceCategory || /commerceAgent\.plan|路由判断：全球采购/.test(answer);
+    if (!isCommerce) return "";
+    return `<div class="commerce-home-actions" data-commerce-home-summary="true">
+      <span>完整计划内容已放入全球采购工作台。</span>
+      <button class="cmd-btn primary" id="commerceViewPlanBtn" type="button">查看全球采购计划</button>
+    </div>`;
   }
 
   function desktopPlanActions(task){
@@ -949,6 +961,16 @@
     if (historyDetail) historyDetail.addEventListener("dblclick", function(){
       selectedHistoryId = "";
       render(host);
+    });
+
+    const commerceViewPlanBtn = host.querySelector("#commerceViewPlanBtn");
+    if (commerceViewPlanBtn) commerceViewPlanBtn.addEventListener("click", function(){
+      const commerceNav = document.querySelector('.nav-item[data-route="commerce"]');
+      if (commerceNav && typeof commerceNav.click === "function") {
+        commerceNav.click();
+        return;
+      }
+      if (window.WeishanRouter && window.WeishanRouter.setRoute) window.WeishanRouter.setRoute("commerce");
     });
   }
 

@@ -1185,6 +1185,17 @@
   font-size:13px;
   font-weight:800;
 }
+.commerce-home-actions{
+  margin-top:10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  border-top:1px solid #edf2f7;
+  padding-top:10px;
+  color:#64748b;
+  font-size:13px;
+}
 .commerce-layout{
   display:grid;
   grid-template-columns:minmax(260px, 340px) minmax(0, 1fr);
