@@ -250,15 +250,20 @@
     const blocked = status === "blocked";
     const missing = Array.isArray(savedPlan.missingFields) && savedPlan.missingFields.length ? "请补充" + savedPlan.missingFields.join("、") + "。" : "";
     const providerMissing = savedPlan.searchStatus === "providerMissing";
+    const fields = savedPlan.normalizedFields || {};
+    const routeCondition = fields.originText && fields.destinationText ? fields.originText + " → " + fields.destinationText : "";
+    const conditionSummary = [routeCondition, fields.dateText || fields.timing || ""].filter(Boolean).join("，");
+    const providerMissingText = savedPlan.category === "flight" ? "机票搜索源未配置，暂不能返回真实价格。" : "搜索源未配置，无法返回真实价格。";
     const answer = [
       blocked ? "全球采购计划已阻断" : "全球采购计划已生成",
       "需求：" + savedPlan.inputSummary,
       "类型：" + (savedPlan.categoryLabel || savedPlan.category),
       "状态：" + (blocked ? "已阻断" : "计划已生成"),
+      !blocked && conditionSummary ? "条件：" + conditionSummary : "",
       blocked ? "原因：涉及下单 / 付款。" : "",
       missing,
-      !blocked && providerMissing ? "搜索源未配置，无法返回真实价格。" : "",
-      "安全边界：" + (blocked ? "不会下单、付款、提交订单、上传护照或提交询价表。" : "未搜索、未下单、未付款、未提交订单。"),
+      !blocked && providerMissing ? providerMissingText : "",
+      "安全边界：" + (blocked ? "不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表。" : "未搜索、未下单、未付款、未提交订单。"),
       "下一步：查看全球采购计划。"
     ].filter(Boolean).join("\n");
     return { answer, commercePlan:savedPlan };

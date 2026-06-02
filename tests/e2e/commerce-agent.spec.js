@@ -214,6 +214,41 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).not.toContainText(/CNY\s*\d+/);
   });
 
+  test("flight booking intent routes to commerce with origin destination and date text", async () => {
+    const command = runId + " 帮我预定明天成都到北京机票";
+    await submitHomeCommand(page, command);
+    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
+    await expect(currentTaskLogs(page)).not.toContainText("准备调用 AI 网关");
+    await expect(currentTaskLogs(page)).not.toContainText("如何手动");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索源未配置，暂不能返回真实价格");
+    await expect(page.locator("#commerceViewPlanBtn")).toBeVisible();
+
+    await page.locator("#commerceViewPlanBtn").click();
+    await page.getByRole("button", { name:"查看计划" }).first().click();
+    await expect(page.locator(".commerce-detail")).toContainText("机票");
+    await expect(page.locator(".commerce-detail")).toContainText("成都");
+    await expect(page.locator(".commerce-detail")).toContainText("北京");
+    await expect(page.locator(".commerce-detail")).toContainText("明天");
+    await expect(page.locator(".commerce-detail")).toContainText("搜索源未配置，无法返回真实机票价格");
+    await expect(page.locator(".commerce-detail")).not.toContainText(/CNY\s*\d+/);
+  });
+
+  test("hotel booking and product buying intents route to commerce before chat", async () => {
+    await submitHomeCommand(page, runId + " 帮我预订上海低价酒店");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：酒店");
+    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
+
+    await submitHomeCommand(page, runId + " 帮我买一台最便宜的 MacBook");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText(/类型：(电商商品|全球采购)/);
+    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
+  });
+
   test("cruise category creates plan without fake price", async () => {
     const command = runId + " 帮我找上海出发的低价邮轮";
     await submitHomeCommand(page, command);
@@ -369,11 +404,24 @@ test.describe.serial("commerce agent workbench", () => {
     const command = runId + " 帮我上传护照并预订公务机";
     await submitHomeCommand(page, command);
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已阻断");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会下单、付款或提交订单，也不会上传护照或提交询价表");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表");
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.locator(".commerce-detail")).toContainText("已阻断");
     await expect(page.locator(".commerce-detail")).toContainText("不会下单、付款或提交订单");
     await expect(page.locator(".commerce-detail")).toContainText(/不保存支付或身份信息|最终执行必须用户确认/);
+  });
+
+  test("flight payment and id upload request is blocked without upload payment or order submit", async () => {
+    const command = runId + " 帮我上传身份证订机票并付款";
+    await submitHomeCommand(page, command);
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已阻断");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会下单、付款或提交订单");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会上传身份证/护照或提交询价表");
+    await page.locator("#commerceViewPlanBtn").click();
+    await expect(page.locator(".commerce-detail")).toContainText("已阻断");
+    await expect(page.locator(".commerce-detail")).toContainText("不会下单、付款或提交订单");
+    await expect(page.locator(".commerce-detail")).toContainText(/不保存支付或身份信息|最终执行必须用户确认/);
+    await expect(page.getByRole("button", { name:/付款|下单|提交订单/ })).toHaveCount(0);
   });
 
   test("home dispatch record keeps commerce entries compact", async () => {

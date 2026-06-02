@@ -168,6 +168,18 @@ test.describe.serial("dispatch router", () => {
     await expectHistory(page, runId, /commerceAgent\.taskCreated|全球采购|MacBook/);
   });
 
+  test("flight booking intent routes to commerce agent before chat", async () => {
+    const command = runId + " 帮我预定明天成都到北京机票";
+    await submitHomeCommand(page, command);
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
+    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
+    await expect(currentTaskLogs(page)).not.toContainText("准备调用 AI 网关");
+    await expectHistory(page, runId, /commerceAgent\.taskCreated|全球采购|成都到北京机票/);
+  });
+
   test("cruise and private jet demands route to commerce agent instead of chat", async () => {
     await submitHomeCommand(page, runId + " 帮我找上海出发的邮轮");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");

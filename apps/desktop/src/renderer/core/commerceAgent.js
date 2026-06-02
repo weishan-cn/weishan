@@ -53,7 +53,7 @@
     if (/邮轮|游轮|cruise|cruise ship|邮轮票|邮轮旅行|邮轮航线|邮轮舱房|皇家加勒比|歌诗达|MSC\s*邮轮|地中海邮轮/i.test(raw)) return "cruise";
     if (/公务机|私人飞机|私人飞机包机|包机|private jet|charter flight|jet charter|商务包机|包机服务/i.test(raw)) return "privateJet";
     if (/酒店|民宿|住宿|Hotel/i.test(raw)) return "hotel";
-    if (/机票|航班|飞机票|flight/i.test(raw)) return "flight";
+    if (/机票|航班|飞机票|航空票|订机票|预定机票|预订机票|买机票|订票|flight/i.test(raw)) return "flight";
     if (/火车票|高铁票|动车票|train/i.test(raw)) return "train";
     if (/OpenRouter|ChatGPT|API|SaaS|模型|model|订阅|会员|AI 平台|AI模型/i.test(raw)) return "aiModelPricing";
     if (/门票|演唱会|展览|票务|ticket/i.test(raw)) return "ticketing";
@@ -94,11 +94,12 @@
   function classifyCommerceIntent(text){
     const raw = String(text || "");
     const category = getCommerceCategory(raw);
-    const purchaseWords = /全球采购|采购代理|自动采购|比价|价格比较|平台比较|最便宜方案|性价比最高|帮我买|帮我订|帮我比较|我想买|订下周|直接下单|下单|付款|采购|买|订|找最便宜|最便宜.*(?:机票|酒店|域名|方案|API|平台|商品|邮轮|游轮|公务机|包机)|OpenRouter.*价格|模型平台.*价格/i;
-    const assistedSearchPurchase = /帮我找.*(?:机票|酒店|火车票|高铁票|航班|商品|MacBook|域名|ChatGPT API|API 方案|模型平台|采购渠道|最便宜|性价比|邮轮|游轮|公务机|包机|私人飞机)/i.test(raw);
-    const directOrderRisk = /直接下单|下单并付款|提交订单|付款|提交.*询价表|提交.*询价|上传.*护照|护照.*预订/i.test(raw);
-    const categoryWords = /酒店|机票|火车票|高铁票|航班|电商|商品|SaaS|AI 模型|模型平台|API|门票|票务|服务预约|域名|MacBook|ChatGPT API|采购渠道|邮轮|游轮|cruise|公务机|私人飞机|包机|private jet|charter flight/i;
-    const isCommerceIntent = directOrderRisk || ((purchaseWords.test(raw) || assistedSearchPurchase) && (categoryWords.test(raw) || category !== "generalProcurement" || /全球采购|采购代理|自动采购|比价|平台比较|价格比较/i.test(raw)));
+    const purchaseWords = /全球采购|采购代理|自动采购|比价|价格比较|平台比较|最便宜方案|性价比最高|可预订|可下单|低价|最便宜|帮我买|帮我订|帮我预定|帮我预订|帮我比较|我想买|订下周|直接下单|下单|付款|采购|购买|买|预定|预订|订票|买票|订|找最便宜|最便宜.*(?:机票|酒店|域名|方案|API|平台|商品|邮轮|游轮|公务机|包机)|OpenRouter.*价格|模型平台.*价格/i;
+    const assistedSearchPurchase = /帮我(?:找|买|购买|订|预定|预订|比较).*(?:机票|飞机票|航空票|酒店|住宿|火车票|高铁票|航班|商品|MacBook|域名|ChatGPT API|API 方案|模型平台|采购渠道|最便宜|低价|性价比|邮轮|游轮|公务机|包机|私人飞机)/i.test(raw);
+    const objectWithPurchase = /(?:机票|飞机票|航空票|航班|酒店|住宿|商品|电商|邮轮|游轮|公务机|私人飞机|包机).*(?:找|买|购买|订|预定|预订|订票|买票|比价|最便宜|低价)|(?:找|买|购买|订|预定|预订|订票|买票|比价|最便宜|低价).*(?:机票|飞机票|航空票|航班|酒店|住宿|商品|电商|邮轮|游轮|公务机|私人飞机|包机)/i.test(raw);
+    const directOrderRisk = /直接下单|下单并付款|提交订单|自动付款|付款|支付|提交.*询价表|提交.*询价|上传.*(?:护照|身份证)|(?:护照|身份证).*(?:预订|预定|订|上传)/i.test(raw);
+    const categoryWords = /酒店|住宿|机票|飞机票|航空票|火车票|高铁票|航班|电商|商品|SaaS|AI 模型|模型平台|API|门票|票务|服务预约|域名|MacBook|ChatGPT API|采购渠道|邮轮|游轮|cruise|公务机|私人飞机|包机|private jet|charter flight/i;
+    const isCommerceIntent = directOrderRisk || objectWithPurchase || ((purchaseWords.test(raw) || assistedSearchPurchase) && (categoryWords.test(raw) || category !== "generalProcurement" || /全球采购|采购代理|自动采购|比价|平台比较|价格比较/i.test(raw)));
     return {
       isCommerceIntent,
       module:"commerceAgent",
@@ -109,15 +110,39 @@
     };
   }
 
+  function cleanPlaceName(value, side){
+    let next = String(value || "");
+    if (side === "origin") next = next.replace(/.*?(?:今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天])/, "");
+    next = next
+      .replace(/^(帮我|请|想|我要|需要|找|买|购买|订|预定|预订|订票|买票|从|出发|低价|最便宜|的)+/g, "")
+      .replace(/(机票|飞机票|航空票|航班|酒店|住宿|火车票|高铁票|邮轮|游轮|公务机|私人飞机|包机|商品|电商|低价|最便宜|的).*$/g, "")
+      .trim();
+    return sanitizeCommerceInput(next).slice(0, 40);
+  }
+
+  function extractCommerceFields(text){
+    const raw = String(text || "");
+    const dateMatch = raw.match(/(\d{4}[-/]\d{1,2}[-/]\d{1,2}|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天])/);
+    const routeMatch = raw.match(/([\u4e00-\u9fa5A-Za-z]{2,24})\s*(?:到|飞往|飞|去)\s*([\u4e00-\u9fa5A-Za-z]{2,24})/);
+    return {
+      originText:routeMatch ? cleanPlaceName(routeMatch[1], "origin") : "",
+      destinationText:routeMatch ? cleanPlaceName(routeMatch[2], "destination") : "",
+      dateText:dateMatch && dateMatch[1] || ""
+    };
+  }
+
   function normalizedFields(text, category){
-    const dateMatch = String(text || "").match(/(\d{4}[-/]\d{1,2}[-/]\d{1,2}|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天])/);
+    const fields = extractCommerceFields(text);
     return {
       need:sanitizeCommerceInput(text),
       category,
       categoryLabel:CATEGORY_LABELS[category] || CATEGORY_LABELS.generalProcurement,
+      originText:fields.originText,
+      destinationText:fields.destinationText,
+      dateText:fields.dateText,
       budget:"",
       region:"",
-      timing:dateMatch && dateMatch[1] || "",
+      timing:fields.dateText,
       constraints:"同等条件下优先价格最低，同时保留风险、信誉、售后和地区限制判断。"
     };
   }
@@ -196,7 +221,7 @@
   }
 
   function taskStatusFromText(text){
-    return /直接下单|下单并付款|支付|付款|提交订单|提交.*询价表|提交.*询价|上传.*护照|护照.*预订/i.test(String(text || "")) ? "blocked" : "planned";
+    return /直接下单|下单并付款|支付|付款|自动付款|提交订单|提交.*询价表|提交.*询价|上传.*(?:护照|身份证)|(?:护照|身份证).*(?:预订|预定|订|上传)/i.test(String(text || "")) ? "blocked" : "planned";
   }
 
   function createCommerceTask(input){

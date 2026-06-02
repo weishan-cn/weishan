@@ -151,11 +151,12 @@
       const result = api.classifyCommerceIntent(raw);
       if (result && result.isCommerceIntent) return true;
     }
-    const purchaseIntent = /全球采购|采购代理|自动采购|比价|价格比较|平台比较|最便宜方案|性价比最高|帮我买|帮我订|帮我比较|我想买|订下周|直接下单|下单|付款|采购|买|订|找最便宜|最便宜.*(?:机票|酒店|域名|方案|API|平台|商品|邮轮|游轮|公务机|包机)|OpenRouter.*价格|模型平台.*价格/i.test(raw);
-    const commerceObject = /酒店|机票|火车票|高铁票|航班|电商|商品|SaaS|AI 模型|模型平台|API|门票|票务|服务预约|域名|MacBook|ChatGPT API|采购渠道|邮轮|游轮|cruise|公务机|私人飞机|包机|private jet|charter flight/i.test(raw);
-    const assistedSearchPurchase = /帮我找.*(?:机票|酒店|火车票|高铁票|航班|商品|MacBook|域名|ChatGPT API|API 方案|模型平台|采购渠道|最便宜|性价比|邮轮|游轮|公务机|包机|私人飞机)/i.test(raw);
-    const directOrderRisk = /直接下单|下单并付款|提交订单|付款/i.test(raw);
-    return directOrderRisk || (purchaseIntent && commerceObject) || assistedSearchPurchase || /全球采购|采购代理|自动采购|比价|平台比较|价格比较/i.test(raw);
+    const purchaseIntent = /全球采购|采购代理|自动采购|比价|价格比较|平台比较|最便宜方案|性价比最高|可预订|可下单|低价|最便宜|帮我买|帮我订|帮我预定|帮我预订|帮我比较|我想买|订下周|直接下单|下单|付款|采购|购买|买|预定|预订|订票|买票|订|找最便宜|最便宜.*(?:机票|酒店|域名|方案|API|平台|商品|邮轮|游轮|公务机|包机)|OpenRouter.*价格|模型平台.*价格/i.test(raw);
+    const commerceObject = /酒店|住宿|机票|飞机票|航空票|火车票|高铁票|航班|电商|商品|SaaS|AI 模型|模型平台|API|门票|票务|服务预约|域名|MacBook|ChatGPT API|采购渠道|邮轮|游轮|cruise|公务机|私人飞机|包机|private jet|charter flight/i.test(raw);
+    const assistedSearchPurchase = /帮我(?:找|买|购买|订|预定|预订|比较).*(?:机票|飞机票|航空票|酒店|住宿|火车票|高铁票|航班|商品|MacBook|域名|ChatGPT API|API 方案|模型平台|采购渠道|最便宜|低价|性价比|邮轮|游轮|公务机|包机|私人飞机)/i.test(raw);
+    const objectWithPurchase = /(?:机票|飞机票|航空票|航班|酒店|住宿|商品|电商|邮轮|游轮|公务机|私人飞机|包机).*(?:找|买|购买|订|预定|预订|订票|买票|比价|最便宜|低价)|(?:找|买|购买|订|预定|预订|订票|买票|比价|最便宜|低价).*(?:机票|飞机票|航空票|航班|酒店|住宿|商品|电商|邮轮|游轮|公务机|私人飞机|包机)/i.test(raw);
+    const directOrderRisk = /直接下单|下单并付款|提交订单|自动付款|付款|支付|提交.*询价表|提交.*询价|上传.*(?:护照|身份证)|(?:护照|身份证).*(?:预订|预定|订|上传)/i.test(raw);
+    return directOrderRisk || objectWithPurchase || (purchaseIntent && commerceObject) || assistedSearchPurchase || /全球采购|采购代理|自动采购|比价|平台比较|价格比较/i.test(raw);
   }
 
   function isDesktopAssistantCommand(text){

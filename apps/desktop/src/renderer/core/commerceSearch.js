@@ -80,12 +80,21 @@
     return fields;
   }
 
+  function cleanPlaceName(value, side){
+    let next = String(value || "");
+    if (side === "origin") next = next.replace(/.*?(?:今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天])/, "");
+    return sanitizeText(next
+      .replace(/^(帮我|请|想|我要|需要|找|买|购买|订|预定|预订|订票|买票|从|出发|低价|最便宜|的)+/g, "")
+      .replace(/(机票|飞机票|航空票|航班|酒店|住宿|火车票|高铁票|邮轮|游轮|公务机|私人飞机|包机|商品|电商|低价|最便宜|的).*$/g, "")
+      .trim(), 40);
+  }
+
   function parseRoute(text){
     const raw = String(text || "");
-    const match = raw.match(/([\u4e00-\u9fa5A-Za-z]{2,20})\s*到\s*([\u4e00-\u9fa5A-Za-z]{2,20})/);
+    const match = raw.match(/([\u4e00-\u9fa5A-Za-z]{2,24})\s*(?:到|飞往|飞|去)\s*([\u4e00-\u9fa5A-Za-z]{2,24})/);
     return {
-      origin:match && match[1] || "",
-      destination:match && match[2] || ""
+      origin:match ? cleanPlaceName(match[1], "origin") : "",
+      destination:match ? cleanPlaceName(match[2], "destination") : ""
     };
   }
 
