@@ -476,6 +476,8 @@
   function desktopAssistantPanel(){
     const settings = desktopAssistantSettings();
     const session = desktopAssistantSession();
+    const api = desktopAssistantApi();
+    const guide = api && api.createDesktopPermissionGuide ? api.createDesktopPermissionGuide() : { permissions:[], message:"当前版本仅生成操作计划和模拟执行，不申请系统权限，不读取屏幕，不控制鼠标键盘。" };
     const status = session.enabled ? "允许本次会话使用" : session.status === "stopped" ? "已停止" : "已关闭";
     return `
       <div class="ws-card desktop-assistant-settings" id="desktopAssistantSettingsPanel">
@@ -495,6 +497,18 @@
         </div>
         <div class="desktop-risk-note desktop-risk-medium">中风险提醒：点击按钮、填写表单、保存/下载/移动文件或修改文档内容，需要用户继续确认。</div>
         <div class="desktop-risk-note desktop-risk-high">高风险操作包括发送邮件、删除文件、付款、提交表单、上传文件、输入密码、安装软件、修改系统设置。此类操作必须二次确认。</div>
+        <div class="desktop-permission-guide" data-desktop-permission-guide="true">
+          <h3>系统权限准备</h3>
+          <p class="ws-muted">${esc(guide.message)}</p>
+          <div class="desktop-permission-list">
+            ${guide.permissions.map(function(item){
+              return `<div class="desktop-permission-item">
+                <b>${esc(item.label)}</b>
+                <span>${esc(item.status)} / ${esc(item.purpose)}</span>
+              </div>`;
+            }).join("")}
+          </div>
+        </div>
       </div>`;
   }
 
@@ -502,6 +516,15 @@
     const panel = host.querySelector("#desktopAssistantSettingsPanel");
     const api = desktopAssistantApi();
     if (!panel || !api || !api.saveDesktopAssistantSettings) return;
+    if (window.HistoryApi && window.HistoryApi.record && api.createDesktopAssistantHistoryPayload) {
+      window.HistoryApi.record("desktopAssistant.permissionGuideViewed", api.createDesktopAssistantHistoryPayload("desktopAssistant.permissionGuideViewed", {
+        inputSummary:"用户查看桌面助手系统权限准备说明。",
+        outputSummary:"当前版本仅生成操作计划和模拟执行，不申请系统权限。",
+        riskLevel:"low",
+        stepCount:0,
+        realExecution:false
+      }));
+    }
     function readSettings(){
       return {
         enabled:!!host.querySelector("#desktopAssistantEnabled").checked,

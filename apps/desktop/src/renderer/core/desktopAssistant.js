@@ -1,6 +1,7 @@
 (function(){
   const DESKTOP_ASSISTANT_STORAGE_KEY = "weishan:desktopAssistant:v1";
   const DESKTOP_ASSISTANT_SESSION_KEY = "weishan:desktopAssistant:session:v1";
+  const DESKTOP_ASSISTANT_QUEUE_KEY = "weishan:desktopAssistant:executionQueue:v1";
   const SCHEMA_VERSION = "weishan.desktopAssistant.v1";
 
   const DEFAULT_SETTINGS = {
@@ -51,6 +52,15 @@
   function writeJson(storage, key, value){
     try { if (storage) storage.setItem(key, JSON.stringify(value)); } catch (_) {}
     return value;
+  }
+
+  function readRawJson(storage, key, fallback){
+    try {
+      const raw = storage && storage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (_) {
+      return fallback;
+    }
   }
 
   function nowIso(){
@@ -134,6 +144,15 @@
       stoppedAt:nowIso(),
       realExecution:false
     });
+  }
+
+  function queueSummary(queue){
+    const steps = Array.isArray(queue && queue.steps) ? queue.steps : [];
+    return {
+      stepCount:steps.length,
+      simulatedStepCount:steps.filter((step) => step && step.status === "simulated").length,
+      blockedStepCount:steps.filter((step) => step && step.status === "blocked").length
+    };
   }
 
   function matchesAny(text, list){
@@ -221,8 +240,140 @@
       requiresSecondConfirm:riskLevel === "high",
       realExecution:false,
       status:"planned",
+      lifecycleStatus:"planCreated",
       createdAt,
       updatedAt:createdAt
+    };
+  }
+
+  function normalizeQueue(queue){
+    const now = nowIso();
+    const data = queue || {};
+    const steps = (Array.isArray(data.steps) ? data.steps : []).map((item, index) => {
+      const step = Object.assign({}, item || {});
+      const riskLevel = step.riskLevel || getRiskLevelForStep(step);
+      return {
+        stepId:step.stepId || "step-" + (index + 1),
+        title:summarize(step.title || "桌面助手步骤", 80),
+        description:summarize(step.description || "", 180),
+        riskLevel,
+        status:step.status || (riskLevel === "high" ? "blocked" : "queued"),
+        realExecution:false,
+        requiresSecondConfirm:step.requiresSecondConfirm === true || riskLevel === "high",
+        updatedAt:step.updatedAt || now
+      };
+    });
+    const summary = queueSummary({ steps });
+    const status = steps.some((step) => step.status === "stopped") ? "stopped" :
+      steps.some((step) => step.status === "blocked") && summary.blockedStepCount === steps.length ? "blocked" :
+      summary.simulatedStepCount && summary.simulatedStepCount + summary.blockedStepCount === steps.length ? "simulated" :
+      data.status || "queued";
+    return Object.assign({}, data, summary, {
+      schemaVersion:"weishan.desktopAssistant.executionQueue.v1",
+      queueId:data.queueId || "desktop-queue-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8),
+      planId:data.planId || "",
+      title:summarize(data.title || "桌面助手执行队列", 80),
+      inputSummary:summarize(data.inputSummary || "", 240),
+      riskLevel:data.riskLevel || highestRisk(steps),
+      status,
+      steps,
+      realExecution:false,
+      requiresSecondConfirm:data.requiresSecondConfirm === true || (data.riskLevel || highestRisk(steps)) === "high",
+      createdAt:data.createdAt || now,
+      updatedAt:now
+    });
+  }
+
+  function createDesktopExecutionQueue(plan){
+    const data = plan || {};
+    const queue = normalizeQueue({
+      planId:data.planId || "",
+      title:data.title || "桌面助手执行队列",
+      inputSummary:data.inputSummary || "",
+      riskLevel:data.riskLevel || highestRisk(data.steps || []),
+      requiresSecondConfirm:data.requiresSecondConfirm === true,
+      status:"executionQueued",
+      steps:(data.steps || []).map((item) => Object.assign({}, item, {
+        status:item.riskLevel === "high" ? "blocked" : "queued",
+        realExecution:false
+      })),
+      createdAt:nowIso()
+    });
+    return saveDesktopExecutionQueue(queue);
+  }
+
+  function getDesktopExecutionQueue(){
+    const raw = readRawJson(safeSessionStorage(), DESKTOP_ASSISTANT_QUEUE_KEY, null);
+    return raw ? normalizeQueue(raw) : null;
+  }
+
+  function saveDesktopExecutionQueue(queue){
+    return writeJson(safeSessionStorage(), DESKTOP_ASSISTANT_QUEUE_KEY, normalizeQueue(queue));
+  }
+
+  function clearDesktopExecutionQueue(){
+    try {
+      const s = safeSessionStorage();
+      if (s) s.removeItem(DESKTOP_ASSISTANT_QUEUE_KEY);
+    } catch (_) {}
+    return null;
+  }
+
+  function blockHighRiskStep(step){
+    const item = Object.assign({}, step || {});
+    return Object.assign({}, item, {
+      riskLevel:item.riskLevel || "high",
+      status:"blocked",
+      realExecution:false,
+      requiresSecondConfirm:true,
+      updatedAt:nowIso()
+    });
+  }
+
+  function simulateDesktopExecutionStep(step){
+    const item = Object.assign({}, step || {});
+    if ((item.riskLevel || getRiskLevelForStep(item)) === "high") return blockHighRiskStep(item);
+    return Object.assign({}, item, {
+      status:"simulated",
+      realExecution:false,
+      updatedAt:nowIso()
+    });
+  }
+
+  function simulateDesktopExecutionQueue(queue){
+    const current = normalizeQueue(queue || getDesktopExecutionQueue() || {});
+    const next = normalizeQueue(Object.assign({}, current, {
+      status:"executionSimulated",
+      steps:(current.steps || []).map((item) => item.riskLevel === "high" ? blockHighRiskStep(item) : simulateDesktopExecutionStep(item))
+    }));
+    return saveDesktopExecutionQueue(next);
+  }
+
+  function stopDesktopAssistantExecution(){
+    stopDesktopAssistantSession();
+    const current = getDesktopExecutionQueue();
+    if (!current) return null;
+    return saveDesktopExecutionQueue(Object.assign({}, current, {
+      status:"stopped",
+      steps:(current.steps || []).map((item) => Object.assign({}, item, {
+        status:item.status === "blocked" ? "blocked" : "stopped",
+        realExecution:false,
+        updatedAt:nowIso()
+      }))
+    }));
+  }
+
+  function createDesktopPermissionGuide(){
+    return {
+      schemaVersion:"weishan.desktopAssistant.permissionGuide.v1",
+      permissions:[
+        { name:"Accessibility", label:"辅助功能 Accessibility", status:"未启用", purpose:"后续真实控制需要" },
+        { name:"Screen Recording", label:"屏幕录制 Screen Recording", status:"未启用", purpose:"后续观察屏幕需要" },
+        { name:"Automation", label:"自动化 Automation", status:"未启用", purpose:"后续控制 App 需要" },
+        { name:"Input Monitoring", label:"输入监控 Input Monitoring", status:"默认不建议开启", purpose:"本轮不使用" }
+      ],
+      message:"当前版本仅生成操作计划和模拟执行，不申请系统权限，不读取屏幕，不控制鼠标键盘。后续如果启用真实桌面控制，必须由用户在 macOS 系统设置中手动授权。",
+      realExecution:false
     };
   }
 
@@ -236,6 +387,8 @@
       action:String(action || "").replace(/^desktopAssistant\./, "") || "event",
       riskLevel,
       stepCount:Number(data.stepCount || steps.length || 0),
+      simulatedStepCount:Number(data.simulatedStepCount || 0),
+      blockedStepCount:Number(data.blockedStepCount || 0),
       inputSummary:summarize(data.inputSummary || data.text || "", 240),
       outputSummary:summarize(data.outputSummary || data.title || "", 240),
       realExecution:false,
@@ -245,9 +398,15 @@
     };
   }
 
+  function createDesktopAssistantExecutionHistoryPayload(action, payload){
+    const queue = normalizeQueue(payload || {});
+    return Object.assign(createDesktopAssistantHistoryPayload(action, queue), queueSummary(queue));
+  }
+
   window.WeishanDesktopAssistant = {
     DESKTOP_ASSISTANT_STORAGE_KEY,
     DESKTOP_ASSISTANT_SESSION_KEY,
+    DESKTOP_ASSISTANT_QUEUE_KEY,
     SCHEMA_VERSION,
     getDesktopAssistantSettings,
     saveDesktopAssistantSettings,
@@ -255,10 +414,20 @@
     setDesktopAssistantSession,
     toggleDesktopAssistantForSession,
     stopDesktopAssistantSession,
+    createDesktopExecutionQueue,
+    getDesktopExecutionQueue,
+    saveDesktopExecutionQueue,
+    clearDesktopExecutionQueue,
+    simulateDesktopExecutionStep,
+    simulateDesktopExecutionQueue,
+    blockHighRiskStep,
+    stopDesktopAssistantExecution,
+    createDesktopPermissionGuide,
     classifyDesktopOperation,
     createDesktopOperationPlan,
     getRiskLevelForStep,
     sanitizeDesktopAssistantText,
-    createDesktopAssistantHistoryPayload
+    createDesktopAssistantHistoryPayload,
+    createDesktopAssistantExecutionHistoryPayload
   };
 })();

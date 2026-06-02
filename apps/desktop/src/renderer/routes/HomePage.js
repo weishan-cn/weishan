@@ -56,7 +56,20 @@
   function desktopAssistantHistory(action, detail){
     const api = desktopAssistantApi();
     if (!api || !api.createDesktopAssistantHistoryPayload || !window.HistoryApi || !window.HistoryApi.record) return;
-    window.HistoryApi.record(action, api.createDesktopAssistantHistoryPayload(action, detail || {}));
+    const payload = api.createDesktopAssistantExecutionHistoryPayload ?
+      api.createDesktopAssistantExecutionHistoryPayload(action, detail || {}) :
+      api.createDesktopAssistantHistoryPayload(action, detail || {});
+    window.HistoryApi.record(action, payload);
+  }
+
+  function desktopExecutionQueue(){
+    const api = desktopAssistantApi();
+    return api && api.getDesktopExecutionQueue ? api.getDesktopExecutionQueue() : null;
+  }
+
+  function latestDesktopTask(){
+    const snap = window.CommandApi.snapshot();
+    return (snap.queue || []).slice().reverse().find((item) => item && (item.meta && item.meta.dispatchModule === "desktopAssistant" || item.module === "desktopAssistant")) || null;
   }
 
   function desktopAssistantStrip(){
@@ -174,7 +187,8 @@
       <div class="cmd-log-list">
         ${(latest.logs || []).map(logLine).join("")}
       </div>
-      ${desktopPlanActions(latest)}`;
+      ${desktopPlanActions(latest)}
+      ${desktopExecutionQueuePanel()}`;
   }
 
   function desktopPlanActions(task){
@@ -192,6 +206,30 @@
         <button class="cmd-btn gray" id="desktopPlanCancel" type="button">取消计划</button>
         <button class="cmd-btn danger ghost" id="desktopPlanStop" type="button">停止接管</button>
       </div>
+    </div>`;
+  }
+
+  function desktopExecutionQueuePanel(){
+    const queue = desktopExecutionQueue();
+    if (!queue || !Array.isArray(queue.steps) || !queue.steps.length) return "";
+    const risk = queue.riskLevel || "low";
+    const rows = queue.steps.map((step) => `<li class="desktop-queue-step desktop-risk-${esc(step.riskLevel || "low")}">
+      <b>${esc(step.title)}</b>
+      <span>${esc(step.description)} · ${esc(step.riskLevel)} · ${esc(step.status)} · realExecution=false</span>
+    </li>`).join("");
+    return `<div class="desktop-execution-queue desktop-risk-${esc(risk)}" data-desktop-execution-queue="true">
+      <div class="desktop-execution-head">
+        <div>
+          <b>桌面助手执行队列</b>
+          <span>状态：${esc(queue.status)} · simulated=${esc(queue.simulatedStepCount)} · blocked=${esc(queue.blockedStepCount)} · realExecution=false</span>
+        </div>
+        <div class="desktop-plan-buttons">
+          <button class="cmd-btn gray" id="desktopQueueSimulate" type="button">模拟执行</button>
+          <button class="cmd-btn gray" id="desktopQueueCancel" type="button">取消计划</button>
+          <button class="cmd-btn danger ghost" id="desktopQueueStop" type="button">停止接管</button>
+        </div>
+      </div>
+      <ol>${rows}</ol>
     </div>`;
   }
 
@@ -361,17 +399,16 @@
 
     function stopDesktopAssistant(){
       const api = desktopAssistantApi();
+      const queue = api && api.stopDesktopAssistantExecution ? api.stopDesktopAssistantExecution() : null;
       const session = api && api.stopDesktopAssistantSession ? api.stopDesktopAssistantSession() : { enabled:false, status:"stopped" };
-      const snap = window.CommandApi.snapshot();
-      const latest = (snap.queue || []).slice().reverse().find((item) => item && (item.meta && item.meta.dispatchModule === "desktopAssistant" || item.module === "desktopAssistant"));
-      desktopAssistantHistory("desktopAssistant.stopped", {
+      const latest = latestDesktopTask();
+      desktopAssistantHistory("desktopAssistant.stopped", Object.assign({}, queue || {}, {
         inputSummary:latest && (latest.inputSummary || latest.text) || "用户点击停止接管。",
         outputSummary:"桌面助手已停止。本轮未执行电脑操作。",
         riskLevel:"low",
-        stepCount:0,
         realExecution:false,
         createdAt:session && session.updatedAt || new Date().toISOString()
-      });
+      }));
       render(host);
     }
 
@@ -380,27 +417,40 @@
 
     const desktopPlanStop = host.querySelector("#desktopPlanStop");
     if (desktopPlanStop) desktopPlanStop.addEventListener("click", stopDesktopAssistant);
+    const desktopQueueStop = host.querySelector("#desktopQueueStop");
+    if (desktopQueueStop) desktopQueueStop.addEventListener("click", stopDesktopAssistant);
 
     const desktopPlanConfirm = host.querySelector("#desktopPlanConfirm");
     if (desktopPlanConfirm) desktopPlanConfirm.addEventListener("click", function(){
-      const snap = window.CommandApi.snapshot();
-      const latest = (snap.queue || []).slice().reverse().find((item) => item && (item.meta && item.meta.dispatchModule === "desktopAssistant" || item.module === "desktopAssistant"));
+      const api = desktopAssistantApi();
+      const latest = latestDesktopTask();
       const meta = latest && latest.meta || {};
-      desktopAssistantHistory("desktopAssistant.planConfirmed", {
+      const plan = api && api.createDesktopOperationPlan ? api.createDesktopOperationPlan(latest && (latest.inputSummary || latest.text) || "") : null;
+      const queue = api && api.createDesktopExecutionQueue && plan ? api.createDesktopExecutionQueue(plan) : null;
+      desktopAssistantHistory("desktopAssistant.planConfirmed", Object.assign({}, queue || plan || {}, {
         inputSummary:latest && latest.inputSummary || latest && latest.text || "确认桌面操作计划。",
         outputSummary:"用户已确认桌面操作计划；本轮仍不执行电脑操作。",
         riskLevel:meta.desktopRiskLevel || "low",
         stepCount:meta.desktopStepCount || 0,
         requiresSecondConfirm:meta.desktopRequiresSecondConfirm === true,
         realExecution:false
-      });
-      alert("已确认计划。本轮不会执行真实电脑操作。");
+      }));
+      if (queue) {
+        desktopAssistantHistory("desktopAssistant.executionQueued", Object.assign({}, queue, {
+          outputSummary:"桌面助手执行队列已生成；realExecution=false。"
+        }));
+        if (Number(queue.blockedStepCount || 0) > 0) {
+          desktopAssistantHistory("desktopAssistant.executionBlocked", Object.assign({}, queue, {
+            outputSummary:"高风险步骤已阻断，不允许模拟为已执行。"
+          }));
+        }
+      }
+      render(host);
     });
 
     const desktopPlanCancel = host.querySelector("#desktopPlanCancel");
     if (desktopPlanCancel) desktopPlanCancel.addEventListener("click", function(){
-      const snap = window.CommandApi.snapshot();
-      const latest = (snap.queue || []).slice().reverse().find((item) => item && (item.meta && item.meta.dispatchModule === "desktopAssistant" || item.module === "desktopAssistant"));
+      const latest = latestDesktopTask();
       const meta = latest && latest.meta || {};
       desktopAssistantHistory("desktopAssistant.planCancelled", {
         inputSummary:latest && latest.inputSummary || latest && latest.text || "取消桌面操作计划。",
@@ -410,7 +460,37 @@
         requiresSecondConfirm:meta.desktopRequiresSecondConfirm === true,
         realExecution:false
       });
-      alert("已取消计划。");
+      const api = desktopAssistantApi();
+      if (api && api.clearDesktopExecutionQueue) api.clearDesktopExecutionQueue();
+      render(host);
+    });
+
+    const desktopQueueCancel = host.querySelector("#desktopQueueCancel");
+    if (desktopQueueCancel) desktopQueueCancel.addEventListener("click", function(){
+      const queue = desktopExecutionQueue();
+      desktopAssistantHistory("desktopAssistant.planCancelled", Object.assign({}, queue || {}, {
+        outputSummary:"用户已取消桌面助手执行队列。"
+      }));
+      const api = desktopAssistantApi();
+      if (api && api.clearDesktopExecutionQueue) api.clearDesktopExecutionQueue();
+      render(host);
+    });
+
+    const desktopQueueSimulate = host.querySelector("#desktopQueueSimulate");
+    if (desktopQueueSimulate) desktopQueueSimulate.addEventListener("click", function(){
+      const api = desktopAssistantApi();
+      const queue = api && api.simulateDesktopExecutionQueue ? api.simulateDesktopExecutionQueue(desktopExecutionQueue()) : null;
+      if (queue) {
+        desktopAssistantHistory("desktopAssistant.executionSimulated", Object.assign({}, queue, {
+          outputSummary:"已完成桌面助手模拟执行；未真实控制电脑。"
+        }));
+        if (Number(queue.blockedStepCount || 0) > 0) {
+          desktopAssistantHistory("desktopAssistant.executionBlocked", Object.assign({}, queue, {
+            outputSummary:"高风险步骤保持 blocked，不执行。"
+          }));
+        }
+      }
+      render(host);
     });
 
     input.addEventListener("keydown", function(ev){

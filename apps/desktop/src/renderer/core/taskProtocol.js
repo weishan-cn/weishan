@@ -25,8 +25,12 @@
     modelStatusViewed:"model.statusViewed",
     desktopAssistantPlanCreated:"desktopAssistant.planCreated",
     desktopAssistantPlanConfirmed:"desktopAssistant.planConfirmed",
+    desktopAssistantExecutionQueued:"desktopAssistant.executionQueued",
+    desktopAssistantExecutionSimulated:"desktopAssistant.executionSimulated",
+    desktopAssistantExecutionBlocked:"desktopAssistant.executionBlocked",
     desktopAssistantPlanCancelled:"desktopAssistant.planCancelled",
     desktopAssistantStopped:"desktopAssistant.stopped",
+    desktopAssistantPermissionGuideViewed:"desktopAssistant.permissionGuideViewed",
     dispatchExecuted:"dispatch.executed",
     dispatchFailed:"dispatch.failed",
     dispatchCancelled:"dispatch.cancelled"

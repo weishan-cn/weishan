@@ -117,7 +117,7 @@ function iconPath() {
 
 function applyAppIdentity() {
   app.setName(APP_NAME);
-  try { app.setAboutPanelOptions({ applicationName: APP_NAME, applicationVersion: "2.0.7" }); } catch (_) {}
+  try { app.setAboutPanelOptions({ applicationName: APP_NAME, applicationVersion: "2.0.8" }); } catch (_) {}
   try {
     const img = nativeImage.createFromPath(iconPath());
     if (!img.isEmpty() && app.dock) app.dock.setIcon(img);
