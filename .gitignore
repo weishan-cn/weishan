@@ -38,3 +38,7 @@ apps/server/.weishan-mail-account.local.json
 .weishan-mail-sync.local.json
 apps/server/.weishan-mail-account.local.json
 apps/server/.weishan-mail-sync.local.json
+
+# Playwright generated artifacts
+playwright-report/
+test-results/
