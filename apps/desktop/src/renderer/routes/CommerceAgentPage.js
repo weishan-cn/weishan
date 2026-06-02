@@ -11,6 +11,19 @@
     return window.WeishanCommerceAgent || null;
   }
 
+  function searchApi(){
+    return window.WeishanCommerceSearch || null;
+  }
+
+  function ensureSearchLoaded(host){
+    if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
+    const script = document.createElement("script");
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.15";
+    script.dataset.weishanDynamic = "WeishanCommerceSearch";
+    script.onload = () => render(host);
+    document.head.appendChild(script);
+  }
+
   function record(action, task, outputSummary){
     const api = agent();
     if (!api || !window.HistoryApi || typeof window.HistoryApi.record !== "function") return;
@@ -19,6 +32,12 @@
     window.HistoryApi.record(action, creator(action, Object.assign({}, task || {}, {
       outputSummary:outputSummary || ""
     })));
+  }
+
+  function recordSearch(action, payload){
+    const api = searchApi();
+    if (!api || !api.createCommerceSearchHistoryPayload || !window.HistoryApi || typeof window.HistoryApi.record !== "function") return;
+    window.HistoryApi.record(action, api.createCommerceSearchHistoryPayload(action, payload || {}));
   }
 
   function timeLabel(value){
@@ -56,6 +75,16 @@
     return map[status] || status || "计划中";
   }
 
+  function searchStatusLabel(task){
+    const status = String(task && task.searchStatus || "");
+    if (status === "completed") return "已返回真实候选方案";
+    if (status === "ready") return "搜索源已配置";
+    if (status === "missingFields") return "搜索条件缺失";
+    if (status === "failed") return "搜索失败";
+    if (status === "blocked") return "已阻断";
+    return "搜索源未配置，无法返回真实价格";
+  }
+
   function taskCards(tasks){
     if (!tasks.length) {
       return `<div class="commerce-empty">
@@ -87,6 +116,7 @@
 
   function detailHtml(task){
     const api = agent();
+    const search = searchApi();
     if (!task) {
       return `<div class="commerce-detail commerce-detail-empty">
         <h2>计划详情</h2>
@@ -94,6 +124,9 @@
       </div>`;
     }
     const detail = api && api.createCommercePlanDetail ? api.createCommercePlanDetail(task) : {};
+    const request = search && search.createCommerceSearchRequest ? search.createCommerceSearchRequest(task) : { missingFields:task.missingFields || [] };
+    const settings = search && search.getCommerceSearchSettings ? search.getCommerceSearchSettings() : {};
+    const hasProvider = !!(search && search.hasCommerceSearchProvider && search.hasCommerceSearchProvider(settings));
     const category = detail.categoryLabel || task.categoryLabel || task.category || "全球采购";
     if (task.status === "blocked") {
       return `<div class="commerce-detail commerce-detail-compact" data-commerce-detail="${esc(task.taskId)}">
@@ -131,14 +164,76 @@
           <div><dt>类目</dt><dd>${esc(category)}</dd></div>
           <div><dt>当前状态</dt><dd>${esc(taskStatusLabel(task.status))}</dd></div>
         </dl>`)}
+        ${section("搜索源状态", searchStatusHtml(task, settings, hasProvider), "commerce-section-tight")}
+        ${section("搜索条件确认", searchRequestHtml(request), "commerce-section-tight")}
         ${section("搜索范围", chips(detail.searchScope), "commerce-section-tight")}
         ${section("比较维度", chips(detail.comparisonDimensions), "commerce-section-tight")}
         ${section("决策规则", `<p>${esc(detail.decisionRule)}</p>`)}
+        ${section("候选方案", candidatesHtml(task), "commerce-section-wide")}
+        ${section("推荐结果", recommendationHtml(task), "commerce-section-wide")}
         ${section("推荐输出格式", `<p class="commerce-muted">后续真实搜索后会生成：</p>${chips(detail.recommendationTemplate && detail.recommendationTemplate.fields)}`)}
         ${section("候选方案字段模板", `<p class="commerce-muted">仅展示字段结构，不填真实价格，不伪造实时库存或可用性。</p>${chips(detail.candidateSchema)}`)}
-        ${section("执行边界", `<div class="commerce-risk">当前为计划阶段：不真实搜索、不下单、不付款、不提交订单。</div>${chips(["不访问外部网站", "不填写订单", "不保存支付或身份信息", "最终执行必须用户确认"])}`)}
+        ${section("执行边界", `<div class="commerce-risk">当前只搜索和展示候选方案，不下单、不付款、不提交订单。</div>${chips(["不自动填写订单", "不保存支付或身份信息", "最终执行必须用户确认", "价格可能变化"])}`)}
         ${section("下一步建议", list(["补充预算、时间、地区限制。", "后续接入真实搜索插件后填入候选方案。", "下单或付款前必须再次确认。"]))}
       </div>
+    </div>`;
+  }
+
+  function searchStatusHtml(task, settings, hasProvider){
+    const missingFields = Array.isArray(task && task.missingFields) && task.missingFields.length ? task.missingFields : [];
+    const disabled = !hasProvider || missingFields.length > 0;
+    return `<div class="commerce-search-panel">
+      <p><b>${hasProvider ? "已配置：" : "未配置："}</b>${hasProvider ? "可以搜索真实候选方案。" : "搜索源未配置，无法返回真实价格。"}</p>
+      <p class="commerce-muted">Provider：${esc(hasProvider ? settings.providerName || "commerceProvider" : "未配置")}</p>
+      ${missingFields.length ? `<p class="commerce-warning">请补充${esc(missingFields.join("、"))}，否则不搜索价格。</p>` : ""}
+      <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${missingFields.length ? "搜索真实价格" : hasProvider ? "搜索真实价格" : "搜索源未配置"}</button>
+      <p class="commerce-muted">价格只来自已配置 provider 返回数据；未配置时不会显示假价格。</p>
+    </div>`;
+  }
+
+  function searchRequestHtml(request){
+    const fields = [
+      ["需求", request.query],
+      ["出发地", request.origin || "待补充"],
+      ["目的地", request.destination || "待补充"],
+      ["日期", request.date || "待补充"],
+      ["币种", request.currency || "CNY"],
+      ["人数 / 数量", String(request.passengers || 1)]
+    ];
+    return `<dl class="commerce-facts">${fields.map((item) => `<div><dt>${esc(item[0])}</dt><dd>${esc(item[1])}</dd></div>`).join("")}</dl>`;
+  }
+
+  function candidatesHtml(task){
+    const candidates = Array.isArray(task && task.candidates) ? task.candidates : [];
+    if (!candidates.length) {
+      return `<p class="commerce-muted">暂无候选方案。搜索源未配置或尚未执行真实搜索时，不显示任何价格。</p>`;
+    }
+    return `<div class="commerce-candidates">
+      ${candidates.map((item) => `<article class="commerce-candidate-card">
+        <div class="commerce-candidate-head">
+          <div>
+            <b>${esc(item.title)}</b>
+            <span>${esc(item.sourceName)} · ${esc(item.collectedAt)}</span>
+          </div>
+          <strong>${esc(item.priceLabel || (item.currency + " " + item.price))}</strong>
+        </div>
+        <div class="commerce-candidate-meta">
+          ${chips([item.departTime && item.arriveTime ? item.departTime + " → " + item.arriveTime : "", item.duration, item.conditions, item.refundPolicySummary, item.riskSummary, item.hiddenFeeNote].filter(Boolean))}
+        </div>
+        <p class="commerce-muted">推荐理由：${esc(item.recommendationReason || "按价格、条件和风险排序后进入候选。")}</p>
+        ${item.bookingUrl ? `<p class="commerce-booking-note">将打开预订页面。weishan 不会下单、付款或提交订单。</p><a class="cmd-btn gray commerce-booking-link" href="${esc(item.bookingUrl)}" target="_blank" rel="noopener noreferrer">打开预订页</a>` : `<p class="commerce-warning">预订链接不是 https，已阻断打开。</p>`}
+      </article>`).join("")}
+    </div>`;
+  }
+
+  function recommendationHtml(task){
+    const rec = task && task.recommendation || null;
+    if (!rec || !rec.title) return `<p class="commerce-muted">暂无推荐结果。候选方案返回后会按价格、风险和条件生成推荐。</p>`;
+    return `<div class="commerce-recommendation">
+      <b>${esc(rec.title)}</b>
+      <p>${esc(rec.reason || "")}</p>
+      <p class="commerce-muted">主要风险：${esc(rec.riskSummary || "价格可能变化，仍需用户确认。")}</p>
+      <p class="commerce-warning">价格可能变化；预订、下单或付款前必须再次确认。</p>
     </div>`;
   }
 
@@ -148,7 +243,15 @@
   }
 
   function render(host){
+    ensureSearchLoaded(host);
     const tasks = loadTasks();
+    try {
+      const requestedTaskId = window.sessionStorage && window.sessionStorage.getItem("weishan:commerceAgent:selectedTask:v1");
+      if (requestedTaskId && tasks.some((task) => task.taskId === requestedTaskId)) {
+        selectedTaskId = requestedTaskId;
+        window.sessionStorage.removeItem("weishan:commerceAgent:selectedTask:v1");
+      }
+    } catch (_) {}
     if (!selectedTaskId || !tasks.some((task) => task.taskId === selectedTaskId)) {
       selectedTaskId = tasks[0] && tasks[0].taskId || "";
     }
@@ -227,6 +330,72 @@
         if (selectedTaskId === taskId) selectedTaskId = next[0] && next[0].taskId || "";
         record("commerceAgent.taskCleared", Object.assign({}, target || {}, { status:"cleared" }), "用户已清理单个全球采购计划。");
         render(host);
+      });
+    });
+    host.querySelectorAll(".commerce-search-real").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const search = searchApi();
+        if (!search || !search.searchCommerceCandidates || !api || !api.updateCommerceTask) return;
+        const taskId = button.getAttribute("data-task-id") || "";
+        const target = tasks.find((task) => task.taskId === taskId);
+        if (!target) return;
+        button.disabled = true;
+        recordSearch("commerceAgent.searchRequested", Object.assign({}, target, { resultStatus:"requested" }));
+        const result = await search.searchCommerceCandidates(target);
+        if (!result.ok) {
+          const status = result.code === "COMMERCE_MISSING_FIELDS" ? "missingFields" : result.code === "COMMERCE_PROVIDER_NOT_CONFIGURED" ? "providerMissing" : "failed";
+          const updated = api.updateCommerceTask(taskId, {
+            searchStatus:status,
+            missingFields:result.request && result.request.missingFields || target.missingFields || [],
+            searchProviderName:result.providerName || "",
+            searchResultSummary:{ candidateCount:0 },
+            updatedAt:new Date().toISOString()
+          });
+          recordSearch(status === "providerMissing" ? "commerceAgent.searchProviderMissing" : "commerceAgent.searchFailed", Object.assign({}, updated || target, {
+            resultStatus:status,
+            outputSummary:result.message || "搜索失败。"
+          }));
+          render(host);
+          return;
+        }
+        const recommendation = result.recommendation || search.createRecommendationFromCandidates(result.candidates || []);
+        const sorted = result.candidates || [];
+        const first = sorted[0] || {};
+        const updated = api.updateCommerceTask(taskId, {
+          status:"recommended",
+          searchStatus:"completed",
+          searchProviderName:result.providerName || "",
+          candidates:sorted,
+          recommendation,
+          searchResultSummary:{
+            candidateCount:sorted.length,
+            lowestPrice:first.price || "",
+            currency:first.currency || "",
+            recommendationTitle:recommendation && recommendation.title || ""
+          },
+          updatedAt:new Date().toISOString()
+        });
+        recordSearch("commerceAgent.searchCompleted", Object.assign({}, updated || target, {
+          providerName:result.providerName,
+          candidates:sorted,
+          resultStatus:"completed"
+        }));
+        recordSearch("commerceAgent.candidatesRendered", Object.assign({}, updated || target, {
+          providerName:result.providerName,
+          candidates:sorted,
+          resultStatus:"rendered"
+        }));
+        render(host);
+      });
+    });
+    host.querySelectorAll(".commerce-booking-link").forEach((link) => {
+      link.addEventListener("click", () => {
+        const taskId = selected && selected.taskId || "";
+        recordSearch("commerceAgent.bookingLinkViewed", Object.assign({}, selected || {}, {
+          taskId,
+          resultStatus:"bookingLinkViewed",
+          outputSummary:"用户查看 https 预订链接；weishan 不下单、不付款、不提交订单。"
+        }));
       });
     });
     if (selected && selected.taskId !== lastViewedTaskId) {

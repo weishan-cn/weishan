@@ -102,15 +102,24 @@
   }
 
   function normalizedFields(text, category){
+    const dateMatch = String(text || "").match(/(\d{4}[-/]\d{1,2}[-/]\d{1,2}|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天])/);
     return {
       need:sanitizeCommerceInput(text),
       category,
       categoryLabel:CATEGORY_LABELS[category] || CATEGORY_LABELS.generalProcurement,
       budget:"",
       region:"",
-      timing:"",
+      timing:dateMatch && dateMatch[1] || "",
       constraints:"同等条件下优先价格最低，同时保留风险、信誉、售后和地区限制判断。"
     };
+  }
+
+  function missingFieldsForTask(text, category){
+    const raw = String(text || "");
+    if (/^(flight|train|hotel)$/.test(category) && !/(\d{4}[-/]\d{1,2}[-/]\d{1,2}|今天|明天|后天|下周|周[一二三四五六日天])/.test(raw)) {
+      return [category === "hotel" ? "入住日期" : "出行日期"];
+    }
+    return [];
   }
 
   function createMockSafeCandidateSchema(category){
@@ -199,6 +208,11 @@
       executionBoundary:createCommerceExecutionBoundary(),
       riskNotice:createCommerceRiskNotice(),
       riskLevel:status === "blocked" ? "high" : "medium",
+      missingFields:missingFieldsForTask(clean, category),
+      searchStatus:"providerMissing",
+      searchProviderName:"",
+      candidates:[],
+      recommendation:null,
       realExecution:false,
       requiresUserConfirmation:true,
       createdAt,
@@ -231,6 +245,12 @@
       executionBoundary:Array.isArray(base.executionBoundary) ? base.executionBoundary : createCommerceExecutionBoundary(),
       riskNotice:Array.isArray(base.riskNotice) ? base.riskNotice : createCommerceRiskNotice(),
       riskLevel:String(base.riskLevel || (base.status === "blocked" ? "high" : "medium")),
+      missingFields:Array.isArray(base.missingFields) ? base.missingFields : missingFieldsForTask(input, category),
+      searchStatus:String(base.searchStatus || "providerMissing"),
+      searchProviderName:String(base.searchProviderName || ""),
+      candidates:Array.isArray(base.candidates) ? base.candidates : [],
+      recommendation:base.recommendation || null,
+      searchResultSummary:base.searchResultSummary || null,
       realExecution:false,
       requiresUserConfirmation:true,
       createdAt,
@@ -318,6 +338,11 @@
       recommendationTemplate:safe.recommendationTemplate,
       executionBoundary:safe.executionBoundary,
       riskNotice:safe.riskNotice,
+      missingFields:safe.missingFields,
+      searchStatus:safe.searchStatus,
+      searchProviderName:safe.searchProviderName,
+      candidates:safe.candidates,
+      recommendation:safe.recommendation,
       nextSteps:[
         "确认搜索范围、预算、地区限制和时间要求。",
         "后续接入真实搜索插件后再填入候选方案。",
@@ -337,6 +362,11 @@
       status:String(task.status || ""),
       inputSummary:sanitizeCommerceInput(task.inputSummary || ""),
       outputSummary:sanitizeCommerceInput(payload && payload.outputSummary || "已生成全球采购计划。"),
+      candidateCount:Array.isArray(task.candidates) ? task.candidates.length : 0,
+      lowestPrice:task.searchResultSummary && task.searchResultSummary.lowestPrice || "",
+      currency:task.searchResultSummary && task.searchResultSummary.currency || "",
+      providerName:task.searchProviderName || "",
+      resultStatus:task.searchStatus || "",
       realExecution:false,
       requiresUserConfirmation:true,
       createdAt:task.createdAt || nowIso(),

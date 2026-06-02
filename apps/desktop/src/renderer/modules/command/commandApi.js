@@ -8,6 +8,9 @@
   if (!window.WeishanCommerceAgent && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.15"></scr' + 'ipt>');
   }
+  if (!window.WeishanCommerceSearch && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.15"></scr' + 'ipt>');
+  }
 
   const QUEUE_KEY = "command.queue.v205";
   const HISTORY_KEY = "command.history.v205";
@@ -35,6 +38,10 @@
 
   function commerceAgent(){
     return window.WeishanCommerceAgent || null;
+  }
+
+  function commerceSearch(){
+    return window.WeishanCommerceSearch || null;
   }
 
   function saveDispatchPrefill(text, plan){
@@ -229,15 +236,27 @@
       };
     }
     const commercePlan = plan && plan.commercePlan || (api.createCommerceTask ? api.createCommerceTask(text) : api.createCommercePlan(text));
+    const search = commerceSearch();
+    if (search && search.createCommerceSearchRequest && search.hasCommerceSearchProvider) {
+      const request = search.createCommerceSearchRequest(commercePlan);
+      const hasProvider = search.hasCommerceSearchProvider(search.getCommerceSearchSettings && search.getCommerceSearchSettings());
+      commercePlan.missingFields = request.missingFields || commercePlan.missingFields || [];
+      commercePlan.searchStatus = commercePlan.status === "blocked" ? "blocked" : commercePlan.missingFields.length ? "missingFields" : hasProvider ? "ready" : "providerMissing";
+      commercePlan.searchProviderName = hasProvider && search.getCommerceSearchSettings ? search.getCommerceSearchSettings().providerName || "commerceProvider" : "";
+    }
     const savedPlan = api.addCommerceTask ? api.addCommerceTask(commercePlan) : (api.saveCommercePlan ? api.saveCommercePlan(commercePlan) : commercePlan);
     const status = savedPlan.status || "planned";
     const blocked = status === "blocked";
+    const missing = Array.isArray(savedPlan.missingFields) && savedPlan.missingFields.length ? "请补充" + savedPlan.missingFields.join("、") + "。" : "";
+    const providerMissing = savedPlan.searchStatus === "providerMissing";
     const answer = [
       blocked ? "全球采购计划已阻断" : "全球采购计划已生成",
       "需求：" + savedPlan.inputSummary,
       "类型：" + (savedPlan.categoryLabel || savedPlan.category),
       "状态：" + (blocked ? "已阻断" : "计划已生成"),
       blocked ? "原因：涉及下单 / 付款。" : "",
+      missing,
+      !blocked && providerMissing ? "搜索源未配置，无法返回真实价格。" : "",
       "安全边界：" + (blocked ? "不会下单、付款或提交订单。" : "未搜索、未下单、未付款、未提交订单。"),
       "下一步：查看全球采购计划。"
     ].filter(Boolean).join("\n");

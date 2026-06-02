@@ -269,6 +269,13 @@
     return status === "blocked" ? "已阻断" : "计划已生成";
   }
 
+  function storedCommerceTask(task){
+    const api = window.WeishanCommerceAgent || null;
+    const meta = task && task.meta || {};
+    if (!api || !api.getCommerceTaskById || !meta.commerceTaskId) return null;
+    return api.getCommerceTaskById(meta.commerceTaskId);
+  }
+
   function commerceHistorySummary(task){
     const meta = task && task.meta || {};
     const type = commerceTypeLabel(meta.commerceCategory);
@@ -347,8 +354,16 @@
     const meta = task && task.meta || {};
     const answer = String(task && task.answer || "");
     if (!isCommerceTask(task)) return "";
-    const blocked = meta.commerceStatus === "blocked" || /全球采购计划已阻断|涉及下单 \/ 付款/.test(answer);
-    const type = commerceTypeLabel(meta.commerceCategory);
+    const stored = storedCommerceTask(task) || {};
+    const blocked = stored.status === "blocked" || meta.commerceStatus === "blocked" || /全球采购计划已阻断|涉及下单 \/ 付款/.test(answer);
+    const type = stored.categoryLabel || commerceTypeLabel(stored.category || meta.commerceCategory);
+    const candidates = Array.isArray(stored.candidates) ? stored.candidates : [];
+    const recommendation = stored.recommendation || {};
+    const summaryData = stored.searchResultSummary || {};
+    const lowest = summaryData.lowestPrice || recommendation.price || "";
+    const currency = summaryData.currency || recommendation.currency || "";
+    const providerMissing = stored.searchStatus === "providerMissing";
+    const missingFields = Array.isArray(stored.missingFields) ? stored.missingFields : [];
     return `<div class="commerce-home-card ${blocked ? "is-blocked" : ""}" data-commerce-home-summary="true">
       <div class="commerce-home-card-main">
         <h3>${blocked ? "全球采购计划已阻断" : "全球采购计划已生成"}</h3>
@@ -356,7 +371,10 @@
         <p><b>类型：</b>${esc(type)}</p>
         <p><b>状态：</b>${blocked ? "已阻断" : "计划已生成"}</p>
         ${blocked ? `<p><b>原因：</b>涉及下单 / 付款</p>` : ""}
-        <p><b>安全边界：</b>${blocked ? "不会下单、付款或提交订单" : "未搜索、未下单、未付款、未提交订单"}</p>
+        ${!blocked && providerMissing ? `<p><b>搜索源：</b>搜索源未配置，无法返回真实价格</p>` : ""}
+        ${!blocked && missingFields.length ? `<p><b>待补充：</b>${esc(missingFields.join("、"))}</p>` : ""}
+        ${!blocked && candidates.length ? `<p><b>搜索结果：</b>已找到 ${candidates.length} 个候选方案${lowest ? " · 最低价格 " + esc(currency ? currency + " " + lowest : lowest) : ""}${recommendation.title ? " · 推荐 " + esc(recommendation.title) : ""}</p>` : ""}
+        <p><b>安全边界：</b>${blocked ? "不会下单、付款或提交订单" : candidates.length ? "仅展示候选方案，未下单、未付款、未提交订单" : "未搜索、未下单、未付款、未提交订单"}</p>
       </div>
       <button class="cmd-btn primary commerce-view-plan-button" id="commerceViewPlanBtn" type="button">查看全球采购计划</button>
     </div>`;
@@ -1006,6 +1024,11 @@
 
     const commerceViewPlanBtn = host.querySelector("#commerceViewPlanBtn");
     if (commerceViewPlanBtn) commerceViewPlanBtn.addEventListener("click", function(){
+      try {
+        const latest = window.CommandApi && window.CommandApi.snapshot ? (window.CommandApi.snapshot().queue || []).slice().reverse().find(isCommerceTask) : null;
+        const task = latest && storedCommerceTask(latest);
+        if (task && task.taskId) window.sessionStorage.setItem("weishan:commerceAgent:selectedTask:v1", task.taskId);
+      } catch (_) {}
       const commerceNav = document.querySelector('.nav-item[data-route="commerce"]');
       if (commerceNav && typeof commerceNav.click === "function") {
         commerceNav.click();

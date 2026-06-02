@@ -32,6 +32,31 @@ async function setMockSettingsAi(page) {
   });
 }
 
+async function installCommerceSearchMock(page, candidates) {
+  await page.evaluate(async (items) => {
+    if (!window.WeishanCommerceSearch) {
+      await new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceSearch.js?v=2.0.15";
+        script.onload = resolve;
+        document.head.appendChild(script);
+      });
+    }
+    window.WeishanCommerceSearchProvider = {
+      search: async () => ({
+        providerName:"E2E Commerce Provider",
+        candidates:items
+      })
+    };
+    window.WeishanCommerceSearch.saveCommerceSearchSettings({
+      enabled:true,
+      providerName:"E2E Commerce Provider",
+      providerMode:"manualProvider",
+      apiKeyConfigured:false
+    });
+  }, candidates);
+}
+
 test.describe.serial("commerce agent workbench", () => {
   let app;
   let page;
@@ -45,10 +70,10 @@ test.describe.serial("commerce agent workbench", () => {
     if (page) {
       await page.evaluate((id) => {
         try {
-          const keys = ["weishan:commerceAgent:lastPlan:v1", "weishan:commerceAgent:tasks:v1"];
+          const keys = ["weishan:commerceAgent:lastPlan:v1", "weishan:commerceAgent:tasks:v1", "weishan:commerceSearch:settings:v1"];
           for (const key of keys) {
             const raw = window.localStorage.getItem(key);
-            if (raw && raw.includes(id)) window.localStorage.removeItem(key);
+            if (key === "weishan:commerceSearch:settings:v1" || raw && raw.includes(id)) window.localStorage.removeItem(key);
           }
         } catch (_) {}
       }, runId);
@@ -73,6 +98,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText(/未搜索|未下单|未付款|未提交订单/);
     await expect(page.locator("[data-commerce-home-summary]")).toContainText(/类型：机票/);
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("待补充：出行日期");
     await expect(page.locator("#commerceViewPlanBtn")).toBeVisible();
     await expect(page.getByText("全球采购计划已生成")).toHaveCount(1);
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("commerceAgent.plan");
@@ -104,6 +130,80 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.getByRole("heading", { name:"下一步建议" })).toBeVisible();
     await expect(page.locator(".commerce-detail")).not.toContainText("realExecution=false");
     await expect(page.locator(".commerce-detail")).not.toContainText("taskId");
+  });
+
+  test("missing search provider does not show fake live prices", async () => {
+    const command = runId + " 帮我比较 OpenRouter 和其他 AI 模型平台价格";
+    await submitHomeCommand(page, command);
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("搜索源未配置，无法返回真实价格");
+    await page.locator("#commerceViewPlanBtn").click();
+    await expect(page.getByText("搜索源未配置，无法返回真实价格").first()).toBeVisible();
+    await expect(page.getByRole("button", { name:"搜索源未配置" }).first()).toBeDisabled();
+    await expect(page.locator(".commerce-detail")).not.toContainText("¥999");
+    await expect(page.locator(".commerce-detail")).not.toContainText("$123");
+    await expect(page.locator(".commerce-detail")).not.toContainText("已找到最低价");
+  });
+
+  test("flight search requires travel date before showing prices", async () => {
+    const command = runId + " 帮我找成都到上海最便宜机票";
+    await submitHomeCommand(page, command);
+    await page.locator("#commerceViewPlanBtn").click();
+    await expect(page.getByText("请补充出行日期").first()).toBeVisible();
+    await expect(page.getByRole("button", { name:"搜索真实价格" }).first()).toBeDisabled();
+    await expect(page.locator(".commerce-detail")).not.toContainText(/CNY\s*\d+/);
+  });
+
+  test("mock provider renders live candidates prices recommendation and https booking links only", async () => {
+    await installCommerceSearchMock(page, [
+      {
+        candidateId:"good-1",
+        sourceName:"E2E Travel",
+        title:"成都到上海经济舱 A",
+        category:"flight",
+        price:860,
+        currency:"CNY",
+        departTime:"2026-06-10 08:00",
+        arriveTime:"2026-06-10 10:45",
+        duration:"2h45m",
+        conditions:"含基础行李",
+        refundPolicySummary:"退改需按航司规则",
+        riskSummary:"价格可能变化",
+        hiddenFeeNote:"不含部分附加服务费",
+        bookingUrl:"https://booking.example.test/flight-a",
+        recommendationReason:"当前 provider 返回价格最低",
+        isLiveResult:true
+      },
+      {
+        candidateId:"bad-url",
+        sourceName:"E2E Travel",
+        title:"成都到上海经济舱 B",
+        category:"flight",
+        price:920,
+        currency:"CNY",
+        refundPolicySummary:"退改需复核",
+        riskSummary:"链接协议不安全",
+        bookingUrl:"javascript:alert(1)",
+        recommendationReason:"备选方案",
+        isLiveResult:true
+      }
+    ]);
+    const command = runId + " 帮我找 2026-06-10 成都到上海最便宜机票";
+    await submitHomeCommand(page, command);
+    await page.locator("#commerceViewPlanBtn").click();
+    await page.getByRole("button", { name:"搜索真实价格" }).first().click();
+    await expect(page.locator(".commerce-detail")).toContainText("候选方案");
+    await expect(page.locator(".commerce-detail")).toContainText("E2E Travel");
+    await expect(page.locator(".commerce-detail")).toContainText("CNY 860");
+    await expect(page.locator(".commerce-detail")).toContainText("退改需按航司规则");
+    await expect(page.locator(".commerce-detail")).toContainText("价格可能变化");
+    await expect(page.locator(".commerce-detail")).toContainText("推荐结果");
+    await expect(page.locator(".commerce-detail")).toContainText("当前 provider 返回价格最低");
+    await expect(page.locator(".commerce-booking-link")).toHaveCount(1);
+    await expect(page.locator(".commerce-booking-link").first()).toHaveAttribute("href", "https://booking.example.test/flight-a");
+    await expect(page.locator(".commerce-detail")).toContainText("预订链接不是 https，已阻断打开");
+    await gotoRoute(page, "home");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已找到 2 个候选方案");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最低价格 CNY 860");
   });
 
   test("ai model pricing plan uses candidate schema without fake live prices", async () => {

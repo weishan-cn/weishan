@@ -1362,6 +1362,9 @@
 .commerce-section-tight{
   min-height:112px;
 }
+.commerce-section-wide{
+  grid-column:1 / -1;
+}
 .commerce-facts{
   margin:0;
   display:grid;
@@ -1416,6 +1419,75 @@
 .commerce-risk b,
 .commerce-risk span{
   display:block;
+}
+.commerce-warning{
+  margin:6px 0;
+  color:#9a3412;
+  font-size:12px;
+  font-weight:900;
+}
+.commerce-search-panel{
+  display:grid;
+  gap:7px;
+}
+.commerce-search-panel p{
+  margin:0;
+}
+.commerce-candidates{
+  display:grid;
+  gap:10px;
+}
+.commerce-candidate-card{
+  border:1px solid #e5e7eb;
+  border-radius:9px;
+  padding:10px;
+  background:#f8fafc;
+  display:grid;
+  gap:8px;
+}
+.commerce-candidate-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+}
+.commerce-candidate-head div{
+  display:grid;
+  gap:3px;
+}
+.commerce-candidate-head b{
+  color:#0f172a;
+}
+.commerce-candidate-head span,
+.commerce-booking-note{
+  color:#64748b;
+  font-size:12px;
+}
+.commerce-candidate-head strong{
+  color:#047857;
+  font-size:15px;
+  white-space:nowrap;
+}
+.commerce-candidate-meta .commerce-chip-list{
+  gap:6px;
+}
+.commerce-booking-note{
+  margin:0;
+}
+.commerce-booking-link{
+  width:max-content;
+}
+.commerce-recommendation{
+  border:1px solid #bbf7d0;
+  border-radius:9px;
+  background:#f0fdf4;
+  color:#14532d;
+  padding:10px;
+  display:grid;
+  gap:6px;
+}
+.commerce-recommendation p{
+  margin:0;
 }
 .commerce-risk-strong{
   border-color:#fecaca;
