@@ -1,6 +1,7 @@
 (function(){
   let selectedHistoryId = "";
   let stagedAttachments = [];
+  let expandedDesktopTasks = {};
 
   function esc(s){
     return String(s || "").replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; });
@@ -97,6 +98,35 @@
     return text || String(task && (task.taskId || task.id || task.createdAt || task.updatedAt) || idx || "");
   }
 
+  function desktopStatusLabel(status, resultStatus){
+    const raw = String(resultStatus || status || "");
+    if (/realOpened|realOpenAppExecuted|realExecuted/.test(raw)) return "已真实打开白名单 App";
+    if (/blocked|executionBlocked/.test(raw)) return "已阻断";
+    if (/failed|APP_OPEN_FAILED/.test(raw)) return "执行失败";
+    if (/stopped/.test(raw)) return "已停止";
+    if (/cancelled/.test(raw)) return "已取消";
+    if (/simulated|executionSimulated/.test(raw)) return "模拟完成";
+    if (/queued|executionQueued|simulating/.test(raw)) return "模拟执行中";
+    return "等待确认";
+  }
+
+  function desktopRiskLabel(risk){
+    const value = String(risk || "low");
+    if (value === "high") return "高风险";
+    if (value === "medium") return "中风险";
+    return "低风险";
+  }
+
+  function desktopResultSummary(task){
+    const label = desktopStatusLabel(task && task.status, task && task.resultStatus);
+    if (label === "模拟完成") return "模拟完成 · 未控制电脑";
+    if (label === "已真实打开白名单 App") return "已真实打开白名单 App";
+    if (label === "已阻断") return "已阻断 · 高风险操作";
+    if (label === "已停止") return "已停止";
+    if (label === "执行失败") return "执行失败";
+    return "等待确认";
+  }
+
   function syncDesktopAssistantTasksFromSnapshot(snapshot){
     const api = desktopAssistantApi();
     if (!api || !api.createDesktopOperationPlan || !api.addDesktopAssistantTask || !api.getDesktopAssistantTasks) return;
@@ -151,6 +181,16 @@
 
   function displayLogText(log){
     const text = String(log && log.text || "");
+    if (/桌面操作计划|desktopAssistant\.plan/.test(text)) {
+      return text
+        .replace(/realExecution=false/g, "未控制电脑")
+        .replace(/realExecution=true/g, "已执行真实白名单打开")
+        .replace(/requiresSecondConfirm=true/g, "需要二次确认")
+        .replace(/requiresSecondConfirm=false/g, "无需二次确认")
+        .replace(/executionQueued|queued/g, "等待确认")
+        .replace(/executionSimulated|simulated/g, "模拟完成")
+        .replace(/executionBlocked|blocked/g, "已阻断");
+    }
     if ((log && (log.type === "answer" || log.type === "ai")) || /<think|```think|```thinking|```reasoning/i.test(text)) {
       return cleanAiDisplay(text);
     }
@@ -249,13 +289,14 @@
     if (meta.dispatchModule !== "desktopAssistant" && task && task.module !== "desktopAssistant") return "";
     const risk = meta.desktopRiskLevel || "low";
     const riskText = risk === "high" ? "高风险" : risk === "medium" ? "中风险" : "普通提示";
+    const isHigh = risk === "high";
     return `<div class="desktop-plan-actions desktop-risk-${esc(risk)}" data-desktop-plan-actions="true">
       <div>
         <b>${esc(riskText)}桌面操作计划</b>
-        <span>仅生成计划，未执行电脑操作。realExecution=false${meta.desktopRequiresSecondConfirm ? " · 必须二次确认" : ""}</span>
+        <span>${isHigh ? "高风险操作已阻断：不会删除、发送、上传、付款、提交表单或输入密码。" : "仅生成计划，等待用户确认后进入模拟队列。"}</span>
       </div>
       <div class="desktop-plan-buttons">
-        <button class="cmd-btn gray" id="desktopPlanConfirm" type="button">确认计划</button>
+        ${isHigh ? "" : `<button class="cmd-btn gray" id="desktopPlanConfirm" type="button">确认计划</button>`}
         <button class="cmd-btn gray" id="desktopPlanCancel" type="button">取消计划</button>
         <button class="cmd-btn danger ghost" id="desktopPlanStop" type="button">停止全部接管</button>
       </div>
@@ -289,9 +330,9 @@
       const hasRiskNotAllowed = openStates.some((state) => state.status === "riskNotAllowed");
       const realOpenNotice = [
         hasSessionRequired ? `<p class="cmd-history-meta">桌面助手未开启，本次任务只能生成计划。请先点击“本次开启桌面助手”。</p>` : "",
-        hasRealOpenDisabled ? `<p class="cmd-history-meta">真实打开白名单 App 当前关闭。当前仅模拟执行，不会真实打开 App。</p>` : "",
+        hasRealOpenDisabled ? `<p class="cmd-history-meta">真实打开白名单 App 当前关闭，可继续模拟执行。</p>` : "",
         canShowRealOpen ? `<p class="cmd-history-meta">确认真实打开仅打开或聚焦白名单 App，不点击、不输入、不读屏。</p>` : "",
-        hasAppNotAllowed ? `<p class="desktop-risk-high">该 App 不在白名单，已阻断。当前只允许 Chrome / Safari / Finder / WPS / Notes / Preview。</p>` : "",
+        hasAppNotAllowed ? `<p class="desktop-compact-warning is-high">该 App 不在白名单，已阻断。当前只允许 Chrome / Safari / Finder / WPS / Notes / Preview。</p>` : "",
         hasRiskNotAllowed ? `<p class="cmd-history-meta">中风险/高风险或非 openApp / focusApp 步骤继续 dry-run，不会真实执行。</p>` : ""
       ].filter(Boolean).join("");
       const realExecutedStep = steps.find((step) => step && step.status === "realExecuted");
@@ -299,7 +340,7 @@
       const blockedStep = steps.find((step) => step && step.status === "blocked");
       const resultPanel = realExecutedStep ? `<div class="desktop-result-card is-success">
         <b>已真实打开白名单 App</b>
-        <p>App：${esc(realExecutedStep.appName || realExecutedStep.appId || "白名单 App")} · 操作：${esc(realExecutedStep.action || "openApp")} · realExecution=true</p>
+        <p>App：${esc(realExecutedStep.appName || realExecutedStep.appId || "白名单 App")} · 操作：${esc(realExecutedStep.action || "openApp")}</p>
         <p>安全边界：未点击、未输入、未读屏、未截图。</p>
         <p>下一步建议：1. 如需继续操作，请重新下达下一步指令。2. 如需点击/输入/读取屏幕，需后续单独授权。3. 当前版本只负责打开或聚焦 App。</p>
       </div>` : failedStep ? `<div class="desktop-result-card is-failed">
@@ -307,39 +348,45 @@
         <p>App：${esc(failedStep.appName || failedStep.appId || "白名单 App")} · ${esc(failedStep.outputSummary || "系统打开失败。")}</p>
         <p>建议：1. 检查该 App 是否已安装。2. 确认 App 是否在白名单。3. 如果是 WPS，可能需要使用正确的 macOS 应用名。</p>
       </div>` : blockedStep ? `<div class="desktop-result-card is-blocked">
-        <b>已阻断</b>
-        <p>${esc(blockedStep.outputSummary || "该动作属于高风险，已阻断。不会删除、发送、上传、付款、提交表单或输入密码。")}</p>
+        <b>高风险操作已阻断</b>
+        <p>不会删除、发送、上传、付款、提交表单或输入密码。</p>
       </div>` : "";
+      const expanded = expandedDesktopTasks[task.taskId] === true;
+      const statusLabel = desktopStatusLabel(task.status, task.resultStatus);
+      const riskLabel = desktopRiskLabel(risk);
       const stepRows = steps.map((step) => `<li class="desktop-queue-step desktop-risk-${esc(step.riskLevel || "low")}">
+        <span class="desktop-step-tag">${esc(desktopRiskLabel(step.riskLevel))}</span>
         <b>${esc(step.title)}</b>
-        <span>${esc(step.description)} · ${esc(step.riskLevel)} · ${esc(step.approvalState || "allowed")} · ${esc(step.resultStatus || step.status)} · ${esc(step.status)} · realExecution=${step.realExecution === true ? "true" : "false"}${step.appName ? " · " + esc(step.appName) : ""}${step.outputSummary ? " · " + esc(step.outputSummary) : ""}</span>
+        <span>${esc(step.description)}${step.appName ? " · " + esc(step.appName) : ""}${step.outputSummary ? " · " + esc(step.outputSummary) : ""}</span>
       </li>`).join("");
       return `<article class="desktop-task-row desktop-risk-${esc(risk)}" data-desktop-task-id="${esc(task.taskId)}">
         <div class="desktop-task-head">
           <div>
             <b>${esc(task.title)}</b>
-            <span>taskId=${esc(task.taskId)} · ${esc(task.status)} · ${esc(task.resultStatus || task.status)} · ${esc(risk)} · steps=${esc(task.stepCount || steps.length)} · realExecution=${task.realExecution === true ? "true" : "false"}</span>
+            <span>${esc(desktopResultSummary(task))}</span>
           </div>
           <div class="desktop-plan-buttons">
-            <button class="cmd-btn gray" data-desktop-task-view="${esc(task.taskId)}" type="button">查看步骤</button>
-            <button class="cmd-btn gray" data-desktop-task-confirm="${esc(task.taskId)}" type="button">确认计划</button>
+            <span class="desktop-status-badge">${esc(statusLabel)}</span>
+            <span class="desktop-risk-badge desktop-risk-${esc(risk)}">${esc(riskLabel)}</span>
+            <button class="cmd-btn gray" data-desktop-task-view="${esc(task.taskId)}" type="button">${expanded ? "收起步骤" : "查看步骤"}</button>
+            ${risk === "high" || task.status === "blocked" ? "" : `<button class="cmd-btn gray" data-desktop-task-confirm="${esc(task.taskId)}" type="button">确认计划</button>`}
             ${canShowRealOpen ? `<button class="cmd-btn green" ${idx === 0 ? "id=\"desktopQueueRealOpen\"" : ""} data-desktop-task-real-open="${esc(task.taskId)}" type="button">确认真实打开</button>` : ""}
             <button class="cmd-btn gray" ${idx === 0 ? "id=\"desktopQueueSimulate\"" : ""} data-desktop-task-simulate="${esc(task.taskId)}" type="button">模拟执行</button>
             <button class="cmd-btn gray" ${idx === 0 ? "id=\"desktopQueueCancel\"" : ""} data-desktop-task-cancel="${esc(task.taskId)}" type="button">取消计划</button>
             <button class="cmd-btn danger ghost" data-desktop-task-stop="${esc(task.taskId)}" type="button">停止此任务</button>
           </div>
         </div>
-        <p class="cmd-history-meta">${esc(task.inputSummary || "桌面助手任务")} · ${esc(task.outputSummary || "等待处理")}</p>
+        <p class="cmd-history-meta">${esc(task.inputSummary || "桌面助手任务")}</p>
         ${realOpenNotice}
         ${resultPanel}
-        <ol class="desktop-task-steps">${stepRows}</ol>
+        ${expanded ? `<div class="desktop-task-debug">taskId=${esc(task.taskId)} · status=${esc(task.status)} · result=${esc(task.resultStatus || task.status)} · steps=${esc(task.stepCount || steps.length)}</div><ol class="desktop-task-steps">${stepRows}</ol>` : ""}
       </article>`;
     }).join("");
     return `<div class="desktop-execution-queue desktop-task-queue" data-desktop-task-queue="true" data-desktop-execution-queue="true">
       <div class="desktop-execution-head">
         <div>
           <b>桌面助手任务队列</b>
-          <span>桌面助手执行队列 · 共 ${esc(tasks.length)} 项 · planned / waitingApproval / queued / simulated / realOpened / blocked / stopped · realExecution 按任务显示</span>
+          <span>桌面助手执行队列 · 共 ${esc(tasks.length)} 项 · 可单独停止，全部接管可一键停止</span>
         </div>
         <div class="desktop-plan-buttons">
           <button class="cmd-btn danger ghost" id="desktopQueueStop" type="button">停止全部接管</button>
@@ -766,6 +813,13 @@
     Array.from(host.querySelectorAll("[data-desktop-task-confirm]")).forEach((btn) => {
       if (btn.id === "desktopPlanConfirm") return;
       btn.addEventListener("click", function(){ confirmDesktopTask(btn.getAttribute("data-desktop-task-confirm") || ""); });
+    });
+    Array.from(host.querySelectorAll("[data-desktop-task-view]")).forEach((btn) => {
+      btn.addEventListener("click", function(){
+        const taskId = btn.getAttribute("data-desktop-task-view") || "";
+        expandedDesktopTasks[taskId] = !expandedDesktopTasks[taskId];
+        render(host);
+      });
     });
     Array.from(host.querySelectorAll("[data-desktop-task-simulate]")).forEach((btn) => {
       if (btn.id === "desktopQueueSimulate") return;

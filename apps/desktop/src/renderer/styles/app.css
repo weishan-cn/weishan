@@ -871,7 +871,7 @@
 }
 .desktop-plan-actions{
   margin:8px 18px 18px;
-  padding:10px 12px;
+  padding:8px 10px;
   display:flex;
   justify-content:space-between;
   gap:12px;
@@ -907,11 +907,23 @@
   color:#92400e;
 }
 .desktop-risk-high{
-  background:#fef2f2;
-  border-color:#fca5a5;
+  background:#fff;
+  border-color:#fecaca;
   color:#991b1b;
 }
 .desktop-risk-high span{
+  color:#991b1b;
+}
+.desktop-compact-warning{
+  margin:6px 0;
+  padding:6px 8px;
+  border-radius:6px;
+  font-size:12px;
+  line-height:1.5;
+}
+.desktop-compact-warning.is-high{
+  background:#fef2f2;
+  border:1px solid #fecaca;
   color:#991b1b;
 }
 .desktop-assistant-settings .desktop-permission-grid{
@@ -974,7 +986,7 @@
   border:1px solid #e5e7eb;
 }
 .desktop-task-queue{
-  max-height:340px;
+  max-height:320px;
   overflow-y:auto;
 }
 .desktop-execution-head{
@@ -1000,14 +1012,15 @@
   gap:8px;
 }
 .desktop-task-list{
-  margin-top:10px;
+  margin-top:8px;
   display:grid;
-  gap:10px;
+  gap:8px;
 }
 .desktop-task-row{
-  padding:10px;
+  padding:8px 10px;
   border:1px solid #e5e7eb;
   border-radius:8px;
+  background:#fff;
 }
 .desktop-task-head{
   display:flex;
@@ -1024,13 +1037,44 @@
   font-size:12px;
   color:#64748b;
 }
+.desktop-status-badge,
+.desktop-risk-badge{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:0 8px;
+  border-radius:999px;
+  border:1px solid #e5e7eb;
+  background:#f8fafc;
+  color:#475569;
+  font-size:12px;
+  font-weight:800;
+}
+.desktop-risk-badge.desktop-risk-high{
+  background:#fef2f2;
+  border-color:#fecaca;
+  color:#991b1b;
+}
+.desktop-risk-badge.desktop-risk-medium{
+  background:#fffbeb;
+  border-color:#fde68a;
+  color:#92400e;
+}
 .desktop-task-steps{
   margin-top:8px;
 }
+.desktop-task-debug{
+  margin-top:6px;
+  color:#94a3b8;
+  font-size:11px;
+}
 .desktop-queue-step{
-  padding:8px 10px;
-  border-radius:8px;
-  border:1px solid #e5e7eb;
+  display:grid;
+  grid-template-columns:auto 150px minmax(0, 1fr);
+  gap:8px;
+  align-items:center;
+  padding:6px 0;
+  border-top:1px solid #f1f5f9;
 }
 .desktop-queue-step b,
 .desktop-queue-step span{
@@ -1039,6 +1083,21 @@
 .desktop-queue-step span{
   margin-top:3px;
   font-size:12px;
+}
+.desktop-step-tag{
+  width:max-content;
+  padding:2px 6px;
+  border-radius:999px;
+  border:1px solid #e5e7eb;
+  background:#f8fafc;
+  color:#475569;
+  font-size:11px !important;
+  font-weight:800;
+}
+.desktop-risk-high .desktop-step-tag{
+  background:#fef2f2;
+  border-color:#fecaca;
+  color:#991b1b;
 }
 .desktop-permission-guide{
   margin-top:14px;
