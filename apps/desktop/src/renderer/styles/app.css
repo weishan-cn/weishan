@@ -1142,3 +1142,74 @@
   font-size:12px;
   color:#64748b;
 }
+.commerce-page{
+  display:grid;
+  gap:14px;
+  max-width:980px;
+}
+.commerce-hero,
+.commerce-plan-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+.commerce-hero h1,
+.commerce-plan-head h2{
+  margin:0;
+  font-size:22px;
+  font-weight:950;
+}
+.commerce-hero p,
+.commerce-plan-head p{
+  margin:5px 0 0;
+  color:#64748b;
+}
+.commerce-toolbar,
+.commerce-plan,
+.commerce-empty{
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  background:#fff;
+  padding:14px;
+}
+.commerce-input{
+  min-height:74px;
+}
+.commerce-badge{
+  display:inline-flex;
+  align-items:center;
+  min-height:26px;
+  padding:0 9px;
+  border-radius:999px;
+  background:#eff6ff;
+  color:#1d4ed8;
+  font-size:12px;
+  font-weight:900;
+}
+.commerce-plan{
+  display:grid;
+  gap:12px;
+}
+.commerce-section{
+  padding-top:10px;
+  border-top:1px solid #f1f5f9;
+}
+.commerce-section h3{
+  margin:0 0 6px;
+  font-size:14px;
+}
+.commerce-section p,
+.commerce-section li,
+.commerce-empty span{
+  color:#475569;
+  line-height:1.55;
+}
+.commerce-section ul{
+  margin:0;
+  padding-left:18px;
+}
+.commerce-safe{
+  color:#047857 !important;
+  font-weight:800;
+}

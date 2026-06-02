@@ -9,6 +9,7 @@
     model:"model",
     chat:"chat",
     desktopAssistant:"desktopAssistant",
+    commerceAgent:"commerceAgent",
     coordination:"coordination"
   };
 
@@ -31,6 +32,7 @@
     modelStatus:"model.status",
     modelSelect:"model.select",
     desktopAssistantPlan:"desktopAssistant.plan",
+    commerceAgentPlan:"commerceAgent.plan",
     coordinationPlan:"coordination.plan"
   };
   const MODEL_SELECTION_KEY = "weishan:model:selected:v1";
@@ -137,6 +139,24 @@
     return window.WeishanDesktopAssistant || null;
   }
 
+  function commerceAgentApi(){
+    return window.WeishanCommerceAgent || null;
+  }
+
+  function isCommerceAgentCommand(text){
+    const raw = String(text || "");
+    const api = commerceAgentApi();
+    if (api && api.classifyCommerceIntent) {
+      const result = api.classifyCommerceIntent(raw);
+      if (result && result.isCommerceIntent) return true;
+    }
+    const purchaseIntent = /全球采购|采购代理|自动采购|比价|价格比较|平台比较|最便宜方案|性价比最高|帮我买|帮我订|帮我比较|我想买|订下周|直接下单|下单|付款|采购|买|订|找最便宜|最便宜.*(?:机票|酒店|域名|方案|API|平台|商品)|OpenRouter.*价格|模型平台.*价格/i.test(raw);
+    const commerceObject = /酒店|机票|火车票|高铁票|航班|电商|商品|SaaS|AI 模型|模型平台|API|门票|票务|服务预约|域名|MacBook|ChatGPT API|采购渠道/i.test(raw);
+    const assistedSearchPurchase = /帮我找.*(?:机票|酒店|火车票|高铁票|航班|商品|MacBook|域名|ChatGPT API|API 方案|模型平台|采购渠道|最便宜|性价比)/i.test(raw);
+    const directOrderRisk = /直接下单|下单并付款|提交订单|付款/i.test(raw);
+    return directOrderRisk || (purchaseIntent && commerceObject) || assistedSearchPurchase || /全球采购|采购代理|自动采购|比价|平台比较|价格比较/i.test(raw);
+  }
+
   function isDesktopAssistantCommand(text){
     const raw = String(text || "");
     const api = desktopAssistantApi();
@@ -218,6 +238,17 @@
       };
     }
 
+    if (isCommerceAgentCommand(raw)) {
+      return {
+        module:DISPATCH_MODULES.commerceAgent,
+        action:DISPATCH_ACTIONS.commerceAgentPlan,
+        routeMode:"console",
+        modules:[DISPATCH_MODULES.commerceAgent],
+        targetRoute:"commerce",
+        confidence:"rule"
+      };
+    }
+
     if (isDesktopAssistantCommand(raw) && !/邮件接管|抓取中心|软件工厂/i.test(raw)) {
       return {
         module:DISPATCH_MODULES.desktopAssistant,
@@ -279,6 +310,17 @@
       plan.riskLevel = desktopPlan && desktopPlan.riskLevel || "low";
       plan.requiresSecondConfirm = desktopPlan && desktopPlan.requiresSecondConfirm === true;
     }
+    if (intent.module === DISPATCH_MODULES.commerceAgent) {
+      const api = commerceAgentApi();
+      const commercePlan = api && api.createCommercePlan ? api.createCommercePlan(cleanInput) : null;
+      plan.executionMode = "commerce_agent_plan_only";
+      plan.realExecution = false;
+      plan.requiresUserConfirmation = true;
+      plan.mockSafeExecutionAllowed = false;
+      plan.commercePlan = commercePlan;
+      plan.category = commercePlan && commercePlan.category || "";
+      plan.riskLevel = commercePlan && commercePlan.riskLevel || "medium";
+    }
     if (intent.module === DISPATCH_MODULES.model) {
       plan.selectedModelId = intent.selectedModelId || inferModelId(cleanInput);
     }
@@ -317,6 +359,7 @@
       "model.status":"查看模型状态",
       "model.select":"选择模型",
       "desktopAssistant.plan":"生成桌面操作计划",
+      "commerceAgent.plan":"生成全球采购计划",
       "chat.answer":"普通问答",
       "coordination.plan":"生成多模块协调计划"
     };
@@ -774,6 +817,34 @@
     ].join("\n");
   }
 
+  function buildCommerceAgentPlan(plan, text){
+    const api = commerceAgentApi();
+    const commercePlan = plan && plan.commercePlan || (api && api.createCommercePlan ? api.createCommercePlan(text) : null);
+    if (!commercePlan) {
+      return [
+        "# 全球采购计划",
+        "",
+        "全球采购模块尚未加载。realExecution=false",
+        "本轮不会真实搜索、下单、付款或提交订单。"
+      ].join("\n");
+    }
+    const scope = (commercePlan.searchScope || []).slice(0, 4).join(" / ");
+    const criteria = (commercePlan.decisionCriteria || []).slice(0, 6).join(" / ");
+    return [
+      "路由判断：全球采购",
+      "已生成采购计划：commerceAgent / commerceAgent.plan",
+      "realExecution=false",
+      "当前仅生成搜索与推荐计划，未下单、未付款、未提交订单。",
+      "",
+      "需求：" + commercePlan.inputSummary,
+      "分类：" + commercePlan.category,
+      "搜索范围：" + scope,
+      "比较维度：" + criteria,
+      "决策目标：同等条件下价格最低，同时综合评分、信誉、售后、退改政策、时效、地区限制、风险和隐性费用。",
+      "下一步：进入全球采购模块查看计划。"
+    ].join("\n");
+  }
+
   function resultForPlan(plan, text){
     if (plan.module === "document") return buildDocumentDraft(text, plan);
     if (plan.module === "ppt") return buildPptOutline(text, plan);
@@ -781,6 +852,7 @@
     if (plan.module === "model" && plan.action === DISPATCH_ACTIONS.modelSelect) return buildModelSelect(plan);
     if (plan.module === "model") return buildModelStatus();
     if (plan.module === "desktopAssistant") return buildDesktopAssistantPlan(plan, text);
+    if (plan.module === "commerceAgent") return buildCommerceAgentPlan(plan, text);
     if (plan.module === "coordination") return buildCoordinationPlan(text, plan.modules);
     if (plan.module === "softwareFactory" || plan.module === "mail" || plan.module === "crawler") return buildModuleDispatchPlan(plan, text);
     return "AI 网关未接通，无法可靠回答。你仍可使用本地调度：文档草稿、PPT 大纲、Codex 指令、邮件接管、抓取中心、软件工厂和 coordination step queue。";
@@ -800,6 +872,7 @@
     if (plan.module === "model") return "weishan-model-status-" + ts + ".md";
     if (plan.module === "chat") return "weishan-chat-answer-" + ts + ".md";
     if (plan.module === "desktopAssistant") return "weishan-desktop-operation-plan-" + ts + ".md";
+    if (plan.module === "commerceAgent") return "weishan-commerce-plan-" + ts + ".md";
     if (plan.module === "coordination") return "weishan-coordination-plan-" + ts + ".md";
     return "weishan-" + plan.module + "-dispatch-plan-" + ts + ".md";
   }
@@ -840,6 +913,7 @@
     buildPptOutline,
     buildCodexInstruction,
     buildCoordinationPlan,
+    buildCommerceAgentPlan,
     createDispatchArtifact,
     createPendingPayload,
     savePendingPayload,

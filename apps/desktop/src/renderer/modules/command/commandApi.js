@@ -5,6 +5,9 @@
   if (!window.WeishanDesktopAssistant && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/desktopAssistant.js?v=2.0.15"></scr' + 'ipt>');
   }
+  if (!window.WeishanCommerceAgent && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.15"></scr' + 'ipt>');
+  }
 
   const QUEUE_KEY = "command.queue.v205";
   const HISTORY_KEY = "command.history.v205";
@@ -28,6 +31,10 @@
 
   function desktopAssistant(){
     return window.WeishanDesktopAssistant || null;
+  }
+
+  function commerceAgent(){
+    return window.WeishanCommerceAgent || null;
   }
 
   function saveDispatchPrefill(text, plan){
@@ -205,6 +212,41 @@
     if (!api || !api.createDesktopAssistantHistoryPayload || !window.HistoryApi || typeof window.HistoryApi.record !== "function") return null;
     const detail = Object.assign({}, plan && plan.desktopOperationPlan || {}, extra || {});
     return window.HistoryApi.record(type, api.createDesktopAssistantHistoryPayload(type, detail));
+  }
+
+  function recordCommerceAgentHistory(type, plan, extra){
+    const api = commerceAgent();
+    if (!api || !api.createCommerceHistoryPayload || !window.HistoryApi || typeof window.HistoryApi.record !== "function") return null;
+    return window.HistoryApi.record(type, api.createCommerceHistoryPayload(type, Object.assign({}, plan || {}, extra || {})));
+  }
+
+  function commerceAgentAnswer(text, plan){
+    const api = commerceAgent();
+    if (!api || !api.createCommercePlan) {
+      return {
+        answer:"全球采购模块尚未加载。本轮不会真实搜索、下单、付款或提交订单。realExecution=false",
+        commercePlan:null
+      };
+    }
+    const commercePlan = plan && plan.commercePlan || api.createCommercePlan(text);
+    if (api.saveCommercePlan) api.saveCommercePlan(commercePlan);
+    const scope = (commercePlan.searchScope || []).slice(0, 4).join(" / ");
+    const criteria = (commercePlan.decisionCriteria || []).slice(0, 6).join(" / ");
+    const answer = [
+      "路由判断：全球采购",
+      "已生成采购计划：commerceAgent / commerceAgent.plan",
+      "realExecution=false",
+      "当前仅生成搜索与推荐计划，未下单、未付款、未提交订单。",
+      "",
+      "需求：" + commercePlan.inputSummary,
+      "分类：" + commercePlan.category,
+      "搜索范围：" + scope,
+      "比较维度：" + criteria,
+      "决策目标：同等条件下价格最低，同时综合评分、信誉、售后、退改政策、时效、地区限制、风险和隐性费用。",
+      "执行边界：不真实搜索外部网站；不下单、不付款、不提交订单；最终执行必须用户确认。",
+      "下一步：进入全球采购模块查看完整计划。"
+    ].join("\n");
+    return { answer, commercePlan };
   }
 
   function desktopAssistantAnswer(text, plan){
@@ -774,6 +816,7 @@
       crawler:"抓取中心",
       builder:"软件工厂",
       mail:"邮件接管",
+      commerce:"全球采购",
       settings:"设置中心"
     }[target] || target;
   }
@@ -918,6 +961,23 @@
               desktopRiskLevel:operationPlan && operationPlan.riskLevel || "low",
               desktopRequiresSecondConfirm:operationPlan && operationPlan.requiresSecondConfirm === true,
               desktopStepCount:operationPlan && operationPlan.stepCount || 0,
+              realExecution:false
+            });
+            return putAnswerLog(t, answer, false);
+          });
+        } else if (plan.module === "commerceAgent") {
+          const commerceResult = commerceAgentAnswer(active.text, plan);
+          answer = commerceResult.answer;
+          const commercePlan = commerceResult.commercePlan;
+          recordCommerceAgentHistory("commerceAgent.planCreated", commercePlan, {
+            inputSummary:taskSummary(active.text, 240),
+            outputSummary:"已生成全球采购搜索与推荐计划；未搜索、未下单、未付款。",
+            realExecution:false
+          });
+          active = patchTask(active.id, (t) => {
+            t.meta = Object.assign({}, t.meta || {}, {
+              commerceTaskId:commercePlan && commercePlan.taskId || "",
+              commerceCategory:commercePlan && commercePlan.category || "",
               realExecution:false
             });
             return putAnswerLog(t, answer, false);

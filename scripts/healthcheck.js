@@ -38,6 +38,7 @@ function checkFiles() {
     "apps/desktop/src/preload.js",
     "apps/desktop/src/renderer/main.js",
     "apps/desktop/src/renderer/routes/HomePage.js",
+    "apps/desktop/src/renderer/routes/CommerceAgentPage.js",
     "apps/desktop/src/renderer/routes/MailPage.js",
     "apps/desktop/src/renderer/routes/CrawlerPage.js",
     "apps/desktop/src/renderer/routes/BuilderPage.js",
@@ -48,6 +49,7 @@ function checkFiles() {
     "apps/desktop/src/renderer/routes/SecurityPage.js",
     "apps/desktop/src/renderer/core/enterpriseSecurity.js",
     "apps/desktop/src/renderer/core/dispatchRouter.js",
+    "apps/desktop/src/renderer/core/commerceAgent.js",
     "apps/desktop/src/renderer/core/desktopAssistant.js",
     "apps/desktop/src/renderer/core/repairCenter.js",
     "apps/desktop/src/renderer/core/taskProtocol.js",
@@ -64,7 +66,7 @@ function checkFiles() {
 function checkPackageScripts() {
   const pkg = JSON.parse(readText("package.json") || "{}");
   const scripts = pkg.scripts || {};
-  return ["check", "dev:desktop", "healthcheck", "release:check", "release:notes", "release:postcheck", "secrets:scan", "version:check", "test:api", "test:e2e", "test:e2e:smoke", "test:e2e:repair", "test:e2e:dispatch", "test:e2e:desktop-assistant", "test:e2e:cloud"].map((script) => {
+  return ["check", "dev:desktop", "healthcheck", "release:check", "release:notes", "release:postcheck", "secrets:scan", "version:check", "test:api", "test:e2e", "test:e2e:smoke", "test:e2e:repair", "test:e2e:dispatch", "test:e2e:commerce-agent", "test:e2e:desktop-assistant", "test:e2e:cloud"].map((script) => {
     const ok = Boolean(scripts[script]);
     const status = ok ? "pass" : (script === "healthcheck" ? "warn" : "fail");
     return result("script:" + script, status, ok ? scripts[script] : "missing", "Add the missing package script.");
@@ -82,6 +84,14 @@ function checkMarkers() {
     marker("apps/desktop/src/renderer/core/taskProtocol.js", /createTaskRecord|addTaskArtifact|TASK_PROTOCOL_VERSION/, "marker:task protocol helper", true),
     marker("apps/desktop/src/renderer/core/dispatchRouter.js", /WeishanDispatchRouter|classifyCommand|createDispatchPlan/, "marker:dispatch router exists", true),
     marker("apps/desktop/src/renderer/core/dispatchRouter.js", /mail|crawler|softwareFactory|document|ppt|codex|chat|coordination/, "marker:dispatch router module coverage", true),
+    marker("apps/desktop/src/renderer/core/dispatchRouter.js", /commerceAgent|commerceAgent\.plan/, "marker:commerce agent route", true),
+    marker("apps/desktop/src/renderer/routes/CommerceAgentPage.js", /全球采购|搜索、比价、推荐、执行前确认/, "marker:commerce agent page", true),
+    marker("apps/desktop/src/renderer/core/commerceAgent.js", /createCommercePlan|classifyCommerceIntent|commerceAgent\.plan/, "marker:commerce agent plan", true),
+    marker("apps/desktop/src/renderer/core/commerceAgent.js", /getCommerceSearchScope|搜索范围|searchScope/, "marker:commerce agent search scope", true),
+    marker("apps/desktop/src/renderer/core/commerceAgent.js", /getCommerceDecisionCriteria|价格|隐性费用|decisionCriteria/, "marker:commerce agent decision criteria", true),
+    marker("apps/desktop/src/renderer/core/commerceAgent.js", /不付款|不真实下单|不下单/, "marker:commerce agent no payment", true),
+    marker("apps/desktop/src/renderer/core/commerceAgent.js", /不提交订单|no order|提交订单/, "marker:commerce agent no order submit", true),
+    marker("apps/desktop/src/renderer/core/commerceAgent.js", /createCommerceHistoryPayload|inputSummary|decisionCriteriaSummary/, "marker:commerce agent history sanitized", true),
     marker("apps/desktop/src/renderer/modules/command/commandApi.js", /dispatch\.|createDispatchPlan|home-dispatch/, "marker:command center dispatch", true),
     marker("apps/desktop/src/renderer/routes/HomePage.js", /homeAiStatus|AI 未连接|AI 已连接/, "marker:home ai gateway status", true),
     marker("apps/desktop/src/renderer/modules/command/commandApi.js", /answerChatWithGateway|chat\.unavailable|AI 网关未接通/, "marker:home chat answer gateway required", true),
