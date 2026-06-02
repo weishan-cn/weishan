@@ -182,14 +182,17 @@
   function displayLogText(log){
     const text = String(log && log.text || "");
     if (/桌面操作计划|desktopAssistant\.plan/.test(text)) {
-      return text
-        .replace(/realExecution=false/g, "未控制电脑")
-        .replace(/realExecution=true/g, "已执行真实白名单打开")
-        .replace(/requiresSecondConfirm=true/g, "需要二次确认")
-        .replace(/requiresSecondConfirm=false/g, "无需二次确认")
-        .replace(/executionQueued|queued/g, "等待确认")
-        .replace(/executionSimulated|simulated/g, "模拟完成")
-        .replace(/executionBlocked|blocked/g, "已阻断");
+      const risk = /高风险|riskLevel[:：]?\s*high/i.test(text) ? "高风险" : /中风险|riskLevel[:：]?\s*medium/i.test(text) ? "中风险" : "低风险";
+      const status = /高风险|blocked|已阻断/i.test(text) ? "已阻断" : /queued|planned|waiting|等待/i.test(text) ? "等待确认" : "已生成计划";
+      const appMatch = text.match(/App[:：]\s*([^\n\r]+)/);
+      return [
+        "路由判断：桌面助手",
+        "已生成操作计划：desktopAssistant / desktopAssistant.plan",
+        "风险等级：" + risk,
+        "当前状态：" + status,
+        appMatch && appMatch[1] ? "App：" + appMatch[1].trim() : "",
+        "请在下方“桌面助手任务队列”中查看和处理。"
+      ].filter(Boolean).join("\n");
     }
     if ((log && (log.type === "answer" || log.type === "ai")) || /<think|```think|```thinking|```reasoning/i.test(text)) {
       return cleanAiDisplay(text);
@@ -290,13 +293,21 @@
     const risk = meta.desktopRiskLevel || "low";
     const riskText = risk === "high" ? "高风险" : risk === "medium" ? "中风险" : "普通提示";
     const isHigh = risk === "high";
+    const session = desktopAssistantSession();
+    const sessionEnabled = session && session.enabled === true;
+    const canConfirm = sessionEnabled && !isHigh;
+    const message = isHigh
+      ? "高风险操作已阻断：不会删除、发送、上传、付款、提交表单或输入密码。"
+      : sessionEnabled
+        ? "仅生成计划，等待用户确认后进入模拟队列。"
+        : "桌面助手未开启。请先点击“本次开启”，再确认或模拟任务。";
     return `<div class="desktop-plan-actions desktop-risk-${esc(risk)}" data-desktop-plan-actions="true">
       <div>
         <b>${esc(riskText)}桌面操作计划</b>
-        <span>${isHigh ? "高风险操作已阻断：不会删除、发送、上传、付款、提交表单或输入密码。" : "仅生成计划，等待用户确认后进入模拟队列。"}</span>
+        <span>${esc(message)}</span>
       </div>
       <div class="desktop-plan-buttons">
-        ${isHigh ? "" : `<button class="cmd-btn gray" id="desktopPlanConfirm" type="button">确认计划</button>`}
+        ${canConfirm ? `<button class="cmd-btn gray" id="desktopPlanConfirm" type="button">确认计划</button>` : ""}
         <button class="cmd-btn gray" id="desktopPlanCancel" type="button">取消计划</button>
         <button class="cmd-btn danger ghost" id="desktopPlanStop" type="button">停止全部接管</button>
       </div>
@@ -317,6 +328,7 @@
     const api = desktopAssistantApi();
     const settings = api && api.getDesktopAssistantSettings ? api.getDesktopAssistantSettings() : {};
     const session = desktopAssistantSession();
+    const sessionEnabled = session && session.enabled === true;
     const taskRows = tasks.map((task, idx) => {
       const risk = task.riskLevel || "low";
       const steps = Array.isArray(task.steps) ? task.steps : [];
@@ -338,6 +350,9 @@
       const realExecutedStep = steps.find((step) => step && step.status === "realExecuted");
       const failedStep = steps.find((step) => step && step.status === "failed");
       const blockedStep = steps.find((step) => step && step.status === "blocked");
+      const isBlockedTask = risk === "high" || task.status === "blocked" || task.resultStatus === "blocked" || !!blockedStep || hasAppNotAllowed;
+      const canConfirmTask = sessionEnabled && !isBlockedTask && !/stopped|cancelled/.test(String(task.status || ""));
+      const canSimulateTask = canConfirmTask;
       const resultPanel = realExecutedStep ? `<div class="desktop-result-card is-success">
         <b>已真实打开白名单 App</b>
         <p>App：${esc(realExecutedStep.appName || realExecutedStep.appId || "白名单 App")} · 操作：${esc(realExecutedStep.action || "openApp")}</p>
@@ -369,9 +384,9 @@
             <span class="desktop-status-badge">${esc(statusLabel)}</span>
             <span class="desktop-risk-badge desktop-risk-${esc(risk)}">${esc(riskLabel)}</span>
             <button class="cmd-btn gray" data-desktop-task-view="${esc(task.taskId)}" type="button">${expanded ? "收起步骤" : "查看步骤"}</button>
-            ${risk === "high" || task.status === "blocked" ? "" : `<button class="cmd-btn gray" data-desktop-task-confirm="${esc(task.taskId)}" type="button">确认计划</button>`}
+            ${canConfirmTask ? `<button class="cmd-btn gray" data-desktop-task-confirm="${esc(task.taskId)}" type="button">确认计划</button>` : ""}
             ${canShowRealOpen ? `<button class="cmd-btn green" ${idx === 0 ? "id=\"desktopQueueRealOpen\"" : ""} data-desktop-task-real-open="${esc(task.taskId)}" type="button">确认真实打开</button>` : ""}
-            <button class="cmd-btn gray" ${idx === 0 ? "id=\"desktopQueueSimulate\"" : ""} data-desktop-task-simulate="${esc(task.taskId)}" type="button">模拟执行</button>
+            ${canSimulateTask ? `<button class="cmd-btn gray" ${idx === 0 ? "id=\"desktopQueueSimulate\"" : ""} data-desktop-task-simulate="${esc(task.taskId)}" type="button">模拟执行</button>` : ""}
             <button class="cmd-btn gray" ${idx === 0 ? "id=\"desktopQueueCancel\"" : ""} data-desktop-task-cancel="${esc(task.taskId)}" type="button">取消计划</button>
             <button class="cmd-btn danger ghost" data-desktop-task-stop="${esc(task.taskId)}" type="button">停止此任务</button>
           </div>

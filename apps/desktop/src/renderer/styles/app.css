@@ -979,6 +979,20 @@
   border-color:#fca5a5;
   color:#991b1b;
 }
+.desktop-result-card.is-blocked{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:7px 10px;
+  line-height:1.4;
+}
+.desktop-result-card.is-blocked b{
+  margin:0;
+  white-space:nowrap;
+}
+.desktop-result-card.is-blocked p{
+  margin:0;
+}
 .desktop-execution-queue{
   margin:8px 18px 20px;
   padding:12px;
