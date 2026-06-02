@@ -159,9 +159,11 @@ test.describe.serial("dispatch router", () => {
   test("commerce purchase demand routes to commerce agent instead of chat", async () => {
     const command = runId + " 帮我买一台性价比高的 MacBook";
     await submitHomeCommand(page, command);
-    await expect(currentTaskLogs(page)).toContainText("路由判断：全球采购");
-    await expect(currentTaskLogs(page)).toContainText("commerceAgent.plan");
-    await expect(currentTaskLogs(page)).toContainText("realExecution=false");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText(/商品|全球采购/);
+    await expect(page.locator("#commerceViewPlanBtn")).toBeVisible();
+    await expect(currentTaskLogs(page)).not.toContainText("commerceAgent.plan");
+    await expect(currentTaskLogs(page)).not.toContainText("realExecution=false");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
     await expectHistory(page, runId, /commerceAgent\.taskCreated|全球采购|MacBook/);
   });

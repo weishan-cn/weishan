@@ -245,6 +245,37 @@
     return "cmd-status-" + (task && task.status ? task.status : "idle");
   }
 
+  function isCommerceTask(task){
+    const meta = task && task.meta || {};
+    return !!(meta.commerceTaskId || meta.commerceCategory || /全球采购计划已/.test(String(task && task.answer || "")));
+  }
+
+  function commerceTypeLabel(category){
+    const map = {
+      flight:"机票",
+      hotel:"酒店",
+      train:"火车票",
+      ecommerce:"商品",
+      aiModelPricing:"AI 模型价格",
+      ticketing:"票务",
+      serviceBooking:"服务预约",
+      domain:"域名",
+      generalProcurement:"全球采购"
+    };
+    return map[category] || category || "全球采购";
+  }
+
+  function commerceStatusLabel(status){
+    return status === "blocked" ? "已阻断" : "计划已生成";
+  }
+
+  function commerceHistorySummary(task){
+    const meta = task && task.meta || {};
+    const type = commerceTypeLabel(meta.commerceCategory);
+    const status = commerceStatusLabel(meta.commerceStatus);
+    return "需求摘要：" + summary(task && task.text || "", 56) + " · 类型：" + type + " · 状态：" + status + " · 未下单 / 未付款";
+  }
+
   function taskKey(task, idx){
     return String((task && (task.id || task.createdAt || task.finishedAt || task.updatedAt)) || idx || "");
   }
@@ -255,6 +286,8 @@
 
   function logLine(log){
     const time = window.CommandApi.timeLabel(log.time);
+    const raw = String(log && log.text || "");
+    if (/已生成调度计划：commerceAgent|commerceAgent\.plan|全球采购计划已/.test(raw)) return "";
     return `
       <div class="cmd-log-line cmd-log-${esc(log.type || "info")}">
         <span class="cmd-time">${esc(time)}</span>
@@ -313,11 +346,19 @@
   function commercePlanActions(task){
     const meta = task && task.meta || {};
     const answer = String(task && task.answer || "");
-    const isCommerce = meta.commerceTaskId || meta.commerceCategory || /commerceAgent\.plan|路由判断：全球采购/.test(answer);
-    if (!isCommerce) return "";
-    return `<div class="commerce-home-actions" data-commerce-home-summary="true">
-      <span>完整计划内容已放入全球采购工作台。</span>
-      <button class="cmd-btn primary" id="commerceViewPlanBtn" type="button">查看全球采购计划</button>
+    if (!isCommerceTask(task)) return "";
+    const blocked = meta.commerceStatus === "blocked" || /全球采购计划已阻断|涉及下单 \/ 付款/.test(answer);
+    const type = commerceTypeLabel(meta.commerceCategory);
+    return `<div class="commerce-home-card ${blocked ? "is-blocked" : ""}" data-commerce-home-summary="true">
+      <div class="commerce-home-card-main">
+        <h3>${blocked ? "全球采购计划已阻断" : "全球采购计划已生成"}</h3>
+        <p><b>需求：</b>${esc(summary(task && task.text || "", 90))}</p>
+        <p><b>类型：</b>${esc(type)}</p>
+        <p><b>状态：</b>${blocked ? "已阻断" : "计划已生成"}</p>
+        ${blocked ? `<p><b>原因：</b>涉及下单 / 付款</p>` : ""}
+        <p><b>安全边界：</b>${blocked ? "不会下单、付款或提交订单" : "未搜索、未下单、未付款、未提交订单"}</p>
+      </div>
+      <button class="cmd-btn primary commerce-view-plan-button" id="commerceViewPlanBtn" type="button">查看全球采购计划</button>
     </div>`;
   }
 
@@ -496,7 +537,7 @@
         <div>
           <b>${esc(task.text)}</b>
           <span class="cmd-history-meta">${esc(taskTime(task))} · ${esc(taskTitle(task))}</span>
-          <p>${esc(summary(displayAnswer(task), 190))}</p>
+          <p>${esc(isCommerceTask(task) ? commerceHistorySummary(task) : summary(displayAnswer(task), 190))}</p>
         </div>
         <small>${esc(t("historyOpenDetail"))}</small>
       </button>

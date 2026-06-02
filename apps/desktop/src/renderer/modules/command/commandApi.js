@@ -233,16 +233,13 @@
     const status = savedPlan.status || "planned";
     const blocked = status === "blocked";
     const answer = [
-      "路由判断：全球采购",
-      "已生成采购计划：commerceAgent / commerceAgent.plan",
+      blocked ? "全球采购计划已阻断" : "全球采购计划已生成",
       "需求：" + savedPlan.inputSummary,
-      "分类：" + savedPlan.category,
-      "状态：" + (blocked ? "已阻断" : status),
+      "类型：" + (savedPlan.categoryLabel || savedPlan.category),
+      "状态：" + (blocked ? "已阻断" : "计划已生成"),
       blocked ? "原因：涉及下单 / 付款。" : "",
-      "realExecution=false",
-      "未搜索、未下单、未付款、未提交订单。",
-      blocked ? "不会下单、付款或提交订单。" : "",
-      "下一步：点击“查看全球采购计划”进入工作台查看完整计划。"
+      "安全边界：" + (blocked ? "不会下单、付款或提交订单。" : "未搜索、未下单、未付款、未提交订单。"),
+      "下一步：查看全球采购计划。"
     ].filter(Boolean).join("\n");
     return { answer, commercePlan:savedPlan };
   }
@@ -974,7 +971,9 @@
               commerceStatus:commercePlan && commercePlan.status || "planned",
               realExecution:false
             });
-            return putAnswerLog(t, answer, false);
+            t.answer = answer;
+            t.updatedAt = nowIso();
+            return t;
           });
         } else {
           answer = executeDispatchPlan(active.text, plan);
@@ -990,8 +989,13 @@
           }, 0);
         }
         active = patchTask(active.id, (t) => {
-          t = addLog(t, "dispatch", "已生成调度计划：" + (plan.module || "unknown") + " / " + (plan.action || "unknown"));
+          if (plan.module !== "commerceAgent") t = addLog(t, "dispatch", "已生成调度计划：" + (plan.module || "unknown") + " / " + (plan.action || "unknown"));
           if (pendingPayload) t = addLog(t, "dispatch", "已写入模块预填参数：" + pendingPayload.targetRoute + "，realExecution=false。");
+          if (plan.module === "commerceAgent") {
+            t.answer = answer;
+            t.updatedAt = nowIso();
+            return t;
+          }
           return putAnswerLog(t, answer, false);
         });
       } else {

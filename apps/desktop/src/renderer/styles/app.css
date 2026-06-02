@@ -1185,16 +1185,40 @@
   font-size:13px;
   font-weight:800;
 }
-.commerce-home-actions{
+.commerce-home-card{
   margin-top:10px;
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:12px;
-  border-top:1px solid #edf2f7;
-  padding-top:10px;
-  color:#64748b;
+  border:1px solid #dbeafe;
+  border-radius:10px;
+  background:#f8fbff;
+  padding:12px;
+  color:#334155;
   font-size:13px;
+}
+.commerce-home-card.is-blocked{
+  border-color:#fecaca;
+  background:#fff7f7;
+}
+.commerce-home-card-main{
+  display:grid;
+  gap:5px;
+}
+.commerce-home-card h3{
+  margin:0 0 2px;
+  font-size:16px;
+  color:#0f172a;
+}
+.commerce-home-card p{
+  margin:0;
+  line-height:1.45;
+}
+.commerce-view-plan-button{
+  white-space:nowrap;
+  min-height:34px;
+  padding-inline:14px;
 }
 .commerce-layout{
   display:grid;

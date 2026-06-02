@@ -68,15 +68,21 @@ test.describe.serial("commerce agent workbench", () => {
   test("home commerce summary stays compact and links to workbench detail", async () => {
     const command = runId + " 帮我找成都到上海最便宜机票";
     await submitHomeCommand(page, command);
-    await expect(currentTaskLogs(page)).toContainText("路由判断：全球采购");
-    await expect(currentTaskLogs(page)).toContainText("commerceAgent.plan");
-    await expect(currentTaskLogs(page)).toContainText("realExecution=false");
-    await expect(currentTaskLogs(page)).toContainText(/未下单|未付款|未提交订单/);
+    await expect(page.locator("[data-commerce-home-summary]")).toHaveCount(1);
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText(/未搜索|未下单|未付款|未提交订单/);
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText(/类型：机票/);
     await expect(page.locator("#commerceViewPlanBtn")).toBeVisible();
+    await expect(page.getByText("全球采购计划已生成")).toHaveCount(1);
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("commerceAgent.plan");
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("realExecution=false");
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("planned");
     await expect(currentTaskLogs(page)).not.toContainText("搜索范围：");
     await expect(currentTaskLogs(page)).not.toContainText("比较维度：");
     await expect(currentTaskLogs(page)).not.toContainText("决策目标：同等条件下价格最低");
     await expect(currentTaskLogs(page)).not.toContainText("执行边界：不真实搜索外部网站");
+    await expect(currentTaskLogs(page)).not.toContainText("commerceAgent.plan");
+    await expect(currentTaskLogs(page)).not.toContainText("realExecution=false");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
 
     await page.locator("#commerceViewPlanBtn").click();
@@ -105,11 +111,12 @@ test.describe.serial("commerce agent workbench", () => {
   test("direct order and payment request remains blocked and plan-only", async () => {
     const command = runId + " 帮我直接下单并付款";
     await submitHomeCommand(page, command);
-    await expect(currentTaskLogs(page)).toContainText("commerceAgent.plan");
-    await expect(currentTaskLogs(page)).toContainText("realExecution=false");
-    await expect(currentTaskLogs(page)).toContainText("状态：已阻断");
-    await expect(currentTaskLogs(page)).toContainText("原因：涉及下单 / 付款");
-    await expect(currentTaskLogs(page)).toContainText(/不会下单、付款或提交订单|未下单|未付款|未提交订单/);
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已阻断");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("原因：涉及下单 / 付款");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会下单、付款或提交订单");
+    await expect(page.locator("#commerceViewPlanBtn")).toBeVisible();
+    await expect(currentTaskLogs(page)).not.toContainText("commerceAgent.plan");
+    await expect(currentTaskLogs(page)).not.toContainText("realExecution=false");
     await expect(currentTaskLogs(page)).not.toContainText("搜索范围：");
     await expect(currentTaskLogs(page)).not.toContainText("决策目标：同等条件下价格最低");
     await page.locator('.nav-item[data-route="commerce"]').click();
@@ -121,9 +128,11 @@ test.describe.serial("commerce agent workbench", () => {
     const command = runId + " 帮我订东京酒店";
     await submitHomeCommand(page, command);
     await expect(page.locator("#cmdHistory")).toContainText("全球采购");
-    await expect(page.locator("#cmdHistory")).toContainText(/未搜索|未下单|未付款|realExecution=false/);
+    await expect(page.locator("#cmdHistory")).toContainText(/未下单|未付款/);
     await expect(page.locator("#cmdHistory")).not.toContainText("候选方案字段模板");
     await expect(page.locator("#cmdHistory")).not.toContainText("决策目标：同等条件下价格最低");
+    await expect(page.locator("#cmdHistory")).not.toContainText("commerceAgent.plan");
+    await expect(page.locator("#cmdHistory")).not.toContainText("realExecution=false");
   });
 
   test("clears a commerce plan from the workbench", async () => {
