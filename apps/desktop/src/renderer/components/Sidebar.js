@@ -25,7 +25,7 @@
       const locked = m.paid && !window.WeishanPermissions.canUse(m.id);
       const label = window.I18n.t(m.id);
       return `${section}<button class="nav-item ${window.WeishanRouter.current()===m.id?'active':''}" data-route="${m.id}" title="${label}"><span class="nav-icon">${m.icon}</span><span class="nav-label">${label}</span>${m.pill?`<b class="pill">${m.pill}</b>`:""}${locked?`<b class="paid">${window.I18n.t("paidOnly")}</b>`:""}</button>`;
-    }).join("") + `</nav><div class="sidebar-foot"><div>weishan v2.08</div><div class="local-dot">● ${window.I18n.t("localFirstMode")}</div></div></aside>`;
+    }).join("") + `</nav><div class="sidebar-foot"><div>weishan v2.14</div><div class="local-dot">● ${window.I18n.t("localFirstMode")}</div></div></aside>`;
   }
   function bind(root){
     const toggle = root.querySelector("#sidebarToggle");
