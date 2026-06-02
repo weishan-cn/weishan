@@ -1,6 +1,6 @@
 {
   "name": "weishan-desktop",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "private": true,
   "scripts": {
     "install:all": "npm install --prefix apps/server && npm install --prefix apps/desktop",
@@ -10,6 +10,7 @@
     "start:server": "npm run start --prefix apps/server",
     "check": "node scripts/check.js",
     "healthcheck": "node scripts/healthcheck.js",
+    "release:check": "node scripts/release-check.js",
     "secrets:scan": "node scripts/secret-scan.js",
     "version:check": "node scripts/version-check.js",
     "verify": "node scripts/verify.js core",
