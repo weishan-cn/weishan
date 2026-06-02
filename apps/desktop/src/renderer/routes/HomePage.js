@@ -44,6 +44,32 @@
     </div>`;
   }
 
+  function desktopAssistantApi(){
+    return window.WeishanDesktopAssistant || null;
+  }
+
+  function desktopAssistantSession(){
+    const api = desktopAssistantApi();
+    return api && api.getDesktopAssistantSession ? api.getDesktopAssistantSession() : { enabled:false, status:"closed" };
+  }
+
+  function desktopAssistantHistory(action, detail){
+    const api = desktopAssistantApi();
+    if (!api || !api.createDesktopAssistantHistoryPayload || !window.HistoryApi || !window.HistoryApi.record) return;
+    window.HistoryApi.record(action, api.createDesktopAssistantHistoryPayload(action, detail || {}));
+  }
+
+  function desktopAssistantStrip(){
+    const session = desktopAssistantSession();
+    const enabled = session && session.enabled === true;
+    return `<div class="desktop-assistant-strip" data-desktop-assistant-session="true">
+      <span class="desktop-assistant-state ${enabled ? "is-on" : "is-off"}">桌面助手：${enabled ? "本次开启" : "关闭"}</span>
+      <button class="cmd-btn gray" id="desktopAssistantEnable" type="button">本次开启</button>
+      <button class="cmd-btn gray" id="desktopAssistantDisable" type="button">关闭</button>
+      <button class="cmd-btn danger ghost" id="desktopAssistantStop" type="button">停止接管</button>
+    </div>`;
+  }
+
   function cleanAiDisplay(text){
     const raw = String(text || "");
     const cleaned = raw
@@ -147,7 +173,26 @@
       </div>
       <div class="cmd-log-list">
         ${(latest.logs || []).map(logLine).join("")}
-      </div>`;
+      </div>
+      ${desktopPlanActions(latest)}`;
+  }
+
+  function desktopPlanActions(task){
+    const meta = task && task.meta || {};
+    if (meta.dispatchModule !== "desktopAssistant" && task && task.module !== "desktopAssistant") return "";
+    const risk = meta.desktopRiskLevel || "low";
+    const riskText = risk === "high" ? "高风险" : risk === "medium" ? "中风险" : "普通提示";
+    return `<div class="desktop-plan-actions desktop-risk-${esc(risk)}" data-desktop-plan-actions="true">
+      <div>
+        <b>${esc(riskText)}桌面操作计划</b>
+        <span>仅生成计划，未执行电脑操作。realExecution=false${meta.desktopRequiresSecondConfirm ? " · 必须二次确认" : ""}</span>
+      </div>
+      <div class="desktop-plan-buttons">
+        <button class="cmd-btn gray" id="desktopPlanConfirm" type="button">确认计划</button>
+        <button class="cmd-btn gray" id="desktopPlanCancel" type="button">取消计划</button>
+        <button class="cmd-btn danger ghost" id="desktopPlanStop" type="button">停止接管</button>
+      </div>
+    </div>`;
   }
 
   function queuePanel(snapshot){
@@ -253,6 +298,7 @@
             <div class="cmd-card-title small-title">
               <h3>${t("homeInputTitle")}</h3>
             </div>
+            ${desktopAssistantStrip()}
             ${attachmentPanel()}
             <textarea id="commandInput" class="cmd-input" placeholder="${t("homePlaceholder")}"></textarea>
             <div class="cmd-actions">
@@ -298,6 +344,74 @@
     }
 
     runBtn.addEventListener("click", submit);
+
+    const desktopEnable = host.querySelector("#desktopAssistantEnable");
+    if (desktopEnable) desktopEnable.addEventListener("click", function(){
+      const api = desktopAssistantApi();
+      if (api && api.toggleDesktopAssistantForSession) api.toggleDesktopAssistantForSession(true);
+      render(host);
+    });
+
+    const desktopDisable = host.querySelector("#desktopAssistantDisable");
+    if (desktopDisable) desktopDisable.addEventListener("click", function(){
+      const api = desktopAssistantApi();
+      if (api && api.toggleDesktopAssistantForSession) api.toggleDesktopAssistantForSession(false);
+      render(host);
+    });
+
+    function stopDesktopAssistant(){
+      const api = desktopAssistantApi();
+      const session = api && api.stopDesktopAssistantSession ? api.stopDesktopAssistantSession() : { enabled:false, status:"stopped" };
+      const snap = window.CommandApi.snapshot();
+      const latest = (snap.queue || []).slice().reverse().find((item) => item && (item.meta && item.meta.dispatchModule === "desktopAssistant" || item.module === "desktopAssistant"));
+      desktopAssistantHistory("desktopAssistant.stopped", {
+        inputSummary:latest && (latest.inputSummary || latest.text) || "用户点击停止接管。",
+        outputSummary:"桌面助手已停止。本轮未执行电脑操作。",
+        riskLevel:"low",
+        stepCount:0,
+        realExecution:false,
+        createdAt:session && session.updatedAt || new Date().toISOString()
+      });
+      render(host);
+    }
+
+    const desktopStop = host.querySelector("#desktopAssistantStop");
+    if (desktopStop) desktopStop.addEventListener("click", stopDesktopAssistant);
+
+    const desktopPlanStop = host.querySelector("#desktopPlanStop");
+    if (desktopPlanStop) desktopPlanStop.addEventListener("click", stopDesktopAssistant);
+
+    const desktopPlanConfirm = host.querySelector("#desktopPlanConfirm");
+    if (desktopPlanConfirm) desktopPlanConfirm.addEventListener("click", function(){
+      const snap = window.CommandApi.snapshot();
+      const latest = (snap.queue || []).slice().reverse().find((item) => item && (item.meta && item.meta.dispatchModule === "desktopAssistant" || item.module === "desktopAssistant"));
+      const meta = latest && latest.meta || {};
+      desktopAssistantHistory("desktopAssistant.planConfirmed", {
+        inputSummary:latest && latest.inputSummary || latest && latest.text || "确认桌面操作计划。",
+        outputSummary:"用户已确认桌面操作计划；本轮仍不执行电脑操作。",
+        riskLevel:meta.desktopRiskLevel || "low",
+        stepCount:meta.desktopStepCount || 0,
+        requiresSecondConfirm:meta.desktopRequiresSecondConfirm === true,
+        realExecution:false
+      });
+      alert("已确认计划。本轮不会执行真实电脑操作。");
+    });
+
+    const desktopPlanCancel = host.querySelector("#desktopPlanCancel");
+    if (desktopPlanCancel) desktopPlanCancel.addEventListener("click", function(){
+      const snap = window.CommandApi.snapshot();
+      const latest = (snap.queue || []).slice().reverse().find((item) => item && (item.meta && item.meta.dispatchModule === "desktopAssistant" || item.module === "desktopAssistant"));
+      const meta = latest && latest.meta || {};
+      desktopAssistantHistory("desktopAssistant.planCancelled", {
+        inputSummary:latest && latest.inputSummary || latest && latest.text || "取消桌面操作计划。",
+        outputSummary:"用户已取消桌面操作计划；未执行电脑操作。",
+        riskLevel:meta.desktopRiskLevel || "low",
+        stepCount:meta.desktopStepCount || 0,
+        requiresSecondConfirm:meta.desktopRequiresSecondConfirm === true,
+        realExecution:false
+      });
+      alert("已取消计划。");
+    });
 
     input.addEventListener("keydown", function(ev){
       if (ev.key === "Enter" && !ev.shiftKey) {

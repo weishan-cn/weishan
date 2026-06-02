@@ -8,6 +8,7 @@
     codex:"codex",
     model:"model",
     chat:"chat",
+    desktopAssistant:"desktopAssistant",
     coordination:"coordination"
   };
 
@@ -29,6 +30,7 @@
     chatAnswered:"chat.answered",
     modelStatus:"model.status",
     modelSelect:"model.select",
+    desktopAssistantPlan:"desktopAssistant.plan",
     coordinationPlan:"coordination.plan"
   };
   const MODEL_SELECTION_KEY = "weishan:model:selected:v1";
@@ -131,6 +133,20 @@
     return DISPATCH_ACTIONS.modelStatus;
   }
 
+  function desktopAssistantApi(){
+    return window.WeishanDesktopAssistant || null;
+  }
+
+  function isDesktopAssistantCommand(text){
+    const raw = String(text || "");
+    const api = desktopAssistantApi();
+    if (api && api.classifyDesktopOperation) {
+      const result = api.classifyDesktopOperation(raw);
+      if (result && result.isDesktopOperation) return true;
+    }
+    return /操作电脑|接管电脑|桌面助手|电脑操作|自动操作|打开软件|打开浏览器|打开\s*Chrome|打开\s*Finder|打开\s*WPS|点击|输入|复制|粘贴|切换窗口|保存文件|删除.*文件|发送邮件|提交表单|付款|安装软件|输入密码|desktop assistant|control computer|operate computer|open\s*Chrome|click|type|paste|copy|switch window/i.test(raw);
+  }
+
   function selectedModelId(){
     try {
       return (window.localStorage && window.localStorage.getItem(MODEL_SELECTION_KEY)) || "weishan-auto";
@@ -214,6 +230,17 @@
       };
     }
 
+    if (isDesktopAssistantCommand(raw) && !/邮件接管|抓取中心|软件工厂/i.test(raw)) {
+      return {
+        module:DISPATCH_MODULES.desktopAssistant,
+        action:DISPATCH_ACTIONS.desktopAssistantPlan,
+        routeMode:"console",
+        modules:[DISPATCH_MODULES.desktopAssistant],
+        targetRoute:"home",
+        confidence:"rule"
+      };
+    }
+
     const module = uniqueModules[0] || DISPATCH_MODULES.chat;
     if (module === "mail") return { module, action:mailAction(raw), routeMode:"module", modules:[module], targetRoute:"mail", confidence:"rule" };
     if (module === "crawler") return { module, action:extractUrl(raw) ? DISPATCH_ACTIONS.crawlerWebFetch : DISPATCH_ACTIONS.crawlerOpen, routeMode:"module", modules:[module], targetRoute:"crawler", confidence:"rule" };
@@ -241,6 +268,17 @@
       mockSafeExecutionAllowed:intent.module === DISPATCH_MODULES.mail || intent.module === DISPATCH_MODULES.softwareFactory || (intent.module === DISPATCH_MODULES.crawler && /^https?:\/\/(example\.com|e2e-local|mock\.local)(?:[/:?#]|$)/i.test(url || "")),
       createdAt:new Date().toISOString()
     });
+    if (intent.module === DISPATCH_MODULES.desktopAssistant) {
+      const api = desktopAssistantApi();
+      const desktopPlan = api && api.createDesktopOperationPlan ? api.createDesktopOperationPlan(cleanInput) : null;
+      plan.executionMode = "desktop_assistant_plan_only";
+      plan.realExecution = false;
+      plan.requiresUserConfirmation = true;
+      plan.mockSafeExecutionAllowed = false;
+      plan.desktopOperationPlan = desktopPlan;
+      plan.riskLevel = desktopPlan && desktopPlan.riskLevel || "low";
+      plan.requiresSecondConfirm = desktopPlan && desktopPlan.requiresSecondConfirm === true;
+    }
     if (intent.module === DISPATCH_MODULES.model) {
       plan.selectedModelId = intent.selectedModelId || inferModelId(cleanInput);
     }
@@ -278,6 +316,7 @@
       "codex.generateInstruction":"生成 Codex 指令",
       "model.status":"查看模型状态",
       "model.select":"选择模型",
+      "desktopAssistant.plan":"生成桌面操作计划",
       "chat.answer":"普通问答",
       "coordination.plan":"生成多模块协调计划"
     };
@@ -703,12 +742,45 @@
     ].join("\n");
   }
 
+  function buildDesktopAssistantPlan(plan, text){
+    const api = desktopAssistantApi();
+    const operationPlan = plan && plan.desktopOperationPlan || (api && api.createDesktopOperationPlan ? api.createDesktopOperationPlan(text) : null);
+    if (!operationPlan) {
+      return [
+        "# 桌面操作计划",
+        "",
+        "桌面助手计划模块未加载。realExecution=false",
+        "本轮不会控制电脑、读取屏幕、点击鼠标或输入键盘。"
+      ].join("\n");
+    }
+    const session = api && api.getDesktopAssistantSession ? api.getDesktopAssistantSession() : { enabled:false };
+    const enabled = session && session.enabled === true;
+    const riskText = operationPlan.riskLevel === "high" ? "高风险" : operationPlan.riskLevel === "medium" ? "中风险" : "普通提示";
+    return [
+      "# 桌面操作计划",
+      "",
+      "任务：" + operationPlan.title,
+      "桌面助手：" + (enabled ? "本次开启" : "关闭"),
+      "风险等级：" + riskText,
+      "requiresSecondConfirm=" + (operationPlan.requiresSecondConfirm ? "true" : "false"),
+      "realExecution=false",
+      "",
+      enabled ? "当前仅生成操作计划，用户确认计划也不会执行真实电脑操作。" : "需要先点击首页“桌面助手：本次开启”，才能继续确认计划。",
+      "",
+      "## 计划步骤",
+      operationPlan.steps.map((step, index) => (index + 1) + ". [" + step.riskLevel + "] " + step.title + " - " + step.description + " · realExecution=false").join("\n"),
+      "",
+      operationPlan.riskLevel === "high" ? "高风险操作必须二次确认。本轮不会删除文件、发送邮件、付款、提交表单、输入密码或修改系统设置。" : "本轮不调用系统权限、不读取屏幕、不控制鼠标键盘。"
+    ].join("\n");
+  }
+
   function resultForPlan(plan, text){
     if (plan.module === "document") return buildDocumentDraft(text, plan);
     if (plan.module === "ppt") return buildPptOutline(text, plan);
     if (plan.module === "codex") return buildCodexInstruction(text, plan);
     if (plan.module === "model" && plan.action === DISPATCH_ACTIONS.modelSelect) return buildModelSelect(plan);
     if (plan.module === "model") return buildModelStatus();
+    if (plan.module === "desktopAssistant") return buildDesktopAssistantPlan(plan, text);
     if (plan.module === "coordination") return buildCoordinationPlan(text, plan.modules);
     if (plan.module === "softwareFactory" || plan.module === "mail" || plan.module === "crawler") return buildModuleDispatchPlan(plan, text);
     return "AI 网关未接通，无法可靠回答。你仍可使用本地调度：文档草稿、PPT 大纲、Codex 指令、邮件接管、抓取中心、软件工厂和 coordination step queue。";
@@ -727,6 +799,7 @@
     if (plan.module === "codex") return "weishan-codex-instruction-" + ts + ".md";
     if (plan.module === "model") return "weishan-model-status-" + ts + ".md";
     if (plan.module === "chat") return "weishan-chat-answer-" + ts + ".md";
+    if (plan.module === "desktopAssistant") return "weishan-desktop-operation-plan-" + ts + ".md";
     if (plan.module === "coordination") return "weishan-coordination-plan-" + ts + ".md";
     return "weishan-" + plan.module + "-dispatch-plan-" + ts + ".md";
   }

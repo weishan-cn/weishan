@@ -48,6 +48,7 @@ function checkFiles() {
     "apps/desktop/src/renderer/routes/SecurityPage.js",
     "apps/desktop/src/renderer/core/enterpriseSecurity.js",
     "apps/desktop/src/renderer/core/dispatchRouter.js",
+    "apps/desktop/src/renderer/core/desktopAssistant.js",
     "apps/desktop/src/renderer/core/repairCenter.js",
     "apps/desktop/src/renderer/core/taskProtocol.js",
     "apps/server/src/cloud/storageAdapter.js",
@@ -63,7 +64,7 @@ function checkFiles() {
 function checkPackageScripts() {
   const pkg = JSON.parse(readText("package.json") || "{}");
   const scripts = pkg.scripts || {};
-  return ["check", "dev:desktop", "healthcheck", "secrets:scan", "test:api", "test:e2e", "test:e2e:smoke", "test:e2e:repair", "test:e2e:dispatch", "test:e2e:cloud"].map((script) => {
+  return ["check", "dev:desktop", "healthcheck", "secrets:scan", "test:api", "test:e2e", "test:e2e:smoke", "test:e2e:repair", "test:e2e:dispatch", "test:e2e:desktop-assistant", "test:e2e:cloud"].map((script) => {
     const ok = Boolean(scripts[script]);
     const status = ok ? "pass" : (script === "healthcheck" ? "warn" : "fail");
     return result("script:" + script, status, ok ? scripts[script] : "missing", "Add the missing package script.");
@@ -115,6 +116,14 @@ function checkMarkers() {
     marker("apps/desktop/src/renderer/core/dispatchRouter.js", /realExecution:false|requiresUserConfirmation:true/, "marker:dispatch real execution false", true),
     marker("apps/desktop/src/renderer/core/dispatchRouter.js", /realExecution:false|mockSafeExecutionAllowed/, "marker:dispatch real execution false by default", true),
     marker("apps/desktop/src/renderer/core/dispatchRouter.js", /requiresUserConfirmation:true/, "marker:dispatch user confirmation required", true),
+    marker("apps/desktop/src/renderer/routes/SettingsPage.js", /桌面助手与自动操作|desktopAssistantSettingsPanel/, "marker:desktop assistant settings", true),
+    marker("apps/desktop/src/renderer/routes/HomePage.js", /desktopAssistantEnable|桌面助手：|本次开启/, "marker:desktop assistant session toggle", true),
+    marker("apps/desktop/src/renderer/core/desktopAssistant.js", /createDesktopOperationPlan|classifyDesktopOperation/, "marker:desktop assistant operation plan", true),
+    marker("apps/desktop/src/renderer/core/desktopAssistant.js", /riskLevel|low|medium|high|getRiskLevelForStep/, "marker:desktop assistant risk levels", true),
+    marker("apps/desktop/src/renderer/routes/SettingsPage.js", /高风险操作包括|desktop-risk-high/, "marker:desktop assistant high risk red warning", true),
+    marker("apps/desktop/src/renderer/core/desktopAssistant.js", /realExecution:false/, "marker:desktop assistant real execution false", true),
+    marker("apps/desktop/src/renderer/routes/HomePage.js", /desktopAssistantStop|停止接管/, "marker:desktop assistant stop button", true),
+    marker("apps/desktop/src/renderer/modules/command/commandApi.js", /desktopAssistant\.planCreated|recordDesktopAssistantHistory/, "marker:desktop assistant history actions", true),
     marker("apps/desktop/src/renderer/modules/history/historyApi.js", /window\.HistoryApi|function record/, "marker:HistoryApi", true),
     marker("apps/desktop/src/renderer/routes/HistoryPage.js", /artifact|history-artifact-download|URL\.createObjectURL/, "marker:artifact download", false),
     marker("apps/desktop/src/renderer/core/enterpriseSecurity.js", /WeishanEnterpriseSecurity|canDownload|createSecurityAuditPayload/, "marker:enterprise security", true),

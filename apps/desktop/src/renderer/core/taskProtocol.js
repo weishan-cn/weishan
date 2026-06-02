@@ -23,6 +23,10 @@
     chatUnavailable:"chat.unavailable",
     modelSelected:"model.selected",
     modelStatusViewed:"model.statusViewed",
+    desktopAssistantPlanCreated:"desktopAssistant.planCreated",
+    desktopAssistantPlanConfirmed:"desktopAssistant.planConfirmed",
+    desktopAssistantPlanCancelled:"desktopAssistant.planCancelled",
+    desktopAssistantStopped:"desktopAssistant.stopped",
     dispatchExecuted:"dispatch.executed",
     dispatchFailed:"dispatch.failed",
     dispatchCancelled:"dispatch.cancelled"
@@ -38,6 +42,7 @@
     document:"document",
     chat:"chat",
     model:"model",
+    desktopAssistant:"desktopAssistant",
     codex:"codex",
     coordination:"coordination",
     storage:"storage",

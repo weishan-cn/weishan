@@ -1,6 +1,9 @@
 (function(){
   if (!window.WeishanDispatchRouter && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/dispatchRouter.js?v=2.0.6"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/dispatchRouter.js?v=2.0.7"></scr' + 'ipt>');
+  }
+  if (!window.WeishanDesktopAssistant && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/desktopAssistant.js?v=2.0.7"></scr' + 'ipt>');
   }
 
   const QUEUE_KEY = "command.queue.v205";
@@ -21,6 +24,10 @@
 
   function dispatchRouter(){
     return window.WeishanDispatchRouter || null;
+  }
+
+  function desktopAssistant(){
+    return window.WeishanDesktopAssistant || null;
   }
 
   function saveDispatchPrefill(text, plan){
@@ -191,6 +198,51 @@
       realExecution:detail.realExecution === true,
       createdAt:nowIso()
     });
+  }
+
+  function recordDesktopAssistantHistory(type, plan, extra){
+    const api = desktopAssistant();
+    if (!api || !api.createDesktopAssistantHistoryPayload || !window.HistoryApi || typeof window.HistoryApi.record !== "function") return null;
+    const detail = Object.assign({}, plan && plan.desktopOperationPlan || {}, extra || {});
+    return window.HistoryApi.record(type, api.createDesktopAssistantHistoryPayload(type, detail));
+  }
+
+  function desktopAssistantAnswer(text, plan){
+    const api = desktopAssistant();
+    if (!api || !api.createDesktopOperationPlan) {
+      return {
+        answer:"桌面助手权限框架尚未加载。本轮不会控制电脑。realExecution=false",
+        operationPlan:null,
+        session:{ enabled:false }
+      };
+    }
+    const operationPlan = plan && plan.desktopOperationPlan || api.createDesktopOperationPlan(text);
+    const session = api.getDesktopAssistantSession ? api.getDesktopAssistantSession() : { enabled:false };
+    const enabled = session && session.enabled === true;
+    const riskLabel = operationPlan.riskLevel === "high" ? "高风险" : operationPlan.riskLevel === "medium" ? "中风险" : "普通提示";
+    const lines = [
+      "# 桌面操作计划",
+      "",
+      "任务：" + operationPlan.title,
+      "桌面助手：" + (enabled ? "本次开启" : "关闭"),
+      "风险等级：" + riskLabel,
+      "requiresSecondConfirm=" + (operationPlan.requiresSecondConfirm ? "true" : "false"),
+      "realExecution=false",
+      "",
+      enabled ? "当前仅生成操作计划，点击“确认计划”也只记录 confirmed，不会执行电脑操作。" : "桌面助手当前关闭。请点击“本次开启”后再确认计划。",
+      "",
+      "## 计划步骤"
+    ];
+    operationPlan.steps.forEach((step, index) => {
+      lines.push((index + 1) + ". [" + step.riskLevel + "] " + step.title + " - " + step.description + " · realExecution=false");
+    });
+    lines.push("");
+    if (operationPlan.riskLevel === "high") {
+      lines.push("高风险操作必须二次确认。本轮不会删除文件、发送邮件、上传文件、付款、提交表单、输入密码、安装软件或修改系统设置。");
+    } else {
+      lines.push("本轮不申请系统权限、不读取屏幕、不控制鼠标键盘。");
+    }
+    return { answer:lines.join("\n"), operationPlan, session };
   }
 
   function isRealtimeQuestion(text){
@@ -814,7 +866,9 @@
         t.meta = Object.assign({}, t.meta || {}, {
           dispatchModule:intent.dispatchPlan.module,
           dispatchAction:intent.dispatchPlan.action,
-          dispatchTargetRoute:intent.dispatchPlan.targetRoute || "home"
+          dispatchTargetRoute:intent.dispatchPlan.targetRoute || "home",
+          desktopRiskLevel:intent.dispatchPlan.riskLevel || "",
+          desktopRequiresSecondConfirm:intent.dispatchPlan.requiresSecondConfirm === true
         });
       }
       return addLog(t, "route", "路由判断：" + intent.label);
@@ -845,6 +899,25 @@
           answer = await answerChatWithGateway(active.text, meta);
           perfEnd(meta, "renderer.ai.gateway.done", aiStartedAt, { inputChars:String(active.text || "").length, outputChars:String(answer || "").length });
           active = patchTask(active.id, (t) => putAnswerLog(t, answer, false));
+        } else if (plan.module === "desktopAssistant") {
+          const desktopResult = desktopAssistantAnswer(active.text, plan);
+          answer = desktopResult.answer;
+          const operationPlan = desktopResult.operationPlan;
+          recordDesktopAssistantHistory("desktopAssistant.planCreated", plan, Object.assign({}, operationPlan || {}, {
+            inputSummary:taskSummary(active.text, 240),
+            outputSummary:operationPlan ? "已生成桌面操作计划：" + operationPlan.riskLevel + "，" + operationPlan.stepCount + " 步。" : "桌面助手计划模块未加载。",
+            realExecution:false
+          }));
+          active = patchTask(active.id, (t) => {
+            t.meta = Object.assign({}, t.meta || {}, {
+              desktopPlanId:operationPlan && operationPlan.planId || "",
+              desktopRiskLevel:operationPlan && operationPlan.riskLevel || "low",
+              desktopRequiresSecondConfirm:operationPlan && operationPlan.requiresSecondConfirm === true,
+              desktopStepCount:operationPlan && operationPlan.stepCount || 0,
+              realExecution:false
+            });
+            return putAnswerLog(t, answer, false);
+          });
         } else {
           answer = executeDispatchPlan(active.text, plan);
         }

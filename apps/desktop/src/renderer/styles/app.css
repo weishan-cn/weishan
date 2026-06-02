@@ -845,3 +845,92 @@
   background:transparent;
   border-top:0;
 }
+
+/* v2.07 desktop assistant permission framework */
+.desktop-assistant-strip{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:4px 18px 10px;
+  border-bottom:1px solid rgba(229,231,235,.7);
+}
+.desktop-assistant-state{
+  font-size:12px;
+  font-weight:850;
+  color:#64748b;
+  margin-right:4px;
+}
+.desktop-assistant-state.is-on{
+  color:#047857;
+}
+.desktop-assistant-state.is-off{
+  color:#64748b;
+}
+.cmd-btn.ghost{
+  background:#fff;
+}
+.desktop-plan-actions{
+  margin:8px 18px 18px;
+  padding:10px 12px;
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+  border-radius:8px;
+  border:1px solid #e5e7eb;
+}
+.desktop-plan-actions b,
+.desktop-plan-actions span{
+  display:block;
+}
+.desktop-plan-actions b{
+  font-size:12px;
+}
+.desktop-plan-actions span{
+  margin-top:3px;
+  font-size:12px;
+  color:#64748b;
+}
+.desktop-plan-buttons{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.desktop-risk-low{
+  background:#f8fafc;
+  border-color:#cbd5e1;
+  color:#334155;
+}
+.desktop-risk-medium{
+  background:#fffbeb;
+  border-color:#f59e0b;
+  color:#92400e;
+}
+.desktop-risk-high{
+  background:#fef2f2;
+  border-color:#fca5a5;
+  color:#991b1b;
+}
+.desktop-risk-high span{
+  color:#991b1b;
+}
+.desktop-assistant-settings .desktop-permission-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px 14px;
+  margin:14px 0;
+}
+.desktop-assistant-settings label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  color:#334155;
+}
+.desktop-risk-note{
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid #e5e7eb;
+  font-size:13px;
+}

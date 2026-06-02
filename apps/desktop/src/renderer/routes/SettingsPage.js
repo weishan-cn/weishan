@@ -447,6 +447,79 @@
       </div>`;
   }
 
+  function desktopAssistantApi(){
+    return window.WeishanDesktopAssistant || null;
+  }
+
+  function desktopAssistantSettings(){
+    const api = desktopAssistantApi();
+    return api && api.getDesktopAssistantSettings ? api.getDesktopAssistantSettings() : {
+      enabled:false,
+      allowPlanGeneration:true,
+      allowKeyboardInput:false,
+      allowMouseClick:false,
+      allowScreenRead:false,
+      requireSecondConfirmForHighRisk:true,
+      autoStopAfterMinutes:30
+    };
+  }
+
+  function desktopAssistantSession(){
+    const api = desktopAssistantApi();
+    return api && api.getDesktopAssistantSession ? api.getDesktopAssistantSession() : { enabled:false, status:"closed" };
+  }
+
+  function checked(value){
+    return value ? " checked" : "";
+  }
+
+  function desktopAssistantPanel(){
+    const settings = desktopAssistantSettings();
+    const session = desktopAssistantSession();
+    const status = session.enabled ? "允许本次会话使用" : session.status === "stopped" ? "已停止" : "已关闭";
+    return `
+      <div class="ws-card desktop-assistant-settings" id="desktopAssistantSettingsPanel">
+        <div class="settings-title-row">
+          <h2>桌面助手与自动操作</h2>
+          <span class="connector-pill ${session.enabled ? "connector-success" : "connector-empty"}">${esc(status)}</span>
+        </div>
+        <p class="ws-muted">桌面助手可在用户明确授权后辅助操作本机软件。本轮为权限框架和操作计划，不会真实点击、输入或读取屏幕。</p>
+        <div class="desktop-permission-grid">
+          <label><input type="checkbox" id="desktopAssistantEnabled"${checked(settings.enabled)}> 启用桌面助手能力</label>
+          <label><input type="checkbox" id="desktopAssistantPlan"${checked(settings.allowPlanGeneration)}> 允许生成操作计划</label>
+          <label><input type="checkbox" id="desktopAssistantKeyboard"${checked(settings.allowKeyboardInput)}> 允许键盘输入（默认关）</label>
+          <label><input type="checkbox" id="desktopAssistantMouse"${checked(settings.allowMouseClick)}> 允许鼠标点击（默认关）</label>
+          <label><input type="checkbox" id="desktopAssistantScreen"${checked(settings.allowScreenRead)}> 允许读取屏幕（默认关）</label>
+          <label><input type="checkbox" id="desktopAssistantSecondConfirm"${checked(settings.requireSecondConfirmForHighRisk)}> 高风险操作必须二次确认</label>
+          <label><input type="checkbox" id="desktopAssistantAutoStop"${checked(settings.autoStopAfterMinutes > 0)}> 30 分钟无操作自动关闭</label>
+        </div>
+        <div class="desktop-risk-note desktop-risk-medium">中风险提醒：点击按钮、填写表单、保存/下载/移动文件或修改文档内容，需要用户继续确认。</div>
+        <div class="desktop-risk-note desktop-risk-high">高风险操作包括发送邮件、删除文件、付款、提交表单、上传文件、输入密码、安装软件、修改系统设置。此类操作必须二次确认。</div>
+      </div>`;
+  }
+
+  function mountDesktopAssistantPanel(host){
+    const panel = host.querySelector("#desktopAssistantSettingsPanel");
+    const api = desktopAssistantApi();
+    if (!panel || !api || !api.saveDesktopAssistantSettings) return;
+    function readSettings(){
+      return {
+        enabled:!!host.querySelector("#desktopAssistantEnabled").checked,
+        allowPlanGeneration:!!host.querySelector("#desktopAssistantPlan").checked,
+        allowKeyboardInput:!!host.querySelector("#desktopAssistantKeyboard").checked,
+        allowMouseClick:!!host.querySelector("#desktopAssistantMouse").checked,
+        allowScreenRead:!!host.querySelector("#desktopAssistantScreen").checked,
+        requireSecondConfirmForHighRisk:!!host.querySelector("#desktopAssistantSecondConfirm").checked,
+        autoStopAfterMinutes:host.querySelector("#desktopAssistantAutoStop").checked ? 30 : 0
+      };
+    }
+    Array.from(panel.querySelectorAll("input[type='checkbox']")).forEach(function(input){
+      input.addEventListener("change", function(){
+        api.saveDesktopAssistantSettings(readSettings());
+      });
+    });
+  }
+
   function renderCloudPlans(host, plans){
     const box = host.querySelector("#cloudPlanList");
     const enterprise = (plans || []).filter(function(plan){
@@ -611,6 +684,7 @@
             <p>free/pro → A；team/enterprise/institution → B。</p>
           </div>
         </div>
+        ${desktopAssistantPanel()}
         ${cloudEnterprisePanel()}
       </section>`;
 
@@ -658,6 +732,7 @@
       alert(t("authenticatorReserved"));
     });
 
+    mountDesktopAssistantPanel(host);
     mountCloudPanel(host);
 
     if (!acc.loggedIn) return;

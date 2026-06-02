@@ -24,7 +24,7 @@ app.use(express.json());
 mountCloudRoutes(app);
 
 const PORT = process.env.PORT || 8787;
-const VERSION = "2.0.6";
+const VERSION = "2.0.7";
 const SERVICE_NAME = "weishan";
 const SITE_URL = process.env.SITE_URL || "https://reset.weishan.ai";
 const supabaseAdmin = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -1181,7 +1181,7 @@ async function listInbox1708h(body, limit) {
       out.reverse();
       return {
         ok: true,
-        version: "2.0.6",
+        version: VERSION,
         provider: cfg.provider,
         imap: { host: cfg.host, port: cfg.port, secure: cfg.secure },
         mailbox: { total, unseen: Number(status.unseen || 0) },
@@ -1269,7 +1269,7 @@ function safeMailError1708h(e) {
   app.post("/v1/email/connect/auto", (req, res) => {
     const email = cleanMail1708h(req.body && req.body.email);
     const provider = detectMailProvider1708h(email);
-    res.json({ ok: true, version: "2.0.6", provider, imap: { host: provider.host, port: provider.port, secure: provider.secure } });
+    res.json({ ok: true, version: VERSION, provider, imap: { host: provider.host, port: provider.port, secure: provider.secure } });
   });
 
   app.post("/v1/email/connect/imap-test", async (req, res) => {
@@ -1302,7 +1302,7 @@ function safeMailError1708h(e) {
       });
       res.json({
         ok: true,
-        version: "2.0.6",
+        version: VERSION,
         message: "账号元数据已保存，授权码不会写入普通本地文件。",
         account: { email: saved.email, provider: saved.provider, host: saved.host, port: saved.port, secure: saved.secure },
         mailbox: test.mailbox,
@@ -1338,7 +1338,7 @@ function safeMailError1708h(e) {
     const saved = accountWithRuntimeSecret1708h(loadAccount1708h(), {});
     res.json({
       ok: true,
-      version: "2.0.6",
+      version: VERSION,
       saved: !!saved,
       account: saved ? { email: saved.email, provider: saved.provider, host: saved.host, port: saved.port, secure: saved.secure, savedAt: saved.savedAt } : null
     });
@@ -1446,7 +1446,7 @@ async function indexAllHeaders1708h(account, limit) {
 
       const data = {
         ok: true,
-        version: "2.0.6",
+        version: VERSION,
         mode: "header-index",
         account: { email: cfg.email, provider: cfg.provider },
         mailbox: { total, unseen: Number(status.unseen || 0) },
@@ -1490,7 +1490,7 @@ app.post("/v1/email/sync/index", async (req, res) => {
 
     res.json({
       ok: true,
-      version: "2.0.6",
+      version: VERSION,
       mode: data.mode,
       mailbox: data.mailbox,
       indexed: data.indexed,
@@ -1505,10 +1505,10 @@ app.post("/v1/email/sync/index", async (req, res) => {
 
 app.get("/v1/email/sync/status", (req, res) => {
   const data = loadSyncIndex1708h();
-  if (!data) return res.json({ ok:true, version:"2.0.6", synced:false });
+  if (!data) return res.json({ ok:true, version: VERSION, synced:false });
   res.json({
     ok: true,
-    version: "2.0.6",
+    version: VERSION,
     synced: true,
     mode: data.mode,
     mailbox: data.mailbox,
@@ -1520,7 +1520,7 @@ app.get("/v1/email/sync/status", (req, res) => {
 
 app.get("/v1/email/sync/messages", (req, res) => {
   const data = loadSyncIndex1708h();
-  if (!data) return res.json({ ok:true, version:"2.0.6", messages:[] });
+  if (!data) return res.json({ ok:true, version: VERSION, messages:[] });
 
   const category = String(req.query.category || "").trim();
   let messages = data.messages || [];
@@ -1528,7 +1528,7 @@ app.get("/v1/email/sync/messages", (req, res) => {
 
   res.json({
     ok: true,
-    version: "2.0.6",
+    version: VERSION,
     total: messages.length,
     messages
   });
@@ -1679,7 +1679,7 @@ app.post("/v1/email/sync/body-step", async (req, res) => {
 
     res.json({
       ok: true,
-      version: "2.0.6",
+      version: VERSION,
       processed: candidates.length,
       okCount,
       failCount,
@@ -1732,7 +1732,7 @@ app.post("/v1/email/sync/body/:uid", async (req, res) => {
 
     res.json({
       ok: true,
-      version: "2.0.6",
+      version: VERSION,
       uid,
       message: Object.assign({}, idx >= 0 ? data.messages[idx] : data.messages[0], { bodyHtml: full.bodyHtml || "" }),
       updatedAt: data.updatedAt
@@ -1826,7 +1826,7 @@ app.post("/v1/email/sync/run-all", async (req, res) => {
 
     res.json({
       ok: true,
-      version: "2.0.6",
+      version: VERSION,
       mode: "one-click-sync-all",
       indexed: data.messages.length,
       processedOk: totalOk,
