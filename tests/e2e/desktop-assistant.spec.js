@@ -136,20 +136,45 @@ test.describe.serial("desktop assistant permission framework", () => {
     await expect(page.locator("#desktopQueueRealOpen")).toBeVisible();
     await expect(page.getByText(/仅打开或聚焦白名单 App，不点击、不输入、不读屏/).first()).toBeVisible();
     await page.locator("#desktopQueueRealOpen").click();
-    await expect(page.getByText(/realExecuted|realExecution=true|Google Chrome/).first()).toBeVisible();
+    await expect(page.getByText(/已真实打开白名单 App|realExecution=true|Google Chrome/).first()).toBeVisible();
+    await expect(page.getByText(/未点击、未输入、未读屏、未截图|下一步建议/).first()).toBeVisible();
     await expect.poll(async () => page.evaluate(() => (window.__DA_OPEN_APP_CALLS__ || []).join(","))).toContain("chrome");
     await expectHistory(page, runId, /desktopAssistant.realOpenAppRequested|realOpenAppRequested|realOpenAppExecuted/);
-    await expectHistory(page, runId, /desktopAssistant.realOpenAppExecuted|realOpenAppExecuted|Google Chrome/);
+    await expectHistory(page, runId, /desktopAssistant.realOpenAppExecuted|realOpened|safetySummary|Google Chrome/);
+  });
+
+  test("real open failure shows a clear safe failure reason", async () => {
+    await page.evaluate(() => {
+      window.__DA_OPEN_APP_CALLS__ = [];
+      window.WeishanAPI = Object.assign({}, window.WeishanAPI || {}, {
+        desktopAssistantOpenApp: async (appId) => {
+          window.__DA_OPEN_APP_CALLS__.push(appId);
+          return { ok:false, code:"APP_OPEN_FAILED", appId, appName:"Google Chrome", message:"系统打开白名单 App 失败，请确认该 App 已安装。", realExecution:false };
+        }
+      });
+    });
+    await gotoRoute(page, "settings");
+    await page.locator("#desktopAssistantEnabled").check();
+    await page.locator("#desktopAssistantRealOpenApp").check();
+    await gotoRoute(page, "home");
+    await page.locator("#desktopAssistantEnable").click();
+    await submitHomeCommand(page, runId + " 打开 Chrome 失败反馈");
+    await page.locator("#desktopPlanConfirm").click();
+    await expect(page.locator("#desktopQueueRealOpen")).toBeVisible();
+    await page.locator("#desktopQueueRealOpen").click();
+    await expect(page.getByText(/打开失败|检查该 App 是否已安装|WPS/).first()).toBeVisible();
+    await expect.poll(async () => page.evaluate(() => (window.__DA_OPEN_APP_CALLS__ || []).join(","))).toContain("chrome");
+    await expectHistory(page, runId, /desktopAssistant.realOpenAppFailed|failed|APP_OPEN_FAILED|检查该 App 是否已安装/);
   });
 
   test("non whitelist app and high risk operations do not expose real open", async () => {
     await page.evaluate(() => { window.__DA_OPEN_APP_CALLS__ = []; });
     await gotoRoute(page, "home");
     await page.locator("#desktopAssistantEnable").click();
-    await submitHomeCommand(page, runId + " 打开软件 终端 执行命令");
-    await expect(page.getByText(/高风险|blocked|必须二次确认|该 App 不在白名单，已阻断/).first()).toBeVisible();
+    await submitHomeCommand(page, runId + " 打开 Terminal 执行命令");
+    await expect(page.getByText(/高风险|blocked|必须二次确认|该 App 不在白名单/).first()).toBeVisible();
     await page.locator("#desktopPlanConfirm").click();
-    await expect(page.getByText(/blocked|高风险/).first()).toBeVisible();
+    await expect(page.getByText(/blocked|高风险|Chrome \/ Safari \/ Finder \/ WPS \/ Notes \/ Preview/).first()).toBeVisible();
     await expect(page.locator("#desktopQueueRealOpen")).toHaveCount(0);
     await submitHomeCommand(page, runId + " 删除文件并发送邮件");
     await expect(page.getByText(/高风险|blocked|必须二次确认/).first()).toBeVisible();

@@ -240,12 +240,28 @@
       hasSessionRequired ? `<p class="cmd-history-meta">桌面助手未开启，本次任务只能生成计划。请先点击“本次开启桌面助手”。</p>` : "",
       hasRealOpenDisabled ? `<p class="cmd-history-meta">真实打开白名单 App 当前关闭。当前仅模拟执行，不会真实打开 App。</p>` : "",
       canShowRealOpen ? `<p class="cmd-history-meta">确认真实打开仅打开或聚焦白名单 App，不点击、不输入、不读屏。</p>` : "",
-      hasAppNotAllowed ? `<p class="desktop-risk-high">该 App 不在白名单，已阻断。</p>` : "",
+      hasAppNotAllowed ? `<p class="desktop-risk-high">该 App 不在白名单，已阻断。当前只允许 Chrome / Safari / Finder / WPS / Notes / Preview。</p>` : "",
       hasRiskNotAllowed ? `<p class="cmd-history-meta">中风险/高风险或非 openApp / focusApp 步骤继续 dry-run，不会真实执行。</p>` : ""
     ].filter(Boolean).join("");
+    const realExecutedStep = queue.steps.find((step) => step && step.status === "realExecuted");
+    const failedStep = queue.steps.find((step) => step && step.status === "failed");
+    const blockedStep = queue.steps.find((step) => step && step.status === "blocked");
+    const resultPanel = realExecutedStep ? `<div class="desktop-result-card is-success">
+      <b>已真实打开白名单 App</b>
+      <p>App：${esc(realExecutedStep.appName || realExecutedStep.appId || "白名单 App")} · 操作：${esc(realExecutedStep.action || "openApp")} · realExecution=true</p>
+      <p>安全边界：未点击、未输入、未读屏、未截图。</p>
+      <p>下一步建议：1. 如需继续操作，请重新下达下一步指令。2. 如需点击/输入/读取屏幕，需后续单独授权。3. 当前版本只负责打开或聚焦 App。</p>
+    </div>` : failedStep ? `<div class="desktop-result-card is-failed">
+      <b>打开失败</b>
+      <p>App：${esc(failedStep.appName || failedStep.appId || "白名单 App")} · ${esc(failedStep.outputSummary || "系统打开失败。")}</p>
+      <p>建议：1. 检查该 App 是否已安装。2. 确认 App 是否在白名单。3. 如果是 WPS，可能需要使用正确的 macOS 应用名。</p>
+    </div>` : blockedStep ? `<div class="desktop-result-card is-blocked">
+      <b>已阻断</b>
+      <p>${esc(blockedStep.outputSummary || "该动作属于高风险，已阻断。不会删除、发送、上传、付款、提交表单或输入密码。")}</p>
+    </div>` : "";
     const rows = queue.steps.map((step) => `<li class="desktop-queue-step desktop-risk-${esc(step.riskLevel || "low")}">
       <b>${esc(step.title)}</b>
-      <span>${esc(step.description)} · ${esc(step.riskLevel)} · ${esc(step.approvalState || "allowed")} · ${esc(step.status)} · realExecution=${step.realExecution === true ? "true" : "false"}${step.appName ? " · " + esc(step.appName) : ""}${step.outputSummary ? " · " + esc(step.outputSummary) : ""}</span>
+      <span>${esc(step.description)} · ${esc(step.riskLevel)} · ${esc(step.approvalState || "allowed")} · ${esc(step.resultStatus || step.status)} · ${esc(step.status)} · realExecution=${step.realExecution === true ? "true" : "false"}${step.appName ? " · " + esc(step.appName) : ""}${step.outputSummary ? " · " + esc(step.outputSummary) : ""}</span>
     </li>`).join("");
     return `<div class="desktop-execution-queue desktop-risk-${esc(risk)}" data-desktop-execution-queue="true">
       <div class="desktop-execution-head">
@@ -261,6 +277,7 @@
         </div>
       </div>
       ${realOpenNotice}
+      ${resultPanel}
       <ol>${rows}</ol>
     </div>`;
   }
@@ -521,6 +538,9 @@
         realOpenAppHistory("desktopAssistant.realOpenAppDenied", {
           appId:"",
           appName:"",
+          actionType:"openApp",
+          resultStatus:state && state.status === "appNotAllowed" ? "blocked" : "blocked",
+          safetySummary:"未点击、未输入、未读屏、未截图",
           realExecution:false,
           inputSummary:queue && queue.inputSummary || "打开白名单 App",
           outputSummary:state && state.outputSummary || "真实打开条件未满足。"
@@ -530,6 +550,9 @@
       }
       const request = api.createRealOpenAppRequest ? api.createRealOpenAppRequest(step) : { appId:step.appId, appName:step.appName };
       realOpenAppHistory("desktopAssistant.realOpenAppRequested", Object.assign({}, request, {
+        actionType:step.action || "openApp",
+        resultStatus:"requested",
+        safetySummary:"未点击、未输入、未读屏、未截图",
         realExecution:false,
         inputSummary:queue && queue.inputSummary || "打开白名单 App",
         outputSummary:"用户确认真实打开白名单 App。"
@@ -541,6 +564,9 @@
           : null;
       if (!bridge) {
         realOpenAppHistory("desktopAssistant.realOpenAppFailed", Object.assign({}, request, {
+          actionType:step.action || "openApp",
+          resultStatus:"failed",
+          safetySummary:"未点击、未输入、未读屏、未截图",
           realExecution:false,
           inputSummary:queue && queue.inputSummary || "打开白名单 App",
           outputSummary:"桌面助手安全桥未加载。"
@@ -557,6 +583,9 @@
           steps:steps.map((item) => item.stepId === step.stepId ? nextStep : item)
         }));
         realOpenAppHistory("desktopAssistant.realOpenAppExecuted", Object.assign({}, request, result, {
+          actionType:step.action || "openApp",
+          resultStatus:"realOpened",
+          safetySummary:"未点击、未输入、未读屏、未截图",
           realExecution:true,
           inputSummary:nextQueue && nextQueue.inputSummary || "打开白名单 App",
           outputSummary:"已真实打开白名单 App：" + (result.appName || request.appName || request.appId)
@@ -570,6 +599,9 @@
           }));
         }
         realOpenAppHistory("desktopAssistant.realOpenAppFailed", Object.assign({}, request, result || {}, {
+          actionType:step.action || "openApp",
+          resultStatus:"failed",
+          safetySummary:"未点击、未输入、未读屏、未截图",
           realExecution:false,
           inputSummary:queue && queue.inputSummary || "打开白名单 App",
           outputSummary:"打开白名单 App 失败：" + (result && (result.message || result.code) || "系统打开失败")

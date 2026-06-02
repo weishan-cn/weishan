@@ -941,6 +941,32 @@
   font-size:13px;
   line-height:1.7;
 }
+.desktop-result-card{
+  margin:10px 0 0;
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid #e5e7eb;
+  font-size:13px;
+  line-height:1.6;
+}
+.desktop-result-card b{
+  display:block;
+  margin-bottom:4px;
+}
+.desktop-result-card p{
+  margin:3px 0;
+}
+.desktop-result-card.is-success{
+  background:#ecfdf5;
+  border-color:#86efac;
+  color:#166534;
+}
+.desktop-result-card.is-failed,
+.desktop-result-card.is-blocked{
+  background:#fef2f2;
+  border-color:#fca5a5;
+  color:#991b1b;
+}
 .desktop-execution-queue{
   margin:8px 18px 20px;
   padding:12px;

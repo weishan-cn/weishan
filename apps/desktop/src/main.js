@@ -129,14 +129,14 @@ function openFixedMacApp(appName) {
     child.on("error", (err) => {
       if (settled) return;
       settled = true;
-      resolve({ ok:false, code:"APP_OPEN_FAILED", message:safeError(err).errorMessage || "App open failed." });
+      resolve({ ok:false, code:"APP_OPEN_FAILED", message:"系统打开白名单 App 失败，请确认该 App 已安装。" });
     });
     child.on("close", (code) => {
       if (settled) return;
       settled = true;
       resolve(code === 0
         ? { ok:true }
-        : { ok:false, code:"APP_OPEN_FAILED", message:"open command returned " + code });
+        : { ok:false, code:"APP_OPEN_FAILED", message:"系统打开白名单 App 失败，请确认该 App 已安装。" });
     });
   });
 }
@@ -158,7 +158,7 @@ async function openWhitelistedDesktopApp(appId) {
   return {
     ok:false,
     code:last && last.code || "APP_OPEN_FAILED",
-    message:last && last.message || "系统打开白名单 App 失败。",
+    message:last && last.message || "系统打开白名单 App 失败，请确认该 App 已安装。",
     appId:key,
     appName:candidates[0],
     realExecution:false

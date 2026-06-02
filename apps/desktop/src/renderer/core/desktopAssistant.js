@@ -170,6 +170,7 @@
       approvalState,
       status:item.status || (blocked ? "blocked" : "queued"),
       realExecution:item.realExecution === true && item.status === "realExecuted",
+      outputSummary:item.outputSummary || (isOpenAppStep(item) && !appAllowed ? "该 App 不在白名单，已阻断。当前只允许 Chrome / Safari / Finder / WPS / Notes / Preview。" : riskLevel === "high" ? "该动作属于高风险，已阻断。不会删除、发送、上传、付款、提交表单或输入密码。" : ""),
       requiresSecondConfirm:item.requiresSecondConfirm === true || blocked || riskLevel === "high"
     });
   }
@@ -264,6 +265,8 @@
       appName:result && result.appName || app.appName || item.appName || "",
       realExecution:true,
       outputSummary:"已真实打开白名单 App：" + (result && result.appName || app.appName || item.appName || item.appId || ""),
+      resultStatus:"realOpened",
+      safetySummary:"未点击、未输入、未读屏、未截图",
       updatedAt:nowIso()
     });
   }
@@ -275,6 +278,8 @@
       lifecycleStatus:"realOpenAppFailed",
       realExecution:false,
       outputSummary:"打开白名单 App 失败：" + summarize(result && (result.message || result.code) || "系统打开失败", 120),
+      resultStatus:"failed",
+      safetySummary:"未点击、未输入、未读屏、未截图",
       updatedAt:nowIso()
     });
   }
@@ -322,6 +327,16 @@
       simulatedStepCount:steps.filter((step) => step && step.status === "simulated").length,
       blockedStepCount:steps.filter((step) => step && step.status === "blocked").length
     };
+  }
+
+  function resultStatusFromPayload(data){
+    const status = String(data && (data.resultStatus || data.status || data.lifecycleStatus || data.code) || "");
+    if (/realOpenAppExecuted|realExecuted|realOpened/.test(status)) return "realOpened";
+    if (/realOpenAppFailed|APP_OPEN_FAILED|failed/.test(status)) return "failed";
+    if (/APP_NOT_ALLOWED|blocked|executionBlocked/.test(status)) return "blocked";
+    if (/stopped/.test(status)) return "stopped";
+    if (/simulated|executionSimulated/.test(status)) return "simulated";
+    return data && data.realExecution === true ? "realOpened" : "simulated";
   }
 
   function matchesAny(text, list){
@@ -431,6 +446,9 @@
         action:step.action || "",
         appId:step.appId || "",
         appName:step.appName || "",
+        outputSummary:step.outputSummary || "",
+        resultStatus:step.resultStatus || "",
+        safetySummary:step.safetySummary || "",
         approvalState:step.approvalState || (riskLevel === "high" ? "blocked" : riskLevel === "medium" ? "needsApproval" : "allowed"),
         status:step.status || (riskLevel === "high" ? "blocked" : "queued"),
         realExecution:step.realExecution === true && step.status === "realExecuted",
@@ -501,6 +519,7 @@
       status:"blocked",
       realExecution:false,
       requiresSecondConfirm:true,
+      outputSummary:item.outputSummary || "该动作属于高风险，已阻断。不会删除、发送、上传、付款、提交表单或输入密码。",
       updatedAt:nowIso()
     });
   }
@@ -511,6 +530,7 @@
     return Object.assign({}, item, {
       status:"simulated",
       realExecution:false,
+      outputSummary:item.outputSummary || "模拟执行：simulated。未真实控制电脑。",
       updatedAt:nowIso()
     });
   }
@@ -564,8 +584,10 @@
       stepCount:Number(data.stepCount || steps.length || 0),
       simulatedStepCount:Number(data.simulatedStepCount || 0),
       blockedStepCount:Number(data.blockedStepCount || 0),
+      resultStatus:resultStatusFromPayload(data),
       inputSummary:summarize(data.inputSummary || data.text || "", 240),
       outputSummary:summarize(data.outputSummary || data.title || "", 240),
+      safetySummary:summarize(data.safetySummary || "未点击、未输入、未读屏、未截图", 120),
       realExecution:false,
       requiresSecondConfirm:data.requiresSecondConfirm === true || riskLevel === "high",
       createdAt:data.createdAt || nowIso(),
@@ -583,10 +605,13 @@
       action:String(action || "").replace(/^desktopAssistant./, "") || "realOpenApp",
       appId:app.appId || summarize(data.appId || "", 80),
       appName:app.appName || summarize(data.appName || "", 80),
+      actionType:summarize(data.actionType || data.desktopAction || "openApp", 40),
+      resultStatus:resultStatusFromPayload(data),
       riskLevel:"low",
       realExecution:data.realExecution === true,
       inputSummary:summarize(data.inputSummary || "打开白名单 App", 240),
       outputSummary:summarize(data.outputSummary || data.message || "桌面助手白名单 App 操作", 240),
+      safetySummary:summarize(data.safetySummary || "未点击、未输入、未读屏、未截图", 120),
       createdAt:data.createdAt || nowIso()
     };
   }
