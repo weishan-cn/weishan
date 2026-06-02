@@ -101,6 +101,8 @@ test.describe.serial("dispatch router", () => {
     await expect(currentTaskLogs(page)).not.toContainText("AI 网关未接通");
     await expect(currentTaskLogs(page)).not.toContainText("不能给出可靠实时结果");
     await expect(currentTaskLogs(page)).not.toContainText("# 本地回答");
+    await expect(currentTaskLogs(page)).not.toContainText("desktopAssistant.plan");
+    await expect(currentTaskLogs(page)).not.toContainText("桌面操作计划");
     await expectHistory(page, runId, /chat\.answered|OpenRouter|aion-labs\/aion-1\.0-mini|高铁/);
   });
 

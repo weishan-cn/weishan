@@ -144,7 +144,7 @@
       const result = api.classifyDesktopOperation(raw);
       if (result && result.isDesktopOperation) return true;
     }
-    return /操作电脑|接管电脑|桌面助手|电脑操作|自动操作|打开软件|打开浏览器|打开\s*Chrome|打开\s*Finder|打开\s*WPS|点击|输入|复制|粘贴|切换窗口|保存文件|删除.*文件|发送邮件|提交表单|付款|安装软件|输入密码|desktop assistant|control computer|operate computer|open\s*Chrome|click|type|paste|copy|switch window/i.test(raw);
+    return /操作电脑|接管电脑|桌面助手|电脑操作|自动操作|打开软件|启动软件|打开浏览器|打开\s*(?:Google\s*)?Chrome|启动\s*(?:Google\s*)?Chrome|打开\s*Safari|启动\s*Safari|打开\s*Finder|打开\s*WPS(?:\s*Office)?|打开\s*备忘录|打开\s*Notes|打开\s*Preview|聚焦\s*(?:Chrome|Safari|Finder|WPS|Notes|Preview)|打开\s*终端|打开\s*Terminal|点击|输入|复制|粘贴|切换窗口|保存文件|删除.*文件|发送邮件|提交表单|付款|安装软件|输入密码|desktop assistant|control computer|operate computer|open\s*(?:Google\s*)?Chrome|open\s*Safari|open\s*Finder|open\s*Notes|open\s*Preview|open\s*app|focus\s*app|click|type|paste|copy|switch window/i.test(raw);
   }
 
   function selectedModelId(){
@@ -218,6 +218,17 @@
       };
     }
 
+    if (isDesktopAssistantCommand(raw) && !/邮件接管|抓取中心|软件工厂/i.test(raw)) {
+      return {
+        module:DISPATCH_MODULES.desktopAssistant,
+        action:DISPATCH_ACTIONS.desktopAssistantPlan,
+        routeMode:"console",
+        modules:[DISPATCH_MODULES.desktopAssistant],
+        targetRoute:"home",
+        confidence:"rule"
+      };
+    }
+
     if (modelKeyword(raw) && !/(VPN|付款|支付|地区|网络).*(怎么|如何|是不是|为什么|解决)|(?:怎么|如何|是不是|为什么|解决).*(VPN|付款|支付|地区|网络)/i.test(raw)) {
       return {
         module:DISPATCH_MODULES.model,
@@ -227,17 +238,6 @@
         targetRoute:"home",
         confidence:"rule",
         selectedModelId:inferModelId(raw)
-      };
-    }
-
-    if (isDesktopAssistantCommand(raw) && !/邮件接管|抓取中心|软件工厂/i.test(raw)) {
-      return {
-        module:DISPATCH_MODULES.desktopAssistant,
-        action:DISPATCH_ACTIONS.desktopAssistantPlan,
-        routeMode:"console",
-        modules:[DISPATCH_MODULES.desktopAssistant],
-        targetRoute:"home",
-        confidence:"rule"
       };
     }
 

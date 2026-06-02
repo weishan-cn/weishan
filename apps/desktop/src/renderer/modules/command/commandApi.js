@@ -220,12 +220,16 @@
     const session = api.getDesktopAssistantSession ? api.getDesktopAssistantSession() : { enabled:false };
     const enabled = session && session.enabled === true;
     const riskLabel = operationPlan.riskLevel === "high" ? "高风险" : operationPlan.riskLevel === "medium" ? "中风险" : "普通提示";
+    const appStep = (operationPlan.steps || []).find((step) => step && (step.action === "openApp" || step.action === "focusApp") && step.appName);
     const lines = [
       "# 桌面操作计划",
       "",
+      "路由判断：桌面助手",
+      "已生成操作计划：desktopAssistant / desktopAssistant.plan",
       "任务：" + operationPlan.title,
       "桌面助手：" + (enabled ? "本次开启" : "关闭"),
       "风险等级：" + riskLabel,
+      appStep ? "App：" + appStep.appName : "",
       "requiresSecondConfirm=" + (operationPlan.requiresSecondConfirm ? "true" : "false"),
       "realExecution=false",
       "",

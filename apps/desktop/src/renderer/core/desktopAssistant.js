@@ -26,8 +26,8 @@
   };
 
   const LOW_KEYWORDS = [
-    "打开应用", "打开软件", "打开浏览器", "打开 Chrome", "打开 Finder", "切换窗口", "复制文本", "粘贴文本", "输入搜索词", "查看页面",
-    "open app", "open browser", "focus app", "switch window", "copy text", "paste text", "search"
+    "打开应用", "打开软件", "启动软件", "打开浏览器", "打开 Chrome", "打开 Google Chrome", "启动 Chrome", "打开 Safari", "启动 Safari", "打开 Finder", "打开 WPS", "打开 WPS Office", "打开备忘录", "打开 Notes", "打开 Preview", "聚焦 Chrome", "聚焦 Safari", "聚焦 Finder", "切换窗口", "复制文本", "粘贴文本", "输入搜索词", "查看页面",
+    "open app", "open browser", "focus app", "open chrome", "open safari", "open finder", "open notes", "open preview", "switch window", "copy text", "paste text", "search"
   ];
   const MEDIUM_KEYWORDS = [
     "点击按钮", "点击", "填写表单", "保存文件", "下载文件", "移动文件", "修改文档内容",
@@ -38,9 +38,9 @@
     "send email", "delete file", "upload file", "submit form", "payment", "pay", "order", "password", "install software", "system settings", "publish", "terminal", "执行命令", "终端"
   ];
   const DESKTOP_KEYWORDS = [
-    "操作电脑", "接管电脑", "桌面助手", "电脑操作", "自动操作", "打开软件", "打开浏览器", "打开 Chrome", "打开 Finder", "打开 WPS", "打开 终端", "执行命令",
+    "操作电脑", "接管电脑", "桌面助手", "电脑操作", "自动操作", "打开软件", "启动软件", "打开浏览器", "打开 Chrome", "打开 Google Chrome", "启动 Chrome", "打开 Safari", "打开 Finder", "打开 WPS", "打开 WPS Office", "打开备忘录", "打开 Notes", "打开 Preview", "聚焦 Chrome", "聚焦 Safari", "打开 终端", "执行命令",
     "点击", "输入", "复制", "粘贴", "切换窗口", "保存文件", "删除文件", "删除", "发送邮件", "提交表单", "付款", "安装软件", "输入密码",
-    "desktop assistant", "control computer", "operate computer", "open Chrome", "open app", "focus app", "click", "type", "paste", "copy", "switch window"
+    "desktop assistant", "control computer", "operate computer", "open Chrome", "open Safari", "open Finder", "open app", "focus app", "click", "type", "paste", "copy", "switch window"
   ];
 
   function safeStorage(){

@@ -65,8 +65,17 @@ test.describe.serial("desktop assistant permission framework", () => {
     await expect(page.getByText("桌面助手：关闭").first()).toBeVisible();
     await submitHomeCommand(page, runId + " 打开 Chrome 搜索 weishan");
     await expect(page.getByText(/桌面助手：关闭|需要先点击首页“桌面助手：本次开启”|realExecution=false/).first()).toBeVisible();
-    await expect(page.getByText(/打开 Chrome|计划步骤/).first()).toBeVisible();
+    await expect(page.getByText(/路由判断：桌面助手|desktopAssistant \/ desktopAssistant\.plan|App：Google Chrome/).first()).toBeVisible();
+    await expect(page.getByText(/chat\.answer|准备调用 AI 网关|如何打开 Chrome/)).toHaveCount(0);
     await expect(page.locator("#desktopQueueRealOpen")).toHaveCount(0);
+  });
+
+  test("open Safari is routed to desktop assistant before chat", async () => {
+    await gotoRoute(page, "home");
+    await submitHomeCommand(page, runId + " 打开 Safari");
+    await expect(page.getByText(/路由判断：桌面助手|desktopAssistant \/ desktopAssistant\.plan|App：Safari/).first()).toBeVisible();
+    await expect(page.getByText(/realExecution=false/).first()).toBeVisible();
+    await expect(page.getByText(/chat\.answer|准备调用 AI 网关|如何打开 Safari/)).toHaveCount(0);
   });
 
   test("session enabled queues and simulates low risk desktop steps without real control", async () => {
@@ -172,6 +181,8 @@ test.describe.serial("desktop assistant permission framework", () => {
     await gotoRoute(page, "home");
     await page.locator("#desktopAssistantEnable").click();
     await submitHomeCommand(page, runId + " 打开 Terminal 执行命令");
+    await expect(page.getByText(/路由判断：桌面助手|desktopAssistant \/ desktopAssistant\.plan/).first()).toBeVisible();
+    await expect(page.getByText(/chat\.answer|准备调用 AI 网关/)).toHaveCount(0);
     await expect(page.getByText(/高风险|blocked|必须二次确认|该 App 不在白名单/).first()).toBeVisible();
     await page.locator("#desktopPlanConfirm").click();
     await expect(page.getByText(/blocked|高风险|Chrome \/ Safari \/ Finder \/ WPS \/ Notes \/ Preview/).first()).toBeVisible();
