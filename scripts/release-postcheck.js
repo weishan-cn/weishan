@@ -31,18 +31,52 @@ function printResults(results) {
   }
 }
 
-function remoteTagCommit(tag) {
-  const peeled = git(["ls-remote", "--tags", "origin", `refs/tags/${tag}^{}`]);
+function parseLsRemoteLine(line) {
+  const parts = String(line || "").trim().split(/\s+/);
+  return {
+    sha: parts[0] || "",
+    ref: parts[1] || ""
+  };
+}
+
+function remoteTagTarget(tag) {
+  const peeledRef = `refs/tags/${tag}^{}`;
+  const directRef = `refs/tags/${tag}`;
+  const peeled = git(["ls-remote", "--tags", "origin", peeledRef]);
   if (peeled.ok && peeled.stdout) {
-    return peeled.stdout.split(/\s+/)[0];
+    const match = peeled.stdout
+      .split(/\r?\n/)
+      .map(parseLsRemoteLine)
+      .find((item) => item.ref === peeledRef);
+    if (match && match.sha) {
+      return {
+        sha: match.sha,
+        mode: "peeled",
+        detail: `${match.sha} ${match.ref}`
+      };
+    }
   }
 
-  const direct = git(["ls-remote", "--tags", "origin", `refs/tags/${tag}`]);
+  const direct = git(["ls-remote", "--tags", "origin", directRef]);
   if (direct.ok && direct.stdout) {
-    return direct.stdout.split(/\s+/)[0];
+    const match = direct.stdout
+      .split(/\r?\n/)
+      .map(parseLsRemoteLine)
+      .find((item) => item.ref === directRef);
+    if (match && match.sha) {
+      return {
+        sha: match.sha,
+        mode: "direct-fallback",
+        detail: `${match.sha} ${match.ref} (peeled ref unavailable; lightweight tag fallback)`
+      };
+    }
   }
 
-  return "";
+  return {
+    sha: "",
+    mode: "missing",
+    detail: peeled.stderr || direct.stderr || "remote tag target unavailable"
+  };
 }
 
 function runPostcheck() {
@@ -86,20 +120,20 @@ function runPostcheck() {
     remoteTagObject.stdout || remoteTagObject.stderr || "missing remote tag"
   );
 
-  const localTagCommit = git(["rev-list", "-n", "1", tagName]);
+  const localTagCommit = git(["rev-parse", `${tagName}^{}`]);
   addResult(
     results,
     "local tag points to HEAD",
     localTagCommit.ok && head.ok && localTagCommit.stdout === head.stdout,
-    localTagCommit.stdout ? `tag=${localTagCommit.stdout}` : (localTagCommit.stderr || "local tag commit unavailable")
+    localTagCommit.stdout ? `peeled tag=${localTagCommit.stdout}` : (localTagCommit.stderr || "local peeled tag target unavailable")
   );
 
-  const remoteCommit = remoteTagCommit(tagName);
+  const remoteCommit = remoteTagTarget(tagName);
   addResult(
     results,
-    "remote tag points to same commit",
-    Boolean(remoteCommit) && localTagCommit.ok && remoteCommit === localTagCommit.stdout,
-    remoteCommit || "remote tag commit unavailable"
+    "remote peeled tag target matches local peeled tag target",
+    Boolean(remoteCommit.sha) && localTagCommit.ok && remoteCommit.sha === localTagCommit.stdout,
+    remoteCommit.detail
   );
 
   printResults(results);
