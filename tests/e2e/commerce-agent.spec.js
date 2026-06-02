@@ -222,9 +222,17 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(currentTaskLogs(page)).not.toContainText("如何手动");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已识别为机票搜索计划");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("出发地：成都");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("目的地：北京");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("日期：明天");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索源未配置，暂不能返回真实价格");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("未配置真实机票搜索 provider");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前不会返回实时机票价格");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("未搜索、未下单、未付款、未提交订单");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("未请求付款");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("未上传或保存身份证/护照");
     await expect(page.locator("#commerceViewPlanBtn")).toBeVisible();
 
     await page.locator("#commerceViewPlanBtn").click();
@@ -233,7 +241,13 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("成都");
     await expect(page.locator(".commerce-detail")).toContainText("北京");
     await expect(page.locator(".commerce-detail")).toContainText("明天");
+    await expect(page.locator(".commerce-detail")).toContainText("已识别为机票搜索计划");
     await expect(page.locator(".commerce-detail")).toContainText("搜索源未配置，无法返回真实机票价格");
+    await expect(page.locator(".commerce-detail")).toContainText("未配置真实机票搜索 provider");
+    await expect(page.locator(".commerce-detail")).toContainText("当前不会返回实时机票价格");
+    await expect(page.locator(".commerce-detail")).toContainText("不会提交订单");
+    await expect(page.locator(".commerce-detail")).toContainText("不会请求付款");
+    await expect(page.locator(".commerce-detail")).toContainText("不会上传或保存身份证/护照");
     await expect(page.locator(".commerce-detail")).not.toContainText(/CNY\s*\d+/);
   });
 
