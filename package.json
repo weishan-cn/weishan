@@ -1,6 +1,6 @@
 {
   "name": "weishan-desktop",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "private": true,
   "scripts": {
     "install:all": "npm install --prefix apps/server && npm install --prefix apps/desktop",
@@ -25,7 +25,9 @@
     "test:e2e:smoke": "playwright test tests/e2e/smoke.spec.js",
     "smoke": "npm run smoke --prefix apps/server",
     "build:mac": "npm run build:mac --prefix apps/desktop",
-    "build:win": "npm run build:win --prefix apps/desktop"
+    "build:win": "npm run build:win --prefix apps/desktop",
+    "test": "npm run test:api",
+    "test:full": "npm run test:api && npm run test:e2e:smoke"
   },
   "description": "weishan desktop MVP with local-first Electron client and local API server.",
   "devDependencies": {
