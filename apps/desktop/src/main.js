@@ -1,6 +1,7 @@
 const { app, BrowserWindow, Menu, nativeImage, ipcMain, shell, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
+const { spawn } = require("child_process");
 const { registerSecureStorageHandlers } = require("./main/secureStorage");
 
 const APP_NAME = "weishan";
@@ -107,6 +108,63 @@ async function withPerf(meta, stage, fn, extra) {
   }
 }
 
+const DESKTOP_ASSISTANT_ALLOWED_APPS = Object.freeze({
+  chrome:["Google Chrome"],
+  safari:["Safari"],
+  finder:["Finder"],
+  wps:["WPS Office", "WPS"],
+  notes:["Notes"],
+  preview:["Preview"]
+});
+
+function desktopAssistantAppCandidates(appId) {
+  const key = String(appId || "").trim().toLowerCase();
+  return DESKTOP_ASSISTANT_ALLOWED_APPS[key] || null;
+}
+
+function openFixedMacApp(appName) {
+  return new Promise((resolve) => {
+    const child = spawn("open", ["-a", appName], { stdio:"ignore", shell:false });
+    let settled = false;
+    child.on("error", (err) => {
+      if (settled) return;
+      settled = true;
+      resolve({ ok:false, code:"APP_OPEN_FAILED", message:safeError(err).errorMessage || "App open failed." });
+    });
+    child.on("close", (code) => {
+      if (settled) return;
+      settled = true;
+      resolve(code === 0
+        ? { ok:true }
+        : { ok:false, code:"APP_OPEN_FAILED", message:"open command returned " + code });
+    });
+  });
+}
+
+async function openWhitelistedDesktopApp(appId) {
+  const key = String(appId || "").trim().toLowerCase();
+  const candidates = desktopAssistantAppCandidates(key);
+  if (!candidates) {
+    return { ok:false, code:"APP_NOT_ALLOWED", message:"App is not in the desktop assistant whitelist.", realExecution:false };
+  }
+  let last = null;
+  for (const appName of candidates) {
+    const result = await openFixedMacApp(appName);
+    if (result && result.ok) {
+      return { ok:true, action:"openWhitelistedApp", appId:key, appName, realExecution:true };
+    }
+    last = result;
+  }
+  return {
+    ok:false,
+    code:last && last.code || "APP_OPEN_FAILED",
+    message:last && last.message || "Failed to open whitelisted App.",
+    appId:key,
+    appName:candidates[0],
+    realExecution:false
+  };
+}
+
 function iconPath() {
   const candidates = [
     path.join(__dirname, "assets/ws-logo.png"),
@@ -117,7 +175,7 @@ function iconPath() {
 
 function applyAppIdentity() {
   app.setName(APP_NAME);
-  try { app.setAboutPanelOptions({ applicationName: APP_NAME, applicationVersion: "2.0.14" }); } catch (_) {}
+  try { app.setAboutPanelOptions({ applicationName: APP_NAME, applicationVersion: "2.0.15" }); } catch (_) {}
   try {
     const img = nativeImage.createFromPath(iconPath());
     if (!img.isEmpty() && app.dock) app.dock.setIcon(img);
@@ -426,6 +484,7 @@ function registerIpcHandlers() {
       throw err;
     }
   });
+  ipcMain.handle("desktopAssistant:openWhitelistedApp", async (_event, appId) => openWhitelistedDesktopApp(appId));
   ipcMain.handle("weishan:choose-files", async () => {
     const r = await dialog.showOpenDialog({ properties: ["openFile", "multiSelections"] });
     if (r.canceled) return { ok: false, files: [] };

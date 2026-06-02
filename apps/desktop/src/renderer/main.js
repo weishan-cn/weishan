@@ -6,7 +6,7 @@
         return;
       }
       const script = document.createElement("script");
-      script.src = "./renderer/core/repairCenter.js?v=2.0.14";
+      script.src = "./renderer/core/repairCenter.js?v=2.0.15";
       script.onload = () => resolve(window.WeishanRepairCenter || null);
       script.onerror = () => resolve(null);
       document.head.appendChild(script);

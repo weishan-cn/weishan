@@ -495,6 +495,12 @@
           <label><input type="checkbox" id="desktopAssistantSecondConfirm"${checked(settings.requireSecondConfirmForHighRisk)}> 高风险操作必须二次确认</label>
           <label><input type="checkbox" id="desktopAssistantAutoStop"${checked(settings.autoStopAfterMinutes > 0)}> 30 分钟无操作自动关闭</label>
         </div>
+        <div class="desktop-real-open-app" data-real-open-app-setting="true">
+          <h3>真实低风险操作</h3>
+          <label><input type="checkbox" id="desktopAssistantRealOpenApp"${checked(settings.allowRealOpenApp)}> 允许真实打开白名单 App</label>
+          <p class="ws-muted">开启后，weishan 只允许在你本次开启桌面助手并确认后，真实打开或聚焦白名单 App。不会点击鼠标，不会输入键盘，不会读取屏幕，不会删除、发送、上传、付款或提交表单。</p>
+          <div class="desktop-risk-note desktop-risk-medium">真实打开 App 属于低风险操作，但仍需要用户确认。</div>
+        </div>
         <div class="desktop-risk-note desktop-risk-medium">中风险提醒：点击按钮、填写表单、保存/下载/移动文件或修改文档内容，需要用户继续确认。</div>
         <div class="desktop-risk-note desktop-risk-high">高风险操作包括发送邮件、删除文件、付款、提交表单、上传文件、输入密码、安装软件、修改系统设置。此类操作必须二次确认。</div>
         <div class="desktop-permission-guide" data-desktop-permission-guide="true">
@@ -533,7 +539,8 @@
         allowMouseClick:!!host.querySelector("#desktopAssistantMouse").checked,
         allowScreenRead:!!host.querySelector("#desktopAssistantScreen").checked,
         requireSecondConfirmForHighRisk:!!host.querySelector("#desktopAssistantSecondConfirm").checked,
-        autoStopAfterMinutes:host.querySelector("#desktopAssistantAutoStop").checked ? 30 : 0
+        autoStopAfterMinutes:host.querySelector("#desktopAssistantAutoStop").checked ? 30 : 0,
+        allowRealOpenApp:!!host.querySelector("#desktopAssistantRealOpenApp").checked
       };
     }
     Array.from(panel.querySelectorAll("input[type='checkbox']")).forEach(function(input){

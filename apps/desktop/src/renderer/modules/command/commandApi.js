@@ -1,9 +1,9 @@
 (function(){
   if (!window.WeishanDispatchRouter && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/dispatchRouter.js?v=2.0.14"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/dispatchRouter.js?v=2.0.15"></scr' + 'ipt>');
   }
   if (!window.WeishanDesktopAssistant && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/desktopAssistant.js?v=2.0.14"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/desktopAssistant.js?v=2.0.15"></scr' + 'ipt>');
   }
 
   const QUEUE_KEY = "command.queue.v205";

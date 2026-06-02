@@ -1,11 +1,12 @@
 const { contextBridge, ipcRenderer, shell } = require("electron");
 
 contextBridge.exposeInMainWorld("weishan", {
-  version: "2.0.14",
+  version: "2.0.15",
   productName: "weishan",
   apiBase: process.env.WEISHAN_API_BASE || "http://127.0.0.1:8787",
   openExternal: (url) => shell.openExternal(url),
   chooseFiles: () => ipcRenderer.invoke("weishan:choose-files"),
+  desktopAssistantOpenApp: (appId) => ipcRenderer.invoke("desktopAssistant:openWhitelistedApp", String(appId || "")),
   secure: {
     set: (key, value) => {
       const safeKey = String(key || "").trim();

@@ -8,6 +8,7 @@ async function resetDesktopAssistantSession(page) {
     try {
       window.sessionStorage.removeItem("weishan:desktopAssistant:session:v1");
       window.sessionStorage.removeItem("weishan:desktopAssistant:executionQueue:v1");
+      window.localStorage.removeItem("weishan:desktopAssistant:realOpenApp:v1");
       if (window.WeishanDesktopAssistant && window.WeishanDesktopAssistant.stopDesktopAssistantSession) {
         window.WeishanDesktopAssistant.stopDesktopAssistantSession();
       }
@@ -97,5 +98,71 @@ test.describe.serial("desktop assistant permission framework", () => {
     await expect(page.getByText("桌面助手：关闭").first()).toBeVisible();
     await expect(page.getByText(/stopped|桌面助手执行队列|停止/).first()).toBeVisible();
     await expectHistory(page, runId, /desktopAssistant\.stopped|stopped|停止接管/);
+  });
+
+  test("real open whitelisted app is disabled by default", async () => {
+    await gotoRoute(page, "settings");
+    await expect(page.getByText("允许真实打开白名单 App").first()).toBeVisible();
+    await expect(page.locator("#desktopAssistantRealOpenApp")).not.toBeChecked();
+    await gotoRoute(page, "home");
+    await page.locator("#desktopAssistantEnable").click();
+    await submitHomeCommand(page, runId + " 打开 Chrome");
+    await page.locator("#desktopPlanConfirm").click();
+    await expect(page.getByText(/当前仅干跑模拟|允许真实打开白名单 App/).first()).toBeVisible();
+    await expect(page.locator("#desktopQueueRealOpen")).toHaveCount(0);
+  });
+
+  test("real open whitelisted app uses mocked safe bridge after explicit setting and confirmation", async () => {
+    await page.evaluate(() => {
+      window.__DA_OPEN_APP_CALLS__ = [];
+      window.WeishanAPI = Object.assign({}, window.WeishanAPI || {}, {
+        desktopAssistantOpenApp: async (appId) => {
+          window.__DA_OPEN_APP_CALLS__.push(appId);
+          return { ok:true, action:"openWhitelistedApp", appId, appName:"Google Chrome", realExecution:true };
+        }
+      });
+    });
+    await gotoRoute(page, "settings");
+    await page.locator("#desktopAssistantEnabled").check();
+    await page.locator("#desktopAssistantRealOpenApp").check();
+    await gotoRoute(page, "home");
+    await page.locator("#desktopAssistantEnable").click();
+    await submitHomeCommand(page, runId + " 打开 Chrome");
+    await page.locator("#desktopPlanConfirm").click();
+    await expect(page.locator("#desktopQueueRealOpen")).toBeVisible();
+    await page.locator("#desktopQueueRealOpen").click();
+    await expect(page.getByText(/realExecuted|realExecution=true|Google Chrome/).first()).toBeVisible();
+    await expect.poll(async () => page.evaluate(() => (window.__DA_OPEN_APP_CALLS__ || []).join(","))).toContain("chrome");
+    await expectHistory(page, runId, /desktopAssistant.realOpenAppRequested|realOpenAppRequested|realOpenAppExecuted/);
+    await expectHistory(page, runId, /desktopAssistant.realOpenAppExecuted|realOpenAppExecuted|Google Chrome/);
+  });
+
+  test("non whitelist app and high risk operations do not expose real open", async () => {
+    await page.evaluate(() => { window.__DA_OPEN_APP_CALLS__ = []; });
+    await gotoRoute(page, "home");
+    await page.locator("#desktopAssistantEnable").click();
+    await submitHomeCommand(page, runId + " 打开软件 终端 执行命令");
+    await expect(page.getByText(/高风险|blocked|必须二次确认/).first()).toBeVisible();
+    await page.locator("#desktopPlanConfirm").click();
+    await expect(page.getByText(/blocked|高风险/).first()).toBeVisible();
+    await expect(page.locator("#desktopQueueRealOpen")).toHaveCount(0);
+    await submitHomeCommand(page, runId + " 删除文件并发送邮件");
+    await expect(page.getByText(/高风险|blocked|必须二次确认/).first()).toBeVisible();
+    await expect(page.locator("#desktopQueueRealOpen")).toHaveCount(0);
+    await expect.poll(async () => page.evaluate(() => (window.__DA_OPEN_APP_CALLS__ || []).length)).toBe(0);
+  });
+
+  test("stopped takeover prevents real open until session is enabled again", async () => {
+    await page.evaluate(() => { window.__DA_OPEN_APP_CALLS__ = []; });
+    await gotoRoute(page, "settings");
+    await page.locator("#desktopAssistantEnabled").check();
+    await page.locator("#desktopAssistantRealOpenApp").check();
+    await gotoRoute(page, "home");
+    await page.locator("#desktopAssistantEnable").click();
+    await page.locator("#desktopAssistantStop").click();
+    await submitHomeCommand(page, runId + " 打开 Chrome");
+    await expect(page.getByText(/桌面助手：关闭|请点击“本次开启”|realExecution=false/).first()).toBeVisible();
+    await expect(page.locator("#desktopQueueRealOpen")).toHaveCount(0);
+    await expect.poll(async () => page.evaluate(() => (window.__DA_OPEN_APP_CALLS__ || []).length)).toBe(0);
   });
 });

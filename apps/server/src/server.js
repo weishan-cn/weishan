@@ -24,7 +24,7 @@ app.use(express.json());
 mountCloudRoutes(app);
 
 const PORT = process.env.PORT || 8787;
-const VERSION = "2.0.14";
+const VERSION = "2.0.15";
 const SERVICE_NAME = "weishan";
 const SITE_URL = process.env.SITE_URL || "https://reset.weishan.ai";
 const supabaseAdmin = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY

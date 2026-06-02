@@ -53,6 +53,12 @@
     return api && api.getDesktopAssistantSession ? api.getDesktopAssistantSession() : { enabled:false, status:"closed" };
   }
 
+  function realOpenAppHistory(action, detail){
+    const api = desktopAssistantApi();
+    if (!api || !api.createRealOpenAppHistoryPayload || !window.HistoryApi || !window.HistoryApi.record) return;
+    window.HistoryApi.record(action, api.createRealOpenAppHistoryPayload(action, detail || {}));
+  }
+
   function desktopAssistantHistory(action, detail){
     const api = desktopAssistantApi();
     if (!api || !api.createDesktopAssistantHistoryPayload || !window.HistoryApi || !window.HistoryApi.record) return;
@@ -60,6 +66,11 @@
       api.createDesktopAssistantExecutionHistoryPayload(action, detail || {}) :
       api.createDesktopAssistantHistoryPayload(action, detail || {});
     window.HistoryApi.record(action, payload);
+  }
+
+  function realOpenAppEnabled(){
+    const api = desktopAssistantApi();
+    return !!(api && api.getRealOpenAppEnabled && api.getRealOpenAppEnabled());
   }
 
   function desktopExecutionQueue(){
@@ -213,9 +224,15 @@
     const queue = desktopExecutionQueue();
     if (!queue || !Array.isArray(queue.steps) || !queue.steps.length) return "";
     const risk = queue.riskLevel || "low";
+    const realOpenEnabled = realOpenAppEnabled();
+    const openSteps = queue.steps.filter((step) => step && (step.action === "openApp" || step.action === "focusApp") && step.appId && step.status !== "blocked" && step.status !== "realExecuted");
+    const canShowRealOpen = realOpenEnabled && openSteps.length > 0 && desktopAssistantSession().enabled === true;
+    const realOpenNotice = openSteps.length && !canShowRealOpen
+      ? `<p class="cmd-history-meta">当前仅干跑模拟。若要真实打开白名单 App，请到设置中心开启“允许真实打开白名单 App”，并本次开启桌面助手。</p>`
+      : "";
     const rows = queue.steps.map((step) => `<li class="desktop-queue-step desktop-risk-${esc(step.riskLevel || "low")}">
       <b>${esc(step.title)}</b>
-      <span>${esc(step.description)} · ${esc(step.riskLevel)} · ${esc(step.status)} · realExecution=false</span>
+      <span>${esc(step.description)} · ${esc(step.riskLevel)} · ${esc(step.approvalState || "allowed")} · ${esc(step.status)} · realExecution=${step.realExecution === true ? "true" : "false"}${step.appName ? " · " + esc(step.appName) : ""}</span>
     </li>`).join("");
     return `<div class="desktop-execution-queue desktop-risk-${esc(risk)}" data-desktop-execution-queue="true">
       <div class="desktop-execution-head">
@@ -224,11 +241,13 @@
           <span>状态：${esc(queue.status)} · simulated=${esc(queue.simulatedStepCount)} · blocked=${esc(queue.blockedStepCount)} · realExecution=false</span>
         </div>
         <div class="desktop-plan-buttons">
+          ${canShowRealOpen ? `<button class="cmd-btn green" id="desktopQueueRealOpen" type="button">确认真实打开</button>` : ""}
           <button class="cmd-btn gray" id="desktopQueueSimulate" type="button">模拟执行</button>
           <button class="cmd-btn gray" id="desktopQueueCancel" type="button">取消计划</button>
           <button class="cmd-btn danger ghost" id="desktopQueueStop" type="button">停止接管</button>
         </div>
       </div>
+      ${realOpenNotice}
       <ol>${rows}</ol>
     </div>`;
   }
@@ -473,6 +492,68 @@
       }));
       const api = desktopAssistantApi();
       if (api && api.clearDesktopExecutionQueue) api.clearDesktopExecutionQueue();
+      render(host);
+    });
+
+    const desktopQueueRealOpen = host.querySelector("#desktopQueueRealOpen");
+    if (desktopQueueRealOpen) desktopQueueRealOpen.addEventListener("click", async function(){
+      const api = desktopAssistantApi();
+      const queue = desktopExecutionQueue();
+      const settings = api && api.getDesktopAssistantSettings ? api.getDesktopAssistantSettings() : {};
+      const session = desktopAssistantSession();
+      const steps = Array.isArray(queue && queue.steps) ? queue.steps : [];
+      const step = steps.find((item) => api && api.canRealOpenApp && api.canRealOpenApp(item, settings, session) && item.status !== "realExecuted");
+      if (!step) {
+        realOpenAppHistory("desktopAssistant.realOpenAppDenied", {
+          appId:"",
+          appName:"",
+          realExecution:false,
+          inputSummary:queue && queue.inputSummary || "打开白名单 App",
+          outputSummary:"真实打开条件未满足。"
+        });
+        render(host);
+        return;
+      }
+      const request = api.createRealOpenAppRequest ? api.createRealOpenAppRequest(step) : { appId:step.appId, appName:step.appName };
+      realOpenAppHistory("desktopAssistant.realOpenAppRequested", Object.assign({}, request, {
+        realExecution:false,
+        inputSummary:queue && queue.inputSummary || "打开白名单 App",
+        outputSummary:"用户确认真实打开白名单 App。"
+      }));
+      const bridge = window.WeishanAPI && typeof window.WeishanAPI.desktopAssistantOpenApp === "function"
+        ? window.WeishanAPI.desktopAssistantOpenApp
+        : window.weishan && typeof window.weishan.desktopAssistantOpenApp === "function"
+          ? window.weishan.desktopAssistantOpenApp
+          : null;
+      if (!bridge) {
+        realOpenAppHistory("desktopAssistant.realOpenAppFailed", Object.assign({}, request, {
+          realExecution:false,
+          inputSummary:queue && queue.inputSummary || "打开白名单 App",
+          outputSummary:"桌面助手安全桥未加载。"
+        }));
+        render(host);
+        return;
+      }
+      let result;
+      try { result = await bridge(request.appId); } catch (err) { result = { ok:false, code:"IPC_FAILED", message:err && err.message || "IPC failed", realExecution:false }; }
+      if (result && result.ok) {
+        const nextStep = api.markRealOpenAppExecuted ? api.markRealOpenAppExecuted(step, result) : Object.assign({}, step, { status:"realExecuted", realExecution:true });
+        const nextQueue = api.saveDesktopExecutionQueue(Object.assign({}, queue, {
+          status:"realOpenAppExecuted",
+          steps:steps.map((item) => item.stepId === step.stepId ? nextStep : item)
+        }));
+        realOpenAppHistory("desktopAssistant.realOpenAppExecuted", Object.assign({}, request, result, {
+          realExecution:true,
+          inputSummary:nextQueue && nextQueue.inputSummary || "打开白名单 App",
+          outputSummary:"已真实打开白名单 App：" + (result.appName || request.appName || request.appId)
+        }));
+      } else {
+        realOpenAppHistory("desktopAssistant.realOpenAppFailed", Object.assign({}, request, result || {}, {
+          realExecution:false,
+          inputSummary:queue && queue.inputSummary || "打开白名单 App",
+          outputSummary:result && result.message || "打开白名单 App 失败。"
+        }));
+      }
       render(host);
     });
 

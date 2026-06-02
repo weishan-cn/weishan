@@ -2,7 +2,17 @@
   const DESKTOP_ASSISTANT_STORAGE_KEY = "weishan:desktopAssistant:v1";
   const DESKTOP_ASSISTANT_SESSION_KEY = "weishan:desktopAssistant:session:v1";
   const DESKTOP_ASSISTANT_QUEUE_KEY = "weishan:desktopAssistant:executionQueue:v1";
+  const REAL_OPEN_APP_SETTING_KEY = "weishan:desktopAssistant:realOpenApp:v1";
   const SCHEMA_VERSION = "weishan.desktopAssistant.v1";
+
+  const DESKTOP_APP_WHITELIST = Object.freeze({
+    chrome:{ appId:"chrome", appName:"Google Chrome", aliases:["chrome", "google chrome", "谷歌", "浏览器"] },
+    safari:{ appId:"safari", appName:"Safari", aliases:["safari"] },
+    finder:{ appId:"finder", appName:"Finder", aliases:["finder", "访达"] },
+    wps:{ appId:"wps", appName:"WPS Office", aliases:["wps", "wps office"] },
+    notes:{ appId:"notes", appName:"Notes", aliases:["notes", "备忘录"] },
+    preview:{ appId:"preview", appName:"Preview", aliases:["preview", "预览"] }
+  });
 
   const DEFAULT_SETTINGS = {
     enabled:false,
@@ -11,12 +21,13 @@
     allowMouseClick:false,
     allowScreenRead:false,
     requireSecondConfirmForHighRisk:true,
-    autoStopAfterMinutes:30
+    autoStopAfterMinutes:30,
+    allowRealOpenApp:false
   };
 
   const LOW_KEYWORDS = [
     "打开应用", "打开软件", "打开浏览器", "打开 Chrome", "打开 Finder", "切换窗口", "复制文本", "粘贴文本", "输入搜索词", "查看页面",
-    "open app", "open browser", "switch window", "copy text", "paste text", "search"
+    "open app", "open browser", "focus app", "switch window", "copy text", "paste text", "search"
   ];
   const MEDIUM_KEYWORDS = [
     "点击按钮", "点击", "填写表单", "保存文件", "下载文件", "移动文件", "修改文档内容",
@@ -24,12 +35,12 @@
   ];
   const HIGH_KEYWORDS = [
     "发送邮件", "删除文件", "删除", "上传文件", "提交表单", "付款", "下单", "输入密码", "修改系统设置", "安装软件", "关闭安全功能", "发布内容",
-    "send email", "delete file", "upload file", "submit form", "payment", "pay", "order", "password", "install software", "system settings", "publish"
+    "send email", "delete file", "upload file", "submit form", "payment", "pay", "order", "password", "install software", "system settings", "publish", "terminal", "执行命令", "终端"
   ];
   const DESKTOP_KEYWORDS = [
-    "操作电脑", "接管电脑", "桌面助手", "电脑操作", "自动操作", "打开软件", "打开浏览器", "打开 Chrome", "打开 Finder", "打开 WPS",
+    "操作电脑", "接管电脑", "桌面助手", "电脑操作", "自动操作", "打开软件", "打开浏览器", "打开 Chrome", "打开 Finder", "打开 WPS", "打开 终端", "执行命令",
     "点击", "输入", "复制", "粘贴", "切换窗口", "保存文件", "删除文件", "删除", "发送邮件", "提交表单", "付款", "安装软件", "输入密码",
-    "desktop assistant", "control computer", "operate computer", "open Chrome", "click", "type", "paste", "copy", "switch window"
+    "desktop assistant", "control computer", "operate computer", "open Chrome", "open app", "focus app", "click", "type", "paste", "copy", "switch window"
   ];
 
   function safeStorage(){
@@ -96,6 +107,7 @@
     next.allowScreenRead = next.allowScreenRead === true;
     next.requireSecondConfirmForHighRisk = next.requireSecondConfirmForHighRisk !== false;
     next.autoStopAfterMinutes = Number(next.autoStopAfterMinutes || 30);
+    next.allowRealOpenApp = next.allowRealOpenApp === true;
     return writeJson(safeStorage(), DESKTOP_ASSISTANT_STORAGE_KEY, next);
   }
 
@@ -108,6 +120,96 @@
       updatedAt:nowIso(),
       realExecution:false
     };
+  }
+
+
+  function getRealOpenAppEnabled(){
+    const settings = getDesktopAssistantSettings();
+    const raw = readRawJson(safeStorage(), REAL_OPEN_APP_SETTING_KEY, null);
+    return raw === true || settings.allowRealOpenApp === true;
+  }
+
+  function setRealOpenAppEnabled(enabled){
+    const next = enabled === true;
+    const settings = getDesktopAssistantSettings();
+    saveDesktopAssistantSettings(Object.assign({}, settings, { allowRealOpenApp:next }));
+    writeJson(safeStorage(), REAL_OPEN_APP_SETTING_KEY, next);
+    return next;
+  }
+
+  function desktopAppById(appId){
+    return DESKTOP_APP_WHITELIST[String(appId || "").trim().toLowerCase()] || null;
+  }
+
+  function inferDesktopApp(text){
+    const clean = String(text || "").toLowerCase();
+    const values = Object.keys(DESKTOP_APP_WHITELIST).map((key) => DESKTOP_APP_WHITELIST[key]);
+    return values.find((item) => item.aliases.some((alias) => clean.indexOf(String(alias).toLowerCase()) >= 0)) || null;
+  }
+
+  function inferDesktopAction(text){
+    const clean = String(text || "").toLowerCase();
+    if (/聚焦|focus/.test(clean)) return "focusApp";
+    if (/打开|open/.test(clean)) return "openApp";
+    return "planOnly";
+  }
+
+  function isOpenAppStep(step){
+    const action = String(step && step.action || "");
+    return action === "openApp" || action === "focusApp";
+  }
+
+  function markStepPolicy(step){
+    const item = Object.assign({}, step || {});
+    const riskLevel = item.riskLevel || getRiskLevelForStep(item);
+    const appAllowed = !isOpenAppStep(item) || !!desktopAppById(item.appId);
+    const blocked = riskLevel === "high" || (isOpenAppStep(item) && !appAllowed);
+    const approvalState = blocked ? "blocked" : riskLevel === "medium" ? "needsApproval" : "allowed";
+    return Object.assign({}, item, {
+      riskLevel:blocked && isOpenAppStep(item) && !appAllowed ? "high" : riskLevel,
+      approvalState,
+      status:item.status || (blocked ? "blocked" : "queued"),
+      realExecution:item.realExecution === true && item.status === "realExecuted",
+      requiresSecondConfirm:item.requiresSecondConfirm === true || blocked || riskLevel === "high"
+    });
+  }
+
+  function canRealOpenApp(step, settings, session){
+    const item = markStepPolicy(step || {});
+    const currentSettings = Object.assign({}, getDesktopAssistantSettings(), settings || {});
+    const currentSession = Object.assign({}, getDesktopAssistantSession(), session || {});
+    return currentSettings.enabled === true &&
+      currentSettings.allowRealOpenApp === true &&
+      currentSession.enabled === true &&
+      item.riskLevel === "low" &&
+      item.approvalState === "allowed" &&
+      isOpenAppStep(item) &&
+      !!desktopAppById(item.appId);
+  }
+
+  function createRealOpenAppRequest(step){
+    const item = markStepPolicy(step || {});
+    const app = desktopAppById(item.appId);
+    return {
+      action:"openWhitelistedApp",
+      appId:app ? app.appId : String(item.appId || ""),
+      appName:app ? app.appName : summarize(item.appName || "", 80),
+      riskLevel:"low",
+      realExecution:true
+    };
+  }
+
+  function markRealOpenAppExecuted(step, result){
+    const item = markStepPolicy(step || {});
+    const app = desktopAppById(item.appId) || {};
+    return Object.assign({}, item, {
+      status:"realExecuted",
+      lifecycleStatus:"realOpenAppExecuted",
+      appId:app.appId || item.appId || "",
+      appName:result && result.appName || app.appName || item.appName || "",
+      realExecution:true,
+      updatedAt:nowIso()
+    });
   }
 
   function getDesktopAssistantSession(){
@@ -183,23 +285,25 @@
     };
   }
 
-  function step(stepId, title, description){
-    const item = {
+  function step(stepId, title, description, extra){
+    const item = Object.assign({
       stepId,
       title:summarize(title, 80),
       description:summarize(description, 180),
       realExecution:false
-    };
-    item.riskLevel = getRiskLevelForStep(item);
-    item.requiresSecondConfirm = item.riskLevel === "high";
-    return item;
+    }, extra || {});
+    item.riskLevel = item.riskLevel || getRiskLevelForStep(item);
+    return markStepPolicy(item);
   }
 
   function inferDesktopSteps(text, riskLevel){
     const clean = summarize(text, 220);
+    const app = inferDesktopApp(clean);
+    const action = inferDesktopAction(clean);
+    const openAppExtra = (action === "openApp" || action === "focusApp") ? { action, appId:app && app.appId || "", appName:app && app.appName || "", riskLevel:app ? "low" : "high" } : {};
     const steps = [
       step("step-1", "确认用户目标", "确认本次只生成桌面操作计划，不控制鼠标、不操作键盘、不读取屏幕。"),
-      step("step-2", "定位目标软件或页面", clean || "根据用户指令定位目标应用或页面，等待用户手动确认。")
+      step("step-2", app ? (action === "focusApp" ? "聚焦白名单 App" : "打开白名单 App") : "定位目标软件或页面", clean || "根据用户指令定位目标应用或页面，等待用户手动确认。", openAppExtra)
     ];
     if (/搜索|search/i.test(clean)) {
       steps.push(step("step-3", "准备搜索词", "把搜索词作为文本计划，不自动打开浏览器，也不自动输入。"));
@@ -252,16 +356,20 @@
     const steps = (Array.isArray(data.steps) ? data.steps : []).map((item, index) => {
       const step = Object.assign({}, item || {});
       const riskLevel = step.riskLevel || getRiskLevelForStep(step);
-      return {
+      return markStepPolicy({
         stepId:step.stepId || "step-" + (index + 1),
         title:summarize(step.title || "桌面助手步骤", 80),
         description:summarize(step.description || "", 180),
         riskLevel,
+        action:step.action || "",
+        appId:step.appId || "",
+        appName:step.appName || "",
+        approvalState:step.approvalState || (riskLevel === "high" ? "blocked" : riskLevel === "medium" ? "needsApproval" : "allowed"),
         status:step.status || (riskLevel === "high" ? "blocked" : "queued"),
-        realExecution:false,
+        realExecution:step.realExecution === true && step.status === "realExecuted",
         requiresSecondConfirm:step.requiresSecondConfirm === true || riskLevel === "high",
         updatedAt:step.updatedAt || now
-      };
+      });
     });
     const summary = queueSummary({ steps });
     const status = steps.some((step) => step.status === "stopped") ? "stopped" :
@@ -294,7 +402,7 @@
       requiresSecondConfirm:data.requiresSecondConfirm === true,
       status:"executionQueued",
       steps:(data.steps || []).map((item) => Object.assign({}, item, {
-        status:item.riskLevel === "high" ? "blocked" : "queued",
+        status:item.riskLevel === "high" || item.approvalState === "blocked" ? "blocked" : "queued",
         realExecution:false
       })),
       createdAt:nowIso()
@@ -332,7 +440,7 @@
 
   function simulateDesktopExecutionStep(step){
     const item = Object.assign({}, step || {});
-    if ((item.riskLevel || getRiskLevelForStep(item)) === "high") return blockHighRiskStep(item);
+    if ((item.riskLevel || getRiskLevelForStep(item)) === "high" || item.status === "blocked" || item.approvalState === "blocked") return blockHighRiskStep(item);
     return Object.assign({}, item, {
       status:"simulated",
       realExecution:false,
@@ -398,6 +506,24 @@
     };
   }
 
+
+  function createRealOpenAppHistoryPayload(action, payload){
+    const data = payload || {};
+    const app = desktopAppById(data.appId) || {};
+    return {
+      schemaVersion:"weishan.task.v1",
+      module:"desktopAssistant",
+      action:String(action || "").replace(/^desktopAssistant./, "") || "realOpenApp",
+      appId:app.appId || summarize(data.appId || "", 80),
+      appName:app.appName || summarize(data.appName || "", 80),
+      riskLevel:"low",
+      realExecution:data.realExecution === true,
+      inputSummary:summarize(data.inputSummary || "打开白名单 App", 240),
+      outputSummary:summarize(data.outputSummary || data.message || "桌面助手白名单 App 操作", 240),
+      createdAt:data.createdAt || nowIso()
+    };
+  }
+
   function createDesktopAssistantExecutionHistoryPayload(action, payload){
     const queue = normalizeQueue(payload || {});
     return Object.assign(createDesktopAssistantHistoryPayload(action, queue), queueSummary(queue));
@@ -407,9 +533,16 @@
     DESKTOP_ASSISTANT_STORAGE_KEY,
     DESKTOP_ASSISTANT_SESSION_KEY,
     DESKTOP_ASSISTANT_QUEUE_KEY,
+    REAL_OPEN_APP_SETTING_KEY,
     SCHEMA_VERSION,
     getDesktopAssistantSettings,
     saveDesktopAssistantSettings,
+    getRealOpenAppEnabled,
+    setRealOpenAppEnabled,
+    canRealOpenApp,
+    createRealOpenAppRequest,
+    markRealOpenAppExecuted,
+    createRealOpenAppHistoryPayload,
     getDesktopAssistantSession,
     setDesktopAssistantSession,
     toggleDesktopAssistantForSession,
