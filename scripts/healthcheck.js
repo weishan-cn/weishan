@@ -139,6 +139,7 @@ function checkMarkers() {
     marker("apps/desktop/src/preload.js", /desktopAssistantOpenApp|desktopAssistant:openWhitelistedApp/, "marker:desktop assistant safe preload bridge", true),
     marker("apps/desktop/src/renderer/routes/SettingsPage.js", /允许真实打开白名单 App|desktopAssistantRealOpenApp/, "marker:desktop assistant real open app switch", true),
     marker("apps/desktop/src/renderer/routes/HomePage.js", /desktopQueueRealOpen|realOpenAppExecuted|确认真实打开/, "marker:desktop assistant real open app confirm", true),
+    marker("apps/desktop/src/renderer/routes/HomePage.js", /desktopAssistantOpenAppBridge|window\.WeishanAPI\.desktopAssistantOpenApp/, "marker:desktop assistant real open homepage bridge", true),
     marker("apps/desktop/src/renderer/routes/HomePage.js", /realOpenDisabled|sessionRequired|appNotAllowed|riskNotAllowed|真实打开白名单 App 当前关闭/, "marker:desktop assistant real open app gated", true),
     marker("apps/desktop/src/renderer/core/desktopAssistant.js", /DESKTOP_APP_WHITELIST|appNotAllowed|desktopAppById/, "marker:desktop assistant whitelist app only", true),
     marker("apps/desktop/src/renderer/routes/HomePage.js", /desktopQueueRealOpen[\s\S]*确认真实打开|不点击、不输入、不读屏/, "marker:desktop assistant real open button guarded", true),

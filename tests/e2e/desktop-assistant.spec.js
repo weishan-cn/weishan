@@ -229,17 +229,19 @@ test.describe.serial("desktop assistant permission framework", () => {
       });
     });
     await gotoRoute(page, "settings");
-    await page.locator("#desktopAssistantEnabled").check();
+    if (await page.locator("#desktopAssistantEnabled").isChecked()) {
+      await page.locator("#desktopAssistantEnabled").uncheck();
+    }
     await page.locator("#desktopAssistantRealOpenApp").check();
     await gotoRoute(page, "home");
     await page.locator("#desktopAssistantEnable").click();
     await submitHomeCommand(page, runId + " 打开 Chrome");
-    await page.locator("#desktopPlanConfirm").click();
     const task = page.locator("[data-desktop-task-id]").filter({ hasText:runId }).filter({ hasText:"打开 Chrome" }).first();
     await expect(task.getByRole("button", { name:"确认真实打开" })).toBeVisible();
     await expect(page.getByText(/仅打开或聚焦白名单 App，不点击、不输入、不读屏/).first()).toBeVisible();
     await task.getByRole("button", { name:"确认真实打开" }).click();
     await expect(task).toContainText(/已真实打开白名单 App|Google Chrome/);
+    await expect(task).toContainText("realExecution=true");
     await expect(page.getByText(/未点击、未输入、未读屏、未截图|下一步建议/).first()).toBeVisible();
     await expect.poll(async () => page.evaluate(() => (window.__DA_OPEN_APP_CALLS__ || []).join(","))).toContain("chrome");
     await expectHistory(page, runId, /desktopAssistant.realOpenAppRequested|realOpenAppRequested|realOpenAppExecuted/);
@@ -262,7 +264,6 @@ test.describe.serial("desktop assistant permission framework", () => {
     await gotoRoute(page, "home");
     await page.locator("#desktopAssistantEnable").click();
     await submitHomeCommand(page, runId + " 打开 Chrome 失败反馈");
-    await page.locator("#desktopPlanConfirm").click();
     const task = page.locator("[data-desktop-task-id]").filter({ hasText:runId }).filter({ hasText:"打开 Chrome 失败反馈" }).first();
     await expect(task.getByRole("button", { name:"确认真实打开" })).toBeVisible();
     await task.getByRole("button", { name:"确认真实打开" }).click();

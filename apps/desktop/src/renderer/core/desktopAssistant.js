@@ -184,8 +184,8 @@
     const item = markStepPolicy(step || {});
     const currentSettings = Object.assign({}, getDesktopAssistantSettings(), settings || {});
     const currentSession = Object.assign({}, getDesktopAssistantSession(), session || {});
-    return currentSettings.enabled === true &&
-      currentSettings.allowRealOpenApp === true &&
+    const realOpenEnabled = getRealOpenAppEnabled() || currentSettings.allowRealOpenApp === true;
+    return realOpenEnabled === true &&
       currentSession.enabled === true &&
       item.riskLevel === "low" &&
       item.approvalState === "allowed" &&
@@ -197,6 +197,7 @@
     const item = markStepPolicy(step || {});
     const currentSettings = Object.assign({}, getDesktopAssistantSettings(), settings || {});
     const currentSession = Object.assign({}, getDesktopAssistantSession(), session || {});
+    const realOpenEnabled = getRealOpenAppEnabled() || currentSettings.allowRealOpenApp === true;
     const app = desktopAppById(item.appId);
     if (!isOpenAppStep(item)) {
       return {
@@ -230,7 +231,7 @@
         realExecution:false
       };
     }
-    if (currentSettings.enabled !== true || currentSettings.allowRealOpenApp !== true) {
+    if (realOpenEnabled !== true) {
       return {
         status:"realOpenDisabled",
         outputSummary:"真实打开白名单 App 当前关闭。",

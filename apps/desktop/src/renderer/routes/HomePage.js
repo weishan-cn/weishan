@@ -74,6 +74,19 @@
     return !!(api && api.getRealOpenAppEnabled && api.getRealOpenAppEnabled());
   }
 
+  function desktopAssistantOpenAppBridge(){
+    if (window.WeishanAPI && typeof window.WeishanAPI.desktopAssistantOpenApp === "function") {
+      return window.WeishanAPI.desktopAssistantOpenApp;
+    }
+    if (window.weishan && typeof window.weishan.desktopAssistantOpenApp === "function") {
+      window.WeishanAPI = Object.assign({}, window.WeishanAPI || {}, {
+        desktopAssistantOpenApp:window.weishan.desktopAssistantOpenApp
+      });
+      return window.WeishanAPI.desktopAssistantOpenApp;
+    }
+    return null;
+  }
+
   function desktopExecutionQueue(){
     const api = desktopAssistantApi();
     return api && api.getDesktopExecutionQueue ? api.getDesktopExecutionQueue() : null;
@@ -354,8 +367,9 @@
       const canConfirmTask = sessionEnabled && !isBlockedTask && !/stopped|cancelled/.test(String(task.status || ""));
       const canSimulateTask = canConfirmTask;
       const resultPanel = realExecutedStep ? `<div class="desktop-result-card is-success">
-        <b>已真实打开白名单 App</b>
+        <b>已真实打开白名单 App：${esc(realExecutedStep.appName || realExecutedStep.appId || "白名单 App")}</b>
         <p>App：${esc(realExecutedStep.appName || realExecutedStep.appId || "白名单 App")} · 操作：${esc(realExecutedStep.action || "openApp")}</p>
+        <p>realExecution=true</p>
         <p>安全边界：未点击、未输入、未读屏、未截图。</p>
         <p>下一步建议：1. 如需继续操作，请重新下达下一步指令。2. 如需点击/输入/读取屏幕，需后续单独授权。3. 当前版本只负责打开或聚焦 App。</p>
       </div>` : failedStep ? `<div class="desktop-result-card is-failed">
@@ -718,11 +732,7 @@
         inputSummary:queue && queue.inputSummary || "打开白名单 App",
         outputSummary:"用户确认真实打开白名单 App。"
       }));
-      const bridge = window.WeishanAPI && typeof window.WeishanAPI.desktopAssistantOpenApp === "function"
-        ? window.WeishanAPI.desktopAssistantOpenApp
-        : window.weishan && typeof window.weishan.desktopAssistantOpenApp === "function"
-          ? window.weishan.desktopAssistantOpenApp
-          : null;
+      const bridge = desktopAssistantOpenAppBridge();
       if (!bridge) {
         realOpenAppHistory("desktopAssistant.realOpenAppFailed", Object.assign({}, request, {
           actionType:step.action || "openApp",
