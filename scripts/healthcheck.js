@@ -64,7 +64,7 @@ function checkFiles() {
 function checkPackageScripts() {
   const pkg = JSON.parse(readText("package.json") || "{}");
   const scripts = pkg.scripts || {};
-  return ["check", "dev:desktop", "healthcheck", "release:check", "secrets:scan", "version:check", "test:api", "test:e2e", "test:e2e:smoke", "test:e2e:repair", "test:e2e:dispatch", "test:e2e:desktop-assistant", "test:e2e:cloud"].map((script) => {
+  return ["check", "dev:desktop", "healthcheck", "release:check", "release:postcheck", "secrets:scan", "version:check", "test:api", "test:e2e", "test:e2e:smoke", "test:e2e:repair", "test:e2e:dispatch", "test:e2e:desktop-assistant", "test:e2e:cloud"].map((script) => {
     const ok = Boolean(scripts[script]);
     const status = ok ? "pass" : (script === "healthcheck" ? "warn" : "fail");
     return result("script:" + script, status, ok ? scripts[script] : "missing", "Add the missing package script.");
