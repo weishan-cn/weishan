@@ -237,6 +237,22 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).not.toContainText(/CNY\s*\d+/);
   });
 
+  test("flight lookup phrasing still routes to commerce instead of chat", async () => {
+    await submitHomeCommand(page, runId + " 明天成都飞北京");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
+    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
+
+    await submitHomeCommand(page, runId + " 查一下明天成都到北京的航班");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
+    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
+  });
+
   test("hotel booking and product buying intents route to commerce before chat", async () => {
     await submitHomeCommand(page, runId + " 帮我预订上海低价酒店");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");

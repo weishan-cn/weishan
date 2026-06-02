@@ -180,6 +180,22 @@ test.describe.serial("dispatch router", () => {
     await expectHistory(page, runId, /commerceAgent\.taskCreated|全球采购|成都到北京机票/);
   });
 
+  test("flight lookup phrasing routes to commerce agent before chat", async () => {
+    await submitHomeCommand(page, runId + " 明天成都飞北京");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
+    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
+
+    await submitHomeCommand(page, runId + " 查一下明天成都到北京的航班");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
+    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
+  });
+
   test("cruise and private jet demands route to commerce agent instead of chat", async () => {
     await submitHomeCommand(page, runId + " 帮我找上海出发的邮轮");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
