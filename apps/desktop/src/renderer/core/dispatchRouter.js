@@ -32,6 +32,7 @@
     modelStatus:"model.status",
     modelSelect:"model.select",
     desktopAssistantPlan:"desktopAssistant.plan",
+    desktopAssistantPaused:"desktopAssistant.paused",
     commerceAgentPlan:"commerceAgent.plan",
     coordinationPlan:"coordination.plan"
   };
@@ -252,7 +253,7 @@
     if (isDesktopAssistantCommand(raw) && !/邮件接管|抓取中心|软件工厂/i.test(raw)) {
       return {
         module:DISPATCH_MODULES.desktopAssistant,
-        action:DISPATCH_ACTIONS.desktopAssistantPlan,
+        action:DISPATCH_ACTIONS.desktopAssistantPaused,
         routeMode:"console",
         modules:[DISPATCH_MODULES.desktopAssistant],
         targetRoute:"home",
@@ -359,6 +360,7 @@
       "model.status":"查看模型状态",
       "model.select":"选择模型",
       "desktopAssistant.plan":"生成桌面操作计划",
+      "desktopAssistant.paused":"桌面助手接管暂停",
       "commerceAgent.plan":"生成全球采购计划",
       "chat.answer":"普通问答",
       "coordination.plan":"生成多模块协调计划"
@@ -790,30 +792,23 @@
     const operationPlan = plan && plan.desktopOperationPlan || (api && api.createDesktopOperationPlan ? api.createDesktopOperationPlan(text) : null);
     if (!operationPlan) {
       return [
-        "# 桌面操作计划",
-        "",
-        "桌面助手计划模块未加载。realExecution=false",
-        "本轮不会控制电脑、读取屏幕、点击鼠标或输入键盘。"
+        "桌面助手接管能力已暂停。当前不会控制浏览器、鼠标、键盘或系统 App。",
+        "realExecution=false"
       ].join("\n");
     }
-    const session = api && api.getDesktopAssistantSession ? api.getDesktopAssistantSession() : { enabled:false };
-    const enabled = session && session.enabled === true;
-    const riskText = operationPlan.riskLevel === "high" ? "高风险" : operationPlan.riskLevel === "medium" ? "中风险" : "普通提示";
+    if (operationPlan.riskLevel === "high") {
+      return [
+        "高风险操作已阻断：不会删除、发送、上传、付款、提交表单或输入密码。",
+        "module: desktopAssistant",
+        "action: desktopAssistant.paused",
+        "realExecution=false"
+      ].join("\n");
+    }
     return [
-      "# 桌面操作计划",
-      "",
-      "任务：" + operationPlan.title,
-      "桌面助手：" + (enabled ? "本次开启" : "关闭"),
-      "风险等级：" + riskText,
-      "requiresSecondConfirm=" + (operationPlan.requiresSecondConfirm ? "true" : "false"),
-      "realExecution=false",
-      "",
-      enabled ? "当前仅生成操作计划，用户确认计划也不会执行真实电脑操作。" : "需要先点击首页“桌面助手：本次开启”，才能继续确认计划。",
-      "",
-      "## 计划步骤",
-      operationPlan.steps.map((step, index) => (index + 1) + ". [" + step.riskLevel + "] " + step.title + " - " + step.description + " · realExecution=false").join("\n"),
-      "",
-      operationPlan.riskLevel === "high" ? "高风险操作必须二次确认。本轮不会删除文件、发送邮件、付款、提交表单、输入密码或修改系统设置。" : "本轮不调用系统权限、不读取屏幕、不控制鼠标键盘。"
+      "桌面助手接管能力已暂停。当前不会控制浏览器、鼠标、键盘或系统 App。",
+      "module: desktopAssistant",
+      "action: desktopAssistant.paused",
+      "realExecution=false"
     ].join("\n");
   }
 

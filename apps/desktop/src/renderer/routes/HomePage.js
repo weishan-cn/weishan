@@ -141,6 +141,8 @@
   }
 
   function syncDesktopAssistantTasksFromSnapshot(snapshot){
+    return;
+    /*
     const api = desktopAssistantApi();
     if (!api || !api.createDesktopOperationPlan || !api.addDesktopAssistantTask || !api.getDesktopAssistantTasks) return;
     const existing = api.getDesktopAssistantTasks();
@@ -166,9 +168,12 @@
         outputSummary:"桌面助手任务已加入多任务队列。"
       }));
     });
+    */
   }
 
   function desktopAssistantStrip(){
+    return "";
+    /*
     const session = desktopAssistantSession();
     const enabled = session && session.enabled === true;
     return `<div class="desktop-assistant-strip" data-desktop-assistant-session="true">
@@ -177,6 +182,7 @@
       <button class="cmd-btn gray" id="desktopAssistantDisable" type="button">关闭</button>
       <button class="cmd-btn danger ghost" id="desktopAssistantStop" type="button">停止接管</button>
     </div>`;
+    */
   }
 
   function cleanAiDisplay(text){
@@ -206,6 +212,9 @@
         appMatch && appMatch[1] ? "App：" + appMatch[1].trim() : "",
         "请在下方“桌面助手任务队列”中查看和处理。"
       ].filter(Boolean).join("\n");
+    }
+    if (/desktopAssistant\.paused|桌面助手接管能力已暂停|高风险操作已阻断/.test(text)) {
+      return text;
     }
     if ((log && (log.type === "answer" || log.type === "ai")) || /<think|```think|```thinking|```reasoning/i.test(text)) {
       return cleanAiDisplay(text);
@@ -301,6 +310,8 @@
   }
 
   function desktopPlanActions(task){
+    return "";
+    /*
     const meta = task && task.meta || {};
     if (meta.dispatchModule !== "desktopAssistant" && task && task.module !== "desktopAssistant") return "";
     const risk = meta.desktopRiskLevel || "low";
@@ -325,9 +336,12 @@
         <button class="cmd-btn danger ghost" id="desktopPlanStop" type="button">停止全部接管</button>
       </div>
     </div>`;
+    */
   }
 
   function desktopExecutionQueuePanel(){
+    return "";
+    /*
     const tasks = desktopAssistantTasks();
     if (!tasks.length) return `<div class="desktop-execution-queue desktop-task-queue" data-desktop-task-queue="true">
       <div class="desktop-execution-head">
@@ -423,6 +437,7 @@
       </div>
       <div class="desktop-task-list">${taskRows}</div>
     </div>`;
+    */
   }
 
   function queuePanel(snapshot){

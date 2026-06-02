@@ -253,42 +253,34 @@
     const api = desktopAssistant();
     if (!api || !api.createDesktopOperationPlan) {
       return {
-        answer:"桌面助手权限框架尚未加载。本轮不会控制电脑。realExecution=false",
+        answer:"桌面助手接管能力已暂停。当前不会控制浏览器、鼠标、键盘或系统 App。\nrealExecution=false",
         operationPlan:null,
         session:{ enabled:false }
       };
     }
     const operationPlan = plan && plan.desktopOperationPlan || api.createDesktopOperationPlan(text);
-    const session = api.getDesktopAssistantSession ? api.getDesktopAssistantSession() : { enabled:false };
-    const enabled = session && session.enabled === true;
-    const riskLabel = operationPlan.riskLevel === "high" ? "高风险" : operationPlan.riskLevel === "medium" ? "中风险" : "普通提示";
-    const appStep = (operationPlan.steps || []).find((step) => step && (step.action === "openApp" || step.action === "focusApp") && step.appName);
-    const lines = [
-      "# 桌面操作计划",
-      "",
-      "路由判断：桌面助手",
-      "已生成操作计划：desktopAssistant / desktopAssistant.plan",
-      "任务：" + operationPlan.title,
-      "桌面助手：" + (enabled ? "本次开启" : "关闭"),
-      "风险等级：" + riskLabel,
-      appStep ? "App：" + appStep.appName : "",
-      "requiresSecondConfirm=" + (operationPlan.requiresSecondConfirm ? "true" : "false"),
-      "realExecution=false",
-      "",
-      enabled ? "当前仅生成操作计划，点击“确认计划”也只记录 confirmed，不会执行电脑操作。" : "桌面助手当前关闭。请点击“本次开启”后再确认计划。",
-      "",
-      "## 计划步骤"
-    ];
-    operationPlan.steps.forEach((step, index) => {
-      lines.push((index + 1) + ". [" + step.riskLevel + "] " + step.title + " - " + step.description + " · realExecution=false");
-    });
-    lines.push("");
     if (operationPlan.riskLevel === "high") {
-      lines.push("高风险操作必须二次确认。本轮不会删除文件、发送邮件、上传文件、付款、提交表单、输入密码、安装软件或修改系统设置。");
-    } else {
-      lines.push("本轮不申请系统权限、不读取屏幕、不控制鼠标键盘。");
+      return {
+        answer:[
+          "高风险操作已阻断：不会删除、发送、上传、付款、提交表单或输入密码。",
+          "module: desktopAssistant",
+          "action: desktopAssistant.paused",
+          "realExecution=false"
+        ].join("\n"),
+        operationPlan,
+        session:{ enabled:false }
+      };
     }
-    return { answer:lines.join("\n"), operationPlan, session };
+    return {
+      answer:[
+        "桌面助手接管能力已暂停。当前不会控制浏览器、鼠标、键盘或系统 App。",
+        "module: desktopAssistant",
+        "action: desktopAssistant.paused",
+        "realExecution=false"
+      ].join("\n"),
+      operationPlan,
+      session:{ enabled:false }
+    };
   }
 
   function isRealtimeQuestion(text){
@@ -950,9 +942,12 @@
           const desktopResult = desktopAssistantAnswer(active.text, plan);
           answer = desktopResult.answer;
           const operationPlan = desktopResult.operationPlan;
-          recordDesktopAssistantHistory("desktopAssistant.planCreated", plan, Object.assign({}, operationPlan || {}, {
+          const historyAction = operationPlan && operationPlan.riskLevel === "high" ? "desktopAssistant.highRiskBlocked" : "desktopAssistant.paused";
+          recordDesktopAssistantHistory(historyAction, plan, Object.assign({}, operationPlan || {}, {
             inputSummary:taskSummary(active.text, 240),
-            outputSummary:operationPlan ? "已生成桌面操作计划：" + operationPlan.riskLevel + "，" + operationPlan.stepCount + " 步。" : "桌面助手计划模块未加载。",
+            outputSummary:operationPlan && operationPlan.riskLevel === "high" ?
+              "高风险操作已阻断；不会删除、发送、上传、付款、提交表单或输入密码。" :
+              "桌面助手接管能力已暂停；当前不会控制浏览器、鼠标、键盘或系统 App。",
             realExecution:false
           }));
           active = patchTask(active.id, (t) => {
