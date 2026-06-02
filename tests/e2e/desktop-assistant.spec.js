@@ -4,17 +4,27 @@ const { launchWeishan, gotoRoute, cleanupE2EData } = require("./helpers");
 const runId = "E2EDESKTOP-" + new Date().toISOString().replace(/[-:TZ.]/g, "").slice(0, 14);
 
 async function resetDesktopAssistantSession(page) {
-  await page.evaluate(() => {
+  await page.evaluate((id) => {
     try {
       window.sessionStorage.removeItem("weishan:desktopAssistant:session:v1");
       window.sessionStorage.removeItem("weishan:desktopAssistant:executionQueue:v1");
+      window.sessionStorage.removeItem("weishan:desktopAssistant:tasks:v1");
       window.localStorage.removeItem("weishan:desktopAssistant:realOpenApp:v1");
       window.localStorage.removeItem("weishan:desktopAssistant:v1");
       if (window.WeishanDesktopAssistant && window.WeishanDesktopAssistant.stopDesktopAssistantSession) {
         window.WeishanDesktopAssistant.stopDesktopAssistantSession();
       }
+      const keys = ["command.queue.v205", "command.history.v205"];
+      keys.forEach((key) => {
+        try {
+          const value = JSON.parse(window.localStorage.getItem(key) || "[]");
+          if (Array.isArray(value)) {
+            window.localStorage.setItem(key, JSON.stringify(value.filter((item) => JSON.stringify(item || {}).indexOf(id) === -1)));
+          }
+        } catch (_) {}
+      });
     } catch (_) {}
-  });
+  }, runId);
 }
 
 async function submitHomeCommand(page, text) {
@@ -78,7 +88,77 @@ test.describe.serial("desktop assistant permission framework", () => {
     await expect(page.getByText(/chat\.answer|准备调用 AI 网关|如何打开 Safari/)).toHaveCount(0);
   });
 
+  test("multiple desktop assistant tasks can coexist in the homepage queue", async () => {
+    await resetDesktopAssistantSession(page);
+    await gotoRoute(page, "home");
+    await page.locator("#desktopAssistantEnable").click();
+    await submitHomeCommand(page, runId + " 多任务 打开 Chrome");
+    await submitHomeCommand(page, runId + " 多任务 打开 Safari");
+    const rows = page.locator("[data-desktop-task-id]").filter({ hasText:runId }).filter({ hasText:"多任务" });
+    await expect(rows).toHaveCount(2);
+    await expect(page.locator("[data-desktop-task-queue]")).toContainText("Google Chrome");
+    await expect(page.locator("[data-desktop-task-queue]")).toContainText("Safari");
+    await expect(page.locator("[data-desktop-task-queue]")).toContainText(/taskId=desktopTask-/);
+    await expect(page.getByText(/chat\.answer|准备调用 AI 网关/)).toHaveCount(0);
+  });
+
+  test("stopping one desktop assistant task does not stop another task", async () => {
+    await resetDesktopAssistantSession(page);
+    await gotoRoute(page, "home");
+    await page.locator("#desktopAssistantEnable").click();
+    await submitHomeCommand(page, runId + " 单停 打开 Chrome");
+    await submitHomeCommand(page, runId + " 单停 打开 Safari");
+    const chromeTask = page.locator("[data-desktop-task-id]").filter({ hasText:runId }).filter({ hasText:"单停" }).filter({ hasText:"Google Chrome" }).first();
+    const safariTask = page.locator("[data-desktop-task-id]").filter({ hasText:runId }).filter({ hasText:"单停" }).filter({ hasText:"Safari" }).first();
+    await expect(chromeTask).toBeVisible();
+    await expect(safariTask).toBeVisible();
+    await chromeTask.getByRole("button", { name:"停止此任务" }).click();
+    await expect(chromeTask).toContainText("stopped");
+    await expect(safariTask).not.toContainText(/stopped/);
+    await expectHistory(page, runId, /desktopAssistant\.taskStopped|taskStopped|stopped/);
+  });
+
+  test("global stop stops all desktop assistant tasks and disables session", async () => {
+    await resetDesktopAssistantSession(page);
+    await gotoRoute(page, "home");
+    await page.locator("#desktopAssistantEnable").click();
+    await submitHomeCommand(page, runId + " 全停 打开 Chrome");
+    await submitHomeCommand(page, runId + " 全停 打开 Safari");
+    await page.locator("#desktopQueueStop").click();
+    await expect(page.getByText("桌面助手：关闭").first()).toBeVisible();
+    await expect(page.locator("[data-desktop-task-id]").filter({ hasText:runId }).filter({ hasText:"全停" }).filter({ hasText:"stopped" })).toHaveCount(2);
+    await expectHistory(page, runId, /desktopAssistant\.stoppedAll|stoppedAll|停止全部/);
+  });
+
+  test("desktop assistant task queue is scrollable and keeps command input visible", async () => {
+    await resetDesktopAssistantSession(page);
+    await gotoRoute(page, "home");
+    await page.locator("#desktopAssistantEnable").click();
+    const commands = ["打开 Chrome", "打开 Safari", "打开 Finder", "打开 WPS", "打开 Notes"];
+    for (const command of commands) {
+      await submitHomeCommand(page, runId + " 滚动 " + command);
+    }
+    const queue = page.locator("[data-desktop-task-queue]");
+    await expect(queue).toBeVisible();
+    await expect(page.locator("[data-desktop-task-id]").filter({ hasText:runId }).filter({ hasText:"滚动" })).toHaveCount(5);
+    await expect.poll(async () => queue.evaluate((node) => window.getComputedStyle(node).overflowY)).toBe("auto");
+    await expect(page.locator("#commandInput")).toBeVisible();
+  });
+
+  test("high risk desktop assistant task remains blocked and can be stopped individually", async () => {
+    await resetDesktopAssistantSession(page);
+    await gotoRoute(page, "home");
+    await page.locator("#desktopAssistantEnable").click();
+    await submitHomeCommand(page, runId + " 高危 删除文件并发送邮件");
+    const task = page.locator("[data-desktop-task-id]").filter({ hasText:runId }).first();
+    await expect(task).toContainText(/blocked|高风险/);
+    await task.getByRole("button", { name:"停止此任务" }).click();
+    await expect(task).toContainText("stopped");
+    await expect(page.locator("#desktopQueueRealOpen")).toHaveCount(0);
+  });
+
   test("session enabled queues and simulates low risk desktop steps without real control", async () => {
+    await resetDesktopAssistantSession(page);
     await gotoRoute(page, "home");
     await page.locator("#desktopAssistantEnable").click();
     await expect(page.getByText("桌面助手：本次开启").first()).toBeVisible();

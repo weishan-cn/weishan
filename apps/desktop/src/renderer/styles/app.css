@@ -973,6 +973,10 @@
   border-radius:8px;
   border:1px solid #e5e7eb;
 }
+.desktop-task-queue{
+  max-height:340px;
+  overflow-y:auto;
+}
 .desktop-execution-head{
   display:flex;
   justify-content:space-between;
@@ -994,6 +998,34 @@
   list-style:none;
   display:grid;
   gap:8px;
+}
+.desktop-task-list{
+  margin-top:10px;
+  display:grid;
+  gap:10px;
+}
+.desktop-task-row{
+  padding:10px;
+  border:1px solid #e5e7eb;
+  border-radius:8px;
+}
+.desktop-task-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+.desktop-task-head b,
+.desktop-task-head span{
+  display:block;
+}
+.desktop-task-head span{
+  margin-top:3px;
+  font-size:12px;
+  color:#64748b;
+}
+.desktop-task-steps{
+  margin-top:8px;
 }
 .desktop-queue-step{
   padding:8px 10px;

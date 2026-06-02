@@ -2,6 +2,7 @@
   const DESKTOP_ASSISTANT_STORAGE_KEY = "weishan:desktopAssistant:v1";
   const DESKTOP_ASSISTANT_SESSION_KEY = "weishan:desktopAssistant:session:v1";
   const DESKTOP_ASSISTANT_QUEUE_KEY = "weishan:desktopAssistant:executionQueue:v1";
+  const DESKTOP_ASSISTANT_TASKS_KEY = "weishan:desktopAssistant:tasks:v1";
   const REAL_OPEN_APP_SETTING_KEY = "weishan:desktopAssistant:realOpenApp:v1";
   const SCHEMA_VERSION = "weishan.desktopAssistant.v1";
 
@@ -76,6 +77,10 @@
 
   function nowIso(){
     return new Date().toISOString();
+  }
+
+  function createDesktopTaskId(){
+    return "desktopTask-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
   }
 
   function sanitizeDesktopAssistantText(value){
@@ -335,6 +340,8 @@
     if (/realOpenAppFailed|APP_OPEN_FAILED|failed/.test(status)) return "failed";
     if (/APP_NOT_ALLOWED|blocked|executionBlocked/.test(status)) return "blocked";
     if (/stopped/.test(status)) return "stopped";
+    if (/cancelled/.test(status)) return "stopped";
+    if (/planned|waitingApproval|queued|simulating/.test(status)) return status;
     if (/simulated|executionSimulated/.test(status)) return "simulated";
     return data && data.realExecution === true ? "realOpened" : "simulated";
   }
@@ -477,6 +484,165 @@
     });
   }
 
+  function taskStatusFromSteps(steps, fallback){
+    const list = Array.isArray(steps) ? steps : [];
+    if (list.length && list.every((step) => step && step.status === "stopped")) return "stopped";
+    if (list.length && list.every((step) => step && step.status === "blocked")) return "blocked";
+    if (list.some((step) => step && step.status === "failed")) return "failed";
+    if (list.some((step) => step && step.status === "realExecuted")) return "realOpened";
+    if (list.length && list.every((step) => step && (step.status === "simulated" || step.status === "blocked"))) return "simulated";
+    return fallback || "planned";
+  }
+
+  function normalizeDesktopAssistantTask(task){
+    const now = nowIso();
+    const data = task || {};
+    const steps = (Array.isArray(data.steps) ? data.steps : []).map((item, index) => markStepPolicy(Object.assign({}, item || {}, {
+      stepId:item && item.stepId || "step-" + (index + 1),
+      title:summarize(item && item.title || "桌面助手步骤", 80),
+      description:summarize(item && item.description || "", 180),
+      updatedAt:item && item.updatedAt || now
+    })));
+    const riskLevel = data.riskLevel || highestRisk(steps);
+    const summary = queueSummary({ steps });
+    const status = data.status === "stopped" || data.status === "cancelled" ? data.status :
+      taskStatusFromSteps(steps, data.status || (riskLevel === "high" ? "blocked" : "planned"));
+    return Object.assign({}, data, summary, {
+      schemaVersion:"weishan.desktopAssistant.task.v1",
+      taskId:data.taskId || createDesktopTaskId(),
+      planId:data.planId || "",
+      title:summarize(data.title || "桌面助手任务", 80),
+      inputSummary:summarize(data.inputSummary || data.text || "", 240),
+      riskLevel,
+      approvalState:data.approvalState || (riskLevel === "high" ? "blocked" : riskLevel === "medium" ? "needsApproval" : "allowed"),
+      status,
+      steps,
+      realExecution:data.realExecution === true && status === "realOpened",
+      resultStatus:data.resultStatus || resultStatusFromPayload(Object.assign({}, data, { status })),
+      outputSummary:summarize(data.outputSummary || "", 240),
+      safetySummary:summarize(data.safetySummary || "未点击、未输入、未读屏、未截图", 120),
+      sourceCommandId:data.sourceCommandId || "",
+      createdAt:data.createdAt || now,
+      updatedAt:data.updatedAt || now
+    });
+  }
+
+  function createDesktopAssistantTask(plan){
+    const data = plan || {};
+    const task = normalizeDesktopAssistantTask({
+      taskId:data.taskId || "",
+      planId:data.planId || "",
+      title:data.title || "桌面助手任务",
+      inputSummary:data.inputSummary || "",
+      riskLevel:data.riskLevel || highestRisk(data.steps || []),
+      approvalState:data.approvalState || "",
+      status:data.status || ((data.riskLevel || highestRisk(data.steps || [])) === "high" ? "blocked" : "planned"),
+      steps:data.steps || [],
+      realExecution:false,
+      resultStatus:data.resultStatus || "",
+      outputSummary:data.outputSummary || "桌面助手任务已创建，等待用户确认。",
+      sourceCommandId:data.sourceCommandId || "",
+      createdAt:data.createdAt || nowIso()
+    });
+    return task;
+  }
+
+  function getDesktopAssistantTasks(){
+    const raw = readRawJson(safeSessionStorage(), DESKTOP_ASSISTANT_TASKS_KEY, []);
+    return (Array.isArray(raw) ? raw : []).map(normalizeDesktopAssistantTask)
+      .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+  }
+
+  function saveDesktopAssistantTasks(tasks){
+    const list = (Array.isArray(tasks) ? tasks : []).map(normalizeDesktopAssistantTask)
+      .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+    return writeJson(safeSessionStorage(), DESKTOP_ASSISTANT_TASKS_KEY, list);
+  }
+
+  function addDesktopAssistantTask(task){
+    const next = normalizeDesktopAssistantTask(task || {});
+    const tasks = getDesktopAssistantTasks().filter((item) => item.taskId !== next.taskId && (!next.sourceCommandId || item.sourceCommandId !== next.sourceCommandId));
+    tasks.unshift(next);
+    saveDesktopAssistantTasks(tasks);
+    return next;
+  }
+
+  function updateDesktopAssistantTask(taskId, patch){
+    const id = String(taskId || "");
+    let updated = null;
+    const tasks = getDesktopAssistantTasks().map((task) => {
+      if (task.taskId !== id) return task;
+      updated = normalizeDesktopAssistantTask(Object.assign({}, task, patch || {}, { taskId:id, updatedAt:nowIso() }));
+      return updated;
+    });
+    saveDesktopAssistantTasks(tasks);
+    return updated;
+  }
+
+  function stopDesktopAssistantTask(taskId){
+    const current = getDesktopAssistantTasks().find((task) => task.taskId === String(taskId || ""));
+    if (!current) return null;
+    const steps = (current.steps || []).map((step) => Object.assign({}, step, {
+      status:"stopped",
+      realExecution:false,
+      resultStatus:"stopped",
+      outputSummary:step.outputSummary || "该任务已停止。",
+      updatedAt:nowIso()
+    }));
+    return updateDesktopAssistantTask(current.taskId, {
+      status:"stopped",
+      resultStatus:"stopped",
+      outputSummary:"已停止此桌面助手任务，不影响其他任务。",
+      realExecution:false,
+      steps
+    });
+  }
+
+  function stopAllDesktopAssistantTasks(){
+    stopDesktopAssistantSession();
+    const stopped = getDesktopAssistantTasks().map((task) => {
+      if (task.status === "stopped" || task.status === "cancelled") return task;
+      return normalizeDesktopAssistantTask(Object.assign({}, task, {
+        status:"stopped",
+        resultStatus:"stopped",
+        outputSummary:"全局停止接管，任务已停止。",
+        realExecution:false,
+        updatedAt:nowIso(),
+        steps:(task.steps || []).map((step) => Object.assign({}, step, {
+          status:"stopped",
+          realExecution:false,
+          resultStatus:"stopped",
+          updatedAt:nowIso()
+        }))
+      }));
+    });
+    return saveDesktopAssistantTasks(stopped);
+  }
+
+  function getActiveDesktopAssistantTasks(){
+    return getDesktopAssistantTasks().filter((task) => !/stopped|cancelled/.test(String(task.status || "")));
+  }
+
+  function createTaskStopHistoryPayload(task){
+    const data = normalizeDesktopAssistantTask(task || {});
+    return {
+      schemaVersion:"weishan.task.v1",
+      module:"desktopAssistant",
+      action:"taskStopped",
+      taskId:data.taskId,
+      riskLevel:data.riskLevel,
+      status:"stopped",
+      resultStatus:"stopped",
+      stepCount:Number(data.stepCount || 0),
+      inputSummary:summarize(data.inputSummary || "", 240),
+      outputSummary:summarize(data.outputSummary || "已停止此桌面助手任务。", 240),
+      realExecution:false,
+      safetySummary:summarize(data.safetySummary || "未点击、未输入、未读屏、未截图", 120),
+      createdAt:data.createdAt || nowIso(),
+      updatedAt:data.updatedAt || nowIso()
+    };
+  }
+
   function createDesktopExecutionQueue(plan){
     const data = plan || {};
     const queue = normalizeQueue({
@@ -580,7 +746,9 @@
       schemaVersion:"weishan.task.v1",
       module:"desktopAssistant",
       action:String(action || "").replace(/^desktopAssistant\./, "") || "event",
+      taskId:summarize(data.taskId || "", 100),
       riskLevel,
+      status:summarize(data.status || "", 40),
       stepCount:Number(data.stepCount || steps.length || 0),
       simulatedStepCount:Number(data.simulatedStepCount || 0),
       blockedStepCount:Number(data.blockedStepCount || 0),
@@ -625,6 +793,7 @@
     DESKTOP_ASSISTANT_STORAGE_KEY,
     DESKTOP_ASSISTANT_SESSION_KEY,
     DESKTOP_ASSISTANT_QUEUE_KEY,
+    DESKTOP_ASSISTANT_TASKS_KEY,
     REAL_OPEN_APP_SETTING_KEY,
     SCHEMA_VERSION,
     getDesktopAssistantSettings,
@@ -649,6 +818,15 @@
     simulateDesktopExecutionQueue,
     blockHighRiskStep,
     stopDesktopAssistantExecution,
+    createDesktopAssistantTask,
+    getDesktopAssistantTasks,
+    saveDesktopAssistantTasks,
+    addDesktopAssistantTask,
+    updateDesktopAssistantTask,
+    stopDesktopAssistantTask,
+    stopAllDesktopAssistantTasks,
+    getActiveDesktopAssistantTasks,
+    createTaskStopHistoryPayload,
     createDesktopPermissionGuide,
     classifyDesktopOperation,
     createDesktopOperationPlan,
