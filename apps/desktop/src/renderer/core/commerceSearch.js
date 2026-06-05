@@ -32,6 +32,22 @@
     return window.WeishanCommerceProviders || null;
   }
 
+  function adapterApi(){
+    return window.WeishanCommerceProviderAdapter || null;
+  }
+
+  function defaultAdapter(category){
+    const api = adapterApi();
+    if (api && api.getDefaultCommerceProviderAdapter) return api.getDefaultCommerceProviderAdapter(category);
+    const next = resultCategory(category);
+    return {
+      providerId:next + "-adapter-disabled",
+      mode:"read_only",
+      configured:false,
+      health:"not_configured"
+    };
+  }
+
   function defaultSettings(){
     return {
       enabled:false,
@@ -82,6 +98,7 @@
     const next = resultCategory(category);
     const configured = hasCommerceSearchProvider(settings);
     const isProduct = next === "product";
+    const adapter = defaultAdapter(next);
     return {
       category:next,
       categoryLabel:isProduct ? "商品" : next === "flight" ? "机票" : next,
@@ -89,7 +106,7 @@
       hasProvider:configured,
       providerHealth:[{
         id:next + (configured ? "-manual-provider" : "-provider-disabled"),
-        name:configured ? String(settings && settings.providerName || "Manual Commerce Provider") : "暂未配置真实搜索源",
+        name:configured ? String(settings && settings.providerName || "Manual Commerce Provider") : "暂未配置真实搜索适配器",
         category:next,
         enabled:configured,
         configured,
@@ -99,11 +116,21 @@
         supportsCheckoutUrl:configured && isProduct,
         supportsPrice:configured,
         safetyLevel:configured ? "test_or_manual_provider" : "disabled",
-        reasonWhenDisabled:configured ? "" : "暂未配置真实搜索源"
+        reasonWhenDisabled:configured ? "" : "暂未配置真实搜索适配器",
+        adapterId:adapter.providerId,
+        adapterMode:"read_only",
+        adapterConfigured:configured,
+        adapterHealth:configured ? "ready" : "not_configured"
       }],
+      adapterHealth:{
+        adapterId:adapter.providerId,
+        adapterMode:"read_only",
+        adapterConfigured:configured,
+        adapterHealth:configured ? "ready" : "not_configured"
+      },
       enabled:configured,
       configured,
-      reasonWhenDisabled:configured ? "" : "暂未配置真实搜索源",
+      reasonWhenDisabled:configured ? "" : "暂未配置真实搜索适配器",
       canShowPrice:configured,
       canShowBookingButton:configured && !isProduct,
       canShowCheckoutButton:configured && isProduct
@@ -539,7 +566,7 @@
       return {
         ok:false,
         code:"COMMERCE_NO_PROVIDER",
-        message:providerHealth.reasonWhenDisabled || "搜索源未配置，无法返回真实价格。",
+        message:providerHealth.reasonWhenDisabled || "搜索适配器未配置，无法返回真实价格。",
         request,
         searchStatus:"no_provider",
         providerHealth:providerHealth.providerHealth,
@@ -585,7 +612,7 @@
     return {
       ok:false,
       code:"COMMERCE_NO_PROVIDER",
-      message:providerHealth.reasonWhenDisabled || "搜索源未配置，无法返回真实价格。",
+      message:providerHealth.reasonWhenDisabled || "搜索适配器未配置，无法返回真实价格。",
       request,
       searchStatus:"no_provider",
       providerHealth:providerHealth.providerHealth,

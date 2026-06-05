@@ -16,9 +16,17 @@
   }
 
   function ensureSearchLoaded(host){
+    if (!window.WeishanCommerceProviderAdapter && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderAdapter"]')) {
+      const adapter = document.createElement("script");
+      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.21";
+      adapter.dataset.weishanDynamic = "WeishanCommerceProviderAdapter";
+      adapter.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(adapter);
+      return;
+    }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
-      providers.src = "./renderer/core/commerceProviders.js?v=2.0.20";
+      providers.src = "./renderer/core/commerceProviders.js?v=2.0.21";
       providers.dataset.weishanDynamic = "WeishanCommerceProviders";
       providers.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(providers);
@@ -91,8 +99,8 @@
     if (status === "missingFields") return "搜索条件缺失";
     if (status === "failed") return "搜索失败";
     if (status === "blocked") return "已阻断";
-    if (status === "no_provider") return "暂未配置真实搜索源，无法返回实时价格";
-    return "搜索源未配置，无法返回真实价格";
+    if (status === "no_provider") return "暂未配置真实搜索适配器，无法返回实时价格";
+    return "搜索适配器未配置，无法返回真实价格";
   }
 
   function commerceDisplayTitle(task){
@@ -214,25 +222,33 @@
     const flightDate = normalized.dateText || normalized.timing || "待补充";
     const health = searchApi() && searchApi().getCommerceProviderHealth ? searchApi().getCommerceProviderHealth(task && task.category, settings) : {};
     const providerRow = Array.isArray(health.providerHealth) && health.providerHealth[0] || {};
+    const adapterInfo = health.adapterHealth || {};
     const reasonWhenDisabled = providerRow.reasonWhenDisabled || "";
     const providerLabel = isModelPricing ? "OpenRouter" : hasProvider ? settings.providerName || "commerceProvider" : "未配置";
     const failedMessage = task && task.searchStatus === "failed" ? task.searchErrorMessage || (isModelPricing ? "OpenRouter 搜索源不可用，无法返回真实价格。" : "搜索失败，无法返回真实价格。") : "";
-    const buttonLabel = isModelPricing ? "搜索 OpenRouter 模型价格" : missingFields.length ? "搜索真实价格" : hasProvider ? "搜索真实价格" : "搜索源未配置";
+    const buttonLabel = isModelPricing ? "搜索 OpenRouter 模型价格" : missingFields.length ? "搜索真实价格" : hasProvider ? "搜索真实价格" : "搜索适配器未配置";
     return `<div class="commerce-search-panel">
-      <p><b>${hasProvider ? "已配置：" : "未配置："}</b>${isModelPricing ? (hasProvider ? "OpenRouter provider 可用于模型价格搜索。" : "OpenRouter provider 不可用。") : hasProvider ? "可以搜索真实候选方案。" : isFlight ? "暂未配置真实机票搜索源，无法返回实时价格。" : isProduct ? "暂未配置真实商品搜索源，无法返回实时价格。" : "搜索源未配置，无法返回真实价格。"}</p>
+      <p><b>${hasProvider ? "已配置：" : "未配置："}</b>${isModelPricing ? (hasProvider ? "OpenRouter provider 可用于模型价格搜索。" : "OpenRouter provider 不可用。") : hasProvider ? "可以搜索真实候选方案。" : isFlight ? "暂未配置真实机票搜索适配器，无法返回实时价格。" : isProduct ? "暂未配置真实商品搜索适配器，无法返回实时价格。" : "搜索适配器未配置，无法返回真实价格。"}</p>
       ${isFlight && !hasProvider ? `<div class="commerce-warning commerce-flight-provider-missing">
         <b>已识别为机票搜索计划。</b>
         <span>出发地：${esc(flightOrigin)} · 目的地：${esc(flightDestination)} · 日期：${esc(flightDate)}</span>
-        <span>暂未配置真实机票搜索源，当前无法返回实时价格。</span>
+        <span>暂未配置真实机票搜索适配器，当前无法返回实时价格。</span>
+        <span>当前模式：只读搜索准备中。</span>
         <span>未下单、未付款、未提交订单、未保存证件。</span>
       </div>` : ""}
       ${isProduct && !hasProvider ? `<div class="commerce-warning commerce-product-provider-missing">
         <b>已识别为商品搜索计划。</b>
-        <span>暂未配置真实商品搜索源，当前无法返回实时价格。</span>
+        <span>暂未配置真实商品搜索适配器，当前无法返回实时价格。</span>
+        <span>当前模式：只读搜索准备中。</span>
         <span>未下单、未付款、未提交订单、未保存银行卡或证件。</span>
       </div>` : ""}
       ${!isModelPricing && !hasProvider ? `<dl class="commerce-facts commerce-provider-health">
         <div><dt>searchStatus</dt><dd>no_provider</dd></div>
+        <div><dt>搜索适配器</dt><dd>暂未配置</dd></div>
+        <div><dt>当前模式</dt><dd>只读搜索准备中</dd></div>
+        <div><dt>adapterMode</dt><dd>${esc(adapterInfo.adapterMode || "read_only")}</dd></div>
+        <div><dt>adapterConfigured</dt><dd>false</dd></div>
+        <div><dt>adapterHealth</dt><dd>${esc(adapterInfo.adapterHealth || "not_configured")}</dd></div>
         <div><dt>canShowPrice</dt><dd>false</dd></div>
         <div><dt>canShowBookingButton</dt><dd>false</dd></div>
         <div><dt>canShowCheckoutButton</dt><dd>false</dd></div>
@@ -242,7 +258,7 @@
       ${isPrivateJet ? `<p class="commerce-warning">公务机属于高价值定制服务，价格通常需要询价确认。当前仅生成搜索和询价计划，不自动提交询价、不付款、不签约。</p>` : ""}
       ${failedMessage ? `<p class="commerce-warning">${esc(failedMessage)}</p>` : ""}
       ${missingFields.length ? `<p class="commerce-warning">请补充${esc(missingFields.join("、"))}，否则不搜索价格。</p>` : ""}
-      <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${esc(disabled && !missingFields.length && !isModelPricing ? "搜索源未配置" : buttonLabel)}</button>
+      <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${esc(disabled && !missingFields.length && !isModelPricing ? "搜索适配器未配置" : buttonLabel)}</button>
       <p class="commerce-muted">价格只来自已配置 provider 返回数据；未配置时不会显示假价格。</p>
     </div>`;
   }
@@ -263,7 +279,7 @@
     const candidates = (Array.isArray(task && task.candidates) ? task.candidates : []).slice(0, 3);
     if (!candidates.length) {
       const status = String(task && task.searchStatus || "");
-      const noResultText = status === "noResults" || status === "no_results" ? "provider 未返回可展示结果。" : "搜索源未配置或尚未执行真实搜索。";
+      const noResultText = status === "noResults" || status === "no_results" ? "provider 未返回可展示结果。" : "搜索适配器未配置或尚未执行真实搜索。";
       return `<p class="commerce-muted">${esc(noResultText)}不显示任何价格，不显示购买、预订或付款按钮。</p>`;
     }
     const isModelPricing = task && task.category === "aiModelPricing";

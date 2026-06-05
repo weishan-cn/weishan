@@ -34,10 +34,18 @@ async function setMockSettingsAi(page) {
 
 async function installCommerceSearchMock(page, candidates) {
   await page.evaluate(async (items) => {
+    if (!window.WeishanCommerceProviderAdapter) {
+      await new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.21";
+        script.onload = resolve;
+        document.head.appendChild(script);
+      });
+    }
     if (!window.WeishanCommerceProviders) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviders.js?v=2.0.20";
+        script.src = "./renderer/core/commerceProviders.js?v=2.0.21";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -67,10 +75,18 @@ async function installCommerceSearchMock(page, candidates) {
 
 async function installOpenRouterModelsMock(page, payload, options = {}) {
   await page.evaluate(async ({ data, fail }) => {
+    if (!window.WeishanCommerceProviderAdapter) {
+      await new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.21";
+        script.onload = resolve;
+        document.head.appendChild(script);
+      });
+    }
     if (!window.WeishanCommerceProviders) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviders.js?v=2.0.20";
+        script.src = "./renderer/core/commerceProviders.js?v=2.0.21";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -140,10 +156,18 @@ test.describe.serial("commerce agent workbench", () => {
   test("provider registry defaults to no-provider health for core categories", async () => {
     await gotoRoute(page, "commerce");
     const health = await page.evaluate(async () => {
+      if (!window.WeishanCommerceProviderAdapter) {
+        await new Promise((resolve) => {
+          const script = document.createElement("script");
+          script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.21";
+          script.onload = resolve;
+          document.head.appendChild(script);
+        });
+      }
       if (!window.WeishanCommerceProviders) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviders.js?v=2.0.20";
+          script.src = "./renderer/core/commerceProviders.js?v=2.0.21";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -158,13 +182,45 @@ test.describe.serial("commerce agent workbench", () => {
       expect(provider.enabled).toBe(false);
       expect(provider.configured).toBe(false);
       expect(provider.sourceType).toBe("manual_disabled");
+      expect(provider.adapterId).toBeTruthy();
+      expect(provider.adapterMode).toBe("read_only");
+      expect(provider.adapterConfigured).toBe(false);
+      expect(provider.adapterHealth).toBe("not_configured");
     }
     for (const item of health.health) {
       expect(item.searchStatus).toBe("no_provider");
       expect(item.canShowPrice).toBe(false);
       expect(item.canShowBookingButton).toBe(false);
       expect(item.canShowCheckoutButton).toBe(false);
+      expect(item.adapterHealth.adapterMode).toBe("read_only");
+      expect(item.adapterHealth.adapterConfigured).toBe(false);
+      expect(item.adapterHealth.adapterHealth).toBe("not_configured");
     }
+  });
+
+  test("provider adapter contract is read only and cannot transact", async () => {
+    await gotoRoute(page, "commerce");
+    const adapter = await page.evaluate(async () => {
+      if (!window.WeishanCommerceProviderAdapter) {
+        await new Promise((resolve) => {
+          const script = document.createElement("script");
+          script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.21";
+          script.onload = resolve;
+          document.head.appendChild(script);
+        });
+      }
+      return window.WeishanCommerceProviderAdapter.getDefaultCommerceProviderAdapter("flight");
+    });
+    expect(adapter.mode).toBe("read_only");
+    expect(adapter.configured).toBe(false);
+    expect(adapter.health).toBe("not_configured");
+    expect(adapter.capabilities.canSearch).toBe(false);
+    expect(adapter.capabilities.canReturnPrice).toBe(false);
+    expect(adapter.capabilities.canReturnBookingUrl).toBe(false);
+    expect(adapter.capabilities.canReturnCheckoutUrl).toBe(false);
+    expect(adapter.capabilities.canCreateOrder).toBe(false);
+    expect(adapter.capabilities.canPay).toBe(false);
+    expect(adapter.capabilities.canSaveIdentity).toBe(false);
   });
 
   test("home commerce summary stays compact and links to workbench detail", async () => {
@@ -283,7 +339,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("目的地：北京");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("日期：明天");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂未配置真实机票搜索源");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂未配置真实机票搜索适配器");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前无法返回实时价格");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("未下单、未付款、未提交订单、未保存证件");
     await expect(page.locator("#commerceViewPlanBtn")).toBeVisible();
@@ -295,7 +351,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("北京");
     await expect(page.locator(".commerce-detail")).toContainText("明天");
     await expect(page.locator(".commerce-detail")).toContainText("已识别为机票搜索计划");
-    await expect(page.locator(".commerce-detail")).toContainText("暂未配置真实机票搜索源");
+    await expect(page.locator(".commerce-detail")).toContainText("暂未配置真实机票搜索适配器");
+    await expect(page.locator(".commerce-detail")).toContainText("当前模式");
+    await expect(page.locator(".commerce-detail")).toContainText("只读搜索准备中");
     await expect(page.locator(".commerce-detail")).toContainText("当前无法返回实时价格");
     await expect(page.locator(".commerce-detail")).toContainText("未下单、未付款、未提交订单、未保存证件");
     await expect(page.locator(".commerce-detail")).not.toContainText(/CNY\s*\d+/);
@@ -334,7 +392,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：商品");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品关键词：华为手机");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂未配置真实商品搜索源");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂未配置真实商品搜索适配器");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前无法返回实时价格");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("未下单、未付款、未提交订单、未保存银行卡或证件");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
@@ -351,7 +409,7 @@ test.describe.serial("commerce agent workbench", () => {
     await clearCommerceSearchMock(page);
     await submitHomeCommand(page, runId + " 帮我预定明天成都到北京机票");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂未配置真实机票搜索源");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂未配置真实机票搜索适配器");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("未下单、未付款、未提交订单、未保存证件");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("CNY ");
     await expect(page.locator("[data-commerce-home-summary] .commerce-booking-link")).toHaveCount(0);
@@ -362,11 +420,15 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("false");
     await expect(page.locator(".commerce-detail")).toContainText("canShowBookingButton");
     await expect(page.locator(".commerce-detail")).toContainText("canShowCheckoutButton");
+    await expect(page.locator(".commerce-detail")).toContainText("adapterMode");
+    await expect(page.locator(".commerce-detail")).toContainText("read_only");
+    await expect(page.locator(".commerce-detail")).toContainText("adapterHealth");
+    await expect(page.locator(".commerce-detail")).toContainText("not_configured");
     await expect(page.locator(".commerce-detail .commerce-booking-link")).toHaveCount(0);
 
     await submitHomeCommand(page, runId + " 买华为手机");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂未配置真实商品搜索源");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂未配置真实商品搜索适配器");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("未下单、未付款、未提交订单、未保存银行卡或证件");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("CNY ");
     await expect(page.locator("[data-commerce-home-summary] .commerce-booking-link")).toHaveCount(0);
@@ -558,7 +620,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("总价");
     await expect(page.locator(".commerce-detail")).toContainText("舱型");
     await expect(page.locator(".commerce-detail")).toContainText("邮轮价格受航线、舱型、日期和人数影响较大");
-    await expect(page.locator(".commerce-detail")).toContainText("搜索源未配置，无法返回真实价格");
+    await expect(page.locator(".commerce-detail")).toContainText("搜索适配器未配置，无法返回真实价格");
     await expect(page.locator(".commerce-detail")).not.toContainText("¥999");
     await expect(page.locator(".commerce-detail")).not.toContainText("$123");
   });
