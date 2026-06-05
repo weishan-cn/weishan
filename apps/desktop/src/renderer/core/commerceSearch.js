@@ -28,6 +28,10 @@
     return raw || "product";
   }
 
+  function providersApi(){
+    return window.WeishanCommerceProviders || null;
+  }
+
   function defaultSettings(){
     return {
       enabled:false,
@@ -72,6 +76,49 @@
     }
     if (next.providerMode === "openRouterModels") return true;
     return false;
+  }
+
+  function fallbackProviderHealth(category, settings){
+    const next = resultCategory(category);
+    const configured = hasCommerceSearchProvider(settings);
+    const isProduct = next === "product";
+    return {
+      category:next,
+      categoryLabel:isProduct ? "商品" : next === "flight" ? "机票" : next,
+      searchStatus:configured ? "ready" : "no_provider",
+      hasProvider:configured,
+      providerHealth:[{
+        id:next + (configured ? "-manual-provider" : "-provider-disabled"),
+        name:configured ? String(settings && settings.providerName || "Manual Commerce Provider") : "暂未配置真实搜索源",
+        category:next,
+        enabled:configured,
+        configured,
+        environment:"renderer",
+        sourceType:configured ? "manual_disabled" : "manual_disabled",
+        supportsBookingUrl:configured && !isProduct,
+        supportsCheckoutUrl:configured && isProduct,
+        supportsPrice:configured,
+        safetyLevel:configured ? "test_or_manual_provider" : "disabled",
+        reasonWhenDisabled:configured ? "" : "暂未配置真实搜索源"
+      }],
+      enabled:configured,
+      configured,
+      reasonWhenDisabled:configured ? "" : "暂未配置真实搜索源",
+      canShowPrice:configured,
+      canShowBookingButton:configured && !isProduct,
+      canShowCheckoutButton:configured && isProduct
+    };
+  }
+
+  function getCommerceProviderRegistry(){
+    const api = providersApi();
+    return api && api.getCommerceProviderRegistry ? api.getCommerceProviderRegistry() : ["flight", "product", "hotel", "ticket", "service"].map((category) => fallbackProviderHealth(category, defaultSettings()).providerHealth[0]);
+  }
+
+  function getCommerceProviderHealth(category, settings){
+    const api = providersApi();
+    if (api && api.getCommerceProviderHealth) return api.getCommerceProviderHealth(category, settings || getCommerceSearchSettings());
+    return fallbackProviderHealth(category, settings || getCommerceSearchSettings());
   }
 
   function isAiModelPricingTask(taskOrRequest){
@@ -486,13 +533,19 @@
   async function searchCommerceCandidates(task){
     const settings = getCommerceSearchSettings();
     const request = createCommerceSearchRequest(task);
+    const providerHealth = getCommerceProviderHealth(request.category, settings);
     if (isAiModelPricingTask(request)) return searchOpenRouterModels(request);
     if (!hasCommerceSearchProvider(settings)) {
       return {
         ok:false,
-        code:"COMMERCE_PROVIDER_NOT_CONFIGURED",
-        message:"搜索源未配置，无法返回真实价格。",
+        code:"COMMERCE_NO_PROVIDER",
+        message:providerHealth.reasonWhenDisabled || "搜索源未配置，无法返回真实价格。",
         request,
+        searchStatus:"no_provider",
+        providerHealth:providerHealth.providerHealth,
+        canShowPrice:false,
+        canShowBookingButton:false,
+        canShowCheckoutButton:false,
         candidates:[]
       };
     }
@@ -502,6 +555,10 @@
         code:"COMMERCE_MISSING_FIELDS",
         message:"搜索条件缺失：" + request.missingFields.join("、"),
         request,
+        providerHealth:providerHealth.providerHealth,
+        canShowPrice:false,
+        canShowBookingButton:false,
+        canShowCheckoutButton:false,
         candidates:[]
       };
     }
@@ -515,6 +572,11 @@
         message:candidates.length > 0 ? "" : "搜索源未返回可展示结果。",
         providerName:settings.providerName || normalized.providerName || "manualProvider",
         request,
+        searchStatus:candidates.length > 0 ? "completed" : "no_results",
+        providerHealth:providerHealth.providerHealth,
+        canShowPrice:candidates.length > 0,
+        canShowBookingButton:candidates.length > 0 && providerHealth.canShowBookingButton === true,
+        canShowCheckoutButton:candidates.length > 0 && providerHealth.canShowCheckoutButton === true,
         candidates,
         recommendation:createRecommendationFromCandidates(candidates),
         realExecution:false
@@ -522,9 +584,14 @@
     }
     return {
       ok:false,
-      code:"COMMERCE_PROVIDER_NOT_CONFIGURED",
-      message:"搜索源未配置，无法返回真实价格。",
+      code:"COMMERCE_NO_PROVIDER",
+      message:providerHealth.reasonWhenDisabled || "搜索源未配置，无法返回真实价格。",
       request,
+      searchStatus:"no_provider",
+      providerHealth:providerHealth.providerHealth,
+      canShowPrice:false,
+      canShowBookingButton:false,
+      canShowCheckoutButton:false,
       candidates:[]
     };
   }
@@ -534,6 +601,8 @@
     getCommerceSearchSettings,
     saveCommerceSearchSettings,
     hasCommerceSearchProvider,
+    getCommerceProviderRegistry,
+    getCommerceProviderHealth,
     createCommerceSearchRequest,
     normalizeCommerceSearchResults,
     sortCommerceCandidates,

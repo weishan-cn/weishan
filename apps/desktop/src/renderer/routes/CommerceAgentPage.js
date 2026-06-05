@@ -16,6 +16,14 @@
   }
 
   function ensureSearchLoaded(host){
+    if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
+      const providers = document.createElement("script");
+      providers.src = "./renderer/core/commerceProviders.js?v=2.0.20";
+      providers.dataset.weishanDynamic = "WeishanCommerceProviders";
+      providers.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(providers);
+      return;
+    }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
     script.src = "./renderer/core/commerceSearch.js?v=2.0.15";
@@ -78,11 +86,12 @@
   function searchStatusLabel(task){
     const status = String(task && task.searchStatus || "");
     if (status === "completed") return "已返回真实候选方案";
-    if (status === "noResults") return "暂无可展示结果";
+    if (status === "noResults" || status === "no_results") return "暂无可展示结果";
     if (status === "ready") return "搜索源已配置";
     if (status === "missingFields") return "搜索条件缺失";
     if (status === "failed") return "搜索失败";
     if (status === "blocked") return "已阻断";
+    if (status === "no_provider") return "暂未配置真实搜索源，无法返回实时价格";
     return "搜索源未配置，无法返回真实价格";
   }
 
@@ -137,7 +146,8 @@
     const request = search && search.createCommerceSearchRequest ? search.createCommerceSearchRequest(task) : { missingFields:task.missingFields || [] };
     const settings = search && search.getCommerceSearchSettings ? search.getCommerceSearchSettings() : {};
     const isModelPricing = task.category === "aiModelPricing";
-    const hasProvider = isModelPricing || !!(search && search.hasCommerceSearchProvider && search.hasCommerceSearchProvider(settings));
+    const health = search && search.getCommerceProviderHealth ? search.getCommerceProviderHealth(task.category, settings) : null;
+    const hasProvider = isModelPricing || !!(health && health.hasProvider || search && search.hasCommerceSearchProvider && search.hasCommerceSearchProvider(settings));
     const category = detail.categoryLabel || task.categoryLabel || task.category || "全球采购";
     if (task.status === "blocked") {
       return `<div class="commerce-detail commerce-detail-compact" data-commerce-detail="${esc(task.taskId)}">
@@ -195,23 +205,38 @@
     const disabled = !hasProvider || missingFields.length > 0;
     const isModelPricing = task && task.category === "aiModelPricing";
     const isFlight = task && task.category === "flight";
+    const isProduct = task && task.category === "ecommerce";
     const isCruise = task && task.category === "cruise";
     const isPrivateJet = task && task.category === "privateJet";
     const normalized = task && task.normalizedFields || {};
     const flightOrigin = normalized.originText || "待补充";
     const flightDestination = normalized.destinationText || "待补充";
     const flightDate = normalized.dateText || normalized.timing || "待补充";
+    const health = searchApi() && searchApi().getCommerceProviderHealth ? searchApi().getCommerceProviderHealth(task && task.category, settings) : {};
+    const providerRow = Array.isArray(health.providerHealth) && health.providerHealth[0] || {};
+    const reasonWhenDisabled = providerRow.reasonWhenDisabled || "";
     const providerLabel = isModelPricing ? "OpenRouter" : hasProvider ? settings.providerName || "commerceProvider" : "未配置";
     const failedMessage = task && task.searchStatus === "failed" ? task.searchErrorMessage || (isModelPricing ? "OpenRouter 搜索源不可用，无法返回真实价格。" : "搜索失败，无法返回真实价格。") : "";
     const buttonLabel = isModelPricing ? "搜索 OpenRouter 模型价格" : missingFields.length ? "搜索真实价格" : hasProvider ? "搜索真实价格" : "搜索源未配置";
     return `<div class="commerce-search-panel">
-      <p><b>${hasProvider ? "已配置：" : "未配置："}</b>${isModelPricing ? (hasProvider ? "OpenRouter provider 可用于模型价格搜索。" : "OpenRouter provider 不可用。") : hasProvider ? "可以搜索真实候选方案。" : isFlight ? "搜索源未配置，无法返回真实机票价格。" : "搜索源未配置，无法返回真实价格。"}</p>
+      <p><b>${hasProvider ? "已配置：" : "未配置："}</b>${isModelPricing ? (hasProvider ? "OpenRouter provider 可用于模型价格搜索。" : "OpenRouter provider 不可用。") : hasProvider ? "可以搜索真实候选方案。" : isFlight ? "暂未配置真实机票搜索源，无法返回实时价格。" : isProduct ? "暂未配置真实商品搜索源，无法返回实时价格。" : "搜索源未配置，无法返回真实价格。"}</p>
       ${isFlight && !hasProvider ? `<div class="commerce-warning commerce-flight-provider-missing">
         <b>已识别为机票搜索计划。</b>
         <span>出发地：${esc(flightOrigin)} · 目的地：${esc(flightDestination)} · 日期：${esc(flightDate)}</span>
-        <span>未配置真实机票搜索 provider，当前不会返回实时机票价格。</span>
-        <span>不会提交订单、不会请求付款，也不会上传或保存身份证/护照。</span>
+        <span>暂未配置真实机票搜索源，当前无法返回实时价格。</span>
+        <span>未下单、未付款、未提交订单、未保存证件。</span>
       </div>` : ""}
+      ${isProduct && !hasProvider ? `<div class="commerce-warning commerce-product-provider-missing">
+        <b>已识别为商品搜索计划。</b>
+        <span>暂未配置真实商品搜索源，当前无法返回实时价格。</span>
+        <span>未下单、未付款、未提交订单、未保存银行卡或证件。</span>
+      </div>` : ""}
+      ${!isModelPricing && !hasProvider ? `<dl class="commerce-facts commerce-provider-health">
+        <div><dt>searchStatus</dt><dd>no_provider</dd></div>
+        <div><dt>canShowPrice</dt><dd>false</dd></div>
+        <div><dt>canShowBookingButton</dt><dd>false</dd></div>
+        <div><dt>canShowCheckoutButton</dt><dd>false</dd></div>
+      </dl>` : ""}
       <p class="commerce-muted">Provider：${esc(providerLabel)}</p>
       ${isCruise ? `<p class="commerce-warning">邮轮价格受航线、舱型、日期和人数影响较大。当前未接入真实搜索源时不显示价格。</p>` : ""}
       ${isPrivateJet ? `<p class="commerce-warning">公务机属于高价值定制服务，价格通常需要询价确认。当前仅生成搜索和询价计划，不自动提交询价、不付款、不签约。</p>` : ""}
@@ -238,7 +263,7 @@
     const candidates = (Array.isArray(task && task.candidates) ? task.candidates : []).slice(0, 3);
     if (!candidates.length) {
       const status = String(task && task.searchStatus || "");
-      const noResultText = status === "noResults" ? "provider 未返回可展示结果。" : "搜索源未配置或尚未执行真实搜索。";
+      const noResultText = status === "noResults" || status === "no_results" ? "provider 未返回可展示结果。" : "搜索源未配置或尚未执行真实搜索。";
       return `<p class="commerce-muted">${esc(noResultText)}不显示任何价格，不显示购买、预订或付款按钮。</p>`;
     }
     const isModelPricing = task && task.category === "aiModelPricing";
@@ -408,16 +433,20 @@
         }));
         const result = await search.searchCommerceCandidates(target);
         if (!result.ok) {
-          const status = result.code === "COMMERCE_MISSING_FIELDS" ? "missingFields" : result.code === "COMMERCE_PROVIDER_NOT_CONFIGURED" ? "providerMissing" : result.code === "COMMERCE_NO_RESULTS" ? "noResults" : "failed";
+          const status = result.code === "COMMERCE_MISSING_FIELDS" ? "missingFields" : result.code === "COMMERCE_NO_PROVIDER" || result.code === "COMMERCE_PROVIDER_NOT_CONFIGURED" ? "no_provider" : result.code === "COMMERCE_NO_RESULTS" ? "no_results" : "failed";
           const updated = api.updateCommerceTask(taskId, {
             searchStatus:status,
             missingFields:result.request && result.request.missingFields || target.missingFields || [],
             searchProviderName:result.providerName || (isModelPricing ? "OpenRouter" : ""),
+            providerHealth:result.providerHealth || target.providerHealth || [],
+            canShowPrice:result.canShowPrice === true,
+            canShowBookingButton:result.canShowBookingButton === true,
+            canShowCheckoutButton:result.canShowCheckoutButton === true,
             searchErrorMessage:result.message || "",
             searchResultSummary:{ candidateCount:0 },
             updatedAt:new Date().toISOString()
           });
-          recordSearch(isModelPricing ? "commerceAgent.openRouterSearchFailed" : status === "providerMissing" ? "commerceAgent.searchProviderMissing" : "commerceAgent.searchFailed", Object.assign({}, updated || target, {
+          recordSearch(isModelPricing ? "commerceAgent.openRouterSearchFailed" : status === "no_provider" ? "commerceAgent.searchProviderMissing" : "commerceAgent.searchFailed", Object.assign({}, updated || target, {
             providerName:result.providerName || (isModelPricing ? "OpenRouter" : ""),
             resultStatus:status,
             outputSummary:result.message || "搜索失败。"
@@ -432,6 +461,10 @@
           status:"recommended",
           searchStatus:"completed",
           searchProviderName:result.providerName || "",
+          providerHealth:result.providerHealth || target.providerHealth || [],
+          canShowPrice:result.canShowPrice === true,
+          canShowBookingButton:result.canShowBookingButton === true,
+          canShowCheckoutButton:result.canShowCheckoutButton === true,
           candidates:sorted,
           recommendation,
           searchResultSummary:{

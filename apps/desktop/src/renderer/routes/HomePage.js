@@ -373,9 +373,9 @@
       modelInput !== "" ? "输入 USD " + Number(modelInput).toFixed(6).replace(/0+$/, "").replace(/\.$/, "") + " / 1M tokens" : "",
       modelOutput !== "" ? "输出 USD " + Number(modelOutput).toFixed(6).replace(/0+$/, "").replace(/\.$/, "") + " / 1M tokens" : ""
     ].filter(Boolean).join(" · ") : "";
-    const providerMissing = stored.searchStatus === "providerMissing";
+    const providerMissing = stored.searchStatus === "no_provider" || stored.searchStatus === "providerMissing";
     const providerFailed = stored.searchStatus === "failed";
-    const noResults = stored.searchStatus === "noResults";
+    const noResults = stored.searchStatus === "noResults" || stored.searchStatus === "no_results";
     const missingFields = Array.isArray(stored.missingFields) ? stored.missingFields : [];
     const normalized = stored.normalizedFields || {};
     const routeCondition = normalized.originText && normalized.destinationText ? normalized.originText + " → " + normalized.destinationText : "";
@@ -385,8 +385,10 @@
     const isProductPlan = stored.category === "ecommerce";
     const commerceApi = window.WeishanCommerceAgent || null;
     const cardTitle = commerceApi && commerceApi.createCommerceDisplayTitle ? commerceApi.createCommerceDisplayTitle(stored, candidates.length > 0) : blocked ? "全球采购计划已阻断" : candidates.length ? type + "搜索已完成" : type + "搜索已生成";
-    const providerMissingText = isFlightPlan ? "未配置真实机票搜索 provider，当前不会返回实时机票价格" : "搜索源未配置，无法返回真实价格";
-    const flightSafetyText = "未搜索、未下单、未付款、未提交订单；未请求付款；未上传或保存身份证/护照";
+    const providerReason = Array.isArray(stored.providerHealth) && stored.providerHealth[0] && stored.providerHealth[0].reasonWhenDisabled || "";
+    const providerMissingText = isFlightPlan ? "暂未配置真实机票搜索源，当前无法返回实时价格" : isProductPlan ? "暂未配置真实商品搜索源，当前无法返回实时价格" : providerReason || "搜索源未配置，无法返回真实价格";
+    const flightSafetyText = "未下单、未付款、未提交订单、未保存证件";
+    const productSafetyText = "未下单、未付款、未提交订单、未保存银行卡或证件";
     const productQuery = normalized.productQuery || normalized.normalizedQuery || "";
     const genericResultSummary = candidates.length ? `已找到 ${candidates.length} 个真实 provider 结果${lowest ? " · 最低总价 " + esc(currency ? currency + " " + lowest : lowest) : ""}${recommendation.title ? " · 推荐 " + esc(recommendation.title) : ""}` : "";
     return `<div class="commerce-home-card ${blocked ? "is-blocked" : ""}" data-commerce-home-summary="true">
@@ -407,7 +409,7 @@
         ${!blocked && noResults ? `<p><b>搜索结果：</b>provider 未返回可展示结果，当前不显示价格。</p>` : ""}
         ${!blocked && missingFields.length ? `<p><b>待补充：</b>${esc(missingFields.join("、"))}</p>` : ""}
         ${!blocked && candidates.length ? `<p><b>搜索结果：</b>${isModelPricing ? esc(modelPriceSummary) : genericResultSummary}</p>` : ""}
-        <p><b>安全边界：</b>${blocked ? "不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表" : isFlightPlan ? flightSafetyText : candidates.length ? "仅展示候选方案，未下单、未付款、未提交订单" : "未搜索、未下单、未付款、未提交订单"}</p>
+        <p><b>安全边界：</b>${blocked ? "不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表" : isFlightPlan ? flightSafetyText : isProductPlan && providerMissing ? productSafetyText : candidates.length ? "仅展示候选方案，未下单、未付款、未提交订单" : "未搜索、未下单、未付款、未提交订单"}</p>
       </div>
       <button class="cmd-btn primary commerce-view-plan-button" id="commerceViewPlanBtn" type="button">查看全球采购计划</button>
     </div>`;
