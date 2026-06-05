@@ -19,6 +19,15 @@
       .slice(0, max || 180);
   }
 
+  function resultCategory(category){
+    const raw = String(category || "");
+    if (raw === "ecommerce") return "product";
+    if (raw === "ticketing") return "ticket";
+    if (raw === "serviceBooking") return "service";
+    if (/^(flight|product|hotel|ticket|service)$/.test(raw)) return raw;
+    return raw || "product";
+  }
+
   function defaultSettings(){
     return {
       enabled:false,
@@ -123,11 +132,77 @@
 
   function validateBookingUrl(url){
     try {
-      const parsed = new URL(String(url || ""));
-      return parsed.protocol === "https:" ? parsed : null;
+      const raw = String(url || "").trim();
+      if (!raw) return null;
+      const parsed = new URL(raw);
+      return parsed.protocol === "https:" || parsed.protocol === "http:" ? parsed : null;
     } catch (_) {
       return null;
     }
+  }
+
+  function normalizeUrlType(value, category){
+    const raw = String(value || "");
+    if (/^(booking|checkout|detail)$/.test(raw)) return raw;
+    if (category === "flight" || category === "hotel" || category === "ticket" || category === "service") return "booking";
+    if (category === "product") return "checkout";
+    return "detail";
+  }
+
+  function normalizeExtras(value){
+    if (Array.isArray(value)) return value.map((item) => sanitizeText(item, 100)).filter(Boolean).slice(0, 8);
+    if (value && typeof value === "object") {
+      return Object.keys(value).slice(0, 8).map((key) => {
+        const text = sanitizeText(key, 40) + "：" + sanitizeText(value[key], 80);
+        return text.trim();
+      }).filter(Boolean);
+    }
+    return sanitizeText(value || "", 160) ? [sanitizeText(value, 160)] : [];
+  }
+
+  function normalizeCommerceResult(candidate, context){
+    const item = candidate && typeof candidate === "object" ? candidate : {};
+    const category = resultCategory(item.category || context && context.category || "");
+    const parsedUrl = validateBookingUrl(item.url || item.bookingUrl);
+    const totalPriceRaw = item.totalPrice !== undefined ? item.totalPrice : item.price;
+    const totalPrice = Number(totalPriceRaw);
+    const price = Number(item.price !== undefined ? item.price : totalPriceRaw);
+    const currency = sanitizeText(item.currency || "", 12);
+    const isRealProviderResult = item.isRealProviderResult === true;
+    const urlType = normalizeUrlType(item.urlType, category);
+    const provider = sanitizeText(item.provider || item.sourceName || context && context.providerName || "搜索源", 80);
+    return {
+      id:sanitizeText(item.id || item.candidateId || ("commerceResult-" + Math.random().toString(36).slice(2, 8)), 80),
+      candidateId:sanitizeText(item.candidateId || item.id || ("commerceResult-" + Math.random().toString(36).slice(2, 8)), 80),
+      category,
+      title:sanitizeText(item.title || "候选方案", 120),
+      provider,
+      sourceName:provider,
+      price:Number.isFinite(price) && price >= 0 ? price : null,
+      currency,
+      totalPrice:Number.isFinite(totalPrice) && totalPrice >= 0 ? totalPrice : null,
+      url:parsedUrl ? parsedUrl.href : "",
+      bookingUrl:parsedUrl ? parsedUrl.href : "",
+      urlType,
+      bookingUrlHost:parsedUrl ? parsedUrl.host : "",
+      conditions:sanitizeText(item.conditions || "", 180),
+      extras:normalizeExtras(item.extras || item.extraServices || item.serviceDifferences || item.hiddenFeeNote || ""),
+      fetchedAt:sanitizeText(item.fetchedAt || item.collectedAt || nowIso(), 40),
+      collectedAt:sanitizeText(item.fetchedAt || item.collectedAt || nowIso(), 40),
+      isRealProviderResult,
+      isLiveResult:isRealProviderResult,
+      priceLabel:sanitizeText(item.priceLabel || (currency && Number.isFinite(totalPrice) ? currency + " " + totalPrice : ""), 120),
+      departTime:sanitizeText(item.departTime || "", 80),
+      arriveTime:sanitizeText(item.arriveTime || "", 80),
+      duration:sanitizeText(item.duration || "", 80),
+      refundPolicySummary:sanitizeText(item.refundPolicySummary || "", 160),
+      rating:sanitizeText(item.rating || "", 40),
+      reputation:sanitizeText(item.reputation || "", 80),
+      riskSummary:sanitizeText(item.riskSummary || (!parsedUrl && (item.url || item.bookingUrl) ? "链接不是 https，已阻断打开。" : ""), 160),
+      hiddenFeeNote:sanitizeText(item.hiddenFeeNote || "", 160),
+      recommendationReason:sanitizeText(item.recommendationReason || "", 180),
+      realExecution:false
+    };
   }
 
   function validateOpenRouterModelUrl(url){
@@ -211,17 +286,20 @@
       riskSummary:hasParsedPricing ? "模型价格可能变化，实际调用费用以平台结算为准。" : "价格字段不可解析，未生成价格结论。",
       hiddenFeeNote:"实际成本可能受路由、缓存、最小计费单位或平台规则影响。",
       bookingUrl:parsedUrl ? parsedUrl.href : "",
+      url:parsedUrl ? parsedUrl.href : "",
+      urlType:"detail",
       bookingUrlHost:parsedUrl ? parsedUrl.host : "",
       recommendationReason:hasParsedPricing ? "按当前结果中的输入/输出综合成本排序；不能视为绝对最优。" : "缺少可解析 pricing 字段，仅展示模型信息，不生成价格推荐。",
       collectedAt:nowIso(),
       isLiveResult:true,
+      isRealProviderResult:true,
       realExecution:false
     };
   }
 
   function sanitizeCommerceCandidate(candidate, context){
     const item = candidate && typeof candidate === "object" ? candidate : {};
-    const parsedUrl = validateBookingUrl(item.bookingUrl);
+    const parsedUrl = validateBookingUrl(item.bookingUrl || item.url);
     const price = Number(item.price);
     return {
       candidateId:sanitizeText(item.candidateId || ("commerceCandidate-" + Math.random().toString(36).slice(2, 8)), 80),
@@ -249,10 +327,13 @@
       riskSummary:sanitizeText(item.riskSummary || (!parsedUrl && item.bookingUrl ? "预订链接不是 https，已阻断打开。" : ""), 160),
       hiddenFeeNote:sanitizeText(item.hiddenFeeNote || "", 160),
       bookingUrl:parsedUrl ? parsedUrl.href : "",
+      url:parsedUrl ? parsedUrl.href : "",
+      urlType:normalizeUrlType(item.urlType, resultCategory(item.category || context && context.category || "")),
       bookingUrlHost:parsedUrl ? parsedUrl.host : "",
       recommendationReason:sanitizeText(item.recommendationReason || "", 180),
       collectedAt:sanitizeText(item.collectedAt || nowIso(), 40),
       isLiveResult:item.isLiveResult !== false,
+      isRealProviderResult:item.isRealProviderResult === true || item.isLiveResult === true,
       realExecution:false
     };
   }
@@ -260,8 +341,12 @@
   function normalizeCommerceSearchResults(raw, context){
     const source = raw && raw.candidates ? raw.candidates : raw;
     const candidates = (Array.isArray(source) ? source : [])
-      .map((item) => sanitizeCommerceCandidate(item, context || {}))
-      .filter((item) => item.price !== null || isAiModelPricingTask(context) && item.modelId);
+      .map((item) => normalizeCommerceResult(item, context || {}))
+      .filter((item) => {
+        if (isAiModelPricingTask(context) && item.modelId) return true;
+        return item.isRealProviderResult === true && item.totalPrice !== null && !!item.currency && !!(item.url || item.bookingUrl);
+      })
+      .map((item) => Object.assign(sanitizeCommerceCandidate(item, context || {}), item));
     return {
       ok:true,
       providerName:sanitizeText(raw && raw.providerName || context && context.providerName || "", 80),
@@ -286,8 +371,8 @@
         const ctxB = Number.isFinite(Number(b && b.contextLength)) ? Number(b.contextLength) : 0;
         if (ctxA !== ctxB) return ctxB - ctxA;
       }
-      const priceA = Number.isFinite(Number(a && a.price)) ? Number(a.price) : Number.POSITIVE_INFINITY;
-      const priceB = Number.isFinite(Number(b && b.price)) ? Number(b.price) : Number.POSITIVE_INFINITY;
+      const priceA = Number.isFinite(Number(a && a.totalPrice)) ? Number(a.totalPrice) : Number.isFinite(Number(a && a.price)) ? Number(a.price) : Number.POSITIVE_INFINITY;
+      const priceB = Number.isFinite(Number(b && b.totalPrice)) ? Number(b.totalPrice) : Number.isFinite(Number(b && b.price)) ? Number(b.price) : Number.POSITIVE_INFINITY;
       if (priceA !== priceB) return priceA - priceB;
       return String(b && b.rating || "").localeCompare(String(a && a.rating || ""));
     });
@@ -309,6 +394,7 @@
       title:top.title,
       sourceName:top.sourceName,
       price:top.price,
+      totalPrice:top.totalPrice || top.price,
       currency:top.currency,
       priceLabel:top.priceLabel,
       promptPricePerMillion:top.promptPricePerMillion || "",
@@ -422,9 +508,11 @@
     if (settings.providerMode === "manualProvider") {
       const raw = await window.WeishanCommerceSearchProvider.search(request);
       const normalized = normalizeCommerceSearchResults(raw, Object.assign({}, request, { providerName:settings.providerName || raw && raw.providerName || "manualProvider" }));
-      const candidates = sortCommerceCandidates(normalized.candidates);
+      const candidates = sortCommerceCandidates(normalized.candidates).slice(0, 3);
       return {
-        ok:true,
+        ok:candidates.length > 0,
+        code:candidates.length > 0 ? "" : "COMMERCE_NO_RESULTS",
+        message:candidates.length > 0 ? "" : "搜索源未返回可展示结果。",
         providerName:settings.providerName || normalized.providerName || "manualProvider",
         request,
         candidates,
@@ -453,6 +541,7 @@
     validateBookingUrl,
     validateOpenRouterModelUrl,
     sanitizeCommerceCandidate,
+    normalizeCommerceResult,
     normalizeOpenRouterModel,
     normalizeOpenRouterModelsResponse,
     createCommerceSearchHistoryPayload,

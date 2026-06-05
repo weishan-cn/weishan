@@ -45,7 +45,7 @@ async function installCommerceSearchMock(page, candidates) {
     window.WeishanCommerceSearchProvider = {
       search: async () => ({
         providerName:"E2E Commerce Provider",
-        candidates:items
+        candidates:items.map((item) => Object.assign({ isRealProviderResult:true }, item))
       })
     };
     window.WeishanCommerceSearch.saveCommerceSearchSettings({
@@ -74,6 +74,15 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
       }
     };
   }, { data:payload, fail:options.fail === true });
+}
+
+async function clearCommerceSearchMock(page) {
+  await page.evaluate(() => {
+    try {
+      delete window.WeishanCommerceSearchProvider;
+      if (window.localStorage) window.localStorage.removeItem("weishan:commerceSearch:settings:v1");
+    } catch (_) {}
+  });
 }
 
 test.describe.serial("commerce agent workbench", () => {
@@ -116,12 +125,12 @@ test.describe.serial("commerce agent workbench", () => {
     const command = runId + " 帮我找成都到上海最便宜机票";
     await submitHomeCommand(page, command);
     await expect(page.locator("[data-commerce-home-summary]")).toHaveCount(1);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText(/未搜索|未下单|未付款|未提交订单/);
     await expect(page.locator("[data-commerce-home-summary]")).toContainText(/类型：机票/);
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("待补充：出行日期");
     await expect(page.locator("#commerceViewPlanBtn")).toBeVisible();
-    await expect(page.getByText("全球采购计划已生成")).toHaveCount(1);
+    await expect(page.getByText("机票搜索已生成")).toHaveCount(1);
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("commerceAgent.plan");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("realExecution=false");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("planned");
@@ -187,7 +196,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("当前结果中的输入/输出综合成本排序");
     await expect(page.locator(".commerce-detail")).toContainText("价格可能变化");
     await expect(page.locator(".commerce-booking-link").first()).toHaveText("打开模型页");
-    await expect(page.locator(".commerce-booking-link").first()).toHaveAttribute("href", /https:\/\/openrouter\.ai\/models\//);
+    await expect(page.locator(".commerce-booking-link").first()).toHaveAttribute("data-url", /https:\/\/openrouter\.ai\/models\//);
     await gotoRoute(page, "home");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("已找到 2 个候选模型");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前较低价格模型 Model B");
@@ -220,7 +229,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
     await expect(currentTaskLogs(page)).not.toContainText("准备调用 AI 网关");
     await expect(currentTaskLogs(page)).not.toContainText("如何手动");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("已识别为机票搜索计划");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
@@ -253,14 +262,14 @@ test.describe.serial("commerce agent workbench", () => {
 
   test("flight lookup phrasing still routes to commerce instead of chat", async () => {
     await submitHomeCommand(page, runId + " 明天成都飞北京");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
 
     await submitHomeCommand(page, runId + " 查一下明天成都到北京的航班");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
@@ -269,20 +278,210 @@ test.describe.serial("commerce agent workbench", () => {
 
   test("hotel booking and product buying intents route to commerce before chat", async () => {
     await submitHomeCommand(page, runId + " 帮我预订上海低价酒店");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("酒店计划已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：酒店");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
 
     await submitHomeCommand(page, runId + " 帮我买一台最便宜的 MacBook");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText(/类型：(电商商品|全球采购)/);
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("MacBook搜索已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：商品");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
+  });
+
+  test("product buying intent keeps user keyword and shows no-provider state without price", async () => {
+    await submitHomeCommand(page, runId + " 买华为手机");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：商品");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品关键词：华为手机");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("搜索源未配置，无法返回真实价格");
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("去购买");
+    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
+
+    await submitHomeCommand(page, runId + " 买华为1手机");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为1手机搜索已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品关键词：华为1手机");
+    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
+  });
+
+  test("product fixture provider sorts by total price and maps action buttons", async () => {
+    await installCommerceSearchMock(page, [
+      {
+        id:"p-2",
+        title:"华为手机 标准套装",
+        provider:"E2E Shop",
+        category:"product",
+        price:1999,
+        totalPrice:2099,
+        currency:"CNY",
+        url:"https://shop.example.test/huawei-standard",
+        urlType:"checkout",
+        conditions:"官方授权店",
+        extras:["含税费", "包邮", "含售后"],
+        recommendationReason:"总成本较低且含售后",
+        isRealProviderResult:true
+      },
+      {
+        id:"p-1",
+        title:"华为手机 裸机",
+        provider:"E2E Shop",
+        category:"product",
+        price:1888,
+        totalPrice:2188,
+        currency:"CNY",
+        url:"https://shop.example.test/huawei-detail",
+        urlType:"detail",
+        conditions:"第三方店铺",
+        extras:["不包邮", "售后需复核"],
+        recommendationReason:"裸价较低但总成本更高",
+        isRealProviderResult:true
+      },
+      {
+        id:"p-3",
+        title:"华为手机 高配套装",
+        provider:"E2E Shop",
+        category:"product",
+        price:2399,
+        totalPrice:2399,
+        currency:"CNY",
+        url:"https://shop.example.test/huawei-high",
+        urlType:"checkout",
+        conditions:"官方店",
+        extras:["包邮", "含售后"],
+        recommendationReason:"配置更高",
+        isRealProviderResult:true
+      },
+      {
+        id:"p-http",
+        title:"华为手机 HTTP 特价",
+        provider:"E2E Shop",
+        category:"product",
+        price:2200,
+        totalPrice:2300,
+        currency:"CNY",
+        url:"http://shop.example.test/huawei-http",
+        urlType:"checkout",
+        conditions:"HTTP provider 链接",
+        extras:["含税费"],
+        recommendationReason:"http provider URL 也允许打开",
+        isRealProviderResult:true
+      },
+      {
+        id:"p-missing-currency",
+        title:"华为手机 缺少币种",
+        provider:"E2E Shop",
+        category:"product",
+        totalPrice:100,
+        url:"https://shop.example.test/huawei-invalid",
+        urlType:"checkout",
+        isRealProviderResult:true
+      },
+      {
+        id:"p-js-url",
+        title:"华为手机 javascript 链接",
+        provider:"E2E Shop",
+        category:"product",
+        totalPrice:100,
+        currency:"CNY",
+        url:"javascript:alert(1)",
+        urlType:"checkout",
+        isRealProviderResult:true
+      },
+      {
+        id:"p-file-url",
+        title:"华为手机 file 链接",
+        provider:"E2E Shop",
+        category:"product",
+        totalPrice:101,
+        currency:"CNY",
+        url:"file:///tmp/a",
+        urlType:"checkout",
+        isRealProviderResult:true
+      },
+      {
+        id:"p-data-url",
+        title:"华为手机 data 链接",
+        provider:"E2E Shop",
+        category:"product",
+        totalPrice:102,
+        currency:"CNY",
+        url:"data:text/html,hello",
+        urlType:"checkout",
+        isRealProviderResult:true
+      },
+      {
+        id:"p-empty-url",
+        title:"华为手机 空 URL",
+        provider:"E2E Shop",
+        category:"product",
+        totalPrice:103,
+        currency:"CNY",
+        url:"",
+        urlType:"checkout",
+        isRealProviderResult:true
+      },
+      {
+        id:"p-no-url",
+        title:"华为手机 无 URL",
+        provider:"E2E Shop",
+        category:"product",
+        totalPrice:104,
+        currency:"CNY",
+        urlType:"checkout",
+        isRealProviderResult:true
+      }
+    ]);
+    await submitHomeCommand(page, runId + " 买华为手机");
+    await page.locator("#commerceViewPlanBtn").click();
+    await page.getByRole("button", { name:"搜索真实价格" }).first().click();
+    await expect(page.locator(".commerce-detail")).toContainText("华为手机搜索已完成");
+    await expect(page.locator(".commerce-candidate-card")).toHaveCount(3);
+    await expect(page.locator(".commerce-candidate-card").nth(0)).toContainText("最低价推荐");
+    await expect(page.locator(".commerce-candidate-card").nth(0)).toContainText("CNY 2099");
+    await expect(page.locator(".commerce-candidate-card").nth(1)).toContainText("CNY 2188");
+    await expect(page.locator(".commerce-candidate-card").nth(2)).toContainText("CNY 2300");
+    await expect(page.locator(".commerce-detail")).toContainText("官方授权店");
+    await expect(page.locator(".commerce-detail")).toContainText("包邮");
+    await expect(page.locator(".commerce-detail")).toContainText("含售后");
+    await expect(page.locator(".commerce-detail")).not.toContainText("缺少币种");
+    await expect(page.locator(".commerce-detail")).not.toContainText("javascript 链接");
+    await expect(page.locator(".commerce-detail")).not.toContainText("file 链接");
+    await expect(page.locator(".commerce-detail")).not.toContainText("data 链接");
+    await expect(page.locator(".commerce-detail")).not.toContainText("空 URL");
+    await expect(page.locator(".commerce-detail")).not.toContainText("无 URL");
+    await expect(page.locator(".commerce-booking-link").nth(0)).toHaveText("去购买");
+    await expect(page.locator(".commerce-booking-link").nth(0)).toHaveAttribute("data-url", "https://shop.example.test/huawei-standard");
+    await expect(page.locator(".commerce-booking-link").nth(1)).toHaveText("查看详情");
+    await expect(page.locator(".commerce-booking-link").nth(1)).toHaveAttribute("data-url", "https://shop.example.test/huawei-detail");
+    await expect(page.locator(".commerce-booking-link").nth(2)).toHaveText("去购买");
+    await expect(page.locator(".commerce-booking-link").nth(2)).toHaveAttribute("data-url", "http://shop.example.test/huawei-http");
+    await page.evaluate(() => {
+      window.__commerceOpenedUrl = "";
+      window.WeishanAPI = window.WeishanAPI || {};
+      window.WeishanAPI.openExternal = async (url) => { window.__commerceOpenedUrl = url; return true; };
+    });
+    await page.locator(".commerce-booking-link").nth(0).click();
+    await expect.poll(() => page.evaluate(() => window.__commerceOpenedUrl)).toBe("https://shop.example.test/huawei-standard");
+    await page.locator(".commerce-booking-link").nth(0).evaluate((el) => { el.setAttribute("data-url", "javascript:alert(1)"); });
+    await page.locator(".commerce-booking-link").nth(0).click();
+    await expect.poll(() => page.evaluate(() => window.__commerceOpenedUrl)).toBe("https://shop.example.test/huawei-standard");
+    await page.locator(".commerce-booking-link").nth(0).evaluate((el) => { el.setAttribute("data-url", "file:///tmp/a"); });
+    await page.locator(".commerce-booking-link").nth(0).click();
+    await expect.poll(() => page.evaluate(() => window.__commerceOpenedUrl)).toBe("https://shop.example.test/huawei-standard");
+    await page.locator(".commerce-booking-link").nth(0).evaluate((el) => { el.setAttribute("data-url", "data:text/html,hello"); });
+    await page.locator(".commerce-booking-link").nth(0).click();
+    await expect.poll(() => page.evaluate(() => window.__commerceOpenedUrl)).toBe("https://shop.example.test/huawei-standard");
+    await expect(page.locator(".commerce-detail")).toContainText("weishan 不自动支付、不提交订单、不保存证件或银行卡");
+    await gotoRoute(page, "home");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已完成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最低总价 CNY 2099");
+    await clearCommerceSearchMock(page);
   });
 
   test("cruise category creates plan without fake price", async () => {
     const command = runId + " 帮我找上海出发的低价邮轮";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("邮轮计划已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：邮轮");
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.locator(".commerce-task-list")).toContainText("邮轮");
@@ -299,7 +498,7 @@ test.describe.serial("commerce agent workbench", () => {
   test("private jet category creates inquiry-only plan without fake price", async () => {
     const command = runId + " 帮我找一架公务机从成都飞香港";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("公务机计划已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：公务机");
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.locator(".commerce-task-list")).toContainText("公务机");
@@ -321,17 +520,20 @@ test.describe.serial("commerce agent workbench", () => {
         title:"成都到上海经济舱 A",
         category:"flight",
         price:860,
+        totalPrice:860,
         currency:"CNY",
+        url:"https://booking.example.test/flight-a",
+        urlType:"booking",
         departTime:"2026-06-10 08:00",
         arriveTime:"2026-06-10 10:45",
         duration:"2h45m",
         conditions:"含基础行李",
+        extras:["含税费", "含基础行李", "可退改需复核"],
         refundPolicySummary:"退改需按航司规则",
         riskSummary:"价格可能变化",
         hiddenFeeNote:"不含部分附加服务费",
-        bookingUrl:"https://booking.example.test/flight-a",
         recommendationReason:"当前 provider 返回价格最低",
-        isLiveResult:true
+        isRealProviderResult:true
       },
       {
         candidateId:"bad-url",
@@ -339,12 +541,41 @@ test.describe.serial("commerce agent workbench", () => {
         title:"成都到上海经济舱 B",
         category:"flight",
         price:920,
+        totalPrice:920,
         currency:"CNY",
+        url:"javascript:alert(1)",
+        urlType:"booking",
         refundPolicySummary:"退改需复核",
         riskSummary:"链接协议不安全",
-        bookingUrl:"javascript:alert(1)",
         recommendationReason:"备选方案",
-        isLiveResult:true
+        isRealProviderResult:true
+      },
+      {
+        candidateId:"good-2",
+        sourceName:"E2E Travel",
+        title:"成都到上海经济舱 C",
+        category:"flight",
+        price:780,
+        totalPrice:780,
+        currency:"CNY",
+        url:"https://booking.example.test/flight-c",
+        urlType:"booking",
+        conditions:"不含托运行李",
+        extras:["含税费", "不含托运行李"],
+        refundPolicySummary:"不可退改",
+        riskSummary:"服务差异较大",
+        recommendationReason:"总价更低但服务较少",
+        isRealProviderResult:true
+      },
+      {
+        candidateId:"filtered-missing-total",
+        sourceName:"E2E Travel",
+        title:"缺少总价的结果",
+        category:"flight",
+        currency:"CNY",
+        url:"https://booking.example.test/no-total",
+        urlType:"booking",
+        isRealProviderResult:true
       }
     ]);
     const command = runId + " 帮我找 2026-06-10 成都到上海最便宜机票";
@@ -353,17 +584,25 @@ test.describe.serial("commerce agent workbench", () => {
     await page.getByRole("button", { name:"搜索真实价格" }).first().click();
     await expect(page.locator(".commerce-detail")).toContainText("候选方案");
     await expect(page.locator(".commerce-detail")).toContainText("E2E Travel");
-    await expect(page.locator(".commerce-detail")).toContainText("CNY 860");
+    await expect(page.locator(".commerce-detail")).toContainText("CNY 780");
     await expect(page.locator(".commerce-detail")).toContainText("退改需按航司规则");
+    await expect(page.locator(".commerce-detail")).toContainText("不含托运行李");
+    await expect(page.locator(".commerce-detail")).toContainText("最低价推荐");
     await expect(page.locator(".commerce-detail")).toContainText("价格可能变化");
     await expect(page.locator(".commerce-detail")).toContainText("推荐结果");
-    await expect(page.locator(".commerce-detail")).toContainText("当前 provider 返回价格最低");
-    await expect(page.locator(".commerce-booking-link")).toHaveCount(1);
-    await expect(page.locator(".commerce-booking-link").first()).toHaveAttribute("href", "https://booking.example.test/flight-a");
-    await expect(page.locator(".commerce-detail")).toContainText("预订链接不是 https，已阻断打开");
+    await expect(page.locator(".commerce-detail")).toContainText("总价更低但服务较少");
+    await expect(page.locator(".commerce-candidate-card")).toHaveCount(2);
+    await expect(page.locator(".commerce-candidate-card").nth(0)).toContainText("CNY 780");
+    await expect(page.locator(".commerce-candidate-card").nth(1)).toContainText("CNY 860");
+    await expect(page.locator(".commerce-booking-link")).toHaveCount(2);
+    await expect(page.locator(".commerce-booking-link").first()).toHaveText("去预订");
+    await expect(page.locator(".commerce-booking-link").first()).toHaveAttribute("data-url", "https://booking.example.test/flight-c");
+    await expect(page.locator(".commerce-detail")).not.toContainText("成都到上海经济舱 B");
+    await expect(page.locator(".commerce-detail")).not.toContainText("缺少总价的结果");
     await gotoRoute(page, "home");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已找到 2 个候选方案");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最低价格 CNY 860");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已完成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已找到 2 个真实 provider 结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最低总价 CNY 780");
   });
 
   test("OpenRouter unparsable pricing and unsafe model links are blocked", async () => {
@@ -402,7 +641,7 @@ test.describe.serial("commerce agent workbench", () => {
   test("direct order and payment request remains blocked and plan-only", async () => {
     const command = runId + " 帮我直接下单并付款";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已阻断");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已阻断");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("原因：涉及下单 / 付款");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会下单、付款或提交订单");
     await expect(page.locator("#commerceViewPlanBtn")).toBeVisible();
@@ -422,7 +661,7 @@ test.describe.serial("commerce agent workbench", () => {
   test("cruise payment request is blocked without payment or order submit", async () => {
     const command = runId + " 帮我直接预订邮轮并付款";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已阻断");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已阻断");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会下单、付款或提交订单");
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.locator(".commerce-detail")).toContainText("已阻断");
@@ -433,7 +672,7 @@ test.describe.serial("commerce agent workbench", () => {
   test("private jet passport upload and inquiry submit are blocked", async () => {
     const command = runId + " 帮我上传护照并预订公务机";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已阻断");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已阻断");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表");
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.locator(".commerce-detail")).toContainText("已阻断");
@@ -444,7 +683,7 @@ test.describe.serial("commerce agent workbench", () => {
   test("flight payment and id upload request is blocked without upload payment or order submit", async () => {
     const command = runId + " 帮我上传身份证订机票并付款";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球采购计划已阻断");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已阻断");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会下单、付款或提交订单");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会上传身份证/护照或提交询价表");
     await page.locator("#commerceViewPlanBtn").click();

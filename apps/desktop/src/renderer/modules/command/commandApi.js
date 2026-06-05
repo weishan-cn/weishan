@@ -255,8 +255,9 @@
     const conditionSummary = [routeCondition, fields.dateText || fields.timing || ""].filter(Boolean).join("，");
     const isFlightPlan = savedPlan.category === "flight";
     const providerMissingText = isFlightPlan ? "未配置真实机票搜索 provider，当前不会返回实时机票价格。" : "搜索源未配置，无法返回真实价格。";
+    const displayTitle = api.createCommerceDisplayTitle ? api.createCommerceDisplayTitle(savedPlan, false) : blocked ? "全球采购计划已阻断" : "全球采购计划已生成";
     const answer = [
-      blocked ? "全球采购计划已阻断" : "全球采购计划已生成",
+      displayTitle,
       "需求：" + savedPlan.inputSummary,
       "类型：" + (savedPlan.categoryLabel || savedPlan.category),
       "状态：" + (blocked ? "已阻断" : "计划已生成"),

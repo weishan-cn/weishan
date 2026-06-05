@@ -7,7 +7,7 @@
     flight:"机票",
     hotel:"酒店",
     train:"火车票",
-    ecommerce:"电商商品",
+    ecommerce:"商品",
     aiModelPricing:"AI 模型价格",
     ticketing:"门票 / 票务",
     serviceBooking:"服务预约",
@@ -60,7 +60,7 @@
     if (/门票|演唱会|展览|票务|ticket/i.test(raw)) return "ticketing";
     if (/预约|保洁|维修|咨询|service/i.test(raw)) return "serviceBooking";
     if (/域名|domain/i.test(raw)) return "domain";
-    if (/MacBook|电脑|手机|商品|电商|买|采购|purchase|shopping/i.test(raw)) return "ecommerce";
+    if (/MacBook|iPhone|华为|苹果|电脑|手机|商品|电商|买|购买|采购|purchase|shopping/i.test(raw)) return "ecommerce";
     return "generalProcurement";
   }
 
@@ -96,8 +96,8 @@
     const raw = String(text || "");
     const category = getCommerceCategory(raw);
     const purchaseWords = /全球采购|采购代理|自动采购|比价|价格比较|平台比较|最便宜方案|性价比最高|可预订|可下单|低价|最便宜|帮我买|帮我订|帮我预定|帮我预订|帮我比较|我想买|订下周|直接下单|下单|付款|采购|购买|买|预定|预订|订票|买票|订|找最便宜|最便宜.*(?:机票|酒店|域名|方案|API|平台|商品|邮轮|游轮|公务机|包机)|OpenRouter.*价格|模型平台.*价格/i;
-    const assistedSearchPurchase = /帮我(?:找|买|购买|订|预定|预订|比较).*(?:机票|飞机票|航空票|酒店|住宿|火车票|高铁票|航班|商品|MacBook|域名|ChatGPT API|API 方案|模型平台|采购渠道|最便宜|低价|性价比|邮轮|游轮|公务机|包机|私人飞机)/i.test(raw);
-    const objectWithPurchase = /(?:机票|飞机票|航空票|航班|酒店|住宿|商品|电商|邮轮|游轮|公务机|私人飞机|包机).*(?:找|买|购买|订|预定|预订|订票|买票|比价|最便宜|低价)|(?:找|买|购买|订|预定|预订|订票|买票|比价|最便宜|低价).*(?:机票|飞机票|航空票|航班|酒店|住宿|商品|电商|邮轮|游轮|公务机|私人飞机|包机)/i.test(raw);
+    const assistedSearchPurchase = /帮我(?:找|买|购买|订|预定|预订|比较).*(?:机票|飞机票|航空票|酒店|住宿|火车票|高铁票|航班|商品|MacBook|iPhone|华为|手机|电脑|域名|ChatGPT API|API 方案|模型平台|采购渠道|最便宜|低价|性价比|邮轮|游轮|公务机|包机|私人飞机)/i.test(raw);
+    const objectWithPurchase = /(?:机票|飞机票|航空票|航班|酒店|住宿|商品|电商|MacBook|iPhone|华为|手机|电脑|邮轮|游轮|公务机|私人飞机|包机).*(?:找|买|购买|订|预定|预订|订票|买票|比价|最便宜|低价)|(?:找|买|购买|订|预定|预订|订票|买票|比价|最便宜|低价).*(?:机票|飞机票|航空票|航班|酒店|住宿|商品|电商|MacBook|iPhone|华为|手机|电脑|邮轮|游轮|公务机|私人飞机|包机)/i.test(raw);
     const flightSearchIntent = category === "flight" && (
       /(?:查|查一下|查询|看一下|找).{0,20}(?:机票|飞机票|航空票|航班)/i.test(raw) ||
       /(\d{4}[-/]\d{1,2}[-/]\d{1,2}|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天]).{0,20}[\u4e00-\u9fa5A-Za-z]{2,24}\s*(?:飞往|飞|到|去)\s*[\u4e00-\u9fa5A-Za-z]{2,24}/i.test(raw)
@@ -136,6 +136,17 @@
     };
   }
 
+  function extractProductQuery(text){
+    const raw = sanitizeCommerceInput(text).replace(/^E2E[A-Z]+-\d+\s*/i, "");
+    return raw
+      .replace(/^(请|帮我|麻烦|我要|我想|想要|需要)\s*/g, "")
+      .replace(/^(买|购买|找|搜索|查找|比较|比价)\s*/g, "")
+      .replace(/(最便宜|低价|性价比高|性价比最高|一个|一台|一部|的|商品|电商|价格|多少钱|帮我|请)/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 60);
+  }
+
   function normalizedFields(text, category){
     const fields = extractCommerceFields(text);
     return {
@@ -145,6 +156,8 @@
       originText:fields.originText,
       destinationText:fields.destinationText,
       dateText:fields.dateText,
+      productQuery:category === "ecommerce" ? extractProductQuery(text) || sanitizeCommerceInput(text) : "",
+      normalizedQuery:category === "ecommerce" ? extractProductQuery(text) || sanitizeCommerceInput(text) : sanitizeCommerceInput(text),
       budget:"",
       region:"",
       timing:fields.dateText,
@@ -257,6 +270,7 @@
       recommendation:null,
       searchErrorMessage:"",
       searchResultSummary:null,
+      displayTitle:"",
       realExecution:false,
       requiresUserConfirmation:true,
       createdAt,
@@ -296,6 +310,7 @@
       recommendation:base.recommendation || null,
       searchErrorMessage:sanitizeCommerceInput(base.searchErrorMessage || ""),
       searchResultSummary:base.searchResultSummary || null,
+      displayTitle:String(base.displayTitle || ""),
       realExecution:false,
       requiresUserConfirmation:true,
       createdAt,
@@ -396,6 +411,24 @@
     };
   }
 
+  function createCommerceDisplayTitle(task, completed){
+    const safe = normalizeTask(task || {});
+    const category = safe.category;
+    const fields = safe.normalizedFields || {};
+    const done = completed === true || safe.searchStatus === "completed" && Array.isArray(safe.candidates) && safe.candidates.length > 0;
+    if (safe.status === "blocked") {
+      if (category === "flight") return "机票搜索已阻断";
+      if (category === "ecommerce") return (fields.productQuery || fields.normalizedQuery || "商品") + "搜索已阻断";
+      return (safe.categoryLabel || "全球采购") + "计划已阻断";
+    }
+    if (category === "flight") return done ? "机票搜索已完成" : "机票搜索已生成";
+    if (category === "ecommerce") {
+      const query = fields.productQuery || fields.normalizedQuery || "商品";
+      return query + (done ? "搜索已完成" : "搜索已生成");
+    }
+    return done ? (safe.categoryLabel || "全球采购") + "搜索已完成" : (safe.categoryLabel || "全球采购") + "计划已生成";
+  }
+
   function createCommerceTaskHistoryPayload(action, payload){
     const task = payload && payload.taskId ? normalizeTask(payload) : normalizeTask(payload || {});
     return {
@@ -468,6 +501,7 @@
     getCommerceCategory,
     getCommerceDecisionCriteria,
     getCommerceSearchScope,
+    createCommerceDisplayTitle,
     saveCommercePlan,
     getCommercePlan,
     clearCommercePlan

@@ -78,11 +78,21 @@
   function searchStatusLabel(task){
     const status = String(task && task.searchStatus || "");
     if (status === "completed") return "已返回真实候选方案";
+    if (status === "noResults") return "暂无可展示结果";
     if (status === "ready") return "搜索源已配置";
     if (status === "missingFields") return "搜索条件缺失";
     if (status === "failed") return "搜索失败";
     if (status === "blocked") return "已阻断";
     return "搜索源未配置，无法返回真实价格";
+  }
+
+  function commerceDisplayTitle(task){
+    const api = agent();
+    if (api && api.createCommerceDisplayTitle) return api.createCommerceDisplayTitle(task, !!(task && Array.isArray(task.candidates) && task.candidates.length));
+    if (!task) return "计划详情";
+    if (task.status === "blocked") return "全球采购计划已阻断";
+    if (task.category === "flight") return task.searchStatus === "completed" ? "机票搜索已完成" : "机票搜索已生成";
+    return task.searchStatus === "completed" ? "搜索已完成" : "搜索已生成";
   }
 
   function taskCards(tasks){
@@ -133,7 +143,7 @@
       return `<div class="commerce-detail commerce-detail-compact" data-commerce-detail="${esc(task.taskId)}">
         <div class="commerce-detail-head">
           <div>
-            <h2>计划详情</h2>
+            <h2>${esc(commerceDisplayTitle(task))}</h2>
             <p>${esc(task.inputSummary)}</p>
           </div>
           <span class="commerce-status blocked">已阻断</span>
@@ -154,7 +164,7 @@
     return `<div class="commerce-detail" data-commerce-detail="${esc(task.taskId)}">
       <div class="commerce-detail-head">
         <div>
-          <h2>计划详情</h2>
+          <h2>${esc(commerceDisplayTitle(task))}</h2>
           <p>${esc(task.inputSummary)}</p>
         </div>
         <span class="commerce-status ${esc(task.status)}">${esc(taskStatusLabel(task.status))}</span>
@@ -163,7 +173,7 @@
         ${section("需求理解", `<dl class="commerce-facts">
           <div><dt>用户需求</dt><dd>${esc(detail.demandUnderstanding || task.inputSummary)}</dd></div>
           <div><dt>类目</dt><dd>${esc(category)}</dd></div>
-          <div><dt>当前状态</dt><dd>${esc(taskStatusLabel(task.status))}</dd></div>
+          <div><dt>当前状态</dt><dd>${esc(taskStatusLabel(task.status))} · ${esc(searchStatusLabel(task))}</dd></div>
         </dl>`)}
         ${section("搜索源状态", searchStatusHtml(task, settings, hasProvider), "commerce-section-tight")}
         ${section("搜索条件确认", searchRequestHtml(request), "commerce-section-tight")}
@@ -225,19 +235,32 @@
   }
 
   function candidatesHtml(task){
-    const candidates = Array.isArray(task && task.candidates) ? task.candidates : [];
+    const candidates = (Array.isArray(task && task.candidates) ? task.candidates : []).slice(0, 3);
     if (!candidates.length) {
-      return `<p class="commerce-muted">暂无候选方案。搜索源未配置或尚未执行真实搜索时，不显示任何价格。</p>`;
+      const status = String(task && task.searchStatus || "");
+      const noResultText = status === "noResults" ? "provider 未返回可展示结果。" : "搜索源未配置或尚未执行真实搜索。";
+      return `<p class="commerce-muted">${esc(noResultText)}不显示任何价格，不显示购买、预订或付款按钮。</p>`;
     }
     const isModelPricing = task && task.category === "aiModelPricing";
+    const actionLabel = (item) => {
+      if (isModelPricing) return "打开模型页";
+      if (item.urlType === "checkout") return "去购买";
+      if (item.urlType === "booking") return "去预订";
+      return "查看详情";
+    };
+    const priceText = (item) => {
+      if (isModelPricing) return item.priceLabel || "";
+      const total = item.totalPrice !== undefined && item.totalPrice !== null ? item.totalPrice : item.price;
+      return item.currency && total !== "" && total !== undefined && total !== null ? item.currency + " " + total : item.priceLabel || "";
+    };
     return `<div class="commerce-candidates">
-      ${candidates.map((item) => `<article class="commerce-candidate-card">
+      ${candidates.map((item, index) => `<article class="commerce-candidate-card">
         <div class="commerce-candidate-head">
           <div>
-            <b>${esc(item.title)}</b>
-            <span>${esc(item.sourceName)}${item.modelId ? " · " + esc(item.modelId) : ""} · ${esc(item.collectedAt)}</span>
+            <b>${index === 0 && !isModelPricing ? '<span class="commerce-lowest-badge">最低价推荐</span> ' : ""}${esc(item.title)}</b>
+            <span>${esc(item.provider || item.sourceName)}${item.modelId ? " · " + esc(item.modelId) : ""} · ${esc(item.fetchedAt || item.collectedAt)}</span>
           </div>
-          <strong>${esc(item.priceLabel || (item.currency + " " + item.price))}</strong>
+          <strong>${esc(priceText(item))}</strong>
         </div>
         ${isModelPricing ? `<dl class="commerce-model-pricing">
           <div><dt>模型 ID</dt><dd>${esc(item.modelId || item.candidateId)}</dd></div>
@@ -247,12 +270,21 @@
           <div><dt>币种</dt><dd>USD</dd></div>
         </dl>` : ""}
         <div class="commerce-candidate-meta">
-          ${chips([item.departTime && item.arriveTime ? item.departTime + " → " + item.arriveTime : "", item.duration, item.conditions, item.refundPolicySummary, item.riskSummary, item.hiddenFeeNote].filter(Boolean))}
+          ${chips([item.departTime && item.arriveTime ? item.departTime + " → " + item.arriveTime : "", item.duration, item.conditions, item.refundPolicySummary, item.riskSummary, item.hiddenFeeNote].concat(item.extras || []).filter(Boolean))}
         </div>
         <p class="commerce-muted">推荐理由：${esc(item.recommendationReason || "按价格、条件和风险排序后进入候选。")}</p>
-        ${item.bookingUrl ? `<p class="commerce-booking-note">${isModelPricing ? "将打开 OpenRouter 模型页。weishan 不会下单、付款或提交订单。" : "将打开预订页面。weishan 不会下单、付款或提交订单。"}</p><a class="cmd-btn gray commerce-booking-link" href="${esc(item.bookingUrl)}" target="_blank" rel="noopener noreferrer">${isModelPricing ? "打开模型页" : "打开预订页"}</a>` : `<p class="commerce-warning">${isModelPricing ? "模型页链接不是 https 或不属于 openrouter.ai，已阻断打开。" : "预订链接不是 https，已阻断打开。"}</p>`}
+        ${item.bookingUrl || item.url ? `<p class="commerce-booking-note">点击后将在外部平台完成预订或付款。weishan 不自动支付、不提交订单、不保存证件或银行卡。</p><button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.bookingUrl || item.url)}">${esc(actionLabel(item))}</button>` : `<p class="commerce-warning">${isModelPricing ? "模型页链接不是 https 或不属于 openrouter.ai，已阻断打开。" : "provider URL 缺失或不是 https，已阻断打开。"}</p>`}
       </article>`).join("")}
     </div>`;
+  }
+
+  function isSafeExternalProviderUrl(url){
+    try {
+      const parsed = new URL(String(url || "").trim());
+      return parsed.protocol === "https:" || parsed.protocol === "http:";
+    } catch (_) {
+      return false;
+    }
   }
 
   function recommendationHtml(task){
@@ -262,7 +294,7 @@
       <b>${esc(rec.title)}</b>
       <p>${esc(rec.reason || "")}</p>
       <p class="commerce-muted">主要风险：${esc(rec.riskSummary || "价格可能变化，仍需用户确认。")}</p>
-      <p class="commerce-warning">价格可能变化；最终以 OpenRouter 页面和实际结算为准。预订、下单或付款前必须再次确认。</p>
+      <p class="commerce-warning">价格可能变化；最终以真实 provider 页面和实际结算为准。预订、下单或付款前必须再次确认。</p>
     </div>`;
   }
 
@@ -376,7 +408,7 @@
         }));
         const result = await search.searchCommerceCandidates(target);
         if (!result.ok) {
-          const status = result.code === "COMMERCE_MISSING_FIELDS" ? "missingFields" : result.code === "COMMERCE_PROVIDER_NOT_CONFIGURED" ? "providerMissing" : "failed";
+          const status = result.code === "COMMERCE_MISSING_FIELDS" ? "missingFields" : result.code === "COMMERCE_PROVIDER_NOT_CONFIGURED" ? "providerMissing" : result.code === "COMMERCE_NO_RESULTS" ? "noResults" : "failed";
           const updated = api.updateCommerceTask(taskId, {
             searchStatus:status,
             missingFields:result.request && result.request.missingFields || target.missingFields || [],
@@ -404,7 +436,7 @@
           recommendation,
           searchResultSummary:{
             candidateCount:sorted.length,
-            lowestPrice:first.price || "",
+            lowestPrice:first.totalPrice || first.price || "",
             currency:first.currency || "",
             lowestPromptPricePerMillion:first.promptPricePerMillion || "",
             lowestCompletionPricePerMillion:first.completionPricePerMillion || "",
@@ -427,12 +459,26 @@
     });
     host.querySelectorAll(".commerce-booking-link").forEach((link) => {
       link.addEventListener("click", () => {
+        const url = link.getAttribute("data-url") || link.getAttribute("href") || "";
         const taskId = selected && selected.taskId || "";
+        if (!isSafeExternalProviderUrl(url)) {
+          recordSearch("commerceAgent.bookingLinkBlocked", Object.assign({}, selected || {}, {
+            taskId,
+            resultStatus:"bookingLinkBlocked",
+            outputSummary:"provider URL 不是 http/https，已安全拦截；weishan 不下单、不付款、不提交订单。"
+          }));
+          return;
+        }
         recordSearch("commerceAgent.bookingLinkViewed", Object.assign({}, selected || {}, {
           taskId,
           resultStatus:"bookingLinkViewed",
-          outputSummary:"用户查看 https 预订链接；weishan 不下单、不付款、不提交订单。"
+          outputSummary:"用户查看 https provider URL；weishan 不下单、不付款、不提交订单。"
         }));
+        if (url && window.WeishanAPI && typeof window.WeishanAPI.openExternal === "function") {
+          window.WeishanAPI.openExternal(url);
+          return;
+        }
+        if (url && window.weishan && typeof window.weishan.openExternal === "function") window.weishan.openExternal(url);
       });
     });
     if (selected && selected.taskId !== lastViewedTaskId) {

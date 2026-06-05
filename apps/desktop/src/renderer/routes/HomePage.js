@@ -296,7 +296,7 @@
   function logLine(log){
     const time = window.CommandApi.timeLabel(log.time);
     const raw = String(log && log.text || "");
-    if (/已生成调度计划：commerceAgent|commerceAgent\.plan|全球采购计划已/.test(raw)) return "";
+    if (/已生成调度计划：commerceAgent|commerceAgent\.plan|全球采购计划已|机票搜索已|搜索已生成|搜索已完成|搜索已阻断/.test(raw)) return "";
     return `
       <div class="cmd-log-line cmd-log-${esc(log.type || "info")}">
         <span class="cmd-time">${esc(time)}</span>
@@ -375,20 +375,27 @@
     ].filter(Boolean).join(" · ") : "";
     const providerMissing = stored.searchStatus === "providerMissing";
     const providerFailed = stored.searchStatus === "failed";
+    const noResults = stored.searchStatus === "noResults";
     const missingFields = Array.isArray(stored.missingFields) ? stored.missingFields : [];
     const normalized = stored.normalizedFields || {};
     const routeCondition = normalized.originText && normalized.destinationText ? normalized.originText + " → " + normalized.destinationText : "";
     const dateCondition = normalized.dateText || normalized.timing || "";
     const conditionSummary = [routeCondition, dateCondition].filter(Boolean).join("，");
     const isFlightPlan = stored.category === "flight";
+    const isProductPlan = stored.category === "ecommerce";
+    const commerceApi = window.WeishanCommerceAgent || null;
+    const cardTitle = commerceApi && commerceApi.createCommerceDisplayTitle ? commerceApi.createCommerceDisplayTitle(stored, candidates.length > 0) : blocked ? "全球采购计划已阻断" : candidates.length ? type + "搜索已完成" : type + "搜索已生成";
     const providerMissingText = isFlightPlan ? "未配置真实机票搜索 provider，当前不会返回实时机票价格" : "搜索源未配置，无法返回真实价格";
     const flightSafetyText = "未搜索、未下单、未付款、未提交订单；未请求付款；未上传或保存身份证/护照";
+    const productQuery = normalized.productQuery || normalized.normalizedQuery || "";
+    const genericResultSummary = candidates.length ? `已找到 ${candidates.length} 个真实 provider 结果${lowest ? " · 最低总价 " + esc(currency ? currency + " " + lowest : lowest) : ""}${recommendation.title ? " · 推荐 " + esc(recommendation.title) : ""}` : "";
     return `<div class="commerce-home-card ${blocked ? "is-blocked" : ""}" data-commerce-home-summary="true">
       <div class="commerce-home-card-main">
-        <h3>${blocked ? "全球采购计划已阻断" : "全球采购计划已生成"}</h3>
+        <h3>${esc(cardTitle)}</h3>
         <p><b>需求：</b>${esc(summary(task && task.text || "", 90))}</p>
         <p><b>类型：</b>${esc(type)}</p>
         <p><b>状态：</b>${blocked ? "已阻断" : "计划已生成"}</p>
+        ${!blocked && isProductPlan && productQuery ? `<p><b>商品关键词：</b>${esc(productQuery)}</p>` : ""}
         ${!blocked && isFlightPlan ? `<p><b>识别结果：</b>已识别为机票搜索计划</p>` : ""}
         ${!blocked && conditionSummary ? `<p><b>条件：</b>${esc(conditionSummary)}</p>` : ""}
         ${!blocked && isFlightPlan && normalized.originText ? `<p><b>出发地：</b>${esc(normalized.originText)}</p>` : ""}
@@ -397,8 +404,9 @@
         ${blocked ? `<p><b>原因：</b>涉及下单 / 付款 / 敏感资料或询价提交</p>` : ""}
         ${!blocked && providerMissing ? `<p><b>搜索源：</b>${esc(providerMissingText)}</p>` : ""}
         ${!blocked && providerFailed ? `<p><b>搜索源：</b>${esc(stored.searchErrorMessage || "搜索源不可用，无法返回真实价格")}</p>` : ""}
+        ${!blocked && noResults ? `<p><b>搜索结果：</b>provider 未返回可展示结果，当前不显示价格。</p>` : ""}
         ${!blocked && missingFields.length ? `<p><b>待补充：</b>${esc(missingFields.join("、"))}</p>` : ""}
-        ${!blocked && candidates.length ? `<p><b>搜索结果：</b>${isModelPricing ? esc(modelPriceSummary) : `已找到 ${candidates.length} 个候选方案${lowest ? " · 最低价格 " + esc(currency ? currency + " " + lowest : lowest) : ""}${recommendation.title ? " · 推荐 " + esc(recommendation.title) : ""}`}</p>` : ""}
+        ${!blocked && candidates.length ? `<p><b>搜索结果：</b>${isModelPricing ? esc(modelPriceSummary) : genericResultSummary}</p>` : ""}
         <p><b>安全边界：</b>${blocked ? "不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表" : isFlightPlan ? flightSafetyText : candidates.length ? "仅展示候选方案，未下单、未付款、未提交订单" : "未搜索、未下单、未付款、未提交订单"}</p>
       </div>
       <button class="cmd-btn primary commerce-view-plan-button" id="commerceViewPlanBtn" type="button">查看全球采购计划</button>
