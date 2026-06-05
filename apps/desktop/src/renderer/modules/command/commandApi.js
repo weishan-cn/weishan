@@ -9,13 +9,16 @@
     document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.15"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderAdapter && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderAdapter.js?v=2.0.21"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderAdapter.js?v=2.0.22"></scr' + 'ipt>');
+  }
+  if (!window.WeishanCommerceProviderConfig && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.22"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviders && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.21"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.22"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceSearch && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.15"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.22"></scr' + 'ipt>');
   }
 
   const QUEUE_KEY = "command.queue.v205";
@@ -252,6 +255,7 @@
       commercePlan.searchStatus = commercePlan.status === "blocked" ? "blocked" : commercePlan.missingFields.length ? "missingFields" : usesOpenRouter || hasProvider ? "ready" : "no_provider";
       commercePlan.searchProviderName = usesOpenRouter ? "OpenRouter" : hasProvider && search.getCommerceSearchSettings ? search.getCommerceSearchSettings().providerName || "commerceProvider" : "";
       commercePlan.providerHealth = providerHealth && providerHealth.providerHealth || [];
+      commercePlan.configHealth = providerHealth && providerHealth.configHealth || {};
       commercePlan.canShowPrice = providerHealth ? providerHealth.canShowPrice === true : false;
       commercePlan.canShowBookingButton = providerHealth ? providerHealth.canShowBookingButton === true : false;
       commercePlan.canShowCheckoutButton = providerHealth ? providerHealth.canShowCheckoutButton === true : false;
@@ -266,7 +270,7 @@
     const conditionSummary = [routeCondition, fields.dateText || fields.timing || ""].filter(Boolean).join("，");
     const isFlightPlan = savedPlan.category === "flight";
     const providerReason = Array.isArray(savedPlan.providerHealth) && savedPlan.providerHealth[0] && savedPlan.providerHealth[0].reasonWhenDisabled || "";
-    const providerMissingText = isFlightPlan ? "暂未配置真实机票搜索适配器，当前无法返回实时价格。" : savedPlan.category === "ecommerce" ? "暂未配置真实商品搜索适配器，当前无法返回实时价格。" : providerReason || "搜索适配器未配置，无法返回真实价格。";
+    const providerMissingText = isFlightPlan ? "暂未配置真实机票搜索适配器；配置状态未配置真实搜索源，当前无法返回实时价格。" : savedPlan.category === "ecommerce" ? "暂未配置真实商品搜索适配器；配置状态未配置真实搜索源，当前无法返回实时价格。" : providerReason || "搜索适配器未配置，配置状态未配置真实搜索源，无法返回真实价格。";
     const displayTitle = api.createCommerceDisplayTitle ? api.createCommerceDisplayTitle(savedPlan, false) : blocked ? "全球采购计划已阻断" : "全球采购计划已生成";
     const answer = [
       displayTitle,

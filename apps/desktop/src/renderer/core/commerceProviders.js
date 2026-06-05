@@ -20,6 +20,48 @@
     return window.WeishanCommerceProviderAdapter || null;
   }
 
+  function configApi(){
+    return window.WeishanCommerceProviderConfig || null;
+  }
+
+  function defaultConfig(category, settings){
+    const api = configApi();
+    if (api && api.getCommerceProviderConfig) return api.getCommerceProviderConfig(category, settings);
+    const next = normalizeCategory(category);
+    return {
+      providerId:next + "-provider-disabled",
+      category:next,
+      enabled:false,
+      configured:false,
+      hasApiKey:false,
+      configSource:"disabled",
+      allowNetworkSearch:false,
+      allowReturnPrice:false,
+      allowBookingUrl:false,
+      allowCheckoutUrl:false,
+      allowCreateOrder:false,
+      allowPay:false,
+      allowSaveIdentity:false,
+      configStatus:"not_configured",
+      reasonWhenUnavailable:"暂未配置真实搜索源"
+    };
+  }
+
+  function configFields(config){
+    const next = config || {};
+    return {
+      configStatus:next.configStatus || "not_configured",
+      hasApiKey:next.hasApiKey === true,
+      allowNetworkSearch:next.allowNetworkSearch === true,
+      allowReturnPrice:next.allowReturnPrice === true,
+      allowBookingUrl:next.allowBookingUrl === true,
+      allowCheckoutUrl:next.allowCheckoutUrl === true,
+      allowCreateOrder:false,
+      allowPay:false,
+      allowSaveIdentity:false
+    };
+  }
+
   function defaultAdapter(category){
     const api = adapterApi();
     if (api && api.getDefaultCommerceProviderAdapter) return api.getDefaultCommerceProviderAdapter(category);
@@ -57,6 +99,7 @@
     const next = normalizeCategory(category);
     const label = CATEGORY_LABELS[next] || "采购";
     const adapter = defaultAdapter(next);
+    const config = defaultConfig(next, null);
     return {
       id:next + "-provider-disabled",
       name:label + "搜索源",
@@ -73,7 +116,17 @@
       adapterId:adapter.providerId,
       adapterMode:"read_only",
       adapterConfigured:false,
-      adapterHealth:"not_configured"
+      adapterHealth:"not_configured",
+      configStatus:"not_configured",
+      hasApiKey:false,
+      allowNetworkSearch:false,
+      allowReturnPrice:false,
+      allowBookingUrl:false,
+      allowCheckoutUrl:false,
+      allowCreateOrder:false,
+      allowPay:false,
+      allowSaveIdentity:false,
+      configHealth:configFields(config)
     };
   }
 
@@ -87,6 +140,8 @@
     if (cfg.enabled !== true || cfg.providerMode !== "manualProvider") return null;
     if (!window.WeishanCommerceSearchProvider || typeof window.WeishanCommerceSearchProvider.search !== "function") return null;
     const adapter = defaultAdapter(next);
+    const config = defaultConfig(next, cfg);
+    if (config.enabled !== true || config.configured !== true || config.hasApiKey !== true || config.allowNetworkSearch !== true || config.allowReturnPrice !== true) return null;
     return {
       id:next + "-manual-provider",
       name:String(cfg.providerName || "Manual Commerce Provider"),
@@ -103,7 +158,17 @@
       adapterId:adapter.providerId,
       adapterMode:"read_only",
       adapterConfigured:true,
-      adapterHealth:"ready"
+      adapterHealth:"ready",
+      configStatus:"ready",
+      hasApiKey:true,
+      allowNetworkSearch:true,
+      allowReturnPrice:true,
+      allowBookingUrl:config.allowBookingUrl === true,
+      allowCheckoutUrl:config.allowCheckoutUrl === true,
+      allowCreateOrder:false,
+      allowPay:false,
+      allowSaveIdentity:false,
+      configHealth:configFields(config)
     };
   }
 
@@ -120,6 +185,7 @@
       hasProvider,
       providerHealth:[provider],
       adapterHealth:adapterFields(provider),
+      configHealth:provider.configHealth || configFields(provider),
       enabled:provider.enabled === true,
       configured:provider.configured === true,
       reasonWhenDisabled:provider.reasonWhenDisabled || "",

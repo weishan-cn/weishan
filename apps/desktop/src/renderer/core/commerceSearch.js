@@ -36,6 +36,57 @@
     return window.WeishanCommerceProviderAdapter || null;
   }
 
+  function configApi(){
+    return window.WeishanCommerceProviderConfig || null;
+  }
+
+  function defaultConfig(category, settings){
+    const api = configApi();
+    if (api && api.getCommerceProviderConfig) return api.getCommerceProviderConfig(category, settings);
+    const next = resultCategory(category);
+    return {
+      providerId:next + "-provider-disabled",
+      category:next,
+      enabled:false,
+      configured:false,
+      hasApiKey:false,
+      configSource:"disabled",
+      allowNetworkSearch:false,
+      allowReturnPrice:false,
+      allowBookingUrl:false,
+      allowCheckoutUrl:false,
+      allowCreateOrder:false,
+      allowPay:false,
+      allowSaveIdentity:false,
+      configStatus:"not_configured",
+      reasonWhenUnavailable:"暂未配置真实搜索源"
+    };
+  }
+
+  function configFields(config){
+    const next = config || {};
+    return {
+      configStatus:next.configStatus || "not_configured",
+      hasApiKey:next.hasApiKey === true,
+      allowNetworkSearch:next.allowNetworkSearch === true,
+      allowReturnPrice:next.allowReturnPrice === true,
+      allowBookingUrl:next.allowBookingUrl === true,
+      allowCheckoutUrl:next.allowCheckoutUrl === true,
+      allowCreateOrder:false,
+      allowPay:false,
+      allowSaveIdentity:false
+    };
+  }
+
+  function isProviderConfigReady(config){
+    return !!(config &&
+      config.enabled === true &&
+      config.configured === true &&
+      config.hasApiKey === true &&
+      config.allowNetworkSearch === true &&
+      config.allowReturnPrice === true);
+  }
+
   function defaultAdapter(category){
     const api = adapterApi();
     if (api && api.getDefaultCommerceProviderAdapter) return api.getDefaultCommerceProviderAdapter(category);
@@ -84,13 +135,13 @@
   function hasCommerceSearchProvider(settings){
     const next = Object.assign(defaultSettings(), settings || getCommerceSearchSettings());
     if (!next.enabled) return false;
+    const config = defaultConfig("product", next);
+    const manualConfigReady = isProviderConfigReady(config);
     if (next.providerMode === "manualProvider") {
-      return !!(window.WeishanCommerceSearchProvider && typeof window.WeishanCommerceSearchProvider.search === "function");
+      return manualConfigReady && !!(window.WeishanCommerceSearchProvider && typeof window.WeishanCommerceSearchProvider.search === "function");
     }
-    if (next.providerMode === "customEndpoint") {
-      return /^https:\/\//i.test(next.endpointUrl || "") && next.apiKeyConfigured === true;
-    }
-    if (next.providerMode === "openRouterModels") return true;
+    if (next.providerMode === "customEndpoint") return false;
+    if (next.providerMode === "openRouterModels") return false;
     return false;
   }
 
@@ -99,11 +150,13 @@
     const configured = hasCommerceSearchProvider(settings);
     const isProduct = next === "product";
     const adapter = defaultAdapter(next);
+    const config = defaultConfig(next, settings);
+    const configReady = isProviderConfigReady(config);
     return {
       category:next,
       categoryLabel:isProduct ? "商品" : next === "flight" ? "机票" : next,
-      searchStatus:configured ? "ready" : "no_provider",
-      hasProvider:configured,
+      searchStatus:configured && configReady ? "ready" : "no_provider",
+      hasProvider:configured && configReady,
       providerHealth:[{
         id:next + (configured ? "-manual-provider" : "-provider-disabled"),
         name:configured ? String(settings && settings.providerName || "Manual Commerce Provider") : "暂未配置真实搜索适配器",
@@ -120,7 +173,17 @@
         adapterId:adapter.providerId,
         adapterMode:"read_only",
         adapterConfigured:configured,
-        adapterHealth:configured ? "ready" : "not_configured"
+        adapterHealth:configured ? "ready" : "not_configured",
+        configStatus:configReady ? "ready" : "not_configured",
+        hasApiKey:config.hasApiKey === true,
+        allowNetworkSearch:config.allowNetworkSearch === true,
+        allowReturnPrice:config.allowReturnPrice === true,
+        allowBookingUrl:config.allowBookingUrl === true,
+        allowCheckoutUrl:config.allowCheckoutUrl === true,
+        allowCreateOrder:false,
+        allowPay:false,
+        allowSaveIdentity:false,
+        configHealth:configFields(config)
       }],
       adapterHealth:{
         adapterId:adapter.providerId,
@@ -128,12 +191,14 @@
         adapterConfigured:configured,
         adapterHealth:configured ? "ready" : "not_configured"
       },
-      enabled:configured,
-      configured,
-      reasonWhenDisabled:configured ? "" : "暂未配置真实搜索适配器",
-      canShowPrice:configured,
-      canShowBookingButton:configured && !isProduct,
-      canShowCheckoutButton:configured && isProduct
+      configHealth:configFields(config),
+      enabled:configured && configReady,
+      configured:configured && configReady,
+      reasonWhenDisabled:configured && configReady ? "" : config.reasonWhenUnavailable || "provider_config_not_ready",
+      reason:"provider_config_not_ready",
+      canShowPrice:configured && configReady,
+      canShowBookingButton:configured && configReady && config.allowBookingUrl === true,
+      canShowCheckoutButton:configured && configReady && config.allowCheckoutUrl === true
     };
   }
 
@@ -146,6 +211,10 @@
     const api = providersApi();
     if (api && api.getCommerceProviderHealth) return api.getCommerceProviderHealth(category, settings || getCommerceSearchSettings());
     return fallbackProviderHealth(category, settings || getCommerceSearchSettings());
+  }
+
+  function getCommerceProviderConfig(category, settings){
+    return defaultConfig(category, settings || getCommerceSearchSettings());
   }
 
   function isAiModelPricingTask(taskOrRequest){
@@ -561,15 +630,38 @@
     const settings = getCommerceSearchSettings();
     const request = createCommerceSearchRequest(task);
     const providerHealth = getCommerceProviderHealth(request.category, settings);
-    if (isAiModelPricingTask(request)) return searchOpenRouterModels(request);
-    if (!hasCommerceSearchProvider(settings)) {
+    const providerConfig = getCommerceProviderConfig(request.category, settings);
+    const configReady = isProviderConfigReady(providerConfig);
+    if (isAiModelPricingTask(request)) {
+      const aiConfig = getCommerceProviderConfig("aiModelPricing", settings);
+      if (!isProviderConfigReady(aiConfig)) {
+        return {
+          ok:false,
+          code:"COMMERCE_PROVIDER_CONFIG_NOT_READY",
+          message:"provider_config_not_ready",
+          reason:"provider_config_not_ready",
+          request,
+          searchStatus:"no_provider",
+          providerHealth:providerHealth.providerHealth,
+          configHealth:configFields(aiConfig),
+          canShowPrice:false,
+          canShowBookingButton:false,
+          canShowCheckoutButton:false,
+          candidates:[]
+        };
+      }
+      return searchOpenRouterModels(request);
+    }
+    if (!hasCommerceSearchProvider(settings) || !configReady) {
       return {
         ok:false,
-        code:"COMMERCE_NO_PROVIDER",
-        message:providerHealth.reasonWhenDisabled || "搜索适配器未配置，无法返回真实价格。",
+        code:"COMMERCE_PROVIDER_CONFIG_NOT_READY",
+        message:"provider_config_not_ready",
+        reason:"provider_config_not_ready",
         request,
         searchStatus:"no_provider",
         providerHealth:providerHealth.providerHealth,
+        configHealth:configFields(providerConfig),
         canShowPrice:false,
         canShowBookingButton:false,
         canShowCheckoutButton:false,
@@ -583,6 +675,7 @@
         message:"搜索条件缺失：" + request.missingFields.join("、"),
         request,
         providerHealth:providerHealth.providerHealth,
+        configHealth:configFields(providerConfig),
         canShowPrice:false,
         canShowBookingButton:false,
         canShowCheckoutButton:false,
@@ -601,6 +694,7 @@
         request,
         searchStatus:candidates.length > 0 ? "completed" : "no_results",
         providerHealth:providerHealth.providerHealth,
+        configHealth:configFields(providerConfig),
         canShowPrice:candidates.length > 0,
         canShowBookingButton:candidates.length > 0 && providerHealth.canShowBookingButton === true,
         canShowCheckoutButton:candidates.length > 0 && providerHealth.canShowCheckoutButton === true,
@@ -613,9 +707,11 @@
       ok:false,
       code:"COMMERCE_NO_PROVIDER",
       message:providerHealth.reasonWhenDisabled || "搜索适配器未配置，无法返回真实价格。",
+      reason:"provider_config_not_ready",
       request,
       searchStatus:"no_provider",
       providerHealth:providerHealth.providerHealth,
+      configHealth:configFields(providerConfig),
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -630,6 +726,8 @@
     hasCommerceSearchProvider,
     getCommerceProviderRegistry,
     getCommerceProviderHealth,
+    getCommerceProviderConfig,
+    isProviderConfigReady,
     createCommerceSearchRequest,
     normalizeCommerceSearchResults,
     sortCommerceCandidates,

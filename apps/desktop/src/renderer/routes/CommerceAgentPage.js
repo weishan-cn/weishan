@@ -18,15 +18,23 @@
   function ensureSearchLoaded(host){
     if (!window.WeishanCommerceProviderAdapter && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderAdapter"]')) {
       const adapter = document.createElement("script");
-      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.21";
+      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.22";
       adapter.dataset.weishanDynamic = "WeishanCommerceProviderAdapter";
       adapter.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(adapter);
       return;
     }
+    if (!window.WeishanCommerceProviderConfig && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConfig"]')) {
+      const config = document.createElement("script");
+      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.22";
+      config.dataset.weishanDynamic = "WeishanCommerceProviderConfig";
+      config.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(config);
+      return;
+    }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
-      providers.src = "./renderer/core/commerceProviders.js?v=2.0.21";
+      providers.src = "./renderer/core/commerceProviders.js?v=2.0.22";
       providers.dataset.weishanDynamic = "WeishanCommerceProviders";
       providers.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(providers);
@@ -34,7 +42,7 @@
     }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
-    script.src = "./renderer/core/commerceSearch.js?v=2.0.15";
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.22";
     script.dataset.weishanDynamic = "WeishanCommerceSearch";
     script.onload = () => render(host);
     document.head.appendChild(script);
@@ -223,6 +231,7 @@
     const health = searchApi() && searchApi().getCommerceProviderHealth ? searchApi().getCommerceProviderHealth(task && task.category, settings) : {};
     const providerRow = Array.isArray(health.providerHealth) && health.providerHealth[0] || {};
     const adapterInfo = health.adapterHealth || {};
+    const configInfo = health.configHealth || {};
     const reasonWhenDisabled = providerRow.reasonWhenDisabled || "";
     const providerLabel = isModelPricing ? "OpenRouter" : hasProvider ? settings.providerName || "commerceProvider" : "未配置";
     const failedMessage = task && task.searchStatus === "failed" ? task.searchErrorMessage || (isModelPricing ? "OpenRouter 搜索源不可用，无法返回真实价格。" : "搜索失败，无法返回真实价格。") : "";
@@ -234,12 +243,14 @@
         <span>出发地：${esc(flightOrigin)} · 目的地：${esc(flightDestination)} · 日期：${esc(flightDate)}</span>
         <span>暂未配置真实机票搜索适配器，当前无法返回实时价格。</span>
         <span>当前模式：只读搜索准备中。</span>
+        <span>配置状态：未配置真实搜索源；网络搜索未启用；实时价格不可用。</span>
         <span>未下单、未付款、未提交订单、未保存证件。</span>
       </div>` : ""}
       ${isProduct && !hasProvider ? `<div class="commerce-warning commerce-product-provider-missing">
         <b>已识别为商品搜索计划。</b>
         <span>暂未配置真实商品搜索适配器，当前无法返回实时价格。</span>
         <span>当前模式：只读搜索准备中。</span>
+        <span>配置状态：未配置真实搜索源；网络搜索未启用；实时价格不可用。</span>
         <span>未下单、未付款、未提交订单、未保存银行卡或证件。</span>
       </div>` : ""}
       ${!isModelPricing && !hasProvider ? `<dl class="commerce-facts commerce-provider-health">
@@ -249,6 +260,13 @@
         <div><dt>adapterMode</dt><dd>${esc(adapterInfo.adapterMode || "read_only")}</dd></div>
         <div><dt>adapterConfigured</dt><dd>false</dd></div>
         <div><dt>adapterHealth</dt><dd>${esc(adapterInfo.adapterHealth || "not_configured")}</dd></div>
+        <div><dt>配置状态</dt><dd>未配置真实搜索源</dd></div>
+        <div><dt>网络搜索</dt><dd>未启用</dd></div>
+        <div><dt>实时价格</dt><dd>不可用</dd></div>
+        <div><dt>configStatus</dt><dd>${esc(configInfo.configStatus || "not_configured")}</dd></div>
+        <div><dt>hasApiKey</dt><dd>${configInfo.hasApiKey === true ? "true" : "false"}</dd></div>
+        <div><dt>allowNetworkSearch</dt><dd>${configInfo.allowNetworkSearch === true ? "true" : "false"}</dd></div>
+        <div><dt>allowReturnPrice</dt><dd>${configInfo.allowReturnPrice === true ? "true" : "false"}</dd></div>
         <div><dt>canShowPrice</dt><dd>false</dd></div>
         <div><dt>canShowBookingButton</dt><dd>false</dd></div>
         <div><dt>canShowCheckoutButton</dt><dd>false</dd></div>
@@ -449,12 +467,13 @@
         }));
         const result = await search.searchCommerceCandidates(target);
         if (!result.ok) {
-          const status = result.code === "COMMERCE_MISSING_FIELDS" ? "missingFields" : result.code === "COMMERCE_NO_PROVIDER" || result.code === "COMMERCE_PROVIDER_NOT_CONFIGURED" ? "no_provider" : result.code === "COMMERCE_NO_RESULTS" ? "no_results" : "failed";
+          const status = result.code === "COMMERCE_MISSING_FIELDS" ? "missingFields" : result.code === "COMMERCE_NO_PROVIDER" || result.code === "COMMERCE_PROVIDER_NOT_CONFIGURED" || result.code === "COMMERCE_PROVIDER_CONFIG_NOT_READY" ? "no_provider" : result.code === "COMMERCE_NO_RESULTS" ? "no_results" : "failed";
           const updated = api.updateCommerceTask(taskId, {
             searchStatus:status,
             missingFields:result.request && result.request.missingFields || target.missingFields || [],
             searchProviderName:result.providerName || (isModelPricing ? "OpenRouter" : ""),
             providerHealth:result.providerHealth || target.providerHealth || [],
+            configHealth:result.configHealth || target.configHealth || {},
             canShowPrice:result.canShowPrice === true,
             canShowBookingButton:result.canShowBookingButton === true,
             canShowCheckoutButton:result.canShowCheckoutButton === true,
@@ -478,6 +497,7 @@
           searchStatus:"completed",
           searchProviderName:result.providerName || "",
           providerHealth:result.providerHealth || target.providerHealth || [],
+          configHealth:result.configHealth || target.configHealth || {},
           canShowPrice:result.canShowPrice === true,
           canShowBookingButton:result.canShowBookingButton === true,
           canShowCheckoutButton:result.canShowCheckoutButton === true,
