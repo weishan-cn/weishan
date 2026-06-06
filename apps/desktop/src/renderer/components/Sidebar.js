@@ -16,6 +16,9 @@
     const shell = document.querySelector(".shell");
     if (shell) shell.classList.toggle("sidebar-collapsed", isCollapsed());
   }
+  function appVersion(){
+    return window.WeishanConfig && window.WeishanConfig.version || "2.0.29";
+  }
   function html(){
     let currentSection = "";
     const collapsed = isCollapsed();
@@ -25,7 +28,7 @@
       const locked = m.paid && !window.WeishanPermissions.canUse(m.id);
       const label = m.label || window.I18n.t(m.id);
       return `${section}<button class="nav-item ${window.WeishanRouter.current()===m.id?'active':''}" data-route="${m.id}" title="${label}"><span class="nav-icon">${m.icon}</span><span class="nav-label">${label}</span>${m.pill?`<b class="pill">${m.pill}</b>`:""}${locked?`<b class="paid">${window.I18n.t("paidOnly")}</b>`:""}</button>`;
-    }).join("") + `</nav><div class="sidebar-foot"><div>weishan v2.15</div><div class="local-dot">● ${window.I18n.t("localFirstMode")}</div></div></aside>`;
+    }).join("") + `</nav><div class="sidebar-foot"><div>weishan v${appVersion()}</div><div class="local-dot">● ${window.I18n.t("localFirstMode")}</div></div></aside>`;
   }
   function bind(root){
     const toggle = root.querySelector("#sidebarToggle");

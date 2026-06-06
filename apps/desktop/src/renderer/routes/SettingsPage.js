@@ -1,6 +1,6 @@
 (function(){
   if (!window.WeishanCommerceLocationPolicy && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceLocationPolicy.js?v=2.0.28"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceLocationPolicy.js?v=2.0.29"></scr' + 'ipt>');
   }
 
   function esc(s){
@@ -487,11 +487,14 @@
     return {
       locationPermissionMode:"off",
       locationPermissionStatus:"not_requested",
+      shippingDestination:{ country:"", region:"", city:"", postalCode:"", source:"unknown", configured:false },
+      shippingDestinationRequiredForAccuratePrice:true,
+      hasShippingDestination:false,
       hasPreciseLocation:false,
       canCalculateAccurateLandedCost:false,
       canShowAccuratePrice:false,
       canShowRedirectButton:false,
-      reason:"location_required",
+      reason:"shipping_destination_required",
       privacy:{
         storeRawCoordinates:false,
         logRawCoordinates:false,
@@ -499,33 +502,46 @@
         useForAds:false,
         useForTracking:false
       },
-      notice:"为了精准计算最低到手价并遵守当地法律，请开启定位权限。weishan 仅将定位用于价格、运费、税费、关税和合规区域计算，不会保存原始位置。"
+      notice:"为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。weishan 仅将位置信息用于价格、运费、税费、关税和合规区域计算，不会保存原始位置。"
     };
   }
 
   function commerceLocationPanel(){
     const policy = commerceLocationPolicy();
     const mode = policy.locationPermissionMode || "off";
+    const destination = policy.shippingDestination || {};
+    const destinationStatus = policy.hasShippingDestination ? "已设置" : "未设置";
     return `
       <div class="ws-card commerce-location-settings" id="commerceLocationSettingsPanel">
         <div class="settings-title-row">
-          <h2>定位权限</h2>
+          <h2>位置与收货目的地</h2>
           <span class="connector-pill ${mode === "off" ? "connector-empty" : "connector-saved"}">${mode === "off" ? "关闭" : "待系统授权"}</span>
         </div>
-        <p class="ws-muted">为了精准计算最低到手价并遵守当地法律，请开启定位权限。weishan 仅将定位用于价格、运费、税费、关税和合规区域计算，不会保存原始位置。</p>
+        <p class="ws-muted">为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。weishan 仅将位置信息用于价格、运费、税费、关税和合规区域计算，不会保存原始位置。</p>
+        <p class="ws-muted">最低到手价需要根据收货目的地计算运费、税费、关税和当地合规要求。</p>
+        <div class="desktop-permission-grid commerce-destination-fields">
+          <label>国家/地区<input class="ws-input" id="commerceDestinationCountry" value="${esc(destination.country || "")}" placeholder="国家/地区"></label>
+          <label>州/省/城市<input class="ws-input" id="commerceDestinationRegion" value="${esc(destination.region || destination.city || "")}" placeholder="州/省/城市"></label>
+          <label>邮编/邮政编码<input class="ws-input" id="commerceDestinationPostalCode" value="${esc(destination.postalCode || "")}" placeholder="邮编/邮政编码"></label>
+        </div>
         <div class="desktop-permission-grid commerce-location-options">
           <label><input type="radio" name="commerceLocationMode" value="always"${mode === "always" ? " checked" : ""}> 永远允许</label>
           <label><input type="radio" name="commerceLocationMode" value="while_using_app"${mode === "while_using_app" ? " checked" : ""}> 使用 App 时允许</label>
           <label><input type="radio" name="commerceLocationMode" value="off"${mode === "off" ? " checked" : ""}> 关闭</label>
         </div>
+        <p class="ws-muted">定位服务偏好用于请求系统位置权限，不代表系统已经授权。系统授权成功前不会显示已定位，也不会把 hasPreciseLocation 设为 true。</p>
         <dl class="commerce-facts">
+          <div><dt>收货目的地</dt><dd>${destinationStatus}</dd></div>
+          <div><dt>国家/地区</dt><dd>${esc(destination.country || "未设置")}</dd></div>
+          <div><dt>州/省/城市</dt><dd>${esc(destination.region || destination.city || "未设置")}</dd></div>
+          <div><dt>邮编/邮政编码</dt><dd>${esc(destination.postalCode || "未设置")}</dd></div>
           <div><dt>定位状态</dt><dd>${esc(policy.locationPermissionStatus || "not_requested")}</dd></div>
           <div><dt>精确最低到手价</dt><dd>${policy.canCalculateAccurateLandedCost ? "可计算" : "不可用"}</dd></div>
           <div><dt>原始坐标保存</dt><dd>false</dd></div>
           <div><dt>第三方共享</dt><dd>false</dd></div>
           <div><dt>广告 / 追踪</dt><dd>false</dd></div>
         </dl>
-        <p class="commerce-warning">未获得系统定位授权前，不显示精确最低到手价，不显示购买、预订或付款跳转按钮。</p>
+        <p class="commerce-warning">weishan 不会保存原始经纬度。定位服务仅用于辅助判断地区；最低到手价以收货目的地为准。</p>
       </div>`;
   }
 
@@ -538,6 +554,27 @@
         const mode = String(input.value || "off");
         api.saveCommerceLocationPolicy({
           locationPermissionMode:mode,
+          locationPermissionStatus:"not_requested",
+          hasPreciseLocation:false
+        });
+        window.WeishanRouter && window.WeishanRouter.refresh && window.WeishanRouter.refresh();
+      });
+    });
+    function readDestination(){
+      return {
+        country:(panel.querySelector("#commerceDestinationCountry") && panel.querySelector("#commerceDestinationCountry").value) || "",
+        region:(panel.querySelector("#commerceDestinationRegion") && panel.querySelector("#commerceDestinationRegion").value) || "",
+        city:"",
+        postalCode:(panel.querySelector("#commerceDestinationPostalCode") && panel.querySelector("#commerceDestinationPostalCode").value) || "",
+        source:"manual"
+      };
+    }
+    ["commerceDestinationCountry", "commerceDestinationRegion", "commerceDestinationPostalCode"].forEach(function(id){
+      const input = panel.querySelector("#" + id);
+      if (!input) return;
+      input.addEventListener("change", function(){
+        api.saveCommerceLocationPolicy({
+          shippingDestination:readDestination(),
           locationPermissionStatus:"not_requested",
           hasPreciseLocation:false
         });

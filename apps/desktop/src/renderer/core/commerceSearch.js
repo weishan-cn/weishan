@@ -63,7 +63,10 @@
     return {
       locationPermissionMode:"off",
       locationPermissionStatus:"not_requested",
-      locationRequiredForAccuratePrice:true,
+      shippingDestination:{ country:"", region:"", city:"", postalCode:"", source:"unknown", configured:false },
+      shippingDestinationRequiredForAccuratePrice:true,
+      hasShippingDestination:false,
+      locationRequiredForAccuratePrice:false,
       hasPreciseLocation:false,
       canCalculateAccurateLandedCost:false,
       canShowAccuratePrice:false,
@@ -71,9 +74,9 @@
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
-      landedCostAccuracy:"blocked_location_required",
-      searchStatus:"location_required",
-      reason:"location_required_for_accurate_landed_cost",
+      landedCostAccuracy:"blocked_shipping_destination_required",
+      searchStatus:"shipping_destination_required",
+      reason:"shipping_destination_required_for_accurate_landed_cost",
       privacy:{
         storeRawCoordinates:false,
         logRawCoordinates:false,
@@ -380,22 +383,22 @@
     };
   }
 
-  function locationRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox){
+  function shippingDestinationRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox){
     const health = locationHealth();
     return {
       ok:false,
-      code:"COMMERCE_LOCATION_REQUIRED",
-      message:"需要开启定位以计算精确最低到手价。",
-      reason:"location_required_for_accurate_landed_cost",
+      code:"COMMERCE_SHIPPING_DESTINATION_REQUIRED",
+      message:"需要设置收货目的地以计算精确最低到手价。",
+      reason:"shipping_destination_required_for_accurate_landed_cost",
       request,
-      searchStatus:"location_required",
+      searchStatus:"shipping_destination_required",
       providerHealth:providerHealth.providerHealth,
       configHealth:configFields(providerConfig),
       connectorHealth,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       locationHealth:health,
-      landedCostAccuracy:"blocked_location_required",
+      landedCostAccuracy:"blocked_shipping_destination_required",
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -1201,8 +1204,8 @@
     const connectorReady = isProviderConnectorReady(providerConnector);
     const connectorHealth = connectorFields(providerConnector);
     const sandbox = getCommerceProviderSandbox(request.category, settings);
-    if (isProductSearchRequest(request) && locationHealth().canCalculateAccurateLandedCost !== true) {
-      return locationRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox);
+    if (isProductSearchRequest(request) && locationHealth().hasShippingDestination !== true) {
+      return shippingDestinationRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox);
     }
     if (isProductSearchRequest(request) && !getProductProviderReadiness(providerConfig).ready) {
       return productProviderBlockedResult(request, providerHealth, providerConfig, connectorHealth, sandbox);
