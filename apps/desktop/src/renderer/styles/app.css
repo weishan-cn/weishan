@@ -1574,3 +1574,121 @@
     max-height:340px;
   }
 }
+
+.commerce-onboarding-review-panel{
+  margin:12px 0 4px;
+  padding:14px;
+  border:1px solid #bfdbfe;
+  border-radius:12px;
+  background:#eff6ff;
+  color:#0f172a;
+  display:grid;
+  gap:12px;
+  box-shadow:0 8px 24px rgba(37,99,235,.08);
+}
+.commerce-onboarding-panel-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid #dbeafe;
+}
+.commerce-onboarding-panel-head h3{
+  margin:0 0 4px;
+  color:#0f172a;
+  font-size:17px;
+  line-height:1.25;
+}
+.commerce-onboarding-panel-head p{
+  margin:0;
+  color:#475569;
+  font-size:13px;
+  font-weight:800;
+  line-height:1.45;
+}
+.commerce-onboarding-panel-head strong{
+  flex:0 0 auto;
+  max-width:260px;
+  border:1px solid #fbbf24;
+  background:#fffbeb;
+  color:#92400e;
+  border-radius:10px;
+  padding:8px 10px;
+  font-size:13px;
+  line-height:1.4;
+}
+.commerce-onboarding-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-onboarding-group{
+  border:1px solid #dbeafe;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+  display:grid;
+  gap:8px;
+}
+.commerce-onboarding-group h4{
+  margin:0;
+  color:#1d4ed8;
+  font-size:13px;
+  line-height:1.25;
+}
+.commerce-onboarding-group ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  gap:7px;
+}
+.commerce-onboarding-group li{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  min-height:22px;
+  font-size:12px;
+  line-height:1.4;
+}
+.commerce-onboarding-group li span{
+  color:#334155;
+  font-weight:900;
+}
+.commerce-onboarding-group li b{
+  flex:0 0 auto;
+  color:#9a3412;
+  font-size:12px;
+  font-weight:900;
+  text-align:right;
+}
+.commerce-onboarding-blocked-state{
+  grid-column:1 / -1;
+  background:#f8fafc;
+}
+.commerce-onboarding-final-note{
+  border-top:1px solid #dbeafe;
+  padding-top:10px;
+  display:grid;
+  gap:6px;
+}
+.commerce-onboarding-final-note p{
+  margin:0;
+  color:#334155;
+  font-size:12px;
+  font-weight:850;
+  line-height:1.55;
+}
+@media (max-width: 980px){
+  .commerce-onboarding-panel-head{
+    display:grid;
+  }
+  .commerce-onboarding-panel-head strong{
+    max-width:none;
+  }
+  .commerce-onboarding-grid{
+    grid-template-columns:1fr;
+  }
+}

@@ -45,7 +45,7 @@
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
     return {
-      checklistVersion:"2.0.35",
+      checklistVersion:"2.0.36",
       phase:"provider_onboarding_checklist",
       category:normalizeCategory(category),
       onboardingStatus:"not_reviewed",

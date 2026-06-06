@@ -388,7 +388,7 @@
     const commerceApi = window.WeishanCommerceAgent || null;
     const cardTitle = commerceApi && commerceApi.createCommerceDisplayTitle ? commerceApi.createCommerceDisplayTitle(stored, candidates.length > 0) : blocked ? "全球采购计划已阻断" : candidates.length ? type + "搜索已完成" : type + "搜索已生成";
     const providerReason = Array.isArray(stored.providerHealth) && stored.providerHealth[0] && stored.providerHealth[0].reasonWhenDisabled || "";
-    const onboardingText = "Provider 接入审查：未完成；接口文档审查：未完成；API key 存储方案：未审查；价格/税费/运费字段审查：未完成；隐私与合规审查：未完成；当前不会连接真实 provider";
+    const onboardingText = "Provider 接入审查未完成，完成前不会连接真实平台；接口文档审查未完成；API key 存储方案未审查；价格、税费和运费字段审查未完成；隐私与合规审查未完成";
     const productProfile = stored.configHealth && stored.configHealth.productProviderProfile || {};
     const productCandidateName = productProfile.selectedCandidateName || productProfile.candidateName || "eBay Browse API";
     const poolSummaryByCategory = {

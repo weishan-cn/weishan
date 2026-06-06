@@ -69,7 +69,7 @@
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
     return {
-      checklistVersion:"2.0.35",
+      checklistVersion:"2.0.36",
       phase:"provider_onboarding_checklist",
       category:resultCategory(category),
       onboardingStatus:"not_reviewed",
@@ -345,7 +345,7 @@
     const next = onboarding || {};
     const safety = next.safety || {};
     return {
-      checklistVersion:next.checklistVersion || "2.0.35",
+      checklistVersion:next.checklistVersion || "2.0.36",
       phase:next.phase || "provider_onboarding_checklist",
       onboardingStatus:next.onboardingStatus || next.status || "not_reviewed",
       status:next.status || next.onboardingStatus || "not_reviewed",

@@ -568,7 +568,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderOnboardingChecklist) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.35";
+          script.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.36";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -583,7 +583,7 @@ test.describe.serial("commerce agent workbench", () => {
         reason:window.WeishanCommerceProviderOnboardingChecklist.explainProviderOnboardingBlockReason("product")
       };
     });
-    expect(result.checklist.checklistVersion).toBe("2.0.35");
+    expect(result.checklist.checklistVersion).toBe("2.0.36");
     expect(result.checklist.phase).toBe("provider_onboarding_checklist");
     expect(result.checklist.appliesTo).toContain("product_marketplace");
     expect(result.checklist.appliesTo).toContain("official_brand_site");
@@ -634,13 +634,17 @@ test.describe.serial("commerce agent workbench", () => {
     await page.locator("#commerceViewPlanBtn").click();
     const detail = page.locator(".commerce-detail");
     await expect(detail).toContainText("Provider 接入审查面板");
-    await expect(detail).toContainText("总体状态");
-    await expect(detail).toContainText("未完成，暂不可接入真实 provider");
+    await expect(detail).toContainText("真实 provider 接入前必须完成以下审查。当前尚未接入任何真实 provider。");
+    await expect(detail).toContainText("总体状态：未完成，暂不可接入真实 provider");
+    await expect(detail).toContainText("合规与条款");
+    await expect(detail).toContainText("API 与接口");
+    await expect(detail).toContainText("价格与费用字段");
+    await expect(detail).toContainText("安全边界");
+    await expect(detail).toContainText("当前阻断状态");
     await expect(detail).toContainText("法律条款审查");
     await expect(detail).toContainText("API 文档审查");
     await expect(detail).toContainText("调用额度 / 频率限制审查");
-    await expect(detail).toContainText("国家 / 地区覆盖审查");
-    await expect(detail).toContainText("商品 / 酒店 / 机票 / 票务数据字段审查");
+    await expect(detail).toContainText("数据字段审查");
     await expect(detail).toContainText("价格字段审查");
     await expect(detail).toContainText("税费 / 关税 / 运费 / 预订费字段审查");
     await expect(detail).toContainText("外部跳转 URL 策略审查");
@@ -652,6 +656,12 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail).toContainText("不保存证件/银行卡确认");
     await expect(detail).toContainText("合规风险审查");
     await expect(detail).toContainText("no_provider fallback 审查");
+    await expect(detail).toContainText("网络搜索");
+    await expect(detail).toContainText("未启用");
+    await expect(detail).toContainText("实时价格");
+    await expect(detail).toContainText("不可用");
+    await expect(detail).toContainText("连接方式");
+    await expect(detail).toContainText("只读搜索准备中，暂未连接真实平台");
     await expect(detail).toContainText("只有以上审查全部完成，并通过 config / adapter / sandbox / connector gate 后，weishan 才允许进入真实 provider 连接");
     await expect(detail).toContainText("真实接通后的状态应为：Provider 接入审查已完成、接口已接入、网络搜索已启用、实时价格可用、精确跳转已启用");
     await expect(detail).toContainText("不能提前模拟");
@@ -1291,8 +1301,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("价格/税费/运费字段审查");
     await expect(page.locator(".commerce-detail")).toContainText("隐私与合规审查");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会连接真实 provider");
-    await expect(page.locator(".commerce-detail")).toContainText("Connector 类型");
-    await expect(page.locator(".commerce-detail")).toContainText("只读搜索模板");
+    await expect(page.locator(".commerce-detail")).toContainText("连接方式");
+    await expect(page.locator(".commerce-detail")).toContainText("只读搜索准备中，暂未连接真实平台");
     await expect(page.locator(".commerce-detail")).toContainText("配置状态");
     await expect(page.locator(".commerce-detail")).toContainText("未配置真实搜索源");
     await expect(page.locator(".commerce-detail")).toContainText("网络搜索");
@@ -1337,8 +1347,52 @@ test.describe.serial("commerce agent workbench", () => {
   });
 
   test("global provider pool copy covers product hotel flight and ticket no-provider pages", async () => {
+    const assertOnboardingPanelVisible = async () => {
+      const detail = page.locator(".commerce-detail");
+      await expect(detail).toContainText("Provider 接入审查面板");
+      await expect(detail).toContainText("总体状态：未完成，暂不可接入真实 provider");
+      await expect(detail).toContainText("合规与条款");
+      await expect(detail).toContainText("API 与接口");
+      await expect(detail).toContainText("价格与费用字段");
+      await expect(detail).toContainText("安全边界");
+      await expect(detail).toContainText("当前阻断状态");
+      await expect(detail).toContainText("法律条款审查");
+      await expect(detail).toContainText("API 文档审查");
+      await expect(detail).toContainText("API key 存储方案");
+      await expect(detail).toContainText("价格字段审查");
+      await expect(detail).toContainText("税费 / 关税 / 运费 / 预订费字段审查");
+      await expect(detail).toContainText("隐私政策审查");
+      await expect(detail).toContainText("不代付款确认");
+      await expect(detail).toContainText("不自动下单确认");
+      await expect(detail).toContainText("不保存证件/银行卡确认");
+      await expect(detail).toContainText("审查全部完成");
+      await expect(detail).toContainText("config / adapter / sandbox / connector gate");
+      await expect(detail).toContainText("接通前不会访问真实平台");
+      await expect(detail).toContainText("不会返回价格");
+      await expect(detail).toContainText("不会跳转购买或预订页面");
+      await expect(detail).toContainText("不能提前模拟");
+      await expect(detail).not.toContainText("legalTermsReviewed=false");
+      await expect(detail).not.toContainText("apiDocsReviewed=false");
+      await expect(detail).not.toContainText("canConnectEndpoint=false");
+      await expect(detail).not.toContainText("canDisplayPrice=false");
+      await expect(detail).not.toContainText("noRealEndpoint=true");
+      await expect(detail).not.toContainText("noApiKey=true");
+      await expect(detail).not.toContainText("provider_onboarding_required");
+      await expect(detail).not.toContainText("endpointConnected=false");
+      await expect(detail).not.toContainText("apiKeyConfigured=false");
+      await expect(detail).not.toContainText("networkAllowed=false");
+      await expect(detail).not.toContainText("canSearchNow=false");
+      await expect(detail).not.toContainText("selectedStatus");
+      await expect(detail).not.toContainText("立即支付");
+      await expect(detail).not.toContainText("上传身份证");
+      await expect(detail).not.toContainText("上传护照");
+      await expect(detail).not.toContainText("保存银行卡");
+      await expect(page.getByRole("button", { name:/去购买|去预订|付款|立即支付|提交订单/ })).toHaveCount(0);
+    };
+
     await submitHomeCommand(page, runId + " 买华为手机");
     await page.locator("#commerceViewPlanBtn").click();
+    await assertOnboardingPanelVisible();
     await expect(page.locator(".commerce-detail")).toContainText("商品电商平台");
     await expect(page.locator(".commerce-detail")).toContainText("品牌官网");
     await expect(page.locator(".commerce-detail")).toContainText("商品官网");
@@ -1347,6 +1401,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("当前不会返回价格");
     await expect(page.locator(".commerce-detail")).toContainText("Provider 接入审查");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会连接真实 provider");
+    await assertOnboardingPanelVisible();
     await expect(page.locator(".commerce-detail")).not.toContainText("去购买");
     await expect(page.locator(".commerce-detail")).not.toContainText("legalTermsReviewed=false");
     await expect(page.locator(".commerce-detail")).not.toContainText("apiDocsReviewed=false");
@@ -1365,6 +1420,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("当前不会返回房价");
     await expect(page.locator(".commerce-detail")).toContainText("Provider 接入审查");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会连接真实 provider");
+    await assertOnboardingPanelVisible();
     await expect(page.locator(".commerce-detail")).not.toContainText("去预订");
 
     await submitHomeCommand(page, runId + " 订机票");
@@ -1377,6 +1433,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("当前不会返回票价");
     await expect(page.locator(".commerce-detail")).toContainText("Provider 接入审查");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会连接真实 provider");
+    await assertOnboardingPanelVisible();
     await expect(page.locator(".commerce-detail")).not.toContainText("去预订");
 
     await submitHomeCommand(page, runId + " 买演唱会门票");

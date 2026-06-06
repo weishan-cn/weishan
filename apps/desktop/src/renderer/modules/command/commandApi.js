@@ -18,7 +18,7 @@
     document.write('<scr' + 'ipt src="./renderer/core/commerceGlobalProviderPool.js?v=2.0.32"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderOnboardingChecklist && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.35"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.36"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProductProviderCandidate && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.32"></scr' + 'ipt>');
@@ -301,7 +301,7 @@
     const conditionSummary = [routeCondition, fields.dateText || fields.timing || ""].filter(Boolean).join("，");
     const isFlightPlan = savedPlan.category === "flight";
     const providerReason = Array.isArray(savedPlan.providerHealth) && savedPlan.providerHealth[0] && savedPlan.providerHealth[0].reasonWhenDisabled || "";
-    const onboardingText = "Provider 接入审查：未完成；接口文档审查：未完成；API key 存储方案：未审查；价格/税费/运费字段审查：未完成；隐私与合规审查：未完成；当前不会连接真实 provider。";
+    const onboardingText = "Provider 接入审查未完成，完成前不会连接真实平台；接口文档审查未完成；API key 存储方案未审查；价格、税费和运费字段审查未完成；隐私与合规审查未完成。";
     const productProfile = savedPlan.configHealth && savedPlan.configHealth.productProviderProfile || {};
     const productCandidateName = productProfile.selectedCandidateName || productProfile.candidateName || "eBay Browse API";
     const poolSummaryByCategory = {

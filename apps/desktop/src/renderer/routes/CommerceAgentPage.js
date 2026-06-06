@@ -42,7 +42,7 @@
     }
     if (!window.WeishanCommerceProviderOnboardingChecklist && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderOnboardingChecklist"]')) {
       const onboarding = document.createElement("script");
-      onboarding.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.35";
+      onboarding.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.36";
       onboarding.dataset.weishanDynamic = "WeishanCommerceProviderOnboardingChecklist";
       onboarding.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(onboarding);
@@ -243,37 +243,56 @@
     const status = onboardingInfo || {};
     const checklist = status.checklist || {};
     const item = (label, value) => `<li><span>${esc(label)}</span><b>${esc(toOnboardingDisplayStatus(value))}</b></li>`;
-    return `<div class="commerce-onboarding-review-panel">
-        <h3>Provider 接入审查面板</h3>
-        <dl class="commerce-facts commerce-onboarding-summary">
-          <div><dt>总体状态</dt><dd>${status.canStartConnectorDevelopment === true ? "已完成，可进入下一步" : "未完成，暂不可接入真实 provider"}</dd></div>
-          <div><dt>接口状态</dt><dd>尚未接入</dd></div>
-          <div><dt>网络搜索</dt><dd>未启用</dd></div>
-          <div><dt>实时价格</dt><dd>不可用</dd></div>
-          <div><dt>精确跳转</dt><dd>待真实 provider 接入后启用</dd></div>
-          <div><dt>支付/下单</dt><dd>不支持，由外部平台完成</dd></div>
-          <div><dt>证件/银行卡</dt><dd>不保存</dd></div>
-        </dl>
-        <ol class="commerce-onboarding-checklist">
-          ${item("法律条款审查", checklist.legalTermsReviewed)}
-          ${item("API 文档审查", checklist.apiDocsReviewed)}
-          ${item("调用额度 / 频率限制审查", checklist.rateLimitReviewed)}
-          ${item("国家 / 地区覆盖审查", checklist.regionCoverageReviewed)}
-          ${item("商品 / 酒店 / 机票 / 票务数据字段审查", checklist.dataFieldsReviewed)}
-          ${item("价格字段审查", checklist.priceFieldsReviewed)}
-          ${item("税费 / 关税 / 运费 / 预订费字段审查", checklist.taxAndFeeFieldsReviewed && checklist.shippingOrBookingFeeFieldsReviewed)}
-          ${item("外部跳转 URL 策略审查", checklist.redirectUrlPolicyReviewed)}
-          ${item("隐私政策审查", checklist.privacyPolicyReviewed)}
-          ${item("API key 存储方案", checklist.apiKeyStoragePlanReviewed ? true : "not_reviewed")}
-          ${item("不代付款确认", checklist.noPaymentConfirmed)}
-          ${item("不自动下单确认", checklist.noAutoOrderConfirmed)}
-          ${item("不保存证件/银行卡确认", checklist.noIdentityStorageConfirmed)}
-          ${item("合规风险审查", checklist.complianceRiskReviewed)}
-          ${item("no_provider fallback 审查", checklist.fallbackNoProviderStateReviewed)}
-        </ol>
-        <p>只有以上审查全部完成，并通过 config / adapter / sandbox / connector gate 后，weishan 才允许进入真实 provider 连接。接通前不会访问真实平台、不会返回价格、不会跳转购买或预订页面。</p>
-        <p>真实接通后的状态应为：Provider 接入审查已完成、接口已接入、网络搜索已启用、实时价格可用、精确跳转已启用。但该状态只能在真实 provider 审查和接入完成后显示，不能提前模拟。</p>
-      </div>`;
+    const group = (title, items) => `<section class="commerce-onboarding-group"><h4>${esc(title)}</h4><ul>${items.join("")}</ul></section>`;
+    return `<section class="commerce-onboarding-review-panel" aria-label="Provider 接入审查面板">
+        <div class="commerce-onboarding-panel-head">
+          <div>
+            <h3>Provider 接入审查面板</h3>
+            <p>真实 provider 接入前必须完成以下审查。当前尚未接入任何真实 provider。</p>
+          </div>
+          <strong>总体状态：${status.canStartConnectorDevelopment === true ? "已完成，可进入下一步" : "未完成，暂不可接入真实 provider"}</strong>
+        </div>
+        <div class="commerce-onboarding-grid">
+          ${group("合规与条款", [
+            item("法律条款审查", checklist.legalTermsReviewed),
+            item("隐私政策审查", checklist.privacyPolicyReviewed),
+            item("合规风险审查", checklist.complianceRiskReviewed)
+          ])}
+          ${group("API 与接口", [
+            item("API 文档审查", checklist.apiDocsReviewed),
+            item("调用额度 / 频率限制审查", checklist.rateLimitReviewed),
+            item("接口接入审查", checklist.endpointConnectionReviewed),
+            item("API key 存储方案", checklist.apiKeyStoragePlanReviewed ? true : "not_reviewed")
+          ])}
+          ${group("价格与费用字段", [
+            item("数据字段审查", checklist.dataFieldsReviewed),
+            item("价格字段审查", checklist.priceFieldsReviewed),
+            item("税费 / 关税 / 运费 / 预订费字段审查", checklist.taxAndFeeFieldsReviewed && checklist.shippingOrBookingFeeFieldsReviewed),
+            item("no_provider fallback 审查", checklist.fallbackNoProviderStateReviewed)
+          ])}
+          ${group("安全边界", [
+            item("不代付款确认", checklist.noPaymentConfirmed),
+            item("不自动下单确认", checklist.noAutoOrderConfirmed),
+            item("不保存证件/银行卡确认", checklist.noIdentityStorageConfirmed),
+            item("外部跳转 URL 策略审查", checklist.redirectUrlPolicyReviewed)
+          ])}
+          <section class="commerce-onboarding-group commerce-onboarding-blocked-state">
+            <h4>当前阻断状态</h4>
+            <ul>
+              <li><span>网络搜索</span><b>未启用</b></li>
+              <li><span>实时价格</span><b>不可用</b></li>
+              <li><span>精确跳转</span><b>待真实 provider 接入后启用</b></li>
+              <li><span>支付/下单</span><b>不支持，由外部平台完成</b></li>
+              <li><span>证件/银行卡</span><b>不保存</b></li>
+              <li><span>连接方式</span><b>只读搜索准备中，暂未连接真实平台</b></li>
+            </ul>
+          </section>
+        </div>
+        <div class="commerce-onboarding-final-note">
+          <p>只有以上审查全部完成，并通过 config / adapter / sandbox / connector gate 后，weishan 才允许进入真实 provider 连接。接通前不会访问真实平台、不会返回价格、不会跳转购买或预订页面。</p>
+          <p>真实接通后的状态应为：Provider 接入审查已完成、接口已接入、网络搜索已启用、实时价格可用、精确跳转已启用。该状态只能在真实 provider 审查和接入完成后显示，不能提前模拟。</p>
+        </div>
+      </section>`;
   }
 
   function providerPoolNoticeHtml(task, configInfo, onboardingInfo){
@@ -286,7 +305,7 @@
         <span>${esc(copy.examples)}。</span>
         ${isProduct ? `<span>eBay Browse API 是商品搜索试点候选之一，尚未接入。</span>` : ""}
         <span>接口状态：尚未接入。</span>
-        <span>Provider 接入审查：未完成。</span>
+        <span>Provider 接入审查：未完成，完成前不会连接真实平台。</span>
         <span>接口文档审查：未完成。</span>
         <span>API key 存储方案：未审查。</span>
         <span>价格/税费/运费字段审查：未完成。</span>
@@ -464,12 +483,12 @@
       ${!isModelPricing && !hasProvider ? `<dl class="commerce-facts commerce-provider-health">
         <div><dt>搜索适配器</dt><dd>暂未配置</dd></div>
         <div><dt>接口状态</dt><dd>尚未接入</dd></div>
-        <div><dt>Provider 接入审查</dt><dd>${onboardingInfo.canConnectEndpoint === true ? "已完成" : "未完成"}</dd></div>
+        <div><dt>Provider 接入审查</dt><dd>${onboardingInfo.canConnectEndpoint === true ? "已完成" : "未完成，完成前不会连接真实平台"}</dd></div>
         <div><dt>接口文档审查</dt><dd>未完成</dd></div>
         <div><dt>API key 存储方案</dt><dd>未审查</dd></div>
         <div><dt>价格/税费/运费字段审查</dt><dd>未完成</dd></div>
         <div><dt>隐私与合规审查</dt><dd>未完成</dd></div>
-        <div><dt>Connector 类型</dt><dd>只读搜索模板</dd></div>
+        <div><dt>连接方式</dt><dd>只读搜索准备中，暂未连接真实平台</dd></div>
         <div><dt>当前模式</dt><dd>只读搜索准备中</dd></div>
         <div><dt>配置状态</dt><dd>未配置真实搜索源</dd></div>
         <div><dt>网络搜索</dt><dd>未启用</dd></div>
