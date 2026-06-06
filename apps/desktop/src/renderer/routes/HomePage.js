@@ -7,7 +7,7 @@
     return String(s || "").replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; });
   }
   function t(key){ return window.I18n.t(key); }
-  function appVersion(){ return window.WeishanConfig && window.WeishanConfig.version || "2.0.29"; }
+  function appVersion(){ return window.WeishanConfig && window.WeishanConfig.version || "2.0.30"; }
 
   function formatSize(size){
     const value = Number(size || 0);
@@ -388,7 +388,9 @@
     const commerceApi = window.WeishanCommerceAgent || null;
     const cardTitle = commerceApi && commerceApi.createCommerceDisplayTitle ? commerceApi.createCommerceDisplayTitle(stored, candidates.length > 0) : blocked ? "全球采购计划已阻断" : candidates.length ? type + "搜索已完成" : type + "搜索已生成";
     const providerReason = Array.isArray(stored.providerHealth) && stored.providerHealth[0] && stored.providerHealth[0].reasonWhenDisabled || "";
-    const providerMissingText = isFlightPlan ? "Provider Connector 未启用；暂未配置真实机票搜索适配器；网络请求未启用，当前无法返回实时价格" : isProductPlan ? "商品搜索 provider：方案已选择，尚未接入；当前试点方向：商品搜索；网络搜索未启用，实时价格不可用；精确跳转待真实 provider 接入后启用" : providerReason || "Provider Connector 未启用；搜索适配器未配置，无法返回真实价格";
+    const productProfile = stored.configHealth && stored.configHealth.productProviderProfile || {};
+    const productCandidateName = productProfile.selectedCandidateName || productProfile.candidateName || "eBay Browse API";
+    const providerMissingText = isFlightPlan ? "Provider Connector 未启用；暂未配置真实机票搜索适配器；网络请求未启用，当前无法返回实时价格" : isProductPlan ? "首个候选 provider：" + productCandidateName + "；当前状态：已选型，尚未接入；当前仅完成 provider 选型，尚未连接真实接口；网络搜索未启用，实时价格不可用；精确跳转待真实 provider 接入后启用；当前不会访问 eBay 或任何真实平台" : providerReason || "Provider Connector 未启用；搜索适配器未配置，无法返回真实价格";
     const flightSafetyText = "未下单、未付款、未提交订单、未保存证件";
     const productSafetyText = "未下单、未付款、未提交订单、未保存银行卡或证件";
     const productQuery = normalized.productQuery || normalized.normalizedQuery || "";
@@ -407,7 +409,7 @@
         ${!blocked && isFlightPlan && dateCondition ? `<p><b>日期：</b>${esc(dateCondition)}</p>` : ""}
         ${blocked ? `<p><b>原因：</b>涉及下单 / 付款 / 敏感资料或询价提交</p>` : ""}
         ${!blocked && destinationRequired ? `<p><b>收货目的地：</b>未设置</p><p><b>定位服务：</b>关闭 / 未授权</p><p><b>价格状态：</b>精确最低到手价不可用</p><p><b>原因：</b>需要收货国家/地区/邮编用于运费、税费、关税和当地合规计算。</p><p class="commerce-warning">为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。实际价格、库存、税费和关税仍以外部平台和海关结算为准。</p>` : ""}
-        ${!blocked && providerMissing ? `<p><b>搜索源：</b>${esc(providerMissingText)}</p>` : ""}
+        ${!blocked && (providerMissing || isProductPlan && destinationRequired) ? `<p><b>搜索源：</b>${esc(providerMissingText)}</p>` : ""}
         ${!blocked && providerFailed ? `<p><b>搜索源：</b>${esc(stored.searchErrorMessage || "搜索源不可用，无法返回真实价格")}</p>` : ""}
         ${!blocked && noResults ? `<p><b>搜索结果：</b>provider 未返回可展示结果，当前不显示价格。</p>` : ""}
         ${!blocked && missingFields.length ? `<p><b>待补充：</b>${esc(missingFields.join("、"))}</p>` : ""}

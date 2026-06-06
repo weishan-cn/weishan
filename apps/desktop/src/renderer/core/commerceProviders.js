@@ -36,6 +36,31 @@
     return window.WeishanCommerceProductProviderSelection || null;
   }
 
+  function productCandidateApi(){
+    return window.WeishanCommerceProductProviderCandidate || null;
+  }
+
+  function productCandidateReadiness(){
+    const api = productCandidateApi();
+    if (api && api.getProductProviderCandidateReadiness) return api.getProductProviderCandidateReadiness();
+    return {
+      selectedFirstCandidate:"ebay_browse_api",
+      selectedName:"eBay Browse API",
+      selectedStatus:"selected_not_connected",
+      ready:false,
+      endpointConnected:false,
+      apiKeyConfigured:false,
+      networkAllowed:false,
+      canSearchNow:false,
+      canReturnPriceNow:false,
+      canRedirectNow:false,
+      canCheckout:false,
+      canPay:false,
+      canStoreIdentity:false,
+      reason:"provider_candidate_selected_not_connected"
+    };
+  }
+
   function productSafetySwitches(){
     const api = productSelectionApi();
     if (api && api.getProductProviderSafetySwitches) return api.getProductProviderSafetySwitches();
@@ -172,8 +197,16 @@
       productProviderNoCheckout:next.productProviderNoCheckout !== false,
       productProviderNoPayment:next.productProviderNoPayment !== false,
       productProviderNoIdentityStorage:next.productProviderNoIdentityStorage !== false,
+      selectedFirstCandidate:next.selectedFirstCandidate || "ebay_browse_api",
+      selectedCandidateName:next.selectedCandidateName || "eBay Browse API",
+      selectedStatus:next.selectedStatus || "selected_not_connected",
+      endpointConnected:next.endpointConnected === true,
+      canSearchNow:next.canSearchNow === true,
+      canReturnPriceNow:next.canReturnPriceNow === true,
+      canRedirectNow:next.canRedirectNow === true,
       productProviderProfile:next.productProviderProfile || productProfile(),
-      productProviderReadiness:next.productProviderReadiness || productReadiness(next)
+      productProviderReadiness:next.productProviderReadiness || productReadiness(next),
+      productProviderCandidateReadiness:next.productProviderCandidateReadiness || productCandidateReadiness()
     };
   }
 
@@ -326,6 +359,7 @@
     const cFields = connectorFields(connector);
     const isProduct = next === "product";
     const productDefaults = isProduct ? productSafetySwitches() : {};
+    const candidate = isProduct ? productCandidateReadiness() : null;
     const providerConnectorFields = isProduct ? Object.assign({}, cFields, {
       connectorStatus:config.connectorStatus || cFields.connectorStatus,
       connectorType:config.connectorType || cFields.connectorType,
@@ -337,6 +371,13 @@
       name:label + "搜索源",
       category:next,
       providerStatus:isProduct ? "candidate_not_connected" : "disabled",
+      selectedFirstCandidate:candidate && candidate.selectedFirstCandidate || undefined,
+      selectedCandidateName:candidate && candidate.selectedName || undefined,
+      selectedStatus:candidate && candidate.selectedStatus || undefined,
+      endpointConnected:false,
+      canSearchNow:false,
+      canReturnPriceNow:false,
+      canRedirectNow:false,
       enabled:false,
       configured:false,
       environment:"renderer",
@@ -381,7 +422,8 @@
       connectorHealth:providerConnectorFields,
       sandboxHealth:sandboxFields(next, null, config, config, connector),
       productProviderProfile:isProduct ? productProfile() : undefined,
-      productProviderReadiness:isProduct ? productReadiness(config) : undefined
+      productProviderReadiness:isProduct ? productReadiness(config) : undefined,
+      productProviderCandidateReadiness:isProduct ? candidate : undefined
     }, productDefaults);
   }
 

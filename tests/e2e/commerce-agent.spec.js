@@ -37,7 +37,7 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceProviderAdapter) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.29";
+        script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.30";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -45,7 +45,15 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceProviderConnector) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.29";
+        script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.30";
+        script.onload = resolve;
+        document.head.appendChild(script);
+      });
+    }
+    if (!window.WeishanCommerceProductProviderCandidate) {
+      await new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceProductProviderCandidate.js?v=2.0.30";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -53,7 +61,7 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceProductProviderSelection) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.29";
+        script.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.30";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -61,7 +69,7 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceProviderConfig) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.29";
+        script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.30";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -69,7 +77,7 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceProviderSandbox) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.29";
+        script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.30";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -78,14 +86,14 @@ async function installCommerceSearchMock(page, candidates) {
       if (!window.WeishanCommerceProviderSandbox) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.29";
+          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.30";
           script.onload = resolve;
           document.head.appendChild(script);
         });
       }
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviders.js?v=2.0.29";
+        script.src = "./renderer/core/commerceProviders.js?v=2.0.30";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -93,7 +101,7 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceSearch) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceSearch.js?v=2.0.29";
+        script.src = "./renderer/core/commerceSearch.js?v=2.0.30";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -101,7 +109,7 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceLocationPolicy) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceLocationPolicy.js?v=2.0.29";
+        script.src = "./renderer/core/commerceLocationPolicy.js?v=2.0.30";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -142,7 +150,7 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
     if (!window.WeishanCommerceProviderAdapter) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.29";
+        script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.30";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -150,7 +158,7 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
     if (!window.WeishanCommerceProviderConnector) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.29";
+        script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.30";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -158,7 +166,7 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
     if (!window.WeishanCommerceProductProviderSelection) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.29";
+        script.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.30";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -166,7 +174,7 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
     if (!window.WeishanCommerceProviderConfig) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.29";
+        script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.30";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -174,7 +182,7 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
     if (!window.WeishanCommerceProviderSandbox) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.29";
+        script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.30";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -183,14 +191,14 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
       if (!window.WeishanCommerceProviderSandbox) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.29";
+          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.30";
           script.onload = resolve;
           document.head.appendChild(script);
         });
       }
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviders.js?v=2.0.29";
+        script.src = "./renderer/core/commerceProviders.js?v=2.0.30";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -198,7 +206,7 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
     if (!window.WeishanCommerceSearch) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceSearch.js?v=2.0.29";
+        script.src = "./renderer/core/commerceSearch.js?v=2.0.30";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -275,7 +283,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceLocationPolicy) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceLocationPolicy.js?v=2.0.29";
+          script.src = "./renderer/core/commerceLocationPolicy.js?v=2.0.30";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -343,7 +351,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderAdapter) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.29";
+          script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.30";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -351,7 +359,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderConnector) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.29";
+          script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.30";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -359,7 +367,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProductProviderSelection) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.29";
+          script.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.30";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -367,7 +375,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderConfig) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.29";
+          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.30";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -376,14 +384,14 @@ test.describe.serial("commerce agent workbench", () => {
         if (!window.WeishanCommerceProviderSandbox) {
           await new Promise((resolve) => {
             const script = document.createElement("script");
-            script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.29";
+            script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.30";
             script.onload = resolve;
             document.head.appendChild(script);
           });
         }
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviders.js?v=2.0.29";
+          script.src = "./renderer/core/commerceProviders.js?v=2.0.30";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -496,13 +504,66 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
+  test("product provider candidate evaluation selects ebay without connecting", async () => {
+    await gotoRoute(page, "commerce");
+    const result = await page.evaluate(async () => {
+      if (!window.WeishanCommerceProductProviderCandidate) {
+        await new Promise((resolve) => {
+          const script = document.createElement("script");
+          script.src = "./renderer/core/commerceProductProviderCandidate.js?v=2.0.30";
+          script.onload = resolve;
+          document.head.appendChild(script);
+        });
+      }
+      return {
+        evaluation:window.WeishanCommerceProductProviderCandidate.getCommerceProductProviderCandidateEvaluation(),
+        selected:window.WeishanCommerceProductProviderCandidate.getSelectedProductProviderCandidate(),
+        readiness:window.WeishanCommerceProductProviderCandidate.getProductProviderCandidateReadiness()
+      };
+    });
+    expect(result.evaluation.evaluationVersion).toBe("2.0.30");
+    expect(result.evaluation.category).toBe("product");
+    expect(result.evaluation.phase).toBe("provider_candidate_evaluation");
+    expect(result.evaluation.selectedFirstCandidate).toBe("ebay_browse_api");
+    expect(result.evaluation.selectedStatus).toBe("selected_not_connected");
+    expect(result.evaluation.safety.noRealEndpoint).toBe(true);
+    expect(result.evaluation.safety.noApiKey).toBe(true);
+    expect(result.evaluation.safety.noNetworkSearch).toBe(true);
+    expect(result.evaluation.safety.noPriceDisplay).toBe(true);
+    expect(result.evaluation.safety.noCheckout).toBe(true);
+    expect(result.evaluation.safety.noPayment).toBe(true);
+    expect(result.evaluation.safety.noOrderSubmit).toBe(true);
+    expect(result.evaluation.safety.noIdentityStorage).toBe(true);
+    const ids = result.evaluation.candidates.map((item) => item.id);
+    expect(ids).toContain("ebay_browse_api");
+    expect(ids).toContain("amazon_product_api");
+    expect(ids).toContain("google_merchant_api");
+    expect(result.selected.id).toBe("ebay_browse_api");
+    expect(result.selected.name).toBe("eBay Browse API");
+    expect(result.selected.endpointConnected).toBe(false);
+    expect(result.selected.networkAllowed).toBe(false);
+    expect(result.selected.canSearchNow).toBe(false);
+    expect(result.selected.canReturnPriceNow).toBe(false);
+    expect(result.selected.canRedirectNow).toBe(false);
+    expect(result.readiness.ready).toBe(false);
+    expect(result.readiness.reason).toBe("provider_candidate_selected_not_connected");
+  });
+
   test("product provider selection is ready for review but not connected", async () => {
     await gotoRoute(page, "commerce");
     const result = await page.evaluate(async () => {
+      if (!window.WeishanCommerceProductProviderCandidate) {
+        await new Promise((resolve) => {
+          const script = document.createElement("script");
+          script.src = "./renderer/core/commerceProductProviderCandidate.js?v=2.0.30";
+          script.onload = resolve;
+          document.head.appendChild(script);
+        });
+      }
       if (!window.WeishanCommerceProductProviderSelection) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.29";
+          script.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.30";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -516,6 +577,8 @@ test.describe.serial("commerce agent workbench", () => {
     expect(result.selection.category).toBe("product");
     expect(result.selection.priority).toBe("first_real_readonly_provider_candidate");
     expect(result.selection.selectionStatus).toBe("selection_ready_not_connected");
+    expect(result.selection.selectedFirstCandidate).toBe("ebay_browse_api");
+    expect(result.selection.selectedStatus).toBe("selected_not_connected");
     expect(result.selection.disallowedMethods.autoCheckout).toBe(true);
     expect(result.selection.disallowedMethods.collectPaymentInfo).toBe(true);
     expect(result.selection.disallowedMethods.storeIdentityDocuments).toBe(true);
@@ -538,6 +601,8 @@ test.describe.serial("commerce agent workbench", () => {
     expect(result.readiness.canPay).toBe(false);
     expect(result.readiness.canStoreIdentity).toBe(false);
     expect(result.readiness.reason).toBe("product_provider_not_connected");
+    expect(result.readiness.candidateReadiness.selectedFirstCandidate).toBe("ebay_browse_api");
+    expect(result.readiness.candidateReadiness.canSearchNow).toBe(false);
   });
 
   test("provider config contract is disabled and does not leak API keys", async () => {
@@ -546,7 +611,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderConfig) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.29";
+          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.30";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -583,7 +648,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderConfig) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.29";
+          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.30";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -591,7 +656,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderSandbox) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.29";
+          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.30";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -647,7 +712,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderAdapter) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.29";
+          script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.30";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -672,7 +737,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderConnector) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.29";
+          script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.30";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -715,13 +780,13 @@ test.describe.serial("commerce agent workbench", () => {
         script.onload = resolve;
         document.head.appendChild(script);
       });
-      await load("WeishanCommerceProviderAdapter", "./renderer/core/commerceProviderAdapter.js?v=2.0.29");
-      await load("WeishanCommerceProviderConnector", "./renderer/core/commerceProviderConnector.js?v=2.0.29");
-      await load("WeishanCommerceProductProviderSelection", "./renderer/core/commerceProductProviderSelection.js?v=2.0.29");
-      await load("WeishanCommerceProviderConfig", "./renderer/core/commerceProviderConfig.js?v=2.0.29");
-      await load("WeishanCommerceProviderSandbox", "./renderer/core/commerceProviderSandbox.js?v=2.0.29");
-      await load("WeishanCommerceProviders", "./renderer/core/commerceProviders.js?v=2.0.29");
-      await load("WeishanCommerceSearch", "./renderer/core/commerceSearch.js?v=2.0.29");
+      await load("WeishanCommerceProviderAdapter", "./renderer/core/commerceProviderAdapter.js?v=2.0.30");
+      await load("WeishanCommerceProviderConnector", "./renderer/core/commerceProviderConnector.js?v=2.0.30");
+      await load("WeishanCommerceProductProviderSelection", "./renderer/core/commerceProductProviderSelection.js?v=2.0.30");
+      await load("WeishanCommerceProviderConfig", "./renderer/core/commerceProviderConfig.js?v=2.0.30");
+      await load("WeishanCommerceProviderSandbox", "./renderer/core/commerceProviderSandbox.js?v=2.0.30");
+      await load("WeishanCommerceProviders", "./renderer/core/commerceProviders.js?v=2.0.30");
+      await load("WeishanCommerceSearch", "./renderer/core/commerceSearch.js?v=2.0.30");
       const oldFetch = window.fetch;
       let called = false;
       window.fetch = async () => {
@@ -933,6 +998,11 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("当前不会显示价格");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会跳转购买/预订页面");
     await expect(page.locator(".commerce-detail")).toContainText("去设置收货目的地");
+    await expect(page.locator(".commerce-detail")).toContainText("首个候选 provider：eBay Browse API");
+    await expect(page.locator(".commerce-detail")).toContainText("当前状态：已选型，尚未接入");
+    await expect(page.locator(".commerce-detail")).toContainText("当前仅完成 provider 选型，尚未连接真实接口");
+    await expect(page.locator(".commerce-detail")).toContainText("当前不会访问 eBay 或任何真实平台");
+    await expect(page.locator(".commerce-detail")).toContainText("后续接入前需完成 API 条款、额度、地区覆盖、价格/运费/税费字段完整性复核");
     await expect(page.locator(".commerce-detail .commerce-booking-link")).toHaveCount(0);
     await expect(page.getByRole("button", { name:"需要设置收货目的地" })).toBeDisabled();
 
@@ -943,6 +1013,8 @@ test.describe.serial("commerce agent workbench", () => {
 
     await submitHomeCommand(page, runId + " 买 iPhone");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("iPhone搜索已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("首个候选 provider：eBay Browse API");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前状态：已选型，尚未接入");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("需要收货国家/地区/邮编用于运费、税费、关税和当地合规计算");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("去购买");
@@ -950,6 +1022,8 @@ test.describe.serial("commerce agent workbench", () => {
 
     await submitHomeCommand(page, runId + " 买 MacBook");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("MacBook搜索已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("首个候选 provider：eBay Browse API");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("网络搜索未启用");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("需要收货国家/地区/邮编用于运费、税费、关税和当地合规计算");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("去购买");
@@ -970,7 +1044,8 @@ test.describe.serial("commerce agent workbench", () => {
 
     await submitHomeCommand(page, runId + " 买华为手机");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品搜索 provider：方案已选择，尚未接入");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("首个候选 provider：eBay Browse API");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前状态：已选型，尚未接入");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("需要设置收货目的地");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("去购买");

@@ -18,7 +18,7 @@
   function ensureSearchLoaded(host){
     if (!window.WeishanCommerceProviderAdapter && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderAdapter"]')) {
       const adapter = document.createElement("script");
-      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.29";
+      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.30";
       adapter.dataset.weishanDynamic = "WeishanCommerceProviderAdapter";
       adapter.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(adapter);
@@ -26,15 +26,23 @@
     }
     if (!window.WeishanCommerceProviderConnector && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConnector"]')) {
       const connector = document.createElement("script");
-      connector.src = "./renderer/core/commerceProviderConnector.js?v=2.0.29";
+      connector.src = "./renderer/core/commerceProviderConnector.js?v=2.0.30";
       connector.dataset.weishanDynamic = "WeishanCommerceProviderConnector";
       connector.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(connector);
       return;
     }
+    if (!window.WeishanCommerceProductProviderCandidate && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProductProviderCandidate"]')) {
+      const candidate = document.createElement("script");
+      candidate.src = "./renderer/core/commerceProductProviderCandidate.js?v=2.0.30";
+      candidate.dataset.weishanDynamic = "WeishanCommerceProductProviderCandidate";
+      candidate.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(candidate);
+      return;
+    }
     if (!window.WeishanCommerceProductProviderSelection && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProductProviderSelection"]')) {
       const selection = document.createElement("script");
-      selection.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.29";
+      selection.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.30";
       selection.dataset.weishanDynamic = "WeishanCommerceProductProviderSelection";
       selection.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(selection);
@@ -42,7 +50,7 @@
     }
     if (!window.WeishanCommerceLocationPolicy && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceLocationPolicy"]')) {
       const location = document.createElement("script");
-      location.src = "./renderer/core/commerceLocationPolicy.js?v=2.0.29";
+      location.src = "./renderer/core/commerceLocationPolicy.js?v=2.0.30";
       location.dataset.weishanDynamic = "WeishanCommerceLocationPolicy";
       location.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(location);
@@ -50,7 +58,7 @@
     }
     if (!window.WeishanCommerceProviderConfig && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConfig"]')) {
       const config = document.createElement("script");
-      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.29";
+      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.30";
       config.dataset.weishanDynamic = "WeishanCommerceProviderConfig";
       config.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(config);
@@ -58,7 +66,7 @@
     }
     if (!window.WeishanCommerceProviderSandbox && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderSandbox"]')) {
       const sandbox = document.createElement("script");
-      sandbox.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.29";
+      sandbox.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.30";
       sandbox.dataset.weishanDynamic = "WeishanCommerceProviderSandbox";
       sandbox.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(sandbox);
@@ -66,7 +74,7 @@
     }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
-      providers.src = "./renderer/core/commerceProviders.js?v=2.0.29";
+      providers.src = "./renderer/core/commerceProviders.js?v=2.0.30";
       providers.dataset.weishanDynamic = "WeishanCommerceProviders";
       providers.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(providers);
@@ -74,7 +82,7 @@
     }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
-    script.src = "./renderer/core/commerceSearch.js?v=2.0.29";
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.30";
     script.dataset.weishanDynamic = "WeishanCommerceSearch";
     script.onload = () => render(host);
     document.head.appendChild(script);
@@ -302,17 +310,20 @@
         <span>未下单、未付款、未提交订单、未保存证件。</span>
       </div>` : ""}
       ${isProduct && !hasProvider ? `<div class="commerce-warning commerce-product-provider-missing">
-        <b>商品搜索 provider：方案已选择，尚未接入。</b>
+        <b>首个候选 provider：${esc(configInfo.productProviderProfile && (configInfo.productProviderProfile.selectedCandidateName || configInfo.productProviderProfile.candidateName) || "eBay Browse API")}</b>
+        <span>当前状态：已选型，尚未接入。</span>
+        <span>当前仅完成 provider 选型，尚未连接真实接口。</span>
         <span>当前试点方向：商品搜索。</span>
         <span>搜索模式：只读搜索准备中。</span>
         <span>网络搜索：未启用。</span>
         <span>实时价格：不可用。</span>
         <span>精确跳转：待真实 provider 接入后启用。</span>
-        <span>当前不会搜索真实平台。</span>
+        <span>当前不会访问 eBay 或任何真实平台。</span>
         <span>当前不会返回价格。</span>
         <span>当前不会下单。</span>
         <span>当前不会付款。</span>
         <span>当前不会保存证件或银行卡。</span>
+        <span>后续接入前需完成 API 条款、额度、地区覆盖、价格/运费/税费字段完整性复核。</span>
         <span>Provider Connector：未启用；Connector 类型：只读搜索模板。</span>
         <span>Provider Sandbox：dry-run；真实 provider 接入前仅做配置、密钥存在性、网络开关、connector 门控和返回结构检查。</span>
         <span>全球搜索准备：未启用；Provider Dry Run：未通过；跨境搜索：未启用。</span>
@@ -353,6 +364,13 @@
         <div><dt>productProviderNoPayment</dt><dd>${configInfo.productProviderNoPayment === false ? "false" : "true"}</dd></div>
         <div><dt>productProviderNoIdentityStorage</dt><dd>${configInfo.productProviderNoIdentityStorage === false ? "false" : "true"}</dd></div>
         <div><dt>productProviderReason</dt><dd>${esc(configInfo.productProviderReadiness && configInfo.productProviderReadiness.reason || "product_provider_not_connected")}</dd></div>` : ""}
+        ${isProduct ? `<div><dt>selectedFirstCandidate</dt><dd>${esc(configInfo.productProviderProfile && configInfo.productProviderProfile.selectedFirstCandidate || "ebay_browse_api")}</dd></div>
+        <div><dt>selectedStatus</dt><dd>${esc(configInfo.productProviderProfile && configInfo.productProviderProfile.selectedStatus || "selected_not_connected")}</dd></div>
+        <div><dt>首个候选 provider</dt><dd>${esc(configInfo.productProviderProfile && (configInfo.productProviderProfile.selectedCandidateName || configInfo.productProviderProfile.candidateName) || "eBay Browse API")}</dd></div>
+        <div><dt>endpointConnected</dt><dd>false</dd></div>
+        <div><dt>canSearchNow</dt><dd>false</dd></div>
+        <div><dt>canReturnPriceNow</dt><dd>false</dd></div>
+        <div><dt>canRedirectNow</dt><dd>false</dd></div>` : ""}
         <div><dt>sandboxMode</dt><dd>${esc(sandboxInfo.sandboxMode || "dry_run")}</dd></div>
         <div><dt>globalReady</dt><dd>${sandboxInfo.globalReady === true ? "true" : "false"}</dd></div>
         <div><dt>全球搜索准备</dt><dd>未启用</dd></div>

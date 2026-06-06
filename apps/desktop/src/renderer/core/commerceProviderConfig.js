@@ -29,6 +29,31 @@
     return window.WeishanCommerceProductProviderSelection || null;
   }
 
+  function productCandidateApi(){
+    return window.WeishanCommerceProductProviderCandidate || null;
+  }
+
+  function productCandidateReadiness(){
+    const api = productCandidateApi();
+    if (api && api.getProductProviderCandidateReadiness) return api.getProductProviderCandidateReadiness();
+    return {
+      selectedFirstCandidate:"ebay_browse_api",
+      selectedName:"eBay Browse API",
+      selectedStatus:"selected_not_connected",
+      ready:false,
+      endpointConnected:false,
+      apiKeyConfigured:false,
+      networkAllowed:false,
+      canSearchNow:false,
+      canReturnPriceNow:false,
+      canRedirectNow:false,
+      canCheckout:false,
+      canPay:false,
+      canStoreIdentity:false,
+      reason:"provider_candidate_selected_not_connected"
+    };
+  }
+
   function productSafetySwitches(){
     const api = productSelectionApi();
     return api && api.getProductProviderSafetySwitches ? api.getProductProviderSafetySwitches() : {
@@ -131,15 +156,24 @@
       reasonWhenUnavailable:"暂未配置真实" + label + "搜索源"
     };
     if (next === "product") {
+      const candidate = productCandidateReadiness();
       return Object.assign({}, base, productSafetySwitches(), {
         connectorType:"readonly_product_search",
         connectorStatus:"not_connected",
         providerReadinessStatus:"not_ready",
         readinessStatus:"not_ready",
-        reasonWhenUnavailable:"商品搜索 provider 尚未接入真实只读搜索源",
-        reasonWhenDisabled:"商品搜索 provider 尚未接入真实只读搜索源",
+        selectedFirstCandidate:candidate.selectedFirstCandidate,
+        selectedCandidateName:candidate.selectedName,
+        selectedStatus:candidate.selectedStatus,
+        endpointConnected:false,
+        canSearchNow:false,
+        canReturnPriceNow:false,
+        canRedirectNow:false,
+        reasonWhenUnavailable:"商品搜索 provider 候选已选型，尚未接入真实只读搜索源",
+        reasonWhenDisabled:"商品搜索 provider 候选已选型，尚未接入真实只读搜索源",
         productProviderProfile:productProfile(),
-        productProviderReadiness:productReadiness()
+        productProviderReadiness:productReadiness(),
+        productProviderCandidateReadiness:candidate
       });
     }
     return base;

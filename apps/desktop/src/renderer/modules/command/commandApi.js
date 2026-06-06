@@ -9,28 +9,31 @@
     document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.15"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderAdapter && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderAdapter.js?v=2.0.29"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderAdapter.js?v=2.0.30"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderConnector && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConnector.js?v=2.0.29"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConnector.js?v=2.0.30"></scr' + 'ipt>');
+  }
+  if (!window.WeishanCommerceProductProviderCandidate && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.30"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProductProviderSelection && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderSelection.js?v=2.0.29"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderSelection.js?v=2.0.30"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceLocationPolicy && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceLocationPolicy.js?v=2.0.29"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceLocationPolicy.js?v=2.0.30"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderConfig && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.29"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.30"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderSandbox && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderSandbox.js?v=2.0.29"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderSandbox.js?v=2.0.30"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviders && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.29"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.30"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceSearch && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.29"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.30"></scr' + 'ipt>');
   }
 
   const QUEUE_KEY = "command.queue.v205";
@@ -291,7 +294,9 @@
     const conditionSummary = [routeCondition, fields.dateText || fields.timing || ""].filter(Boolean).join("，");
     const isFlightPlan = savedPlan.category === "flight";
     const providerReason = Array.isArray(savedPlan.providerHealth) && savedPlan.providerHealth[0] && savedPlan.providerHealth[0].reasonWhenDisabled || "";
-    const providerMissingText = isFlightPlan ? "暂未配置真实机票搜索适配器；配置状态未配置真实搜索源，当前无法返回实时价格。" : savedPlan.category === "ecommerce" ? "商品搜索 provider：方案已选择，尚未接入；当前试点方向：商品搜索；网络搜索未启用，实时价格不可用；精确跳转待真实 provider 接入后启用。" : providerReason || "搜索适配器未配置，配置状态未配置真实搜索源，无法返回真实价格。";
+    const productProfile = savedPlan.configHealth && savedPlan.configHealth.productProviderProfile || {};
+    const productCandidateName = productProfile.selectedCandidateName || productProfile.candidateName || "eBay Browse API";
+    const providerMissingText = isFlightPlan ? "暂未配置真实机票搜索适配器；配置状态未配置真实搜索源，当前无法返回实时价格。" : savedPlan.category === "ecommerce" ? "首个候选 provider：" + productCandidateName + "；当前状态：已选型，尚未接入；当前仅完成 provider 选型，尚未连接真实接口；网络搜索未启用，实时价格不可用；精确跳转待真实 provider 接入后启用；当前不会访问 eBay 或任何真实平台。" : providerReason || "搜索适配器未配置，配置状态未配置真实搜索源，无法返回真实价格。";
     const displayTitle = api.createCommerceDisplayTitle ? api.createCommerceDisplayTitle(savedPlan, false) : blocked ? "全球采购计划已阻断" : "全球采购计划已生成";
     const answer = [
       displayTitle,
@@ -306,7 +311,7 @@
       blocked ? "原因：涉及下单 / 付款。" : "",
       missing,
       !blocked && destinationRequired ? "需要设置收货目的地以计算精确最低到手价。收货国家/地区/邮编用于运费、税费、关税和当地合规计算；当前不会显示价格或跳转购买/预订页面。" : "",
-      !blocked && providerMissing ? providerMissingText : "",
+      !blocked && (providerMissing || savedPlan.category === "ecommerce" && destinationRequired) ? providerMissingText : "",
       "安全边界：" + (blocked ? "不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表。" : isFlightPlan ? "未下单、未付款、未提交订单、未保存证件。" : savedPlan.category === "ecommerce" ? "未下单、未付款、未提交订单、未保存银行卡或证件。" : "未搜索、未下单、未付款、未提交订单。"),
       "下一步：查看全球采购计划。"
     ].filter(Boolean).join("\n");

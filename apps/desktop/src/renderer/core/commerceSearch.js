@@ -53,6 +53,10 @@
     return window.WeishanCommerceProductProviderSelection || null;
   }
 
+  function productCandidateApi(){
+    return window.WeishanCommerceProductProviderCandidate || null;
+  }
+
   function locationPolicyApi(){
     return window.WeishanCommerceLocationPolicy || null;
   }
@@ -147,15 +151,44 @@
     };
   }
 
+  function getProductProviderCandidateReadiness(){
+    const api = productCandidateApi();
+    if (api && api.getProductProviderCandidateReadiness) return api.getProductProviderCandidateReadiness();
+    return {
+      selectedFirstCandidate:"ebay_browse_api",
+      selectedName:"eBay Browse API",
+      selectedStatus:"selected_not_connected",
+      ready:false,
+      endpointConnected:false,
+      apiKeyConfigured:false,
+      networkAllowed:false,
+      canSearchNow:false,
+      canReturnPriceNow:false,
+      canRedirectNow:false,
+      canCheckout:false,
+      canPay:false,
+      canStoreIdentity:false,
+      reason:"provider_candidate_selected_not_connected"
+    };
+  }
+
   function defaultConfig(category, settings){
     const api = configApi();
     if (api && api.getCommerceProviderConfig) return api.getCommerceProviderConfig(category, settings);
     const next = resultCategory(category);
     const productDefaults = next === "product" ? productSafetySwitches() : {};
+    const productCandidate = next === "product" ? getProductProviderCandidateReadiness() : null;
     return Object.assign({
       providerId:next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled",
       category:next,
       providerStatus:next === "product" ? "candidate_not_connected" : "disabled",
+      selectedFirstCandidate:productCandidate && productCandidate.selectedFirstCandidate || undefined,
+      selectedCandidateName:productCandidate && productCandidate.selectedName || undefined,
+      selectedStatus:productCandidate && productCandidate.selectedStatus || undefined,
+      endpointConnected:false,
+      canSearchNow:false,
+      canReturnPriceNow:false,
+      canRedirectNow:false,
       enabled:false,
       configured:false,
       hasApiKey:false,
@@ -178,7 +211,8 @@
       configStatus:"not_configured",
       reasonWhenUnavailable:next === "product" ? "商品搜索 provider 尚未接入真实只读搜索源" : "暂未配置真实搜索源",
       productProviderProfile:next === "product" ? getProductProviderProfile() : undefined,
-      productProviderReadiness:next === "product" ? getProductProviderReadiness(productDefaults) : undefined
+      productProviderReadiness:next === "product" ? getProductProviderReadiness(productDefaults) : undefined,
+      productProviderCandidateReadiness:productCandidate || undefined
     }, productDefaults);
   }
 
@@ -223,8 +257,16 @@
       productProviderNoCheckout:next.productProviderNoCheckout !== false,
       productProviderNoPayment:next.productProviderNoPayment !== false,
       productProviderNoIdentityStorage:next.productProviderNoIdentityStorage !== false,
+      selectedFirstCandidate:next.selectedFirstCandidate || "ebay_browse_api",
+      selectedCandidateName:next.selectedCandidateName || "eBay Browse API",
+      selectedStatus:next.selectedStatus || "selected_not_connected",
+      endpointConnected:next.endpointConnected === true,
+      canSearchNow:next.canSearchNow === true,
+      canReturnPriceNow:next.canReturnPriceNow === true,
+      canRedirectNow:next.canRedirectNow === true,
       productProviderProfile:next.productProviderProfile || getProductProviderProfile(),
-      productProviderReadiness:next.productProviderReadiness || getProductProviderReadiness(next)
+      productProviderReadiness:next.productProviderReadiness || getProductProviderReadiness(next),
+      productProviderCandidateReadiness:next.productProviderCandidateReadiness || getProductProviderCandidateReadiness()
     };
   }
 
