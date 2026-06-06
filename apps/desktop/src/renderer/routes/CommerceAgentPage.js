@@ -18,7 +18,7 @@
   function ensureSearchLoaded(host){
     if (!window.WeishanCommerceProviderAdapter && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderAdapter"]')) {
       const adapter = document.createElement("script");
-      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.27";
+      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.28";
       adapter.dataset.weishanDynamic = "WeishanCommerceProviderAdapter";
       adapter.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(adapter);
@@ -26,7 +26,7 @@
     }
     if (!window.WeishanCommerceProviderConnector && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConnector"]')) {
       const connector = document.createElement("script");
-      connector.src = "./renderer/core/commerceProviderConnector.js?v=2.0.27";
+      connector.src = "./renderer/core/commerceProviderConnector.js?v=2.0.28";
       connector.dataset.weishanDynamic = "WeishanCommerceProviderConnector";
       connector.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(connector);
@@ -34,15 +34,23 @@
     }
     if (!window.WeishanCommerceProductProviderSelection && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProductProviderSelection"]')) {
       const selection = document.createElement("script");
-      selection.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.27";
+      selection.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.28";
       selection.dataset.weishanDynamic = "WeishanCommerceProductProviderSelection";
       selection.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(selection);
       return;
     }
+    if (!window.WeishanCommerceLocationPolicy && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceLocationPolicy"]')) {
+      const location = document.createElement("script");
+      location.src = "./renderer/core/commerceLocationPolicy.js?v=2.0.28";
+      location.dataset.weishanDynamic = "WeishanCommerceLocationPolicy";
+      location.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(location);
+      return;
+    }
     if (!window.WeishanCommerceProviderConfig && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConfig"]')) {
       const config = document.createElement("script");
-      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.27";
+      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.28";
       config.dataset.weishanDynamic = "WeishanCommerceProviderConfig";
       config.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(config);
@@ -50,7 +58,7 @@
     }
     if (!window.WeishanCommerceProviderSandbox && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderSandbox"]')) {
       const sandbox = document.createElement("script");
-      sandbox.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.27";
+      sandbox.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.28";
       sandbox.dataset.weishanDynamic = "WeishanCommerceProviderSandbox";
       sandbox.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(sandbox);
@@ -58,7 +66,7 @@
     }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
-      providers.src = "./renderer/core/commerceProviders.js?v=2.0.27";
+      providers.src = "./renderer/core/commerceProviders.js?v=2.0.28";
       providers.dataset.weishanDynamic = "WeishanCommerceProviders";
       providers.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(providers);
@@ -66,7 +74,7 @@
     }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
-    script.src = "./renderer/core/commerceSearch.js?v=2.0.27";
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.28";
     script.dataset.weishanDynamic = "WeishanCommerceSearch";
     script.onload = () => render(host);
     document.head.appendChild(script);
@@ -129,6 +137,7 @@
     if (status === "noResults" || status === "no_results") return "暂无可展示结果";
     if (status === "ready") return "搜索源已配置";
     if (status === "missingFields") return "搜索条件缺失";
+    if (status === "location_required") return "需要开启定位以计算精确最低到手价";
     if (status === "failed") return "搜索失败";
     if (status === "blocked") return "已阻断";
     if (status === "no_provider") return "暂未配置真实搜索适配器，无法返回实时价格";
@@ -242,10 +251,12 @@
 
   function searchStatusHtml(task, settings, hasProvider){
     const missingFields = Array.isArray(task && task.missingFields) && task.missingFields.length ? task.missingFields : [];
-    const disabled = !hasProvider || missingFields.length > 0;
     const isModelPricing = task && task.category === "aiModelPricing";
     const isFlight = task && task.category === "flight";
     const isProduct = task && task.category === "ecommerce";
+    const locationInfo = searchApi() && searchApi().locationHealthForCommerce ? searchApi().locationHealthForCommerce() : {};
+    const locationRequired = isProduct && (task && task.searchStatus === "location_required" || locationInfo.canCalculateAccurateLandedCost !== true);
+    const disabled = !hasProvider || missingFields.length > 0 || locationRequired;
     const isCruise = task && task.category === "cruise";
     const isPrivateJet = task && task.category === "privateJet";
     const normalized = task && task.normalizedFields || {};
@@ -265,6 +276,18 @@
     const buttonLabel = isModelPricing ? "搜索 OpenRouter 模型价格" : missingFields.length ? "搜索真实价格" : hasProvider ? "搜索真实价格" : "搜索适配器未配置";
     return `<div class="commerce-search-panel">
       <p><b>${hasProvider ? "已配置：" : "未配置："}</b>${isModelPricing ? (hasProvider ? "OpenRouter provider 可用于模型价格搜索。" : "OpenRouter provider 不可用。") : hasProvider ? "可以搜索真实候选方案。" : isFlight ? "暂未配置真实机票搜索适配器，无法返回实时价格。" : isProduct ? "暂未配置真实商品搜索适配器，无法返回实时价格。" : "搜索适配器未配置，无法返回真实价格。"}</p>
+      ${locationRequired ? `<div class="commerce-warning commerce-location-required">
+        <b>需要开启定位以计算精确最低到手价</b>
+        <span>定位状态：未开启。</span>
+        <span>价格状态：精确最低到手价不可用。</span>
+        <span>原因：需要定位用于运费、税费、关税和当地合规计算。</span>
+        <span>当前不会搜索真实平台。</span>
+        <span>当前不会显示价格。</span>
+        <span>当前不会跳转购买/预订页面。</span>
+        <span>当前不会下单、付款或保存证件/银行卡。</span>
+        <span>为了精准计算最低到手价并遵守当地法律，请开启定位权限。实际价格、库存、税费和关税仍以外部平台和海关结算为准。</span>
+        <button class="cmd-btn gray commerce-open-location-settings" type="button">去设置开启定位</button>
+      </div>` : ""}
       ${isFlight && !hasProvider ? `<div class="commerce-warning commerce-flight-provider-missing">
         <b>已识别为机票搜索计划。</b>
         <span>出发地：${esc(flightOrigin)} · 目的地：${esc(flightDestination)} · 日期：${esc(flightDate)}</span>
@@ -355,7 +378,7 @@
       ${isPrivateJet ? `<p class="commerce-warning">公务机属于高价值定制服务，价格通常需要询价确认。当前仅生成搜索和询价计划，不自动提交询价、不付款、不签约。</p>` : ""}
       ${failedMessage ? `<p class="commerce-warning">${esc(failedMessage)}</p>` : ""}
       ${missingFields.length ? `<p class="commerce-warning">请补充${esc(missingFields.join("、"))}，否则不搜索价格。</p>` : ""}
-      <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${esc(disabled && !missingFields.length && !isModelPricing ? "搜索适配器未配置" : buttonLabel)}</button>
+      <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${esc(locationRequired ? "需要开启定位" : disabled && !missingFields.length && !isModelPricing ? "搜索适配器未配置" : buttonLabel)}</button>
       <p class="commerce-muted">价格只来自已配置 provider 返回数据；未配置时不会显示假价格。</p>
     </div>`;
   }
@@ -563,6 +586,12 @@
     if (back) back.addEventListener("click", () => window.WeishanRouter && window.WeishanRouter.setRoute("home"));
     const emptyBack = host.querySelector("#commerceEmptyBackHome");
     if (emptyBack) emptyBack.addEventListener("click", () => window.WeishanRouter && window.WeishanRouter.setRoute("home"));
+    host.querySelectorAll(".commerce-open-location-settings").forEach((button) => {
+      button.addEventListener("click", () => {
+        try { window.sessionStorage && window.sessionStorage.setItem("weishan:settings:focus", "commerceLocation"); } catch (_) {}
+        if (window.WeishanRouter && window.WeishanRouter.setRoute) window.WeishanRouter.setRoute("settings");
+      });
+    });
     const generate = host.querySelector("#commerceGenerate");
     if (generate) generate.addEventListener("click", () => {
       if (!api || !api.createCommerceTask || !api.addCommerceTask) return;
@@ -611,7 +640,7 @@
         }));
         const result = await search.searchCommerceCandidates(target);
         if (!result.ok) {
-          const status = result.code === "COMMERCE_MISSING_FIELDS" ? "missingFields" : result.code === "COMMERCE_NO_PROVIDER" || result.code === "COMMERCE_PROVIDER_NOT_CONFIGURED" || result.code === "COMMERCE_PROVIDER_CONFIG_NOT_READY" ? "no_provider" : result.code === "COMMERCE_NO_RESULTS" ? "no_results" : "failed";
+          const status = result.code === "COMMERCE_MISSING_FIELDS" ? "missingFields" : result.code === "COMMERCE_LOCATION_REQUIRED" ? "location_required" : result.code === "COMMERCE_NO_PROVIDER" || result.code === "COMMERCE_PROVIDER_NOT_CONFIGURED" || result.code === "COMMERCE_PROVIDER_CONFIG_NOT_READY" ? "no_provider" : result.code === "COMMERCE_NO_RESULTS" ? "no_results" : "failed";
           const updated = api.updateCommerceTask(taskId, {
             searchStatus:status,
             missingFields:result.request && result.request.missingFields || target.missingFields || [],
@@ -621,6 +650,8 @@
             connectorHealth:result.connectorHealth || target.connectorHealth || {},
             sandboxHealth:result.sandboxHealth || target.sandboxHealth || {},
             dryRunHealth:result.dryRunHealth || result.sandboxHealth || target.dryRunHealth || target.sandboxHealth || {},
+            locationHealth:result.locationHealth || target.locationHealth || {},
+            landedCostAccuracy:result.landedCostAccuracy || target.landedCostAccuracy || "",
             canShowPrice:result.canShowPrice === true,
             canShowBookingButton:result.canShowBookingButton === true,
             canShowCheckoutButton:result.canShowCheckoutButton === true,

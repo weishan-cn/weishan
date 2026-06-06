@@ -374,6 +374,7 @@
       modelOutput !== "" ? "输出 USD " + Number(modelOutput).toFixed(6).replace(/0+$/, "").replace(/\.$/, "") + " / 1M tokens" : ""
     ].filter(Boolean).join(" · ") : "";
     const providerMissing = stored.searchStatus === "no_provider" || stored.searchStatus === "providerMissing";
+    const locationRequired = stored.searchStatus === "location_required";
     const providerFailed = stored.searchStatus === "failed";
     const noResults = stored.searchStatus === "noResults" || stored.searchStatus === "no_results";
     const missingFields = Array.isArray(stored.missingFields) ? stored.missingFields : [];
@@ -404,14 +405,16 @@
         ${!blocked && isFlightPlan && normalized.destinationText ? `<p><b>目的地：</b>${esc(normalized.destinationText)}</p>` : ""}
         ${!blocked && isFlightPlan && dateCondition ? `<p><b>日期：</b>${esc(dateCondition)}</p>` : ""}
         ${blocked ? `<p><b>原因：</b>涉及下单 / 付款 / 敏感资料或询价提交</p>` : ""}
+        ${!blocked && locationRequired ? `<p><b>定位状态：</b>未开启</p><p><b>价格状态：</b>精确最低到手价不可用</p><p><b>原因：</b>需要定位用于运费、税费、关税和当地合规计算。</p><p class="commerce-warning">为了精准计算最低到手价并遵守当地法律，请开启定位权限。实际价格、库存、税费和关税仍以外部平台和海关结算为准。</p>` : ""}
         ${!blocked && providerMissing ? `<p><b>搜索源：</b>${esc(providerMissingText)}</p>` : ""}
         ${!blocked && providerFailed ? `<p><b>搜索源：</b>${esc(stored.searchErrorMessage || "搜索源不可用，无法返回真实价格")}</p>` : ""}
         ${!blocked && noResults ? `<p><b>搜索结果：</b>provider 未返回可展示结果，当前不显示价格。</p>` : ""}
         ${!blocked && missingFields.length ? `<p><b>待补充：</b>${esc(missingFields.join("、"))}</p>` : ""}
         ${!blocked && candidates.length ? `<p><b>搜索结果：</b>${isModelPricing ? esc(modelPriceSummary) : genericResultSummary}</p>` : ""}
-        <p><b>安全边界：</b>${blocked ? "不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表" : isFlightPlan ? flightSafetyText : isProductPlan && providerMissing ? productSafetyText : candidates.length ? "仅展示候选方案，未下单、未付款、未提交订单" : "未搜索、未下单、未付款、未提交订单"}</p>
+        <p><b>安全边界：</b>${blocked ? "不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表" : isFlightPlan ? flightSafetyText : isProductPlan && (providerMissing || locationRequired) ? productSafetyText : candidates.length ? "仅展示候选方案，未下单、未付款、未提交订单" : "未搜索、未下单、未付款、未提交订单"}</p>
       </div>
       <button class="cmd-btn primary commerce-view-plan-button" id="commerceViewPlanBtn" type="button">查看全球采购计划</button>
+      ${!blocked && locationRequired ? `<button class="cmd-btn gray commerce-open-location-settings" id="commerceOpenLocationSettingsBtn" type="button">去设置开启定位</button>` : ""}
     </div>`;
   }
 
@@ -1070,6 +1073,11 @@
         return;
       }
       if (window.WeishanRouter && window.WeishanRouter.setRoute) window.WeishanRouter.setRoute("commerce");
+    });
+    const locationSettingsBtn = host.querySelector("#commerceOpenLocationSettingsBtn");
+    if (locationSettingsBtn) locationSettingsBtn.addEventListener("click", function(){
+      try { window.sessionStorage && window.sessionStorage.setItem("weishan:settings:focus", "commerceLocation"); } catch (_) {}
+      if (window.WeishanRouter && window.WeishanRouter.setRoute) window.WeishanRouter.setRoute("settings");
     });
   }
 

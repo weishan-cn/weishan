@@ -9,25 +9,28 @@
     document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.15"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderAdapter && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderAdapter.js?v=2.0.27"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderAdapter.js?v=2.0.28"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderConnector && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConnector.js?v=2.0.27"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConnector.js?v=2.0.28"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProductProviderSelection && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderSelection.js?v=2.0.27"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderSelection.js?v=2.0.28"></scr' + 'ipt>');
+  }
+  if (!window.WeishanCommerceLocationPolicy && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceLocationPolicy.js?v=2.0.28"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderConfig && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.27"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.28"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderSandbox && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderSandbox.js?v=2.0.27"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderSandbox.js?v=2.0.28"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviders && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.27"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.28"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceSearch && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.27"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.28"></scr' + 'ipt>');
   }
 
   const QUEUE_KEY = "command.queue.v205";
@@ -260,23 +263,29 @@
       const hasProvider = search.hasCommerceSearchProvider(search.getCommerceSearchSettings && search.getCommerceSearchSettings());
       const providerHealth = search.getCommerceProviderHealth ? search.getCommerceProviderHealth(commercePlan.category, search.getCommerceSearchSettings && search.getCommerceSearchSettings()) : null;
       const usesOpenRouter = commercePlan.category === "aiModelPricing";
+      const isProductPlan = commercePlan.category === "ecommerce" || commercePlan.category === "product";
+      const locationHealth = search.locationHealthForCommerce ? search.locationHealthForCommerce() : null;
+      const locationRequired = isProductPlan && locationHealth && locationHealth.canCalculateAccurateLandedCost !== true;
       commercePlan.missingFields = request.missingFields || commercePlan.missingFields || [];
-      commercePlan.searchStatus = commercePlan.status === "blocked" ? "blocked" : commercePlan.missingFields.length ? "missingFields" : usesOpenRouter || hasProvider ? "ready" : "no_provider";
+      commercePlan.searchStatus = commercePlan.status === "blocked" ? "blocked" : commercePlan.missingFields.length ? "missingFields" : locationRequired ? "location_required" : usesOpenRouter || hasProvider ? "ready" : "no_provider";
       commercePlan.searchProviderName = usesOpenRouter ? "OpenRouter" : hasProvider && search.getCommerceSearchSettings ? search.getCommerceSearchSettings().providerName || "commerceProvider" : "";
       commercePlan.providerHealth = providerHealth && providerHealth.providerHealth || [];
       commercePlan.configHealth = providerHealth && providerHealth.configHealth || {};
       commercePlan.connectorHealth = providerHealth && providerHealth.connectorHealth || {};
       commercePlan.sandboxHealth = providerHealth && providerHealth.sandboxHealth || {};
       commercePlan.dryRunHealth = providerHealth && (providerHealth.dryRunHealth || providerHealth.sandboxHealth) || {};
-      commercePlan.canShowPrice = providerHealth ? providerHealth.canShowPrice === true : false;
-      commercePlan.canShowBookingButton = providerHealth ? providerHealth.canShowBookingButton === true : false;
-      commercePlan.canShowCheckoutButton = providerHealth ? providerHealth.canShowCheckoutButton === true : false;
+      commercePlan.locationHealth = locationHealth || {};
+      commercePlan.landedCostAccuracy = locationRequired ? "blocked_location_required" : "";
+      commercePlan.canShowPrice = !locationRequired && providerHealth ? providerHealth.canShowPrice === true : false;
+      commercePlan.canShowBookingButton = !locationRequired && providerHealth ? providerHealth.canShowBookingButton === true : false;
+      commercePlan.canShowCheckoutButton = !locationRequired && providerHealth ? providerHealth.canShowCheckoutButton === true : false;
     }
     const savedPlan = api.addCommerceTask ? api.addCommerceTask(commercePlan) : (api.saveCommercePlan ? api.saveCommercePlan(commercePlan) : commercePlan);
     const status = savedPlan.status || "planned";
     const blocked = status === "blocked";
     const missing = Array.isArray(savedPlan.missingFields) && savedPlan.missingFields.length ? "请补充" + savedPlan.missingFields.join("、") + "。" : "";
     const providerMissing = savedPlan.searchStatus === "no_provider" || savedPlan.searchStatus === "providerMissing";
+    const locationRequired = savedPlan.searchStatus === "location_required";
     const fields = savedPlan.normalizedFields || {};
     const routeCondition = fields.originText && fields.destinationText ? fields.originText + " → " + fields.destinationText : "";
     const conditionSummary = [routeCondition, fields.dateText || fields.timing || ""].filter(Boolean).join("，");
@@ -296,6 +305,7 @@
       !blocked && isFlightPlan && (fields.dateText || fields.timing) ? "日期：" + (fields.dateText || fields.timing) : "",
       blocked ? "原因：涉及下单 / 付款。" : "",
       missing,
+      !blocked && locationRequired ? "需要开启定位以计算精确最低到手价。定位用于运费、税费、关税和当地合规计算；当前不会显示价格或跳转购买/预订页面。" : "",
       !blocked && providerMissing ? providerMissingText : "",
       "安全边界：" + (blocked ? "不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表。" : isFlightPlan ? "未下单、未付款、未提交订单、未保存证件。" : savedPlan.category === "ecommerce" ? "未下单、未付款、未提交订单、未保存银行卡或证件。" : "未搜索、未下单、未付款、未提交订单。"),
       "下一步：查看全球采购计划。"

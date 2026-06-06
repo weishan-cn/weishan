@@ -53,6 +53,37 @@
     return window.WeishanCommerceProductProviderSelection || null;
   }
 
+  function locationPolicyApi(){
+    return window.WeishanCommerceLocationPolicy || null;
+  }
+
+  function locationHealth(){
+    const api = locationPolicyApi();
+    if (api && api.locationHealthForCommerce) return api.locationHealthForCommerce();
+    return {
+      locationPermissionMode:"off",
+      locationPermissionStatus:"not_requested",
+      locationRequiredForAccuratePrice:true,
+      hasPreciseLocation:false,
+      canCalculateAccurateLandedCost:false,
+      canShowAccuratePrice:false,
+      canShowRedirectButton:false,
+      canShowPrice:false,
+      canShowBookingButton:false,
+      canShowCheckoutButton:false,
+      landedCostAccuracy:"blocked_location_required",
+      searchStatus:"location_required",
+      reason:"location_required_for_accurate_landed_cost",
+      privacy:{
+        storeRawCoordinates:false,
+        logRawCoordinates:false,
+        shareWithThirdParty:false,
+        useForAds:false,
+        useForTracking:false
+      }
+    };
+  }
+
   function productSafetySwitches(){
     const api = productSelectionApi();
     if (api && api.getProductProviderSafetySwitches) return api.getProductProviderSafetySwitches();
@@ -342,6 +373,29 @@
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       productProviderReadiness:readiness,
+      canShowPrice:false,
+      canShowBookingButton:false,
+      canShowCheckoutButton:false,
+      candidates:[]
+    };
+  }
+
+  function locationRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox){
+    const health = locationHealth();
+    return {
+      ok:false,
+      code:"COMMERCE_LOCATION_REQUIRED",
+      message:"需要开启定位以计算精确最低到手价。",
+      reason:"location_required_for_accurate_landed_cost",
+      request,
+      searchStatus:"location_required",
+      providerHealth:providerHealth.providerHealth,
+      configHealth:configFields(providerConfig),
+      connectorHealth,
+      sandboxHealth:sandbox,
+      dryRunHealth:sandbox,
+      locationHealth:health,
+      landedCostAccuracy:"blocked_location_required",
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -1147,6 +1201,9 @@
     const connectorReady = isProviderConnectorReady(providerConnector);
     const connectorHealth = connectorFields(providerConnector);
     const sandbox = getCommerceProviderSandbox(request.category, settings);
+    if (isProductSearchRequest(request) && locationHealth().canCalculateAccurateLandedCost !== true) {
+      return locationRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox);
+    }
     if (isProductSearchRequest(request) && !getProductProviderReadiness(providerConfig).ready) {
       return productProviderBlockedResult(request, providerHealth, providerConfig, connectorHealth, sandbox);
     }
@@ -1269,6 +1326,7 @@
     getCommerceProviderConfig,
     getCommerceProviderConnector,
     getCommerceProviderSandbox,
+    locationHealthForCommerce:locationHealth,
     isProviderConfigReady,
     isProviderConnectorReady,
     getProductProviderReadiness,

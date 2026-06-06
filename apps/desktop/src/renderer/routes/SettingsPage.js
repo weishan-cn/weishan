@@ -1,4 +1,8 @@
 (function(){
+  if (!window.WeishanCommerceLocationPolicy && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceLocationPolicy.js?v=2.0.28"></scr' + 'ipt>');
+  }
+
   function esc(s){
     return String(s||"").replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; });
   }
@@ -473,6 +477,75 @@
     return value ? " checked" : "";
   }
 
+  function commerceLocationApi(){
+    return window.WeishanCommerceLocationPolicy || null;
+  }
+
+  function commerceLocationPolicy(){
+    const api = commerceLocationApi();
+    if (api && api.getCommerceLocationPolicy) return api.getCommerceLocationPolicy();
+    return {
+      locationPermissionMode:"off",
+      locationPermissionStatus:"not_requested",
+      hasPreciseLocation:false,
+      canCalculateAccurateLandedCost:false,
+      canShowAccuratePrice:false,
+      canShowRedirectButton:false,
+      reason:"location_required",
+      privacy:{
+        storeRawCoordinates:false,
+        logRawCoordinates:false,
+        shareWithThirdParty:false,
+        useForAds:false,
+        useForTracking:false
+      },
+      notice:"为了精准计算最低到手价并遵守当地法律，请开启定位权限。weishan 仅将定位用于价格、运费、税费、关税和合规区域计算，不会保存原始位置。"
+    };
+  }
+
+  function commerceLocationPanel(){
+    const policy = commerceLocationPolicy();
+    const mode = policy.locationPermissionMode || "off";
+    return `
+      <div class="ws-card commerce-location-settings" id="commerceLocationSettingsPanel">
+        <div class="settings-title-row">
+          <h2>定位权限</h2>
+          <span class="connector-pill ${mode === "off" ? "connector-empty" : "connector-saved"}">${mode === "off" ? "关闭" : "待系统授权"}</span>
+        </div>
+        <p class="ws-muted">为了精准计算最低到手价并遵守当地法律，请开启定位权限。weishan 仅将定位用于价格、运费、税费、关税和合规区域计算，不会保存原始位置。</p>
+        <div class="desktop-permission-grid commerce-location-options">
+          <label><input type="radio" name="commerceLocationMode" value="always"${mode === "always" ? " checked" : ""}> 永远允许</label>
+          <label><input type="radio" name="commerceLocationMode" value="while_using_app"${mode === "while_using_app" ? " checked" : ""}> 使用 App 时允许</label>
+          <label><input type="radio" name="commerceLocationMode" value="off"${mode === "off" ? " checked" : ""}> 关闭</label>
+        </div>
+        <dl class="commerce-facts">
+          <div><dt>定位状态</dt><dd>${esc(policy.locationPermissionStatus || "not_requested")}</dd></div>
+          <div><dt>精确最低到手价</dt><dd>${policy.canCalculateAccurateLandedCost ? "可计算" : "不可用"}</dd></div>
+          <div><dt>原始坐标保存</dt><dd>false</dd></div>
+          <div><dt>第三方共享</dt><dd>false</dd></div>
+          <div><dt>广告 / 追踪</dt><dd>false</dd></div>
+        </dl>
+        <p class="commerce-warning">未获得系统定位授权前，不显示精确最低到手价，不显示购买、预订或付款跳转按钮。</p>
+      </div>`;
+  }
+
+  function mountCommerceLocationPanel(host){
+    const panel = host.querySelector("#commerceLocationSettingsPanel");
+    const api = commerceLocationApi();
+    if (!panel || !api || !api.saveCommerceLocationPolicy) return;
+    panel.querySelectorAll("input[name='commerceLocationMode']").forEach(function(input){
+      input.addEventListener("change", function(){
+        const mode = String(input.value || "off");
+        api.saveCommerceLocationPolicy({
+          locationPermissionMode:mode,
+          locationPermissionStatus:"not_requested",
+          hasPreciseLocation:false
+        });
+        window.WeishanRouter && window.WeishanRouter.refresh && window.WeishanRouter.refresh();
+      });
+    });
+  }
+
   function desktopAssistantPanel(){
     const settings = desktopAssistantSettings();
     const session = desktopAssistantSession();
@@ -722,6 +795,7 @@
             <p>free/pro → A；team/enterprise/institution → B。</p>
           </div>
         </div>
+        ${commerceLocationPanel()}
         ${desktopAssistantPanel()}
         ${cloudEnterprisePanel()}
       </section>`;
@@ -771,7 +845,15 @@
     });
 
     mountDesktopAssistantPanel(host);
+    mountCommerceLocationPanel(host);
     mountCloudPanel(host);
+    try {
+      if (window.sessionStorage && window.sessionStorage.getItem("weishan:settings:focus") === "commerceLocation") {
+        window.sessionStorage.removeItem("weishan:settings:focus");
+        const target = host.querySelector("#commerceLocationSettingsPanel");
+        if (target && target.scrollIntoView) target.scrollIntoView({ block:"start" });
+      }
+    } catch (_) {}
 
     if (!acc.loggedIn) return;
 
