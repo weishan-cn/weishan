@@ -44,6 +44,40 @@
     return window.WeishanCommerceGlobalProviderPool || null;
   }
 
+  function onboardingApi(){
+    return window.WeishanCommerceProviderOnboardingChecklist || null;
+  }
+
+  function onboardingStatus(category){
+    const api = onboardingApi();
+    if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
+    return {
+      checklistVersion:"2.0.34",
+      phase:"provider_onboarding_checklist",
+      category:normalizeCategory(category),
+      onboardingStatus:"not_reviewed",
+      status:"not_reviewed",
+      providerOnboardingRequired:true,
+      requiredBeforeConnection:true,
+      canStartConnectorDevelopment:false,
+      canConfigureApiKey:false,
+      canConnectEndpoint:false,
+      canEnableNetworkSearch:false,
+      canDisplayPrice:false,
+      reason:"provider_onboarding_required",
+      safety:{
+        noRealEndpoint:true,
+        noApiKey:true,
+        noNetworkSearch:true,
+        noPriceDisplay:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true
+      }
+    };
+  }
+
   function poolReadiness(){
     const api = poolApi();
     if (api && api.getCommerceGlobalProviderPoolReadiness) return api.getCommerceGlobalProviderPoolReadiness();
@@ -151,6 +185,11 @@
     return Object.assign({
       providerId:next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled",
       category:next,
+      onboardingStatus:"not_reviewed",
+      providerOnboardingRequired:true,
+      canStartConnectorDevelopment:false,
+      canConnectEndpoint:false,
+      canDisplayPrice:false,
       providerStatus:next === "product" ? "candidate_not_connected" : "disabled",
       enabled:false,
       configured:false,
@@ -174,7 +213,8 @@
       configStatus:"not_configured",
       reasonWhenUnavailable:next === "product" ? "全球多源 provider 候选池准备中，尚未接入真实只读搜索源" : "暂未配置真实搜索源",
       productProviderProfile:next === "product" ? productProfile() : undefined,
-      productProviderReadiness:next === "product" ? productReadiness(productDefaults) : undefined
+      productProviderReadiness:next === "product" ? productReadiness(productDefaults) : undefined,
+      providerOnboardingStatus:onboardingStatus(next)
     }, productDefaults);
   }
 
@@ -231,7 +271,13 @@
       productProviderProfile:next.productProviderProfile || productProfile(),
       productProviderReadiness:next.productProviderReadiness || productReadiness(next),
       productProviderCandidateReadiness:next.productProviderCandidateReadiness || productCandidateReadiness(),
-      globalProviderPoolReadiness:next.globalProviderPoolReadiness || poolReadiness()
+      globalProviderPoolReadiness:next.globalProviderPoolReadiness || poolReadiness(),
+      onboardingStatus:next.onboardingStatus || "not_reviewed",
+      providerOnboardingRequired:next.providerOnboardingRequired !== false,
+      canStartConnectorDevelopment:next.canStartConnectorDevelopment === true,
+      canConnectEndpoint:next.canConnectEndpoint === true,
+      canDisplayPrice:next.canDisplayPrice === true,
+      providerOnboardingStatus:next.providerOnboardingStatus || onboardingStatus(next.category)
     };
   }
 
@@ -382,6 +428,7 @@
     const config = defaultConfig(next, null);
     const connector = defaultConnector(next, null);
     const cFields = connectorFields(connector);
+    const onboarding = onboardingStatus(next);
     const isProduct = next === "product";
     const productDefaults = isProduct ? productSafetySwitches() : {};
     const candidate = isProduct ? productCandidateReadiness() : null;
@@ -406,6 +453,11 @@
       canSearchNow:false,
       canReturnPriceNow:false,
       canRedirectNow:false,
+      onboardingStatus:onboarding.onboardingStatus || onboarding.status || "not_reviewed",
+      providerOnboardingRequired:onboarding.providerOnboardingRequired !== false,
+      canStartConnectorDevelopment:onboarding.canStartConnectorDevelopment === true,
+      canConnectEndpoint:onboarding.canConnectEndpoint === true,
+      canDisplayPrice:onboarding.canDisplayPrice === true,
       enabled:false,
       configured:false,
       environment:"renderer",
@@ -447,6 +499,7 @@
       supportsReadOnlySearch:config.supportsReadOnlySearch === true,
       supportsCrossBorderSearch:config.supportsCrossBorderSearch === true,
       configHealth:configFields(config),
+      onboardingHealth:onboarding,
       connectorHealth:providerConnectorFields,
       sandboxHealth:sandboxFields(next, null, config, config, connector),
       productProviderProfile:isProduct ? productProfile() : undefined,
@@ -469,6 +522,7 @@
     const config = defaultConfig(next, cfg);
     const connector = defaultConnector(next, cfg);
     const cFields = connectorFields(connector);
+    const onboarding = onboardingStatus(next);
     if (config.enabled !== true || config.configured !== true || config.hasApiKey !== true || config.allowNetworkSearch !== true || config.allowReturnPrice !== true) return null;
     if (cFields.connectorEnabled !== true || cFields.connectorConfigured !== true || cFields.connectorNetworkAllowed !== true || cFields.supportsSearch !== true || cFields.supportsPrice !== true) return null;
     return {
@@ -484,6 +538,11 @@
       supportsPrice:true,
       safetyLevel:"test_or_manual_provider",
       reasonWhenDisabled:"",
+      onboardingStatus:onboarding.onboardingStatus || onboarding.status || "not_reviewed",
+      providerOnboardingRequired:onboarding.providerOnboardingRequired !== false,
+      canStartConnectorDevelopment:onboarding.canStartConnectorDevelopment === true,
+      canConnectEndpoint:onboarding.canConnectEndpoint === true,
+      canDisplayPrice:onboarding.canDisplayPrice === true,
       adapterId:adapter.providerId,
       adapterMode:"read_only",
       adapterConfigured:true,
@@ -516,6 +575,7 @@
       supportsReadOnlySearch:config.supportsReadOnlySearch === true,
       supportsCrossBorderSearch:config.supportsCrossBorderSearch === true,
       configHealth:configFields(config),
+      onboardingHealth:onboarding,
       connectorHealth:cFields,
       sandboxHealth:sandboxFields(next, cfg, config, config, connector)
     };
@@ -536,6 +596,7 @@
       adapterHealth:adapterFields(provider),
       connectorHealth:provider.connectorHealth || connectorFields(provider),
       configHealth:provider.configHealth || configFields(provider),
+      onboardingHealth:provider.onboardingHealth || onboardingStatus(next),
       sandboxHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
       dryRunHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
       enabled:provider.enabled === true,

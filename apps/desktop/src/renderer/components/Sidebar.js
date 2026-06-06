@@ -17,7 +17,7 @@
     if (shell) shell.classList.toggle("sidebar-collapsed", isCollapsed());
   }
   function appVersion(){
-    return window.WeishanConfig && window.WeishanConfig.version || "2.0.32";
+    return window.WeishanConfig && window.WeishanConfig.version || "2.0.34";
   }
   function html(){
     let currentSection = "";

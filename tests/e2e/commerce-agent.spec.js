@@ -562,6 +562,67 @@ test.describe.serial("commerce agent workbench", () => {
     expect(result.readiness.reason).toBe("provider_pool_not_connected");
   });
 
+  test("provider onboarding checklist blocks endpoint key network and price by default", async () => {
+    await gotoRoute(page, "commerce");
+    const result = await page.evaluate(async () => {
+      if (!window.WeishanCommerceProviderOnboardingChecklist) {
+        await new Promise((resolve) => {
+          const script = document.createElement("script");
+          script.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.34";
+          script.onload = resolve;
+          document.head.appendChild(script);
+        });
+      }
+      return {
+        checklist:window.WeishanCommerceProviderOnboardingChecklist.getProviderOnboardingChecklist("product"),
+        status:window.WeishanCommerceProviderOnboardingChecklist.getProviderOnboardingStatus("product"),
+        canStart:window.WeishanCommerceProviderOnboardingChecklist.canStartProviderConnectorDevelopment("product"),
+        reason:window.WeishanCommerceProviderOnboardingChecklist.explainProviderOnboardingBlockReason("product")
+      };
+    });
+    expect(result.checklist.checklistVersion).toBe("2.0.34");
+    expect(result.checklist.phase).toBe("provider_onboarding_checklist");
+    expect(result.checklist.appliesTo).toContain("product_marketplace");
+    expect(result.checklist.appliesTo).toContain("official_brand_site");
+    expect(result.checklist.appliesTo).toContain("hotel_ota");
+    expect(result.checklist.appliesTo).toContain("hotel_official_site");
+    expect(result.checklist.appliesTo).toContain("flight_ota");
+    expect(result.checklist.appliesTo).toContain("airline_official_site");
+    expect(result.checklist.appliesTo).toContain("ticketing_platform");
+    expect(result.checklist.appliesTo).toContain("local_service_platform");
+    expect(result.checklist.defaultStatus).toBe("not_reviewed");
+    expect(result.checklist.requiredBeforeConnection).toBe(true);
+    expect(result.checklist.approvalRequiredBeforeEndpoint).toBe(true);
+    expect(result.checklist.approvalRequiredBeforeApiKey).toBe(true);
+    expect(result.checklist.approvalRequiredBeforeNetwork).toBe(true);
+    expect(result.checklist.approvalRequiredBeforePriceDisplay).toBe(true);
+    expect(result.checklist.checklist.legalTermsReviewed).toBe(false);
+    expect(result.checklist.checklist.apiDocsReviewed).toBe(false);
+    expect(result.checklist.checklist.taxAndFeeFieldsReviewed).toBe(false);
+    expect(result.checklist.checklist.shippingOrBookingFeeFieldsReviewed).toBe(false);
+    expect(result.checklist.checklist.apiKeyStoragePlanReviewed).toBe(false);
+    expect(result.checklist.checklist.noPaymentConfirmed).toBe(false);
+    expect(result.checklist.checklist.noAutoOrderConfirmed).toBe(false);
+    expect(result.checklist.checklist.noIdentityStorageConfirmed).toBe(false);
+    expect(result.checklist.safety.noRealEndpoint).toBe(true);
+    expect(result.checklist.safety.noApiKey).toBe(true);
+    expect(result.checklist.safety.noNetworkSearch).toBe(true);
+    expect(result.checklist.safety.noPriceDisplay).toBe(true);
+    expect(result.checklist.safety.noCheckout).toBe(true);
+    expect(result.checklist.safety.noPayment).toBe(true);
+    expect(result.checklist.safety.noOrderSubmit).toBe(true);
+    expect(result.checklist.safety.noIdentityStorage).toBe(true);
+    expect(result.status.status).toBe("not_reviewed");
+    expect(result.status.canStartConnectorDevelopment).toBe(false);
+    expect(result.status.canConfigureApiKey).toBe(false);
+    expect(result.status.canConnectEndpoint).toBe(false);
+    expect(result.status.canEnableNetworkSearch).toBe(false);
+    expect(result.status.canDisplayPrice).toBe(false);
+    expect(result.status.reason).toBe("provider_onboarding_required");
+    expect(result.canStart).toBe(false);
+    expect(result.reason).toBe("provider_onboarding_required");
+  });
+
   test("product provider candidate evaluation keeps ebay as one pilot candidate without connecting", async () => {
     await gotoRoute(page, "commerce");
     const result = await page.evaluate(async () => {
@@ -1170,6 +1231,14 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("当前不会跳转预订页面");
     await expect(page.locator(".commerce-detail")).toContainText("接口状态");
     await expect(page.locator(".commerce-detail")).toContainText("尚未接入");
+    await expect(page.locator(".commerce-detail")).toContainText("Provider 接入审查");
+    await expect(page.locator(".commerce-detail")).toContainText("未完成");
+    await expect(page.locator(".commerce-detail")).toContainText("接口文档审查");
+    await expect(page.locator(".commerce-detail")).toContainText("API key 存储方案");
+    await expect(page.locator(".commerce-detail")).toContainText("未审查");
+    await expect(page.locator(".commerce-detail")).toContainText("价格/税费/运费字段审查");
+    await expect(page.locator(".commerce-detail")).toContainText("隐私与合规审查");
+    await expect(page.locator(".commerce-detail")).toContainText("当前不会连接真实 provider");
     await expect(page.locator(".commerce-detail")).toContainText("Connector 类型");
     await expect(page.locator(".commerce-detail")).toContainText("只读搜索模板");
     await expect(page.locator(".commerce-detail")).toContainText("配置状态");
@@ -1199,6 +1268,10 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).not.toContainText("selectedStatus");
     await expect(page.locator(".commerce-detail")).not.toContainText("noRealEndpoint=true");
     await expect(page.locator(".commerce-detail")).not.toContainText("noApiKey=true");
+    await expect(page.locator(".commerce-detail")).not.toContainText("legalTermsReviewed=false");
+    await expect(page.locator(".commerce-detail")).not.toContainText("apiDocsReviewed=false");
+    await expect(page.locator(".commerce-detail")).not.toContainText("canConnectEndpoint=false");
+    await expect(page.locator(".commerce-detail")).not.toContainText("canDisplayPrice=false");
     await expect(page.locator(".commerce-detail .commerce-booking-link")).toHaveCount(0);
 
     await submitHomeCommand(page, runId + " 买华为手机");
@@ -1220,7 +1293,15 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("区域电商平台");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会访问任何真实平台");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会返回价格");
+    await expect(page.locator(".commerce-detail")).toContainText("Provider 接入审查");
+    await expect(page.locator(".commerce-detail")).toContainText("当前不会连接真实 provider");
     await expect(page.locator(".commerce-detail")).not.toContainText("去购买");
+    await expect(page.locator(".commerce-detail")).not.toContainText("legalTermsReviewed=false");
+    await expect(page.locator(".commerce-detail")).not.toContainText("apiDocsReviewed=false");
+    await expect(page.locator(".commerce-detail")).not.toContainText("canConnectEndpoint=false");
+    await expect(page.locator(".commerce-detail")).not.toContainText("canDisplayPrice=false");
+    await expect(page.locator(".commerce-detail")).not.toContainText("noRealEndpoint=true");
+    await expect(page.locator(".commerce-detail")).not.toContainText("noApiKey=true");
 
     await submitHomeCommand(page, runId + " 订酒店");
     await page.locator("#commerceViewPlanBtn").click();
@@ -1230,6 +1311,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("Booking / Agoda / Expedia / 携程 / 酒店官网");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会访问任何真实酒店平台");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会返回房价");
+    await expect(page.locator(".commerce-detail")).toContainText("Provider 接入审查");
+    await expect(page.locator(".commerce-detail")).toContainText("当前不会连接真实 provider");
     await expect(page.locator(".commerce-detail")).not.toContainText("去预订");
 
     await submitHomeCommand(page, runId + " 订机票");
@@ -1240,6 +1323,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("Trip.com / Expedia / 航司官网");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会访问任何真实机票平台");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会返回票价");
+    await expect(page.locator(".commerce-detail")).toContainText("Provider 接入审查");
+    await expect(page.locator(".commerce-detail")).toContainText("当前不会连接真实 provider");
     await expect(page.locator(".commerce-detail")).not.toContainText("去预订");
 
     await submitHomeCommand(page, runId + " 买演唱会门票");
@@ -1250,6 +1335,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("Ticketmaster / 大麦 / Eventbrite / 活动官网");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会访问任何真实票务平台");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会返回票价");
+    await expect(page.locator(".commerce-detail")).toContainText("Provider 接入审查");
+    await expect(page.locator(".commerce-detail")).toContainText("当前不会连接真实 provider");
     await expect(page.locator(".commerce-detail")).not.toContainText("去购买");
     await expect(page.locator(".commerce-detail")).not.toContainText("立即支付");
     await expect(page.locator(".commerce-detail")).not.toContainText("上传身份证");

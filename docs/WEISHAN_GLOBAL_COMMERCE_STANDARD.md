@@ -131,6 +131,31 @@ Provider 包括但不限于：
 
 Provider 示例只代表候选池范围，不代表已经接入。未通过完整安全链路前，不允许联网搜索、不允许返回价格、不允许展示购买或预订按钮。
 
+## 7.1. Provider Onboarding Checklist 标准
+
+任何真实 provider 接入前必须完成 Provider Onboarding Checklist。无论 provider 类型是商品平台、品牌官网、酒店 OTA、酒店官网、机票 OTA、航司官网、票务平台还是本地服务预约平台，未完成审查前都不得进入 connector 开发或真实连接阶段。
+
+未完成审查前不得配置 API key，未完成审查前不得连接真实 endpoint，未完成审查前不得启用网络搜索，未完成审查前不得显示价格，未完成审查前不得显示购买/预订按钮。
+
+Provider Onboarding Checklist 必须审查：
+
+- 法律条款
+- API 文档
+- 额度和 rate limit
+- 地区覆盖
+- 数据字段
+- 价格字段
+- 税费字段
+- 运费 / 预订费字段
+- 跳转 URL 策略
+- 隐私政策
+- API key 存储方案
+- no payment / no auto order / no identity storage 的执行边界
+- 合规风险
+- fallback no_provider 状态
+
+无论 provider 类型如何，都不得自动付款、自动下单、提交订单或保存证件/银行卡。Provider Onboarding Checklist 只允许推进只读搜索准备，不允许绕过 candidate evaluation、config safety、read_only adapter、sandbox dry run 或 connector gate。
+
 ## 8. 结果展示标准
 
 结果最多展示 2-3 条。

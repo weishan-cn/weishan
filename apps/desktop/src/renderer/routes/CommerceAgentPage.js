@@ -40,6 +40,14 @@
       document.head.appendChild(pool);
       return;
     }
+    if (!window.WeishanCommerceProviderOnboardingChecklist && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderOnboardingChecklist"]')) {
+      const onboarding = document.createElement("script");
+      onboarding.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.34";
+      onboarding.dataset.weishanDynamic = "WeishanCommerceProviderOnboardingChecklist";
+      onboarding.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(onboarding);
+      return;
+    }
     if (!window.WeishanCommerceProductProviderCandidate && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProductProviderCandidate"]')) {
       const candidate = document.createElement("script");
       candidate.src = "./renderer/core/commerceProductProviderCandidate.js?v=2.0.32";
@@ -223,6 +231,11 @@
         <span>${esc(copy.examples)}。</span>
         ${isProduct ? `<span>eBay Browse API 是商品搜索试点候选之一，尚未接入。</span>` : ""}
         <span>接口状态：尚未接入。</span>
+        <span>Provider 接入审查：未完成。</span>
+        <span>接口文档审查：未完成。</span>
+        <span>API key 存储方案：未审查。</span>
+        <span>价格/税费/运费字段审查：未完成。</span>
+        <span>隐私与合规审查：未完成。</span>
         <span>搜索模式：只读搜索准备中。</span>
         <span>网络搜索：未启用。</span>
         <span>实时价格：不可用。</span>
@@ -230,6 +243,7 @@
         <span>${esc(copy.noAccess)}</span>
         <span>${esc(copy.noPrice)}</span>
         <span>${esc(copy.noRedirect)}</span>
+        <span>当前不会连接真实 provider。</span>
         <span>支付/下单：不支持，由外部平台完成。</span>
         <span>证件/银行卡：不保存。</span>
         <span>当前不会下单、付款或保存证件/银行卡。</span>
@@ -360,6 +374,7 @@
     const adapterInfo = health.adapterHealth || {};
     const configInfo = health.configHealth || {};
     const connectorInfo = health.connectorHealth || task.connectorHealth || {};
+    const onboardingInfo = health.onboardingHealth || task.onboardingHealth || {};
     const sandboxInfo = health.dryRunHealth || health.sandboxHealth || {};
     const globalReadiness = sandboxInfo.globalReadiness || {};
     const reasonWhenDisabled = providerRow.reasonWhenDisabled || "";
@@ -393,6 +408,11 @@
       ${!isModelPricing && !hasProvider ? `<dl class="commerce-facts commerce-provider-health">
         <div><dt>搜索适配器</dt><dd>暂未配置</dd></div>
         <div><dt>接口状态</dt><dd>尚未接入</dd></div>
+        <div><dt>Provider 接入审查</dt><dd>${onboardingInfo.canConnectEndpoint === true ? "已完成" : "未完成"}</dd></div>
+        <div><dt>接口文档审查</dt><dd>未完成</dd></div>
+        <div><dt>API key 存储方案</dt><dd>未审查</dd></div>
+        <div><dt>价格/税费/运费字段审查</dt><dd>未完成</dd></div>
+        <div><dt>隐私与合规审查</dt><dd>未完成</dd></div>
         <div><dt>Connector 类型</dt><dd>只读搜索模板</dd></div>
         <div><dt>当前模式</dt><dd>只读搜索准备中</dd></div>
         <div><dt>配置状态</dt><dd>未配置真实搜索源</dd></div>
@@ -680,6 +700,7 @@
             providerHealth:result.providerHealth || target.providerHealth || [],
             configHealth:result.configHealth || target.configHealth || {},
             connectorHealth:result.connectorHealth || target.connectorHealth || {},
+            onboardingHealth:result.onboardingHealth || target.onboardingHealth || {},
             sandboxHealth:result.sandboxHealth || target.sandboxHealth || {},
             dryRunHealth:result.dryRunHealth || result.sandboxHealth || target.dryRunHealth || target.sandboxHealth || {},
             locationHealth:result.locationHealth || target.locationHealth || {},
@@ -709,6 +730,7 @@
           providerHealth:result.providerHealth || target.providerHealth || [],
           configHealth:result.configHealth || target.configHealth || {},
           connectorHealth:result.connectorHealth || target.connectorHealth || {},
+          onboardingHealth:result.onboardingHealth || target.onboardingHealth || {},
           sandboxHealth:result.sandboxHealth || target.sandboxHealth || {},
           dryRunHealth:result.dryRunHealth || result.sandboxHealth || target.dryRunHealth || target.sandboxHealth || {},
           canShowPrice:result.canShowPrice === true,

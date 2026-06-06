@@ -17,6 +17,9 @@
   if (!window.WeishanCommerceGlobalProviderPool && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceGlobalProviderPool.js?v=2.0.32"></scr' + 'ipt>');
   }
+  if (!window.WeishanCommerceProviderOnboardingChecklist && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.34"></scr' + 'ipt>');
+  }
   if (!window.WeishanCommerceProductProviderCandidate && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.32"></scr' + 'ipt>');
   }
@@ -278,6 +281,7 @@
       commercePlan.providerHealth = providerHealth && providerHealth.providerHealth || [];
       commercePlan.configHealth = providerHealth && providerHealth.configHealth || {};
       commercePlan.connectorHealth = providerHealth && providerHealth.connectorHealth || {};
+      commercePlan.onboardingHealth = providerHealth && providerHealth.onboardingHealth || {};
       commercePlan.sandboxHealth = providerHealth && providerHealth.sandboxHealth || {};
       commercePlan.dryRunHealth = providerHealth && (providerHealth.dryRunHealth || providerHealth.sandboxHealth) || {};
       commercePlan.locationHealth = locationHealth || {};
@@ -297,14 +301,15 @@
     const conditionSummary = [routeCondition, fields.dateText || fields.timing || ""].filter(Boolean).join("，");
     const isFlightPlan = savedPlan.category === "flight";
     const providerReason = Array.isArray(savedPlan.providerHealth) && savedPlan.providerHealth[0] && savedPlan.providerHealth[0].reasonWhenDisabled || "";
+    const onboardingText = "Provider 接入审查：未完成；接口文档审查：未完成；API key 存储方案：未审查；价格/税费/运费字段审查：未完成；隐私与合规审查：未完成；当前不会连接真实 provider。";
     const productProfile = savedPlan.configHealth && savedPlan.configHealth.productProviderProfile || {};
     const productCandidateName = productProfile.selectedCandidateName || productProfile.candidateName || "eBay Browse API";
     const poolSummaryByCategory = {
-      ecommerce:"全球多源 provider 候选池：准备中，尚未接入；当前比较范围：商品电商平台、品牌官网、商品官网、区域电商平台；商品搜索试点候选：" + productCandidateName + " 等；网络搜索未启用，实时价格不可用；精确跳转待真实 provider 接入后启用；当前不会访问任何真实平台；当前不会返回价格；当前不会跳转购买页面。",
-      hotel:"全球多源 provider 候选池：准备中，尚未接入；当前比较范围：酒店官网、酒店 OTA、区域住宿平台；示例候选类型：Booking / Agoda / Expedia / 携程 / 酒店官网 等；当前不会访问任何真实酒店平台；当前不会返回房价；当前不会跳转预订页面。",
-      flight:"全球多源 provider 候选池：准备中，尚未接入；当前比较范围：机票 OTA、航司官网、区域旅行平台；示例候选类型：Trip.com / Expedia / 航司官网 等；当前不会访问任何真实机票平台；当前不会返回票价；当前不会跳转预订页面。",
-      ticketing:"全球多源 provider 候选池：准备中，尚未接入；当前比较范围：票务平台、活动官网、区域票务平台；示例候选类型：Ticketmaster / 大麦 / Eventbrite / 活动官网 等；当前不会访问任何真实票务平台；当前不会返回票价；当前不会跳转购票页面。",
-      serviceBooking:"全球多源 provider 候选池：准备中，尚未接入；当前比较范围：本地服务预约平台、服务商官网、区域服务平台；当前不会访问任何真实服务平台；当前不会返回预约价格；当前不会跳转预约页面。"
+      ecommerce:"全球多源 provider 候选池：准备中，尚未接入；" + onboardingText + " 当前比较范围：商品电商平台、品牌官网、商品官网、区域电商平台；商品搜索试点候选：" + productCandidateName + " 等；网络搜索未启用，实时价格不可用；精确跳转待真实 provider 接入后启用；当前不会访问任何真实平台；当前不会返回价格；当前不会跳转购买页面。",
+      hotel:"全球多源 provider 候选池：准备中，尚未接入；" + onboardingText + " 当前比较范围：酒店官网、酒店 OTA、区域住宿平台；示例候选类型：Booking / Agoda / Expedia / 携程 / 酒店官网 等；当前不会访问任何真实酒店平台；当前不会返回房价；当前不会跳转预订页面。",
+      flight:"全球多源 provider 候选池：准备中，尚未接入；" + onboardingText + " 当前比较范围：机票 OTA、航司官网、区域旅行平台；示例候选类型：Trip.com / Expedia / 航司官网 等；当前不会访问任何真实机票平台；当前不会返回票价；当前不会跳转预订页面。",
+      ticketing:"全球多源 provider 候选池：准备中，尚未接入；" + onboardingText + " 当前比较范围：票务平台、活动官网、区域票务平台；示例候选类型：Ticketmaster / 大麦 / Eventbrite / 活动官网 等；当前不会访问任何真实票务平台；当前不会返回票价；当前不会跳转购票页面。",
+      serviceBooking:"全球多源 provider 候选池：准备中，尚未接入；" + onboardingText + " 当前比较范围：本地服务预约平台、服务商官网、区域服务平台；当前不会访问任何真实服务平台；当前不会返回预约价格；当前不会跳转预约页面。"
     };
     const providerMissingText = poolSummaryByCategory[savedPlan.category] || providerReason || "搜索适配器未配置，配置状态未配置真实搜索源，无法返回真实价格。";
     const displayTitle = api.createCommerceDisplayTitle ? api.createCommerceDisplayTitle(savedPlan, false) : blocked ? "全球采购计划已阻断" : "全球采购计划已生成";

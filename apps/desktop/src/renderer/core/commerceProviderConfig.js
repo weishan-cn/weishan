@@ -37,6 +37,40 @@
     return window.WeishanCommerceGlobalProviderPool || null;
   }
 
+  function onboardingApi(){
+    return window.WeishanCommerceProviderOnboardingChecklist || null;
+  }
+
+  function onboardingStatus(category){
+    const api = onboardingApi();
+    if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
+    return {
+      checklistVersion:"2.0.34",
+      phase:"provider_onboarding_checklist",
+      category:normalizeCategory(category),
+      onboardingStatus:"not_reviewed",
+      status:"not_reviewed",
+      providerOnboardingRequired:true,
+      requiredBeforeConnection:true,
+      canStartConnectorDevelopment:false,
+      canConfigureApiKey:false,
+      canConnectEndpoint:false,
+      canEnableNetworkSearch:false,
+      canDisplayPrice:false,
+      reason:"provider_onboarding_required",
+      safety:{
+        noRealEndpoint:true,
+        noApiKey:true,
+        noNetworkSearch:true,
+        noPriceDisplay:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true
+      }
+    };
+  }
+
   function poolReadiness(){
     const api = poolApi();
     if (api && api.getCommerceGlobalProviderPoolReadiness) return api.getCommerceGlobalProviderPoolReadiness();
@@ -141,6 +175,11 @@
     const base = {
       providerId:next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled",
       category:next,
+      onboardingStatus:"not_reviewed",
+      providerOnboardingRequired:true,
+      canStartConnectorDevelopment:false,
+      canConnectEndpoint:false,
+      canDisplayPrice:false,
       providerStatus:next === "product" ? "candidate_not_connected" : "disabled",
       enabled:false,
       configured:false,
@@ -175,7 +214,8 @@
       supportsReadOnlySearch:false,
       supportsCrossBorderSearch:false,
       configStatus:"not_configured",
-      reasonWhenUnavailable:"暂未配置真实" + label + "搜索源"
+      reasonWhenUnavailable:"暂未配置真实" + label + "搜索源",
+      providerOnboardingStatus:onboardingStatus(next)
     };
     if (next === "product") {
       const candidate = productCandidateReadiness();
@@ -199,7 +239,8 @@
         reasonWhenDisabled:"全球多源 provider 候选池准备中，尚未接入真实只读搜索源",
         productProviderProfile:productProfile(),
         productProviderReadiness:productReadiness(),
-        productProviderCandidateReadiness:candidate
+        productProviderCandidateReadiness:candidate,
+        providerOnboardingStatus:onboardingStatus(next)
       });
     }
     return base;
