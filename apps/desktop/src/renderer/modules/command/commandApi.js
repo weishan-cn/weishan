@@ -9,16 +9,19 @@
     document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.15"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderAdapter && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderAdapter.js?v=2.0.22"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderAdapter.js?v=2.0.23"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderConfig && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.22"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.23"></scr' + 'ipt>');
+  }
+  if (!window.WeishanCommerceProviderSandbox && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderSandbox.js?v=2.0.23"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviders && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.22"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.23"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceSearch && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.22"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.23"></scr' + 'ipt>');
   }
 
   const QUEUE_KEY = "command.queue.v205";
@@ -256,6 +259,8 @@
       commercePlan.searchProviderName = usesOpenRouter ? "OpenRouter" : hasProvider && search.getCommerceSearchSettings ? search.getCommerceSearchSettings().providerName || "commerceProvider" : "";
       commercePlan.providerHealth = providerHealth && providerHealth.providerHealth || [];
       commercePlan.configHealth = providerHealth && providerHealth.configHealth || {};
+      commercePlan.sandboxHealth = providerHealth && providerHealth.sandboxHealth || {};
+      commercePlan.dryRunHealth = providerHealth && (providerHealth.dryRunHealth || providerHealth.sandboxHealth) || {};
       commercePlan.canShowPrice = providerHealth ? providerHealth.canShowPrice === true : false;
       commercePlan.canShowBookingButton = providerHealth ? providerHealth.canShowBookingButton === true : false;
       commercePlan.canShowCheckoutButton = providerHealth ? providerHealth.canShowCheckoutButton === true : false;

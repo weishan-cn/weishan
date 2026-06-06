@@ -24,6 +24,10 @@
     return window.WeishanCommerceProviderConfig || null;
   }
 
+  function sandboxApi(){
+    return window.WeishanCommerceProviderSandbox || null;
+  }
+
   function defaultConfig(category, settings){
     const api = configApi();
     if (api && api.getCommerceProviderConfig) return api.getCommerceProviderConfig(category, settings);
@@ -42,6 +46,8 @@
       allowCreateOrder:false,
       allowPay:false,
       allowSaveIdentity:false,
+      sandboxMode:"dry_run",
+      providerReadinessStatus:"blocked_before_network",
       configStatus:"not_configured",
       reasonWhenUnavailable:"暂未配置真实搜索源"
     };
@@ -58,7 +64,68 @@
       allowCheckoutUrl:next.allowCheckoutUrl === true,
       allowCreateOrder:false,
       allowPay:false,
-      allowSaveIdentity:false
+      allowSaveIdentity:false,
+      sandboxMode:next.sandboxMode || "dry_run",
+      providerReadinessStatus:next.providerReadinessStatus || "blocked_before_network",
+      supportedRegions:Array.isArray(next.supportedRegions) ? next.supportedRegions : [],
+      supportedCountries:Array.isArray(next.supportedCountries) ? next.supportedCountries : [],
+      supportedLanguages:Array.isArray(next.supportedLanguages) ? next.supportedLanguages : [],
+      supportedCurrencies:Array.isArray(next.supportedCurrencies) ? next.supportedCurrencies : [],
+      globalProviderType:next.globalProviderType || "unknown",
+      complianceRegion:next.complianceRegion || "unknown",
+      requiresUserAccount:next.requiresUserAccount === true,
+      requiresIdentityDocument:next.requiresIdentityDocument === true,
+      requiresPaymentMethod:next.requiresPaymentMethod === true,
+      supportsReadOnlySearch:next.supportsReadOnlySearch === true,
+      supportsCrossBorderSearch:next.supportsCrossBorderSearch === true
+    };
+  }
+
+  function sandboxFields(category, settings, config){
+    const api = sandboxApi();
+    if (api && api.getCommerceProviderSandbox) return api.getCommerceProviderSandbox(category, settings, config, config, defaultAdapter(category));
+    return {
+      category:normalizeCategory(category),
+      sandboxMode:"dry_run",
+      dryRun:true,
+      mode:"read_only",
+      globalReady:false,
+      networkAllowed:false,
+      priceAllowed:false,
+      bookingUrlAllowed:false,
+      checkoutUrlAllowed:false,
+      createOrderAllowed:false,
+      paymentAllowed:false,
+      identityStorageAllowed:false,
+      canProceedToRealSearch:false,
+      providerReadinessStatus:"blocked_before_network",
+      apiKeyPresent:false,
+      networkRequestAllowed:false,
+      canCallProvider:false,
+      canShowPrice:false,
+      canShowBookingButton:false,
+      canShowCheckoutButton:false,
+      canCreateOrder:false,
+      canPay:false,
+      canSaveIdentity:false,
+      schemaValidationStatus:"not_run",
+      reason:"provider_dry_run_blocked",
+      reasonWhenBlocked:"Provider sandbox dry-run 未通过：真实搜索未启用",
+      globalReadiness:{
+        globalReady:false,
+        supportedRegions:[],
+        supportedCountries:[],
+        supportedLanguages:[],
+        supportedCurrencies:[],
+        globalProviderType:"unknown",
+        complianceRegion:"unknown",
+        requiresUserAccount:false,
+        requiresIdentityDocument:false,
+        requiresPaymentMethod:false,
+        supportsReadOnlySearch:false,
+        supportsCrossBorderSearch:false
+      },
+      checks:[]
     };
   }
 
@@ -126,7 +193,19 @@
       allowCreateOrder:false,
       allowPay:false,
       allowSaveIdentity:false,
-      configHealth:configFields(config)
+      supportedRegions:Array.isArray(config.supportedRegions) ? config.supportedRegions : [],
+      supportedCountries:Array.isArray(config.supportedCountries) ? config.supportedCountries : [],
+      supportedLanguages:Array.isArray(config.supportedLanguages) ? config.supportedLanguages : [],
+      supportedCurrencies:Array.isArray(config.supportedCurrencies) ? config.supportedCurrencies : [],
+      globalProviderType:config.globalProviderType || "unknown",
+      complianceRegion:config.complianceRegion || "unknown",
+      requiresUserAccount:false,
+      requiresIdentityDocument:false,
+      requiresPaymentMethod:false,
+      supportsReadOnlySearch:config.supportsReadOnlySearch === true,
+      supportsCrossBorderSearch:config.supportsCrossBorderSearch === true,
+      configHealth:configFields(config),
+      sandboxHealth:sandboxFields(next, null, config)
     };
   }
 
@@ -168,7 +247,19 @@
       allowCreateOrder:false,
       allowPay:false,
       allowSaveIdentity:false,
-      configHealth:configFields(config)
+      supportedRegions:Array.isArray(config.supportedRegions) ? config.supportedRegions : [],
+      supportedCountries:Array.isArray(config.supportedCountries) ? config.supportedCountries : [],
+      supportedLanguages:Array.isArray(config.supportedLanguages) ? config.supportedLanguages : [],
+      supportedCurrencies:Array.isArray(config.supportedCurrencies) ? config.supportedCurrencies : [],
+      globalProviderType:config.globalProviderType || "unknown",
+      complianceRegion:config.complianceRegion || "unknown",
+      requiresUserAccount:false,
+      requiresIdentityDocument:false,
+      requiresPaymentMethod:false,
+      supportsReadOnlySearch:config.supportsReadOnlySearch === true,
+      supportsCrossBorderSearch:config.supportsCrossBorderSearch === true,
+      configHealth:configFields(config),
+      sandboxHealth:sandboxFields(next, cfg, config)
     };
   }
 
@@ -186,6 +277,8 @@
       providerHealth:[provider],
       adapterHealth:adapterFields(provider),
       configHealth:provider.configHealth || configFields(provider),
+      sandboxHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth),
+      dryRunHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth),
       enabled:provider.enabled === true,
       configured:provider.configured === true,
       reasonWhenDisabled:provider.reasonWhenDisabled || "",

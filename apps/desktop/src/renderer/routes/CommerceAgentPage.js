@@ -18,7 +18,7 @@
   function ensureSearchLoaded(host){
     if (!window.WeishanCommerceProviderAdapter && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderAdapter"]')) {
       const adapter = document.createElement("script");
-      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.22";
+      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.23";
       adapter.dataset.weishanDynamic = "WeishanCommerceProviderAdapter";
       adapter.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(adapter);
@@ -26,15 +26,23 @@
     }
     if (!window.WeishanCommerceProviderConfig && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConfig"]')) {
       const config = document.createElement("script");
-      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.22";
+      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.23";
       config.dataset.weishanDynamic = "WeishanCommerceProviderConfig";
       config.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(config);
       return;
     }
+    if (!window.WeishanCommerceProviderSandbox && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderSandbox"]')) {
+      const sandbox = document.createElement("script");
+      sandbox.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.23";
+      sandbox.dataset.weishanDynamic = "WeishanCommerceProviderSandbox";
+      sandbox.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(sandbox);
+      return;
+    }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
-      providers.src = "./renderer/core/commerceProviders.js?v=2.0.22";
+      providers.src = "./renderer/core/commerceProviders.js?v=2.0.23";
       providers.dataset.weishanDynamic = "WeishanCommerceProviders";
       providers.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(providers);
@@ -42,7 +50,7 @@
     }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
-    script.src = "./renderer/core/commerceSearch.js?v=2.0.22";
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.23";
     script.dataset.weishanDynamic = "WeishanCommerceSearch";
     script.onload = () => render(host);
     document.head.appendChild(script);
@@ -232,6 +240,8 @@
     const providerRow = Array.isArray(health.providerHealth) && health.providerHealth[0] || {};
     const adapterInfo = health.adapterHealth || {};
     const configInfo = health.configHealth || {};
+    const sandboxInfo = health.dryRunHealth || health.sandboxHealth || {};
+    const globalReadiness = sandboxInfo.globalReadiness || {};
     const reasonWhenDisabled = providerRow.reasonWhenDisabled || "";
     const providerLabel = isModelPricing ? "OpenRouter" : hasProvider ? settings.providerName || "commerceProvider" : "未配置";
     const failedMessage = task && task.searchStatus === "failed" ? task.searchErrorMessage || (isModelPricing ? "OpenRouter 搜索源不可用，无法返回真实价格。" : "搜索失败，无法返回真实价格。") : "";
@@ -243,14 +253,20 @@
         <span>出发地：${esc(flightOrigin)} · 目的地：${esc(flightDestination)} · 日期：${esc(flightDate)}</span>
         <span>暂未配置真实机票搜索适配器，当前无法返回实时价格。</span>
         <span>当前模式：只读搜索准备中。</span>
+        <span>Provider Sandbox：dry-run；真实 provider 接入前仅做配置、密钥存在性、网络开关和返回结构检查。</span>
+        <span>全球搜索准备：未启用；Provider Dry Run：未通过；跨境搜索：未启用。</span>
         <span>配置状态：未配置真实搜索源；网络搜索未启用；实时价格不可用。</span>
+        <span>weishan 面向全球采购场景设计，当前正在准备多国家、多平台、多币种的只读搜索能力；在真实 provider 启用前不会联网搜索、不会返回价格、不会下单或付款。</span>
         <span>未下单、未付款、未提交订单、未保存证件。</span>
       </div>` : ""}
       ${isProduct && !hasProvider ? `<div class="commerce-warning commerce-product-provider-missing">
         <b>已识别为商品搜索计划。</b>
         <span>暂未配置真实商品搜索适配器，当前无法返回实时价格。</span>
         <span>当前模式：只读搜索准备中。</span>
+        <span>Provider Sandbox：dry-run；真实 provider 接入前仅做配置、密钥存在性、网络开关和返回结构检查。</span>
+        <span>全球搜索准备：未启用；Provider Dry Run：未通过；跨境搜索：未启用。</span>
         <span>配置状态：未配置真实搜索源；网络搜索未启用；实时价格不可用。</span>
+        <span>weishan 面向全球采购场景设计，当前正在准备多国家、多平台、多币种的只读搜索能力；在真实 provider 启用前不会联网搜索、不会返回价格、不会下单或付款。</span>
         <span>未下单、未付款、未提交订单、未保存银行卡或证件。</span>
       </div>` : ""}
       ${!isModelPricing && !hasProvider ? `<dl class="commerce-facts commerce-provider-health">
@@ -267,6 +283,23 @@
         <div><dt>hasApiKey</dt><dd>${configInfo.hasApiKey === true ? "true" : "false"}</dd></div>
         <div><dt>allowNetworkSearch</dt><dd>${configInfo.allowNetworkSearch === true ? "true" : "false"}</dd></div>
         <div><dt>allowReturnPrice</dt><dd>${configInfo.allowReturnPrice === true ? "true" : "false"}</dd></div>
+        <div><dt>sandboxMode</dt><dd>${esc(sandboxInfo.sandboxMode || "dry_run")}</dd></div>
+        <div><dt>globalReady</dt><dd>${sandboxInfo.globalReady === true ? "true" : "false"}</dd></div>
+        <div><dt>全球搜索准备</dt><dd>未启用</dd></div>
+        <div><dt>Provider Dry Run</dt><dd>${sandboxInfo.canProceedToRealSearch === true ? "已通过" : "未通过"}</dd></div>
+        <div><dt>跨境搜索</dt><dd>${globalReadiness.supportsCrossBorderSearch === true ? "已启用" : "未启用"}</dd></div>
+        <div><dt>providerReadiness</dt><dd>${esc(sandboxInfo.providerReadinessStatus || "blocked_before_network")}</dd></div>
+        <div><dt>schemaValidation</dt><dd>${esc(sandboxInfo.schemaValidationStatus || "not_run")}</dd></div>
+        <div><dt>supportedRegions</dt><dd>${esc((globalReadiness.supportedRegions || []).join(", ") || "[]")}</dd></div>
+        <div><dt>supportedCountries</dt><dd>${esc((globalReadiness.supportedCountries || []).join(", ") || "[]")}</dd></div>
+        <div><dt>supportedLanguages</dt><dd>${esc((globalReadiness.supportedLanguages || []).join(", ") || "[]")}</dd></div>
+        <div><dt>supportedCurrencies</dt><dd>${esc((globalReadiness.supportedCurrencies || []).join(", ") || "[]")}</dd></div>
+        <div><dt>complianceRegion</dt><dd>${esc(globalReadiness.complianceRegion || "unknown")}</dd></div>
+        <div><dt>supportsReadOnlySearch</dt><dd>${globalReadiness.supportsReadOnlySearch === true ? "true" : "false"}</dd></div>
+        <div><dt>supportsCrossBorderSearch</dt><dd>${globalReadiness.supportsCrossBorderSearch === true ? "true" : "false"}</dd></div>
+        <div><dt>requiresUserAccount</dt><dd>${globalReadiness.requiresUserAccount === true ? "true" : "false"}</dd></div>
+        <div><dt>requiresIdentityDocument</dt><dd>${globalReadiness.requiresIdentityDocument === true ? "true" : "false"}</dd></div>
+        <div><dt>requiresPaymentMethod</dt><dd>${globalReadiness.requiresPaymentMethod === true ? "true" : "false"}</dd></div>
         <div><dt>canShowPrice</dt><dd>false</dd></div>
         <div><dt>canShowBookingButton</dt><dd>false</dd></div>
         <div><dt>canShowCheckoutButton</dt><dd>false</dd></div>
@@ -474,6 +507,8 @@
             searchProviderName:result.providerName || (isModelPricing ? "OpenRouter" : ""),
             providerHealth:result.providerHealth || target.providerHealth || [],
             configHealth:result.configHealth || target.configHealth || {},
+            sandboxHealth:result.sandboxHealth || target.sandboxHealth || {},
+            dryRunHealth:result.dryRunHealth || result.sandboxHealth || target.dryRunHealth || target.sandboxHealth || {},
             canShowPrice:result.canShowPrice === true,
             canShowBookingButton:result.canShowBookingButton === true,
             canShowCheckoutButton:result.canShowCheckoutButton === true,
@@ -498,6 +533,8 @@
           searchProviderName:result.providerName || "",
           providerHealth:result.providerHealth || target.providerHealth || [],
           configHealth:result.configHealth || target.configHealth || {},
+          sandboxHealth:result.sandboxHealth || target.sandboxHealth || {},
+          dryRunHealth:result.dryRunHealth || result.sandboxHealth || target.dryRunHealth || target.sandboxHealth || {},
           canShowPrice:result.canShowPrice === true,
           canShowBookingButton:result.canShowBookingButton === true,
           canShowCheckoutButton:result.canShowCheckoutButton === true,
