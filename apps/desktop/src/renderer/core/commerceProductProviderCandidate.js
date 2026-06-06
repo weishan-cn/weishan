@@ -1,5 +1,5 @@
 (function(){
-  const EVALUATION_VERSION = "2.0.30";
+  const EVALUATION_VERSION = "2.0.31";
   const SELECTED_FIRST_CANDIDATE = "ebay_browse_api";
   const SELECTED_STATUS = "selected_not_connected";
 
@@ -34,17 +34,43 @@
     }, extra || {});
   }
 
+  function poolApi(){
+    return window.WeishanCommerceGlobalProviderPool || null;
+  }
+
+  function poolReadiness(){
+    const api = poolApi();
+    if (api && api.getCommerceGlobalProviderPoolReadiness) return api.getCommerceGlobalProviderPoolReadiness();
+    return {
+      poolVersion:EVALUATION_VERSION,
+      phase:"multi_source_provider_pool_not_connected",
+      ready:false,
+      connected:false,
+      networkAllowed:false,
+      canSearchNow:false,
+      canReturnPriceNow:false,
+      canRedirectNow:false,
+      maxDisplayedResults:3,
+      reason:"provider_pool_not_connected",
+      safety:baseSafety()
+    };
+  }
+
   function getCommerceProductProviderCandidateEvaluation(){
     return clone({
       evaluationVersion:EVALUATION_VERSION,
       category:"product",
       phase:"provider_candidate_evaluation",
+      poolPhase:poolReadiness().phase,
+      poolStrategy:"compare_multiple_sources_before_redirect",
       selectedFirstCandidate:SELECTED_FIRST_CANDIDATE,
       selectedStatus:SELECTED_STATUS,
+      selectedWording:"product_search_trial_candidate_one",
       candidates:[
         Object.assign({
           id:"ebay_browse_api",
           name:"eBay Browse API",
+          role:"product_search_trial_candidate_one",
           providerType:"marketplace_search_api",
           readOnlySearchFit:"high",
           globalCoverageFit:"medium",
@@ -55,7 +81,7 @@
           requiresPaymentMethod:false,
           requiresIdentityDocument:false,
           riskLevel:"medium",
-          reason:"Suitable as first readonly product search candidate, but endpoint and terms must be reviewed before connection."
+          reason:"One product-search pilot candidate in a broader multi-source pool; endpoint, terms and coverage must be reviewed before connection."
         }, disabledRuntimeFields()),
         Object.assign({
           id:"amazon_product_api",
@@ -88,7 +114,8 @@
           reason:"Useful ecosystem, but current API direction is Merchant API migration and may be more merchant-management oriented than consumer comparison."
         }, disabledRuntimeFields())
       ],
-      safety:baseSafety()
+      safety:baseSafety(),
+      poolReadiness:poolReadiness()
     });
   }
 
@@ -108,6 +135,7 @@
       selectedFirstCandidate:SELECTED_FIRST_CANDIDATE,
       selectedName:selected && selected.name || "eBay Browse API",
       selectedStatus:SELECTED_STATUS,
+      selectedWording:"product_search_trial_candidate_one",
       ready:false,
       endpointConnected:false,
       apiKeyConfigured:false,
@@ -119,6 +147,7 @@
       canPay:false,
       canStoreIdentity:false,
       reason:"provider_candidate_selected_not_connected",
+      poolReadiness:poolReadiness(),
       safety:baseSafety()
     };
   }

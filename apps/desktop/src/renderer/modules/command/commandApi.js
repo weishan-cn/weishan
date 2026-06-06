@@ -9,31 +9,34 @@
     document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.15"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderAdapter && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderAdapter.js?v=2.0.30"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderAdapter.js?v=2.0.31"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderConnector && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConnector.js?v=2.0.30"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConnector.js?v=2.0.31"></scr' + 'ipt>');
+  }
+  if (!window.WeishanCommerceGlobalProviderPool && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceGlobalProviderPool.js?v=2.0.31"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProductProviderCandidate && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.30"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.31"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProductProviderSelection && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderSelection.js?v=2.0.30"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderSelection.js?v=2.0.31"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceLocationPolicy && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceLocationPolicy.js?v=2.0.30"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceLocationPolicy.js?v=2.0.31"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderConfig && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.30"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.31"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderSandbox && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderSandbox.js?v=2.0.30"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderSandbox.js?v=2.0.31"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviders && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.30"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.31"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceSearch && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.30"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.31"></scr' + 'ipt>');
   }
 
   const QUEUE_KEY = "command.queue.v205";
@@ -296,7 +299,7 @@
     const providerReason = Array.isArray(savedPlan.providerHealth) && savedPlan.providerHealth[0] && savedPlan.providerHealth[0].reasonWhenDisabled || "";
     const productProfile = savedPlan.configHealth && savedPlan.configHealth.productProviderProfile || {};
     const productCandidateName = productProfile.selectedCandidateName || productProfile.candidateName || "eBay Browse API";
-    const providerMissingText = isFlightPlan ? "暂未配置真实机票搜索适配器；配置状态未配置真实搜索源，当前无法返回实时价格。" : savedPlan.category === "ecommerce" ? "首个候选 provider：" + productCandidateName + "；当前状态：已选型，尚未接入；当前仅完成 provider 选型，尚未连接真实接口；网络搜索未启用，实时价格不可用；精确跳转待真实 provider 接入后启用；当前不会访问 eBay 或任何真实平台。" : providerReason || "搜索适配器未配置，配置状态未配置真实搜索源，无法返回真实价格。";
+    const providerMissingText = isFlightPlan ? "暂未配置真实机票搜索适配器；配置状态未配置真实搜索源，当前无法返回实时价格。" : savedPlan.category === "ecommerce" ? "全球多源 provider 候选池：准备中，尚未接入；当前比较范围：商品平台、品牌官网、酒店、机票、票务和服务平台；商品搜索试点候选：" + productCandidateName + " 等；网络搜索未启用，实时价格不可用；精确跳转待真实 provider 接入后启用；当前不会访问任何真实平台。" : providerReason || "搜索适配器未配置，配置状态未配置真实搜索源，无法返回真实价格。";
     const displayTitle = api.createCommerceDisplayTitle ? api.createCommerceDisplayTitle(savedPlan, false) : blocked ? "全球采购计划已阻断" : "全球采购计划已生成";
     const answer = [
       displayTitle,

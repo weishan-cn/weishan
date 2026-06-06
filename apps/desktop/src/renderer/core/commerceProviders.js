@@ -40,6 +40,27 @@
     return window.WeishanCommerceProductProviderCandidate || null;
   }
 
+  function poolApi(){
+    return window.WeishanCommerceGlobalProviderPool || null;
+  }
+
+  function poolReadiness(){
+    const api = poolApi();
+    if (api && api.getCommerceGlobalProviderPoolReadiness) return api.getCommerceGlobalProviderPoolReadiness();
+    return {
+      poolVersion:"2.0.31",
+      phase:"multi_source_provider_pool_not_connected",
+      ready:false,
+      connected:false,
+      networkAllowed:false,
+      canSearchNow:false,
+      canReturnPriceNow:false,
+      canRedirectNow:false,
+      maxDisplayedResults:3,
+      reason:"provider_pool_not_connected"
+    };
+  }
+
   function productCandidateReadiness(){
     const api = productCandidateApi();
     if (api && api.getProductProviderCandidateReadiness) return api.getProductProviderCandidateReadiness();
@@ -47,6 +68,7 @@
       selectedFirstCandidate:"ebay_browse_api",
       selectedName:"eBay Browse API",
       selectedStatus:"selected_not_connected",
+      selectedWording:"product_search_trial_candidate_one",
       ready:false,
       endpointConnected:false,
       apiKeyConfigured:false,
@@ -117,7 +139,7 @@
       paymentAllowed:false,
       identityStorageAllowed:false,
       readOnlyOnly:true,
-      reasonWhenUnavailable:"商品搜索 provider 尚未接入真实只读搜索源"
+      reasonWhenUnavailable:"全球多源 provider 候选池准备中，尚未接入真实只读搜索源"
     };
   }
 
@@ -146,11 +168,11 @@
       connectorConfigured:false,
       connectorNetworkAllowed:false,
       connectorType:next === "product" ? "readonly_product_search" : "readonly_search",
-      connectorReasonWhenUnavailable:next === "product" ? "商品搜索 provider 方案已选择，尚未接入真实只读搜索源" : "Provider Connector 未启用",
+      connectorReasonWhenUnavailable:next === "product" ? "全球多源 provider 候选池准备中，尚未接入真实只读搜索源" : "Provider Connector 未启用",
       sandboxMode:"dry_run",
       providerReadinessStatus:next === "product" ? "not_ready" : "blocked_before_network",
       configStatus:"not_configured",
-      reasonWhenUnavailable:next === "product" ? "商品搜索 provider 尚未接入真实只读搜索源" : "暂未配置真实搜索源",
+      reasonWhenUnavailable:next === "product" ? "全球多源 provider 候选池准备中，尚未接入真实只读搜索源" : "暂未配置真实搜索源",
       productProviderProfile:next === "product" ? productProfile() : undefined,
       productProviderReadiness:next === "product" ? productReadiness(productDefaults) : undefined
     }, productDefaults);
@@ -200,13 +222,16 @@
       selectedFirstCandidate:next.selectedFirstCandidate || "ebay_browse_api",
       selectedCandidateName:next.selectedCandidateName || "eBay Browse API",
       selectedStatus:next.selectedStatus || "selected_not_connected",
+      selectedWording:next.selectedWording || "product_search_trial_candidate_one",
+      globalProviderPoolPhase:next.globalProviderPoolPhase || "multi_source_provider_pool_not_connected",
       endpointConnected:next.endpointConnected === true,
       canSearchNow:next.canSearchNow === true,
       canReturnPriceNow:next.canReturnPriceNow === true,
       canRedirectNow:next.canRedirectNow === true,
       productProviderProfile:next.productProviderProfile || productProfile(),
       productProviderReadiness:next.productProviderReadiness || productReadiness(next),
-      productProviderCandidateReadiness:next.productProviderCandidateReadiness || productCandidateReadiness()
+      productProviderCandidateReadiness:next.productProviderCandidateReadiness || productCandidateReadiness(),
+      globalProviderPoolReadiness:next.globalProviderPoolReadiness || poolReadiness()
     };
   }
 
@@ -360,6 +385,7 @@
     const isProduct = next === "product";
     const productDefaults = isProduct ? productSafetySwitches() : {};
     const candidate = isProduct ? productCandidateReadiness() : null;
+    const pool = isProduct ? poolReadiness() : null;
     const providerConnectorFields = isProduct ? Object.assign({}, cFields, {
       connectorStatus:config.connectorStatus || cFields.connectorStatus,
       connectorType:config.connectorType || cFields.connectorType,
@@ -374,6 +400,8 @@
       selectedFirstCandidate:candidate && candidate.selectedFirstCandidate || undefined,
       selectedCandidateName:candidate && candidate.selectedName || undefined,
       selectedStatus:candidate && candidate.selectedStatus || undefined,
+      selectedWording:candidate && (candidate.selectedWording || "product_search_trial_candidate_one") || undefined,
+      globalProviderPoolPhase:pool && pool.phase || undefined,
       endpointConnected:false,
       canSearchNow:false,
       canReturnPriceNow:false,
@@ -386,7 +414,7 @@
       supportsCheckoutUrl:false,
       supportsPrice:false,
       safetyLevel:"disabled",
-      reasonWhenDisabled:isProduct ? "商品搜索 provider 尚未接入真实只读搜索源" : "暂未配置真实" + label + "搜索适配器",
+      reasonWhenDisabled:isProduct ? "全球多源 provider 候选池准备中，尚未接入真实只读搜索源" : "暂未配置真实" + label + "搜索适配器",
       adapterId:adapter.providerId,
       adapterMode:"read_only",
       adapterConfigured:false,
@@ -423,7 +451,8 @@
       sandboxHealth:sandboxFields(next, null, config, config, connector),
       productProviderProfile:isProduct ? productProfile() : undefined,
       productProviderReadiness:isProduct ? productReadiness(config) : undefined,
-      productProviderCandidateReadiness:isProduct ? candidate : undefined
+      productProviderCandidateReadiness:isProduct ? candidate : undefined,
+      globalProviderPoolReadiness:isProduct ? pool : undefined
     }, productDefaults);
   }
 

@@ -7,7 +7,7 @@
     return String(s || "").replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; });
   }
   function t(key){ return window.I18n.t(key); }
-  function appVersion(){ return window.WeishanConfig && window.WeishanConfig.version || "2.0.30"; }
+  function appVersion(){ return window.WeishanConfig && window.WeishanConfig.version || "2.0.31"; }
 
   function formatSize(size){
     const value = Number(size || 0);
@@ -390,7 +390,7 @@
     const providerReason = Array.isArray(stored.providerHealth) && stored.providerHealth[0] && stored.providerHealth[0].reasonWhenDisabled || "";
     const productProfile = stored.configHealth && stored.configHealth.productProviderProfile || {};
     const productCandidateName = productProfile.selectedCandidateName || productProfile.candidateName || "eBay Browse API";
-    const providerMissingText = isFlightPlan ? "Provider Connector 未启用；暂未配置真实机票搜索适配器；网络请求未启用，当前无法返回实时价格" : isProductPlan ? "首个候选 provider：" + productCandidateName + "；当前状态：已选型，尚未接入；当前仅完成 provider 选型，尚未连接真实接口；网络搜索未启用，实时价格不可用；精确跳转待真实 provider 接入后启用；当前不会访问 eBay 或任何真实平台" : providerReason || "Provider Connector 未启用；搜索适配器未配置，无法返回真实价格";
+    const providerMissingText = isFlightPlan ? "Provider Connector 未启用；暂未配置真实机票搜索适配器；网络请求未启用，当前无法返回实时价格" : isProductPlan ? "全球多源 provider 候选池：准备中，尚未接入；当前比较范围：商品平台、品牌官网、酒店、机票、票务和服务平台；商品搜索试点候选：" + productCandidateName + " 等；网络搜索未启用，实时价格不可用；精确跳转待真实 provider 接入后启用；当前不会访问任何真实平台" : providerReason || "Provider Connector 未启用；搜索适配器未配置，无法返回真实价格";
     const flightSafetyText = "未下单、未付款、未提交订单、未保存证件";
     const productSafetyText = "未下单、未付款、未提交订单、未保存银行卡或证件";
     const productQuery = normalized.productQuery || normalized.normalizedQuery || "";

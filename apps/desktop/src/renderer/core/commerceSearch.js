@@ -57,6 +57,10 @@
     return window.WeishanCommerceProductProviderCandidate || null;
   }
 
+  function poolApi(){
+    return window.WeishanCommerceGlobalProviderPool || null;
+  }
+
   function locationPolicyApi(){
     return window.WeishanCommerceLocationPolicy || null;
   }
@@ -123,6 +127,7 @@
       canPay:false,
       canStoreIdentity:false,
       reason:"product_provider_not_connected",
+      poolReason:"provider_pool_not_connected",
       safetySwitches:productSafetySwitches()
     };
   }
@@ -147,7 +152,24 @@
       paymentAllowed:false,
       identityStorageAllowed:false,
       readOnlyOnly:true,
-      reasonWhenUnavailable:"商品搜索 provider 尚未接入真实只读搜索源"
+      reasonWhenUnavailable:"全球多源 provider 候选池准备中，尚未接入真实只读搜索源"
+    };
+  }
+
+  function getGlobalProviderPoolReadiness(){
+    const api = poolApi();
+    if (api && api.getCommerceGlobalProviderPoolReadiness) return api.getCommerceGlobalProviderPoolReadiness();
+    return {
+      poolVersion:"2.0.31",
+      phase:"multi_source_provider_pool_not_connected",
+      ready:false,
+      connected:false,
+      networkAllowed:false,
+      canSearchNow:false,
+      canReturnPriceNow:false,
+      canRedirectNow:false,
+      maxDisplayedResults:3,
+      reason:"provider_pool_not_connected"
     };
   }
 
@@ -158,6 +180,7 @@
       selectedFirstCandidate:"ebay_browse_api",
       selectedName:"eBay Browse API",
       selectedStatus:"selected_not_connected",
+      selectedWording:"product_search_trial_candidate_one",
       ready:false,
       endpointConnected:false,
       apiKeyConfigured:false,
@@ -168,7 +191,8 @@
       canCheckout:false,
       canPay:false,
       canStoreIdentity:false,
-      reason:"provider_candidate_selected_not_connected"
+      reason:"provider_candidate_selected_not_connected",
+      poolReadiness:getGlobalProviderPoolReadiness()
     };
   }
 
@@ -178,6 +202,7 @@
     const next = resultCategory(category);
     const productDefaults = next === "product" ? productSafetySwitches() : {};
     const productCandidate = next === "product" ? getProductProviderCandidateReadiness() : null;
+    const pool = next === "product" ? getGlobalProviderPoolReadiness() : null;
     return Object.assign({
       providerId:next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled",
       category:next,
@@ -185,6 +210,8 @@
       selectedFirstCandidate:productCandidate && productCandidate.selectedFirstCandidate || undefined,
       selectedCandidateName:productCandidate && productCandidate.selectedName || undefined,
       selectedStatus:productCandidate && productCandidate.selectedStatus || undefined,
+      selectedWording:productCandidate && (productCandidate.selectedWording || "product_search_trial_candidate_one") || undefined,
+      globalProviderPoolPhase:pool && pool.phase || undefined,
       endpointConnected:false,
       canSearchNow:false,
       canReturnPriceNow:false,
@@ -205,14 +232,15 @@
       connectorConfigured:false,
       connectorNetworkAllowed:false,
       connectorType:next === "product" ? "readonly_product_search" : "readonly_search",
-      connectorReasonWhenUnavailable:next === "product" ? "商品搜索 provider 方案已选择，尚未接入真实只读搜索源" : "Provider Connector 未启用",
+      connectorReasonWhenUnavailable:next === "product" ? "全球多源 provider 候选池准备中，尚未接入真实只读搜索源" : "Provider Connector 未启用",
       sandboxMode:"dry_run",
       providerReadinessStatus:next === "product" ? "not_ready" : "blocked_before_network",
       configStatus:"not_configured",
-      reasonWhenUnavailable:next === "product" ? "商品搜索 provider 尚未接入真实只读搜索源" : "暂未配置真实搜索源",
+      reasonWhenUnavailable:next === "product" ? "全球多源 provider 候选池准备中，尚未接入真实只读搜索源" : "暂未配置真实搜索源",
       productProviderProfile:next === "product" ? getProductProviderProfile() : undefined,
       productProviderReadiness:next === "product" ? getProductProviderReadiness(productDefaults) : undefined,
-      productProviderCandidateReadiness:productCandidate || undefined
+      productProviderCandidateReadiness:productCandidate || undefined,
+      globalProviderPoolReadiness:pool || undefined
     }, productDefaults);
   }
 
@@ -260,13 +288,16 @@
       selectedFirstCandidate:next.selectedFirstCandidate || "ebay_browse_api",
       selectedCandidateName:next.selectedCandidateName || "eBay Browse API",
       selectedStatus:next.selectedStatus || "selected_not_connected",
+      selectedWording:next.selectedWording || "product_search_trial_candidate_one",
+      globalProviderPoolPhase:next.globalProviderPoolPhase || "multi_source_provider_pool_not_connected",
       endpointConnected:next.endpointConnected === true,
       canSearchNow:next.canSearchNow === true,
       canReturnPriceNow:next.canReturnPriceNow === true,
       canRedirectNow:next.canRedirectNow === true,
       productProviderProfile:next.productProviderProfile || getProductProviderProfile(),
       productProviderReadiness:next.productProviderReadiness || getProductProviderReadiness(next),
-      productProviderCandidateReadiness:next.productProviderCandidateReadiness || getProductProviderCandidateReadiness()
+      productProviderCandidateReadiness:next.productProviderCandidateReadiness || getProductProviderCandidateReadiness(),
+      globalProviderPoolReadiness:next.globalProviderPoolReadiness || getGlobalProviderPoolReadiness()
     };
   }
 
@@ -405,11 +436,12 @@
 
   function productProviderBlockedResult(request, providerHealth, providerConfig, connectorHealth, sandbox){
     const readiness = getProductProviderReadiness(providerConfig);
+    const pool = getGlobalProviderPoolReadiness();
     return {
       ok:false,
       code:"COMMERCE_PRODUCT_PROVIDER_NOT_CONNECTED",
-      message:"product_provider_not_connected",
-      reason:readiness.reason || "product_provider_not_connected",
+      message:"provider_pool_not_connected",
+      reason:pool.reason || readiness.reason || "provider_pool_not_connected",
       request,
       searchStatus:"no_provider",
       providerHealth:providerHealth.providerHealth,
@@ -418,6 +450,7 @@
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       productProviderReadiness:readiness,
+      globalProviderPoolReadiness:pool,
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,

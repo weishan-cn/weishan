@@ -33,6 +33,27 @@
     return window.WeishanCommerceProductProviderCandidate || null;
   }
 
+  function poolApi(){
+    return window.WeishanCommerceGlobalProviderPool || null;
+  }
+
+  function poolReadiness(){
+    const api = poolApi();
+    if (api && api.getCommerceGlobalProviderPoolReadiness) return api.getCommerceGlobalProviderPoolReadiness();
+    return {
+      poolVersion:"2.0.31",
+      phase:"multi_source_provider_pool_not_connected",
+      ready:false,
+      connected:false,
+      networkAllowed:false,
+      canSearchNow:false,
+      canReturnPriceNow:false,
+      canRedirectNow:false,
+      maxDisplayedResults:3,
+      reason:"provider_pool_not_connected"
+    };
+  }
+
   function productCandidateReadiness(){
     const api = productCandidateApi();
     if (api && api.getProductProviderCandidateReadiness) return api.getProductProviderCandidateReadiness();
@@ -40,6 +61,7 @@
       selectedFirstCandidate:"ebay_browse_api",
       selectedName:"eBay Browse API",
       selectedStatus:"selected_not_connected",
+      selectedWording:"product_search_trial_candidate_one",
       ready:false,
       endpointConnected:false,
       apiKeyConfigured:false,
@@ -109,7 +131,7 @@
       paymentAllowed:false,
       identityStorageAllowed:false,
       readOnlyOnly:true,
-      reasonWhenUnavailable:"商品搜索 provider 尚未接入真实只读搜索源"
+      reasonWhenUnavailable:"全球多源 provider 候选池准备中，尚未接入真实只读搜索源"
     };
   }
 
@@ -157,6 +179,7 @@
     };
     if (next === "product") {
       const candidate = productCandidateReadiness();
+      const pool = poolReadiness();
       return Object.assign({}, base, productSafetySwitches(), {
         connectorType:"readonly_product_search",
         connectorStatus:"not_connected",
@@ -165,12 +188,15 @@
         selectedFirstCandidate:candidate.selectedFirstCandidate,
         selectedCandidateName:candidate.selectedName,
         selectedStatus:candidate.selectedStatus,
+        selectedWording:candidate.selectedWording || "product_search_trial_candidate_one",
+        globalProviderPoolPhase:pool.phase,
+        globalProviderPoolReadiness:pool,
         endpointConnected:false,
         canSearchNow:false,
         canReturnPriceNow:false,
         canRedirectNow:false,
-        reasonWhenUnavailable:"商品搜索 provider 候选已选型，尚未接入真实只读搜索源",
-        reasonWhenDisabled:"商品搜索 provider 候选已选型，尚未接入真实只读搜索源",
+        reasonWhenUnavailable:"全球多源 provider 候选池准备中，尚未接入真实只读搜索源",
+        reasonWhenDisabled:"全球多源 provider 候选池准备中，尚未接入真实只读搜索源",
         productProviderProfile:productProfile(),
         productProviderReadiness:productReadiness(),
         productProviderCandidateReadiness:candidate

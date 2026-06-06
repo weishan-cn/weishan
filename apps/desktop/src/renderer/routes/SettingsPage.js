@@ -1,6 +1,6 @@
 (function(){
   if (!window.WeishanCommerceLocationPolicy && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceLocationPolicy.js?v=2.0.30"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceLocationPolicy.js?v=2.0.31"></scr' + 'ipt>');
   }
 
   function esc(s){
