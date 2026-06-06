@@ -37,7 +37,7 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceProviderAdapter) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.24";
+        script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.25";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -45,7 +45,7 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceProviderConnector) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.24";
+        script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.25";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -53,7 +53,7 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceProviderConfig) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.24";
+        script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.25";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -61,7 +61,7 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceProviderSandbox) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.24";
+        script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.25";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -70,14 +70,14 @@ async function installCommerceSearchMock(page, candidates) {
       if (!window.WeishanCommerceProviderSandbox) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.24";
+          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.25";
           script.onload = resolve;
           document.head.appendChild(script);
         });
       }
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviders.js?v=2.0.24";
+        script.src = "./renderer/core/commerceProviders.js?v=2.0.25";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -85,7 +85,7 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceSearch) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceSearch.js?v=2.0.24";
+        script.src = "./renderer/core/commerceSearch.js?v=2.0.25";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -114,7 +114,7 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
     if (!window.WeishanCommerceProviderAdapter) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.24";
+        script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.25";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -122,7 +122,7 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
     if (!window.WeishanCommerceProviderConnector) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.24";
+        script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.25";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -130,7 +130,7 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
     if (!window.WeishanCommerceProviderConfig) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.24";
+        script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.25";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -138,7 +138,7 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
     if (!window.WeishanCommerceProviderSandbox) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.24";
+        script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.25";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -147,14 +147,14 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
       if (!window.WeishanCommerceProviderSandbox) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.24";
+          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.25";
           script.onload = resolve;
           document.head.appendChild(script);
         });
       }
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviders.js?v=2.0.24";
+        script.src = "./renderer/core/commerceProviders.js?v=2.0.25";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -162,7 +162,7 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
     if (!window.WeishanCommerceSearch) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceSearch.js?v=2.0.24";
+        script.src = "./renderer/core/commerceSearch.js?v=2.0.25";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -238,7 +238,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderAdapter) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.24";
+          script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.25";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -246,7 +246,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderConnector) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.24";
+          script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.25";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -254,7 +254,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderConfig) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.24";
+          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.25";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -263,14 +263,14 @@ test.describe.serial("commerce agent workbench", () => {
         if (!window.WeishanCommerceProviderSandbox) {
           await new Promise((resolve) => {
             const script = document.createElement("script");
-            script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.24";
+            script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.25";
             script.onload = resolve;
             document.head.appendChild(script);
           });
         }
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviders.js?v=2.0.24";
+          script.src = "./renderer/core/commerceProviders.js?v=2.0.25";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -371,7 +371,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderConfig) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.24";
+          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.25";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -408,7 +408,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderConfig) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.24";
+          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.25";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -416,7 +416,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderSandbox) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.24";
+          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.25";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -472,7 +472,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderAdapter) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.24";
+          script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.25";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -497,7 +497,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderConnector) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.24";
+          script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.25";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -540,12 +540,12 @@ test.describe.serial("commerce agent workbench", () => {
         script.onload = resolve;
         document.head.appendChild(script);
       });
-      await load("WeishanCommerceProviderAdapter", "./renderer/core/commerceProviderAdapter.js?v=2.0.24");
-      await load("WeishanCommerceProviderConnector", "./renderer/core/commerceProviderConnector.js?v=2.0.24");
-      await load("WeishanCommerceProviderConfig", "./renderer/core/commerceProviderConfig.js?v=2.0.24");
-      await load("WeishanCommerceProviderSandbox", "./renderer/core/commerceProviderSandbox.js?v=2.0.24");
-      await load("WeishanCommerceProviders", "./renderer/core/commerceProviders.js?v=2.0.24");
-      await load("WeishanCommerceSearch", "./renderer/core/commerceSearch.js?v=2.0.24");
+      await load("WeishanCommerceProviderAdapter", "./renderer/core/commerceProviderAdapter.js?v=2.0.25");
+      await load("WeishanCommerceProviderConnector", "./renderer/core/commerceProviderConnector.js?v=2.0.25");
+      await load("WeishanCommerceProviderConfig", "./renderer/core/commerceProviderConfig.js?v=2.0.25");
+      await load("WeishanCommerceProviderSandbox", "./renderer/core/commerceProviderSandbox.js?v=2.0.25");
+      await load("WeishanCommerceProviders", "./renderer/core/commerceProviders.js?v=2.0.25");
+      await load("WeishanCommerceSearch", "./renderer/core/commerceSearch.js?v=2.0.25");
       const oldFetch = window.fetch;
       let called = false;
       window.fetch = async () => {
@@ -889,6 +889,34 @@ test.describe.serial("commerce agent workbench", () => {
         isRealProviderResult:true
       },
       {
+        id:"p-5",
+        title:"华为手机 第五候选",
+        provider:"E2E Shop",
+        category:"product",
+        price:2500,
+        totalPrice:2500,
+        currency:"CNY",
+        url:"https://shop.example.test/huawei-fifth",
+        urlType:"checkout",
+        conditions:"第三方店铺",
+        extras:["费用条件待复核"],
+        recommendationReason:"超过前三不展示",
+        isRealProviderResult:true
+      },
+      {
+        id:"p-mock-low",
+        title:"华为手机 mock 低价",
+        provider:"E2E Shop",
+        category:"product",
+        price:1,
+        totalPrice:1,
+        currency:"CNY",
+        url:"https://shop.example.test/huawei-mock",
+        urlType:"checkout",
+        sourceType:"mock",
+        isRealProviderResult:true
+      },
+      {
         id:"p-missing-currency",
         title:"华为手机 缺少币种",
         provider:"E2E Shop",
@@ -962,6 +990,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-candidate-card").nth(0)).toContainText("CNY 2099");
     await expect(page.locator(".commerce-candidate-card").nth(1)).toContainText("CNY 2188");
     await expect(page.locator(".commerce-candidate-card").nth(2)).toContainText("CNY 2300");
+    await expect(page.locator(".commerce-detail")).toContainText("免费的全球比价与跳转服务");
+    await expect(page.locator(".commerce-detail")).toContainText("费用条件不完整，请以跳转后 provider 页面为准");
     await expect(page.locator(".commerce-detail")).toContainText("官方授权店");
     await expect(page.locator(".commerce-detail")).toContainText("包邮");
     await expect(page.locator(".commerce-detail")).toContainText("含售后");
@@ -971,6 +1001,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).not.toContainText("data 链接");
     await expect(page.locator(".commerce-detail")).not.toContainText("空 URL");
     await expect(page.locator(".commerce-detail")).not.toContainText("无 URL");
+    await expect(page.locator(".commerce-detail")).not.toContainText("第五候选");
+    await expect(page.locator(".commerce-detail")).not.toContainText("mock 低价");
     await expect(page.locator(".commerce-booking-link").nth(0)).toHaveText("去购买");
     await expect(page.locator(".commerce-booking-link").nth(0)).toHaveAttribute("data-url", "https://shop.example.test/huawei-standard");
     await expect(page.locator(".commerce-booking-link").nth(1)).toHaveText("查看详情");

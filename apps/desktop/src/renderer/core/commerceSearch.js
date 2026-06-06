@@ -1,6 +1,7 @@
 (function(){
   const COMMERCE_SEARCH_SETTINGS_KEY = "weishan:commerceSearch:settings:v1";
   const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
+  const CHEAPEST_REDIRECT_MODE = "cheapest_redirect";
 
   function nowIso(){
     return new Date().toISOString();
@@ -483,6 +484,39 @@
     return "detail";
   }
 
+  function isBlockedSourceType(value){
+    return /^(fake|demo|mock|fake_price|demo_price|mock_price|production_mock)$/i.test(String(value || "").trim());
+  }
+
+  function isValidTotalPrice(value){
+    const num = Number(value);
+    return value !== null && value !== "" && Number.isFinite(num) && num >= 0;
+  }
+
+  function isDisplayableProviderResult(item){
+    const result = item || {};
+    const parsedUrl = validateBookingUrl(result.url || result.bookingUrl);
+    const urlType = normalizeUrlType(result.urlType, result.category);
+    return result.isRealProviderResult === true &&
+      !!String(result.provider || result.sourceName || "").trim() &&
+      !!String(result.title || "").trim() &&
+      isValidTotalPrice(result.totalPrice) &&
+      !!String(result.currency || "").trim() &&
+      !!parsedUrl &&
+      /^(booking|checkout|detail)$/.test(urlType) &&
+      !isBlockedSourceType(result.sourceType || result.dataSourceType || "");
+  }
+
+  function inferPriceCompleteness(item){
+    const text = normalizeExtras(item && item.extras || []).concat([
+      item && item.conditions,
+      item && item.refundPolicySummary,
+      item && item.hiddenFeeNote
+    ]).join(" ");
+    if (/(不包邮|不含税|不含税费|不含运费|费用条件待复核|费用不明|待复核)/.test(text)) return "provider_conditions_incomplete";
+    return /(含税|含税费|包邮|含运费|含服务费|含行李|含基础行李|含城市税)/.test(text) ? "complete_enough" : "provider_conditions_incomplete";
+  }
+
   function normalizeExtras(value){
     if (Array.isArray(value)) return value.map((item) => sanitizeText(item, 100)).filter(Boolean).slice(0, 8);
     if (value && typeof value === "object") {
@@ -518,6 +552,9 @@
       url:parsedUrl ? parsedUrl.href : "",
       bookingUrl:parsedUrl ? parsedUrl.href : "",
       urlType,
+      redirectMode:CHEAPEST_REDIRECT_MODE,
+      sourceType:sanitizeText(item.sourceType || context && context.sourceType || "provider", 60),
+      priceCompleteness:inferPriceCompleteness(item),
       bookingUrlHost:parsedUrl ? parsedUrl.host : "",
       conditions:sanitizeText(item.conditions || "", 180),
       extras:normalizeExtras(item.extras || item.extraServices || item.serviceDifferences || item.hiddenFeeNote || ""),
@@ -663,6 +700,9 @@
       bookingUrl:parsedUrl ? parsedUrl.href : "",
       url:parsedUrl ? parsedUrl.href : "",
       urlType:normalizeUrlType(item.urlType, resultCategory(item.category || context && context.category || "")),
+      redirectMode:CHEAPEST_REDIRECT_MODE,
+      sourceType:sanitizeText(item.sourceType || item.dataSourceType || "provider", 60),
+      priceCompleteness:item.priceCompleteness || inferPriceCompleteness(item),
       bookingUrlHost:parsedUrl ? parsedUrl.host : "",
       recommendationReason:sanitizeText(item.recommendationReason || "", 180),
       collectedAt:sanitizeText(item.collectedAt || nowIso(), 40),
@@ -678,7 +718,7 @@
       .map((item) => normalizeCommerceResult(item, context || {}))
       .filter((item) => {
         if (isAiModelPricingTask(context) && item.modelId) return true;
-        return item.isRealProviderResult === true && item.totalPrice !== null && !!item.currency && !!(item.url || item.bookingUrl);
+        return isDisplayableProviderResult(item);
       })
       .map((item) => Object.assign(sanitizeCommerceCandidate(item, context || {}), item));
     return {
@@ -921,6 +961,8 @@
         canShowPrice:candidates.length > 0,
         canShowBookingButton:candidates.length > 0 && providerHealth.canShowBookingButton === true,
         canShowCheckoutButton:candidates.length > 0 && providerHealth.canShowCheckoutButton === true,
+        redirectMode:CHEAPEST_REDIRECT_MODE,
+        cheapestRedirect:true,
         candidates,
         recommendation:createRecommendationFromCandidates(candidates),
         realExecution:false
@@ -958,6 +1000,8 @@
     isProviderConfigReady,
     isProviderConnectorReady,
     createCommerceSearchRequest,
+    CHEAPEST_REDIRECT_MODE,
+    isDisplayableProviderResult,
     normalizeCommerceSearchResults,
     sortCommerceCandidates,
     createRecommendationFromCandidates,

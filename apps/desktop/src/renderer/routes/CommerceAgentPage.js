@@ -18,7 +18,7 @@
   function ensureSearchLoaded(host){
     if (!window.WeishanCommerceProviderAdapter && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderAdapter"]')) {
       const adapter = document.createElement("script");
-      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.24";
+      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.25";
       adapter.dataset.weishanDynamic = "WeishanCommerceProviderAdapter";
       adapter.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(adapter);
@@ -26,7 +26,7 @@
     }
     if (!window.WeishanCommerceProviderConnector && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConnector"]')) {
       const connector = document.createElement("script");
-      connector.src = "./renderer/core/commerceProviderConnector.js?v=2.0.24";
+      connector.src = "./renderer/core/commerceProviderConnector.js?v=2.0.25";
       connector.dataset.weishanDynamic = "WeishanCommerceProviderConnector";
       connector.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(connector);
@@ -34,7 +34,7 @@
     }
     if (!window.WeishanCommerceProviderConfig && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConfig"]')) {
       const config = document.createElement("script");
-      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.24";
+      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.25";
       config.dataset.weishanDynamic = "WeishanCommerceProviderConfig";
       config.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(config);
@@ -42,7 +42,7 @@
     }
     if (!window.WeishanCommerceProviderSandbox && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderSandbox"]')) {
       const sandbox = document.createElement("script");
-      sandbox.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.24";
+      sandbox.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.25";
       sandbox.dataset.weishanDynamic = "WeishanCommerceProviderSandbox";
       sandbox.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(sandbox);
@@ -50,7 +50,7 @@
     }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
-      providers.src = "./renderer/core/commerceProviders.js?v=2.0.24";
+      providers.src = "./renderer/core/commerceProviders.js?v=2.0.25";
       providers.dataset.weishanDynamic = "WeishanCommerceProviders";
       providers.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(providers);
@@ -58,7 +58,7 @@
     }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
-    script.src = "./renderer/core/commerceSearch.js?v=2.0.24";
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.25";
     script.dataset.weishanDynamic = "WeishanCommerceSearch";
     script.onload = () => render(host);
     document.head.appendChild(script);
@@ -363,6 +363,7 @@
       return item.currency && total !== "" && total !== undefined && total !== null ? item.currency + " " + total : item.priceLabel || "";
     };
     return `<div class="commerce-candidates">
+      <p class="commerce-muted">weishan 当前提供免费的全球比价与跳转服务；同等条件下优先展示当前可比结果中的最低总价，实际价格和库存以外部平台页面为准。</p>
       ${candidates.map((item, index) => `<article class="commerce-candidate-card">
         <div class="commerce-candidate-head">
           <div>
@@ -381,6 +382,7 @@
         <div class="commerce-candidate-meta">
           ${chips([item.departTime && item.arriveTime ? item.departTime + " → " + item.arriveTime : "", item.duration, item.conditions, item.refundPolicySummary, item.riskSummary, item.hiddenFeeNote].concat(item.extras || []).filter(Boolean))}
         </div>
+        ${item.priceCompleteness === "provider_conditions_incomplete" ? `<p class="commerce-warning">费用条件不完整，请以跳转后 provider 页面为准。</p>` : ""}
         <p class="commerce-muted">推荐理由：${esc(item.recommendationReason || "按价格、条件和风险排序后进入候选。")}</p>
         ${item.bookingUrl || item.url ? `<p class="commerce-booking-note">点击后将在外部平台完成预订或付款。weishan 不自动支付、不提交订单、不保存证件或银行卡。</p><button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.bookingUrl || item.url)}">${esc(actionLabel(item))}</button>` : `<p class="commerce-warning">${isModelPricing ? "模型页链接不是 https 或不属于 openrouter.ai，已阻断打开。" : "provider URL 缺失或不是 https，已阻断打开。"}</p>`}
       </article>`).join("")}
