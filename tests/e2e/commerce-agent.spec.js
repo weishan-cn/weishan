@@ -568,7 +568,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderOnboardingChecklist) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.34";
+          script.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.35";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -576,11 +576,14 @@ test.describe.serial("commerce agent workbench", () => {
       return {
         checklist:window.WeishanCommerceProviderOnboardingChecklist.getProviderOnboardingChecklist("product"),
         status:window.WeishanCommerceProviderOnboardingChecklist.getProviderOnboardingStatus("product"),
+        displayNotReviewed:window.WeishanCommerceProviderOnboardingChecklist.toOnboardingDisplayStatus("not_reviewed"),
+        displayDisabled:window.WeishanCommerceProviderOnboardingChecklist.toOnboardingDisplayStatus("disabled"),
+        displayReady:window.WeishanCommerceProviderOnboardingChecklist.toOnboardingDisplayStatus("ready"),
         canStart:window.WeishanCommerceProviderOnboardingChecklist.canStartProviderConnectorDevelopment("product"),
         reason:window.WeishanCommerceProviderOnboardingChecklist.explainProviderOnboardingBlockReason("product")
       };
     });
-    expect(result.checklist.checklistVersion).toBe("2.0.34");
+    expect(result.checklist.checklistVersion).toBe("2.0.35");
     expect(result.checklist.phase).toBe("provider_onboarding_checklist");
     expect(result.checklist.appliesTo).toContain("product_marketplace");
     expect(result.checklist.appliesTo).toContain("official_brand_site");
@@ -619,8 +622,57 @@ test.describe.serial("commerce agent workbench", () => {
     expect(result.status.canEnableNetworkSearch).toBe(false);
     expect(result.status.canDisplayPrice).toBe(false);
     expect(result.status.reason).toBe("provider_onboarding_required");
+    expect(result.displayNotReviewed).toBe("未审查");
+    expect(result.displayDisabled).toBe("未启用");
+    expect(result.displayReady).toBe("可进入下一步");
     expect(result.canStart).toBe(false);
     expect(result.reason).toBe("provider_onboarding_required");
+  });
+
+  test("provider onboarding review panel explains required checks without raw fields", async () => {
+    await submitHomeCommand(page, runId + " 买华为手机");
+    await page.locator("#commerceViewPlanBtn").click();
+    const detail = page.locator(".commerce-detail");
+    await expect(detail).toContainText("Provider 接入审查面板");
+    await expect(detail).toContainText("总体状态");
+    await expect(detail).toContainText("未完成，暂不可接入真实 provider");
+    await expect(detail).toContainText("法律条款审查");
+    await expect(detail).toContainText("API 文档审查");
+    await expect(detail).toContainText("调用额度 / 频率限制审查");
+    await expect(detail).toContainText("国家 / 地区覆盖审查");
+    await expect(detail).toContainText("商品 / 酒店 / 机票 / 票务数据字段审查");
+    await expect(detail).toContainText("价格字段审查");
+    await expect(detail).toContainText("税费 / 关税 / 运费 / 预订费字段审查");
+    await expect(detail).toContainText("外部跳转 URL 策略审查");
+    await expect(detail).toContainText("隐私政策审查");
+    await expect(detail).toContainText("API key 存储方案");
+    await expect(detail).toContainText("未审查");
+    await expect(detail).toContainText("不代付款确认");
+    await expect(detail).toContainText("不自动下单确认");
+    await expect(detail).toContainText("不保存证件/银行卡确认");
+    await expect(detail).toContainText("合规风险审查");
+    await expect(detail).toContainText("no_provider fallback 审查");
+    await expect(detail).toContainText("只有以上审查全部完成，并通过 config / adapter / sandbox / connector gate 后，weishan 才允许进入真实 provider 连接");
+    await expect(detail).toContainText("真实接通后的状态应为：Provider 接入审查已完成、接口已接入、网络搜索已启用、实时价格可用、精确跳转已启用");
+    await expect(detail).toContainText("不能提前模拟");
+    await expect(detail).not.toContainText("legalTermsReviewed=false");
+    await expect(detail).not.toContainText("apiDocsReviewed=false");
+    await expect(detail).not.toContainText("canConnectEndpoint=false");
+    await expect(detail).not.toContainText("canDisplayPrice=false");
+    await expect(detail).not.toContainText("noRealEndpoint=true");
+    await expect(detail).not.toContainText("noApiKey=true");
+    await expect(detail).not.toContainText("provider_onboarding_required");
+    await expect(detail).not.toContainText("endpointConnected=false");
+    await expect(detail).not.toContainText("canSearchNow=false");
+    await expect(detail).not.toContainText("selectedStatus");
+    await expect(detail).not.toContainText("去购买");
+    await expect(detail).not.toContainText("去预订");
+    await expect(detail).not.toContainText("立即支付");
+    await expect(detail).not.toContainText("上传身份证");
+    await expect(detail).not.toContainText("上传护照");
+    await expect(detail).not.toContainText("保存银行卡");
+    await expect(page.getByRole("button", { name:/去购买|去预订|付款|立即支付|提交订单/ })).toHaveCount(0);
+    await expect(detail).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
   });
 
   test("product provider candidate evaluation keeps ebay as one pilot candidate without connecting", async () => {

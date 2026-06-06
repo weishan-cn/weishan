@@ -42,7 +42,7 @@
     }
     if (!window.WeishanCommerceProviderOnboardingChecklist && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderOnboardingChecklist"]')) {
       const onboarding = document.createElement("script");
-      onboarding.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.34";
+      onboarding.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.35";
       onboarding.dataset.weishanDynamic = "WeishanCommerceProviderOnboardingChecklist";
       onboarding.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(onboarding);
@@ -221,7 +221,62 @@
     return map[key] || null;
   }
 
-  function providerPoolNoticeHtml(task, configInfo){
+  function toOnboardingDisplayStatus(value){
+    if (value === true) return "已完成";
+    if (value === false) return "未完成";
+    const raw = String(value || "");
+    const map = {
+      not_reviewed:"未审查",
+      not_connected:"尚未接入",
+      disabled:"未启用",
+      unavailable:"不可用",
+      blocked:"已阻断",
+      ready:"可进入下一步",
+      completed:"已完成",
+      connected:"已接入",
+      enabled:"已启用"
+    };
+    return map[raw] || "未完成";
+  }
+
+  function providerOnboardingReviewPanelHtml(onboardingInfo){
+    const status = onboardingInfo || {};
+    const checklist = status.checklist || {};
+    const item = (label, value) => `<li><span>${esc(label)}</span><b>${esc(toOnboardingDisplayStatus(value))}</b></li>`;
+    return `<div class="commerce-onboarding-review-panel">
+        <h3>Provider 接入审查面板</h3>
+        <dl class="commerce-facts commerce-onboarding-summary">
+          <div><dt>总体状态</dt><dd>${status.canStartConnectorDevelopment === true ? "已完成，可进入下一步" : "未完成，暂不可接入真实 provider"}</dd></div>
+          <div><dt>接口状态</dt><dd>尚未接入</dd></div>
+          <div><dt>网络搜索</dt><dd>未启用</dd></div>
+          <div><dt>实时价格</dt><dd>不可用</dd></div>
+          <div><dt>精确跳转</dt><dd>待真实 provider 接入后启用</dd></div>
+          <div><dt>支付/下单</dt><dd>不支持，由外部平台完成</dd></div>
+          <div><dt>证件/银行卡</dt><dd>不保存</dd></div>
+        </dl>
+        <ol class="commerce-onboarding-checklist">
+          ${item("法律条款审查", checklist.legalTermsReviewed)}
+          ${item("API 文档审查", checklist.apiDocsReviewed)}
+          ${item("调用额度 / 频率限制审查", checklist.rateLimitReviewed)}
+          ${item("国家 / 地区覆盖审查", checklist.regionCoverageReviewed)}
+          ${item("商品 / 酒店 / 机票 / 票务数据字段审查", checklist.dataFieldsReviewed)}
+          ${item("价格字段审查", checklist.priceFieldsReviewed)}
+          ${item("税费 / 关税 / 运费 / 预订费字段审查", checklist.taxAndFeeFieldsReviewed && checklist.shippingOrBookingFeeFieldsReviewed)}
+          ${item("外部跳转 URL 策略审查", checklist.redirectUrlPolicyReviewed)}
+          ${item("隐私政策审查", checklist.privacyPolicyReviewed)}
+          ${item("API key 存储方案", checklist.apiKeyStoragePlanReviewed ? true : "not_reviewed")}
+          ${item("不代付款确认", checklist.noPaymentConfirmed)}
+          ${item("不自动下单确认", checklist.noAutoOrderConfirmed)}
+          ${item("不保存证件/银行卡确认", checklist.noIdentityStorageConfirmed)}
+          ${item("合规风险审查", checklist.complianceRiskReviewed)}
+          ${item("no_provider fallback 审查", checklist.fallbackNoProviderStateReviewed)}
+        </ol>
+        <p>只有以上审查全部完成，并通过 config / adapter / sandbox / connector gate 后，weishan 才允许进入真实 provider 连接。接通前不会访问真实平台、不会返回价格、不会跳转购买或预订页面。</p>
+        <p>真实接通后的状态应为：Provider 接入审查已完成、接口已接入、网络搜索已启用、实时价格可用、精确跳转已启用。但该状态只能在真实 provider 审查和接入完成后显示，不能提前模拟。</p>
+      </div>`;
+  }
+
+  function providerPoolNoticeHtml(task, configInfo, onboardingInfo){
     const copy = providerPoolCopy(task, configInfo || {});
     if (!copy) return "";
     const isProduct = commercePoolCategory(task) === "product";
@@ -247,6 +302,7 @@
         <span>支付/下单：不支持，由外部平台完成。</span>
         <span>证件/银行卡：不保存。</span>
         <span>当前不会下单、付款或保存证件/银行卡。</span>
+        ${providerOnboardingReviewPanelHtml(onboardingInfo || {})}
       </div>`;
   }
 
@@ -396,7 +452,7 @@
         <span>为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。实际价格、库存、税费和关税仍以外部平台和海关结算为准。</span>
         <button class="cmd-btn gray commerce-open-location-settings" type="button">去设置收货目的地</button>
       </div>` : ""}
-      ${!isModelPricing && !hasProvider ? providerPoolNoticeHtml(task, configInfo) : ""}
+      ${!isModelPricing && !hasProvider ? providerPoolNoticeHtml(task, configInfo, onboardingInfo) : ""}
       ${isFlight && !hasProvider ? `<div class="commerce-warning commerce-flight-provider-missing">
         <b>已识别为机票搜索计划。</b>
         <span>出发地：${esc(flightOrigin)} · 目的地：${esc(flightDestination)} · 日期：${esc(flightDate)}</span>

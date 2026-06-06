@@ -1,5 +1,5 @@
 (function(){
-  const CHECKLIST_VERSION = "2.0.34";
+  const CHECKLIST_VERSION = "2.0.35";
   const PHASE = "provider_onboarding_checklist";
   const DEFAULT_STATUS = "not_reviewed";
   const BLOCK_REASON = "provider_onboarding_required";
@@ -100,6 +100,24 @@
     };
   }
 
+  function toOnboardingDisplayStatus(value){
+    if (value === true) return "已完成";
+    if (value === false) return "未完成";
+    const raw = String(value || "");
+    const map = {
+      not_reviewed:"未审查",
+      not_connected:"尚未接入",
+      disabled:"未启用",
+      unavailable:"不可用",
+      blocked:"已阻断",
+      ready:"可进入下一步",
+      completed:"已完成",
+      connected:"已接入",
+      enabled:"已启用"
+    };
+    return map[raw] || "未完成";
+  }
+
   function canStartProviderConnectorDevelopment(category){
     return getProviderOnboardingStatus(category).canStartConnectorDevelopment === true;
   }
@@ -117,6 +135,7 @@
     APPLIES_TO:APPLIES_TO.slice(),
     getProviderOnboardingChecklist,
     getProviderOnboardingStatus,
+    toOnboardingDisplayStatus,
     canStartProviderConnectorDevelopment,
     explainProviderOnboardingBlockReason
   };
