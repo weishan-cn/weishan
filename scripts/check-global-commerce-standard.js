@@ -1,0 +1,59 @@
+#!/usr/bin/env node
+
+const fs = require("node:fs");
+const path = require("node:path");
+
+const ROOT = path.resolve(__dirname, "..");
+const STANDARD_PATH = path.join(ROOT, "docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md");
+
+const REQUIRED_PHRASES = [
+  "全球个人数字采购代理",
+  "不是 eBay 工具",
+  "不是单一平台工具",
+  "不是交易平台",
+  "不是支付平台",
+  "不代付款",
+  "不自动下单",
+  "不提交订单",
+  "不保存银行卡",
+  "不保存身份证",
+  "不保存护照",
+  "totalLandedCost",
+  "预估",
+  "待确认",
+  "收货目的地",
+  "Mac 定位服务只辅助",
+  "candidate evaluation",
+  "config safety",
+  "read_only adapter",
+  "sandbox dry run",
+  "connector gate",
+  "不允许 fake price",
+  "不允许 demo price",
+  "不允许 mock price",
+  "每个版本只做一个完整功能模块"
+];
+
+function main() {
+  console.log("Before implementing commerce features, read docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md. If the task conflicts with the standard, stop and report.");
+
+  if (!fs.existsSync(STANDARD_PATH)) {
+    console.error("GLOBAL_COMMERCE_STANDARD_CHECK FAIL");
+    console.error("Missing file: docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md");
+    process.exit(1);
+  }
+
+  const text = fs.readFileSync(STANDARD_PATH, "utf8");
+  const missing = REQUIRED_PHRASES.filter((phrase) => !text.includes(phrase));
+
+  if (missing.length) {
+    console.error("GLOBAL_COMMERCE_STANDARD_CHECK FAIL");
+    console.error("Missing required phrases:");
+    missing.forEach((phrase) => console.error("- " + phrase));
+    process.exit(1);
+  }
+
+  console.log("GLOBAL_COMMERCE_STANDARD_CHECK PASS");
+}
+
+main();

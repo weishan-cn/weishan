@@ -1,6 +1,6 @@
 {
   "name": "weishan-desktop",
-  "version": "2.0.32",
+  "version": "2.0.33",
   "private": true,
   "scripts": {
     "install:all": "npm install --prefix apps/server && npm install --prefix apps/desktop",
@@ -14,6 +14,7 @@
     "release:notes": "node scripts/release-notes.js",
     "release:postcheck": "node scripts/release-postcheck.js",
     "secrets:scan": "node scripts/secret-scan.js",
+    "standard:commerce": "node scripts/check-global-commerce-standard.js",
     "version:check": "node scripts/version-check.js",
     "verify": "node scripts/verify.js core",
     "verify:all": "node scripts/verify.js all",

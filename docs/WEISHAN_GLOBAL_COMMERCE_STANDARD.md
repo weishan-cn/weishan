@@ -4,7 +4,7 @@
 
 weishan 是全球个人数字采购代理，帮助用户把自然语言需求转化为安全、可比较、可跳转的购买或预订方案。
 
-weishan 不是单一平台工具，不是 eBay 工具，不是只面向中国市场的工具。weishan 也不是交易平台、支付平台或资金托管平台。
+weishan 不是单一平台工具，不是 eBay 工具，不是只面向中国市场的工具。weishan 也不是交易平台、不是支付平台或资金托管平台。
 
 在前期阶段，weishan 免费帮助用户找到同等条件下更低的真实购买或预订页面。用户最终仍在外部真实平台完成交易，weishan 不代付款、不自动下单。
 
@@ -91,7 +91,7 @@ weishan 可以提供搜索、比较、推荐和外部跳转，但交易、付款
 - 州 / 省 / 城市
 - 邮编 / 邮政编码
 
-Mac 端不应强调 GPS。Mac 定位服务只能作为辅助能力，用于帮助用户填写或确认区域信息。最低到手价必须以收货目的地为准，而不是以原始 GPS 坐标为准。
+Mac 端不应强调 GPS。Mac 定位服务只能作为辅助能力，用于帮助用户填写或确认区域信息。最低到手价必须以收货目的地为准，而不是以原始 GPS 坐标为准。简写标准：Mac 定位服务只辅助。
 
 没有收货目的地时，不能显示精确最低到手价，不能显示购买、预订或付款按钮。
 
@@ -123,6 +123,7 @@ Provider 包括但不限于：
 - candidate evaluation
 - config safety
 - adapter read_only
+- read_only adapter
 - sandbox dry run
 - connector disabled-by-default
 - no API key leak
@@ -208,6 +209,9 @@ weishan 必须遵守以下安全与隐私标准：
 - fake price 进入生产 UI
 - demo price 进入生产 UI
 - mock price 进入生产 UI
+- 不允许 fake price
+- 不允许 demo price
+- 不允许 mock price
 - 硬编码真实价格
 - 硬编码真实税率并当作确定费用
 - 自动支付

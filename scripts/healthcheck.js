@@ -76,7 +76,7 @@ function checkFiles() {
 function checkPackageScripts() {
   const pkg = JSON.parse(readText("package.json") || "{}");
   const scripts = pkg.scripts || {};
-  return ["check", "dev:desktop", "healthcheck", "release:check", "release:notes", "release:postcheck", "secrets:scan", "version:check", "test:api", "test:e2e", "test:e2e:smoke", "test:e2e:repair", "test:e2e:dispatch", "test:e2e:commerce-agent", "test:e2e:desktop-assistant", "test:e2e:cloud"].map((script) => {
+  return ["check", "dev:desktop", "healthcheck", "release:check", "release:notes", "release:postcheck", "secrets:scan", "standard:commerce", "version:check", "test:api", "test:e2e", "test:e2e:smoke", "test:e2e:repair", "test:e2e:dispatch", "test:e2e:commerce-agent", "test:e2e:desktop-assistant", "test:e2e:cloud"].map((script) => {
     const ok = Boolean(scripts[script]);
     const status = ok ? "pass" : (script === "healthcheck" ? "warn" : "fail");
     return result("script:" + script, status, ok ? scripts[script] : "missing", "Add the missing package script.");
@@ -164,6 +164,15 @@ function checkMarkers() {
     marker("apps/desktop/src/renderer/core/commerceGlobalProviderPool.js", /noPayment:true|noAutoPay:true/, "marker:commerce provider pool no payment", true),
     marker("apps/desktop/src/renderer/core/commerceGlobalProviderPool.js", /noIdentityStorage:true|noIdentityStorage:true/, "marker:commerce provider pool no identity storage", true),
     marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /weishan 全球采购与最低到手价标准 V1|全球个人数字采购代理/, "marker:global commerce standard", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /weishan 全球采购与最低到手价标准 V1/, "marker:global commerce standard file", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /每次新功能前必须先读[\s\S]*WEISHAN_GLOBAL_COMMERCE_STANDARD\.md/, "marker:global commerce standard required before development", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /不是 eBay 工具|不是单一平台工具/, "marker:global commerce standard not ebay only", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /不代付款|不是支付平台/, "marker:global commerce standard no payment", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /不自动下单|不提交订单/, "marker:global commerce standard no auto order", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /不保存银行卡|不保存身份证|不保存护照/, "marker:global commerce standard no identity storage", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /totalLandedCost|最低到手价/, "marker:global commerce standard landed cost", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /收货目的地|Mac 定位服务只能作为辅助/, "marker:global commerce standard shipping destination", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /candidate evaluation|config safety|read_only adapter|sandbox dry run|connector gate/, "marker:global commerce standard provider gate", true),
     marker("apps/desktop/src/renderer/routes/CommerceAgentPage.js", /商品电商平台、品牌官网、商品官网、区域电商平台/, "marker:commerce product pool ui scope", true),
     marker("apps/desktop/src/renderer/routes/CommerceAgentPage.js", /酒店官网、酒店 OTA、区域住宿平台/, "marker:commerce hotel pool ui scope", true),
     marker("apps/desktop/src/renderer/routes/CommerceAgentPage.js", /机票 OTA、航司官网、区域旅行平台/, "marker:commerce flight pool ui scope", true),

@@ -42,6 +42,7 @@ function cleanupPlaywrightArtifacts() {
 }
 
 function runCore() {
+  runStep("Global commerce standard", "npm", ["run", "standard:commerce"]);
   runStep("Secret scan", "npm", ["run", "secrets:scan"]);
   runStep("Version check", "npm", ["run", "version:check"]);
   runStep("Healthcheck", "npm", ["run", "healthcheck"]);
