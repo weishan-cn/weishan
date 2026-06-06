@@ -1482,6 +1482,44 @@
 .commerce-candidate-meta .commerce-chip-list{
   gap:6px;
 }
+.commerce-landed-cost{
+  display:grid;
+  gap:6px;
+}
+.commerce-route{
+  margin:0;
+  color:#475569;
+  font-size:12px;
+  font-weight:800;
+}
+.commerce-fee-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:6px 10px;
+  margin:0;
+}
+.commerce-fee-grid div{
+  min-width:0;
+  border:1px solid #e2e8f0;
+  border-radius:7px;
+  background:#fff;
+  padding:6px 7px;
+}
+.commerce-fee-grid div.is-total{
+  border-color:#bbf7d0;
+  background:#f0fdf4;
+}
+.commerce-fee-grid dt{
+  color:#64748b;
+  font-size:11px;
+}
+.commerce-fee-grid dd{
+  margin:2px 0 0;
+  color:#0f172a;
+  font-size:12px;
+  font-weight:800;
+  overflow-wrap:anywhere;
+}
 .commerce-model-pricing{
   display:grid;
   grid-template-columns:repeat(2, minmax(0, 1fr));

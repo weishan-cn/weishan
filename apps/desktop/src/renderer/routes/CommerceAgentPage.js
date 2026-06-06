@@ -18,7 +18,7 @@
   function ensureSearchLoaded(host){
     if (!window.WeishanCommerceProviderAdapter && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderAdapter"]')) {
       const adapter = document.createElement("script");
-      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.26";
+      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.27";
       adapter.dataset.weishanDynamic = "WeishanCommerceProviderAdapter";
       adapter.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(adapter);
@@ -26,7 +26,7 @@
     }
     if (!window.WeishanCommerceProviderConnector && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConnector"]')) {
       const connector = document.createElement("script");
-      connector.src = "./renderer/core/commerceProviderConnector.js?v=2.0.26";
+      connector.src = "./renderer/core/commerceProviderConnector.js?v=2.0.27";
       connector.dataset.weishanDynamic = "WeishanCommerceProviderConnector";
       connector.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(connector);
@@ -34,7 +34,7 @@
     }
     if (!window.WeishanCommerceProductProviderSelection && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProductProviderSelection"]')) {
       const selection = document.createElement("script");
-      selection.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.26";
+      selection.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.27";
       selection.dataset.weishanDynamic = "WeishanCommerceProductProviderSelection";
       selection.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(selection);
@@ -42,7 +42,7 @@
     }
     if (!window.WeishanCommerceProviderConfig && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConfig"]')) {
       const config = document.createElement("script");
-      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.26";
+      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.27";
       config.dataset.weishanDynamic = "WeishanCommerceProviderConfig";
       config.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(config);
@@ -50,7 +50,7 @@
     }
     if (!window.WeishanCommerceProviderSandbox && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderSandbox"]')) {
       const sandbox = document.createElement("script");
-      sandbox.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.26";
+      sandbox.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.27";
       sandbox.dataset.weishanDynamic = "WeishanCommerceProviderSandbox";
       sandbox.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(sandbox);
@@ -58,7 +58,7 @@
     }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
-      providers.src = "./renderer/core/commerceProviders.js?v=2.0.26";
+      providers.src = "./renderer/core/commerceProviders.js?v=2.0.27";
       providers.dataset.weishanDynamic = "WeishanCommerceProviders";
       providers.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(providers);
@@ -66,7 +66,7 @@
     }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
-    script.src = "./renderer/core/commerceSearch.js?v=2.0.26";
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.27";
     script.dataset.weishanDynamic = "WeishanCommerceSearch";
     script.onload = () => render(host);
     document.head.appendChild(script);
@@ -372,6 +372,69 @@
     return `<dl class="commerce-facts">${fields.map((item) => `<div><dt>${esc(item[0])}</dt><dd>${esc(item[1])}</dd></div>`).join("")}</dl>`;
   }
 
+  function moneyText(amount, currency, fallback){
+    const value = Number(amount);
+    if (!Number.isFinite(value) || value < 0) return fallback || "待确认";
+    const rounded = Math.round(value * 100) / 100;
+    return `${esc(currency || "")} ${esc(String(rounded))}`.trim();
+  }
+
+  function feePartText(part, currency){
+    const item = part || {};
+    const certainty = String(item.certainty || "unknown");
+    if (certainty === "unknown" || item.amount === null || item.amount === undefined || item.amount === "") return "待确认";
+    const suffix = certainty === "estimated" ? "（预估）" : "";
+    return moneyText(item.amount, item.currency || currency, "待确认") + suffix;
+  }
+
+  function landedCompletenessText(item){
+    const completeness = String(item && item.landedCostCompleteness || "");
+    if (completeness === "complete") return "完整";
+    if (completeness === "estimated") return "部分预估";
+    if (completeness === "partial") return "费用缺失";
+    return "待确认";
+  }
+
+  function landedTotalLabel(item){
+    const completeness = String(item && item.landedCostCompleteness || "");
+    if (completeness === "complete" && !(item && item.hasEstimatedFees) && !(item && item.hasUnknownFees)) return "到手总价";
+    if (completeness === "estimated" || item && item.hasEstimatedFees) return "预估到手总价";
+    return "参考到手价";
+  }
+
+  function landedCostFields(item){
+    const breakdown = item && item.landedCostBreakdown || {};
+    return [
+      ["商品价", breakdown.itemPrice],
+      ["运费", breakdown.shippingFee],
+      ["关税/进口税", breakdown.dutyFee],
+      ["税费/VAT/GST/销售税", breakdown.taxFee],
+      ["平台服务费", breakdown.platformFee],
+      ["支付手续费", breakdown.paymentFee],
+      ["清关/报关费", breakdown.brokerageFee],
+      ["保险/必选服务费", breakdown.insuranceFee],
+      ["其他必选费用", breakdown.requiredExtraFee]
+    ];
+  }
+
+  function landedCostHtml(item){
+    const total = item && item.totalLandedCost !== undefined && item.totalLandedCost !== null ? item.totalLandedCost : item && item.totalPrice;
+    const route = [item && item.sourceCountry, item && item.destinationCountry].filter(Boolean).join(" → ");
+    const hasRoute = route.trim();
+    const feeNotice = item && item.feeNotice || "费用条件不完整，实际总价以外部商家页面/海关结算为准。";
+    return `<div class="commerce-landed-cost">
+      ${hasRoute ? `<p class="commerce-route">发货 / 收货：${esc(route)}${item.crossBorder ? " · 跨境" : ""}</p>` : ""}
+      <dl class="commerce-fee-grid">
+        ${landedCostFields(item).map(([label, part]) => `<div><dt>${esc(label)}</dt><dd>${esc(feePartText(part, item && item.currency))}</dd></div>`).join("")}
+        <div class="is-total"><dt>${esc(landedTotalLabel(item))}</dt><dd>${esc(moneyText(total, item && item.currency, "待确认"))}</dd></div>
+        <div><dt>费用完整性</dt><dd>${esc(landedCompletenessText(item))}</dd></div>
+      </dl>
+      <p class="commerce-warning">${esc(feeNotice)}</p>
+      ${(item && item.hasEstimatedFees) ? `<p class="commerce-muted">含预估费用；实际以外部平台和海关结算为准。</p>` : ""}
+      ${(item && item.hasUnknownFees) ? `<p class="commerce-muted">存在待确认费用；不可把商品裸价视为完整到手价。</p>` : ""}
+    </div>`;
+  }
+
   function candidatesHtml(task){
     const candidates = (Array.isArray(task && task.candidates) ? task.candidates : []).slice(0, 3);
     if (!candidates.length) {
@@ -388,18 +451,18 @@
     };
     const priceText = (item) => {
       if (isModelPricing) return item.priceLabel || "";
-      const total = item.totalPrice !== undefined && item.totalPrice !== null ? item.totalPrice : item.price;
+      const total = item.totalLandedCost !== undefined && item.totalLandedCost !== null ? item.totalLandedCost : item.totalPrice !== undefined && item.totalPrice !== null ? item.totalPrice : item.price;
       return item.currency && total !== "" && total !== undefined && total !== null ? item.currency + " " + total : item.priceLabel || "";
     };
     return `<div class="commerce-candidates">
-      <p class="commerce-muted">weishan 当前提供免费的全球比价与跳转服务；同等条件下优先展示当前可比结果中的最低总价，实际价格和库存以外部平台页面为准。</p>
+      <p class="commerce-muted">weishan 当前提供免费的全球比价与跳转服务；同等条件下优先展示当前可比结果中的最低到手总价，实际价格、库存、关税和税费以外部平台/海关结算为准。</p>
       ${candidates.map((item, index) => `<article class="commerce-candidate-card">
         <div class="commerce-candidate-head">
           <div>
-            <b>${index === 0 && !isModelPricing ? '<span class="commerce-lowest-badge">最低价推荐</span> ' : ""}${esc(item.title)}</b>
+            <b>${index === 0 && !isModelPricing ? '<span class="commerce-lowest-badge">最低到手价推荐</span> ' : ""}${esc(item.title)}</b>
             <span>${esc(item.provider || item.sourceName)}${item.modelId ? " · " + esc(item.modelId) : ""} · ${esc(item.fetchedAt || item.collectedAt)}</span>
           </div>
-          <strong>${esc(priceText(item))}</strong>
+          <strong>${isModelPricing ? esc(priceText(item)) : `${esc(landedTotalLabel(item))} ${esc(priceText(item))}`}</strong>
         </div>
         ${isModelPricing ? `<dl class="commerce-model-pricing">
           <div><dt>模型 ID</dt><dd>${esc(item.modelId || item.candidateId)}</dd></div>
@@ -407,13 +470,13 @@
           <div><dt>输出价格</dt><dd>${esc(item.outputPriceLabel || "价格字段不可解析")}</dd></div>
           <div><dt>上下文长度</dt><dd>${esc(item.contextLength || "未提供")}</dd></div>
           <div><dt>币种</dt><dd>USD</dd></div>
-        </dl>` : ""}
+        </dl>` : landedCostHtml(item)}
         <div class="commerce-candidate-meta">
           ${chips([item.departTime && item.arriveTime ? item.departTime + " → " + item.arriveTime : "", item.duration, item.conditions, item.refundPolicySummary, item.riskSummary, item.hiddenFeeNote].concat(item.extras || []).filter(Boolean))}
         </div>
         ${item.priceCompleteness === "provider_conditions_incomplete" ? `<p class="commerce-warning">费用条件不完整，请以跳转后 provider 页面为准。</p>` : ""}
         <p class="commerce-muted">推荐理由：${esc(item.recommendationReason || "按价格、条件和风险排序后进入候选。")}</p>
-        ${item.bookingUrl || item.url ? `<p class="commerce-booking-note">点击后将在外部平台完成预订或付款。weishan 不自动支付、不提交订单、不保存证件或银行卡。</p><button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.bookingUrl || item.url)}">${esc(actionLabel(item))}</button>` : `<p class="commerce-warning">${isModelPricing ? "模型页链接不是 https 或不属于 openrouter.ai，已阻断打开。" : "provider URL 缺失或不是 https，已阻断打开。"}</p>`}
+        ${item.bookingUrl || item.url ? `<p class="commerce-booking-note">点击后将在外部商家平台完成购买或预订。weishan 只提供比价与跳转，不代付款、不自动下单、不保存支付或证件信息。</p><button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.bookingUrl || item.url)}">${esc(actionLabel(item))}</button>` : `<p class="commerce-warning">${isModelPricing ? "模型页链接不是 https 或不属于 openrouter.ai，已阻断打开。" : "provider URL 缺失或不是 https，已阻断打开。"}</p>`}
       </article>`).join("")}
     </div>`;
   }
@@ -593,6 +656,7 @@
           searchResultSummary:{
             candidateCount:sorted.length,
             lowestPrice:first.totalPrice || first.price || "",
+            lowestLandedCost:first.totalLandedCost || first.totalPrice || first.price || "",
             currency:first.currency || "",
             lowestPromptPricePerMillion:first.promptPricePerMillion || "",
             lowestCompletionPricePerMillion:first.completionPricePerMillion || "",

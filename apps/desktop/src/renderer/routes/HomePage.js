@@ -362,7 +362,7 @@
     const candidates = Array.isArray(stored.candidates) ? stored.candidates : [];
     const recommendation = stored.recommendation || {};
     const summaryData = stored.searchResultSummary || {};
-    const lowest = summaryData.lowestPrice || recommendation.price || "";
+    const lowest = summaryData.lowestLandedCost || summaryData.lowestPrice || recommendation.totalLandedCost || recommendation.price || "";
     const currency = summaryData.currency || recommendation.currency || "";
     const isModelPricing = stored.category === "aiModelPricing";
     const modelInput = summaryData.lowestPromptPricePerMillion || recommendation.promptPricePerMillion || "";
@@ -390,7 +390,7 @@
     const flightSafetyText = "未下单、未付款、未提交订单、未保存证件";
     const productSafetyText = "未下单、未付款、未提交订单、未保存银行卡或证件";
     const productQuery = normalized.productQuery || normalized.normalizedQuery || "";
-    const genericResultSummary = candidates.length ? `已找到 ${candidates.length} 个真实 provider 结果${lowest ? " · 最低总价 " + esc(currency ? currency + " " + lowest : lowest) : ""}${recommendation.title ? " · 推荐 " + esc(recommendation.title) : ""}` : "";
+    const genericResultSummary = candidates.length ? `已找到 ${candidates.length} 个真实 provider 结果${lowest ? " · 最低到手价 " + esc(currency ? currency + " " + lowest : lowest) : ""}${recommendation.title ? " · 推荐 " + esc(recommendation.title) : ""}` : "";
     return `<div class="commerce-home-card ${blocked ? "is-blocked" : ""}" data-commerce-home-summary="true">
       <div class="commerce-home-card-main">
         <h3>${esc(cardTitle)}</h3>

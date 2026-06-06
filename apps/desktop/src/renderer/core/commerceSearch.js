@@ -599,6 +599,119 @@
     return value !== null && value !== "" && Number.isFinite(num) && num >= 0;
   }
 
+  const LANDED_COST_FIELDS = [
+    ["itemPrice", "商品价"],
+    ["shippingFee", "运费"],
+    ["dutyFee", "关税/进口税"],
+    ["taxFee", "增值税/VAT/GST/销售税"],
+    ["platformFee", "平台服务费"],
+    ["paymentFee", "支付手续费"],
+    ["brokerageFee", "清关/报关费"],
+    ["insuranceFee", "保险/必选服务费"],
+    ["requiredExtraFee", "其他必选费用"]
+  ];
+
+  function normalizeCertainty(value){
+    const raw = String(value || "").trim();
+    return /^(confirmed|estimated|unknown)$/.test(raw) ? raw : "unknown";
+  }
+
+  function normalizeMoneyPart(value, label, currency){
+    const fallbackCurrency = sanitizeText(currency || "", 12);
+    if (value && typeof value === "object") {
+      const amount = Number(value.amount);
+      const certainty = normalizeCertainty(value.certainty);
+      return {
+        amount:Number.isFinite(amount) && amount >= 0 ? amount : null,
+        currency:sanitizeText(value.currency || fallbackCurrency, 12),
+        certainty:Number.isFinite(amount) && amount >= 0 ? certainty : "unknown",
+        label:sanitizeText(value.label || label, 40)
+      };
+    }
+    const amount = Number(value);
+    return {
+      amount:Number.isFinite(amount) && amount >= 0 ? amount : null,
+      currency:fallbackCurrency,
+      certainty:Number.isFinite(amount) && amount >= 0 ? "confirmed" : "unknown",
+      label
+    };
+  }
+
+  function normalizeLandedCostBreakdown(result, context){
+    const item = result && typeof result === "object" ? result : {};
+    const input = item.landedCostBreakdown && typeof item.landedCostBreakdown === "object" ? item.landedCostBreakdown : {};
+    const currency = sanitizeText(item.currency || context && context.currency || "", 12);
+    const output = {};
+    LANDED_COST_FIELDS.forEach(([key, label]) => {
+      const source = input[key] !== undefined ? input[key] : item[key];
+      output[key] = normalizeMoneyPart(source, label, currency);
+    });
+    if ((output.itemPrice.amount === null || output.itemPrice.amount === undefined) && isValidTotalPrice(item.itemPrice || item.price)) {
+      output.itemPrice = normalizeMoneyPart(item.itemPrice !== undefined ? item.itemPrice : item.price, "商品价", currency);
+    }
+    return output;
+  }
+
+  function calculateTotalLandedCost(result){
+    const item = result && typeof result === "object" ? result : {};
+    if (isValidTotalPrice(item.totalLandedCost)) return Number(item.totalLandedCost);
+    const breakdown = item.landedCostBreakdown && typeof item.landedCostBreakdown === "object" ? item.landedCostBreakdown : normalizeLandedCostBreakdown(item);
+    let total = 0;
+    let hasAny = false;
+    LANDED_COST_FIELDS.forEach(([key]) => {
+      const part = breakdown[key] || {};
+      const amount = Number(part.amount);
+      if (Number.isFinite(amount) && amount >= 0 && part.certainty !== "unknown") {
+        total += amount;
+        hasAny = true;
+      }
+    });
+    return hasAny ? total : null;
+  }
+
+  function inferLandedCostCompleteness(result, breakdown){
+    const explicit = String(result && result.landedCostCompleteness || "");
+    if (/^(complete|partial|estimated|unknown)$/.test(explicit)) return explicit;
+    const parts = breakdown || normalizeLandedCostBreakdown(result);
+    const required = ["itemPrice", "shippingFee", "dutyFee", "taxFee"];
+    const unknownRequired = required.some((key) => !parts[key] || parts[key].amount === null || parts[key].certainty === "unknown");
+    const estimated = LANDED_COST_FIELDS.some(([key]) => parts[key] && parts[key].certainty === "estimated");
+    if (unknownRequired) return "partial";
+    return estimated ? "estimated" : "complete";
+  }
+
+  function landedCostNotice(completeness, hasEstimatedFees, hasUnknownFees){
+    if (completeness === "complete" && !hasEstimatedFees && !hasUnknownFees) {
+      return "到手总价已包含 provider 返回的商品价、运费、税费、关税和必选费用。";
+    }
+    if (hasEstimatedFees || completeness === "estimated") {
+      return "预估到手总价包含 provider 返回的预估费用；实际以外部平台和海关结算为准。";
+    }
+    return "费用条件不完整，实际总价以外部商家页面/海关结算为准。";
+  }
+
+  function isDisplayableLandedCostResult(result){
+    const item = result || {};
+    const total = calculateTotalLandedCost(item);
+    return isDisplayableProviderResult(item) &&
+      (total === null || Number.isFinite(Number(total))) &&
+      !isBlockedSourceType(item.sourceType || item.dataSourceType || "");
+  }
+
+  function landedSortValue(result){
+    const landed = calculateTotalLandedCost(result);
+    if (Number.isFinite(Number(landed))) return Number(landed);
+    if (isValidTotalPrice(result && result.totalPrice)) return Number(result.totalPrice);
+    return Number.POSITIVE_INFINITY;
+  }
+
+  function compareByTotalLandedCost(a, b){
+    const costA = landedSortValue(a);
+    const costB = landedSortValue(b);
+    if (costA !== costB) return costA - costB;
+    return String(b && b.rating || "").localeCompare(String(a && a.rating || ""));
+  }
+
   function isDisplayableProviderResult(item){
     const result = item || {};
     const parsedUrl = validateBookingUrl(result.url || result.bookingUrl);
@@ -638,13 +751,22 @@
     const item = candidate && typeof candidate === "object" ? candidate : {};
     const category = resultCategory(item.category || context && context.category || "");
     const parsedUrl = validateBookingUrl(item.url || item.bookingUrl);
-    const totalPriceRaw = item.totalPrice !== undefined ? item.totalPrice : item.price;
+    const totalPriceRaw = item.totalPrice !== undefined ? item.totalPrice : item.totalLandedCost !== undefined ? item.totalLandedCost : item.price;
     const totalPrice = Number(totalPriceRaw);
     const price = Number(item.price !== undefined ? item.price : totalPriceRaw);
     const currency = sanitizeText(item.currency || "", 12);
     const isRealProviderResult = item.isRealProviderResult === true;
     const urlType = normalizeUrlType(item.urlType, category);
     const provider = sanitizeText(item.provider || item.sourceName || context && context.providerName || "搜索源", 80);
+    const sourceCountry = sanitizeText(item.sourceCountry || context && context.sourceCountry || "", 40);
+    const destinationCountry = sanitizeText(item.destinationCountry || context && context.destinationCountry || "", 40);
+    const breakdown = normalizeLandedCostBreakdown(Object.assign({}, item, { currency }), context || {});
+    const calculatedLandedCost = calculateTotalLandedCost(Object.assign({}, item, { landedCostBreakdown:breakdown }));
+    const explicitLandedCost = isValidTotalPrice(item.totalLandedCost) ? Number(item.totalLandedCost) : null;
+    const totalLandedCost = explicitLandedCost !== null ? explicitLandedCost : calculatedLandedCost;
+    const hasEstimatedFees = LANDED_COST_FIELDS.some(([key]) => breakdown[key] && breakdown[key].certainty === "estimated");
+    const hasUnknownFees = LANDED_COST_FIELDS.some(([key]) => breakdown[key] && breakdown[key].certainty === "unknown");
+    const landedCostCompleteness = inferLandedCostCompleteness(item, breakdown);
     return {
       id:sanitizeText(item.id || item.candidateId || ("commerceResult-" + Math.random().toString(36).slice(2, 8)), 80),
       candidateId:sanitizeText(item.candidateId || item.id || ("commerceResult-" + Math.random().toString(36).slice(2, 8)), 80),
@@ -655,6 +777,24 @@
       price:Number.isFinite(price) && price >= 0 ? price : null,
       currency,
       totalPrice:Number.isFinite(totalPrice) && totalPrice >= 0 ? totalPrice : null,
+      totalLandedCost:Number.isFinite(Number(totalLandedCost)) && Number(totalLandedCost) >= 0 ? Number(totalLandedCost) : null,
+      landedCostBreakdown:breakdown,
+      landedCostCompleteness,
+      hasEstimatedFees,
+      hasUnknownFees,
+      feeNotice:sanitizeText(item.feeNotice || landedCostNotice(landedCostCompleteness, hasEstimatedFees, hasUnknownFees), 220),
+      itemPrice:breakdown.itemPrice.amount,
+      shippingFee:breakdown.shippingFee.amount,
+      dutyFee:breakdown.dutyFee.amount,
+      taxFee:breakdown.taxFee.amount,
+      platformFee:breakdown.platformFee.amount,
+      paymentFee:breakdown.paymentFee.amount,
+      brokerageFee:breakdown.brokerageFee.amount,
+      insuranceFee:breakdown.insuranceFee.amount,
+      requiredExtraFee:breakdown.requiredExtraFee.amount,
+      sourceCountry,
+      destinationCountry,
+      crossBorder:item.crossBorder === true || !!(sourceCountry && destinationCountry && sourceCountry !== destinationCountry),
       url:parsedUrl ? parsedUrl.href : "",
       bookingUrl:parsedUrl ? parsedUrl.href : "",
       urlType,
@@ -778,6 +918,11 @@
     const item = candidate && typeof candidate === "object" ? candidate : {};
     const parsedUrl = validateBookingUrl(item.bookingUrl || item.url);
     const price = Number(item.price);
+    const breakdown = normalizeLandedCostBreakdown(item, context || {});
+    const landedCost = calculateTotalLandedCost(Object.assign({}, item, { landedCostBreakdown:breakdown }));
+    const landedCostCompleteness = inferLandedCostCompleteness(item, breakdown);
+    const hasEstimatedFees = LANDED_COST_FIELDS.some(([key]) => breakdown[key] && breakdown[key].certainty === "estimated");
+    const hasUnknownFees = LANDED_COST_FIELDS.some(([key]) => breakdown[key] && breakdown[key].certainty === "unknown");
     return {
       candidateId:sanitizeText(item.candidateId || ("commerceCandidate-" + Math.random().toString(36).slice(2, 8)), 80),
       sourceName:sanitizeText(item.sourceName || item.provider || "搜索源", 80),
@@ -786,6 +931,25 @@
       category:sanitizeText(item.category || context && context.category || "", 60),
       price:Number.isFinite(price) && price >= 0 ? price : null,
       currency:sanitizeText(item.currency || context && context.currency || "CNY", 12),
+      totalPrice:isValidTotalPrice(item.totalPrice) ? Number(item.totalPrice) : isValidTotalPrice(landedCost) ? Number(landedCost) : Number.isFinite(price) && price >= 0 ? price : null,
+      totalLandedCost:Number.isFinite(Number(landedCost)) && Number(landedCost) >= 0 ? Number(landedCost) : null,
+      landedCostBreakdown:breakdown,
+      landedCostCompleteness,
+      hasEstimatedFees,
+      hasUnknownFees,
+      feeNotice:sanitizeText(item.feeNotice || landedCostNotice(landedCostCompleteness, hasEstimatedFees, hasUnknownFees), 220),
+      itemPrice:breakdown.itemPrice.amount,
+      shippingFee:breakdown.shippingFee.amount,
+      dutyFee:breakdown.dutyFee.amount,
+      taxFee:breakdown.taxFee.amount,
+      platformFee:breakdown.platformFee.amount,
+      paymentFee:breakdown.paymentFee.amount,
+      brokerageFee:breakdown.brokerageFee.amount,
+      insuranceFee:breakdown.insuranceFee.amount,
+      requiredExtraFee:breakdown.requiredExtraFee.amount,
+      sourceCountry:sanitizeText(item.sourceCountry || context && context.sourceCountry || "", 40),
+      destinationCountry:sanitizeText(item.destinationCountry || context && context.destinationCountry || "", 40),
+      crossBorder:item.crossBorder === true || !!(item.sourceCountry && item.destinationCountry && item.sourceCountry !== item.destinationCountry),
       priceLabel:sanitizeText(item.priceLabel || (Number.isFinite(price) && price >= 0 ? String(item.currency || context && context.currency || "CNY") + " " + price : ""), 120),
       promptPricePerToken:item.promptPricePerToken === undefined ? "" : sanitizeText(item.promptPricePerToken, 40),
       completionPricePerToken:item.completionPricePerToken === undefined ? "" : sanitizeText(item.completionPricePerToken, 40),
@@ -824,7 +988,7 @@
       .map((item) => normalizeCommerceResult(item, context || {}))
       .filter((item) => {
         if (isAiModelPricingTask(context) && item.modelId) return true;
-        return isDisplayableProviderResult(item);
+        return isDisplayableLandedCostResult(item);
       })
       .map((item) => Object.assign(sanitizeCommerceCandidate(item, context || {}), item));
     return {
@@ -862,10 +1026,7 @@
         const ctxB = Number.isFinite(Number(b && b.contextLength)) ? Number(b.contextLength) : 0;
         if (ctxA !== ctxB) return ctxB - ctxA;
       }
-      const priceA = Number.isFinite(Number(a && a.totalPrice)) ? Number(a.totalPrice) : Number.isFinite(Number(a && a.price)) ? Number(a.price) : Number.POSITIVE_INFINITY;
-      const priceB = Number.isFinite(Number(b && b.totalPrice)) ? Number(b.totalPrice) : Number.isFinite(Number(b && b.price)) ? Number(b.price) : Number.POSITIVE_INFINITY;
-      if (priceA !== priceB) return priceA - priceB;
-      return String(b && b.rating || "").localeCompare(String(a && a.rating || ""));
+      return compareByTotalLandedCost(a, b);
     });
   }
 
@@ -886,13 +1047,14 @@
       sourceName:top.sourceName,
       price:top.price,
       totalPrice:top.totalPrice || top.price,
+      totalLandedCost:top.totalLandedCost || top.totalPrice || top.price,
       currency:top.currency,
       priceLabel:top.priceLabel,
       promptPricePerMillion:top.promptPricePerMillion || "",
       completionPricePerMillion:top.completionPricePerMillion || "",
       inputPriceLabel:top.inputPriceLabel || "",
       outputPriceLabel:top.outputPriceLabel || "",
-      reason:top.recommendationReason || (top.category === "aiModelPricing" ? "按当前结果中的输入/输出综合成本排序；不能视为绝对最优。" : "按当前 provider 返回数据排序，该方案价格最低，同时保留退改、风险和隐性费用复核。"),
+      reason:top.recommendationReason || (top.category === "aiModelPricing" ? "按当前结果中的输入/输出综合成本排序；不能视为绝对最优。" : "同等条件下按当前可比结果中的到手总价排序；不代表全网最低或保证最低。"),
       riskSummary:top.riskSummary || "价格可能变化，预订前仍需用户确认。",
       priceMayChange:true
     };
@@ -912,6 +1074,7 @@
       inputSummary:sanitizeText(data.inputSummary || data.query || "", 240),
       candidateCount:candidates.length,
       lowestPrice:lowest.price || "",
+      lowestLandedCost:lowest.totalLandedCost || lowest.totalPrice || "",
       lowestPromptPricePerMillion:lowest.promptPricePerMillion || "",
       lowestCompletionPricePerMillion:lowest.completionPricePerMillion || "",
       currency:lowest.currency || data.currency || "",
@@ -1113,6 +1276,10 @@
     createCommerceSearchRequest,
     CHEAPEST_REDIRECT_MODE,
     isDisplayableProviderResult,
+    isDisplayableLandedCostResult,
+    normalizeLandedCostBreakdown,
+    calculateTotalLandedCost,
+    compareByTotalLandedCost,
     normalizeCommerceSearchResults,
     sortCommerceCandidates,
     createRecommendationFromCandidates,
