@@ -49,13 +49,79 @@
     return window.WeishanCommerceProviderConnector || null;
   }
 
+  function productSelectionApi(){
+    return window.WeishanCommerceProductProviderSelection || null;
+  }
+
+  function productSafetySwitches(){
+    const api = productSelectionApi();
+    if (api && api.getProductProviderSafetySwitches) return api.getProductProviderSafetySwitches();
+    return {
+      productProviderEnabled:false,
+      productProviderConfigured:false,
+      productProviderHasApiKey:false,
+      productProviderNetworkAllowed:false,
+      productProviderPriceAllowed:false,
+      productProviderRedirectAllowed:false,
+      productProviderReadOnlyOnly:true,
+      productProviderNoCheckout:true,
+      productProviderNoPayment:true,
+      productProviderNoIdentityStorage:true
+    };
+  }
+
+  function getProductProviderReadiness(input){
+    const api = productSelectionApi();
+    if (api && api.getProductProviderReadiness) return api.getProductProviderReadiness(input || productSafetySwitches());
+    return {
+      providerId:"product_search_readonly_candidate",
+      category:"product",
+      selectionStatus:"selection_ready_not_connected",
+      ready:false,
+      canSearch:false,
+      canReturnPrice:false,
+      canRedirect:false,
+      canCheckout:false,
+      canPay:false,
+      canStoreIdentity:false,
+      reason:"product_provider_not_connected",
+      safetySwitches:productSafetySwitches()
+    };
+  }
+
+  function getProductProviderProfile(){
+    const api = productSelectionApi();
+    if (api && api.getProductProviderProfile) return api.getProductProviderProfile();
+    return {
+      providerId:"product_search_readonly_candidate",
+      category:"product",
+      selectionStatus:"selection_ready_not_connected",
+      connectionStatus:"not_connected",
+      readinessStatus:"not_ready",
+      providerEndpoint:"",
+      networkEndpoint:"",
+      enabled:false,
+      configured:false,
+      networkAllowed:false,
+      priceAllowed:false,
+      redirectAllowed:false,
+      checkoutAllowed:false,
+      paymentAllowed:false,
+      identityStorageAllowed:false,
+      readOnlyOnly:true,
+      reasonWhenUnavailable:"商品搜索 provider 尚未接入真实只读搜索源"
+    };
+  }
+
   function defaultConfig(category, settings){
     const api = configApi();
     if (api && api.getCommerceProviderConfig) return api.getCommerceProviderConfig(category, settings);
     const next = resultCategory(category);
-    return {
-      providerId:next + "-provider-disabled",
+    const productDefaults = next === "product" ? productSafetySwitches() : {};
+    return Object.assign({
+      providerId:next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled",
       category:next,
+      providerStatus:next === "product" ? "candidate_not_connected" : "disabled",
       enabled:false,
       configured:false,
       hasApiKey:false,
@@ -67,17 +133,19 @@
       allowCreateOrder:false,
       allowPay:false,
       allowSaveIdentity:false,
-      connectorStatus:"not_configured",
+      connectorStatus:next === "product" ? "not_connected" : "not_configured",
       connectorEnabled:false,
       connectorConfigured:false,
       connectorNetworkAllowed:false,
-      connectorType:"readonly_search",
-      connectorReasonWhenUnavailable:"Provider Connector 未启用",
+      connectorType:next === "product" ? "readonly_product_search" : "readonly_search",
+      connectorReasonWhenUnavailable:next === "product" ? "商品搜索 provider 方案已选择，尚未接入真实只读搜索源" : "Provider Connector 未启用",
       sandboxMode:"dry_run",
-      providerReadinessStatus:"blocked_before_network",
+      providerReadinessStatus:next === "product" ? "not_ready" : "blocked_before_network",
       configStatus:"not_configured",
-      reasonWhenUnavailable:"暂未配置真实搜索源"
-    };
+      reasonWhenUnavailable:next === "product" ? "商品搜索 provider 尚未接入真实只读搜索源" : "暂未配置真实搜索源",
+      productProviderProfile:next === "product" ? getProductProviderProfile() : undefined,
+      productProviderReadiness:next === "product" ? getProductProviderReadiness(productDefaults) : undefined
+    }, productDefaults);
   }
 
   function configFields(config){
@@ -110,7 +178,19 @@
       requiresIdentityDocument:next.requiresIdentityDocument === true,
       requiresPaymentMethod:next.requiresPaymentMethod === true,
       supportsReadOnlySearch:next.supportsReadOnlySearch === true,
-      supportsCrossBorderSearch:next.supportsCrossBorderSearch === true
+      supportsCrossBorderSearch:next.supportsCrossBorderSearch === true,
+      productProviderEnabled:next.productProviderEnabled === true,
+      productProviderConfigured:next.productProviderConfigured === true,
+      productProviderHasApiKey:next.productProviderHasApiKey === true,
+      productProviderNetworkAllowed:next.productProviderNetworkAllowed === true,
+      productProviderPriceAllowed:next.productProviderPriceAllowed === true,
+      productProviderRedirectAllowed:next.productProviderRedirectAllowed === true,
+      productProviderReadOnlyOnly:next.productProviderReadOnlyOnly !== false,
+      productProviderNoCheckout:next.productProviderNoCheckout !== false,
+      productProviderNoPayment:next.productProviderNoPayment !== false,
+      productProviderNoIdentityStorage:next.productProviderNoIdentityStorage !== false,
+      productProviderProfile:next.productProviderProfile || getProductProviderProfile(),
+      productProviderReadiness:next.productProviderReadiness || getProductProviderReadiness(next)
     };
   }
 
@@ -241,6 +321,32 @@
       config.hasApiKey === true &&
       config.allowNetworkSearch === true &&
       config.allowReturnPrice === true);
+  }
+
+  function isProductSearchRequest(request){
+    return resultCategory(request && request.category) === "product";
+  }
+
+  function productProviderBlockedResult(request, providerHealth, providerConfig, connectorHealth, sandbox){
+    const readiness = getProductProviderReadiness(providerConfig);
+    return {
+      ok:false,
+      code:"COMMERCE_PRODUCT_PROVIDER_NOT_CONNECTED",
+      message:"product_provider_not_connected",
+      reason:readiness.reason || "product_provider_not_connected",
+      request,
+      searchStatus:"no_provider",
+      providerHealth:providerHealth.providerHealth,
+      configHealth:configFields(providerConfig),
+      connectorHealth,
+      sandboxHealth:sandbox,
+      dryRunHealth:sandbox,
+      productProviderReadiness:readiness,
+      canShowPrice:false,
+      canShowBookingButton:false,
+      canShowCheckoutButton:false,
+      candidates:[]
+    };
   }
 
   function defaultAdapter(category){
@@ -878,6 +984,9 @@
     const connectorReady = isProviderConnectorReady(providerConnector);
     const connectorHealth = connectorFields(providerConnector);
     const sandbox = getCommerceProviderSandbox(request.category, settings);
+    if (isProductSearchRequest(request) && !getProductProviderReadiness(providerConfig).ready) {
+      return productProviderBlockedResult(request, providerHealth, providerConfig, connectorHealth, sandbox);
+    }
     if (isAiModelPricingTask(request)) {
       const aiConfig = getCommerceProviderConfig("aiModelPricing", settings);
       const aiConnector = getCommerceProviderConnector("aiModelPricing", settings);
@@ -999,6 +1108,8 @@
     getCommerceProviderSandbox,
     isProviderConfigReady,
     isProviderConnectorReady,
+    getProductProviderReadiness,
+    getProductProviderProfile,
     createCommerceSearchRequest,
     CHEAPEST_REDIRECT_MODE,
     isDisplayableProviderResult,

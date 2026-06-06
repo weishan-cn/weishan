@@ -32,13 +32,79 @@
     return window.WeishanCommerceProviderConnector || null;
   }
 
+  function productSelectionApi(){
+    return window.WeishanCommerceProductProviderSelection || null;
+  }
+
+  function productSafetySwitches(){
+    const api = productSelectionApi();
+    if (api && api.getProductProviderSafetySwitches) return api.getProductProviderSafetySwitches();
+    return {
+      productProviderEnabled:false,
+      productProviderConfigured:false,
+      productProviderHasApiKey:false,
+      productProviderNetworkAllowed:false,
+      productProviderPriceAllowed:false,
+      productProviderRedirectAllowed:false,
+      productProviderReadOnlyOnly:true,
+      productProviderNoCheckout:true,
+      productProviderNoPayment:true,
+      productProviderNoIdentityStorage:true
+    };
+  }
+
+  function productReadiness(input){
+    const api = productSelectionApi();
+    if (api && api.getProductProviderReadiness) return api.getProductProviderReadiness(input || productSafetySwitches());
+    return {
+      providerId:"product_search_readonly_candidate",
+      category:"product",
+      selectionStatus:"selection_ready_not_connected",
+      ready:false,
+      canSearch:false,
+      canReturnPrice:false,
+      canRedirect:false,
+      canCheckout:false,
+      canPay:false,
+      canStoreIdentity:false,
+      reason:"product_provider_not_connected",
+      safetySwitches:productSafetySwitches()
+    };
+  }
+
+  function productProfile(){
+    const api = productSelectionApi();
+    if (api && api.getProductProviderProfile) return api.getProductProviderProfile();
+    return {
+      providerId:"product_search_readonly_candidate",
+      category:"product",
+      selectionStatus:"selection_ready_not_connected",
+      connectionStatus:"not_connected",
+      readinessStatus:"not_ready",
+      providerEndpoint:"",
+      networkEndpoint:"",
+      enabled:false,
+      configured:false,
+      networkAllowed:false,
+      priceAllowed:false,
+      redirectAllowed:false,
+      checkoutAllowed:false,
+      paymentAllowed:false,
+      identityStorageAllowed:false,
+      readOnlyOnly:true,
+      reasonWhenUnavailable:"商品搜索 provider 尚未接入真实只读搜索源"
+    };
+  }
+
   function defaultConfig(category, settings){
     const api = configApi();
     if (api && api.getCommerceProviderConfig) return api.getCommerceProviderConfig(category, settings);
     const next = normalizeCategory(category);
-    return {
-      providerId:next + "-provider-disabled",
+    const productDefaults = next === "product" ? productSafetySwitches() : {};
+    return Object.assign({
+      providerId:next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled",
       category:next,
+      providerStatus:next === "product" ? "candidate_not_connected" : "disabled",
       enabled:false,
       configured:false,
       hasApiKey:false,
@@ -50,17 +116,19 @@
       allowCreateOrder:false,
       allowPay:false,
       allowSaveIdentity:false,
-      connectorStatus:"not_configured",
+      connectorStatus:next === "product" ? "not_connected" : "not_configured",
       connectorEnabled:false,
       connectorConfigured:false,
       connectorNetworkAllowed:false,
-      connectorType:"readonly_search",
-      connectorReasonWhenUnavailable:"Provider Connector 未启用",
+      connectorType:next === "product" ? "readonly_product_search" : "readonly_search",
+      connectorReasonWhenUnavailable:next === "product" ? "商品搜索 provider 方案已选择，尚未接入真实只读搜索源" : "Provider Connector 未启用",
       sandboxMode:"dry_run",
-      providerReadinessStatus:"blocked_before_network",
+      providerReadinessStatus:next === "product" ? "not_ready" : "blocked_before_network",
       configStatus:"not_configured",
-      reasonWhenUnavailable:"暂未配置真实搜索源"
-    };
+      reasonWhenUnavailable:next === "product" ? "商品搜索 provider 尚未接入真实只读搜索源" : "暂未配置真实搜索源",
+      productProviderProfile:next === "product" ? productProfile() : undefined,
+      productProviderReadiness:next === "product" ? productReadiness(productDefaults) : undefined
+    }, productDefaults);
   }
 
   function configFields(config){
@@ -93,7 +161,19 @@
       requiresIdentityDocument:next.requiresIdentityDocument === true,
       requiresPaymentMethod:next.requiresPaymentMethod === true,
       supportsReadOnlySearch:next.supportsReadOnlySearch === true,
-      supportsCrossBorderSearch:next.supportsCrossBorderSearch === true
+      supportsCrossBorderSearch:next.supportsCrossBorderSearch === true,
+      productProviderEnabled:next.productProviderEnabled === true,
+      productProviderConfigured:next.productProviderConfigured === true,
+      productProviderHasApiKey:next.productProviderHasApiKey === true,
+      productProviderNetworkAllowed:next.productProviderNetworkAllowed === true,
+      productProviderPriceAllowed:next.productProviderPriceAllowed === true,
+      productProviderRedirectAllowed:next.productProviderRedirectAllowed === true,
+      productProviderReadOnlyOnly:next.productProviderReadOnlyOnly !== false,
+      productProviderNoCheckout:next.productProviderNoCheckout !== false,
+      productProviderNoPayment:next.productProviderNoPayment !== false,
+      productProviderNoIdentityStorage:next.productProviderNoIdentityStorage !== false,
+      productProviderProfile:next.productProviderProfile || productProfile(),
+      productProviderReadiness:next.productProviderReadiness || productReadiness(next)
     };
   }
 
@@ -244,10 +324,19 @@
     const config = defaultConfig(next, null);
     const connector = defaultConnector(next, null);
     const cFields = connectorFields(connector);
-    return {
-      id:next + "-provider-disabled",
+    const isProduct = next === "product";
+    const productDefaults = isProduct ? productSafetySwitches() : {};
+    const providerConnectorFields = isProduct ? Object.assign({}, cFields, {
+      connectorStatus:config.connectorStatus || cFields.connectorStatus,
+      connectorType:config.connectorType || cFields.connectorType,
+      connectorReasonWhenUnavailable:config.connectorReasonWhenUnavailable || cFields.connectorReasonWhenUnavailable
+    }) : cFields;
+    return Object.assign({
+      id:isProduct ? "product_search_readonly_candidate" : next + "-provider-disabled",
+      providerId:isProduct ? "product_search_readonly_candidate" : next + "-provider-disabled",
       name:label + "搜索源",
       category:next,
+      providerStatus:isProduct ? "candidate_not_connected" : "disabled",
       enabled:false,
       configured:false,
       environment:"renderer",
@@ -256,18 +345,18 @@
       supportsCheckoutUrl:false,
       supportsPrice:false,
       safetyLevel:"disabled",
-      reasonWhenDisabled:"暂未配置真实" + label + "搜索适配器",
+      reasonWhenDisabled:isProduct ? "商品搜索 provider 尚未接入真实只读搜索源" : "暂未配置真实" + label + "搜索适配器",
       adapterId:adapter.providerId,
       adapterMode:"read_only",
       adapterConfigured:false,
       adapterHealth:"not_configured",
-      connectorId:cFields.connectorId,
-      connectorStatus:cFields.connectorStatus,
+      connectorId:providerConnectorFields.connectorId,
+      connectorStatus:providerConnectorFields.connectorStatus,
       connectorEnabled:false,
       connectorConfigured:false,
       connectorNetworkAllowed:false,
-      connectorType:cFields.connectorType,
-      connectorReasonWhenUnavailable:cFields.connectorReasonWhenUnavailable,
+      connectorType:providerConnectorFields.connectorType,
+      connectorReasonWhenUnavailable:providerConnectorFields.connectorReasonWhenUnavailable,
       configStatus:"not_configured",
       hasApiKey:false,
       allowNetworkSearch:false,
@@ -289,9 +378,11 @@
       supportsReadOnlySearch:config.supportsReadOnlySearch === true,
       supportsCrossBorderSearch:config.supportsCrossBorderSearch === true,
       configHealth:configFields(config),
-      connectorHealth:cFields,
-      sandboxHealth:sandboxFields(next, null, config, config, connector)
-    };
+      connectorHealth:providerConnectorFields,
+      sandboxHealth:sandboxFields(next, null, config, config, connector),
+      productProviderProfile:isProduct ? productProfile() : undefined,
+      productProviderReadiness:isProduct ? productReadiness(config) : undefined
+    }, productDefaults);
   }
 
   function getCommerceProviderRegistry(){
