@@ -390,7 +390,16 @@
     const providerReason = Array.isArray(stored.providerHealth) && stored.providerHealth[0] && stored.providerHealth[0].reasonWhenDisabled || "";
     const productProfile = stored.configHealth && stored.configHealth.productProviderProfile || {};
     const productCandidateName = productProfile.selectedCandidateName || productProfile.candidateName || "eBay Browse API";
-    const providerMissingText = isFlightPlan ? "Provider Connector 未启用；暂未配置真实机票搜索适配器；网络请求未启用，当前无法返回实时价格" : isProductPlan ? "全球多源 provider 候选池：准备中，尚未接入；当前比较范围：商品平台、品牌官网、酒店、机票、票务和服务平台；商品搜索试点候选：" + productCandidateName + " 等；网络搜索未启用，实时价格不可用；精确跳转待真实 provider 接入后启用；当前不会访问任何真实平台" : providerReason || "Provider Connector 未启用；搜索适配器未配置，无法返回真实价格";
+    const poolSummaryByCategory = {
+      ecommerce:"全球多源 provider 候选池：准备中，尚未接入；当前比较范围：商品电商平台、品牌官网、商品官网、区域电商平台；商品搜索试点候选：" + productCandidateName + " 等；网络搜索未启用，实时价格不可用；精确跳转待真实 provider 接入后启用；当前不会访问任何真实平台；当前不会返回价格；当前不会跳转购买页面",
+      product:"全球多源 provider 候选池：准备中，尚未接入；当前比较范围：商品电商平台、品牌官网、商品官网、区域电商平台；商品搜索试点候选：" + productCandidateName + " 等；网络搜索未启用，实时价格不可用；精确跳转待真实 provider 接入后启用；当前不会访问任何真实平台；当前不会返回价格；当前不会跳转购买页面",
+      hotel:"全球多源 provider 候选池：准备中，尚未接入；当前比较范围：酒店官网、酒店 OTA、区域住宿平台；示例候选类型：Booking / Agoda / Expedia / 携程 / 酒店官网 等；当前不会访问任何真实酒店平台；当前不会返回房价；当前不会跳转预订页面",
+      flight:"全球多源 provider 候选池：准备中，尚未接入；当前比较范围：机票 OTA、航司官网、区域旅行平台；示例候选类型：Trip.com / Expedia / 航司官网 等；当前不会访问任何真实机票平台；当前不会返回票价；当前不会跳转预订页面",
+      ticketing:"全球多源 provider 候选池：准备中，尚未接入；当前比较范围：票务平台、活动官网、区域票务平台；示例候选类型：Ticketmaster / 大麦 / Eventbrite / 活动官网 等；当前不会访问任何真实票务平台；当前不会返回票价；当前不会跳转购票页面",
+      ticket:"全球多源 provider 候选池：准备中，尚未接入；当前比较范围：票务平台、活动官网、区域票务平台；示例候选类型：Ticketmaster / 大麦 / Eventbrite / 活动官网 等；当前不会访问任何真实票务平台；当前不会返回票价；当前不会跳转购票页面",
+      serviceBooking:"全球多源 provider 候选池：准备中，尚未接入；当前比较范围：本地服务预约平台、服务商官网、区域服务平台；当前不会访问任何真实服务平台；当前不会返回预约价格；当前不会跳转预约页面"
+    };
+    const providerMissingText = poolSummaryByCategory[stored.category] || providerReason || "Provider Connector 未启用；搜索适配器未配置，无法返回真实价格";
     const flightSafetyText = "未下单、未付款、未提交订单、未保存证件";
     const productSafetyText = "未下单、未付款、未提交订单、未保存银行卡或证件";
     const productQuery = normalized.productQuery || normalized.normalizedQuery || "";

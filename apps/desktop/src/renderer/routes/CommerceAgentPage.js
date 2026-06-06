@@ -18,7 +18,7 @@
   function ensureSearchLoaded(host){
     if (!window.WeishanCommerceProviderAdapter && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderAdapter"]')) {
       const adapter = document.createElement("script");
-      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.31";
+      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.32";
       adapter.dataset.weishanDynamic = "WeishanCommerceProviderAdapter";
       adapter.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(adapter);
@@ -26,7 +26,7 @@
     }
     if (!window.WeishanCommerceProviderConnector && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConnector"]')) {
       const connector = document.createElement("script");
-      connector.src = "./renderer/core/commerceProviderConnector.js?v=2.0.31";
+      connector.src = "./renderer/core/commerceProviderConnector.js?v=2.0.32";
       connector.dataset.weishanDynamic = "WeishanCommerceProviderConnector";
       connector.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(connector);
@@ -34,7 +34,7 @@
     }
     if (!window.WeishanCommerceGlobalProviderPool && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceGlobalProviderPool"]')) {
       const pool = document.createElement("script");
-      pool.src = "./renderer/core/commerceGlobalProviderPool.js?v=2.0.31";
+      pool.src = "./renderer/core/commerceGlobalProviderPool.js?v=2.0.32";
       pool.dataset.weishanDynamic = "WeishanCommerceGlobalProviderPool";
       pool.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(pool);
@@ -42,7 +42,7 @@
     }
     if (!window.WeishanCommerceProductProviderCandidate && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProductProviderCandidate"]')) {
       const candidate = document.createElement("script");
-      candidate.src = "./renderer/core/commerceProductProviderCandidate.js?v=2.0.31";
+      candidate.src = "./renderer/core/commerceProductProviderCandidate.js?v=2.0.32";
       candidate.dataset.weishanDynamic = "WeishanCommerceProductProviderCandidate";
       candidate.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(candidate);
@@ -50,7 +50,7 @@
     }
     if (!window.WeishanCommerceProductProviderSelection && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProductProviderSelection"]')) {
       const selection = document.createElement("script");
-      selection.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.31";
+      selection.src = "./renderer/core/commerceProductProviderSelection.js?v=2.0.32";
       selection.dataset.weishanDynamic = "WeishanCommerceProductProviderSelection";
       selection.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(selection);
@@ -58,7 +58,7 @@
     }
     if (!window.WeishanCommerceLocationPolicy && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceLocationPolicy"]')) {
       const location = document.createElement("script");
-      location.src = "./renderer/core/commerceLocationPolicy.js?v=2.0.31";
+      location.src = "./renderer/core/commerceLocationPolicy.js?v=2.0.32";
       location.dataset.weishanDynamic = "WeishanCommerceLocationPolicy";
       location.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(location);
@@ -66,7 +66,7 @@
     }
     if (!window.WeishanCommerceProviderConfig && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConfig"]')) {
       const config = document.createElement("script");
-      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.31";
+      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.32";
       config.dataset.weishanDynamic = "WeishanCommerceProviderConfig";
       config.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(config);
@@ -74,7 +74,7 @@
     }
     if (!window.WeishanCommerceProviderSandbox && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderSandbox"]')) {
       const sandbox = document.createElement("script");
-      sandbox.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.31";
+      sandbox.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.32";
       sandbox.dataset.weishanDynamic = "WeishanCommerceProviderSandbox";
       sandbox.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(sandbox);
@@ -82,7 +82,7 @@
     }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
-      providers.src = "./renderer/core/commerceProviders.js?v=2.0.31";
+      providers.src = "./renderer/core/commerceProviders.js?v=2.0.32";
       providers.dataset.weishanDynamic = "WeishanCommerceProviders";
       providers.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(providers);
@@ -90,7 +90,7 @@
     }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
-    script.src = "./renderer/core/commerceSearch.js?v=2.0.31";
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.32";
     script.dataset.weishanDynamic = "WeishanCommerceSearch";
     script.onload = () => render(host);
     document.head.appendChild(script);
@@ -158,6 +158,82 @@
     if (status === "blocked") return "已阻断";
     if (status === "no_provider") return "暂未配置真实搜索适配器，无法返回实时价格";
     return "搜索适配器未配置，无法返回真实价格";
+  }
+
+  function commercePoolCategory(task){
+    const category = String(task && task.category || "");
+    if (category === "ecommerce" || category === "product") return "product";
+    if (category === "flight") return "flight";
+    if (category === "hotel") return "hotel";
+    if (category === "ticketing" || category === "ticket") return "ticket";
+    if (category === "serviceBooking" || category === "service") return "service";
+    return "";
+  }
+
+  function providerPoolCopy(task, configInfo){
+    const key = commercePoolCategory(task);
+    const productCandidateName = configInfo && configInfo.productProviderProfile && (configInfo.productProviderProfile.selectedCandidateName || configInfo.productProviderProfile.candidateName) || "eBay Browse API";
+    const map = {
+      product:{
+        scope:"商品电商平台、品牌官网、商品官网、区域电商平台",
+        examples:"商品搜索试点候选：" + productCandidateName + " 等",
+        noAccess:"当前不会访问任何真实平台。",
+        noPrice:"当前不会返回价格。",
+        noRedirect:"当前不会跳转购买页面。"
+      },
+      hotel:{
+        scope:"酒店官网、酒店 OTA、区域住宿平台",
+        examples:"示例候选类型：Booking / Agoda / Expedia / 携程 / 酒店官网 等",
+        noAccess:"当前不会访问任何真实酒店平台。",
+        noPrice:"当前不会返回房价。",
+        noRedirect:"当前不会跳转预订页面。"
+      },
+      flight:{
+        scope:"机票 OTA、航司官网、区域旅行平台",
+        examples:"示例候选类型：Trip.com / Expedia / 航司官网 等",
+        noAccess:"当前不会访问任何真实机票平台。",
+        noPrice:"当前不会返回票价。",
+        noRedirect:"当前不会跳转预订页面。"
+      },
+      ticket:{
+        scope:"票务平台、活动官网、区域票务平台",
+        examples:"示例候选类型：Ticketmaster / 大麦 / Eventbrite / 活动官网 等",
+        noAccess:"当前不会访问任何真实票务平台。",
+        noPrice:"当前不会返回票价。",
+        noRedirect:"当前不会跳转购票页面。"
+      },
+      service:{
+        scope:"本地服务预约平台、服务商官网、区域服务平台",
+        examples:"示例候选类型：本地服务平台 / 服务商官网 / 区域预约平台 等",
+        noAccess:"当前不会访问任何真实服务平台。",
+        noPrice:"当前不会返回预约价格。",
+        noRedirect:"当前不会跳转预约页面。"
+      }
+    };
+    return map[key] || null;
+  }
+
+  function providerPoolNoticeHtml(task, configInfo){
+    const copy = providerPoolCopy(task, configInfo || {});
+    if (!copy) return "";
+    const isProduct = commercePoolCategory(task) === "product";
+    return `<div class="commerce-warning commerce-provider-pool-missing">
+        <b>全球多源 provider 候选池：准备中，尚未接入。</b>
+        <span>当前比较范围：${esc(copy.scope)}。</span>
+        <span>${esc(copy.examples)}。</span>
+        ${isProduct ? `<span>eBay Browse API 是商品搜索试点候选之一，尚未接入。</span>` : ""}
+        <span>接口状态：尚未接入。</span>
+        <span>搜索模式：只读搜索准备中。</span>
+        <span>网络搜索：未启用。</span>
+        <span>实时价格：不可用。</span>
+        <span>精确跳转：待真实 provider 接入后启用。</span>
+        <span>${esc(copy.noAccess)}</span>
+        <span>${esc(copy.noPrice)}</span>
+        <span>${esc(copy.noRedirect)}</span>
+        <span>支付/下单：不支持，由外部平台完成。</span>
+        <span>证件/银行卡：不保存。</span>
+        <span>当前不会下单、付款或保存证件/银行卡。</span>
+      </div>`;
   }
 
   function commerceDisplayTitle(task){
@@ -305,101 +381,29 @@
         <span>为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。实际价格、库存、税费和关税仍以外部平台和海关结算为准。</span>
         <button class="cmd-btn gray commerce-open-location-settings" type="button">去设置收货目的地</button>
       </div>` : ""}
+      ${!isModelPricing && !hasProvider ? providerPoolNoticeHtml(task, configInfo) : ""}
       ${isFlight && !hasProvider ? `<div class="commerce-warning commerce-flight-provider-missing">
         <b>已识别为机票搜索计划。</b>
         <span>出发地：${esc(flightOrigin)} · 目的地：${esc(flightDestination)} · 日期：${esc(flightDate)}</span>
         <span>暂未配置真实机票搜索适配器，当前无法返回实时价格。</span>
-        <span>当前模式：只读搜索准备中。</span>
-        <span>Provider Connector：未启用；Connector 类型：只读搜索模板。</span>
-        <span>Provider Sandbox：dry-run；真实 provider 接入前仅做配置、密钥存在性、网络开关、connector 门控和返回结构检查。</span>
-        <span>全球搜索准备：未启用；Provider Dry Run：未通过；跨境搜索：未启用。</span>
         <span>配置状态：未配置真实搜索源；网络请求未启用；实时价格不可用。</span>
         <span>weishan 面向全球采购场景设计，当前正在准备多国家、多平台、多币种的只读搜索能力；在真实 provider 启用前不会联网搜索、不会返回价格、不会下单或付款。</span>
         <span>未下单、未付款、未提交订单、未保存证件。</span>
       </div>` : ""}
-      ${isProduct && !hasProvider ? `<div class="commerce-warning commerce-product-provider-missing">
-        <b>全球多源 provider 候选池：准备中，尚未接入。</b>
-        <span>当前比较范围：商品平台、品牌官网、酒店、机票、票务和服务平台。</span>
-        <span>商品搜索试点候选：${esc(configInfo.productProviderProfile && (configInfo.productProviderProfile.selectedCandidateName || configInfo.productProviderProfile.candidateName) || "eBay Browse API")} 等。</span>
-        <span>eBay Browse API 是商品搜索试点候选之一，尚未接入。</span>
-        <span>搜索模式：只读搜索准备中。</span>
-        <span>网络搜索：未启用。</span>
-        <span>实时价格：不可用。</span>
-        <span>精确跳转：待真实 provider 接入后启用。</span>
-        <span>当前不会访问任何真实平台。</span>
-        <span>当前不会返回价格。</span>
-        <span>当前不会下单。</span>
-        <span>当前不会付款。</span>
-        <span>当前不会保存证件或银行卡。</span>
-        <span>后续接入前需完成 API 条款、额度、地区覆盖、价格/运费/税费字段完整性复核。</span>
-        <span>Provider Connector：未启用；Connector 类型：只读搜索模板。</span>
-        <span>Provider Sandbox：dry-run；真实 provider 接入前仅做配置、密钥存在性、网络开关、connector 门控和返回结构检查。</span>
-        <span>全球搜索准备：未启用；Provider Dry Run：未通过；跨境搜索：未启用。</span>
-        <span>配置状态：未配置真实搜索源；网络请求未启用；实时价格不可用。</span>
-        <span>weishan 当前提供免费的全球比价与跳转服务；商品搜索 provider 接入后，将优先展示同等条件下可比结果中的较低总价，并跳转到外部平台完成购买。</span>
-        <span>实际价格、库存和条款以外部 provider 页面为准。</span>
-        <span>weishan 面向全球采购场景设计，当前正在准备多国家、多平台、多币种的只读搜索能力；在真实 provider 启用前不会联网搜索、不会返回价格、不会下单或付款。</span>
-        <span>未下单、未付款、未提交订单、未保存银行卡或证件。</span>
-      </div>` : ""}
       ${!isModelPricing && !hasProvider ? `<dl class="commerce-facts commerce-provider-health">
-        <div><dt>searchStatus</dt><dd>no_provider</dd></div>
         <div><dt>搜索适配器</dt><dd>暂未配置</dd></div>
-        <div><dt>Provider Connector</dt><dd>未启用</dd></div>
+        <div><dt>接口状态</dt><dd>尚未接入</dd></div>
         <div><dt>Connector 类型</dt><dd>只读搜索模板</dd></div>
-        <div><dt>connectorStatus</dt><dd>${esc(connectorInfo.connectorStatus || "not_configured")}</dd></div>
-        <div><dt>connectorEnabled</dt><dd>false</dd></div>
-        <div><dt>connectorConfigured</dt><dd>false</dd></div>
-        <div><dt>connectorNetworkAllowed</dt><dd>false</dd></div>
         <div><dt>当前模式</dt><dd>只读搜索准备中</dd></div>
-        <div><dt>adapterMode</dt><dd>${esc(adapterInfo.adapterMode || "read_only")}</dd></div>
-        <div><dt>adapterConfigured</dt><dd>false</dd></div>
-        <div><dt>adapterHealth</dt><dd>${esc(adapterInfo.adapterHealth || "not_configured")}</dd></div>
         <div><dt>配置状态</dt><dd>未配置真实搜索源</dd></div>
-        <div><dt>网络请求</dt><dd>未启用</dd></div>
+        <div><dt>网络搜索</dt><dd>未启用</dd></div>
         <div><dt>实时价格</dt><dd>不可用</dd></div>
-        <div><dt>configStatus</dt><dd>${esc(configInfo.configStatus || "not_configured")}</dd></div>
-        <div><dt>hasApiKey</dt><dd>${configInfo.hasApiKey === true ? "true" : "false"}</dd></div>
-        <div><dt>allowNetworkSearch</dt><dd>${configInfo.allowNetworkSearch === true ? "true" : "false"}</dd></div>
-        <div><dt>allowReturnPrice</dt><dd>${configInfo.allowReturnPrice === true ? "true" : "false"}</dd></div>
-        ${isProduct ? `<div><dt>productProviderEnabled</dt><dd>${configInfo.productProviderEnabled === true ? "true" : "false"}</dd></div>
-        <div><dt>productProviderConfigured</dt><dd>${configInfo.productProviderConfigured === true ? "true" : "false"}</dd></div>
-        <div><dt>productProviderHasApiKey</dt><dd>${configInfo.productProviderHasApiKey === true ? "true" : "false"}</dd></div>
-        <div><dt>productProviderNetworkAllowed</dt><dd>${configInfo.productProviderNetworkAllowed === true ? "true" : "false"}</dd></div>
-        <div><dt>productProviderPriceAllowed</dt><dd>${configInfo.productProviderPriceAllowed === true ? "true" : "false"}</dd></div>
-        <div><dt>productProviderRedirectAllowed</dt><dd>${configInfo.productProviderRedirectAllowed === true ? "true" : "false"}</dd></div>
-        <div><dt>productProviderReadOnlyOnly</dt><dd>${configInfo.productProviderReadOnlyOnly === false ? "false" : "true"}</dd></div>
-        <div><dt>productProviderNoCheckout</dt><dd>${configInfo.productProviderNoCheckout === false ? "false" : "true"}</dd></div>
-        <div><dt>productProviderNoPayment</dt><dd>${configInfo.productProviderNoPayment === false ? "false" : "true"}</dd></div>
-        <div><dt>productProviderNoIdentityStorage</dt><dd>${configInfo.productProviderNoIdentityStorage === false ? "false" : "true"}</dd></div>
-        <div><dt>productProviderReason</dt><dd>${esc(configInfo.productProviderReadiness && configInfo.productProviderReadiness.reason || "product_provider_not_connected")}</dd></div>` : ""}
-        ${isProduct ? `<div><dt>selectedFirstCandidate</dt><dd>${esc(configInfo.productProviderProfile && configInfo.productProviderProfile.selectedFirstCandidate || "ebay_browse_api")}</dd></div>
-        <div><dt>selectedStatus</dt><dd>${esc(configInfo.productProviderProfile && configInfo.productProviderProfile.selectedStatus || "selected_not_connected")}</dd></div>
-        <div><dt>商品搜索试点候选之一</dt><dd>${esc(configInfo.productProviderProfile && (configInfo.productProviderProfile.selectedCandidateName || configInfo.productProviderProfile.candidateName) || "eBay Browse API")}</dd></div>
-        <div><dt>globalProviderPoolPhase</dt><dd>${esc(configInfo.globalProviderPoolPhase || configInfo.globalProviderPoolReadiness && configInfo.globalProviderPoolReadiness.phase || "multi_source_provider_pool_not_connected")}</dd></div>
-        <div><dt>endpointConnected</dt><dd>false</dd></div>
-        <div><dt>canSearchNow</dt><dd>false</dd></div>
-        <div><dt>canReturnPriceNow</dt><dd>false</dd></div>
-        <div><dt>canRedirectNow</dt><dd>false</dd></div>` : ""}
-        <div><dt>sandboxMode</dt><dd>${esc(sandboxInfo.sandboxMode || "dry_run")}</dd></div>
-        <div><dt>globalReady</dt><dd>${sandboxInfo.globalReady === true ? "true" : "false"}</dd></div>
+        <div><dt>精确跳转</dt><dd>待真实 provider 接入后启用</dd></div>
+        <div><dt>支付/下单</dt><dd>不支持，由外部平台完成</dd></div>
+        <div><dt>证件/银行卡</dt><dd>不保存</dd></div>
         <div><dt>全球搜索准备</dt><dd>未启用</dd></div>
         <div><dt>Provider Dry Run</dt><dd>${sandboxInfo.canProceedToRealSearch === true ? "已通过" : "未通过"}</dd></div>
         <div><dt>跨境搜索</dt><dd>${globalReadiness.supportsCrossBorderSearch === true ? "已启用" : "未启用"}</dd></div>
-        <div><dt>providerReadiness</dt><dd>${esc(sandboxInfo.providerReadinessStatus || "blocked_before_network")}</dd></div>
-        <div><dt>schemaValidation</dt><dd>${esc(sandboxInfo.schemaValidationStatus || "not_run")}</dd></div>
-        <div><dt>supportedRegions</dt><dd>${esc((globalReadiness.supportedRegions || []).join(", ") || "[]")}</dd></div>
-        <div><dt>supportedCountries</dt><dd>${esc((globalReadiness.supportedCountries || []).join(", ") || "[]")}</dd></div>
-        <div><dt>supportedLanguages</dt><dd>${esc((globalReadiness.supportedLanguages || []).join(", ") || "[]")}</dd></div>
-        <div><dt>supportedCurrencies</dt><dd>${esc((globalReadiness.supportedCurrencies || []).join(", ") || "[]")}</dd></div>
-        <div><dt>complianceRegion</dt><dd>${esc(globalReadiness.complianceRegion || "unknown")}</dd></div>
-        <div><dt>supportsReadOnlySearch</dt><dd>${globalReadiness.supportsReadOnlySearch === true ? "true" : "false"}</dd></div>
-        <div><dt>supportsCrossBorderSearch</dt><dd>${globalReadiness.supportsCrossBorderSearch === true ? "true" : "false"}</dd></div>
-        <div><dt>requiresUserAccount</dt><dd>${globalReadiness.requiresUserAccount === true ? "true" : "false"}</dd></div>
-        <div><dt>requiresIdentityDocument</dt><dd>${globalReadiness.requiresIdentityDocument === true ? "true" : "false"}</dd></div>
-        <div><dt>requiresPaymentMethod</dt><dd>${globalReadiness.requiresPaymentMethod === true ? "true" : "false"}</dd></div>
-        <div><dt>canShowPrice</dt><dd>false</dd></div>
-        <div><dt>canShowBookingButton</dt><dd>false</dd></div>
-        <div><dt>canShowCheckoutButton</dt><dd>false</dd></div>
       </dl>` : ""}
       <p class="commerce-muted">Provider：${esc(providerLabel)}</p>
       ${isCruise ? `<p class="commerce-warning">邮轮价格受航线、舱型、日期和人数影响较大。当前未接入真实搜索源时不显示价格。</p>` : ""}
