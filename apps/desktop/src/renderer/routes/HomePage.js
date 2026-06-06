@@ -382,11 +382,11 @@
     const dateCondition = normalized.dateText || normalized.timing || "";
     const conditionSummary = [routeCondition, dateCondition].filter(Boolean).join("，");
     const isFlightPlan = stored.category === "flight";
-    const isProductPlan = stored.category === "ecommerce";
+    const isProductPlan = stored.category === "ecommerce" || stored.category === "product";
     const commerceApi = window.WeishanCommerceAgent || null;
     const cardTitle = commerceApi && commerceApi.createCommerceDisplayTitle ? commerceApi.createCommerceDisplayTitle(stored, candidates.length > 0) : blocked ? "全球采购计划已阻断" : candidates.length ? type + "搜索已完成" : type + "搜索已生成";
     const providerReason = Array.isArray(stored.providerHealth) && stored.providerHealth[0] && stored.providerHealth[0].reasonWhenDisabled || "";
-    const providerMissingText = isFlightPlan ? "暂未配置真实机票搜索适配器；配置状态未配置真实搜索源，当前无法返回实时价格" : isProductPlan ? "暂未配置真实商品搜索适配器；配置状态未配置真实搜索源，当前无法返回实时价格" : providerReason || "搜索适配器未配置，配置状态未配置真实搜索源，无法返回真实价格";
+    const providerMissingText = isFlightPlan ? "Provider Connector 未启用；暂未配置真实机票搜索适配器；网络请求未启用，当前无法返回实时价格" : isProductPlan ? "Provider Connector 未启用；暂未配置真实商品搜索适配器；网络请求未启用，当前无法返回实时价格" : providerReason || "Provider Connector 未启用；搜索适配器未配置，无法返回真实价格";
     const flightSafetyText = "未下单、未付款、未提交订单、未保存证件";
     const productSafetyText = "未下单、未付款、未提交订单、未保存银行卡或证件";
     const productQuery = normalized.productQuery || normalized.normalizedQuery || "";

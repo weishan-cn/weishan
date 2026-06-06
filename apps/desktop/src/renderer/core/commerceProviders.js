@@ -28,6 +28,10 @@
     return window.WeishanCommerceProviderSandbox || null;
   }
 
+  function connectorApi(){
+    return window.WeishanCommerceProviderConnector || null;
+  }
+
   function defaultConfig(category, settings){
     const api = configApi();
     if (api && api.getCommerceProviderConfig) return api.getCommerceProviderConfig(category, settings);
@@ -46,6 +50,12 @@
       allowCreateOrder:false,
       allowPay:false,
       allowSaveIdentity:false,
+      connectorStatus:"not_configured",
+      connectorEnabled:false,
+      connectorConfigured:false,
+      connectorNetworkAllowed:false,
+      connectorType:"readonly_search",
+      connectorReasonWhenUnavailable:"Provider Connector 未启用",
       sandboxMode:"dry_run",
       providerReadinessStatus:"blocked_before_network",
       configStatus:"not_configured",
@@ -65,6 +75,12 @@
       allowCreateOrder:false,
       allowPay:false,
       allowSaveIdentity:false,
+      connectorStatus:next.connectorStatus || "not_configured",
+      connectorEnabled:next.connectorEnabled === true,
+      connectorConfigured:next.connectorConfigured === true,
+      connectorNetworkAllowed:next.connectorNetworkAllowed === true,
+      connectorType:next.connectorType || "readonly_search",
+      connectorReasonWhenUnavailable:next.connectorReasonWhenUnavailable || "",
       sandboxMode:next.sandboxMode || "dry_run",
       providerReadinessStatus:next.providerReadinessStatus || "blocked_before_network",
       supportedRegions:Array.isArray(next.supportedRegions) ? next.supportedRegions : [],
@@ -81,9 +97,68 @@
     };
   }
 
-  function sandboxFields(category, settings, config){
+  function defaultConnector(category, settings){
+    const api = connectorApi();
+    if (api && api.getCommerceProviderConnector) return api.getCommerceProviderConnector(category, settings);
+    const next = normalizeCategory(category);
+    return {
+      connectorId:"global_" + next + "_search_template",
+      providerId:next + "-provider-disabled",
+      category:next,
+      displayName:"只读搜索模板",
+      connectorType:"readonly_search",
+      enabled:false,
+      configured:false,
+      networkAllowed:false,
+      requiresApiKey:true,
+      hasApiKey:false,
+      supportedRegions:[],
+      supportedCountries:[],
+      supportedLanguages:[],
+      supportedCurrencies:[],
+      complianceRegion:"unknown",
+      dataSourceType:"template_disabled",
+      connectorStatus:"not_configured",
+      reasonWhenUnavailable:"Provider Connector 未启用",
+      supportsSearch:false,
+      supportsPrice:false,
+      supportsBookingUrl:false,
+      supportsCheckoutUrl:false,
+      supportsCreateOrder:false,
+      supportsPayment:false,
+      supportsIdentityStorage:false
+    };
+  }
+
+  function connectorFields(connector){
+    const next = connector || {};
+    return {
+      connectorId:String(next.connectorId || ""),
+      connectorStatus:next.connectorStatus || "not_configured",
+      connectorEnabled:next.enabled === true || next.connectorEnabled === true,
+      connectorConfigured:next.configured === true || next.connectorConfigured === true,
+      connectorNetworkAllowed:next.networkAllowed === true || next.connectorNetworkAllowed === true,
+      connectorType:next.connectorType || "readonly_search",
+      connectorReasonWhenUnavailable:next.reasonWhenUnavailable || next.connectorReasonWhenUnavailable || "",
+      dataSourceType:next.dataSourceType || "template_disabled",
+      supportedRegions:Array.isArray(next.supportedRegions) ? next.supportedRegions : [],
+      supportedCountries:Array.isArray(next.supportedCountries) ? next.supportedCountries : [],
+      supportedLanguages:Array.isArray(next.supportedLanguages) ? next.supportedLanguages : [],
+      supportedCurrencies:Array.isArray(next.supportedCurrencies) ? next.supportedCurrencies : [],
+      complianceRegion:next.complianceRegion || "unknown",
+      supportsSearch:next.supportsSearch === true,
+      supportsPrice:next.supportsPrice === true,
+      supportsBookingUrl:next.supportsBookingUrl === true,
+      supportsCheckoutUrl:next.supportsCheckoutUrl === true,
+      supportsCreateOrder:false,
+      supportsPayment:false,
+      supportsIdentityStorage:false
+    };
+  }
+
+  function sandboxFields(category, settings, config, provider, connector){
     const api = sandboxApi();
-    if (api && api.getCommerceProviderSandbox) return api.getCommerceProviderSandbox(category, settings, config, config, defaultAdapter(category));
+    if (api && api.getCommerceProviderSandbox) return api.getCommerceProviderSandbox(category, settings, config, provider || config, defaultAdapter(category), connector || defaultConnector(category, settings));
     return {
       category:normalizeCategory(category),
       sandboxMode:"dry_run",
@@ -167,6 +242,8 @@
     const label = CATEGORY_LABELS[next] || "采购";
     const adapter = defaultAdapter(next);
     const config = defaultConfig(next, null);
+    const connector = defaultConnector(next, null);
+    const cFields = connectorFields(connector);
     return {
       id:next + "-provider-disabled",
       name:label + "搜索源",
@@ -184,6 +261,13 @@
       adapterMode:"read_only",
       adapterConfigured:false,
       adapterHealth:"not_configured",
+      connectorId:cFields.connectorId,
+      connectorStatus:cFields.connectorStatus,
+      connectorEnabled:false,
+      connectorConfigured:false,
+      connectorNetworkAllowed:false,
+      connectorType:cFields.connectorType,
+      connectorReasonWhenUnavailable:cFields.connectorReasonWhenUnavailable,
       configStatus:"not_configured",
       hasApiKey:false,
       allowNetworkSearch:false,
@@ -205,7 +289,8 @@
       supportsReadOnlySearch:config.supportsReadOnlySearch === true,
       supportsCrossBorderSearch:config.supportsCrossBorderSearch === true,
       configHealth:configFields(config),
-      sandboxHealth:sandboxFields(next, null, config)
+      connectorHealth:cFields,
+      sandboxHealth:sandboxFields(next, null, config, config, connector)
     };
   }
 
@@ -220,7 +305,10 @@
     if (!window.WeishanCommerceSearchProvider || typeof window.WeishanCommerceSearchProvider.search !== "function") return null;
     const adapter = defaultAdapter(next);
     const config = defaultConfig(next, cfg);
+    const connector = defaultConnector(next, cfg);
+    const cFields = connectorFields(connector);
     if (config.enabled !== true || config.configured !== true || config.hasApiKey !== true || config.allowNetworkSearch !== true || config.allowReturnPrice !== true) return null;
+    if (cFields.connectorEnabled !== true || cFields.connectorConfigured !== true || cFields.connectorNetworkAllowed !== true || cFields.supportsSearch !== true || cFields.supportsPrice !== true) return null;
     return {
       id:next + "-manual-provider",
       name:String(cfg.providerName || "Manual Commerce Provider"),
@@ -238,6 +326,13 @@
       adapterMode:"read_only",
       adapterConfigured:true,
       adapterHealth:"ready",
+      connectorId:cFields.connectorId,
+      connectorStatus:cFields.connectorStatus,
+      connectorEnabled:cFields.connectorEnabled,
+      connectorConfigured:cFields.connectorConfigured,
+      connectorNetworkAllowed:cFields.connectorNetworkAllowed,
+      connectorType:cFields.connectorType,
+      connectorReasonWhenUnavailable:cFields.connectorReasonWhenUnavailable,
       configStatus:"ready",
       hasApiKey:true,
       allowNetworkSearch:true,
@@ -259,7 +354,8 @@
       supportsReadOnlySearch:config.supportsReadOnlySearch === true,
       supportsCrossBorderSearch:config.supportsCrossBorderSearch === true,
       configHealth:configFields(config),
-      sandboxHealth:sandboxFields(next, cfg, config)
+      connectorHealth:cFields,
+      sandboxHealth:sandboxFields(next, cfg, config, config, connector)
     };
   }
 
@@ -276,9 +372,10 @@
       hasProvider,
       providerHealth:[provider],
       adapterHealth:adapterFields(provider),
+      connectorHealth:provider.connectorHealth || connectorFields(provider),
       configHealth:provider.configHealth || configFields(provider),
-      sandboxHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth),
-      dryRunHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth),
+      sandboxHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
+      dryRunHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
       enabled:provider.enabled === true,
       configured:provider.configured === true,
       reasonWhenDisabled:provider.reasonWhenDisabled || "",

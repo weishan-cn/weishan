@@ -44,6 +44,10 @@
     return window.WeishanCommerceProviderSandbox || null;
   }
 
+  function connectorApi(){
+    return window.WeishanCommerceProviderConnector || null;
+  }
+
   function defaultConfig(category, settings){
     const api = configApi();
     if (api && api.getCommerceProviderConfig) return api.getCommerceProviderConfig(category, settings);
@@ -62,6 +66,12 @@
       allowCreateOrder:false,
       allowPay:false,
       allowSaveIdentity:false,
+      connectorStatus:"not_configured",
+      connectorEnabled:false,
+      connectorConfigured:false,
+      connectorNetworkAllowed:false,
+      connectorType:"readonly_search",
+      connectorReasonWhenUnavailable:"Provider Connector 未启用",
       sandboxMode:"dry_run",
       providerReadinessStatus:"blocked_before_network",
       configStatus:"not_configured",
@@ -81,6 +91,12 @@
       allowCreateOrder:false,
       allowPay:false,
       allowSaveIdentity:false,
+      connectorStatus:next.connectorStatus || "not_configured",
+      connectorEnabled:next.connectorEnabled === true,
+      connectorConfigured:next.connectorConfigured === true,
+      connectorNetworkAllowed:next.connectorNetworkAllowed === true,
+      connectorType:next.connectorType || "readonly_search",
+      connectorReasonWhenUnavailable:next.connectorReasonWhenUnavailable || "",
       sandboxMode:next.sandboxMode || "dry_run",
       providerReadinessStatus:next.providerReadinessStatus || "blocked_before_network",
       supportedRegions:Array.isArray(next.supportedRegions) ? next.supportedRegions : [],
@@ -97,9 +113,68 @@
     };
   }
 
-  function sandboxFields(category, settings, config){
+  function defaultConnector(category, settings){
+    const api = connectorApi();
+    if (api && api.getCommerceProviderConnector) return api.getCommerceProviderConnector(category, settings);
+    const next = resultCategory(category);
+    return {
+      connectorId:"global_" + next + "_search_template",
+      providerId:next + "-provider-disabled",
+      category:next,
+      displayName:"只读搜索模板",
+      connectorType:"readonly_search",
+      enabled:false,
+      configured:false,
+      networkAllowed:false,
+      requiresApiKey:true,
+      hasApiKey:false,
+      supportedRegions:[],
+      supportedCountries:[],
+      supportedLanguages:[],
+      supportedCurrencies:[],
+      complianceRegion:"unknown",
+      dataSourceType:"template_disabled",
+      connectorStatus:"not_configured",
+      reasonWhenUnavailable:"Provider Connector 未启用",
+      supportsSearch:false,
+      supportsPrice:false,
+      supportsBookingUrl:false,
+      supportsCheckoutUrl:false,
+      supportsCreateOrder:false,
+      supportsPayment:false,
+      supportsIdentityStorage:false
+    };
+  }
+
+  function connectorFields(connector){
+    const next = connector || {};
+    return {
+      connectorId:String(next.connectorId || ""),
+      connectorStatus:next.connectorStatus || "not_configured",
+      connectorEnabled:next.enabled === true || next.connectorEnabled === true,
+      connectorConfigured:next.configured === true || next.connectorConfigured === true,
+      connectorNetworkAllowed:next.networkAllowed === true || next.connectorNetworkAllowed === true,
+      connectorType:next.connectorType || "readonly_search",
+      connectorReasonWhenUnavailable:next.reasonWhenUnavailable || next.connectorReasonWhenUnavailable || "",
+      dataSourceType:next.dataSourceType || "template_disabled",
+      supportedRegions:Array.isArray(next.supportedRegions) ? next.supportedRegions : [],
+      supportedCountries:Array.isArray(next.supportedCountries) ? next.supportedCountries : [],
+      supportedLanguages:Array.isArray(next.supportedLanguages) ? next.supportedLanguages : [],
+      supportedCurrencies:Array.isArray(next.supportedCurrencies) ? next.supportedCurrencies : [],
+      complianceRegion:next.complianceRegion || "unknown",
+      supportsSearch:next.supportsSearch === true,
+      supportsPrice:next.supportsPrice === true,
+      supportsBookingUrl:next.supportsBookingUrl === true,
+      supportsCheckoutUrl:next.supportsCheckoutUrl === true,
+      supportsCreateOrder:false,
+      supportsPayment:false,
+      supportsIdentityStorage:false
+    };
+  }
+
+  function sandboxFields(category, settings, config, connector){
     const api = sandboxApi();
-    if (api && api.getCommerceProviderSandbox) return api.getCommerceProviderSandbox(category, settings, config, config, defaultAdapter(category));
+    if (api && api.getCommerceProviderSandbox) return api.getCommerceProviderSandbox(category, settings, config, config, defaultAdapter(category), connector || defaultConnector(category, settings));
     return {
       category:resultCategory(category),
       sandboxMode:"dry_run",
@@ -147,6 +222,15 @@
 
   function isProviderSandboxReady(sandbox){
     return !!(sandbox && sandbox.canProceedToRealSearch === true && sandbox.canCallProvider === true && sandbox.sandboxMode === "dry_run");
+  }
+
+  function isProviderConnectorReady(connector){
+    const next = connectorFields(connector);
+    return next.connectorEnabled === true &&
+      next.connectorConfigured === true &&
+      next.connectorNetworkAllowed === true &&
+      next.supportsSearch === true &&
+      next.supportsPrice === true;
   }
 
   function isProviderConfigReady(config){
@@ -222,13 +306,16 @@
     const isProduct = next === "product";
     const adapter = defaultAdapter(next);
     const config = defaultConfig(next, settings);
+    const connector = defaultConnector(next, settings);
+    const cFields = connectorFields(connector);
     const configReady = isProviderConfigReady(config);
-    const sandbox = sandboxFields(next, settings, config);
+    const connectorReady = isProviderConnectorReady(connector);
+    const sandbox = sandboxFields(next, settings, config, connector);
     return {
       category:next,
       categoryLabel:isProduct ? "商品" : next === "flight" ? "机票" : next,
-      searchStatus:configured && configReady ? "ready" : "no_provider",
-      hasProvider:configured && configReady,
+      searchStatus:configured && configReady && connectorReady ? "ready" : "no_provider",
+      hasProvider:configured && configReady && connectorReady,
       providerHealth:[{
         id:next + (configured ? "-manual-provider" : "-provider-disabled"),
         name:configured ? String(settings && settings.providerName || "Manual Commerce Provider") : "暂未配置真实搜索适配器",
@@ -246,6 +333,13 @@
         adapterMode:"read_only",
         adapterConfigured:configured,
         adapterHealth:configured ? "ready" : "not_configured",
+        connectorId:cFields.connectorId,
+        connectorStatus:cFields.connectorStatus,
+        connectorEnabled:cFields.connectorEnabled,
+        connectorConfigured:cFields.connectorConfigured,
+        connectorNetworkAllowed:cFields.connectorNetworkAllowed,
+        connectorType:cFields.connectorType,
+        connectorReasonWhenUnavailable:cFields.connectorReasonWhenUnavailable,
         configStatus:configReady ? "ready" : "not_configured",
         hasApiKey:config.hasApiKey === true,
         allowNetworkSearch:config.allowNetworkSearch === true,
@@ -267,6 +361,7 @@
         supportsReadOnlySearch:config.supportsReadOnlySearch === true,
         supportsCrossBorderSearch:config.supportsCrossBorderSearch === true,
         configHealth:configFields(config),
+        connectorHealth:cFields,
         sandboxHealth:sandbox
       }],
       adapterHealth:{
@@ -275,16 +370,17 @@
         adapterConfigured:configured,
         adapterHealth:configured ? "ready" : "not_configured"
       },
+      connectorHealth:cFields,
       configHealth:configFields(config),
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
-      enabled:configured && configReady,
-      configured:configured && configReady,
-      reasonWhenDisabled:configured && configReady ? "" : config.reasonWhenUnavailable || "provider_config_not_ready",
-      reason:"provider_config_not_ready",
-      canShowPrice:configured && configReady,
-      canShowBookingButton:configured && configReady && config.allowBookingUrl === true,
-      canShowCheckoutButton:configured && configReady && config.allowCheckoutUrl === true
+      enabled:configured && configReady && connectorReady,
+      configured:configured && configReady && connectorReady,
+      reasonWhenDisabled:configured && configReady && connectorReady ? "" : cFields.connectorReasonWhenUnavailable || config.reasonWhenUnavailable || "provider_config_not_ready",
+      reason:connectorReady ? "provider_config_not_ready" : "connector_not_enabled",
+      canShowPrice:configured && configReady && connectorReady,
+      canShowBookingButton:configured && configReady && connectorReady && config.allowBookingUrl === true,
+      canShowCheckoutButton:configured && configReady && connectorReady && config.allowCheckoutUrl === true
     };
   }
 
@@ -303,9 +399,13 @@
     return defaultConfig(category, settings || getCommerceSearchSettings());
   }
 
+  function getCommerceProviderConnector(category, settings){
+    return defaultConnector(category, settings || getCommerceSearchSettings());
+  }
+
   function getCommerceProviderSandbox(category, settings){
     const nextSettings = settings || getCommerceSearchSettings();
-    return sandboxFields(category, nextSettings, getCommerceProviderConfig(category, nextSettings));
+    return sandboxFields(category, nextSettings, getCommerceProviderConfig(category, nextSettings), getCommerceProviderConnector(category, nextSettings));
   }
 
   function isAiModelPricingTask(taskOrRequest){
@@ -733,21 +833,28 @@
     const request = createCommerceSearchRequest(task);
     const providerHealth = getCommerceProviderHealth(request.category, settings);
     const providerConfig = getCommerceProviderConfig(request.category, settings);
+    const providerConnector = getCommerceProviderConnector(request.category, settings);
     const configReady = isProviderConfigReady(providerConfig);
+    const connectorReady = isProviderConnectorReady(providerConnector);
+    const connectorHealth = connectorFields(providerConnector);
     const sandbox = getCommerceProviderSandbox(request.category, settings);
     if (isAiModelPricingTask(request)) {
       const aiConfig = getCommerceProviderConfig("aiModelPricing", settings);
+      const aiConnector = getCommerceProviderConnector("aiModelPricing", settings);
+      const aiConnectorReady = isProviderConnectorReady(aiConnector);
+      const aiConnectorHealth = connectorFields(aiConnector);
       const aiSandbox = getCommerceProviderSandbox("aiModelPricing", settings);
-      if (!isProviderConfigReady(aiConfig) || !isProviderSandboxReady(aiSandbox)) {
+      if (!isProviderConfigReady(aiConfig) || !aiConnectorReady || !isProviderSandboxReady(aiSandbox)) {
         return {
           ok:false,
           code:"COMMERCE_PROVIDER_CONFIG_NOT_READY",
           message:"provider_config_not_ready",
-          reason:"provider_dry_run_blocked",
+          reason:aiConnectorReady ? "provider_dry_run_blocked" : "connector_not_enabled",
           request,
           searchStatus:"no_provider",
           providerHealth:providerHealth.providerHealth,
           configHealth:configFields(aiConfig),
+          connectorHealth:aiConnectorHealth,
           sandboxHealth:aiSandbox,
           dryRunHealth:aiSandbox,
           canShowPrice:false,
@@ -758,16 +865,17 @@
       }
       return searchOpenRouterModels(request);
     }
-    if (!hasCommerceSearchProvider(settings) || !configReady || !isProviderSandboxReady(sandbox)) {
+    if (!hasCommerceSearchProvider(settings) || !configReady || !connectorReady || !isProviderSandboxReady(sandbox)) {
       return {
         ok:false,
         code:"COMMERCE_PROVIDER_CONFIG_NOT_READY",
         message:"provider_config_not_ready",
-        reason:"provider_dry_run_blocked",
+        reason:connectorReady ? "provider_dry_run_blocked" : "connector_not_enabled",
         request,
         searchStatus:"no_provider",
         providerHealth:providerHealth.providerHealth,
         configHealth:configFields(providerConfig),
+        connectorHealth,
         sandboxHealth:sandbox,
         dryRunHealth:sandbox,
         canShowPrice:false,
@@ -784,6 +892,7 @@
         request,
         providerHealth:providerHealth.providerHealth,
         configHealth:configFields(providerConfig),
+        connectorHealth,
         sandboxHealth:sandbox,
         dryRunHealth:sandbox,
         canShowPrice:false,
@@ -806,6 +915,7 @@
         searchStatus:candidates.length > 0 ? "completed" : "no_results",
         providerHealth:providerHealth.providerHealth,
         configHealth:configFields(providerConfig),
+        connectorHealth,
         sandboxHealth:Object.assign({}, sandbox, sandboxValidation),
         dryRunHealth:Object.assign({}, sandbox, sandboxValidation),
         canShowPrice:candidates.length > 0,
@@ -825,6 +935,7 @@
       searchStatus:"no_provider",
       providerHealth:providerHealth.providerHealth,
       configHealth:configFields(providerConfig),
+      connectorHealth,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       canShowPrice:false,
@@ -842,8 +953,10 @@
     getCommerceProviderRegistry,
     getCommerceProviderHealth,
     getCommerceProviderConfig,
+    getCommerceProviderConnector,
     getCommerceProviderSandbox,
     isProviderConfigReady,
+    isProviderConnectorReady,
     createCommerceSearchRequest,
     normalizeCommerceSearchResults,
     sortCommerceCandidates,

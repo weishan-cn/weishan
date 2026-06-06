@@ -58,18 +58,23 @@
     };
   }
 
-  function runProviderDryRun(provider, config, adapter, queryContext){
+  function runProviderDryRun(provider, config, adapter, queryContext, connector){
     const p = provider || {};
     const cfg = config || {};
     const a = adapter || {};
     const q = queryContext || {};
+    const c = connector || {};
     const next = normalizeCategory(p.category || cfg.category || q.category);
     const mode = a.mode || p.adapterMode || "read_only";
+    const connectorType = c.connectorType || p.connectorType || cfg.connectorType || "readonly_search";
+    const connectorEnabled = c.enabled === true || p.connectorEnabled === true || cfg.connectorEnabled === true;
+    const connectorConfigured = c.configured === true || p.connectorConfigured === true || cfg.connectorConfigured === true;
+    const connectorNetworkAllowed = c.networkAllowed === true || p.connectorNetworkAllowed === true || cfg.connectorNetworkAllowed === true;
     const apiKeyPresent = cfg.hasApiKey === true || q.apiKeyConfigured === true;
-    const networkAllowed = cfg.allowNetworkSearch === true && q.allowNetworkSearch === true;
-    const priceAllowed = cfg.allowReturnPrice === true && q.allowReturnPrice === true;
-    const bookingUrlAllowed = cfg.allowBookingUrl === true && q.allowBookingUrl === true;
-    const checkoutUrlAllowed = cfg.allowCheckoutUrl === true && q.allowCheckoutUrl === true;
+    const networkAllowed = cfg.allowNetworkSearch === true && q.allowNetworkSearch === true && connectorNetworkAllowed === true;
+    const priceAllowed = cfg.allowReturnPrice === true && q.allowReturnPrice === true && c.supportsPrice === true;
+    const bookingUrlAllowed = cfg.allowBookingUrl === true && q.allowBookingUrl === true && c.supportsBookingUrl === true;
+    const checkoutUrlAllowed = cfg.allowCheckoutUrl === true && q.allowCheckoutUrl === true && c.supportsCheckoutUrl === true;
     const configured = cfg.enabled === true && cfg.configured === true && apiKeyPresent === true;
     const explicitTestProvider = !!(window.WeishanCommerceSearchProvider && typeof window.WeishanCommerceSearchProvider.search === "function" && q.providerMode === "manualProvider");
     const explicitModelTestProvider = !!(window.WeishanOpenRouterModelsProvider && q.providerMode === "openRouterModels");
@@ -81,9 +86,18 @@
       { name:"network search allowed", pass:networkAllowed === true },
       { name:"price return allowed", pass:priceAllowed === true },
       { name:"adapter read only", pass:mode === "read_only" },
+      { name:"connector read only", pass:connectorType === "readonly_search" },
+      { name:"connector enabled", pass:connectorEnabled === true },
+      { name:"connector configured", pass:connectorConfigured === true },
+      { name:"connector network allowed", pass:connectorNetworkAllowed === true },
+      { name:"connector can search", pass:c.supportsSearch === true },
+      { name:"connector can return price", pass:c.supportsPrice === true },
       { name:"cannot create order", pass:cfg.allowCreateOrder !== true && p.allowCreateOrder !== true },
       { name:"cannot pay", pass:cfg.allowPay !== true && p.allowPay !== true },
       { name:"cannot save identity", pass:cfg.allowSaveIdentity !== true && p.allowSaveIdentity !== true },
+      { name:"connector cannot create order", pass:c.supportsCreateOrder !== true },
+      { name:"connector cannot pay", pass:c.supportsPayment !== true },
+      { name:"connector cannot save identity", pass:c.supportsIdentityStorage !== true },
       { name:"global metadata present", pass:global.globalReady === true },
       { name:"cross border search supported", pass:global.supportsCrossBorderSearch === true },
       { name:"does not require user account", pass:global.requiresUserAccount !== true },
@@ -98,6 +112,12 @@
       category:next,
       dryRun:true,
       mode:"read_only",
+      connectorStatus:c.connectorStatus || p.connectorStatus || cfg.connectorStatus || "not_configured",
+      connectorEnabled,
+      connectorConfigured,
+      connectorNetworkAllowed,
+      connectorType,
+      connectorReasonWhenUnavailable:c.reasonWhenUnavailable || p.connectorReasonWhenUnavailable || cfg.connectorReasonWhenUnavailable || "Provider Connector 未启用",
       globalReady:global.globalReady === true,
       networkAllowed,
       priceAllowed,
@@ -129,8 +149,8 @@
     };
   }
 
-  function getCommerceProviderSandbox(category, settings, config, provider, adapter){
-    return runProviderDryRun(Object.assign({ category:normalizeCategory(category) }, provider || {}), config || {}, adapter || {}, Object.assign({}, settings || {}, { category:normalizeCategory(category) }));
+  function getCommerceProviderSandbox(category, settings, config, provider, adapter, connector){
+    return runProviderDryRun(Object.assign({ category:normalizeCategory(category) }, provider || {}), config || {}, adapter || {}, Object.assign({}, settings || {}, { category:normalizeCategory(category) }), connector || {});
   }
 
   function canProviderProceedToRealSearch(providerHealth){

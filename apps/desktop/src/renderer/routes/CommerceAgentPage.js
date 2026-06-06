@@ -18,15 +18,23 @@
   function ensureSearchLoaded(host){
     if (!window.WeishanCommerceProviderAdapter && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderAdapter"]')) {
       const adapter = document.createElement("script");
-      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.23";
+      adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.24";
       adapter.dataset.weishanDynamic = "WeishanCommerceProviderAdapter";
       adapter.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(adapter);
       return;
     }
+    if (!window.WeishanCommerceProviderConnector && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConnector"]')) {
+      const connector = document.createElement("script");
+      connector.src = "./renderer/core/commerceProviderConnector.js?v=2.0.24";
+      connector.dataset.weishanDynamic = "WeishanCommerceProviderConnector";
+      connector.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(connector);
+      return;
+    }
     if (!window.WeishanCommerceProviderConfig && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConfig"]')) {
       const config = document.createElement("script");
-      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.23";
+      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.24";
       config.dataset.weishanDynamic = "WeishanCommerceProviderConfig";
       config.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(config);
@@ -34,7 +42,7 @@
     }
     if (!window.WeishanCommerceProviderSandbox && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderSandbox"]')) {
       const sandbox = document.createElement("script");
-      sandbox.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.23";
+      sandbox.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.24";
       sandbox.dataset.weishanDynamic = "WeishanCommerceProviderSandbox";
       sandbox.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(sandbox);
@@ -42,7 +50,7 @@
     }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
-      providers.src = "./renderer/core/commerceProviders.js?v=2.0.23";
+      providers.src = "./renderer/core/commerceProviders.js?v=2.0.24";
       providers.dataset.weishanDynamic = "WeishanCommerceProviders";
       providers.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(providers);
@@ -50,7 +58,7 @@
     }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
-    script.src = "./renderer/core/commerceSearch.js?v=2.0.23";
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.24";
     script.dataset.weishanDynamic = "WeishanCommerceSearch";
     script.onload = () => render(host);
     document.head.appendChild(script);
@@ -240,6 +248,7 @@
     const providerRow = Array.isArray(health.providerHealth) && health.providerHealth[0] || {};
     const adapterInfo = health.adapterHealth || {};
     const configInfo = health.configHealth || {};
+    const connectorInfo = health.connectorHealth || task.connectorHealth || {};
     const sandboxInfo = health.dryRunHealth || health.sandboxHealth || {};
     const globalReadiness = sandboxInfo.globalReadiness || {};
     const reasonWhenDisabled = providerRow.reasonWhenDisabled || "";
@@ -253,9 +262,10 @@
         <span>出发地：${esc(flightOrigin)} · 目的地：${esc(flightDestination)} · 日期：${esc(flightDate)}</span>
         <span>暂未配置真实机票搜索适配器，当前无法返回实时价格。</span>
         <span>当前模式：只读搜索准备中。</span>
-        <span>Provider Sandbox：dry-run；真实 provider 接入前仅做配置、密钥存在性、网络开关和返回结构检查。</span>
+        <span>Provider Connector：未启用；Connector 类型：只读搜索模板。</span>
+        <span>Provider Sandbox：dry-run；真实 provider 接入前仅做配置、密钥存在性、网络开关、connector 门控和返回结构检查。</span>
         <span>全球搜索准备：未启用；Provider Dry Run：未通过；跨境搜索：未启用。</span>
-        <span>配置状态：未配置真实搜索源；网络搜索未启用；实时价格不可用。</span>
+        <span>配置状态：未配置真实搜索源；网络请求未启用；实时价格不可用。</span>
         <span>weishan 面向全球采购场景设计，当前正在准备多国家、多平台、多币种的只读搜索能力；在真实 provider 启用前不会联网搜索、不会返回价格、不会下单或付款。</span>
         <span>未下单、未付款、未提交订单、未保存证件。</span>
       </div>` : ""}
@@ -263,21 +273,28 @@
         <b>已识别为商品搜索计划。</b>
         <span>暂未配置真实商品搜索适配器，当前无法返回实时价格。</span>
         <span>当前模式：只读搜索准备中。</span>
-        <span>Provider Sandbox：dry-run；真实 provider 接入前仅做配置、密钥存在性、网络开关和返回结构检查。</span>
+        <span>Provider Connector：未启用；Connector 类型：只读搜索模板。</span>
+        <span>Provider Sandbox：dry-run；真实 provider 接入前仅做配置、密钥存在性、网络开关、connector 门控和返回结构检查。</span>
         <span>全球搜索准备：未启用；Provider Dry Run：未通过；跨境搜索：未启用。</span>
-        <span>配置状态：未配置真实搜索源；网络搜索未启用；实时价格不可用。</span>
+        <span>配置状态：未配置真实搜索源；网络请求未启用；实时价格不可用。</span>
         <span>weishan 面向全球采购场景设计，当前正在准备多国家、多平台、多币种的只读搜索能力；在真实 provider 启用前不会联网搜索、不会返回价格、不会下单或付款。</span>
         <span>未下单、未付款、未提交订单、未保存银行卡或证件。</span>
       </div>` : ""}
       ${!isModelPricing && !hasProvider ? `<dl class="commerce-facts commerce-provider-health">
         <div><dt>searchStatus</dt><dd>no_provider</dd></div>
         <div><dt>搜索适配器</dt><dd>暂未配置</dd></div>
+        <div><dt>Provider Connector</dt><dd>未启用</dd></div>
+        <div><dt>Connector 类型</dt><dd>只读搜索模板</dd></div>
+        <div><dt>connectorStatus</dt><dd>${esc(connectorInfo.connectorStatus || "not_configured")}</dd></div>
+        <div><dt>connectorEnabled</dt><dd>false</dd></div>
+        <div><dt>connectorConfigured</dt><dd>false</dd></div>
+        <div><dt>connectorNetworkAllowed</dt><dd>false</dd></div>
         <div><dt>当前模式</dt><dd>只读搜索准备中</dd></div>
         <div><dt>adapterMode</dt><dd>${esc(adapterInfo.adapterMode || "read_only")}</dd></div>
         <div><dt>adapterConfigured</dt><dd>false</dd></div>
         <div><dt>adapterHealth</dt><dd>${esc(adapterInfo.adapterHealth || "not_configured")}</dd></div>
         <div><dt>配置状态</dt><dd>未配置真实搜索源</dd></div>
-        <div><dt>网络搜索</dt><dd>未启用</dd></div>
+        <div><dt>网络请求</dt><dd>未启用</dd></div>
         <div><dt>实时价格</dt><dd>不可用</dd></div>
         <div><dt>configStatus</dt><dd>${esc(configInfo.configStatus || "not_configured")}</dd></div>
         <div><dt>hasApiKey</dt><dd>${configInfo.hasApiKey === true ? "true" : "false"}</dd></div>
@@ -507,6 +524,7 @@
             searchProviderName:result.providerName || (isModelPricing ? "OpenRouter" : ""),
             providerHealth:result.providerHealth || target.providerHealth || [],
             configHealth:result.configHealth || target.configHealth || {},
+            connectorHealth:result.connectorHealth || target.connectorHealth || {},
             sandboxHealth:result.sandboxHealth || target.sandboxHealth || {},
             dryRunHealth:result.dryRunHealth || result.sandboxHealth || target.dryRunHealth || target.sandboxHealth || {},
             canShowPrice:result.canShowPrice === true,
@@ -533,6 +551,7 @@
           searchProviderName:result.providerName || "",
           providerHealth:result.providerHealth || target.providerHealth || [],
           configHealth:result.configHealth || target.configHealth || {},
+          connectorHealth:result.connectorHealth || target.connectorHealth || {},
           sandboxHealth:result.sandboxHealth || target.sandboxHealth || {},
           dryRunHealth:result.dryRunHealth || result.sandboxHealth || target.dryRunHealth || target.sandboxHealth || {},
           canShowPrice:result.canShowPrice === true,

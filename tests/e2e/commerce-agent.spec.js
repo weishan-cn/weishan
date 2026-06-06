@@ -37,7 +37,15 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceProviderAdapter) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.23";
+        script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.24";
+        script.onload = resolve;
+        document.head.appendChild(script);
+      });
+    }
+    if (!window.WeishanCommerceProviderConnector) {
+      await new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.24";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -45,7 +53,7 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceProviderConfig) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.23";
+        script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.24";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -53,7 +61,7 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceProviderSandbox) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.23";
+        script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.24";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -62,14 +70,14 @@ async function installCommerceSearchMock(page, candidates) {
       if (!window.WeishanCommerceProviderSandbox) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.23";
+          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.24";
           script.onload = resolve;
           document.head.appendChild(script);
         });
       }
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviders.js?v=2.0.23";
+        script.src = "./renderer/core/commerceProviders.js?v=2.0.24";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -77,7 +85,7 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceSearch) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceSearch.js?v=2.0.23";
+        script.src = "./renderer/core/commerceSearch.js?v=2.0.24";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -106,7 +114,15 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
     if (!window.WeishanCommerceProviderAdapter) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.23";
+        script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.24";
+        script.onload = resolve;
+        document.head.appendChild(script);
+      });
+    }
+    if (!window.WeishanCommerceProviderConnector) {
+      await new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.24";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -114,7 +130,7 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
     if (!window.WeishanCommerceProviderConfig) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.23";
+        script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.24";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -122,7 +138,7 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
     if (!window.WeishanCommerceProviderSandbox) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.23";
+        script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.24";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -131,14 +147,14 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
       if (!window.WeishanCommerceProviderSandbox) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.23";
+          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.24";
           script.onload = resolve;
           document.head.appendChild(script);
         });
       }
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviders.js?v=2.0.23";
+        script.src = "./renderer/core/commerceProviders.js?v=2.0.24";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -146,7 +162,7 @@ async function installOpenRouterModelsMock(page, payload, options = {}) {
     if (!window.WeishanCommerceSearch) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceSearch.js?v=2.0.23";
+        script.src = "./renderer/core/commerceSearch.js?v=2.0.24";
         script.onload = resolve;
         document.head.appendChild(script);
       });
@@ -222,7 +238,15 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderAdapter) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.23";
+          script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.24";
+          script.onload = resolve;
+          document.head.appendChild(script);
+        });
+      }
+      if (!window.WeishanCommerceProviderConnector) {
+        await new Promise((resolve) => {
+          const script = document.createElement("script");
+          script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.24";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -230,7 +254,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderConfig) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.23";
+          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.24";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -239,14 +263,14 @@ test.describe.serial("commerce agent workbench", () => {
         if (!window.WeishanCommerceProviderSandbox) {
           await new Promise((resolve) => {
             const script = document.createElement("script");
-            script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.23";
+            script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.24";
             script.onload = resolve;
             document.head.appendChild(script);
           });
         }
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviders.js?v=2.0.23";
+          script.src = "./renderer/core/commerceProviders.js?v=2.0.24";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -265,6 +289,12 @@ test.describe.serial("commerce agent workbench", () => {
       expect(provider.adapterMode).toBe("read_only");
       expect(provider.adapterConfigured).toBe(false);
       expect(provider.adapterHealth).toBe("not_configured");
+      expect(provider.connectorId).toBeTruthy();
+      expect(provider.connectorStatus).toBe("not_configured");
+      expect(provider.connectorEnabled).toBe(false);
+      expect(provider.connectorConfigured).toBe(false);
+      expect(provider.connectorNetworkAllowed).toBe(false);
+      expect(provider.connectorType).toBe("readonly_search");
       expect(provider.configStatus).toBe("not_configured");
       expect(provider.hasApiKey).toBe(false);
       expect(provider.allowNetworkSearch).toBe(false);
@@ -305,6 +335,16 @@ test.describe.serial("commerce agent workbench", () => {
       expect(item.adapterHealth.adapterMode).toBe("read_only");
       expect(item.adapterHealth.adapterConfigured).toBe(false);
       expect(item.adapterHealth.adapterHealth).toBe("not_configured");
+      expect(item.connectorHealth.connectorStatus).toBe("not_configured");
+      expect(item.connectorHealth.connectorEnabled).toBe(false);
+      expect(item.connectorHealth.connectorConfigured).toBe(false);
+      expect(item.connectorHealth.connectorNetworkAllowed).toBe(false);
+      expect(item.connectorHealth.connectorType).toBe("readonly_search");
+      expect(item.connectorHealth.supportsSearch).toBe(false);
+      expect(item.connectorHealth.supportsPrice).toBe(false);
+      expect(item.connectorHealth.supportsCreateOrder).toBe(false);
+      expect(item.connectorHealth.supportsPayment).toBe(false);
+      expect(item.connectorHealth.supportsIdentityStorage).toBe(false);
       expect(item.configHealth.configStatus).toBe("not_configured");
       expect(item.configHealth.hasApiKey).toBe(false);
       expect(item.configHealth.allowNetworkSearch).toBe(false);
@@ -331,7 +371,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderConfig) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.23";
+          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.24";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -368,7 +408,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderConfig) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.23";
+          script.src = "./renderer/core/commerceProviderConfig.js?v=2.0.24";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -376,7 +416,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderSandbox) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.23";
+          script.src = "./renderer/core/commerceProviderSandbox.js?v=2.0.24";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -432,7 +472,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderAdapter) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.23";
+          script.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.24";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -449,6 +489,87 @@ test.describe.serial("commerce agent workbench", () => {
     expect(adapter.capabilities.canCreateOrder).toBe(false);
     expect(adapter.capabilities.canPay).toBe(false);
     expect(adapter.capabilities.canSaveIdentity).toBe(false);
+  });
+
+  test("provider connector contract is disabled and read-only by default", async () => {
+    await gotoRoute(page, "commerce");
+    const result = await page.evaluate(async () => {
+      if (!window.WeishanCommerceProviderConnector) {
+        await new Promise((resolve) => {
+          const script = document.createElement("script");
+          script.src = "./renderer/core/commerceProviderConnector.js?v=2.0.24";
+          script.onload = resolve;
+          document.head.appendChild(script);
+        });
+      }
+      const connector = window.WeishanCommerceProviderConnector.getCommerceProviderConnector("flight", { enabled:false, providerMode:"disabled" });
+      const searchResult = await connector.search({ category:"flight", query:"明天成都飞北京" });
+      const health = window.WeishanCommerceProviderConnector.getCommerceConnectorHealth("flight", { enabled:false, providerMode:"disabled" });
+      return { connector, searchResult, health };
+    });
+    expect(result.connector.connectorType).toBe("readonly_search");
+    expect(result.connector.enabled).toBe(false);
+    expect(result.connector.configured).toBe(false);
+    expect(result.connector.networkAllowed).toBe(false);
+    expect(result.connector.hasApiKey).toBe(false);
+    expect(result.connector.supportsSearch).toBe(false);
+    expect(result.connector.supportsPrice).toBe(false);
+    expect(result.connector.supportsBookingUrl).toBe(false);
+    expect(result.connector.supportsCheckoutUrl).toBe(false);
+    expect(result.connector.supportsCreateOrder).toBe(false);
+    expect(result.connector.supportsPayment).toBe(false);
+    expect(result.connector.supportsIdentityStorage).toBe(false);
+    expect(result.connector.dataSourceType).toBe("template_disabled");
+    expect(result.searchResult.ok).toBe(false);
+    expect(result.searchResult.searchStatus).toBe("no_provider");
+    expect(result.searchResult.reason).toBe("connector_not_enabled");
+    expect(result.searchResult.candidates).toEqual([]);
+    expect(result.health.connectorStatus).toBe("not_configured");
+    expect(result.health.connectorEnabled).toBe(false);
+    expect(result.health.connectorConfigured).toBe(false);
+    expect(result.health.connectorNetworkAllowed).toBe(false);
+  });
+
+  test("disabled connector stops at no-provider without network calls", async () => {
+    await gotoRoute(page, "commerce");
+    const result = await page.evaluate(async () => {
+      const load = (globalName, src) => new Promise((resolve) => {
+        if (window[globalName]) return resolve();
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = resolve;
+        document.head.appendChild(script);
+      });
+      await load("WeishanCommerceProviderAdapter", "./renderer/core/commerceProviderAdapter.js?v=2.0.24");
+      await load("WeishanCommerceProviderConnector", "./renderer/core/commerceProviderConnector.js?v=2.0.24");
+      await load("WeishanCommerceProviderConfig", "./renderer/core/commerceProviderConfig.js?v=2.0.24");
+      await load("WeishanCommerceProviderSandbox", "./renderer/core/commerceProviderSandbox.js?v=2.0.24");
+      await load("WeishanCommerceProviders", "./renderer/core/commerceProviders.js?v=2.0.24");
+      await load("WeishanCommerceSearch", "./renderer/core/commerceSearch.js?v=2.0.24");
+      const oldFetch = window.fetch;
+      let called = false;
+      window.fetch = async () => {
+        called = true;
+        throw new Error("fetch must not be called while connector is disabled");
+      };
+      try {
+        const searchResult = await window.WeishanCommerceSearch.searchCommerceCandidates({
+          taskId:"connector-disabled",
+          category:"flight",
+          inputSummary:"明天成都飞北京"
+        });
+        return { called, searchResult };
+      } finally {
+        window.fetch = oldFetch;
+      }
+    });
+    expect(result.called).toBe(false);
+    expect(result.searchResult.searchStatus).toBe("no_provider");
+    expect(result.searchResult.reason).toBe("connector_not_enabled");
+    expect(result.searchResult.canShowPrice).toBe(false);
+    expect(result.searchResult.canShowBookingButton).toBe(false);
+    expect(result.searchResult.canShowCheckoutButton).toBe(false);
+    expect(result.searchResult.candidates).toEqual([]);
   });
 
   test("home commerce summary stays compact and links to workbench detail", async () => {
@@ -620,6 +741,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：商品");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品关键词：华为手机");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("Provider Connector 未启用");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂未配置真实商品搜索适配器");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前无法返回实时价格");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("未下单、未付款、未提交订单、未保存银行卡或证件");
@@ -637,6 +759,7 @@ test.describe.serial("commerce agent workbench", () => {
     await clearCommerceSearchMock(page);
     await submitHomeCommand(page, runId + " 帮我预定明天成都到北京机票");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("Provider Connector 未启用");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂未配置真实机票搜索适配器");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("未下单、未付款、未提交订单、未保存证件");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("CNY ");
@@ -652,9 +775,16 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("read_only");
     await expect(page.locator(".commerce-detail")).toContainText("adapterHealth");
     await expect(page.locator(".commerce-detail")).toContainText("not_configured");
+    await expect(page.locator(".commerce-detail")).toContainText("Provider Connector");
+    await expect(page.locator(".commerce-detail")).toContainText("未启用");
+    await expect(page.locator(".commerce-detail")).toContainText("Connector 类型");
+    await expect(page.locator(".commerce-detail")).toContainText("只读搜索模板");
+    await expect(page.locator(".commerce-detail")).toContainText("connectorStatus");
+    await expect(page.locator(".commerce-detail")).toContainText("connectorEnabled");
+    await expect(page.locator(".commerce-detail")).toContainText("connectorNetworkAllowed");
     await expect(page.locator(".commerce-detail")).toContainText("配置状态");
     await expect(page.locator(".commerce-detail")).toContainText("未配置真实搜索源");
-    await expect(page.locator(".commerce-detail")).toContainText("网络搜索");
+    await expect(page.locator(".commerce-detail")).toContainText("网络请求");
     await expect(page.locator(".commerce-detail")).toContainText("未启用");
     await expect(page.locator(".commerce-detail")).toContainText("实时价格");
     await expect(page.locator(".commerce-detail")).toContainText("不可用");
@@ -689,6 +819,7 @@ test.describe.serial("commerce agent workbench", () => {
 
     await submitHomeCommand(page, runId + " 买华为手机");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("Provider Connector 未启用");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂未配置真实商品搜索适配器");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("未下单、未付款、未提交订单、未保存银行卡或证件");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("CNY ");
