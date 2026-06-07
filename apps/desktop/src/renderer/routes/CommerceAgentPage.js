@@ -98,7 +98,7 @@
     }
     if (!window.WeishanCommerceProviderConfig && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConfig"]')) {
       const config = document.createElement("script");
-      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.43";
+      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.47";
       config.dataset.weishanDynamic = "WeishanCommerceProviderConfig";
       config.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(config);
@@ -114,15 +114,23 @@
     }
     if (!window.WeishanCommerceConnectorGate && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceConnectorGate"]')) {
       const connectorGate = document.createElement("script");
-      connectorGate.src = "./renderer/core/commerceConnectorGate.js?v=2.0.46";
+      connectorGate.src = "./renderer/core/commerceConnectorGate.js?v=2.0.47";
       connectorGate.dataset.weishanDynamic = "WeishanCommerceConnectorGate";
       connectorGate.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(connectorGate);
       return;
     }
+    if (!window.WeishanCommerceProviderIntegrationReadiness && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderIntegrationReadiness"]')) {
+      const readiness = document.createElement("script");
+      readiness.src = "./renderer/core/commerceProviderIntegrationReadiness.js?v=2.0.47";
+      readiness.dataset.weishanDynamic = "WeishanCommerceProviderIntegrationReadiness";
+      readiness.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(readiness);
+      return;
+    }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
-      providers.src = "./renderer/core/commerceProviders.js?v=2.0.46";
+      providers.src = "./renderer/core/commerceProviders.js?v=2.0.47";
       providers.dataset.weishanDynamic = "WeishanCommerceProviders";
       providers.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(providers);
@@ -130,7 +138,7 @@
     }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
-    script.src = "./renderer/core/commerceSearch.js?v=2.0.46";
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.47";
     script.dataset.weishanDynamic = "WeishanCommerceSearch";
     script.onload = () => render(host);
     document.head.appendChild(script);
@@ -449,6 +457,27 @@
     </section>`;
   }
 
+  function providerIntegrationReadinessPanelHtml(readinessInfo){
+    const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
+    const group = (title, items) => `<section class="commerce-provider-readiness-group"><h4>${esc(title)}</h4><ul>${items.map((item) => row(item[0], item[1])).join("")}</ul></section>`;
+    return `<section class="commerce-provider-readiness-panel" aria-label="Provider 接入准备总览">
+      <div class="commerce-provider-readiness-head">
+        <div>
+          <h3>Provider 接入准备总览</h3>
+          <p>真实 provider 接入前必须完成所有 gate。当前尚未准备好接入任何真实 provider。</p>
+        </div>
+        <strong>总体状态：未准备好</strong>
+      </div>
+      <div class="commerce-provider-readiness-grid">
+        ${group("总体能力", [["真实 provider", "不可接入"], ["API key", "不可使用"], ["网络请求", "未启用"], ["真实结果", "不可返回"], ["真实价格", "不可用"], ["测试价格", "不可用"], ["精确跳转", "未启用"], ["支付 / 下单", "不支持"], ["证件 / 银行卡", "不保存"]])}
+        ${group("Gate 总览", [["全球采购标准", "已要求"], ["当地法律合规", "未确认"], ["Provider Onboarding", "未完成"], ["Provider Approval", "未审查"], ["只读 Connector Stub", "未准备"], ["Provider Stub Profile", "仅建档，尚未接入"], ["密钥安全方案", "未配置"], ["Sandbox Dry Run", "未运行"], ["Connector Gate", "已阻断"], ["人工批准", "未完成"]])}
+      </div>
+      <div class="commerce-provider-readiness-note">
+        <p>该面板只是接入准备总览，不会打开任何 connector。当前不会访问 eBay 或任何真实 provider，不会读取 API key，不会连接 endpoint，不会发起网络请求，不会返回商品、价格或跳转链接。</p>
+      </div>
+    </section>`;
+  }
+
   function providerStubProfilePanelHtml(profileInfo, task){
     const category = commercePoolCategory(task);
     if (category !== "product") return "";
@@ -524,6 +553,7 @@
     const isProduct = commercePoolCategory(task) === "product";
     return `<div class="commerce-warning commerce-provider-pool-missing">
         <b>全球多源 provider 候选池：准备中，尚未接入。</b>
+        ${providerIntegrationReadinessPanelHtml(configInfo && configInfo.providerIntegrationReadiness || {})}
         ${providerStubProfilePanelHtml(configInfo && configInfo.providerStubProfileHealth || {}, task)}
         ${readOnlyConnectorStubPanelHtml(configInfo && configInfo.connectorStubHealth || {})}
         ${providerSecretStoragePanelHtml(configInfo && configInfo.providerSecretHealth || {})}

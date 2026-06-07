@@ -442,6 +442,27 @@
     </section>`;
   }
 
+  function commerceProviderIntegrationReadinessHomePanel(){
+    const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
+    const group = (title, items) => `<section class="commerce-provider-readiness-group"><h4>${esc(title)}</h4><ul>${items.map((item) => row(item[0], item[1])).join("")}</ul></section>`;
+    return `<section class="commerce-provider-readiness-panel commerce-provider-readiness-home-panel" aria-label="Provider 接入准备总览">
+      <div class="commerce-provider-readiness-head">
+        <div>
+          <h3>Provider 接入准备总览</h3>
+          <p>真实 provider 接入前必须完成所有 gate。当前尚未准备好接入任何真实 provider。</p>
+        </div>
+        <strong>总体状态：未准备好</strong>
+      </div>
+      <div class="commerce-provider-readiness-grid">
+        ${group("总体能力", [["真实 provider", "不可接入"], ["API key", "不可使用"], ["网络请求", "未启用"], ["真实结果", "不可返回"], ["真实价格", "不可用"], ["测试价格", "不可用"], ["精确跳转", "未启用"], ["支付 / 下单", "不支持"], ["证件 / 银行卡", "不保存"]])}
+        ${group("Gate 总览", [["全球采购标准", "已要求"], ["当地法律合规", "未确认"], ["Provider Onboarding", "未完成"], ["Provider Approval", "未审查"], ["只读 Connector Stub", "未准备"], ["Provider Stub Profile", "仅建档，尚未接入"], ["密钥安全方案", "未配置"], ["Sandbox Dry Run", "未运行"], ["Connector Gate", "已阻断"], ["人工批准", "未完成"]])}
+      </div>
+      <div class="commerce-provider-readiness-note">
+        <p>该面板只是接入准备总览，不会打开任何 connector。当前不会访问 eBay 或任何真实 provider，不会读取 API key，不会连接 endpoint，不会发起网络请求，不会返回商品、价格或跳转链接。</p>
+      </div>
+    </section>`;
+  }
+
   function commerceReadOnlyConnectorStubHomePanel(){
     const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
     const group = (title, items) => `<section class="commerce-stub-group"><h4>${esc(title)}</h4><ul>${items.map((item) => row(item[0], item[1])).join("")}</ul></section>`;
@@ -635,6 +656,7 @@
         ${!blocked && isFlightPlan && dateCondition ? `<p><b>日期：</b>${esc(dateCondition)}</p>` : ""}
         ${blocked ? `<p><b>原因：</b>涉及下单 / 付款 / 敏感资料或询价提交</p>` : ""}
         ${!blocked && localLawPanelRequired ? commerceLocalLawHomePanel(stored) : ""}
+        ${showOnboardingHomePanel ? commerceProviderIntegrationReadinessHomePanel(stored.providerIntegrationReadiness || stored.configHealth && stored.configHealth.providerIntegrationReadiness || {}) : ""}
         ${showOnboardingHomePanel ? commerceProviderSecretStorageHomePanel(stored.providerSecretHealth || stored.configHealth && stored.configHealth.providerSecretHealth || {}) : ""}
         ${showOnboardingHomePanel ? commerceProviderSandboxDryRunHomePanel(stored.providerSandboxDryRunHealth || stored.configHealth && stored.configHealth.providerSandboxDryRunHealth || {}) : ""}
         ${showOnboardingHomePanel ? commerceConnectorGateHomePanel(stored.connectorGateHealth || stored.configHealth && stored.configHealth.connectorGateHealth || {}) : ""}

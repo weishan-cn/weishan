@@ -72,6 +72,10 @@
     return window.WeishanCommerceConnectorGate || null;
   }
 
+  function integrationReadinessApi(){
+    return window.WeishanCommerceProviderIntegrationReadiness || null;
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
@@ -244,6 +248,58 @@
     };
   }
 
+  function providerIntegrationReadiness(providerId, providerHealth){
+    const api = integrationReadinessApi();
+    if (api && api.getProviderIntegrationReadiness) return api.getProviderIntegrationReadiness(providerId || "provider-disabled", providerHealth || {});
+    return {
+      readinessVersion:"2.0.47",
+      phase:"provider_integration_readiness_summary",
+      providerId:String(providerId || "provider-disabled"),
+      defaultStatus:"not_ready",
+      readinessStatus:"not_ready",
+      summaryMode:"pre_connection_readiness",
+      canConnectProvider:false,
+      canUseApiKey:false,
+      canUseNetwork:false,
+      canReturnRealResults:false,
+      canDisplayRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      canCheckout:false,
+      canPay:false,
+      canSubmitOrder:false,
+      canStoreIdentity:false,
+      reason:"provider_integration_not_ready",
+      gates:{
+        globalCommerceStandard:"required",
+        localLawCompliance:"not_verified",
+        providerOnboarding:"not_completed",
+        providerApproval:"not_reviewed",
+        readOnlyConnectorStub:"not_ready",
+        providerStubProfile:"profile_only_not_connected",
+        secretStorage:"not_configured",
+        sandboxDryRun:"not_run",
+        connectorGate:"blocked",
+        humanApproval:"not_granted"
+      },
+      safety:{
+        noRealEndpoint:true,
+        noRealApiKey:true,
+        noNetworkSearch:true,
+        noRealResults:true,
+        noRealPrice:true,
+        noFakeDemoMockPrice:true,
+        noRedirect:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true,
+        noRawGpsStorage:true,
+        noBypassLocalLaw:true
+      }
+    };
+  }
+
   function poolReadiness(){
     const api = poolApi();
     if (api && api.getCommerceGlobalProviderPoolReadiness) return api.getCommerceGlobalProviderPoolReadiness();
@@ -351,9 +407,14 @@
     const providerId = next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled";
     const approval = approvalStatus(next, providerId);
     const gate = connectorGateStatus(providerId);
+    const readiness = providerIntegrationReadiness(providerId, { connectorGateHealth:gate });
     return Object.assign({
       providerId,
       category:next,
+      providerIntegrationReadiness:readiness,
+      providerIntegrationReadinessStatus:readiness.readinessStatus || "not_ready",
+      providerIntegrationSummaryMode:readiness.summaryMode || "pre_connection_readiness",
+      canProceedToProviderIntegration:false,
       approvalStatus:approval.approvalStatus || "not_reviewed",
       providerApprovalRequired:true,
       canRequestApproval:approval.canRequestApproval !== false,
@@ -459,6 +520,10 @@
       connectorGateStatus:next.connectorGateStatus || next.connectorGateHealth && next.connectorGateHealth.connectorGateStatus || "blocked",
       connectorGateMode:next.connectorGateMode || next.connectorGateHealth && next.connectorGateHealth.gateMode || "final_pre_connection_gate",
       canOpenCommerceConnector:next.canOpenCommerceConnector === true,
+      providerIntegrationReadiness:next.providerIntegrationReadiness || providerIntegrationReadiness(next.selectedFirstCandidate || next.providerId, next),
+      providerIntegrationReadinessStatus:next.providerIntegrationReadinessStatus || next.providerIntegrationReadiness && next.providerIntegrationReadiness.readinessStatus || "not_ready",
+      providerIntegrationSummaryMode:next.providerIntegrationSummaryMode || next.providerIntegrationReadiness && next.providerIntegrationReadiness.summaryMode || "pre_connection_readiness",
+      canProceedToProviderIntegration:false,
       globalProviderPoolReadiness:next.globalProviderPoolReadiness || poolReadiness(),
       onboardingStatus:next.onboardingStatus || "not_reviewed",
       providerOnboardingRequired:next.providerOnboardingRequired !== false,
@@ -628,6 +693,7 @@
     const approval = approvalStatus(next, config.providerId);
     const stub = connectorStubStatus(next, config.providerId, approval);
     const gate = config.connectorGateHealth || connectorGateStatus(config.selectedFirstCandidate || config.providerId);
+    const readiness = config.providerIntegrationReadiness || providerIntegrationReadiness(config.selectedFirstCandidate || config.providerId, config);
     const isProduct = next === "product";
     const productDefaults = isProduct ? productSafetySwitches() : {};
     const candidate = isProduct ? productCandidateReadiness() : null;
@@ -674,6 +740,10 @@
       connectorGateMode:gate.gateMode || "final_pre_connection_gate",
       canOpenCommerceConnector:gate.canOpenConnector === true,
       connectorGateHealth:gate,
+      providerIntegrationReadiness:readiness,
+      providerIntegrationReadinessStatus:readiness.readinessStatus || "not_ready",
+      providerIntegrationSummaryMode:readiness.summaryMode || "pre_connection_readiness",
+      canProceedToProviderIntegration:false,
       enabled:false,
       configured:false,
       environment:"renderer",
@@ -826,6 +896,7 @@
     const provider = manualProvider || defaultProvider(next);
     const hasProvider = provider.enabled === true && provider.configured === true;
     const canShowPrice = hasProvider && provider.supportsPrice === true;
+    const integrationReadiness = provider.providerIntegrationReadiness || provider.configHealth && provider.configHealth.providerIntegrationReadiness || providerIntegrationReadiness(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id, provider);
     return {
       category:next,
       categoryLabel:CATEGORY_LABELS[next] || "采购",
@@ -842,6 +913,10 @@
       providerSecretHealth:provider.providerSecretHealth || provider.configHealth && provider.configHealth.providerSecretHealth || providerSecretStorageStatus(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id),
       providerSandboxDryRunHealth:provider.providerSandboxDryRunHealth || provider.configHealth && provider.configHealth.providerSandboxDryRunHealth || providerSandboxDryRunStatus(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id),
       connectorGateHealth:provider.connectorGateHealth || provider.configHealth && provider.configHealth.connectorGateHealth || connectorGateStatus(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id),
+      providerIntegrationReadiness:integrationReadiness,
+      providerIntegrationReadinessStatus:integrationReadiness.readinessStatus || "not_ready",
+      providerIntegrationSummaryMode:integrationReadiness.summaryMode || "pre_connection_readiness",
+      canProceedToProviderIntegration:false,
       sandboxHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
       dryRunHealth:provider.providerSandboxDryRunHealth || provider.configHealth && provider.configHealth.providerSandboxDryRunHealth || providerSandboxDryRunStatus(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id),
       enabled:provider.enabled === true,
@@ -857,6 +932,7 @@
     normalizeCategory,
     getCommerceProviderRegistry,
     getCommerceProviderHealth,
-    getCommerceConnectorGateStatus:connectorGateStatus
+    getCommerceConnectorGateStatus:connectorGateStatus,
+    getProviderIntegrationReadiness:providerIntegrationReadiness
   };
 })();

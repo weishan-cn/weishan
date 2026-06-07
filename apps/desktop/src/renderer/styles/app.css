@@ -2153,6 +2153,121 @@
   }
 }
 
+.commerce-provider-readiness-panel{
+  display:grid;
+  gap:12px;
+  padding:14px;
+  margin:12px 0;
+  border:1px solid #86efac;
+  border-radius:12px;
+  background:#f0fdf4;
+  color:#0f172a;
+  box-shadow:0 10px 24px rgba(22,101,52,.08);
+}
+.commerce-provider-readiness-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid #bbf7d0;
+}
+.commerce-provider-readiness-head h3{
+  margin:0 0 4px;
+  font-size:17px;
+  line-height:1.25;
+  color:#166534;
+}
+.commerce-provider-readiness-head p{
+  margin:0;
+  color:#14532d;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-provider-readiness-head strong{
+  flex:0 0 auto;
+  max-width:240px;
+  border:1px solid #4ade80;
+  border-radius:10px;
+  background:#dcfce7;
+  color:#166534;
+  padding:8px 10px;
+  font-size:13px;
+  line-height:1.4;
+}
+.commerce-provider-readiness-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-provider-readiness-group{
+  border:1px solid #bbf7d0;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+  display:grid;
+  gap:8px;
+}
+.commerce-provider-readiness-group h4{
+  margin:0;
+  color:#166534;
+  font-size:13px;
+  line-height:1.25;
+}
+.commerce-provider-readiness-group ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:7px 10px;
+}
+.commerce-provider-readiness-group li{
+  display:grid;
+  gap:3px;
+  font-size:12px;
+  line-height:1.45;
+}
+.commerce-provider-readiness-group li span{
+  color:#14532d;
+  font-weight:900;
+}
+.commerce-provider-readiness-group li b{
+  color:#0f172a;
+  font-size:12px;
+  font-weight:900;
+}
+.commerce-provider-readiness-note{
+  display:grid;
+  gap:6px;
+  padding:10px;
+  border:1px solid #4ade80;
+  border-radius:10px;
+  background:#dcfce7;
+  color:#14532d;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-provider-readiness-note p{
+  margin:0;
+}
+@media (max-width: 1180px){
+  .commerce-provider-readiness-grid,
+  .commerce-provider-readiness-group ul{
+    grid-template-columns:1fr;
+  }
+}
+@media (max-width: 760px){
+  .commerce-provider-readiness-head{
+    display:grid;
+  }
+  .commerce-provider-readiness-head strong{
+    max-width:none;
+  }
+}
+
 .commerce-connector-gate-panel{
   display:grid;
   gap:12px;

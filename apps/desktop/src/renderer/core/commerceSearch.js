@@ -89,6 +89,10 @@
     return window.WeishanCommerceConnectorGate || null;
   }
 
+  function integrationReadinessApi(){
+    return window.WeishanCommerceProviderIntegrationReadiness || null;
+  }
+
   function localLawApi(){
     return window.WeishanCommerceLocalLawCompliance || null;
   }
@@ -495,6 +499,59 @@
     };
   }
 
+  function getProviderIntegrationReadiness(providerId, providerHealth){
+    const api = integrationReadinessApi();
+    if (api && api.getProviderIntegrationReadiness) return api.getProviderIntegrationReadiness(providerId || "provider-disabled", providerHealth || {});
+    if (configApi() && configApi().getProviderIntegrationReadiness) return configApi().getProviderIntegrationReadiness(providerId || "provider-disabled", providerHealth || {});
+    return {
+      readinessVersion:"2.0.47",
+      phase:"provider_integration_readiness_summary",
+      providerId:String(providerId || "provider-disabled"),
+      defaultStatus:"not_ready",
+      readinessStatus:"not_ready",
+      summaryMode:"pre_connection_readiness",
+      canConnectProvider:false,
+      canUseApiKey:false,
+      canUseNetwork:false,
+      canReturnRealResults:false,
+      canDisplayRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      canCheckout:false,
+      canPay:false,
+      canSubmitOrder:false,
+      canStoreIdentity:false,
+      reason:"provider_integration_not_ready",
+      gates:{
+        globalCommerceStandard:"required",
+        localLawCompliance:"not_verified",
+        providerOnboarding:"not_completed",
+        providerApproval:"not_reviewed",
+        readOnlyConnectorStub:"not_ready",
+        providerStubProfile:"profile_only_not_connected",
+        secretStorage:"not_configured",
+        sandboxDryRun:"not_run",
+        connectorGate:"blocked",
+        humanApproval:"not_granted"
+      },
+      safety:{
+        noRealEndpoint:true,
+        noRealApiKey:true,
+        noNetworkSearch:true,
+        noRealResults:true,
+        noRealPrice:true,
+        noFakeDemoMockPrice:true,
+        noRedirect:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true,
+        noRawGpsStorage:true,
+        noBypassLocalLaw:true
+      }
+    };
+  }
+
   function defaultConfig(category, settings){
     const api = configApi();
     if (api && api.getCommerceProviderConfig) return api.getCommerceProviderConfig(category, settings);
@@ -507,6 +564,7 @@
     const stub = connectorStubFields(getReadOnlyConnectorStubStatus(next, next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled", approval));
     const dryRun = providerSandboxDryRunFields(getProviderSandboxDryRunStatus(next === "product" ? "ebay_browse_api" : next + "-provider-disabled"));
     const connectorGate = connectorGateFields(getCommerceConnectorGateStatus(next === "product" ? "ebay_browse_api" : next + "-provider-disabled"));
+    const integrationReadiness = providerIntegrationReadinessFields(getProviderIntegrationReadiness(next === "product" ? "ebay_browse_api" : next + "-provider-disabled", { connectorGateHealth:connectorGate }));
     return Object.assign({
       providerId:next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled",
       category:next,
@@ -563,6 +621,10 @@
       connectorGateStatus:connectorGate.connectorGateStatus,
       connectorGateMode:connectorGate.gateMode,
       canOpenCommerceConnector:false,
+      providerIntegrationReadiness:integrationReadiness,
+      providerIntegrationReadinessStatus:integrationReadiness.readinessStatus,
+      providerIntegrationSummaryMode:integrationReadiness.summaryMode,
+      canProceedToProviderIntegration:false,
       globalProviderPoolReadiness:pool || undefined,
       approvalHealth:approval,
       connectorStubHealth:stub,
@@ -642,6 +704,10 @@
       connectorGateStatus:next.connectorGateStatus || next.connectorGateHealth && next.connectorGateHealth.connectorGateStatus || "blocked",
       connectorGateMode:next.connectorGateMode || next.connectorGateHealth && next.connectorGateHealth.gateMode || "final_pre_connection_gate",
       canOpenCommerceConnector:next.canOpenCommerceConnector === true,
+      providerIntegrationReadiness:next.providerIntegrationReadiness || getProviderIntegrationReadiness(next.selectedFirstCandidate || next.providerId, next),
+      providerIntegrationReadinessStatus:next.providerIntegrationReadinessStatus || next.providerIntegrationReadiness && next.providerIntegrationReadiness.readinessStatus || "not_ready",
+      providerIntegrationSummaryMode:next.providerIntegrationSummaryMode || next.providerIntegrationReadiness && next.providerIntegrationReadiness.summaryMode || "pre_connection_readiness",
+      canProceedToProviderIntegration:false,
       globalProviderPoolReadiness:next.globalProviderPoolReadiness || getGlobalProviderPoolReadiness()
     };
   }
@@ -898,6 +964,74 @@
         canPay:false,
         canSubmitOrder:false,
         canStoreIdentity:false
+      },
+      safety:{
+        noRealEndpoint:safety.noRealEndpoint !== false,
+        noRealApiKey:safety.noRealApiKey !== false,
+        noNetworkSearch:safety.noNetworkSearch !== false,
+        noRealResults:safety.noRealResults !== false,
+        noRealPrice:safety.noRealPrice !== false,
+        noFakeDemoMockPrice:safety.noFakeDemoMockPrice !== false,
+        noRedirect:safety.noRedirect !== false,
+        noCheckout:safety.noCheckout !== false,
+        noPayment:safety.noPayment !== false,
+        noOrderSubmit:safety.noOrderSubmit !== false,
+        noIdentityStorage:safety.noIdentityStorage !== false,
+        noRawGpsStorage:safety.noRawGpsStorage !== false,
+        noBypassLocalLaw:safety.noBypassLocalLaw !== false
+      }
+    };
+  }
+
+  function providerIntegrationReadinessFields(readiness){
+    const next = readiness || {};
+    const overall = next.overall || {};
+    const gates = next.gates || {};
+    const safety = next.safety || {};
+    return {
+      readinessVersion:next.readinessVersion || "2.0.47",
+      phase:next.phase || "provider_integration_readiness_summary",
+      providerId:next.providerId || "provider-disabled",
+      defaultStatus:next.defaultStatus || "not_ready",
+      readinessStatus:next.readinessStatus || "not_ready",
+      summaryMode:next.summaryMode || "pre_connection_readiness",
+      canConnectProvider:false,
+      canUseApiKey:false,
+      canUseNetwork:false,
+      canReturnRealResults:false,
+      canDisplayRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      canCheckout:false,
+      canPay:false,
+      canSubmitOrder:false,
+      canStoreIdentity:false,
+      reason:next.reason || "provider_integration_not_ready",
+      overall:{
+        canConnectProvider:overall.canConnectProvider === true && false,
+        canUseApiKey:overall.canUseApiKey === true && false,
+        canUseNetwork:overall.canUseNetwork === true && false,
+        canReturnRealResults:overall.canReturnRealResults === true && false,
+        canDisplayRealPrice:overall.canDisplayRealPrice === true && false,
+        canReturnMockPrice:overall.canReturnMockPrice === true && false,
+        canRedirect:overall.canRedirect === true && false,
+        canCheckout:overall.canCheckout === true && false,
+        canPay:overall.canPay === true && false,
+        canSubmitOrder:overall.canSubmitOrder === true && false,
+        canStoreIdentity:overall.canStoreIdentity === true && false,
+        reason:overall.reason || "provider_integration_not_ready"
+      },
+      gates:{
+        globalCommerceStandard:gates.globalCommerceStandard || "required",
+        localLawCompliance:gates.localLawCompliance || "not_verified",
+        providerOnboarding:gates.providerOnboarding || "not_completed",
+        providerApproval:gates.providerApproval || "not_reviewed",
+        readOnlyConnectorStub:gates.readOnlyConnectorStub || "not_ready",
+        providerStubProfile:gates.providerStubProfile || "profile_only_not_connected",
+        secretStorage:gates.secretStorage || "not_configured",
+        sandboxDryRun:gates.sandboxDryRun || "not_run",
+        connectorGate:gates.connectorGate || "blocked",
+        humanApproval:gates.humanApproval || "not_granted"
       },
       safety:{
         noRealEndpoint:safety.noRealEndpoint !== false,
@@ -1265,6 +1399,7 @@
     const secret = providerSecretFields(providerConfig && providerConfig.providerSecretHealth || getProviderSecretStorageStatus(profile.providerId));
     const sandboxDryRun = providerSandboxDryRunFields(providerConfig && providerConfig.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile.providerId));
     const connectorGate = connectorGateFields(providerConfig && providerConfig.connectorGateHealth || getCommerceConnectorGateStatus(profile.providerId));
+    const integrationReadiness = providerIntegrationReadinessFields(providerConfig && providerConfig.providerIntegrationReadiness || getProviderIntegrationReadiness(profile.providerId, { connectorGateHealth:connectorGate }));
     return {
       ok:false,
       code:"COMMERCE_PRODUCT_PROVIDER_NOT_CONNECTED",
@@ -1282,6 +1417,10 @@
       providerSecretHealth:secret,
       providerSandboxDryRunHealth:sandboxDryRun,
       connectorGateHealth:connectorGate,
+      providerIntegrationReadiness:integrationReadiness,
+      providerIntegrationReadinessStatus:integrationReadiness.readinessStatus,
+      providerIntegrationSummaryMode:integrationReadiness.summaryMode,
+      canProceedToProviderIntegration:false,
       sandboxHealth:sandbox,
       dryRunHealth:sandboxDryRun,
       productProviderReadiness:readiness,
@@ -1301,6 +1440,7 @@
     const secret = providerSecretFields(providerConfig && providerConfig.providerSecretHealth || getProviderSecretStorageStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     const sandboxDryRun = providerSandboxDryRunFields(providerConfig && providerConfig.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     const connectorGate = connectorGateFields(providerConfig && providerConfig.connectorGateHealth || getCommerceConnectorGateStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
+    const integrationReadiness = providerIntegrationReadinessFields(providerConfig && providerConfig.providerIntegrationReadiness || getProviderIntegrationReadiness(profile && profile.providerId || providerConfig && providerConfig.providerId, { connectorGateHealth:connectorGate }));
     return {
       ok:false,
       code:"COMMERCE_PROVIDER_APPROVAL_REQUIRED",
@@ -1318,6 +1458,10 @@
       providerSecretHealth:secret,
       providerSandboxDryRunHealth:sandboxDryRun,
       connectorGateHealth:connectorGate,
+      providerIntegrationReadiness:integrationReadiness,
+      providerIntegrationReadinessStatus:integrationReadiness.readinessStatus,
+      providerIntegrationSummaryMode:integrationReadiness.summaryMode,
+      canProceedToProviderIntegration:false,
       sandboxHealth:sandbox,
       dryRunHealth:sandboxDryRun,
       canShowPrice:false,
@@ -1335,6 +1479,7 @@
     const secret = providerSecretFields(providerConfig && providerConfig.providerSecretHealth || getProviderSecretStorageStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     const sandboxDryRun = providerSandboxDryRunFields(providerConfig && providerConfig.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     const connectorGate = connectorGateFields(providerConfig && providerConfig.connectorGateHealth || getCommerceConnectorGateStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
+    const integrationReadiness = providerIntegrationReadinessFields(providerConfig && providerConfig.providerIntegrationReadiness || getProviderIntegrationReadiness(profile && profile.providerId || providerConfig && providerConfig.providerId, { connectorGateHealth:connectorGate }));
     return {
       ok:false,
       code:"COMMERCE_READ_ONLY_CONNECTOR_STUB_REQUIRED",
@@ -1352,6 +1497,10 @@
       providerSecretHealth:secret,
       providerSandboxDryRunHealth:sandboxDryRun,
       connectorGateHealth:connectorGate,
+      providerIntegrationReadiness:integrationReadiness,
+      providerIntegrationReadinessStatus:integrationReadiness.readinessStatus,
+      providerIntegrationSummaryMode:integrationReadiness.summaryMode,
+      canProceedToProviderIntegration:false,
       sandboxHealth:sandbox,
       dryRunHealth:sandboxDryRun,
       canShowPrice:false,
@@ -1369,6 +1518,7 @@
     const secret = providerSecretFields(secretHealth || getProviderSecretStorageStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     const sandboxDryRun = providerSandboxDryRunFields(providerConfig && providerConfig.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     const connectorGate = connectorGateFields(providerConfig && providerConfig.connectorGateHealth || getCommerceConnectorGateStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
+    const integrationReadiness = providerIntegrationReadinessFields(providerConfig && providerConfig.providerIntegrationReadiness || getProviderIntegrationReadiness(profile && profile.providerId || providerConfig && providerConfig.providerId, { connectorGateHealth:connectorGate }));
     return {
       ok:false,
       code:"COMMERCE_PROVIDER_SECRET_STORAGE_REQUIRED",
@@ -1386,6 +1536,10 @@
       providerSecretHealth:secret,
       providerSandboxDryRunHealth:sandboxDryRun,
       connectorGateHealth:connectorGate,
+      providerIntegrationReadiness:integrationReadiness,
+      providerIntegrationReadinessStatus:integrationReadiness.readinessStatus,
+      providerIntegrationSummaryMode:integrationReadiness.summaryMode,
+      canProceedToProviderIntegration:false,
       sandboxHealth:sandbox,
       dryRunHealth:sandboxDryRun,
       canShowPrice:false,
@@ -1403,6 +1557,7 @@
     const secret = providerSecretFields(secretHealth || getProviderSecretStorageStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     const sandboxDryRun = providerSandboxDryRunFields(dryRunHealth || providerConfig && providerConfig.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     const connectorGate = connectorGateFields(providerConfig && providerConfig.connectorGateHealth || getCommerceConnectorGateStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
+    const integrationReadiness = providerIntegrationReadinessFields(providerConfig && providerConfig.providerIntegrationReadiness || getProviderIntegrationReadiness(profile && profile.providerId || providerConfig && providerConfig.providerId, { connectorGateHealth:connectorGate }));
     return {
       ok:false,
       code:"COMMERCE_PROVIDER_SANDBOX_DRY_RUN_REQUIRED",
@@ -1420,6 +1575,10 @@
       providerSecretHealth:secret,
       providerSandboxDryRunHealth:sandboxDryRun,
       connectorGateHealth:connectorGate,
+      providerIntegrationReadiness:integrationReadiness,
+      providerIntegrationReadinessStatus:integrationReadiness.readinessStatus,
+      providerIntegrationSummaryMode:integrationReadiness.summaryMode,
+      canProceedToProviderIntegration:false,
       sandboxHealth:sandbox,
       dryRunHealth:sandboxDryRun,
       canShowPrice:false,
@@ -1437,6 +1596,7 @@
     const secret = providerSecretFields(secretHealth || getProviderSecretStorageStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     const sandboxDryRun = providerSandboxDryRunFields(dryRunHealth || providerConfig && providerConfig.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     const connectorGate = connectorGateFields(gateHealth || providerConfig && providerConfig.connectorGateHealth || getCommerceConnectorGateStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
+    const integrationReadiness = providerIntegrationReadinessFields(providerConfig && providerConfig.providerIntegrationReadiness || getProviderIntegrationReadiness(profile && profile.providerId || providerConfig && providerConfig.providerId, { connectorGateHealth:connectorGate }));
     return {
       ok:false,
       code:"COMMERCE_CONNECTOR_GATE_REQUIRED",
@@ -1454,6 +1614,10 @@
       providerSecretHealth:secret,
       providerSandboxDryRunHealth:sandboxDryRun,
       connectorGateHealth:connectorGate,
+      providerIntegrationReadiness:integrationReadiness,
+      providerIntegrationReadinessStatus:integrationReadiness.readinessStatus,
+      providerIntegrationSummaryMode:integrationReadiness.summaryMode,
+      canProceedToProviderIntegration:false,
       sandboxHealth:sandbox,
       dryRunHealth:sandboxDryRun,
       canShowPrice:false,
@@ -1472,6 +1636,7 @@
     const secret = providerSecretFields(providerConfig && providerConfig.providerSecretHealth || getProviderSecretStorageStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     const sandboxDryRun = providerSandboxDryRunFields(providerConfig && providerConfig.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     const connectorGate = connectorGateFields(providerConfig && providerConfig.connectorGateHealth || getCommerceConnectorGateStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
+    const integrationReadiness = providerIntegrationReadinessFields(providerConfig && providerConfig.providerIntegrationReadiness || getProviderIntegrationReadiness(profile && profile.providerId || providerConfig && providerConfig.providerId, { connectorGateHealth:connectorGate }));
     return {
       ok:false,
       code:"COMMERCE_LOCAL_LAW_COMPLIANCE_REQUIRED",
@@ -1489,6 +1654,10 @@
       providerSecretHealth:secret,
       providerSandboxDryRunHealth:sandboxDryRun,
       connectorGateHealth:connectorGate,
+      providerIntegrationReadiness:integrationReadiness,
+      providerIntegrationReadinessStatus:integrationReadiness.readinessStatus,
+      providerIntegrationSummaryMode:integrationReadiness.summaryMode,
+      canProceedToProviderIntegration:false,
       sandboxHealth:sandbox,
       dryRunHealth:sandboxDryRun,
       locationHealth:locationHealth(),
@@ -1509,6 +1678,7 @@
     const secret = providerSecretFields(providerConfig && providerConfig.providerSecretHealth || getProviderSecretStorageStatus(profile.providerId));
     const sandboxDryRun = providerSandboxDryRunFields(providerConfig && providerConfig.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile.providerId));
     const connectorGate = connectorGateFields(providerConfig && providerConfig.connectorGateHealth || getCommerceConnectorGateStatus(profile.providerId));
+    const integrationReadiness = providerIntegrationReadinessFields(providerConfig && providerConfig.providerIntegrationReadiness || getProviderIntegrationReadiness(profile.providerId, { connectorGateHealth:connectorGate }));
     return {
       ok:false,
       code:"COMMERCE_SHIPPING_DESTINATION_REQUIRED",
@@ -1526,6 +1696,10 @@
       providerSecretHealth:secret,
       providerSandboxDryRunHealth:sandboxDryRun,
       connectorGateHealth:connectorGate,
+      providerIntegrationReadiness:integrationReadiness,
+      providerIntegrationReadinessStatus:integrationReadiness.readinessStatus,
+      providerIntegrationSummaryMode:integrationReadiness.summaryMode,
+      canProceedToProviderIntegration:false,
       sandboxHealth:sandbox,
       dryRunHealth:sandboxDryRun,
       locationHealth:health,
@@ -1613,6 +1787,7 @@
     const sandbox = sandboxFields(next, settings, config, connector);
     const sandboxDryRun = providerSandboxDryRunFields(config.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile && profile.providerId || config.providerId || next + "-provider-disabled"));
     const connectorGate = connectorGateFields(config.connectorGateHealth || getCommerceConnectorGateStatus(profile && profile.providerId || config.providerId || next + "-provider-disabled"));
+    const integrationReadiness = providerIntegrationReadinessFields(config.providerIntegrationReadiness || getProviderIntegrationReadiness(profile && profile.providerId || config.providerId || next + "-provider-disabled", { connectorGateHealth:connectorGate }));
     return {
       category:next,
       categoryLabel:isProduct ? "商品" : next === "flight" ? "机票" : next,
@@ -1688,6 +1863,10 @@
         providerStubProfileHealth:profile,
         providerSandboxDryRunHealth:sandboxDryRun,
         connectorGateHealth:connectorGate,
+        providerIntegrationReadiness:integrationReadiness,
+        providerIntegrationReadinessStatus:integrationReadiness.readinessStatus,
+        providerIntegrationSummaryMode:integrationReadiness.summaryMode,
+        canProceedToProviderIntegration:false,
         sandboxHealth:sandbox
       }],
       adapterHealth:{
@@ -1704,6 +1883,10 @@
       providerStubProfileHealth:profile,
       providerSandboxDryRunHealth:sandboxDryRun,
       connectorGateHealth:connectorGate,
+      providerIntegrationReadiness:integrationReadiness,
+      providerIntegrationReadinessStatus:integrationReadiness.readinessStatus,
+      providerIntegrationSummaryMode:integrationReadiness.summaryMode,
+      canProceedToProviderIntegration:false,
       sandboxHealth:sandbox,
       dryRunHealth:sandboxDryRun,
       enabled:configured && configReady && connectorReady,
@@ -2378,6 +2561,7 @@
     const providerSecretHealth = providerSecretFields(providerConfig && providerConfig.providerSecretHealth || providerHealth && providerHealth.providerSecretHealth || getProviderSecretStorageStatus(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId));
     const providerSandboxDryRunHealth = providerSandboxDryRunFields(providerConfig && providerConfig.providerSandboxDryRunHealth || providerHealth && providerHealth.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId));
     const connectorGateHealth = connectorGateFields(providerConfig && providerConfig.connectorGateHealth || providerHealth && providerHealth.connectorGateHealth || getCommerceConnectorGateStatus(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId));
+    const providerIntegrationReadiness = providerIntegrationReadinessFields(providerConfig && providerConfig.providerIntegrationReadiness || providerHealth && providerHealth.providerIntegrationReadiness || getProviderIntegrationReadiness(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId, { connectorGateHealth }));
     const sandbox = getCommerceProviderSandbox(request.category, settings);
     const complianceHealth = !isAiModelPricingTask(request) ? evaluateLocalLawCompliance(request, { locationHealth:locationHealth() }) : null;
     if (complianceHealth && complianceHealth.canSearchProvider !== true) {
@@ -2427,6 +2611,10 @@
           providerSecretHealth:providerSecretFields(getProviderSecretStorageStatus(aiConfig && aiConfig.providerId || "aiModelPricing-provider-disabled")),
           providerSandboxDryRunHealth:providerSandboxDryRunFields(getProviderSandboxDryRunStatus(aiConfig && aiConfig.providerId || "aiModelPricing-provider-disabled")),
           connectorGateHealth:connectorGateFields(getCommerceConnectorGateStatus(aiConfig && aiConfig.providerId || "aiModelPricing-provider-disabled")),
+          providerIntegrationReadiness:providerIntegrationReadinessFields(aiConfig && aiConfig.providerIntegrationReadiness || getProviderIntegrationReadiness(aiConfig && aiConfig.providerId || "aiModelPricing-provider-disabled")),
+          providerIntegrationReadinessStatus:"not_ready",
+          providerIntegrationSummaryMode:"pre_connection_readiness",
+          canProceedToProviderIntegration:false,
           sandboxHealth:aiSandbox,
           dryRunHealth:providerSandboxDryRunFields(getProviderSandboxDryRunStatus(aiConfig && aiConfig.providerId || "aiModelPricing-provider-disabled")),
           canShowPrice:false,
@@ -2455,6 +2643,10 @@
         providerSecretHealth,
         providerSandboxDryRunHealth,
         connectorGateHealth,
+        providerIntegrationReadiness,
+        providerIntegrationReadinessStatus:providerIntegrationReadiness.readinessStatus,
+        providerIntegrationSummaryMode:providerIntegrationReadiness.summaryMode,
+        canProceedToProviderIntegration:false,
         sandboxHealth:sandbox,
         dryRunHealth:providerSandboxDryRunHealth,
         canShowPrice:false,
@@ -2479,6 +2671,10 @@
         providerSecretHealth,
         providerSandboxDryRunHealth,
         connectorGateHealth,
+        providerIntegrationReadiness,
+        providerIntegrationReadinessStatus:providerIntegrationReadiness.readinessStatus,
+        providerIntegrationSummaryMode:providerIntegrationReadiness.summaryMode,
+        canProceedToProviderIntegration:false,
         sandboxHealth:sandbox,
         dryRunHealth:providerSandboxDryRunHealth,
         canShowPrice:false,
@@ -2509,6 +2705,10 @@
         providerSecretHealth,
         providerSandboxDryRunHealth,
         connectorGateHealth,
+        providerIntegrationReadiness,
+        providerIntegrationReadinessStatus:providerIntegrationReadiness.readinessStatus,
+        providerIntegrationSummaryMode:providerIntegrationReadiness.summaryMode,
+        canProceedToProviderIntegration:false,
         sandboxHealth:Object.assign({}, sandbox, sandboxValidation),
         dryRunHealth:providerSandboxDryRunHealth,
         canShowPrice:candidates.length > 0,
@@ -2538,6 +2738,10 @@
       providerSecretHealth,
       providerSandboxDryRunHealth,
       connectorGateHealth,
+      providerIntegrationReadiness,
+      providerIntegrationReadinessStatus:providerIntegrationReadiness.readinessStatus,
+      providerIntegrationSummaryMode:providerIntegrationReadiness.summaryMode,
+      canProceedToProviderIntegration:false,
       sandboxHealth:sandbox,
       dryRunHealth:providerSandboxDryRunHealth,
       canShowPrice:false,
@@ -2564,6 +2768,7 @@
     getProviderSecretStorageStatus,
     getProviderSandboxDryRunStatus,
     getCommerceConnectorGateStatus,
+    getProviderIntegrationReadiness,
     locationHealthForCommerce:locationHealth,
     getLocalLawCompliancePolicy,
     evaluateLocalLawCompliance,

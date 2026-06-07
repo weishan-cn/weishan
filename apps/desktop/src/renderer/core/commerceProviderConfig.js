@@ -65,6 +65,10 @@
     return window.WeishanCommerceConnectorGate || null;
   }
 
+  function integrationReadinessApi(){
+    return window.WeishanCommerceProviderIntegrationReadiness || null;
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
@@ -237,6 +241,58 @@
     };
   }
 
+  function providerIntegrationReadiness(providerId, providerHealth){
+    const api = integrationReadinessApi();
+    if (api && api.getProviderIntegrationReadiness) return api.getProviderIntegrationReadiness(providerId || "provider-disabled", providerHealth || {});
+    return {
+      readinessVersion:"2.0.47",
+      phase:"provider_integration_readiness_summary",
+      providerId:String(providerId || "provider-disabled"),
+      defaultStatus:"not_ready",
+      readinessStatus:"not_ready",
+      summaryMode:"pre_connection_readiness",
+      canConnectProvider:false,
+      canUseApiKey:false,
+      canUseNetwork:false,
+      canReturnRealResults:false,
+      canDisplayRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      canCheckout:false,
+      canPay:false,
+      canSubmitOrder:false,
+      canStoreIdentity:false,
+      reason:"provider_integration_not_ready",
+      gates:{
+        globalCommerceStandard:"required",
+        localLawCompliance:"not_verified",
+        providerOnboarding:"not_completed",
+        providerApproval:"not_reviewed",
+        readOnlyConnectorStub:"not_ready",
+        providerStubProfile:"profile_only_not_connected",
+        secretStorage:"not_configured",
+        sandboxDryRun:"not_run",
+        connectorGate:"blocked",
+        humanApproval:"not_granted"
+      },
+      safety:{
+        noRealEndpoint:true,
+        noRealApiKey:true,
+        noNetworkSearch:true,
+        noRealResults:true,
+        noRealPrice:true,
+        noFakeDemoMockPrice:true,
+        noRedirect:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true,
+        noRawGpsStorage:true,
+        noBypassLocalLaw:true
+      }
+    };
+  }
+
   function poolReadiness(){
     const api = poolApi();
     if (api && api.getCommerceGlobalProviderPoolReadiness) return api.getCommerceGlobalProviderPoolReadiness();
@@ -344,9 +400,14 @@
     const secret = providerSecretStorageStatus(providerId);
     const dryRun = providerSandboxDryRunStatus(providerId);
     const gate = connectorGateStatus(providerId);
+    const readiness = providerIntegrationReadiness(providerId, { connectorGateHealth:gate });
     const base = {
       providerId,
       category:next,
+      providerIntegrationReadiness:readiness,
+      providerIntegrationReadinessStatus:readiness.readinessStatus || "not_ready",
+      providerIntegrationSummaryMode:readiness.summaryMode || "pre_connection_readiness",
+      canProceedToProviderIntegration:false,
       providerSecretHealth:secret,
       providerSecretStatus:secret.secretStatus || "not_configured",
       providerSecretStorageMode:secret.storageMode || "secure_storage_required",
@@ -424,6 +485,8 @@
       const candidate = productCandidateReadiness();
       const pool = poolReadiness();
       const profileHealth = providerStubProfileStatus(candidate.selectedFirstCandidate || "ebay_browse_api");
+      const productGate = connectorGateStatus(candidate.selectedFirstCandidate || "ebay_browse_api");
+      const productIntegrationReadiness = providerIntegrationReadiness(candidate.selectedFirstCandidate || "ebay_browse_api", { connectorGateHealth:productGate });
       return Object.assign({}, base, productSafetySwitches(), {
         connectorType:"readonly_product_search",
         connectorStatus:"not_connected",
@@ -444,11 +507,14 @@
         productProviderProfile:productProfile(),
         productProviderReadiness:productReadiness(),
         productProviderCandidateReadiness:candidate,
-      providerStubProfileHealth:profileHealth,
-      providerSecretHealth:providerSecretStorageStatus(candidate.selectedFirstCandidate || "ebay_browse_api"),
-      providerSandboxDryRunHealth:providerSandboxDryRunStatus(candidate.selectedFirstCandidate || "ebay_browse_api"),
-      connectorGateHealth:connectorGateStatus(candidate.selectedFirstCandidate || "ebay_browse_api"),
-      providerOnboardingStatus:onboardingStatus(next)
+        providerStubProfileHealth:profileHealth,
+        providerSecretHealth:providerSecretStorageStatus(candidate.selectedFirstCandidate || "ebay_browse_api"),
+        providerSandboxDryRunHealth:providerSandboxDryRunStatus(candidate.selectedFirstCandidate || "ebay_browse_api"),
+        connectorGateHealth:productGate,
+        providerIntegrationReadiness:productIntegrationReadiness,
+        providerIntegrationReadinessStatus:productIntegrationReadiness.readinessStatus || "not_ready",
+        providerIntegrationSummaryMode:productIntegrationReadiness.summaryMode || "pre_connection_readiness",
+        providerOnboardingStatus:onboardingStatus(next)
       });
     }
     return base;
@@ -563,9 +629,14 @@
     const approval = config.approvalHealth || approvalStatus(config.category, config.providerId);
     const stub = config.connectorStubHealth || connectorStubStatus(config.category, config.providerId, approval);
     const gate = config.connectorGateHealth || connectorGateStatus(config.selectedFirstCandidate || config.providerId);
+    const readiness = config.providerIntegrationReadiness || providerIntegrationReadiness(config.selectedFirstCandidate || config.providerId, config);
     return {
       configStatus:ready ? "ready" : "not_configured",
       providerConfig:config,
+      providerIntegrationReadiness:readiness,
+      providerIntegrationReadinessStatus:readiness.readinessStatus || "not_ready",
+      providerIntegrationSummaryMode:readiness.summaryMode || "pre_connection_readiness",
+      canProceedToProviderIntegration:false,
       hasApiKey:config.hasApiKey === true,
       allowNetworkSearch:config.allowNetworkSearch === true,
       allowReturnPrice:config.allowReturnPrice === true,
@@ -646,6 +717,7 @@
     getProviderSecretStorageStatus:providerSecretStorageStatus,
     getProviderSandboxDryRunStatus:providerSandboxDryRunStatus,
     getCommerceConnectorGateStatus:connectorGateStatus,
+    getProviderIntegrationReadiness:providerIntegrationReadiness,
     getReadOnlyConnectorStubStatus:connectorStubStatus
   };
 })();

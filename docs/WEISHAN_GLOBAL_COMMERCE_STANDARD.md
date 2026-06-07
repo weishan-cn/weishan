@@ -265,6 +265,16 @@ Connector Gate 通过后也不得自动放开 checkout/payment/order，不得自
 
 用户 UI 只能显示自然语言 Connector Gate 状态，例如 “Gate 状态：已阻断”、“Connector：不可打开”、“Endpoint：不可连接”、“API key：不可使用”、“网络请求：未启用”。不得把 connector_gate_required、connectorGateStatus=blocked、canOpenConnector=false、canConnectEndpoint=false、canUseApiKey=false、canUseNetwork=false、canReturnRealResults=false、canReturnRealPrice=false、canReturnMockPrice=false、noRealEndpoint=true、noRealApiKey=true、noNetworkSearch=true 等 raw/internal 字段裸露给普通用户。
 
+## 7.8. Provider Integration Readiness Summary 标准
+
+Provider Integration Readiness Summary 是真实 provider 接入前的接入准备总览，只用于汇总所有前置 gate 的状态。不代表真实 provider 已接入。
+
+接入准备总览必须覆盖 Global Commerce Standard、Local Law Compliance Gate、Provider Onboarding Checklist、Provider Approval Workflow、Read-only Connector Stub、Provider Stub Profile、Provider Secret Storage Plan、Provider Sandbox Dry Run、Connector Gate 和人工批准。
+
+默认状态下，readiness 必须 not_ready。接入准备总览不得连接真实 endpoint，不得使用真实 API key，不得发起网络请求，不得返回真实商品结果，不得显示真实价格，不得返回 fake/demo/mock price，不得跳转购买，不得自动放开 connector，不得自动放开 checkout/payment/order。
+
+接入准备总览只能显示自然语言，例如 “总体状态：未准备好”、“真实 provider：不可接入”、“API key：不可使用”、“网络请求：未启用”、“真实结果：不可返回”、“真实价格：不可用”、“测试价格：不可用”、“精确跳转：未启用”。不得把 provider_integration_not_ready、readinessStatus=not_ready、canConnectProvider=false、canUseApiKey=false、canUseNetwork=false、canReturnRealResults=false、canDisplayRealPrice=false、canReturnMockPrice=false、noRealEndpoint=true、noRealApiKey=true、noNetworkSearch=true 等 raw/internal 字段裸露给普通用户。
+
 ## 8. 结果展示标准
 
 结果最多展示 2-3 条。
