@@ -1,5 +1,5 @@
 (function(){
-  const READINESS_VERSION = "2.0.47";
+  const READINESS_VERSION = "2.0.48";
   const PHASE = "provider_integration_readiness_summary";
   const DEFAULT_STATUS = "not_ready";
   const SUMMARY_MODE = "pre_connection_readiness";

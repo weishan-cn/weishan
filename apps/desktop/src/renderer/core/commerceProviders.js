@@ -76,6 +76,10 @@
     return window.WeishanCommerceProviderIntegrationReadiness || null;
   }
 
+  function integrationRunbookApi(){
+    return window.WeishanCommerceProviderIntegrationRunbook || null;
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
@@ -252,7 +256,7 @@
     const api = integrationReadinessApi();
     if (api && api.getProviderIntegrationReadiness) return api.getProviderIntegrationReadiness(providerId || "provider-disabled", providerHealth || {});
     return {
-      readinessVersion:"2.0.47",
+      readinessVersion:"2.0.48",
       phase:"provider_integration_readiness_summary",
       providerId:String(providerId || "provider-disabled"),
       defaultStatus:"not_ready",
@@ -297,6 +301,33 @@
         noRawGpsStorage:true,
         noBypassLocalLaw:true
       }
+    };
+  }
+
+  function providerIntegrationRunbook(providerId, providerHealth){
+    const api = integrationRunbookApi();
+    if (api && api.getProviderIntegrationRunbook) return api.getProviderIntegrationRunbook(providerId || "provider-disabled", providerHealth || {});
+    if (configApi() && configApi().getProviderIntegrationRunbook) return configApi().getProviderIntegrationRunbook(providerId || "provider-disabled", providerHealth || {});
+    return {
+      runbookVersion:"2.0.48",
+      phase:"provider_integration_manual_approval_runbook",
+      providerId:String(providerId || "provider-disabled"),
+      defaultStatus:"manual_approval_required",
+      runbookStatus:"manual_approval_required",
+      runbookMode:"pre_real_provider_connection",
+      canApproveRealProvider:false,
+      canConnectEndpoint:false,
+      canUseApiKey:false,
+      canUseNetwork:false,
+      canReturnRealResults:false,
+      canDisplayRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      canCheckout:false,
+      canPay:false,
+      canSubmitOrder:false,
+      canStoreIdentity:false,
+      reason:"provider_manual_approval_runbook_required"
     };
   }
 
@@ -408,6 +439,7 @@
     const approval = approvalStatus(next, providerId);
     const gate = connectorGateStatus(providerId);
     const readiness = providerIntegrationReadiness(providerId, { connectorGateHealth:gate });
+    const runbook = providerIntegrationRunbook(providerId, { providerIntegrationReadiness:readiness, connectorGateHealth:gate });
     return Object.assign({
       providerId,
       category:next,
@@ -415,6 +447,11 @@
       providerIntegrationReadinessStatus:readiness.readinessStatus || "not_ready",
       providerIntegrationSummaryMode:readiness.summaryMode || "pre_connection_readiness",
       canProceedToProviderIntegration:false,
+      providerIntegrationRunbook:runbook,
+      providerIntegrationRunbookStatus:runbook.runbookStatus || "manual_approval_required",
+      providerIntegrationRunbookMode:runbook.runbookMode || "pre_real_provider_connection",
+      canApproveProviderIntegration:false,
+      canProceedAfterManualApproval:false,
       approvalStatus:approval.approvalStatus || "not_reviewed",
       providerApprovalRequired:true,
       canRequestApproval:approval.canRequestApproval !== false,
@@ -694,6 +731,7 @@
     const stub = connectorStubStatus(next, config.providerId, approval);
     const gate = config.connectorGateHealth || connectorGateStatus(config.selectedFirstCandidate || config.providerId);
     const readiness = config.providerIntegrationReadiness || providerIntegrationReadiness(config.selectedFirstCandidate || config.providerId, config);
+    const runbook = config.providerIntegrationRunbook || providerIntegrationRunbook(config.selectedFirstCandidate || config.providerId, config);
     const isProduct = next === "product";
     const productDefaults = isProduct ? productSafetySwitches() : {};
     const candidate = isProduct ? productCandidateReadiness() : null;
@@ -744,6 +782,11 @@
       providerIntegrationReadinessStatus:readiness.readinessStatus || "not_ready",
       providerIntegrationSummaryMode:readiness.summaryMode || "pre_connection_readiness",
       canProceedToProviderIntegration:false,
+      providerIntegrationRunbook:runbook,
+      providerIntegrationRunbookStatus:runbook.runbookStatus || "manual_approval_required",
+      providerIntegrationRunbookMode:runbook.runbookMode || "pre_real_provider_connection",
+      canApproveProviderIntegration:false,
+      canProceedAfterManualApproval:false,
       enabled:false,
       configured:false,
       environment:"renderer",
@@ -897,6 +940,7 @@
     const hasProvider = provider.enabled === true && provider.configured === true;
     const canShowPrice = hasProvider && provider.supportsPrice === true;
     const integrationReadiness = provider.providerIntegrationReadiness || provider.configHealth && provider.configHealth.providerIntegrationReadiness || providerIntegrationReadiness(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id, provider);
+    const integrationRunbook = provider.providerIntegrationRunbook || provider.configHealth && provider.configHealth.providerIntegrationRunbook || providerIntegrationRunbook(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id, provider);
     return {
       category:next,
       categoryLabel:CATEGORY_LABELS[next] || "采购",
@@ -917,6 +961,11 @@
       providerIntegrationReadinessStatus:integrationReadiness.readinessStatus || "not_ready",
       providerIntegrationSummaryMode:integrationReadiness.summaryMode || "pre_connection_readiness",
       canProceedToProviderIntegration:false,
+      providerIntegrationRunbook:integrationRunbook,
+      providerIntegrationRunbookStatus:integrationRunbook.runbookStatus || "manual_approval_required",
+      providerIntegrationRunbookMode:integrationRunbook.runbookMode || "pre_real_provider_connection",
+      canApproveProviderIntegration:false,
+      canProceedAfterManualApproval:false,
       sandboxHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
       dryRunHealth:provider.providerSandboxDryRunHealth || provider.configHealth && provider.configHealth.providerSandboxDryRunHealth || providerSandboxDryRunStatus(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id),
       enabled:provider.enabled === true,
@@ -933,6 +982,7 @@
     getCommerceProviderRegistry,
     getCommerceProviderHealth,
     getCommerceConnectorGateStatus:connectorGateStatus,
-    getProviderIntegrationReadiness:providerIntegrationReadiness
+    getProviderIntegrationReadiness:providerIntegrationReadiness,
+    getProviderIntegrationRunbook:providerIntegrationRunbook
   };
 })();

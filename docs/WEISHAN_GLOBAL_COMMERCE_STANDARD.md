@@ -275,6 +275,18 @@ Provider Integration Readiness Summary 是真实 provider 接入前的接入准�
 
 接入准备总览只能显示自然语言，例如 “总体状态：未准备好”、“真实 provider：不可接入”、“API key：不可使用”、“网络请求：未启用”、“真实结果：不可返回”、“真实价格：不可用”、“测试价格：不可用”、“精确跳转：未启用”。不得把 provider_integration_not_ready、readinessStatus=not_ready、canConnectProvider=false、canUseApiKey=false、canUseNetwork=false、canReturnRealResults=false、canDisplayRealPrice=false、canReturnMockPrice=false、noRealEndpoint=true、noRealApiKey=true、noNetworkSearch=true 等 raw/internal 字段裸露给普通用户。
 
+## 7.9. Provider Integration Manual Approval Runbook 标准
+
+Provider Integration Manual Approval Runbook 是真实 provider 接入前的人工审批与运行手册。该手册不代表真实 provider 已接入，不代表真实 provider 已批准。
+
+人工审批与运行手册必须覆盖范围审查、Provider 条款审查、当地法律审查、隐私审查、API 文档审查、Endpoint 审查、API key 存储审查、请求 / 响应结构审查、频率限制审查、价格 / 税费 / 运费字段审查、跳转策略审查、不付款确认、不提交订单确认、不保存证件 / 银行卡确认、回滚方案审查和最终人工批准。
+
+任意审批阶段未完成时，不得连接真实 endpoint，不得使用真实 API key，不得发起网络请求，不得返回真实商品结果，不得显示真实价格，不得返回 fake/demo/mock price，不得跳转购买，不得自动放开 connector，不得自动放开 checkout/payment/order，不得自动付款，不得自动下单，不得提交订单，不得保存身份证、护照或银行卡。
+
+真正接入真实 provider 必须另起版本，经过单独 review、本地 commit、tag 前检查、annotated tag、push main、push tag、release:postcheck PASS 和实机 UI 验收。不得在建立运行手册的同一版本中放开真实 provider 连接。
+
+用户 UI 只能显示自然语言 Provider 接入人工审批手册状态，例如 “手册状态：需要人工审批”、“手册模式：真实接入前运行手册”、“真实 provider：不可批准”、“Endpoint：不可连接”、“API key：不可使用”、“网络请求：未启用”。不得把 provider_manual_approval_runbook_required、runbookStatus=manual_approval_required、canApproveRealProvider=false、canConnectEndpoint=false、canUseApiKey=false、canUseNetwork=false、canReturnRealResults=false、canDisplayRealPrice=false、canReturnMockPrice=false、noRealEndpoint=true、noRealApiKey=true、noNetworkSearch=true 等 raw/internal 字段裸露给普通用户。
+
 ## 8. 结果展示标准
 
 结果最多展示 2-3 条。

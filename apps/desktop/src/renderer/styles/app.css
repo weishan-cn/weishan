@@ -2268,6 +2268,121 @@
   }
 }
 
+.commerce-provider-runbook-panel{
+  display:grid;
+  gap:12px;
+  padding:14px;
+  margin:12px 0;
+  border:1px solid #fbbf24;
+  border-radius:12px;
+  background:#fffbeb;
+  color:#0f172a;
+  box-shadow:0 10px 24px rgba(146,64,14,.08);
+}
+.commerce-provider-runbook-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid #fde68a;
+}
+.commerce-provider-runbook-head h3{
+  margin:0 0 4px;
+  font-size:17px;
+  line-height:1.25;
+  color:#92400e;
+}
+.commerce-provider-runbook-head p{
+  margin:0;
+  color:#78350f;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-provider-runbook-head strong{
+  flex:0 0 auto;
+  max-width:250px;
+  border:1px solid #f59e0b;
+  border-radius:10px;
+  background:#fef3c7;
+  color:#92400e;
+  padding:8px 10px;
+  font-size:13px;
+  line-height:1.4;
+}
+.commerce-provider-runbook-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-provider-runbook-group{
+  border:1px solid #fde68a;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+  display:grid;
+  gap:8px;
+}
+.commerce-provider-runbook-group h4{
+  margin:0;
+  color:#92400e;
+  font-size:13px;
+  line-height:1.25;
+}
+.commerce-provider-runbook-group ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:7px 10px;
+}
+.commerce-provider-runbook-group li{
+  display:grid;
+  gap:3px;
+  font-size:12px;
+  line-height:1.45;
+}
+.commerce-provider-runbook-group li span{
+  color:#78350f;
+  font-weight:900;
+}
+.commerce-provider-runbook-group li b{
+  color:#0f172a;
+  font-size:12px;
+  font-weight:900;
+}
+.commerce-provider-runbook-note{
+  display:grid;
+  gap:6px;
+  padding:10px;
+  border:1px solid #f59e0b;
+  border-radius:10px;
+  background:#fef3c7;
+  color:#78350f;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-provider-runbook-note p{
+  margin:0;
+}
+@media (max-width: 1180px){
+  .commerce-provider-runbook-grid,
+  .commerce-provider-runbook-group ul{
+    grid-template-columns:1fr;
+  }
+}
+@media (max-width: 760px){
+  .commerce-provider-runbook-head{
+    display:grid;
+  }
+  .commerce-provider-runbook-head strong{
+    max-width:none;
+  }
+}
+
 .commerce-connector-gate-panel{
   display:grid;
   gap:12px;

@@ -93,6 +93,10 @@
     return window.WeishanCommerceProviderIntegrationReadiness || null;
   }
 
+  function integrationRunbookApi(){
+    return window.WeishanCommerceProviderIntegrationRunbook || null;
+  }
+
   function localLawApi(){
     return window.WeishanCommerceLocalLawCompliance || null;
   }
@@ -504,7 +508,7 @@
     if (api && api.getProviderIntegrationReadiness) return api.getProviderIntegrationReadiness(providerId || "provider-disabled", providerHealth || {});
     if (configApi() && configApi().getProviderIntegrationReadiness) return configApi().getProviderIntegrationReadiness(providerId || "provider-disabled", providerHealth || {});
     return {
-      readinessVersion:"2.0.47",
+      readinessVersion:"2.0.48",
       phase:"provider_integration_readiness_summary",
       providerId:String(providerId || "provider-disabled"),
       defaultStatus:"not_ready",
@@ -549,6 +553,34 @@
         noRawGpsStorage:true,
         noBypassLocalLaw:true
       }
+    };
+  }
+
+  function getProviderIntegrationRunbook(providerId, providerHealth){
+    const api = integrationRunbookApi();
+    if (api && api.getProviderIntegrationRunbook) return api.getProviderIntegrationRunbook(providerId || "provider-disabled", providerHealth || {});
+    if (configApi() && configApi().getProviderIntegrationRunbook) return configApi().getProviderIntegrationRunbook(providerId || "provider-disabled", providerHealth || {});
+    if (providersApi() && providersApi().getProviderIntegrationRunbook) return providersApi().getProviderIntegrationRunbook(providerId || "provider-disabled", providerHealth || {});
+    return {
+      runbookVersion:"2.0.48",
+      phase:"provider_integration_manual_approval_runbook",
+      providerId:String(providerId || "provider-disabled"),
+      defaultStatus:"manual_approval_required",
+      runbookStatus:"manual_approval_required",
+      runbookMode:"pre_real_provider_connection",
+      canApproveRealProvider:false,
+      canConnectEndpoint:false,
+      canUseApiKey:false,
+      canUseNetwork:false,
+      canReturnRealResults:false,
+      canDisplayRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      canCheckout:false,
+      canPay:false,
+      canSubmitOrder:false,
+      canStoreIdentity:false,
+      reason:"provider_manual_approval_runbook_required"
     };
   }
 
@@ -708,6 +740,11 @@
       providerIntegrationReadinessStatus:next.providerIntegrationReadinessStatus || next.providerIntegrationReadiness && next.providerIntegrationReadiness.readinessStatus || "not_ready",
       providerIntegrationSummaryMode:next.providerIntegrationSummaryMode || next.providerIntegrationReadiness && next.providerIntegrationReadiness.summaryMode || "pre_connection_readiness",
       canProceedToProviderIntegration:false,
+      providerIntegrationRunbook:next.providerIntegrationRunbook || getProviderIntegrationRunbook(next.selectedFirstCandidate || next.providerId, next),
+      providerIntegrationRunbookStatus:next.providerIntegrationRunbookStatus || next.providerIntegrationRunbook && next.providerIntegrationRunbook.runbookStatus || "manual_approval_required",
+      providerIntegrationRunbookMode:next.providerIntegrationRunbookMode || next.providerIntegrationRunbook && next.providerIntegrationRunbook.runbookMode || "pre_real_provider_connection",
+      canApproveProviderIntegration:false,
+      canProceedAfterManualApproval:false,
       globalProviderPoolReadiness:next.globalProviderPoolReadiness || getGlobalProviderPoolReadiness()
     };
   }
@@ -989,7 +1026,7 @@
     const gates = next.gates || {};
     const safety = next.safety || {};
     return {
-      readinessVersion:next.readinessVersion || "2.0.47",
+      readinessVersion:next.readinessVersion || "2.0.48",
       phase:next.phase || "provider_integration_readiness_summary",
       providerId:next.providerId || "provider-disabled",
       defaultStatus:next.defaultStatus || "not_ready",
@@ -2562,6 +2599,7 @@
     const providerSandboxDryRunHealth = providerSandboxDryRunFields(providerConfig && providerConfig.providerSandboxDryRunHealth || providerHealth && providerHealth.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId));
     const connectorGateHealth = connectorGateFields(providerConfig && providerConfig.connectorGateHealth || providerHealth && providerHealth.connectorGateHealth || getCommerceConnectorGateStatus(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId));
     const providerIntegrationReadiness = providerIntegrationReadinessFields(providerConfig && providerConfig.providerIntegrationReadiness || providerHealth && providerHealth.providerIntegrationReadiness || getProviderIntegrationReadiness(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId, { connectorGateHealth }));
+    const providerIntegrationRunbook = providerConfig && providerConfig.providerIntegrationRunbook || providerHealth && providerHealth.providerIntegrationRunbook || getProviderIntegrationRunbook(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId, { providerIntegrationReadiness, connectorGateHealth });
     const sandbox = getCommerceProviderSandbox(request.category, settings);
     const complianceHealth = !isAiModelPricingTask(request) ? evaluateLocalLawCompliance(request, { locationHealth:locationHealth() }) : null;
     if (complianceHealth && complianceHealth.canSearchProvider !== true) {
@@ -2615,6 +2653,11 @@
           providerIntegrationReadinessStatus:"not_ready",
           providerIntegrationSummaryMode:"pre_connection_readiness",
           canProceedToProviderIntegration:false,
+          providerIntegrationRunbook:getProviderIntegrationRunbook(aiConfig && aiConfig.providerId || "aiModelPricing-provider-disabled"),
+          providerIntegrationRunbookStatus:"manual_approval_required",
+          providerIntegrationRunbookMode:"pre_real_provider_connection",
+          canApproveProviderIntegration:false,
+          canProceedAfterManualApproval:false,
           sandboxHealth:aiSandbox,
           dryRunHealth:providerSandboxDryRunFields(getProviderSandboxDryRunStatus(aiConfig && aiConfig.providerId || "aiModelPricing-provider-disabled")),
           canShowPrice:false,
@@ -2647,6 +2690,11 @@
         providerIntegrationReadinessStatus:providerIntegrationReadiness.readinessStatus,
         providerIntegrationSummaryMode:providerIntegrationReadiness.summaryMode,
         canProceedToProviderIntegration:false,
+        providerIntegrationRunbook,
+        providerIntegrationRunbookStatus:providerIntegrationRunbook.runbookStatus || "manual_approval_required",
+        providerIntegrationRunbookMode:providerIntegrationRunbook.runbookMode || "pre_real_provider_connection",
+        canApproveProviderIntegration:false,
+        canProceedAfterManualApproval:false,
         sandboxHealth:sandbox,
         dryRunHealth:providerSandboxDryRunHealth,
         canShowPrice:false,
@@ -2675,6 +2723,11 @@
         providerIntegrationReadinessStatus:providerIntegrationReadiness.readinessStatus,
         providerIntegrationSummaryMode:providerIntegrationReadiness.summaryMode,
         canProceedToProviderIntegration:false,
+        providerIntegrationRunbook,
+        providerIntegrationRunbookStatus:providerIntegrationRunbook.runbookStatus || "manual_approval_required",
+        providerIntegrationRunbookMode:providerIntegrationRunbook.runbookMode || "pre_real_provider_connection",
+        canApproveProviderIntegration:false,
+        canProceedAfterManualApproval:false,
         sandboxHealth:sandbox,
         dryRunHealth:providerSandboxDryRunHealth,
         canShowPrice:false,
@@ -2709,6 +2762,11 @@
         providerIntegrationReadinessStatus:providerIntegrationReadiness.readinessStatus,
         providerIntegrationSummaryMode:providerIntegrationReadiness.summaryMode,
         canProceedToProviderIntegration:false,
+        providerIntegrationRunbook,
+        providerIntegrationRunbookStatus:providerIntegrationRunbook.runbookStatus || "manual_approval_required",
+        providerIntegrationRunbookMode:providerIntegrationRunbook.runbookMode || "pre_real_provider_connection",
+        canApproveProviderIntegration:false,
+        canProceedAfterManualApproval:false,
         sandboxHealth:Object.assign({}, sandbox, sandboxValidation),
         dryRunHealth:providerSandboxDryRunHealth,
         canShowPrice:candidates.length > 0,
@@ -2742,6 +2800,11 @@
       providerIntegrationReadinessStatus:providerIntegrationReadiness.readinessStatus,
       providerIntegrationSummaryMode:providerIntegrationReadiness.summaryMode,
       canProceedToProviderIntegration:false,
+      providerIntegrationRunbook,
+      providerIntegrationRunbookStatus:providerIntegrationRunbook.runbookStatus || "manual_approval_required",
+      providerIntegrationRunbookMode:providerIntegrationRunbook.runbookMode || "pre_real_provider_connection",
+      canApproveProviderIntegration:false,
+      canProceedAfterManualApproval:false,
       sandboxHealth:sandbox,
       dryRunHealth:providerSandboxDryRunHealth,
       canShowPrice:false,

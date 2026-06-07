@@ -98,7 +98,7 @@
     }
     if (!window.WeishanCommerceProviderConfig && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConfig"]')) {
       const config = document.createElement("script");
-      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.47";
+      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.48";
       config.dataset.weishanDynamic = "WeishanCommerceProviderConfig";
       config.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(config);
@@ -114,7 +114,7 @@
     }
     if (!window.WeishanCommerceConnectorGate && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceConnectorGate"]')) {
       const connectorGate = document.createElement("script");
-      connectorGate.src = "./renderer/core/commerceConnectorGate.js?v=2.0.47";
+      connectorGate.src = "./renderer/core/commerceConnectorGate.js?v=2.0.48";
       connectorGate.dataset.weishanDynamic = "WeishanCommerceConnectorGate";
       connectorGate.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(connectorGate);
@@ -122,15 +122,23 @@
     }
     if (!window.WeishanCommerceProviderIntegrationReadiness && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderIntegrationReadiness"]')) {
       const readiness = document.createElement("script");
-      readiness.src = "./renderer/core/commerceProviderIntegrationReadiness.js?v=2.0.47";
+      readiness.src = "./renderer/core/commerceProviderIntegrationReadiness.js?v=2.0.48";
       readiness.dataset.weishanDynamic = "WeishanCommerceProviderIntegrationReadiness";
       readiness.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(readiness);
       return;
     }
+    if (!window.WeishanCommerceProviderIntegrationRunbook && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderIntegrationRunbook"]')) {
+      const runbook = document.createElement("script");
+      runbook.src = "./renderer/core/commerceProviderIntegrationRunbook.js?v=2.0.48";
+      runbook.dataset.weishanDynamic = "WeishanCommerceProviderIntegrationRunbook";
+      runbook.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(runbook);
+      return;
+    }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
-      providers.src = "./renderer/core/commerceProviders.js?v=2.0.47";
+      providers.src = "./renderer/core/commerceProviders.js?v=2.0.48";
       providers.dataset.weishanDynamic = "WeishanCommerceProviders";
       providers.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(providers);
@@ -138,7 +146,7 @@
     }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
-    script.src = "./renderer/core/commerceSearch.js?v=2.0.47";
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.48";
     script.dataset.weishanDynamic = "WeishanCommerceSearch";
     script.onload = () => render(host);
     document.head.appendChild(script);
@@ -478,6 +486,27 @@
     </section>`;
   }
 
+  function providerIntegrationRunbookPanelHtml(runbookInfo){
+    const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
+    const group = (title, items) => `<section class="commerce-provider-runbook-group"><h4>${esc(title)}</h4><ul>${items.map((item) => row(item[0], item[1])).join("")}</ul></section>`;
+    return `<section class="commerce-provider-runbook-panel" aria-label="Provider 接入人工审批手册">
+      <div class="commerce-provider-runbook-head">
+        <div>
+          <h3>Provider 接入人工审批手册</h3>
+          <p>真实 provider 接入前必须完成人工审批与运行手册确认。当前不会批准任何真实 provider 接入。</p>
+        </div>
+        <strong>手册状态：需要人工审批</strong>
+      </div>
+      <div class="commerce-provider-runbook-grid">
+        ${group("当前审批状态", [["手册状态", "需要人工审批"], ["手册模式", "真实接入前运行手册"], ["真实 provider", "不可批准"], ["Endpoint", "不可连接"], ["API key", "不可使用"], ["网络请求", "未启用"], ["真实结果", "不可返回"], ["真实价格", "不可用"], ["测试价格", "不可用"], ["精确跳转", "未启用"], ["支付 / 下单", "不支持"], ["证件 / 银行卡", "不保存"], ["回滚方案", "必须准备"], ["最终人工批准", "未完成"]])}
+        ${group("人工审批阶段", [["范围审查", "未开始"], ["Provider 条款审查", "未开始"], ["当地法律审查", "未开始"], ["隐私审查", "未开始"], ["API 文档审查", "未开始"], ["Endpoint 审查", "未开始"], ["API key 存储审查", "未开始"], ["请求 / 响应结构审查", "未开始"], ["频率限制审查", "未开始"], ["价格 / 税费 / 运费字段审查", "未开始"], ["跳转策略审查", "未开始"], ["不付款确认", "未开始"], ["不提交订单确认", "未开始"], ["不保存证件 / 银行卡确认", "未开始"], ["回滚方案审查", "未开始"], ["最终人工批准", "未开始"]])}
+      </div>
+      <div class="commerce-provider-runbook-note">
+        <p>该手册只是接入前人工审批流程，不会打开任何 connector。当前不会访问 eBay 或任何真实 provider，不会读取 API key，不会连接 endpoint，不会发起网络请求，不会返回商品、价格或跳转链接。真正接入必须另起版本单独 review。</p>
+      </div>
+    </section>`;
+  }
+
   function providerStubProfilePanelHtml(profileInfo, task){
     const category = commercePoolCategory(task);
     if (category !== "product") return "";
@@ -554,6 +583,7 @@
     return `<div class="commerce-warning commerce-provider-pool-missing">
         <b>全球多源 provider 候选池：准备中，尚未接入。</b>
         ${providerIntegrationReadinessPanelHtml(configInfo && configInfo.providerIntegrationReadiness || {})}
+        ${providerIntegrationRunbookPanelHtml(configInfo && configInfo.providerIntegrationRunbook || {})}
         ${providerStubProfilePanelHtml(configInfo && configInfo.providerStubProfileHealth || {}, task)}
         ${readOnlyConnectorStubPanelHtml(configInfo && configInfo.connectorStubHealth || {})}
         ${providerSecretStoragePanelHtml(configInfo && configInfo.providerSecretHealth || {})}

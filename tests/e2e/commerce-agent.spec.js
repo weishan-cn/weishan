@@ -1516,7 +1516,7 @@ test.describe.serial("commerce agent workbench", () => {
       delete window.WeishanCommerceProviderIntegrationReadiness;
       await new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceProviderIntegrationReadiness.js?v=2.0.47&contract=" + Date.now();
+        script.src = "./renderer/core/commerceProviderIntegrationReadiness.js?v=2.0.48&contract=" + Date.now();
         script.onload = resolve;
         script.onerror = reject;
         document.head.appendChild(script);
@@ -1532,7 +1532,7 @@ test.describe.serial("commerce agent workbench", () => {
         displayModel:api.getProviderIntegrationReadinessDisplayModel(readiness)
       };
     });
-    expect(result.readiness.readinessVersion).toBe("2.0.47");
+    expect(result.readiness.readinessVersion).toBe("2.0.48");
     expect(result.readiness.phase).toBe("provider_integration_readiness_summary");
     expect(result.readiness.defaultStatus).toBe("not_ready");
     expect(result.readiness.readinessStatus).toBe("not_ready");
@@ -1649,6 +1649,175 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(detail).toContainText("当地法律合规审查");
       await expect(detail).toContainText("Provider Sandbox Dry Run");
       await expect(detail).toContainText("Provider 密钥安全方案");
+      await expect(detail).toContainText("Provider 接入审查面板");
+      for (const field of rawFields) await expect(detail).not.toContainText(field);
+      await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+      await gotoRoute(page, "home");
+    }
+  });
+
+  test("provider integration manual approval runbook contract blocks real provider approval", async () => {
+    await gotoRoute(page, "commerce");
+    const result = await page.evaluate(async () => {
+      delete window.WeishanCommerceProviderIntegrationRunbook;
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceProviderIntegrationRunbook.js?v=2.0.48&contract=" + Date.now();
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      const api = window.WeishanCommerceProviderIntegrationRunbook;
+      const runbook = api.getProviderIntegrationRunbook("ebay_browse_api");
+      return {
+        runbook,
+        canApprove:api.canApproveProviderIntegration(runbook),
+        canProceed:api.canProceedAfterManualApproval(runbook),
+        blockers:api.explainProviderIntegrationRunbookBlockers(runbook),
+        displayStatus:api.toProviderIntegrationRunbookDisplayStatus("manual_approval_required"),
+        displayMode:api.toProviderIntegrationRunbookDisplayStatus("pre_real_provider_connection"),
+        displayModel:api.getProviderIntegrationRunbookDisplayModel(runbook)
+      };
+    });
+    expect(result.runbook.runbookVersion).toBe("2.0.48");
+    expect(result.runbook.phase).toBe("provider_integration_manual_approval_runbook");
+    expect(result.runbook.defaultStatus).toBe("manual_approval_required");
+    expect(result.runbook.runbookStatus).toBe("manual_approval_required");
+    expect(result.runbook.runbookMode).toBe("pre_real_provider_connection");
+    expect(result.runbook.appliesBefore).toContain("endpoint_connection");
+    expect(result.runbook.appliesBefore).toContain("api_key_use");
+    expect(result.runbook.appliesBefore).toContain("network_search");
+    expect(result.runbook.appliesBefore).toContain("real_result_display");
+    expect(result.runbook.appliesBefore).toContain("real_price_display");
+    expect(result.runbook.appliesBefore).toContain("redirect_enablement");
+    expect(result.runbook.requiredBeforeApproval.globalCommerceStandard).toBe(true);
+    expect(result.runbook.requiredBeforeApproval.localLawComplianceGate).toBe(true);
+    expect(result.runbook.requiredBeforeApproval.providerOnboardingChecklist).toBe(true);
+    expect(result.runbook.requiredBeforeApproval.providerApprovalWorkflow).toBe(true);
+    expect(result.runbook.requiredBeforeApproval.readOnlyConnectorStub).toBe(true);
+    expect(result.runbook.requiredBeforeApproval.providerStubProfile).toBe(true);
+    expect(result.runbook.requiredBeforeApproval.providerSecretStoragePlan).toBe(true);
+    expect(result.runbook.requiredBeforeApproval.providerSandboxDryRun).toBe(true);
+    expect(result.runbook.requiredBeforeApproval.connectorGate).toBe(true);
+    expect(result.runbook.requiredBeforeApproval.integrationReadinessSummary).toBe(true);
+    expect(result.runbook.requiredBeforeApproval.humanApproval).toBe(true);
+    expect(result.runbook.approvalStages.scopeReview).toBe("not_started");
+    expect(result.runbook.approvalStages.finalHumanApproval).toBe("not_started");
+    expect(result.runbook.canApproveRealProvider).toBe(false);
+    expect(result.runbook.canConnectEndpoint).toBe(false);
+    expect(result.runbook.canUseApiKey).toBe(false);
+    expect(result.runbook.canUseNetwork).toBe(false);
+    expect(result.runbook.canReturnRealResults).toBe(false);
+    expect(result.runbook.canDisplayRealPrice).toBe(false);
+    expect(result.runbook.canReturnMockPrice).toBe(false);
+    expect(result.runbook.canRedirect).toBe(false);
+    expect(result.runbook.canCheckout).toBe(false);
+    expect(result.runbook.canPay).toBe(false);
+    expect(result.runbook.canSubmitOrder).toBe(false);
+    expect(result.runbook.canStoreIdentity).toBe(false);
+    expect(result.runbook.safety.noRealEndpoint).toBe(true);
+    expect(result.runbook.safety.noRealApiKey).toBe(true);
+    expect(result.runbook.safety.noNetworkSearch).toBe(true);
+    expect(result.runbook.safety.noRealResults).toBe(true);
+    expect(result.runbook.safety.noRealPrice).toBe(true);
+    expect(result.runbook.safety.noFakeDemoMockPrice).toBe(true);
+    expect(result.runbook.safety.noRedirect).toBe(true);
+    expect(result.runbook.safety.noCheckout).toBe(true);
+    expect(result.runbook.safety.noPayment).toBe(true);
+    expect(result.runbook.safety.noOrderSubmit).toBe(true);
+    expect(result.runbook.safety.noIdentityStorage).toBe(true);
+    expect(result.runbook.safety.rollbackRequired).toBe(true);
+    expect(result.runbook.safety.manualFinalApprovalRequired).toBe(true);
+    expect(result.canApprove).toBe(false);
+    expect(result.canProceed).toBe(false);
+    expect(result.blockers).toContain("provider_manual_approval_runbook_required");
+    expect(result.blockers).toContain("all_manual_approval_stages_required_before_real_provider_connection");
+    expect(result.blockers).toContain("separate_version_required_for_real_provider_connection");
+    expect(result.displayStatus).toBe("需要人工审批");
+    expect(result.displayMode).toBe("真实接入前运行手册");
+    expect(result.displayModel.title).toBe("Provider 接入人工审批手册");
+    expect(result.displayModel.note).toContain("真正接入必须另起版本单独 review");
+  });
+
+  test("provider integration manual approval runbook appears on home and detail without raw fields", async () => {
+    const inputs = ["买华为手机", "订酒店", "订机票", "买演唱会门票"];
+    const rawFields = [
+      "provider_manual_approval_runbook_required",
+      "runbookStatus=manual_approval_required",
+      "canApproveRealProvider=false",
+      "canConnectEndpoint=false",
+      "canUseApiKey=false",
+      "canUseNetwork=false",
+      "canReturnRealResults=false",
+      "canDisplayRealPrice=false",
+      "canReturnMockPrice=false",
+      "noRealEndpoint=true",
+      "noRealApiKey=true",
+      "noNetworkSearch=true"
+    ];
+    const requiredTexts = [
+      "Provider 接入人工审批手册",
+      "真实 provider 接入前必须完成人工审批与运行手册确认",
+      "手册状态：需要人工审批",
+      "手册模式：真实接入前运行手册",
+      "真实 provider：不可批准",
+      "Endpoint：不可连接",
+      "API key：不可使用",
+      "网络请求：未启用",
+      "真实结果：不可返回",
+      "真实价格：不可用",
+      "测试价格：不可用",
+      "精确跳转：未启用",
+      "支付 / 下单：不支持",
+      "证件 / 银行卡：不保存",
+      "回滚方案：必须准备",
+      "最终人工批准：未完成",
+      "范围审查：未开始",
+      "Provider 条款审查：未开始",
+      "当地法律审查：未开始",
+      "隐私审查：未开始",
+      "API 文档审查：未开始",
+      "Endpoint 审查：未开始",
+      "API key 存储审查：未开始",
+      "请求 / 响应结构审查：未开始",
+      "频率限制审查：未开始",
+      "价格 / 税费 / 运费字段审查：未开始",
+      "跳转策略审查：未开始",
+      "不付款确认：未开始",
+      "不提交订单确认：未开始",
+      "不保存证件 / 银行卡确认：未开始",
+      "回滚方案审查：未开始",
+      "该手册只是接入前人工审批流程",
+      "当前不会访问 eBay 或任何真实 provider",
+      "不会读取 API key",
+      "不会连接 endpoint",
+      "不会发起网络请求",
+      "不会返回商品、价格或跳转链接",
+      "真正接入必须另起版本单独 review"
+    ];
+    for (const text of inputs) {
+      await submitHomeCommand(page, runId + "-RUNBOOK " + text);
+      const home = page.locator('[data-commerce-home-summary="true"]').first();
+      const homePanel = home.locator(".commerce-provider-runbook-panel").first();
+      for (const required of requiredTexts) await expect(homePanel).toContainText(required);
+      await expectPanelBefore(homePanel, home.locator(".commerce-provider-secret-panel").first());
+      await expect(home).toContainText("当地法律合规审查");
+      await expect(home).toContainText("Provider 接入准备总览");
+      await expect(home).toContainText("Connector Gate");
+      await expect(home).toContainText("Provider 接入审查面板");
+      for (const field of rawFields) await expect(home).not.toContainText(field);
+      await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+      await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+      await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+
+      await page.locator("#commerceViewPlanBtn").click();
+      const detail = page.locator(".commerce-detail").first();
+      const detailPanel = detail.locator(".commerce-provider-runbook-panel").first();
+      for (const required of requiredTexts) await expect(detailPanel).toContainText(required);
+      await expectPanelBefore(detailPanel, detail.locator(".commerce-provider-stub-profile-panel, .commerce-readonly-stub-panel").first());
+      await expect(detail).toContainText("当地法律合规审查");
+      await expect(detail).toContainText("Provider 接入准备总览");
+      await expect(detail).toContainText("Connector Gate");
       await expect(detail).toContainText("Provider 接入审查面板");
       for (const field of rawFields) await expect(detail).not.toContainText(field);
       await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
