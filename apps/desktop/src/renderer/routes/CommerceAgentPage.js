@@ -58,10 +58,18 @@
     }
     if (!window.WeishanCommerceProductProviderCandidate && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProductProviderCandidate"]')) {
       const candidate = document.createElement("script");
-      candidate.src = "./renderer/core/commerceProductProviderCandidate.js?v=2.0.32";
+      candidate.src = "./renderer/core/commerceProductProviderCandidate.js?v=2.0.43";
       candidate.dataset.weishanDynamic = "WeishanCommerceProductProviderCandidate";
       candidate.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(candidate);
+      return;
+    }
+    if (!window.WeishanCommerceEbayBrowseStubProfile && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceEbayBrowseStubProfile"]')) {
+      const profile = document.createElement("script");
+      profile.src = "./renderer/core/commerceEbayBrowseStubProfile.js?v=2.0.43";
+      profile.dataset.weishanDynamic = "WeishanCommerceEbayBrowseStubProfile";
+      profile.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(profile);
       return;
     }
     if (!window.WeishanCommerceProductProviderSelection && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProductProviderSelection"]')) {
@@ -90,7 +98,7 @@
     }
     if (!window.WeishanCommerceProviderConfig && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConfig"]')) {
       const config = document.createElement("script");
-      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.40";
+      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.43";
       config.dataset.weishanDynamic = "WeishanCommerceProviderConfig";
       config.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(config);
@@ -106,7 +114,7 @@
     }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
-      providers.src = "./renderer/core/commerceProviders.js?v=2.0.40";
+      providers.src = "./renderer/core/commerceProviders.js?v=2.0.43";
       providers.dataset.weishanDynamic = "WeishanCommerceProviders";
       providers.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(providers);
@@ -114,7 +122,7 @@
     }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
-    script.src = "./renderer/core/commerceSearch.js?v=2.0.40";
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.43";
     script.dataset.weishanDynamic = "WeishanCommerceSearch";
     script.onload = () => render(host);
     document.head.appendChild(script);
@@ -361,6 +369,33 @@
     </section>`;
   }
 
+  function providerStubProfilePanelHtml(profileInfo, task){
+    const category = commercePoolCategory(task);
+    if (category !== "product") return "";
+    const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
+    const group = (title, items) => `<section class="commerce-stub-group"><h4>${esc(title)}</h4><ul>${items.map((item) => row(item[0], item[1])).join("")}</ul></section>`;
+    const providerName = profileInfo && profileInfo.providerName || "eBay Browse API";
+    return `<section class="commerce-readonly-stub-panel commerce-provider-stub-profile-panel" aria-label="Provider Stub Profile">
+      <div class="commerce-readonly-stub-head">
+        <div>
+          <h3>Provider Stub Profile</h3>
+          <p>eBay Browse API 目前只是商品搜索候选 provider 档案，尚未接入真实平台。</p>
+        </div>
+        <strong>档案状态：仅建档，尚未接入</strong>
+      </div>
+      <div class="commerce-readonly-stub-grid">
+        ${group("候选档案", [["Provider", providerName], ["类别", "商品电商平台"], ["用途", "商品搜索候选"]])}
+        ${group("连接状态", [["Connector 模式", "只读"], ["当前连接", "未接入"], ["API key", "未配置"]])}
+        ${group("搜索与展示", [["网络搜索", "未启用"], ["真实价格", "不可用"], ["测试价格", "不可用"], ["精确跳转", "未启用"]])}
+        ${group("交易与隐私", [["支付 / 下单", "不支持"], ["证件 / 银行卡", "不保存"]])}
+      </div>
+      <div class="commerce-readonly-stub-note">
+        <p>eBay Browse API 只是商品搜索候选 provider 之一。当前不会访问 eBay，不会返回 eBay 商品或价格，不会跳转 eBay 页面。</p>
+        <p>真实接入前仍必须通过当地法律合规、Provider Onboarding、Provider Approval、只读 Connector Stub、sandbox dry run 和 connector gate。</p>
+      </div>
+    </section>`;
+  }
+
   function localLawCompliancePanelHtml(task){
     const health = task && task.complianceHealth || {};
     const regulated = health.complianceStatus === "compliance_review_required";
@@ -409,6 +444,7 @@
     const isProduct = commercePoolCategory(task) === "product";
     return `<div class="commerce-warning commerce-provider-pool-missing">
         <b>全球多源 provider 候选池：准备中，尚未接入。</b>
+        ${providerStubProfilePanelHtml(configInfo && configInfo.providerStubProfileHealth || {}, task)}
         ${readOnlyConnectorStubPanelHtml(configInfo && configInfo.connectorStubHealth || {})}
         ${providerApprovalWorkflowPanelHtml(approvalInfo || {})}
         ${providerOnboardingReviewPanelHtml(onboardingInfo || {})}

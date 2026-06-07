@@ -38,6 +38,30 @@
     return window.WeishanCommerceGlobalProviderPool || null;
   }
 
+  function stubProfileApi(){
+    return window.WeishanCommerceEbayBrowseStubProfile || null;
+  }
+
+  function ebayStubProfileStatus(){
+    const api = stubProfileApi();
+    if (api && api.getProviderStubProfileStatus) return api.getProviderStubProfileStatus(SELECTED_FIRST_CANDIDATE);
+    return {
+      profileVersion:"2.0.43",
+      providerId:SELECTED_FIRST_CANDIDATE,
+      providerName:"eBay Browse API",
+      profileStatus:"profile_only_not_connected",
+      connectorMode:"read_only",
+      canUseForReview:true,
+      canConnectEndpoint:false,
+      canConfigureApiKey:false,
+      canUseNetwork:false,
+      canReturnRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      reason:"provider_stub_profile_only"
+    };
+  }
+
   function poolReadiness(){
     const api = poolApi();
     if (api && api.getCommerceGlobalProviderPoolReadiness) return api.getCommerceGlobalProviderPoolReadiness();
@@ -66,6 +90,7 @@
       selectedFirstCandidate:SELECTED_FIRST_CANDIDATE,
       selectedStatus:SELECTED_STATUS,
       selectedWording:"product_search_trial_candidate_one",
+      providerStubProfileHealth:ebayStubProfileStatus(),
       candidates:[
         Object.assign({
           id:"ebay_browse_api",
@@ -147,6 +172,7 @@
       canPay:false,
       canStoreIdentity:false,
       reason:"provider_candidate_selected_not_connected",
+      providerStubProfileHealth:ebayStubProfileStatus(),
       poolReadiness:poolReadiness(),
       safety:baseSafety()
     };

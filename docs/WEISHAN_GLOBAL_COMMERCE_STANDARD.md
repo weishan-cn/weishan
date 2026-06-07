@@ -198,6 +198,18 @@ Provider Approval Workflow 至少包括：
 
 无论 stub 状态如何，weishan 都不得自动付款、自动下单、提交订单或保存证件 / 银行卡。
 
+## 7.4. Provider Stub Profile 标准
+
+Provider Stub Profile 只是候选 provider 档案，用于记录未来可能接入的 provider 基础信息、审批要求、只读 stub 设计边界和安全阻断状态。provider stub profile 只是候选 provider 档案，不代表已接入 provider。
+
+eBay Browse API 只是商品搜索候选之一，不能代表 weishan 的唯一方向。weishan 不是 eBay 工具，也不是单一平台工具。商品、品牌官网、酒店、机票、票务和服务平台仍属于全球多源 provider 候选池。
+
+Provider Stub Profile 默认状态可以是 `profile_only_not_connected`。该状态只允许用于候选档案、approval review 和 read_only_stub_design，不得访问真实 provider，不得配置 API key，不得连接 endpoint，不得启用网络搜索，不得显示真实价格，不得返回 fake/demo/mock price，不得跳转购买。
+
+Provider Stub Profile 不能绕过 Local Law Compliance Gate、Provider Onboarding Checklist、Provider Approval Workflow、Read-only Connector Stub、sandbox dry run、config / adapter / connector gate 或人工批准。任何真实连接仍必须等所有 gate 完成后才允许进入真实 connector 开发。
+
+用户 UI 可以用自然语言展示 provider 档案状态，但不得把 `profile_only_not_connected`、内部布尔值或 raw reason 直接暴露给普通用户。未接入前不得显示“已接入 eBay”“正在搜索 eBay”“eBay 当前最低价”“eBay 已可购买”或类似假接通状态。
+
 ## 8. 结果展示标准
 
 结果最多展示 2-3 条。

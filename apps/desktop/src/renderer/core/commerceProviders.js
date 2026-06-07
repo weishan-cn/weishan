@@ -56,6 +56,10 @@
     return window.WeishanCommerceReadOnlyConnectorStub || null;
   }
 
+  function stubProfileApi(){
+    return window.WeishanCommerceEbayBrowseStubProfile || null;
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
@@ -121,6 +125,26 @@
       canReturnMockPrice:false,
       canRedirect:false,
       reason:"provider_approval_required_before_stub"
+    };
+  }
+
+  function providerStubProfileStatus(providerId){
+    const api = stubProfileApi();
+    if (api && api.getProviderStubProfileStatus) return api.getProviderStubProfileStatus(providerId || "ebay_browse_api");
+    return {
+      profileVersion:"2.0.43",
+      providerId:"ebay_browse_api",
+      providerName:"eBay Browse API",
+      profileStatus:"profile_only_not_connected",
+      connectorMode:"read_only",
+      canUseForReview:true,
+      canConnectEndpoint:false,
+      canConfigureApiKey:false,
+      canUseNetwork:false,
+      canReturnRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      reason:"provider_stub_profile_only"
     };
   }
 
@@ -327,6 +351,7 @@
       productProviderProfile:next.productProviderProfile || productProfile(),
       productProviderReadiness:next.productProviderReadiness || productReadiness(next),
       productProviderCandidateReadiness:next.productProviderCandidateReadiness || productCandidateReadiness(),
+      providerStubProfileHealth:next.providerStubProfileHealth || providerStubProfileStatus(next.selectedFirstCandidate || "ebay_browse_api"),
       globalProviderPoolReadiness:next.globalProviderPoolReadiness || poolReadiness(),
       onboardingStatus:next.onboardingStatus || "not_reviewed",
       providerOnboardingRequired:next.providerOnboardingRequired !== false,
@@ -671,6 +696,7 @@
       onboardingHealth:onboarding,
       approvalHealth:approval,
       connectorStubHealth:stub,
+      providerStubProfileHealth:next === "product" ? providerStubProfileStatus("ebay_browse_api") : undefined,
       connectorHealth:cFields,
       sandboxHealth:sandboxFields(next, cfg, config, config, connector)
     };
@@ -694,6 +720,7 @@
       onboardingHealth:provider.onboardingHealth || onboardingStatus(next),
       approvalHealth:provider.approvalHealth || approvalStatus(next, provider.providerId || provider.id),
       connectorStubHealth:provider.connectorStubHealth || connectorStubStatus(next, provider.providerId || provider.id, provider.approvalHealth || approvalStatus(next, provider.providerId || provider.id)),
+      providerStubProfileHealth:provider.providerStubProfileHealth || provider.configHealth && provider.configHealth.providerStubProfileHealth || (next === "product" ? providerStubProfileStatus("ebay_browse_api") : undefined),
       sandboxHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
       dryRunHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
       enabled:provider.enabled === true,

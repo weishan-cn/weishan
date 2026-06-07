@@ -73,6 +73,10 @@
     return window.WeishanCommerceReadOnlyConnectorStub || null;
   }
 
+  function stubProfileApi(){
+    return window.WeishanCommerceEbayBrowseStubProfile || null;
+  }
+
   function localLawApi(){
     return window.WeishanCommerceLocalLawCompliance || null;
   }
@@ -372,6 +376,26 @@
     };
   }
 
+  function getProviderStubProfileStatus(providerId){
+    const api = stubProfileApi();
+    if (api && api.getProviderStubProfileStatus) return api.getProviderStubProfileStatus(providerId || "ebay_browse_api");
+    return {
+      profileVersion:"2.0.43",
+      providerId:"ebay_browse_api",
+      providerName:"eBay Browse API",
+      profileStatus:"profile_only_not_connected",
+      connectorMode:"read_only",
+      canUseForReview:true,
+      canConnectEndpoint:false,
+      canConfigureApiKey:false,
+      canUseNetwork:false,
+      canReturnRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      reason:"provider_stub_profile_only"
+    };
+  }
+
   function defaultConfig(category, settings){
     const api = configApi();
     if (api && api.getCommerceProviderConfig) return api.getCommerceProviderConfig(category, settings);
@@ -379,6 +403,7 @@
     const productDefaults = next === "product" ? productSafetySwitches() : {};
     const productCandidate = next === "product" ? getProductProviderCandidateReadiness() : null;
     const pool = next === "product" ? getGlobalProviderPoolReadiness() : null;
+    const profileHealth = next === "product" ? getProviderStubProfileStatus(productCandidate && productCandidate.selectedFirstCandidate || "ebay_browse_api") : null;
     const approval = approvalFields(getProviderApprovalStatus(next, next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled"));
     const stub = connectorStubFields(getReadOnlyConnectorStubStatus(next, next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled", approval));
     return Object.assign({
@@ -430,6 +455,7 @@
       productProviderProfile:next === "product" ? getProductProviderProfile() : undefined,
       productProviderReadiness:next === "product" ? getProductProviderReadiness(productDefaults) : undefined,
       productProviderCandidateReadiness:productCandidate || undefined,
+      providerStubProfileHealth:profileHealth || undefined,
       globalProviderPoolReadiness:pool || undefined,
       approvalHealth:approval,
       connectorStubHealth:stub,
@@ -502,7 +528,27 @@
       productProviderProfile:next.productProviderProfile || getProductProviderProfile(),
       productProviderReadiness:next.productProviderReadiness || getProductProviderReadiness(next),
       productProviderCandidateReadiness:next.productProviderCandidateReadiness || getProductProviderCandidateReadiness(),
+      providerStubProfileHealth:next.providerStubProfileHealth || getProviderStubProfileStatus(next.selectedFirstCandidate || "ebay_browse_api"),
       globalProviderPoolReadiness:next.globalProviderPoolReadiness || getGlobalProviderPoolReadiness()
+    };
+  }
+
+  function providerStubProfileFields(profile){
+    const next = profile || {};
+    return {
+      profileVersion:next.profileVersion || "2.0.43",
+      providerId:next.providerId || "ebay_browse_api",
+      providerName:next.providerName || "eBay Browse API",
+      profileStatus:next.profileStatus || "profile_only_not_connected",
+      connectorMode:next.connectorMode || "read_only",
+      canUseForReview:next.canUseForReview !== false,
+      canConnectEndpoint:false,
+      canConfigureApiKey:false,
+      canUseNetwork:false,
+      canReturnRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      reason:next.reason || "provider_stub_profile_only"
     };
   }
 
@@ -814,6 +860,7 @@
     const onboarding = onboardingFields(getProviderOnboardingStatus(request && request.category));
     const approval = approvalFields(getProviderApprovalStatus(request && request.category, providerConfig && providerConfig.providerId));
     const stub = connectorStubFields(getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
+    const profile = providerStubProfileFields(providerConfig && providerConfig.providerStubProfileHealth || getProviderStubProfileStatus("ebay_browse_api"));
     return {
       ok:false,
       code:"COMMERCE_PRODUCT_PROVIDER_NOT_CONNECTED",
@@ -827,6 +874,7 @@
       onboardingHealth:onboarding,
       approvalHealth:approval,
       connectorStubHealth:stub,
+      providerStubProfileHealth:profile,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       productProviderReadiness:readiness,
@@ -842,6 +890,7 @@
     const onboarding = onboardingFields(getProviderOnboardingStatus(request && request.category));
     const approval = approvalFields(approvalHealth || getProviderApprovalStatus(request && request.category, providerConfig && providerConfig.providerId));
     const stub = connectorStubFields(getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
+    const profile = resultCategory(request && request.category) === "product" ? providerStubProfileFields(providerConfig && providerConfig.providerStubProfileHealth || getProviderStubProfileStatus("ebay_browse_api")) : undefined;
     return {
       ok:false,
       code:"COMMERCE_PROVIDER_APPROVAL_REQUIRED",
@@ -855,6 +904,7 @@
       onboardingHealth:onboarding,
       approvalHealth:approval,
       connectorStubHealth:stub,
+      providerStubProfileHealth:profile,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       canShowPrice:false,
@@ -868,6 +918,7 @@
     const onboarding = onboardingFields(getProviderOnboardingStatus(request && request.category));
     const approval = approvalFields(approvalHealth || getProviderApprovalStatus(request && request.category, providerConfig && providerConfig.providerId));
     const stub = connectorStubFields(stubHealth || getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
+    const profile = resultCategory(request && request.category) === "product" ? providerStubProfileFields(providerConfig && providerConfig.providerStubProfileHealth || getProviderStubProfileStatus("ebay_browse_api")) : undefined;
     return {
       ok:false,
       code:"COMMERCE_READ_ONLY_CONNECTOR_STUB_REQUIRED",
@@ -881,6 +932,7 @@
       onboardingHealth:onboarding,
       approvalHealth:approval,
       connectorStubHealth:stub,
+      providerStubProfileHealth:profile,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       canShowPrice:false,
@@ -895,6 +947,7 @@
     const approval = approvalFields(getProviderApprovalStatus(request && request.category, providerConfig && providerConfig.providerId));
     const stub = connectorStubFields(getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
     const health = complianceHealth || evaluateLocalLawCompliance(request, { locationHealth:locationHealth() });
+    const profile = resultCategory(request && request.category) === "product" ? providerStubProfileFields(providerConfig && providerConfig.providerStubProfileHealth || getProviderStubProfileStatus("ebay_browse_api")) : undefined;
     return {
       ok:false,
       code:"COMMERCE_LOCAL_LAW_COMPLIANCE_REQUIRED",
@@ -908,6 +961,7 @@
       onboardingHealth:onboarding,
       approvalHealth:approval,
       connectorStubHealth:stub,
+      providerStubProfileHealth:profile,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       locationHealth:locationHealth(),
@@ -924,6 +978,7 @@
     const onboarding = onboardingFields(getProviderOnboardingStatus(request && request.category));
     const approval = approvalFields(getProviderApprovalStatus(request && request.category, providerConfig && providerConfig.providerId));
     const stub = connectorStubFields(getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
+    const profile = providerStubProfileFields(providerConfig && providerConfig.providerStubProfileHealth || getProviderStubProfileStatus("ebay_browse_api"));
     return {
       ok:false,
       code:"COMMERCE_SHIPPING_DESTINATION_REQUIRED",
@@ -937,6 +992,7 @@
       onboardingHealth:onboarding,
       approvalHealth:approval,
       connectorStubHealth:stub,
+      providerStubProfileHealth:profile,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       locationHealth:health,
@@ -1018,6 +1074,7 @@
     const oFields = onboardingFields(onboarding);
     const approval = approvalFields(getProviderApprovalStatus(next, config.providerId));
     const stub = connectorStubFields(getReadOnlyConnectorStubStatus(next, config.providerId, approval));
+    const profile = isProduct ? providerStubProfileFields(config.providerStubProfileHealth || getProviderStubProfileStatus("ebay_browse_api")) : undefined;
     const configReady = isProviderConfigReady(config);
     const connectorReady = isProviderConnectorReady(connector);
     const sandbox = sandboxFields(next, settings, config, connector);
@@ -1058,6 +1115,7 @@
         canBuildReadOnlyConnectorStub:stub.canBuildStub,
         canExecuteReadOnlyConnectorStub:stub.canExecuteStub,
         connectorStubHealth:stub,
+        providerStubProfileHealth:profile,
         adapterId:adapter.providerId,
         adapterMode:"read_only",
         adapterConfigured:configured,
@@ -1089,10 +1147,11 @@
         requiresPaymentMethod:config.requiresPaymentMethod === true,
         supportsReadOnlySearch:config.supportsReadOnlySearch === true,
         supportsCrossBorderSearch:config.supportsCrossBorderSearch === true,
-      configHealth:configFields(config),
-      connectorHealth:cFields,
-      connectorStubHealth:stub,
-      sandboxHealth:sandbox
+        configHealth:configFields(config),
+        connectorHealth:cFields,
+        connectorStubHealth:stub,
+        providerStubProfileHealth:profile,
+        sandboxHealth:sandbox
       }],
       adapterHealth:{
         adapterId:adapter.providerId,
@@ -1105,6 +1164,7 @@
       onboardingHealth:oFields,
       approvalHealth:approval,
       connectorStubHealth:stub,
+      providerStubProfileHealth:profile,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       enabled:configured && configReady && connectorReady,
@@ -1775,6 +1835,7 @@
     const onboardingHealth = onboardingFields(getProviderOnboardingStatus(request.category));
     const approvalHealth = approvalFields(getProviderApprovalStatus(request.category, providerConfig && providerConfig.providerId));
     const connectorStubHealth = connectorStubFields(getReadOnlyConnectorStubStatus(request.category, providerConfig && providerConfig.providerId, approvalHealth));
+    const providerStubProfileHealth = resultCategory(request.category) === "product" ? providerStubProfileFields(providerConfig && providerConfig.providerStubProfileHealth || providerHealth && providerHealth.providerStubProfileHealth || getProviderStubProfileStatus("ebay_browse_api")) : undefined;
     const sandbox = getCommerceProviderSandbox(request.category, settings);
     const complianceHealth = !isAiModelPricingTask(request) ? evaluateLocalLawCompliance(request, { locationHealth:locationHealth() }) : null;
     if (complianceHealth && complianceHealth.canSearchProvider !== true) {
@@ -1836,6 +1897,7 @@
         onboardingHealth,
         approvalHealth,
         connectorStubHealth,
+        providerStubProfileHealth,
         sandboxHealth:sandbox,
         dryRunHealth:sandbox,
         canShowPrice:false,
@@ -1856,6 +1918,7 @@
         onboardingHealth,
         approvalHealth,
         connectorStubHealth,
+        providerStubProfileHealth,
         sandboxHealth:sandbox,
         dryRunHealth:sandbox,
         canShowPrice:false,
@@ -1882,6 +1945,7 @@
         onboardingHealth,
         approvalHealth,
         connectorStubHealth,
+        providerStubProfileHealth,
         sandboxHealth:Object.assign({}, sandbox, sandboxValidation),
         dryRunHealth:Object.assign({}, sandbox, sandboxValidation),
         canShowPrice:candidates.length > 0,
@@ -1907,6 +1971,7 @@
       onboardingHealth,
       approvalHealth,
       connectorStubHealth,
+      providerStubProfileHealth,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       canShowPrice:false,
@@ -1929,6 +1994,7 @@
     getProviderOnboardingStatus,
     getProviderApprovalStatus,
     getReadOnlyConnectorStubStatus,
+    getProviderStubProfileStatus,
     locationHealthForCommerce:locationHealth,
     getLocalLawCompliancePolicy,
     evaluateLocalLawCompliance,

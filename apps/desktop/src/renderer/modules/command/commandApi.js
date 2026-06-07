@@ -26,8 +26,11 @@
   if (!window.WeishanCommerceReadOnlyConnectorStub && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceReadOnlyConnectorStub.js?v=2.0.41"></scr' + 'ipt>');
   }
+  if (!window.WeishanCommerceEbayBrowseStubProfile && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceEbayBrowseStubProfile.js?v=2.0.43"></scr' + 'ipt>');
+  }
   if (!window.WeishanCommerceProductProviderCandidate && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.32"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.43"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProductProviderSelection && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderSelection.js?v=2.0.32"></scr' + 'ipt>');
@@ -39,16 +42,16 @@
     document.write('<scr' + 'ipt src="./renderer/core/commerceLocalLawCompliance.js?v=2.0.41"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderConfig && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.41"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.43"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderSandbox && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProviderSandbox.js?v=2.0.32"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviders && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.41"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.43"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceSearch && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.41"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.43"></scr' + 'ipt>');
   }
 
   const QUEUE_KEY = "command.queue.v205";
@@ -297,6 +300,7 @@
       commercePlan.onboardingHealth = providerHealth && providerHealth.onboardingHealth || {};
       commercePlan.approvalHealth = providerHealth && providerHealth.approvalHealth || approvalHealth || {};
       commercePlan.connectorStubHealth = providerHealth && providerHealth.connectorStubHealth || {};
+      commercePlan.providerStubProfileHealth = providerHealth && (providerHealth.providerStubProfileHealth || providerHealth.configHealth && providerHealth.configHealth.providerStubProfileHealth) || {};
       commercePlan.sandboxHealth = providerHealth && providerHealth.sandboxHealth || {};
       commercePlan.dryRunHealth = providerHealth && (providerHealth.dryRunHealth || providerHealth.sandboxHealth) || {};
       commercePlan.locationHealth = locationHealth || {};

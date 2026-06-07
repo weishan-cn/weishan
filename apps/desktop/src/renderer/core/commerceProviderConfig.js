@@ -49,6 +49,10 @@
     return window.WeishanCommerceReadOnlyConnectorStub || null;
   }
 
+  function stubProfileApi(){
+    return window.WeishanCommerceEbayBrowseStubProfile || null;
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
@@ -114,6 +118,26 @@
       canReturnMockPrice:false,
       canRedirect:false,
       reason:"provider_approval_required_before_stub"
+    };
+  }
+
+  function providerStubProfileStatus(providerId){
+    const api = stubProfileApi();
+    if (api && api.getProviderStubProfileStatus) return api.getProviderStubProfileStatus(providerId || "ebay_browse_api");
+    return {
+      profileVersion:"2.0.43",
+      providerId:"ebay_browse_api",
+      providerName:"eBay Browse API",
+      profileStatus:"profile_only_not_connected",
+      connectorMode:"read_only",
+      canUseForReview:true,
+      canConnectEndpoint:false,
+      canConfigureApiKey:false,
+      canUseNetwork:false,
+      canReturnRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      reason:"provider_stub_profile_only"
     };
   }
 
@@ -282,6 +306,7 @@
     if (next === "product") {
       const candidate = productCandidateReadiness();
       const pool = poolReadiness();
+      const profileHealth = providerStubProfileStatus(candidate.selectedFirstCandidate || "ebay_browse_api");
       return Object.assign({}, base, productSafetySwitches(), {
         connectorType:"readonly_product_search",
         connectorStatus:"not_connected",
@@ -302,6 +327,7 @@
         productProviderProfile:productProfile(),
         productProviderReadiness:productReadiness(),
         productProviderCandidateReadiness:candidate,
+        providerStubProfileHealth:profileHealth,
         providerOnboardingStatus:onboardingStatus(next)
       });
     }
@@ -475,6 +501,7 @@
       productProviderNoIdentityStorage:config.productProviderNoIdentityStorage !== false,
       productProviderProfile:config.productProviderProfile || productProfile(),
       productProviderReadiness:config.productProviderReadiness || productReadiness(config),
+      providerStubProfileHealth:config.providerStubProfileHealth || providerStubProfileStatus(config.selectedFirstCandidate || "ebay_browse_api"),
       reasonWhenUnavailable:ready ? "" : config.reasonWhenUnavailable || "provider_config_not_ready"
     };
   }
@@ -488,6 +515,7 @@
     getCommerceProviderConfig,
     getCommerceProviderConfigRegistry,
     getCommerceProviderConfigHealth,
+    getProviderStubProfileStatus:providerStubProfileStatus,
     getReadOnlyConnectorStubStatus:connectorStubStatus
   };
 })();

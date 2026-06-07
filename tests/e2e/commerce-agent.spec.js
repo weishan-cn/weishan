@@ -924,6 +924,213 @@ test.describe.serial("commerce agent workbench", () => {
     expect(result.displayDisabled).toBe("未启用");
   });
 
+  test("provider stub profile contract keeps ebay browse api profile-only and blocked", async () => {
+    await gotoRoute(page, "commerce");
+    const result = await page.evaluate(async () => {
+      delete window.WeishanCommerceEbayBrowseStubProfile;
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceEbayBrowseStubProfile.js?v=2.0.43&contract=" + Date.now();
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      const api = window.WeishanCommerceEbayBrowseStubProfile;
+      return {
+        profile:api.getEbayBrowseStubProfile(),
+        status:api.getProviderStubProfileStatus("ebay_browse_api"),
+        canUse:api.canUseProviderStubProfile("ebay_browse_api"),
+        canConnect:api.canConnectProviderFromProfile("ebay_browse_api"),
+        reason:api.explainProviderStubProfileBlockReason("ebay_browse_api"),
+        displayProfile:api.toProviderStubProfileDisplayStatus("profile_only_not_connected"),
+        displayReason:api.toProviderStubProfileDisplayStatus("provider_stub_profile_only")
+      };
+    });
+    expect(result.profile.profileVersion).toBe("2.0.43");
+    expect(result.profile.phase).toBe("provider_stub_profile");
+    expect(result.profile.providerId).toBe("ebay_browse_api");
+    expect(result.profile.providerName).toBe("eBay Browse API");
+    expect(result.profile.providerCategory).toBe("product_marketplace");
+    expect(result.profile.profileStatus).toBe("profile_only_not_connected");
+    expect(result.profile.connectorMode).toBe("read_only");
+    expect(result.profile.intendedUse).toBe("product_search_candidate");
+    expect(result.profile.allowedUse).toContain("candidate_profile");
+    expect(result.profile.allowedUse).toContain("approval_review");
+    expect(result.profile.allowedUse).toContain("read_only_stub_design");
+    expect(result.profile.blockedUse).toContain("real_endpoint_connection");
+    expect(result.profile.blockedUse).toContain("real_api_key_configuration");
+    expect(result.profile.blockedUse).toContain("real_network_search");
+    expect(result.profile.blockedUse).toContain("real_price_display");
+    expect(result.profile.blockedUse).toContain("redirect_to_provider");
+    expect(result.profile.requiredBeforeConnection.globalCommerceStandard).toBe(true);
+    expect(result.profile.requiredBeforeConnection.localLawComplianceGate).toBe(true);
+    expect(result.profile.requiredBeforeConnection.providerOnboardingChecklist).toBe(true);
+    expect(result.profile.requiredBeforeConnection.providerApprovalWorkflow).toBe(true);
+    expect(result.profile.requiredBeforeConnection.approvedForStub).toBe(true);
+    expect(result.profile.requiredBeforeConnection.readOnlyConnectorStub).toBe(true);
+    expect(result.profile.requiredBeforeConnection.apiKeyStorageReview).toBe(true);
+    expect(result.profile.requiredBeforeConnection.endpointReview).toBe(true);
+    expect(result.profile.requiredBeforeConnection.sandboxDryRun).toBe(true);
+    expect(result.profile.requiredBeforeConnection.connectorGate).toBe(true);
+    expect(result.profile.requiredBeforeConnection.humanApproval).toBe(true);
+    expect(result.profile.connectionState.endpointConnected).toBe(false);
+    expect(result.profile.connectionState.apiKeyConfigured).toBe(false);
+    expect(result.profile.connectionState.networkAllowed).toBe(false);
+    expect(result.profile.connectionState.canSearchNow).toBe(false);
+    expect(result.profile.connectionState.canReturnRealPrice).toBe(false);
+    expect(result.profile.connectionState.canReturnMockPrice).toBe(false);
+    expect(result.profile.connectionState.canRedirectNow).toBe(false);
+    expect(result.profile.connectionState.canCheckout).toBe(false);
+    expect(result.profile.connectionState.canPay).toBe(false);
+    expect(result.profile.connectionState.canSubmitOrder).toBe(false);
+    expect(result.profile.connectionState.canStoreIdentity).toBe(false);
+    expect(result.profile.safety.noRealEndpoint).toBe(true);
+    expect(result.profile.safety.noApiKey).toBe(true);
+    expect(result.profile.safety.noNetworkSearch).toBe(true);
+    expect(result.profile.safety.noRealPrice).toBe(true);
+    expect(result.profile.safety.noFakeDemoMockPrice).toBe(true);
+    expect(result.profile.safety.noRedirect).toBe(true);
+    expect(result.profile.safety.noCheckout).toBe(true);
+    expect(result.profile.safety.noPayment).toBe(true);
+    expect(result.profile.safety.noOrderSubmit).toBe(true);
+    expect(result.profile.safety.noIdentityStorage).toBe(true);
+    expect(result.profile.safety.noRawGpsStorage).toBe(true);
+    expect(result.status.providerId).toBe("ebay_browse_api");
+    expect(result.status.providerName).toBe("eBay Browse API");
+    expect(result.status.profileStatus).toBe("profile_only_not_connected");
+    expect(result.status.connectorMode).toBe("read_only");
+    expect(result.status.canUseForReview).toBe(true);
+    expect(result.status.canConnectEndpoint).toBe(false);
+    expect(result.status.canConfigureApiKey).toBe(false);
+    expect(result.status.canUseNetwork).toBe(false);
+    expect(result.status.canReturnRealPrice).toBe(false);
+    expect(result.status.canReturnMockPrice).toBe(false);
+    expect(result.status.canRedirect).toBe(false);
+    expect(result.status.reason).toBe("provider_stub_profile_only");
+    expect(result.canUse).toBe(true);
+    expect(result.canConnect).toBe(false);
+    expect(result.reason).toBe("provider_stub_profile_only");
+    expect(result.displayProfile).toBe("仅建档，尚未接入");
+    expect(result.displayReason).toBe("仅用于候选档案和审查");
+  });
+
+  test("provider stub profile panel explains ebay is only a product candidate", async () => {
+    await submitHomeCommand(page, runId + "-STUB-PROFILE 买华为手机");
+    const home = page.locator('[data-commerce-home-summary="true"]').first();
+    await expect(home).toContainText("Provider Stub Profile");
+    await expect(home).toContainText("eBay Browse API 目前只是商品搜索候选 provider 档案，尚未接入真实平台。");
+    await expect(home).toContainText("Provider：eBay Browse API");
+    await expect(home).toContainText("类别：商品电商平台");
+    await expect(home).toContainText("档案状态：仅建档，尚未接入");
+    await expect(home).toContainText("Connector 模式：只读");
+    await expect(home).toContainText("用途：商品搜索候选");
+    await expect(home).toContainText("当前连接：未接入");
+    await expect(home).toContainText("API key：未配置");
+    await expect(home).toContainText("网络搜索：未启用");
+    await expect(home).toContainText("真实价格：不可用");
+    await expect(home).toContainText("测试价格：不可用");
+    await expect(home).toContainText("精确跳转：未启用");
+    await expect(home).toContainText("支付 / 下单：不支持");
+    await expect(home).toContainText("证件 / 银行卡：不保存");
+    await expect(home).toContainText("eBay Browse API 只是商品搜索候选 provider 之一");
+    await expect(home).toContainText("当前不会访问 eBay，不会返回 eBay 商品或价格，不会跳转 eBay 页面");
+    await expect(home).toContainText("真实接入前仍必须通过当地法律合规、Provider Onboarding、Provider Approval、只读 Connector Stub、sandbox dry run 和 connector gate");
+    await expect(home).not.toContainText("profile_only_not_connected");
+    await expect(home).not.toContainText("provider_stub_profile_only");
+    await expect(home).not.toContainText("endpointConnected=false");
+    await expect(home).not.toContainText("apiKeyConfigured=false");
+    await expect(home).not.toContainText("networkAllowed=false");
+    await expect(home).not.toContainText("canSearchNow=false");
+    await expect(home).not.toContainText("canReturnRealPrice=false");
+    await expect(home).not.toContainText("canReturnMockPrice=false");
+    await expect(home).not.toContainText("canRedirectNow=false");
+    await expect(home).not.toContainText("noRealEndpoint=true");
+    await expect(home).not.toContainText("noApiKey=true");
+    await expect(home).not.toContainText("noNetworkSearch=true");
+    await expect(home).not.toContainText("已接入 eBay");
+    await expect(home).not.toContainText("正在搜索 eBay");
+    await expect(home).not.toContainText("eBay 当前最低价");
+    await expect(home).not.toContainText("eBay 全网最低价");
+    await expect(home).not.toContainText("eBay 保证最低价");
+    await expect(home).not.toContainText("eBay 已可购买");
+    await expect(home).not.toContainText("eBay 付款");
+    await expect(home).not.toContainText("eBay 下单");
+    await expect(home).not.toContainText("eBay API key 已配置");
+    await expect(home).not.toContainText("eBay endpoint 已连接");
+    await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+    await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+
+    await page.locator("#commerceViewPlanBtn").click();
+    const detail = page.locator(".commerce-detail").first();
+    await expect(detail).toContainText("Provider Stub Profile");
+    await expect(detail).toContainText("Provider：eBay Browse API");
+    await expect(detail).toContainText("档案状态：仅建档，尚未接入");
+    await expect(detail).toContainText("当前不会访问 eBay，不会返回 eBay 商品或价格，不会跳转 eBay 页面");
+    await expect(detail).not.toContainText("profile_only_not_connected");
+    await expect(detail).not.toContainText("provider_stub_profile_only");
+    await expect(detail).not.toContainText("endpointConnected=false");
+    await expect(detail).not.toContainText("apiKeyConfigured=false");
+    await expect(detail).not.toContainText("networkAllowed=false");
+    await expect(detail).not.toContainText("canSearchNow=false");
+    await expect(detail).not.toContainText("canReturnRealPrice=false");
+    await expect(detail).not.toContainText("canReturnMockPrice=false");
+    await expect(detail).not.toContainText("canRedirectNow=false");
+    await expect(detail).not.toContainText("noRealEndpoint=true");
+    await expect(detail).not.toContainText("noApiKey=true");
+    await expect(detail).not.toContainText("noNetworkSearch=true");
+    await expect(detail).not.toContainText("已接入 eBay");
+    await expect(detail).not.toContainText("正在搜索 eBay");
+    await expect(detail).not.toContainText("eBay 当前最低价");
+    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+  });
+
+  test("provider stub profile does not make hotel flight or ticket flows ebay-only", async () => {
+    const inputs = [
+      { text:"买华为手机", expectsEbay:true },
+      { text:"订酒店", expectsEbay:false },
+      { text:"订机票", expectsEbay:false },
+      { text:"买演唱会门票", expectsEbay:false }
+    ];
+    for (const item of inputs) {
+      await submitHomeCommand(page, runId + "-STUB-MULTI " + item.text);
+      const home = page.locator('[data-commerce-home-summary="true"]').first();
+      await expect(home).toContainText("当地法律合规审查");
+      await expect(home).toContainText("只读 Connector Stub");
+      await expect(home).toContainText("Provider 审批流程");
+      await expect(home).toContainText("Provider 接入审查面板");
+      if (item.expectsEbay) {
+        await expect(home).toContainText("全球多源 provider 候选池：准备中，尚未接入");
+        await expect(home).toContainText("Provider Stub Profile");
+        await expect(home).toContainText("eBay Browse API 只是商品搜索候选 provider 之一");
+      } else {
+        await expect(home).not.toContainText("Provider Stub Profile");
+        await expect(home).not.toContainText("eBay Browse API 只是商品搜索候选 provider 之一");
+      }
+      await expect(home).not.toContainText("已接入 eBay");
+      await expect(home).not.toContainText("正在搜索 eBay");
+      await expect(home).not.toContainText("eBay 当前最低价");
+      await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+      await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+      await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+      await page.locator("#commerceViewPlanBtn").click();
+      const detail = page.locator(".commerce-detail").first();
+      if (item.expectsEbay) {
+        await expect(detail).toContainText("全球多源 provider 候选池：准备中，尚未接入");
+        await expect(detail).toContainText("Provider Stub Profile");
+        await expect(detail).toContainText("eBay Browse API 只是商品搜索候选 provider 之一");
+      } else {
+        await expect(detail).not.toContainText("Provider Stub Profile");
+        await expect(detail).not.toContainText("eBay Browse API 只是商品搜索候选 provider 之一");
+      }
+      await expect(detail).not.toContainText("已接入 eBay");
+      await expect(detail).not.toContainText("正在搜索 eBay");
+      await expect(detail).not.toContainText("eBay 当前最低价");
+      await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+      await gotoRoute(page, "home");
+    }
+  });
+
   test("provider approval workflow panel explains approval stages without raw fields", async () => {
     await submitHomeCommand(page, runId + " 买华为手机");
     const home = page.locator("[data-commerce-home-summary]");
