@@ -81,6 +81,10 @@
     return window.WeishanCommerceProviderSecretStoragePlan || null;
   }
 
+  function sandboxDryRunApi(){
+    return window.WeishanCommerceProviderSandboxDryRun || null;
+  }
+
   function localLawApi(){
     return window.WeishanCommerceLocalLawCompliance || null;
   }
@@ -424,6 +428,28 @@
     };
   }
 
+  function getProviderSandboxDryRunStatus(providerId, providerHealth){
+    const api = sandboxDryRunApi();
+    if (api && api.getProviderSandboxDryRunStatus) return api.getProviderSandboxDryRunStatus(providerId || "provider-disabled", providerHealth);
+    if (configApi() && configApi().getProviderSandboxDryRunStatus) return configApi().getProviderSandboxDryRunStatus(providerId || "provider-disabled", providerHealth);
+    return {
+      dryRunVersion:"2.0.45",
+      phase:"provider_sandbox_dry_run_framework",
+      providerId:String(providerId || "provider-disabled"),
+      dryRunStatus:"not_run",
+      dryRunMode:"offline_sandbox",
+      canRunDryRun:false,
+      canUseRealEndpoint:false,
+      canUseRealApiKey:false,
+      canUseNetwork:false,
+      canReturnRealResults:false,
+      canReturnRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      reason:"provider_sandbox_dry_run_required"
+    };
+  }
+
   function defaultConfig(category, settings){
     const api = configApi();
     if (api && api.getCommerceProviderConfig) return api.getCommerceProviderConfig(category, settings);
@@ -434,6 +460,7 @@
     const profileHealth = next === "product" ? getProviderStubProfileStatus(productCandidate && productCandidate.selectedFirstCandidate || "ebay_browse_api") : null;
     const approval = approvalFields(getProviderApprovalStatus(next, next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled"));
     const stub = connectorStubFields(getReadOnlyConnectorStubStatus(next, next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled", approval));
+    const dryRun = providerSandboxDryRunFields(getProviderSandboxDryRunStatus(next === "product" ? "ebay_browse_api" : next + "-provider-disabled"));
     return Object.assign({
       providerId:next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled",
       category:next,
@@ -485,6 +512,7 @@
       productProviderCandidateReadiness:productCandidate || undefined,
       providerStubProfileHealth:profileHealth || undefined,
       providerSecretHealth:getProviderSecretStorageStatus(next === "product" ? "ebay_browse_api" : next + "-provider-disabled"),
+      providerSandboxDryRunHealth:dryRun,
       globalProviderPoolReadiness:pool || undefined,
       approvalHealth:approval,
       connectorStubHealth:stub,
@@ -559,6 +587,7 @@
       productProviderCandidateReadiness:next.productProviderCandidateReadiness || getProductProviderCandidateReadiness(),
       providerStubProfileHealth:next.providerStubProfileHealth || getProviderStubProfileStatus(next.selectedFirstCandidate || "ebay_browse_api"),
       providerSecretHealth:next.providerSecretHealth || getProviderSecretStorageStatus(next.selectedFirstCandidate || next.providerId),
+      providerSandboxDryRunHealth:next.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(next.selectedFirstCandidate || next.providerId),
       globalProviderPoolReadiness:next.globalProviderPoolReadiness || getGlobalProviderPoolReadiness()
     };
   }
@@ -666,6 +695,85 @@
         noPayment:safety.noPayment !== false,
         noOrderSubmit:safety.noOrderSubmit !== false,
         noIdentityStorage:safety.noIdentityStorage !== false
+      }
+    };
+  }
+
+  function providerSandboxDryRunFields(dryRun){
+    const next = dryRun || {};
+    const checks = next.dryRunChecks || {};
+    const capabilities = next.capabilities || {};
+    const safety = next.safety || {};
+    return {
+      dryRunVersion:next.dryRunVersion || "2.0.45",
+      phase:next.phase || "provider_sandbox_dry_run_framework",
+      providerId:next.providerId || "provider-disabled",
+      defaultStatus:next.defaultStatus || "not_run",
+      dryRunStatus:next.dryRunStatus || "not_run",
+      dryRunMode:next.dryRunMode || "offline_sandbox",
+      requiresGlobalCommerceStandard:next.requiresGlobalCommerceStandard !== false,
+      requiresLocalLawCompliance:next.requiresLocalLawCompliance !== false,
+      requiresProviderOnboarding:next.requiresProviderOnboarding !== false,
+      requiresProviderApproval:next.requiresProviderApproval !== false,
+      requiresReadOnlyConnectorStub:next.requiresReadOnlyConnectorStub !== false,
+      requiresProviderStubProfile:next.requiresProviderStubProfile !== false,
+      requiresSecretStoragePlan:next.requiresSecretStoragePlan !== false,
+      requiresHumanApproval:next.requiresHumanApproval !== false,
+      canRunDryRun:false,
+      canUseRealEndpoint:false,
+      canUseRealApiKey:false,
+      canUseNetwork:false,
+      canReturnRealResults:false,
+      canReturnRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      canCheckout:false,
+      canPay:false,
+      canSubmitOrder:false,
+      canStoreIdentity:false,
+      reason:next.reason || "provider_sandbox_dry_run_required",
+      dryRunChecks:{
+        requestShapeReviewed:checks.requestShapeReviewed === true,
+        responseShapeReviewed:checks.responseShapeReviewed === true,
+        errorHandlingReviewed:checks.errorHandlingReviewed === true,
+        timeoutHandlingReviewed:checks.timeoutHandlingReviewed === true,
+        rateLimitHandlingReviewed:checks.rateLimitHandlingReviewed === true,
+        paginationReviewed:checks.paginationReviewed === true,
+        priceFieldReviewed:checks.priceFieldReviewed === true,
+        taxFeeShippingFieldReviewed:checks.taxFeeShippingFieldReviewed === true,
+        redirectUrlReviewed:checks.redirectUrlReviewed === true,
+        privacyReviewed:checks.privacyReviewed === true,
+        noPaymentConfirmed:checks.noPaymentConfirmed === true,
+        noOrderSubmitConfirmed:checks.noOrderSubmitConfirmed === true,
+        noIdentityStorageConfirmed:checks.noIdentityStorageConfirmed === true
+      },
+      capabilities:{
+        canRunDryRun:capabilities.canRunDryRun === true && false,
+        canUseRealEndpoint:false,
+        canUseRealApiKey:false,
+        canUseNetwork:false,
+        canReturnRealResults:false,
+        canReturnRealPrice:false,
+        canReturnMockPrice:false,
+        canRedirect:false,
+        canCheckout:false,
+        canPay:false,
+        canSubmitOrder:false,
+        canStoreIdentity:false
+      },
+      safety:{
+        noRealEndpoint:safety.noRealEndpoint !== false,
+        noRealApiKey:safety.noRealApiKey !== false,
+        noNetworkSearch:safety.noNetworkSearch !== false,
+        noRealResults:safety.noRealResults !== false,
+        noRealPrice:safety.noRealPrice !== false,
+        noFakeDemoMockPrice:safety.noFakeDemoMockPrice !== false,
+        noRedirect:safety.noRedirect !== false,
+        noCheckout:safety.noCheckout !== false,
+        noPayment:safety.noPayment !== false,
+        noOrderSubmit:safety.noOrderSubmit !== false,
+        noIdentityStorage:safety.noIdentityStorage !== false,
+        noRawGpsStorage:safety.noRawGpsStorage !== false
       }
     };
   }
@@ -971,6 +1079,18 @@
       secret.canRedirect === true);
   }
 
+  function isProviderSandboxDryRunReady(dryRun){
+    return !!(dryRun &&
+      dryRun.dryRunStatus === "passed" &&
+      dryRun.canRunDryRun === true &&
+      dryRun.canUseRealEndpoint === true &&
+      dryRun.canUseRealApiKey === true &&
+      dryRun.canUseNetwork === true &&
+      dryRun.canReturnRealResults === true &&
+      dryRun.canReturnRealPrice === true &&
+      dryRun.canRedirect === true);
+  }
+
   function isFixtureValidationProvider(config, settings){
     const cfg = settings || {};
     return !!(config &&
@@ -992,6 +1112,7 @@
     const stub = connectorStubFields(getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
     const profile = providerStubProfileFields(providerConfig && providerConfig.providerStubProfileHealth || getProviderStubProfileStatus("ebay_browse_api"));
     const secret = providerSecretFields(providerConfig && providerConfig.providerSecretHealth || getProviderSecretStorageStatus(profile.providerId));
+    const sandboxDryRun = providerSandboxDryRunFields(providerConfig && providerConfig.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile.providerId));
     return {
       ok:false,
       code:"COMMERCE_PRODUCT_PROVIDER_NOT_CONNECTED",
@@ -1007,8 +1128,9 @@
       connectorStubHealth:stub,
       providerStubProfileHealth:profile,
       providerSecretHealth:secret,
+      providerSandboxDryRunHealth:sandboxDryRun,
       sandboxHealth:sandbox,
-      dryRunHealth:sandbox,
+      dryRunHealth:sandboxDryRun,
       productProviderReadiness:readiness,
       globalProviderPoolReadiness:pool,
       canShowPrice:false,
@@ -1024,6 +1146,7 @@
     const stub = connectorStubFields(getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
     const profile = resultCategory(request && request.category) === "product" ? providerStubProfileFields(providerConfig && providerConfig.providerStubProfileHealth || getProviderStubProfileStatus("ebay_browse_api")) : undefined;
     const secret = providerSecretFields(providerConfig && providerConfig.providerSecretHealth || getProviderSecretStorageStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
+    const sandboxDryRun = providerSandboxDryRunFields(providerConfig && providerConfig.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     return {
       ok:false,
       code:"COMMERCE_PROVIDER_APPROVAL_REQUIRED",
@@ -1039,8 +1162,9 @@
       connectorStubHealth:stub,
       providerStubProfileHealth:profile,
       providerSecretHealth:secret,
+      providerSandboxDryRunHealth:sandboxDryRun,
       sandboxHealth:sandbox,
-      dryRunHealth:sandbox,
+      dryRunHealth:sandboxDryRun,
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -1054,6 +1178,7 @@
     const stub = connectorStubFields(stubHealth || getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
     const profile = resultCategory(request && request.category) === "product" ? providerStubProfileFields(providerConfig && providerConfig.providerStubProfileHealth || getProviderStubProfileStatus("ebay_browse_api")) : undefined;
     const secret = providerSecretFields(providerConfig && providerConfig.providerSecretHealth || getProviderSecretStorageStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
+    const sandboxDryRun = providerSandboxDryRunFields(providerConfig && providerConfig.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     return {
       ok:false,
       code:"COMMERCE_READ_ONLY_CONNECTOR_STUB_REQUIRED",
@@ -1069,8 +1194,9 @@
       connectorStubHealth:stub,
       providerStubProfileHealth:profile,
       providerSecretHealth:secret,
+      providerSandboxDryRunHealth:sandboxDryRun,
       sandboxHealth:sandbox,
-      dryRunHealth:sandbox,
+      dryRunHealth:sandboxDryRun,
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -1084,6 +1210,7 @@
     const stub = connectorStubFields(stubHealth || getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
     const profile = resultCategory(request && request.category) === "product" ? providerStubProfileFields(providerConfig && providerConfig.providerStubProfileHealth || getProviderStubProfileStatus("ebay_browse_api")) : undefined;
     const secret = providerSecretFields(secretHealth || getProviderSecretStorageStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
+    const sandboxDryRun = providerSandboxDryRunFields(providerConfig && providerConfig.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     return {
       ok:false,
       code:"COMMERCE_PROVIDER_SECRET_STORAGE_REQUIRED",
@@ -1099,8 +1226,41 @@
       connectorStubHealth:stub,
       providerStubProfileHealth:profile,
       providerSecretHealth:secret,
+      providerSandboxDryRunHealth:sandboxDryRun,
       sandboxHealth:sandbox,
-      dryRunHealth:sandbox,
+      dryRunHealth:sandboxDryRun,
+      canShowPrice:false,
+      canShowBookingButton:false,
+      canShowCheckoutButton:false,
+      candidates:[]
+    };
+  }
+
+  function providerSandboxDryRunRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, approvalHealth, stubHealth, secretHealth, dryRunHealth){
+    const onboarding = onboardingFields(getProviderOnboardingStatus(request && request.category));
+    const approval = approvalFields(approvalHealth || getProviderApprovalStatus(request && request.category, providerConfig && providerConfig.providerId));
+    const stub = connectorStubFields(stubHealth || getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
+    const profile = resultCategory(request && request.category) === "product" ? providerStubProfileFields(providerConfig && providerConfig.providerStubProfileHealth || getProviderStubProfileStatus("ebay_browse_api")) : undefined;
+    const secret = providerSecretFields(secretHealth || getProviderSecretStorageStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
+    const sandboxDryRun = providerSandboxDryRunFields(dryRunHealth || providerConfig && providerConfig.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
+    return {
+      ok:false,
+      code:"COMMERCE_PROVIDER_SANDBOX_DRY_RUN_REQUIRED",
+      message:"provider_sandbox_dry_run_required",
+      reason:sandboxDryRun.reason || "provider_sandbox_dry_run_required",
+      request,
+      searchStatus:"no_provider",
+      providerHealth:providerHealth.providerHealth,
+      configHealth:configFields(providerConfig),
+      connectorHealth,
+      onboardingHealth:onboarding,
+      approvalHealth:approval,
+      connectorStubHealth:stub,
+      providerStubProfileHealth:profile,
+      providerSecretHealth:secret,
+      providerSandboxDryRunHealth:sandboxDryRun,
+      sandboxHealth:sandbox,
+      dryRunHealth:sandboxDryRun,
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -1115,6 +1275,7 @@
     const health = complianceHealth || evaluateLocalLawCompliance(request, { locationHealth:locationHealth() });
     const profile = resultCategory(request && request.category) === "product" ? providerStubProfileFields(providerConfig && providerConfig.providerStubProfileHealth || getProviderStubProfileStatus("ebay_browse_api")) : undefined;
     const secret = providerSecretFields(providerConfig && providerConfig.providerSecretHealth || getProviderSecretStorageStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
+    const sandboxDryRun = providerSandboxDryRunFields(providerConfig && providerConfig.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile && profile.providerId || providerConfig && providerConfig.providerId));
     return {
       ok:false,
       code:"COMMERCE_LOCAL_LAW_COMPLIANCE_REQUIRED",
@@ -1130,8 +1291,9 @@
       connectorStubHealth:stub,
       providerStubProfileHealth:profile,
       providerSecretHealth:secret,
+      providerSandboxDryRunHealth:sandboxDryRun,
       sandboxHealth:sandbox,
-      dryRunHealth:sandbox,
+      dryRunHealth:sandboxDryRun,
       locationHealth:locationHealth(),
       complianceHealth:health,
       canShowPrice:false,
@@ -1148,6 +1310,7 @@
     const stub = connectorStubFields(getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
     const profile = providerStubProfileFields(providerConfig && providerConfig.providerStubProfileHealth || getProviderStubProfileStatus("ebay_browse_api"));
     const secret = providerSecretFields(providerConfig && providerConfig.providerSecretHealth || getProviderSecretStorageStatus(profile.providerId));
+    const sandboxDryRun = providerSandboxDryRunFields(providerConfig && providerConfig.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile.providerId));
     return {
       ok:false,
       code:"COMMERCE_SHIPPING_DESTINATION_REQUIRED",
@@ -1163,8 +1326,9 @@
       connectorStubHealth:stub,
       providerStubProfileHealth:profile,
       providerSecretHealth:secret,
+      providerSandboxDryRunHealth:sandboxDryRun,
       sandboxHealth:sandbox,
-      dryRunHealth:sandbox,
+      dryRunHealth:sandboxDryRun,
       locationHealth:health,
       landedCostAccuracy:"blocked_shipping_destination_required",
       canShowPrice:false,
@@ -1248,6 +1412,7 @@
     const configReady = isProviderConfigReady(config);
     const connectorReady = isProviderConnectorReady(connector);
     const sandbox = sandboxFields(next, settings, config, connector);
+    const sandboxDryRun = providerSandboxDryRunFields(config.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(profile && profile.providerId || config.providerId || next + "-provider-disabled"));
     return {
       category:next,
       categoryLabel:isProduct ? "商品" : next === "flight" ? "机票" : next,
@@ -1321,6 +1486,7 @@
         connectorHealth:cFields,
         connectorStubHealth:stub,
         providerStubProfileHealth:profile,
+        providerSandboxDryRunHealth:sandboxDryRun,
         sandboxHealth:sandbox
       }],
       adapterHealth:{
@@ -1335,8 +1501,9 @@
       approvalHealth:approval,
       connectorStubHealth:stub,
       providerStubProfileHealth:profile,
+      providerSandboxDryRunHealth:sandboxDryRun,
       sandboxHealth:sandbox,
-      dryRunHealth:sandbox,
+      dryRunHealth:sandboxDryRun,
       enabled:configured && configReady && connectorReady,
       configured:configured && configReady && connectorReady,
       reasonWhenDisabled:configured && configReady && connectorReady ? "" : cFields.connectorReasonWhenUnavailable || config.reasonWhenUnavailable || "provider_config_not_ready",
@@ -2007,6 +2174,7 @@
     const connectorStubHealth = connectorStubFields(getReadOnlyConnectorStubStatus(request.category, providerConfig && providerConfig.providerId, approvalHealth));
     const providerStubProfileHealth = resultCategory(request.category) === "product" ? providerStubProfileFields(providerConfig && providerConfig.providerStubProfileHealth || providerHealth && providerHealth.providerStubProfileHealth || getProviderStubProfileStatus("ebay_browse_api")) : undefined;
     const providerSecretHealth = providerSecretFields(providerConfig && providerConfig.providerSecretHealth || providerHealth && providerHealth.providerSecretHealth || getProviderSecretStorageStatus(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId));
+    const providerSandboxDryRunHealth = providerSandboxDryRunFields(providerConfig && providerConfig.providerSandboxDryRunHealth || providerHealth && providerHealth.providerSandboxDryRunHealth || getProviderSandboxDryRunStatus(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId));
     const sandbox = getCommerceProviderSandbox(request.category, settings);
     const complianceHealth = !isAiModelPricingTask(request) ? evaluateLocalLawCompliance(request, { locationHealth:locationHealth() }) : null;
     if (complianceHealth && complianceHealth.canSearchProvider !== true) {
@@ -2026,6 +2194,9 @@
     }
     if (!isAiModelPricingTask(request) && !isFixtureValidationProvider(providerConfig, settings) && !isProviderSecretStorageReady(providerSecretHealth)) {
       return providerSecretStorageRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, approvalHealth, connectorStubHealth, providerSecretHealth);
+    }
+    if (!isAiModelPricingTask(request) && !isFixtureValidationProvider(providerConfig, settings) && !isProviderSandboxDryRunReady(providerSandboxDryRunHealth)) {
+      return providerSandboxDryRunRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, approvalHealth, connectorStubHealth, providerSecretHealth, providerSandboxDryRunHealth);
     }
     if (isAiModelPricingTask(request)) {
       const aiConfig = getCommerceProviderConfig("aiModelPricing", settings);
@@ -2048,8 +2219,9 @@
           approvalHealth:approvalFields(getProviderApprovalStatus("aiModelPricing", aiConfig && aiConfig.providerId)),
           connectorStubHealth:connectorStubFields(getReadOnlyConnectorStubStatus("aiModelPricing", aiConfig && aiConfig.providerId, getProviderApprovalStatus("aiModelPricing", aiConfig && aiConfig.providerId))),
           providerSecretHealth:providerSecretFields(getProviderSecretStorageStatus(aiConfig && aiConfig.providerId || "aiModelPricing-provider-disabled")),
+          providerSandboxDryRunHealth:providerSandboxDryRunFields(getProviderSandboxDryRunStatus(aiConfig && aiConfig.providerId || "aiModelPricing-provider-disabled")),
           sandboxHealth:aiSandbox,
-          dryRunHealth:aiSandbox,
+          dryRunHealth:providerSandboxDryRunFields(getProviderSandboxDryRunStatus(aiConfig && aiConfig.providerId || "aiModelPricing-provider-disabled")),
           canShowPrice:false,
           canShowBookingButton:false,
           canShowCheckoutButton:false,
@@ -2074,8 +2246,9 @@
         connectorStubHealth,
         providerStubProfileHealth,
         providerSecretHealth,
+        providerSandboxDryRunHealth,
         sandboxHealth:sandbox,
-        dryRunHealth:sandbox,
+        dryRunHealth:providerSandboxDryRunHealth,
         canShowPrice:false,
         canShowBookingButton:false,
         canShowCheckoutButton:false,
@@ -2096,8 +2269,9 @@
         connectorStubHealth,
         providerStubProfileHealth,
         providerSecretHealth,
+        providerSandboxDryRunHealth,
         sandboxHealth:sandbox,
-        dryRunHealth:sandbox,
+        dryRunHealth:providerSandboxDryRunHealth,
         canShowPrice:false,
         canShowBookingButton:false,
         canShowCheckoutButton:false,
@@ -2124,8 +2298,9 @@
         connectorStubHealth,
         providerStubProfileHealth,
         providerSecretHealth,
+        providerSandboxDryRunHealth,
         sandboxHealth:Object.assign({}, sandbox, sandboxValidation),
-        dryRunHealth:Object.assign({}, sandbox, sandboxValidation),
+        dryRunHealth:providerSandboxDryRunHealth,
         canShowPrice:candidates.length > 0,
         canShowBookingButton:candidates.length > 0 && providerHealth.canShowBookingButton === true,
         canShowCheckoutButton:candidates.length > 0 && providerHealth.canShowCheckoutButton === true,
@@ -2151,8 +2326,9 @@
       connectorStubHealth,
       providerStubProfileHealth,
       providerSecretHealth,
+      providerSandboxDryRunHealth,
       sandboxHealth:sandbox,
-      dryRunHealth:sandbox,
+      dryRunHealth:providerSandboxDryRunHealth,
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -2175,6 +2351,7 @@
     getReadOnlyConnectorStubStatus,
     getProviderStubProfileStatus,
     getProviderSecretStorageStatus,
+    getProviderSandboxDryRunStatus,
     locationHealthForCommerce:locationHealth,
     getLocalLawCompliancePolicy,
     evaluateLocalLawCompliance,

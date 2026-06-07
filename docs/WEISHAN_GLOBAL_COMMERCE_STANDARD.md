@@ -241,6 +241,18 @@ Provider Secret Storage Plan 默认必须满足：
 
 weishan 不得提供真实 provider 密钥输入框，不得保存真实 key，不得读取 key，不得将 key 用于网络请求，直到 Provider Secret Storage Plan 明确通过。测试可以验证占位符被阻断，但不得让 fake/demo/mock price 或明文 secret 进入生产 UI。
 
+## 7.6. Provider Sandbox Dry Run 标准
+
+Provider Sandbox Dry Run 是真实 provider 接入前的离线沙箱空跑框架。真实 provider 接入前必须完成 sandbox dry run。
+
+sandbox dry run 默认是离线沙箱，只用于检查未来 connector 的请求/响应结构。sandbox dry run 默认不得访问真实 endpoint，默认不得使用真实 API key，默认不得发起网络请求，默认不得返回真实商品结果，默认不得返回真实价格，默认不得返回 fake/demo/mock price，默认不得跳转购买 / 预订页面。
+
+sandbox dry run 通过后也不得自动放开 API key、endpoint、network、price、redirect、checkout/payment/order。任何放开都必须重新经过 Local Law Compliance Gate、Provider Onboarding Checklist、Provider Approval Workflow、Read-only Connector Stub、Provider Stub Profile、Provider Secret Storage Plan、connector gate 和 human approval。
+
+Provider Sandbox Dry Run 只允许审查未来 connector 的请求结构、响应结构、错误处理、超时处理、频率限制、分页、价格字段、税费 / 运费字段、跳转 URL、隐私边界、不付款、不提交订单和不保存证件 / 银行卡。
+
+无论 dry run 状态如何，weishan 都不得自动付款、自动下单、提交订单或保存证件 / 银行卡。
+
 ## 8. 结果展示标准
 
 结果最多展示 2-3 条。

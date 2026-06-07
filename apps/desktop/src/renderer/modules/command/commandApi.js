@@ -32,6 +32,9 @@
   if (!window.WeishanCommerceProviderSecretStoragePlan && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProviderSecretStoragePlan.js?v=2.0.44"></scr' + 'ipt>');
   }
+  if (!window.WeishanCommerceProviderSandboxDryRun && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderSandboxDryRun.js?v=2.0.45"></scr' + 'ipt>');
+  }
   if (!window.WeishanCommerceProductProviderCandidate && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.44"></scr' + 'ipt>');
   }
@@ -305,8 +308,9 @@
       commercePlan.connectorStubHealth = providerHealth && providerHealth.connectorStubHealth || {};
       commercePlan.providerStubProfileHealth = providerHealth && (providerHealth.providerStubProfileHealth || providerHealth.configHealth && providerHealth.configHealth.providerStubProfileHealth) || {};
       commercePlan.providerSecretHealth = providerHealth && (providerHealth.providerSecretHealth || providerHealth.configHealth && providerHealth.configHealth.providerSecretHealth) || {};
+      commercePlan.providerSandboxDryRunHealth = providerHealth && (providerHealth.providerSandboxDryRunHealth || providerHealth.configHealth && providerHealth.configHealth.providerSandboxDryRunHealth) || {};
       commercePlan.sandboxHealth = providerHealth && providerHealth.sandboxHealth || {};
-      commercePlan.dryRunHealth = providerHealth && (providerHealth.dryRunHealth || providerHealth.sandboxHealth) || {};
+      commercePlan.dryRunHealth = providerHealth && (providerHealth.providerSandboxDryRunHealth || providerHealth.dryRunHealth || providerHealth.sandboxHealth) || {};
       commercePlan.locationHealth = locationHealth || {};
       commercePlan.complianceHealth = complianceHealth || {};
       commercePlan.landedCostAccuracy = destinationRequired ? "blocked_shipping_destination_required" : "";

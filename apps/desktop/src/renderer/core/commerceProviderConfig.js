@@ -57,6 +57,10 @@
     return window.WeishanCommerceProviderSecretStoragePlan || null;
   }
 
+  function sandboxDryRunApi(){
+    return window.WeishanCommerceProviderSandboxDryRun || null;
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
@@ -168,6 +172,27 @@
     };
   }
 
+  function providerSandboxDryRunStatus(providerId, providerHealth){
+    const api = sandboxDryRunApi();
+    if (api && api.getProviderSandboxDryRunStatus) return api.getProviderSandboxDryRunStatus(providerId || "provider-disabled", providerHealth);
+    return {
+      dryRunVersion:"2.0.45",
+      phase:"provider_sandbox_dry_run_framework",
+      providerId:String(providerId || "provider-disabled"),
+      dryRunStatus:"not_run",
+      dryRunMode:"offline_sandbox",
+      canRunDryRun:false,
+      canUseRealEndpoint:false,
+      canUseRealApiKey:false,
+      canUseNetwork:false,
+      canReturnRealResults:false,
+      canReturnRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      reason:"provider_sandbox_dry_run_required"
+    };
+  }
+
   function poolReadiness(){
     const api = poolApi();
     if (api && api.getCommerceGlobalProviderPoolReadiness) return api.getCommerceGlobalProviderPoolReadiness();
@@ -273,6 +298,7 @@
     const approval = approvalStatus(next, providerId);
     const stub = connectorStubStatus(next, providerId, approval);
     const secret = providerSecretStorageStatus(providerId);
+    const dryRun = providerSandboxDryRunStatus(providerId);
     const base = {
       providerId,
       category:next,
@@ -283,6 +309,13 @@
       canSaveProviderApiKey:false,
       canReadProviderApiKey:false,
       canUseProviderApiKeyForNetwork:false,
+      providerSandboxDryRunHealth:dryRun,
+      providerSandboxDryRunStatus:dryRun.dryRunStatus || "not_run",
+      providerSandboxDryRunMode:dryRun.dryRunMode || "offline_sandbox",
+      canRunProviderSandboxDryRun:false,
+      canUseSandboxRealEndpoint:false,
+      canUseSandboxApiKey:false,
+      canReturnSandboxResults:false,
       connectorStubHealth:stub,
       connectorStubStatus:stub.stubStatus || "stub_not_ready",
       connectorStubMode:stub.connectorMode || "read_only",
@@ -364,6 +397,7 @@
         productProviderCandidateReadiness:candidate,
       providerStubProfileHealth:profileHealth,
       providerSecretHealth:providerSecretStorageStatus(candidate.selectedFirstCandidate || "ebay_browse_api"),
+      providerSandboxDryRunHealth:providerSandboxDryRunStatus(candidate.selectedFirstCandidate || "ebay_browse_api"),
       providerOnboardingStatus:onboardingStatus(next)
       });
     }
@@ -539,6 +573,7 @@
       productProviderReadiness:config.productProviderReadiness || productReadiness(config),
       providerStubProfileHealth:config.providerStubProfileHealth || providerStubProfileStatus(config.selectedFirstCandidate || "ebay_browse_api"),
       providerSecretHealth:config.providerSecretHealth || providerSecretStorageStatus(config.selectedFirstCandidate || config.providerId),
+      providerSandboxDryRunHealth:config.providerSandboxDryRunHealth || providerSandboxDryRunStatus(config.selectedFirstCandidate || config.providerId),
       reasonWhenUnavailable:ready ? "" : config.reasonWhenUnavailable || "provider_config_not_ready"
     };
   }
@@ -554,6 +589,7 @@
     getCommerceProviderConfigHealth,
     getProviderStubProfileStatus:providerStubProfileStatus,
     getProviderSecretStorageStatus:providerSecretStorageStatus,
+    getProviderSandboxDryRunStatus:providerSandboxDryRunStatus,
     getReadOnlyConnectorStubStatus:connectorStubStatus
   };
 })();

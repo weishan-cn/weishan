@@ -64,6 +64,10 @@
     return window.WeishanCommerceProviderSecretStoragePlan || null;
   }
 
+  function sandboxDryRunApi(){
+    return window.WeishanCommerceProviderSandboxDryRun || null;
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
@@ -172,6 +176,27 @@
       canReturnRealPrice:false,
       canRedirect:false,
       reason:"provider_secret_storage_not_approved"
+    };
+  }
+
+  function providerSandboxDryRunStatus(providerId, providerHealth){
+    const api = sandboxDryRunApi();
+    if (api && api.getProviderSandboxDryRunStatus) return api.getProviderSandboxDryRunStatus(providerId || "provider-disabled", providerHealth);
+    return {
+      dryRunVersion:"2.0.45",
+      phase:"provider_sandbox_dry_run_framework",
+      providerId:String(providerId || "provider-disabled"),
+      dryRunStatus:"not_run",
+      dryRunMode:"offline_sandbox",
+      canRunDryRun:false,
+      canUseRealEndpoint:false,
+      canUseRealApiKey:false,
+      canUseNetwork:false,
+      canReturnRealResults:false,
+      canReturnRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      reason:"provider_sandbox_dry_run_required"
     };
   }
 
@@ -380,6 +405,7 @@
       productProviderCandidateReadiness:next.productProviderCandidateReadiness || productCandidateReadiness(),
       providerStubProfileHealth:next.providerStubProfileHealth || providerStubProfileStatus(next.selectedFirstCandidate || "ebay_browse_api"),
       providerSecretHealth:next.providerSecretHealth || providerSecretStorageStatus(next.selectedFirstCandidate || next.providerId),
+      providerSandboxDryRunHealth:next.providerSandboxDryRunHealth || providerSandboxDryRunStatus(next.selectedFirstCandidate || next.providerId),
       globalProviderPoolReadiness:next.globalProviderPoolReadiness || poolReadiness(),
       onboardingStatus:next.onboardingStatus || "not_reviewed",
       providerOnboardingRequired:next.providerOnboardingRequired !== false,
@@ -726,6 +752,7 @@
       connectorStubHealth:stub,
       providerStubProfileHealth:next === "product" ? providerStubProfileStatus("ebay_browse_api") : undefined,
       providerSecretHealth:providerSecretStorageStatus(next === "product" ? "ebay_browse_api" : config.providerId || next + "-provider-disabled"),
+      providerSandboxDryRunHealth:providerSandboxDryRunStatus(next === "product" ? "ebay_browse_api" : config.providerId || next + "-provider-disabled"),
       connectorHealth:cFields,
       sandboxHealth:sandboxFields(next, cfg, config, config, connector)
     };
@@ -751,8 +778,9 @@
       connectorStubHealth:provider.connectorStubHealth || connectorStubStatus(next, provider.providerId || provider.id, provider.approvalHealth || approvalStatus(next, provider.providerId || provider.id)),
       providerStubProfileHealth:provider.providerStubProfileHealth || provider.configHealth && provider.configHealth.providerStubProfileHealth || (next === "product" ? providerStubProfileStatus("ebay_browse_api") : undefined),
       providerSecretHealth:provider.providerSecretHealth || provider.configHealth && provider.configHealth.providerSecretHealth || providerSecretStorageStatus(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id),
+      providerSandboxDryRunHealth:provider.providerSandboxDryRunHealth || provider.configHealth && provider.configHealth.providerSandboxDryRunHealth || providerSandboxDryRunStatus(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id),
       sandboxHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
-      dryRunHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
+      dryRunHealth:provider.providerSandboxDryRunHealth || provider.configHealth && provider.configHealth.providerSandboxDryRunHealth || providerSandboxDryRunStatus(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id),
       enabled:provider.enabled === true,
       configured:provider.configured === true,
       reasonWhenDisabled:provider.reasonWhenDisabled || "",

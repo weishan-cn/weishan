@@ -489,6 +489,30 @@
     </section>`;
   }
 
+  function commerceProviderSandboxDryRunHomePanel(){
+    const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
+    const group = (title, items) => `<section class="commerce-sandbox-dry-run-group"><h4>${esc(title)}</h4><ul>${items.map((item) => row(item[0], item[1])).join("")}</ul></section>`;
+    return `<section class="commerce-sandbox-dry-run-panel commerce-sandbox-dry-run-home-panel" aria-label="Provider Sandbox Dry Run">
+      <div class="commerce-sandbox-dry-run-head">
+        <div>
+          <h3>Provider Sandbox Dry Run</h3>
+          <p>真实 provider 接入前必须完成离线沙箱空跑。当前不会访问任何真实平台。</p>
+        </div>
+        <strong>Dry Run 状态：未运行</strong>
+      </div>
+      <div class="commerce-sandbox-dry-run-grid">
+        ${group("沙箱状态", [["Dry Run 状态", "未运行"], ["Dry Run 模式", "离线沙箱"], ["真实 endpoint", "不可使用"], ["真实 API key", "不可使用"], ["网络请求", "未启用"]])}
+        ${group("结果与跳转", [["真实结果", "不可返回"], ["真实价格", "不可用"], ["测试价格", "不可用"], ["精确跳转", "未启用"]])}
+        ${group("交易与隐私", [["支付 / 下单", "不支持"], ["证件 / 银行卡", "不保存"]])}
+        ${group("空跑检查清单", [["请求结构审查", "未完成"], ["响应结构审查", "未完成"], ["错误处理审查", "未完成"], ["超时处理审查", "未完成"], ["频率限制审查", "未完成"], ["分页处理审查", "未完成"], ["价格字段审查", "未完成"], ["税费 / 运费字段审查", "未完成"], ["跳转 URL 审查", "未完成"], ["隐私审查", "未完成"], ["不付款确认", "未完成"], ["不提交订单确认", "未完成"], ["不保存证件 / 银行卡确认", "未完成"]])}
+      </div>
+      <div class="commerce-sandbox-dry-run-note">
+        <p>Sandbox dry run 只用于检查未来 connector 的请求/响应结构。当前不会访问 eBay 或任何真实 provider，不会读取 API key，不会发起网络请求，不会返回商品、价格或跳转链接。</p>
+        <p>即使后续 dry run 通过，也不会自动放开 API key、endpoint、network、price、redirect、checkout、payment 或 order。</p>
+      </div>
+    </section>`;
+  }
+
   function commerceProviderStubProfileHomePanel(profileInfo, category){
     const rawCategory = String(category || "");
     if (rawCategory !== "product" && rawCategory !== "ecommerce") return "";
@@ -587,6 +611,7 @@
         ${blocked ? `<p><b>原因：</b>涉及下单 / 付款 / 敏感资料或询价提交</p>` : ""}
         ${!blocked && localLawPanelRequired ? commerceLocalLawHomePanel(stored) : ""}
         ${showOnboardingHomePanel ? commerceProviderSecretStorageHomePanel(stored.providerSecretHealth || stored.configHealth && stored.configHealth.providerSecretHealth || {}) : ""}
+        ${showOnboardingHomePanel ? commerceProviderSandboxDryRunHomePanel(stored.providerSandboxDryRunHealth || stored.configHealth && stored.configHealth.providerSandboxDryRunHealth || {}) : ""}
         ${!blocked && isProductPlan ? commerceProviderStubProfileHomePanel(stored.providerStubProfileHealth || stored.configHealth && stored.configHealth.providerStubProfileHealth || {}, stored.category) : ""}
         ${!blocked && approvalPanelRequired ? commerceReadOnlyConnectorStubHomePanel(stored.connectorStubHealth) : ""}
         ${!blocked && approvalPanelRequired ? commerceProviderApprovalHomePanel(stored.approvalHealth) : ""}

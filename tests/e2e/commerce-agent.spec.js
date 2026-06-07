@@ -1183,6 +1183,160 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
+  test("provider sandbox dry run contract blocks endpoint key network results price and redirect", async () => {
+    await gotoRoute(page, "commerce");
+    const result = await page.evaluate(async () => {
+      delete window.WeishanCommerceProviderSandboxDryRun;
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceProviderSandboxDryRun.js?v=2.0.45&contract=" + Date.now();
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      const api = window.WeishanCommerceProviderSandboxDryRun;
+      const status = api.getProviderSandboxDryRunStatus("ebay_browse_api");
+      return {
+        policy:api.getProviderSandboxDryRunPolicy("ebay_browse_api"),
+        status,
+        canRun:api.canRunProviderSandboxDryRun("ebay_browse_api"),
+        canEndpoint:api.canUseSandboxRealEndpoint("ebay_browse_api"),
+        canKey:api.canUseSandboxApiKey("ebay_browse_api"),
+        canResults:api.canReturnSandboxResults("ebay_browse_api"),
+        reason:api.explainProviderSandboxDryRunBlockReason("ebay_browse_api"),
+        displayStatus:api.toProviderSandboxDryRunDisplayStatus("not_run"),
+        displayMode:api.toProviderSandboxDryRunDisplayStatus("offline_sandbox")
+      };
+    });
+    expect(result.policy.dryRunVersion).toBe("2.0.45");
+    expect(result.policy.phase).toBe("provider_sandbox_dry_run_framework");
+    expect(result.policy.defaultStatus).toBe("not_run");
+    expect(result.policy.dryRunMode).toBe("offline_sandbox");
+    expect(result.policy.requiresGlobalCommerceStandard).toBe(true);
+    expect(result.policy.requiresLocalLawCompliance).toBe(true);
+    expect(result.policy.requiresProviderOnboarding).toBe(true);
+    expect(result.policy.requiresProviderApproval).toBe(true);
+    expect(result.policy.requiresReadOnlyConnectorStub).toBe(true);
+    expect(result.policy.requiresProviderStubProfile).toBe(true);
+    expect(result.policy.requiresSecretStoragePlan).toBe(true);
+    expect(result.policy.requiresHumanApproval).toBe(true);
+    expect(result.policy.dryRunChecks.requestShapeReviewed).toBe(false);
+    expect(result.policy.dryRunChecks.responseShapeReviewed).toBe(false);
+    expect(result.policy.dryRunChecks.errorHandlingReviewed).toBe(false);
+    expect(result.policy.dryRunChecks.timeoutHandlingReviewed).toBe(false);
+    expect(result.policy.dryRunChecks.rateLimitHandlingReviewed).toBe(false);
+    expect(result.policy.dryRunChecks.paginationReviewed).toBe(false);
+    expect(result.policy.dryRunChecks.priceFieldReviewed).toBe(false);
+    expect(result.policy.dryRunChecks.taxFeeShippingFieldReviewed).toBe(false);
+    expect(result.policy.dryRunChecks.redirectUrlReviewed).toBe(false);
+    expect(result.policy.dryRunChecks.privacyReviewed).toBe(false);
+    expect(result.policy.dryRunChecks.noPaymentConfirmed).toBe(false);
+    expect(result.policy.dryRunChecks.noOrderSubmitConfirmed).toBe(false);
+    expect(result.policy.dryRunChecks.noIdentityStorageConfirmed).toBe(false);
+    expect(result.policy.capabilities.canRunDryRun).toBe(false);
+    expect(result.policy.capabilities.canUseRealEndpoint).toBe(false);
+    expect(result.policy.capabilities.canUseRealApiKey).toBe(false);
+    expect(result.policy.capabilities.canUseNetwork).toBe(false);
+    expect(result.policy.capabilities.canReturnRealResults).toBe(false);
+    expect(result.policy.capabilities.canReturnRealPrice).toBe(false);
+    expect(result.policy.capabilities.canReturnMockPrice).toBe(false);
+    expect(result.policy.capabilities.canRedirect).toBe(false);
+    expect(result.policy.safety.noRealEndpoint).toBe(true);
+    expect(result.policy.safety.noRealApiKey).toBe(true);
+    expect(result.policy.safety.noNetworkSearch).toBe(true);
+    expect(result.policy.safety.noRealResults).toBe(true);
+    expect(result.policy.safety.noRealPrice).toBe(true);
+    expect(result.policy.safety.noFakeDemoMockPrice).toBe(true);
+    expect(result.policy.safety.noRedirect).toBe(true);
+    expect(result.status.dryRunStatus).toBe("not_run");
+    expect(result.status.dryRunMode).toBe("offline_sandbox");
+    expect(result.status.canRunDryRun).toBe(false);
+    expect(result.status.canUseRealEndpoint).toBe(false);
+    expect(result.status.canUseRealApiKey).toBe(false);
+    expect(result.status.canUseNetwork).toBe(false);
+    expect(result.status.canReturnRealResults).toBe(false);
+    expect(result.status.canReturnRealPrice).toBe(false);
+    expect(result.status.canReturnMockPrice).toBe(false);
+    expect(result.status.canRedirect).toBe(false);
+    expect(result.status.reason).toBe("provider_sandbox_dry_run_required");
+    expect(result.canRun).toBe(false);
+    expect(result.canEndpoint).toBe(false);
+    expect(result.canKey).toBe(false);
+    expect(result.canResults).toBe(false);
+    expect(result.reason).toBe("provider_sandbox_dry_run_required");
+    expect(result.displayStatus).toBe("未运行");
+    expect(result.displayMode).toBe("离线沙箱");
+  });
+
+  test("provider sandbox dry run panel appears without raw fields and blocks real provider access", async () => {
+    const inputs = ["买华为手机", "订酒店", "订机票", "买演唱会门票"];
+    for (const text of inputs) {
+      await submitHomeCommand(page, runId + "-SANDBOX-DRY-RUN " + text);
+      const home = page.locator('[data-commerce-home-summary="true"]').first();
+      await expect(home).toContainText("Provider Sandbox Dry Run");
+      await expect(home).toContainText("真实 provider 接入前必须完成离线沙箱空跑。当前不会访问任何真实平台。");
+      await expect(home).toContainText("Dry Run 状态：未运行");
+      await expect(home).toContainText("Dry Run 模式：离线沙箱");
+      await expect(home).toContainText("真实 endpoint：不可使用");
+      await expect(home).toContainText("真实 API key：不可使用");
+      await expect(home).toContainText("网络请求：未启用");
+      await expect(home).toContainText("真实结果：不可返回");
+      await expect(home).toContainText("真实价格：不可用");
+      await expect(home).toContainText("测试价格：不可用");
+      await expect(home).toContainText("精确跳转：未启用");
+      await expect(home).toContainText("请求结构审查：未完成");
+      await expect(home).toContainText("响应结构审查：未完成");
+      await expect(home).toContainText("错误处理审查：未完成");
+      await expect(home).toContainText("超时处理审查：未完成");
+      await expect(home).toContainText("频率限制审查：未完成");
+      await expect(home).toContainText("分页处理审查：未完成");
+      await expect(home).toContainText("价格字段审查：未完成");
+      await expect(home).toContainText("税费 / 运费字段审查：未完成");
+      await expect(home).toContainText("跳转 URL 审查：未完成");
+      await expect(home).toContainText("隐私审查：未完成");
+      await expect(home).toContainText("不付款确认：未完成");
+      await expect(home).toContainText("不提交订单确认：未完成");
+      await expect(home).toContainText("不保存证件 / 银行卡确认：未完成");
+      await expect(home).toContainText("当前不会访问 eBay 或任何真实 provider");
+      await expect(home).toContainText("不会读取 API key");
+      await expect(home).toContainText("不会发起网络请求");
+      await expect(home).toContainText("不会返回商品、价格或跳转链接");
+      await expect(home).not.toContainText("provider_sandbox_dry_run_required");
+      await expect(home).not.toContainText("dryRunStatus=not_run");
+      await expect(home).not.toContainText("canRunDryRun=false");
+      await expect(home).not.toContainText("canUseRealEndpoint=false");
+      await expect(home).not.toContainText("canUseRealApiKey=false");
+      await expect(home).not.toContainText("canUseNetwork=false");
+      await expect(home).not.toContainText("canReturnRealResults=false");
+      await expect(home).not.toContainText("canReturnRealPrice=false");
+      await expect(home).not.toContainText("canReturnMockPrice=false");
+      await expect(home).not.toContainText("noRealEndpoint=true");
+      await expect(home).not.toContainText("noRealApiKey=true");
+      await expect(home).not.toContainText("noNetworkSearch=true");
+      await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+      await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+      await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+      await expect(home).toContainText("当地法律合规审查");
+      await expect(home).toContainText("Provider 密钥安全方案");
+      await expect(home).toContainText("Provider 审批流程");
+      await expect(home).toContainText("只读 Connector Stub");
+
+      await page.locator("#commerceViewPlanBtn").click();
+      const detail = page.locator(".commerce-detail").first();
+      await expect(detail).toContainText("Provider Sandbox Dry Run");
+      await expect(detail).toContainText("Dry Run 状态：未运行");
+      await expect(detail).toContainText("Dry Run 模式：离线沙箱");
+      await expect(detail).toContainText("当前不会访问 eBay 或任何真实 provider");
+      await expect(detail).not.toContainText("provider_sandbox_dry_run_required");
+      await expect(detail).not.toContainText("dryRunStatus=not_run");
+      await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+      await expect(detail).toContainText("Provider 接入审查面板");
+      await expect(detail).toContainText("Provider 密钥安全方案");
+      await expect(detail).toContainText("只读 Connector Stub");
+      await gotoRoute(page, "home");
+    }
+  });
+
   test("provider stub profile panel explains ebay is only a product candidate", async () => {
     await submitHomeCommand(page, runId + "-STUB-PROFILE 买华为手机");
     const home = page.locator('[data-commerce-home-summary="true"]').first();
