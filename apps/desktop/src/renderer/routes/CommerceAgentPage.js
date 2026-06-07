@@ -248,21 +248,33 @@
     if (api && api.toCommerceLocalIntentDisplayStatus) return api.toCommerceLocalIntentDisplayStatus(route || {});
     const map = {
       product:"商品",
+      complex_product:"复杂商品采购",
       hotel:"酒店",
       flight:"机票",
       ticket:"门票 / 票务",
       local_service:"本地服务",
+      multi_category_travel:"复合旅行计划",
       general_commerce:"全球采购",
       unknown:"待确认"
     };
     const category = route && route.intentCategory || "unknown";
+    const complex = route && route.aiFallbackRequired === true;
+    const categories = Array.isArray(route && route.categories) ? route.categories.map((item) => map[item] || item).filter(Boolean) : [];
     return {
       title:"本地意图识别",
       subtitle:"普通购物、酒店、机票、票务请求优先使用本地规则识别，减少 AI token 消耗。",
-      routeModeLabel:"本地规则优先",
-      aiUsedLabel:"否",
-      aiFallbackLabel:"仅复杂需求可选",
+      routeModeLabel:complex ? "本地规则优先 + AI fallback" : "本地规则优先",
+      aiUsedLabel:complex ? "否，等待复杂理解" : "否",
+      aiFallbackLabel:complex ? "复杂需求需要 AI 理解" : "仅复杂需求可选",
       categoryLabel:map[category] || "待确认",
+      detectedCategoriesLabel:categories.length ? categories.join(" + ") : "待确认",
+      destinationLabel:route && route.destination || "待确认",
+      timeHintLabel:route && route.timeHint || "待确认",
+      travelerHintLabel:route && route.travelerHint || "待确认",
+      budgetHintLabel:route && route.budgetHint || "待确认",
+      optimizationGoalLabel:route && route.optimizationGoal || "待确认",
+      useCaseHintLabel:route && route.useCaseHint || "",
+      isComplex:complex,
       commercePlanLabel:route && route.canTriggerCommercePlan === false ? "否" : "是",
       providerSearchLabel:"否",
       priceLabel:"否",
@@ -275,6 +287,14 @@
     if (!route) return "";
     const display = commerceLocalIntentDisplay(route);
     const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
+    const complexRows = display.isComplex ? `
+            ${row("识别类别", display.detectedCategoriesLabel)}
+            ${row("目的地", display.destinationLabel)}
+            ${row("时间条件", display.timeHintLabel)}
+            ${row("人员条件", display.travelerHintLabel)}
+            ${row("预算条件", display.budgetHintLabel)}
+            ${row("优化目标", display.optimizationGoalLabel)}
+            ${display.useCaseHintLabel ? row("用途条件", display.useCaseHintLabel) : ""}` : "";
     return `<section class="commerce-local-intent-panel" aria-label="本地意图识别">
       <div class="commerce-local-intent-head">
         <div>
@@ -291,6 +311,7 @@
             ${row("是否使用 AI", display.aiUsedLabel)}
             ${row("AI fallback", display.aiFallbackLabel)}
             ${row("当前类别", display.categoryLabel)}
+            ${complexRows}
             ${row("是否进入采购计划", display.commercePlanLabel)}
           </ul>
         </section>

@@ -155,6 +155,18 @@ const REQUIRED_PHRASES = [
   "不得返回 fake/demo/mock price",
   "复杂自然语言需求可以进入 AI fallback",
   "AI fallback 不得绕过",
+  "Complex Commerce Intent AI Fallback",
+  "复杂 commerce intent 可以进入 AI fallback",
+  "简单 commerce intent 应继续本地识别",
+  "AI fallback 只用于自然语言理解和结构化计划",
+  "AI fallback 不得访问真实 provider",
+  "AI fallback 不得连接真实 endpoint",
+  "AI fallback 不得使用 API key",
+  "AI fallback 不得发起 provider 网络搜索",
+  "AI fallback 不得返回真实商品结果",
+  "AI fallback 不得显示真实价格",
+  "AI fallback 不得返回 fake/demo/mock price",
+  "AI fallback 不得绕过",
   "每个版本只做一个完整功能模块"
 ];
 

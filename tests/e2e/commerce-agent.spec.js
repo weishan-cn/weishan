@@ -1825,13 +1825,13 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("commerce local intent router contract routes simple commerce without ai", async () => {
+  test("commerce local intent router contract routes simple commerce without ai and marks complex fallback", async () => {
     await gotoRoute(page, "home");
     const result = await page.evaluate(async () => {
       delete window.WeishanCommerceLocalIntentRouter;
       await new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceLocalIntentRouter.js?v=2.0.49&contract=" + Date.now();
+        script.src = "./renderer/core/commerceLocalIntentRouter.js?v=2.0.50&contract=" + Date.now();
         script.onload = resolve;
         script.onerror = reject;
         document.head.appendChild(script);
@@ -1844,11 +1844,12 @@ test.describe.serial("commerce agent workbench", () => {
         flight:api.routeCommerceIntentLocally("订机票"),
         ticket:api.routeCommerceIntentLocally("买演唱会门票"),
         localService:api.routeCommerceIntentLocally("预约理发"),
-        complex:api.routeCommerceIntentLocally("下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高")
+        complex:api.routeCommerceIntentLocally("下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高"),
+        complexProduct:api.routeCommerceIntentLocally("我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比")
       };
       return { contract, samples };
     });
-    expect(result.contract.routerVersion).toBe("2.0.49");
+    expect(result.contract.routerVersion).toBe("2.0.50");
     expect(result.contract.phase).toBe("commerce_local_intent_router");
     expect(result.contract.defaultMode).toBe("local_first");
     expect(result.contract.tokenPolicy.simpleCommerceIntentUsesAi).toBe(false);
@@ -1906,10 +1907,33 @@ test.describe.serial("commerce agent workbench", () => {
       expect(result.samples[key].canDisplayRealPrice).toBe(false);
       expect(result.samples[key].canRedirect).toBe(false);
     }
-    expect(result.samples.complex.intentCategory).toBe("general_commerce");
+    expect(result.samples.complex.intentCategory).toBe("multi_category_travel");
+    expect(result.samples.complex.commerceType).toBe("travel_plan");
+    expect(result.samples.complex.routeMode).toBe("local_first_with_ai_fallback");
     expect(result.samples.complex.aiUsed).toBe(false);
     expect(result.samples.complex.aiFallbackEligible).toBe(true);
+    expect(result.samples.complex.aiFallbackRequired).toBe(true);
+    expect(result.samples.complex.categories).toEqual(["flight", "hotel"]);
+    expect(result.samples.complex.destination).toBe("东京");
+    expect(result.samples.complex.timeHint).toBe("下个月");
+    expect(result.samples.complex.travelerHint).toBe("带孩子");
+    expect(result.samples.complex.budgetHint).toContain("一万以内");
+    expect(result.samples.complex.optimizationGoal).toBe("性价比高");
+    expect(result.samples.complex.commerceAiIntentUnderstanding.scope).toBe("intent_understanding_only");
+    expect(result.samples.complex.commerceAiIntentUnderstanding.canAccessProvider).toBe(false);
+    expect(result.samples.complex.commerceAiIntentUnderstanding.canSearchNetwork).toBe(false);
+    expect(result.samples.complex.commerceAiIntentUnderstanding.canReturnPrice).toBe(false);
+    expect(result.samples.complex.commerceAiIntentUnderstanding.canRedirect).toBe(false);
     expect(result.samples.complex.canTriggerRealProviderSearch).toBe(false);
+    expect(result.samples.complex.canDisplayRealPrice).toBe(false);
+    expect(result.samples.complex.canRedirect).toBe(false);
+    expect(result.samples.complexProduct.intentCategory).toBe("complex_product");
+    expect(result.samples.complexProduct.aiUsed).toBe(false);
+    expect(result.samples.complexProduct.aiFallbackEligible).toBe(true);
+    expect(result.samples.complexProduct.aiFallbackRequired).toBe(true);
+    expect(result.samples.complexProduct.budgetHint).toContain("一万以内");
+    expect(result.samples.complexProduct.useCaseHint).toBe("适合剪视频");
+    expect(result.samples.complexProduct.optimizationGoal).toBe("性价比高");
   });
 
   test("commerce local intent panel appears for simple categories without raw fields", async () => {
@@ -1965,23 +1989,67 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("commerce local intent marks complex fallback without using ai or unlocking providers", async () => {
+  test("commerce local intent marks complex travel fallback without unlocking providers", async () => {
     await submitHomeCommand(page, runId + "-LOCAL-INTENT-COMPLEX 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高");
     const home = page.locator('[data-commerce-home-summary="true"]').first();
     const panel = home.locator(".commerce-local-intent-panel").first();
     await expect(panel).toContainText("本地意图识别");
-    await expect(panel).toContainText("路由方式：本地规则优先");
-    await expect(panel).toContainText("是否使用 AI：否");
-    await expect(panel).toContainText("AI fallback：仅复杂需求可选");
-    await expect(panel).toContainText("当前类别：全球采购");
+    await expect(panel).toContainText("路由方式：本地规则优先 + AI fallback");
+    await expect(panel).toContainText("是否使用 AI：否，等待复杂理解");
+    await expect(panel).toContainText("AI fallback：复杂需求需要 AI 理解");
+    await expect(panel).toContainText("当前类别：复合旅行计划");
+    await expect(panel).toContainText("识别类别：机票 + 酒店");
+    await expect(panel).toContainText("目的地：东京");
+    await expect(panel).toContainText("时间条件：下个月");
+    await expect(panel).toContainText("人员条件：带孩子");
+    await expect(panel).toContainText("预算条件：一万以内");
+    await expect(panel).toContainText("优化目标：性价比高");
     await expect(panel).toContainText("是否访问真实平台：否");
+    await expect(panel).toContainText("是否返回价格：否");
+    await expect(panel).toContainText("是否跳转购买：否");
+    await expect(home).toContainText("当地法律合规审查");
+    await expect(home).toContainText("Provider 接入准备总览");
+    await expect(home).toContainText("Provider 接入人工审批手册");
+    await expect(home).toContainText("Connector Gate");
+    await expect(home).toContainText("Provider Sandbox Dry Run");
+    await expect(home).toContainText("Provider 密钥安全方案");
     await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
-    await expect(home).not.toContainText("aiUsed=false");
-    await expect(home).not.toContainText("aiFallbackEligible=true");
-    await expect(home).not.toContainText("routedBy=local_rules");
-    await expect(home).not.toContainText("canTriggerRealProviderSearch=false");
+    const rawFields = [
+      "aiUsed=true",
+      "aiFallbackRequired=true",
+      "aiFallbackEligible=true",
+      "commerceAiIntentUnderstanding",
+      "local_first_with_ai_fallback",
+      "extractedConstraints",
+      "canAccessProvider=false",
+      "canSearchNetwork=false",
+      "canReturnPrice=false"
+    ];
+    for (const field of rawFields) await expect(home).not.toContainText(field);
+  });
+
+  test("commerce local intent marks complex product fallback without prices or buying buttons", async () => {
+    await submitHomeCommand(page, runId + "-LOCAL-INTENT-COMPLEX-PRODUCT 我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比");
+    const home = page.locator('[data-commerce-home-summary="true"]').first();
+    const panel = home.locator(".commerce-local-intent-panel").first();
+    await expect(panel).toContainText("本地意图识别");
+    await expect(panel).toContainText("AI fallback：复杂需求需要 AI 理解");
+    await expect(panel).toContainText("当前类别：复杂商品采购");
+    await expect(panel).toContainText("识别类别：商品");
+    await expect(panel).toContainText("预算条件：一万以内");
+    await expect(panel).toContainText("用途条件：适合剪视频");
+    await expect(panel).toContainText("优化目标：性价比高");
+    await expect(panel).toContainText("是否访问真实平台：否");
+    await expect(panel).toContainText("是否返回价格：否");
+    await expect(panel).toContainText("是否跳转购买：否");
+    await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+    await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+    await expect(home).not.toContainText("aiFallbackRequired=true");
+    await expect(home).not.toContainText("commerceAiIntentUnderstanding");
+    await expect(home).not.toContainText("extractedConstraints");
   });
 
   test("provider stub profile panel explains ebay is only a product candidate", async () => {

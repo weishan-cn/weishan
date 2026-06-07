@@ -413,6 +413,20 @@ gate / panel 渲染不得调用 AI。静态安全面板、Provider gate、当地
 
 复杂自然语言需求可以进入 AI fallback，例如多类别、多城市、复杂预算和约束、明确要求“帮我规划 / 帮我比较方案 / 给我推荐理由”的需求。但 AI fallback 不得绕过当地法律合规、provider onboarding、provider approval、secret storage、sandbox dry run、Connector Gate、人工审批或任何付款 / 下单 / 证件保存边界。
 
+### Complex Commerce Intent AI Fallback 标准
+
+简单 commerce intent 应继续本地识别，不调用 AI。普通商品、酒店、机票、票务、本地服务请求必须优先使用本地规则，避免不必要的 token 消耗。
+
+复杂 commerce intent 可以进入 AI fallback。复杂需求包括多类别组合、时间 / 人员 / 地点 / 预算约束、明确比较 / 规划 / 推荐目标、长句采购或预订需求。
+
+AI fallback 只用于自然语言理解和结构化计划。允许生成的字段仅限于 categories、destination、timeHint、travelerHint、budgetHint、optimizationGoal、missingFields 等结构化计划字段。
+
+AI fallback 不得访问真实 provider，不得连接真实 endpoint，不得使用 API key，不得发起 provider 网络搜索，不得返回真实商品结果，不得显示真实价格，不得返回 fake/demo/mock price，不得跳转购买 / 预订页面。
+
+标准短语：AI fallback 不得连接真实 endpoint。AI fallback 不得使用 API key。AI fallback 不得发起 provider 网络搜索。AI fallback 不得返回真实商品结果。AI fallback 不得显示真实价格。AI fallback 不得返回 fake/demo/mock price。
+
+AI fallback 不得绕过 Local Law、Onboarding、Approval、Secret Storage、Sandbox Dry Run、Connector Gate、Readiness、Runbook。AI fallback 不得自动付款、自动下单、提交订单或保存证件 / 银行卡。
+
 ## 13. 当前版本链条
 
 - v2.0.25：真实价格只读展示 + 最低价精确跳转

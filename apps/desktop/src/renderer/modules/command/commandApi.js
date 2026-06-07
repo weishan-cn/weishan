@@ -108,6 +108,30 @@
     return window.WeishanCommerceLocalIntentRouter || null;
   }
 
+  function applyComplexCommerceLocalIntent(commercePlan, route){
+    if (!commercePlan || !route || route.aiFallbackRequired !== true) return commercePlan;
+    const protectedCategories = new Set(["cruise", "privateJet", "train", "domain", "aiModelPricing"]);
+    const map = {
+      multi_category_travel:"复合旅行计划",
+      complex_product:"复杂商品采购",
+      general_commerce:"多类别全球采购"
+    };
+    if (!protectedCategories.has(commercePlan.category)) {
+      commercePlan.categoryLabel = map[route.intentCategory] || commercePlan.categoryLabel || "多类别全球采购";
+    }
+    commercePlan.commerceAiIntentUnderstanding = route.commerceAiIntentUnderstanding || {};
+    commercePlan.complexIntentSummary = {
+      categories:route.categories || [],
+      destination:route.destination || "",
+      timeHint:route.timeHint || "",
+      travelerHint:route.travelerHint || "",
+      budgetHint:route.budgetHint || "",
+      optimizationGoal:route.optimizationGoal || "",
+      useCaseHint:route.useCaseHint || ""
+    };
+    return commercePlan;
+  }
+
   function saveDispatchPrefill(text, plan){
     const router = dispatchRouter();
     if (!router || !router.createPendingPayload || !router.savePendingPayload || !plan) return null;
@@ -303,6 +327,7 @@
     const commerceLocalIntentRoute = plan && plan.commerceLocalIntentRoute || (localIntent && localIntent.routeCommerceIntentLocally ? localIntent.routeCommerceIntentLocally(text) : null);
     const commercePlan = plan && plan.commercePlan || (api.createCommerceTask ? api.createCommerceTask(text) : api.createCommercePlan(text));
     if (commercePlan && commerceLocalIntentRoute) commercePlan.commerceLocalIntentRoute = commerceLocalIntentRoute;
+    applyComplexCommerceLocalIntent(commercePlan, commerceLocalIntentRoute);
     const search = commerceSearch();
     if (search && search.createCommerceSearchRequest && search.hasCommerceSearchProvider) {
       const request = search.createCommerceSearchRequest(commercePlan);

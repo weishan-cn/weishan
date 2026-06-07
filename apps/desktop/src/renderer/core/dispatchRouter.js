@@ -148,6 +148,30 @@
     return window.WeishanCommerceLocalIntentRouter || null;
   }
 
+  function applyComplexCommerceLocalIntent(commercePlan, route){
+    if (!commercePlan || !route || route.aiFallbackRequired !== true) return commercePlan;
+    const protectedCategories = new Set(["cruise", "privateJet", "train", "domain", "aiModelPricing"]);
+    const map = {
+      multi_category_travel:"复合旅行计划",
+      complex_product:"复杂商品采购",
+      general_commerce:"多类别全球采购"
+    };
+    if (!protectedCategories.has(commercePlan.category)) {
+      commercePlan.categoryLabel = map[route.intentCategory] || commercePlan.categoryLabel || "多类别全球采购";
+    }
+    commercePlan.commerceAiIntentUnderstanding = route.commerceAiIntentUnderstanding || {};
+    commercePlan.complexIntentSummary = {
+      categories:route.categories || [],
+      destination:route.destination || "",
+      timeHint:route.timeHint || "",
+      travelerHint:route.travelerHint || "",
+      budgetHint:route.budgetHint || "",
+      optimizationGoal:route.optimizationGoal || "",
+      useCaseHint:route.useCaseHint || ""
+    };
+    return commercePlan;
+  }
+
   function isCommerceAgentCommand(text){
     const raw = String(text || "");
     const router = commerceLocalIntentRouterApi();
@@ -332,6 +356,7 @@
       const commerceLocalIntentRoute = intent.commerceLocalIntentRoute || (localIntentRouter && localIntentRouter.routeCommerceIntentLocally ? localIntentRouter.routeCommerceIntentLocally(cleanInput) : null);
       const commercePlan = api && api.createCommercePlan ? api.createCommercePlan(cleanInput) : null;
       if (commercePlan && commerceLocalIntentRoute) commercePlan.commerceLocalIntentRoute = commerceLocalIntentRoute;
+      applyComplexCommerceLocalIntent(commercePlan, commerceLocalIntentRoute);
       plan.executionMode = "commerce_agent_plan_only";
       plan.realExecution = false;
       plan.requiresUserConfirmation = true;
