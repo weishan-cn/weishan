@@ -6,7 +6,7 @@
     document.write('<scr' + 'ipt src="./renderer/core/desktopAssistant.js?v=2.0.15"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceAgent && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.38"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.39"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderAdapter && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProviderAdapter.js?v=2.0.32"></scr' + 'ipt>');
@@ -18,7 +18,7 @@
     document.write('<scr' + 'ipt src="./renderer/core/commerceGlobalProviderPool.js?v=2.0.32"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderOnboardingChecklist && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.38"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.39"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProductProviderCandidate && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.32"></scr' + 'ipt>');
@@ -30,19 +30,19 @@
     document.write('<scr' + 'ipt src="./renderer/core/commerceLocationPolicy.js?v=2.0.32"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceLocalLawCompliance && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceLocalLawCompliance.js?v=2.0.38"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceLocalLawCompliance.js?v=2.0.39"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderConfig && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.38"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.39"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderSandbox && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProviderSandbox.js?v=2.0.32"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviders && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.38"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.39"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceSearch && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.38"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.39"></scr' + 'ipt>');
   }
 
   const QUEUE_KEY = "command.queue.v205";

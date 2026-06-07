@@ -356,11 +356,42 @@
   function commerceLocalLawHomePanel(stored){
     const health = stored && stored.complianceHealth || {};
     const regulated = health.complianceStatus === "compliance_review_required";
-    return `<section class="commerce-local-law-panel" aria-label="当地法律合规 Gate">
-      <h3>当地法律合规：未确认</h3>
-      ${regulated ? `<p><b>该需求可能涉及当地法律限制。</b></p><p>需要先确认当前位置和收货地 / 目的地。</p><p>合法性未确认前，weishan 不显示价格、不跳转购买或预订页面。</p>` : `<p><b>合规依据：</b>定位服务或收货 / 目的地信息未完成。</p><p><b>合规处理：</b>未确认前不显示价格、不跳转购买或预订页面。</p>`}
-      <p><b>规则冲突处理：</b>当前位置与收货地 / 目的地冲突时，按更严格的一方处理。</p>
-      <p><b>隐私说明：</b>不保存原始 GPS 坐标，不上传定位到第三方，不用于广告、追踪或画像。</p>
+    const row = (label, value) => `<li><span>${esc(label)}</span><b>${esc(value)}</b></li>`;
+    return `<section class="commerce-local-law-panel commerce-local-law-review-panel" aria-label="当地法律合规审查">
+      <div class="commerce-local-law-head">
+        <div>
+          <h3>当地法律合规审查</h3>
+          <p>购物和预订必须遵守当地法律。合法性未确认前，weishan 不显示价格、不跳转购买或预订页面。</p>
+        </div>
+        <strong>合规状态：未确认</strong>
+      </div>
+      <div class="commerce-local-law-grid">
+        <section class="commerce-local-law-group">
+          <h4>当前合规状态</h4>
+          <ul>
+            ${row("合规状态", "未确认")}
+            ${row("合规处理", "未确认前不显示价格、不跳转购买或预订页面")}
+            ${row("地区依据", "优先使用定位服务；无法精准定位时使用收货地址 / 目的地 / 服务发生地")}
+            ${row("规则冲突处理", "当前位置与收货地 / 目的地冲突时，按更严格的一方处理")}
+          </ul>
+        </section>
+        <section class="commerce-local-law-group commerce-local-law-privacy">
+          <h4>隐私与法律说明</h4>
+          <ul>
+            ${row("隐私保护", "不保存原始 GPS 坐标，不上传定位到第三方，不用于广告、追踪或画像")}
+            ${row("法律说明", "weishan 不提供法律意见，不帮助规避当地法律")}
+          </ul>
+        </section>
+      </div>
+      ${regulated ? `<div class="commerce-local-law-regulated">
+        <b>该需求可能涉及当地法律限制</b>
+        <span>需要先确认当前位置和收货地 / 目的地。</span>
+        <span>合法性未确认前，weishan 不显示价格、不跳转购买或预订页面。</span>
+        <span>当前仅做风险分类和阻断，不做真实法律结论。</span>
+      </div>` : `<div class="commerce-local-law-regulated is-neutral">
+        <b>合规依据：定位服务或收货 / 目的地信息未完成</b>
+        <span>未确认前不显示价格、不跳转购买或预订页面。</span>
+      </div>`}
     </section>`;
   }
 
@@ -410,6 +441,7 @@
     const providerMissing = stored.searchStatus === "no_provider" || stored.searchStatus === "providerMissing";
     const destinationRequired = stored.searchStatus === "shipping_destination_required" || stored.searchStatus === "location_required";
     const complianceRequired = stored.searchStatus === "local_law_compliance_required";
+    const localLawPanelRequired = !isModelPricing && stored.complianceHealth && stored.complianceHealth.canSearchProvider === false;
     const providerFailed = stored.searchStatus === "failed";
     const noResults = stored.searchStatus === "noResults" || stored.searchStatus === "no_results";
     const missingFields = Array.isArray(stored.missingFields) ? stored.missingFields : [];
@@ -453,7 +485,7 @@
         ${!blocked && isFlightPlan && normalized.destinationText ? `<p><b>目的地：</b>${esc(normalized.destinationText)}</p>` : ""}
         ${!blocked && isFlightPlan && dateCondition ? `<p><b>日期：</b>${esc(dateCondition)}</p>` : ""}
         ${blocked ? `<p><b>原因：</b>涉及下单 / 付款 / 敏感资料或询价提交</p>` : ""}
-        ${!blocked && complianceRequired ? commerceLocalLawHomePanel(stored) : ""}
+        ${!blocked && localLawPanelRequired ? commerceLocalLawHomePanel(stored) : ""}
         ${!blocked && destinationRequired ? `<p><b>收货目的地：</b>未设置</p><p><b>定位服务：</b>关闭 / 未授权</p><p><b>价格状态：</b>精确最低到手价不可用</p><p><b>原因：</b>需要收货国家/地区/邮编用于运费、税费、关税和当地合规计算。</p><p class="commerce-warning">为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。实际价格、库存、税费和关税仍以外部平台和海关结算为准。</p>` : ""}
         ${!blocked && (providerMissing || complianceRequired || isProductPlan && destinationRequired) ? `<p><b>搜索源：</b>${esc(providerMissingText)}</p>` : ""}
         ${!blocked && providerFailed ? `<p><b>搜索源：</b>${esc(stored.searchErrorMessage || "搜索源不可用，无法返回真实价格")}</p>` : ""}

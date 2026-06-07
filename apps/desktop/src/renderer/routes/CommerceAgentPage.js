@@ -307,13 +307,43 @@
   function localLawCompliancePanelHtml(task){
     const health = task && task.complianceHealth || {};
     const regulated = health.complianceStatus === "compliance_review_required";
-    return `<div class="commerce-warning commerce-local-law-panel" aria-label="当地法律合规 Gate">
-      <b>当地法律合规：未确认</b>
-      ${regulated ? `<span>该需求可能涉及当地法律限制。</span><span>需要先确认当前位置和收货地 / 目的地。</span><span>合法性未确认前，weishan 不显示价格、不跳转购买或预订页面。</span>` : `<span>合规依据：定位服务或收货 / 目的地信息未完成。</span><span>合规处理：未确认前不显示价格、不跳转购买或预订页面。</span>`}
-      <span>规则冲突处理：当前位置与收货地 / 目的地冲突时，按更严格的一方处理。</span>
-      <span>隐私说明：不保存原始 GPS 坐标，不上传定位到第三方，不用于广告、追踪或画像。</span>
-      <span>weishan 不提供法律意见，也不帮助规避当地法律。</span>
-    </div>`;
+    const row = (label, value) => `<li><span>${esc(label)}</span><b>${esc(value)}</b></li>`;
+    return `<section class="commerce-local-law-panel commerce-local-law-review-panel" aria-label="当地法律合规审查">
+      <div class="commerce-local-law-head">
+        <div>
+          <h3>当地法律合规审查</h3>
+          <p>购物和预订必须遵守当地法律。合法性未确认前，weishan 不显示价格、不跳转购买或预订页面。</p>
+        </div>
+        <strong>合规状态：未确认</strong>
+      </div>
+      <div class="commerce-local-law-grid">
+        <section class="commerce-local-law-group">
+          <h4>当前合规状态</h4>
+          <ul>
+            ${row("合规状态", "未确认")}
+            ${row("合规处理", "未确认前不显示价格、不跳转购买或预订页面")}
+            ${row("地区依据", "优先使用定位服务；无法精准定位时使用收货地址 / 目的地 / 服务发生地")}
+            ${row("规则冲突处理", "当前位置与收货地 / 目的地冲突时，按更严格的一方处理")}
+          </ul>
+        </section>
+        <section class="commerce-local-law-group commerce-local-law-privacy">
+          <h4>隐私与法律说明</h4>
+          <ul>
+            ${row("隐私保护", "不保存原始 GPS 坐标，不上传定位到第三方，不用于广告、追踪或画像")}
+            ${row("法律说明", "weishan 不提供法律意见，不帮助规避当地法律")}
+          </ul>
+        </section>
+      </div>
+      ${regulated ? `<div class="commerce-local-law-regulated">
+        <b>该需求可能涉及当地法律限制</b>
+        <span>需要先确认当前位置和收货地 / 目的地。</span>
+        <span>合法性未确认前，weishan 不显示价格、不跳转购买或预订页面。</span>
+        <span>当前仅做风险分类和阻断，不做真实法律结论。</span>
+      </div>` : `<div class="commerce-local-law-regulated is-neutral">
+        <b>合规依据：定位服务或收货 / 目的地信息未完成</b>
+        <span>未确认前不显示价格、不跳转购买或预订页面。</span>
+      </div>`}
+    </section>`;
   }
 
   function providerPoolNoticeHtml(task, configInfo, onboardingInfo){
@@ -458,6 +488,7 @@
     const isProduct = task && task.category === "ecommerce";
     const locationInfo = searchApi() && searchApi().locationHealthForCommerce ? searchApi().locationHealthForCommerce() : {};
     const complianceRequired = task && task.searchStatus === "local_law_compliance_required";
+    const localLawPanelRequired = !isModelPricing && task && task.complianceHealth && task.complianceHealth.canSearchProvider === false;
     const destinationRequired = !complianceRequired && isProduct && (task && (task.searchStatus === "shipping_destination_required" || task.searchStatus === "location_required") || locationInfo.hasShippingDestination !== true);
     const disabled = !hasProvider || missingFields.length > 0 || destinationRequired || complianceRequired;
     const isCruise = task && task.category === "cruise";
@@ -480,7 +511,7 @@
     const buttonLabel = isModelPricing ? "搜索 OpenRouter 模型价格" : missingFields.length ? "搜索真实价格" : hasProvider ? "搜索真实价格" : "搜索适配器未配置";
     return `<div class="commerce-search-panel">
       <p><b>${hasProvider ? "已配置：" : "未配置："}</b>${isModelPricing ? (hasProvider ? "OpenRouter provider 可用于模型价格搜索。" : "OpenRouter provider 不可用。") : hasProvider ? "可以搜索真实候选方案。" : isFlight ? "暂未配置真实机票搜索适配器，无法返回实时价格。" : isProduct ? "暂未配置真实商品搜索适配器，无法返回实时价格。" : "搜索适配器未配置，无法返回真实价格。"}</p>
-      ${complianceRequired ? localLawCompliancePanelHtml(task) : ""}
+      ${localLawPanelRequired ? localLawCompliancePanelHtml(task) : ""}
       ${destinationRequired ? `<div class="commerce-warning commerce-location-required">
         <b>需要设置收货目的地以计算精确最低到手价</b>
         <span>收货目的地：未设置。</span>

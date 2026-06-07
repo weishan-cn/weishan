@@ -73,7 +73,7 @@
     const api = localLawApi();
     if (api && api.getLocalLawCompliancePolicy) return api.getLocalLawCompliancePolicy();
     return {
-      complianceVersion:"2.0.38",
+      complianceVersion:"2.0.39",
       phase:"local_law_compliance_gate",
       defaultStatus:"not_verified",
       requiredBeforeSearch:true,
@@ -93,7 +93,7 @@
     const api = localLawApi();
     if (api && api.evaluateLocalLawCompliance) return api.evaluateLocalLawCompliance(request, settings || { locationHealth:locationHealth() });
     return {
-      complianceVersion:"2.0.38",
+      complianceVersion:"2.0.39",
       phase:"local_law_compliance_gate",
       complianceStatus:"not_verified",
       searchStatus:"local_law_compliance_required",
@@ -125,7 +125,7 @@
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
     return {
-      checklistVersion:"2.0.38",
+      checklistVersion:"2.0.39",
       phase:"provider_onboarding_checklist",
       category:resultCategory(category),
       onboardingStatus:"not_reviewed",
@@ -401,7 +401,7 @@
     const next = onboarding || {};
     const safety = next.safety || {};
     return {
-      checklistVersion:next.checklistVersion || "2.0.38",
+      checklistVersion:next.checklistVersion || "2.0.39",
       phase:next.phase || "provider_onboarding_checklist",
       onboardingStatus:next.onboardingStatus || next.status || "not_reviewed",
       status:next.status || next.onboardingStatus || "not_reviewed",

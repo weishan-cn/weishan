@@ -1704,16 +1704,120 @@
   border-color:#f59e0b;
 }
 
-.commerce-local-law-panel {
+.commerce-local-law-panel{
+  margin:12px 0;
+}
+.commerce-local-law-review-panel{
+  display:grid;
+  gap:12px;
+  padding:14px;
+  border:1px solid #fed7aa;
+  border-radius:12px;
+  background:#fff7ed;
+  color:#0f172a;
+  box-shadow:0 10px 24px rgba(194,65,12,.08);
+}
+.commerce-local-law-head{
   display:flex;
-  flex-direction:column;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid #fed7aa;
+}
+.commerce-local-law-head h3{
+  margin:0 0 4px;
+  font-size:17px;
+  line-height:1.25;
+  color:#7c2d12;
+}
+.commerce-local-law-head p{
+  margin:0;
+  color:#7c2d12;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-local-law-head strong{
+  flex:0 0 auto;
+  max-width:220px;
+  border:1px solid #fb923c;
+  border-radius:10px;
+  background:#ffedd5;
+  color:#9a3412;
+  padding:8px 10px;
+  font-size:13px;
+  line-height:1.4;
+}
+.commerce-local-law-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-local-law-group{
+  border:1px solid #fed7aa;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+  display:grid;
+  gap:8px;
+}
+.commerce-local-law-group h4{
+  margin:0;
+  color:#9a3412;
+  font-size:13px;
+  line-height:1.25;
+}
+.commerce-local-law-group ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  gap:7px;
+}
+.commerce-local-law-group li{
+  display:grid;
+  gap:3px;
+  font-size:12px;
+  line-height:1.45;
+}
+.commerce-local-law-group li span{
+  color:#7c2d12;
+  font-weight:900;
+}
+.commerce-local-law-group li b{
+  color:#0f172a;
+  font-size:12px;
+  font-weight:900;
+}
+.commerce-local-law-regulated{
+  display:grid;
   gap:6px;
-  margin:10px 0;
+  padding:10px;
+  border:1px solid #fdba74;
+  border-radius:10px;
+  background:#ffedd5;
+  color:#7c2d12;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
 }
-.commerce-local-law-panel h3 {
-  margin:0;
-  font-size:15px;
+.commerce-local-law-regulated b{
+  color:#9a3412;
 }
-.commerce-local-law-panel p {
-  margin:0;
+.commerce-local-law-regulated.is-neutral{
+  border-color:#fde68a;
+  background:#fffbeb;
+  color:#78350f;
+}
+@media (max-width: 980px){
+  .commerce-local-law-head{
+    display:grid;
+  }
+  .commerce-local-law-head strong{
+    max-width:none;
+  }
+  .commerce-local-law-grid{
+    grid-template-columns:1fr;
+  }
 }

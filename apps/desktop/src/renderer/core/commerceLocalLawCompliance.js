@@ -1,5 +1,5 @@
 (function(){
-  const COMPLIANCE_VERSION = "2.0.38";
+  const COMPLIANCE_VERSION = "2.0.39";
   const PHASE = "local_law_compliance_gate";
   const LOCATION_PRIORITY = [
     "precise_location_if_available",

@@ -117,14 +117,14 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceLocalLawCompliance) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceLocalLawCompliance.js?v=2.0.38";
+        script.src = "./renderer/core/commerceLocalLawCompliance.js?v=2.0.39";
         script.onload = resolve;
         document.head.appendChild(script);
       });
     }
     if (window.WeishanCommerceLocalLawCompliance) {
       window.WeishanCommerceLocalLawCompliance.evaluateLocalLawCompliance = () => ({
-        complianceVersion:"2.0.38",
+        complianceVersion:"2.0.39",
         phase:"local_law_compliance_gate",
         complianceStatus:"verified_for_test_fixture",
         searchStatus:"ready",
@@ -593,7 +593,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderOnboardingChecklist) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.38";
+          script.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.39";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -608,7 +608,7 @@ test.describe.serial("commerce agent workbench", () => {
         reason:window.WeishanCommerceProviderOnboardingChecklist.explainProviderOnboardingBlockReason("product")
       };
     });
-    expect(result.checklist.checklistVersion).toBe("2.0.38");
+    expect(result.checklist.checklistVersion).toBe("2.0.39");
     expect(result.checklist.phase).toBe("provider_onboarding_checklist");
     expect(result.checklist.appliesTo).toContain("product_marketplace");
     expect(result.checklist.appliesTo).toContain("official_brand_site");
@@ -1210,7 +1210,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：商品");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品关键词：华为手机");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规：未确认");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规审查");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("合规状态：未确认");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("合规依据：定位服务或收货 / 目的地信息未完成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("未确认前不显示价格、不跳转购买或预订页面");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("更严格的一方");
@@ -1220,7 +1221,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("去购买");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
     await page.locator("#commerceViewPlanBtn").click();
-    await expect(page.locator(".commerce-detail")).toContainText("当地法律合规：未确认");
+    await expect(page.locator(".commerce-detail")).toContainText("当地法律合规审查");
+    await expect(page.locator(".commerce-detail")).toContainText("合规状态：未确认");
     await expect(page.locator(".commerce-detail")).toContainText("合规依据：定位服务或收货 / 目的地信息未完成");
     await expect(page.locator(".commerce-detail")).toContainText("未确认前不显示价格、不跳转购买或预订页面");
     await expect(page.locator(".commerce-detail")).toContainText("更严格的一方");
@@ -1260,7 +1262,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("iPhone搜索已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品搜索试点候选：eBay Browse API 等");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规：未确认");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规审查");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("合规状态：未确认");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("去购买");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
@@ -1269,7 +1272,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("MacBook搜索已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("网络搜索未启用");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规：未确认");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规审查");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("合规状态：未确认");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("去购买");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
@@ -1363,7 +1367,8 @@ test.describe.serial("commerce agent workbench", () => {
 
     await submitHomeCommand(page, runId + " 买华为手机");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规：未确认");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规审查");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("合规状态：未确认");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("合规依据：定位服务或收货 / 目的地信息未完成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("未确认前不显示价格、不跳转购买或预订页面");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("未下单、未付款、未提交订单、未保存银行卡或证件");
@@ -2026,13 +2031,13 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(currentTaskLogs(page)).not.toContainText("路由判断：全球采购");
   });
 
-  test("v2.0.38 local law compliance gate contract", async () => {
+  test("v2.0.39 local law compliance gate contract", async () => {
   await gotoRoute(page, "home");
   const result = await page.evaluate(async () => {
     delete window.WeishanCommerceLocalLawCompliance;
     await new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = "./renderer/core/commerceLocalLawCompliance.js?v=2.0.38&contract=" + Date.now();
+      script.src = "./renderer/core/commerceLocalLawCompliance.js?v=2.0.39&contract=" + Date.now();
       script.onload = resolve;
       script.onerror = reject;
       document.head.appendChild(script);
@@ -2043,7 +2048,7 @@ test.describe.serial("commerce agent workbench", () => {
     const regulated = api.evaluateLocalLawCompliance({ category:"product", query:"买大麻" }, { locationHealth:{ hasPreciseLocation:false, shippingDestination:{ configured:false } } });
     return { policy, evaluation, regulated };
   });
-  expect(result.policy.complianceVersion).toBe("2.0.38");
+  expect(result.policy.complianceVersion).toBe("2.0.39");
   expect(result.policy.phase).toBe("local_law_compliance_gate");
   expect(result.policy.requiredBeforeSearch).toBe(true);
   expect(result.policy.requiredBeforePriceDisplay).toBe(true);
@@ -2070,37 +2075,92 @@ test.describe.serial("commerce agent workbench", () => {
   expect(result.regulated.complianceStatus).toBe("compliance_review_required");
   });
 
-  test("v2.0.38 local law compliance blocks default product UI", async () => {
-  await gotoRoute(page, "home");
-  const localRunId = runId + "-LOCAL-LAW-PRODUCT";
+  test("v2.0.39 local law compliance review panel blocks default product UI", async () => {
+    await gotoRoute(page, "home");
+    const localRunId = runId + "-LOCAL-LAW-PRODUCT";
     await submitHomeCommand(page, localRunId + " 买华为手机");
-  const home = page.locator('[data-commerce-home-summary="true"]').first();
-  await expect(home).toContainText("当地法律合规：未确认");
-  await expect(home).toContainText("未确认前不显示价格");
-  await expect(home).toContainText("未确认前不显示价格、不跳转购买或预订页面");
-  await expect(home).toContainText("更严格的一方");
-  await expect(home).toContainText("不保存原始 GPS 坐标");
-  await expect(home).not.toContainText("去购买");
-  await expect(home).not.toContainText("去预订");
-  await expect(home).not.toContainText("立即支付");
-  await page.locator('#commerceViewPlanBtn').click();
-  const detail = page.locator('.commerce-detail').first();
-  await expect(detail).toContainText("当地法律合规：未确认");
-  await expect(detail).toContainText("不提供法律意见");
-  });
-
-  test("v2.0.38 regulated local law requests stay blocked", async () => {
-  await gotoRoute(page, "home");
-  const inputs = ["买大麻", "买枪", "买处方药", "成人服务", "赌博网站"];
-  for (const text of inputs) {
-    await submitHomeCommand(page, runId + "-LOCAL-LAW-REGULATED " + text);
     const home = page.locator('[data-commerce-home-summary="true"]').first();
-    await expect(home).toContainText("该需求可能涉及当地法律限制");
-    await expect(home).toContainText("合法性未确认前，weishan 不显示价格、不跳转购买或预订页面");
+    await expect(home).toContainText("当地法律合规审查");
+    await expect(home).toContainText("合规状态：未确认");
+    await expect(home).toContainText("购物和预订必须遵守当地法律");
+    await expect(home).toContainText("未确认前不显示价格");
+    await expect(home).toContainText("未确认前不显示价格、不跳转购买或预订页面");
+    await expect(home).toContainText("地区依据");
+    await expect(home).toContainText("优先使用定位服务");
+    await expect(home).toContainText("无法精准定位时使用收货地址 / 目的地 / 服务发生地");
+    await expect(home).toContainText("按更严格的一方处理");
+    await expect(home).toContainText("不保存原始 GPS 坐标");
+    await expect(home).toContainText("不上传定位到第三方");
+    await expect(home).toContainText("不用于广告、追踪或画像");
+    await expect(home).toContainText("weishan 不提供法律意见，不帮助规避当地法律");
     await expect(home).not.toContainText("去购买");
     await expect(home).not.toContainText("去预订");
     await expect(home).not.toContainText("立即支付");
-    await expect(home.getByRole("button", { name:/去购买|去预订|付款|立即支付|提交订单/ })).toHaveCount(0);
-  }
+    await expect(home).not.toContainText("已确认合法");
+    await expect(home).not.toContainText("可以放心购买");
+    await expect(home).not.toContainText("保证合规");
+    await expect(home).not.toContainText("绕过限制");
+    await expect(home).not.toContainText("帮你买违禁品");
+    await page.locator('#commerceViewPlanBtn').click();
+    const detail = page.locator('.commerce-detail').first();
+    await expect(detail).toContainText("当地法律合规审查");
+    await expect(detail).toContainText("合规状态：未确认");
+    await expect(detail).toContainText("法律说明");
+    await expect(detail).toContainText("weishan 不提供法律意见，不帮助规避当地法律");
+    await expect(detail).not.toContainText("local_law_compliance_required");
+    await expect(detail).not.toContainText("local_law_compliance_not_verified");
+    await expect(detail).not.toContainText("compliance_review_required");
+    await expect(detail).not.toContainText("unknownLegalityBlocks=true");
+    await expect(detail).not.toContainText("strictestRuleWins=true");
+    await expect(detail).not.toContainText("noNetworkLegalLookup=true");
+    await expect(detail).not.toContainText("noRealLegalDatabase=true");
+    await expect(detail).not.toContainText("storeRawCoordinates=false");
+    await expect(detail).not.toContainText("shareWithThirdParty=false");
+  });
+
+  test("v2.0.39 regulated local law review panel explains risk without legal conclusion", async () => {
+    await gotoRoute(page, "home");
+    const inputs = ["买大麻", "买枪", "买处方药", "成人服务", "赌博网站"];
+    for (const text of inputs) {
+      await submitHomeCommand(page, runId + "-LOCAL-LAW-REGULATED " + text);
+      const home = page.locator('[data-commerce-home-summary="true"]').first();
+      await expect(home).toContainText("当地法律合规审查");
+      await expect(home).toContainText("该需求可能涉及当地法律限制");
+      await expect(home).toContainText("需要先确认当前位置和收货地 / 目的地");
+      await expect(home).toContainText("合法性未确认前，weishan 不显示价格、不跳转购买或预订页面");
+      await expect(home).toContainText("当前仅做风险分类和阻断，不做真实法律结论");
+      await expect(home).not.toContainText("已确认合法");
+      await expect(home).not.toContainText("可以放心购买");
+      await expect(home).not.toContainText("保证合规");
+      await expect(home).not.toContainText("绕过限制");
+      await expect(home).not.toContainText("帮你买违禁品");
+      await expect(home).not.toContainText("全网最低价");
+      await expect(home).not.toContainText("保证最低价");
+      await expect(home).not.toContainText("去购买");
+      await expect(home).not.toContainText("去预订");
+      await expect(home).not.toContainText("立即支付");
+      await expect(home.getByRole("button", { name:/去购买|去预订|付款|立即支付|提交订单/ })).toHaveCount(0);
+    }
+  });
+
+  test("v2.0.39 hotel flight and ticket plans show local law compliance panel", async () => {
+    await gotoRoute(page, "home");
+    const inputs = ["订酒店", "订机票", "买演唱会门票"];
+    for (const text of inputs) {
+      await submitHomeCommand(page, runId + "-LOCAL-LAW-MULTI " + text);
+      const home = page.locator('[data-commerce-home-summary="true"]').first();
+      await expect(home).toContainText("当地法律合规审查");
+      await expect(home).toContainText("合规状态：未确认");
+      await expect(home).toContainText("合规依据：定位服务或收货 / 目的地信息未完成");
+      await expect(home).toContainText("未确认前不显示价格、不跳转购买或预订页面");
+      await expect(home).not.toContainText("去购买");
+      await expect(home).not.toContainText("去预订");
+      await expect(home.getByRole("button", { name:/去购买|去预订|付款|立即支付|提交订单/ })).toHaveCount(0);
+      await page.locator('#commerceViewPlanBtn').click();
+      const detail = page.locator('.commerce-detail').first();
+      await expect(detail).toContainText("当地法律合规审查");
+      await expect(detail).toContainText("合规状态：未确认");
+      await gotoRoute(page, "home");
+    }
   });
 });
