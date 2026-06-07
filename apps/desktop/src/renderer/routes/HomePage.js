@@ -353,6 +353,28 @@
       ${desktopExecutionQueuePanel()}`;
   }
 
+  function commerceOnboardingHomePanel(){
+    const group = (title, items) => `<section class="commerce-onboarding-group"><h4>${esc(title)}</h4><ul>${items.map((item) => `<li><span>${esc(item[0])}：</span><b>${esc(item[1])}</b></li>`).join("")}</ul></section>`;
+    return `<section class="commerce-onboarding-review-panel commerce-onboarding-home-panel" aria-label="Provider 接入审查面板">
+      <div class="commerce-onboarding-panel-head">
+        <div>
+          <h3>Provider 接入审查面板</h3>
+          <p>真实 provider 接入前必须完成以下审查。当前尚未接入任何真实 provider。</p>
+        </div>
+        <strong>总体状态：未完成，暂不可接入真实 provider</strong>
+      </div>
+      <div class="commerce-onboarding-grid">
+        ${group("合规与条款", [["法律条款审查", "未完成"], ["隐私与合规审查", "未完成"]])}
+        ${group("API 与接口", [["API 文档审查", "未完成"], ["API key 存储方案", "未审查"]])}
+        ${group("价格与费用字段", [["价格/税费/运费字段审查", "未完成"], ["实时价格", "不可用"]])}
+        ${group("安全边界", [["不代付款确认", "未完成"], ["不自动下单确认", "未完成"], ["不保存证件/银行卡确认", "未完成"]])}
+        ${group("当前阻断状态", [["网络搜索", "未启用"], ["精确跳转", "待真实 provider 接入后启用"]])}
+      </div>
+      <div class="commerce-onboarding-final-note">
+        <p>只有以上审查全部完成，并通过 config / adapter / sandbox / connector gate 后，weishan 才允许进入真实 provider 连接。接通前不会访问真实平台、不会返回价格、不会跳转购买或预订页面。</p>
+      </div>
+    </section>`;
+  }
   function commercePlanActions(task){
     const meta = task && task.meta || {};
     const answer = String(task && task.answer || "");
@@ -401,6 +423,7 @@
       serviceBooking:"全球多源 provider 候选池：准备中，尚未接入；" + onboardingText + "；当前比较范围：本地服务预约平台、服务商官网、区域服务平台；当前不会访问任何真实服务平台；当前不会返回预约价格；当前不会跳转预约页面"
     };
     const providerMissingText = poolSummaryByCategory[stored.category] || providerReason || "Provider Connector 未启用；搜索适配器未配置，无法返回真实价格";
+    const showOnboardingHomePanel = !blocked && !isModelPricing && (providerMissing || destinationRequired || ["ecommerce", "product", "hotel", "flight", "ticketing", "ticket", "serviceBooking"].includes(stored.category));
     const flightSafetyText = "未下单、未付款、未提交订单、未保存证件";
     const productSafetyText = "未下单、未付款、未提交订单、未保存银行卡或证件";
     const productQuery = normalized.productQuery || normalized.normalizedQuery || "";
@@ -424,6 +447,7 @@
         ${!blocked && noResults ? `<p><b>搜索结果：</b>provider 未返回可展示结果，当前不显示价格。</p>` : ""}
         ${!blocked && missingFields.length ? `<p><b>待补充：</b>${esc(missingFields.join("、"))}</p>` : ""}
         ${!blocked && candidates.length ? `<p><b>搜索结果：</b>${isModelPricing ? esc(modelPriceSummary) : genericResultSummary}</p>` : ""}
+        ${showOnboardingHomePanel ? commerceOnboardingHomePanel() : ""}
         <p><b>安全边界：</b>${blocked ? "不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表" : isFlightPlan ? flightSafetyText : isProductPlan && (providerMissing || destinationRequired) ? productSafetyText : candidates.length ? "仅展示候选方案，未下单、未付款、未提交订单" : "未搜索、未下单、未付款、未提交订单"}</p>
       </div>
       <button class="cmd-btn primary commerce-view-plan-button" id="commerceViewPlanBtn" type="button">查看全球采购计划</button>

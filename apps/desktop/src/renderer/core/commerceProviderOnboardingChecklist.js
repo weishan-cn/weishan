@@ -1,5 +1,5 @@
 (function(){
-  const CHECKLIST_VERSION = "2.0.36";
+  const CHECKLIST_VERSION = "2.0.37";
   const PHASE = "provider_onboarding_checklist";
   const DEFAULT_STATUS = "not_reviewed";
   const BLOCK_REASON = "provider_onboarding_required";

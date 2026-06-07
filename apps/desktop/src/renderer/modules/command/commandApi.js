@@ -18,7 +18,7 @@
     document.write('<scr' + 'ipt src="./renderer/core/commerceGlobalProviderPool.js?v=2.0.32"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderOnboardingChecklist && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.36"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.37"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProductProviderCandidate && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.32"></scr' + 'ipt>');

@@ -568,7 +568,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderOnboardingChecklist) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.36";
+          script.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.37";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -583,7 +583,7 @@ test.describe.serial("commerce agent workbench", () => {
         reason:window.WeishanCommerceProviderOnboardingChecklist.explainProviderOnboardingBlockReason("product")
       };
     });
-    expect(result.checklist.checklistVersion).toBe("2.0.36");
+    expect(result.checklist.checklistVersion).toBe("2.0.37");
     expect(result.checklist.phase).toBe("provider_onboarding_checklist");
     expect(result.checklist.appliesTo).toContain("product_marketplace");
     expect(result.checklist.appliesTo).toContain("official_brand_site");
@@ -1390,7 +1390,36 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(page.getByRole("button", { name:/去购买|去预订|付款|立即支付|提交订单/ })).toHaveCount(0);
     };
 
+    const assertHomeOnboardingPanelVisible = async () => {
+      const home = page.locator("[data-commerce-home-summary]");
+      await expect(home.locator(".commerce-onboarding-review-panel")).toHaveCount(1);
+      await expect(home.locator(".commerce-onboarding-group")).toHaveCount(5);
+      await expect(home).toContainText("Provider 接入审查面板");
+      await expect(home).toContainText("总体状态：未完成，暂不可接入真实 provider");
+      await expect(home).toContainText("合规与条款");
+      await expect(home).toContainText("API 与接口");
+      await expect(home).toContainText("价格与费用字段");
+      await expect(home).toContainText("安全边界");
+      await expect(home).toContainText("当前阻断状态");
+      await expect(home).toContainText("法律条款审查：未完成");
+      await expect(home).toContainText("API 文档审查：未完成");
+      await expect(home).toContainText("API key 存储方案：未审查");
+      await expect(home).toContainText("价格/税费/运费字段审查：未完成");
+      await expect(home).toContainText("隐私与合规审查：未完成");
+      await expect(home).toContainText("网络搜索：未启用");
+      await expect(home).toContainText("实时价格：不可用");
+      await expect(home).toContainText("精确跳转：待真实 provider 接入后启用");
+      await expect(home).not.toContainText("provider_onboarding_required");
+      await expect(home).not.toContainText("endpointConnected=false");
+      await expect(home).not.toContainText("selectedStatus");
+      await expect(home).not.toContainText("立即支付");
+      await expect(home).not.toContainText("上传身份证");
+      await expect(home).not.toContainText("上传护照");
+      await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+    };
+
     await submitHomeCommand(page, runId + " 买华为手机");
+    await assertHomeOnboardingPanelVisible();
     await page.locator("#commerceViewPlanBtn").click();
     await assertOnboardingPanelVisible();
     await expect(page.locator(".commerce-detail")).toContainText("商品电商平台");
@@ -1411,6 +1440,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).not.toContainText("noApiKey=true");
 
     await submitHomeCommand(page, runId + " 订酒店");
+    await assertHomeOnboardingPanelVisible();
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.locator(".commerce-detail")).toContainText("酒店官网");
     await expect(page.locator(".commerce-detail")).toContainText("酒店 OTA");
@@ -1424,6 +1454,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).not.toContainText("去预订");
 
     await submitHomeCommand(page, runId + " 订机票");
+    await assertHomeOnboardingPanelVisible();
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.locator(".commerce-detail")).toContainText("机票 OTA");
     await expect(page.locator(".commerce-detail")).toContainText("航司官网");
@@ -1437,6 +1468,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).not.toContainText("去预订");
 
     await submitHomeCommand(page, runId + " 买演唱会门票");
+    await assertHomeOnboardingPanelVisible();
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.locator(".commerce-detail")).toContainText("票务平台");
     await expect(page.locator(".commerce-detail")).toContainText("活动官网");
@@ -1446,6 +1478,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("当前不会返回票价");
     await expect(page.locator(".commerce-detail")).toContainText("Provider 接入审查");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会连接真实 provider");
+    await assertOnboardingPanelVisible();
     await expect(page.locator(".commerce-detail")).not.toContainText("去购买");
     await expect(page.locator(".commerce-detail")).not.toContainText("立即支付");
     await expect(page.locator(".commerce-detail")).not.toContainText("上传身份证");

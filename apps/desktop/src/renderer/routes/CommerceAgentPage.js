@@ -42,7 +42,7 @@
     }
     if (!window.WeishanCommerceProviderOnboardingChecklist && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderOnboardingChecklist"]')) {
       const onboarding = document.createElement("script");
-      onboarding.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.36";
+      onboarding.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.37";
       onboarding.dataset.weishanDynamic = "WeishanCommerceProviderOnboardingChecklist";
       onboarding.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(onboarding);

@@ -1692,3 +1692,14 @@
     grid-template-columns:1fr;
   }
 }
+
+.commerce-home-card .commerce-onboarding-home-panel{
+  margin:14px 0 10px;
+  border-width:2px;
+  background:#f0f9ff;
+  box-shadow:0 10px 26px rgba(14,116,144,.10);
+}
+.commerce-home-card .commerce-onboarding-home-panel .commerce-onboarding-panel-head strong{
+  background:#fef3c7;
+  border-color:#f59e0b;
+}
