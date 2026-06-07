@@ -65,6 +65,10 @@
     return window.WeishanCommerceProviderOnboardingChecklist || null;
   }
 
+  function approvalApi(){
+    return window.WeishanCommerceProviderApprovalWorkflow || null;
+  }
+
   function localLawApi(){
     return window.WeishanCommerceLocalLawCompliance || null;
   }
@@ -73,7 +77,7 @@
     const api = localLawApi();
     if (api && api.getLocalLawCompliancePolicy) return api.getLocalLawCompliancePolicy();
     return {
-      complianceVersion:"2.0.39",
+      complianceVersion:"2.0.40",
       phase:"local_law_compliance_gate",
       defaultStatus:"not_verified",
       requiredBeforeSearch:true,
@@ -93,7 +97,7 @@
     const api = localLawApi();
     if (api && api.evaluateLocalLawCompliance) return api.evaluateLocalLawCompliance(request, settings || { locationHealth:locationHealth() });
     return {
-      complianceVersion:"2.0.39",
+      complianceVersion:"2.0.40",
       phase:"local_law_compliance_gate",
       complianceStatus:"not_verified",
       searchStatus:"local_law_compliance_required",
@@ -125,7 +129,7 @@
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
     return {
-      checklistVersion:"2.0.39",
+      checklistVersion:"2.0.40",
       phase:"provider_onboarding_checklist",
       category:resultCategory(category),
       onboardingStatus:"not_reviewed",
@@ -147,6 +151,64 @@
         noPayment:true,
         noOrderSubmit:true,
         noIdentityStorage:true
+      }
+    };
+  }
+
+  function getProviderApprovalStatus(category, providerId){
+    const api = approvalApi();
+    if (api && api.getProviderApprovalStatus) return api.getProviderApprovalStatus(category, providerId);
+    return {
+      workflowVersion:"2.0.40",
+      phase:"provider_approval_workflow",
+      category:resultCategory(category),
+      providerId:String(providerId || resultCategory(category) + "-provider-disabled"),
+      approvalStatus:"not_reviewed",
+      canRequestApproval:true,
+      canStartConnectorStubDevelopment:false,
+      canConfigureApiKey:false,
+      canConnectEndpoint:false,
+      canEnableNetworkSearch:false,
+      canDisplayPrice:false,
+      canRedirect:false,
+      canCheckout:false,
+      canPay:false,
+      canSubmitOrder:false,
+      canStoreIdentity:false,
+      reason:"provider_approval_required",
+      approvalStages:{
+        legalReviewRequired:true,
+        apiDocsReviewRequired:true,
+        privacyReviewRequired:true,
+        feeFieldReviewRequired:true,
+        securityReviewRequired:true,
+        localLawReviewRequired:true,
+        humanApprovalRequired:true
+      },
+      gates:{
+        allowConnectorStubDevelopment:false,
+        allowApiKeyConfiguration:false,
+        allowEndpointConnection:false,
+        allowNetworkSearch:false,
+        allowPriceDisplay:false,
+        allowRedirect:false,
+        allowCheckout:false,
+        allowPayment:false,
+        allowOrderSubmit:false,
+        allowIdentityStorage:false
+      },
+      safety:{
+        noRealEndpoint:true,
+        noApiKey:true,
+        noNetworkSearch:true,
+        noPriceDisplay:true,
+        noRedirect:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true,
+        noLegalAdvice:true,
+        noBypassLocalLaw:true
       }
     };
   }
@@ -293,6 +355,7 @@
     const productDefaults = next === "product" ? productSafetySwitches() : {};
     const productCandidate = next === "product" ? getProductProviderCandidateReadiness() : null;
     const pool = next === "product" ? getGlobalProviderPoolReadiness() : null;
+    const approval = approvalFields(getProviderApprovalStatus(next, next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled"));
     return Object.assign({
       providerId:next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled",
       category:next,
@@ -311,6 +374,13 @@
       canSearchNow:false,
       canReturnPriceNow:false,
       canRedirectNow:false,
+      approvalStatus:approval.approvalStatus,
+      providerApprovalRequired:true,
+      canRequestApproval:approval.canRequestApproval,
+      canStartConnectorStubDevelopment:approval.canStartConnectorStubDevelopment,
+      canConfigureApiKey:approval.canConfigureApiKey,
+      canEnableNetworkSearch:approval.canEnableNetworkSearch,
+      canRedirect:approval.canRedirect,
       enabled:false,
       configured:false,
       hasApiKey:false,
@@ -336,6 +406,7 @@
       productProviderReadiness:next === "product" ? getProductProviderReadiness(productDefaults) : undefined,
       productProviderCandidateReadiness:productCandidate || undefined,
       globalProviderPoolReadiness:pool || undefined,
+      approvalHealth:approval,
       providerOnboardingStatus:getProviderOnboardingStatus(next)
     }, productDefaults);
   }
@@ -390,6 +461,14 @@
       canSearchNow:next.canSearchNow === true,
       canReturnPriceNow:next.canReturnPriceNow === true,
       canRedirectNow:next.canRedirectNow === true,
+      approvalStatus:next.approvalStatus || "not_reviewed",
+      providerApprovalRequired:next.providerApprovalRequired !== false,
+      canRequestApproval:next.canRequestApproval !== false,
+      canStartConnectorStubDevelopment:next.canStartConnectorStubDevelopment === true,
+      canConfigureApiKey:next.canConfigureApiKey === true,
+      canEnableNetworkSearch:next.canEnableNetworkSearch === true,
+      canRedirect:next.canRedirect === true,
+      approvalHealth:next.approvalHealth || approvalFields(getProviderApprovalStatus(next.category, next.providerId)),
       productProviderProfile:next.productProviderProfile || getProductProviderProfile(),
       productProviderReadiness:next.productProviderReadiness || getProductProviderReadiness(next),
       productProviderCandidateReadiness:next.productProviderCandidateReadiness || getProductProviderCandidateReadiness(),
@@ -401,7 +480,7 @@
     const next = onboarding || {};
     const safety = next.safety || {};
     return {
-      checklistVersion:next.checklistVersion || "2.0.39",
+      checklistVersion:next.checklistVersion || "2.0.40",
       phase:next.phase || "provider_onboarding_checklist",
       onboardingStatus:next.onboardingStatus || next.status || "not_reviewed",
       status:next.status || next.onboardingStatus || "not_reviewed",
@@ -422,6 +501,64 @@
         noPayment:safety.noPayment !== false,
         noOrderSubmit:safety.noOrderSubmit !== false,
         noIdentityStorage:safety.noIdentityStorage !== false
+      }
+    };
+  }
+
+  function approvalFields(approval){
+    const next = approval || {};
+    const stages = next.approvalStages || {};
+    const gates = next.gates || {};
+    const safety = next.safety || {};
+    return {
+      workflowVersion:next.workflowVersion || "2.0.40",
+      phase:next.phase || "provider_approval_workflow",
+      approvalStatus:next.approvalStatus || "not_reviewed",
+      canRequestApproval:next.canRequestApproval !== false,
+      canStartConnectorStubDevelopment:next.canStartConnectorStubDevelopment === true,
+      canConfigureApiKey:next.canConfigureApiKey === true,
+      canConnectEndpoint:next.canConnectEndpoint === true,
+      canEnableNetworkSearch:next.canEnableNetworkSearch === true,
+      canDisplayPrice:next.canDisplayPrice === true,
+      canRedirect:next.canRedirect === true,
+      canCheckout:next.canCheckout === true,
+      canPay:next.canPay === true,
+      canSubmitOrder:next.canSubmitOrder === true,
+      canStoreIdentity:next.canStoreIdentity === true,
+      reason:next.reason || "provider_approval_required",
+      approvalStages:{
+        legalReviewRequired:stages.legalReviewRequired !== false,
+        apiDocsReviewRequired:stages.apiDocsReviewRequired !== false,
+        privacyReviewRequired:stages.privacyReviewRequired !== false,
+        feeFieldReviewRequired:stages.feeFieldReviewRequired !== false,
+        securityReviewRequired:stages.securityReviewRequired !== false,
+        localLawReviewRequired:stages.localLawReviewRequired !== false,
+        humanApprovalRequired:stages.humanApprovalRequired !== false
+      },
+      gates:{
+        allowConnectorStubDevelopment:gates.allowConnectorStubDevelopment === true,
+        allowApiKeyConfiguration:gates.allowApiKeyConfiguration === true,
+        allowEndpointConnection:gates.allowEndpointConnection === true,
+        allowNetworkSearch:gates.allowNetworkSearch === true,
+        allowPriceDisplay:gates.allowPriceDisplay === true,
+        allowRedirect:gates.allowRedirect === true,
+        allowCheckout:gates.allowCheckout === true,
+        allowPayment:gates.allowPayment === true,
+        allowOrderSubmit:gates.allowOrderSubmit === true,
+        allowIdentityStorage:gates.allowIdentityStorage === true
+      },
+      safety:{
+        noRealEndpoint:safety.noRealEndpoint !== false,
+        noApiKey:safety.noApiKey !== false,
+        noNetworkSearch:safety.noNetworkSearch !== false,
+        noPriceDisplay:safety.noPriceDisplay !== false,
+        noRedirect:safety.noRedirect !== false,
+        noCheckout:safety.noCheckout !== false,
+        noPayment:safety.noPayment !== false,
+        noOrderSubmit:safety.noOrderSubmit !== false,
+        noIdentityStorage:safety.noIdentityStorage !== false,
+        noLegalAdvice:safety.noLegalAdvice !== false,
+        noBypassLocalLaw:safety.noBypassLocalLaw !== false
       }
     };
   }
@@ -555,6 +692,14 @@
       config.allowReturnPrice === true);
   }
 
+  function isProviderApprovalReady(approval){
+    return !!(approval &&
+      approval.canConnectEndpoint === true &&
+      approval.canEnableNetworkSearch === true &&
+      approval.canDisplayPrice === true &&
+      approval.canRedirect === true);
+  }
+
   function isProductSearchRequest(request){
     return resultCategory(request && request.category) === "product";
   }
@@ -563,6 +708,7 @@
     const readiness = getProductProviderReadiness(providerConfig);
     const pool = getGlobalProviderPoolReadiness();
     const onboarding = onboardingFields(getProviderOnboardingStatus(request && request.category));
+    const approval = approvalFields(getProviderApprovalStatus(request && request.category, providerConfig && providerConfig.providerId));
     return {
       ok:false,
       code:"COMMERCE_PRODUCT_PROVIDER_NOT_CONNECTED",
@@ -574,6 +720,7 @@
       configHealth:configFields(providerConfig),
       connectorHealth,
       onboardingHealth:onboarding,
+      approvalHealth:approval,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       productProviderReadiness:readiness,
@@ -585,8 +732,33 @@
     };
   }
 
+  function providerApprovalRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, approvalHealth){
+    const onboarding = onboardingFields(getProviderOnboardingStatus(request && request.category));
+    const approval = approvalFields(approvalHealth || getProviderApprovalStatus(request && request.category, providerConfig && providerConfig.providerId));
+    return {
+      ok:false,
+      code:"COMMERCE_PROVIDER_APPROVAL_REQUIRED",
+      message:"provider_approval_required",
+      reason:"provider_approval_required",
+      request,
+      searchStatus:"no_provider",
+      providerHealth:providerHealth.providerHealth,
+      configHealth:configFields(providerConfig),
+      connectorHealth,
+      onboardingHealth:onboarding,
+      approvalHealth:approval,
+      sandboxHealth:sandbox,
+      dryRunHealth:sandbox,
+      canShowPrice:false,
+      canShowBookingButton:false,
+      canShowCheckoutButton:false,
+      candidates:[]
+    };
+  }
+
   function localLawComplianceRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, complianceHealth){
     const onboarding = onboardingFields(getProviderOnboardingStatus(request && request.category));
+    const approval = approvalFields(getProviderApprovalStatus(request && request.category, providerConfig && providerConfig.providerId));
     const health = complianceHealth || evaluateLocalLawCompliance(request, { locationHealth:locationHealth() });
     return {
       ok:false,
@@ -599,6 +771,7 @@
       configHealth:configFields(providerConfig),
       connectorHealth,
       onboardingHealth:onboarding,
+      approvalHealth:approval,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       locationHealth:locationHealth(),
@@ -613,6 +786,7 @@
   function shippingDestinationRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox){
     const health = locationHealth();
     const onboarding = onboardingFields(getProviderOnboardingStatus(request && request.category));
+    const approval = approvalFields(getProviderApprovalStatus(request && request.category, providerConfig && providerConfig.providerId));
     return {
       ok:false,
       code:"COMMERCE_SHIPPING_DESTINATION_REQUIRED",
@@ -624,6 +798,7 @@
       configHealth:configFields(providerConfig),
       connectorHealth,
       onboardingHealth:onboarding,
+      approvalHealth:approval,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       locationHealth:health,
@@ -703,6 +878,7 @@
     const cFields = connectorFields(connector);
     const onboarding = getProviderOnboardingStatus(next);
     const oFields = onboardingFields(onboarding);
+    const approval = approvalFields(getProviderApprovalStatus(next, config.providerId));
     const configReady = isProviderConfigReady(config);
     const connectorReady = isProviderConnectorReady(connector);
     const sandbox = sandboxFields(next, settings, config, connector);
@@ -730,6 +906,14 @@
         canConnectEndpoint:oFields.canConnectEndpoint,
         canDisplayPrice:oFields.canDisplayPrice,
         onboardingHealth:oFields,
+        approvalStatus:approval.approvalStatus,
+        providerApprovalRequired:true,
+        canRequestApproval:approval.canRequestApproval,
+        canStartConnectorStubDevelopment:approval.canStartConnectorStubDevelopment,
+        canConfigureApiKey:approval.canConfigureApiKey,
+        canEnableNetworkSearch:approval.canEnableNetworkSearch,
+        canRedirect:approval.canRedirect,
+        approvalHealth:approval,
         adapterId:adapter.providerId,
         adapterMode:"read_only",
         adapterConfigured:configured,
@@ -774,6 +958,7 @@
       connectorHealth:cFields,
       configHealth:configFields(config),
       onboardingHealth:oFields,
+      approvalHealth:approval,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       enabled:configured && configReady && connectorReady,
@@ -1442,6 +1627,7 @@
     const connectorReady = isProviderConnectorReady(providerConnector);
     const connectorHealth = connectorFields(providerConnector);
     const onboardingHealth = onboardingFields(getProviderOnboardingStatus(request.category));
+    const approvalHealth = approvalFields(getProviderApprovalStatus(request.category, providerConfig && providerConfig.providerId));
     const sandbox = getCommerceProviderSandbox(request.category, settings);
     const complianceHealth = !isAiModelPricingTask(request) ? evaluateLocalLawCompliance(request, { locationHealth:locationHealth() }) : null;
     if (complianceHealth && complianceHealth.canSearchProvider !== true) {
@@ -1452,6 +1638,9 @@
     }
     if (isProductSearchRequest(request) && !getProductProviderReadiness(providerConfig).ready) {
       return productProviderBlockedResult(request, providerHealth, providerConfig, connectorHealth, sandbox);
+    }
+    if (!isAiModelPricingTask(request) && !isProviderApprovalReady(approvalHealth)) {
+      return providerApprovalRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, approvalHealth);
     }
     if (isAiModelPricingTask(request)) {
       const aiConfig = getCommerceProviderConfig("aiModelPricing", settings);
@@ -1471,6 +1660,7 @@
           configHealth:configFields(aiConfig),
           connectorHealth:aiConnectorHealth,
           onboardingHealth:onboardingFields(getProviderOnboardingStatus("aiModelPricing")),
+          approvalHealth:approvalFields(getProviderApprovalStatus("aiModelPricing", aiConfig && aiConfig.providerId)),
           sandboxHealth:aiSandbox,
           dryRunHealth:aiSandbox,
           canShowPrice:false,
@@ -1493,6 +1683,7 @@
         configHealth:configFields(providerConfig),
         connectorHealth,
         onboardingHealth,
+        approvalHealth,
         sandboxHealth:sandbox,
         dryRunHealth:sandbox,
         canShowPrice:false,
@@ -1511,6 +1702,7 @@
         configHealth:configFields(providerConfig),
         connectorHealth,
         onboardingHealth,
+        approvalHealth,
         sandboxHealth:sandbox,
         dryRunHealth:sandbox,
         canShowPrice:false,
@@ -1535,6 +1727,7 @@
         configHealth:configFields(providerConfig),
         connectorHealth,
         onboardingHealth,
+        approvalHealth,
         sandboxHealth:Object.assign({}, sandbox, sandboxValidation),
         dryRunHealth:Object.assign({}, sandbox, sandboxValidation),
         canShowPrice:candidates.length > 0,
@@ -1558,6 +1751,7 @@
       configHealth:configFields(providerConfig),
       connectorHealth,
       onboardingHealth,
+      approvalHealth,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       canShowPrice:false,
@@ -1578,6 +1772,7 @@
     getCommerceProviderConnector,
     getCommerceProviderSandbox,
     getProviderOnboardingStatus,
+    getProviderApprovalStatus,
     locationHealthForCommerce:locationHealth,
     getLocalLawCompliancePolicy,
     evaluateLocalLawCompliance,

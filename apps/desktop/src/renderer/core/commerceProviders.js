@@ -48,11 +48,15 @@
     return window.WeishanCommerceProviderOnboardingChecklist || null;
   }
 
+  function approvalApi(){
+    return window.WeishanCommerceProviderApprovalWorkflow || null;
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
     return {
-      checklistVersion:"2.0.38",
+      checklistVersion:"2.0.40",
       phase:"provider_onboarding_checklist",
       category:normalizeCategory(category),
       onboardingStatus:"not_reviewed",
@@ -75,6 +79,24 @@
         noOrderSubmit:true,
         noIdentityStorage:true
       }
+    };
+  }
+
+  function approvalStatus(category, providerId){
+    const api = approvalApi();
+    if (api && api.getProviderApprovalStatus) return api.getProviderApprovalStatus(category, providerId);
+    return {
+      workflowVersion:"2.0.40",
+      phase:"provider_approval_workflow",
+      approvalStatus:"not_reviewed",
+      canRequestApproval:true,
+      canStartConnectorStubDevelopment:false,
+      canConfigureApiKey:false,
+      canConnectEndpoint:false,
+      canEnableNetworkSearch:false,
+      canDisplayPrice:false,
+      canRedirect:false,
+      reason:"provider_approval_required"
     };
   }
 
@@ -182,9 +204,19 @@
     if (api && api.getCommerceProviderConfig) return api.getCommerceProviderConfig(category, settings);
     const next = normalizeCategory(category);
     const productDefaults = next === "product" ? productSafetySwitches() : {};
+    const providerId = next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled";
+    const approval = approvalStatus(next, providerId);
     return Object.assign({
-      providerId:next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled",
+      providerId,
       category:next,
+      approvalStatus:approval.approvalStatus || "not_reviewed",
+      providerApprovalRequired:true,
+      canRequestApproval:approval.canRequestApproval !== false,
+      canStartConnectorStubDevelopment:approval.canStartConnectorStubDevelopment === true,
+      canConfigureApiKey:approval.canConfigureApiKey === true,
+      canEnableNetworkSearch:approval.canEnableNetworkSearch === true,
+      canRedirect:approval.canRedirect === true,
+      approvalHealth:approval,
       onboardingStatus:"not_reviewed",
       providerOnboardingRequired:true,
       canStartConnectorDevelopment:false,
@@ -277,6 +309,14 @@
       canStartConnectorDevelopment:next.canStartConnectorDevelopment === true,
       canConnectEndpoint:next.canConnectEndpoint === true,
       canDisplayPrice:next.canDisplayPrice === true,
+      approvalStatus:next.approvalStatus || "not_reviewed",
+      providerApprovalRequired:next.providerApprovalRequired !== false,
+      canRequestApproval:next.canRequestApproval !== false,
+      canStartConnectorStubDevelopment:next.canStartConnectorStubDevelopment === true,
+      canConfigureApiKey:next.canConfigureApiKey === true,
+      canEnableNetworkSearch:next.canEnableNetworkSearch === true,
+      canRedirect:next.canRedirect === true,
+      approvalHealth:next.approvalHealth || approvalStatus(next.category, next.providerId),
       providerOnboardingStatus:next.providerOnboardingStatus || onboardingStatus(next.category)
     };
   }
@@ -429,6 +469,7 @@
     const connector = defaultConnector(next, null);
     const cFields = connectorFields(connector);
     const onboarding = onboardingStatus(next);
+    const approval = approvalStatus(next, config.providerId);
     const isProduct = next === "product";
     const productDefaults = isProduct ? productSafetySwitches() : {};
     const candidate = isProduct ? productCandidateReadiness() : null;
@@ -458,6 +499,14 @@
       canStartConnectorDevelopment:onboarding.canStartConnectorDevelopment === true,
       canConnectEndpoint:onboarding.canConnectEndpoint === true,
       canDisplayPrice:onboarding.canDisplayPrice === true,
+      approvalStatus:approval.approvalStatus || "not_reviewed",
+      providerApprovalRequired:true,
+      canRequestApproval:approval.canRequestApproval !== false,
+      canStartConnectorStubDevelopment:approval.canStartConnectorStubDevelopment === true,
+      canConfigureApiKey:approval.canConfigureApiKey === true,
+      canEnableNetworkSearch:approval.canEnableNetworkSearch === true,
+      canRedirect:approval.canRedirect === true,
+      approvalHealth:approval,
       enabled:false,
       configured:false,
       environment:"renderer",
@@ -500,6 +549,7 @@
       supportsCrossBorderSearch:config.supportsCrossBorderSearch === true,
       configHealth:configFields(config),
       onboardingHealth:onboarding,
+      approvalHealth:approval,
       connectorHealth:providerConnectorFields,
       sandboxHealth:sandboxFields(next, null, config, config, connector),
       productProviderProfile:isProduct ? productProfile() : undefined,
@@ -523,6 +573,8 @@
     const connector = defaultConnector(next, cfg);
     const cFields = connectorFields(connector);
     const onboarding = onboardingStatus(next);
+    const approval = approvalStatus(next, config.providerId);
+    if (approval.canConnectEndpoint !== true || approval.canEnableNetworkSearch !== true || approval.canDisplayPrice !== true || approval.canRedirect !== true) return null;
     if (config.enabled !== true || config.configured !== true || config.hasApiKey !== true || config.allowNetworkSearch !== true || config.allowReturnPrice !== true) return null;
     if (cFields.connectorEnabled !== true || cFields.connectorConfigured !== true || cFields.connectorNetworkAllowed !== true || cFields.supportsSearch !== true || cFields.supportsPrice !== true) return null;
     return {
@@ -543,6 +595,14 @@
       canStartConnectorDevelopment:onboarding.canStartConnectorDevelopment === true,
       canConnectEndpoint:onboarding.canConnectEndpoint === true,
       canDisplayPrice:onboarding.canDisplayPrice === true,
+      approvalStatus:approval.approvalStatus || "not_reviewed",
+      providerApprovalRequired:true,
+      canRequestApproval:approval.canRequestApproval !== false,
+      canStartConnectorStubDevelopment:approval.canStartConnectorStubDevelopment === true,
+      canConfigureApiKey:approval.canConfigureApiKey === true,
+      canEnableNetworkSearch:approval.canEnableNetworkSearch === true,
+      canRedirect:approval.canRedirect === true,
+      approvalHealth:approval,
       adapterId:adapter.providerId,
       adapterMode:"read_only",
       adapterConfigured:true,

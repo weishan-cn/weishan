@@ -41,11 +41,15 @@
     return window.WeishanCommerceProviderOnboardingChecklist || null;
   }
 
+  function approvalApi(){
+    return window.WeishanCommerceProviderApprovalWorkflow || null;
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
     return {
-      checklistVersion:"2.0.38",
+      checklistVersion:"2.0.40",
       phase:"provider_onboarding_checklist",
       category:normalizeCategory(category),
       onboardingStatus:"not_reviewed",
@@ -68,6 +72,24 @@
         noOrderSubmit:true,
         noIdentityStorage:true
       }
+    };
+  }
+
+  function approvalStatus(category, providerId){
+    const api = approvalApi();
+    if (api && api.getProviderApprovalStatus) return api.getProviderApprovalStatus(category, providerId);
+    return {
+      workflowVersion:"2.0.40",
+      phase:"provider_approval_workflow",
+      approvalStatus:"not_reviewed",
+      canRequestApproval:true,
+      canStartConnectorStubDevelopment:false,
+      canConfigureApiKey:false,
+      canConnectEndpoint:false,
+      canEnableNetworkSearch:false,
+      canDisplayPrice:false,
+      canRedirect:false,
+      reason:"provider_approval_required"
     };
   }
 
@@ -172,9 +194,19 @@
   function defaultProviderConfig(category){
     const next = normalizeCategory(category);
     const label = CATEGORY_LABELS[next] || "采购";
+    const providerId = next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled";
+    const approval = approvalStatus(next, providerId);
     const base = {
-      providerId:next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled",
+      providerId,
       category:next,
+      approvalStatus:approval.approvalStatus || "not_reviewed",
+      providerApprovalRequired:true,
+      canRequestApproval:approval.canRequestApproval !== false,
+      canStartConnectorStubDevelopment:approval.canStartConnectorStubDevelopment === true,
+      canConfigureApiKey:approval.canConfigureApiKey === true,
+      canEnableNetworkSearch:approval.canEnableNetworkSearch === true,
+      canRedirect:approval.canRedirect === true,
+      approvalHealth:approval,
       onboardingStatus:"not_reviewed",
       providerOnboardingRequired:true,
       canStartConnectorDevelopment:false,
@@ -352,6 +384,7 @@
       config.hasApiKey === true &&
       config.allowNetworkSearch === true &&
       config.allowReturnPrice === true;
+    const approval = config.approvalHealth || approvalStatus(config.category, config.providerId);
     return {
       configStatus:ready ? "ready" : "not_configured",
       providerConfig:config,
@@ -382,6 +415,15 @@
       requiresPaymentMethod:config.requiresPaymentMethod === true,
       supportsReadOnlySearch:config.supportsReadOnlySearch === true,
       supportsCrossBorderSearch:config.supportsCrossBorderSearch === true,
+      approvalStatus:approval.approvalStatus || "not_reviewed",
+      providerApprovalRequired:true,
+      canRequestApproval:approval.canRequestApproval !== false,
+      canStartConnectorStubDevelopment:approval.canStartConnectorStubDevelopment === true,
+      canConfigureApiKey:approval.canConfigureApiKey === true,
+      canConnectEndpoint:approval.canConnectEndpoint === true,
+      canEnableNetworkSearch:approval.canEnableNetworkSearch === true,
+      canRedirect:approval.canRedirect === true,
+      approvalHealth:approval,
       canShowPrice:ready,
       canShowBookingButton:ready && config.allowBookingUrl === true,
       canShowCheckoutButton:ready && config.allowCheckoutUrl === true,

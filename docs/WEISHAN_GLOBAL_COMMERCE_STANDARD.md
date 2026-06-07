@@ -166,6 +166,26 @@ Provider Onboarding Checklist 必须审查：
 
 无论 provider 类型如何，都不得自动付款、自动下单、提交订单或保存证件/银行卡。Provider Onboarding Checklist 只允许推进只读搜索准备，不允许绕过 candidate evaluation、config safety、read_only adapter、sandbox dry run 或 connector gate。
 
+## 7.2. Provider Approval Workflow 标准
+
+任何真实 provider 接入前必须完成 Provider Approval Workflow 分级审批。provider 默认状态为未审查，未审查或审查中不得配置 API key、不得连接真实 endpoint、不得启用网络搜索、不得显示价格、不得跳转购买 / 预订页面。
+
+Provider Approval Workflow 至少包括：
+
+- 法律条款审查
+- API 文档审查
+- 隐私政策审查
+- 价格 / 税费 / 运费字段审查
+- 安全审查
+- 当地法律合规审查
+- 人工批准
+
+`approved_for_stub` 只允许开发只读 connector stub，不允许真实网络搜索，不允许配置真实 API key，不允许连接真实 endpoint，不允许显示价格，也不允许展示购买或预订按钮。
+
+任何真实接入前必须同时通过 Local Law Compliance Gate、Provider Onboarding Checklist、config / adapter / sandbox / connector gate。人工批准必须在真实接入前完成。
+
+无论审批状态如何，weishan 都不得自动付款、自动下单、提交订单或保存证件 / 银行卡。
+
 ## 8. 结果展示标准
 
 结果最多展示 2-3 条。

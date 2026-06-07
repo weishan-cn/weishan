@@ -48,7 +48,19 @@ const REQUIRED_PHRASES = [
   "不提供法律意见",
   "不帮助规避当地法律",
   "不保存原始 GPS 坐标",
-    "每个版本只做一个完整功能模块"
+  "Provider Approval Workflow",
+  "分级审批",
+  "未审查",
+  "审查中",
+  "approved_for_stub",
+  "只读 connector stub",
+  "不得配置 API key",
+  "不得连接真实 endpoint",
+  "不得启用网络搜索",
+  "不得显示价格",
+  "不得跳转购买",
+  "人工批准",
+  "每个版本只做一个完整功能模块"
 ];
 
 function main() {

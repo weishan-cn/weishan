@@ -117,14 +117,14 @@ async function installCommerceSearchMock(page, candidates) {
     if (!window.WeishanCommerceLocalLawCompliance) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
-        script.src = "./renderer/core/commerceLocalLawCompliance.js?v=2.0.39";
+        script.src = "./renderer/core/commerceLocalLawCompliance.js?v=2.0.40";
         script.onload = resolve;
         document.head.appendChild(script);
       });
     }
     if (window.WeishanCommerceLocalLawCompliance) {
       window.WeishanCommerceLocalLawCompliance.evaluateLocalLawCompliance = () => ({
-        complianceVersion:"2.0.39",
+        complianceVersion:"2.0.40",
         phase:"local_law_compliance_gate",
         complianceStatus:"verified_for_test_fixture",
         searchStatus:"ready",
@@ -137,6 +137,70 @@ async function installCommerceSearchMock(page, candidates) {
         reason:"test_fixture_local_law_verified",
         privacy:{ storeRawCoordinates:false, logRawCoordinates:false, shareWithThirdParty:false, useForAds:false, useForTracking:false },
         safety:{ noRealLegalDatabase:true, noNetworkLegalLookup:true, noCheckout:true, noPayment:true, noOrderSubmit:true, noIdentityStorage:true }
+      });
+    }
+    if (!window.WeishanCommerceProviderApprovalWorkflow) {
+      await new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceProviderApprovalWorkflow.js?v=2.0.40";
+        script.onload = resolve;
+        document.head.appendChild(script);
+      });
+    }
+    if (window.WeishanCommerceProviderApprovalWorkflow) {
+      const workflow = window.WeishanCommerceProviderApprovalWorkflow;
+      workflow.getProviderApprovalStatus = (category, providerId) => ({
+        workflowVersion:"2.0.40",
+        phase:"provider_approval_workflow",
+        category:category || "product",
+        providerId:providerId || "e2e-commerce-provider",
+        approvalStatus:"approved_for_test_fixture",
+        canRequestApproval:true,
+        canStartConnectorStubDevelopment:true,
+        canConfigureApiKey:true,
+        canConnectEndpoint:true,
+        canEnableNetworkSearch:true,
+        canDisplayPrice:true,
+        canRedirect:true,
+        canCheckout:false,
+        canPay:false,
+        canSubmitOrder:false,
+        canStoreIdentity:false,
+        reason:"test_fixture_provider_approval",
+        approvalStages:{
+          legalReviewRequired:true,
+          apiDocsReviewRequired:true,
+          privacyReviewRequired:true,
+          feeFieldReviewRequired:true,
+          securityReviewRequired:true,
+          localLawReviewRequired:true,
+          humanApprovalRequired:true
+        },
+        gates:{
+          allowConnectorStubDevelopment:true,
+          allowApiKeyConfiguration:true,
+          allowEndpointConnection:true,
+          allowNetworkSearch:true,
+          allowPriceDisplay:true,
+          allowRedirect:true,
+          allowCheckout:false,
+          allowPayment:false,
+          allowOrderSubmit:false,
+          allowIdentityStorage:false
+        },
+        safety:{
+          noRealEndpoint:false,
+          noApiKey:false,
+          noNetworkSearch:false,
+          noPriceDisplay:false,
+          noRedirect:false,
+          noCheckout:true,
+          noPayment:true,
+          noOrderSubmit:true,
+          noIdentityStorage:true,
+          noLegalAdvice:true,
+          noBypassLocalLaw:true
+        }
       });
     }
     if (!window.WeishanCommerceLocationPolicy) {
@@ -593,7 +657,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderOnboardingChecklist) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.39";
+          script.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.40";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -608,7 +672,7 @@ test.describe.serial("commerce agent workbench", () => {
         reason:window.WeishanCommerceProviderOnboardingChecklist.explainProviderOnboardingBlockReason("product")
       };
     });
-    expect(result.checklist.checklistVersion).toBe("2.0.39");
+    expect(result.checklist.checklistVersion).toBe("2.0.40");
     expect(result.checklist.phase).toBe("provider_onboarding_checklist");
     expect(result.checklist.appliesTo).toContain("product_marketplace");
     expect(result.checklist.appliesTo).toContain("official_brand_site");
@@ -652,6 +716,203 @@ test.describe.serial("commerce agent workbench", () => {
     expect(result.displayReady).toBe("可进入下一步");
     expect(result.canStart).toBe(false);
     expect(result.reason).toBe("provider_onboarding_required");
+  });
+
+  test("provider approval workflow blocks endpoint key network price and redirect by default", async () => {
+    await gotoRoute(page, "commerce");
+    const result = await page.evaluate(async () => {
+      delete window.WeishanCommerceProviderApprovalWorkflow;
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceProviderApprovalWorkflow.js?v=2.0.40&contract=" + Date.now();
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      const api = window.WeishanCommerceProviderApprovalWorkflow;
+      return {
+        workflow:api.getProviderApprovalWorkflow("product"),
+        status:api.getProviderApprovalStatus("product", "product-provider-disabled"),
+        canRequest:api.canRequestProviderApproval("product", "product-provider-disabled"),
+        canStartStub:api.canStartConnectorStubDevelopment("product", "product-provider-disabled"),
+        canConfigureKey:api.canConfigureProviderApiKey("product", "product-provider-disabled"),
+        canConnectEndpoint:api.canConnectProviderEndpoint("product", "product-provider-disabled"),
+        reason:api.explainProviderApprovalBlockReason("product", "product-provider-disabled"),
+        displayNotReviewed:api.toProviderApprovalDisplayStatus("not_reviewed"),
+        displayReviewRequested:api.toProviderApprovalDisplayStatus("review_requested"),
+        displayLegal:api.toProviderApprovalDisplayStatus("legal_review"),
+        displayApi:api.toProviderApprovalDisplayStatus("api_review"),
+        displayPrivacy:api.toProviderApprovalDisplayStatus("privacy_review"),
+        displayFee:api.toProviderApprovalDisplayStatus("fee_field_review"),
+        displaySecurity:api.toProviderApprovalDisplayStatus("security_review"),
+        displayStub:api.toProviderApprovalDisplayStatus("approved_for_stub"),
+        displayRejected:api.toProviderApprovalDisplayStatus("rejected"),
+        displayBlocked:api.toProviderApprovalDisplayStatus("blocked")
+      };
+    });
+    expect(result.workflow.workflowVersion).toBe("2.0.40");
+    expect(result.workflow.phase).toBe("provider_approval_workflow");
+    expect(result.workflow.defaultStatus).toBe("not_reviewed");
+    expect(result.workflow.appliesTo).toContain("product_marketplace");
+    expect(result.workflow.appliesTo).toContain("official_brand_site");
+    expect(result.workflow.appliesTo).toContain("hotel_ota");
+    expect(result.workflow.appliesTo).toContain("hotel_official_site");
+    expect(result.workflow.appliesTo).toContain("flight_ota");
+    expect(result.workflow.appliesTo).toContain("airline_official_site");
+    expect(result.workflow.appliesTo).toContain("ticketing_platform");
+    expect(result.workflow.appliesTo).toContain("local_service_platform");
+    expect(result.workflow.statuses).toContain("not_reviewed");
+    expect(result.workflow.statuses).toContain("review_requested");
+    expect(result.workflow.statuses).toContain("legal_review");
+    expect(result.workflow.statuses).toContain("api_review");
+    expect(result.workflow.statuses).toContain("privacy_review");
+    expect(result.workflow.statuses).toContain("fee_field_review");
+    expect(result.workflow.statuses).toContain("security_review");
+    expect(result.workflow.statuses).toContain("approved_for_stub");
+    expect(result.workflow.statuses).toContain("rejected");
+    expect(result.workflow.statuses).toContain("blocked");
+    expect(result.workflow.approvalStages.legalReviewRequired).toBe(true);
+    expect(result.workflow.approvalStages.apiDocsReviewRequired).toBe(true);
+    expect(result.workflow.approvalStages.privacyReviewRequired).toBe(true);
+    expect(result.workflow.approvalStages.feeFieldReviewRequired).toBe(true);
+    expect(result.workflow.approvalStages.securityReviewRequired).toBe(true);
+    expect(result.workflow.approvalStages.localLawReviewRequired).toBe(true);
+    expect(result.workflow.approvalStages.humanApprovalRequired).toBe(true);
+    expect(result.workflow.gates.allowConnectorStubDevelopment).toBe(false);
+    expect(result.workflow.gates.allowApiKeyConfiguration).toBe(false);
+    expect(result.workflow.gates.allowEndpointConnection).toBe(false);
+    expect(result.workflow.gates.allowNetworkSearch).toBe(false);
+    expect(result.workflow.gates.allowPriceDisplay).toBe(false);
+    expect(result.workflow.gates.allowRedirect).toBe(false);
+    expect(result.workflow.gates.allowCheckout).toBe(false);
+    expect(result.workflow.gates.allowPayment).toBe(false);
+    expect(result.workflow.gates.allowOrderSubmit).toBe(false);
+    expect(result.workflow.gates.allowIdentityStorage).toBe(false);
+    expect(result.workflow.safety.noRealEndpoint).toBe(true);
+    expect(result.workflow.safety.noApiKey).toBe(true);
+    expect(result.workflow.safety.noNetworkSearch).toBe(true);
+    expect(result.workflow.safety.noPriceDisplay).toBe(true);
+    expect(result.workflow.safety.noRedirect).toBe(true);
+    expect(result.workflow.safety.noCheckout).toBe(true);
+    expect(result.workflow.safety.noPayment).toBe(true);
+    expect(result.workflow.safety.noOrderSubmit).toBe(true);
+    expect(result.workflow.safety.noIdentityStorage).toBe(true);
+    expect(result.status.approvalStatus).toBe("not_reviewed");
+    expect(result.status.canRequestApproval).toBe(true);
+    expect(result.status.canStartConnectorStubDevelopment).toBe(false);
+    expect(result.status.canConfigureApiKey).toBe(false);
+    expect(result.status.canConnectEndpoint).toBe(false);
+    expect(result.status.canEnableNetworkSearch).toBe(false);
+    expect(result.status.canDisplayPrice).toBe(false);
+    expect(result.status.canRedirect).toBe(false);
+    expect(result.status.reason).toBe("provider_approval_required");
+    expect(result.canRequest).toBe(true);
+    expect(result.canStartStub).toBe(false);
+    expect(result.canConfigureKey).toBe(false);
+    expect(result.canConnectEndpoint).toBe(false);
+    expect(result.reason).toBe("provider_approval_required");
+    expect(result.displayNotReviewed).toBe("未审查");
+    expect(result.displayReviewRequested).toBe("已请求审查");
+    expect(result.displayLegal).toBe("法律条款审查中");
+    expect(result.displayApi).toBe("API 文档审查中");
+    expect(result.displayPrivacy).toBe("隐私政策审查中");
+    expect(result.displayFee).toBe("价格/税费/运费字段审查中");
+    expect(result.displaySecurity).toBe("安全审查中");
+    expect(result.displayStub).toBe("已批准开发只读 connector stub");
+    expect(result.displayRejected).toBe("已拒绝");
+    expect(result.displayBlocked).toBe("已阻断");
+  });
+
+  test("provider approval workflow panel explains approval stages without raw fields", async () => {
+    await submitHomeCommand(page, runId + " 买华为手机");
+    const home = page.locator("[data-commerce-home-summary]");
+    await expect(home).toContainText("Provider 审批流程");
+    await expect(home).toContainText("真实 provider 接入前必须完成分级审批。当前不会连接任何真实 provider。");
+    await expect(home).toContainText("审批状态：未审查");
+    await expect(home).toContainText("当前阶段：尚未进入审查流程");
+    await expect(home).toContainText("Connector stub：暂不可开发");
+    await expect(home).toContainText("API key：不可配置");
+    await expect(home).toContainText("Endpoint：不可连接");
+    await expect(home).toContainText("网络搜索：未启用");
+    await expect(home).toContainText("实时价格：不可用");
+    await expect(home).toContainText("精确跳转：未启用");
+    await expect(home).toContainText("法律条款审查：未开始");
+    await expect(home).toContainText("API 文档审查：未开始");
+    await expect(home).toContainText("隐私政策审查：未开始");
+    await expect(home).toContainText("价格 / 税费 / 运费字段审查：未开始");
+    await expect(home).toContainText("安全审查：未开始");
+    await expect(home).toContainText("当地法律合规审查：未开始");
+    await expect(home).toContainText("人工批准：未完成");
+    await expect(home).toContainText("只读 connector stub 开发许可：未授予");
+    await expect(home).toContainText("只读 connector stub 只允许开发准备，不连接真实平台");
+    await expect(home).toContainText("即使批准开发 stub，仍不会显示价格或跳转购买页面");
+    await expect(home).not.toContainText("provider_approval_required");
+    await expect(home).not.toContainText("approvalStatus=not_reviewed");
+    await expect(home).not.toContainText("allowConnectorStubDevelopment=false");
+    await expect(home).not.toContainText("allowApiKeyConfiguration=false");
+    await expect(home).not.toContainText("allowEndpointConnection=false");
+    await expect(home).not.toContainText("allowNetworkSearch=false");
+    await expect(home).not.toContainText("allowPriceDisplay=false");
+    await expect(home).not.toContainText("legalReviewRequired=true");
+    await expect(home).not.toContainText("apiDocsReviewRequired=true");
+    await expect(home).not.toContainText("humanApprovalRequired=true");
+    await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+    await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+
+    await page.locator("#commerceViewPlanBtn").click();
+    const detail = page.locator(".commerce-detail");
+    await expect(detail).toContainText("Provider 审批流程");
+    await expect(detail).toContainText("只有 provider 完成分级审批，并且本地法律合规、onboarding checklist、config / adapter / sandbox / connector gate 均通过后");
+    await expect(detail).toContainText("当前不会连接真实平台，不会返回价格，不会跳转购买或预订页面");
+    await expect(detail).not.toContainText("provider_approval_required");
+    await expect(detail).not.toContainText("approvalStatus=not_reviewed");
+    await expect(detail).not.toContainText("allowConnectorStubDevelopment=false");
+    await expect(detail).not.toContainText("allowApiKeyConfiguration=false");
+    await expect(detail).not.toContainText("allowEndpointConnection=false");
+    await expect(detail).not.toContainText("allowNetworkSearch=false");
+    await expect(detail).not.toContainText("allowPriceDisplay=false");
+    await expect(detail).not.toContainText("legalReviewRequired=true");
+    await expect(detail).not.toContainText("apiDocsReviewRequired=true");
+    await expect(detail).not.toContainText("humanApprovalRequired=true");
+    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+  });
+
+  test("provider approval workflow appears for product hotel flight and ticket plans", async () => {
+    const inputs = ["买华为手机", "订酒店", "订机票", "买演唱会门票"];
+    for (const text of inputs) {
+      await submitHomeCommand(page, runId + "-APPROVAL-MULTI " + text);
+      const home = page.locator("[data-commerce-home-summary]");
+      await expect(home).toContainText("Provider 审批流程");
+      await expect(home).toContainText("审批状态：未审查");
+      await expect(home).toContainText("Connector stub：暂不可开发");
+      await expect(home).toContainText("API key：不可配置");
+      await expect(home).toContainText("Endpoint：不可连接");
+      await expect(home).toContainText("网络搜索：未启用");
+      await expect(home).toContainText("实时价格：不可用");
+      await expect(home).toContainText("精确跳转：未启用");
+      await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+      await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+      await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+      await page.locator("#commerceViewPlanBtn").click();
+      const detail = page.locator(".commerce-detail");
+      await expect(detail).toContainText("Provider 审批流程");
+      await expect(detail).toContainText("审批状态：未审查");
+      await expect(detail).toContainText("只读 connector stub 只允许开发准备，不连接真实平台");
+      await expect(detail).toContainText("即使批准开发 stub，仍不会显示价格或跳转购买页面");
+      await expect(detail).not.toContainText("provider_approval_required");
+      await expect(detail).not.toContainText("approvalStatus=not_reviewed");
+      await expect(detail).not.toContainText("allowConnectorStubDevelopment=false");
+      await expect(detail).not.toContainText("allowApiKeyConfiguration=false");
+      await expect(detail).not.toContainText("allowEndpointConnection=false");
+      await expect(detail).not.toContainText("allowNetworkSearch=false");
+      await expect(detail).not.toContainText("allowPriceDisplay=false");
+      await expect(detail).not.toContainText("legalReviewRequired=true");
+      await expect(detail).not.toContainText("apiDocsReviewRequired=true");
+      await expect(detail).not.toContainText("humanApprovalRequired=true");
+      await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+      await gotoRoute(page, "home");
+    }
   });
 
   test("provider onboarding review panel explains required checks without raw fields", async () => {
@@ -706,7 +967,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail).not.toContainText("上传身份证");
     await expect(detail).not.toContainText("上传护照");
     await expect(detail).not.toContainText("保存银行卡");
-    await expect(page.getByRole("button", { name:/去购买|去预订|付款|立即支付|提交订单/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
     await expect(detail).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
   });
 
@@ -1417,7 +1678,7 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(detail).not.toContainText("上传身份证");
       await expect(detail).not.toContainText("上传护照");
       await expect(detail).not.toContainText("保存银行卡");
-      await expect(page.getByRole("button", { name:/去购买|去预订|付款|立即支付|提交订单/ })).toHaveCount(0);
+      await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
     };
 
     const assertHomeOnboardingPanelVisible = async () => {
@@ -2031,13 +2292,13 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(currentTaskLogs(page)).not.toContainText("路由判断：全球采购");
   });
 
-  test("v2.0.39 local law compliance gate contract", async () => {
+  test("v2.0.40 local law compliance gate contract", async () => {
   await gotoRoute(page, "home");
   const result = await page.evaluate(async () => {
     delete window.WeishanCommerceLocalLawCompliance;
     await new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = "./renderer/core/commerceLocalLawCompliance.js?v=2.0.39&contract=" + Date.now();
+      script.src = "./renderer/core/commerceLocalLawCompliance.js?v=2.0.40&contract=" + Date.now();
       script.onload = resolve;
       script.onerror = reject;
       document.head.appendChild(script);
@@ -2048,7 +2309,7 @@ test.describe.serial("commerce agent workbench", () => {
     const regulated = api.evaluateLocalLawCompliance({ category:"product", query:"买大麻" }, { locationHealth:{ hasPreciseLocation:false, shippingDestination:{ configured:false } } });
     return { policy, evaluation, regulated };
   });
-  expect(result.policy.complianceVersion).toBe("2.0.39");
+  expect(result.policy.complianceVersion).toBe("2.0.40");
   expect(result.policy.phase).toBe("local_law_compliance_gate");
   expect(result.policy.requiredBeforeSearch).toBe(true);
   expect(result.policy.requiredBeforePriceDisplay).toBe(true);
@@ -2075,7 +2336,7 @@ test.describe.serial("commerce agent workbench", () => {
   expect(result.regulated.complianceStatus).toBe("compliance_review_required");
   });
 
-  test("v2.0.39 local law compliance review panel blocks default product UI", async () => {
+  test("v2.0.40 local law compliance review panel blocks default product UI", async () => {
     await gotoRoute(page, "home");
     const localRunId = runId + "-LOCAL-LAW-PRODUCT";
     await submitHomeCommand(page, localRunId + " 买华为手机");
@@ -2118,7 +2379,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail).not.toContainText("shareWithThirdParty=false");
   });
 
-  test("v2.0.39 regulated local law review panel explains risk without legal conclusion", async () => {
+  test("v2.0.40 regulated local law review panel explains risk without legal conclusion", async () => {
     await gotoRoute(page, "home");
     const inputs = ["买大麻", "买枪", "买处方药", "成人服务", "赌博网站"];
     for (const text of inputs) {
@@ -2139,11 +2400,11 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(home).not.toContainText("去购买");
       await expect(home).not.toContainText("去预订");
       await expect(home).not.toContainText("立即支付");
-      await expect(home.getByRole("button", { name:/去购买|去预订|付款|立即支付|提交订单/ })).toHaveCount(0);
+      await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
     }
   });
 
-  test("v2.0.39 hotel flight and ticket plans show local law compliance panel", async () => {
+  test("v2.0.40 hotel flight and ticket plans show local law compliance panel", async () => {
     await gotoRoute(page, "home");
     const inputs = ["订酒店", "订机票", "买演唱会门票"];
     for (const text of inputs) {
@@ -2155,7 +2416,7 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(home).toContainText("未确认前不显示价格、不跳转购买或预订页面");
       await expect(home).not.toContainText("去购买");
       await expect(home).not.toContainText("去预订");
-      await expect(home.getByRole("button", { name:/去购买|去预订|付款|立即支付|提交订单/ })).toHaveCount(0);
+      await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
       await page.locator('#commerceViewPlanBtn').click();
       const detail = page.locator('.commerce-detail').first();
       await expect(detail).toContainText("当地法律合规审查");

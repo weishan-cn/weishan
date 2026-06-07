@@ -6,7 +6,7 @@
     document.write('<scr' + 'ipt src="./renderer/core/desktopAssistant.js?v=2.0.15"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceAgent && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.39"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.40"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderAdapter && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProviderAdapter.js?v=2.0.32"></scr' + 'ipt>');
@@ -18,7 +18,10 @@
     document.write('<scr' + 'ipt src="./renderer/core/commerceGlobalProviderPool.js?v=2.0.32"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderOnboardingChecklist && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.39"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.40"></scr' + 'ipt>');
+  }
+  if (!window.WeishanCommerceProviderApprovalWorkflow && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderApprovalWorkflow.js?v=2.0.40"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProductProviderCandidate && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.32"></scr' + 'ipt>');
@@ -30,19 +33,19 @@
     document.write('<scr' + 'ipt src="./renderer/core/commerceLocationPolicy.js?v=2.0.32"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceLocalLawCompliance && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceLocalLawCompliance.js?v=2.0.39"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceLocalLawCompliance.js?v=2.0.40"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderConfig && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.39"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.40"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderSandbox && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProviderSandbox.js?v=2.0.32"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviders && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.39"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.40"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceSearch && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.39"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.40"></scr' + 'ipt>');
   }
 
   const QUEUE_KEY = "command.queue.v205";
@@ -276,6 +279,7 @@
       const providerHealth = search.getCommerceProviderHealth ? search.getCommerceProviderHealth(commercePlan.category, search.getCommerceSearchSettings && search.getCommerceSearchSettings()) : null;
       const usesOpenRouter = commercePlan.category === "aiModelPricing";
       const isProductPlan = commercePlan.category === "ecommerce" || commercePlan.category === "product";
+      const approvalHealth = !usesOpenRouter && search.getProviderApprovalStatus ? search.getProviderApprovalStatus(commercePlan.category) : null;
       const locationHealth = search.locationHealthForCommerce ? search.locationHealthForCommerce() : null;
       const complianceRequest = Object.assign({}, request, { query:text, inputSummary:text, text });
       const complianceHealth = !usesOpenRouter && search.evaluateLocalLawCompliance ? search.evaluateLocalLawCompliance(complianceRequest, { locationHealth }) : null;
@@ -288,14 +292,16 @@
       commercePlan.configHealth = providerHealth && providerHealth.configHealth || {};
       commercePlan.connectorHealth = providerHealth && providerHealth.connectorHealth || {};
       commercePlan.onboardingHealth = providerHealth && providerHealth.onboardingHealth || {};
+      commercePlan.approvalHealth = providerHealth && providerHealth.approvalHealth || approvalHealth || {};
       commercePlan.sandboxHealth = providerHealth && providerHealth.sandboxHealth || {};
       commercePlan.dryRunHealth = providerHealth && (providerHealth.dryRunHealth || providerHealth.sandboxHealth) || {};
       commercePlan.locationHealth = locationHealth || {};
       commercePlan.complianceHealth = complianceHealth || {};
       commercePlan.landedCostAccuracy = destinationRequired ? "blocked_shipping_destination_required" : "";
-      commercePlan.canShowPrice = !destinationRequired && !complianceRequired && providerHealth ? providerHealth.canShowPrice === true : false;
-      commercePlan.canShowBookingButton = !destinationRequired && !complianceRequired && providerHealth ? providerHealth.canShowBookingButton === true : false;
-      commercePlan.canShowCheckoutButton = !destinationRequired && !complianceRequired && providerHealth ? providerHealth.canShowCheckoutButton === true : false;
+      const approvalReady = !approvalHealth || approvalHealth.canDisplayPrice === true && approvalHealth.canRedirect === true;
+      commercePlan.canShowPrice = !destinationRequired && !complianceRequired && approvalReady && providerHealth ? providerHealth.canShowPrice === true : false;
+      commercePlan.canShowBookingButton = !destinationRequired && !complianceRequired && approvalReady && providerHealth ? providerHealth.canShowBookingButton === true : false;
+      commercePlan.canShowCheckoutButton = !destinationRequired && !complianceRequired && approvalReady && providerHealth ? providerHealth.canShowCheckoutButton === true : false;
     }
     const savedPlan = api.addCommerceTask ? api.addCommerceTask(commercePlan) : (api.saveCommercePlan ? api.saveCommercePlan(commercePlan) : commercePlan);
     const status = savedPlan.status || "planned";

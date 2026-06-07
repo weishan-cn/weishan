@@ -42,10 +42,18 @@
     }
     if (!window.WeishanCommerceProviderOnboardingChecklist && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderOnboardingChecklist"]')) {
       const onboarding = document.createElement("script");
-      onboarding.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.38";
+      onboarding.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.40";
       onboarding.dataset.weishanDynamic = "WeishanCommerceProviderOnboardingChecklist";
       onboarding.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(onboarding);
+      return;
+    }
+    if (!window.WeishanCommerceProviderApprovalWorkflow && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderApprovalWorkflow"]')) {
+      const approval = document.createElement("script");
+      approval.src = "./renderer/core/commerceProviderApprovalWorkflow.js?v=2.0.40";
+      approval.dataset.weishanDynamic = "WeishanCommerceProviderApprovalWorkflow";
+      approval.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(approval);
       return;
     }
     if (!window.WeishanCommerceProductProviderCandidate && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProductProviderCandidate"]')) {
@@ -74,7 +82,7 @@
     }
     if (!window.WeishanCommerceLocalLawCompliance && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceLocalLawCompliance"]')) {
       const localLaw = document.createElement("script");
-      localLaw.src = "./renderer/core/commerceLocalLawCompliance.js?v=2.0.38";
+      localLaw.src = "./renderer/core/commerceLocalLawCompliance.js?v=2.0.40";
       localLaw.dataset.weishanDynamic = "WeishanCommerceLocalLawCompliance";
       localLaw.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(localLaw);
@@ -82,7 +90,7 @@
     }
     if (!window.WeishanCommerceProviderConfig && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConfig"]')) {
       const config = document.createElement("script");
-      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.38";
+      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.40";
       config.dataset.weishanDynamic = "WeishanCommerceProviderConfig";
       config.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(config);
@@ -98,7 +106,7 @@
     }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
-      providers.src = "./renderer/core/commerceProviders.js?v=2.0.32";
+      providers.src = "./renderer/core/commerceProviders.js?v=2.0.40";
       providers.dataset.weishanDynamic = "WeishanCommerceProviders";
       providers.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(providers);
@@ -106,7 +114,7 @@
     }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
-    script.src = "./renderer/core/commerceSearch.js?v=2.0.38";
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.40";
     script.dataset.weishanDynamic = "WeishanCommerceSearch";
     script.onload = () => render(host);
     document.head.appendChild(script);
@@ -304,6 +312,31 @@
       </section>`;
   }
 
+  function providerApprovalWorkflowPanelHtml(approvalInfo){
+    const status = approvalInfo || {};
+    const row = (label, value) => `<li><span>${esc(label)}</span><b>${esc(value)}</b></li>`;
+    const group = (title, items) => `<section class="commerce-approval-group"><h4>${esc(title)}</h4><ul>${items.map((item) => row(item[0], item[1])).join("")}</ul></section>`;
+    return `<section class="commerce-provider-approval-panel" aria-label="Provider 审批流程">
+      <div class="commerce-provider-approval-head">
+        <div>
+          <h3>Provider 审批流程</h3>
+          <p>真实 provider 接入前必须完成分级审批。当前不会连接任何真实 provider。</p>
+        </div>
+        <strong>审批状态：${status.canConnectEndpoint === true ? "已批准进入下一步" : "未审查"}</strong>
+      </div>
+      <div class="commerce-provider-approval-grid">
+        ${group("当前状态", [["当前阶段", "尚未进入审查流程"], ["Connector stub", "暂不可开发"], ["API key", "不可配置"], ["Endpoint", "不可连接"]])}
+        ${group("连接与展示", [["网络搜索", "未启用"], ["实时价格", "不可用"], ["精确跳转", "未启用"]])}
+        ${group("审批阶段清单", [["法律条款审查", "未开始"], ["API 文档审查", "未开始"], ["隐私政策审查", "未开始"], ["价格 / 税费 / 运费字段审查", "未开始"]])}
+        ${group("安全审批", [["安全审查", "未开始"], ["当地法律合规审查", "未开始"], ["人工批准", "未完成"], ["只读 connector stub 开发许可", "未授予"]])}
+      </div>
+      <div class="commerce-provider-approval-note">
+        <p>只有 provider 完成分级审批，并且本地法律合规、onboarding checklist、config / adapter / sandbox / connector gate 均通过后，weishan 才允许进入真实 provider 连接。当前不会连接真实平台，不会返回价格，不会跳转购买或预订页面。</p>
+        <p>只读 connector stub 只允许开发准备，不连接真实平台。即使批准开发 stub，仍不会显示价格或跳转购买页面。</p>
+      </div>
+    </section>`;
+  }
+
   function localLawCompliancePanelHtml(task){
     const health = task && task.complianceHealth || {};
     const regulated = health.complianceStatus === "compliance_review_required";
@@ -346,7 +379,7 @@
     </section>`;
   }
 
-  function providerPoolNoticeHtml(task, configInfo, onboardingInfo){
+  function providerPoolNoticeHtml(task, configInfo, onboardingInfo, approvalInfo){
     const copy = providerPoolCopy(task, configInfo || {});
     if (!copy) return "";
     const isProduct = commercePoolCategory(task) === "product";
@@ -373,6 +406,7 @@
         <span>证件/银行卡：不保存。</span>
         <span>当前不会下单、付款或保存证件/银行卡。</span>
         ${providerOnboardingReviewPanelHtml(onboardingInfo || {})}
+        ${providerApprovalWorkflowPanelHtml(approvalInfo || {})}
       </div>`;
   }
 
@@ -503,6 +537,7 @@
     const configInfo = health.configHealth || {};
     const connectorInfo = health.connectorHealth || task.connectorHealth || {};
     const onboardingInfo = health.onboardingHealth || task.onboardingHealth || {};
+    const approvalInfo = health.approvalHealth || task.approvalHealth || {};
     const sandboxInfo = health.dryRunHealth || health.sandboxHealth || {};
     const globalReadiness = sandboxInfo.globalReadiness || {};
     const reasonWhenDisabled = providerRow.reasonWhenDisabled || "";
@@ -525,7 +560,7 @@
         <span>为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。实际价格、库存、税费和关税仍以外部平台和海关结算为准。</span>
         <button class="cmd-btn gray commerce-open-location-settings" type="button">去设置收货目的地</button>
       </div>` : ""}
-      ${!isModelPricing && !hasProvider ? providerPoolNoticeHtml(task, configInfo, onboardingInfo) : ""}
+      ${!isModelPricing && !hasProvider ? providerPoolNoticeHtml(task, configInfo, onboardingInfo, approvalInfo) : ""}
       ${isFlight && !hasProvider ? `<div class="commerce-warning commerce-flight-provider-missing">
         <b>已识别为机票搜索计划。</b>
         <span>出发地：${esc(flightOrigin)} · 目的地：${esc(flightDestination)} · 日期：${esc(flightDate)}</span>
