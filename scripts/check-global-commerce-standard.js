@@ -142,6 +142,19 @@ const REQUIRED_PHRASES = [
   "不得自动放开 connector",
   "真正接入真实 provider 必须另起版本",
   "人工批准",
+  "Commerce Local Intent Router",
+  "本地意图识别",
+  "简单 commerce intent 不应调用 AI",
+  "减少 AI token 消耗",
+  "gate / panel 渲染不得调用 AI",
+  "不得连接真实 provider",
+  "不得访问真实 endpoint",
+  "不得使用 API key",
+  "不得返回真实商品结果",
+  "不得显示真实价格",
+  "不得返回 fake/demo/mock price",
+  "复杂自然语言需求可以进入 AI fallback",
+  "AI fallback 不得绕过",
   "每个版本只做一个完整功能模块"
 ];
 

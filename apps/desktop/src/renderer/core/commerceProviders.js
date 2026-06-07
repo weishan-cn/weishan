@@ -80,6 +80,22 @@
     return window.WeishanCommerceProviderIntegrationRunbook || null;
   }
 
+  function localIntentRouterApi(){
+    return window.WeishanCommerceLocalIntentRouter || null;
+  }
+
+  function localIntentRouterContract(){
+    const api = localIntentRouterApi();
+    if (api && api.getCommerceLocalIntentRouterContract) return api.getCommerceLocalIntentRouterContract();
+    return {
+      routerVersion:"2.0.49",
+      phase:"commerce_local_intent_router",
+      defaultMode:"local_first",
+      tokenPolicy:{ simpleCommerceIntentUsesAi:false, localRuleFirst:true },
+      capabilities:{ canRouteWithoutAi:true, canTriggerRealProviderSearch:false, canDisplayRealPrice:false, canRedirect:false }
+    };
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
@@ -964,6 +980,7 @@
       providerIntegrationRunbook:integrationRunbook,
       providerIntegrationRunbookStatus:integrationRunbook.runbookStatus || "manual_approval_required",
       providerIntegrationRunbookMode:integrationRunbook.runbookMode || "pre_real_provider_connection",
+      commerceLocalIntentRouter:provider.commerceLocalIntentRouter || provider.configHealth && provider.configHealth.commerceLocalIntentRouter || localIntentRouterContract(),
       canApproveProviderIntegration:false,
       canProceedAfterManualApproval:false,
       sandboxHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
@@ -983,6 +1000,7 @@
     getCommerceProviderHealth,
     getCommerceConnectorGateStatus:connectorGateStatus,
     getProviderIntegrationReadiness:providerIntegrationReadiness,
-    getProviderIntegrationRunbook:providerIntegrationRunbook
+    getProviderIntegrationRunbook:providerIntegrationRunbook,
+    getCommerceLocalIntentRouterContract:localIntentRouterContract
   };
 })();

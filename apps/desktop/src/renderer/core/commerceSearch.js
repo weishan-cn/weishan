@@ -101,6 +101,31 @@
     return window.WeishanCommerceLocalLawCompliance || null;
   }
 
+  function localIntentRouterApi(){
+    return window.WeishanCommerceLocalIntentRouter || null;
+  }
+
+  function getCommerceLocalIntentRoute(input){
+    const api = localIntentRouterApi();
+    if (api && api.routeCommerceIntentLocally) return api.routeCommerceIntentLocally(input || "");
+    return {
+      routerVersion:"2.0.49",
+      phase:"commerce_local_intent_router",
+      routeMode:"local_first",
+      routedBy:"local_rules",
+      aiUsed:false,
+      aiFallbackEligible:false,
+      intentCategory:"unknown",
+      commerceType:"unknown",
+      confidence:"low",
+      reason:"unknown_intent",
+      canTriggerCommercePlan:false,
+      canTriggerRealProviderSearch:false,
+      canDisplayRealPrice:false,
+      canRedirect:false
+    };
+  }
+
   function getLocalLawCompliancePolicy(){
     const api = localLawApi();
     if (api && api.getLocalLawCompliancePolicy) return api.getLocalLawCompliancePolicy();
@@ -2002,10 +2027,12 @@
   function createCommerceSearchRequest(task){
     const route = parseRoute(task && task.inputSummary);
     const category = String(task && task.category || "generalProcurement");
+    const commerceLocalIntentRoute = task && task.commerceLocalIntentRoute || getCommerceLocalIntentRoute(task && task.inputSummary || "");
     return {
       taskId:String(task && task.taskId || ""),
       category,
       query:sanitizeText(task && task.inputSummary || "", 240),
+      commerceLocalIntentRoute,
       origin:route.origin,
       destination:route.destination,
       date:parseDate(task && task.inputSummary || ""),
@@ -2832,6 +2859,7 @@
     getProviderSandboxDryRunStatus,
     getCommerceConnectorGateStatus,
     getProviderIntegrationReadiness,
+    getCommerceLocalIntentRoute,
     locationHealthForCommerce:locationHealth,
     getLocalLawCompliancePolicy,
     evaluateLocalLawCompliance,

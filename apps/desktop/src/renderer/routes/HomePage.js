@@ -286,6 +286,76 @@
     return "需求摘要：" + summary(task && task.text || "", 56) + " · 类型：" + type + " · 状态：" + status + " · 未下单 / 未付款";
   }
 
+  function commerceLocalIntentRouteForTask(task, stored){
+    const api = window.WeishanCommerceLocalIntentRouter || null;
+    const existing = stored && stored.commerceLocalIntentRoute || task && task.meta && task.meta.commerceLocalIntentRoute || null;
+    if (existing && existing.intentCategory) return existing;
+    if (api && api.routeCommerceIntentLocally) return api.routeCommerceIntentLocally(task && task.text || stored && stored.inputSummary || "");
+    return null;
+  }
+
+  function commerceLocalIntentDisplay(route){
+    const api = window.WeishanCommerceLocalIntentRouter || null;
+    if (api && api.toCommerceLocalIntentDisplayStatus) return api.toCommerceLocalIntentDisplayStatus(route || {});
+    const map = {
+      product:"商品",
+      hotel:"酒店",
+      flight:"机票",
+      ticket:"门票 / 票务",
+      local_service:"本地服务",
+      general_commerce:"全球采购",
+      unknown:"待确认"
+    };
+    const category = route && route.intentCategory || "unknown";
+    return {
+      title:"本地意图识别",
+      subtitle:"普通购物、酒店、机票、票务请求优先使用本地规则识别，减少 AI token 消耗。",
+      routeModeLabel:"本地规则优先",
+      aiUsedLabel:"否",
+      aiFallbackLabel:"仅复杂需求可选",
+      categoryLabel:map[category] || "待确认",
+      commercePlanLabel:route && route.canTriggerCommercePlan === false ? "否" : "是",
+      providerSearchLabel:"否",
+      priceLabel:"否",
+      redirectLabel:"否"
+    };
+  }
+
+  function commerceLocalIntentHomePanel(route){
+    if (!route) return "";
+    const display = commerceLocalIntentDisplay(route);
+    const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
+    return `<section class="commerce-local-intent-panel commerce-local-intent-home-panel" aria-label="本地意图识别">
+      <div class="commerce-local-intent-head">
+        <div>
+          <h3>${esc(display.title)}</h3>
+          <p>${esc(display.subtitle)}</p>
+        </div>
+        <strong>是否使用 AI：${esc(display.aiUsedLabel)}</strong>
+      </div>
+      <div class="commerce-local-intent-grid">
+        <section class="commerce-local-intent-group">
+          <h4>路由状态</h4>
+          <ul>
+            ${row("路由方式", display.routeModeLabel)}
+            ${row("是否使用 AI", display.aiUsedLabel)}
+            ${row("AI fallback", display.aiFallbackLabel)}
+            ${row("当前类别", display.categoryLabel)}
+            ${row("是否进入采购计划", display.commercePlanLabel)}
+          </ul>
+        </section>
+        <section class="commerce-local-intent-group">
+          <h4>不访问真实平台</h4>
+          <ul>
+            ${row("是否访问真实平台", display.providerSearchLabel)}
+            ${row("是否返回价格", display.priceLabel)}
+            ${row("是否跳转购买", display.redirectLabel)}
+          </ul>
+        </section>
+      </div>
+    </section>`;
+  }
+
   function taskKey(task, idx){
     return String((task && (task.id || task.createdAt || task.finishedAt || task.updatedAt)) || idx || "");
   }
@@ -633,6 +703,7 @@
     const complianceRequired = stored.searchStatus === "local_law_compliance_required";
     const localLawPanelRequired = !isModelPricing && stored.complianceHealth && stored.complianceHealth.canSearchProvider === false;
     const approvalPanelRequired = !isModelPricing && ["ecommerce", "product", "hotel", "flight", "ticketing", "ticket", "serviceBooking", "service"].includes(stored.category);
+    const localIntentRoute = commerceLocalIntentRouteForTask(task, stored);
     const providerFailed = stored.searchStatus === "failed";
     const noResults = stored.searchStatus === "noResults" || stored.searchStatus === "no_results";
     const missingFields = Array.isArray(stored.missingFields) ? stored.missingFields : [];
@@ -676,6 +747,7 @@
         ${!blocked && isFlightPlan && normalized.destinationText ? `<p><b>目的地：</b>${esc(normalized.destinationText)}</p>` : ""}
         ${!blocked && isFlightPlan && dateCondition ? `<p><b>日期：</b>${esc(dateCondition)}</p>` : ""}
         ${blocked ? `<p><b>原因：</b>涉及下单 / 付款 / 敏感资料或询价提交</p>` : ""}
+        ${!blocked ? commerceLocalIntentHomePanel(localIntentRoute) : ""}
         ${!blocked && localLawPanelRequired ? commerceLocalLawHomePanel(stored) : ""}
         ${showOnboardingHomePanel ? commerceProviderIntegrationReadinessHomePanel(stored.providerIntegrationReadiness || stored.configHealth && stored.configHealth.providerIntegrationReadiness || {}) : ""}
         ${showOnboardingHomePanel ? commerceProviderIntegrationRunbookHomePanel(stored.providerIntegrationRunbook || stored.configHealth && stored.configHealth.providerIntegrationRunbook || {}) : ""}

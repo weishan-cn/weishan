@@ -136,6 +136,14 @@
       document.head.appendChild(runbook);
       return;
     }
+    if (!window.WeishanCommerceLocalIntentRouter && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceLocalIntentRouter"]')) {
+      const localIntent = document.createElement("script");
+      localIntent.src = "./renderer/core/commerceLocalIntentRouter.js?v=2.0.49";
+      localIntent.dataset.weishanDynamic = "WeishanCommerceLocalIntentRouter";
+      localIntent.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(localIntent);
+      return;
+    }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
       providers.src = "./renderer/core/commerceProviders.js?v=2.0.48";
@@ -225,6 +233,77 @@
     if (category === "ticketing" || category === "ticket") return "ticket";
     if (category === "serviceBooking" || category === "service") return "service";
     return "";
+  }
+
+  function commerceLocalIntentRouteForTask(task){
+    const existing = task && task.commerceLocalIntentRoute || null;
+    if (existing && existing.intentCategory) return existing;
+    const api = window.WeishanCommerceLocalIntentRouter || null;
+    if (api && api.routeCommerceIntentLocally) return api.routeCommerceIntentLocally(task && task.inputSummary || "");
+    return null;
+  }
+
+  function commerceLocalIntentDisplay(route){
+    const api = window.WeishanCommerceLocalIntentRouter || null;
+    if (api && api.toCommerceLocalIntentDisplayStatus) return api.toCommerceLocalIntentDisplayStatus(route || {});
+    const map = {
+      product:"商品",
+      hotel:"酒店",
+      flight:"机票",
+      ticket:"门票 / 票务",
+      local_service:"本地服务",
+      general_commerce:"全球采购",
+      unknown:"待确认"
+    };
+    const category = route && route.intentCategory || "unknown";
+    return {
+      title:"本地意图识别",
+      subtitle:"普通购物、酒店、机票、票务请求优先使用本地规则识别，减少 AI token 消耗。",
+      routeModeLabel:"本地规则优先",
+      aiUsedLabel:"否",
+      aiFallbackLabel:"仅复杂需求可选",
+      categoryLabel:map[category] || "待确认",
+      commercePlanLabel:route && route.canTriggerCommercePlan === false ? "否" : "是",
+      providerSearchLabel:"否",
+      priceLabel:"否",
+      redirectLabel:"否"
+    };
+  }
+
+  function commerceLocalIntentPanelHtml(task){
+    const route = commerceLocalIntentRouteForTask(task);
+    if (!route) return "";
+    const display = commerceLocalIntentDisplay(route);
+    const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
+    return `<section class="commerce-local-intent-panel" aria-label="本地意图识别">
+      <div class="commerce-local-intent-head">
+        <div>
+          <h3>${esc(display.title)}</h3>
+          <p>${esc(display.subtitle)}</p>
+        </div>
+        <strong>是否使用 AI：${esc(display.aiUsedLabel)}</strong>
+      </div>
+      <div class="commerce-local-intent-grid">
+        <section class="commerce-local-intent-group">
+          <h4>路由状态</h4>
+          <ul>
+            ${row("路由方式", display.routeModeLabel)}
+            ${row("是否使用 AI", display.aiUsedLabel)}
+            ${row("AI fallback", display.aiFallbackLabel)}
+            ${row("当前类别", display.categoryLabel)}
+            ${row("是否进入采购计划", display.commercePlanLabel)}
+          </ul>
+        </section>
+        <section class="commerce-local-intent-group">
+          <h4>不访问真实平台</h4>
+          <ul>
+            ${row("是否访问真实平台", display.providerSearchLabel)}
+            ${row("是否返回价格", display.priceLabel)}
+            ${row("是否跳转购买", display.redirectLabel)}
+          </ul>
+        </section>
+      </div>
+    </section>`;
   }
 
   function providerPoolCopy(task, configInfo){
@@ -582,6 +661,7 @@
     const isProduct = commercePoolCategory(task) === "product";
     return `<div class="commerce-warning commerce-provider-pool-missing">
         <b>全球多源 provider 候选池：准备中，尚未接入。</b>
+        ${commerceLocalIntentPanelHtml(task)}
         ${providerIntegrationReadinessPanelHtml(configInfo && configInfo.providerIntegrationReadiness || {})}
         ${providerIntegrationRunbookPanelHtml(configInfo && configInfo.providerIntegrationRunbook || {})}
         ${providerStubProfilePanelHtml(configInfo && configInfo.providerStubProfileHealth || {}, task)}

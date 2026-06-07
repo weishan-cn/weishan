@@ -73,6 +73,34 @@
     return window.WeishanCommerceProviderIntegrationRunbook || null;
   }
 
+  function localIntentRouterApi(){
+    return window.WeishanCommerceLocalIntentRouter || null;
+  }
+
+  function localIntentRouterContract(){
+    const api = localIntentRouterApi();
+    if (api && api.getCommerceLocalIntentRouterContract) return api.getCommerceLocalIntentRouterContract();
+    return {
+      routerVersion:"2.0.49",
+      phase:"commerce_local_intent_router",
+      defaultMode:"local_first",
+      tokenPolicy:{
+        simpleCommerceIntentUsesAi:false,
+        localRuleFirst:true,
+        aiFallbackAllowedForComplexIntent:true,
+        aiFallbackRequiresExplicitNeed:true,
+        neverUseAiForGateRendering:true,
+        neverUseAiForStaticSafetyPanels:true
+      },
+      capabilities:{
+        canRouteWithoutAi:true,
+        canTriggerRealProviderSearch:false,
+        canDisplayRealPrice:false,
+        canRedirect:false
+      }
+    };
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
@@ -442,6 +470,7 @@
       providerIntegrationRunbook:runbook,
       providerIntegrationRunbookStatus:runbook.runbookStatus || "manual_approval_required",
       providerIntegrationRunbookMode:runbook.runbookMode || "pre_real_provider_connection",
+      commerceLocalIntentRouter:localIntentRouterContract(),
       canApproveProviderIntegration:false,
       canProceedAfterManualApproval:false,
       providerSecretHealth:secret,
@@ -681,6 +710,7 @@
       providerIntegrationRunbook:runbook,
       providerIntegrationRunbookStatus:runbook.runbookStatus || "manual_approval_required",
       providerIntegrationRunbookMode:runbook.runbookMode || "pre_real_provider_connection",
+      commerceLocalIntentRouter:config.commerceLocalIntentRouter || localIntentRouterContract(),
       canApproveProviderIntegration:false,
       canProceedAfterManualApproval:false,
       hasApiKey:config.hasApiKey === true,
@@ -765,6 +795,7 @@
     getCommerceConnectorGateStatus:connectorGateStatus,
     getProviderIntegrationReadiness:providerIntegrationReadiness,
     getProviderIntegrationRunbook:providerIntegrationRunbook,
+    getCommerceLocalIntentRouterContract:localIntentRouterContract,
     getReadOnlyConnectorStubStatus:connectorStubStatus
   };
 })();

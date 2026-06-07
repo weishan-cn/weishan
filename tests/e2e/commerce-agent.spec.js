@@ -1825,6 +1825,165 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
+  test("commerce local intent router contract routes simple commerce without ai", async () => {
+    await gotoRoute(page, "home");
+    const result = await page.evaluate(async () => {
+      delete window.WeishanCommerceLocalIntentRouter;
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceLocalIntentRouter.js?v=2.0.49&contract=" + Date.now();
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      const api = window.WeishanCommerceLocalIntentRouter;
+      const contract = api.getCommerceLocalIntentRouterContract();
+      const samples = {
+        product:api.routeCommerceIntentLocally("买华为手机"),
+        hotel:api.routeCommerceIntentLocally("订酒店"),
+        flight:api.routeCommerceIntentLocally("订机票"),
+        ticket:api.routeCommerceIntentLocally("买演唱会门票"),
+        localService:api.routeCommerceIntentLocally("预约理发"),
+        complex:api.routeCommerceIntentLocally("下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高")
+      };
+      return { contract, samples };
+    });
+    expect(result.contract.routerVersion).toBe("2.0.49");
+    expect(result.contract.phase).toBe("commerce_local_intent_router");
+    expect(result.contract.defaultMode).toBe("local_first");
+    expect(result.contract.tokenPolicy.simpleCommerceIntentUsesAi).toBe(false);
+    expect(result.contract.tokenPolicy.localRuleFirst).toBe(true);
+    expect(result.contract.tokenPolicy.aiFallbackAllowedForComplexIntent).toBe(true);
+    expect(result.contract.tokenPolicy.aiFallbackRequiresExplicitNeed).toBe(true);
+    expect(result.contract.tokenPolicy.neverUseAiForGateRendering).toBe(true);
+    expect(result.contract.tokenPolicy.neverUseAiForStaticSafetyPanels).toBe(true);
+    expect(result.contract.supportedCategories.product).toBe(true);
+    expect(result.contract.supportedCategories.hotel).toBe(true);
+    expect(result.contract.supportedCategories.flight).toBe(true);
+    expect(result.contract.supportedCategories.ticket).toBe(true);
+    expect(result.contract.supportedCategories.localService).toBe(true);
+    expect(result.contract.supportedCategories.generalCommerce).toBe(true);
+    expect(result.contract.capabilities.canRouteWithoutAi).toBe(true);
+    expect(result.contract.capabilities.canRouteProduct).toBe(true);
+    expect(result.contract.capabilities.canRouteHotel).toBe(true);
+    expect(result.contract.capabilities.canRouteFlight).toBe(true);
+    expect(result.contract.capabilities.canRouteTicket).toBe(true);
+    expect(result.contract.capabilities.canRouteLocalService).toBe(true);
+    expect(result.contract.capabilities.canTriggerCommercePlan).toBe(true);
+    expect(result.contract.capabilities.canTriggerRealProviderSearch).toBe(false);
+    expect(result.contract.capabilities.canDisplayRealPrice).toBe(false);
+    expect(result.contract.capabilities.canRedirect).toBe(false);
+    expect(result.contract.capabilities.canCheckout).toBe(false);
+    expect(result.contract.capabilities.canPay).toBe(false);
+    expect(result.contract.capabilities.canSubmitOrder).toBe(false);
+    expect(result.contract.safety.noAiTokenForSimpleIntent).toBe(true);
+    expect(result.contract.safety.noProviderNetworkSearch).toBe(true);
+    expect(result.contract.safety.noRealEndpoint).toBe(true);
+    expect(result.contract.safety.noRealApiKey).toBe(true);
+    expect(result.contract.safety.noRealResults).toBe(true);
+    expect(result.contract.safety.noRealPrice).toBe(true);
+    expect(result.contract.safety.noFakeDemoMockPrice).toBe(true);
+    expect(result.contract.safety.noRedirect).toBe(true);
+    expect(result.contract.safety.noCheckout).toBe(true);
+    expect(result.contract.safety.noPayment).toBe(true);
+    expect(result.contract.safety.noOrderSubmit).toBe(true);
+    expect(result.contract.safety.noIdentityStorage).toBe(true);
+    expect(result.contract.safety.noRawGpsStorage).toBe(true);
+    expect(result.contract.safety.noBypassLocalLaw).toBe(true);
+    expect(result.samples.product.intentCategory).toBe("product");
+    expect(result.samples.hotel.intentCategory).toBe("hotel");
+    expect(result.samples.flight.intentCategory).toBe("flight");
+    expect(result.samples.ticket.intentCategory).toBe("ticket");
+    expect(result.samples.localService.intentCategory).toBe("local_service");
+    for (const key of ["product", "hotel", "flight", "ticket", "localService"]) {
+      expect(result.samples[key].routeMode).toBe("local_first");
+      expect(result.samples[key].routedBy).toBe("local_rules");
+      expect(result.samples[key].aiUsed).toBe(false);
+      expect(result.samples[key].aiFallbackEligible).toBe(false);
+      expect(result.samples[key].reason).toBe("local_rule_match");
+      expect(result.samples[key].canTriggerCommercePlan).toBe(true);
+      expect(result.samples[key].canTriggerRealProviderSearch).toBe(false);
+      expect(result.samples[key].canDisplayRealPrice).toBe(false);
+      expect(result.samples[key].canRedirect).toBe(false);
+    }
+    expect(result.samples.complex.intentCategory).toBe("general_commerce");
+    expect(result.samples.complex.aiUsed).toBe(false);
+    expect(result.samples.complex.aiFallbackEligible).toBe(true);
+    expect(result.samples.complex.canTriggerRealProviderSearch).toBe(false);
+  });
+
+  test("commerce local intent panel appears for simple categories without raw fields", async () => {
+    const cases = [
+      ["买华为手机", "商品"],
+      ["订酒店", "酒店"],
+      ["订机票", "机票"],
+      ["买演唱会门票", "门票 / 票务"],
+      ["预约理发", "本地服务"]
+    ];
+    const rawFields = [
+      "routedBy=local_rules",
+      "aiUsed=false",
+      "aiFallbackEligible=false",
+      "local_rule_match",
+      "intentCategory=product",
+      "intentCategory=hotel",
+      "intentCategory=flight",
+      "intentCategory=ticket",
+      "canTriggerRealProviderSearch=false",
+      "noAiTokenForSimpleIntent=true"
+    ];
+    for (const [input, categoryLabel] of cases) {
+      await submitHomeCommand(page, runId + "-LOCAL-INTENT " + input);
+      const home = page.locator('[data-commerce-home-summary="true"]').first();
+      const panel = home.locator(".commerce-local-intent-panel").first();
+      await expect(panel).toContainText("本地意图识别");
+      await expect(panel).toContainText("普通购物、酒店、机票、票务请求优先使用本地规则识别，减少 AI token 消耗。");
+      await expect(panel).toContainText("路由方式：本地规则优先");
+      await expect(panel).toContainText("是否使用 AI：否");
+      await expect(panel).toContainText("AI fallback：仅复杂需求可选");
+      await expect(panel).toContainText("当前类别：" + categoryLabel);
+      await expect(panel).toContainText("是否进入采购计划：是");
+      await expect(panel).toContainText("是否访问真实平台：否");
+      await expect(panel).toContainText("是否返回价格：否");
+      await expect(panel).toContainText("是否跳转购买：否");
+      await expect(home).toContainText("Provider 接入准备总览");
+      await expect(home).toContainText("Connector Gate");
+      await expect(home).toContainText("Provider 接入审查面板");
+      for (const field of rawFields) await expect(home).not.toContainText(field);
+      await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+      await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+      await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+      await page.locator("#commerceViewPlanBtn").click();
+      const detail = page.locator(".commerce-detail").first();
+      const detailPanel = detail.locator(".commerce-local-intent-panel").first();
+      await expect(detailPanel).toContainText("本地意图识别");
+      await expect(detailPanel).toContainText("当前类别：" + categoryLabel);
+      await expect(detailPanel).toContainText("是否使用 AI：否");
+      for (const field of rawFields) await expect(detail).not.toContainText(field);
+      await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+      await gotoRoute(page, "home");
+    }
+  });
+
+  test("commerce local intent marks complex fallback without using ai or unlocking providers", async () => {
+    await submitHomeCommand(page, runId + "-LOCAL-INTENT-COMPLEX 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高");
+    const home = page.locator('[data-commerce-home-summary="true"]').first();
+    const panel = home.locator(".commerce-local-intent-panel").first();
+    await expect(panel).toContainText("本地意图识别");
+    await expect(panel).toContainText("路由方式：本地规则优先");
+    await expect(panel).toContainText("是否使用 AI：否");
+    await expect(panel).toContainText("AI fallback：仅复杂需求可选");
+    await expect(panel).toContainText("当前类别：全球采购");
+    await expect(panel).toContainText("是否访问真实平台：否");
+    await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+    await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+    await expect(home).not.toContainText("aiUsed=false");
+    await expect(home).not.toContainText("aiFallbackEligible=true");
+    await expect(home).not.toContainText("routedBy=local_rules");
+    await expect(home).not.toContainText("canTriggerRealProviderSearch=false");
+  });
+
   test("provider stub profile panel explains ebay is only a product candidate", async () => {
     await submitHomeCommand(page, runId + "-STUB-PROFILE 买华为手机");
     const home = page.locator('[data-commerce-home-summary="true"]').first();

@@ -401,6 +401,18 @@ weishan 必须遵守以下安全与隐私标准：
 
 在 review 前不要 commit、tag 或 push。
 
+### Commerce Local Intent Router 标准
+
+Commerce Local Intent Router 是 weishan 全球采购入口的本地意图识别层。
+
+本地意图识别必须优先处理普通购物、酒店、机票、票务、本地服务和一般全球采购需求。简单 commerce intent 不应调用 AI，目的是减少 AI token 消耗，并避免把明确的采购入口误判为普通问答。
+
+gate / panel 渲染不得调用 AI。静态安全面板、Provider gate、当地法律合规、Connector Gate、Provider Integration Readiness 和 Provider Integration Manual Approval Runbook 的显示必须来自确定性本地状态，不得依赖 AI 输出。
+
+本地路由只能决定是否进入全球采购计划，不得连接真实 provider，不得访问真实 endpoint，不得使用 API key，不得返回真实商品结果，不得显示真实价格，不得返回 fake/demo/mock price，不得跳转购买或预订页面。
+
+复杂自然语言需求可以进入 AI fallback，例如多类别、多城市、复杂预算和约束、明确要求“帮我规划 / 帮我比较方案 / 给我推荐理由”的需求。但 AI fallback 不得绕过当地法律合规、provider onboarding、provider approval、secret storage、sandbox dry run、Connector Gate、人工审批或任何付款 / 下单 / 证件保存边界。
+
 ## 13. 当前版本链条
 
 - v2.0.25：真实价格只读展示 + 最低价精确跳转

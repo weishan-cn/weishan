@@ -144,8 +144,17 @@
     return window.WeishanCommerceAgent || null;
   }
 
+  function commerceLocalIntentRouterApi(){
+    return window.WeishanCommerceLocalIntentRouter || null;
+  }
+
   function isCommerceAgentCommand(text){
     const raw = String(text || "");
+    const router = commerceLocalIntentRouterApi();
+    if (router && router.routeCommerceIntentLocally) {
+      const route = router.routeCommerceIntentLocally(raw);
+      if (route && route.canTriggerCommercePlan === true && route.intentCategory !== "unknown") return true;
+    }
     const api = commerceAgentApi();
     if (api && api.classifyCommerceIntent) {
       const result = api.classifyCommerceIntent(raw);
@@ -243,13 +252,16 @@
     }
 
     if (isCommerceAgentCommand(raw)) {
+      const localIntentRouter = commerceLocalIntentRouterApi();
+      const commerceLocalIntentRoute = localIntentRouter && localIntentRouter.routeCommerceIntentLocally ? localIntentRouter.routeCommerceIntentLocally(raw) : null;
       return {
         module:DISPATCH_MODULES.commerceAgent,
         action:DISPATCH_ACTIONS.commerceAgentPlan,
         routeMode:"console",
         modules:[DISPATCH_MODULES.commerceAgent],
         targetRoute:"commerce",
-        confidence:"rule"
+        confidence:"rule",
+        commerceLocalIntentRoute
       };
     }
 
@@ -316,12 +328,16 @@
     }
     if (intent.module === DISPATCH_MODULES.commerceAgent) {
       const api = commerceAgentApi();
+      const localIntentRouter = commerceLocalIntentRouterApi();
+      const commerceLocalIntentRoute = intent.commerceLocalIntentRoute || (localIntentRouter && localIntentRouter.routeCommerceIntentLocally ? localIntentRouter.routeCommerceIntentLocally(cleanInput) : null);
       const commercePlan = api && api.createCommercePlan ? api.createCommercePlan(cleanInput) : null;
+      if (commercePlan && commerceLocalIntentRoute) commercePlan.commerceLocalIntentRoute = commerceLocalIntentRoute;
       plan.executionMode = "commerce_agent_plan_only";
       plan.realExecution = false;
       plan.requiresUserConfirmation = true;
       plan.mockSafeExecutionAllowed = false;
       plan.commercePlan = commercePlan;
+      plan.commerceLocalIntentRoute = commerceLocalIntentRoute;
       plan.category = commercePlan && commercePlan.category || "";
       plan.riskLevel = commercePlan && commercePlan.riskLevel || "medium";
     }

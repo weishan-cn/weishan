@@ -1,6 +1,6 @@
 (function(){
   if (!window.WeishanDispatchRouter && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/dispatchRouter.js?v=2.0.15"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/dispatchRouter.js?v=2.0.49"></scr' + 'ipt>');
   }
   if (!window.WeishanDesktopAssistant && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/desktopAssistant.js?v=2.0.15"></scr' + 'ipt>');
@@ -43,6 +43,9 @@
   }
   if (!window.WeishanCommerceProviderIntegrationRunbook && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProviderIntegrationRunbook.js?v=2.0.48"></scr' + 'ipt>');
+  }
+  if (!window.WeishanCommerceLocalIntentRouter && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceLocalIntentRouter.js?v=2.0.49"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProductProviderCandidate && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.44"></scr' + 'ipt>');
@@ -99,6 +102,10 @@
 
   function commerceSearch(){
     return window.WeishanCommerceSearch || null;
+  }
+
+  function commerceLocalIntentRouter(){
+    return window.WeishanCommerceLocalIntentRouter || null;
   }
 
   function saveDispatchPrefill(text, plan){
@@ -292,7 +299,10 @@
         commercePlan:null
       };
     }
+    const localIntent = commerceLocalIntentRouter();
+    const commerceLocalIntentRoute = plan && plan.commerceLocalIntentRoute || (localIntent && localIntent.routeCommerceIntentLocally ? localIntent.routeCommerceIntentLocally(text) : null);
     const commercePlan = plan && plan.commercePlan || (api.createCommerceTask ? api.createCommerceTask(text) : api.createCommercePlan(text));
+    if (commercePlan && commerceLocalIntentRoute) commercePlan.commerceLocalIntentRoute = commerceLocalIntentRoute;
     const search = commerceSearch();
     if (search && search.createCommerceSearchRequest && search.hasCommerceSearchProvider) {
       const request = search.createCommerceSearchRequest(commercePlan);
@@ -321,6 +331,7 @@
       commercePlan.connectorGateHealth = providerHealth && (providerHealth.connectorGateHealth || providerHealth.configHealth && providerHealth.configHealth.connectorGateHealth) || {};
       commercePlan.providerIntegrationReadiness = providerHealth && (providerHealth.providerIntegrationReadiness || providerHealth.configHealth && providerHealth.configHealth.providerIntegrationReadiness) || {};
       commercePlan.providerIntegrationRunbook = providerHealth && (providerHealth.providerIntegrationRunbook || providerHealth.configHealth && providerHealth.configHealth.providerIntegrationRunbook) || {};
+      commercePlan.commerceLocalIntentRoute = commerceLocalIntentRoute || providerHealth && (providerHealth.commerceLocalIntentRoute || providerHealth.configHealth && providerHealth.configHealth.commerceLocalIntentRoute) || commercePlan.commerceLocalIntentRoute || {};
       commercePlan.sandboxHealth = providerHealth && providerHealth.sandboxHealth || {};
       commercePlan.dryRunHealth = providerHealth && (providerHealth.providerSandboxDryRunHealth || providerHealth.dryRunHealth || providerHealth.sandboxHealth) || {};
       commercePlan.locationHealth = locationHealth || {};
