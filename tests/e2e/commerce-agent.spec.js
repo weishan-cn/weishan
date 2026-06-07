@@ -14,6 +14,14 @@ function currentTaskLogs(page) {
   return page.locator(".cmd-log-list").first();
 }
 
+async function expectPanelBefore(first, second) {
+  const firstBox = await first.boundingBox();
+  const secondBox = await second.boundingBox();
+  expect(firstBox, "first panel should have a layout box").not.toBeNull();
+  expect(secondBox, "second panel should have a layout box").not.toBeNull();
+  expect(firstBox.y).toBeLessThan(secondBox.y);
+}
+
 async function setMockSettingsAi(page) {
   await page.evaluate(() => {
     if (!window.WeishanAPI) return;
@@ -959,6 +967,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(home).toContainText("不会启用网络搜索");
     await expect(home).toContainText("不会显示价格");
     await expect(home).toContainText("不会跳转购买或预订页面");
+    await expect(home.locator(".commerce-readonly-stub-panel").last()).toContainText("只读 Connector Stub");
+    await expectPanelBefore(home.locator(".commerce-readonly-stub-panel").last(), home.locator(".commerce-onboarding-review-panel").last());
     await expect(home).not.toContainText("provider_approval_required");
     await expect(home).not.toContainText("provider_approval_required_before_stub");
     await expect(home).not.toContainText("stubStatus=stub_not_ready");
@@ -996,6 +1006,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail).toContainText("即使允许开发 stub，也不会连接真实平台");
     await expect(detail).toContainText("只有 provider 完成分级审批，并且本地法律合规、onboarding checklist、config / adapter / sandbox / connector gate 均通过后");
     await expect(detail).toContainText("当前不会连接真实平台，不会返回价格，不会跳转购买或预订页面");
+    await expect(detail.locator(".commerce-readonly-stub-panel").last()).toContainText("只读 Connector Stub");
+    await expectPanelBefore(detail.locator(".commerce-readonly-stub-panel").last(), detail.locator(".commerce-onboarding-review-panel").last());
     await expect(detail).not.toContainText("provider_approval_required");
     await expect(detail).not.toContainText("provider_approval_required_before_stub");
     await expect(detail).not.toContainText("stubStatus=stub_not_ready");
@@ -1035,7 +1047,11 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(home).toContainText("只读 Connector Stub");
       await expect(home).toContainText("Stub 状态：未准备");
       await expect(home).toContainText("Connector 模式：只读");
+      await expect(home).toContainText("Stub 开发许可：未授予");
       await expect(home).toContainText("Stub 执行：未启用");
+      await expect(home).toContainText("测试价格：不可用");
+      await expect(home.locator(".commerce-readonly-stub-panel").last()).toContainText("只读 Connector Stub");
+      await expectPanelBefore(home.locator(".commerce-readonly-stub-panel").last(), home.locator(".commerce-onboarding-review-panel").last());
       await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
       await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
       await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
@@ -1045,10 +1061,15 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(detail).toContainText("审批状态：未审查");
       await expect(detail).toContainText("只读 Connector Stub");
       await expect(detail).toContainText("Stub 状态：未准备");
+      await expect(detail).toContainText("Connector 模式：只读");
+      await expect(detail).toContainText("Stub 开发许可：未授予");
+      await expect(detail).toContainText("Stub 执行：未启用");
       await expect(detail).toContainText("真实价格：不可用");
       await expect(detail).toContainText("测试价格：不可用");
       await expect(detail).toContainText("只读 connector stub 只允许开发准备，不连接真实平台");
       await expect(detail).toContainText("即使批准开发 stub，仍不会显示价格或跳转购买页面");
+      await expect(detail.locator(".commerce-readonly-stub-panel").last()).toContainText("只读 Connector Stub");
+      await expectPanelBefore(detail.locator(".commerce-readonly-stub-panel").last(), detail.locator(".commerce-onboarding-review-panel").last());
       await expect(detail).not.toContainText("provider_approval_required");
       await expect(detail).not.toContainText("provider_approval_required_before_stub");
       await expect(detail).not.toContainText("stubStatus=stub_not_ready");

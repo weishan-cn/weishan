@@ -409,6 +409,9 @@
     const isProduct = commercePoolCategory(task) === "product";
     return `<div class="commerce-warning commerce-provider-pool-missing">
         <b>全球多源 provider 候选池：准备中，尚未接入。</b>
+        ${readOnlyConnectorStubPanelHtml(configInfo && configInfo.connectorStubHealth || {})}
+        ${providerApprovalWorkflowPanelHtml(approvalInfo || {})}
+        ${providerOnboardingReviewPanelHtml(onboardingInfo || {})}
         <span>当前比较范围：${esc(copy.scope)}。</span>
         <span>${esc(copy.examples)}。</span>
         ${isProduct ? `<span>eBay Browse API 是商品搜索试点候选之一，尚未接入。</span>` : ""}
@@ -429,9 +432,6 @@
         <span>支付/下单：不支持，由外部平台完成。</span>
         <span>证件/银行卡：不保存。</span>
         <span>当前不会下单、付款或保存证件/银行卡。</span>
-        ${providerOnboardingReviewPanelHtml(onboardingInfo || {})}
-        ${providerApprovalWorkflowPanelHtml(approvalInfo || {})}
-        ${readOnlyConnectorStubPanelHtml(configInfo && configInfo.connectorStubHealth || {})}
       </div>`;
   }
 

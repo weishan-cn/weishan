@@ -536,8 +536,8 @@
         ${!blocked && isFlightPlan && dateCondition ? `<p><b>日期：</b>${esc(dateCondition)}</p>` : ""}
         ${blocked ? `<p><b>原因：</b>涉及下单 / 付款 / 敏感资料或询价提交</p>` : ""}
         ${!blocked && localLawPanelRequired ? commerceLocalLawHomePanel(stored) : ""}
-        ${!blocked && approvalPanelRequired ? commerceProviderApprovalHomePanel(stored.approvalHealth) : ""}
         ${!blocked && approvalPanelRequired ? commerceReadOnlyConnectorStubHomePanel(stored.connectorStubHealth) : ""}
+        ${!blocked && approvalPanelRequired ? commerceProviderApprovalHomePanel(stored.approvalHealth) : ""}
         ${!blocked && destinationRequired ? `<p><b>收货目的地：</b>未设置</p><p><b>定位服务：</b>关闭 / 未授权</p><p><b>价格状态：</b>精确最低到手价不可用</p><p><b>原因：</b>需要收货国家/地区/邮编用于运费、税费、关税和当地合规计算。</p><p class="commerce-warning">为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。实际价格、库存、税费和关税仍以外部平台和海关结算为准。</p>` : ""}
         ${!blocked && (providerMissing || complianceRequired || isProductPlan && destinationRequired) ? `<p><b>搜索源：</b>${esc(providerMissingText)}</p>` : ""}
         ${!blocked && providerFailed ? `<p><b>搜索源：</b>${esc(stored.searchErrorMessage || "搜索源不可用，无法返回真实价格")}</p>` : ""}
