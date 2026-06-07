@@ -68,6 +68,10 @@
     return window.WeishanCommerceProviderSandboxDryRun || null;
   }
 
+  function connectorGateApi(){
+    return window.WeishanCommerceConnectorGate || null;
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
@@ -200,6 +204,46 @@
     };
   }
 
+  function connectorGateStatus(providerId){
+    const api = connectorGateApi();
+    if (api && api.getCommerceConnectorGateStatus) return api.getCommerceConnectorGateStatus(providerId || "provider-disabled");
+    return {
+      connectorGateVersion:"2.0.46",
+      phase:"connector_gate_framework",
+      providerId:String(providerId || "provider-disabled"),
+      connectorGateStatus:"blocked",
+      gateMode:"final_pre_connection_gate",
+      canOpenConnector:false,
+      canConnectEndpoint:false,
+      canUseApiKey:false,
+      canUseNetwork:false,
+      canReturnRealResults:false,
+      canReturnRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      canCheckout:false,
+      canPay:false,
+      canSubmitOrder:false,
+      canStoreIdentity:false,
+      reason:"connector_gate_required",
+      safety:{
+        noRealEndpoint:true,
+        noRealApiKey:true,
+        noNetworkSearch:true,
+        noRealResults:true,
+        noRealPrice:true,
+        noFakeDemoMockPrice:true,
+        noRedirect:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true,
+        noRawGpsStorage:true,
+        noBypassLocalLaw:true
+      }
+    };
+  }
+
   function poolReadiness(){
     const api = poolApi();
     if (api && api.getCommerceGlobalProviderPoolReadiness) return api.getCommerceGlobalProviderPoolReadiness();
@@ -306,6 +350,7 @@
     const productDefaults = next === "product" ? productSafetySwitches() : {};
     const providerId = next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled";
     const approval = approvalStatus(next, providerId);
+    const gate = connectorGateStatus(providerId);
     return Object.assign({
       providerId,
       category:next,
@@ -342,6 +387,10 @@
       connectorReasonWhenUnavailable:next === "product" ? "全球多源 provider 候选池准备中，尚未接入真实只读搜索源" : "Provider Connector 未启用",
       sandboxMode:"dry_run",
       providerReadinessStatus:next === "product" ? "not_ready" : "blocked_before_network",
+      connectorGateHealth:gate,
+      connectorGateStatus:gate.connectorGateStatus || "blocked",
+      connectorGateMode:gate.gateMode || "final_pre_connection_gate",
+      canOpenCommerceConnector:false,
       configStatus:"not_configured",
       reasonWhenUnavailable:next === "product" ? "全球多源 provider 候选池准备中，尚未接入真实只读搜索源" : "暂未配置真实搜索源",
       productProviderProfile:next === "product" ? productProfile() : undefined,
@@ -406,6 +455,10 @@
       providerStubProfileHealth:next.providerStubProfileHealth || providerStubProfileStatus(next.selectedFirstCandidate || "ebay_browse_api"),
       providerSecretHealth:next.providerSecretHealth || providerSecretStorageStatus(next.selectedFirstCandidate || next.providerId),
       providerSandboxDryRunHealth:next.providerSandboxDryRunHealth || providerSandboxDryRunStatus(next.selectedFirstCandidate || next.providerId),
+      connectorGateHealth:next.connectorGateHealth || connectorGateStatus(next.selectedFirstCandidate || next.providerId),
+      connectorGateStatus:next.connectorGateStatus || next.connectorGateHealth && next.connectorGateHealth.connectorGateStatus || "blocked",
+      connectorGateMode:next.connectorGateMode || next.connectorGateHealth && next.connectorGateHealth.gateMode || "final_pre_connection_gate",
+      canOpenCommerceConnector:next.canOpenCommerceConnector === true,
       globalProviderPoolReadiness:next.globalProviderPoolReadiness || poolReadiness(),
       onboardingStatus:next.onboardingStatus || "not_reviewed",
       providerOnboardingRequired:next.providerOnboardingRequired !== false,
@@ -574,6 +627,7 @@
     const onboarding = onboardingStatus(next);
     const approval = approvalStatus(next, config.providerId);
     const stub = connectorStubStatus(next, config.providerId, approval);
+    const gate = config.connectorGateHealth || connectorGateStatus(config.selectedFirstCandidate || config.providerId);
     const isProduct = next === "product";
     const productDefaults = isProduct ? productSafetySwitches() : {};
     const candidate = isProduct ? productCandidateReadiness() : null;
@@ -616,6 +670,10 @@
       canBuildReadOnlyConnectorStub:stub.canBuildStub === true,
       canExecuteReadOnlyConnectorStub:stub.canExecuteStub === true,
       connectorStubHealth:stub,
+      connectorGateStatus:gate.connectorGateStatus || "blocked",
+      connectorGateMode:gate.gateMode || "final_pre_connection_gate",
+      canOpenCommerceConnector:gate.canOpenConnector === true,
+      connectorGateHealth:gate,
       enabled:false,
       configured:false,
       environment:"renderer",
@@ -660,6 +718,7 @@
       onboardingHealth:onboarding,
       approvalHealth:approval,
       connectorStubHealth:stub,
+      connectorGateHealth:gate,
       connectorHealth:providerConnectorFields,
       sandboxHealth:sandboxFields(next, null, config, config, connector),
       productProviderProfile:isProduct ? productProfile() : undefined,
@@ -685,7 +744,9 @@
     const onboarding = onboardingStatus(next);
     const approval = approvalStatus(next, config.providerId);
     const stub = connectorStubStatus(next, config.providerId, approval);
+    const gate = config.connectorGateHealth || connectorGateStatus(config.selectedFirstCandidate || config.providerId || next + "-provider-disabled");
     if (stub.canExecuteStub !== true) return null;
+    if (gate.canOpenConnector !== true || gate.canUseApiKey !== true || gate.canUseNetwork !== true || gate.canReturnRealResults !== true) return null;
     if (approval.canConnectEndpoint !== true || approval.canEnableNetworkSearch !== true || approval.canDisplayPrice !== true || approval.canRedirect !== true) return null;
     if (config.enabled !== true || config.configured !== true || config.hasApiKey !== true || config.allowNetworkSearch !== true || config.allowReturnPrice !== true) return null;
     if (cFields.connectorEnabled !== true || cFields.connectorConfigured !== true || cFields.connectorNetworkAllowed !== true || cFields.supportsSearch !== true || cFields.supportsPrice !== true) return null;
@@ -753,6 +814,7 @@
       providerStubProfileHealth:next === "product" ? providerStubProfileStatus("ebay_browse_api") : undefined,
       providerSecretHealth:providerSecretStorageStatus(next === "product" ? "ebay_browse_api" : config.providerId || next + "-provider-disabled"),
       providerSandboxDryRunHealth:providerSandboxDryRunStatus(next === "product" ? "ebay_browse_api" : config.providerId || next + "-provider-disabled"),
+      connectorGateHealth:gate,
       connectorHealth:cFields,
       sandboxHealth:sandboxFields(next, cfg, config, config, connector)
     };
@@ -779,6 +841,7 @@
       providerStubProfileHealth:provider.providerStubProfileHealth || provider.configHealth && provider.configHealth.providerStubProfileHealth || (next === "product" ? providerStubProfileStatus("ebay_browse_api") : undefined),
       providerSecretHealth:provider.providerSecretHealth || provider.configHealth && provider.configHealth.providerSecretHealth || providerSecretStorageStatus(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id),
       providerSandboxDryRunHealth:provider.providerSandboxDryRunHealth || provider.configHealth && provider.configHealth.providerSandboxDryRunHealth || providerSandboxDryRunStatus(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id),
+      connectorGateHealth:provider.connectorGateHealth || provider.configHealth && provider.configHealth.connectorGateHealth || connectorGateStatus(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id),
       sandboxHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
       dryRunHealth:provider.providerSandboxDryRunHealth || provider.configHealth && provider.configHealth.providerSandboxDryRunHealth || providerSandboxDryRunStatus(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id),
       enabled:provider.enabled === true,
@@ -793,6 +856,7 @@
   window.WeishanCommerceProviders = {
     normalizeCategory,
     getCommerceProviderRegistry,
-    getCommerceProviderHealth
+    getCommerceProviderHealth,
+    getCommerceConnectorGateStatus:connectorGateStatus
   };
 })();

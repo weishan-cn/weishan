@@ -61,6 +61,10 @@
     return window.WeishanCommerceProviderSandboxDryRun || null;
   }
 
+  function connectorGateApi(){
+    return window.WeishanCommerceConnectorGate || null;
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
@@ -193,6 +197,46 @@
     };
   }
 
+  function connectorGateStatus(providerId){
+    const api = connectorGateApi();
+    if (api && api.getCommerceConnectorGateStatus) return api.getCommerceConnectorGateStatus(providerId || "provider-disabled");
+    return {
+      connectorGateVersion:"2.0.46",
+      phase:"connector_gate_framework",
+      providerId:String(providerId || "provider-disabled"),
+      connectorGateStatus:"blocked",
+      gateMode:"final_pre_connection_gate",
+      canOpenConnector:false,
+      canConnectEndpoint:false,
+      canUseApiKey:false,
+      canUseNetwork:false,
+      canReturnRealResults:false,
+      canReturnRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      canCheckout:false,
+      canPay:false,
+      canSubmitOrder:false,
+      canStoreIdentity:false,
+      reason:"connector_gate_required",
+      safety:{
+        noRealEndpoint:true,
+        noRealApiKey:true,
+        noNetworkSearch:true,
+        noRealResults:true,
+        noRealPrice:true,
+        noFakeDemoMockPrice:true,
+        noRedirect:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true,
+        noRawGpsStorage:true,
+        noBypassLocalLaw:true
+      }
+    };
+  }
+
   function poolReadiness(){
     const api = poolApi();
     if (api && api.getCommerceGlobalProviderPoolReadiness) return api.getCommerceGlobalProviderPoolReadiness();
@@ -299,6 +343,7 @@
     const stub = connectorStubStatus(next, providerId, approval);
     const secret = providerSecretStorageStatus(providerId);
     const dryRun = providerSandboxDryRunStatus(providerId);
+    const gate = connectorGateStatus(providerId);
     const base = {
       providerId,
       category:next,
@@ -316,6 +361,10 @@
       canUseSandboxRealEndpoint:false,
       canUseSandboxApiKey:false,
       canReturnSandboxResults:false,
+      connectorGateHealth:gate,
+      connectorGateStatus:gate.connectorGateStatus || "blocked",
+      connectorGateMode:gate.gateMode || "final_pre_connection_gate",
+      canOpenCommerceConnector:false,
       connectorStubHealth:stub,
       connectorStubStatus:stub.stubStatus || "stub_not_ready",
       connectorStubMode:stub.connectorMode || "read_only",
@@ -398,6 +447,7 @@
       providerStubProfileHealth:profileHealth,
       providerSecretHealth:providerSecretStorageStatus(candidate.selectedFirstCandidate || "ebay_browse_api"),
       providerSandboxDryRunHealth:providerSandboxDryRunStatus(candidate.selectedFirstCandidate || "ebay_browse_api"),
+      connectorGateHealth:connectorGateStatus(candidate.selectedFirstCandidate || "ebay_browse_api"),
       providerOnboardingStatus:onboardingStatus(next)
       });
     }
@@ -512,6 +562,7 @@
       config.allowReturnPrice === true;
     const approval = config.approvalHealth || approvalStatus(config.category, config.providerId);
     const stub = config.connectorStubHealth || connectorStubStatus(config.category, config.providerId, approval);
+    const gate = config.connectorGateHealth || connectorGateStatus(config.selectedFirstCandidate || config.providerId);
     return {
       configStatus:ready ? "ready" : "not_configured",
       providerConfig:config,
@@ -574,6 +625,10 @@
       providerStubProfileHealth:config.providerStubProfileHealth || providerStubProfileStatus(config.selectedFirstCandidate || "ebay_browse_api"),
       providerSecretHealth:config.providerSecretHealth || providerSecretStorageStatus(config.selectedFirstCandidate || config.providerId),
       providerSandboxDryRunHealth:config.providerSandboxDryRunHealth || providerSandboxDryRunStatus(config.selectedFirstCandidate || config.providerId),
+      connectorGateHealth:gate,
+      connectorGateStatus:gate.connectorGateStatus || "blocked",
+      connectorGateMode:gate.gateMode || "final_pre_connection_gate",
+      canOpenCommerceConnector:gate.canOpenConnector === true,
       reasonWhenUnavailable:ready ? "" : config.reasonWhenUnavailable || "provider_config_not_ready"
     };
   }
@@ -590,6 +645,7 @@
     getProviderStubProfileStatus:providerStubProfileStatus,
     getProviderSecretStorageStatus:providerSecretStorageStatus,
     getProviderSandboxDryRunStatus:providerSandboxDryRunStatus,
+    getCommerceConnectorGateStatus:connectorGateStatus,
     getReadOnlyConnectorStubStatus:connectorStubStatus
   };
 })();

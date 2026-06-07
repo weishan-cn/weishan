@@ -253,6 +253,18 @@ Provider Sandbox Dry Run 只允许审查未来 connector 的请求结构、响�
 
 无论 dry run 状态如何，weishan 都不得自动付款、自动下单、提交订单或保存证件 / 银行卡。
 
+## 7.7. Connector Gate 标准
+
+Connector Gate 是真实 provider 接入前的最终闸门，也是 “真实连接前最终闸门”。任意前置 gate 未完成时，Connector Gate 必须 blocked。
+
+Connector Gate 必须聚合并检查：Global Commerce Standard、Local Law Compliance Gate、Provider Onboarding Checklist、Provider Approval Workflow、Read-only Connector Stub、Provider Stub Profile、Provider Secret Storage Plan、Provider Sandbox Dry Run、config safety、read_only adapter、endpoint review、API key storage review、network policy review、price field review、redirect policy review 和 human approval。
+
+默认状态下，Connector Gate 不得打开 connector，不得连接真实 endpoint，不得使用真实 API key，不得发起网络请求，不得返回真实商品结果，不得返回真实价格，不得返回 fake/demo/mock price，不得跳转购买或预订页面。
+
+Connector Gate 通过后也不得自动放开 checkout/payment/order，不得自动付款，不得自动下单，不得提交订单，不得保存身份证、护照或银行卡。任何真实 connector 放开都必须再次确认当地法律合规、密钥安全、endpoint、network、price、redirect、no payment、no order 和 no identity storage。
+
+用户 UI 只能显示自然语言 Connector Gate 状态，例如 “Gate 状态：已阻断”、“Connector：不可打开”、“Endpoint：不可连接”、“API key：不可使用”、“网络请求：未启用”。不得把 connector_gate_required、connectorGateStatus=blocked、canOpenConnector=false、canConnectEndpoint=false、canUseApiKey=false、canUseNetwork=false、canReturnRealResults=false、canReturnRealPrice=false、canReturnMockPrice=false、noRealEndpoint=true、noRealApiKey=true、noNetworkSearch=true 等 raw/internal 字段裸露给普通用户。
+
 ## 8. 结果展示标准
 
 结果最多展示 2-3 条。

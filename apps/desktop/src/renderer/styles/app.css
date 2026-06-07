@@ -2153,6 +2153,122 @@
   }
 }
 
+.commerce-connector-gate-panel{
+  display:grid;
+  gap:12px;
+  padding:14px;
+  margin:12px 0;
+  border:1px solid #7dd3fc;
+  border-radius:12px;
+  background:#ecfeff;
+  color:#0f172a;
+  box-shadow:0 10px 24px rgba(14,116,144,.08);
+}
+.commerce-connector-gate-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid #a5f3fc;
+}
+.commerce-connector-gate-head h3{
+  margin:0 0 4px;
+  font-size:17px;
+  line-height:1.25;
+  color:#0e7490;
+}
+.commerce-connector-gate-head p{
+  margin:0;
+  color:#155e75;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-connector-gate-head strong{
+  flex:0 0 auto;
+  max-width:220px;
+  border:1px solid #22d3ee;
+  border-radius:10px;
+  background:#cffafe;
+  color:#0e7490;
+  padding:8px 10px;
+  font-size:13px;
+  line-height:1.4;
+}
+.commerce-connector-gate-grid{
+  display:grid;
+  grid-template-columns:repeat(5, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-connector-gate-group{
+  border:1px solid #a5f3fc;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+  display:grid;
+  gap:8px;
+}
+.commerce-connector-gate-group h4{
+  margin:0;
+  color:#0e7490;
+  font-size:13px;
+  line-height:1.25;
+}
+.commerce-connector-gate-group ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  gap:7px;
+}
+.commerce-connector-gate-group li{
+  display:grid;
+  gap:3px;
+  font-size:12px;
+  line-height:1.45;
+}
+.commerce-connector-gate-group li span{
+  color:#155e75;
+  font-weight:900;
+}
+.commerce-connector-gate-group li b{
+  color:#0f172a;
+  font-size:12px;
+  font-weight:900;
+}
+.commerce-connector-gate-note{
+  display:grid;
+  gap:6px;
+  padding:10px;
+  border:1px solid #22d3ee;
+  border-radius:10px;
+  background:#cffafe;
+  color:#164e63;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-connector-gate-note p{
+  margin:0;
+}
+@media (max-width: 1180px){
+  .commerce-connector-gate-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px){
+  .commerce-connector-gate-head{
+    display:grid;
+  }
+  .commerce-connector-gate-head strong{
+    max-width:none;
+  }
+  .commerce-connector-gate-grid{
+    grid-template-columns:1fr;
+  }
+}
+
 .commerce-local-law-panel{
   margin:12px 0;
 }

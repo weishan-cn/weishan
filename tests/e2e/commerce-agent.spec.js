@@ -1337,6 +1337,179 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
+  test("connector gate contract blocks connector endpoint key network results price and redirect", async () => {
+    await gotoRoute(page, "commerce");
+    const result = await page.evaluate(async () => {
+      delete window.WeishanCommerceConnectorGate;
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceConnectorGate.js?v=2.0.46&contract=" + Date.now();
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      const api = window.WeishanCommerceConnectorGate;
+      const status = api.getCommerceConnectorGateStatus("ebay_browse_api");
+      return {
+        policy:api.getCommerceConnectorGatePolicy("ebay_browse_api"),
+        status,
+        canOpen:api.canOpenCommerceConnector("ebay_browse_api"),
+        canEndpoint:api.canUseConnectorEndpoint("ebay_browse_api"),
+        canKey:api.canUseConnectorApiKey("ebay_browse_api"),
+        canNetwork:api.canUseConnectorNetwork("ebay_browse_api"),
+        canResults:api.canReturnConnectorResults("ebay_browse_api"),
+        reason:api.explainCommerceConnectorGateBlockReason("ebay_browse_api"),
+        displayStatus:api.toCommerceConnectorGateDisplayStatus("blocked"),
+        displayMode:api.toCommerceConnectorGateDisplayStatus("final_pre_connection_gate")
+      };
+    });
+    expect(result.policy.connectorGateVersion).toBe("2.0.46");
+    expect(result.policy.phase).toBe("connector_gate_framework");
+    expect(result.policy.defaultStatus).toBe("blocked");
+    expect(result.policy.gateMode).toBe("final_pre_connection_gate");
+    expect(result.policy.requiresGlobalCommerceStandard).toBe(true);
+    expect(result.policy.requiresLocalLawCompliance).toBe(true);
+    expect(result.policy.requiresProviderOnboarding).toBe(true);
+    expect(result.policy.requiresProviderApproval).toBe(true);
+    expect(result.policy.requiresReadOnlyConnectorStub).toBe(true);
+    expect(result.policy.requiresProviderStubProfile).toBe(true);
+    expect(result.policy.requiresSecretStoragePlan).toBe(true);
+    expect(result.policy.requiresSandboxDryRun).toBe(true);
+    expect(result.policy.requiresHumanApproval).toBe(true);
+    expect(result.policy.requiredChecks.globalCommerceStandardPassed).toBe(false);
+    expect(result.policy.requiredChecks.localLawCompliancePassed).toBe(false);
+    expect(result.policy.requiredChecks.providerOnboardingCompleted).toBe(false);
+    expect(result.policy.requiredChecks.providerApprovalGranted).toBe(false);
+    expect(result.policy.requiredChecks.readOnlyConnectorStubReady).toBe(false);
+    expect(result.policy.requiredChecks.providerStubProfileReviewed).toBe(false);
+    expect(result.policy.requiredChecks.secretStorageApproved).toBe(false);
+    expect(result.policy.requiredChecks.sandboxDryRunPassed).toBe(false);
+    expect(result.policy.requiredChecks.endpointReviewed).toBe(false);
+    expect(result.policy.requiredChecks.apiKeyStorageReviewed).toBe(false);
+    expect(result.policy.requiredChecks.networkPolicyReviewed).toBe(false);
+    expect(result.policy.requiredChecks.priceFieldReviewed).toBe(false);
+    expect(result.policy.requiredChecks.redirectPolicyReviewed).toBe(false);
+    expect(result.policy.requiredChecks.humanApprovalGranted).toBe(false);
+    expect(result.policy.capabilities.canOpenConnector).toBe(false);
+    expect(result.policy.capabilities.canConnectEndpoint).toBe(false);
+    expect(result.policy.capabilities.canUseApiKey).toBe(false);
+    expect(result.policy.capabilities.canUseNetwork).toBe(false);
+    expect(result.policy.capabilities.canReturnRealResults).toBe(false);
+    expect(result.policy.capabilities.canReturnRealPrice).toBe(false);
+    expect(result.policy.capabilities.canReturnMockPrice).toBe(false);
+    expect(result.policy.capabilities.canRedirect).toBe(false);
+    expect(result.policy.safety.noRealEndpoint).toBe(true);
+    expect(result.policy.safety.noRealApiKey).toBe(true);
+    expect(result.policy.safety.noNetworkSearch).toBe(true);
+    expect(result.policy.safety.noRealResults).toBe(true);
+    expect(result.policy.safety.noRealPrice).toBe(true);
+    expect(result.policy.safety.noFakeDemoMockPrice).toBe(true);
+    expect(result.policy.safety.noRedirect).toBe(true);
+    expect(result.status.connectorGateStatus).toBe("blocked");
+    expect(result.status.gateMode).toBe("final_pre_connection_gate");
+    expect(result.status.canOpenConnector).toBe(false);
+    expect(result.status.canConnectEndpoint).toBe(false);
+    expect(result.status.canUseApiKey).toBe(false);
+    expect(result.status.canUseNetwork).toBe(false);
+    expect(result.status.canReturnRealResults).toBe(false);
+    expect(result.status.canReturnRealPrice).toBe(false);
+    expect(result.status.canReturnMockPrice).toBe(false);
+    expect(result.status.canRedirect).toBe(false);
+    expect(result.status.reason).toBe("connector_gate_required");
+    expect(result.canOpen).toBe(false);
+    expect(result.canEndpoint).toBe(false);
+    expect(result.canKey).toBe(false);
+    expect(result.canNetwork).toBe(false);
+    expect(result.canResults).toBe(false);
+    expect(result.reason).toBe("connector_gate_required");
+    expect(result.displayStatus).toBe("已阻断");
+    expect(result.displayMode).toBe("真实连接前最终闸门");
+  });
+
+  test("connector gate panel appears without raw fields and blocks real connector access", async () => {
+    const inputs = ["买华为手机", "订酒店", "订机票", "买演唱会门票"];
+    const rawFields = [
+      "connector_gate_required",
+      "connectorGateStatus=blocked",
+      "canOpenConnector=false",
+      "canConnectEndpoint=false",
+      "canUseApiKey=false",
+      "canUseNetwork=false",
+      "canReturnRealResults=false",
+      "canReturnRealPrice=false",
+      "canReturnMockPrice=false",
+      "noRealEndpoint=true",
+      "noRealApiKey=true",
+      "noNetworkSearch=true"
+    ];
+    for (const text of inputs) {
+      await submitHomeCommand(page, runId + "-CONNECTOR-GATE " + text);
+      const home = page.locator('[data-commerce-home-summary="true"]').first();
+      const homePanel = home.locator(".commerce-connector-gate-panel").first();
+      await expect(homePanel).toContainText("Connector Gate");
+      await expect(homePanel).toContainText("真实 provider connector 接入前必须通过最终闸门");
+      await expect(homePanel).toContainText("Gate 状态：已阻断");
+      await expect(homePanel).toContainText("闸门模式：真实连接前最终闸门");
+      await expect(homePanel).toContainText("Connector：不可打开");
+      await expect(homePanel).toContainText("Endpoint：不可连接");
+      await expect(homePanel).toContainText("API key：不可使用");
+      await expect(homePanel).toContainText("网络请求：未启用");
+      await expect(homePanel).toContainText("真实结果：不可返回");
+      await expect(homePanel).toContainText("真实价格：不可用");
+      await expect(homePanel).toContainText("测试价格：不可用");
+      await expect(homePanel).toContainText("精确跳转：未启用");
+      await expect(homePanel).toContainText("支付 / 下单：不支持");
+      await expect(homePanel).toContainText("证件 / 银行卡：不保存");
+      await expect(homePanel).toContainText("全球采购标准：未通过最终接入审查");
+      await expect(homePanel).toContainText("当地法律合规：未通过最终接入审查");
+      await expect(homePanel).toContainText("Provider Onboarding：未完成");
+      await expect(homePanel).toContainText("Provider Approval：未完成");
+      await expect(homePanel).toContainText("只读 Connector Stub：未准备");
+      await expect(homePanel).toContainText("密钥安全方案：未批准");
+      await expect(homePanel).toContainText("Sandbox Dry Run：未通过");
+      await expect(homePanel).toContainText("Endpoint 审查：未完成");
+      await expect(homePanel).toContainText("API key 存储审查：未完成");
+      await expect(homePanel).toContainText("网络策略审查：未完成");
+      await expect(homePanel).toContainText("价格字段审查：未完成");
+      await expect(homePanel).toContainText("跳转策略审查：未完成");
+      await expect(homePanel).toContainText("当前不会访问 eBay 或任何真实 provider");
+      await expect(homePanel).toContainText("不会读取 API key");
+      await expect(homePanel).toContainText("不会连接 endpoint");
+      await expect(homePanel).toContainText("不会发起网络请求");
+      await expect(homePanel).toContainText("不会返回商品、价格或跳转链接");
+      await expect(homePanel).toContainText("任意前置 gate 未完成时");
+      await expect(homePanel).toContainText("通过后也不得自动放开 checkout、payment 或 order");
+      for (const field of rawFields) await expect(home).not.toContainText(field);
+      await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+      await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+      await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+      await expect(home).toContainText("当地法律合规审查");
+      await expect(home).toContainText("Provider Sandbox Dry Run");
+      await expect(home).toContainText("Provider 密钥安全方案");
+
+      await page.locator("#commerceViewPlanBtn").click();
+      const detail = page.locator(".commerce-detail").first();
+      const detailPanel = detail.locator(".commerce-connector-gate-panel").first();
+      await expect(detailPanel).toContainText("Connector Gate");
+      await expect(detailPanel).toContainText("Gate 状态：已阻断");
+      await expect(detailPanel).toContainText("Connector：不可打开");
+      await expect(detailPanel).toContainText("Endpoint：不可连接");
+      await expect(detailPanel).toContainText("API key：不可使用");
+      await expect(detailPanel).toContainText("网络请求：未启用");
+      await expect(detailPanel).toContainText("真实结果：不可返回");
+      await expect(detailPanel).toContainText("真实价格：不可用");
+      await expect(detailPanel).toContainText("测试价格：不可用");
+      await expect(detailPanel).toContainText("精确跳转：未启用");
+      await expect(detailPanel).toContainText("当前不会访问 eBay 或任何真实 provider");
+      for (const field of rawFields) await expect(detail).not.toContainText(field);
+      await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+      await expect(detail).toContainText("当地法律合规审查");
+      await expect(detail).toContainText("Provider Sandbox Dry Run");
+      await expect(detail).toContainText("Provider 接入审查面板");
+      await gotoRoute(page, "home");
+    }
+  });
+
   test("provider stub profile panel explains ebay is only a product candidate", async () => {
     await submitHomeCommand(page, runId + "-STUB-PROFILE 买华为手机");
     const home = page.locator('[data-commerce-home-summary="true"]').first();
