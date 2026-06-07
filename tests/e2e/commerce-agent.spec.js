@@ -823,6 +823,99 @@ test.describe.serial("commerce agent workbench", () => {
     expect(result.displayBlocked).toBe("已阻断");
   });
 
+  test("read-only connector stub contract blocks execution endpoint key network price and redirect", async () => {
+    await gotoRoute(page, "commerce");
+    const result = await page.evaluate(async () => {
+      delete window.WeishanCommerceReadOnlyConnectorStub;
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceReadOnlyConnectorStub.js?v=2.0.41&contract=" + Date.now();
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      const api = window.WeishanCommerceReadOnlyConnectorStub;
+      const defaultStatus = api.getReadOnlyConnectorStubStatus("product", "product-provider-disabled", { approvalStatus:"not_reviewed" });
+      const approvedStatus = api.getReadOnlyConnectorStubStatus("product", "product-provider-disabled", { approvalStatus:"approved_for_stub" });
+      return {
+        policy:api.getReadOnlyConnectorStubPolicy("product", "product-provider-disabled"),
+        defaultStatus,
+        approvedStatus,
+        canBuildDefault:api.canBuildReadOnlyConnectorStub("product", "product-provider-disabled", { approvalStatus:"not_reviewed" }),
+        canBuildApproved:api.canBuildReadOnlyConnectorStub("product", "product-provider-disabled", { approvalStatus:"approved_for_stub" }),
+        canExecuteApproved:api.canExecuteReadOnlyConnectorStub("product", "product-provider-disabled", { approvalStatus:"approved_for_stub" }),
+        reason:api.explainReadOnlyConnectorStubBlockReason("product", "product-provider-disabled", { approvalStatus:"not_reviewed" }),
+        displayStub:api.toReadOnlyConnectorStubDisplayStatus("stub_not_ready"),
+        displayReadOnly:api.toReadOnlyConnectorStubDisplayStatus("read_only"),
+        displayDisabled:api.toReadOnlyConnectorStubDisplayStatus("disabled")
+      };
+    });
+    expect(result.policy.stubVersion).toBe("2.0.41");
+    expect(result.policy.phase).toBe("read_only_connector_stub_framework");
+    expect(result.policy.defaultStatus).toBe("stub_not_ready");
+    expect(result.policy.connectorMode).toBe("read_only");
+    expect(result.policy.allowedAfterApprovalStatus).toBe("approved_for_stub");
+    expect(result.policy.requiresProviderApproval).toBe(true);
+    expect(result.policy.requiresLocalLawCompliance).toBe(true);
+    expect(result.policy.requiresOnboardingChecklist).toBe(true);
+    expect(result.policy.requiresConfigGate).toBe(true);
+    expect(result.policy.requiresAdapterGate).toBe(true);
+    expect(result.policy.requiresSandboxGate).toBe(true);
+    expect(result.policy.requiresConnectorGate).toBe(true);
+    expect(result.policy.capabilities.canBuildStub).toBe(false);
+    expect(result.policy.capabilities.canConfigureApiKey).toBe(false);
+    expect(result.policy.capabilities.canConnectEndpoint).toBe(false);
+    expect(result.policy.capabilities.canUseNetwork).toBe(false);
+    expect(result.policy.capabilities.canReturnRealPrice).toBe(false);
+    expect(result.policy.capabilities.canReturnMockPrice).toBe(false);
+    expect(result.policy.capabilities.canRedirect).toBe(false);
+    expect(result.policy.capabilities.canCheckout).toBe(false);
+    expect(result.policy.capabilities.canPay).toBe(false);
+    expect(result.policy.capabilities.canSubmitOrder).toBe(false);
+    expect(result.policy.capabilities.canStoreIdentity).toBe(false);
+    expect(result.policy.safety.noRealEndpoint).toBe(true);
+    expect(result.policy.safety.noApiKey).toBe(true);
+    expect(result.policy.safety.noNetworkSearch).toBe(true);
+    expect(result.policy.safety.noRealPrice).toBe(true);
+    expect(result.policy.safety.noFakeDemoMockPrice).toBe(true);
+    expect(result.policy.safety.noRedirect).toBe(true);
+    expect(result.policy.safety.noCheckout).toBe(true);
+    expect(result.policy.safety.noPayment).toBe(true);
+    expect(result.policy.safety.noOrderSubmit).toBe(true);
+    expect(result.policy.safety.noIdentityStorage).toBe(true);
+    expect(result.policy.safety.noRawGpsStorage).toBe(true);
+    expect(result.defaultStatus.stubStatus).toBe("stub_not_ready");
+    expect(result.defaultStatus.connectorMode).toBe("read_only");
+    expect(result.defaultStatus.canBuildStub).toBe(false);
+    expect(result.defaultStatus.canExecuteStub).toBe(false);
+    expect(result.defaultStatus.canConfigureApiKey).toBe(false);
+    expect(result.defaultStatus.canConnectEndpoint).toBe(false);
+    expect(result.defaultStatus.canUseNetwork).toBe(false);
+    expect(result.defaultStatus.canReturnRealPrice).toBe(false);
+    expect(result.defaultStatus.canReturnMockPrice).toBe(false);
+    expect(result.defaultStatus.canRedirect).toBe(false);
+    expect(result.defaultStatus.reason).toBe("provider_approval_required_before_stub");
+    expect(result.approvedStatus.canBuildStub).toBe(true);
+    expect(result.approvedStatus.canExecuteStub).toBe(false);
+    expect(result.approvedStatus.canConfigureApiKey).toBe(false);
+    expect(result.approvedStatus.canConnectEndpoint).toBe(false);
+    expect(result.approvedStatus.canUseNetwork).toBe(false);
+    expect(result.approvedStatus.canReturnRealPrice).toBe(false);
+    expect(result.approvedStatus.canReturnMockPrice).toBe(false);
+    expect(result.approvedStatus.canRedirect).toBe(false);
+    expect(result.approvedStatus.canCheckout).toBe(false);
+    expect(result.approvedStatus.canPay).toBe(false);
+    expect(result.approvedStatus.canSubmitOrder).toBe(false);
+    expect(result.approvedStatus.canStoreIdentity).toBe(false);
+    expect(result.canBuildDefault).toBe(false);
+    expect(result.canBuildApproved).toBe(true);
+    expect(result.canExecuteApproved).toBe(false);
+    expect(result.reason).toBe("provider_approval_required_before_stub");
+    expect(result.displayStub).toBe("未准备");
+    expect(result.displayReadOnly).toBe("只读");
+    expect(result.displayDisabled).toBe("未启用");
+  });
+
   test("provider approval workflow panel explains approval stages without raw fields", async () => {
     await submitHomeCommand(page, runId + " 买华为手机");
     const home = page.locator("[data-commerce-home-summary]");
@@ -846,7 +939,37 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(home).toContainText("只读 connector stub 开发许可：未授予");
     await expect(home).toContainText("只读 connector stub 只允许开发准备，不连接真实平台");
     await expect(home).toContainText("即使批准开发 stub，仍不会显示价格或跳转购买页面");
+    await expect(home).toContainText("只读 Connector Stub");
+    await expect(home).toContainText("真实 provider 接入前，weishan 只能准备只读 connector stub。当前不会连接任何真实平台。");
+    await expect(home).toContainText("Stub 状态：未准备");
+    await expect(home).toContainText("Connector 模式：只读");
+    await expect(home).toContainText("Stub 开发许可：未授予");
+    await expect(home).toContainText("Stub 执行：未启用");
+    await expect(home).toContainText("API key：不可配置");
+    await expect(home).toContainText("Endpoint：不可连接");
+    await expect(home).toContainText("网络搜索：未启用");
+    await expect(home).toContainText("真实价格：不可用");
+    await expect(home).toContainText("测试价格：不可用");
+    await expect(home).toContainText("精确跳转：未启用");
+    await expect(home).toContainText("支付 / 下单：不支持");
+    await expect(home).toContainText("证件 / 银行卡：不保存");
+    await expect(home).toContainText("approved_for_stub 后，才允许开发只读 connector stub");
+    await expect(home).toContainText("即使允许开发 stub，也不会连接真实平台");
+    await expect(home).toContainText("不会配置真实 API key");
+    await expect(home).toContainText("不会启用网络搜索");
+    await expect(home).toContainText("不会显示价格");
+    await expect(home).toContainText("不会跳转购买或预订页面");
     await expect(home).not.toContainText("provider_approval_required");
+    await expect(home).not.toContainText("provider_approval_required_before_stub");
+    await expect(home).not.toContainText("stubStatus=stub_not_ready");
+    await expect(home).not.toContainText("canBuildStub=false");
+    await expect(home).not.toContainText("canExecuteStub=false");
+    await expect(home).not.toContainText("canUseNetwork=false");
+    await expect(home).not.toContainText("canReturnRealPrice=false");
+    await expect(home).not.toContainText("canReturnMockPrice=false");
+    await expect(home).not.toContainText("noFakeDemoMockPrice=true");
+    await expect(home).not.toContainText("noRealEndpoint=true");
+    await expect(home).not.toContainText("noApiKey=true");
     await expect(home).not.toContainText("approvalStatus=not_reviewed");
     await expect(home).not.toContainText("allowConnectorStubDevelopment=false");
     await expect(home).not.toContainText("allowApiKeyConfiguration=false");
@@ -863,9 +986,27 @@ test.describe.serial("commerce agent workbench", () => {
     await page.locator("#commerceViewPlanBtn").click();
     const detail = page.locator(".commerce-detail");
     await expect(detail).toContainText("Provider 审批流程");
+    await expect(detail).toContainText("只读 Connector Stub");
+    await expect(detail).toContainText("Stub 状态：未准备");
+    await expect(detail).toContainText("Connector 模式：只读");
+    await expect(detail).toContainText("Stub 开发许可：未授予");
+    await expect(detail).toContainText("Stub 执行：未启用");
+    await expect(detail).toContainText("真实价格：不可用");
+    await expect(detail).toContainText("测试价格：不可用");
+    await expect(detail).toContainText("即使允许开发 stub，也不会连接真实平台");
     await expect(detail).toContainText("只有 provider 完成分级审批，并且本地法律合规、onboarding checklist、config / adapter / sandbox / connector gate 均通过后");
     await expect(detail).toContainText("当前不会连接真实平台，不会返回价格，不会跳转购买或预订页面");
     await expect(detail).not.toContainText("provider_approval_required");
+    await expect(detail).not.toContainText("provider_approval_required_before_stub");
+    await expect(detail).not.toContainText("stubStatus=stub_not_ready");
+    await expect(detail).not.toContainText("canBuildStub=false");
+    await expect(detail).not.toContainText("canExecuteStub=false");
+    await expect(detail).not.toContainText("canUseNetwork=false");
+    await expect(detail).not.toContainText("canReturnRealPrice=false");
+    await expect(detail).not.toContainText("canReturnMockPrice=false");
+    await expect(detail).not.toContainText("noFakeDemoMockPrice=true");
+    await expect(detail).not.toContainText("noRealEndpoint=true");
+    await expect(detail).not.toContainText("noApiKey=true");
     await expect(detail).not.toContainText("approvalStatus=not_reviewed");
     await expect(detail).not.toContainText("allowConnectorStubDevelopment=false");
     await expect(detail).not.toContainText("allowApiKeyConfiguration=false");
@@ -891,6 +1032,10 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(home).toContainText("网络搜索：未启用");
       await expect(home).toContainText("实时价格：不可用");
       await expect(home).toContainText("精确跳转：未启用");
+      await expect(home).toContainText("只读 Connector Stub");
+      await expect(home).toContainText("Stub 状态：未准备");
+      await expect(home).toContainText("Connector 模式：只读");
+      await expect(home).toContainText("Stub 执行：未启用");
       await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
       await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
       await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
@@ -898,9 +1043,23 @@ test.describe.serial("commerce agent workbench", () => {
       const detail = page.locator(".commerce-detail");
       await expect(detail).toContainText("Provider 审批流程");
       await expect(detail).toContainText("审批状态：未审查");
+      await expect(detail).toContainText("只读 Connector Stub");
+      await expect(detail).toContainText("Stub 状态：未准备");
+      await expect(detail).toContainText("真实价格：不可用");
+      await expect(detail).toContainText("测试价格：不可用");
       await expect(detail).toContainText("只读 connector stub 只允许开发准备，不连接真实平台");
       await expect(detail).toContainText("即使批准开发 stub，仍不会显示价格或跳转购买页面");
       await expect(detail).not.toContainText("provider_approval_required");
+      await expect(detail).not.toContainText("provider_approval_required_before_stub");
+      await expect(detail).not.toContainText("stubStatus=stub_not_ready");
+      await expect(detail).not.toContainText("canBuildStub=false");
+      await expect(detail).not.toContainText("canExecuteStub=false");
+      await expect(detail).not.toContainText("canUseNetwork=false");
+      await expect(detail).not.toContainText("canReturnRealPrice=false");
+      await expect(detail).not.toContainText("canReturnMockPrice=false");
+      await expect(detail).not.toContainText("noFakeDemoMockPrice=true");
+      await expect(detail).not.toContainText("noRealEndpoint=true");
+      await expect(detail).not.toContainText("noApiKey=true");
       await expect(detail).not.toContainText("approvalStatus=not_reviewed");
       await expect(detail).not.toContainText("allowConnectorStubDevelopment=false");
       await expect(detail).not.toContainText("allowApiKeyConfiguration=false");

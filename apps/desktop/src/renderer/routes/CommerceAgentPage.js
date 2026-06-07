@@ -314,7 +314,7 @@
 
   function providerApprovalWorkflowPanelHtml(approvalInfo){
     const status = approvalInfo || {};
-    const row = (label, value) => `<li><span>${esc(label)}</span><b>${esc(value)}</b></li>`;
+    const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
     const group = (title, items) => `<section class="commerce-approval-group"><h4>${esc(title)}</h4><ul>${items.map((item) => row(item[0], item[1])).join("")}</ul></section>`;
     return `<section class="commerce-provider-approval-panel" aria-label="Provider 审批流程">
       <div class="commerce-provider-approval-head">
@@ -333,6 +333,30 @@
       <div class="commerce-provider-approval-note">
         <p>只有 provider 完成分级审批，并且本地法律合规、onboarding checklist、config / adapter / sandbox / connector gate 均通过后，weishan 才允许进入真实 provider 连接。当前不会连接真实平台，不会返回价格，不会跳转购买或预订页面。</p>
         <p>只读 connector stub 只允许开发准备，不连接真实平台。即使批准开发 stub，仍不会显示价格或跳转购买页面。</p>
+      </div>
+    </section>`;
+  }
+
+  function readOnlyConnectorStubPanelHtml(stubInfo){
+    const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
+    const group = (title, items) => `<section class="commerce-stub-group"><h4>${esc(title)}</h4><ul>${items.map((item) => row(item[0], item[1])).join("")}</ul></section>`;
+    return `<section class="commerce-readonly-stub-panel" aria-label="只读 Connector Stub">
+      <div class="commerce-readonly-stub-head">
+        <div>
+          <h3>只读 Connector Stub</h3>
+          <p>真实 provider 接入前，weishan 只能准备只读 connector stub。当前不会连接任何真实平台。</p>
+        </div>
+        <strong>Stub 状态：未准备</strong>
+      </div>
+      <div class="commerce-readonly-stub-grid">
+        ${group("Stub 准备状态", [["Connector 模式", "只读"], ["Stub 开发许可", "未授予"], ["Stub 执行", "未启用"]])}
+        ${group("连接限制", [["API key", "不可配置"], ["Endpoint", "不可连接"], ["网络搜索", "未启用"]])}
+        ${group("结果展示", [["真实价格", "不可用"], ["测试价格", "不可用"], ["精确跳转", "未启用"]])}
+        ${group("交易与隐私", [["支付 / 下单", "不支持"], ["证件 / 银行卡", "不保存"]])}
+      </div>
+      <div class="commerce-readonly-stub-note">
+        <p>只有 provider 审批状态达到 approved_for_stub 后，才允许开发只读 connector stub。</p>
+        <p>即使允许开发 stub，也不会连接真实平台、不会配置真实 API key、不会启用网络搜索、不会显示价格、不会跳转购买或预订页面。</p>
       </div>
     </section>`;
   }
@@ -407,6 +431,7 @@
         <span>当前不会下单、付款或保存证件/银行卡。</span>
         ${providerOnboardingReviewPanelHtml(onboardingInfo || {})}
         ${providerApprovalWorkflowPanelHtml(approvalInfo || {})}
+        ${readOnlyConnectorStubPanelHtml(configInfo && configInfo.connectorStubHealth || {})}
       </div>`;
   }
 

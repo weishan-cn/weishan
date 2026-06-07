@@ -1815,6 +1815,117 @@
   }
 }
 
+.commerce-readonly-stub-panel{
+  display:grid;
+  gap:12px;
+  padding:14px;
+  margin:12px 0;
+  border:1px solid #c4b5fd;
+  border-radius:12px;
+  background:#f5f3ff;
+  color:#0f172a;
+  box-shadow:0 10px 24px rgba(109,40,217,.08);
+}
+.commerce-readonly-stub-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid #c4b5fd;
+}
+.commerce-readonly-stub-head h3{
+  margin:0 0 4px;
+  font-size:17px;
+  line-height:1.25;
+  color:#6d28d9;
+}
+.commerce-readonly-stub-head p{
+  margin:0;
+  color:#5b21b6;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-readonly-stub-head strong{
+  flex:0 0 auto;
+  max-width:220px;
+  border:1px solid #a78bfa;
+  border-radius:10px;
+  background:#ede9fe;
+  color:#6d28d9;
+  padding:8px 10px;
+  font-size:13px;
+  line-height:1.4;
+}
+.commerce-readonly-stub-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-stub-group{
+  border:1px solid #c4b5fd;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+  display:grid;
+  gap:8px;
+}
+.commerce-stub-group h4{
+  margin:0;
+  color:#6d28d9;
+  font-size:13px;
+  line-height:1.25;
+}
+.commerce-stub-group ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  gap:7px;
+}
+.commerce-stub-group li{
+  display:grid;
+  gap:3px;
+  font-size:12px;
+  line-height:1.45;
+}
+.commerce-stub-group li span{
+  color:#5b21b6;
+  font-weight:900;
+}
+.commerce-stub-group li b{
+  color:#0f172a;
+  font-size:12px;
+  font-weight:900;
+}
+.commerce-readonly-stub-note{
+  display:grid;
+  gap:6px;
+  padding:10px;
+  border:1px solid #a78bfa;
+  border-radius:10px;
+  background:#ede9fe;
+  color:#4c1d95;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-readonly-stub-note p{
+  margin:0;
+}
+@media (max-width: 980px){
+  .commerce-readonly-stub-head{
+    display:grid;
+  }
+  .commerce-readonly-stub-head strong{
+    max-width:none;
+  }
+  .commerce-readonly-stub-grid{
+    grid-template-columns:1fr;
+  }
+}
+
 .commerce-local-law-panel{
   margin:12px 0;
 }

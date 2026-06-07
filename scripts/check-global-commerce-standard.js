@@ -53,12 +53,17 @@ const REQUIRED_PHRASES = [
   "未审查",
   "审查中",
   "approved_for_stub",
+  "Read-only Connector Stub",
   "只读 connector stub",
+  "stub 默认不可执行",
   "不得配置 API key",
   "不得连接真实 endpoint",
   "不得启用网络搜索",
+  "不得返回真实价格",
+  "不得返回 fake/demo/mock price",
   "不得显示价格",
   "不得跳转购买",
+  "approved_for_stub 只允许开发 stub 结构",
   "人工批准",
   "每个版本只做一个完整功能模块"
 ];

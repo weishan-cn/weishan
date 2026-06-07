@@ -69,6 +69,10 @@
     return window.WeishanCommerceProviderApprovalWorkflow || null;
   }
 
+  function connectorStubApi(){
+    return window.WeishanCommerceReadOnlyConnectorStub || null;
+  }
+
   function localLawApi(){
     return window.WeishanCommerceLocalLawCompliance || null;
   }
@@ -210,6 +214,26 @@
         noLegalAdvice:true,
         noBypassLocalLaw:true
       }
+    };
+  }
+
+  function getReadOnlyConnectorStubStatus(category, providerId, approvalHealth){
+    const api = connectorStubApi();
+    if (api && api.getReadOnlyConnectorStubStatus) return api.getReadOnlyConnectorStubStatus(category, providerId, approvalHealth);
+    return {
+      stubVersion:"2.0.41",
+      phase:"read_only_connector_stub_framework",
+      stubStatus:"stub_not_ready",
+      connectorMode:"read_only",
+      canBuildStub:false,
+      canExecuteStub:false,
+      canConfigureApiKey:false,
+      canConnectEndpoint:false,
+      canUseNetwork:false,
+      canReturnRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      reason:"provider_approval_required_before_stub"
     };
   }
 
@@ -356,6 +380,7 @@
     const productCandidate = next === "product" ? getProductProviderCandidateReadiness() : null;
     const pool = next === "product" ? getGlobalProviderPoolReadiness() : null;
     const approval = approvalFields(getProviderApprovalStatus(next, next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled"));
+    const stub = connectorStubFields(getReadOnlyConnectorStubStatus(next, next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled", approval));
     return Object.assign({
       providerId:next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled",
       category:next,
@@ -407,6 +432,11 @@
       productProviderCandidateReadiness:productCandidate || undefined,
       globalProviderPoolReadiness:pool || undefined,
       approvalHealth:approval,
+      connectorStubHealth:stub,
+      connectorStubStatus:stub.stubStatus,
+      connectorStubMode:stub.connectorMode,
+      canBuildReadOnlyConnectorStub:stub.canBuildStub,
+      canExecuteReadOnlyConnectorStub:stub.canExecuteStub,
       providerOnboardingStatus:getProviderOnboardingStatus(next)
     }, productDefaults);
   }
@@ -563,6 +593,66 @@
     };
   }
 
+  function connectorStubFields(stub){
+    const next = stub || {};
+    const capabilities = next.capabilities || {};
+    const safety = next.safety || {};
+    return {
+      stubVersion:next.stubVersion || "2.0.41",
+      phase:next.phase || "read_only_connector_stub_framework",
+      defaultStatus:next.defaultStatus || "stub_not_ready",
+      stubStatus:next.stubStatus || next.defaultStatus || "stub_not_ready",
+      connectorMode:next.connectorMode || "read_only",
+      allowedAfterApprovalStatus:next.allowedAfterApprovalStatus || "approved_for_stub",
+      requiresProviderApproval:next.requiresProviderApproval !== false,
+      requiresLocalLawCompliance:next.requiresLocalLawCompliance !== false,
+      requiresOnboardingChecklist:next.requiresOnboardingChecklist !== false,
+      requiresConfigGate:next.requiresConfigGate !== false,
+      requiresAdapterGate:next.requiresAdapterGate !== false,
+      requiresSandboxGate:next.requiresSandboxGate !== false,
+      requiresConnectorGate:next.requiresConnectorGate !== false,
+      canBuildStub:next.canBuildStub === true || capabilities.canBuildStub === true,
+      canExecuteStub:next.canExecuteStub === true,
+      canConfigureApiKey:false,
+      canConnectEndpoint:false,
+      canUseNetwork:false,
+      canReturnRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      canCheckout:false,
+      canPay:false,
+      canSubmitOrder:false,
+      canStoreIdentity:false,
+      reason:next.reason || "provider_approval_required_before_stub",
+      capabilities:{
+        canBuildStub:next.canBuildStub === true || capabilities.canBuildStub === true,
+        canConfigureApiKey:false,
+        canConnectEndpoint:false,
+        canUseNetwork:false,
+        canReturnRealPrice:false,
+        canReturnMockPrice:false,
+        canRedirect:false,
+        canCheckout:false,
+        canPay:false,
+        canSubmitOrder:false,
+        canStoreIdentity:false
+      },
+      safety:{
+        noRealEndpoint:safety.noRealEndpoint !== false,
+        noApiKey:safety.noApiKey !== false,
+        noNetworkSearch:safety.noNetworkSearch !== false,
+        noRealPrice:safety.noRealPrice !== false,
+        noFakeDemoMockPrice:safety.noFakeDemoMockPrice !== false,
+        noRedirect:safety.noRedirect !== false,
+        noCheckout:safety.noCheckout !== false,
+        noPayment:safety.noPayment !== false,
+        noOrderSubmit:safety.noOrderSubmit !== false,
+        noIdentityStorage:safety.noIdentityStorage !== false,
+        noRawGpsStorage:safety.noRawGpsStorage !== false
+      }
+    };
+  }
+
   function defaultConnector(category, settings){
     const api = connectorApi();
     if (api && api.getCommerceProviderConnector) return api.getCommerceProviderConnector(category, settings);
@@ -694,10 +784,24 @@
 
   function isProviderApprovalReady(approval){
     return !!(approval &&
+      (approval.approvalStatus === "approved_for_stub" ||
       approval.canConnectEndpoint === true &&
       approval.canEnableNetworkSearch === true &&
       approval.canDisplayPrice === true &&
-      approval.canRedirect === true);
+      approval.canRedirect === true));
+  }
+
+  function isReadOnlyConnectorStubExecutable(stub){
+    return !!(stub && stub.connectorMode === "read_only" && stub.canExecuteStub === true && stub.canUseNetwork === true && stub.canReturnRealPrice === true && stub.canRedirect === true);
+  }
+
+  function isFixtureValidationProvider(config, settings){
+    const cfg = settings || {};
+    return !!(config &&
+      config.providerReadinessStatus === "ready_for_fixture_validation" &&
+      cfg.providerMode === "manualProvider" &&
+      window.WeishanCommerceSearchProvider &&
+      typeof window.WeishanCommerceSearchProvider.search === "function");
   }
 
   function isProductSearchRequest(request){
@@ -709,6 +813,7 @@
     const pool = getGlobalProviderPoolReadiness();
     const onboarding = onboardingFields(getProviderOnboardingStatus(request && request.category));
     const approval = approvalFields(getProviderApprovalStatus(request && request.category, providerConfig && providerConfig.providerId));
+    const stub = connectorStubFields(getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
     return {
       ok:false,
       code:"COMMERCE_PRODUCT_PROVIDER_NOT_CONNECTED",
@@ -721,6 +826,7 @@
       connectorHealth,
       onboardingHealth:onboarding,
       approvalHealth:approval,
+      connectorStubHealth:stub,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       productProviderReadiness:readiness,
@@ -735,6 +841,7 @@
   function providerApprovalRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, approvalHealth){
     const onboarding = onboardingFields(getProviderOnboardingStatus(request && request.category));
     const approval = approvalFields(approvalHealth || getProviderApprovalStatus(request && request.category, providerConfig && providerConfig.providerId));
+    const stub = connectorStubFields(getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
     return {
       ok:false,
       code:"COMMERCE_PROVIDER_APPROVAL_REQUIRED",
@@ -747,6 +854,33 @@
       connectorHealth,
       onboardingHealth:onboarding,
       approvalHealth:approval,
+      connectorStubHealth:stub,
+      sandboxHealth:sandbox,
+      dryRunHealth:sandbox,
+      canShowPrice:false,
+      canShowBookingButton:false,
+      canShowCheckoutButton:false,
+      candidates:[]
+    };
+  }
+
+  function readOnlyConnectorStubRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, approvalHealth, stubHealth){
+    const onboarding = onboardingFields(getProviderOnboardingStatus(request && request.category));
+    const approval = approvalFields(approvalHealth || getProviderApprovalStatus(request && request.category, providerConfig && providerConfig.providerId));
+    const stub = connectorStubFields(stubHealth || getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
+    return {
+      ok:false,
+      code:"COMMERCE_READ_ONLY_CONNECTOR_STUB_REQUIRED",
+      message:"read_only_connector_stub_not_ready",
+      reason:stub.reason || "provider_approval_required_before_stub",
+      request,
+      searchStatus:"no_provider",
+      providerHealth:providerHealth.providerHealth,
+      configHealth:configFields(providerConfig),
+      connectorHealth,
+      onboardingHealth:onboarding,
+      approvalHealth:approval,
+      connectorStubHealth:stub,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       canShowPrice:false,
@@ -759,6 +893,7 @@
   function localLawComplianceRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, complianceHealth){
     const onboarding = onboardingFields(getProviderOnboardingStatus(request && request.category));
     const approval = approvalFields(getProviderApprovalStatus(request && request.category, providerConfig && providerConfig.providerId));
+    const stub = connectorStubFields(getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
     const health = complianceHealth || evaluateLocalLawCompliance(request, { locationHealth:locationHealth() });
     return {
       ok:false,
@@ -772,6 +907,7 @@
       connectorHealth,
       onboardingHealth:onboarding,
       approvalHealth:approval,
+      connectorStubHealth:stub,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       locationHealth:locationHealth(),
@@ -787,6 +923,7 @@
     const health = locationHealth();
     const onboarding = onboardingFields(getProviderOnboardingStatus(request && request.category));
     const approval = approvalFields(getProviderApprovalStatus(request && request.category, providerConfig && providerConfig.providerId));
+    const stub = connectorStubFields(getReadOnlyConnectorStubStatus(request && request.category, providerConfig && providerConfig.providerId, approval));
     return {
       ok:false,
       code:"COMMERCE_SHIPPING_DESTINATION_REQUIRED",
@@ -799,6 +936,7 @@
       connectorHealth,
       onboardingHealth:onboarding,
       approvalHealth:approval,
+      connectorStubHealth:stub,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       locationHealth:health,
@@ -879,6 +1017,7 @@
     const onboarding = getProviderOnboardingStatus(next);
     const oFields = onboardingFields(onboarding);
     const approval = approvalFields(getProviderApprovalStatus(next, config.providerId));
+    const stub = connectorStubFields(getReadOnlyConnectorStubStatus(next, config.providerId, approval));
     const configReady = isProviderConfigReady(config);
     const connectorReady = isProviderConnectorReady(connector);
     const sandbox = sandboxFields(next, settings, config, connector);
@@ -914,6 +1053,11 @@
         canEnableNetworkSearch:approval.canEnableNetworkSearch,
         canRedirect:approval.canRedirect,
         approvalHealth:approval,
+        connectorStubStatus:stub.stubStatus,
+        connectorStubMode:stub.connectorMode,
+        canBuildReadOnlyConnectorStub:stub.canBuildStub,
+        canExecuteReadOnlyConnectorStub:stub.canExecuteStub,
+        connectorStubHealth:stub,
         adapterId:adapter.providerId,
         adapterMode:"read_only",
         adapterConfigured:configured,
@@ -945,9 +1089,10 @@
         requiresPaymentMethod:config.requiresPaymentMethod === true,
         supportsReadOnlySearch:config.supportsReadOnlySearch === true,
         supportsCrossBorderSearch:config.supportsCrossBorderSearch === true,
-        configHealth:configFields(config),
-        connectorHealth:cFields,
-        sandboxHealth:sandbox
+      configHealth:configFields(config),
+      connectorHealth:cFields,
+      connectorStubHealth:stub,
+      sandboxHealth:sandbox
       }],
       adapterHealth:{
         adapterId:adapter.providerId,
@@ -959,6 +1104,7 @@
       configHealth:configFields(config),
       onboardingHealth:oFields,
       approvalHealth:approval,
+      connectorStubHealth:stub,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       enabled:configured && configReady && connectorReady,
@@ -1628,6 +1774,7 @@
     const connectorHealth = connectorFields(providerConnector);
     const onboardingHealth = onboardingFields(getProviderOnboardingStatus(request.category));
     const approvalHealth = approvalFields(getProviderApprovalStatus(request.category, providerConfig && providerConfig.providerId));
+    const connectorStubHealth = connectorStubFields(getReadOnlyConnectorStubStatus(request.category, providerConfig && providerConfig.providerId, approvalHealth));
     const sandbox = getCommerceProviderSandbox(request.category, settings);
     const complianceHealth = !isAiModelPricingTask(request) ? evaluateLocalLawCompliance(request, { locationHealth:locationHealth() }) : null;
     if (complianceHealth && complianceHealth.canSearchProvider !== true) {
@@ -1641,6 +1788,9 @@
     }
     if (!isAiModelPricingTask(request) && !isProviderApprovalReady(approvalHealth)) {
       return providerApprovalRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, approvalHealth);
+    }
+    if (!isAiModelPricingTask(request) && !isFixtureValidationProvider(providerConfig, settings) && !isReadOnlyConnectorStubExecutable(connectorStubHealth)) {
+      return readOnlyConnectorStubRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, approvalHealth, connectorStubHealth);
     }
     if (isAiModelPricingTask(request)) {
       const aiConfig = getCommerceProviderConfig("aiModelPricing", settings);
@@ -1661,6 +1811,7 @@
           connectorHealth:aiConnectorHealth,
           onboardingHealth:onboardingFields(getProviderOnboardingStatus("aiModelPricing")),
           approvalHealth:approvalFields(getProviderApprovalStatus("aiModelPricing", aiConfig && aiConfig.providerId)),
+          connectorStubHealth:connectorStubFields(getReadOnlyConnectorStubStatus("aiModelPricing", aiConfig && aiConfig.providerId, getProviderApprovalStatus("aiModelPricing", aiConfig && aiConfig.providerId))),
           sandboxHealth:aiSandbox,
           dryRunHealth:aiSandbox,
           canShowPrice:false,
@@ -1684,6 +1835,7 @@
         connectorHealth,
         onboardingHealth,
         approvalHealth,
+        connectorStubHealth,
         sandboxHealth:sandbox,
         dryRunHealth:sandbox,
         canShowPrice:false,
@@ -1703,6 +1855,7 @@
         connectorHealth,
         onboardingHealth,
         approvalHealth,
+        connectorStubHealth,
         sandboxHealth:sandbox,
         dryRunHealth:sandbox,
         canShowPrice:false,
@@ -1728,6 +1881,7 @@
         connectorHealth,
         onboardingHealth,
         approvalHealth,
+        connectorStubHealth,
         sandboxHealth:Object.assign({}, sandbox, sandboxValidation),
         dryRunHealth:Object.assign({}, sandbox, sandboxValidation),
         canShowPrice:candidates.length > 0,
@@ -1752,6 +1906,7 @@
       connectorHealth,
       onboardingHealth,
       approvalHealth,
+      connectorStubHealth,
       sandboxHealth:sandbox,
       dryRunHealth:sandbox,
       canShowPrice:false,
@@ -1773,6 +1928,7 @@
     getCommerceProviderSandbox,
     getProviderOnboardingStatus,
     getProviderApprovalStatus,
+    getReadOnlyConnectorStubStatus,
     locationHealthForCommerce:locationHealth,
     getLocalLawCompliancePolicy,
     evaluateLocalLawCompliance,

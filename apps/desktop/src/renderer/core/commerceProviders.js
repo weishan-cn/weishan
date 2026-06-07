@@ -52,6 +52,10 @@
     return window.WeishanCommerceProviderApprovalWorkflow || null;
   }
 
+  function connectorStubApi(){
+    return window.WeishanCommerceReadOnlyConnectorStub || null;
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
@@ -97,6 +101,26 @@
       canDisplayPrice:false,
       canRedirect:false,
       reason:"provider_approval_required"
+    };
+  }
+
+  function connectorStubStatus(category, providerId, approvalHealth){
+    const api = connectorStubApi();
+    if (api && api.getReadOnlyConnectorStubStatus) return api.getReadOnlyConnectorStubStatus(category, providerId, approvalHealth);
+    return {
+      stubVersion:"2.0.41",
+      phase:"read_only_connector_stub_framework",
+      stubStatus:"stub_not_ready",
+      connectorMode:"read_only",
+      canBuildStub:false,
+      canExecuteStub:false,
+      canConfigureApiKey:false,
+      canConnectEndpoint:false,
+      canUseNetwork:false,
+      canReturnRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      reason:"provider_approval_required_before_stub"
     };
   }
 
@@ -470,6 +494,7 @@
     const cFields = connectorFields(connector);
     const onboarding = onboardingStatus(next);
     const approval = approvalStatus(next, config.providerId);
+    const stub = connectorStubStatus(next, config.providerId, approval);
     const isProduct = next === "product";
     const productDefaults = isProduct ? productSafetySwitches() : {};
     const candidate = isProduct ? productCandidateReadiness() : null;
@@ -507,6 +532,11 @@
       canEnableNetworkSearch:approval.canEnableNetworkSearch === true,
       canRedirect:approval.canRedirect === true,
       approvalHealth:approval,
+      connectorStubStatus:stub.stubStatus || "stub_not_ready",
+      connectorStubMode:stub.connectorMode || "read_only",
+      canBuildReadOnlyConnectorStub:stub.canBuildStub === true,
+      canExecuteReadOnlyConnectorStub:stub.canExecuteStub === true,
+      connectorStubHealth:stub,
       enabled:false,
       configured:false,
       environment:"renderer",
@@ -550,6 +580,7 @@
       configHealth:configFields(config),
       onboardingHealth:onboarding,
       approvalHealth:approval,
+      connectorStubHealth:stub,
       connectorHealth:providerConnectorFields,
       sandboxHealth:sandboxFields(next, null, config, config, connector),
       productProviderProfile:isProduct ? productProfile() : undefined,
@@ -574,6 +605,8 @@
     const cFields = connectorFields(connector);
     const onboarding = onboardingStatus(next);
     const approval = approvalStatus(next, config.providerId);
+    const stub = connectorStubStatus(next, config.providerId, approval);
+    if (stub.canExecuteStub !== true) return null;
     if (approval.canConnectEndpoint !== true || approval.canEnableNetworkSearch !== true || approval.canDisplayPrice !== true || approval.canRedirect !== true) return null;
     if (config.enabled !== true || config.configured !== true || config.hasApiKey !== true || config.allowNetworkSearch !== true || config.allowReturnPrice !== true) return null;
     if (cFields.connectorEnabled !== true || cFields.connectorConfigured !== true || cFields.connectorNetworkAllowed !== true || cFields.supportsSearch !== true || cFields.supportsPrice !== true) return null;
@@ -636,6 +669,8 @@
       supportsCrossBorderSearch:config.supportsCrossBorderSearch === true,
       configHealth:configFields(config),
       onboardingHealth:onboarding,
+      approvalHealth:approval,
+      connectorStubHealth:stub,
       connectorHealth:cFields,
       sandboxHealth:sandboxFields(next, cfg, config, config, connector)
     };
@@ -657,6 +692,8 @@
       connectorHealth:provider.connectorHealth || connectorFields(provider),
       configHealth:provider.configHealth || configFields(provider),
       onboardingHealth:provider.onboardingHealth || onboardingStatus(next),
+      approvalHealth:provider.approvalHealth || approvalStatus(next, provider.providerId || provider.id),
+      connectorStubHealth:provider.connectorStubHealth || connectorStubStatus(next, provider.providerId || provider.id, provider.approvalHealth || approvalStatus(next, provider.providerId || provider.id)),
       sandboxHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
       dryRunHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
       enabled:provider.enabled === true,

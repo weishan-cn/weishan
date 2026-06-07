@@ -45,6 +45,10 @@
     return window.WeishanCommerceProviderApprovalWorkflow || null;
   }
 
+  function connectorStubApi(){
+    return window.WeishanCommerceReadOnlyConnectorStub || null;
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
@@ -90,6 +94,26 @@
       canDisplayPrice:false,
       canRedirect:false,
       reason:"provider_approval_required"
+    };
+  }
+
+  function connectorStubStatus(category, providerId, approvalHealth){
+    const api = connectorStubApi();
+    if (api && api.getReadOnlyConnectorStubStatus) return api.getReadOnlyConnectorStubStatus(category, providerId, approvalHealth);
+    return {
+      stubVersion:"2.0.41",
+      phase:"read_only_connector_stub_framework",
+      stubStatus:"stub_not_ready",
+      connectorMode:"read_only",
+      canBuildStub:false,
+      canExecuteStub:false,
+      canConfigureApiKey:false,
+      canConnectEndpoint:false,
+      canUseNetwork:false,
+      canReturnRealPrice:false,
+      canReturnMockPrice:false,
+      canRedirect:false,
+      reason:"provider_approval_required_before_stub"
     };
   }
 
@@ -196,9 +220,15 @@
     const label = CATEGORY_LABELS[next] || "采购";
     const providerId = next === "product" ? "product_search_readonly_candidate" : next + "-provider-disabled";
     const approval = approvalStatus(next, providerId);
+    const stub = connectorStubStatus(next, providerId, approval);
     const base = {
       providerId,
       category:next,
+      connectorStubHealth:stub,
+      connectorStubStatus:stub.stubStatus || "stub_not_ready",
+      connectorStubMode:stub.connectorMode || "read_only",
+      canBuildReadOnlyConnectorStub:stub.canBuildStub === true,
+      canExecuteReadOnlyConnectorStub:stub.canExecuteStub === true,
       approvalStatus:approval.approvalStatus || "not_reviewed",
       providerApprovalRequired:true,
       canRequestApproval:approval.canRequestApproval !== false,
@@ -385,6 +415,7 @@
       config.allowNetworkSearch === true &&
       config.allowReturnPrice === true;
     const approval = config.approvalHealth || approvalStatus(config.category, config.providerId);
+    const stub = config.connectorStubHealth || connectorStubStatus(config.category, config.providerId, approval);
     return {
       configStatus:ready ? "ready" : "not_configured",
       providerConfig:config,
@@ -416,6 +447,11 @@
       supportsReadOnlySearch:config.supportsReadOnlySearch === true,
       supportsCrossBorderSearch:config.supportsCrossBorderSearch === true,
       approvalStatus:approval.approvalStatus || "not_reviewed",
+      connectorStubHealth:stub,
+      connectorStubStatus:stub.stubStatus || "stub_not_ready",
+      connectorStubMode:stub.connectorMode || "read_only",
+      canBuildReadOnlyConnectorStub:stub.canBuildStub === true,
+      canExecuteReadOnlyConnectorStub:stub.canExecuteStub === true,
       providerApprovalRequired:true,
       canRequestApproval:approval.canRequestApproval !== false,
       canStartConnectorStubDevelopment:approval.canStartConnectorStubDevelopment === true,
@@ -451,6 +487,7 @@
     defaultProviderConfig,
     getCommerceProviderConfig,
     getCommerceProviderConfigRegistry,
-    getCommerceProviderConfigHealth
+    getCommerceProviderConfigHealth,
+    getReadOnlyConnectorStubStatus:connectorStubStatus
   };
 })();

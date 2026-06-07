@@ -186,6 +186,18 @@ Provider Approval Workflow 至少包括：
 
 无论审批状态如何，weishan 都不得自动付款、自动下单、提交订单或保存证件 / 银行卡。
 
+## 7.3. Read-only Connector Stub 标准
+
+真实 provider 接入前只能先开发 Read-only Connector Stub，也就是只读 connector stub。connector stub 默认不可执行，只用于准备代码结构、接口契约、状态展示和安全 gate。
+
+只读 connector stub 默认必须满足：不得连接真实 endpoint，不得配置 API key，不得启用网络搜索，不得返回真实价格，不得返回 fake/demo/mock price，不得跳转购买 / 预订页面。
+
+`approved_for_stub` 只允许开发 stub 结构，不允许真实 provider 连接。标准短语：approved_for_stub 只允许开发 stub 结构。即使 provider 审批状态达到 `approved_for_stub`，也不得连接真实 endpoint、不得配置真实 API key、不得启用网络搜索、不得显示价格、不得跳转购买或预订页面。
+
+任何真实连接仍必须通过 Local Law Compliance Gate、Provider Onboarding Checklist、Provider Approval Workflow、config / adapter / sandbox / connector gate。只读 connector stub 不得绕过这些 gate。
+
+无论 stub 状态如何，weishan 都不得自动付款、自动下单、提交订单或保存证件 / 银行卡。
+
 ## 8. 结果展示标准
 
 结果最多展示 2-3 条。
