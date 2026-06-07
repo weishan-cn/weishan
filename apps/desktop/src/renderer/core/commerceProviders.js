@@ -60,6 +60,10 @@
     return window.WeishanCommerceEbayBrowseStubProfile || null;
   }
 
+  function secretStorageApi(){
+    return window.WeishanCommerceProviderSecretStoragePlan || null;
+  }
+
   function onboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
@@ -145,6 +149,29 @@
       canReturnMockPrice:false,
       canRedirect:false,
       reason:"provider_stub_profile_only"
+    };
+  }
+
+  function providerSecretStorageStatus(providerId){
+    const api = secretStorageApi();
+    if (api && api.getProviderSecretStorageStatus) return api.getProviderSecretStorageStatus(providerId || "provider-disabled");
+    return {
+      secretPlanVersion:"2.0.44",
+      phase:"provider_secret_storage_plan",
+      providerId:String(providerId || "provider-disabled"),
+      secretStatus:"not_configured",
+      storageMode:"secure_storage_required",
+      canInputApiKey:false,
+      canSaveApiKey:false,
+      canReadApiKey:false,
+      canUseApiKeyForNetwork:false,
+      canConnectEndpoint:false,
+      canUseNetwork:false,
+      canEnableNetworkSearch:false,
+      canDisplayPrice:false,
+      canReturnRealPrice:false,
+      canRedirect:false,
+      reason:"provider_secret_storage_not_approved"
     };
   }
 
@@ -352,6 +379,7 @@
       productProviderReadiness:next.productProviderReadiness || productReadiness(next),
       productProviderCandidateReadiness:next.productProviderCandidateReadiness || productCandidateReadiness(),
       providerStubProfileHealth:next.providerStubProfileHealth || providerStubProfileStatus(next.selectedFirstCandidate || "ebay_browse_api"),
+      providerSecretHealth:next.providerSecretHealth || providerSecretStorageStatus(next.selectedFirstCandidate || next.providerId),
       globalProviderPoolReadiness:next.globalProviderPoolReadiness || poolReadiness(),
       onboardingStatus:next.onboardingStatus || "not_reviewed",
       providerOnboardingRequired:next.providerOnboardingRequired !== false,
@@ -697,6 +725,7 @@
       approvalHealth:approval,
       connectorStubHealth:stub,
       providerStubProfileHealth:next === "product" ? providerStubProfileStatus("ebay_browse_api") : undefined,
+      providerSecretHealth:providerSecretStorageStatus(next === "product" ? "ebay_browse_api" : config.providerId || next + "-provider-disabled"),
       connectorHealth:cFields,
       sandboxHealth:sandboxFields(next, cfg, config, config, connector)
     };
@@ -721,6 +750,7 @@
       approvalHealth:provider.approvalHealth || approvalStatus(next, provider.providerId || provider.id),
       connectorStubHealth:provider.connectorStubHealth || connectorStubStatus(next, provider.providerId || provider.id, provider.approvalHealth || approvalStatus(next, provider.providerId || provider.id)),
       providerStubProfileHealth:provider.providerStubProfileHealth || provider.configHealth && provider.configHealth.providerStubProfileHealth || (next === "product" ? providerStubProfileStatus("ebay_browse_api") : undefined),
+      providerSecretHealth:provider.providerSecretHealth || provider.configHealth && provider.configHealth.providerSecretHealth || providerSecretStorageStatus(next === "product" ? "ebay_browse_api" : provider.providerId || provider.id),
       sandboxHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
       dryRunHealth:provider.sandboxHealth || sandboxFields(next, settings, provider.configHealth, provider, provider.connectorHealth),
       enabled:provider.enabled === true,

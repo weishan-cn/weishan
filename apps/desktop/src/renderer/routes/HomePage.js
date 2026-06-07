@@ -466,6 +466,29 @@
     </section>`;
   }
 
+  function commerceProviderSecretStorageHomePanel(){
+    const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
+    const group = (title, items) => `<section class="commerce-secret-group"><h4>${esc(title)}</h4><ul>${items.map((item) => row(item[0], item[1])).join("")}</ul></section>`;
+    return `<section class="commerce-provider-secret-panel commerce-provider-secret-home-panel" aria-label="Provider 密钥安全方案">
+      <div class="commerce-provider-secret-head">
+        <div>
+          <h3>Provider 密钥安全方案</h3>
+          <p>真实 provider API key 接入前必须完成安全存储审查。当前不会保存或使用任何真实 API key。</p>
+        </div>
+        <strong>密钥状态：未配置</strong>
+      </div>
+      <div class="commerce-provider-secret-grid">
+        ${group("存储状态", [["密钥状态", "未配置"], ["存储方式", "需要安全存储"], ["API key 输入", "未开放"], ["API key 保存", "未开放"], ["API key 读取", "未开放"]])}
+        ${group("使用限制", [["网络使用", "未启用"], ["Endpoint", "不可连接"], ["网络搜索", "未启用"], ["实时价格", "不可用"], ["精确跳转", "未启用"]])}
+        ${group("明文保护", [["明文显示", "禁止"], ["日志记录", "禁止"], ["Git 提交", "禁止"]])}
+      </div>
+      <div class="commerce-provider-secret-note">
+        <p>provider API key 只能在完成安全存储审查、Provider Approval、只读 Connector Stub、sandbox dry run 和 connector gate 后使用。</p>
+        <p>当前不会保存真实 key，不会读取 key，不会用于网络请求。</p>
+      </div>
+    </section>`;
+  }
+
   function commerceProviderStubProfileHomePanel(profileInfo, category){
     const rawCategory = String(category || "");
     if (rawCategory !== "product" && rawCategory !== "ecommerce") return "";
@@ -563,6 +586,7 @@
         ${!blocked && isFlightPlan && dateCondition ? `<p><b>日期：</b>${esc(dateCondition)}</p>` : ""}
         ${blocked ? `<p><b>原因：</b>涉及下单 / 付款 / 敏感资料或询价提交</p>` : ""}
         ${!blocked && localLawPanelRequired ? commerceLocalLawHomePanel(stored) : ""}
+        ${showOnboardingHomePanel ? commerceProviderSecretStorageHomePanel(stored.providerSecretHealth || stored.configHealth && stored.configHealth.providerSecretHealth || {}) : ""}
         ${!blocked && isProductPlan ? commerceProviderStubProfileHomePanel(stored.providerStubProfileHealth || stored.configHealth && stored.configHealth.providerStubProfileHealth || {}, stored.category) : ""}
         ${!blocked && approvalPanelRequired ? commerceReadOnlyConnectorStubHomePanel(stored.connectorStubHealth) : ""}
         ${!blocked && approvalPanelRequired ? commerceProviderApprovalHomePanel(stored.approvalHealth) : ""}

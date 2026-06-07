@@ -1014,6 +1014,175 @@ test.describe.serial("commerce agent workbench", () => {
     expect(result.displayReason).toBe("仅用于候选档案和审查");
   });
 
+  test("provider secret storage plan contract blocks key input save read use and network", async () => {
+    await gotoRoute(page, "commerce");
+    const result = await page.evaluate(async () => {
+      delete window.WeishanCommerceProviderSecretStoragePlan;
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceProviderSecretStoragePlan.js?v=2.0.44&contract=" + Date.now();
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+      const api = window.WeishanCommerceProviderSecretStoragePlan;
+      const status = api.getProviderSecretStorageStatus("ebay_browse_api");
+      return {
+        plan:api.getProviderSecretStoragePlan("ebay_browse_api"),
+        status,
+        canInput:api.canInputProviderApiKey("ebay_browse_api"),
+        canSave:api.canSaveProviderApiKey("ebay_browse_api"),
+        canUse:api.canUseProviderApiKey("ebay_browse_api"),
+        maskedEmpty:api.maskProviderSecret(""),
+        maskedValue:api.maskProviderSecret("placeholder"),
+        reason:api.explainProviderSecretStorageBlockReason("ebay_browse_api"),
+        displayNotConfigured:api.toProviderSecretStorageDisplayStatus("not_configured"),
+        displaySecureRequired:api.toProviderSecretStorageDisplayStatus("secure_storage_required")
+      };
+    });
+    expect(result.plan.secretPlanVersion).toBe("2.0.44");
+    expect(result.plan.phase).toBe("provider_secret_storage_plan");
+    expect(result.plan.defaultStatus).toBe("not_configured");
+    expect(result.plan.appliesTo).toEqual(expect.arrayContaining([
+      "product_marketplace",
+      "official_brand_site",
+      "hotel_ota",
+      "hotel_official_site",
+      "flight_ota",
+      "airline_official_site",
+      "ticketing_platform",
+      "local_service_platform"
+    ]));
+    expect(result.plan.storagePolicy.useSecureStorage).toBe(true);
+    expect(result.plan.storagePolicy.allowPlaintextInRepo).toBe(false);
+    expect(result.plan.storagePolicy.allowPlaintextInUi).toBe(false);
+    expect(result.plan.storagePolicy.allowPlaintextInLogs).toBe(false);
+    expect(result.plan.storagePolicy.allowPlaintextInLocalStorage).toBe(false);
+    expect(result.plan.storagePolicy.allowPlaintextInSessionStorage).toBe(false);
+    expect(result.plan.storagePolicy.allowPlaintextInQueryString).toBe(false);
+    expect(result.plan.storagePolicy.allowPlaintextInErrorMessage).toBe(false);
+    expect(result.plan.gates.canInputApiKey).toBe(false);
+    expect(result.plan.gates.canSaveApiKey).toBe(false);
+    expect(result.plan.gates.canReadApiKey).toBe(false);
+    expect(result.plan.gates.canUseApiKeyForNetwork).toBe(false);
+    expect(result.plan.gates.canConnectEndpoint).toBe(false);
+    expect(result.plan.gates.canEnableNetworkSearch).toBe(false);
+    expect(result.plan.gates.canReturnRealPrice).toBe(false);
+    expect(result.plan.gates.canRedirect).toBe(false);
+    expect(result.plan.requiredBeforeKeyUse.securityStorageReview).toBe(true);
+    expect(result.plan.requiredBeforeKeyUse.providerApprovalWorkflow).toBe(true);
+    expect(result.plan.requiredBeforeKeyUse.readOnlyConnectorStub).toBe(true);
+    expect(result.plan.requiredBeforeKeyUse.sandboxDryRun).toBe(true);
+    expect(result.plan.requiredBeforeKeyUse.connectorGate).toBe(true);
+    expect(result.plan.safety.noRealApiKey).toBe(true);
+    expect(result.plan.safety.noPlaintextSecret).toBe(true);
+    expect(result.plan.safety.noSecretLogging).toBe(true);
+    expect(result.plan.safety.noSecretInUi).toBe(true);
+    expect(result.plan.safety.noSecretInGit).toBe(true);
+    expect(result.plan.safety.noNetworkSearch).toBe(true);
+    expect(result.plan.safety.noRealEndpoint).toBe(true);
+    expect(result.plan.safety.noRealPrice).toBe(true);
+    expect(result.plan.safety.noFakeDemoMockPrice).toBe(true);
+    expect(result.plan.safety.noRedirect).toBe(true);
+    expect(result.plan.safety.noCheckout).toBe(true);
+    expect(result.plan.safety.noPayment).toBe(true);
+    expect(result.plan.safety.noOrderSubmit).toBe(true);
+    expect(result.plan.safety.noIdentityStorage).toBe(true);
+    expect(result.status.secretStatus).toBe("not_configured");
+    expect(result.status.storageMode).toBe("secure_storage_required");
+    expect(result.status.canInputApiKey).toBe(false);
+    expect(result.status.canSaveApiKey).toBe(false);
+    expect(result.status.canReadApiKey).toBe(false);
+    expect(result.status.canUseApiKeyForNetwork).toBe(false);
+    expect(result.status.canConnectEndpoint).toBe(false);
+    expect(result.status.canEnableNetworkSearch).toBe(false);
+    expect(result.status.canReturnRealPrice).toBe(false);
+    expect(result.status.canRedirect).toBe(false);
+    expect(result.status.reason).toBe("provider_secret_storage_not_approved");
+    expect(result.canInput).toBe(false);
+    expect(result.canSave).toBe(false);
+    expect(result.canUse).toBe(false);
+    expect(result.maskedEmpty).toBe("未配置");
+    expect(result.maskedValue).toBe("[redacted]");
+    expect(result.reason).toBe("provider_secret_storage_not_approved");
+    expect(result.displayNotConfigured).toBe("未配置");
+    expect(result.displaySecureRequired).toBe("需要安全存储");
+  });
+
+  test("provider secret storage panel appears without raw fields or secret leaks", async () => {
+    const inputs = ["买华为手机", "订酒店", "订机票", "买演唱会门票"];
+    for (const text of inputs) {
+      await submitHomeCommand(page, runId + "-SECRET-PANEL " + text);
+      const home = page.locator('[data-commerce-home-summary="true"]').first();
+      await expect(home).toContainText("Provider 密钥安全方案");
+      await expect(home).toContainText("真实 provider API key 接入前必须完成安全存储审查。当前不会保存或使用任何真实 API key。");
+      await expect(home).toContainText("密钥状态：未配置");
+      await expect(home).toContainText("存储方式：需要安全存储");
+      await expect(home).toContainText("API key 输入：未开放");
+      await expect(home).toContainText("API key 保存：未开放");
+      await expect(home).toContainText("API key 读取：未开放");
+      await expect(home).toContainText("网络使用：未启用");
+      await expect(home).toContainText("Endpoint：不可连接");
+      await expect(home).toContainText("网络搜索：未启用");
+      await expect(home).toContainText("实时价格：不可用");
+      await expect(home).toContainText("精确跳转：未启用");
+      await expect(home).toContainText("明文显示：禁止");
+      await expect(home).toContainText("日志记录：禁止");
+      await expect(home).toContainText("Git 提交：禁止");
+      await expect(home).toContainText("provider API key 只能在完成安全存储审查、Provider Approval、只读 Connector Stub、sandbox dry run 和 connector gate 后使用。");
+      await expect(home).toContainText("当前不会保存真实 key，不会读取 key，不会用于网络请求。");
+      await expect(home).not.toContainText("provider_secret_storage_not_approved");
+      await expect(home).not.toContainText("secretStatus=not_configured");
+      await expect(home).not.toContainText("canInputApiKey=false");
+      await expect(home).not.toContainText("canSaveApiKey=false");
+      await expect(home).not.toContainText("canReadApiKey=false");
+      await expect(home).not.toContainText("canUseApiKeyForNetwork=false");
+      await expect(home).not.toContainText("allowPlaintextInRepo=false");
+      await expect(home).not.toContainText("allowPlaintextInUi=false");
+      await expect(home).not.toContainText("allowPlaintextInLogs=false");
+      await expect(home).not.toContainText("noRealApiKey=true");
+      await expect(home).not.toContainText("noPlaintextSecret=true");
+      await expect(home).not.toContainText("noSecretLogging=true");
+      await expect(home).not.toContainText("secret-value");
+      await expect(home).not.toContainText("test-secret");
+      await expect(home).not.toContainText("sk-");
+      await expect(home).not.toContainText("Bearer");
+      await expect(home).not.toContainText("client_secret");
+      await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+      await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+      await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+
+      await page.locator("#commerceViewPlanBtn").click();
+      const detail = page.locator(".commerce-detail").first();
+      await expect(detail).toContainText("Provider 密钥安全方案");
+      await expect(detail).toContainText("密钥状态：未配置");
+      await expect(detail).toContainText("API key 输入：未开放");
+      await expect(detail).toContainText("API key 保存：未开放");
+      await expect(detail).toContainText("API key 读取：未开放");
+      await expect(detail).toContainText("网络使用：未启用");
+      await expect(detail).toContainText("明文显示：禁止");
+      await expect(detail).not.toContainText("provider_secret_storage_not_approved");
+      await expect(detail).not.toContainText("secretStatus=not_configured");
+      await expect(detail).not.toContainText("canInputApiKey=false");
+      await expect(detail).not.toContainText("canSaveApiKey=false");
+      await expect(detail).not.toContainText("canReadApiKey=false");
+      await expect(detail).not.toContainText("canUseApiKeyForNetwork=false");
+      await expect(detail).not.toContainText("allowPlaintextInRepo=false");
+      await expect(detail).not.toContainText("allowPlaintextInUi=false");
+      await expect(detail).not.toContainText("allowPlaintextInLogs=false");
+      await expect(detail).not.toContainText("noRealApiKey=true");
+      await expect(detail).not.toContainText("noPlaintextSecret=true");
+      await expect(detail).not.toContainText("noSecretLogging=true");
+      await expect(detail).not.toContainText("secret-value");
+      await expect(detail).not.toContainText("test-secret");
+      await expect(detail).not.toContainText("sk-");
+      await expect(detail).not.toContainText("Bearer");
+      await expect(detail).not.toContainText("client_secret");
+      await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+      await gotoRoute(page, "home");
+    }
+  });
+
   test("provider stub profile panel explains ebay is only a product candidate", async () => {
     await submitHomeCommand(page, runId + "-STUB-PROFILE 买华为手机");
     const home = page.locator('[data-commerce-home-summary="true"]').first();

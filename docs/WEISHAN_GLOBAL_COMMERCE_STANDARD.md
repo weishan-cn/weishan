@@ -210,6 +210,37 @@ Provider Stub Profile 不能绕过 Local Law Compliance Gate、Provider Onboardi
 
 用户 UI 可以用自然语言展示 provider 档案状态，但不得把 `profile_only_not_connected`、内部布尔值或 raw reason 直接暴露给普通用户。未接入前不得显示“已接入 eBay”“正在搜索 eBay”“eBay 当前最低价”“eBay 已可购买”或类似假接通状态。
 
+## 7.5. Provider Secret Storage Plan 标准
+
+Provider Secret Storage Plan 是真实 provider API key 接入前的安全存储方案审查。任何 provider 在未完成安全存储审查前，不得输入真实 API key，不得保存真实 API key，不得读取真实 API key，不得使用真实 API key 发起网络请求。
+
+Provider Secret Storage Plan 默认状态必须是 `not_configured`，默认阻断原因可以是 `provider_secret_storage_not_approved`。该状态只允许显示自然语言安全说明，不允许把 `secretStatus=not_configured`、`canInputApiKey=false`、`canSaveApiKey=false`、`canReadApiKey=false`、`canUseApiKeyForNetwork=false` 等 raw 字段暴露给普通用户。
+
+密钥安全存储方案必须覆盖全部 provider 类别：商品电商平台、品牌官网、商品官网、区域电商平台、酒店 OTA、酒店官网、机票 OTA、航司官网、票务平台、本地服务预约平台。
+
+Provider Secret Storage Plan 默认必须满足：
+
+- 不允许真实 API key
+- 不允许明文密钥
+- 不允许明文密钥进入 Git
+- 不允许明文密钥进入 UI
+- 不允许明文密钥进入日志
+- 不允许明文密钥进入 localStorage
+- 不允许明文密钥进入 sessionStorage
+- 不允许明文密钥进入 query string
+- 不允许明文密钥进入 error message
+- 不允许读取 provider secret
+- 不允许使用 provider secret 发起网络请求
+- 不允许连接真实 endpoint
+- 不允许启用网络搜索
+- 不允许显示真实价格
+- 不允许返回 fake/demo/mock price
+- 不允许跳转购买或预订页面
+
+真实 provider API key 只能在完成安全存储审查、Provider Approval Workflow、Read-only Connector Stub、sandbox dry run 和 connector gate 后使用。任何真实密钥使用还必须通过 Local Law Compliance Gate、Provider Onboarding Checklist、config safety、read_only adapter 和人工批准。
+
+weishan 不得提供真实 provider 密钥输入框，不得保存真实 key，不得读取 key，不得将 key 用于网络请求，直到 Provider Secret Storage Plan 明确通过。测试可以验证占位符被阻断，但不得让 fake/demo/mock price 或明文 secret 进入生产 UI。
+
 ## 8. 结果展示标准
 
 结果最多展示 2-3 条。
