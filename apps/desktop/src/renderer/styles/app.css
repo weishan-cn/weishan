@@ -1703,3 +1703,17 @@
   background:#fef3c7;
   border-color:#f59e0b;
 }
+
+.commerce-local-law-panel {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin:10px 0;
+}
+.commerce-local-law-panel h3 {
+  margin:0;
+  font-size:15px;
+}
+.commerce-local-law-panel p {
+  margin:0;
+}

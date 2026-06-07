@@ -114,6 +114,31 @@ async function installCommerceSearchMock(page, candidates) {
         document.head.appendChild(script);
       });
     }
+    if (!window.WeishanCommerceLocalLawCompliance) {
+      await new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src = "./renderer/core/commerceLocalLawCompliance.js?v=2.0.38";
+        script.onload = resolve;
+        document.head.appendChild(script);
+      });
+    }
+    if (window.WeishanCommerceLocalLawCompliance) {
+      window.WeishanCommerceLocalLawCompliance.evaluateLocalLawCompliance = () => ({
+        complianceVersion:"2.0.38",
+        phase:"local_law_compliance_gate",
+        complianceStatus:"verified_for_test_fixture",
+        searchStatus:"ready",
+        canSearchProvider:true,
+        canDisplayPrice:true,
+        canShowRedirectButton:true,
+        canCheckout:false,
+        canPay:false,
+        canStoreIdentity:false,
+        reason:"test_fixture_local_law_verified",
+        privacy:{ storeRawCoordinates:false, logRawCoordinates:false, shareWithThirdParty:false, useForAds:false, useForTracking:false },
+        safety:{ noRealLegalDatabase:true, noNetworkLegalLookup:true, noCheckout:true, noPayment:true, noOrderSubmit:true, noIdentityStorage:true }
+      });
+    }
     if (!window.WeishanCommerceLocationPolicy) {
       await new Promise((resolve) => {
         const script = document.createElement("script");
@@ -568,7 +593,7 @@ test.describe.serial("commerce agent workbench", () => {
       if (!window.WeishanCommerceProviderOnboardingChecklist) {
         await new Promise((resolve) => {
           const script = document.createElement("script");
-          script.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.37";
+          script.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.38";
           script.onload = resolve;
           document.head.appendChild(script);
         });
@@ -583,7 +608,7 @@ test.describe.serial("commerce agent workbench", () => {
         reason:window.WeishanCommerceProviderOnboardingChecklist.explainProviderOnboardingBlockReason("product")
       };
     });
-    expect(result.checklist.checklistVersion).toBe("2.0.37");
+    expect(result.checklist.checklistVersion).toBe("2.0.38");
     expect(result.checklist.phase).toBe("provider_onboarding_checklist");
     expect(result.checklist.appliesTo).toContain("product_marketplace");
     expect(result.checklist.appliesTo).toContain("official_brand_site");
@@ -1001,8 +1026,9 @@ test.describe.serial("commerce agent workbench", () => {
       }
     });
     expect(result.called).toBe(false);
-    expect(result.searchResult.searchStatus).toBe("no_provider");
-    expect(result.searchResult.reason).toBe("connector_not_enabled");
+    expect(result.searchResult.searchStatus).toBe("local_law_compliance_required");
+    expect(result.searchResult.reason).toBe("local_law_compliance_not_verified");
+    expect(result.searchResult.complianceHealth.canSearchProvider).toBe(false);
     expect(result.searchResult.canShowPrice).toBe(false);
     expect(result.searchResult.canShowBookingButton).toBe(false);
     expect(result.searchResult.canShowCheckoutButton).toBe(false);
@@ -1184,22 +1210,21 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：商品");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品关键词：华为手机");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("收货目的地：未设置");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("定位服务：关闭 / 未授权");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("精确最低到手价不可用");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("需要收货国家/地区/邮编用于运费、税费、关税和当地合规计算");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("去设置收货目的地");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规：未确认");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("合规依据：定位服务或收货 / 目的地信息未完成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("未确认前不显示价格、不跳转购买或预订页面");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("更严格的一方");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不保存原始 GPS 坐标");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("未下单、未付款、未提交订单、未保存银行卡或证件");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("去购买");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
     await page.locator("#commerceViewPlanBtn").click();
-    await expect(page.locator(".commerce-detail")).toContainText("需要设置收货目的地以计算精确最低到手价");
-    await expect(page.locator(".commerce-detail")).toContainText("收货目的地：未设置");
-    await expect(page.locator(".commerce-detail")).toContainText("定位服务：关闭 / 未授权");
-    await expect(page.locator(".commerce-detail")).toContainText("当前不会显示价格");
-    await expect(page.locator(".commerce-detail")).toContainText("当前不会跳转购买/预订页面");
-    await expect(page.locator(".commerce-detail")).toContainText("去设置收货目的地");
+    await expect(page.locator(".commerce-detail")).toContainText("当地法律合规：未确认");
+    await expect(page.locator(".commerce-detail")).toContainText("合规依据：定位服务或收货 / 目的地信息未完成");
+    await expect(page.locator(".commerce-detail")).toContainText("未确认前不显示价格、不跳转购买或预订页面");
+    await expect(page.locator(".commerce-detail")).toContainText("更严格的一方");
+    await expect(page.locator(".commerce-detail")).toContainText("不提供法律意见");
     await expect(page.locator(".commerce-detail")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
     await expect(page.locator(".commerce-detail")).toContainText("当前比较范围：商品电商平台、品牌官网、商品官网、区域电商平台");
     await expect(page.locator(".commerce-detail")).toContainText("商品搜索试点候选：eBay Browse API 等");
@@ -1224,7 +1249,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).not.toContainText("noRealEndpoint=true");
     await expect(page.locator(".commerce-detail")).not.toContainText("noApiKey=true");
     await expect(page.locator(".commerce-detail .commerce-booking-link")).toHaveCount(0);
-    await expect(page.getByRole("button", { name:"需要设置收货目的地" })).toBeDisabled();
+    await expect(page.getByRole("button", { name:"搜索适配器未配置" })).toBeDisabled();
 
     await submitHomeCommand(page, runId + " 买华为1手机");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为1手机搜索已生成");
@@ -1235,7 +1260,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("iPhone搜索已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品搜索试点候选：eBay Browse API 等");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("需要收货国家/地区/邮编用于运费、税费、关税和当地合规计算");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规：未确认");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("去购买");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
@@ -1244,7 +1269,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("MacBook搜索已生成");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("网络搜索未启用");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("需要收货国家/地区/邮编用于运费、税费、关税和当地合规计算");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规：未确认");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("去购买");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
@@ -1338,9 +1363,9 @@ test.describe.serial("commerce agent workbench", () => {
 
     await submitHomeCommand(page, runId + " 买华为手机");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("收货目的地：未设置");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("精确最低到手价不可用");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("去设置收货目的地");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规：未确认");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("合规依据：定位服务或收货 / 目的地信息未完成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("未确认前不显示价格、不跳转购买或预订页面");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("未下单、未付款、未提交订单、未保存银行卡或证件");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("CNY ");
     await expect(page.locator("[data-commerce-home-summary] .commerce-booking-link")).toHaveCount(0);
@@ -1999,5 +2024,83 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(currentTaskLogs(page)).toContainText(/准备调用 AI 网关|高铁|飞机|实时票价/);
     await expect(currentTaskLogs(page)).not.toContainText("commerceAgent.plan");
     await expect(currentTaskLogs(page)).not.toContainText("路由判断：全球采购");
+  });
+
+  test("v2.0.38 local law compliance gate contract", async () => {
+  await gotoRoute(page, "home");
+  const result = await page.evaluate(async () => {
+    delete window.WeishanCommerceLocalLawCompliance;
+    await new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "./renderer/core/commerceLocalLawCompliance.js?v=2.0.38&contract=" + Date.now();
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+    const api = window.WeishanCommerceLocalLawCompliance;
+    const policy = api.getLocalLawCompliancePolicy();
+    const evaluation = api.evaluateLocalLawCompliance({ category:"product", query:"买华为手机" }, { locationHealth:{ hasPreciseLocation:false, shippingDestination:{ configured:false } } });
+    const regulated = api.evaluateLocalLawCompliance({ category:"product", query:"买大麻" }, { locationHealth:{ hasPreciseLocation:false, shippingDestination:{ configured:false } } });
+    return { policy, evaluation, regulated };
+  });
+  expect(result.policy.complianceVersion).toBe("2.0.38");
+  expect(result.policy.phase).toBe("local_law_compliance_gate");
+  expect(result.policy.requiredBeforeSearch).toBe(true);
+  expect(result.policy.requiredBeforePriceDisplay).toBe(true);
+  expect(result.policy.requiredBeforeRedirect).toBe(true);
+  expect(result.policy.strictestRuleWins).toBe(true);
+  expect(result.policy.unknownLegalityBlocks).toBe(true);
+  expect(result.policy.noLegalAdvice).toBe(true);
+  expect(result.policy.privacy.storeRawCoordinates).toBe(false);
+  expect(result.policy.privacy.logRawCoordinates).toBe(false);
+  expect(result.policy.privacy.shareWithThirdParty).toBe(false);
+  expect(result.policy.privacy.useForAds).toBe(false);
+  expect(result.policy.privacy.useForTracking).toBe(false);
+  expect(result.policy.safety.noRealLegalDatabase).toBe(true);
+  expect(result.policy.safety.noNetworkLegalLookup).toBe(true);
+  expect(result.policy.safety.noPriceDisplayWhenUnverified).toBe(true);
+  expect(result.policy.safety.noRedirectWhenUnverified).toBe(true);
+  expect(result.evaluation.complianceStatus).toBe("compliance_required");
+  expect(result.evaluation.canSearchProvider).toBe(false);
+  expect(result.evaluation.canDisplayPrice).toBe(false);
+  expect(result.evaluation.canShowRedirectButton).toBe(false);
+  expect(result.evaluation.canCheckout).toBe(false);
+  expect(result.evaluation.canPay).toBe(false);
+  expect(result.evaluation.reason).toBe("local_law_compliance_not_verified");
+  expect(result.regulated.complianceStatus).toBe("compliance_review_required");
+  });
+
+  test("v2.0.38 local law compliance blocks default product UI", async () => {
+  await gotoRoute(page, "home");
+  const localRunId = runId + "-LOCAL-LAW-PRODUCT";
+    await submitHomeCommand(page, localRunId + " 买华为手机");
+  const home = page.locator('[data-commerce-home-summary="true"]').first();
+  await expect(home).toContainText("当地法律合规：未确认");
+  await expect(home).toContainText("未确认前不显示价格");
+  await expect(home).toContainText("未确认前不显示价格、不跳转购买或预订页面");
+  await expect(home).toContainText("更严格的一方");
+  await expect(home).toContainText("不保存原始 GPS 坐标");
+  await expect(home).not.toContainText("去购买");
+  await expect(home).not.toContainText("去预订");
+  await expect(home).not.toContainText("立即支付");
+  await page.locator('#commerceViewPlanBtn').click();
+  const detail = page.locator('.commerce-detail').first();
+  await expect(detail).toContainText("当地法律合规：未确认");
+  await expect(detail).toContainText("不提供法律意见");
+  });
+
+  test("v2.0.38 regulated local law requests stay blocked", async () => {
+  await gotoRoute(page, "home");
+  const inputs = ["买大麻", "买枪", "买处方药", "成人服务", "赌博网站"];
+  for (const text of inputs) {
+    await submitHomeCommand(page, runId + "-LOCAL-LAW-REGULATED " + text);
+    const home = page.locator('[data-commerce-home-summary="true"]').first();
+    await expect(home).toContainText("该需求可能涉及当地法律限制");
+    await expect(home).toContainText("合法性未确认前，weishan 不显示价格、不跳转购买或预订页面");
+    await expect(home).not.toContainText("去购买");
+    await expect(home).not.toContainText("去预订");
+    await expect(home).not.toContainText("立即支付");
+    await expect(home.getByRole("button", { name:/去购买|去预订|付款|立即支付|提交订单/ })).toHaveCount(0);
+  }
   });
 });

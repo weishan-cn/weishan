@@ -6,7 +6,7 @@
     document.write('<scr' + 'ipt src="./renderer/core/desktopAssistant.js?v=2.0.15"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceAgent && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.15"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.38"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderAdapter && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProviderAdapter.js?v=2.0.32"></scr' + 'ipt>');
@@ -18,7 +18,7 @@
     document.write('<scr' + 'ipt src="./renderer/core/commerceGlobalProviderPool.js?v=2.0.32"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderOnboardingChecklist && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.37"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.38"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProductProviderCandidate && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.32"></scr' + 'ipt>');
@@ -29,17 +29,20 @@
   if (!window.WeishanCommerceLocationPolicy && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceLocationPolicy.js?v=2.0.32"></scr' + 'ipt>');
   }
+  if (!window.WeishanCommerceLocalLawCompliance && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceLocalLawCompliance.js?v=2.0.38"></scr' + 'ipt>');
+  }
   if (!window.WeishanCommerceProviderConfig && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.32"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviderConfig.js?v=2.0.38"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderSandbox && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProviderSandbox.js?v=2.0.32"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviders && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.32"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceProviders.js?v=2.0.38"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceSearch && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.32"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceSearch.js?v=2.0.38"></scr' + 'ipt>');
   }
 
   const QUEUE_KEY = "command.queue.v205";
@@ -274,9 +277,12 @@
       const usesOpenRouter = commercePlan.category === "aiModelPricing";
       const isProductPlan = commercePlan.category === "ecommerce" || commercePlan.category === "product";
       const locationHealth = search.locationHealthForCommerce ? search.locationHealthForCommerce() : null;
-      const destinationRequired = isProductPlan && locationHealth && locationHealth.hasShippingDestination !== true;
+      const complianceRequest = Object.assign({}, request, { query:text, inputSummary:text, text });
+      const complianceHealth = !usesOpenRouter && search.evaluateLocalLawCompliance ? search.evaluateLocalLawCompliance(complianceRequest, { locationHealth }) : null;
+      const complianceRequired = complianceHealth && complianceHealth.canSearchProvider !== true;
+      const destinationRequired = !complianceRequired && isProductPlan && locationHealth && locationHealth.hasShippingDestination !== true;
       commercePlan.missingFields = request.missingFields || commercePlan.missingFields || [];
-      commercePlan.searchStatus = commercePlan.status === "blocked" ? "blocked" : commercePlan.missingFields.length ? "missingFields" : destinationRequired ? "shipping_destination_required" : usesOpenRouter || hasProvider ? "ready" : "no_provider";
+      commercePlan.searchStatus = commercePlan.status === "blocked" ? "blocked" : commercePlan.missingFields.length ? "missingFields" : complianceRequired ? "local_law_compliance_required" : destinationRequired ? "shipping_destination_required" : usesOpenRouter || hasProvider ? "ready" : "no_provider";
       commercePlan.searchProviderName = usesOpenRouter ? "OpenRouter" : hasProvider && search.getCommerceSearchSettings ? search.getCommerceSearchSettings().providerName || "commerceProvider" : "";
       commercePlan.providerHealth = providerHealth && providerHealth.providerHealth || [];
       commercePlan.configHealth = providerHealth && providerHealth.configHealth || {};
@@ -285,10 +291,11 @@
       commercePlan.sandboxHealth = providerHealth && providerHealth.sandboxHealth || {};
       commercePlan.dryRunHealth = providerHealth && (providerHealth.dryRunHealth || providerHealth.sandboxHealth) || {};
       commercePlan.locationHealth = locationHealth || {};
+      commercePlan.complianceHealth = complianceHealth || {};
       commercePlan.landedCostAccuracy = destinationRequired ? "blocked_shipping_destination_required" : "";
-      commercePlan.canShowPrice = !destinationRequired && providerHealth ? providerHealth.canShowPrice === true : false;
-      commercePlan.canShowBookingButton = !destinationRequired && providerHealth ? providerHealth.canShowBookingButton === true : false;
-      commercePlan.canShowCheckoutButton = !destinationRequired && providerHealth ? providerHealth.canShowCheckoutButton === true : false;
+      commercePlan.canShowPrice = !destinationRequired && !complianceRequired && providerHealth ? providerHealth.canShowPrice === true : false;
+      commercePlan.canShowBookingButton = !destinationRequired && !complianceRequired && providerHealth ? providerHealth.canShowBookingButton === true : false;
+      commercePlan.canShowCheckoutButton = !destinationRequired && !complianceRequired && providerHealth ? providerHealth.canShowCheckoutButton === true : false;
     }
     const savedPlan = api.addCommerceTask ? api.addCommerceTask(commercePlan) : (api.saveCommercePlan ? api.saveCommercePlan(commercePlan) : commercePlan);
     const status = savedPlan.status || "planned";
@@ -296,6 +303,10 @@
     const missing = Array.isArray(savedPlan.missingFields) && savedPlan.missingFields.length ? "请补充" + savedPlan.missingFields.join("、") + "。" : "";
     const providerMissing = savedPlan.searchStatus === "no_provider" || savedPlan.searchStatus === "providerMissing";
     const destinationRequired = savedPlan.searchStatus === "shipping_destination_required" || savedPlan.searchStatus === "location_required";
+    const complianceRequired = savedPlan.searchStatus === "local_law_compliance_required";
+    const complianceHealth = savedPlan.complianceHealth || {};
+    const regulatedCompliance = complianceHealth.complianceStatus === "compliance_review_required";
+    const complianceText = regulatedCompliance ? "该需求可能涉及当地法律限制。需要先确认当前位置和收货地 / 目的地。合法性未确认前，weishan 不显示价格、不跳转购买或预订页面。" : "当地法律合规：未确认。合规依据：定位服务或收货 / 目的地信息未完成。合规处理：未确认前不显示价格、不跳转购买或预订页面。规则冲突处理：当前位置与收货地 / 目的地冲突时，按更严格的一方处理。隐私说明：不保存原始 GPS 坐标，不上传定位到第三方，不用于广告、追踪或画像。";
     const fields = savedPlan.normalizedFields || {};
     const routeCondition = fields.originText && fields.destinationText ? fields.originText + " → " + fields.destinationText : "";
     const conditionSummary = [routeCondition, fields.dateText || fields.timing || ""].filter(Boolean).join("，");
@@ -325,8 +336,9 @@
       !blocked && isFlightPlan && (fields.dateText || fields.timing) ? "日期：" + (fields.dateText || fields.timing) : "",
       blocked ? "原因：涉及下单 / 付款。" : "",
       missing,
+      !blocked && complianceRequired ? complianceText : "",
       !blocked && destinationRequired ? "需要设置收货目的地以计算精确最低到手价。收货国家/地区/邮编用于运费、税费、关税和当地合规计算；当前不会显示价格或跳转购买/预订页面。" : "",
-      !blocked && (providerMissing || savedPlan.category === "ecommerce" && destinationRequired) ? providerMissingText : "",
+      !blocked && (providerMissing || complianceRequired || savedPlan.category === "ecommerce" && destinationRequired) ? providerMissingText : "",
       "安全边界：" + (blocked ? "不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表。" : isFlightPlan ? "未下单、未付款、未提交订单、未保存证件。" : savedPlan.category === "ecommerce" ? "未下单、未付款、未提交订单、未保存银行卡或证件。" : "未搜索、未下单、未付款、未提交订单。"),
       "下一步：查看全球采购计划。"
     ].filter(Boolean).join("\n");

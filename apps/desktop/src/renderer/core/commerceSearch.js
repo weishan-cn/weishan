@@ -65,11 +65,67 @@
     return window.WeishanCommerceProviderOnboardingChecklist || null;
   }
 
+  function localLawApi(){
+    return window.WeishanCommerceLocalLawCompliance || null;
+  }
+
+  function getLocalLawCompliancePolicy(){
+    const api = localLawApi();
+    if (api && api.getLocalLawCompliancePolicy) return api.getLocalLawCompliancePolicy();
+    return {
+      complianceVersion:"2.0.38",
+      phase:"local_law_compliance_gate",
+      defaultStatus:"not_verified",
+      requiredBeforeSearch:true,
+      requiredBeforePriceDisplay:true,
+      requiredBeforeRedirect:true,
+      locationPriority:["precise_location_if_available", "shipping_destination", "service_destination", "manual_region_selection"],
+      strictestRuleWins:true,
+      unknownLegalityBlocks:true,
+      noLegalAdvice:true,
+      privacy:{ storeRawCoordinates:false, logRawCoordinates:false, shareWithThirdParty:false, useForAds:false, useForTracking:false },
+      regulatedCategories:["cannabis_or_marijuana", "weapons_or_firearms", "controlled_medication", "adult_services", "gambling", "tobacco_or_nicotine", "alcohol", "hazardous_goods", "restricted_financial_products", "regionally_restricted_goods_or_services"],
+      safety:{ noRealLegalDatabase:true, noNetworkLegalLookup:true, noPriceDisplayWhenUnverified:true, noRedirectWhenUnverified:true, noCheckout:true, noPayment:true, noOrderSubmit:true, noIdentityStorage:true }
+    };
+  }
+
+  function evaluateLocalLawCompliance(request, settings){
+    const api = localLawApi();
+    if (api && api.evaluateLocalLawCompliance) return api.evaluateLocalLawCompliance(request, settings || { locationHealth:locationHealth() });
+    return {
+      complianceVersion:"2.0.38",
+      phase:"local_law_compliance_gate",
+      complianceStatus:"not_verified",
+      searchStatus:"local_law_compliance_required",
+      canSearchProvider:false,
+      canDisplayPrice:false,
+      canShowRedirectButton:false,
+      canCheckout:false,
+      canPay:false,
+      canStoreIdentity:false,
+      canShowPrice:false,
+      canShowBookingButton:false,
+      canShowCheckoutButton:false,
+      strictestRuleWins:true,
+      unknownLegalityBlocks:true,
+      noLegalAdvice:true,
+      reason:"local_law_compliance_not_verified",
+      privacy:{ storeRawCoordinates:false, logRawCoordinates:false, shareWithThirdParty:false, useForAds:false, useForTracking:false },
+      safety:{ noRealLegalDatabase:true, noNetworkLegalLookup:true, noPriceDisplayWhenUnverified:true, noRedirectWhenUnverified:true, noCheckout:true, noPayment:true, noOrderSubmit:true, noIdentityStorage:true }
+    };
+  }
+
+  function explainLocalLawBlockReason(result){
+    const api = localLawApi();
+    if (api && api.explainLocalLawBlockReason) return api.explainLocalLawBlockReason(result);
+    return "当地法律合规未确认，未确认前不显示价格、不跳转购买或预订页面。";
+  }
+
   function getProviderOnboardingStatus(category){
     const api = onboardingApi();
     if (api && api.getProviderOnboardingStatus) return api.getProviderOnboardingStatus(category);
     return {
-      checklistVersion:"2.0.37",
+      checklistVersion:"2.0.38",
       phase:"provider_onboarding_checklist",
       category:resultCategory(category),
       onboardingStatus:"not_reviewed",
@@ -345,7 +401,7 @@
     const next = onboarding || {};
     const safety = next.safety || {};
     return {
-      checklistVersion:next.checklistVersion || "2.0.37",
+      checklistVersion:next.checklistVersion || "2.0.38",
       phase:next.phase || "provider_onboarding_checklist",
       onboardingStatus:next.onboardingStatus || next.status || "not_reviewed",
       status:next.status || next.onboardingStatus || "not_reviewed",
@@ -522,6 +578,31 @@
       dryRunHealth:sandbox,
       productProviderReadiness:readiness,
       globalProviderPoolReadiness:pool,
+      canShowPrice:false,
+      canShowBookingButton:false,
+      canShowCheckoutButton:false,
+      candidates:[]
+    };
+  }
+
+  function localLawComplianceRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, complianceHealth){
+    const onboarding = onboardingFields(getProviderOnboardingStatus(request && request.category));
+    const health = complianceHealth || evaluateLocalLawCompliance(request, { locationHealth:locationHealth() });
+    return {
+      ok:false,
+      code:"COMMERCE_LOCAL_LAW_COMPLIANCE_REQUIRED",
+      message:explainLocalLawBlockReason(health),
+      reason:"local_law_compliance_not_verified",
+      request,
+      searchStatus:"local_law_compliance_required",
+      providerHealth:providerHealth.providerHealth,
+      configHealth:configFields(providerConfig),
+      connectorHealth,
+      onboardingHealth:onboarding,
+      sandboxHealth:sandbox,
+      dryRunHealth:sandbox,
+      locationHealth:locationHealth(),
+      complianceHealth:health,
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -1362,6 +1443,10 @@
     const connectorHealth = connectorFields(providerConnector);
     const onboardingHealth = onboardingFields(getProviderOnboardingStatus(request.category));
     const sandbox = getCommerceProviderSandbox(request.category, settings);
+    const complianceHealth = !isAiModelPricingTask(request) ? evaluateLocalLawCompliance(request, { locationHealth:locationHealth() }) : null;
+    if (complianceHealth && complianceHealth.canSearchProvider !== true) {
+      return localLawComplianceRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, complianceHealth);
+    }
     if (isProductSearchRequest(request) && locationHealth().hasShippingDestination !== true) {
       return shippingDestinationRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox);
     }
@@ -1494,6 +1579,9 @@
     getCommerceProviderSandbox,
     getProviderOnboardingStatus,
     locationHealthForCommerce:locationHealth,
+    getLocalLawCompliancePolicy,
+    evaluateLocalLawCompliance,
+    explainLocalLawBlockReason,
     isProviderConfigReady,
     isProviderConnectorReady,
     getProductProviderReadiness,

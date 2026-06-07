@@ -353,6 +353,17 @@
       ${desktopExecutionQueuePanel()}`;
   }
 
+  function commerceLocalLawHomePanel(stored){
+    const health = stored && stored.complianceHealth || {};
+    const regulated = health.complianceStatus === "compliance_review_required";
+    return `<section class="commerce-local-law-panel" aria-label="当地法律合规 Gate">
+      <h3>当地法律合规：未确认</h3>
+      ${regulated ? `<p><b>该需求可能涉及当地法律限制。</b></p><p>需要先确认当前位置和收货地 / 目的地。</p><p>合法性未确认前，weishan 不显示价格、不跳转购买或预订页面。</p>` : `<p><b>合规依据：</b>定位服务或收货 / 目的地信息未完成。</p><p><b>合规处理：</b>未确认前不显示价格、不跳转购买或预订页面。</p>`}
+      <p><b>规则冲突处理：</b>当前位置与收货地 / 目的地冲突时，按更严格的一方处理。</p>
+      <p><b>隐私说明：</b>不保存原始 GPS 坐标，不上传定位到第三方，不用于广告、追踪或画像。</p>
+    </section>`;
+  }
+
   function commerceOnboardingHomePanel(){
     const group = (title, items) => `<section class="commerce-onboarding-group"><h4>${esc(title)}</h4><ul>${items.map((item) => `<li><span>${esc(item[0])}：</span><b>${esc(item[1])}</b></li>`).join("")}</ul></section>`;
     return `<section class="commerce-onboarding-review-panel commerce-onboarding-home-panel" aria-label="Provider 接入审查面板">
@@ -398,6 +409,7 @@
     ].filter(Boolean).join(" · ") : "";
     const providerMissing = stored.searchStatus === "no_provider" || stored.searchStatus === "providerMissing";
     const destinationRequired = stored.searchStatus === "shipping_destination_required" || stored.searchStatus === "location_required";
+    const complianceRequired = stored.searchStatus === "local_law_compliance_required";
     const providerFailed = stored.searchStatus === "failed";
     const noResults = stored.searchStatus === "noResults" || stored.searchStatus === "no_results";
     const missingFields = Array.isArray(stored.missingFields) ? stored.missingFields : [];
@@ -423,7 +435,7 @@
       serviceBooking:"全球多源 provider 候选池：准备中，尚未接入；" + onboardingText + "；当前比较范围：本地服务预约平台、服务商官网、区域服务平台；当前不会访问任何真实服务平台；当前不会返回预约价格；当前不会跳转预约页面"
     };
     const providerMissingText = poolSummaryByCategory[stored.category] || providerReason || "Provider Connector 未启用；搜索适配器未配置，无法返回真实价格";
-    const showOnboardingHomePanel = !blocked && !isModelPricing && (providerMissing || destinationRequired || ["ecommerce", "product", "hotel", "flight", "ticketing", "ticket", "serviceBooking"].includes(stored.category));
+    const showOnboardingHomePanel = !blocked && !isModelPricing && (providerMissing || destinationRequired || complianceRequired || ["ecommerce", "product", "hotel", "flight", "ticketing", "ticket", "serviceBooking"].includes(stored.category));
     const flightSafetyText = "未下单、未付款、未提交订单、未保存证件";
     const productSafetyText = "未下单、未付款、未提交订单、未保存银行卡或证件";
     const productQuery = normalized.productQuery || normalized.normalizedQuery || "";
@@ -441,14 +453,15 @@
         ${!blocked && isFlightPlan && normalized.destinationText ? `<p><b>目的地：</b>${esc(normalized.destinationText)}</p>` : ""}
         ${!blocked && isFlightPlan && dateCondition ? `<p><b>日期：</b>${esc(dateCondition)}</p>` : ""}
         ${blocked ? `<p><b>原因：</b>涉及下单 / 付款 / 敏感资料或询价提交</p>` : ""}
+        ${!blocked && complianceRequired ? commerceLocalLawHomePanel(stored) : ""}
         ${!blocked && destinationRequired ? `<p><b>收货目的地：</b>未设置</p><p><b>定位服务：</b>关闭 / 未授权</p><p><b>价格状态：</b>精确最低到手价不可用</p><p><b>原因：</b>需要收货国家/地区/邮编用于运费、税费、关税和当地合规计算。</p><p class="commerce-warning">为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。实际价格、库存、税费和关税仍以外部平台和海关结算为准。</p>` : ""}
-        ${!blocked && (providerMissing || isProductPlan && destinationRequired) ? `<p><b>搜索源：</b>${esc(providerMissingText)}</p>` : ""}
+        ${!blocked && (providerMissing || complianceRequired || isProductPlan && destinationRequired) ? `<p><b>搜索源：</b>${esc(providerMissingText)}</p>` : ""}
         ${!blocked && providerFailed ? `<p><b>搜索源：</b>${esc(stored.searchErrorMessage || "搜索源不可用，无法返回真实价格")}</p>` : ""}
         ${!blocked && noResults ? `<p><b>搜索结果：</b>provider 未返回可展示结果，当前不显示价格。</p>` : ""}
         ${!blocked && missingFields.length ? `<p><b>待补充：</b>${esc(missingFields.join("、"))}</p>` : ""}
         ${!blocked && candidates.length ? `<p><b>搜索结果：</b>${isModelPricing ? esc(modelPriceSummary) : genericResultSummary}</p>` : ""}
         ${showOnboardingHomePanel ? commerceOnboardingHomePanel() : ""}
-        <p><b>安全边界：</b>${blocked ? "不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表" : isFlightPlan ? flightSafetyText : isProductPlan && (providerMissing || destinationRequired) ? productSafetyText : candidates.length ? "仅展示候选方案，未下单、未付款、未提交订单" : "未搜索、未下单、未付款、未提交订单"}</p>
+        <p><b>安全边界：</b>${blocked ? "不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表" : isFlightPlan ? flightSafetyText : isProductPlan && (providerMissing || destinationRequired || complianceRequired) ? productSafetyText : candidates.length ? "仅展示候选方案，未下单、未付款、未提交订单" : "未搜索、未下单、未付款、未提交订单"}</p>
       </div>
       <button class="cmd-btn primary commerce-view-plan-button" id="commerceViewPlanBtn" type="button">查看全球采购计划</button>
       ${!blocked && destinationRequired ? `<button class="cmd-btn gray commerce-open-location-settings" id="commerceOpenLocationSettingsBtn" type="button">去设置收货目的地</button>` : ""}

@@ -42,7 +42,7 @@
     }
     if (!window.WeishanCommerceProviderOnboardingChecklist && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderOnboardingChecklist"]')) {
       const onboarding = document.createElement("script");
-      onboarding.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.37";
+      onboarding.src = "./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.38";
       onboarding.dataset.weishanDynamic = "WeishanCommerceProviderOnboardingChecklist";
       onboarding.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(onboarding);
@@ -72,9 +72,17 @@
       document.head.appendChild(location);
       return;
     }
+    if (!window.WeishanCommerceLocalLawCompliance && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceLocalLawCompliance"]')) {
+      const localLaw = document.createElement("script");
+      localLaw.src = "./renderer/core/commerceLocalLawCompliance.js?v=2.0.38";
+      localLaw.dataset.weishanDynamic = "WeishanCommerceLocalLawCompliance";
+      localLaw.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(localLaw);
+      return;
+    }
     if (!window.WeishanCommerceProviderConfig && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderConfig"]')) {
       const config = document.createElement("script");
-      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.32";
+      config.src = "./renderer/core/commerceProviderConfig.js?v=2.0.38";
       config.dataset.weishanDynamic = "WeishanCommerceProviderConfig";
       config.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(config);
@@ -98,7 +106,7 @@
     }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
-    script.src = "./renderer/core/commerceSearch.js?v=2.0.32";
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.38";
     script.dataset.weishanDynamic = "WeishanCommerceSearch";
     script.onload = () => render(host);
     document.head.appendChild(script);
@@ -161,6 +169,7 @@
     if (status === "noResults" || status === "no_results") return "暂无可展示结果";
     if (status === "ready") return "搜索源已配置";
     if (status === "missingFields") return "搜索条件缺失";
+    if (status === "local_law_compliance_required") return "当地法律合规未确认";
     if (status === "shipping_destination_required" || status === "location_required") return "需要设置收货目的地以计算精确最低到手价";
     if (status === "failed") return "搜索失败";
     if (status === "blocked") return "已阻断";
@@ -293,6 +302,18 @@
           <p>真实接通后的状态应为：Provider 接入审查已完成、接口已接入、网络搜索已启用、实时价格可用、精确跳转已启用。该状态只能在真实 provider 审查和接入完成后显示，不能提前模拟。</p>
         </div>
       </section>`;
+  }
+
+  function localLawCompliancePanelHtml(task){
+    const health = task && task.complianceHealth || {};
+    const regulated = health.complianceStatus === "compliance_review_required";
+    return `<div class="commerce-warning commerce-local-law-panel" aria-label="当地法律合规 Gate">
+      <b>当地法律合规：未确认</b>
+      ${regulated ? `<span>该需求可能涉及当地法律限制。</span><span>需要先确认当前位置和收货地 / 目的地。</span><span>合法性未确认前，weishan 不显示价格、不跳转购买或预订页面。</span>` : `<span>合规依据：定位服务或收货 / 目的地信息未完成。</span><span>合规处理：未确认前不显示价格、不跳转购买或预订页面。</span>`}
+      <span>规则冲突处理：当前位置与收货地 / 目的地冲突时，按更严格的一方处理。</span>
+      <span>隐私说明：不保存原始 GPS 坐标，不上传定位到第三方，不用于广告、追踪或画像。</span>
+      <span>weishan 不提供法律意见，也不帮助规避当地法律。</span>
+    </div>`;
   }
 
   function providerPoolNoticeHtml(task, configInfo, onboardingInfo){
@@ -436,8 +457,9 @@
     const isFlight = task && task.category === "flight";
     const isProduct = task && task.category === "ecommerce";
     const locationInfo = searchApi() && searchApi().locationHealthForCommerce ? searchApi().locationHealthForCommerce() : {};
-    const destinationRequired = isProduct && (task && (task.searchStatus === "shipping_destination_required" || task.searchStatus === "location_required") || locationInfo.hasShippingDestination !== true);
-    const disabled = !hasProvider || missingFields.length > 0 || destinationRequired;
+    const complianceRequired = task && task.searchStatus === "local_law_compliance_required";
+    const destinationRequired = !complianceRequired && isProduct && (task && (task.searchStatus === "shipping_destination_required" || task.searchStatus === "location_required") || locationInfo.hasShippingDestination !== true);
+    const disabled = !hasProvider || missingFields.length > 0 || destinationRequired || complianceRequired;
     const isCruise = task && task.category === "cruise";
     const isPrivateJet = task && task.category === "privateJet";
     const normalized = task && task.normalizedFields || {};
@@ -458,6 +480,7 @@
     const buttonLabel = isModelPricing ? "搜索 OpenRouter 模型价格" : missingFields.length ? "搜索真实价格" : hasProvider ? "搜索真实价格" : "搜索适配器未配置";
     return `<div class="commerce-search-panel">
       <p><b>${hasProvider ? "已配置：" : "未配置："}</b>${isModelPricing ? (hasProvider ? "OpenRouter provider 可用于模型价格搜索。" : "OpenRouter provider 不可用。") : hasProvider ? "可以搜索真实候选方案。" : isFlight ? "暂未配置真实机票搜索适配器，无法返回实时价格。" : isProduct ? "暂未配置真实商品搜索适配器，无法返回实时价格。" : "搜索适配器未配置，无法返回真实价格。"}</p>
+      ${complianceRequired ? localLawCompliancePanelHtml(task) : ""}
       ${destinationRequired ? `<div class="commerce-warning commerce-location-required">
         <b>需要设置收货目的地以计算精确最低到手价</b>
         <span>收货目的地：未设置。</span>
@@ -767,7 +790,7 @@
         }));
         const result = await search.searchCommerceCandidates(target);
         if (!result.ok) {
-          const status = result.code === "COMMERCE_MISSING_FIELDS" ? "missingFields" : result.code === "COMMERCE_SHIPPING_DESTINATION_REQUIRED" || result.code === "COMMERCE_LOCATION_REQUIRED" ? "shipping_destination_required" : result.code === "COMMERCE_NO_PROVIDER" || result.code === "COMMERCE_PROVIDER_NOT_CONFIGURED" || result.code === "COMMERCE_PROVIDER_CONFIG_NOT_READY" ? "no_provider" : result.code === "COMMERCE_NO_RESULTS" ? "no_results" : "failed";
+          const status = result.code === "COMMERCE_MISSING_FIELDS" ? "missingFields" : result.code === "COMMERCE_LOCAL_LAW_COMPLIANCE_REQUIRED" ? "local_law_compliance_required" : result.code === "COMMERCE_SHIPPING_DESTINATION_REQUIRED" || result.code === "COMMERCE_LOCATION_REQUIRED" ? "shipping_destination_required" : result.code === "COMMERCE_NO_PROVIDER" || result.code === "COMMERCE_PROVIDER_NOT_CONFIGURED" || result.code === "COMMERCE_PROVIDER_CONFIG_NOT_READY" ? "no_provider" : result.code === "COMMERCE_NO_RESULTS" ? "no_results" : "failed";
           const updated = api.updateCommerceTask(taskId, {
             searchStatus:status,
             missingFields:result.request && result.request.missingFields || target.missingFields || [],
@@ -779,6 +802,7 @@
             sandboxHealth:result.sandboxHealth || target.sandboxHealth || {},
             dryRunHealth:result.dryRunHealth || result.sandboxHealth || target.dryRunHealth || target.sandboxHealth || {},
             locationHealth:result.locationHealth || target.locationHealth || {},
+            complianceHealth:result.complianceHealth || target.complianceHealth || {},
             landedCostAccuracy:result.landedCostAccuracy || target.landedCostAccuracy || "",
             canShowPrice:result.canShowPrice === true,
             canShowBookingButton:result.canShowBookingButton === true,
