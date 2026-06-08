@@ -465,6 +465,14 @@ SubPlan Answer Collector 只把用户回答映射到子计划草稿。答案收�
 
 本轮不做长期持久化，不得保存身份证、护照、银行卡或敏感身份信息，不得保存原始 GPS 坐标。SubPlan Answer Collector 不得自动付款、自动下单或提交订单，也不得绕过 Local Law、Provider Onboarding、Approval、Secret Storage、Sandbox Dry Run、Connector Gate、Readiness 或 Runbook。
 
+### Task History Detail Restore 标准
+
+Task History Detail Restore 只用于恢复和回看任务历史详情。任务历史回看不代表重新执行任务，也不代表任何真实 provider 已接入。任务历史回看不允许访问真实 provider，任务历史回看不允许连接真实 endpoint，任务历史回看不允许使用 API key，任务历史回看不允许发起 provider 网络搜索。
+
+任务历史回看不允许返回真实商品结果，任务历史回看不允许显示真实价格，任务历史回看不允许返回 fake/demo/mock price，任务历史回看不允许跳转购买 / 预订页面。历史详情只能恢复已生成的本地摘要、gate、子计划、问题或答案收集信息，不得重新运行任务，不得共享或放开 provider、endpoint、API key、价格、跳转、checkout、payment、order 或身份信息。
+
+Task History Detail Restore 不得自动付款、自动下单或提交订单，不得保存身份证、护照、银行卡或敏感身份信息，不得保存原始 GPS 坐标。用户 UI 只能显示自然语言历史详情，不得向普通用户暴露 raw/internal task history 字段。
+
 ## 13. 当前版本链条
 
 - v2.0.25：真实价格只读展示 + 最低价精确跳转
@@ -473,6 +481,7 @@ SubPlan Answer Collector 只把用户回答映射到子计划草稿。答案收�
 - v2.0.28：定位权限与最低到手价门控
 - v2.0.29：收货目的地 gate + UI 版本显示修复
 - v2.0.30：全球商品 provider 候选评估
+- v2.0.55：Task History Detail Restore / 任务历史详情恢复
 
 后续版本必须继续保持全球多源、只读搜索、安全门控、外部跳转的方向，不能退化为单一平台工具。
 

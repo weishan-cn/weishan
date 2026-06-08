@@ -2505,6 +2505,86 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
+  test("task history detail restore opens prior task in main area without rerun", async () => {
+    const firstInput = runId + "-HISTORY-RESTORE 买华为手机";
+    const secondInput = runId + "-HISTORY-RESTORE 买演唱会门票";
+    await submitHomeCommand(page, firstInput);
+    await submitHomeCommand(page, secondInput);
+
+    const historyItems = page.locator("#cmdHistory [data-history-id]");
+    await expect(historyItems.filter({ hasText:firstInput }).first()).toBeVisible();
+    await expect(historyItems.filter({ hasText:secondInput }).first()).toBeVisible();
+    const historyCountBefore = await historyItems.count();
+
+    await historyItems.filter({ hasText:firstInput }).first().click();
+    const detail = page.locator('#cmdConsole [data-task-history-detail="true"]').first();
+    await expect(detail).toBeVisible();
+    await expect(detail).toContainText("历史任务详情");
+    await expect(detail).toContainText(firstInput);
+    await expect(detail).toContainText("原始需求");
+    await expect(detail).toContainText("识别结果 / 计划内容");
+    await expect(detail).toContainText("安全边界摘要");
+    await expect(detail).toContainText("当前不会访问真实 provider");
+    await expect(detail).toContainText("当前不会返回价格");
+    await expect(detail).toContainText("当前不会跳转购买或预订页面");
+    await expect(detail).toContainText("历史回看不会重新执行任务");
+    await expect(detail.locator(".commerce-home-card")).toBeVisible();
+    await expect(page.locator("#cmdHistory [data-history-id]").filter({ hasText:firstInput }).first()).toHaveClass(/is-selected/);
+    await expect(page.locator("#cmdHistory")).toContainText("返回最新摘要");
+    await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
+
+    const taskHistoryRawFields = [
+      "taskHistoryDetailVersion",
+      "selectedTaskHistoryId",
+      "historyDetailRestoreMode",
+      "restoreHistoryTask=true",
+      "rerunTask=false",
+      "canAccessProvider=false",
+      "canUseApiKey=false",
+      "canUseNetwork=false",
+      "canReturnRealPrice=false",
+      "canRedirect=false"
+    ];
+    for (const field of taskHistoryRawFields) await expect(detail).not.toContainText(field);
+    await expect(detail).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(detail.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+
+    await page.locator("#taskHistoryLatestBtn").click();
+    await expect(page.locator('#cmdConsole [data-task-history-detail="true"]')).toHaveCount(0);
+    await expect(page.locator("#cmdConsole")).toContainText(secondInput);
+    await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
+  });
+
+  test("task history detail restore preserves complex answer details by selected record", async () => {
+    const demand = runId + "-HISTORY-ANSWER 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。";
+    const answer = runId + "-HISTORY-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。";
+    await submitHomeCommand(page, demand);
+    await submitHomeCommand(page, answer);
+
+    const historyItems = page.locator("#cmdHistory [data-history-id]");
+    const historyCountBefore = await historyItems.count();
+    await expect(historyItems.filter({ hasText:answer }).first()).toBeVisible();
+    await historyItems.filter({ hasText:answer }).first().click();
+
+    const detail = page.locator('#cmdConsole [data-task-history-detail="true"]').first();
+    await expect(detail).toContainText("历史任务详情");
+    await expect(detail).toContainText(answer);
+    await expect(detail).toContainText("子计划答案收集");
+    await expect(detail).toContainText("旅行计划");
+    await expect(detail).toContainText("商品采购计划");
+    for (const text of ["出发地：成都", "出行日期：7月12日", "入住日期：7月12日", "离店日期：7月16日", "儿童年龄：8岁", "品牌偏好：都可以", "性能要求：32G内存 / 1T硬盘", "收货地：成都", "是否接受二手：不接受", "补齐度", "仍缺字段"]) await expect(detail).toContainText(text);
+    await expect(detail).toContainText("是否访问真实平台：否");
+    await expect(detail).toContainText("是否返回价格：否");
+    await expect(detail).toContainText("是否跳转购买：否");
+    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(detail.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+    await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
+
+    await page.locator("#historyBackBtn").click();
+    await expect(page.locator('#cmdConsole [data-task-history-detail="true"]')).toHaveCount(0);
+  });
+
   test("complex intent split panel separates travel product ticket and service without raw fields", async () => {
     const cases = [
       {

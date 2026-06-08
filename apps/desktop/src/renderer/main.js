@@ -36,7 +36,7 @@
     return loadScriptOnce("WeishanCommerceAgent", "./renderer/core/commerceAgent.js?v=2.0.15");
   }
   function loadCommerceAgentPage(){
-    return loadScriptOnce("CommerceAgentPage", "./renderer/routes/CommerceAgentPage.js?v=2.0.54");
+    return loadScriptOnce("CommerceAgentPage", "./renderer/routes/CommerceAgentPage.js?v=2.0.55");
   }
   function installCommerceRoute(){
     if (!window.WeishanRouter || window.WeishanRouter.__commerceRouteInstalled) return;

@@ -1,5 +1,6 @@
 (function(){
   let selectedHistoryId = "";
+  let selectedHistoryText = "";
   let stagedAttachments = [];
   let expandedDesktopTasks = {};
 
@@ -696,7 +697,9 @@
   }
 
   function taskKey(task, idx){
-    return String((task && (task.id || task.createdAt || task.finishedAt || task.updatedAt)) || idx || "");
+    const stable = task && (task.id || task.createdAt || task.finishedAt || task.updatedAt) || "";
+    const text = task && (task.text || task.inputSummary || task.outputSummary) || "";
+    return [stable, text, task && task.status || "", String(idx)].filter(Boolean).join("::");
   }
 
   function taskTime(task){
@@ -733,9 +736,97 @@
     return out.slice(0, 8);
   }
 
+  function historyItems(snapshot){
+    return recentDone(snapshot && snapshot.queue || [], snapshot && snapshot.history || []);
+  }
+
+  function selectedHistoryTask(snapshot){
+    if (!selectedHistoryId && !selectedHistoryText) return null;
+    const items = historyItems(snapshot);
+    return items.find((task, idx) => taskKey(task, idx) === selectedHistoryId)
+      || items.find((task) => String(task && task.text || "") === selectedHistoryText)
+      || null;
+  }
+
+  function taskResultTypeLabel(task, stored){
+    const meta = task && task.meta || {};
+    if (isCommerceTask(task)) return "全球采购 / " + commerceTypeLabel(meta.commerceCategory || stored && stored.category);
+    if (meta.dispatchModule) return meta.dispatchModule;
+    return task && task.module || "本地任务";
+  }
+
+  function taskHistorySafetySummary(task){
+    if (isCommerceTask(task)) {
+      return "未搜索、未下单、未付款、未提交订单、未保存证件 / 银行卡。当前不会访问真实 provider，当前不会返回价格，当前不会跳转购买或预订页面。";
+    }
+    return "任务历史回看只用于查看已生成结果，不会重新执行任务，不会访问真实 provider，不会连接 endpoint，不会读取 API key，不会发起网络请求。";
+  }
+
+  function taskHistoryPlanSummary(task, stored){
+    if (isCommerceTask(task)) {
+      return commerceHistorySummary(task);
+    }
+    const answer = summary(displayAnswer(task), 260);
+    return answer || "暂无结构化计划；显示当前任务摘要。";
+  }
+
+  function taskHistoryLogDetail(task){
+    const lines = (task && task.logs || [])
+      .map((log) => displayLogText(log))
+      .filter(Boolean);
+    const answer = displayAnswer(task);
+    return answer || lines.join("\n") || t("homeNoDisplayableAi");
+  }
+
+  function taskHistoryDetailView(task){
+    if (!task) return "";
+    const stored = storedCommerceTask(task);
+    const status = taskTitle(task);
+    const type = taskResultTypeLabel(task, stored);
+    const time = taskTime(task);
+    const safety = taskHistorySafetySummary(task);
+    const detail = taskHistoryLogDetail(task);
+    const commerceDetail = isCommerceTask(task) ? commercePlanActions(task) : "";
+    return `<div class="cmd-history-main-detail" data-task-history-detail="true">
+      <div class="cmd-history-main-head">
+        <div>
+          <span>正在查看历史任务</span>
+          <h3>历史任务详情</h3>
+        </div>
+        <button class="cmd-btn gray" id="taskHistoryLatestBtn" type="button">返回最新摘要</button>
+      </div>
+      <div class="cmd-history-main-grid">
+        <div><span>任务名称</span><b>${esc(task.text || "历史任务")}</b></div>
+        <div><span>执行时间</span><b>${esc(time)}</b></div>
+        <div><span>状态</span><b>${esc(status)}</b></div>
+        <div><span>类型 / 类别</span><b>${esc(type)}</b></div>
+      </div>
+      <section class="cmd-history-main-section">
+        <h4>原始需求</h4>
+        <p>${esc(task.text || "暂无原始需求")}</p>
+      </section>
+      <section class="cmd-history-main-section">
+        <h4>识别结果 / 计划内容</h4>
+        <p>${esc(taskHistoryPlanSummary(task, stored))}</p>
+      </section>
+      <section class="cmd-history-main-section is-safety">
+        <h4>安全边界摘要</h4>
+        <p>${esc(safety)}</p>
+      </section>
+      <section class="cmd-history-main-section">
+        <h4>下一步</h4>
+        <p>如需继续，请返回最新摘要或重新发起下一步指令；历史回看不会重新执行任务。</p>
+      </section>
+      ${commerceDetail ? `<div class="cmd-history-commerce-detail">${commerceDetail}</div>` : `<pre class="cmd-history-main-full">${esc(detail)}</pre>`}
+    </div>`;
+  }
+
   function mainLogs(snapshot){
     const tasks = snapshot.queue || [];
     const running = tasks.find((x) => x.status === "running");
+    const selected = selectedHistoryTask(snapshot);
+    if (selected) return taskHistoryDetailView(selected);
+
     const latest = running || tasks.slice().reverse().find((x) => x.status === "done" || x.status === "failed") || (snapshot.history || [])[0];
 
     if (!latest) {
@@ -1267,37 +1358,27 @@
   }
 
   function historyPanel(snapshot){
-    const items = recentDone(snapshot.queue, snapshot.history);
+    const items = historyItems(snapshot);
     if (!items.length) return `<div class="cmd-mini-empty">${t("homeEmptyHistory")}</div>`;
-    const selectedIndex = items.findIndex((task, idx) => taskKey(task, idx) === selectedHistoryId);
-    if (selectedIndex >= 0) {
-      const task = items[selectedIndex];
-      const body = displayAnswer(task) || t("homeNoDisplayableAi");
-      return `
-        <div class="cmd-history-detail" id="cmdHistoryDetail">
-          <div class="cmd-history-detail-head">
-            <button class="cmd-history-back" id="historyBackBtn" type="button">‹ ${t("historyBack")}</button>
-            <span class="cmd-pill ${statusCls(task)}">${esc(taskTitle(task))}</span>
-          </div>
-          <h4>${esc(task.text || t("historyDetail"))}</h4>
-          <div class="cmd-history-meta">
-            <span>${esc(taskTime(task))}</span>
-            <span>${esc(taskTitle(task))}</span>
-          </div>
-          <p class="cmd-history-tip">${t("historyDoubleClickBack")}</p>
-          <pre class="cmd-history-full">${esc(body)}</pre>
-        </div>`;
-    }
-    return items.map((task, idx) => `
-      <button class="cmd-history-item" data-history-id="${esc(taskKey(task, idx))}" type="button" title="${t("historyOpenDetail")}">
+    const selectedIndex = items.findIndex((task, idx) => taskKey(task, idx) === selectedHistoryId || String(task && task.text || "") === selectedHistoryText);
+    const restoreHeader = selectedIndex >= 0 ? `<div class="cmd-history-restore-head">
+      <span>正在查看历史任务详情</span>
+      <button class="cmd-history-back" id="historyBackBtn" type="button">返回最新摘要</button>
+    </div>` : "";
+    const list = items.map((task, idx) => {
+      const key = taskKey(task, idx);
+      const textKey = String(task && task.text || "");
+      const selected = key === selectedHistoryId || textKey === selectedHistoryText;
+      return `<button class="cmd-history-item ${selected ? "is-selected" : ""}" data-history-id="${esc(key)}" data-history-text="${esc(textKey)}" type="button" title="${t("historyOpenDetail")}" aria-pressed="${selected ? "true" : "false"}">
         <div>
           <b>${esc(task.text)}</b>
           <span class="cmd-history-meta">${esc(taskTime(task))} · ${esc(taskTitle(task))}</span>
           <p>${esc(isCommerceTask(task) ? commerceHistorySummary(task) : summary(displayAnswer(task), 190))}</p>
         </div>
-        <small>${esc(t("historyOpenDetail"))}</small>
-      </button>
-    `).join("");
+        <small>${selected ? "查看中" : esc(t("historyOpenDetail"))}</small>
+      </button>`;
+    }).join("");
+    return restoreHeader + list;
   }
 
   function modulePanel(){
@@ -1385,6 +1466,29 @@
   function bind(host){
     const input = host.querySelector("#commandInput");
     const runBtn = host.querySelector("#runBtn");
+
+    if (!window.__WEISHAN_TASK_HISTORY_RESTORE_BOUND__) {
+      window.__WEISHAN_TASK_HISTORY_RESTORE_BOUND__ = true;
+      document.addEventListener("click", function(ev){
+        const currentHost = document.querySelector("#pageHost") || host;
+        const target = ev.target && ev.target.closest ? ev.target : null;
+        const historyBtn = target && target.closest("[data-history-id]");
+        if (historyBtn && currentHost && currentHost.contains(historyBtn)) {
+          ev.preventDefault();
+          selectedHistoryId = historyBtn.getAttribute("data-history-id") || "";
+          selectedHistoryText = historyBtn.getAttribute("data-history-text") || "";
+          render(currentHost);
+          return;
+        }
+        const latestBtn = target && target.closest ? target.closest("#historyBackBtn, #taskHistoryLatestBtn") : null;
+        if (latestBtn && currentHost && currentHost.contains(latestBtn)) {
+          ev.preventDefault();
+          selectedHistoryId = "";
+          selectedHistoryText = "";
+          render(currentHost);
+        }
+      }, true);
+    }
 
     function submit(){
       let text = input.value.trim();
@@ -1739,25 +1843,6 @@
     const recordBtn = host.querySelector("#recordBtn");
     recordBtn.addEventListener("click", function(){
       alert(t("recordReserved"));
-    });
-
-    Array.from(host.querySelectorAll("[data-history-id]")).forEach((btn) => {
-      btn.addEventListener("click", function(){
-        selectedHistoryId = btn.getAttribute("data-history-id") || "";
-        render(host);
-      });
-    });
-
-    const historyBackBtn = host.querySelector("#historyBackBtn");
-    if (historyBackBtn) historyBackBtn.addEventListener("click", function(){
-      selectedHistoryId = "";
-      render(host);
-    });
-
-    const historyDetail = host.querySelector("#cmdHistoryDetail");
-    if (historyDetail) historyDetail.addEventListener("dblclick", function(){
-      selectedHistoryId = "";
-      render(host);
     });
 
     const commerceViewPlanBtn = host.querySelector("#commerceViewPlanBtn");
