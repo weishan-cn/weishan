@@ -2722,6 +2722,133 @@
   }
 }
 
+.commerce-subplan-gate-panel{
+  display:grid;
+  gap:12px;
+  padding:14px;
+  margin:12px 0;
+  border:1px solid #38bdf8;
+  border-radius:12px;
+  background:#f0f9ff;
+  color:#0f172a;
+  box-shadow:0 10px 24px rgba(14,165,233,.08);
+}
+.commerce-subplan-gate-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid #bae6fd;
+}
+.commerce-subplan-gate-head h3{
+  margin:0 0 4px;
+  color:#0369a1;
+  font-size:17px;
+  line-height:1.25;
+}
+.commerce-subplan-gate-head p{
+  margin:0;
+  color:#075985;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-subplan-gate-head strong{
+  flex:0 0 auto;
+  max-width:240px;
+  border:1px solid #38bdf8;
+  border-radius:10px;
+  background:#e0f2fe;
+  color:#075985;
+  padding:8px 10px;
+  font-size:13px;
+  line-height:1.4;
+}
+.commerce-subplan-gate-status ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  grid-template-columns:repeat(5, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-subplan-gate-status li,
+.commerce-subplan-gate-card li{
+  display:grid;
+  gap:3px;
+  font-size:12px;
+  line-height:1.45;
+}
+.commerce-subplan-gate-status li{
+  border:1px solid #bae6fd;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+}
+.commerce-subplan-gate-status span,
+.commerce-subplan-gate-card span{
+  color:#075985;
+  font-weight:900;
+}
+.commerce-subplan-gate-status b,
+.commerce-subplan-gate-card b{
+  color:#0f172a;
+  font-size:12px;
+  font-weight:900;
+}
+.commerce-subplan-gate-cards{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-subplan-gate-card{
+  border:1px solid #bae6fd;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+  display:grid;
+  gap:8px;
+}
+.commerce-subplan-gate-card h4{
+  margin:0;
+  color:#0369a1;
+  font-size:14px;
+  line-height:1.25;
+}
+.commerce-subplan-gate-card ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  gap:7px;
+}
+.commerce-subplan-gate-note{
+  padding:10px;
+  border:1px solid #38bdf8;
+  border-radius:10px;
+  background:#e0f2fe;
+  color:#075985;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-subplan-gate-note p{
+  margin:0;
+}
+@media (max-width: 980px){
+  .commerce-subplan-gate-head{
+    display:grid;
+  }
+  .commerce-subplan-gate-head strong{
+    max-width:none;
+  }
+  .commerce-subplan-gate-status ul,
+  .commerce-subplan-gate-cards{
+    grid-template-columns:1fr;
+  }
+}
+
 .commerce-local-law-panel{
   margin:12px 0;
 }

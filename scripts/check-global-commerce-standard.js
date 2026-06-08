@@ -177,6 +177,16 @@ const REQUIRED_PHRASES = [
   "拆分不允许返回真实商品结果",
   "拆分不允许显示真实价格",
   "拆分不允许返回 fake/demo/mock price",
+  "SubPlan Gate Matrix",
+  "只整理子计划、缺失信息和下一步动作",
+  "矩阵不代表任何真实 provider 已接入",
+  "矩阵不允许访问真实 provider",
+  "矩阵不允许连接真实 endpoint",
+  "矩阵不允许使用 API key",
+  "矩阵不允许发起 provider 网络搜索",
+  "矩阵不允许返回真实商品结果",
+  "矩阵不允许显示真实价格",
+  "矩阵不允许返回 fake/demo/mock price",
   "每个子计划必须独立走",
   "每个版本只做一个完整功能模块"
 ];

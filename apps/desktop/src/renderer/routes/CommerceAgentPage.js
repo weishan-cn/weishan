@@ -138,7 +138,7 @@
     }
     if (!window.WeishanCommerceLocalIntentRouter && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceLocalIntentRouter"]')) {
       const localIntent = document.createElement("script");
-      localIntent.src = "./renderer/core/commerceLocalIntentRouter.js?v=2.0.51";
+      localIntent.src = "./renderer/core/commerceLocalIntentRouter.js?v=2.0.52";
       localIntent.dataset.weishanDynamic = "WeishanCommerceLocalIntentRouter";
       localIntent.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(localIntent);
@@ -146,10 +146,18 @@
     }
     if (!window.WeishanCommerceComplexIntentSplitPlanner && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceComplexIntentSplitPlanner"]')) {
       const splitPlanner = document.createElement("script");
-      splitPlanner.src = "./renderer/core/commerceComplexIntentSplitPlanner.js?v=2.0.51";
+      splitPlanner.src = "./renderer/core/commerceComplexIntentSplitPlanner.js?v=2.0.52";
       splitPlanner.dataset.weishanDynamic = "WeishanCommerceComplexIntentSplitPlanner";
       splitPlanner.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(splitPlanner);
+      return;
+    }
+    if (!window.WeishanCommerceSubPlanGateMatrix && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceSubPlanGateMatrix"]')) {
+      const gateMatrix = document.createElement("script");
+      gateMatrix.src = "./renderer/core/commerceSubPlanGateMatrix.js?v=2.0.52";
+      gateMatrix.dataset.weishanDynamic = "WeishanCommerceSubPlanGateMatrix";
+      gateMatrix.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(gateMatrix);
       return;
     }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
@@ -419,6 +427,89 @@
         ${(display.subPlans || []).map(subPlanCard).join("")}
       </div>
       <div class="commerce-complex-split-note">
+        <p>${esc(display.note)}</p>
+      </div>
+    </section>`;
+  }
+
+  function commerceSubPlanGateMatrixForTask(task, splitResult){
+    const existing = task && task.commerceSubPlanGateMatrix || null;
+    if (existing && Array.isArray(existing.subPlanMatrices)) return existing;
+    const matrix = window.WeishanCommerceSubPlanGateMatrix || null;
+    if (matrix && matrix.buildSubPlanGateMatrix && splitResult) return matrix.buildSubPlanGateMatrix(splitResult, task && task.providerHealth || null);
+    return null;
+  }
+
+  function commerceSubPlanGateMatrixDisplay(matrix){
+    const api = window.WeishanCommerceSubPlanGateMatrix || null;
+    if (api && api.toSubPlanGateMatrixDisplayStatus) return api.toSubPlanGateMatrixDisplayStatus(matrix || {});
+    const subPlans = Array.isArray(matrix && matrix.subPlanMatrices) ? matrix.subPlanMatrices : [];
+    return {
+      title:"子计划闸门矩阵",
+      subtitle:"每个子计划独立显示 gate、缺失信息和下一步动作。当前不会访问任何真实 provider。",
+      overallStatusLabel:"已阻断",
+      subPlanCountLabel:String(subPlans.length || 0),
+      providerAccessLabel:"否",
+      priceLabel:"否",
+      redirectLabel:"否",
+      subPlans:subPlans.map((plan) => ({
+        title:plan.title || "子计划",
+        statusLabel:plan.statusLabel || "已阻断",
+        categoryLabel:plan.categoryLabel || "全球采购",
+        recognizedFieldsLabel:Array.isArray(plan.recognizedFields) && plan.recognizedFields.length ? plan.recognizedFields.join(" / ") : "待补充",
+        missingFieldsLabel:Array.isArray(plan.missingFields) && plan.missingFields.length ? plan.missingFields.join("、") : "待确认",
+        nextActionsLabel:Array.isArray(plan.nextActions) && plan.nextActions.length ? plan.nextActions.join("、") : "等待 provider 接入审批完成",
+        gateStatusLabel:Array.isArray(plan.gateRows) ? plan.gateRows.map((row) => row.label).filter(Boolean).join("、") : "",
+        providerAccessLabel:"否",
+        priceLabel:"否",
+        redirectLabel:"否"
+      })),
+      note:"该矩阵只用于整理子计划、缺失信息和下一步动作，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。"
+    };
+  }
+
+  function commerceSubPlanGateMatrixPanelHtml(task){
+    const splitResult = commerceComplexIntentSplitForTask(task);
+    const matrix = commerceSubPlanGateMatrixForTask(task, splitResult);
+    if (!matrix) return "";
+    const display = commerceSubPlanGateMatrixDisplay(matrix);
+    const row = (label, value) => value ? `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>` : "";
+    const subPlanCard = (plan, index) => `<article class="commerce-subplan-gate-card">
+      <h4>子计划 ${index + 1}：${esc(plan.title)}</h4>
+      <ul>
+        ${row("子计划", plan.title)}
+        ${row("状态", plan.statusLabel)}
+        ${row("类别", plan.categoryLabel)}
+        ${row("已识别信息", plan.recognizedFieldsLabel)}
+        ${row("缺失信息", plan.missingFieldsLabel)}
+        ${row("下一步", plan.nextActionsLabel)}
+        ${row("Gate 状态", plan.gateStatusLabel)}
+        ${row("是否访问真实平台", plan.providerAccessLabel)}
+        ${row("是否返回价格", plan.priceLabel)}
+        ${row("是否跳转购买", plan.redirectLabel)}
+      </ul>
+    </article>`;
+    return `<section class="commerce-subplan-gate-panel" aria-label="子计划闸门矩阵">
+      <div class="commerce-subplan-gate-head">
+        <div>
+          <h3>${esc(display.title)}</h3>
+          <p>${esc(display.subtitle)}</p>
+        </div>
+        <strong>总体状态：${esc(display.overallStatusLabel)}</strong>
+      </div>
+      <div class="commerce-subplan-gate-status">
+        <ul>
+          ${row("总体状态", display.overallStatusLabel)}
+          ${row("子计划数量", display.subPlanCountLabel)}
+          ${row("是否访问真实平台", display.providerAccessLabel)}
+          ${row("是否返回价格", display.priceLabel)}
+          ${row("是否跳转购买", display.redirectLabel)}
+        </ul>
+      </div>
+      <div class="commerce-subplan-gate-cards">
+        ${(display.subPlans || []).map(subPlanCard).join("")}
+      </div>
+      <div class="commerce-subplan-gate-note">
         <p>${esc(display.note)}</p>
       </div>
     </section>`;
@@ -897,6 +988,7 @@
         <span class="commerce-status ${esc(task.status)}">${esc(taskStatusLabel(task.status))}</span>
       </div>
       ${commerceComplexIntentSplitPanelHtml(task)}
+      ${commerceSubPlanGateMatrixPanelHtml(task)}
       <div class="commerce-detail-grid">
         ${section("需求理解", `<dl class="commerce-facts">
           <div><dt>用户需求</dt><dd>${esc(detail.demandUnderstanding || task.inputSummary)}</dd></div>

@@ -151,6 +151,9 @@
   function commerceComplexIntentSplitPlannerApi(){
     return window.WeishanCommerceComplexIntentSplitPlanner || null;
   }
+  function commerceSubPlanGateMatrixApi(){
+    return window.WeishanCommerceSubPlanGateMatrix || null;
+  }
 
   function applyComplexCommerceLocalIntent(commercePlan, route){
     if (!commercePlan || !route || route.aiFallbackRequired !== true) return commercePlan;
@@ -181,6 +184,15 @@
     const planner = commerceComplexIntentSplitPlannerApi();
     if (planner && planner.splitComplexCommerceIntent) {
       commercePlan.commerceComplexIntentSplit = planner.splitComplexCommerceIntent(input, route || commercePlan.commerceLocalIntentRoute || null);
+    }
+    return commercePlan;
+  }
+
+  function attachSubPlanGateMatrix(commercePlan){
+    if (!commercePlan || !commercePlan.commerceComplexIntentSplit) return commercePlan;
+    const matrix = commerceSubPlanGateMatrixApi();
+    if (matrix && matrix.buildSubPlanGateMatrix) {
+      commercePlan.commerceSubPlanGateMatrix = matrix.buildSubPlanGateMatrix(commercePlan.commerceComplexIntentSplit, commercePlan.providerHealth || null);
     }
     return commercePlan;
   }
@@ -371,6 +383,7 @@
       if (commercePlan && commerceLocalIntentRoute) commercePlan.commerceLocalIntentRoute = commerceLocalIntentRoute;
       applyComplexCommerceLocalIntent(commercePlan, commerceLocalIntentRoute);
       attachComplexCommerceSplit(commercePlan, cleanInput, commerceLocalIntentRoute);
+      attachSubPlanGateMatrix(commercePlan);
       plan.executionMode = "commerce_agent_plan_only";
       plan.realExecution = false;
       plan.requiresUserConfirmation = true;

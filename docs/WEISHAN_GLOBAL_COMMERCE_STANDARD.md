@@ -437,6 +437,16 @@ Complex Intent Split Planner 只负责拆分复合需求，把旅行、商品、
 
 复杂输入可以被拆成旅行计划、商品采购计划、门票计划、本地服务计划、酒店计划或机票计划；简单单一需求应保持单计划。拆分阶段只生成结构化计划，不自动付款、不自动下单、不提交订单、不保存身份证 / 护照 / 银行卡，也不保存原始 GPS 坐标。
 
+### SubPlan Gate Matrix 标准
+
+SubPlan Gate Matrix 只整理子计划、缺失信息和下一步动作。矩阵用于帮助用户理解每个子计划当前被哪些 gate 阻断、缺哪些信息、下一步应补什么。
+
+矩阵不代表任何真实 provider 已接入。矩阵不允许访问真实 provider，矩阵不允许连接真实 endpoint，矩阵不允许使用 API key，矩阵不允许发起 provider 网络搜索，矩阵不允许返回真实商品结果，矩阵不允许显示真实价格，矩阵不允许返回 fake/demo/mock price，矩阵不允许跳转购买 / 预订页面。
+
+每个子计划必须独立走 Local Law、Onboarding、Approval、Secret Storage、Sandbox Dry Run、Connector Gate、Readiness、Runbook。矩阵不得让不同子计划共享 provider、endpoint、API key、价格、跳转、checkout、payment、order 或身份信息。
+
+SubPlan Gate Matrix 不得自动付款、自动下单、提交订单或保存证件 / 银行卡，也不得保存原始 GPS 坐标。矩阵展示只能使用自然语言，不得向普通用户暴露 raw/internal gate 字段。
+
 ## 13. 当前版本链条
 
 - v2.0.25：真实价格只读展示 + 最低价精确跳转

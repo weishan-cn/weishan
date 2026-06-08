@@ -2135,6 +2135,154 @@ test.describe.serial("commerce agent workbench", () => {
     expect(result.display.subPlanCountLabel).toBe("2");
   });
 
+  test("subplan gate matrix contract creates blocked matrix per subplan only", async () => {
+    await gotoRoute(page, "home");
+    const result = await page.evaluate(async () => {
+      delete window.WeishanCommerceLocalIntentRouter;
+      delete window.WeishanCommerceComplexIntentSplitPlanner;
+      delete window.WeishanCommerceSubPlanGateMatrix;
+      async function load(src) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src + "?contract=" + Date.now();
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+      await load("./renderer/core/commerceLocalIntentRouter.js?v=2.0.52");
+      await load("./renderer/core/commerceComplexIntentSplitPlanner.js?v=2.0.52");
+      await load("./renderer/core/commerceSubPlanGateMatrix.js?v=2.0.52");
+      const input = "下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。";
+      const router = window.WeishanCommerceLocalIntentRouter;
+      const planner = window.WeishanCommerceComplexIntentSplitPlanner;
+      const matrixApi = window.WeishanCommerceSubPlanGateMatrix;
+      const split = planner.splitComplexCommerceIntent(input, router.routeCommerceIntentLocally(input));
+      const matrix = matrixApi.buildSubPlanGateMatrix(split);
+      const display = matrixApi.toSubPlanGateMatrixDisplayStatus(matrix);
+      return {
+        contract:matrixApi.getSubPlanGateMatrixContract(),
+        split,
+        matrix,
+        display
+      };
+    });
+    expect(result.contract.matrixVersion).toBe("2.0.52");
+    expect(result.contract.phase).toBe("subplan_gate_matrix");
+    expect(result.contract.defaultMode).toBe("per_subplan_gate_matrix");
+    expect(result.contract.capabilities.canBuildGateMatrix).toBe(true);
+    expect(result.contract.capabilities.canShowMissingFields).toBe(true);
+    expect(result.contract.capabilities.canShowNextActions).toBe(true);
+    for (const key of ["canAccessProvider", "canUseApiKey", "canUseNetwork", "canReturnRealResults", "canReturnRealPrice", "canReturnMockPrice", "canRedirect", "canCheckout", "canPay", "canSubmitOrder"]) {
+      expect(result.contract.capabilities[key]).toBe(false);
+    }
+    for (const key of ["noRealEndpoint", "noRealApiKey", "noNetworkSearch", "noRealResults", "noRealPrice", "noFakeDemoMockPrice", "noRedirect"]) {
+      expect(result.contract.safety[key]).toBe(true);
+    }
+    expect(result.matrix.matrixVersion).toBe("2.0.52");
+    expect(result.matrix.phase).toBe("subplan_gate_matrix");
+    expect(result.matrix.matrixMode).toBe("per_subplan_gate_matrix");
+    expect(result.matrix.overallStatus).toBe("blocked");
+    expect(result.matrix.subPlanCount).toBe(2);
+    expect(result.matrix.canAccessProvider).toBe(false);
+    expect(result.matrix.canUseNetwork).toBe(false);
+    expect(result.matrix.canReturnRealPrice).toBe(false);
+    expect(result.matrix.canRedirect).toBe(false);
+    const travel = result.matrix.subPlanMatrices[0];
+    const product = result.matrix.subPlanMatrices[1];
+    expect(travel.title).toBe("旅行计划");
+    expect(travel.status).toBe("blocked");
+    expect(travel.missingFields).toEqual(expect.arrayContaining(["出发地", "具体出行日期", "入住日期", "离店日期", "儿童年龄"]));
+    expect(product.title).toBe("商品采购计划");
+    expect(product.missingFields).toEqual(expect.arrayContaining(["品牌偏好", "性能要求", "购买地区或收货地", "是否接受二手"]));
+    for (const plan of result.matrix.subPlanMatrices) {
+      expect(plan.gates.localLawCompliance).toBe("not_verified");
+      expect(plan.gates.providerOnboarding).toBe("not_completed");
+      expect(plan.gates.providerApproval).toBe("not_reviewed");
+      expect(plan.gates.secretStorage).toBe("not_configured");
+      expect(plan.gates.sandboxDryRun).toBe("not_run");
+      expect(plan.gates.connectorGate).toBe("blocked");
+      expect(plan.canAccessProvider).toBe(false);
+      expect(plan.canUseNetwork).toBe(false);
+      expect(plan.canReturnRealPrice).toBe(false);
+      expect(plan.canReturnMockPrice).toBe(false);
+      expect(plan.canRedirect).toBe(false);
+    }
+    expect(result.display.title).toBe("子计划闸门矩阵");
+    expect(result.display.subPlanCountLabel).toBe("2");
+    expect(result.display.providerAccessLabel).toBe("否");
+    expect(result.display.priceLabel).toBe("否");
+    expect(result.display.redirectLabel).toBe("否");
+  });
+
+  test("subplan gate matrix shows missing fields and next actions without raw fields", async () => {
+    await submitHomeCommand(page, runId + "-MATRIX 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。");
+    const home = page.locator('[data-commerce-home-summary="true"]').first();
+    const panel = home.locator(".commerce-subplan-gate-panel").first();
+    await expect(panel).toContainText("子计划闸门矩阵");
+    await expect(panel).toContainText("总体状态：已阻断");
+    await expect(panel).toContainText("子计划数量：2");
+    await expect(panel).toContainText("旅行计划");
+    await expect(panel).toContainText("商品采购计划");
+    for (const text of ["缺失信息", "下一步", "出发地", "具体出行日期", "入住日期", "离店日期", "儿童年龄", "品牌偏好", "性能要求", "收货地"]) {
+      await expect(panel).toContainText(text);
+    }
+    for (const text of ["当地法律未确认", "Provider Onboarding 未完成", "Provider Approval 未审查", "Secret Storage 未配置", "Sandbox Dry Run 未运行", "Connector Gate 已阻断"]) {
+      await expect(panel).toContainText(text);
+    }
+    await expect(panel).toContainText("是否访问真实平台：否");
+    await expect(panel).toContainText("是否返回价格：否");
+    await expect(panel).toContainText("是否跳转购买：否");
+    await expect(panel).toContainText("该矩阵只用于整理子计划、缺失信息和下一步动作，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。");
+    for (const text of ["当地法律合规审查", "Provider 接入准备总览", "Provider 接入人工审批手册", "Connector Gate", "Provider Sandbox Dry Run", "Provider 密钥安全方案"]) {
+      await expect(home).toContainText(text);
+    }
+    await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+    await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+    const rawFields = ["matrixVersion", "matrixMode=per_subplan_gate_matrix", "subPlanMatrices", "canAccessProvider=false", "canUseNetwork=false", "canReturnRealPrice=false", "canRedirect=false", "localLawCompliance:not_verified", "connectorGate:blocked"];
+    for (const field of rawFields) await expect(home).not.toContainText(field);
+    await page.locator("#commerceViewPlanBtn").click();
+    const detail = page.locator(".commerce-detail").first();
+    const detailPanel = detail.locator(".commerce-subplan-gate-panel").first();
+    await expect(detailPanel).toContainText("子计划闸门矩阵");
+    await expect(detailPanel).toContainText("子计划数量：2");
+    await expect(detailPanel).toContainText("旅行计划");
+    await expect(detailPanel).toContainText("商品采购计划");
+    for (const text of ["出发地", "具体出行日期", "入住日期", "离店日期", "儿童年龄", "品牌偏好", "性能要求", "收货地"]) {
+      await expect(detailPanel).toContainText(text);
+    }
+    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+    for (const field of rawFields) await expect(detail).not.toContainText(field);
+  });
+
+  test("subplan gate matrix supports simple product ticket and local service plans", async () => {
+    const cases = [
+      { input:"买华为手机", expected:["子计划数量：1", "商品采购计划", "缺失信息", "收货地", "预算", "型号或配置", "是否访问真实平台：否"] },
+      { input:"买演唱会门票", expected:["子计划数量：1", "门票计划", "缺失信息", "城市", "日期", "张数", "座位偏好", "是否访问真实平台：否"] },
+      { input:"预约理发", expected:["子计划数量：1", "本地服务计划", "缺失信息", "服务地点", "预约时间", "是否需要上门", "是否访问真实平台：否"] }
+    ];
+    for (const item of cases) {
+      await submitHomeCommand(page, runId + "-MATRIX-SIMPLE " + item.input);
+      const home = page.locator('[data-commerce-home-summary="true"]').first();
+      const panel = home.locator(".commerce-subplan-gate-panel").first();
+      await expect(panel).toContainText("子计划闸门矩阵");
+      for (const text of item.expected) await expect(panel).toContainText(text);
+      await expect(panel).toContainText("是否返回价格：否");
+      await expect(panel).toContainText("是否跳转购买：否");
+      await expect(panel).toContainText("下一步");
+      await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+      await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+      await expect(home).not.toContainText("matrixMode=per_subplan_gate_matrix");
+      await expect(home).not.toContainText("subPlanMatrices");
+      await page.locator("#commerceViewPlanBtn").click();
+      const detail = page.locator(".commerce-detail").first();
+      await expect(detail.locator(".commerce-subplan-gate-panel").first()).toContainText("子计划闸门矩阵");
+      await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+      await gotoRoute(page, "home");
+    }
+  });
+
   test("complex intent split panel separates travel product ticket and service without raw fields", async () => {
     const cases = [
       {
