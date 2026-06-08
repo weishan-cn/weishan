@@ -3092,11 +3092,156 @@
 .commerce-subplan-question-note p, .commerce-subplan-answer-note p{
   margin:0;
 }
+.commerce-subplan-completion-panel{
+  display:grid;
+  gap:12px;
+  padding:14px;
+  margin:12px 0;
+  border:1px solid #14b8a6;
+  border-radius:12px;
+  background:#f0fdfa;
+  color:#0f172a;
+  box-shadow:0 10px 24px rgba(20,184,166,.08);
+}
+.commerce-subplan-completion-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid #99f6e4;
+}
+.commerce-subplan-completion-head h3{
+  margin:0 0 4px;
+  color:#0f766e;
+  font-size:17px;
+  line-height:1.25;
+}
+.commerce-subplan-completion-head p{
+  margin:0;
+  color:#115e59;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-subplan-completion-head strong{
+  flex:0 0 auto;
+  max-width:230px;
+  border:1px solid #14b8a6;
+  border-radius:10px;
+  background:#ccfbf1;
+  color:#115e59;
+  padding:8px 10px;
+  font-size:13px;
+  line-height:1.4;
+}
+.commerce-subplan-completion-status ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  grid-template-columns:repeat(7, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-subplan-completion-status li,
+.commerce-subplan-completion-meta li{
+  display:grid;
+  gap:3px;
+  border:1px solid #99f6e4;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+  font-size:12px;
+  line-height:1.45;
+}
+.commerce-subplan-completion-status span,
+.commerce-subplan-completion-meta span{
+  color:#115e59;
+  font-weight:900;
+}
+.commerce-subplan-completion-status b,
+.commerce-subplan-completion-meta b{
+  color:#0f172a;
+  font-size:12px;
+  font-weight:900;
+}
+.commerce-subplan-completion-cards{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-subplan-completion-card{
+  border:1px solid #99f6e4;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+  display:grid;
+  gap:10px;
+}
+.commerce-subplan-completion-card h4{
+  margin:0;
+  color:#0f766e;
+  font-size:14px;
+  line-height:1.25;
+}
+.commerce-subplan-completion-meta{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:8px;
+}
+.commerce-subplan-completion-columns{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:8px;
+}
+.commerce-subplan-completion-columns div{
+  border:1px solid #ccfbf1;
+  border-radius:10px;
+  background:#f8fffd;
+  padding:9px;
+  display:grid;
+  gap:6px;
+}
+.commerce-subplan-completion-columns b{
+  color:#115e59;
+  font-size:12px;
+  font-weight:950;
+}
+.commerce-subplan-completion-columns ul{
+  margin:0;
+  padding-left:18px;
+  display:grid;
+  gap:5px;
+}
+.commerce-subplan-completion-columns li{
+  color:#0f172a;
+  font-size:12px;
+  line-height:1.45;
+}
+.commerce-subplan-completion-note{
+  padding:10px;
+  border:1px solid #14b8a6;
+  border-radius:10px;
+  background:#ccfbf1;
+  color:#115e59;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-subplan-completion-note p{
+  margin:0;
+}
 @media (max-width: 980px){
   .commerce-subplan-gate-head{
     display:grid;
   }
   .commerce-subplan-question-head, .commerce-subplan-answer-head{
+    display:grid;
+  }
+  .commerce-subplan-completion-head{
     display:grid;
   }
   .commerce-subplan-gate-head strong{
@@ -3105,11 +3250,18 @@
   .commerce-subplan-question-head strong, .commerce-subplan-answer-head strong{
     max-width:none;
   }
+  .commerce-subplan-completion-head strong{
+    max-width:none;
+  }
   .commerce-subplan-gate-status ul,
   .commerce-subplan-gate-cards,
   .commerce-subplan-question-status ul, .commerce-subplan-answer-status ul,
   .commerce-subplan-question-cards, .commerce-subplan-answer-cards,
-  .commerce-subplan-question-meta, .commerce-subplan-answer-meta{
+  .commerce-subplan-question-meta, .commerce-subplan-answer-meta,
+  .commerce-subplan-completion-status ul,
+  .commerce-subplan-completion-cards,
+  .commerce-subplan-completion-meta,
+  .commerce-subplan-completion-columns{
     grid-template-columns:1fr;
   }
 }

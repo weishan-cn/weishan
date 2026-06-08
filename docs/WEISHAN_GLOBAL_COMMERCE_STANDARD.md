@@ -465,6 +465,16 @@ SubPlan Answer Collector 只把用户回答映射到子计划草稿。答案收�
 
 本轮不做长期持久化，不得保存身份证、护照、银行卡或敏感身份信息，不得保存原始 GPS 坐标。SubPlan Answer Collector 不得自动付款、自动下单或提交订单，也不得绕过 Local Law、Provider Onboarding、Approval、Secret Storage、Sandbox Dry Run、Connector Gate、Readiness 或 Runbook。
 
+### SubPlan Completion Workspace 标准
+
+SubPlan Completion Workspace 只汇总每个子计划的已补齐字段、仍缺字段、下一问题和下一步动作。补齐工作台只整理临时计划草稿，不代表任何真实 provider 已接入。
+
+补齐工作台不允许访问真实 provider，补齐工作台不允许连接真实 endpoint，补齐工作台不允许使用 API key，补齐工作台不允许发起 provider 网络搜索，补齐工作台不允许返回真实商品结果，补齐工作台不允许显示真实价格，补齐工作台不允许返回 fake/demo/mock price，补齐工作台不允许跳转购买 / 预订页面。
+
+每个工作台项目必须归属到对应子计划。补齐工作台不得跨子计划混用回答、问题、缺失字段或下一步动作，也不得让不同子计划共享 provider、endpoint、API key、价格、跳转、checkout、payment、order 或身份信息。
+
+SubPlan Completion Workspace 不得长期保存用户答案，不得保存身份证、护照、银行卡或敏感身份信息，不得保存原始 GPS 坐标。补齐工作台不得自动付款、自动下单或提交订单，也不得绕过 Local Law、Provider Onboarding、Approval、Secret Storage、Sandbox Dry Run、Connector Gate、Readiness 或 Runbook。用户 UI 只能显示自然语言补齐工作台，不得向普通用户暴露 raw/internal completion workspace 字段。
+
 ### Task History Detail Restore 标准
 
 Task History Detail Restore 只用于恢复和回看任务历史详情。任务历史回看不代表重新执行任务，也不代表任何真实 provider 已接入。任务历史回看不允许访问真实 provider，任务历史回看不允许连接真实 endpoint，任务历史回看不允许使用 API key，任务历史回看不允许发起 provider 网络搜索。
@@ -482,6 +492,7 @@ Task History Detail Restore 不得自动付款、自动下单或提交订单，�
 - v2.0.29：收货目的地 gate + UI 版本显示修复
 - v2.0.30：全球商品 provider 候选评估
 - v2.0.55：Task History Detail Restore / 任务历史详情恢复
+- v2.0.56：SubPlan Completion Workspace / 子计划补齐工作台
 
 后续版本必须继续保持全球多源、只读搜索、安全门控、外部跳转的方向，不能退化为单一平台工具。
 

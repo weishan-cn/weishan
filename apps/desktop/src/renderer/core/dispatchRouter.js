@@ -160,6 +160,9 @@
   function commerceSubPlanAnswerCollectorApi(){
     return window.WeishanCommerceSubPlanAnswerCollector || null;
   }
+  function commerceSubPlanCompletionWorkspaceApi(){
+    return window.WeishanCommerceSubPlanCompletionWorkspace || null;
+  }
 
   function applyComplexCommerceLocalIntent(commercePlan, route){
     if (!commercePlan || !route || route.aiFallbackRequired !== true) return commercePlan;
@@ -228,6 +231,20 @@
     commercePlan.commerceSubPlanQuestions = baseQuestions;
     commercePlan.commerceSubPlanAnswerCollection = collector.collectSubPlanAnswers(input, baseQuestions, previousPlan && previousPlan.commerceSubPlanAnswerCollection || null);
     commercePlan.answerCollectorSourceTaskId = previousPlan && previousPlan.taskId || "";
+    return commercePlan;
+  }
+
+  function attachSubPlanCompletionWorkspace(commercePlan){
+    if (!commercePlan) return commercePlan;
+    const workspace = commerceSubPlanCompletionWorkspaceApi();
+    if (workspace && workspace.buildSubPlanCompletionWorkspace) {
+      commercePlan.commerceSubPlanCompletionWorkspace = workspace.buildSubPlanCompletionWorkspace({
+        commerceComplexIntentSplit:commercePlan.commerceComplexIntentSplit || null,
+        commerceSubPlanGateMatrix:commercePlan.commerceSubPlanGateMatrix || null,
+        commerceSubPlanQuestions:commercePlan.commerceSubPlanQuestions || null,
+        commerceSubPlanAnswerCollection:commercePlan.commerceSubPlanAnswerCollection || null
+      });
+    }
     return commercePlan;
   }
 
@@ -425,6 +442,7 @@
       attachSubPlanGateMatrix(commercePlan);
       attachSubPlanQuestions(commercePlan);
       attachSubPlanAnswers(commercePlan, cleanInput);
+      attachSubPlanCompletionWorkspace(commercePlan);
       plan.executionMode = "commerce_agent_plan_only";
       plan.realExecution = false;
       plan.requiresUserConfirmation = true;

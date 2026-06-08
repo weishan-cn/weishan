@@ -176,6 +176,14 @@
       document.head.appendChild(answerCollector);
       return;
     }
+    if (!window.WeishanCommerceSubPlanCompletionWorkspace && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceSubPlanCompletionWorkspace"]')) {
+      const completionWorkspace = document.createElement("script");
+      completionWorkspace.src = "./renderer/core/commerceSubPlanCompletionWorkspace.js?v=2.0.56";
+      completionWorkspace.dataset.weishanDynamic = "WeishanCommerceSubPlanCompletionWorkspace";
+      completionWorkspace.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(completionWorkspace);
+      return;
+    }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
       providers.src = "./renderer/core/commerceProviders.js?v=2.0.48";
@@ -633,6 +641,85 @@
         ${(display.groups || []).map(groupCard).join("")}
       </div>
       <div class="commerce-subplan-answer-note"><p>${esc(display.note)}</p></div>
+    </section>`;
+  }
+
+  function commerceSubPlanCompletionWorkspaceForTask(task){
+    const existing = task && task.commerceSubPlanCompletionWorkspace || null;
+    if (existing && Array.isArray(existing.workspaceItems)) return existing;
+    const splitResult = commerceComplexIntentSplitForTask(task);
+    const matrix = commerceSubPlanGateMatrixForTask(task, splitResult);
+    const questionResult = commerceSubPlanQuestionsForTask(task);
+    const answerResult = commerceSubPlanAnswerCollectionForTask(task);
+    const api = window.WeishanCommerceSubPlanCompletionWorkspace || null;
+    if (api && api.buildSubPlanCompletionWorkspace) {
+      return api.buildSubPlanCompletionWorkspace({
+        commerceComplexIntentSplit:splitResult || null,
+        commerceSubPlanGateMatrix:matrix || null,
+        commerceSubPlanQuestions:questionResult || null,
+        commerceSubPlanAnswerCollection:answerResult || null
+      });
+    }
+    return null;
+  }
+
+  function commerceSubPlanCompletionWorkspaceDisplay(workspaceResult){
+    const api = window.WeishanCommerceSubPlanCompletionWorkspace || null;
+    if (api && api.toSubPlanCompletionWorkspaceDisplayStatus) return api.toSubPlanCompletionWorkspaceDisplayStatus(workspaceResult || {});
+    return { title:"子计划补齐工作台", subtitle:"集中显示每个子计划的已补齐字段、仍缺字段、下一问题和下一步动作。", overallStatusLabel:"待补充", subPlanCountLabel:"0", completedFieldCountLabel:"0", remainingFieldCountLabel:"0", nextQuestionCountLabel:"0", providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否", items:[], note:"该工作台只整理计划草稿，不长期保存用户答案，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。" };
+  }
+
+  function commerceSubPlanCompletionWorkspacePanelHtml(task){
+    const workspaceResult = commerceSubPlanCompletionWorkspaceForTask(task);
+    if (!workspaceResult) return "";
+    const display = commerceSubPlanCompletionWorkspaceDisplay(workspaceResult);
+    const row = (label, value) => value ? `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>` : "";
+    const list = (items, emptyLabel) => `<ul>${(items && items.length ? items : [emptyLabel]).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>`;
+    const workspaceCard = (item, index) => `<article class="commerce-subplan-completion-card">
+      <h4>子计划 ${index + 1}：${esc(item.title)}</h4>
+      <ul class="commerce-subplan-completion-meta">
+        ${row("子计划", item.title)}
+        ${row("类别", item.categoryLabel)}
+        ${row("状态", item.statusLabel)}
+        ${row("已补齐字段数量", item.completedFieldCountLabel)}
+        ${row("仍缺字段数量", item.remainingFieldCountLabel)}
+        ${row("补齐度", item.completenessLabel)}
+        ${row("下一问题", item.nextQuestionLabel)}
+        ${row("是否访问真实平台", item.providerAccessLabel)}
+        ${row("是否返回价格", item.priceLabel)}
+        ${row("是否跳转购买", item.redirectLabel)}
+      </ul>
+      <div class="commerce-subplan-completion-columns">
+        <div><b>已补齐字段</b>${list(item.completedFields, "暂无已补齐字段")}</div>
+        <div><b>仍缺字段</b>${list(item.remainingFields, "暂无剩余字段")}</div>
+        <div><b>下一问题</b>${list(item.nextQuestions, item.nextQuestionLabel || "暂无下一问题")}</div>
+        <div><b>下一步</b>${list(item.nextActions, "等待补充回答")}</div>
+      </div>
+    </article>`;
+    return `<section class="commerce-subplan-completion-panel" aria-label="子计划补齐工作台">
+      <div class="commerce-subplan-completion-head">
+        <div>
+          <h3>${esc(display.title)}</h3>
+          <p>${esc(display.subtitle)}</p>
+        </div>
+        <strong>总体状态：${esc(display.overallStatusLabel)}</strong>
+      </div>
+      <div class="commerce-subplan-completion-status">
+        <ul>
+          ${row("总体状态", display.overallStatusLabel)}
+          ${row("子计划数量", display.subPlanCountLabel)}
+          ${row("已补齐字段数量", display.completedFieldCountLabel)}
+          ${row("仍缺字段数量", display.remainingFieldCountLabel)}
+          ${row("下一问题数量", display.nextQuestionCountLabel)}
+          ${row("是否访问真实平台", display.providerAccessLabel)}
+          ${row("是否返回价格", display.priceLabel)}
+          ${row("是否跳转购买", display.redirectLabel)}
+        </ul>
+      </div>
+      <div class="commerce-subplan-completion-cards">
+        ${(display.items || []).map(workspaceCard).join("")}
+      </div>
+      <div class="commerce-subplan-completion-note"><p>${esc(display.note)}</p></div>
     </section>`;
   }
 
@@ -1162,6 +1249,7 @@
       ${commerceSubPlanGateMatrixPanelHtml(task)}
       ${commerceSubPlanQuestionsPanelHtml(task)}
       ${commerceSubPlanAnswerCollectionPanelHtml(task)}
+      ${commerceSubPlanCompletionWorkspacePanelHtml(task)}
       <div class="commerce-detail-grid">
         ${section("需求理解", `<dl class="commerce-facts">
           <div><dt>用户需求</dt><dd>${esc(detail.demandUnderstanding || task.inputSummary)}</dd></div>
