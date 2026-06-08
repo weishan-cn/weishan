@@ -584,6 +584,68 @@
     };
   }
 
+  function commerceSubPlanAnswerCollectionForTask(task, stored, questionResult){
+    const existing = stored && stored.commerceSubPlanAnswerCollection || task && task.meta && task.meta.commerceSubPlanAnswerCollection || null;
+    if (existing && Array.isArray(existing.subPlanDrafts)) return existing;
+    const api = window.WeishanCommerceSubPlanAnswerCollector || null;
+    if (api && api.collectSubPlanAnswers && questionResult) return api.collectSubPlanAnswers(stored && stored.inputSummary || task && task.text || "", questionResult, null);
+    return null;
+  }
+
+  function commerceSubPlanAnswerCollectionDisplay(answerResult){
+    const api = window.WeishanCommerceSubPlanAnswerCollector || null;
+    if (api && api.toSubPlanAnswerCollectorDisplayStatus) return api.toSubPlanAnswerCollectorDisplayStatus(answerResult || {});
+    return { title:"子计划答案收集", subtitle:"根据用户回答补齐子计划信息。当前只更新计划草稿，不访问任何真实 provider。", overallStatusLabel:"等待回答", subPlanCountLabel:"0", completedFieldCountLabel:"0", remainingFieldCountLabel:"0", providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否", groups:[], note:"这些回答只用于补齐计划草稿，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。" };
+  }
+
+  function commerceSubPlanAnswerCollectionHomePanel(answerResult){
+    if (!answerResult) return "";
+    const display = commerceSubPlanAnswerCollectionDisplay(answerResult);
+    const row = (label, value) => value ? `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>` : "";
+    const list = (items, emptyLabel) => `<ul>${(items && items.length ? items : [emptyLabel]).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>`;
+    const groupCard = (group, index) => `<article class="commerce-subplan-answer-card">
+      <h4>子计划 ${index + 1}：${esc(group.title)}</h4>
+      <ul class="commerce-subplan-answer-meta">
+        ${row("子计划", group.title)}
+        ${row("类别", group.categoryLabel)}
+        ${row("补齐度", group.completenessLabel)}
+        ${row("是否可进入下一步审查", group.canProceedLabel)}
+        ${row("是否访问真实平台", group.providerAccessLabel)}
+        ${row("是否返回价格", group.priceLabel)}
+        ${row("是否跳转购买", group.redirectLabel)}
+      </ul>
+      <div class="commerce-subplan-answer-columns">
+        <div><b>已补齐字段</b>${list(group.completedFields, "暂无已补齐字段")}</div>
+        <div><b>仍缺字段</b>${list(group.remainingFields, "暂无剩余字段")}</div>
+        <div><b>下一步</b>${list(group.nextSteps, "等待补充回答")}</div>
+      </div>
+    </article>`;
+    return `<section class="commerce-subplan-answer-panel commerce-subplan-answer-home-panel" aria-label="子计划答案收集">
+      <div class="commerce-subplan-answer-head">
+        <div>
+          <h3>${esc(display.title)}</h3>
+          <p>${esc(display.subtitle)}</p>
+        </div>
+        <strong>总体状态：${esc(display.overallStatusLabel)}</strong>
+      </div>
+      <div class="commerce-subplan-answer-status">
+        <ul>
+          ${row("总体状态", display.overallStatusLabel)}
+          ${row("子计划数量", display.subPlanCountLabel)}
+          ${row("已补齐字段数量", display.completedFieldCountLabel)}
+          ${row("仍缺字段数量", display.remainingFieldCountLabel)}
+          ${row("是否访问真实平台", display.providerAccessLabel)}
+          ${row("是否返回价格", display.priceLabel)}
+          ${row("是否跳转购买", display.redirectLabel)}
+        </ul>
+      </div>
+      <div class="commerce-subplan-answer-cards">
+        ${(display.groups || []).map(groupCard).join("")}
+      </div>
+      <div class="commerce-subplan-answer-note"><p>${esc(display.note)}</p></div>
+    </section>`;
+  }
+
   function commerceSubPlanQuestionsHomePanel(questionResult){
     if (!questionResult) return "";
     const display = commerceSubPlanQuestionsDisplay(questionResult);
@@ -984,6 +1046,7 @@
     const complexIntentSplit = commerceComplexIntentSplitForTask(task, stored, localIntentRoute);
     const subPlanGateMatrix = commerceSubPlanGateMatrixForTask(task, stored, complexIntentSplit);
     const subPlanQuestions = commerceSubPlanQuestionsForTask(task, stored, subPlanGateMatrix);
+    const subPlanAnswerCollection = commerceSubPlanAnswerCollectionForTask(task, stored, subPlanQuestions);
     const providerFailed = stored.searchStatus === "failed";
     const noResults = stored.searchStatus === "noResults" || stored.searchStatus === "no_results";
     const missingFields = Array.isArray(stored.missingFields) ? stored.missingFields : [];
@@ -1031,6 +1094,7 @@
         ${!blocked ? commerceComplexIntentSplitHomePanel(complexIntentSplit) : ""}
         ${!blocked ? commerceSubPlanGateMatrixHomePanel(subPlanGateMatrix) : ""}
         ${!blocked ? commerceSubPlanQuestionsHomePanel(subPlanQuestions) : ""}
+        ${!blocked ? commerceSubPlanAnswerCollectionHomePanel(subPlanAnswerCollection) : ""}
         ${!blocked && localLawPanelRequired ? commerceLocalLawHomePanel(stored) : ""}
         ${showOnboardingHomePanel ? commerceProviderIntegrationReadinessHomePanel(stored.providerIntegrationReadiness || stored.configHealth && stored.configHealth.providerIntegrationReadiness || {}) : ""}
         ${showOnboardingHomePanel ? commerceProviderIntegrationRunbookHomePanel(stored.providerIntegrationRunbook || stored.configHealth && stored.configHealth.providerIntegrationRunbook || {}) : ""}

@@ -2406,6 +2406,105 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
+
+
+  test("subplan answer collector contract maps answers without provider access", async () => {
+    await gotoRoute(page, "home");
+    const result = await page.evaluate(async () => {
+      delete window.WeishanCommerceLocalIntentRouter;
+      delete window.WeishanCommerceComplexIntentSplitPlanner;
+      delete window.WeishanCommerceSubPlanGateMatrix;
+      delete window.WeishanCommerceSubPlanQuestionGenerator;
+      delete window.WeishanCommerceSubPlanAnswerCollector;
+      async function load(src) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src + "?answer-contract=" + Date.now();
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+      await load("./renderer/core/commerceLocalIntentRouter.js?v=2.0.54");
+      await load("./renderer/core/commerceComplexIntentSplitPlanner.js?v=2.0.54");
+      await load("./renderer/core/commerceSubPlanGateMatrix.js?v=2.0.54");
+      await load("./renderer/core/commerceSubPlanQuestionGenerator.js?v=2.0.54");
+      await load("./renderer/core/commerceSubPlanAnswerCollector.js?v=2.0.54");
+      const input = "下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。";
+      const route = window.WeishanCommerceLocalIntentRouter.routeCommerceIntentLocally(input);
+      const split = window.WeishanCommerceComplexIntentSplitPlanner.splitComplexCommerceIntent(input, route);
+      const matrix = window.WeishanCommerceSubPlanGateMatrix.buildSubPlanGateMatrix(split);
+      const questions = window.WeishanCommerceSubPlanQuestionGenerator.generateQuestionsForSubPlanMatrix(matrix);
+      const collector = window.WeishanCommerceSubPlanAnswerCollector;
+      const answer = "我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。";
+      const collected = collector.collectSubPlanAnswers(answer, questions);
+      return { contract:collector.getSubPlanAnswerCollectorContract(), collected, display:collector.toSubPlanAnswerCollectorDisplayStatus(collected) };
+    });
+    expect(result.contract.answerCollectorVersion).toBe("2.0.54");
+    expect(result.contract.phase).toBe("subplan_answer_collector");
+    expect(result.contract.defaultMode).toBe("map_answers_to_subplan_fields");
+    for (const key of ["canCollectAnswers", "canMapAnswersToFields", "canUpdateSubPlanDraft", "canComputeCompleteness", "canShowRemainingQuestions"]) expect(result.contract.capabilities[key]).toBe(true);
+    for (const key of ["canAccessProvider", "canUseApiKey", "canUseNetwork", "canReturnRealResults", "canReturnRealPrice", "canReturnMockPrice", "canRedirect", "canCheckout", "canPay", "canSubmitOrder", "canStoreIdentity"]) expect(result.contract.capabilities[key]).toBe(false);
+    for (const key of ["noRealEndpoint", "noRealApiKey", "noNetworkSearch", "noRealResults", "noRealPrice", "noFakeDemoMockPrice", "noRedirect", "noIdentityStorage"]) expect(result.contract.safety[key]).toBe(true);
+    expect(result.collected.subPlanCount).toBe(2);
+    expect(result.collected.completedFieldCount).toBe(9);
+    expect(result.display.title).toBe("子计划答案收集");
+    expect(result.display.providerAccessLabel).toBe("否");
+    expect(result.display.priceLabel).toBe("否");
+    expect(result.display.redirectLabel).toBe("否");
+    const travel = result.display.groups.find((item) => item.title === "旅行计划");
+    const product = result.display.groups.find((item) => item.title === "商品采购计划");
+    expect(travel.completedFields).toEqual(expect.arrayContaining(["出发地：成都", "出行日期：7月12日", "入住日期：7月12日", "离店日期：7月16日", "儿童年龄：8岁"]));
+    expect(product.completedFields).toEqual(expect.arrayContaining(["品牌偏好：都可以", "性能要求：32G内存 / 1T硬盘", "收货地：成都", "是否接受二手：不接受"]));
+  });
+
+  test("subplan answer panel collects travel product answers without raw fields", async () => {
+    await submitHomeCommand(page, runId + "-ANSWERS 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。");
+    await submitHomeCommand(page, runId + "-ANSWERS 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
+    const home = page.locator('[data-commerce-home-summary="true"]').first();
+    const panel = home.locator(".commerce-subplan-answer-panel").first();
+    await expect(panel).toContainText("子计划答案收集");
+    await expect(panel).toContainText("已收集部分回答");
+    await expect(panel).toContainText("旅行计划");
+    await expect(panel).toContainText("商品采购计划");
+    for (const text of ["出发地：成都", "出行日期：7月12日", "入住日期：7月12日", "离店日期：7月16日", "儿童年龄：8岁", "品牌偏好：都可以", "性能要求：32G内存 / 1T硬盘", "收货地：成都", "是否接受二手：不接受", "补齐度", "仍缺字段", "是否访问真实平台：否", "是否返回价格：否", "是否跳转购买：否"]) await expect(panel).toContainText(text);
+    const rawFields = ["answerCollectorVersion", "defaultMode=map_answers_to_subplan_fields", "mappedAnswers", "subPlanAnswerDraft", "temporarySessionOnly=true", "canAccessProvider=false", "canUseNetwork=false", "canReturnRealPrice=false", "canRedirect=false"];
+    for (const field of rawFields) await expect(home).not.toContainText(field);
+    await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+    await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+    await page.locator("#commerceViewPlanBtn").click();
+    const detail = page.locator(".commerce-detail").first();
+    const detailPanel = detail.locator(".commerce-subplan-answer-panel").first();
+    await expect(detailPanel).toContainText("子计划答案收集");
+    await expect(detailPanel).toContainText("出发地：成都");
+    await expect(detailPanel).toContainText("性能要求：32G内存 / 1T硬盘");
+    for (const field of rawFields) await expect(detail).not.toContainText(field);
+    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+  });
+
+  test("subplan answer panel supports ticket and local service answers", async () => {
+    const cases = [
+      { plan:"买演唱会门票", answer:"成都，周六晚上，两张，中区座位，预算每张500以内。", expected:["门票计划", "城市：成都", "日期 / 时间段：周六晚上", "张数：两张", "座位偏好：中区座位", "预算：每张500以内"] },
+      { plan:"预约理发", answer:"在高新区，明天下午，预算100以内，不需要上门。", expected:["本地服务计划", "服务地点：高新区", "预约时间：明天下午", "预算：100以内", "是否需要上门：不需要"] }
+    ];
+    for (const item of cases) {
+      await submitHomeCommand(page, runId + "-ANSWER-SIMPLE " + item.plan);
+      await submitHomeCommand(page, runId + "-ANSWER-SIMPLE " + item.answer);
+      const home = page.locator('[data-commerce-home-summary="true"]').first();
+      const panel = home.locator(".commerce-subplan-answer-panel").first();
+      await expect(panel).toContainText("子计划答案收集");
+      for (const text of item.expected) await expect(panel).toContainText(text);
+      await expect(panel).toContainText("是否访问真实平台：否");
+      await expect(panel).toContainText("是否返回价格：否");
+      await expect(panel).toContainText("是否跳转购买：否");
+      await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+      await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+      for (const field of ["answerCollectorVersion", "mappedAnswers", "subPlanAnswerDraft", "canAccessProvider=false"]) await expect(home).not.toContainText(field);
+      await gotoRoute(page, "home");
+    }
+  });
+
   test("complex intent split panel separates travel product ticket and service without raw fields", async () => {
     const cases = [
       {

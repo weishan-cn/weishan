@@ -157,6 +157,9 @@
   function commerceSubPlanQuestionGeneratorApi(){
     return window.WeishanCommerceSubPlanQuestionGenerator || null;
   }
+  function commerceSubPlanAnswerCollectorApi(){
+    return window.WeishanCommerceSubPlanAnswerCollector || null;
+  }
 
   function applyComplexCommerceLocalIntent(commercePlan, route){
     if (!commercePlan || !route || route.aiFallbackRequired !== true) return commercePlan;
@@ -209,8 +212,32 @@
     return commercePlan;
   }
 
+  function latestQuestionCommercePlan(){
+    const api = commerceAgentApi();
+    if (!api || !api.getCommerceTasks) return null;
+    return (api.getCommerceTasks() || []).find((task) => task && task.commerceSubPlanQuestions && Array.isArray(task.commerceSubPlanQuestions.subPlanQuestionGroups)) || null;
+  }
+
+  function attachSubPlanAnswers(commercePlan, input){
+    const collector = commerceSubPlanAnswerCollectorApi();
+    if (!collector || !collector.collectSubPlanAnswers) return commercePlan;
+    const previousPlan = latestQuestionCommercePlan();
+    const answerLike = looksLikeSubPlanAnswer(input) && previousPlan;
+    const baseQuestions = answerLike ? previousPlan.commerceSubPlanQuestions : commercePlan && commercePlan.commerceSubPlanQuestions || previousPlan && previousPlan.commerceSubPlanQuestions || null;
+    if (!baseQuestions) return commercePlan;
+    commercePlan.commerceSubPlanQuestions = baseQuestions;
+    commercePlan.commerceSubPlanAnswerCollection = collector.collectSubPlanAnswers(input, baseQuestions, previousPlan && previousPlan.commerceSubPlanAnswerCollection || null);
+    commercePlan.answerCollectorSourceTaskId = previousPlan && previousPlan.taskId || "";
+    return commercePlan;
+  }
+
+  function looksLikeSubPlanAnswer(text){
+    return /从[^，。,.、\s]+出发|\d{1,2}\s*月\s*\d{1,2}\s*日\s*(?:出发|入住|离店)|孩子\s*[0-9一二三四五六七八九十]+\s*岁|品牌(?:都可以|不限|无所谓)|\d+\s*G\s*内存|\d+\s*T\s*硬盘|收货地|不接受二手|接受二手|周[一二三四五六日天](?:上午|下午|晚上)?|[一二两三四五六七八九十0-9]+\s*张|中区|预算\s*\d+\s*以内|不需要上门|需要上门/i.test(String(text || ""));
+  }
+
   function isCommerceAgentCommand(text){
     const raw = String(text || "");
+    if (looksLikeSubPlanAnswer(raw) && latestQuestionCommercePlan()) return true;
     const router = commerceLocalIntentRouterApi();
     if (router && router.routeCommerceIntentLocally) {
       const route = router.routeCommerceIntentLocally(raw);
@@ -397,6 +424,7 @@
       attachComplexCommerceSplit(commercePlan, cleanInput, commerceLocalIntentRoute);
       attachSubPlanGateMatrix(commercePlan);
       attachSubPlanQuestions(commercePlan);
+      attachSubPlanAnswers(commercePlan, cleanInput);
       plan.executionMode = "commerce_agent_plan_only";
       plan.realExecution = false;
       plan.requiresUserConfirmation = true;

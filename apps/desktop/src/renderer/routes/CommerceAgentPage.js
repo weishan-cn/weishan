@@ -138,7 +138,7 @@
     }
     if (!window.WeishanCommerceLocalIntentRouter && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceLocalIntentRouter"]')) {
       const localIntent = document.createElement("script");
-      localIntent.src = "./renderer/core/commerceLocalIntentRouter.js?v=2.0.53";
+      localIntent.src = "./renderer/core/commerceLocalIntentRouter.js?v=2.0.54";
       localIntent.dataset.weishanDynamic = "WeishanCommerceLocalIntentRouter";
       localIntent.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(localIntent);
@@ -146,7 +146,7 @@
     }
     if (!window.WeishanCommerceComplexIntentSplitPlanner && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceComplexIntentSplitPlanner"]')) {
       const splitPlanner = document.createElement("script");
-      splitPlanner.src = "./renderer/core/commerceComplexIntentSplitPlanner.js?v=2.0.53";
+      splitPlanner.src = "./renderer/core/commerceComplexIntentSplitPlanner.js?v=2.0.54";
       splitPlanner.dataset.weishanDynamic = "WeishanCommerceComplexIntentSplitPlanner";
       splitPlanner.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(splitPlanner);
@@ -154,7 +154,7 @@
     }
     if (!window.WeishanCommerceSubPlanGateMatrix && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceSubPlanGateMatrix"]')) {
       const gateMatrix = document.createElement("script");
-      gateMatrix.src = "./renderer/core/commerceSubPlanGateMatrix.js?v=2.0.53";
+      gateMatrix.src = "./renderer/core/commerceSubPlanGateMatrix.js?v=2.0.54";
       gateMatrix.dataset.weishanDynamic = "WeishanCommerceSubPlanGateMatrix";
       gateMatrix.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(gateMatrix);
@@ -162,10 +162,18 @@
     }
     if (!window.WeishanCommerceSubPlanQuestionGenerator && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceSubPlanQuestionGenerator"]')) {
       const questionGenerator = document.createElement("script");
-      questionGenerator.src = "./renderer/core/commerceSubPlanQuestionGenerator.js?v=2.0.53";
+      questionGenerator.src = "./renderer/core/commerceSubPlanQuestionGenerator.js?v=2.0.54";
       questionGenerator.dataset.weishanDynamic = "WeishanCommerceSubPlanQuestionGenerator";
       questionGenerator.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(questionGenerator);
+      return;
+    }
+    if (!window.WeishanCommerceSubPlanAnswerCollector && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceSubPlanAnswerCollector"]')) {
+      const answerCollector = document.createElement("script");
+      answerCollector.src = "./renderer/core/commerceSubPlanAnswerCollector.js?v=2.0.54";
+      answerCollector.dataset.weishanDynamic = "WeishanCommerceSubPlanAnswerCollector";
+      answerCollector.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(answerCollector);
       return;
     }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
@@ -562,6 +570,70 @@
       })),
       note:"这些问题只用于补齐计划信息，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。"
     };
+  }
+
+  function commerceSubPlanAnswerCollectionForTask(task){
+    const existing = task && task.commerceSubPlanAnswerCollection || null;
+    if (existing && Array.isArray(existing.subPlanDrafts)) return existing;
+    const questionResult = commerceSubPlanQuestionsForTask(task);
+    const api = window.WeishanCommerceSubPlanAnswerCollector || null;
+    if (api && api.collectSubPlanAnswers && questionResult) return api.collectSubPlanAnswers(task && task.inputSummary || "", questionResult, null);
+    return null;
+  }
+
+  function commerceSubPlanAnswerCollectionDisplay(answerResult){
+    const api = window.WeishanCommerceSubPlanAnswerCollector || null;
+    if (api && api.toSubPlanAnswerCollectorDisplayStatus) return api.toSubPlanAnswerCollectorDisplayStatus(answerResult || {});
+    return { title:"子计划答案收集", subtitle:"根据用户回答补齐子计划信息。当前只更新计划草稿，不访问任何真实 provider。", overallStatusLabel:"等待回答", subPlanCountLabel:"0", completedFieldCountLabel:"0", remainingFieldCountLabel:"0", providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否", groups:[], note:"这些回答只用于补齐计划草稿，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。" };
+  }
+
+  function commerceSubPlanAnswerCollectionPanelHtml(task){
+    const answerResult = commerceSubPlanAnswerCollectionForTask(task);
+    if (!answerResult) return "";
+    const display = commerceSubPlanAnswerCollectionDisplay(answerResult);
+    const row = (label, value) => value ? `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>` : "";
+    const list = (items, emptyLabel) => `<ul>${(items && items.length ? items : [emptyLabel]).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>`;
+    const groupCard = (group, index) => `<article class="commerce-subplan-answer-card">
+      <h4>子计划 ${index + 1}：${esc(group.title)}</h4>
+      <ul class="commerce-subplan-answer-meta">
+        ${row("子计划", group.title)}
+        ${row("类别", group.categoryLabel)}
+        ${row("补齐度", group.completenessLabel)}
+        ${row("是否可进入下一步审查", group.canProceedLabel)}
+        ${row("是否访问真实平台", group.providerAccessLabel)}
+        ${row("是否返回价格", group.priceLabel)}
+        ${row("是否跳转购买", group.redirectLabel)}
+      </ul>
+      <div class="commerce-subplan-answer-columns">
+        <div><b>已补齐字段</b>${list(group.completedFields, "暂无已补齐字段")}</div>
+        <div><b>仍缺字段</b>${list(group.remainingFields, "暂无剩余字段")}</div>
+        <div><b>下一步</b>${list(group.nextSteps, "等待补充回答")}</div>
+      </div>
+    </article>`;
+    return `<section class="commerce-subplan-answer-panel" aria-label="子计划答案收集">
+      <div class="commerce-subplan-answer-head">
+        <div>
+          <h3>${esc(display.title)}</h3>
+          <p>${esc(display.subtitle)}</p>
+        </div>
+        <strong>总体状态：${esc(display.overallStatusLabel)}</strong>
+      </div>
+      <div class="commerce-subplan-answer-status">
+        <ul>
+          ${row("总体状态", display.overallStatusLabel)}
+          ${row("子计划数量", display.subPlanCountLabel)}
+          ${row("已补齐字段数量", display.completedFieldCountLabel)}
+          ${row("仍缺字段数量", display.remainingFieldCountLabel)}
+          ${row("是否访问真实平台", display.providerAccessLabel)}
+          ${row("是否返回价格", display.priceLabel)}
+          ${row("是否跳转购买", display.redirectLabel)}
+        </ul>
+      </div>
+      <div class="commerce-subplan-answer-cards">
+        ${(display.groups || []).map(groupCard).join("")}
+      </div>
+      <div class="commerce-subplan-answer-note"><p>${esc(display.note)}</p></div>
+    </section>`;
   }
 
   function commerceSubPlanQuestionsPanelHtml(task){
@@ -1089,6 +1161,7 @@
       ${commerceComplexIntentSplitPanelHtml(task)}
       ${commerceSubPlanGateMatrixPanelHtml(task)}
       ${commerceSubPlanQuestionsPanelHtml(task)}
+      ${commerceSubPlanAnswerCollectionPanelHtml(task)}
       <div class="commerce-detail-grid">
         ${section("需求理解", `<dl class="commerce-facts">
           <div><dt>用户需求</dt><dd>${esc(detail.demandUnderstanding || task.inputSummary)}</dd></div>

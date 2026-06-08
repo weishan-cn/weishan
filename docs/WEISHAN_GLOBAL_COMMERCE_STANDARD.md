@@ -457,6 +457,14 @@ SubPlan Question Generator 只根据缺失信息生成补充问题。问题用�
 
 SubPlan Question Generator 不得自动付款、自动下单、提交订单或保存证件 / 银行卡，也不得保存原始 GPS 坐标。问题展示只能使用自然语言，不得向普通用户暴露 raw/internal question generator 字段。
 
+### SubPlan Answer Collector 标准
+
+SubPlan Answer Collector 只把用户回答映射到子计划草稿。答案收集不代表任何真实 provider 已接入。答案收集不允许访问真实 provider，答案收集不允许连接真实 endpoint，答案收集不允许使用 API key，答案收集不允许发起 provider 网络搜索。
+
+答案收集不允许返回真实商品结果，答案收集不允许显示真实价格，答案收集不允许返回 fake/demo/mock price，答案收集不允许跳转购买 / 预订页面。每个回答必须归属到对应子计划，不得跨子计划混用回答，也不得让不同子计划共享 provider、endpoint、API key、价格、跳转、checkout、payment、order 或身份信息。
+
+本轮不做长期持久化，不得保存身份证、护照、银行卡或敏感身份信息，不得保存原始 GPS 坐标。SubPlan Answer Collector 不得自动付款、自动下单或提交订单，也不得绕过 Local Law、Provider Onboarding、Approval、Secret Storage、Sandbox Dry Run、Connector Gate、Readiness 或 Runbook。
+
 ## 13. 当前版本链条
 
 - v2.0.25：真实价格只读展示 + 最低价精确跳转
