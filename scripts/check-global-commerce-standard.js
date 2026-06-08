@@ -167,6 +167,17 @@ const REQUIRED_PHRASES = [
   "AI fallback 不得显示真实价格",
   "AI fallback 不得返回 fake/demo/mock price",
   "AI fallback 不得绕过",
+  "Complex Intent Split Planner",
+  "只负责拆分复合需求",
+  "拆分不代表任何真实 provider 已接入",
+  "拆分不允许访问真实 provider",
+  "拆分不允许连接真实 endpoint",
+  "拆分不允许使用 API key",
+  "拆分不允许发起 provider 网络搜索",
+  "拆分不允许返回真实商品结果",
+  "拆分不允许显示真实价格",
+  "拆分不允许返回 fake/demo/mock price",
+  "每个子计划必须独立走",
   "每个版本只做一个完整功能模块"
 ];
 

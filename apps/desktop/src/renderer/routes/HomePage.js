@@ -377,6 +377,93 @@
     </section>`;
   }
 
+  function commerceComplexIntentSplitForTask(task, stored, route){
+    const existing = stored && stored.commerceComplexIntentSplit || task && task.meta && task.meta.commerceComplexIntentSplit || null;
+    if (existing && Array.isArray(existing.subPlans)) return existing;
+    const api = window.WeishanCommerceComplexIntentSplitPlanner || null;
+    if (api && api.splitComplexCommerceIntent) return api.splitComplexCommerceIntent(task && task.text || stored && stored.inputSummary || "", route || null);
+    return null;
+  }
+
+  function commerceComplexIntentSplitDisplay(splitResult){
+    const api = window.WeishanCommerceComplexIntentSplitPlanner || null;
+    if (api && api.toComplexIntentSplitDisplayStatus) return api.toComplexIntentSplitDisplayStatus(splitResult || {});
+    const subPlans = Array.isArray(splitResult && splitResult.subPlans) ? splitResult.subPlans : [];
+    return {
+      title:"复杂意图拆分计划",
+      subtitle:"复合需求会先拆成多个独立子计划，每个子计划分别走安全 gate。当前不会访问任何真实 provider。",
+      splitStatusLabel:splitResult && splitResult.shouldSplit === true ? "已拆分" : "无需拆分",
+      splitReasonLabel:splitResult && splitResult.shouldSplit === true ? "多类别复合需求" : "单一简单需求",
+      subPlanCountLabel:String(subPlans.length || 0),
+      subPlans:subPlans.map((plan) => ({
+        title:plan.title || "子计划",
+        categoryLabel:plan.categoryLabel || plan.intentCategory || "全球采购",
+        componentsLabel:Array.isArray(plan.components) ? plan.components.join(" + ") : "",
+        destinationLabel:plan.destination || "",
+        timeHintLabel:plan.timeHint || "",
+        travelerHintLabel:plan.travelerHint || "",
+        budgetHintLabel:plan.budgetHint || "",
+        optimizationGoalLabel:plan.optimizationGoal || "",
+        productHintLabel:plan.productHint || "",
+        usageHintLabel:plan.usageHint || "",
+        ticketHintLabel:plan.ticketHint || "",
+        serviceHintLabel:plan.serviceHint || "",
+        providerAccessLabel:"否",
+        priceLabel:"否",
+        redirectLabel:"否"
+      })),
+      note:"该拆分只生成计划，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。"
+    };
+  }
+
+  function commerceComplexIntentSplitHomePanel(splitResult){
+    if (!splitResult) return "";
+    const display = commerceComplexIntentSplitDisplay(splitResult);
+    const row = (label, value) => value ? `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>` : "";
+    const subPlanCard = (plan) => `<article class="commerce-split-subplan-card">
+      <h4>${esc(plan.title)}</h4>
+      <ul>
+        ${row("子计划", plan.title)}
+        ${row("类别", plan.categoryLabel)}
+        ${row("组件", plan.componentsLabel)}
+        ${row("目的地", plan.destinationLabel)}
+        ${row("时间条件", plan.timeHintLabel)}
+        ${row("人员条件", plan.travelerHintLabel)}
+        ${row("商品需求", plan.productHintLabel)}
+        ${row("用途条件", plan.usageHintLabel)}
+        ${row("票务需求", plan.ticketHintLabel)}
+        ${row("服务需求", plan.serviceHintLabel)}
+        ${row("预算条件", plan.budgetHintLabel)}
+        ${row("优化目标", plan.optimizationGoalLabel)}
+        ${row("是否访问真实平台", plan.providerAccessLabel)}
+        ${row("是否返回价格", plan.priceLabel)}
+        ${row("是否跳转购买", plan.redirectLabel)}
+      </ul>
+    </article>`;
+    return `<section class="commerce-complex-split-panel commerce-complex-split-home-panel" aria-label="复杂意图拆分计划">
+      <div class="commerce-complex-split-head">
+        <div>
+          <h3>${esc(display.title)}</h3>
+          <p>${esc(display.subtitle)}</p>
+        </div>
+        <strong>拆分状态：${esc(display.splitStatusLabel)}</strong>
+      </div>
+      <div class="commerce-complex-split-status">
+        <ul>
+          ${row("拆分状态", display.splitStatusLabel)}
+          ${row("拆分原因", display.splitReasonLabel)}
+          ${row("子计划数量", display.subPlanCountLabel)}
+        </ul>
+      </div>
+      <div class="commerce-split-subplans">
+        ${(display.subPlans || []).map(subPlanCard).join("")}
+      </div>
+      <div class="commerce-complex-split-note">
+        <p>${esc(display.note)}</p>
+      </div>
+    </section>`;
+  }
+
   function taskKey(task, idx){
     return String((task && (task.id || task.createdAt || task.finishedAt || task.updatedAt)) || idx || "");
   }
@@ -725,6 +812,7 @@
     const localLawPanelRequired = !isModelPricing && stored.complianceHealth && stored.complianceHealth.canSearchProvider === false;
     const approvalPanelRequired = !isModelPricing && ["ecommerce", "product", "hotel", "flight", "ticketing", "ticket", "serviceBooking", "service"].includes(stored.category);
     const localIntentRoute = commerceLocalIntentRouteForTask(task, stored);
+    const complexIntentSplit = commerceComplexIntentSplitForTask(task, stored, localIntentRoute);
     const providerFailed = stored.searchStatus === "failed";
     const noResults = stored.searchStatus === "noResults" || stored.searchStatus === "no_results";
     const missingFields = Array.isArray(stored.missingFields) ? stored.missingFields : [];
@@ -769,6 +857,7 @@
         ${!blocked && isFlightPlan && dateCondition ? `<p><b>日期：</b>${esc(dateCondition)}</p>` : ""}
         ${blocked ? `<p><b>原因：</b>涉及下单 / 付款 / 敏感资料或询价提交</p>` : ""}
         ${!blocked ? commerceLocalIntentHomePanel(localIntentRoute) : ""}
+        ${!blocked ? commerceComplexIntentSplitHomePanel(complexIntentSplit) : ""}
         ${!blocked && localLawPanelRequired ? commerceLocalLawHomePanel(stored) : ""}
         ${showOnboardingHomePanel ? commerceProviderIntegrationReadinessHomePanel(stored.providerIntegrationReadiness || stored.configHealth && stored.configHealth.providerIntegrationReadiness || {}) : ""}
         ${showOnboardingHomePanel ? commerceProviderIntegrationRunbookHomePanel(stored.providerIntegrationRunbook || stored.configHealth && stored.configHealth.providerIntegrationRunbook || {}) : ""}

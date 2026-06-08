@@ -2595,6 +2595,133 @@
   }
 }
 
+.commerce-complex-split-panel{
+  display:grid;
+  gap:12px;
+  padding:14px;
+  margin:12px 0;
+  border:1px solid #f59e0b;
+  border-radius:12px;
+  background:#fffbeb;
+  color:#0f172a;
+  box-shadow:0 10px 24px rgba(217,119,6,.08);
+}
+.commerce-complex-split-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid #fcd34d;
+}
+.commerce-complex-split-head h3{
+  margin:0 0 4px;
+  font-size:17px;
+  line-height:1.25;
+  color:#b45309;
+}
+.commerce-complex-split-head p{
+  margin:0;
+  color:#92400e;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-complex-split-head strong{
+  flex:0 0 auto;
+  max-width:230px;
+  border:1px solid #f59e0b;
+  border-radius:10px;
+  background:#fef3c7;
+  color:#92400e;
+  padding:8px 10px;
+  font-size:13px;
+  line-height:1.4;
+}
+.commerce-complex-split-status ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-complex-split-status li,
+.commerce-split-subplan-card li{
+  display:grid;
+  gap:3px;
+  font-size:12px;
+  line-height:1.45;
+}
+.commerce-complex-split-status li{
+  border:1px solid #fcd34d;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+}
+.commerce-complex-split-status span,
+.commerce-split-subplan-card span{
+  color:#92400e;
+  font-weight:900;
+}
+.commerce-complex-split-status b,
+.commerce-split-subplan-card b{
+  color:#0f172a;
+  font-size:12px;
+  font-weight:900;
+}
+.commerce-split-subplans{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-split-subplan-card{
+  border:1px solid #fcd34d;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+  display:grid;
+  gap:8px;
+}
+.commerce-split-subplan-card h4{
+  margin:0;
+  color:#b45309;
+  font-size:14px;
+  line-height:1.25;
+}
+.commerce-split-subplan-card ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  gap:7px;
+}
+.commerce-complex-split-note{
+  padding:10px;
+  border:1px solid #f59e0b;
+  border-radius:10px;
+  background:#fef3c7;
+  color:#78350f;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-complex-split-note p{
+  margin:0;
+}
+@media (max-width: 980px){
+  .commerce-complex-split-head{
+    display:grid;
+  }
+  .commerce-complex-split-head strong{
+    max-width:none;
+  }
+  .commerce-complex-split-status ul,
+  .commerce-split-subplans{
+    grid-template-columns:1fr;
+  }
+}
+
 .commerce-local-law-panel{
   margin:12px 0;
 }

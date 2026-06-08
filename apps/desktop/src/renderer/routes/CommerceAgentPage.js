@@ -138,10 +138,18 @@
     }
     if (!window.WeishanCommerceLocalIntentRouter && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceLocalIntentRouter"]')) {
       const localIntent = document.createElement("script");
-      localIntent.src = "./renderer/core/commerceLocalIntentRouter.js?v=2.0.49";
+      localIntent.src = "./renderer/core/commerceLocalIntentRouter.js?v=2.0.51";
       localIntent.dataset.weishanDynamic = "WeishanCommerceLocalIntentRouter";
       localIntent.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(localIntent);
+      return;
+    }
+    if (!window.WeishanCommerceComplexIntentSplitPlanner && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceComplexIntentSplitPlanner"]')) {
+      const splitPlanner = document.createElement("script");
+      splitPlanner.src = "./renderer/core/commerceComplexIntentSplitPlanner.js?v=2.0.51";
+      splitPlanner.dataset.weishanDynamic = "WeishanCommerceComplexIntentSplitPlanner";
+      splitPlanner.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(splitPlanner);
       return;
     }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
@@ -323,6 +331,95 @@
             ${row("是否跳转购买", display.redirectLabel)}
           </ul>
         </section>
+      </div>
+    </section>`;
+  }
+
+  function commerceComplexIntentSplitForTask(task){
+    const existing = task && task.commerceComplexIntentSplit || null;
+    if (existing && Array.isArray(existing.subPlans)) return existing;
+    const planner = window.WeishanCommerceComplexIntentSplitPlanner || null;
+    if (!planner || !planner.splitComplexCommerceIntent) return null;
+    const route = commerceLocalIntentRouteForTask(task);
+    return planner.splitComplexCommerceIntent(task && task.inputSummary || "", route);
+  }
+
+  function commerceComplexIntentSplitDisplay(splitResult){
+    const planner = window.WeishanCommerceComplexIntentSplitPlanner || null;
+    if (planner && planner.toComplexIntentSplitDisplayStatus) return planner.toComplexIntentSplitDisplayStatus(splitResult || {});
+    const subPlans = Array.isArray(splitResult && splitResult.subPlans) ? splitResult.subPlans : [];
+    return {
+      title:"复杂意图拆分计划",
+      subtitle:"复合需求会先拆成多个独立子计划，每个子计划分别走安全 gate。当前不会访问任何真实 provider。",
+      splitStatusLabel:splitResult && splitResult.shouldSplit === true ? "已拆分" : "无需拆分",
+      splitReasonLabel:splitResult && splitResult.shouldSplit === true ? "多类别复合需求" : "单一简单需求",
+      subPlanCountLabel:String(subPlans.length || 0),
+      subPlans:subPlans.map((plan) => ({
+        title:plan.title || "子计划",
+        categoryLabel:plan.categoryLabel || plan.intentCategory || "全球采购",
+        componentsLabel:Array.isArray(plan.components) ? plan.components.join(" + ") : "",
+        destinationLabel:plan.destination || "",
+        timeHintLabel:plan.timeHint || "",
+        travelerHintLabel:plan.travelerHint || "",
+        budgetHintLabel:plan.budgetHint || "",
+        optimizationGoalLabel:plan.optimizationGoal || "",
+        productHintLabel:plan.productHint || "",
+        usageHintLabel:plan.usageHint || "",
+        ticketHintLabel:plan.ticketHint || "",
+        serviceHintLabel:plan.serviceHint || "",
+        providerAccessLabel:"否",
+        priceLabel:"否",
+        redirectLabel:"否"
+      })),
+      note:"该拆分只生成计划，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。"
+    };
+  }
+
+  function commerceComplexIntentSplitPanelHtml(task){
+    const splitResult = commerceComplexIntentSplitForTask(task);
+    if (!splitResult) return "";
+    const display = commerceComplexIntentSplitDisplay(splitResult);
+    const row = (label, value) => value ? `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>` : "";
+    const subPlanCard = (plan) => `<article class="commerce-split-subplan-card">
+      <h4>${esc(plan.title)}</h4>
+      <ul>
+        ${row("子计划", plan.title)}
+        ${row("类别", plan.categoryLabel)}
+        ${row("组件", plan.componentsLabel)}
+        ${row("目的地", plan.destinationLabel)}
+        ${row("时间条件", plan.timeHintLabel)}
+        ${row("人员条件", plan.travelerHintLabel)}
+        ${row("商品需求", plan.productHintLabel)}
+        ${row("用途条件", plan.usageHintLabel)}
+        ${row("票务需求", plan.ticketHintLabel)}
+        ${row("服务需求", plan.serviceHintLabel)}
+        ${row("预算条件", plan.budgetHintLabel)}
+        ${row("优化目标", plan.optimizationGoalLabel)}
+        ${row("是否访问真实平台", plan.providerAccessLabel)}
+        ${row("是否返回价格", plan.priceLabel)}
+        ${row("是否跳转购买", plan.redirectLabel)}
+      </ul>
+    </article>`;
+    return `<section class="commerce-complex-split-panel" aria-label="复杂意图拆分计划">
+      <div class="commerce-complex-split-head">
+        <div>
+          <h3>${esc(display.title)}</h3>
+          <p>${esc(display.subtitle)}</p>
+        </div>
+        <strong>拆分状态：${esc(display.splitStatusLabel)}</strong>
+      </div>
+      <div class="commerce-complex-split-status">
+        <ul>
+          ${row("拆分状态", display.splitStatusLabel)}
+          ${row("拆分原因", display.splitReasonLabel)}
+          ${row("子计划数量", display.subPlanCountLabel)}
+        </ul>
+      </div>
+      <div class="commerce-split-subplans">
+        ${(display.subPlans || []).map(subPlanCard).join("")}
+      </div>
+      <div class="commerce-complex-split-note">
+        <p>${esc(display.note)}</p>
       </div>
     </section>`;
   }
@@ -799,6 +896,7 @@
         </div>
         <span class="commerce-status ${esc(task.status)}">${esc(taskStatusLabel(task.status))}</span>
       </div>
+      ${commerceComplexIntentSplitPanelHtml(task)}
       <div class="commerce-detail-grid">
         ${section("需求理解", `<dl class="commerce-facts">
           <div><dt>用户需求</dt><dd>${esc(detail.demandUnderstanding || task.inputSummary)}</dd></div>

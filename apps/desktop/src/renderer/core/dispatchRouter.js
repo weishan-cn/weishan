@@ -148,6 +148,10 @@
     return window.WeishanCommerceLocalIntentRouter || null;
   }
 
+  function commerceComplexIntentSplitPlannerApi(){
+    return window.WeishanCommerceComplexIntentSplitPlanner || null;
+  }
+
   function applyComplexCommerceLocalIntent(commercePlan, route){
     if (!commercePlan || !route || route.aiFallbackRequired !== true) return commercePlan;
     const protectedCategories = new Set(["cruise", "privateJet", "train", "domain", "aiModelPricing"]);
@@ -169,6 +173,15 @@
       optimizationGoal:route.optimizationGoal || "",
       useCaseHint:route.useCaseHint || ""
     };
+    return commercePlan;
+  }
+
+  function attachComplexCommerceSplit(commercePlan, input, route){
+    if (!commercePlan) return commercePlan;
+    const planner = commerceComplexIntentSplitPlannerApi();
+    if (planner && planner.splitComplexCommerceIntent) {
+      commercePlan.commerceComplexIntentSplit = planner.splitComplexCommerceIntent(input, route || commercePlan.commerceLocalIntentRoute || null);
+    }
     return commercePlan;
   }
 
@@ -357,6 +370,7 @@
       const commercePlan = api && api.createCommercePlan ? api.createCommercePlan(cleanInput) : null;
       if (commercePlan && commerceLocalIntentRoute) commercePlan.commerceLocalIntentRoute = commerceLocalIntentRoute;
       applyComplexCommerceLocalIntent(commercePlan, commerceLocalIntentRoute);
+      attachComplexCommerceSplit(commercePlan, cleanInput, commerceLocalIntentRoute);
       plan.executionMode = "commerce_agent_plan_only";
       plan.realExecution = false;
       plan.requiresUserConfirmation = true;

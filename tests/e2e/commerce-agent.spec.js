@@ -2052,6 +2052,177 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(home).not.toContainText("extractedConstraints");
   });
 
+  test("complex intent split planner contract creates safe subplans only", async () => {
+    await gotoRoute(page, "home");
+    const result = await page.evaluate(async () => {
+      delete window.WeishanCommerceLocalIntentRouter;
+      delete window.WeishanCommerceComplexIntentSplitPlanner;
+      async function load(src) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src + "?contract=" + Date.now();
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+      await load("./renderer/core/commerceLocalIntentRouter.js?v=2.0.51");
+      await load("./renderer/core/commerceComplexIntentSplitPlanner.js?v=2.0.51");
+      const router = window.WeishanCommerceLocalIntentRouter;
+      const planner = window.WeishanCommerceComplexIntentSplitPlanner;
+      const contract = planner.getComplexIntentSplitPlannerContract();
+      const travelProductInput = "下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。";
+      const travelTicketInput = "下个月去东京，帮我看机票酒店和演唱会门票。";
+      const productServiceInput = "帮我买一个手机，再预约附近理发。";
+      const simpleInput = "买华为手机";
+      const travelProduct = planner.splitComplexCommerceIntent(travelProductInput, router.routeCommerceIntentLocally(travelProductInput));
+      const travelTicket = planner.splitComplexCommerceIntent(travelTicketInput, router.routeCommerceIntentLocally(travelTicketInput));
+      const productService = planner.splitComplexCommerceIntent(productServiceInput, router.routeCommerceIntentLocally(productServiceInput));
+      const simple = planner.splitComplexCommerceIntent(simpleInput, router.routeCommerceIntentLocally(simpleInput));
+      const display = planner.toComplexIntentSplitDisplayStatus(travelProduct);
+      return { contract, travelProduct, travelTicket, productService, simple, display };
+    });
+    expect(result.contract.splitPlannerVersion).toBe("2.0.51");
+    expect(result.contract.phase).toBe("complex_intent_split_planner");
+    expect(result.contract.defaultMode).toBe("split_complex_commerce_intent");
+    for (const key of ["splitTravelAndProduct", "splitTravelAndTicket", "splitProductAndService", "splitMultipleMajorCategories", "keepSimpleIntentAsSinglePlan", "noProviderAccessDuringSplit", "noPriceDuringSplit", "noRedirectDuringSplit"]) {
+      expect(result.contract.splitPolicy[key]).toBe(true);
+    }
+    for (const key of ["canSplitComplexIntent", "canCreateTravelSubPlan", "canCreateProductSubPlan", "canCreateTicketSubPlan", "canCreateLocalServiceSubPlan", "canCreateHotelSubPlan", "canCreateFlightSubPlan"]) {
+      expect(result.contract.capabilities[key]).toBe(true);
+    }
+    for (const key of ["canAccessProvider", "canUseApiKey", "canUseNetwork", "canReturnRealResults", "canReturnRealPrice", "canReturnMockPrice", "canRedirect", "canCheckout", "canPay", "canSubmitOrder"]) {
+      expect(result.contract.capabilities[key]).toBe(false);
+    }
+    for (const key of ["noRealEndpoint", "noRealApiKey", "noNetworkSearch", "noRealResults", "noRealPrice", "noFakeDemoMockPrice", "noRedirect", "noCheckout", "noPayment", "noOrderSubmit", "noIdentityStorage", "noRawGpsStorage", "noBypassLocalLaw"]) {
+      expect(result.contract.safety[key]).toBe(true);
+    }
+    expect(result.travelProduct.shouldSplit).toBe(true);
+    expect(result.travelProduct.splitReason).toBe("multiple_major_categories");
+    expect(result.travelProduct.subPlans.map((plan) => plan.commerceType)).toEqual(["travel_plan", "product"]);
+    expect(result.travelProduct.subPlans[0].components).toEqual(["flight", "hotel"]);
+    expect(result.travelProduct.subPlans[0].destination).toBe("东京");
+    expect(result.travelProduct.subPlans[0].timeHint).toBe("下个月");
+    expect(result.travelProduct.subPlans[0].travelerHint).toBe("带孩子");
+    expect(result.travelProduct.subPlans[0].budgetHint).toContain("一万以内");
+    expect(result.travelProduct.subPlans[0].optimizationGoal).toBe("性价比高");
+    expect(result.travelProduct.subPlans[1].productHint).toBe("适合剪视频的电脑");
+    expect(result.travelProduct.subPlans[1].usageHint).toBe("剪视频");
+    expect(result.travelProduct.subPlans[1].budgetHint).toContain("一万以内");
+    expect(result.travelProduct.subPlans[1].optimizationGoal).toBe("性价比");
+    expect(result.travelTicket.subPlans.map((plan) => plan.commerceType)).toEqual(["travel_plan", "ticket"]);
+    expect(result.travelTicket.subPlans[1].ticketHint).toBe("演唱会门票");
+    expect(result.productService.subPlans.map((plan) => plan.commerceType)).toEqual(["product", "serviceBooking"]);
+    expect(result.productService.subPlans[0].productHint).toBe("手机");
+    expect(result.productService.subPlans[1].serviceHint).toBe("理发");
+    expect(result.simple.shouldSplit).toBe(false);
+    expect(result.simple.splitReason).toBe("simple_single_intent");
+    expect(result.simple.subPlans).toHaveLength(1);
+    for (const plan of result.travelProduct.subPlans.concat(result.travelTicket.subPlans, result.productService.subPlans, result.simple.subPlans)) {
+      expect(plan.canAccessProvider).toBe(false);
+      expect(plan.canUseApiKey).toBe(false);
+      expect(plan.canUseNetwork).toBe(false);
+      expect(plan.canReturnRealResults).toBe(false);
+      expect(plan.canReturnRealPrice).toBe(false);
+      expect(plan.canReturnMockPrice).toBe(false);
+      expect(plan.canRedirect).toBe(false);
+      expect(plan.canCheckout).toBe(false);
+      expect(plan.canPay).toBe(false);
+      expect(plan.canSubmitOrder).toBe(false);
+    }
+    expect(result.display.title).toBe("复杂意图拆分计划");
+    expect(result.display.splitStatusLabel).toBe("已拆分");
+    expect(result.display.subPlanCountLabel).toBe("2");
+  });
+
+  test("complex intent split panel separates travel product ticket and service without raw fields", async () => {
+    const cases = [
+      {
+        input:"下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。",
+        expected:["拆分状态：已拆分", "拆分原因：多类别复合需求", "子计划数量：2", "子计划：旅行计划", "类别：复合旅行计划", "组件：机票 + 酒店", "目的地：东京", "时间条件：下个月", "人员条件：带孩子", "预算条件：一万以内", "优化目标：性价比高", "子计划：商品采购计划", "类别：商品", "商品需求：适合剪视频的电脑", "用途条件：剪视频", "优化目标：性价比"]
+      },
+      {
+        input:"下个月去东京，帮我看机票酒店和演唱会门票。",
+        expected:["拆分状态：已拆分", "拆分原因：多类别复合需求", "子计划数量：2", "子计划：旅行计划", "组件：机票 + 酒店", "目的地：东京", "时间条件：下个月", "子计划：门票计划", "票务需求：演唱会门票"]
+      },
+      {
+        input:"帮我买一个手机，再预约附近理发。",
+        expected:["拆分状态：已拆分", "拆分原因：多类别复合需求", "子计划数量：2", "子计划：商品采购计划", "商品需求：手机", "子计划：本地服务计划", "服务需求：理发"]
+      }
+    ];
+    const rawFields = [
+      "splitPlannerVersion",
+      "splitMode=split_complex_commerce_intent",
+      "shouldSplit=true",
+      "splitReason=multiple_major_categories",
+      "subPlanId=travel-1",
+      "canAccessProvider=false",
+      "canUseNetwork=false",
+      "canReturnRealResults=false",
+      "canReturnRealPrice=false",
+      "canRedirect=false"
+    ];
+    for (const item of cases) {
+      await submitHomeCommand(page, runId + "-SPLIT " + item.input);
+      const home = page.locator('[data-commerce-home-summary="true"]').first();
+      const panel = home.locator(".commerce-complex-split-panel").first();
+      await expect(panel).toContainText("复杂意图拆分计划");
+      await expect(panel).toContainText("复合需求会先拆成多个独立子计划，每个子计划分别走安全 gate。当前不会访问任何真实 provider。");
+      for (const text of item.expected) await expect(panel).toContainText(text);
+      await expect(panel).toContainText("是否访问真实平台：否");
+      await expect(panel).toContainText("是否返回价格：否");
+      await expect(panel).toContainText("是否跳转购买：否");
+      await expect(panel).toContainText("该拆分只生成计划，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。");
+      await expect(home).toContainText("当地法律合规审查");
+      await expect(home).toContainText("Provider 接入准备总览");
+      await expect(home).toContainText("Provider 接入人工审批手册");
+      await expect(home).toContainText("Connector Gate");
+      await expect(home).toContainText("Provider Sandbox Dry Run");
+      await expect(home).toContainText("Provider 密钥安全方案");
+      await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+      await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+      await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+      for (const field of rawFields) await expect(home).not.toContainText(field);
+      await page.locator("#commerceViewPlanBtn").click();
+      const detail = page.locator(".commerce-detail").first();
+      const detailPanel = detail.locator(".commerce-complex-split-panel").first();
+      await expect(detailPanel).toContainText("复杂意图拆分计划");
+      for (const text of item.expected) await expect(detailPanel).toContainText(text);
+      await expect(detailPanel).toContainText("是否访问真实平台：否");
+      await expect(detailPanel).toContainText("是否返回价格：否");
+      await expect(detailPanel).toContainText("是否跳转购买：否");
+      await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+      for (const field of rawFields) await expect(detail).not.toContainText(field);
+      await gotoRoute(page, "home");
+    }
+  });
+
+  test("simple commerce intent remains a single split plan without unlocking providers", async () => {
+    const cases = ["买华为手机", "订酒店", "订机票", "买演唱会门票", "预约理发"];
+    for (const input of cases) {
+      await submitHomeCommand(page, runId + "-NO-SPLIT " + input);
+      const home = page.locator('[data-commerce-home-summary="true"]').first();
+      const panel = home.locator(".commerce-complex-split-panel").first();
+      await expect(panel).toContainText("复杂意图拆分计划");
+      await expect(panel).toContainText("拆分状态：无需拆分");
+      await expect(panel).toContainText("拆分原因：单一简单需求");
+      await expect(panel).toContainText("子计划数量：1");
+      await expect(panel).toContainText("是否访问真实平台：否");
+      await expect(panel).toContainText("是否返回价格：否");
+      await expect(panel).toContainText("是否跳转购买：否");
+      await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+      await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+      await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+      await expect(home).not.toContainText("shouldSplit=false");
+      await expect(home).not.toContainText("simple_single_intent");
+      await page.locator("#commerceViewPlanBtn").click();
+      const detail = page.locator(".commerce-detail").first();
+      await expect(detail.locator(".commerce-complex-split-panel").first()).toContainText("拆分状态：无需拆分");
+      await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+      await gotoRoute(page, "home");
+    }
+  });
+
   test("provider stub profile panel explains ebay is only a product candidate", async () => {
     await submitHomeCommand(page, runId + "-STUB-PROFILE 买华为手机");
     const home = page.locator('[data-commerce-home-summary="true"]').first();

@@ -1,6 +1,6 @@
 (function(){
   if (!window.WeishanDispatchRouter && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/dispatchRouter.js?v=2.0.49"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/dispatchRouter.js?v=2.0.51"></scr' + 'ipt>');
   }
   if (!window.WeishanDesktopAssistant && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/desktopAssistant.js?v=2.0.15"></scr' + 'ipt>');
@@ -45,7 +45,10 @@
     document.write('<scr' + 'ipt src="./renderer/core/commerceProviderIntegrationRunbook.js?v=2.0.48"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceLocalIntentRouter && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceLocalIntentRouter.js?v=2.0.49"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceLocalIntentRouter.js?v=2.0.51"></scr' + 'ipt>');
+  }
+  if (!window.WeishanCommerceComplexIntentSplitPlanner && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceComplexIntentSplitPlanner.js?v=2.0.51"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProductProviderCandidate && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.44"></scr' + 'ipt>');
@@ -108,6 +111,10 @@
     return window.WeishanCommerceLocalIntentRouter || null;
   }
 
+  function commerceComplexIntentSplitPlanner(){
+    return window.WeishanCommerceComplexIntentSplitPlanner || null;
+  }
+
   function applyComplexCommerceLocalIntent(commercePlan, route){
     if (!commercePlan || !route || route.aiFallbackRequired !== true) return commercePlan;
     const protectedCategories = new Set(["cruise", "privateJet", "train", "domain", "aiModelPricing"]);
@@ -129,6 +136,15 @@
       optimizationGoal:route.optimizationGoal || "",
       useCaseHint:route.useCaseHint || ""
     };
+    return commercePlan;
+  }
+
+  function attachComplexCommerceSplit(commercePlan, input, route){
+    if (!commercePlan) return commercePlan;
+    const planner = commerceComplexIntentSplitPlanner();
+    if (planner && planner.splitComplexCommerceIntent) {
+      commercePlan.commerceComplexIntentSplit = planner.splitComplexCommerceIntent(input, route || commercePlan.commerceLocalIntentRoute || null);
+    }
     return commercePlan;
   }
 
@@ -328,6 +344,7 @@
     const commercePlan = plan && plan.commercePlan || (api.createCommerceTask ? api.createCommerceTask(text) : api.createCommercePlan(text));
     if (commercePlan && commerceLocalIntentRoute) commercePlan.commerceLocalIntentRoute = commerceLocalIntentRoute;
     applyComplexCommerceLocalIntent(commercePlan, commerceLocalIntentRoute);
+    attachComplexCommerceSplit(commercePlan, text, commerceLocalIntentRoute);
     const search = commerceSearch();
     if (search && search.createCommerceSearchRequest && search.hasCommerceSearchProvider) {
       const request = search.createCommerceSearchRequest(commercePlan);
