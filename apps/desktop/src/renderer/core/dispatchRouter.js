@@ -163,6 +163,9 @@
   function commerceSubPlanCompletionWorkspaceApi(){
     return window.WeishanCommerceSubPlanCompletionWorkspace || null;
   }
+  function commerceSubPlanDraftReviewSummaryApi(){
+    return window.WeishanCommerceSubPlanDraftReviewSummary || null;
+  }
 
   function applyComplexCommerceLocalIntent(commercePlan, route){
     if (!commercePlan || !route || route.aiFallbackRequired !== true) return commercePlan;
@@ -229,6 +232,10 @@
     const baseQuestions = answerLike ? previousPlan.commerceSubPlanQuestions : commercePlan && commercePlan.commerceSubPlanQuestions || previousPlan && previousPlan.commerceSubPlanQuestions || null;
     if (!baseQuestions) return commercePlan;
     commercePlan.commerceSubPlanQuestions = baseQuestions;
+    if (answerLike && previousPlan) {
+      commercePlan.commerceComplexIntentSplit = commercePlan.commerceComplexIntentSplit || previousPlan.commerceComplexIntentSplit || null;
+      commercePlan.commerceSubPlanGateMatrix = commercePlan.commerceSubPlanGateMatrix || previousPlan.commerceSubPlanGateMatrix || null;
+    }
     commercePlan.commerceSubPlanAnswerCollection = collector.collectSubPlanAnswers(input, baseQuestions, previousPlan && previousPlan.commerceSubPlanAnswerCollection || null);
     commercePlan.answerCollectorSourceTaskId = previousPlan && previousPlan.taskId || "";
     return commercePlan;
@@ -243,6 +250,21 @@
         commerceSubPlanGateMatrix:commercePlan.commerceSubPlanGateMatrix || null,
         commerceSubPlanQuestions:commercePlan.commerceSubPlanQuestions || null,
         commerceSubPlanAnswerCollection:commercePlan.commerceSubPlanAnswerCollection || null
+      });
+    }
+    return commercePlan;
+  }
+
+  function attachSubPlanDraftReviewSummary(commercePlan){
+    if (!commercePlan) return commercePlan;
+    const review = commerceSubPlanDraftReviewSummaryApi();
+    if (review && review.buildSubPlanDraftReviewSummary) {
+      commercePlan.commerceSubPlanDraftReviewSummary = review.buildSubPlanDraftReviewSummary({
+        commerceComplexIntentSplit:commercePlan.commerceComplexIntentSplit || null,
+        commerceSubPlanGateMatrix:commercePlan.commerceSubPlanGateMatrix || null,
+        commerceSubPlanQuestions:commercePlan.commerceSubPlanQuestions || null,
+        commerceSubPlanAnswerCollection:commercePlan.commerceSubPlanAnswerCollection || null,
+        commerceSubPlanCompletionWorkspace:commercePlan.commerceSubPlanCompletionWorkspace || null
       });
     }
     return commercePlan;
@@ -443,6 +465,7 @@
       attachSubPlanQuestions(commercePlan);
       attachSubPlanAnswers(commercePlan, cleanInput);
       attachSubPlanCompletionWorkspace(commercePlan);
+      attachSubPlanDraftReviewSummary(commercePlan);
       plan.executionMode = "commerce_agent_plan_only";
       plan.realExecution = false;
       plan.requiresUserConfirmation = true;

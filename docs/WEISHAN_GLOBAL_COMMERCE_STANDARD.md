@@ -475,6 +475,18 @@ SubPlan Completion Workspace 只汇总每个子计划的已补齐字段、仍缺
 
 SubPlan Completion Workspace 不得长期保存用户答案，不得保存身份证、护照、银行卡或敏感身份信息，不得保存原始 GPS 坐标。补齐工作台不得自动付款、自动下单或提交订单，也不得绕过 Local Law、Provider Onboarding、Approval、Secret Storage、Sandbox Dry Run、Connector Gate、Readiness 或 Runbook。用户 UI 只能显示自然语言补齐工作台，不得向普通用户暴露 raw/internal completion workspace 字段。
 
+### SubPlan Draft Review Summary 标准
+
+SubPlan Draft Review Summary 只整理可复核的子计划草稿。草稿复核摘要用于让用户检查每个子计划已补齐字段、仍未确认字段、剩余风险和下一步动作，不代表任何真实 provider 已接入。
+
+草稿复核摘要不代表任何真实 provider 已接入。草稿复核摘要不允许访问真实 provider，草稿复核摘要不允许连接真实 endpoint，草稿复核摘要不允许使用 API key，草稿复核摘要不允许发起 provider 网络搜索。
+
+草稿复核摘要不允许返回真实商品结果，草稿复核摘要不允许显示真实价格，草稿复核摘要不允许返回 fake/demo/mock price，草稿复核摘要不允许跳转购买 / 预订页面。
+
+草稿复核摘要不得自动付款、自动下单或提交订单。草稿复核摘要不得保存身份证、护照、银行卡或敏感身份信息，不得保存原始 GPS 坐标，也不得长期保存用户答案。
+
+每个复核字段必须归属到对应子计划。草稿复核摘要不得跨子计划混用字段、问题、回答、风险或下一步动作，也不得让不同子计划共享 provider、endpoint、API key、价格、跳转、checkout、payment、order 或身份信息。用户 UI 只能显示自然语言草稿复核摘要，不得向普通用户暴露 raw/internal draft review summary 字段。
+
 ### Task History Detail Restore 标准
 
 Task History Detail Restore 只用于恢复和回看任务历史详情。任务历史回看不代表重新执行任务，也不代表任何真实 provider 已接入。任务历史回看不允许访问真实 provider，任务历史回看不允许连接真实 endpoint，任务历史回看不允许使用 API key，任务历史回看不允许发起 provider 网络搜索。
@@ -493,6 +505,7 @@ Task History Detail Restore 不得自动付款、自动下单或提交订单，�
 - v2.0.30：全球商品 provider 候选评估
 - v2.0.55：Task History Detail Restore / 任务历史详情恢复
 - v2.0.56：SubPlan Completion Workspace / 子计划补齐工作台
+- v2.0.57：SubPlan Draft Review Summary / 子计划草稿复核摘要
 
 后续版本必须继续保持全球多源、只读搜索、安全门控、外部跳转的方向，不能退化为单一平台工具。
 

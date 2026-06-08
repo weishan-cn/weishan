@@ -3234,6 +3234,148 @@
 .commerce-subplan-completion-note p{
   margin:0;
 }
+.commerce-subplan-draft-review-panel{
+  display:grid;
+  gap:12px;
+  padding:14px;
+  margin:12px 0;
+  border:1px solid #a855f7;
+  border-radius:12px;
+  background:#faf5ff;
+  color:#0f172a;
+  box-shadow:0 10px 24px rgba(168,85,247,.08);
+}
+.commerce-subplan-draft-review-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid #e9d5ff;
+}
+.commerce-subplan-draft-review-head h3{
+  margin:0 0 4px;
+  color:#7e22ce;
+  font-size:17px;
+  line-height:1.25;
+}
+.commerce-subplan-draft-review-head p{
+  margin:0;
+  color:#6b21a8;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-subplan-draft-review-head strong{
+  flex:0 0 auto;
+  max-width:240px;
+  border:1px solid #a855f7;
+  border-radius:10px;
+  background:#f3e8ff;
+  color:#6b21a8;
+  padding:8px 10px;
+  font-size:13px;
+  line-height:1.4;
+}
+.commerce-subplan-draft-review-status ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  grid-template-columns:repeat(7, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-subplan-draft-review-status li,
+.commerce-subplan-draft-review-meta li{
+  display:grid;
+  gap:3px;
+  border:1px solid #e9d5ff;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+  font-size:12px;
+  line-height:1.45;
+}
+.commerce-subplan-draft-review-status span,
+.commerce-subplan-draft-review-meta span{
+  color:#6b21a8;
+  font-weight:900;
+}
+.commerce-subplan-draft-review-status b,
+.commerce-subplan-draft-review-meta b{
+  color:#0f172a;
+  font-size:12px;
+  font-weight:900;
+}
+.commerce-subplan-draft-review-cards{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-subplan-draft-review-card{
+  border:1px solid #e9d5ff;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+  display:grid;
+  gap:10px;
+}
+.commerce-subplan-draft-review-card h4{
+  margin:0;
+  color:#7e22ce;
+  font-size:14px;
+  line-height:1.25;
+}
+.commerce-subplan-draft-review-meta{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:8px;
+}
+.commerce-subplan-draft-review-columns{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:8px;
+}
+.commerce-subplan-draft-review-columns div{
+  border:1px solid #f3e8ff;
+  border-radius:10px;
+  background:#fdfaff;
+  padding:9px;
+  display:grid;
+  gap:6px;
+}
+.commerce-subplan-draft-review-columns b{
+  color:#6b21a8;
+  font-size:12px;
+  font-weight:950;
+}
+.commerce-subplan-draft-review-columns ul{
+  margin:0;
+  padding-left:18px;
+  display:grid;
+  gap:5px;
+}
+.commerce-subplan-draft-review-columns li{
+  color:#0f172a;
+  font-size:12px;
+  line-height:1.45;
+}
+.commerce-subplan-draft-review-note{
+  padding:10px;
+  border:1px solid #a855f7;
+  border-radius:10px;
+  background:#f3e8ff;
+  color:#6b21a8;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-subplan-draft-review-note p{
+  margin:0;
+}
 @media (max-width: 980px){
   .commerce-subplan-gate-head{
     display:grid;
@@ -3242,6 +3384,9 @@
     display:grid;
   }
   .commerce-subplan-completion-head{
+    display:grid;
+  }
+  .commerce-subplan-draft-review-head{
     display:grid;
   }
   .commerce-subplan-gate-head strong{
@@ -3253,6 +3398,9 @@
   .commerce-subplan-completion-head strong{
     max-width:none;
   }
+  .commerce-subplan-draft-review-head strong{
+    max-width:none;
+  }
   .commerce-subplan-gate-status ul,
   .commerce-subplan-gate-cards,
   .commerce-subplan-question-status ul, .commerce-subplan-answer-status ul,
@@ -3261,7 +3409,11 @@
   .commerce-subplan-completion-status ul,
   .commerce-subplan-completion-cards,
   .commerce-subplan-completion-meta,
-  .commerce-subplan-completion-columns{
+  .commerce-subplan-completion-columns,
+  .commerce-subplan-draft-review-status ul,
+  .commerce-subplan-draft-review-cards,
+  .commerce-subplan-draft-review-meta,
+  .commerce-subplan-draft-review-columns{
     grid-template-columns:1fr;
   }
 }

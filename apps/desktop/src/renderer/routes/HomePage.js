@@ -721,6 +721,76 @@
     </section>`;
   }
 
+  function commerceSubPlanDraftReviewForTask(task, stored, splitResult, matrix, questionResult, answerResult, workspaceResult){
+    const existing = stored && stored.commerceSubPlanDraftReviewSummary || task && task.meta && task.meta.commerceSubPlanDraftReviewSummary || null;
+    if (existing && Array.isArray(existing.reviewItems)) return existing;
+    const api = window.WeishanCommerceSubPlanDraftReviewSummary || null;
+    if (api && api.buildSubPlanDraftReviewSummary) {
+      return api.buildSubPlanDraftReviewSummary({
+        commerceComplexIntentSplit:splitResult || null,
+        commerceSubPlanGateMatrix:matrix || null,
+        commerceSubPlanQuestions:questionResult || null,
+        commerceSubPlanAnswerCollection:answerResult || null,
+        commerceSubPlanCompletionWorkspace:workspaceResult || null
+      });
+    }
+    return null;
+  }
+
+  function commerceSubPlanDraftReviewDisplay(reviewResult){
+    const api = window.WeishanCommerceSubPlanDraftReviewSummary || null;
+    if (api && api.toSubPlanDraftReviewDisplayStatus) return api.toSubPlanDraftReviewDisplayStatus(reviewResult || {});
+    return { title:"子计划草稿复核摘要", subtitle:"把已补齐的信息整理成可复核摘要，供用户确认。当前不会访问任何真实 provider。", overallStatusLabel:"仍需补充", subPlanCountLabel:"0", readyReviewItemCountLabel:"0", needsMoreInformationCountLabel:"0", providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否", items:[], note:"该复核摘要只用于确认计划草稿，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。" };
+  }
+
+  function commerceSubPlanDraftReviewHomePanel(reviewResult){
+    if (!reviewResult) return "";
+    const display = commerceSubPlanDraftReviewDisplay(reviewResult);
+    const row = (label, value) => value ? `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>` : "";
+    const list = (items, emptyLabel) => `<ul>${(items && items.length ? items : [emptyLabel]).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>`;
+    const reviewCard = (item, index) => `<article class="commerce-subplan-draft-review-card">
+      <h4>子计划 ${index + 1}：${esc(item.title)}</h4>
+      <ul class="commerce-subplan-draft-review-meta">
+        ${row("子计划", item.title)}
+        ${row("类别", item.categoryLabel)}
+        ${row("复核状态", item.reviewStatusLabel)}
+        ${row("是否访问真实平台", item.providerAccessLabel)}
+        ${row("是否返回价格", item.priceLabel)}
+        ${row("是否跳转购买", item.redirectLabel)}
+      </ul>
+      <div class="commerce-subplan-draft-review-columns">
+        <div><b>${esc(item.confirmPrompt)}</b>${list(item.confirmableFields, "暂无已确认字段")}</div>
+        <div><b>仍未确认</b>${list(item.unconfirmedFields, "暂无")}</div>
+        <div><b>剩余风险</b>${list(item.remainingRisks, "当前仍受安全 gate 阻断")}</div>
+        <div><b>下一步</b>${list(item.reviewActions, "等待用户复核草稿")}</div>
+      </div>
+    </article>`;
+    return `<section class="commerce-subplan-draft-review-panel commerce-subplan-draft-review-home-panel" aria-label="子计划草稿复核摘要">
+      <div class="commerce-subplan-draft-review-head">
+        <div>
+          <h3>${esc(display.title)}</h3>
+          <p>${esc(display.subtitle)}</p>
+        </div>
+        <strong>总体状态：${esc(display.overallStatusLabel)}</strong>
+      </div>
+      <div class="commerce-subplan-draft-review-status">
+        <ul>
+          ${row("总体状态", display.overallStatusLabel)}
+          ${row("子计划数量", display.subPlanCountLabel)}
+          ${row("可复核子计划数量", display.readyReviewItemCountLabel)}
+          ${row("仍需补充子计划数量", display.needsMoreInformationCountLabel)}
+          ${row("是否访问真实平台", display.providerAccessLabel)}
+          ${row("是否返回价格", display.priceLabel)}
+          ${row("是否跳转购买", display.redirectLabel)}
+        </ul>
+      </div>
+      <div class="commerce-subplan-draft-review-cards">
+        ${(display.items || []).map(reviewCard).join("")}
+      </div>
+      <div class="commerce-subplan-draft-review-note"><p>${esc(display.note)}</p></div>
+    </section>`;
+  }
+
   function commerceSubPlanQuestionsHomePanel(questionResult){
     if (!questionResult) return "";
     const display = commerceSubPlanQuestionsDisplay(questionResult);
@@ -1213,6 +1283,7 @@
     const subPlanQuestions = commerceSubPlanQuestionsForTask(task, stored, subPlanGateMatrix);
     const subPlanAnswerCollection = commerceSubPlanAnswerCollectionForTask(task, stored, subPlanQuestions);
     const subPlanCompletionWorkspace = commerceSubPlanCompletionWorkspaceForTask(task, stored, complexIntentSplit, subPlanGateMatrix, subPlanQuestions, subPlanAnswerCollection);
+    const subPlanDraftReviewSummary = commerceSubPlanDraftReviewForTask(task, stored, complexIntentSplit, subPlanGateMatrix, subPlanQuestions, subPlanAnswerCollection, subPlanCompletionWorkspace);
     const providerFailed = stored.searchStatus === "failed";
     const noResults = stored.searchStatus === "noResults" || stored.searchStatus === "no_results";
     const missingFields = Array.isArray(stored.missingFields) ? stored.missingFields : [];
@@ -1262,6 +1333,7 @@
         ${!blocked ? commerceSubPlanQuestionsHomePanel(subPlanQuestions) : ""}
         ${!blocked ? commerceSubPlanAnswerCollectionHomePanel(subPlanAnswerCollection) : ""}
         ${!blocked ? commerceSubPlanCompletionWorkspaceHomePanel(subPlanCompletionWorkspace) : ""}
+        ${!blocked ? commerceSubPlanDraftReviewHomePanel(subPlanDraftReviewSummary) : ""}
         ${!blocked && localLawPanelRequired ? commerceLocalLawHomePanel(stored) : ""}
         ${showOnboardingHomePanel ? commerceProviderIntegrationReadinessHomePanel(stored.providerIntegrationReadiness || stored.configHealth && stored.configHealth.providerIntegrationReadiness || {}) : ""}
         ${showOnboardingHomePanel ? commerceProviderIntegrationRunbookHomePanel(stored.providerIntegrationRunbook || stored.configHealth && stored.configHealth.providerIntegrationRunbook || {}) : ""}

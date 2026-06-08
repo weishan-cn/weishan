@@ -2566,6 +2566,76 @@ test.describe.serial("commerce agent workbench", () => {
     expect(product.nextActions.join(" ")).toContain("等待 provider 接入审批完成");
   });
 
+  test("subplan draft review summary contract keeps review local and provider blocked", async () => {
+    await gotoRoute(page, "home");
+    const result = await page.evaluate(async () => {
+      delete window.WeishanCommerceLocalIntentRouter;
+      delete window.WeishanCommerceComplexIntentSplitPlanner;
+      delete window.WeishanCommerceSubPlanGateMatrix;
+      delete window.WeishanCommerceSubPlanQuestionGenerator;
+      delete window.WeishanCommerceSubPlanAnswerCollector;
+      delete window.WeishanCommerceSubPlanCompletionWorkspace;
+      delete window.WeishanCommerceSubPlanDraftReviewSummary;
+      async function load(src) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src + "?draft-review-contract=" + Date.now();
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+      await load("./renderer/core/commerceLocalIntentRouter.js?v=2.0.54");
+      await load("./renderer/core/commerceComplexIntentSplitPlanner.js?v=2.0.54");
+      await load("./renderer/core/commerceSubPlanGateMatrix.js?v=2.0.54");
+      await load("./renderer/core/commerceSubPlanQuestionGenerator.js?v=2.0.54");
+      await load("./renderer/core/commerceSubPlanAnswerCollector.js?v=2.0.54");
+      await load("./renderer/core/commerceSubPlanCompletionWorkspace.js?v=2.0.56");
+      await load("./renderer/core/commerceSubPlanDraftReviewSummary.js?v=2.0.57");
+      const input = "下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。";
+      const answer = "我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。";
+      const route = window.WeishanCommerceLocalIntentRouter.routeCommerceIntentLocally(input);
+      const split = window.WeishanCommerceComplexIntentSplitPlanner.splitComplexCommerceIntent(input, route);
+      const matrix = window.WeishanCommerceSubPlanGateMatrix.buildSubPlanGateMatrix(split);
+      const questions = window.WeishanCommerceSubPlanQuestionGenerator.generateQuestionsForSubPlanMatrix(matrix);
+      const answers = window.WeishanCommerceSubPlanAnswerCollector.collectSubPlanAnswers(answer, questions);
+      const workspace = window.WeishanCommerceSubPlanCompletionWorkspace.buildSubPlanCompletionWorkspace({
+        commerceComplexIntentSplit:split,
+        commerceSubPlanGateMatrix:matrix,
+        commerceSubPlanQuestions:questions,
+        commerceSubPlanAnswerCollection:answers
+      });
+      const reviewApi = window.WeishanCommerceSubPlanDraftReviewSummary;
+      const review = reviewApi.buildSubPlanDraftReviewSummary({
+        commerceComplexIntentSplit:split,
+        commerceSubPlanGateMatrix:matrix,
+        commerceSubPlanQuestions:questions,
+        commerceSubPlanAnswerCollection:answers,
+        commerceSubPlanCompletionWorkspace:workspace
+      });
+      return { contract:reviewApi.getSubPlanDraftReviewContract(), review, display:reviewApi.toSubPlanDraftReviewDisplayStatus(review) };
+    });
+    expect(result.contract.draftReviewVersion).toBe("2.0.57");
+    expect(result.contract.phase).toBe("subplan_draft_review_summary");
+    expect(result.contract.defaultMode).toBe("review_completed_subplan_drafts");
+    for (const key of ["summarizeSubPlanDrafts", "showUserConfirmableSummary", "showConfirmedFields", "showUnconfirmedFields", "showRemainingRisks", "preserveSubPlanIsolation", "temporarySessionOnly", "noLongTermStorage", "noProviderAccess", "noPriceDuringReview", "noRedirectDuringReview", "noCheckoutDuringReview"]) expect(result.contract.reviewPolicy[key]).toBe(true);
+    for (const key of ["canBuildDraftReviewSummary", "canShowConfirmableDraft", "canShowConfirmedFields", "canShowUnconfirmedFields", "canShowRemainingRisks", "canSuggestReviewActions"]) expect(result.contract.capabilities[key]).toBe(true);
+    for (const key of ["canAccessProvider", "canUseApiKey", "canUseNetwork", "canReturnRealResults", "canReturnRealPrice", "canReturnMockPrice", "canRedirect", "canCheckout", "canPay", "canSubmitOrder", "canStoreIdentity"]) expect(result.contract.capabilities[key]).toBe(false);
+    for (const key of ["noRealEndpoint", "noRealApiKey", "noNetworkSearch", "noRealResults", "noRealPrice", "noFakeDemoMockPrice", "noRedirect", "noIdentityStorage"]) expect(result.contract.safety[key]).toBe(true);
+    expect(result.review.subPlanCount).toBe(2);
+    expect(result.review.canProceedToProviderReview).toBe(false);
+    expect(result.display.title).toBe("子计划草稿复核摘要");
+    expect(result.display.providerAccessLabel).toBe("否");
+    expect(result.display.priceLabel).toBe("否");
+    expect(result.display.redirectLabel).toBe("否");
+    const travel = result.display.items.find((item) => item.title === "旅行计划");
+    const product = result.display.items.find((item) => item.title === "商品采购计划");
+    expect(travel.confirmableFields).toEqual(expect.arrayContaining(["出发地：成都", "出行日期：7月12日", "入住日期：7月12日", "离店日期：7月16日", "儿童年龄：8岁"]));
+    expect(product.confirmableFields).toEqual(expect.arrayContaining(["商品需求：适合剪视频的电脑", "预算：一万以内", "品牌偏好：都可以", "性能要求：32G 内存 / 1T 硬盘", "收货地：成都", "是否接受二手：不接受"]));
+    expect(travel.remainingRisks.join(" ")).toContain("Connector Gate 已阻断");
+    expect(product.remainingRisks.join(" ")).toContain("当前不能访问真实平台，不能返回价格");
+  });
+
   test("subplan completion workspace shows completed remaining fields and next actions without raw fields", async () => {
     await submitHomeCommand(page, runId + "-COMPLETION 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。");
     await submitHomeCommand(page, runId + "-COMPLETION 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
@@ -2592,6 +2662,32 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
   });
 
+  test("subplan draft review summary shows confirmable drafts without raw fields", async () => {
+    await submitHomeCommand(page, runId + "-DRAFT-REVIEW 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。");
+    await submitHomeCommand(page, runId + "-DRAFT-REVIEW 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
+    const home = page.locator('[data-commerce-home-summary="true"]').first();
+    const panel = home.locator(".commerce-subplan-draft-review-panel").first();
+    await expect(panel).toContainText("子计划草稿复核摘要");
+    await expect(panel).toContainText("旅行计划");
+    await expect(panel).toContainText("商品采购计划");
+    for (const text of ["请确认以下旅行计划是否准确", "出发地：成都", "出行日期：7月12日", "入住日期：7月12日", "离店日期：7月16日", "儿童年龄：8岁", "请确认以下商品采购计划是否准确", "商品需求：适合剪视频的电脑", "品牌偏好：都可以", "性能要求：32G 内存 / 1T 硬盘", "收货地：成都", "是否接受二手：不接受", "剩余风险", "当地法律合规未确认", "Provider 审批未完成", "Connector Gate 已阻断", "是否访问真实平台：否", "是否返回价格：否", "是否跳转购买：否"]) await expect(panel).toContainText(text);
+    const rawFields = ["draftReviewVersion", "defaultMode=review_completed_subplan_drafts", "reviewItems", "confirmableSummary", "unconfirmedFields", "remainingRisks", "canAccessProvider=false", "canUseNetwork=false", "canReturnRealPrice=false", "canRedirect=false", "rawTask", "dispatchPayload", "commandPayload"];
+    for (const field of rawFields) await expect(home).not.toContainText(field);
+    await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+    await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+    await page.locator("#commerceViewPlanBtn").click();
+    const detail = page.locator(".commerce-detail").first();
+    const detailPanel = detail.locator(".commerce-subplan-draft-review-panel").first();
+    await expect(detailPanel).toContainText("子计划草稿复核摘要");
+    await expect(detailPanel).toContainText("旅行计划");
+    await expect(detailPanel).toContainText("商品采购计划");
+    await expect(detailPanel).toContainText("出发地：成都");
+    await expect(detailPanel).toContainText("性能要求：32G 内存 / 1T 硬盘");
+    for (const field of rawFields) await expect(detail).not.toContainText(field);
+    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+  });
+
   test("subplan completion workspace supports simple product ticket and local service next questions", async () => {
     const cases = [
       { input:"买华为手机", title:"商品采购计划", expected:["子计划补齐工作台", "收货地在哪个国家或城市？", "预算大概是多少？", "你需要什么型号或配置？"] },
@@ -2614,6 +2710,26 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
+  test("subplan draft review summary asks for missing fields on simple product", async () => {
+    await submitHomeCommand(page, runId + "-DRAFT-REVIEW-SIMPLE 买华为手机");
+    const home = page.locator('[data-commerce-home-summary="true"]').first();
+    const panel = home.locator(".commerce-subplan-draft-review-panel").first();
+    await expect(panel).toContainText("子计划草稿复核摘要");
+    await expect(panel).toContainText("总体状态：仍需补充");
+    await expect(panel).toContainText("商品采购计划");
+    await expect(panel).toContainText("收货地");
+    await expect(panel).toContainText("预算");
+    await expect(panel).toContainText("型号或配置");
+    await expect(panel).toContainText("下一步");
+    await expect(panel).toContainText("先回答补充问题");
+    await expect(panel).toContainText("是否访问真实平台：否");
+    await expect(panel).toContainText("是否返回价格：否");
+    await expect(panel).toContainText("是否跳转购买：否");
+    for (const field of ["draftReviewVersion", "defaultMode=review_completed_subplan_drafts", "reviewItems", "confirmableSummary", "unconfirmedFields", "remainingRisks", "canAccessProvider=false"]) await expect(home).not.toContainText(field);
+    await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+  });
+
   test("task history detail restores subplan completion workspace without rerun", async () => {
     const demand = runId + "-COMPLETION-HISTORY 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。";
     const answer = runId + "-COMPLETION-HISTORY 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。";
@@ -2634,6 +2750,32 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail).toContainText("历史回看不会重新执行任务");
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
     for (const field of ["completionWorkspaceVersion", "defaultMode=guided_subplan_completion", "workspaceItems", "temporarySessionOnly=true", "temporaryDraftOnly=true", "canAccessProvider=false"]) await expect(detail).not.toContainText(field);
+    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(detail.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+  });
+
+  test("task history detail restores subplan draft review summary without rerun", async () => {
+    const demand = runId + "-DRAFT-REVIEW-HISTORY 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。";
+    const answer = runId + "-DRAFT-REVIEW-HISTORY 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。";
+    await submitHomeCommand(page, demand);
+    await submitHomeCommand(page, answer);
+    await submitHomeCommand(page, runId + "-DRAFT-REVIEW-HISTORY 买演唱会门票");
+    const historyItems = page.locator("#cmdHistory [data-history-id]");
+    await expect(historyItems.filter({ hasText:answer }).first()).toBeVisible();
+    const historyCountBefore = await historyItems.count();
+    await historyItems.filter({ hasText:answer }).first().click();
+    const detail = page.locator('#cmdConsole [data-task-history-detail="true"]').first();
+    await expect(detail).toContainText("历史任务详情");
+    await expect(detail).toContainText("子计划草稿复核摘要");
+    await expect(detail).toContainText("旅行计划");
+    await expect(detail).toContainText("商品采购计划");
+    await expect(detail).toContainText("出发地：成都");
+    await expect(detail).toContainText("收货地：成都");
+    await expect(detail).toContainText("剩余风险");
+    await expect(detail).toContainText("安全边界");
+    await expect(detail).toContainText("历史回看不会重新执行任务");
+    await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
+    for (const field of ["draftReviewVersion", "defaultMode=review_completed_subplan_drafts", "reviewItems", "confirmableSummary", "unconfirmedFields", "remainingRisks", "canAccessProvider=false"]) await expect(detail).not.toContainText(field);
     await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(detail.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
   });
