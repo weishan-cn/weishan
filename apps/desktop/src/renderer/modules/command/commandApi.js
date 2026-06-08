@@ -1,6 +1,6 @@
 (function(){
   if (!window.WeishanDispatchRouter && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/dispatchRouter.js?v=2.0.52"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/dispatchRouter.js?v=2.0.53"></scr' + 'ipt>');
   }
   if (!window.WeishanDesktopAssistant && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/desktopAssistant.js?v=2.0.15"></scr' + 'ipt>');
@@ -45,13 +45,16 @@
     document.write('<scr' + 'ipt src="./renderer/core/commerceProviderIntegrationRunbook.js?v=2.0.48"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceLocalIntentRouter && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceLocalIntentRouter.js?v=2.0.52"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceLocalIntentRouter.js?v=2.0.53"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceComplexIntentSplitPlanner && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceComplexIntentSplitPlanner.js?v=2.0.52"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceComplexIntentSplitPlanner.js?v=2.0.53"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceSubPlanGateMatrix && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceSubPlanGateMatrix.js?v=2.0.52"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceSubPlanGateMatrix.js?v=2.0.53"></scr' + 'ipt>');
+  }
+  if (!window.WeishanCommerceSubPlanQuestionGenerator && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceSubPlanQuestionGenerator.js?v=2.0.53"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProductProviderCandidate && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.44"></scr' + 'ipt>');
@@ -120,6 +123,9 @@
   function commerceSubPlanGateMatrix(){
     return window.WeishanCommerceSubPlanGateMatrix || null;
   }
+  function commerceSubPlanQuestionGenerator(){
+    return window.WeishanCommerceSubPlanQuestionGenerator || null;
+  }
 
   function applyComplexCommerceLocalIntent(commercePlan, route){
     if (!commercePlan || !route || route.aiFallbackRequired !== true) return commercePlan;
@@ -159,6 +165,15 @@
     const matrix = commerceSubPlanGateMatrix();
     if (matrix && matrix.buildSubPlanGateMatrix) {
       commercePlan.commerceSubPlanGateMatrix = matrix.buildSubPlanGateMatrix(commercePlan.commerceComplexIntentSplit, commercePlan.providerHealth || null);
+    }
+    return commercePlan;
+  }
+
+  function attachSubPlanQuestions(commercePlan){
+    if (!commercePlan || !commercePlan.commerceSubPlanGateMatrix) return commercePlan;
+    const generator = commerceSubPlanQuestionGenerator();
+    if (generator && generator.generateQuestionsForSubPlanMatrix) {
+      commercePlan.commerceSubPlanQuestions = generator.generateQuestionsForSubPlanMatrix(commercePlan.commerceSubPlanGateMatrix);
     }
     return commercePlan;
   }
@@ -361,6 +376,7 @@
     applyComplexCommerceLocalIntent(commercePlan, commerceLocalIntentRoute);
     attachComplexCommerceSplit(commercePlan, text, commerceLocalIntentRoute);
     attachSubPlanGateMatrix(commercePlan);
+    attachSubPlanQuestions(commercePlan);
     const search = commerceSearch();
     if (search && search.createCommerceSearchRequest && search.hasCommerceSearchProvider) {
       const request = search.createCommerceSearchRequest(commercePlan);

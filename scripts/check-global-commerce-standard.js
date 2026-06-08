@@ -187,6 +187,17 @@ const REQUIRED_PHRASES = [
   "矩阵不允许返回真实商品结果",
   "矩阵不允许显示真实价格",
   "矩阵不允许返回 fake/demo/mock price",
+  "SubPlan Question Generator",
+  "只根据缺失信息生成补充问题",
+  "问题生成不代表任何真实 provider 已接入",
+  "问题生成不允许访问真实 provider",
+  "问题生成不允许连接真实 endpoint",
+  "问题生成不允许使用 API key",
+  "问题生成不允许发起 provider 网络搜索",
+  "问题生成不允许返回真实商品结果",
+  "问题生成不允许显示真实价格",
+  "问题生成不允许返回 fake/demo/mock price",
+  "每个问题必须归属到对应子计划",
   "每个子计划必须独立走",
   "每个版本只做一个完整功能模块"
 ];

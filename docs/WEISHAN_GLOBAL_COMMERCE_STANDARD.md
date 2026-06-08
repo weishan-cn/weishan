@@ -447,6 +447,16 @@ SubPlan Gate Matrix 只整理子计划、缺失信息和下一步动作。矩阵
 
 SubPlan Gate Matrix 不得自动付款、自动下单、提交订单或保存证件 / 银行卡，也不得保存原始 GPS 坐标。矩阵展示只能使用自然语言，不得向普通用户暴露 raw/internal gate 字段。
 
+### SubPlan Question Generator 标准
+
+SubPlan Question Generator 只根据缺失信息生成补充问题。问题用于帮助用户补齐每个子计划进入后续 gate 前需要确认的信息，不代表任何真实 provider 已接入。
+
+问题生成不代表任何真实 provider 已接入。问题生成不允许访问真实 provider，问题生成不允许连接真实 endpoint，问题生成不允许使用 API key，问题生成不允许发起 provider 网络搜索，问题生成不允许返回真实商品结果，问题生成不允许显示真实价格，问题生成不允许返回 fake/demo/mock price，问题生成不允许跳转购买 / 预订页面。
+
+每个问题必须归属到对应子计划。问题生成不得跨子计划混用问题，也不得让不同子计划共享 provider、endpoint、API key、价格、跳转、checkout、payment、order 或身份信息。
+
+SubPlan Question Generator 不得自动付款、自动下单、提交订单或保存证件 / 银行卡，也不得保存原始 GPS 坐标。问题展示只能使用自然语言，不得向普通用户暴露 raw/internal question generator 字段。
+
 ## 13. 当前版本链条
 
 - v2.0.25：真实价格只读展示 + 最低价精确跳转

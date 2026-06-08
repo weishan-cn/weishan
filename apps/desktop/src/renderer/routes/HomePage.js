@@ -545,6 +545,94 @@
     </section>`;
   }
 
+  function commerceSubPlanQuestionsForTask(task, stored, matrix){
+    const existing = stored && stored.commerceSubPlanQuestions || task && task.meta && task.meta.commerceSubPlanQuestions || null;
+    if (existing && Array.isArray(existing.subPlanQuestionGroups)) return existing;
+    const api = window.WeishanCommerceSubPlanQuestionGenerator || null;
+    if (api && api.generateQuestionsForSubPlanMatrix && matrix) return api.generateQuestionsForSubPlanMatrix(matrix);
+    return null;
+  }
+
+  function commerceSubPlanQuestionsDisplay(questionResult){
+    const api = window.WeishanCommerceSubPlanQuestionGenerator || null;
+    if (api && api.toSubPlanQuestionDisplayStatus) return api.toSubPlanQuestionDisplayStatus(questionResult || {});
+    const groups = Array.isArray(questionResult && questionResult.subPlanQuestionGroups) ? questionResult.subPlanQuestionGroups : [];
+    return {
+      title:"子计划补充问题",
+      subtitle:"根据每个子计划的缺失信息生成问题，帮助用户补齐信息。当前不会访问任何真实 provider。",
+      overallStatusLabel:"待补充",
+      subPlanCountLabel:String(groups.length || 0),
+      questionCountLabel:String(groups.reduce((sum, group) => sum + Number(group.questionCount || 0), 0)),
+      providerAccessLabel:"否",
+      priceLabel:"否",
+      redirectLabel:"否",
+      groups:groups.map((group) => ({
+        title:group.title || "子计划",
+        categoryLabel:group.categoryLabel || group.title || "子计划",
+        questionCountLabel:String(group.questionCount || 0),
+        providerAccessLabel:"否",
+        priceLabel:"否",
+        redirectLabel:"否",
+        questions:(Array.isArray(group.questions) ? group.questions : []).map((question) => ({
+          text:question.questionText || "",
+          priorityLabel:question.priorityLabel || "中",
+          answerTypeLabel:question.answerType || "文本",
+          optionsLabel:Array.isArray(question.options) && question.options.length ? question.options.join(" / ") : "自由填写"
+        }))
+      })),
+      note:"这些问题只用于补齐计划信息，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。"
+    };
+  }
+
+  function commerceSubPlanQuestionsHomePanel(questionResult){
+    if (!questionResult) return "";
+    const display = commerceSubPlanQuestionsDisplay(questionResult);
+    const row = (label, value) => value ? `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>` : "";
+    const questionRow = (question) => `<li>
+      <b>${esc(question.text)}</b>
+      <span>优先级：${esc(question.priorityLabel)} · 回答类型：${esc(question.answerTypeLabel)} · 选项：${esc(question.optionsLabel)}</span>
+    </li>`;
+    const groupCard = (group, index) => `<article class="commerce-subplan-question-card">
+      <h4>子计划 ${index + 1}：${esc(group.title)}</h4>
+      <ul class="commerce-subplan-question-meta">
+        ${row("子计划", group.title)}
+        ${row("类别", group.categoryLabel)}
+        ${row("问题数量", group.questionCountLabel)}
+        ${row("是否访问真实平台", group.providerAccessLabel)}
+        ${row("是否返回价格", group.priceLabel)}
+        ${row("是否跳转购买", group.redirectLabel)}
+      </ul>
+      <ol>
+        ${(group.questions || []).map(questionRow).join("")}
+      </ol>
+    </article>`;
+    return `<section class="commerce-subplan-question-panel commerce-subplan-question-home-panel" aria-label="子计划补充问题">
+      <div class="commerce-subplan-question-head">
+        <div>
+          <h3>${esc(display.title)}</h3>
+          <p>${esc(display.subtitle)}</p>
+        </div>
+        <strong>总体状态：${esc(display.overallStatusLabel)}</strong>
+      </div>
+      <div class="commerce-subplan-question-status">
+        <ul>
+          ${row("总体状态", display.overallStatusLabel)}
+          ${row("子计划数量", display.subPlanCountLabel)}
+          ${row("问题数量", display.questionCountLabel)}
+          ${row("是否访问真实平台", display.providerAccessLabel)}
+          ${row("是否返回价格", display.priceLabel)}
+          ${row("是否跳转购买", display.redirectLabel)}
+        </ul>
+      </div>
+      <div class="commerce-subplan-question-cards">
+        ${(display.groups || []).map(groupCard).join("")}
+      </div>
+      <div class="commerce-subplan-question-note">
+        <p>${esc(display.note)}</p>
+      </div>
+    </section>`;
+  }
+
   function taskKey(task, idx){
     return String((task && (task.id || task.createdAt || task.finishedAt || task.updatedAt)) || idx || "");
   }
@@ -895,6 +983,7 @@
     const localIntentRoute = commerceLocalIntentRouteForTask(task, stored);
     const complexIntentSplit = commerceComplexIntentSplitForTask(task, stored, localIntentRoute);
     const subPlanGateMatrix = commerceSubPlanGateMatrixForTask(task, stored, complexIntentSplit);
+    const subPlanQuestions = commerceSubPlanQuestionsForTask(task, stored, subPlanGateMatrix);
     const providerFailed = stored.searchStatus === "failed";
     const noResults = stored.searchStatus === "noResults" || stored.searchStatus === "no_results";
     const missingFields = Array.isArray(stored.missingFields) ? stored.missingFields : [];
@@ -941,6 +1030,7 @@
         ${!blocked ? commerceLocalIntentHomePanel(localIntentRoute) : ""}
         ${!blocked ? commerceComplexIntentSplitHomePanel(complexIntentSplit) : ""}
         ${!blocked ? commerceSubPlanGateMatrixHomePanel(subPlanGateMatrix) : ""}
+        ${!blocked ? commerceSubPlanQuestionsHomePanel(subPlanQuestions) : ""}
         ${!blocked && localLawPanelRequired ? commerceLocalLawHomePanel(stored) : ""}
         ${showOnboardingHomePanel ? commerceProviderIntegrationReadinessHomePanel(stored.providerIntegrationReadiness || stored.configHealth && stored.configHealth.providerIntegrationReadiness || {}) : ""}
         ${showOnboardingHomePanel ? commerceProviderIntegrationRunbookHomePanel(stored.providerIntegrationRunbook || stored.configHealth && stored.configHealth.providerIntegrationRunbook || {}) : ""}

@@ -2283,6 +2283,129 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
+  test("subplan question generator contract turns missing fields into safe questions", async () => {
+    await gotoRoute(page, "home");
+    const result = await page.evaluate(async () => {
+      delete window.WeishanCommerceLocalIntentRouter;
+      delete window.WeishanCommerceComplexIntentSplitPlanner;
+      delete window.WeishanCommerceSubPlanGateMatrix;
+      delete window.WeishanCommerceSubPlanQuestionGenerator;
+      async function load(src) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src + "?question-contract=" + Date.now();
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+      await load("./renderer/core/commerceLocalIntentRouter.js?v=2.0.53");
+      await load("./renderer/core/commerceComplexIntentSplitPlanner.js?v=2.0.53");
+      await load("./renderer/core/commerceSubPlanGateMatrix.js?v=2.0.53");
+      await load("./renderer/core/commerceSubPlanQuestionGenerator.js?v=2.0.53");
+      const input = "下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。";
+      const route = window.WeishanCommerceLocalIntentRouter.routeCommerceIntentLocally(input);
+      const split = window.WeishanCommerceComplexIntentSplitPlanner.splitComplexCommerceIntent(input, route);
+      const matrix = window.WeishanCommerceSubPlanGateMatrix.buildSubPlanGateMatrix(split);
+      const generator = window.WeishanCommerceSubPlanQuestionGenerator;
+      const questions = generator.generateQuestionsForSubPlanMatrix(matrix);
+      const display = generator.toSubPlanQuestionDisplayStatus(questions);
+      return {
+        contract:generator.getSubPlanQuestionGeneratorContract(),
+        questions,
+        display
+      };
+    });
+    expect(result.contract.questionGeneratorVersion).toBe("2.0.53");
+    expect(result.contract.phase).toBe("subplan_question_generator");
+    expect(result.contract.defaultMode).toBe("missing_fields_to_questions");
+    for (const key of ["canGenerateQuestions", "canGroupQuestionsBySubPlan", "canPrioritizeQuestions", "canSuggestAnswerType", "canSuggestOptions"]) {
+      expect(result.contract.capabilities[key]).toBe(true);
+    }
+    for (const key of ["canAccessProvider", "canUseApiKey", "canUseNetwork", "canReturnRealResults", "canReturnRealPrice", "canReturnMockPrice", "canRedirect"]) {
+      expect(result.contract.capabilities[key]).toBe(false);
+    }
+    for (const key of ["noRealEndpoint", "noRealApiKey", "noNetworkSearch", "noRealResults", "noRealPrice", "noFakeDemoMockPrice", "noRedirect"]) {
+      expect(result.contract.safety[key]).toBe(true);
+    }
+    expect(result.questions.questionGeneratorVersion).toBe("2.0.53");
+    expect(result.questions.phase).toBe("subplan_question_generator");
+    expect(result.questions.mode).toBe("missing_fields_to_questions");
+    expect(result.questions.subPlanQuestionGroups).toHaveLength(2);
+    expect(result.questions.canAccessProvider).toBe(false);
+    expect(result.questions.canUseNetwork).toBe(false);
+    expect(result.questions.canReturnRealPrice).toBe(false);
+    expect(result.questions.canRedirect).toBe(false);
+    const travel = result.questions.subPlanQuestionGroups[0];
+    const product = result.questions.subPlanQuestionGroups[1];
+    expect(travel.title).toBe("旅行计划");
+    expect(travel.questions.map((item) => item.questionText)).toEqual(expect.arrayContaining(["你从哪个城市出发？", "具体哪一天出发？", "酒店哪天入住？", "酒店哪天离店？", "孩子几岁？"]));
+    expect(product.title).toBe("商品采购计划");
+    expect(product.questions.map((item) => item.questionText)).toEqual(expect.arrayContaining(["你偏好哪个品牌？没有偏好也可以说“都可以”。", "主要需要什么性能要求，例如内存、硬盘、显卡？", "收货地在哪个国家或城市？", "是否接受二手或翻新机？"]));
+    expect(product.questions.find((item) => item.missingField === "是否接受二手").answerType).toBe("boolean");
+    expect(product.questions.find((item) => item.missingField === "是否接受二手").options).toEqual(["是", "否", "不确定"]);
+    expect(result.display.title).toBe("子计划补充问题");
+    expect(result.display.providerAccessLabel).toBe("否");
+    expect(result.display.priceLabel).toBe("否");
+    expect(result.display.redirectLabel).toBe("否");
+  });
+
+  test("subplan question panel shows travel product questions without raw fields", async () => {
+    await submitHomeCommand(page, runId + "-QUESTIONS 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。");
+    const home = page.locator('[data-commerce-home-summary="true"]').first();
+    const panel = home.locator(".commerce-subplan-question-panel").first();
+    await expect(panel).toContainText("子计划补充问题");
+    await expect(panel).toContainText("总体状态：待补充");
+    await expect(panel).toContainText("子计划数量：2");
+    await expect(panel).toContainText("旅行计划");
+    await expect(panel).toContainText("商品采购计划");
+    for (const text of ["你从哪个城市出发？", "具体哪一天出发？", "酒店哪天入住？", "酒店哪天离店？", "孩子几岁？", "你偏好哪个品牌？", "主要需要什么性能要求，例如内存、硬盘、显卡？", "收货地在哪个国家或城市？", "是否接受二手或翻新机？"]) {
+      await expect(panel).toContainText(text);
+    }
+    for (const text of ["优先级：高", "优先级：中", "回答类型", "是否访问真实平台：否", "是否返回价格：否", "是否跳转购买：否"]) {
+      await expect(panel).toContainText(text);
+    }
+    await expect(panel).toContainText("这些问题只用于补齐计划信息，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。");
+    const rawFields = ["questionGeneratorVersion", "mode=missing_fields_to_questions", "subPlanQuestionGroups", "questionId", "requiredBeforeProviderSearch=true", "canAccessProvider=false", "canUseNetwork=false", "canReturnRealPrice=false", "canRedirect=false"];
+    for (const field of rawFields) await expect(home).not.toContainText(field);
+    await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+    await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+    await page.locator("#commerceViewPlanBtn").click();
+    const detail = page.locator(".commerce-detail").first();
+    const detailPanel = detail.locator(".commerce-subplan-question-panel").first();
+    await expect(detailPanel).toContainText("子计划补充问题");
+    await expect(detailPanel).toContainText("旅行计划");
+    await expect(detailPanel).toContainText("商品采购计划");
+    await expect(detailPanel).toContainText("你从哪个城市出发？");
+    await expect(detailPanel).toContainText("是否接受二手或翻新机？");
+    for (const field of rawFields) await expect(detail).not.toContainText(field);
+    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+  });
+
+  test("subplan question panel supports simple product ticket and local service questions", async () => {
+    const cases = [
+      { input:"买华为手机", expected:["子计划补充问题", "商品采购计划", "收货地在哪个国家或城市？", "预算大概是多少？", "你需要什么型号或配置？"] },
+      { input:"买演唱会门票", expected:["子计划补充问题", "门票计划", "想看哪个城市的票？", "想看哪一天或哪个时间段？", "需要几张票？", "对座位区域有什么偏好？"] },
+      { input:"预约理发", expected:["子计划补充问题", "本地服务计划", "服务地点在哪个城市或区域？", "想预约哪天、哪个时间段？", "预算大概是多少？"] }
+    ];
+    for (const item of cases) {
+      await submitHomeCommand(page, runId + "-QUESTIONS-SIMPLE " + item.input);
+      const home = page.locator('[data-commerce-home-summary="true"]').first();
+      const panel = home.locator(".commerce-subplan-question-panel").first();
+      for (const text of item.expected) await expect(panel).toContainText(text);
+      await expect(panel).toContainText("是否访问真实平台：否");
+      await expect(panel).toContainText("是否返回价格：否");
+      await expect(panel).toContainText("是否跳转购买：否");
+      await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+      await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+      await expect(home).not.toContainText("mode=missing_fields_to_questions");
+      await expect(home).not.toContainText("subPlanQuestionGroups");
+      await expect(home).not.toContainText("questionId");
+      await gotoRoute(page, "home");
+    }
+  });
+
   test("complex intent split panel separates travel product ticket and service without raw fields", async () => {
     const cases = [
       {

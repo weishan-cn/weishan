@@ -154,6 +154,9 @@
   function commerceSubPlanGateMatrixApi(){
     return window.WeishanCommerceSubPlanGateMatrix || null;
   }
+  function commerceSubPlanQuestionGeneratorApi(){
+    return window.WeishanCommerceSubPlanQuestionGenerator || null;
+  }
 
   function applyComplexCommerceLocalIntent(commercePlan, route){
     if (!commercePlan || !route || route.aiFallbackRequired !== true) return commercePlan;
@@ -193,6 +196,15 @@
     const matrix = commerceSubPlanGateMatrixApi();
     if (matrix && matrix.buildSubPlanGateMatrix) {
       commercePlan.commerceSubPlanGateMatrix = matrix.buildSubPlanGateMatrix(commercePlan.commerceComplexIntentSplit, commercePlan.providerHealth || null);
+    }
+    return commercePlan;
+  }
+
+  function attachSubPlanQuestions(commercePlan){
+    if (!commercePlan || !commercePlan.commerceSubPlanGateMatrix) return commercePlan;
+    const generator = commerceSubPlanQuestionGeneratorApi();
+    if (generator && generator.generateQuestionsForSubPlanMatrix) {
+      commercePlan.commerceSubPlanQuestions = generator.generateQuestionsForSubPlanMatrix(commercePlan.commerceSubPlanGateMatrix);
     }
     return commercePlan;
   }
@@ -384,6 +396,7 @@
       applyComplexCommerceLocalIntent(commercePlan, commerceLocalIntentRoute);
       attachComplexCommerceSplit(commercePlan, cleanInput, commerceLocalIntentRoute);
       attachSubPlanGateMatrix(commercePlan);
+      attachSubPlanQuestions(commercePlan);
       plan.executionMode = "commerce_agent_plan_only";
       plan.realExecution = false;
       plan.requiresUserConfirmation = true;
