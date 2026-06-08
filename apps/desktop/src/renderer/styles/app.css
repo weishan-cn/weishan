@@ -3376,6 +3376,149 @@
 .commerce-subplan-draft-review-note p{
   margin:0;
 }
+
+.commerce-subplan-draft-confirmation-panel{
+  display:grid;
+  gap:12px;
+  padding:14px;
+  margin:12px 0;
+  border:1px solid #0f766e;
+  border-radius:12px;
+  background:#f0fdfa;
+  color:#0f172a;
+  box-shadow:0 10px 24px rgba(15,118,110,.08);
+}
+.commerce-subplan-draft-confirmation-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  padding-bottom:10px;
+  border-bottom:1px solid #99f6e4;
+}
+.commerce-subplan-draft-confirmation-head h3{
+  margin:0 0 4px;
+  color:#0f766e;
+  font-size:17px;
+  line-height:1.25;
+}
+.commerce-subplan-draft-confirmation-head p{
+  margin:0;
+  color:#115e59;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-subplan-draft-confirmation-head strong{
+  flex:0 0 auto;
+  max-width:260px;
+  border:1px solid #0f766e;
+  border-radius:10px;
+  background:#ccfbf1;
+  color:#115e59;
+  padding:8px 10px;
+  font-size:13px;
+  line-height:1.4;
+}
+.commerce-subplan-draft-confirmation-status ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  grid-template-columns:repeat(8, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-subplan-draft-confirmation-status li,
+.commerce-subplan-draft-confirmation-meta li{
+  display:grid;
+  gap:3px;
+  border:1px solid #99f6e4;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+  font-size:12px;
+  line-height:1.45;
+}
+.commerce-subplan-draft-confirmation-status span,
+.commerce-subplan-draft-confirmation-meta span{
+  color:#115e59;
+  font-weight:900;
+}
+.commerce-subplan-draft-confirmation-status b,
+.commerce-subplan-draft-confirmation-meta b{
+  color:#0f172a;
+  font-size:12px;
+  font-weight:900;
+}
+.commerce-subplan-draft-confirmation-cards{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:10px;
+}
+.commerce-subplan-draft-confirmation-card{
+  border:1px solid #99f6e4;
+  border-radius:10px;
+  background:#fff;
+  padding:10px;
+  display:grid;
+  gap:10px;
+}
+.commerce-subplan-draft-confirmation-card h4{
+  margin:0;
+  color:#0f766e;
+  font-size:14px;
+  line-height:1.25;
+}
+.commerce-subplan-draft-confirmation-meta{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:8px;
+}
+.commerce-subplan-draft-confirmation-columns{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:8px;
+}
+.commerce-subplan-draft-confirmation-columns div{
+  border:1px solid #ccfbf1;
+  border-radius:10px;
+  background:#f8fffe;
+  padding:9px;
+  display:grid;
+  gap:6px;
+}
+.commerce-subplan-draft-confirmation-columns b{
+  color:#115e59;
+  font-size:12px;
+  font-weight:950;
+}
+.commerce-subplan-draft-confirmation-columns ul{
+  margin:0;
+  padding-left:18px;
+  display:grid;
+  gap:5px;
+}
+.commerce-subplan-draft-confirmation-columns li{
+  color:#0f172a;
+  font-size:12px;
+  line-height:1.45;
+}
+.commerce-subplan-draft-confirmation-note{
+  padding:10px;
+  border:1px solid #0f766e;
+  border-radius:10px;
+  background:#ccfbf1;
+  color:#115e59;
+  font-size:13px;
+  font-weight:850;
+  line-height:1.45;
+}
+.commerce-subplan-draft-confirmation-note p{
+  margin:0;
+}
 @media (max-width: 980px){
   .commerce-subplan-gate-head{
     display:grid;
@@ -3387,6 +3530,9 @@
     display:grid;
   }
   .commerce-subplan-draft-review-head{
+    display:grid;
+  }
+  .commerce-subplan-draft-confirmation-head{
     display:grid;
   }
   .commerce-subplan-gate-head strong{
@@ -3401,6 +3547,9 @@
   .commerce-subplan-draft-review-head strong{
     max-width:none;
   }
+  .commerce-subplan-draft-confirmation-head strong{
+    max-width:none;
+  }
   .commerce-subplan-gate-status ul,
   .commerce-subplan-gate-cards,
   .commerce-subplan-question-status ul, .commerce-subplan-answer-status ul,
@@ -3413,7 +3562,11 @@
   .commerce-subplan-draft-review-status ul,
   .commerce-subplan-draft-review-cards,
   .commerce-subplan-draft-review-meta,
-  .commerce-subplan-draft-review-columns{
+  .commerce-subplan-draft-review-columns,
+  .commerce-subplan-draft-confirmation-status ul,
+  .commerce-subplan-draft-confirmation-cards,
+  .commerce-subplan-draft-confirmation-meta,
+  .commerce-subplan-draft-confirmation-columns{
     grid-template-columns:1fr;
   }
 }

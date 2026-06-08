@@ -6,7 +6,7 @@
     document.write('<scr' + 'ipt src="./renderer/core/desktopAssistant.js?v=2.0.15"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceAgent && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.54"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.58"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderAdapter && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProviderAdapter.js?v=2.0.32"></scr' + 'ipt>');
@@ -132,6 +132,15 @@
   function commerceSubPlanAnswerCollector(){
     return window.WeishanCommerceSubPlanAnswerCollector || null;
   }
+  function commerceSubPlanCompletionWorkspace(){
+    return window.WeishanCommerceSubPlanCompletionWorkspace || null;
+  }
+  function commerceSubPlanDraftReviewSummary(){
+    return window.WeishanCommerceSubPlanDraftReviewSummary || null;
+  }
+  function commerceSubPlanDraftConfirmation(){
+    return window.WeishanCommerceSubPlanDraftConfirmation || null;
+  }
 
   function applyComplexCommerceLocalIntent(commercePlan, route){
     if (!commercePlan || !route || route.aiFallbackRequired !== true) return commercePlan;
@@ -190,8 +199,35 @@
     return (api.getCommerceTasks() || []).find((task) => task && task.commerceSubPlanQuestions && Array.isArray(task.commerceSubPlanQuestions.subPlanQuestionGroups)) || null;
   }
 
+  function latestDraftReviewCommercePlan(){
+    const api = commerceAgent();
+    if (!api || !api.getCommerceTasks) return null;
+    return (api.getCommerceTasks() || []).find((task) => task && (task.commerceSubPlanDraftConfirmation || task.commerceSubPlanDraftReviewSummary)) || null;
+  }
+
+  function cloneCommandValue(value){
+    return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;
+  }
+
   function looksLikeSubPlanAnswer(text){
     return /从[^，。,.、\s]+出发|\d{1,2}\s*月\s*\d{1,2}\s*日\s*(?:出发|入住|离店)|孩子\s*[0-9一二三四五六七八九十]+\s*岁|品牌(?:都可以|不限|无所谓)|\d+\s*G\s*内存|\d+\s*T\s*硬盘|收货地|不接受二手|接受二手|周[一二三四五六日天](?:上午|下午|晚上)?|[一二两三四五六七八九十0-9]+\s*张|中区|预算\s*\d+\s*以内|不需要上门|需要上门/i.test(String(text || ""));
+  }
+
+  function looksLikeSubPlanDraftConfirmationOrRevision(text){
+    return /确认|没问题|这样可以|都确认|先不确认|改成|修改|调整|修正|更正|品牌优先|内存至少|硬盘至少|不要转机|优先直飞/i.test(String(text || ""));
+  }
+
+  function ensureDraftReviewContextForConfirmation(commercePlan, input){
+    if (!commercePlan || !looksLikeSubPlanDraftConfirmationOrRevision(input)) return commercePlan;
+    const previousPlan = latestDraftReviewCommercePlan();
+    if (!previousPlan) return commercePlan;
+    commercePlan.commerceComplexIntentSplit = cloneCommandValue(previousPlan.commerceComplexIntentSplit) || null;
+    commercePlan.commerceSubPlanGateMatrix = cloneCommandValue(previousPlan.commerceSubPlanGateMatrix) || null;
+    commercePlan.commerceSubPlanQuestions = cloneCommandValue(previousPlan.commerceSubPlanQuestions) || null;
+    commercePlan.commerceSubPlanAnswerCollection = cloneCommandValue(previousPlan.commerceSubPlanAnswerCollection) || null;
+    commercePlan.commerceSubPlanCompletionWorkspace = cloneCommandValue(previousPlan.commerceSubPlanCompletionWorkspace) || null;
+    commercePlan.commerceSubPlanDraftReviewSummary = cloneCommandValue(previousPlan.commerceSubPlanDraftReviewSummary) || null;
+    return commercePlan;
   }
 
   function maybeAttachSubPlanAnswers(commercePlan, input){
@@ -211,6 +247,51 @@
       commercePlan.commerceSubPlanGateMatrix = previousPlan.commerceSubPlanGateMatrix || commercePlan.commerceSubPlanGateMatrix;
       commercePlan.category = previousPlan.category || commercePlan.category;
       commercePlan.categoryLabel = previousPlan.categoryLabel || commercePlan.categoryLabel;
+    }
+    return commercePlan;
+  }
+
+  function attachSubPlanCompletionWorkspace(commercePlan){
+    if (!commercePlan) return commercePlan;
+    const workspace = commerceSubPlanCompletionWorkspace();
+    if (workspace && workspace.buildSubPlanCompletionWorkspace) {
+      commercePlan.commerceSubPlanCompletionWorkspace = workspace.buildSubPlanCompletionWorkspace({
+        commerceComplexIntentSplit:commercePlan.commerceComplexIntentSplit || null,
+        commerceSubPlanGateMatrix:commercePlan.commerceSubPlanGateMatrix || null,
+        commerceSubPlanQuestions:commercePlan.commerceSubPlanQuestions || null,
+        commerceSubPlanAnswerCollection:commercePlan.commerceSubPlanAnswerCollection || null
+      });
+    }
+    return commercePlan;
+  }
+
+  function attachSubPlanDraftReviewSummary(commercePlan, input){
+    if (!commercePlan) return commercePlan;
+    ensureDraftReviewContextForConfirmation(commercePlan, input);
+    const review = commerceSubPlanDraftReviewSummary();
+    if (review && review.buildSubPlanDraftReviewSummary) {
+      commercePlan.commerceSubPlanDraftReviewSummary = review.buildSubPlanDraftReviewSummary({
+        commerceComplexIntentSplit:commercePlan.commerceComplexIntentSplit || null,
+        commerceSubPlanGateMatrix:commercePlan.commerceSubPlanGateMatrix || null,
+        commerceSubPlanQuestions:commercePlan.commerceSubPlanQuestions || null,
+        commerceSubPlanAnswerCollection:commercePlan.commerceSubPlanAnswerCollection || null,
+        commerceSubPlanCompletionWorkspace:commercePlan.commerceSubPlanCompletionWorkspace || null
+      });
+    }
+    return commercePlan;
+  }
+
+  function attachSubPlanDraftConfirmation(commercePlan, input){
+    if (!commercePlan) return commercePlan;
+    const confirmation = commerceSubPlanDraftConfirmation();
+    if (confirmation && confirmation.buildSubPlanDraftConfirmation) {
+      ensureDraftReviewContextForConfirmation(commercePlan, input);
+      const previousPlan = latestDraftReviewCommercePlan();
+      commercePlan.commerceSubPlanDraftConfirmation = confirmation.buildSubPlanDraftConfirmation({
+        input,
+        commerceSubPlanDraftReviewSummary:commercePlan.commerceSubPlanDraftReviewSummary || null,
+        previousConfirmation:previousPlan && previousPlan.commerceSubPlanDraftConfirmation || null
+      });
     }
     return commercePlan;
   }
@@ -419,6 +500,9 @@
     attachSubPlanGateMatrix(commercePlan);
     attachSubPlanQuestions(commercePlan);
     maybeAttachSubPlanAnswers(commercePlan, text);
+    attachSubPlanCompletionWorkspace(commercePlan);
+    attachSubPlanDraftReviewSummary(commercePlan, text);
+    attachSubPlanDraftConfirmation(commercePlan, text);
     const search = commerceSearch();
     if (search && search.createCommerceSearchRequest && search.hasCommerceSearchProvider) {
       const request = search.createCommerceSearchRequest(commercePlan);

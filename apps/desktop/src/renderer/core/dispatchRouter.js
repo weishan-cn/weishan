@@ -166,6 +166,9 @@
   function commerceSubPlanDraftReviewSummaryApi(){
     return window.WeishanCommerceSubPlanDraftReviewSummary || null;
   }
+  function commerceSubPlanDraftConfirmationApi(){
+    return window.WeishanCommerceSubPlanDraftConfirmation || null;
+  }
 
   function applyComplexCommerceLocalIntent(commercePlan, route){
     if (!commercePlan || !route || route.aiFallbackRequired !== true) return commercePlan;
@@ -224,20 +227,90 @@
     return (api.getCommerceTasks() || []).find((task) => task && task.commerceSubPlanQuestions && Array.isArray(task.commerceSubPlanQuestions.subPlanQuestionGroups)) || null;
   }
 
+  function latestDraftReviewCommercePlan(){
+    const api = commerceAgentApi();
+    if (!api || !api.getCommerceTasks) return null;
+    return (api.getCommerceTasks() || []).find((task) => task && (task.commerceSubPlanDraftConfirmation || task.commerceSubPlanDraftReviewSummary)) || null;
+  }
+
+  function hasCollectedSubPlanAnswers(answerCollection){
+    return Boolean(answerCollection && Number(answerCollection.completedFieldCount || 0) > 0);
+  }
+
+  function cloneDispatchValue(value){
+    return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;
+  }
+
+  function looksLikeSubPlanDraftConfirmationOrRevision(text){
+    return /确认|没问题|这样可以|都确认|先不确认|改成|修改|调整|修正|更正|品牌优先|内存至少|硬盘至少|不要转机|优先直飞/i.test(String(text || ""));
+  }
+
+  function ensureDraftReviewContextForConfirmation(commercePlan, input){
+    if (!commercePlan || !looksLikeSubPlanDraftConfirmationOrRevision(input)) return commercePlan;
+    const previousPlan = latestDraftReviewCommercePlan();
+    if (!previousPlan) return commercePlan;
+    commercePlan.commerceComplexIntentSplit = cloneDispatchValue(previousPlan.commerceComplexIntentSplit) || null;
+    commercePlan.commerceSubPlanGateMatrix = cloneDispatchValue(previousPlan.commerceSubPlanGateMatrix) || null;
+    commercePlan.commerceSubPlanQuestions = cloneDispatchValue(previousPlan.commerceSubPlanQuestions) || null;
+    commercePlan.commerceSubPlanAnswerCollection = cloneDispatchValue(previousPlan.commerceSubPlanAnswerCollection) || null;
+    commercePlan.commerceSubPlanCompletionWorkspace = cloneDispatchValue(previousPlan.commerceSubPlanCompletionWorkspace) || null;
+    commercePlan.commerceSubPlanDraftReviewSummary = cloneDispatchValue(previousPlan.commerceSubPlanDraftReviewSummary) || null;
+    return commercePlan;
+  }
+
+
+  function prefillSubPlanAnswersFromLatestQuestion(commercePlan, input){
+    if (!commercePlan || Number(commercePlan.commerceSubPlanAnswerCollection && commercePlan.commerceSubPlanAnswerCollection.completedFieldCount || 0) > 0) return commercePlan;
+    const collector = commerceSubPlanAnswerCollectorApi();
+    const previousPlan = latestQuestionCommercePlan();
+    const previousQuestions = previousPlan && previousPlan.commerceSubPlanQuestions || null;
+    if (!collector || !collector.collectSubPlanAnswers || !previousPlan || !previousQuestions) return commercePlan;
+    const previousDraft = hasCollectedSubPlanAnswers(previousPlan.commerceSubPlanAnswerCollection) ? previousPlan.commerceSubPlanAnswerCollection : null;
+    const collected = collector.collectSubPlanAnswers(input, cloneDispatchValue(previousQuestions), previousDraft);
+    if (!collected || Number(collected.completedFieldCount || 0) <= 0) return commercePlan;
+    commercePlan.commerceComplexIntentSplit = cloneDispatchValue(previousPlan.commerceComplexIntentSplit) || null;
+    commercePlan.commerceSubPlanGateMatrix = cloneDispatchValue(previousPlan.commerceSubPlanGateMatrix) || null;
+    commercePlan.commerceSubPlanQuestions = cloneDispatchValue(previousQuestions) || null;
+    commercePlan.commerceSubPlanAnswerCollection = collected;
+    commercePlan.answerCollectorSourceTaskId = previousPlan.taskId || "";
+    return commercePlan;
+  }
+
+  function reconcileSubPlanAnswerContext(commercePlan, input){
+    if (!commercePlan || Number(commercePlan.commerceSubPlanAnswerCollection && commercePlan.commerceSubPlanAnswerCollection.completedFieldCount || 0) > 0) return commercePlan;
+    const collector = commerceSubPlanAnswerCollectorApi();
+    const previousPlan = latestQuestionCommercePlan();
+    const previousQuestions = previousPlan && previousPlan.commerceSubPlanQuestions || null;
+    if (!collector || !collector.collectSubPlanAnswers || !previousPlan || !previousQuestions) return commercePlan;
+    const retryDraft = hasCollectedSubPlanAnswers(previousPlan.commerceSubPlanAnswerCollection) ? previousPlan.commerceSubPlanAnswerCollection : null;
+    const retry = collector.collectSubPlanAnswers(input, cloneDispatchValue(previousQuestions), retryDraft);
+    if (!retry || Number(retry.completedFieldCount || 0) <= 0) return commercePlan;
+    commercePlan.commerceComplexIntentSplit = cloneDispatchValue(previousPlan.commerceComplexIntentSplit) || null;
+    commercePlan.commerceSubPlanGateMatrix = cloneDispatchValue(previousPlan.commerceSubPlanGateMatrix) || null;
+    commercePlan.commerceSubPlanQuestions = cloneDispatchValue(previousQuestions) || null;
+    commercePlan.commerceSubPlanAnswerCollection = retry;
+    commercePlan.answerCollectorSourceTaskId = previousPlan.taskId || "";
+    return commercePlan;
+  }
+
   function attachSubPlanAnswers(commercePlan, input){
+    if (commercePlan && Number(commercePlan.commerceSubPlanAnswerCollection && commercePlan.commerceSubPlanAnswerCollection.completedFieldCount || 0) > 0) return commercePlan;
     const collector = commerceSubPlanAnswerCollectorApi();
     if (!collector || !collector.collectSubPlanAnswers) return commercePlan;
     const previousPlan = latestQuestionCommercePlan();
-    const answerLike = looksLikeSubPlanAnswer(input) && previousPlan;
-    const baseQuestions = answerLike ? previousPlan.commerceSubPlanQuestions : commercePlan && commercePlan.commerceSubPlanQuestions || previousPlan && previousPlan.commerceSubPlanQuestions || null;
+    const previousQuestions = previousPlan && previousPlan.commerceSubPlanQuestions || null;
+    const previousAnswerDraft = previousPlan && hasCollectedSubPlanAnswers(previousPlan.commerceSubPlanAnswerCollection) ? previousPlan.commerceSubPlanAnswerCollection : null;
+    const previousAnswerAttempt = previousQuestions ? collector.collectSubPlanAnswers(input, cloneDispatchValue(previousQuestions), previousAnswerDraft) : null;
+    const answerLike = previousPlan && (looksLikeSubPlanAnswer(input) || previousAnswerAttempt && Number(previousAnswerAttempt.completedFieldCount || 0) > 0);
+    const baseQuestions = answerLike ? cloneDispatchValue(previousQuestions) : commercePlan && commercePlan.commerceSubPlanQuestions || previousQuestions || null;
     if (!baseQuestions) return commercePlan;
     commercePlan.commerceSubPlanQuestions = baseQuestions;
     if (answerLike && previousPlan) {
-      commercePlan.commerceComplexIntentSplit = commercePlan.commerceComplexIntentSplit || previousPlan.commerceComplexIntentSplit || null;
-      commercePlan.commerceSubPlanGateMatrix = commercePlan.commerceSubPlanGateMatrix || previousPlan.commerceSubPlanGateMatrix || null;
+      commercePlan.commerceComplexIntentSplit = cloneDispatchValue(previousPlan.commerceComplexIntentSplit) || null;
+      commercePlan.commerceSubPlanGateMatrix = cloneDispatchValue(previousPlan.commerceSubPlanGateMatrix) || null;
     }
-    commercePlan.commerceSubPlanAnswerCollection = collector.collectSubPlanAnswers(input, baseQuestions, previousPlan && previousPlan.commerceSubPlanAnswerCollection || null);
-    commercePlan.answerCollectorSourceTaskId = previousPlan && previousPlan.taskId || "";
+    commercePlan.commerceSubPlanAnswerCollection = answerLike && previousAnswerAttempt && Number(previousAnswerAttempt.completedFieldCount || 0) > 0 ? previousAnswerAttempt : collector.collectSubPlanAnswers(input, baseQuestions, answerLike ? previousAnswerDraft : null);
+    commercePlan.answerCollectorSourceTaskId = answerLike && previousPlan ? previousPlan.taskId || "" : "";
     return commercePlan;
   }
 
@@ -255,8 +328,9 @@
     return commercePlan;
   }
 
-  function attachSubPlanDraftReviewSummary(commercePlan){
+  function attachSubPlanDraftReviewSummary(commercePlan, input){
     if (!commercePlan) return commercePlan;
+    ensureDraftReviewContextForConfirmation(commercePlan, input);
     const review = commerceSubPlanDraftReviewSummaryApi();
     if (review && review.buildSubPlanDraftReviewSummary) {
       commercePlan.commerceSubPlanDraftReviewSummary = review.buildSubPlanDraftReviewSummary({
@@ -270,6 +344,21 @@
     return commercePlan;
   }
 
+  function attachSubPlanDraftConfirmation(commercePlan, input){
+    if (!commercePlan) return commercePlan;
+    const confirmation = commerceSubPlanDraftConfirmationApi();
+    if (confirmation && confirmation.buildSubPlanDraftConfirmation) {
+      ensureDraftReviewContextForConfirmation(commercePlan, input);
+      const previousPlan = latestDraftReviewCommercePlan();
+      commercePlan.commerceSubPlanDraftConfirmation = confirmation.buildSubPlanDraftConfirmation({
+        input,
+        commerceSubPlanDraftReviewSummary:commercePlan.commerceSubPlanDraftReviewSummary || null,
+        previousConfirmation:previousPlan && previousPlan.commerceSubPlanDraftConfirmation || null
+      });
+    }
+    return commercePlan;
+  }
+
   function looksLikeSubPlanAnswer(text){
     return /从[^，。,.、\s]+出发|\d{1,2}\s*月\s*\d{1,2}\s*日\s*(?:出发|入住|离店)|孩子\s*[0-9一二三四五六七八九十]+\s*岁|品牌(?:都可以|不限|无所谓)|\d+\s*G\s*内存|\d+\s*T\s*硬盘|收货地|不接受二手|接受二手|周[一二三四五六日天](?:上午|下午|晚上)?|[一二两三四五六七八九十0-9]+\s*张|中区|预算\s*\d+\s*以内|不需要上门|需要上门/i.test(String(text || ""));
   }
@@ -277,6 +366,7 @@
   function isCommerceAgentCommand(text){
     const raw = String(text || "");
     if (looksLikeSubPlanAnswer(raw) && latestQuestionCommercePlan()) return true;
+    if (looksLikeSubPlanDraftConfirmationOrRevision(raw) && latestDraftReviewCommercePlan()) return true;
     const router = commerceLocalIntentRouterApi();
     if (router && router.routeCommerceIntentLocally) {
       const route = router.routeCommerceIntentLocally(raw);
@@ -463,9 +553,12 @@
       attachComplexCommerceSplit(commercePlan, cleanInput, commerceLocalIntentRoute);
       attachSubPlanGateMatrix(commercePlan);
       attachSubPlanQuestions(commercePlan);
-      attachSubPlanAnswers(commercePlan, cleanInput);
+      prefillSubPlanAnswersFromLatestQuestion(commercePlan, cleanInput);
+      if (!commercePlan.commerceSubPlanAnswerCollection || Number(commercePlan.commerceSubPlanAnswerCollection.completedFieldCount || 0) <= 0) attachSubPlanAnswers(commercePlan, cleanInput);
+      reconcileSubPlanAnswerContext(commercePlan, cleanInput);
       attachSubPlanCompletionWorkspace(commercePlan);
-      attachSubPlanDraftReviewSummary(commercePlan);
+      attachSubPlanDraftReviewSummary(commercePlan, cleanInput);
+      attachSubPlanDraftConfirmation(commercePlan, cleanInput);
       plan.executionMode = "commerce_agent_plan_only";
       plan.realExecution = false;
       plan.requiresUserConfirmation = true;

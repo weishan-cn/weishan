@@ -487,6 +487,20 @@ SubPlan Draft Review Summary 只整理可复核的子计划草稿。草稿复核
 
 每个复核字段必须归属到对应子计划。草稿复核摘要不得跨子计划混用字段、问题、回答、风险或下一步动作，也不得让不同子计划共享 provider、endpoint、API key、价格、跳转、checkout、payment、order 或身份信息。用户 UI 只能显示自然语言草稿复核摘要，不得向普通用户暴露 raw/internal draft review summary 字段。
 
+### SubPlan Draft Confirmation & Revision Router 标准
+
+SubPlan Draft Confirmation & Revision Router 只处理用户对临时子计划草稿的确认或修正。草稿确认与修正不代表任何真实 provider 已接入，不代表草稿已经通过当地法律合规、provider 审批或 Connector Gate。
+
+草稿确认与修正不允许访问真实 provider，草稿确认与修正不允许连接真实 endpoint，草稿确认与修正不允许使用 API key，草稿确认与修正不允许发起 provider 网络搜索。
+
+草稿确认与修正不允许返回真实商品结果，草稿确认与修正不允许显示真实价格，草稿确认与修正不允许返回 fake/demo/mock price，草稿确认与修正不允许跳转购买 / 预订页面。
+
+用户确认草稿后仍必须经过 Local Law、Provider Onboarding、Approval、Secret Storage、Sandbox Dry Run、Connector Gate、Readiness、Runbook 和人工批准。草稿确认不得自动放开 provider、endpoint、API key、network、price、redirect、checkout、payment、order 或 identity 能力。
+
+每个确认或修正必须归属到对应子计划。草稿确认与修正不得跨子计划混用字段、问题、回答、风险、修正或下一步动作，也不得让不同子计划共享 provider、endpoint、API key、价格、跳转、checkout、payment、order 或身份信息。
+
+SubPlan Draft Confirmation & Revision Router 不得长期保存用户答案，不得保存身份证、护照、银行卡或敏感身份信息，不得保存原始 GPS 坐标。用户 UI 只能显示自然语言确认与修正摘要，不得向普通用户暴露 raw/internal draft confirmation 字段。
+
 ### Task History Detail Restore 标准
 
 Task History Detail Restore 只用于恢复和回看任务历史详情。任务历史回看不代表重新执行任务，也不代表任何真实 provider 已接入。任务历史回看不允许访问真实 provider，任务历史回看不允许连接真实 endpoint，任务历史回看不允许使用 API key，任务历史回看不允许发起 provider 网络搜索。
@@ -506,6 +520,7 @@ Task History Detail Restore 不得自动付款、自动下单或提交订单，�
 - v2.0.55：Task History Detail Restore / 任务历史详情恢复
 - v2.0.56：SubPlan Completion Workspace / 子计划补齐工作台
 - v2.0.57：SubPlan Draft Review Summary / 子计划草稿复核摘要
+- v2.0.58：SubPlan Draft Confirmation & Revision Router / 子计划草稿确认与修正路由
 
 后续版本必须继续保持全球多源、只读搜索、安全门控、外部跳转的方向，不能退化为单一平台工具。
 
