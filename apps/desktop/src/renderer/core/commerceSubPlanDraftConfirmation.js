@@ -164,7 +164,7 @@
     const text = normalizeInput(input);
     const reviewItems = getReviewItems(draftReviewSummary);
     const hasConfirmationWord = /(确认|没问题|这样可以|可以了|都确认|确认一下|草稿可以|计划可以)/.test(text);
-    const hasRevisionWord = /(改成|修改|调整|优先|不接受|接受二手|不要|至少|补充|改为)/.test(text);
+    const hasRevisionWord = hasExplicitRevisionIntent(text);
     if (!hasConfirmationWord || hasRevisionWord && !/(确认|没问题|这样可以|都确认)/.test(text)) {
       return {
         hasConfirmation: false,
@@ -223,7 +223,22 @@
     return "";
   }
 
+  function hasExplicitRevisionIntent(input) {
+    const text = normalizeInput(input);
+    if (!text) return false;
+    if (/(改成|修改|调整|改为|更改|修正|改一下|换成|替换成)/.test(text)) return true;
+    if (/(预算|品牌|出发地|出行日期|入住日期|离店日期|孩子|儿童年龄|收货地|服务地点|预约时间|城市|日期|时间段|座位|张数)[^，。,.]*(?:改|调整|换|修改)/.test(text)) return true;
+    if (/(电脑|商品)?品牌[^，。,.]*优先/.test(text)) return true;
+    if (/(航班|酒店区域|座位)[^，。,.]*优先/.test(text)) return true;
+    return false;
+  }
+
   function detectDraftRevisionIntent(input, draftReviewSummary) {
+    if (!hasExplicitRevisionIntent(input)) {
+      return {
+        hasRevision: false
+      };
+    }
     return {
       hasRevision: mapRevisionToSubPlanField(input, getReviewItems(draftReviewSummary)).length > 0
     };
@@ -233,9 +248,10 @@
     const text = normalizeInput(input);
     const revisions = [];
     if (!text) return revisions;
+    if (!hasExplicitRevisionIntent(text)) return revisions;
 
-    addRevision(revisions, reviewItems, "travel", "departure", firstMatch(text, [/出发地?改成([^，。,.]+)/, /从([^，。,.]+)出发/ ]));
-    addRevision(revisions, reviewItems, "travel", "travelDate", firstMatch(text, [/出行日期改成([^，。,.]+)/, /(?:改成)?([^，。,.]+)出发/ ]));
+    addRevision(revisions, reviewItems, "travel", "departure", firstMatch(text, [/出发地?(?:改成|改为|修改为|调整为|换成)([^，。,.]+)/ ]));
+    addRevision(revisions, reviewItems, "travel", "travelDate", firstMatch(text, [/出行日期(?:改成|改为|修改为|调整为|换成)([^，。,.]+)/, /出发(?:日期|时间)?(?:改成|改为|修改为|调整为|换成)([^，。,.]+)/ ]));
     addRevision(revisions, reviewItems, "travel", "checkInDate", firstMatch(text, [/入住日期改成([^，。,.]+)/, /酒店[^，。,.]*入住[^0-9一二三四五六七八九十]*([^，。,.]+)/ ]));
     addRevision(revisions, reviewItems, "travel", "checkOutDate", firstMatch(text, [/离店日期改成([^，。,.]+)/, /酒店[^，。,.]*离店[^0-9一二三四五六七八九十]*([^，。,.]+)/ ]));
     addRevision(revisions, reviewItems, "travel", "childAge", firstMatch(text, [/孩子(?:年龄)?改成([^，。,.]+)/, /孩子([^，。,.]*?岁)/ ]));
@@ -376,8 +392,9 @@
     const reviewItems = getReviewItems(draftReviewSummary);
     const confirmations = mapConfirmationToSubPlan(input, reviewItems);
     const revisions = mapRevisionToSubPlanField(input, reviewItems);
-    const previous = mergePreviousState(previousConfirmation);
-    const overallStatus = computeDraftConfirmationStatus(reviewItems, confirmations, revisions, previousConfirmation);
+    const effectivePreviousConfirmation = confirmations.length || revisions.length ? previousConfirmation : null;
+    const previous = mergePreviousState(effectivePreviousConfirmation);
+    const overallStatus = computeDraftConfirmationStatus(reviewItems, confirmations, revisions, effectivePreviousConfirmation);
     const confirmationById = new Map(confirmations.map((item) => [item.subPlanId, item]));
     const revisionsById = new Map(previous.revisionsById);
     revisions.forEach((revision) => {

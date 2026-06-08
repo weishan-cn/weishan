@@ -4806,7 +4806,8 @@ test.describe.serial("commerce agent workbench", () => {
       };
       const confirmed = api.buildSubPlanDraftConfirmation({ input:"两个都确认", commerceSubPlanDraftReviewSummary:review });
       const revised = api.buildSubPlanDraftConfirmation({ input:"电脑预算改成8000以内，品牌优先苹果，不接受二手。", commerceSubPlanDraftReviewSummary:review });
-      return { contract, confirmed, revised };
+      const answerOnly = api.buildSubPlanDraftConfirmation({ input:"我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。", commerceSubPlanDraftReviewSummary:review });
+      return { contract, confirmed, revised, answerOnly };
     });
     expect(result.contract.draftConfirmationVersion).toBe("2.0.58");
     expect(result.contract.phase).toBe("subplan_draft_confirmation_revision_router");
@@ -4841,6 +4842,10 @@ test.describe.serial("commerce agent workbench", () => {
     expect(result.revised.status).toBe("has_revision_waiting_review");
     expect(result.revised.revisions.map((item) => item.subPlanTitle)).toEqual(expect.arrayContaining(["商品采购计划"]));
     expect(result.revised.revisions.map((item) => item.label + "：" + item.value)).toEqual(expect.arrayContaining(["预算：8000以内", "品牌偏好：苹果优先", "是否接受二手：不接受"]));
+    expect(result.answerOnly.status).toBe("waiting_confirmation");
+    expect(result.answerOnly.revisedCount).toBe(0);
+    expect(result.answerOnly.revisions).toEqual([]);
+    expect(JSON.stringify(result.answerOnly)).not.toContain("出行日期：我从成都");
   });
 
   test("v2.0.58 global draft confirmation updates temporary subplan summaries without provider access", async () => {
@@ -4850,6 +4855,11 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, runId + "-DRAFT-CONFIRM-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
     await waitForLatestHomeTexts(page, ["旅行计划", "商品采购计划"]);
     await waitForLatestDraftReviewReady(page);
+    let answerPanel = page.locator('[data-commerce-home-summary="true"] .commerce-subplan-draft-confirmation-panel').last();
+    await expect(answerPanel).toContainText("等待确认");
+    await expect(answerPanel).not.toContainText("有修正待复核");
+    await expect(answerPanel).not.toContainText("出行日期：我从成都");
+    await expect(answerPanel).not.toContainText("修正字段：出行日期：我从成都");
     await submitHomeCommand(page, runId + "-DRAFT-CONFIRM-ALL 两个都确认");
     const home = page.locator('[data-commerce-home-summary="true"]').last();
     const panel = home.locator('.commerce-subplan-draft-confirmation-panel').first();
