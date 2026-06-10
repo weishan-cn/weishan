@@ -59,6 +59,9 @@
   if (!window.WeishanCommerceSubPlanAnswerCollector && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceSubPlanAnswerCollector.js?v=2.0.54"></scr' + 'ipt>');
   }
+  if (!window.WeishanCommerceSubPlanDraftActionBar && typeof document !== "undefined" && document.currentScript && document.write) {
+    document.write('<scr' + 'ipt src="./renderer/core/commerceSubPlanDraftActionBar.js?v=2.0.59"></scr' + 'ipt>');
+  }
   if (!window.WeishanCommerceProductProviderCandidate && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProductProviderCandidate.js?v=2.0.44"></scr' + 'ipt>');
   }
@@ -140,6 +143,9 @@
   }
   function commerceSubPlanDraftConfirmation(){
     return window.WeishanCommerceSubPlanDraftConfirmation || null;
+  }
+  function commerceSubPlanDraftActionBar(){
+    return window.WeishanCommerceSubPlanDraftActionBar || null;
   }
 
   function applyComplexCommerceLocalIntent(commercePlan, route){
@@ -291,6 +297,20 @@
         input,
         commerceSubPlanDraftReviewSummary:commercePlan.commerceSubPlanDraftReviewSummary || null,
         previousConfirmation:previousPlan && previousPlan.commerceSubPlanDraftConfirmation || null
+      });
+    }
+    return commercePlan;
+  }
+
+  function attachSubPlanDraftActionBar(commercePlan){
+    if (!commercePlan) return commercePlan;
+    const actionBar = commerceSubPlanDraftActionBar();
+    if (actionBar && actionBar.buildSubPlanDraftActionBar) {
+      commercePlan.commerceSubPlanDraftActionBar = actionBar.buildSubPlanDraftActionBar({
+        commerceSubPlanQuestions:commercePlan.commerceSubPlanQuestions || null,
+        commerceSubPlanCompletionWorkspace:commercePlan.commerceSubPlanCompletionWorkspace || null,
+        commerceSubPlanDraftReviewSummary:commercePlan.commerceSubPlanDraftReviewSummary || null,
+        commerceSubPlanDraftConfirmation:commercePlan.commerceSubPlanDraftConfirmation || null
       });
     }
     return commercePlan;
@@ -503,6 +523,7 @@
     attachSubPlanCompletionWorkspace(commercePlan);
     attachSubPlanDraftReviewSummary(commercePlan, text);
     attachSubPlanDraftConfirmation(commercePlan, text);
+    attachSubPlanDraftActionBar(commercePlan);
     const search = commerceSearch();
     if (search && search.createCommerceSearchRequest && search.hasCommerceSearchProvider) {
       const request = search.createCommerceSearchRequest(commercePlan);

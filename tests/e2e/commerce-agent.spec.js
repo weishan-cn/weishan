@@ -4987,4 +4987,107 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
   });
 
+  test("v2.0.59 subplan draft action bar contract keeps suggestions local", async () => {
+    await gotoRoute(page, "home");
+    const result = await page.evaluate(() => {
+      const api = window.WeishanCommerceSubPlanDraftActionBar;
+      const contract = api.getSubPlanDraftActionBarContract();
+      const review = {
+        reviewItems:[
+          { id:"travel-1", title:"旅行计划", categoryLabel:"复合旅行计划", confirmableSummary:["出发地：成都"] },
+          { id:"product-1", title:"商品采购计划", categoryLabel:"商品", confirmableSummary:["品牌偏好：都可以"] }
+        ]
+      };
+      const confirmation = { confirmedCount:1, revisedCount:0, pendingCount:1, confirmationItems:[] };
+      const actionBar = api.buildSubPlanDraftActionBar({ commerceSubPlanDraftReviewSummary:review, commerceSubPlanDraftConfirmation:confirmation });
+      return { contract, actionBar, display:api.toSubPlanDraftActionBarDisplayStatus(actionBar) };
+    });
+    expect(result.contract.draftActionBarVersion).toBe("2.0.59");
+    expect(result.contract.phase).toBe("subplan_draft_review_action_bar");
+    expect(result.contract.defaultMode).toBe("suggest_next_draft_actions");
+    for (const key of ["canShowActionSuggestions", "canShowConfirmationExamples", "canShowRevisionExamples", "canShowSafetyReminder"]) expect(result.contract.capabilities[key]).toBe(true);
+    for (const key of ["canAccessProvider", "canUseApiKey", "canUseNetwork", "canReturnRealResults", "canReturnRealPrice", "canReturnMockPrice", "canRedirect", "canCheckout", "canPay", "canSubmitOrder", "canStoreIdentity"]) expect(result.contract.capabilities[key]).toBe(false);
+    expect(result.display.title).toBe("草稿下一步动作");
+    expect(result.display.actionLabels).toEqual(expect.arrayContaining(["确认全部草稿", "只确认旅行计划", "只确认商品采购计划", "修改旅行计划", "修改商品采购计划", "返回补充问题", "查看安全边界"]));
+    expect(result.display.examples).toEqual(expect.arrayContaining(["两个都确认", "确认旅行计划", "电脑计划确认", "酒店入住日期改成7月13日", "电脑品牌优先苹果，预算改成8000以内", "返回补充问题"]));
+    expect(result.display.safetyItems).toEqual(expect.arrayContaining(["不访问真实 provider", "不连接 endpoint", "不读取 API key", "当前不会返回价格", "当前不会跳转购买或预订"]));
+  });
+
+  test("v2.0.59 complex answer shows draft action bar without raw fields", async () => {
+    await gotoRoute(page, "home");
+    await submitHomeCommand(page, runId + "-ACTIONBAR-COMPLEX 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。");
+    await waitForLatestHomeTexts(page, ["旅行计划", "商品采购计划"]);
+    await submitHomeCommand(page, runId + "-ACTIONBAR-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
+    const home = page.locator('[data-commerce-home-summary="true"]').last();
+    const panel = home.locator(".commerce-subplan-draft-action-panel").first();
+    await expect(panel).toContainText("草稿下一步动作");
+    for (const text of ["你可以确认草稿，也可以说明要修改哪一项", "两个都确认", "确认旅行计划", "电脑计划确认", "酒店入住日期改成7月13日", "电脑品牌优先苹果，预算改成8000以内", "返回补充问题", "当前不会访问真实 provider", "当前不会返回价格", "当前不会跳转购买或预订"]) {
+      await expect(panel).toContainText(text);
+    }
+    const rawFields = ["draftActionBarVersion", "defaultMode=suggest_next_draft_actions", "actionPolicy", "actionSuggestions", "confirmationSuggestions", "revisionSuggestions", "canAccessProvider=false", "canUseNetwork=false", "canReturnRealPrice=false", "canRedirect=false", "rawTask", "dispatchPayload", "commandPayload"];
+    for (const field of rawFields) await expect(home).not.toContainText(field);
+    await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+    await page.locator("#commerceViewPlanBtn").click();
+    const detail = page.locator(".commerce-detail").first();
+    const detailPanel = detail.locator(".commerce-subplan-draft-action-panel").first();
+    await expect(detailPanel).toContainText("草稿下一步动作");
+    await expect(detailPanel).toContainText("当前不会访问真实 provider");
+    for (const field of rawFields) await expect(detail).not.toContainText(field);
+  });
+
+  test("v2.0.59 confirmation updates draft action bar next steps", async () => {
+    await gotoRoute(page, "home");
+    await submitHomeCommand(page, runId + "-ACTIONBAR-CONFIRM-COMPLEX 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。");
+    await waitForLatestHomeTexts(page, ["旅行计划", "商品采购计划"]);
+    await submitHomeCommand(page, runId + "-ACTIONBAR-CONFIRM-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
+    await waitForLatestDraftReviewReady(page);
+    await submitHomeCommand(page, runId + "-ACTIONBAR-CONFIRM 两个都确认");
+    const panel = page.locator('[data-commerce-home-summary="true"] .commerce-subplan-draft-action-panel').last();
+    await expect(panel).toContainText("已确认的子计划可以继续修改");
+    await expect(panel).toContainText("未确认的子计划仍可确认");
+    await expect(panel).toContainText("下一步仍需完成当地法律合规确认");
+    await expect(panel).toContainText("Provider 审批");
+    await expect(panel).toContainText("Connector Gate");
+    await expect(panel).toContainText("不访问真实 provider");
+    await expect(panel).toContainText("当前不会返回价格");
+    await expect(panel).toContainText("当前不会跳转购买或预订");
+  });
+
+  test("v2.0.59 revision updates draft action bar review prompts", async () => {
+    await gotoRoute(page, "home");
+    await submitHomeCommand(page, runId + "-ACTIONBAR-REVISION-COMPLEX 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。");
+    await waitForLatestHomeTexts(page, ["旅行计划", "商品采购计划"]);
+    await submitHomeCommand(page, runId + "-ACTIONBAR-REVISION-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
+    await waitForLatestDraftReviewReady(page);
+    await submitHomeCommand(page, runId + "-ACTIONBAR-REVISION 酒店入住日期改成7月13日，离店日期改成7月17日");
+    const panel = page.locator('[data-commerce-home-summary="true"] .commerce-subplan-draft-action-panel').last();
+    await expect(panel).toContainText("有修正待复核");
+    await expect(panel).toContainText("可以确认旅行计划");
+    await expect(panel).toContainText("可以继续修改其它字段");
+    await expect(panel).toContainText("不访问真实 provider");
+    await expect(panel).toContainText("不连接 endpoint");
+    await expect(panel).toContainText("不读取 API key");
+    await expect(panel).toContainText("当前不会返回价格");
+  });
+
+  test("v2.0.59 draft action bar does not expose provider actions or payment entry", async () => {
+    await gotoRoute(page, "home");
+    await submitHomeCommand(page, runId + "-ACTIONBAR-SAFETY 买华为手机");
+    const home = page.locator('[data-commerce-home-summary="true"]').last();
+    const panel = home.locator(".commerce-subplan-draft-action-panel").first();
+    await expect(panel).toContainText("草稿下一步动作");
+    for (const text of ["不访问真实 provider", "不连接 endpoint", "不读取 API key", "当前不会发起网络搜索", "当前不会返回价格", "当前不会跳转购买或预订"]) {
+      await expect(panel).toContainText(text);
+    }
+    await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+    await expect(home).not.toContainText("fake price");
+    await expect(home).not.toContainText("demo price");
+    await expect(home).not.toContainText("mock price");
+    await expect(home).not.toContainText("EBAY_API_KEY");
+    await expect(home).not.toContainText("EBAY_CLIENT_SECRET");
+    await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+  });
+
 });

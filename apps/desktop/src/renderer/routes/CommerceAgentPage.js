@@ -200,6 +200,14 @@
       document.head.appendChild(draftConfirmation);
       return;
     }
+    if (!window.WeishanCommerceSubPlanDraftActionBar && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceSubPlanDraftActionBar"]')) {
+      const draftActionBar = document.createElement("script");
+      draftActionBar.src = "./renderer/core/commerceSubPlanDraftActionBar.js?v=2.0.59";
+      draftActionBar.dataset.weishanDynamic = "WeishanCommerceSubPlanDraftActionBar";
+      draftActionBar.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(draftActionBar);
+      return;
+    }
     if (!window.WeishanCommerceProviders && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviders"]')) {
       const providers = document.createElement("script");
       providers.src = "./renderer/core/commerceProviders.js?v=2.0.48";
@@ -888,6 +896,73 @@
     </section>`;
   }
 
+  function commerceSubPlanDraftActionBarForTask(task){
+    const existing = task && task.commerceSubPlanDraftActionBar || null;
+    if (existing && existing.phase === "subplan_draft_review_action_bar") return existing;
+    const reviewResult = commerceSubPlanDraftReviewForTask(task);
+    const confirmationResult = commerceSubPlanDraftConfirmationForTask(task);
+    const questionResult = commerceSubPlanQuestionsForTask(task);
+    const workspaceResult = commerceSubPlanCompletionWorkspaceForTask(task);
+    const api = window.WeishanCommerceSubPlanDraftActionBar || null;
+    if (api && api.buildSubPlanDraftActionBar) {
+      return api.buildSubPlanDraftActionBar({
+        commerceSubPlanQuestions:questionResult || null,
+        commerceSubPlanCompletionWorkspace:workspaceResult || null,
+        commerceSubPlanDraftReviewSummary:reviewResult || null,
+        commerceSubPlanDraftConfirmation:confirmationResult || null
+      });
+    }
+    return null;
+  }
+
+  function commerceSubPlanDraftActionBarDisplay(actionBar){
+    const api = window.WeishanCommerceSubPlanDraftActionBar || null;
+    if (api && api.toSubPlanDraftActionBarDisplayStatus) return api.toSubPlanDraftActionBarDisplayStatus(actionBar || {});
+    return { title:"草稿下一步动作", subtitle:"你可以确认草稿，也可以说明要修改哪一项。当前不会访问任何真实 provider。", statusLabel:"等待补充问题", actionLabels:["确认全部草稿", "只确认旅行计划", "只确认商品采购计划", "修改旅行计划", "修改商品采购计划", "返回补充问题", "查看安全边界"], guidance:["先补充问题", "查看草稿复核摘要", "当前不会访问真实 provider"], examples:["两个都确认", "确认旅行计划", "电脑计划确认", "酒店入住日期改成7月13日", "电脑品牌优先苹果，预算改成8000以内", "返回补充问题"], safetyItems:["当前不会访问真实 provider", "当前不会返回价格", "当前不会跳转购买或预订"], providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否" };
+  }
+
+  function commerceSubPlanDraftActionBarPanelHtml(task){
+    const actionBar = commerceSubPlanDraftActionBarForTask(task);
+    if (!actionBar) return "";
+    const display = commerceSubPlanDraftActionBarDisplay(actionBar);
+    const list = (items, className, emptyLabel) => `<ul class="${esc(className)}">${(items && items.length ? items : [emptyLabel]).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>`;
+    const row = (label, value) => value ? `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>` : "";
+    return `<section class="commerce-subplan-draft-action-panel" aria-label="草稿下一步动作">
+      <div class="commerce-subplan-draft-action-head">
+        <div>
+          <h3>${esc(display.title)}</h3>
+          <p>${esc(display.subtitle)}</p>
+        </div>
+        <strong>状态：${esc(display.statusLabel)}</strong>
+      </div>
+      <div class="commerce-subplan-draft-action-grid">
+        <div>
+          <b>动作提示</b>
+          ${list(display.actionLabels, "commerce-subplan-draft-action-list", "查看草稿复核摘要")}
+        </div>
+        <div>
+          <b>示例指令</b>
+          ${list(display.examples, "commerce-subplan-draft-action-list", "两个都确认")}
+        </div>
+        <div>
+          <b>当前提示</b>
+          ${list(display.guidance, "commerce-subplan-draft-action-list", "先补充问题")}
+        </div>
+        <div>
+          <b>安全边界</b>
+          ${list(display.safetyItems, "commerce-subplan-draft-action-list", "当前不会访问真实 provider")}
+        </div>
+      </div>
+      <div class="commerce-subplan-draft-action-status">
+        <ul>
+          ${row("是否访问真实平台", display.providerAccessLabel)}
+          ${row("是否返回价格", display.priceLabel)}
+          ${row("是否跳转购买或预订", display.redirectLabel)}
+        </ul>
+      </div>
+    </section>`;
+  }
+
 
   function commerceSubPlanQuestionsPanelHtml(task){
     const questionResult = commerceSubPlanQuestionsForTask(task);
@@ -1418,6 +1493,7 @@
       ${commerceSubPlanCompletionWorkspacePanelHtml(task)}
       ${commerceSubPlanDraftReviewPanelHtml(task)}
       ${commerceSubPlanDraftConfirmationPanelHtml(task)}
+      ${commerceSubPlanDraftActionBarPanelHtml(task)}
       <div class="commerce-detail-grid">
         ${section("需求理解", `<dl class="commerce-facts">
           <div><dt>用户需求</dt><dd>${esc(detail.demandUnderstanding || task.inputSummary)}</dd></div>

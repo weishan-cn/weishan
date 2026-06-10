@@ -862,6 +862,68 @@
     </section>`;
   }
 
+  function commerceSubPlanDraftActionBarForTask(stored, questionResult, workspaceResult, draftReviewSummary, draftConfirmation){
+    const existing = stored && stored.commerceSubPlanDraftActionBar || null;
+    if (existing && existing.phase === "subplan_draft_review_action_bar") return existing;
+    const api = window.WeishanCommerceSubPlanDraftActionBar || null;
+    if (api && api.buildSubPlanDraftActionBar) {
+      return api.buildSubPlanDraftActionBar({
+        commerceSubPlanQuestions:questionResult || null,
+        commerceSubPlanCompletionWorkspace:workspaceResult || null,
+        commerceSubPlanDraftReviewSummary:draftReviewSummary || null,
+        commerceSubPlanDraftConfirmation:draftConfirmation || null
+      });
+    }
+    return null;
+  }
+
+  function commerceSubPlanDraftActionBarDisplay(actionBar){
+    const api = window.WeishanCommerceSubPlanDraftActionBar || null;
+    if (api && api.toSubPlanDraftActionBarDisplayStatus) return api.toSubPlanDraftActionBarDisplayStatus(actionBar || {});
+    return { title:"草稿下一步动作", subtitle:"你可以确认草稿，也可以说明要修改哪一项。当前不会访问任何真实 provider。", statusLabel:"等待补充问题", actionLabels:["确认全部草稿", "只确认旅行计划", "只确认商品采购计划", "修改旅行计划", "修改商品采购计划", "返回补充问题", "查看安全边界"], guidance:["先补充问题", "查看草稿复核摘要", "当前不会访问真实 provider"], examples:["两个都确认", "确认旅行计划", "电脑计划确认", "酒店入住日期改成7月13日", "电脑品牌优先苹果，预算改成8000以内", "返回补充问题"], safetyItems:["当前不会访问真实 provider", "当前不会返回价格", "当前不会跳转购买或预订"], providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否" };
+  }
+
+  function commerceSubPlanDraftActionBarHomePanel(actionBar){
+    if (!actionBar) return "";
+    const display = commerceSubPlanDraftActionBarDisplay(actionBar);
+    const list = (items, className, emptyLabel) => `<ul class="${esc(className)}">${(items && items.length ? items : [emptyLabel]).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>`;
+    const row = (label, value) => value ? `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>` : "";
+    return `<section class="commerce-subplan-draft-action-panel commerce-subplan-draft-action-home-panel" aria-label="草稿下一步动作">
+      <div class="commerce-subplan-draft-action-head">
+        <div>
+          <h3>${esc(display.title)}</h3>
+          <p>${esc(display.subtitle)}</p>
+        </div>
+        <strong>状态：${esc(display.statusLabel)}</strong>
+      </div>
+      <div class="commerce-subplan-draft-action-grid">
+        <div>
+          <b>动作提示</b>
+          ${list(display.actionLabels, "commerce-subplan-draft-action-list", "查看草稿复核摘要")}
+        </div>
+        <div>
+          <b>示例指令</b>
+          ${list(display.examples, "commerce-subplan-draft-action-list", "两个都确认")}
+        </div>
+        <div>
+          <b>当前提示</b>
+          ${list(display.guidance, "commerce-subplan-draft-action-list", "先补充问题")}
+        </div>
+        <div>
+          <b>安全边界</b>
+          ${list(display.safetyItems, "commerce-subplan-draft-action-list", "当前不会访问真实 provider")}
+        </div>
+      </div>
+      <div class="commerce-subplan-draft-action-status">
+        <ul>
+          ${row("是否访问真实平台", display.providerAccessLabel)}
+          ${row("是否返回价格", display.priceLabel)}
+          ${row("是否跳转购买或预订", display.redirectLabel)}
+        </ul>
+      </div>
+    </section>`;
+  }
+
 
   function commerceSubPlanQuestionsHomePanel(questionResult){
     if (!questionResult) return "";
@@ -1357,6 +1419,7 @@
     const subPlanCompletionWorkspace = commerceSubPlanCompletionWorkspaceForTask(task, stored, complexIntentSplit, subPlanGateMatrix, subPlanQuestions, subPlanAnswerCollection);
     const subPlanDraftReviewSummary = commerceSubPlanDraftReviewForTask(task, stored, complexIntentSplit, subPlanGateMatrix, subPlanQuestions, subPlanAnswerCollection, subPlanCompletionWorkspace);
     const subPlanDraftConfirmation = commerceSubPlanDraftConfirmationForTask(task, stored, subPlanDraftReviewSummary);
+    const subPlanDraftActionBar = commerceSubPlanDraftActionBarForTask(stored, subPlanQuestions, subPlanCompletionWorkspace, subPlanDraftReviewSummary, subPlanDraftConfirmation);
     const providerFailed = stored.searchStatus === "failed";
     const noResults = stored.searchStatus === "noResults" || stored.searchStatus === "no_results";
     const missingFields = Array.isArray(stored.missingFields) ? stored.missingFields : [];
@@ -1408,6 +1471,7 @@
         ${!blocked ? commerceSubPlanCompletionWorkspaceHomePanel(subPlanCompletionWorkspace) : ""}
         ${!blocked ? commerceSubPlanDraftReviewHomePanel(subPlanDraftReviewSummary) : ""}
         ${!blocked ? commerceSubPlanDraftConfirmationHomePanel(subPlanDraftConfirmation) : ""}
+        ${!blocked ? commerceSubPlanDraftActionBarHomePanel(subPlanDraftActionBar) : ""}
         ${!blocked && localLawPanelRequired ? commerceLocalLawHomePanel(stored) : ""}
         ${showOnboardingHomePanel ? commerceProviderIntegrationReadinessHomePanel(stored.providerIntegrationReadiness || stored.configHealth && stored.configHealth.providerIntegrationReadiness || {}) : ""}
         ${showOnboardingHomePanel ? commerceProviderIntegrationRunbookHomePanel(stored.providerIntegrationRunbook || stored.configHealth && stored.configHealth.providerIntegrationRunbook || {}) : ""}

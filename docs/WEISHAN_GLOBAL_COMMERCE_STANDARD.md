@@ -501,6 +501,18 @@ SubPlan Draft Confirmation & Revision Router 只处理用户对临时子计划�
 
 SubPlan Draft Confirmation & Revision Router 不得长期保存用户答案，不得保存身份证、护照、银行卡或敏感身份信息，不得保存原始 GPS 坐标。用户 UI 只能显示自然语言确认与修正摘要，不得向普通用户暴露 raw/internal draft confirmation 字段。
 
+### SubPlan Draft Action Bar 标准
+
+SubPlan Draft Action Bar 只提供草稿确认、修正和安全复核的下一步提示。动作提示用于告诉用户可以继续说什么，动作提示不代表任何真实 provider 已接入。
+
+动作提示不允许访问真实 provider，动作提示不允许连接真实 endpoint，动作提示不允许使用 API key，动作提示不允许发起 provider 网络搜索。
+
+动作提示不允许返回真实商品结果，动作提示不允许显示真实价格，动作提示不允许返回 fake/demo/mock price，动作提示不允许跳转购买 / 预订页面。
+
+动作提示不得自动付款、自动下单或提交订单，不得保存身份证、护照、银行卡或敏感身份信息，不得长期保存用户答案，不得保存原始 GPS 坐标。
+
+动作提示只能显示自然语言确认示例、修正示例、返回补充问题示例和安全提醒。用户 UI 不得向普通用户暴露 raw/internal action bar 字段，不得显示 draftActionBarVersion、defaultMode、actionPolicy、actionSuggestions、confirmationSuggestions、revisionSuggestions、rawTask、dispatchPayload 或 commandPayload。
+
 ### Task History Detail Restore 标准
 
 Task History Detail Restore 只用于恢复和回看任务历史详情。任务历史回看不代表重新执行任务，也不代表任何真实 provider 已接入。任务历史回看不允许访问真实 provider，任务历史回看不允许连接真实 endpoint，任务历史回看不允许使用 API key，任务历史回看不允许发起 provider 网络搜索。
@@ -521,6 +533,7 @@ Task History Detail Restore 不得自动付款、自动下单或提交订单，�
 - v2.0.56：SubPlan Completion Workspace / 子计划补齐工作台
 - v2.0.57：SubPlan Draft Review Summary / 子计划草稿复核摘要
 - v2.0.58：SubPlan Draft Confirmation & Revision Router / 子计划草稿确认与修正路由
+- v2.0.59：Confirmation Hotfix + SubPlan Draft Action Bar / 确认修复热补丁 + 草稿复核动作栏
 
 后续版本必须继续保持全球多源、只读搜索、安全门控、外部跳转的方向，不能退化为单一平台工具。
 
