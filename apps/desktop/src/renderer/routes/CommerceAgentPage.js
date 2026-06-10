@@ -918,7 +918,7 @@
   function commerceSubPlanDraftActionBarDisplay(actionBar){
     const api = window.WeishanCommerceSubPlanDraftActionBar || null;
     if (api && api.toSubPlanDraftActionBarDisplayStatus) return api.toSubPlanDraftActionBarDisplayStatus(actionBar || {});
-    return { title:"草稿下一步动作", subtitle:"你可以确认草稿，也可以说明要修改哪一项。当前不会访问任何真实 provider。", statusLabel:"等待补充问题", actionLabels:["确认全部草稿", "只确认旅行计划", "只确认商品采购计划", "修改旅行计划", "修改商品采购计划", "返回补充问题", "查看安全边界"], guidance:["先补充问题", "查看草稿复核摘要", "当前不会访问真实 provider"], examples:["两个都确认", "确认旅行计划", "电脑计划确认", "酒店入住日期改成7月13日", "电脑品牌优先苹果，预算改成8000以内", "返回补充问题"], safetyItems:["当前不会访问真实 provider", "当前不会返回价格", "当前不会跳转购买或预订"], providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否" };
+    return { title:"草稿下一步动作", subtitle:"你可以确认草稿，也可以说明要修改哪一项。当前不会访问任何真实 provider。", statusLabel:"等待补充问题", actionLabels:["确认全部草稿", "只确认旅行计划", "只确认商品采购计划", "修改旅行计划", "修改商品采购计划", "返回补充问题", "查看安全边界"], actionChips:[{group:"确认类", label:"两个都确认"}, {group:"确认类", label:"确认旅行计划"}, {group:"确认类", label:"电脑计划确认"}, {group:"旅行修改类", label:"酒店入住日期改成7月13日"}, {group:"商品修改类", label:"电脑品牌优先苹果"}, {group:"辅助类", label:"返回补充问题"}, {group:"辅助类", label:"查看安全边界"}], chipHint:"已填入指令，请确认后点击开始执行。", guidance:["先补充问题", "查看草稿复核摘要", "当前不会访问真实 provider"], examples:["两个都确认", "确认旅行计划", "电脑计划确认", "酒店入住日期改成7月13日", "电脑品牌优先苹果，预算改成8000以内", "返回补充问题"], safetyItems:["当前不会访问真实 provider", "当前不会返回价格", "当前不会跳转购买或预订"], providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否" };
   }
 
   function commerceSubPlanDraftActionBarPanelHtml(task){
@@ -926,6 +926,18 @@
     if (!actionBar) return "";
     const display = commerceSubPlanDraftActionBarDisplay(actionBar);
     const list = (items, className, emptyLabel) => `<ul class="${esc(className)}">${(items && items.length ? items : [emptyLabel]).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>`;
+    const chipGroups = (display.actionChips || []).reduce((groups, chip) => {
+      const group = chip && chip.group || "快捷动作";
+      if (!groups[group]) groups[group] = [];
+      groups[group].push(chip && chip.label || chip);
+      return groups;
+    }, {});
+    const chips = Object.keys(chipGroups).map((group) => `<div class="commerce-subplan-draft-chip-group">
+      <b>${esc(group)}</b>
+      <div class="commerce-subplan-draft-chip-list">
+        ${chipGroups[group].map((label) => `<button class="commerce-subplan-draft-chip" type="button" data-commerce-action-chip="${esc(label)}">${esc(label)}</button>`).join("")}
+      </div>
+    </div>`).join("");
     const row = (label, value) => value ? `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>` : "";
     return `<section class="commerce-subplan-draft-action-panel" aria-label="草稿下一步动作">
       <div class="commerce-subplan-draft-action-head">
@@ -939,6 +951,12 @@
         <div>
           <b>动作提示</b>
           ${list(display.actionLabels, "commerce-subplan-draft-action-list", "查看草稿复核摘要")}
+        </div>
+        <div>
+          <b>快捷动作</b>
+          <p class="commerce-subplan-draft-chip-note">点击后只填入输入框，不会自动执行。</p>
+          <div class="commerce-subplan-draft-chips">${chips}</div>
+          <p class="commerce-subplan-draft-chip-feedback" data-commerce-action-chip-feedback aria-live="polite"></p>
         </div>
         <div>
           <b>示例指令</b>
@@ -1816,6 +1834,19 @@
       selectedTaskId = task.taskId;
       record("commerceAgent.taskCreated", task, "已在全球采购工作台生成本地 mock-safe 采购计划。");
       render(host);
+    });
+    host.querySelectorAll("[data-commerce-action-chip]").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const text = chip.getAttribute("data-commerce-action-chip") || "";
+        if (input) {
+          input.value = text;
+          draftText = text;
+          input.dispatchEvent(new Event("input", { bubbles:true }));
+          input.focus();
+        }
+        const feedback = host.querySelector("[data-commerce-action-chip-feedback]");
+        if (feedback) feedback.textContent = "已填入指令，请确认后点击开始执行。";
+      });
     });
     const clearAll = host.querySelector("#commerceClearAll");
     if (clearAll) clearAll.addEventListener("click", () => {

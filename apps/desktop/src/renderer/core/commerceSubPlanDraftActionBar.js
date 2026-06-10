@@ -1,7 +1,9 @@
 (function(){
   const DRAFT_ACTION_BAR_VERSION = "2.0.59";
+  const ACTION_CHIPS_VERSION = "2.0.60";
   const PHASE = "subplan_draft_review_action_bar";
   const DEFAULT_MODE = "suggest_next_draft_actions";
+  const CHIP_MODE = "fill_command_input_only";
 
   const CONTRACT = {
     draftActionBarVersion: DRAFT_ACTION_BAR_VERSION,
@@ -20,11 +22,31 @@
       noRedirectDuringActionSuggestion: true,
       noCheckoutDuringActionSuggestion: true
     },
+    actionChipsVersion: ACTION_CHIPS_VERSION,
+    chipMode: CHIP_MODE,
+    actionChipPolicy: {
+      fillInputOnly: true,
+      neverAutoExecute: true,
+      requireUserClickStart: true,
+      preserveSubPlanIsolation: true,
+      temporarySessionOnly: true,
+      noLongTermStorage: true,
+      noProviderAccess: true,
+      noPriceDuringChipSuggestion: true,
+      noRedirectDuringChipSuggestion: true,
+      noCheckoutDuringChipSuggestion: true,
+      noPayment: true,
+      noOrderSubmit: true,
+      noIdentityStorage: true
+    },
     capabilities: {
       canShowActionSuggestions: true,
       canShowConfirmationExamples: true,
       canShowRevisionExamples: true,
       canShowSafetyReminder: true,
+      canShowActionChips: true,
+      canFillCommandInput: true,
+      canAutoExecuteChip: false,
       canAccessProvider: false,
       canUseApiKey: false,
       canUseNetwork: false,
@@ -99,6 +121,23 @@
     "当前不会返回价格",
     "当前不会跳转购买或预订",
     "当前不会下单或付款"
+  ];
+
+  const ACTION_CHIPS = [
+    { group: "确认类", label: "两个都确认" },
+    { group: "确认类", label: "确认旅行计划" },
+    { group: "确认类", label: "电脑计划确认" },
+    { group: "旅行修改类", label: "酒店入住日期改成7月13日" },
+    { group: "旅行修改类", label: "离店日期改成7月17日" },
+    { group: "旅行修改类", label: "孩子改成9岁" },
+    { group: "旅行修改类", label: "出发地改成都双流" },
+    { group: "商品修改类", label: "电脑品牌优先苹果" },
+    { group: "商品修改类", label: "预算改成8000以内" },
+    { group: "商品修改类", label: "内存至少32G" },
+    { group: "商品修改类", label: "收货地改上海" },
+    { group: "商品修改类", label: "不接受二手" },
+    { group: "辅助类", label: "返回补充问题" },
+    { group: "辅助类", label: "查看安全边界" }
   ];
 
   function clone(value) {
@@ -227,6 +266,10 @@
       status,
       statusLabel,
       actionSuggestions: ACTION_SUGGESTIONS,
+      actionChipsVersion: ACTION_CHIPS_VERSION,
+      chipMode: CHIP_MODE,
+      actionChips: clone(ACTION_CHIPS),
+      chipHint: "已填入指令，请确认后点击开始执行。",
       confirmationSuggestions: confirmation,
       revisionSuggestions: revision,
       questionReturnSuggestions: questionReturn,
@@ -240,7 +283,7 @@
       temporarySessionOnly: true,
       noLongTermStorage: true,
       rawFieldsHiddenFromUserUi: true
-    }, clone(CONTRACT.actionPolicy), clone(CONTRACT.capabilities), clone(CONTRACT.safety));
+    }, clone(CONTRACT.actionPolicy), clone(CONTRACT.actionChipPolicy), clone(CONTRACT.capabilities), clone(CONTRACT.safety));
   }
 
   function toSubPlanDraftActionBarDisplayStatus(actionBar) {
@@ -250,6 +293,8 @@
       subtitle: source.subtitle || "你可以确认草稿，也可以说明要修改哪一项。当前不会访问任何真实 provider。",
       statusLabel: source.statusLabel || "等待补充问题",
       actionLabels: ACTION_SUGGESTIONS,
+      actionChips: clone(source.actionChips && source.actionChips.length ? source.actionChips : ACTION_CHIPS),
+      chipHint: source.chipHint || "已填入指令，请确认后点击开始执行。",
       guidance: unique(source.displayItems && source.displayItems.length ? source.displayItems : ["先补充问题", "查看草稿复核摘要", "当前不会访问真实 provider"]),
       examples: unique(source.displayExamples && source.displayExamples.length ? source.displayExamples : CONFIRMATION_EXAMPLES.concat(REVISION_EXAMPLES.slice(0, 2), ["返回补充问题"])),
       safetyItems: unique(source.safetyItems && source.safetyItems.length ? source.safetyItems : SAFETY_ITEMS),
