@@ -1,9 +1,11 @@
 (function(){
   const DRAFT_ACTION_BAR_VERSION = "2.0.59";
   const ACTION_CHIPS_VERSION = "2.0.60";
+  const FOCUS_ASSIST_VERSION = "2.0.61";
   const PHASE = "subplan_draft_review_action_bar";
   const DEFAULT_MODE = "suggest_next_draft_actions";
   const CHIP_MODE = "fill_command_input_only";
+  const FOCUS_ASSIST_MODE = "focus_input_and_highlight_start_only";
 
   const CONTRACT = {
     draftActionBarVersion: DRAFT_ACTION_BAR_VERSION,
@@ -39,6 +41,26 @@
       noOrderSubmit: true,
       noIdentityStorage: true
     },
+    focusAssistVersion: FOCUS_ASSIST_VERSION,
+    focusAssistMode: FOCUS_ASSIST_MODE,
+    focusAssistPolicy: {
+      focusInputAfterChipClick: true,
+      scrollInputIntoView: true,
+      highlightStartButton: true,
+      showManualStartHint: true,
+      neverAutoExecute: true,
+      requireUserClickStart: true,
+      preserveSubPlanIsolation: true,
+      temporarySessionOnly: true,
+      noLongTermStorage: true,
+      noProviderAccess: true,
+      noPriceDuringFocusAssist: true,
+      noRedirectDuringFocusAssist: true,
+      noCheckoutDuringFocusAssist: true,
+      noPayment: true,
+      noOrderSubmit: true,
+      noIdentityStorage: true
+    },
     capabilities: {
       canShowActionSuggestions: true,
       canShowConfirmationExamples: true,
@@ -46,6 +68,9 @@
       canShowSafetyReminder: true,
       canShowActionChips: true,
       canFillCommandInput: true,
+      canFocusCommandInput: true,
+      canHighlightStartButton: true,
+      canShowManualStartHint: true,
       canAutoExecuteChip: false,
       canAccessProvider: false,
       canUseApiKey: false,
@@ -268,8 +293,10 @@
       actionSuggestions: ACTION_SUGGESTIONS,
       actionChipsVersion: ACTION_CHIPS_VERSION,
       chipMode: CHIP_MODE,
+      focusAssistVersion: FOCUS_ASSIST_VERSION,
+      focusAssistMode: FOCUS_ASSIST_MODE,
       actionChips: clone(ACTION_CHIPS),
-      chipHint: "已填入指令，请确认后点击开始执行。",
+      chipHint: "已填入指令，请确认后点击开始执行",
       confirmationSuggestions: confirmation,
       revisionSuggestions: revision,
       questionReturnSuggestions: questionReturn,
@@ -283,7 +310,7 @@
       temporarySessionOnly: true,
       noLongTermStorage: true,
       rawFieldsHiddenFromUserUi: true
-    }, clone(CONTRACT.actionPolicy), clone(CONTRACT.actionChipPolicy), clone(CONTRACT.capabilities), clone(CONTRACT.safety));
+    }, clone(CONTRACT.actionPolicy), clone(CONTRACT.actionChipPolicy), clone(CONTRACT.focusAssistPolicy), clone(CONTRACT.capabilities), clone(CONTRACT.safety));
   }
 
   function toSubPlanDraftActionBarDisplayStatus(actionBar) {
@@ -294,7 +321,7 @@
       statusLabel: source.statusLabel || "等待补充问题",
       actionLabels: ACTION_SUGGESTIONS,
       actionChips: clone(source.actionChips && source.actionChips.length ? source.actionChips : ACTION_CHIPS),
-      chipHint: source.chipHint || "已填入指令，请确认后点击开始执行。",
+      chipHint: source.chipHint || "已填入指令，请确认后点击开始执行",
       guidance: unique(source.displayItems && source.displayItems.length ? source.displayItems : ["先补充问题", "查看草稿复核摘要", "当前不会访问真实 provider"]),
       examples: unique(source.displayExamples && source.displayExamples.length ? source.displayExamples : CONFIRMATION_EXAMPLES.concat(REVISION_EXAMPLES.slice(0, 2), ["返回补充问题"])),
       safetyItems: unique(source.safetyItems && source.safetyItems.length ? source.safetyItems : SAFETY_ITEMS),

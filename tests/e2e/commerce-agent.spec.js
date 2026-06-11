@@ -5013,14 +5013,25 @@ test.describe.serial("commerce agent workbench", () => {
     expect(result.contract.draftActionBarVersion).toBe("2.0.59");
     expect(result.contract.actionChipsVersion).toBe("2.0.60");
     expect(result.contract.chipMode).toBe("fill_command_input_only");
+    expect(result.contract.focusAssistVersion).toBe("2.0.61");
+    expect(result.contract.focusAssistMode).toBe("focus_input_and_highlight_start_only");
     expect(result.contract.phase).toBe("subplan_draft_review_action_bar");
     expect(result.contract.defaultMode).toBe("suggest_next_draft_actions");
     expect(result.contract.actionChipPolicy.fillInputOnly).toBe(true);
     expect(result.contract.actionChipPolicy.neverAutoExecute).toBe(true);
     expect(result.contract.actionChipPolicy.requireUserClickStart).toBe(true);
+    expect(result.contract.focusAssistPolicy.focusInputAfterChipClick).toBe(true);
+    expect(result.contract.focusAssistPolicy.scrollInputIntoView).toBe(true);
+    expect(result.contract.focusAssistPolicy.highlightStartButton).toBe(true);
+    expect(result.contract.focusAssistPolicy.showManualStartHint).toBe(true);
+    expect(result.contract.focusAssistPolicy.neverAutoExecute).toBe(true);
+    expect(result.contract.focusAssistPolicy.requireUserClickStart).toBe(true);
     for (const key of ["canShowActionSuggestions", "canShowConfirmationExamples", "canShowRevisionExamples", "canShowSafetyReminder"]) expect(result.contract.capabilities[key]).toBe(true);
     expect(result.contract.capabilities.canShowActionChips).toBe(true);
     expect(result.contract.capabilities.canFillCommandInput).toBe(true);
+    expect(result.contract.capabilities.canFocusCommandInput).toBe(true);
+    expect(result.contract.capabilities.canHighlightStartButton).toBe(true);
+    expect(result.contract.capabilities.canShowManualStartHint).toBe(true);
     for (const key of ["canAutoExecuteChip", "canAccessProvider", "canUseApiKey", "canUseNetwork", "canReturnRealResults", "canReturnRealPrice", "canReturnMockPrice", "canRedirect", "canCheckout", "canPay", "canSubmitOrder", "canStoreIdentity"]) expect(result.contract.capabilities[key]).toBe(false);
     expect(result.display.title).toBe("草稿下一步动作");
     expect(result.display.actionLabels).toEqual(expect.arrayContaining(["确认全部草稿", "只确认旅行计划", "只确认商品采购计划", "修改旅行计划", "修改商品采购计划", "返回补充问题", "查看安全边界"]));
@@ -5044,6 +5055,8 @@ test.describe.serial("commerce agent workbench", () => {
     for (const field of rawFields) await expect(home).not.toContainText(field);
     const rawChipFields = ["actionChipsVersion", "chipMode", "fillInputOnly", "neverAutoExecute", "actionChipPolicy", "canAutoExecuteChip=false", "canAccessProvider=false", "canUseNetwork=false", "rawTask", "dispatchPayload", "commandPayload"];
     for (const field of rawChipFields) await expect(home).not.toContainText(field);
+    const rawFocusAssistFields = ["focusAssistVersion", "focusAssistMode", "focusAssistPolicy", "focusInputAfterChipClick", "highlightStartButton", "canFocusCommandInput=true", "canHighlightStartButton=true", "canAutoExecuteChip=false", "canAccessProvider=false", "rawTask", "dispatchPayload", "commandPayload"];
+    for (const field of rawFocusAssistFields) await expect(home).not.toContainText(field);
     await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
     await page.locator("#commerceViewPlanBtn").click();
@@ -5054,6 +5067,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detailPanel).toContainText("当前不会访问真实 provider");
     for (const field of rawFields) await expect(detail).not.toContainText(field);
     for (const field of rawChipFields) await expect(detail).not.toContainText(field);
+    for (const field of rawFocusAssistFields) await expect(detail).not.toContainText(field);
   });
 
   test("v2.0.60 draft action chips fill input only before manual start", async () => {
@@ -5075,7 +5089,7 @@ test.describe.serial("commerce agent workbench", () => {
     });
     await home.locator('[data-commerce-action-chip="两个都确认"]').click();
     await expect(page.locator("#commandInput")).toHaveValue("两个都确认");
-    await expect(home).toContainText("已填入指令，请确认后点击开始执行。");
+    await expect(home).toContainText("已填入指令，请确认后点击开始执行");
     expect(await page.evaluate(() => window.HistoryApi.list().length)).toBe(beforeState.historyCount);
     expect(await page.evaluate(() => window.CommandApi.snapshot().queue.length)).toBe(beforeState.queueCount);
     expect(await page.evaluate(() => {
@@ -5133,8 +5147,87 @@ test.describe.serial("commerce agent workbench", () => {
     const beforeHistoryCount = await page.evaluate(() => window.HistoryApi.list().length);
     await detail.locator('[data-commerce-action-chip="查看安全边界"]').click();
     await expect(page.locator("#commerceInput")).toHaveValue("查看安全边界");
-    await expect(detail).toContainText("已填入指令，请确认后点击开始执行。");
+    await expect(page.locator("#commerceInput")).toBeFocused();
+    await expect(page.locator("#commerceGenerate")).toHaveClass(/commerce-chip-focus-start-highlight/);
+    await expect(detail).toContainText("已填入指令，请确认后点击开始执行");
     expect(await page.evaluate(() => window.HistoryApi.list().length)).toBe(beforeHistoryCount);
+  });
+
+  test("v2.0.61 draft action chip focus assist highlights manual start only", async () => {
+    await resetCommerceTasks(page);
+    await gotoRoute(page, "home");
+    await submitHomeCommand(page, runId + "-FOCUSASSIST-COMPLEX 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。");
+    await waitForLatestHomeTexts(page, ["旅行计划", "商品采购计划"]);
+    await submitHomeCommand(page, runId + "-FOCUSASSIST-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
+    await waitForLatestDraftReviewReady(page);
+    const home = page.locator('[data-commerce-home-summary="true"]').last();
+    const beforeState = await page.evaluate(() => {
+      const task = window.WeishanCommerceAgent.getCommerceTasks()[0];
+      const confirmation = task && task.commerceSubPlanDraftConfirmation || {};
+      return {
+        historyCount:window.HistoryApi.list().length,
+        queueCount:window.CommandApi.snapshot().queue.length,
+        confirmedCount:confirmation.confirmedCount || 0
+      };
+    });
+    await home.locator('[data-commerce-action-chip="两个都确认"]').click();
+    await expect(page.locator("#commandInput")).toHaveValue("两个都确认");
+    await expect(page.locator("#commandInput")).toBeFocused();
+    await expect(page.locator("#runBtn")).toHaveClass(/commerce-chip-focus-start-highlight/);
+    await expect(home).toContainText("已填入指令，请确认后点击开始执行");
+    const inputBox = await page.locator("#commandInput").boundingBox();
+    const viewportHeight = await page.evaluate(() => window.innerHeight);
+    expect(inputBox && inputBox.y).toBeGreaterThanOrEqual(0);
+    expect(inputBox && inputBox.y).toBeLessThan(viewportHeight);
+    expect(await page.evaluate(() => window.HistoryApi.list().length)).toBe(beforeState.historyCount);
+    expect(await page.evaluate(() => window.CommandApi.snapshot().queue.length)).toBe(beforeState.queueCount);
+    expect(await page.evaluate(() => {
+      const task = window.WeishanCommerceAgent.getCommerceTasks()[0];
+      return task && task.commerceSubPlanDraftConfirmation && task.commerceSubPlanDraftConfirmation.confirmedCount || 0;
+    })).toBe(beforeState.confirmedCount);
+    await expect(home).not.toContainText("已确认全部子计划草稿");
+    await page.locator("#runBtn").click();
+    const confirmedPanel = page.locator('[data-commerce-home-summary="true"] .commerce-subplan-draft-confirmation-panel').last();
+    await expect(confirmedPanel).toContainText("旅行计划");
+    await expect(confirmedPanel).toContainText("商品采购计划");
+    await expect(confirmedPanel).toContainText("已确认全部子计划草稿");
+  });
+
+  test("v2.0.61 revision chip focus assist waits for manual start", async () => {
+    await resetCommerceTasks(page);
+    await gotoRoute(page, "home");
+    await submitHomeCommand(page, runId + "-FOCUSASSIST-REVISION-COMPLEX 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。");
+    await waitForLatestHomeTexts(page, ["旅行计划", "商品采购计划"]);
+    await submitHomeCommand(page, runId + "-FOCUSASSIST-REVISION-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
+    await waitForLatestDraftReviewReady(page);
+    const home = page.locator('[data-commerce-home-summary="true"]').last();
+    const beforeState = await page.evaluate(() => {
+      const task = window.WeishanCommerceAgent.getCommerceTasks()[0];
+      const confirmation = task && task.commerceSubPlanDraftConfirmation || {};
+      return {
+        historyCount:window.HistoryApi.list().length,
+        queueCount:window.CommandApi.snapshot().queue.length,
+        revisedCount:confirmation.revisedCount || 0
+      };
+    });
+    await home.locator('[data-commerce-action-chip="酒店入住日期改成7月13日"]').click();
+    await expect(page.locator("#commandInput")).toHaveValue("酒店入住日期改成7月13日");
+    await expect(page.locator("#commandInput")).toBeFocused();
+    await expect(page.locator("#runBtn")).toHaveClass(/commerce-chip-focus-start-highlight/);
+    await expect(home).toContainText("已填入指令，请确认后点击开始执行");
+    expect(await page.evaluate(() => window.HistoryApi.list().length)).toBe(beforeState.historyCount);
+    expect(await page.evaluate(() => window.CommandApi.snapshot().queue.length)).toBe(beforeState.queueCount);
+    expect(await page.evaluate(() => {
+      const task = window.WeishanCommerceAgent.getCommerceTasks()[0];
+      return task && task.commerceSubPlanDraftConfirmation && task.commerceSubPlanDraftConfirmation.revisedCount || 0;
+    })).toBe(beforeState.revisedCount);
+    await expect(home).not.toContainText("入住日期：7月13日");
+    await page.locator("#runBtn").click();
+    const revisedPanel = page.locator('[data-commerce-home-summary="true"] .commerce-subplan-draft-confirmation-panel').last();
+    await expect(revisedPanel).toContainText("旅行计划");
+    await expect(revisedPanel).toContainText("已修正待复核");
+    await expect(revisedPanel).toContainText("入住日期：7月13日");
+    await expect(revisedPanel).toContainText("商品采购计划");
   });
 
   test("v2.0.59 confirmation updates draft action bar next steps", async () => {

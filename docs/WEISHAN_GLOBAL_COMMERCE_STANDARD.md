@@ -529,6 +529,16 @@ Action Chips 不允许返回真实商品结果，Action Chips 不允许显示真
 
 Action Chips 只能作为本地快捷提示：点击 chip 只填充输入框，不得触发 dispatch，不得创建任务，不得访问 provider，不得查价，不得跳转，不得付款，不得下单。用户 UI 不得裸露 actionChipsVersion、chipMode、actionChipPolicy、fillInputOnly、neverAutoExecute、canAutoExecuteChip 或 raw/internal payload 字段。
 
+### SubPlan Draft Chip Focus Assist 标准
+
+SubPlan Draft Chip Focus Assist 只用于点击 chip 后聚焦输入框和高亮开始执行按钮。Focus Assist 不得自动执行，必须要求用户手动点击开始执行。Focus Assist 不得自动创建任务，Focus Assist 不得触发 dispatch。
+
+Focus Assist 不代表真实 provider 已接入。Focus Assist 不允许访问真实 provider，Focus Assist 不允许连接真实 endpoint，Focus Assist 不允许使用 API key，Focus Assist 不允许发起 provider 网络搜索。
+
+Focus Assist 不允许返回真实商品结果，Focus Assist 不允许显示真实价格，Focus Assist 不允许返回 fake/demo/mock price。Focus Assist 不允许跳转购买 / 预订页面，不得自动付款、自动下单或提交订单。Focus Assist 不得保存身份证、护照、银行卡或敏感身份信息，不得长期保存用户答案。
+
+Focus Assist 用户 UI 只能显示自然语言提示，不得裸露 focusAssistVersion、focusAssistMode、focusAssistPolicy、focusInputAfterChipClick、highlightStartButton、canFocusCommandInput、canHighlightStartButton、canAutoExecuteChip 或 raw/internal payload 字段。
+
 ## 13. 当前版本链条
 
 - v2.0.25：真实价格只读展示 + 最低价精确跳转
@@ -543,6 +553,7 @@ Action Chips 只能作为本地快捷提示：点击 chip 只填充输入框，�
 - v2.0.58：SubPlan Draft Confirmation & Revision Router / 子计划草稿确认与修正路由
 - v2.0.59：Confirmation Hotfix + SubPlan Draft Action Bar / 确认修复热补丁 + 草稿复核动作栏
 - v2.0.60：SubPlan Draft Action Chips / 子计划草稿快捷动作填充
+- v2.0.61：SubPlan Draft Chip Focus Assist / 子计划草稿快捷动作聚焦辅助
 
 后续版本必须继续保持全球多源、只读搜索、安全门控、外部跳转的方向，不能退化为单一平台工具。
 
