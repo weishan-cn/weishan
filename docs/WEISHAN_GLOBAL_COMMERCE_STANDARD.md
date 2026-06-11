@@ -501,6 +501,14 @@ SubPlan Draft Confirmation & Revision Router 只处理用户对临时子计划�
 
 SubPlan Draft Confirmation & Revision Router 不得长期保存用户答案，不得保存身份证、护照、银行卡或敏感身份信息，不得保存原始 GPS 坐标。用户 UI 只能显示自然语言确认与修正摘要，不得向普通用户暴露 raw/internal draft confirmation 字段。
 
+### Result Summary 标准
+
+Result Summary 默认显示在全球采购页面顶部，让普通用户先看到最终结果摘要，再选择是否查看过程。结果摘要必须显示旅行计划摘要、商品采购计划摘要和当前状态：“草稿已补齐，等待确认”。
+
+结果摘要必须明确提示：当前不会访问真实平台、不会返回价格、不会跳转购买或预订。结果摘要不得代表真实 provider 已接入，不得连接 endpoint，不得使用 API key，不得发起网络搜索，不得返回真实价格或 fake/demo/mock price。
+
+结果摘要不得新增购买 / 预订 / 付款按钮，不得自动付款、自动下单或提交订单，不得保存身份证、护照、银行卡或长期保存用户答案。结果摘要必须保留草稿确认与修正 chip，并继续遵守默认折叠分析过程和默认压缩安全边界。
+
 ### Collapse Commerce Process By Default 标准
 
 普通用户默认只看结果和确认状态，不看完整过程。默认折叠本地意图识别、复杂意图拆分计划、子计划闸门矩阵、子计划补充问题、子计划答案收集、子计划补齐工作台、Provider 接入准备总览、Provider 审批流程、Provider Sandbox Dry Run、Connector Gate、只读 Connector Stub、Provider 密钥安全方案和 Provider 接入审查面板。
@@ -563,6 +571,7 @@ Focus Assist 用户 UI 只能显示自然语言提示，不得裸露 focusAssist
 - v2.0.60：SubPlan Draft Action Chips / 子计划草稿快捷动作填充
 - v2.0.61：SubPlan Draft Chip Focus Assist / 子计划草稿快捷动作聚焦辅助
 - v2.0.62：Collapse Commerce Process By Default / 默认折叠全球采购过程
+- v2.0.63：Result Summary / 结果摘要
 
 后续版本必须继续保持全球多源、只读搜索、安全门控、外部跳转的方向，不能退化为单一平台工具。
 

@@ -2813,6 +2813,37 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
   });
 
+
+  test("v2.0.63 result summary is shown before collapsed process", async () => {
+    await resetCommerceTasks(page);
+    await gotoRoute(page, "home");
+    await submitHomeCommand(page, runId + "-RESULT-SUMMARY-COMPLEX 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。");
+    await waitForLatestHomeTexts(page, ["旅行计划", "商品采购计划"]);
+    await submitHomeCommand(page, runId + "-RESULT-SUMMARY-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
+    await waitForLatestDraftReviewReady(page);
+    const home = page.locator('[data-commerce-home-summary="true"]').last();
+    const summaryPanel = home.locator(".commerce-result-summary-panel");
+    await expect(summaryPanel).toHaveCount(1);
+    await expect(summaryPanel).toContainText("结果摘要");
+    await expect(summaryPanel).toContainText("旅行计划");
+    await expect(summaryPanel).toContainText("成都出发，7月12日去东京，7月12日入住，7月16日离店，孩子8岁，预算一万以内，目标性价比高。");
+    await expect(summaryPanel).toContainText("商品采购计划");
+    await expect(summaryPanel).toContainText("适合剪视频的电脑，32G内存 / 1T硬盘，品牌都可以，收货地成都，不接受二手，预算一万以内。");
+    await expect(summaryPanel).toContainText("草稿已补齐，等待确认");
+    await expect(summaryPanel).toContainText("当前不会访问真实平台、不会返回价格、不会跳转购买或预订");
+    await expect(home).toContainText("两个都确认");
+    await expect(home).toContainText("电脑品牌优先苹果");
+    await expect(home.locator("details.commerce-process-disclosure")).not.toHaveAttribute("open", "");
+    await expect(home.locator("details.commerce-safety-disclosure")).not.toHaveAttribute("open", "");
+    await page.locator("#commerceViewPlanBtn").click();
+    const detail = page.locator(".commerce-detail").first();
+    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("结果摘要");
+    await expect(detail.locator("details.commerce-process-disclosure")).not.toHaveAttribute("open", "");
+    await expect(detail.locator("details.commerce-safety-disclosure")).not.toHaveAttribute("open", "");
+    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(detail.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+  });
+
   test("v2.0.62 commerce process and safety panels are collapsed by default", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");

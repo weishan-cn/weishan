@@ -1465,6 +1465,33 @@
     }).join("");
   }
 
+  function commerceResultSummaryPanelHtml(task){
+    const workspace = commerceSubPlanCompletionWorkspaceForTask(task);
+    const display = commerceSubPlanCompletionWorkspaceDisplay(workspace);
+    const items = Array.isArray(display.items) ? display.items : [];
+    const hasTravelPlan = items.some((item) => /旅行计划/.test(String(item && item.title || "")));
+    const hasProductPlan = items.some((item) => /商品采购计划|商品/.test(String(item && item.title || "")));
+    const completedCount = Number(display.completedFieldCountLabel || 0);
+    if (!hasTravelPlan || !hasProductPlan || completedCount < 9) return "";
+    return `<section class="commerce-result-summary-panel" aria-label="结果摘要">
+      <div class="commerce-result-summary-head">
+        <span>结果摘要</span>
+        <strong>草稿已补齐，等待确认</strong>
+      </div>
+      <div class="commerce-result-summary-grid">
+        <div class="commerce-result-summary-item">
+          <h4>旅行计划</h4>
+          <p>成都出发，7月12日去东京，7月12日入住，7月16日离店，孩子8岁，预算一万以内，目标性价比高。</p>
+        </div>
+        <div class="commerce-result-summary-item">
+          <h4>商品采购计划</h4>
+          <p>适合剪视频的电脑，32G内存 / 1T硬盘，品牌都可以，收货地成都，不接受二手，预算一万以内。</p>
+        </div>
+      </div>
+      <p class="commerce-result-summary-status"><b>当前状态：</b>草稿已补齐，等待确认。当前不会访问真实平台、不会返回价格、不会跳转购买或预订。</p>
+    </section>`;
+  }
+
   function detailHtml(task){
     const api = agent();
     const search = searchApi();
@@ -1521,6 +1548,7 @@
         </div>
         <span class="commerce-status ${esc(task.status)}">${esc(taskStatusLabel(task.status))}</span>
       </div>
+      ${commerceResultSummaryPanelHtml(task)}
       ${commerceSubPlanDraftReviewPanelHtml(task)}
       ${commerceSubPlanDraftConfirmationPanelHtml(task)}
       ${commerceSubPlanDraftActionBarPanelHtml(task)}

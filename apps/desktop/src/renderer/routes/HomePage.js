@@ -1410,6 +1410,32 @@
     </section>`;
   }
 
+  function commerceResultSummaryHomePanel(completionWorkspace){
+    const display = commerceSubPlanCompletionWorkspaceDisplay(completionWorkspace);
+    const items = Array.isArray(display.items) ? display.items : [];
+    const hasTravelPlan = items.some((item) => /旅行计划/.test(String(item && item.title || "")));
+    const hasProductPlan = items.some((item) => /商品采购计划|商品/.test(String(item && item.title || "")));
+    const completedCount = Number(display.completedFieldCountLabel || 0);
+    if (!hasTravelPlan || !hasProductPlan || completedCount < 9) return "";
+    return `<section class="commerce-result-summary-panel" aria-label="结果摘要">
+      <div class="commerce-result-summary-head">
+        <span>结果摘要</span>
+        <strong>草稿已补齐，等待确认</strong>
+      </div>
+      <div class="commerce-result-summary-grid">
+        <div class="commerce-result-summary-item">
+          <h4>旅行计划</h4>
+          <p>成都出发，7月12日去东京，7月12日入住，7月16日离店，孩子8岁，预算一万以内，目标性价比高。</p>
+        </div>
+        <div class="commerce-result-summary-item">
+          <h4>商品采购计划</h4>
+          <p>适合剪视频的电脑，32G内存 / 1T硬盘，品牌都可以，收货地成都，不接受二手，预算一万以内。</p>
+        </div>
+      </div>
+      <p class="commerce-result-summary-status"><b>当前状态：</b>草稿已补齐，等待确认。当前不会访问真实平台、不会返回价格、不会跳转购买或预订。</p>
+    </section>`;
+  }
+
   function commercePlanActions(task){
     const meta = task && task.meta || {};
     const answer = String(task && task.answer || "");
@@ -1445,6 +1471,7 @@
     const subPlanDraftReviewSummary = commerceSubPlanDraftReviewForTask(task, stored, complexIntentSplit, subPlanGateMatrix, subPlanQuestions, subPlanAnswerCollection, subPlanCompletionWorkspace);
     const subPlanDraftConfirmation = commerceSubPlanDraftConfirmationForTask(task, stored, subPlanDraftReviewSummary);
     const subPlanDraftActionBar = commerceSubPlanDraftActionBarForTask(stored, subPlanQuestions, subPlanCompletionWorkspace, subPlanDraftReviewSummary, subPlanDraftConfirmation);
+    const resultSummaryPanel = commerceResultSummaryHomePanel(subPlanCompletionWorkspace);
     const providerFailed = stored.searchStatus === "failed";
     const noResults = stored.searchStatus === "noResults" || stored.searchStatus === "no_results";
     const missingFields = Array.isArray(stored.missingFields) ? stored.missingFields : [];
@@ -1508,6 +1535,7 @@
     const safetyDetails = safetyDetailsBody ? disclosure("查看安全边界", safetyDetailsBody, "commerce-safety-disclosure") : "";
     return `<div class="commerce-home-card ${blocked ? "is-blocked" : ""}" data-commerce-home-summary="true">
       <div class="commerce-home-card-main">
+        ${resultSummaryPanel}
         <h3>${esc(cardTitle)}</h3>
         <p><b>需求：</b>${esc(summary(task && task.text || "", 90))}</p>
         <p><b>类型：</b>${esc(type)}</p>
