@@ -263,6 +263,13 @@
     </section>`;
   }
 
+  function disclosure(title, body, className){
+    return `<details class="commerce-disclosure ${esc(className || "")}">
+      <summary>${esc(title)}</summary>
+      <div class="commerce-disclosure-body">${body}</div>
+    </details>`;
+  }
+
   function taskStatusLabel(status){
     const map = {
       planned:"计划中",
@@ -1474,6 +1481,16 @@
     const health = search && search.getCommerceProviderHealth ? search.getCommerceProviderHealth(task.category, settings) : null;
     const hasProvider = isModelPricing || !!(health && health.hasProvider || search && search.hasCommerceSearchProvider && search.hasCommerceSearchProvider(settings));
     const category = detail.categoryLabel || task.categoryLabel || task.category || "全球采购";
+    const blocked = task.status === "blocked";
+    const analysisProcessBody = !blocked ? [
+      commerceLocalIntentPanelHtml(task),
+      commerceComplexIntentSplitPanelHtml(task),
+      commerceSubPlanGateMatrixPanelHtml(task),
+      commerceSubPlanQuestionsPanelHtml(task),
+      commerceSubPlanAnswerCollectionPanelHtml(task),
+      commerceSubPlanCompletionWorkspacePanelHtml(task)
+    ].join("") : "";
+    const analysisProcessDisclosure = analysisProcessBody ? disclosure("查看分析过程", analysisProcessBody, "commerce-process-disclosure") : "";
     if (task.status === "blocked") {
       return `<div class="commerce-detail commerce-detail-compact" data-commerce-detail="${esc(task.taskId)}">
         <div class="commerce-detail-head">
@@ -1504,14 +1521,10 @@
         </div>
         <span class="commerce-status ${esc(task.status)}">${esc(taskStatusLabel(task.status))}</span>
       </div>
-      ${commerceComplexIntentSplitPanelHtml(task)}
-      ${commerceSubPlanGateMatrixPanelHtml(task)}
-      ${commerceSubPlanQuestionsPanelHtml(task)}
-      ${commerceSubPlanAnswerCollectionPanelHtml(task)}
-      ${commerceSubPlanCompletionWorkspacePanelHtml(task)}
       ${commerceSubPlanDraftReviewPanelHtml(task)}
       ${commerceSubPlanDraftConfirmationPanelHtml(task)}
       ${commerceSubPlanDraftActionBarPanelHtml(task)}
+      ${analysisProcessDisclosure}
       <div class="commerce-detail-grid">
         ${section("需求理解", `<dl class="commerce-facts">
           <div><dt>用户需求</dt><dd>${esc(detail.demandUnderstanding || task.inputSummary)}</dd></div>
@@ -1527,7 +1540,7 @@
         ${section("推荐结果", recommendationHtml(task), "commerce-section-wide")}
         ${section("推荐输出格式", `<p class="commerce-muted">后续真实搜索后会生成：</p>${chips(detail.recommendationTemplate && detail.recommendationTemplate.fields)}`)}
         ${section("候选方案字段模板", `<p class="commerce-muted">仅展示字段结构，不填真实价格，不伪造实时库存或可用性。</p>${chips(detail.candidateSchema)}`)}
-        ${section("执行边界", `<div class="commerce-risk">当前只搜索和展示候选方案，不下单、不付款、不提交订单。</div>${chips(["不自动填写订单", "不保存支付或身份信息", "最终执行必须用户确认", "价格可能变化"])}`)}
+        ${section("执行边界", `<div class="commerce-risk">当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单。</div>`)}
         ${section("下一步建议", list(["补充预算、时间、地区限制。", "后续接入真实搜索插件后填入候选方案。", "下单或付款前必须再次确认。"]))}
       </div>
     </div>`;
@@ -1562,10 +1575,9 @@
     const providerLabel = isModelPricing ? "OpenRouter" : hasProvider ? settings.providerName || "commerceProvider" : "未配置";
     const failedMessage = task && task.searchStatus === "failed" ? task.searchErrorMessage || (isModelPricing ? "OpenRouter 搜索源不可用，无法返回真实价格。" : "搜索失败，无法返回真实价格。") : "";
     const buttonLabel = isModelPricing ? "搜索 OpenRouter 模型价格" : missingFields.length ? "搜索真实价格" : hasProvider ? "搜索真实价格" : "搜索适配器未配置";
-    return `<div class="commerce-search-panel">
-      <p><b>${hasProvider ? "已配置：" : "未配置："}</b>${isModelPricing ? (hasProvider ? "OpenRouter provider 可用于模型价格搜索。" : "OpenRouter provider 不可用。") : hasProvider ? "可以搜索真实候选方案。" : isFlight ? "暂未配置真实机票搜索适配器，无法返回实时价格。" : isProduct ? "暂未配置真实商品搜索适配器，无法返回实时价格。" : "搜索适配器未配置，无法返回真实价格。"}</p>
-      ${localLawPanelRequired ? localLawCompliancePanelHtml(task) : ""}
-      ${destinationRequired ? `<div class="commerce-warning commerce-location-required">
+    const providerSafetyBody = !isModelPricing ? [
+      localLawPanelRequired ? localLawCompliancePanelHtml(task) : "",
+      destinationRequired ? `<div class="commerce-warning commerce-location-required">
         <b>需要设置收货目的地以计算精确最低到手价</b>
         <span>收货目的地：未设置。</span>
         <span>定位服务：关闭 / 未授权。</span>
@@ -1577,17 +1589,9 @@
         <span>当前不会下单、付款或保存证件/银行卡。</span>
         <span>为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。实际价格、库存、税费和关税仍以外部平台和海关结算为准。</span>
         <button class="cmd-btn gray commerce-open-location-settings" type="button">去设置收货目的地</button>
-      </div>` : ""}
-      ${!isModelPricing && !hasProvider ? providerPoolNoticeHtml(task, configInfo, onboardingInfo, approvalInfo) : ""}
-      ${isFlight && !hasProvider ? `<div class="commerce-warning commerce-flight-provider-missing">
-        <b>已识别为机票搜索计划。</b>
-        <span>出发地：${esc(flightOrigin)} · 目的地：${esc(flightDestination)} · 日期：${esc(flightDate)}</span>
-        <span>暂未配置真实机票搜索适配器，当前无法返回实时价格。</span>
-        <span>配置状态：未配置真实搜索源；网络请求未启用；实时价格不可用。</span>
-        <span>weishan 面向全球采购场景设计，当前正在准备多国家、多平台、多币种的只读搜索能力；在真实 provider 启用前不会联网搜索、不会返回价格、不会下单或付款。</span>
-        <span>未下单、未付款、未提交订单、未保存证件。</span>
-      </div>` : ""}
-      ${!isModelPricing && !hasProvider ? `<dl class="commerce-facts commerce-provider-health">
+      </div>` : "",
+      !hasProvider ? providerPoolNoticeHtml(task, configInfo, onboardingInfo, approvalInfo) : "",
+      !hasProvider ? `<dl class="commerce-facts commerce-provider-health">
         <div><dt>搜索适配器</dt><dd>暂未配置</dd></div>
         <div><dt>接口状态</dt><dd>尚未接入</dd></div>
         <div><dt>Provider 接入审查</dt><dd>${onboardingInfo.canConnectEndpoint === true ? "已完成" : "未完成，完成前不会连接真实平台"}</dd></div>
@@ -1606,7 +1610,20 @@
         <div><dt>全球搜索准备</dt><dd>未启用</dd></div>
         <div><dt>Provider Dry Run</dt><dd>${sandboxInfo.canProceedToRealSearch === true ? "已通过" : "未通过"}</dd></div>
         <div><dt>跨境搜索</dt><dd>${globalReadiness.supportsCrossBorderSearch === true ? "已启用" : "未启用"}</dd></div>
-      </dl>` : ""}
+      </dl>` : ""
+    ].filter(Boolean).join("") : "";
+    const providerSafetyDisclosure = providerSafetyBody ? disclosure("查看安全边界", providerSafetyBody, "commerce-safety-disclosure") : "";
+    return `<div class="commerce-search-panel">
+      <p><b>${hasProvider ? "已配置：" : "未配置："}</b>${isModelPricing ? (hasProvider ? "OpenRouter provider 可用于模型价格搜索。" : "OpenRouter provider 不可用。") : hasProvider ? "可以搜索真实候选方案。" : isFlight ? "暂未配置真实机票搜索适配器，无法返回实时价格。" : isProduct ? "暂未配置真实商品搜索适配器，无法返回实时价格。" : "搜索适配器未配置，无法返回真实价格。"}</p>
+      ${providerSafetyDisclosure}
+      ${isFlight && !hasProvider ? `<div class="commerce-warning commerce-flight-provider-missing">
+        <b>已识别为机票搜索计划。</b>
+        <span>出发地：${esc(flightOrigin)} · 目的地：${esc(flightDestination)} · 日期：${esc(flightDate)}</span>
+        <span>暂未配置真实机票搜索适配器，当前无法返回实时价格。</span>
+        <span>配置状态：未配置真实搜索源；网络请求未启用；实时价格不可用。</span>
+        <span>weishan 面向全球采购场景设计，当前正在准备多国家、多平台、多币种的只读搜索能力；在真实 provider 启用前不会联网搜索、不会返回价格、不会下单或付款。</span>
+        <span>未下单、未付款、未提交订单、未保存证件。</span>
+      </div>` : ""}
       <p class="commerce-muted">Provider：${esc(providerLabel)}</p>
       ${isCruise ? `<p class="commerce-warning">邮轮价格受航线、舱型、日期和人数影响较大。当前未接入真实搜索源时不显示价格。</p>` : ""}
       ${isPrivateJet ? `<p class="commerce-warning">公务机属于高价值定制服务，价格通常需要询价确认。当前仅生成搜索和询价计划，不自动提交询价、不付款、不签约。</p>` : ""}
@@ -1787,7 +1804,7 @@
       </div>
 
       <div class="commerce-safety">
-        当前只搜索和展示候选方案，不下单、不付款、不提交订单。
+        当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单。
       </div>
 
       <div class="commerce-toolbar">

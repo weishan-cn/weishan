@@ -234,6 +234,13 @@
     return clean.length > max ? clean.slice(0, max).trim() + "..." : clean;
   }
 
+  function disclosure(title, body, className){
+    return `<details class="commerce-disclosure ${esc(className || "")}">
+      <summary>${esc(title)}</summary>
+      <div class="commerce-disclosure-body">${body}</div>
+    </details>`;
+  }
+
   function taskTitle(task){
     if (!task) return "";
     if (task.status === "queued") return t("statusQueued");
@@ -1468,6 +1475,37 @@
     const productSafetyText = "未下单、未付款、未提交订单、未保存银行卡或证件";
     const productQuery = normalized.productQuery || normalized.normalizedQuery || "";
     const genericResultSummary = candidates.length ? `已找到 ${candidates.length} 个真实 provider 结果${lowest ? " · 最低到手价 " + esc(currency ? currency + " " + lowest : lowest) : ""}${recommendation.title ? " · 推荐 " + esc(recommendation.title) : ""}` : "";
+    const analysisProcessBody = !blocked ? [
+      commerceLocalIntentHomePanel(localIntentRoute),
+      commerceComplexIntentSplitHomePanel(complexIntentSplit),
+      commerceSubPlanGateMatrixHomePanel(subPlanGateMatrix),
+      commerceSubPlanQuestionsHomePanel(subPlanQuestions),
+      commerceSubPlanAnswerCollectionHomePanel(subPlanAnswerCollection),
+      commerceSubPlanCompletionWorkspaceHomePanel(subPlanCompletionWorkspace)
+    ].join("") : "";
+    const analysisProcessDisclosure = analysisProcessBody ? disclosure("查看分析过程", analysisProcessBody, "commerce-process-disclosure") : "";
+    const safetyBrief = !blocked ? `<p class="commerce-safety-brief">当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单。</p>` : "";
+    const safetyDetailsBody = !blocked ? [
+      `<p class="commerce-safety-lead">当前只整理草稿和审查边界，不会访问真实 provider，不会联网，不会显示价格，也不会发起购买、付款或下单。</p>`,
+      `<ul class="commerce-safety-list">
+        <li>当前不会访问真实 provider</li>
+        <li>当前不会返回价格</li>
+        <li>当前不会跳转购买或预订</li>
+        <li>当前不会付款或下单</li>
+        <li>不会保存身份证、护照、银行卡或长期保存用户答案</li>
+      </ul>`,
+      localLawPanelRequired ? commerceLocalLawHomePanel(stored) : "",
+      showOnboardingHomePanel ? commerceProviderIntegrationReadinessHomePanel(stored.providerIntegrationReadiness || stored.configHealth && stored.configHealth.providerIntegrationReadiness || {}) : "",
+      showOnboardingHomePanel ? commerceProviderIntegrationRunbookHomePanel(stored.providerRunbook || stored.providerIntegrationRunbook || stored.configHealth && stored.configHealth.providerIntegrationRunbook || {}) : "",
+      showOnboardingHomePanel ? commerceProviderSecretStorageHomePanel(stored.providerSecretHealth || stored.configHealth && stored.configHealth.providerSecretHealth || {}) : "",
+      showOnboardingHomePanel ? commerceProviderSandboxDryRunHomePanel(stored.providerSandboxDryRunHealth || stored.configHealth && stored.configHealth.providerSandboxDryRunHealth || {}) : "",
+      showOnboardingHomePanel ? commerceConnectorGateHomePanel(stored.connectorGateHealth || stored.configHealth && stored.configHealth.connectorGateHealth || {}) : "",
+      !blocked && isProductPlan ? commerceProviderStubProfileHomePanel(stored.providerStubProfileHealth || stored.configHealth && stored.configHealth.providerStubProfileHealth || {}, stored.category) : "",
+      !blocked && approvalPanelRequired ? commerceReadOnlyConnectorStubHomePanel(stored.connectorStubHealth) : "",
+      !blocked && approvalPanelRequired ? commerceProviderApprovalHomePanel(stored.approvalHealth) : "",
+      showOnboardingHomePanel ? commerceOnboardingHomePanel() : ""
+    ].filter(Boolean).join("") : "";
+    const safetyDetails = safetyDetailsBody ? disclosure("查看安全边界", safetyDetailsBody, "commerce-safety-disclosure") : "";
     return `<div class="commerce-home-card ${blocked ? "is-blocked" : ""}" data-commerce-home-summary="true">
       <div class="commerce-home-card-main">
         <h3>${esc(cardTitle)}</h3>
@@ -1481,31 +1519,18 @@
         ${!blocked && isFlightPlan && normalized.destinationText ? `<p><b>目的地：</b>${esc(normalized.destinationText)}</p>` : ""}
         ${!blocked && isFlightPlan && dateCondition ? `<p><b>日期：</b>${esc(dateCondition)}</p>` : ""}
         ${blocked ? `<p><b>原因：</b>涉及下单 / 付款 / 敏感资料或询价提交</p>` : ""}
-        ${!blocked ? commerceLocalIntentHomePanel(localIntentRoute) : ""}
-        ${!blocked ? commerceComplexIntentSplitHomePanel(complexIntentSplit) : ""}
-        ${!blocked ? commerceSubPlanGateMatrixHomePanel(subPlanGateMatrix) : ""}
-        ${!blocked ? commerceSubPlanQuestionsHomePanel(subPlanQuestions) : ""}
-        ${!blocked ? commerceSubPlanAnswerCollectionHomePanel(subPlanAnswerCollection) : ""}
-        ${!blocked ? commerceSubPlanCompletionWorkspaceHomePanel(subPlanCompletionWorkspace) : ""}
+        ${analysisProcessDisclosure}
         ${!blocked ? commerceSubPlanDraftReviewHomePanel(subPlanDraftReviewSummary) : ""}
         ${!blocked ? commerceSubPlanDraftConfirmationHomePanel(subPlanDraftConfirmation) : ""}
         ${!blocked ? commerceSubPlanDraftActionBarHomePanel(subPlanDraftActionBar) : ""}
-        ${!blocked && localLawPanelRequired ? commerceLocalLawHomePanel(stored) : ""}
-        ${showOnboardingHomePanel ? commerceProviderIntegrationReadinessHomePanel(stored.providerIntegrationReadiness || stored.configHealth && stored.configHealth.providerIntegrationReadiness || {}) : ""}
-        ${showOnboardingHomePanel ? commerceProviderIntegrationRunbookHomePanel(stored.providerIntegrationRunbook || stored.configHealth && stored.configHealth.providerIntegrationRunbook || {}) : ""}
-        ${showOnboardingHomePanel ? commerceProviderSecretStorageHomePanel(stored.providerSecretHealth || stored.configHealth && stored.configHealth.providerSecretHealth || {}) : ""}
-        ${showOnboardingHomePanel ? commerceProviderSandboxDryRunHomePanel(stored.providerSandboxDryRunHealth || stored.configHealth && stored.configHealth.providerSandboxDryRunHealth || {}) : ""}
-        ${showOnboardingHomePanel ? commerceConnectorGateHomePanel(stored.connectorGateHealth || stored.configHealth && stored.configHealth.connectorGateHealth || {}) : ""}
-        ${!blocked && isProductPlan ? commerceProviderStubProfileHomePanel(stored.providerStubProfileHealth || stored.configHealth && stored.configHealth.providerStubProfileHealth || {}, stored.category) : ""}
-        ${!blocked && approvalPanelRequired ? commerceReadOnlyConnectorStubHomePanel(stored.connectorStubHealth) : ""}
-        ${!blocked && approvalPanelRequired ? commerceProviderApprovalHomePanel(stored.approvalHealth) : ""}
+        ${safetyBrief}
+        ${safetyDetails}
         ${!blocked && destinationRequired ? `<p><b>收货目的地：</b>未设置</p><p><b>定位服务：</b>关闭 / 未授权</p><p><b>价格状态：</b>精确最低到手价不可用</p><p><b>原因：</b>需要收货国家/地区/邮编用于运费、税费、关税和当地合规计算。</p><p class="commerce-warning">为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。实际价格、库存、税费和关税仍以外部平台和海关结算为准。</p>` : ""}
         ${!blocked && (providerMissing || complianceRequired || isProductPlan && destinationRequired) ? `<p><b>搜索源：</b>${esc(providerMissingText)}</p>` : ""}
         ${!blocked && providerFailed ? `<p><b>搜索源：</b>${esc(stored.searchErrorMessage || "搜索源不可用，无法返回真实价格")}</p>` : ""}
         ${!blocked && noResults ? `<p><b>搜索结果：</b>provider 未返回可展示结果，当前不显示价格。</p>` : ""}
         ${!blocked && missingFields.length ? `<p><b>待补充：</b>${esc(missingFields.join("、"))}</p>` : ""}
         ${!blocked && candidates.length ? `<p><b>搜索结果：</b>${isModelPricing ? esc(modelPriceSummary) : genericResultSummary}</p>` : ""}
-        ${showOnboardingHomePanel ? commerceOnboardingHomePanel() : ""}
         <p><b>安全边界：</b>${blocked ? "不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表" : isFlightPlan ? flightSafetyText : isProductPlan && (providerMissing || destinationRequired || complianceRequired) ? productSafetyText : candidates.length ? "仅展示候选方案，未下单、未付款、未提交订单" : "未搜索、未下单、未付款、未提交订单"}</p>
       </div>
       <button class="cmd-btn primary commerce-view-plan-button" id="commerceViewPlanBtn" type="button">查看全球采购计划</button>

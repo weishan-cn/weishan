@@ -425,7 +425,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.getByRole("heading", { name:"全球采购" })).toBeVisible();
     await expect(page.locator(".commerce-hero h1")).toHaveText("全球采购");
     await expect(page.getByText("搜索、比价、推荐、执行前确认")).toBeVisible();
-    await expect(page.getByText("当前只搜索和展示候选方案，不下单、不付款、不提交订单").first()).toBeVisible();
+    await expect(page.getByText("当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单").first()).toBeVisible();
   });
 
   test("commerce location policy defaults to destination required and private", async () => {
@@ -2798,6 +2798,12 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail).toContainText("子计划补齐工作台");
     await expect(detail).toContainText("旅行计划");
     await expect(detail).toContainText("商品采购计划");
+    await expect(detail).toContainText("查看分析过程");
+    await expect(detail).toContainText("查看安全边界");
+    await expect(detail.locator("details.commerce-process-disclosure")).toHaveCount(1);
+    await expect(detail.locator("details.commerce-safety-disclosure")).toHaveCount(1);
+    await expect(detail.locator("details.commerce-process-disclosure")).not.toHaveAttribute("open", "");
+    await expect(detail.locator("details.commerce-safety-disclosure")).not.toHaveAttribute("open", "");
     await expect(detail).toContainText("出发地：成都");
     await expect(detail).toContainText("收货地：成都");
     await expect(detail).toContainText("历史回看不会重新执行任务");
@@ -2805,6 +2811,34 @@ test.describe.serial("commerce agent workbench", () => {
     for (const field of ["completionWorkspaceVersion", "defaultMode=guided_subplan_completion", "workspaceItems", "temporarySessionOnly=true", "temporaryDraftOnly=true", "canAccessProvider=false"]) await expect(detail).not.toContainText(field);
     await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(detail.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+  });
+
+  test("v2.0.62 commerce process and safety panels are collapsed by default", async () => {
+    await resetCommerceTasks(page);
+    await gotoRoute(page, "home");
+    await submitHomeCommand(page, runId + "-COLLAPSE-COMPLEX 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。");
+    await waitForLatestHomeTexts(page, ["旅行计划", "商品采购计划"]);
+    await submitHomeCommand(page, runId + "-COLLAPSE-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
+    await waitForLatestDraftReviewReady(page);
+    const home = page.locator('[data-commerce-home-summary="true"]').last();
+    const homeProcess = home.locator("details.commerce-process-disclosure");
+    const homeSafety = home.locator("details.commerce-safety-disclosure");
+    await expect(home).toContainText("查看分析过程");
+    await expect(home).toContainText("查看安全边界");
+    await expect(homeProcess).toHaveCount(1);
+    await expect(homeSafety).toHaveCount(1);
+    await expect(homeProcess).not.toHaveAttribute("open", "");
+    await expect(homeSafety).not.toHaveAttribute("open", "");
+    await homeProcess.locator("summary").click();
+    await homeSafety.locator("summary").click();
+    await expect(homeProcess).toHaveAttribute("open", "");
+    await expect(homeSafety).toHaveAttribute("open", "");
+    await page.locator("#commerceViewPlanBtn").click();
+    const detail = page.locator(".commerce-detail").first();
+    await expect(detail.locator("details.commerce-process-disclosure")).toHaveCount(1);
+    await expect(detail.locator("details.commerce-safety-disclosure")).toHaveCount(1);
+    await expect(detail.locator("details.commerce-process-disclosure")).not.toHaveAttribute("open", "");
+    await expect(detail.locator("details.commerce-safety-disclosure")).not.toHaveAttribute("open", "");
   });
 
   test("task history detail restores subplan draft review summary without rerun", async () => {
@@ -4598,7 +4632,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("该请求涉及下单 / 付款，已阻断");
     await expect(page.locator(".commerce-detail")).toContainText("不会下单、付款或提交订单");
     await expect(page.getByRole("button", { name:/付款|下单|提交订单/ })).toHaveCount(0);
-    await expect(page.locator(".commerce-safety")).toContainText("当前只搜索和展示候选方案，不下单、不付款、不提交订单");
+    await expect(page.locator(".commerce-safety")).toContainText("当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单");
   });
 
   test("cruise payment request is blocked without payment or order submit", async () => {

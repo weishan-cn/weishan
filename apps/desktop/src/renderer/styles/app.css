@@ -1304,6 +1304,54 @@
   font-size:13px;
   font-weight:800;
 }
+.commerce-safety-brief{
+  margin:8px 0 0;
+  padding:0 2px;
+  color:#475569;
+  font-size:12px;
+  line-height:1.55;
+}
+.commerce-disclosure{
+  margin-top:10px;
+  border:1px solid #e2e8f0;
+  border-radius:10px;
+  background:#fff;
+  padding:10px 12px;
+}
+.commerce-disclosure > summary{
+  list-style:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  color:#0f172a;
+  font-size:13px;
+  font-weight:950;
+}
+.commerce-disclosure > summary::-webkit-details-marker{
+  display:none;
+}
+.commerce-disclosure > summary::after{
+  content:"▸";
+  color:#64748b;
+  font-size:12px;
+  transition:transform .15s ease;
+}
+.commerce-disclosure[open] > summary::after{
+  transform:rotate(90deg);
+}
+.commerce-disclosure-body{
+  display:grid;
+  gap:10px;
+  margin-top:10px;
+}
+.commerce-process-disclosure{
+  background:#f8fafc;
+}
+.commerce-safety-disclosure{
+  background:#f8fbff;
+}
 .commerce-home-card{
   margin-top:10px;
   display:flex;

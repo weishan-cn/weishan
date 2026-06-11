@@ -501,6 +501,14 @@ SubPlan Draft Confirmation & Revision Router 只处理用户对临时子计划�
 
 SubPlan Draft Confirmation & Revision Router 不得长期保存用户答案，不得保存身份证、护照、银行卡或敏感身份信息，不得保存原始 GPS 坐标。用户 UI 只能显示自然语言确认与修正摘要，不得向普通用户暴露 raw/internal draft confirmation 字段。
 
+### Collapse Commerce Process By Default 标准
+
+普通用户默认只看结果和确认状态，不看完整过程。默认折叠本地意图识别、复杂意图拆分计划、子计划闸门矩阵、子计划补充问题、子计划答案收集、子计划补齐工作台、Provider 接入准备总览、Provider 审批流程、Provider Sandbox Dry Run、Connector Gate、只读 Connector Stub、Provider 密钥安全方案和 Provider 接入审查面板。
+
+默认只能看到“查看分析过程”入口，点击后再展开完整过程。默认安全边界只能看到一行摘要：“当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单。”；点击“查看安全边界”后再展开完整安全说明。
+
+历史任务回看也必须遵守同样的默认折叠规则，不能默认把完整过程一次性铺开。
+
 ### SubPlan Draft Action Bar 标准
 
 SubPlan Draft Action Bar 只提供草稿确认、修正和安全复核的下一步提示。动作提示用于告诉用户可以继续说什么，动作提示不代表任何真实 provider 已接入。
@@ -554,6 +562,7 @@ Focus Assist 用户 UI 只能显示自然语言提示，不得裸露 focusAssist
 - v2.0.59：Confirmation Hotfix + SubPlan Draft Action Bar / 确认修复热补丁 + 草稿复核动作栏
 - v2.0.60：SubPlan Draft Action Chips / 子计划草稿快捷动作填充
 - v2.0.61：SubPlan Draft Chip Focus Assist / 子计划草稿快捷动作聚焦辅助
+- v2.0.62：Collapse Commerce Process By Default / 默认折叠全球采购过程
 
 后续版本必须继续保持全球多源、只读搜索、安全门控、外部跳转的方向，不能退化为单一平台工具。
 
