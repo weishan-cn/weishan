@@ -1448,6 +1448,83 @@
           </ul>
         </section>
       </div>
+      <section class="commerce-result-summary-checklist" aria-label="可执行清单">
+        <div class="commerce-result-summary-checklist-head">
+          <div>
+            <h4>可执行清单</h4>
+            <p>你可以把下面的条件复制到机票、酒店或购物平台自行搜索。当前不会访问真实平台、不会返回价格、不会跳转购买或预订。</p>
+          </div>
+        </div>
+        <div class="commerce-result-summary-checklist-grid">
+          <section class="commerce-result-summary-checklist-card">
+            <h5>旅行计划可执行清单</h5>
+            <div class="commerce-result-summary-checklist-group">
+              <b>机票搜索条件：</b>
+              <ul>
+                <li>出发地：成都</li>
+                <li>目的地：东京</li>
+                <li>出发日期：7月12日</li>
+                <li>乘客：1名成人 + 1名8岁儿童</li>
+                <li>预算目标：总预算一万以内</li>
+                <li>排序建议：优先看总价、转机次数、起飞时间、行李规则</li>
+              </ul>
+            </div>
+            <div class="commerce-result-summary-checklist-group">
+              <b>酒店搜索条件：</b>
+              <ul>
+                <li>目的地：东京</li>
+                <li>入住日期：7月12日</li>
+                <li>离店日期：7月16日</li>
+                <li>人员：带8岁儿童</li>
+                <li>筛选建议：优先看家庭友好、地铁方便、评分、取消政策、税费是否包含</li>
+              </ul>
+            </div>
+            <div class="commerce-result-summary-checklist-group">
+              <b>旅行确认前检查：</b>
+              <ul>
+                <li>护照 / 签证 / 入境要求需自行确认</li>
+                <li>航班行李规则需自行确认</li>
+                <li>酒店儿童入住政策需自行确认</li>
+                <li>最终价格以真实平台为准</li>
+              </ul>
+            </div>
+          </section>
+          <section class="commerce-result-summary-checklist-card">
+            <h5>商品采购可执行清单</h5>
+            <div class="commerce-result-summary-checklist-group">
+              <b>电脑搜索条件：</b>
+              <ul>
+                <li>用途：剪视频</li>
+                <li>内存：32G</li>
+                <li>硬盘：1T</li>
+                <li>品牌：都可以</li>
+                <li>收货地：成都</li>
+                <li>是否接受二手：不接受</li>
+                <li>预算：一万以内</li>
+              </ul>
+            </div>
+            <div class="commerce-result-summary-checklist-group">
+              <b>电脑筛选建议：</b>
+              <ul>
+                <li>优先看内存、硬盘、CPU、显卡、屏幕、散热、售后</li>
+                <li>剪视频优先看性能释放和内存容量</li>
+                <li>不接受二手时排除二手 / 翻新 / 展示机</li>
+                <li>比较时看最终到手价、保修、退换政策</li>
+              </ul>
+            </div>
+            <div class="commerce-result-summary-checklist-group">
+              <b>商品确认前检查：</b>
+              <ul>
+                <li>型号是否为新机</li>
+                <li>是否官方保修</li>
+                <li>配置是否真为32G / 1T</li>
+                <li>收货地是否支持配送</li>
+                <li>最终价格以真实平台为准</li>
+              </ul>
+            </div>
+          </section>
+        </div>
+      </section>
       <section class="commerce-result-summary-next">
         <h4>下一步</h4>
         <p>你可以直接选择：</p>
