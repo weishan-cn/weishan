@@ -256,7 +256,8 @@
 
   function isCommerceTask(task){
     const meta = task && task.meta || {};
-    return !!(meta.commerceTaskId || meta.commerceCategory || /全球采购计划已/.test(String(task && task.answer || "")));
+    const payload = task && task.payload || {};
+    return !!(meta.commerceTaskId || meta.commerceCategory || payload.module === "commerceAgent" || task && task.module === "commerceAgent" || /全球采购计划已/.test(String(task && task.answer || payload.outputSummary || "")));
   }
 
   function commerceTypeLabel(category){
@@ -283,8 +284,28 @@
   function storedCommerceTask(task){
     const api = window.WeishanCommerceAgent || null;
     const meta = task && task.meta || {};
-    if (!api || !api.getCommerceTaskById || !meta.commerceTaskId) return null;
-    return api.getCommerceTaskById(meta.commerceTaskId);
+    const payload = task && task.payload || {};
+    if (!api || !api.getCommerceTaskById || !task) return null;
+    const ids = [
+      meta.commerceTaskId,
+      task.taskId,
+      task.id,
+      payload.taskId,
+      payload.commerceTaskId,
+      payload && payload.meta && payload.meta.commerceTaskId
+    ].filter(Boolean);
+    for (const id of ids) {
+      const commerceTask = api.getCommerceTaskById(String(id));
+      if (commerceTask) return commerceTask;
+    }
+    return null;
+  }
+
+  function historyCommerceTask(task){
+    const stored = storedCommerceTask(task);
+    if (stored) return stored;
+    if (isCommerceTask(task)) return task;
+    return null;
   }
 
   function commerceHistorySummary(task){
@@ -1069,6 +1090,8 @@
     if (isCommerceTask(task)) {
       return commerceHistorySummary(task);
     }
+    const resolved = storedCommerceTask(task);
+    if (resolved) return commerceHistorySummary(resolved);
     const answer = summary(displayAnswer(task), 260);
     return answer || "暂无结构化计划；显示当前任务摘要。";
   }
@@ -1084,12 +1107,26 @@
   function taskHistoryDetailView(task){
     if (!task) return "";
     const stored = storedCommerceTask(task);
+    const commerceTask = historyCommerceTask(task) || stored;
+    const historySummaryWorkspace = commerceTask && commerceTask.commerceSubPlanCompletionWorkspace || stored && stored.commerceSubPlanCompletionWorkspace || null;
+    const historyDraftReviewSummary = commerceTask && commerceTask.commerceSubPlanDraftReviewSummary || stored && stored.commerceSubPlanDraftReviewSummary || null;
+    const historyDraftConfirmation = commerceTask && commerceTask.commerceSubPlanDraftConfirmation || stored && stored.commerceSubPlanDraftConfirmation || null;
+    const historyDraftActionBar = commerceTask && commerceTask.commerceSubPlanDraftActionBar || stored && stored.commerceSubPlanDraftActionBar || null;
     const status = taskTitle(task);
     const type = taskResultTypeLabel(task, stored);
     const time = taskTime(task);
     const safety = taskHistorySafetySummary(task);
     const detail = taskHistoryLogDetail(task);
-    const commerceDetail = isCommerceTask(task) ? commercePlanActions(task) : "";
+    const historySummaryPanel = historySummaryWorkspace ? commerceHistoryResultSummaryHomePanel(historySummaryWorkspace) : "";
+    const historyDraftReviewPanel = historyDraftReviewSummary ? commerceSubPlanDraftReviewHomePanel(historyDraftReviewSummary) : "";
+    const historyDraftConfirmationPanel = historyDraftConfirmation ? commerceSubPlanDraftConfirmationHomePanel(historyDraftConfirmation) : "";
+    const historyDraftActionBarPanel = historyDraftActionBar ? commerceSubPlanDraftActionBarHomePanel(historyDraftActionBar) : "";
+    const historyCompletionPanel = historySummaryWorkspace ? commerceSubPlanCompletionWorkspaceHomePanel(historySummaryWorkspace) : "";
+    const historyProcessDisclosure = commerceTask ? disclosure("查看分析过程", `<p>历史回看保留分析过程：本地意图识别、复杂意图拆分计划、子计划闸门矩阵、子计划补充问题、子计划答案收集、子计划补齐工作台。</p>`, "commerce-process-disclosure") : "";
+    const historySafetyDisclosure = commerceTask ? disclosure("查看安全边界", `<p>历史回看保留安全边界：当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单。</p>`, "commerce-safety-disclosure") : "";
+    const commerceDetail = commerceTask ? commercePlanActions(commerceTask) : "";
+    const historyCommerceDetailBody = [historySummaryPanel, historyDraftReviewPanel, historyDraftConfirmationPanel, historyCompletionPanel, historyDraftActionBarPanel, historyProcessDisclosure, historySafetyDisclosure, commerceDetail].filter(Boolean).join("");
+    const historyCommerceDetail = historyCommerceDetailBody ? `<div class="commerce-home-card commerce-history-home-card">${historyCommerceDetailBody}</div>` : "";
     return `<div class="cmd-history-main-detail" data-task-history-detail="true">
       <div class="cmd-history-main-head">
         <div>
@@ -1110,7 +1147,7 @@
       </section>
       <section class="cmd-history-main-section">
         <h4>识别结果 / 计划内容</h4>
-        <p>${esc(taskHistoryPlanSummary(task, stored))}</p>
+        <p>${esc(taskHistoryPlanSummary(commerceTask || task, stored || commerceTask))}</p>
       </section>
       <section class="cmd-history-main-section is-safety">
         <h4>安全边界摘要</h4>
@@ -1120,7 +1157,7 @@
         <h4>下一步</h4>
         <p>如需继续，请返回最新摘要或重新发起下一步指令；历史回看不会重新执行任务。</p>
       </section>
-      ${commerceDetail ? `<div class="cmd-history-commerce-detail">${commerceDetail}</div>` : `<pre class="cmd-history-main-full">${esc(detail)}</pre>`}
+      ${historyCommerceDetail ? `<div class="cmd-history-commerce-detail">${historyCommerceDetail}</div>` : `<pre class="cmd-history-main-full">${esc(detail)}</pre>`}
     </div>`;
   }
 
@@ -1492,6 +1529,141 @@
     const hasProductPlan = items.some((item) => /商品采购计划|商品/.test(String(item && item.title || "")));
     const completedCount = Number(display.completedFieldCountLabel || 0);
     if (!hasTravelPlan || !hasProductPlan || completedCount < 9) return "";
+    return `<section class="commerce-result-summary-panel" aria-label="结果摘要">
+      <div class="commerce-result-summary-head">
+        <div class="commerce-result-summary-headline">
+          <span>结果摘要</span>
+          <strong>草稿已补齐，等待确认</strong>
+        </div>
+        <p>普通用户默认先看结果，不看完整过程。</p>
+      </div>
+      <div class="commerce-result-summary-grid">
+        <section class="commerce-result-summary-card">
+          <h4>旅行计划摘要</h4>
+          <ul>
+            <li>成都出发 → 东京</li>
+            <li>7月12日出发，7月12日入住，7月16日离店</li>
+            <li>孩子 8 岁</li>
+            <li>预算一万以内</li>
+            <li>目标：性价比高</li>
+          </ul>
+        </section>
+        <section class="commerce-result-summary-card">
+          <h4>商品采购计划摘要</h4>
+          <ul>
+            <li>适合剪视频的电脑</li>
+            <li>32G 内存 / 1T 硬盘</li>
+            <li>品牌都可以</li>
+            <li>收货地成都</li>
+            <li>不接受二手</li>
+            <li>预算一万以内</li>
+          </ul>
+        </section>
+      </div>
+      <section class="commerce-result-summary-checklist" aria-label="可执行清单">
+        <div class="commerce-result-summary-checklist-head">
+          <div>
+            <h4>可执行清单</h4>
+            <p>你可以把下面的条件复制到机票、酒店或购物平台自行搜索。当前不会访问真实平台、不会返回价格、不会跳转购买或预订。</p>
+          </div>
+          <div class="commerce-result-summary-copy-actions" aria-label="可执行清单复制按钮">
+            <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="flight">复制机票搜索条件</button>
+            <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="hotel">复制酒店搜索条件</button>
+            <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="computer">复制电脑搜索条件</button>
+            <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="full">复制全部清单</button>
+          </div>
+        </div>
+        <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback aria-live="polite"></p>
+        <div class="commerce-result-summary-checklist-grid">
+          <section class="commerce-result-summary-checklist-card">
+            <h5>旅行计划可执行清单</h5>
+            <div class="commerce-result-summary-checklist-group">
+              <b>机票搜索条件：</b>
+              <ul>
+                <li>出发地：成都</li>
+                <li>目的地：东京</li>
+                <li>出发日期：7月12日</li>
+                <li>乘客：1名成人 + 1名8岁儿童</li>
+                <li>预算目标：总预算一万以内</li>
+                <li>排序建议：优先看总价、转机次数、起飞时间、行李规则</li>
+              </ul>
+            </div>
+            <div class="commerce-result-summary-checklist-group">
+              <b>酒店搜索条件：</b>
+              <ul>
+                <li>目的地：东京</li>
+                <li>入住日期：7月12日</li>
+                <li>离店日期：7月16日</li>
+                <li>人员：带8岁儿童</li>
+                <li>筛选建议：优先看家庭友好、地铁方便、评分、取消政策、税费是否包含</li>
+              </ul>
+            </div>
+            <div class="commerce-result-summary-checklist-group">
+              <b>旅行确认前检查：</b>
+              <ul>
+                <li>护照 / 签证 / 入境要求需自行确认</li>
+                <li>航班行李规则需自行确认</li>
+                <li>酒店儿童入住政策需自行确认</li>
+                <li>最终价格以真实平台为准</li>
+              </ul>
+            </div>
+          </section>
+          <section class="commerce-result-summary-checklist-card">
+            <h5>商品采购可执行清单</h5>
+            <div class="commerce-result-summary-checklist-group">
+              <b>电脑搜索条件：</b>
+              <ul>
+                <li>用途：剪视频</li>
+                <li>内存：32G</li>
+                <li>硬盘：1T</li>
+                <li>品牌：都可以</li>
+                <li>收货地：成都</li>
+                <li>是否接受二手：不接受</li>
+                <li>预算：一万以内</li>
+              </ul>
+            </div>
+            <div class="commerce-result-summary-checklist-group">
+              <b>电脑筛选建议：</b>
+              <ul>
+                <li>优先看内存、硬盘、CPU、显卡、屏幕、散热、售后</li>
+                <li>剪视频优先看性能释放和内存容量</li>
+                <li>不接受二手时排除二手 / 翻新 / 展示机</li>
+                <li>比较时看最终到手价、保修、退换政策</li>
+              </ul>
+            </div>
+            <div class="commerce-result-summary-checklist-group">
+              <b>商品确认前检查：</b>
+              <ul>
+                <li>型号是否为新机</li>
+                <li>是否官方保修</li>
+                <li>配置是否真为32G / 1T</li>
+                <li>收货地是否支持配送</li>
+                <li>最终价格以真实平台为准</li>
+              </ul>
+            </div>
+          </section>
+        </div>
+      </section>
+      <section class="commerce-result-summary-next">
+        <h4>下一步</h4>
+        <p>你可以直接选择：</p>
+        <ul>
+          <li>两个都确认</li>
+          <li>确认旅行计划</li>
+          <li>电脑计划确认</li>
+          <li>修改酒店日期</li>
+          <li>修改电脑品牌或预算</li>
+        </ul>
+      </section>
+      <p class="commerce-result-summary-status"><b>安全提示：</b>当前不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</p>
+    </section>`;
+  }
+
+  function commerceHistoryResultSummaryHomePanel(completionWorkspace){
+    if (!completionWorkspace) return "";
+    const display = commerceSubPlanCompletionWorkspaceDisplay(completionWorkspace);
+    const items = Array.isArray(display.items) ? display.items : [];
+    if (!items.length) return "";
     return `<section class="commerce-result-summary-panel" aria-label="结果摘要">
       <div class="commerce-result-summary-head">
         <div class="commerce-result-summary-headline">

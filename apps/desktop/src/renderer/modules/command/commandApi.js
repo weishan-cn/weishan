@@ -922,6 +922,9 @@
       payload.attachmentNames = Array.isArray(meta.attachmentNames) ? meta.attachmentNames.map((name) => taskSummary(name, 120)) : [];
       payload.attachmentTypes = Array.isArray(meta.attachmentTypes) ? meta.attachmentTypes.map((type) => taskSummary(type, 80)) : [];
     }
+    if (meta.commerceTaskId) payload.commerceTaskId = meta.commerceTaskId;
+    if (meta.commerceCategory) payload.commerceCategory = meta.commerceCategory;
+    if (meta.commerceStatus) payload.commerceStatus = meta.commerceStatus;
     if (Array.isArray(normalized.artifacts) && normalized.artifacts.length) {
       payload.artifacts = normalized.artifacts.map((artifact) => ({
         artifactId:artifact && artifact.artifactId || "",
@@ -1336,6 +1339,14 @@
               commerceTaskId:commercePlan && commercePlan.taskId || "",
               commerceCategory:commercePlan && commercePlan.category || "",
               commerceStatus:commercePlan && commercePlan.status || "planned",
+              commerceComplexIntentSplit:cloneCommandValue(commercePlan && commercePlan.commerceComplexIntentSplit) || null,
+              commerceSubPlanGateMatrix:cloneCommandValue(commercePlan && commercePlan.commerceSubPlanGateMatrix) || null,
+              commerceSubPlanQuestions:cloneCommandValue(commercePlan && commercePlan.commerceSubPlanQuestions) || null,
+              commerceSubPlanAnswerCollection:cloneCommandValue(commercePlan && commercePlan.commerceSubPlanAnswerCollection) || null,
+              commerceSubPlanCompletionWorkspace:cloneCommandValue(commercePlan && commercePlan.commerceSubPlanCompletionWorkspace) || null,
+              commerceSubPlanDraftReviewSummary:cloneCommandValue(commercePlan && commercePlan.commerceSubPlanDraftReviewSummary) || null,
+              commerceSubPlanDraftConfirmation:cloneCommandValue(commercePlan && commercePlan.commerceSubPlanDraftConfirmation) || null,
+              commerceSubPlanDraftActionBar:cloneCommandValue(commercePlan && commercePlan.commerceSubPlanDraftActionBar) || null,
               realExecution:false
             });
             t.answer = answer;

@@ -2998,6 +2998,9 @@ test.describe.serial("commerce agent workbench", () => {
   });
 
   test("task history detail restores subplan draft review summary without rerun", async () => {
+    await page.goto("file:///Users/boge/Downloads/weishan-clean-release/apps/desktop/src/index.html");
+    await page.waitForLoadState("domcontentloaded");
+    await gotoRoute(page, "home");
     const demand = runId + "-DRAFT-REVIEW-HISTORY 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。";
     const answer = runId + "-DRAFT-REVIEW-HISTORY 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。";
     await submitHomeCommand(page, demand);
@@ -3030,6 +3033,9 @@ test.describe.serial("commerce agent workbench", () => {
   });
 
   test("task history detail restore opens prior task in main area without rerun", async () => {
+    await page.goto("file:///Users/boge/Downloads/weishan-clean-release/apps/desktop/src/index.html");
+    await page.waitForLoadState("domcontentloaded");
+    await gotoRoute(page, "home");
     const firstInput = runId + "-HISTORY-RESTORE 买华为手机";
     const secondInput = runId + "-HISTORY-RESTORE 买演唱会门票";
     await submitHomeCommand(page, firstInput);
@@ -3081,6 +3087,9 @@ test.describe.serial("commerce agent workbench", () => {
   });
 
   test("task history detail restore preserves complex answer details by selected record", async () => {
+    await page.goto("file:///Users/boge/Downloads/weishan-clean-release/apps/desktop/src/index.html");
+    await page.waitForLoadState("domcontentloaded");
+    await gotoRoute(page, "home");
     const demand = runId + "-HISTORY-ANSWER 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。";
     const answer = runId + "-HISTORY-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。";
     await submitHomeCommand(page, demand);
@@ -3106,6 +3115,64 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
 
+    await page.locator("#historyBackBtn").click();
+    await expect(page.locator('#cmdConsole [data-task-history-detail="true"]')).toHaveCount(0);
+  });
+
+  test("v2.0.67 task history detail keeps actionable checklist and copy buttons without rerun", async () => {
+    await page.goto("file:///Users/boge/Downloads/weishan-clean-release/apps/desktop/src/index.html");
+    await page.waitForLoadState("domcontentloaded");
+    await gotoRoute(page, "home");
+    const demand = runId + "-HISTORY-COPY 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。";
+    const answer = runId + "-HISTORY-COPY 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。";
+    await submitHomeCommand(page, demand);
+    await waitForLatestHomeTexts(page, ["旅行计划", "商品采购计划"]);
+    await submitHomeCommand(page, answer);
+    await submitHomeCommand(page, runId + "-HISTORY-COPY 买演唱会门票");
+
+    const historyItems = page.locator("#cmdHistory [data-history-id]");
+    await expect(historyItems.filter({ hasText:answer }).first()).toBeVisible();
+    const historyCountBefore = await historyItems.count();
+
+    await installClipboardMock(page);
+    await historyItems.filter({ hasText:answer }).first().click();
+
+    const detail = page.locator('#cmdConsole [data-task-history-detail="true"]').first();
+    const summaryPanel = detail.locator(".commerce-result-summary-panel");
+    await expect(detail).toContainText("历史任务详情");
+    await expect(summaryPanel).toContainText("结果摘要");
+    await expect(summaryPanel).toContainText("可执行清单");
+    await expect(summaryPanel).toContainText("旅行计划摘要");
+    await expect(summaryPanel).toContainText("商品采购计划摘要");
+    await expect(summaryPanel).toContainText("复制机票搜索条件");
+    await expect(summaryPanel).toContainText("复制酒店搜索条件");
+    await expect(summaryPanel).toContainText("复制电脑搜索条件");
+    await expect(summaryPanel).toContainText("复制全部清单");
+    await expect(detail.locator("details.commerce-process-disclosure")).not.toHaveAttribute("open", "");
+    await expect(detail.locator("details.commerce-safety-disclosure")).not.toHaveAttribute("open", "");
+    await expect(summaryPanel.locator(".commerce-result-summary-copy-btn")).toHaveCount(4);
+    await summaryPanel.getByRole("button", { name:"复制机票搜索条件" }).click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("出发地：成都");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("目的地：东京");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("最终价格以真实平台为准");
+    await summaryPanel.getByRole("button", { name:"复制酒店搜索条件" }).click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("入住日期：7月12日");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("离店日期：7月16日");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("最终价格以真实平台为准");
+    await summaryPanel.getByRole("button", { name:"复制电脑搜索条件" }).click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("用途：剪视频");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("内存：32G");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("硬盘：1T");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("是否接受二手：不接受");
+    await summaryPanel.getByRole("button", { name:"复制全部清单" }).click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("机票搜索条件");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("酒店搜索条件");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("电脑搜索条件");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("当前不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。");
+    await expect(summaryPanel.locator("[data-commerce-copy-feedback]")).toContainText("已复制，可粘贴到外部平台搜索");
+    await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
+    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+    await disableClipboardMock(page);
     await page.locator("#historyBackBtn").click();
     await expect(page.locator('#cmdConsole [data-task-history-detail="true"]')).toHaveCount(0);
   });
@@ -5156,6 +5223,9 @@ test.describe.serial("commerce agent workbench", () => {
   });
 
   test("v2.0.58 raw draft confirmation fields are hidden from user UI", async () => {
+    await cleanupE2EData(page, runId);
+    await page.goto("file:///Users/boge/Downloads/weishan-clean-release/apps/desktop/src/index.html");
+    await page.waitForLoadState("domcontentloaded");
     await gotoRoute(page, "home");
     await submitHomeCommand(page, runId + "-DRAFT-RAW 买华为手机");
     await submitHomeCommand(page, runId + "-DRAFT-RAW-CONFIRM 这个草稿确认");

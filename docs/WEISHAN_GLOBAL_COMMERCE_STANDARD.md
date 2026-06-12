@@ -561,6 +561,23 @@ Task History Detail Restore 只用于恢复和回看任务历史详情。任务�
 
 Task History Detail Restore 不得自动付款、自动下单或提交订单，不得保存身份证、护照、银行卡或敏感身份信息，不得保存原始 GPS 坐标。用户 UI 只能显示自然语言历史详情，不得向普通用户暴露 raw/internal task history 字段。
 
+### History Actionable Checklist 标准
+
+History Actionable Checklist 必须在历史回看中保留可执行清单和复制按钮。
+历史回看必须显示结果摘要。
+历史回看必须显示可执行清单。
+历史回看必须保留复制按钮。
+历史回看必须保留可执行清单。
+历史回看的复制按钮只复制到剪贴板。
+历史回看不得重新执行任务。
+历史回看不得新增任务历史。
+历史回看不得打开外部平台。
+历史回看不得发起网络搜索。
+历史回看不得返回价格、付款或下单。
+历史回看不得保存身份证、护照或银行卡。
+
+历史回看的复制内容必须继续提示最终价格以真实平台为准，但不能把真实价格、fake/demo/mock price、购买 / 预订 / 付款按钮、内部付款页、自动支付、自动下单或提交订单带给普通用户。
+
 ### SubPlan Draft Action Chips 标准
 
 SubPlan Draft Action Chips 只用于把自然语言指令填入输入框。Action Chips 不得自动执行，必须要求用户手动点击开始执行。Action Chips 不代表真实 provider 已接入，Action Chips 不允许访问真实 provider，Action Chips 不允许连接真实 endpoint，Action Chips 不允许使用 API key，Action Chips 不允许发起 provider 网络搜索。
@@ -599,6 +616,7 @@ Focus Assist 用户 UI 只能显示自然语言提示，不得裸露 focusAssist
 - v2.0.64：Result Summary Card Polish / 结果摘要卡片增强
 - v2.0.65：Actionable Commerce Checklist / 可执行采购清单
 - v2.0.66：Copy Actionable Commerce Checklist / 一键复制可执行清单
+- v2.0.67：Fix History Actionable Checklist / 修复历史回看可执行清单和复制按钮
 
 后续版本必须继续保持全球多源、只读搜索、安全门控、外部跳转的方向，不能退化为单一平台工具。
 
