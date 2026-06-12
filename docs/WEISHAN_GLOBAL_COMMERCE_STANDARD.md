@@ -525,6 +525,14 @@ Actionable Checklist 必须显示在结果摘要卡片下方，标题为“可�
 
 Actionable Checklist 仍然不得访问真实 provider，不得连接 endpoint，不得使用 API key，不得发起网络搜索，不得返回真实价格或 fake/demo/mock price，不得显示购买 / 付款 / 下单入口，不得保存身份证 / 护照 / 银行卡，不得长期保存用户答案。
 
+### Copy Actionable Checklist 标准
+
+Copy Actionable Checklist 必须提供“复制机票搜索条件”、“复制酒店搜索条件”、“复制电脑搜索条件”和“复制全部清单”四个按钮，且只能把对应文本复制到剪贴板。复制按钮只复制文本到剪贴板，不得打开外部平台，不得自动打开外部平台，不得自动搜索，不得自动跳转，不得自动创建任务历史，不得改变当前计划状态，不得返回价格，不得付款或下单，不得保存证件或银行卡。
+
+复制机票搜索条件必须包含机票搜索条件全文，以及“注意：最终价格以真实平台为准。”；复制酒店搜索条件必须包含酒店搜索条件全文，以及“注意：最终价格以真实平台为准。”；复制电脑搜索条件必须包含电脑搜索条件全文，以及“注意：最终价格以真实平台为准。”；复制全部清单必须包含机票、酒店、电脑三段完整内容，以及“当前不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。”。
+
+Copy Actionable Checklist 不得访问真实 provider，不得连接真实 endpoint，不得使用 API key，不得发起网络搜索，不得返回真实价格或 fake/demo/mock price，不得跳转购买 / 预订页面，不得付款，不得下单，不得保存身份证、护照、银行卡或长期保存用户答案。复制失败时只能提示“复制失败，请手动选择文本复制”，不得报错崩溃。
+
 ### Collapse Commerce Process By Default 标准
 
 普通用户默认只看结果和确认状态，不看完整过程。默认折叠本地意图识别、复杂意图拆分计划、子计划闸门矩阵、子计划补充问题、子计划答案收集、子计划补齐工作台、Provider 接入准备总览、Provider 审批流程、Provider Sandbox Dry Run、Connector Gate、只读 Connector Stub、Provider 密钥安全方案和 Provider 接入审查面板。
@@ -590,6 +598,7 @@ Focus Assist 用户 UI 只能显示自然语言提示，不得裸露 focusAssist
 - v2.0.63：Result Summary / 结果摘要
 - v2.0.64：Result Summary Card Polish / 结果摘要卡片增强
 - v2.0.65：Actionable Commerce Checklist / 可执行采购清单
+- v2.0.66：Copy Actionable Commerce Checklist / 一键复制可执行清单
 
 后续版本必须继续保持全球多源、只读搜索、安全门控、外部跳转的方向，不能退化为单一平台工具。
 

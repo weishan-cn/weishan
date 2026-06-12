@@ -1465,6 +1465,81 @@
     }).join("");
   }
 
+  function commerceActionableChecklistSection(title, lines){
+    return [title].concat(lines || []).join("\n");
+  }
+
+  function commerceActionableChecklistCopyText(kind){
+    // 复制按钮只复制文本到剪贴板，不会发起网络搜索，不会返回 fake/demo/mock price，不会提交订单，不会保存身份证、护照、银行卡。
+    const flight = commerceActionableChecklistSection("机票搜索条件", [
+      "出发地：成都",
+      "目的地：东京",
+      "出发日期：7月12日",
+      "乘客：1名成人 + 1名8岁儿童",
+      "预算目标：总预算一万以内",
+      "排序建议：优先看总价、转机次数、起飞时间、行李规则",
+      "注意：最终价格以真实平台为准。"
+    ]);
+    const hotel = commerceActionableChecklistSection("酒店搜索条件", [
+      "目的地：东京",
+      "入住日期：7月12日",
+      "离店日期：7月16日",
+      "人员：带8岁儿童",
+      "筛选建议：优先看家庭友好、地铁方便、评分、取消政策、税费是否包含",
+      "注意：最终价格以真实平台为准。"
+    ]);
+    const computer = commerceActionableChecklistSection("电脑搜索条件", [
+      "用途：剪视频",
+      "内存：32G",
+      "硬盘：1T",
+      "品牌：都可以",
+      "收货地：成都",
+      "是否接受二手：不接受",
+      "预算：一万以内",
+      "筛选建议：优先看内存、硬盘、CPU、显卡、屏幕、散热、售后；排除二手 / 翻新 / 展示机",
+      "注意：最终价格以真实平台为准。"
+    ]);
+    const full = [
+      "可执行清单",
+      flight,
+      hotel,
+      computer,
+      "当前不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。"
+    ].join("\n\n");
+    return { flight, hotel, computer, full }[kind] || "";
+  }
+
+  function commerceCopyTextToClipboard(text){
+    const value = String(text || "");
+    if (!value) return Promise.resolve(false);
+    const testClipboard = window.__WEISHAN_TEST_CLIPBOARD_WRITE__;
+    if (typeof testClipboard === "function") {
+      return Promise.resolve(testClipboard(value)).then(() => true).catch(() => false);
+    }
+    const clipboard = navigator.clipboard && typeof navigator.clipboard.writeText === "function" ? navigator.clipboard : null;
+    if (clipboard) {
+      return Promise.resolve(clipboard.writeText(value)).then(() => true).catch(() => false);
+    }
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = value;
+      textarea.setAttribute("readonly", "true");
+      textarea.style.position = "fixed";
+      textarea.style.top = "0";
+      textarea.style.left = "-9999px";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      textarea.setSelectionRange(0, value.length);
+      const copied = !!(document.execCommand && document.execCommand("copy"));
+      textarea.remove();
+      return Promise.resolve(copied);
+    } catch (_) {
+      return Promise.resolve(false);
+    }
+  }
+
   function commerceResultSummaryPanelHtml(task){
     const workspace = commerceSubPlanCompletionWorkspaceForTask(task);
     const display = commerceSubPlanCompletionWorkspaceDisplay(workspace);
@@ -1510,7 +1585,14 @@
             <h4>可执行清单</h4>
             <p>你可以把下面的条件复制到机票、酒店或购物平台自行搜索。当前不会访问真实平台、不会返回价格、不会跳转购买或预订。</p>
           </div>
+          <div class="commerce-result-summary-copy-actions" aria-label="可执行清单复制按钮">
+            <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="flight">复制机票搜索条件</button>
+            <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="hotel">复制酒店搜索条件</button>
+            <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="computer">复制电脑搜索条件</button>
+            <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="full">复制全部清单</button>
+          </div>
         </div>
+        <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback aria-live="polite"></p>
         <div class="commerce-result-summary-checklist-grid">
           <section class="commerce-result-summary-checklist-card">
             <h5>旅行计划可执行清单</h5>
@@ -2007,6 +2089,30 @@
       chip.addEventListener("click", () => {
         const text = chip.getAttribute("data-commerce-action-chip") || "";
         applyCommerceActionChipFocusAssist(text);
+      });
+    });
+    let commerceActionableChecklistCopyTimer = 0;
+    function showCommerceActionableChecklistFeedback(message, failed){
+      const feedback = host.querySelector("[data-commerce-copy-feedback]");
+      if (!feedback) return;
+      feedback.textContent = message;
+      feedback.classList.toggle("is-failed", !!failed);
+      window.clearTimeout(commerceActionableChecklistCopyTimer);
+      commerceActionableChecklistCopyTimer = window.setTimeout(() => {
+        if (feedback.textContent === message) feedback.textContent = "";
+        feedback.classList.remove("is-failed");
+      }, 2600);
+    }
+    async function copyCommerceActionableChecklist(kind){
+      const ok = await commerceCopyTextToClipboard(commerceActionableChecklistCopyText(kind));
+      showCommerceActionableChecklistFeedback(
+        ok ? "已复制，可粘贴到外部平台搜索" : "复制失败，请手动选择文本复制",
+        !ok
+      );
+    }
+    host.querySelectorAll("[data-commerce-copy-kind]").forEach((button) => {
+      button.addEventListener("click", () => {
+        copyCommerceActionableChecklist(button.getAttribute("data-commerce-copy-kind") || "");
       });
     });
     const clearAll = host.querySelector("#commerceClearAll");

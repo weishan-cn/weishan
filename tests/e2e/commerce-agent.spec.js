@@ -48,6 +48,24 @@ async function waitForLatestDraftReviewReady(page) {
   }), { timeout:15000 }).toBe("subplan_draft_review_summary");
 }
 
+async function installClipboardMock(page) {
+  await page.evaluate(() => {
+    window.__WEISHAN_TEST_CLIPBOARD_TEXT__ = "";
+    window.__WEISHAN_TEST_CLIPBOARD_WRITE__ = async (text) => {
+      window.__WEISHAN_TEST_CLIPBOARD_TEXT__ = String(text || "");
+    };
+  });
+}
+
+async function disableClipboardMock(page) {
+  await page.evaluate(() => {
+    window.__WEISHAN_TEST_CLIPBOARD_TEXT__ = "";
+    window.__WEISHAN_TEST_CLIPBOARD_WRITE__ = async () => {
+      throw new Error("clipboard unavailable");
+    };
+  });
+}
+
 function currentTaskLogs(page) {
   return page.locator(".cmd-log-list").first();
 }
@@ -2894,10 +2912,61 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail.locator(".commerce-result-summary-panel")).toContainText("机票搜索条件");
     await expect(detail.locator(".commerce-result-summary-panel")).toContainText("电脑搜索条件");
     await expect(detail.locator(".commerce-result-summary-panel")).toContainText("下一步");
+    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制机票搜索条件" })).toHaveCount(1);
+    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制酒店搜索条件" })).toHaveCount(1);
+    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制电脑搜索条件" })).toHaveCount(1);
+    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制全部清单" })).toHaveCount(1);
     await expect(detail.locator("details.commerce-process-disclosure")).not.toHaveAttribute("open", "");
     await expect(detail.locator("details.commerce-safety-disclosure")).not.toHaveAttribute("open", "");
     await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(detail.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+  });
+
+  test("v2.0.66 actionable checklist copy buttons copy text to clipboard without side effects", async () => {
+    await resetCommerceTasks(page);
+    await gotoRoute(page, "home");
+    await submitHomeCommand(page, runId + "-COPY-CHECKLIST-COMPLEX 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。");
+    await waitForLatestHomeTexts(page, ["旅行计划", "商品采购计划"]);
+    await submitHomeCommand(page, runId + "-COPY-CHECKLIST-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
+    await waitForLatestDraftReviewReady(page);
+    const home = page.locator('[data-commerce-home-summary="true"]').last();
+    const summaryPanel = home.locator(".commerce-result-summary-panel");
+    await expect(summaryPanel).toContainText("复制机票搜索条件");
+    await expect(summaryPanel).toContainText("复制酒店搜索条件");
+    await expect(summaryPanel).toContainText("复制电脑搜索条件");
+    await expect(summaryPanel).toContainText("复制全部清单");
+    await installClipboardMock(page);
+    const historyCountBefore = await page.locator("#cmdHistory [data-history-id]").count();
+    const copyButtons = {
+      flight: summaryPanel.getByRole("button", { name:"复制机票搜索条件" }),
+      hotel: summaryPanel.getByRole("button", { name:"复制酒店搜索条件" }),
+      computer: summaryPanel.getByRole("button", { name:"复制电脑搜索条件" }),
+      full: summaryPanel.getByRole("button", { name:"复制全部清单" })
+    };
+    await copyButtons.flight.click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("出发地：成都");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("目的地：东京");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("最终价格以真实平台为准");
+    await expect(summaryPanel.locator("[data-commerce-copy-feedback]")).toContainText("已复制，可粘贴到外部平台搜索");
+    await copyButtons.hotel.click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("入住日期：7月12日");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("离店日期：7月16日");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("家庭友好");
+    await copyButtons.computer.click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("用途：剪视频");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("内存：32G");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("硬盘：1T");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("是否接受二手：不接受");
+    await copyButtons.full.click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("机票搜索条件");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("酒店搜索条件");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("电脑搜索条件");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("当前不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。");
+    await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
+    await expect(summaryPanel.locator(".commerce-booking-link")).toHaveCount(0);
+    await disableClipboardMock(page);
+    await copyButtons.flight.click();
+    await expect(summaryPanel.locator("[data-commerce-copy-feedback]")).toContainText("复制失败，请手动选择文本复制");
   });
 
   test("v2.0.62 commerce process and safety panels are collapsed by default", async () => {

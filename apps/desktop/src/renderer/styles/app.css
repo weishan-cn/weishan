@@ -4047,6 +4047,34 @@
   color: #475569;
 }
 
+.commerce-result-summary-copy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.commerce-result-summary-copy-btn {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.commerce-result-summary-copy-feedback {
+  margin: 0 0 10px;
+  min-height: 18px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #047857;
+  font-weight: 800;
+}
+
+.commerce-result-summary-copy-feedback.is-failed {
+  color: #b91c1c;
+}
+
 .commerce-result-summary-checklist-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4117,6 +4145,10 @@
 
   .commerce-result-summary-checklist-head {
     flex-direction: column;
+  }
+
+  .commerce-result-summary-copy-actions {
+    justify-content: flex-start;
   }
 
   .commerce-result-summary-head p {
