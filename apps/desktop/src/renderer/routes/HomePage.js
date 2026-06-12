@@ -1419,20 +1419,47 @@
     if (!hasTravelPlan || !hasProductPlan || completedCount < 9) return "";
     return `<section class="commerce-result-summary-panel" aria-label="结果摘要">
       <div class="commerce-result-summary-head">
-        <span>结果摘要</span>
-        <strong>草稿已补齐，等待确认</strong>
+        <div class="commerce-result-summary-headline">
+          <span>结果摘要</span>
+          <strong>草稿已补齐，等待确认</strong>
+        </div>
+        <p>普通用户默认先看结果，不看完整过程。</p>
       </div>
       <div class="commerce-result-summary-grid">
-        <div class="commerce-result-summary-item">
-          <h4>旅行计划</h4>
-          <p>成都出发，7月12日去东京，7月12日入住，7月16日离店，孩子8岁，预算一万以内，目标性价比高。</p>
-        </div>
-        <div class="commerce-result-summary-item">
-          <h4>商品采购计划</h4>
-          <p>适合剪视频的电脑，32G内存 / 1T硬盘，品牌都可以，收货地成都，不接受二手，预算一万以内。</p>
-        </div>
+        <section class="commerce-result-summary-card">
+          <h4>旅行计划摘要</h4>
+          <ul>
+            <li>成都出发 → 东京</li>
+            <li>7月12日出发，7月12日入住，7月16日离店</li>
+            <li>孩子 8 岁</li>
+            <li>预算一万以内</li>
+            <li>目标：性价比高</li>
+          </ul>
+        </section>
+        <section class="commerce-result-summary-card">
+          <h4>商品采购计划摘要</h4>
+          <ul>
+            <li>适合剪视频的电脑</li>
+            <li>32G 内存 / 1T 硬盘</li>
+            <li>品牌都可以</li>
+            <li>收货地成都</li>
+            <li>不接受二手</li>
+            <li>预算一万以内</li>
+          </ul>
+        </section>
       </div>
-      <p class="commerce-result-summary-status"><b>当前状态：</b>草稿已补齐，等待确认。当前不会访问真实平台、不会返回价格、不会跳转购买或预订。</p>
+      <section class="commerce-result-summary-next">
+        <h4>下一步</h4>
+        <p>你可以直接选择：</p>
+        <ul>
+          <li>两个都确认</li>
+          <li>确认旅行计划</li>
+          <li>电脑计划确认</li>
+          <li>修改酒店日期</li>
+          <li>修改电脑品牌或预算</li>
+        </ul>
+      </section>
+      <p class="commerce-result-summary-status"><b>安全提示：</b>当前不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</p>
     </section>`;
   }
 

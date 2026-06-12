@@ -3924,29 +3924,41 @@
 
 .commerce-result-summary-panel {
   border: 1px solid rgba(30, 64, 175, 0.14);
-  border-radius: 8px;
-  background: #f8fafc;
-  padding: 14px;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(239, 246, 255, 0.92) 0%, rgba(248, 250, 252, 1) 42%, rgba(255, 255, 255, 1) 100%);
+  padding: 16px;
   margin: 0 0 14px;
   color: #172033;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
 }
 
 .commerce-result-summary-head {
   display: flex;
   justify-content: space-between;
   gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.commerce-result-summary-headline {
+  display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .commerce-result-summary-head span {
-  font-size: 15px;
-  font-weight: 750;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
 }
 
 .commerce-result-summary-head strong {
   font-size: 12px;
-  font-weight: 650;
+  font-weight: 700;
   color: #166534;
   background: #dcfce7;
   border: 1px solid rgba(22, 101, 52, 0.14);
@@ -3955,26 +3967,57 @@
   white-space: nowrap;
 }
 
+.commerce-result-summary-head p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #475569;
+  max-width: 42ch;
+}
+
 .commerce-result-summary-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
-.commerce-result-summary-item {
+.commerce-result-summary-card {
   background: #ffffff;
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 8px;
-  padding: 10px;
+  padding: 12px;
 }
 
-.commerce-result-summary-item h4 {
-  margin: 0 0 6px;
+.commerce-result-summary-card h4,
+.commerce-result-summary-next h4 {
+  margin: 0 0 8px;
   font-size: 13px;
   color: #0f172a;
 }
 
-.commerce-result-summary-item p,
+.commerce-result-summary-card ul,
+.commerce-result-summary-next ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+}
+
+.commerce-result-summary-card li,
+.commerce-result-summary-next li {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #334155;
+}
+
+.commerce-result-summary-next {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
 .commerce-result-summary-status {
   margin: 0;
   font-size: 13px;
@@ -3994,5 +4037,9 @@
   .commerce-result-summary-head {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .commerce-result-summary-head p {
+    max-width: none;
   }
 }
