@@ -610,7 +610,7 @@ function checkMarkers() {
     marker("apps/desktop/src/renderer/core/commerceSearch.js", /价格字段不可解析|OPENROUTER_MODELS_UNAVAILABLE|无法返回真实价格/, "marker:commerce openrouter no fake price", true),
     marker("apps/desktop/src/renderer/core/commerceSearch.js", /1000000|1M tokens|pricePerMillion/, "marker:commerce openrouter price per million", true),
     marker("apps/desktop/src/renderer/core/commerceSearch.js", /validateOpenRouterModelUrl|openrouter\.ai/, "marker:commerce openrouter https model link only", true),
-    marker("apps/desktop/src/renderer/routes/CommerceAgentPage.js", /OpenRouter 搜索源不可用|搜索源不可用，无法返回真实价格/, "marker:commerce provider failure no fake result", true),
+    marker("apps/desktop/src/renderer/routes/CommerceAgentPage.js", /OpenRouter 搜索源不可用|当前模型结果源不可用|搜索源未配置，无法返回真实价格|搜索能力未配置，无法返回真实价格/, "marker:commerce provider failure no fake result", true),
     marker("apps/desktop/src/renderer/core/commerceSearch.js", /isAiModelPricingTask\(request\).*searchOpenRouterModels|category === "aiModelPricing"/s, "marker:commerce non ai category no openrouter leakage", true),
     marker("apps/desktop/src/renderer/routes/CommerceAgentPage.js", /不下单、不付款、不提交订单|不会下单、付款或提交订单/, "marker:commerce no payment submit", true),
     marker("apps/desktop/src/renderer/core/commerceAgent.js", /cruise:"邮轮"|邮轮公司官网|邮轮航线/, "marker:commerce cruise category", true),

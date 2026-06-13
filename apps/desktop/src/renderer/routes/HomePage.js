@@ -241,6 +241,10 @@
     </details>`;
   }
 
+  function technicalDetailsDisclosure(body, className){
+    return body ? disclosure("查看技术细节", body, className || "commerce-technical-disclosure") : "";
+  }
+
   function taskTitle(task){
     if (!task) return "";
     if (task.status === "queued") return t("statusQueued");
@@ -908,7 +912,7 @@
   function commerceSubPlanDraftActionBarDisplay(actionBar){
     const api = window.WeishanCommerceSubPlanDraftActionBar || null;
     if (api && api.toSubPlanDraftActionBarDisplayStatus) return api.toSubPlanDraftActionBarDisplayStatus(actionBar || {});
-    return { title:"草稿下一步动作", subtitle:"你可以确认草稿，也可以说明要修改哪一项。当前不会访问任何真实 provider。", statusLabel:"等待补充问题", actionLabels:["确认全部草稿", "只确认旅行计划", "只确认商品采购计划", "修改旅行计划", "修改商品采购计划", "返回补充问题", "查看安全边界"], actionChips:[{group:"确认类", label:"两个都确认"}, {group:"确认类", label:"确认旅行计划"}, {group:"确认类", label:"电脑计划确认"}, {group:"旅行修改类", label:"酒店入住日期改成7月13日"}, {group:"商品修改类", label:"电脑品牌优先苹果"}, {group:"辅助类", label:"返回补充问题"}, {group:"辅助类", label:"查看安全边界"}], chipHint:"已填入指令，请确认后点击开始执行", guidance:["先补充问题", "查看草稿复核摘要", "当前不会访问真实 provider"], examples:["两个都确认", "确认旅行计划", "电脑计划确认", "酒店入住日期改成7月13日", "电脑品牌优先苹果，预算改成8000以内", "返回补充问题"], safetyItems:["当前不会访问真实 provider", "当前不会返回价格", "当前不会跳转购买或预订"], providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否" };
+    return { title:"草稿下一步动作", subtitle:"你可以确认草稿，也可以说明要修改哪一项。当前不会访问任何真实平台。", statusLabel:"等待补充问题", actionLabels:["确认全部草稿", "只确认旅行计划", "只确认商品采购计划", "修改旅行计划", "修改商品采购计划", "返回补充问题", "查看安全边界"], actionChips:[{group:"确认类", label:"两个都确认"}, {group:"确认类", label:"确认旅行计划"}, {group:"确认类", label:"电脑计划确认"}, {group:"旅行修改类", label:"酒店入住日期改成7月13日"}, {group:"商品修改类", label:"电脑品牌优先苹果"}, {group:"辅助类", label:"返回补充问题"}, {group:"辅助类", label:"查看安全边界"}], chipHint:"已填入指令，请确认后点击开始执行", guidance:["先补充问题", "查看草稿复核摘要", "当前不会访问真实平台"], examples:["两个都确认", "确认旅行计划", "电脑计划确认", "酒店入住日期改成7月13日", "电脑品牌优先苹果，预算改成8000以内", "返回补充问题"], safetyItems:["当前不会访问真实平台", "当前不会返回价格", "当前不会跳转购买或预订"], providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否" };
   }
 
   function commerceSubPlanDraftActionBarHomePanel(actionBar){
@@ -957,7 +961,7 @@
         </div>
         <div>
           <b>安全边界</b>
-          ${list(display.safetyItems, "commerce-subplan-draft-action-list", "当前不会访问真实 provider")}
+          ${list(display.safetyItems, "commerce-subplan-draft-action-list", "当前不会访问真实平台")}
         </div>
       </div>
       <div class="commerce-subplan-draft-action-status">
@@ -1081,9 +1085,9 @@
 
   function taskHistorySafetySummary(task){
     if (isCommerceTask(task)) {
-      return "未搜索、未下单、未付款、未提交订单、未保存证件 / 银行卡。当前不会访问真实 provider，当前不会返回价格，当前不会跳转购买或预订页面。";
+      return "未搜索、未下单、未付款、未提交订单、未保存证件 / 银行卡。当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订。";
     }
-    return "任务历史回看只用于查看已生成结果，不会重新执行任务，不会访问真实 provider，不会连接 endpoint，不会读取 API key，不会发起网络请求。";
+    return "任务历史回看只用于查看已生成结果，不会重新执行任务，也不会访问真实平台、返回价格、跳转购买或预订。";
   }
 
   function taskHistoryPlanSummary(task, stored){
@@ -1118,14 +1122,18 @@
     const safety = taskHistorySafetySummary(task);
     const detail = taskHistoryLogDetail(task);
     const historySummaryPanel = historySummaryWorkspace ? commerceHistoryResultSummaryHomePanel(historySummaryWorkspace) : "";
-    const historyDraftReviewPanel = historyDraftReviewSummary ? commerceSubPlanDraftReviewHomePanel(historyDraftReviewSummary) : "";
-    const historyDraftConfirmationPanel = historyDraftConfirmation ? commerceSubPlanDraftConfirmationHomePanel(historyDraftConfirmation) : "";
     const historyDraftActionBarPanel = historyDraftActionBar ? commerceSubPlanDraftActionBarHomePanel(historyDraftActionBar) : "";
     const historyCompletionPanel = historySummaryWorkspace ? commerceSubPlanCompletionWorkspaceHomePanel(historySummaryWorkspace) : "";
     const historyProcessDisclosure = commerceTask ? disclosure("查看分析过程", `<p>历史回看保留分析过程：本地意图识别、复杂意图拆分计划、子计划闸门矩阵、子计划补充问题、子计划答案收集、子计划补齐工作台。</p>`, "commerce-process-disclosure") : "";
     const historySafetyDisclosure = commerceTask ? disclosure("查看安全边界", `<p>历史回看保留安全边界：当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单。</p>`, "commerce-safety-disclosure") : "";
+    const historyTechnicalDisclosure = commerceTask ? technicalDetailsDisclosure([
+      `<p>技术细节只用于内部说明，不影响默认结果。这里会显示 provider、API key、endpoint、Connector Gate、Sandbox Dry Run、Provider Approval、Provider Onboarding、Secret Storage、Stub、dispatch、gate、AI fallback，以及本地规则优先 + AI fallback 等内部状态。</p>`,
+      historyDraftReviewSummary ? commerceSubPlanDraftReviewHomePanel(historyDraftReviewSummary) : "",
+      historyDraftConfirmation ? commerceSubPlanDraftConfirmationHomePanel(historyDraftConfirmation) : "",
+      historyCompletionPanel || ""
+    ].filter(Boolean).join(""), "commerce-technical-disclosure") : "";
     const commerceDetail = commerceTask ? commercePlanActions(commerceTask) : "";
-    const historyCommerceDetailBody = [historySummaryPanel, historyDraftReviewPanel, historyDraftConfirmationPanel, historyCompletionPanel, historyDraftActionBarPanel, historyProcessDisclosure, historySafetyDisclosure, commerceDetail].filter(Boolean).join("");
+    const historyCommerceDetailBody = [historySummaryPanel, historyDraftActionBarPanel, historyTechnicalDisclosure, historyProcessDisclosure, historySafetyDisclosure, commerceDetail].filter(Boolean).join("");
     const historyCommerceDetail = historyCommerceDetailBody ? `<div class="commerce-home-card commerce-history-home-card">${historyCommerceDetailBody}</div>` : "";
     return `<div class="cmd-history-main-detail" data-task-history-detail="true">
       <div class="cmd-history-main-head">
@@ -2186,7 +2194,7 @@
       commerceSubPlanCompletionWorkspaceHomePanel(subPlanCompletionWorkspace)
     ].join("") : "";
     const analysisProcessDisclosure = analysisProcessBody ? disclosure("查看分析过程", analysisProcessBody, "commerce-process-disclosure") : "";
-    const safetyBrief = !blocked ? `<p class="commerce-safety-brief">当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单。</p>` : "";
+    const safetyBrief = !blocked ? `<p class="commerce-safety-brief">当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</p>` : "";
     const safetyDetailsBody = !blocked ? [
       `<p class="commerce-safety-lead">当前只整理草稿和审查边界，不会访问真实 provider，不会联网，不会显示价格，也不会发起购买、付款或下单。</p>`,
       `<ul class="commerce-safety-list">
@@ -2196,18 +2204,26 @@
         <li>当前不会付款或下单</li>
         <li>不会保存身份证、护照、银行卡或长期保存用户答案</li>
       </ul>`,
-      localLawPanelRequired ? commerceLocalLawHomePanel(stored) : "",
-      showOnboardingHomePanel ? commerceProviderIntegrationReadinessHomePanel(stored.providerIntegrationReadiness || stored.configHealth && stored.configHealth.providerIntegrationReadiness || {}) : "",
-      showOnboardingHomePanel ? commerceProviderIntegrationRunbookHomePanel(stored.providerRunbook || stored.providerIntegrationRunbook || stored.configHealth && stored.configHealth.providerIntegrationRunbook || {}) : "",
-      showOnboardingHomePanel ? commerceProviderSecretStorageHomePanel(stored.providerSecretHealth || stored.configHealth && stored.configHealth.providerSecretHealth || {}) : "",
-      showOnboardingHomePanel ? commerceProviderSandboxDryRunHomePanel(stored.providerSandboxDryRunHealth || stored.configHealth && stored.configHealth.providerSandboxDryRunHealth || {}) : "",
-      showOnboardingHomePanel ? commerceConnectorGateHomePanel(stored.connectorGateHealth || stored.configHealth && stored.configHealth.connectorGateHealth || {}) : "",
-      !blocked && isProductPlan ? commerceProviderStubProfileHomePanel(stored.providerStubProfileHealth || stored.configHealth && stored.configHealth.providerStubProfileHealth || {}, stored.category) : "",
-      !blocked && approvalPanelRequired ? commerceReadOnlyConnectorStubHomePanel(stored.connectorStubHealth) : "",
-      !blocked && approvalPanelRequired ? commerceProviderApprovalHomePanel(stored.approvalHealth) : "",
-      showOnboardingHomePanel ? commerceOnboardingHomePanel() : ""
+      localLawPanelRequired ? commerceLocalLawHomePanel(stored) : ""
     ].filter(Boolean).join("") : "";
     const safetyDetails = safetyDetailsBody ? disclosure("查看安全边界", safetyDetailsBody, "commerce-safety-disclosure") : "";
+    const technicalDetails = !blocked ? technicalDetailsDisclosure([
+      `<p>技术细节只用于内部说明，不影响默认结果。这里会显示 provider、API key、endpoint、Connector Gate、Sandbox Dry Run、Provider Approval、Provider Onboarding、Secret Storage、Stub、dispatch、gate、AI fallback，以及本地规则优先 + AI fallback 等内部状态。</p>`,
+      providerMissingText ? `<p>${esc(providerMissingText)}</p>` : "",
+      `<p>全球多源 provider 候选池：准备中，尚未接入。</p>`,
+      !blocked ? commerceSubPlanDraftReviewHomePanel(subPlanDraftReviewSummary) : "",
+      !blocked ? commerceSubPlanDraftConfirmationHomePanel(subPlanDraftConfirmation) : "",
+      !blocked && subPlanCompletionWorkspace ? commerceSubPlanCompletionWorkspaceHomePanel(subPlanCompletionWorkspace) : "",
+      !blocked && showOnboardingHomePanel ? commerceOnboardingHomePanel() : "",
+      !blocked && showOnboardingHomePanel ? commerceProviderIntegrationReadinessHomePanel(stored.providerIntegrationReadiness || stored.configHealth && stored.configHealth.providerIntegrationReadiness || {}) : "",
+      !blocked && showOnboardingHomePanel ? commerceProviderIntegrationRunbookHomePanel(stored.providerRunbook || stored.providerIntegrationRunbook || stored.configHealth && stored.configHealth.providerIntegrationRunbook || {}) : "",
+      !blocked && showOnboardingHomePanel ? commerceProviderSecretStorageHomePanel(stored.providerSecretHealth || stored.configHealth && stored.configHealth.providerSecretHealth || {}) : "",
+      !blocked && showOnboardingHomePanel ? commerceProviderSandboxDryRunHomePanel(stored.providerSandboxDryRunHealth || stored.configHealth && stored.configHealth.providerSandboxDryRunHealth || {}) : "",
+      !blocked && showOnboardingHomePanel ? commerceConnectorGateHomePanel(stored.connectorGateHealth || stored.configHealth && stored.configHealth.connectorGateHealth || {}) : "",
+      !blocked && isProductPlan ? commerceProviderStubProfileHomePanel(stored.providerStubProfileHealth || stored.configHealth && stored.configHealth.providerStubProfileHealth || {}, stored.category) : "",
+      !blocked && approvalPanelRequired ? commerceReadOnlyConnectorStubHomePanel(stored.connectorStubHealth) : "",
+      !blocked && approvalPanelRequired ? commerceProviderApprovalHomePanel(stored.approvalHealth) : ""
+    ].filter(Boolean).join(""), "commerce-technical-disclosure") : "";
     return `<div class="commerce-home-card ${blocked ? "is-blocked" : ""}" data-commerce-home-summary="true">
       <div class="commerce-home-card-main">
         ${resultSummaryPanel}
@@ -2223,15 +2239,11 @@
         ${!blocked && isFlightPlan && dateCondition ? `<p><b>日期：</b>${esc(dateCondition)}</p>` : ""}
         ${blocked ? `<p><b>原因：</b>涉及下单 / 付款 / 敏感资料或询价提交</p>` : ""}
         ${analysisProcessDisclosure}
-        ${!blocked ? commerceSubPlanDraftReviewHomePanel(subPlanDraftReviewSummary) : ""}
-        ${!blocked ? commerceSubPlanDraftConfirmationHomePanel(subPlanDraftConfirmation) : ""}
         ${!blocked ? commerceSubPlanDraftActionBarHomePanel(subPlanDraftActionBar) : ""}
         ${safetyBrief}
         ${safetyDetails}
+        ${technicalDetails}
         ${!blocked && destinationRequired ? `<p><b>收货目的地：</b>未设置</p><p><b>定位服务：</b>关闭 / 未授权</p><p><b>价格状态：</b>精确最低到手价不可用</p><p><b>原因：</b>需要收货国家/地区/邮编用于运费、税费、关税和当地合规计算。</p><p class="commerce-warning">为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。实际价格、库存、税费和关税仍以外部平台和海关结算为准。</p>` : ""}
-        ${!blocked && (providerMissing || complianceRequired || isProductPlan && destinationRequired) ? `<p><b>搜索源：</b>${esc(providerMissingText)}</p>` : ""}
-        ${!blocked && providerFailed ? `<p><b>搜索源：</b>${esc(stored.searchErrorMessage || "搜索源不可用，无法返回真实价格")}</p>` : ""}
-        ${!blocked && noResults ? `<p><b>搜索结果：</b>provider 未返回可展示结果，当前不显示价格。</p>` : ""}
         ${!blocked && missingFields.length ? `<p><b>待补充：</b>${esc(missingFields.join("、"))}</p>` : ""}
         ${!blocked && candidates.length ? `<p><b>搜索结果：</b>${isModelPricing ? esc(modelPriceSummary) : genericResultSummary}</p>` : ""}
         <p><b>安全边界：</b>${blocked ? "不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表" : isFlightPlan ? flightSafetyText : isProductPlan && (providerMissing || destinationRequired || complianceRequired) ? productSafetyText : candidates.length ? "仅展示候选方案，未下单、未付款、未提交订单" : "未搜索、未下单、未付款、未提交订单"}</p>

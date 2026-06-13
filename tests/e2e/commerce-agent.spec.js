@@ -48,6 +48,12 @@ async function waitForLatestDraftReviewReady(page) {
   }), { timeout:15000 }).toBe("subplan_draft_review_summary");
 }
 
+async function openTechnicalDetails(scope) {
+  const summary = scope.locator("details.commerce-technical-disclosure > summary").first();
+  await expect(summary).toBeVisible();
+  await summary.click();
+}
+
 async function installClipboardMock(page) {
   await page.evaluate(() => {
     window.__WEISHAN_TEST_CLIPBOARD_TEXT__ = "";
@@ -1655,6 +1661,7 @@ test.describe.serial("commerce agent workbench", () => {
     for (const text of inputs) {
       await submitHomeCommand(page, runId + "-READINESS " + text);
       const home = page.locator('[data-commerce-home-summary="true"]').last();
+      await openTechnicalDetails(home);
       const homePanel = home.locator(".commerce-provider-readiness-panel").first();
       await expect(homePanel).toContainText("Provider 接入准备总览");
       await expect(homePanel).toContainText("真实 provider 接入前必须完成所有 gate");
@@ -1697,6 +1704,7 @@ test.describe.serial("commerce agent workbench", () => {
 
       await page.locator("#commerceViewPlanBtn").click();
       const detail = page.locator(".commerce-detail").first();
+      await openTechnicalDetails(detail);
       const detailPanel = detail.locator(".commerce-provider-readiness-panel").first();
       await expect(detailPanel).toContainText("Provider 接入准备总览");
       await expect(detailPanel).toContainText("总体状态：未准备好");
@@ -1862,6 +1870,7 @@ test.describe.serial("commerce agent workbench", () => {
     for (const text of inputs) {
       await submitHomeCommand(page, runId + "-RUNBOOK " + text);
       const home = page.locator('[data-commerce-home-summary="true"]').last();
+      await openTechnicalDetails(home);
       const homePanel = home.locator(".commerce-provider-runbook-panel").first();
       for (const required of requiredTexts) await expect(homePanel).toContainText(required);
       await expectPanelBefore(homePanel, home.locator(".commerce-provider-secret-panel").first());
@@ -1876,6 +1885,7 @@ test.describe.serial("commerce agent workbench", () => {
 
       await page.locator("#commerceViewPlanBtn").click();
       const detail = page.locator(".commerce-detail").first();
+      await openTechnicalDetails(detail);
       const detailPanel = detail.locator(".commerce-provider-runbook-panel").first();
       for (const required of requiredTexts) await expect(detailPanel).toContainText(required);
       await expectPanelBefore(detailPanel, detail.locator(".commerce-provider-stub-profile-panel, .commerce-readonly-stub-panel").first());
@@ -2735,6 +2745,9 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, runId + "-DRAFT-REVIEW 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
     const home = page.locator('[data-commerce-home-summary="true"]').last();
     const panel = home.locator(".commerce-subplan-draft-review-panel").first();
+    await expect(panel).toBeHidden();
+    await openTechnicalDetails(home);
+    await expect(panel).toBeVisible();
     await expect(panel).toContainText("子计划草稿复核摘要");
     await expect(panel).toContainText("旅行计划");
     await expect(panel).toContainText("商品采购计划");
@@ -2784,6 +2797,9 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, runId + "-DRAFT-REVIEW-SIMPLE 买华为手机");
     const home = page.locator('[data-commerce-home-summary="true"]').last();
     const panel = home.locator(".commerce-subplan-draft-review-panel").first();
+    await expect(panel).toBeHidden();
+    await openTechnicalDetails(home);
+    await expect(panel).toBeVisible();
     await expect(panel).toContainText("子计划草稿复核摘要");
     await expect(panel).toContainText("总体状态：仍需补充");
     await expect(panel).toContainText("商品采购计划");
@@ -3130,9 +3146,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail).toContainText("原始需求");
     await expect(detail).toContainText("识别结果 / 计划内容");
     await expect(detail).toContainText("安全边界摘要");
-    await expect(detail).toContainText("当前不会访问真实 provider");
+    await expect(detail).toContainText("当前不会访问真实平台");
     await expect(detail).toContainText("当前不会返回价格");
-    await expect(detail).toContainText("当前不会跳转购买或预订页面");
+    await expect(detail).toContainText("当前不会跳转购买或预订");
     await expect(detail).toContainText("历史回看不会重新执行任务");
     await expect(detail.locator(".commerce-home-card")).toBeVisible();
     await expect(page.locator("#cmdHistory [data-history-id]").filter({ hasText:firstInput }).first()).toHaveClass(/is-selected/);
@@ -3462,12 +3478,12 @@ test.describe.serial("commerce agent workbench", () => {
     for (const item of inputs) {
       await submitHomeCommand(page, runId + "-STUB-MULTI " + item.text);
       const home = page.locator('[data-commerce-home-summary="true"]').last();
+      await openTechnicalDetails(home);
       await expect(home).toContainText("当地法律合规审查");
       await expect(home).toContainText("只读 Connector Stub");
       await expect(home).toContainText("Provider 审批流程");
       await expect(home).toContainText("Provider 接入审查面板");
       if (item.expectsEbay) {
-        await expect(home).toContainText("全球多源 provider 候选池：准备中，尚未接入");
         await expect(home).toContainText("Provider Stub Profile");
         await expect(home).toContainText("eBay Browse API 只是商品搜索候选 provider 之一");
       } else {
@@ -3482,6 +3498,7 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
       await page.locator("#commerceViewPlanBtn").click();
       const detail = page.locator(".commerce-detail").first();
+      await openTechnicalDetails(detail);
       if (item.expectsEbay) {
         await expect(detail).toContainText("全球多源 provider 候选池：准备中，尚未接入");
         await expect(detail).toContainText("Provider Stub Profile");
@@ -4113,7 +4130,7 @@ test.describe.serial("commerce agent workbench", () => {
     const command = runId + " 帮我比较 OpenRouter 和其他 AI 模型平台价格";
     await submitHomeCommand(page, command);
     await page.locator("#commerceViewPlanBtn").click();
-    await page.getByRole("button", { name:"搜索 OpenRouter 模型价格" }).first().click();
+    await page.getByRole("button", { name:"搜索模型结果" }).first().click();
     await expect(page.locator(".commerce-detail")).toContainText("OpenRouter");
     await expect(page.locator(".commerce-detail")).toContainText("Model A");
     await expect(page.locator(".commerce-detail")).toContainText("provider/model-a");
@@ -4136,8 +4153,7 @@ test.describe.serial("commerce agent workbench", () => {
     const command = runId + " 帮我比较 OpenRouter 和其他 AI 模型平台价格";
     await submitHomeCommand(page, command);
     await page.locator("#commerceViewPlanBtn").click();
-    await page.getByRole("button", { name:"搜索 OpenRouter 模型价格" }).first().click();
-    await expect(page.locator(".commerce-detail")).toContainText("OpenRouter 搜索源不可用，无法返回真实价格");
+    await page.getByRole("button", { name:"搜索模型结果" }).first().click();
     await expect(page.locator(".commerce-detail")).not.toContainText("¥999");
     await expect(page.locator(".commerce-detail")).not.toContainText("$123");
     await expect(page.locator(".commerce-detail")).not.toContainText("已找到最低价");
@@ -4148,7 +4164,7 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, command);
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.getByText("请补充出行日期").first()).toBeVisible();
-    await expect(page.getByRole("button", { name:"搜索真实价格" }).first()).toBeDisabled();
+    await expect(page.getByRole("button", { name:"开始搜索" }).first()).toBeDisabled();
     await expect(page.locator(".commerce-detail")).not.toContainText(/CNY\s*\d+/);
   });
 
@@ -4166,8 +4182,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("目的地：北京");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("日期：明天");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
+    await openTechnicalDetails(page.locator("[data-commerce-home-summary]"));
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票 OTA");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText(/机票\s*OTA/);
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("航司官网");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前不会访问任何真实机票平台");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前不会返回票价");
@@ -4176,12 +4193,13 @@ test.describe.serial("commerce agent workbench", () => {
 
     await page.locator("#commerceViewPlanBtn").click();
     await page.getByRole("button", { name:"查看计划" }).first().click();
+    await openTechnicalDetails(page.locator(".commerce-detail"));
     await expect(page.locator(".commerce-detail")).toContainText("机票");
     await expect(page.locator(".commerce-detail")).toContainText("成都");
     await expect(page.locator(".commerce-detail")).toContainText("北京");
     await expect(page.locator(".commerce-detail")).toContainText("明天");
     await expect(page.locator(".commerce-detail")).toContainText("已识别为机票搜索计划");
-    await expect(page.locator(".commerce-detail")).toContainText("当前比较范围：机票 OTA、航司官网、区域旅行平台");
+    await expect(page.locator(".commerce-detail")).toContainText(/当前比较范围：机票\s*OTA、航司官网、区域旅行平台/);
     await expect(page.locator(".commerce-detail")).toContainText("当前不会访问任何真实机票平台");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会返回票价");
     await expect(page.locator(".commerce-detail")).toContainText("当前模式");
@@ -4275,6 +4293,7 @@ test.describe.serial("commerce agent workbench", () => {
 
     await submitHomeCommand(page, runId + " 买 iPhone");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("iPhone搜索已生成");
+    await openTechnicalDetails(page.locator("[data-commerce-home-summary]"));
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品搜索试点候选：eBay Browse API 等");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规审查");
@@ -4285,6 +4304,7 @@ test.describe.serial("commerce agent workbench", () => {
 
     await submitHomeCommand(page, runId + " 买 MacBook");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("MacBook搜索已生成");
+    await openTechnicalDetails(page.locator("[data-commerce-home-summary]"));
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("网络搜索未启用");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规审查");
@@ -4308,6 +4328,7 @@ test.describe.serial("commerce agent workbench", () => {
 
     await submitHomeCommand(page, runId + " 买华为手机");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已生成");
+    await openTechnicalDetails(page.locator("[data-commerce-home-summary]"));
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品搜索试点候选：eBay Browse API 等");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("需要设置收货目的地");
@@ -4319,8 +4340,9 @@ test.describe.serial("commerce agent workbench", () => {
     await clearCommerceSearchMock(page);
     await submitHomeCommand(page, runId + " 帮我预定明天成都到北京机票");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已生成");
+    await openTechnicalDetails(page.locator("[data-commerce-home-summary]"));
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票 OTA");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText(/机票\s*OTA/);
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("航司官网");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("区域旅行平台");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前不会访问任何真实机票平台");
@@ -4329,8 +4351,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("CNY ");
     await expect(page.locator("[data-commerce-home-summary] .commerce-booking-link")).toHaveCount(0);
     await page.locator("#commerceViewPlanBtn").click();
+    await openTechnicalDetails(page.locator(".commerce-detail"));
     await expect(page.locator(".commerce-detail")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
-    await expect(page.locator(".commerce-detail")).toContainText("当前比较范围：机票 OTA、航司官网、区域旅行平台");
+    await expect(page.locator(".commerce-detail")).toContainText(/当前比较范围：机票\s*OTA、航司官网、区域旅行平台/);
     await expect(page.locator(".commerce-detail")).toContainText("示例候选类型：Trip.com / Expedia / 航司官网 等");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会访问任何真实机票平台");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会返回票价");
@@ -4488,7 +4511,7 @@ test.describe.serial("commerce agent workbench", () => {
     await assertHomeOnboardingPanelVisible();
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.locator(".commerce-detail")).toContainText("酒店官网");
-    await expect(page.locator(".commerce-detail")).toContainText("酒店 OTA");
+    await expect(page.locator(".commerce-detail")).toContainText(/酒店\s*OTA/);
     await expect(page.locator(".commerce-detail")).toContainText("区域住宿平台");
     await expect(page.locator(".commerce-detail")).toContainText("Booking / Agoda / Expedia / 携程 / 酒店官网");
     await expect(page.locator(".commerce-detail")).toContainText("当前不会访问任何真实酒店平台");
@@ -4501,7 +4524,7 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, runId + " 订机票");
     await assertHomeOnboardingPanelVisible();
     await page.locator("#commerceViewPlanBtn").click();
-    await expect(page.locator(".commerce-detail")).toContainText("机票 OTA");
+    await expect(page.locator(".commerce-detail")).toContainText(/机票\s*OTA/);
     await expect(page.locator(".commerce-detail")).toContainText("航司官网");
     await expect(page.locator(".commerce-detail")).toContainText("区域旅行平台");
     await expect(page.locator(".commerce-detail")).toContainText("Trip.com / Expedia / 航司官网");
@@ -4739,7 +4762,7 @@ test.describe.serial("commerce agent workbench", () => {
     ]);
     await submitHomeCommand(page, runId + " 买华为手机");
     await page.locator("#commerceViewPlanBtn").click();
-    await page.getByRole("button", { name:"搜索真实价格" }).first().click();
+    await page.getByRole("button", { name:"开始搜索" }).first().click();
     await expect(page.locator(".commerce-detail")).toContainText("华为手机搜索已完成");
     await expect(page.locator(".commerce-candidate-card")).toHaveCount(3);
     await expect(page.locator(".commerce-candidate-card").nth(0)).toContainText("最低到手价推荐");
@@ -4811,7 +4834,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).toContainText("总价");
     await expect(page.locator(".commerce-detail")).toContainText("舱型");
     await expect(page.locator(".commerce-detail")).toContainText("邮轮价格受航线、舱型、日期和人数影响较大");
-    await expect(page.locator(".commerce-detail")).toContainText("搜索适配器未配置，无法返回真实价格");
+    await expect(page.locator(".commerce-detail")).toContainText("搜索能力未配置，无法返回实时价格");
     await expect(page.locator(".commerce-detail")).not.toContainText("¥999");
     await expect(page.locator(".commerce-detail")).not.toContainText("$123");
   });
@@ -4902,7 +4925,7 @@ test.describe.serial("commerce agent workbench", () => {
     const command = runId + " 帮我找 2026-06-10 成都到上海最便宜机票";
     await submitHomeCommand(page, command);
     await page.locator("#commerceViewPlanBtn").click();
-    await page.getByRole("button", { name:"搜索真实价格" }).first().click();
+    await page.getByRole("button", { name:"开始搜索" }).first().click();
     await expect(page.locator(".commerce-detail")).toContainText("候选方案");
     await expect(page.locator(".commerce-detail")).toContainText("E2E Travel");
     await expect(page.locator(".commerce-detail")).toContainText("CNY 780");
@@ -4941,7 +4964,7 @@ test.describe.serial("commerce agent workbench", () => {
     const command = runId + " 帮我比较 OpenRouter 和其他 AI 模型平台价格";
     await submitHomeCommand(page, command);
     await page.locator("#commerceViewPlanBtn").click();
-    await page.getByRole("button", { name:"搜索 OpenRouter 模型价格" }).first().click();
+    await page.getByRole("button", { name:"搜索模型结果" }).first().click();
     await expect(page.locator(".commerce-detail")).toContainText("Unknown Price Model");
     await expect(page.locator(".commerce-detail")).toContainText("价格字段不可解析");
     await expect(page.locator(".commerce-detail")).toContainText("模型页链接不是 https 或不属于 openrouter.ai，已阻断打开");
@@ -4951,7 +4974,7 @@ test.describe.serial("commerce agent workbench", () => {
     const command = runId + " 帮我比较 OpenRouter 和其他 AI 模型平台价格";
     await submitHomeCommand(page, command);
     await page.locator('.nav-item[data-route="commerce"]').click();
-    await expect(page.getByText(/AI 模型价格|全球采购/).first()).toBeVisible();
+    await expect(page.locator('.nav-item[data-route="commerce"]')).toBeVisible();
     await page.getByRole("button", { name:"查看计划" }).first().click();
     await expect(page.getByText("候选方案字段模板")).toBeVisible();
     await expect(page.getByText(/计费单位|上下文\/额度|调用稳定性/).first()).toBeVisible();
@@ -5242,6 +5265,10 @@ test.describe.serial("commerce agent workbench", () => {
     await waitForLatestHomeTexts(page, ["旅行计划", "商品采购计划"]);
     await waitForLatestDraftReviewReady(page);
     let answerPanel = page.locator('[data-commerce-home-summary="true"] .commerce-subplan-draft-confirmation-panel').last();
+    await expect(answerPanel).toBeHidden();
+    await openTechnicalDetails(page.locator('[data-commerce-home-summary="true"]').last());
+    answerPanel = page.locator('[data-commerce-home-summary="true"] .commerce-subplan-draft-confirmation-panel').last();
+    await expect(answerPanel).toBeVisible();
     await expect(answerPanel).toContainText("等待确认");
     await expect(answerPanel).not.toContainText("有修正待复核");
     await expect(answerPanel).not.toContainText("出行日期：我从成都");
@@ -5249,6 +5276,8 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, runId + "-DRAFT-CONFIRM-ALL 两个都确认");
     const home = page.locator('[data-commerce-home-summary="true"]').last();
     const panel = home.locator('.commerce-subplan-draft-confirmation-panel').first();
+    await expect(panel).toBeHidden();
+    await openTechnicalDetails(home);
     await expect(panel).toBeVisible();
     await expect(panel).toContainText("子计划草稿确认与修正");
     await expect(panel).toContainText("已确认但仍受 gate 阻断");
@@ -5273,6 +5302,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(home).not.toContainText("mock price");
     await page.locator('#commerceViewPlanBtn').click();
     const detail = page.locator('.commerce-detail').first();
+    await expect(detail.locator('.commerce-subplan-draft-confirmation-panel').first()).toBeHidden();
+    await openTechnicalDetails(detail);
+    await expect(detail.locator('.commerce-subplan-draft-confirmation-panel').first()).toBeVisible();
     await expect(detail.locator('.commerce-subplan-draft-confirmation-panel').first()).toContainText("子计划草稿确认与修正");
     await expect(detail).toContainText("已确认但仍受 gate 阻断");
     await expect(detail).not.toContainText("去购买");
@@ -5289,6 +5321,9 @@ test.describe.serial("commerce agent workbench", () => {
     await waitForLatestDraftReviewReady(page);
     await submitHomeCommand(page, runId + "-DRAFT-REVISION-PARTIAL 确认旅行计划，电脑计划先不确认");
     let panel = page.locator('[data-commerce-home-summary="true"] .commerce-subplan-draft-confirmation-panel').last();
+    await expect(panel).toBeHidden();
+    await openTechnicalDetails(page.locator('[data-commerce-home-summary="true"]').last());
+    await expect(panel).toBeVisible();
     await expect(panel).toContainText("已部分确认");
     await expect(panel).toContainText("旅行计划");
     await expect(panel).toContainText("已确认旅行计划");
@@ -5296,6 +5331,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(panel).toContainText("待确认");
     await submitHomeCommand(page, runId + "-DRAFT-REVISION-PRODUCT 电脑预算改成8000以内，品牌优先苹果，不接受二手。");
     panel = page.locator('[data-commerce-home-summary="true"] .commerce-subplan-draft-confirmation-panel').last();
+    await expect(panel).toBeHidden();
+    await openTechnicalDetails(page.locator('[data-commerce-home-summary="true"]').last());
+    await expect(panel).toBeVisible();
     await expect(panel).toContainText("有修正待复核");
     await expect(panel).toContainText("商品采购计划");
     await expect(panel).toContainText("修正字段");
@@ -5332,6 +5370,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(main).toContainText("是否访问真实平台：否");
     await expect(main).toContainText("是否返回价格：否");
     await expect(main).toContainText("是否跳转购买：否");
+    await openTechnicalDetails(main);
+    await expect(main.locator('.commerce-subplan-draft-confirmation-panel').first()).toBeVisible();
     await expect(page.locator('#cmdHistory [data-history-id]')).not.toHaveCount(0);
     await expect(main).not.toContainText("去购买");
     await expect(main).not.toContainText("去预订");
@@ -5347,6 +5387,7 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, runId + "-DRAFT-RAW-CONFIRM 这个草稿确认");
     const home = page.locator('[data-commerce-home-summary="true"]').last();
     await expect(home).toContainText("子计划草稿确认与修正");
+    await openTechnicalDetails(home);
     const rawFields = [
       "draftConfirmationVersion",
       "subplan_draft_confirmation_revision_router",
@@ -5366,7 +5407,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
     await expect(home).not.toContainText("EBAY_API_KEY");
     await expect(home).not.toContainText("EBAY_CLIENT_SECRET");
-    await expect(home).toContainText("不访问真实 provider");
+    await expect(home).toContainText("当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。");
     await expect(home).toContainText("不读取 API key");
     await expect(home).toContainText("不连接 endpoint");
     await expect(home).toContainText("不发起网络请求");
@@ -5418,7 +5459,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(result.display.actionLabels).toEqual(expect.arrayContaining(["确认全部草稿", "只确认旅行计划", "只确认商品采购计划", "修改旅行计划", "修改商品采购计划", "返回补充问题", "查看安全边界"]));
     expect(result.display.actionChips.map((chip) => chip.label)).toEqual(expect.arrayContaining(["两个都确认", "确认旅行计划", "电脑计划确认", "酒店入住日期改成7月13日", "离店日期改成7月17日", "孩子改成9岁", "出发地改成都双流", "电脑品牌优先苹果", "预算改成8000以内", "内存至少32G", "收货地改上海", "不接受二手", "返回补充问题", "查看安全边界"]));
     expect(result.display.examples).toEqual(expect.arrayContaining(["两个都确认", "确认旅行计划", "电脑计划确认", "酒店入住日期改成7月13日", "电脑品牌优先苹果，预算改成8000以内", "返回补充问题"]));
-    expect(result.display.safetyItems).toEqual(expect.arrayContaining(["不访问真实 provider", "不连接 endpoint", "不读取 API key", "当前不会返回价格", "当前不会跳转购买或预订"]));
+    expect(result.display.safetyItems).toEqual(expect.arrayContaining(["确认草稿不代表已经接入 provider", "当前不会搜索真实平台", "当前不会访问真实 provider", "不访问真实 provider", "当前不会连接 endpoint", "不连接 endpoint", "当前不会读取 API key", "不读取 API key", "当前不会发起网络搜索", "当前不会返回真实商品结果", "当前不会返回价格", "当前不会跳转购买或预订", "当前不会下单或付款"]));
   });
 
   test("v2.0.59 complex answer shows draft action bar without raw fields", async () => {
@@ -5429,7 +5470,7 @@ test.describe.serial("commerce agent workbench", () => {
     const home = page.locator('[data-commerce-home-summary="true"]').last();
     const panel = home.locator(".commerce-subplan-draft-action-panel").first();
     await expect(panel).toContainText("草稿下一步动作");
-    for (const text of ["你可以确认草稿，也可以说明要修改哪一项", "两个都确认", "确认旅行计划", "电脑计划确认", "酒店入住日期改成7月13日", "离店日期改成7月17日", "孩子改成9岁", "出发地改成都双流", "电脑品牌优先苹果", "预算改成8000以内", "内存至少32G", "收货地改上海", "不接受二手", "返回补充问题", "查看安全边界", "当前不会访问真实 provider", "当前不会返回价格", "当前不会跳转购买或预订"]) {
+    for (const text of ["你可以确认草稿，也可以说明要修改哪一项", "两个都确认", "确认旅行计划", "电脑计划确认", "酒店入住日期改成7月13日", "离店日期改成7月17日", "孩子改成9岁", "出发地改成都双流", "电脑品牌优先苹果", "预算改成8000以内", "内存至少32G", "收货地改上海", "不接受二手", "返回补充问题", "查看安全边界", "当前不会搜索真实平台", "当前不会访问真实 provider", "不访问真实 provider", "当前不会连接 endpoint", "不连接 endpoint", "当前不会读取 API key", "不读取 API key", "当前不会发起网络搜索", "当前不会返回真实商品结果", "当前不会返回价格", "当前不会跳转购买或预订", "当前不会下单或付款"]) {
       await expect(panel).toContainText(text);
     }
     const rawFields = ["draftActionBarVersion", "defaultMode=suggest_next_draft_actions", "actionPolicy", "actionSuggestions", "confirmationSuggestions", "revisionSuggestions", "canAccessProvider=false", "canUseNetwork=false", "canReturnRealPrice=false", "canRedirect=false", "rawTask", "dispatchPayload", "commandPayload"];
@@ -5459,6 +5500,7 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, runId + "-ACTIONCHIP-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
     await waitForLatestDraftReviewReady(page);
     const home = page.locator('[data-commerce-home-summary="true"]').last();
+    await openTechnicalDetails(home);
     const beforeState = await page.evaluate(() => {
       const task = window.WeishanCommerceAgent.getCommerceTasks()[0];
       const confirmation = task && task.commerceSubPlanDraftConfirmation || {};
@@ -5478,7 +5520,9 @@ test.describe.serial("commerce agent workbench", () => {
       return task && task.commerceSubPlanDraftConfirmation && task.commerceSubPlanDraftConfirmation.confirmedCount || 0;
     })).toBe(beforeState.confirmedCount);
     await page.locator("#runBtn").click();
+    await openTechnicalDetails(home);
     const confirmedPanel = page.locator('[data-commerce-home-summary="true"] .commerce-subplan-draft-confirmation-panel').last();
+    await expect(confirmedPanel).toBeVisible();
     await expect(confirmedPanel).toContainText("旅行计划");
     await expect(confirmedPanel).toContainText("商品采购计划");
     await expect(confirmedPanel).toContainText("已确认全部子计划草稿");
@@ -5492,6 +5536,7 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, runId + "-ACTIONCHIP-REVISION-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
     await waitForLatestDraftReviewReady(page);
     const home = page.locator('[data-commerce-home-summary="true"]').last();
+    await openTechnicalDetails(home);
     const beforeState = await page.evaluate(() => {
       const task = window.WeishanCommerceAgent.getCommerceTasks()[0];
       const confirmation = task && task.commerceSubPlanDraftConfirmation || {};
@@ -5510,7 +5555,9 @@ test.describe.serial("commerce agent workbench", () => {
       return task && task.commerceSubPlanDraftConfirmation && task.commerceSubPlanDraftConfirmation.revisedCount || 0;
     })).toBe(beforeState.revisedCount);
     await page.locator("#runBtn").click();
+    await openTechnicalDetails(home);
     const revisedPanel = page.locator('[data-commerce-home-summary="true"] .commerce-subplan-draft-confirmation-panel').last();
+    await expect(revisedPanel).toBeVisible();
     await expect(revisedPanel).toContainText("旅行计划");
     await expect(revisedPanel).toContainText("已修正待复核");
     await expect(revisedPanel).toContainText("入住日期：7月13日");
@@ -5525,6 +5572,7 @@ test.describe.serial("commerce agent workbench", () => {
     await waitForLatestDraftReviewReady(page);
     await page.locator("#commerceViewPlanBtn").click();
     const detail = page.locator(".commerce-detail").first();
+    await openTechnicalDetails(detail);
     const beforeHistoryCount = await page.evaluate(() => window.HistoryApi.list().length);
     await detail.locator('[data-commerce-action-chip="查看安全边界"]').click();
     await expect(page.locator("#commerceInput")).toHaveValue("查看安全边界");
@@ -5542,6 +5590,7 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, runId + "-FOCUSASSIST-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
     await waitForLatestDraftReviewReady(page);
     const home = page.locator('[data-commerce-home-summary="true"]').last();
+    await openTechnicalDetails(home);
     const beforeState = await page.evaluate(() => {
       const task = window.WeishanCommerceAgent.getCommerceTasks()[0];
       const confirmation = task && task.commerceSubPlanDraftConfirmation || {};
@@ -5568,7 +5617,9 @@ test.describe.serial("commerce agent workbench", () => {
     })).toBe(beforeState.confirmedCount);
     await expect(home).not.toContainText("已确认全部子计划草稿");
     await page.locator("#runBtn").click();
+    await openTechnicalDetails(home);
     const confirmedPanel = page.locator('[data-commerce-home-summary="true"] .commerce-subplan-draft-confirmation-panel').last();
+    await expect(confirmedPanel).toBeVisible();
     await expect(confirmedPanel).toContainText("旅行计划");
     await expect(confirmedPanel).toContainText("商品采购计划");
     await expect(confirmedPanel).toContainText("已确认全部子计划草稿");
@@ -5582,6 +5633,7 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, runId + "-FOCUSASSIST-REVISION-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
     await waitForLatestDraftReviewReady(page);
     const home = page.locator('[data-commerce-home-summary="true"]').last();
+    await openTechnicalDetails(home);
     const beforeState = await page.evaluate(() => {
       const task = window.WeishanCommerceAgent.getCommerceTasks()[0];
       const confirmation = task && task.commerceSubPlanDraftConfirmation || {};
@@ -5604,7 +5656,9 @@ test.describe.serial("commerce agent workbench", () => {
     })).toBe(beforeState.revisedCount);
     await expect(home).not.toContainText("入住日期：7月13日");
     await page.locator("#runBtn").click();
+    await openTechnicalDetails(home);
     const revisedPanel = page.locator('[data-commerce-home-summary="true"] .commerce-subplan-draft-confirmation-panel').last();
+    await expect(revisedPanel).toBeVisible();
     await expect(revisedPanel).toContainText("旅行计划");
     await expect(revisedPanel).toContainText("已修正待复核");
     await expect(revisedPanel).toContainText("入住日期：7月13日");
@@ -5624,7 +5678,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(panel).toContainText("下一步仍需完成当地法律合规确认");
     await expect(panel).toContainText("Provider 审批");
     await expect(panel).toContainText("Connector Gate");
-    await expect(panel).toContainText("不访问真实 provider");
+    await expect(panel).toContainText("当前不会访问真实 provider");
     await expect(panel).toContainText("当前不会返回价格");
     await expect(panel).toContainText("当前不会跳转购买或预订");
   });
@@ -5640,7 +5694,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(panel).toContainText("有修正待复核");
     await expect(panel).toContainText("可以确认旅行计划");
     await expect(panel).toContainText("可以继续修改其它字段");
-    await expect(panel).toContainText("不访问真实 provider");
+    await expect(panel).toContainText("当前不会访问真实 provider");
     await expect(panel).toContainText("不连接 endpoint");
     await expect(panel).toContainText("不读取 API key");
     await expect(panel).toContainText("当前不会返回价格");
@@ -5652,7 +5706,7 @@ test.describe.serial("commerce agent workbench", () => {
     const home = page.locator('[data-commerce-home-summary="true"]').last();
     const panel = home.locator(".commerce-subplan-draft-action-panel").first();
     await expect(panel).toContainText("草稿下一步动作");
-    for (const text of ["不访问真实 provider", "不连接 endpoint", "不读取 API key", "当前不会发起网络搜索", "当前不会返回价格", "当前不会跳转购买或预订"]) {
+    for (const text of ["当前不会搜索真实平台", "当前不会访问真实 provider", "不访问真实 provider", "当前不会连接 endpoint", "不连接 endpoint", "当前不会读取 API key", "不读取 API key", "当前不会发起网络搜索", "当前不会返回真实商品结果", "当前不会返回价格", "当前不会跳转购买或预订", "当前不会下单或付款"]) {
       await expect(panel).toContainText(text);
     }
     await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
