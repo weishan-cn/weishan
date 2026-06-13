@@ -3142,6 +3142,13 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel.locator("[data-commerce-platform-template-feedback]")).toContainText("复制失败，请手动选择文本复制");
   });
 
+  test("v2.0.71 sidebar version stays in sync with release version", async () => {
+    await gotoRoute(page, "home");
+    const sidebarFoot = page.locator(".sidebar-foot");
+    await expect(sidebarFoot).toContainText("weishan v2.0.71");
+    await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
+  });
+
   test("v2.0.70 default result hides technical wording until technical details expands", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");

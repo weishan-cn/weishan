@@ -15,6 +15,16 @@ function readJson(relativePath) {
   }
 }
 
+function readText(relativePath) {
+  const fullPath = path.join(ROOT, relativePath);
+  if (!fs.existsSync(fullPath)) return null;
+  try {
+    return fs.readFileSync(fullPath, "utf8");
+  } catch (error) {
+    return { __readError: error.message };
+  }
+}
+
 function addCheck(results, name, expected, actual, detail) {
   const pass = Boolean(expected) && Boolean(actual) && expected === actual;
   results.push({
@@ -22,6 +32,27 @@ function addCheck(results, name, expected, actual, detail) {
     pass,
     detail: pass ? `${expected}` : `${detail || "version mismatch"}: expected ${expected || "missing"}, got ${actual || "missing"}`
   });
+}
+
+function checkRendererConfigVersion(results, expectedVersion) {
+  const configPath = "apps/desktop/src/renderer/core/config.js";
+  const config = readText(configPath);
+  if (!config) {
+    results.push({ name: "apps/desktop renderer config version", pass: false, detail: configPath + " missing" });
+    return;
+  }
+  if (config.__readError) {
+    results.push({ name: "apps/desktop renderer config version", pass: false, detail: config.__readError });
+    return;
+  }
+  const match = config.match(/version:\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop renderer config version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/config.js window.WeishanConfig.version"
+  );
 }
 
 function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
@@ -61,9 +92,15 @@ function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
 function runVersionCheck() {
   const results = [];
 
+  const rootPackage = readJson("package.json");
+
   checkPackagePair(results, "root", "package.json", "package-lock.json", { checkRootPackageEntry: true });
   checkPackagePair(results, "apps/desktop", "apps/desktop/package.json", "apps/desktop/package-lock.json");
   checkPackagePair(results, "apps/server", "apps/server/package.json", "apps/server/package-lock.json");
+
+  if (rootPackage && !rootPackage.__readError) {
+    checkRendererConfigVersion(results, rootPackage.version);
+  }
 
   results.forEach((item) => {
     const prefix = item.pass ? "[PASS]" : "[FAIL]";
