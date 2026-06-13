@@ -533,6 +533,23 @@ Copy Actionable Checklist 必须提供“复制机票搜索条件”、“复制
 
 Copy Actionable Checklist 不得访问真实 provider，不得连接真实 endpoint，不得使用 API key，不得发起网络搜索，不得返回真实价格或 fake/demo/mock price，不得跳转购买 / 预订页面，不得付款，不得下单，不得保存身份证、护照、银行卡或长期保存用户答案。复制失败时只能提示“复制失败，请手动选择文本复制”，不得报错崩溃。
 
+
+### Platform Search Template Pack 标准
+
+Platform Search Template Pack 必须显示在可执行清单下方，标题必须为“平台搜索模板”，副标题必须说明复制后可以粘贴到对应平台自行搜索，并明确当前不会打开外部平台，不会访问真实 provider，不会返回价格，不会跳转购买或预订。
+
+Platform Search Template Pack 必须显示 5 组模板：机票平台模板、酒店平台模板、中文购物平台模板、英文购物平台模板和全部平台模板。机票平台模板必须包含 Google Flights 模板和 Trip.com / 携程模板；酒店平台模板必须包含 Booking 模板和 Agoda 模板；中文购物平台模板必须包含京东模板和淘宝 / 天猫模板；英文购物平台模板必须包含 Amazon 模板和 Best Buy 模板；全部平台模板必须包含上述八个模板名称以及安全说明。
+
+Google Flights 模板必须包含 From: Chengdu、To: Tokyo、Departure date: July 12、Passengers: 1 adult + 1 child aged 8、Budget target: total trip budget within RMB 10,000、Compare: total price, number of stops, departure time, baggage rules 和 Note: final price must be checked on the real platform. Trip.com / 携程模板必须包含出发地：成都、目的地：东京、出发日期：7月12日、乘客：1名成人 + 1名8岁儿童、预算目标：总预算一万以内、优先比较：总价、转机次数、起飞时间、行李规则 和 注意：最终价格以真实平台为准。
+
+Booking 模板必须包含 Destination: Tokyo、Check-in: July 12、Check-out: July 16、Guests: adult with 8-year-old child、Preferences: family friendly, near subway or convenient transport, good rating, clear cancellation policy, taxes and fees included if possible 和 Note: final price and room policy must be checked on the real platform。Agoda 模板必须包含 Destination: Tokyo、Check-in date: July 12、Check-out date: July 16、Guests: adult + child aged 8、Filter by: family friendly, location convenience, rating, cancellation policy, total price with taxes and fees 和 Note: final price must be checked on the real platform。
+
+京东模板必须包含 用途：剪视频、内存：32G、硬盘：1T、品牌：都可以、收货地：成都、是否接受二手：不接受、预算：一万以内、筛选建议：优先看 CPU、显卡、内存、硬盘、屏幕、散热、售后、官方保修、排除：二手、翻新机、展示机 和 注意：最终价格、库存、保修和退换政策以真实平台为准。淘宝 / 天猫模板必须包含 搜索词：剪视频电脑 32G内存 1T硬盘 新机、预算：一万以内、收货地：成都、品牌：不限、排除：二手、翻新、展示机、重点确认：官方保修、真实配置、最终到手价、退换政策 和 注意：最终价格以真实平台为准。
+
+Amazon 模板必须包含 Use case: video editing、Memory: 32GB RAM、Storage: 1TB SSD、Brand: any brand、Condition: new only, no used or refurbished items、Budget: within RMB 10,000 or equivalent、Compare: CPU, GPU, RAM, storage, display, cooling, warranty, return policy 和 Note: final price, availability, warranty and return policy must be checked on the real platform。Best Buy 模板必须包含 Use case: video editing、RAM: 32GB、Storage: 1TB SSD、Condition: new only、Brand: flexible、Budget: within RMB 10,000 or equivalent、Compare: processor, graphics, memory, storage, screen, cooling, warranty, return policy 和 Note: final price must be checked on the real platform。
+
+Platform Search Template Pack 必须只生成可复制文本，不得打开外部平台，不得访问真实 provider，不得发起网络搜索，不得返回价格，不得返回 fake/demo/mock price，不得跳转购买或预订，不得付款或下单，不得保存证件或银行卡，不得长期保存用户答案。复制按钮必须提供“复制 Google Flights 模板”、“复制 Trip.com / 携程模板”、“复制 Booking 模板”、“复制 Agoda 模板”、“复制京东模板”、“复制淘宝 / 天猫模板”、“复制 Amazon 模板”、“复制 Best Buy 模板”和“复制全部平台模板”。最终价格、库存、政策和合法性以真实平台和当地法律为准。历史回看必须保留平台搜索模板。历史回看必须保留复制按钮。复制失败时只能提示“复制失败，请手动选择文本复制”，不得报错崩溃。
+
 ### Collapse Commerce Process By Default 标准
 
 普通用户默认只看结果和确认状态，不看完整过程。默认折叠本地意图识别、复杂意图拆分计划、子计划闸门矩阵、子计划补充问题、子计划答案收集、子计划补齐工作台、Provider 接入准备总览、Provider 审批流程、Provider Sandbox Dry Run、Connector Gate、只读 Connector Stub、Provider 密钥安全方案和 Provider 接入审查面板。
@@ -617,6 +634,7 @@ Focus Assist 用户 UI 只能显示自然语言提示，不得裸露 focusAssist
 - v2.0.65：Actionable Commerce Checklist / 可执行采购清单
 - v2.0.66：Copy Actionable Commerce Checklist / 一键复制可执行清单
 - v2.0.67：Fix History Actionable Checklist / 修复历史回看可执行清单和复制按钮
+- v2.0.68：Platform Search Template Pack / 平台搜索模板包
 
 后续版本必须继续保持全球多源、只读搜索、安全门控、外部跳转的方向，不能退化为单一平台工具。
 

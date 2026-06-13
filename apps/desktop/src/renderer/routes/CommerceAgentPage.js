@@ -1509,6 +1509,321 @@
     return { flight, hotel, computer, full }[kind] || "";
   }
 
+  function commercePlatformSearchTemplateList(lines){
+    return `<ul>${(lines || []).map((line) => `<li>${esc(line)}</li>`).join("")}</ul>`;
+  }
+
+  function commercePlatformSearchTemplateGroup(title, lines){
+    return `<div class="commerce-result-summary-checklist-group">
+      <b>${esc(title)}</b>
+      ${commercePlatformSearchTemplateList(lines)}
+    </div>`;
+  }
+
+  function commercePlatformSearchTemplateCopyText(kind){
+    const lineJoin = (lines) => lines.join("\n");
+    const paragraphJoin = (lines) => lines.join("\n\n");
+    const googleFlights = lineJoin([
+      "Google Flights search template",
+      "From: Chengdu",
+      "To: Tokyo",
+      "Departure date: July 12",
+      "Passengers: 1 adult + 1 child aged 8",
+      "Budget target: total trip budget within RMB 10,000",
+      "Compare: total price, number of stops, departure time, baggage rules",
+      "Note: final price must be checked on the real platform."
+    ]);
+    const tripCom = lineJoin([
+      "机票搜索模板",
+      "出发地：成都",
+      "目的地：东京",
+      "出发日期：7月12日",
+      "乘客：1名成人 + 1名8岁儿童",
+      "预算目标：总预算一万以内",
+      "优先比较：总价、转机次数、起飞时间、行李规则",
+      "注意：最终价格以真实平台为准。"
+    ]);
+    const booking = lineJoin([
+      "Booking hotel search template",
+      "Destination: Tokyo",
+      "Check-in: July 12",
+      "Check-out: July 16",
+      "Guests: adult with 8-year-old child",
+      "Preferences: family friendly, near subway or convenient transport, good rating, clear cancellation policy, taxes and fees included if possible",
+      "Note: final price and room policy must be checked on the real platform."
+    ]);
+    const agoda = lineJoin([
+      "Agoda hotel search template",
+      "Destination: Tokyo",
+      "Check-in date: July 12",
+      "Check-out date: July 16",
+      "Guests: adult + child aged 8",
+      "Filter by: family friendly, location convenience, rating, cancellation policy, total price with taxes and fees",
+      "Note: final price must be checked on the real platform."
+    ]);
+    const jd = lineJoin([
+      "京东电脑搜索模板",
+      "用途：剪视频",
+      "内存：32G",
+      "硬盘：1T",
+      "品牌：都可以",
+      "收货地：成都",
+      "是否接受二手：不接受",
+      "预算：一万以内",
+      "筛选建议：优先看 CPU、显卡、内存、硬盘、屏幕、散热、售后、官方保修",
+      "排除：二手、翻新机、展示机",
+      "注意：最终价格、库存、保修和退换政策以真实平台为准。"
+    ]);
+    const taobaoTmall = lineJoin([
+      "淘宝 / 天猫电脑搜索模板",
+      "搜索词：剪视频电脑 32G内存 1T硬盘 新机",
+      "预算：一万以内",
+      "收货地：成都",
+      "品牌：不限",
+      "排除：二手、翻新、展示机",
+      "重点确认：官方保修、真实配置、最终到手价、退换政策",
+      "注意：最终价格以真实平台为准。"
+    ]);
+    const amazon = lineJoin([
+      "Amazon laptop search template",
+      "Use case: video editing",
+      "Memory: 32GB RAM",
+      "Storage: 1TB SSD",
+      "Brand: any brand",
+      "Condition: new only, no used or refurbished items",
+      "Budget: within RMB 10,000 or equivalent",
+      "Compare: CPU, GPU, RAM, storage, display, cooling, warranty, return policy",
+      "Note: final price, availability, warranty and return policy must be checked on the real platform."
+    ]);
+    const bestBuy = lineJoin([
+      "Best Buy laptop search template",
+      "Use case: video editing",
+      "RAM: 32GB",
+      "Storage: 1TB SSD",
+      "Condition: new only",
+      "Brand: flexible",
+      "Budget: within RMB 10,000 or equivalent",
+      "Compare: processor, graphics, memory, storage, screen, cooling, warranty, return policy",
+      "Note: final price must be checked on the real platform."
+    ]);
+    const allPlatforms = paragraphJoin([
+      "全部平台模板",
+      "Google Flights 模板",
+      googleFlights,
+      "Trip.com / 携程模板",
+      tripCom,
+      "Booking 模板",
+      booking,
+      "Agoda 模板",
+      agoda,
+      "京东模板",
+      jd,
+      "淘宝 / 天猫模板",
+      taobaoTmall,
+      "Amazon 模板",
+      amazon,
+      "Best Buy 模板",
+      bestBuy,
+      "当前不会访问真实平台。",
+      "当前不会返回价格。",
+      "当前不会跳转购买或预订。",
+      "当前不会付款或下单。",
+      "最终价格、库存、政策和合法性以真实平台和当地法律为准。"
+    ]);
+    return {
+      googleFlights,
+      tripCom,
+      booking,
+      agoda,
+      jd,
+      taobaoTmall,
+      amazon,
+      bestBuy,
+      allPlatforms
+    }[kind] || "";
+  }
+
+  function commercePlatformSearchTemplatePackHtml(){
+    const buttons = [
+      ["googleFlights", "复制 Google Flights 模板"],
+      ["tripCom", "复制 Trip.com / 携程模板"],
+      ["booking", "复制 Booking 模板"],
+      ["agoda", "复制 Agoda 模板"],
+      ["jd", "复制京东模板"],
+      ["taobaoTmall", "复制淘宝 / 天猫模板"],
+      ["amazon", "复制 Amazon 模板"],
+      ["bestBuy", "复制 Best Buy 模板"],
+      ["allPlatforms", "复制全部平台模板"]
+    ];
+    const groups = [
+      {
+        title: "机票平台模板",
+        items: [
+          {
+            title: "Google Flights 模板",
+            lines: [
+              "From: Chengdu",
+              "To: Tokyo",
+              "Departure date: July 12",
+              "Passengers: 1 adult + 1 child aged 8",
+              "Budget target: total trip budget within RMB 10,000",
+              "Compare: total price, number of stops, departure time, baggage rules",
+              "Note: final price must be checked on the real platform."
+            ]
+          },
+          {
+            title: "Trip.com / 携程模板",
+            lines: [
+              "出发地：成都",
+              "目的地：东京",
+              "出发日期：7月12日",
+              "乘客：1名成人 + 1名8岁儿童",
+              "预算目标：总预算一万以内",
+              "优先比较：总价、转机次数、起飞时间、行李规则",
+              "注意：最终价格以真实平台为准。"
+            ]
+          }
+        ]
+      },
+      {
+        title: "酒店平台模板",
+        items: [
+          {
+            title: "Booking 模板",
+            lines: [
+              "Destination: Tokyo",
+              "Check-in: July 12",
+              "Check-out: July 16",
+              "Guests: adult with 8-year-old child",
+              "Preferences: family friendly, near subway or convenient transport, good rating, clear cancellation policy, taxes and fees included if possible",
+              "Note: final price and room policy must be checked on the real platform."
+            ]
+          },
+          {
+            title: "Agoda 模板",
+            lines: [
+              "Destination: Tokyo",
+              "Check-in date: July 12",
+              "Check-out date: July 16",
+              "Guests: adult + child aged 8",
+              "Filter by: family friendly, location convenience, rating, cancellation policy, total price with taxes and fees",
+              "Note: final price must be checked on the real platform."
+            ]
+          }
+        ]
+      },
+      {
+        title: "中文购物平台模板",
+        items: [
+          {
+            title: "京东模板",
+            lines: [
+              "用途：剪视频",
+              "内存：32G",
+              "硬盘：1T",
+              "品牌：都可以",
+              "收货地：成都",
+              "是否接受二手：不接受",
+              "预算：一万以内",
+              "筛选建议：优先看 CPU、显卡、内存、硬盘、屏幕、散热、售后、官方保修",
+              "排除：二手、翻新机、展示机",
+              "注意：最终价格、库存、保修和退换政策以真实平台为准。"
+            ]
+          },
+          {
+            title: "淘宝 / 天猫模板",
+            lines: [
+              "搜索词：剪视频电脑 32G内存 1T硬盘 新机",
+              "预算：一万以内",
+              "收货地：成都",
+              "品牌：不限",
+              "排除：二手、翻新、展示机",
+              "重点确认：官方保修、真实配置、最终到手价、退换政策",
+              "注意：最终价格以真实平台为准。"
+            ]
+          }
+        ]
+      },
+      {
+        title: "英文购物平台模板",
+        items: [
+          {
+            title: "Amazon 模板",
+            lines: [
+              "Use case: video editing",
+              "Memory: 32GB RAM",
+              "Storage: 1TB SSD",
+              "Brand: any brand",
+              "Condition: new only, no used or refurbished items",
+              "Budget: within RMB 10,000 or equivalent",
+              "Compare: CPU, GPU, RAM, storage, display, cooling, warranty, return policy",
+              "Note: final price, availability, warranty and return policy must be checked on the real platform."
+            ]
+          },
+          {
+            title: "Best Buy 模板",
+            lines: [
+              "Use case: video editing",
+              "RAM: 32GB",
+              "Storage: 1TB SSD",
+              "Condition: new only",
+              "Brand: flexible",
+              "Budget: within RMB 10,000 or equivalent",
+              "Compare: processor, graphics, memory, storage, screen, cooling, warranty, return policy",
+              "Note: final price must be checked on the real platform."
+            ]
+          }
+        ]
+      },
+      {
+        title: "全部平台模板",
+        items: [
+          {
+            title: "包含模板",
+            lines: [
+              "Google Flights 模板",
+              "Trip.com / 携程模板",
+              "Booking 模板",
+              "Agoda 模板",
+              "京东模板",
+              "淘宝 / 天猫模板",
+              "Amazon 模板",
+              "Best Buy 模板"
+            ]
+          },
+          {
+            title: "安全说明",
+            lines: [
+              "当前不会访问真实平台。",
+              "当前不会返回价格。",
+              "当前不会跳转购买或预订。",
+              "当前不会付款或下单。",
+              "最终价格、库存、政策和合法性以真实平台和当地法律为准。"
+            ]
+          }
+        ]
+      }
+    ];
+    return `<section class="commerce-result-summary-checklist commerce-platform-template-pack" aria-label="平台搜索模板">
+      <div class="commerce-result-summary-checklist-head">
+        <div>
+          <h4>平台搜索模板</h4>
+          <p>复制下面的模板后，可以粘贴到对应平台自行搜索。当前不会打开外部平台，不会访问真实 provider，不会返回价格，不会跳转购买或预订。</p>
+        </div>
+        <div class="commerce-result-summary-copy-actions" aria-label="平台搜索模板复制按钮">
+          ${buttons.map(([kind, label]) => `<button class="cmd-btn gray commerce-platform-template-copy-btn" type="button" data-commerce-template-kind="${esc(kind)}">${esc(label)}</button>`).join("")}
+        </div>
+      </div>
+      <p class="commerce-result-summary-copy-feedback commerce-platform-template-copy-feedback" data-commerce-platform-template-feedback aria-live="polite"></p>
+      <div class="commerce-result-summary-checklist-grid commerce-platform-template-grid">
+        ${groups.map((group) => `<section class="commerce-result-summary-checklist-card">
+          <h5>${esc(group.title)}</h5>
+          ${group.items.map((item) => commercePlatformSearchTemplateGroup(item.title, item.lines)).join("")}
+        </section>`).join("")}
+      </div>
+    </section>`;
+  }
+
   function commerceCopyTextToClipboard(text){
     const value = String(text || "");
     if (!value) return Promise.resolve(false);
@@ -1663,6 +1978,7 @@
           </section>
         </div>
       </section>
+      ${commercePlatformSearchTemplatePackHtml()}
       <section class="commerce-result-summary-next">
         <h4>下一步</h4>
         <p>你可以直接选择：</p>
@@ -2113,6 +2429,30 @@
     host.querySelectorAll("[data-commerce-copy-kind]").forEach((button) => {
       button.addEventListener("click", () => {
         copyCommerceActionableChecklist(button.getAttribute("data-commerce-copy-kind") || "");
+      });
+    });
+    let commercePlatformTemplateCopyTimer = 0;
+    function showCommercePlatformTemplateFeedback(message, failed){
+      const feedback = host.querySelector("[data-commerce-platform-template-feedback]");
+      if (!feedback) return;
+      feedback.textContent = message;
+      feedback.classList.toggle("is-failed", !!failed);
+      window.clearTimeout(commercePlatformTemplateCopyTimer);
+      commercePlatformTemplateCopyTimer = window.setTimeout(() => {
+        if (feedback.textContent === message) feedback.textContent = "";
+        feedback.classList.remove("is-failed");
+      }, 2600);
+    }
+    async function copyCommercePlatformTemplate(kind){
+      const ok = await commerceCopyTextToClipboard(commercePlatformSearchTemplateCopyText(kind));
+      showCommercePlatformTemplateFeedback(
+        ok ? "已复制，可粘贴到外部平台搜索" : "复制失败，请手动选择文本复制",
+        !ok
+      );
+    }
+    host.querySelectorAll("[data-commerce-template-kind]").forEach((button) => {
+      button.addEventListener("click", () => {
+        copyCommercePlatformTemplate(button.getAttribute("data-commerce-template-kind") || "");
       });
     });
     const clearAll = host.querySelector("#commerceClearAll");

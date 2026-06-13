@@ -440,8 +440,8 @@ test.describe.serial("commerce agent workbench", () => {
   test("global commerce workbench entry shows safety boundary", async () => {
     await expect(page.locator('.nav-item[data-route="commerce"]')).toBeVisible();
     await page.locator('.nav-item[data-route="commerce"]').click();
-    await expect(page.getByRole("heading", { name:"全球采购" })).toBeVisible();
-    await expect(page.locator(".commerce-hero h1")).toHaveText("全球采购");
+    await expect(page.getByRole("heading", { name:"全球采购" })).toBeVisible({ timeout:15000 });
+    await expect(page.locator(".commerce-hero h1")).toHaveText("全球采购", { timeout:15000 });
     await expect(page.getByText("搜索、比价、推荐、执行前确认")).toBeVisible();
     await expect(page.getByText("当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单").first()).toBeVisible();
   });
@@ -2969,6 +2969,82 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel.locator("[data-commerce-copy-feedback]")).toContainText("复制失败，请手动选择文本复制");
   });
 
+  test("v2.0.68 platform search template pack copy buttons copy text to clipboard without side effects", async () => {
+    await resetCommerceTasks(page);
+    await gotoRoute(page, "home");
+    await submitHomeCommand(page, runId + "-PLATFORM-TEMPLATE-COMPLEX 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。");
+    await waitForLatestHomeTexts(page, ["旅行计划", "商品采购计划"]);
+    await submitHomeCommand(page, runId + "-PLATFORM-TEMPLATE-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
+    await waitForLatestDraftReviewReady(page);
+    const home = page.locator('[data-commerce-home-summary="true"]').last();
+    const summaryPanel = home.locator(".commerce-result-summary-panel");
+    await expect(summaryPanel).toContainText("平台搜索模板");
+    for (const text of ["复制 Google Flights 模板", "复制 Trip.com / 携程模板", "复制 Booking 模板", "复制 Agoda 模板", "复制京东模板", "复制淘宝 / 天猫模板", "复制 Amazon 模板", "复制 Best Buy 模板", "复制全部平台模板"]) await expect(summaryPanel).toContainText(text);
+    await expect(summaryPanel.locator(".commerce-platform-template-copy-btn")).toHaveCount(9);
+    await installClipboardMock(page);
+    const historyCountBefore = await page.locator("#cmdHistory [data-history-id]").count();
+    const buttons = {
+      googleFlights: summaryPanel.getByRole("button", { name:"复制 Google Flights 模板" }),
+      tripCom: summaryPanel.getByRole("button", { name:"复制 Trip.com / 携程模板" }),
+      booking: summaryPanel.getByRole("button", { name:"复制 Booking 模板" }),
+      agoda: summaryPanel.getByRole("button", { name:"复制 Agoda 模板" }),
+      jd: summaryPanel.getByRole("button", { name:"复制京东模板" }),
+      taobaoTmall: summaryPanel.getByRole("button", { name:"复制淘宝 / 天猫模板" }),
+      amazon: summaryPanel.getByRole("button", { name:"复制 Amazon 模板" }),
+      bestBuy: summaryPanel.getByRole("button", { name:"复制 Best Buy 模板" }),
+      allPlatforms: summaryPanel.getByRole("button", { name:"复制全部平台模板" })
+    };
+    await buttons.googleFlights.click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("From: Chengdu");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("To: Tokyo");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("Departure date: July 12");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("1 adult + 1 child aged 8");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("final price must be checked on the real platform");
+    await expect(summaryPanel.locator("[data-commerce-platform-template-feedback]")).toContainText("已复制，可粘贴到外部平台搜索");
+    await buttons.tripCom.click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("出发地：成都");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("目的地：东京");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("出发日期：7月12日");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("最终价格以真实平台为准");
+    await buttons.booking.click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("Destination: Tokyo");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("Check-in: July 12");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("Check-out: July 16");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("family friendly");
+    await buttons.agoda.click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("Destination: Tokyo");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("Check-in date: July 12");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("total price with taxes and fees");
+    await buttons.jd.click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("用途：剪视频");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("内存：32G");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("硬盘：1T");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("收货地：成都");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("排除：二手、翻新机、展示机");
+    await buttons.taobaoTmall.click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("搜索词：剪视频电脑 32G内存 1T硬盘 新机");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("最终价格以真实平台为准");
+    await buttons.amazon.click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("Use case: video editing");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("Memory: 32GB RAM");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("Storage: 1TB SSD");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("new only");
+    await buttons.bestBuy.click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("Best Buy laptop search template");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("RAM: 32GB");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("Storage: 1TB SSD");
+    await buttons.allPlatforms.click();
+    for (const text of ["Google Flights search template", "机票搜索模板", "Booking hotel search template", "京东电脑搜索模板", "Amazon laptop search template", "当前不会访问真实平台", "当前不会付款或下单"]){
+      await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain(text);
+    }
+    await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
+    await expect(summaryPanel.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(summaryPanel.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+    await disableClipboardMock(page);
+    await buttons.googleFlights.click();
+    await expect(summaryPanel.locator("[data-commerce-platform-template-feedback]")).toContainText("复制失败，请手动选择文本复制");
+  });
+
   test("v2.0.62 commerce process and safety panels are collapsed by default", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
@@ -3172,6 +3248,46 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel.locator("[data-commerce-copy-feedback]")).toContainText("已复制，可粘贴到外部平台搜索");
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
     await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+    await disableClipboardMock(page);
+    await page.locator("#historyBackBtn").click();
+    await expect(page.locator('#cmdConsole [data-task-history-detail="true"]')).toHaveCount(0);
+  });
+
+  test("v2.0.68 task history detail keeps platform search template pack and copy buttons without rerun", async () => {
+    await page.goto("file:///Users/boge/Downloads/weishan-clean-release/apps/desktop/src/index.html");
+    await page.waitForLoadState("domcontentloaded");
+    await gotoRoute(page, "home");
+    const demand = runId + "-PLATFORM-TEMPLATE-HISTORY 下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。";
+    const answer = runId + "-PLATFORM-TEMPLATE-HISTORY 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。";
+    await submitHomeCommand(page, demand);
+    await waitForLatestHomeTexts(page, ["旅行计划", "商品采购计划"]);
+    await submitHomeCommand(page, answer);
+    await submitHomeCommand(page, runId + "-PLATFORM-TEMPLATE-HISTORY 买演唱会门票");
+    const historyItems = page.locator("#cmdHistory [data-history-id]");
+    await expect(historyItems.filter({ hasText:answer }).first()).toBeVisible();
+    const historyCountBefore = await historyItems.count();
+    await installClipboardMock(page);
+    await historyItems.filter({ hasText:answer }).first().click();
+    const detail = page.locator('#cmdConsole [data-task-history-detail="true"]').first();
+    const summaryPanel = detail.locator(".commerce-result-summary-panel");
+    await expect(detail).toContainText("历史任务详情");
+    await expect(summaryPanel).toContainText("结果摘要");
+    await expect(summaryPanel).toContainText("可执行清单");
+    await expect(summaryPanel).toContainText("平台搜索模板");
+    for (const text of ["复制 Google Flights 模板", "复制 Trip.com / 携程模板", "复制 Booking 模板", "复制 Agoda 模板", "复制京东模板", "复制淘宝 / 天猫模板", "复制 Amazon 模板", "复制 Best Buy 模板", "复制全部平台模板"]){
+      await expect(summaryPanel).toContainText(text);
+    }
+    await expect(summaryPanel.locator(".commerce-platform-template-copy-btn")).toHaveCount(9);
+    await expect(detail.locator("details.commerce-process-disclosure")).not.toHaveAttribute("open", "");
+    await expect(detail.locator("details.commerce-safety-disclosure")).not.toHaveAttribute("open", "");
+    await summaryPanel.getByRole("button", { name:"复制全部平台模板" }).click();
+    for (const text of ["Google Flights search template", "Trip.com / 携程模板", "Booking hotel search template", "Agoda hotel search template", "京东电脑搜索模板", "淘宝 / 天猫电脑搜索模板", "Amazon laptop search template", "Best Buy laptop search template", "当前不会访问真实平台", "当前不会付款或下单"]){
+      await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain(text);
+    }
+    await expect(summaryPanel.locator("[data-commerce-platform-template-feedback]")).toContainText("已复制，可粘贴到外部平台搜索");
+    await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
+    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(detail.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
     await disableClipboardMock(page);
     await page.locator("#historyBackBtn").click();
     await expect(page.locator('#cmdConsole [data-task-history-detail="true"]')).toHaveCount(0);
