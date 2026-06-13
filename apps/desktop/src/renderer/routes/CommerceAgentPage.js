@@ -266,12 +266,42 @@
   function disclosure(title, body, className){
     return `<details class="commerce-disclosure ${esc(className || "")}">
       <summary>${esc(title)}</summary>
-      <div class="commerce-disclosure-body">${body}</div>
+      <div class="commerce-disclosure-template" data-commerce-disclosure-html="${esc(encodeURIComponent(body || ""))}" hidden></div>
+      <div class="commerce-disclosure-body" hidden></div>
     </details>`;
   }
 
   function technicalDetailsDisclosure(body, className){
     return body ? disclosure("查看技术细节", body, className || "commerce-technical-disclosure") : "";
+  }
+
+  function hydrateDisclosureSections(root){
+    const scope = root || document;
+    Array.from(scope.querySelectorAll("details.commerce-disclosure")).forEach((details) => {
+      if (details.dataset.weishanDisclosureHydrated === "true") return;
+      details.dataset.weishanDisclosureHydrated = "true";
+      const body = details.querySelector(".commerce-disclosure-body");
+      const template = details.querySelector(".commerce-disclosure-template");
+      const sync = () => {
+        if (!body) return;
+        if (details.open) {
+          if (template && !details.dataset.weishanDisclosureLoaded) {
+            body.innerHTML = "";
+            try {
+              body.innerHTML = decodeURIComponent(template.dataset.commerceDisclosureHtml || "");
+            } catch (err) {
+              body.textContent = template.dataset.commerceDisclosureHtml || "";
+            }
+            details.dataset.weishanDisclosureLoaded = "true";
+          }
+          body.hidden = false;
+          return;
+        }
+        body.hidden = true;
+      };
+      details.addEventListener("toggle", sync);
+      sync();
+    });
   }
 
   function taskStatusLabel(status){
@@ -338,7 +368,7 @@
     return {
       title:"本地意图识别",
       subtitle:"普通购物、酒店、机票、票务请求优先使用本地规则识别，减少 AI token 消耗。",
-      routeModeLabel:complex ? "本地规则优先 + AI fallback" : "本地规则优先",
+      routeModeLabel:complex ? "本地规则优先 + AI 智能优化" : "本地规则优先",
       aiUsedLabel:complex ? "否，等待复杂理解" : "否",
       aiFallbackLabel:complex ? "复杂需求需要 AI 理解" : "仅复杂需求可选",
       categoryLabel:map[category] || "待确认",
@@ -384,7 +414,7 @@
           <ul>
             ${row("路由方式", display.routeModeLabel)}
             ${row("是否使用 AI", display.aiUsedLabel)}
-            ${row("AI fallback", display.aiFallbackLabel)}
+            ${row("智能优化", display.aiFallbackLabel)}
             ${row("当前类别", display.categoryLabel)}
             ${complexRows}
             ${row("是否进入采购计划", display.commercePlanLabel)}
@@ -417,7 +447,7 @@
     const subPlans = Array.isArray(splitResult && splitResult.subPlans) ? splitResult.subPlans : [];
     return {
       title:"复杂意图拆分计划",
-      subtitle:"复合需求会先拆成多个独立子计划，每个子计划分别走安全 gate。当前不会访问任何真实 provider。",
+      subtitle:"复合需求会先拆成多个独立子计划，每个子计划分别走安全 gate。当前不会访问真实平台。",
       splitStatusLabel:splitResult && splitResult.shouldSplit === true ? "已拆分" : "无需拆分",
       splitReasonLabel:splitResult && splitResult.shouldSplit === true ? "多类别复合需求" : "单一简单需求",
       subPlanCountLabel:String(subPlans.length || 0),
@@ -438,7 +468,7 @@
         priceLabel:"否",
         redirectLabel:"否"
       })),
-      note:"该拆分只生成计划，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。"
+      note:"该拆分只生成计划，不访问真实平台，不读取任何密钥，不连接接口，不发起网络请求，不返回商品、价格或跳转链接。"
     };
   }
 
@@ -505,7 +535,7 @@
     const subPlans = Array.isArray(matrix && matrix.subPlanMatrices) ? matrix.subPlanMatrices : [];
     return {
       title:"子计划闸门矩阵",
-      subtitle:"每个子计划独立显示 gate、缺失信息和下一步动作。当前不会访问任何真实 provider。",
+      subtitle:"每个子计划独立显示 gate、缺失信息和下一步动作。当前不会访问真实平台。",
       overallStatusLabel:"已阻断",
       subPlanCountLabel:String(subPlans.length || 0),
       providerAccessLabel:"否",
@@ -523,7 +553,7 @@
         priceLabel:"否",
         redirectLabel:"否"
       })),
-      note:"该矩阵只用于整理子计划、缺失信息和下一步动作，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。"
+      note:"该矩阵只用于整理子计划、缺失信息和下一步动作，不访问真实平台，不读取任何密钥，不连接接口，不发起网络请求，不返回商品、价格或跳转链接。"
     };
   }
 
@@ -590,7 +620,7 @@
     const groups = Array.isArray(questionResult && questionResult.subPlanQuestionGroups) ? questionResult.subPlanQuestionGroups : [];
     return {
       title:"子计划补充问题",
-      subtitle:"根据每个子计划的缺失信息生成问题，帮助用户补齐信息。当前不会访问任何真实 provider。",
+      subtitle:"根据每个子计划的缺失信息生成问题，帮助用户补齐信息。当前不会访问真实平台。",
       overallStatusLabel:"待补充",
       subPlanCountLabel:String(groups.length || 0),
       questionCountLabel:String(groups.reduce((sum, group) => sum + Number(group.questionCount || 0), 0)),
@@ -611,7 +641,7 @@
           optionsLabel:Array.isArray(question.options) && question.options.length ? question.options.join(" / ") : "自由填写"
         }))
       })),
-      note:"这些问题只用于补齐计划信息，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。"
+      note:"这些问题只用于补齐计划信息，不访问真实平台，不读取任何密钥，不连接接口，不发起网络请求，不返回商品、价格或跳转链接。"
     };
   }
 
@@ -627,7 +657,7 @@
   function commerceSubPlanAnswerCollectionDisplay(answerResult){
     const api = window.WeishanCommerceSubPlanAnswerCollector || null;
     if (api && api.toSubPlanAnswerCollectorDisplayStatus) return api.toSubPlanAnswerCollectorDisplayStatus(answerResult || {});
-    return { title:"子计划答案收集", subtitle:"根据用户回答补齐子计划信息。当前只更新计划草稿，不访问任何真实 provider。", overallStatusLabel:"等待回答", subPlanCountLabel:"0", completedFieldCountLabel:"0", remainingFieldCountLabel:"0", providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否", groups:[], note:"这些回答只用于补齐计划草稿，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。" };
+    return { title:"子计划答案收集", subtitle:"根据用户回答补齐子计划信息。当前只更新计划草稿，不访问真实平台。", overallStatusLabel:"等待回答", subPlanCountLabel:"0", completedFieldCountLabel:"0", remainingFieldCountLabel:"0", providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否", groups:[], note:"这些回答只用于补齐计划草稿，不访问真实平台，不读取任何密钥，不连接接口，不发起网络请求，不返回商品、价格或跳转链接。" };
   }
 
   function commerceSubPlanAnswerCollectionPanelHtml(task){
@@ -701,7 +731,7 @@
   function commerceSubPlanCompletionWorkspaceDisplay(workspaceResult){
     const api = window.WeishanCommerceSubPlanCompletionWorkspace || null;
     if (api && api.toSubPlanCompletionWorkspaceDisplayStatus) return api.toSubPlanCompletionWorkspaceDisplayStatus(workspaceResult || {});
-    return { title:"子计划补齐工作台", subtitle:"集中显示每个子计划的已补齐字段、仍缺字段、下一问题和下一步动作。", overallStatusLabel:"待补充", subPlanCountLabel:"0", completedFieldCountLabel:"0", remainingFieldCountLabel:"0", nextQuestionCountLabel:"0", providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否", items:[], note:"该工作台只整理计划草稿，不长期保存用户答案，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。" };
+    return { title:"子计划补齐工作台", subtitle:"集中显示每个子计划的已补齐字段、仍缺字段、下一问题和下一步动作。", overallStatusLabel:"待补充", subPlanCountLabel:"0", completedFieldCountLabel:"0", remainingFieldCountLabel:"0", nextQuestionCountLabel:"0", providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否", items:[], note:"该工作台只整理计划草稿，不长期保存用户答案，不访问真实平台，不读取任何密钥，不连接接口，不发起网络请求，不返回商品、价格或跳转链接。" };
   }
 
   function commerceSubPlanCompletionWorkspacePanelHtml(task){
@@ -782,7 +812,7 @@
   function commerceSubPlanDraftReviewDisplay(reviewResult){
     const api = window.WeishanCommerceSubPlanDraftReviewSummary || null;
     if (api && api.toSubPlanDraftReviewDisplayStatus) return api.toSubPlanDraftReviewDisplayStatus(reviewResult || {});
-    return { title:"子计划草稿复核摘要", subtitle:"把已补齐的信息整理成可复核摘要，供用户确认。当前不会访问任何真实 provider。", overallStatusLabel:"仍需补充", subPlanCountLabel:"0", readyReviewItemCountLabel:"0", needsMoreInformationCountLabel:"0", providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否", items:[], note:"该复核摘要只用于确认计划草稿，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。" };
+    return { title:"子计划草稿复核摘要", subtitle:"把已补齐的信息整理成可复核摘要，供用户确认。当前不会访问真实平台。", overallStatusLabel:"仍需补充", subPlanCountLabel:"0", readyReviewItemCountLabel:"0", needsMoreInformationCountLabel:"0", providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否", items:[], note:"该复核摘要只用于确认计划草稿，不访问真实平台，不读取任何密钥，不连接接口，不发起网络请求，不返回商品、价格或跳转链接。" };
   }
 
   function commerceSubPlanDraftReviewPanelHtml(task){
@@ -853,7 +883,7 @@
   function commerceSubPlanDraftConfirmationDisplay(confirmationResult){
     const api = window.WeishanCommerceSubPlanDraftConfirmation || null;
     if (api && api.toSubPlanDraftConfirmationDisplayStatus) return api.toSubPlanDraftConfirmationDisplayStatus(confirmationResult || {});
-    return { title:"子计划草稿确认与修正", subtitle:"用户确认或修正只更新临时计划草稿；确认后仍必须经过当地法律合规、provider 审批和 Connector Gate。", statusLabel:"等待确认", subPlanCountLabel:"0", confirmedCountLabel:"0", revisedCountLabel:"0", pendingCountLabel:"0", providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否", items:[], note:"该确认与修正只更新临时计划草稿，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。" };
+    return { title:"子计划草稿确认与修正", subtitle:"用户确认或修正只更新临时计划草稿；确认后仍必须经过当地法律合规和最终接入审查。", statusLabel:"等待确认", subPlanCountLabel:"0", confirmedCountLabel:"0", revisedCountLabel:"0", pendingCountLabel:"0", providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否", items:[], note:"该确认与修正只更新临时计划草稿，不访问真实平台，不读取任何密钥，不连接接口，不发起网络请求，不返回商品、价格或跳转链接。" };
   }
 
   function commerceSubPlanDraftConfirmationPanelHtml(task){
@@ -929,7 +959,7 @@
   function commerceSubPlanDraftActionBarDisplay(actionBar){
     const api = window.WeishanCommerceSubPlanDraftActionBar || null;
     if (api && api.toSubPlanDraftActionBarDisplayStatus) return api.toSubPlanDraftActionBarDisplayStatus(actionBar || {});
-    return { title:"草稿下一步动作", subtitle:"你可以确认草稿，也可以说明要修改哪一项。当前不会访问任何真实平台。", statusLabel:"等待补充问题", actionLabels:["确认全部草稿", "只确认旅行计划", "只确认商品采购计划", "修改旅行计划", "修改商品采购计划", "返回补充问题", "查看安全边界"], actionChips:[{group:"确认类", label:"两个都确认"}, {group:"确认类", label:"确认旅行计划"}, {group:"确认类", label:"电脑计划确认"}, {group:"旅行修改类", label:"酒店入住日期改成7月13日"}, {group:"商品修改类", label:"电脑品牌优先苹果"}, {group:"辅助类", label:"返回补充问题"}, {group:"辅助类", label:"查看安全边界"}], chipHint:"已填入指令，请确认后点击开始执行", guidance:["先补充问题", "查看草稿复核摘要", "当前不会访问真实平台"], examples:["两个都确认", "确认旅行计划", "电脑计划确认", "酒店入住日期改成7月13日", "电脑品牌优先苹果，预算改成8000以内", "返回补充问题"], safetyItems:["当前不会访问真实平台", "当前不会返回价格", "当前不会跳转购买或预订"], providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否" };
+    return { title:"草稿下一步动作", subtitle:"你可以确认草稿，也可以说明要修改哪一项。当前只整理草稿，不会自动执行。", statusLabel:"等待补充问题", actionLabels:["确认全部草稿", "只确认旅行计划", "只确认商品采购计划", "修改旅行计划", "修改商品采购计划", "返回补充问题", "查看安全边界"], actionChips:[{group:"确认类", label:"两个都确认"}, {group:"确认类", label:"确认旅行计划"}, {group:"确认类", label:"电脑计划确认"}, {group:"旅行修改类", label:"酒店入住日期改成7月13日"}, {group:"商品修改类", label:"电脑品牌优先苹果"}, {group:"辅助类", label:"返回补充问题"}, {group:"辅助类", label:"查看安全边界"}], chipHint:"已填入指令，请确认后点击开始执行", guidance:["先补充问题", "查看草稿复核摘要", "当前只整理草稿，不会自动执行"], examples:["两个都确认", "确认旅行计划", "电脑计划确认", "酒店入住日期改成7月13日", "电脑品牌优先苹果，预算改成8000以内", "返回补充问题"], safetyItems:["当前只整理草稿", "不会自动执行", "不会返回价格", "不会跳转购买或预订", "不会自动下单或付款"], providerAccessLabel:"否", priceLabel:"否", redirectLabel:"否" };
   }
 
   function commerceSubPlanDraftActionBarPanelHtml(task){
@@ -1812,7 +1842,7 @@
       <div class="commerce-result-summary-checklist-head">
         <div>
           <h4>平台搜索模板</h4>
-          <p>复制下面的模板后，可以粘贴到对应平台自行搜索。当前不会打开外部平台，不会访问真实 provider，不会返回价格，不会跳转购买或预订。</p>
+          <p>复制下面的模板后，可以粘贴到对应平台自行搜索。当前不会打开外部平台，不会访问真实平台，不会返回价格，不会跳转购买或预订。</p>
         </div>
         <div class="commerce-result-summary-copy-actions" aria-label="平台搜索模板复制按钮">
           ${buttons.map(([kind, label]) => `<button class="cmd-btn gray commerce-platform-template-copy-btn" type="button" data-commerce-template-kind="${esc(kind)}">${esc(label)}</button>`).join("")}
@@ -2013,6 +2043,7 @@
     const isModelPricing = task.category === "aiModelPricing";
     const health = search && search.getCommerceProviderHealth ? search.getCommerceProviderHealth(task.category, settings) : null;
     const hasProvider = isModelPricing || !!(health && health.hasProvider || search && search.hasCommerceSearchProvider && search.hasCommerceSearchProvider(settings));
+    const configInfo = health && health.configHealth || task.configHealth || {};
     const onboardingInfo = health && health.onboardingHealth || task.onboardingHealth || {};
     const approvalInfo = health && health.approvalHealth || task.approvalHealth || {};
     const category = detail.categoryLabel || task.categoryLabel || task.category || "全球采购";
@@ -2028,6 +2059,7 @@
     const analysisProcessDisclosure = analysisProcessBody ? disclosure("查看分析过程", analysisProcessBody, "commerce-process-disclosure") : "";
     const technicalDetails = technicalDetailsDisclosure([
       `<p>技术细节只用于内部说明，不影响默认结果。这里会显示 provider、API key、endpoint、Connector Gate、Sandbox Dry Run、Provider Approval、Provider Onboarding、Secret Storage、Stub、dispatch、gate、AI fallback，以及本地规则优先 + AI fallback 等内部状态。</p>`,
+      providerPoolNoticeHtml(task, configInfo, onboardingInfo, approvalInfo),
       providerOnboardingReviewPanelHtml(onboardingInfo),
       providerApprovalWorkflowPanelHtml(approvalInfo),
       commerceSubPlanDraftReviewPanelHtml(task),
@@ -2132,27 +2164,10 @@
         <span>为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。实际价格、库存、税费和关税仍以外部平台和海关结算为准。</span>
         <button class="cmd-btn gray commerce-open-location-settings" type="button">去设置收货目的地</button>
       </div>` : "",
-      !hasProvider ? providerPoolNoticeHtml(task, configInfo, onboardingInfo, approvalInfo) : "",
-      !hasProvider ? `<dl class="commerce-facts commerce-provider-health">
-        <div><dt>搜索适配器</dt><dd>暂未配置</dd></div>
-        <div><dt>接口状态</dt><dd>尚未接入</dd></div>
-        <div><dt>Provider 接入审查</dt><dd>${onboardingInfo.canConnectEndpoint === true ? "已完成" : "未完成，完成前不会连接真实平台"}</dd></div>
-        <div><dt>接口文档审查</dt><dd>未完成</dd></div>
-        <div><dt>API key 存储方案</dt><dd>未审查</dd></div>
-        <div><dt>价格/税费/运费字段审查</dt><dd>未完成</dd></div>
-        <div><dt>隐私与合规审查</dt><dd>未完成</dd></div>
-        <div><dt>连接方式</dt><dd>只读搜索准备中，暂未连接真实平台</dd></div>
-        <div><dt>当前模式</dt><dd>只读搜索准备中</dd></div>
-        <div><dt>配置状态</dt><dd>未配置真实搜索源</dd></div>
-        <div><dt>网络搜索</dt><dd>未启用</dd></div>
-        <div><dt>实时价格</dt><dd>不可用</dd></div>
-        <div><dt>精确跳转</dt><dd>待真实 provider 接入后启用</dd></div>
-        <div><dt>支付/下单</dt><dd>不支持，由外部平台完成</dd></div>
-        <div><dt>证件/银行卡</dt><dd>不保存</dd></div>
-        <div><dt>全球搜索准备</dt><dd>未启用</dd></div>
-        <div><dt>Provider Dry Run</dt><dd>${sandboxInfo.canProceedToRealSearch === true ? "已通过" : "未通过"}</dd></div>
-        <div><dt>跨境搜索</dt><dd>${globalReadiness.supportsCrossBorderSearch === true ? "已启用" : "未启用"}</dd></div>
-      </dl>` : ""
+      !hasProvider ? `<div class="commerce-warning commerce-provider-missing">
+        <b>当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</b>
+        <span>详细技术状态请展开“查看技术细节”。</span>
+      </div>` : ""
     ].filter(Boolean).join("") : "";
     const providerSafetyDisclosure = providerSafetyBody ? disclosure("查看安全边界", providerSafetyBody, "commerce-safety-disclosure") : "";
     return `<div class="commerce-search-panel">

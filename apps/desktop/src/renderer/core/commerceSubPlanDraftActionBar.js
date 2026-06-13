@@ -133,19 +133,12 @@
   ];
 
   const SAFETY_ITEMS = [
-    "确认草稿不代表已经接入 provider",
-    "当前不会搜索真实平台",
-    "当前不会访问真实 provider",
-    "不访问真实 provider",
-    "当前不会连接 endpoint",
-    "不连接 endpoint",
-    "当前不会读取 API key",
-    "不读取 API key",
-    "当前不会发起网络搜索",
-    "当前不会返回真实商品结果",
-    "当前不会返回价格",
-    "当前不会跳转购买或预订",
-    "当前不会下单或付款"
+    "当前只是帮你整理搜索条件",
+    "不会访问真实平台",
+    "不会自动执行",
+    "不会返回价格",
+    "不会跳转购买或预订",
+    "不会付款或下单"
   ];
 
   const ACTION_CHIPS = [
@@ -208,7 +201,7 @@
     const guidance = [];
     if (confirmed > 0) guidance.push("已确认的子计划可以继续修改");
     if (confirmed > 0) guidance.push("未确认的子计划仍可确认");
-    if (confirmed > 0) guidance.push("下一步仍需完成当地法律合规确认、Provider 审批和 Connector Gate");
+    if (confirmed > 0) guidance.push("下一步仍需完成合规审查、审批和最终闸门确认");
     if (!total) guidance.push("查看草稿复核摘要");
     return {
       title: "确认草稿",
@@ -256,7 +249,15 @@
     return {
       title: "查看安全边界",
       prompts: ["查看安全边界"],
-      items: SAFETY_ITEMS
+      items: [
+        "当前只是帮你整理搜索条件",
+        "不会访问真实平台",
+        "不会自动执行",
+        "不会返回价格",
+        "不会跳转购买或预订",
+        "不会付款或下单",
+        "不会保存证件、银行卡或敏感信息"
+      ]
     };
   }
 
@@ -287,7 +288,7 @@
       phase: PHASE,
       defaultMode: DEFAULT_MODE,
       title: "草稿下一步动作",
-      subtitle: "你可以确认草稿，也可以说明要修改哪一项。当前不会访问任何真实 provider。",
+      subtitle: "你可以确认草稿，也可以说明要修改哪一项。当前只整理草稿，不会自动执行。",
       status,
       statusLabel,
       actionSuggestions: ACTION_SUGGESTIONS,
@@ -301,9 +302,16 @@
       revisionSuggestions: revision,
       questionReturnSuggestions: questionReturn,
       safetyReminder,
-      displayItems: unique(displayGuidance.length ? displayGuidance : ["先补充问题", "查看草稿复核摘要", "当前不会访问真实 provider"]),
+      displayItems: unique(displayGuidance.length ? displayGuidance : ["先补充问题", "查看草稿复核摘要", "当前只整理草稿，不会自动执行"]),
       displayExamples: unique(CONFIRMATION_EXAMPLES.concat(["酒店入住日期改成7月13日", "电脑品牌优先苹果，预算改成8000以内", "返回补充问题"])),
-      safetyItems: SAFETY_ITEMS,
+      safetyItems: [
+        "当前只是帮你整理搜索条件",
+        "不会访问真实平台",
+        "不会自动执行",
+        "不会返回价格",
+        "不会跳转购买或预订",
+        "不会付款或下单"
+      ],
       providerAccessLabel: "否",
       priceLabel: "否",
       redirectLabel: "否",
@@ -317,14 +325,21 @@
     const source = actionBar || buildSubPlanDraftActionBar({});
     return {
       title: source.title || "草稿下一步动作",
-      subtitle: source.subtitle || "你可以确认草稿，也可以说明要修改哪一项。当前不会访问任何真实 provider。",
+      subtitle: source.subtitle || "你可以确认草稿，也可以说明要修改哪一项。当前只整理草稿，不会自动执行。",
       statusLabel: source.statusLabel || "等待补充问题",
       actionLabels: ACTION_SUGGESTIONS,
       actionChips: clone(source.actionChips && source.actionChips.length ? source.actionChips : ACTION_CHIPS),
       chipHint: source.chipHint || "已填入指令，请确认后点击开始执行",
-      guidance: unique(source.displayItems && source.displayItems.length ? source.displayItems : ["先补充问题", "查看草稿复核摘要", "当前不会访问真实 provider"]),
+      guidance: unique(source.displayItems && source.displayItems.length ? source.displayItems : ["先补充问题", "查看草稿复核摘要", "当前只整理草稿，不会自动执行"]),
       examples: unique(source.displayExamples && source.displayExamples.length ? source.displayExamples : CONFIRMATION_EXAMPLES.concat(REVISION_EXAMPLES.slice(0, 2), ["返回补充问题"])),
-      safetyItems: unique(source.safetyItems && source.safetyItems.length ? source.safetyItems : SAFETY_ITEMS),
+      safetyItems: unique(source.safetyItems && source.safetyItems.length ? source.safetyItems : [
+        "当前只是帮你整理搜索条件",
+        "不会访问真实平台",
+        "不会自动执行",
+        "不会返回价格",
+        "不会跳转购买或预订",
+        "不会付款或下单"
+      ]),
       providerAccessLabel: source.providerAccessLabel || "否",
       priceLabel: source.priceLabel || "否",
       redirectLabel: source.redirectLabel || "否"

@@ -638,6 +638,15 @@ Focus Assist 用户 UI 只能显示自然语言提示，不得裸露 focusAssist
 
 后续版本必须继续保持全球多源、只读搜索、安全门控、外部跳转的方向，不能退化为单一平台工具。
 
+## 13. 默认结果噪音控制
+
+默认结果区必须保持普通用户可读，不得直接泄露 provider / API key / endpoint / Connector Gate / Sandbox Dry Run / Provider Approval / Provider Onboarding / Secret Storage / Stub / raw / dispatch / gate / AI fallback 等技术词。
+默认结果区不得泄露 provider / API key / endpoint 等技术词。
+
+默认安全提示必须使用普通用户语言，例如：当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。
+
+这些技术词只能出现在“查看技术细节”展开后。历史回看默认也不得泄露技术词，必须保持结果优先、过程折叠、安全边界压缩。
+
 ## 14. Codex 开发规则
 
 每次新功能前必须先读：
