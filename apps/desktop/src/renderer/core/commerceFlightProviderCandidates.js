@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const CONTRACT_VERSION = "2.0.77";
+  const CONTRACT_VERSION = "2.0.78";
   const PHASE = "flight_provider_candidate_registry";
   const DEFAULT_TRUST_STATUS = "candidate_only";
   const DEFAULT_MANUAL_REVIEW_STATUS = "not_reviewed";
@@ -254,7 +254,12 @@
         candidateCountLabel: "候选平台",
         allowlistTitle: "默认优先域名白名单",
         blockedRulesTitle: "默认阻断规则",
-        capabilityLine: "API key 不可用 / 网络搜索不可用 / 价格不可用 / booking 链接不可用 / 下单不可用 / 付款不可用 / 身份证 / 护照 / 银行卡不可保存"
+        capabilityLine: "API key 不可用 / 网络搜索不可用 / 价格不可用 / booking 链接不可用 / 下单不可用 / 付款不可用 / 身份证 / 护照 / 银行卡不可保存",
+        approvalStatusLine: "审批状态：未审查",
+        readonlyStubPermissionLine: "只读适配器开发许可：未授予",
+        readOnlyPriceSourceLine: "只读价格源：未启用",
+        bookingUrlStatusLine: "bookingUrl：未启用",
+        tradeStatusLine: "付款 / 下单：不支持"
       }, raw.display && typeof raw.display === "object" ? raw.display : {})
     });
   }
@@ -269,6 +274,11 @@
       candidateCountLabel: `${safe.candidateProfiles.length} 个候选平台`,
       allowlistTitle: safe.display.allowlistTitle || "默认优先域名白名单",
       blockedRulesTitle: safe.display.blockedRulesTitle || "默认阻断规则",
+      approvalStatusLine: safe.display.approvalStatusLine || "审批状态：未审查",
+      readonlyStubPermissionLine: safe.display.readonlyStubPermissionLine || "只读适配器开发许可：未授予",
+      readOnlyPriceSourceLine: safe.display.readOnlyPriceSourceLine || "只读价格源：未启用",
+      bookingUrlStatusLine: safe.display.bookingUrlStatusLine || "bookingUrl：未启用",
+      tradeStatusLine: safe.display.tradeStatusLine || "付款 / 下单：不支持",
       allowlistDomains: Array.isArray(safe.domainSafetyRules.allowedDomains) ? safe.domainSafetyRules.allowedDomains.slice() : [],
       blockedRules: Array.isArray(safe.domainSafetyRules.blockedRules) ? safe.domainSafetyRules.blockedRules.slice() : [],
       candidateProfiles: safe.candidateProfiles.map((profile) => ({
@@ -285,6 +295,10 @@
         bookingUrlStatusLabel: profile.bookingUrlStatus === "not_available" ? "不可用" : profile.bookingUrlStatus,
         trustStatusLabel: profile.trustStatus === DEFAULT_TRUST_STATUS ? "仅候选" : profile.trustStatus,
         manualReviewStatusLabel: profile.manualReviewStatus === DEFAULT_MANUAL_REVIEW_STATUS ? "未审查" : profile.manualReviewStatus,
+        approvalStatusLabel: safe.display.approvalStatusLine || "审批状态：未审查",
+        readonlyStubPermissionStatusLabel: safe.display.readonlyStubPermissionLine || "只读适配器开发许可：未授予",
+        readOnlyPriceSourceStatusLabel: safe.display.readOnlyPriceSourceLine || "只读价格源：未启用",
+        tradeStatusLabel: safe.display.tradeStatusLine || "付款 / 下单：不支持",
         riskLevelLabel: profile.riskLevel === "low" ? "低风险" : profile.riskLevel,
         capabilityLine: safe.display.capabilityLine || "API key 不可用 / 网络搜索不可用 / 价格不可用 / booking 链接不可用 / 下单不可用 / 付款不可用 / 身份证 / 护照 / 银行卡不可保存",
         notes: profile.notes || ""

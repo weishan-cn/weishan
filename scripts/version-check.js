@@ -118,6 +118,27 @@ function checkFlightProviderApprovalVersion(results, expectedVersion) {
   );
 }
 
+function checkFlightReadonlyStubPermissionVersion(results, expectedVersion) {
+  const permissionPath = "apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js";
+  const permission = readText(permissionPath);
+  if (!permission) {
+    results.push({ name: "apps/desktop flight readonly stub permission version", pass: false, detail: permissionPath + " missing" });
+    return;
+  }
+  if (permission.__readError) {
+    results.push({ name: "apps/desktop flight readonly stub permission version", pass: false, detail: permission.__readError });
+    return;
+  }
+  const match = permission.match(/PERMISSION_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop flight readonly stub permission version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js PERMISSION_VERSION"
+  );
+}
+
 function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
   const pkg = readJson(packagePath);
   const lock = readJson(lockPath);
@@ -166,6 +187,7 @@ function runVersionCheck() {
     checkFlightLowestOffersVersion(results, rootPackage.version);
     checkFlightProviderCandidatesVersion(results, rootPackage.version);
     checkFlightProviderApprovalVersion(results, rootPackage.version);
+    checkFlightReadonlyStubPermissionVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

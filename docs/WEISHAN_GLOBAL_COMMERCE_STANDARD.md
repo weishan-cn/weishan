@@ -763,3 +763,50 @@ Codex 不得自行扩大范围，不得接真实 endpoint，不得引入付款�
 - API key 是否只在安全位置存在
 - 是否仍不创建内部付款页
 - 是否仍不自动支付、不自动下单、不保存证件或银行卡
+
+## 19. 只读适配器开发许可状态
+
+v2.0.78 在机票 Provider 接入审批面板之上新增 “Readonly Stub Permission State / 只读适配器开发许可状态”。默认必须返回 `flightReadonlyStubPermission`，其 `permissionVersion`、`phase`、`overallStatus`、`currentStage`、`checklist` 和 `capabilities` 默认固定为未授予状态；没有人工批准开发只读 stub 时不得展示价格卡片、bookingUrl、外部跳转、付款或下单入口，只能显示“查看只读适配器开发许可”“只读适配器开发许可：未授予”“当前状态：尚未授予只读适配器开发许可。”“当前阶段：需要人工批准”“平台身份确认：未完成”“官方域名 / allowlist 审查：未完成”“Provider 条款审查：未完成”“API 文档审查：未完成”“API key 安全存储方案：未完成”“请求结构审查：未完成”“响应结构审查：未完成”“错误处理审查：未完成”“超时 / 频率限制审查：未完成”“人工批准开发只读 stub：未完成”等 UI 闸门文案。
+
+只读适配器开发许可的状态结构必须至少包含：
+
+- `permissionVersion`
+- `phase: "flight_readonly_stub_permission"`
+- `overallStatus: not_granted`
+- `overallStatus` 可取值：`not_granted`、`granted_for_stub_dev`、`rejected`
+- `currentStage: approval_required`
+- `currentStage` 可取值：`approval_required`、`stub_dev_allowed`、`sandbox_required`
+- `checklist`
+- `capabilities`
+
+默认 `capabilities` 必须全部为 false：
+
+- `canDevelopReadonlyStub: false`
+- `canUseRealApiKey: false`
+- `canConnectRealEndpoint: false`
+- `canUseNetwork: false`
+- `canReturnPrice: false`
+- `canReturnBookingUrl: false`
+- `canOpenBookingUrl: false`
+- `canCreateOrder: false`
+- `canPay: false`
+- `canStoreIdentity: false`
+
+默认 `checklist` 至少包括：
+
+- `platformIdentityReview`
+- `officialDomainAllowlistReview`
+- `providerTermsReview`
+- `apiDocumentationReview`
+- `apiKeyStoragePlanReview`
+- `requestSchemaReview`
+- `responseSchemaReview`
+- `errorHandlingReview`
+- `timeoutRateLimitReview`
+- `finalStubDevApproval`
+
+只读适配器只允许开发请求 / 响应结构，不允许连接真实 endpoint，不允许读取真实 API key，不允许返回真实价格，不允许生成预订链接，不允许发起网络请求，不允许付款，不允许下单，不允许保存证件 / 银行卡。人工批准开发只读 stub 之前，候选平台默认仍是“未审查”，只读价格源默认仍是“未启用”，bookingUrl 默认仍是“未启用”，付款 / 下单默认仍是“不支持”。
+
+- 不能发起网络请求
+- 不能返回 bookingUrl
+- 不能保存证件 / 银行卡

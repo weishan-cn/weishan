@@ -39,7 +39,7 @@
       return api.getFlightLowestOffersContract(contract);
     }
     const fallback = {
-      contractVersion:"2.0.77",
+      contractVersion:"2.0.78",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -99,7 +99,7 @@
       return api.getFlightProviderCandidatesRegistry(registry);
     }
     const fallback = {
-      contractVersion:"2.0.77",
+      contractVersion:"2.0.78",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -169,7 +169,7 @@
       return api.getFlightProviderApprovalStatus(status);
     }
     const fallback = {
-      approvalVersion:"2.0.77",
+      approvalVersion:"2.0.78",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -252,6 +252,70 @@
       checklist:Object.assign({}, fallback.checklist, raw.checklist && typeof raw.checklist === "object" ? raw.checklist : {}),
       capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
       safety:Object.assign({}, fallback.safety, raw.safety && typeof raw.safety === "object" ? raw.safety : {}),
+      display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
+  function createFlightReadonlyStubPermission(permission){
+    const api = window.WeishanCommerceFlightReadonlyStubPermission;
+    if (api && typeof api.normalizeFlightReadonlyStubPermission === "function") {
+      return api.normalizeFlightReadonlyStubPermission(permission);
+    }
+    if (api && typeof api.getFlightReadonlyStubPermission === "function") {
+      return api.getFlightReadonlyStubPermission(permission);
+    }
+    const fallback = {
+      permissionVersion:"2.0.78",
+      phase:"flight_readonly_stub_permission",
+      providerCategory:"flight",
+      providerId:"flight-provider-disabled",
+      providerName:"机票候选平台",
+      overallStatus:"not_granted",
+      currentStage:"approval_required",
+      permissionStatus:"not_granted",
+      checklist:{
+        platformIdentityReview:false,
+        officialDomainAllowlistReview:false,
+        providerTermsReview:false,
+        apiDocumentationReview:false,
+        apiKeyStoragePlanReview:false,
+        requestSchemaReview:false,
+        responseSchemaReview:false,
+        errorHandlingReview:false,
+        timeoutRateLimitReview:false,
+        finalStubDevApproval:false
+      },
+      capabilities:{
+        canDevelopReadonlyStub:false,
+        canUseRealApiKey:false,
+        canConnectRealEndpoint:false,
+        canUseNetwork:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canOpenBookingUrl:false,
+        canCreateOrder:false,
+        canPay:false,
+        canStoreIdentity:false
+      },
+      display:{
+        summaryTitle:"只读适配器开发许可",
+        permissionStatusLine:"只读适配器开发许可：未授予",
+        currentStatusLine:"当前状态：尚未授予只读适配器开发许可。",
+        currentStageLine:"当前阶段：需要人工批准",
+        nextStepLine:"下一步：完成 provider 条款、API 文档、域名 allowlist、API key 存储方案和请求 / 响应结构审查",
+        noticeLine:"只读适配器只允许开发请求 / 响应结构，不允许连接真实 endpoint，不允许读取真实 API key，不允许返回真实价格，不允许生成预订链接。",
+        checklistTitle:"前置条件",
+        capabilityTitle:"当前能力",
+        checklistGroups:[
+          { title:"前置条件", items:[["平台身份确认", "未完成"], ["官方域名 / allowlist 审查", "未完成"], ["Provider 条款审查", "未完成"], ["API 文档审查", "未完成"], ["API key 安全存储方案", "未完成"], ["请求结构审查", "未完成"], ["响应结构审查", "未完成"], ["错误处理审查", "未完成"], ["超时 / 频率限制审查", "未完成"], ["人工批准开发只读 stub", "未完成"]] }
+        ],
+        capabilityLines:["不能开发真实 connector", "不能读取 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"]
+      }
+    };
+    const raw = permission && typeof permission === "object" ? permission : {};
+    return Object.assign({}, fallback, raw, {
+      checklist:Object.assign({}, fallback.checklist, raw.checklist && typeof raw.checklist === "object" ? raw.checklist : {}),
+      capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
       display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
     });
   }
@@ -517,6 +581,7 @@
       flightLowestOffersContract:category === "flight" ? createFlightLowestOffersContract() : null,
       flightProviderCandidatesRegistry:category === "flight" ? createFlightProviderCandidatesRegistry() : null,
       flightProviderApprovalStatus:category === "flight" ? createFlightProviderApprovalStatus() : null,
+      flightReadonlyStubPermission:category === "flight" ? createFlightReadonlyStubPermission() : null,
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -565,6 +630,7 @@
       flightLowestOffersContract:category === "flight" ? createFlightLowestOffersContract(base.flightLowestOffersContract) : null,
       flightProviderCandidatesRegistry:category === "flight" ? createFlightProviderCandidatesRegistry(base.flightProviderCandidatesRegistry) : null,
       flightProviderApprovalStatus:category === "flight" ? createFlightProviderApprovalStatus(base.flightProviderApprovalStatus) : null,
+      flightReadonlyStubPermission:category === "flight" ? createFlightReadonlyStubPermission(base.flightReadonlyStubPermission) : null,
       canShowPrice:base.canShowPrice === true,
       canShowBookingButton:base.canShowBookingButton === true,
       canShowCheckoutButton:base.canShowCheckoutButton === true,
@@ -677,6 +743,7 @@
       flightLowestOffersContract:safe.category === "flight" ? safe.flightLowestOffersContract : null,
       flightProviderCandidatesRegistry:safe.category === "flight" ? safe.flightProviderCandidatesRegistry : null,
       flightProviderApprovalStatus:safe.category === "flight" ? safe.flightProviderApprovalStatus : null,
+      flightReadonlyStubPermission:safe.category === "flight" ? safe.flightReadonlyStubPermission : null,
       candidates:safe.candidates,
       recommendation:safe.recommendation,
       nextSteps:[

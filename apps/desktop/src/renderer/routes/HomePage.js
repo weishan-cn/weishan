@@ -2059,7 +2059,7 @@
 
   function commerceFlightLowestOffersContract(task){
     const fallback = {
-      contractVersion:"2.0.77",
+      contractVersion:"2.0.78",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -2123,7 +2123,7 @@
 
   function commerceFlightProviderCandidatesRegistry(task){
     const fallback = {
-      contractVersion:"2.0.77",
+      contractVersion:"2.0.78",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -2228,6 +2228,11 @@
             ${escListItem("支持货币", profile.supportedCurrenciesLabel)}
             ${escListItem("官方域名", profile.officialDomainsLabel)}
             ${escListItem("搜索入口", profile.searchEntryUrlLabel)}
+            ${escListItem("审批状态", profile.approvalStatusLabel)}
+            ${escListItem("只读适配器开发许可", profile.readonlyStubPermissionStatusLabel)}
+            ${escListItem("只读价格源", profile.readOnlyPriceSourceStatusLabel)}
+            ${escListItem("bookingUrl", profile.bookingUrlStatusLabel)}
+            ${escListItem("付款 / 下单", profile.tradeStatusLabel)}
             ${escListItem("API 状态", profile.apiStatusLabel)}
             ${escListItem("价格状态", profile.priceStatusLabel)}
             ${escListItem("bookingUrl 状态", profile.bookingUrlStatusLabel)}
@@ -2243,13 +2248,114 @@
     return disclosure("查看候选平台", body, "commerce-flight-provider-candidates-disclosure");
   }
 
+  function commerceFlightReadonlyStubPermissionStatus(task){
+    const api = window.WeishanCommerceFlightReadonlyStubPermission;
+    const source = task && task.flightReadonlyStubPermission || null;
+    if (api && typeof api.normalizeFlightReadonlyStubPermission === "function") return api.normalizeFlightReadonlyStubPermission(source);
+    if (api && typeof api.getFlightReadonlyStubPermission === "function") return api.getFlightReadonlyStubPermission(source);
+    const fallback = {
+      permissionVersion:"2.0.78",
+      phase:"flight_readonly_stub_permission",
+      providerCategory:"flight",
+      providerId:"flight-provider-disabled",
+      providerName:"机票候选平台",
+      overallStatus:"not_granted",
+      currentStage:"approval_required",
+      permissionStatus:"not_granted",
+      checklist:{
+        platformIdentityReview:false,
+        officialDomainAllowlistReview:false,
+        providerTermsReview:false,
+        apiDocumentationReview:false,
+        apiKeyStoragePlanReview:false,
+        requestSchemaReview:false,
+        responseSchemaReview:false,
+        errorHandlingReview:false,
+        timeoutRateLimitReview:false,
+        finalStubDevApproval:false
+      },
+      capabilities:{
+        canDevelopReadonlyStub:false,
+        canUseRealApiKey:false,
+        canConnectRealEndpoint:false,
+        canUseNetwork:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canOpenBookingUrl:false,
+        canCreateOrder:false,
+        canPay:false,
+        canStoreIdentity:false
+      },
+      display:{
+        summaryTitle:"只读适配器开发许可",
+        permissionStatusLine:"只读适配器开发许可：未授予",
+        currentStatusLine:"当前状态：尚未授予只读适配器开发许可。",
+        currentStageLine:"当前阶段：需要人工批准",
+        nextStepLine:"下一步：完成 provider 条款、API 文档、域名 allowlist、API key 存储方案和请求 / 响应结构审查",
+        noticeLine:"只读适配器只允许开发请求 / 响应结构，不允许连接真实 endpoint，不允许读取真实 API key，不允许返回真实价格，不允许生成预订链接。",
+        checklistTitle:"前置条件",
+        capabilityTitle:"当前能力",
+        checklistGroups:[
+          { title:"前置条件", items:[["平台身份确认", "未完成"], ["官方域名 / allowlist 审查", "未完成"], ["Provider 条款审查", "未完成"], ["API 文档审查", "未完成"], ["API key 安全存储方案", "未完成"], ["请求结构审查", "未完成"], ["响应结构审查", "未完成"], ["错误处理审查", "未完成"], ["超时 / 频率限制审查", "未完成"], ["人工批准开发只读 stub", "未完成"]] }
+        ],
+        capabilityLines:["不能开发真实 connector", "不能读取 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"]
+      }
+    };
+    const raw = source && typeof source === "object" ? source : {};
+    return Object.assign({}, fallback, raw, {
+      checklist:Object.assign({}, fallback.checklist, raw.checklist && typeof raw.checklist === "object" ? raw.checklist : {}),
+      capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
+  function commerceFlightReadonlyStubPermissionDisplay(task){
+    const status = commerceFlightReadonlyStubPermissionStatus(task);
+    const api = window.WeishanCommerceFlightReadonlyStubPermission;
+    if (api && typeof api.describeFlightReadonlyStubPermission === "function") return api.describeFlightReadonlyStubPermission(status);
+    return status.display || {};
+  }
+
+  function commerceFlightReadonlyStubPermissionDisclosure(task){
+    const display = commerceFlightReadonlyStubPermissionDisplay(task);
+    if (!display) return "";
+    const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
+    const checklist = Array.isArray(display.checklistGroups) ? display.checklistGroups : [];
+    const checklistHtml = checklist.map((group) => `<section class="commerce-flight-readonly-stub-permission-group"><h5>${esc(group.title || "")}</h5><ul>${(Array.isArray(group.items) ? group.items : []).map((item) => row(item[0], item[1])).join("")}</ul></section>`).join("");
+    const capabilityHtml = Array.isArray(display.capabilityLines) ? `<ul>${display.capabilityLines.map((line) => `<li>${esc(line)}</li>`).join("")}</ul>` : "";
+    const body = `<section class="commerce-flight-readonly-stub-permission-panel" aria-label="只读适配器开发许可">
+      <div class="commerce-flight-readonly-stub-permission-head">
+        <div>
+          <h4>${esc(display.summaryTitle || "只读适配器开发许可")}</h4>
+          <p>${esc(display.currentStatusLine || "当前状态：尚未授予只读适配器开发许可。")}</p>
+          <p>${esc(display.noticeLine || "只读适配器只允许开发请求 / 响应结构，不允许连接真实 endpoint，不允许读取真实 API key，不允许返回真实价格，不允许生成预订链接。")}</p>
+        </div>
+        <strong>${esc(display.permissionStatusLine || "只读适配器开发许可：未授予")}</strong>
+      </div>
+      <div class="commerce-flight-readonly-stub-permission-summary">
+        <ul>
+          ${row("当前阶段", display.currentStageLine || "当前阶段：需要人工批准")}
+          ${row("下一步", display.nextStepLine || "下一步：完成 provider 条款、API 文档、域名 allowlist、API key 存储方案和请求 / 响应结构审查")}
+        </ul>
+      </div>
+      <div class="commerce-flight-readonly-stub-permission-rules">
+        ${checklistHtml}
+      </div>
+      <section class="commerce-flight-readonly-stub-permission-capabilities">
+        <h5>${esc(display.capabilityTitle || "当前能力")}</h5>
+        ${capabilityHtml}
+      </section>
+    </section>`;
+    return disclosure("查看只读适配器开发许可", body, "commerce-flight-readonly-stub-permission-disclosure");
+  }
+
   function commerceFlightProviderApprovalStatus(task){
     const api = window.WeishanCommerceFlightProviderApproval;
     const source = task && task.flightProviderApprovalStatus || null;
     if (api && typeof api.normalizeFlightProviderApprovalStatus === "function") return api.normalizeFlightProviderApprovalStatus(source);
     if (api && typeof api.getFlightProviderApprovalStatus === "function") return api.getFlightProviderApprovalStatus(source);
     const fallback = {
-      approvalVersion:"2.0.77",
+      approvalVersion:"2.0.78",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -2360,6 +2466,9 @@
       </div>
       <div class="commerce-flight-provider-approval-summary">
         <ul>
+          ${row("只读适配器开发许可", display.readonlyStubPermissionLine || "只读适配器开发许可：未授予")}
+          ${row("当前阶段", display.readonlyStubPermissionStageLine || "当前阶段：需要人工批准")}
+          ${row("下一步", display.readonlyStubPermissionNextStepLine || "下一步：完成 provider 条款、API 文档、域名 allowlist、API key 存储方案和请求 / 响应结构审查")}
           ${row("只读价格源", display.readOnlyPriceSourceLine || "未启用")}
           ${row("bookingUrl", display.bookingUrlStatusLine || "未启用")}
           ${row("付款 / 下单", display.tradeStatusLine || "不支持")}
@@ -2423,6 +2532,7 @@
       </div>
       ${commerceFlightProviderCandidatesDisclosure(task)}
       ${commerceFlightProviderApprovalDisclosure(task)}
+      ${commerceFlightReadonlyStubPermissionDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;

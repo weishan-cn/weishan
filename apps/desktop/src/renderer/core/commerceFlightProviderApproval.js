@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const APPROVAL_VERSION = "2.0.77";
+  const APPROVAL_VERSION = "2.0.78";
   const PHASE = "flight_provider_approval";
   const DEFAULT_STATUS = "not_reviewed";
   const DEFAULT_ALLOWED_STAGE = "candidate_only";
@@ -160,6 +160,9 @@
         summaryTitle: "机票 Provider 接入审批",
         currentStatusLine: "当前状态：候选平台已建档，尚未批准接入只读价格源。",
         approvalStatusLine: "审批状态：未审查",
+        readonlyStubPermissionLine: "只读适配器开发许可：未授予",
+        readonlyStubPermissionStageLine: "当前阶段：需要人工批准",
+        readonlyStubPermissionNextStepLine: "下一步：完成 provider 条款、API 文档、域名 allowlist、API key 存储方案和请求 / 响应结构审查",
         readOnlyPriceSourceLine: "只读价格源：未启用",
         bookingUrlStatusLine: "bookingUrl：未启用",
         tradeStatusLine: "付款 / 下单：不支持",
@@ -186,6 +189,9 @@
       summaryTitle: safe.display.summaryTitle || "机票 Provider 接入审批",
       currentStatusLine: safe.display.currentStatusLine || "当前状态：候选平台已建档，尚未批准接入只读价格源。",
       approvalStatusLine: safe.display.approvalStatusLine || "审批状态：未审查",
+      readonlyStubPermissionLine: safe.display.readonlyStubPermissionLine || "只读适配器开发许可：未授予",
+      readonlyStubPermissionStageLine: safe.display.readonlyStubPermissionStageLine || "当前阶段：需要人工批准",
+      readonlyStubPermissionNextStepLine: safe.display.readonlyStubPermissionNextStepLine || "下一步：完成 provider 条款、API 文档、域名 allowlist、API key 存储方案和请求 / 响应结构审查",
       readOnlyPriceSourceLine: safe.display.readOnlyPriceSourceLine || "只读价格源：未启用",
       bookingUrlStatusLine: safe.display.bookingUrlStatusLine || "bookingUrl：未启用",
       tradeStatusLine: safe.display.tradeStatusLine || "付款 / 下单：不支持",
