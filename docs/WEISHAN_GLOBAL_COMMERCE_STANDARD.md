@@ -657,6 +657,7 @@ One Screen Result Mode 只改变展示层，不改变 provider gate，不接真�
 - v2.0.74：Trusted External Search Router / 可信外部搜索路由
 - v2.0.75：Lowest Two Flight Offers Contract / 机票最低两家结果展示合同
 - v2.0.76：Flight Provider Candidate Registry / 机票候选 Provider 档案与白名单规则
+- v2.0.77：Flight Provider Approval Panel / 机票 Provider 接入审批面板
 
 ## 13. 可信外部搜索路线
 
@@ -726,6 +727,12 @@ v2.0.76 在阶段一之上补充机票候选 Provider 档案与白名单规则�
 候选平台档案只允许描述搜索入口、官方域名、风险等级、人工复核状态和可见的安全边界说明；不允许露出真实 API key、endpoint、真实价格、fake/demo/mock price、付款、下单、证件保存或未知网站结果。
 
 后续版本继续保持阶段一和阶段二的边界，只有在真实只读 provider 获得明确批准后，才可能展示真实价格。
+
+## 18. 机票 Provider 接入审批面板
+
+v2.0.77 在机票候选平台档案之上补充机票 Provider 接入审批面板。默认必须返回 flightProviderApprovalStatus，approvalVersion / approvalStatus / trustStatus / manualReviewStatus / checklist 默认固定为候选审批状态；没有通过人工审核的可信候选档案时不得展示价格卡片、bookingUrl、外部跳转、付款或下单入口，只能显示“查看 Provider 审批状态”“机票 Provider 接入审批”“当前状态：候选平台已建档，尚未批准接入只读价格源。”“审批状态：未审查”“只读价格源：未启用”“bookingUrl：未启用”“付款 / 下单：不支持”“需要 allowlist”“禁止未知域名 / 短链接 / 可疑域名”“AI 不能生成可疑 provider 域名”“人工审核后才允许进入 provider approval”等 UI 闸门文案。
+
+候选平台审批面板只作安全审查档案，不连接 API，不返回价格，不生成 booking 链接。默认允许域名白名单必须包含 Google Flights、Trip.com / 携程、Skyscanner、Kayak、Expedia、Booking Flights 和航司官网占位。默认阻断规则必须覆盖短链接、非 HTTPS、拼写相似的仿冒域名、AI 生成域名、私聊付款、先转账出票、低价异常、无主体信息、和搜索意图无关、成人 / 赌博 / 武器 / 毒品等高风险域名。历史回看也必须保留同样的审批状态说明和外部搜索按钮。
 
 ## 14. 默认结果噪音控制
 

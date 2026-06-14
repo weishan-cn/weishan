@@ -76,6 +76,48 @@ function checkFlightProviderCandidatesVersion(results, expectedVersion) {
   );
 }
 
+function checkFlightLowestOffersVersion(results, expectedVersion) {
+  const lowestPath = "apps/desktop/src/renderer/core/commerceFlightLowestOffersContract.js";
+  const lowest = readText(lowestPath);
+  if (!lowest) {
+    results.push({ name: "apps/desktop flight lowest offers contract version", pass: false, detail: lowestPath + " missing" });
+    return;
+  }
+  if (lowest.__readError) {
+    results.push({ name: "apps/desktop flight lowest offers contract version", pass: false, detail: lowest.__readError });
+    return;
+  }
+  const match = lowest.match(/CONTRACT_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop flight lowest offers contract version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceFlightLowestOffersContract.js CONTRACT_VERSION"
+  );
+}
+
+function checkFlightProviderApprovalVersion(results, expectedVersion) {
+  const approvalPath = "apps/desktop/src/renderer/core/commerceFlightProviderApproval.js";
+  const approval = readText(approvalPath);
+  if (!approval) {
+    results.push({ name: "apps/desktop flight provider approval version", pass: false, detail: approvalPath + " missing" });
+    return;
+  }
+  if (approval.__readError) {
+    results.push({ name: "apps/desktop flight provider approval version", pass: false, detail: approval.__readError });
+    return;
+  }
+  const match = approval.match(/APPROVAL_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop flight provider approval version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceFlightProviderApproval.js APPROVAL_VERSION"
+  );
+}
+
 function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
   const pkg = readJson(packagePath);
   const lock = readJson(lockPath);
@@ -121,7 +163,9 @@ function runVersionCheck() {
 
   if (rootPackage && !rootPackage.__readError) {
     checkRendererConfigVersion(results, rootPackage.version);
+    checkFlightLowestOffersVersion(results, rootPackage.version);
     checkFlightProviderCandidatesVersion(results, rootPackage.version);
+    checkFlightProviderApprovalVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

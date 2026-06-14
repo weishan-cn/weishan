@@ -39,7 +39,7 @@
       return api.getFlightLowestOffersContract(contract);
     }
     const fallback = {
-      contractVersion:"2.0.75",
+      contractVersion:"2.0.77",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -99,7 +99,7 @@
       return api.getFlightProviderCandidatesRegistry(registry);
     }
     const fallback = {
-      contractVersion:"2.0.76",
+      contractVersion:"2.0.77",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -156,6 +156,102 @@
       capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
       safety:Object.assign({}, fallback.safety, raw.safety && typeof raw.safety === "object" ? raw.safety : {}),
       domainSafetyRules:Object.assign({}, fallback.domainSafetyRules, raw.domainSafetyRules && typeof raw.domainSafetyRules === "object" ? raw.domainSafetyRules : {}),
+      display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
+  function createFlightProviderApprovalStatus(status){
+    const api = window.WeishanCommerceFlightProviderApproval;
+    if (api && typeof api.normalizeFlightProviderApprovalStatus === "function") {
+      return api.normalizeFlightProviderApprovalStatus(status);
+    }
+    if (api && typeof api.getFlightProviderApprovalStatus === "function") {
+      return api.getFlightProviderApprovalStatus(status);
+    }
+    const fallback = {
+      approvalVersion:"2.0.77",
+      phase:"flight_provider_approval",
+      providerCategory:"flight",
+      providerId:"flight-provider-disabled",
+      providerName:"机票候选平台",
+      overallStatus:"candidate_only",
+      approvalStatus:"not_reviewed",
+      currentAllowedStage:"candidate_only",
+      trustStatus:"candidate_only",
+      manualReviewStatus:"not_reviewed",
+      allowlistDomains:["google.com", "google.com/travel/flights", "trip.com", "ctrip.com", "skyscanner.com", "kayak.com", "expedia.com", "booking.com", "airline-official-website.placeholder"],
+      blockedRules:["短链接", "非 HTTPS", "拼写相似的仿冒域名", "AI 生成域名", "私聊付款", "先转账出票", "低价异常", "无主体信息", "和搜索意图无关", "成人 / 赌博 / 武器 / 毒品等高风险域名"],
+      checklist:{
+        platformIdentityReviewed:false,
+        officialDomainAllowlistReviewed:false,
+        providerTermsReviewed:false,
+        localLawReviewed:false,
+        apiDocsReviewed:false,
+        apiKeyStorageReviewed:false,
+        priceFieldReviewed:false,
+        taxFeeBaggageFieldReviewed:false,
+        bookingUrlReviewed:false,
+        sandboxDryRunCompleted:false,
+        finalHumanApproval:false
+      },
+      capabilities:{
+        canUseApiKey:false,
+        canUseNetworkApi:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canOpenBookingUrl:false,
+        canCreateOrder:false,
+        canPay:false,
+        canStoreIdentity:false,
+        canStorePassport:false,
+        canStoreBankCard:false
+      },
+      safety:{
+        noRealEndpoint:true,
+        noRealApiKey:true,
+        noNetworkSearch:true,
+        noRealResults:true,
+        noRealPrice:true,
+        noFakeDemoMockPrice:true,
+        noBookingUrl:true,
+        noRedirect:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true,
+        noPassportStorage:true,
+        noBankCardStorage:true
+      },
+      display:{
+        summaryTitle:"机票 Provider 接入审批",
+        currentStatusLine:"当前状态：候选平台已建档，尚未批准接入只读价格源。",
+        approvalStatusLine:"审批状态：未审查",
+        readOnlyPriceSourceLine:"只读价格源：未启用",
+        bookingUrlStatusLine:"bookingUrl：未启用",
+        tradeStatusLine:"付款 / 下单：不支持",
+        candidatePlatformsLine:"候选平台：Google Flights / Trip.com / 携程 / Skyscanner / Kayak / Expedia",
+        allowlistTitle:"默认允许域名白名单",
+        blockedRulesTitle:"默认阻断规则",
+        allowlistRequirementLine:"需要 allowlist",
+        blockedRulesSummaryLine:"禁止未知域名 / 短链接 / 可疑域名",
+        aiRiskLine:"AI 不能生成可疑 provider 域名",
+        humanApprovalLine:"人工审核后才允许进入 provider approval",
+        notesLine:"候选平台只作档案，不连接 API，不返回价格，不生成 booking 链接。",
+        checklistGroups:[
+          { title:"候选与白名单", items:[["候选平台", "已建档"], ["allowlist", "已要求"], ["未知域名", "阻断"], ["短链接", "阻断"], ["可疑域名", "阻断"]] },
+          { title:"平台审批", items:[["平台身份审查", "未开始"], ["Provider 条款审查", "未开始"], ["人工审核", "未完成"], ["最终人工批准", "未完成"]] },
+          { title:"接口与价格", items:[["API 文档审查", "未开始"], ["API key 存储审查", "未开始"], ["Endpoint 审查", "未开始"], ["价格字段审查", "未开始"], ["bookingUrl 审查", "未开始"]] },
+          { title:"安全与执行", items:[["当地法律审查", "未开始"], ["税费 / 退改签字段审查", "未开始"], ["Sandbox Dry Run", "未开始"], ["只读价格源", "未启用"], ["bookingUrl", "未启用"], ["付款 / 下单", "不支持"]] }
+        ]
+      }
+    };
+    const raw = status && typeof status === "object" ? status : {};
+    return Object.assign({}, fallback, raw, {
+      allowlistDomains:Array.isArray(raw.allowlistDomains) ? raw.allowlistDomains.slice() : fallback.allowlistDomains.slice(),
+      blockedRules:Array.isArray(raw.blockedRules) ? raw.blockedRules.slice() : fallback.blockedRules.slice(),
+      checklist:Object.assign({}, fallback.checklist, raw.checklist && typeof raw.checklist === "object" ? raw.checklist : {}),
+      capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      safety:Object.assign({}, fallback.safety, raw.safety && typeof raw.safety === "object" ? raw.safety : {}),
       display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
     });
   }
@@ -420,6 +516,7 @@
       complianceHealth:{},
       flightLowestOffersContract:category === "flight" ? createFlightLowestOffersContract() : null,
       flightProviderCandidatesRegistry:category === "flight" ? createFlightProviderCandidatesRegistry() : null,
+      flightProviderApprovalStatus:category === "flight" ? createFlightProviderApprovalStatus() : null,
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -467,6 +564,7 @@
       complianceHealth:base.complianceHealth && typeof base.complianceHealth === "object" ? base.complianceHealth : {},
       flightLowestOffersContract:category === "flight" ? createFlightLowestOffersContract(base.flightLowestOffersContract) : null,
       flightProviderCandidatesRegistry:category === "flight" ? createFlightProviderCandidatesRegistry(base.flightProviderCandidatesRegistry) : null,
+      flightProviderApprovalStatus:category === "flight" ? createFlightProviderApprovalStatus(base.flightProviderApprovalStatus) : null,
       canShowPrice:base.canShowPrice === true,
       canShowBookingButton:base.canShowBookingButton === true,
       canShowCheckoutButton:base.canShowCheckoutButton === true,
@@ -578,6 +676,7 @@
       searchProviderName:safe.searchProviderName,
       flightLowestOffersContract:safe.category === "flight" ? safe.flightLowestOffersContract : null,
       flightProviderCandidatesRegistry:safe.category === "flight" ? safe.flightProviderCandidatesRegistry : null,
+      flightProviderApprovalStatus:safe.category === "flight" ? safe.flightProviderApprovalStatus : null,
       candidates:safe.candidates,
       recommendation:safe.recommendation,
       nextSteps:[
