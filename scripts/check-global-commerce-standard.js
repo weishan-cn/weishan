@@ -505,7 +505,19 @@ const REQUIRED_PHRASES = [
   "人工批准开发只读 stub：未完成",
   "不能发起网络请求",
   "不能返回 bookingUrl",
-  "不能保存证件 / 银行卡"
+  "不能保存证件 / 银行卡",
+  "v2.0.80：Readonly Stub Adapter Scaffold / 只读适配器空壳",
+  "flightReadonlyStubAdapter",
+  "查看只读适配器空壳",
+  "只读适配器空壳：已建立",
+  "尚未允许连接真实 provider",
+  "可以校验输入形状",
+  "可以构建请求形状",
+  "可以规范化响应形状",
+  "只读适配器空壳：可用",
+  "真实网络连接：未启用",
+  "真实价格返回：未启用",
+  "bookingUrl 返回：未启用"
 ];
 
 function main() {

@@ -3177,7 +3177,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.79 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
+  test("v2.0.80 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -3197,15 +3197,17 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。");
     await expect(summaryPanel).toContainText("接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。");
     await expect(summaryPanel).toContainText("当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单");
+    await expect(summaryPanel).toContainText("查看只读适配器空壳");
+    await expect(summaryPanel.locator("details.commerce-flight-readonly-stub-adapter-disclosure")).not.toHaveAttribute("open", "");
     await expect(summaryPanel).not.toContainText("最终价格以真实平台为准");
     await expect(summaryPanel).not.toContainText(/¥\s*\d+/);
-    for (const label of ["打开全网搜索", "打开 Google Flights 搜索", "打开 Trip.com / 携程搜索", "复制机票搜索条件", "复制 Google Flights 模板", "复制 Trip.com / 携程模板", "查看候选平台", "查看分析过程", "查看安全边界", "查看技术细节"]) await expect(home).toContainText(label);
+    for (const label of ["打开全网搜索", "打开 Google Flights 搜索", "打开 Trip.com / 携程搜索", "复制机票搜索条件", "复制 Google Flights 模板", "复制 Trip.com / 携程模板", "查看候选平台", "查看 Provider 审批状态", "查看只读适配器开发许可", "查看只读适配器空壳", "查看分析过程", "查看安全边界", "查看技术细节"]) await expect(home).toContainText(label);
     await expect(summaryPanel).toContainText("点击后会打开外部搜索或外部平台");
     await expect(summaryPanel).toContainText("weishan 当前不返回价格，不付款，不下单");
     await expect(summaryPanel).toContainText("全网搜索结果由外部搜索引擎提供");
     const contract = await page.evaluate(() => window.WeishanCommerceFlightLowestOffersContract && typeof window.WeishanCommerceFlightLowestOffersContract.getFlightLowestOffersContract === "function" ? window.WeishanCommerceFlightLowestOffersContract.getFlightLowestOffersContract() : null);
     expect(contract).toEqual(expect.objectContaining({
-      contractVersion:"2.0.79",
+      contractVersion:"2.0.80",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -3221,7 +3223,7 @@ test.describe.serial("commerce agent workbench", () => {
     }));
     const registry = await page.evaluate(() => window.WeishanCommerceFlightProviderCandidates && typeof window.WeishanCommerceFlightProviderCandidates.getFlightProviderCandidatesRegistry === "function" ? window.WeishanCommerceFlightProviderCandidates.getFlightProviderCandidatesRegistry() : null);
     expect(registry).toEqual(expect.objectContaining({
-      contractVersion:"2.0.79",
+      contractVersion:"2.0.80",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -3234,6 +3236,7 @@ test.describe.serial("commerce agent workbench", () => {
       currentStatusLine:"当前状态：候选平台档案已整理，暂不接入真实价格源。",
       approvalStatusLine:"审批状态：未审查",
       readonlyStubPermissionLine:"只读适配器开发许可：未授予",
+      readonlyStubAdapterStatusLine:"可用",
       readOnlyPriceSourceLine:"只读价格源：未启用",
       bookingUrlStatusLine:"bookingUrl：未启用",
       tradeStatusLine:"付款 / 下单：不支持"
@@ -3339,8 +3342,69 @@ test.describe.serial("commerce agent workbench", () => {
       noPassportStorage:true,
       noBankCardStorage:true
     }));
+    const readonlyStubAdapter = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubAdapter && typeof window.WeishanCommerceFlightReadonlyStubAdapter.getFlightReadonlyStubAdapter === "function" ? window.WeishanCommerceFlightReadonlyStubAdapter.getFlightReadonlyStubAdapter() : null);
+    expect(readonlyStubAdapter).toEqual(expect.objectContaining({
+      adapterVersion:"2.0.80",
+      phase:"flight_readonly_stub_adapter",
+      overallStatus:"shell_ready",
+      currentStage:"shell_ready"
+    }));
+    expect(readonlyStubAdapter.capabilities).toEqual(expect.objectContaining({
+      canValidateInputShape:true,
+      canBuildRequestShape:true,
+      canNormalizeResponseShape:true,
+      canUseRealApiKey:false,
+      canConnectRealEndpoint:false,
+      canUseNetwork:false,
+      canReturnPrice:false,
+      canReturnBookingUrl:false,
+      canOpenBookingUrl:false,
+      canCreateOrder:false,
+      canPay:false,
+      canStoreIdentity:false,
+      canStorePassport:false,
+      canStoreBankCard:false
+    }));
+    expect(readonlyStubAdapter.requestShapeLines).toEqual(expect.arrayContaining([
+      "origin：出发地",
+      "destination：目的地",
+      "departureDate：出发日期",
+      "returnDateIfAny：返回日期（如有）",
+      "adultsChildrenIfAny：成人 / 儿童（如有）",
+      "cabinIfAny：舱位（如有）",
+      "currencyIfFuture：币种（未来）",
+      "regionIfFuture：区域（未来）"
+    ]));
+    expect(readonlyStubAdapter.responseShapeLines).toEqual(expect.arrayContaining([
+      "providerName：提供方名称",
+      "airlineName：航司名称",
+      "departureTime：起飞时间",
+      "arrivalTime：到达时间",
+      "duration：时长",
+      "stops：中转次数",
+      "baggageInfo：行李信息",
+      "taxFeeInfo：税费 / 手续费信息",
+      "finalPrice：禁用",
+      "bookingUrl：禁用"
+    ]));
+    expect(readonlyStubAdapter.safety).toEqual(expect.objectContaining({
+      noRealEndpoint:true,
+      noRealApiKey:true,
+      noNetworkSearch:true,
+      noRealResults:true,
+      noRealPrice:true,
+      noFakeDemoMockPrice:true,
+      noBookingUrl:true,
+      noRedirect:true,
+      noCheckout:true,
+      noPayment:true,
+      noOrderSubmit:true,
+      noIdentityStorage:true,
+      noPassportStorage:true,
+      noBankCardStorage:true
+    }));
     const defaultText = await visibleTextWithoutTechnicalDetails(home);
-    for (const hidden of ["商品采购计划", "酒店计划", "电脑搜索条件", "京东模板", "淘宝 / 天猫", "Amazon 模板", "Best Buy 模板", "Booking hotel search template", "Google Flights search template", "未知网站结果", "可疑域名", "约 ", "已找到机票价格", "价格如下"]) {
+    for (const hidden of ["商品采购计划", "酒店计划", "电脑搜索条件", "京东模板", "淘宝 / 天猫", "Amazon 模板", "Best Buy 模板", "Booking hotel search template", "Google Flights search template", "未知网站结果", "可疑域名", "约 ", "已找到机票价格", "价格如下", "只读适配器空壳已建立", "尚未允许连接真实 provider", "可以校验输入形状", "可以构建请求形状", "可以规范化响应形状", "真实网络连接：未启用", "真实价格返回：未启用", "bookingUrl 返回：未启用"]) {
       expect(defaultText).not.toContain(hidden);
     }
     await expect(summaryPanel).toContainText("查看候选平台");
@@ -3353,6 +3417,7 @@ test.describe.serial("commerce agent workbench", () => {
     for (const text of ["Google Flights", "Trip.com / 携程", "Skyscanner", "Kayak", "Expedia", "Booking Flights", "航司官网占位"]) {
       await expect(summaryPanel).toContainText(text);
     }
+    await expect(summaryPanel).toContainText("只读适配器空壳：可用");
     await expect(summaryPanel).toContainText("API 状态：未连接");
     await expect(summaryPanel).toContainText("价格状态：不可用");
     await expect(summaryPanel).toContainText("bookingUrl 状态：不可用");
@@ -3389,9 +3454,20 @@ test.describe.serial("commerce agent workbench", () => {
     for (const text of ["平台身份确认：未完成", "官方域名 / allowlist 审查：未完成", "Provider 条款审查：未完成", "API 文档审查：未完成", "API key 安全存储方案：未完成", "请求结构审查：未完成", "响应结构审查：未完成", "错误处理审查：未完成", "超时 / 频率限制审查：未完成", "人工批准开发只读 stub：未完成", "不能开发真实 connector", "不能读取 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"]) {
       await expect(summaryPanel).toContainText(text);
     }
+    await expect(summaryPanel).toContainText("查看只读适配器空壳");
+    const readonlyStubAdapterDisclosure = summaryPanel.locator("details.commerce-flight-readonly-stub-adapter-disclosure");
+    await expect(readonlyStubAdapterDisclosure).not.toHaveAttribute("open", "");
+    await openDisclosure(summaryPanel, "commerce-flight-readonly-stub-adapter-disclosure");
+    await expect(summaryPanel).toContainText("只读适配器空壳");
+    await expect(summaryPanel).toContainText("只读适配器空壳：已建立");
+    await expect(summaryPanel).toContainText("只读适配器空壳已建立");
+    await expect(summaryPanel).toContainText("尚未允许连接真实 provider");
+    for (const text of ["只读适配器空壳：可用", "真实网络连接：未启用", "真实价格返回：未启用", "bookingUrl 返回：未启用", "可以校验输入形状", "可以构建请求形状", "可以规范化响应形状", "不能读取 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"]) {
+      await expect(summaryPanel).toContainText(text);
+    }
     const readonlyStubPermission = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubPermission && typeof window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission === "function" ? window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission() : null);
     expect(readonlyStubPermission).toEqual(expect.objectContaining({
-      permissionVersion:"2.0.79",
+      permissionVersion:"2.0.80",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -3508,6 +3584,17 @@ test.describe.serial("commerce agent workbench", () => {
     for (const text of ["平台身份确认：未完成", "官方域名 / allowlist 审查：未完成", "Provider 条款审查：未完成", "API 文档审查：未完成", "API key 安全存储方案：未完成", "请求结构审查：未完成", "响应结构审查：未完成", "错误处理审查：未完成", "超时 / 频率限制审查：未完成", "人工批准开发只读 stub：未完成", "不能开发真实 connector", "不能读取 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"]) {
       await expect(historyDetail).toContainText(text);
     }
+    await expect(historyDetail).toContainText("查看只读适配器空壳");
+    const historyReadonlyAdapterDisclosure = historyDetail.locator("details.commerce-flight-readonly-stub-adapter-disclosure");
+    await expect(historyReadonlyAdapterDisclosure).not.toHaveAttribute("open", "");
+    await openDisclosure(historyDetail, "commerce-flight-readonly-stub-adapter-disclosure");
+    await expect(historyDetail).toContainText("只读适配器空壳");
+    await expect(historyDetail).toContainText("只读适配器空壳：已建立");
+    await expect(historyDetail).toContainText("只读适配器空壳已建立");
+    await expect(historyDetail).toContainText("尚未允许连接真实 provider");
+    for (const text of ["只读适配器空壳：可用", "真实网络连接：未启用", "真实价格返回：未启用", "bookingUrl 返回：未启用", "可以校验输入形状", "可以构建请求形状", "可以规范化响应形状", "不能读取 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"]) {
+      await expect(historyDetail).toContainText(text);
+    }
     const historyOpenCountBefore = await page.evaluate(() => (window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ || []).length);
     await historyDetail.getByRole("button", { name:"打开 Google Flights 搜索" }).click();
     await expect.poll(async () => page.evaluate(() => (window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ || []).length), { timeout:5000 }).toBe(historyOpenCountBefore + 1);
@@ -3517,7 +3604,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.79 bare flight intent still renders the simple flight result card", async () => {
+  test("v2.0.80 bare flight intent still renders the simple flight result card", async () => {
     await resetCommerceTasks(page);
     await page.reload({ waitUntil:"domcontentloaded" });
     await gotoRoute(page, "home");
@@ -3537,6 +3624,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("查看候选平台");
     await expect(summaryPanel).toContainText("查看 Provider 审批状态");
     await expect(summaryPanel).toContainText("查看只读适配器开发许可");
+    await expect(summaryPanel).toContainText("查看只读适配器空壳");
     await expect(summaryPanel).not.toContainText("最终价格以真实平台为准");
     await expect(summaryPanel).not.toContainText(/¥\s*\d+/);
     const defaultText = await visibleTextWithoutTechnicalDetails(home);
@@ -3545,10 +3633,10 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.0.79 sidebar version stays in sync with release version", async () => {
+  test("v2.0.80 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.0.79");
+    await expect(sidebarFoot).toContainText("weishan v2.0.80");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 

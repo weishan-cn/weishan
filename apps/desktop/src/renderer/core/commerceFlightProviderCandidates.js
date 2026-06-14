@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const CONTRACT_VERSION = "2.0.79";
+  const CONTRACT_VERSION = "2.0.80";
   const PHASE = "flight_provider_candidate_registry";
   const DEFAULT_TRUST_STATUS = "candidate_only";
   const DEFAULT_MANUAL_REVIEW_STATUS = "not_reviewed";
@@ -255,6 +255,7 @@
         allowlistTitle: "默认优先域名白名单",
         blockedRulesTitle: "默认阻断规则",
         capabilityLine: "API key 不可用 / 网络搜索不可用 / 价格不可用 / booking 链接不可用 / 下单不可用 / 付款不可用 / 身份证 / 护照 / 银行卡不可保存",
+        readonlyStubAdapterStatusLine: "可用",
         approvalStatusLine: "审批状态：未审查",
         readonlyStubPermissionLine: "只读适配器开发许可：未授予",
         readOnlyPriceSourceLine: "只读价格源：未启用",
@@ -276,6 +277,7 @@
       blockedRulesTitle: safe.display.blockedRulesTitle || "默认阻断规则",
       approvalStatusLine: safe.display.approvalStatusLine || "审批状态：未审查",
       readonlyStubPermissionLine: safe.display.readonlyStubPermissionLine || "只读适配器开发许可：未授予",
+      readonlyStubAdapterStatusLine: safe.display.readonlyStubAdapterStatusLine || "可用",
       readOnlyPriceSourceLine: safe.display.readOnlyPriceSourceLine || "只读价格源：未启用",
       bookingUrlStatusLine: safe.display.bookingUrlStatusLine || "bookingUrl：未启用",
       tradeStatusLine: safe.display.tradeStatusLine || "付款 / 下单：不支持",
@@ -297,6 +299,7 @@
         manualReviewStatusLabel: profile.manualReviewStatus === DEFAULT_MANUAL_REVIEW_STATUS ? "未审查" : profile.manualReviewStatus,
         approvalStatusLabel: safe.display.approvalStatusLine || "审批状态：未审查",
         readonlyStubPermissionStatusLabel: safe.display.readonlyStubPermissionLine || "只读适配器开发许可：未授予",
+        readonlyStubAdapterStatusLabel: safe.display.readonlyStubAdapterStatusLine || "可用",
         readOnlyPriceSourceStatusLabel: safe.display.readOnlyPriceSourceLine || "只读价格源：未启用",
         tradeStatusLabel: safe.display.tradeStatusLine || "付款 / 下单：不支持",
         riskLevelLabel: profile.riskLevel === "low" ? "低风险" : profile.riskLevel,

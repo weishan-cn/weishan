@@ -39,7 +39,7 @@
       return api.getFlightLowestOffersContract(contract);
     }
     const fallback = {
-      contractVersion:"2.0.79",
+      contractVersion:"2.0.80",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -99,7 +99,7 @@
       return api.getFlightProviderCandidatesRegistry(registry);
     }
     const fallback = {
-      contractVersion:"2.0.79",
+      contractVersion:"2.0.80",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -169,7 +169,7 @@
       return api.getFlightProviderApprovalStatus(status);
     }
     const fallback = {
-      approvalVersion:"2.0.79",
+      approvalVersion:"2.0.80",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -265,7 +265,7 @@
       return api.getFlightReadonlyStubPermission(permission);
     }
     const fallback = {
-      permissionVersion:"2.0.79",
+      permissionVersion:"2.0.80",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -316,6 +316,113 @@
     return Object.assign({}, fallback, raw, {
       checklist:Object.assign({}, fallback.checklist, raw.checklist && typeof raw.checklist === "object" ? raw.checklist : {}),
       capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
+  function createFlightReadonlyStubAdapter(adapter){
+    const api = window.WeishanCommerceFlightReadonlyStubAdapter;
+    if (api && typeof api.normalizeFlightReadonlyStubAdapter === "function") {
+      return api.normalizeFlightReadonlyStubAdapter(adapter);
+    }
+    if (api && typeof api.getFlightReadonlyStubAdapter === "function") {
+      return api.getFlightReadonlyStubAdapter(adapter);
+    }
+    const fallback = {
+      adapterVersion:"2.0.80",
+      phase:"flight_readonly_stub_adapter",
+      overallStatus:"shell_ready",
+      currentStage:"shell_ready",
+      capabilities:{
+        canValidateInputShape:true,
+        canBuildRequestShape:true,
+        canNormalizeResponseShape:true,
+        canUseRealApiKey:false,
+        canConnectRealEndpoint:false,
+        canUseNetwork:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canOpenBookingUrl:false,
+        canCreateOrder:false,
+        canPay:false,
+        canStoreIdentity:false,
+        canStorePassport:false,
+        canStoreBankCard:false
+      },
+      safety:{
+        noRealEndpoint:true,
+        noRealApiKey:true,
+        noNetworkSearch:true,
+        noRealResults:true,
+        noRealPrice:true,
+        noFakeDemoMockPrice:true,
+        noBookingUrl:true,
+        noRedirect:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true,
+        noPassportStorage:true,
+        noBankCardStorage:true
+      },
+      requestShapeLines:[
+        "origin：出发地",
+        "destination：目的地",
+        "departureDate：出发日期",
+        "returnDateIfAny：返回日期（如有）",
+        "adultsChildrenIfAny：成人 / 儿童（如有）",
+        "cabinIfAny：舱位（如有）",
+        "currencyIfFuture：币种（未来）",
+        "regionIfFuture：区域（未来）"
+      ],
+      responseShapeLines:[
+        "providerName：提供方名称",
+        "airlineName：航司名称",
+        "departureTime：起飞时间",
+        "arrivalTime：到达时间",
+        "duration：时长",
+        "stops：中转次数",
+        "baggageInfo：行李信息",
+        "taxFeeInfo：税费 / 手续费信息",
+        "finalPrice：禁用",
+        "bookingUrl：禁用"
+      ],
+      display:{
+        summaryTitle:"只读适配器空壳",
+        shellStatusLine:"只读适配器空壳：已建立",
+        currentStatusLine:"只读适配器空壳已建立",
+        connectionStatusLine:"尚未允许连接真实 provider",
+        summaryNote:"只读适配器空壳只允许开发请求 / 响应结构，不允许连接真实 endpoint，不允许读取真实 API key，不允许返回真实价格，不允许生成预订链接。",
+        capabilityTitle:"当前能力",
+        requestShapeTitle:"请求形状",
+        responseShapeTitle:"响应形状",
+        capabilityLines:[
+          "可以校验输入形状",
+          "可以构建请求形状",
+          "可以规范化响应形状",
+          "不能读取 API key",
+          "不能连接 endpoint",
+          "不能发起网络请求",
+          "不能返回价格",
+          "不能返回 bookingUrl",
+          "不能打开预订页",
+          "不能付款",
+          "不能下单",
+          "不能保存证件 / 银行卡"
+        ],
+        readonlyStubAdapterLine:"只读适配器空壳：已建立",
+        readonlyStubAdapterAvailabilityLine:"只读适配器空壳：可用",
+        realNetworkConnectionLine:"真实网络连接：未启用",
+        realPriceReturnLine:"真实价格返回：未启用",
+        bookingUrlReturnLine:"bookingUrl 返回：未启用"
+      }
+    };
+    const raw = adapter && typeof adapter === "object" ? adapter : {};
+    return Object.assign({}, fallback, raw, {
+      capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      safety:Object.assign({}, fallback.safety, raw.safety && typeof raw.safety === "object" ? raw.safety : {}),
+      requestShapeLines:Array.isArray(raw.requestShapeLines) ? raw.requestShapeLines.slice() : fallback.requestShapeLines.slice(),
+      responseShapeLines:Array.isArray(raw.responseShapeLines) ? raw.responseShapeLines.slice() : fallback.responseShapeLines.slice(),
       display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
     });
   }
@@ -582,6 +689,7 @@
       flightProviderCandidatesRegistry:category === "flight" ? createFlightProviderCandidatesRegistry() : null,
       flightProviderApprovalStatus:category === "flight" ? createFlightProviderApprovalStatus() : null,
       flightReadonlyStubPermission:category === "flight" ? createFlightReadonlyStubPermission() : null,
+      flightReadonlyStubAdapter:category === "flight" ? createFlightReadonlyStubAdapter() : null,
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -631,6 +739,7 @@
       flightProviderCandidatesRegistry:category === "flight" ? createFlightProviderCandidatesRegistry(base.flightProviderCandidatesRegistry) : null,
       flightProviderApprovalStatus:category === "flight" ? createFlightProviderApprovalStatus(base.flightProviderApprovalStatus) : null,
       flightReadonlyStubPermission:category === "flight" ? createFlightReadonlyStubPermission(base.flightReadonlyStubPermission) : null,
+      flightReadonlyStubAdapter:category === "flight" ? createFlightReadonlyStubAdapter(base.flightReadonlyStubAdapter) : null,
       canShowPrice:base.canShowPrice === true,
       canShowBookingButton:base.canShowBookingButton === true,
       canShowCheckoutButton:base.canShowCheckoutButton === true,
@@ -744,6 +853,7 @@
       flightProviderCandidatesRegistry:safe.category === "flight" ? safe.flightProviderCandidatesRegistry : null,
       flightProviderApprovalStatus:safe.category === "flight" ? safe.flightProviderApprovalStatus : null,
       flightReadonlyStubPermission:safe.category === "flight" ? safe.flightReadonlyStubPermission : null,
+      flightReadonlyStubAdapter:safe.category === "flight" ? safe.flightReadonlyStubAdapter : null,
       candidates:safe.candidates,
       recommendation:safe.recommendation,
       nextSteps:[

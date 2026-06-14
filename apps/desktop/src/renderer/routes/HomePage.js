@@ -2059,7 +2059,7 @@
 
   function commerceFlightLowestOffersContract(task){
     const fallback = {
-      contractVersion:"2.0.79",
+      contractVersion:"2.0.80",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -2123,7 +2123,7 @@
 
   function commerceFlightProviderCandidatesRegistry(task){
     const fallback = {
-      contractVersion:"2.0.79",
+      contractVersion:"2.0.80",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -2230,6 +2230,7 @@
             ${escListItem("搜索入口", profile.searchEntryUrlLabel)}
             ${escListItem("审批状态", profile.approvalStatusLabel)}
             ${escListItem("只读适配器开发许可", profile.readonlyStubPermissionStatusLabel)}
+            ${escListItem("只读适配器空壳", profile.readonlyStubAdapterStatusLabel)}
             ${escListItem("只读价格源", profile.readOnlyPriceSourceStatusLabel)}
             ${escListItem("bookingUrl", profile.bookingUrlStatusLabel)}
             ${escListItem("付款 / 下单", profile.tradeStatusLabel)}
@@ -2254,7 +2255,7 @@
     if (api && typeof api.normalizeFlightReadonlyStubPermission === "function") return api.normalizeFlightReadonlyStubPermission(source);
     if (api && typeof api.getFlightReadonlyStubPermission === "function") return api.getFlightReadonlyStubPermission(source);
     const fallback = {
-      permissionVersion:"2.0.79",
+      permissionVersion:"2.0.80",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -2349,13 +2350,135 @@
     return disclosure("查看只读适配器开发许可", body, "commerce-flight-readonly-stub-permission-disclosure");
   }
 
+  function commerceFlightReadonlyStubAdapterStatus(task){
+    const api = window.WeishanCommerceFlightReadonlyStubAdapter;
+    const source = task && task.flightReadonlyStubAdapter || null;
+    if (api && typeof api.normalizeFlightReadonlyStubAdapter === "function") return api.normalizeFlightReadonlyStubAdapter(source);
+    if (api && typeof api.getFlightReadonlyStubAdapter === "function") return api.getFlightReadonlyStubAdapter(source);
+    const fallback = {
+      adapterVersion:"2.0.80",
+      phase:"flight_readonly_stub_adapter",
+      overallStatus:"shell_ready",
+      currentStage:"shell_ready",
+      capabilities:{
+        canValidateInputShape:true,
+        canBuildRequestShape:true,
+        canNormalizeResponseShape:true,
+        canUseRealApiKey:false,
+        canConnectRealEndpoint:false,
+        canUseNetwork:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canOpenBookingUrl:false,
+        canCreateOrder:false,
+        canPay:false,
+        canStoreIdentity:false,
+        canStorePassport:false,
+        canStoreBankCard:false
+      },
+      safety:{
+        noRealEndpoint:true,
+        noRealApiKey:true,
+        noNetworkSearch:true,
+        noRealResults:true,
+        noRealPrice:true,
+        noFakeDemoMockPrice:true,
+        noBookingUrl:true,
+        noRedirect:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true,
+        noPassportStorage:true,
+        noBankCardStorage:true
+      },
+      requestShapeLines:["origin：出发地", "destination：目的地", "departureDate：出发日期", "returnDateIfAny：返回日期（如有）", "adultsChildrenIfAny：成人 / 儿童（如有）", "cabinIfAny：舱位（如有）", "currencyIfFuture：币种（未来）", "regionIfFuture：区域（未来）"],
+      responseShapeLines:["providerName：提供方名称", "airlineName：航司名称", "departureTime：起飞时间", "arrivalTime：到达时间", "duration：时长", "stops：中转次数", "baggageInfo：行李信息", "taxFeeInfo：税费 / 手续费信息", "finalPrice：禁用", "bookingUrl：禁用"],
+      display:{
+        summaryTitle:"只读适配器空壳",
+        shellStatusLine:"只读适配器空壳：已建立",
+        currentStatusLine:"只读适配器空壳已建立",
+        connectionStatusLine:"尚未允许连接真实 provider",
+        summaryNote:"只读适配器空壳只允许开发请求 / 响应结构，不允许连接真实 endpoint，不允许读取真实 API key，不允许返回真实价格，不允许生成预订链接。",
+        capabilityTitle:"当前能力",
+        requestShapeTitle:"请求形状",
+        responseShapeTitle:"响应形状",
+        capabilityLines:["可以校验输入形状", "可以构建请求形状", "可以规范化响应形状", "不能读取 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"],
+        readonlyStubAdapterLine:"只读适配器空壳：已建立",
+        readonlyStubAdapterAvailabilityLine:"只读适配器空壳：可用",
+        realNetworkConnectionLine:"真实网络连接：未启用",
+        realPriceReturnLine:"真实价格返回：未启用",
+        bookingUrlReturnLine:"bookingUrl 返回：未启用"
+      }
+    };
+    const raw = source && typeof source === "object" ? source : {};
+    return Object.assign({}, fallback, raw, {
+      capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      safety:Object.assign({}, fallback.safety, raw.safety && typeof raw.safety === "object" ? raw.safety : {}),
+      requestShapeLines:Array.isArray(raw.requestShapeLines) ? raw.requestShapeLines.slice() : fallback.requestShapeLines.slice(),
+      responseShapeLines:Array.isArray(raw.responseShapeLines) ? raw.responseShapeLines.slice() : fallback.responseShapeLines.slice(),
+      display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
+  function commerceFlightReadonlyStubAdapterDisplay(task){
+    const status = commerceFlightReadonlyStubAdapterStatus(task);
+    const api = window.WeishanCommerceFlightReadonlyStubAdapter;
+    if (api && typeof api.describeFlightReadonlyStubAdapter === "function") return api.describeFlightReadonlyStubAdapter(status);
+    return status.display || {};
+  }
+
+  function commerceFlightReadonlyStubAdapterDisclosure(task){
+    const display = commerceFlightReadonlyStubAdapterDisplay(task);
+    if (!display) return "";
+    const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
+    const requestShapeLines = Array.isArray(display.requestShapeLines) ? display.requestShapeLines : [];
+    const responseShapeLines = Array.isArray(display.responseShapeLines) ? display.responseShapeLines : [];
+    const capabilityLines = Array.isArray(display.capabilityLines) ? display.capabilityLines : [];
+    const body = `<section class="commerce-flight-readonly-stub-adapter-panel" aria-label="只读适配器空壳">
+      <div class="commerce-flight-readonly-stub-adapter-head">
+        <div>
+          <h4>${esc(display.summaryTitle || "只读适配器空壳")}</h4>
+          <p>${esc(display.shellStatusLine || "只读适配器空壳：已建立")}</p>
+          <p>${esc(display.currentStatusLine || "只读适配器空壳已建立")}</p>
+          <p>${esc(display.connectionStatusLine || "尚未允许连接真实 provider")}</p>
+          <p>${esc(display.summaryNote || "只读适配器空壳只允许开发请求 / 响应结构，不允许连接真实 endpoint，不允许读取真实 API key，不允许返回真实价格，不允许生成预订链接。")}</p>
+        </div>
+        <strong>${esc(display.readonlyStubAdapterLine || "只读适配器空壳：已建立")}</strong>
+      </div>
+      <div class="commerce-flight-readonly-stub-adapter-summary">
+        <ul>
+          ${row("只读适配器空壳", display.readonlyStubAdapterAvailabilityLine || "可用")}
+          ${row("真实网络连接", display.realNetworkConnectionLine || "未启用")}
+          ${row("真实价格返回", display.realPriceReturnLine || "未启用")}
+          ${row("bookingUrl 返回", display.bookingUrlReturnLine || "未启用")}
+        </ul>
+      </div>
+      <div class="commerce-flight-readonly-stub-adapter-rules">
+        <section>
+          <h5>${esc(display.requestShapeTitle || "请求形状")}</h5>
+          <ul>${requestShapeLines.map((line) => `<li>${esc(line)}</li>`).join("")}</ul>
+        </section>
+        <section>
+          <h5>${esc(display.responseShapeTitle || "响应形状")}</h5>
+          <ul>${responseShapeLines.map((line) => `<li>${esc(line)}</li>`).join("")}</ul>
+        </section>
+        <section>
+          <h5>${esc(display.capabilityTitle || "当前能力")}</h5>
+          <ul>${capabilityLines.map((line) => `<li>${esc(line)}</li>`).join("")}</ul>
+        </section>
+      </div>
+    </section>`;
+    return disclosure("查看只读适配器空壳", body, "commerce-flight-readonly-stub-adapter-disclosure");
+  }
+
   function commerceFlightProviderApprovalStatus(task){
     const api = window.WeishanCommerceFlightProviderApproval;
     const source = task && task.flightProviderApprovalStatus || null;
     if (api && typeof api.normalizeFlightProviderApprovalStatus === "function") return api.normalizeFlightProviderApprovalStatus(source);
     if (api && typeof api.getFlightProviderApprovalStatus === "function") return api.getFlightProviderApprovalStatus(source);
     const fallback = {
-      approvalVersion:"2.0.79",
+      approvalVersion:"2.0.80",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -2467,8 +2590,11 @@
       <div class="commerce-flight-provider-approval-summary">
         <ul>
           ${row("只读适配器开发许可", display.readonlyStubPermissionLine || "只读适配器开发许可：未授予")}
+          ${row("只读适配器空壳", display.readonlyStubAdapterLine || "已建立")}
           ${row("当前阶段", display.readonlyStubPermissionStageLine || "当前阶段：需要人工批准")}
           ${row("下一步", display.readonlyStubPermissionNextStepLine || "下一步：完成 provider 条款、API 文档、域名 allowlist、API key 存储方案和请求 / 响应结构审查")}
+          ${row("真实网络连接", display.realNetworkConnectionLine || "未启用")}
+          ${row("真实价格返回", display.realPriceReturnLine || "未启用")}
           ${row("只读价格源", display.readOnlyPriceSourceLine || "未启用")}
           ${row("bookingUrl", display.bookingUrlStatusLine || "未启用")}
           ${row("付款 / 下单", display.tradeStatusLine || "不支持")}
@@ -2533,6 +2659,7 @@
       ${commerceFlightProviderCandidatesDisclosure(task)}
       ${commerceFlightProviderApprovalDisclosure(task)}
       ${commerceFlightReadonlyStubPermissionDisclosure(task)}
+      ${commerceFlightReadonlyStubAdapterDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;

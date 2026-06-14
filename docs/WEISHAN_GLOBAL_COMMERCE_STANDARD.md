@@ -810,3 +810,62 @@ v2.0.79 在机票 Provider 接入审批面板之上新增 “Readonly Stub Permi
 - 不能发起网络请求
 - 不能返回 bookingUrl
 - 不能保存证件 / 银行卡
+
+## 20. 只读适配器空壳
+
+v2.0.80：Readonly Stub Adapter Scaffold / 只读适配器空壳
+
+v2.0.80 在只读适配器开发许可之上新增 “Readonly Stub Adapter Scaffold / 只读适配器空壳”。默认必须返回 `flightReadonlyStubAdapter`，其 `adapterVersion`、`phase`、`overallStatus`、`currentStage`、`capabilities`、`requestShapeLines`、`responseShapeLines` 和 `display` 默认固定为空壳状态；没有允许连接真实 provider 时不得展示价格卡片、bookingUrl、外部跳转、付款或下单入口，只能显示“查看只读适配器空壳”“只读适配器空壳：已建立”“只读适配器空壳已建立”“尚未允许连接真实 provider”“只读适配器空壳：可用”“真实网络连接：未启用”“真实价格返回：未启用”“bookingUrl 返回：未启用”“可以校验输入形状”“可以构建请求形状”“可以规范化响应形状”“不能读取 API key”“不能连接 endpoint”“不能发起网络请求”“不能返回价格”“不能返回 bookingUrl”“不能打开预订页”“不能付款”“不能下单”“不能保存证件 / 银行卡”等 UI 闸门文案。
+
+只读适配器空壳的状态结构必须至少包含：
+
+- `adapterVersion`
+- `phase: "flight_readonly_stub_adapter"`
+- `overallStatus: shell_ready`
+- `currentStage: shell_ready`
+- `capabilities`
+- `requestShapeLines`
+- `responseShapeLines`
+
+默认 `capabilities` 必须至少包含：
+
+- `canValidateInputShape: true`
+- `canBuildRequestShape: true`
+- `canNormalizeResponseShape: true`
+- `canUseRealApiKey: false`
+- `canConnectRealEndpoint: false`
+- `canUseNetwork: false`
+- `canReturnPrice: false`
+- `canReturnBookingUrl: false`
+- `canOpenBookingUrl: false`
+- `canCreateOrder: false`
+- `canPay: false`
+- `canStoreIdentity: false`
+- `canStorePassport: false`
+- `canStoreBankCard: false`
+
+默认 `requestShapeLines` 至少包括：
+
+- `origin：出发地`
+- `destination：目的地`
+- `departureDate：出发日期`
+- `returnDateIfAny：返回日期（如有）`
+- `adultsChildrenIfAny：成人 / 儿童（如有）`
+- `cabinIfAny：舱位（如有）`
+- `currencyIfFuture：币种（未来）`
+- `regionIfFuture：区域（未来）`
+
+默认 `responseShapeLines` 至少包括：
+
+- `providerName：提供方名称`
+- `airlineName：航司名称`
+- `departureTime：起飞时间`
+- `arrivalTime：到达时间`
+- `duration：时长`
+- `stops：中转次数`
+- `baggageInfo：行李信息`
+- `taxFeeInfo：税费 / 手续费信息`
+- `finalPrice：禁用`
+- `bookingUrl：禁用`
+
+只读适配器空壳只允许校验输入形状、构建请求形状和规范化响应形状，不允许读取真实 API key，不允许连接真实 endpoint，不允许发起网络请求，不允许返回真实价格，不允许返回 bookingUrl，不允许打开预订页，不允许付款，不允许下单，不允许保存证件 / 银行卡。候选平台与 Provider 审批状态必须继续保留默认未审查和未启用状态。
