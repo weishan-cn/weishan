@@ -3173,7 +3173,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.75 trusted external search router keeps lowest two flight offers contract gated", async () => {
+  test("v2.0.76 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -3189,18 +3189,19 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("出发日期：7月15日");
     await expect(summaryPanel).toContainText("搜索目标：低价优先");
     await expect(summaryPanel).toContainText("当前不能返回实时价格");
+    await expect(summaryPanel).toContainText("当前状态：未接入真实机票价格源，暂不能返回实时价格。");
     await expect(summaryPanel).toContainText("价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。");
     await expect(summaryPanel).toContainText("接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。");
     await expect(summaryPanel).toContainText("当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单");
     await expect(summaryPanel).not.toContainText("最终价格以真实平台为准");
     await expect(summaryPanel).not.toContainText(/¥\s*\d+/);
-    for (const label of ["打开全网搜索", "打开 Google Flights 搜索", "打开 Trip.com / 携程搜索", "复制机票搜索条件", "复制 Google Flights 模板", "复制 Trip.com / 携程模板", "查看分析过程", "查看安全边界", "查看技术细节"]) await expect(home).toContainText(label);
+    for (const label of ["打开全网搜索", "打开 Google Flights 搜索", "打开 Trip.com / 携程搜索", "复制机票搜索条件", "复制 Google Flights 模板", "复制 Trip.com / 携程模板", "查看候选平台", "查看分析过程", "查看安全边界", "查看技术细节"]) await expect(home).toContainText(label);
     await expect(summaryPanel).toContainText("点击后会打开外部搜索或外部平台");
     await expect(summaryPanel).toContainText("weishan 当前不返回价格，不付款，不下单");
     await expect(summaryPanel).toContainText("全网搜索结果由外部搜索引擎提供");
     const contract = await page.evaluate(() => window.WeishanCommerceFlightLowestOffersContract && typeof window.WeishanCommerceFlightLowestOffersContract.getFlightLowestOffersContract === "function" ? window.WeishanCommerceFlightLowestOffersContract.getFlightLowestOffersContract() : null);
     expect(contract).toEqual(expect.objectContaining({
-      contractVersion:"2.0.75",
+      contractVersion:"2.0.76",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -3210,9 +3211,95 @@ test.describe.serial("commerce agent workbench", () => {
     expect(contract.offers).toEqual([]);
     expect(contract.display).toEqual(expect.objectContaining({
       summaryTitle:"机票搜索条件已整理",
+      currentStatusLine:"当前状态：未接入真实机票价格源，暂不能返回实时价格。",
       priceStateLine:"价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。",
       futureLine:"接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。"
     }));
+    const registry = await page.evaluate(() => window.WeishanCommerceFlightProviderCandidates && typeof window.WeishanCommerceFlightProviderCandidates.getFlightProviderCandidatesRegistry === "function" ? window.WeishanCommerceFlightProviderCandidates.getFlightProviderCandidatesRegistry() : null);
+    expect(registry).toEqual(expect.objectContaining({
+      contractVersion:"2.0.76",
+      phase:"flight_provider_candidate_registry",
+      registryStatus:"candidate_registry_only",
+      candidateCount:7,
+      trustStatus:"candidate_only",
+      manualReviewStatus:"not_reviewed"
+    }));
+    expect(registry.domainSafetyRules.allowedDomains).toEqual(expect.arrayContaining([
+      "google.com",
+      "google.com/travel/flights",
+      "trip.com",
+      "ctrip.com",
+      "skyscanner.com",
+      "kayak.com",
+      "expedia.com",
+      "booking.com"
+    ]));
+    expect(registry.domainSafetyRules.blockedRules).toEqual(expect.arrayContaining([
+      "短链接",
+      "非 HTTPS",
+      "拼写相似的仿冒域名",
+      "AI 生成域名",
+      "私聊付款",
+      "先转账出票",
+      "低价异常",
+      "无主体信息",
+      "和搜索意图无关",
+      "成人 / 赌博 / 武器 / 毒品等高风险域名"
+    ]));
+    for (const candidate of [
+      { providerId:"google_flights", providerName:"Google Flights", officialDomains:["google.com", "google.com/travel/flights"], searchEntryUrl:"https://www.google.com/travel/flights", regionScope:["global"], supportedLanguages:["zh-CN", "en"], supportedCurrencies:["CNY", "USD", "HKD", "SGD"] },
+      { providerId:"trip_com_ctrip", providerName:"Trip.com / 携程", officialDomains:["trip.com", "ctrip.com"], searchEntryUrl:"https://www.trip.com/flights/search/", regionScope:["global", "China outbound"], supportedLanguages:["zh-CN", "en"], supportedCurrencies:["CNY", "USD", "HKD", "SGD"] },
+      { providerId:"skyscanner", providerName:"Skyscanner", officialDomains:["skyscanner.com"], searchEntryUrl:"https://www.skyscanner.com/flights", regionScope:["global"], supportedLanguages:["zh-CN", "en"], supportedCurrencies:["CNY", "USD", "GBP", "EUR"] },
+      { providerId:"kayak", providerName:"Kayak", officialDomains:["kayak.com"], searchEntryUrl:"https://www.kayak.com/flights", regionScope:["global"], supportedLanguages:["en"], supportedCurrencies:["USD", "CNY", "EUR", "GBP"] },
+      { providerId:"expedia", providerName:"Expedia", officialDomains:["expedia.com"], searchEntryUrl:"https://www.expedia.com/Flights", regionScope:["global"], supportedLanguages:["en"], supportedCurrencies:["USD", "CNY", "EUR", "GBP"] },
+      { providerId:"booking_flights", providerName:"Booking Flights", officialDomains:["booking.com"], searchEntryUrl:"https://www.booking.com/flights", regionScope:["global"], supportedLanguages:["en"], supportedCurrencies:["USD", "CNY", "EUR", "GBP"] },
+      { providerId:"airline_official_website", providerName:"航司官网占位", officialDomains:["airline-official-website.placeholder"], searchEntryUrl:"https://www.google.com/search?q=airline+official+website+flight+search", regionScope:["carrier-specific"], supportedLanguages:["varies by carrier"], supportedCurrencies:["varies by carrier"] }
+    ]) {
+      const profile = registry.candidateProfiles.find((item) => item.providerId === candidate.providerId);
+      expect(profile).toEqual(expect.objectContaining({
+        providerName: candidate.providerName,
+        providerType: "flight_search_candidate",
+        searchEntryUrl: candidate.searchEntryUrl,
+        apiStatus: "not_connected",
+        priceStatus: "not_available",
+        bookingUrlStatus: "not_available",
+        trustStatus: "candidate_only",
+        manualReviewStatus: "not_reviewed",
+        riskLevel: candidate.providerId === "airline_official_website" ? "medium" : "low"
+      }));
+      expect(profile.regionScope).toEqual(candidate.regionScope);
+      expect(profile.supportedLanguages).toEqual(candidate.supportedLanguages);
+      expect(profile.supportedCurrencies).toEqual(candidate.supportedCurrencies);
+      expect(profile.officialDomains).toEqual(candidate.officialDomains);
+      expect(profile.capabilities).toEqual(expect.objectContaining({
+        canUseApiKey:false,
+        canUseNetworkApi:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canOpenBookingUrl:false,
+        canCreateOrder:false,
+        canPay:false,
+        canStoreIdentity:false,
+        canStorePassport:false,
+        canStoreBankCard:false
+      }));
+      expect(profile.safety).toEqual(expect.objectContaining({
+        noRealEndpoint:true,
+        noRealApiKey:true,
+        noNetworkSearch:true,
+        noRealResults:true,
+        noRealPrice:true,
+        noFakeDemoMockPrice:true,
+        noBookingUrl:true,
+        noRedirect:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true,
+        noPassportStorage:true,
+        noBankCardStorage:true
+      }));
+    }
     expect(contract.capabilities).toEqual(expect.objectContaining({
       canReturnOffers:false,
       canReturnPrice:false,
@@ -3229,16 +3316,36 @@ test.describe.serial("commerce agent workbench", () => {
       noRealResults:true,
       noRealPrice:true,
       noFakeDemoMockPrice:true,
+      noBookingUrl:true,
       noRedirect:true,
       noCheckout:true,
       noPayment:true,
       noOrderSubmit:true,
-      noIdentityStorage:true
+      noIdentityStorage:true,
+      noPassportStorage:true,
+      noBankCardStorage:true
     }));
     const defaultText = await visibleTextWithoutTechnicalDetails(home);
     for (const hidden of ["商品采购计划", "酒店计划", "电脑搜索条件", "京东模板", "淘宝 / 天猫", "Amazon 模板", "Best Buy 模板", "Booking hotel search template", "Google Flights search template", "未知网站结果", "可疑域名", "约 ", "已找到机票价格", "价格如下"]) {
       expect(defaultText).not.toContain(hidden);
     }
+    await expect(summaryPanel).toContainText("查看候选平台");
+    const candidateDisclosure = summaryPanel.locator("details.commerce-flight-provider-candidates-disclosure");
+    await expect(candidateDisclosure).not.toHaveAttribute("open", "");
+    await openDisclosure(summaryPanel, "commerce-flight-provider-candidates-disclosure");
+    await expect(summaryPanel).toContainText("候选平台档案与白名单规则");
+    await expect(summaryPanel).toContainText("默认优先域名白名单");
+    await expect(summaryPanel).toContainText("默认阻断规则");
+    for (const text of ["Google Flights", "Trip.com / 携程", "Skyscanner", "Kayak", "Expedia", "Booking Flights", "航司官网占位"]) {
+      await expect(summaryPanel).toContainText(text);
+    }
+    await expect(summaryPanel).toContainText("API 状态：未连接");
+    await expect(summaryPanel).toContainText("价格状态：不可用");
+    await expect(summaryPanel).toContainText("bookingUrl 状态：不可用");
+    await expect(summaryPanel).toContainText("可信状态：仅候选");
+    await expect(summaryPanel).toContainText("人工复核：未审查");
+    await expect(summaryPanel).toContainText("风险等级：低风险");
+    await expect(summaryPanel).toContainText("候选平台只作档案，不连接 API，不返回价格，不生成 booking 链接。");
     await expect(summaryPanel.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(summaryPanel.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
     await installClipboardMock(page);
@@ -3278,11 +3385,23 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(historyDetail).toContainText("目的地：成都");
     await expect(historyDetail).toContainText("出发日期：7月15日");
     await expect(historyDetail).toContainText("当前不能返回实时价格");
+    await expect(historyDetail).toContainText("当前状态：未接入真实机票价格源，暂不能返回实时价格。");
     await expect(historyDetail).toContainText("价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。");
     await expect(historyDetail).not.toContainText("最终价格以真实平台为准");
     await expect(historyDetail).toContainText("打开全网搜索");
     await expect(historyDetail).toContainText("打开 Google Flights 搜索");
     await expect(historyDetail).toContainText("打开 Trip.com / 携程搜索");
+    await expect(historyDetail).toContainText("查看候选平台");
+    await expect(historyDetail.locator("details.commerce-flight-provider-candidates-disclosure")).not.toHaveAttribute("open", "");
+    await openDisclosure(historyDetail, "commerce-flight-provider-candidates-disclosure");
+    await expect(historyDetail).toContainText("候选平台档案与白名单规则");
+    await expect(historyDetail).toContainText("Google Flights");
+    await expect(historyDetail).toContainText("Trip.com / 携程");
+    await expect(historyDetail).toContainText("Skyscanner");
+    await expect(historyDetail).toContainText("Kayak");
+    await expect(historyDetail).toContainText("Expedia");
+    await expect(historyDetail).toContainText("Booking Flights");
+    await expect(historyDetail).toContainText("航司官网占位");
     const historyOpenCountBefore = await page.evaluate(() => (window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ || []).length);
     await historyDetail.getByRole("button", { name:"打开 Google Flights 搜索" }).click();
     await expect.poll(async () => page.evaluate(() => (window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ || []).length), { timeout:5000 }).toBe(historyOpenCountBefore + 1);
@@ -3292,7 +3411,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.75 bare flight intent still renders the simple flight result card", async () => {
+  test("v2.0.76 bare flight intent still renders the simple flight result card", async () => {
     await resetCommerceTasks(page);
     await page.reload({ waitUntil:"domcontentloaded" });
     await gotoRoute(page, "home");
@@ -3306,8 +3425,10 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("目的地：成都");
     await expect(summaryPanel).toContainText("出发日期：7月15日");
     await expect(summaryPanel).toContainText("搜索目标：按条件筛选");
+    await expect(summaryPanel).toContainText("当前状态：未接入真实机票价格源，暂不能返回实时价格。");
     await expect(summaryPanel).toContainText("当前不能返回实时价格");
     await expect(summaryPanel).toContainText("价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。");
+    await expect(summaryPanel).toContainText("查看候选平台");
     await expect(summaryPanel).not.toContainText("最终价格以真实平台为准");
     await expect(summaryPanel).not.toContainText(/¥\s*\d+/);
     const defaultText = await visibleTextWithoutTechnicalDetails(home);
@@ -3316,10 +3437,10 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.0.75 sidebar version stays in sync with release version", async () => {
+  test("v2.0.76 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.0.75");
+    await expect(sidebarFoot).toContainText("weishan v2.0.76");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 

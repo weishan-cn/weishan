@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const CONTRACT_VERSION = "2.0.75";
+  const CONTRACT_VERSION = "2.0.76";
   const PHASE = "flight_lowest_two_offers_contract";
   const DEFAULT_PROVIDER_STATUS = "not_configured";
   const DEFAULT_OFFERS_STATUS = "unavailable";
@@ -18,7 +18,9 @@
       canOpenExternalBooking: false,
       canCreateOrder: false,
       canPay: false,
-      canStoreIdentity: false
+      canStoreIdentity: false,
+      canStorePassport: false,
+      canStoreBankCard: false
     };
   }
 
@@ -30,17 +32,21 @@
       noRealResults: true,
       noRealPrice: true,
       noFakeDemoMockPrice: true,
+      noBookingUrl: true,
       noRedirect: true,
       noCheckout: true,
       noPayment: true,
       noOrderSubmit: true,
-      noIdentityStorage: true
+      noIdentityStorage: true,
+      noPassportStorage: true,
+      noBankCardStorage: true
     };
   }
 
   function defaultDisplay() {
     return {
       summaryTitle: "机票搜索条件已整理",
+      currentStatusLine: "当前状态：未接入真实机票价格源，暂不能返回实时价格。",
       priceStateLine: "价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。",
       futureLine: "接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。"
     };
@@ -76,12 +82,14 @@
     if (safe.providerStatus === "approved_readonly") {
       return {
         summaryTitle: safe.display.summaryTitle || "机票最低价结果",
+        currentStatusLine: safe.display.currentStatusLine || "当前状态：已接入真实只读价格源，当前可展示通过安全检查的最低价前 2 家可信平台结果。",
         priceStateLine: "价格状态：已接入真实只读价格源，当前可展示通过安全检查的最低价前 2 家可信平台结果。",
         futureLine: safe.display.futureLine || "最终价格、库存、出票规则和付款以外部平台为准。"
       };
     }
     return {
       summaryTitle: safe.display.summaryTitle || "机票搜索条件已整理",
+      currentStatusLine: safe.display.currentStatusLine || "当前状态：未接入真实机票价格源，暂不能返回实时价格。",
       priceStateLine: safe.display.priceStateLine || "价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。",
       futureLine: safe.display.futureLine || "接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。"
     };

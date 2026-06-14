@@ -656,6 +656,7 @@ One Screen Result Mode 只改变展示层，不改变 provider gate，不接真�
 - v2.0.73：Simple Flight Result Fix / 简单机票结果修正
 - v2.0.74：Trusted External Search Router / 可信外部搜索路由
 - v2.0.75：Lowest Two Flight Offers Contract / 机票最低两家结果展示合同
+- v2.0.76：Flight Provider Candidate Registry / 机票候选 Provider 档案与白名单规则
 
 ## 13. 可信外部搜索路线
 
@@ -715,6 +716,16 @@ AI 只能参与意图识别、搜索词优化和风险提示。AI 可以标记�
 - canStoreIdentity: false
 
 在未获得 approved_readonly provider 时，默认结果区只显示搜索条件、价格状态说明和可信外部搜索入口，不显示价格卡片、bookingUrl、假价格、demo/mock price、购买按钮、付款按钮或下单入口。历史回看也必须保留同样的价格状态说明和外部搜索按钮。
+
+## 17. 机票候选 Provider 档案与白名单规则
+
+v2.0.76 在阶段一之上补充机票候选 Provider 档案与白名单规则。默认必须返回 flightProviderCandidatesRegistry，registryStatus / trustStatus / manualReviewStatus / candidateProfiles 默认固定为候选档案状态；没有人工审核通过的可信候选档案时不得展示价格卡片、bookingUrl、外部跳转、付款或下单入口，只能显示“候选平台档案与白名单规则”“查看候选平台”“候选平台只作档案，不连接 API，不返回价格，不生成 booking 链接。”等 UI 闸门文案。
+
+默认优先域名白名单必须包含 Google Flights、Trip.com / 携程、Skyscanner、Kayak、Expedia、Booking Flights 和航司官网占位。默认阻断规则必须覆盖短链接、非 HTTPS、拼写相似的仿冒域名、AI 生成域名、私聊付款、先转账出票、低价异常、无主体信息、和搜索意图无关、成人 / 赌博 / 武器 / 毒品等高风险域名。候选平台只作档案，不连接 API，不返回价格，不生成 booking 链接。
+
+候选平台档案只允许描述搜索入口、官方域名、风险等级、人工复核状态和可见的安全边界说明；不允许露出真实 API key、endpoint、真实价格、fake/demo/mock price、付款、下单、证件保存或未知网站结果。
+
+后续版本继续保持阶段一和阶段二的边界，只有在真实只读 provider 获得明确批准后，才可能展示真实价格。
 
 ## 14. 默认结果噪音控制
 

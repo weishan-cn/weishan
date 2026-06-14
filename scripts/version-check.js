@@ -55,6 +55,27 @@ function checkRendererConfigVersion(results, expectedVersion) {
   );
 }
 
+function checkFlightProviderCandidatesVersion(results, expectedVersion) {
+  const candidatesPath = "apps/desktop/src/renderer/core/commerceFlightProviderCandidates.js";
+  const candidates = readText(candidatesPath);
+  if (!candidates) {
+    results.push({ name: "apps/desktop flight provider candidates registry version", pass: false, detail: candidatesPath + " missing" });
+    return;
+  }
+  if (candidates.__readError) {
+    results.push({ name: "apps/desktop flight provider candidates registry version", pass: false, detail: candidates.__readError });
+    return;
+  }
+  const match = candidates.match(/CONTRACT_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop flight provider candidates registry version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceFlightProviderCandidates.js CONTRACT_VERSION"
+  );
+}
+
 function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
   const pkg = readJson(packagePath);
   const lock = readJson(lockPath);
@@ -100,6 +121,7 @@ function runVersionCheck() {
 
   if (rootPackage && !rootPackage.__readError) {
     checkRendererConfigVersion(results, rootPackage.version);
+    checkFlightProviderCandidatesVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

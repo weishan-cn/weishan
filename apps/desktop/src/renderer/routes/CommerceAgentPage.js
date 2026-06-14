@@ -2073,7 +2073,7 @@
 
   function commerceFlightLowestOffersContract(task){
     const fallback = {
-      contractVersion:"2.0.75",
+      contractVersion:"2.0.76",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -2088,7 +2088,9 @@
         canOpenExternalBooking:false,
         canCreateOrder:false,
         canPay:false,
-        canStoreIdentity:false
+        canStoreIdentity:false,
+        canStorePassport:false,
+        canStoreBankCard:false
       },
       safety:{
         noRealEndpoint:true,
@@ -2097,14 +2099,18 @@
         noRealResults:true,
         noRealPrice:true,
         noFakeDemoMockPrice:true,
+        noBookingUrl:true,
         noRedirect:true,
         noCheckout:true,
         noPayment:true,
         noOrderSubmit:true,
-        noIdentityStorage:true
+        noIdentityStorage:true,
+        noPassportStorage:true,
+        noBankCardStorage:true
       },
       display:{
         summaryTitle:"机票搜索条件已整理",
+        currentStatusLine:"当前状态：未接入真实机票价格源，暂不能返回实时价格。",
         priceStateLine:"价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。",
         futureLine:"接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。"
       }
@@ -2123,9 +2129,132 @@
     const display = contract.display || {};
     return {
       summaryTitle:display.summaryTitle || "机票搜索条件已整理",
+      currentStatusLine:display.currentStatusLine || "当前状态：未接入真实机票价格源，暂不能返回实时价格。",
       priceStateLine:display.priceStateLine || "价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。",
       futureLine:display.futureLine || "接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。"
     };
+  }
+
+  function commerceFlightProviderCandidatesRegistry(task){
+    const fallback = {
+      contractVersion:"2.0.76",
+      phase:"flight_provider_candidate_registry",
+      registryStatus:"candidate_registry_only",
+      candidateCount:7,
+      trustStatus:"candidate_only",
+      manualReviewStatus:"not_reviewed",
+      domainSafetyRules:{
+        allowedDomains:["google.com", "google.com/travel/flights", "trip.com", "ctrip.com", "skyscanner.com", "kayak.com", "expedia.com", "booking.com"],
+        blockedRules:["短链接", "非 HTTPS", "拼写相似的仿冒域名", "AI 生成域名", "私聊付款", "先转账出票", "低价异常", "无主体信息", "和搜索意图无关", "成人 / 赌博 / 武器 / 毒品等高风险域名"]
+      },
+      candidateProfiles:[],
+      capabilities:{
+        canUseApiKey:false,
+        canUseNetworkApi:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canOpenBookingUrl:false,
+        canCreateOrder:false,
+        canPay:false,
+        canStoreIdentity:false,
+        canStorePassport:false,
+        canStoreBankCard:false
+      },
+      safety:{
+        noRealEndpoint:true,
+        noRealApiKey:true,
+        noNetworkSearch:true,
+        noRealResults:true,
+        noRealPrice:true,
+        noFakeDemoMockPrice:true,
+        noBookingUrl:true,
+        noRedirect:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true,
+        noPassportStorage:true,
+        noBankCardStorage:true
+      },
+      display:{
+        summaryTitle:"候选平台档案与白名单规则",
+        currentStatusLine:"当前状态：候选平台档案已整理，暂不接入真实价格源。",
+        introLine:"这些只是候选平台档案，不代表已接入。当前不读取 API key，不连接 endpoint，不返回价格，不生成 booking 链接。",
+        trustedRoutesLine:"默认优先保留官方平台、知名旅行平台和已人工审核白名单。",
+        candidateCountLabel:"候选平台",
+        allowlistTitle:"默认优先域名白名单",
+        blockedRulesTitle:"默认阻断规则",
+        capabilityLine:"API key 不可用 / 网络搜索不可用 / 价格不可用 / booking 链接不可用 / 下单不可用 / 付款不可用 / 身份证 / 护照 / 银行卡不可保存"
+      }
+    };
+    const api = window.WeishanCommerceFlightProviderCandidates;
+    const source = task && task.flightProviderCandidatesRegistry || null;
+    if (api && typeof api.normalizeFlightProviderCandidatesRegistry === "function") return api.normalizeFlightProviderCandidatesRegistry(source);
+    if (api && typeof api.getFlightProviderCandidatesRegistry === "function") return api.getFlightProviderCandidatesRegistry(source);
+    const raw = source && typeof source === "object" ? source : {};
+    return Object.assign({}, fallback, raw, {
+      candidateProfiles:Array.isArray(raw.candidateProfiles) ? raw.candidateProfiles.slice() : fallback.candidateProfiles.slice(),
+      capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      safety:Object.assign({}, fallback.safety, raw.safety && typeof raw.safety === "object" ? raw.safety : {}),
+      domainSafetyRules:Object.assign({}, fallback.domainSafetyRules, raw.domainSafetyRules && typeof raw.domainSafetyRules === "object" ? raw.domainSafetyRules : {}),
+      display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
+  function commerceFlightProviderCandidatesDisplay(task){
+    const registry = commerceFlightProviderCandidatesRegistry(task);
+    const api = window.WeishanCommerceFlightProviderCandidates;
+    if (api && typeof api.describeFlightProviderCandidatesRegistry === "function") return api.describeFlightProviderCandidatesRegistry(registry);
+    return registry;
+  }
+
+  function commerceFlightProviderCandidatesDisclosure(task){
+    const display = commerceFlightProviderCandidatesDisplay(task);
+    if (!display || !display.candidateProfiles) return "";
+    const escListItem = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value || "")}</b></li>`;
+    const body = `<section class="commerce-flight-provider-candidates-panel" aria-label="候选平台档案与白名单规则">
+      <div class="commerce-flight-provider-candidates-head">
+        <div>
+          <h4>${esc(display.summaryTitle || "候选平台档案与白名单规则")}</h4>
+          <p>${esc(display.introLine || "这些只是候选平台档案，不代表已接入。当前不读取 API key，不连接 endpoint，不返回价格，不生成 booking 链接。")}</p>
+        </div>
+        <strong>${esc(display.currentStatusLine || "当前状态：候选平台档案已整理，暂不接入真实价格源。")}</strong>
+      </div>
+      <p class="commerce-flight-provider-candidates-note">${esc(display.trustedRoutesLine || "默认优先保留官方平台、知名旅行平台和已人工审核白名单。")}</p>
+      <div class="commerce-flight-provider-candidates-rules">
+        <section>
+          <h5>${esc(display.allowlistTitle || "默认优先域名白名单")}</h5>
+          <ul>${(display.allowlistDomains || []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+        </section>
+        <section>
+          <h5>${esc(display.blockedRulesTitle || "默认阻断规则")}</h5>
+          <ul>${(display.blockedRules || []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+        </section>
+      </div>
+      <div class="commerce-flight-provider-candidates-grid">
+        ${(display.candidateProfiles || []).map((profile) => `<article class="commerce-flight-provider-candidate-card">
+          <h5>${esc(profile.providerName)}</h5>
+          <ul>
+            ${escListItem("平台 ID", profile.providerId)}
+            ${escListItem("平台类型", profile.providerTypeLabel)}
+            ${escListItem("区域范围", profile.regionScopeLabel)}
+            ${escListItem("支持语言", profile.supportedLanguagesLabel)}
+            ${escListItem("支持货币", profile.supportedCurrenciesLabel)}
+            ${escListItem("官方域名", profile.officialDomainsLabel)}
+            ${escListItem("搜索入口", profile.searchEntryUrlLabel)}
+            ${escListItem("API 状态", profile.apiStatusLabel)}
+            ${escListItem("价格状态", profile.priceStatusLabel)}
+            ${escListItem("bookingUrl 状态", profile.bookingUrlStatusLabel)}
+            ${escListItem("可信状态", profile.trustStatusLabel)}
+            ${escListItem("人工复核", profile.manualReviewStatusLabel)}
+            ${escListItem("风险等级", profile.riskLevelLabel)}
+            ${escListItem("能力", profile.capabilityLine)}
+            ${escListItem("说明", profile.notes)}
+          </ul>
+        </article>`).join("")}
+      </div>
+    </section>`;
+    return disclosure("查看候选平台", body, "commerce-flight-provider-candidates-disclosure");
   }
 
   function commerceSimpleFlightResultPanelHtml(task){
@@ -2148,6 +2277,7 @@
           <p>目的地：${esc(fields.destination)}</p>
           <p>出发日期：${esc(fields.date)}</p>
           <p>搜索目标：${esc(fields.goal)}</p>
+          <p>${esc(flightLowestOffers.currentStatusLine)}</p>
           <p>${esc(flightLowestOffers.priceStateLine)}</p>
           <p>${esc(flightLowestOffers.futureLine)}</p>
         </section>
@@ -2161,6 +2291,7 @@
         <button class="cmd-btn gray commerce-platform-template-copy-btn" type="button" data-commerce-template-kind="simpleGoogleFlights" data-commerce-template-text="${commerceEncodedCopyText(copyTexts.googleFlights)}">复制 Google Flights 模板</button>
         <button class="cmd-btn gray commerce-platform-template-copy-btn" type="button" data-commerce-template-kind="simpleTripCom" data-commerce-template-text="${commerceEncodedCopyText(copyTexts.tripCom)}">复制 Trip.com / 携程模板</button>
       </div>
+      ${commerceFlightProviderCandidatesDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;

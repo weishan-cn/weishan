@@ -54,7 +54,9 @@
         canOpenExternalBooking:false,
         canCreateOrder:false,
         canPay:false,
-        canStoreIdentity:false
+        canStoreIdentity:false,
+        canStorePassport:false,
+        canStoreBankCard:false
       },
       safety:{
         noRealEndpoint:true,
@@ -63,14 +65,18 @@
         noRealResults:true,
         noRealPrice:true,
         noFakeDemoMockPrice:true,
+        noBookingUrl:true,
         noRedirect:true,
         noCheckout:true,
         noPayment:true,
         noOrderSubmit:true,
-        noIdentityStorage:true
+        noIdentityStorage:true,
+        noPassportStorage:true,
+        noBankCardStorage:true
       },
       display:{
         summaryTitle:"机票搜索条件已整理",
+        currentStatusLine:"当前状态：未接入真实机票价格源，暂不能返回实时价格。",
         priceStateLine:"价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。",
         futureLine:"接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。"
       }
@@ -80,6 +86,76 @@
       offers:Array.isArray(raw.offers) ? raw.offers.slice() : fallback.offers.slice(),
       capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
       safety:Object.assign({}, fallback.safety, raw.safety && typeof raw.safety === "object" ? raw.safety : {}),
+      display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
+  function createFlightProviderCandidatesRegistry(registry){
+    const api = window.WeishanCommerceFlightProviderCandidates;
+    if (api && typeof api.normalizeFlightProviderCandidatesRegistry === "function") {
+      return api.normalizeFlightProviderCandidatesRegistry(registry);
+    }
+    if (api && typeof api.getFlightProviderCandidatesRegistry === "function") {
+      return api.getFlightProviderCandidatesRegistry(registry);
+    }
+    const fallback = {
+      contractVersion:"2.0.76",
+      phase:"flight_provider_candidate_registry",
+      registryStatus:"candidate_registry_only",
+      candidateCount:7,
+      trustStatus:"candidate_only",
+      manualReviewStatus:"not_reviewed",
+      domainSafetyRules:{
+        allowedDomains:["google.com", "google.com/travel/flights", "trip.com", "ctrip.com", "skyscanner.com", "kayak.com", "expedia.com", "booking.com"],
+        blockedRules:["短链接", "非 HTTPS", "拼写相似的仿冒域名", "AI 生成域名", "私聊付款", "先转账出票", "低价异常", "无主体信息", "和搜索意图无关", "成人 / 赌博 / 武器 / 毒品等高风险域名"]
+      },
+      candidateProfiles:[],
+      capabilities:{
+        canUseApiKey:false,
+        canUseNetworkApi:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canOpenBookingUrl:false,
+        canCreateOrder:false,
+        canPay:false,
+        canStoreIdentity:false,
+        canStorePassport:false,
+        canStoreBankCard:false
+      },
+      safety:{
+        noRealEndpoint:true,
+        noRealApiKey:true,
+        noNetworkSearch:true,
+        noRealResults:true,
+        noRealPrice:true,
+        noFakeDemoMockPrice:true,
+        noBookingUrl:true,
+        noRedirect:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true,
+        noPassportStorage:true,
+        noBankCardStorage:true
+      },
+      display:{
+        summaryTitle:"候选平台档案与白名单规则",
+        currentStatusLine:"当前状态：候选平台档案已整理，暂不接入真实价格源。",
+        introLine:"这些只是候选平台档案，不代表已接入。当前不读取 API key，不连接 endpoint，不返回价格，不生成 booking 链接。",
+        trustedRoutesLine:"默认优先保留官方平台、知名旅行平台和已人工审核白名单。",
+        candidateCountLabel:"候选平台",
+        allowlistTitle:"默认优先域名白名单",
+        blockedRulesTitle:"默认阻断规则",
+        capabilityLine:"API key 不可用 / 网络搜索不可用 / 价格不可用 / booking 链接不可用 / 下单不可用 / 付款不可用 / 身份证 / 护照 / 银行卡不可保存"
+      }
+    };
+    const raw = registry && typeof registry === "object" ? registry : {};
+    const candidateProfiles = Array.isArray(raw.candidateProfiles) ? raw.candidateProfiles.slice() : fallback.candidateProfiles.slice();
+    return Object.assign({}, fallback, raw, {
+      candidateProfiles,
+      capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      safety:Object.assign({}, fallback.safety, raw.safety && typeof raw.safety === "object" ? raw.safety : {}),
+      domainSafetyRules:Object.assign({}, fallback.domainSafetyRules, raw.domainSafetyRules && typeof raw.domainSafetyRules === "object" ? raw.domainSafetyRules : {}),
       display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
     });
   }
@@ -343,6 +419,7 @@
       providerHealth:[],
       complianceHealth:{},
       flightLowestOffersContract:category === "flight" ? createFlightLowestOffersContract() : null,
+      flightProviderCandidatesRegistry:category === "flight" ? createFlightProviderCandidatesRegistry() : null,
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -389,6 +466,7 @@
       providerHealth:Array.isArray(base.providerHealth) ? base.providerHealth : [],
       complianceHealth:base.complianceHealth && typeof base.complianceHealth === "object" ? base.complianceHealth : {},
       flightLowestOffersContract:category === "flight" ? createFlightLowestOffersContract(base.flightLowestOffersContract) : null,
+      flightProviderCandidatesRegistry:category === "flight" ? createFlightProviderCandidatesRegistry(base.flightProviderCandidatesRegistry) : null,
       canShowPrice:base.canShowPrice === true,
       canShowBookingButton:base.canShowBookingButton === true,
       canShowCheckoutButton:base.canShowCheckoutButton === true,
@@ -499,6 +577,7 @@
       searchStatus:safe.searchStatus,
       searchProviderName:safe.searchProviderName,
       flightLowestOffersContract:safe.category === "flight" ? safe.flightLowestOffersContract : null,
+      flightProviderCandidatesRegistry:safe.category === "flight" ? safe.flightProviderCandidatesRegistry : null,
       candidates:safe.candidates,
       recommendation:safe.recommendation,
       nextSteps:[
