@@ -109,6 +109,22 @@ async function disableClipboardMock(page) {
   });
 }
 
+async function installOpenExternalMock(page) {
+  await page.evaluate(() => {
+    window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ = [];
+    window.__WEISHAN_TEST_OPEN_EXTERNAL__ = async (url) => {
+      window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__.push(String(url || ""));
+    };
+  });
+}
+
+async function latestOpenExternalUrl(page) {
+  return page.evaluate(() => {
+    const urls = window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ || [];
+    return urls[urls.length - 1] || "";
+  });
+}
+
 function currentTaskLogs(page) {
   return page.locator(".cmd-log-list").first();
 }
@@ -3157,7 +3173,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.73 simple flight request shows concise no-price result", async () => {
+  test("v2.0.74 trusted external search router opens only user clicked trusted flight entries", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -3175,15 +3191,30 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("暂不能返回实时价格");
     await expect(summaryPanel).toContainText("最终价格以真实平台为准");
     await expect(summaryPanel).toContainText("当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单");
-    for (const label of ["复制机票搜索条件", "复制 Google Flights 模板", "复制 Trip.com / 携程模板", "查看分析过程", "查看安全边界", "查看技术细节"]) await expect(home).toContainText(label);
+    for (const label of ["打开全网搜索", "打开 Google Flights 搜索", "打开 Trip.com / 携程搜索", "复制机票搜索条件", "复制 Google Flights 模板", "复制 Trip.com / 携程模板", "查看分析过程", "查看安全边界", "查看技术细节"]) await expect(home).toContainText(label);
+    await expect(summaryPanel).toContainText("点击后会打开外部搜索或外部平台");
+    await expect(summaryPanel).toContainText("weishan 当前不返回价格，不付款，不下单");
+    await expect(summaryPanel).toContainText("全网搜索结果由外部搜索引擎提供");
     const defaultText = await visibleTextWithoutTechnicalDetails(home);
-    for (const hidden of ["商品采购计划", "酒店计划", "电脑搜索条件", "京东模板", "淘宝 / 天猫", "Amazon 模板", "Best Buy 模板", "Booking hotel search template", "Google Flights search template", "约 ", "已找到机票价格", "价格如下"]) {
+    for (const hidden of ["商品采购计划", "酒店计划", "电脑搜索条件", "京东模板", "淘宝 / 天猫", "Amazon 模板", "Best Buy 模板", "Booking hotel search template", "Google Flights search template", "未知网站结果", "可疑域名", "约 ", "已找到机票价格", "价格如下", "最低价 "]) {
       expect(defaultText).not.toContain(hidden);
     }
     await expect(summaryPanel.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(summaryPanel.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
     await installClipboardMock(page);
+    await installOpenExternalMock(page);
     const historyCountBefore = await page.locator("#cmdHistory [data-history-id]").count();
+    await expect.poll(async () => page.evaluate(() => (window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ || []).length), { timeout:5000 }).toBe(0);
+    await summaryPanel.getByRole("button", { name:"打开全网搜索" }).click();
+    await expect.poll(async () => latestOpenExternalUrl(page), { timeout:5000 }).toContain("https://www.google.com/search?");
+    await expect.poll(async () => latestOpenExternalUrl(page), { timeout:5000 }).toContain(encodeURIComponent("7月15日 上海 到 成都 最便宜 机票"));
+    await summaryPanel.getByRole("button", { name:"打开 Google Flights 搜索" }).click();
+    await expect.poll(async () => latestOpenExternalUrl(page), { timeout:5000 }).toContain("https://www.google.com/travel/flights?");
+    await expect.poll(async () => latestOpenExternalUrl(page), { timeout:5000 }).toContain("Shanghai");
+    await summaryPanel.getByRole("button", { name:"打开 Trip.com / 携程搜索" }).click();
+    await expect.poll(async () => latestOpenExternalUrl(page), { timeout:5000 }).toContain("https://www.trip.com/flights/search/");
+    await expect.poll(async () => latestOpenExternalUrl(page), { timeout:5000 }).toContain("Chengdu");
+    await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
     await summaryPanel.getByRole("button", { name:"复制机票搜索条件" }).click();
     for (const text of ["机票搜索条件", "出发地：上海", "目的地：成都", "出发日期：7月15日", "搜索目标：低价优先", "最终价格以真实平台为准"]) {
       await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain(text);
@@ -3207,6 +3238,13 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(historyDetail).toContainText("目的地：成都");
     await expect(historyDetail).toContainText("出发日期：7月15日");
     await expect(historyDetail).toContainText("暂不能返回实时价格");
+    await expect(historyDetail).toContainText("打开全网搜索");
+    await expect(historyDetail).toContainText("打开 Google Flights 搜索");
+    await expect(historyDetail).toContainText("打开 Trip.com / 携程搜索");
+    const historyOpenCountBefore = await page.evaluate(() => (window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ || []).length);
+    await historyDetail.getByRole("button", { name:"打开 Google Flights 搜索" }).click();
+    await expect.poll(async () => page.evaluate(() => (window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ || []).length), { timeout:5000 }).toBe(historyOpenCountBefore + 1);
+    await expect.poll(async () => latestOpenExternalUrl(page), { timeout:5000 }).toContain("https://www.google.com/travel/flights?");
     await expect(historyDetail).toContainText("查看技术细节");
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountAfterNewTask);
     await disableClipboardMock(page);
@@ -3215,7 +3253,7 @@ test.describe.serial("commerce agent workbench", () => {
   test("v2.0.71 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.0.73");
+    await expect(sidebarFoot).toContainText("weishan v2.0.74");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 

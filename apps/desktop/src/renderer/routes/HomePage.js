@@ -2035,13 +2035,32 @@
     };
   }
 
+  function commerceSimpleFlightExternalSearchUrls(task){
+    const fields = commerceSimpleFlightFields(task);
+    const enOrigin = commerceSimpleFlightEnglishCity(fields.origin);
+    const enDestination = commerceSimpleFlightEnglishCity(fields.destination);
+    const enDate = commerceSimpleFlightEnglishDate(fields.date);
+    const zhQuery = [fields.date, fields.origin, "到", fields.destination, fields.goal === "低价优先" ? "最便宜" : "", "机票"].filter(Boolean).join(" ");
+    const enQuery = [enOrigin, "to", enDestination, "flight", enDate, fields.goal === "低价优先" ? "lowest fare" : ""].filter(Boolean).join(" ");
+    return {
+      web:"https://www.google.com/search?q=" + encodeURIComponent(zhQuery),
+      googleFlights:"https://www.google.com/travel/flights?q=" + encodeURIComponent(enQuery),
+      tripCom:"https://www.trip.com/flights/search/?q=" + encodeURIComponent(enQuery)
+    };
+  }
+
   function commerceEncodedCopyText(text){
     return esc(encodeURIComponent(String(text || "")));
+  }
+
+  function commerceEncodedExternalUrl(url){
+    return esc(encodeURIComponent(String(url || "")));
   }
 
   function commerceSimpleFlightResultPanelHtml(task){
     const fields = commerceSimpleFlightFields(task);
     const copyTexts = commerceSimpleFlightCopyTexts(task);
+    const externalUrls = commerceSimpleFlightExternalSearchUrls(task);
     return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-simple-flight-result" aria-label="机票搜索条件已整理">
       <div class="commerce-result-summary-head">
         <div class="commerce-result-summary-headline">
@@ -2063,12 +2082,60 @@
         <p class="commerce-result-summary-status"><b>提示：</b>当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</p>
       </div>
       <div class="commerce-one-screen-actions" aria-label="机票搜索条件操作">
+        <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="web" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.web)}">打开全网搜索</button>
+        <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="googleFlights" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.googleFlights)}">打开 Google Flights 搜索</button>
+        <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="tripCom" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.tripCom)}">打开 Trip.com / 携程搜索</button>
         <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="simpleFlight" data-commerce-copy-text="${commerceEncodedCopyText(copyTexts.flight)}">复制机票搜索条件</button>
         <button class="cmd-btn gray commerce-platform-template-copy-btn" type="button" data-commerce-template-kind="simpleGoogleFlights" data-commerce-template-text="${commerceEncodedCopyText(copyTexts.googleFlights)}">复制 Google Flights 模板</button>
         <button class="cmd-btn gray commerce-platform-template-copy-btn" type="button" data-commerce-template-kind="simpleTripCom" data-commerce-template-text="${commerceEncodedCopyText(copyTexts.tripCom)}">复制 Trip.com / 携程模板</button>
       </div>
+      <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;
+  }
+
+  function commerceDecodedInlineValue(button, attr){
+    const encoded = button && button.getAttribute(attr) || "";
+    if (!encoded) return "";
+    try { return decodeURIComponent(encoded); } catch (_) { return encoded; }
+  }
+
+  function commerceIsTrustedExternalSearchUrl(url){
+    try {
+      const parsed = new URL(String(url || ""));
+      if (parsed.protocol !== "https:") return false;
+      return ["www.google.com", "google.com", "www.bing.com", "bing.com", "duckduckgo.com", "www.trip.com", "trip.com"].includes(parsed.hostname);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function commerceOpenTrustedExternalSearch(url){
+    const value = String(url || "");
+    if (!commerceIsTrustedExternalSearchUrl(value)) return Promise.resolve(false);
+    if (typeof window.__WEISHAN_TEST_OPEN_EXTERNAL__ === "function") {
+      return Promise.resolve(window.__WEISHAN_TEST_OPEN_EXTERNAL__(value)).then(() => true).catch(() => false);
+    }
+    if (window.WeishanAPI && typeof window.WeishanAPI.openExternal === "function") {
+      return Promise.resolve(window.WeishanAPI.openExternal(value)).then(() => true).catch(() => false);
+    }
+    if (window.weishan && typeof window.weishan.openExternal === "function") {
+      return Promise.resolve(window.weishan.openExternal(value)).then(() => true).catch(() => false);
+    }
+    return Promise.resolve(false);
+  }
+
+  let commerceExternalSearchFeedbackTimer = 0;
+  function showCommerceExternalSearchFeedback(host, message, failed){
+    const feedback = host && host.querySelector("[data-commerce-platform-template-feedback]");
+    if (!feedback) return;
+    feedback.textContent = message;
+    feedback.classList.toggle("is-failed", !!failed);
+    window.clearTimeout(commerceExternalSearchFeedbackTimer);
+    commerceExternalSearchFeedbackTimer = window.setTimeout(function(){
+      if (feedback.textContent === message) feedback.textContent = "";
+      feedback.classList.remove("is-failed");
+    }, 2600);
   }
 
   function commerceCopyTextToClipboard(text){
@@ -2935,8 +3002,16 @@
       try { return decodeURIComponent(encoded); } catch (_) { return encoded; }
     }
 
-    host.addEventListener("click", (event) => {
+    const commerceDelegatedClickHandler = (event) => {
       const target = event.target && event.target.closest ? event.target : null;
+      const externalButton = target && target.closest("[data-commerce-external-search-url]");
+      if (externalButton && host.contains(externalButton)) {
+        const url = commerceDecodedInlineValue(externalButton, "data-commerce-external-search-url");
+        commerceOpenTrustedExternalSearch(url).then(function(ok){
+          showCommerceExternalSearchFeedback(host, ok ? "已打开外部搜索入口，请在外部平台确认实时价格和规则" : "外部搜索入口未打开，请手动复制搜索条件", !ok);
+        });
+        return;
+      }
       const checklistButton = target && target.closest("[data-commerce-copy-kind]");
       if (checklistButton && host.contains(checklistButton)) {
         copyCommerceActionableChecklist(checklistButton.getAttribute("data-commerce-copy-kind") || "", commerceDecodedInlineCopyText(checklistButton, "data-commerce-copy-text"));
@@ -2946,7 +3021,10 @@
       if (templateButton && host.contains(templateButton)) {
         copyCommercePlatformTemplate(templateButton.getAttribute("data-commerce-template-kind") || "", commerceDecodedInlineCopyText(templateButton, "data-commerce-template-text"));
       }
-    });
+    };
+    if (host.__commerceDelegatedClickHandler) host.removeEventListener("click", host.__commerceDelegatedClickHandler);
+    host.__commerceDelegatedClickHandler = commerceDelegatedClickHandler;
+    host.addEventListener("click", commerceDelegatedClickHandler);
 
     const clearFinishedBtn = host.querySelector("#clearFinishedBtn");
     clearFinishedBtn.addEventListener("click", function(){
