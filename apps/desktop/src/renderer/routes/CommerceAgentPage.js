@@ -1982,6 +1982,109 @@
       ${disclosure("查看平台模板", commercePlatformSearchTemplatePackHtml(), "commerce-platform-template-disclosure")}
     </section>`;
   }
+  function commerceSimpleFlightFields(task){
+    const normalized = task && (task.normalizedFields || task.normalized) || {};
+    const raw = String(task && (task.inputSummary || task.rawInput || task.title || task.text) || "");
+    const origin = String(normalized.originText || "").trim();
+    const destination = String(normalized.destinationText || "").trim();
+    const date = String(normalized.dateText || normalized.timing || "").trim();
+    const lowPrice = /最便宜|低价|便宜/.test(raw) || /低价优先/.test(String(normalized.constraints || ""));
+    return {
+      origin,
+      destination,
+      date,
+      goal:lowPrice ? "低价优先" : "按条件筛选"
+    };
+  }
+
+  function commerceIsSimpleFlightTask(task){
+    const raw = String(task && (task.inputSummary || task.rawInput || task.title || task.text) || "");
+    const fields = commerceSimpleFlightFields(task);
+    return !!(task && task.category === "flight" && fields.origin && fields.destination && /\d{1,2}月\d{1,2}日/.test(fields.date) && !/(酒店|住宿|电脑|商品|剪视频|内存|硬盘|采购计划)/.test(raw));
+  }
+
+  function commerceSimpleFlightEnglishCity(value){
+    const map = { "上海":"Shanghai", "成都":"Chengdu", "北京":"Beijing", "广州":"Guangzhou", "深圳":"Shenzhen", "杭州":"Hangzhou", "东京":"Tokyo" };
+    return map[value] || value;
+  }
+
+  function commerceSimpleFlightEnglishDate(value){
+    const match = String(value || "").match(/(\d{1,2})月(\d{1,2})日/);
+    if (!match) return value;
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    return (months[Number(match[1]) - 1] || (match[1] + "月")) + " " + Number(match[2]);
+  }
+
+  function commerceSimpleFlightCopyTexts(task){
+    const fields = commerceSimpleFlightFields(task);
+    const enOrigin = commerceSimpleFlightEnglishCity(fields.origin);
+    const enDestination = commerceSimpleFlightEnglishCity(fields.destination);
+    const enDate = commerceSimpleFlightEnglishDate(fields.date);
+    const googleGoal = fields.goal === "低价优先" ? "lowest available fare" : "best matching fare";
+    return {
+      flight:[
+        "机票搜索条件",
+        "出发地：" + fields.origin,
+        "目的地：" + fields.destination,
+        "出发日期：" + fields.date,
+        "搜索目标：" + fields.goal,
+        "注意：当前不会访问真实平台，不会返回实时价格，最终价格以真实平台为准。"
+      ].join("\n"),
+      googleFlights:[
+        "Google Flights search template",
+        "From: " + enOrigin,
+        "To: " + enDestination,
+        "Departure date: " + enDate,
+        "Goal: " + googleGoal,
+        "Note: final price must be checked on the real platform."
+      ].join("\n"),
+      tripCom:[
+        "机票搜索模板",
+        "出发地：" + fields.origin,
+        "目的地：" + fields.destination,
+        "出发日期：" + fields.date,
+        "搜索目标：" + fields.goal,
+        "注意：最终价格以真实平台为准。"
+      ].join("\n")
+    };
+  }
+
+  function commerceEncodedCopyText(text){
+    return esc(encodeURIComponent(String(text || "")));
+  }
+
+  function commerceSimpleFlightResultPanelHtml(task){
+    const fields = commerceSimpleFlightFields(task);
+    const copyTexts = commerceSimpleFlightCopyTexts(task);
+    return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-simple-flight-result" aria-label="机票搜索条件已整理">
+      <div class="commerce-result-summary-head">
+        <div class="commerce-result-summary-headline">
+          <span>最终结果</span>
+          <strong>机票搜索条件已整理</strong>
+        </div>
+        <p>简单机票请求只整理搜索条件；当前不能返回实时价格。</p>
+      </div>
+      <div class="commerce-one-screen-body">
+        <section class="commerce-one-screen-card">
+          <h4>机票：</h4>
+          <p>出发地：${esc(fields.origin)}</p>
+          <p>目的地：${esc(fields.destination)}</p>
+          <p>出发日期：${esc(fields.date)}</p>
+          <p>搜索目标：${esc(fields.goal)}</p>
+          <p>当前状态：未接入真实机票平台，暂不能返回实时价格。</p>
+          <p>最终价格以真实平台为准。</p>
+        </section>
+        <p class="commerce-result-summary-status"><b>提示：</b>当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</p>
+      </div>
+      <div class="commerce-one-screen-actions" aria-label="机票搜索条件操作">
+        <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="simpleFlight" data-commerce-copy-text="${commerceEncodedCopyText(copyTexts.flight)}">复制机票搜索条件</button>
+        <button class="cmd-btn gray commerce-platform-template-copy-btn" type="button" data-commerce-template-kind="simpleGoogleFlights" data-commerce-template-text="${commerceEncodedCopyText(copyTexts.googleFlights)}">复制 Google Flights 模板</button>
+        <button class="cmd-btn gray commerce-platform-template-copy-btn" type="button" data-commerce-template-kind="simpleTripCom" data-commerce-template-text="${commerceEncodedCopyText(copyTexts.tripCom)}">复制 Trip.com / 携程模板</button>
+      </div>
+      <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
+    </section>`;
+  }
+
   function commerceCopyTextToClipboard(text){
     const value = String(text || "");
     if (!value) return Promise.resolve(false);
@@ -2014,6 +2117,7 @@
   }
 
   function commerceResultSummaryPanelHtml(task){
+    if (commerceIsSimpleFlightTask(task)) return commerceSimpleFlightResultPanelHtml(task);
     const workspace = commerceSubPlanCompletionWorkspaceForTask(task);
     const display = commerceSubPlanCompletionWorkspaceDisplay(workspace);
     const items = Array.isArray(display.items) ? display.items : [];
@@ -2084,6 +2188,7 @@
       </div>`;
     }
     const resultSummaryPanel = commerceResultSummaryPanelHtml(task);
+    const simpleFlightResultMode = commerceIsSimpleFlightTask(task);
     const oneScreenResultMode = !!resultSummaryPanel && !blocked;
     const detailSafetyDetails = !blocked ? disclosure("查看安全边界", `
       <p class="commerce-safety-lead">当前只是整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</p>
@@ -2121,7 +2226,7 @@
         <span class="commerce-status ${esc(task.status)}">${esc(taskStatusLabel(task.status))}</span>
       </div>
       ${resultSummaryPanel}
-      ${commerceSubPlanDraftActionBarPanelHtml(task)}
+      ${simpleFlightResultMode ? "" : commerceSubPlanDraftActionBarPanelHtml(task)}
       ${analysisProcessDisclosure}
       ${detailSafetyDetails}
       ${technicalDetails}
@@ -2455,8 +2560,8 @@
         feedback.classList.remove("is-failed");
       }, 2600);
     }
-    async function copyCommerceActionableChecklist(kind){
-      const ok = await commerceCopyTextToClipboard(commerceActionableChecklistCopyText(kind));
+    async function copyCommerceActionableChecklist(kind, overrideText){
+      const ok = await commerceCopyTextToClipboard(overrideText || commerceActionableChecklistCopyText(kind));
       showCommerceActionableChecklistFeedback(
         ok ? "已复制，可粘贴到外部平台搜索" : "复制失败，请手动选择文本复制",
         !ok
@@ -2474,23 +2579,30 @@
         feedback.classList.remove("is-failed");
       }, 2600);
     }
-    async function copyCommercePlatformTemplate(kind){
-      const ok = await commerceCopyTextToClipboard(commercePlatformSearchTemplateCopyText(kind));
+    async function copyCommercePlatformTemplate(kind, overrideText){
+      const ok = await commerceCopyTextToClipboard(overrideText || commercePlatformSearchTemplateCopyText(kind));
       showCommercePlatformTemplateFeedback(
         ok ? "已复制，可粘贴到外部平台搜索" : "复制失败，请手动选择文本复制",
         !ok
       );
     }
+
+    function commerceDecodedInlineCopyText(button, attr){
+      const encoded = button && button.getAttribute(attr) || "";
+      if (!encoded) return "";
+      try { return decodeURIComponent(encoded); } catch (_) { return encoded; }
+    }
+
     host.addEventListener("click", (event) => {
       const target = event.target && event.target.closest ? event.target : null;
       const checklistButton = target && target.closest("[data-commerce-copy-kind]");
       if (checklistButton && host.contains(checklistButton)) {
-        copyCommerceActionableChecklist(checklistButton.getAttribute("data-commerce-copy-kind") || "");
+        copyCommerceActionableChecklist(checklistButton.getAttribute("data-commerce-copy-kind") || "", commerceDecodedInlineCopyText(checklistButton, "data-commerce-copy-text"));
         return;
       }
       const templateButton = target && target.closest("[data-commerce-template-kind]");
       if (templateButton && host.contains(templateButton)) {
-        copyCommercePlatformTemplate(templateButton.getAttribute("data-commerce-template-kind") || "");
+        copyCommercePlatformTemplate(templateButton.getAttribute("data-commerce-template-kind") || "", commerceDecodedInlineCopyText(templateButton, "data-commerce-template-text"));
       }
     });
 

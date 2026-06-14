@@ -3157,10 +3157,65 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
+  test("v2.0.73 simple flight request shows concise no-price result", async () => {
+    await resetCommerceTasks(page);
+    await gotoRoute(page, "home");
+    const latestButton = page.locator("#taskHistoryLatestBtn");
+    if (await latestButton.count()) await latestButton.click();
+    const inputText = runId + "-SIMPLE-FLIGHT 7月15日上海到成都最便宜的机票";
+    await submitHomeCommand(page, inputText);
+    const home = page.locator('[data-commerce-home-summary="true"]').last();
+    const summaryPanel = home.locator(".commerce-simple-flight-result");
+    await expect(summaryPanel).toHaveCount(1, { timeout:15000 });
+    await expect(summaryPanel).toContainText("机票搜索条件已整理");
+    await expect(summaryPanel).toContainText("出发地：上海");
+    await expect(summaryPanel).toContainText("目的地：成都");
+    await expect(summaryPanel).toContainText("出发日期：7月15日");
+    await expect(summaryPanel).toContainText("搜索目标：低价优先");
+    await expect(summaryPanel).toContainText("暂不能返回实时价格");
+    await expect(summaryPanel).toContainText("最终价格以真实平台为准");
+    await expect(summaryPanel).toContainText("当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单");
+    for (const label of ["复制机票搜索条件", "复制 Google Flights 模板", "复制 Trip.com / 携程模板", "查看分析过程", "查看安全边界", "查看技术细节"]) await expect(home).toContainText(label);
+    const defaultText = await visibleTextWithoutTechnicalDetails(home);
+    for (const hidden of ["商品采购计划", "酒店计划", "电脑搜索条件", "京东模板", "淘宝 / 天猫", "Amazon 模板", "Best Buy 模板", "Booking hotel search template", "Google Flights search template", "约 ", "已找到机票价格", "价格如下"]) {
+      expect(defaultText).not.toContain(hidden);
+    }
+    await expect(summaryPanel.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(summaryPanel.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+    await installClipboardMock(page);
+    const historyCountBefore = await page.locator("#cmdHistory [data-history-id]").count();
+    await summaryPanel.getByRole("button", { name:"复制机票搜索条件" }).click();
+    for (const text of ["机票搜索条件", "出发地：上海", "目的地：成都", "出发日期：7月15日", "搜索目标：低价优先", "最终价格以真实平台为准"]) {
+      await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain(text);
+    }
+    await summaryPanel.getByRole("button", { name:"复制 Google Flights 模板" }).click();
+    for (const text of ["Google Flights search template", "From: Shanghai", "To: Chengdu", "Departure date: July 15", "lowest available fare", "final price must be checked on the real platform"]) {
+      await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain(text);
+    }
+    await summaryPanel.getByRole("button", { name:"复制 Trip.com / 携程模板" }).click();
+    for (const text of ["机票搜索模板", "出发地：上海", "目的地：成都", "出发日期：7月15日", "最终价格以真实平台为准"]) {
+      await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain(text);
+    }
+    await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
+    await submitHomeCommand(page, runId + "-SIMPLE-FLIGHT-HISTORY 买演唱会门票");
+    const historyCountAfterNewTask = await page.locator("#cmdHistory [data-history-id]").count();
+    await page.locator('#cmdHistory [data-history-id]', { hasText:"上海到成都" }).first().click();
+    const historyDetail = page.locator('#cmdConsole [data-task-history-detail="true"]').first();
+    await expect(historyDetail).toContainText("历史任务详情");
+    await expect(historyDetail).toContainText("机票搜索条件已整理");
+    await expect(historyDetail).toContainText("出发地：上海");
+    await expect(historyDetail).toContainText("目的地：成都");
+    await expect(historyDetail).toContainText("出发日期：7月15日");
+    await expect(historyDetail).toContainText("暂不能返回实时价格");
+    await expect(historyDetail).toContainText("查看技术细节");
+    await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountAfterNewTask);
+    await disableClipboardMock(page);
+  });
+
   test("v2.0.71 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.0.72");
+    await expect(sidebarFoot).toContainText("weishan v2.0.73");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 

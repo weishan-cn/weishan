@@ -54,7 +54,8 @@
     if (/公务机|私人飞机|私人飞机包机|包机|private jet|charter flight|jet charter|商务包机|包机服务/i.test(raw)) return "privateJet";
     if (/酒店|民宿|住宿|Hotel/i.test(raw)) return "hotel";
     if (/机票|航班|飞机票|航空票|订机票|预定机票|预订机票|买机票|订票|flight/i.test(raw)) return "flight";
-    if (/(\d{4}[-/]\d{1,2}[-/]\d{1,2}|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天]).{0,20}[\u4e00-\u9fa5A-Za-z]{2,24}\s*(?:飞往|飞|到|去)\s*[\u4e00-\u9fa5A-Za-z]{2,24}/i.test(raw)) return "flight";
+    if (/(\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}月\d{1,2}日|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天]).{0,20}[\u4e00-\u9fa5A-Za-z]{2,24}\s*(?:飞往|飞|到|去)\s*[\u4e00-\u9fa5A-Za-z]{2,24}/i.test(raw)) return "flight";
+    if (/[\u4e00-\u9fa5A-Za-z]{2,24}\s*(?:飞往|飞|到|去)\s*[\u4e00-\u9fa5A-Za-z]{2,24}.{0,20}(\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}月\d{1,2}日|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天])/i.test(raw)) return "flight";
     if (/火车票|高铁票|动车票|train/i.test(raw)) return "train";
     if (/OpenRouter|ChatGPT|API|SaaS|模型|model|订阅|会员|AI 平台|AI模型/i.test(raw)) return "aiModelPricing";
     if (/门票|演唱会|展览|票务|ticket/i.test(raw)) return "ticketing";
@@ -100,7 +101,8 @@
     const objectWithPurchase = /(?:机票|飞机票|航空票|航班|酒店|住宿|商品|电商|MacBook|iPhone|华为|手机|电脑|邮轮|游轮|公务机|私人飞机|包机).*(?:找|买|购买|订|预定|预订|订票|买票|比价|最便宜|低价)|(?:找|买|购买|订|预定|预订|订票|买票|比价|最便宜|低价).*(?:机票|飞机票|航空票|航班|酒店|住宿|商品|电商|MacBook|iPhone|华为|手机|电脑|邮轮|游轮|公务机|私人飞机|包机)/i.test(raw);
     const flightSearchIntent = category === "flight" && (
       /(?:查|查一下|查询|看一下|找).{0,20}(?:机票|飞机票|航空票|航班)/i.test(raw) ||
-      /(\d{4}[-/]\d{1,2}[-/]\d{1,2}|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天]).{0,20}[\u4e00-\u9fa5A-Za-z]{2,24}\s*(?:飞往|飞|到|去)\s*[\u4e00-\u9fa5A-Za-z]{2,24}/i.test(raw)
+      /(\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}月\d{1,2}日|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天]).{0,20}[\u4e00-\u9fa5A-Za-z]{2,24}\s*(?:飞往|飞|到|去)\s*[\u4e00-\u9fa5A-Za-z]{2,24}/i.test(raw) ||
+      /[\u4e00-\u9fa5A-Za-z]{2,24}\s*(?:飞往|飞|到|去)\s*[\u4e00-\u9fa5A-Za-z]{2,24}.{0,20}(\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}月\d{1,2}日|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天])/i.test(raw)
     );
     const directOrderRisk = /直接下单|下单并付款|提交订单|自动付款|付款|支付|提交.*询价表|提交.*询价|上传.*(?:护照|身份证)|(?:护照|身份证).*(?:预订|预定|订|上传)/i.test(raw);
     const categoryWords = /酒店|住宿|机票|飞机票|航空票|火车票|高铁票|航班|电商|商品|SaaS|AI 模型|模型平台|API|门票|票务|服务预约|域名|MacBook|ChatGPT API|采购渠道|邮轮|游轮|cruise|公务机|私人飞机|包机|private jet|charter flight/i;
@@ -117,7 +119,7 @@
 
   function cleanPlaceName(value, side){
     let next = String(value || "");
-    if (side === "origin") next = next.replace(/.*?(?:今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天])/, "");
+    if (side === "origin") next = next.replace(/.*?(?:\d{1,2}月\d{1,2}日|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天])/, "");
     next = next
       .replace(/^(帮我|请|想|我要|需要|找|买|购买|订|预定|预订|订票|买票|从|出发|低价|最便宜|的)+/g, "")
       .replace(/(机票|飞机票|航空票|航班|酒店|住宿|火车票|高铁票|邮轮|游轮|公务机|私人飞机|包机|商品|电商|低价|最便宜|的).*$/g, "")
@@ -127,8 +129,26 @@
 
   function extractCommerceFields(text){
     const raw = String(text || "");
-    const dateMatch = raw.match(/(\d{4}[-/]\d{1,2}[-/]\d{1,2}|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天])/);
-    const routeMatch = raw.match(/([\u4e00-\u9fa5A-Za-z]{2,24})\s*(?:到|飞往|飞|去)\s*([\u4e00-\u9fa5A-Za-z]{2,24})/);
+    const datePattern = "(\\d{4}[-/]\\d{1,2}[-/]\\d{1,2}|\\d{1,2}月\\d{1,2}日|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天])";
+    const placePattern = "([\\u4e00-\\u9fa5A-Za-z]{2,24})";
+    const dateMatch = raw.match(new RegExp(datePattern));
+    let routeMatch = raw.match(new RegExp(datePattern + "\\s*" + placePattern + "\\s*(?:到|飞往|飞|去)\\s*" + placePattern, "i"));
+    if (routeMatch) {
+      return {
+        originText:cleanPlaceName(routeMatch[2], "origin"),
+        destinationText:cleanPlaceName(routeMatch[3], "destination"),
+        dateText:routeMatch[1] || ""
+      };
+    }
+    routeMatch = raw.match(new RegExp(placePattern + "\\s*(?:到|飞往|飞|去)\\s*" + placePattern + "\\s*" + datePattern, "i"));
+    if (routeMatch) {
+      return {
+        originText:cleanPlaceName(routeMatch[1], "origin"),
+        destinationText:cleanPlaceName(routeMatch[2], "destination"),
+        dateText:routeMatch[3] || ""
+      };
+    }
+    routeMatch = raw.match(/([\u4e00-\u9fa5A-Za-z]{2,24})\s*(?:到|飞往|飞|去)\s*([\u4e00-\u9fa5A-Za-z]{2,24})/);
     return {
       originText:routeMatch ? cleanPlaceName(routeMatch[1], "origin") : "",
       destinationText:routeMatch ? cleanPlaceName(routeMatch[2], "destination") : "",
@@ -161,13 +181,13 @@
       budget:"",
       region:"",
       timing:fields.dateText,
-      constraints:"同等条件下优先价格最低，同时保留风险、信誉、售后和地区限制判断。"
+      constraints:/最便宜|低价|便宜/.test(String(text || "")) ? "低价优先" : "同等条件下优先价格最低，同时保留风险、信誉、售后和地区限制判断。"
     };
   }
 
   function missingFieldsForTask(text, category){
     const raw = String(text || "");
-    if (/^(flight|train|hotel)$/.test(category) && !/(\d{4}[-/]\d{1,2}[-/]\d{1,2}|今天|明天|后天|下周|周[一二三四五六日天])/.test(raw)) {
+    if (/^(flight|train|hotel)$/.test(category) && !/(\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}月\d{1,2}日|今天|明天|后天|下周|周[一二三四五六日天])/.test(raw)) {
       return [category === "hotel" ? "入住日期" : "出行日期"];
     }
     return [];
