@@ -2071,10 +2071,68 @@
     return esc(encodeURIComponent(String(url || "")));
   }
 
+  function commerceFlightLowestOffersContract(task){
+    const fallback = {
+      contractVersion:"2.0.75",
+      phase:"flight_lowest_two_offers_contract",
+      providerStatus:"not_configured",
+      offersStatus:"unavailable",
+      offers:[],
+      maxDisplayedOffers:2,
+      selectionPolicy:"lowest_total_price_first",
+      trustedSearchRoutes:["google_search", "google_flights", "trip_com"],
+      capabilities:{
+        canReturnOffers:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canOpenExternalBooking:false,
+        canCreateOrder:false,
+        canPay:false,
+        canStoreIdentity:false
+      },
+      safety:{
+        noRealEndpoint:true,
+        noRealApiKey:true,
+        noNetworkSearch:true,
+        noRealResults:true,
+        noRealPrice:true,
+        noFakeDemoMockPrice:true,
+        noRedirect:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true
+      },
+      display:{
+        summaryTitle:"机票搜索条件已整理",
+        priceStateLine:"价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。",
+        futureLine:"接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。"
+      }
+    };
+    const api = window.WeishanCommerceFlightLowestOffersContract;
+    const source = task && task.flightLowestOffersContract || null;
+    if (api && typeof api.normalizeFlightLowestOffersContract === "function") return api.normalizeFlightLowestOffersContract(source);
+    if (api && typeof api.getFlightLowestOffersContract === "function") return api.getFlightLowestOffersContract(source);
+    return fallback;
+  }
+
+  function commerceFlightLowestOffersDisplay(task){
+    const contract = commerceFlightLowestOffersContract(task);
+    const api = window.WeishanCommerceFlightLowestOffersContract;
+    if (api && typeof api.describeFlightLowestOffersContract === "function") return api.describeFlightLowestOffersContract(contract);
+    const display = contract.display || {};
+    return {
+      summaryTitle:display.summaryTitle || "机票搜索条件已整理",
+      priceStateLine:display.priceStateLine || "价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。",
+      futureLine:display.futureLine || "接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。"
+    };
+  }
+
   function commerceSimpleFlightResultPanelHtml(task){
     const fields = commerceSimpleFlightFields(task);
     const copyTexts = commerceSimpleFlightCopyTexts(task);
     const externalUrls = commerceSimpleFlightExternalSearchUrls(task);
+    const flightLowestOffers = commerceFlightLowestOffersDisplay(task);
     return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-simple-flight-result" aria-label="机票搜索条件已整理">
       <div class="commerce-result-summary-head">
         <div class="commerce-result-summary-headline">
@@ -2090,8 +2148,8 @@
           <p>目的地：${esc(fields.destination)}</p>
           <p>出发日期：${esc(fields.date)}</p>
           <p>搜索目标：${esc(fields.goal)}</p>
-          <p>当前状态：未接入真实机票平台，暂不能返回实时价格。</p>
-          <p>最终价格以真实平台为准。</p>
+          <p>${esc(flightLowestOffers.priceStateLine)}</p>
+          <p>${esc(flightLowestOffers.futureLine)}</p>
         </section>
         <p class="commerce-result-summary-status"><b>提示：</b>当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</p>
       </div>

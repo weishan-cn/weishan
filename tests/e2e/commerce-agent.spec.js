@@ -3173,7 +3173,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.74 trusted external search router opens only user clicked trusted flight entries", async () => {
+  test("v2.0.75 trusted external search router keeps lowest two flight offers contract gated", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -3188,15 +3188,55 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("目的地：成都");
     await expect(summaryPanel).toContainText("出发日期：7月15日");
     await expect(summaryPanel).toContainText("搜索目标：低价优先");
-    await expect(summaryPanel).toContainText("暂不能返回实时价格");
-    await expect(summaryPanel).toContainText("最终价格以真实平台为准");
+    await expect(summaryPanel).toContainText("当前不能返回实时价格");
+    await expect(summaryPanel).toContainText("价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。");
+    await expect(summaryPanel).toContainText("接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。");
     await expect(summaryPanel).toContainText("当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单");
+    await expect(summaryPanel).not.toContainText("最终价格以真实平台为准");
+    await expect(summaryPanel).not.toContainText(/¥\s*\d+/);
     for (const label of ["打开全网搜索", "打开 Google Flights 搜索", "打开 Trip.com / 携程搜索", "复制机票搜索条件", "复制 Google Flights 模板", "复制 Trip.com / 携程模板", "查看分析过程", "查看安全边界", "查看技术细节"]) await expect(home).toContainText(label);
     await expect(summaryPanel).toContainText("点击后会打开外部搜索或外部平台");
     await expect(summaryPanel).toContainText("weishan 当前不返回价格，不付款，不下单");
     await expect(summaryPanel).toContainText("全网搜索结果由外部搜索引擎提供");
+    const contract = await page.evaluate(() => window.WeishanCommerceFlightLowestOffersContract && typeof window.WeishanCommerceFlightLowestOffersContract.getFlightLowestOffersContract === "function" ? window.WeishanCommerceFlightLowestOffersContract.getFlightLowestOffersContract() : null);
+    expect(contract).toEqual(expect.objectContaining({
+      contractVersion:"2.0.75",
+      phase:"flight_lowest_two_offers_contract",
+      providerStatus:"not_configured",
+      offersStatus:"unavailable",
+      maxDisplayedOffers:2,
+      selectionPolicy:"lowest_total_price_first"
+    }));
+    expect(contract.offers).toEqual([]);
+    expect(contract.display).toEqual(expect.objectContaining({
+      summaryTitle:"机票搜索条件已整理",
+      priceStateLine:"价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。",
+      futureLine:"接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。"
+    }));
+    expect(contract.capabilities).toEqual(expect.objectContaining({
+      canReturnOffers:false,
+      canReturnPrice:false,
+      canReturnBookingUrl:false,
+      canOpenExternalBooking:false,
+      canCreateOrder:false,
+      canPay:false,
+      canStoreIdentity:false
+    }));
+    expect(contract.safety).toEqual(expect.objectContaining({
+      noRealEndpoint:true,
+      noRealApiKey:true,
+      noNetworkSearch:true,
+      noRealResults:true,
+      noRealPrice:true,
+      noFakeDemoMockPrice:true,
+      noRedirect:true,
+      noCheckout:true,
+      noPayment:true,
+      noOrderSubmit:true,
+      noIdentityStorage:true
+    }));
     const defaultText = await visibleTextWithoutTechnicalDetails(home);
-    for (const hidden of ["商品采购计划", "酒店计划", "电脑搜索条件", "京东模板", "淘宝 / 天猫", "Amazon 模板", "Best Buy 模板", "Booking hotel search template", "Google Flights search template", "未知网站结果", "可疑域名", "约 ", "已找到机票价格", "价格如下", "最低价 "]) {
+    for (const hidden of ["商品采购计划", "酒店计划", "电脑搜索条件", "京东模板", "淘宝 / 天猫", "Amazon 模板", "Best Buy 模板", "Booking hotel search template", "Google Flights search template", "未知网站结果", "可疑域名", "约 ", "已找到机票价格", "价格如下"]) {
       expect(defaultText).not.toContain(hidden);
     }
     await expect(summaryPanel.locator(".commerce-booking-link")).toHaveCount(0);
@@ -3237,7 +3277,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(historyDetail).toContainText("出发地：上海");
     await expect(historyDetail).toContainText("目的地：成都");
     await expect(historyDetail).toContainText("出发日期：7月15日");
-    await expect(historyDetail).toContainText("暂不能返回实时价格");
+    await expect(historyDetail).toContainText("当前不能返回实时价格");
+    await expect(historyDetail).toContainText("价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。");
+    await expect(historyDetail).not.toContainText("最终价格以真实平台为准");
     await expect(historyDetail).toContainText("打开全网搜索");
     await expect(historyDetail).toContainText("打开 Google Flights 搜索");
     await expect(historyDetail).toContainText("打开 Trip.com / 携程搜索");
@@ -3250,10 +3292,34 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.71 sidebar version stays in sync with release version", async () => {
+  test("v2.0.75 bare flight intent still renders the simple flight result card", async () => {
+    await resetCommerceTasks(page);
+    await page.reload({ waitUntil:"domcontentloaded" });
+    await gotoRoute(page, "home");
+    const inputText = runId + "-SIMPLE-FLIGHT-BARE 7月15日上海到成都机票";
+    await submitHomeCommand(page, inputText);
+    const home = page.locator('[data-commerce-home-summary="true"]').last();
+    const summaryPanel = page.locator(".commerce-simple-flight-result");
+    await expect(summaryPanel).toHaveCount(1, { timeout:15000 });
+    await expect(summaryPanel).toContainText("机票搜索条件已整理");
+    await expect(summaryPanel).toContainText("出发地：上海");
+    await expect(summaryPanel).toContainText("目的地：成都");
+    await expect(summaryPanel).toContainText("出发日期：7月15日");
+    await expect(summaryPanel).toContainText("搜索目标：按条件筛选");
+    await expect(summaryPanel).toContainText("当前不能返回实时价格");
+    await expect(summaryPanel).toContainText("价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。");
+    await expect(summaryPanel).not.toContainText("最终价格以真实平台为准");
+    await expect(summaryPanel).not.toContainText(/¥\s*\d+/);
+    const defaultText = await visibleTextWithoutTechnicalDetails(home);
+    for (const hidden of ["商品采购计划", "酒店计划", "电脑搜索条件", "京东模板", "淘宝 / 天猫", "Amazon 模板", "Best Buy 模板"]) {
+      expect(defaultText).not.toContain(hidden);
+    }
+  });
+
+  test("v2.0.75 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.0.74");
+    await expect(sidebarFoot).toContainText("weishan v2.0.75");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 

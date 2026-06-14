@@ -30,6 +30,60 @@
       .slice(0, 240);
   }
 
+  function createFlightLowestOffersContract(contract){
+    const api = window.WeishanCommerceFlightLowestOffersContract;
+    if (api && typeof api.normalizeFlightLowestOffersContract === "function") {
+      return api.normalizeFlightLowestOffersContract(contract);
+    }
+    if (api && typeof api.getFlightLowestOffersContract === "function") {
+      return api.getFlightLowestOffersContract(contract);
+    }
+    const fallback = {
+      contractVersion:"2.0.75",
+      phase:"flight_lowest_two_offers_contract",
+      providerStatus:"not_configured",
+      offersStatus:"unavailable",
+      offers:[],
+      maxDisplayedOffers:2,
+      selectionPolicy:"lowest_total_price_first",
+      trustedSearchRoutes:["google_search", "google_flights", "trip_com"],
+      capabilities:{
+        canReturnOffers:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canOpenExternalBooking:false,
+        canCreateOrder:false,
+        canPay:false,
+        canStoreIdentity:false
+      },
+      safety:{
+        noRealEndpoint:true,
+        noRealApiKey:true,
+        noNetworkSearch:true,
+        noRealResults:true,
+        noRealPrice:true,
+        noFakeDemoMockPrice:true,
+        noRedirect:true,
+        noCheckout:true,
+        noPayment:true,
+        noOrderSubmit:true,
+        noIdentityStorage:true
+      },
+      display:{
+        summaryTitle:"机票搜索条件已整理",
+        priceStateLine:"价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。",
+        futureLine:"接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。"
+      }
+    };
+    const raw = contract && typeof contract === "object" ? contract : {};
+    return Object.assign({}, fallback, raw, {
+      offers:Array.isArray(raw.offers) ? raw.offers.slice() : fallback.offers.slice(),
+      capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      safety:Object.assign({}, fallback.safety, raw.safety && typeof raw.safety === "object" ? raw.safety : {}),
+      display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
   function createTaskId(){
     return "commerceTask-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
   }
@@ -288,6 +342,7 @@
       searchProviderName:"",
       providerHealth:[],
       complianceHealth:{},
+      flightLowestOffersContract:category === "flight" ? createFlightLowestOffersContract() : null,
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -333,6 +388,7 @@
       searchProviderName:String(base.searchProviderName || ""),
       providerHealth:Array.isArray(base.providerHealth) ? base.providerHealth : [],
       complianceHealth:base.complianceHealth && typeof base.complianceHealth === "object" ? base.complianceHealth : {},
+      flightLowestOffersContract:category === "flight" ? createFlightLowestOffersContract(base.flightLowestOffersContract) : null,
       canShowPrice:base.canShowPrice === true,
       canShowBookingButton:base.canShowBookingButton === true,
       canShowCheckoutButton:base.canShowCheckoutButton === true,
@@ -442,6 +498,7 @@
       missingFields:safe.missingFields,
       searchStatus:safe.searchStatus,
       searchProviderName:safe.searchProviderName,
+      flightLowestOffersContract:safe.category === "flight" ? safe.flightLowestOffersContract : null,
       candidates:safe.candidates,
       recommendation:safe.recommendation,
       nextSteps:[
