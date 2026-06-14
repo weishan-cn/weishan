@@ -3177,7 +3177,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.80 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
+  test("v2.0.81 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -3207,7 +3207,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("全网搜索结果由外部搜索引擎提供");
     const contract = await page.evaluate(() => window.WeishanCommerceFlightLowestOffersContract && typeof window.WeishanCommerceFlightLowestOffersContract.getFlightLowestOffersContract === "function" ? window.WeishanCommerceFlightLowestOffersContract.getFlightLowestOffersContract() : null);
     expect(contract).toEqual(expect.objectContaining({
-      contractVersion:"2.0.80",
+      contractVersion:"2.0.81",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -3223,7 +3223,7 @@ test.describe.serial("commerce agent workbench", () => {
     }));
     const registry = await page.evaluate(() => window.WeishanCommerceFlightProviderCandidates && typeof window.WeishanCommerceFlightProviderCandidates.getFlightProviderCandidatesRegistry === "function" ? window.WeishanCommerceFlightProviderCandidates.getFlightProviderCandidatesRegistry() : null);
     expect(registry).toEqual(expect.objectContaining({
-      contractVersion:"2.0.80",
+      contractVersion:"2.0.81",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -3344,7 +3344,7 @@ test.describe.serial("commerce agent workbench", () => {
     }));
     const readonlyStubAdapter = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubAdapter && typeof window.WeishanCommerceFlightReadonlyStubAdapter.getFlightReadonlyStubAdapter === "function" ? window.WeishanCommerceFlightReadonlyStubAdapter.getFlightReadonlyStubAdapter() : null);
     expect(readonlyStubAdapter).toEqual(expect.objectContaining({
-      adapterVersion:"2.0.80",
+      adapterVersion:"2.0.81",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready"
@@ -3465,9 +3465,118 @@ test.describe.serial("commerce agent workbench", () => {
     for (const text of ["只读适配器空壳：可用", "真实网络连接：未启用", "真实价格返回：未启用", "bookingUrl 返回：未启用", "可以校验输入形状", "可以构建请求形状", "可以规范化响应形状", "不能读取 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"]) {
       await expect(summaryPanel).toContainText(text);
     }
+    await expect(summaryPanel).toContainText("查看 Sandbox Dry Run");
+    const sandboxDisclosure = summaryPanel.locator("details.commerce-flight-sandbox-dry-run-disclosure");
+    await expect(sandboxDisclosure).not.toHaveAttribute("open", "");
+    await openDisclosure(summaryPanel, "commerce-flight-sandbox-dry-run-disclosure");
+    await expect(summaryPanel).toContainText("Sandbox Dry Run");
+    await expect(summaryPanel).toContainText("沙箱空跑外壳已建立，但未连接真实 provider。");
+    await expect(summaryPanel).toContainText("只允许验证输入、请求和响应结构，不连接真实 endpoint，不读取真实 API key，不返回真实价格，不生成预订链接。");
+    for (const text of ["validate_user_input：验证用户输入", "build_request_shape：构建请求形状", "validate_request_shape：校验请求形状", "skip_network_call：跳过网络调用", "build_empty_response_shape：构建空响应形状", "validate_response_shape：校验响应形状", "block_price_return：阻断价格返回", "block_booking_url_return：阻断 bookingUrl 返回", "block_order_creation：阻断下单创建", "block_payment：阻断付款", "可以运行沙箱空跑外壳", "可以校验输入形状", "可以校验请求形状", "可以校验响应形状", "可以模拟控制流", "只使用 fixture / 本地结构", "不能读取真实 API key", "不能连接真实 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡", "真实 API key：已阻断", "真实 endpoint：已阻断", "真实网络请求：已阻断", "真实价格：已阻断", "bookingUrl：已阻断", "下单：已阻断", "付款：已阻断", "身份证 / 银行卡：已阻断"]) {
+      await expect(summaryPanel).toContainText(text);
+    }
+    const sandboxDryRun = await page.evaluate(() => window.WeishanCommerceFlightSandboxDryRun && window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract ? window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract : null);
+    expect(sandboxDryRun).toEqual(expect.objectContaining({
+      sandboxDryRunVersion:"2.0.81",
+      phase:"flight_sandbox_dry_run_shell",
+      dryRunStatus:"shell_only",
+      networkMode:"disabled",
+      apiKeyMode:"disabled",
+      endpointMode:"disabled",
+      providerMode:"disabled",
+      priceMode:"disabled",
+      bookingUrlMode:"disabled",
+      orderMode:"disabled",
+      paymentMode:"disabled",
+      identityStorageMode:"disabled"
+    }));
+    expect(sandboxDryRun.capabilities).toEqual(expect.objectContaining({
+      canRunDryRunShell:true,
+      canValidateInputShape:true,
+      canValidateRequestShape:true,
+      canValidateResponseShape:true,
+      canSimulateControlFlow:true,
+      canUseFixtureOnly:true,
+      canUseRealApiKey:false,
+      canConnectRealEndpoint:false,
+      canUseNetwork:false,
+      canReturnPrice:false,
+      canReturnBookingUrl:false,
+      canOpenBookingUrl:false,
+      canCreateOrder:false,
+      canPay:false,
+      canStoreIdentity:false,
+      canStorePassport:false,
+      canStoreBankCard:false
+    }));
+    const sandboxPlan = await page.evaluate(() => window.WeishanCommerceFlightSandboxDryRun && typeof window.WeishanCommerceFlightSandboxDryRun.createFlightSandboxDryRunPlan === "function" ? window.WeishanCommerceFlightSandboxDryRun.createFlightSandboxDryRunPlan({ origin:"上海", destination:"成都", departureDate:"7月15日" }) : null);
+    expect(sandboxPlan).toEqual(expect.objectContaining({
+      status:"dry_run_plan_only",
+      canExecuteNetwork:false,
+      reason:"sandbox_dry_run_shell_no_network"
+    }));
+    expect(sandboxPlan.steps).toEqual([
+      "validate_user_input",
+      "build_request_shape",
+      "validate_request_shape",
+      "skip_network_call",
+      "build_empty_response_shape",
+      "validate_response_shape",
+      "block_price_return",
+      "block_booking_url_return",
+      "block_order_creation",
+      "block_payment"
+    ]);
+    expect(sandboxPlan.blockedCapabilities).toEqual(expect.arrayContaining([
+      "canUseRealApiKey",
+      "canConnectRealEndpoint",
+      "canUseNetwork",
+      "canReturnPrice",
+      "canReturnBookingUrl",
+      "canOpenBookingUrl",
+      "canCreateOrder",
+      "canPay",
+      "canStoreIdentity",
+      "canStorePassport",
+      "canStoreBankCard"
+    ]));
+    const sandboxRun = await page.evaluate(() => window.WeishanCommerceFlightSandboxDryRun && typeof window.WeishanCommerceFlightSandboxDryRun.runFlightSandboxDryRun === "function" ? window.WeishanCommerceFlightSandboxDryRun.runFlightSandboxDryRun({ origin:"上海", destination:"成都", departureDate:"7月15日" }) : null);
+    expect(sandboxRun).toEqual(expect.objectContaining({
+      status:"dry_run_completed",
+      mode:"shell_only",
+      reason:"sandbox_dry_run_shell_completed_without_network",
+      networkAttempted:false,
+      apiKeyRead:false,
+      endpointConnected:false,
+      providerConnected:false,
+      priceReturned:false,
+      bookingUrlReturned:false,
+      orderCreated:false,
+      paymentStarted:false,
+      identityStored:false
+    }));
+    expect(sandboxRun.offers).toEqual([]);
+    expect(sandboxRun.blockedCapabilities).toEqual(expect.arrayContaining([
+      "canUseRealApiKey",
+      "canConnectRealEndpoint",
+      "canUseNetwork",
+      "canReturnPrice",
+      "canReturnBookingUrl",
+      "canOpenBookingUrl",
+      "canCreateOrder",
+      "canPay",
+      "canStoreIdentity",
+      "canStorePassport",
+      "canStoreBankCard"
+    ]));
+    const sandboxAssert = await page.evaluate(() => {
+      const api = window.WeishanCommerceFlightSandboxDryRun;
+      return api && typeof api.assertNoFlightSandboxNetworkUse === "function" ? api.assertNoFlightSandboxNetworkUse(api.runFlightSandboxDryRun({ origin:"上海", destination:"成都", departureDate:"7月15日" })) : null;
+    });
+    expect(sandboxAssert).toBe(true);
     const readonlyStubPermission = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubPermission && typeof window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission === "function" ? window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission() : null);
     expect(readonlyStubPermission).toEqual(expect.objectContaining({
-      permissionVersion:"2.0.80",
+      permissionVersion:"2.0.81",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -3595,6 +3704,15 @@ test.describe.serial("commerce agent workbench", () => {
     for (const text of ["只读适配器空壳：可用", "真实网络连接：未启用", "真实价格返回：未启用", "bookingUrl 返回：未启用", "可以校验输入形状", "可以构建请求形状", "可以规范化响应形状", "不能读取 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"]) {
       await expect(historyDetail).toContainText(text);
     }
+    await expect(historyDetail).toContainText("查看 Sandbox Dry Run");
+    const historySandboxDisclosure = historyDetail.locator("details.commerce-flight-sandbox-dry-run-disclosure");
+    await expect(historySandboxDisclosure).not.toHaveAttribute("open", "");
+    await openDisclosure(historyDetail, "commerce-flight-sandbox-dry-run-disclosure");
+    await expect(historyDetail).toContainText("Sandbox Dry Run");
+    await expect(historyDetail).toContainText("沙箱空跑外壳已建立，但未连接真实 provider。");
+    for (const text of ["validate_user_input：验证用户输入", "build_request_shape：构建请求形状", "validate_request_shape：校验请求形状", "skip_network_call：跳过网络调用", "build_empty_response_shape：构建空响应形状", "validate_response_shape：校验响应形状", "block_price_return：阻断价格返回", "block_booking_url_return：阻断 bookingUrl 返回", "block_order_creation：阻断下单创建", "block_payment：阻断付款", "可以运行沙箱空跑外壳", "可以校验输入形状", "可以校验请求形状", "可以校验响应形状", "可以模拟控制流", "只使用 fixture / 本地结构", "不能读取真实 API key", "不能连接真实 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"]) {
+      await expect(historyDetail).toContainText(text);
+    }
     const historyOpenCountBefore = await page.evaluate(() => (window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ || []).length);
     await historyDetail.getByRole("button", { name:"打开 Google Flights 搜索" }).click();
     await expect.poll(async () => page.evaluate(() => (window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ || []).length), { timeout:5000 }).toBe(historyOpenCountBefore + 1);
@@ -3604,7 +3722,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.80 bare flight intent still renders the simple flight result card", async () => {
+  test("v2.0.81 bare flight intent still renders the simple flight result card", async () => {
     await resetCommerceTasks(page);
     await page.reload({ waitUntil:"domcontentloaded" });
     await gotoRoute(page, "home");
@@ -3625,6 +3743,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("查看 Provider 审批状态");
     await expect(summaryPanel).toContainText("查看只读适配器开发许可");
     await expect(summaryPanel).toContainText("查看只读适配器空壳");
+    await expect(summaryPanel).toContainText("查看 Sandbox Dry Run");
     await expect(summaryPanel).not.toContainText("最终价格以真实平台为准");
     await expect(summaryPanel).not.toContainText(/¥\s*\d+/);
     const defaultText = await visibleTextWithoutTechnicalDetails(home);
@@ -3633,10 +3752,10 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.0.80 sidebar version stays in sync with release version", async () => {
+  test("v2.0.81 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.0.80");
+    await expect(sidebarFoot).toContainText("weishan v2.0.81");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const CONTRACT_VERSION = "2.0.80";
+  const CONTRACT_VERSION = "2.0.81";
   const PHASE = "flight_provider_candidate_registry";
   const DEFAULT_TRUST_STATUS = "candidate_only";
   const DEFAULT_MANUAL_REVIEW_STATUS = "not_reviewed";
@@ -85,6 +85,7 @@
         apiStatus: "not_connected",
         priceStatus: "not_available",
         bookingUrlStatus: "not_available",
+        sandboxDryRunStatus: "shell_ready",
         trustStatus: DEFAULT_TRUST_STATUS,
         manualReviewStatus: DEFAULT_MANUAL_REVIEW_STATUS,
         riskLevel: "low",
@@ -104,6 +105,7 @@
         apiStatus: "not_connected",
         priceStatus: "not_available",
         bookingUrlStatus: "not_available",
+        sandboxDryRunStatus: "shell_ready",
         trustStatus: DEFAULT_TRUST_STATUS,
         manualReviewStatus: DEFAULT_MANUAL_REVIEW_STATUS,
         riskLevel: "low",
@@ -123,6 +125,7 @@
         apiStatus: "not_connected",
         priceStatus: "not_available",
         bookingUrlStatus: "not_available",
+        sandboxDryRunStatus: "shell_ready",
         trustStatus: DEFAULT_TRUST_STATUS,
         manualReviewStatus: DEFAULT_MANUAL_REVIEW_STATUS,
         riskLevel: "low",
@@ -142,6 +145,7 @@
         apiStatus: "not_connected",
         priceStatus: "not_available",
         bookingUrlStatus: "not_available",
+        sandboxDryRunStatus: "shell_ready",
         trustStatus: DEFAULT_TRUST_STATUS,
         manualReviewStatus: DEFAULT_MANUAL_REVIEW_STATUS,
         riskLevel: "low",
@@ -161,6 +165,7 @@
         apiStatus: "not_connected",
         priceStatus: "not_available",
         bookingUrlStatus: "not_available",
+        sandboxDryRunStatus: "shell_ready",
         trustStatus: DEFAULT_TRUST_STATUS,
         manualReviewStatus: DEFAULT_MANUAL_REVIEW_STATUS,
         riskLevel: "low",
@@ -199,6 +204,7 @@
         apiStatus: "not_connected",
         priceStatus: "not_available",
         bookingUrlStatus: "not_available",
+        sandboxDryRunStatus: "shell_ready",
         trustStatus: DEFAULT_TRUST_STATUS,
         manualReviewStatus: DEFAULT_MANUAL_REVIEW_STATUS,
         riskLevel: "medium",
@@ -223,6 +229,7 @@
       apiStatus: String(raw.apiStatus || "not_connected"),
       priceStatus: String(raw.priceStatus || "not_available"),
       bookingUrlStatus: String(raw.bookingUrlStatus || "not_available"),
+      sandboxDryRunStatus: String(raw.sandboxDryRunStatus || "shell_ready"),
       trustStatus: String(raw.trustStatus || DEFAULT_TRUST_STATUS),
       manualReviewStatus: String(raw.manualReviewStatus || DEFAULT_MANUAL_REVIEW_STATUS),
       riskLevel: String(raw.riskLevel || "low"),
@@ -255,6 +262,7 @@
         allowlistTitle: "默认优先域名白名单",
         blockedRulesTitle: "默认阻断规则",
         capabilityLine: "API key 不可用 / 网络搜索不可用 / 价格不可用 / booking 链接不可用 / 下单不可用 / 付款不可用 / 身份证 / 护照 / 银行卡不可保存",
+        sandboxDryRunStatusLine: "Sandbox Dry Run：外壳可用，真实连接未启用",
         readonlyStubAdapterStatusLine: "可用",
         approvalStatusLine: "审批状态：未审查",
         readonlyStubPermissionLine: "只读适配器开发许可：未授予",
@@ -281,6 +289,7 @@
       readOnlyPriceSourceLine: safe.display.readOnlyPriceSourceLine || "只读价格源：未启用",
       bookingUrlStatusLine: safe.display.bookingUrlStatusLine || "bookingUrl：未启用",
       tradeStatusLine: safe.display.tradeStatusLine || "付款 / 下单：不支持",
+      sandboxDryRunStatusLine: safe.display.sandboxDryRunStatusLine || "Sandbox Dry Run：外壳可用，真实连接未启用",
       allowlistDomains: Array.isArray(safe.domainSafetyRules.allowedDomains) ? safe.domainSafetyRules.allowedDomains.slice() : [],
       blockedRules: Array.isArray(safe.domainSafetyRules.blockedRules) ? safe.domainSafetyRules.blockedRules.slice() : [],
       candidateProfiles: safe.candidateProfiles.map((profile) => ({
@@ -295,6 +304,7 @@
         apiStatusLabel: profile.apiStatus === "not_connected" ? "未连接" : profile.apiStatus,
         priceStatusLabel: profile.priceStatus === "not_available" ? "不可用" : profile.priceStatus,
         bookingUrlStatusLabel: profile.bookingUrlStatus === "not_available" ? "不可用" : profile.bookingUrlStatus,
+        sandboxDryRunStatusLabel: profile.sandboxDryRunStatus === "shell_ready" ? "外壳可用，真实连接未启用" : profile.sandboxDryRunStatus,
         trustStatusLabel: profile.trustStatus === DEFAULT_TRUST_STATUS ? "仅候选" : profile.trustStatus,
         manualReviewStatusLabel: profile.manualReviewStatus === DEFAULT_MANUAL_REVIEW_STATUS ? "未审查" : profile.manualReviewStatus,
         approvalStatusLabel: safe.display.approvalStatusLine || "审批状态：未审查",

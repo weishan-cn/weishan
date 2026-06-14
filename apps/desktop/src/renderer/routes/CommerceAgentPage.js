@@ -2073,7 +2073,7 @@
 
   function commerceFlightLowestOffersContract(task){
     const fallback = {
-      contractVersion:"2.0.80",
+      contractVersion:"2.0.81",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -2137,7 +2137,7 @@
 
   function commerceFlightProviderCandidatesRegistry(task){
     const fallback = {
-      contractVersion:"2.0.80",
+      contractVersion:"2.0.81",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -2245,6 +2245,7 @@
             ${escListItem("审批状态", profile.approvalStatusLabel)}
             ${escListItem("只读适配器开发许可", profile.readonlyStubPermissionStatusLabel)}
             ${escListItem("只读适配器空壳", profile.readonlyStubAdapterStatusLabel)}
+            ${escListItem("Sandbox Dry Run", profile.sandboxDryRunStatusLabel)}
             ${escListItem("只读价格源", profile.readOnlyPriceSourceStatusLabel)}
             ${escListItem("bookingUrl", profile.bookingUrlStatusLabel)}
             ${escListItem("付款 / 下单", profile.tradeStatusLabel)}
@@ -2263,13 +2264,116 @@
     return disclosure("查看候选平台", body, "commerce-flight-provider-candidates-disclosure");
   }
 
+  function commerceFlightSandboxDryRunStatus(task){
+    const api = window.WeishanCommerceFlightSandboxDryRun;
+    const source = task && task.flightSandboxDryRun || null;
+    if (api && typeof api.normalizeFlightSandboxDryRunContract === "function") return api.normalizeFlightSandboxDryRunContract(source);
+    if (api && typeof api.getFlightSandboxDryRunContract === "function") return api.getFlightSandboxDryRunContract(source);
+    return {
+      sandboxDryRunVersion:"2.0.81",
+      phase:"flight_sandbox_dry_run_shell",
+      dryRunStatus:"shell_only",
+      networkMode:"disabled",
+      apiKeyMode:"disabled",
+      endpointMode:"disabled",
+      providerMode:"disabled",
+      priceMode:"disabled",
+      bookingUrlMode:"disabled",
+      orderMode:"disabled",
+      paymentMode:"disabled",
+      identityStorageMode:"disabled",
+      capabilities:{
+        canRunDryRunShell:true,
+        canValidateInputShape:true,
+        canValidateRequestShape:true,
+        canValidateResponseShape:true,
+        canSimulateControlFlow:true,
+        canUseFixtureOnly:true,
+        canUseRealApiKey:false,
+        canConnectRealEndpoint:false,
+        canUseNetwork:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canOpenBookingUrl:false,
+        canCreateOrder:false,
+        canPay:false,
+        canStoreIdentity:false,
+        canStorePassport:false,
+        canStoreBankCard:false
+      },
+      blockedCapabilities:["canUseRealApiKey", "canConnectRealEndpoint", "canUseNetwork", "canReturnPrice", "canReturnBookingUrl", "canOpenBookingUrl", "canCreateOrder", "canPay", "canStoreIdentity", "canStorePassport", "canStoreBankCard"],
+      steps:["validate_user_input", "build_request_shape", "validate_request_shape", "skip_network_call", "build_empty_response_shape", "validate_response_shape", "block_price_return", "block_booking_url_return", "block_order_creation", "block_payment"],
+      display:{
+        summaryTitle:"Sandbox Dry Run",
+        shellStatusLine:"Sandbox Dry Run：外壳已建立",
+        currentStatusLine:"沙箱空跑外壳已建立，但未连接真实 provider。",
+        reasonLine:"只允许验证输入、请求和响应结构，不连接真实 endpoint，不读取真实 API key，不返回真实价格，不生成预订链接。",
+        stepsTitle:"Dry Run 步骤",
+        capabilityTitle:"当前能力",
+        blockedTitle:"阻断能力",
+        stepLabels:["validate_user_input：验证用户输入", "build_request_shape：构建请求形状", "validate_request_shape：校验请求形状", "skip_network_call：跳过网络调用", "build_empty_response_shape：构建空响应形状", "validate_response_shape：校验响应形状", "block_price_return：阻断价格返回", "block_booking_url_return：阻断 bookingUrl 返回", "block_order_creation：阻断下单创建", "block_payment：阻断付款"],
+        capabilityLines:["可以运行沙箱空跑外壳", "可以校验输入形状", "可以校验请求形状", "可以校验响应形状", "可以模拟控制流", "只使用 fixture / 本地结构", "不能读取真实 API key", "不能连接真实 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"],
+        blockedCapabilityLines:["真实 API key：已阻断", "真实 endpoint：已阻断", "真实网络请求：已阻断", "真实价格：已阻断", "bookingUrl：已阻断", "下单：已阻断", "付款：已阻断", "身份证 / 银行卡：已阻断"]
+      }
+    };
+  }
+
+  function commerceFlightSandboxDryRunDisplay(task){
+    const api = window.WeishanCommerceFlightSandboxDryRun;
+    const status = commerceFlightSandboxDryRunStatus(task);
+    if (api && typeof api.describeFlightSandboxDryRunContract === "function") return api.describeFlightSandboxDryRunContract(status);
+    return status.display || {};
+  }
+
+  function commerceFlightSandboxDryRunDisclosure(task){
+    const display = commerceFlightSandboxDryRunDisplay(task);
+    if (!display) return "";
+    const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
+    const stepLabels = Array.isArray(display.stepLabels) ? display.stepLabels : [];
+    const capabilityLines = Array.isArray(display.capabilityLines) ? display.capabilityLines : [];
+    const blockedCapabilityLines = Array.isArray(display.blockedCapabilityLines) ? display.blockedCapabilityLines : [];
+    const body = `<section class="commerce-flight-sandbox-dry-run-panel" aria-label="Sandbox Dry Run">
+      <div class="commerce-flight-sandbox-dry-run-head">
+        <div>
+          <h4>${esc(display.summaryTitle || "Sandbox Dry Run")}</h4>
+          <p>${esc(display.shellStatusLine || "Sandbox Dry Run：外壳已建立")}</p>
+          <p>${esc(display.currentStatusLine || "沙箱空跑外壳已建立，但未连接真实 provider。")}</p>
+          <p>${esc(display.reasonLine || "只允许验证输入、请求和响应结构，不连接真实 endpoint，不读取真实 API key，不返回真实价格，不生成预订链接。")}</p>
+        </div>
+        <strong>${esc(display.shellStatusLine || "Sandbox Dry Run：外壳已建立")}</strong>
+      </div>
+      <div class="commerce-flight-sandbox-dry-run-summary">
+        <ul>
+          ${row("步骤标题", display.stepsTitle || "Dry Run 步骤")}
+          ${row("能力标题", display.capabilityTitle || "当前能力")}
+          ${row("阻断标题", display.blockedTitle || "阻断能力")}
+        </ul>
+      </div>
+      <div class="commerce-flight-sandbox-dry-run-rules">
+        <section>
+          <h5>${esc(display.stepsTitle || "Dry Run 步骤")}</h5>
+          <ul>${stepLabels.map((line) => `<li>${esc(line)}</li>`).join("")}</ul>
+        </section>
+        <section>
+          <h5>${esc(display.capabilityTitle || "当前能力")}</h5>
+          <ul>${capabilityLines.map((line) => `<li>${esc(line)}</li>`).join("")}</ul>
+        </section>
+        <section>
+          <h5>${esc(display.blockedTitle || "阻断能力")}</h5>
+          <ul>${blockedCapabilityLines.map((line) => `<li>${esc(line)}</li>`).join("")}</ul>
+        </section>
+      </div>
+    </section>`;
+    return disclosure("查看 Sandbox Dry Run", body, "commerce-flight-sandbox-dry-run-disclosure");
+  }
+
   function commerceFlightReadonlyStubPermissionStatus(task){
     const api = window.WeishanCommerceFlightReadonlyStubPermission;
     const source = task && task.flightReadonlyStubPermission || null;
     if (api && typeof api.normalizeFlightReadonlyStubPermission === "function") return api.normalizeFlightReadonlyStubPermission(source);
     if (api && typeof api.getFlightReadonlyStubPermission === "function") return api.getFlightReadonlyStubPermission(source);
     const fallback = {
-      permissionVersion:"2.0.80",
+      permissionVersion:"2.0.81",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -2351,6 +2455,7 @@
         <ul>
           ${row("当前阶段", display.currentStageLine || "当前阶段：需要人工批准")}
           ${row("下一步", display.nextStepLine || "下一步：完成 provider 条款、API 文档、域名 allowlist、API key 存储方案和请求 / 响应结构审查")}
+          ${row("Sandbox Dry Run", display.sandboxDryRunLine || "Sandbox Dry Run：外壳已建立，尚未批准真实沙箱连接。")}
         </ul>
       </div>
       <div class="commerce-flight-readonly-stub-permission-rules">
@@ -2370,7 +2475,7 @@
     if (api && typeof api.normalizeFlightReadonlyStubAdapter === "function") return api.normalizeFlightReadonlyStubAdapter(source);
     if (api && typeof api.getFlightReadonlyStubAdapter === "function") return api.getFlightReadonlyStubAdapter(source);
     const fallback = {
-      adapterVersion:"2.0.80",
+      adapterVersion:"2.0.81",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -2463,6 +2568,7 @@
       <div class="commerce-flight-readonly-stub-adapter-summary">
         <ul>
           ${row("只读适配器空壳", display.readonlyStubAdapterAvailabilityLine || "可用")}
+          ${row("Sandbox Dry Run", display.sandboxDryRunLine || "Sandbox Dry Run：外壳已建立")}
           ${row("真实网络连接", display.realNetworkConnectionLine || "未启用")}
           ${row("真实价格返回", display.realPriceReturnLine || "未启用")}
           ${row("bookingUrl 返回", display.bookingUrlReturnLine || "未启用")}
@@ -2492,7 +2598,7 @@
     if (api && typeof api.normalizeFlightProviderApprovalStatus === "function") return api.normalizeFlightProviderApprovalStatus(source);
     if (api && typeof api.getFlightProviderApprovalStatus === "function") return api.getFlightProviderApprovalStatus(source);
     const fallback = {
-      approvalVersion:"2.0.80",
+      approvalVersion:"2.0.81",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -2605,6 +2711,7 @@
         <ul>
           ${row("只读适配器开发许可", display.readonlyStubPermissionLine || "只读适配器开发许可：未授予")}
           ${row("只读适配器空壳", display.readonlyStubAdapterLine || "已建立")}
+          ${row("Sandbox Dry Run", display.sandboxDryRunLine || "Sandbox Dry Run：外壳已建立，尚未批准真实连接")}
           ${row("当前阶段", display.readonlyStubPermissionStageLine || "当前阶段：需要人工批准")}
           ${row("下一步", display.readonlyStubPermissionNextStepLine || "下一步：完成 provider 条款、API 文档、域名 allowlist、API key 存储方案和请求 / 响应结构审查")}
           ${row("真实网络连接", display.realNetworkConnectionLine || "未启用")}
@@ -2669,11 +2776,13 @@
         <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="simpleFlight" data-commerce-copy-text="${commerceEncodedCopyText(copyTexts.flight)}">复制机票搜索条件</button>
         <button class="cmd-btn gray commerce-platform-template-copy-btn" type="button" data-commerce-template-kind="simpleGoogleFlights" data-commerce-template-text="${commerceEncodedCopyText(copyTexts.googleFlights)}">复制 Google Flights 模板</button>
         <button class="cmd-btn gray commerce-platform-template-copy-btn" type="button" data-commerce-template-kind="simpleTripCom" data-commerce-template-text="${commerceEncodedCopyText(copyTexts.tripCom)}">复制 Trip.com / 携程模板</button>
+        <button class="cmd-btn gray commerce-sandbox-dry-run-btn" type="button">查看 Sandbox Dry Run</button>
       </div>
       ${commerceFlightProviderCandidatesDisclosure(task)}
       ${commerceFlightProviderApprovalDisclosure(task)}
       ${commerceFlightReadonlyStubPermissionDisclosure(task)}
       ${commerceFlightReadonlyStubAdapterDisclosure(task)}
+      ${commerceFlightSandboxDryRunDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;

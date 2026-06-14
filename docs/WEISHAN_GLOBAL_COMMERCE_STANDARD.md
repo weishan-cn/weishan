@@ -869,3 +869,73 @@ v2.0.80 在只读适配器开发许可之上新增 “Readonly Stub Adapter Scaf
 - `bookingUrl：禁用`
 
 只读适配器空壳只允许校验输入形状、构建请求形状和规范化响应形状，不允许读取真实 API key，不允许连接真实 endpoint，不允许发起网络请求，不允许返回真实价格，不允许返回 bookingUrl，不允许打开预订页，不允许付款，不允许下单，不允许保存证件 / 银行卡。候选平台与 Provider 审批状态必须继续保留默认未审查和未启用状态。
+
+## 21. Sandbox Dry Run Shell
+
+v2.0.81：Sandbox Dry Run Shell / 机票只读适配器沙箱空跑外壳
+
+v2.0.81 在只读适配器空壳之上新增 “Sandbox Dry Run Shell / 机票只读适配器沙箱空跑外壳”。默认必须返回 `flightSandboxDryRun`，其 `sandboxDryRunVersion`、`phase`、`dryRunStatus`、`networkMode`、`apiKeyMode`、`endpointMode`、`providerMode`、`priceMode`、`bookingUrlMode`、`orderMode`、`paymentMode`、`identityStorageMode`、`capabilities`、`steps` 和 `blockedCapabilities` 默认固定为仅外壳状态；没有启用真实 provider、API key、endpoint、网络、价格、bookingUrl、付款或下单时，不得展示真实结果，只能显示“查看 Sandbox Dry Run”“Sandbox Dry Run：外壳已建立”“沙箱空跑外壳已建立，但未连接真实 provider。”“只允许验证输入、请求和响应结构，不连接真实 endpoint，不读取真实 API key，不返回真实价格，不生成预订链接。”等 UI 闸门文案。
+
+Sandbox Dry Run Shell 的状态结构必须至少包含：
+
+- `sandboxDryRunVersion`
+- `phase: "flight_sandbox_dry_run_shell"`
+- `dryRunStatus: "shell_only"`
+- `networkMode: "disabled"`
+- `apiKeyMode: "disabled"`
+- `endpointMode: "disabled"`
+- `providerMode: "disabled"`
+- `priceMode: "disabled"`
+- `bookingUrlMode: "disabled"`
+- `orderMode: "disabled"`
+- `paymentMode: "disabled"`
+- `identityStorageMode: "disabled"`
+
+默认 `capabilities` 必须至少包含：
+
+- `canRunDryRunShell: true`
+- `canValidateInputShape: true`
+- `canValidateRequestShape: true`
+- `canValidateResponseShape: true`
+- `canSimulateControlFlow: true`
+- `canUseFixtureOnly: true`
+- `canUseRealApiKey: false`
+- `canConnectRealEndpoint: false`
+- `canUseNetwork: false`
+- `canReturnPrice: false`
+- `canReturnBookingUrl: false`
+- `canOpenBookingUrl: false`
+- `canCreateOrder: false`
+- `canPay: false`
+- `canStoreIdentity: false`
+- `canStorePassport: false`
+- `canStoreBankCard: false`
+
+默认 `steps` 必须至少包含：
+
+- `validate_user_input`
+- `build_request_shape`
+- `validate_request_shape`
+- `skip_network_call`
+- `build_empty_response_shape`
+- `validate_response_shape`
+- `block_price_return`
+- `block_booking_url_return`
+- `block_order_creation`
+- `block_payment`
+
+默认 `blockedCapabilities` 必须至少包含：
+
+- `canUseRealApiKey`
+- `canConnectRealEndpoint`
+- `canUseNetwork`
+- `canReturnPrice`
+- `canReturnBookingUrl`
+- `canOpenBookingUrl`
+- `canCreateOrder`
+- `canPay`
+- `canStoreIdentity`
+- `canStorePassport`
+- `canStoreBankCard`
+
+Sandbox Dry Run Shell 只允许校验输入、请求和响应结构、模拟控制流和使用 fixture，不允许发起真实网络请求，不允许读取真实 API key，不允许连接真实 endpoint，不允许返回真实价格，不允许返回 bookingUrl，不允许打开预订页，不允许付款，不允许下单，不允许保存证件 / 银行卡。候选平台、Provider 审批状态、只读适配器开发许可和只读适配器空壳必须继续保留默认阻断状态。

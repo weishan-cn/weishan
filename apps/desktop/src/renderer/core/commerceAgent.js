@@ -39,7 +39,7 @@
       return api.getFlightLowestOffersContract(contract);
     }
     const fallback = {
-      contractVersion:"2.0.80",
+      contractVersion:"2.0.81",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -99,7 +99,7 @@
       return api.getFlightProviderCandidatesRegistry(registry);
     }
     const fallback = {
-      contractVersion:"2.0.80",
+      contractVersion:"2.0.81",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -169,7 +169,7 @@
       return api.getFlightProviderApprovalStatus(status);
     }
     const fallback = {
-      approvalVersion:"2.0.80",
+      approvalVersion:"2.0.81",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -265,7 +265,7 @@
       return api.getFlightReadonlyStubPermission(permission);
     }
     const fallback = {
-      permissionVersion:"2.0.80",
+      permissionVersion:"2.0.81",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -329,7 +329,7 @@
       return api.getFlightReadonlyStubAdapter(adapter);
     }
     const fallback = {
-      adapterVersion:"2.0.80",
+      adapterVersion:"2.0.81",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -423,6 +423,129 @@
       safety:Object.assign({}, fallback.safety, raw.safety && typeof raw.safety === "object" ? raw.safety : {}),
       requestShapeLines:Array.isArray(raw.requestShapeLines) ? raw.requestShapeLines.slice() : fallback.requestShapeLines.slice(),
       responseShapeLines:Array.isArray(raw.responseShapeLines) ? raw.responseShapeLines.slice() : fallback.responseShapeLines.slice(),
+      display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
+  function createFlightSandboxDryRun(shell){
+    const api = window.WeishanCommerceFlightSandboxDryRun;
+    if (api && typeof api.normalizeFlightSandboxDryRunContract === "function") {
+      return api.normalizeFlightSandboxDryRunContract(shell);
+    }
+    if (api && typeof api.getFlightSandboxDryRunContract === "function") {
+      return api.getFlightSandboxDryRunContract(shell);
+    }
+    const fallback = {
+      sandboxDryRunVersion:"2.0.81",
+      phase:"flight_sandbox_dry_run_shell",
+      dryRunStatus:"shell_only",
+      networkMode:"disabled",
+      apiKeyMode:"disabled",
+      endpointMode:"disabled",
+      providerMode:"disabled",
+      priceMode:"disabled",
+      bookingUrlMode:"disabled",
+      orderMode:"disabled",
+      paymentMode:"disabled",
+      identityStorageMode:"disabled",
+      capabilities:{
+        canRunDryRunShell:true,
+        canValidateInputShape:true,
+        canValidateRequestShape:true,
+        canValidateResponseShape:true,
+        canSimulateControlFlow:true,
+        canUseFixtureOnly:true,
+        canUseRealApiKey:false,
+        canConnectRealEndpoint:false,
+        canUseNetwork:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canOpenBookingUrl:false,
+        canCreateOrder:false,
+        canPay:false,
+        canStoreIdentity:false,
+        canStorePassport:false,
+        canStoreBankCard:false
+      },
+      blockedCapabilities:[
+        "canUseRealApiKey",
+        "canConnectRealEndpoint",
+        "canUseNetwork",
+        "canReturnPrice",
+        "canReturnBookingUrl",
+        "canOpenBookingUrl",
+        "canCreateOrder",
+        "canPay",
+        "canStoreIdentity",
+        "canStorePassport",
+        "canStoreBankCard"
+      ],
+      steps:[
+        "validate_user_input",
+        "build_request_shape",
+        "validate_request_shape",
+        "skip_network_call",
+        "build_empty_response_shape",
+        "validate_response_shape",
+        "block_price_return",
+        "block_booking_url_return",
+        "block_order_creation",
+        "block_payment"
+      ],
+      display:{
+        summaryTitle:"Sandbox Dry Run",
+        shellStatusLine:"Sandbox Dry Run：外壳已建立",
+        currentStatusLine:"沙箱空跑外壳已建立，但未连接真实 provider。",
+        reasonLine:"只允许验证输入、请求和响应结构，不连接真实 endpoint，不读取真实 API key，不返回真实价格，不生成预订链接。",
+        stepsTitle:"Dry Run 步骤",
+        capabilityTitle:"当前能力",
+        blockedTitle:"阻断能力",
+        stepLabels:[
+          "validate_user_input：验证用户输入",
+          "build_request_shape：构建请求形状",
+          "validate_request_shape：校验请求形状",
+          "skip_network_call：跳过网络调用",
+          "build_empty_response_shape：构建空响应形状",
+          "validate_response_shape：校验响应形状",
+          "block_price_return：阻断价格返回",
+          "block_booking_url_return：阻断 bookingUrl 返回",
+          "block_order_creation：阻断下单创建",
+          "block_payment：阻断付款"
+        ],
+        capabilityLines:[
+          "可以运行沙箱空跑外壳",
+          "可以校验输入形状",
+          "可以校验请求形状",
+          "可以校验响应形状",
+          "可以模拟控制流",
+          "只使用 fixture / 本地结构",
+          "不能读取真实 API key",
+          "不能连接真实 endpoint",
+          "不能发起网络请求",
+          "不能返回价格",
+          "不能返回 bookingUrl",
+          "不能打开预订页",
+          "不能付款",
+          "不能下单",
+          "不能保存证件 / 银行卡"
+        ],
+        blockedCapabilityLines:[
+          "真实 API key：已阻断",
+          "真实 endpoint：已阻断",
+          "真实网络请求：已阻断",
+          "真实价格：已阻断",
+          "bookingUrl：已阻断",
+          "下单：已阻断",
+          "付款：已阻断",
+          "身份证 / 银行卡：已阻断"
+        ]
+      }
+    };
+    const raw = shell && typeof shell === "object" ? shell : {};
+    return Object.assign({}, fallback, raw, {
+      capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      blockedCapabilities:Array.isArray(raw.blockedCapabilities) ? raw.blockedCapabilities.slice() : fallback.blockedCapabilities.slice(),
+      steps:Array.isArray(raw.steps) ? raw.steps.slice() : fallback.steps.slice(),
       display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
     });
   }
@@ -690,6 +813,7 @@
       flightProviderApprovalStatus:category === "flight" ? createFlightProviderApprovalStatus() : null,
       flightReadonlyStubPermission:category === "flight" ? createFlightReadonlyStubPermission() : null,
       flightReadonlyStubAdapter:category === "flight" ? createFlightReadonlyStubAdapter() : null,
+      flightSandboxDryRun:category === "flight" ? createFlightSandboxDryRun() : null,
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -740,6 +864,7 @@
       flightProviderApprovalStatus:category === "flight" ? createFlightProviderApprovalStatus(base.flightProviderApprovalStatus) : null,
       flightReadonlyStubPermission:category === "flight" ? createFlightReadonlyStubPermission(base.flightReadonlyStubPermission) : null,
       flightReadonlyStubAdapter:category === "flight" ? createFlightReadonlyStubAdapter(base.flightReadonlyStubAdapter) : null,
+      flightSandboxDryRun:category === "flight" ? createFlightSandboxDryRun(base.flightSandboxDryRun) : null,
       canShowPrice:base.canShowPrice === true,
       canShowBookingButton:base.canShowBookingButton === true,
       canShowCheckoutButton:base.canShowCheckoutButton === true,
@@ -854,6 +979,7 @@
       flightProviderApprovalStatus:safe.category === "flight" ? safe.flightProviderApprovalStatus : null,
       flightReadonlyStubPermission:safe.category === "flight" ? safe.flightReadonlyStubPermission : null,
       flightReadonlyStubAdapter:safe.category === "flight" ? safe.flightReadonlyStubAdapter : null,
+      flightSandboxDryRun:safe.category === "flight" ? safe.flightSandboxDryRun : null,
       candidates:safe.candidates,
       recommendation:safe.recommendation,
       nextSteps:[

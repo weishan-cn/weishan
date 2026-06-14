@@ -160,6 +160,27 @@ function checkFlightReadonlyStubAdapterVersion(results, expectedVersion) {
   );
 }
 
+function checkFlightSandboxDryRunVersion(results, expectedVersion) {
+  const sandboxPath = "apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js";
+  const sandbox = readText(sandboxPath);
+  if (!sandbox) {
+    results.push({ name: "apps/desktop flight sandbox dry run version", pass: false, detail: sandboxPath + " missing" });
+    return;
+  }
+  if (sandbox.__readError) {
+    results.push({ name: "apps/desktop flight sandbox dry run version", pass: false, detail: sandbox.__readError });
+    return;
+  }
+  const match = sandbox.match(/SANDBOX_DRY_RUN_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop flight sandbox dry run version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js SANDBOX_DRY_RUN_VERSION"
+  );
+}
+
 function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
   const pkg = readJson(packagePath);
   const lock = readJson(lockPath);
@@ -210,6 +231,7 @@ function runVersionCheck() {
     checkFlightProviderApprovalVersion(results, rootPackage.version);
     checkFlightReadonlyStubPermissionVersion(results, rootPackage.version);
     checkFlightReadonlyStubAdapterVersion(results, rootPackage.version);
+    checkFlightSandboxDryRunVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

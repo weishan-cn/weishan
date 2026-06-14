@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const APPROVAL_VERSION = "2.0.80";
+  const APPROVAL_VERSION = "2.0.81";
   const PHASE = "flight_provider_approval";
   const DEFAULT_STATUS = "not_reviewed";
   const DEFAULT_ALLOWED_STAGE = "candidate_only";
@@ -162,6 +162,7 @@
         approvalStatusLine: "审批状态：未审查",
         readonlyStubPermissionLine: "只读适配器开发许可：未授予",
         readonlyStubAdapterLine: "已建立",
+        sandboxDryRunLine: "Sandbox Dry Run：外壳已建立，尚未批准真实连接",
         readonlyStubPermissionStageLine: "当前阶段：需要人工批准",
         readonlyStubPermissionNextStepLine: "下一步：完成 provider 条款、API 文档、域名 allowlist、API key 存储方案和请求 / 响应结构审查",
         readOnlyPriceSourceLine: "只读价格源：未启用",
@@ -194,6 +195,7 @@
       approvalStatusLine: safe.display.approvalStatusLine || "审批状态：未审查",
       readonlyStubPermissionLine: safe.display.readonlyStubPermissionLine || "只读适配器开发许可：未授予",
       readonlyStubAdapterLine: safe.display.readonlyStubAdapterLine || "已建立",
+      sandboxDryRunLine: safe.display.sandboxDryRunLine || "Sandbox Dry Run：外壳已建立，尚未批准真实连接",
       readonlyStubPermissionStageLine: safe.display.readonlyStubPermissionStageLine || "当前阶段：需要人工批准",
       readonlyStubPermissionNextStepLine: safe.display.readonlyStubPermissionNextStepLine || "下一步：完成 provider 条款、API 文档、域名 allowlist、API key 存储方案和请求 / 响应结构审查",
       readOnlyPriceSourceLine: safe.display.readOnlyPriceSourceLine || "只读价格源：未启用",

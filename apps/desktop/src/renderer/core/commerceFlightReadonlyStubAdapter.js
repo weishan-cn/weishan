@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const ADAPTER_VERSION = "2.0.80";
+  const ADAPTER_VERSION = "2.0.81";
   const PHASE = "flight_readonly_stub_adapter";
   const DEFAULT_OVERALL_STATUS = "shell_ready";
   const DEFAULT_CURRENT_STAGE = "shell_ready";
@@ -82,6 +82,7 @@
       shellStatusLine: "只读适配器空壳：已建立",
       currentStatusLine: "只读适配器空壳已建立",
       connectionStatusLine: "尚未允许连接真实 provider",
+      sandboxDryRunLine: "Sandbox Dry Run：外壳已建立",
       summaryNote: "只读适配器空壳只允许开发请求 / 响应结构，不允许连接真实 endpoint，不允许读取真实 API key，不允许返回真实价格，不允许生成预订链接。",
       capabilityTitle: "当前能力",
       requestShapeTitle: "请求形状",
@@ -169,6 +170,7 @@
       shellStatusLine: safe.display.shellStatusLine || "只读适配器空壳：已建立",
       currentStatusLine: safe.display.currentStatusLine || "只读适配器空壳已建立",
       connectionStatusLine: safe.display.connectionStatusLine || "尚未允许连接真实 provider",
+      sandboxDryRunLine: safe.display.sandboxDryRunLine || "Sandbox Dry Run：外壳已建立",
       summaryNote: safe.display.summaryNote || "只读适配器空壳只允许开发请求 / 响应结构，不允许连接真实 endpoint，不允许读取真实 API key，不允许返回真实价格，不允许生成预订链接。",
       capabilityTitle: safe.display.capabilityTitle || "当前能力",
       requestShapeTitle: safe.display.requestShapeTitle || "请求形状",

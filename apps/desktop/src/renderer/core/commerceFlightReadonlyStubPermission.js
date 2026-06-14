@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PERMISSION_VERSION = "2.0.80";
+  const PERMISSION_VERSION = "2.0.81";
   const PHASE = "flight_readonly_stub_permission";
   const DEFAULT_OVERALL_STATUS = "not_granted";
   const DEFAULT_CURRENT_STAGE = "approval_required";
@@ -46,6 +46,7 @@
       summaryTitle: "只读适配器开发许可",
       permissionStatusLine: "只读适配器开发许可：未授予",
       currentStatusLine: "当前状态：尚未授予只读适配器开发许可。",
+      sandboxDryRunLine: "Sandbox Dry Run：外壳已建立，尚未批准真实沙箱连接。",
       currentStageLine: "当前阶段：需要人工批准",
       nextStepLine: "下一步：完成 provider 条款、API 文档、域名 allowlist、API key 存储方案和请求 / 响应结构审查",
       noticeLine: "只读适配器只允许开发请求 / 响应结构，不允许连接真实 endpoint，不允许读取真实 API key，不允许返回真实价格，不允许生成预订链接。",
@@ -111,6 +112,7 @@
       summaryTitle: safe.display.summaryTitle || "只读适配器开发许可",
       permissionStatusLine: safe.display.permissionStatusLine || "只读适配器开发许可：未授予",
       currentStatusLine: safe.display.currentStatusLine || "当前状态：尚未授予只读适配器开发许可。",
+      sandboxDryRunLine: safe.display.sandboxDryRunLine || "Sandbox Dry Run：外壳已建立，尚未批准真实沙箱连接。",
       currentStageLine: safe.display.currentStageLine || "当前阶段：需要人工批准",
       nextStepLine: safe.display.nextStepLine || "下一步：完成 provider 条款、API 文档、域名 allowlist、API key 存储方案和请求 / 响应结构审查",
       noticeLine: safe.display.noticeLine || "只读适配器只允许开发请求 / 响应结构，不允许连接真实 endpoint，不允许读取真实 API key，不允许返回真实价格，不允许生成预订链接。",
