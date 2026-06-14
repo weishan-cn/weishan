@@ -613,6 +613,18 @@ Focus Assist 不允许返回真实商品结果，Focus Assist 不允许显示真
 
 Focus Assist 用户 UI 只能显示自然语言提示，不得裸露 focusAssistVersion、focusAssistMode、focusAssistPolicy、focusInputAfterChipClick、highlightStartButton、canFocusCommandInput、canHighlightStartButton、canAutoExecuteChip 或 raw/internal payload 字段。
 
+### One Screen Result Mode 标准
+
+One Screen Result Mode 必须让普通用户默认只看到一个“最终结果”卡片。默认首屏只展示自然语言旅行计划、电脑计划、普通用户安全提示、复制全部搜索条件、复制旅行搜索条件、复制电脑搜索条件，以及“查看可执行清单”“查看平台模板”“查看分析过程”“查看安全边界”“查看技术细节”等入口。
+
+默认不得铺开可执行清单全文、平台搜索模板全文、Google Flights / Trip.com / Booking / Agoda / 京东 / 淘宝 / Amazon / Best Buy 模板全文、机票 / 酒店 / 电脑搜索条件长列表、本地意图识别、子计划拆分、子计划补齐工作台、草稿确认与修正、provider / API key / endpoint / gate / dry run / onboarding / approval 等技术内容。
+
+点击“查看可执行清单”后才能显示旅行可执行清单、商品可执行清单、机票 / 酒店 / 电脑搜索条件。点击“查看平台模板”后才能显示平台搜索模板全文和复制全部平台模板。点击“查看分析过程”“查看安全边界”“查看技术细节”后才能显示对应过程、安全和技术信息。
+
+One Screen Result Mode 只改变展示层，不改变 provider gate，不接真实 provider，不访问真实平台，不返回价格，不返回 fake/demo/mock price，不跳转购买或预订，不付款或下单，不保存身份证、护照、银行卡或长期保存用户答案。复制按钮仍只能复制到剪贴板，不得打开外部平台，不得自动搜索，不得新增历史任务。chip 仍只能填入输入框，不得自动执行。
+
+历史回看也必须默认显示“最终结果”单屏卡片，保留可执行清单和平台模板折叠入口，不得重新执行历史任务，不得清空历史任务。
+
 ## 13. 当前版本链条
 
 - v2.0.25：真实价格只读展示 + 最低价精确跳转
@@ -635,6 +647,10 @@ Focus Assist 用户 UI 只能显示自然语言提示，不得裸露 focusAssist
 - v2.0.66：Copy Actionable Commerce Checklist / 一键复制可执行清单
 - v2.0.67：Fix History Actionable Checklist / 修复历史回看可执行清单和复制按钮
 - v2.0.68：Platform Search Template Pack / 平台搜索模板包
+- v2.0.69：Hide Technical Noise / 隐藏多余技术文字
+- v2.0.70：Fix Default Technical Noise Leak / 修复默认页技术词泄露
+- v2.0.71：Sidebar Version Sync / 修复侧边栏版本号不同步
+- v2.0.72：One Screen Result Mode / 单屏结果模式
 
 后续版本必须继续保持全球多源、只读搜索、安全门控、外部跳转的方向，不能退化为单一平台工具。
 

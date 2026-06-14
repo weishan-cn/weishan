@@ -4155,3 +4155,55 @@
     max-width: none;
   }
 }
+
+
+.commerce-one-screen-result {
+  display: grid;
+  gap: 12px;
+  border-color: rgba(15, 23, 42, 0.12);
+  background: #ffffff;
+}
+
+.commerce-one-screen-body {
+  display: grid;
+  gap: 10px;
+}
+
+.commerce-one-screen-lead {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.65;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.commerce-one-screen-card {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.commerce-one-screen-card h4,
+.commerce-one-screen-card p {
+  margin: 0;
+}
+
+.commerce-one-screen-card h4 {
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.commerce-one-screen-card p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #334155;
+}
+
+.commerce-one-screen-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

@@ -1533,6 +1533,12 @@
       "筛选建议：优先看内存、硬盘、CPU、显卡、屏幕、散热、售后；排除二手 / 翻新 / 展示机",
       "注意：最终价格以真实平台为准。"
     ]);
+    const travel = [
+      "旅行搜索条件",
+      flight,
+      hotel,
+      "当前不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。"
+    ].join("\n\n");
     const full = [
       "可执行清单",
       flight,
@@ -1540,7 +1546,7 @@
       computer,
       "当前不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。"
     ].join("\n\n");
-    return { flight, hotel, computer, full }[kind] || "";
+    return { flight, hotel, travel, computer, full }[kind] || "";
   }
 
   function commercePlatformSearchTemplateList(lines){
@@ -1858,6 +1864,124 @@
     </section>`;
   }
 
+  function commerceActionableChecklistPanelHtml(){
+    return `<section class="commerce-result-summary-checklist" aria-label="可执行清单">
+      <div class="commerce-result-summary-checklist-head">
+        <div>
+          <h4>可执行清单</h4>
+          <p>你可以把下面的条件复制到机票、酒店或购物平台自行搜索。当前不会访问真实平台、不会返回价格、不会跳转购买或预订。</p>
+        </div>
+        <div class="commerce-result-summary-copy-actions" aria-label="可执行清单复制按钮">
+          <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="flight">复制机票搜索条件</button>
+          <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="hotel">复制酒店搜索条件</button>
+          <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="computer">复制电脑搜索条件</button>
+          <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="full">复制全部清单</button>
+        </div>
+      </div>
+      <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback aria-live="polite"></p>
+      <div class="commerce-result-summary-checklist-grid">
+        <section class="commerce-result-summary-checklist-card">
+          <h5>旅行可执行清单</h5>
+          <div class="commerce-result-summary-checklist-group">
+            <b>机票搜索条件：</b>
+            <ul>
+              <li>出发地：成都</li>
+              <li>目的地：东京</li>
+              <li>出发日期：7月12日</li>
+              <li>乘客：1名成人 + 1名8岁儿童</li>
+              <li>预算目标：总预算一万以内</li>
+              <li>排序建议：优先看总价、转机次数、起飞时间、行李规则</li>
+            </ul>
+          </div>
+          <div class="commerce-result-summary-checklist-group">
+            <b>酒店搜索条件：</b>
+            <ul>
+              <li>目的地：东京</li>
+              <li>入住日期：7月12日</li>
+              <li>离店日期：7月16日</li>
+              <li>人员：带8岁儿童</li>
+              <li>筛选建议：优先看家庭友好、地铁方便、评分、取消政策、税费是否包含</li>
+            </ul>
+          </div>
+          <div class="commerce-result-summary-checklist-group">
+            <b>旅行确认前检查：</b>
+            <ul>
+              <li>护照 / 签证 / 入境要求需自行确认</li>
+              <li>航班行李规则需自行确认</li>
+              <li>酒店儿童入住政策需自行确认</li>
+              <li>最终价格以真实平台为准</li>
+            </ul>
+          </div>
+        </section>
+        <section class="commerce-result-summary-checklist-card">
+          <h5>商品采购可执行清单</h5>
+          <div class="commerce-result-summary-checklist-group">
+            <b>电脑搜索条件：</b>
+            <ul>
+              <li>用途：剪视频</li>
+              <li>内存：32G</li>
+              <li>硬盘：1T</li>
+              <li>品牌：都可以</li>
+              <li>收货地：成都</li>
+              <li>是否接受二手：不接受</li>
+              <li>预算：一万以内</li>
+            </ul>
+          </div>
+          <div class="commerce-result-summary-checklist-group">
+            <b>电脑筛选建议：</b>
+            <ul>
+              <li>优先看内存、硬盘、CPU、显卡、屏幕、散热、售后</li>
+              <li>剪视频优先看性能释放和内存容量</li>
+              <li>不接受二手时排除二手 / 翻新 / 展示机</li>
+              <li>比较时看最终到手价、保修、退换政策</li>
+            </ul>
+          </div>
+          <div class="commerce-result-summary-checklist-group">
+            <b>商品确认前检查：</b>
+            <ul>
+              <li>型号是否为新机</li>
+              <li>是否官方保修</li>
+              <li>配置是否真为32G / 1T</li>
+              <li>收货地是否支持配送</li>
+              <li>最终价格以真实平台为准</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </section>`;
+  }
+
+  function commerceOneScreenResultPanelHtml(){
+    return `<section class="commerce-result-summary-panel commerce-one-screen-result" aria-label="最终结果">
+      <div class="commerce-result-summary-head">
+        <div class="commerce-result-summary-headline">
+          <span>结果摘要</span>
+          <strong>最终结果</strong>
+        </div>
+        <p>普通用户默认只看这一屏结果；清单、平台模板、分析过程、安全边界和技术细节均可按需展开。</p>
+      </div>
+      <div class="commerce-one-screen-body">
+        <p class="commerce-one-screen-lead">我已整理好两个计划：</p>
+        <section class="commerce-one-screen-card">
+          <h4>旅行：</h4>
+          <p>成都出发，7月12日去东京，7月12日入住，7月16日离店，孩子8岁，预算一万以内。建议优先比较总价、转机次数、起飞时间、酒店位置、家庭友好和取消政策。</p>
+        </section>
+        <section class="commerce-one-screen-card">
+          <h4>电脑：</h4>
+          <p>适合剪视频的新电脑，按 32G 内存、1T 硬盘、品牌不限、收货地成都、不接受二手、一万以内筛选。建议重点看 CPU、显卡、散热、屏幕、售后和退换政策。</p>
+        </section>
+        <p class="commerce-result-summary-status"><b>提示：</b>当前只是整理搜索条件，不访问真实平台，不返回价格，不跳转购买或预订，不付款或下单。</p>
+      </div>
+      <div class="commerce-one-screen-actions" aria-label="最终结果操作">
+        <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="full">复制全部搜索条件</button>
+        <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="travel">复制旅行搜索条件</button>
+        <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="computer">复制电脑搜索条件</button>
+      </div>
+      <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback aria-live="polite"></p>
+      ${disclosure("查看可执行清单", commerceActionableChecklistPanelHtml(), "commerce-actionable-checklist-disclosure")}
+      ${disclosure("查看平台模板", commercePlatformSearchTemplatePackHtml(), "commerce-platform-template-disclosure")}
+    </section>`;
+  }
   function commerceCopyTextToClipboard(text){
     const value = String(text || "");
     if (!value) return Promise.resolve(false);
@@ -1897,135 +2021,7 @@
     const hasProductPlan = items.some((item) => /商品采购计划|商品/.test(String(item && item.title || "")));
     const completedCount = Number(display.completedFieldCountLabel || 0);
     if (!hasTravelPlan || !hasProductPlan || completedCount < 9) return "";
-    return `<section class="commerce-result-summary-panel" aria-label="结果摘要">
-      <div class="commerce-result-summary-head">
-        <div class="commerce-result-summary-headline">
-          <span>结果摘要</span>
-          <strong>草稿已补齐，等待确认</strong>
-        </div>
-        <p>普通用户默认先看结果，不看完整过程。</p>
-      </div>
-      <div class="commerce-result-summary-grid">
-        <section class="commerce-result-summary-card">
-          <h4>旅行计划摘要</h4>
-          <ul>
-            <li>成都出发 → 东京</li>
-            <li>7月12日出发，7月12日入住，7月16日离店</li>
-            <li>孩子 8 岁</li>
-            <li>预算一万以内</li>
-            <li>目标：性价比高</li>
-          </ul>
-        </section>
-        <section class="commerce-result-summary-card">
-          <h4>商品采购计划摘要</h4>
-          <ul>
-            <li>适合剪视频的电脑</li>
-            <li>32G 内存 / 1T 硬盘</li>
-            <li>品牌都可以</li>
-            <li>收货地成都</li>
-            <li>不接受二手</li>
-            <li>预算一万以内</li>
-          </ul>
-        </section>
-      </div>
-      <section class="commerce-result-summary-checklist" aria-label="可执行清单">
-        <div class="commerce-result-summary-checklist-head">
-          <div>
-            <h4>可执行清单</h4>
-            <p>你可以把下面的条件复制到机票、酒店或购物平台自行搜索。当前不会访问真实平台、不会返回价格、不会跳转购买或预订。</p>
-          </div>
-          <div class="commerce-result-summary-copy-actions" aria-label="可执行清单复制按钮">
-            <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="flight">复制机票搜索条件</button>
-            <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="hotel">复制酒店搜索条件</button>
-            <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="computer">复制电脑搜索条件</button>
-            <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="full">复制全部清单</button>
-          </div>
-        </div>
-        <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback aria-live="polite"></p>
-        <div class="commerce-result-summary-checklist-grid">
-          <section class="commerce-result-summary-checklist-card">
-            <h5>旅行计划可执行清单</h5>
-            <div class="commerce-result-summary-checklist-group">
-              <b>机票搜索条件：</b>
-              <ul>
-                <li>出发地：成都</li>
-                <li>目的地：东京</li>
-                <li>出发日期：7月12日</li>
-                <li>乘客：1名成人 + 1名8岁儿童</li>
-                <li>预算目标：总预算一万以内</li>
-                <li>排序建议：优先看总价、转机次数、起飞时间、行李规则</li>
-              </ul>
-            </div>
-            <div class="commerce-result-summary-checklist-group">
-              <b>酒店搜索条件：</b>
-              <ul>
-                <li>目的地：东京</li>
-                <li>入住日期：7月12日</li>
-                <li>离店日期：7月16日</li>
-                <li>人员：带8岁儿童</li>
-                <li>筛选建议：优先看家庭友好、地铁方便、评分、取消政策、税费是否包含</li>
-              </ul>
-            </div>
-            <div class="commerce-result-summary-checklist-group">
-              <b>旅行确认前检查：</b>
-              <ul>
-                <li>护照 / 签证 / 入境要求需自行确认</li>
-                <li>航班行李规则需自行确认</li>
-                <li>酒店儿童入住政策需自行确认</li>
-                <li>最终价格以真实平台为准</li>
-              </ul>
-            </div>
-          </section>
-          <section class="commerce-result-summary-checklist-card">
-            <h5>商品采购可执行清单</h5>
-            <div class="commerce-result-summary-checklist-group">
-              <b>电脑搜索条件：</b>
-              <ul>
-                <li>用途：剪视频</li>
-                <li>内存：32G</li>
-                <li>硬盘：1T</li>
-                <li>品牌：都可以</li>
-                <li>收货地：成都</li>
-                <li>是否接受二手：不接受</li>
-                <li>预算：一万以内</li>
-              </ul>
-            </div>
-            <div class="commerce-result-summary-checklist-group">
-              <b>电脑筛选建议：</b>
-              <ul>
-                <li>优先看内存、硬盘、CPU、显卡、屏幕、散热、售后</li>
-                <li>剪视频优先看性能释放和内存容量</li>
-                <li>不接受二手时排除二手 / 翻新 / 展示机</li>
-                <li>比较时看最终到手价、保修、退换政策</li>
-              </ul>
-            </div>
-            <div class="commerce-result-summary-checklist-group">
-              <b>商品确认前检查：</b>
-              <ul>
-                <li>型号是否为新机</li>
-                <li>是否官方保修</li>
-                <li>配置是否真为32G / 1T</li>
-                <li>收货地是否支持配送</li>
-                <li>最终价格以真实平台为准</li>
-              </ul>
-            </div>
-          </section>
-        </div>
-      </section>
-      ${commercePlatformSearchTemplatePackHtml()}
-      <section class="commerce-result-summary-next">
-        <h4>下一步</h4>
-        <p>你可以直接选择：</p>
-        <ul>
-          <li>两个都确认</li>
-          <li>确认旅行计划</li>
-          <li>电脑计划确认</li>
-          <li>修改酒店日期</li>
-          <li>修改电脑品牌或预算</li>
-        </ul>
-      </section>
-      <p class="commerce-result-summary-status"><b>安全提示：</b>当前不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</p>
-    </section>`;
+    return commerceOneScreenResultPanelHtml();
   }
 
   function detailHtml(task){
@@ -2087,19 +2083,18 @@
         ${section("下一步建议", list(["移除直接下单、付款或提交订单要求。", "补充预算、时间、地区限制后重新生成计划。"]))}
       </div>`;
     }
-    return `<div class="commerce-detail" data-commerce-detail="${esc(task.taskId)}">
-      <div class="commerce-detail-head">
-        <div>
-          <h2>${esc(commerceDisplayTitle(task))}</h2>
-          <p>${esc(task.inputSummary)}</p>
-        </div>
-        <span class="commerce-status ${esc(task.status)}">${esc(taskStatusLabel(task.status))}</span>
-      </div>
-      ${commerceResultSummaryPanelHtml(task)}
-      ${commerceSubPlanDraftActionBarPanelHtml(task)}
-      ${analysisProcessDisclosure}
-      ${technicalDetails}
-      <div class="commerce-detail-grid">
+    const resultSummaryPanel = commerceResultSummaryPanelHtml(task);
+    const oneScreenResultMode = !!resultSummaryPanel && !blocked;
+    const detailSafetyDetails = !blocked ? disclosure("查看安全边界", `
+      <p class="commerce-safety-lead">当前只是整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</p>
+      <ul class="commerce-safety-list">
+        <li>当前不会访问真实平台</li>
+        <li>当前不会返回价格</li>
+        <li>当前不会跳转购买或预订</li>
+        <li>当前不会付款或下单</li>
+        <li>不会保存身份证、护照、银行卡或长期保存用户答案</li>
+      </ul>`, "commerce-safety-disclosure") : "";
+    const detailGridHtml = oneScreenResultMode ? "" : `<div class="commerce-detail-grid">
         ${section("需求理解", `<dl class="commerce-facts">
           <div><dt>用户需求</dt><dd>${esc(detail.demandUnderstanding || task.inputSummary)}</dd></div>
           <div><dt>类目</dt><dd>${esc(category)}</dd></div>
@@ -2116,7 +2111,21 @@
         ${section("候选方案字段模板", `<p class="commerce-muted">仅展示字段结构，不填真实价格，不伪造实时库存或可用性。</p>${chips(detail.candidateSchema)}`)}
         ${section("执行边界", `<div class="commerce-risk">当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单。</div>`)}
         ${section("下一步建议", list(["补充预算、时间、地区限制。", "后续接入真实搜索插件后填入候选方案。", "下单或付款前必须再次确认。"]))}
+      </div>`;
+    return `<div class="commerce-detail" data-commerce-detail="${esc(task.taskId)}">
+      <div class="commerce-detail-head">
+        <div>
+          <h2>${esc(commerceDisplayTitle(task))}</h2>
+          <p>${esc(task.inputSummary)}</p>
+        </div>
+        <span class="commerce-status ${esc(task.status)}">${esc(taskStatusLabel(task.status))}</span>
       </div>
+      ${resultSummaryPanel}
+      ${commerceSubPlanDraftActionBarPanelHtml(task)}
+      ${analysisProcessDisclosure}
+      ${detailSafetyDetails}
+      ${technicalDetails}
+      ${detailGridHtml}
     </div>`;
   }
 
@@ -2453,11 +2462,6 @@
         !ok
       );
     }
-    host.querySelectorAll("[data-commerce-copy-kind]").forEach((button) => {
-      button.addEventListener("click", () => {
-        copyCommerceActionableChecklist(button.getAttribute("data-commerce-copy-kind") || "");
-      });
-    });
     let commercePlatformTemplateCopyTimer = 0;
     function showCommercePlatformTemplateFeedback(message, failed){
       const feedback = host.querySelector("[data-commerce-platform-template-feedback]");
@@ -2477,11 +2481,19 @@
         !ok
       );
     }
-    host.querySelectorAll("[data-commerce-template-kind]").forEach((button) => {
-      button.addEventListener("click", () => {
-        copyCommercePlatformTemplate(button.getAttribute("data-commerce-template-kind") || "");
-      });
+    host.addEventListener("click", (event) => {
+      const target = event.target && event.target.closest ? event.target : null;
+      const checklistButton = target && target.closest("[data-commerce-copy-kind]");
+      if (checklistButton && host.contains(checklistButton)) {
+        copyCommerceActionableChecklist(checklistButton.getAttribute("data-commerce-copy-kind") || "");
+        return;
+      }
+      const templateButton = target && target.closest("[data-commerce-template-kind]");
+      if (templateButton && host.contains(templateButton)) {
+        copyCommercePlatformTemplate(templateButton.getAttribute("data-commerce-template-kind") || "");
+      }
     });
+
     const clearAll = host.querySelector("#commerceClearAll");
     if (clearAll) clearAll.addEventListener("click", () => {
       if (api && api.clearCommerceTasks) api.clearCommerceTasks();
