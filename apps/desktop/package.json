@@ -1,12 +1,12 @@
 {
   "name": "weishan",
-  "version": "2.0.78",
+  "version": "2.0.79",
   "main": "src/main.js",
   "scripts": {
     "dev": "electron .",
     "check": "node --check src/main.js && node --check src/preload.js && node --check src/renderer/core/store.js && node --check src/renderer/core/config.js && node --check src/renderer/core/i18n.js && node --check src/renderer/core/permissions.js && node --check src/renderer/core/api.js && node --check src/renderer/core/router.js && node --check src/renderer/modules/plans/plansData.js && node --check src/renderer/modules/account/accountApi.js && node --check src/renderer/modules/subscription/subscriptionApi.js && node --check src/renderer/modules/history/historyApi.js && node --check src/renderer/modules/memory/memoryApi.js && node --check src/renderer/modules/projects/projectApi.js && node --check src/renderer/modules/command/commandApi.js && node --check src/renderer/modules/mail/mailApi.js && node --check src/renderer/modules/crawler/crawlerApi.js && node --check src/renderer/modules/software/softwareApi.js && node --check src/renderer/modules/storage/storageApi.js && node --check src/renderer/modules/team/teamApi.js && node --check src/renderer/modules/reports/reportApi.js && node --check src/renderer/modules/audit/auditApi.js && node --check src/renderer/modules/security/securityApi.js && node --check src/renderer/modules/backup/backupApi.js && node --check src/renderer/components/Sidebar.js && node --check src/renderer/components/Topbar.js && node --check src/renderer/routes/HomePage.js && node --check src/renderer/routes/ProjectsPage.js && node --check src/renderer/routes/MemoryPage.js && node --check src/renderer/routes/HistoryPage.js && node --check src/renderer/routes/MailPage.js && node --check src/renderer/routes/CrawlerPage.js && node --check src/renderer/routes/BuilderPage.js && node --check src/renderer/routes/StoragePage.js && node --check src/renderer/routes/TeamPage.js && node --check src/renderer/routes/SeatsPage.js && node --check src/renderer/routes/ReportsPage.js && node --check src/renderer/routes/AuditPage.js && node --check src/renderer/routes/SecurityPage.js && node --check src/renderer/routes/SettingsPage.js && node --check src/renderer/main.js",
     "build": "electron-builder",
-    "build:mac": "electron-builder --mac",
+    "build:mac": "electron-builder --mac && node ../../scripts/sign-mac-app.js",
     "build:win": "electron-builder --win"
   },
   "dependencies": {},

@@ -39,7 +39,7 @@
       return api.getFlightLowestOffersContract(contract);
     }
     const fallback = {
-      contractVersion:"2.0.78",
+      contractVersion:"2.0.79",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -99,7 +99,7 @@
       return api.getFlightProviderCandidatesRegistry(registry);
     }
     const fallback = {
-      contractVersion:"2.0.78",
+      contractVersion:"2.0.79",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -169,7 +169,7 @@
       return api.getFlightProviderApprovalStatus(status);
     }
     const fallback = {
-      approvalVersion:"2.0.78",
+      approvalVersion:"2.0.79",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -265,7 +265,7 @@
       return api.getFlightReadonlyStubPermission(permission);
     }
     const fallback = {
-      permissionVersion:"2.0.78",
+      permissionVersion:"2.0.79",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",

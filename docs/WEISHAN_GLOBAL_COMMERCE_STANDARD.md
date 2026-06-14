@@ -766,7 +766,7 @@ Codex 不得自行扩大范围，不得接真实 endpoint，不得引入付款�
 
 ## 19. 只读适配器开发许可状态
 
-v2.0.78 在机票 Provider 接入审批面板之上新增 “Readonly Stub Permission State / 只读适配器开发许可状态”。默认必须返回 `flightReadonlyStubPermission`，其 `permissionVersion`、`phase`、`overallStatus`、`currentStage`、`checklist` 和 `capabilities` 默认固定为未授予状态；没有人工批准开发只读 stub 时不得展示价格卡片、bookingUrl、外部跳转、付款或下单入口，只能显示“查看只读适配器开发许可”“只读适配器开发许可：未授予”“当前状态：尚未授予只读适配器开发许可。”“当前阶段：需要人工批准”“平台身份确认：未完成”“官方域名 / allowlist 审查：未完成”“Provider 条款审查：未完成”“API 文档审查：未完成”“API key 安全存储方案：未完成”“请求结构审查：未完成”“响应结构审查：未完成”“错误处理审查：未完成”“超时 / 频率限制审查：未完成”“人工批准开发只读 stub：未完成”等 UI 闸门文案。
+v2.0.79 在机票 Provider 接入审批面板之上新增 “Readonly Stub Permission State / 只读适配器开发许可状态”。默认必须返回 `flightReadonlyStubPermission`，其 `permissionVersion`、`phase`、`overallStatus`、`currentStage`、`checklist` 和 `capabilities` 默认固定为未授予状态；没有人工批准开发只读 stub 时不得展示价格卡片、bookingUrl、外部跳转、付款或下单入口，只能显示“查看只读适配器开发许可”“只读适配器开发许可：未授予”“当前状态：尚未授予只读适配器开发许可。”“当前阶段：需要人工批准”“平台身份确认：未完成”“官方域名 / allowlist 审查：未完成”“Provider 条款审查：未完成”“API 文档审查：未完成”“API key 安全存储方案：未完成”“请求结构审查：未完成”“响应结构审查：未完成”“错误处理审查：未完成”“超时 / 频率限制审查：未完成”“人工批准开发只读 stub：未完成”等 UI 闸门文案。
 
 只读适配器开发许可的状态结构必须至少包含：
 

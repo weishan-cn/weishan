@@ -2059,7 +2059,7 @@
 
   function commerceFlightLowestOffersContract(task){
     const fallback = {
-      contractVersion:"2.0.78",
+      contractVersion:"2.0.79",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -2123,7 +2123,7 @@
 
   function commerceFlightProviderCandidatesRegistry(task){
     const fallback = {
-      contractVersion:"2.0.78",
+      contractVersion:"2.0.79",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -2254,7 +2254,7 @@
     if (api && typeof api.normalizeFlightReadonlyStubPermission === "function") return api.normalizeFlightReadonlyStubPermission(source);
     if (api && typeof api.getFlightReadonlyStubPermission === "function") return api.getFlightReadonlyStubPermission(source);
     const fallback = {
-      permissionVersion:"2.0.78",
+      permissionVersion:"2.0.79",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -2355,7 +2355,7 @@
     if (api && typeof api.normalizeFlightProviderApprovalStatus === "function") return api.normalizeFlightProviderApprovalStatus(source);
     if (api && typeof api.getFlightProviderApprovalStatus === "function") return api.getFlightProviderApprovalStatus(source);
     const fallback = {
-      approvalVersion:"2.0.78",
+      approvalVersion:"2.0.79",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",

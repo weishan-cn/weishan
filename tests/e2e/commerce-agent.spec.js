@@ -3177,7 +3177,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.78 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
+  test("v2.0.79 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -3205,7 +3205,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("全网搜索结果由外部搜索引擎提供");
     const contract = await page.evaluate(() => window.WeishanCommerceFlightLowestOffersContract && typeof window.WeishanCommerceFlightLowestOffersContract.getFlightLowestOffersContract === "function" ? window.WeishanCommerceFlightLowestOffersContract.getFlightLowestOffersContract() : null);
     expect(contract).toEqual(expect.objectContaining({
-      contractVersion:"2.0.78",
+      contractVersion:"2.0.79",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -3221,7 +3221,7 @@ test.describe.serial("commerce agent workbench", () => {
     }));
     const registry = await page.evaluate(() => window.WeishanCommerceFlightProviderCandidates && typeof window.WeishanCommerceFlightProviderCandidates.getFlightProviderCandidatesRegistry === "function" ? window.WeishanCommerceFlightProviderCandidates.getFlightProviderCandidatesRegistry() : null);
     expect(registry).toEqual(expect.objectContaining({
-      contractVersion:"2.0.78",
+      contractVersion:"2.0.79",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -3391,7 +3391,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
     const readonlyStubPermission = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubPermission && typeof window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission === "function" ? window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission() : null);
     expect(readonlyStubPermission).toEqual(expect.objectContaining({
-      permissionVersion:"2.0.78",
+      permissionVersion:"2.0.79",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -3517,7 +3517,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.78 bare flight intent still renders the simple flight result card", async () => {
+  test("v2.0.79 bare flight intent still renders the simple flight result card", async () => {
     await resetCommerceTasks(page);
     await page.reload({ waitUntil:"domcontentloaded" });
     await gotoRoute(page, "home");
@@ -3545,10 +3545,10 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.0.78 sidebar version stays in sync with release version", async () => {
+  test("v2.0.79 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.0.78");
+    await expect(sidebarFoot).toContainText("weishan v2.0.79");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 
