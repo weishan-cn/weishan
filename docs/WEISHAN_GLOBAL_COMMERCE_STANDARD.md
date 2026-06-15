@@ -1110,3 +1110,44 @@ v2.0.85 标准 marker：
 - marker:user api priority external final price
 - marker:user api priority candidate fallback
 - marker:user api priority no fake price
+
+## v2.0.86：API Binding Safe Shell / API 绑定安全壳
+v2.0.86 新增 `commerceApiBindingSafeShell.js`，只提供 API 绑定入口、权限说明、绑定状态展示和只读 fixture 结构测试。该安全壳不保存真实 API key，不保存明文 key，不读取 `.env`，不读取 `process.env`，不访问系统钥匙串，不连接 endpoint，不发起网络请求，不返回价格，不生成 bookingUrl，不付款，不下单，不上传身份证、护照或银行卡，不保存银行卡。
+
+默认状态必须是：
+- 用户 API：未绑定
+- weishan 候选平台：可用
+- 真实价格结果：暂无
+- 搜索优先级：候选平台与外部搜索入口 fallback
+
+`查看 API 绑定说明` 默认折叠。展开后只能说明权限边界：
+- 当前状态：用户 API 未绑定。
+- 绑定 API 后，可优先使用用户授权平台的只读价格结果。
+- API 只用于搜索、读取价格、读取库存、分析结果。
+- 点击价格后跳转到外部平台或官网确认。
+- 绑定 API 不代表允许付款。
+- 绑定 API 不代表允许下单。
+- 绑定 API 不代表允许提交身份证、护照或银行卡。
+- 只读 API：允许搜索 / 返回价格。
+- 写入 API：默认禁止。
+- 下单 API：默认禁止。
+- 支付 API：禁止。
+- 身份资料上传：禁止。
+- 银行卡保存：禁止。
+
+只读 fixture 绑定仅可用于测试结构，允许 `canShowPrice: true` 和 `canShowBookingUrl: true` 的测试态，但必须继续禁止 `canCreateOrder`、`canPay`、`canUploadIdentity`、`canStoreIdentity`、`canStoreBankCard`。生产默认不得显示 fixture 价格，不得显示真实价格，不得显示 fake/demo/mock price，不得显示 bookingUrl，不得显示预订、付款或下单入口。
+
+v2.0.86 标准 marker：
+- marker:api binding safe shell
+- marker:api binding safe shell no real key
+- marker:api binding safe shell no plaintext key
+- marker:api binding safe shell no endpoint
+- marker:api binding safe shell no network
+- marker:api binding safe shell no price
+- marker:api binding safe shell no booking url
+- marker:api binding safe shell no payment
+- marker:api binding safe shell no order submit
+- marker:api binding safe shell no identity upload
+- marker:api binding safe shell no bank card storage
+- marker:api binding safe shell readonly only
+- marker:api binding safe shell user api not bound

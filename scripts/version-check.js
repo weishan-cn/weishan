@@ -224,6 +224,27 @@ function checkUserApiPriorityPolicyVersion(results, expectedVersion) {
   );
 }
 
+function checkApiBindingSafeShellVersion(results, expectedVersion) {
+  const shellPath = "apps/desktop/src/renderer/core/commerceApiBindingSafeShell.js";
+  const shell = readText(shellPath);
+  if (!shell) {
+    results.push({ name: "apps/desktop API binding safe shell version", pass: false, detail: shellPath + " missing" });
+    return;
+  }
+  if (shell.__readError) {
+    results.push({ name: "apps/desktop API binding safe shell version", pass: false, detail: shell.__readError });
+    return;
+  }
+  const match = shell.match(/SHELL_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop API binding safe shell version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceApiBindingSafeShell.js SHELL_VERSION"
+  );
+}
+
 function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
   const pkg = readJson(packagePath);
   const lock = readJson(lockPath);
@@ -277,6 +298,7 @@ function runVersionCheck() {
     checkFlightSandboxDryRunVersion(results, rootPackage.version);
     checkFlightSandboxProviderMatrixVersion(results, rootPackage.version);
     checkUserApiPriorityPolicyVersion(results, rootPackage.version);
+    checkApiBindingSafeShellVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {
