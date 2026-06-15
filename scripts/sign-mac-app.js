@@ -31,6 +31,14 @@ function main() {
   console.log('[sign] ad-hoc signing ' + path.relative(ROOT, appPath));
   run('codesign', ['--force', '--deep', '--sign', '-', appPath]);
 
+  console.log('[xattr] clearing quarantine/provenance flags ' + path.relative(ROOT, appPath));
+  try {
+    run('xattr', ['-dr', 'com.apple.quarantine', appPath]);
+  } catch (_) {}
+  try {
+    run('xattr', ['-dr', 'com.apple.provenance', appPath]);
+  } catch (_) {}
+
   console.log('[verify] verifying ' + path.relative(ROOT, appPath));
   run('codesign', ['--verify', '--deep', '--strict', '--verbose=2', appPath]);
 

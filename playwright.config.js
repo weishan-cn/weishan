@@ -5,7 +5,8 @@ module.exports = defineConfig({
   timeout: 60000,
   retries: 0,
   workers: 1,
-  reporter: [["list"], ["html", { open: "never" }]],
+  outputDir: "/private/tmp/weishan-playwright-results",
+  reporter: [["list"]],
   use: {
     trace: "retain-on-failure"
   }

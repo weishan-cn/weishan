@@ -872,9 +872,9 @@ v2.0.80 在只读适配器开发许可之上新增 “Readonly Stub Adapter Scaf
 
 ## 21. Sandbox Dry Run Shell
 
-v2.0.81：Sandbox Dry Run Shell / 机票只读适配器沙箱空跑外壳
+v2.0.82：Sandbox Dry Run Shell / 机票只读适配器沙箱空跑外壳
 
-v2.0.81 在只读适配器空壳之上新增 “Sandbox Dry Run Shell / 机票只读适配器沙箱空跑外壳”。默认必须返回 `flightSandboxDryRun`，其 `sandboxDryRunVersion`、`phase`、`dryRunStatus`、`networkMode`、`apiKeyMode`、`endpointMode`、`providerMode`、`priceMode`、`bookingUrlMode`、`orderMode`、`paymentMode`、`identityStorageMode`、`capabilities`、`steps` 和 `blockedCapabilities` 默认固定为仅外壳状态；没有启用真实 provider、API key、endpoint、网络、价格、bookingUrl、付款或下单时，不得展示真实结果，只能显示“查看 Sandbox Dry Run”“Sandbox Dry Run：外壳已建立”“沙箱空跑外壳已建立，但未连接真实 provider。”“只允许验证输入、请求和响应结构，不连接真实 endpoint，不读取真实 API key，不返回真实价格，不生成预订链接。”等 UI 闸门文案。
+v2.0.82 在只读适配器空壳之上新增 “Sandbox Dry Run Shell / 机票只读适配器沙箱空跑外壳”。默认必须返回 `flightSandboxDryRun`，其 `sandboxDryRunVersion`、`phase`、`dryRunStatus`、`networkMode`、`apiKeyMode`、`endpointMode`、`providerMode`、`priceMode`、`bookingUrlMode`、`orderMode`、`paymentMode`、`identityStorageMode`、`capabilities`、`steps` 和 `blockedCapabilities` 默认固定为仅外壳状态；没有启用真实 provider、API key、endpoint、网络、价格、bookingUrl、付款或下单时，不得展示真实结果，只能显示“查看 Sandbox Dry Run”“Sandbox Dry Run：外壳已建立”“沙箱空跑外壳已建立，但未连接真实 provider。”“只允许验证输入、请求和响应结构，不连接真实 endpoint，不读取真实 API key，不返回真实价格，不生成预订链接。”等 UI 闸门文案。
 
 Sandbox Dry Run Shell 的状态结构必须至少包含：
 
