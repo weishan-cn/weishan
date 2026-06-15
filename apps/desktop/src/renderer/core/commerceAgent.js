@@ -39,7 +39,7 @@
       return api.getFlightLowestOffersContract(contract);
     }
     const fallback = {
-      contractVersion:"2.0.82",
+      contractVersion:"2.0.83",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -99,7 +99,7 @@
       return api.getFlightProviderCandidatesRegistry(registry);
     }
     const fallback = {
-      contractVersion:"2.0.82",
+      contractVersion:"2.0.83",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -169,7 +169,7 @@
       return api.getFlightProviderApprovalStatus(status);
     }
     const fallback = {
-      approvalVersion:"2.0.82",
+      approvalVersion:"2.0.83",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -265,7 +265,7 @@
       return api.getFlightReadonlyStubPermission(permission);
     }
     const fallback = {
-      permissionVersion:"2.0.82",
+      permissionVersion:"2.0.83",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -329,7 +329,7 @@
       return api.getFlightReadonlyStubAdapter(adapter);
     }
     const fallback = {
-      adapterVersion:"2.0.82",
+      adapterVersion:"2.0.83",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -436,7 +436,7 @@
       return api.getFlightSandboxDryRunContract(shell);
     }
     const fallback = {
-      sandboxDryRunVersion:"2.0.82",
+      sandboxDryRunVersion:"2.0.83",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -546,6 +546,103 @@
       capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
       blockedCapabilities:Array.isArray(raw.blockedCapabilities) ? raw.blockedCapabilities.slice() : fallback.blockedCapabilities.slice(),
       steps:Array.isArray(raw.steps) ? raw.steps.slice() : fallback.steps.slice(),
+      display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
+  function createFlightSandboxProviderMatrix(matrix){
+    const api = window.WeishanCommerceFlightSandboxProviderMatrix;
+    if (api && typeof api.normalizeFlightSandboxProviderMatrix === "function") {
+      return api.normalizeFlightSandboxProviderMatrix(matrix);
+    }
+    if (api && typeof api.getFlightSandboxProviderMatrixContract === "function") {
+      return api.getFlightSandboxProviderMatrixContract(matrix);
+    }
+    const fallback = {
+      matrixVersion:"2.0.83",
+      phase:"flight_sandbox_provider_matrix",
+      matrixStatus:"readiness_matrix_only",
+      networkMode:"disabled",
+      apiKeyMode:"disabled",
+      endpointMode:"disabled",
+      providerMode:"candidate_only",
+      priceMode:"disabled",
+      bookingUrlMode:"disabled",
+      orderMode:"disabled",
+      paymentMode:"disabled",
+      identityStorageMode:"disabled",
+      capabilities:{
+        canBuildProviderMatrix:true,
+        canAttachCandidateProviders:true,
+        canAttachDryRunShellStatus:true,
+        canAttachReadonlyStubStatus:true,
+        canAttachApprovalStatus:true,
+        canAuditBlockedCapabilities:true,
+        canShowReadinessState:true,
+        canUseNetwork:false,
+        canUseApiKey:false,
+        canConnectEndpoint:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canOpenBookingUrl:false,
+        canCreateOrder:false,
+        canPay:false,
+        canStoreIdentity:false
+      },
+      providerRows:[
+        { providerId:"google_flights", providerName:"Google Flights", providerType:"flight_search_candidate", candidateStatus:"candidate_only", approvalStatus:"not_reviewed", readonlyStubPermission:"not_granted", readonlyStubScaffold:"available", sandboxDryRunShell:"available_shell_only", realProviderConnection:"disabled", apiKey:"disabled", endpoint:"disabled", network:"disabled", priceReturn:"disabled", bookingUrlReturn:"disabled", orderCreation:"disabled", payment:"disabled", identityStorage:"disabled", readinessLevel:"not_ready_for_price", reason:"provider_matrix_no_real_connection" },
+        { providerId:"trip_com_ctrip", providerName:"Trip.com / 携程", providerType:"flight_search_candidate", candidateStatus:"candidate_only", approvalStatus:"not_reviewed", readonlyStubPermission:"not_granted", readonlyStubScaffold:"available", sandboxDryRunShell:"available_shell_only", realProviderConnection:"disabled", apiKey:"disabled", endpoint:"disabled", network:"disabled", priceReturn:"disabled", bookingUrlReturn:"disabled", orderCreation:"disabled", payment:"disabled", identityStorage:"disabled", readinessLevel:"not_ready_for_price", reason:"provider_matrix_no_real_connection" },
+        { providerId:"skyscanner", providerName:"Skyscanner", providerType:"flight_search_candidate", candidateStatus:"candidate_only", approvalStatus:"not_reviewed", readonlyStubPermission:"not_granted", readonlyStubScaffold:"available", sandboxDryRunShell:"available_shell_only", realProviderConnection:"disabled", apiKey:"disabled", endpoint:"disabled", network:"disabled", priceReturn:"disabled", bookingUrlReturn:"disabled", orderCreation:"disabled", payment:"disabled", identityStorage:"disabled", readinessLevel:"not_ready_for_price", reason:"provider_matrix_no_real_connection" },
+        { providerId:"kayak", providerName:"Kayak", providerType:"flight_search_candidate", candidateStatus:"candidate_only", approvalStatus:"not_reviewed", readonlyStubPermission:"not_granted", readonlyStubScaffold:"available", sandboxDryRunShell:"available_shell_only", realProviderConnection:"disabled", apiKey:"disabled", endpoint:"disabled", network:"disabled", priceReturn:"disabled", bookingUrlReturn:"disabled", orderCreation:"disabled", payment:"disabled", identityStorage:"disabled", readinessLevel:"not_ready_for_price", reason:"provider_matrix_no_real_connection" },
+        { providerId:"expedia", providerName:"Expedia", providerType:"flight_search_candidate", candidateStatus:"candidate_only", approvalStatus:"not_reviewed", readonlyStubPermission:"not_granted", readonlyStubScaffold:"available", sandboxDryRunShell:"available_shell_only", realProviderConnection:"disabled", apiKey:"disabled", endpoint:"disabled", network:"disabled", priceReturn:"disabled", bookingUrlReturn:"disabled", orderCreation:"disabled", payment:"disabled", identityStorage:"disabled", readinessLevel:"not_ready_for_price", reason:"provider_matrix_no_real_connection" },
+        { providerId:"booking_flights", providerName:"Booking Flights", providerType:"flight_search_candidate", candidateStatus:"candidate_only", approvalStatus:"not_reviewed", readonlyStubPermission:"not_granted", readonlyStubScaffold:"available", sandboxDryRunShell:"available_shell_only", realProviderConnection:"disabled", apiKey:"disabled", endpoint:"disabled", network:"disabled", priceReturn:"disabled", bookingUrlReturn:"disabled", orderCreation:"disabled", payment:"disabled", identityStorage:"disabled", readinessLevel:"not_ready_for_price", reason:"provider_matrix_no_real_connection" },
+        { providerId:"airline_official_website", providerName:"航司官网占位", providerType:"flight_search_candidate", candidateStatus:"candidate_only", approvalStatus:"not_reviewed", readonlyStubPermission:"not_granted", readonlyStubScaffold:"available", sandboxDryRunShell:"available_shell_only", realProviderConnection:"disabled", apiKey:"disabled", endpoint:"disabled", network:"disabled", priceReturn:"disabled", bookingUrlReturn:"disabled", orderCreation:"disabled", payment:"disabled", identityStorage:"disabled", readinessLevel:"not_ready_for_price", reason:"provider_matrix_no_real_connection" }
+      ],
+      summary:{
+        totalCandidates:7,
+        readyForReadonlyPrice:0,
+        readyForBookingUrl:0,
+        readyForPayment:0,
+        blockedFromNetwork:7,
+        blockedFromPrice:7,
+        blockedFromBookingUrl:7,
+        blockedFromOrder:7,
+        blockedFromPayment:7,
+        overallStatus:"not_ready_for_real_price",
+        reason:"all_candidates_require_human_approval_and_real_provider_connection"
+      },
+      display:{
+        summaryTitle:"候选平台沙箱矩阵",
+        currentStatusLine:"当前状态：候选平台已进入沙箱矩阵，但尚未允许连接真实 provider。",
+        matrixSummaryLine:"矩阵摘要：候选平台数量：7 · 可返回真实价格：0 · 可返回 bookingUrl：0 · 可下单：0 · 可付款：0 · 网络连接：全部禁用 · API key：全部禁用 · endpoint：全部禁用",
+        conclusionLine:"当前结论：不能返回最低价两家",
+        reasonLine:"候选平台沙箱矩阵只用于审计和准备，不代表已接入真实 provider。",
+        blockedConclusionLine:"候选平台沙箱矩阵默认全部阻断，只允许审计，不允许真实连接。",
+        providerRowLabels:{
+          candidateStatus:"候选状态",
+          approvalStatus:"审批状态",
+          readonlyStubPermission:"只读适配器开发许可",
+          readonlyStubScaffold:"只读适配器空壳",
+          sandboxDryRunShell:"Sandbox Dry Run",
+          realProviderConnection:"真实 provider",
+          apiKey:"API key",
+          endpoint:"endpoint",
+          network:"网络",
+          priceReturn:"价格返回",
+          bookingUrlReturn:"bookingUrl",
+          orderCreation:"下单",
+          payment:"付款",
+          identityStorage:"证件 / 银行卡",
+          readinessLevel:"当前结论",
+          reason:"原因"
+        }
+      }
+    };
+    const raw = matrix && typeof matrix === "object" ? matrix : {};
+    const providerRows = Array.isArray(raw.providerRows) ? raw.providerRows.slice() : fallback.providerRows.slice();
+    return Object.assign({}, fallback, raw, {
+      providerRows,
+      capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
       display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
     });
   }
@@ -814,6 +911,7 @@
       flightReadonlyStubPermission:category === "flight" ? createFlightReadonlyStubPermission() : null,
       flightReadonlyStubAdapter:category === "flight" ? createFlightReadonlyStubAdapter() : null,
       flightSandboxDryRun:category === "flight" ? createFlightSandboxDryRun() : null,
+      flightSandboxProviderMatrix:category === "flight" ? createFlightSandboxProviderMatrix() : null,
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -865,6 +963,7 @@
       flightReadonlyStubPermission:category === "flight" ? createFlightReadonlyStubPermission(base.flightReadonlyStubPermission) : null,
       flightReadonlyStubAdapter:category === "flight" ? createFlightReadonlyStubAdapter(base.flightReadonlyStubAdapter) : null,
       flightSandboxDryRun:category === "flight" ? createFlightSandboxDryRun(base.flightSandboxDryRun) : null,
+      flightSandboxProviderMatrix:category === "flight" ? createFlightSandboxProviderMatrix(base.flightSandboxProviderMatrix) : null,
       canShowPrice:base.canShowPrice === true,
       canShowBookingButton:base.canShowBookingButton === true,
       canShowCheckoutButton:base.canShowCheckoutButton === true,
@@ -980,6 +1079,7 @@
       flightReadonlyStubPermission:safe.category === "flight" ? safe.flightReadonlyStubPermission : null,
       flightReadonlyStubAdapter:safe.category === "flight" ? safe.flightReadonlyStubAdapter : null,
       flightSandboxDryRun:safe.category === "flight" ? safe.flightSandboxDryRun : null,
+      flightSandboxProviderMatrix:safe.category === "flight" ? safe.flightSandboxProviderMatrix : null,
       candidates:safe.candidates,
       recommendation:safe.recommendation,
       nextSteps:[
@@ -1074,6 +1174,7 @@
     createRecommendationTemplate,
     createCommerceRiskNotice,
     createCommerceExecutionBoundary,
+    createFlightSandboxProviderMatrix,
     createCommerceTaskHistoryPayload,
     createCommerceHistoryPayload,
     sanitizeCommerceInput,

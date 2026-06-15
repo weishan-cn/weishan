@@ -2059,7 +2059,7 @@
 
   function commerceFlightLowestOffersContract(task){
     const fallback = {
-      contractVersion:"2.0.82",
+      contractVersion:"2.0.83",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -2123,7 +2123,7 @@
 
   function commerceFlightProviderCandidatesRegistry(task){
     const fallback = {
-      contractVersion:"2.0.82",
+      contractVersion:"2.0.83",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -2196,6 +2196,7 @@
 
   function commerceFlightProviderCandidatesDisclosure(task){
     const display = commerceFlightProviderCandidatesDisplay(task);
+    const matrix = commerceFlightSandboxProviderMatrixDisplay(task);
     if (!display || !display.candidateProfiles) return "";
     const escListItem = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value || "")}</b></li>`;
     const body = `<section class="commerce-flight-provider-candidates-panel" aria-label="候选平台档案与白名单规则">
@@ -2207,6 +2208,8 @@
         <strong>${esc(display.currentStatusLine || "当前状态：候选平台档案已整理，暂不接入真实价格源。")}</strong>
       </div>
       <p class="commerce-flight-provider-candidates-note">${esc(display.trustedRoutesLine || "默认优先保留官方平台、知名旅行平台和已人工审核白名单。")}</p>
+      <p class="commerce-flight-provider-candidates-note">${esc(matrix.currentStatusLine || "沙箱矩阵：已进入")}</p>
+      <p class="commerce-flight-provider-candidates-note">${esc(matrix.conclusionLine || "当前结论：不能返回真实价格")}</p>
       <div class="commerce-flight-provider-candidates-rules">
         <section>
           <h5>${esc(display.allowlistTitle || "默认优先域名白名单")}</h5>
@@ -2256,7 +2259,7 @@
     if (api && typeof api.normalizeFlightSandboxDryRunContract === "function") return api.normalizeFlightSandboxDryRunContract(source);
     if (api && typeof api.getFlightSandboxDryRunContract === "function") return api.getFlightSandboxDryRunContract(source);
     return {
-      sandboxDryRunVersion:"2.0.82",
+      sandboxDryRunVersion:"2.0.83",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -2313,6 +2316,7 @@
 
   function commerceFlightSandboxDryRunDisclosure(task){
     const display = commerceFlightSandboxDryRunDisplay(task);
+    const matrix = commerceFlightSandboxProviderMatrixDisplay(task);
     if (!display) return "";
     const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
     const stepLabels = Array.isArray(display.stepLabels) ? display.stepLabels : [];
@@ -2325,6 +2329,7 @@
           <p>${esc(display.shellStatusLine || "Sandbox Dry Run：外壳已建立")}</p>
           <p>${esc(display.currentStatusLine || "沙箱空跑外壳已建立，但未连接真实 provider。")}</p>
           <p>${esc(display.reasonLine || "只允许验证输入、请求和响应结构，不连接真实 endpoint，不读取真实 API key，不返回真实价格，不生成预订链接。")}</p>
+          <p>${esc(matrix.currentStatusLine || "候选平台沙箱矩阵：已建立")}</p>
         </div>
         <strong>${esc(display.shellStatusLine || "Sandbox Dry Run：外壳已建立")}</strong>
       </div>
@@ -2353,13 +2358,182 @@
     return disclosure("查看 Sandbox Dry Run", body, "commerce-flight-sandbox-dry-run-disclosure");
   }
 
+  function commerceFlightSandboxProviderMatrixStatus(task){
+    const api = window.WeishanCommerceFlightSandboxProviderMatrix;
+    const source = task && task.flightSandboxProviderMatrix || null;
+    if (api && typeof api.normalizeFlightSandboxProviderMatrix === "function") return api.normalizeFlightSandboxProviderMatrix(source);
+    if (api && typeof api.getFlightSandboxProviderMatrixContract === "function") return api.getFlightSandboxProviderMatrixContract(source);
+    const candidates = commerceFlightProviderCandidatesStatus(task);
+    const candidateProfiles = Array.isArray(candidates && candidates.candidateProfiles) ? candidates.candidateProfiles : [];
+    const providerRows = candidateProfiles.map((profile) => ({
+      providerId:String(profile.providerId || ""),
+      providerName:String(profile.providerName || ""),
+      providerTypeLabel:String(profile.providerType || "flight_search_candidate"),
+      candidateStatusLabel:"candidate_only",
+      approvalStatusLabel:"not_reviewed",
+      readonlyStubPermissionLabel:"not_granted",
+      readonlyStubScaffoldLabel:"available",
+      sandboxDryRunShellLabel:"available_shell_only",
+      realProviderConnectionLabel:"disabled",
+      apiKeyLabel:"disabled",
+      endpointLabel:"disabled",
+      networkLabel:"disabled",
+      priceReturnLabel:"disabled",
+      bookingUrlReturnLabel:"disabled",
+      orderCreationLabel:"disabled",
+      paymentLabel:"disabled",
+      identityStorageLabel:"disabled",
+      readinessLevelLabel:"not_ready_for_price",
+      reasonLabel:"provider_matrix_no_real_connection",
+      officialDomains:Array.isArray(profile.officialDomains) ? profile.officialDomains.slice() : [],
+      searchEntryUrl:String(profile.searchEntryUrl || "")
+    }));
+    const totalCandidates = providerRows.length;
+    const summary = {
+      totalCandidates,
+      readyForReadonlyPrice:0,
+      readyForBookingUrl:0,
+      readyForPayment:0,
+      blockedFromNetwork:totalCandidates,
+      blockedFromPrice:totalCandidates,
+      blockedFromBookingUrl:totalCandidates,
+      blockedFromOrder:totalCandidates,
+      blockedFromPayment:totalCandidates,
+      overallStatus:"not_ready_for_real_price",
+      reason:"all_candidates_require_human_approval_and_real_provider_connection"
+    };
+    return {
+      matrixVersion:"2.0.83",
+      phase:"flight_sandbox_provider_matrix",
+      matrixStatus:"readiness_matrix_only",
+      networkMode:"disabled",
+      apiKeyMode:"disabled",
+      endpointMode:"disabled",
+      providerMode:"candidate_only",
+      priceMode:"disabled",
+      bookingUrlMode:"disabled",
+      orderMode:"disabled",
+      paymentMode:"disabled",
+      identityStorageMode:"disabled",
+      capabilities:{
+        canBuildProviderMatrix:true,
+        canAttachCandidateProviders:true,
+        canAttachDryRunShellStatus:true,
+        canAttachReadonlyStubStatus:true,
+        canAttachApprovalStatus:true,
+        canAuditBlockedCapabilities:true,
+        canShowReadinessState:true,
+        canUseNetwork:false,
+        canUseApiKey:false,
+        canConnectEndpoint:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canOpenBookingUrl:false,
+        canCreateOrder:false,
+        canPay:false,
+        canStoreIdentity:false
+      },
+      providerRows,
+      summary,
+      display:{
+        summaryTitle:"候选平台沙箱矩阵",
+        currentStatusLine:"当前状态：候选平台已进入沙箱矩阵，但尚未允许连接真实 provider。",
+        matrixSummaryLine:`矩阵摘要：候选平台数量：${summary.totalCandidates} · 可返回真实价格：0 · 可返回 bookingUrl：0 · 可下单：0 · 可付款：0 · 网络连接：全部禁用 · API key：全部禁用 · endpoint：全部禁用`,
+        conclusionLine:"当前结论：不能返回最低价两家",
+        reasonLine:"候选平台沙箱矩阵只用于审计和准备，不代表已接入真实 provider。",
+        blockedConclusionLine:"候选平台沙箱矩阵默认全部阻断，只允许审计，不允许真实连接。",
+        providerRowLabels:{
+          candidateStatus:"候选状态",
+          approvalStatus:"审批状态",
+          readonlyStubPermission:"只读适配器开发许可",
+          readonlyStubScaffold:"只读适配器空壳",
+          sandboxDryRunShell:"Sandbox Dry Run",
+          realProviderConnection:"真实 provider",
+          apiKey:"API key",
+          endpoint:"endpoint",
+          network:"网络",
+          priceReturn:"价格返回",
+          bookingUrlReturn:"bookingUrl",
+          orderCreation:"下单",
+          payment:"付款",
+          identityStorage:"证件 / 银行卡",
+          readinessLevel:"当前结论",
+          reason:"原因"
+        }
+      }
+    };
+  }
+
+  function commerceFlightSandboxProviderMatrixDisplay(task){
+    const status = commerceFlightSandboxProviderMatrixStatus(task);
+    const api = window.WeishanCommerceFlightSandboxProviderMatrix;
+    if (api && typeof api.describeFlightSandboxProviderMatrix === "function") return api.describeFlightSandboxProviderMatrix(status);
+    return status.display || {};
+  }
+
+  function commerceFlightSandboxProviderMatrixDisclosure(task){
+    const display = commerceFlightSandboxProviderMatrixDisplay(task);
+    if (!display) return "";
+    const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
+    const providerRows = Array.isArray(display.providerRows) ? display.providerRows : [];
+    const body = `<section class="commerce-flight-sandbox-provider-matrix-panel" aria-label="候选平台沙箱矩阵">
+      <div class="commerce-flight-sandbox-provider-matrix-head">
+        <div>
+          <h4>${esc(display.summaryTitle || "候选平台沙箱矩阵")}</h4>
+          <p>${esc(display.currentStatusLine || "当前状态：候选平台已进入沙箱矩阵，但尚未允许连接真实 provider。")}</p>
+          <p>${esc(display.matrixSummaryLine || `矩阵摘要：候选平台数量：${providerRows.length} · 可返回真实价格：0 · 可返回 bookingUrl：0 · 可下单：0 · 可付款：0 · 网络连接：全部禁用 · API key：全部禁用 · endpoint：全部禁用`)}</p>
+        </div>
+        <strong>${esc(display.conclusionLine || "当前结论：不能返回最低价两家")}</strong>
+      </div>
+      <p>${esc(display.reasonLine || "候选平台沙箱矩阵只用于审计和准备，不代表已接入真实 provider。")}</p>
+      <p>${esc(display.blockedConclusionLine || "候选平台沙箱矩阵默认全部阻断，只允许审计，不允许真实连接。")}</p>
+      <div class="commerce-flight-sandbox-provider-matrix-summary">
+        <ul>
+          ${row("候选平台数量", String(providerRows.length))}
+          ${row("可返回真实价格", "0")}
+          ${row("可返回 bookingUrl", "0")}
+          ${row("可下单", "0")}
+          ${row("可付款", "0")}
+          ${row("网络连接", "全部禁用")}
+          ${row("API key", "全部禁用")}
+          ${row("endpoint", "全部禁用")}
+        </ul>
+      </div>
+      <div class="commerce-flight-sandbox-provider-matrix-grid">
+        ${providerRows.map((profile) => `<article class="commerce-flight-sandbox-provider-matrix-card">
+          <h5>${esc(profile.providerName)}</h5>
+          <ul>
+            ${row("候选状态", profile.candidateStatusLabel)}
+            ${row("审批状态", profile.approvalStatusLabel)}
+            ${row("只读适配器开发许可", profile.readonlyStubPermissionLabel)}
+            ${row("只读适配器空壳", profile.readonlyStubScaffoldLabel)}
+            ${row("Sandbox Dry Run", profile.sandboxDryRunShellLabel)}
+            ${row("真实 provider", profile.realProviderConnectionLabel)}
+            ${row("API key", profile.apiKeyLabel)}
+            ${row("endpoint", profile.endpointLabel)}
+            ${row("网络", profile.networkLabel)}
+            ${row("价格返回", profile.priceReturnLabel)}
+            ${row("bookingUrl", profile.bookingUrlReturnLabel)}
+            ${row("下单", profile.orderCreationLabel)}
+            ${row("付款", profile.paymentLabel)}
+            ${row("证件 / 银行卡", profile.identityStorageLabel)}
+            ${row("当前结论", profile.readinessLevelLabel)}
+            ${row("原因", profile.reasonLabel)}
+          </ul>
+          <p>${esc("当前结论：不能返回最低价两家")}</p>
+        </article>`).join("")}
+      </div>
+    </section>`;
+    return disclosure("查看候选平台沙箱矩阵", body, "commerce-flight-sandbox-provider-matrix-disclosure");
+  }
+
   function commerceFlightReadonlyStubPermissionStatus(task){
     const api = window.WeishanCommerceFlightReadonlyStubPermission;
     const source = task && task.flightReadonlyStubPermission || null;
     if (api && typeof api.normalizeFlightReadonlyStubPermission === "function") return api.normalizeFlightReadonlyStubPermission(source);
     if (api && typeof api.getFlightReadonlyStubPermission === "function") return api.getFlightReadonlyStubPermission(source);
     const fallback = {
-      permissionVersion:"2.0.82",
+      permissionVersion:"2.0.83",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -2423,6 +2597,7 @@
 
   function commerceFlightReadonlyStubPermissionDisclosure(task){
     const display = commerceFlightReadonlyStubPermissionDisplay(task);
+    const matrix = commerceFlightSandboxProviderMatrixDisplay(task);
     if (!display) return "";
     const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
     const checklist = Array.isArray(display.checklistGroups) ? display.checklistGroups : [];
@@ -2442,6 +2617,7 @@
           ${row("当前阶段", display.currentStageLine || "当前阶段：需要人工批准")}
           ${row("下一步", display.nextStepLine || "下一步：完成 provider 条款、API 文档、域名 allowlist、API key 存储方案和请求 / 响应结构审查")}
           ${row("Sandbox Dry Run", display.sandboxDryRunLine || "Sandbox Dry Run：外壳已建立，尚未批准真实沙箱连接。")}
+          ${row("候选平台沙箱矩阵", matrix.currentStatusLine || "已建立")}
         </ul>
       </div>
       <div class="commerce-flight-readonly-stub-permission-rules">
@@ -2461,7 +2637,7 @@
     if (api && typeof api.normalizeFlightReadonlyStubAdapter === "function") return api.normalizeFlightReadonlyStubAdapter(source);
     if (api && typeof api.getFlightReadonlyStubAdapter === "function") return api.getFlightReadonlyStubAdapter(source);
     const fallback = {
-      adapterVersion:"2.0.82",
+      adapterVersion:"2.0.83",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -2535,6 +2711,7 @@
 
   function commerceFlightReadonlyStubAdapterDisclosure(task){
     const display = commerceFlightReadonlyStubAdapterDisplay(task);
+    const matrix = commerceFlightSandboxProviderMatrixDisplay(task);
     if (!display) return "";
     const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
     const requestShapeLines = Array.isArray(display.requestShapeLines) ? display.requestShapeLines : [];
@@ -2548,6 +2725,7 @@
           <p>${esc(display.currentStatusLine || "只读适配器空壳已建立")}</p>
           <p>${esc(display.connectionStatusLine || "尚未允许连接真实 provider")}</p>
           <p>${esc(display.summaryNote || "只读适配器空壳只允许开发请求 / 响应结构，不允许连接真实 endpoint，不允许读取真实 API key，不允许返回真实价格，不允许生成预订链接。")}</p>
+          <p>${esc(matrix.currentStatusLine || "候选平台沙箱矩阵：已建立")}</p>
         </div>
         <strong>${esc(display.readonlyStubAdapterLine || "只读适配器空壳：已建立")}</strong>
       </div>
@@ -2558,6 +2736,7 @@
           ${row("真实网络连接", display.realNetworkConnectionLine || "未启用")}
           ${row("真实价格返回", display.realPriceReturnLine || "未启用")}
           ${row("bookingUrl 返回", display.bookingUrlReturnLine || "未启用")}
+          ${row("候选平台沙箱矩阵", matrix.currentStatusLine || "已建立")}
         </ul>
       </div>
       <div class="commerce-flight-readonly-stub-adapter-rules">
@@ -2584,7 +2763,7 @@
     if (api && typeof api.normalizeFlightProviderApprovalStatus === "function") return api.normalizeFlightProviderApprovalStatus(source);
     if (api && typeof api.getFlightProviderApprovalStatus === "function") return api.getFlightProviderApprovalStatus(source);
     const fallback = {
-      approvalVersion:"2.0.82",
+      approvalVersion:"2.0.83",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -2680,6 +2859,7 @@
 
   function commerceFlightProviderApprovalDisclosure(task){
     const display = commerceFlightProviderApprovalDisplay(task);
+    const matrix = commerceFlightSandboxProviderMatrixDisplay(task);
     if (!display) return "";
     const row = (label, value) => `<li><span>${esc(label)}：</span><b>${esc(value)}</b></li>`;
     const checklist = Array.isArray(display.checklistGroups) ? display.checklistGroups : [];
@@ -2706,6 +2886,7 @@
           ${row("bookingUrl", display.bookingUrlStatusLine || "未启用")}
           ${row("付款 / 下单", display.tradeStatusLine || "不支持")}
           ${row("候选平台", display.candidatePlatformsLine || "Google Flights / Trip.com / 携程 / Skyscanner / Kayak / Expedia")}
+          ${row("候选平台沙箱矩阵", matrix.currentStatusLine || "已进入")}
           ${row("allowlist", display.allowlistRequirementLine || "需要 allowlist")}
           ${row("域名阻断", display.blockedRulesSummaryLine || "禁止未知域名 / 短链接 / 可疑域名")}
           ${row("AI 风险提示", display.aiRiskLine || "AI 不能生成可疑 provider 域名")}
@@ -2763,12 +2944,14 @@
         <button class="cmd-btn gray commerce-platform-template-copy-btn" type="button" data-commerce-template-kind="simpleGoogleFlights" data-commerce-template-text="${commerceEncodedCopyText(copyTexts.googleFlights)}">复制 Google Flights 模板</button>
         <button class="cmd-btn gray commerce-platform-template-copy-btn" type="button" data-commerce-template-kind="simpleTripCom" data-commerce-template-text="${commerceEncodedCopyText(copyTexts.tripCom)}">复制 Trip.com / 携程模板</button>
         <button class="cmd-btn gray commerce-sandbox-dry-run-btn" type="button">查看 Sandbox Dry Run</button>
+        <button class="cmd-btn gray commerce-sandbox-provider-matrix-btn" type="button">查看候选平台沙箱矩阵</button>
       </div>
       ${commerceFlightProviderCandidatesDisclosure(task)}
       ${commerceFlightProviderApprovalDisclosure(task)}
       ${commerceFlightReadonlyStubPermissionDisclosure(task)}
       ${commerceFlightReadonlyStubAdapterDisclosure(task)}
       ${commerceFlightSandboxDryRunDisclosure(task)}
+      ${commerceFlightSandboxProviderMatrixDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;

@@ -181,6 +181,28 @@ function checkFlightSandboxDryRunVersion(results, expectedVersion) {
   );
 }
 
+
+function checkFlightSandboxProviderMatrixVersion(results, expectedVersion) {
+  const matrixPath = "apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js";
+  const matrix = readText(matrixPath);
+  if (!matrix) {
+    results.push({ name: "apps/desktop flight sandbox provider matrix version", pass: false, detail: matrixPath + " missing" });
+    return;
+  }
+  if (matrix.__readError) {
+    results.push({ name: "apps/desktop flight sandbox provider matrix version", pass: false, detail: matrix.__readError });
+    return;
+  }
+  const match = matrix.match(/MATRIX_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop flight sandbox provider matrix version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js MATRIX_VERSION"
+  );
+}
+
 function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
   const pkg = readJson(packagePath);
   const lock = readJson(lockPath);
@@ -232,6 +254,7 @@ function runVersionCheck() {
     checkFlightReadonlyStubPermissionVersion(results, rootPackage.version);
     checkFlightReadonlyStubAdapterVersion(results, rootPackage.version);
     checkFlightSandboxDryRunVersion(results, rootPackage.version);
+    checkFlightSandboxProviderMatrixVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

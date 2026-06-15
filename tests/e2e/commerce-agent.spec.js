@@ -3177,7 +3177,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.82 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
+  test("v2.0.83 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -3207,7 +3207,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("全网搜索结果由外部搜索引擎提供");
     const contract = await page.evaluate(() => window.WeishanCommerceFlightLowestOffersContract && typeof window.WeishanCommerceFlightLowestOffersContract.getFlightLowestOffersContract === "function" ? window.WeishanCommerceFlightLowestOffersContract.getFlightLowestOffersContract() : null);
     expect(contract).toEqual(expect.objectContaining({
-      contractVersion:"2.0.82",
+      contractVersion:"2.0.83",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -3223,7 +3223,7 @@ test.describe.serial("commerce agent workbench", () => {
     }));
     const registry = await page.evaluate(() => window.WeishanCommerceFlightProviderCandidates && typeof window.WeishanCommerceFlightProviderCandidates.getFlightProviderCandidatesRegistry === "function" ? window.WeishanCommerceFlightProviderCandidates.getFlightProviderCandidatesRegistry() : null);
     expect(registry).toEqual(expect.objectContaining({
-      contractVersion:"2.0.82",
+      contractVersion:"2.0.83",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -3344,7 +3344,7 @@ test.describe.serial("commerce agent workbench", () => {
     }));
     const readonlyStubAdapter = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubAdapter && typeof window.WeishanCommerceFlightReadonlyStubAdapter.getFlightReadonlyStubAdapter === "function" ? window.WeishanCommerceFlightReadonlyStubAdapter.getFlightReadonlyStubAdapter() : null);
     expect(readonlyStubAdapter).toEqual(expect.objectContaining({
-      adapterVersion:"2.0.82",
+      adapterVersion:"2.0.83",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready"
@@ -3466,6 +3466,81 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(summaryPanel).toContainText(text);
     }
     await expect(summaryPanel).toContainText("查看 Sandbox Dry Run");
+    await expect(summaryPanel).toContainText("查看候选平台沙箱矩阵");
+    const matrixDisclosure = summaryPanel.locator("details.commerce-flight-sandbox-provider-matrix-disclosure");
+    await expect(matrixDisclosure).not.toHaveAttribute("open", "");
+    await openDisclosure(summaryPanel, "commerce-flight-sandbox-provider-matrix-disclosure");
+    await expect(matrixDisclosure).toContainText("候选平台沙箱矩阵");
+    for (const text of ["候选平台已进入沙箱矩阵，但尚未允许连接真实 provider。", "矩阵摘要：候选平台数量：7", "可返回真实价格：0", "可返回 bookingUrl：0", "可下单：0", "可付款：0", "网络连接：全部禁用", "API key：全部禁用", "endpoint：全部禁用", "当前结论：不能返回最低价两家", "候选平台沙箱矩阵默认全部阻断，只允许审计，不允许真实连接。", "候选平台沙箱矩阵只用于审计和准备，不代表已接入真实 provider。", "Google Flights", "Trip.com / 携程", "Skyscanner", "Kayak", "Expedia", "Booking Flights", "航司官网占位", "审批状态：未审查", "只读适配器开发许可：未授予", "只读适配器空壳：可用", "Sandbox Dry Run：外壳可用", "真实 provider：未连接", "API key：禁用", "endpoint：禁用", "网络：禁用", "价格返回：禁用", "bookingUrl：禁用", "下单：禁用", "付款：禁用"]) {
+      await expect(matrixDisclosure).toContainText(text);
+    }
+    const matrix = await page.evaluate(() => window.WeishanCommerceFlightSandboxProviderMatrix && typeof window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract === "function" ? window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract() : null);
+    expect(matrix).toEqual(expect.objectContaining({
+      matrixVersion:"2.0.83",
+      phase:"flight_sandbox_provider_matrix",
+      matrixStatus:"readiness_matrix_only",
+      networkMode:"disabled",
+      apiKeyMode:"disabled",
+      endpointMode:"disabled",
+      providerMode:"candidate_only",
+      priceMode:"disabled",
+      bookingUrlMode:"disabled",
+      orderMode:"disabled",
+      paymentMode:"disabled",
+      identityStorageMode:"disabled"
+    }));
+    expect(matrix.capabilities).toEqual(expect.objectContaining({
+      canBuildProviderMatrix:true,
+      canAttachCandidateProviders:true,
+      canAttachDryRunShellStatus:true,
+      canAttachReadonlyStubStatus:true,
+      canAttachApprovalStatus:true,
+      canAuditBlockedCapabilities:true,
+      canShowReadinessState:true,
+      canUseNetwork:false,
+      canUseApiKey:false,
+      canConnectEndpoint:false,
+      canReturnPrice:false,
+      canReturnBookingUrl:false,
+      canOpenBookingUrl:false,
+      canCreateOrder:false,
+      canPay:false,
+      canStoreIdentity:false
+    }));
+    expect(matrix.summary).toEqual(expect.objectContaining({
+      totalCandidates:7,
+      readyForReadonlyPrice:0,
+      readyForBookingUrl:0,
+      readyForPayment:0,
+      blockedFromNetwork:7,
+      blockedFromPrice:7,
+      blockedFromBookingUrl:7,
+      blockedFromOrder:7,
+      blockedFromPayment:7,
+      overallStatus:"not_ready_for_real_price",
+      reason:"all_candidates_require_human_approval_and_real_provider_connection"
+    }));
+    expect(matrix.providerRows).toHaveLength(7);
+    for (const row of matrix.providerRows) {
+      expect(row).toEqual(expect.objectContaining({
+        candidateStatus:"candidate_only",
+        approvalStatus:"not_reviewed",
+        readonlyStubPermission:"not_granted",
+        readonlyStubScaffold:"available",
+        sandboxDryRunShell:"available_shell_only",
+        realProviderConnection:"disabled",
+        apiKey:"disabled",
+        endpoint:"disabled",
+        network:"disabled",
+        priceReturn:"disabled",
+        bookingUrlReturn:"disabled",
+        orderCreation:"disabled",
+        payment:"disabled",
+        identityStorage:"disabled",
+        readinessLevel:"not_ready_for_price",
+        reason:"provider_matrix_no_real_connection"
+      }));
+    }
     const sandboxDisclosure = summaryPanel.locator("details.commerce-flight-sandbox-dry-run-disclosure");
     await expect(sandboxDisclosure).not.toHaveAttribute("open", "");
     await openDisclosure(summaryPanel, "commerce-flight-sandbox-dry-run-disclosure");
@@ -3477,7 +3552,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
     const sandboxDryRun = await page.evaluate(() => window.WeishanCommerceFlightSandboxDryRun && window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract ? window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract : null);
     expect(sandboxDryRun).toEqual(expect.objectContaining({
-      sandboxDryRunVersion:"2.0.82",
+      sandboxDryRunVersion:"2.0.83",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -3576,7 +3651,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(sandboxAssert).toBe(true);
     const readonlyStubPermission = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubPermission && typeof window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission === "function" ? window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission() : null);
     expect(readonlyStubPermission).toEqual(expect.objectContaining({
-      permissionVersion:"2.0.82",
+      permissionVersion:"2.0.83",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -3705,13 +3780,13 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(historyDetail).toContainText(text);
     }
     await expect(historyDetail).toContainText("查看 Sandbox Dry Run");
-    const historySandboxDisclosure = historyDetail.locator("details.commerce-flight-sandbox-dry-run-disclosure");
-    await expect(historySandboxDisclosure).not.toHaveAttribute("open", "");
-    await openDisclosure(historyDetail, "commerce-flight-sandbox-dry-run-disclosure");
-    await expect(historyDetail).toContainText("Sandbox Dry Run");
-    await expect(historyDetail).toContainText("沙箱空跑外壳已建立，但未连接真实 provider。");
-    for (const text of ["validate_user_input：验证用户输入", "build_request_shape：构建请求形状", "validate_request_shape：校验请求形状", "skip_network_call：跳过网络调用", "build_empty_response_shape：构建空响应形状", "validate_response_shape：校验响应形状", "block_price_return：阻断价格返回", "block_booking_url_return：阻断 bookingUrl 返回", "block_order_creation：阻断下单创建", "block_payment：阻断付款", "可以运行沙箱空跑外壳", "可以校验输入形状", "可以校验请求形状", "可以校验响应形状", "可以模拟控制流", "只使用 fixture / 本地结构", "不能读取真实 API key", "不能连接真实 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"]) {
-      await expect(historyDetail).toContainText(text);
+    await expect(historyDetail).toContainText("查看候选平台沙箱矩阵");
+    const historyMatrixDisclosure = historyDetail.locator("details.commerce-flight-sandbox-provider-matrix-disclosure");
+    await expect(historyMatrixDisclosure).not.toHaveAttribute("open", "");
+    await openDisclosure(historyDetail, "commerce-flight-sandbox-provider-matrix-disclosure");
+    await expect(historyMatrixDisclosure).toContainText("候选平台沙箱矩阵");
+    for (const text of ["候选平台已进入沙箱矩阵，但尚未允许连接真实 provider。", "矩阵摘要：候选平台数量：7", "可返回真实价格：0", "可返回 bookingUrl：0", "可下单：0", "可付款：0", "网络连接：全部禁用", "API key：全部禁用", "endpoint：全部禁用", "当前结论：不能返回最低价两家", "候选平台沙箱矩阵默认全部阻断，只允许审计，不允许真实连接。", "候选平台沙箱矩阵只用于审计和准备，不代表已接入真实 provider。", "Google Flights", "Trip.com / 携程", "Skyscanner", "Kayak", "Expedia", "Booking Flights", "航司官网占位", "审批状态：未审查", "只读适配器开发许可：未授予", "只读适配器空壳：可用", "Sandbox Dry Run：外壳可用", "真实 provider：未连接", "API key：禁用", "endpoint：禁用", "网络：禁用", "价格返回：禁用", "bookingUrl：禁用", "下单：禁用", "付款：禁用"]) {
+      await expect(historyMatrixDisclosure).toContainText(text);
     }
     const historyOpenCountBefore = await page.evaluate(() => (window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ || []).length);
     await historyDetail.getByRole("button", { name:"打开 Google Flights 搜索" }).click();
@@ -3722,7 +3797,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.82 bare flight intent still renders the simple flight result card", async () => {
+  test("v2.0.83 bare flight intent still renders the simple flight result card", async () => {
     await resetCommerceTasks(page);
     await page.reload({ waitUntil:"domcontentloaded" });
     await gotoRoute(page, "home");
@@ -3744,6 +3819,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("查看只读适配器开发许可");
     await expect(summaryPanel).toContainText("查看只读适配器空壳");
     await expect(summaryPanel).toContainText("查看 Sandbox Dry Run");
+    await expect(summaryPanel).toContainText("查看候选平台沙箱矩阵");
+    const bareMatrixDisclosure = summaryPanel.locator("details.commerce-flight-sandbox-provider-matrix-disclosure");
+    await expect(bareMatrixDisclosure).not.toHaveAttribute("open", "");
     await expect(summaryPanel).not.toContainText("最终价格以真实平台为准");
     await expect(summaryPanel).not.toContainText(/¥\s*\d+/);
     const defaultText = await visibleTextWithoutTechnicalDetails(home);
@@ -3752,10 +3830,10 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.0.82 sidebar version stays in sync with release version", async () => {
+  test("v2.0.83 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.0.82");
+    await expect(sidebarFoot).toContainText("weishan v2.0.83");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 

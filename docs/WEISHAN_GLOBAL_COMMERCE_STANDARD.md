@@ -939,3 +939,87 @@ Sandbox Dry Run Shell 的状态结构必须至少包含：
 - `canStoreBankCard`
 
 Sandbox Dry Run Shell 只允许校验输入、请求和响应结构、模拟控制流和使用 fixture，不允许发起真实网络请求，不允许读取真实 API key，不允许连接真实 endpoint，不允许返回真实价格，不允许返回 bookingUrl，不允许打开预订页，不允许付款，不允许下单，不允许保存证件 / 银行卡。候选平台、Provider 审批状态、只读适配器开发许可和只读适配器空壳必须继续保留默认阻断状态。
+
+
+## v2.0.83：Sandbox Provider Matrix / 候选平台沙箱矩阵
+v2.0.83 在 `Sandbox Dry Run Shell`、`Readonly Stub Permission State`、`Readonly Stub Adapter Scaffold`、`Provider Approval Panel` 和 `Candidate Registry` 之上，新增 `Sandbox Provider Matrix / 候选平台沙箱矩阵`。默认只允许展示候选平台沙箱矩阵，不允许真实 provider 连接，不允许读取真实 API key，不允许连接真实 endpoint，不允许返回真实价格，不允许生成 bookingUrl，不允许付款，不允许下单。
+
+默认必须显示：
+- `查看候选平台沙箱矩阵`
+- `当前状态：候选平台已进入沙箱矩阵，但尚未允许连接真实 provider。`
+- `矩阵摘要`
+- `可返回真实价格：0`
+- `可返回 bookingUrl：0`
+- `可下单：0`
+- `可付款：0`
+- `网络连接：全部禁用`
+- `API key：全部禁用`
+- `endpoint：全部禁用`
+- `当前结论：不能返回最低价两家`
+- `候选平台沙箱矩阵默认全部阻断，只允许审计，不允许真实连接。`
+- `候选平台沙箱矩阵只用于审计和准备，不代表已接入真实 provider。`
+
+`flightSandboxProviderMatrix` 默认字段：
+- `matrixVersion: "2.0.83"`
+- `phase: "flight_sandbox_provider_matrix"`
+- `matrixStatus: "readiness_matrix_only"`
+- `networkMode: "disabled"`
+- `apiKeyMode: "disabled"`
+- `endpointMode: "disabled"`
+- `providerMode: "candidate_only"`
+- `priceMode: "disabled"`
+- `bookingUrlMode: "disabled"`
+- `orderMode: "disabled"`
+- `paymentMode: "disabled"`
+- `identityStorageMode: "disabled"`
+
+默认 `capabilities` 必须至少包含：
+- `canBuildProviderMatrix: true`
+- `canAttachCandidateProviders: true`
+- `canAttachDryRunShellStatus: true`
+- `canAttachReadonlyStubStatus: true`
+- `canAttachApprovalStatus: true`
+- `canAuditBlockedCapabilities: true`
+- `canShowReadinessState: true`
+- `canUseNetwork: false`
+- `canUseApiKey: false`
+- `canConnectEndpoint: false`
+- `canReturnPrice: false`
+- `canReturnBookingUrl: false`
+- `canOpenBookingUrl: false`
+- `canCreateOrder: false`
+- `canPay: false`
+- `canStoreIdentity: false`
+
+默认 `providerRows` 每一行都必须保持：
+- `candidateStatus: "candidate_only"`
+- `approvalStatus: "not_reviewed"`
+- `readonlyStubPermission: "not_granted"`
+- `readonlyStubScaffold: "available"`
+- `sandboxDryRunShell: "available_shell_only"`
+- `realProviderConnection: "disabled"`
+- `apiKey: "disabled"`
+- `endpoint: "disabled"`
+- `network: "disabled"`
+- `priceReturn: "disabled"`
+- `bookingUrlReturn: "disabled"`
+- `orderCreation: "disabled"`
+- `payment: "disabled"`
+- `identityStorage: "disabled"`
+- `readinessLevel: "not_ready_for_price"`
+- `reason: "provider_matrix_no_real_connection"`
+
+默认 `summary` 必须至少包含：
+- `totalCandidates`
+- `readyForReadonlyPrice: 0`
+- `readyForBookingUrl: 0`
+- `readyForPayment: 0`
+- `blockedFromNetwork: totalCandidates`
+- `blockedFromPrice: totalCandidates`
+- `blockedFromBookingUrl: totalCandidates`
+- `blockedFromOrder: totalCandidates`
+- `blockedFromPayment: totalCandidates`
+- `overallStatus: "not_ready_for_real_price"`
+- `reason: "all_candidates_require_human_approval_and_real_provider_connection"`
+
+`assertFlightSandboxProviderMatrixSafe` 必须拒绝任何可返回真实价格、bookingUrl、下单、付款或身份信息的矩阵。矩阵只用于审计和准备，不代表真实 provider 已接入。
