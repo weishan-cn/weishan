@@ -245,6 +245,27 @@ function checkApiBindingSafeShellVersion(results, expectedVersion) {
   );
 }
 
+function checkUserApiProviderCatalogVersion(results, expectedVersion) {
+  const catalogPath = "apps/desktop/src/renderer/core/commerceUserApiProviderCatalog.js";
+  const catalog = readText(catalogPath);
+  if (!catalog) {
+    results.push({ name: "apps/desktop user API provider catalog version", pass: false, detail: catalogPath + " missing" });
+    return;
+  }
+  if (catalog.__readError) {
+    results.push({ name: "apps/desktop user API provider catalog version", pass: false, detail: catalog.__readError });
+    return;
+  }
+  const match = catalog.match(/CATALOG_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop user API provider catalog version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceUserApiProviderCatalog.js CATALOG_VERSION"
+  );
+}
+
 function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
   const pkg = readJson(packagePath);
   const lock = readJson(lockPath);
@@ -299,6 +320,7 @@ function runVersionCheck() {
     checkFlightSandboxProviderMatrixVersion(results, rootPackage.version);
     checkUserApiPriorityPolicyVersion(results, rootPackage.version);
     checkApiBindingSafeShellVersion(results, rootPackage.version);
+    checkUserApiProviderCatalogVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

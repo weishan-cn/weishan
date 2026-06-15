@@ -3179,12 +3179,12 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  // v2.0.86 real result only surface hides debug panels by default
+  // v2.0.87 real result only surface hides debug panels by default
   // 查看 Provider 审批状态 ... 人工审核后才允许进入 provider approval
   // 查看只读适配器开发许可 ... 人工批准开发只读 stub
   // 查看只读适配器空壳 ... 不能保存证件 / 银行卡
   // 查看 Sandbox Dry Run ... 沙箱空跑外壳已建立，但未连接真实 provider ... block_price_return ... block_payment
-  test("v2.0.86 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
+  test("v2.0.87 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -3209,11 +3209,20 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("接入可信价格源后，将只显示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。");
     await expect(summaryPanel).toContainText("当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单");
     await expect(summaryPanel).toContainText("查看 API 绑定说明");
+    await expect(summaryPanel).toContainText("查看可绑定 API 平台目录");
+    await expect(summaryPanel).toContainText("复制搜索条件");
+    await expect(summaryPanel).not.toContainText("平台目录已建立，但尚未绑定任何真实 API");
+    await expect(summaryPanel).not.toContainText("API key 输入：禁用");
     await summaryPanel.getByText("查看 API 绑定说明").click();
     await expect(summaryPanel).toContainText("API 绑定说明");
     await expect(summaryPanel).toContainText("当前状态：用户 API 未绑定。");
     await expect(summaryPanel).toContainText("绑定 API 后，可优先使用用户授权平台的只读价格结果。");
     await expect(summaryPanel).toContainText("API 只用于搜索、读取价格、读取库存、分析结果。");
+    await expect(summaryPanel).toContainText("可绑定 API 平台目录：已建立");
+    await expect(summaryPanel).toContainText("当前已绑定 API：0");
+    await expect(summaryPanel).toContainText("当前只读价格能力：未启用");
+    await expect(summaryPanel).toContainText("真实 API key 输入：未启用");
+    await expect(summaryPanel).toContainText("真实 endpoint 连接：未启用");
     await expect(summaryPanel).toContainText("绑定 API 不代表允许付款");
     await expect(summaryPanel).toContainText("绑定 API 不代表允许下单");
     await expect(summaryPanel).toContainText("绑定 API 不代表允许提交身份证、护照或银行卡");
@@ -3238,7 +3247,7 @@ test.describe.serial("commerce agent workbench", () => {
       })
     } : null);
     expect(userApiPolicy.contract).toEqual(expect.objectContaining({
-      policyVersion:"2.0.86",
+      policyVersion:"2.0.87",
       phase:"user_api_priority_search_policy",
       policyStatus:"policy_only",
       userApiMode:"not_bound",
@@ -3305,7 +3314,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingSafeShell.contract).toEqual(expect.objectContaining({
-      shellVersion:"2.0.86",
+      shellVersion:"2.0.87",
       phase:"api_binding_safe_shell",
       shellStatus:"safe_shell_only",
       bindingStatus:"not_bound",
@@ -3396,9 +3405,118 @@ test.describe.serial("commerce agent workbench", () => {
     ]));
     expect(apiBindingSafeShell.assertDefault).toBe(true);
     expect(apiBindingSafeShell.assertFixture).toBe(true);
+    await summaryPanel.getByText("查看可绑定 API 平台目录").click();
+    await expect(summaryPanel).toContainText("可绑定 API 平台目录");
+    await expect(summaryPanel).toContainText("平台目录已建立，但尚未绑定任何真实 API");
+    await expect(summaryPanel).toContainText("可选平台类型：机票 / 酒店 / 商品 / 本地服务");
+    await expect(summaryPanel).toContainText("已绑定 API：0");
+    await expect(summaryPanel).toContainText("可返回真实价格：0");
+    await expect(summaryPanel).toContainText("可下单：0");
+    await expect(summaryPanel).toContainText("可付款：0");
+    await expect(summaryPanel).toContainText("机票 / 航旅");
+    await expect(summaryPanel).toContainText("酒店");
+    await expect(summaryPanel).toContainText("商品 / 电商");
+    await expect(summaryPanel).toContainText("本地服务 / 门票");
+    for (const providerName of ["Trip.com API / Partner API", "Skyscanner API / Partner API", "Amadeus / GDS 类", "Expedia Partner Solutions", "Amazon Product Advertising API", "eBay Browse API", "Walmart API", "京东联盟 / 京东开放平台", "淘宝 / 天猫开放平台", "拼多多开放平台"]) {
+      await expect(summaryPanel).toContainText(providerName);
+    }
+    for (const capability of ["只读潜力：可评估", "写入能力：禁用", "下单能力：禁用", "支付能力：禁用", "身份资料上传：禁用", "API key 输入：禁用", "endpoint 连接：禁用"]) {
+      await expect(summaryPanel).toContainText(capability);
+    }
+    const userApiProviderCatalog = await page.evaluate(() => {
+      const api = window.WeishanCommerceUserApiProviderCatalog;
+      if (!api) return null;
+      const catalog = api.buildUserApiProviderCatalog();
+      const summary = api.summarizeUserApiProviderCatalog(catalog);
+      return {
+        contract:api.commerceUserApiProviderCatalogContract,
+        catalog,
+        summary,
+        flightIntent:api.resolveProviderCatalogForIntent("7月15日上海到成都机票"),
+        hotelIntent:api.resolveProviderCatalogForIntent("东京酒店"),
+        commerceIntent:api.resolveProviderCatalogForIntent("买电脑"),
+        localIntent:api.resolveProviderCatalogForIntent("买演唱会门票"),
+        assertSafe:api.assertUserApiProviderCatalogSafe(catalog, summary)
+      };
+    });
+    expect(userApiProviderCatalog.contract).toEqual(expect.objectContaining({
+      catalogVersion:"2.0.87",
+      phase:"user_api_provider_catalog",
+      catalogStatus:"catalog_only",
+      realApiConnectionMode:"disabled",
+      apiKeyInputMode:"disabled",
+      apiKeyStorageMode:"disabled",
+      endpointConnectionMode:"disabled",
+      networkMode:"disabled",
+      priceMode:"disabled_without_binding",
+      bookingUrlMode:"disabled_without_binding",
+      orderMode:"disabled",
+      paymentMode:"disabled",
+      identityUploadMode:"disabled",
+      identityStorageMode:"disabled",
+      bankCardStorageMode:"disabled"
+    }));
+    expect(userApiProviderCatalog.contract.capabilities).toEqual(expect.objectContaining({
+      canShowProviderCatalog:true,
+      canShowProviderTypes:true,
+      canShowReadOnlyCapability:true,
+      canShowPermissionBoundary:true,
+      canRecommendProviderCategory:true,
+      canShowFutureBindingPath:true,
+      canInputRealApiKey:false,
+      canSaveRealApiKey:false,
+      canReadRealApiKey:false,
+      canTestConnection:false,
+      canConnectEndpoint:false,
+      canUseNetwork:false,
+      canReturnPrice:false,
+      canReturnBookingUrl:false,
+      canCreateOrder:false,
+      canPay:false,
+      canUploadIdentity:false,
+      canStoreIdentity:false,
+      canStorePassport:false,
+      canStoreBankCard:false
+    }));
+    expect(userApiProviderCatalog.catalog).toEqual(expect.arrayContaining([
+      expect.objectContaining({ providerName:"Trip.com API / Partner API", category:"flight", bindingStatus:"not_bound", apiKeyInput:"disabled", endpointConnection:"disabled", networkConnection:"disabled", paymentCapability:"disabled" }),
+      expect.objectContaining({ providerName:"Booking / partner source", category:"hotel", bindingStatus:"not_bound" }),
+      expect.objectContaining({ providerName:"Amazon Product Advertising API", category:"commerce", bindingStatus:"not_bound" }),
+      expect.objectContaining({ providerName:"Event / ticket provider APIs", category:"local_service", bindingStatus:"not_bound" })
+    ]));
+    for (const provider of userApiProviderCatalog.catalog) {
+      expect(provider).toEqual(expect.objectContaining({
+        bindingStatus:"not_bound",
+        apiKeyInput:"disabled",
+        apiKeyStorage:"disabled",
+        endpointConnection:"disabled",
+        networkConnection:"disabled",
+        writeCapability:"disabled",
+        orderCapability:"disabled",
+        paymentCapability:"disabled",
+        identityUploadCapability:"disabled"
+      }));
+    }
+    expect(userApiProviderCatalog.summary).toEqual(expect.objectContaining({
+      boundProviders:0,
+      providersWithWriteEnabled:0,
+      providersWithOrderEnabled:0,
+      providersWithPaymentEnabled:0,
+      providersWithIdentityUploadEnabled:0,
+      overallStatus:"catalog_only_no_binding"
+    }));
+    expect(userApiProviderCatalog.flightIntent.recommendedCategory).toBe("flight");
+    expect(userApiProviderCatalog.hotelIntent.recommendedCategory).toBe("hotel");
+    expect(userApiProviderCatalog.commerceIntent.recommendedCategory).toBe("commerce");
+    expect(userApiProviderCatalog.localIntent.recommendedCategory).toBe("local_service");
+    expect(userApiProviderCatalog.flightIntent.providers.every((provider) => provider.category === "flight")).toBe(true);
+    expect(userApiProviderCatalog.hotelIntent.providers.every((provider) => provider.category === "hotel")).toBe(true);
+    expect(userApiProviderCatalog.commerceIntent.providers.every((provider) => provider.category === "commerce")).toBe(true);
+    expect(userApiProviderCatalog.localIntent.providers.every((provider) => provider.category === "local_service")).toBe(true);
+    expect(userApiProviderCatalog.assertSafe).toBe(true);
     const matrix = await page.evaluate(() => window.WeishanCommerceFlightSandboxProviderMatrix && typeof window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract === "function" ? window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract() : null);
     expect(matrix).toEqual(expect.objectContaining({
-      matrixVersion:"2.0.86",
+      matrixVersion:"2.0.87",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -3465,7 +3583,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
     const sandboxDryRun = await page.evaluate(() => window.WeishanCommerceFlightSandboxDryRun && window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract ? window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract : null);
     expect(sandboxDryRun).toEqual(expect.objectContaining({
-      sandboxDryRunVersion:"2.0.86",
+      sandboxDryRunVersion:"2.0.87",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -3564,7 +3682,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(sandboxAssert).toBe(true);
     const readonlyStubPermission = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubPermission && typeof window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission === "function" ? window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission() : null);
     expect(readonlyStubPermission).toEqual(expect.objectContaining({
-      permissionVersion:"2.0.86",
+      permissionVersion:"2.0.87",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -3611,7 +3729,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect.poll(async () => latestOpenExternalUrl(page), { timeout:5000 }).toContain("https://www.trip.com/flights/search/");
     await expect.poll(async () => latestOpenExternalUrl(page), { timeout:5000 }).toContain("Chengdu");
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
-    await summaryPanel.getByRole("button", { name:"复制机票搜索条件" }).click();
+    await summaryPanel.getByRole("button", { name:"复制搜索条件" }).click();
     for (const text of ["机票搜索条件", "出发地：上海", "目的地：成都", "出发日期：7月15日", "排序：低价优先", "最终价格以真实平台为准"]) {
       await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain(text);
     }
@@ -3636,12 +3754,19 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(historyDetail).toContainText("打开全网搜索");
     await expect(historyDetail).toContainText("打开 Google Flights 搜索");
     await expect(historyDetail).toContainText("打开 Trip.com / 携程搜索");
-    await expect(historyDetail).toContainText("复制机票搜索条件");
+    await expect(historyDetail).toContainText("复制搜索条件");
     await expect(historyDetail).toContainText("查看 API 绑定说明");
+    await expect(historyDetail).toContainText("查看可绑定 API 平台目录");
     await historyDetail.getByText("查看 API 绑定说明").click();
     await expect(historyDetail).toContainText("当前状态：用户 API 未绑定。");
+    await expect(historyDetail).toContainText("可绑定 API 平台目录：已建立");
     await expect(historyDetail).toContainText("绑定 API 不代表允许付款");
     await expect(historyDetail).toContainText("只读 API：允许搜索 / 返回价格");
+    await historyDetail.getByText("查看可绑定 API 平台目录").click();
+    await expect(historyDetail).toContainText("平台目录已建立，但尚未绑定任何真实 API");
+    await expect(historyDetail).toContainText("已绑定 API：0");
+    await expect(historyDetail).toContainText("Trip.com API / Partner API");
+    await expect(historyDetail).toContainText("Amazon Product Advertising API");
     await expect(historyDetail).not.toContainText("查看高级调试信息");
     await expect(historyDetail).not.toContainText("Sandbox Dry Run");
     await expect(historyDetail).not.toContainText("候选平台沙箱矩阵");
@@ -3656,7 +3781,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.86 bare flight intent still renders the simple flight result card", async () => {
+  test("v2.0.87 bare flight intent still renders the simple flight result card", async () => {
     await resetCommerceTasks(page);
     await page.reload({ waitUntil:"domcontentloaded" });
     await gotoRoute(page, "home");
@@ -3678,8 +3803,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("打开全网搜索");
     await expect(summaryPanel).toContainText("打开 Google Flights 搜索");
     await expect(summaryPanel).toContainText("打开 Trip.com / 携程搜索");
-    await expect(summaryPanel).toContainText("复制机票搜索条件");
+    await expect(summaryPanel).toContainText("复制搜索条件");
     await expect(summaryPanel).toContainText("查看 API 绑定说明");
+    await expect(summaryPanel).toContainText("查看可绑定 API 平台目录");
     await expect(summaryPanel).not.toContainText("查看高级调试信息");
     await expect(summaryPanel).not.toContainText("查看候选平台");
     await expect(summaryPanel).not.toContainText("查看 Provider 审批状态");
@@ -3695,10 +3821,10 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.0.86 sidebar version stays in sync with release version", async () => {
+  test("v2.0.87 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.0.86");
+    await expect(sidebarFoot).toContainText("weishan v2.0.87");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 

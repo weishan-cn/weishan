@@ -39,7 +39,7 @@
       return api.getFlightLowestOffersContract(contract);
     }
     const fallback = {
-      contractVersion:"2.0.86",
+      contractVersion:"2.0.87",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -99,7 +99,7 @@
       return api.getFlightProviderCandidatesRegistry(registry);
     }
     const fallback = {
-      contractVersion:"2.0.86",
+      contractVersion:"2.0.87",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -169,7 +169,7 @@
       return api.getFlightProviderApprovalStatus(status);
     }
     const fallback = {
-      approvalVersion:"2.0.86",
+      approvalVersion:"2.0.87",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -265,7 +265,7 @@
       return api.getFlightReadonlyStubPermission(permission);
     }
     const fallback = {
-      permissionVersion:"2.0.86",
+      permissionVersion:"2.0.87",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -329,7 +329,7 @@
       return api.getFlightReadonlyStubAdapter(adapter);
     }
     const fallback = {
-      adapterVersion:"2.0.86",
+      adapterVersion:"2.0.87",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -436,7 +436,7 @@
       return api.getFlightSandboxDryRunContract(shell);
     }
     const fallback = {
-      sandboxDryRunVersion:"2.0.86",
+      sandboxDryRunVersion:"2.0.87",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -559,7 +559,7 @@
       return api.getFlightSandboxProviderMatrixContract(matrix);
     }
     const fallback = {
-      matrixVersion:"2.0.86",
+      matrixVersion:"2.0.87",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -691,7 +691,7 @@
         sourceLine:"未绑定 API 时，可使用 weishan 候选平台和外部搜索入口。"
       };
     return {
-      policyVersion:"2.0.86",
+      policyVersion:"2.0.87",
       phase:"user_api_priority_search_policy",
       userApiBindingState:binding,
       searchMode,
@@ -705,7 +705,7 @@
     const shellState = api && typeof api.getApiBindingSafeShellState === "function"
       ? api.getApiBindingSafeShellState(raw.shellState || raw)
       : {
-        shellVersion:"2.0.86",
+        shellVersion:"2.0.87",
         phase:"api_binding_safe_shell",
         status:"not_bound",
         userApi:"not_bound",
@@ -764,12 +764,68 @@
         mode
       };
     return {
-      shellVersion:"2.0.86",
+      shellVersion:"2.0.87",
       phase:"api_binding_safe_shell",
       shellState,
       mode,
       display,
       permissionTiers:api && typeof api.buildApiBindingPermissionTiers === "function" ? api.buildApiBindingPermissionTiers() : []
+    };
+  }
+
+  function createUserApiProviderCatalogState(state){
+    const api = window.WeishanCommerceUserApiProviderCatalog;
+    const raw = state && typeof state === "object" ? state : {};
+    const catalog = api && typeof api.buildUserApiProviderCatalog === "function"
+      ? api.buildUserApiProviderCatalog()
+      : [];
+    const summary = api && typeof api.summarizeUserApiProviderCatalog === "function"
+      ? api.summarizeUserApiProviderCatalog(catalog)
+      : {
+        totalProviders:catalog.length,
+        flightProviders:0,
+        hotelProviders:0,
+        commerceProviders:0,
+        localServiceProviders:0,
+        boundProviders:0,
+        providersWithReadOnlyPotential:catalog.length,
+        providersWithWriteEnabled:0,
+        providersWithOrderEnabled:0,
+        providersWithPaymentEnabled:0,
+        providersWithIdentityUploadEnabled:0,
+        overallStatus:"catalog_only_no_binding",
+        reason:"provider_catalog_available_but_no_real_api_binding"
+      };
+    const display = api && typeof api.buildUserApiProviderCatalogDisplay === "function"
+      ? api.buildUserApiProviderCatalogDisplay(catalog)
+      : Object.assign({
+        title:"可绑定 API 平台目录",
+        currentStatusLine:"平台目录已建立，但尚未绑定任何真实 API。",
+        providerTypeLine:"可选平台类型：机票 / 酒店 / 商品 / 本地服务",
+        boundLine:"已绑定 API：0",
+        priceLine:"可返回真实价格：0",
+        orderLine:"可下单：0",
+        paymentLine:"可付款：0",
+        explanationLine:"绑定 API 后，weishan 可优先使用用户授权平台的只读价格结果。",
+        safetyLine:"当前版本只展示平台目录和权限说明，不保存真实 API key，不测试连接。",
+        groups:{ flight:[], hotel:[], commerce:[], localService:[] },
+        capabilityLines:[
+          "只读潜力：可评估",
+          "写入能力：禁用",
+          "下单能力：禁用",
+          "支付能力：禁用",
+          "身份资料上传：禁用",
+          "API key 输入：禁用",
+          "endpoint 连接：禁用"
+        ]
+      }, raw.display || {});
+    return {
+      catalogVersion:"2.0.87",
+      phase:"user_api_provider_catalog",
+      catalogStatus:"catalog_only",
+      catalog,
+      summary,
+      display
     };
   }
 
@@ -1040,6 +1096,7 @@
       flightSandboxProviderMatrix:category === "flight" ? createFlightSandboxProviderMatrix() : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState() : null,
+      userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState() : null,
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -1094,6 +1151,7 @@
       flightSandboxProviderMatrix:category === "flight" ? createFlightSandboxProviderMatrix(base.flightSandboxProviderMatrix) : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(base.userApiPriorityPolicyState),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState(base.apiBindingSafeShellState) : null,
+      userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState(base.userApiProviderCatalogState) : null,
       canShowPrice:base.canShowPrice === true,
       canShowBookingButton:base.canShowBookingButton === true,
       canShowCheckoutButton:base.canShowCheckoutButton === true,
@@ -1212,6 +1270,7 @@
       flightSandboxProviderMatrix:safe.category === "flight" ? safe.flightSandboxProviderMatrix : null,
       userApiPriorityPolicyState:safe.userApiPriorityPolicyState,
       apiBindingSafeShellState:safe.category === "flight" ? safe.apiBindingSafeShellState : null,
+      userApiProviderCatalogState:safe.category === "flight" ? safe.userApiProviderCatalogState : null,
       candidates:safe.candidates,
       recommendation:safe.recommendation,
       nextSteps:[
@@ -1309,6 +1368,7 @@
     createFlightSandboxProviderMatrix,
     createUserApiPriorityPolicyState,
     createApiBindingSafeShellState,
+    createUserApiProviderCatalogState,
     createCommerceTaskHistoryPayload,
     createCommerceHistoryPayload,
     sanitizeCommerceInput,

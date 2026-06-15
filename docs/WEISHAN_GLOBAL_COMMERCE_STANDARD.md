@@ -1137,7 +1137,7 @@ v2.0.86 新增 `commerceApiBindingSafeShell.js`，只提供 API 绑定入口、�
 
 只读 fixture 绑定仅可用于测试结构，允许 `canShowPrice: true` 和 `canShowBookingUrl: true` 的测试态，但必须继续禁止 `canCreateOrder`、`canPay`、`canUploadIdentity`、`canStoreIdentity`、`canStoreBankCard`。生产默认不得显示 fixture 价格，不得显示真实价格，不得显示 fake/demo/mock price，不得显示 bookingUrl，不得显示预订、付款或下单入口。
 
-v2.0.86 标准 marker：
+v2.0.87 标准 marker：
 - marker:api binding safe shell
 - marker:api binding safe shell no real key
 - marker:api binding safe shell no plaintext key
@@ -1151,3 +1151,52 @@ v2.0.86 标准 marker：
 - marker:api binding safe shell no bank card storage
 - marker:api binding safe shell readonly only
 - marker:api binding safe shell user api not bound
+
+## v2.0.87：User API Provider Catalog / 用户 API 平台目录
+v2.0.87 新增 `commerceUserApiProviderCatalog.js`，只展示可绑定 API 平台目录、平台类型、只读潜力、权限说明和未来绑定路径。目录只是目录，不代表已接入真实 provider；当前不输入真实 API key，不保存真实 API key，不明文保存 key，不读取 key，不测试连接，不连接 endpoint，不发起网络请求，不返回真实价格，不返回 fake/demo/mock price，不生成 bookingUrl，不付款，不下单，不上传身份证、护照或银行卡，不保存银行卡。
+
+默认简单机票结果仍显示：
+- 用户 API：未绑定
+- weishan 候选平台：可用
+- 真实价格结果：暂无
+- 暂无真实价格结果
+- 查看 API 绑定说明
+- 查看可绑定 API 平台目录
+
+`查看可绑定 API 平台目录` 默认折叠。展开后只能显示平台目录和权限说明：
+- 可绑定 API 平台目录
+- 平台目录已建立，但尚未绑定任何真实 API。
+- 可选平台类型：机票 / 酒店 / 商品 / 本地服务
+- 已绑定 API：0
+- 可返回真实价格：0
+- 可下单：0
+- 可付款：0
+- 机票 / 航旅：Trip.com API / Partner API、Skyscanner API / Partner API、Amadeus / GDS 类、Expedia Partner Solutions、Airline official APIs
+- 酒店：Booking / partner source、Agoda / partner source、Expedia Partner Solutions、Trip.com hotel partner、Hotel official APIs
+- 商品 / 电商：Amazon Product Advertising API、eBay Browse API、Walmart API、京东联盟 / 京东开放平台、淘宝 / 天猫开放平台、拼多多开放平台、Google Shopping / Merchant source
+- 本地服务 / 门票：Google Business / Places-like source、Event / ticket provider APIs、Regional local service providers
+- 只读潜力：可评估
+- 写入能力：禁用
+- 下单能力：禁用
+- 支付能力：禁用
+- 身份资料上传：禁用
+- API key 输入：禁用
+- endpoint 连接：禁用
+
+`查看 API 绑定说明` 必须联动显示：可绑定 API 平台目录：已建立、当前已绑定 API：0、当前只读价格能力：未启用、真实 API key 输入：未启用、真实 endpoint 连接：未启用。
+
+v2.0.87 标准 marker：
+- marker:user api provider catalog
+- marker:user api provider catalog only
+- marker:user api provider catalog no real key
+- marker:user api provider catalog no key input
+- marker:user api provider catalog no endpoint
+- marker:user api provider catalog no network
+- marker:user api provider catalog no price
+- marker:user api provider catalog no booking url
+- marker:user api provider catalog no payment
+- marker:user api provider catalog no order submit
+- marker:user api provider catalog no identity upload
+- marker:user api provider catalog bound zero
+- marker:user api provider catalog provider types
+- marker:user api provider catalog readonly potential

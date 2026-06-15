@@ -2074,7 +2074,7 @@
 
   function commerceFlightLowestOffersContract(task){
     const fallback = {
-      contractVersion:"2.0.86",
+      contractVersion:"2.0.87",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -2179,8 +2179,72 @@
     };
   }
 
+  function commerceUserApiProviderCatalogDisplay(task){
+    const api = window.WeishanCommerceUserApiProviderCatalog;
+    const state = task && task.userApiProviderCatalogState || null;
+    if (api && typeof api.buildUserApiProviderCatalogDisplay === "function") return api.buildUserApiProviderCatalogDisplay(state && state.catalog);
+    return state && state.display || {
+      title:"可绑定 API 平台目录",
+      currentStatusLine:"平台目录已建立，但尚未绑定任何真实 API。",
+      providerTypeLine:"可选平台类型：机票 / 酒店 / 商品 / 本地服务",
+      boundLine:"已绑定 API：0",
+      priceLine:"可返回真实价格：0",
+      orderLine:"可下单：0",
+      paymentLine:"可付款：0",
+      explanationLine:"绑定 API 后，weishan 可优先使用用户授权平台的只读价格结果。",
+      safetyLine:"当前版本只展示平台目录和权限说明，不保存真实 API key，不测试连接。",
+      groupLabels:{ flight:"机票 / 航旅", hotel:"酒店", commerce:"商品 / 电商", localService:"本地服务 / 门票" },
+      groups:{ flight:[], hotel:[], commerce:[], localService:[] },
+      capabilityLines:[
+        "只读潜力：可评估",
+        "写入能力：禁用",
+        "下单能力：禁用",
+        "支付能力：禁用",
+        "身份资料上传：禁用",
+        "API key 输入：禁用",
+        "endpoint 连接：禁用"
+      ]
+    };
+  }
+
+  function commerceUserApiProviderCatalogDisclosure(task){
+    const display = commerceUserApiProviderCatalogDisplay(task);
+    const groups = display.groups || {};
+    const labels = display.groupLabels || {};
+    const capabilityLines = Array.isArray(display.capabilityLines) ? display.capabilityLines : [];
+    const groupHtml = [
+      ["flight", labels.flight || "机票 / 航旅"],
+      ["hotel", labels.hotel || "酒店"],
+      ["commerce", labels.commerce || "商品 / 电商"],
+      ["localService", labels.localService || "本地服务 / 门票"]
+    ].map(([key, label]) => {
+      const providers = Array.isArray(groups[key]) ? groups[key] : [];
+      return `<section class="commerce-api-provider-catalog-group">
+        <h5>${esc(label)}</h5>
+        <ul>${providers.map((item) => `<li>${esc(item.providerName || "")}</li>`).join("")}</ul>
+        <div class="commerce-api-provider-catalog-capabilities">${capabilityLines.map((line) => `<p>${esc(line)}</p>`).join("")}</div>
+      </section>`;
+    }).join("");
+    const body = `<section class="commerce-api-provider-catalog" aria-label="可绑定 API 平台目录">
+      <h4>${esc(display.title || "可绑定 API 平台目录")}</h4>
+      <p>${esc(display.currentStatusLine || "平台目录已建立，但尚未绑定任何真实 API。")}</p>
+      <div class="commerce-api-provider-catalog-summary">
+        <p>${esc(display.providerTypeLine || "可选平台类型：机票 / 酒店 / 商品 / 本地服务")}</p>
+        <p>${esc(display.boundLine || "已绑定 API：0")}</p>
+        <p>${esc(display.priceLine || "可返回真实价格：0")}</p>
+        <p>${esc(display.orderLine || "可下单：0")}</p>
+        <p>${esc(display.paymentLine || "可付款：0")}</p>
+      </div>
+      <p>${esc(display.explanationLine || "绑定 API 后，weishan 可优先使用用户授权平台的只读价格结果。")}</p>
+      <p>${esc(display.safetyLine || "当前版本只展示平台目录和权限说明，不保存真实 API key，不测试连接。")}</p>
+      ${groupHtml}
+    </section>`;
+    return disclosure("查看可绑定 API 平台目录", body, "commerce-api-provider-catalog-disclosure");
+  }
+
   function commerceApiBindingSafeShellDisclosure(task){
     const display = commerceApiBindingSafeShellDisplay(task);
+    const catalog = commerceUserApiProviderCatalogDisplay(task);
     const safetyLines = Array.isArray(display.safetyLines) ? display.safetyLines : [];
     const body = `<section class="commerce-api-binding-safe-shell" aria-label="API 绑定说明">
       <h4>API 绑定说明</h4>
@@ -2188,6 +2252,12 @@
       <p>${esc(display.bindFutureLine || "绑定 API 后，可优先使用用户授权平台的只读价格结果。")}</p>
       <p>${esc(display.readonlyScopeLine || "API 只用于搜索、读取价格、读取库存、分析结果。")}</p>
       <p>${esc(display.externalConfirmLine || "点击价格后跳转到外部平台或官网确认。")}</p>
+      <p>可绑定 API 平台目录：已建立</p>
+      <p>当前已绑定 API：0</p>
+      <p>当前只读价格能力：未启用</p>
+      <p>真实 API key 输入：未启用</p>
+      <p>真实 endpoint 连接：未启用</p>
+      <p>${esc(catalog.safetyLine || "当前版本只展示平台目录和权限说明，不保存真实 API key，不测试连接。")}</p>
       <ul>${safetyLines.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
     </section>`;
     return disclosure("查看 API 绑定说明", body, "commerce-api-binding-safe-shell-disclosure");
@@ -2195,7 +2265,7 @@
 
   function commerceFlightProviderCandidatesRegistry(task){
     const fallback = {
-      contractVersion:"2.0.86",
+      contractVersion:"2.0.87",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -2331,7 +2401,7 @@
     if (api && typeof api.normalizeFlightSandboxDryRunContract === "function") return api.normalizeFlightSandboxDryRunContract(source);
     if (api && typeof api.getFlightSandboxDryRunContract === "function") return api.getFlightSandboxDryRunContract(source);
     return {
-      sandboxDryRunVersion:"2.0.86",
+      sandboxDryRunVersion:"2.0.87",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -2475,7 +2545,7 @@
       reason:"all_candidates_require_human_approval_and_real_provider_connection"
     };
     return {
-      matrixVersion:"2.0.86",
+      matrixVersion:"2.0.87",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -2605,7 +2675,7 @@
     if (api && typeof api.normalizeFlightReadonlyStubPermission === "function") return api.normalizeFlightReadonlyStubPermission(source);
     if (api && typeof api.getFlightReadonlyStubPermission === "function") return api.getFlightReadonlyStubPermission(source);
     const fallback = {
-      permissionVersion:"2.0.86",
+      permissionVersion:"2.0.87",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -2709,7 +2779,7 @@
     if (api && typeof api.normalizeFlightReadonlyStubAdapter === "function") return api.normalizeFlightReadonlyStubAdapter(source);
     if (api && typeof api.getFlightReadonlyStubAdapter === "function") return api.getFlightReadonlyStubAdapter(source);
     const fallback = {
-      adapterVersion:"2.0.86",
+      adapterVersion:"2.0.87",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -2835,7 +2905,7 @@
     if (api && typeof api.normalizeFlightProviderApprovalStatus === "function") return api.normalizeFlightProviderApprovalStatus(source);
     if (api && typeof api.getFlightProviderApprovalStatus === "function") return api.getFlightProviderApprovalStatus(source);
     const fallback = {
-      approvalVersion:"2.0.86",
+      approvalVersion:"2.0.87",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -3033,9 +3103,10 @@
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="web" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.web)}">打开全网搜索</button>
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="googleFlights" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.googleFlights)}">打开 Google Flights 搜索</button>
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="tripCom" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.tripCom)}">打开 Trip.com / 携程搜索</button>
-        <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="simpleFlight" data-commerce-copy-text="${commerceEncodedCopyText(copyTexts.flight)}">复制机票搜索条件</button>
+        <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="simpleFlight" data-commerce-copy-text="${commerceEncodedCopyText(copyTexts.flight)}">复制搜索条件</button>
       </div>
       ${commerceApiBindingSafeShellDisclosure(task)}
+      ${commerceUserApiProviderCatalogDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;
