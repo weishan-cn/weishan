@@ -1077,3 +1077,36 @@ v2.0.84 标准 marker：
 - marker:real result only external search fallback
 - marker:real result only user api priority future
 - marker:real result only trusted price source required
+
+## v2.0.85：User API Priority Search Policy / 用户 API 优先搜索策略
+v2.0.85 新增 `commerceUserApiPriorityPolicy.js`，只定义用户 API 优先搜索策略、搜索模式展示和价格来源标签，不接真实 API，不读取 `.env`，不读取 `process.env` 里的真实 provider key，不访问系统钥匙串，不联网，不保存 key。
+
+用户已绑定 API 的未来路径：优先使用用户自己的 API / provider key 做只读搜索和价格分析，只允许读取价格、库存和基础结果信息。即使用户绑定 API，weishan 仍不能付款、不能下单、不能提交身份证 / 护照 / 银行卡或任何身份资料，不能保存银行卡、身份证或护照，不能把写入 API、下单 API、支付 API 作为默认能力。
+
+用户未绑定 API 的当前默认路径：使用 weishan 候选平台 / 外部搜索入口。没有真实用户 API 或真实 provider 时，不显示价格，不显示 bookingUrl，不显示价格卡片，只显示 `暂无真实价格结果`，并保留 `打开全网搜索`、`打开 Google Flights 搜索`、`打开 Trip.com / 携程搜索`、`复制搜索条件`。
+
+默认搜索模式必须展示为：
+
+- 用户 API：未绑定
+- weishan 候选平台：可用
+- 真实价格结果：暂无
+- 绑定 API 后，将优先使用用户授权平台的只读价格结果
+- 未绑定 API 时，可使用 weishan 候选平台和外部搜索入口。
+
+价格卡片规则：只有真实可信价格源可用时才允许显示价格卡片。价格卡片必须标明来源、平台、更新时间、是否含税费 / 运费 / 行李，以及 `最终价格以跳转页面为准`。无真实用户 API / 无真实 provider 时，`price` 必须为空，`bookingUrl` 必须为空，不得显示价格卡片。
+
+严禁 fake price、mock price、demo price、AI 估算价格、`约 ¥xxx`、`最低价 ¥xxx`、`已找到价格`、伪造 bookingUrl、预订按钮、付款按钮、下单按钮、内部付款页、自动支付、自动下单、提交订单、身份资料上传、银行卡保存、身份证保存、护照保存。
+
+v2.0.85 标准 marker：
+- marker:user api priority search policy
+- marker:user api priority not bound fallback
+- marker:user api priority readonly only
+- marker:user api priority no write api
+- marker:user api priority no order api
+- marker:user api priority no payment api
+- marker:user api priority no identity upload
+- marker:user api priority no bank card storage
+- marker:user api priority source label required
+- marker:user api priority external final price
+- marker:user api priority candidate fallback
+- marker:user api priority no fake price

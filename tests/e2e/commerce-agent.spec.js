@@ -3179,12 +3179,12 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  // v2.0.84 real result only surface hides debug panels by default
+  // v2.0.85 real result only surface hides debug panels by default
   // 查看 Provider 审批状态 ... 人工审核后才允许进入 provider approval
   // 查看只读适配器开发许可 ... 人工批准开发只读 stub
   // 查看只读适配器空壳 ... 不能保存证件 / 银行卡
   // 查看 Sandbox Dry Run ... 沙箱空跑外壳已建立，但未连接真实 provider ... block_price_return ... block_payment
-  test("v2.0.84 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
+  test("v2.0.85 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -3199,13 +3199,80 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("目的地：成都");
     await expect(summaryPanel).toContainText("出发日期：7月15日");
     await expect(summaryPanel).toContainText("排序：低价优先");
+    await expect(summaryPanel).toContainText("用户 API：未绑定");
+    await expect(summaryPanel).toContainText("weishan 候选平台：可用");
+    await expect(summaryPanel).toContainText("真实价格结果：暂无");
     await expect(summaryPanel).toContainText("暂无真实价格结果");
     await expect(summaryPanel).toContainText("当前尚未接入真实只读机票价格源，不能展示价格。");
+    await expect(summaryPanel).toContainText("绑定 API 后，将优先使用用户授权平台的只读价格结果");
+    await expect(summaryPanel).toContainText("未绑定 API 时，可使用 weishan 候选平台和外部搜索入口。");
     await expect(summaryPanel).toContainText("接入可信价格源后，将只显示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。");
     await expect(summaryPanel).toContainText("当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单");
+    const userApiPolicy = await page.evaluate(() => window.WeishanCommerceUserApiPriorityPolicy ? {
+      contract:window.WeishanCommerceUserApiPriorityPolicy.commerceUserApiPriorityPolicyContract,
+      notBoundMode:window.WeishanCommerceUserApiPriorityPolicy.resolveCommerceSearchMode({
+        userApiBindingState:window.WeishanCommerceUserApiPriorityPolicy.getUserApiBindingState()
+      }),
+      boundReadonlyFixture:window.WeishanCommerceUserApiPriorityPolicy.resolveCommerceSearchMode({
+        userApiBindingState:window.WeishanCommerceUserApiPriorityPolicy.getUserApiBindingState({
+          __fixture:true,
+          status:"bound_readonly_fixture",
+          providerName:"Trip.com API fixture",
+          canReadPrice:true
+        })
+      })
+    } : null);
+    expect(userApiPolicy.contract).toEqual(expect.objectContaining({
+      policyVersion:"2.0.85",
+      phase:"user_api_priority_search_policy",
+      policyStatus:"policy_only",
+      userApiMode:"not_bound",
+      candidateProviderMode:"available",
+      realPriceMode:"unavailable_without_bound_api",
+      paymentMode:"disabled",
+      orderMode:"disabled",
+      identityStorageMode:"disabled"
+    }));
+    expect(userApiPolicy.contract.capabilities).toEqual(expect.objectContaining({
+      canDetectUserApiBinding:true,
+      canPreferUserApiWhenBound:true,
+      canFallbackToCandidateProviders:true,
+      canShowSearchMode:true,
+      canShowSourceLabel:true,
+      canShowTrustedPriceOnly:true,
+      canUseReadOnlyUserApi:false,
+      canUseWriteApi:false,
+      canCreateOrder:false,
+      canPay:false,
+      canUploadIdentity:false,
+      canStoreIdentity:false,
+      canStoreBankCard:false
+    }));
+    expect(userApiPolicy.notBoundMode).toEqual(expect.objectContaining({
+      mode:"candidate_provider_fallback",
+      userApi:"not_bound",
+      candidateProviders:"available",
+      realPriceResults:"unavailable",
+      canShowPrice:false,
+      canShowBookingUrl:false,
+      canPay:false,
+      canCreateOrder:false,
+      canStoreIdentity:false
+    }));
+    expect(userApiPolicy.boundReadonlyFixture).toEqual(expect.objectContaining({
+      mode:"user_api_readonly_first",
+      userApi:"bound",
+      resultSource:"user_bound_api",
+      providerName:"Trip.com API fixture",
+      canShowPrice:true,
+      canCreateOrder:false,
+      canPay:false,
+      canUploadIdentity:false,
+      canStoreIdentity:false
+    }));
     const matrix = await page.evaluate(() => window.WeishanCommerceFlightSandboxProviderMatrix && typeof window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract === "function" ? window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract() : null);
     expect(matrix).toEqual(expect.objectContaining({
-      matrixVersion:"2.0.84",
+      matrixVersion:"2.0.85",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -3272,7 +3339,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
     const sandboxDryRun = await page.evaluate(() => window.WeishanCommerceFlightSandboxDryRun && window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract ? window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract : null);
     expect(sandboxDryRun).toEqual(expect.objectContaining({
-      sandboxDryRunVersion:"2.0.84",
+      sandboxDryRunVersion:"2.0.85",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -3371,7 +3438,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(sandboxAssert).toBe(true);
     const readonlyStubPermission = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubPermission && typeof window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission === "function" ? window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission() : null);
     expect(readonlyStubPermission).toEqual(expect.objectContaining({
-      permissionVersion:"2.0.84",
+      permissionVersion:"2.0.85",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -3434,6 +3501,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(historyDetail).toContainText("目的地：成都");
     await expect(historyDetail).toContainText("出发日期：7月15日");
     await expect(historyDetail).toContainText("排序：低价优先");
+    await expect(historyDetail).toContainText("用户 API：未绑定");
+    await expect(historyDetail).toContainText("weishan 候选平台：可用");
+    await expect(historyDetail).toContainText("真实价格结果：暂无");
     await expect(historyDetail).toContainText("暂无真实价格结果");
     await expect(historyDetail).toContainText("当前尚未接入真实只读机票价格源，不能展示价格。");
     await expect(historyDetail).toContainText("接入可信价格源后，将只显示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。");
@@ -3455,7 +3525,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.84 bare flight intent still renders the simple flight result card", async () => {
+  test("v2.0.85 bare flight intent still renders the simple flight result card", async () => {
     await resetCommerceTasks(page);
     await page.reload({ waitUntil:"domcontentloaded" });
     await gotoRoute(page, "home");
@@ -3469,6 +3539,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("目的地：成都");
     await expect(summaryPanel).toContainText("出发日期：7月15日");
     await expect(summaryPanel).toContainText("排序：按条件筛选");
+    await expect(summaryPanel).toContainText("用户 API：未绑定");
+    await expect(summaryPanel).toContainText("weishan 候选平台：可用");
+    await expect(summaryPanel).toContainText("真实价格结果：暂无");
     await expect(summaryPanel).toContainText("暂无真实价格结果");
     await expect(summaryPanel).toContainText("当前尚未接入真实只读机票价格源，不能展示价格。");
     await expect(summaryPanel).toContainText("打开全网搜索");
@@ -3490,10 +3563,10 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.0.84 sidebar version stays in sync with release version", async () => {
+  test("v2.0.85 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.0.84");
+    await expect(sidebarFoot).toContainText("weishan v2.0.85");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 

@@ -203,6 +203,27 @@ function checkFlightSandboxProviderMatrixVersion(results, expectedVersion) {
   );
 }
 
+function checkUserApiPriorityPolicyVersion(results, expectedVersion) {
+  const policyPath = "apps/desktop/src/renderer/core/commerceUserApiPriorityPolicy.js";
+  const policy = readText(policyPath);
+  if (!policy) {
+    results.push({ name: "apps/desktop user API priority policy version", pass: false, detail: policyPath + " missing" });
+    return;
+  }
+  if (policy.__readError) {
+    results.push({ name: "apps/desktop user API priority policy version", pass: false, detail: policy.__readError });
+    return;
+  }
+  const match = policy.match(/POLICY_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop user API priority policy version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceUserApiPriorityPolicy.js POLICY_VERSION"
+  );
+}
+
 function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
   const pkg = readJson(packagePath);
   const lock = readJson(lockPath);
@@ -255,6 +276,7 @@ function runVersionCheck() {
     checkFlightReadonlyStubAdapterVersion(results, rootPackage.version);
     checkFlightSandboxDryRunVersion(results, rootPackage.version);
     checkFlightSandboxProviderMatrixVersion(results, rootPackage.version);
+    checkUserApiPriorityPolicyVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

@@ -2074,7 +2074,7 @@
 
   function commerceFlightLowestOffersContract(task){
     const fallback = {
-      contractVersion:"2.0.84",
+      contractVersion:"2.0.85",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -2136,9 +2136,24 @@
     };
   }
 
+  function commerceUserApiSearchModeDisplay(task){
+    const api = window.WeishanCommerceUserApiPriorityPolicy;
+    const state = task && task.userApiPriorityPolicyState || null;
+    const searchMode = state && state.searchMode || null;
+    if (api && typeof api.buildSearchModeDisplay === "function") return api.buildSearchModeDisplay(searchMode);
+    return state && state.display || {
+      title:"当前搜索模式",
+      userApiLine:"用户 API：未绑定",
+      candidateProviderLine:"weishan 候选平台：可用",
+      realPriceLine:"真实价格结果：暂无",
+      futureLine:"绑定 API 后，将优先使用用户授权平台的只读价格结果",
+      sourceLine:"未绑定 API 时，可使用 weishan 候选平台和外部搜索入口。"
+    };
+  }
+
   function commerceFlightProviderCandidatesRegistry(task){
     const fallback = {
-      contractVersion:"2.0.84",
+      contractVersion:"2.0.85",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -2274,7 +2289,7 @@
     if (api && typeof api.normalizeFlightSandboxDryRunContract === "function") return api.normalizeFlightSandboxDryRunContract(source);
     if (api && typeof api.getFlightSandboxDryRunContract === "function") return api.getFlightSandboxDryRunContract(source);
     return {
-      sandboxDryRunVersion:"2.0.84",
+      sandboxDryRunVersion:"2.0.85",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -2418,7 +2433,7 @@
       reason:"all_candidates_require_human_approval_and_real_provider_connection"
     };
     return {
-      matrixVersion:"2.0.84",
+      matrixVersion:"2.0.85",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -2548,7 +2563,7 @@
     if (api && typeof api.normalizeFlightReadonlyStubPermission === "function") return api.normalizeFlightReadonlyStubPermission(source);
     if (api && typeof api.getFlightReadonlyStubPermission === "function") return api.getFlightReadonlyStubPermission(source);
     const fallback = {
-      permissionVersion:"2.0.84",
+      permissionVersion:"2.0.85",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -2652,7 +2667,7 @@
     if (api && typeof api.normalizeFlightReadonlyStubAdapter === "function") return api.normalizeFlightReadonlyStubAdapter(source);
     if (api && typeof api.getFlightReadonlyStubAdapter === "function") return api.getFlightReadonlyStubAdapter(source);
     const fallback = {
-      adapterVersion:"2.0.84",
+      adapterVersion:"2.0.85",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -2778,7 +2793,7 @@
     if (api && typeof api.normalizeFlightProviderApprovalStatus === "function") return api.normalizeFlightProviderApprovalStatus(source);
     if (api && typeof api.getFlightProviderApprovalStatus === "function") return api.getFlightProviderApprovalStatus(source);
     const fallback = {
-      approvalVersion:"2.0.84",
+      approvalVersion:"2.0.85",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -2930,6 +2945,7 @@
     const copyTexts = commerceSimpleFlightCopyTexts(task);
     const externalUrls = commerceSimpleFlightExternalSearchUrls(task);
     const flightLowestOffers = commerceFlightLowestOffersDisplay(task);
+    const searchModeDisplay = commerceUserApiSearchModeDisplay(task);
     // marker:one screen actionable checklist collapsed
     // disclosure("查看可执行清单") ... commerceActionableChecklistPanelHtml
     // marker:one screen platform templates collapsed
@@ -2949,8 +2965,16 @@
           <p>目的地：${esc(fields.destination)}</p>
           <p>出发日期：${esc(fields.date)}</p>
           <p>排序：${esc(fields.goal)}</p>
+          <div class="commerce-search-mode-summary" aria-label="当前搜索模式">
+            <h5>${esc(searchModeDisplay.title || "当前搜索模式")}</h5>
+            <p>${esc(searchModeDisplay.userApiLine || "用户 API：未绑定")}</p>
+            <p>${esc(searchModeDisplay.candidateProviderLine || "weishan 候选平台：可用")}</p>
+            <p>${esc(searchModeDisplay.realPriceLine || "真实价格结果：暂无")}</p>
+          </div>
           <p class="commerce-simple-flight-empty">${esc(flightLowestOffers.currentStatusLine || "暂无真实价格结果")}</p>
           <p>${esc(flightLowestOffers.priceStateLine || "当前尚未接入真实只读机票价格源，不能展示价格。")}</p>
+          <p>${esc(searchModeDisplay.futureLine || "绑定 API 后，将优先使用用户授权平台的只读价格结果")}</p>
+          <p>${esc(searchModeDisplay.sourceLine || "未绑定 API 时，可使用 weishan 候选平台和外部搜索入口。")}</p>
           <p>${esc(flightLowestOffers.futureLine || "接入可信价格源后，将只展示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。")}</p>
           <p>weishan 不收款、不下单、不保存身份证、护照或银行卡。</p>
         </section>

@@ -39,7 +39,7 @@
       return api.getFlightLowestOffersContract(contract);
     }
     const fallback = {
-      contractVersion:"2.0.84",
+      contractVersion:"2.0.85",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -99,7 +99,7 @@
       return api.getFlightProviderCandidatesRegistry(registry);
     }
     const fallback = {
-      contractVersion:"2.0.84",
+      contractVersion:"2.0.85",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -169,7 +169,7 @@
       return api.getFlightProviderApprovalStatus(status);
     }
     const fallback = {
-      approvalVersion:"2.0.84",
+      approvalVersion:"2.0.85",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -265,7 +265,7 @@
       return api.getFlightReadonlyStubPermission(permission);
     }
     const fallback = {
-      permissionVersion:"2.0.84",
+      permissionVersion:"2.0.85",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -329,7 +329,7 @@
       return api.getFlightReadonlyStubAdapter(adapter);
     }
     const fallback = {
-      adapterVersion:"2.0.84",
+      adapterVersion:"2.0.85",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -436,7 +436,7 @@
       return api.getFlightSandboxDryRunContract(shell);
     }
     const fallback = {
-      sandboxDryRunVersion:"2.0.84",
+      sandboxDryRunVersion:"2.0.85",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -559,7 +559,7 @@
       return api.getFlightSandboxProviderMatrixContract(matrix);
     }
     const fallback = {
-      matrixVersion:"2.0.84",
+      matrixVersion:"2.0.85",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -645,6 +645,58 @@
       capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
       display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
     });
+  }
+
+  function createUserApiPriorityPolicyState(state){
+    const api = window.WeishanCommerceUserApiPriorityPolicy;
+    const raw = state && typeof state === "object" ? state : {};
+    const binding = api && typeof api.getUserApiBindingState === "function"
+      ? api.getUserApiBindingState(raw.userApiBindingState)
+      : {
+        status:"not_bound",
+        hasUserApi:false,
+        providerName:null,
+        apiType:null,
+        canReadPrice:false,
+        canWrite:false,
+        canCreateOrder:false,
+        canPay:false,
+        canUploadIdentity:false
+      };
+    const searchMode = api && typeof api.resolveCommerceSearchMode === "function"
+      ? api.resolveCommerceSearchMode({
+        userApiBindingState: binding,
+        candidateProviders: raw.candidateProviders || "available"
+      })
+      : {
+        mode:"candidate_provider_fallback",
+        userApi:"not_bound",
+        candidateProviders:"available",
+        realPriceResults:"unavailable",
+        resultSource:"weishan_candidate_platforms_or_external_search",
+        canShowPrice:false,
+        canShowBookingUrl:false,
+        canPay:false,
+        canCreateOrder:false,
+        canStoreIdentity:false
+      };
+    const display = api && typeof api.buildSearchModeDisplay === "function"
+      ? api.buildSearchModeDisplay(searchMode)
+      : {
+        title:"当前搜索模式",
+        userApiLine:"用户 API：未绑定",
+        candidateProviderLine:"weishan 候选平台：可用",
+        realPriceLine:"真实价格结果：暂无",
+        futureLine:"绑定 API 后，将优先使用用户授权平台的只读价格结果",
+        sourceLine:"未绑定 API 时，可使用 weishan 候选平台和外部搜索入口。"
+      };
+    return {
+      policyVersion:"2.0.85",
+      phase:"user_api_priority_search_policy",
+      userApiBindingState:binding,
+      searchMode,
+      display
+    };
   }
 
   function createTaskId(){
@@ -912,6 +964,7 @@
       flightReadonlyStubAdapter:category === "flight" ? createFlightReadonlyStubAdapter() : null,
       flightSandboxDryRun:category === "flight" ? createFlightSandboxDryRun() : null,
       flightSandboxProviderMatrix:category === "flight" ? createFlightSandboxProviderMatrix() : null,
+      userApiPriorityPolicyState:createUserApiPriorityPolicyState(),
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -964,6 +1017,7 @@
       flightReadonlyStubAdapter:category === "flight" ? createFlightReadonlyStubAdapter(base.flightReadonlyStubAdapter) : null,
       flightSandboxDryRun:category === "flight" ? createFlightSandboxDryRun(base.flightSandboxDryRun) : null,
       flightSandboxProviderMatrix:category === "flight" ? createFlightSandboxProviderMatrix(base.flightSandboxProviderMatrix) : null,
+      userApiPriorityPolicyState:createUserApiPriorityPolicyState(base.userApiPriorityPolicyState),
       canShowPrice:base.canShowPrice === true,
       canShowBookingButton:base.canShowBookingButton === true,
       canShowCheckoutButton:base.canShowCheckoutButton === true,
@@ -1080,6 +1134,7 @@
       flightReadonlyStubAdapter:safe.category === "flight" ? safe.flightReadonlyStubAdapter : null,
       flightSandboxDryRun:safe.category === "flight" ? safe.flightSandboxDryRun : null,
       flightSandboxProviderMatrix:safe.category === "flight" ? safe.flightSandboxProviderMatrix : null,
+      userApiPriorityPolicyState:safe.userApiPriorityPolicyState,
       candidates:safe.candidates,
       recommendation:safe.recommendation,
       nextSteps:[
@@ -1175,6 +1230,7 @@
     createCommerceRiskNotice,
     createCommerceExecutionBoundary,
     createFlightSandboxProviderMatrix,
+    createUserApiPriorityPolicyState,
     createCommerceTaskHistoryPayload,
     createCommerceHistoryPayload,
     sanitizeCommerceInput,

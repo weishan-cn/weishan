@@ -526,7 +526,7 @@ const REQUIRED_PHRASES = [
   "真实网络连接：未启用",
   "真实价格返回：未启用",
   "bookingUrl 返回：未启用",
-  "v2.0.84：Sandbox Provider Matrix / 候选平台沙箱矩阵",
+  "v2.0.83：Sandbox Provider Matrix / 候选平台沙箱矩阵",
   "查看候选平台沙箱矩阵",
   "当前状态：候选平台已进入沙箱矩阵，但尚未允许连接真实 provider。",
   "矩阵摘要",
@@ -556,6 +556,22 @@ const REQUIRED_PHRASES = [
   "打开 Google Flights 搜索",
   "打开 Trip.com / 携程搜索",
   "复制搜索条件",
+  "v2.0.85：User API Priority Search Policy / 用户 API 优先搜索策略",
+  "commerceUserApiPriorityPolicy.js",
+  "用户 API：未绑定",
+  "weishan 候选平台：可用",
+  "真实价格结果：暂无",
+  "绑定 API 后，将优先使用用户授权平台的只读价格结果",
+  "未绑定 API 时，可使用 weishan 候选平台和外部搜索入口。",
+  "不读取 `.env`",
+  "不读取 `process.env` 里的真实 provider key",
+  "不访问系统钥匙串",
+  "不保存 key",
+  "写入 API",
+  "下单 API",
+  "支付 API",
+  "身份资料上传",
+  "银行卡保存"
 ];
 
 function main() {
