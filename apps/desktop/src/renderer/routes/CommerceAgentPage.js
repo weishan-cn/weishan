@@ -2244,6 +2244,8 @@
       <p>${esc(display.explanationLine || "绑定 API 后，weishan 可优先使用用户授权平台的只读价格结果。")}</p>
       <p>${esc(display.safetyLine || "当前版本只展示平台目录和权限说明，不保存真实 API key，不测试连接。")}</p>
       <p>API 绑定表单：禁用预览</p>
+      <p>API 绑定权限清单：只读预览</p>
+      <p>平台目录不代表已获得 API 权限</p>
       <p>平台目录只用于了解未来可绑定平台，不代表当前可连接真实 API</p>
       ${groupHtml}
     </section>`;
@@ -2310,9 +2312,65 @@
       <div class="commerce-api-binding-mock-fields">${fieldHtml}</div>
       <h5>${esc(display.actionIntroLine || "按钮，全部禁用：")}</h5>
       <div class="commerce-api-binding-mock-actions">${actionHtml}</div>
+      <p>API 绑定权限清单：只读预览</p>
+      <p>未完成权限确认前，表单保持禁用</p>
+      <p>当前版本不能提交绑定确认</p>
       <ul>${safetyLines.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
     </section>`;
     return disclosure("查看 API 绑定表单", body, "commerce-api-binding-mock-form-disclosure");
+  }
+
+  function commerceApiBindingPermissionChecklistDisplay(){
+    const api = window.WeishanCommerceApiBindingPermissionChecklist;
+    if (api && typeof api.buildApiBindingPermissionChecklistDisplay === "function") return api.buildApiBindingPermissionChecklistDisplay();
+    return {
+      title:"API 绑定权限清单",
+      currentStatusLine:"权限清单为只读预览，当前版本不能提交绑定确认。",
+      allowedTitle:"允许的未来只读能力：",
+      forbiddenTitle:"禁止能力：",
+      disabledTitle:"当前版本禁用：",
+      previewTitle:"未来绑定前确认预览：",
+      confirmationButtonLabel:"提交绑定确认",
+      confirmationButtonDisabled:true,
+      checklist:{
+        allowedFutureReadonly:["只读搜索", "读取价格", "读取库存", "分析结果", "显示来源平台", "点击价格后跳转外部平台确认"].map((label) => ({ label, status:"allowed_future_readonly", enabledNow:false })),
+        forbidden:["写入 API", "下单 API", "支付 API", "上传身份证", "上传护照", "保存银行卡", "自动付款", "自动下单", "后台静默调用 API", "明文保存 API key"].map((label) => ({ label, status:"forbidden", enabledNow:false })),
+        disabledCurrentVersion:["API key 输入", "API key 保存", "API 连接测试", "endpoint 连接", "真实网络请求", "真实价格返回", "bookingUrl 返回"].map((label) => ({ label, status:"disabled_current_version", enabledNow:false }))
+      },
+      confirmationPreview:[
+        "我确认该 API 仅用于只读搜索和价格读取。",
+        "我理解 weishan 不会替我付款。",
+        "我理解 weishan 不会替我下单。",
+        "我理解 weishan 不会上传身份证、护照或银行卡。",
+        "我理解最终价格以外部平台页面为准。",
+        "我理解当前版本不会保存真实 API key。",
+        "我理解未通过安全审查前不会连接真实 endpoint。"
+      ]
+    };
+  }
+
+  function commerceApiBindingPermissionChecklistDisclosure(){
+    const display = commerceApiBindingPermissionChecklistDisplay();
+    const checklist = display.checklist || {};
+    const allowed = Array.isArray(checklist.allowedFutureReadonly) ? checklist.allowedFutureReadonly : [];
+    const forbidden = Array.isArray(checklist.forbidden) ? checklist.forbidden : [];
+    const disabled = Array.isArray(checklist.disabledCurrentVersion) ? checklist.disabledCurrentVersion : [];
+    const preview = Array.isArray(display.confirmationPreview) ? display.confirmationPreview : [];
+    const itemHtml = (items, suffix) => items.map((item) => `<li>${esc(item.label || "")}${suffix}</li>`).join("");
+    const body = `<section class="commerce-api-binding-permission-checklist" aria-label="API 绑定权限清单">
+      <h4>${esc(display.title || "API 绑定权限清单")}</h4>
+      <p>${esc(display.currentStatusLine || "权限清单为只读预览，当前版本不能提交绑定确认。")}</p>
+      <h5>${esc(display.allowedTitle || "允许的未来只读能力：")}</h5>
+      <ul>${itemHtml(allowed, "")}</ul>
+      <h5>${esc(display.forbiddenTitle || "禁止能力：")}</h5>
+      <ul>${itemHtml(forbidden, "：禁止")}</ul>
+      <h5>${esc(display.disabledTitle || "当前版本禁用：")}</h5>
+      <ul>${itemHtml(disabled, "：禁用")}</ul>
+      <h5>${esc(display.previewTitle || "未来绑定前确认预览：")}</h5>
+      <ul>${preview.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      <button class="cmd-btn gray commerce-api-binding-confirm-preview" type="button" disabled aria-disabled="true">${esc(display.confirmationButtonLabel || "提交绑定确认")}</button>
+    </section>`;
+    return disclosure("查看 API 绑定权限清单", body, "commerce-api-binding-permission-checklist-disclosure");
   }
 
   function commerceApiBindingSafeShellDisclosure(task){
@@ -2332,6 +2390,8 @@
       <p>真实 endpoint 连接：未启用</p>
       <p>${esc(catalog.safetyLine || "当前版本只展示平台目录和权限说明，不保存真实 API key，不测试连接。")}</p>
       <p>API 绑定表单：禁用预览</p>
+      <p>API 绑定权限清单：只读预览</p>
+      <p>当前不能提交绑定确认</p>
       <p>当前不能输入真实 API key</p>
       <p>当前不能保存 key</p>
       <p>当前不能测试连接</p>
@@ -3181,6 +3241,7 @@
       ${commerceApiBindingSafeShellDisclosure(task)}
       ${commerceUserApiProviderCatalogDisclosure(task)}
       ${commerceApiBindingMockFormDisclosure(task)}
+      ${commerceApiBindingPermissionChecklistDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;

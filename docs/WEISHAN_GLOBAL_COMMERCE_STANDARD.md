@@ -1255,3 +1255,81 @@ v2.0.88 标准 marker：
 - marker:api binding mock form no order submit
 - marker:api binding mock form no identity upload
 - marker:api binding mock form no bank card storage
+
+## v2.0.89：API Binding Permission Checklist / API 绑定权限清单
+v2.0.89 新增 `commerceApiBindingPermissionChecklist.js`，只展示 API 绑定权限清单的只读预览。该清单用于让用户在未来绑定真实平台 API 之前理解允许的只读能力、禁止能力、当前版本禁用项和未来绑定前确认文本；当前版本不得提交绑定确认，不得输入真实 API key，不得保存 key，不得测试连接，不得连接 endpoint，不得发起网络请求。
+
+默认简单机票结果仍只展示真实结果优先页面，并保留：
+- 用户 API：未绑定
+- weishan 候选平台：可用
+- 真实价格结果：暂无
+- 暂无真实价格结果
+- 查看 API 绑定说明
+- 查看可绑定 API 平台目录
+- 查看 API 绑定表单
+- 查看 API 绑定权限清单
+
+`查看 API 绑定权限清单` 默认折叠。展开后只能显示只读预览：
+- API 绑定权限清单
+- 权限清单为只读预览，当前版本不能提交绑定确认。
+- 允许的未来只读能力：
+- 只读搜索
+- 读取价格
+- 读取库存
+- 分析结果
+- 显示来源平台
+- 点击价格后跳转外部平台确认
+- 禁止能力：
+- 写入 API：禁止
+- 下单 API：禁止
+- 支付 API：禁止
+- 上传身份证：禁止
+- 上传护照：禁止
+- 保存银行卡：禁止
+- 自动付款：禁止
+- 自动下单：禁止
+- 后台静默调用 API：禁止
+- 明文保存 API key：禁止
+- 当前版本禁用：
+- API key 输入：禁用
+- API key 保存：禁用
+- API 连接测试：禁用
+- endpoint 连接：禁用
+- 真实网络请求：禁用
+- 真实价格返回：禁用
+- bookingUrl 返回：禁用
+- 未来绑定前确认预览：
+- 我确认该 API 仅用于只读搜索和价格读取。
+- 我理解 weishan 不会替我付款。
+- 我理解 weishan 不会替我下单。
+- 我理解 weishan 不会上传身份证、护照或银行卡。
+- 我理解最终价格以外部平台页面为准。
+- 我理解当前版本不会保存真实 API key。
+- 我理解未通过安全审查前不会连接真实 endpoint。
+- 提交绑定确认
+
+提交绑定确认按钮必须 disabled。权限清单不得输入真实 API key，不得保存 key，不得读取 key，不得明文保存 key，不得测试连接，不得连接 endpoint，不得发起网络请求，不得返回真实价格，不得返回 fake/demo/mock price，不得生成 bookingUrl，不得付款，不得下单，不得上传身份证、护照或银行卡，不得保存银行卡。
+
+`查看 API 绑定说明` 必须联动显示：API 绑定权限清单：只读预览、当前不能提交绑定确认、当前不能输入真实 API key。
+
+`查看可绑定 API 平台目录` 必须联动显示：API 绑定权限清单：只读预览、平台目录不代表已获得 API 权限。
+
+`查看 API 绑定表单` 必须联动显示：API 绑定权限清单：只读预览、未完成权限确认前，表单保持禁用、当前版本不能提交绑定确认。
+
+v2.0.89 标准 marker：
+- marker:api binding permission checklist
+- marker:api binding permission checklist only
+- marker:api binding permission checklist readonly preview
+- marker:api binding permission checklist no real binding
+- marker:api binding permission checklist no real key
+- marker:api binding permission checklist no key input
+- marker:api binding permission checklist no save key
+- marker:api binding permission checklist no test connection
+- marker:api binding permission checklist no endpoint
+- marker:api binding permission checklist no network
+- marker:api binding permission checklist no price
+- marker:api binding permission checklist no booking url
+- marker:api binding permission checklist no payment
+- marker:api binding permission checklist no order submit
+- marker:api binding permission checklist no identity upload
+- marker:api binding permission checklist disabled confirmation

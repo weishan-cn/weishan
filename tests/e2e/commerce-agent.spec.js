@@ -3179,12 +3179,12 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  // v2.0.88 real result only surface hides debug panels by default
+  // v2.0.89 real result only surface hides debug panels by default
   // 查看 Provider 审批状态 ... 人工审核后才允许进入 provider approval
   // 查看只读适配器开发许可 ... 人工批准开发只读 stub
   // 查看只读适配器空壳 ... 不能保存证件 / 银行卡
   // 查看 Sandbox Dry Run ... 沙箱空跑外壳已建立，但未连接真实 provider ... block_price_return ... block_payment
-  test("v2.0.88 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
+  test("v2.0.89 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -3211,11 +3211,14 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("查看 API 绑定说明");
     await expect(summaryPanel).toContainText("查看可绑定 API 平台目录");
     await expect(summaryPanel).toContainText("查看 API 绑定表单");
+    await expect(summaryPanel).toContainText("查看 API 绑定权限清单");
     await expect(summaryPanel).toContainText("复制搜索条件");
     await expect(summaryPanel).not.toContainText("平台目录已建立，但尚未绑定任何真实 API");
     await expect(summaryPanel).not.toContainText("API key 输入：禁用");
     await expect(summaryPanel).not.toContainText("API 绑定表单为禁用预览");
+    await expect(summaryPanel).not.toContainText("权限清单为只读预览");
     await expect(summaryPanel).not.toContainText("保存 API 配置");
+    await expect(summaryPanel).not.toContainText("提交绑定确认");
     await summaryPanel.getByText("查看 API 绑定说明").click();
     await expect(summaryPanel).toContainText("API 绑定说明");
     await expect(summaryPanel).toContainText("当前状态：用户 API 未绑定。");
@@ -3227,6 +3230,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("真实 API key 输入：未启用");
     await expect(summaryPanel).toContainText("真实 endpoint 连接：未启用");
     await expect(summaryPanel).toContainText("API 绑定表单：禁用预览");
+    await expect(summaryPanel).toContainText("API 绑定权限清单：只读预览");
+    await expect(summaryPanel).toContainText("当前不能提交绑定确认");
     await expect(summaryPanel).toContainText("当前不能输入真实 API key");
     await expect(summaryPanel).toContainText("当前不能保存 key");
     await expect(summaryPanel).toContainText("当前不能测试连接");
@@ -3254,7 +3259,7 @@ test.describe.serial("commerce agent workbench", () => {
       })
     } : null);
     expect(userApiPolicy.contract).toEqual(expect.objectContaining({
-      policyVersion:"2.0.88",
+      policyVersion:"2.0.89",
       phase:"user_api_priority_search_policy",
       policyStatus:"policy_only",
       userApiMode:"not_bound",
@@ -3321,7 +3326,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingSafeShell.contract).toEqual(expect.objectContaining({
-      shellVersion:"2.0.88",
+      shellVersion:"2.0.89",
       phase:"api_binding_safe_shell",
       shellStatus:"safe_shell_only",
       bindingStatus:"not_bound",
@@ -3431,6 +3436,8 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(summaryPanel).toContainText(capability);
     }
     await expect(summaryPanel).toContainText("API 绑定表单：禁用预览");
+    await expect(summaryPanel).toContainText("API 绑定权限清单：只读预览");
+    await expect(summaryPanel).toContainText("平台目录不代表已获得 API 权限");
     await expect(summaryPanel).toContainText("平台目录只用于了解未来可绑定平台，不代表当前可连接真实 API");
     const userApiProviderCatalog = await page.evaluate(() => {
       const api = window.WeishanCommerceUserApiProviderCatalog;
@@ -3449,7 +3456,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(userApiProviderCatalog.contract).toEqual(expect.objectContaining({
-      catalogVersion:"2.0.88",
+      catalogVersion:"2.0.89",
       phase:"user_api_provider_catalog",
       catalogStatus:"catalog_only",
       realApiConnectionMode:"disabled",
@@ -3535,6 +3542,9 @@ test.describe.serial("commerce agent workbench", () => {
     for (const safety of ["当前版本不能输入真实 API key", "当前版本不能保存 API key", "当前版本不能测试连接", "当前版本不能连接 endpoint", "当前版本不能发起网络请求", "当前版本不能返回真实价格", "当前版本不能返回 bookingUrl", "当前版本不能付款", "当前版本不能下单", "当前版本不能上传身份证、护照或银行卡"]) {
       await expect(summaryPanel).toContainText(safety);
     }
+    await expect(summaryPanel).toContainText("API 绑定权限清单：只读预览");
+    await expect(summaryPanel).toContainText("未完成权限确认前，表单保持禁用");
+    await expect(summaryPanel).toContainText("当前版本不能提交绑定确认");
     const mockForm = summaryPanel.locator(".commerce-api-binding-mock-form");
     await expect(mockForm.locator("[data-api-binding-mock-field]")).toHaveCount(10);
     await expect(mockForm.locator("[data-api-binding-mock-action]")).toHaveCount(5);
@@ -3556,7 +3566,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingMockForm.contract).toEqual(expect.objectContaining({
-      formVersion:"2.0.88",
+      formVersion:"2.0.89",
       phase:"api_binding_mock_form_disabled_state",
       formStatus:"disabled_mock_only",
       inputMode:"disabled",
@@ -3616,9 +3626,103 @@ test.describe.serial("commerce agent workbench", () => {
     }));
     expect(apiBindingMockForm.display.currentStatusLine).toContain("当前版本不保存真实 API key");
     expect(apiBindingMockForm.assertSafe).toBe(true);
+    await summaryPanel.getByText("查看 API 绑定权限清单").click();
+    await expect(summaryPanel).toContainText("API 绑定权限清单");
+    await expect(summaryPanel).toContainText("权限清单为只读预览，当前版本不能提交绑定确认。");
+    await expect(summaryPanel).toContainText("允许的未来只读能力：");
+    for (const label of ["只读搜索", "读取价格", "读取库存", "分析结果", "显示来源平台", "点击价格后跳转外部平台确认"]) {
+      await expect(summaryPanel).toContainText(label);
+    }
+    await expect(summaryPanel).toContainText("禁止能力：");
+    for (const label of ["写入 API：禁止", "下单 API：禁止", "支付 API：禁止", "上传身份证：禁止", "上传护照：禁止", "保存银行卡：禁止", "自动付款：禁止", "自动下单：禁止", "后台静默调用 API：禁止", "明文保存 API key：禁止"]) {
+      await expect(summaryPanel).toContainText(label);
+    }
+    await expect(summaryPanel).toContainText("当前版本禁用：");
+    for (const label of ["API key 输入：禁用", "API key 保存：禁用", "API 连接测试：禁用", "endpoint 连接：禁用", "真实网络请求：禁用", "真实价格返回：禁用", "bookingUrl 返回：禁用"]) {
+      await expect(summaryPanel).toContainText(label);
+    }
+    await expect(summaryPanel).toContainText("未来绑定前确认预览：");
+    for (const label of ["我确认该 API 仅用于只读搜索和价格读取。", "我理解 weishan 不会替我付款。", "我理解 weishan 不会替我下单。", "我理解 weishan 不会上传身份证、护照或银行卡。", "我理解最终价格以外部平台页面为准。", "我理解当前版本不会保存真实 API key。", "我理解未通过安全审查前不会连接真实 endpoint。"]) {
+      await expect(summaryPanel).toContainText(label);
+    }
+    const permissionPanel = summaryPanel.locator(".commerce-api-binding-permission-checklist");
+    await expect(permissionPanel.getByRole("button", { name:"提交绑定确认" })).toBeDisabled();
+    const apiBindingPermissionChecklist = await page.evaluate(() => {
+      const api = window.WeishanCommerceApiBindingPermissionChecklist;
+      if (!api) return null;
+      const checklist = api.buildApiBindingPermissionChecklist();
+      const confirmationPreview = api.buildApiBindingUserConfirmationPreview();
+      const state = api.getApiBindingChecklistState();
+      return {
+        contract:api.commerceApiBindingPermissionChecklistContract,
+        checklist,
+        confirmationPreview,
+        state,
+        display:api.buildApiBindingPermissionChecklistDisplay(),
+        assertSafe:api.assertApiBindingPermissionChecklistSafe({ checklist, confirmationPreview, state })
+      };
+    });
+    expect(apiBindingPermissionChecklist.contract).toEqual(expect.objectContaining({
+      checklistVersion:"2.0.89",
+      phase:"api_binding_permission_checklist",
+      checklistStatus:"checklist_only",
+      realBindingMode:"disabled",
+      apiKeyInputMode:"disabled",
+      apiKeyStorageMode:"disabled",
+      testConnectionMode:"disabled",
+      endpointConnectionMode:"disabled",
+      networkMode:"disabled",
+      priceMode:"disabled_without_binding",
+      bookingUrlMode:"disabled_without_binding",
+      orderMode:"disabled",
+      paymentMode:"disabled",
+      identityUploadMode:"disabled",
+      identityStorageMode:"disabled",
+      bankCardStorageMode:"disabled"
+    }));
+    expect(apiBindingPermissionChecklist.contract.capabilities).toEqual(expect.objectContaining({
+      canShowPermissionChecklist:true,
+      canShowReadOnlyChecklist:true,
+      canShowForbiddenPermissionChecklist:true,
+      canShowUserConfirmationPreview:true,
+      canExplainBindingRisks:true,
+      canInputApiKey:false,
+      canSaveApiKey:false,
+      canTestConnection:false,
+      canConnectEndpoint:false,
+      canUseNetwork:false,
+      canReturnPrice:false,
+      canReturnBookingUrl:false,
+      canCreateOrder:false,
+      canPay:false,
+      canUploadIdentity:false,
+      canStoreIdentity:false,
+      canStorePassport:false,
+      canStoreBankCard:false
+    }));
+    expect(apiBindingPermissionChecklist.checklist.allowedFutureReadonly.every((item) => item.status === "allowed_future_readonly" && item.enabledNow === false && item.requiresUserBinding === true && item.requiresHumanReview === true)).toBe(true);
+    expect(apiBindingPermissionChecklist.checklist.forbidden.every((item) => item.status === "forbidden" && item.enabledNow === false)).toBe(true);
+    expect(apiBindingPermissionChecklist.checklist.disabledCurrentVersion.every((item) => item.status === "disabled_current_version" && item.enabledNow === false)).toBe(true);
+    expect(apiBindingPermissionChecklist.state).toEqual(expect.objectContaining({
+      status:"checklist_only",
+      canConfirm:false,
+      canSubmit:false,
+      canInputApiKey:false,
+      canSaveApiKey:false,
+      canTestConnection:false,
+      canUseNetwork:false,
+      canReturnPrice:false,
+      canReturnBookingUrl:false,
+      canCreateOrder:false,
+      canPay:false,
+      canUploadIdentity:false,
+      canStoreBankCard:false
+    }));
+    expect(apiBindingPermissionChecklist.display.confirmationButtonDisabled).toBe(true);
+    expect(apiBindingPermissionChecklist.assertSafe).toBe(true);
     const matrix = await page.evaluate(() => window.WeishanCommerceFlightSandboxProviderMatrix && typeof window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract === "function" ? window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract() : null);
     expect(matrix).toEqual(expect.objectContaining({
-      matrixVersion:"2.0.88",
+      matrixVersion:"2.0.89",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -3685,7 +3789,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
     const sandboxDryRun = await page.evaluate(() => window.WeishanCommerceFlightSandboxDryRun && window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract ? window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract : null);
     expect(sandboxDryRun).toEqual(expect.objectContaining({
-      sandboxDryRunVersion:"2.0.88",
+      sandboxDryRunVersion:"2.0.89",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -3784,7 +3888,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(sandboxAssert).toBe(true);
     const readonlyStubPermission = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubPermission && typeof window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission === "function" ? window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission() : null);
     expect(readonlyStubPermission).toEqual(expect.objectContaining({
-      permissionVersion:"2.0.88",
+      permissionVersion:"2.0.89",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -3860,6 +3964,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(historyDetail).toContainText("查看 API 绑定说明");
     await expect(historyDetail).toContainText("查看可绑定 API 平台目录");
     await expect(historyDetail).toContainText("查看 API 绑定表单");
+    await expect(historyDetail).toContainText("查看 API 绑定权限清单");
     await historyDetail.getByText("查看 API 绑定说明").click();
     await expect(historyDetail).toContainText("当前状态：用户 API 未绑定。");
     await expect(historyDetail).toContainText("可绑定 API 平台目录：已建立");
@@ -3877,6 +3982,13 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(historyDetail.locator("[data-api-binding-mock-action]")).toHaveCount(5);
     expect(await historyDetail.locator("[data-api-binding-mock-field]").evaluateAll((nodes) => nodes.every((node) => node.disabled === true && node.value === ""))).toBe(true);
     expect(await historyDetail.locator("[data-api-binding-mock-action]").evaluateAll((nodes) => nodes.every((node) => node.disabled === true))).toBe(true);
+    await historyDetail.getByText("查看 API 绑定权限清单").click();
+    await expect(historyDetail).toContainText("权限清单为只读预览，当前版本不能提交绑定确认。");
+    await expect(historyDetail).toContainText("只读搜索");
+    await expect(historyDetail).toContainText("后台静默调用 API：禁止");
+    await expect(historyDetail).toContainText("API 连接测试：禁用");
+    await expect(historyDetail).toContainText("我理解当前版本不会保存真实 API key。");
+    await expect(historyDetail.locator(".commerce-api-binding-permission-checklist").getByRole("button", { name:"提交绑定确认" })).toBeDisabled();
     await expect(historyDetail).not.toContainText("查看高级调试信息");
     await expect(historyDetail).not.toContainText("Sandbox Dry Run");
     await expect(historyDetail).not.toContainText("候选平台沙箱矩阵");
@@ -3891,7 +4003,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.88 bare flight intent still renders the simple flight result card", async () => {
+  test("v2.0.89 bare flight intent still renders the simple flight result card", async () => {
     await resetCommerceTasks(page);
     await page.reload({ waitUntil:"domcontentloaded" });
     await gotoRoute(page, "home");
@@ -3917,8 +4029,11 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("查看 API 绑定说明");
     await expect(summaryPanel).toContainText("查看可绑定 API 平台目录");
     await expect(summaryPanel).toContainText("查看 API 绑定表单");
+    await expect(summaryPanel).toContainText("查看 API 绑定权限清单");
     await expect(summaryPanel).not.toContainText("API 绑定表单为禁用预览");
+    await expect(summaryPanel).not.toContainText("权限清单为只读预览");
     await expect(summaryPanel).not.toContainText("保存 API 配置");
+    await expect(summaryPanel).not.toContainText("提交绑定确认");
     await expect(summaryPanel).not.toContainText("查看高级调试信息");
     await expect(summaryPanel).not.toContainText("查看候选平台");
     await expect(summaryPanel).not.toContainText("查看 Provider 审批状态");
@@ -3934,10 +4049,10 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.0.88 sidebar version stays in sync with release version", async () => {
+  test("v2.0.89 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.0.88");
+    await expect(sidebarFoot).toContainText("weishan v2.0.89");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 
