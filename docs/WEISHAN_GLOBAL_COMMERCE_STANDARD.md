@@ -1200,3 +1200,58 @@ v2.0.87 标准 marker：
 - marker:user api provider catalog bound zero
 - marker:user api provider catalog provider types
 - marker:user api provider catalog readonly potential
+
+## v2.0.88：API Binding Mock Form Disabled State / API 绑定表单禁用态
+v2.0.88 新增 `commerceApiBindingMockForm.js`，只展示未来 API 绑定表单的禁用预览。该表单用于让用户理解后续可能需要的平台类型、平台名称、权限类型、API key、API secret、endpoint、地区、币种、回调地址和备注字段，但当前版本不得允许任何真实输入、保存、测试连接或启用价格结果。
+
+默认简单机票结果仍只展示真实结果优先页面，并保留：
+- 用户 API：未绑定
+- weishan 候选平台：可用
+- 真实价格结果：暂无
+- 暂无真实价格结果
+- 查看 API 绑定说明
+- 查看可绑定 API 平台目录
+- 查看 API 绑定表单
+
+`查看 API 绑定表单` 默认折叠。展开后只能显示禁用态预览：
+- API 绑定表单
+- API 绑定表单为禁用预览
+- 当前版本不保存真实 API key
+- 平台类型
+- 平台名称
+- 权限类型
+- API key
+- API secret
+- endpoint
+- 地区
+- 币种
+- 回调地址
+- 备注
+- 保存 API 配置
+- 测试连接
+- 删除绑定
+- 启用只读搜索
+- 启用价格结果
+
+所有字段必须 disabled、required false、value 为空。所有动作按钮必须 disabled，包括保存 API 配置、测试连接、删除绑定、启用只读搜索和启用价格结果。该表单不得输入真实 API key，不得保存 key，不得读取 key，不得明文保存 key，不得测试连接，不得连接 endpoint，不得发起网络请求，不得返回真实价格，不得返回 fake/demo/mock price，不得生成 bookingUrl，不得付款，不得下单，不得上传身份证、护照或银行卡，不得保存银行卡。
+
+`查看 API 绑定说明` 必须联动显示：API 绑定表单：禁用预览、当前不能输入真实 API key、当前不能保存 key、当前不能测试连接。
+
+`查看可绑定 API 平台目录` 必须联动显示：API 绑定表单：禁用预览、平台目录只用于了解未来可绑定平台，不代表当前可连接真实 API。
+
+v2.0.88 标准 marker：
+- marker:api binding mock form disabled state
+- marker:api binding mock form disabled only
+- marker:api binding mock form no real key
+- marker:api binding mock form no plaintext key
+- marker:api binding mock form no editable key input
+- marker:api binding mock form no save key
+- marker:api binding mock form no test connection
+- marker:api binding mock form no endpoint
+- marker:api binding mock form no network
+- marker:api binding mock form no price
+- marker:api binding mock form no booking url
+- marker:api binding mock form no payment
+- marker:api binding mock form no order submit
+- marker:api binding mock form no identity upload
+- marker:api binding mock form no bank card storage

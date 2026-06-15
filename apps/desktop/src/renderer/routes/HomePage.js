@@ -2074,7 +2074,7 @@
 
   function commerceFlightLowestOffersContract(task){
     const fallback = {
-      contractVersion:"2.0.87",
+      contractVersion:"2.0.88",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -2237,9 +2237,76 @@
       </div>
       <p>${esc(display.explanationLine || "绑定 API 后，weishan 可优先使用用户授权平台的只读价格结果。")}</p>
       <p>${esc(display.safetyLine || "当前版本只展示平台目录和权限说明，不保存真实 API key，不测试连接。")}</p>
+      <p>API 绑定表单：禁用预览</p>
+      <p>平台目录只用于了解未来可绑定平台，不代表当前可连接真实 API</p>
       ${groupHtml}
     </section>`;
     return disclosure("查看可绑定 API 平台目录", body, "commerce-api-provider-catalog-disclosure");
+  }
+
+  function commerceApiBindingMockFormDisplay(){
+    const api = window.WeishanCommerceApiBindingMockForm;
+    if (api && typeof api.buildApiBindingMockFormDisplay === "function") return api.buildApiBindingMockFormDisplay();
+    return {
+      title:"API 绑定表单",
+      currentStatusLine:"API 绑定表单为禁用预览，当前版本不保存真实 API key。",
+      fieldIntroLine:"表单字段，全部禁用：",
+      actionIntroLine:"按钮，全部禁用：",
+      safetyLines:[
+        "当前版本不能输入真实 API key",
+        "当前版本不能保存 API key",
+        "当前版本不能测试连接",
+        "当前版本不能连接 endpoint",
+        "当前版本不能发起网络请求",
+        "当前版本不能返回真实价格",
+        "当前版本不能返回 bookingUrl",
+        "当前版本不能付款",
+        "当前版本不能下单",
+        "当前版本不能上传身份证、护照或银行卡"
+      ],
+      fields:[
+        { fieldId:"providerCategory", label:"平台类型", placeholder:"请选择平台类型（当前禁用）", disabled:true, value:"", securityNotice:"仅展示未来字段，不连接真实 provider。" },
+        { fieldId:"providerName", label:"平台名称", placeholder:"请选择平台名称（当前禁用）", disabled:true, value:"", securityNotice:"仅展示未来字段，不保存平台凭据。" },
+        { fieldId:"permissionTier", label:"权限类型", placeholder:"请选择权限类型（当前禁用）", disabled:true, value:"", securityNotice:"写入、下单、支付、身份资料权限均禁用。" },
+        { fieldId:"apiKeyPlaceholder", label:"API key", placeholder:"API key（当前不可输入）", disabled:true, value:"", securityNotice:"当前版本不保存真实 API key。" },
+        { fieldId:"apiSecretPlaceholder", label:"API secret", placeholder:"API secret（当前不可输入）", disabled:true, value:"", securityNotice:"当前版本不保存真实 API secret。" },
+        { fieldId:"endpointPlaceholder", label:"endpoint", placeholder:"endpoint（当前不可输入）", disabled:true, value:"", securityNotice:"当前版本不连接 endpoint，不测试连接。" },
+        { fieldId:"regionScope", label:"地区", placeholder:"地区范围（当前禁用）", disabled:true, value:"", securityNotice:"仅用于未来只读搜索范围说明。" },
+        { fieldId:"currencyScope", label:"币种", placeholder:"币种范围（当前禁用）", disabled:true, value:"", securityNotice:"当前不会返回真实价格。" },
+        { fieldId:"callbackUrl", label:"回调地址", placeholder:"回调地址（当前禁用）", disabled:true, value:"", securityNotice:"当前不会生成回调，不连接外部服务。" },
+        { fieldId:"note", label:"备注", placeholder:"备注（当前禁用）", disabled:true, value:"", securityNotice:"当前不会提交或保存任何 API 配置。" }
+      ],
+      actions:[
+        { actionId:"saveApiConfig", label:"保存 API 配置", disabled:true, reason:"当前版本不保存真实 API key。" },
+        { actionId:"testConnection", label:"测试连接", disabled:true, reason:"当前版本不连接 endpoint，不发起网络请求。" },
+        { actionId:"deleteBinding", label:"删除绑定", disabled:true, reason:"当前没有真实绑定可删除。" },
+        { actionId:"enableReadonlySearch", label:"启用只读搜索", disabled:true, reason:"当前尚未通过人工审批和安全检查。" },
+        { actionId:"enablePriceResults", label:"启用价格结果", disabled:true, reason:"当前无真实可信价格源。" }
+      ]
+    };
+  }
+
+  function commerceApiBindingMockFormDisclosure(){
+    const display = commerceApiBindingMockFormDisplay();
+    const fields = Array.isArray(display.fields) ? display.fields : [];
+    const actions = Array.isArray(display.actions) ? display.actions : [];
+    const safetyLines = Array.isArray(display.safetyLines) ? display.safetyLines : [];
+    const fieldHtml = fields.map((item) => `<label class="commerce-api-binding-mock-field">
+      <span>${esc(item.label || "")}</span>
+      <input type="text" value="${esc(item.value || "")}" placeholder="${esc(item.placeholder || "")}" disabled aria-disabled="true" data-api-binding-mock-field="${esc(item.fieldId || "")}">
+      <small>${esc(item.securityNotice || "")}</small>
+    </label>`).join("");
+    const actionHtml = actions.map((item) => `<button class="cmd-btn gray commerce-api-binding-mock-action" type="button" disabled aria-disabled="true" data-api-binding-mock-action="${esc(item.actionId || "")}" title="${esc(item.reason || "")}">${esc(item.label || "")}</button>`).join("");
+    const body = `<section class="commerce-api-binding-mock-form" aria-label="API 绑定表单">
+      <h4>${esc(display.title || "API 绑定表单")}</h4>
+      <p>${esc(display.currentStatusLine || "API 绑定表单为禁用预览，当前版本不保存真实 API key。")}</p>
+      <h5>${esc(display.fieldIntroLine || "表单字段，全部禁用：")}</h5>
+      <div class="commerce-api-binding-mock-fields">${fieldHtml}</div>
+      <h5>${esc(display.actionIntroLine || "按钮，全部禁用：")}</h5>
+      <div class="commerce-api-binding-mock-actions">${actionHtml}</div>
+      <ul>${safetyLines.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+    </section>`;
+    return disclosure("查看 API 绑定表单", body, "commerce-api-binding-mock-form-disclosure");
   }
 
   function commerceApiBindingSafeShellDisclosure(task){
@@ -2258,6 +2325,10 @@
       <p>真实 API key 输入：未启用</p>
       <p>真实 endpoint 连接：未启用</p>
       <p>${esc(catalog.safetyLine || "当前版本只展示平台目录和权限说明，不保存真实 API key，不测试连接。")}</p>
+      <p>API 绑定表单：禁用预览</p>
+      <p>当前不能输入真实 API key</p>
+      <p>当前不能保存 key</p>
+      <p>当前不能测试连接</p>
       <ul>${safetyLines.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
     </section>`;
     return disclosure("查看 API 绑定说明", body, "commerce-api-binding-safe-shell-disclosure");
@@ -2265,7 +2336,7 @@
 
   function commerceFlightProviderCandidatesRegistry(task){
     const fallback = {
-      contractVersion:"2.0.87",
+      contractVersion:"2.0.88",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -2401,7 +2472,7 @@
     if (api && typeof api.normalizeFlightSandboxDryRunContract === "function") return api.normalizeFlightSandboxDryRunContract(source);
     if (api && typeof api.getFlightSandboxDryRunContract === "function") return api.getFlightSandboxDryRunContract(source);
     return {
-      sandboxDryRunVersion:"2.0.87",
+      sandboxDryRunVersion:"2.0.88",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -2545,7 +2616,7 @@
       reason:"all_candidates_require_human_approval_and_real_provider_connection"
     };
     return {
-      matrixVersion:"2.0.87",
+      matrixVersion:"2.0.88",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -2675,7 +2746,7 @@
     if (api && typeof api.normalizeFlightReadonlyStubPermission === "function") return api.normalizeFlightReadonlyStubPermission(source);
     if (api && typeof api.getFlightReadonlyStubPermission === "function") return api.getFlightReadonlyStubPermission(source);
     const fallback = {
-      permissionVersion:"2.0.87",
+      permissionVersion:"2.0.88",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -2779,7 +2850,7 @@
     if (api && typeof api.normalizeFlightReadonlyStubAdapter === "function") return api.normalizeFlightReadonlyStubAdapter(source);
     if (api && typeof api.getFlightReadonlyStubAdapter === "function") return api.getFlightReadonlyStubAdapter(source);
     const fallback = {
-      adapterVersion:"2.0.87",
+      adapterVersion:"2.0.88",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -2905,7 +2976,7 @@
     if (api && typeof api.normalizeFlightProviderApprovalStatus === "function") return api.normalizeFlightProviderApprovalStatus(source);
     if (api && typeof api.getFlightProviderApprovalStatus === "function") return api.getFlightProviderApprovalStatus(source);
     const fallback = {
-      approvalVersion:"2.0.87",
+      approvalVersion:"2.0.88",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -3107,6 +3178,7 @@
       </div>
       ${commerceApiBindingSafeShellDisclosure(task)}
       ${commerceUserApiProviderCatalogDisclosure(task)}
+      ${commerceApiBindingMockFormDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;

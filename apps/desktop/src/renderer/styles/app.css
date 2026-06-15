@@ -4207,3 +4207,37 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+
+.commerce-api-binding-mock-form {
+  display: grid;
+  gap: 10px;
+}
+
+.commerce-api-binding-mock-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.commerce-api-binding-mock-field {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.commerce-api-binding-mock-field input {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 8px;
+  padding: 7px 9px;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.commerce-api-binding-mock-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

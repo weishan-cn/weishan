@@ -266,6 +266,27 @@ function checkUserApiProviderCatalogVersion(results, expectedVersion) {
   );
 }
 
+function checkApiBindingMockFormVersion(results, expectedVersion) {
+  const formPath = "apps/desktop/src/renderer/core/commerceApiBindingMockForm.js";
+  const form = readText(formPath);
+  if (!form) {
+    results.push({ name: "apps/desktop API binding mock form version", pass: false, detail: formPath + " missing" });
+    return;
+  }
+  if (form.__readError) {
+    results.push({ name: "apps/desktop API binding mock form version", pass: false, detail: form.__readError });
+    return;
+  }
+  const match = form.match(/FORM_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop API binding mock form version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceApiBindingMockForm.js FORM_VERSION"
+  );
+}
+
 function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
   const pkg = readJson(packagePath);
   const lock = readJson(lockPath);
@@ -321,6 +342,7 @@ function runVersionCheck() {
     checkUserApiPriorityPolicyVersion(results, rootPackage.version);
     checkApiBindingSafeShellVersion(results, rootPackage.version);
     checkUserApiProviderCatalogVersion(results, rootPackage.version);
+    checkApiBindingMockFormVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {
