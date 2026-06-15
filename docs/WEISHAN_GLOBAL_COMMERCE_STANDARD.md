@@ -1023,3 +1023,57 @@ v2.0.83 在 `Sandbox Dry Run Shell`、`Readonly Stub Permission State`、`Readon
 - `reason: "all_candidates_require_human_approval_and_real_provider_connection"`
 
 `assertFlightSandboxProviderMatrixSafe` 必须拒绝任何可返回真实价格、bookingUrl、下单、付款或身份信息的矩阵。矩阵只用于审计和准备，不代表真实 provider 已接入。
+
+## v2.0.84：Real Result Only Surface / 真实结果优先展示
+v2.0.84：Sandbox Provider Matrix / 候选平台沙箱矩阵 保持为只读调试层，默认不展示。
+v2.0.84 在 `Sandbox Provider Matrix / 候选平台沙箱矩阵` 之上，调整默认 UI 为真实结果优先展示。默认结果页只展示用户搜索条件、真实价格结果卡片、平台名称、价格、更新时间、可信度、点击跳转外部平台 / 官网和必要安全提示；当没有真实可信价格源时，只显示 `暂无真实价格结果`，并明确说明当前尚未接入真实只读机票价格源，不能展示价格，接入可信价格源后将只显示通过安全检查的真实价格结果，最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。
+
+默认 UI 不展示：
+- 分析过程
+- Provider 审批状态
+- 只读适配器开发许可
+- 只读适配器空壳
+- Sandbox Dry Run
+- 候选平台沙箱矩阵
+- 技术细节
+- contract
+- dry run
+- matrix
+- API key
+- endpoint
+- provider 内部状态
+
+默认 UI 不展示分析过程，默认 UI 不展示 Provider 审批状态，默认 UI 不展示只读适配器开发许可，默认 UI 不展示只读适配器空壳，默认 UI 不展示 Sandbox Dry Run，默认 UI 不展示候选平台沙箱矩阵，默认 UI 不展示技术细节。
+
+简单机票请求（例如 7月15日上海到成都最便宜的机票）默认显示：
+- `机票搜索结果`
+- `出发地：上海`
+- `目的地：成都`
+- `日期：7月15日`
+- `排序：低价优先`
+- `暂无真实价格结果`
+- `当前尚未接入真实只读机票价格源，不能展示价格。`
+- `接入可信价格源后，将只显示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。`
+- `weishan 不收款、不下单、不保存身份证、护照或银行卡。`
+
+默认按钮只保留：
+- `打开全网搜索`
+- `打开 Google Flights 搜索`
+- `打开 Trip.com / 携程搜索`
+- `复制搜索条件`
+
+价格卡片结构可以保留在代码里，但当没有真实 provider 时必须为空，不得显示 fake/demo/mock price，不得伪造 bookingUrl，不得显示预订、付款或下单入口。
+
+v2.0.84 标准 marker：
+- marker:real result only surface
+- marker:real result only no fake price
+- marker:real result only no mock price
+- marker:real result only no demo price
+- marker:real result only no booking url
+- marker:real result only no payment
+- marker:real result only no order submit
+- marker:real result only hidden debug panels
+- marker:real result only no real provider
+- marker:real result only external search fallback
+- marker:real result only user api priority future
+- marker:real result only trusted price source required

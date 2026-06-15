@@ -39,7 +39,7 @@
       return api.getFlightLowestOffersContract(contract);
     }
     const fallback = {
-      contractVersion:"2.0.83",
+      contractVersion:"2.0.84",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -75,10 +75,10 @@
         noBankCardStorage:true
       },
       display:{
-        summaryTitle:"机票搜索条件已整理",
-        currentStatusLine:"当前状态：未接入真实机票价格源，暂不能返回实时价格。",
-        priceStateLine:"价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。",
-        futureLine:"接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。"
+        summaryTitle:"机票搜索结果",
+        currentStatusLine:"暂无真实价格结果",
+        priceStateLine:"当前尚未接入真实只读机票价格源，不能展示价格。",
+        futureLine:"接入可信价格源后，将只显示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。"
       }
     };
     const raw = contract && typeof contract === "object" ? contract : {};
@@ -99,7 +99,7 @@
       return api.getFlightProviderCandidatesRegistry(registry);
     }
     const fallback = {
-      contractVersion:"2.0.83",
+      contractVersion:"2.0.84",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -169,7 +169,7 @@
       return api.getFlightProviderApprovalStatus(status);
     }
     const fallback = {
-      approvalVersion:"2.0.83",
+      approvalVersion:"2.0.84",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -265,7 +265,7 @@
       return api.getFlightReadonlyStubPermission(permission);
     }
     const fallback = {
-      permissionVersion:"2.0.83",
+      permissionVersion:"2.0.84",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -329,7 +329,7 @@
       return api.getFlightReadonlyStubAdapter(adapter);
     }
     const fallback = {
-      adapterVersion:"2.0.83",
+      adapterVersion:"2.0.84",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -436,7 +436,7 @@
       return api.getFlightSandboxDryRunContract(shell);
     }
     const fallback = {
-      sandboxDryRunVersion:"2.0.83",
+      sandboxDryRunVersion:"2.0.84",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -559,7 +559,7 @@
       return api.getFlightSandboxProviderMatrixContract(matrix);
     }
     const fallback = {
-      matrixVersion:"2.0.83",
+      matrixVersion:"2.0.84",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",

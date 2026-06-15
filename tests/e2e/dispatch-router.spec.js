@@ -159,8 +159,9 @@ test.describe.serial("dispatch router", () => {
   test("commerce purchase demand routes to commerce agent instead of chat", async () => {
     const command = runId + " 帮我买一台性价比高的 MacBook";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("MacBook搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText(/商品|全球采购/);
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("MacBook");
     await expect(page.locator("#commerceViewPlanBtn")).toBeVisible();
     await expect(currentTaskLogs(page)).not.toContainText("commerceAgent.plan");
     await expect(currentTaskLogs(page)).not.toContainText("realExecution=false");
@@ -168,18 +169,18 @@ test.describe.serial("dispatch router", () => {
     await expectHistory(page, runId, /commerceAgent\.taskCreated|全球采购|MacBook/);
 
     await submitHomeCommand(page, runId + " 买华为1手机");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为1手机搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品关键词：华为1手机");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为1手机");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
   });
 
   test("flight booking intent routes to commerce agent before chat", async () => {
     const command = runId + " 帮我预定明天成都到北京机票";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都到北京机票");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
     await expect(currentTaskLogs(page)).not.toContainText("准备调用 AI 网关");
     await expectHistory(page, runId, /commerceAgent\.taskCreated|全球采购|成都到北京机票/);
@@ -187,29 +188,29 @@ test.describe.serial("dispatch router", () => {
 
   test("flight lookup phrasing routes to commerce agent before chat", async () => {
     await submitHomeCommand(page, runId + " 明天成都飞北京");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都飞北京");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
 
     await submitHomeCommand(page, runId + " 查一下明天成都到北京的航班");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都到北京的航班");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
   });
 
   test("cruise and private jet demands route to commerce agent instead of chat", async () => {
     await submitHomeCommand(page, runId + " 帮我找上海出发的邮轮");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("邮轮计划已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：邮轮");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("邮轮");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
 
     await submitHomeCommand(page, runId + " 帮我比较公务机包机价格");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("公务机计划已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：公务机");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("公务机");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
   });
 

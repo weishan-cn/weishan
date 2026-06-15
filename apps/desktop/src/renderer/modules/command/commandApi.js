@@ -6,7 +6,7 @@
     document.write('<scr' + 'ipt src="./renderer/core/desktopAssistant.js?v=2.0.15"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceAgent && typeof document !== "undefined" && document.currentScript && document.write) {
-    document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.58"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt src="./renderer/core/commerceAgent.js?v=2.0.84"></scr' + 'ipt>');
   }
   if (!window.WeishanCommerceProviderAdapter && typeof document !== "undefined" && document.currentScript && document.write) {
     document.write('<scr' + 'ipt src="./renderer/core/commerceProviderAdapter.js?v=2.0.32"></scr' + 'ipt>');

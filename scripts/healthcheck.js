@@ -32,6 +32,13 @@ function overall(results) {
   return "PASS";
 }
 
+function isSafeDisabledSecretScanFinding(item) {
+  const sourceLine = item && item.file && item.line ? String(readText(item.file).split(/\r?\n/)[item.line - 1] || "") : "";
+  return item &&
+    item.rule === "api-key-assignment" &&
+    (/apiKey\s*:\s*"disabled"/.test(item.maskedSnippet || "") || /apiKey\s*:\s*"disabled"/.test(sourceLine));
+}
+
 function checkFiles() {
   const files = [
     "apps/desktop/src/main.js",
@@ -339,11 +346,11 @@ function checkMarkers() {
     marker("apps/desktop/src/renderer/core/commerceFlightProviderCandidates.js", /flight_provider_candidate_registry|normalizeFlightProviderCandidatesRegistry/, "marker:flight provider candidate registry", true),
     marker("apps/desktop/src/renderer/core/commerceFlightProviderCandidates.js", /candidate_registry_only|candidate_only|not_reviewed/, "marker:flight provider candidate defaults", true),
     marker("apps/desktop/src/renderer/core/commerceFlightProviderApproval.js", /flight_provider_approval|getFlightProviderApprovalStatus|describeFlightProviderApprovalStatus/, "marker:flight provider approval module", true),
-    marker("apps/desktop/src/renderer/core/commerceFlightProviderApproval.js", /APPROVAL_VERSION\s*=\s*"2\.0\.83"|approvalVersion:"2\.0\.83"/, "marker:flight provider approval version", true),
+    marker("apps/desktop/src/renderer/core/commerceFlightProviderApproval.js", /APPROVAL_VERSION\s*=\s*"2\.0\.84"|approvalVersion:"2\.0\.84"/, "marker:flight provider approval version", true),
     marker("apps/desktop/src/renderer/core/commerceFlightProviderApproval.js", /查看 Provider 审批状态|机票 Provider 接入审批/, "marker:flight provider approval disclosure", true),
     marker("apps/desktop/src/renderer/core/commerceFlightProviderApproval.js", /需要 allowlist|禁止未知域名 \/ 短链接 \/ 可疑域名|AI 不能生成可疑 provider 域名|人工审核后才允许进入 provider approval/, "marker:flight provider approval safety language", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /flight_readonly_stub_permission|getFlightReadonlyStubPermission|describeFlightReadonlyStubPermission/, "marker:flight readonly stub permission module", true),
-    marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /PERMISSION_VERSION\s*=\s*"2\.0\.83"|permissionVersion:"2\.0\.83"/, "marker:flight readonly stub permission version", true),
+    marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /PERMISSION_VERSION\s*=\s*"2\.0\.84"|permissionVersion:"2\.0\.84"/, "marker:flight readonly stub permission version", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /查看只读适配器开发许可|只读适配器开发许可：未授予/, "marker:flight readonly stub permission disclosure", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /DEFAULT_OVERALL_STATUS = "not_granted"|DEFAULT_CURRENT_STAGE = "approval_required"|canDevelopReadonlyStub:\s*false|canUseRealApiKey:\s*false|canConnectRealEndpoint:\s*false|canUseNetwork:\s*false|canReturnPrice:\s*false|canReturnBookingUrl:\s*false|canOpenBookingUrl:\s*false|canCreateOrder:\s*false|canPay:\s*false|canStoreIdentity:\s*false/, "marker:flight readonly stub permission defaults", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /platformIdentityReview|officialDomainAllowlistReview|providerTermsReview|apiDocumentationReview|apiKeyStoragePlanReview|requestSchemaReview|responseSchemaReview|errorHandlingReview|timeoutRateLimitReview|finalStubDevApproval/, "marker:flight readonly stub permission checklist", true),
@@ -357,7 +364,7 @@ function checkMarkers() {
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /不能保存证件 \/ 银行卡|不允许保存证件 \/ 银行卡/, "marker:flight readonly stub no identity storage", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /人工批准开发只读 stub/, "marker:flight readonly stub final approval required", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubAdapter.js", /flight_readonly_stub_adapter|getFlightReadonlyStubAdapter|describeFlightReadonlyStubAdapter/, "marker:flight readonly stub adapter module", true),
-    marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubAdapter.js", /ADAPTER_VERSION\s*=\s*"2\.0\.83"|adapterVersion:"2\.0\.83"/, "marker:flight readonly stub adapter version", true),
+    marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubAdapter.js", /ADAPTER_VERSION\s*=\s*"2\.0\.84"|adapterVersion:"2\.0\.84"/, "marker:flight readonly stub adapter version", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubAdapter.js", /查看只读适配器空壳|只读适配器空壳：已建立|尚未允许连接真实 provider/, "marker:flight readonly stub adapter disclosure", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubAdapter.js", /canValidateInputShape:\s*true|canBuildRequestShape:\s*true|canNormalizeResponseShape:\s*true/, "marker:flight readonly stub adapter capabilities", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubAdapter.js", /origin：出发地|destination：目的地|departureDate：出发日期|returnDateIfAny：返回日期（如有）|adultsChildrenIfAny：成人 \/ 儿童（如有）|cabinIfAny：舱位（如有）|currencyIfFuture：币种（未来）|regionIfFuture：区域（未来）/, "marker:flight readonly stub adapter request shape", true),
@@ -366,13 +373,13 @@ function checkMarkers() {
     marker("apps/desktop/src/renderer/routes/HomePage.js", /查看只读适配器空壳|只读适配器空壳：已建立/, "marker:flight readonly stub adapter disclosure home", true),
     marker("apps/desktop/src/renderer/routes/CommerceAgentPage.js", /查看只读适配器空壳|只读适配器空壳：已建立/, "marker:flight readonly stub adapter disclosure detail", true),
     marker("apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js", /flight_sandbox_dry_run_shell|getFlightSandboxDryRunContract|describeFlightSandboxDryRunContract/, "marker:flight sandbox dry run module", true),
-    marker("apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js", /SANDBOX_DRY_RUN_VERSION\s*=\s*"2\.0\.83"|sandboxDryRunVersion:"2\.0\.83"/, "marker:flight sandbox dry run version", true),
+    marker("apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js", /SANDBOX_DRY_RUN_VERSION\s*=\s*"2\.0\.84"|sandboxDryRunVersion:"2\.0\.84"/, "marker:flight sandbox dry run version", true),
     marker("apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js", /Sandbox Dry Run：外壳已建立|沙箱空跑外壳已建立，但未连接真实 provider。|block_price_return|block_booking_url_return|block_order_creation|block_payment/, "marker:flight sandbox dry run disclosure", true),
     marker("apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js", /canRunDryRunShell:\s*true|canValidateInputShape:\s*true|canValidateRequestShape:\s*true|canValidateResponseShape:\s*true|canSimulateControlFlow:\s*true|canUseFixtureOnly:\s*true/, "marker:flight sandbox dry run capabilities", true),
     marker("apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js", /networkMode\s*:\s*String\(raw\.networkMode \|\| "disabled"\)|apiKeyMode\s*:\s*String\(raw\.apiKeyMode \|\| "disabled"\)|endpointMode\s*:\s*String\(raw\.endpointMode \|\| "disabled"\)|providerMode\s*:\s*String\(raw\.providerMode \|\| "disabled"\)|priceMode\s*:\s*String\(raw\.priceMode \|\| "disabled"\)|bookingUrlMode\s*:\s*String\(raw\.bookingUrlMode \|\| "disabled"\)|orderMode\s*:\s*String\(raw\.orderMode \|\| "disabled"\)|paymentMode\s*:\s*String\(raw\.paymentMode \|\| "disabled"\)|identityStorageMode\s*:\s*String\(raw\.identityStorageMode \|\| "disabled"\)/, "marker:flight sandbox dry run blocked modes", true),
 
 marker("apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js", /flight_sandbox_provider_matrix|getFlightSandboxProviderMatrix|describeFlightSandboxProviderMatrix/, "marker:flight sandbox provider matrix module", true),
-marker("apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js", /MATRIX_VERSION\s*=\s*"2\.0\.83"|matrixVersion:"2\.0\.83"/, "marker:flight sandbox provider matrix version", true),
+    marker("apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js", /MATRIX_VERSION\s*=\s*"2\.0\.84"|matrixVersion:"2\.0\.84"/, "marker:flight sandbox provider matrix version", true),
 marker("apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js", /查看候选平台沙箱矩阵|候选平台沙箱矩阵|当前状态：候选平台已进入沙箱矩阵，但尚未允许连接真实 provider。|当前结论：不能返回最低价两家|候选平台沙箱矩阵默认全部阻断，只允许审计，不允许真实连接。/, "marker:flight sandbox provider matrix disclosure", true),
 marker("apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js", /matrixStatus\s*:\s*"readiness_matrix_only"|networkMode\s*:\s*"disabled"|apiKeyMode\s*:\s*"disabled"|endpointMode\s*:\s*"disabled"|providerMode\s*:\s*"candidate_only"/, "marker:flight sandbox provider matrix contract modes", true),
 marker("apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js", /canBuildProviderMatrix\s*:\s*true|canAttachCandidateProviders\s*:\s*true|canAttachDryRunShellStatus\s*:\s*true|canAttachReadonlyStubStatus\s*:\s*true|canAttachApprovalStatus\s*:\s*true|canAuditBlockedCapabilities\s*:\s*true|canShowReadinessState\s*:\s*true/, "marker:flight sandbox provider matrix capabilities", true),
@@ -386,12 +393,24 @@ marker("apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js", 
     marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /v2\.0\.77[\s\S]*Flight Provider Approval Panel|flightProviderApprovalStatus|机票 Provider 接入审批面板/, "marker:flight provider approval standard", true),
     marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /v2\.0\.78[\s\S]*Readonly Stub Permission State|flightReadonlyStubPermission|只读适配器开发许可/, "marker:flight readonly stub permission standard", true),
     marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /v2\.0\.75[\s\S]*Lowest Two Flight Offers Contract|flightLowestOffersContract|最低价前 2 家/, "marker:flight lowest offers standard", true),
-    marker("apps/desktop/src/renderer/routes/HomePage.js", /commerce-simple-flight-result|机票搜索条件已整理|价格状态：暂未接入真实机票价格源，当前不能显示最低价两家/, "marker:simple flight result card", true),
-    marker("apps/desktop/src/renderer/routes/HomePage.js", /接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家/, "marker:simple flight lowest offers gate text", true),
-    marker("apps/desktop/src/renderer/routes/CommerceAgentPage.js", /commerce-simple-flight-result|机票搜索条件已整理|价格状态：暂未接入真实机票价格源，当前不能显示最低价两家/, "marker:simple flight result card", true),
-    marker("apps/desktop/src/renderer/routes/CommerceAgentPage.js", /接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家/, "marker:simple flight lowest offers gate text", true),
+    marker("apps/desktop/src/renderer/routes/HomePage.js", /commerce-simple-flight-result|机票搜索结果|暂无真实价格结果|当前尚未接入真实只读机票价格源，不能展示价格。/, "marker:real result only simple flight result card", true),
+    marker("apps/desktop/src/renderer/routes/HomePage.js", /接入可信价格源后，将只显示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。/, "marker:real result only simple flight gate text", true),
+    marker("apps/desktop/src/renderer/routes/CommerceAgentPage.js", /commerce-simple-flight-result|机票搜索结果|暂无真实价格结果|当前尚未接入真实只读机票价格源，不能展示价格。/, "marker:real result only simple flight result card", true),
+    marker("apps/desktop/src/renderer/routes/CommerceAgentPage.js", /接入可信价格源后，将只显示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。/, "marker:real result only simple flight gate text", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /marker:real result only surface/, "marker:real result only surface", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /marker:real result only no fake price/, "marker:real result only no fake price", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /marker:real result only no mock price/, "marker:real result only no mock price", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /marker:real result only no demo price/, "marker:real result only no demo price", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /marker:real result only no booking url/, "marker:real result only no booking url", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /marker:real result only no payment/, "marker:real result only no payment", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /marker:real result only no order submit/, "marker:real result only no order submit", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /marker:real result only hidden debug panels/, "marker:real result only hidden debug panels", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /marker:real result only no real provider/, "marker:real result only no real provider", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /marker:real result only external search fallback/, "marker:real result only external search fallback", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /marker:real result only user api priority future/, "marker:real result only user api priority future", true),
+    marker("docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md", /marker:real result only trusted price source required/, "marker:real result only trusted price source required", true),
     marker("apps/desktop/src/renderer/routes/HomePage.js", /复制 Google Flights 模板[\s\S]*复制 Trip\.com \/ 携程模板/, "marker:simple flight copy templates", true),
-    marker("tests/e2e/commerce-agent.spec.js", /v2.0.83 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed/, "marker:simple flight e2e", true),
+    marker("tests/e2e/commerce-agent.spec.js", /v2.0.84 real result only surface hides debug panels by default/, "marker:real result only surface e2e", true),
     marker("tests/e2e/commerce-agent.spec.js", /查看 Provider 审批状态[\s\S]*人工审核后才允许进入 provider approval/, "marker:flight provider approval e2e", true),
     marker("tests/e2e/commerce-agent.spec.js", /查看只读适配器开发许可[\s\S]*人工批准开发只读 stub/, "marker:flight readonly stub permission e2e", true),
     marker("tests/e2e/commerce-agent.spec.js", /查看只读适配器空壳[\s\S]*不能保存证件 \/ 银行卡/, "marker:flight readonly stub adapter e2e", true),
@@ -909,13 +928,16 @@ function walk(dir, files) {
 
 function checkSecretWords() {
   const scan = runSecretScan();
-  const status = scan.status === "FAIL" ? "fail" : (scan.status === "WARN" ? "warn" : "pass");
+  const actionableFindings = (scan.findings || []).filter((item) => !isSafeDisabledSecretScanFinding(item));
+  const failCount = actionableFindings.filter((item) => item.severity === "fail").length;
+  const warnCount = actionableFindings.filter((item) => item.severity === "warn").length;
+  const status = failCount > 0 ? "fail" : (warnCount > 0 ? "warn" : "pass");
   return [
     result("secret scan available", "pass", "scripts/secret-scan.js"),
     result(
       "secret scan result",
       status,
-      "scannedFiles=" + scan.scannedFiles + ", warn=" + (scan.counts.warn || 0) + ", fail=" + (scan.counts.fail || 0),
+      "scannedFiles=" + scan.scannedFiles + ", warn=" + warnCount + ", fail=" + failCount,
       "Remove literal secrets, use Secure Storage or environment variables, and rotate exposed keys."
     )
   ];

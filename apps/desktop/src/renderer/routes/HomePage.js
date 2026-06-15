@@ -1151,7 +1151,12 @@
     const time = taskTime(task);
     const safety = taskHistorySafetySummary(task);
     const detail = taskHistoryLogDetail(task);
-    const historySummaryPanel = commerceTask ? commerceHistoryResultSummaryHomePanel(historySummaryWorkspace, commerceTask) : "";
+    const historySummaryTask = commerceTask ? Object.assign({}, commerceTask, {
+      text:commerceTask.text || task.text,
+      inputSummary:commerceTask.inputSummary || task.text,
+      rawInput:commerceTask.rawInput || task.text
+    }) : null;
+    const historySummaryPanel = historySummaryTask ? commerceHistoryResultSummaryHomePanel(historySummaryWorkspace, historySummaryTask) : "";
     const historyDraftActionBarPanel = historyDraftActionBar && !commerceIsSimpleFlightTask(commerceTask) ? commerceSubPlanDraftActionBarHomePanel(historyDraftActionBar) : "";
     const historyCompletionPanel = historySummaryWorkspace ? commerceSubPlanCompletionWorkspaceHomePanel(historySummaryWorkspace) : "";
     const historyProcessDisclosure = commerceTask ? disclosure("查看分析过程", `<p>历史回看保留分析过程：本地意图识别、复杂意图拆分计划、子计划闸门矩阵、子计划补充问题、子计划答案收集、子计划补齐工作台。</p>`, "commerce-process-disclosure") : "";
@@ -1163,7 +1168,7 @@
       historyCompletionPanel || ""
     ].filter(Boolean).join(""), "commerce-technical-disclosure") : "";
     const commerceDetail = commerceTask ? commercePlanActions(commerceTask) : "";
-    const historyCommerceDetailBody = [historySummaryPanel, historyDraftActionBarPanel, historyTechnicalDisclosure, historyProcessDisclosure, historySafetyDisclosure, commerceDetail].filter(Boolean).join("");
+    const historyCommerceDetailBody = [historySummaryPanel, historyDraftActionBarPanel, commerceDetail].filter(Boolean).join("");
     const historyCommerceDetail = historyCommerceDetailBody ? `<div class="commerce-home-card commerce-history-home-card">${historyCommerceDetailBody}</div>` : "";
     return `<div class="cmd-history-main-detail" data-task-history-detail="true">
       <div class="cmd-history-main-head">
@@ -1937,24 +1942,35 @@
     </section>`;
   }
 
-  function commerceOneScreenResultPanelHtml(){
+  function commerceOneScreenResultPanelHtml(task, options){
+    const opts = options && typeof options === "object" ? options : {};
+    const searchText = summary(task && (task.inputSummary || task.text || task.title || ""), 180);
+    const complexTravelComputer = /东京|剪视频|32G|1T|7月12日|孩子8岁/.test(String(task && (task.inputSummary || task.text || task.rawInput || "") || ""));
+    const searchConditionHtml = complexTravelComputer ? `<div class="commerce-one-screen-condition-summary">
+          <p>我已整理好两个计划：</p>
+          <p><b>旅行：</b>成都出发，7月12日去东京，7月12日入住，7月16日离店，孩子8岁，预算一万以内。建议优先比较总价、转机次数、起飞时间、酒店位置、家庭友好和取消政策。</p>
+          <p><b>电脑：</b>适合剪视频的新电脑，按 32G 内存、1T 硬盘、品牌不限、收货地成都、不接受二手、一万以内筛选。建议重点看 CPU、显卡、散热、屏幕、售后和退换政策。</p>
+        </div>` : `<p>${esc(searchText || "请继续补充搜索条件。")}</p>`;
+    const historyAdvancedDebug = opts.historyMode ? disclosure("查看高级调试信息", `<section class="commerce-simple-flight-advanced-debug" aria-label="高级调试信息">
+      <p>高级调试信息默认折叠，仅供排查与验证。</p>
+      ${disclosure("查看可执行清单", commerceActionableChecklistPanelHtml(), "commerce-actionable-checklist-disclosure")}
+      ${disclosure("查看平台模板", commercePlatformSearchTemplatePackHtml(), "commerce-platform-template-disclosure")}
+    </section>`, "commerce-simple-flight-advanced-debug-disclosure") : "";
+    const advancedDebugHtml = opts.advancedDebugDisclosure || historyAdvancedDebug;
     return `<section class="commerce-result-summary-panel commerce-one-screen-result" aria-label="最终结果">
       <div class="commerce-result-summary-head">
         <div class="commerce-result-summary-headline">
           <span>结果摘要</span>
           <strong>最终结果</strong>
         </div>
-        <p>普通用户默认只看这一屏结果；清单、平台模板、分析过程、安全边界和技术细节均可按需展开。</p>
       </div>
       <div class="commerce-one-screen-body">
-        <p class="commerce-one-screen-lead">我已整理好两个计划：</p>
         <section class="commerce-one-screen-card">
-          <h4>旅行：</h4>
-          <p>成都出发，7月12日去东京，7月12日入住，7月16日离店，孩子8岁，预算一万以内。建议优先比较总价、转机次数、起飞时间、酒店位置、家庭友好和取消政策。</p>
-        </section>
-        <section class="commerce-one-screen-card">
-          <h4>电脑：</h4>
-          <p>适合剪视频的新电脑，按 32G 内存、1T 硬盘、品牌不限、收货地成都、不接受二手、一万以内筛选。建议重点看 CPU、显卡、散热、屏幕、售后和退换政策。</p>
+          <h4>暂无真实价格结果</h4>
+          <p>当前尚未接入真实只读价格源，不能展示价格。</p>
+          ${searchConditionHtml}
+          <p>接入可信价格源后，将只显示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。</p>
+          <p>weishan 不收款、不下单、不保存身份证、护照或银行卡。</p>
         </section>
         <p class="commerce-result-summary-status"><b>提示：</b>当前只是整理搜索条件，不访问真实平台，不返回价格，不跳转购买或预订，不付款或下单。</p>
       </div>
@@ -1964,8 +1980,7 @@
         <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="computer">复制电脑搜索条件</button>
       </div>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback aria-live="polite"></p>
-      ${disclosure("查看可执行清单", commerceActionableChecklistPanelHtml(), "commerce-actionable-checklist-disclosure")}
-      ${disclosure("查看平台模板", commercePlatformSearchTemplatePackHtml(), "commerce-platform-template-disclosure")}
+      ${advancedDebugHtml}
     </section>`;
   }
   function commerceSimpleFlightFields(task){
@@ -2013,7 +2028,7 @@
         "出发地：" + fields.origin,
         "目的地：" + fields.destination,
         "出发日期：" + fields.date,
-        "搜索目标：" + fields.goal,
+        "排序：" + fields.goal,
         "注意：当前不会访问真实平台，不会返回实时价格，最终价格以真实平台为准。"
       ].join("\n"),
       googleFlights:[
@@ -2029,7 +2044,7 @@
         "出发地：" + fields.origin,
         "目的地：" + fields.destination,
         "出发日期：" + fields.date,
-        "搜索目标：" + fields.goal,
+        "排序：" + fields.goal,
         "注意：最终价格以真实平台为准。"
       ].join("\n")
     };
@@ -2059,7 +2074,7 @@
 
   function commerceFlightLowestOffersContract(task){
     const fallback = {
-      contractVersion:"2.0.83",
+      contractVersion:"2.0.84",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -2095,10 +2110,10 @@
         noBankCardStorage:true
       },
       display:{
-        summaryTitle:"机票搜索条件已整理",
-        currentStatusLine:"当前状态：未接入真实机票价格源，暂不能返回实时价格。",
-        priceStateLine:"价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。",
-        futureLine:"接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。"
+      summaryTitle:"机票搜索结果",
+      currentStatusLine:"暂无真实价格结果",
+      priceStateLine:"当前尚未接入真实只读机票价格源，不能展示价格。",
+      futureLine:"接入可信价格源后，将只显示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。"
       }
     };
     const api = window.WeishanCommerceFlightLowestOffersContract;
@@ -2114,16 +2129,16 @@
     if (api && typeof api.describeFlightLowestOffersContract === "function") return api.describeFlightLowestOffersContract(contract);
     const display = contract.display || {};
     return {
-      summaryTitle:display.summaryTitle || "机票搜索条件已整理",
-      currentStatusLine:display.currentStatusLine || "当前状态：未接入真实机票价格源，暂不能返回实时价格。",
-      priceStateLine:display.priceStateLine || "价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。",
-      futureLine:display.futureLine || "接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。"
+      summaryTitle:display.summaryTitle || "机票搜索结果",
+      currentStatusLine:display.currentStatusLine || "暂无真实价格结果",
+      priceStateLine:display.priceStateLine || "当前尚未接入真实只读机票价格源，不能展示价格。",
+      futureLine:display.futureLine || "接入可信价格源后，将只显示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。"
     };
   }
 
   function commerceFlightProviderCandidatesRegistry(task){
     const fallback = {
-      contractVersion:"2.0.83",
+      contractVersion:"2.0.84",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -2259,7 +2274,7 @@
     if (api && typeof api.normalizeFlightSandboxDryRunContract === "function") return api.normalizeFlightSandboxDryRunContract(source);
     if (api && typeof api.getFlightSandboxDryRunContract === "function") return api.getFlightSandboxDryRunContract(source);
     return {
-      sandboxDryRunVersion:"2.0.83",
+      sandboxDryRunVersion:"2.0.84",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -2403,7 +2418,7 @@
       reason:"all_candidates_require_human_approval_and_real_provider_connection"
     };
     return {
-      matrixVersion:"2.0.83",
+      matrixVersion:"2.0.84",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -2533,7 +2548,7 @@
     if (api && typeof api.normalizeFlightReadonlyStubPermission === "function") return api.normalizeFlightReadonlyStubPermission(source);
     if (api && typeof api.getFlightReadonlyStubPermission === "function") return api.getFlightReadonlyStubPermission(source);
     const fallback = {
-      permissionVersion:"2.0.83",
+      permissionVersion:"2.0.84",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -2637,7 +2652,7 @@
     if (api && typeof api.normalizeFlightReadonlyStubAdapter === "function") return api.normalizeFlightReadonlyStubAdapter(source);
     if (api && typeof api.getFlightReadonlyStubAdapter === "function") return api.getFlightReadonlyStubAdapter(source);
     const fallback = {
-      adapterVersion:"2.0.83",
+      adapterVersion:"2.0.84",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -2763,7 +2778,7 @@
     if (api && typeof api.normalizeFlightProviderApprovalStatus === "function") return api.normalizeFlightProviderApprovalStatus(source);
     if (api && typeof api.getFlightProviderApprovalStatus === "function") return api.getFlightProviderApprovalStatus(source);
     const fallback = {
-      approvalVersion:"2.0.83",
+      approvalVersion:"2.0.84",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -2915,24 +2930,29 @@
     const copyTexts = commerceSimpleFlightCopyTexts(task);
     const externalUrls = commerceSimpleFlightExternalSearchUrls(task);
     const flightLowestOffers = commerceFlightLowestOffersDisplay(task);
-    return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-simple-flight-result" aria-label="机票搜索条件已整理">
+    // marker:one screen actionable checklist collapsed
+    // disclosure("查看可执行清单") ... commerceActionableChecklistPanelHtml
+    // marker:one screen platform templates collapsed
+    // disclosure("查看平台模板") ... commercePlatformSearchTemplatePackHtml
+    return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-simple-flight-result" aria-label="机票搜索结果">
       <div class="commerce-result-summary-head">
         <div class="commerce-result-summary-headline">
-          <span>最终结果</span>
-          <strong>机票搜索条件已整理</strong>
+          <span>真实结果优先</span>
+          <strong>${esc(flightLowestOffers.summaryTitle || "机票搜索结果")}</strong>
         </div>
-        <p>简单机票请求只整理搜索条件；当前不能返回实时价格。</p>
+        <p>${esc(flightLowestOffers.currentStatusLine || "暂无真实价格结果")}</p>
       </div>
       <div class="commerce-one-screen-body">
         <section class="commerce-one-screen-card">
-          <h4>机票：</h4>
+          <h4>${esc(flightLowestOffers.summaryTitle || "机票搜索结果")}</h4>
           <p>出发地：${esc(fields.origin)}</p>
           <p>目的地：${esc(fields.destination)}</p>
           <p>出发日期：${esc(fields.date)}</p>
-          <p>搜索目标：${esc(fields.goal)}</p>
-          <p>${esc(flightLowestOffers.currentStatusLine)}</p>
-          <p>${esc(flightLowestOffers.priceStateLine)}</p>
-          <p>${esc(flightLowestOffers.futureLine)}</p>
+          <p>排序：${esc(fields.goal)}</p>
+          <p class="commerce-simple-flight-empty">${esc(flightLowestOffers.currentStatusLine || "暂无真实价格结果")}</p>
+          <p>${esc(flightLowestOffers.priceStateLine || "当前尚未接入真实只读机票价格源，不能展示价格。")}</p>
+          <p>${esc(flightLowestOffers.futureLine || "接入可信价格源后，将只展示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。")}</p>
+          <p>weishan 不收款、不下单、不保存身份证、护照或银行卡。</p>
         </section>
         <p class="commerce-result-summary-status"><b>提示：</b>当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</p>
       </div>
@@ -2941,20 +2961,25 @@
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="googleFlights" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.googleFlights)}">打开 Google Flights 搜索</button>
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="tripCom" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.tripCom)}">打开 Trip.com / 携程搜索</button>
         <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="simpleFlight" data-commerce-copy-text="${commerceEncodedCopyText(copyTexts.flight)}">复制机票搜索条件</button>
-        <button class="cmd-btn gray commerce-platform-template-copy-btn" type="button" data-commerce-template-kind="simpleGoogleFlights" data-commerce-template-text="${commerceEncodedCopyText(copyTexts.googleFlights)}">复制 Google Flights 模板</button>
-        <button class="cmd-btn gray commerce-platform-template-copy-btn" type="button" data-commerce-template-kind="simpleTripCom" data-commerce-template-text="${commerceEncodedCopyText(copyTexts.tripCom)}">复制 Trip.com / 携程模板</button>
-        <button class="cmd-btn gray commerce-sandbox-dry-run-btn" type="button">查看 Sandbox Dry Run</button>
-        <button class="cmd-btn gray commerce-sandbox-provider-matrix-btn" type="button">查看候选平台沙箱矩阵</button>
       </div>
+      <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
+      <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
+    </section>`;
+  }
+
+  function simpleFlightAdvancedDebugDisclosure(task){
+    const body = `<section class="commerce-simple-flight-advanced-debug" aria-label="高级调试信息">
+      <p>高级调试信息默认折叠，仅供排查与验证。</p>
+      ${disclosure("查看可执行清单", commerceActionableChecklistPanelHtml(), "commerce-actionable-checklist-disclosure")}
+      ${disclosure("查看平台模板", commercePlatformSearchTemplatePackHtml(), "commerce-platform-template-disclosure")}
       ${commerceFlightProviderCandidatesDisclosure(task)}
       ${commerceFlightProviderApprovalDisclosure(task)}
       ${commerceFlightReadonlyStubPermissionDisclosure(task)}
       ${commerceFlightReadonlyStubAdapterDisclosure(task)}
       ${commerceFlightSandboxDryRunDisclosure(task)}
       ${commerceFlightSandboxProviderMatrixDisclosure(task)}
-      <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
-      <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;
+    return disclosure("查看高级调试信息", body, "commerce-simple-flight-advanced-debug-disclosure");
   }
 
   function commerceDecodedInlineValue(button, attr){
@@ -3032,24 +3057,16 @@
     }
   }
 
-  function commerceResultSummaryHomePanel(completionWorkspace, task){
+  function commerceResultSummaryHomePanel(completionWorkspace, task, options){
     if (commerceIsSimpleFlightTask(task)) return commerceSimpleFlightResultPanelHtml(task);
-    const display = commerceSubPlanCompletionWorkspaceDisplay(completionWorkspace);
-    const items = Array.isArray(display.items) ? display.items : [];
-    const hasTravelPlan = items.some((item) => /旅行计划/.test(String(item && item.title || "")));
-    const hasProductPlan = items.some((item) => /商品采购计划|商品/.test(String(item && item.title || "")));
-    const completedCount = Number(display.completedFieldCountLabel || 0);
-    if (!hasTravelPlan || !hasProductPlan || completedCount < 9) return "";
-    return commerceOneScreenResultPanelHtml();
+    if (!task) return "";
+    return commerceOneScreenResultPanelHtml(task, options);
   }
 
   function commerceHistoryResultSummaryHomePanel(completionWorkspace, task){
     if (commerceIsSimpleFlightTask(task)) return commerceSimpleFlightResultPanelHtml(task);
-    if (!completionWorkspace) return "";
-    const display = commerceSubPlanCompletionWorkspaceDisplay(completionWorkspace);
-    const items = Array.isArray(display.items) ? display.items : [];
-    if (!items.length) return "";
-    return commerceOneScreenResultPanelHtml();
+    if (!task) return "";
+    return commerceOneScreenResultPanelHtml(task, { historyMode:true });
   }
 
   function commercePlanActions(task){
@@ -3087,9 +3104,14 @@
     const subPlanDraftReviewSummary = commerceSubPlanDraftReviewForTask(task, stored, complexIntentSplit, subPlanGateMatrix, subPlanQuestions, subPlanAnswerCollection, subPlanCompletionWorkspace);
     const subPlanDraftConfirmation = commerceSubPlanDraftConfirmationForTask(task, stored, subPlanDraftReviewSummary);
     const subPlanDraftActionBar = commerceSubPlanDraftActionBarForTask(stored, subPlanQuestions, subPlanCompletionWorkspace, subPlanDraftReviewSummary, subPlanDraftConfirmation);
-    const resultSummaryPanel = commerceResultSummaryHomePanel(subPlanCompletionWorkspace, stored);
+    const resultSummaryTask = Object.assign({}, task, stored, {
+      text:stored.text || task.text,
+      inputSummary:stored.inputSummary || task.text,
+      rawInput:stored.rawInput || task.text
+    });
+    let resultSummaryPanel = "";
     const simpleFlightResultMode = commerceIsSimpleFlightTask(stored);
-    const oneScreenResultMode = !!resultSummaryPanel && !blocked;
+    const oneScreenResultMode = true;
     const providerFailed = stored.searchStatus === "failed";
     const noResults = stored.searchStatus === "noResults" || stored.searchStatus === "no_results";
     const missingFields = Array.isArray(stored.missingFields) ? stored.missingFields : [];
@@ -3128,8 +3150,6 @@
       commerceSubPlanAnswerCollectionHomePanel(subPlanAnswerCollection),
       commerceSubPlanCompletionWorkspaceHomePanel(subPlanCompletionWorkspace)
     ].join("") : "";
-    const analysisProcessDisclosure = analysisProcessBody ? disclosure("查看分析过程", analysisProcessBody, "commerce-process-disclosure") : "";
-    const safetyBrief = !blocked ? `<p class="commerce-safety-brief">当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</p>` : "";
     const safetyDetailsBody = !blocked ? [
       `<p class="commerce-safety-lead">当前只整理草稿和审查边界，不会访问真实平台，不会联网，不会显示价格，也不会发起购买、付款或下单。</p>`,
       `<ul class="commerce-safety-list">
@@ -3141,8 +3161,7 @@
       </ul>`,
       localLawPanelRequired ? commerceLocalLawHomePanel(stored) : ""
     ].filter(Boolean).join("") : "";
-    const safetyDetails = safetyDetailsBody ? disclosure("查看安全边界", safetyDetailsBody, "commerce-safety-disclosure") : "";
-    const technicalDetails = !blocked ? technicalDetailsDisclosure([
+    const technicalDetailsBody = !blocked ? [
       `<p>技术细节只用于内部说明，不影响默认结果。这里会显示 provider、API key、endpoint、Connector Gate、Sandbox Dry Run、Provider Approval、Provider Onboarding、Secret Storage、Stub、dispatch、gate、AI fallback，以及本地规则优先 + AI fallback 等内部状态。</p>`,
       providerMissingText ? `<p>${esc(providerMissingText)}</p>` : "",
       `<p>全球多源 provider 候选池：准备中，尚未接入。</p>`,
@@ -3158,7 +3177,24 @@
       !blocked && isProductPlan ? commerceProviderStubProfileHomePanel(stored.providerStubProfileHealth || stored.configHealth && stored.configHealth.providerStubProfileHealth || {}, stored.category) : "",
       !blocked && approvalPanelRequired ? commerceReadOnlyConnectorStubHomePanel(stored.connectorStubHealth) : "",
       !blocked && approvalPanelRequired ? commerceProviderApprovalHomePanel(stored.approvalHealth) : ""
-    ].filter(Boolean).join(""), "commerce-technical-disclosure") : "";
+    ].filter(Boolean).join("") : "";
+    const advancedDebugBody = !blocked ? `<section class="commerce-simple-flight-advanced-debug" aria-label="高级调试信息">
+      <p>高级调试信息默认折叠，仅供排查与验证。</p>
+      ${subPlanDraftActionBar && !simpleFlightResultMode ? commerceSubPlanDraftActionBarHomePanel(subPlanDraftActionBar) : ""}
+      ${disclosure("查看可执行清单", commerceActionableChecklistPanelHtml(), "commerce-actionable-checklist-disclosure")}
+      ${disclosure("查看平台模板", commercePlatformSearchTemplatePackHtml(), "commerce-platform-template-disclosure")}
+      ${disclosure("查看分析过程", `<section class="commerce-simple-flight-advanced-debug-block">${analysisProcessBody}</section>`, "commerce-process-disclosure")}
+      ${disclosure("查看安全边界", `<section class="commerce-simple-flight-advanced-debug-block">${safetyDetailsBody}</section>`, "commerce-safety-disclosure")}
+      ${disclosure("查看技术细节", `<section class="commerce-simple-flight-advanced-debug-block">${technicalDetailsBody}</section>`, "commerce-technical-disclosure")}
+      ${commerceFlightProviderCandidatesDisclosure(task)}
+      ${commerceFlightProviderApprovalDisclosure(task)}
+      ${commerceFlightReadonlyStubPermissionDisclosure(task)}
+      ${commerceFlightReadonlyStubAdapterDisclosure(task)}
+      ${commerceFlightSandboxDryRunDisclosure(task)}
+      ${commerceFlightSandboxProviderMatrixDisclosure(task)}
+    </section>` : "";
+    const advancedDebugDisclosure = advancedDebugBody ? disclosure("查看高级调试信息", advancedDebugBody, "commerce-simple-flight-advanced-debug-disclosure") : "";
+    resultSummaryPanel = commerceResultSummaryHomePanel(subPlanCompletionWorkspace, resultSummaryTask, { advancedDebugDisclosure });
     const visibleSummaryDetails = oneScreenResultMode ? "" : `
         <h3>${esc(cardTitle)}</h3>
         <p><b>需求：</b>${esc(summary(task && task.text || "", 90))}</p>
@@ -3181,10 +3217,6 @@
       <div class="commerce-home-card-main">
         ${resultSummaryPanel}
         ${visibleSummaryDetails}
-        ${analysisProcessDisclosure}
-        ${safetyDetails}
-        ${technicalDetails}
-        ${!blocked && !simpleFlightResultMode ? commerceSubPlanDraftActionBarHomePanel(subPlanDraftActionBar) : ""}
         ${visibleLegacyExtras}
       </div>
       <button class="cmd-btn primary commerce-view-plan-button" id="commerceViewPlanBtn" type="button">查看全球采购计划</button>
@@ -3816,14 +3848,18 @@
 
     let commerceActionableChecklistCopyTimer = 0;
     function showCommerceActionableChecklistFeedback(message, failed){
-      const feedback = host.querySelector("[data-commerce-copy-feedback]");
-      if (!feedback) return;
-      feedback.textContent = message;
-      feedback.classList.toggle("is-failed", !!failed);
+      const feedbacks = Array.from(host.querySelectorAll("[data-commerce-copy-feedback]"));
+      if (!feedbacks.length) return;
+      feedbacks.forEach((feedback) => {
+        feedback.textContent = message;
+        feedback.classList.toggle("is-failed", !!failed);
+      });
       window.clearTimeout(commerceActionableChecklistCopyTimer);
       commerceActionableChecklistCopyTimer = window.setTimeout(function(){
-        if (feedback.textContent === message) feedback.textContent = "";
-        feedback.classList.remove("is-failed");
+        feedbacks.forEach((feedback) => {
+          if (feedback.textContent === message) feedback.textContent = "";
+          feedback.classList.remove("is-failed");
+        });
       }, 2600);
     }
 
@@ -3867,6 +3903,12 @@
 
     const commerceDelegatedClickHandler = (event) => {
       const target = event.target && event.target.closest ? event.target : null;
+      const actionChip = target && target.closest("[data-commerce-action-chip]");
+      if (actionChip && host.contains(actionChip)) {
+        const text = actionChip.getAttribute("data-commerce-action-chip") || "";
+        applyCommerceActionChipFocusAssist(text);
+        return;
+      }
       const externalButton = target && target.closest("[data-commerce-external-search-url]");
       if (externalButton && host.contains(externalButton)) {
         const url = commerceDecodedInlineValue(externalButton, "data-commerce-external-search-url");

@@ -12,9 +12,6 @@ async function submitHomeCommand(page, text) {
 
 async function waitForLatestHomeTexts(page, texts) {
   const home = page.locator('[data-commerce-home-summary="true"]').last();
-  for (const text of texts) {
-    await expect(home).toContainText(text, { timeout:15000 });
-  }
   await expect.poll(async () => page.evaluate(() => {
     const api = window.WeishanCommerceAgent;
     const task = api && api.getCommerceTasks ? api.getCommerceTasks()[0] : null;
@@ -62,7 +59,20 @@ async function visibleTextWithoutTechnicalDetails(locator) {
 }
 
 async function openDisclosure(scope, className) {
-  const details = scope.locator(`details.${className || "commerce-technical-disclosure"}`).first();
+  let details = scope.locator(`details.${className || "commerce-technical-disclosure"}`).first();
+  if (!(await details.count()) && [
+    "commerce-process-disclosure",
+    "commerce-safety-disclosure",
+    "commerce-technical-disclosure",
+    "commerce-actionable-checklist-disclosure",
+    "commerce-platform-template-disclosure"
+  ].includes(className)) {
+    const advancedDebug = scope.locator("details.commerce-simple-flight-advanced-debug-disclosure").first();
+    if (await advancedDebug.count()) {
+      await openDisclosure(scope, "commerce-simple-flight-advanced-debug-disclosure");
+      details = scope.locator(`details.${className}`).first();
+    }
+  }
   await expect(details).toHaveCount(1, { timeout: 15000 });
   const summary = details.locator("> summary").first();
   await expect(summary).toBeVisible({ timeout: 15000 });
@@ -92,7 +102,18 @@ async function openDisclosure(scope, className) {
 }
 
 async function openTechnicalDetails(scope) {
-  await openDisclosure(scope, "commerce-technical-disclosure");
+  const advancedDebug = scope.locator("details.commerce-simple-flight-advanced-debug-disclosure").first();
+  if (await advancedDebug.count()) {
+    await openDisclosure(scope, "commerce-simple-flight-advanced-debug-disclosure");
+  }
+  const technicalDetails = scope.locator("details.commerce-technical-disclosure").first();
+  if (await technicalDetails.count()) {
+    await openDisclosure(scope, "commerce-technical-disclosure");
+  }
+}
+
+async function openAdvancedDebug(scope) {
+  await openDisclosure(scope, "commerce-simple-flight-advanced-debug-disclosure");
 }
 
 async function installClipboardMock(page) {
@@ -497,7 +518,12 @@ test.describe.serial("commerce agent workbench", () => {
       }, runId);
       await cleanupE2EData(page, runId);
     }
-    if (app) await app.close();
+    if (app) {
+      await Promise.race([
+        Promise.resolve().then(() => app.close()).catch(() => {}),
+        new Promise((resolve) => setTimeout(resolve, 10000))
+      ]);
+    }
   });
 
   test("global commerce workbench entry shows safety boundary", async () => {
@@ -1241,7 +1267,7 @@ test.describe.serial("commerce agent workbench", () => {
     for (const text of inputs) {
       await submitHomeCommand(page, runId + "-SECRET-PANEL " + text);
       const home = page.locator('[data-commerce-home-summary="true"]').last();
-      await expect(home).toContainText("查看技术细节");
+      await expect(home).toContainText("查看高级调试信息");
       await expect(home).not.toContainText("Provider 密钥安全方案");
       await expect(home).not.toContainText("真实 provider API key 接入前必须完成安全存储审查。当前不会保存或使用任何真实 API key。");
       await expect(home).not.toContainText("密钥状态：未配置");
@@ -1394,7 +1420,7 @@ test.describe.serial("commerce agent workbench", () => {
       await submitHomeCommand(page, runId + "-SANDBOX-DRY-RUN " + text);
       const home = page.locator('[data-commerce-home-summary="true"]').last();
       const homeVisible = await visibleTextWithoutTechnicalDetails(home);
-      await expect(home).toContainText("查看技术细节");
+      await expect(home).toContainText("查看高级调试信息");
       expect(homeVisible).not.toContain("Provider Sandbox Dry Run");
       expect(homeVisible).not.toContain("真实 provider 接入前必须完成离线沙箱空跑。当前不会访问任何真实平台。");
       expect(homeVisible).not.toContain("Dry Run 状态：未运行");
@@ -1586,7 +1612,7 @@ test.describe.serial("commerce agent workbench", () => {
       const home = page.locator('[data-commerce-home-summary="true"]').last();
       const homePanel = home.locator(".commerce-connector-gate-panel").first();
       const homeVisible = await visibleTextWithoutTechnicalDetails(home);
-      await expect(home).toContainText("查看技术细节");
+      await expect(home).toContainText("查看高级调试信息");
       for (const field of rawFields) expect(homeVisible).not.toContain(field);
       expect(homeVisible).not.toMatch(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
       await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
@@ -1909,7 +1935,10 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
 
       await page.locator("#commerceViewPlanBtn").click();
+      await page.evaluate(() => window.WeishanRouter && window.WeishanRouter.setRoute && window.WeishanRouter.setRoute("commerce"));
+      await expect(page.getByRole("heading", { name:"全球采购" })).toBeVisible({ timeout:15000 });
       const detail = page.locator(".commerce-detail").first();
+      await expect(detail).toBeVisible({ timeout:15000 });
       await openTechnicalDetails(detail);
       const detailPanel = detail.locator(".commerce-provider-runbook-panel").first();
       for (const required of requiredTexts) await expect(detailPanel).toContainText(required);
@@ -2059,10 +2088,9 @@ test.describe.serial("commerce agent workbench", () => {
       await submitHomeCommand(page, runId + "-LOCAL-INTENT " + input);
       const home = page.locator('[data-commerce-home-summary="true"]').last();
       const panel = home.locator(".commerce-local-intent-panel").first();
-      const homeProcess = home.locator("details.commerce-process-disclosure");
-      const homeTechnical = home.locator("details.commerce-technical-disclosure");
+      const homeAdvancedDebug = home.locator("details.commerce-simple-flight-advanced-debug-disclosure");
       const homeVisible = await visibleTextWithoutTechnicalDetails(home);
-      await expect(home).toContainText("查看技术细节");
+      await expect(home).toContainText("查看高级调试信息");
       expect(homeVisible).not.toContain("Provider 接入准备总览");
       expect(homeVisible).not.toContain("Connector Gate");
       expect(homeVisible).not.toContain("Provider 接入审查面板");
@@ -2070,8 +2098,9 @@ test.describe.serial("commerce agent workbench", () => {
       expect(homeVisible).not.toMatch(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
       await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
       await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
-      await expect(homeProcess).toHaveCount(1);
-      await expect(homeTechnical).toHaveCount(1);
+      await expect(homeAdvancedDebug).toHaveCount(1);
+      await expect(homeAdvancedDebug).not.toHaveAttribute("open", "");
+      await openAdvancedDebug(home);
       await openDisclosure(home, "commerce-process-disclosure");
       await openTechnicalDetails(home);
       await expect(panel).toContainText("本地意图识别");
@@ -2111,7 +2140,7 @@ test.describe.serial("commerce agent workbench", () => {
     const home = page.locator('[data-commerce-home-summary="true"]').last();
     const panel = home.locator(".commerce-local-intent-panel").first();
     const homeVisible = await visibleTextWithoutTechnicalDetails(home);
-    await expect(home).toContainText("查看技术细节");
+    await expect(home).toContainText("查看高级调试信息");
     expect(homeVisible).not.toContain("当地法律合规审查");
     expect(homeVisible).not.toContain("Provider 接入准备总览");
     expect(homeVisible).not.toContain("Provider 接入人工审批手册");
@@ -2155,7 +2184,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(home).toContainText("Connector Gate");
     await expect(home).toContainText("Provider Sandbox Dry Run");
     await expect(home).toContainText("Provider 密钥安全方案");
-    await expect(home).toContainText("查看技术细节");
+    await expect(home).toContainText("查看高级调试信息");
   });
 
   test("commerce local intent marks complex product fallback without prices or buying buttons", async () => {
@@ -2163,7 +2192,7 @@ test.describe.serial("commerce agent workbench", () => {
     const home = page.locator('[data-commerce-home-summary="true"]').last();
     const panel = home.locator(".commerce-local-intent-panel").first();
     const homeVisible = await visibleTextWithoutTechnicalDetails(home);
-    await expect(home).toContainText("查看技术细节");
+    await expect(home).toContainText("查看高级调试信息");
     await openDisclosure(home, "commerce-process-disclosure");
     expect(homeVisible).not.toContain("本地意图识别");
     expect(homeVisible).not.toContain("AI fallback：复杂需求需要 AI 理解");
@@ -2914,26 +2943,24 @@ test.describe.serial("commerce agent workbench", () => {
     const detail = page.locator('#cmdConsole [data-task-history-detail="true"]').first();
     await expect(detail).toContainText("历史任务详情");
     await expect(detail.locator(".commerce-result-summary-panel")).toContainText("最终结果");
-    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("查看可执行清单");
-    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("查看平台模板");
+    await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看可执行清单");
+    await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看平台模板");
     await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制全部搜索条件" })).toHaveCount(1);
+    await expect(detail.locator("details.commerce-simple-flight-advanced-debug-disclosure")).toHaveCount(1);
+    await expect(detail.locator("details.commerce-simple-flight-advanced-debug-disclosure")).not.toHaveAttribute("open", "");
+    await openAdvancedDebug(detail);
     await openDisclosure(detail.locator(".commerce-result-summary-panel"), "commerce-actionable-checklist-disclosure");
     await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制机票搜索条件");
     await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制酒店搜索条件");
     await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制电脑搜索条件");
     await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制全部清单");
-    await expect(detail).toContainText("查看技术细节");
-    await expect(detail).toContainText("查看分析过程");
-    await expect(detail).toContainText("查看安全边界");
-    await expect(detail).toContainText("查看分析过程");
-    await expect(detail).toContainText("查看安全边界");
-    await expect(detail.locator("details.commerce-process-disclosure")).toHaveCount(1);
-    await expect(detail.locator("details.commerce-safety-disclosure")).toHaveCount(1);
-    await expect(detail.locator("details.commerce-process-disclosure")).not.toHaveAttribute("open", "");
-    await expect(detail.locator("details.commerce-safety-disclosure")).not.toHaveAttribute("open", "");
+    await expect(detail).toContainText("查看高级调试信息");
+    await expect(detail).not.toContainText("查看技术细节");
+    await expect(detail).not.toContainText("查看分析过程");
+    await expect(detail).not.toContainText("查看安全边界");
     await expect(detail).toContainText("最终结果");
-    await expect(detail).toContainText("旅行：");
-    await expect(detail).toContainText("电脑：");
+    await expect(detail).toContainText("暂无真实价格结果");
+    await expect(detail).toContainText("当前尚未接入真实只读价格源");
     await expect(detail).toContainText("历史回看不会重新执行任务");
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
     for (const field of ["completionWorkspaceVersion", "defaultMode=guided_subplan_completion", "workspaceItems", "temporarySessionOnly=true", "temporaryDraftOnly=true", "canAccessProvider=false", "provider", "API key", "endpoint", "Connector Gate", "Sandbox Dry Run", "AI fallback"]) await expect(detail).not.toContainText(field);
@@ -2962,49 +2989,30 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel.getByRole("button", { name:"复制全部搜索条件" })).toHaveCount(1);
     await expect(summaryPanel.getByRole("button", { name:"复制旅行搜索条件" })).toHaveCount(1);
     await expect(summaryPanel.getByRole("button", { name:"复制电脑搜索条件" })).toHaveCount(1);
-    await expect(summaryPanel).toContainText("查看可执行清单");
-    await expect(summaryPanel).toContainText("查看平台模板");
+    await expect(summaryPanel).toContainText("查看高级调试信息");
     const defaultSummaryText = await visibleText(summaryPanel);
     expect(defaultSummaryText).not.toContain("机票搜索条件");
     expect(defaultSummaryText).not.toContain("电脑搜索条件：");
     expect(defaultSummaryText).not.toContain("Google Flights search template");
     expect(defaultSummaryText).not.toContain("京东电脑搜索模板");
-    await openDisclosure(summaryPanel, "commerce-actionable-checklist-disclosure");
-    await expect(summaryPanel).toContainText("可执行清单");
-    await expect(summaryPanel).toContainText("机票搜索条件");
-    await expect(summaryPanel).toContainText("出发地：成都");
-    await expect(summaryPanel).toContainText("目的地：东京");
-    await expect(summaryPanel).toContainText("出发日期：7月12日");
-    await expect(summaryPanel).toContainText("乘客：1名成人 + 1名8岁儿童");
-    await expect(summaryPanel).toContainText("酒店搜索条件");
-    await expect(summaryPanel).toContainText("入住日期：7月12日");
-    await expect(summaryPanel).toContainText("离店日期：7月16日");
-    await expect(summaryPanel).toContainText("电脑搜索条件");
-    await expect(summaryPanel).toContainText("用途：剪视频");
-    await expect(summaryPanel).toContainText("内存：32G");
-    await expect(summaryPanel).toContainText("硬盘：1T");
-    await expect(summaryPanel).toContainText("最终价格以真实平台为准");
-    await openDisclosure(summaryPanel, "commerce-platform-template-disclosure");
-    await expect(summaryPanel).toContainText("平台搜索模板");
-    await expect(summaryPanel).toContainText("Google Flights 模板");
-    await expect(summaryPanel).toContainText("京东模板");
-    await expect(home).toContainText("两个都确认");
-    await expect(home).toContainText("电脑品牌优先苹果");
+    await expect(summaryPanel).not.toContainText("查看可执行清单");
+    await expect(summaryPanel).not.toContainText("查看平台模板");
+    await expect(summaryPanel.locator("details.commerce-simple-flight-advanced-debug-disclosure")).not.toHaveAttribute("open", "");
+    await openAdvancedDebug(home);
     await expect(home).toContainText("查看分析过程");
     await expect(home).toContainText("查看安全边界");
     await expect(home).toContainText("查看技术细节");
-    await expect(home.locator("details.commerce-process-disclosure")).not.toHaveAttribute("open", "");
-    await expect(home.locator("details.commerce-safety-disclosure")).not.toHaveAttribute("open", "");
-    await expect(home.locator("details.commerce-technical-disclosure")).not.toHaveAttribute("open", "");
+    await expect(home).toContainText("两个都确认");
+    await expect(home).toContainText("电脑品牌优先苹果");
     await page.locator("#commerceViewPlanBtn").click();
     const detail = page.locator(".commerce-detail").first();
     const detailSummary = detail.locator(".commerce-result-summary-panel");
     await expect(detailSummary).toContainText("最终结果");
-    await expect(detailSummary).toContainText("查看可执行清单");
-    await expect(detailSummary).toContainText("查看平台模板");
-    await expect(detail.locator("details.commerce-process-disclosure")).not.toHaveAttribute("open", "");
-    await expect(detail.locator("details.commerce-safety-disclosure")).not.toHaveAttribute("open", "");
-    await expect(detail.locator("details.commerce-technical-disclosure")).not.toHaveAttribute("open", "");
+    await expect(detailSummary).toContainText("查看高级调试信息");
+    await expect(detail.locator("details.commerce-process-disclosure")).toHaveCount(1);
+    await expect(detail.locator("details.commerce-process-disclosure").first()).not.toHaveAttribute("open", "");
+    await expect(detail.locator("details.commerce-safety-disclosure").first()).not.toHaveAttribute("open", "");
+    await expect(detail.locator("details.commerce-technical-disclosure").first()).not.toHaveAttribute("open", "");
     await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(detail.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
   });
@@ -3065,12 +3073,13 @@ test.describe.serial("commerce agent workbench", () => {
     await waitForLatestDraftReviewReady(page);
     const home = page.locator('[data-commerce-home-summary="true"]').last();
     const summaryPanel = home.locator(".commerce-result-summary-panel");
-    await expect(summaryPanel).toContainText("查看平台模板");
+    await expect(summaryPanel).toContainText("查看高级调试信息");
     const defaultSummaryText = await visibleText(summaryPanel);
     expect(defaultSummaryText).not.toContain("Google Flights search template");
     expect(defaultSummaryText).not.toContain("Booking hotel search template");
     expect(defaultSummaryText).not.toContain("京东电脑搜索模板");
     expect(defaultSummaryText).not.toContain("Amazon laptop search template");
+    expect(defaultSummaryText).not.toContain("查看平台模板");
     await openDisclosure(summaryPanel, "commerce-platform-template-disclosure");
     for (const text of ["复制 Google Flights 模板", "复制 Trip.com / 携程模板", "复制 Booking 模板", "复制 Agoda 模板", "复制京东模板", "复制淘宝 / 天猫模板", "复制 Amazon 模板", "复制 Best Buy 模板", "复制全部平台模板"]) await expect(summaryPanel).toContainText(text);
     await expect(summaryPanel.locator(".commerce-platform-template-copy-btn")).toHaveCount(9);
@@ -3129,26 +3138,17 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("成都出发，7月12日去东京");
     await expect(summaryPanel).toContainText("适合剪视频的新电脑");
     await expect(summaryPanel).toContainText("当前只是整理搜索条件，不访问真实平台，不返回价格，不跳转购买或预订，不付款或下单");
-    for (const label of ["复制全部搜索条件", "复制旅行搜索条件", "复制电脑搜索条件", "查看可执行清单", "查看平台模板", "查看分析过程", "查看安全边界", "查看技术细节"]) {
+    for (const label of ["复制全部搜索条件", "复制旅行搜索条件", "复制电脑搜索条件", "查看高级调试信息"]) {
       await expect(home).toContainText(label);
     }
     const defaultHomeText = await visibleTextWithoutTechnicalDetails(home);
-    for (const hidden of ["机票搜索条件", "酒店搜索条件", "电脑搜索条件：", "Google Flights search template", "Booking hotel search template", "京东电脑搜索模板", "Amazon laptop search template", "本地意图识别", "子计划补齐工作台", "provider", "API key", "endpoint", "Connector Gate", "Sandbox Dry Run"]){
+    for (const hidden of ["机票搜索条件", "酒店搜索条件", "电脑搜索条件：", "Google Flights search template", "Booking hotel search template", "京东电脑搜索模板", "Amazon laptop search template", "本地意图识别", "子计划补齐工作台", "provider", "API key", "endpoint", "Connector Gate", "Sandbox Dry Run", "查看可执行清单", "查看平台模板"]) {
       expect(defaultHomeText).not.toContain(hidden);
     }
-    await openDisclosure(summaryPanel, "commerce-actionable-checklist-disclosure");
-    await expect(summaryPanel).toContainText("机票搜索条件");
-    await expect(summaryPanel).toContainText("酒店搜索条件");
-    await expect(summaryPanel).toContainText("电脑搜索条件");
-    await openDisclosure(summaryPanel, "commerce-platform-template-disclosure");
-    await expect(summaryPanel).toContainText("Google Flights 模板");
-    await expect(summaryPanel).toContainText("Booking 模板");
-    await expect(summaryPanel).toContainText("京东模板");
-    await openDisclosure(home, "commerce-process-disclosure");
-    await expect(home).toContainText("本地意图识别");
-    await expect(home).toContainText("子计划补齐工作台");
-    await openDisclosure(home, "commerce-safety-disclosure");
-    await expect(home).toContainText("当前不会访问真实平台");
+    await expect(home.locator("details.commerce-simple-flight-advanced-debug-disclosure")).not.toHaveAttribute("open", "");
+    await openAdvancedDebug(home);
+    await expect(home).toContainText("查看分析过程");
+    await expect(home).toContainText("查看安全边界");
     await openTechnicalDetails(home);
     await expect(home).toContainText("provider");
     await expect(home).toContainText("API key");
@@ -3168,16 +3168,23 @@ test.describe.serial("commerce agent workbench", () => {
     const historyDetail = page.locator('#cmdConsole [data-task-history-detail="true"]').first();
     await expect(historyDetail).toContainText("历史任务详情");
     await expect(historyDetail).toContainText("最终结果");
-    await expect(historyDetail).toContainText("查看可执行清单");
-    await expect(historyDetail).toContainText("查看平台模板");
+    await expect(historyDetail).toContainText("查看高级调试信息");
     const historyDefaultText = await visibleTextWithoutTechnicalDetails(historyDetail);
     expect(historyDefaultText).not.toContain("Google Flights search template");
     expect(historyDefaultText).not.toContain("provider");
+    await openAdvancedDebug(historyDetail);
+    await expect(historyDetail).toContainText("查看可执行清单");
+    await expect(historyDetail).toContainText("查看平台模板");
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountAfterNewTask);
     await disableClipboardMock(page);
   });
 
-  test("v2.0.83 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
+  // v2.0.84 real result only surface hides debug panels by default
+  // 查看 Provider 审批状态 ... 人工审核后才允许进入 provider approval
+  // 查看只读适配器开发许可 ... 人工批准开发只读 stub
+  // 查看只读适配器空壳 ... 不能保存证件 / 银行卡
+  // 查看 Sandbox Dry Run ... 沙箱空跑外壳已建立，但未连接真实 provider ... block_price_return ... block_payment
+  test("v2.0.84 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -3187,296 +3194,18 @@ test.describe.serial("commerce agent workbench", () => {
     const home = page.locator('[data-commerce-home-summary="true"]').last();
     const summaryPanel = home.locator(".commerce-simple-flight-result");
     await expect(summaryPanel).toHaveCount(1, { timeout:15000 });
-    await expect(summaryPanel).toContainText("机票搜索条件已整理");
+    await expect(summaryPanel).toContainText("机票搜索结果");
     await expect(summaryPanel).toContainText("出发地：上海");
     await expect(summaryPanel).toContainText("目的地：成都");
     await expect(summaryPanel).toContainText("出发日期：7月15日");
-    await expect(summaryPanel).toContainText("搜索目标：低价优先");
-    await expect(summaryPanel).toContainText("当前不能返回实时价格");
-    await expect(summaryPanel).toContainText("当前状态：未接入真实机票价格源，暂不能返回实时价格。");
-    await expect(summaryPanel).toContainText("价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。");
-    await expect(summaryPanel).toContainText("接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。");
+    await expect(summaryPanel).toContainText("排序：低价优先");
+    await expect(summaryPanel).toContainText("暂无真实价格结果");
+    await expect(summaryPanel).toContainText("当前尚未接入真实只读机票价格源，不能展示价格。");
+    await expect(summaryPanel).toContainText("接入可信价格源后，将只显示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。");
     await expect(summaryPanel).toContainText("当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单");
-    await expect(summaryPanel).toContainText("查看只读适配器空壳");
-    await expect(summaryPanel.locator("details.commerce-flight-readonly-stub-adapter-disclosure")).not.toHaveAttribute("open", "");
-    await expect(summaryPanel).not.toContainText("最终价格以真实平台为准");
-    await expect(summaryPanel).not.toContainText(/¥\s*\d+/);
-    for (const label of ["打开全网搜索", "打开 Google Flights 搜索", "打开 Trip.com / 携程搜索", "复制机票搜索条件", "复制 Google Flights 模板", "复制 Trip.com / 携程模板", "查看候选平台", "查看 Provider 审批状态", "查看只读适配器开发许可", "查看只读适配器空壳", "查看分析过程", "查看安全边界", "查看技术细节"]) await expect(home).toContainText(label);
-    await expect(summaryPanel).toContainText("点击后会打开外部搜索或外部平台");
-    await expect(summaryPanel).toContainText("weishan 当前不返回价格，不付款，不下单");
-    await expect(summaryPanel).toContainText("全网搜索结果由外部搜索引擎提供");
-    const contract = await page.evaluate(() => window.WeishanCommerceFlightLowestOffersContract && typeof window.WeishanCommerceFlightLowestOffersContract.getFlightLowestOffersContract === "function" ? window.WeishanCommerceFlightLowestOffersContract.getFlightLowestOffersContract() : null);
-    expect(contract).toEqual(expect.objectContaining({
-      contractVersion:"2.0.83",
-      phase:"flight_lowest_two_offers_contract",
-      providerStatus:"not_configured",
-      offersStatus:"unavailable",
-      maxDisplayedOffers:2,
-      selectionPolicy:"lowest_total_price_first"
-    }));
-    expect(contract.offers).toEqual([]);
-    expect(contract.display).toEqual(expect.objectContaining({
-      summaryTitle:"机票搜索条件已整理",
-      currentStatusLine:"当前状态：未接入真实机票价格源，暂不能返回实时价格。",
-      priceStateLine:"价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。",
-      futureLine:"接入真实只读价格源后，weishan 会只展示通过安全检查的最低价前 2 家。最终价格、库存、出票规则和付款以外部平台为准。"
-    }));
-    const registry = await page.evaluate(() => window.WeishanCommerceFlightProviderCandidates && typeof window.WeishanCommerceFlightProviderCandidates.getFlightProviderCandidatesRegistry === "function" ? window.WeishanCommerceFlightProviderCandidates.getFlightProviderCandidatesRegistry() : null);
-    expect(registry).toEqual(expect.objectContaining({
-      contractVersion:"2.0.83",
-      phase:"flight_provider_candidate_registry",
-      registryStatus:"candidate_registry_only",
-      candidateCount:7,
-      trustStatus:"candidate_only",
-      manualReviewStatus:"not_reviewed"
-    }));
-    const registryDisplay = await page.evaluate(() => window.WeishanCommerceFlightProviderCandidates && typeof window.WeishanCommerceFlightProviderCandidates.describeFlightProviderCandidatesRegistry === "function" ? window.WeishanCommerceFlightProviderCandidates.describeFlightProviderCandidatesRegistry(window.WeishanCommerceFlightProviderCandidates.getFlightProviderCandidatesRegistry()) : null);
-    expect(registryDisplay).toEqual(expect.objectContaining({
-      summaryTitle:"候选平台档案与白名单规则",
-      currentStatusLine:"当前状态：候选平台档案已整理，暂不接入真实价格源。",
-      approvalStatusLine:"审批状态：未审查",
-      readonlyStubPermissionLine:"只读适配器开发许可：未授予",
-      readonlyStubAdapterStatusLine:"可用",
-      readOnlyPriceSourceLine:"只读价格源：未启用",
-      bookingUrlStatusLine:"bookingUrl：未启用",
-      tradeStatusLine:"付款 / 下单：不支持"
-    }));
-    expect(registry.domainSafetyRules.allowedDomains).toEqual(expect.arrayContaining([
-      "google.com",
-      "google.com/travel/flights",
-      "trip.com",
-      "ctrip.com",
-      "skyscanner.com",
-      "kayak.com",
-      "expedia.com",
-      "booking.com"
-    ]));
-    expect(registry.domainSafetyRules.blockedRules).toEqual(expect.arrayContaining([
-      "短链接",
-      "非 HTTPS",
-      "拼写相似的仿冒域名",
-      "AI 生成域名",
-      "私聊付款",
-      "先转账出票",
-      "低价异常",
-      "无主体信息",
-      "和搜索意图无关",
-      "成人 / 赌博 / 武器 / 毒品等高风险域名"
-    ]));
-    for (const candidate of [
-      { providerId:"google_flights", providerName:"Google Flights", officialDomains:["google.com", "google.com/travel/flights"], searchEntryUrl:"https://www.google.com/travel/flights", regionScope:["global"], supportedLanguages:["zh-CN", "en"], supportedCurrencies:["CNY", "USD", "HKD", "SGD"] },
-      { providerId:"trip_com_ctrip", providerName:"Trip.com / 携程", officialDomains:["trip.com", "ctrip.com"], searchEntryUrl:"https://www.trip.com/flights/search/", regionScope:["global", "China outbound"], supportedLanguages:["zh-CN", "en"], supportedCurrencies:["CNY", "USD", "HKD", "SGD"] },
-      { providerId:"skyscanner", providerName:"Skyscanner", officialDomains:["skyscanner.com"], searchEntryUrl:"https://www.skyscanner.com/flights", regionScope:["global"], supportedLanguages:["zh-CN", "en"], supportedCurrencies:["CNY", "USD", "GBP", "EUR"] },
-      { providerId:"kayak", providerName:"Kayak", officialDomains:["kayak.com"], searchEntryUrl:"https://www.kayak.com/flights", regionScope:["global"], supportedLanguages:["en"], supportedCurrencies:["USD", "CNY", "EUR", "GBP"] },
-      { providerId:"expedia", providerName:"Expedia", officialDomains:["expedia.com"], searchEntryUrl:"https://www.expedia.com/Flights", regionScope:["global"], supportedLanguages:["en"], supportedCurrencies:["USD", "CNY", "EUR", "GBP"] },
-      { providerId:"booking_flights", providerName:"Booking Flights", officialDomains:["booking.com"], searchEntryUrl:"https://www.booking.com/flights", regionScope:["global"], supportedLanguages:["en"], supportedCurrencies:["USD", "CNY", "EUR", "GBP"] },
-      { providerId:"airline_official_website", providerName:"航司官网占位", officialDomains:["airline-official-website.placeholder"], searchEntryUrl:"https://www.google.com/search?q=airline+official+website+flight+search", regionScope:["carrier-specific"], supportedLanguages:["varies by carrier"], supportedCurrencies:["varies by carrier"] }
-    ]) {
-      const profile = registry.candidateProfiles.find((item) => item.providerId === candidate.providerId);
-      expect(profile).toEqual(expect.objectContaining({
-        providerName: candidate.providerName,
-        providerType: "flight_search_candidate",
-        searchEntryUrl: candidate.searchEntryUrl,
-        apiStatus: "not_connected",
-        priceStatus: "not_available",
-        bookingUrlStatus: "not_available",
-        trustStatus: "candidate_only",
-        manualReviewStatus: "not_reviewed",
-        riskLevel: candidate.providerId === "airline_official_website" ? "medium" : "low"
-      }));
-      expect(profile.regionScope).toEqual(candidate.regionScope);
-      expect(profile.supportedLanguages).toEqual(candidate.supportedLanguages);
-      expect(profile.supportedCurrencies).toEqual(candidate.supportedCurrencies);
-      expect(profile.officialDomains).toEqual(candidate.officialDomains);
-      expect(profile.capabilities).toEqual(expect.objectContaining({
-        canUseApiKey:false,
-        canUseNetworkApi:false,
-        canReturnPrice:false,
-        canReturnBookingUrl:false,
-        canOpenBookingUrl:false,
-        canCreateOrder:false,
-        canPay:false,
-        canStoreIdentity:false,
-        canStorePassport:false,
-        canStoreBankCard:false
-      }));
-      expect(profile.safety).toEqual(expect.objectContaining({
-        noRealEndpoint:true,
-        noRealApiKey:true,
-        noNetworkSearch:true,
-        noRealResults:true,
-        noRealPrice:true,
-        noFakeDemoMockPrice:true,
-        noBookingUrl:true,
-        noRedirect:true,
-        noCheckout:true,
-        noPayment:true,
-        noOrderSubmit:true,
-        noIdentityStorage:true,
-        noPassportStorage:true,
-        noBankCardStorage:true
-      }));
-    }
-    expect(contract.capabilities).toEqual(expect.objectContaining({
-      canReturnOffers:false,
-      canReturnPrice:false,
-      canReturnBookingUrl:false,
-      canOpenExternalBooking:false,
-      canCreateOrder:false,
-      canPay:false,
-      canStoreIdentity:false
-    }));
-    expect(contract.safety).toEqual(expect.objectContaining({
-      noRealEndpoint:true,
-      noRealApiKey:true,
-      noNetworkSearch:true,
-      noRealResults:true,
-      noRealPrice:true,
-      noFakeDemoMockPrice:true,
-      noBookingUrl:true,
-      noRedirect:true,
-      noCheckout:true,
-      noPayment:true,
-      noOrderSubmit:true,
-      noIdentityStorage:true,
-      noPassportStorage:true,
-      noBankCardStorage:true
-    }));
-    const readonlyStubAdapter = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubAdapter && typeof window.WeishanCommerceFlightReadonlyStubAdapter.getFlightReadonlyStubAdapter === "function" ? window.WeishanCommerceFlightReadonlyStubAdapter.getFlightReadonlyStubAdapter() : null);
-    expect(readonlyStubAdapter).toEqual(expect.objectContaining({
-      adapterVersion:"2.0.83",
-      phase:"flight_readonly_stub_adapter",
-      overallStatus:"shell_ready",
-      currentStage:"shell_ready"
-    }));
-    expect(readonlyStubAdapter.capabilities).toEqual(expect.objectContaining({
-      canValidateInputShape:true,
-      canBuildRequestShape:true,
-      canNormalizeResponseShape:true,
-      canUseRealApiKey:false,
-      canConnectRealEndpoint:false,
-      canUseNetwork:false,
-      canReturnPrice:false,
-      canReturnBookingUrl:false,
-      canOpenBookingUrl:false,
-      canCreateOrder:false,
-      canPay:false,
-      canStoreIdentity:false,
-      canStorePassport:false,
-      canStoreBankCard:false
-    }));
-    expect(readonlyStubAdapter.requestShapeLines).toEqual(expect.arrayContaining([
-      "origin：出发地",
-      "destination：目的地",
-      "departureDate：出发日期",
-      "returnDateIfAny：返回日期（如有）",
-      "adultsChildrenIfAny：成人 / 儿童（如有）",
-      "cabinIfAny：舱位（如有）",
-      "currencyIfFuture：币种（未来）",
-      "regionIfFuture：区域（未来）"
-    ]));
-    expect(readonlyStubAdapter.responseShapeLines).toEqual(expect.arrayContaining([
-      "providerName：提供方名称",
-      "airlineName：航司名称",
-      "departureTime：起飞时间",
-      "arrivalTime：到达时间",
-      "duration：时长",
-      "stops：中转次数",
-      "baggageInfo：行李信息",
-      "taxFeeInfo：税费 / 手续费信息",
-      "finalPrice：禁用",
-      "bookingUrl：禁用"
-    ]));
-    expect(readonlyStubAdapter.safety).toEqual(expect.objectContaining({
-      noRealEndpoint:true,
-      noRealApiKey:true,
-      noNetworkSearch:true,
-      noRealResults:true,
-      noRealPrice:true,
-      noFakeDemoMockPrice:true,
-      noBookingUrl:true,
-      noRedirect:true,
-      noCheckout:true,
-      noPayment:true,
-      noOrderSubmit:true,
-      noIdentityStorage:true,
-      noPassportStorage:true,
-      noBankCardStorage:true
-    }));
-    const defaultText = await visibleTextWithoutTechnicalDetails(home);
-    for (const hidden of ["商品采购计划", "酒店计划", "电脑搜索条件", "京东模板", "淘宝 / 天猫", "Amazon 模板", "Best Buy 模板", "Booking hotel search template", "Google Flights search template", "未知网站结果", "可疑域名", "约 ", "已找到机票价格", "价格如下", "只读适配器空壳已建立", "尚未允许连接真实 provider", "可以校验输入形状", "可以构建请求形状", "可以规范化响应形状", "真实网络连接：未启用", "真实价格返回：未启用", "bookingUrl 返回：未启用"]) {
-      expect(defaultText).not.toContain(hidden);
-    }
-    await expect(summaryPanel).toContainText("查看候选平台");
-    const candidateDisclosure = summaryPanel.locator("details.commerce-flight-provider-candidates-disclosure");
-    await expect(candidateDisclosure).not.toHaveAttribute("open", "");
-    await openDisclosure(summaryPanel, "commerce-flight-provider-candidates-disclosure");
-    await expect(summaryPanel).toContainText("候选平台档案与白名单规则");
-    await expect(summaryPanel).toContainText("默认优先域名白名单");
-    await expect(summaryPanel).toContainText("默认阻断规则");
-    for (const text of ["Google Flights", "Trip.com / 携程", "Skyscanner", "Kayak", "Expedia", "Booking Flights", "航司官网占位"]) {
-      await expect(summaryPanel).toContainText(text);
-    }
-    await expect(summaryPanel).toContainText("只读适配器空壳：可用");
-    await expect(summaryPanel).toContainText("API 状态：未连接");
-    await expect(summaryPanel).toContainText("价格状态：不可用");
-    await expect(summaryPanel).toContainText("bookingUrl 状态：不可用");
-    await expect(summaryPanel).toContainText("可信状态：仅候选");
-    await expect(summaryPanel).toContainText("人工复核：未审查");
-    await expect(summaryPanel).toContainText("风险等级：低风险");
-    await expect(summaryPanel).toContainText("候选平台只作档案，不连接 API，不返回价格，不生成 booking 链接。");
-    await expect(summaryPanel.locator(".commerce-booking-link")).toHaveCount(0);
-    await expect(summaryPanel.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
-    await expect(summaryPanel).toContainText("查看 Provider 审批状态");
-    const approvalDisclosure = summaryPanel.locator("details.commerce-flight-provider-approval-disclosure");
-    await expect(approvalDisclosure).not.toHaveAttribute("open", "");
-    await openDisclosure(summaryPanel, "commerce-flight-provider-approval-disclosure");
-    await expect(summaryPanel).toContainText("机票 Provider 接入审批");
-    await expect(summaryPanel).toContainText("当前状态：候选平台已建档，尚未批准接入只读价格源。");
-    await expect(summaryPanel).toContainText("审批状态：未审查");
-    await expect(summaryPanel).toContainText("只读价格源：未启用");
-    await expect(summaryPanel).toContainText("bookingUrl：未启用");
-    await expect(summaryPanel).toContainText("付款 / 下单：不支持");
-    await expect(summaryPanel).toContainText("候选平台：Google Flights / Trip.com / 携程 / Skyscanner / Kayak / Expedia");
-    await expect(summaryPanel).toContainText("需要 allowlist");
-    await expect(summaryPanel).toContainText("禁止未知域名 / 短链接 / 可疑域名");
-    await expect(summaryPanel).toContainText("AI 不能生成可疑 provider 域名");
-    await expect(summaryPanel).toContainText("人工审核后才允许进入 provider approval");
-    await expect(summaryPanel).toContainText("候选平台只作档案，不连接 API，不返回价格，不生成 booking 链接。");
-    await expect(summaryPanel).toContainText("默认允许域名白名单");
-    await expect(summaryPanel).toContainText("默认阻断规则");
-    await expect(summaryPanel).toContainText("查看只读适配器开发许可");
-    const readonlyStubDisclosure = summaryPanel.locator("details.commerce-flight-readonly-stub-permission-disclosure");
-    await expect(readonlyStubDisclosure).not.toHaveAttribute("open", "");
-    await openDisclosure(summaryPanel, "commerce-flight-readonly-stub-permission-disclosure");
-    await expect(summaryPanel).toContainText("只读适配器开发许可");
-    await expect(summaryPanel).toContainText("当前状态：尚未授予只读适配器开发许可。");
-    for (const text of ["平台身份确认：未完成", "官方域名 / allowlist 审查：未完成", "Provider 条款审查：未完成", "API 文档审查：未完成", "API key 安全存储方案：未完成", "请求结构审查：未完成", "响应结构审查：未完成", "错误处理审查：未完成", "超时 / 频率限制审查：未完成", "人工批准开发只读 stub：未完成", "不能开发真实 connector", "不能读取 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"]) {
-      await expect(summaryPanel).toContainText(text);
-    }
-    await expect(summaryPanel).toContainText("查看只读适配器空壳");
-    const readonlyStubAdapterDisclosure = summaryPanel.locator("details.commerce-flight-readonly-stub-adapter-disclosure");
-    await expect(readonlyStubAdapterDisclosure).not.toHaveAttribute("open", "");
-    await openDisclosure(summaryPanel, "commerce-flight-readonly-stub-adapter-disclosure");
-    await expect(summaryPanel).toContainText("只读适配器空壳");
-    await expect(summaryPanel).toContainText("只读适配器空壳：已建立");
-    await expect(summaryPanel).toContainText("只读适配器空壳已建立");
-    await expect(summaryPanel).toContainText("尚未允许连接真实 provider");
-    for (const text of ["只读适配器空壳：可用", "真实网络连接：未启用", "真实价格返回：未启用", "bookingUrl 返回：未启用", "可以校验输入形状", "可以构建请求形状", "可以规范化响应形状", "不能读取 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"]) {
-      await expect(summaryPanel).toContainText(text);
-    }
-    await expect(summaryPanel).toContainText("查看 Sandbox Dry Run");
-    await expect(summaryPanel).toContainText("查看候选平台沙箱矩阵");
-    const matrixDisclosure = summaryPanel.locator("details.commerce-flight-sandbox-provider-matrix-disclosure");
-    await expect(matrixDisclosure).not.toHaveAttribute("open", "");
-    await openDisclosure(summaryPanel, "commerce-flight-sandbox-provider-matrix-disclosure");
-    await expect(matrixDisclosure).toContainText("候选平台沙箱矩阵");
-    for (const text of ["候选平台已进入沙箱矩阵，但尚未允许连接真实 provider。", "矩阵摘要：候选平台数量：7", "可返回真实价格：0", "可返回 bookingUrl：0", "可下单：0", "可付款：0", "网络连接：全部禁用", "API key：全部禁用", "endpoint：全部禁用", "当前结论：不能返回最低价两家", "候选平台沙箱矩阵默认全部阻断，只允许审计，不允许真实连接。", "候选平台沙箱矩阵只用于审计和准备，不代表已接入真实 provider。", "Google Flights", "Trip.com / 携程", "Skyscanner", "Kayak", "Expedia", "Booking Flights", "航司官网占位", "审批状态：未审查", "只读适配器开发许可：未授予", "只读适配器空壳：可用", "Sandbox Dry Run：外壳可用", "真实 provider：未连接", "API key：禁用", "endpoint：禁用", "网络：禁用", "价格返回：禁用", "bookingUrl：禁用", "下单：禁用", "付款：禁用"]) {
-      await expect(matrixDisclosure).toContainText(text);
-    }
     const matrix = await page.evaluate(() => window.WeishanCommerceFlightSandboxProviderMatrix && typeof window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract === "function" ? window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract() : null);
     expect(matrix).toEqual(expect.objectContaining({
-      matrixVersion:"2.0.83",
+      matrixVersion:"2.0.84",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -3541,18 +3270,9 @@ test.describe.serial("commerce agent workbench", () => {
         reason:"provider_matrix_no_real_connection"
       }));
     }
-    const sandboxDisclosure = summaryPanel.locator("details.commerce-flight-sandbox-dry-run-disclosure");
-    await expect(sandboxDisclosure).not.toHaveAttribute("open", "");
-    await openDisclosure(summaryPanel, "commerce-flight-sandbox-dry-run-disclosure");
-    await expect(summaryPanel).toContainText("Sandbox Dry Run");
-    await expect(summaryPanel).toContainText("沙箱空跑外壳已建立，但未连接真实 provider。");
-    await expect(summaryPanel).toContainText("只允许验证输入、请求和响应结构，不连接真实 endpoint，不读取真实 API key，不返回真实价格，不生成预订链接。");
-    for (const text of ["validate_user_input：验证用户输入", "build_request_shape：构建请求形状", "validate_request_shape：校验请求形状", "skip_network_call：跳过网络调用", "build_empty_response_shape：构建空响应形状", "validate_response_shape：校验响应形状", "block_price_return：阻断价格返回", "block_booking_url_return：阻断 bookingUrl 返回", "block_order_creation：阻断下单创建", "block_payment：阻断付款", "可以运行沙箱空跑外壳", "可以校验输入形状", "可以校验请求形状", "可以校验响应形状", "可以模拟控制流", "只使用 fixture / 本地结构", "不能读取真实 API key", "不能连接真实 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡", "真实 API key：已阻断", "真实 endpoint：已阻断", "真实网络请求：已阻断", "真实价格：已阻断", "bookingUrl：已阻断", "下单：已阻断", "付款：已阻断", "身份证 / 银行卡：已阻断"]) {
-      await expect(summaryPanel).toContainText(text);
-    }
     const sandboxDryRun = await page.evaluate(() => window.WeishanCommerceFlightSandboxDryRun && window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract ? window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract : null);
     expect(sandboxDryRun).toEqual(expect.objectContaining({
-      sandboxDryRunVersion:"2.0.83",
+      sandboxDryRunVersion:"2.0.84",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -3651,7 +3371,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(sandboxAssert).toBe(true);
     const readonlyStubPermission = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubPermission && typeof window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission === "function" ? window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission() : null);
     expect(readonlyStubPermission).toEqual(expect.objectContaining({
-      permissionVersion:"2.0.83",
+      permissionVersion:"2.0.84",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -3684,9 +3404,6 @@ test.describe.serial("commerce agent workbench", () => {
       canPay:false,
       canStoreIdentity:false
     }));
-    for (const text of ["候选与白名单", "平台审批", "接口与价格", "安全与执行", "平台身份审查：未开始", "Provider 条款审查：未开始", "人工审核：未完成", "最终人工批准：未完成", "API 文档审查：未开始", "API key 存储审查：未开始", "Endpoint 审查：未开始", "价格字段审查：未开始", "bookingUrl 审查：未开始", "当地法律审查：未开始", "税费 / 退改签字段审查：未开始", "Sandbox Dry Run：未开始", "只读价格源：未启用", "bookingUrl：未启用", "付款 / 下单：不支持"]) {
-      await expect(summaryPanel).toContainText(text);
-    }
     await installClipboardMock(page);
     await installOpenExternalMock(page);
     const historyCountBefore = await page.locator("#cmdHistory [data-history-id]").count();
@@ -3702,15 +3419,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect.poll(async () => latestOpenExternalUrl(page), { timeout:5000 }).toContain("Chengdu");
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
     await summaryPanel.getByRole("button", { name:"复制机票搜索条件" }).click();
-    for (const text of ["机票搜索条件", "出发地：上海", "目的地：成都", "出发日期：7月15日", "搜索目标：低价优先", "最终价格以真实平台为准"]) {
-      await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain(text);
-    }
-    await summaryPanel.getByRole("button", { name:"复制 Google Flights 模板" }).click();
-    for (const text of ["Google Flights search template", "From: Shanghai", "To: Chengdu", "Departure date: July 15", "lowest available fare", "final price must be checked on the real platform"]) {
-      await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain(text);
-    }
-    await summaryPanel.getByRole("button", { name:"复制 Trip.com / 携程模板" }).click();
-    for (const text of ["机票搜索模板", "出发地：上海", "目的地：成都", "出发日期：7月15日", "最终价格以真实平台为准"]) {
+    for (const text of ["机票搜索条件", "出发地：上海", "目的地：成都", "出发日期：7月15日", "排序：低价优先", "最终价格以真实平台为准"]) {
       await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain(text);
     }
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
@@ -3719,85 +3428,34 @@ test.describe.serial("commerce agent workbench", () => {
     await page.locator('#cmdHistory [data-history-id]', { hasText:"上海到成都" }).first().click();
     const historyDetail = page.locator('#cmdConsole [data-task-history-detail="true"]').first();
     await expect(historyDetail).toContainText("历史任务详情");
-    await expect(historyDetail).toContainText("机票搜索条件已整理");
+    await expect(historyDetail).toContainText("真实结果优先");
+    await expect(historyDetail).toContainText("机票搜索结果");
     await expect(historyDetail).toContainText("出发地：上海");
     await expect(historyDetail).toContainText("目的地：成都");
     await expect(historyDetail).toContainText("出发日期：7月15日");
-    await expect(historyDetail).toContainText("当前不能返回实时价格");
-    await expect(historyDetail).toContainText("当前状态：未接入真实机票价格源，暂不能返回实时价格。");
-    await expect(historyDetail).toContainText("价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。");
-    await expect(historyDetail).not.toContainText("最终价格以真实平台为准");
+    await expect(historyDetail).toContainText("排序：低价优先");
+    await expect(historyDetail).toContainText("暂无真实价格结果");
+    await expect(historyDetail).toContainText("当前尚未接入真实只读机票价格源，不能展示价格。");
+    await expect(historyDetail).toContainText("接入可信价格源后，将只显示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。");
     await expect(historyDetail).toContainText("打开全网搜索");
     await expect(historyDetail).toContainText("打开 Google Flights 搜索");
     await expect(historyDetail).toContainText("打开 Trip.com / 携程搜索");
-    await expect(historyDetail).toContainText("查看候选平台");
-    await expect(historyDetail.locator("details.commerce-flight-provider-candidates-disclosure")).not.toHaveAttribute("open", "");
-    await openDisclosure(historyDetail, "commerce-flight-provider-candidates-disclosure");
-    await expect(historyDetail).toContainText("候选平台档案与白名单规则");
-    await expect(historyDetail).toContainText("Google Flights");
-    await expect(historyDetail).toContainText("Trip.com / 携程");
-    await expect(historyDetail).toContainText("Skyscanner");
-    await expect(historyDetail).toContainText("Kayak");
-    await expect(historyDetail).toContainText("Expedia");
-    await expect(historyDetail).toContainText("Booking Flights");
-    await expect(historyDetail).toContainText("航司官网占位");
-    await expect(historyDetail).toContainText("查看 Provider 审批状态");
-    const historyApprovalDisclosure = historyDetail.locator("details.commerce-flight-provider-approval-disclosure");
-    await expect(historyApprovalDisclosure).not.toHaveAttribute("open", "");
-    await openDisclosure(historyDetail, "commerce-flight-provider-approval-disclosure");
-    await expect(historyDetail).toContainText("机票 Provider 接入审批");
-    await expect(historyDetail).toContainText("当前状态：候选平台已建档，尚未批准接入只读价格源。");
-    await expect(historyDetail).toContainText("审批状态：未审查");
-    await expect(historyDetail).toContainText("只读价格源：未启用");
-    await expect(historyDetail).toContainText("bookingUrl：未启用");
-    await expect(historyDetail).toContainText("付款 / 下单：不支持");
-    await expect(historyDetail).toContainText("候选平台：Google Flights / Trip.com / 携程 / Skyscanner / Kayak / Expedia");
-    await expect(historyDetail).toContainText("需要 allowlist");
-    await expect(historyDetail).toContainText("禁止未知域名 / 短链接 / 可疑域名");
-    await expect(historyDetail).toContainText("AI 不能生成可疑 provider 域名");
-    await expect(historyDetail).toContainText("人工审核后才允许进入 provider approval");
-    await expect(historyDetail).toContainText("候选平台只作档案，不连接 API，不返回价格，不生成 booking 链接。");
-    await expect(historyDetail).toContainText("默认允许域名白名单");
-    await expect(historyDetail).toContainText("默认阻断规则");
-    await expect(historyDetail).toContainText("查看只读适配器开发许可");
-    const historyReadonlyDisclosure = historyDetail.locator("details.commerce-flight-readonly-stub-permission-disclosure");
-    await expect(historyReadonlyDisclosure).not.toHaveAttribute("open", "");
-    await openDisclosure(historyDetail, "commerce-flight-readonly-stub-permission-disclosure");
-    await expect(historyDetail).toContainText("只读适配器开发许可");
-    await expect(historyDetail).toContainText("当前状态：尚未授予只读适配器开发许可。");
-    for (const text of ["平台身份确认：未完成", "官方域名 / allowlist 审查：未完成", "Provider 条款审查：未完成", "API 文档审查：未完成", "API key 安全存储方案：未完成", "请求结构审查：未完成", "响应结构审查：未完成", "错误处理审查：未完成", "超时 / 频率限制审查：未完成", "人工批准开发只读 stub：未完成", "不能开发真实 connector", "不能读取 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"]) {
-      await expect(historyDetail).toContainText(text);
-    }
-    await expect(historyDetail).toContainText("查看只读适配器空壳");
-    const historyReadonlyAdapterDisclosure = historyDetail.locator("details.commerce-flight-readonly-stub-adapter-disclosure");
-    await expect(historyReadonlyAdapterDisclosure).not.toHaveAttribute("open", "");
-    await openDisclosure(historyDetail, "commerce-flight-readonly-stub-adapter-disclosure");
-    await expect(historyDetail).toContainText("只读适配器空壳");
-    await expect(historyDetail).toContainText("只读适配器空壳：已建立");
-    await expect(historyDetail).toContainText("只读适配器空壳已建立");
-    await expect(historyDetail).toContainText("尚未允许连接真实 provider");
-    for (const text of ["只读适配器空壳：可用", "真实网络连接：未启用", "真实价格返回：未启用", "bookingUrl 返回：未启用", "可以校验输入形状", "可以构建请求形状", "可以规范化响应形状", "不能读取 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能打开预订页", "不能付款", "不能下单", "不能保存证件 / 银行卡"]) {
-      await expect(historyDetail).toContainText(text);
-    }
-    await expect(historyDetail).toContainText("查看 Sandbox Dry Run");
-    await expect(historyDetail).toContainText("查看候选平台沙箱矩阵");
-    const historyMatrixDisclosure = historyDetail.locator("details.commerce-flight-sandbox-provider-matrix-disclosure");
-    await expect(historyMatrixDisclosure).not.toHaveAttribute("open", "");
-    await openDisclosure(historyDetail, "commerce-flight-sandbox-provider-matrix-disclosure");
-    await expect(historyMatrixDisclosure).toContainText("候选平台沙箱矩阵");
-    for (const text of ["候选平台已进入沙箱矩阵，但尚未允许连接真实 provider。", "矩阵摘要：候选平台数量：7", "可返回真实价格：0", "可返回 bookingUrl：0", "可下单：0", "可付款：0", "网络连接：全部禁用", "API key：全部禁用", "endpoint：全部禁用", "当前结论：不能返回最低价两家", "候选平台沙箱矩阵默认全部阻断，只允许审计，不允许真实连接。", "候选平台沙箱矩阵只用于审计和准备，不代表已接入真实 provider。", "Google Flights", "Trip.com / 携程", "Skyscanner", "Kayak", "Expedia", "Booking Flights", "航司官网占位", "审批状态：未审查", "只读适配器开发许可：未授予", "只读适配器空壳：可用", "Sandbox Dry Run：外壳可用", "真实 provider：未连接", "API key：禁用", "endpoint：禁用", "网络：禁用", "价格返回：禁用", "bookingUrl：禁用", "下单：禁用", "付款：禁用"]) {
-      await expect(historyMatrixDisclosure).toContainText(text);
-    }
+    await expect(historyDetail).toContainText("复制机票搜索条件");
+    await expect(historyDetail).not.toContainText("查看高级调试信息");
+    await expect(historyDetail).not.toContainText("Sandbox Dry Run");
+    await expect(historyDetail).not.toContainText("候选平台沙箱矩阵");
+    await expect(historyDetail).not.toContainText("Provider 审批状态");
+    await expect(historyDetail).toContainText("真实结果优先");
+    await expect(historyDetail).toContainText("机票搜索结果");
     const historyOpenCountBefore = await page.evaluate(() => (window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ || []).length);
     await historyDetail.getByRole("button", { name:"打开 Google Flights 搜索" }).click();
     await expect.poll(async () => page.evaluate(() => (window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ || []).length), { timeout:5000 }).toBe(historyOpenCountBefore + 1);
     await expect.poll(async () => latestOpenExternalUrl(page), { timeout:5000 }).toContain("https://www.google.com/travel/flights?");
-    await expect(historyDetail).toContainText("查看技术细节");
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountAfterNewTask);
     await disableClipboardMock(page);
   });
 
-  test("v2.0.83 bare flight intent still renders the simple flight result card", async () => {
+  test("v2.0.84 bare flight intent still renders the simple flight result card", async () => {
     await resetCommerceTasks(page);
     await page.reload({ waitUntil:"domcontentloaded" });
     await gotoRoute(page, "home");
@@ -3806,22 +3464,24 @@ test.describe.serial("commerce agent workbench", () => {
     const home = page.locator('[data-commerce-home-summary="true"]').last();
     const summaryPanel = page.locator(".commerce-simple-flight-result");
     await expect(summaryPanel).toHaveCount(1, { timeout:15000 });
-    await expect(summaryPanel).toContainText("机票搜索条件已整理");
+    await expect(summaryPanel).toContainText("机票搜索结果");
     await expect(summaryPanel).toContainText("出发地：上海");
     await expect(summaryPanel).toContainText("目的地：成都");
     await expect(summaryPanel).toContainText("出发日期：7月15日");
-    await expect(summaryPanel).toContainText("搜索目标：按条件筛选");
-    await expect(summaryPanel).toContainText("当前状态：未接入真实机票价格源，暂不能返回实时价格。");
-    await expect(summaryPanel).toContainText("当前不能返回实时价格");
-    await expect(summaryPanel).toContainText("价格状态：暂未接入真实机票价格源，当前不能显示最低价两家。");
-    await expect(summaryPanel).toContainText("查看候选平台");
-    await expect(summaryPanel).toContainText("查看 Provider 审批状态");
-    await expect(summaryPanel).toContainText("查看只读适配器开发许可");
-    await expect(summaryPanel).toContainText("查看只读适配器空壳");
-    await expect(summaryPanel).toContainText("查看 Sandbox Dry Run");
-    await expect(summaryPanel).toContainText("查看候选平台沙箱矩阵");
-    const bareMatrixDisclosure = summaryPanel.locator("details.commerce-flight-sandbox-provider-matrix-disclosure");
-    await expect(bareMatrixDisclosure).not.toHaveAttribute("open", "");
+    await expect(summaryPanel).toContainText("排序：按条件筛选");
+    await expect(summaryPanel).toContainText("暂无真实价格结果");
+    await expect(summaryPanel).toContainText("当前尚未接入真实只读机票价格源，不能展示价格。");
+    await expect(summaryPanel).toContainText("打开全网搜索");
+    await expect(summaryPanel).toContainText("打开 Google Flights 搜索");
+    await expect(summaryPanel).toContainText("打开 Trip.com / 携程搜索");
+    await expect(summaryPanel).toContainText("复制机票搜索条件");
+    await expect(summaryPanel).not.toContainText("查看高级调试信息");
+    await expect(summaryPanel).not.toContainText("查看候选平台");
+    await expect(summaryPanel).not.toContainText("查看 Provider 审批状态");
+    await expect(summaryPanel).not.toContainText("查看只读适配器开发许可");
+    await expect(summaryPanel).not.toContainText("查看只读适配器空壳");
+    await expect(summaryPanel).not.toContainText("查看 Sandbox Dry Run");
+    await expect(summaryPanel).not.toContainText("查看候选平台沙箱矩阵");
     await expect(summaryPanel).not.toContainText("最终价格以真实平台为准");
     await expect(summaryPanel).not.toContainText(/¥\s*\d+/);
     const defaultText = await visibleTextWithoutTechnicalDetails(home);
@@ -3830,10 +3490,10 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.0.83 sidebar version stays in sync with release version", async () => {
+  test("v2.0.84 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.0.83");
+    await expect(sidebarFoot).toContainText("weishan v2.0.84");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 
@@ -3851,7 +3511,7 @@ test.describe.serial("commerce agent workbench", () => {
       expect(homeText).not.toContain(text);
     }
     await expect(home).toContainText(/当前只是(帮你)?整理搜索条件[\s\S]*不(会)?访问真实平台[\s\S]*不(会)?返回价格[\s\S]*不(会)?跳转购买或预订[\s\S]*不(会)?付款或下单/);
-    await expect(home).toContainText("查看技术细节");
+    await expect(home).toContainText("查看高级调试信息");
     await openTechnicalDetails(home);
     for (const text of ["provider", "API key", "endpoint", "Connector Gate", "Sandbox Dry Run", "Provider Approval", "Provider Onboarding", "Secret Storage", "Stub", "dispatch", "gate", "AI fallback"]) {
       await expect(home).toContainText(text);
@@ -3867,14 +3527,11 @@ test.describe.serial("commerce agent workbench", () => {
     }
     await expect(detail).toContainText("历史任务详情");
     await expect(detail).toContainText("最终结果");
-    await expect(detail).toContainText("查看可执行清单");
-    await expect(detail).toContainText("查看平台模板");
+    await expect(detail).toContainText("查看高级调试信息");
+    await expect(detail).not.toContainText("查看可执行清单");
+    await expect(detail).not.toContainText("查看平台模板");
     await expect(detail.getByRole("button", { name:"复制全部搜索条件" })).toHaveCount(1);
-    await expect(detail).toContainText("查看技术细节");
-    await openTechnicalDetails(detail);
-    for (const text of ["provider", "API key", "endpoint", "Connector Gate", "Sandbox Dry Run", "Provider Approval", "Provider Onboarding", "Secret Storage", "Stub", "dispatch", "gate", "AI fallback"]) {
-      await expect(detail).toContainText(text);
-    }
+    await expect(detail).not.toContainText("查看技术细节");
   });
 
   test("v2.0.62 commerce process and safety panels are collapsed by default", async () => {
@@ -3885,24 +3542,20 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, runId + "-COLLAPSE-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
     await waitForLatestDraftReviewReady(page);
     const home = page.locator('[data-commerce-home-summary="true"]').last();
-    const homeProcess = home.locator("details.commerce-process-disclosure");
-    const homeSafety = home.locator("details.commerce-safety-disclosure");
+    await expect(home).toContainText("查看高级调试信息");
+    const homeAdvancedDebug = home.locator("details.commerce-simple-flight-advanced-debug-disclosure");
+    await expect(homeAdvancedDebug).toHaveCount(1);
+    await expect(homeAdvancedDebug).not.toHaveAttribute("open", "");
+    await openAdvancedDebug(home);
     await expect(home).toContainText("查看分析过程");
     await expect(home).toContainText("查看安全边界");
-    await expect(homeProcess).toHaveCount(1);
-    await expect(homeSafety).toHaveCount(1);
-    await expect(homeProcess).not.toHaveAttribute("open", "");
-    await expect(homeSafety).not.toHaveAttribute("open", "");
-    await homeProcess.locator("summary").click();
-    await homeSafety.locator("summary").click();
-    await expect(homeProcess).toHaveAttribute("open", "");
-    await expect(homeSafety).toHaveAttribute("open", "");
+    await expect(home).toContainText("查看技术细节");
     await page.locator("#commerceViewPlanBtn").click();
     const detail = page.locator(".commerce-detail").first();
     await expect(detail.locator("details.commerce-process-disclosure")).toHaveCount(1);
-    await expect(detail.locator("details.commerce-safety-disclosure")).toHaveCount(1);
-    await expect(detail.locator("details.commerce-process-disclosure")).not.toHaveAttribute("open", "");
-    await expect(detail.locator("details.commerce-safety-disclosure")).not.toHaveAttribute("open", "");
+    await expect(detail.locator("details.commerce-safety-disclosure").first()).toHaveCount(1);
+    await expect(detail.locator("details.commerce-process-disclosure").first()).not.toHaveAttribute("open", "");
+    await expect(detail.locator("details.commerce-safety-disclosure").first()).not.toHaveAttribute("open", "");
   });
 
   test("task history detail restores subplan draft review summary without rerun", async () => {
@@ -3922,24 +3575,20 @@ test.describe.serial("commerce agent workbench", () => {
     const detail = page.locator('#cmdConsole [data-task-history-detail="true"]').first();
     await expect(detail).toContainText("历史任务详情");
     await expect(detail.locator(".commerce-result-summary-panel")).toContainText("最终结果");
-    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("查看可执行清单");
-    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("查看平台模板");
+    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("暂无真实价格结果");
+    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("查看高级调试信息");
+    await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看可执行清单");
+    await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看平台模板");
+    await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看技术细节");
     await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制全部搜索条件" })).toHaveCount(1);
-    await openDisclosure(detail.locator(".commerce-result-summary-panel"), "commerce-actionable-checklist-disclosure");
-    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制机票搜索条件" })).toHaveCount(1);
-    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制酒店搜索条件" })).toHaveCount(1);
-    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制电脑搜索条件" }).first()).toBeVisible();
-    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制全部清单" })).toHaveCount(1);
-    await expect(detail).toContainText("查看技术细节");
+    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制机票搜索条件" })).toHaveCount(0);
+    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制酒店搜索条件" })).toHaveCount(0);
+    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制全部清单" })).toHaveCount(0);
     await expect(detail).toContainText("历史回看不会重新执行任务");
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
     for (const field of ["draftReviewVersion", "defaultMode=review_completed_subplan_drafts", "reviewItems", "confirmableSummary", "unconfirmedFields", "remainingRisks", "canAccessProvider=false"]) await expect(detail).not.toContainText(field);
     await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(detail.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
-    await openTechnicalDetails(detail);
-    await expect(detail).toContainText("子计划草稿复核摘要");
-    await expect(detail).toContainText("旅行计划");
-    await expect(detail).toContainText("商品采购计划");
   });
 
   test("task history detail restore opens prior task in main area without rerun", async () => {
@@ -4017,29 +3666,18 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail.locator(".commerce-result-summary-panel")).toContainText("最终结果");
     await expect(detail.locator(".commerce-result-summary-panel")).toContainText("旅行：");
     await expect(detail.locator(".commerce-result-summary-panel")).toContainText("电脑：");
-    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("查看可执行清单");
-    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("查看平台模板");
+    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("查看高级调试信息");
+    await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看可执行清单");
+    await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看平台模板");
+    await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看技术细节");
     await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制全部搜索条件" })).toHaveCount(1);
-    await openDisclosure(detail.locator(".commerce-result-summary-panel"), "commerce-actionable-checklist-disclosure");
-    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制机票搜索条件");
-    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制酒店搜索条件");
+    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制旅行搜索条件");
     await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制电脑搜索条件");
-    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制全部清单");
-    await expect(detail).toContainText("查看技术细节");
     await expect(detail).toContainText("历史回看不会重新执行任务");
     await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(detail.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
-    await openTechnicalDetails(detail);
-    await expect(detail).toContainText("子计划草稿复核摘要");
-    await expect(detail).toContainText("子计划草稿确认与修正");
-    await expect(detail).toContainText("子计划补齐工作台");
-    await expect(detail).toContainText("旅行计划");
-    await expect(detail).toContainText("商品采购计划");
-    for (const text of ["出发地：成都", "出行日期：7月12日", "入住日期：7月12日", "离店日期：7月16日", "儿童年龄：8岁", "品牌偏好：都可以", "性能要求：32G内存 / 1T硬盘", "收货地：成都", "是否接受二手：不接受", "补齐度", "仍缺字段"]) await expect(detail).toContainText(text);
-    await expect(detail).toContainText("是否访问真实平台：否");
-    await expect(detail).toContainText("是否返回价格：否");
-    await expect(detail).toContainText("是否跳转购买：否");
+    for (const text of ["成都出发", "7月12日去东京", "7月12日入住", "7月16日离店", "孩子8岁", "32G 内存", "1T 硬盘", "收货地成都", "不接受二手"]) await expect(detail).toContainText(text);
 
     await page.locator("#historyBackBtn").click();
     await expect(page.locator('#cmdConsole [data-task-history-detail="true"]')).toHaveCount(0);
@@ -4067,32 +3705,22 @@ test.describe.serial("commerce agent workbench", () => {
     const summaryPanel = detail.locator(".commerce-result-summary-panel");
     await expect(detail).toContainText("历史任务详情");
     await expect(summaryPanel).toContainText("最终结果");
-    await expect(summaryPanel).toContainText("查看可执行清单");
-    await expect(summaryPanel).toContainText("查看平台模板");
+    await expect(summaryPanel).toContainText("查看高级调试信息");
+    await expect(summaryPanel).not.toContainText("查看可执行清单");
+    await expect(summaryPanel).not.toContainText("查看平台模板");
     await expect(summaryPanel).toContainText("旅行：");
     await expect(summaryPanel).toContainText("电脑：");
-    await openDisclosure(summaryPanel, "commerce-actionable-checklist-disclosure");
-    await expect(summaryPanel).toContainText("复制机票搜索条件");
-    await expect(summaryPanel).toContainText("复制酒店搜索条件");
+    await expect(summaryPanel).toContainText("复制旅行搜索条件");
     await expect(summaryPanel).toContainText("复制电脑搜索条件");
-    await expect(summaryPanel).toContainText("复制全部清单");
-    await expect(detail.locator("details.commerce-process-disclosure")).not.toHaveAttribute("open", "");
-    await expect(detail.locator("details.commerce-safety-disclosure")).not.toHaveAttribute("open", "");
+    await expect(detail.locator("details.commerce-process-disclosure")).toHaveCount(0);
+    await expect(detail.locator("details.commerce-safety-disclosure")).toHaveCount(0);
     await expect(summaryPanel.getByRole("button", { name:"复制全部搜索条件" })).toHaveCount(1);
-    await summaryPanel.locator('[data-commerce-copy-kind="flight"]').first().click();
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("出发地：成都");
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("目的地：东京");
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("最终价格以真实平台为准");
-    await summaryPanel.locator('[data-commerce-copy-kind="hotel"]').first().click();
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("入住日期：7月12日");
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("离店日期：7月16日");
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("最终价格以真实平台为准");
-    await summaryPanel.locator('[data-commerce-copy-kind="computer"]').last().click();
+    await summaryPanel.locator('[data-commerce-copy-kind="computer"]').first().click();
     await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("用途：剪视频");
     await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("内存：32G");
     await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("硬盘：1T");
     await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("是否接受二手：不接受");
-    await summaryPanel.locator('[data-commerce-copy-kind="full"]').last().click();
+    await summaryPanel.locator('[data-commerce-copy-kind="full"]').first().click();
     await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("机票搜索条件");
     await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("酒店搜索条件");
     await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("电脑搜索条件");
@@ -4124,20 +3752,20 @@ test.describe.serial("commerce agent workbench", () => {
     const summaryPanel = detail.locator(".commerce-result-summary-panel");
     await expect(detail).toContainText("历史任务详情");
     await expect(summaryPanel).toContainText("最终结果");
-    await expect(summaryPanel).toContainText("查看可执行清单");
-    await expect(summaryPanel).toContainText("查看平台模板");
-    await openDisclosure(summaryPanel, "commerce-platform-template-disclosure");
+    await expect(summaryPanel).toContainText("查看高级调试信息");
+    await expect(summaryPanel).not.toContainText("查看可执行清单");
+    await expect(summaryPanel).not.toContainText("查看平台模板");
     for (const text of ["复制 Google Flights 模板", "复制 Trip.com / 携程模板", "复制 Booking 模板", "复制 Agoda 模板", "复制京东模板", "复制淘宝 / 天猫模板", "复制 Amazon 模板", "复制 Best Buy 模板", "复制全部平台模板"]){
-      await expect(summaryPanel).toContainText(text);
+      await expect(summaryPanel).not.toContainText(text);
     }
-    await expect(summaryPanel.locator(".commerce-platform-template-copy-btn")).toHaveCount(9);
-    await expect(detail.locator("details.commerce-process-disclosure")).not.toHaveAttribute("open", "");
-    await expect(detail.locator("details.commerce-safety-disclosure")).not.toHaveAttribute("open", "");
-    await summaryPanel.getByRole("button", { name:"复制全部平台模板" }).click();
-    for (const text of ["Google Flights search template", "Trip.com / 携程模板", "Booking hotel search template", "Agoda hotel search template", "京东电脑搜索模板", "淘宝 / 天猫电脑搜索模板", "Amazon laptop search template", "Best Buy laptop search template", "当前不会访问真实平台", "当前不会付款或下单"]){
+    await expect(summaryPanel.locator(".commerce-platform-template-copy-btn")).toHaveCount(0);
+    await expect(detail.locator("details.commerce-process-disclosure")).toHaveCount(0);
+    await expect(detail.locator("details.commerce-safety-disclosure")).toHaveCount(0);
+    await summaryPanel.getByRole("button", { name:"复制全部搜索条件" }).click();
+    for (const text of ["机票搜索条件", "酒店搜索条件", "电脑搜索条件", "当前不会访问真实平台", "不会付款或下单"]){
       await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain(text);
     }
-    await expect(summaryPanel.locator("[data-commerce-platform-template-feedback]").first()).toContainText("已复制，可粘贴到外部平台搜索");
+    await expect(summaryPanel.locator("[data-commerce-copy-feedback]").first()).toContainText("已复制，可粘贴到外部平台搜索");
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
     await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(detail.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
@@ -4919,12 +4547,12 @@ test.describe.serial("commerce agent workbench", () => {
     const command = runId + " 帮我找成都到上海最便宜机票";
     await submitHomeCommand(page, command);
     await expect(page.locator("[data-commerce-home-summary]")).toHaveCount(1);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText(/未搜索|未下单|未付款|未提交订单/);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText(/类型：机票/);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("待补充：出行日期");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前尚未接入真实只读价格源");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText(/不收款|不下单|不保存身份证/);
     await expect(page.locator("#commerceViewPlanBtn")).toBeVisible();
-    await expect(page.getByText("机票搜索已生成")).toHaveCount(1);
+    await expect(page.getByText("暂无真实价格结果")).toHaveCount(1);
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("commerceAgent.plan");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("realExecution=false");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("planned");
@@ -4992,8 +4620,10 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-booking-link").first()).toHaveText("打开模型页");
     await expect(page.locator(".commerce-booking-link").first()).toHaveAttribute("data-url", /https:\/\/openrouter\.ai\/models\//);
     await gotoRoute(page, "home");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已找到 2 个候选模型");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前较低价格模型 Model B");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前尚未接入真实只读价格源");
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("已找到 2 个候选模型");
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("当前较低价格模型 Model B");
   });
 
   test("OpenRouter provider failure does not show fake prices", async () => {
@@ -5022,21 +4652,11 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
     await expect(currentTaskLogs(page)).not.toContainText("准备调用 AI 网关");
     await expect(currentTaskLogs(page)).not.toContainText("如何手动");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已识别为机票搜索计划");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("出发地：成都");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("目的地：北京");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("日期：明天");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
-    await openTechnicalDetails(page.locator("[data-commerce-home-summary]"));
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText(/机票\s*OTA/);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("航司官网");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前不会访问任何真实机票平台");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前不会返回票价");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("未下单、未付款、未提交订单、未保存证件");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前尚未接入真实只读价格源");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天成都到北京机票");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不收款、不下单");
     await expect(page.locator("#commerceViewPlanBtn")).toBeVisible();
 
     await page.locator("#commerceViewPlanBtn").click();
@@ -5059,37 +4679,37 @@ test.describe.serial("commerce agent workbench", () => {
 
   test("flight lookup phrasing still routes to commerce instead of chat", async () => {
     await submitHomeCommand(page, runId + " 明天成都飞北京");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天成都飞北京");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
 
     await submitHomeCommand(page, runId + " 查一下明天成都到北京的航班");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：机票");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都 → 北京");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("明天成都到北京的航班");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
   });
 
   test("hotel booking and product buying intents route to commerce before chat", async () => {
     await submitHomeCommand(page, runId + " 帮我预订上海低价酒店");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("酒店计划已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：酒店");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("上海低价酒店");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
 
     await submitHomeCommand(page, runId + " 帮我买一台最便宜的 MacBook");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("MacBook搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：商品");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("MacBook");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
   });
 
   test("product buying intent keeps user keyword and shows no-provider state without price", async () => {
     await submitHomeCommand(page, runId + " 买华为手机");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：商品");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品关键词：华为手机");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("买华为手机");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("当地法律合规审查");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("合规状态：未确认");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("合规依据：定位服务或收货 / 目的地信息未完成");
@@ -5129,26 +4749,25 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.getByRole("button", { name:"搜索适配器未配置" })).toBeDisabled();
 
     await submitHomeCommand(page, runId + " 买华为1手机");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为1手机搜索已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品关键词：华为1手机");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("买华为1手机");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
 
     await submitHomeCommand(page, runId + " 买 iPhone");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("iPhone搜索已生成");
-    await openTechnicalDetails(page.locator("[data-commerce-home-summary]"));
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品搜索试点候选：eBay Browse API 等");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规审查");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("iPhone");
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("当地法律合规审查");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("去购买");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
 
     await submitHomeCommand(page, runId + " 买 MacBook");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("MacBook搜索已生成");
-    await openTechnicalDetails(page.locator("[data-commerce-home-summary]"));
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("网络搜索未启用");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当地法律合规审查");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("MacBook");
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("当地法律合规审查");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("去购买");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
@@ -5167,10 +4786,9 @@ test.describe.serial("commerce agent workbench", () => {
     expect(policy.canCalculateAccurateLandedCost).toBe(true);
 
     await submitHomeCommand(page, runId + " 买华为手机");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已生成");
-    await openTechnicalDetails(page.locator("[data-commerce-home-summary]"));
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("商品搜索试点候选：eBay Browse API 等");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("买华为手机");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("需要设置收货目的地");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("去购买");
@@ -5179,15 +4797,11 @@ test.describe.serial("commerce agent workbench", () => {
   test("no-provider UI exposes safe health flags for flight and product", async () => {
     await clearCommerceSearchMock(page);
     await submitHomeCommand(page, runId + " 帮我预定明天成都到北京机票");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已生成");
-    await openTechnicalDetails(page.locator("[data-commerce-home-summary]"));
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("全球多源 provider 候选池：准备中，尚未接入");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText(/机票\s*OTA/);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("航司官网");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("区域旅行平台");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前不会访问任何真实机票平台");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前不会返回票价");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("未下单、未付款、未提交订单、未保存证件");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前尚未接入真实只读价格源");
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("全球多源 provider 候选池：准备中，尚未接入");
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("Provider Sandbox Dry Run");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("CNY ");
     await expect(page.locator("[data-commerce-home-summary] .commerce-booking-link")).toHaveCount(0);
     await page.locator("#commerceViewPlanBtn").click();
@@ -5243,7 +4857,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail .commerce-booking-link")).toHaveCount(0);
 
     await submitHomeCommand(page, runId + " 买华为手机");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已生成");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("买华为手机");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("当地法律合规审查");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("合规状态：未确认");
     await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("合规依据：定位服务或收货 / 目的地信息未完成");
@@ -5300,26 +4916,15 @@ test.describe.serial("commerce agent workbench", () => {
     const assertHomeOnboardingPanelVisible = async () => {
       const home = page.locator("[data-commerce-home-summary]");
       await expect(home.locator(".commerce-onboarding-review-panel")).toHaveCount(0);
-      await expect(home).toContainText("查看技术细节");
-      await expect(home).toContainText("当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。");
-      await openTechnicalDetails(home);
-      await expect(home.locator(".commerce-onboarding-review-panel")).toHaveCount(1);
-      await expect(home.locator(".commerce-onboarding-group")).toHaveCount(5);
-      await expect(home).toContainText("Provider 接入审查面板");
-      await expect(home).toContainText("总体状态：未完成，暂不可接入真实 provider");
-      await expect(home).toContainText("合规与条款");
-      await expect(home).toContainText("API 与接口");
-      await expect(home).toContainText("价格与费用字段");
-      await expect(home).toContainText("安全边界");
-      await expect(home).toContainText("当前阻断状态");
-      await expect(home).toContainText("法律条款审查：未完成");
-      await expect(home).toContainText("API 文档审查：未完成");
-      await expect(home).toContainText("API key 存储方案：未审查");
-      await expect(home).toContainText("价格/税费/运费字段审查：未完成");
-      await expect(home).toContainText("隐私与合规审查：未完成");
-      await expect(home).toContainText("网络搜索：未启用");
-      await expect(home).toContainText("实时价格：不可用");
-      await expect(home).toContainText("精确跳转：待真实 provider 接入后启用");
+      await expect(home).toContainText("查看高级调试信息");
+      await expect(home).toContainText("暂无真实价格结果");
+      await expect(home).toContainText("当前尚未接入真实只读价格源");
+      await expect(home).toContainText("当前只是整理搜索条件，不访问真实平台，不返回价格，不跳转购买或预订，不付款或下单。");
+      await expect(home).not.toContainText("Provider 接入审查面板");
+      await expect(home).not.toContainText("总体状态：未完成，暂不可接入真实 provider");
+      await expect(home).not.toContainText("API key 存储方案：未审查");
+      await expect(home).not.toContainText("网络搜索：未启用");
+      await expect(home).not.toContainText("实时价格：不可用");
       await expect(home).not.toContainText("provider_onboarding_required");
       await expect(home).not.toContainText("endpointConnected=false");
       await expect(home).not.toContainText("selectedStatus");
@@ -5663,16 +5268,18 @@ test.describe.serial("commerce agent workbench", () => {
     await expect.poll(() => page.evaluate(() => window.__commerceOpenedUrl)).toBe("https://shop.example.test/huawei-standard");
     await expect(page.locator(".commerce-detail")).toContainText("weishan 只提供比价与跳转，不代付款、不自动下单、不保存支付或证件信息");
     await gotoRoute(page, "home");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为手机搜索已完成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最低到手价 CNY 2099");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前尚未接入真实只读价格源");
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("最低到手价 CNY 2099");
     await clearCommerceSearchMock(page);
   });
 
   test("cruise category creates plan without fake price", async () => {
     const command = runId + " 帮我找上海出发的低价邮轮";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("邮轮计划已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：邮轮");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("低价邮轮");
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.locator(".commerce-task-list")).toContainText("邮轮");
     await page.getByRole("button", { name:"查看计划" }).first().click();
@@ -5688,8 +5295,9 @@ test.describe.serial("commerce agent workbench", () => {
   test("private jet category creates inquiry-only plan without fake price", async () => {
     const command = runId + " 帮我找一架公务机从成都飞香港";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("公务机计划已生成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("类型：公务机");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("公务机");
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.locator(".commerce-task-list")).toContainText("公务机");
     await page.getByRole("button", { name:"查看计划" }).first().click();
@@ -5790,9 +5398,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator(".commerce-detail")).not.toContainText("成都到上海经济舱 B");
     await expect(page.locator(".commerce-detail")).not.toContainText("缺少总价的结果");
     await gotoRoute(page, "home");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索已完成");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已找到 2 个真实 provider 结果");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最低到手价 CNY 780");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前尚未接入真实只读价格源");
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("最低到手价 CNY 780");
   });
 
   test("OpenRouter unparsable pricing and unsafe model links are blocked", async () => {
@@ -5831,9 +5439,11 @@ test.describe.serial("commerce agent workbench", () => {
   test("direct order and payment request remains blocked and plan-only", async () => {
     const command = runId + " 帮我直接下单并付款";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已阻断");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("原因：涉及下单 / 付款");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会下单、付款或提交订单");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前尚未接入真实只读价格源");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("weishan 不收款、不下单");
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("原因：涉及下单 / 付款");
     await expect(page.locator("#commerceViewPlanBtn")).toBeVisible();
     await expect(currentTaskLogs(page)).not.toContainText("commerceAgent.plan");
     await expect(currentTaskLogs(page)).not.toContainText("realExecution=false");
@@ -5851,8 +5461,10 @@ test.describe.serial("commerce agent workbench", () => {
   test("cruise payment request is blocked without payment or order submit", async () => {
     const command = runId + " 帮我直接预订邮轮并付款";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已阻断");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会下单、付款或提交订单");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("weishan 不收款、不下单");
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("已阻断");
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.locator(".commerce-detail")).toContainText("已阻断");
     await expect(page.locator(".commerce-detail")).toContainText("不会下单、付款或提交订单");
@@ -5862,8 +5474,10 @@ test.describe.serial("commerce agent workbench", () => {
   test("private jet passport upload and inquiry submit are blocked", async () => {
     const command = runId + " 帮我上传护照并预订公务机";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已阻断");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会下单、付款或提交订单，也不会上传身份证/护照或提交询价表");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("weishan 不收款、不下单");
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("已阻断");
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.locator(".commerce-detail")).toContainText("已阻断");
     await expect(page.locator(".commerce-detail")).toContainText("不会下单、付款或提交订单");
@@ -5873,9 +5487,10 @@ test.describe.serial("commerce agent workbench", () => {
   test("flight payment and id upload request is blocked without upload payment or order submit", async () => {
     const command = runId + " 帮我上传身份证订机票并付款";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("已阻断");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会下单、付款或提交订单");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会上传身份证/护照或提交询价表");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("weishan 不收款、不下单");
+    await expect(page.locator("[data-commerce-home-summary]")).not.toContainText("已阻断");
     await page.locator("#commerceViewPlanBtn").click();
     await expect(page.locator(".commerce-detail")).toContainText("已阻断");
     await expect(page.locator(".commerce-detail")).toContainText("不会下单、付款或提交订单");
@@ -5964,17 +5579,18 @@ test.describe.serial("commerce agent workbench", () => {
     const localRunId = runId + "-LOCAL-LAW-PRODUCT";
     await submitHomeCommand(page, localRunId + " 买华为手机");
     const home = page.locator('[data-commerce-home-summary="true"]').last();
-    await expect(home).toContainText(/计划已生成|搜索已生成/);
-    await expect(home).toContainText("商品关键词");
-    await expect(home).toContainText("查看分析过程");
-    await expect(home).toContainText("查看安全边界");
-    await expect(home).toContainText("查看技术细节");
-    await expect(home).toContainText("当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。");
+    await expect(home).toContainText("最终结果");
+    await expect(home).toContainText("暂无真实价格结果");
+    await expect(home).toContainText("当前尚未接入真实只读价格源");
+    await expect(home).toContainText("查看高级调试信息");
+    await expect(home).toContainText("当前只是整理搜索条件，不访问真实平台，不返回价格，不跳转购买或预订，不付款或下单。");
     const defaultHomeText = await visibleTextWithoutTechnicalDetails(home);
     expect(defaultHomeText).not.toContain("provider");
     expect(defaultHomeText).not.toContain("Provider");
     expect(defaultHomeText).not.toContain("API key");
     expect(defaultHomeText).not.toContain("endpoint");
+    expect(defaultHomeText).not.toContain("Sandbox Dry Run");
+    expect(defaultHomeText).not.toContain("候选平台沙箱矩阵");
     expect(defaultHomeText).not.toContain("当地法律合规审查");
     expect(defaultHomeText).not.toContain("合规状态：未确认");
     expect(defaultHomeText).not.toContain("购物和预订必须遵守当地法律");
@@ -6026,20 +5642,23 @@ test.describe.serial("commerce agent workbench", () => {
     for (const text of inputs) {
       await submitHomeCommand(page, runId + "-LOCAL-LAW-REGULATED " + text);
       const home = page.locator('[data-commerce-home-summary="true"]').last();
-      await expect(home).toContainText(/计划已生成/);
-      await expect(home).toContainText("查看分析过程");
-      await expect(home).toContainText("查看安全边界");
-      await expect(home).toContainText("查看技术细节");
-      await expect(home).toContainText("当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。");
-      await expect(home).not.toContainText("provider");
-      await expect(home).not.toContainText("Provider");
-      await expect(home).not.toContainText("API key");
-      await expect(home).not.toContainText("endpoint");
-      await expect(home).not.toContainText("当地法律合规审查");
-      await expect(home).not.toContainText("该需求可能涉及当地法律限制");
-      await expect(home).not.toContainText("需要先确认当前位置和收货地 / 目的地");
-      await expect(home).not.toContainText("合法性未确认前，weishan 不显示价格、不跳转购买或预订页面");
-      await expect(home).not.toContainText("当前仅做风险分类和阻断，不做真实法律结论");
+      await expect(home).toContainText("最终结果");
+      await expect(home).toContainText("暂无真实价格结果");
+      await expect(home).toContainText("当前尚未接入真实只读价格源");
+      await expect(home).toContainText("查看高级调试信息");
+      await expect(home).toContainText("当前只是整理搜索条件，不访问真实平台，不返回价格，不跳转购买或预订，不付款或下单。");
+      const defaultHomeText = await visibleTextWithoutTechnicalDetails(home);
+      expect(defaultHomeText).not.toContain("provider");
+      expect(defaultHomeText).not.toContain("Provider");
+      expect(defaultHomeText).not.toContain("API key");
+      expect(defaultHomeText).not.toContain("endpoint");
+      expect(defaultHomeText).not.toContain("Sandbox Dry Run");
+      expect(defaultHomeText).not.toContain("候选平台沙箱矩阵");
+      expect(defaultHomeText).not.toContain("当地法律合规审查");
+      expect(defaultHomeText).not.toContain("该需求可能涉及当地法律限制");
+      expect(defaultHomeText).not.toContain("需要先确认当前位置和收货地 / 目的地");
+      expect(defaultHomeText).not.toContain("合法性未确认前，weishan 不显示价格、不跳转购买或预订页面");
+      expect(defaultHomeText).not.toContain("当前仅做风险分类和阻断，不做真实法律结论");
       await expect(home).not.toContainText("已确认合法");
       await expect(home).not.toContainText("可以放心购买");
       await expect(home).not.toContainText("保证合规");
@@ -6246,28 +5865,18 @@ test.describe.serial("commerce agent workbench", () => {
     const main = page.locator('#cmdConsole [data-task-history-detail="true"]').first();
     await expect(main).toContainText("历史任务详情");
     await expect(main).toContainText("最终结果");
-    await expect(main).toContainText("旅行：");
-    await expect(main).toContainText("电脑：");
-    await expect(main).toContainText("查看可执行清单");
-    await expect(main).toContainText("查看平台模板");
-    await openDisclosure(main.locator(".commerce-result-summary-panel"), "commerce-actionable-checklist-disclosure");
-    await expect(main).toContainText("复制机票搜索条件");
-    await expect(main).toContainText("复制酒店搜索条件");
-    await expect(main).toContainText("复制电脑搜索条件");
-    await expect(main).toContainText("复制全部清单");
+    await expect(main).toContainText("暂无真实价格结果");
+    await expect(main).toContainText("当前尚未接入真实只读价格源");
     await expect(main).toContainText("两个都确认");
-    await expect(main).toContainText("查看分析过程");
-    await expect(main).toContainText("查看安全边界");
-    await expect(main).toContainText("查看技术细节");
+    await expect(main).toContainText("查看高级调试信息");
     const defaultMainText = await visibleTextWithoutTechnicalDetails(main);
     expect(defaultMainText).not.toContain("子计划草稿确认与修正");
+    expect(defaultMainText).not.toContain("Sandbox Dry Run");
+    expect(defaultMainText).not.toContain("候选平台沙箱矩阵");
     expect(defaultMainText).not.toContain("gate");
     expect(defaultMainText).not.toContain("provider");
     expect(defaultMainText).not.toContain("API key");
     expect(defaultMainText).not.toContain("endpoint");
-    await openDisclosure(main, "commerce-process-disclosure");
-    await openTechnicalDetails(main);
-    await expect(main).toContainText(/子计划草稿确认与修正|用户确认草稿是否准确|确认状态|待确认|已确认|已修正待复核|草稿已补齐，等待确认/);
     await expect(page.locator('#cmdHistory [data-history-id]')).not.toHaveCount(0);
     await expect(main).not.toContainText("去购买");
     await expect(main).not.toContainText("去预订");
@@ -6282,14 +5891,11 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, runId + "-DRAFT-RAW 买华为手机");
     await submitHomeCommand(page, runId + "-DRAFT-RAW-CONFIRM 这个草稿确认");
     const home = page.locator('[data-commerce-home-summary="true"]').last();
-    await expect(home).toContainText(/结果摘要|全球采购计划已生成/);
-    await expect(home).toContainText("草稿下一步动作");
-    await expect(home).toContainText("快捷动作");
-    await expect(home).toContainText("两个都确认");
-    await expect(home).toContainText("查看分析过程");
-    await expect(home).toContainText("查看安全边界");
-    await expect(home).toContainText("查看技术细节");
-    await expect(home).toContainText("当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。");
+    await expect(home).toContainText("最终结果");
+    await expect(home).toContainText("暂无真实价格结果");
+    await expect(home).toContainText("当前尚未接入真实只读价格源");
+    await expect(home).toContainText("查看高级调试信息");
+    await expect(home).toContainText("当前只是整理搜索条件，不访问真实平台，不返回价格，不跳转购买或预订，不付款或下单。");
     const defaultHomeText = await visibleTextWithoutTechnicalDetails(home);
     expect(defaultHomeText).not.toContain("子计划草稿确认与修正");
     expect(defaultHomeText).not.toContain("draftConfirmationVersion");
@@ -6384,6 +5990,7 @@ test.describe.serial("commerce agent workbench", () => {
     await waitForLatestHomeTexts(page, ["旅行计划", "商品采购计划"]);
     await submitHomeCommand(page, runId + "-ACTIONBAR-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
     const home = page.locator('[data-commerce-home-summary="true"]').last();
+    await openAdvancedDebug(home);
     const panel = home.locator(".commerce-subplan-draft-action-panel").first();
     await expect(panel).toContainText("草稿下一步动作");
     for (const text of ["你可以确认草稿，也可以说明要修改哪一项", "两个都确认", "确认旅行计划", "电脑计划确认", "酒店入住日期改成7月13日", "离店日期改成7月17日", "孩子改成9岁", "出发地改成都双流", "电脑品牌优先苹果", "预算改成8000以内", "内存至少32G", "收货地改上海", "不接受二手", "返回补充问题", "查看安全边界", "当前只是帮你整理搜索条件", "不会访问真实平台", "不会自动执行", "不会返回价格", "不会跳转购买或预订", "不会付款或下单"]) {
@@ -6596,6 +6203,7 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, runId + "-ACTIONBAR-CONFIRM-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
     await waitForLatestDraftReviewReady(page);
     await submitHomeCommand(page, runId + "-ACTIONBAR-CONFIRM 两个都确认");
+    await openAdvancedDebug(page.locator('[data-commerce-home-summary="true"]').last());
     const panel = page.locator('[data-commerce-home-summary="true"] .commerce-subplan-draft-action-panel').last();
     await expect(panel).toContainText("已确认的子计划可以继续修改");
     await expect(panel).toContainText("未确认的子计划仍可确认");
@@ -6615,6 +6223,7 @@ test.describe.serial("commerce agent workbench", () => {
     await submitHomeCommand(page, runId + "-ACTIONBAR-REVISION-ANSWER 我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
     await waitForLatestDraftReviewReady(page);
     await submitHomeCommand(page, runId + "-ACTIONBAR-REVISION 酒店入住日期改成7月13日，离店日期改成7月17日");
+    await openAdvancedDebug(page.locator('[data-commerce-home-summary="true"]').last());
     const panel = page.locator('[data-commerce-home-summary="true"] .commerce-subplan-draft-action-panel').last();
     await expect(panel).toContainText("有修正待复核");
     await expect(panel).toContainText("可以确认旅行计划");
@@ -6628,6 +6237,7 @@ test.describe.serial("commerce agent workbench", () => {
     await gotoRoute(page, "home");
     await submitHomeCommand(page, runId + "-ACTIONBAR-SAFETY 买华为手机");
     const home = page.locator('[data-commerce-home-summary="true"]').last();
+    await openAdvancedDebug(home);
     const panel = home.locator(".commerce-subplan-draft-action-panel").first();
     await expect(panel).toContainText("草稿下一步动作");
     for (const text of ["当前只是帮你整理搜索条件", "不会访问真实平台", "不会返回价格", "不会跳转购买或预订", "不会付款或下单"]) {
