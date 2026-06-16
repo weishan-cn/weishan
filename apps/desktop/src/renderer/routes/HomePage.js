@@ -2239,6 +2239,8 @@
       <p>${esc(display.safetyLine || "当前版本只展示平台目录和权限说明，不保存真实 API key，不测试连接。")}</p>
       <p>API 绑定表单：禁用预览</p>
       <p>API 绑定权限清单：只读预览</p>
+      <p>API 绑定准备状态：未准备</p>
+      <p>平台目录只是目录，不代表已经可绑定</p>
       <p>平台目录不代表已获得 API 权限</p>
       <p>平台目录只用于了解未来可绑定平台，不代表当前可连接真实 API</p>
       ${groupHtml}
@@ -2307,6 +2309,8 @@
       <h5>${esc(display.actionIntroLine || "按钮，全部禁用：")}</h5>
       <div class="commerce-api-binding-mock-actions">${actionHtml}</div>
       <p>API 绑定权限清单：只读预览</p>
+      <p>API 绑定准备状态：未准备</p>
+      <p>安全密钥存储方案未完成前，表单保持禁用</p>
       <p>未完成权限确认前，表单保持禁用</p>
       <p>当前版本不能提交绑定确认</p>
       <ul>${safetyLines.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
@@ -2362,9 +2366,82 @@
       <ul>${itemHtml(disabled, "：禁用")}</ul>
       <h5>${esc(display.previewTitle || "未来绑定前确认预览：")}</h5>
       <ul>${preview.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      <p>API 绑定准备状态：未准备</p>
+      <p>权限确认当前不能提交</p>
+      <p>下一步是安全密钥存储方案</p>
       <button class="cmd-btn gray commerce-api-binding-confirm-preview" type="button" disabled aria-disabled="true">${esc(display.confirmationButtonLabel || "提交绑定确认")}</button>
     </section>`;
     return disclosure("查看 API 绑定权限清单", body, "commerce-api-binding-permission-checklist-disclosure");
+  }
+
+  function commerceApiBindingReadinessDisplay(){
+    const api = window.WeishanCommerceApiBindingReadinessStatus;
+    if (api && typeof api.buildApiBindingReadinessDisplay === "function") return api.buildApiBindingReadinessDisplay();
+    return {
+      title:"API 绑定准备状态",
+      conclusionLine:"当前还不能绑定真实 API。",
+      nextStepLine:"下一步：安全密钥存储方案",
+      nextStepDetail:"先设计安全密钥存储方案。当前版本仍不能输入、保存或测试真实 API key。",
+      statusLines:[
+        "用户 API：未绑定",
+        "平台目录：已建立",
+        "API 绑定说明：已建立",
+        "API 绑定表单：禁用预览",
+        "API 绑定权限清单：只读预览",
+        "安全密钥存储方案：未完成",
+        "Provider 人工审查：未开始",
+        "只读沙箱连接：未准备",
+        "真实价格结果：暂无"
+      ],
+      blockerTitle:"为什么还不能绑定：",
+      status:{
+        blockers:[
+          "安全密钥存储方案未完成",
+          "API 绑定权限确认不能提交",
+          "Provider 条款 / API 文档未人工审查",
+          "只读沙箱连接闸门未完成",
+          "endpoint 连接未启用",
+          "网络请求未启用",
+          "真实价格返回未启用",
+          "bookingUrl 返回未启用"
+        ]
+      },
+      routeTitle:"后续路线：",
+      steps:[
+        { label:"平台目录 / 说明 / 禁用表单 / 权限清单", status:"已建立" },
+        { label:"安全密钥存储方案", status:"下一步" },
+        { label:"只读 API 绑定草稿", status:"未开始" },
+        { label:"Provider 人工审查", status:"未开始" },
+        { label:"只读沙箱闸门", status:"未开始" },
+        { label:"只读价格结果", status:"未开始" }
+      ],
+      permanentTitle:"永久限制：",
+      permanentLimits:["weishan 不付款", "weishan 不下单", "weishan 不上传身份证、护照或银行卡", "weishan 不保存银行卡"]
+    };
+  }
+
+  function commerceApiBindingReadinessDisclosure(){
+    const display = commerceApiBindingReadinessDisplay();
+    const statusLines = Array.isArray(display.statusLines) ? display.statusLines : [];
+    const blockers = display.status && Array.isArray(display.status.blockers) ? display.status.blockers : [];
+    const steps = Array.isArray(display.steps) ? display.steps : [];
+    const permanentLimits = Array.isArray(display.permanentLimits) ? display.permanentLimits : [];
+    const body = `<section class="commerce-api-binding-readiness-status" aria-label="API 绑定准备状态">
+      <h4>${esc(display.title || "API 绑定准备状态")}</h4>
+      <h5>当前结论：</h5>
+      <p>${esc(display.conclusionLine || "当前还不能绑定真实 API。")}</p>
+      <h5>当前状态：</h5>
+      <ul>${statusLines.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      <h5>${esc(display.blockerTitle || "为什么还不能绑定：")}</h5>
+      <ul>${blockers.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      <h5>${esc(display.nextStepLine || "下一步：安全密钥存储方案")}</h5>
+      <p>${esc(display.nextStepDetail || "先设计安全密钥存储方案。当前版本仍不能输入、保存或测试真实 API key。")}</p>
+      <h5>${esc(display.routeTitle || "后续路线：")}</h5>
+      <ol>${steps.map((item) => `<li>${esc(item.label || "")}：${esc(item.status || "")}</li>`).join("")}</ol>
+      <h5>${esc(display.permanentTitle || "永久限制：")}</h5>
+      <ul>${permanentLimits.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+    </section>`;
+    return disclosure("查看 API 绑定准备状态", body, "commerce-api-binding-readiness-status-disclosure");
   }
 
   function commerceApiBindingSafeShellDisclosure(task){
@@ -2385,6 +2462,8 @@
       <p>${esc(catalog.safetyLine || "当前版本只展示平台目录和权限说明，不保存真实 API key，不测试连接。")}</p>
       <p>API 绑定表单：禁用预览</p>
       <p>API 绑定权限清单：只读预览</p>
+      <p>API 绑定准备状态：未准备</p>
+      <p>下一步：安全密钥存储方案</p>
       <p>当前不能提交绑定确认</p>
       <p>当前不能输入真实 API key</p>
       <p>当前不能保存 key</p>
@@ -3240,6 +3319,7 @@
       ${commerceUserApiProviderCatalogDisclosure(task)}
       ${commerceApiBindingMockFormDisclosure(task)}
       ${commerceApiBindingPermissionChecklistDisclosure(task)}
+      ${commerceApiBindingReadinessDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;

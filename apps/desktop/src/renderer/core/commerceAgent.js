@@ -39,7 +39,7 @@
       return api.getFlightLowestOffersContract(contract);
     }
     const fallback = {
-      contractVersion:"2.0.89",
+      contractVersion:"2.0.90",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -99,7 +99,7 @@
       return api.getFlightProviderCandidatesRegistry(registry);
     }
     const fallback = {
-      contractVersion:"2.0.89",
+      contractVersion:"2.0.90",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -169,7 +169,7 @@
       return api.getFlightProviderApprovalStatus(status);
     }
     const fallback = {
-      approvalVersion:"2.0.89",
+      approvalVersion:"2.0.90",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -265,7 +265,7 @@
       return api.getFlightReadonlyStubPermission(permission);
     }
     const fallback = {
-      permissionVersion:"2.0.89",
+      permissionVersion:"2.0.90",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -329,7 +329,7 @@
       return api.getFlightReadonlyStubAdapter(adapter);
     }
     const fallback = {
-      adapterVersion:"2.0.89",
+      adapterVersion:"2.0.90",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -436,7 +436,7 @@
       return api.getFlightSandboxDryRunContract(shell);
     }
     const fallback = {
-      sandboxDryRunVersion:"2.0.89",
+      sandboxDryRunVersion:"2.0.90",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -559,7 +559,7 @@
       return api.getFlightSandboxProviderMatrixContract(matrix);
     }
     const fallback = {
-      matrixVersion:"2.0.89",
+      matrixVersion:"2.0.90",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -691,7 +691,7 @@
         sourceLine:"未绑定 API 时，可使用 weishan 候选平台和外部搜索入口。"
       };
     return {
-      policyVersion:"2.0.89",
+      policyVersion:"2.0.90",
       phase:"user_api_priority_search_policy",
       userApiBindingState:binding,
       searchMode,
@@ -705,7 +705,7 @@
     const shellState = api && typeof api.getApiBindingSafeShellState === "function"
       ? api.getApiBindingSafeShellState(raw.shellState || raw)
       : {
-        shellVersion:"2.0.89",
+        shellVersion:"2.0.90",
         phase:"api_binding_safe_shell",
         status:"not_bound",
         userApi:"not_bound",
@@ -764,7 +764,7 @@
         mode
       };
     return {
-      shellVersion:"2.0.89",
+      shellVersion:"2.0.90",
       phase:"api_binding_safe_shell",
       shellState,
       mode,
@@ -820,11 +820,65 @@
         ]
       }, raw.display || {});
     return {
-      catalogVersion:"2.0.89",
+      catalogVersion:"2.0.90",
       phase:"user_api_provider_catalog",
       catalogStatus:"catalog_only",
       catalog,
       summary,
+      display
+    };
+  }
+
+  function createApiBindingReadinessStatus(state){
+    const api = window.WeishanCommerceApiBindingReadinessStatus;
+    const raw = state && typeof state === "object" ? state : {};
+    const status = api && typeof api.buildApiBindingReadinessStatus === "function"
+      ? api.buildApiBindingReadinessStatus(raw)
+      : {
+        status:"not_ready",
+        canBindApi:false,
+        currentStage:"pre_binding_safety",
+        nextStep:"secure_key_storage_plan",
+        summary:{
+          userApi:"not_bound",
+          providerCatalog:"available",
+          apiBindingExplanation:"available",
+          mockForm:"disabled_preview",
+          permissionChecklist:"readonly_preview",
+          secureKeyStorage:"not_ready",
+          providerReview:"not_started",
+          readonlySandbox:"not_ready",
+          realPriceResult:"unavailable"
+        },
+        blockers:[
+          "安全密钥存储方案未完成",
+          "API 绑定权限确认不能提交",
+          "Provider 条款 / API 文档未人工审查",
+          "只读沙箱连接闸门未完成",
+          "endpoint 连接未启用",
+          "网络请求未启用",
+          "真实价格返回未启用",
+          "bookingUrl 返回未启用"
+        ]
+      };
+    const steps = api && typeof api.buildApiBindingReadinessSteps === "function"
+      ? api.buildApiBindingReadinessSteps()
+      : [];
+    const display = api && typeof api.buildApiBindingReadinessDisplay === "function"
+      ? api.buildApiBindingReadinessDisplay()
+      : {
+        title:"API 绑定准备状态",
+        conclusionLine:"当前还不能绑定真实 API。",
+        nextStepLine:"下一步：安全密钥存储方案",
+        nextStepDetail:"先设计安全密钥存储方案。当前版本仍不能输入、保存或测试真实 API key。"
+      };
+    return {
+      readinessVersion:"2.0.90",
+      phase:"api_binding_readiness_status",
+      readinessStatus:"not_ready",
+      readinessMode:"status_only",
+      status,
+      steps,
       display
     };
   }
@@ -1097,6 +1151,7 @@
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState() : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState() : null,
+      apiBindingReadinessStatus:category === "flight" ? createApiBindingReadinessStatus() : null,
       canShowPrice:false,
       canShowBookingButton:false,
       canShowCheckoutButton:false,
@@ -1152,6 +1207,7 @@
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(base.userApiPriorityPolicyState),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState(base.apiBindingSafeShellState) : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState(base.userApiProviderCatalogState) : null,
+      apiBindingReadinessStatus:category === "flight" ? createApiBindingReadinessStatus(base.apiBindingReadinessStatus) : null,
       canShowPrice:base.canShowPrice === true,
       canShowBookingButton:base.canShowBookingButton === true,
       canShowCheckoutButton:base.canShowCheckoutButton === true,
@@ -1271,6 +1327,7 @@
       userApiPriorityPolicyState:safe.userApiPriorityPolicyState,
       apiBindingSafeShellState:safe.category === "flight" ? safe.apiBindingSafeShellState : null,
       userApiProviderCatalogState:safe.category === "flight" ? safe.userApiProviderCatalogState : null,
+      apiBindingReadinessStatus:safe.category === "flight" ? safe.apiBindingReadinessStatus : null,
       candidates:safe.candidates,
       recommendation:safe.recommendation,
       nextSteps:[

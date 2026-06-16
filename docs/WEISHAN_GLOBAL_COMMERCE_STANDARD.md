@@ -1333,3 +1333,81 @@ v2.0.89 标准 marker：
 - marker:api binding permission checklist no order submit
 - marker:api binding permission checklist no identity upload
 - marker:api binding permission checklist disabled confirmation
+
+## v2.0.90：API Binding Readiness Status / API 绑定准备状态
+v2.0.90 新增 `commerceApiBindingReadinessStatus.js`，只做 API 绑定准备状态汇总。该状态用于让用户一眼理解当前不能绑定真实 API、原因、下一步和当前可做事项；不得输入真实 API key，不得保存 key，不得测试连接，不得连接 endpoint，不得发起真实网络请求。
+
+默认简单机票结果仍只展示真实结果优先页面，并保留：
+- 用户 API：未绑定
+- weishan 候选平台：可用
+- 真实价格结果：暂无
+- 暂无真实价格结果
+- 查看 API 绑定说明
+- 查看可绑定 API 平台目录
+- 查看 API 绑定表单
+- 查看 API 绑定权限清单
+- 查看 API 绑定准备状态
+
+`查看 API 绑定准备状态` 默认折叠。展开后必须显示：
+- API 绑定准备状态
+- 当前结论：当前还不能绑定真实 API。
+- 用户 API：未绑定
+- 平台目录：已建立
+- API 绑定说明：已建立
+- API 绑定表单：禁用预览
+- API 绑定权限清单：只读预览
+- 安全密钥存储方案：未完成
+- Provider 人工审查：未开始
+- 只读沙箱连接：未准备
+- 真实价格结果：暂无
+- 为什么还不能绑定：
+- 安全密钥存储方案未完成
+- API 绑定权限确认不能提交
+- Provider 条款 / API 文档未人工审查
+- 只读沙箱连接闸门未完成
+- endpoint 连接未启用
+- 网络请求未启用
+- 真实价格返回未启用
+- bookingUrl 返回未启用
+- 下一步：安全密钥存储方案
+- 当前版本仍不能输入、保存或测试真实 API key。
+
+后续路线必须保持：
+1. 平台目录 / 说明 / 禁用表单 / 权限清单：已建立
+2. 安全密钥存储方案：下一步
+3. 只读 API 绑定草稿：未开始
+4. Provider 人工审查：未开始
+5. 只读沙箱闸门：未开始
+6. 只读价格结果：未开始
+
+永久限制：
+- weishan 不付款
+- weishan 不下单
+- weishan 不上传身份证、护照或银行卡
+- weishan 不保存银行卡
+
+`查看 API 绑定说明` 必须联动显示：API 绑定准备状态：未准备、下一步：安全密钥存储方案。
+
+`查看可绑定 API 平台目录` 必须联动显示：API 绑定准备状态：未准备、平台目录只是目录，不代表已经可绑定。
+
+`查看 API 绑定表单` 必须联动显示：API 绑定准备状态：未准备、安全密钥存储方案未完成前，表单保持禁用。
+
+`查看 API 绑定权限清单` 必须联动显示：API 绑定准备状态：未准备、权限确认当前不能提交、下一步是安全密钥存储方案。
+
+v2.0.90 标准 marker：
+- marker:api binding readiness status
+- marker:api binding readiness status only
+- marker:api binding readiness not ready
+- marker:api binding readiness secure storage next
+- marker:api binding readiness no real binding
+- marker:api binding readiness no real key
+- marker:api binding readiness no key input
+- marker:api binding readiness no save key
+- marker:api binding readiness no test connection
+- marker:api binding readiness no endpoint
+- marker:api binding readiness no network
+- marker:api binding readiness no price
+- marker:api binding readiness no booking url
+- marker:api binding readiness no payment
+- marker:api binding readiness no order submit
+- marker:api binding readiness no identity upload

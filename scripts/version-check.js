@@ -308,6 +308,27 @@ function checkApiBindingPermissionChecklistVersion(results, expectedVersion) {
   );
 }
 
+function checkApiBindingReadinessStatusVersion(results, expectedVersion) {
+  const readinessPath = "apps/desktop/src/renderer/core/commerceApiBindingReadinessStatus.js";
+  const readiness = readText(readinessPath);
+  if (!readiness) {
+    results.push({ name: "apps/desktop API binding readiness status version", pass: false, detail: readinessPath + " missing" });
+    return;
+  }
+  if (readiness.__readError) {
+    results.push({ name: "apps/desktop API binding readiness status version", pass: false, detail: readiness.__readError });
+    return;
+  }
+  const match = readiness.match(/READINESS_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop API binding readiness status version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceApiBindingReadinessStatus.js READINESS_VERSION"
+  );
+}
+
 function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
   const pkg = readJson(packagePath);
   const lock = readJson(lockPath);
@@ -365,6 +386,7 @@ function runVersionCheck() {
     checkUserApiProviderCatalogVersion(results, rootPackage.version);
     checkApiBindingMockFormVersion(results, rootPackage.version);
     checkApiBindingPermissionChecklistVersion(results, rootPackage.version);
+    checkApiBindingReadinessStatusVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {
