@@ -1334,8 +1334,8 @@ v2.0.89 标准 marker：
 - marker:api binding permission checklist no identity upload
 - marker:api binding permission checklist disabled confirmation
 
-## v2.0.90：API Binding Readiness Status / API 绑定准备状态
-v2.0.90 新增 `commerceApiBindingReadinessStatus.js`，只做 API 绑定准备状态汇总。该状态用于让用户一眼理解当前不能绑定真实 API、原因、下一步和当前可做事项；不得输入真实 API key，不得保存 key，不得测试连接，不得连接 endpoint，不得发起真实网络请求。
+## v2.0.91：API Binding Readiness Status / API 绑定准备状态
+v2.0.91 新增 `commerceApiBindingReadinessStatus.js`，只做 API 绑定准备状态汇总。该状态用于让用户一眼理解当前不能绑定真实 API、原因、下一步和当前可做事项；不得输入真实 API key，不得保存 key，不得测试连接，不得连接 endpoint，不得发起真实网络请求。
 
 默认简单机票结果仍只展示真实结果优先页面，并保留：
 - 用户 API：未绑定
@@ -1394,7 +1394,7 @@ v2.0.90 新增 `commerceApiBindingReadinessStatus.js`，只做 API 绑定准备�
 
 `查看 API 绑定权限清单` 必须联动显示：API 绑定准备状态：未准备、权限确认当前不能提交、下一步是安全密钥存储方案。
 
-v2.0.90 标准 marker：
+v2.0.91 标准 marker：
 - marker:api binding readiness status
 - marker:api binding readiness status only
 - marker:api binding readiness not ready
@@ -1411,3 +1411,54 @@ v2.0.90 标准 marker：
 - marker:api binding readiness no payment
 - marker:api binding readiness no order submit
 - marker:api binding readiness no identity upload
+
+## v2.0.91：Secure Key Storage Plan / 安全密钥存储方案
+v2.0.91 新增 `commerceSecureKeyStoragePlan.js`，只做安全密钥存储方案说明，不保存真实 API key，不写入明文，不写入 `.env` / `localStorage` / `sessionStorage` / 日志，不连接 endpoint，不发起网络请求，不返回价格，不生成 bookingUrl，不付款，不下单。
+
+默认简单机票结果仍只展示真实结果优先页面，并保留：
+- 查看安全密钥存储方案
+- 安全密钥存储方案：计划中
+- 当前状态：仅计划，尚未实现真实安全密钥存储。
+- 当前阶段：设计中
+- 未来目标：macOS Keychain / Electron safeStorage
+- 禁止：明文、.env、localStorage、sessionStorage、日志
+- 下一步：设计安全密钥存储实现
+- 当前版本不读取真实 API key，不保存明文，不写入 .env / localStorage / sessionStorage / 日志。
+
+`查看安全密钥存储方案` 默认折叠。展开后必须显示：
+- 安全密钥存储方案
+- 安全密钥存储方案：计划中
+- 当前状态：仅计划，尚未实现真实安全密钥存储。
+- 当前阶段：设计中
+- 未来目标：macOS Keychain / Electron safeStorage
+- 禁止渠道：明文、.env、localStorage、sessionStorage、日志
+- 下一步：设计安全密钥存储实现
+- 当前版本不读取真实 API key，不保存明文，不写入 .env / localStorage / sessionStorage / 日志。
+- 不能读取真实 API key
+- 不能保存真实 API key
+- 不能连接 endpoint
+- 不能发起网络请求
+- 不能返回价格
+- 不能返回 bookingUrl
+- 不能付款
+- 不能下单
+- 不能保存身份证 / 护照 / 银行卡
+
+`查看安全密钥存储方案` 必须联动显示：安全密钥存储方案：计划中、下一步：设计安全密钥存储实现。
+
+历史参考：v2.0.90：API Binding Readiness Status / API 绑定准备状态
+
+marker:secure key storage plan
+marker:secure key storage plan plan only
+marker:secure key storage plan no real api key
+marker:secure key storage plan no endpoint
+marker:secure key storage plan no network
+marker:secure key storage plan no price
+marker:secure key storage plan no booking url
+marker:secure key storage plan no payment
+marker:secure key storage plan no order submit
+marker:secure key storage plan no identity storage
+marker:secure key storage plan macos keychain
+marker:secure key storage plan electron safestorage
+marker:secure key storage plan not granted
+marker:secure key storage plan approval required

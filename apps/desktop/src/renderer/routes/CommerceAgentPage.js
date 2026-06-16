@@ -2450,6 +2450,71 @@
     return disclosure("查看 API 绑定准备状态", body, "commerce-api-binding-readiness-status-disclosure");
   }
 
+  function commerceSecureKeyStoragePlanDisplay(task){
+    const plan = task && task.flightSecureKeyStoragePlan || null;
+    const api = window.WeishanCommerceSecureKeyStoragePlan;
+    if (api && typeof api.describeSecureKeyStoragePlan === "function") return api.describeSecureKeyStoragePlan(plan);
+    return {
+      summaryTitle: "安全密钥存储方案",
+      planStatusLine: "安全密钥存储方案：计划中",
+      currentStatusLine: "当前状态：仅计划，尚未实现真实安全密钥存储。",
+      currentStageLine: "当前阶段：设计中",
+      futureTargetsLine: "未来目标：macOS Keychain / Electron safeStorage",
+      blockedChannelsLine: "禁止：明文、.env、localStorage、sessionStorage、日志",
+      nextStepLine: "下一步：设计安全密钥存储实现",
+      safetyLine: "当前版本不读取真实 API key，不保存明文，不写入 .env / localStorage / sessionStorage / 日志。",
+      storageTargets: ["macOS Keychain", "Electron safeStorage"],
+      blockedChannels: [".env", "localStorage", "sessionStorage", "日志", "明文"],
+      capabilityLines: ["不能读取真实 API key", "不能保存真实 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能付款", "不能下单", "不能保存身份证 / 护照 / 银行卡"],
+      checklistGroups: [{
+        title: "前置条件",
+        items: [
+          ["macOS Keychain 方案", "未开始"],
+          ["Electron safeStorage 方案", "未开始"],
+          [".env / 明文", "禁止"],
+          ["localStorage", "禁止"],
+          ["sessionStorage", "禁止"],
+          ["日志", "禁止"],
+          ["人工批准", "未开始"]
+        ]
+      }]
+    };
+  }
+
+  function commerceSecureKeyStoragePlanDisclosure(task){
+    const display = commerceSecureKeyStoragePlanDisplay(task);
+    const storageTargets = Array.isArray(display.storageTargets) ? display.storageTargets : [];
+    const blockedChannels = Array.isArray(display.blockedChannels) ? display.blockedChannels : [];
+    const capabilityLines = Array.isArray(display.capabilityLines) ? display.capabilityLines : [];
+    const checklistGroups = Array.isArray(display.checklistGroups) ? display.checklistGroups : [];
+    const body = `<section class="commerce-secure-key-storage-plan-panel" aria-label="安全密钥存储方案">
+      <h4>${esc(display.summaryTitle || "安全密钥存储方案")}</h4>
+      <p>${esc(display.planStatusLine || "安全密钥存储方案：计划中")}</p>
+      <p>${esc(display.currentStatusLine || "当前状态：仅计划，尚未实现真实安全密钥存储。")}</p>
+      <p>${esc(display.currentStageLine || "当前阶段：设计中")}</p>
+      <p>${esc(display.futureTargetsLine || "未来目标：macOS Keychain / Electron safeStorage")}</p>
+      <p>${esc(display.blockedChannelsLine || "禁止：明文、.env、localStorage、sessionStorage、日志")}</p>
+      <p>${esc(display.nextStepLine || "下一步：设计安全密钥存储实现")}</p>
+      <p>${esc(display.safetyLine || "当前版本不读取真实 API key，不保存明文，不写入 .env / localStorage / sessionStorage / 日志。")}</p>
+      <div class="commerce-secure-key-storage-plan-targets">
+        <h5>未来目标</h5>
+        <ul>${storageTargets.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      </div>
+      <div class="commerce-secure-key-storage-plan-blocked">
+        <h5>禁止渠道</h5>
+        <ul>${blockedChannels.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      </div>
+      <div class="commerce-secure-key-storage-plan-capabilities">
+        <h5>当前能力</h5>
+        <ul>${capabilityLines.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      </div>
+      <div class="commerce-secure-key-storage-plan-checklists">
+        ${checklistGroups.map((group) => `<section><h5>${esc(group && group.title || "")}</h5><ul>${(Array.isArray(group && group.items) ? group.items : []).map((item) => `<li>${esc(item && item[0] || "")}：${esc(item && item[1] || "")}</li>`).join("")}</ul></section>`).join("")}
+      </div>
+    </section>`;
+    return disclosure("查看安全密钥存储方案", body, "commerce-secure-key-storage-plan-disclosure");
+  }
+
   function commerceApiBindingSafeShellDisclosure(task){
     const display = commerceApiBindingSafeShellDisplay(task);
     const catalog = commerceUserApiProviderCatalogDisplay(task);
@@ -3322,6 +3387,7 @@
       ${commerceApiBindingMockFormDisclosure(task)}
       ${commerceApiBindingPermissionChecklistDisclosure(task)}
       ${commerceApiBindingReadinessDisclosure(task)}
+      ${commerceSecureKeyStoragePlanDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;
@@ -3338,6 +3404,7 @@
       ${commerceFlightReadonlyStubAdapterDisclosure(task)}
       ${commerceFlightSandboxDryRunDisclosure(task)}
       ${commerceFlightSandboxProviderMatrixDisclosure(task)}
+      ${commerceSecureKeyStoragePlanDisclosure(task)}
     </section>`;
     return disclosure("查看高级调试信息", body, "commerce-simple-flight-advanced-debug-disclosure");
   }

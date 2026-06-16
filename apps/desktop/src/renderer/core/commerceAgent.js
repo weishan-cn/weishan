@@ -39,7 +39,7 @@
       return api.getFlightLowestOffersContract(contract);
     }
     const fallback = {
-      contractVersion:"2.0.90",
+      contractVersion:"2.0.91",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -99,7 +99,7 @@
       return api.getFlightProviderCandidatesRegistry(registry);
     }
     const fallback = {
-      contractVersion:"2.0.90",
+      contractVersion:"2.0.91",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -169,7 +169,7 @@
       return api.getFlightProviderApprovalStatus(status);
     }
     const fallback = {
-      approvalVersion:"2.0.90",
+      approvalVersion:"2.0.91",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -265,7 +265,7 @@
       return api.getFlightReadonlyStubPermission(permission);
     }
     const fallback = {
-      permissionVersion:"2.0.90",
+      permissionVersion:"2.0.91",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -329,7 +329,7 @@
       return api.getFlightReadonlyStubAdapter(adapter);
     }
     const fallback = {
-      adapterVersion:"2.0.90",
+      adapterVersion:"2.0.91",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -436,7 +436,7 @@
       return api.getFlightSandboxDryRunContract(shell);
     }
     const fallback = {
-      sandboxDryRunVersion:"2.0.90",
+      sandboxDryRunVersion:"2.0.91",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -559,7 +559,7 @@
       return api.getFlightSandboxProviderMatrixContract(matrix);
     }
     const fallback = {
-      matrixVersion:"2.0.90",
+      matrixVersion:"2.0.91",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -647,6 +647,92 @@
     });
   }
 
+  function createSecureKeyStoragePlan(plan){
+    const api = window.WeishanCommerceSecureKeyStoragePlan;
+    if (api && typeof api.normalizeSecureKeyStoragePlan === "function") {
+      return api.normalizeSecureKeyStoragePlan(plan);
+    }
+    if (api && typeof api.getSecureKeyStoragePlanState === "function") {
+      return api.getSecureKeyStoragePlanState(plan);
+    }
+    const fallback = {
+      secureKeyStoragePlanVersion:"2.0.91",
+      phase:"flight_secure_key_storage_plan",
+      planStatus:"plan_only",
+      currentStage:"design_required",
+      storageMode:"secure_storage_required",
+      macOSKeychainMode:"not_connected",
+      electronSafeStorageMode:"not_connected",
+      plaintextMode:"forbidden",
+      envFileMode:"forbidden",
+      localStorageMode:"forbidden",
+      sessionStorageMode:"forbidden",
+      logMode:"forbidden",
+      endpointMode:"disabled",
+      networkMode:"disabled",
+      priceMode:"disabled",
+      bookingUrlMode:"disabled",
+      orderMode:"disabled",
+      paymentMode:"disabled",
+      identityStorageMode:"disabled",
+      storageTargets:["macOS Keychain", "Electron safeStorage"],
+      blockedChannels:["明文", ".env", "localStorage", "sessionStorage", "日志", "query string", "error message"],
+      checklist:{
+        macOSKeychainDesign:false,
+        electronSafeStorageDesign:false,
+        plaintextForbidden:false,
+        envFileForbidden:false,
+        localStorageForbidden:false,
+        sessionStorageForbidden:false,
+        logForbidden:false,
+        finalHumanApproval:false
+      },
+      capabilities:{
+        canDescribePlan:true,
+        canShowCurrentStage:true,
+        canShowBlockedChannels:true,
+        canShowFutureTargets:true,
+        canUseMacOSKeychain:false,
+        canUseElectronSafeStorage:false,
+        canStorePlaintext:false,
+        canStoreEnvFile:false,
+        canStoreLocalStorage:false,
+        canStoreSessionStorage:false,
+        canStoreLogs:false,
+        canUseNetwork:false,
+        canConnectEndpoint:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canCreateOrder:false,
+        canPay:false,
+        canStoreIdentity:false
+      },
+      display:{
+        summaryTitle:"安全密钥存储方案",
+        planStatusLine:"安全密钥存储方案：计划中",
+        currentStatusLine:"当前状态：仅计划，尚未实现真实安全密钥存储。",
+        currentStageLine:"当前阶段：设计中",
+        futureTargetsLine:"未来目标：macOS Keychain / Electron safeStorage",
+        blockedChannelsTitle:"禁止渠道",
+        blockedChannelsLine:"禁止：明文、.env、localStorage、sessionStorage、日志",
+        nextStepLine:"下一步：设计安全密钥存储实现",
+        safetyLine:"当前版本不读取真实 API key，不保存明文，不写入 .env / localStorage / sessionStorage / 日志。",
+        capabilityTitle:"当前能力",
+        checklistTitle:"前置条件",
+        capabilityLines:["不能读取真实 API key", "不能保存真实 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能付款", "不能下单", "不能保存身份证 / 护照 / 银行卡"],
+        checklistGroups:[{ title:"前置条件", items:[["macOS Keychain 方案", "未开始"], ["Electron safeStorage 方案", "未开始"], [".env / 明文", "禁止"], ["localStorage", "禁止"], ["sessionStorage", "禁止"], ["日志", "禁止"], ["人工批准", "未开始"]] }]
+      }
+    };
+    const raw = plan && typeof plan === "object" ? plan : {};
+    return Object.assign({}, fallback, raw, {
+      storageTargets:Array.isArray(raw.storageTargets) ? raw.storageTargets.slice() : fallback.storageTargets.slice(),
+      blockedChannels:Array.isArray(raw.blockedChannels) ? raw.blockedChannels.slice() : fallback.blockedChannels.slice(),
+      checklist:Object.assign({}, fallback.checklist, raw.checklist && typeof raw.checklist === "object" ? raw.checklist : {}),
+      capabilities:Object.assign({}, fallback.capabilities, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      display:Object.assign({}, fallback.display, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
   function createUserApiPriorityPolicyState(state){
     const api = window.WeishanCommerceUserApiPriorityPolicy;
     const raw = state && typeof state === "object" ? state : {};
@@ -691,7 +777,7 @@
         sourceLine:"未绑定 API 时，可使用 weishan 候选平台和外部搜索入口。"
       };
     return {
-      policyVersion:"2.0.90",
+      policyVersion:"2.0.91",
       phase:"user_api_priority_search_policy",
       userApiBindingState:binding,
       searchMode,
@@ -705,7 +791,7 @@
     const shellState = api && typeof api.getApiBindingSafeShellState === "function"
       ? api.getApiBindingSafeShellState(raw.shellState || raw)
       : {
-        shellVersion:"2.0.90",
+        shellVersion:"2.0.91",
         phase:"api_binding_safe_shell",
         status:"not_bound",
         userApi:"not_bound",
@@ -764,7 +850,7 @@
         mode
       };
     return {
-      shellVersion:"2.0.90",
+      shellVersion:"2.0.91",
       phase:"api_binding_safe_shell",
       shellState,
       mode,
@@ -820,7 +906,7 @@
         ]
       }, raw.display || {});
     return {
-      catalogVersion:"2.0.90",
+      catalogVersion:"2.0.91",
       phase:"user_api_provider_catalog",
       catalogStatus:"catalog_only",
       catalog,
@@ -873,7 +959,7 @@
         nextStepDetail:"先设计安全密钥存储方案。当前版本仍不能输入、保存或测试真实 API key。"
       };
     return {
-      readinessVersion:"2.0.90",
+      readinessVersion:"2.0.91",
       phase:"api_binding_readiness_status",
       readinessStatus:"not_ready",
       readinessMode:"status_only",
@@ -1148,6 +1234,7 @@
       flightReadonlyStubAdapter:category === "flight" ? createFlightReadonlyStubAdapter() : null,
       flightSandboxDryRun:category === "flight" ? createFlightSandboxDryRun() : null,
       flightSandboxProviderMatrix:category === "flight" ? createFlightSandboxProviderMatrix() : null,
+      flightSecureKeyStoragePlan:category === "flight" ? createSecureKeyStoragePlan() : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState() : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState() : null,
@@ -1204,6 +1291,7 @@
       flightReadonlyStubAdapter:category === "flight" ? createFlightReadonlyStubAdapter(base.flightReadonlyStubAdapter) : null,
       flightSandboxDryRun:category === "flight" ? createFlightSandboxDryRun(base.flightSandboxDryRun) : null,
       flightSandboxProviderMatrix:category === "flight" ? createFlightSandboxProviderMatrix(base.flightSandboxProviderMatrix) : null,
+      flightSecureKeyStoragePlan:category === "flight" ? createSecureKeyStoragePlan(base.flightSecureKeyStoragePlan) : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(base.userApiPriorityPolicyState),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState(base.apiBindingSafeShellState) : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState(base.userApiProviderCatalogState) : null,
@@ -1324,6 +1412,7 @@
       flightReadonlyStubAdapter:safe.category === "flight" ? safe.flightReadonlyStubAdapter : null,
       flightSandboxDryRun:safe.category === "flight" ? safe.flightSandboxDryRun : null,
       flightSandboxProviderMatrix:safe.category === "flight" ? safe.flightSandboxProviderMatrix : null,
+      flightSecureKeyStoragePlan:safe.category === "flight" ? safe.flightSecureKeyStoragePlan : null,
       userApiPriorityPolicyState:safe.userApiPriorityPolicyState,
       apiBindingSafeShellState:safe.category === "flight" ? safe.apiBindingSafeShellState : null,
       userApiProviderCatalogState:safe.category === "flight" ? safe.userApiProviderCatalogState : null,

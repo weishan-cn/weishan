@@ -203,6 +203,27 @@ function checkFlightSandboxProviderMatrixVersion(results, expectedVersion) {
   );
 }
 
+function checkSecureKeyStoragePlanVersion(results, expectedVersion) {
+  const planPath = "apps/desktop/src/renderer/core/commerceSecureKeyStoragePlan.js";
+  const plan = readText(planPath);
+  if (!plan) {
+    results.push({ name: "apps/desktop secure key storage plan version", pass: false, detail: planPath + " missing" });
+    return;
+  }
+  if (plan.__readError) {
+    results.push({ name: "apps/desktop secure key storage plan version", pass: false, detail: plan.__readError });
+    return;
+  }
+  const match = plan.match(/SECURE_KEY_STORAGE_PLAN_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop secure key storage plan version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceSecureKeyStoragePlan.js SECURE_KEY_STORAGE_PLAN_VERSION"
+  );
+}
+
 function checkUserApiPriorityPolicyVersion(results, expectedVersion) {
   const policyPath = "apps/desktop/src/renderer/core/commerceUserApiPriorityPolicy.js";
   const policy = readText(policyPath);
@@ -381,6 +402,7 @@ function runVersionCheck() {
     checkFlightReadonlyStubAdapterVersion(results, rootPackage.version);
     checkFlightSandboxDryRunVersion(results, rootPackage.version);
     checkFlightSandboxProviderMatrixVersion(results, rootPackage.version);
+    checkSecureKeyStoragePlanVersion(results, rootPackage.version);
     checkUserApiPriorityPolicyVersion(results, rootPackage.version);
     checkApiBindingSafeShellVersion(results, rootPackage.version);
     checkUserApiProviderCatalogVersion(results, rootPackage.version);
