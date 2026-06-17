@@ -535,7 +535,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.getByText("当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单").first()).toBeVisible();
   });
 
-  test("v2.0.99 commerce detail renders secure key storage plan body", async () => {
+  test("v2.1.0 commerce detail renders secure key storage plan body", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "commerce");
     await page.locator(".commerce-input").fill(runId + "-SECURE-KEY-BODY 7月15日上海到成都最便宜的机票");
@@ -578,7 +578,7 @@ test.describe.serial("commerce agent workbench", () => {
       "增加审计日志，但不得记录 key 明文",
       "风险模型",
       "下一步",
-      "provider endpoint allowlist 闸门。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。"
+      "provider endpoint allowlist 闸门：已建立。下一步：只读 provider sandbox gate。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。"
     ]) {
       await expect(secureKeyStorageBody).toContainText(text);
     }
@@ -600,7 +600,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.0.99 renders key delete rotate expiry draft and keeps lifecycle operations blocked", async () => {
+  test("v2.1.0 renders key delete rotate expiry draft and keeps lifecycle operations blocked", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "commerce");
     await page.locator(".commerce-input").fill(runId + "-KEY-LIFECYCLE 7月15日上海到成都最便宜的机票");
@@ -648,7 +648,7 @@ test.describe.serial("commerce agent workbench", () => {
       "安全存储设计闸门：关闭",
       "安全密钥存储方案：方案已建立，尚未实现",
       "API 绑定准备状态：未准备",
-      "下一步：provider endpoint allowlist 闸门",
+      "下一步：只读 provider sandbox gate",
       "当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key"
     ]) {
       await expect(lifecycleBody).toContainText(text);
@@ -663,7 +663,7 @@ test.describe.serial("commerce agent workbench", () => {
     });
     expect(lifecycleContract.assertSafe).toBe(true);
     expect(lifecycleContract.draft).toEqual(expect.objectContaining({
-      version:"2.0.99",
+      version:"2.1.0",
       draftStatus:"draft_only",
       implementationStatus:"not_implemented",
       realKeyDelete:"disabled",
@@ -700,6 +700,110 @@ test.describe.serial("commerce agent workbench", () => {
     expect(lifecycleContract.draft.stateMachine.currentAllowedState).toBe("draft_alias_only");
     expect(lifecycleContract.draft.stateMachine.transitions.every((item) => item.status === "blocked")).toBe(true);
   });
+
+  test("v2.1.0 provider endpoint allowlist gate stays draft-only and blocked", async () => {
+    await resetCommerceTasks(page);
+    await gotoRoute(page, "commerce");
+    await page.locator(".commerce-input").fill(runId + "-ENDPOINT-GATE 7月15日上海到成都最便宜的机票");
+    await page.getByRole("button", { name:"生成采购计划" }).click();
+    const detail = page.locator(".commerce-detail").first();
+    await expect(detail).toContainText("机票搜索结果");
+    await expect(detail).toContainText("查看 provider endpoint allowlist 闸门");
+    await detail.locator("summary").filter({ hasText:"查看 provider endpoint allowlist 闸门" }).click();
+    const gateBody = detail.locator("details.commerce-provider-endpoint-allowlist-gate-disclosure .commerce-disclosure-body").first();
+    for (const text of [
+      "provider endpoint allowlist 闸门",
+      "endpoint allowlist 闸门：已建立",
+      "闸门状态：关闭",
+      "allowlist 状态：草案",
+      "真实 endpoint 连接：未开放",
+      "真实网络请求：未开放",
+      "provider sandbox：未开放",
+      "真实价格读取：未开放",
+      "bookingUrl 读取：未开放",
+      "下单：禁止",
+      "付款：禁止",
+      "身份上传：禁止",
+      "flightProviders",
+      "hotelProviders",
+      "commerceProviders",
+      "localServiceProviders",
+      "google.com/travel/flights：external_search_only，not_api_endpoint",
+      "trip.com：candidate_domain_unverified",
+      "skyscanner.com：candidate_domain_unverified",
+      "pinduoduo.com：candidate_domain_unverified",
+      "non_https",
+      "credential_query_params",
+      "not_allowlisted",
+      "missing_manual_approval",
+      "search inventory",
+      "create order",
+      "ENDPOINT_EVALUATION_DRAFT",
+      "ENDPOINT_BLOCKED_NOT_HTTPS",
+      "ENDPOINT_BLOCKED_CREDENTIAL_QUERY",
+      "PROVIDER_SANDBOX_GATE_PENDING",
+      "endpoint URL 记录前必须脱敏",
+      "所有事件必须 redacted: true",
+      "下一步：只读 provider sandbox gate",
+      "当前版本仍不能连接真实 endpoint、不能测试连接、不能联网、不能读取真实价格"
+    ]) {
+      await expect(gateBody).toContainText(text);
+    }
+    const contract = await page.evaluate(() => {
+      const api = window.WeishanCommerceProviderEndpointAllowlistGate;
+      const gate = api.commerceProviderEndpointAllowlistGateContract;
+      const evaluation = api.evaluateProviderEndpointAllowlistDraft({ providerId:"trip_com", endpointUrl:"http://trip.com/api/search?api_key=dummy" });
+      const normalized = api.normalizeEndpointDraft("https://trip.com/api?token=dummy");
+      return {
+        gate,
+        evaluation,
+        normalized,
+        categories:api.buildProviderEndpointCategoriesDraft(),
+        domains:api.buildProviderAllowedDomainDraft(),
+        risks:api.buildEndpointRiskScanDraft(),
+        readonly:api.buildProviderReadOnlyGateDraft(),
+        audit:api.buildProviderEndpointAuditEventsDraft(),
+        safe:api.assertProviderEndpointAllowlistGateSafe(gate)
+      };
+    });
+    expect(contract.safe).toBe(true);
+    expect(contract.gate).toEqual(expect.objectContaining({
+      gateVersion:"2.1.0",
+      phase:"provider_endpoint_allowlist_gate",
+      gateStatus:"closed",
+      allowlistStatus:"draft",
+      endpointConnection:"disabled",
+      networkMode:"disabled",
+      providerSandbox:"disabled",
+      realPrice:"disabled",
+      bookingUrl:"disabled"
+    }));
+    expect(contract.gate.capabilities).toEqual(expect.objectContaining({
+      canInputApiKey:false,
+      canSaveApiKey:false,
+      canReadApiKey:false,
+      canConnectRealEndpoint:false,
+      canTestConnection:false,
+      canUseNetwork:false,
+      canUseProviderSandbox:false,
+      canReturnPrice:false,
+      canReturnBookingUrl:false,
+      canCreateOrder:false,
+      canPay:false,
+      canUploadIdentity:false
+    }));
+    expect(contract.evaluation.decision).toBe("blocked");
+    expect(contract.evaluation.canUseNetwork).toBe(false);
+    expect(contract.evaluation.canReturnPrice).toBe(false);
+    expect(contract.evaluation.canReturnBookingUrl).toBe(false);
+    expect(contract.normalized.hasCredentialQueryParams).toBe(true);
+    expect(contract.normalized.sanitizedUrl).toContain("[REDACTED_CREDENTIAL_PARAMS]");
+    expect(contract.domains.length).toBeGreaterThan(5);
+    expect(contract.risks.canUseNetwork).toBe(false);
+    expect(contract.readonly.canCreateOrder).toBe(false);
+    expect(contract.audit.redacted).toBe(true);
+  });
+
 
   test("commerce location policy defaults to destination required and private", async () => {
     await gotoRoute(page, "commerce");
@@ -3345,12 +3449,12 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  // v2.0.99 real result only surface hides debug panels by default
+  // v2.1.0 real result only surface hides debug panels by default
   // 查看 Provider 审批状态 ... 人工审核后才允许进入 provider approval
   // 查看只读适配器开发许可 ... 人工批准开发只读 stub
   // 查看只读适配器空壳 ... 不能保存证件 / 银行卡
   // 查看 Sandbox Dry Run ... 沙箱空跑外壳已建立，但未连接真实 provider ... block_price_return ... block_payment
-  test("v2.0.99 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
+  test("v2.1.0 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -3446,7 +3550,7 @@ test.describe.serial("commerce agent workbench", () => {
       })
     } : null);
     expect(userApiPolicy.contract).toEqual(expect.objectContaining({
-      policyVersion:"2.0.99",
+      policyVersion:"2.1.0",
       phase:"user_api_priority_search_policy",
       policyStatus:"policy_only",
       userApiMode:"not_bound",
@@ -3513,7 +3617,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingSafeShell.contract).toEqual(expect.objectContaining({
-      shellVersion:"2.0.99",
+      shellVersion:"2.1.0",
       phase:"api_binding_safe_shell",
       shellStatus:"safe_shell_only",
       bindingStatus:"not_bound",
@@ -3645,7 +3749,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(userApiProviderCatalog.contract).toEqual(expect.objectContaining({
-      catalogVersion:"2.0.99",
+      catalogVersion:"2.1.0",
       phase:"user_api_provider_catalog",
       catalogStatus:"catalog_only",
       realApiConnectionMode:"disabled",
@@ -3757,7 +3861,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingMockForm.contract).toEqual(expect.objectContaining({
-      formVersion:"2.0.99",
+      formVersion:"2.1.0",
       phase:"api_binding_mock_form_disabled_state",
       formStatus:"disabled_mock_only",
       inputMode:"disabled",
@@ -3838,7 +3942,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
     await expect(summaryPanel).toContainText("API 绑定准备状态：未准备");
     await expect(summaryPanel).toContainText("权限确认当前不能提交");
-    await expect(summaryPanel).toContainText("下一步是 provider endpoint allowlist 闸门");
+    await expect(summaryPanel).toContainText("未完成只读 provider sandbox gate 前，不能提交绑定确认");
     const permissionPanel = summaryPanel.locator(".commerce-api-binding-permission-checklist");
     await expect(permissionPanel.getByRole("button", { name:"提交绑定确认" })).toBeDisabled();
     const apiBindingPermissionChecklist = await page.evaluate(() => {
@@ -3857,7 +3961,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingPermissionChecklist.contract).toEqual(expect.objectContaining({
-      checklistVersion:"2.0.99",
+      checklistVersion:"2.1.0",
       phase:"api_binding_permission_checklist",
       checklistStatus:"checklist_only",
       realBindingMode:"disabled",
@@ -3935,7 +4039,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("网络请求未启用");
     await expect(summaryPanel).toContainText("真实价格返回未启用");
     await expect(summaryPanel).toContainText("bookingUrl 返回未启用");
-    await expect(summaryPanel).toContainText("下一步：provider endpoint allowlist 闸门");
+    await expect(summaryPanel).toContainText("下一步：只读 provider sandbox gate");
     await expect(summaryPanel).toContainText("key 删除 / 轮换 / 过期机制草案：已建立");
     await expect(summaryPanel).toContainText("当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key");
     await expect(summaryPanel).toContainText("weishan 不付款");
@@ -3957,7 +4061,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingReadiness.contract).toEqual(expect.objectContaining({
-      readinessVersion:"2.0.99",
+      readinessVersion:"2.1.0",
       phase:"api_binding_readiness_status",
       readinessStatus:"not_ready",
       readinessMode:"status_only",
@@ -4003,7 +4107,7 @@ test.describe.serial("commerce agent workbench", () => {
       status:"not_ready",
       canBindApi:false,
       currentStage:"pre_binding_safety",
-      nextStep:"provider_endpoint_allowlist_gate"
+      nextStep:"readonly_provider_sandbox_gate"
     }));
     expect(apiBindingReadiness.status.summary).toEqual(expect.objectContaining({
       userApi:"not_bound",
@@ -4033,7 +4137,7 @@ test.describe.serial("commerce agent workbench", () => {
       expect.objectContaining({ stepId:"current_readonly_info", canProceedNow:true }),
       expect.objectContaining({ stepId:"key_redaction_and_log_leak_rules", status:"established", canProceedNow:false }),
       expect.objectContaining({ stepId:"key_delete_rotate_expiry_draft", status:"established", canProceedNow:false }),
-      expect.objectContaining({ stepId:"provider_endpoint_allowlist_gate", status:"next", canProceedNow:false }),
+      expect.objectContaining({ stepId:"readonly_provider_sandbox_gate", status:"next", canProceedNow:false }),
       expect.objectContaining({ stepId:"readonly_api_binding_draft", status:"not_ready", canProceedNow:false }),
       expect.objectContaining({ stepId:"provider_human_review", status:"not_ready", canProceedNow:false }),
       expect.objectContaining({ stepId:"readonly_sandbox_gate", status:"not_ready", canProceedNow:false }),
@@ -4042,7 +4146,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(apiBindingReadiness.assertSafe).toBe(true);
     const matrix = await page.evaluate(() => window.WeishanCommerceFlightSandboxProviderMatrix && typeof window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract === "function" ? window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract() : null);
     expect(matrix).toEqual(expect.objectContaining({
-      matrixVersion:"2.0.99",
+      matrixVersion:"2.1.0",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -4109,7 +4213,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
     const sandboxDryRun = await page.evaluate(() => window.WeishanCommerceFlightSandboxDryRun && window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract ? window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract : null);
     expect(sandboxDryRun).toEqual(expect.objectContaining({
-      sandboxDryRunVersion:"2.0.99",
+      sandboxDryRunVersion:"2.1.0",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -4208,7 +4312,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(sandboxAssert).toBe(true);
     const readonlyStubPermission = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubPermission && typeof window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission === "function" ? window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission() : null);
     expect(readonlyStubPermission).toEqual(expect.objectContaining({
-      permissionVersion:"2.0.99",
+      permissionVersion:"2.1.0",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -4254,7 +4358,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(secureKeyStoragePlan.contract).toEqual(expect.objectContaining({
-      secureKeyStoragePlanVersion:"2.0.99",
+      secureKeyStoragePlanVersion:"2.1.0",
       phase:"flight_secure_key_storage_plan",
       planStatus:"plan_only",
       currentStage:"design_required",
@@ -4358,7 +4462,7 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(summaryPanel).toContainText(text);
     }
     await expect(summaryPanel).toContainText("安全存储设计闸门：关闭");
-    await expect(summaryPanel).toContainText("下一步：provider endpoint allowlist 闸门");
+    await expect(summaryPanel).toContainText("下一步：只读 provider sandbox gate");
     await expect(summaryPanel).toContainText("真实 API key 输入仍未开放");
     const secureStorageDesignGate = await page.evaluate(() => {
       const api = window.WeishanCommerceSecureStorageDesignGate;
@@ -4375,7 +4479,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(secureStorageDesignGate.contract).toEqual(expect.objectContaining({
-      version:"2.0.99",
+      version:"2.1.0",
       gateName:"secure_storage_design_gate",
       gateStatus:"closed",
       phase:"design_gate"
@@ -4415,13 +4519,13 @@ test.describe.serial("commerce agent workbench", () => {
       canProceedToProviderSandbox:false,
       canProceedToRealPrice:false,
       canProceedToBookingUrl:false,
-      nextRequiredStep:"provider_endpoint_allowlist_gate",
+      nextRequiredStep:"readonly_provider_sandbox_gate",
       currentUserActionRequired:false
     }));
     expect(secureStorageDesignGate.evaluation).toEqual(expect.objectContaining({
       allowed:false,
       gateStatus:"closed",
-      nextRequiredStep:"provider_endpoint_allowlist_gate"
+      nextRequiredStep:"readonly_provider_sandbox_gate"
     }));
     expect(secureStorageDesignGate.assertSafe).toBe(true);
     await summaryPanel.getByText("查看安全存储设计闸门").click();
@@ -4447,15 +4551,15 @@ test.describe.serial("commerce agent workbench", () => {
       "密钥脱敏与日志防泄露规则：已建立",
       "key 删除 / 轮换 / 过期机制草案：已建立",
       "真实 key 删除 / 轮换 / 过期：未开放",
-      "provider endpoint allowlist 未完成",
+      "provider endpoint allowlist 闸门已建立，等待只读 provider sandbox gate",
       "只读 provider 沙箱未完成",
       "设计密钥数据结构",
       "设计本机安全写入接口",
       "设计本机安全读取接口",
       "设计删除 key 机制",
       "设计轮换 key 机制",
-      "设计 endpoint allowlist",
-      "v2.0.99：本机安全存储接口草案",
+      "设计只读 provider sandbox gate",
+      "v2.1.0：本机安全存储接口草案",
       "apiKey → [REDACTED_API_KEY]",
       "apiSecret → [REDACTED_API_SECRET]",
       "accessToken → [REDACTED_ACCESS_TOKEN]",
@@ -4480,7 +4584,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(localSecureStorageDraft.contract).toEqual(expect.objectContaining({
-      version:"2.0.99",
+      version:"2.1.0",
       draftStatus:"draft_only",
       implementationStatus:"not_implemented"
     }));
@@ -4534,7 +4638,7 @@ test.describe.serial("commerce agent workbench", () => {
       allowed:false,
       draftStatus:"draft_only",
       gateStatus:"closed",
-      nextRequiredStep:"provider_endpoint_allowlist_gate"
+      nextRequiredStep:"readonly_provider_sandbox_gate"
     }));
     expect(JSON.stringify(localSecureStorageDraft.redaction)).toContain("[REDACTED_API_KEY]");
     expect(JSON.stringify(localSecureStorageDraft.redaction)).toContain("[REDACTED_API_SECRET]");
@@ -4630,7 +4734,7 @@ test.describe.serial("commerce agent workbench", () => {
       expect(keyRedactionRules.output).toContain(placeholder);
     }
     await summaryPanel.getByText("查看密钥脱敏与日志防泄露规则").click();
-    for (const text of ["密钥脱敏与日志防泄露规则", "脱敏规则：已建立", "日志防泄露规则：已建立", "真实 API key 输入：未开放", "真实 API key 保存：未开放", "真实 API key 读取：未开放", "敏感字段识别规则", "脱敏映射", "安全审计日志规则", "UI / 截图 / 崩溃报告规则", "apiKey", "clientSecret", "accessToken", "credential query params", "apiKey → [REDACTED_API_KEY]", "clientSecret → [REDACTED_CLIENT_SECRET]", "credential query params → [REDACTED_CREDENTIAL_PARAMS]", "object redaction：PASS", "headers redaction：PASS", "url redaction：PASS", "log message redaction：PASS", "audit event redaction：PASS", "dummy secret raw strings absent：PASS", "key 删除 / 轮换 / 过期机制草案：已建立", "下一步：provider endpoint allowlist 闸门"]) {
+    for (const text of ["密钥脱敏与日志防泄露规则", "脱敏规则：已建立", "日志防泄露规则：已建立", "真实 API key 输入：未开放", "真实 API key 保存：未开放", "真实 API key 读取：未开放", "敏感字段识别规则", "脱敏映射", "安全审计日志规则", "UI / 截图 / 崩溃报告规则", "apiKey", "clientSecret", "accessToken", "credential query params", "apiKey → [REDACTED_API_KEY]", "clientSecret → [REDACTED_CLIENT_SECRET]", "credential query params → [REDACTED_CREDENTIAL_PARAMS]", "object redaction：PASS", "headers redaction：PASS", "url redaction：PASS", "log message redaction：PASS", "audit event redaction：PASS", "dummy secret raw strings absent：PASS", "key 删除 / 轮换 / 过期机制草案：已建立", "下一步：只读 provider sandbox gate"]) {
       await expect(summaryPanel).toContainText(text);
     }
     for (const raw of ["DEMO_API_KEY_SHOULD_NOT_APPEAR", "DEMO_SECRET_SHOULD_NOT_APPEAR", "DEMO_ACCESS_TOKEN_SHOULD_NOT_APPEAR", "DEMO_AUTH_HEADER_SHOULD_NOT_APPEAR", "DEMO_PASSWORD_SHOULD_NOT_APPEAR", "DEMO_PRIVATE_KEY_SHOULD_NOT_APPEAR"]) {
@@ -4716,7 +4820,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(historyDetail).toContainText("Provider 人工审查：未开始");
     await expect(historyDetail).toContainText("只读沙箱连接：未准备");
     await expect(historyDetail).toContainText("真实价格结果：暂无");
-    await expect(historyDetail).toContainText("下一步：provider endpoint allowlist 闸门");
+    await expect(historyDetail).toContainText("下一步：只读 provider sandbox gate");
     await historyDetail.getByText("查看安全密钥存储方案").click();
     await expect(historyDetail).toContainText("安全密钥存储方案：计划中");
     await expect(historyDetail).toContainText("当前状态：安全密钥存储仍处于方案阶段，当前版本不会保存真实 API key。");
@@ -4742,13 +4846,13 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(historyDetail).toContainText("prepareSecretWriteDraft");
     await expect(historyDetail).toContainText("KEY_WRITE_BLOCKED");
     await expect(historyDetail).toContainText("redactSecretLikeValue");
-    await expect(historyDetail).toContainText("下一步：provider endpoint allowlist 闸门");
+    await expect(historyDetail).toContainText("下一步：只读 provider sandbox gate");
     await historyDetail.getByText("查看密钥脱敏与日志防泄露规则").click();
-    for (const text of ["密钥脱敏与日志防泄露规则", "脱敏规则：已建立", "日志防泄露规则：已建立", "真实 API key 输入：未开放", "真实 API key 保存：未开放", "真实 API key 读取：未开放", "敏感字段识别规则", "脱敏映射", "安全审计日志规则", "UI / 截图 / 崩溃报告规则", "object redaction：PASS", "headers redaction：PASS", "url redaction：PASS", "log message redaction：PASS", "audit event redaction：PASS", "dummy secret raw strings absent：PASS", "key 删除 / 轮换 / 过期机制草案：已建立", "下一步：provider endpoint allowlist 闸门"]) {
+    for (const text of ["密钥脱敏与日志防泄露规则", "脱敏规则：已建立", "日志防泄露规则：已建立", "真实 API key 输入：未开放", "真实 API key 保存：未开放", "真实 API key 读取：未开放", "敏感字段识别规则", "脱敏映射", "安全审计日志规则", "UI / 截图 / 崩溃报告规则", "object redaction：PASS", "headers redaction：PASS", "url redaction：PASS", "log message redaction：PASS", "audit event redaction：PASS", "dummy secret raw strings absent：PASS", "key 删除 / 轮换 / 过期机制草案：已建立", "下一步：只读 provider sandbox gate"]) {
       await expect(historyDetail).toContainText(text);
     }
     await historyDetail.getByText("查看 key 删除 / 轮换 / 过期机制草案").click();
-    for (const text of ["生命周期草案：已建立", "真实删除：未开放", "真实轮换：未开放", "真实过期：未开放", "真实吊销：未开放", "真实恢复：未开放", "key 状态机草案", "当前允许状态：draft_alias_only", "阻断迁移", "删除机制草案", "轮换机制草案", "过期机制草案", "生命周期审计事件草案", "所有事件必须 redacted: true", "下一步：provider endpoint allowlist 闸门"]) {
+    for (const text of ["生命周期草案：已建立", "真实删除：未开放", "真实轮换：未开放", "真实过期：未开放", "真实吊销：未开放", "真实恢复：未开放", "key 状态机草案", "当前允许状态：draft_alias_only", "阻断迁移", "删除机制草案", "轮换机制草案", "过期机制草案", "生命周期审计事件草案", "所有事件必须 redacted: true", "下一步：只读 provider sandbox gate"]) {
       await expect(historyDetail).toContainText(text);
     }
     for (const text of [
@@ -4782,7 +4886,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.99 bare flight intent still renders the simple flight result card", async () => {
+  test("v2.1.0 bare flight intent still renders the simple flight result card", async () => {
     await resetCommerceTasks(page);
     await page.reload({ waitUntil:"domcontentloaded" });
     await gotoRoute(page, "home");
@@ -4834,10 +4938,10 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.0.99 sidebar version stays in sync with release version", async () => {
+  test("v2.1.0 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.0.99");
+    await expect(sidebarFoot).toContainText("weishan v2.1.0");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 

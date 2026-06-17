@@ -434,6 +434,27 @@ function checkKeyLifecycleDraftVersion(results, expectedVersion) {
   );
 }
 
+function checkProviderEndpointAllowlistGateVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/commerceProviderEndpointAllowlistGate.js";
+  const gate = readText(gatePath);
+  if (!gate) {
+    results.push({ name: "apps/desktop provider endpoint allowlist gate version", pass: false, detail: gatePath + " missing" });
+    return;
+  }
+  if (gate.__readError) {
+    results.push({ name: "apps/desktop provider endpoint allowlist gate version", pass: false, detail: gate.__readError });
+    return;
+  }
+  const match = gate.match(/ALLOWLIST_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop provider endpoint allowlist gate version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceProviderEndpointAllowlistGate.js ALLOWLIST_GATE_VERSION"
+  );
+}
+
 function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
   const pkg = readJson(packagePath);
   const lock = readJson(lockPath);
@@ -497,6 +518,7 @@ function runVersionCheck() {
     checkApiBindingReadinessStatusVersion(results, rootPackage.version);
     checkKeyRedactionAndLogLeakRulesVersion(results, rootPackage.version);
     checkKeyLifecycleDraftVersion(results, rootPackage.version);
+    checkProviderEndpointAllowlistGateVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

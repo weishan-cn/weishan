@@ -5,14 +5,14 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src *; img-src 'self' data: blob: file: https: http:; style-src 'self' 'unsafe-inline'; script-src 'self' 'nonce-weishan-build-marker'; frame-src 'none'; object-src 'none';">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>weishan</title>
-  <script nonce="weishan-build-marker">window.WEISHAN_BUILD_MARKER = "v2.0.99-key-redaction-log-leak-rules";</script>
-  <link rel="stylesheet" href="./renderer/styles/app.css?v=2.0.99">
+  <script nonce="weishan-build-marker">window.WEISHAN_BUILD_MARKER = "v2.1.0-provider-endpoint-allowlist-gate";</script>
+  <link rel="stylesheet" href="./renderer/styles/app.css?v=2.1.0">
 </head>
 <body>
   <div id="app"></div>
   <script src="./renderer/core/store.js?v=2.0.15"></script>
   <script src="./renderer/core/sessionGuard.js?v=2.0.15"></script>
-  <script src="./renderer/core/config.js?v=2.0.99"></script>
+  <script src="./renderer/core/config.js?v=2.1.0"></script>
   <script src="./renderer/core/i18n.js?v=2.0.15"></script>
   <script src="./renderer/core/permissions.js?v=2.0.15"></script>
   <script src="./renderer/core/perfTrace.js?v=2.0.15"></script>
@@ -31,24 +31,25 @@
   <script src="./renderer/core/commerceProviderOnboardingChecklist.js?v=2.0.44"></script>
   <script src="./renderer/core/commerceProviderApprovalWorkflow.js?v=2.0.44"></script>
   <script src="./renderer/core/commerceReadOnlyConnectorStub.js?v=2.0.44"></script>
-  <script src="./renderer/core/commerceFlightProviderCandidates.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceFlightProviderApproval.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceFlightReadonlyStubPermission.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceFlightReadonlyStubAdapter.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceFlightSandboxDryRun.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceFlightSandboxProviderMatrix.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceFlightLowestOffersContract.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceUserApiPriorityPolicy.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceApiBindingSafeShell.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceUserApiProviderCatalog.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceApiBindingMockForm.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceApiBindingPermissionChecklist.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceApiBindingReadinessStatus.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceSecureKeyStoragePlan.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceSecureStorageDesignGate.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceLocalSecureStorageInterfaceDraft.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceKeyRedactionAndLogLeakRules.js?v=2.0.99"></script>
-  <script src="./renderer/core/commerceKeyLifecycleDraft.js?v=2.0.99"></script>
+  <script src="./renderer/core/commerceFlightProviderCandidates.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceFlightProviderApproval.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceFlightReadonlyStubPermission.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceFlightReadonlyStubAdapter.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceFlightSandboxDryRun.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceFlightSandboxProviderMatrix.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceFlightLowestOffersContract.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceUserApiPriorityPolicy.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceApiBindingSafeShell.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceUserApiProviderCatalog.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceApiBindingMockForm.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceApiBindingPermissionChecklist.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceApiBindingReadinessStatus.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceSecureKeyStoragePlan.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceSecureStorageDesignGate.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceLocalSecureStorageInterfaceDraft.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceKeyRedactionAndLogLeakRules.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceKeyLifecycleDraft.js?v=2.1.0"></script>
+  <script src="./renderer/core/commerceProviderEndpointAllowlistGate.js?v=2.1.0"></script>
   <script src="./renderer/core/commerceEbayBrowseStubProfile.js?v=2.0.44"></script>
   <script src="./renderer/core/commerceProviderSecretStoragePlan.js?v=2.0.44"></script>
   <script src="./renderer/core/commerceProviderSandboxDryRun.js?v=2.0.48"></script>
@@ -77,7 +78,7 @@
   <script src="./renderer/modules/backup/backupApi.js?v=2.0.15"></script>
   <script src="./renderer/components/Sidebar.js?v=2.0.15"></script>
   <script src="./renderer/components/Topbar.js?v=2.0.15"></script>
-  <script src="./renderer/routes/HomePage.js?v=2.0.99"></script>
+  <script src="./renderer/routes/HomePage.js?v=2.1.0"></script>
   <script src="./renderer/routes/ProjectsPage.js?v=2.0.15"></script>
   <script src="./renderer/routes/MemoryPage.js?v=2.0.15"></script>
   <script src="./renderer/routes/HistoryPage.js?v=2.0.15"></script>
@@ -91,6 +92,6 @@
   <script src="./renderer/routes/AuditPage.js?v=2.0.15"></script>
   <script src="./renderer/routes/SecurityPage.js?v=2.0.15"></script>
   <script src="./renderer/routes/SettingsPage.js?v=2.0.15"></script>
-  <script src="./renderer/main.js?v=2.0.99"></script>
+  <script src="./renderer/main.js?v=2.1.0"></script>
 </body>
 </html>

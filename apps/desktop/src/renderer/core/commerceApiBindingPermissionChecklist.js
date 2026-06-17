@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const CHECKLIST_VERSION = "2.0.99";
+  const CHECKLIST_VERSION = "2.1.0";
   const PHASE = "api_binding_permission_checklist";
 
   function clone(value) {
@@ -184,7 +184,7 @@
       secureStorageDesignGateLine: "未通过安全存储设计闸门前，不能提交绑定确认",
       localSecureStorageInterfaceDraftLine: "密钥脱敏与日志防泄露规则已建立",
       keyDeleteRotateExpiryLine: "key 删除 / 轮换 / 过期机制草案已建立，但真实删除 / 轮换 / 过期仍未开放，不能提交绑定确认",
-      providerEndpointAllowlistGateLine: "provider endpoint allowlist 闸门未完成，不能提交绑定确认",
+      providerEndpointAllowlistGateLine: "provider endpoint allowlist 闸门已建立，等待只读 provider sandbox gate，不能提交绑定确认",
       allowedTitle: "允许的未来只读能力：",
       forbiddenTitle: "禁止能力：",
       disabledTitle: "当前版本禁用：",

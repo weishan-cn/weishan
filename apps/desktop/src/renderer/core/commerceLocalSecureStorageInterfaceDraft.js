@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const DRAFT_VERSION = "2.0.99";
+  const DRAFT_VERSION = "2.1.0";
   const DRAFT_NAME = "local_secure_storage_interface_draft";
   const PHASE = "local_secure_storage_interface_draft";
 
@@ -233,7 +233,7 @@
       paymentMode: "disabled",
       identityStorageMode: "disabled",
       keyRedactionAndLogLeakRules: "established",
-      nextRequiredStep: "provider_endpoint_allowlist_gate",
+      nextRequiredStep: "readonly_provider_sandbox_gate",
       capabilities: disabledCapabilities(),
       dataModelDraft: buildLocalSecureStorageDataModelDraft(),
       methodDraft: buildLocalSecureStorageMethodDraft(),
@@ -255,7 +255,7 @@
         redactionRulesLine: "密钥脱敏与日志防泄露规则：已建立",
         keyLifecycleDraftLine: "key 删除 / 轮换 / 过期机制草案：已建立",
         keyLifecycleRealActionsLine: "真实删除 / 轮换 / 过期仍未开放",
-        nextStepLine: "下一步：provider endpoint allowlist 闸门",
+        nextStepLine: "下一步：只读 provider sandbox gate",
         safetyLine: "当前版本仍不能输入、保存、读取或测试真实 API key。"
       }
     }, raw, {
@@ -285,7 +285,7 @@
         redactionRulesLine: "密钥脱敏与日志防泄露规则：已建立",
         keyLifecycleDraftLine: "key 删除 / 轮换 / 过期机制草案：已建立",
         keyLifecycleRealActionsLine: "真实删除 / 轮换 / 过期仍未开放",
-        nextStepLine: "下一步：provider endpoint allowlist 闸门",
+        nextStepLine: "下一步：只读 provider sandbox gate",
         safetyLine: "当前版本仍不能输入、保存、读取或测试真实 API key。"
       }, raw.display && typeof raw.display === "object" ? raw.display : {})
     }));
@@ -298,7 +298,7 @@
       draftStatus: draft.draftStatus,
       implementationStatus: draft.implementationStatus,
       gateStatus: "closed",
-      nextRequiredStep: "provider_endpoint_allowlist_gate",
+      nextRequiredStep: "readonly_provider_sandbox_gate",
       safetySummary: "本机安全存储接口仍为草案；key 生命周期草案已建立，但不能输入、保存、读取、删除、轮换或测试真实 API key，不能连接 endpoint，不能联网，不能返回价格或 bookingUrl。"
     });
   }

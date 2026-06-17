@@ -1777,3 +1777,41 @@ marker:key lifecycle chinese blocked draft labels
 marker:key lifecycle prepare key delete draft blocked
 marker:key lifecycle prepare key rotate draft blocked
 marker:key lifecycle evaluate key expiry draft draft
+
+## v2.1.0：Provider Endpoint Allowlist Gate / provider endpoint allowlist 闸门
+
+v2.1.0 新增 `commerceProviderEndpointAllowlistGate.js`，只建立 provider endpoint allowlist 草案闸门。该闸门用于整理 provider 分类、候选域名、阻断规则、endpoint 风险扫描、只读 provider gate 草案和 endpoint 审计事件草案。当前版本仍不得输入、保存、读取真实 API key，不得连接真实 endpoint，不得测试连接，不得联网，不得启用 provider sandbox，不得读取真实价格，不得返回 bookingUrl，不得预订、付款、下单或上传身份资料。
+
+UI 中 `查看 provider endpoint allowlist 闸门` 默认折叠。展开后必须显示：endpoint allowlist 闸门：已建立、闸门状态：关闭、allowlist 状态：草案、真实 endpoint 连接：未开放、真实网络请求：未开放、provider sandbox：未开放、真实价格读取：未开放、bookingUrl 读取：未开放、下单：禁止、付款：禁止、身份上传：禁止。
+
+provider 分类草案必须包括 flightProviders、hotelProviders、commerceProviders、localServiceProviders。候选域名草案必须只显示候选 / 未验证 / external search 状态，不得显示真实 API endpoint。阻断规则必须覆盖 non_https、ip_address_endpoint、localhost_endpoint、short_url、unknown_domain、suspicious_typo_domain、credential_query_params、not_allowlisted、manual_review_required、payment_endpoint_blocked、order_endpoint_blocked 和 identity_upload_endpoint_blocked。endpoint 风险扫描草案必须覆盖 auth_header_required、write_permission_required、order_permission_required、payment_permission_required、identity_upload_required、missing_api_docs_review、missing_terms_review 和 missing_manual_approval。
+
+只读 provider gate 草案只允许未来评估 search inventory、read price、read availability、read provider source、read updatedAt、taxes / fees、baggage / shipping / refund fields；仍禁止 create order、hold booking、submit passenger identity、submit passport、submit bank card、submit payment、auto purchase、auto checkout、write user data to provider 和 upload documents。
+
+endpoint 审计事件草案必须包括 ENDPOINT_EVALUATION_DRAFT、ENDPOINT_BLOCKED_NOT_HTTPS、ENDPOINT_BLOCKED_IP_ADDRESS、ENDPOINT_BLOCKED_LOCALHOST、ENDPOINT_BLOCKED_SHORT_URL、ENDPOINT_BLOCKED_UNKNOWN_DOMAIN、ENDPOINT_BLOCKED_CREDENTIAL_QUERY、ENDPOINT_BLOCKED_NOT_ALLOWLISTED、ENDPOINT_BLOCKED_MANUAL_REVIEW_REQUIRED、ENDPOINT_BLOCKED_WRITE_PERMISSION、ENDPOINT_BLOCKED_ORDER_PERMISSION、ENDPOINT_BLOCKED_PAYMENT_PERMISSION、ENDPOINT_BLOCKED_IDENTITY_UPLOAD、PROVIDER_READONLY_GATE_BLOCKED 和 PROVIDER_SANDBOX_GATE_PENDING。所有事件必须 redacted: true；endpoint URL 记录前必须脱敏，只允许记录 providerId / hostname / decision / blockedReason / timestamp。
+
+本阶段必须联动显示：key 删除 / 轮换 / 过期机制草案显示 provider endpoint allowlist 闸门：已建立，下一步：只读 provider sandbox gate；密钥脱敏与日志防泄露规则显示 endpoint URL 记录前必须脱敏；本机安全存储接口草案显示 endpoint 连接仍未开放；安全存储设计闸门显示只读 provider sandbox gate：未建立；安全密钥存储方案显示真实 endpoint 连接仍未开放；API 绑定准备状态 / 说明 / 表单 / 权限清单显示当前仍不能绑定真实 API、不能连接真实 endpoint、不能返回真实价格，未完成只读 provider sandbox gate 前不能提交绑定确认。
+
+marker:provider endpoint allowlist gate
+marker:provider endpoint allowlist gate established
+marker:provider endpoint allowlist gate closed
+marker:provider endpoint allowlist draft only
+marker:provider endpoint no real endpoint connection
+marker:provider endpoint no network
+marker:provider endpoint no connection test
+marker:provider endpoint no provider sandbox
+marker:provider endpoint no real price
+marker:provider endpoint no booking url
+marker:provider endpoint no payment
+marker:provider endpoint no order submit
+marker:provider endpoint no identity upload
+marker:provider endpoint provider categories draft
+marker:provider endpoint candidate domains draft
+marker:provider endpoint blocked non https
+marker:provider endpoint blocked credential query params
+marker:provider endpoint blocked not allowlisted
+marker:provider endpoint risk scan draft
+marker:provider endpoint readonly gate
+marker:provider endpoint audit events
+marker:provider endpoint audit redacted true
+marker:provider endpoint next readonly sandbox gate

@@ -2317,7 +2317,7 @@
       <p>API 绑定权限清单：只读预览</p>
       <p>API 绑定准备状态：未准备</p>
       <p>安全密钥存储方案尚未实现前，表单保持禁用</p>
-      <p>密钥脱敏与日志防泄露规则已建立，key 删除 / 轮换 / 过期机制草案已建立，但 provider endpoint allowlist 闸门未完成，表单仍不可用</p>
+      <p>密钥脱敏与日志防泄露规则已建立，key 删除 / 轮换 / 过期机制草案已建立，但 provider endpoint allowlist 闸门已建立，等待只读 provider sandbox gate，表单仍不可用</p>
       <p>安全存储设计闸门关闭，表单不可用</p>
       <p>本机安全存储接口仍为草案，表单不可用</p>
       <p>未完成权限确认前，表单保持禁用</p>
@@ -2380,7 +2380,7 @@
       <p>未通过安全存储设计闸门前，不能提交绑定确认</p>
       <p>密钥脱敏与日志防泄露规则已建立</p>
       <p>key 删除 / 轮换 / 过期机制草案已建立，但真实删除 / 轮换 / 过期仍未开放，不能提交绑定确认</p>
-      <p>下一步是 provider endpoint allowlist 闸门</p>
+      <p>未完成只读 provider sandbox gate 前，不能提交绑定确认</p>
       <button class="cmd-btn gray commerce-api-binding-confirm-preview" type="button" disabled aria-disabled="true">${esc(display.confirmationButtonLabel || "提交绑定确认")}</button>
     </section>`;
     return disclosure("查看 API 绑定权限清单", body, "commerce-api-binding-permission-checklist-disclosure");
@@ -2392,7 +2392,7 @@
     return {
       title:"API 绑定准备状态",
       conclusionLine:"当前还不能绑定真实 API。",
-      nextStepLine:"下一步：provider endpoint allowlist 闸门",
+      nextStepLine:"下一步：只读 provider sandbox gate",
       nextStepDetail:"密钥脱敏与日志防泄露规则：已建立。key 删除 / 轮换 / 过期机制草案：已建立。当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。",
       statusLines:[
         "用户 API：未绑定",
@@ -2449,7 +2449,7 @@
       <p>当前不能绑定真实 API</p>
       <p>本机安全存储接口草案：已建立</p>
       <p>密钥脱敏与日志防泄露规则：已建立</p>
-      <p>下一步：provider endpoint allowlist 闸门</p>
+      <p>下一步：只读 provider sandbox gate</p>
       <p>key 删除 / 轮换 / 过期机制草案：已建立</p>
       <p>真实 key 删除 / 轮换 / 过期：未开放</p>
       <p>key 输入：未开放</p>
@@ -2460,7 +2460,7 @@
       <ul>${statusLines.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
       <h5>${esc(display.blockerTitle || "为什么还不能绑定：")}</h5>
       <ul>${blockers.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
-      <h5>${esc(display.nextStepLine || "下一步：provider endpoint allowlist 闸门")}</h5>
+      <h5>${esc(display.nextStepLine || "下一步：只读 provider sandbox gate")}</h5>
       <p>${esc(display.nextStepDetail || "密钥脱敏与日志防泄露规则：已建立。key 删除 / 轮换 / 过期机制草案：已建立。当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。")}</p>
       <h5>${esc(display.routeTitle || "后续路线：")}</h5>
       <ol>${steps.map((item) => `<li>${esc(item.label || "")}：${esc(item.status || "")}</li>`).join("")}</ol>
@@ -2629,7 +2629,7 @@
       ],
       auditDraft:{ events:["KEY_ALIAS_CREATED_DRAFT", "KEY_WRITE_BLOCKED", "KEY_READ_BLOCKED", "KEY_DELETE_BLOCKED", "KEY_ROTATE_BLOCKED", "CONNECTION_TEST_BLOCKED", "PROVIDER_SANDBOX_BLOCKED", "REAL_PRICE_BLOCKED", "BOOKING_URL_BLOCKED"], rules:["审计日志不得记录 key 明文", "审计日志只允许记录 key alias"] },
       redactionDraft:{ functions:["redactSecretLikeValue", "redactObject", "redactHeaders", "redactUrl"], placeholders:{ apiKey:"[REDACTED_API_KEY]", apiSecret:"[REDACTED_API_SECRET]", accessToken:"[REDACTED_ACCESS_TOKEN]", authorizationHeader:"[REDACTED_AUTH_HEADER]", credentialParams:"[REDACTED_CREDENTIAL_PARAMS]" } },
-      display:{ title:"本机安全存储接口草案", currentStatusLine:"接口草案：已建立", implementationLine:"真实实现：未启用", keyInputLine:"真实 API key 输入：未开放", keySaveLine:"真实 API key 保存：未开放", keyReadLine:"真实 API key 读取：未开放", keyDeleteRotateLine:"删除 / 轮换：未开放", connectionTestLine:"测试连接：未开放", providerSandboxLine:"provider 沙箱：未开放", priceLine:"真实价格：未开放", bookingUrlLine:"bookingUrl：未开放", keyLifecycleDraftLine:"key 删除 / 轮换 / 过期机制草案：已建立", nextStepLine:"下一步：provider endpoint allowlist 闸门", safetyLine:"当前版本仍不能输入、保存、读取或测试真实 API key。" }
+      display:{ title:"本机安全存储接口草案", currentStatusLine:"接口草案：已建立", implementationLine:"真实实现：未启用", keyInputLine:"真实 API key 输入：未开放", keySaveLine:"真实 API key 保存：未开放", keyReadLine:"真实 API key 读取：未开放", keyDeleteRotateLine:"删除 / 轮换：未开放", connectionTestLine:"测试连接：未开放", providerSandboxLine:"provider 沙箱：未开放", priceLine:"真实价格：未开放", bookingUrlLine:"bookingUrl：未开放", keyLifecycleDraftLine:"key 删除 / 轮换 / 过期机制草案：已建立", nextStepLine:"下一步：只读 provider sandbox gate", safetyLine:"当前版本仍不能输入、保存、读取或测试真实 API key。" }
     };
   }
 
@@ -2685,7 +2685,7 @@
       <h5>下一步</h5>
       <p>${esc(display.keyLifecycleDraftLine || "key 删除 / 轮换 / 过期机制草案：已建立")}</p>
       <p>${esc(display.keyLifecycleRealActionsLine || "真实删除 / 轮换 / 过期仍未开放")}</p>
-      <p>${esc(display.nextStepLine || "下一步：provider endpoint allowlist 闸门")}</p>
+      <p>${esc(display.nextStepLine || "下一步：只读 provider sandbox gate")}</p>
       <p>${esc(display.safetyLine || "当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
     </section>`;
     return disclosure("查看本机安全存储接口草案", body, "commerce-local-secure-storage-interface-draft-disclosure");
@@ -2730,7 +2730,7 @@
       <p>生命周期审计事件草案：已建立</p>
       <p>真实删除 / 轮换 / 过期 / 吊销 / 恢复仍未开放</p>
       <h5>下一步：</h5>
-      <p>${esc(display.nextStepLine || "下一步：provider endpoint allowlist 闸门。")}</p>
+      <p>${esc(display.nextStepLine || "下一步：只读 provider sandbox gate。")}</p>
       <p>${esc(display.safetyLine || "当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
     </section>`;
     return disclosure("查看密钥脱敏与日志防泄露规则", body, "commerce-key-redaction-log-leak-rules-disclosure");
@@ -2758,7 +2758,7 @@
         providerSandboxLine:"provider 沙箱：未开放",
         realPriceLine:"真实价格：未开放",
         bookingUrlLine:"bookingUrl：未开放",
-        nextStepLine:"下一步：provider endpoint allowlist 闸门",
+        nextStepLine:"下一步：只读 provider sandbox gate",
         currentVersionLine:"当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key"
       },
       stateMachine:{ currentAllowedState:"draft_alias_only", currentBlockedStates:["active_readonly", "rotation_pending", "rotated", "deleted", "revoked"], transitions:[{ from:"draft_alias_only", to:"pending_secure_storage", status:"blocked" }] },
@@ -2820,7 +2820,7 @@
       <p>安全密钥存储方案：方案已建立，尚未实现</p>
       <p>API 绑定准备状态：未准备</p>
       <p>API 绑定说明 / 表单 / 权限清单：只读预览或禁用预览</p>
-      <p>${esc(display.nextStepLine || "下一步：provider endpoint allowlist 闸门")}</p>
+      <p>${esc(display.nextStepLine || "下一步：只读 provider sandbox gate")}</p>
       <p>${esc(display.currentVersionLine || "当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key")}</p>
     </section>`;
     return disclosure("查看 key 删除 / 轮换 / 过期机制草案", body, "commerce-key-lifecycle-draft-disclosure");
@@ -2852,7 +2852,7 @@
       <p>密钥脱敏与日志防泄露规则：已建立</p>
       <p>key 删除 / 轮换 / 过期机制草案：已建立</p>
       <p>真实 key 删除 / 轮换 / 过期仍未开放</p>
-      <p>下一步：provider endpoint allowlist 闸门</p>
+      <p>下一步：只读 provider sandbox gate</p>
       <p>真实 API key 输入仍未开放</p>
       <div class="commerce-secure-key-storage-plan-status-checklist">
         <h5>${esc(display.statusChecklistTitle || "当前状态清单")}</h5>
@@ -2923,7 +2923,7 @@
       <p>已建立密钥脱敏与日志防泄露规则</p>
       <p>已建立 key 删除 / 轮换 / 过期机制草案</p>
       <p>真实删除 / 轮换 / 过期仍未开放</p>
-      <p>下一步：provider endpoint allowlist 闸门</p>
+      <p>下一步：只读 provider sandbox gate</p>
       <p>当前仍不能保存真实 API key</p>
       <p>当前不能提交绑定确认</p>
       <p>当前不能输入真实 API key</p>
@@ -3723,6 +3723,66 @@
     return disclosure("查看 Provider 审批状态", body, "commerce-flight-provider-approval-disclosure");
   }
 
+  function commerceProviderEndpointAllowlistGateDisplay(task){
+    const api = window.WeishanCommerceProviderEndpointAllowlistGate;
+    const gate = task && task.providerEndpointAllowlistGate || null;
+    if (api && typeof api.buildProviderEndpointAllowlistGateDisplay === "function") return api.buildProviderEndpointAllowlistGateDisplay(gate);
+    return gate && typeof gate === "object" ? gate : {
+      gateVersion:"2.1.0",
+      gateStatus:"closed",
+      allowlistStatus:"draft",
+      display:{ title:"provider endpoint allowlist 闸门", establishedLine:"endpoint allowlist 闸门：已建立", gateStatusLine:"闸门状态：关闭", allowlistStatusLine:"allowlist 状态：草案", endpointConnectionLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", providerSandboxLine:"provider sandbox：未开放", priceLine:"真实价格读取：未开放", bookingUrlLine:"bookingUrl 读取：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", nextStepLine:"下一步：只读 provider sandbox gate", safetyLine:"当前版本仍不能连接真实 endpoint、不能测试连接、不能联网、不能读取真实价格" },
+      categories:{ flightProviders:["Google Flights", "Trip.com / 携程", "Skyscanner", "Kayak", "Expedia"], hotelProviders:["Booking", "Agoda", "Trip.com / 携程"], commerceProviders:["Amazon", "eBay", "Walmart", "京东", "淘宝", "天猫", "拼多多"], localServiceProviders:["本地服务候选平台"] },
+      candidateDomains:["google.com/travel/flights：external_search_only，not_api_endpoint", "trip.com：candidate_domain_unverified", "skyscanner.com：candidate_domain_unverified", "kayak.com：candidate_domain_unverified", "expediagroup.com：candidate_partner_domain_unverified", "booking.com：candidate_domain_unverified", "amazon.com：candidate_domain_unverified", "ebay.com：candidate_domain_unverified", "walmart.com：candidate_domain_unverified", "jd.com：candidate_domain_unverified", "taobao.com：candidate_domain_unverified", "tmall.com：candidate_domain_unverified", "pinduoduo.com：candidate_domain_unverified"],
+      blockedRules:["non_https", "ip_address_endpoint", "localhost_endpoint", "127.0.0.1_endpoint", "0.0.0.0_endpoint", "short_url", "unknown_domain", "suspicious_typo_domain", "credential_query_params", "api_key query params", "token query params", "secret query params", "password query params", "not_allowlisted", "manual_review_required", "payment_endpoint_blocked", "order_endpoint_blocked", "identity_upload_endpoint_blocked"],
+      riskScan:{ riskSignals:["non_https", "ip_address_endpoint", "localhost_endpoint", "unknown_domain", "short_url", "suspicious_typo_domain", "credential_query_params", "auth_header_required", "write_permission_required", "order_permission_required", "payment_permission_required", "identity_upload_required", "missing_api_docs_review", "missing_terms_review", "missing_manual_approval"] },
+      readonlyGate:{ allowedFutureActions:["search inventory", "read price", "read availability", "read provider source", "read updatedAt", "read taxes / fees", "read baggage / shipping / refund fields"], forbiddenActions:["create order", "hold booking", "submit passenger identity", "submit passport", "submit bank card", "submit payment", "auto purchase", "auto checkout", "write user data to provider", "upload documents"] },
+      audit:{ events:["ENDPOINT_EVALUATION_DRAFT", "ENDPOINT_BLOCKED_NOT_HTTPS", "ENDPOINT_BLOCKED_IP_ADDRESS", "ENDPOINT_BLOCKED_LOCALHOST", "ENDPOINT_BLOCKED_SHORT_URL", "ENDPOINT_BLOCKED_UNKNOWN_DOMAIN", "ENDPOINT_BLOCKED_CREDENTIAL_QUERY", "ENDPOINT_BLOCKED_NOT_ALLOWLISTED", "ENDPOINT_BLOCKED_MANUAL_REVIEW_REQUIRED", "ENDPOINT_BLOCKED_WRITE_PERMISSION", "ENDPOINT_BLOCKED_ORDER_PERMISSION", "ENDPOINT_BLOCKED_PAYMENT_PERMISSION", "ENDPOINT_BLOCKED_IDENTITY_UPLOAD", "PROVIDER_READONLY_GATE_BLOCKED", "PROVIDER_SANDBOX_GATE_PENDING"], rules:["不记录真实 API key", "不记录 secret", "不记录 token", "不记录 authorization header", "不记录 credential query params", "endpoint URL 记录前必须脱敏", "只记录 providerId / hostname / decision / blockedReason / timestamp", "所有事件必须 redacted: true"], redacted:true }
+    };
+  }
+
+  function commerceProviderEndpointAllowlistGateDisclosure(task){
+    const gate = commerceProviderEndpointAllowlistGateDisplay(task);
+    const display = gate.display || {};
+    const categories = gate.categories || {};
+    const categoryHtml = Object.keys(categories).map(function(key){ return '<li><span>' + esc(key) + '：</span><b>' + esc((categories[key] || []).join(' / ')) + '</b></li>'; }).join('');
+    const domainItems = (Array.isArray(gate.candidateDomains) ? gate.candidateDomains : []).map(function(item){ return typeof item === 'string' ? item : item.domain + '：' + item.status + (item.endpointType ? '，' + item.endpointType : ''); });
+    const riskSignals = gate.riskScan && Array.isArray(gate.riskScan.riskSignals) ? gate.riskScan.riskSignals : [];
+    const allowedFutureActions = gate.readonlyGate && Array.isArray(gate.readonlyGate.allowedFutureActions) ? gate.readonlyGate.allowedFutureActions : [];
+    const forbiddenActions = gate.readonlyGate && Array.isArray(gate.readonlyGate.forbiddenActions) ? gate.readonlyGate.forbiddenActions : [];
+    const auditEvents = gate.audit && Array.isArray(gate.audit.events) ? gate.audit.events : [];
+    const auditRules = gate.audit && Array.isArray(gate.audit.rules) ? gate.audit.rules : [];
+    const listHtml = function(items){ return '<ul>' + items.map(function(item){ return '<li>' + esc(item) + '</li>'; }).join('') + '</ul>'; };
+    const providerStatusRows = ["endpointStatus：draft_only", "officialDomainVerified：false", "apiDocsReviewed：false", "termsReviewed：false", "networkEnabled：false", "canConnect：false", "canReturnPrice：false", "canReturnBookingUrl：false", "canCreateOrder：false", "canPay：false"];
+    const body = '<section class="commerce-provider-endpoint-allowlist-gate-panel" aria-label="provider endpoint allowlist 闸门">'
+      + '<h4>' + esc(display.title || 'provider endpoint allowlist 闸门') + '</h4>'
+      + '<p>' + esc(display.establishedLine || 'endpoint allowlist 闸门：已建立') + '</p>'
+      + '<p>' + esc(display.gateStatusLine || '闸门状态：关闭') + '</p>'
+      + '<p>' + esc(display.allowlistStatusLine || 'allowlist 状态：草案') + '</p>'
+      + '<p>' + esc(display.endpointConnectionLine || '真实 endpoint 连接：未开放') + '</p>'
+      + '<p>' + esc(display.networkLine || '真实网络请求：未开放') + '</p>'
+      + '<p>' + esc(display.providerSandboxLine || 'provider sandbox：未开放') + '</p>'
+      + '<p>' + esc(display.priceLine || '真实价格读取：未开放') + '</p>'
+      + '<p>' + esc(display.bookingUrlLine || 'bookingUrl 读取：未开放') + '</p>'
+      + '<p>' + esc(display.orderLine || '下单：禁止') + '</p>'
+      + '<p>' + esc(display.paymentLine || '付款：禁止') + '</p>'
+      + '<p>' + esc(display.identityLine || '身份上传：禁止') + '</p>'
+      + '<h5>provider 分类草案</h5><ul>' + categoryHtml + '</ul>'
+      + '<h5>provider 默认状态</h5>' + listHtml(providerStatusRows)
+      + '<h5>候选域名草案</h5>' + listHtml(domainItems)
+      + '<h5>阻断规则</h5>' + listHtml(Array.isArray(gate.blockedRules) ? gate.blockedRules : [])
+      + '<h5>endpoint 风险扫描草案</h5>' + listHtml(riskSignals)
+      + '<h5>只读 provider gate 草案</h5><p>未来允许评估的只读动作：</p>' + listHtml(allowedFutureActions)
+      + '<p>禁止动作：</p>' + listHtml(forbiddenActions)
+      + '<h5>endpoint 审计事件草案</h5>' + listHtml(auditEvents)
+      + '<h5>审计日志规则</h5>' + listHtml(auditRules)
+      + '<p>所有事件必须 redacted: true</p>'
+      + '<p>' + esc(display.nextStepLine || '下一步：只读 provider sandbox gate') + '</p>'
+      + '<p>' + esc(display.safetyLine || '当前版本仍不能连接真实 endpoint、不能测试连接、不能联网、不能读取真实价格') + '</p>'
+      + '</section>';
+    return disclosure("查看 provider endpoint allowlist 闸门", body, "commerce-provider-endpoint-allowlist-gate-disclosure");
+  }
+
   function commerceSimpleFlightResultPanelHtml(task){
     const fields = commerceSimpleFlightFields(task);
     const copyTexts = commerceSimpleFlightCopyTexts(task);
@@ -3782,6 +3842,7 @@
       ${commerceLocalSecureStorageInterfaceDraftDisclosure(task)}
       ${commerceKeyRedactionAndLogLeakRulesDisclosure(task)}
       ${commerceKeyLifecycleDraftDisclosure(task)}
+      ${commerceProviderEndpointAllowlistGateDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;
@@ -3803,6 +3864,7 @@
       ${commerceLocalSecureStorageInterfaceDraftDisclosure(task)}
       ${commerceKeyRedactionAndLogLeakRulesDisclosure(task)}
       ${commerceKeyLifecycleDraftDisclosure(task)}
+      ${commerceProviderEndpointAllowlistGateDisclosure(task)}
     </section>`;
     return disclosure("查看高级调试信息", body, "commerce-simple-flight-advanced-debug-disclosure");
   }

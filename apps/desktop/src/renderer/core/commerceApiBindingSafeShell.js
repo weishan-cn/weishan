@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SHELL_VERSION = "2.0.99";
+  const SHELL_VERSION = "2.1.0";
   const PHASE = "api_binding_safe_shell";
 
   function clone(value) {
@@ -216,7 +216,7 @@
       keyRedactionAndLogLeakRulesLine: "已建立密钥脱敏与日志防泄露规则",
       keyLifecycleDraftLine: "已建立 key 删除 / 轮换 / 过期机制草案",
       keyLifecycleRealActionsLine: "真实删除 / 轮换 / 过期仍未开放",
-      providerEndpointAllowlistGateLine: "下一步：provider endpoint allowlist 闸门",
+      providerEndpointAllowlistGateLine: "下一步：只读 provider sandbox gate",
       gateStatusLine: "当前闸门关闭",
       keyStorageLine: "当前不能保存真实 API key",
       safetyLines: [

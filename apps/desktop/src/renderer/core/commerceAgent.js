@@ -39,7 +39,7 @@
       return api.getFlightLowestOffersContract(contract);
     }
     const fallback = {
-      contractVersion:"2.0.99",
+      contractVersion:"2.1.0",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -99,7 +99,7 @@
       return api.getFlightProviderCandidatesRegistry(registry);
     }
     const fallback = {
-      contractVersion:"2.0.99",
+      contractVersion:"2.1.0",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -169,7 +169,7 @@
       return api.getFlightProviderApprovalStatus(status);
     }
     const fallback = {
-      approvalVersion:"2.0.99",
+      approvalVersion:"2.1.0",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -265,7 +265,7 @@
       return api.getFlightReadonlyStubPermission(permission);
     }
     const fallback = {
-      permissionVersion:"2.0.99",
+      permissionVersion:"2.1.0",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -329,7 +329,7 @@
       return api.getFlightReadonlyStubAdapter(adapter);
     }
     const fallback = {
-      adapterVersion:"2.0.99",
+      adapterVersion:"2.1.0",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -436,7 +436,7 @@
       return api.getFlightSandboxDryRunContract(shell);
     }
     const fallback = {
-      sandboxDryRunVersion:"2.0.99",
+      sandboxDryRunVersion:"2.1.0",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -559,7 +559,7 @@
       return api.getFlightSandboxProviderMatrixContract(matrix);
     }
     const fallback = {
-      matrixVersion:"2.0.99",
+      matrixVersion:"2.1.0",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -656,7 +656,7 @@
       return api.getSecureKeyStoragePlanState(plan);
     }
     const fallback = {
-      secureKeyStoragePlanVersion:"2.0.99",
+      secureKeyStoragePlanVersion:"2.1.0",
       phase:"flight_secure_key_storage_plan",
       planStatus:"plan_only",
       currentStage:"design_required",
@@ -728,7 +728,7 @@
         riskModelTitle:"风险模型",
         riskModelItems:["明文泄露风险", "日志泄露风险", "截图泄露风险", "复制粘贴泄露风险", "crash report 泄露风险", "恶意 provider 风险", "钓鱼 endpoint 风险", "权限过宽风险", "用户误绑定写入 / 下单 / 支付 API 风险"],
         nextStepTitle:"下一步",
-        nextStepText:"provider endpoint allowlist 闸门。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。",
+        nextStepText:"provider endpoint allowlist 闸门：已建立。下一步：只读 provider sandbox gate。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。",
         capabilityTitle:"当前能力",
         checklistTitle:"前置条件",
         capabilityLines:["不能读取真实 API key", "不能保存真实 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能付款", "不能下单", "不能保存身份证 / 护照 / 银行卡"],
@@ -751,7 +751,7 @@
       return api.buildSecureStorageDesignGate(gate);
     }
     return {
-      version:"2.0.99",
+      version:"2.1.0",
       gateName:"secure_storage_design_gate",
       gateStatus:"closed",
       phase:"design_gate",
@@ -786,7 +786,7 @@
       },
       blockingReasons:["安全密钥写入实现未完成", "安全密钥读取实现未完成", "Keychain 适配未完成", "safeStorage 适配未完成", "provider endpoint allowlist 未完成"],
       unlockChecklist:["设计密钥数据结构", "设计本机安全写入接口", "设计本机安全读取接口", "完成安全审查后，才允许进入下一阶段"],
-      implementationMilestones:["v2.0.99：安全存储设计闸门，默认关闭", "v2.0.99：本机安全存储接口草案，仍不写真实 key"],
+      implementationMilestones:["v2.1.0：安全存储设计闸门，默认关闭", "v2.1.0：本机安全存储接口草案，仍不写真实 key"],
       auditRules:["日志中永不记录完整 key", "UI 不得展示明文 key"],
       redactionRules:["apiKey → [REDACTED_API_KEY]", "apiSecret → [REDACTED_API_SECRET]"]
     };
@@ -798,7 +798,7 @@
       return api.buildLocalSecureStorageInterfaceDraft(draft);
     }
     return {
-      version:"2.0.99",
+      version:"2.1.0",
       draftName:"local_secure_storage_interface_draft",
       phase:"local_secure_storage_interface_draft",
       draftStatus:"draft_only",
@@ -819,7 +819,7 @@
       orderMode:"disabled",
       paymentMode:"disabled",
       identityStorageMode:"disabled",
-      nextRequiredStep:"provider_endpoint_allowlist_gate",
+      nextRequiredStep:"readonly_provider_sandbox_gate",
       capabilities:{
         canShowInterfaceDraft:true,
         canShowDataModelDraft:true,
@@ -892,7 +892,7 @@
         redactionRulesLine:"密钥脱敏与日志防泄露规则：已建立",
         keyLifecycleDraftLine:"key 删除 / 轮换 / 过期机制草案：已建立",
         keyLifecycleRealActionsLine:"真实删除 / 轮换 / 过期仍未开放",
-        nextStepLine:"下一步：provider endpoint allowlist 闸门",
+        nextStepLine:"下一步：只读 provider sandbox gate",
         safetyLine:"当前版本仍不能输入、保存、读取或测试真实 API key。"
       }
     };
@@ -904,7 +904,7 @@
       return Object.assign({}, api.commerceKeyRedactionAndLogLeakRulesContract, state && typeof state === "object" ? state : {});
     }
     return {
-      version:"2.0.99",
+      version:"2.1.0",
       moduleName:"commerce_key_redaction_and_log_leak_rules",
       phase:"key_redaction_and_log_leak_prevention_rules",
       ruleStatus:"rules_established",
@@ -945,7 +945,7 @@
         keyLifecycleDraftLine:"key 删除 / 轮换 / 过期机制草案：已建立",
         keyLifecycleAuditEventsLine:"生命周期审计事件草案：已建立",
         keyLifecycleRealActionsLine:"真实删除 / 轮换 / 过期 / 吊销 / 恢复仍未开放",
-        nextStepLine:"下一步：provider endpoint allowlist 闸门。",
+        nextStepLine:"下一步：只读 provider sandbox gate。",
         safetyLine:"当前版本仍不能输入、保存、读取或测试真实 API key。"
       }
     };
@@ -958,7 +958,7 @@
       return Object.assign({}, api.buildKeyLifecycleDraft(), raw);
     }
     return Object.assign({
-      version:"2.0.99",
+      version:"2.1.0",
       moduleName:"key_delete_rotate_expiry_draft",
       phase:"key_lifecycle_draft",
       draftStatus:"draft_only",
@@ -1008,10 +1008,36 @@
         realExpiryLine:"真实过期：未开放",
         realRevocationLine:"真实吊销：未开放",
         realRestoreLine:"真实恢复：未开放",
-        nextStepLine:"下一步：provider endpoint allowlist 闸门",
+        nextStepLine:"下一步：只读 provider sandbox gate",
         currentVersionLine:"当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key"
       }
     }, raw);
+  }
+
+  function createProviderEndpointAllowlistGate(state){
+    const api = window.WeishanCommerceProviderEndpointAllowlistGate;
+    const raw = state && typeof state === "object" ? state : {};
+    const base = api && api.commerceProviderEndpointAllowlistGateContract ? api.commerceProviderEndpointAllowlistGateContract : {
+      gateVersion:"2.1.0",
+      phase:"provider_endpoint_allowlist_gate",
+      gateStatus:"closed",
+      allowlistStatus:"draft",
+      endpointConnection:"disabled",
+      networkMode:"disabled",
+      providerSandbox:"disabled",
+      realPrice:"disabled",
+      bookingUrl:"disabled",
+      orderMode:"disabled",
+      paymentMode:"disabled",
+      identityUpload:"disabled",
+      capabilities:{ canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false, canConnectRealEndpoint:false, canTestConnection:false, canUseNetwork:false, canUseProviderSandbox:false, canReturnPrice:false, canReturnBookingUrl:false, canCreateOrder:false, canPay:false, canUploadIdentity:false },
+      display:{ title:"provider endpoint allowlist 闸门", establishedLine:"endpoint allowlist 闸门：已建立", gateStatusLine:"闸门状态：关闭", allowlistStatusLine:"allowlist 状态：草案", endpointConnectionLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", providerSandboxLine:"provider sandbox：未开放", priceLine:"真实价格读取：未开放", bookingUrlLine:"bookingUrl 读取：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", nextStepLine:"下一步：只读 provider sandbox gate", safetyLine:"当前版本仍不能连接真实 endpoint、不能测试连接、不能联网、不能读取真实价格" }
+    };
+    const display = api && typeof api.buildProviderEndpointAllowlistGateDisplay === "function" ? api.buildProviderEndpointAllowlistGateDisplay(raw) : {};
+    return Object.assign({}, base, raw, display, {
+      capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
   }
 
   function createUserApiPriorityPolicyState(state){
@@ -1058,7 +1084,7 @@
         sourceLine:"未绑定 API 时，可使用 weishan 候选平台和外部搜索入口。"
       };
     return {
-      policyVersion:"2.0.99",
+      policyVersion:"2.1.0",
       phase:"user_api_priority_search_policy",
       userApiBindingState:binding,
       searchMode,
@@ -1072,7 +1098,7 @@
     const shellState = api && typeof api.getApiBindingSafeShellState === "function"
       ? api.getApiBindingSafeShellState(raw.shellState || raw)
       : {
-        shellVersion:"2.0.99",
+        shellVersion:"2.1.0",
         phase:"api_binding_safe_shell",
         status:"not_bound",
         userApi:"not_bound",
@@ -1131,7 +1157,7 @@
         mode
       };
     return {
-      shellVersion:"2.0.99",
+      shellVersion:"2.1.0",
       phase:"api_binding_safe_shell",
       shellState,
       mode,
@@ -1187,7 +1213,7 @@
         ]
       }, raw.display || {});
     return {
-      catalogVersion:"2.0.99",
+      catalogVersion:"2.1.0",
       phase:"user_api_provider_catalog",
       catalogStatus:"catalog_only",
       catalog,
@@ -1205,7 +1231,7 @@
         status:"not_ready",
         canBindApi:false,
         currentStage:"pre_binding_safety",
-      nextStep:"provider_endpoint_allowlist_gate",
+      nextStep:"readonly_provider_sandbox_gate",
         summary:{
           userApi:"not_bound",
           providerCatalog:"available",
@@ -1222,7 +1248,7 @@
           "API 绑定权限确认不能提交",
           "Provider 条款 / API 文档未人工审查",
           "只读沙箱连接闸门未完成",
-          "provider endpoint allowlist 闸门未完成",
+          "provider endpoint allowlist 闸门已建立，等待只读 provider sandbox gate",
           "endpoint 连接未启用",
           "网络请求未启用",
           "真实价格返回未启用",
@@ -1237,11 +1263,11 @@
       : {
         title:"API 绑定准备状态",
         conclusionLine:"当前还不能绑定真实 API。",
-        nextStepLine:"下一步：provider endpoint allowlist 闸门",
+        nextStepLine:"下一步：只读 provider sandbox gate",
         nextStepDetail:"密钥脱敏与日志防泄露规则：已建立。key 删除 / 轮换 / 过期机制草案：已建立。当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。"
       };
     return {
-      readinessVersion:"2.0.99",
+      readinessVersion:"2.1.0",
       phase:"api_binding_readiness_status",
       readinessStatus:"not_ready",
       readinessMode:"status_only",
@@ -1521,6 +1547,7 @@
       localSecureStorageInterfaceDraft:category === "flight" ? createLocalSecureStorageInterfaceDraft() : null,
       keyRedactionAndLogLeakRules:category === "flight" ? createKeyRedactionAndLogLeakRules() : null,
       keyLifecycleDraft:category === "flight" ? createKeyLifecycleDraft() : null,
+      providerEndpointAllowlistGate:category === "flight" ? createProviderEndpointAllowlistGate() : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState() : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState() : null,
@@ -1582,6 +1609,7 @@
       localSecureStorageInterfaceDraft:category === "flight" ? createLocalSecureStorageInterfaceDraft(base.localSecureStorageInterfaceDraft) : null,
       keyRedactionAndLogLeakRules:category === "flight" ? createKeyRedactionAndLogLeakRules(base.keyRedactionAndLogLeakRules) : null,
       keyLifecycleDraft:category === "flight" ? createKeyLifecycleDraft(base.keyLifecycleDraft) : null,
+      providerEndpointAllowlistGate:category === "flight" ? createProviderEndpointAllowlistGate(base.providerEndpointAllowlistGate) : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(base.userApiPriorityPolicyState),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState(base.apiBindingSafeShellState) : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState(base.userApiProviderCatalogState) : null,
@@ -1706,6 +1734,7 @@
       localSecureStorageInterfaceDraft:safe.category === "flight" ? safe.localSecureStorageInterfaceDraft : null,
       keyRedactionAndLogLeakRules:safe.category === "flight" ? safe.keyRedactionAndLogLeakRules : null,
       keyLifecycleDraft:safe.category === "flight" ? safe.keyLifecycleDraft : null,
+      providerEndpointAllowlistGate:safe.category === "flight" ? safe.providerEndpointAllowlistGate : null,
       userApiPriorityPolicyState:safe.userApiPriorityPolicyState,
       apiBindingSafeShellState:safe.category === "flight" ? safe.apiBindingSafeShellState : null,
       userApiProviderCatalogState:safe.category === "flight" ? safe.userApiProviderCatalogState : null,
@@ -1809,6 +1838,7 @@
     createLocalSecureStorageInterfaceDraft,
     createKeyRedactionAndLogLeakRules,
     createKeyLifecycleDraft,
+    createProviderEndpointAllowlistGate,
     createUserApiPriorityPolicyState,
     createApiBindingSafeShellState,
     createUserApiProviderCatalogState,
