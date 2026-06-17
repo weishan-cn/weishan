@@ -1462,3 +1462,47 @@ marker:secure key storage plan macos keychain
 marker:secure key storage plan electron safestorage
 marker:secure key storage plan not granted
 marker:secure key storage plan approval required
+
+## v2.0.92：Fix Secure Key Storage Plan Checklist / 补齐安全密钥存储方案清单
+v2.0.92 只修安全密钥存储方案面板文案和验收清单，不接真实 API，不读取或保存真实 API key，不连接 endpoint，不发起网络请求，不返回价格，不生成 bookingUrl，不付款，不下单。
+
+`查看安全密钥存储方案` 默认仍折叠。展开后必须直接显示：
+- 安全密钥存储方案
+- 当前状态：安全密钥存储仍处于方案阶段，当前版本不会保存真实 API key。
+- 真实密钥保存：未启用
+- macOS Keychain：未连接
+- Electron safeStorage：未实现
+- .env 保存：禁止
+- 明文保存：禁止
+- localStorage 保存：禁止
+- sessionStorage 保存：禁止
+- 日志记录 key：禁止
+- API 连接测试：未启用
+- endpoint 连接：未启用
+- 真实价格返回：未启用
+- bookingUrl 返回：未启用
+
+未来允许评估的存储目标只包括：
+- macOS Keychain
+- Electron safeStorage + 加密本地存储
+- 用户本机加密配置文件
+- 企业托管密钥服务
+
+禁止的存储方式包括：
+- 明文文件
+- .env
+- localStorage
+- sessionStorage
+- 前端代码
+- 日志文件
+- crash report
+- 远程未加密存储
+- 自动上传到服务器
+- 通过聊天记录保存 API key
+- 通过截图保存 API key
+
+下一步只能是实现本机安全存储设计。当前版本仍不能输入、保存、读取或测试真实 API key。
+
+marker:secure key storage plan status checklist
+marker:secure key storage plan forbidden storage checklist
+marker:secure key storage plan disabled connection checklist

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SECURE_KEY_STORAGE_PLAN_VERSION = "2.0.91";
+  const SECURE_KEY_STORAGE_PLAN_VERSION = "2.0.92";
   const PHASE = "flight_secure_key_storage_plan";
   const DEFAULT_PLAN_STATUS = "plan_only";
   const DEFAULT_CURRENT_STAGE = "design_required";
@@ -62,13 +62,74 @@
     return {
       summaryTitle: "安全密钥存储方案",
       planStatusLine: "安全密钥存储方案：计划中",
-      currentStatusLine: "当前状态：仅计划，尚未实现真实安全密钥存储。",
+      currentStatusLine: "当前状态：安全密钥存储仍处于方案阶段，当前版本不会保存真实 API key。",
       currentStageLine: "当前阶段：设计中",
       futureTargetsLine: "未来目标：macOS Keychain / Electron safeStorage",
       blockedChannelsTitle: "禁止渠道",
       blockedChannelsLine: "禁止：明文、.env、localStorage、sessionStorage、日志",
-      nextStepLine: "下一步：设计安全密钥存储实现",
-      safetyLine: "当前版本不读取真实 API key，不保存明文，不写入 .env / localStorage / sessionStorage / 日志。",
+      nextStepLine: "下一步：实现本机安全存储设计。",
+      safetyLine: "当前版本仍不能输入、保存、读取或测试真实 API key。",
+      statusChecklistTitle: "当前状态清单",
+      statusChecklistItems: [
+        "真实密钥保存：未启用",
+        "macOS Keychain：未连接",
+        "Electron safeStorage：未实现",
+        ".env 保存：禁止",
+        "明文保存：禁止",
+        "localStorage 保存：禁止",
+        "sessionStorage 保存：禁止",
+        "日志记录 key：禁止",
+        "API 连接测试：未启用",
+        "endpoint 连接：未启用",
+        "真实价格返回：未启用",
+        "bookingUrl 返回：未启用"
+      ],
+      futureStorageTargetsTitle: "未来允许评估的存储目标",
+      futureStorageTargets: [
+        "macOS Keychain",
+        "Electron safeStorage + 加密本地存储",
+        "用户本机加密配置文件",
+        "企业托管密钥服务"
+      ],
+      forbiddenStorageTitle: "禁止的存储方式",
+      forbiddenStorageItems: [
+        "明文文件",
+        ".env",
+        "localStorage",
+        "sessionStorage",
+        "前端代码",
+        "日志文件",
+        "crash report",
+        "远程未加密存储",
+        "自动上传到服务器",
+        "通过聊天记录保存 API key",
+        "通过截图保存 API key"
+      ],
+      implementationStepsTitle: "实施步骤",
+      implementationSteps: [
+        "设计密钥数据模型",
+        "选择安全存储目标",
+        "增加本机加密写入能力",
+        "增加读取前权限确认",
+        "增加删除 / 轮换 / 过期机制",
+        "增加审计日志，但不得记录 key 明文",
+        "增加只读 provider 沙箱连接",
+        "增加真实只读价格源前的人工复核"
+      ],
+      riskModelTitle: "风险模型",
+      riskModelItems: [
+        "明文泄露风险",
+        "日志泄露风险",
+        "截图泄露风险",
+        "复制粘贴泄露风险",
+        "crash report 泄露风险",
+        "恶意 provider 风险",
+        "钓鱼 endpoint 风险",
+        "权限过宽风险",
+        "用户误绑定写入 / 下单 / 支付 API 风险"
+      ],
+      nextStepTitle: "下一步",
+      nextStepText: "实现本机安全存储设计。当前版本仍不能输入、保存、读取或测试真实 API key。",
       capabilityTitle: "当前能力",
       checklistTitle: "前置条件",
       capabilityLines: [
@@ -143,13 +204,25 @@
     return clone({
       title: display.summaryTitle || "安全密钥存储方案",
       planStatusLine: display.planStatusLine || "安全密钥存储方案：计划中",
-      currentStatusLine: display.currentStatusLine || "当前状态：仅计划，尚未实现真实安全密钥存储。",
+      currentStatusLine: display.currentStatusLine || "当前状态：安全密钥存储仍处于方案阶段，当前版本不会保存真实 API key。",
       currentStageLine: display.currentStageLine || "当前阶段：设计中",
       futureTargetsLine: display.futureTargetsLine || "未来目标：macOS Keychain / Electron safeStorage",
       blockedChannelsTitle: display.blockedChannelsTitle || "禁止渠道",
       blockedChannelsLine: display.blockedChannelsLine || "禁止：明文、.env、localStorage、sessionStorage、日志",
-      nextStepLine: display.nextStepLine || "下一步：设计安全密钥存储实现",
-      safetyLine: display.safetyLine || "当前版本不读取真实 API key，不保存明文，不写入 .env / localStorage / sessionStorage / 日志。",
+      nextStepLine: display.nextStepLine || "下一步：实现本机安全存储设计。",
+      safetyLine: display.safetyLine || "当前版本仍不能输入、保存、读取或测试真实 API key。",
+      statusChecklistTitle: display.statusChecklistTitle || "当前状态清单",
+      statusChecklistItems: Array.isArray(display.statusChecklistItems) ? display.statusChecklistItems.slice() : defaultDisplay().statusChecklistItems.slice(),
+      futureStorageTargetsTitle: display.futureStorageTargetsTitle || "未来允许评估的存储目标",
+      futureStorageTargets: Array.isArray(display.futureStorageTargets) ? display.futureStorageTargets.slice() : defaultDisplay().futureStorageTargets.slice(),
+      forbiddenStorageTitle: display.forbiddenStorageTitle || "禁止的存储方式",
+      forbiddenStorageItems: Array.isArray(display.forbiddenStorageItems) ? display.forbiddenStorageItems.slice() : defaultDisplay().forbiddenStorageItems.slice(),
+      implementationStepsTitle: display.implementationStepsTitle || "实施步骤",
+      implementationSteps: Array.isArray(display.implementationSteps) ? display.implementationSteps.slice() : defaultDisplay().implementationSteps.slice(),
+      riskModelTitle: display.riskModelTitle || "风险模型",
+      riskModelItems: Array.isArray(display.riskModelItems) ? display.riskModelItems.slice() : defaultDisplay().riskModelItems.slice(),
+      nextStepTitle: display.nextStepTitle || "下一步",
+      nextStepText: display.nextStepText || "实现本机安全存储设计。当前版本仍不能输入、保存、读取或测试真实 API key。",
       capabilityTitle: display.capabilityTitle || "当前能力",
       checklistTitle: display.checklistTitle || "前置条件",
       capabilityLines: Array.isArray(display.capabilityLines) ? display.capabilityLines.slice() : defaultDisplay().capabilityLines.slice(),
@@ -221,7 +294,7 @@
     if (/sk-[A-Za-z0-9]|api[_-]?key\s*[:=]\s*[A-Za-z0-9_-]{8,}|https?:\/\/api\./i.test(joined)) {
       issues.push("secret_or_endpoint");
     }
-    if (/明文保存|写入\s*\.env|localStorage|sessionStorage|日志/.test(joined) && /true/.test(joined)) {
+    if (/"canStorePlaintext":true|"canStoreEnvFile":true|"canStoreLocalStorage":true|"canStoreSessionStorage":true|"canStoreLogs":true/.test(joined)) {
       issues.push("plaintext_channel");
     }
     if (issues.length) throw new Error("secure_key_storage_plan_violation:" + issues.join(","));
