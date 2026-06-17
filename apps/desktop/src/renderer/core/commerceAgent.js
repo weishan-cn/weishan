@@ -39,7 +39,7 @@
       return api.getFlightLowestOffersContract(contract);
     }
     const fallback = {
-      contractVersion:"2.0.98",
+      contractVersion:"2.0.99",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -99,7 +99,7 @@
       return api.getFlightProviderCandidatesRegistry(registry);
     }
     const fallback = {
-      contractVersion:"2.0.98",
+      contractVersion:"2.0.99",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -169,7 +169,7 @@
       return api.getFlightProviderApprovalStatus(status);
     }
     const fallback = {
-      approvalVersion:"2.0.98",
+      approvalVersion:"2.0.99",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -265,7 +265,7 @@
       return api.getFlightReadonlyStubPermission(permission);
     }
     const fallback = {
-      permissionVersion:"2.0.98",
+      permissionVersion:"2.0.99",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -329,7 +329,7 @@
       return api.getFlightReadonlyStubAdapter(adapter);
     }
     const fallback = {
-      adapterVersion:"2.0.98",
+      adapterVersion:"2.0.99",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -436,7 +436,7 @@
       return api.getFlightSandboxDryRunContract(shell);
     }
     const fallback = {
-      sandboxDryRunVersion:"2.0.98",
+      sandboxDryRunVersion:"2.0.99",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -559,7 +559,7 @@
       return api.getFlightSandboxProviderMatrixContract(matrix);
     }
     const fallback = {
-      matrixVersion:"2.0.98",
+      matrixVersion:"2.0.99",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -656,7 +656,7 @@
       return api.getSecureKeyStoragePlanState(plan);
     }
     const fallback = {
-      secureKeyStoragePlanVersion:"2.0.98",
+      secureKeyStoragePlanVersion:"2.0.99",
       phase:"flight_secure_key_storage_plan",
       planStatus:"plan_only",
       currentStage:"design_required",
@@ -751,7 +751,7 @@
       return api.buildSecureStorageDesignGate(gate);
     }
     return {
-      version:"2.0.98",
+      version:"2.0.99",
       gateName:"secure_storage_design_gate",
       gateStatus:"closed",
       phase:"design_gate",
@@ -786,7 +786,7 @@
       },
       blockingReasons:["安全密钥写入实现未完成", "安全密钥读取实现未完成", "Keychain 适配未完成", "safeStorage 适配未完成", "provider endpoint allowlist 未完成"],
       unlockChecklist:["设计密钥数据结构", "设计本机安全写入接口", "设计本机安全读取接口", "完成安全审查后，才允许进入下一阶段"],
-      implementationMilestones:["v2.0.98：安全存储设计闸门，默认关闭", "v2.0.98：本机安全存储接口草案，仍不写真实 key"],
+      implementationMilestones:["v2.0.99：安全存储设计闸门，默认关闭", "v2.0.99：本机安全存储接口草案，仍不写真实 key"],
       auditRules:["日志中永不记录完整 key", "UI 不得展示明文 key"],
       redactionRules:["apiKey → [REDACTED_API_KEY]", "apiSecret → [REDACTED_API_SECRET]"]
     };
@@ -798,7 +798,7 @@
       return api.buildLocalSecureStorageInterfaceDraft(draft);
     }
     return {
-      version:"2.0.98",
+      version:"2.0.99",
       draftName:"local_secure_storage_interface_draft",
       phase:"local_secure_storage_interface_draft",
       draftStatus:"draft_only",
@@ -904,7 +904,7 @@
       return Object.assign({}, api.commerceKeyRedactionAndLogLeakRulesContract, state && typeof state === "object" ? state : {});
     }
     return {
-      version:"2.0.98",
+      version:"2.0.99",
       moduleName:"commerce_key_redaction_and_log_leak_rules",
       phase:"key_redaction_and_log_leak_prevention_rules",
       ruleStatus:"rules_established",
@@ -958,7 +958,7 @@
       return Object.assign({}, api.buildKeyLifecycleDraft(), raw);
     }
     return Object.assign({
-      version:"2.0.98",
+      version:"2.0.99",
       moduleName:"key_delete_rotate_expiry_draft",
       phase:"key_lifecycle_draft",
       draftStatus:"draft_only",
@@ -1058,7 +1058,7 @@
         sourceLine:"未绑定 API 时，可使用 weishan 候选平台和外部搜索入口。"
       };
     return {
-      policyVersion:"2.0.98",
+      policyVersion:"2.0.99",
       phase:"user_api_priority_search_policy",
       userApiBindingState:binding,
       searchMode,
@@ -1072,7 +1072,7 @@
     const shellState = api && typeof api.getApiBindingSafeShellState === "function"
       ? api.getApiBindingSafeShellState(raw.shellState || raw)
       : {
-        shellVersion:"2.0.98",
+        shellVersion:"2.0.99",
         phase:"api_binding_safe_shell",
         status:"not_bound",
         userApi:"not_bound",
@@ -1131,7 +1131,7 @@
         mode
       };
     return {
-      shellVersion:"2.0.98",
+      shellVersion:"2.0.99",
       phase:"api_binding_safe_shell",
       shellState,
       mode,
@@ -1187,7 +1187,7 @@
         ]
       }, raw.display || {});
     return {
-      catalogVersion:"2.0.98",
+      catalogVersion:"2.0.99",
       phase:"user_api_provider_catalog",
       catalogStatus:"catalog_only",
       catalog,
@@ -1241,7 +1241,7 @@
         nextStepDetail:"密钥脱敏与日志防泄露规则：已建立。key 删除 / 轮换 / 过期机制草案：已建立。当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。"
       };
     return {
-      readinessVersion:"2.0.98",
+      readinessVersion:"2.0.99",
       phase:"api_binding_readiness_status",
       readinessStatus:"not_ready",
       readinessMode:"status_only",

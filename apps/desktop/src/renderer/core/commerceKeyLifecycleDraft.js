@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const LIFECYCLE_VERSION = "2.0.98";
+  const LIFECYCLE_VERSION = "2.0.99";
 
   function clone(value) {
     return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;
@@ -276,6 +276,13 @@
         realExpiryLine: "真实过期：未开放",
         realRevocationLine: "真实吊销：未开放",
         realRestoreLine: "真实恢复：未开放",
+        keyInputLine: "真实 API key 输入：未开放",
+        keySaveLine: "真实 API key 保存：未开放",
+        keyReadLine: "真实 API key 读取：未开放",
+        connectionTestLine: "测试连接：未开放",
+        providerSandboxLine: "provider 沙箱：未开放",
+        realPriceLine: "真实价格：未开放",
+        bookingUrlLine: "bookingUrl：未开放",
         nextStepLine: "下一步：provider endpoint allowlist 闸门",
         currentVersionLine: "当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key"
       }

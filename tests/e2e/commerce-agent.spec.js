@@ -535,7 +535,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.getByText("当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单").first()).toBeVisible();
   });
 
-  test("v2.0.98 commerce detail renders secure key storage plan body", async () => {
+  test("v2.0.99 commerce detail renders secure key storage plan body", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "commerce");
     await page.locator(".commerce-input").fill(runId + "-SECURE-KEY-BODY 7月15日上海到成都最便宜的机票");
@@ -600,7 +600,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.0.98 renders key delete rotate expiry draft and keeps lifecycle operations blocked", async () => {
+  test("v2.0.99 renders key delete rotate expiry draft and keeps lifecycle operations blocked", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "commerce");
     await page.locator(".commerce-input").fill(runId + "-KEY-LIFECYCLE 7月15日上海到成都最便宜的机票");
@@ -618,15 +618,29 @@ test.describe.serial("commerce agent workbench", () => {
       "真实过期：未开放",
       "真实吊销：未开放",
       "真实恢复：未开放",
+      "真实 API key 输入：未开放",
+      "真实 API key 保存：未开放",
+      "真实 API key 读取：未开放",
+      "测试连接：未开放",
+      "provider 沙箱：未开放",
+      "真实价格：未开放",
+      "bookingUrl：未开放",
       "key 状态机草案",
       "当前允许状态：draft_alias_only",
       "阻断迁移",
       "删除机制草案",
-      "prepareKeyDeleteDraft：blocked",
+      "prepareKeyDeleteDraft：阻断",
+      "confirmKeyDeleteDraft：阻断",
+      "finalizeKeyDeleteDraft：阻断",
       "轮换机制草案",
-      "prepareKeyRotateDraft：blocked",
+      "prepareKeyRotateDraft：阻断",
+      "validateRotationCandidateDraft：阻断",
+      "confirmKeyRotateDraft：阻断",
+      "finalizeKeyRotateDraft：阻断",
       "过期机制草案",
-      "prepareKeyExpiryDraft：blocked",
+      "prepareKeyExpiryDraft：阻断",
+      "evaluateKeyExpiryDraft：草案",
+      "markKeyExpiredDraft：阻断",
       "生命周期审计事件草案",
       "所有事件必须 redacted: true",
       "密钥脱敏与日志防泄露规则：已建立",
@@ -649,7 +663,7 @@ test.describe.serial("commerce agent workbench", () => {
     });
     expect(lifecycleContract.assertSafe).toBe(true);
     expect(lifecycleContract.draft).toEqual(expect.objectContaining({
-      version:"2.0.98",
+      version:"2.0.99",
       draftStatus:"draft_only",
       implementationStatus:"not_implemented",
       realKeyDelete:"disabled",
@@ -3331,12 +3345,12 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  // v2.0.98 real result only surface hides debug panels by default
+  // v2.0.99 real result only surface hides debug panels by default
   // 查看 Provider 审批状态 ... 人工审核后才允许进入 provider approval
   // 查看只读适配器开发许可 ... 人工批准开发只读 stub
   // 查看只读适配器空壳 ... 不能保存证件 / 银行卡
   // 查看 Sandbox Dry Run ... 沙箱空跑外壳已建立，但未连接真实 provider ... block_price_return ... block_payment
-  test("v2.0.98 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
+  test("v2.0.99 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -3432,7 +3446,7 @@ test.describe.serial("commerce agent workbench", () => {
       })
     } : null);
     expect(userApiPolicy.contract).toEqual(expect.objectContaining({
-      policyVersion:"2.0.98",
+      policyVersion:"2.0.99",
       phase:"user_api_priority_search_policy",
       policyStatus:"policy_only",
       userApiMode:"not_bound",
@@ -3499,7 +3513,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingSafeShell.contract).toEqual(expect.objectContaining({
-      shellVersion:"2.0.98",
+      shellVersion:"2.0.99",
       phase:"api_binding_safe_shell",
       shellStatus:"safe_shell_only",
       bindingStatus:"not_bound",
@@ -3631,7 +3645,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(userApiProviderCatalog.contract).toEqual(expect.objectContaining({
-      catalogVersion:"2.0.98",
+      catalogVersion:"2.0.99",
       phase:"user_api_provider_catalog",
       catalogStatus:"catalog_only",
       realApiConnectionMode:"disabled",
@@ -3743,7 +3757,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingMockForm.contract).toEqual(expect.objectContaining({
-      formVersion:"2.0.98",
+      formVersion:"2.0.99",
       phase:"api_binding_mock_form_disabled_state",
       formStatus:"disabled_mock_only",
       inputMode:"disabled",
@@ -3843,7 +3857,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingPermissionChecklist.contract).toEqual(expect.objectContaining({
-      checklistVersion:"2.0.98",
+      checklistVersion:"2.0.99",
       phase:"api_binding_permission_checklist",
       checklistStatus:"checklist_only",
       realBindingMode:"disabled",
@@ -3943,7 +3957,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingReadiness.contract).toEqual(expect.objectContaining({
-      readinessVersion:"2.0.98",
+      readinessVersion:"2.0.99",
       phase:"api_binding_readiness_status",
       readinessStatus:"not_ready",
       readinessMode:"status_only",
@@ -4028,7 +4042,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(apiBindingReadiness.assertSafe).toBe(true);
     const matrix = await page.evaluate(() => window.WeishanCommerceFlightSandboxProviderMatrix && typeof window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract === "function" ? window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract() : null);
     expect(matrix).toEqual(expect.objectContaining({
-      matrixVersion:"2.0.98",
+      matrixVersion:"2.0.99",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -4095,7 +4109,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
     const sandboxDryRun = await page.evaluate(() => window.WeishanCommerceFlightSandboxDryRun && window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract ? window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract : null);
     expect(sandboxDryRun).toEqual(expect.objectContaining({
-      sandboxDryRunVersion:"2.0.98",
+      sandboxDryRunVersion:"2.0.99",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -4194,7 +4208,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(sandboxAssert).toBe(true);
     const readonlyStubPermission = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubPermission && typeof window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission === "function" ? window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission() : null);
     expect(readonlyStubPermission).toEqual(expect.objectContaining({
-      permissionVersion:"2.0.98",
+      permissionVersion:"2.0.99",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -4240,7 +4254,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(secureKeyStoragePlan.contract).toEqual(expect.objectContaining({
-      secureKeyStoragePlanVersion:"2.0.98",
+      secureKeyStoragePlanVersion:"2.0.99",
       phase:"flight_secure_key_storage_plan",
       planStatus:"plan_only",
       currentStage:"design_required",
@@ -4361,7 +4375,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(secureStorageDesignGate.contract).toEqual(expect.objectContaining({
-      version:"2.0.98",
+      version:"2.0.99",
       gateName:"secure_storage_design_gate",
       gateStatus:"closed",
       phase:"design_gate"
@@ -4441,7 +4455,7 @@ test.describe.serial("commerce agent workbench", () => {
       "设计删除 key 机制",
       "设计轮换 key 机制",
       "设计 endpoint allowlist",
-      "v2.0.98：本机安全存储接口草案",
+      "v2.0.99：本机安全存储接口草案",
       "apiKey → [REDACTED_API_KEY]",
       "apiSecret → [REDACTED_API_SECRET]",
       "accessToken → [REDACTED_ACCESS_TOKEN]",
@@ -4466,7 +4480,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(localSecureStorageDraft.contract).toEqual(expect.objectContaining({
-      version:"2.0.98",
+      version:"2.0.99",
       draftStatus:"draft_only",
       implementationStatus:"not_implemented"
     }));
@@ -4768,7 +4782,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.0.98 bare flight intent still renders the simple flight result card", async () => {
+  test("v2.0.99 bare flight intent still renders the simple flight result card", async () => {
     await resetCommerceTasks(page);
     await page.reload({ waitUntil:"domcontentloaded" });
     await gotoRoute(page, "home");
@@ -4820,10 +4834,10 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.0.98 sidebar version stays in sync with release version", async () => {
+  test("v2.0.99 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.0.98");
+    await expect(sidebarFoot).toContainText("weishan v2.0.99");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 

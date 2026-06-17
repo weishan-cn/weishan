@@ -2745,6 +2745,13 @@
         realExpiryLine:"真实过期：未开放",
         realRevocationLine:"真实吊销：未开放",
         realRestoreLine:"真实恢复：未开放",
+        keyInputLine:"真实 API key 输入：未开放",
+        keySaveLine:"真实 API key 保存：未开放",
+        keyReadLine:"真实 API key 读取：未开放",
+        connectionTestLine:"测试连接：未开放",
+        providerSandboxLine:"provider 沙箱：未开放",
+        realPriceLine:"真实价格：未开放",
+        bookingUrlLine:"bookingUrl：未开放",
         nextStepLine:"下一步：provider endpoint allowlist 闸门",
         currentVersionLine:"当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key"
       },
@@ -2766,7 +2773,8 @@
     const rotateDraft = draft.rotateDraft || {};
     const expiryDraft = draft.expiryDraft || {};
     const audit = draft.auditEventsDraft || {};
-    const methodList = (methods) => Object.keys(methods || {}).map((key) => `<li>${esc(key)}：${esc((methods[key] && methods[key].status) || "blocked")}</li>`).join("");
+    const statusLabel = (status) => status === "draft_only" ? "草案" : status === "blocked" ? "阻断" : status || "阻断";
+    const methodList = (methods) => Object.keys(methods || {}).map((key) => `<li>${esc(key)}：${esc(statusLabel(methods[key] && methods[key].status))}</li>`).join("");
     const body = `<section class="commerce-key-lifecycle-draft-panel" aria-label="key 删除 / 轮换 / 过期机制草案">
       <h4>${esc(display.title || "key 删除 / 轮换 / 过期机制草案")}</h4>
       <p>${esc(display.lifecycleStatusLine || "生命周期草案：已建立")}</p>
@@ -2775,11 +2783,18 @@
       <p>${esc(display.realExpiryLine || "真实过期：未开放")}</p>
       <p>${esc(display.realRevocationLine || "真实吊销：未开放")}</p>
       <p>${esc(display.realRestoreLine || "真实恢复：未开放")}</p>
+      <p>${esc(display.keyInputLine || "真实 API key 输入：未开放")}</p>
+      <p>${esc(display.keySaveLine || "真实 API key 保存：未开放")}</p>
+      <p>${esc(display.keyReadLine || "真实 API key 读取：未开放")}</p>
+      <p>${esc(display.connectionTestLine || "测试连接：未开放")}</p>
+      <p>${esc(display.providerSandboxLine || "provider 沙箱：未开放")}</p>
+      <p>${esc(display.realPriceLine || "真实价格：未开放")}</p>
+      <p>${esc(display.bookingUrlLine || "bookingUrl：未开放")}</p>
       <h5>key 状态机草案</h5>
       <p>当前允许状态：${esc(stateMachine.currentAllowedState || "draft_alias_only")}</p>
       <p>当前阻断状态：${esc(blockedStates.join(" / ") || "active_readonly / rotation_pending / rotated / deleted / revoked")}</p>
       <h5>阻断迁移</h5>
-      <ul>${transitions.map((item) => `<li>${esc(item.from || "")} → ${esc(item.to || "")}：${esc(item.status || "blocked")}</li>`).join("")}</ul>
+      <ul>${transitions.map((item) => `<li>${esc(item.from || "")} -> ${esc(item.to || "")}：${esc(item.status || "blocked")}</li>`).join("")}</ul>
       <h5>删除机制草案</h5>
       <ul>${(Array.isArray(deleteDraft.deleteRules) ? deleteDraft.deleteRules : []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
       <ul>${methodList(deleteDraft.deleteMethodDraft)}</ul>

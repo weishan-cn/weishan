@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GATE_VERSION = "2.0.98";
+  const GATE_VERSION = "2.0.99";
   const GATE_NAME = "secure_storage_design_gate";
   const PHASE = "design_gate";
 
@@ -44,11 +44,11 @@
   ];
 
   const implementationMilestones = [
-    "v2.0.98：安全存储设计闸门，默认关闭",
-    "v2.0.98：本机安全存储接口草案，已建立，但仍不写真实 key",
-    "v2.0.98：密钥脱敏与日志防泄露规则，已建立，但仍不写真实 key",
-    "v2.0.98：key 删除 / 轮换 / 过期机制草案",
-    "v2.0.98：provider endpoint allowlist 闸门",
+    "v2.0.99：安全存储设计闸门，默认关闭",
+    "v2.0.99：本机安全存储接口草案，已建立，但仍不写真实 key",
+    "v2.0.99：密钥脱敏与日志防泄露规则，已建立，但仍不写真实 key",
+    "v2.0.99：key 删除 / 轮换 / 过期机制草案",
+    "v2.0.99：provider endpoint allowlist 闸门",
     "v2.0.99：只读沙箱连接闸门",
     "v2.1.0：人工确认后，才考虑真实只读 key 输入"
   ];

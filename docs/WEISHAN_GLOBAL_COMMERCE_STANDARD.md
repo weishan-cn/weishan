@@ -1739,3 +1739,41 @@ marker:key lifecycle no booking url
 marker:key lifecycle state machine
 marker:key lifecycle audit events
 marker:key lifecycle next provider endpoint allowlist gate
+
+## v2.0.99：Fix Key Lifecycle Draft UI Checklist / 修复 key 生命周期草案 UI 清单
+
+v2.0.99 只修复 `查看 key 删除 / 轮换 / 过期机制草案` 的 UI 清单展示，不开发 provider endpoint allowlist，不接真实 API，不保存 key，不联网。内部 contract 可以继续使用 `blocked` / `draft_only`，但普通用户 UI 必须显示中文状态“阻断 / 草案”。
+
+目标面板展开后必须逐项显示当前状态：
+
+- 真实 API key 输入：未开放
+- 真实 API key 保存：未开放
+- 真实 API key 读取：未开放
+- 测试连接：未开放
+- provider 沙箱：未开放
+- 真实价格：未开放
+- bookingUrl：未开放
+
+目标面板的方法状态必须显示中文：
+
+- prepareKeyDeleteDraft：阻断
+- confirmKeyDeleteDraft：阻断
+- finalizeKeyDeleteDraft：阻断
+- prepareKeyRotateDraft：阻断
+- validateRotationCandidateDraft：阻断
+- confirmKeyRotateDraft：阻断
+- finalizeKeyRotateDraft：阻断
+- prepareKeyExpiryDraft：阻断
+- evaluateKeyExpiryDraft：草案
+- markKeyExpiredDraft：阻断
+
+本阶段仍不得输入、保存、读取、删除、轮换或设置真实 API key 过期，不得测试连接，不得连接 endpoint，不得联网，不得显示价格，不得生成 bookingUrl，不得预订、付款或下单。
+
+marker:key lifecycle ui checklist complete
+marker:key lifecycle current status explicit
+marker:key lifecycle real key input save read not open
+marker:key lifecycle test provider price booking not open
+marker:key lifecycle chinese blocked draft labels
+marker:key lifecycle prepare key delete draft blocked
+marker:key lifecycle prepare key rotate draft blocked
+marker:key lifecycle evaluate key expiry draft draft

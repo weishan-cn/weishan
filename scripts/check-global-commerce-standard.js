@@ -867,7 +867,15 @@ const REQUIRED_PHRASES = [
   "marker:key lifecycle no booking url",
   "marker:key lifecycle state machine",
   "marker:key lifecycle audit events",
-  "marker:key lifecycle next provider endpoint allowlist gate"
+  "marker:key lifecycle next provider endpoint allowlist gate",
+  "marker:key lifecycle ui checklist complete",
+  "marker:key lifecycle current status explicit",
+  "marker:key lifecycle real key input save read not open",
+  "marker:key lifecycle test provider price booking not open",
+  "marker:key lifecycle chinese blocked draft labels",
+  "marker:key lifecycle prepare key delete draft blocked",
+  "marker:key lifecycle prepare key rotate draft blocked",
+  "marker:key lifecycle evaluate key expiry draft draft"
 ];
 
 function main() {
