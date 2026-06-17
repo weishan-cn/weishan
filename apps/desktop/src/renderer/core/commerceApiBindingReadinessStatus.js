@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READINESS_VERSION = "2.0.95";
+  const READINESS_VERSION = "2.0.96";
   const PHASE = "api_binding_readiness_status";
 
   function clone(value) {
@@ -43,7 +43,7 @@
       realBindingMode: String(raw.realBindingMode || "disabled"),
       apiKeyInputMode: String(raw.apiKeyInputMode || "disabled"),
       apiKeyStorageMode: String(raw.apiKeyStorageMode || "disabled"),
-      secureStorageMode: String(raw.secureStorageMode || "not_ready"),
+      secureStorageMode: String(raw.secureStorageMode || "plan_established_not_implemented"),
       permissionChecklistMode: String(raw.permissionChecklistMode || "readonly_preview"),
       providerCatalogMode: String(raw.providerCatalogMode || "catalog_only"),
       mockFormMode: String(raw.mockFormMode || "disabled_preview"),
@@ -74,13 +74,13 @@
         apiBindingExplanation: "available",
         mockForm: "disabled_preview",
         permissionChecklist: "readonly_preview",
-        secureKeyStorage: "not_ready",
+        secureKeyStorage: "plan_established_not_implemented",
         providerReview: "not_started",
         readonlySandbox: "not_ready",
         realPriceResult: "unavailable"
       },
       blockers: [
-        "安全密钥存储方案未完成",
+        "安全密钥存储方案尚未实现",
         "API 绑定权限确认不能提交",
         "Provider 条款 / API 文档未人工审查",
         "只读沙箱连接闸门未完成",
@@ -98,7 +98,7 @@
   function buildApiBindingReadinessSteps() {
     return clone([
       { stepId: "current_readonly_info", label: "平台目录 / 说明 / 禁用表单 / 权限清单", status: "available", canProceedNow: true, reason: "当前只能查看说明、目录、禁用表单和权限清单。" },
-      { stepId: "secure_key_storage_plan", label: "安全密钥存储方案", status: "next", canProceedNow: false, reason: "下一步先设计安全密钥存储方案。" },
+      { stepId: "secure_key_storage_plan", label: "安全密钥存储方案", status: "next", canProceedNow: false, reason: "安全密钥存储方案已建立，尚未实现。" },
       { stepId: "readonly_api_binding_draft", label: "只读 API 绑定草稿", status: "not_ready", canProceedNow: false, reason: "安全密钥存储方案完成前不能进入草稿。" },
       { stepId: "provider_human_review", label: "Provider 人工审查", status: "not_ready", canProceedNow: false, reason: "Provider 条款和 API 文档尚未人工审查。" },
       { stepId: "readonly_sandbox_gate", label: "只读沙箱闸门", status: "not_ready", canProceedNow: false, reason: "只读沙箱连接闸门未完成。" },
@@ -181,7 +181,7 @@
         "API 绑定说明：已建立",
         "API 绑定表单：禁用预览",
         "API 绑定权限清单：只读预览",
-        "安全密钥存储方案：未完成",
+        "安全密钥存储方案：方案已建立，尚未实现",
         "Provider 人工审查：未开始",
         "只读沙箱连接：未准备",
         "真实价格结果：暂无"

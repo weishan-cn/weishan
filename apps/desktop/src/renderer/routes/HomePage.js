@@ -2310,7 +2310,7 @@
       <div class="commerce-api-binding-mock-actions">${actionHtml}</div>
       <p>API 绑定权限清单：只读预览</p>
       <p>API 绑定准备状态：未准备</p>
-      <p>安全密钥存储方案未完成前，表单保持禁用</p>
+      <p>安全密钥存储方案尚未实现前，表单保持禁用</p>
       <p>安全存储设计闸门关闭，表单不可用</p>
       <p>本机安全存储接口仍为草案，表单不可用</p>
       <p>未完成权限确认前，表单保持禁用</p>
@@ -2392,7 +2392,7 @@
         "API 绑定说明：已建立",
         "API 绑定表单：禁用预览",
         "API 绑定权限清单：只读预览",
-        "安全密钥存储方案：未完成",
+        "安全密钥存储方案：方案已建立，尚未实现",
         "Provider 人工审查：未开始",
         "只读沙箱连接：未准备",
         "真实价格结果：暂无"
@@ -2400,7 +2400,7 @@
       blockerTitle:"为什么还不能绑定：",
       status:{
         blockers:[
-          "安全密钥存储方案未完成",
+          "安全密钥存储方案尚未实现",
           "API 绑定权限确认不能提交",
           "Provider 条款 / API 文档未人工审查",
           "只读沙箱连接闸门未完成",
@@ -2511,13 +2511,13 @@
       return api.buildSecureStorageDesignGate(gate);
     }
     return {
-      version:"2.0.95",
+      version:"2.0.96",
       gateName:"secure_storage_design_gate",
       gateStatus:"closed",
       phase:"design_gate",
       blockingReasons:["安全密钥写入实现未完成", "安全密钥读取实现未完成", "Keychain 适配未完成", "safeStorage 适配未完成", "provider endpoint allowlist 未完成"],
       unlockChecklist:["设计密钥数据结构", "设计本机安全写入接口", "设计本机安全读取接口", "完成安全审查后，才允许进入下一阶段"],
-      implementationMilestones:["v2.0.95：安全存储设计闸门，默认关闭", "v2.0.95：本机安全存储接口草案，仍不写真实 key"],
+      implementationMilestones:["v2.0.96：安全存储设计闸门，默认关闭", "v2.0.96：本机安全存储接口草案，仍不写真实 key"],
       auditRules:["日志中永不记录完整 key", "UI 不得展示明文 key"],
       redactionRules:["apiKey → [REDACTED_API_KEY]", "apiSecret → [REDACTED_API_SECRET]"],
       display:{
@@ -2586,12 +2586,12 @@
       return api.buildLocalSecureStorageInterfaceDraft(draft);
     }
     return {
-      version:"2.0.95",
+      version:"2.0.96",
       draftStatus:"draft_only",
       implementationStatus:"not_implemented",
       dataModelDraft:{
-        keyAliasModel:{ keyAliasId:"field:keyAliasId", providerId:"field:providerId", providerName:"field:providerName", permissionType:"field:permissionType_readonly_only", maskedPreview:"field:maskedPreview_redacted_only" },
-        keySecretModel:{ secretRef:"field:secretRef_reference_only", encryptedPayloadRef:"field:encryptedPayloadRef_reference_only", backendType:"field:backendType_candidate_only", keyVersion:"field:keyVersion" },
+        keyAliasModel:{ keyAliasId:"field:keyAliasId", providerId:"field:providerId", providerName:"field:providerName", permissionType:"field:permissionType_readonly_only", region:"field:region", currency:"field:currency", status:"field:status_draft_only", displayName:"field:displayName", maskedPreview:"field:maskedPreview_redacted_only" },
+        keySecretModel:{ secretRef:"field:secretRef_reference_only", encryptedPayloadRef:"field:encryptedPayloadRef_reference_only", backendType:"field:backendType_candidate_only", keyVersion:"field:keyVersion", rotationVersion:"field:rotationVersion" },
         providerBindingModel:{ bindingId:"field:bindingId", providerId:"field:providerId", providerName:"field:providerName", keyAliasId:"field:keyAliasId", endpointAllowlistStatus:"field:endpointAllowlistStatus_not_approved", sandboxStatus:"field:sandboxStatus_disabled", status:"draft_only" }
       },
       methodDraft:{
@@ -2602,17 +2602,17 @@
         prepareSecretRotateDraft:{ status:"blocked", reason:"secret_rotate_blocked" },
         prepareConnectionTestDraft:{ status:"blocked", reason:"endpoint_connection_disabled" },
         prepareProviderSandboxDraft:{ status:"blocked", reason:"provider_sandbox_disabled" },
-        prepareReadonlyPriceDraft:{ status:"blocked", reason:"real_price_disabled" },
+        prepareRealPriceReadDraft:{ status:"blocked", reason:"real_price_read_blocked" },
         prepareBookingUrlDraft:{ status:"blocked", reason:"booking_url_disabled" }
       },
       backendCandidates:[
-        { backendType:"macOS Keychain", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false },
-        { backendType:"Electron safeStorage", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false },
-        { backendType:"encrypted local config file", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false },
-        { backendType:"enterprise managed key service", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false }
+        { backendType:"macOS Keychain", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false, displayLine:"macOS Keychain：候选，未连接" },
+        { backendType:"Electron safeStorage + encrypted file", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false, displayLine:"Electron safeStorage + encrypted file：候选，未实现" },
+        { backendType:"encrypted local config", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false, displayLine:"encrypted local config：候选，未实现" },
+        { backendType:"enterprise managed secret", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false, displayLine:"enterprise managed secret：候选，未实现" }
       ],
-      auditDraft:{ events:["alias_created_draft", "secret_write_blocked", "secret_read_blocked", "connection_test_blocked", "price_return_blocked"], rules:["审计日志不得记录 key 明文", "审计日志只允许记录 key alias"] },
-      redactionDraft:{ functions:["redactSecretLikeValue", "redactObject", "redactHeaders", "redactUrl"], placeholders:{ apiKey:"[REDACTED_API_KEY]", apiSecret:"[REDACTED_API_SECRET]", accessToken:"[REDACTED_ACCESS_TOKEN]", authorizationHeader:"[REDACTED_AUTH_HEADER]" } },
+      auditDraft:{ events:["KEY_ALIAS_CREATED_DRAFT", "KEY_WRITE_BLOCKED", "KEY_READ_BLOCKED", "KEY_DELETE_BLOCKED", "KEY_ROTATE_BLOCKED", "CONNECTION_TEST_BLOCKED", "PROVIDER_SANDBOX_BLOCKED", "REAL_PRICE_BLOCKED", "BOOKING_URL_BLOCKED"], rules:["审计日志不得记录 key 明文", "审计日志只允许记录 key alias"] },
+      redactionDraft:{ functions:["redactSecretLikeValue", "redactObject", "redactHeaders", "redactUrl"], placeholders:{ apiKey:"[REDACTED_API_KEY]", apiSecret:"[REDACTED_API_SECRET]", accessToken:"[REDACTED_ACCESS_TOKEN]", authorizationHeader:"[REDACTED_AUTH_HEADER]", credentialParams:"[REDACTED_CREDENTIAL_PARAMS]" } },
       display:{ title:"本机安全存储接口草案", currentStatusLine:"接口草案：已建立", implementationLine:"真实实现：未启用", keyInputLine:"真实 API key 输入：未开放", keySaveLine:"真实 API key 保存：未开放", keyReadLine:"真实 API key 读取：未开放", keyDeleteRotateLine:"删除 / 轮换：未开放", connectionTestLine:"测试连接：未开放", providerSandboxLine:"provider 沙箱：未开放", priceLine:"真实价格：未开放", bookingUrlLine:"bookingUrl：未开放", nextStepLine:"下一步：密钥脱敏与日志防泄露规则", safetyLine:"当前版本仍不能输入、保存、读取或测试真实 API key。" }
     };
   }
@@ -2631,9 +2631,10 @@
     }).join("");
     const methodHtml = Object.keys(methodDraft).map((key) => {
       const method = methodDraft[key] || {};
-      return `<li>${esc(key)}：${esc(method.status || "blocked")}，${esc(method.reason || "")}</li>`;
+      const label = key === "prepareKeyAliasDraft" ? "只生成 alias 草案，不接收真实 key" : "阻断";
+      return `<li>${esc(key)}：${esc(label)}</li>`;
     }).join("");
-    const backendHtml = backendCandidates.map((item) => `<li>${esc(item.backendType || "")}：${esc(item.candidateStatus || "candidate_only")}，connected=${esc(String(item.connected === true))}，canRead=${esc(String(item.canRead === true))}，canWrite=${esc(String(item.canWrite === true))}，canDelete=${esc(String(item.canDelete === true))}，canRotate=${esc(String(item.canRotate === true))}</li>`).join("");
+    const backendHtml = backendCandidates.map((item) => `<li>${esc(item.displayLine || (item.backendType || "") + "：候选，未实现")}</li>`).join("");
     const placeholders = redaction.placeholders && typeof redaction.placeholders === "object" ? redaction.placeholders : {};
     const body = `<section class="commerce-local-secure-storage-interface-draft-panel" aria-label="本机安全存储接口草案">
       <h4>${esc(display.title || "本机安全存储接口草案")}</h4>
@@ -2659,10 +2660,11 @@
       <ul>${(Array.isArray(audit.rules) ? audit.rules : []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
       <h5>脱敏接口草案</h5>
       <ul>${(Array.isArray(redaction.functions) ? redaction.functions : []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
-      <p>${esc(placeholders.apiKey || "[REDACTED_API_KEY]")}</p>
-      <p>${esc(placeholders.apiSecret || "[REDACTED_API_SECRET]")}</p>
-      <p>${esc(placeholders.accessToken || "[REDACTED_ACCESS_TOKEN]")}</p>
-      <p>${esc(placeholders.authorizationHeader || "[REDACTED_AUTH_HEADER]")}</p>
+      <p>apiKey → ${esc(placeholders.apiKey || "[REDACTED_API_KEY]")}</p>
+      <p>apiSecret → ${esc(placeholders.apiSecret || "[REDACTED_API_SECRET]")}</p>
+      <p>accessToken → ${esc(placeholders.accessToken || "[REDACTED_ACCESS_TOKEN]")}</p>
+      <p>authorization header → ${esc(placeholders.authorizationHeader || "[REDACTED_AUTH_HEADER]")}</p>
+      <p>credential query params → ${esc(placeholders.credentialParams || "[REDACTED_CREDENTIAL_PARAMS]")}</p>
       <h5>下一步</h5>
       <p>${esc(display.nextStepLine || "下一步：密钥脱敏与日志防泄露规则")}</p>
       <p>${esc(display.safetyLine || "当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>

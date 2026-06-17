@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const DRAFT_VERSION = "2.0.95";
+  const DRAFT_VERSION = "2.0.96";
   const DRAFT_NAME = "local_secure_storage_interface_draft";
   const PHASE = "local_secure_storage_interface_draft";
 
@@ -52,8 +52,11 @@
         providerId: "field:providerId",
         providerName: "field:providerName",
         permissionType: "field:permissionType_readonly_only",
-        maskedPreview: "field:maskedPreview_redacted_only",
+        region: "field:region",
+        currency: "field:currency",
         status: "field:status_draft_only",
+        displayName: "field:displayName",
+        maskedPreview: "field:maskedPreview_redacted_only",
         createdAt: "field:createdAt",
         updatedAt: "field:updatedAt"
       },
@@ -62,6 +65,7 @@
         encryptedPayloadRef: "field:encryptedPayloadRef_reference_only",
         backendType: "field:backendType_candidate_only",
         keyVersion: "field:keyVersion",
+        rotationVersion: "field:rotationVersion",
         rotationRequiredAt: "field:rotationRequiredAt",
         lastReadAt: "field:lastReadAt_disabled",
         status: "field:status_not_stored"
@@ -106,17 +110,17 @@
       prepareSecretRotateDraft: blockedMethod("prepareSecretRotateDraft", "secret_rotate_blocked"),
       prepareConnectionTestDraft: blockedMethod("prepareConnectionTestDraft", "endpoint_connection_disabled"),
       prepareProviderSandboxDraft: blockedMethod("prepareProviderSandboxDraft", "provider_sandbox_disabled"),
-      prepareReadonlyPriceDraft: blockedMethod("prepareReadonlyPriceDraft", "real_price_disabled"),
+      prepareRealPriceReadDraft: blockedMethod("prepareRealPriceReadDraft", "real_price_read_blocked"),
       prepareBookingUrlDraft: blockedMethod("prepareBookingUrlDraft", "booking_url_disabled")
     });
   }
 
   function buildLocalSecureStorageBackendCandidates() {
     return clone([
-      { backendType: "macOS Keychain", candidateStatus: "candidate_only", connected: false, canRead: false, canWrite: false, canDelete: false, canRotate: false },
-      { backendType: "Electron safeStorage", candidateStatus: "candidate_only", connected: false, canRead: false, canWrite: false, canDelete: false, canRotate: false },
-      { backendType: "encrypted local config file", candidateStatus: "candidate_only", connected: false, canRead: false, canWrite: false, canDelete: false, canRotate: false },
-      { backendType: "enterprise managed key service", candidateStatus: "candidate_only", connected: false, canRead: false, canWrite: false, canDelete: false, canRotate: false }
+      { backendType: "macOS Keychain", candidateStatus: "candidate_only", connected: false, canRead: false, canWrite: false, canDelete: false, canRotate: false, displayLine: "macOS Keychain：候选，未连接" },
+      { backendType: "Electron safeStorage + encrypted file", candidateStatus: "candidate_only", connected: false, canRead: false, canWrite: false, canDelete: false, canRotate: false, displayLine: "Electron safeStorage + encrypted file：候选，未实现" },
+      { backendType: "encrypted local config", candidateStatus: "candidate_only", connected: false, canRead: false, canWrite: false, canDelete: false, canRotate: false, displayLine: "encrypted local config：候选，未实现" },
+      { backendType: "enterprise managed secret", candidateStatus: "candidate_only", connected: false, canRead: false, canWrite: false, canDelete: false, canRotate: false, displayLine: "enterprise managed secret：候选，未实现" }
     ]);
   }
 
@@ -124,15 +128,15 @@
     return clone({
       auditStatus: "draft_only",
       events: [
-        "alias_created_draft",
-        "secret_write_blocked",
-        "secret_read_blocked",
-        "secret_delete_blocked",
-        "secret_rotate_blocked",
-        "connection_test_blocked",
-        "endpoint_connection_blocked",
-        "price_return_blocked",
-        "booking_url_return_blocked"
+        "KEY_ALIAS_CREATED_DRAFT",
+        "KEY_WRITE_BLOCKED",
+        "KEY_READ_BLOCKED",
+        "KEY_DELETE_BLOCKED",
+        "KEY_ROTATE_BLOCKED",
+        "CONNECTION_TEST_BLOCKED",
+        "PROVIDER_SANDBOX_BLOCKED",
+        "REAL_PRICE_BLOCKED",
+        "BOOKING_URL_BLOCKED"
       ],
       rules: [
         "审计日志不得记录 key 明文",
