@@ -1507,3 +1507,74 @@ marker:secure key storage plan status checklist
 marker:secure key storage plan forbidden storage checklist
 marker:secure key storage plan disabled connection checklist
 marker:secure key storage plan body rendering
+
+## v2.0.94：Secure Storage Design Gate / 安全存储设计闸门
+v2.0.94 新增安全存储设计闸门。该闸门只是未来 API key 输入、保存、读取、测试连接、provider 沙箱连接、真实价格返回和 bookingUrl 返回前的统一准入层，不是安全密钥存储实现。
+
+默认状态必须为：
+- 闸门状态：关闭
+- 当前阶段：设计闸门
+- 真实 API key 输入：未开放
+- 真实 API key 保存：未开放
+- 真实 API key 读取：未开放
+- 测试连接：未开放
+- provider 沙箱连接：未开放
+- 真实价格返回：未开放
+- bookingUrl 返回：未开放
+
+阻断原因必须包括：
+- 安全密钥写入实现未完成
+- 安全密钥读取实现未完成
+- 删除 / 轮换机制未完成
+- Keychain 适配未完成
+- safeStorage 适配未完成
+- 加密本地存储未完成
+- 审计日志规则未完成
+- key 明文脱敏规则未完成
+- crash report 脱敏规则未完成
+- 截图 / UI 暴露防护未完成
+- provider endpoint allowlist 未完成
+- 只读 provider 沙箱未完成
+- 网络请求闸门未完成
+- 真实价格字段校验未完成
+- bookingUrl 安全校验未完成
+- 人工安全审查未完成
+
+解锁前检查清单必须包括密钥数据结构、本机安全写入接口、本机安全读取接口、删除 key、轮换 key、过期 key、key 别名、日志脱敏、crash report 脱敏、截图 / 复制限制提示、endpoint allowlist、provider 沙箱只读连接、价格字段校验、bookingUrl 域名校验和人工安全审查。
+
+实施里程碑：
+- v2.0.94：安全存储设计闸门，默认关闭
+- v2.0.95：本机安全存储接口草案，仍不写真实 key
+- v2.0.96：密钥脱敏与日志防泄露规则
+- v2.0.97：key 删除 / 轮换 / 过期机制草案
+- v2.0.98：provider endpoint allowlist 闸门
+- v2.0.99：只读沙箱连接闸门
+- v2.1.0：人工确认后，才考虑真实只读 key 输入
+
+审计规则必须要求日志中永不记录完整 key、UI 不显示明文 key、crash report 不包含 key / secret / token、E2E 截图不得出现真实 key、删除 key 必须有用户确认，且当前版本仍不能测试连接。
+
+脱敏规则必须至少覆盖：
+- apiKey → [REDACTED_API_KEY]
+- apiSecret → [REDACTED_API_SECRET]
+- accessToken → [REDACTED_ACCESS_TOKEN]
+- refreshToken → [REDACTED_REFRESH_TOKEN]
+- authorization header → [REDACTED_AUTH_HEADER]
+- endpoint credential query params → [REDACTED_CREDENTIAL_PARAMS]
+
+安全存储设计闸门不得放开真实 API key 输入、保存、读取，不得接 macOS Keychain，不得接 Electron safeStorage 真实写入，不得写 .env / localStorage / sessionStorage / 日志，不得测试连接，不得连接 endpoint，不得联网，不得显示真实价格或 fake/demo/mock price，不得生成 bookingUrl，不得显示预订 / 付款 / 下单入口。
+
+marker:secure storage design gate
+marker:secure storage design gate closed
+marker:secure storage gate no key input
+marker:secure storage gate no key save
+marker:secure storage gate no key read
+marker:secure storage gate no keychain
+marker:secure storage gate no safestorage
+marker:secure storage gate no env
+marker:secure storage gate no logs
+marker:secure storage gate no endpoint
+marker:secure storage gate no network
+marker:secure storage gate no price
+marker:secure storage gate no booking url
+marker:secure storage gate unlock checklist
+marker:secure storage gate redaction rules

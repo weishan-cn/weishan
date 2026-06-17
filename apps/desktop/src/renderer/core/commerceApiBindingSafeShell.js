@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SHELL_VERSION = "2.0.93";
+  const SHELL_VERSION = "2.0.94";
   const PHASE = "api_binding_safe_shell";
 
   function clone(value) {
@@ -211,6 +211,9 @@
       bindFutureLine: "绑定 API 后，可优先使用用户授权平台的只读价格结果。",
       readonlyScopeLine: "API 只用于搜索、读取价格、读取库存、分析结果。",
       externalConfirmLine: "点击价格后跳转到外部平台或官网确认。",
+      secureStorageDesignGateLine: "API 绑定必须先通过安全存储设计闸门",
+      gateStatusLine: "当前闸门关闭",
+      keyStorageLine: "当前不能保存真实 API key",
       safetyLines: [
         "绑定 API 不代表允许付款",
         "绑定 API 不代表允许下单",

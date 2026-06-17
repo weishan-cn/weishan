@@ -224,6 +224,27 @@ function checkSecureKeyStoragePlanVersion(results, expectedVersion) {
   );
 }
 
+function checkSecureStorageDesignGateVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/commerceSecureStorageDesignGate.js";
+  const gate = readText(gatePath);
+  if (!gate) {
+    results.push({ name: "apps/desktop secure storage design gate version", pass: false, detail: gatePath + " missing" });
+    return;
+  }
+  if (gate.__readError) {
+    results.push({ name: "apps/desktop secure storage design gate version", pass: false, detail: gate.__readError });
+    return;
+  }
+  const match = gate.match(/GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop secure storage design gate version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceSecureStorageDesignGate.js GATE_VERSION"
+  );
+}
+
 function checkUserApiPriorityPolicyVersion(results, expectedVersion) {
   const policyPath = "apps/desktop/src/renderer/core/commerceUserApiPriorityPolicy.js";
   const policy = readText(policyPath);
@@ -403,6 +424,7 @@ function runVersionCheck() {
     checkFlightSandboxDryRunVersion(results, rootPackage.version);
     checkFlightSandboxProviderMatrixVersion(results, rootPackage.version);
     checkSecureKeyStoragePlanVersion(results, rootPackage.version);
+    checkSecureStorageDesignGateVersion(results, rootPackage.version);
     checkUserApiPriorityPolicyVersion(results, rootPackage.version);
     checkApiBindingSafeShellVersion(results, rootPackage.version);
     checkUserApiProviderCatalogVersion(results, rootPackage.version);

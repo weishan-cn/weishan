@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READINESS_VERSION = "2.0.93";
+  const READINESS_VERSION = "2.0.94";
   const PHASE = "api_binding_readiness_status";
 
   function clone(value) {
@@ -67,7 +67,7 @@
       status: "not_ready",
       canBindApi: false,
       currentStage: "pre_binding_safety",
-      nextStep: "secure_key_storage_plan",
+      nextStep: "secure_storage_interface_draft",
       summary: {
         userApi: "not_bound",
         providerCatalog: "available",
@@ -134,7 +134,7 @@
     const state = getApiBindingReadinessState();
     const violations = [];
     if (status.canBindApi !== false) violations.push("canBindApi");
-    if (status.nextStep !== "secure_key_storage_plan") violations.push("nextStep");
+    if (status.nextStep !== "secure_storage_interface_draft") violations.push("nextStep");
     [
       "canInputApiKey",
       "canSaveApiKey",
@@ -167,8 +167,12 @@
     return clone({
       title: "API 绑定准备状态",
       conclusionLine: "当前还不能绑定真实 API。",
-      nextStepLine: "下一步：安全密钥存储方案",
-      nextStepDetail: "先设计安全密钥存储方案。当前版本仍不能输入、保存或测试真实 API key。",
+      secureStorageDesignGateLine: "安全存储设计闸门：关闭",
+      keyInputLine: "key 输入：未开放",
+      keySaveLine: "key 保存：未开放",
+      connectionTestLine: "测试连接：未开放",
+      nextStepLine: "下一步：本机安全存储接口草案",
+      nextStepDetail: "先完成本机安全存储接口草案。当前版本仍不能输入、保存或测试真实 API key。",
       statusLines: [
         "用户 API：未绑定",
         "平台目录：已建立",
