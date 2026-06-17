@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READINESS_VERSION = "2.0.96";
+  const READINESS_VERSION = "2.0.97";
   const PHASE = "api_binding_readiness_status";
 
   function clone(value) {
@@ -67,7 +67,7 @@
       status: "not_ready",
       canBindApi: false,
       currentStage: "pre_binding_safety",
-      nextStep: "key_redaction_and_log_leak_prevention_rules",
+      nextStep: "key_delete_rotate_expiry_draft",
       summary: {
         userApi: "not_bound",
         providerCatalog: "available",
@@ -80,7 +80,7 @@
         realPriceResult: "unavailable"
       },
       blockers: [
-        "安全密钥存储方案尚未实现",
+        "key 删除 / 轮换 / 过期机制未建立",
         "API 绑定权限确认不能提交",
         "Provider 条款 / API 文档未人工审查",
         "只读沙箱连接闸门未完成",
@@ -98,7 +98,8 @@
   function buildApiBindingReadinessSteps() {
     return clone([
       { stepId: "current_readonly_info", label: "平台目录 / 说明 / 禁用表单 / 权限清单", status: "available", canProceedNow: true, reason: "当前只能查看说明、目录、禁用表单和权限清单。" },
-      { stepId: "secure_key_storage_plan", label: "安全密钥存储方案", status: "next", canProceedNow: false, reason: "安全密钥存储方案已建立，尚未实现。" },
+      { stepId: "key_redaction_and_log_leak_rules", label: "密钥脱敏与日志防泄露规则", status: "established", canProceedNow: false, reason: "规则层已建立，但仍不允许输入、保存、读取或测试真实 API key。" },
+      { stepId: "key_delete_rotate_expiry_draft", label: "key 删除 / 轮换 / 过期机制", status: "next", canProceedNow: false, reason: "删除、轮换和过期机制尚未建立。" },
       { stepId: "readonly_api_binding_draft", label: "只读 API 绑定草稿", status: "not_ready", canProceedNow: false, reason: "安全密钥存储方案完成前不能进入草稿。" },
       { stepId: "provider_human_review", label: "Provider 人工审查", status: "not_ready", canProceedNow: false, reason: "Provider 条款和 API 文档尚未人工审查。" },
       { stepId: "readonly_sandbox_gate", label: "只读沙箱闸门", status: "not_ready", canProceedNow: false, reason: "只读沙箱连接闸门未完成。" },
@@ -134,7 +135,7 @@
     const state = getApiBindingReadinessState();
     const violations = [];
     if (status.canBindApi !== false) violations.push("canBindApi");
-    if (status.nextStep !== "key_redaction_and_log_leak_prevention_rules") violations.push("nextStep");
+    if (status.nextStep !== "key_delete_rotate_expiry_draft") violations.push("nextStep");
     [
       "canInputApiKey",
       "canSaveApiKey",
@@ -173,8 +174,8 @@
       keySaveLine: "key 保存：未开放",
       keyReadLine: "key 读取：未开放",
       connectionTestLine: "测试连接：未开放",
-      nextStepLine: "下一步：密钥脱敏与日志防泄露规则",
-      nextStepDetail: "先完成密钥脱敏与日志防泄露规则。当前版本仍不能输入、保存、读取或测试真实 API key。",
+      nextStepLine: "下一步：key 删除 / 轮换 / 过期机制草案",
+      nextStepDetail: "密钥脱敏与日志防泄露规则：已建立。key 删除 / 轮换 / 过期机制：未建立。当前版本仍不能输入、保存、读取或测试真实 API key。",
       statusLines: [
         "用户 API：未绑定",
         "平台目录：已建立",
@@ -182,6 +183,8 @@
         "API 绑定表单：禁用预览",
         "API 绑定权限清单：只读预览",
         "安全密钥存储方案：方案已建立，尚未实现",
+        "密钥脱敏与日志防泄露规则：已建立",
+        "key 删除 / 轮换 / 过期机制：未建立",
         "Provider 人工审查：未开始",
         "只读沙箱连接：未准备",
         "真实价格结果：暂无"

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SECURE_KEY_STORAGE_PLAN_VERSION = "2.0.96";
+  const SECURE_KEY_STORAGE_PLAN_VERSION = "2.0.97";
   const PHASE = "flight_secure_key_storage_plan";
   const DEFAULT_PLAN_STATUS = "plan_only";
   const DEFAULT_CURRENT_STAGE = "design_required";
@@ -67,12 +67,13 @@
       futureTargetsLine: "未来目标：macOS Keychain / Electron safeStorage",
       blockedChannelsTitle: "禁止渠道",
       blockedChannelsLine: "禁止：明文、.env、localStorage、sessionStorage、日志",
-      nextStepLine: "下一步：实现本机安全存储设计。",
+      nextStepLine: "密钥脱敏与日志防泄露规则：已建立",
       safetyLine: "当前版本仍不能输入、保存、读取或测试真实 API key。",
       secureStorageDesignGateLine: "安全存储设计闸门：关闭",
       localInterfaceDraftLine: "本机安全存储接口草案：已建立",
       realKeyStorageLine: "真实 key 保存仍未启用",
-      secureStorageDesignGateNextStepLine: "下一步：密钥脱敏与日志防泄露规则",
+      secureStorageDesignGateNextStepLine: "下一步：key 删除 / 轮换 / 过期机制草案",
+      keyRedactionAndLogLeakRulesLine: "密钥脱敏与日志防泄露规则：已建立",
       secureStorageDesignGateKeyInputLine: "真实 API key 输入仍未开放",
       statusChecklistTitle: "当前状态清单",
       statusChecklistItems: [
@@ -134,7 +135,7 @@
         "用户误绑定写入 / 下单 / 支付 API 风险"
       ],
       nextStepTitle: "下一步",
-      nextStepText: "实现本机安全存储设计。当前版本仍不能输入、保存、读取或测试真实 API key。",
+      nextStepText: "key 删除 / 轮换 / 过期机制草案。当前版本仍不能输入、保存、读取或测试真实 API key。",
       capabilityTitle: "当前能力",
       checklistTitle: "前置条件",
       capabilityLines: [
@@ -214,12 +215,13 @@
       futureTargetsLine: display.futureTargetsLine || "未来目标：macOS Keychain / Electron safeStorage",
       blockedChannelsTitle: display.blockedChannelsTitle || "禁止渠道",
       blockedChannelsLine: display.blockedChannelsLine || "禁止：明文、.env、localStorage、sessionStorage、日志",
-      nextStepLine: display.nextStepLine || "下一步：实现本机安全存储设计。",
+      nextStepLine: display.nextStepLine || "密钥脱敏与日志防泄露规则：已建立",
       safetyLine: display.safetyLine || "当前版本仍不能输入、保存、读取或测试真实 API key。",
       secureStorageDesignGateLine: display.secureStorageDesignGateLine || "安全存储设计闸门：关闭",
       localInterfaceDraftLine: display.localInterfaceDraftLine || "本机安全存储接口草案：已建立",
       realKeyStorageLine: display.realKeyStorageLine || "真实 key 保存仍未启用",
-      secureStorageDesignGateNextStepLine: display.secureStorageDesignGateNextStepLine || "下一步：密钥脱敏与日志防泄露规则",
+      secureStorageDesignGateNextStepLine: display.secureStorageDesignGateNextStepLine || "下一步：key 删除 / 轮换 / 过期机制草案",
+      keyRedactionAndLogLeakRulesLine: display.keyRedactionAndLogLeakRulesLine || "密钥脱敏与日志防泄露规则：已建立",
       secureStorageDesignGateKeyInputLine: display.secureStorageDesignGateKeyInputLine || "真实 API key 输入仍未开放",
       statusChecklistTitle: display.statusChecklistTitle || "当前状态清单",
       statusChecklistItems: Array.isArray(display.statusChecklistItems) ? display.statusChecklistItems.slice() : defaultDisplay().statusChecklistItems.slice(),
@@ -232,7 +234,7 @@
       riskModelTitle: display.riskModelTitle || "风险模型",
       riskModelItems: Array.isArray(display.riskModelItems) ? display.riskModelItems.slice() : defaultDisplay().riskModelItems.slice(),
       nextStepTitle: display.nextStepTitle || "下一步",
-      nextStepText: display.nextStepText || "实现本机安全存储设计。当前版本仍不能输入、保存、读取或测试真实 API key。",
+      nextStepText: display.nextStepText || "key 删除 / 轮换 / 过期机制草案。当前版本仍不能输入、保存、读取或测试真实 API key。",
       capabilityTitle: display.capabilityTitle || "当前能力",
       checklistTitle: display.checklistTitle || "前置条件",
       capabilityLines: Array.isArray(display.capabilityLines) ? display.capabilityLines.slice() : defaultDisplay().capabilityLines.slice(),

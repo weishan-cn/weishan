@@ -2317,6 +2317,7 @@
       <p>API 绑定权限清单：只读预览</p>
       <p>API 绑定准备状态：未准备</p>
       <p>安全密钥存储方案尚未实现前，表单保持禁用</p>
+      <p>密钥脱敏与日志防泄露规则已建立，但 key 删除 / 轮换 / 过期机制未建立，表单仍不可用</p>
       <p>安全存储设计闸门关闭，表单不可用</p>
       <p>本机安全存储接口仍为草案，表单不可用</p>
       <p>未完成权限确认前，表单保持禁用</p>
@@ -2377,8 +2378,9 @@
       <p>API 绑定准备状态：未准备</p>
       <p>权限确认当前不能提交</p>
       <p>未通过安全存储设计闸门前，不能提交绑定确认</p>
-      <p>未完成密钥脱敏与日志防泄露规则前，不能提交绑定确认</p>
-      <p>下一步是密钥脱敏与日志防泄露规则</p>
+      <p>密钥脱敏与日志防泄露规则已建立</p>
+      <p>未完成 key 删除 / 轮换 / 过期机制前，不能提交绑定确认</p>
+      <p>下一步是 key 删除 / 轮换 / 过期机制草案</p>
       <button class="cmd-btn gray commerce-api-binding-confirm-preview" type="button" disabled aria-disabled="true">${esc(display.confirmationButtonLabel || "提交绑定确认")}</button>
     </section>`;
     return disclosure("查看 API 绑定权限清单", body, "commerce-api-binding-permission-checklist-disclosure");
@@ -2390,8 +2392,8 @@
     return {
       title:"API 绑定准备状态",
       conclusionLine:"当前还不能绑定真实 API。",
-      nextStepLine:"下一步：密钥脱敏与日志防泄露规则",
-      nextStepDetail:"先设计安全密钥存储方案。当前版本仍不能输入、保存或测试真实 API key。",
+      nextStepLine:"下一步：key 删除 / 轮换 / 过期机制草案",
+      nextStepDetail:"密钥脱敏与日志防泄露规则：已建立。key 删除 / 轮换 / 过期机制：未建立。当前版本仍不能输入、保存、读取或测试真实 API key。",
       statusLines:[
         "用户 API：未绑定",
         "平台目录：已建立",
@@ -2401,7 +2403,9 @@
         "安全密钥存储方案：方案已建立，尚未实现",
         "Provider 人工审查：未开始",
         "只读沙箱连接：未准备",
-        "真实价格结果：暂无"
+        "真实价格结果：暂无",
+        "密钥脱敏与日志防泄露规则：已建立",
+        "key 删除 / 轮换 / 过期机制：未建立"
       ],
       blockerTitle:"为什么还不能绑定：",
       status:{
@@ -2443,7 +2447,9 @@
       <p>安全存储设计闸门：关闭</p>
       <p>当前不能绑定真实 API</p>
       <p>本机安全存储接口草案：已建立</p>
-      <p>下一步：密钥脱敏与日志防泄露规则</p>
+      <p>密钥脱敏与日志防泄露规则：已建立</p>
+      <p>下一步：key 删除 / 轮换 / 过期机制草案</p>
+      <p>key 删除 / 轮换 / 过期机制：未建立</p>
       <p>key 输入：未开放</p>
       <p>key 保存：未开放</p>
       <p>key 读取：未开放</p>
@@ -2452,8 +2458,8 @@
       <ul>${statusLines.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
       <h5>${esc(display.blockerTitle || "为什么还不能绑定：")}</h5>
       <ul>${blockers.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
-      <h5>${esc(display.nextStepLine || "下一步：密钥脱敏与日志防泄露规则")}</h5>
-      <p>${esc(display.nextStepDetail || "先设计安全密钥存储方案。当前版本仍不能输入、保存或测试真实 API key。")}</p>
+      <h5>${esc(display.nextStepLine || "下一步：key 删除 / 轮换 / 过期机制草案")}</h5>
+      <p>${esc(display.nextStepDetail || "密钥脱敏与日志防泄露规则：已建立。key 删除 / 轮换 / 过期机制：未建立。当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
       <h5>${esc(display.routeTitle || "后续路线：")}</h5>
       <ol>${steps.map((item) => `<li>${esc(item.label || "")}：${esc(item.status || "")}</li>`).join("")}</ol>
       <h5>${esc(display.permanentTitle || "永久限制：")}</h5>
@@ -2476,7 +2482,7 @@
       currentStageLine: "当前阶段：设计中",
       futureTargetsLine: "未来目标：macOS Keychain / Electron safeStorage",
       blockedChannelsLine: "禁止：明文、.env、localStorage、sessionStorage、日志",
-      nextStepLine: "下一步：实现本机安全存储设计。",
+      nextStepLine: "密钥脱敏与日志防泄露规则：已建立",
       safetyLine: "当前版本仍不能输入、保存、读取或测试真实 API key。",
       localInterfaceDraftLine: "本机安全存储接口草案：已建立",
       realKeyStorageLine: "真实 key 保存仍未启用",
@@ -2491,7 +2497,7 @@
       riskModelTitle: "风险模型",
       riskModelItems: ["明文泄露风险", "日志泄露风险", "截图泄露风险", "复制粘贴泄露风险", "crash report 泄露风险", "恶意 provider 风险", "钓鱼 endpoint 风险", "权限过宽风险", "用户误绑定写入 / 下单 / 支付 API 风险"],
       nextStepTitle: "下一步",
-      nextStepText: "实现本机安全存储设计。当前版本仍不能输入、保存、读取或测试真实 API key。",
+      nextStepText: "key 删除 / 轮换 / 过期机制草案。当前版本仍不能输入、保存、读取或测试真实 API key。",
       storageTargets: ["macOS Keychain", "Electron safeStorage"],
       blockedChannels: [".env", "localStorage", "sessionStorage", "日志", "明文"],
       capabilityLines: ["不能读取真实 API key", "不能保存真实 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能付款", "不能下单", "不能保存身份证 / 护照 / 银行卡"],
@@ -2539,7 +2545,8 @@
         providerSandboxLine:"provider 沙箱连接：未开放",
         priceLine:"真实价格返回：未开放",
         bookingUrlLine:"bookingUrl 返回：未开放",
-        nextStepLine:"密钥脱敏与日志防泄露规则。当前版本仍不能输入、保存、读取或测试真实 API key。"
+        keyRedactionAndLogLeakRulesLine:"密钥脱敏与日志防泄露规则：已建立",
+        nextStepLine:"key 删除 / 轮换 / 过期机制草案。当前版本仍不能输入、保存、读取或测试真实 API key。"
       }
     };
   }
@@ -2567,6 +2574,7 @@
       <p>${esc(display.providerSandboxLine || "provider 沙箱连接：未开放")}</p>
       <p>${esc(display.priceLine || "真实价格返回：未开放")}</p>
       <p>${esc(display.bookingUrlLine || "bookingUrl 返回：未开放")}</p>
+      <p>${esc(display.keyRedactionAndLogLeakRulesLine || "密钥脱敏与日志防泄露规则：已建立")}</p>
       <h5>为什么还不能进入真实密钥阶段：</h5>
       <ul>${blockingReasons.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
       <h5>解锁前检查清单：</h5>
@@ -2580,7 +2588,7 @@
       <h5>风险模型：</h5>
       <ul>${threatModel.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
       <h5>下一步：</h5>
-      <p>${esc(display.nextStepLine || "密钥脱敏与日志防泄露规则。当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
+      <p>${esc(display.nextStepLine || "key 删除 / 轮换 / 过期机制草案。当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
     </section>`;
     return disclosure("查看安全存储设计闸门", body, "commerce-secure-storage-design-gate-disclosure");
   }
@@ -2619,7 +2627,7 @@
       ],
       auditDraft:{ events:["KEY_ALIAS_CREATED_DRAFT", "KEY_WRITE_BLOCKED", "KEY_READ_BLOCKED", "KEY_DELETE_BLOCKED", "KEY_ROTATE_BLOCKED", "CONNECTION_TEST_BLOCKED", "PROVIDER_SANDBOX_BLOCKED", "REAL_PRICE_BLOCKED", "BOOKING_URL_BLOCKED"], rules:["审计日志不得记录 key 明文", "审计日志只允许记录 key alias"] },
       redactionDraft:{ functions:["redactSecretLikeValue", "redactObject", "redactHeaders", "redactUrl"], placeholders:{ apiKey:"[REDACTED_API_KEY]", apiSecret:"[REDACTED_API_SECRET]", accessToken:"[REDACTED_ACCESS_TOKEN]", authorizationHeader:"[REDACTED_AUTH_HEADER]", credentialParams:"[REDACTED_CREDENTIAL_PARAMS]" } },
-      display:{ title:"本机安全存储接口草案", currentStatusLine:"接口草案：已建立", implementationLine:"真实实现：未启用", keyInputLine:"真实 API key 输入：未开放", keySaveLine:"真实 API key 保存：未开放", keyReadLine:"真实 API key 读取：未开放", keyDeleteRotateLine:"删除 / 轮换：未开放", connectionTestLine:"测试连接：未开放", providerSandboxLine:"provider 沙箱：未开放", priceLine:"真实价格：未开放", bookingUrlLine:"bookingUrl：未开放", nextStepLine:"下一步：密钥脱敏与日志防泄露规则", safetyLine:"当前版本仍不能输入、保存、读取或测试真实 API key。" }
+      display:{ title:"本机安全存储接口草案", currentStatusLine:"接口草案：已建立", implementationLine:"真实实现：未启用", keyInputLine:"真实 API key 输入：未开放", keySaveLine:"真实 API key 保存：未开放", keyReadLine:"真实 API key 读取：未开放", keyDeleteRotateLine:"删除 / 轮换：未开放", connectionTestLine:"测试连接：未开放", providerSandboxLine:"provider 沙箱：未开放", priceLine:"真实价格：未开放", bookingUrlLine:"bookingUrl：未开放", nextStepLine:"下一步：key 删除 / 轮换 / 过期机制草案", safetyLine:"当前版本仍不能输入、保存、读取或测试真实 API key。" }
     };
   }
 
@@ -2654,6 +2662,7 @@
       <p>${esc(display.providerSandboxLine || "provider 沙箱：未开放")}</p>
       <p>${esc(display.priceLine || "真实价格：未开放")}</p>
       <p>${esc(display.bookingUrlLine || "bookingUrl：未开放")}</p>
+      <p>${esc(display.redactionRulesLine || "密钥脱敏与日志防泄露规则：已建立")}</p>
       <h5>数据模型草案</h5>
       ${modelHtml}
       <h5>接口方法草案</h5>
@@ -2672,10 +2681,51 @@
       <p>authorization header → ${esc(placeholders.authorizationHeader || "[REDACTED_AUTH_HEADER]")}</p>
       <p>credential query params → ${esc(placeholders.credentialParams || "[REDACTED_CREDENTIAL_PARAMS]")}</p>
       <h5>下一步</h5>
-      <p>${esc(display.nextStepLine || "下一步：密钥脱敏与日志防泄露规则")}</p>
+      <p>${esc(display.nextStepLine || "下一步：key 删除 / 轮换 / 过期机制草案")}</p>
       <p>${esc(display.safetyLine || "当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
     </section>`;
     return disclosure("查看本机安全存储接口草案", body, "commerce-local-secure-storage-interface-draft-disclosure");
+  }
+
+  function commerceKeyRedactionAndLogLeakRulesDisclosure(){
+    const api = window.WeishanCommerceKeyRedactionAndLogLeakRules;
+    const contract = api && api.commerceKeyRedactionAndLogLeakRulesContract || {};
+    const display = api && typeof api.buildDisplayModel === "function" ? api.buildDisplayModel() : contract.display || {};
+    const patterns = api && typeof api.buildSecretFieldPatternRules === "function" ? api.buildSecretFieldPatternRules() : contract.secretFieldPatternRules || {};
+    const redactionMap = api && typeof api.buildRedactionMap === "function" ? api.buildRedactionMap() : contract.redactionMap || {};
+    const dummy = api && typeof api.buildDummyRedactionTestResult === "function" ? api.buildDummyRedactionTestResult() : contract.dummyRedactionTestResult || {};
+    const statusLines = Array.isArray(display.statusLines) ? display.statusLines : [];
+    const exactFields = Array.isArray(patterns.exactFieldNames) ? patterns.exactFieldNames : [];
+    const redactionMapHtml = Object.keys(redactionMap).map((key) => `<li>${esc(key)} → ${esc(redactionMap[key])}</li>`).join("");
+    const auditRules = Array.isArray(display.auditLogRules) ? display.auditLogRules : [];
+    const uiRules = Array.isArray(display.uiRules) ? display.uiRules : [];
+    const dummyLines = [
+      ["object redaction", dummy.objectRedaction || "PASS"],
+      ["headers redaction", dummy.headersRedaction || "PASS"],
+      ["url redaction", dummy.urlRedaction || "PASS"],
+      ["log message redaction", dummy.logMessageRedaction || "PASS"],
+      ["audit event redaction", dummy.auditEventRedaction || "PASS"],
+      ["dummy secret raw strings absent", dummy.dummySecretRawStringsAbsent || "PASS"]
+    ];
+    const body = `<section class="commerce-key-redaction-log-leak-rules-panel" aria-label="密钥脱敏与日志防泄露规则">
+      <h4>${esc(display.title || "密钥脱敏与日志防泄露规则")}</h4>
+      <h5>当前状态：</h5>
+      <ul>${statusLines.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      <h5>${esc(display.fieldPatternTitle || "敏感字段识别规则")}</h5>
+      <ul>${exactFields.map((item) => `<li>${esc(item)}</li>`).join("")}<li>credential query params</li></ul>
+      <h5>${esc(display.redactionMapTitle || "脱敏映射")}</h5>
+      <ul>${redactionMapHtml}</ul>
+      <h5>${esc(display.auditLogRulesTitle || "安全审计日志规则")}</h5>
+      <ul>${auditRules.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      <h5>${esc(display.uiRulesTitle || "UI / 截图 / 崩溃报告规则")}</h5>
+      <ul>${uiRules.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      <h5>${esc(display.dummyTestTitle || "Dummy 脱敏自检")}</h5>
+      <ul>${dummyLines.map(([label, value]) => `<li>${esc(label)}：${esc(value)}</li>`).join("")}</ul>
+      <h5>下一步：</h5>
+      <p>${esc(display.nextStepLine || "下一步：key 删除 / 轮换 / 过期机制草案。")}</p>
+      <p>${esc(display.safetyLine || "当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
+    </section>`;
+    return disclosure("查看密钥脱敏与日志防泄露规则", body, "commerce-key-redaction-log-leak-rules-disclosure");
   }
 
   function commerceSecureKeyStoragePlanDisclosure(task){
@@ -2696,12 +2746,13 @@
       <p>${esc(display.currentStageLine || "当前阶段：设计中")}</p>
       <p>${esc(display.futureTargetsLine || "未来目标：macOS Keychain / Electron safeStorage")}</p>
       <p>${esc(display.blockedChannelsLine || "禁止：明文、.env、localStorage、sessionStorage、日志")}</p>
-      <p>${esc(display.nextStepLine || "下一步：实现本机安全存储设计。")}</p>
+      <p>${esc(display.nextStepLine || "密钥脱敏与日志防泄露规则：已建立")}</p>
       <p>${esc(display.safetyLine || "当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
       <p>安全存储设计闸门：关闭</p>
       <p>${esc(display.localInterfaceDraftLine || "本机安全存储接口草案：已建立")}</p>
       <p>${esc(display.realKeyStorageLine || "真实 key 保存仍未启用")}</p>
-      <p>下一步：密钥脱敏与日志防泄露规则</p>
+      <p>密钥脱敏与日志防泄露规则：已建立</p>
+      <p>下一步：key 删除 / 轮换 / 过期机制草案</p>
       <p>真实 API key 输入仍未开放</p>
       <div class="commerce-secure-key-storage-plan-status-checklist">
         <h5>${esc(display.statusChecklistTitle || "当前状态清单")}</h5>
@@ -2725,7 +2776,7 @@
       </div>
       <div class="commerce-secure-key-storage-plan-next-step">
         <h5>${esc(display.nextStepTitle || "下一步")}</h5>
-        <p>${esc(display.nextStepText || "实现本机安全存储设计。当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
+        <p>${esc(display.nextStepText || "key 删除 / 轮换 / 过期机制草案。当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
       </div>
       <div class="commerce-secure-key-storage-plan-targets">
         <h5>未来目标</h5>
@@ -2769,7 +2820,8 @@
       <p>API 绑定表单：禁用预览</p>
       <p>API 绑定权限清单：只读预览</p>
       <p>API 绑定准备状态：未准备</p>
-      <p>下一步：密钥脱敏与日志防泄露规则</p>
+      <p>已建立密钥脱敏与日志防泄露规则</p>
+      <p>下一步：key 删除 / 轮换 / 过期机制草案</p>
       <p>当前仍不能保存真实 API key</p>
       <p>当前不能提交绑定确认</p>
       <p>当前不能输入真实 API key</p>
@@ -3626,6 +3678,7 @@
       ${commerceSecureKeyStoragePlanDisclosure(task)}
       ${commerceSecureStorageDesignGateDisclosure(task)}
       ${commerceLocalSecureStorageInterfaceDraftDisclosure(task)}
+      ${commerceKeyRedactionAndLogLeakRulesDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;
@@ -3645,6 +3698,7 @@
       ${commerceSecureKeyStoragePlanDisclosure(task)}
       ${commerceSecureStorageDesignGateDisclosure(task)}
       ${commerceLocalSecureStorageInterfaceDraftDisclosure(task)}
+      ${commerceKeyRedactionAndLogLeakRulesDisclosure(task)}
     </section>`;
     return disclosure("查看高级调试信息", body, "commerce-simple-flight-advanced-debug-disclosure");
   }

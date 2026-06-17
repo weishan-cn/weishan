@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SHELL_VERSION = "2.0.96";
+  const SHELL_VERSION = "2.0.97";
   const PHASE = "api_binding_safe_shell";
 
   function clone(value) {
@@ -213,6 +213,7 @@
       externalConfirmLine: "点击价格后跳转到外部平台或官网确认。",
       secureStorageDesignGateLine: "API 绑定必须先通过安全存储设计闸门",
       localSecureStorageInterfaceDraftLine: "已建立本机安全存储接口草案",
+      keyRedactionAndLogLeakRulesLine: "已建立密钥脱敏与日志防泄露规则",
       gateStatusLine: "当前闸门关闭",
       keyStorageLine: "当前不能保存真实 API key",
       safetyLines: [

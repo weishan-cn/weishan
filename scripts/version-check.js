@@ -392,6 +392,27 @@ function checkApiBindingReadinessStatusVersion(results, expectedVersion) {
   );
 }
 
+function checkKeyRedactionAndLogLeakRulesVersion(results, expectedVersion) {
+  const rulesPath = "apps/desktop/src/renderer/core/commerceKeyRedactionAndLogLeakRules.js";
+  const rules = readText(rulesPath);
+  if (!rules) {
+    results.push({ name: "apps/desktop key redaction and log leak rules version", pass: false, detail: rulesPath + " missing" });
+    return;
+  }
+  if (rules.__readError) {
+    results.push({ name: "apps/desktop key redaction and log leak rules version", pass: false, detail: rules.__readError });
+    return;
+  }
+  const match = rules.match(/RULES_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop key redaction and log leak rules version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceKeyRedactionAndLogLeakRules.js RULES_VERSION"
+  );
+}
+
 function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
   const pkg = readJson(packagePath);
   const lock = readJson(lockPath);
@@ -453,6 +474,7 @@ function runVersionCheck() {
     checkApiBindingMockFormVersion(results, rootPackage.version);
     checkApiBindingPermissionChecklistVersion(results, rootPackage.version);
     checkApiBindingReadinessStatusVersion(results, rootPackage.version);
+    checkKeyRedactionAndLogLeakRulesVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

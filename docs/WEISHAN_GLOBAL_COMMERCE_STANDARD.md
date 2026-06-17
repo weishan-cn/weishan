@@ -1633,3 +1633,58 @@ marker:local secure storage prepare real price read draft blocked
 marker:local secure storage audit uppercase events
 marker:local secure storage credential params redaction
 marker:api binding readiness secure key storage plan established not implemented
+
+
+## v2.0.97：Key Redaction & Log Leak Prevention Rules / 密钥脱敏与日志防泄露规则
+
+v2.0.97 新增密钥脱敏与日志防泄露规则。本阶段只建立敏感字段识别、脱敏映射、安全审计日志规则、UI / 截图 / 崩溃报告防泄露规则，以及 dummy 脱敏自检。当前版本仍不得输入、保存、读取或测试真实 API key，不得连接 endpoint，不得联网，不得返回价格，不得返回 bookingUrl，不得付款或下单。
+
+UI 中 `查看密钥脱敏与日志防泄露规则` 默认折叠。展开后必须显示：
+- 密钥脱敏规则：已建立
+- 日志防泄露规则：已建立
+- 真实 API key 输入：未开放
+- 真实 API key 保存：未开放
+- 真实 API key 读取：未开放
+- 敏感字段识别规则
+- 脱敏映射
+- 安全审计日志规则
+- UI / 截图 / 崩溃报告规则
+- Dummy 脱敏自检 PASS
+- 下一步：key 删除 / 轮换 / 过期机制草案
+
+敏感字段识别规则必须覆盖 apiKey、apiSecret、clientSecret、accessToken、refreshToken、authorization、bearer token、password、privateKey、credential query params。
+
+脱敏映射必须至少包含：
+- apiKey → [REDACTED_API_KEY]
+- apiSecret → [REDACTED_API_SECRET]
+- clientSecret → [REDACTED_CLIENT_SECRET]
+- accessToken → [REDACTED_ACCESS_TOKEN]
+- refreshToken → [REDACTED_REFRESH_TOKEN]
+- authorization header → [REDACTED_AUTH_HEADER]
+- bearer token → [REDACTED_BEARER_TOKEN]
+- password → [REDACTED_PASSWORD]
+- privateKey → [REDACTED_PRIVATE_KEY]
+- credential query params → [REDACTED_CREDENTIAL_PARAMS]
+- unknown secret-like value → [REDACTED_SECRET]
+
+安全审计日志只能记录 alias、providerId、blocked reason、timestamp、event type 等非密钥字段；不得记录 key 明文、secret 明文、token 明文、authorization header、endpoint credential query params。UI、截图和 crash report 不得展示真实 key 或 dummy raw secret。
+
+本阶段必须联动显示：本机安全存储接口草案已建立密钥脱敏与日志防泄露规则，安全存储设计闸门显示密钥脱敏与日志防泄露规则已建立，安全密钥存储方案显示密钥脱敏与日志防泄露规则已建立，API 绑定准备状态 / 说明 / 表单 / 权限清单显示下一步为 key 删除 / 轮换 / 过期机制草案。
+
+marker:key redaction and log leak prevention rules
+marker:key redaction rules established
+marker:log leak prevention rules established
+marker:key redaction no real key
+marker:key redaction no key input
+marker:key redaction no key save
+marker:key redaction no key read
+marker:key redaction no endpoint
+marker:key redaction no network
+marker:key redaction no price
+marker:key redaction no booking url
+marker:key redaction secret field patterns
+marker:key redaction redaction map
+marker:key redaction audit log rules
+marker:key redaction dummy raw absent
+marker:key redaction credential params
+marker:key redaction next key delete rotate expiry draft

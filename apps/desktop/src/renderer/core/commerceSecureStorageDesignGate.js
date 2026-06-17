@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GATE_VERSION = "2.0.96";
+  const GATE_VERSION = "2.0.97";
   const GATE_NAME = "secure_storage_design_gate";
   const PHASE = "design_gate";
 
@@ -16,10 +16,7 @@
     "Keychain 适配未完成",
     "safeStorage 适配未完成",
     "加密本地存储未完成",
-    "审计日志规则未完成",
-    "key 明文脱敏规则未完成",
-    "crash report 脱敏规则未完成",
-    "截图 / UI 暴露防护未完成",
+    "key 删除 / 轮换 / 过期机制未完成",
     "provider endpoint allowlist 未完成",
     "只读 provider 沙箱未完成",
     "网络请求闸门未完成",
@@ -47,10 +44,10 @@
   ];
 
   const implementationMilestones = [
-    "v2.0.96：安全存储设计闸门，默认关闭",
-    "v2.0.96：本机安全存储接口草案，已建立，但仍不写真实 key",
-    "v2.0.96：密钥脱敏与日志防泄露规则",
-    "v2.0.97：key 删除 / 轮换 / 过期机制草案",
+    "v2.0.97：安全存储设计闸门，默认关闭",
+    "v2.0.97：本机安全存储接口草案，已建立，但仍不写真实 key",
+    "v2.0.97：密钥脱敏与日志防泄露规则，已建立，但仍不写真实 key",
+    "v2.0.98：key 删除 / 轮换 / 过期机制草案",
     "v2.0.98：provider endpoint allowlist 闸门",
     "v2.0.99：只读沙箱连接闸门",
     "v2.1.0：人工确认后，才考虑真实只读 key 输入"
@@ -139,6 +136,8 @@
       phase: PHASE,
       realKeyStorageReady: false,
       localSecureStorageInterfaceDraft: "established",
+      keyRedactionAndLogLeakRules: "established",
+      nextRequiredStep: "key_delete_rotate_expiry_draft",
       realImplementation: "disabled",
       keyInputReady: false,
       keyWriteReady: false,
@@ -184,7 +183,8 @@
         auditTitle: "审计规则",
         redactionTitle: "脱敏规则",
         nextStepTitle: "下一步",
-        nextStepLine: "密钥脱敏与日志防泄露规则。当前版本仍不能输入、保存、读取或测试真实 API key。"
+        keyRedactionAndLogLeakRulesLine: "密钥脱敏与日志防泄露规则：已建立",
+        nextStepLine: "key 删除 / 轮换 / 过期机制草案。当前版本仍不能输入、保存、读取或测试真实 API key。"
       }
     };
   }
@@ -219,7 +219,7 @@
       canProceedToProviderSandbox: false,
       canProceedToRealPrice: false,
       canProceedToBookingUrl: false,
-      nextRequiredStep: "key_redaction_and_log_leak_prevention_rules",
+      nextRequiredStep: "key_delete_rotate_expiry_draft",
       currentUserActionRequired: false
     });
   }
@@ -231,7 +231,7 @@
       gateStatus: "closed",
       phase: PHASE,
       blockingReasons: gate.blockingReasons.slice(),
-      nextRequiredStep: "key_redaction_and_log_leak_prevention_rules",
+      nextRequiredStep: "key_delete_rotate_expiry_draft",
       safetySummary: "安全存储设计闸门关闭；当前版本不能输入、保存、读取或测试真实 API key，不能连接 endpoint，不能联网，不能返回价格或 bookingUrl。"
     });
   }

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const DRAFT_VERSION = "2.0.96";
+  const DRAFT_VERSION = "2.0.97";
   const DRAFT_NAME = "local_secure_storage_interface_draft";
   const PHASE = "local_secure_storage_interface_draft";
 
@@ -232,7 +232,8 @@
       orderMode: "disabled",
       paymentMode: "disabled",
       identityStorageMode: "disabled",
-      nextRequiredStep: "key_redaction_and_log_leak_prevention_rules",
+      keyRedactionAndLogLeakRules: "established",
+      nextRequiredStep: "key_delete_rotate_expiry_draft",
       capabilities: disabledCapabilities(),
       dataModelDraft: buildLocalSecureStorageDataModelDraft(),
       methodDraft: buildLocalSecureStorageMethodDraft(),
@@ -251,7 +252,8 @@
         providerSandboxLine: "provider 沙箱：未开放",
         priceLine: "真实价格：未开放",
         bookingUrlLine: "bookingUrl：未开放",
-        nextStepLine: "下一步：密钥脱敏与日志防泄露规则",
+        redactionRulesLine: "密钥脱敏与日志防泄露规则：已建立",
+        nextStepLine: "下一步：key 删除 / 轮换 / 过期机制草案",
         safetyLine: "当前版本仍不能输入、保存、读取或测试真实 API key。"
       }
     }, raw, {
@@ -278,7 +280,8 @@
         providerSandboxLine: "provider 沙箱：未开放",
         priceLine: "真实价格：未开放",
         bookingUrlLine: "bookingUrl：未开放",
-        nextStepLine: "下一步：密钥脱敏与日志防泄露规则",
+        redactionRulesLine: "密钥脱敏与日志防泄露规则：已建立",
+        nextStepLine: "下一步：key 删除 / 轮换 / 过期机制草案",
         safetyLine: "当前版本仍不能输入、保存、读取或测试真实 API key。"
       }, raw.display && typeof raw.display === "object" ? raw.display : {})
     }));
@@ -291,7 +294,7 @@
       draftStatus: draft.draftStatus,
       implementationStatus: draft.implementationStatus,
       gateStatus: "closed",
-      nextRequiredStep: "key_redaction_and_log_leak_prevention_rules",
+      nextRequiredStep: "key_delete_rotate_expiry_draft",
       safetySummary: "本机安全存储接口仍为草案；不能输入、保存、读取或测试真实 API key，不能连接 endpoint，不能联网，不能返回价格或 bookingUrl。"
     });
   }
