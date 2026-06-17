@@ -4160,6 +4160,7 @@
         if (url && window.weishan && typeof window.weishan.openExternal === "function") window.weishan.openExternal(url);
       });
     });
+    hydrateDisclosureSections(host);
     if (selected && selected.taskId !== lastViewedTaskId) {
       lastViewedTaskId = selected.taskId;
       record("commerceAgent.planViewed", selected, "用户已查看全球采购计划详情。");

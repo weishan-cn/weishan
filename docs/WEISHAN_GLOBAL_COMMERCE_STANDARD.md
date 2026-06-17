@@ -1463,8 +1463,8 @@ marker:secure key storage plan electron safestorage
 marker:secure key storage plan not granted
 marker:secure key storage plan approval required
 
-## v2.0.92：Fix Secure Key Storage Plan Checklist / 补齐安全密钥存储方案清单
-v2.0.92 只修安全密钥存储方案面板文案和验收清单，不接真实 API，不读取或保存真实 API key，不连接 endpoint，不发起网络请求，不返回价格，不生成 bookingUrl，不付款，不下单。
+## v2.0.93：Fix Secure Key Storage Plan Checklist / 补齐安全密钥存储方案清单
+v2.0.93 只修安全密钥存储方案面板文案、详情页正文渲染和验收清单，不接真实 API，不读取或保存真实 API key，不连接 endpoint，不发起网络请求，不返回价格，不生成 bookingUrl，不付款，不下单。
 
 `查看安全密钥存储方案` 默认仍折叠。展开后必须直接显示：
 - 安全密钥存储方案
@@ -1506,3 +1506,4 @@ v2.0.92 只修安全密钥存储方案面板文案和验收清单，不接真实
 marker:secure key storage plan status checklist
 marker:secure key storage plan forbidden storage checklist
 marker:secure key storage plan disabled connection checklist
+marker:secure key storage plan body rendering
