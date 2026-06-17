@@ -1,5 +1,5 @@
 (function(){
-  const ALLOWLIST_GATE_VERSION = "2.1.0";
+  const ALLOWLIST_GATE_VERSION = "2.1.1";
 
   const providerCategories = {
     flightProviders:["Google Flights", "Trip.com / 携程", "Skyscanner", "Kayak", "Expedia"],
@@ -139,6 +139,10 @@
     endpointConnection:"disabled",
     networkMode:"disabled",
     providerSandbox:"disabled",
+    readonlyProviderSandboxGate:"established",
+    realSandboxRun:"disabled",
+    realProviderConnection:"disabled",
+    realNetwork:"disabled",
     realPrice:"disabled",
     bookingUrl:"disabled",
     orderMode:"disabled",
@@ -172,12 +176,16 @@
       endpointConnectionLine:"真实 endpoint 连接：未开放",
       networkLine:"真实网络请求：未开放",
       providerSandboxLine:"provider sandbox：未开放",
+      readonlyProviderSandboxGateLine:"只读 provider sandbox gate：已建立",
+      realSandboxRunLine:"真实 sandbox 运行：未开放",
+      realProviderConnectionLine:"真实 provider 连接：未开放",
+      realNetworkLine:"真实网络：未开放",
       priceLine:"真实价格读取：未开放",
       bookingUrlLine:"bookingUrl 读取：未开放",
       orderLine:"下单：禁止",
       paymentLine:"付款：禁止",
       identityLine:"身份上传：禁止",
-      nextStepLine:"下一步：只读 provider sandbox gate",
+      nextStepLine:"只读 provider sandbox gate：已建立。下一步：只读 provider result schema gate",
       safetyLine:"当前版本仍不能连接真实 endpoint、不能测试连接、不能联网、不能读取真实价格"
     }
   };

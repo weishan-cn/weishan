@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GATE_VERSION = "2.1.0";
+  const GATE_VERSION = "2.1.1";
   const GATE_NAME = "secure_storage_design_gate";
   const PHASE = "design_gate";
 
@@ -36,7 +36,7 @@
     "设计日志脱敏",
     "设计 crash report 脱敏",
     "设计截图 / 复制限制提示",
-    "设计只读 provider sandbox gate",
+    "设计只读 provider result schema gate",
     "设计 provider 沙箱只读连接",
     "设计价格字段校验",
     "设计 bookingUrl 域名校验",
@@ -44,13 +44,13 @@
   ];
 
   const implementationMilestones = [
-    "v2.1.0：安全存储设计闸门，默认关闭",
-    "v2.1.0：本机安全存储接口草案，已建立，但仍不写真实 key",
-    "v2.1.0：密钥脱敏与日志防泄露规则，已建立，但仍不写真实 key",
-    "v2.1.0：key 删除 / 轮换 / 过期机制草案",
-    "v2.1.0：provider endpoint allowlist 闸门；下一步只读 provider sandbox gate",
-    "v2.1.0：只读沙箱连接闸门",
-    "v2.1.0：人工确认后，才考虑真实只读 key 输入"
+    "v2.1.1：安全存储设计闸门，默认关闭",
+    "v2.1.1：本机安全存储接口草案，已建立，但仍不写真实 key",
+    "v2.1.1：密钥脱敏与日志防泄露规则，已建立，但仍不写真实 key",
+    "v2.1.1：key 删除 / 轮换 / 过期机制草案",
+    "v2.1.1：provider endpoint allowlist 闸门；只读 provider sandbox gate 已建立；下一步只读 provider result schema gate",
+    "v2.1.1：只读沙箱连接闸门",
+    "v2.1.1：人工确认后，才考虑真实只读 key 输入"
   ];
 
   const threatModel = [
@@ -137,7 +137,7 @@
       realKeyStorageReady: false,
       localSecureStorageInterfaceDraft: "established",
       keyRedactionAndLogLeakRules: "established",
-      nextRequiredStep: "readonly_provider_sandbox_gate",
+      nextRequiredStep: "readonly_provider_result_schema_gate",
       realImplementation: "disabled",
       keyInputReady: false,
       keyWriteReady: false,
@@ -186,7 +186,7 @@
         keyRedactionAndLogLeakRulesLine: "密钥脱敏与日志防泄露规则：已建立",
         keyLifecycleDraftLine: "key 删除 / 轮换 / 过期机制草案：已建立",
         keyLifecycleRealActionsLine: "真实删除 / 轮换 / 过期仍未开放",
-        nextStepLine: "provider endpoint allowlist 闸门：已建立。下一步：只读 provider sandbox gate。当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。"
+        nextStepLine: "provider endpoint allowlist 闸门：已建立。只读 provider sandbox gate：已建立。下一步：只读 provider result schema gate。当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。"
       }
     };
   }
@@ -221,7 +221,7 @@
       canProceedToProviderSandbox: false,
       canProceedToRealPrice: false,
       canProceedToBookingUrl: false,
-      nextRequiredStep: "readonly_provider_sandbox_gate",
+      nextRequiredStep: "readonly_provider_result_schema_gate",
       currentUserActionRequired: false
     });
   }
@@ -233,7 +233,7 @@
       gateStatus: "closed",
       phase: PHASE,
       blockingReasons: gate.blockingReasons.slice(),
-      nextRequiredStep: "readonly_provider_sandbox_gate",
+      nextRequiredStep: "readonly_provider_result_schema_gate",
       safetySummary: "安全存储设计闸门关闭；key 生命周期草案已建立，但当前版本不能输入、保存、读取、删除、轮换或测试真实 API key，不能连接 endpoint，不能联网，不能返回价格或 bookingUrl。"
     });
   }

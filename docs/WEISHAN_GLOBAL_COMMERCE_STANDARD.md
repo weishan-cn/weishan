@@ -1549,7 +1549,7 @@ v2.0.96 新增安全存储设计闸门。该闸门只是未来 API key 输入、
 - v2.0.98：key 删除 / 轮换 / 过期机制草案
 - v2.0.98：provider endpoint allowlist 闸门
 - v2.0.99：只读沙箱连接闸门
-- v2.1.0：人工确认后，才考虑真实只读 key 输入
+- v2.1.1：人工确认后，才考虑真实只读 key 输入
 
 审计规则必须要求日志中永不记录完整 key、UI 不显示明文 key、crash report 不包含 key / secret / token、E2E 截图不得出现真实 key、删除 key 必须有用户确认，且当前版本仍不能测试连接。
 
@@ -1790,7 +1790,7 @@ provider 分类草案必须包括 flightProviders、hotelProviders、commercePro
 
 endpoint 审计事件草案必须包括 ENDPOINT_EVALUATION_DRAFT、ENDPOINT_BLOCKED_NOT_HTTPS、ENDPOINT_BLOCKED_IP_ADDRESS、ENDPOINT_BLOCKED_LOCALHOST、ENDPOINT_BLOCKED_SHORT_URL、ENDPOINT_BLOCKED_UNKNOWN_DOMAIN、ENDPOINT_BLOCKED_CREDENTIAL_QUERY、ENDPOINT_BLOCKED_NOT_ALLOWLISTED、ENDPOINT_BLOCKED_MANUAL_REVIEW_REQUIRED、ENDPOINT_BLOCKED_WRITE_PERMISSION、ENDPOINT_BLOCKED_ORDER_PERMISSION、ENDPOINT_BLOCKED_PAYMENT_PERMISSION、ENDPOINT_BLOCKED_IDENTITY_UPLOAD、PROVIDER_READONLY_GATE_BLOCKED 和 PROVIDER_SANDBOX_GATE_PENDING。所有事件必须 redacted: true；endpoint URL 记录前必须脱敏，只允许记录 providerId / hostname / decision / blockedReason / timestamp。
 
-本阶段必须联动显示：key 删除 / 轮换 / 过期机制草案显示 provider endpoint allowlist 闸门：已建立，下一步：只读 provider sandbox gate；密钥脱敏与日志防泄露规则显示 endpoint URL 记录前必须脱敏；本机安全存储接口草案显示 endpoint 连接仍未开放；安全存储设计闸门显示只读 provider sandbox gate：未建立；安全密钥存储方案显示真实 endpoint 连接仍未开放；API 绑定准备状态 / 说明 / 表单 / 权限清单显示当前仍不能绑定真实 API、不能连接真实 endpoint、不能返回真实价格，未完成只读 provider sandbox gate 前不能提交绑定确认。
+本阶段必须联动显示：key 删除 / 轮换 / 过期机制草案显示 provider endpoint allowlist 闸门：已建立，下一步：只读 provider result schema gate；密钥脱敏与日志防泄露规则显示 endpoint URL 记录前必须脱敏；本机安全存储接口草案显示 endpoint 连接仍未开放；安全存储设计闸门显示只读 provider sandbox gate：未建立；安全密钥存储方案显示真实 endpoint 连接仍未开放；API 绑定准备状态 / 说明 / 表单 / 权限清单显示当前仍不能绑定真实 API、不能连接真实 endpoint、不能返回真实价格，未完成只读 provider result schema gate 前不能提交绑定确认。
 
 marker:provider endpoint allowlist gate
 marker:provider endpoint allowlist gate established
@@ -1815,3 +1815,38 @@ marker:provider endpoint readonly gate
 marker:provider endpoint audit events
 marker:provider endpoint audit redacted true
 marker:provider endpoint next readonly sandbox gate
+
+
+## v2.1.1：Read-only Provider Sandbox Gate / 只读 provider sandbox 闸门
+
+v2.1.1 新增 `commerceReadonlyProviderSandboxGate.js`，只建立只读 provider sandbox gate 草案闸门。该闸门用于展示 sandbox 阶段草案、sandbox request 草案、sandbox response 草案、只读字段 allowlist、写入动作 blocklist、sandbox 运行条件、当前缺失条件、sandbox 风险扫描草案和 sandbox 审计事件草案。当前版本仍不运行真实 sandbox，不连接真实 provider，不连接真实 endpoint，不发起真实网络请求，不读取真实 API key，不返回真实价格，不返回 availability，不返回 bookingUrl，不预订、不付款、不下单、不上传身份资料。
+
+UI 中 `查看只读 provider sandbox gate` 默认折叠。展开后必须显示：只读 provider sandbox gate：已建立、gate 状态：关闭、sandbox 状态：草案、真实 sandbox 运行：未开放、真实 provider 连接：未开放、真实 endpoint 连接：未开放、真实网络请求：未开放、真实价格读取：未开放、availability 读取：未开放、bookingUrl 读取：未开放、下单：禁止、付款：禁止、身份上传：禁止。
+
+sandbox request 草案只能展示未来结构字段，不得包含真实 API key、apiSecret、accessToken、authorization、password、passportNumber、identityNumber、bankCardNumber、paymentToken、orderPayload 或 checkoutPayload。sandbox response 草案可以列出未来只读字段，但当前 response、price、availability、bookingUrl 全部禁用；response 禁止 bookingUrl、checkoutUrl、paymentUrl、orderId、paymentId、passengerIdentity、passportNumber、bankCardNumber、rawApiKey、rawToken、rawHeaders 和 rawProviderPayloadWithSecrets。
+
+只读字段 allowlist 当前启用字段必须为 none；price、availability、taxesAndFees、baggageInfo、refundPolicy 和 shippingInfo 当前仍禁用。写入动作 blocklist 必须禁止 create_order、hold_booking、submit_passenger_identity、submit_passport、submit_bank_card、submit_payment、auto_purchase、auto_checkout、write_user_data_to_provider 和 upload_documents。sandbox 当前决策必须是 allowed: false、decision: blocked、reason: readonly_provider_sandbox_gate_closed。
+
+sandbox 审计事件草案必须包括 READONLY_SANDBOX_EVALUATION_DRAFT、READONLY_SANDBOX_BLOCKED_GATE_CLOSED、READONLY_SANDBOX_BLOCKED_ENDPOINT_NOT_REVIEWED、READONLY_SANDBOX_BLOCKED_TERMS_NOT_REVIEWED、READONLY_SANDBOX_BLOCKED_API_DOCS_NOT_REVIEWED、READONLY_SANDBOX_BLOCKED_SCOPE_NOT_READONLY、READONLY_SANDBOX_BLOCKED_NETWORK_DISABLED、READONLY_SANDBOX_BLOCKED_SECRET_RISK、READONLY_SANDBOX_BLOCKED_WRITE_ACTION、READONLY_SANDBOX_SCHEMA_DRAFT_CREATED 和 READONLY_SANDBOX_RESULT_BLOCKED。所有事件必须 redacted: true；只允许记录 providerId / endpointHost / decision / blockedReason / timestamp。
+
+本阶段必须联动显示：provider endpoint allowlist gate 显示只读 provider sandbox gate：已建立，下一步：只读 provider result schema gate；key 删除 / 轮换 / 过期机制草案、密钥脱敏与日志防泄露规则、本机安全存储接口草案、安全存储设计闸门、安全密钥存储方案、API 绑定准备状态 / 说明 / 表单 / 权限清单均显示当前仍不能绑定真实 API、不能连接真实 endpoint、不能运行真实 sandbox、不能返回真实价格，未完成只读 provider result schema gate 前不能提交绑定确认。
+
+marker:readonly provider sandbox gate
+marker:readonly provider sandbox gate closed
+marker:readonly provider sandbox draft only
+marker:readonly provider sandbox no real sandbox
+marker:readonly provider sandbox no endpoint
+marker:readonly provider sandbox no network
+marker:readonly provider sandbox no real price
+marker:readonly provider sandbox no availability
+marker:readonly provider sandbox no booking url
+marker:readonly provider sandbox request draft
+marker:readonly provider sandbox response draft
+marker:readonly provider sandbox field allowlist
+marker:readonly provider sandbox write action blocklist
+marker:readonly provider sandbox run conditions
+marker:readonly provider sandbox decision blocked
+marker:readonly provider sandbox risk scan
+marker:readonly provider sandbox audit events
+marker:readonly provider sandbox audit redacted true
+marker:readonly provider sandbox next result schema gate

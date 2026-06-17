@@ -728,7 +728,7 @@
         riskModelTitle:"风险模型",
         riskModelItems:["明文泄露风险", "日志泄露风险", "截图泄露风险", "复制粘贴泄露风险", "crash report 泄露风险", "恶意 provider 风险", "钓鱼 endpoint 风险", "权限过宽风险", "用户误绑定写入 / 下单 / 支付 API 风险"],
         nextStepTitle:"下一步",
-        nextStepText:"provider endpoint allowlist 闸门：已建立。下一步：只读 provider sandbox gate。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。",
+        nextStepText:"provider endpoint allowlist 闸门：已建立。只读 provider sandbox gate：已建立。下一步：只读 provider result schema gate。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。",
         capabilityTitle:"当前能力",
         checklistTitle:"前置条件",
         capabilityLines:["不能读取真实 API key", "不能保存真实 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能付款", "不能下单", "不能保存身份证 / 护照 / 银行卡"],
@@ -786,7 +786,7 @@
       },
       blockingReasons:["安全密钥写入实现未完成", "安全密钥读取实现未完成", "Keychain 适配未完成", "safeStorage 适配未完成", "provider endpoint allowlist 未完成"],
       unlockChecklist:["设计密钥数据结构", "设计本机安全写入接口", "设计本机安全读取接口", "完成安全审查后，才允许进入下一阶段"],
-      implementationMilestones:["v2.1.0：安全存储设计闸门，默认关闭", "v2.1.0：本机安全存储接口草案，仍不写真实 key"],
+      implementationMilestones:["v2.1.1：安全存储设计闸门，默认关闭", "v2.1.1：本机安全存储接口草案，仍不写真实 key"],
       auditRules:["日志中永不记录完整 key", "UI 不得展示明文 key"],
       redactionRules:["apiKey → [REDACTED_API_KEY]", "apiSecret → [REDACTED_API_SECRET]"]
     };
@@ -892,7 +892,7 @@
         redactionRulesLine:"密钥脱敏与日志防泄露规则：已建立",
         keyLifecycleDraftLine:"key 删除 / 轮换 / 过期机制草案：已建立",
         keyLifecycleRealActionsLine:"真实删除 / 轮换 / 过期仍未开放",
-        nextStepLine:"下一步：只读 provider sandbox gate",
+        nextStepLine:"下一步：只读 provider result schema gate",
         safetyLine:"当前版本仍不能输入、保存、读取或测试真实 API key。"
       }
     };
@@ -945,7 +945,7 @@
         keyLifecycleDraftLine:"key 删除 / 轮换 / 过期机制草案：已建立",
         keyLifecycleAuditEventsLine:"生命周期审计事件草案：已建立",
         keyLifecycleRealActionsLine:"真实删除 / 轮换 / 过期 / 吊销 / 恢复仍未开放",
-        nextStepLine:"下一步：只读 provider sandbox gate。",
+        nextStepLine:"下一步：只读 provider result schema gate。",
         safetyLine:"当前版本仍不能输入、保存、读取或测试真实 API key。"
       }
     };
@@ -1008,7 +1008,7 @@
         realExpiryLine:"真实过期：未开放",
         realRevocationLine:"真实吊销：未开放",
         realRestoreLine:"真实恢复：未开放",
-        nextStepLine:"下一步：只读 provider sandbox gate",
+        nextStepLine:"下一步：只读 provider result schema gate",
         currentVersionLine:"当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key"
       }
     }, raw);
@@ -1018,7 +1018,7 @@
     const api = window.WeishanCommerceProviderEndpointAllowlistGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderEndpointAllowlistGateContract ? api.commerceProviderEndpointAllowlistGateContract : {
-      gateVersion:"2.1.0",
+      gateVersion:"2.1.1",
       phase:"provider_endpoint_allowlist_gate",
       gateStatus:"closed",
       allowlistStatus:"draft",
@@ -1031,10 +1031,45 @@
       paymentMode:"disabled",
       identityUpload:"disabled",
       capabilities:{ canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false, canConnectRealEndpoint:false, canTestConnection:false, canUseNetwork:false, canUseProviderSandbox:false, canReturnPrice:false, canReturnBookingUrl:false, canCreateOrder:false, canPay:false, canUploadIdentity:false },
-      display:{ title:"provider endpoint allowlist 闸门", establishedLine:"endpoint allowlist 闸门：已建立", gateStatusLine:"闸门状态：关闭", allowlistStatusLine:"allowlist 状态：草案", endpointConnectionLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", providerSandboxLine:"provider sandbox：未开放", priceLine:"真实价格读取：未开放", bookingUrlLine:"bookingUrl 读取：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", nextStepLine:"下一步：只读 provider sandbox gate", safetyLine:"当前版本仍不能连接真实 endpoint、不能测试连接、不能联网、不能读取真实价格" }
+      display:{ title:"provider endpoint allowlist 闸门", establishedLine:"endpoint allowlist 闸门：已建立", gateStatusLine:"闸门状态：关闭", allowlistStatusLine:"allowlist 状态：草案", endpointConnectionLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", providerSandboxLine:"provider sandbox：未开放", priceLine:"真实价格读取：未开放", bookingUrlLine:"bookingUrl 读取：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", readonlyProviderSandboxGateLine:"只读 provider sandbox gate：已建立", realSandboxRunLine:"真实 sandbox 运行：未开放", realProviderConnectionLine:"真实 provider 连接：未开放", realNetworkLine:"真实网络：未开放", nextStepLine:"只读 provider sandbox gate：已建立。下一步：只读 provider result schema gate", safetyLine:"当前版本仍不能连接真实 endpoint、不能测试连接、不能联网、不能读取真实价格" }
     };
     const display = api && typeof api.buildProviderEndpointAllowlistGateDisplay === "function" ? api.buildProviderEndpointAllowlistGateDisplay(raw) : {};
     return Object.assign({}, base, raw, display, {
+      capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
+  function createReadonlyProviderSandboxGate(state){
+    const api = window.WeishanCommerceReadonlyProviderSandboxGate;
+    const raw = state && typeof state === "object" ? state : {};
+    const base = api && api.commerceReadonlyProviderSandboxGateContract ? api.commerceReadonlyProviderSandboxGateContract : {
+      version:"2.1.1",
+      moduleName:"readonly_provider_sandbox_gate",
+      phase:"readonly_provider_sandbox_gate",
+      gateStatus:"closed",
+      sandboxStatus:"draft_only",
+      realSandboxRun:"disabled",
+      realProviderConnection:"disabled",
+      realEndpointConnection:"disabled",
+      realNetworkRequest:"disabled",
+      realPriceRead:"disabled",
+      realAvailabilityRead:"disabled",
+      realBookingUrlRead:"disabled",
+      realOrder:"forbidden",
+      realPayment:"forbidden",
+      realIdentityUpload:"forbidden",
+      apiKeyInput:"disabled",
+      apiKeyStorage:"disabled",
+      apiKeyRead:"disabled",
+      connectionTest:"disabled",
+      capabilities:{ canShowReadonlySandboxGate:true, canShowSandboxRequestDraft:true, canShowSandboxResponseDraft:true, canShowReadonlyFieldAllowlist:true, canShowWriteActionBlocklist:true, canShowSandboxRunConditions:true, canShowSandboxBlockedReasons:true, canShowSandboxRiskScan:true, canShowSandboxAuditEvents:true, canEvaluateSandboxDraft:true, canRunRealSandbox:false, canConnectEndpoint:false, canUseNetwork:false, canTestConnection:false, canReturnPrice:false, canReturnAvailability:false, canReturnBookingUrl:false, canCreateOrder:false, canPay:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false },
+      display:{ title:"只读 provider sandbox gate", establishedLine:"只读 provider sandbox gate：已建立", gateStatusLine:"gate 状态：关闭", sandboxStatusLine:"sandbox 状态：草案", realSandboxRunLine:"真实 sandbox 运行：未开放", realProviderConnectionLine:"真实 provider 连接：未开放", endpointConnectionLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", priceLine:"真实价格读取：未开放", availabilityLine:"availability 读取：未开放", bookingUrlLine:"bookingUrl 读取：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", nextStepLine:"下一步：只读 provider result schema gate", safetyLine:"当前版本仍不能运行真实 sandbox、不能连接真实 endpoint、不能联网、不能读取真实价格" }
+    };
+    if (api && typeof api.buildReadonlyProviderSandboxGateDisplay === "function") {
+      return api.buildReadonlyProviderSandboxGateDisplay(Object.assign({}, base, raw));
+    }
+    return Object.assign({}, base, raw, {
       capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
       display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {})
     });
@@ -1248,7 +1283,7 @@
           "API 绑定权限确认不能提交",
           "Provider 条款 / API 文档未人工审查",
           "只读沙箱连接闸门未完成",
-          "provider endpoint allowlist 闸门已建立，等待只读 provider sandbox gate",
+          "provider endpoint allowlist 闸门已建立，只读 provider sandbox gate：已建立，等待只读 provider result schema gate",
           "endpoint 连接未启用",
           "网络请求未启用",
           "真实价格返回未启用",
@@ -1263,7 +1298,7 @@
       : {
         title:"API 绑定准备状态",
         conclusionLine:"当前还不能绑定真实 API。",
-        nextStepLine:"下一步：只读 provider sandbox gate",
+        nextStepLine:"下一步：只读 provider result schema gate",
         nextStepDetail:"密钥脱敏与日志防泄露规则：已建立。key 删除 / 轮换 / 过期机制草案：已建立。当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。"
       };
     return {
@@ -1548,6 +1583,7 @@
       keyRedactionAndLogLeakRules:category === "flight" ? createKeyRedactionAndLogLeakRules() : null,
       keyLifecycleDraft:category === "flight" ? createKeyLifecycleDraft() : null,
       providerEndpointAllowlistGate:category === "flight" ? createProviderEndpointAllowlistGate() : null,
+      readonlyProviderSandboxGate:category === "flight" ? createReadonlyProviderSandboxGate() : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState() : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState() : null,
@@ -1610,6 +1646,7 @@
       keyRedactionAndLogLeakRules:category === "flight" ? createKeyRedactionAndLogLeakRules(base.keyRedactionAndLogLeakRules) : null,
       keyLifecycleDraft:category === "flight" ? createKeyLifecycleDraft(base.keyLifecycleDraft) : null,
       providerEndpointAllowlistGate:category === "flight" ? createProviderEndpointAllowlistGate(base.providerEndpointAllowlistGate) : null,
+      readonlyProviderSandboxGate:category === "flight" ? createReadonlyProviderSandboxGate(base.readonlyProviderSandboxGate) : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(base.userApiPriorityPolicyState),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState(base.apiBindingSafeShellState) : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState(base.userApiProviderCatalogState) : null,
@@ -1735,6 +1772,7 @@
       keyRedactionAndLogLeakRules:safe.category === "flight" ? safe.keyRedactionAndLogLeakRules : null,
       keyLifecycleDraft:safe.category === "flight" ? safe.keyLifecycleDraft : null,
       providerEndpointAllowlistGate:safe.category === "flight" ? safe.providerEndpointAllowlistGate : null,
+      readonlyProviderSandboxGate:safe.category === "flight" ? safe.readonlyProviderSandboxGate : null,
       userApiPriorityPolicyState:safe.userApiPriorityPolicyState,
       apiBindingSafeShellState:safe.category === "flight" ? safe.apiBindingSafeShellState : null,
       userApiProviderCatalogState:safe.category === "flight" ? safe.userApiProviderCatalogState : null,
@@ -1839,6 +1877,7 @@
     createKeyRedactionAndLogLeakRules,
     createKeyLifecycleDraft,
     createProviderEndpointAllowlistGate,
+    createReadonlyProviderSandboxGate,
     createUserApiPriorityPolicyState,
     createApiBindingSafeShellState,
     createUserApiProviderCatalogState,

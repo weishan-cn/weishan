@@ -33,10 +33,10 @@
     });
   }
   function loadCommerceAgent(){
-    return loadScriptOnce("WeishanCommerceAgent", "./renderer/core/commerceAgent.js?v=2.1.0");
+    return loadScriptOnce("WeishanCommerceAgent", "./renderer/core/commerceAgent.js?v=2.1.1");
   }
   function loadCommerceAgentPage(){
-    return loadScriptOnce("CommerceAgentPage", "./renderer/routes/CommerceAgentPage.js?v=2.1.0");
+    return loadScriptOnce("CommerceAgentPage", "./renderer/routes/CommerceAgentPage.js?v=2.1.1");
   }
   function installCommerceRoute(){
     if (!window.WeishanRouter || window.WeishanRouter.__commerceRouteInstalled) return;

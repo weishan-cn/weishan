@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const LIFECYCLE_VERSION = "2.1.0";
+  const LIFECYCLE_VERSION = "2.1.1";
 
   function clone(value) {
     return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;
@@ -256,7 +256,7 @@
       canReturnPrice: false,
       canReturnBookingUrl: false,
       reason: "key_lifecycle_draft_only",
-      nextStep: "readonly_provider_sandbox_gate"
+      nextStep: "readonly_provider_result_schema_gate"
     });
   }
 
@@ -283,7 +283,7 @@
         providerSandboxLine: "provider 沙箱：未开放",
         realPriceLine: "真实价格：未开放",
         bookingUrlLine: "bookingUrl：未开放",
-        nextStepLine: "下一步：只读 provider sandbox gate",
+        nextStepLine: "下一步：只读 provider result schema gate",
         currentVersionLine: "当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key"
       }
     }));
