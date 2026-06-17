@@ -1546,7 +1546,7 @@ v2.0.96 新增安全存储设计闸门。该闸门只是未来 API key 输入、
 - v2.0.96：安全存储设计闸门，默认关闭
 - v2.0.96：本机安全存储接口草案，仍不写真实 key
 - v2.0.96：密钥脱敏与日志防泄露规则
-- v2.0.97：key 删除 / 轮换 / 过期机制草案
+- v2.0.98：key 删除 / 轮换 / 过期机制草案
 - v2.0.98：provider endpoint allowlist 闸门
 - v2.0.99：只读沙箱连接闸门
 - v2.1.0：人工确认后，才考虑真实只读 key 输入
@@ -1635,9 +1635,9 @@ marker:local secure storage credential params redaction
 marker:api binding readiness secure key storage plan established not implemented
 
 
-## v2.0.97：Key Redaction & Log Leak Prevention Rules / 密钥脱敏与日志防泄露规则
+## v2.0.98：Key Redaction & Log Leak Prevention Rules / 密钥脱敏与日志防泄露规则
 
-v2.0.97 新增密钥脱敏与日志防泄露规则。本阶段只建立敏感字段识别、脱敏映射、安全审计日志规则、UI / 截图 / 崩溃报告防泄露规则，以及 dummy 脱敏自检。当前版本仍不得输入、保存、读取或测试真实 API key，不得连接 endpoint，不得联网，不得返回价格，不得返回 bookingUrl，不得付款或下单。
+v2.0.98 新增密钥脱敏与日志防泄露规则。本阶段只建立敏感字段识别、脱敏映射、安全审计日志规则、UI / 截图 / 崩溃报告防泄露规则，以及 dummy 脱敏自检。当前版本仍不得输入、保存、读取或测试真实 API key，不得连接 endpoint，不得联网，不得返回价格，不得返回 bookingUrl，不得付款或下单。
 
 UI 中 `查看密钥脱敏与日志防泄露规则` 默认折叠。展开后必须显示：
 - 密钥脱敏规则：已建立
@@ -1650,7 +1650,8 @@ UI 中 `查看密钥脱敏与日志防泄露规则` 默认折叠。展开后必�
 - 安全审计日志规则
 - UI / 截图 / 崩溃报告规则
 - Dummy 脱敏自检 PASS
-- 下一步：key 删除 / 轮换 / 过期机制草案
+- key 删除 / 轮换 / 过期机制草案：已建立
+- 下一步：provider endpoint allowlist 闸门
 
 敏感字段识别规则必须覆盖 apiKey、apiSecret、clientSecret、accessToken、refreshToken、authorization、bearer token、password、privateKey、credential query params。
 
@@ -1669,7 +1670,7 @@ UI 中 `查看密钥脱敏与日志防泄露规则` 默认折叠。展开后必�
 
 安全审计日志只能记录 alias、providerId、blocked reason、timestamp、event type 等非密钥字段；不得记录 key 明文、secret 明文、token 明文、authorization header、endpoint credential query params。UI、截图和 crash report 不得展示真实 key 或 dummy raw secret。
 
-本阶段必须联动显示：本机安全存储接口草案已建立密钥脱敏与日志防泄露规则，安全存储设计闸门显示密钥脱敏与日志防泄露规则已建立，安全密钥存储方案显示密钥脱敏与日志防泄露规则已建立，API 绑定准备状态 / 说明 / 表单 / 权限清单显示下一步为 key 删除 / 轮换 / 过期机制草案。
+本阶段必须联动显示：本机安全存储接口草案已建立密钥脱敏与日志防泄露规则，安全存储设计闸门显示密钥脱敏与日志防泄露规则已建立，安全密钥存储方案显示密钥脱敏与日志防泄露规则已建立，API 绑定准备状态 / 说明 / 表单 / 权限清单显示 key 删除 / 轮换 / 过期机制草案已建立，下一步为 provider endpoint allowlist 闸门。
 
 marker:key redaction and log leak prevention rules
 marker:key redaction rules established
@@ -1688,3 +1689,53 @@ marker:key redaction audit log rules
 marker:key redaction dummy raw absent
 marker:key redaction credential params
 marker:key redaction next key delete rotate expiry draft
+
+
+## v2.0.98：Key Delete / Rotate / Expiry Draft / key 删除、轮换、过期机制草案
+
+v2.0.98 新增 `commerceKeyLifecycleDraft.js`，只建立 key 删除、轮换、过期、吊销、恢复的生命周期草案、状态机草案、阻断迁移、删除机制草案、轮换机制草案、过期机制草案和生命周期审计事件草案。当前版本仍不得输入、保存、读取、删除、轮换、设置过期、吊销、恢复或测试真实 API key，不得连接 Keychain，不得连接 Electron safeStorage，不得连接 endpoint，不得联网，不得返回价格，不得返回 bookingUrl，不得付款或下单。
+
+UI 中 `查看 key 删除 / 轮换 / 过期机制草案` 默认折叠。展开后必须显示：
+
+- key 删除 / 轮换 / 过期机制草案
+- 生命周期草案：已建立
+- 真实删除：未开放
+- 真实轮换：未开放
+- 真实过期：未开放
+- 真实吊销：未开放
+- 真实恢复：未开放
+- key 状态机草案
+- 当前允许状态：draft_alias_only
+- 阻断迁移
+- 删除机制草案
+- 轮换机制草案
+- 过期机制草案
+- 生命周期审计事件草案
+- 所有事件必须 redacted: true
+- 下一步：provider endpoint allowlist 闸门
+
+Key lifecycle draft 必须包含状态机草案：`draft_alias_only`、`pending_secure_storage`、`active_readonly`、`expired`、`rotation_required`、`rotation_pending`、`rotated`、`deletion_requested`、`deleted`、`revoked`、`disabled`、`blocked`。当前唯一允许状态为 `draft_alias_only`，所有进入 active / rotated / deleted / revoked 的迁移必须保持 blocked。
+
+删除机制草案必须显示 `prepareKeyDeleteDraft`、`confirmKeyDeleteDraft`、`finalizeKeyDeleteDraft`，全部 blocked。轮换机制草案必须显示 `prepareKeyRotateDraft`、`validateRotationCandidateDraft`、`confirmKeyRotateDraft`、`finalizeKeyRotateDraft`，全部 blocked。过期机制草案必须显示 `prepareKeyExpiryDraft`、`evaluateKeyExpiryDraft`、`markKeyExpiredDraft`，不得启用真实过期或真实 provider binding disable。
+
+生命周期审计事件草案只允许记录 aliasId、providerId、action、blockedReason、timestamp 等脱敏字段。所有事件必须 `redacted: true`，不得记录旧 key、新 key、secret、token、authorization header 或 credential query params。
+
+本阶段必须联动显示：密钥脱敏与日志防泄露规则已建立；本机安全存储接口草案已建立；安全存储设计闸门仍关闭；安全密钥存储方案仍未实现真实保存；API 绑定准备状态仍未准备；API 绑定说明 / 表单 / 权限清单仍为只读预览或禁用预览。下一步统一为 provider endpoint allowlist 闸门。
+
+marker:key lifecycle draft
+marker:key delete rotate expiry draft
+marker:key lifecycle draft only
+marker:key lifecycle no real key
+marker:key lifecycle no key delete
+marker:key lifecycle no key rotate
+marker:key lifecycle no key expiry
+marker:key lifecycle no key input
+marker:key lifecycle no key save
+marker:key lifecycle no key read
+marker:key lifecycle no endpoint
+marker:key lifecycle no network
+marker:key lifecycle no price
+marker:key lifecycle no booking url
+marker:key lifecycle state machine
+marker:key lifecycle audit events
+marker:key lifecycle next provider endpoint allowlist gate

@@ -413,6 +413,27 @@ function checkKeyRedactionAndLogLeakRulesVersion(results, expectedVersion) {
   );
 }
 
+function checkKeyLifecycleDraftVersion(results, expectedVersion) {
+  const lifecyclePath = "apps/desktop/src/renderer/core/commerceKeyLifecycleDraft.js";
+  const lifecycle = readText(lifecyclePath);
+  if (!lifecycle) {
+    results.push({ name: "apps/desktop key lifecycle draft version", pass: false, detail: lifecyclePath + " missing" });
+    return;
+  }
+  if (lifecycle.__readError) {
+    results.push({ name: "apps/desktop key lifecycle draft version", pass: false, detail: lifecycle.__readError });
+    return;
+  }
+  const match = lifecycle.match(/LIFECYCLE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop key lifecycle draft version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceKeyLifecycleDraft.js LIFECYCLE_VERSION"
+  );
+}
+
 function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
   const pkg = readJson(packagePath);
   const lock = readJson(lockPath);
@@ -475,6 +496,7 @@ function runVersionCheck() {
     checkApiBindingPermissionChecklistVersion(results, rootPackage.version);
     checkApiBindingReadinessStatusVersion(results, rootPackage.version);
     checkKeyRedactionAndLogLeakRulesVersion(results, rootPackage.version);
+    checkKeyLifecycleDraftVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const ADAPTER_VERSION = "2.0.97";
+  const ADAPTER_VERSION = "2.0.98";
   const PHASE = "flight_readonly_stub_adapter";
   const DEFAULT_OVERALL_STATUS = "shell_ready";
   const DEFAULT_CURRENT_STAGE = "shell_ready";

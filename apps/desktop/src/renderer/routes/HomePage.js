@@ -2311,7 +2311,7 @@
       <p>API 绑定权限清单：只读预览</p>
       <p>API 绑定准备状态：未准备</p>
       <p>安全密钥存储方案尚未实现前，表单保持禁用</p>
-      <p>密钥脱敏与日志防泄露规则已建立，但 key 删除 / 轮换 / 过期机制未建立，表单仍不可用</p>
+      <p>密钥脱敏与日志防泄露规则已建立，key 删除 / 轮换 / 过期机制草案已建立，但 provider endpoint allowlist 闸门未完成，表单仍不可用</p>
       <p>安全存储设计闸门关闭，表单不可用</p>
       <p>本机安全存储接口仍为草案，表单不可用</p>
       <p>未完成权限确认前，表单保持禁用</p>
@@ -2373,8 +2373,8 @@
       <p>权限确认当前不能提交</p>
       <p>未通过安全存储设计闸门前，不能提交绑定确认</p>
       <p>密钥脱敏与日志防泄露规则已建立</p>
-      <p>未完成 key 删除 / 轮换 / 过期机制前，不能提交绑定确认</p>
-      <p>下一步是 key 删除 / 轮换 / 过期机制草案</p>
+      <p>key 删除 / 轮换 / 过期机制草案已建立，但真实删除 / 轮换 / 过期仍未开放，不能提交绑定确认</p>
+      <p>下一步是 provider endpoint allowlist 闸门</p>
       <button class="cmd-btn gray commerce-api-binding-confirm-preview" type="button" disabled aria-disabled="true">${esc(display.confirmationButtonLabel || "提交绑定确认")}</button>
     </section>`;
     return disclosure("查看 API 绑定权限清单", body, "commerce-api-binding-permission-checklist-disclosure");
@@ -2386,8 +2386,8 @@
     return {
       title:"API 绑定准备状态",
       conclusionLine:"当前还不能绑定真实 API。",
-      nextStepLine:"下一步：key 删除 / 轮换 / 过期机制草案",
-      nextStepDetail:"密钥脱敏与日志防泄露规则：已建立。key 删除 / 轮换 / 过期机制：未建立。当前版本仍不能输入、保存、读取或测试真实 API key。",
+      nextStepLine:"下一步：provider endpoint allowlist 闸门",
+      nextStepDetail:"密钥脱敏与日志防泄露规则：已建立。key 删除 / 轮换 / 过期机制草案：已建立。当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。",
       statusLines:[
         "用户 API：未绑定",
         "平台目录：已建立",
@@ -2399,7 +2399,8 @@
         "只读沙箱连接：未准备",
         "真实价格结果：暂无",
         "密钥脱敏与日志防泄露规则：已建立",
-        "key 删除 / 轮换 / 过期机制：未建立"
+        "key 删除 / 轮换 / 过期机制草案：已建立",
+        "真实 key 删除 / 轮换 / 过期：未开放"
       ],
       blockerTitle:"为什么还不能绑定：",
       status:{
@@ -2442,8 +2443,9 @@
       <p>当前不能绑定真实 API</p>
       <p>本机安全存储接口草案：已建立</p>
       <p>密钥脱敏与日志防泄露规则：已建立</p>
-      <p>下一步：key 删除 / 轮换 / 过期机制草案</p>
-      <p>key 删除 / 轮换 / 过期机制：未建立</p>
+      <p>下一步：provider endpoint allowlist 闸门</p>
+      <p>key 删除 / 轮换 / 过期机制草案：已建立</p>
+      <p>真实 key 删除 / 轮换 / 过期：未开放</p>
       <p>key 输入：未开放</p>
       <p>key 保存：未开放</p>
       <p>key 读取：未开放</p>
@@ -2452,8 +2454,8 @@
       <ul>${statusLines.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
       <h5>${esc(display.blockerTitle || "为什么还不能绑定：")}</h5>
       <ul>${blockers.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
-      <h5>${esc(display.nextStepLine || "下一步：key 删除 / 轮换 / 过期机制草案")}</h5>
-      <p>${esc(display.nextStepDetail || "密钥脱敏与日志防泄露规则：已建立。key 删除 / 轮换 / 过期机制：未建立。当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
+      <h5>${esc(display.nextStepLine || "下一步：provider endpoint allowlist 闸门")}</h5>
+      <p>${esc(display.nextStepDetail || "密钥脱敏与日志防泄露规则：已建立。key 删除 / 轮换 / 过期机制草案：已建立。当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。")}</p>
       <h5>${esc(display.routeTitle || "后续路线：")}</h5>
       <ol>${steps.map((item) => `<li>${esc(item.label || "")}：${esc(item.status || "")}</li>`).join("")}</ol>
       <h5>${esc(display.permanentTitle || "永久限制：")}</h5>
@@ -2491,7 +2493,7 @@
       riskModelTitle: "风险模型",
       riskModelItems: ["明文泄露风险", "日志泄露风险", "截图泄露风险", "复制粘贴泄露风险", "crash report 泄露风险", "恶意 provider 风险", "钓鱼 endpoint 风险", "权限过宽风险", "用户误绑定写入 / 下单 / 支付 API 风险"],
       nextStepTitle: "下一步",
-      nextStepText: "key 删除 / 轮换 / 过期机制草案。当前版本仍不能输入、保存、读取或测试真实 API key。",
+      nextStepText: "provider endpoint allowlist 闸门。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。",
       storageTargets: ["macOS Keychain", "Electron safeStorage"],
       blockedChannels: [".env", "localStorage", "sessionStorage", "日志", "明文"],
       capabilityLines: ["不能读取真实 API key", "不能保存真实 API key", "不能连接 endpoint", "不能发起网络请求", "不能返回价格", "不能返回 bookingUrl", "不能付款", "不能下单", "不能保存身份证 / 护照 / 银行卡"],
@@ -2540,7 +2542,7 @@
         priceLine:"真实价格返回：未开放",
         bookingUrlLine:"bookingUrl 返回：未开放",
         keyRedactionAndLogLeakRulesLine:"密钥脱敏与日志防泄露规则：已建立",
-        nextStepLine:"key 删除 / 轮换 / 过期机制草案。当前版本仍不能输入、保存、读取或测试真实 API key。"
+        nextStepLine:"provider endpoint allowlist 闸门。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。"
       }
     };
   }
@@ -2582,7 +2584,7 @@
       <h5>风险模型：</h5>
       <ul>${threatModel.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
       <h5>下一步：</h5>
-      <p>${esc(display.nextStepLine || "key 删除 / 轮换 / 过期机制草案。当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
+      <p>${esc(display.nextStepLine || "provider endpoint allowlist 闸门。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。")}</p>
     </section>`;
     return disclosure("查看安全存储设计闸门", body, "commerce-secure-storage-design-gate-disclosure");
   }
@@ -2621,7 +2623,7 @@
       ],
       auditDraft:{ events:["KEY_ALIAS_CREATED_DRAFT", "KEY_WRITE_BLOCKED", "KEY_READ_BLOCKED", "KEY_DELETE_BLOCKED", "KEY_ROTATE_BLOCKED", "CONNECTION_TEST_BLOCKED", "PROVIDER_SANDBOX_BLOCKED", "REAL_PRICE_BLOCKED", "BOOKING_URL_BLOCKED"], rules:["审计日志不得记录 key 明文", "审计日志只允许记录 key alias"] },
       redactionDraft:{ functions:["redactSecretLikeValue", "redactObject", "redactHeaders", "redactUrl"], placeholders:{ apiKey:"[REDACTED_API_KEY]", apiSecret:"[REDACTED_API_SECRET]", accessToken:"[REDACTED_ACCESS_TOKEN]", authorizationHeader:"[REDACTED_AUTH_HEADER]", credentialParams:"[REDACTED_CREDENTIAL_PARAMS]" } },
-      display:{ title:"本机安全存储接口草案", currentStatusLine:"接口草案：已建立", implementationLine:"真实实现：未启用", keyInputLine:"真实 API key 输入：未开放", keySaveLine:"真实 API key 保存：未开放", keyReadLine:"真实 API key 读取：未开放", keyDeleteRotateLine:"删除 / 轮换：未开放", connectionTestLine:"测试连接：未开放", providerSandboxLine:"provider 沙箱：未开放", priceLine:"真实价格：未开放", bookingUrlLine:"bookingUrl：未开放", nextStepLine:"下一步：key 删除 / 轮换 / 过期机制草案", safetyLine:"当前版本仍不能输入、保存、读取或测试真实 API key。" }
+      display:{ title:"本机安全存储接口草案", currentStatusLine:"接口草案：已建立", implementationLine:"真实实现：未启用", keyInputLine:"真实 API key 输入：未开放", keySaveLine:"真实 API key 保存：未开放", keyReadLine:"真实 API key 读取：未开放", keyDeleteRotateLine:"删除 / 轮换：未开放", connectionTestLine:"测试连接：未开放", providerSandboxLine:"provider 沙箱：未开放", priceLine:"真实价格：未开放", bookingUrlLine:"bookingUrl：未开放", keyLifecycleDraftLine:"key 删除 / 轮换 / 过期机制草案：已建立", nextStepLine:"下一步：provider endpoint allowlist 闸门", safetyLine:"当前版本仍不能输入、保存、读取或测试真实 API key。" }
     };
   }
 
@@ -2675,7 +2677,9 @@
       <p>authorization header → ${esc(placeholders.authorizationHeader || "[REDACTED_AUTH_HEADER]")}</p>
       <p>credential query params → ${esc(placeholders.credentialParams || "[REDACTED_CREDENTIAL_PARAMS]")}</p>
       <h5>下一步</h5>
-      <p>${esc(display.nextStepLine || "下一步：key 删除 / 轮换 / 过期机制草案")}</p>
+      <p>${esc(display.keyLifecycleDraftLine || "key 删除 / 轮换 / 过期机制草案：已建立")}</p>
+      <p>${esc(display.keyLifecycleRealActionsLine || "真实删除 / 轮换 / 过期仍未开放")}</p>
+      <p>${esc(display.nextStepLine || "下一步：provider endpoint allowlist 闸门")}</p>
       <p>${esc(display.safetyLine || "当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
     </section>`;
     return disclosure("查看本机安全存储接口草案", body, "commerce-local-secure-storage-interface-draft-disclosure");
@@ -2715,11 +2719,90 @@
       <ul>${uiRules.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
       <h5>${esc(display.dummyTestTitle || "Dummy 脱敏自检")}</h5>
       <ul>${dummyLines.map(([label, value]) => `<li>${esc(label)}：${esc(value)}</li>`).join("")}</ul>
+      <h5>key 生命周期联动</h5>
+      <p>key 删除 / 轮换 / 过期机制草案：已建立</p>
+      <p>生命周期审计事件草案：已建立</p>
+      <p>真实删除 / 轮换 / 过期 / 吊销 / 恢复仍未开放</p>
       <h5>下一步：</h5>
-      <p>${esc(display.nextStepLine || "下一步：key 删除 / 轮换 / 过期机制草案。")}</p>
+      <p>${esc(display.nextStepLine || "下一步：provider endpoint allowlist 闸门。")}</p>
       <p>${esc(display.safetyLine || "当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
     </section>`;
     return disclosure("查看密钥脱敏与日志防泄露规则", body, "commerce-key-redaction-log-leak-rules-disclosure");
+  }
+
+  function commerceKeyLifecycleDraftDisplay(task){
+    const api = window.WeishanCommerceKeyLifecycleDraft;
+    const draft = task && task.keyLifecycleDraft || null;
+    if (api && typeof api.buildKeyLifecycleDraft === "function") {
+      return Object.assign({}, api.buildKeyLifecycleDraft(), draft && typeof draft === "object" ? draft : {});
+    }
+    return draft || {
+      display:{
+        title:"key 删除 / 轮换 / 过期机制草案",
+        lifecycleStatusLine:"生命周期草案：已建立",
+        realDeleteLine:"真实删除：未开放",
+        realRotateLine:"真实轮换：未开放",
+        realExpiryLine:"真实过期：未开放",
+        realRevocationLine:"真实吊销：未开放",
+        realRestoreLine:"真实恢复：未开放",
+        nextStepLine:"下一步：provider endpoint allowlist 闸门",
+        currentVersionLine:"当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key"
+      },
+      stateMachine:{ currentAllowedState:"draft_alias_only", currentBlockedStates:["active_readonly", "rotation_pending", "rotated", "deleted", "revoked"], transitions:[{ from:"draft_alias_only", to:"pending_secure_storage", status:"blocked" }] },
+      deleteDraft:{ deleteRules:["删除前必须二次确认"], deleteBlockedReasons:["secure storage 未实现"], deleteMethodDraft:{ prepareKeyDeleteDraft:{ status:"blocked" }, confirmKeyDeleteDraft:{ status:"blocked" }, finalizeKeyDeleteDraft:{ status:"blocked" } } },
+      rotateDraft:{ rotateRules:["轮换前必须二次确认"], rotateBlockedReasons:["secure storage 未实现"], rotateMethodDraft:{ prepareKeyRotateDraft:{ status:"blocked" }, validateRotationCandidateDraft:{ status:"blocked" }, confirmKeyRotateDraft:{ status:"blocked" }, finalizeKeyRotateDraft:{ status:"blocked" } } },
+      expiryDraft:{ expiryRules:["key 可以设置 expiresAt"], expiryBlockedReasons:["secure storage 未实现"], expiryMethodDraft:{ prepareKeyExpiryDraft:{ status:"blocked" }, evaluateKeyExpiryDraft:{ status:"draft_only" }, markKeyExpiredDraft:{ status:"blocked" } } },
+      auditEventsDraft:{ eventTypes:["KEY_DELETE_BLOCKED", "KEY_ROTATE_BLOCKED", "KEY_EXPIRED_BLOCKED"], auditRules:["所有事件必须 redacted: true"] }
+    };
+  }
+
+  function commerceKeyLifecycleDraftDisclosure(task){
+    const draft = commerceKeyLifecycleDraftDisplay(task);
+    const display = draft.display || {};
+    const stateMachine = draft.stateMachine || {};
+    const transitions = Array.isArray(stateMachine.transitions) ? stateMachine.transitions : [];
+    const blockedStates = Array.isArray(stateMachine.currentBlockedStates) ? stateMachine.currentBlockedStates : [];
+    const deleteDraft = draft.deleteDraft || {};
+    const rotateDraft = draft.rotateDraft || {};
+    const expiryDraft = draft.expiryDraft || {};
+    const audit = draft.auditEventsDraft || {};
+    const methodList = (methods) => Object.keys(methods || {}).map((key) => `<li>${esc(key)}：${esc((methods[key] && methods[key].status) || "blocked")}</li>`).join("");
+    const body = `<section class="commerce-key-lifecycle-draft-panel" aria-label="key 删除 / 轮换 / 过期机制草案">
+      <h4>${esc(display.title || "key 删除 / 轮换 / 过期机制草案")}</h4>
+      <p>${esc(display.lifecycleStatusLine || "生命周期草案：已建立")}</p>
+      <p>${esc(display.realDeleteLine || "真实删除：未开放")}</p>
+      <p>${esc(display.realRotateLine || "真实轮换：未开放")}</p>
+      <p>${esc(display.realExpiryLine || "真实过期：未开放")}</p>
+      <p>${esc(display.realRevocationLine || "真实吊销：未开放")}</p>
+      <p>${esc(display.realRestoreLine || "真实恢复：未开放")}</p>
+      <h5>key 状态机草案</h5>
+      <p>当前允许状态：${esc(stateMachine.currentAllowedState || "draft_alias_only")}</p>
+      <p>当前阻断状态：${esc(blockedStates.join(" / ") || "active_readonly / rotation_pending / rotated / deleted / revoked")}</p>
+      <h5>阻断迁移</h5>
+      <ul>${transitions.map((item) => `<li>${esc(item.from || "")} → ${esc(item.to || "")}：${esc(item.status || "blocked")}</li>`).join("")}</ul>
+      <h5>删除机制草案</h5>
+      <ul>${(Array.isArray(deleteDraft.deleteRules) ? deleteDraft.deleteRules : []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      <ul>${methodList(deleteDraft.deleteMethodDraft)}</ul>
+      <h5>轮换机制草案</h5>
+      <ul>${(Array.isArray(rotateDraft.rotateRules) ? rotateDraft.rotateRules : []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      <ul>${methodList(rotateDraft.rotateMethodDraft)}</ul>
+      <h5>过期机制草案</h5>
+      <ul>${(Array.isArray(expiryDraft.expiryRules) ? expiryDraft.expiryRules : []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      <ul>${methodList(expiryDraft.expiryMethodDraft)}</ul>
+      <h5>生命周期审计事件草案</h5>
+      <ul>${(Array.isArray(audit.eventTypes) ? audit.eventTypes : []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      <ul>${(Array.isArray(audit.auditRules) ? audit.auditRules : []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      <h5>联动状态</h5>
+      <p>密钥脱敏与日志防泄露规则：已建立</p>
+      <p>本机安全存储接口草案：已建立</p>
+      <p>安全存储设计闸门：关闭</p>
+      <p>安全密钥存储方案：方案已建立，尚未实现</p>
+      <p>API 绑定准备状态：未准备</p>
+      <p>API 绑定说明 / 表单 / 权限清单：只读预览或禁用预览</p>
+      <p>${esc(display.nextStepLine || "下一步：provider endpoint allowlist 闸门")}</p>
+      <p>${esc(display.currentVersionLine || "当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key")}</p>
+    </section>`;
+    return disclosure("查看 key 删除 / 轮换 / 过期机制草案", body, "commerce-key-lifecycle-draft-disclosure");
   }
 
   function commerceSecureKeyStoragePlanDisclosure(task){
@@ -2746,7 +2829,9 @@
       <p>${esc(display.localInterfaceDraftLine || "本机安全存储接口草案：已建立")}</p>
       <p>${esc(display.realKeyStorageLine || "真实 key 保存仍未启用")}</p>
       <p>密钥脱敏与日志防泄露规则：已建立</p>
-      <p>下一步：key 删除 / 轮换 / 过期机制草案</p>
+      <p>key 删除 / 轮换 / 过期机制草案：已建立</p>
+      <p>真实 key 删除 / 轮换 / 过期仍未开放</p>
+      <p>下一步：provider endpoint allowlist 闸门</p>
       <p>真实 API key 输入仍未开放</p>
       <div class="commerce-secure-key-storage-plan-status-checklist">
         <h5>${esc(display.statusChecklistTitle || "当前状态清单")}</h5>
@@ -2770,7 +2855,7 @@
       </div>
       <div class="commerce-secure-key-storage-plan-next-step">
         <h5>${esc(display.nextStepTitle || "下一步")}</h5>
-        <p>${esc(display.nextStepText || "key 删除 / 轮换 / 过期机制草案。当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
+        <p>${esc(display.nextStepText || "provider endpoint allowlist 闸门。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。")}</p>
       </div>
       <div class="commerce-secure-key-storage-plan-targets">
         <h5>未来目标</h5>
@@ -2815,7 +2900,9 @@
       <p>API 绑定权限清单：只读预览</p>
       <p>API 绑定准备状态：未准备</p>
       <p>已建立密钥脱敏与日志防泄露规则</p>
-      <p>下一步：key 删除 / 轮换 / 过期机制草案</p>
+      <p>已建立 key 删除 / 轮换 / 过期机制草案</p>
+      <p>真实删除 / 轮换 / 过期仍未开放</p>
+      <p>下一步：provider endpoint allowlist 闸门</p>
       <p>当前仍不能保存真实 API key</p>
       <p>当前不能提交绑定确认</p>
       <p>当前不能输入真实 API key</p>
@@ -3677,6 +3764,7 @@
       ${commerceSecureStorageDesignGateDisclosure(task)}
       ${commerceLocalSecureStorageInterfaceDraftDisclosure(task)}
       ${commerceKeyRedactionAndLogLeakRulesDisclosure(task)}
+      ${commerceKeyLifecycleDraftDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;
@@ -3697,6 +3785,7 @@
       ${commerceSecureStorageDesignGateDisclosure(task)}
       ${commerceLocalSecureStorageInterfaceDraftDisclosure(task)}
       ${commerceKeyRedactionAndLogLeakRulesDisclosure(task)}
+      ${commerceKeyLifecycleDraftDisclosure(task)}
     </section>`;
     return disclosure("查看高级调试信息", body, "commerce-simple-flight-advanced-debug-disclosure");
   }

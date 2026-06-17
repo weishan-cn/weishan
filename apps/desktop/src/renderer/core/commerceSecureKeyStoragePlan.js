@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SECURE_KEY_STORAGE_PLAN_VERSION = "2.0.97";
+  const SECURE_KEY_STORAGE_PLAN_VERSION = "2.0.98";
   const PHASE = "flight_secure_key_storage_plan";
   const DEFAULT_PLAN_STATUS = "plan_only";
   const DEFAULT_CURRENT_STAGE = "design_required";
@@ -72,8 +72,10 @@
       secureStorageDesignGateLine: "安全存储设计闸门：关闭",
       localInterfaceDraftLine: "本机安全存储接口草案：已建立",
       realKeyStorageLine: "真实 key 保存仍未启用",
-      secureStorageDesignGateNextStepLine: "下一步：key 删除 / 轮换 / 过期机制草案",
+      secureStorageDesignGateNextStepLine: "下一步：provider endpoint allowlist 闸门",
       keyRedactionAndLogLeakRulesLine: "密钥脱敏与日志防泄露规则：已建立",
+      keyLifecycleDraftLine: "key 删除 / 轮换 / 过期机制草案：已建立",
+      keyLifecycleRealActionsLine: "真实 key 删除 / 轮换 / 过期仍未开放",
       secureStorageDesignGateKeyInputLine: "真实 API key 输入仍未开放",
       statusChecklistTitle: "当前状态清单",
       statusChecklistItems: [
@@ -135,7 +137,7 @@
         "用户误绑定写入 / 下单 / 支付 API 风险"
       ],
       nextStepTitle: "下一步",
-      nextStepText: "key 删除 / 轮换 / 过期机制草案。当前版本仍不能输入、保存、读取或测试真实 API key。",
+      nextStepText: "provider endpoint allowlist 闸门。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。",
       capabilityTitle: "当前能力",
       checklistTitle: "前置条件",
       capabilityLines: [
@@ -220,8 +222,10 @@
       secureStorageDesignGateLine: display.secureStorageDesignGateLine || "安全存储设计闸门：关闭",
       localInterfaceDraftLine: display.localInterfaceDraftLine || "本机安全存储接口草案：已建立",
       realKeyStorageLine: display.realKeyStorageLine || "真实 key 保存仍未启用",
-      secureStorageDesignGateNextStepLine: display.secureStorageDesignGateNextStepLine || "下一步：key 删除 / 轮换 / 过期机制草案",
+      secureStorageDesignGateNextStepLine: display.secureStorageDesignGateNextStepLine || "下一步：provider endpoint allowlist 闸门",
       keyRedactionAndLogLeakRulesLine: display.keyRedactionAndLogLeakRulesLine || "密钥脱敏与日志防泄露规则：已建立",
+      keyLifecycleDraftLine: display.keyLifecycleDraftLine || "key 删除 / 轮换 / 过期机制草案：已建立",
+      keyLifecycleRealActionsLine: display.keyLifecycleRealActionsLine || "真实 key 删除 / 轮换 / 过期仍未开放",
       secureStorageDesignGateKeyInputLine: display.secureStorageDesignGateKeyInputLine || "真实 API key 输入仍未开放",
       statusChecklistTitle: display.statusChecklistTitle || "当前状态清单",
       statusChecklistItems: Array.isArray(display.statusChecklistItems) ? display.statusChecklistItems.slice() : defaultDisplay().statusChecklistItems.slice(),
@@ -234,7 +238,7 @@
       riskModelTitle: display.riskModelTitle || "风险模型",
       riskModelItems: Array.isArray(display.riskModelItems) ? display.riskModelItems.slice() : defaultDisplay().riskModelItems.slice(),
       nextStepTitle: display.nextStepTitle || "下一步",
-      nextStepText: display.nextStepText || "key 删除 / 轮换 / 过期机制草案。当前版本仍不能输入、保存、读取或测试真实 API key。",
+      nextStepText: display.nextStepText || "provider endpoint allowlist 闸门。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。",
       capabilityTitle: display.capabilityTitle || "当前能力",
       checklistTitle: display.checklistTitle || "前置条件",
       capabilityLines: Array.isArray(display.capabilityLines) ? display.capabilityLines.slice() : defaultDisplay().capabilityLines.slice(),

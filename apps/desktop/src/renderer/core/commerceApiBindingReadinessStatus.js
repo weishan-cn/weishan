@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READINESS_VERSION = "2.0.97";
+  const READINESS_VERSION = "2.0.98";
   const PHASE = "api_binding_readiness_status";
 
   function clone(value) {
@@ -67,7 +67,7 @@
       status: "not_ready",
       canBindApi: false,
       currentStage: "pre_binding_safety",
-      nextStep: "key_delete_rotate_expiry_draft",
+      nextStep: "provider_endpoint_allowlist_gate",
       summary: {
         userApi: "not_bound",
         providerCatalog: "available",
@@ -80,7 +80,7 @@
         realPriceResult: "unavailable"
       },
       blockers: [
-        "key 删除 / 轮换 / 过期机制未建立",
+        "provider endpoint allowlist 闸门未完成",
         "API 绑定权限确认不能提交",
         "Provider 条款 / API 文档未人工审查",
         "只读沙箱连接闸门未完成",
@@ -99,8 +99,9 @@
     return clone([
       { stepId: "current_readonly_info", label: "平台目录 / 说明 / 禁用表单 / 权限清单", status: "available", canProceedNow: true, reason: "当前只能查看说明、目录、禁用表单和权限清单。" },
       { stepId: "key_redaction_and_log_leak_rules", label: "密钥脱敏与日志防泄露规则", status: "established", canProceedNow: false, reason: "规则层已建立，但仍不允许输入、保存、读取或测试真实 API key。" },
-      { stepId: "key_delete_rotate_expiry_draft", label: "key 删除 / 轮换 / 过期机制", status: "next", canProceedNow: false, reason: "删除、轮换和过期机制尚未建立。" },
-      { stepId: "readonly_api_binding_draft", label: "只读 API 绑定草稿", status: "not_ready", canProceedNow: false, reason: "安全密钥存储方案完成前不能进入草稿。" },
+      { stepId: "key_delete_rotate_expiry_draft", label: "key 删除 / 轮换 / 过期机制", status: "established", canProceedNow: false, reason: "草案已建立，但真实删除、轮换、过期、吊销和恢复仍未开放。" },
+      { stepId: "provider_endpoint_allowlist_gate", label: "provider endpoint allowlist 闸门", status: "next", canProceedNow: false, reason: "完成 endpoint allowlist 前不能连接真实 provider。" },
+      { stepId: "readonly_api_binding_draft", label: "只读 API 绑定草稿", status: "not_ready", canProceedNow: false, reason: "provider endpoint allowlist 闸门完成前不能进入草稿。" },
       { stepId: "provider_human_review", label: "Provider 人工审查", status: "not_ready", canProceedNow: false, reason: "Provider 条款和 API 文档尚未人工审查。" },
       { stepId: "readonly_sandbox_gate", label: "只读沙箱闸门", status: "not_ready", canProceedNow: false, reason: "只读沙箱连接闸门未完成。" },
       { stepId: "readonly_price_result", label: "只读价格结果", status: "not_ready", canProceedNow: false, reason: "未接入可信只读价格源。" },
@@ -135,7 +136,7 @@
     const state = getApiBindingReadinessState();
     const violations = [];
     if (status.canBindApi !== false) violations.push("canBindApi");
-    if (status.nextStep !== "key_delete_rotate_expiry_draft") violations.push("nextStep");
+    if (status.nextStep !== "provider_endpoint_allowlist_gate") violations.push("nextStep");
     [
       "canInputApiKey",
       "canSaveApiKey",
@@ -174,8 +175,8 @@
       keySaveLine: "key 保存：未开放",
       keyReadLine: "key 读取：未开放",
       connectionTestLine: "测试连接：未开放",
-      nextStepLine: "下一步：key 删除 / 轮换 / 过期机制草案",
-      nextStepDetail: "密钥脱敏与日志防泄露规则：已建立。key 删除 / 轮换 / 过期机制：未建立。当前版本仍不能输入、保存、读取或测试真实 API key。",
+      nextStepLine: "下一步：provider endpoint allowlist 闸门",
+      nextStepDetail: "密钥脱敏与日志防泄露规则：已建立。key 删除 / 轮换 / 过期机制草案：已建立。当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。",
       statusLines: [
         "用户 API：未绑定",
         "平台目录：已建立",
@@ -184,7 +185,8 @@
         "API 绑定权限清单：只读预览",
         "安全密钥存储方案：方案已建立，尚未实现",
         "密钥脱敏与日志防泄露规则：已建立",
-        "key 删除 / 轮换 / 过期机制：未建立",
+        "key 删除 / 轮换 / 过期机制草案：已建立",
+        "真实 key 删除 / 轮换 / 过期：未开放",
         "Provider 人工审查：未开始",
         "只读沙箱连接：未准备",
         "真实价格结果：暂无"

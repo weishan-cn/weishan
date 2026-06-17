@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const RULES_VERSION = "2.0.97";
+  const RULES_VERSION = "2.0.98";
   const MODULE_NAME = "key_redaction_and_log_leak_prevention_rules";
   const PHASE = "redaction_rules";
 
@@ -332,7 +332,10 @@
         "测试连接结果不得包含原始认证头"
       ],
       dummyTestTitle: "Dummy 脱敏自检",
-      nextStepLine: "下一步：key 删除 / 轮换 / 过期机制草案。",
+      keyLifecycleDraftLine: "key 删除 / 轮换 / 过期机制草案：已建立",
+      keyLifecycleAuditEventsLine: "生命周期审计事件草案：已建立",
+      keyLifecycleRealActionsLine: "真实删除 / 轮换 / 过期 / 吊销 / 恢复仍未开放",
+      nextStepLine: "下一步：provider endpoint allowlist 闸门。",
       safetyLine: "当前版本仍不能输入、保存、读取或测试真实 API key。"
     });
   }
