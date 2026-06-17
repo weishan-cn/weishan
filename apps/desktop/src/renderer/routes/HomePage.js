@@ -2312,6 +2312,7 @@
       <p>API 绑定准备状态：未准备</p>
       <p>安全密钥存储方案未完成前，表单保持禁用</p>
       <p>安全存储设计闸门关闭，表单不可用</p>
+      <p>本机安全存储接口仍为草案，表单不可用</p>
       <p>未完成权限确认前，表单保持禁用</p>
       <p>当前版本不能提交绑定确认</p>
       <ul>${safetyLines.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
@@ -2370,7 +2371,8 @@
       <p>API 绑定准备状态：未准备</p>
       <p>权限确认当前不能提交</p>
       <p>未通过安全存储设计闸门前，不能提交绑定确认</p>
-      <p>下一步是安全密钥存储方案</p>
+      <p>未完成密钥脱敏与日志防泄露规则前，不能提交绑定确认</p>
+      <p>下一步是密钥脱敏与日志防泄露规则</p>
       <button class="cmd-btn gray commerce-api-binding-confirm-preview" type="button" disabled aria-disabled="true">${esc(display.confirmationButtonLabel || "提交绑定确认")}</button>
     </section>`;
     return disclosure("查看 API 绑定权限清单", body, "commerce-api-binding-permission-checklist-disclosure");
@@ -2382,7 +2384,7 @@
     return {
       title:"API 绑定准备状态",
       conclusionLine:"当前还不能绑定真实 API。",
-      nextStepLine:"下一步：本机安全存储接口草案",
+      nextStepLine:"下一步：密钥脱敏与日志防泄露规则",
       nextStepDetail:"先设计安全密钥存储方案。当前版本仍不能输入、保存或测试真实 API key。",
       statusLines:[
         "用户 API：未绑定",
@@ -2434,15 +2436,17 @@
       <p>${esc(display.conclusionLine || "当前还不能绑定真实 API。")}</p>
       <p>安全存储设计闸门：关闭</p>
       <p>当前不能绑定真实 API</p>
-      <p>下一步：本机安全存储接口草案</p>
+      <p>本机安全存储接口草案：已建立</p>
+      <p>下一步：密钥脱敏与日志防泄露规则</p>
       <p>key 输入：未开放</p>
       <p>key 保存：未开放</p>
+      <p>key 读取：未开放</p>
       <p>测试连接：未开放</p>
       <h5>当前状态：</h5>
       <ul>${statusLines.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
       <h5>${esc(display.blockerTitle || "为什么还不能绑定：")}</h5>
       <ul>${blockers.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
-      <h5>${esc(display.nextStepLine || "下一步：本机安全存储接口草案")}</h5>
+      <h5>${esc(display.nextStepLine || "下一步：密钥脱敏与日志防泄露规则")}</h5>
       <p>${esc(display.nextStepDetail || "先设计安全密钥存储方案。当前版本仍不能输入、保存或测试真实 API key。")}</p>
       <h5>${esc(display.routeTitle || "后续路线：")}</h5>
       <ol>${steps.map((item) => `<li>${esc(item.label || "")}：${esc(item.status || "")}</li>`).join("")}</ol>
@@ -2468,6 +2472,8 @@
       blockedChannelsLine: "禁止：明文、.env、localStorage、sessionStorage、日志",
       nextStepLine: "下一步：实现本机安全存储设计。",
       safetyLine: "当前版本仍不能输入、保存、读取或测试真实 API key。",
+      localInterfaceDraftLine: "本机安全存储接口草案：已建立",
+      realKeyStorageLine: "真实 key 保存仍未启用",
       statusChecklistTitle: "当前状态清单",
       statusChecklistItems: ["真实密钥保存：未启用", "macOS Keychain：未连接", "Electron safeStorage：未实现", ".env 保存：禁止", "明文保存：禁止", "localStorage 保存：禁止", "sessionStorage 保存：禁止", "日志记录 key：禁止", "API 连接测试：未启用", "endpoint 连接：未启用", "真实价格返回：未启用", "bookingUrl 返回：未启用"],
       futureStorageTargetsTitle: "未来允许评估的存储目标",
@@ -2505,19 +2511,21 @@
       return api.buildSecureStorageDesignGate(gate);
     }
     return {
-      version:"2.0.94",
+      version:"2.0.95",
       gateName:"secure_storage_design_gate",
       gateStatus:"closed",
       phase:"design_gate",
       blockingReasons:["安全密钥写入实现未完成", "安全密钥读取实现未完成", "Keychain 适配未完成", "safeStorage 适配未完成", "provider endpoint allowlist 未完成"],
       unlockChecklist:["设计密钥数据结构", "设计本机安全写入接口", "设计本机安全读取接口", "完成安全审查后，才允许进入下一阶段"],
-      implementationMilestones:["v2.0.94：安全存储设计闸门，默认关闭", "v2.0.95：本机安全存储接口草案，仍不写真实 key"],
+      implementationMilestones:["v2.0.95：安全存储设计闸门，默认关闭", "v2.0.95：本机安全存储接口草案，仍不写真实 key"],
       auditRules:["日志中永不记录完整 key", "UI 不得展示明文 key"],
       redactionRules:["apiKey → [REDACTED_API_KEY]", "apiSecret → [REDACTED_API_SECRET]"],
       display:{
         title:"安全存储设计闸门",
         gateStatusLine:"闸门状态：关闭",
         phaseLine:"当前阶段：设计闸门",
+        localInterfaceDraftLine:"本机安全存储接口草案：已建立",
+        realImplementationLine:"真实实现：未启用",
         keyInputLine:"真实 API key 输入：未开放",
         keySaveLine:"真实 API key 保存：未开放",
         keyReadLine:"真实 API key 读取：未开放",
@@ -2525,7 +2533,7 @@
         providerSandboxLine:"provider 沙箱连接：未开放",
         priceLine:"真实价格返回：未开放",
         bookingUrlLine:"bookingUrl 返回：未开放",
-        nextStepLine:"本机安全存储接口草案。当前版本仍不能输入、保存、读取或测试真实 API key。"
+        nextStepLine:"密钥脱敏与日志防泄露规则。当前版本仍不能输入、保存、读取或测试真实 API key。"
       }
     };
   }
@@ -2544,6 +2552,8 @@
       <h5>当前状态：</h5>
       <p>${esc(display.gateStatusLine || "闸门状态：关闭")}</p>
       <p>${esc(display.phaseLine || "当前阶段：设计闸门")}</p>
+      <p>${esc(display.localInterfaceDraftLine || "本机安全存储接口草案：已建立")}</p>
+      <p>${esc(display.realImplementationLine || "真实实现：未启用")}</p>
       <p>${esc(display.keyInputLine || "真实 API key 输入：未开放")}</p>
       <p>${esc(display.keySaveLine || "真实 API key 保存：未开放")}</p>
       <p>${esc(display.keyReadLine || "真实 API key 读取：未开放")}</p>
@@ -2564,9 +2574,100 @@
       <h5>风险模型：</h5>
       <ul>${threatModel.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
       <h5>下一步：</h5>
-      <p>${esc(display.nextStepLine || "本机安全存储接口草案。当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
+      <p>${esc(display.nextStepLine || "密钥脱敏与日志防泄露规则。当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
     </section>`;
     return disclosure("查看安全存储设计闸门", body, "commerce-secure-storage-design-gate-disclosure");
+  }
+
+  function commerceLocalSecureStorageInterfaceDraftDisplay(task){
+    const draft = task && task.localSecureStorageInterfaceDraft || null;
+    const api = window.WeishanCommerceLocalSecureStorageInterfaceDraft;
+    if (api && typeof api.buildLocalSecureStorageInterfaceDraft === "function") {
+      return api.buildLocalSecureStorageInterfaceDraft(draft);
+    }
+    return {
+      version:"2.0.95",
+      draftStatus:"draft_only",
+      implementationStatus:"not_implemented",
+      dataModelDraft:{
+        keyAliasModel:{ keyAliasId:"field:keyAliasId", providerId:"field:providerId", providerName:"field:providerName", permissionType:"field:permissionType_readonly_only", maskedPreview:"field:maskedPreview_redacted_only" },
+        keySecretModel:{ secretRef:"field:secretRef_reference_only", encryptedPayloadRef:"field:encryptedPayloadRef_reference_only", backendType:"field:backendType_candidate_only", keyVersion:"field:keyVersion" },
+        providerBindingModel:{ bindingId:"field:bindingId", providerId:"field:providerId", providerName:"field:providerName", keyAliasId:"field:keyAliasId", endpointAllowlistStatus:"field:endpointAllowlistStatus_not_approved", sandboxStatus:"field:sandboxStatus_disabled", status:"draft_only" }
+      },
+      methodDraft:{
+        prepareKeyAliasDraft:{ status:"draft_only", reason:"alias_draft_only_no_real_key" },
+        prepareSecretWriteDraft:{ status:"blocked", reason:"secret_write_blocked" },
+        prepareSecretReadDraft:{ status:"blocked", reason:"secret_read_blocked" },
+        prepareSecretDeleteDraft:{ status:"blocked", reason:"secret_delete_blocked" },
+        prepareSecretRotateDraft:{ status:"blocked", reason:"secret_rotate_blocked" },
+        prepareConnectionTestDraft:{ status:"blocked", reason:"endpoint_connection_disabled" },
+        prepareProviderSandboxDraft:{ status:"blocked", reason:"provider_sandbox_disabled" },
+        prepareReadonlyPriceDraft:{ status:"blocked", reason:"real_price_disabled" },
+        prepareBookingUrlDraft:{ status:"blocked", reason:"booking_url_disabled" }
+      },
+      backendCandidates:[
+        { backendType:"macOS Keychain", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false },
+        { backendType:"Electron safeStorage", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false },
+        { backendType:"encrypted local config file", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false },
+        { backendType:"enterprise managed key service", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false }
+      ],
+      auditDraft:{ events:["alias_created_draft", "secret_write_blocked", "secret_read_blocked", "connection_test_blocked", "price_return_blocked"], rules:["审计日志不得记录 key 明文", "审计日志只允许记录 key alias"] },
+      redactionDraft:{ functions:["redactSecretLikeValue", "redactObject", "redactHeaders", "redactUrl"], placeholders:{ apiKey:"[REDACTED_API_KEY]", apiSecret:"[REDACTED_API_SECRET]", accessToken:"[REDACTED_ACCESS_TOKEN]", authorizationHeader:"[REDACTED_AUTH_HEADER]" } },
+      display:{ title:"本机安全存储接口草案", currentStatusLine:"接口草案：已建立", implementationLine:"真实实现：未启用", keyInputLine:"真实 API key 输入：未开放", keySaveLine:"真实 API key 保存：未开放", keyReadLine:"真实 API key 读取：未开放", keyDeleteRotateLine:"删除 / 轮换：未开放", connectionTestLine:"测试连接：未开放", providerSandboxLine:"provider 沙箱：未开放", priceLine:"真实价格：未开放", bookingUrlLine:"bookingUrl：未开放", nextStepLine:"下一步：密钥脱敏与日志防泄露规则", safetyLine:"当前版本仍不能输入、保存、读取或测试真实 API key。" }
+    };
+  }
+
+  function commerceLocalSecureStorageInterfaceDraftDisclosure(task){
+    const draft = commerceLocalSecureStorageInterfaceDraftDisplay(task);
+    const display = draft.display || {};
+    const modelGroups = draft.dataModelDraft && typeof draft.dataModelDraft === "object" ? draft.dataModelDraft : {};
+    const methodDraft = draft.methodDraft && typeof draft.methodDraft === "object" ? draft.methodDraft : {};
+    const backendCandidates = Array.isArray(draft.backendCandidates) ? draft.backendCandidates : [];
+    const audit = draft.auditDraft && typeof draft.auditDraft === "object" ? draft.auditDraft : {};
+    const redaction = draft.redactionDraft && typeof draft.redactionDraft === "object" ? draft.redactionDraft : {};
+    const modelHtml = Object.keys(modelGroups).map((groupName) => {
+      const fields = modelGroups[groupName] && typeof modelGroups[groupName] === "object" ? modelGroups[groupName] : {};
+      return `<section><h5>${esc(groupName)}</h5><ul>${Object.keys(fields).map((key) => `<li>${esc(key)}：${esc(fields[key])}</li>`).join("")}</ul></section>`;
+    }).join("");
+    const methodHtml = Object.keys(methodDraft).map((key) => {
+      const method = methodDraft[key] || {};
+      return `<li>${esc(key)}：${esc(method.status || "blocked")}，${esc(method.reason || "")}</li>`;
+    }).join("");
+    const backendHtml = backendCandidates.map((item) => `<li>${esc(item.backendType || "")}：${esc(item.candidateStatus || "candidate_only")}，connected=${esc(String(item.connected === true))}，canRead=${esc(String(item.canRead === true))}，canWrite=${esc(String(item.canWrite === true))}，canDelete=${esc(String(item.canDelete === true))}，canRotate=${esc(String(item.canRotate === true))}</li>`).join("");
+    const placeholders = redaction.placeholders && typeof redaction.placeholders === "object" ? redaction.placeholders : {};
+    const body = `<section class="commerce-local-secure-storage-interface-draft-panel" aria-label="本机安全存储接口草案">
+      <h4>${esc(display.title || "本机安全存储接口草案")}</h4>
+      <p>${esc(display.currentStatusLine || "接口草案：已建立")}</p>
+      <p>${esc(display.implementationLine || "真实实现：未启用")}</p>
+      <p>${esc(display.keyInputLine || "真实 API key 输入：未开放")}</p>
+      <p>${esc(display.keySaveLine || "真实 API key 保存：未开放")}</p>
+      <p>${esc(display.keyReadLine || "真实 API key 读取：未开放")}</p>
+      <p>${esc(display.keyDeleteRotateLine || "删除 / 轮换：未开放")}</p>
+      <p>${esc(display.connectionTestLine || "测试连接：未开放")}</p>
+      <p>${esc(display.providerSandboxLine || "provider 沙箱：未开放")}</p>
+      <p>${esc(display.priceLine || "真实价格：未开放")}</p>
+      <p>${esc(display.bookingUrlLine || "bookingUrl：未开放")}</p>
+      <h5>数据模型草案</h5>
+      ${modelHtml}
+      <h5>接口方法草案</h5>
+      <ul>${methodHtml}</ul>
+      <h5>存储后端候选</h5>
+      <ul>${backendHtml}</ul>
+      <h5>审计事件草案</h5>
+      <ul>${(Array.isArray(audit.events) ? audit.events : []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      <h5>审计规则草案</h5>
+      <ul>${(Array.isArray(audit.rules) ? audit.rules : []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      <h5>脱敏接口草案</h5>
+      <ul>${(Array.isArray(redaction.functions) ? redaction.functions : []).map((item) => `<li>${esc(item)}</li>`).join("")}</ul>
+      <p>${esc(placeholders.apiKey || "[REDACTED_API_KEY]")}</p>
+      <p>${esc(placeholders.apiSecret || "[REDACTED_API_SECRET]")}</p>
+      <p>${esc(placeholders.accessToken || "[REDACTED_ACCESS_TOKEN]")}</p>
+      <p>${esc(placeholders.authorizationHeader || "[REDACTED_AUTH_HEADER]")}</p>
+      <h5>下一步</h5>
+      <p>${esc(display.nextStepLine || "下一步：密钥脱敏与日志防泄露规则")}</p>
+      <p>${esc(display.safetyLine || "当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
+    </section>`;
+    return disclosure("查看本机安全存储接口草案", body, "commerce-local-secure-storage-interface-draft-disclosure");
   }
 
   function commerceSecureKeyStoragePlanDisclosure(task){
@@ -2590,7 +2691,9 @@
       <p>${esc(display.nextStepLine || "下一步：实现本机安全存储设计。")}</p>
       <p>${esc(display.safetyLine || "当前版本仍不能输入、保存、读取或测试真实 API key。")}</p>
       <p>安全存储设计闸门：关闭</p>
-      <p>下一步：本机安全存储接口草案</p>
+      <p>${esc(display.localInterfaceDraftLine || "本机安全存储接口草案：已建立")}</p>
+      <p>${esc(display.realKeyStorageLine || "真实 key 保存仍未启用")}</p>
+      <p>下一步：密钥脱敏与日志防泄露规则</p>
       <p>真实 API key 输入仍未开放</p>
       <div class="commerce-secure-key-storage-plan-status-checklist">
         <h5>${esc(display.statusChecklistTitle || "当前状态清单")}</h5>
@@ -2652,12 +2755,14 @@
       <p>真实 endpoint 连接：未启用</p>
       <p>${esc(catalog.safetyLine || "当前版本只展示平台目录和权限说明，不保存真实 API key，不测试连接。")}</p>
       <p>API 绑定必须先通过安全存储设计闸门</p>
+      <p>已建立本机安全存储接口草案</p>
       <p>当前闸门关闭</p>
       <p>当前不能保存真实 API key</p>
       <p>API 绑定表单：禁用预览</p>
       <p>API 绑定权限清单：只读预览</p>
       <p>API 绑定准备状态：未准备</p>
-      <p>下一步：本机安全存储接口草案</p>
+      <p>下一步：密钥脱敏与日志防泄露规则</p>
+      <p>当前仍不能保存真实 API key</p>
       <p>当前不能提交绑定确认</p>
       <p>当前不能输入真实 API key</p>
       <p>当前不能保存 key</p>
@@ -3516,6 +3621,7 @@
       ${commerceApiBindingReadinessDisclosure(task)}
       ${commerceSecureKeyStoragePlanDisclosure(task)}
       ${commerceSecureStorageDesignGateDisclosure(task)}
+      ${commerceLocalSecureStorageInterfaceDraftDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;
@@ -3534,6 +3640,7 @@
       ${commerceFlightSandboxProviderMatrixDisclosure(task)}
       ${commerceSecureKeyStoragePlanDisclosure(task)}
       ${commerceSecureStorageDesignGateDisclosure(task)}
+      ${commerceLocalSecureStorageInterfaceDraftDisclosure(task)}
     </section>`;
     return disclosure("查看高级调试信息", body, "commerce-simple-flight-advanced-debug-disclosure");
   }

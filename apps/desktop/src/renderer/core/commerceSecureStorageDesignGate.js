@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GATE_VERSION = "2.0.94";
+  const GATE_VERSION = "2.0.95";
   const GATE_NAME = "secure_storage_design_gate";
   const PHASE = "design_gate";
 
@@ -47,8 +47,8 @@
   ];
 
   const implementationMilestones = [
-    "v2.0.94：安全存储设计闸门，默认关闭",
-    "v2.0.95：本机安全存储接口草案，仍不写真实 key",
+    "v2.0.95：安全存储设计闸门，默认关闭",
+    "v2.0.95：本机安全存储接口草案，已建立，但仍不写真实 key",
     "v2.0.96：密钥脱敏与日志防泄露规则",
     "v2.0.97：key 删除 / 轮换 / 过期机制草案",
     "v2.0.98：provider endpoint allowlist 闸门",
@@ -138,6 +138,8 @@
       gateStatus: "closed",
       phase: PHASE,
       realKeyStorageReady: false,
+      localSecureStorageInterfaceDraft: "established",
+      realImplementation: "disabled",
       keyInputReady: false,
       keyWriteReady: false,
       keyReadReady: false,
@@ -167,6 +169,8 @@
         statusTitle: "当前状态",
         gateStatusLine: "闸门状态：关闭",
         phaseLine: "当前阶段：设计闸门",
+        localInterfaceDraftLine: "本机安全存储接口草案：已建立",
+        realImplementationLine: "真实实现：未启用",
         keyInputLine: "真实 API key 输入：未开放",
         keySaveLine: "真实 API key 保存：未开放",
         keyReadLine: "真实 API key 读取：未开放",
@@ -180,7 +184,7 @@
         auditTitle: "审计规则",
         redactionTitle: "脱敏规则",
         nextStepTitle: "下一步",
-        nextStepLine: "本机安全存储接口草案。当前版本仍不能输入、保存、读取或测试真实 API key。"
+        nextStepLine: "密钥脱敏与日志防泄露规则。当前版本仍不能输入、保存、读取或测试真实 API key。"
       }
     };
   }
@@ -215,7 +219,7 @@
       canProceedToProviderSandbox: false,
       canProceedToRealPrice: false,
       canProceedToBookingUrl: false,
-      nextRequiredStep: "secure_storage_interface_draft",
+      nextRequiredStep: "key_redaction_and_log_leak_prevention_rules",
       currentUserActionRequired: false
     });
   }
@@ -227,7 +231,7 @@
       gateStatus: "closed",
       phase: PHASE,
       blockingReasons: gate.blockingReasons.slice(),
-      nextRequiredStep: "secure_storage_interface_draft",
+      nextRequiredStep: "key_redaction_and_log_leak_prevention_rules",
       safetySummary: "安全存储设计闸门关闭；当前版本不能输入、保存、读取或测试真实 API key，不能连接 endpoint，不能联网，不能返回价格或 bookingUrl。"
     });
   }

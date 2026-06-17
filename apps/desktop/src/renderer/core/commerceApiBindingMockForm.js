@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FORM_VERSION = "2.0.94";
+  const FORM_VERSION = "2.0.95";
   const PHASE = "api_binding_mock_form_disabled_state";
 
   function clone(value) {
@@ -155,6 +155,7 @@
       title: "API 绑定表单",
       currentStatusLine: "API 绑定表单为禁用预览，当前版本不保存真实 API key。",
       secureStorageDesignGateLine: "安全存储设计闸门关闭，表单不可用",
+      localSecureStorageInterfaceDraftLine: "本机安全存储接口仍为草案，表单不可用",
       fieldIntroLine: "表单字段，全部禁用：",
       actionIntroLine: "按钮，全部禁用：",
       safetyLines: [

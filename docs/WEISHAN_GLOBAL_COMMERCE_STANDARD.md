@@ -1508,8 +1508,8 @@ marker:secure key storage plan forbidden storage checklist
 marker:secure key storage plan disabled connection checklist
 marker:secure key storage plan body rendering
 
-## v2.0.94：Secure Storage Design Gate / 安全存储设计闸门
-v2.0.94 新增安全存储设计闸门。该闸门只是未来 API key 输入、保存、读取、测试连接、provider 沙箱连接、真实价格返回和 bookingUrl 返回前的统一准入层，不是安全密钥存储实现。
+## v2.0.95：Secure Storage Design Gate / 安全存储设计闸门
+v2.0.95 新增安全存储设计闸门。该闸门只是未来 API key 输入、保存、读取、测试连接、provider 沙箱连接、真实价格返回和 bookingUrl 返回前的统一准入层，不是安全密钥存储实现。
 
 默认状态必须为：
 - 闸门状态：关闭
@@ -1543,7 +1543,7 @@ v2.0.94 新增安全存储设计闸门。该闸门只是未来 API key 输入、
 解锁前检查清单必须包括密钥数据结构、本机安全写入接口、本机安全读取接口、删除 key、轮换 key、过期 key、key 别名、日志脱敏、crash report 脱敏、截图 / 复制限制提示、endpoint allowlist、provider 沙箱只读连接、价格字段校验、bookingUrl 域名校验和人工安全审查。
 
 实施里程碑：
-- v2.0.94：安全存储设计闸门，默认关闭
+- v2.0.95：安全存储设计闸门，默认关闭
 - v2.0.95：本机安全存储接口草案，仍不写真实 key
 - v2.0.96：密钥脱敏与日志防泄露规则
 - v2.0.97：key 删除 / 轮换 / 过期机制草案
@@ -1578,3 +1578,39 @@ marker:secure storage gate no price
 marker:secure storage gate no booking url
 marker:secure storage gate unlock checklist
 marker:secure storage gate redaction rules
+## v2.0.95：Local Secure Storage Interface Draft / 本机安全存储接口草案
+
+v2.0.95 在安全存储设计闸门之后新增 `Local Secure Storage Interface Draft / 本机安全存储接口草案`。本阶段只允许建立本机安全存储的数据模型、方法草案、后端候选、审计事件草案和脱敏接口草案；所有接口都只能返回 draft / blocked / disabled 状态。当前版本不得输入、保存、读取、删除、轮换或测试真实 API key，不得连接 Keychain，不得连接 Electron safeStorage，不得写入加密本地存储，不得读取 `.env`，不得连接 endpoint，不得联网，不得返回价格，不得返回 bookingUrl，不得付款，不得下单，不得保存身份证、护照或银行卡。
+
+实现模块：`commerceLocalSecureStorageInterfaceDraft.js`。
+
+本机安全存储接口草案必须包含：
+
+- 数据模型草案：`keyAliasId`、`providerId`、`providerName`、`permissionType`、`maskedPreview`、`secretRef`、`encryptedPayloadRef`、`backendType`、`keyVersion`、`bindingId`、`endpointAllowlistStatus`、`sandboxStatus`。
+- 方法草案：`prepareKeyAliasDraft`、`prepareSecretWriteDraft`、`prepareSecretReadDraft`、`prepareSecretDeleteDraft`、`prepareSecretRotateDraft`、`prepareConnectionTestDraft`、`prepareProviderSandboxDraft`、`prepareReadonlyPriceDraft`、`prepareBookingUrlDraft`。除 alias 草案展示外，所有真实能力都必须 blocked。
+- 存储后端候选：`macOS Keychain`、`Electron safeStorage`、`encrypted local config file`、`enterprise managed key service`。全部为 candidate_only，connected / canRead / canWrite / canDelete / canRotate 均为 false。
+- 审计草案：只允许记录 alias 和 blocked 事件，不得记录 key 明文、secret 明文、access token 或 auth header。
+- 脱敏草案：必须提供 `redactSecretLikeValue`、`redactObject`、`redactHeaders`、`redactUrl`，并使用 `[REDACTED_API_KEY]`、`[REDACTED_API_SECRET]`、`[REDACTED_ACCESS_TOKEN]`、`[REDACTED_AUTH_HEADER]`、`[REDACTED_CREDENTIAL_PARAMS]` 等占位。
+
+UI 中 `查看本机安全存储接口草案` 默认折叠。展开后必须显示：接口草案已建立、真实实现未启用、真实 API key 输入未开放、真实 API key 保存未开放、真实 API key 读取未开放、删除 / 轮换未开放、测试连接未开放、provider 沙箱未开放、真实价格未开放、bookingUrl 未开放，以及下一步为密钥脱敏与日志防泄露规则。
+
+UI 精确状态短语必须包含：`draft_only`、`接口草案：已建立`、`真实实现：未启用`、`删除 / 轮换：未开放`、`provider 沙箱：未开放`、`真实价格：未开放`、`bookingUrl：未开放`。
+
+安全存储设计闸门必须联动显示：本机安全存储接口草案已建立，真实实现未启用，下一步为密钥脱敏与日志防泄露规则。安全密钥存储方案、API 绑定准备状态、API 绑定说明、API 绑定表单和 API 绑定权限清单必须继续显示真实 key 保存、读取、连接测试、endpoint、network、price、bookingUrl、payment 和 order 能力均未开放。
+
+marker:local secure storage interface draft
+marker:local secure storage draft only
+marker:local secure storage no real key
+marker:local secure storage no key input
+marker:local secure storage no key save
+marker:local secure storage no key read
+marker:local secure storage no keychain
+marker:local secure storage no safestorage
+marker:local secure storage no encrypted local store
+marker:local secure storage no endpoint
+marker:local secure storage no network
+marker:local secure storage no price
+marker:local secure storage no booking url
+marker:local secure storage audit draft
+marker:local secure storage redaction draft
+marker:local secure storage backend candidates

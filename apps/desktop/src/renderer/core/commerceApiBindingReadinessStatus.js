@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READINESS_VERSION = "2.0.94";
+  const READINESS_VERSION = "2.0.95";
   const PHASE = "api_binding_readiness_status";
 
   function clone(value) {
@@ -67,7 +67,7 @@
       status: "not_ready",
       canBindApi: false,
       currentStage: "pre_binding_safety",
-      nextStep: "secure_storage_interface_draft",
+      nextStep: "key_redaction_and_log_leak_prevention_rules",
       summary: {
         userApi: "not_bound",
         providerCatalog: "available",
@@ -134,7 +134,7 @@
     const state = getApiBindingReadinessState();
     const violations = [];
     if (status.canBindApi !== false) violations.push("canBindApi");
-    if (status.nextStep !== "secure_storage_interface_draft") violations.push("nextStep");
+    if (status.nextStep !== "key_redaction_and_log_leak_prevention_rules") violations.push("nextStep");
     [
       "canInputApiKey",
       "canSaveApiKey",
@@ -168,11 +168,13 @@
       title: "API 绑定准备状态",
       conclusionLine: "当前还不能绑定真实 API。",
       secureStorageDesignGateLine: "安全存储设计闸门：关闭",
+      localSecureStorageInterfaceDraftLine: "本机安全存储接口草案：已建立",
       keyInputLine: "key 输入：未开放",
       keySaveLine: "key 保存：未开放",
+      keyReadLine: "key 读取：未开放",
       connectionTestLine: "测试连接：未开放",
-      nextStepLine: "下一步：本机安全存储接口草案",
-      nextStepDetail: "先完成本机安全存储接口草案。当前版本仍不能输入、保存或测试真实 API key。",
+      nextStepLine: "下一步：密钥脱敏与日志防泄露规则",
+      nextStepDetail: "先完成密钥脱敏与日志防泄露规则。当前版本仍不能输入、保存、读取或测试真实 API key。",
       statusLines: [
         "用户 API：未绑定",
         "平台目录：已建立",

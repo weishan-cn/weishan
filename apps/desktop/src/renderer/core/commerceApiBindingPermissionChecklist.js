@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const CHECKLIST_VERSION = "2.0.94";
+  const CHECKLIST_VERSION = "2.0.95";
   const PHASE = "api_binding_permission_checklist";
 
   function clone(value) {
@@ -182,6 +182,7 @@
       title: "API 绑定权限清单",
       currentStatusLine: "权限清单为只读预览，当前版本不能提交绑定确认。",
       secureStorageDesignGateLine: "未通过安全存储设计闸门前，不能提交绑定确认",
+      localSecureStorageInterfaceDraftLine: "未完成密钥脱敏与日志防泄露规则前，不能提交绑定确认",
       allowedTitle: "允许的未来只读能力：",
       forbiddenTitle: "禁止能力：",
       disabledTitle: "当前版本禁用：",

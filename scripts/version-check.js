@@ -245,6 +245,27 @@ function checkSecureStorageDesignGateVersion(results, expectedVersion) {
   );
 }
 
+function checkLocalSecureStorageInterfaceDraftVersion(results, expectedVersion) {
+  const draftPath = "apps/desktop/src/renderer/core/commerceLocalSecureStorageInterfaceDraft.js";
+  const draft = readText(draftPath);
+  if (!draft) {
+    results.push({ name: "apps/desktop local secure storage interface draft version", pass: false, detail: draftPath + " missing" });
+    return;
+  }
+  if (draft.__readError) {
+    results.push({ name: "apps/desktop local secure storage interface draft version", pass: false, detail: draft.__readError });
+    return;
+  }
+  const match = draft.match(/DRAFT_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop local secure storage interface draft version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceLocalSecureStorageInterfaceDraft.js DRAFT_VERSION"
+  );
+}
+
 function checkUserApiPriorityPolicyVersion(results, expectedVersion) {
   const policyPath = "apps/desktop/src/renderer/core/commerceUserApiPriorityPolicy.js";
   const policy = readText(policyPath);
@@ -425,6 +446,7 @@ function runVersionCheck() {
     checkFlightSandboxProviderMatrixVersion(results, rootPackage.version);
     checkSecureKeyStoragePlanVersion(results, rootPackage.version);
     checkSecureStorageDesignGateVersion(results, rootPackage.version);
+    checkLocalSecureStorageInterfaceDraftVersion(results, rootPackage.version);
     checkUserApiPriorityPolicyVersion(results, rootPackage.version);
     checkApiBindingSafeShellVersion(results, rootPackage.version);
     checkUserApiProviderCatalogVersion(results, rootPackage.version);

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SECURE_KEY_STORAGE_PLAN_VERSION = "2.0.94";
+  const SECURE_KEY_STORAGE_PLAN_VERSION = "2.0.95";
   const PHASE = "flight_secure_key_storage_plan";
   const DEFAULT_PLAN_STATUS = "plan_only";
   const DEFAULT_CURRENT_STAGE = "design_required";
@@ -70,7 +70,9 @@
       nextStepLine: "下一步：实现本机安全存储设计。",
       safetyLine: "当前版本仍不能输入、保存、读取或测试真实 API key。",
       secureStorageDesignGateLine: "安全存储设计闸门：关闭",
-      secureStorageDesignGateNextStepLine: "下一步：本机安全存储接口草案",
+      localInterfaceDraftLine: "本机安全存储接口草案：已建立",
+      realKeyStorageLine: "真实 key 保存仍未启用",
+      secureStorageDesignGateNextStepLine: "下一步：密钥脱敏与日志防泄露规则",
       secureStorageDesignGateKeyInputLine: "真实 API key 输入仍未开放",
       statusChecklistTitle: "当前状态清单",
       statusChecklistItems: [
@@ -215,7 +217,9 @@
       nextStepLine: display.nextStepLine || "下一步：实现本机安全存储设计。",
       safetyLine: display.safetyLine || "当前版本仍不能输入、保存、读取或测试真实 API key。",
       secureStorageDesignGateLine: display.secureStorageDesignGateLine || "安全存储设计闸门：关闭",
-      secureStorageDesignGateNextStepLine: display.secureStorageDesignGateNextStepLine || "下一步：本机安全存储接口草案",
+      localInterfaceDraftLine: display.localInterfaceDraftLine || "本机安全存储接口草案：已建立",
+      realKeyStorageLine: display.realKeyStorageLine || "真实 key 保存仍未启用",
+      secureStorageDesignGateNextStepLine: display.secureStorageDesignGateNextStepLine || "下一步：密钥脱敏与日志防泄露规则",
       secureStorageDesignGateKeyInputLine: display.secureStorageDesignGateKeyInputLine || "真实 API key 输入仍未开放",
       statusChecklistTitle: display.statusChecklistTitle || "当前状态清单",
       statusChecklistItems: Array.isArray(display.statusChecklistItems) ? display.statusChecklistItems.slice() : defaultDisplay().statusChecklistItems.slice(),

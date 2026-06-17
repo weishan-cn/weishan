@@ -39,7 +39,7 @@
       return api.getFlightLowestOffersContract(contract);
     }
     const fallback = {
-      contractVersion:"2.0.94",
+      contractVersion:"2.0.95",
       phase:"flight_lowest_two_offers_contract",
       providerStatus:"not_configured",
       offersStatus:"unavailable",
@@ -99,7 +99,7 @@
       return api.getFlightProviderCandidatesRegistry(registry);
     }
     const fallback = {
-      contractVersion:"2.0.94",
+      contractVersion:"2.0.95",
       phase:"flight_provider_candidate_registry",
       registryStatus:"candidate_registry_only",
       candidateCount:7,
@@ -169,7 +169,7 @@
       return api.getFlightProviderApprovalStatus(status);
     }
     const fallback = {
-      approvalVersion:"2.0.94",
+      approvalVersion:"2.0.95",
       phase:"flight_provider_approval",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -265,7 +265,7 @@
       return api.getFlightReadonlyStubPermission(permission);
     }
     const fallback = {
-      permissionVersion:"2.0.94",
+      permissionVersion:"2.0.95",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -329,7 +329,7 @@
       return api.getFlightReadonlyStubAdapter(adapter);
     }
     const fallback = {
-      adapterVersion:"2.0.94",
+      adapterVersion:"2.0.95",
       phase:"flight_readonly_stub_adapter",
       overallStatus:"shell_ready",
       currentStage:"shell_ready",
@@ -436,7 +436,7 @@
       return api.getFlightSandboxDryRunContract(shell);
     }
     const fallback = {
-      sandboxDryRunVersion:"2.0.94",
+      sandboxDryRunVersion:"2.0.95",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -559,7 +559,7 @@
       return api.getFlightSandboxProviderMatrixContract(matrix);
     }
     const fallback = {
-      matrixVersion:"2.0.94",
+      matrixVersion:"2.0.95",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -656,7 +656,7 @@
       return api.getSecureKeyStoragePlanState(plan);
     }
     const fallback = {
-      secureKeyStoragePlanVersion:"2.0.94",
+      secureKeyStoragePlanVersion:"2.0.95",
       phase:"flight_secure_key_storage_plan",
       planStatus:"plan_only",
       currentStage:"design_required",
@@ -751,7 +751,7 @@
       return api.buildSecureStorageDesignGate(gate);
     }
     return {
-      version:"2.0.94",
+      version:"2.0.95",
       gateName:"secure_storage_design_gate",
       gateStatus:"closed",
       phase:"design_gate",
@@ -786,9 +786,112 @@
       },
       blockingReasons:["安全密钥写入实现未完成", "安全密钥读取实现未完成", "Keychain 适配未完成", "safeStorage 适配未完成", "provider endpoint allowlist 未完成"],
       unlockChecklist:["设计密钥数据结构", "设计本机安全写入接口", "设计本机安全读取接口", "完成安全审查后，才允许进入下一阶段"],
-      implementationMilestones:["v2.0.94：安全存储设计闸门，默认关闭", "v2.0.95：本机安全存储接口草案，仍不写真实 key"],
+      implementationMilestones:["v2.0.95：安全存储设计闸门，默认关闭", "v2.0.95：本机安全存储接口草案，仍不写真实 key"],
       auditRules:["日志中永不记录完整 key", "UI 不得展示明文 key"],
       redactionRules:["apiKey → [REDACTED_API_KEY]", "apiSecret → [REDACTED_API_SECRET]"]
+    };
+  }
+
+  function createLocalSecureStorageInterfaceDraft(draft){
+    const api = window.WeishanCommerceLocalSecureStorageInterfaceDraft;
+    if (api && typeof api.buildLocalSecureStorageInterfaceDraft === "function") {
+      return api.buildLocalSecureStorageInterfaceDraft(draft);
+    }
+    return {
+      version:"2.0.95",
+      draftName:"local_secure_storage_interface_draft",
+      phase:"local_secure_storage_interface_draft",
+      draftStatus:"draft_only",
+      implementationStatus:"not_implemented",
+      realKeyStorage:"disabled",
+      keyInputMode:"disabled",
+      keySaveMode:"disabled",
+      keyReadMode:"disabled",
+      keyDeleteMode:"disabled",
+      keyRotationMode:"disabled",
+      keychainMode:"disabled",
+      safeStorageMode:"disabled",
+      encryptedLocalStoreMode:"disabled",
+      endpointMode:"disabled",
+      networkMode:"disabled",
+      priceMode:"disabled",
+      bookingUrlMode:"disabled",
+      orderMode:"disabled",
+      paymentMode:"disabled",
+      identityStorageMode:"disabled",
+      nextRequiredStep:"key_redaction_and_log_leak_prevention_rules",
+      capabilities:{
+        canShowInterfaceDraft:true,
+        canShowDataModelDraft:true,
+        canShowMethodDraft:true,
+        canShowBackendCandidates:true,
+        canShowAuditDraft:true,
+        canShowRedactionDraft:true,
+        canInputApiKey:false,
+        canSaveApiKey:false,
+        canReadApiKey:false,
+        canDeleteApiKey:false,
+        canRotateApiKey:false,
+        canUseKeychain:false,
+        canUseSafeStorage:false,
+        canWriteEncryptedLocalStore:false,
+        canWriteEnv:false,
+        canWriteLocalStorage:false,
+        canWriteSessionStorage:false,
+        canWriteLogs:false,
+        canTestConnection:false,
+        canConnectEndpoint:false,
+        canUseNetwork:false,
+        canRunProviderSandbox:false,
+        canReturnPrice:false,
+        canReturnBookingUrl:false,
+        canOpenBookingUrl:false,
+        canCreateOrder:false,
+        canPay:false,
+        canUploadIdentity:false,
+        canStoreIdentity:false,
+        canStorePassport:false,
+        canStoreBankCard:false
+      },
+      dataModelDraft:{
+        keyAliasModel:{ keyAliasId:"field:keyAliasId", providerId:"field:providerId", providerName:"field:providerName", permissionType:"field:permissionType_readonly_only", maskedPreview:"field:maskedPreview_redacted_only" },
+        keySecretModel:{ secretRef:"field:secretRef_reference_only", encryptedPayloadRef:"field:encryptedPayloadRef_reference_only", backendType:"field:backendType_candidate_only", keyVersion:"field:keyVersion" },
+        providerBindingModel:{ bindingId:"field:bindingId", providerId:"field:providerId", keyAliasId:"field:keyAliasId", endpointAllowlistStatus:"field:endpointAllowlistStatus_not_approved", sandboxStatus:"field:sandboxStatus_disabled", status:"draft_only" }
+      },
+      methodDraft:{
+        prepareKeyAliasDraft:{ status:"draft_only", allowed:false, reason:"alias_draft_only_no_real_key" },
+        prepareSecretWriteDraft:{ status:"blocked", allowed:false, reason:"secret_write_blocked" },
+        prepareSecretReadDraft:{ status:"blocked", allowed:false, reason:"secret_read_blocked" },
+        prepareSecretDeleteDraft:{ status:"blocked", allowed:false, reason:"secret_delete_blocked" },
+        prepareSecretRotateDraft:{ status:"blocked", allowed:false, reason:"secret_rotate_blocked" },
+        prepareConnectionTestDraft:{ status:"blocked", allowed:false, reason:"endpoint_connection_disabled" },
+        prepareProviderSandboxDraft:{ status:"blocked", allowed:false, reason:"provider_sandbox_disabled" },
+        prepareReadonlyPriceDraft:{ status:"blocked", allowed:false, reason:"real_price_disabled" },
+        prepareBookingUrlDraft:{ status:"blocked", allowed:false, reason:"booking_url_disabled" }
+      },
+      backendCandidates:[
+        { backendType:"macOS Keychain", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false },
+        { backendType:"Electron safeStorage", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false },
+        { backendType:"encrypted local config file", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false },
+        { backendType:"enterprise managed key service", candidateStatus:"candidate_only", connected:false, canRead:false, canWrite:false, canDelete:false, canRotate:false }
+      ],
+      auditDraft:{ auditStatus:"draft_only", events:["alias_created_draft", "secret_write_blocked", "secret_read_blocked", "connection_test_blocked", "price_return_blocked"], rules:["审计日志不得记录 key 明文", "审计日志只允许记录 key alias"] },
+      redactionDraft:{ redactionStatus:"draft_only", functions:["redactSecretLikeValue", "redactObject", "redactHeaders", "redactUrl"], placeholders:{ apiKey:"[REDACTED_API_KEY]", apiSecret:"[REDACTED_API_SECRET]", accessToken:"[REDACTED_ACCESS_TOKEN]", authorizationHeader:"[REDACTED_AUTH_HEADER]" } },
+      display:{
+        title:"本机安全存储接口草案",
+        currentStatusLine:"接口草案：已建立",
+        implementationLine:"真实实现：未启用",
+        keyInputLine:"真实 API key 输入：未开放",
+        keySaveLine:"真实 API key 保存：未开放",
+        keyReadLine:"真实 API key 读取：未开放",
+        keyDeleteRotateLine:"删除 / 轮换：未开放",
+        connectionTestLine:"测试连接：未开放",
+        providerSandboxLine:"provider 沙箱：未开放",
+        priceLine:"真实价格：未开放",
+        bookingUrlLine:"bookingUrl：未开放",
+        nextStepLine:"下一步：密钥脱敏与日志防泄露规则",
+        safetyLine:"当前版本仍不能输入、保存、读取或测试真实 API key。"
+      }
     };
   }
 
@@ -836,7 +939,7 @@
         sourceLine:"未绑定 API 时，可使用 weishan 候选平台和外部搜索入口。"
       };
     return {
-      policyVersion:"2.0.94",
+      policyVersion:"2.0.95",
       phase:"user_api_priority_search_policy",
       userApiBindingState:binding,
       searchMode,
@@ -850,7 +953,7 @@
     const shellState = api && typeof api.getApiBindingSafeShellState === "function"
       ? api.getApiBindingSafeShellState(raw.shellState || raw)
       : {
-        shellVersion:"2.0.94",
+        shellVersion:"2.0.95",
         phase:"api_binding_safe_shell",
         status:"not_bound",
         userApi:"not_bound",
@@ -909,7 +1012,7 @@
         mode
       };
     return {
-      shellVersion:"2.0.94",
+      shellVersion:"2.0.95",
       phase:"api_binding_safe_shell",
       shellState,
       mode,
@@ -965,7 +1068,7 @@
         ]
       }, raw.display || {});
     return {
-      catalogVersion:"2.0.94",
+      catalogVersion:"2.0.95",
       phase:"user_api_provider_catalog",
       catalogStatus:"catalog_only",
       catalog,
@@ -983,7 +1086,7 @@
         status:"not_ready",
         canBindApi:false,
         currentStage:"pre_binding_safety",
-        nextStep:"secure_storage_interface_draft",
+        nextStep:"key_redaction_and_log_leak_prevention_rules",
         summary:{
           userApi:"not_bound",
           providerCatalog:"available",
@@ -1014,11 +1117,11 @@
       : {
         title:"API 绑定准备状态",
         conclusionLine:"当前还不能绑定真实 API。",
-        nextStepLine:"下一步：本机安全存储接口草案",
+        nextStepLine:"下一步：密钥脱敏与日志防泄露规则",
         nextStepDetail:"先完成本机安全存储接口草案。当前版本仍不能输入、保存或测试真实 API key。"
       };
     return {
-      readinessVersion:"2.0.94",
+      readinessVersion:"2.0.95",
       phase:"api_binding_readiness_status",
       readinessStatus:"not_ready",
       readinessMode:"status_only",
@@ -1295,6 +1398,7 @@
       flightSandboxProviderMatrix:category === "flight" ? createFlightSandboxProviderMatrix() : null,
       flightSecureKeyStoragePlan:category === "flight" ? createSecureKeyStoragePlan() : null,
       secureStorageDesignGate:category === "flight" ? createSecureStorageDesignGate() : null,
+      localSecureStorageInterfaceDraft:category === "flight" ? createLocalSecureStorageInterfaceDraft() : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState() : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState() : null,
@@ -1353,6 +1457,7 @@
       flightSandboxProviderMatrix:category === "flight" ? createFlightSandboxProviderMatrix(base.flightSandboxProviderMatrix) : null,
       flightSecureKeyStoragePlan:category === "flight" ? createSecureKeyStoragePlan(base.flightSecureKeyStoragePlan) : null,
       secureStorageDesignGate:category === "flight" ? createSecureStorageDesignGate(base.secureStorageDesignGate) : null,
+      localSecureStorageInterfaceDraft:category === "flight" ? createLocalSecureStorageInterfaceDraft(base.localSecureStorageInterfaceDraft) : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(base.userApiPriorityPolicyState),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState(base.apiBindingSafeShellState) : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState(base.userApiProviderCatalogState) : null,
@@ -1474,6 +1579,7 @@
       flightSandboxDryRun:safe.category === "flight" ? safe.flightSandboxDryRun : null,
       flightSandboxProviderMatrix:safe.category === "flight" ? safe.flightSandboxProviderMatrix : null,
       flightSecureKeyStoragePlan:safe.category === "flight" ? safe.flightSecureKeyStoragePlan : null,
+      localSecureStorageInterfaceDraft:safe.category === "flight" ? safe.localSecureStorageInterfaceDraft : null,
       userApiPriorityPolicyState:safe.userApiPriorityPolicyState,
       apiBindingSafeShellState:safe.category === "flight" ? safe.apiBindingSafeShellState : null,
       userApiProviderCatalogState:safe.category === "flight" ? safe.userApiProviderCatalogState : null,
@@ -1574,6 +1680,7 @@
     createCommerceExecutionBoundary,
     createFlightSandboxProviderMatrix,
     createSecureStorageDesignGate,
+    createLocalSecureStorageInterfaceDraft,
     createUserApiPriorityPolicyState,
     createApiBindingSafeShellState,
     createUserApiProviderCatalogState,
