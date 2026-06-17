@@ -1,24 +1,46 @@
-# weishan desktop v2.06
+# Weishan
 
-This is the current clean baseline for the weishan desktop MVP.
+[Website](https://www.weishan.ai) | [Contact](mailto:contact@weishan.ai) | [Support](mailto:support@weishan.ai) | License: MIT
 
-It contains:
+Weishan is a local-first AI desktop workspace for productivity and automation.
 
-- `apps/desktop` — Electron desktop client
-- `apps/server` — local API server on `http://127.0.0.1:8787`
-- Email risk check API
-- Supabase Auth endpoints for signup, login and password reset
-- Optional Resend email verification code sending
-- Local-first desktop workflow
+The project currently focuses on a desktop app, a local API server, email takeover, email risk checks, Supabase Auth endpoints, optional Resend verification, local-first user-authorized workflows, and permission-gated AI actions.
 
-## Quick start
+## Safety Principles
+
+- Local-first by default.
+- Explicit user authorization before sensitive actions.
+- No automatic email sending.
+- No password storage.
+- Supabase service role keys must stay server-side only.
+- No payment execution.
+- No identity document or card storage.
+- Dry-run first for provider and commerce workflows.
+
+## Current Modules
+
+- `apps/desktop` - Electron desktop client.
+- `apps/server` - Local API server on `http://127.0.0.1:8787`.
+- Email risk check.
+- Email takeover workflow.
+- Authentication endpoints.
+- Safe workflow authorization layer.
+
+## Quick Start
+
+Install app dependencies:
 
 ```bash
 npm run install:all
+```
+
+Start the local API server:
+
+```bash
 npm run dev:server
 ```
 
-Open another terminal:
+Open another terminal and start the desktop client:
 
 ```bash
 npm run dev:desktop
@@ -30,23 +52,25 @@ Or start both together:
 npm run dev
 ```
 
-## Test the local API
+## Local API Test
 
 ```bash
 curl http://127.0.0.1:8787/health
 curl http://127.0.0.1:8787/
 curl -X POST http://127.0.0.1:8787/validate-email \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@gmail.com"}'
+  -d '{"email":"contact@weishan.ai"}'
 ```
 
 ## Environment
+
+Create a local server environment file from the example:
 
 ```bash
 cp apps/server/.env.example apps/server/.env
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` must stay on the server side only. Do not place it in the desktop client.
+`SUPABASE_SERVICE_ROLE_KEY` must stay on the server side only. Do not place it in the desktop client, frontend code, logs, screenshots, issues, or pull requests.
 
 ## Build
 
@@ -57,34 +81,34 @@ npm run build:win
 
 Build output is under `apps/desktop/dist/`.
 
-## Notes
+## Project Structure
 
-This clean package removes historical `.bak-*` patch files and macOS metadata. The current active files are:
+- `apps/desktop` - Electron desktop client, renderer UI, local workflow surfaces, and desktop packaging.
+- `apps/server` - Local API server, health endpoint, email risk check, auth endpoints, and server-side integrations.
+- `docs` - Architecture, security, roadmap, provider, handoff, and operating notes.
+- `scripts` - Local verification, release checks, health checks, and packaging helpers.
+- `tests` - API and Playwright end-to-end regression tests.
+- `.github` - GitHub Actions workflows and open-source contribution templates.
 
-- `apps/desktop/src/index.html`
-- `apps/desktop/src/main.js`
-- `apps/desktop/src/preload.js`
-- `apps/server/src/server.js`
-- `apps/server/src/emailRisk.js`
+## Roadmap
 
+- Stabilize local-first email takeover.
+- Strengthen permission-gated workflows.
+- Expand provider sandbox and dry-run flows.
+- Improve regression tests.
+- Improve release workflow.
+- Prepare public contributor documentation.
 
-## Email Takeover
+## Maintainer Workflow
 
-Lightweight email takeover adds one desktop entry: `邮件接管`.
+Codex will be used to support the maintainers in a real open-source workflow, including:
 
-Available actions require separate user authorization every time:
+- Issue triage.
+- Pull request review.
+- Regression testing.
+- Release checks.
+- Security review.
+- Documentation maintenance.
+- Maintainer automation.
 
-- 整理邮件 (`email.organize`)
-- 生成回复草稿 (`email.replyDraft`)
-- 按语气改写 (`email.rewriteTone`)
-- 提取待办 (`email.extractTodos`)
-- 标记重要邮件 (`email.markImportant`)
-
-Email isolation rule: `accountId + provider + mailboxEmail + messageId`. Blank lines are treated as body content, not as message ownership boundaries.
-
-
-## 邮箱账号接管
-
-主流程：邮件接管 → 连接邮箱 → 输入邮箱地址与授权码/App Password → 自动读取最近邮件 → 单独授权执行整理、草稿、改写、待办、标重要。
-
-权限边界：只读、不保存密码、不自动发送邮件；文件导入为高级功能。
+Codex is intended to reduce recurring maintainer workload while preserving human review for safety-sensitive changes.
