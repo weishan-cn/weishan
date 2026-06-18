@@ -1085,6 +1085,11 @@ const REQUIRED_PHRASES = [
   "marker:read only adapter no booking url",
   "marker:read only adapter no write action",
   "marker:read only adapter audit redacted",
+  "marker:local safety evidence console",
+  "marker:local safety evidence console local only",
+  "marker:manual ui acceptance assistant",
+  "marker:no secret persistence guard",
+  "marker:settings auth local security evidence",
 ];
 
 function main() {

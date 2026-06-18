@@ -2041,6 +2041,34 @@ marker:offline provider fixture validation harness audit redacted
 
 v2.1.9 新增 `commerceProviderComplianceDecisionEngine.js`、`commerceOfflineProviderFixtureRunner.js`、`commerceNoNetworkSentinelAudit.js`、`commerceProviderComplianceEvidenceReport.js` 和 `scripts/commerce-provider-offline-fixture-runner.js`。本阶段只建立离线合规判定、离线 fixture 执行、自检式无网络哨兵审计和证据包汇总；当前版本仍不激活真实 provider，不读取或保存真实 API key，不连接真实 endpoint，不发起真实网络请求，不读取真实 provider result，不显示真实价格，不显示 availability，不显示 bookingUrl，不预订、不付款、不下单、不上传证件或银行卡资料。
 
+## v2.1.10：Local Safety Evidence Console / 本地安全证据台
+
+v2.1.10 新增 `commerceLocalSafetyEvidenceConsole.js`、`commerceManualUiAcceptanceAssistant.js`、`commerceNoSecretPersistenceGuard.js`、`settingsAuthLocalSecurityEvidence.js` 和 `scripts/security-no-secret-persistence.js`。本阶段只把 release 状态、Settings/Auth 本地模式、Commerce 离线合规、provider no-go、fixture runner、no-secret persistence guard 和安全红线汇总为本地证据；当前版本仍不进入真实 API、真实 key、真实 endpoint、真实 provider、真实网络、真实价格、真实 bookingUrl、预订、付款或下单。
+
+- marker:local safety evidence console
+- marker:local safety evidence console local only
+- marker:local safety evidence console offline summary
+- marker:local safety evidence console provider no-go
+- marker:local safety evidence console redacted
+- marker:manual ui acceptance assistant
+- marker:manual ui acceptance no automation guarantee
+- marker:manual ui acceptance no pass fabrication
+- marker:manual ui acceptance screenshot evidence
+- marker:no secret persistence guard
+- marker:no secret persistence local static scan
+- marker:no secret persistence no real secret access
+- marker:no secret persistence no keychain
+- marker:no secret persistence no safestorage
+- marker:no secret persistence no env write
+- marker:no secret persistence no localStorage secret
+- marker:no secret persistence no sessionStorage secret
+- marker:settings auth local security evidence
+- marker:settings auth local no cloud auth
+- marker:settings auth local passwordVerifier
+- marker:settings auth local recovery no network
+- marker:settings auth local recovery no email
+- marker:settings auth local recovery no key read
+
 `查看 provider compliance decision engine` 默认折叠。展开后必须显示：provider compliance decision engine：engine 已建立、status: blocked、mode: offline decision only、sideEffects: none、real provider connection disabled、real network disabled、real credential read disabled、real price display disabled、real bookingUrl disabled、providerActivationDecision: no-go、redacted: true。decision input draft、decision output draft、default decisions、blocked reasons、withheld reasons、error codes 和 providerComplianceDecisionAuditDraft 只能是离线草案，不得产生副作用。
 
 `查看 offline provider fixture runner` 默认折叠。展开后必须显示：offline provider fixture runner：runner 已建立、status: offline only、mode: deterministic fixture runner、real provider fixture disabled、real provider result disabled、real network disabled、real price disabled、fake/mock/demo/AI price display disabled、bookingUrl display disabled、raw provider payload display disabled、all fixture outputs redacted、redacted: true。fixture runner 只能处理内置离线 descriptor，summary 中 networkAttemptCount、realProviderCallCount、realPriceDisplayedCount 和 bookingUrlDisplayedCount 必须为 0。

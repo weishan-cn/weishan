@@ -1,5 +1,5 @@
 (function(){
-  const READONLY_ADAPTER_CONTRACT_GATE_VERSION = "2.1.9";
+  const READONLY_ADAPTER_CONTRACT_GATE_VERSION = "2.1.10";
 
   const adapterInterfaceFields = [
     "adapterId", "providerId", "providerName", "adapterVersion", "supportedIntentList", "readonlyMethodList", "blockedMethodList", "requestSchemaVersion", "responseSchemaVersion", "timeoutPolicy", "retryPolicy", "rateLimitPolicy", "redactionPolicy", "auditPolicy", "redacted: true"

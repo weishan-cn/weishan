@@ -742,6 +742,42 @@ function checkProviderComplianceEvidenceReportVersion(results, expectedVersion) 
   addCheck(results, "apps/desktop provider compliance evidence report version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/commerceProviderComplianceEvidenceReport.js PROVIDER_COMPLIANCE_EVIDENCE_REPORT_VERSION");
 }
 
+function checkLocalSafetyEvidenceConsoleVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/commerceLocalSafetyEvidenceConsole.js";
+  const gate = readText(gatePath);
+  if (!gate) { results.push({ name:"apps/desktop local safety evidence console version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop local safety evidence console version", pass:false, detail:gate.__readError }); return; }
+  const match = gate.match(/LOCAL_SAFETY_EVIDENCE_CONSOLE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop local safety evidence console version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/commerceLocalSafetyEvidenceConsole.js LOCAL_SAFETY_EVIDENCE_CONSOLE_VERSION");
+}
+
+function checkManualUiAcceptanceAssistantVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/commerceManualUiAcceptanceAssistant.js";
+  const gate = readText(gatePath);
+  if (!gate) { results.push({ name:"apps/desktop manual UI acceptance assistant version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop manual UI acceptance assistant version", pass:false, detail:gate.__readError }); return; }
+  const match = gate.match(/MANUAL_UI_ACCEPTANCE_ASSISTANT_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop manual UI acceptance assistant version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/commerceManualUiAcceptanceAssistant.js MANUAL_UI_ACCEPTANCE_ASSISTANT_VERSION");
+}
+
+function checkNoSecretPersistenceGuardVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/commerceNoSecretPersistenceGuard.js";
+  const gate = readText(gatePath);
+  if (!gate) { results.push({ name:"apps/desktop no-secret persistence guard version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop no-secret persistence guard version", pass:false, detail:gate.__readError }); return; }
+  const match = gate.match(/NO_SECRET_PERSISTENCE_GUARD_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop no-secret persistence guard version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/commerceNoSecretPersistenceGuard.js NO_SECRET_PERSISTENCE_GUARD_VERSION");
+}
+
+function checkSettingsAuthLocalSecurityEvidenceVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/modules/account/settingsAuthLocalSecurityEvidence.js";
+  const gate = readText(gatePath);
+  if (!gate) { results.push({ name:"apps/desktop settings auth local security evidence version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop settings auth local security evidence version", pass:false, detail:gate.__readError }); return; }
+  const match = gate.match(/SETTINGS_AUTH_LOCAL_SECURITY_EVIDENCE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop settings auth local security evidence version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/modules/account/settingsAuthLocalSecurityEvidence.js SETTINGS_AUTH_LOCAL_SECURITY_EVIDENCE_VERSION");
+}
+
 function runVersionCheck() {
   const results = [];
 
@@ -788,6 +824,10 @@ function runVersionCheck() {
     checkOfflineProviderFixtureRunnerVersion(results, rootPackage.version);
     checkNoNetworkSentinelAuditVersion(results, rootPackage.version);
     checkProviderComplianceEvidenceReportVersion(results, rootPackage.version);
+    checkLocalSafetyEvidenceConsoleVersion(results, rootPackage.version);
+    checkManualUiAcceptanceAssistantVersion(results, rootPackage.version);
+    checkNoSecretPersistenceGuardVersion(results, rootPackage.version);
+    checkSettingsAuthLocalSecurityEvidenceVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {
