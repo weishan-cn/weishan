@@ -510,6 +510,28 @@ function checkPackagePair(results, label, packagePath, lockPath, options = {}) {
   }
 }
 
+
+function checkReadonlyProviderResultSchemaGateVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/commerceReadonlyProviderResultSchemaGate.js";
+  const gate = readText(gatePath);
+  if (!gate) {
+    results.push({ name: "apps/desktop readonly provider result schema gate version", pass: false, detail: gatePath + " missing" });
+    return;
+  }
+  if (gate.__readError) {
+    results.push({ name: "apps/desktop readonly provider result schema gate version", pass: false, detail: gate.__readError });
+    return;
+  }
+  const match = gate.match(/READONLY_PROVIDER_RESULT_SCHEMA_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop readonly provider result schema gate version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceReadonlyProviderResultSchemaGate.js READONLY_PROVIDER_RESULT_SCHEMA_GATE_VERSION"
+  );
+}
+
 function runVersionCheck() {
   const results = [];
 
@@ -541,6 +563,7 @@ function runVersionCheck() {
     checkKeyLifecycleDraftVersion(results, rootPackage.version);
     checkProviderEndpointAllowlistGateVersion(results, rootPackage.version);
     checkReadonlyProviderSandboxGateVersion(results, rootPackage.version);
+    checkReadonlyProviderResultSchemaGateVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

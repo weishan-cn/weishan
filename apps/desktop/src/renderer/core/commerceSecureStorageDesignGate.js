@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GATE_VERSION = "2.1.1";
+  const GATE_VERSION = "2.1.2";
   const GATE_NAME = "secure_storage_design_gate";
   const PHASE = "design_gate";
 
@@ -44,13 +44,13 @@
   ];
 
   const implementationMilestones = [
-    "v2.1.1：安全存储设计闸门，默认关闭",
-    "v2.1.1：本机安全存储接口草案，已建立，但仍不写真实 key",
-    "v2.1.1：密钥脱敏与日志防泄露规则，已建立，但仍不写真实 key",
-    "v2.1.1：key 删除 / 轮换 / 过期机制草案",
-    "v2.1.1：provider endpoint allowlist 闸门；只读 provider sandbox gate 已建立；下一步只读 provider result schema gate",
-    "v2.1.1：只读沙箱连接闸门",
-    "v2.1.1：人工确认后，才考虑真实只读 key 输入"
+    "v2.1.2：安全存储设计闸门，默认关闭",
+    "v2.1.2：本机安全存储接口草案，已建立，但仍不写真实 key",
+    "v2.1.2：密钥脱敏与日志防泄露规则，已建立，但仍不写真实 key",
+    "v2.1.2：key 删除 / 轮换 / 过期机制草案",
+    "v2.1.2：provider endpoint allowlist 闸门；只读 provider sandbox gate 已建立；下一步只读 provider result schema gate",
+    "v2.1.2：只读沙箱连接闸门",
+    "v2.1.2：人工确认后，才考虑真实只读 key 输入"
   ];
 
   const threatModel = [
@@ -186,7 +186,7 @@
         keyRedactionAndLogLeakRulesLine: "密钥脱敏与日志防泄露规则：已建立",
         keyLifecycleDraftLine: "key 删除 / 轮换 / 过期机制草案：已建立",
         keyLifecycleRealActionsLine: "真实删除 / 轮换 / 过期仍未开放",
-        nextStepLine: "provider endpoint allowlist 闸门：已建立。只读 provider sandbox gate：已建立。下一步：只读 provider result schema gate。当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。"
+        nextStepLine: "provider endpoint allowlist 闸门：已建立。只读 provider sandbox gate：已建立。下一步：只读 provider result schema gate；只读 provider result schema gate：已建立。下一步：provider result source label gate。当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。"
       }
     };
   }

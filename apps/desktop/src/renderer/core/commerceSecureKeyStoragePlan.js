@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SECURE_KEY_STORAGE_PLAN_VERSION = "2.1.1";
+  const SECURE_KEY_STORAGE_PLAN_VERSION = "2.1.2";
   const PHASE = "flight_secure_key_storage_plan";
   const DEFAULT_PLAN_STATUS = "plan_only";
   const DEFAULT_CURRENT_STAGE = "design_required";
@@ -72,7 +72,7 @@
       secureStorageDesignGateLine: "安全存储设计闸门：关闭",
       localInterfaceDraftLine: "本机安全存储接口草案：已建立",
       realKeyStorageLine: "真实 key 保存仍未启用",
-      secureStorageDesignGateNextStepLine: "下一步：只读 provider result schema gate",
+      secureStorageDesignGateNextStepLine: "下一步：只读 provider result schema gate；只读 provider result schema gate：已建立。下一步：provider result source label gate",
       keyRedactionAndLogLeakRulesLine: "密钥脱敏与日志防泄露规则：已建立",
       keyLifecycleDraftLine: "key 删除 / 轮换 / 过期机制草案：已建立",
       keyLifecycleRealActionsLine: "真实 key 删除 / 轮换 / 过期仍未开放",
@@ -137,7 +137,7 @@
         "用户误绑定写入 / 下单 / 支付 API 风险"
       ],
       nextStepTitle: "下一步",
-      nextStepText: "provider endpoint allowlist 闸门：已建立。只读 provider sandbox gate：已建立。下一步：只读 provider result schema gate。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。",
+      nextStepText: "provider endpoint allowlist 闸门：已建立。只读 provider sandbox gate：已建立。下一步：只读 provider result schema gate；只读 provider result schema gate：已建立。下一步：provider result source label gate。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。",
       capabilityTitle: "当前能力",
       checklistTitle: "前置条件",
       capabilityLines: [
@@ -222,7 +222,7 @@
       secureStorageDesignGateLine: display.secureStorageDesignGateLine || "安全存储设计闸门：关闭",
       localInterfaceDraftLine: display.localInterfaceDraftLine || "本机安全存储接口草案：已建立",
       realKeyStorageLine: display.realKeyStorageLine || "真实 key 保存仍未启用",
-      secureStorageDesignGateNextStepLine: display.secureStorageDesignGateNextStepLine || "下一步：只读 provider result schema gate",
+      secureStorageDesignGateNextStepLine: display.secureStorageDesignGateNextStepLine || "下一步：只读 provider result schema gate；只读 provider result schema gate：已建立。下一步：provider result source label gate",
       keyRedactionAndLogLeakRulesLine: display.keyRedactionAndLogLeakRulesLine || "密钥脱敏与日志防泄露规则：已建立",
       keyLifecycleDraftLine: display.keyLifecycleDraftLine || "key 删除 / 轮换 / 过期机制草案：已建立",
       keyLifecycleRealActionsLine: display.keyLifecycleRealActionsLine || "真实 key 删除 / 轮换 / 过期仍未开放",
@@ -238,7 +238,7 @@
       riskModelTitle: display.riskModelTitle || "风险模型",
       riskModelItems: Array.isArray(display.riskModelItems) ? display.riskModelItems.slice() : defaultDisplay().riskModelItems.slice(),
       nextStepTitle: display.nextStepTitle || "下一步",
-      nextStepText: display.nextStepText || "provider endpoint allowlist 闸门：已建立。只读 provider sandbox gate：已建立。下一步：只读 provider result schema gate。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。",
+      nextStepText: display.nextStepText || "provider endpoint allowlist 闸门：已建立。只读 provider sandbox gate：已建立。下一步：只读 provider result schema gate；只读 provider result schema gate：已建立。下一步：provider result source label gate。key 删除 / 轮换 / 过期机制草案已建立，但当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。",
       capabilityTitle: display.capabilityTitle || "当前能力",
       checklistTitle: display.checklistTitle || "前置条件",
       capabilityLines: Array.isArray(display.capabilityLines) ? display.capabilityLines.slice() : defaultDisplay().capabilityLines.slice(),

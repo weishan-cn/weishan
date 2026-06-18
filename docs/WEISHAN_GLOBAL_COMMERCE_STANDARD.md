@@ -1850,3 +1850,29 @@ marker:readonly provider sandbox risk scan
 marker:readonly provider sandbox audit events
 marker:readonly provider sandbox audit redacted true
 marker:readonly provider sandbox next result schema gate
+
+## v2.1.2：Read-only Provider Result Schema Gate / 只读 provider 结果结构闸门
+v2.1.2 新增 `commerceReadonlyProviderResultSchemaGate.js`，只建立只读 provider result schema gate 草案闸门。该闸门用于展示 future-only result 类型草案、字段 allowlist、字段 blocklist、价格完整性规则、来源完整性规则、bookingUrl 规则、raw provider payload 规则、result 风险扫描草案和 result 审计事件草案。当前版本仍不读取真实 provider result，不连接真实 provider，不连接真实 endpoint，不发起真实网络请求，不读取真实 API key，不显示真实价格，不显示 availability，不显示 bookingUrl，不展示 raw provider payload，不预订、不付款、不下单、不上传身份资料。
+
+UI 中 `查看只读 provider result schema gate` 默认折叠。展开后必须显示：只读 provider result schema gate、只读 provider result schema gate：已建立、gate 状态：关闭、schema 状态：草案、真实 provider result 读取：未开放、真实价格显示：未开放、availability 显示：未开放、bookingUrl 显示：未开放、raw provider payload 显示：禁止、真实 sandbox 运行：未开放、真实 endpoint 连接：未开放、真实网络请求：未开放、下单：禁止、付款：禁止、身份上传：禁止。
+
+结果类型草案必须包含：flight_offer、hotel_offer、product_offer、local_service_offer、ticket_offer、provider_notice、no_result、blocked_result、schema_error。当前启用结果类型必须为 none。通用允许字段草案必须包含 resultId、resultType、providerId、providerName、providerCategory、sourceType、sourceUrlHost、title、currency、price、priceDisplayMode、taxesAndFees、totalPrice、availability、updatedAt、providerReferenceId、readonlyEvidence、redacted、sandboxOnly、draftOnly。flight / hotel / product 字段草案必须包含 origin、destination、departureDate、returnDate、carrierName、flightNumber、cabinClass、baggageInfo、refundPolicy、hotelName、roomType、cancellationPolicy、productName、brand、model、specs。当前禁用字段必须包含 price、totalPrice、taxesAndFees、availability、bookingUrl、sourceUrl、rawProviderPayload。始终禁止字段必须包含 bookingUrl、checkoutUrl、paymentUrl、orderUrl、createOrderUrl、passengerIdentity、passportNumber、identityNumber、bankCardNumber、rawApiKey、rawToken、rawHeaders、rawRequest、rawResponse。
+
+价格完整性规则必须阻断 fake price、mock price、demo price、AI 估算价格、最低价和约 ¥xxx。来源完整性规则必须在 providerId 缺失、sourceUrlHost 缺失、updatedAt 缺失、readonlyEvidence 缺失、result 来自 raw AI 估算、result 来自未知网站或短链接时阻断。bookingUrl 当前状态必须为 disabled，displayForbidden 必须为 true，generationForbidden 必须为 true，payment URL 和 checkout URL 必须阻断。rawPayloadDisplay 必须为 forbidden，并要求 no raw JSON display、no raw headers display、no raw response body display。
+
+result 风险扫描草案必须包含 result_missing_provider_id、result_missing_provider_name、price_is_estimated、price_is_mock、price_is_demo、price_is_fake、booking_url_present、raw_payload_present、passenger_identity_present、bank_card_present。result 审计事件草案必须包含 READONLY_RESULT_SCHEMA_EVALUATION_DRAFT、READONLY_RESULT_BLOCKED_GATE_CLOSED、READONLY_RESULT_BLOCKED_PRICE_DISPLAY_DISABLED、READONLY_RESULT_BLOCKED_BOOKING_URL_DISABLED、READONLY_RESULT_BLOCKED_RAW_PAYLOAD、READONLY_RESULT_BLOCKED_FAKE_PRICE、READONLY_RESULT_BLOCKED_MOCK_PRICE、READONLY_RESULT_BLOCKED_DEMO_PRICE、READONLY_RESULT_BLOCKED_AI_ESTIMATE、READONLY_RESULT_BLOCKED_PAYMENT_FIELD、READONLY_RESULT_BLOCKED_IDENTITY_FIELD、READONLY_RESULT_SCHEMA_DRAFT_CREATED。所有事件必须 redacted: true。下一步必须显示 provider result source label gate。
+
+本阶段必须联动显示：只读 provider sandbox gate 显示只读 provider result schema gate：已建立，下一步：provider result source label gate；provider endpoint allowlist gate、key 删除 / 轮换 / 过期机制草案、密钥脱敏与日志防泄露规则、本机安全存储接口草案、安全存储设计闸门、安全密钥存储方案、API 绑定准备状态 / 说明 / 表单 / 权限清单均显示真实 provider result 读取、真实价格显示、availability、bookingUrl 和 raw provider payload 能力仍未开放，未完成 provider result source label gate 前不能提交绑定确认。
+
+marker:readonly provider result schema gate
+marker:readonly provider result schema gate closed
+marker:readonly provider result schema draft only
+marker:readonly provider result no real provider result
+marker:readonly provider result no real price
+marker:readonly provider result no booking url
+marker:readonly provider result no raw payload
+marker:readonly provider result price integrity rules
+marker:readonly provider result source integrity rules
+marker:readonly provider result booking url rules
+marker:readonly provider result audit events
+marker:readonly provider result next source label gate

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const RULES_VERSION = "2.1.1";
+  const RULES_VERSION = "2.1.2";
   const MODULE_NAME = "key_redaction_and_log_leak_prevention_rules";
   const PHASE = "redaction_rules";
 
@@ -335,7 +335,7 @@
       keyLifecycleDraftLine: "key 删除 / 轮换 / 过期机制草案：已建立",
       keyLifecycleAuditEventsLine: "生命周期审计事件草案：已建立",
       keyLifecycleRealActionsLine: "真实删除 / 轮换 / 过期 / 吊销 / 恢复仍未开放",
-      nextStepLine: "下一步：只读 provider result schema gate。",
+      nextStepLine: "下一步：只读 provider result schema gate；只读 provider result schema gate：已建立。下一步：provider result source label gate。",
       safetyLine: "当前版本仍不能输入、保存、读取或测试真实 API key。"
     });
   }

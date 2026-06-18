@@ -1,5 +1,5 @@
 (function(){
-  const ALLOWLIST_GATE_VERSION = "2.1.1";
+  const ALLOWLIST_GATE_VERSION = "2.1.2";
 
   const providerCategories = {
     flightProviders:["Google Flights", "Trip.com / 携程", "Skyscanner", "Kayak", "Expedia"],
@@ -185,7 +185,7 @@
       orderLine:"下单：禁止",
       paymentLine:"付款：禁止",
       identityLine:"身份上传：禁止",
-      nextStepLine:"只读 provider sandbox gate：已建立。下一步：只读 provider result schema gate",
+      nextStepLine:"只读 provider sandbox gate：已建立。下一步：只读 provider result schema gate；只读 provider result schema gate：已建立。下一步：provider result source label gate",
       safetyLine:"当前版本仍不能连接真实 endpoint、不能测试连接、不能联网、不能读取真实价格"
     }
   };

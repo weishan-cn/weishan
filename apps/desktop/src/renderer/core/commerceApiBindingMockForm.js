@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FORM_VERSION = "2.1.1";
+  const FORM_VERSION = "2.1.2";
   const PHASE = "api_binding_mock_form_disabled_state";
 
   function clone(value) {
@@ -156,7 +156,7 @@
       currentStatusLine: "API 绑定表单为禁用预览，当前版本不保存真实 API key。",
       secureStorageDesignGateLine: "安全存储设计闸门关闭，表单不可用",
       localSecureStorageInterfaceDraftLine: "本机安全存储接口仍为草案，表单不可用",
-      keyRedactionAndLogLeakRulesLine: "密钥脱敏与日志防泄露规则已建立，key 删除 / 轮换 / 过期机制草案已建立，但 provider endpoint allowlist 闸门已建立，只读 provider sandbox gate：已建立，等待只读 provider result schema gate，表单仍不可用",
+      keyRedactionAndLogLeakRulesLine: "密钥脱敏与日志防泄露规则已建立，key 删除 / 轮换 / 过期机制草案已建立，但 provider endpoint allowlist 闸门已建立，只读 provider sandbox gate：已建立，等待只读 provider result schema gate；只读 provider result schema gate：已建立，provider result source label gate：未建立，表单仍不可用",
       fieldIntroLine: "表单字段，全部禁用：",
       actionIntroLine: "按钮，全部禁用：",
       safetyLines: [

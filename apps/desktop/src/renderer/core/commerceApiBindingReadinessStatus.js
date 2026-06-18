@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READINESS_VERSION = "2.1.1";
+  const READINESS_VERSION = "2.1.2";
   const PHASE = "api_binding_readiness_status";
 
   function clone(value) {
@@ -80,7 +80,7 @@
         realPriceResult: "unavailable"
       },
       blockers: [
-        "provider endpoint allowlist 闸门已建立，只读 provider sandbox gate：已建立，等待只读 provider result schema gate",
+        "provider endpoint allowlist 闸门已建立，只读 provider sandbox gate：已建立，等待只读 provider result schema gate；只读 provider result schema gate：已建立，provider result source label gate：未建立",
         "API 绑定权限确认不能提交",
         "Provider 条款 / API 文档未人工审查",
         "只读沙箱连接闸门未完成",
@@ -101,7 +101,7 @@
       { stepId: "key_redaction_and_log_leak_rules", label: "密钥脱敏与日志防泄露规则", status: "established", canProceedNow: false, reason: "规则层已建立，但仍不允许输入、保存、读取或测试真实 API key。" },
       { stepId: "key_delete_rotate_expiry_draft", label: "key 删除 / 轮换 / 过期机制", status: "established", canProceedNow: false, reason: "草案已建立，但真实删除、轮换、过期、吊销和恢复仍未开放。" },
       { stepId: "readonly_provider_sandbox_gate", label: "只读 provider sandbox gate", status: "established", canProceedNow: false, reason: "gate 已建立但真实 sandbox 仍未开放。" },
-      { stepId: "readonly_provider_result_schema_gate", label: "只读 provider result schema gate", status: "next", canProceedNow: false, reason: "未完成 result schema gate 前不能返回真实价格。" },
+      { stepId: "readonly_provider_result_schema_gate", label: "只读 provider result schema gate", status: "next", canProceedNow: false, reason: "未完成 provider result source label gate 前不能返回真实价格。" },
       { stepId: "readonly_api_binding_draft", label: "只读 API 绑定草稿", status: "not_ready", canProceedNow: false, reason: "provider endpoint allowlist 闸门完成前不能进入草稿。" },
       { stepId: "provider_human_review", label: "Provider 人工审查", status: "not_ready", canProceedNow: false, reason: "Provider 条款和 API 文档尚未人工审查。" },
       { stepId: "readonly_sandbox_gate", label: "只读沙箱闸门", status: "not_ready", canProceedNow: false, reason: "只读沙箱连接闸门未完成。" },
@@ -176,7 +176,7 @@
       keySaveLine: "key 保存：未开放",
       keyReadLine: "key 读取：未开放",
       connectionTestLine: "测试连接：未开放",
-      nextStepLine: "下一步：只读 provider result schema gate",
+      nextStepLine: "下一步：只读 provider result schema gate；只读 provider result schema gate：已建立。下一步：provider result source label gate",
       nextStepDetail: "密钥脱敏与日志防泄露规则：已建立。key 删除 / 轮换 / 过期机制草案：已建立。当前版本仍不能输入、保存、读取、删除、轮换或测试真实 API key。",
       statusLines: [
         "用户 API：未绑定",

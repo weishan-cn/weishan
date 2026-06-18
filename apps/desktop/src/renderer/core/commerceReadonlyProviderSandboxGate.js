@@ -1,5 +1,5 @@
 (function(){
-  const READONLY_PROVIDER_SANDBOX_GATE_VERSION = "2.1.1";
+  const READONLY_PROVIDER_SANDBOX_GATE_VERSION = "2.1.2";
 
   const readonlyScope = [
     "search_inventory",
@@ -274,7 +274,7 @@
       orderLine:"下单：禁止",
       paymentLine:"付款：禁止",
       identityLine:"身份上传：禁止",
-      nextStepLine:"下一步：只读 provider result schema gate",
+      nextStepLine:"下一步：只读 provider result schema gate；只读 provider result schema gate：已建立。下一步：provider result source label gate",
       safetyLine:"当前版本仍不能运行真实 sandbox、不能连接真实 endpoint、不能联网、不能读取真实价格"
     }
   };

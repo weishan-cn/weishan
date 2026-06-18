@@ -786,7 +786,7 @@
       },
       blockingReasons:["安全密钥写入实现未完成", "安全密钥读取实现未完成", "Keychain 适配未完成", "safeStorage 适配未完成", "provider endpoint allowlist 未完成"],
       unlockChecklist:["设计密钥数据结构", "设计本机安全写入接口", "设计本机安全读取接口", "完成安全审查后，才允许进入下一阶段"],
-      implementationMilestones:["v2.1.1：安全存储设计闸门，默认关闭", "v2.1.1：本机安全存储接口草案，仍不写真实 key"],
+      implementationMilestones:["v2.1.2：安全存储设计闸门，默认关闭", "v2.1.2：本机安全存储接口草案，仍不写真实 key"],
       auditRules:["日志中永不记录完整 key", "UI 不得展示明文 key"],
       redactionRules:["apiKey → [REDACTED_API_KEY]", "apiSecret → [REDACTED_API_SECRET]"]
     };
@@ -1018,7 +1018,7 @@
     const api = window.WeishanCommerceProviderEndpointAllowlistGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderEndpointAllowlistGateContract ? api.commerceProviderEndpointAllowlistGateContract : {
-      gateVersion:"2.1.1",
+      gateVersion:"2.1.2",
       phase:"provider_endpoint_allowlist_gate",
       gateStatus:"closed",
       allowlistStatus:"draft",
@@ -1044,7 +1044,7 @@
     const api = window.WeishanCommerceReadonlyProviderSandboxGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyProviderSandboxGateContract ? api.commerceReadonlyProviderSandboxGateContract : {
-      version:"2.1.1",
+      version:"2.1.2",
       moduleName:"readonly_provider_sandbox_gate",
       phase:"readonly_provider_sandbox_gate",
       gateStatus:"closed",
@@ -1068,6 +1068,43 @@
     };
     if (api && typeof api.buildReadonlyProviderSandboxGateDisplay === "function") {
       return api.buildReadonlyProviderSandboxGateDisplay(Object.assign({}, base, raw));
+    }
+    return Object.assign({}, base, raw, {
+      capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
+  function createReadonlyProviderResultSchemaGate(state){
+    const api = window.WeishanCommerceReadonlyProviderResultSchemaGate;
+    const raw = state && typeof state === "object" ? state : {};
+    const base = api && api.commerceReadonlyProviderResultSchemaGateContract ? api.commerceReadonlyProviderResultSchemaGateContract : {
+      version:"2.1.2",
+      moduleName:"readonly_provider_result_schema_gate",
+      phase:"readonly_provider_result_schema_gate",
+      gateStatus:"closed",
+      schemaStatus:"draft_only",
+      realProviderResultRead:"disabled",
+      realPriceDisplay:"disabled",
+      realAvailabilityDisplay:"disabled",
+      realBookingUrlDisplay:"disabled",
+      rawProviderPayloadDisplay:"forbidden",
+      realProviderConnection:"disabled",
+      realEndpointConnection:"disabled",
+      realNetworkRequest:"disabled",
+      realSandboxRun:"disabled",
+      realOrder:"forbidden",
+      realPayment:"forbidden",
+      realIdentityUpload:"forbidden",
+      apiKeyInput:"disabled",
+      apiKeyStorage:"disabled",
+      apiKeyRead:"disabled",
+      connectionTest:"disabled",
+      capabilities:{ canShowResultSchemaGate:true, canShowResultTypeDraft:true, canShowFieldAllowlist:true, canShowFieldBlocklist:true, canShowPriceIntegrityRules:true, canShowSourceIntegrityRules:true, canShowBookingUrlRules:true, canShowRawPayloadRules:true, canShowResultRiskScan:true, canShowResultAuditEvents:true, canEvaluateResultSchemaDraft:true, canReadRealProviderResult:false, canDisplayRealPrice:false, canDisplayRealAvailability:false, canDisplayBookingUrl:false, canDisplayRawProviderPayload:false, canRunRealSandbox:false, canConnectEndpoint:false, canUseNetwork:false, canTestConnection:false, canCreateOrder:false, canPay:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false, canUseKeychain:false, canUseSafeStorage:false, canUseEncryptedLocalStore:false, canWriteEnv:false, canWriteLocalStorage:false, canWriteSessionStorage:false, canWriteLogs:false },
+      display:{ title:"只读 provider result schema gate", establishedLine:"只读 provider result schema gate：已建立", gateStatusLine:"gate 状态：关闭", schemaStatusLine:"schema 状态：草案", realProviderResultLine:"真实 provider result 读取：未开放", realPriceLine:"真实价格显示：未开放", availabilityLine:"availability 显示：未开放", bookingUrlLine:"bookingUrl 显示：未开放", rawPayloadLine:"raw provider payload 显示：禁止", realSandboxLine:"真实 sandbox 运行：未开放", endpointLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", nextStepLine:"下一步：provider result source label gate", safetyLine:"当前版本仍不能读取真实 provider result、不能显示真实价格、不能显示 bookingUrl。" }
+    };
+    if (api && typeof api.buildReadonlyProviderResultSchemaGateDisplay === "function") {
+      return api.buildReadonlyProviderResultSchemaGateDisplay(Object.assign({}, base, raw));
     }
     return Object.assign({}, base, raw, {
       capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
@@ -1584,6 +1621,7 @@
       keyLifecycleDraft:category === "flight" ? createKeyLifecycleDraft() : null,
       providerEndpointAllowlistGate:category === "flight" ? createProviderEndpointAllowlistGate() : null,
       readonlyProviderSandboxGate:category === "flight" ? createReadonlyProviderSandboxGate() : null,
+      readonlyProviderResultSchemaGate:category === "flight" ? createReadonlyProviderResultSchemaGate() : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState() : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState() : null,
@@ -1647,6 +1685,7 @@
       keyLifecycleDraft:category === "flight" ? createKeyLifecycleDraft(base.keyLifecycleDraft) : null,
       providerEndpointAllowlistGate:category === "flight" ? createProviderEndpointAllowlistGate(base.providerEndpointAllowlistGate) : null,
       readonlyProviderSandboxGate:category === "flight" ? createReadonlyProviderSandboxGate(base.readonlyProviderSandboxGate) : null,
+      readonlyProviderResultSchemaGate:category === "flight" ? createReadonlyProviderResultSchemaGate(base.readonlyProviderResultSchemaGate) : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(base.userApiPriorityPolicyState),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState(base.apiBindingSafeShellState) : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState(base.userApiProviderCatalogState) : null,
@@ -1773,6 +1812,7 @@
       keyLifecycleDraft:safe.category === "flight" ? safe.keyLifecycleDraft : null,
       providerEndpointAllowlistGate:safe.category === "flight" ? safe.providerEndpointAllowlistGate : null,
       readonlyProviderSandboxGate:safe.category === "flight" ? safe.readonlyProviderSandboxGate : null,
+      readonlyProviderResultSchemaGate:safe.category === "flight" ? safe.readonlyProviderResultSchemaGate : null,
       userApiPriorityPolicyState:safe.userApiPriorityPolicyState,
       apiBindingSafeShellState:safe.category === "flight" ? safe.apiBindingSafeShellState : null,
       userApiProviderCatalogState:safe.category === "flight" ? safe.userApiProviderCatalogState : null,
