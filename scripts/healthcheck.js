@@ -83,6 +83,10 @@ function checkFiles() {
       "apps/desktop/src/renderer/core/commerceProviderGateMatrixDashboard.js",
       "apps/desktop/src/renderer/core/commerceProviderNoNetworkRuntimeGuard.js",
       "apps/desktop/src/renderer/core/commerceOfflineProviderFixtureValidationHarness.js",
+      "apps/desktop/src/renderer/core/commerceProviderComplianceDecisionEngine.js",
+      "apps/desktop/src/renderer/core/commerceOfflineProviderFixtureRunner.js",
+      "apps/desktop/src/renderer/core/commerceNoNetworkSentinelAudit.js",
+      "apps/desktop/src/renderer/core/commerceProviderComplianceEvidenceReport.js",
     "apps/desktop/src/renderer/core/commerceCredentialConsentScopeGate.js",
     "apps/desktop/src/renderer/core/commerceProviderActivationReadinessGate.js",
     "apps/desktop/src/renderer/core/commerceSecureStorageDesignGate.js",
@@ -104,7 +108,7 @@ function checkFiles() {
 function checkPackageScripts() {
   const pkg = JSON.parse(readText("package.json") || "{}");
   const scripts = pkg.scripts || {};
-  return ["check", "dev:desktop", "healthcheck", "release:check", "release:notes", "release:postcheck", "secrets:scan", "standard:commerce", "version:check", "test:api", "test:e2e", "test:e2e:smoke", "test:e2e:repair", "test:e2e:dispatch", "test:e2e:commerce-agent", "test:e2e:desktop-assistant", "test:e2e:cloud"].map((script) => {
+  return ["check", "dev:desktop", "healthcheck", "release:check", "release:notes", "release:postcheck", "secrets:scan", "standard:commerce", "commerce:provider-fixtures:offline", "version:check", "test:api", "test:e2e", "test:e2e:smoke", "test:e2e:repair", "test:e2e:dispatch", "test:e2e:commerce-agent", "test:e2e:desktop-assistant", "test:e2e:cloud"].map((script) => {
     const ok = Boolean(scripts[script]);
     const status = ok ? "pass" : (script === "healthcheck" ? "warn" : "fail");
     return result("script:" + script, status, ok ? scripts[script] : "missing", "Add the missing package script.");
@@ -123,6 +127,15 @@ function checkMarkers() {
     marker("apps/desktop/src/renderer/core/dispatchRouter.js", /WeishanDispatchRouter|classifyCommand|createDispatchPlan/, "marker:dispatch router exists", true),
     marker("apps/desktop/src/renderer/core/dispatchRouter.js", /mail|crawler|softwareFactory|document|ppt|codex|chat|coordination/, "marker:dispatch router module coverage", true),
     marker("apps/desktop/src/renderer/core/dispatchRouter.js", /commerceAgent|commerceAgent\.plan/, "marker:commerce agent route", true),
+    marker("apps/desktop/src/renderer/core/commerceProviderComplianceDecisionEngine.js", /provider_compliance_decision_engine|offline_decision_only|sideEffects:"none"/, "marker:provider compliance decision engine", true),
+    marker("apps/desktop/src/renderer/core/commerceProviderComplianceDecisionEngine.js", /canUseNetwork:false|canReadCredential:false|canDisplayRealPrice:false|canDisplayBookingUrl:false/, "marker:provider compliance decision engine all blocked", true),
+    marker("apps/desktop/src/renderer/core/commerceOfflineProviderFixtureRunner.js", /offline_provider_fixture_runner|deterministic_fixture_runner|runOfflineProviderFixtures/, "marker:offline provider fixture runner", true),
+    marker("apps/desktop/src/renderer/core/commerceOfflineProviderFixtureRunner.js", /networkAttemptCount:0|realProviderCallCount:0|realPriceDisplayedCount:0|bookingUrlDisplayedCount:0/, "marker:offline provider fixture runner zero real calls", true),
+    marker("apps/desktop/src/renderer/core/commerceNoNetworkSentinelAudit.js", /no_network_sentinel_audit|static_no_network_audit|no global monkey patch/, "marker:no network sentinel audit", true),
+    marker("apps/desktop/src/renderer/core/commerceNoNetworkSentinelAudit.js", /canUseNetwork:false|canUseFetch:false|canUseXhr:false|canCallProviderSandbox:false/, "marker:no network sentinel audit all blocked", true),
+    marker("apps/desktop/src/renderer/core/commerceProviderComplianceEvidenceReport.js", /provider_compliance_evidence_report|offline_evidence_only|providerActivationState:"no-go"/, "marker:provider compliance evidence report", true),
+    marker("apps/desktop/src/renderer/core/commerceProviderComplianceEvidenceReport.js", /canApproveProvider:false|canReadCredential:false|canDisplayRealPrice:false|canDisplayBookingUrl:false/, "marker:provider compliance evidence report all blocked", true),
+    marker("scripts/commerce-provider-offline-fixture-runner.js", /COMMERCE_PROVIDER_OFFLINE_FIXTURE_RUNNER PASS|assertNoForbiddenOutput|networkAttemptCount/, "marker:offline provider fixture runner cli", true),
     marker("apps/desktop/src/renderer/routes/CommerceAgentPage.js", /全球采购|搜索、比价、推荐、执行前确认/, "marker:commerce agent page", true),
     marker("apps/desktop/src/renderer/core/commerceAgent.js", /createCommercePlan|classifyCommerceIntent|commerceAgent\.plan/, "marker:commerce agent plan", true),
     marker("apps/desktop/src/renderer/core/commerceProviderAdapter.js", /createReadOnlyProviderAdapter|search:typeof next\.search|normalizeResult|validateResult/, "marker:commerce provider adapter contract", true),
@@ -362,11 +375,11 @@ function checkMarkers() {
     marker("apps/desktop/src/renderer/core/commerceFlightProviderCandidates.js", /flight_provider_candidate_registry|normalizeFlightProviderCandidatesRegistry/, "marker:flight provider candidate registry", true),
     marker("apps/desktop/src/renderer/core/commerceFlightProviderCandidates.js", /candidate_registry_only|candidate_only|not_reviewed/, "marker:flight provider candidate defaults", true),
     marker("apps/desktop/src/renderer/core/commerceFlightProviderApproval.js", /flight_provider_approval|getFlightProviderApprovalStatus|describeFlightProviderApprovalStatus/, "marker:flight provider approval module", true),
-    marker("apps/desktop/src/renderer/core/commerceFlightProviderApproval.js", /APPROVAL_VERSION\s*=\s*"2\.1\.7"|approvalVersion:"2\.1\.7"/, "marker:flight provider approval version", true),
+    marker("apps/desktop/src/renderer/core/commerceFlightProviderApproval.js", /APPROVAL_VERSION\s*=\s*"2\.1\.8"|approvalVersion:"2\.1\.8"/, "marker:flight provider approval version", true),
     marker("apps/desktop/src/renderer/core/commerceFlightProviderApproval.js", /查看 Provider 审批状态|机票 Provider 接入审批/, "marker:flight provider approval disclosure", true),
     marker("apps/desktop/src/renderer/core/commerceFlightProviderApproval.js", /需要 allowlist|禁止未知域名 \/ 短链接 \/ 可疑域名|AI 不能生成可疑 provider 域名|人工审核后才允许进入 provider approval/, "marker:flight provider approval safety language", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /flight_readonly_stub_permission|getFlightReadonlyStubPermission|describeFlightReadonlyStubPermission/, "marker:flight readonly stub permission module", true),
-    marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /PERMISSION_VERSION\s*=\s*"2\.1\.7"|permissionVersion:"2\.1\.7"/, "marker:flight readonly stub permission version", true),
+    marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /PERMISSION_VERSION\s*=\s*"2\.1\.8"|permissionVersion:"2\.1\.8"/, "marker:flight readonly stub permission version", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /查看只读适配器开发许可|只读适配器开发许可：未授予/, "marker:flight readonly stub permission disclosure", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /DEFAULT_OVERALL_STATUS = "not_granted"|DEFAULT_CURRENT_STAGE = "approval_required"|canDevelopReadonlyStub:\s*false|canUseRealApiKey:\s*false|canConnectRealEndpoint:\s*false|canUseNetwork:\s*false|canReturnPrice:\s*false|canReturnBookingUrl:\s*false|canOpenBookingUrl:\s*false|canCreateOrder:\s*false|canPay:\s*false|canStoreIdentity:\s*false/, "marker:flight readonly stub permission defaults", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /platformIdentityReview|officialDomainAllowlistReview|providerTermsReview|apiDocumentationReview|apiKeyStoragePlanReview|requestSchemaReview|responseSchemaReview|errorHandlingReview|timeoutRateLimitReview|finalStubDevApproval/, "marker:flight readonly stub permission checklist", true),
@@ -380,7 +393,7 @@ function checkMarkers() {
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /不能保存证件 \/ 银行卡|不允许保存证件 \/ 银行卡/, "marker:flight readonly stub no identity storage", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubPermission.js", /人工批准开发只读 stub/, "marker:flight readonly stub final approval required", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubAdapter.js", /flight_readonly_stub_adapter|getFlightReadonlyStubAdapter|describeFlightReadonlyStubAdapter/, "marker:flight readonly stub adapter module", true),
-    marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubAdapter.js", /ADAPTER_VERSION\s*=\s*"2\.1\.7"|adapterVersion:"2\.1\.7"/, "marker:flight readonly stub adapter version", true),
+    marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubAdapter.js", /ADAPTER_VERSION\s*=\s*"2\.1\.8"|adapterVersion:"2\.1\.8"/, "marker:flight readonly stub adapter version", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubAdapter.js", /查看只读适配器空壳|只读适配器空壳：已建立|尚未允许连接真实 provider/, "marker:flight readonly stub adapter disclosure", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubAdapter.js", /canValidateInputShape:\s*true|canBuildRequestShape:\s*true|canNormalizeResponseShape:\s*true/, "marker:flight readonly stub adapter capabilities", true),
     marker("apps/desktop/src/renderer/core/commerceFlightReadonlyStubAdapter.js", /origin：出发地|destination：目的地|departureDate：出发日期|returnDateIfAny：返回日期（如有）|adultsChildrenIfAny：成人 \/ 儿童（如有）|cabinIfAny：舱位（如有）|currencyIfFuture：币种（未来）|regionIfFuture：区域（未来）/, "marker:flight readonly stub adapter request shape", true),
@@ -389,13 +402,13 @@ function checkMarkers() {
     marker("apps/desktop/src/renderer/routes/HomePage.js", /查看只读适配器空壳|只读适配器空壳：已建立/, "marker:flight readonly stub adapter disclosure home", true),
     marker("apps/desktop/src/renderer/routes/CommerceAgentPage.js", /查看只读适配器空壳|只读适配器空壳：已建立/, "marker:flight readonly stub adapter disclosure detail", true),
     marker("apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js", /flight_sandbox_dry_run_shell|getFlightSandboxDryRunContract|describeFlightSandboxDryRunContract/, "marker:flight sandbox dry run module", true),
-    marker("apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js", /SANDBOX_DRY_RUN_VERSION\s*=\s*"2\.1\.7"|sandboxDryRunVersion:"2\.1\.7"/, "marker:flight sandbox dry run version", true),
+    marker("apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js", /SANDBOX_DRY_RUN_VERSION\s*=\s*"2\.1\.8"|sandboxDryRunVersion:"2\.1\.8"/, "marker:flight sandbox dry run version", true),
     marker("apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js", /Sandbox Dry Run：外壳已建立|沙箱空跑外壳已建立，但未连接真实 provider。|block_price_return|block_booking_url_return|block_order_creation|block_payment/, "marker:flight sandbox dry run disclosure", true),
     marker("apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js", /canRunDryRunShell:\s*true|canValidateInputShape:\s*true|canValidateRequestShape:\s*true|canValidateResponseShape:\s*true|canSimulateControlFlow:\s*true|canUseFixtureOnly:\s*true/, "marker:flight sandbox dry run capabilities", true),
     marker("apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js", /networkMode\s*:\s*String\(raw\.networkMode \|\| "disabled"\)|apiKeyMode\s*:\s*String\(raw\.apiKeyMode \|\| "disabled"\)|endpointMode\s*:\s*String\(raw\.endpointMode \|\| "disabled"\)|providerMode\s*:\s*String\(raw\.providerMode \|\| "disabled"\)|priceMode\s*:\s*String\(raw\.priceMode \|\| "disabled"\)|bookingUrlMode\s*:\s*String\(raw\.bookingUrlMode \|\| "disabled"\)|orderMode\s*:\s*String\(raw\.orderMode \|\| "disabled"\)|paymentMode\s*:\s*String\(raw\.paymentMode \|\| "disabled"\)|identityStorageMode\s*:\s*String\(raw\.identityStorageMode \|\| "disabled"\)/, "marker:flight sandbox dry run blocked modes", true),
 
 marker("apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js", /flight_sandbox_provider_matrix|getFlightSandboxProviderMatrix|describeFlightSandboxProviderMatrix/, "marker:flight sandbox provider matrix module", true),
-    marker("apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js", /MATRIX_VERSION\s*=\s*"2\.1\.7"|matrixVersion:"2\.1\.7"/, "marker:flight sandbox provider matrix version", true),
+    marker("apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js", /MATRIX_VERSION\s*=\s*"2\.1\.8"|matrixVersion:"2\.1\.8"/, "marker:flight sandbox provider matrix version", true),
 marker("apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js", /查看候选平台沙箱矩阵|候选平台沙箱矩阵|当前状态：候选平台已进入沙箱矩阵，但尚未允许连接真实 provider。|当前结论：不能返回最低价两家|候选平台沙箱矩阵默认全部阻断，只允许审计，不允许真实连接。/, "marker:flight sandbox provider matrix disclosure", true),
 marker("apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js", /matrixStatus\s*:\s*"readiness_matrix_only"|networkMode\s*:\s*"disabled"|apiKeyMode\s*:\s*"disabled"|endpointMode\s*:\s*"disabled"|providerMode\s*:\s*"candidate_only"/, "marker:flight sandbox provider matrix contract modes", true),
 marker("apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js", /canBuildProviderMatrix\s*:\s*true|canAttachCandidateProviders\s*:\s*true|canAttachDryRunShellStatus\s*:\s*true|canAttachReadonlyStubStatus\s*:\s*true|canAttachApprovalStatus\s*:\s*true|canAuditBlockedCapabilities\s*:\s*true|canShowReadinessState\s*:\s*true/, "marker:flight sandbox provider matrix capabilities", true),
@@ -1255,7 +1268,7 @@ marker("apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js", 
     marker("apps/desktop/src/renderer/core/commerceReadonlyAdapterContractGate.js", /gateStatus:"closed"|adapterExecution:"disabled"|realNetwork:"disabled"|realEndpoint:"disabled"/, "marker:read only adapter contract closed no network", true),
     marker("apps/desktop/src/renderer/core/commerceReadonlyAdapterContractGate.js", /canReadRealProviderResult:false|canDisplayRealPrice:false|canDisplayBookingUrl:false|canCreateBooking:false|canPay:false/, "marker:read only adapter contract no result booking payment", true),
     marker("apps/desktop/src/renderer/routes/CommerceAgentPage.js", /查看 read-only adapter contract gate|read-only adapter contract gate：gate 已建立/, "marker:read only adapter contract ui", true),
-    marker("tests/e2e/commerce-agent.spec.js", /v2.1.7 provider activation readiness gates|provider activation readiness gate：gate 已建立|credential consent scope gate：gate 已建立|read-only adapter contract gate：gate 已建立/, "marker:v2.1.7 e2e coverage", true),
+    marker("tests/e2e/commerce-agent.spec.js", /v2.1.8 provider activation readiness gates|provider activation readiness gate：gate 已建立|credential consent scope gate：gate 已建立|read-only adapter contract gate：gate 已建立/, "marker:v2.1.8 e2e coverage", true),
     marker("playwright.config.js", /testDir:\s*["']\.\/tests\/e2e["']|reporter|trace/, "marker:playwright config", false),
     marker("tests/e2e/smoke.spec.js", /app launches|home page visible|crawler page visible/, "marker:playwright smoke", false)
   ];

@@ -1018,7 +1018,7 @@
     const api = window.WeishanCommerceProviderEndpointAllowlistGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderEndpointAllowlistGateContract ? api.commerceProviderEndpointAllowlistGateContract : {
-      gateVersion:"2.1.7",
+      gateVersion:"2.1.8",
       phase:"provider_endpoint_allowlist_gate",
       gateStatus:"closed",
       allowlistStatus:"draft",
@@ -1044,7 +1044,7 @@
     const api = window.WeishanCommerceReadonlyProviderSandboxGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyProviderSandboxGateContract ? api.commerceReadonlyProviderSandboxGateContract : {
-      version:"2.1.7",
+      version:"2.1.8",
       moduleName:"readonly_provider_sandbox_gate",
       phase:"readonly_provider_sandbox_gate",
       gateStatus:"closed",
@@ -1079,7 +1079,7 @@
     const api = window.WeishanCommerceReadonlyProviderResultSchemaGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyProviderResultSchemaGateContract ? api.commerceReadonlyProviderResultSchemaGateContract : {
-      version:"2.1.7",
+      version:"2.1.8",
       moduleName:"readonly_provider_result_schema_gate",
       phase:"readonly_provider_result_schema_gate",
       gateStatus:"closed",
@@ -1116,7 +1116,7 @@
     const api = window.WeishanCommerceProviderResultSourceLabelGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderResultSourceLabelGateContract ? api.commerceProviderResultSourceLabelGateContract : {
-      version:"2.1.7",
+      version:"2.1.8",
       moduleName:"provider_result_source_label_gate",
       phase:"provider_result_source_label_gate",
       gateStatus:"closed",
@@ -1146,7 +1146,7 @@
     const api = window.WeishanCommercePriceIntegrityTaxesFeesGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commercePriceIntegrityTaxesFeesGateContract ? api.commercePriceIntegrityTaxesFeesGateContract : {
-      version:"2.1.7",
+      version:"2.1.8",
       moduleName:"price_integrity_taxes_fees_gate",
       phase:"price_integrity_taxes_fees_gate",
       gateStatus:"closed",
@@ -1173,7 +1173,7 @@
     const api = window.WeishanCommerceBookingUrlDomainSafetyGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceBookingUrlDomainSafetyGateContract ? api.commerceBookingUrlDomainSafetyGateContract : {
-      version:"2.1.7",
+      version:"2.1.8",
       moduleName:"booking_url_domain_safety_gate",
       phase:"booking_url_domain_safety_gate",
       gateStatus:"closed",
@@ -1203,7 +1203,7 @@
     const api = window.WeishanCommerceManualProviderReviewWorkflow;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceManualProviderReviewWorkflowContract ? api.commerceManualProviderReviewWorkflowContract : {
-      version:"2.1.7",
+      version:"2.1.8",
       moduleName:"manual_provider_review_workflow",
       phase:"manual_provider_review_workflow",
       workflowStatus:"draft_only",
@@ -1231,7 +1231,7 @@
     const api = window.WeishanCommerceProviderActivationReadinessGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderActivationReadinessGateContract ? api.commerceProviderActivationReadinessGateContract : {
-      version:"2.1.7",
+      version:"2.1.8",
       moduleName:"provider_activation_readiness_gate",
       phase:"provider_activation_readiness_gate",
       gateStatus:"blocked",
@@ -1257,7 +1257,7 @@
     const api = window.WeishanCommerceCredentialConsentScopeGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceCredentialConsentScopeGateContract ? api.commerceCredentialConsentScopeGateContract : {
-      version:"2.1.7",
+      version:"2.1.8",
       moduleName:"credential_consent_scope_gate",
       phase:"credential_consent_scope_gate",
       gateStatus:"closed",
@@ -1283,7 +1283,7 @@
     const api = window.WeishanCommerceReadonlyAdapterContractGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyAdapterContractGateContract ? api.commerceReadonlyAdapterContractGateContract : {
-      version:"2.1.7",
+      version:"2.1.8",
       moduleName:"readonly_adapter_contract_gate",
       phase:"readonly_adapter_contract_gate",
       gateStatus:"closed",
@@ -1308,7 +1308,7 @@
     const api = window.WeishanCommerceProviderGateMatrixDashboard;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderGateMatrixDashboardContract ? api.commerceProviderGateMatrixDashboardContract : {
-      version:"2.1.7", moduleName:"provider_gate_matrix_dashboard", phase:"provider_gate_matrix_dashboard", dashboardStatus:"blocked", mode:"matrix_only", providerActivationState:"no-go", realProviderConnection:"disabled", realProviderSandbox:"disabled", realNetwork:"disabled", realPrice:"disabled", realBookingUrl:"disabled", orderMode:"disabled", paymentMode:"disabled", checkoutMode:"disabled", redacted:true,
+      version:"2.1.8", moduleName:"provider_gate_matrix_dashboard", phase:"provider_gate_matrix_dashboard", dashboardStatus:"blocked", mode:"matrix_only", providerActivationState:"no-go", realProviderConnection:"disabled", realProviderSandbox:"disabled", realNetwork:"disabled", realPrice:"disabled", realBookingUrl:"disabled", orderMode:"disabled", paymentMode:"disabled", checkoutMode:"disabled", redacted:true,
       capabilities:{ canActivateProvider:false, canConnectRealProvider:false, canRunRealProviderSandbox:false, canUseNetwork:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, canCreateOrder:false, canPay:false, canCheckout:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false },
       display:{ title:"provider gate matrix dashboard", establishedLine:"provider gate matrix dashboard：dashboard 已建立", statusLine:"status: blocked", modeLine:"mode: matrix only", activationLine:"providerActivationState: no-go", providerConnectionLine:"real provider connection disabled", sandboxLine:"real provider sandbox disabled", networkLine:"real network disabled", priceLine:"real price disabled", bookingUrlLine:"real bookingUrl disabled", orderPaymentLine:"order / payment / checkout disabled", redactedLine:"redacted: true" }
     };
@@ -1320,7 +1320,7 @@
     const api = window.WeishanCommerceProviderNoNetworkRuntimeGuard;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderNoNetworkRuntimeGuardContract ? api.commerceProviderNoNetworkRuntimeGuardContract : {
-      version:"2.1.7", moduleName:"provider_no_network_runtime_guard", phase:"provider_no_network_runtime_guard", guardStatus:"blocked", mode:"no_network_enforcement_draft", providerNetwork:"disabled", redirectFollowMode:"disabled", adapterExecution:"disabled", redacted:true,
+      version:"2.1.8", moduleName:"provider_no_network_runtime_guard", phase:"provider_no_network_runtime_guard", guardStatus:"blocked", mode:"no_network_enforcement_draft", providerNetwork:"disabled", redirectFollowMode:"disabled", adapterExecution:"disabled", redacted:true,
       capabilities:{ canUseFetch:false, canUseXhr:false, canUseWebSocket:false, canUseEventSource:false, canUseSendBeacon:false, canUseElectronNet:false, canUseNodeHttp:false, canUseNodeHttps:false, canResolveDns:false, canFollowRedirect:false, canExecuteAdapter:false, canRunRealProviderSandbox:false, canReadRealProviderResult:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, canCreateOrder:false, canPay:false },
       display:{ title:"provider no-network runtime guard", establishedLine:"provider no-network runtime guard：guard 已建立", statusLine:"status: blocked", modeLine:"mode: no-network enforcement draft", providerNetworkLine:"provider network disabled", fetchLine:"fetch disabled for provider", xhrLine:"XMLHttpRequest disabled for provider", websocketLine:"WebSocket disabled for provider", eventSourceLine:"EventSource disabled for provider", sendBeaconLine:"navigator.sendBeacon disabled for provider", electronNetLine:"Electron net disabled for provider", nodeHttpLine:"Node http/https disabled for provider", dnsLine:"DNS lookup disabled for provider", redirectLine:"redirect follow disabled", adapterLine:"adapter execution disabled", redactedLine:"redacted: true" }
     };
@@ -1332,12 +1332,78 @@
     const api = window.WeishanCommerceOfflineProviderFixtureValidationHarness;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceOfflineProviderFixtureValidationHarnessContract ? api.commerceOfflineProviderFixtureValidationHarnessContract : {
-      version:"2.1.7", moduleName:"offline_provider_fixture_validation_harness", phase:"offline_provider_fixture_validation_harness", harnessStatus:"offline_only", mode:"fixture_validation_draft", realProviderFixture:"disabled", realProviderResult:"disabled", realNetwork:"disabled", fakeMockDemoAiPriceDisplay:"disabled", bookingUrlDisplay:"disabled", rawProviderPayloadDisplay:"disabled", unsafeFixturePolicy:"all_blocked", redacted:true,
+      version:"2.1.8", moduleName:"offline_provider_fixture_validation_harness", phase:"offline_provider_fixture_validation_harness", harnessStatus:"offline_only", mode:"fixture_validation_draft", realProviderFixture:"disabled", realProviderResult:"disabled", realNetwork:"disabled", fakeMockDemoAiPriceDisplay:"disabled", bookingUrlDisplay:"disabled", rawProviderPayloadDisplay:"disabled", unsafeFixturePolicy:"all_blocked", redacted:true,
       capabilities:{ canUseRealProviderFixture:false, canReadRealProviderResult:false, canUseNetwork:false, canDisplayFakePrice:false, canDisplayMockPrice:false, canDisplayDemoPrice:false, canDisplayAiEstimatedPrice:false, canDisplayRealPrice:false, canDisplayAvailability:false, canDisplayBookingUrl:false, canDisplayRawProviderPayload:false, canCreateOrder:false, canPay:false },
       display:{ title:"offline provider fixture validation harness", establishedLine:"offline provider fixture validation harness：harness 已建立", statusLine:"status: offline only", modeLine:"mode: fixture validation draft", realFixtureLine:"real provider fixture disabled", realResultLine:"real provider result disabled", networkLine:"real network disabled", fakePriceLine:"fake/mock/demo/AI price display disabled", bookingUrlLine:"bookingUrl display disabled", rawPayloadLine:"raw provider payload display disabled", unsafeLine:"all unsafe fixtures blocked", redactedLine:"redacted: true" }
     };
     if (api && typeof api.buildOfflineProviderFixtureValidationHarnessDisplay === "function") return api.buildOfflineProviderFixtureValidationHarnessDisplay(Object.assign({}, base, raw));
     return Object.assign({}, base, raw, { capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}), display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {}) });
+  }
+
+  function createProviderComplianceDecisionEngine(state){
+    const api = window.WeishanCommerceProviderComplianceDecisionEngine;
+    const raw = state && typeof state === "object" ? state : {};
+    if (api && typeof api.buildProviderComplianceDecisionReport === "function") return api.buildProviderComplianceDecisionReport(raw);
+    return Object.assign({
+      version:"2.1.8",
+      contract:{ engineStatus:"blocked", mode:"offline_decision_only", sideEffects:"none", realProviderConnection:"disabled", realNetwork:"disabled", realCredentialRead:"disabled", realPriceDisplay:"disabled", realBookingUrl:"disabled", providerActivationDecision:"no-go", redacted:true },
+      decisionInputDraft:{ fields:["providerId", "providerName", "manualReviewState", "credentialConsentState", "endpointAllowlistState", "sandboxState", "redacted: true"] },
+      decisionOutputDraft:{ providerActivationDecision:"no-go", priceDisplayDecision:"withheld", bookingUrlDecision:"forbidden", networkDecision:"blocked", credentialDecision:"blocked", adapterExecutionDecision:"disabled", redacted:true },
+      defaultDecision:{ providerActivationDecision:"no-go", priceDisplayDecision:"withheld", bookingUrlDecision:"forbidden", networkDecision:"blocked", credentialDecision:"blocked", adapterExecutionDecision:"disabled" },
+      blockedReasonList:["no provider approved", "manual review pending", "credential consent not approved", "endpoint connection disabled", "network disabled", "raw provider payload forbidden", "order / payment / checkout disabled"],
+      withheldReasonList:["price source not trusted", "price integrity not complete"],
+      decisionErrorCodes:["PROVIDER_ACTIVATION_NO_GO", "NETWORK_DISABLED", "PRICE_WITHHELD", "BOOKING_URL_FORBIDDEN", "RAW_PAYLOAD_FORBIDDEN"],
+      audit:{ providerComplianceDecisionAuditDraft:{ eventType:"PROVIDER_COMPLIANCE_DECISION_DRAFT", providerActivationDecision:"no-go", networkDecision:"blocked", priceDisplayDecision:"withheld", bookingUrlDecision:"forbidden", redacted:true } },
+      redacted:true
+    }, raw);
+  }
+
+  function createOfflineProviderFixtureRunner(state){
+    const api = window.WeishanCommerceOfflineProviderFixtureRunner;
+    const raw = state && typeof state === "object" ? state : {};
+    if (api && typeof api.buildOfflineProviderFixtureRunnerDisplay === "function") return api.buildOfflineProviderFixtureRunnerDisplay(raw);
+    return Object.assign({
+      version:"2.1.8",
+      contract:{ runnerStatus:"offline_only", mode:"deterministic_fixture_runner", realProviderFixture:"disabled", realProviderResult:"disabled", realNetwork:"disabled", realPrice:"disabled", fakeMockDemoAiPriceDisplay:"disabled", bookingUrlDisplay:"disabled", rawProviderPayloadDisplay:"disabled", redacted:true },
+      pipeline:["loadOfflineFixtureDescriptor", "redactOfflineFixture", "evaluateProviderComplianceReadiness", "compareExpectedDecision", "emitOfflineFixtureRunnerAuditEvent"],
+      fixtureCategories:["schema_missing_field", "source_label_missing_evidence", "price_integrity_missing_currency", "booking_url_unknown_host", "network_fetch_attempt", "raw_provider_payload_attempt"],
+      expectedOutcomes:["missing providerId -> blocked", "missing currency -> price withheld", "fetch attempt -> NETWORK_DISABLED", "raw provider payload -> RAW_PAYLOAD_FORBIDDEN"],
+      runnerSummary:{ status:"PASS", fixtureCount:0, passedFixtureCount:0, failedFixtureCount:0, networkAttemptCount:0, realProviderCallCount:0, realPriceDisplayedCount:0, bookingUrlDisplayedCount:0, redacted:true },
+      audit:{ offlineProviderFixtureRunnerAuditDraft:{ eventType:"OFFLINE_PROVIDER_FIXTURE_RUNNER_DECISION_DRAFT", actualDecision:"blocked", redacted:true } },
+      redacted:true
+    }, raw);
+  }
+
+  function createNoNetworkSentinelAudit(state){
+    const api = window.WeishanCommerceNoNetworkSentinelAudit;
+    const raw = state && typeof state === "object" ? state : {};
+    if (api && typeof api.buildNoNetworkSentinelAuditDisplay === "function") return api.buildNoNetworkSentinelAuditDisplay(raw);
+    return Object.assign({
+      version:"2.1.8",
+      contract:{ sentinelStatus:"blocked", mode:"static_no_network_audit", globalMonkeyPatch:"disabled", providerNetworkCall:"disabled", fetchAttempt:"blocked", xhrAttempt:"blocked", websocketAttempt:"blocked", redacted:true },
+      sentinelScope:["provider adapters", "provider sandbox", "offline fixture runner", "provider compliance decision engine"],
+      blockedPrimitives:["fetch", "XMLHttpRequest", "WebSocket", "EventSource", "navigator.sendBeacon", "Electron net", "Node http", "Node https", "DNS lookup", "redirect follow", "provider write action call"],
+      defaultPrimitiveDecisions:["fetch -> NETWORK_DISABLED", "XMLHttpRequest -> NETWORK_DISABLED", "WebSocket -> NETWORK_DISABLED"],
+      sentinelDecisionObjectDraft:{ networkPrimitive:"fetch", decision:"blocked", blockedReason:"NETWORK_DISABLED", redacted:true },
+      audit:{ noNetworkSentinelAuditDraft:{ eventType:"NO_NETWORK_SENTINEL_DECISION_DRAFT", decision:"blocked", blockedReason:"NETWORK_DISABLED", redacted:true } },
+      redacted:true
+    }, raw);
+  }
+
+  function createProviderComplianceEvidenceReport(state){
+    const api = window.WeishanCommerceProviderComplianceEvidenceReport;
+    const raw = state && typeof state === "object" ? state : {};
+    if (api && typeof api.buildProviderComplianceEvidenceReport === "function") return api.buildProviderComplianceEvidenceReport(raw);
+    return Object.assign({
+      version:"2.1.8",
+      contract:{ reportStatus:"blocked", mode:"offline_evidence_only", providerActivationState:"no-go", realProviderApproval:"none", credentialConsentApproval:"none", realSecureStorage:"disabled", realEndpointConnection:"disabled", realSandbox:"disabled", realProviderResult:"disabled", realPrice:"disabled", realBookingUrl:"disabled", redacted:true },
+      evidenceSections:["gateMatrixEvidence", "activationReadinessEvidence", "credentialConsentEvidence", "offlineFixtureRunnerEvidence", "noNetworkSentinelEvidence"],
+      evidenceSummary:{ providerActivationState:"no-go", decisionEngineState:"blocked / no-go", fixtureRunnerState:"offline only / PASS", noNetworkSentinelState:"blocked", redacted:true },
+      overallEvidenceConclusions:["decision engine: blocked / no-go", "fixture runner: offline only / PASS", "no-network sentinel: blocked", "provider activation: no-go", "price display: withheld", "bookingUrl display: forbidden"],
+      userVisibleNotes:["当前版本只是离线合规证据包", "当前版本不能联网接 provider", "当前版本不能显示真实价格", "当前版本不能预订 / 付款 / 下单"],
+      audit:{ providerComplianceEvidenceReportAuditDraft:{ eventType:"PROVIDER_COMPLIANCE_EVIDENCE_REPORT_DRAFT", providerActivationState:"no-go", blockedReason:"provider_compliance_evidence_no_go", redacted:true } },
+      redacted:true
+    }, raw);
   }
 
   function createUserApiPriorityPolicyState(state){
@@ -1869,6 +1935,10 @@
       providerGateMatrixDashboard:category === "flight" ? createProviderGateMatrixDashboard() : null,
       providerNoNetworkRuntimeGuard:category === "flight" ? createProviderNoNetworkRuntimeGuard() : null,
       offlineProviderFixtureValidationHarness:category === "flight" ? createOfflineProviderFixtureValidationHarness() : null,
+      providerComplianceDecisionEngine:category === "flight" ? createProviderComplianceDecisionEngine() : null,
+      offlineProviderFixtureRunner:category === "flight" ? createOfflineProviderFixtureRunner() : null,
+      noNetworkSentinelAudit:category === "flight" ? createNoNetworkSentinelAudit() : null,
+      providerComplianceEvidenceReport:category === "flight" ? createProviderComplianceEvidenceReport() : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState() : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState() : null,
@@ -1943,6 +2013,10 @@
       providerGateMatrixDashboard:category === "flight" ? createProviderGateMatrixDashboard(base.providerGateMatrixDashboard) : null,
       providerNoNetworkRuntimeGuard:category === "flight" ? createProviderNoNetworkRuntimeGuard(base.providerNoNetworkRuntimeGuard) : null,
       offlineProviderFixtureValidationHarness:category === "flight" ? createOfflineProviderFixtureValidationHarness(base.offlineProviderFixtureValidationHarness) : null,
+      providerComplianceDecisionEngine:category === "flight" ? createProviderComplianceDecisionEngine(base.providerComplianceDecisionEngine) : null,
+      offlineProviderFixtureRunner:category === "flight" ? createOfflineProviderFixtureRunner(base.offlineProviderFixtureRunner) : null,
+      noNetworkSentinelAudit:category === "flight" ? createNoNetworkSentinelAudit(base.noNetworkSentinelAudit) : null,
+      providerComplianceEvidenceReport:category === "flight" ? createProviderComplianceEvidenceReport(base.providerComplianceEvidenceReport) : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(base.userApiPriorityPolicyState),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState(base.apiBindingSafeShellState) : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState(base.userApiProviderCatalogState) : null,
@@ -2080,6 +2154,10 @@
       providerGateMatrixDashboard:safe.category === "flight" ? safe.providerGateMatrixDashboard : null,
       providerNoNetworkRuntimeGuard:safe.category === "flight" ? safe.providerNoNetworkRuntimeGuard : null,
       offlineProviderFixtureValidationHarness:safe.category === "flight" ? safe.offlineProviderFixtureValidationHarness : null,
+      providerComplianceDecisionEngine:safe.category === "flight" ? safe.providerComplianceDecisionEngine : null,
+      offlineProviderFixtureRunner:safe.category === "flight" ? safe.offlineProviderFixtureRunner : null,
+      noNetworkSentinelAudit:safe.category === "flight" ? safe.noNetworkSentinelAudit : null,
+      providerComplianceEvidenceReport:safe.category === "flight" ? safe.providerComplianceEvidenceReport : null,
       userApiPriorityPolicyState:safe.userApiPriorityPolicyState,
       apiBindingSafeShellState:safe.category === "flight" ? safe.apiBindingSafeShellState : null,
       userApiProviderCatalogState:safe.category === "flight" ? safe.userApiProviderCatalogState : null,

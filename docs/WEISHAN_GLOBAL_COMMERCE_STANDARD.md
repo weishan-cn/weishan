@@ -1964,9 +1964,9 @@ marker:manual provider review states
 marker:manual provider review audit redacted
 
 
-## v2.1.7：Provider Activation Readiness Bundle / provider 激活准备闸门组合
+## v2.1.8：Provider Activation Readiness Bundle / provider 激活准备闸门组合
 
-v2.1.7 新增 `commerceProviderActivationReadinessGate.js`、`commerceCredentialConsentScopeGate.js` 和 `commerceReadonlyAdapterContractGate.js`。本阶段只建立 provider 激活准备总闸门、credential consent scope 草案闸门和 read-only adapter contract 草案闸门；当前版本仍不激活真实 provider，不输入、不保存、不读取真实 credential，不连接真实 endpoint，不运行真实 provider sandbox，不发起真实网络请求，不读取真实 provider result，不显示真实价格，不显示 availability，不显示 bookingUrl，不预订、不付款、不下单、不上传证件或银行卡资料。
+v2.1.8 新增 `commerceProviderActivationReadinessGate.js`、`commerceCredentialConsentScopeGate.js` 和 `commerceReadonlyAdapterContractGate.js`。本阶段只建立 provider 激活准备总闸门、credential consent scope 草案闸门和 read-only adapter contract 草案闸门；当前版本仍不激活真实 provider，不输入、不保存、不读取真实 credential，不连接真实 endpoint，不运行真实 provider sandbox，不发起真实网络请求，不读取真实 provider result，不显示真实价格，不显示 availability，不显示 bookingUrl，不预订、不付款、不下单、不上传证件或银行卡资料。
 
 `查看 provider activation readiness gate` 默认折叠。展开后必须显示：provider activation readiness gate：gate 已建立、status: blocked、mode: readiness only、provider activation disabled、real provider connection disabled、real provider sandbox disabled、real price disabled、real bookingUrl disabled、order / payment / checkout disabled、activationGoNoGo: no-go、redacted: true。前置 gate 汇总必须包含 result schema gate、provider source label gate、price integrity / taxes / fees gate、bookingUrl domain safety gate、manual provider review workflow、provider endpoint allowlist gate、readonly provider sandbox gate、API binding readiness、secure storage design gate、local secure storage interface draft、key redaction rules 和 key lifecycle draft。当前阻断原因必须包含 no provider approved、manual review pending、readonly permission not granted、credential consent not collected、secure storage real implementation disabled、real key input disabled、endpoint connection disabled、real sandbox disabled、real provider result disabled、price display disabled、bookingUrl display disabled、payment / checkout / order disabled 和 identity / passport / bank card flow disabled。审计事件草案必须显示 providerActivationReadinessAuditDraft，所有事件必须 redacted: true。
 
@@ -2001,9 +2001,9 @@ marker:read only adapter no booking url
 marker:read only adapter no write action
 marker:read only adapter audit redacted
 
-## v2.1.7：Offline Provider Compliance Harness Bundle / 离线 provider 合规校验组合
+## v2.1.8：Offline Provider Compliance Harness Bundle / 离线 provider 合规校验组合
 
-v2.1.7 新增 `commerceProviderGateMatrixDashboard.js`、`commerceProviderNoNetworkRuntimeGuard.js` 和 `commerceOfflineProviderFixtureValidationHarness.js`。本阶段只建立 provider 接入前总矩阵、无网络运行时守卫和离线 fixture 校验器；当前版本仍不激活真实 provider，不输入、不保存、不读取真实 API key，不连接真实 endpoint，不运行真实 provider sandbox，不发起真实网络请求，不解析真实 provider DNS，不读取真实 provider result，不显示真实价格，不显示 availability，不显示 bookingUrl，不预订、不付款、不下单、不上传证件或银行卡资料。
+v2.1.8 新增 `commerceProviderGateMatrixDashboard.js`、`commerceProviderNoNetworkRuntimeGuard.js` 和 `commerceOfflineProviderFixtureValidationHarness.js`。本阶段只建立 provider 接入前总矩阵、无网络运行时守卫和离线 fixture 校验器；当前版本仍不激活真实 provider，不输入、不保存、不读取真实 API key，不连接真实 endpoint，不运行真实 provider sandbox，不发起真实网络请求，不解析真实 provider DNS，不读取真实 provider result，不显示真实价格，不显示 availability，不显示 bookingUrl，不预订、不付款、不下单、不上传证件或银行卡资料。
 
 `查看 provider gate matrix dashboard` 默认折叠。展开后必须显示：provider gate matrix dashboard：dashboard 已建立、status: blocked、mode: matrix only、providerActivationState: no-go、real provider connection disabled、real provider sandbox disabled、real network disabled、real price disabled、real bookingUrl disabled、order / payment / checkout disabled、redacted: true。全部 gate 汇总矩阵必须包含 API binding readiness: not ready、secure key storage plan: plan only、secure storage design gate: closed、local secure storage interface draft: draft only、key redaction rules: established、key lifecycle draft: draft only、provider endpoint allowlist gate: closed、readonly provider sandbox gate: closed、readonly provider result schema gate: closed / draft、provider result source label gate: closed / draft、price integrity / taxes / fees gate: closed / draft、bookingUrl domain safety gate: closed / draft、manual provider review workflow: draft only / no provider approved、provider activation readiness gate: blocked / no-go、credential consent scope gate: closed / draft、read-only adapter contract gate: closed / contract draft only、provider no-network runtime guard: blocked、offline provider fixture validation harness: offline only。总体 no-go 原因必须包含 no provider approved、manual review pending、credential consent not collected、real secure storage disabled、real key input disabled、endpoint connection disabled、real sandbox disabled、real provider result disabled、price display disabled、bookingUrl display disabled、adapter execution disabled、network disabled、order / payment / checkout disabled 和 identity / passport / bank card flow disabled。readinessScore 必须为 0，审计事件草案必须显示 providerGateMatrixAuditDraft，所有事件必须 redacted: true。
 
@@ -2036,3 +2036,60 @@ marker:offline provider fixture validation harness no network
 marker:offline provider fixture validation harness no price display
 marker:offline provider fixture validation harness no booking url
 marker:offline provider fixture validation harness audit redacted
+
+## v2.1.8：Offline Provider Enforcement Engine + Evidence Pack / 离线 provider 执行闸门与证据包
+
+v2.1.8 新增 `commerceProviderComplianceDecisionEngine.js`、`commerceOfflineProviderFixtureRunner.js`、`commerceNoNetworkSentinelAudit.js`、`commerceProviderComplianceEvidenceReport.js` 和 `scripts/commerce-provider-offline-fixture-runner.js`。本阶段只建立离线合规判定、离线 fixture 执行、自检式无网络哨兵审计和证据包汇总；当前版本仍不激活真实 provider，不读取或保存真实 API key，不连接真实 endpoint，不发起真实网络请求，不读取真实 provider result，不显示真实价格，不显示 availability，不显示 bookingUrl，不预订、不付款、不下单、不上传证件或银行卡资料。
+
+`查看 provider compliance decision engine` 默认折叠。展开后必须显示：provider compliance decision engine：engine 已建立、status: blocked、mode: offline decision only、sideEffects: none、real provider connection disabled、real network disabled、real credential read disabled、real price display disabled、real bookingUrl disabled、providerActivationDecision: no-go、redacted: true。decision input draft、decision output draft、default decisions、blocked reasons、withheld reasons、error codes 和 providerComplianceDecisionAuditDraft 只能是离线草案，不得产生副作用。
+
+`查看 offline provider fixture runner` 默认折叠。展开后必须显示：offline provider fixture runner：runner 已建立、status: offline only、mode: deterministic fixture runner、real provider fixture disabled、real provider result disabled、real network disabled、real price disabled、fake/mock/demo/AI price display disabled、bookingUrl display disabled、raw provider payload display disabled、all fixture outputs redacted、redacted: true。fixture runner 只能处理内置离线 descriptor，summary 中 networkAttemptCount、realProviderCallCount、realPriceDisplayedCount 和 bookingUrlDisplayedCount 必须为 0。
+
+`查看 no-network sentinel audit` 默认折叠。展开后必须显示：no-network sentinel audit：sentinel 已建立、status: blocked、mode: static no-network audit、no global monkey patch、no provider network call、fetch attempt blocked、XMLHttpRequest attempt blocked、WebSocket attempt blocked、EventSource attempt blocked、sendBeacon attempt blocked、Electron net attempt blocked、Node http/https attempt blocked、DNS lookup attempt blocked、redirect follow blocked、redacted: true。该哨兵只展示静态决策草案，不 monkey patch 全局对象，不发起网络，不解析 DNS。
+
+`查看 provider compliance evidence report` 默认折叠。展开后必须显示：provider compliance evidence report：report 已建立、status: blocked、mode: offline evidence only、providerActivationState: no-go、no real provider approved、no credential consent approved、no real secure storage、no real endpoint connection、no real sandbox、no real provider result、no real price、no real bookingUrl、redacted: true。证据包只能汇总前置 gate、decision engine、fixture runner、no-network sentinel 和人工审查草案，不代表 provider 已批准。
+
+`npm run commerce:provider-fixtures:offline` 必须只执行离线 fixture runner CLI，输出 COMMERCE_PROVIDER_OFFLINE_FIXTURE_RUNNER PASS、mode=offline_only、network=disabled、networkAttemptCount=0、realProviderCallCount=0、realPriceDisplayedCount=0、bookingUrlDisplayedCount=0、redacted=true。该脚本不得输出真实 URL、真实 API key、secret、token、真实价格或 bookingUrl。
+
+marker:provider compliance decision engine
+marker:provider compliance decision engine offline only
+marker:provider compliance decision engine no side effects
+marker:provider compliance decision engine all blocked
+marker:provider compliance decision engine no real provider
+marker:provider compliance decision engine no credential
+marker:provider compliance decision engine no network
+marker:provider compliance decision engine no price
+marker:provider compliance decision engine no booking url
+marker:provider compliance decision engine audit redacted
+
+marker:offline provider fixture runner
+marker:offline provider fixture runner offline only
+marker:offline provider fixture runner deterministic
+marker:offline provider fixture runner pass
+marker:offline provider fixture runner no real provider
+marker:offline provider fixture runner no network
+marker:offline provider fixture runner no price
+marker:offline provider fixture runner no booking url
+marker:offline provider fixture runner redacted
+
+marker:no network sentinel audit
+marker:no network sentinel audit static only
+marker:no network sentinel audit no monkey patch
+marker:no network sentinel audit no provider network call
+marker:no network sentinel audit fetch blocked
+marker:no network sentinel audit xhr websocket blocked
+marker:no network sentinel audit electron net blocked
+marker:no network sentinel audit node http https blocked
+marker:no network sentinel audit dns blocked
+marker:no network sentinel audit redacted
+
+marker:provider compliance evidence report
+marker:provider compliance evidence report offline evidence only
+marker:provider compliance evidence report no go
+marker:provider compliance evidence report no real provider
+marker:provider compliance evidence report no credential
+marker:provider compliance evidence report no endpoint
+marker:provider compliance evidence report no sandbox
+marker:provider compliance evidence report no price
+marker:provider compliance evidence report no booking url
+marker:provider compliance evidence report audit redacted
