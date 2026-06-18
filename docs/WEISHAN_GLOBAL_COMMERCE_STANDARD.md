@@ -1914,3 +1914,51 @@ marker:price integrity taxes fees prerequisites
 marker:price integrity taxes fees no fake price
 marker:price integrity taxes fees risk scan
 marker:price integrity taxes fees audit redacted
+
+## v2.1.5：BookingUrl Domain Safety Gate + Manual Provider Review Workflow Bundle
+
+v2.1.5 新增 `commerceBookingUrlDomainSafetyGate.js` 和 `commerceManualProviderReviewWorkflow.js`。本阶段只建立 bookingUrl 域名安全闸门和人工 provider 审查流程草案；当前版本仍不生成真实 bookingUrl，不展示可点击 provider booking 链接，不连接真实 endpoint，不联网，不读取或保存真实 API key，不显示真实价格，不显示 availability，不预订、不付款、不下单、不上传身份资料或银行卡资料。
+
+`查看 bookingUrl domain safety gate` 默认折叠。展开后必须显示：gate 已建立、status: closed、mode: draft only、bookingUrl display disabled、bookingUrl generation disabled、bookingUrl click disabled、redirect follow disabled、real provider booking link disabled、real network disabled、no order / no payment / no checkout。
+UI 正文必须包含精确状态行：bookingUrl domain safety gate：gate 已建立。
+
+未来 bookingUrl 安全字段草案必须包含 providerId、providerName、sourceUrlHost、sourceHostDisplayName、bookingUrlHost、bookingUrlPathCategory、redirectChainHostList、urlScheme、linkIntent、reviewState、updatedAt、readonlyEvidence、redacted: true。域名安全规则必须显示：只允许 https、必须 exact host match、必须匹配 provider endpoint allowlist gate、必须匹配 provider result source label gate、unknown host 阻断、short URL 阻断、redirect chain 阻断、credential query params 阻断、token / apiKey / secret 参数阻断、PII query params 阻断、passport / identity / passenger 参数阻断、payment path 阻断、checkout path 阻断、order path 阻断、identity upload path 阻断、non-https 阻断、localhost 阻断、private IP 阻断、IP literal host 阻断、unicode homograph / punycode risk 阻断、raw provider payload 阻断。
+
+始终禁止 URL 类型必须显示：bookingUrl 当前禁止展示、checkoutUrl 始终禁止、paymentUrl 始终禁止、orderUrl 始终禁止、identityUploadUrl 始终禁止、passengerFormUrl 始终禁止、bankCardFormUrl 始终禁止、providerWriteActionUrl 始终禁止、rawProviderUrlWithSecrets 始终禁止。当前用户可见策略必须显示：当前版本不显示真实 bookingUrl、当前版本不生成 bookingUrl、当前版本不提供预订按钮、当前版本不提供付款按钮、当前版本不提供下单按钮、当前版本只允许外部搜索入口保持人工跳转、外部搜索入口不得自动点击、外部搜索入口不得伪装为 provider bookingUrl。
+
+bookingUrl 风险扫描草案必须显示 bookingUrlRiskScanDraft、nonHttpsDetected、unknownHostDetected、shortUrlDetected、redirectChainDetected、credentialParamsDetected、piiParamsDetected、paymentPathDetected、checkoutPathDetected、orderPathDetected、identityPathDetected、rawProviderPayloadDetected、redacted: true。审计事件草案必须显示 bookingUrlSafetyAuditDraft、eventType、schemaVersion、gateState、blockedReason、bookingUrlHost、sourceUrlHost、linkIntent、resultObservedAt、redacted: true。联动必须显示 provider result source label gate、price integrity / taxes / fees gate、只读 provider result schema gate、只读 provider sandbox gate、provider endpoint allowlist gate、key 生命周期、密钥脱敏规则、本机安全存储、API 绑定准备状态、manual provider review workflow。
+
+`查看 manual provider review workflow` 默认折叠。展开后必须显示：workflow 已建立、status: draft only、no provider approved、all provider review pending、manual approval disabled、real provider connection disabled、real provider sandbox disabled、real price disabled、bookingUrl disabled。provider review object 草案必须包含 providerId、providerName、providerType、providerRegion、sourceHost、apiDocsStatus、termsStatus、readonlyPermissionStatus、pricingDataPolicyStatus、bookingLinkPolicyStatus、dataRetentionStatus、privacyStatus、piiHandlingStatus、rateLimitStatus、sandboxEvidenceStatus、manualReviewState、reviewerRole、reviewedAt、blockedReason、redacted: true。
+UI 正文必须包含精确状态行：manual provider review workflow：workflow 已建立。
+
+review state 草案必须显示 not_started、docs_pending、terms_pending、readonly_permission_pending、privacy_review_pending、security_review_pending、sandbox_evidence_pending、blocked、rejected、approved_for_future_readonly，并明确当前没有 provider 处于 approved_for_future_readonly，UI 不提供 approve 按钮，UI 不提供 reject 按钮，UI 不提供提交审查按钮，当前仅展示只读流程草案。
+
+人工审查清单必须显示：API 文档是否可审查、服务条款是否允许只读查询、是否禁止 scraping 或自动化访问、是否允许价格数据展示、是否允许税费展示、是否允许 booking link 展示、是否存在写入动作风险、是否涉及身份资料上传、是否涉及银行卡资料、是否有数据保留要求、是否有日志脱敏要求、是否有 rate limit、是否有 sandbox 文档、是否有 provider 联系方式、是否有 credential policy、是否有 privacy policy。
+
+默认阻断原因必须显示：缺 API 文档阻断、缺服务条款阻断、缺只读授权阻断、条款禁止自动访问阻断、条款禁止价格展示阻断、缺税费完整性阻断、缺 source label 阻断、缺 endpoint allowlist 阻断、缺 sandbox evidence 阻断、存在写入动作阻断、存在 payment / checkout / order 动作阻断、存在 identity upload 动作阻断、存在银行卡字段阻断。审计事件草案必须显示 manualProviderReviewAuditDraft、eventType、schemaVersion、workflowState、providerId、providerName、manualReviewState、blockedReason、reviewedAt、reviewerRole、redacted: true。
+
+本阶段必须联动显示：bookingUrl domain safety gate、provider result source label gate、price integrity / taxes / fees gate、只读 provider result schema gate、只读 provider sandbox gate、provider endpoint allowlist gate、API 绑定准备状态、密钥脱敏规则、本机安全存储。
+
+marker:booking url domain safety gate
+marker:booking url domain safety gate closed
+marker:booking url domain safety draft only
+marker:booking url domain safety no booking url
+marker:booking url domain safety no generation
+marker:booking url domain safety no click
+marker:booking url domain safety no network
+marker:booking url domain safety host rules
+marker:booking url domain safety write paths blocked
+marker:booking url domain safety risk scan
+marker:booking url domain safety audit redacted
+
+marker:manual provider review workflow
+marker:manual provider review draft only
+marker:manual provider review no provider approved
+marker:manual provider review all pending
+marker:manual provider review no manual approval
+marker:manual provider review no real provider
+marker:manual provider review no price
+marker:manual provider review no booking url
+marker:manual provider review object draft
+marker:manual provider review states
+marker:manual provider review audit redacted

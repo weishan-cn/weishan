@@ -4038,6 +4038,129 @@
     return disclosure('查看 price integrity / taxes / fees gate', body, 'commerce-price-integrity-taxes-fees-gate-disclosure');
   }
 
+  function commerceBookingUrlDomainSafetyGateDisplay(task){
+    const api = window.WeishanCommerceBookingUrlDomainSafetyGate;
+    const gate = task && task.bookingUrlDomainSafetyGate || null;
+    if (api && typeof api.buildBookingUrlDomainSafetyGateDisplay === "function") return api.buildBookingUrlDomainSafetyGateDisplay(gate);
+    return gate && typeof gate === "object" ? gate : {
+      version:"2.1.5",
+      gateStatus:"closed",
+      mode:"draft_only",
+      display:{ title:"bookingUrl domain safety gate", establishedLine:"bookingUrl domain safety gate：gate 已建立", gateStatusLine:"status: closed", modeLine:"mode: draft only", bookingUrlDisplayLine:"bookingUrl display disabled", bookingUrlGenerationLine:"bookingUrl generation disabled", bookingUrlClickLine:"bookingUrl click disabled", redirectFollowLine:"redirect follow disabled", providerBookingLinkLine:"real provider booking link disabled", networkLine:"real network disabled", safetyLine:"no order / no payment / no checkout" },
+      safetyFieldsDraft:{ fields:["providerId", "providerName", "sourceUrlHost", "sourceHostDisplayName", "bookingUrlHost", "bookingUrlPathCategory", "redirectChainHostList", "urlScheme", "linkIntent", "reviewState", "updatedAt", "readonlyEvidence", "redacted: true"] },
+      domainSafetyRules:{ rules:["只允许 https", "必须 exact host match", "必须匹配 provider endpoint allowlist gate", "必须匹配 provider result source label gate", "unknown host 阻断", "short URL 阻断", "redirect chain 阻断", "credential query params 阻断", "token / apiKey / secret 参数阻断", "PII query params 阻断", "passport / identity / passenger 参数阻断", "payment path 阻断", "checkout path 阻断", "order path 阻断", "identity upload path 阻断", "non-https 阻断", "localhost 阻断", "private IP 阻断", "IP literal host 阻断", "unicode homograph / punycode risk 阻断", "raw provider payload 阻断"] },
+      forbiddenUrlTypes:{ forbiddenUrlTypes:["bookingUrl 当前禁止展示", "checkoutUrl 始终禁止", "paymentUrl 始终禁止", "orderUrl 始终禁止", "identityUploadUrl 始终禁止", "passengerFormUrl 始终禁止", "bankCardFormUrl 始终禁止", "providerWriteActionUrl 始终禁止", "rawProviderUrlWithSecrets 始终禁止"] },
+      visiblePolicy:{ policy:["当前版本不显示真实 bookingUrl", "当前版本不生成 bookingUrl", "当前版本不提供预订按钮", "当前版本不提供付款按钮", "当前版本不提供下单按钮", "当前版本只允许外部搜索入口保持人工跳转", "外部搜索入口不得自动点击", "外部搜索入口不得伪装为 provider bookingUrl"] },
+      riskScan:{ bookingUrlRiskScanDraft:["nonHttpsDetected", "unknownHostDetected", "shortUrlDetected", "redirectChainDetected", "credentialParamsDetected", "piiParamsDetected", "paymentPathDetected", "checkoutPathDetected", "orderPathDetected", "identityPathDetected", "rawProviderPayloadDetected", "redacted: true"] },
+      audit:{ bookingUrlSafetyAuditDraft:{ eventType:"BOOKING_URL_DOMAIN_SAFETY_EVALUATION_DRAFT", schemaVersion:"2.1.5", gateState:"closed", blockedReason:"booking_url_domain_safety_gate_closed", bookingUrlHost:"none", sourceUrlHost:"none", linkIntent:"none", resultObservedAt:"none", redacted:true } },
+      linkage:["provider result source label gate", "price integrity / taxes / fees gate", "只读 provider result schema gate", "只读 provider sandbox gate", "provider endpoint allowlist gate", "key 生命周期", "密钥脱敏规则", "本机安全存储", "API 绑定准备状态", "manual provider review workflow"]
+    };
+  }
+
+  function commerceBookingUrlDomainSafetyGateDisclosure(task){
+    const gate = commerceBookingUrlDomainSafetyGateDisplay(task);
+    const display = gate.display || {};
+    const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
+    const fields = gate.safetyFieldsDraft || {};
+    const rules = gate.domainSafetyRules || {};
+    const forbidden = gate.forbiddenUrlTypes || {};
+    const policy = gate.visiblePolicy || {};
+    const risk = gate.riskScan || {};
+    const audit = gate.audit && gate.audit.bookingUrlSafetyAuditDraft || {};
+    const body = '<section class="commerce-booking-url-domain-safety-gate-panel" aria-label="bookingUrl domain safety gate">'
+      + '<h4>' + esc(display.title || 'bookingUrl domain safety gate') + '</h4>'
+      + '<p>' + esc(display.establishedLine || 'bookingUrl domain safety gate：gate 已建立') + '</p>'
+      + '<p>' + esc(display.gateStatusLine || 'status: closed') + '</p>'
+      + '<p>' + esc(display.modeLine || 'mode: draft only') + '</p>'
+      + '<p>' + esc(display.bookingUrlDisplayLine || 'bookingUrl display disabled') + '</p>'
+      + '<p>' + esc(display.bookingUrlGenerationLine || 'bookingUrl generation disabled') + '</p>'
+      + '<p>' + esc(display.bookingUrlClickLine || 'bookingUrl click disabled') + '</p>'
+      + '<p>' + esc(display.redirectFollowLine || 'redirect follow disabled') + '</p>'
+      + '<p>' + esc(display.providerBookingLinkLine || 'real provider booking link disabled') + '</p>'
+      + '<p>' + esc(display.networkLine || 'real network disabled') + '</p>'
+      + '<p>' + esc(display.safetyLine || 'no order / no payment / no checkout') + '</p>'
+      + '<h5>未来 bookingUrl 安全字段草案</h5>' + listHtml(fields.fields || [])
+      + '<h5>域名安全规则</h5>' + listHtml(rules.rules || [])
+      + '<h5>始终禁止 URL 类型</h5>' + listHtml(forbidden.forbiddenUrlTypes || [])
+      + '<h5>当前用户可见策略</h5>' + listHtml(policy.policy || [])
+      + '<h5>风险扫描草案</h5><p>bookingUrlRiskScanDraft</p>' + listHtml(risk.bookingUrlRiskScanDraft || [])
+      + '<h5>审计事件草案</h5><p>bookingUrlSafetyAuditDraft</p>'
+      + '<p>eventType：' + esc(audit.eventType || 'BOOKING_URL_DOMAIN_SAFETY_EVALUATION_DRAFT') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.5') + '</p>'
+      + '<p>gateState：' + esc(audit.gateState || 'closed') + '</p>'
+      + '<p>blockedReason：' + esc(audit.blockedReason || 'booking_url_domain_safety_gate_closed') + '</p>'
+      + '<p>bookingUrlHost：' + esc(audit.bookingUrlHost || 'none') + '</p>'
+      + '<p>sourceUrlHost：' + esc(audit.sourceUrlHost || 'none') + '</p>'
+      + '<p>linkIntent：' + esc(audit.linkIntent || 'none') + '</p>'
+      + '<p>resultObservedAt：' + esc(audit.resultObservedAt || 'none') + '</p>'
+      + '<p>redacted: true</p>'
+      + '<h5>与前置 gate 联动</h5>' + listHtml(gate.linkage || [])
+      + '</section>';
+    return disclosure('查看 bookingUrl domain safety gate', body, 'commerce-booking-url-domain-safety-gate-disclosure');
+  }
+
+  function commerceManualProviderReviewWorkflowDisplay(task){
+    const api = window.WeishanCommerceManualProviderReviewWorkflow;
+    const workflow = task && task.manualProviderReviewWorkflow || null;
+    if (api && typeof api.buildManualProviderReviewWorkflowDisplay === "function") return api.buildManualProviderReviewWorkflowDisplay(workflow);
+    return workflow && typeof workflow === "object" ? workflow : {
+      version:"2.1.5",
+      workflowStatus:"draft_only",
+      display:{ title:"manual provider review workflow", establishedLine:"manual provider review workflow：workflow 已建立", statusLine:"status: draft only", providerApprovalLine:"no provider approved", reviewPendingLine:"all provider review pending", manualApprovalLine:"manual approval disabled", providerConnectionLine:"real provider connection disabled", sandboxLine:"real provider sandbox disabled", priceLine:"real price disabled", bookingUrlLine:"bookingUrl disabled", noApprovedLine:"当前没有 provider 处于 approved_for_future_readonly", noApproveButtonLine:"UI 不提供 approve 按钮", noRejectButtonLine:"UI 不提供 reject 按钮", noSubmitReviewLine:"UI 不提供提交审查按钮", draftOnlyLine:"当前仅展示只读流程草案" },
+      providerReviewObjectDraft:{ fields:["providerId", "providerName", "providerType", "providerRegion", "sourceHost", "apiDocsStatus", "termsStatus", "readonlyPermissionStatus", "pricingDataPolicyStatus", "bookingLinkPolicyStatus", "dataRetentionStatus", "privacyStatus", "piiHandlingStatus", "rateLimitStatus", "sandboxEvidenceStatus", "manualReviewState", "reviewerRole", "reviewedAt", "blockedReason", "redacted: true"] },
+      reviewStateDraft:{ states:["not_started", "docs_pending", "terms_pending", "readonly_permission_pending", "privacy_review_pending", "security_review_pending", "sandbox_evidence_pending", "blocked", "rejected", "approved_for_future_readonly"] },
+      checklist:{ checklist:["API 文档是否可审查", "服务条款是否允许只读查询", "是否禁止 scraping 或自动化访问", "是否允许价格数据展示", "是否允许税费展示", "是否允许 booking link 展示", "是否存在写入动作风险", "是否涉及身份资料上传", "是否涉及银行卡资料", "是否有数据保留要求", "是否有日志脱敏要求", "是否有 rate limit", "是否有 sandbox 文档", "是否有 provider 联系方式", "是否有 credential policy", "是否有 privacy policy"] },
+      blockedReasons:{ blockedReasons:["缺 API 文档阻断", "缺服务条款阻断", "缺只读授权阻断", "条款禁止自动访问阻断", "条款禁止价格展示阻断", "缺税费完整性阻断", "缺 source label 阻断", "缺 endpoint allowlist 阻断", "缺 sandbox evidence 阻断", "存在写入动作阻断", "存在 payment / checkout / order 动作阻断", "存在 identity upload 动作阻断", "存在银行卡字段阻断"] },
+      audit:{ manualProviderReviewAuditDraft:{ eventType:"MANUAL_PROVIDER_REVIEW_EVALUATION_DRAFT", schemaVersion:"2.1.5", workflowState:"draft_only", providerId:"none", providerName:"none", manualReviewState:"not_started", blockedReason:"manual_provider_review_workflow_draft_only", reviewedAt:"none", reviewerRole:"none", redacted:true } },
+      linkage:["bookingUrl domain safety gate", "provider result source label gate", "price integrity / taxes / fees gate", "只读 provider result schema gate", "只读 provider sandbox gate", "provider endpoint allowlist gate", "API 绑定准备状态", "密钥脱敏规则", "本机安全存储"]
+    };
+  }
+
+  function commerceManualProviderReviewWorkflowDisclosure(task){
+    const workflow = commerceManualProviderReviewWorkflowDisplay(task);
+    const display = workflow.display || {};
+    const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
+    const objectDraft = workflow.providerReviewObjectDraft || {};
+    const states = workflow.reviewStateDraft || {};
+    const checklist = workflow.checklist || {};
+    const blocked = workflow.blockedReasons || {};
+    const audit = workflow.audit && workflow.audit.manualProviderReviewAuditDraft || {};
+    const body = '<section class="commerce-manual-provider-review-workflow-panel" aria-label="manual provider review workflow">'
+      + '<h4>' + esc(display.title || 'manual provider review workflow') + '</h4>'
+      + '<p>' + esc(display.establishedLine || 'manual provider review workflow：workflow 已建立') + '</p>'
+      + '<p>' + esc(display.statusLine || 'status: draft only') + '</p>'
+      + '<p>' + esc(display.providerApprovalLine || 'no provider approved') + '</p>'
+      + '<p>' + esc(display.reviewPendingLine || 'all provider review pending') + '</p>'
+      + '<p>' + esc(display.manualApprovalLine || 'manual approval disabled') + '</p>'
+      + '<p>' + esc(display.providerConnectionLine || 'real provider connection disabled') + '</p>'
+      + '<p>' + esc(display.sandboxLine || 'real provider sandbox disabled') + '</p>'
+      + '<p>' + esc(display.priceLine || 'real price disabled') + '</p>'
+      + '<p>' + esc(display.bookingUrlLine || 'bookingUrl disabled') + '</p>'
+      + '<h5>provider review object 草案</h5>' + listHtml(objectDraft.fields || [])
+      + '<h5>review state 草案</h5>' + listHtml(states.states || [])
+      + '<p>' + esc(display.noApprovedLine || '当前没有 provider 处于 approved_for_future_readonly') + '</p>'
+      + '<p>' + esc(display.noApproveButtonLine || 'UI 不提供 approve 按钮') + '</p>'
+      + '<p>' + esc(display.noRejectButtonLine || 'UI 不提供 reject 按钮') + '</p>'
+      + '<p>' + esc(display.noSubmitReviewLine || 'UI 不提供提交审查按钮') + '</p>'
+      + '<p>' + esc(display.draftOnlyLine || '当前仅展示只读流程草案') + '</p>'
+      + '<h5>人工审查清单</h5>' + listHtml(checklist.checklist || [])
+      + '<h5>默认阻断原因</h5>' + listHtml(blocked.blockedReasons || [])
+      + '<h5>审计事件草案</h5><p>manualProviderReviewAuditDraft</p>'
+      + '<p>eventType：' + esc(audit.eventType || 'MANUAL_PROVIDER_REVIEW_EVALUATION_DRAFT') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.5') + '</p>'
+      + '<p>workflowState：' + esc(audit.workflowState || 'draft_only') + '</p>'
+      + '<p>providerId：' + esc(audit.providerId || 'none') + '</p>'
+      + '<p>providerName：' + esc(audit.providerName || 'none') + '</p>'
+      + '<p>manualReviewState：' + esc(audit.manualReviewState || 'not_started') + '</p>'
+      + '<p>blockedReason：' + esc(audit.blockedReason || 'manual_provider_review_workflow_draft_only') + '</p>'
+      + '<p>reviewedAt：' + esc(audit.reviewedAt || 'none') + '</p>'
+      + '<p>reviewerRole：' + esc(audit.reviewerRole || 'none') + '</p>'
+      + '<p>redacted: true</p>'
+      + '<h5>与前置 gate 联动</h5>' + listHtml(workflow.linkage || [])
+      + '</section>';
+    return disclosure('查看 manual provider review workflow', body, 'commerce-manual-provider-review-workflow-disclosure');
+  }
+
   function commerceSimpleFlightResultPanelHtml(task){
     const fields = commerceSimpleFlightFields(task);
     const copyTexts = commerceSimpleFlightCopyTexts(task);
@@ -4103,6 +4226,8 @@
       ${commerceReadonlyProviderResultSchemaGateDisclosure(task)}
       ${commerceProviderResultSourceLabelGateDisclosure(task)}
       ${commercePriceIntegrityTaxesFeesGateDisclosure(task)}
+      ${commerceBookingUrlDomainSafetyGateDisclosure(task)}
+      ${commerceManualProviderReviewWorkflowDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;
@@ -4129,6 +4254,8 @@
       ${commerceReadonlyProviderResultSchemaGateDisclosure(task)}
       ${commerceProviderResultSourceLabelGateDisclosure(task)}
       ${commercePriceIntegrityTaxesFeesGateDisclosure(task)}
+      ${commerceBookingUrlDomainSafetyGateDisclosure(task)}
+      ${commerceManualProviderReviewWorkflowDisclosure(task)}
     </section>`;
     return disclosure("查看高级调试信息", body, "commerce-simple-flight-advanced-debug-disclosure");
   }

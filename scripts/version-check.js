@@ -574,6 +574,48 @@ function checkPriceIntegrityTaxesFeesGateVersion(results, expectedVersion) {
   );
 }
 
+function checkBookingUrlDomainSafetyGateVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/commerceBookingUrlDomainSafetyGate.js";
+  const gate = readText(gatePath);
+  if (!gate) {
+    results.push({ name: "apps/desktop bookingUrl domain safety gate version", pass: false, detail: gatePath + " missing" });
+    return;
+  }
+  if (gate.__readError) {
+    results.push({ name: "apps/desktop bookingUrl domain safety gate version", pass: false, detail: gate.__readError });
+    return;
+  }
+  const match = gate.match(/BOOKING_URL_DOMAIN_SAFETY_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop bookingUrl domain safety gate version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceBookingUrlDomainSafetyGate.js BOOKING_URL_DOMAIN_SAFETY_GATE_VERSION"
+  );
+}
+
+function checkManualProviderReviewWorkflowVersion(results, expectedVersion) {
+  const workflowPath = "apps/desktop/src/renderer/core/commerceManualProviderReviewWorkflow.js";
+  const workflow = readText(workflowPath);
+  if (!workflow) {
+    results.push({ name: "apps/desktop manual provider review workflow version", pass: false, detail: workflowPath + " missing" });
+    return;
+  }
+  if (workflow.__readError) {
+    results.push({ name: "apps/desktop manual provider review workflow version", pass: false, detail: workflow.__readError });
+    return;
+  }
+  const match = workflow.match(/MANUAL_PROVIDER_REVIEW_WORKFLOW_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop manual provider review workflow version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceManualProviderReviewWorkflow.js MANUAL_PROVIDER_REVIEW_WORKFLOW_VERSION"
+  );
+}
+
 function runVersionCheck() {
   const results = [];
 
@@ -608,6 +650,8 @@ function runVersionCheck() {
     checkReadonlyProviderResultSchemaGateVersion(results, rootPackage.version);
     checkProviderResultSourceLabelGateVersion(results, rootPackage.version);
     checkPriceIntegrityTaxesFeesGateVersion(results, rootPackage.version);
+    checkBookingUrlDomainSafetyGateVersion(results, rootPackage.version);
+    checkManualProviderReviewWorkflowVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

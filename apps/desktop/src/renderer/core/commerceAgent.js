@@ -1018,7 +1018,7 @@
     const api = window.WeishanCommerceProviderEndpointAllowlistGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderEndpointAllowlistGateContract ? api.commerceProviderEndpointAllowlistGateContract : {
-      gateVersion:"2.1.4",
+      gateVersion:"2.1.5",
       phase:"provider_endpoint_allowlist_gate",
       gateStatus:"closed",
       allowlistStatus:"draft",
@@ -1044,7 +1044,7 @@
     const api = window.WeishanCommerceReadonlyProviderSandboxGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyProviderSandboxGateContract ? api.commerceReadonlyProviderSandboxGateContract : {
-      version:"2.1.4",
+      version:"2.1.5",
       moduleName:"readonly_provider_sandbox_gate",
       phase:"readonly_provider_sandbox_gate",
       gateStatus:"closed",
@@ -1079,7 +1079,7 @@
     const api = window.WeishanCommerceReadonlyProviderResultSchemaGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyProviderResultSchemaGateContract ? api.commerceReadonlyProviderResultSchemaGateContract : {
-      version:"2.1.4",
+      version:"2.1.5",
       moduleName:"readonly_provider_result_schema_gate",
       phase:"readonly_provider_result_schema_gate",
       gateStatus:"closed",
@@ -1116,7 +1116,7 @@
     const api = window.WeishanCommerceProviderResultSourceLabelGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderResultSourceLabelGateContract ? api.commerceProviderResultSourceLabelGateContract : {
-      version:"2.1.4",
+      version:"2.1.5",
       moduleName:"provider_result_source_label_gate",
       phase:"provider_result_source_label_gate",
       gateStatus:"closed",
@@ -1146,7 +1146,7 @@
     const api = window.WeishanCommercePriceIntegrityTaxesFeesGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commercePriceIntegrityTaxesFeesGateContract ? api.commercePriceIntegrityTaxesFeesGateContract : {
-      version:"2.1.4",
+      version:"2.1.5",
       moduleName:"price_integrity_taxes_fees_gate",
       phase:"price_integrity_taxes_fees_gate",
       gateStatus:"closed",
@@ -1162,6 +1162,63 @@
     };
     if (api && typeof api.buildPriceIntegrityTaxesFeesGateDisplay === "function") {
       return api.buildPriceIntegrityTaxesFeesGateDisplay(Object.assign({}, base, raw));
+    }
+    return Object.assign({}, base, raw, {
+      capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
+  function createBookingUrlDomainSafetyGate(state){
+    const api = window.WeishanCommerceBookingUrlDomainSafetyGate;
+    const raw = state && typeof state === "object" ? state : {};
+    const base = api && api.commerceBookingUrlDomainSafetyGateContract ? api.commerceBookingUrlDomainSafetyGateContract : {
+      version:"2.1.5",
+      moduleName:"booking_url_domain_safety_gate",
+      phase:"booking_url_domain_safety_gate",
+      gateStatus:"closed",
+      mode:"draft_only",
+      bookingUrlDisplay:"disabled",
+      bookingUrlGeneration:"disabled",
+      bookingUrlClick:"disabled",
+      redirectFollow:"disabled",
+      realProviderBookingLink:"disabled",
+      realNetwork:"disabled",
+      orderMode:"forbidden",
+      paymentMode:"forbidden",
+      checkoutMode:"forbidden",
+      capabilities:{ canShowBookingUrlDomainSafetyGate:true, canShowFutureSafetyFields:true, canShowDomainSafetyRules:true, canShowForbiddenUrlTypes:true, canShowVisiblePolicy:true, canShowRiskScanDraft:true, canShowAuditDraft:true, canDisplayBookingUrl:false, canGenerateBookingUrl:false, canClickBookingUrl:false, canFollowRedirect:false, canUseRealProviderBookingLink:false, canUseNetwork:false, canConnectEndpoint:false, canCreateOrder:false, canPay:false, canCheckout:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false },
+      display:{ title:"bookingUrl domain safety gate", establishedLine:"bookingUrl domain safety gate：gate 已建立", gateStatusLine:"status: closed", modeLine:"mode: draft only", bookingUrlDisplayLine:"bookingUrl display disabled", bookingUrlGenerationLine:"bookingUrl generation disabled", bookingUrlClickLine:"bookingUrl click disabled", redirectFollowLine:"redirect follow disabled", providerBookingLinkLine:"real provider booking link disabled", networkLine:"real network disabled", safetyLine:"no order / no payment / no checkout" }
+    };
+    if (api && typeof api.buildBookingUrlDomainSafetyGateDisplay === "function") {
+      return api.buildBookingUrlDomainSafetyGateDisplay(Object.assign({}, base, raw));
+    }
+    return Object.assign({}, base, raw, {
+      capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
+  function createManualProviderReviewWorkflow(state){
+    const api = window.WeishanCommerceManualProviderReviewWorkflow;
+    const raw = state && typeof state === "object" ? state : {};
+    const base = api && api.commerceManualProviderReviewWorkflowContract ? api.commerceManualProviderReviewWorkflowContract : {
+      version:"2.1.5",
+      moduleName:"manual_provider_review_workflow",
+      phase:"manual_provider_review_workflow",
+      workflowStatus:"draft_only",
+      providerApprovalStatus:"none_approved",
+      providerReviewStatus:"all_pending",
+      manualApproval:"disabled",
+      realProviderConnection:"disabled",
+      realProviderSandbox:"disabled",
+      realPrice:"disabled",
+      bookingUrl:"disabled",
+      capabilities:{ canShowManualProviderReviewWorkflow:true, canShowProviderReviewObjectDraft:true, canShowReviewStateDraft:true, canShowManualChecklist:true, canShowBlockedReasons:true, canShowAuditDraft:true, canApproveProvider:false, canRejectProvider:false, canSubmitReview:false, canConnectRealProvider:false, canRunRealProviderSandbox:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, canUseNetwork:false, canConnectEndpoint:false, canCreateOrder:false, canPay:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false },
+      display:{ title:"manual provider review workflow", establishedLine:"manual provider review workflow：workflow 已建立", statusLine:"status: draft only", providerApprovalLine:"no provider approved", reviewPendingLine:"all provider review pending", manualApprovalLine:"manual approval disabled", providerConnectionLine:"real provider connection disabled", sandboxLine:"real provider sandbox disabled", priceLine:"real price disabled", bookingUrlLine:"bookingUrl disabled", noApprovedLine:"当前没有 provider 处于 approved_for_future_readonly", noApproveButtonLine:"UI 不提供 approve 按钮", noRejectButtonLine:"UI 不提供 reject 按钮", noSubmitReviewLine:"UI 不提供提交审查按钮", draftOnlyLine:"当前仅展示只读流程草案" }
+    };
+    if (api && typeof api.buildManualProviderReviewWorkflowDisplay === "function") {
+      return api.buildManualProviderReviewWorkflowDisplay(Object.assign({}, base, raw));
     }
     return Object.assign({}, base, raw, {
       capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
@@ -1690,6 +1747,8 @@
       readonlyProviderResultSchemaGate:category === "flight" ? createReadonlyProviderResultSchemaGate() : null,
       providerResultSourceLabelGate:category === "flight" ? createProviderResultSourceLabelGate() : null,
       priceIntegrityTaxesFeesGate:category === "flight" ? createPriceIntegrityTaxesFeesGate() : null,
+      bookingUrlDomainSafetyGate:category === "flight" ? createBookingUrlDomainSafetyGate() : null,
+      manualProviderReviewWorkflow:category === "flight" ? createManualProviderReviewWorkflow() : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState() : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState() : null,
@@ -1756,6 +1815,8 @@
       readonlyProviderResultSchemaGate:category === "flight" ? createReadonlyProviderResultSchemaGate(base.readonlyProviderResultSchemaGate) : null,
       providerResultSourceLabelGate:category === "flight" ? createProviderResultSourceLabelGate(base.providerResultSourceLabelGate) : null,
       priceIntegrityTaxesFeesGate:category === "flight" ? createPriceIntegrityTaxesFeesGate(base.priceIntegrityTaxesFeesGate) : null,
+      bookingUrlDomainSafetyGate:category === "flight" ? createBookingUrlDomainSafetyGate(base.bookingUrlDomainSafetyGate) : null,
+      manualProviderReviewWorkflow:category === "flight" ? createManualProviderReviewWorkflow(base.manualProviderReviewWorkflow) : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(base.userApiPriorityPolicyState),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState(base.apiBindingSafeShellState) : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState(base.userApiProviderCatalogState) : null,
