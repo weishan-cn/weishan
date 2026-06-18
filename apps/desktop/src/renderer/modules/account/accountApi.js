@@ -175,11 +175,11 @@
 
   function recover(input) {
     const email = normalizeEmail((input && input.email) || "");
-    const notice = "本地测试账号不支持客户端找回密码；后台管理员账号请到后台管理服务处理。当前不会联网、不会发送邮件、不会读取密钥。";
+    const notice = "本地模式说明：本地模式不联网，不发邮件，不读取密钥，不清空表单，不跳路由，不连接真实云账号，不显示发送成功提示。";
     if (!email) return { ok:false, error:"请输入邮箱。" + notice };
 
     if (isReservedAdminEmail(email)) {
-      return { ok:false, error:notice };
+      return { ok:false, error:"后台管理员账号不用于客户端普通用户登录；请到后台管理服务处理。" + notice };
     }
 
     const saved = profile(email);

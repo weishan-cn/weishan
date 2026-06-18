@@ -5,6 +5,9 @@ const runId = "E2ESETTINGS-AUTH-" + new Date().toISOString().replace(/[-:TZ.]/g,
 const email = `${runId.toLowerCase()}@example.test`;
 const name = `本地测试用户 ${runId}`;
 const password = `local-pass-${runId}`;
+const fixedEmail = "local-ui-check-v212@example.local";
+const fixedName = "localv212";
+const fixedPassword = "LocalOnly-v212-Password-Do-Not-Reuse";
 
 async function clearAuthData(page) {
   await page.evaluate((id) => {
@@ -15,7 +18,14 @@ async function clearAuthData(page) {
         const key = window.localStorage.key(i);
         if (!key) continue;
         const value = window.localStorage.getItem(key) || "";
-        if (key.includes(id.toLowerCase()) || key.includes(id) || value.includes(id)) keys.push(key);
+        if (
+          key.includes(id.toLowerCase()) ||
+          key.includes(id) ||
+          key.includes("local-ui-check-v212@example.local") ||
+          value.includes(id) ||
+          value.includes("local-ui-check-v212@example.local") ||
+          value.includes("localv212")
+        ) keys.push(key);
       }
       keys.forEach((key) => window.localStorage.removeItem(key));
       window.localStorage.removeItem(prefix + "account.current");
@@ -63,10 +73,43 @@ test.describe.serial("settings local auth hotfix", () => {
     await expect(page.locator("#registerBtn")).toBeVisible();
     await expect(page.locator("#loginBtn")).toBeVisible();
     await expect(page.locator("#recoverBtn")).toBeVisible();
+    await expect(page.locator("#registerBtn")).toHaveAttribute("type", "button");
+    await expect(page.locator("#loginBtn")).toHaveAttribute("type", "button");
+    await expect(page.locator("#recoverBtn")).toHaveAttribute("type", "button");
     await expect(page.getByText("登录后才能配置 AI Key")).toBeVisible();
     await expect(page.locator("#apiKey")).toHaveCount(0);
     await expect(page.locator("#saveConnector")).toHaveCount(0);
     await expect(page.locator("#testConnector")).toHaveCount(0);
+    expect(pageErrors).toEqual([]);
+  });
+
+  test("ordinary local auth buttons are clickable and admin email remains blocked", async () => {
+    await openSettings(page);
+    const before = requests.length;
+
+    await page.locator("#accountEmail").fill("contact@weishan.ai");
+    await page.locator("#accountName").fill("admin");
+    await page.locator("#accountPassword").fill(fixedPassword);
+    await page.locator("#registerBtn").click();
+    await expect(page.locator("#accountStatus")).toContainText("后台管理员账号，不用于客户端普通用户登录");
+
+    await page.locator("#accountEmail").fill(fixedEmail);
+    await page.locator("#accountName").fill(fixedName);
+    await page.locator("#accountPassword").fill(fixedPassword);
+    await page.locator("#registerBtn").click();
+    await expect(page.locator("#pageHost .account-username")).toHaveText(fixedName);
+    await expect(page.locator("#pageHost .account-id-line").first()).toContainText(fixedEmail);
+
+    await page.locator("#logoutBtn2").click();
+    await page.locator("#accountEmail").fill(fixedEmail);
+    await page.locator("#accountPassword").fill(fixedPassword);
+    await page.locator("#loginBtn").click();
+    await expect(page.locator("#pageHost .account-username")).toHaveText(fixedName);
+    await page.locator("#logoutBtn2").click();
+    await expect(page.locator("#accountEmail")).toBeVisible();
+
+    const newHttpRequests = httpRequests(requests.slice(before));
+    expect(newHttpRequests).toEqual([]);
     expect(pageErrors).toEqual([]);
   });
 
@@ -114,8 +157,13 @@ test.describe.serial("settings local auth hotfix", () => {
 
     const status = page.locator("#accountStatus");
     await expect(status).toContainText("本地测试账号存在");
-    await expect(status).toContainText("本地测试账号不支持客户端找回密码");
-    await expect(status).toContainText("当前不会联网、不会发送邮件、不会读取密钥");
+    await expect(status).toContainText("本地模式不联网");
+    await expect(status).toContainText("不发邮件");
+    await expect(status).toContainText("不读取密钥");
+    await expect(status).toContainText("不清空表单");
+    await expect(status).toContainText("不跳路由");
+    await expect(status).toContainText("不连接真实云账号");
+    await expect(status).not.toContainText("邮件已发送");
     await expect(page.locator("#accountEmail")).toHaveValue(email);
     await expect(page.locator("#accountName")).toHaveValue(name);
     await expect(page.locator("#accountPassword")).toHaveValue(password);

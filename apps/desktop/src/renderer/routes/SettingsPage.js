@@ -194,9 +194,9 @@
         <input class="ws-input" id="accountPassword" type="password" placeholder="${t("accountPasswordPlaceholder")}">
       </div>
       <div class="ws-row">
-        <button class="ws-btn" id="registerBtn">${t("registerLogin")}</button>
-        <button class="ws-btn green" id="loginBtn">${t("loginExisting")}</button>
-        <button class="ws-btn gray" id="recoverBtn">${t("recoverPassword")}</button>
+        <button type="button" class="ws-btn" id="registerBtn" data-account-action="register">${t("registerLogin")}</button>
+        <button type="button" class="ws-btn green" id="loginBtn" data-account-action="login">${t("loginExisting")}</button>
+        <button type="button" class="ws-btn gray" id="recoverBtn" data-account-action="recover">${t("recoverPassword")}</button>
       </div>
 
       <div class="account-help">
@@ -261,7 +261,7 @@
     const api = window.WeishanSettingsAuthLocalSecurityEvidence;
     const state = api && typeof api.buildSettingsAuthLocalSecurityEvidence === "function" ? api.buildSettingsAuthLocalSecurityEvidence() : {
       display:{ title:"settings auth local security evidence", establishedLine:"evidence 已建立", statusLine:"status: local auth evidence only", modeLine:"mode: no cloud auth", registerLine:"local register enabled", loginLine:"local login enabled", recoveryLine:"local recovery notice enabled", verifierLine:"passwordVerifier enabled", migrationLine:"legacy plain password migration compatible", emailLine:"real email sending disabled", networkLine:"real network disabled", keyLine:"real key read disabled", redactedLine:"redacted: true" },
-      accountLocalObjectDraft:{ accountId:"local account id", emailAlias:"local email alias", passwordVerifier:"enabled", schemaVersion:"2.1.11", redacted:true },
+      accountLocalObjectDraft:{ accountId:"local account id", emailAlias:"local email alias", passwordVerifier:"enabled", schemaVersion:"2.1.12", redacted:true },
       recoveryNoticeDraft:["本地模式不联网", "本地模式不发邮件", "本地模式不读取密钥", "本地模式不连接云账号", "找回密码不会清空表单", "找回密码不会跳路由", "找回密码不会发送真实邮件", "找回密码不会读取 API key", "找回密码不会触发 provider 连接"],
       authSafetyBoundaries:["raw password display forbidden", "raw password persistence forbidden", "passwordVerifier only", "raw token display forbidden", "rawApiKey display forbidden", "real API key input disabled", "real endpoint test disabled", "Keychain disabled", "safeStorage disabled", "cloud auth disabled", "provider auth disabled"],
       audit:{ settingsAuthLocalSecurityEvidenceAuditDraft:{ eventType:"SETTINGS_AUTH_LOCAL_SECURITY_EVIDENCE_DRAFT", redacted:true } }
@@ -936,24 +936,50 @@
       if (el) el.textContent = text;
     }
 
+    function handleAccountAction(action, event){
+      if (event && event.preventDefault) event.preventDefault();
+      if (event && event.stopPropagation) event.stopPropagation();
+      if (action === "register") {
+        const r = window.AccountApi.register(accountInput());
+        if (!r.ok) status(r.error);
+        else window.WeishanRouter.refresh();
+        return;
+      }
+      if (action === "login") {
+        const r = window.AccountApi.login(accountInput());
+        if (!r.ok) status(r.error);
+        else window.WeishanRouter.refresh();
+        return;
+      }
+      if (action === "recover") {
+        const r = window.AccountApi.recover(accountInput());
+        status(r.ok ? r.message : r.error);
+      }
+    }
+
+    const accountActionHost = host.querySelector(".ws-card");
+    if (accountActionHost) accountActionHost.addEventListener("click", function(event){
+      const target = event.target && event.target.closest ? event.target.closest("[data-account-action]") : null;
+      if (!target || !accountActionHost.contains(target)) return;
+      handleAccountAction(target.getAttribute("data-account-action"), event);
+    });
+
     const registerBtn = host.querySelector("#registerBtn");
-    if (registerBtn) registerBtn.addEventListener("click", function(){
-      const r = window.AccountApi.register(accountInput());
-      if (!r.ok) status(r.error);
-      else window.WeishanRouter.refresh();
+    if (registerBtn) registerBtn.addEventListener("click", function(event){
+      if (event && event.defaultPrevented) return;
+      handleAccountAction("register", event);
     });
 
     const loginBtn = host.querySelector("#loginBtn");
-    if (loginBtn) loginBtn.addEventListener("click", function(){
-      const r = window.AccountApi.login(accountInput());
-      if (!r.ok) status(r.error);
-      else window.WeishanRouter.refresh();
+    if (loginBtn) loginBtn.addEventListener("click", function(event){
+      if (event && event.defaultPrevented) return;
+      handleAccountAction("login", event);
     });
 
     const recoverBtn = host.querySelector("#recoverBtn");
-    if (recoverBtn) recoverBtn.addEventListener("click", function(){
-      const r = window.AccountApi.recover(accountInput());
-      status(r.ok ? r.message : r.error);
+    if (recoverBtn) recoverBtn.addEventListener("click", function(event){
+      if (event && event.defaultPrevented) return;
+      handleAccountAction("recover", event);
     });
 
     const logoutBtn2 = host.querySelector("#logoutBtn2");
