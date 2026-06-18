@@ -679,6 +679,33 @@ function checkReadonlyAdapterContractGateVersion(results, expectedVersion) {
   );
 }
 
+function checkProviderGateMatrixDashboardVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/commerceProviderGateMatrixDashboard.js";
+  const gate = readText(gatePath);
+  if (!gate) { results.push({ name:"apps/desktop provider gate matrix dashboard version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider gate matrix dashboard version", pass:false, detail:gate.__readError }); return; }
+  const match = gate.match(/PROVIDER_GATE_MATRIX_DASHBOARD_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop provider gate matrix dashboard version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/commerceProviderGateMatrixDashboard.js PROVIDER_GATE_MATRIX_DASHBOARD_VERSION");
+}
+
+function checkProviderNoNetworkRuntimeGuardVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/commerceProviderNoNetworkRuntimeGuard.js";
+  const gate = readText(gatePath);
+  if (!gate) { results.push({ name:"apps/desktop provider no-network runtime guard version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider no-network runtime guard version", pass:false, detail:gate.__readError }); return; }
+  const match = gate.match(/PROVIDER_NO_NETWORK_RUNTIME_GUARD_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop provider no-network runtime guard version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/commerceProviderNoNetworkRuntimeGuard.js PROVIDER_NO_NETWORK_RUNTIME_GUARD_VERSION");
+}
+
+function checkOfflineProviderFixtureValidationHarnessVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/commerceOfflineProviderFixtureValidationHarness.js";
+  const gate = readText(gatePath);
+  if (!gate) { results.push({ name:"apps/desktop offline provider fixture validation harness version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop offline provider fixture validation harness version", pass:false, detail:gate.__readError }); return; }
+  const match = gate.match(/OFFLINE_PROVIDER_FIXTURE_VALIDATION_HARNESS_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop offline provider fixture validation harness version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/commerceOfflineProviderFixtureValidationHarness.js OFFLINE_PROVIDER_FIXTURE_VALIDATION_HARNESS_VERSION");
+}
+
 function runVersionCheck() {
   const results = [];
 
@@ -718,6 +745,9 @@ function runVersionCheck() {
     checkProviderActivationReadinessGateVersion(results, rootPackage.version);
     checkCredentialConsentScopeGateVersion(results, rootPackage.version);
     checkReadonlyAdapterContractGateVersion(results, rootPackage.version);
+    checkProviderGateMatrixDashboardVersion(results, rootPackage.version);
+    checkProviderNoNetworkRuntimeGuardVersion(results, rootPackage.version);
+    checkOfflineProviderFixtureValidationHarnessVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

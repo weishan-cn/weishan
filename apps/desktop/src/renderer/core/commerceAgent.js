@@ -1018,7 +1018,7 @@
     const api = window.WeishanCommerceProviderEndpointAllowlistGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderEndpointAllowlistGateContract ? api.commerceProviderEndpointAllowlistGateContract : {
-      gateVersion:"2.1.6",
+      gateVersion:"2.1.7",
       phase:"provider_endpoint_allowlist_gate",
       gateStatus:"closed",
       allowlistStatus:"draft",
@@ -1044,7 +1044,7 @@
     const api = window.WeishanCommerceReadonlyProviderSandboxGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyProviderSandboxGateContract ? api.commerceReadonlyProviderSandboxGateContract : {
-      version:"2.1.6",
+      version:"2.1.7",
       moduleName:"readonly_provider_sandbox_gate",
       phase:"readonly_provider_sandbox_gate",
       gateStatus:"closed",
@@ -1079,7 +1079,7 @@
     const api = window.WeishanCommerceReadonlyProviderResultSchemaGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyProviderResultSchemaGateContract ? api.commerceReadonlyProviderResultSchemaGateContract : {
-      version:"2.1.6",
+      version:"2.1.7",
       moduleName:"readonly_provider_result_schema_gate",
       phase:"readonly_provider_result_schema_gate",
       gateStatus:"closed",
@@ -1116,7 +1116,7 @@
     const api = window.WeishanCommerceProviderResultSourceLabelGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderResultSourceLabelGateContract ? api.commerceProviderResultSourceLabelGateContract : {
-      version:"2.1.6",
+      version:"2.1.7",
       moduleName:"provider_result_source_label_gate",
       phase:"provider_result_source_label_gate",
       gateStatus:"closed",
@@ -1146,7 +1146,7 @@
     const api = window.WeishanCommercePriceIntegrityTaxesFeesGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commercePriceIntegrityTaxesFeesGateContract ? api.commercePriceIntegrityTaxesFeesGateContract : {
-      version:"2.1.6",
+      version:"2.1.7",
       moduleName:"price_integrity_taxes_fees_gate",
       phase:"price_integrity_taxes_fees_gate",
       gateStatus:"closed",
@@ -1173,7 +1173,7 @@
     const api = window.WeishanCommerceBookingUrlDomainSafetyGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceBookingUrlDomainSafetyGateContract ? api.commerceBookingUrlDomainSafetyGateContract : {
-      version:"2.1.6",
+      version:"2.1.7",
       moduleName:"booking_url_domain_safety_gate",
       phase:"booking_url_domain_safety_gate",
       gateStatus:"closed",
@@ -1203,7 +1203,7 @@
     const api = window.WeishanCommerceManualProviderReviewWorkflow;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceManualProviderReviewWorkflowContract ? api.commerceManualProviderReviewWorkflowContract : {
-      version:"2.1.6",
+      version:"2.1.7",
       moduleName:"manual_provider_review_workflow",
       phase:"manual_provider_review_workflow",
       workflowStatus:"draft_only",
@@ -1231,7 +1231,7 @@
     const api = window.WeishanCommerceProviderActivationReadinessGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderActivationReadinessGateContract ? api.commerceProviderActivationReadinessGateContract : {
-      version:"2.1.6",
+      version:"2.1.7",
       moduleName:"provider_activation_readiness_gate",
       phase:"provider_activation_readiness_gate",
       gateStatus:"blocked",
@@ -1257,7 +1257,7 @@
     const api = window.WeishanCommerceCredentialConsentScopeGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceCredentialConsentScopeGateContract ? api.commerceCredentialConsentScopeGateContract : {
-      version:"2.1.6",
+      version:"2.1.7",
       moduleName:"credential_consent_scope_gate",
       phase:"credential_consent_scope_gate",
       gateStatus:"closed",
@@ -1283,7 +1283,7 @@
     const api = window.WeishanCommerceReadonlyAdapterContractGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyAdapterContractGateContract ? api.commerceReadonlyAdapterContractGateContract : {
-      version:"2.1.6",
+      version:"2.1.7",
       moduleName:"readonly_adapter_contract_gate",
       phase:"readonly_adapter_contract_gate",
       gateStatus:"closed",
@@ -1300,6 +1300,43 @@
       display:{ title:"read-only adapter contract gate", establishedLine:"read-only adapter contract gate：gate 已建立", statusLine:"status: closed", modeLine:"mode: contract draft only", adapterExecutionLine:"adapter execution disabled", networkLine:"real network disabled", endpointLine:"real endpoint disabled", sandboxLine:"real provider sandbox disabled", providerResultLine:"real provider result disabled", rawPayloadLine:"raw payload display disabled", writeActionLine:"write action disabled", dryRunLine:"executeReadonlyDryRun 当前 disabled", noNetworkLine:"不执行真实 network", noEndpointLine:"不调用真实 provider endpoint", noResultLine:"不读取真实 provider result", withheldLine:"当前 price 仍 withheld；当前 availability 仍 withheld；当前 bookingUrl 仍 forbidden；rawProviderPayload forbidden", redactedLine:"redacted: true" }
     };
     if (api && typeof api.buildReadonlyAdapterContractGateDisplay === "function") return api.buildReadonlyAdapterContractGateDisplay(Object.assign({}, base, raw));
+    return Object.assign({}, base, raw, { capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}), display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {}) });
+  }
+
+
+  function createProviderGateMatrixDashboard(state){
+    const api = window.WeishanCommerceProviderGateMatrixDashboard;
+    const raw = state && typeof state === "object" ? state : {};
+    const base = api && api.commerceProviderGateMatrixDashboardContract ? api.commerceProviderGateMatrixDashboardContract : {
+      version:"2.1.7", moduleName:"provider_gate_matrix_dashboard", phase:"provider_gate_matrix_dashboard", dashboardStatus:"blocked", mode:"matrix_only", providerActivationState:"no-go", realProviderConnection:"disabled", realProviderSandbox:"disabled", realNetwork:"disabled", realPrice:"disabled", realBookingUrl:"disabled", orderMode:"disabled", paymentMode:"disabled", checkoutMode:"disabled", redacted:true,
+      capabilities:{ canActivateProvider:false, canConnectRealProvider:false, canRunRealProviderSandbox:false, canUseNetwork:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, canCreateOrder:false, canPay:false, canCheckout:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false },
+      display:{ title:"provider gate matrix dashboard", establishedLine:"provider gate matrix dashboard：dashboard 已建立", statusLine:"status: blocked", modeLine:"mode: matrix only", activationLine:"providerActivationState: no-go", providerConnectionLine:"real provider connection disabled", sandboxLine:"real provider sandbox disabled", networkLine:"real network disabled", priceLine:"real price disabled", bookingUrlLine:"real bookingUrl disabled", orderPaymentLine:"order / payment / checkout disabled", redactedLine:"redacted: true" }
+    };
+    if (api && typeof api.buildProviderGateMatrixDashboardDisplay === "function") return api.buildProviderGateMatrixDashboardDisplay(Object.assign({}, base, raw));
+    return Object.assign({}, base, raw, { capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}), display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {}) });
+  }
+
+  function createProviderNoNetworkRuntimeGuard(state){
+    const api = window.WeishanCommerceProviderNoNetworkRuntimeGuard;
+    const raw = state && typeof state === "object" ? state : {};
+    const base = api && api.commerceProviderNoNetworkRuntimeGuardContract ? api.commerceProviderNoNetworkRuntimeGuardContract : {
+      version:"2.1.7", moduleName:"provider_no_network_runtime_guard", phase:"provider_no_network_runtime_guard", guardStatus:"blocked", mode:"no_network_enforcement_draft", providerNetwork:"disabled", redirectFollowMode:"disabled", adapterExecution:"disabled", redacted:true,
+      capabilities:{ canUseFetch:false, canUseXhr:false, canUseWebSocket:false, canUseEventSource:false, canUseSendBeacon:false, canUseElectronNet:false, canUseNodeHttp:false, canUseNodeHttps:false, canResolveDns:false, canFollowRedirect:false, canExecuteAdapter:false, canRunRealProviderSandbox:false, canReadRealProviderResult:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, canCreateOrder:false, canPay:false },
+      display:{ title:"provider no-network runtime guard", establishedLine:"provider no-network runtime guard：guard 已建立", statusLine:"status: blocked", modeLine:"mode: no-network enforcement draft", providerNetworkLine:"provider network disabled", fetchLine:"fetch disabled for provider", xhrLine:"XMLHttpRequest disabled for provider", websocketLine:"WebSocket disabled for provider", eventSourceLine:"EventSource disabled for provider", sendBeaconLine:"navigator.sendBeacon disabled for provider", electronNetLine:"Electron net disabled for provider", nodeHttpLine:"Node http/https disabled for provider", dnsLine:"DNS lookup disabled for provider", redirectLine:"redirect follow disabled", adapterLine:"adapter execution disabled", redactedLine:"redacted: true" }
+    };
+    if (api && typeof api.buildProviderNoNetworkRuntimeGuardDisplay === "function") return api.buildProviderNoNetworkRuntimeGuardDisplay(Object.assign({}, base, raw));
+    return Object.assign({}, base, raw, { capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}), display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {}) });
+  }
+
+  function createOfflineProviderFixtureValidationHarness(state){
+    const api = window.WeishanCommerceOfflineProviderFixtureValidationHarness;
+    const raw = state && typeof state === "object" ? state : {};
+    const base = api && api.commerceOfflineProviderFixtureValidationHarnessContract ? api.commerceOfflineProviderFixtureValidationHarnessContract : {
+      version:"2.1.7", moduleName:"offline_provider_fixture_validation_harness", phase:"offline_provider_fixture_validation_harness", harnessStatus:"offline_only", mode:"fixture_validation_draft", realProviderFixture:"disabled", realProviderResult:"disabled", realNetwork:"disabled", fakeMockDemoAiPriceDisplay:"disabled", bookingUrlDisplay:"disabled", rawProviderPayloadDisplay:"disabled", unsafeFixturePolicy:"all_blocked", redacted:true,
+      capabilities:{ canUseRealProviderFixture:false, canReadRealProviderResult:false, canUseNetwork:false, canDisplayFakePrice:false, canDisplayMockPrice:false, canDisplayDemoPrice:false, canDisplayAiEstimatedPrice:false, canDisplayRealPrice:false, canDisplayAvailability:false, canDisplayBookingUrl:false, canDisplayRawProviderPayload:false, canCreateOrder:false, canPay:false },
+      display:{ title:"offline provider fixture validation harness", establishedLine:"offline provider fixture validation harness：harness 已建立", statusLine:"status: offline only", modeLine:"mode: fixture validation draft", realFixtureLine:"real provider fixture disabled", realResultLine:"real provider result disabled", networkLine:"real network disabled", fakePriceLine:"fake/mock/demo/AI price display disabled", bookingUrlLine:"bookingUrl display disabled", rawPayloadLine:"raw provider payload display disabled", unsafeLine:"all unsafe fixtures blocked", redactedLine:"redacted: true" }
+    };
+    if (api && typeof api.buildOfflineProviderFixtureValidationHarnessDisplay === "function") return api.buildOfflineProviderFixtureValidationHarnessDisplay(Object.assign({}, base, raw));
     return Object.assign({}, base, raw, { capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}), display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {}) });
   }
 
@@ -1829,6 +1866,9 @@
       providerActivationReadinessGate:category === "flight" ? createProviderActivationReadinessGate() : null,
       credentialConsentScopeGate:category === "flight" ? createCredentialConsentScopeGate() : null,
       readonlyAdapterContractGate:category === "flight" ? createReadonlyAdapterContractGate() : null,
+      providerGateMatrixDashboard:category === "flight" ? createProviderGateMatrixDashboard() : null,
+      providerNoNetworkRuntimeGuard:category === "flight" ? createProviderNoNetworkRuntimeGuard() : null,
+      offlineProviderFixtureValidationHarness:category === "flight" ? createOfflineProviderFixtureValidationHarness() : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState() : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState() : null,
@@ -1900,6 +1940,9 @@
       providerActivationReadinessGate:category === "flight" ? createProviderActivationReadinessGate(base.providerActivationReadinessGate) : null,
       credentialConsentScopeGate:category === "flight" ? createCredentialConsentScopeGate(base.credentialConsentScopeGate) : null,
       readonlyAdapterContractGate:category === "flight" ? createReadonlyAdapterContractGate(base.readonlyAdapterContractGate) : null,
+      providerGateMatrixDashboard:category === "flight" ? createProviderGateMatrixDashboard(base.providerGateMatrixDashboard) : null,
+      providerNoNetworkRuntimeGuard:category === "flight" ? createProviderNoNetworkRuntimeGuard(base.providerNoNetworkRuntimeGuard) : null,
+      offlineProviderFixtureValidationHarness:category === "flight" ? createOfflineProviderFixtureValidationHarness(base.offlineProviderFixtureValidationHarness) : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(base.userApiPriorityPolicyState),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState(base.apiBindingSafeShellState) : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState(base.userApiProviderCatalogState) : null,
@@ -2034,6 +2077,9 @@
       providerActivationReadinessGate:safe.category === "flight" ? safe.providerActivationReadinessGate : null,
       credentialConsentScopeGate:safe.category === "flight" ? safe.credentialConsentScopeGate : null,
       readonlyAdapterContractGate:safe.category === "flight" ? safe.readonlyAdapterContractGate : null,
+      providerGateMatrixDashboard:safe.category === "flight" ? safe.providerGateMatrixDashboard : null,
+      providerNoNetworkRuntimeGuard:safe.category === "flight" ? safe.providerNoNetworkRuntimeGuard : null,
+      offlineProviderFixtureValidationHarness:safe.category === "flight" ? safe.offlineProviderFixtureValidationHarness : null,
       userApiPriorityPolicyState:safe.userApiPriorityPolicyState,
       apiBindingSafeShellState:safe.category === "flight" ? safe.apiBindingSafeShellState : null,
       userApiProviderCatalogState:safe.category === "flight" ? safe.userApiProviderCatalogState : null,

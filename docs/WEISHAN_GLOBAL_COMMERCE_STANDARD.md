@@ -1964,9 +1964,9 @@ marker:manual provider review states
 marker:manual provider review audit redacted
 
 
-## v2.1.6：Provider Activation Readiness Bundle / provider 激活准备闸门组合
+## v2.1.7：Provider Activation Readiness Bundle / provider 激活准备闸门组合
 
-v2.1.6 新增 `commerceProviderActivationReadinessGate.js`、`commerceCredentialConsentScopeGate.js` 和 `commerceReadonlyAdapterContractGate.js`。本阶段只建立 provider 激活准备总闸门、credential consent scope 草案闸门和 read-only adapter contract 草案闸门；当前版本仍不激活真实 provider，不输入、不保存、不读取真实 credential，不连接真实 endpoint，不运行真实 provider sandbox，不发起真实网络请求，不读取真实 provider result，不显示真实价格，不显示 availability，不显示 bookingUrl，不预订、不付款、不下单、不上传证件或银行卡资料。
+v2.1.7 新增 `commerceProviderActivationReadinessGate.js`、`commerceCredentialConsentScopeGate.js` 和 `commerceReadonlyAdapterContractGate.js`。本阶段只建立 provider 激活准备总闸门、credential consent scope 草案闸门和 read-only adapter contract 草案闸门；当前版本仍不激活真实 provider，不输入、不保存、不读取真实 credential，不连接真实 endpoint，不运行真实 provider sandbox，不发起真实网络请求，不读取真实 provider result，不显示真实价格，不显示 availability，不显示 bookingUrl，不预订、不付款、不下单、不上传证件或银行卡资料。
 
 `查看 provider activation readiness gate` 默认折叠。展开后必须显示：provider activation readiness gate：gate 已建立、status: blocked、mode: readiness only、provider activation disabled、real provider connection disabled、real provider sandbox disabled、real price disabled、real bookingUrl disabled、order / payment / checkout disabled、activationGoNoGo: no-go、redacted: true。前置 gate 汇总必须包含 result schema gate、provider source label gate、price integrity / taxes / fees gate、bookingUrl domain safety gate、manual provider review workflow、provider endpoint allowlist gate、readonly provider sandbox gate、API binding readiness、secure storage design gate、local secure storage interface draft、key redaction rules 和 key lifecycle draft。当前阻断原因必须包含 no provider approved、manual review pending、readonly permission not granted、credential consent not collected、secure storage real implementation disabled、real key input disabled、endpoint connection disabled、real sandbox disabled、real provider result disabled、price display disabled、bookingUrl display disabled、payment / checkout / order disabled 和 identity / passport / bank card flow disabled。审计事件草案必须显示 providerActivationReadinessAuditDraft，所有事件必须 redacted: true。
 
@@ -2000,3 +2000,39 @@ marker:read only adapter no real result
 marker:read only adapter no booking url
 marker:read only adapter no write action
 marker:read only adapter audit redacted
+
+## v2.1.7：Offline Provider Compliance Harness Bundle / 离线 provider 合规校验组合
+
+v2.1.7 新增 `commerceProviderGateMatrixDashboard.js`、`commerceProviderNoNetworkRuntimeGuard.js` 和 `commerceOfflineProviderFixtureValidationHarness.js`。本阶段只建立 provider 接入前总矩阵、无网络运行时守卫和离线 fixture 校验器；当前版本仍不激活真实 provider，不输入、不保存、不读取真实 API key，不连接真实 endpoint，不运行真实 provider sandbox，不发起真实网络请求，不解析真实 provider DNS，不读取真实 provider result，不显示真实价格，不显示 availability，不显示 bookingUrl，不预订、不付款、不下单、不上传证件或银行卡资料。
+
+`查看 provider gate matrix dashboard` 默认折叠。展开后必须显示：provider gate matrix dashboard：dashboard 已建立、status: blocked、mode: matrix only、providerActivationState: no-go、real provider connection disabled、real provider sandbox disabled、real network disabled、real price disabled、real bookingUrl disabled、order / payment / checkout disabled、redacted: true。全部 gate 汇总矩阵必须包含 API binding readiness: not ready、secure key storage plan: plan only、secure storage design gate: closed、local secure storage interface draft: draft only、key redaction rules: established、key lifecycle draft: draft only、provider endpoint allowlist gate: closed、readonly provider sandbox gate: closed、readonly provider result schema gate: closed / draft、provider result source label gate: closed / draft、price integrity / taxes / fees gate: closed / draft、bookingUrl domain safety gate: closed / draft、manual provider review workflow: draft only / no provider approved、provider activation readiness gate: blocked / no-go、credential consent scope gate: closed / draft、read-only adapter contract gate: closed / contract draft only、provider no-network runtime guard: blocked、offline provider fixture validation harness: offline only。总体 no-go 原因必须包含 no provider approved、manual review pending、credential consent not collected、real secure storage disabled、real key input disabled、endpoint connection disabled、real sandbox disabled、real provider result disabled、price display disabled、bookingUrl display disabled、adapter execution disabled、network disabled、order / payment / checkout disabled 和 identity / passport / bank card flow disabled。readinessScore 必须为 0，审计事件草案必须显示 providerGateMatrixAuditDraft，所有事件必须 redacted: true。
+
+`查看 provider no-network runtime guard` 默认折叠。展开后必须显示：provider no-network runtime guard：guard 已建立、status: blocked、mode: no-network enforcement draft、provider network disabled、fetch disabled for provider、XMLHttpRequest disabled for provider、WebSocket disabled for provider、EventSource disabled for provider、navigator.sendBeacon disabled for provider、Electron net disabled for provider、Node http/https disabled for provider、DNS lookup disabled for provider、redirect follow disabled、adapter execution disabled、redacted: true。永远阻断的 network primitive 必须包含 fetch、XMLHttpRequest、WebSocket、EventSource、navigator.sendBeacon、Electron net、Node http、Node https、DNS lookup、redirect follow、external provider sandbox call 和 provider write action call。阻断错误状态必须包含 NETWORK_DISABLED、PROVIDER_NETWORK_DISABLED、ENDPOINT_CONNECTION_DISABLED、REAL_SANDBOX_DISABLED、CREDENTIAL_NOT_AVAILABLE、CONSENT_NOT_APPROVED、PROVIDER_NOT_APPROVED、ENDPOINT_NOT_ALLOWED、REDIRECT_FORBIDDEN、WRITE_ACTION_FORBIDDEN、BOOKING_URL_FORBIDDEN 和 RAW_PAYLOAD_FORBIDDEN。审计事件草案必须显示 providerNoNetworkRuntimeGuardAuditDraft，所有事件必须 redacted: true。
+
+`查看 offline provider fixture validation harness` 默认折叠。展开后必须显示：offline provider fixture validation harness：harness 已建立、status: offline only、mode: fixture validation draft、real provider fixture disabled、real provider result disabled、real network disabled、fake/mock/demo/AI price display disabled、bookingUrl display disabled、raw provider payload display disabled、all unsafe fixtures blocked、redacted: true。fixture case 草案必须包含 missing_provider_id_fixture、missing_source_host_fixture、missing_updated_at_fixture、missing_readonly_evidence_fixture、unknown_host_fixture、short_url_fixture、credential_query_param_fixture、raw_provider_payload_fixture、price_without_currency_fixture、price_without_taxes_fixture、price_without_fees_fixture、estimated_price_fixture、mock_price_fixture、booking_url_detected_fixture、payment_path_detected_fixture、checkout_path_detected_fixture、order_path_detected_fixture、identity_upload_detected_fixture 和 write_action_detected_fixture。fixture 只允许展示 blocked / withheld / redacted 状态，不得在用户结果区展示真实 price、fake price、mock price、demo price、AI 估价、最低价、约 ¥xxx 或 estimated price。审计事件草案必须显示 offlineFixtureValidationAuditDraft，所有事件必须 redacted: true。
+
+marker:provider gate matrix dashboard
+marker:provider gate matrix dashboard blocked
+marker:provider gate matrix dashboard no go
+marker:provider gate matrix dashboard no real provider
+marker:provider gate matrix dashboard no price
+marker:provider gate matrix dashboard no booking url
+marker:provider gate matrix dashboard audit redacted
+
+marker:provider no network runtime guard
+marker:provider no network runtime guard blocked
+marker:provider no network runtime guard no fetch
+marker:provider no network runtime guard no xhr websocket
+marker:provider no network runtime guard no electron net
+marker:provider no network runtime guard no node http https
+marker:provider no network runtime guard no dns
+marker:provider no network runtime guard audit redacted
+
+marker:offline provider fixture validation harness
+marker:offline provider fixture validation harness offline only
+marker:offline provider fixture validation harness all blocked
+marker:offline provider fixture validation harness no real provider
+marker:offline provider fixture validation harness no network
+marker:offline provider fixture validation harness no price display
+marker:offline provider fixture validation harness no booking url
+marker:offline provider fixture validation harness audit redacted
