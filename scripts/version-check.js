@@ -616,6 +616,69 @@ function checkManualProviderReviewWorkflowVersion(results, expectedVersion) {
   );
 }
 
+function checkProviderActivationReadinessGateVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/commerceProviderActivationReadinessGate.js";
+  const gate = readText(gatePath);
+  if (!gate) {
+    results.push({ name: "apps/desktop provider activation readiness gate version", pass: false, detail: gatePath + " missing" });
+    return;
+  }
+  if (gate.__readError) {
+    results.push({ name: "apps/desktop provider activation readiness gate version", pass: false, detail: gate.__readError });
+    return;
+  }
+  const match = gate.match(/PROVIDER_ACTIVATION_READINESS_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop provider activation readiness gate version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceProviderActivationReadinessGate.js PROVIDER_ACTIVATION_READINESS_GATE_VERSION"
+  );
+}
+
+function checkCredentialConsentScopeGateVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/commerceCredentialConsentScopeGate.js";
+  const gate = readText(gatePath);
+  if (!gate) {
+    results.push({ name: "apps/desktop credential consent scope gate version", pass: false, detail: gatePath + " missing" });
+    return;
+  }
+  if (gate.__readError) {
+    results.push({ name: "apps/desktop credential consent scope gate version", pass: false, detail: gate.__readError });
+    return;
+  }
+  const match = gate.match(/CREDENTIAL_CONSENT_SCOPE_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop credential consent scope gate version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceCredentialConsentScopeGate.js CREDENTIAL_CONSENT_SCOPE_GATE_VERSION"
+  );
+}
+
+function checkReadonlyAdapterContractGateVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/commerceReadonlyAdapterContractGate.js";
+  const gate = readText(gatePath);
+  if (!gate) {
+    results.push({ name: "apps/desktop read-only adapter contract gate version", pass: false, detail: gatePath + " missing" });
+    return;
+  }
+  if (gate.__readError) {
+    results.push({ name: "apps/desktop read-only adapter contract gate version", pass: false, detail: gate.__readError });
+    return;
+  }
+  const match = gate.match(/READONLY_ADAPTER_CONTRACT_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop read-only adapter contract gate version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceReadonlyAdapterContractGate.js READONLY_ADAPTER_CONTRACT_GATE_VERSION"
+  );
+}
+
 function runVersionCheck() {
   const results = [];
 
@@ -652,6 +715,9 @@ function runVersionCheck() {
     checkPriceIntegrityTaxesFeesGateVersion(results, rootPackage.version);
     checkBookingUrlDomainSafetyGateVersion(results, rootPackage.version);
     checkManualProviderReviewWorkflowVersion(results, rootPackage.version);
+    checkProviderActivationReadinessGateVersion(results, rootPackage.version);
+    checkCredentialConsentScopeGateVersion(results, rootPackage.version);
+    checkReadonlyAdapterContractGateVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

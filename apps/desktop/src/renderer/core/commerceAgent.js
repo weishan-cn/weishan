@@ -1018,7 +1018,7 @@
     const api = window.WeishanCommerceProviderEndpointAllowlistGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderEndpointAllowlistGateContract ? api.commerceProviderEndpointAllowlistGateContract : {
-      gateVersion:"2.1.5",
+      gateVersion:"2.1.6",
       phase:"provider_endpoint_allowlist_gate",
       gateStatus:"closed",
       allowlistStatus:"draft",
@@ -1044,7 +1044,7 @@
     const api = window.WeishanCommerceReadonlyProviderSandboxGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyProviderSandboxGateContract ? api.commerceReadonlyProviderSandboxGateContract : {
-      version:"2.1.5",
+      version:"2.1.6",
       moduleName:"readonly_provider_sandbox_gate",
       phase:"readonly_provider_sandbox_gate",
       gateStatus:"closed",
@@ -1079,7 +1079,7 @@
     const api = window.WeishanCommerceReadonlyProviderResultSchemaGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyProviderResultSchemaGateContract ? api.commerceReadonlyProviderResultSchemaGateContract : {
-      version:"2.1.5",
+      version:"2.1.6",
       moduleName:"readonly_provider_result_schema_gate",
       phase:"readonly_provider_result_schema_gate",
       gateStatus:"closed",
@@ -1116,7 +1116,7 @@
     const api = window.WeishanCommerceProviderResultSourceLabelGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderResultSourceLabelGateContract ? api.commerceProviderResultSourceLabelGateContract : {
-      version:"2.1.5",
+      version:"2.1.6",
       moduleName:"provider_result_source_label_gate",
       phase:"provider_result_source_label_gate",
       gateStatus:"closed",
@@ -1146,7 +1146,7 @@
     const api = window.WeishanCommercePriceIntegrityTaxesFeesGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commercePriceIntegrityTaxesFeesGateContract ? api.commercePriceIntegrityTaxesFeesGateContract : {
-      version:"2.1.5",
+      version:"2.1.6",
       moduleName:"price_integrity_taxes_fees_gate",
       phase:"price_integrity_taxes_fees_gate",
       gateStatus:"closed",
@@ -1173,7 +1173,7 @@
     const api = window.WeishanCommerceBookingUrlDomainSafetyGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceBookingUrlDomainSafetyGateContract ? api.commerceBookingUrlDomainSafetyGateContract : {
-      version:"2.1.5",
+      version:"2.1.6",
       moduleName:"booking_url_domain_safety_gate",
       phase:"booking_url_domain_safety_gate",
       gateStatus:"closed",
@@ -1203,7 +1203,7 @@
     const api = window.WeishanCommerceManualProviderReviewWorkflow;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceManualProviderReviewWorkflowContract ? api.commerceManualProviderReviewWorkflowContract : {
-      version:"2.1.5",
+      version:"2.1.6",
       moduleName:"manual_provider_review_workflow",
       phase:"manual_provider_review_workflow",
       workflowStatus:"draft_only",
@@ -1224,6 +1224,83 @@
       capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
       display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {})
     });
+  }
+
+
+  function createProviderActivationReadinessGate(state){
+    const api = window.WeishanCommerceProviderActivationReadinessGate;
+    const raw = state && typeof state === "object" ? state : {};
+    const base = api && api.commerceProviderActivationReadinessGateContract ? api.commerceProviderActivationReadinessGateContract : {
+      version:"2.1.6",
+      moduleName:"provider_activation_readiness_gate",
+      phase:"provider_activation_readiness_gate",
+      gateStatus:"blocked",
+      mode:"readiness_only",
+      activationGoNoGo:"no-go",
+      providerActivation:"disabled",
+      realProviderConnection:"disabled",
+      realProviderSandbox:"disabled",
+      realPrice:"disabled",
+      realBookingUrl:"disabled",
+      orderMode:"disabled",
+      paymentMode:"disabled",
+      checkoutMode:"disabled",
+      redacted:true,
+      capabilities:{ canActivateProvider:false, canConnectRealProvider:false, canRunRealProviderSandbox:false, canUseNetwork:false, canConnectEndpoint:false, canReadRealProviderResult:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, canCreateOrder:false, canPay:false, canCheckout:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false },
+      display:{ title:"provider activation readiness gate", establishedLine:"provider activation readiness gate：gate 已建立", statusLine:"status: blocked", modeLine:"mode: readiness only", providerActivationLine:"provider activation disabled", providerConnectionLine:"real provider connection disabled", sandboxLine:"real provider sandbox disabled", priceLine:"real price disabled", bookingUrlLine:"real bookingUrl disabled", orderPaymentLine:"order / payment / checkout disabled", decisionLine:"activationGoNoGo: no-go", redactedLine:"redacted: true" }
+    };
+    if (api && typeof api.buildProviderActivationReadinessGateDisplay === "function") return api.buildProviderActivationReadinessGateDisplay(Object.assign({}, base, raw));
+    return Object.assign({}, base, raw, { capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}), display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {}) });
+  }
+
+  function createCredentialConsentScopeGate(state){
+    const api = window.WeishanCommerceCredentialConsentScopeGate;
+    const raw = state && typeof state === "object" ? state : {};
+    const base = api && api.commerceCredentialConsentScopeGateContract ? api.commerceCredentialConsentScopeGateContract : {
+      version:"2.1.6",
+      moduleName:"credential_consent_scope_gate",
+      phase:"credential_consent_scope_gate",
+      gateStatus:"closed",
+      mode:"draft_only",
+      realCredentialInput:"disabled",
+      realCredentialSave:"disabled",
+      realCredentialRead:"disabled",
+      credentialLifecycleRealOperations:"disabled",
+      keychainMode:"disabled",
+      safeStorageMode:"disabled",
+      encryptedLocalStoreMode:"disabled",
+      envMode:"disabled",
+      browserStorageMode:"disabled",
+      redacted:true,
+      capabilities:{ canInputCredential:false, canSaveCredential:false, canReadCredential:false, canTestConnection:false, canDeleteRealCredential:false, canRotateRealCredential:false, canExpireRealCredential:false, canUseKeychain:false, canUseSafeStorage:false, canUseEncryptedLocalStore:false, canWriteEnv:false, canWriteLocalStorage:false, canWriteSessionStorage:false, canUseNetwork:false, canConnectEndpoint:false, canCreateOrder:false, canPay:false, canUploadIdentity:false },
+      display:{ title:"credential consent scope gate", establishedLine:"credential consent scope gate：gate 已建立", statusLine:"status: closed", modeLine:"mode: draft only", inputLine:"real credential input disabled", saveLine:"real credential save disabled", readLine:"real credential read disabled", lifecycleLine:"credential deletion / rotation / expiry real operations disabled", keychainLine:"Keychain disabled", safeStorageLine:"safeStorage disabled", encryptedStoreLine:"encrypted local store disabled", envLine:".env disabled", browserStorageLine:"localStorage / sessionStorage disabled", noApprovedLine:"当前没有 consent 处于 approved_for_future_readonly", noInputLine:"UI 不提供输入 key", noSaveLine:"UI 不提供保存 key", noReadLine:"UI 不提供读取 key", noTestLine:"UI 不提供测试连接", noLifecycleLine:"UI 不提供删除 / 轮换 / 过期真实操作", draftOnlyLine:"当前仅展示只读 consent 草案", redactedLine:"redacted: true" }
+    };
+    if (api && typeof api.buildCredentialConsentScopeGateDisplay === "function") return api.buildCredentialConsentScopeGateDisplay(Object.assign({}, base, raw));
+    return Object.assign({}, base, raw, { capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}), display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {}) });
+  }
+
+  function createReadonlyAdapterContractGate(state){
+    const api = window.WeishanCommerceReadonlyAdapterContractGate;
+    const raw = state && typeof state === "object" ? state : {};
+    const base = api && api.commerceReadonlyAdapterContractGateContract ? api.commerceReadonlyAdapterContractGateContract : {
+      version:"2.1.6",
+      moduleName:"readonly_adapter_contract_gate",
+      phase:"readonly_adapter_contract_gate",
+      gateStatus:"closed",
+      mode:"contract_draft_only",
+      adapterExecution:"disabled",
+      realNetwork:"disabled",
+      realEndpoint:"disabled",
+      realProviderSandbox:"disabled",
+      realProviderResult:"disabled",
+      rawPayloadDisplay:"disabled",
+      writeAction:"disabled",
+      redacted:true,
+      capabilities:{ canExecuteAdapter:false, canExecuteReadonlyDryRun:false, canUseNetwork:false, canConnectEndpoint:false, canRunRealProviderSandbox:false, canReadRealProviderResult:false, canDisplayRawProviderPayload:false, canDisplayRealPrice:false, canDisplayAvailability:false, canDisplayBookingUrl:false, canCreateBooking:false, canSubmitOrder:false, canCheckout:false, canPay:false, canUploadIdentity:false, canSubmitBankCard:false, canSendRawToken:false, canSendRawApiKey:false },
+      display:{ title:"read-only adapter contract gate", establishedLine:"read-only adapter contract gate：gate 已建立", statusLine:"status: closed", modeLine:"mode: contract draft only", adapterExecutionLine:"adapter execution disabled", networkLine:"real network disabled", endpointLine:"real endpoint disabled", sandboxLine:"real provider sandbox disabled", providerResultLine:"real provider result disabled", rawPayloadLine:"raw payload display disabled", writeActionLine:"write action disabled", dryRunLine:"executeReadonlyDryRun 当前 disabled", noNetworkLine:"不执行真实 network", noEndpointLine:"不调用真实 provider endpoint", noResultLine:"不读取真实 provider result", withheldLine:"当前 price 仍 withheld；当前 availability 仍 withheld；当前 bookingUrl 仍 forbidden；rawProviderPayload forbidden", redactedLine:"redacted: true" }
+    };
+    if (api && typeof api.buildReadonlyAdapterContractGateDisplay === "function") return api.buildReadonlyAdapterContractGateDisplay(Object.assign({}, base, raw));
+    return Object.assign({}, base, raw, { capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}), display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {}) });
   }
 
   function createUserApiPriorityPolicyState(state){
@@ -1749,6 +1826,9 @@
       priceIntegrityTaxesFeesGate:category === "flight" ? createPriceIntegrityTaxesFeesGate() : null,
       bookingUrlDomainSafetyGate:category === "flight" ? createBookingUrlDomainSafetyGate() : null,
       manualProviderReviewWorkflow:category === "flight" ? createManualProviderReviewWorkflow() : null,
+      providerActivationReadinessGate:category === "flight" ? createProviderActivationReadinessGate() : null,
+      credentialConsentScopeGate:category === "flight" ? createCredentialConsentScopeGate() : null,
+      readonlyAdapterContractGate:category === "flight" ? createReadonlyAdapterContractGate() : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState() : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState() : null,
@@ -1817,6 +1897,9 @@
       priceIntegrityTaxesFeesGate:category === "flight" ? createPriceIntegrityTaxesFeesGate(base.priceIntegrityTaxesFeesGate) : null,
       bookingUrlDomainSafetyGate:category === "flight" ? createBookingUrlDomainSafetyGate(base.bookingUrlDomainSafetyGate) : null,
       manualProviderReviewWorkflow:category === "flight" ? createManualProviderReviewWorkflow(base.manualProviderReviewWorkflow) : null,
+      providerActivationReadinessGate:category === "flight" ? createProviderActivationReadinessGate(base.providerActivationReadinessGate) : null,
+      credentialConsentScopeGate:category === "flight" ? createCredentialConsentScopeGate(base.credentialConsentScopeGate) : null,
+      readonlyAdapterContractGate:category === "flight" ? createReadonlyAdapterContractGate(base.readonlyAdapterContractGate) : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(base.userApiPriorityPolicyState),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState(base.apiBindingSafeShellState) : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState(base.userApiProviderCatalogState) : null,
@@ -1946,6 +2029,11 @@
       readonlyProviderResultSchemaGate:safe.category === "flight" ? safe.readonlyProviderResultSchemaGate : null,
       providerResultSourceLabelGate:safe.category === "flight" ? safe.providerResultSourceLabelGate : null,
       priceIntegrityTaxesFeesGate:safe.category === "flight" ? safe.priceIntegrityTaxesFeesGate : null,
+      bookingUrlDomainSafetyGate:safe.category === "flight" ? safe.bookingUrlDomainSafetyGate : null,
+      manualProviderReviewWorkflow:safe.category === "flight" ? safe.manualProviderReviewWorkflow : null,
+      providerActivationReadinessGate:safe.category === "flight" ? safe.providerActivationReadinessGate : null,
+      credentialConsentScopeGate:safe.category === "flight" ? safe.credentialConsentScopeGate : null,
+      readonlyAdapterContractGate:safe.category === "flight" ? safe.readonlyAdapterContractGate : null,
       userApiPriorityPolicyState:safe.userApiPriorityPolicyState,
       apiBindingSafeShellState:safe.category === "flight" ? safe.apiBindingSafeShellState : null,
       userApiProviderCatalogState:safe.category === "flight" ? safe.userApiProviderCatalogState : null,

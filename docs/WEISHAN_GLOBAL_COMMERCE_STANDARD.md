@@ -1962,3 +1962,41 @@ marker:manual provider review no booking url
 marker:manual provider review object draft
 marker:manual provider review states
 marker:manual provider review audit redacted
+
+
+## v2.1.6：Provider Activation Readiness Bundle / provider 激活准备闸门组合
+
+v2.1.6 新增 `commerceProviderActivationReadinessGate.js`、`commerceCredentialConsentScopeGate.js` 和 `commerceReadonlyAdapterContractGate.js`。本阶段只建立 provider 激活准备总闸门、credential consent scope 草案闸门和 read-only adapter contract 草案闸门；当前版本仍不激活真实 provider，不输入、不保存、不读取真实 credential，不连接真实 endpoint，不运行真实 provider sandbox，不发起真实网络请求，不读取真实 provider result，不显示真实价格，不显示 availability，不显示 bookingUrl，不预订、不付款、不下单、不上传证件或银行卡资料。
+
+`查看 provider activation readiness gate` 默认折叠。展开后必须显示：provider activation readiness gate：gate 已建立、status: blocked、mode: readiness only、provider activation disabled、real provider connection disabled、real provider sandbox disabled、real price disabled、real bookingUrl disabled、order / payment / checkout disabled、activationGoNoGo: no-go、redacted: true。前置 gate 汇总必须包含 result schema gate、provider source label gate、price integrity / taxes / fees gate、bookingUrl domain safety gate、manual provider review workflow、provider endpoint allowlist gate、readonly provider sandbox gate、API binding readiness、secure storage design gate、local secure storage interface draft、key redaction rules 和 key lifecycle draft。当前阻断原因必须包含 no provider approved、manual review pending、readonly permission not granted、credential consent not collected、secure storage real implementation disabled、real key input disabled、endpoint connection disabled、real sandbox disabled、real provider result disabled、price display disabled、bookingUrl display disabled、payment / checkout / order disabled 和 identity / passport / bank card flow disabled。审计事件草案必须显示 providerActivationReadinessAuditDraft，所有事件必须 redacted: true。
+
+`查看 credential consent scope gate` 默认折叠。展开后必须显示：credential consent scope gate：gate 已建立、status: closed、mode: draft only、real credential input disabled、real credential save disabled、real credential read disabled、credential deletion / rotation / expiry real operations disabled、Keychain disabled、safeStorage disabled、encrypted local store disabled、.env disabled、localStorage / sessionStorage disabled、当前没有 consent 处于 approved_for_future_readonly、UI 不提供输入 key、UI 不提供保存 key、UI 不提供读取 key、UI 不提供测试连接、当前仅展示只读 consent 草案、redacted: true。credential scope 草案只能包含 readonly_search、readonly_price_query、readonly_availability_query、readonly_provider_notice 以及 no_booking、no_payment、no_order、no_profile_write、no_identity_upload、no_bank_card_submit 等限制范围；不得开放 booking、payment、order、profile write、identity upload 或 bank card submit。审计事件草案必须显示 credentialConsentScopeAuditDraft，所有事件必须 redacted: true。
+
+`查看 read-only adapter contract gate` 默认折叠。展开后必须显示：read-only adapter contract gate：gate 已建立、status: closed、mode: contract draft only、adapter execution disabled、real network disabled、real endpoint disabled、real provider sandbox disabled、real provider result disabled、raw payload display disabled、write action disabled、executeReadonlyDryRun 当前 disabled、不执行真实 network、不调用真实 provider endpoint、不读取真实 provider result、当前 price 仍 withheld、当前 availability 仍 withheld、当前 bookingUrl 仍 forbidden、rawProviderPayload forbidden、redacted: true。只读方法草案可包含 planReadonlySearch、buildReadonlyRequest、validateReadonlyRequest、executeReadonlyDryRun、normalizeReadonlyResult、validateResultSchema、validateSourceLabel、validatePriceIntegrity、validateBookingUrlSafety、emitReadonlyAuditEvent；永久禁止方法必须包含 createBooking、submitOrder、checkout、pay、uploadIdentityDocument、uploadPassport、submitBankCard、writeProviderProfile、sendRawToken 和 sendRawApiKey。审计事件草案必须显示 readonlyAdapterContractAuditDraft，所有事件必须 redacted: true。
+
+本阶段必须联动显示：manual provider review workflow、bookingUrl domain safety gate、price integrity / taxes / fees gate、provider result source label gate、只读 provider result schema gate、只读 provider sandbox gate、provider endpoint allowlist gate、API 绑定准备状态、密钥脱敏规则和本机安全存储。即使所有草案面板可见，也不得自动放开 provider activation、credential input / save / read、Keychain、safeStorage、endpoint、network、provider sandbox、provider result、price、availability、bookingUrl、booking、payment、checkout、order、identity upload 或 bank card submit。
+
+marker:provider activation readiness gate
+marker:provider activation readiness blocked
+marker:provider activation readiness no go
+marker:provider activation readiness no real provider
+marker:provider activation readiness no price
+marker:provider activation readiness no booking url
+marker:provider activation readiness audit redacted
+
+marker:credential consent scope gate
+marker:credential consent scope closed
+marker:credential consent no real credential
+marker:credential consent no keychain safestorage
+marker:credential consent no env browser storage
+marker:credential consent readonly scopes
+marker:credential consent audit redacted
+
+marker:read only adapter contract gate
+marker:read only adapter contract closed
+marker:read only adapter no network
+marker:read only adapter no endpoint
+marker:read only adapter no real result
+marker:read only adapter no booking url
+marker:read only adapter no write action
+marker:read only adapter audit redacted
