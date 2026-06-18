@@ -2041,9 +2041,9 @@ marker:offline provider fixture validation harness audit redacted
 
 v2.1.9 新增 `commerceProviderComplianceDecisionEngine.js`、`commerceOfflineProviderFixtureRunner.js`、`commerceNoNetworkSentinelAudit.js`、`commerceProviderComplianceEvidenceReport.js` 和 `scripts/commerce-provider-offline-fixture-runner.js`。本阶段只建立离线合规判定、离线 fixture 执行、自检式无网络哨兵审计和证据包汇总；当前版本仍不激活真实 provider，不读取或保存真实 API key，不连接真实 endpoint，不发起真实网络请求，不读取真实 provider result，不显示真实价格，不显示 availability，不显示 bookingUrl，不预订、不付款、不下单、不上传证件或银行卡资料。
 
-## v2.1.10：Local Safety Evidence Console / 本地安全证据台
+## v2.1.11：Local Safety Evidence Console / 本地安全证据台
 
-v2.1.10 新增 `commerceLocalSafetyEvidenceConsole.js`、`commerceManualUiAcceptanceAssistant.js`、`commerceNoSecretPersistenceGuard.js`、`settingsAuthLocalSecurityEvidence.js` 和 `scripts/security-no-secret-persistence.js`。本阶段只把 release 状态、Settings/Auth 本地模式、Commerce 离线合规、provider no-go、fixture runner、no-secret persistence guard 和安全红线汇总为本地证据；当前版本仍不进入真实 API、真实 key、真实 endpoint、真实 provider、真实网络、真实价格、真实 bookingUrl、预订、付款或下单。
+v2.1.11 新增 `commerceLocalSafetyEvidenceConsole.js`、`commerceManualUiAcceptanceAssistant.js`、`commerceNoSecretPersistenceGuard.js`、`settingsAuthLocalSecurityEvidence.js` 和 `scripts/security-no-secret-persistence.js`。本阶段只把 release 状态、Settings/Auth 本地模式、Commerce 离线合规、provider no-go、fixture runner、no-secret persistence guard 和安全红线汇总为本地证据；当前版本仍不进入真实 API、真实 key、真实 endpoint、真实 provider、真实网络、真实价格、真实 bookingUrl、预订、付款或下单。
 
 - marker:local safety evidence console
 - marker:local safety evidence console local only

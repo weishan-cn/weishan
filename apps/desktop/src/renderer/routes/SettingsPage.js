@@ -222,10 +222,10 @@
   function settingsNoSecretPersistenceGuardPanel(){
     const api = window.WeishanCommerceNoSecretPersistenceGuard;
     const state = api && typeof api.buildNoSecretPersistenceGuard === "function" ? api.buildNoSecretPersistenceGuard() : {
-      display:{ title:"no-secret persistence guard", establishedLine:"guard 已建立", statusLine:"status: local static scan only", modeLine:"mode: no real secret access", realKeyLine:"real API key read disabled", keychainLine:"Keychain access disabled", safeStorageLine:"safeStorage access disabled", envLine:".env secret write forbidden", localStorageLine:"localStorage secret write forbidden", sessionStorageLine:"sessionStorage secret write forbidden", rawPasswordLine:"raw password persistence forbidden", rawTokenLine:"raw token display forbidden", rawApiKeyLine:"rawApiKey display forbidden", scanResultLine:"scanResult: PASS", redactedLine:"redacted: true" },
+      display:{ title:"no-secret persistence guard", establishedLine:"guard 已建立", statusLine:"status: local static scan only", modeLine:"mode: no real secret access", realKeyLine:"real API key read disabled", keychainLine:"Keychain access disabled", safeStorageLine:"safeStorage access disabled", envLine:".env secret write forbidden", localStorageLine:"localStorage secret write forbidden", sessionStorageLine:"sessionStorage secret write forbidden", rawPasswordLine:"raw password persistence forbidden", rawTokenLine:"raw token display forbidden", rawApiKeyLine:"rawApiKey display forbidden", providerCredentialLine:"provider credential persistence forbidden", endpointSecretLine:"endpoint secret persistence forbidden", scanResultLine:"scanResult: PASS", redactedLine:"redacted: true" },
       scanScope:["repo source files", "renderer modules", "account module", "commerce modules", "tests", "scripts", "package scripts", "docs / standards", "exclude node_modules", "exclude dist", "exclude user app data", "exclude Keychain", "exclude safeStorage", "exclude real environment secrets"],
-      blockedPatterns:["localStorage.setItem apiKey", "localStorage.setItem token", "localStorage.setItem password", "sessionStorage.setItem apiKey", "sessionStorage.setItem token", "sessionStorage.setItem password", "writeFile .env", "rawApiKey display", "rawToken display", "raw password display", "Keychain secret read", "safeStorage secret read"],
-      currentScanResult:{ scanResult:"PASS", blockedPatternCount:0, realSecretReadCount:0, keychainAccessCount:0, safeStorageAccessCount:0, envSecretWriteCount:0, localStorageSecretWriteCount:0, sessionStorageSecretWriteCount:0, rawPasswordPersistenceCount:0, rawApiKeyDisplayCount:0, redacted:true },
+      blockedPatterns:["localStorage.setItem apiKey", "localStorage.setItem token", "localStorage.setItem password", "sessionStorage.setItem apiKey", "sessionStorage.setItem token", "sessionStorage.setItem password", "writeFile .env", "rawApiKey display", "rawToken display", "raw password display", "Keychain secret read", "safeStorage secret read", "provider credential persisted", "endpoint secret persisted"],
+      currentScanResult:{ scanResult:"PASS", blockedPatternCount:0, realSecretReadCount:0, keychainAccessCount:0, safeStorageAccessCount:0, envSecretWriteCount:0, localStorageSecretWriteCount:0, sessionStorageSecretWriteCount:0, rawPasswordPersistenceCount:0, rawApiKeyDisplayCount:0, providerCredentialPersistedCount:0, endpointSecretPersistedCount:0, redacted:true },
       audit:{ noSecretPersistenceGuardAuditDraft:{ eventType:"NO_SECRET_PERSISTENCE_GUARD_SCAN_DRAFT", redacted:true } }
     };
     const display = state.display || {};
@@ -245,6 +245,8 @@
         <p>${esc(display.rawPasswordLine || "raw password persistence forbidden")}</p>
         <p>${esc(display.rawTokenLine || "raw token display forbidden")}</p>
         <p>${esc(display.rawApiKeyLine || "rawApiKey display forbidden")}</p>
+        <p>${esc(display.providerCredentialLine || "provider credential persistence forbidden")}</p>
+        <p>${esc(display.endpointSecretLine || "endpoint secret persistence forbidden")}</p>
         <p>${esc(display.scanResultLine || "scanResult: PASS")}</p>
         <p>${esc(display.redactedLine || "redacted: true")}</p>
         <h4>scan scope 草案</h4>${simpleList(state.scanScope || [])}
@@ -259,7 +261,7 @@
     const api = window.WeishanSettingsAuthLocalSecurityEvidence;
     const state = api && typeof api.buildSettingsAuthLocalSecurityEvidence === "function" ? api.buildSettingsAuthLocalSecurityEvidence() : {
       display:{ title:"settings auth local security evidence", establishedLine:"evidence 已建立", statusLine:"status: local auth evidence only", modeLine:"mode: no cloud auth", registerLine:"local register enabled", loginLine:"local login enabled", recoveryLine:"local recovery notice enabled", verifierLine:"passwordVerifier enabled", migrationLine:"legacy plain password migration compatible", emailLine:"real email sending disabled", networkLine:"real network disabled", keyLine:"real key read disabled", redactedLine:"redacted: true" },
-      accountLocalObjectDraft:{ accountId:"local account id", emailAlias:"local email alias", passwordVerifier:"enabled", schemaVersion:"2.1.10", redacted:true },
+      accountLocalObjectDraft:{ accountId:"local account id", emailAlias:"local email alias", passwordVerifier:"enabled", schemaVersion:"2.1.11", redacted:true },
       recoveryNoticeDraft:["本地模式不联网", "本地模式不发邮件", "本地模式不读取密钥", "本地模式不连接云账号", "找回密码不会清空表单", "找回密码不会跳路由", "找回密码不会发送真实邮件", "找回密码不会读取 API key", "找回密码不会触发 provider 连接"],
       authSafetyBoundaries:["raw password display forbidden", "raw password persistence forbidden", "passwordVerifier only", "raw token display forbidden", "rawApiKey display forbidden", "real API key input disabled", "real endpoint test disabled", "Keychain disabled", "safeStorage disabled", "cloud auth disabled", "provider auth disabled"],
       audit:{ settingsAuthLocalSecurityEvidenceAuditDraft:{ eventType:"SETTINGS_AUTH_LOCAL_SECURITY_EVIDENCE_DRAFT", redacted:true } }

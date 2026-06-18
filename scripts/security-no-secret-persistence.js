@@ -33,6 +33,29 @@ const allowedFixturePatterns = [
   /local-ui-check-v219@example\.local/
 ];
 
+const allowedPolicyTextPatterns = [
+  /Keychain disabled/i,
+  /Keychain access disabled/i,
+  /safeStorage disabled/i,
+  /safeStorage access disabled/i,
+  /endpoint connection disabled/i,
+  /provider credential persistence forbidden/i,
+  /endpoint secret persistence forbidden/i,
+  /localStorage secret write forbidden/i,
+  /sessionStorage secret write forbidden/i,
+  /real API key read disabled/i,
+  /credential input disabled/i
+];
+
+const dangerousExecutablePatterns = [
+  /localStorage\s*\.\s*setItem\s*\(/i,
+  /sessionStorage\s*\.\s*setItem\s*\(/i,
+  /writeFile(?:Sync)?\s*\(/i,
+  /keytar\s*\./i,
+  /safeStorage\s*\.\s*(?:encryptString|decryptString)\s*\(/i,
+  /security\s+(?:find|add)-generic-password/i
+];
+
 const blockedChecks = [
   {
     name:"localStorage.setItem apiKey",
@@ -96,18 +119,20 @@ const blockedChecks = [
   },
   {
     name:"provider credential persisted",
-    counter:"localStorageSecretWriteCount",
-    pattern:/(?:providerCredential|credentialSecret|secretRef)\s*.*(?:localStorage|sessionStorage|writeFile)/i
+    counter:"providerCredentialPersistedCount",
+    pattern:/(?:(?:localStorage|sessionStorage)\s*\.\s*setItem\s*\([^;\n]*(?:providerCredential|credentialSecret|secretRef|providerSecret)|writeFile(?:Sync)?\s*\([^;\n]*(?:providerCredential|credentialSecret|secretRef|providerSecret))/i
   },
   {
     name:"endpoint secret persisted",
-    counter:"envSecretWriteCount",
-    pattern:/(?:endpointSecret|providerSecret)\s*.*(?:writeFile|localStorage|sessionStorage)/i
+    counter:"endpointSecretPersistedCount",
+    pattern:/(?:(?:localStorage|sessionStorage)\s*\.\s*setItem\s*\([^;\n]*(?:endpointSecret|providerEndpointSecret)|writeFile(?:Sync)?\s*\([^;\n]*(?:endpointSecret|providerEndpointSecret))/i
   }
 ];
 
 const counters = {
   blockedPatternCount:0,
+  allowedPolicyTextCount:0,
+  allowedTestAssertionCount:0,
   allowedTestFixtureCount:0,
   realSecretReadCount:0,
   keychainAccessCount:0,
@@ -116,7 +141,9 @@ const counters = {
   localStorageSecretWriteCount:0,
   sessionStorageSecretWriteCount:0,
   rawPasswordPersistenceCount:0,
-  rawApiKeyDisplayCount:0
+  rawApiKeyDisplayCount:0,
+  providerCredentialPersistedCount:0,
+  endpointSecretPersistedCount:0
 };
 
 function listTrackedFiles() {
@@ -143,7 +170,56 @@ function isDocumentationOnlyLine(line) {
   return /(?:未启用|未开放|未连接|未实现|禁止|不得|不会|不能|no real|disabled|forbidden|not enabled|not connected|not implemented|redacted)/i.test(line);
 }
 
+function isAllowedPolicyTextLine(line) {
+  return allowedPolicyTextPatterns.some((pattern) => pattern.test(line)) || isDocumentationOnlyLine(line);
+}
+
+function isExecutableDangerousLine(line) {
+  return dangerousExecutablePatterns.some((pattern) => pattern.test(line));
+}
+
+function isScannerRuleMetadataLine(file, line) {
+  return file.replace(/\\/g, "/") === "scripts/security-no-secret-persistence.js"
+    && (/^\s*(?:name|counter|pattern|sample)\s*:/.test(line) || /\bsample\s*:/.test(line));
+}
+
+function matchingBlockedChecks(line) {
+  return blockedChecks.filter((check) => check.pattern.test(line));
+}
+
+function runSelfTests() {
+  const allowedPolicySamples = [
+    "Keychain disabled",
+    "safeStorage disabled",
+    "endpoint connection disabled",
+    "provider credential persistence forbidden",
+    "endpoint secret persistence forbidden",
+    "localStorage secret write forbidden",
+    "sessionStorage secret write forbidden"
+  ];
+  allowedPolicySamples.forEach((sample) => {
+    if (!isAllowedPolicyTextLine(sample)) throw new Error("allowed policy text not recognized: " + sample);
+    counters.allowedPolicyTextCount += 1;
+  });
+
+  const dangerousSamples = [
+    { name:"localStorage.setItem apiKey", sample:'localStorage.setItem("apiKey", "x")' },
+    { name:"sessionStorage.setItem token", sample:'sessionStorage.setItem("token", "x")' },
+    { name:"safeStorage secret read", sample:'safeStorage.decryptString(apiKeyBuffer)' },
+    { name:"Keychain secret read", sample:'keytar.getPassword("provider", "apiKey")' },
+    { name:"writeFile .env", sample:'writeFileSync(".env", "API_KEY=x")' },
+    { name:"provider credential persisted", sample:'localStorage.setItem("providerCredential", "x")' },
+    { name:"endpoint secret persisted", sample:'writeFileSync("config.json", endpointSecret)' }
+  ];
+  dangerousSamples.forEach(({ name, sample }) => {
+    const found = matchingBlockedChecks(sample).some((check) => check.name === name);
+    if (!found) throw new Error("dangerous sample not detected: " + name);
+    counters.allowedTestAssertionCount += 1;
+  });
+}
+
 function main() {
+  runSelfTests();
   const files = listTrackedFiles().filter(shouldScan);
   const violations = [];
 
@@ -169,9 +245,18 @@ function main() {
         counters.allowedTestFixtureCount += 1;
         return;
       }
-      if (isDocumentationOnlyLine(line)) return;
-      blockedChecks.forEach((check) => {
-        if (!check.pattern.test(line)) return;
+      if (isScannerRuleMetadataLine(normalized, line)) return;
+
+      const matches = matchingBlockedChecks(line);
+      if (!matches.length) {
+        if (isAllowedPolicyTextLine(line)) counters.allowedPolicyTextCount += 1;
+        return;
+      }
+      if (isAllowedPolicyTextLine(line) && !isExecutableDangerousLine(line)) {
+        counters.allowedPolicyTextCount += 1;
+        return;
+      }
+      matches.forEach((check) => {
         counters[check.counter] += 1;
         counters.blockedPatternCount += 1;
         violations.push({ file, line:index + 1, check:check.name });
@@ -184,6 +269,8 @@ function main() {
   console.log("network=disabled");
   console.log("scannedFileCount=" + files.length);
   console.log("blockedPatternCount=" + counters.blockedPatternCount);
+  console.log("allowedPolicyTextCount=" + counters.allowedPolicyTextCount);
+  console.log("allowedTestAssertionCount=" + counters.allowedTestAssertionCount);
   console.log("allowedTestFixtureCount=" + counters.allowedTestFixtureCount);
   console.log("realSecretReadCount=" + counters.realSecretReadCount);
   console.log("keychainAccessCount=" + counters.keychainAccessCount);
@@ -193,6 +280,8 @@ function main() {
   console.log("sessionStorageSecretWriteCount=" + counters.sessionStorageSecretWriteCount);
   console.log("rawPasswordPersistenceCount=" + counters.rawPasswordPersistenceCount);
   console.log("rawApiKeyDisplayCount=" + counters.rawApiKeyDisplayCount);
+  console.log("providerCredentialPersistedCount=" + counters.providerCredentialPersistedCount);
+  console.log("endpointSecretPersistedCount=" + counters.endpointSecretPersistedCount);
   console.log("redacted=true");
 
   violations.slice(0, 40).forEach((violation) => {
