@@ -1989,11 +1989,13 @@
     const origin = String(normalized.originText || "").trim();
     const destination = String(normalized.destinationText || "").trim();
     const date = String(normalized.dateText || normalized.timing || "").trim();
+    const dateDisplay = date.replace(/^(\d{1,2})月(\d{1,2})日$/, "$1 月 $2 日");
     const lowPrice = /最便宜|低价|便宜/.test(raw) || /低价优先/.test(String(normalized.constraints || ""));
     return {
       origin,
       destination,
       date,
+      dateDisplay,
       goal:lowPrice ? "低价优先" : "按条件筛选"
     };
   }
@@ -3722,7 +3724,7 @@
     const gate = task && task.providerEndpointAllowlistGate || null;
     if (api && typeof api.buildProviderEndpointAllowlistGateDisplay === "function") return api.buildProviderEndpointAllowlistGateDisplay(gate);
     return gate && typeof gate === "object" ? gate : {
-      gateVersion:"2.1.2",
+      gateVersion:"2.1.3",
       gateStatus:"closed",
       allowlistStatus:"draft",
       display:{ title:"provider endpoint allowlist 闸门", establishedLine:"endpoint allowlist 闸门：已建立", gateStatusLine:"闸门状态：关闭", allowlistStatusLine:"allowlist 状态：草案", endpointConnectionLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", providerSandboxLine:"provider sandbox：未开放", priceLine:"真实价格读取：未开放", bookingUrlLine:"bookingUrl 读取：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", readonlyProviderSandboxGateLine:"只读 provider sandbox gate：已建立", realSandboxRunLine:"真实 sandbox 运行：未开放", realProviderConnectionLine:"真实 provider 连接：未开放", realNetworkLine:"真实网络：未开放", nextStepLine:"只读 provider sandbox gate：已建立。下一步：只读 provider result schema gate；只读 provider result schema gate：已建立。下一步：provider result source label gate", safetyLine:"当前版本仍不能连接真实 endpoint、不能测试连接、不能联网、不能读取真实价格" },
@@ -3786,7 +3788,7 @@
     const gate = task && task.readonlyProviderSandboxGate || null;
     if (api && typeof api.buildReadonlyProviderSandboxGateDisplay === "function") return api.buildReadonlyProviderSandboxGateDisplay(gate);
     return gate && typeof gate === "object" ? gate : {
-      version:"2.1.2",
+      version:"2.1.3",
       gateStatus:"closed",
       sandboxStatus:"draft_only",
       display:{ title:"只读 provider sandbox gate", establishedLine:"只读 provider sandbox gate：已建立", gateStatusLine:"gate 状态：关闭", sandboxStatusLine:"sandbox 状态：草案", realSandboxRunLine:"真实 sandbox 运行：未开放", realProviderConnectionLine:"真实 provider 连接：未开放", endpointConnectionLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", priceLine:"真实价格读取：未开放", availabilityLine:"availability 读取：未开放", bookingUrlLine:"bookingUrl 读取：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", nextStepLine:"下一步：只读 provider result schema gate；只读 provider result schema gate：已建立。下一步：provider result source label gate", safetyLine:"当前版本仍不能运行真实 sandbox、不能连接真实 endpoint、不能联网、不能读取真实价格" },
@@ -3854,10 +3856,10 @@
     const gate = task && task.readonlyProviderResultSchemaGate || null;
     if (api && typeof api.buildReadonlyProviderResultSchemaGateDisplay === "function") return api.buildReadonlyProviderResultSchemaGateDisplay(gate);
     return gate && typeof gate === "object" ? gate : {
-      version:"2.1.2",
+      version:"2.1.3",
       gateStatus:"closed",
       schemaStatus:"draft_only",
-      display:{ title:"只读 provider result schema gate", establishedLine:"只读 provider result schema gate：已建立", gateStatusLine:"gate 状态：关闭", schemaStatusLine:"schema 状态：草案", realProviderResultLine:"真实 provider result 读取：未开放", realPriceLine:"真实价格显示：未开放", availabilityLine:"availability 显示：未开放", bookingUrlLine:"bookingUrl 显示：未开放", rawPayloadLine:"raw provider payload 显示：禁止", realSandboxLine:"真实 sandbox 运行：未开放", endpointLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", nextStepLine:"下一步：provider result source label gate", safetyLine:"当前版本仍不能读取真实 provider result、不能显示真实价格、不能显示 bookingUrl。" },
+      display:{ title:"只读 provider result schema gate", establishedLine:"只读 provider result schema gate：已建立", gateStatusLine:"gate 状态：关闭 / closed", schemaStatusLine:"schema 状态：草案 / draft", realProviderResultLine:"真实 provider result 读取：未开放", realPriceLine:"真实价格显示：未开放", availabilityLine:"availability 显示：未开放", bookingUrlLine:"bookingUrl 显示：未开放", rawPayloadLine:"raw provider payload 显示：禁止", realSandboxLine:"真实 sandbox 运行：未开放", endpointLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", nextStepLine:"下一步：provider result source label gate", safetyLine:"当前版本仍不能读取真实 provider result、不能显示真实价格、不能显示 bookingUrl。" },
       resultTypesDraft:{ resultTypes:["flight_offer", "hotel_offer", "product_offer", "local_service_offer", "ticket_offer", "provider_notice", "no_result", "blocked_result", "schema_error"], currentEnabledTypes:["none"], currentDraftOnlyTypes:["flight_offer", "hotel_offer", "product_offer", "local_service_offer", "ticket_offer", "provider_notice", "no_result", "blocked_result", "schema_error"] },
       fieldAllowlist:{ commonAllowedFields:["resultId", "resultType", "providerId", "providerName", "providerCategory", "sourceType", "sourceUrlHost", "title", "description", "currency", "price", "priceDisplayMode", "taxesAndFees", "totalPrice", "availability", "updatedAt", "providerReferenceId", "readonlyEvidence", "riskLevel", "redacted", "sandboxOnly", "draftOnly"], flightAllowedFields:["origin", "destination", "departureDate", "returnDate", "carrierName", "flightNumber", "cabinClass", "baggageInfo", "refundPolicy", "duration", "stops"], hotelAllowedFields:["city", "checkInDate", "checkOutDate", "hotelName", "roomType", "cancellationPolicy", "breakfastIncluded", "locationSummary"], productAllowedFields:["productName", "brand", "model", "specs", "shippingInfo", "sellerName", "warrantyInfo"], localServiceAllowedFields:["serviceName", "locationSummary", "availableDate", "timeSlot", "ticketType", "refundPolicy"], currentEnabledFields:["none"], currentDisabledFields:["price", "totalPrice", "taxesAndFees", "availability", "bookingUrl", "sourceUrl", "rawProviderPayload"] },
       fieldBlocklist:{ alwaysForbiddenFields:["bookingUrl", "checkoutUrl", "paymentUrl", "orderUrl", "createOrderUrl", "passengerIdentity", "passportNumber", "identityNumber", "bankCardNumber", "rawApiKey", "rawToken", "rawHeaders", "rawRequest", "rawResponse"] },
@@ -3912,6 +3914,7 @@
       + '<h5>result 风险扫描草案</h5>' + listHtml(risk.riskSignals || []) + '<p>currentRiskLevel：' + esc(risk.currentRiskLevel || 'blocked') + '</p>'
       + '<h5>result 审计事件草案</h5>' + listHtml(audit.events || [])
       + '<h5>result 审计规则</h5>' + listHtml(audit.auditRules || []) + '<p>所有事件必须 redacted: true</p>'
+      + '<h5>联动关系</h5>' + listHtml(['sandbox gate', 'endpoint allowlist gate', 'key 生命周期', '脱敏规则', '本机安全存储', 'API 绑定准备状态'])
       + '<p>' + esc(display.nextStepLine || '下一步：provider result source label gate') + '</p>'
       + '<p>' + esc(display.safetyLine || '当前版本仍不能读取真实 provider result、不能显示真实价格、不能显示 bookingUrl。') + '</p>'
       + '</section>';
@@ -3943,6 +3946,7 @@
           <p>出发地：${esc(fields.origin)}</p>
           <p>目的地：${esc(fields.destination)}</p>
           <p>出发日期：${esc(fields.date)}</p>
+          <p>日期：${esc(fields.dateDisplay || fields.date)}</p>
           <p>排序：${esc(fields.goal)}</p>
           <div class="commerce-search-mode-summary" aria-label="当前搜索模式">
             <h5>${esc(searchModeDisplay.title || "当前搜索模式")}</h5>

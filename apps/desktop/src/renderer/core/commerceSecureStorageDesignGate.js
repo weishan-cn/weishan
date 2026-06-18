@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GATE_VERSION = "2.1.2";
+  const GATE_VERSION = "2.1.3";
   const GATE_NAME = "secure_storage_design_gate";
   const PHASE = "design_gate";
 
@@ -44,13 +44,13 @@
   ];
 
   const implementationMilestones = [
-    "v2.1.2：安全存储设计闸门，默认关闭",
-    "v2.1.2：本机安全存储接口草案，已建立，但仍不写真实 key",
-    "v2.1.2：密钥脱敏与日志防泄露规则，已建立，但仍不写真实 key",
-    "v2.1.2：key 删除 / 轮换 / 过期机制草案",
-    "v2.1.2：provider endpoint allowlist 闸门；只读 provider sandbox gate 已建立；下一步只读 provider result schema gate",
-    "v2.1.2：只读沙箱连接闸门",
-    "v2.1.2：人工确认后，才考虑真实只读 key 输入"
+    "v2.1.3：安全存储设计闸门，默认关闭",
+    "v2.1.3：本机安全存储接口草案，已建立，但仍不写真实 key",
+    "v2.1.3：密钥脱敏与日志防泄露规则，已建立，但仍不写真实 key",
+    "v2.1.3：key 删除 / 轮换 / 过期机制草案",
+    "v2.1.3：provider endpoint allowlist 闸门；只读 provider sandbox gate 已建立；下一步只读 provider result schema gate",
+    "v2.1.3：只读沙箱连接闸门",
+    "v2.1.3：人工确认后，才考虑真实只读 key 输入"
   ];
 
   const threatModel = [

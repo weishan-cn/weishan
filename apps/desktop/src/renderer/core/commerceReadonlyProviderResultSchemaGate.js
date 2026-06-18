@@ -1,5 +1,5 @@
 (function(){
-  const READONLY_PROVIDER_RESULT_SCHEMA_GATE_VERSION = "2.1.2";
+  const READONLY_PROVIDER_RESULT_SCHEMA_GATE_VERSION = "2.1.3";
 
   const resultTypes = [
     "flight_offer",
@@ -260,8 +260,8 @@
     display:{
       title:"只读 provider result schema gate",
       establishedLine:"只读 provider result schema gate：已建立",
-      gateStatusLine:"gate 状态：关闭",
-      schemaStatusLine:"schema 状态：草案",
+      gateStatusLine:"gate 状态：关闭 / closed",
+      schemaStatusLine:"schema 状态：草案 / draft",
       realProviderResultLine:"真实 provider result 读取：未开放",
       realPriceLine:"真实价格显示：未开放",
       availabilityLine:"availability 显示：未开放",
