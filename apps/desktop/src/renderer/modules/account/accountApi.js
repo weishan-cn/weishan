@@ -56,6 +56,31 @@
     return { ok:true, email, name, password };
   }
 
+  function passwordVerifier(email, password) {
+    const raw = normalizeEmail(email) + "::" + String(password || "");
+    let hash = 2166136261;
+    for (let i = 0; i < raw.length; i += 1) {
+      hash ^= raw.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return "local-v1:" + (hash >>> 0).toString(16);
+  }
+
+  function matchesPassword(saved, email, password) {
+    if (!saved) return false;
+    if (saved.passwordVerifier) return saved.passwordVerifier === passwordVerifier(email, password);
+    return saved.password === password;
+  }
+
+  function withoutSensitiveProfileFields(profile) {
+    const next = Object.assign({}, profile || {});
+    delete next.password;
+    delete next.token;
+    delete next.secret;
+    delete next.apiKey;
+    return next;
+  }
+
   function register(input) {
     const v = validateInput(input || {}, "register");
     if (!v.ok) return v;
@@ -69,7 +94,7 @@
     const nextProfile = {
       email:v.email,
       name:v.name,
-      password:v.password,
+      passwordVerifier:passwordVerifier(v.email, v.password),
       accountId,
       emailVerified:false,
       authenticatorEnabled:false,
@@ -106,8 +131,14 @@
       return { ok:false, error:"本地没有这个普通用户账号。请先点击“注册并登录”。" };
     }
 
-    if (saved.password !== v.password) {
+    if (!matchesPassword(saved, v.email, v.password)) {
       return { ok:false, error:"邮箱或密码不匹配。" };
+    }
+
+    if (saved.password) {
+      window.WeishanStore.write("account.profile." + v.email, Object.assign(withoutSensitiveProfileFields(saved), {
+        passwordVerifier:passwordVerifier(v.email, v.password)
+      }));
     }
 
     const session = {
@@ -144,20 +175,21 @@
 
   function recover(input) {
     const email = normalizeEmail((input && input.email) || "");
-    if (!email) return { ok:false, error:"请输入邮箱。" };
+    const notice = "本地测试账号不支持客户端找回密码；后台管理员账号请到后台管理服务处理。当前不会联网、不会发送邮件、不会读取密钥。";
+    if (!email) return { ok:false, error:"请输入邮箱。" + notice };
 
     if (isReservedAdminEmail(email)) {
-      return { ok:false, error:"后台管理员账号不在客户端找回。请到后台管理服务处理。" };
+      return { ok:false, error:notice };
     }
 
     const saved = profile(email);
     if (!saved) {
-      return { ok:false, error:"本地没有该普通用户账号。正式云账号以后通过邮箱验证找回。" };
+      return { ok:false, error:"本地没有该普通用户账号。" + notice };
     }
 
     return {
       ok:true,
-      message:"本地测试账号存在。正式版会接邮箱验证 + Authenticator 恢复码重置。"
+      message:"本地测试账号存在，但当前客户端不执行真实找回密码。" + notice
     };
   }
 
