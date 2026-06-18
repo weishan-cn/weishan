@@ -535,7 +535,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.getByText("当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单").first()).toBeVisible();
   });
 
-  test("v2.1.3 commerce detail renders secure key storage plan body", async () => {
+  test("v2.1.4 commerce detail renders secure key storage plan body", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "commerce");
     await page.locator(".commerce-input").fill(runId + "-SECURE-KEY-BODY 7月15日上海到成都最便宜的机票");
@@ -600,7 +600,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.1.3 renders key delete rotate expiry draft and keeps lifecycle operations blocked", async () => {
+  test("v2.1.4 renders key delete rotate expiry draft and keeps lifecycle operations blocked", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "commerce");
     await page.locator(".commerce-input").fill(runId + "-KEY-LIFECYCLE 7月15日上海到成都最便宜的机票");
@@ -663,7 +663,7 @@ test.describe.serial("commerce agent workbench", () => {
     });
     expect(lifecycleContract.assertSafe).toBe(true);
     expect(lifecycleContract.draft).toEqual(expect.objectContaining({
-      version:"2.1.3",
+      version:"2.1.4",
       draftStatus:"draft_only",
       implementationStatus:"not_implemented",
       realKeyDelete:"disabled",
@@ -701,7 +701,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(lifecycleContract.draft.stateMachine.transitions.every((item) => item.status === "blocked")).toBe(true);
   });
 
-  test("v2.1.3 provider endpoint allowlist gate stays draft-only and blocked", async () => {
+  test("v2.1.4 provider endpoint allowlist gate stays draft-only and blocked", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "commerce");
     await page.locator(".commerce-input").fill(runId + "-ENDPOINT-GATE 7月15日上海到成都最便宜的机票");
@@ -768,7 +768,7 @@ test.describe.serial("commerce agent workbench", () => {
     });
     expect(contract.safe).toBe(true);
     expect(contract.gate).toEqual(expect.objectContaining({
-      gateVersion:"2.1.3",
+      gateVersion:"2.1.4",
       phase:"provider_endpoint_allowlist_gate",
       gateStatus:"closed",
       allowlistStatus:"draft",
@@ -805,7 +805,7 @@ test.describe.serial("commerce agent workbench", () => {
   });
 
 
-  test("v2.1.3 readonly provider sandbox gate stays draft-only and blocked", async () => {
+  test("v2.1.4 readonly provider sandbox gate stays draft-only and blocked", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "commerce");
     await page.locator(".commerce-input").fill(runId + "-READONLY-SANDBOX-GATE 7月15日上海到成都最便宜的机票");
@@ -891,7 +891,7 @@ test.describe.serial("commerce agent workbench", () => {
     });
     expect(contract.safe).toBe(true);
     expect(contract.gate).toEqual(expect.objectContaining({
-      version:"2.1.3",
+      version:"2.1.4",
       phase:"readonly_provider_sandbox_gate",
       gateStatus:"closed",
       sandboxStatus:"draft_only",
@@ -935,7 +935,7 @@ test.describe.serial("commerce agent workbench", () => {
 
 
 
-  test("v2.1.3 readonly provider result schema gate stays draft-only and blocked", async () => {
+  test("v2.1.4 readonly provider result schema gate stays draft-only and blocked", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "commerce");
     await page.locator(".commerce-input").fill(runId + "-READONLY-RESULT-SCHEMA-GATE 7月15日上海到成都最便宜的机票");
@@ -1123,7 +1123,7 @@ test.describe.serial("commerce agent workbench", () => {
     });
     expect(contract.safe).toBe(true);
     expect(contract.gate).toEqual(expect.objectContaining({
-      version:"2.1.3",
+      version:"2.1.4",
       phase:"readonly_provider_result_schema_gate",
       gateStatus:"closed",
       schemaStatus:"draft_only",
@@ -1179,6 +1179,60 @@ test.describe.serial("commerce agent workbench", () => {
     expect(contract.raw.rawPayloadDisplay).toBe("forbidden");
     expect(contract.risk.currentRiskLevel).toBe("blocked");
     expect(contract.audit.redacted).toBe(true);
+  });
+
+  test("v2.1.4 provider source label and price integrity gates stay draft-only and blocked", async () => {
+    await resetCommerceTasks(page);
+    await gotoRoute(page, "commerce");
+    await page.locator(".commerce-input").fill(runId + "-SOURCE-LABEL-PRICE-INTEGRITY 7 月 15 日上海到成都最便宜的机票");
+    await page.getByRole("button", { name:"生成采购计划" }).click();
+    const detail = page.locator(".commerce-detail").first();
+    await expect(detail).toContainText("查看 provider result source label gate");
+    await expect(detail).toContainText("查看 price integrity / taxes / fees gate");
+    const contracts = await page.evaluate(() => {
+      const sourceApi = window.WeishanCommerceProviderResultSourceLabelGate;
+      const priceApi = window.WeishanCommercePriceIntegrityTaxesFeesGate;
+      return {
+        source:{
+          gate:sourceApi.commerceProviderResultSourceLabelGateContract,
+          required:sourceApi.buildProviderResultSourceLabelRequiredFieldsDraft(),
+          types:sourceApi.buildProviderResultSourceTypeDraft(),
+          rules:sourceApi.buildProviderResultSourceLabelBlockRules(),
+          audit:sourceApi.buildProviderResultSourceLabelAuditDraft(),
+          evaluation:sourceApi.evaluateProviderResultSourceLabelDraft({ providerName:"draft" }),
+          safe:sourceApi.assertProviderResultSourceLabelGateSafe(sourceApi.commerceProviderResultSourceLabelGateContract)
+        },
+        price:{
+          gate:priceApi.commercePriceIntegrityTaxesFeesGateContract,
+          required:priceApi.buildPriceQuoteRequiredFieldsDraft(),
+          prereq:priceApi.buildPriceDisplayPrerequisitesDraft(),
+          policy:priceApi.buildCurrentPricePolicyDraft(),
+          tax:priceApi.buildTaxFeeCompletenessRulesDraft(),
+          risk:priceApi.buildPriceIntegrityRiskScanDraft(),
+          audit:priceApi.buildPriceIntegrityAuditDraft(),
+          evaluation:priceApi.evaluatePriceIntegrityDraft({ providerId:"draft", providerName:"draft", currency:"CNY", total:"demo price", bookingUrl:"https://example.invalid/checkout" }),
+          safe:priceApi.assertPriceIntegrityTaxesFeesGateSafe(priceApi.commercePriceIntegrityTaxesFeesGateContract)
+        }
+      };
+    });
+    expect(contracts.source.safe).toBe(true);
+    expect(contracts.source.gate).toEqual(expect.objectContaining({ version:"2.1.4", phase:"provider_result_source_label_gate", gateStatus:"closed", mode:"draft_only", realProviderSourceLabel:"disabled", realProviderResultRead:"disabled", realNetwork:"disabled", realPriceDisplay:"disabled", realAvailabilityDisplay:"disabled", realBookingUrlDisplay:"disabled", rawProviderPayloadDisplay:"forbidden" }));
+    expect(contracts.source.gate.capabilities).toEqual(expect.objectContaining({ canReadRealProviderResult:false, canDisplayRealSourceLabel:false, canUseNetwork:false, canConnectEndpoint:false, canDisplayRealPrice:false, canDisplayRealAvailability:false, canDisplayBookingUrl:false, canDisplayRawProviderPayload:false, canCreateOrder:false, canPay:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false }));
+    expect(contracts.source.required.requiredFields).toEqual(expect.arrayContaining(["providerId", "providerName", "sourceType", "sourceUrlHost", "updatedAt", "readonlyEvidence", "redacted: true"]));
+    expect(contracts.source.types.sourceTypes).toEqual(expect.arrayContaining(["user_bound_api", "weishan_readonly_provider", "public_search", "manual_reviewed_source", "blocked_unknown_source", "no_provider"]));
+    expect(contracts.source.rules.rules).toEqual(expect.arrayContaining(["unknown host 阻断", "short URL 阻断", "credential query params 阻断", "raw provider payload 阻断"]));
+    expect(contracts.source.audit.sourceLabelAuditDraft).toEqual(expect.objectContaining({ gateState:"closed", redacted:true }));
+    expect(contracts.source.evaluation).toEqual(expect.objectContaining({ allowed:false, decision:"blocked", canUseNetwork:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, redacted:true }));
+    expect(contracts.price.safe).toBe(true);
+    expect(contracts.price.gate).toEqual(expect.objectContaining({ version:"2.1.4", phase:"price_integrity_taxes_fees_gate", gateStatus:"closed", mode:"draft_only", realPriceDisplay:"disabled", realProviderPrice:"disabled", taxFeeVerification:"disabled_until_readonly_provider_result_available", realProviderResultRead:"disabled", realNetwork:"disabled", realBookingUrlDisplay:"disabled" }));
+    expect(contracts.price.gate.capabilities).toEqual(expect.objectContaining({ canReadRealProviderResult:false, canDisplayRealPrice:false, canCalculateLowestPrice:false, canDisplayAvailability:false, canDisplayBookingUrl:false, canUseNetwork:false, canConnectEndpoint:false, canCreateOrder:false, canPay:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false }));
+    expect(contracts.price.required.requiredFields).toEqual(expect.arrayContaining(["currency", "baseFare", "taxes", "fees", "total", "priceObservedAt", "readonlyEvidence", "taxFeeCompleteness", "redacted: true"]));
+    expect(contracts.price.prereq.prerequisites).toEqual(expect.arrayContaining(["没有 source label gate 通过不显示价格", "没有 result schema gate 通过不显示价格"]));
+    expect(contracts.price.policy.policy).toEqual(expect.arrayContaining(["当前不得显示 fake price", "当前不得显示 mock price", "当前不得显示 demo price", "当前不得显示 AI 估价"]));
+    expect(contracts.price.tax.rules).toEqual(expect.arrayContaining(["税费缺失则 price withheld", "币种缺失则 price withheld", "source label 缺失则 price withheld"]));
+    expect(contracts.price.risk.priceIntegrityRiskScanDraft).toEqual(expect.arrayContaining(["missingCurrency", "missingTaxes", "missingFees", "bookingUrlDetected", "redacted: true"]));
+    expect(contracts.price.audit.priceIntegrityAuditDraft).toEqual(expect.objectContaining({ gateState:"closed", redacted:true }));
+    expect(contracts.price.evaluation).toEqual(expect.objectContaining({ allowed:false, decision:"price withheld", canUseNetwork:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, redacted:true }));
   });
 
   test("commerce location policy defaults to destination required and private", async () => {
@@ -3825,12 +3879,12 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  // v2.1.3 real result only surface hides debug panels by default
+  // v2.1.4 real result only surface hides debug panels by default
   // 查看 Provider 审批状态 ... 人工审核后才允许进入 provider approval
   // 查看只读适配器开发许可 ... 人工批准开发只读 stub
   // 查看只读适配器空壳 ... 不能保存证件 / 银行卡
   // 查看 Sandbox Dry Run ... 沙箱空跑外壳已建立，但未连接真实 provider ... block_price_return ... block_payment
-  test("v2.1.3 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
+  test("v2.1.4 trusted external search router keeps lowest two flight offers contract gated and candidate registry collapsed", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -3865,6 +3919,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("查看安全密钥存储方案");
     await expect(summaryPanel).toContainText("查看安全存储设计闸门");
     await expect(summaryPanel).toContainText("查看只读 provider result schema gate");
+    await expect(summaryPanel).toContainText("查看 provider result source label gate");
+    await expect(summaryPanel).toContainText("查看 price integrity / taxes / fees gate");
     await expect(summaryPanel).toContainText("查看本机安全存储接口草案");
     await expect(summaryPanel).toContainText("查看密钥脱敏与日志防泄露规则");
     await expect(summaryPanel).toContainText("复制搜索条件");
@@ -3872,6 +3928,78 @@ test.describe.serial("commerce agent workbench", () => {
     const resultSchemaGateBody = summaryPanel.locator("details.commerce-readonly-provider-result-schema-gate-disclosure .commerce-disclosure-body").first();
     for (const text of ["只读 provider result schema gate：已建立", "closed", "draft", "redacted: true", "rawProviderPayload", "bookingUrl", "raw provider payload 显示：禁止", "sandbox gate", "endpoint allowlist gate", "key 生命周期", "脱敏规则", "本机安全存储", "API 绑定准备状态"]) {
       await expect(resultSchemaGateBody).toContainText(text);
+    }
+    await summaryPanel.locator("summary").filter({ hasText:"查看 provider result source label gate" }).click();
+    const sourceLabelGateBody = summaryPanel.locator("details.commerce-provider-result-source-label-gate-disclosure .commerce-disclosure-body").first();
+    for (const text of [
+      "provider result source label gate：已建立",
+      "closed",
+      "draft only",
+      "real provider source label 未开放",
+      "real provider result 未读取",
+      "real network disabled",
+      "providerId",
+      "providerName",
+      "sourceType",
+      "sourceUrlHost",
+      "updatedAt",
+      "readonlyEvidence",
+      "redacted: true",
+      "user_bound_api",
+      "weishan_readonly_provider",
+      "public_search",
+      "manual_reviewed_source",
+      "blocked_unknown_source",
+      "no_provider",
+      "来源：未接入真实 provider",
+      "缺 providerId 阻断",
+      "unknown host 阻断",
+      "short URL 阻断",
+      "credential query params 阻断",
+      "token / apiKey / secret 参数阻断",
+      "raw provider payload 阻断",
+      "sourceLabelAuditDraft",
+      "endpoint allowlist gate",
+      "只读 provider result schema gate",
+      "API 绑定准备状态"
+    ]) {
+      await expect(sourceLabelGateBody).toContainText(text);
+    }
+    await summaryPanel.locator("summary").filter({ hasText:"查看 price integrity / taxes / fees gate" }).click();
+    const priceIntegrityGateBody = summaryPanel.locator("details.commerce-price-integrity-taxes-fees-gate-disclosure .commerce-disclosure-body").first();
+    for (const text of [
+      "price integrity / taxes / fees gate：已建立",
+      "closed",
+      "draft only",
+      "real price display disabled",
+      "real provider price disabled",
+      "tax / fee verification disabled until readonly provider result is available",
+      "currency",
+      "baseFare",
+      "taxes",
+      "fees",
+      "total",
+      "priceObservedAt",
+      "updatedAt",
+      "readonlyEvidence",
+      "taxFeeCompleteness",
+      "price withheld",
+      "没有 source label gate 通过不显示价格",
+      "没有 result schema gate 通过不显示价格",
+      "当前版本仍隐藏价格",
+      "当前不得显示 fake price",
+      "当前不得显示 mock price",
+      "当前不得显示 demo price",
+      "当前不得显示 AI 估价",
+      "priceIntegrityRiskScanDraft",
+      "missingCurrency",
+      "missingTaxes",
+      "missingFees",
+      "bookingUrlDetected",
+      "priceIntegrityAuditDraft",
+      "redacted: true"
+    ]) {
+      await expect(priceIntegrityGateBody).toContainText(text);
     }
     await expect(summaryPanel).not.toContainText("平台目录已建立，但尚未绑定任何真实 API");
     await expect(summaryPanel).not.toContainText("API key 输入：禁用");
@@ -3935,7 +4063,7 @@ test.describe.serial("commerce agent workbench", () => {
       })
     } : null);
     expect(userApiPolicy.contract).toEqual(expect.objectContaining({
-      policyVersion:"2.1.3",
+      policyVersion:"2.1.4",
       phase:"user_api_priority_search_policy",
       policyStatus:"policy_only",
       userApiMode:"not_bound",
@@ -4002,7 +4130,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingSafeShell.contract).toEqual(expect.objectContaining({
-      shellVersion:"2.1.3",
+      shellVersion:"2.1.4",
       phase:"api_binding_safe_shell",
       shellStatus:"safe_shell_only",
       bindingStatus:"not_bound",
@@ -4134,7 +4262,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(userApiProviderCatalog.contract).toEqual(expect.objectContaining({
-      catalogVersion:"2.1.3",
+      catalogVersion:"2.1.4",
       phase:"user_api_provider_catalog",
       catalogStatus:"catalog_only",
       realApiConnectionMode:"disabled",
@@ -4246,7 +4374,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingMockForm.contract).toEqual(expect.objectContaining({
-      formVersion:"2.1.3",
+      formVersion:"2.1.4",
       phase:"api_binding_mock_form_disabled_state",
       formStatus:"disabled_mock_only",
       inputMode:"disabled",
@@ -4346,7 +4474,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingPermissionChecklist.contract).toEqual(expect.objectContaining({
-      checklistVersion:"2.1.3",
+      checklistVersion:"2.1.4",
       phase:"api_binding_permission_checklist",
       checklistStatus:"checklist_only",
       realBindingMode:"disabled",
@@ -4446,7 +4574,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingReadiness.contract).toEqual(expect.objectContaining({
-      readinessVersion:"2.1.3",
+      readinessVersion:"2.1.4",
       phase:"api_binding_readiness_status",
       readinessStatus:"not_ready",
       readinessMode:"status_only",
@@ -4531,7 +4659,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(apiBindingReadiness.assertSafe).toBe(true);
     const matrix = await page.evaluate(() => window.WeishanCommerceFlightSandboxProviderMatrix && typeof window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract === "function" ? window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract() : null);
     expect(matrix).toEqual(expect.objectContaining({
-      matrixVersion:"2.1.3",
+      matrixVersion:"2.1.4",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -4598,7 +4726,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
     const sandboxDryRun = await page.evaluate(() => window.WeishanCommerceFlightSandboxDryRun && window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract ? window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract : null);
     expect(sandboxDryRun).toEqual(expect.objectContaining({
-      sandboxDryRunVersion:"2.1.3",
+      sandboxDryRunVersion:"2.1.4",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -4697,7 +4825,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(sandboxAssert).toBe(true);
     const readonlyStubPermission = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubPermission && typeof window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission === "function" ? window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission() : null);
     expect(readonlyStubPermission).toEqual(expect.objectContaining({
-      permissionVersion:"2.1.3",
+      permissionVersion:"2.1.4",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -4743,7 +4871,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(secureKeyStoragePlan.contract).toEqual(expect.objectContaining({
-      secureKeyStoragePlanVersion:"2.1.3",
+      secureKeyStoragePlanVersion:"2.1.4",
       phase:"flight_secure_key_storage_plan",
       planStatus:"plan_only",
       currentStage:"design_required",
@@ -4864,7 +4992,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(secureStorageDesignGate.contract).toEqual(expect.objectContaining({
-      version:"2.1.3",
+      version:"2.1.4",
       gateName:"secure_storage_design_gate",
       gateStatus:"closed",
       phase:"design_gate"
@@ -4944,7 +5072,7 @@ test.describe.serial("commerce agent workbench", () => {
       "设计删除 key 机制",
       "设计轮换 key 机制",
       "设计只读 provider result schema gate",
-      "v2.1.3：本机安全存储接口草案",
+      "v2.1.4：本机安全存储接口草案",
       "apiKey → [REDACTED_API_KEY]",
       "apiSecret → [REDACTED_API_SECRET]",
       "accessToken → [REDACTED_ACCESS_TOKEN]",
@@ -4969,7 +5097,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(localSecureStorageDraft.contract).toEqual(expect.objectContaining({
-      version:"2.1.3",
+      version:"2.1.4",
       draftStatus:"draft_only",
       implementationStatus:"not_implemented"
     }));
@@ -5271,7 +5399,7 @@ test.describe.serial("commerce agent workbench", () => {
     await disableClipboardMock(page);
   });
 
-  test("v2.1.3 bare flight intent still renders the simple flight result card", async () => {
+  test("v2.1.4 bare flight intent still renders the simple flight result card", async () => {
     await resetCommerceTasks(page);
     await page.reload({ waitUntil:"domcontentloaded" });
     await gotoRoute(page, "home");
@@ -5323,10 +5451,10 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.1.3 sidebar version stays in sync with release version", async () => {
+  test("v2.1.4 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.1.3");
+    await expect(sidebarFoot).toContainText("weishan v2.1.4");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 

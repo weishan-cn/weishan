@@ -786,7 +786,7 @@
       },
       blockingReasons:["安全密钥写入实现未完成", "安全密钥读取实现未完成", "Keychain 适配未完成", "safeStorage 适配未完成", "provider endpoint allowlist 未完成"],
       unlockChecklist:["设计密钥数据结构", "设计本机安全写入接口", "设计本机安全读取接口", "完成安全审查后，才允许进入下一阶段"],
-      implementationMilestones:["v2.1.3：安全存储设计闸门，默认关闭", "v2.1.3：本机安全存储接口草案，仍不写真实 key"],
+      implementationMilestones:["v2.1.4：安全存储设计闸门，默认关闭", "v2.1.4：本机安全存储接口草案，仍不写真实 key"],
       auditRules:["日志中永不记录完整 key", "UI 不得展示明文 key"],
       redactionRules:["apiKey → [REDACTED_API_KEY]", "apiSecret → [REDACTED_API_SECRET]"]
     };
@@ -1018,7 +1018,7 @@
     const api = window.WeishanCommerceProviderEndpointAllowlistGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderEndpointAllowlistGateContract ? api.commerceProviderEndpointAllowlistGateContract : {
-      gateVersion:"2.1.3",
+      gateVersion:"2.1.4",
       phase:"provider_endpoint_allowlist_gate",
       gateStatus:"closed",
       allowlistStatus:"draft",
@@ -1044,7 +1044,7 @@
     const api = window.WeishanCommerceReadonlyProviderSandboxGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyProviderSandboxGateContract ? api.commerceReadonlyProviderSandboxGateContract : {
-      version:"2.1.3",
+      version:"2.1.4",
       moduleName:"readonly_provider_sandbox_gate",
       phase:"readonly_provider_sandbox_gate",
       gateStatus:"closed",
@@ -1079,7 +1079,7 @@
     const api = window.WeishanCommerceReadonlyProviderResultSchemaGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyProviderResultSchemaGateContract ? api.commerceReadonlyProviderResultSchemaGateContract : {
-      version:"2.1.3",
+      version:"2.1.4",
       moduleName:"readonly_provider_result_schema_gate",
       phase:"readonly_provider_result_schema_gate",
       gateStatus:"closed",
@@ -1105,6 +1105,63 @@
     };
     if (api && typeof api.buildReadonlyProviderResultSchemaGateDisplay === "function") {
       return api.buildReadonlyProviderResultSchemaGateDisplay(Object.assign({}, base, raw));
+    }
+    return Object.assign({}, base, raw, {
+      capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
+  function createProviderResultSourceLabelGate(state){
+    const api = window.WeishanCommerceProviderResultSourceLabelGate;
+    const raw = state && typeof state === "object" ? state : {};
+    const base = api && api.commerceProviderResultSourceLabelGateContract ? api.commerceProviderResultSourceLabelGateContract : {
+      version:"2.1.4",
+      moduleName:"provider_result_source_label_gate",
+      phase:"provider_result_source_label_gate",
+      gateStatus:"closed",
+      mode:"draft_only",
+      realProviderSourceLabel:"disabled",
+      realProviderResultRead:"disabled",
+      realNetwork:"disabled",
+      realEndpointConnection:"disabled",
+      realProviderConnection:"disabled",
+      realPriceDisplay:"disabled",
+      realAvailabilityDisplay:"disabled",
+      realBookingUrlDisplay:"disabled",
+      rawProviderPayloadDisplay:"forbidden",
+      capabilities:{ canShowSourceLabelGate:true, canShowRequiredFieldsDraft:true, canShowSourceTypeDraft:true, canShowVisibleLabelDraft:true, canShowBlockRules:true, canShowAuditDraft:true, canShowGateLinkage:true, canReadRealProviderResult:false, canDisplayRealSourceLabel:false, canUseNetwork:false, canConnectEndpoint:false, canDisplayRealPrice:false, canDisplayRealAvailability:false, canDisplayBookingUrl:false, canDisplayRawProviderPayload:false, canCreateOrder:false, canPay:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false },
+      display:{ title:"provider result source label gate", establishedLine:"provider result source label gate：已建立", gateStatusLine:"gate 状态：关闭 / closed", modeLine:"mode: draft only", sourceLabelLine:"real provider source label 未开放", providerResultLine:"real provider result 未读取", networkLine:"real network disabled", safetyLine:"当前版本仍不读取真实 provider result，不显示真实来源标签，不联网，不显示真实价格。" }
+    };
+    if (api && typeof api.buildProviderResultSourceLabelGateDisplay === "function") {
+      return api.buildProviderResultSourceLabelGateDisplay(Object.assign({}, base, raw));
+    }
+    return Object.assign({}, base, raw, {
+      capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
+      display:Object.assign({}, base.display || {}, raw.display && typeof raw.display === "object" ? raw.display : {})
+    });
+  }
+
+  function createPriceIntegrityTaxesFeesGate(state){
+    const api = window.WeishanCommercePriceIntegrityTaxesFeesGate;
+    const raw = state && typeof state === "object" ? state : {};
+    const base = api && api.commercePriceIntegrityTaxesFeesGateContract ? api.commercePriceIntegrityTaxesFeesGateContract : {
+      version:"2.1.4",
+      moduleName:"price_integrity_taxes_fees_gate",
+      phase:"price_integrity_taxes_fees_gate",
+      gateStatus:"closed",
+      mode:"draft_only",
+      realPriceDisplay:"disabled",
+      realProviderPrice:"disabled",
+      taxFeeVerification:"disabled_until_readonly_provider_result_available",
+      realProviderResultRead:"disabled",
+      realNetwork:"disabled",
+      realBookingUrlDisplay:"disabled",
+      capabilities:{ canShowPriceIntegrityGate:true, canShowRequiredQuoteFields:true, canShowDisplayPrerequisites:true, canShowCurrentPricePolicy:true, canShowTaxFeeCompletenessRules:true, canShowRiskScanDraft:true, canShowAuditDraft:true, canReadRealProviderResult:false, canDisplayRealPrice:false, canCalculateLowestPrice:false, canDisplayAvailability:false, canDisplayBookingUrl:false, canUseNetwork:false, canConnectEndpoint:false, canCreateOrder:false, canPay:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false },
+      display:{ title:"price integrity / taxes / fees gate", establishedLine:"price integrity / taxes / fees gate：已建立", gateStatusLine:"gate 状态：关闭 / closed", modeLine:"mode: draft only", realPriceLine:"real price display disabled", providerPriceLine:"real provider price disabled", taxFeeLine:"tax / fee verification disabled until readonly provider result is available", safetyLine:"当前版本仍隐藏价格，只显示暂无真实价格结果，不显示 fake/mock/demo/AI 估价。" }
+    };
+    if (api && typeof api.buildPriceIntegrityTaxesFeesGateDisplay === "function") {
+      return api.buildPriceIntegrityTaxesFeesGateDisplay(Object.assign({}, base, raw));
     }
     return Object.assign({}, base, raw, {
       capabilities:Object.assign({}, base.capabilities || {}, raw.capabilities && typeof raw.capabilities === "object" ? raw.capabilities : {}),
@@ -1631,6 +1688,8 @@
       providerEndpointAllowlistGate:category === "flight" ? createProviderEndpointAllowlistGate() : null,
       readonlyProviderSandboxGate:category === "flight" ? createReadonlyProviderSandboxGate() : null,
       readonlyProviderResultSchemaGate:category === "flight" ? createReadonlyProviderResultSchemaGate() : null,
+      providerResultSourceLabelGate:category === "flight" ? createProviderResultSourceLabelGate() : null,
+      priceIntegrityTaxesFeesGate:category === "flight" ? createPriceIntegrityTaxesFeesGate() : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState() : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState() : null,
@@ -1695,6 +1754,8 @@
       providerEndpointAllowlistGate:category === "flight" ? createProviderEndpointAllowlistGate(base.providerEndpointAllowlistGate) : null,
       readonlyProviderSandboxGate:category === "flight" ? createReadonlyProviderSandboxGate(base.readonlyProviderSandboxGate) : null,
       readonlyProviderResultSchemaGate:category === "flight" ? createReadonlyProviderResultSchemaGate(base.readonlyProviderResultSchemaGate) : null,
+      providerResultSourceLabelGate:category === "flight" ? createProviderResultSourceLabelGate(base.providerResultSourceLabelGate) : null,
+      priceIntegrityTaxesFeesGate:category === "flight" ? createPriceIntegrityTaxesFeesGate(base.priceIntegrityTaxesFeesGate) : null,
       userApiPriorityPolicyState:createUserApiPriorityPolicyState(base.userApiPriorityPolicyState),
       apiBindingSafeShellState:category === "flight" ? createApiBindingSafeShellState(base.apiBindingSafeShellState) : null,
       userApiProviderCatalogState:category === "flight" ? createUserApiProviderCatalogState(base.userApiProviderCatalogState) : null,
@@ -1822,6 +1883,8 @@
       providerEndpointAllowlistGate:safe.category === "flight" ? safe.providerEndpointAllowlistGate : null,
       readonlyProviderSandboxGate:safe.category === "flight" ? safe.readonlyProviderSandboxGate : null,
       readonlyProviderResultSchemaGate:safe.category === "flight" ? safe.readonlyProviderResultSchemaGate : null,
+      providerResultSourceLabelGate:safe.category === "flight" ? safe.providerResultSourceLabelGate : null,
+      priceIntegrityTaxesFeesGate:safe.category === "flight" ? safe.priceIntegrityTaxesFeesGate : null,
       userApiPriorityPolicyState:safe.userApiPriorityPolicyState,
       apiBindingSafeShellState:safe.category === "flight" ? safe.apiBindingSafeShellState : null,
       userApiProviderCatalogState:safe.category === "flight" ? safe.userApiProviderCatalogState : null,

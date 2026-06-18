@@ -1851,8 +1851,8 @@ marker:readonly provider sandbox audit events
 marker:readonly provider sandbox audit redacted true
 marker:readonly provider sandbox next result schema gate
 
-## v2.1.3：Read-only Provider Result Schema Gate / 只读 provider 结果结构闸门
-v2.1.3 新增 `commerceReadonlyProviderResultSchemaGate.js`，只建立只读 provider result schema gate 草案闸门。该闸门用于展示 future-only result 类型草案、字段 allowlist、字段 blocklist、价格完整性规则、来源完整性规则、bookingUrl 规则、raw provider payload 规则、result 风险扫描草案和 result 审计事件草案。当前版本仍不读取真实 provider result，不连接真实 provider，不连接真实 endpoint，不发起真实网络请求，不读取真实 API key，不显示真实价格，不显示 availability，不显示 bookingUrl，不展示 raw provider payload，不预订、不付款、不下单、不上传身份资料。
+## v2.1.4：Read-only Provider Result Schema Gate / 只读 provider 结果结构闸门
+v2.1.4 新增 `commerceReadonlyProviderResultSchemaGate.js`，只建立只读 provider result schema gate 草案闸门。该闸门用于展示 future-only result 类型草案、字段 allowlist、字段 blocklist、价格完整性规则、来源完整性规则、bookingUrl 规则、raw provider payload 规则、result 风险扫描草案和 result 审计事件草案。当前版本仍不读取真实 provider result，不连接真实 provider，不连接真实 endpoint，不发起真实网络请求，不读取真实 API key，不显示真实价格，不显示 availability，不显示 bookingUrl，不展示 raw provider payload，不预订、不付款、不下单、不上传身份资料。
 
 UI 中 `查看只读 provider result schema gate` 默认折叠。展开后必须显示：只读 provider result schema gate、只读 provider result schema gate：已建立、gate 状态：关闭、schema 状态：草案、真实 provider result 读取：未开放、真实价格显示：未开放、availability 显示：未开放、bookingUrl 显示：未开放、raw provider payload 显示：禁止、真实 sandbox 运行：未开放、真实 endpoint 连接：未开放、真实网络请求：未开放、下单：禁止、付款：禁止、身份上传：禁止。
 
@@ -1876,3 +1876,41 @@ marker:readonly provider result source integrity rules
 marker:readonly provider result booking url rules
 marker:readonly provider result audit events
 marker:readonly provider result next source label gate
+
+## v2.1.4：Provider Result Source Label + Price Integrity Gate Bundle
+
+v2.1.4 新增 `commerceProviderResultSourceLabelGate.js` 和 `commercePriceIntegrityTaxesFeesGate.js`。本阶段只建立未来只读 provider result 来源标签闸门和价格完整性 / 税费完整性闸门。两个 gate 只展示结构草案、UI 文案、安全规则、风险扫描草案和审计事件草案；当前版本仍不读取真实 provider result，不连接真实 endpoint，不联网，不读取或保存真实 API key，不显示真实价格，不显示 availability，不生成 bookingUrl，不预订、不付款、不下单。
+
+`查看 provider result source label gate` 默认折叠。展开后必须显示：gate 已建立、status: closed、mode: draft only、real provider source label 未开放、real provider result 未读取、real network disabled。未来 source label 必填字段草案必须包含 providerId、providerName、sourceType、sourceUrlHost、sourceHostDisplayName、providerRegion、updatedAt、resultObservedAt、readonlyEvidence、evidenceType、sourceTrustState、redacted: true。sourceType 草案必须包含 user_bound_api、weishan_readonly_provider、public_search、manual_reviewed_source、blocked_unknown_source、no_provider。用户可见来源标签草案必须显示来源未接入真实 provider、Provider 未绑定 / 未连接、Source host 未连接真实来源、Updated at 无真实更新时间、Evidence readonlyEvidence draft only、Trust state closed / pending review。
+
+source label 阻断规则必须显示：缺 providerId 阻断、缺 providerName 阻断、缺 sourceUrlHost 阻断、缺 updatedAt 阻断、缺 readonlyEvidence 阻断、unknown host 阻断、short URL 阻断、credential query params 阻断、token / apiKey / secret 参数阻断、raw provider URL with secrets 阻断、raw provider payload 阻断。审计事件草案必须显示 sourceLabelAuditDraft、eventType、schemaVersion、gateState、blockedReason、sourceUrlHost、resultObservedAt、redacted: true。联动必须显示只读 provider result schema gate、只读 provider sandbox gate、provider endpoint allowlist gate、key 生命周期、密钥脱敏规则、本机安全存储、API 绑定准备状态。
+
+`查看 price integrity / taxes / fees gate` 默认折叠。展开后必须显示：gate 已建立、status: closed、mode: draft only、real price display disabled、real provider price disabled、tax / fee verification disabled until readonly provider result is available。未来 price quote 必填字段草案必须包含 providerId、providerName、sourceUrlHost、currency、baseFare、taxes、fees、total、priceObservedAt、updatedAt、readonlyEvidence、taxFeeCompleteness、quoteType、redacted: true。
+
+价格显示前置条件必须显示：没有 providerId 不显示价格、没有 providerName 不显示价格、没有 sourceUrlHost 不显示价格、没有 currency 不显示价格、没有 total 不显示价格、没有 taxes / fees 完整性信息不显示价格、没有 updatedAt 不显示价格、没有 readonlyEvidence 不显示价格、没有 source label gate 通过不显示价格、没有 result schema gate 通过不显示价格。当前价格策略必须显示：当前版本仍隐藏价格、当前只显示“暂无真实价格结果”、当前不得显示 fake price、mock price、demo price、AI 估价、最低价 / 约 ¥xxx / estimated price，且不得根据不完整来源计算最低价。
+
+税费完整性规则必须显示：baseFare、taxes、fees、total 必须可追溯；税费缺失、税费未知、币种缺失、更新时间缺失、provider evidence 缺失或 source label 缺失时均 price withheld。风险扫描草案必须显示 priceIntegrityRiskScanDraft、missingCurrency、missingTaxes、missingFees、missingUpdatedAt、missingReadonlyEvidence、untrustedSourceHost、estimatedPriceDetected、mockPriceDetected、bookingUrlDetected、rawProviderPayloadDetected、redacted: true。审计事件草案必须显示 priceIntegrityAuditDraft、eventType、schemaVersion、gateState、withheldReason、providerId、sourceUrlHost、priceObservedAt、taxFeeCompleteness、redacted: true。
+
+marker:provider result source label gate
+marker:provider result source label gate closed
+marker:provider result source label draft only
+marker:provider result source label no real provider result
+marker:provider result source label no network
+marker:provider result source label no price
+marker:provider result source label no booking url
+marker:provider result source label required fields
+marker:provider result source label source types
+marker:provider result source label blocked sources
+marker:provider result source label audit redacted
+
+marker:price integrity taxes fees gate
+marker:price integrity taxes fees gate closed
+marker:price integrity taxes fees draft only
+marker:price integrity taxes fees no real price
+marker:price integrity taxes fees no provider price
+marker:price integrity taxes fees no booking url
+marker:price integrity taxes fees required fields
+marker:price integrity taxes fees prerequisites
+marker:price integrity taxes fees no fake price
+marker:price integrity taxes fees risk scan
+marker:price integrity taxes fees audit redacted

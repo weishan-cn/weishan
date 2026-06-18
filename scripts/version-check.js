@@ -532,6 +532,48 @@ function checkReadonlyProviderResultSchemaGateVersion(results, expectedVersion) 
   );
 }
 
+function checkProviderResultSourceLabelGateVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/commerceProviderResultSourceLabelGate.js";
+  const gate = readText(gatePath);
+  if (!gate) {
+    results.push({ name: "apps/desktop provider result source label gate version", pass: false, detail: gatePath + " missing" });
+    return;
+  }
+  if (gate.__readError) {
+    results.push({ name: "apps/desktop provider result source label gate version", pass: false, detail: gate.__readError });
+    return;
+  }
+  const match = gate.match(/PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop provider result source label gate version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceProviderResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION"
+  );
+}
+
+function checkPriceIntegrityTaxesFeesGateVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/commercePriceIntegrityTaxesFeesGate.js";
+  const gate = readText(gatePath);
+  if (!gate) {
+    results.push({ name: "apps/desktop price integrity taxes fees gate version", pass: false, detail: gatePath + " missing" });
+    return;
+  }
+  if (gate.__readError) {
+    results.push({ name: "apps/desktop price integrity taxes fees gate version", pass: false, detail: gate.__readError });
+    return;
+  }
+  const match = gate.match(/PRICE_INTEGRITY_TAXES_FEES_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop price integrity taxes fees gate version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commercePriceIntegrityTaxesFeesGate.js PRICE_INTEGRITY_TAXES_FEES_GATE_VERSION"
+  );
+}
+
 function runVersionCheck() {
   const results = [];
 
@@ -564,6 +606,8 @@ function runVersionCheck() {
     checkProviderEndpointAllowlistGateVersion(results, rootPackage.version);
     checkReadonlyProviderSandboxGateVersion(results, rootPackage.version);
     checkReadonlyProviderResultSchemaGateVersion(results, rootPackage.version);
+    checkProviderResultSourceLabelGateVersion(results, rootPackage.version);
+    checkPriceIntegrityTaxesFeesGateVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

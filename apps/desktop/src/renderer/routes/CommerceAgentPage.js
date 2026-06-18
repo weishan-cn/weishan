@@ -3730,7 +3730,7 @@
     const gate = task && task.providerEndpointAllowlistGate || null;
     if (api && typeof api.buildProviderEndpointAllowlistGateDisplay === "function") return api.buildProviderEndpointAllowlistGateDisplay(gate);
     return gate && typeof gate === "object" ? gate : {
-      gateVersion:"2.1.3",
+      gateVersion:"2.1.4",
       gateStatus:"closed",
       allowlistStatus:"draft",
       display:{ title:"provider endpoint allowlist 闸门", establishedLine:"endpoint allowlist 闸门：已建立", gateStatusLine:"闸门状态：关闭", allowlistStatusLine:"allowlist 状态：草案", endpointConnectionLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", providerSandboxLine:"provider sandbox：未开放", priceLine:"真实价格读取：未开放", bookingUrlLine:"bookingUrl 读取：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", readonlyProviderSandboxGateLine:"只读 provider sandbox gate：已建立", realSandboxRunLine:"真实 sandbox 运行：未开放", realProviderConnectionLine:"真实 provider 连接：未开放", realNetworkLine:"真实网络：未开放", nextStepLine:"只读 provider sandbox gate：已建立。下一步：只读 provider result schema gate；只读 provider result schema gate：已建立。下一步：provider result source label gate", safetyLine:"当前版本仍不能连接真实 endpoint、不能测试连接、不能联网、不能读取真实价格" },
@@ -3794,7 +3794,7 @@
     const gate = task && task.readonlyProviderSandboxGate || null;
     if (api && typeof api.buildReadonlyProviderSandboxGateDisplay === "function") return api.buildReadonlyProviderSandboxGateDisplay(gate);
     return gate && typeof gate === "object" ? gate : {
-      version:"2.1.3",
+      version:"2.1.4",
       gateStatus:"closed",
       sandboxStatus:"draft_only",
       display:{ title:"只读 provider sandbox gate", establishedLine:"只读 provider sandbox gate：已建立", gateStatusLine:"gate 状态：关闭", sandboxStatusLine:"sandbox 状态：草案", realSandboxRunLine:"真实 sandbox 运行：未开放", realProviderConnectionLine:"真实 provider 连接：未开放", endpointConnectionLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", priceLine:"真实价格读取：未开放", availabilityLine:"availability 读取：未开放", bookingUrlLine:"bookingUrl 读取：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", nextStepLine:"下一步：只读 provider result schema gate；只读 provider result schema gate：已建立。下一步：provider result source label gate", safetyLine:"当前版本仍不能运行真实 sandbox、不能连接真实 endpoint、不能联网、不能读取真实价格" },
@@ -3862,7 +3862,7 @@
     const gate = task && task.readonlyProviderResultSchemaGate || null;
     if (api && typeof api.buildReadonlyProviderResultSchemaGateDisplay === "function") return api.buildReadonlyProviderResultSchemaGateDisplay(gate);
     return gate && typeof gate === "object" ? gate : {
-      version:"2.1.3",
+      version:"2.1.4",
       gateStatus:"closed",
       schemaStatus:"draft_only",
       display:{ title:"只读 provider result schema gate", establishedLine:"只读 provider result schema gate：已建立", gateStatusLine:"gate 状态：关闭 / closed", schemaStatusLine:"schema 状态：草案 / draft", realProviderResultLine:"真实 provider result 读取：未开放", realPriceLine:"真实价格显示：未开放", availabilityLine:"availability 显示：未开放", bookingUrlLine:"bookingUrl 显示：未开放", rawPayloadLine:"raw provider payload 显示：禁止", realSandboxLine:"真实 sandbox 运行：未开放", endpointLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", nextStepLine:"下一步：provider result source label gate", safetyLine:"当前版本仍不能读取真实 provider result、不能显示真实价格、不能显示 bookingUrl。" },
@@ -3925,6 +3925,117 @@
       + '<p>' + esc(display.safetyLine || '当前版本仍不能读取真实 provider result、不能显示真实价格、不能显示 bookingUrl。') + '</p>'
       + '</section>';
     return disclosure('查看只读 provider result schema gate', body, 'commerce-readonly-provider-result-schema-gate-disclosure');
+  }
+
+  function commerceProviderResultSourceLabelGateDisplay(task){
+    const api = window.WeishanCommerceProviderResultSourceLabelGate;
+    const gate = task && task.providerResultSourceLabelGate || null;
+    if (api && typeof api.buildProviderResultSourceLabelGateDisplay === "function") return api.buildProviderResultSourceLabelGateDisplay(gate);
+    return gate && typeof gate === "object" ? gate : {
+      version:"2.1.4",
+      gateStatus:"closed",
+      mode:"draft_only",
+      display:{ title:"provider result source label gate", establishedLine:"provider result source label gate：已建立", gateStatusLine:"gate 状态：关闭 / closed", modeLine:"mode: draft only", sourceLabelLine:"real provider source label 未开放", providerResultLine:"real provider result 未读取", networkLine:"real network disabled", safetyLine:"当前版本仍不读取真实 provider result，不显示真实来源标签，不联网，不显示真实价格。" },
+      requiredFieldsDraft:{ requiredFields:["providerId", "providerName", "sourceType", "sourceUrlHost", "sourceHostDisplayName", "providerRegion", "updatedAt", "resultObservedAt", "readonlyEvidence", "evidenceType", "sourceTrustState", "redacted: true"] },
+      sourceTypeDraft:{ sourceTypes:["user_bound_api", "weishan_readonly_provider", "public_search", "manual_reviewed_source", "blocked_unknown_source", "no_provider"] },
+      visibleSourceLabelDraft:{ labels:["来源：未接入真实 provider", "Provider：未绑定 / 未连接", "Source host：未连接真实来源", "Updated at：无真实更新时间", "Evidence：readonlyEvidence draft only", "Trust state：closed / pending review"] },
+      blockRules:{ rules:["缺 providerId 阻断", "缺 providerName 阻断", "缺 sourceUrlHost 阻断", "缺 updatedAt 阻断", "缺 readonlyEvidence 阻断", "unknown host 阻断", "short URL 阻断", "credential query params 阻断", "token / apiKey / secret 参数阻断", "raw provider URL with secrets 阻断", "raw provider payload 阻断"] },
+      audit:{ sourceLabelAuditDraft:{ eventType:"SOURCE_LABEL_GATE_EVALUATION_DRAFT", schemaVersion:"2.1.4", gateState:"closed", blockedReason:"source_label_gate_closed", sourceUrlHost:"none", resultObservedAt:"none", redacted:true } },
+      linkage:["只读 provider result schema gate", "只读 provider sandbox gate", "provider endpoint allowlist gate", "key 生命周期", "密钥脱敏规则", "本机安全存储", "API 绑定准备状态"]
+    };
+  }
+
+  function commerceProviderResultSourceLabelGateDisclosure(task){
+    const gate = commerceProviderResultSourceLabelGateDisplay(task);
+    const display = gate.display || {};
+    const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
+    const required = gate.requiredFieldsDraft || {};
+    const sourceType = gate.sourceTypeDraft || {};
+    const visible = gate.visibleSourceLabelDraft || {};
+    const block = gate.blockRules || {};
+    const audit = gate.audit && gate.audit.sourceLabelAuditDraft || {};
+    const body = '<section class="commerce-provider-result-source-label-gate-panel" aria-label="provider result source label gate">'
+      + '<h4>' + esc(display.title || 'provider result source label gate') + '</h4>'
+      + '<p>' + esc(display.establishedLine || 'provider result source label gate：已建立') + '</p>'
+      + '<p>' + esc(display.gateStatusLine || 'gate 状态：关闭 / closed') + '</p>'
+      + '<p>' + esc(display.modeLine || 'mode: draft only') + '</p>'
+      + '<p>' + esc(display.sourceLabelLine || 'real provider source label 未开放') + '</p>'
+      + '<p>' + esc(display.providerResultLine || 'real provider result 未读取') + '</p>'
+      + '<p>' + esc(display.networkLine || 'real network disabled') + '</p>'
+      + '<h5>未来 source label 必填字段草案</h5>' + listHtml(required.requiredFields || [])
+      + '<h5>sourceType 草案</h5>' + listHtml(sourceType.sourceTypes || [])
+      + '<h5>用户可见来源标签草案</h5>' + listHtml(visible.labels || [])
+      + '<h5>阻断规则</h5>' + listHtml(block.rules || [])
+      + '<h5>审计事件草案</h5><p>sourceLabelAuditDraft</p>'
+      + '<p>eventType：' + esc(audit.eventType || 'SOURCE_LABEL_GATE_EVALUATION_DRAFT') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.4') + '</p>'
+      + '<p>gateState：' + esc(audit.gateState || 'closed') + '</p>'
+      + '<p>blockedReason：' + esc(audit.blockedReason || 'source_label_gate_closed') + '</p>'
+      + '<p>sourceUrlHost：' + esc(audit.sourceUrlHost || 'none') + '</p>'
+      + '<p>resultObservedAt：' + esc(audit.resultObservedAt || 'none') + '</p>'
+      + '<p>redacted: true</p>'
+      + '<h5>与前置 gate 联动</h5>' + listHtml(gate.linkage || [])
+      + '<p>' + esc(display.safetyLine || '当前版本仍不读取真实 provider result，不显示真实来源标签，不联网，不显示真实价格。') + '</p>'
+      + '</section>';
+    return disclosure('查看 provider result source label gate', body, 'commerce-provider-result-source-label-gate-disclosure');
+  }
+
+  function commercePriceIntegrityTaxesFeesGateDisplay(task){
+    const api = window.WeishanCommercePriceIntegrityTaxesFeesGate;
+    const gate = task && task.priceIntegrityTaxesFeesGate || null;
+    if (api && typeof api.buildPriceIntegrityTaxesFeesGateDisplay === "function") return api.buildPriceIntegrityTaxesFeesGateDisplay(gate);
+    return gate && typeof gate === "object" ? gate : {
+      version:"2.1.4",
+      gateStatus:"closed",
+      mode:"draft_only",
+      display:{ title:"price integrity / taxes / fees gate", establishedLine:"price integrity / taxes / fees gate：已建立", gateStatusLine:"gate 状态：关闭 / closed", modeLine:"mode: draft only", realPriceLine:"real price display disabled", providerPriceLine:"real provider price disabled", taxFeeLine:"tax / fee verification disabled until readonly provider result is available", safetyLine:"当前版本仍隐藏价格，只显示暂无真实价格结果，不显示 fake/mock/demo/AI 估价。" },
+      quoteRequiredFields:{ requiredFields:["providerId", "providerName", "sourceUrlHost", "currency", "baseFare", "taxes", "fees", "total", "priceObservedAt", "updatedAt", "readonlyEvidence", "taxFeeCompleteness", "quoteType", "redacted: true"] },
+      displayPrerequisites:{ prerequisites:["没有 providerId 不显示价格", "没有 providerName 不显示价格", "没有 sourceUrlHost 不显示价格", "没有 currency 不显示价格", "没有 total 不显示价格", "没有 taxes / fees 完整性信息不显示价格", "没有 updatedAt 不显示价格", "没有 readonlyEvidence 不显示价格", "没有 source label gate 通过不显示价格", "没有 result schema gate 通过不显示价格"], decisionWithoutPrerequisites:"price withheld" },
+      currentPricePolicy:{ policy:["当前版本仍隐藏价格", "当前只显示“暂无真实价格结果”", "当前不得显示 fake price", "当前不得显示 mock price", "当前不得显示 demo price", "当前不得显示 AI 估价", "当前不得显示最低价 / 约 ¥xxx / estimated price", "当前不得根据不完整来源计算最低价"] },
+      taxFeeCompletenessRules:{ rules:["baseFare、taxes、fees、total 必须可追溯", "税费缺失则 price withheld", "税费未知则 price withheld", "币种缺失则 price withheld", "更新时间缺失则 price withheld", "provider evidence 缺失则 price withheld", "source label 缺失则 price withheld"] },
+      riskScan:{ priceIntegrityRiskScanDraft:["missingCurrency", "missingTaxes", "missingFees", "missingUpdatedAt", "missingReadonlyEvidence", "untrustedSourceHost", "estimatedPriceDetected", "mockPriceDetected", "bookingUrlDetected", "rawProviderPayloadDetected", "redacted: true"] },
+      audit:{ priceIntegrityAuditDraft:{ eventType:"PRICE_INTEGRITY_EVALUATION_DRAFT", schemaVersion:"2.1.4", gateState:"closed", withheldReason:"price_integrity_gate_closed", providerId:"none", sourceUrlHost:"none", priceObservedAt:"none", taxFeeCompleteness:"none", redacted:true } },
+      linkage:["provider result source label gate", "只读 provider result schema gate", "只读 provider sandbox gate", "provider endpoint allowlist gate", "密钥脱敏规则", "API 绑定准备状态"]
+    };
+  }
+
+  function commercePriceIntegrityTaxesFeesGateDisclosure(task){
+    const gate = commercePriceIntegrityTaxesFeesGateDisplay(task);
+    const display = gate.display || {};
+    const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
+    const quote = gate.quoteRequiredFields || {};
+    const prereq = gate.displayPrerequisites || {};
+    const policy = gate.currentPricePolicy || {};
+    const tax = gate.taxFeeCompletenessRules || {};
+    const risk = gate.riskScan || {};
+    const audit = gate.audit && gate.audit.priceIntegrityAuditDraft || {};
+    const body = '<section class="commerce-price-integrity-taxes-fees-gate-panel" aria-label="price integrity / taxes / fees gate">'
+      + '<h4>' + esc(display.title || 'price integrity / taxes / fees gate') + '</h4>'
+      + '<p>' + esc(display.establishedLine || 'price integrity / taxes / fees gate：已建立') + '</p>'
+      + '<p>' + esc(display.gateStatusLine || 'gate 状态：关闭 / closed') + '</p>'
+      + '<p>' + esc(display.modeLine || 'mode: draft only') + '</p>'
+      + '<p>' + esc(display.realPriceLine || 'real price display disabled') + '</p>'
+      + '<p>' + esc(display.providerPriceLine || 'real provider price disabled') + '</p>'
+      + '<p>' + esc(display.taxFeeLine || 'tax / fee verification disabled until readonly provider result is available') + '</p>'
+      + '<h5>未来 price quote 必填字段草案</h5>' + listHtml(quote.requiredFields || [])
+      + '<h5>价格显示前置条件</h5>' + listHtml(prereq.prerequisites || []) + '<p>' + esc(prereq.decisionWithoutPrerequisites || 'price withheld') + '</p>'
+      + '<h5>当前价格策略</h5>' + listHtml(policy.policy || [])
+      + '<h5>税费完整性规则</h5>' + listHtml(tax.rules || [])
+      + '<h5>风险扫描草案</h5><p>priceIntegrityRiskScanDraft</p>' + listHtml(risk.priceIntegrityRiskScanDraft || [])
+      + '<h5>审计事件草案</h5><p>priceIntegrityAuditDraft</p>'
+      + '<p>eventType：' + esc(audit.eventType || 'PRICE_INTEGRITY_EVALUATION_DRAFT') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.4') + '</p>'
+      + '<p>gateState：' + esc(audit.gateState || 'closed') + '</p>'
+      + '<p>withheldReason：' + esc(audit.withheldReason || 'price_integrity_gate_closed') + '</p>'
+      + '<p>providerId：' + esc(audit.providerId || 'none') + '</p>'
+      + '<p>sourceUrlHost：' + esc(audit.sourceUrlHost || 'none') + '</p>'
+      + '<p>priceObservedAt：' + esc(audit.priceObservedAt || 'none') + '</p>'
+      + '<p>taxFeeCompleteness：' + esc(audit.taxFeeCompleteness || 'none') + '</p>'
+      + '<p>redacted: true</p>'
+      + '<h5>与前置 gate 联动</h5>' + listHtml(gate.linkage || [])
+      + '<p>' + esc(display.safetyLine || '当前版本仍隐藏价格，只显示暂无真实价格结果，不显示 fake/mock/demo/AI 估价。') + '</p>'
+      + '</section>';
+    return disclosure('查看 price integrity / taxes / fees gate', body, 'commerce-price-integrity-taxes-fees-gate-disclosure');
   }
 
   function commerceSimpleFlightResultPanelHtml(task){
@@ -3990,6 +4101,8 @@
       ${commerceProviderEndpointAllowlistGateDisclosure(task)}
       ${commerceReadonlyProviderSandboxGateDisclosure(task)}
       ${commerceReadonlyProviderResultSchemaGateDisclosure(task)}
+      ${commerceProviderResultSourceLabelGateDisclosure(task)}
+      ${commercePriceIntegrityTaxesFeesGateDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;
@@ -4014,6 +4127,8 @@
       ${commerceProviderEndpointAllowlistGateDisclosure(task)}
       ${commerceReadonlyProviderSandboxGateDisclosure(task)}
       ${commerceReadonlyProviderResultSchemaGateDisclosure(task)}
+      ${commerceProviderResultSourceLabelGateDisclosure(task)}
+      ${commercePriceIntegrityTaxesFeesGateDisclosure(task)}
     </section>`;
     return disclosure("查看高级调试信息", body, "commerce-simple-flight-advanced-debug-disclosure");
   }
