@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_PLAN_COMPOSER_VERSION = "2.1.15";
+  const GLOBAL_PROCUREMENT_PLAN_COMPOSER_VERSION = "2.1.16";
 
   function cloneList(list){
     return Array.isArray(list) ? list.slice() : [];
@@ -58,6 +58,18 @@
       category,
       categoryLabel:labelForCategory(category),
       categoryList,
+      querySummary:{
+        origin:safeIntent.origin || "",
+        destination:safeIntent.destination || "",
+        date:safeIntent.date || "",
+        dateRange:safeIntent.dateRange || "",
+        location:safeIntent.location || "",
+        activityName:safeIntent.activityName || "",
+        productName:safeIntent.productName || "",
+        serviceName:safeIntent.serviceName || "",
+        sortPreference:safeIntent.sortPreference || "",
+        budgetPreference:safeIntent.budgetPreference || ""
+      },
       missingInfoList,
       externalSearchEntries:buildExternalSearchEntries(safeIntent),
       safetyRestrictions:[
