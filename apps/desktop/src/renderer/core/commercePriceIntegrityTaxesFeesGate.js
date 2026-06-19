@@ -1,5 +1,5 @@
 (function(){
-  const PRICE_INTEGRITY_TAXES_FEES_GATE_VERSION = "2.1.16";
+  const PRICE_INTEGRITY_TAXES_FEES_GATE_VERSION = "2.1.17";
 
   const priceQuoteRequiredFields = [
     "providerId",
@@ -118,7 +118,7 @@
       realPriceLine:"real price display disabled",
       providerPriceLine:"real provider price disabled",
       taxFeeLine:"tax / fee verification disabled until readonly provider result is available",
-      safetyLine:"当前版本仍隐藏价格，只显示暂无真实价格结果，不显示 fake/mock/demo/AI 估价。"
+      safetyLine:"当前版本仍隐藏价格，只显示暂无真实价格结果，不显示虚构价格或非真实报价。"
     }
   };
 

@@ -2140,3 +2140,17 @@ v2.1.15 新增 `globalProcurementIntentRouter.js`、`globalProcurementPlanCompos
 - marker:global procurement no order submit
 - marker:global procurement no identity upload
 - marker:global procurement restricted external search blocked
+
+## v2.1.17：Global Procurement Detail Quality Bundle / 全球采购详情质量包
+
+v2.1.17 新增 `globalProcurementMissingInfoChecklist.js`、`globalProcurementSafeNextStepGuidance.js`、`globalProcurementExternalSearchPolicy.js` 和 `globalProcurementDetailQualityComposer.js`。本阶段在既有全球采购离线规划基础上补齐详情正文质量、待补充信息清单、安全下一步建议、外部搜索入口规则和历史详情一致性；仍不接真实 provider，不读取 API key，不连接 endpoint，不联网，不显示真实价格，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
+
+- marker:global procurement detail quality composer
+- marker:global procurement missing info checklist
+- marker:global procurement safe next step guidance
+- marker:global procurement external search policy
+- marker:global procurement history detail consistency
+- marker:global procurement no fake price
+- marker:global procurement no booking url
+- marker:global procurement no payment
+- marker:global procurement no order submit

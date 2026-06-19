@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_INTENT_ROUTER_VERSION = "2.1.16";
+  const GLOBAL_PROCUREMENT_INTENT_ROUTER_VERSION = "2.1.17";
 
   const categoryLabels = {
     flight:"机票",

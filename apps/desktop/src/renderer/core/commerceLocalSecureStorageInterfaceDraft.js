@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const DRAFT_VERSION = "2.1.16";
+  const DRAFT_VERSION = "2.1.17";
   const DRAFT_NAME = "local_secure_storage_interface_draft";
   const PHASE = "local_secure_storage_interface_draft";
 

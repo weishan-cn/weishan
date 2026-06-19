@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_PLAN_COMPOSER_VERSION = "2.1.16";
+  const GLOBAL_PROCUREMENT_PLAN_COMPOSER_VERSION = "2.1.17";
 
   function cloneList(list){
     return Array.isArray(list) ? list.slice() : [];
@@ -33,6 +33,10 @@
     const safeIntent = intent && typeof intent === "object" ? intent : {};
     const category = safeIntent.category || "unknown_procurement";
     const blocked = category === "restricted_or_blocked";
+    const detailApi = window.WeishanGlobalProcurementDetailQualityComposer;
+    const detailQuality = detailApi && typeof detailApi.composeGlobalProcurementDetailQuality === "function"
+      ? detailApi.composeGlobalProcurementDetailQuality(safeIntent)
+      : null;
     const categoryList = cloneList(safeIntent.categoryList || [category]);
     const missingInfoList = cloneList(safeIntent.missingInfoList);
     const planItems = categoryList.map((item) => ({
@@ -54,7 +58,7 @@
       phase:"global_procurement_plan_composer",
       title:"全球采购计划",
       status:blocked ? "blocked" : "offline_planning_only",
-      currentStatus:blocked ? "该请求涉及受限或高风险品类，已阻断。" : "当前为离线采购规划，只整理条件，不接真实 provider。",
+      currentStatus:blocked ? "该请求涉及受限或高风险品类，已阻断。" : "当前为离线采购规划，只整理条件，不接真实平台。",
       category,
       categoryLabel:labelForCategory(category),
       categoryList,
@@ -73,10 +77,10 @@
       missingInfoList,
       externalSearchEntries:buildExternalSearchEntries(safeIntent),
       safetyRestrictions:[
-        "不接真实 provider",
-        "不读取 API key",
-        "不连接 endpoint",
-        "不发起网络请求",
+        "不接真实平台",
+        "不读取真实平台密钥",
+        "不连接真实平台接口",
+        "不发起真实网络请求",
         "不显示真实价格",
         "不显示任何非真实价格",
         "不生成 bookingUrl",
@@ -84,6 +88,7 @@
         "不提交证件 / 银行卡"
       ],
       planItems,
+      detailQuality,
       blockedReason:safeIntent.blockedReason || "",
       redacted:true
     };

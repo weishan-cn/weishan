@@ -1,5 +1,5 @@
 (function(){
-  const MANUAL_UI_ACCEPTANCE_ASSISTANT_VERSION = "2.1.16";
+  const MANUAL_UI_ACCEPTANCE_ASSISTANT_VERSION = "2.1.17";
 
   const manualSteps = [
     "打开 /Applications/weishan.app",
@@ -16,16 +16,16 @@
   ];
 
   const screenshotPaths = [
-    "/tmp/weishan-v2.1.16-ui-acceptance/01_app_launched.png",
-    "/tmp/weishan-v2.1.16-ui-acceptance/02_settings_auth.png",
-    "/tmp/weishan-v2.1.16-ui-acceptance/03_commerce_flight_result.png",
-    "/tmp/weishan-v2.1.16-ui-acceptance/04_local_safety_evidence_console.png",
-    "/tmp/weishan-v2.1.16-ui-acceptance/05_manual_ui_acceptance_assistant.png",
-    "/tmp/weishan-v2.1.16-ui-acceptance/06_no_secret_persistence_guard.png",
-    "/tmp/weishan-v2.1.16-ui-acceptance/07_settings_auth_local_security_evidence.png",
-    "/tmp/weishan-v2.1.16-ui-acceptance/08_no_forbidden_controls.png",
-    "/tmp/weishan-v2.1.16-ui-acceptance/09_history_reopen.png",
-    "/tmp/weishan-v2.1.16-ui-acceptance/10_compound_request.png"
+    "/tmp/weishan-v2.1.17-ui-acceptance/01_app_launched.png",
+    "/tmp/weishan-v2.1.17-ui-acceptance/02_settings_auth.png",
+    "/tmp/weishan-v2.1.17-ui-acceptance/03_commerce_flight_result.png",
+    "/tmp/weishan-v2.1.17-ui-acceptance/04_local_safety_evidence_console.png",
+    "/tmp/weishan-v2.1.17-ui-acceptance/05_manual_ui_acceptance_assistant.png",
+    "/tmp/weishan-v2.1.17-ui-acceptance/06_no_secret_persistence_guard.png",
+    "/tmp/weishan-v2.1.17-ui-acceptance/07_settings_auth_local_security_evidence.png",
+    "/tmp/weishan-v2.1.17-ui-acceptance/08_no_forbidden_controls.png",
+    "/tmp/weishan-v2.1.17-ui-acceptance/09_history_reopen.png",
+    "/tmp/weishan-v2.1.17-ui-acceptance/10_compound_request.png"
   ];
 
   const passFailRules = [
@@ -38,7 +38,7 @@
     "commerce:provider-fixtures:offline failed -> FAIL",
     "no-secret persistence scan failed -> FAIL",
     "出现真实价格 -> FAIL",
-    "出现 fake/mock/demo/AI 估价 -> FAIL",
+    "出现虚构价格或非真实报价 -> FAIL",
     "出现 bookingUrl -> FAIL",
     "出现 API key 输入 -> FAIL",
     "出现 endpoint 测试连接 -> FAIL",
