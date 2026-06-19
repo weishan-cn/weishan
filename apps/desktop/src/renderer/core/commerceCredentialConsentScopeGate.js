@@ -1,5 +1,5 @@
 (function(){
-  const CREDENTIAL_CONSENT_SCOPE_GATE_VERSION = "2.1.14";
+  const CREDENTIAL_CONSENT_SCOPE_GATE_VERSION = "2.1.15";
 
   const consentObjectFields = [
     "consentId", "providerId", "providerName", "credentialAlias", "credentialScope", "readonlyOnly", "allowedActionList", "blockedActionList", "consentState", "consentCollectedAt", "consentExpiresAt", "revocationState", "storageBackend", "secretRef", "redacted: true"

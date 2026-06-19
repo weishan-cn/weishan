@@ -261,7 +261,7 @@
     const api = window.WeishanSettingsAuthLocalSecurityEvidence;
     const state = api && typeof api.buildSettingsAuthLocalSecurityEvidence === "function" ? api.buildSettingsAuthLocalSecurityEvidence() : {
       display:{ title:"settings auth local security evidence", establishedLine:"evidence 已建立", statusLine:"status: local auth evidence only", modeLine:"mode: no cloud auth", registerLine:"local register enabled", loginLine:"local login enabled", recoveryLine:"local recovery notice enabled", verifierLine:"passwordVerifier enabled", migrationLine:"legacy plain password migration compatible", emailLine:"real email sending disabled", networkLine:"real network disabled", keyLine:"real key read disabled", redactedLine:"redacted: true" },
-      accountLocalObjectDraft:{ accountId:"local account id", emailAlias:"local email alias", passwordVerifier:"enabled", schemaVersion:"2.1.14", redacted:true },
+      accountLocalObjectDraft:{ accountId:"local account id", emailAlias:"local email alias", passwordVerifier:"enabled", schemaVersion:"2.1.15", redacted:true },
       recoveryNoticeDraft:["本地模式不联网", "本地模式不发邮件", "本地模式不读取密钥", "本地模式不连接云账号", "找回密码不会清空表单", "找回密码不会跳路由", "找回密码不会发送真实邮件", "找回密码不会读取 API key", "找回密码不会触发 provider 连接"],
       authSafetyBoundaries:["raw password display forbidden", "raw password persistence forbidden", "passwordVerifier only", "raw token display forbidden", "rawApiKey display forbidden", "real API key input disabled", "real endpoint test disabled", "Keychain disabled", "safeStorage disabled", "cloud auth disabled", "provider auth disabled"],
       audit:{ settingsAuthLocalSecurityEvidenceAuditDraft:{ eventType:"SETTINGS_AUTH_LOCAL_SECURITY_EVIDENCE_DRAFT", redacted:true } }
