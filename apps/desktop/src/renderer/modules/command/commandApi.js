@@ -1021,8 +1021,7 @@
       ].filter(Boolean)
     });
 
-    const items = queue();
-    items.push(task);
+    const items = [task].concat(queue().filter((item) => item.id !== task.id));
     taskPerf[task.id] = meta;
     saveQueue(items);
     processQueue();
