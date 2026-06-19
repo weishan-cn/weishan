@@ -194,9 +194,9 @@
         <input class="ws-input" id="accountPassword" type="password" placeholder="${t("accountPasswordPlaceholder")}">
       </div>
       <div class="ws-row">
-        <button type="button" class="ws-btn" id="registerBtn" data-account-action="register">${t("registerLogin")}</button>
-        <button type="button" class="ws-btn green" id="loginBtn" data-account-action="login">${t("loginExisting")}</button>
-        <button type="button" class="ws-btn gray" id="recoverBtn" data-account-action="recover">${t("recoverPassword")}</button>
+        <button type="button" class="ws-btn account-action-btn account-action-register" id="registerBtn" data-account-action="register">${t("registerLogin")}</button>
+        <button type="button" class="ws-btn green account-action-btn account-action-login" id="loginBtn" data-account-action="login">${t("loginExisting")}</button>
+        <button type="button" class="ws-btn account-action-btn account-action-recover" id="recoverBtn" data-account-action="recover">${t("recoverPassword")}</button>
       </div>
 
       <div class="account-help">
@@ -204,7 +204,7 @@
         <div>${t("userRegisterHelp")}</div>
       </div>
 
-      <div class="ws-item account-status" id="accountStatus">${t("notLoggedIn")}</div>`;
+      <div class="ws-item account-status" id="accountStatus" aria-live="polite">${t("notLoggedIn")}</div>`;
   }
 
   function simpleList(items){
@@ -261,7 +261,7 @@
     const api = window.WeishanSettingsAuthLocalSecurityEvidence;
     const state = api && typeof api.buildSettingsAuthLocalSecurityEvidence === "function" ? api.buildSettingsAuthLocalSecurityEvidence() : {
       display:{ title:"settings auth local security evidence", establishedLine:"evidence 已建立", statusLine:"status: local auth evidence only", modeLine:"mode: no cloud auth", registerLine:"local register enabled", loginLine:"local login enabled", recoveryLine:"local recovery notice enabled", verifierLine:"passwordVerifier enabled", migrationLine:"legacy plain password migration compatible", emailLine:"real email sending disabled", networkLine:"real network disabled", keyLine:"real key read disabled", redactedLine:"redacted: true" },
-      accountLocalObjectDraft:{ accountId:"local account id", emailAlias:"local email alias", passwordVerifier:"enabled", schemaVersion:"2.1.12", redacted:true },
+      accountLocalObjectDraft:{ accountId:"local account id", emailAlias:"local email alias", passwordVerifier:"enabled", schemaVersion:"2.1.13", redacted:true },
       recoveryNoticeDraft:["本地模式不联网", "本地模式不发邮件", "本地模式不读取密钥", "本地模式不连接云账号", "找回密码不会清空表单", "找回密码不会跳路由", "找回密码不会发送真实邮件", "找回密码不会读取 API key", "找回密码不会触发 provider 连接"],
       authSafetyBoundaries:["raw password display forbidden", "raw password persistence forbidden", "passwordVerifier only", "raw token display forbidden", "rawApiKey display forbidden", "real API key input disabled", "real endpoint test disabled", "Keychain disabled", "safeStorage disabled", "cloud auth disabled", "provider auth disabled"],
       audit:{ settingsAuthLocalSecurityEvidenceAuditDraft:{ eventType:"SETTINGS_AUTH_LOCAL_SECURITY_EVIDENCE_DRAFT", redacted:true } }
@@ -936,24 +936,64 @@
       if (el) el.textContent = text;
     }
 
+    function accountButton(action){
+      return host.querySelector('[data-account-action="' + action + '"]');
+    }
+
+    function setAccountButtonState(action, state){
+      const btn = accountButton(action);
+      if (!btn) return;
+      btn.classList.remove("is-processing", "is-success", "is-error");
+      btn.removeAttribute("aria-busy");
+      if (state && state !== "idle") {
+        btn.classList.add("is-" + state);
+        btn.setAttribute("data-feedback-state", state);
+      } else {
+        btn.setAttribute("data-feedback-state", "idle");
+      }
+      if (state === "processing") btn.setAttribute("aria-busy", "true");
+    }
+
+    function resetOtherAccountButtons(action){
+      ["register", "login", "recover"].forEach(function(name){
+        if (name !== action) setAccountButtonState(name, "idle");
+      });
+    }
+
+    function runAccountAction(action, worker){
+      const btn = accountButton(action);
+      if (btn && btn.getAttribute("data-feedback-state") === "processing") return;
+      resetOtherAccountButtons(action);
+      setAccountButtonState(action, "processing");
+      status(action === "recover" ? "正在准备本地找回密码说明..." : "正在处理本地账号操作...");
+      window.setTimeout(function(){
+        const r = worker();
+        if (!r.ok) {
+          setAccountButtonState(action, "error");
+          status(r.error);
+          return;
+        }
+        setAccountButtonState(action, "success");
+        status(r.message || "本地账号操作已完成。");
+        if (action === "register" || action === "login") {
+          window.setTimeout(function(){ window.WeishanRouter.refresh(); }, 120);
+        }
+      }, 80);
+    }
+
     function handleAccountAction(action, event){
       if (event && event.preventDefault) event.preventDefault();
       if (event && event.stopPropagation) event.stopPropagation();
       if (action === "register") {
-        const r = window.AccountApi.register(accountInput());
-        if (!r.ok) status(r.error);
-        else window.WeishanRouter.refresh();
+        runAccountAction("register", function(){ return window.AccountApi.register(accountInput()); });
         return;
       }
       if (action === "login") {
-        const r = window.AccountApi.login(accountInput());
-        if (!r.ok) status(r.error);
-        else window.WeishanRouter.refresh();
+        runAccountAction("login", function(){ return window.AccountApi.login(accountInput()); });
         return;
       }
       if (action === "recover") {
-        const r = window.AccountApi.recover(accountInput());
-        status(r.ok ? r.message : r.error);
+        runAccountAction("recover", function(){ return window.AccountApi.recover(accountInput()); });
       }
     }
 

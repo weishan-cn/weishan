@@ -5,9 +5,9 @@ const runId = "E2ESETTINGS-AUTH-" + new Date().toISOString().replace(/[-:TZ.]/g,
 const email = `${runId.toLowerCase()}@example.test`;
 const name = `本地测试用户 ${runId}`;
 const password = `local-pass-${runId}`;
-const fixedEmail = "local-ui-check-v212@example.local";
-const fixedName = "localv212";
-const fixedPassword = "LocalOnly-v212-Password-Do-Not-Reuse";
+const fixedEmail = "local-ui-check-v213@example.local";
+const fixedName = "localv213";
+const fixedPassword = "LocalOnly-v213-Password-Do-Not-Reuse";
 
 async function clearAuthData(page) {
   await page.evaluate((id) => {
@@ -21,10 +21,10 @@ async function clearAuthData(page) {
         if (
           key.includes(id.toLowerCase()) ||
           key.includes(id) ||
-          key.includes("local-ui-check-v212@example.local") ||
+          key.includes("local-ui-check-v213@example.local") ||
           value.includes(id) ||
-          value.includes("local-ui-check-v212@example.local") ||
-          value.includes("localv212")
+          value.includes("local-ui-check-v213@example.local") ||
+          value.includes("localv213")
         ) keys.push(key);
       }
       keys.forEach((key) => window.localStorage.removeItem(key));
@@ -76,6 +76,13 @@ test.describe.serial("settings local auth hotfix", () => {
     await expect(page.locator("#registerBtn")).toHaveAttribute("type", "button");
     await expect(page.locator("#loginBtn")).toHaveAttribute("type", "button");
     await expect(page.locator("#recoverBtn")).toHaveAttribute("type", "button");
+    await expect(page.locator("#registerBtn")).not.toBeDisabled();
+    await expect(page.locator("#loginBtn")).not.toBeDisabled();
+    await expect(page.locator("#recoverBtn")).not.toBeDisabled();
+    await expect(page.locator("#registerBtn")).toHaveClass(/account-action-btn/);
+    await expect(page.locator("#loginBtn")).toHaveClass(/account-action-btn/);
+    await expect(page.locator("#recoverBtn")).toHaveClass(/account-action-recover/);
+    await expect(page.locator("#recoverBtn")).not.toHaveClass(/\bgray\b/);
     await expect(page.getByText("登录后才能配置 AI Key")).toBeVisible();
     await expect(page.locator("#apiKey")).toHaveCount(0);
     await expect(page.locator("#saveConnector")).toHaveCount(0);
@@ -91,6 +98,7 @@ test.describe.serial("settings local auth hotfix", () => {
     await page.locator("#accountName").fill("admin");
     await page.locator("#accountPassword").fill(fixedPassword);
     await page.locator("#registerBtn").click();
+    await expect(page.locator("#registerBtn")).toHaveAttribute("data-feedback-state", "error");
     await expect(page.locator("#accountStatus")).toContainText("后台管理员账号，不用于客户端普通用户登录");
 
     await page.locator("#accountEmail").fill(fixedEmail);
@@ -154,6 +162,7 @@ test.describe.serial("settings local auth hotfix", () => {
     await page.locator("#accountName").fill(name);
     await page.locator("#accountPassword").fill(password);
     await page.locator("#recoverBtn").click();
+    await expect(page.locator("#recoverBtn")).toHaveAttribute("data-feedback-state", "success");
 
     const status = page.locator("#accountStatus");
     await expect(status).toContainText("本地测试账号存在");
