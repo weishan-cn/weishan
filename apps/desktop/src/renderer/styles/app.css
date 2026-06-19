@@ -4241,4 +4241,95 @@
   flex-wrap: wrap;
   gap: 8px;
 }
-.ws-btn.account-action-btn{height:46px;min-width:132px;border-radius:12px;font-weight:950;box-shadow:0 8px 18px rgba(15,23,42,.08);transition:transform .12s ease,box-shadow .12s ease,filter .12s ease,background .12s ease}.ws-btn.account-action-btn:hover{filter:brightness(1.04);box-shadow:0 12px 24px rgba(15,23,42,.12)}.ws-btn.account-action-btn:active,.ws-btn.account-action-btn.is-processing{transform:translateY(1px) scale(.99);box-shadow:0 5px 12px rgba(15,23,42,.12)}.ws-btn.account-action-btn:focus-visible{outline:3px solid rgba(37,99,235,.32);outline-offset:2px}.ws-btn.account-action-recover{background:#e0f2fe;color:#075985;border:1px solid #bae6fd}.ws-btn.account-action-recover:hover{background:#bae6fd}.ws-btn.account-action-btn.is-processing{cursor:progress}.ws-btn.account-action-btn.is-success{box-shadow:0 0 0 3px rgba(34,197,94,.22)}.ws-btn.account-action-btn.is-error{box-shadow:0 0 0 3px rgba(239,68,68,.22)}
+.ws-btn.auth-action-button,
+.ws-btn.account-action-btn {
+  min-width: 132px;
+  height: 46px;
+  border-radius: 12px;
+  padding: 0 18px;
+  font-weight: 950;
+  line-height: 1;
+  border: 1px solid transparent;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    filter 0.12s ease,
+    background 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.ws-btn.auth-action-primary {
+  background: #1677ff;
+  color: #ffffff;
+}
+
+.ws-btn.auth-action-success {
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.ws-btn.auth-action-secondary,
+.ws-btn.account-action-recover {
+  background: #e0f2fe;
+  color: #075985;
+  border-color: #7dd3fc;
+}
+
+.ws-btn.auth-action-button:hover,
+.ws-btn.account-action-btn:hover {
+  filter: brightness(1.04);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+}
+
+.ws-btn.auth-action-primary:hover {
+  background: #0f66df;
+}
+
+.ws-btn.auth-action-success:hover {
+  background: #15803d;
+}
+
+.ws-btn.auth-action-secondary:hover,
+.ws-btn.account-action-recover:hover {
+  background: #bae6fd;
+  border-color: #38bdf8;
+}
+
+.ws-btn.auth-action-button:active,
+.ws-btn.account-action-btn:active,
+.ws-btn.auth-action-button.is-processing,
+.ws-btn.account-action-btn.is-processing {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 5px 12px rgba(15, 23, 42, 0.12);
+}
+
+.ws-btn.auth-action-button:focus-visible,
+.ws-btn.account-action-btn:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, 0.34);
+  outline-offset: 2px;
+}
+
+.ws-btn.auth-action-button.is-processing,
+.ws-btn.account-action-btn.is-processing {
+  cursor: progress;
+}
+
+.ws-btn.auth-action-button.is-success,
+.ws-btn.account-action-btn.is-success {
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.24), 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.ws-btn.auth-action-button.is-error,
+.ws-btn.account-action-btn.is-error {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.24), 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.ws-btn.auth-action-button:disabled,
+.ws-btn.account-action-btn:disabled {
+  transform: none;
+  box-shadow: none;
+  filter: none;
+  cursor: not-allowed;
+  opacity: 0.58;
+}

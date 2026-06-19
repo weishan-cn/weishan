@@ -194,9 +194,9 @@
         <input class="ws-input" id="accountPassword" type="password" placeholder="${t("accountPasswordPlaceholder")}">
       </div>
       <div class="ws-row">
-        <button type="button" class="ws-btn account-action-btn account-action-register" id="registerBtn" data-account-action="register">${t("registerLogin")}</button>
-        <button type="button" class="ws-btn green account-action-btn account-action-login" id="loginBtn" data-account-action="login">${t("loginExisting")}</button>
-        <button type="button" class="ws-btn account-action-btn account-action-recover" id="recoverBtn" data-account-action="recover">${t("recoverPassword")}</button>
+        <button type="button" class="ws-btn auth-action-button auth-action-primary account-action-btn account-action-register" id="registerBtn" data-account-action="register">${t("registerLogin")}</button>
+        <button type="button" class="ws-btn auth-action-button auth-action-success account-action-btn account-action-login" id="loginBtn" data-account-action="login">${t("loginExisting")}</button>
+        <button type="button" class="ws-btn auth-action-button auth-action-secondary account-action-btn account-action-recover" id="recoverBtn" data-account-action="recover">${t("recoverPassword")}</button>
       </div>
 
       <div class="account-help">
@@ -261,7 +261,7 @@
     const api = window.WeishanSettingsAuthLocalSecurityEvidence;
     const state = api && typeof api.buildSettingsAuthLocalSecurityEvidence === "function" ? api.buildSettingsAuthLocalSecurityEvidence() : {
       display:{ title:"settings auth local security evidence", establishedLine:"evidence 已建立", statusLine:"status: local auth evidence only", modeLine:"mode: no cloud auth", registerLine:"local register enabled", loginLine:"local login enabled", recoveryLine:"local recovery notice enabled", verifierLine:"passwordVerifier enabled", migrationLine:"legacy plain password migration compatible", emailLine:"real email sending disabled", networkLine:"real network disabled", keyLine:"real key read disabled", redactedLine:"redacted: true" },
-      accountLocalObjectDraft:{ accountId:"local account id", emailAlias:"local email alias", passwordVerifier:"enabled", schemaVersion:"2.1.13", redacted:true },
+      accountLocalObjectDraft:{ accountId:"local account id", emailAlias:"local email alias", passwordVerifier:"enabled", schemaVersion:"2.1.14", redacted:true },
       recoveryNoticeDraft:["本地模式不联网", "本地模式不发邮件", "本地模式不读取密钥", "本地模式不连接云账号", "找回密码不会清空表单", "找回密码不会跳路由", "找回密码不会发送真实邮件", "找回密码不会读取 API key", "找回密码不会触发 provider 连接"],
       authSafetyBoundaries:["raw password display forbidden", "raw password persistence forbidden", "passwordVerifier only", "raw token display forbidden", "rawApiKey display forbidden", "real API key input disabled", "real endpoint test disabled", "Keychain disabled", "safeStorage disabled", "cloud auth disabled", "provider auth disabled"],
       audit:{ settingsAuthLocalSecurityEvidenceAuditDraft:{ eventType:"SETTINGS_AUTH_LOCAL_SECURITY_EVIDENCE_DRAFT", redacted:true } }
@@ -940,9 +940,35 @@
       return host.querySelector('[data-account-action="' + action + '"]');
     }
 
+    function accountButtonIdleLabel(action){
+      if (action === "register") return t("registerLogin");
+      if (action === "login") return t("loginExisting");
+      return t("recoverPassword");
+    }
+
+    function accountButtonFeedbackLabel(action, state){
+      if (state === "processing") {
+        if (action === "register") return "正在注册...";
+        if (action === "login") return "正在登录...";
+        return "正在准备说明...";
+      }
+      if (state === "success") {
+        if (action === "register") return "注册完成";
+        if (action === "login") return "登录完成";
+        return "本地说明已显示";
+      }
+      if (state === "error") {
+        if (action === "register") return "注册受阻";
+        if (action === "login") return "登录受阻";
+        return "说明受阻";
+      }
+      return accountButtonIdleLabel(action);
+    }
+
     function setAccountButtonState(action, state){
       const btn = accountButton(action);
       if (!btn) return;
+      if (!btn.getAttribute("data-idle-label")) btn.setAttribute("data-idle-label", accountButtonIdleLabel(action));
       btn.classList.remove("is-processing", "is-success", "is-error");
       btn.removeAttribute("aria-busy");
       if (state && state !== "idle") {
@@ -952,6 +978,7 @@
         btn.setAttribute("data-feedback-state", "idle");
       }
       if (state === "processing") btn.setAttribute("aria-busy", "true");
+      btn.textContent = accountButtonFeedbackLabel(action, state || "idle");
     }
 
     function resetOtherAccountButtons(action){

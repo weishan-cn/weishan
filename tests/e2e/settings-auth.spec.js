@@ -5,9 +5,9 @@ const runId = "E2ESETTINGS-AUTH-" + new Date().toISOString().replace(/[-:TZ.]/g,
 const email = `${runId.toLowerCase()}@example.test`;
 const name = `本地测试用户 ${runId}`;
 const password = `local-pass-${runId}`;
-const fixedEmail = "local-ui-check-v213@example.local";
-const fixedName = "localv213";
-const fixedPassword = "LocalOnly-v213-Password-Do-Not-Reuse";
+const fixedEmail = "local-ui-check-v214@example.local";
+const fixedName = "localv214";
+const fixedPassword = "LocalOnly-v214-Password-Do-Not-Reuse";
 
 async function clearAuthData(page) {
   await page.evaluate((id) => {
@@ -21,10 +21,10 @@ async function clearAuthData(page) {
         if (
           key.includes(id.toLowerCase()) ||
           key.includes(id) ||
-          key.includes("local-ui-check-v213@example.local") ||
+          key.includes("local-ui-check-v214@example.local") ||
           value.includes(id) ||
-          value.includes("local-ui-check-v213@example.local") ||
-          value.includes("localv213")
+          value.includes("local-ui-check-v214@example.local") ||
+          value.includes("localv214")
         ) keys.push(key);
       }
       keys.forEach((key) => window.localStorage.removeItem(key));
@@ -81,8 +81,44 @@ test.describe.serial("settings local auth hotfix", () => {
     await expect(page.locator("#recoverBtn")).not.toBeDisabled();
     await expect(page.locator("#registerBtn")).toHaveClass(/account-action-btn/);
     await expect(page.locator("#loginBtn")).toHaveClass(/account-action-btn/);
+    await expect(page.locator("#registerBtn")).toHaveClass(/auth-action-button/);
+    await expect(page.locator("#loginBtn")).toHaveClass(/auth-action-button/);
+    await expect(page.locator("#recoverBtn")).toHaveClass(/auth-action-button/);
+    await expect(page.locator("#registerBtn")).toHaveClass(/auth-action-primary/);
+    await expect(page.locator("#loginBtn")).toHaveClass(/auth-action-success/);
+    await expect(page.locator("#recoverBtn")).toHaveClass(/auth-action-secondary/);
     await expect(page.locator("#recoverBtn")).toHaveClass(/account-action-recover/);
     await expect(page.locator("#recoverBtn")).not.toHaveClass(/\bgray\b/);
+    await expect(page.locator("#recoverBtn")).not.toHaveAttribute("disabled", /.*/);
+    await page.locator("#registerBtn").focus();
+    await expect(page.locator("#registerBtn")).toBeFocused();
+    await page.locator("#loginBtn").focus();
+    await expect(page.locator("#loginBtn")).toBeFocused();
+    await page.locator("#recoverBtn").focus();
+    await expect(page.locator("#recoverBtn")).toBeFocused();
+    const buttonStyles = await page.locator("#registerBtn").evaluate((register) => {
+      const login = document.querySelector("#loginBtn");
+      const recover = document.querySelector("#recoverBtn");
+      const read = (el) => {
+        const style = window.getComputedStyle(el);
+        return {
+          height: style.height,
+          radius: style.borderRadius,
+          weight: style.fontWeight,
+          cursor: style.cursor,
+          background: style.backgroundColor
+        };
+      };
+      return { register: read(register), login: read(login), recover: read(recover) };
+    });
+    expect(buttonStyles.register.height).toBe(buttonStyles.login.height);
+    expect(buttonStyles.register.height).toBe(buttonStyles.recover.height);
+    expect(buttonStyles.register.radius).toBe(buttonStyles.login.radius);
+    expect(buttonStyles.register.radius).toBe(buttonStyles.recover.radius);
+    expect(buttonStyles.register.weight).toBe(buttonStyles.login.weight);
+    expect(buttonStyles.register.weight).toBe(buttonStyles.recover.weight);
+    expect(buttonStyles.recover.cursor).not.toBe("not-allowed");
+    expect(buttonStyles.recover.background).not.toBe("rgb(229, 231, 235)");
     await expect(page.getByText("登录后才能配置 AI Key")).toBeVisible();
     await expect(page.locator("#apiKey")).toHaveCount(0);
     await expect(page.locator("#saveConnector")).toHaveCount(0);
@@ -99,6 +135,7 @@ test.describe.serial("settings local auth hotfix", () => {
     await page.locator("#accountPassword").fill(fixedPassword);
     await page.locator("#registerBtn").click();
     await expect(page.locator("#registerBtn")).toHaveAttribute("data-feedback-state", "error");
+    await expect(page.locator("#registerBtn")).toHaveClass(/is-error/);
     await expect(page.locator("#accountStatus")).toContainText("后台管理员账号，不用于客户端普通用户登录");
 
     await page.locator("#accountEmail").fill(fixedEmail);
@@ -163,6 +200,7 @@ test.describe.serial("settings local auth hotfix", () => {
     await page.locator("#accountPassword").fill(password);
     await page.locator("#recoverBtn").click();
     await expect(page.locator("#recoverBtn")).toHaveAttribute("data-feedback-state", "success");
+    await expect(page.locator("#recoverBtn")).toHaveClass(/is-success/);
 
     const status = page.locator("#accountStatus");
     await expect(status).toContainText("本地测试账号存在");

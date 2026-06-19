@@ -1,5 +1,5 @@
 (function(){
-  const SETTINGS_AUTH_LOCAL_SECURITY_EVIDENCE_VERSION = "2.1.13";
+  const SETTINGS_AUTH_LOCAL_SECURITY_EVIDENCE_VERSION = "2.1.14";
 
   const recoveryNoticeDraft = [
     "本地模式不联网",
