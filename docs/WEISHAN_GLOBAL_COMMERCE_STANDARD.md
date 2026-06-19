@@ -2154,3 +2154,20 @@ v2.1.20 新增 `globalProcurementMissingInfoChecklist.js`、`globalProcurementSa
 - marker:global procurement no booking url
 - marker:global procurement no payment
 - marker:global procurement no order submit
+
+## v2.1.21：Global Procurement User-Facing Result Cards Bundle / 全球采购用户结果卡片包
+
+v2.1.21 新增 `globalProcurementQuickSummary.js` 和 `globalProcurementUserFacingResultCards.js`。本阶段把全球采购结果面进一步收口成用户可读的结果卡片：按品类显示标题、简短摘要、当前状态、已整理条件、仍待人工确认项、当前未开放能力和人工下一步；同时清理与当前品类无关的复制按钮，统一历史类别标签，并新增 `查看全球采购用户结果卡片规则` 供验收与审计。当前版本仍不接真实 provider，不读取 API key，不连接 endpoint，不联网，不显示真实价格，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
+
+- marker:global procurement quick summary
+- marker:global procurement user-facing result cards
+- marker:global procurement result cards user-facing summary only
+- marker:global procurement result cards no unrelated copy buttons
+- marker:global procurement result cards restricted strip
+- marker:global procurement history label normalization
+- marker:global procurement result cards no real provider
+- marker:global procurement result cards no network
+- marker:global procurement result cards no real price
+- marker:global procurement result cards no booking url
+- marker:global procurement result cards no payment
+- marker:global procurement result cards no order submit

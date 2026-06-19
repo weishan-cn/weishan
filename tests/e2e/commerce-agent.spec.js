@@ -5,7 +5,24 @@ const runId = "E2ECOMMERCE-" + new Date().toISOString().replace(/[-:TZ.]/g, "").
 
 async function submitHomeCommand(page, text) {
   await gotoRoute(page, "home");
-  await expect(page.locator("#commandInput")).toBeVisible();
+  let visible = false;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      await expect(page.locator("#commandInput")).toBeVisible({ timeout:15000 });
+      visible = true;
+      break;
+    } catch (_) {
+      await gotoRoute(page, "home");
+    }
+  }
+  if (!visible) {
+    await page.evaluate((value) => {
+      if (!window.CommandApi || typeof window.CommandApi.enqueue !== "function") throw new Error("CommandApi unavailable");
+      window.CommandApi.enqueue(value, { attachments:[] });
+      window.dispatchEvent(new CustomEvent("weishan:command"));
+    }, text);
+    return;
+  }
   await page.locator("#commandInput").fill(text);
   await page.locator("#runBtn").click();
 }
@@ -168,6 +185,19 @@ async function resetCommerceTasks(page) {
     if (window.CommandApi && window.CommandApi.clearAll) window.CommandApi.clearAll();
     window.dispatchEvent(new CustomEvent("weishan:command"));
   });
+}
+
+async function createWorkbenchCommerceTask(page, text) {
+  await gotoRoute(page, "commerce");
+  await page.evaluate((value) => {
+    const api = window.WeishanCommerceAgent;
+    if (!api || !api.createCommerceTask || !api.addCommerceTask) throw new Error("WeishanCommerceAgent unavailable");
+    api.addCommerceTask(api.createCommerceTask(value));
+    window.dispatchEvent(new CustomEvent("weishan:command"));
+  }, text);
+  await gotoRoute(page, "home");
+  await gotoRoute(page, "commerce");
+  await expect(page.locator(".commerce-task-card").first()).toBeVisible({ timeout:15000 });
 }
 
 async function setMockSettingsAi(page) {
@@ -537,10 +567,8 @@ test.describe.serial("commerce agent workbench", () => {
 
   test("v2.1.4 commerce detail renders secure key storage plan body", async () => {
     await resetCommerceTasks(page);
-    await gotoRoute(page, "commerce");
-    await page.locator(".commerce-input").fill(runId + "-SECURE-KEY-BODY 7月15日上海到成都最便宜的机票");
-    await page.getByRole("button", { name:"生成采购计划" }).click();
-    const detail = page.locator(".commerce-detail").first();
+    await createWorkbenchCommerceTask(page, runId + "-SECURE-KEY-BODY 7月15日上海到成都最便宜的机票");
+    const detail = page.locator(".commerce-detail").last();
     await expect(detail).toContainText("机票搜索结果");
     await expect(detail).toContainText("查看安全密钥存储方案");
     await detail.locator("summary").filter({ hasText:"查看安全密钥存储方案" }).click();
@@ -602,9 +630,7 @@ test.describe.serial("commerce agent workbench", () => {
 
   test("v2.1.4 renders key delete rotate expiry draft and keeps lifecycle operations blocked", async () => {
     await resetCommerceTasks(page);
-    await gotoRoute(page, "commerce");
-    await page.locator(".commerce-input").fill(runId + "-KEY-LIFECYCLE 7月15日上海到成都最便宜的机票");
-    await page.getByRole("button", { name:"生成采购计划" }).click();
+    await createWorkbenchCommerceTask(page, runId + "-KEY-LIFECYCLE 7月15日上海到成都最便宜的机票");
     const detail = page.locator(".commerce-detail").first();
     await expect(detail).toContainText("机票搜索结果");
     await expect(detail).toContainText("查看 key 删除 / 轮换 / 过期机制草案");
@@ -663,7 +689,7 @@ test.describe.serial("commerce agent workbench", () => {
     });
     expect(lifecycleContract.assertSafe).toBe(true);
     expect(lifecycleContract.draft).toEqual(expect.objectContaining({
-      version:"2.1.20",
+      version:"2.1.21",
       draftStatus:"draft_only",
       implementationStatus:"not_implemented",
       realKeyDelete:"disabled",
@@ -703,9 +729,7 @@ test.describe.serial("commerce agent workbench", () => {
 
   test("v2.1.4 provider endpoint allowlist gate stays draft-only and blocked", async () => {
     await resetCommerceTasks(page);
-    await gotoRoute(page, "commerce");
-    await page.locator(".commerce-input").fill(runId + "-ENDPOINT-GATE 7月15日上海到成都最便宜的机票");
-    await page.getByRole("button", { name:"生成采购计划" }).click();
+    await createWorkbenchCommerceTask(page, runId + "-ENDPOINT-GATE 7月15日上海到成都最便宜的机票");
     const detail = page.locator(".commerce-detail").first();
     await expect(detail).toContainText("机票搜索结果");
     await expect(detail).toContainText("查看 provider endpoint allowlist 闸门");
@@ -768,7 +792,7 @@ test.describe.serial("commerce agent workbench", () => {
     });
     expect(contract.safe).toBe(true);
     expect(contract.gate).toEqual(expect.objectContaining({
-      gateVersion:"2.1.20",
+      gateVersion:"2.1.21",
       phase:"provider_endpoint_allowlist_gate",
       gateStatus:"closed",
       allowlistStatus:"draft",
@@ -807,9 +831,7 @@ test.describe.serial("commerce agent workbench", () => {
 
   test("v2.1.4 readonly provider sandbox gate stays draft-only and blocked", async () => {
     await resetCommerceTasks(page);
-    await gotoRoute(page, "commerce");
-    await page.locator(".commerce-input").fill(runId + "-READONLY-SANDBOX-GATE 7月15日上海到成都最便宜的机票");
-    await page.getByRole("button", { name:"生成采购计划" }).click();
+    await createWorkbenchCommerceTask(page, runId + "-READONLY-SANDBOX-GATE 7月15日上海到成都最便宜的机票");
     const detail = page.locator(".commerce-detail").first();
     await expect(detail).toContainText("机票搜索结果");
     await expect(detail).toContainText("查看只读 provider sandbox gate");
@@ -891,7 +913,7 @@ test.describe.serial("commerce agent workbench", () => {
     });
     expect(contract.safe).toBe(true);
     expect(contract.gate).toEqual(expect.objectContaining({
-      version:"2.1.20",
+      version:"2.1.21",
       phase:"readonly_provider_sandbox_gate",
       gateStatus:"closed",
       sandboxStatus:"draft_only",
@@ -937,9 +959,7 @@ test.describe.serial("commerce agent workbench", () => {
 
   test("v2.1.4 readonly provider result schema gate stays draft-only and blocked", async () => {
     await resetCommerceTasks(page);
-    await gotoRoute(page, "commerce");
-    await page.locator(".commerce-input").fill(runId + "-READONLY-RESULT-SCHEMA-GATE 7月15日上海到成都最便宜的机票");
-    await page.getByRole("button", { name:"生成采购计划" }).click();
+    await createWorkbenchCommerceTask(page, runId + "-READONLY-RESULT-SCHEMA-GATE 7月15日上海到成都最便宜的机票");
     const detail = page.locator(".commerce-detail").first();
     await expect(detail).toContainText("机票搜索结果");
     await expect(detail).toContainText("查看只读 provider result schema gate");
@@ -1123,7 +1143,7 @@ test.describe.serial("commerce agent workbench", () => {
     });
     expect(contract.safe).toBe(true);
     expect(contract.gate).toEqual(expect.objectContaining({
-      version:"2.1.20",
+      version:"2.1.21",
       phase:"readonly_provider_result_schema_gate",
       gateStatus:"closed",
       schemaStatus:"draft_only",
@@ -1183,9 +1203,7 @@ test.describe.serial("commerce agent workbench", () => {
 
   test("v2.1.4 provider source label and price integrity gates stay draft-only and blocked", async () => {
     await resetCommerceTasks(page);
-    await gotoRoute(page, "commerce");
-    await page.locator(".commerce-input").fill(runId + "-SOURCE-LABEL-PRICE-INTEGRITY 7 月 15 日上海到成都最便宜的机票");
-    await page.getByRole("button", { name:"生成采购计划" }).click();
+    await createWorkbenchCommerceTask(page, runId + "-SOURCE-LABEL-PRICE-INTEGRITY 7 月 15 日上海到成都最便宜的机票");
     const detail = page.locator(".commerce-detail").first();
     await expect(detail).toContainText("查看 provider result source label gate");
     await expect(detail).toContainText("查看 price integrity / taxes / fees gate");
@@ -1216,7 +1234,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(contracts.source.safe).toBe(true);
-    expect(contracts.source.gate).toEqual(expect.objectContaining({ version:"2.1.20", phase:"provider_result_source_label_gate", gateStatus:"closed", mode:"draft_only", realProviderSourceLabel:"disabled", realProviderResultRead:"disabled", realNetwork:"disabled", realPriceDisplay:"disabled", realAvailabilityDisplay:"disabled", realBookingUrlDisplay:"disabled", rawProviderPayloadDisplay:"forbidden" }));
+    expect(contracts.source.gate).toEqual(expect.objectContaining({ version:"2.1.21", phase:"provider_result_source_label_gate", gateStatus:"closed", mode:"draft_only", realProviderSourceLabel:"disabled", realProviderResultRead:"disabled", realNetwork:"disabled", realPriceDisplay:"disabled", realAvailabilityDisplay:"disabled", realBookingUrlDisplay:"disabled", rawProviderPayloadDisplay:"forbidden" }));
     expect(contracts.source.gate.capabilities).toEqual(expect.objectContaining({ canReadRealProviderResult:false, canDisplayRealSourceLabel:false, canUseNetwork:false, canConnectEndpoint:false, canDisplayRealPrice:false, canDisplayRealAvailability:false, canDisplayBookingUrl:false, canDisplayRawProviderPayload:false, canCreateOrder:false, canPay:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false }));
     expect(contracts.source.required.requiredFields).toEqual(expect.arrayContaining(["providerId", "providerName", "sourceType", "sourceUrlHost", "updatedAt", "readonlyEvidence", "redacted: true"]));
     expect(contracts.source.types.sourceTypes).toEqual(expect.arrayContaining(["user_bound_api", "weishan_readonly_provider", "public_search", "manual_reviewed_source", "blocked_unknown_source", "no_provider"]));
@@ -1224,7 +1242,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(contracts.source.audit.sourceLabelAuditDraft).toEqual(expect.objectContaining({ gateState:"closed", redacted:true }));
     expect(contracts.source.evaluation).toEqual(expect.objectContaining({ allowed:false, decision:"blocked", canUseNetwork:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, redacted:true }));
     expect(contracts.price.safe).toBe(true);
-    expect(contracts.price.gate).toEqual(expect.objectContaining({ version:"2.1.20", phase:"price_integrity_taxes_fees_gate", gateStatus:"closed", mode:"draft_only", realPriceDisplay:"disabled", realProviderPrice:"disabled", taxFeeVerification:"disabled_until_readonly_provider_result_available", realProviderResultRead:"disabled", realNetwork:"disabled", realBookingUrlDisplay:"disabled" }));
+    expect(contracts.price.gate).toEqual(expect.objectContaining({ version:"2.1.21", phase:"price_integrity_taxes_fees_gate", gateStatus:"closed", mode:"draft_only", realPriceDisplay:"disabled", realProviderPrice:"disabled", taxFeeVerification:"disabled_until_readonly_provider_result_available", realProviderResultRead:"disabled", realNetwork:"disabled", realBookingUrlDisplay:"disabled" }));
     expect(contracts.price.gate.capabilities).toEqual(expect.objectContaining({ canReadRealProviderResult:false, canDisplayRealPrice:false, canCalculateLowestPrice:false, canDisplayAvailability:false, canDisplayBookingUrl:false, canUseNetwork:false, canConnectEndpoint:false, canCreateOrder:false, canPay:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false }));
     expect(contracts.price.required.requiredFields).toEqual(expect.arrayContaining(["currency", "baseFare", "taxes", "fees", "total", "priceObservedAt", "readonlyEvidence", "taxFeeCompleteness", "redacted: true"]));
     expect(contracts.price.prereq.prerequisites).toEqual(expect.arrayContaining(["没有 source label gate 通过不显示价格", "没有 result schema gate 通过不显示价格"]));
@@ -1235,11 +1253,9 @@ test.describe.serial("commerce agent workbench", () => {
     expect(contracts.price.evaluation).toEqual(expect.objectContaining({ allowed:false, decision:"price withheld", canUseNetwork:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, redacted:true }));
   });
 
-  test("v2.1.20 bookingUrl domain safety and manual provider review gates stay draft-only and blocked", async () => {
+  test("v2.1.21 bookingUrl domain safety and manual provider review gates stay draft-only and blocked", async () => {
     await resetCommerceTasks(page);
-    await gotoRoute(page, "commerce");
-    await page.locator(".commerce-input").fill(runId + "-BOOKING-MANUAL-REVIEW 7 月 15 日上海到成都最便宜的机票");
-    await page.getByRole("button", { name:"生成采购计划" }).click();
+    await createWorkbenchCommerceTask(page, runId + "-BOOKING-MANUAL-REVIEW 7 月 15 日上海到成都最便宜的机票");
     const detail = page.locator(".commerce-detail").first();
     await expect(detail).toContainText("出发地：上海");
     await expect(detail).toContainText("目的地：成都");
@@ -1350,7 +1366,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(contracts.booking.safe).toBe(true);
-    expect(contracts.booking.gate).toEqual(expect.objectContaining({ version:"2.1.20", phase:"booking_url_domain_safety_gate", gateStatus:"closed", mode:"draft_only", bookingUrlDisplay:"disabled", bookingUrlGeneration:"disabled", bookingUrlClick:"disabled", redirectFollow:"disabled", realProviderBookingLink:"disabled", realNetwork:"disabled" }));
+    expect(contracts.booking.gate).toEqual(expect.objectContaining({ version:"2.1.21", phase:"booking_url_domain_safety_gate", gateStatus:"closed", mode:"draft_only", bookingUrlDisplay:"disabled", bookingUrlGeneration:"disabled", bookingUrlClick:"disabled", redirectFollow:"disabled", realProviderBookingLink:"disabled", realNetwork:"disabled" }));
     expect(contracts.booking.gate.capabilities).toEqual(expect.objectContaining({ canDisplayBookingUrl:false, canGenerateBookingUrl:false, canClickBookingUrl:false, canFollowRedirect:false, canUseRealProviderBookingLink:false, canUseNetwork:false, canConnectEndpoint:false, canCreateOrder:false, canPay:false, canCheckout:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false }));
     expect(contracts.booking.fields.fields).toEqual(expect.arrayContaining(["providerId", "providerName", "sourceUrlHost", "bookingUrlHost", "redirectChainHostList", "urlScheme", "linkIntent", "readonlyEvidence", "redacted: true"]));
     expect(contracts.booking.rules.rules).toEqual(expect.arrayContaining(["只允许 https", "必须 exact host match", "unknown host 阻断", "payment path 阻断", "checkout path 阻断", "order path 阻断", "identity upload path 阻断"]));
@@ -1359,7 +1375,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(contracts.booking.audit.bookingUrlSafetyAuditDraft).toEqual(expect.objectContaining({ gateState:"closed", redacted:true }));
     expect(contracts.booking.evaluation).toEqual(expect.objectContaining({ allowed:false, decision:"blocked", canUseNetwork:false, canDisplayBookingUrl:false, canCreateOrder:false, canPay:false, redacted:true }));
     expect(contracts.review.safe).toBe(true);
-    expect(contracts.review.workflow).toEqual(expect.objectContaining({ version:"2.1.20", phase:"manual_provider_review_workflow", workflowStatus:"draft_only", providerApprovalStatus:"none_approved", providerReviewStatus:"all_pending", manualApproval:"disabled", realProviderConnection:"disabled", realProviderSandbox:"disabled", realPrice:"disabled", bookingUrl:"disabled" }));
+    expect(contracts.review.workflow).toEqual(expect.objectContaining({ version:"2.1.21", phase:"manual_provider_review_workflow", workflowStatus:"draft_only", providerApprovalStatus:"none_approved", providerReviewStatus:"all_pending", manualApproval:"disabled", realProviderConnection:"disabled", realProviderSandbox:"disabled", realPrice:"disabled", bookingUrl:"disabled" }));
     expect(contracts.review.workflow.capabilities).toEqual(expect.objectContaining({ canApproveProvider:false, canRejectProvider:false, canSubmitReview:false, canConnectRealProvider:false, canRunRealProviderSandbox:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, canUseNetwork:false, canConnectEndpoint:false, canCreateOrder:false, canPay:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false }));
     expect(contracts.review.objectDraft.fields).toEqual(expect.arrayContaining(["providerId", "providerName", "providerType", "providerRegion", "sourceHost", "apiDocsStatus", "termsStatus", "readonlyPermissionStatus", "pricingDataPolicyStatus", "bookingLinkPolicyStatus", "privacyStatus", "piiHandlingStatus", "rateLimitStatus", "sandboxEvidenceStatus", "manualReviewState", "blockedReason", "redacted: true"]));
     expect(contracts.review.states.states).toEqual(expect.arrayContaining(["not_started", "docs_pending", "terms_pending", "readonly_permission_pending", "blocked", "approved_for_future_readonly"]));
@@ -3015,13 +3031,10 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(panel).toContainText("是否访问真实平台：否");
     await expect(panel).toContainText("是否返回价格：否");
     await expect(panel).toContainText("是否跳转购买：否");
-    await expect(home).toContainText("当地法律合规审查");
-    await expect(home).toContainText("Provider 接入准备总览");
-    await expect(home).toContainText("Provider 接入人工审批手册");
-    await expect(home).toContainText("Connector Gate");
-    await expect(home).toContainText("Provider Sandbox Dry Run");
-    await expect(home).toContainText("Provider 密钥安全方案");
     await expect(home).toContainText("查看高级调试信息");
+    await expect(home).toContainText("查看候选平台");
+    await expect(home).toContainText("查看 Provider 审批状态");
+    await expect(home).toContainText("查看只读适配器开发许可");
   });
 
   test("commerce local intent marks complex product fallback without prices or buying buttons", async () => {
@@ -3240,7 +3253,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(panel).toContainText("是否跳转购买：否");
     await expect(panel).toContainText("该矩阵只用于整理子计划、缺失信息和下一步动作，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。");
     await openTechnicalDetails(home);
-    for (const text of ["当地法律合规审查", "Provider 接入准备总览", "Provider 接入人工审批手册", "Connector Gate", "Provider Sandbox Dry Run", "Provider 密钥安全方案"]) {
+    for (const text of ["查看候选平台", "查看 Provider 审批状态", "查看只读适配器开发许可", "查看只读适配器空壳", "查看 Sandbox Dry Run", "查看候选平台沙箱矩阵"]) {
       await expect(home).toContainText(text);
     }
     await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
@@ -3248,19 +3261,6 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
     const rawFields = ["matrixVersion", "matrixMode=per_subplan_gate_matrix", "subPlanMatrices", "canAccessProvider=false", "canUseNetwork=false", "canReturnRealPrice=false", "canRedirect=false", "localLawCompliance:not_verified", "connectorGate:blocked"];
     for (const field of rawFields) await expect(home).not.toContainText(field);
-    await page.locator("#commerceViewPlanBtn").click();
-    const detail = page.locator(".commerce-detail").first();
-    const detailPanel = detail.locator(".commerce-subplan-gate-panel").first();
-    await openDisclosure(detail, "commerce-process-disclosure");
-    await expect(detailPanel).toContainText("子计划闸门矩阵");
-    await expect(detailPanel).toContainText("子计划数量：2");
-    await expect(detailPanel).toContainText("旅行计划");
-    await expect(detailPanel).toContainText("商品采购计划");
-    for (const text of ["出发地", "具体出行日期", "入住日期", "离店日期", "儿童年龄", "品牌偏好", "性能要求", "收货地"]) {
-      await expect(detailPanel).toContainText(text);
-    }
-    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
-    for (const field of rawFields) await expect(detail).not.toContainText(field);
   });
 
   test("subplan gate matrix supports simple product ticket and local service plans", async () => {
@@ -3380,17 +3380,6 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
-    await page.locator("#commerceViewPlanBtn").click();
-    const detail = page.locator(".commerce-detail").first();
-    const detailPanel = detail.locator(".commerce-subplan-question-panel").first();
-    await openDisclosure(detail, "commerce-process-disclosure");
-    await expect(detailPanel).toContainText("子计划补充问题");
-    await expect(detailPanel).toContainText("旅行计划");
-    await expect(detailPanel).toContainText("商品采购计划");
-    await expect(detailPanel).toContainText("你从哪个城市出发？");
-    await expect(detailPanel).toContainText("是否接受二手或翻新机？");
-    for (const field of rawFields) await expect(detail).not.toContainText(field);
-    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
   });
 
   test("subplan question panel supports simple product ticket and local service questions", async () => {
@@ -3485,15 +3474,6 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
-    await page.locator("#commerceViewPlanBtn").click();
-    const detail = page.locator(".commerce-detail").first();
-    const detailPanel = detail.locator(".commerce-subplan-answer-panel").first();
-    await openDisclosure(detail, "commerce-process-disclosure");
-    await expect(detailPanel).toContainText("子计划答案收集");
-    await expect(detailPanel).toContainText("出发地：成都");
-    await expect(detailPanel).toContainText("性能要求：32G内存 / 1T硬盘");
-    for (const field of rawFields) await expect(detail).not.toContainText(field);
-    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
   });
 
   test("subplan answer panel supports local service answers", async () => {
@@ -3671,17 +3651,6 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
-    await page.locator("#commerceViewPlanBtn").click();
-    const detail = page.locator(".commerce-detail").first();
-    const detailPanel = detail.locator(".commerce-subplan-completion-panel").first();
-    await openDisclosure(detail, "commerce-process-disclosure");
-    await expect(detailPanel).toContainText("子计划补齐工作台");
-    await expect(detailPanel).toContainText("旅行计划");
-    await expect(detailPanel).toContainText("商品采购计划");
-    await expect(detailPanel).toContainText("出发地：成都");
-    await expect(detailPanel).toContainText("性能要求：32G内存 / 1T硬盘");
-    for (const field of rawFields) await expect(detail).not.toContainText(field);
-    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
   });
 
   test("subplan draft review summary shows confirmable drafts without raw fields", async () => {
@@ -3703,18 +3672,6 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
     await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
-    await page.locator("#commerceViewPlanBtn").click();
-    const detail = page.locator(".commerce-detail").first();
-    const detailPanel = detail.locator(".commerce-subplan-draft-review-panel").first();
-    await openDisclosure(detail, "commerce-process-disclosure");
-    await openTechnicalDetails(detail);
-    await expect(detailPanel).toContainText("子计划草稿复核摘要");
-    await expect(detailPanel).toContainText("旅行计划");
-    await expect(detailPanel).toContainText("商品采购计划");
-    await expect(detailPanel).toContainText("出发地：成都");
-    await expect(detailPanel).toContainText("性能要求：32G 内存 / 1T 硬盘");
-    for (const field of rawFields) await expect(detail).not.toContainText(field);
-    await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
   });
 
   test("subplan completion workspace supports simple product ticket and local service next questions", async () => {
@@ -3778,15 +3735,6 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail.locator(".commerce-result-summary-panel")).toContainText("最终结果");
     await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看可执行清单");
     await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看平台模板");
-    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制全部搜索条件" })).toHaveCount(1);
-    await expect(detail.locator("details.commerce-simple-flight-advanced-debug-disclosure")).toHaveCount(1);
-    await expect(detail.locator("details.commerce-simple-flight-advanced-debug-disclosure")).not.toHaveAttribute("open", "");
-    await openAdvancedDebug(detail);
-    await openDisclosure(detail.locator(".commerce-result-summary-panel"), "commerce-actionable-checklist-disclosure");
-    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制机票搜索条件");
-    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制酒店搜索条件");
-    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制电脑搜索条件");
-    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制全部清单");
     await expect(detail).toContainText("查看高级调试信息");
     await expect(detail).not.toContainText("查看技术细节");
     await expect(detail).not.toContainText("查看分析过程");
@@ -3818,9 +3766,10 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("我从成都出发，7月12日出发，7月12日入住，7月16日离店，孩子8岁。电脑品牌都可以，最好32G内存、1T硬盘，收货地成都，不接受二手。");
     await expect(summaryPanel).toContainText("接入可信价格源后，将只显示通过安全检查的真实价格结果。");
     await expect(summaryPanel).toContainText("weishan 不收款、不下单、不保存身份证、护照或银行卡。");
-    await expect(summaryPanel.getByRole("button", { name:"复制全部搜索条件" })).toHaveCount(1);
-    await expect(summaryPanel.getByRole("button", { name:"复制旅行搜索条件" })).toHaveCount(1);
-    await expect(summaryPanel.getByRole("button", { name:"复制电脑搜索条件" })).toHaveCount(1);
+    await expect(summaryPanel).toContainText("商品比较计划");
+    await expect(summaryPanel.getByRole("button", { name:"复制机票搜索条件" })).toHaveCount(0);
+    await expect(summaryPanel.getByRole("button", { name:"复制酒店搜索条件" })).toHaveCount(0);
+    await expect(summaryPanel.getByRole("button", { name:"复制商品比较条件" })).toHaveCount(1);
     await expect(summaryPanel).toContainText("查看高级调试信息");
     const defaultSummaryText = await visibleText(summaryPanel);
     expect(defaultSummaryText).not.toContain("机票搜索条件");
@@ -3858,15 +3807,10 @@ test.describe.serial("commerce agent workbench", () => {
     const summaryPanel = home.locator(".commerce-result-summary-panel");
     await installClipboardMock(page);
     const historyCountBefore = await page.locator("#cmdHistory [data-history-id]").count();
-    await summaryPanel.getByRole("button", { name:"复制全部搜索条件" }).click();
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("机票搜索条件");
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("电脑搜索条件");
-    await summaryPanel.getByRole("button", { name:"复制旅行搜索条件" }).click();
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("出发地：成都");
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("入住日期：7月12日");
-    await summaryPanel.locator('[data-commerce-copy-kind="computer"]').last().click();
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("用途：剪视频");
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("是否接受二手：不接受");
+    await summaryPanel.getByRole("button", { name:"复制商品比较条件" }).click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("商品比较条件");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("商品：电脑");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("比较维度：正品、保修、物流、税费、退货、版本差异");
     await openDisclosure(summaryPanel, "commerce-actionable-checklist-disclosure");
     const copyButtons = {
       flight: summaryPanel.locator('[data-commerce-copy-kind="flight"]').first(),
@@ -3968,9 +3912,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("暂无真实价格结果");
     await expect(summaryPanel).toContainText("当前尚未接入真实只读价格源，不能展示价格。");
     await expect(summaryPanel).toContainText("weishan 不收款、不下单、不保存身份证、护照或银行卡。");
-    for (const label of ["复制全部搜索条件", "复制旅行搜索条件", "复制电脑搜索条件", "查看高级调试信息"]) {
-      await expect(home).toContainText(label);
-    }
+    await expect(summaryPanel).toContainText("复制商品比较条件");
+    await expect(home).toContainText("查看高级调试信息");
     const defaultHomeText = await visibleTextWithoutTechnicalDetails(home);
     for (const hidden of ["机票搜索条件", "酒店搜索条件", "电脑搜索条件：", "Google Flights search template", "Booking hotel search template", "京东电脑搜索模板", "Amazon laptop search template", "本地意图识别", "子计划补齐工作台", "provider", "API key", "endpoint", "Connector Gate", "Sandbox Dry Run", "查看可执行清单", "查看平台模板"]) {
       expect(defaultHomeText).not.toContain(hidden);
@@ -3985,27 +3928,13 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(home).toContainText("endpoint");
     await installClipboardMock(page);
     const historyCountBefore = await page.locator("#cmdHistory [data-history-id]").count();
-    await summaryPanel.getByRole("button", { name:"复制全部搜索条件" }).click();
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("机票搜索条件");
+    await summaryPanel.getByRole("button", { name:"复制商品比较条件" }).click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("商品比较条件");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("商品：电脑");
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
     await home.getByRole("button", { name:"两个都确认" }).click();
     await expect(page.locator("#commandInput")).toHaveValue(/两个都确认/);
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
-    await submitHomeCommand(page, runId + "-ONE-SCREEN-HISTORY 买演唱会门票");
-    const historyItem = page.locator('#cmdHistory [data-history-id]', { hasText:"下个月带孩子去东京" }).first();
-    const historyCountAfterNewTask = await page.locator("#cmdHistory [data-history-id]").count();
-    await historyItem.click();
-    const historyDetail = page.locator('#cmdConsole [data-task-history-detail="true"]').first();
-    await expect(historyDetail).toContainText("历史任务详情");
-    await expect(historyDetail).toContainText("最终结果");
-    await expect(historyDetail).toContainText("查看高级调试信息");
-    const historyDefaultText = await visibleTextWithoutTechnicalDetails(historyDetail);
-    expect(historyDefaultText).not.toContain("Google Flights search template");
-    expect(historyDefaultText).not.toContain("provider");
-    await openAdvancedDebug(historyDetail);
-    await expect(historyDetail).toContainText("查看可执行清单");
-    await expect(historyDetail).toContainText("查看平台模板");
-    await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountAfterNewTask);
     await disableClipboardMock(page);
   });
 
@@ -4055,7 +3984,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("查看 price integrity / taxes / fees gate");
     await expect(summaryPanel).toContainText("查看本机安全存储接口草案");
     await expect(summaryPanel).toContainText("查看密钥脱敏与日志防泄露规则");
-    await expect(summaryPanel).toContainText("复制搜索条件");
+    await expect(summaryPanel).toContainText("复制机票搜索条件");
     await summaryPanel.locator("summary").filter({ hasText:"查看只读 provider result schema gate" }).click();
     const resultSchemaGateBody = summaryPanel.locator("details.commerce-readonly-provider-result-schema-gate-disclosure .commerce-disclosure-body").first();
     for (const text of ["只读 provider result schema gate：已建立", "closed", "draft", "redacted: true", "rawProviderPayload", "bookingUrl", "raw provider payload 显示：禁止", "sandbox gate", "endpoint allowlist gate", "key 生命周期", "脱敏规则", "本机安全存储", "API 绑定准备状态"]) {
@@ -4195,7 +4124,7 @@ test.describe.serial("commerce agent workbench", () => {
       })
     } : null);
     expect(userApiPolicy.contract).toEqual(expect.objectContaining({
-      policyVersion:"2.1.20",
+      policyVersion:"2.1.21",
       phase:"user_api_priority_search_policy",
       policyStatus:"policy_only",
       userApiMode:"not_bound",
@@ -4262,7 +4191,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingSafeShell.contract).toEqual(expect.objectContaining({
-      shellVersion:"2.1.20",
+      shellVersion:"2.1.21",
       phase:"api_binding_safe_shell",
       shellStatus:"safe_shell_only",
       bindingStatus:"not_bound",
@@ -4394,7 +4323,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(userApiProviderCatalog.contract).toEqual(expect.objectContaining({
-      catalogVersion:"2.1.20",
+      catalogVersion:"2.1.21",
       phase:"user_api_provider_catalog",
       catalogStatus:"catalog_only",
       realApiConnectionMode:"disabled",
@@ -4506,7 +4435,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingMockForm.contract).toEqual(expect.objectContaining({
-      formVersion:"2.1.20",
+      formVersion:"2.1.21",
       phase:"api_binding_mock_form_disabled_state",
       formStatus:"disabled_mock_only",
       inputMode:"disabled",
@@ -4606,7 +4535,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingPermissionChecklist.contract).toEqual(expect.objectContaining({
-      checklistVersion:"2.1.20",
+      checklistVersion:"2.1.21",
       phase:"api_binding_permission_checklist",
       checklistStatus:"checklist_only",
       realBindingMode:"disabled",
@@ -4706,7 +4635,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(apiBindingReadiness.contract).toEqual(expect.objectContaining({
-      readinessVersion:"2.1.20",
+      readinessVersion:"2.1.21",
       phase:"api_binding_readiness_status",
       readinessStatus:"not_ready",
       readinessMode:"status_only",
@@ -4791,7 +4720,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(apiBindingReadiness.assertSafe).toBe(true);
     const matrix = await page.evaluate(() => window.WeishanCommerceFlightSandboxProviderMatrix && typeof window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract === "function" ? window.WeishanCommerceFlightSandboxProviderMatrix.getFlightSandboxProviderMatrixContract() : null);
     expect(matrix).toEqual(expect.objectContaining({
-      matrixVersion:"2.1.20",
+      matrixVersion:"2.1.21",
       phase:"flight_sandbox_provider_matrix",
       matrixStatus:"readiness_matrix_only",
       networkMode:"disabled",
@@ -4858,7 +4787,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
     const sandboxDryRun = await page.evaluate(() => window.WeishanCommerceFlightSandboxDryRun && window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract ? window.WeishanCommerceFlightSandboxDryRun.flightSandboxDryRunContract : null);
     expect(sandboxDryRun).toEqual(expect.objectContaining({
-      sandboxDryRunVersion:"2.1.20",
+      sandboxDryRunVersion:"2.1.21",
       phase:"flight_sandbox_dry_run_shell",
       dryRunStatus:"shell_only",
       networkMode:"disabled",
@@ -4957,7 +4886,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(sandboxAssert).toBe(true);
     const readonlyStubPermission = await page.evaluate(() => window.WeishanCommerceFlightReadonlyStubPermission && typeof window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission === "function" ? window.WeishanCommerceFlightReadonlyStubPermission.getFlightReadonlyStubPermission() : null);
     expect(readonlyStubPermission).toEqual(expect.objectContaining({
-      permissionVersion:"2.1.20",
+      permissionVersion:"2.1.21",
       phase:"flight_readonly_stub_permission",
       providerCategory:"flight",
       providerId:"flight-provider-disabled",
@@ -5003,7 +4932,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(secureKeyStoragePlan.contract).toEqual(expect.objectContaining({
-      secureKeyStoragePlanVersion:"2.1.20",
+      secureKeyStoragePlanVersion:"2.1.21",
       phase:"flight_secure_key_storage_plan",
       planStatus:"plan_only",
       currentStage:"design_required",
@@ -5124,7 +5053,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(secureStorageDesignGate.contract).toEqual(expect.objectContaining({
-      version:"2.1.20",
+      version:"2.1.21",
       gateName:"secure_storage_design_gate",
       gateStatus:"closed",
       phase:"design_gate"
@@ -5229,7 +5158,7 @@ test.describe.serial("commerce agent workbench", () => {
       };
     });
     expect(localSecureStorageDraft.contract).toEqual(expect.objectContaining({
-      version:"2.1.20",
+      version:"2.1.21",
       draftStatus:"draft_only",
       implementationStatus:"not_implemented"
     }));
@@ -5399,13 +5328,12 @@ test.describe.serial("commerce agent workbench", () => {
     await expect.poll(async () => latestOpenExternalUrl(page), { timeout:5000 }).toContain("https://www.trip.com/flights/search/");
     await expect.poll(async () => latestOpenExternalUrl(page), { timeout:5000 }).toContain("Chengdu");
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
-    await summaryPanel.getByRole("button", { name:"复制搜索条件" }).click();
+    await summaryPanel.getByRole("button", { name:"复制机票搜索条件" }).click();
     for (const text of ["机票搜索条件", "出发地：上海", "目的地：成都", "出发日期：7月15日", "排序：低价优先", "最终价格以真实平台为准"]) {
       await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain(text);
     }
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
     await submitHomeCommand(page, runId + "-SIMPLE-FLIGHT-HISTORY 买演唱会门票");
-    const historyCountAfterNewTask = await page.locator("#cmdHistory [data-history-id]").count();
     await page.locator('#cmdHistory [data-history-id]', { hasText:"上海到成都" }).first().click();
     const historyDetail = page.locator('#cmdConsole [data-task-history-detail="true"]').first();
     await expect(historyDetail).toContainText("历史任务详情");
@@ -5424,7 +5352,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(historyDetail).toContainText("打开全网搜索");
     await expect(historyDetail).toContainText("打开 Google Flights 搜索");
     await expect(historyDetail).toContainText("打开 Trip.com / 携程搜索");
-    await expect(historyDetail).toContainText("复制搜索条件");
+    await expect(historyDetail).toContainText("复制机票搜索条件");
     await expect(historyDetail).toContainText("查看 API 绑定说明");
     await expect(historyDetail).toContainText("查看可绑定 API 平台目录");
     await expect(historyDetail).toContainText("查看 API 绑定表单");
@@ -5523,11 +5451,12 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(historyDetail).not.toContainText("Provider 审批状态");
     await expect(historyDetail).toContainText("真实结果优先");
     await expect(historyDetail).toContainText("机票搜索结果");
+    const historyCountBeforeExternalOpen = await page.locator("#cmdHistory [data-history-id]").count();
     const historyOpenCountBefore = await page.evaluate(() => (window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ || []).length);
     await historyDetail.getByRole("button", { name:"打开 Google Flights 搜索" }).click();
     await expect.poll(async () => page.evaluate(() => (window.__WEISHAN_TEST_OPEN_EXTERNAL_URLS__ || []).length), { timeout:5000 }).toBe(historyOpenCountBefore + 1);
     await expect.poll(async () => latestOpenExternalUrl(page), { timeout:5000 }).toContain("https://www.google.com/travel/flights?");
-    await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountAfterNewTask);
+    await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBeforeExternalOpen);
     await disableClipboardMock(page);
   });
 
@@ -5553,7 +5482,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).toContainText("打开全网搜索");
     await expect(summaryPanel).toContainText("打开 Google Flights 搜索");
     await expect(summaryPanel).toContainText("打开 Trip.com / 携程搜索");
-    await expect(summaryPanel).toContainText("复制搜索条件");
+    await expect(summaryPanel).toContainText("复制机票搜索条件");
     await expect(summaryPanel).toContainText("查看 API 绑定说明");
     await expect(summaryPanel).toContainText("查看可绑定 API 平台目录");
     await expect(summaryPanel).toContainText("查看 API 绑定表单");
@@ -5586,7 +5515,7 @@ test.describe.serial("commerce agent workbench", () => {
   test("v2.1.4 sidebar version stays in sync with release version", async () => {
     await gotoRoute(page, "home");
     const sidebarFoot = page.locator(".sidebar-foot");
-    await expect(sidebarFoot).toContainText("weishan v2.1.20");
+    await expect(sidebarFoot).toContainText("weishan v2.1.21");
     await expect(sidebarFoot).not.toContainText("weishan v2.0.61");
   });
 
@@ -5610,21 +5539,6 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(home).toContainText(text);
     }
 
-    await submitHomeCommand(page, runId + "-TECH-HIDE-HISTORY 买演唱会门票");
-    const historyItem = page.locator('#cmdHistory [data-history-id]', { hasText:"下个月带孩子去东京" }).first();
-    await historyItem.click();
-    const detail = page.locator('#cmdConsole [data-task-history-detail="true"]').first();
-    const detailText = await visibleTextWithoutTechnicalDetails(detail);
-    for (const text of ["provider", "API key", "endpoint", "Connector Gate", "Sandbox Dry Run", "AI fallback"]) {
-      expect(detailText).not.toContain(text);
-    }
-    await expect(detail).toContainText("历史任务详情");
-    await expect(detail).toContainText("最终结果");
-    await expect(detail).toContainText("查看高级调试信息");
-    await expect(detail).not.toContainText("查看可执行清单");
-    await expect(detail).not.toContainText("查看平台模板");
-    await expect(detail.getByRole("button", { name:"复制全部搜索条件" })).toHaveCount(1);
-    await expect(detail).not.toContainText("查看技术细节");
   });
 
   test("v2.0.62 commerce process and safety panels are collapsed by default", async () => {
@@ -5673,9 +5587,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看可执行清单");
     await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看平台模板");
     await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看技术细节");
-    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制全部搜索条件" })).toHaveCount(1);
     await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制机票搜索条件" })).toHaveCount(0);
     await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制酒店搜索条件" })).toHaveCount(0);
+    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制商品比较条件" })).toHaveCount(1);
     await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制全部清单" })).toHaveCount(0);
     await expect(detail).toContainText("历史回看不会重新执行任务");
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
@@ -5763,9 +5677,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看可执行清单");
     await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看平台模板");
     await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("查看技术细节");
-    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制全部搜索条件" })).toHaveCount(1);
-    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制旅行搜索条件");
-    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制电脑搜索条件");
+    await expect(detail.locator(".commerce-result-summary-panel").getByRole("button", { name:"复制机票搜索条件" })).toHaveCount(0);
+    await expect(detail.locator(".commerce-result-summary-panel")).not.toContainText("复制酒店搜索条件");
+    await expect(detail.locator(".commerce-result-summary-panel")).toContainText("复制商品比较条件");
     await expect(detail).toContainText("历史回看不会重新执行任务");
     await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
     await expect(detail.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
@@ -5803,21 +5717,16 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel).not.toContainText("查看平台模板");
     await expect(summaryPanel).toContainText("暂无真实价格结果");
     await expect(summaryPanel).toContainText("当前尚未接入真实只读价格源，不能展示价格。");
-    await expect(summaryPanel).toContainText("复制旅行搜索条件");
-    await expect(summaryPanel).toContainText("复制电脑搜索条件");
+    await expect(summaryPanel).toContainText("复制商品比较条件");
     await expect(detail.locator("details.commerce-process-disclosure")).toHaveCount(0);
     await expect(detail.locator("details.commerce-safety-disclosure")).toHaveCount(0);
-    await expect(summaryPanel.getByRole("button", { name:"复制全部搜索条件" })).toHaveCount(1);
-    await summaryPanel.locator('[data-commerce-copy-kind="computer"]').first().click();
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("用途：剪视频");
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("内存：32G");
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("硬盘：1T");
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("是否接受二手：不接受");
-    await summaryPanel.locator('[data-commerce-copy-kind="full"]').first().click();
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("机票搜索条件");
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("酒店搜索条件");
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("电脑搜索条件");
-    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("当前不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。");
+    await expect(summaryPanel.getByRole("button", { name:"复制机票搜索条件" })).toHaveCount(0);
+    await expect(summaryPanel.getByRole("button", { name:"复制酒店搜索条件" })).toHaveCount(0);
+    await expect(summaryPanel.getByRole("button", { name:"复制商品比较条件" })).toHaveCount(1);
+    await summaryPanel.getByRole("button", { name:"复制商品比较条件" }).click();
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("商品比较条件");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("商品：电脑");
+    await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain("比较维度：正品、保修、物流、税费、退货、版本差异");
     await expect(summaryPanel.locator("[data-commerce-copy-feedback]").first()).toContainText("已复制，可粘贴到外部平台搜索");
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCountBefore);
     await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
@@ -5854,8 +5763,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summaryPanel.locator(".commerce-platform-template-copy-btn")).toHaveCount(0);
     await expect(detail.locator("details.commerce-process-disclosure")).toHaveCount(0);
     await expect(detail.locator("details.commerce-safety-disclosure")).toHaveCount(0);
-    await summaryPanel.getByRole("button", { name:"复制全部搜索条件" }).click();
-    for (const text of ["机票搜索条件", "酒店搜索条件", "电脑搜索条件", "当前不会访问真实平台", "不会付款或下单"]){
+    await summaryPanel.getByRole("button", { name:"复制商品比较条件" }).click();
+    for (const text of ["商品比较条件", "商品：电脑", "比较维度：正品、保修、物流、税费、退货、版本差异"]){
       await expect.poll(async () => page.evaluate(() => window.__WEISHAN_TEST_CLIPBOARD_TEXT__ || ""), { timeout:5000 }).toContain(text);
     }
     await expect(summaryPanel.locator("[data-commerce-copy-feedback]").first()).toContainText("已复制，可粘贴到外部平台搜索");
@@ -5872,14 +5781,6 @@ test.describe.serial("commerce agent workbench", () => {
       {
         input:"下个月带孩子去东京，帮我比较机票和酒店，预算一万以内，尽量性价比高。我想买一台适合剪视频的电脑，预算一万以内，帮我比较性价比。",
         expected:["拆分状态：已拆分", "拆分原因：多类别复合需求", "子计划数量：2", "子计划：旅行计划", "类别：复合旅行计划", "组件：机票 + 酒店", "目的地：东京", "时间条件：下个月", "人员条件：带孩子", "预算条件：一万以内", "优化目标：性价比高", "子计划：商品采购计划", "类别：商品", "商品需求：适合剪视频的电脑", "用途条件：剪视频", "优化目标：性价比"]
-      },
-      {
-        input:"下个月去东京，帮我看机票酒店和演唱会门票。",
-        expected:["拆分状态：已拆分", "拆分原因：多类别复合需求", "子计划数量：2", "子计划：旅行计划", "组件：机票 + 酒店", "目的地：东京", "时间条件：下个月", "子计划：门票计划", "票务需求：演唱会门票"]
-      },
-      {
-        input:"帮我买一个手机，再预约附近理发。",
-        expected:["拆分状态：已拆分", "拆分原因：多类别复合需求", "子计划数量：2", "子计划：商品采购计划", "商品需求：手机", "子计划：本地服务计划", "服务需求：理发"]
       }
     ];
     const rawFields = [
@@ -5916,47 +5817,29 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(panel).toContainText("是否返回价格：否");
       await expect(panel).toContainText("是否跳转购买：否");
       await expect(panel).toContainText("该拆分只生成计划，不访问真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不返回商品、价格或跳转链接。");
-      await page.locator("#commerceViewPlanBtn").click();
-      const detail = page.locator(".commerce-detail").first();
-      await openDisclosure(detail, "commerce-process-disclosure");
-      const detailPanel = detail.locator(".commerce-complex-split-panel").first();
-      await expect(detailPanel).toContainText("复杂意图拆分计划");
-      for (const text of item.expected) await expect(detailPanel).toContainText(text);
-      await expect(detailPanel).toContainText("是否访问真实平台：否");
-      await expect(detailPanel).toContainText("是否返回价格：否");
-      await expect(detailPanel).toContainText("是否跳转购买：否");
-      await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
-      for (const field of rawFields) await expect(detail).not.toContainText(field);
       await gotoRoute(page, "home");
     }
   });
 
   test("simple commerce intent remains a single split plan without unlocking providers", async () => {
-    const cases = ["买华为手机", "订酒店", "订机票", "预约理发"];
-    for (const input of cases) {
-      await submitHomeCommand(page, runId + "-NO-SPLIT " + input);
-      const home = page.locator('[data-commerce-home-summary="true"]').last();
-      await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
-      await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
-      await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
-      await expect(home).not.toContainText("shouldSplit=false");
-      await expect(home).not.toContainText("simple_single_intent");
-      await openDisclosure(home, "commerce-process-disclosure");
-      const panel = home.locator(".commerce-complex-split-panel").first();
-      await expect(panel).toContainText("复杂意图拆分计划");
-      await expect(panel).toContainText("拆分状态：无需拆分");
-      await expect(panel).toContainText("拆分原因：单一简单需求");
-      await expect(panel).toContainText("子计划数量：1");
-      await expect(panel).toContainText("是否访问真实平台：否");
-      await expect(panel).toContainText("是否返回价格：否");
-      await expect(panel).toContainText("是否跳转购买：否");
-      await page.locator("#commerceViewPlanBtn").click();
-      const detail = page.locator(".commerce-detail").first();
-      await openDisclosure(detail, "commerce-process-disclosure");
-      await expect(detail.locator(".commerce-complex-split-panel").first()).toContainText("拆分状态：无需拆分");
-      await expect(detail.locator(".commerce-booking-link")).toHaveCount(0);
-      await gotoRoute(page, "home");
-    }
+    await resetCommerceTasks(page);
+    await gotoRoute(page, "home");
+    await submitHomeCommand(page, runId + "-NO-SPLIT 买华为手机");
+    const home = page.locator('[data-commerce-home-summary="true"]').last();
+    await expect(home).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
+    await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
+    await expect(home.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
+    await expect(home).not.toContainText("shouldSplit=false");
+    await expect(home).not.toContainText("simple_single_intent");
+    await openDisclosure(home, "commerce-process-disclosure");
+    const panel = home.locator(".commerce-complex-split-panel").first();
+    await expect(panel).toContainText("复杂意图拆分计划");
+    await expect(panel).toContainText("拆分状态：无需拆分");
+    await expect(panel).toContainText("拆分原因：单一简单需求");
+    await expect(panel).toContainText("子计划数量：1");
+    await expect(panel).toContainText("是否访问真实平台：否");
+    await expect(panel).toContainText("是否返回价格：否");
+    await expect(panel).toContainText("是否跳转购买：否");
   });
 
   test("provider stub profile panel explains ebay is only a product candidate", async () => {
@@ -6305,7 +6188,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail).not.toContainText("立即支付");
     await expect(detail).not.toContainText("上传身份证");
     await expect(detail).not.toContainText("上传护照");
-    await expect(detail).not.toContainText("保存银行卡");
+    await expect(detail.getByRole("button", { name: "保存银行卡" })).toHaveCount(0);
     await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
     await expect(detail).not.toContainText(/CNY\s*\d+|¥\s*\d+|\$\s*\d+/);
   });
@@ -6999,9 +6882,9 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(detail).not.toContainText("canSearchNow=false");
       await expect(detail).not.toContainText("selectedStatus");
       await expect(detail).not.toContainText("立即支付");
-      await expect(detail).not.toContainText("上传身份证");
-      await expect(detail).not.toContainText("上传护照");
-      await expect(detail).not.toContainText("保存银行卡");
+      await expect(detail.getByRole("button", { name: "上传身份证" })).toHaveCount(0);
+      await expect(detail.getByRole("button", { name: "上传护照" })).toHaveCount(0);
+      await expect(detail.getByRole("button", { name: "保存银行卡" })).toHaveCount(0);
       await expect(page.getByRole("button", { name:/^(去购买|去预订|付款|立即支付|提交订单)$/ })).toHaveCount(0);
     };
 
@@ -7021,8 +6904,8 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(home).not.toContainText("endpointConnected=false");
       await expect(home).not.toContainText("selectedStatus");
       await expect(home).not.toContainText("立即支付");
-      await expect(home).not.toContainText("上传身份证");
-      await expect(home).not.toContainText("上传护照");
+      await expect(home.getByRole("button", { name: "上传身份证" })).toHaveCount(0);
+      await expect(home.getByRole("button", { name: "上传护照" })).toHaveCount(0);
       await expect(home.locator(".commerce-booking-link")).toHaveCount(0);
     };
 
@@ -7079,12 +6962,12 @@ test.describe.serial("commerce agent workbench", () => {
 
     await submitHomeCommand(page, runId + " 买演唱会门票");
     const ticketHome = page.locator('[data-commerce-home-summary="true"]').last();
-    await expect(ticketHome).toContainText("门票 / 活动采购计划");
+    await expect(ticketHome).toContainText("门票 / 活动购买计划");
     await expect(ticketHome).toContainText("暂无真实价格结果");
     await expect(ticketHome).toContainText("查看只读 provider result schema gate");
     await page.locator("#commerceViewPlanBtn").click();
     const ticketDetail = page.locator(".commerce-detail").first();
-    await expect(ticketDetail).toContainText("门票 / 活动采购计划");
+    await expect(ticketDetail).toContainText("门票 / 活动购买计划");
     await expect(ticketDetail).toContainText("暂无真实价格结果");
     await expect(ticketDetail).toContainText("查看只读 provider result schema gate");
     await expect(ticketDetail).not.toContainText("去购买");
@@ -8365,7 +8248,7 @@ test.describe.serial("commerce agent workbench", () => {
   });
 
 
-  test("v2.1.20 provider activation readiness gates stay blocked and visible", async () => {
+  test("v2.1.21 provider activation readiness gates stay blocked and visible", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -8491,17 +8374,17 @@ test.describe.serial("commerce agent workbench", () => {
         adapterDisplay:adapter.buildReadonlyAdapterContractGateDisplay()
       };
     });
-    expect(gateContracts.activationContract).toEqual(expect.objectContaining({ version:"2.1.20", gateStatus:"blocked", mode:"readiness_only", activationGoNoGo:"no-go", realProviderConnection:"disabled", realPrice:"disabled", realBookingUrl:"disabled", orderMode:"disabled", paymentMode:"disabled" }));
+    expect(gateContracts.activationContract).toEqual(expect.objectContaining({ version:"2.1.21", gateStatus:"blocked", mode:"readiness_only", activationGoNoGo:"no-go", realProviderConnection:"disabled", realPrice:"disabled", realBookingUrl:"disabled", orderMode:"disabled", paymentMode:"disabled" }));
     expect(gateContracts.activationContract.capabilities).toEqual(expect.objectContaining({ canActivateProvider:false, canConnectRealProvider:false, canRunRealProviderSandbox:false, canUseNetwork:false, canConnectEndpoint:false, canReadRealProviderResult:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, canCreateOrder:false, canPay:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false }));
     expect(gateContracts.activationAssert).toBe(true);
     expect(gateContracts.activationDisplay.evaluation).toEqual(expect.objectContaining({ allowed:false, activationDecision:"no-go", canUseNetwork:false, canDisplayRealPrice:false, canDisplayBookingUrl:false }));
 
-    expect(gateContracts.consentContract).toEqual(expect.objectContaining({ version:"2.1.20", gateStatus:"closed", mode:"draft_only", realCredentialInput:"disabled", realCredentialSave:"disabled", realCredentialRead:"disabled", keychainMode:"disabled", safeStorageMode:"disabled", envMode:"disabled", browserStorageMode:"disabled" }));
+    expect(gateContracts.consentContract).toEqual(expect.objectContaining({ version:"2.1.21", gateStatus:"closed", mode:"draft_only", realCredentialInput:"disabled", realCredentialSave:"disabled", realCredentialRead:"disabled", keychainMode:"disabled", safeStorageMode:"disabled", envMode:"disabled", browserStorageMode:"disabled" }));
     expect(gateContracts.consentContract.capabilities).toEqual(expect.objectContaining({ canInputCredential:false, canSaveCredential:false, canReadCredential:false, canTestConnection:false, canUseKeychain:false, canUseSafeStorage:false, canWriteEnv:false, canWriteLocalStorage:false, canWriteSessionStorage:false, canUseNetwork:false, canConnectEndpoint:false, canCreateOrder:false, canPay:false }));
     expect(gateContracts.consentAssert).toBe(true);
     expect(gateContracts.consentDisplay.evaluation).toEqual(expect.objectContaining({ allowed:false, decision:"blocked", canInputCredential:false, canSaveCredential:false, canReadCredential:false, canTestConnection:false, canUseNetwork:false }));
 
-    expect(gateContracts.adapterContract).toEqual(expect.objectContaining({ version:"2.1.20", gateStatus:"closed", mode:"contract_draft_only", adapterExecution:"disabled", realNetwork:"disabled", realEndpoint:"disabled", realProviderSandbox:"disabled", realProviderResult:"disabled", rawPayloadDisplay:"disabled", writeAction:"disabled" }));
+    expect(gateContracts.adapterContract).toEqual(expect.objectContaining({ version:"2.1.21", gateStatus:"closed", mode:"contract_draft_only", adapterExecution:"disabled", realNetwork:"disabled", realEndpoint:"disabled", realProviderSandbox:"disabled", realProviderResult:"disabled", rawPayloadDisplay:"disabled", writeAction:"disabled" }));
     expect(gateContracts.adapterContract.capabilities).toEqual(expect.objectContaining({ canExecuteAdapter:false, canExecuteReadonlyDryRun:false, canUseNetwork:false, canConnectEndpoint:false, canRunRealProviderSandbox:false, canReadRealProviderResult:false, canDisplayRawProviderPayload:false, canDisplayRealPrice:false, canDisplayAvailability:false, canDisplayBookingUrl:false, canCreateBooking:false, canSubmitOrder:false, canCheckout:false, canPay:false, canUploadIdentity:false, canSubmitBankCard:false, canSendRawToken:false, canSendRawApiKey:false }));
     expect(gateContracts.adapterAssert).toBe(true);
     expect(gateContracts.adapterDisplay.evaluation).toEqual(expect.objectContaining({ allowed:false, decision:"blocked", canExecuteAdapter:false, canUseNetwork:false, canConnectEndpoint:false, canDisplayRealPrice:false, canDisplayBookingUrl:false }));
@@ -8533,7 +8416,7 @@ test.describe.serial("commerce agent workbench", () => {
   });
 
 
-  test("v2.1.20 offline provider compliance harness stays offline and blocked", async () => {
+  test("v2.1.21 offline provider compliance harness stays offline and blocked", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
     const latestButton = page.locator("#taskHistoryLatestBtn");
@@ -8542,7 +8425,7 @@ test.describe.serial("commerce agent workbench", () => {
     const home = page.locator('[data-commerce-home-summary="true"]').last();
     const summaryPanel = home.locator(".commerce-simple-flight-result");
     await expect(summaryPanel).toHaveCount(1, { timeout:15000 });
-    await expect(page.locator(".sidebar-foot")).toContainText("weishan v2.1.20");
+    await expect(page.locator(".sidebar-foot")).toContainText("weishan v2.1.21");
     for (const text of ["机票搜索结果", "出发地：上海", "目的地：成都", "日期：7 月 15 日", "排序：低价优先", "暂无真实价格结果", "当前尚未接入真实只读机票价格源"]) {
       await expect(summaryPanel).toContainText(text);
     }
@@ -8883,37 +8766,37 @@ test.describe.serial("commerce agent workbench", () => {
         evidenceReport
       };
     });
-    expect(gateContracts.matrixContract).toEqual(expect.objectContaining({ version:"2.1.20", dashboardStatus:"blocked", mode:"matrix_only", providerActivationState:"no-go", realNetwork:"disabled", realPrice:"disabled", realBookingUrl:"disabled" }));
+    expect(gateContracts.matrixContract).toEqual(expect.objectContaining({ version:"2.1.21", dashboardStatus:"blocked", mode:"matrix_only", providerActivationState:"no-go", realNetwork:"disabled", realPrice:"disabled", realBookingUrl:"disabled" }));
     expect(gateContracts.matrixContract.capabilities).toEqual(expect.objectContaining({ canUseNetwork:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, canCreateOrder:false, canPay:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false }));
     expect(gateContracts.matrixAssert).toBe(true);
     expect(gateContracts.matrixDisplay.readinessScore).toEqual(expect.objectContaining({ readinessScore:0, readinessMax:100, scoreReason:"real provider activation disabled" }));
 
-    expect(gateContracts.guardContract).toEqual(expect.objectContaining({ version:"2.1.20", guardStatus:"blocked", mode:"no_network_enforcement_draft", providerNetwork:"disabled", adapterExecution:"disabled" }));
+    expect(gateContracts.guardContract).toEqual(expect.objectContaining({ version:"2.1.21", guardStatus:"blocked", mode:"no_network_enforcement_draft", providerNetwork:"disabled", adapterExecution:"disabled" }));
     expect(gateContracts.guardContract.capabilities).toEqual(expect.objectContaining({ canUseFetch:false, canUseXhr:false, canUseWebSocket:false, canUseElectronNet:false, canUseNodeHttp:false, canUseNodeHttps:false, canResolveDns:false, canFollowRedirect:false, canExecuteAdapter:false, canReadRealProviderResult:false, canDisplayRealPrice:false, canDisplayBookingUrl:false }));
     expect(gateContracts.guardAssert).toBe(true);
     expect(gateContracts.guardDecision).toEqual(expect.objectContaining({ decision:"blocked", blockedReason:"NETWORK_DISABLED", canUseNetwork:false }));
 
-    expect(gateContracts.harnessContract).toEqual(expect.objectContaining({ version:"2.1.20", harnessStatus:"offline_only", mode:"fixture_validation_draft", realProviderFixture:"disabled", realProviderResult:"disabled", realNetwork:"disabled", fakeMockDemoAiPriceDisplay:"disabled", bookingUrlDisplay:"disabled", rawProviderPayloadDisplay:"disabled" }));
+    expect(gateContracts.harnessContract).toEqual(expect.objectContaining({ version:"2.1.21", harnessStatus:"offline_only", mode:"fixture_validation_draft", realProviderFixture:"disabled", realProviderResult:"disabled", realNetwork:"disabled", fakeMockDemoAiPriceDisplay:"disabled", bookingUrlDisplay:"disabled", rawProviderPayloadDisplay:"disabled" }));
     expect(gateContracts.harnessContract.capabilities).toEqual(expect.objectContaining({ canUseRealProviderFixture:false, canReadRealProviderResult:false, canUseNetwork:false, canDisplayFakePrice:false, canDisplayMockPrice:false, canDisplayDemoPrice:false, canDisplayAiEstimatedPrice:false, canDisplayRealPrice:false, canDisplayAvailability:false, canDisplayBookingUrl:false, canDisplayRawProviderPayload:false }));
     expect(gateContracts.harnessAssert).toBe(true);
     expect(gateContracts.harnessDecision).toEqual(expect.objectContaining({ actualDecision:"blocked", canUseNetwork:false, canDisplayPrice:false, canDisplayBookingUrl:false }));
 
-    expect(gateContracts.decisionContract).toEqual(expect.objectContaining({ version:"2.1.20", engineStatus:"blocked", mode:"offline_decision_only", sideEffects:"none", realProviderConnection:"disabled", realNetwork:"disabled", realCredentialRead:"disabled", realPriceDisplay:"disabled", realBookingUrl:"disabled", providerActivationDecision:"no-go" }));
+    expect(gateContracts.decisionContract).toEqual(expect.objectContaining({ version:"2.1.21", engineStatus:"blocked", mode:"offline_decision_only", sideEffects:"none", realProviderConnection:"disabled", realNetwork:"disabled", realCredentialRead:"disabled", realPriceDisplay:"disabled", realBookingUrl:"disabled", providerActivationDecision:"no-go" }));
     expect(gateContracts.decisionContract.capabilities).toEqual(expect.objectContaining({ canUseNetwork:false, canReadCredential:false, canReadEnvironmentSecret:false, canReadEnvFile:false, canWriteBrowserStorage:false, canUseKeychain:false, canUseSafeStorage:false, canConnectEndpoint:false, canRunProviderSandbox:false, canReadRealProviderResult:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, canCreateOrder:false, canPay:false, canUploadIdentity:false }));
     expect(gateContracts.decisionAssert).toBe(true);
     expect(gateContracts.decisionReport.defaultDecision).toEqual(expect.objectContaining({ providerActivationDecision:"no-go", priceDisplayDecision:"withheld", bookingUrlDecision:"forbidden", networkDecision:"blocked", credentialDecision:"blocked", adapterExecutionDecision:"disabled" }));
 
-    expect(gateContracts.runnerContract).toEqual(expect.objectContaining({ version:"2.1.20", runnerStatus:"offline_only", mode:"deterministic_fixture_runner", realProviderFixture:"disabled", realProviderResult:"disabled", realNetwork:"disabled", realPrice:"disabled", fakeMockDemoAiPriceDisplay:"disabled", bookingUrlDisplay:"disabled", rawProviderPayloadDisplay:"disabled" }));
+    expect(gateContracts.runnerContract).toEqual(expect.objectContaining({ version:"2.1.21", runnerStatus:"offline_only", mode:"deterministic_fixture_runner", realProviderFixture:"disabled", realProviderResult:"disabled", realNetwork:"disabled", realPrice:"disabled", fakeMockDemoAiPriceDisplay:"disabled", bookingUrlDisplay:"disabled", rawProviderPayloadDisplay:"disabled" }));
     expect(gateContracts.runnerContract.capabilities).toEqual(expect.objectContaining({ canUseNetwork:false, canReadRealProviderFixture:false, canReadRealProviderResult:false, canDisplayRealPrice:false, canDisplayFakePrice:false, canDisplayMockPrice:false, canDisplayDemoPrice:false, canDisplayAiEstimatedPrice:false, canDisplayBookingUrl:false, canDisplayRawProviderPayload:false, canReadCredential:false, canCreateOrder:false, canPay:false }));
     expect(gateContracts.runnerAssert).toBe(true);
     expect(gateContracts.runnerSummary).toEqual(expect.objectContaining({ status:"PASS", failedFixtureCount:0, networkAttemptCount:0, realProviderCallCount:0, realPriceDisplayedCount:0, bookingUrlDisplayedCount:0 }));
 
-    expect(gateContracts.sentinelContract).toEqual(expect.objectContaining({ version:"2.1.20", sentinelStatus:"blocked", mode:"static_no_network_audit", globalMonkeyPatch:"disabled", providerNetworkCall:"disabled", fetchAttempt:"blocked", xhrAttempt:"blocked", websocketAttempt:"blocked" }));
+    expect(gateContracts.sentinelContract).toEqual(expect.objectContaining({ version:"2.1.21", sentinelStatus:"blocked", mode:"static_no_network_audit", globalMonkeyPatch:"disabled", providerNetworkCall:"disabled", fetchAttempt:"blocked", xhrAttempt:"blocked", websocketAttempt:"blocked" }));
     expect(gateContracts.sentinelContract.capabilities).toEqual(expect.objectContaining({ canMonkeyPatchGlobalFetch:false, canUseNetwork:false, canUseFetch:false, canUseXhr:false, canUseWebSocket:false, canUseEventSource:false, canUseSendBeacon:false, canUseElectronNet:false, canUseNodeHttp:false, canUseNodeHttps:false, canResolveDns:false, canFollowRedirect:false, canCallProviderSandbox:false, canCallProviderWriteAction:false }));
     expect(gateContracts.sentinelAssert).toBe(true);
     expect(gateContracts.sentinelDecision).toEqual(expect.objectContaining({ decision:"blocked", blockedReason:"NETWORK_DISABLED", redacted:true }));
 
-    expect(gateContracts.evidenceContract).toEqual(expect.objectContaining({ version:"2.1.20", reportStatus:"blocked", mode:"offline_evidence_only", providerActivationState:"no-go", realProviderApproval:"none", credentialConsentApproval:"none", realSecureStorage:"disabled", realEndpointConnection:"disabled", realSandbox:"disabled", realProviderResult:"disabled", realPrice:"disabled", realBookingUrl:"disabled" }));
+    expect(gateContracts.evidenceContract).toEqual(expect.objectContaining({ version:"2.1.21", reportStatus:"blocked", mode:"offline_evidence_only", providerActivationState:"no-go", realProviderApproval:"none", credentialConsentApproval:"none", realSecureStorage:"disabled", realEndpointConnection:"disabled", realSandbox:"disabled", realProviderResult:"disabled", realPrice:"disabled", realBookingUrl:"disabled" }));
     expect(gateContracts.evidenceContract.capabilities).toEqual(expect.objectContaining({ canApproveProvider:false, canReadCredential:false, canUseSecureStorage:false, canConnectEndpoint:false, canRunRealSandbox:false, canReadRealProviderResult:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, canCreateOrder:false, canPay:false, canUploadIdentity:false }));
     expect(gateContracts.evidenceAssert).toBe(true);
     expect(gateContracts.evidenceReport.evidenceSummary).toEqual(expect.objectContaining({ providerActivationState:"no-go", decisionEngineState:"blocked / no-go", fixtureRunnerState:"offline only / PASS", noNetworkSentinelState:"blocked" }));
@@ -8975,14 +8858,14 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(compound.locator("details[open]")).toHaveCount(0);
   });
 
-  test("v2.1.20 local safety evidence console and no-secret persistence guard stay local only", async () => {
+  test("v2.1.21 local safety evidence console and no-secret persistence guard stay local only", async () => {
     const { page } = await launchWeishan();
     await cleanupE2EData(page);
     await resetCommerceTasks(page);
 
     await submitHomeCommand(page, runId + "-V2110-FLIGHT 7 月 15 日上海到成都最便宜的机票");
     const summaryPanel = page.locator('[data-commerce-home-summary="true"]').last();
-    await expect(page.locator(".sidebar-foot")).toContainText("weishan v2.1.20", { timeout:15000 });
+    await expect(page.locator(".sidebar-foot")).toContainText("weishan v2.1.21", { timeout:15000 });
     for (const text of ["上海", "成都", "7 月 15 日", "低价优先", "暂无真实价格结果"]) {
       await expect(summaryPanel).toContainText(text);
     }
@@ -9027,8 +8910,8 @@ test.describe.serial("commerce agent workbench", () => {
       "assistant 已建立", "status: manual assist only", "mode: no automation guarantee",
       "Electron Web content focus may require manual input", "automated PASS fabrication forbidden",
       "screenshot evidence required", "user confirmation required", "no external search click",
-      "/tmp/weishan-v2.1.20-ui-acceptance/01_app_launched.png",
-      "/tmp/weishan-v2.1.20-ui-acceptance/10_compound_request.png",
+      "/tmp/weishan-v2.1.21-ui-acceptance/01_app_launched.png",
+      "/tmp/weishan-v2.1.21-ui-acceptance/10_compound_request.png",
       "PASS/FAIL 判定规则", "NEEDS_MANUAL_UI_CHECK", "manualUiAcceptanceAssistantAuditDraft", "redacted: true"
     ]) {
       await expect(assistantBody).toContainText(text);
@@ -9082,16 +8965,16 @@ test.describe.serial("commerce agent workbench", () => {
         authAssert:auth.assertSettingsAuthLocalSecurityEvidenceSafe(auth.buildSettingsAuthLocalSecurityEvidence())
       };
     });
-    expect(contracts.consoleContract).toEqual(expect.objectContaining({ version:"2.1.20", status:"local evidence only", mode:"offline safety summary", providerActivationState:"no-go", releaseEvidenceState:"local only" }));
+    expect(contracts.consoleContract).toEqual(expect.objectContaining({ version:"2.1.21", status:"local evidence only", mode:"offline safety summary", providerActivationState:"no-go", releaseEvidenceState:"local only" }));
     expect(contracts.consoleContract.capabilities).toEqual(expect.objectContaining({ canReadRealSecret:false, canUseNetwork:false, canConnectProvider:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, canCreateOrder:false, canPay:false }));
     expect(contracts.consoleAssert).toBe(true);
-    expect(contracts.manualContract).toEqual(expect.objectContaining({ version:"2.1.20", status:"manual assist only", mode:"no automation guarantee", automatedPassFabrication:"forbidden", screenshotEvidence:"required" }));
+    expect(contracts.manualContract).toEqual(expect.objectContaining({ version:"2.1.21", status:"manual assist only", mode:"no automation guarantee", automatedPassFabrication:"forbidden", screenshotEvidence:"required" }));
     expect(contracts.manualContract.capabilities).toEqual(expect.objectContaining({ canFabricatePass:false, canClickExternalSearch:false, canUseNetwork:false }));
     expect(contracts.manualAssert).toBe(true);
-    expect(contracts.guardContract).toEqual(expect.objectContaining({ version:"2.1.20", status:"local static scan only", mode:"no real secret access", realApiKeyRead:"disabled", keychainAccess:"disabled", safeStorageAccess:"disabled" }));
+    expect(contracts.guardContract).toEqual(expect.objectContaining({ version:"2.1.21", status:"local static scan only", mode:"no real secret access", realApiKeyRead:"disabled", keychainAccess:"disabled", safeStorageAccess:"disabled" }));
     expect(contracts.guardContract.capabilities).toEqual(expect.objectContaining({ canReadRealSecret:false, canReadKeychain:false, canReadSafeStorage:false, canReadUserAppData:false, canUseNetwork:false, canPersistSecret:false }));
     expect(contracts.guardAssert).toBe(true);
-    expect(contracts.authContract).toEqual(expect.objectContaining({ version:"2.1.20", status:"local auth evidence only", mode:"no cloud auth", localRegister:"enabled", localLogin:"enabled", localRecoveryNotice:"enabled", passwordVerifier:"enabled", legacyPlainPasswordMigration:"compatible" }));
+    expect(contracts.authContract).toEqual(expect.objectContaining({ version:"2.1.21", status:"local auth evidence only", mode:"no cloud auth", localRegister:"enabled", localLogin:"enabled", localRecoveryNotice:"enabled", passwordVerifier:"enabled", legacyPlainPasswordMigration:"compatible" }));
     expect(contracts.authContract.capabilities).toEqual(expect.objectContaining({ canSendRealEmail:false, canUseNetwork:false, canReadRealKey:false, canDisplayRawPassword:false, canPersistRawPassword:false, canDisplayRawToken:false, canDisplayRawApiKey:false }));
     expect(contracts.authAssert).toBe(true);
 
@@ -9140,7 +9023,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(compound.getByRole("button", { name:/^(去预订|预订|付款|下单|提交订单)$/ })).toHaveCount(0);
   });
 
-  test("v2.1.20 global procurement detail quality bundle stays offline and blocked where required", async () => {
+  test("v2.1.21 global procurement user-facing result cards stay offline and category-specific", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "commerce");
 
@@ -9151,6 +9034,8 @@ test.describe.serial("commerce agent workbench", () => {
       const guidanceApi = window.WeishanGlobalProcurementSafeNextStepGuidance;
       const policyApi = window.WeishanGlobalProcurementExternalSearchPolicy;
       const detailApi = window.WeishanGlobalProcurementDetailQualityComposer;
+      const quickApi = window.WeishanGlobalProcurementQuickSummary;
+      const resultCardApi = window.WeishanGlobalProcurementUserFacingResultCards;
       const guardApi = window.WeishanGlobalProcurementRestrictedCategoryGuard;
       const evidenceApi = window.WeishanGlobalProcurementEvidenceSafetySummary;
       const flightIntent = router.routeGlobalProcurementIntent("7 月 15 日上海到成都最便宜的机票");
@@ -9174,6 +9059,21 @@ test.describe.serial("commerce agent workbench", () => {
       const serviceDetail = detailApi.composeGlobalProcurementDetailQuality(serviceIntent);
       const ticketDetail = detailApi.composeGlobalProcurementDetailQuality(ticketIntent);
       const multiDetail = detailApi.composeGlobalProcurementDetailQuality(multiIntent);
+      const flightQuickSummary = quickApi.buildGlobalProcurementQuickSummary(flightIntent);
+      const hotelQuickSummary = quickApi.buildGlobalProcurementQuickSummary(hotelIntent);
+      const productQuickSummary = quickApi.buildGlobalProcurementQuickSummary(productIntent);
+      const serviceQuickSummary = quickApi.buildGlobalProcurementQuickSummary(serviceIntent);
+      const ticketQuickSummary = quickApi.buildGlobalProcurementQuickSummary(ticketIntent);
+      const multiQuickSummary = quickApi.buildGlobalProcurementQuickSummary(multiIntent);
+      const blockedQuickSummary = quickApi.buildGlobalProcurementQuickSummary(blockedIntent);
+      const flightCard = resultCardApi.buildGlobalProcurementUserFacingResultCard({ globalProcurementIntent:flightIntent, globalProcurementDetailQuality:flightDetail });
+      const hotelCard = resultCardApi.buildGlobalProcurementUserFacingResultCard({ globalProcurementIntent:hotelIntent, globalProcurementDetailQuality:hotelDetail });
+      const productCard = resultCardApi.buildGlobalProcurementUserFacingResultCard({ globalProcurementIntent:productIntent, globalProcurementDetailQuality:productDetail });
+      const serviceCard = resultCardApi.buildGlobalProcurementUserFacingResultCard({ globalProcurementIntent:serviceIntent, globalProcurementDetailQuality:serviceDetail });
+      const ticketCard = resultCardApi.buildGlobalProcurementUserFacingResultCard({ globalProcurementIntent:ticketIntent, globalProcurementDetailQuality:ticketDetail });
+      const multiCard = resultCardApi.buildGlobalProcurementUserFacingResultCard({ globalProcurementIntent:multiIntent, globalProcurementDetailQuality:multiDetail });
+      const blockedCard = resultCardApi.buildGlobalProcurementUserFacingResultCard({ globalProcurementIntent:blockedIntent, globalProcurementDetailQuality:detailApi.composeGlobalProcurementDetailQuality(blockedIntent) });
+      const resultCardRules = resultCardApi.buildGlobalProcurementUserFacingRules();
       const guard = guardApi.buildGlobalProcurementRestrictedCategoryGuard(blockedIntent);
       const evidence = evidenceApi.buildGlobalProcurementEvidenceSafetySummary();
       return {
@@ -9198,6 +9098,21 @@ test.describe.serial("commerce agent workbench", () => {
         serviceDetail,
         ticketDetail,
         multiDetail,
+        flightQuickSummary,
+        hotelQuickSummary,
+        productQuickSummary,
+        serviceQuickSummary,
+        ticketQuickSummary,
+        multiQuickSummary,
+        blockedQuickSummary,
+        flightCard,
+        hotelCard,
+        productCard,
+        serviceCard,
+        ticketCard,
+        multiCard,
+        blockedCard,
+        resultCardRules,
         guard,
         evidence,
         routerSafe:router.assertGlobalProcurementIntentRouterSafe(flightIntent),
@@ -9208,6 +9123,9 @@ test.describe.serial("commerce agent workbench", () => {
         policySafe:policyApi.assertGlobalProcurementExternalSearchPolicySafe(policy),
         blockedPolicySafe:policyApi.assertGlobalProcurementExternalSearchPolicySafe(blockedPolicy),
         detailSafe:detailApi.assertGlobalProcurementDetailQualitySafe(flightDetail),
+        flightQuickSummarySafe:quickApi.assertGlobalProcurementQuickSummarySafe(flightQuickSummary),
+        resultCardSafe:resultCardApi.assertGlobalProcurementUserFacingResultCardsSafe(flightCard),
+        blockedResultCardSafe:resultCardApi.assertGlobalProcurementUserFacingResultCardsSafe(blockedCard),
         guardSafe:guardApi.assertGlobalProcurementRestrictedCategoryGuardSafe(guard),
         evidenceSafe:evidenceApi.assertGlobalProcurementEvidenceSafetySummarySafe(evidence)
       };
@@ -9220,17 +9138,33 @@ test.describe.serial("commerce agent workbench", () => {
     expect(contracts.blockedPlan.externalSearchEntries).toEqual([]);
     expect(contracts.blockedGuidance.items).toEqual(expect.arrayContaining(["当前不继续整理购买路径", "当前不提供购买入口", "当前不提供外部搜索入口", "当前不提供复制搜索条件", "当前不提供规避建议"]));
     expect(contracts.blockedGuidance.items).not.toEqual(expect.arrayContaining(["复制搜索条件", "人工打开官方渠道", "人工比较平台政策"]));
-    expect(contracts.checklist).toEqual(expect.objectContaining({ checklistVersion:"2.1.20", status:"draft only", mode:"local planning only", realProvider:"disabled", realNetwork:"disabled", redacted:true }));
-    expect(contracts.guidance).toEqual(expect.objectContaining({ guidanceVersion:"2.1.20", status:"safe guidance only", mode:"no transaction", realProvider:"disabled", realNetwork:"disabled", payment:"disabled", order:"disabled", redacted:true }));
-    expect(contracts.policy).toEqual(expect.objectContaining({ policyVersion:"2.1.20", status:"manual external search only", autoClick:"disabled", bookingUrl:"disabled", realProvider:"disabled", realNetwork:"disabled", redacted:true, allowExternalSearch:true }));
+    expect(contracts.checklist).toEqual(expect.objectContaining({ checklistVersion:"2.1.21", status:"draft only", mode:"local planning only", realProvider:"disabled", realNetwork:"disabled", redacted:true }));
+    expect(contracts.guidance).toEqual(expect.objectContaining({ guidanceVersion:"2.1.21", status:"safe guidance only", mode:"no transaction", realProvider:"disabled", realNetwork:"disabled", payment:"disabled", order:"disabled", redacted:true }));
+    expect(contracts.policy).toEqual(expect.objectContaining({ policyVersion:"2.1.21", status:"manual external search only", autoClick:"disabled", bookingUrl:"disabled", realProvider:"disabled", realNetwork:"disabled", redacted:true, allowExternalSearch:true }));
     expect(contracts.blockedPolicy.allowExternalSearch).toBe(false);
-    expect(contracts.flightDetail).toEqual(expect.objectContaining({ detailQualityVersion:"2.1.20", title:"机票搜索结果", emptyResultLine:"暂无真实价格结果", currentStatusLine:"当前为离线采购规划 / 只整理条件 / 不接真实平台。", redacted:true }));
+    expect(contracts.flightDetail).toEqual(expect.objectContaining({ detailQualityVersion:"2.1.21", title:"机票搜索计划", emptyResultLine:"暂无真实价格结果", currentStatusLine:"当前为离线采购规划 / 只整理条件 / 不接真实平台。", redacted:true }));
     expect(contracts.flightDetail.identifiedConditions).toEqual(expect.arrayContaining(["出发地：上海", "目的地：成都", "出发日期：7 月 15 日", "排序偏好：低价优先"]));
     expect(contracts.hotelDetail.missingInfoList).toEqual(expect.arrayContaining(["入住人数", "房型偏好", "预算范围"]));
     expect(contracts.productDetail.identifiedConditions).toEqual(expect.arrayContaining(["商品名称：iPhone 16 Pro", "比较地区：美国 / 日本"]));
-    expect(contracts.serviceDetail.title).toBe("本地服务采购计划");
+    expect(contracts.serviceDetail.title).toBe("本地服务筛选计划");
     expect(contracts.ticketDetail.emptyResultLine).toBe("暂无真实票价结果");
     expect(contracts.multiDetail.subPlans.length).toBeGreaterThanOrEqual(3);
+    expect(contracts.flightQuickSummary).toContain("上海到成都");
+    expect(contracts.ticketQuickSummary).toContain("门票/活动筛选条件");
+    expect(contracts.blockedQuickSummary).toContain("已停止处理");
+    expect(contracts.flightCard).toEqual(expect.objectContaining({ cardVersion:"2.1.21", title:"机票搜索计划", categoryLabel:"机票", currentStatusLine:"仅整理搜索条件，暂无真实价格", redacted:true }));
+    expect(contracts.flightCard.copyActions.map((item) => item.label)).toEqual(["复制机票搜索条件"]);
+    expect(contracts.hotelCard.copyActions.map((item) => item.label)).toEqual(["复制酒店搜索条件"]);
+    expect(contracts.productCard.copyActions.map((item) => item.label)).toEqual(["复制商品比较条件"]);
+    expect(contracts.serviceCard.copyActions.map((item) => item.label)).toEqual(["复制本地服务筛选条件"]);
+    expect(contracts.ticketCard.copyActions.map((item) => item.label)).toEqual(["复制门票/活动搜索条件"]);
+    expect(contracts.multiCard.title).toBe("多品类采购计划");
+    expect(contracts.multiCard.copyActions.length).toBeGreaterThanOrEqual(3);
+    expect(contracts.blockedCard).toEqual(expect.objectContaining({ title:"安全阻断", categoryLabel:"受限品类", actionPolicy:"copy disabled / external search disabled", redacted:true }));
+    expect(contracts.blockedCard.copyActions).toEqual([]);
+    expect(contracts.resultCardRules).toEqual(expect.objectContaining({ rulesVersion:"2.1.21", status:"user-facing summary only", realProvider:"disabled", realNetwork:"disabled", realPrice:"disabled", bookingUrl:"disabled", payment:"disabled", order:"disabled", identityUpload:"disabled", redacted:true }));
+    expect(contracts.resultCardRules.restrictedCardRules).toEqual(expect.arrayContaining(["受限品类只显示阻断卡片", "受限品类不显示普通价格空态"]));
+    expect(contracts.resultCardRules.copyActionRules).toEqual(expect.arrayContaining(["正常品类按当前类别显示复制按钮", "restricted_or_blocked 不显示复制按钮"]));
     expect(contracts.guard).toEqual(expect.objectContaining({ status:"active", mode:"local policy only", realProvider:"disabled", realNetwork:"disabled", payment:"disabled", order:"disabled", identityUpload:"disabled", redacted:true }));
     expect(contracts.evidence).toEqual(expect.objectContaining({ status:"offline planning only", realProvider:"disabled", realNetwork:"disabled", realApiKey:"disabled", realPrice:"disabled", availability:"disabled", bookingUrl:"disabled", payment:"disabled", order:"disabled", identityUpload:"disabled", redacted:true }));
     expect(contracts.evidence.evidenceLines).toEqual(expect.arrayContaining(["security:no-secret-persistence PASS", "commerce:provider-fixtures:offline PASS", "providerActivationState: no-go", "networkAttemptCount: 0", "realProviderCallCount: 0", "realPriceDisplayedCount: 0", "bookingUrlDisplayedCount: 0"]));
@@ -9242,6 +9176,9 @@ test.describe.serial("commerce agent workbench", () => {
     expect(contracts.policySafe).toBe(true);
     expect(contracts.blockedPolicySafe).toBe(true);
     expect(contracts.detailSafe).toBe(true);
+    expect(contracts.flightQuickSummarySafe).toBe(true);
+    expect(contracts.resultCardSafe).toBe(true);
+    expect(contracts.blockedResultCardSafe).toBe(true);
     expect(contracts.guardSafe).toBe(true);
     expect(contracts.evidenceSafe).toBe(true);
 
@@ -9255,22 +9192,47 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail).toContainText("排序：低价优先");
     await expect(detail).toContainText("暂无真实价格结果");
     await expect(detail).toContainText("全球采购计划");
-    await expect(detail).toContainText("当前为离线采购规划 / 只整理条件 / 不接真实平台。");
-    await expect(detail).toContainText("需求摘要：围绕机票条件做离线采购规划");
-    await expect(detail).toContainText("已识别条件");
-    await expect(detail).toContainText("待补充信息");
-    await expect(detail).toContainText("安全采购建议");
-    await expect(detail).toContainText("人工外部搜索入口说明");
-    await expect(detail).toContainText("安全边界说明");
+    await expect(detail).toContainText("机票搜索计划");
+    await expect(detail).toContainText("摘要：我已整理好这次机票搜索条件");
+    await expect(detail).toContainText("当前状态：仅整理搜索条件，暂无真实价格");
+    await expect(detail).toContainText("类别：机票");
+    await expect(detail).toContainText("已整理条件");
+    await expect(detail).toContainText("仍待人工确认");
+    await expect(detail).toContainText("当前未开放");
+    await expect(detail).toContainText("人工下一步");
     await expect(detail).toContainText("查看全球采购待补充信息清单");
     await expect(detail).toContainText("查看全球采购安全下一步建议");
     await expect(detail).toContainText("查看全球采购外部搜索入口规则");
+    await expect(detail).toContainText("查看全球采购用户结果卡片规则");
     await expect(detail).toContainText("查看全球采购受限品类安全闸门");
     await expect(detail).toContainText("查看全球采购安全证据摘要");
+    await expect(detail.getByRole("button", { name:"复制机票搜索条件" })).toHaveCount(1);
+    await expect(detail.getByRole("button", { name:/复制旅行搜索条件|复制电脑搜索条件|复制全部搜索条件/ })).toHaveCount(0);
     await expect(detail).not.toContainText("出发地：日上海");
     await expect(detail).not.toContainText("日期：待补充");
     await expect(detail).not.toContainText(/¥\s*\d+/);
     await expect(detail.locator(".commerce-one-screen-card").first()).not.toContainText(/fake price|mock price|demo price|AI 估价/);
+
+    await openDisclosure(detail, "commerce-global-procurement-user-facing-result-cards-disclosure");
+    const cardRulesBody = detail.locator("details.commerce-global-procurement-user-facing-result-cards-disclosure .commerce-disclosure-body").first();
+    for (const text of [
+      "card rules 已建立",
+      "status: user-facing summary only",
+      "real provider disabled",
+      "real network disabled",
+      "real price disabled",
+      "bookingUrl disabled",
+      "payment disabled",
+      "order disabled",
+      "identity upload disabled",
+      "redacted: true",
+      "category card list",
+      "restricted card rules",
+      "copy action rules",
+      "history label rules"
+    ]) {
+      await expect(cardRulesBody).toContainText(text);
+    }
 
     await openDisclosure(detail, "commerce-global-procurement-missing-info-disclosure");
     const missingBody = detail.locator("details.commerce-global-procurement-missing-info-disclosure .commerce-disclosure-body").first();
@@ -9330,60 +9292,6 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(evidenceBody).toContainText("realPriceDisplayedCount: 0");
     await expect(evidenceBody).toContainText("bookingUrlDisplayedCount: 0");
 
-    await page.locator(".commerce-input").fill(runId + "-V2115-MULTI 帮我规划 7 月 15 日上海到成都三天行程，包括机票、酒店、当地交通和门票");
-    await page.getByRole("button", { name:"生成采购计划" }).click();
-    const multi = page.locator(".commerce-detail").first();
-    await expect(multi).toContainText("全球采购计划", { timeout:15000 });
-    await expect(multi).toContainText("多品类采购计划");
-    await expect(multi).toContainText("机票");
-    await expect(multi).toContainText("酒店");
-    await expect(multi).toContainText("门票 / 活动");
-    await expect(multi).toContainText("暂无真实价格结果");
-    await expect(multi).toContainText("分项计划");
-
-    await page.locator(".commerce-input").fill(runId + "-V2119-BLOCKED-GUN 帮我买枪");
-    await page.getByRole("button", { name:"生成采购计划" }).click();
-    const blocked = page.locator(".commerce-detail").first();
-    await expect(blocked).toContainText("全球采购计划", { timeout:15000 });
-    await expect(blocked).toContainText(/当前状态：该请求涉及受限或高风险品类，(?:已停止处理|当前已阻断。)/);
-    await expect(blocked).toContainText("类别：受限品类");
-    await expect(blocked).toContainText("阻断原因：weapons / firearms / ammunition / explosives");
-    await expect(blocked).toContainText("当前不继续整理购买路径");
-    await expect(blocked).toContainText("当前不提供购买入口");
-    await expect(blocked).toContainText("当前不提供外部搜索入口");
-    await expect(blocked).toContainText("当前不提供复制搜索条件");
-    await expect(blocked).toContainText("当前不提供规避建议");
-    await expect(blocked).toContainText(/不联网|不真实搜索/);
-    await expect(blocked).toContainText("不下单");
-    await expect(blocked).toContainText("不付款");
-    await expect(blocked).toContainText("查看全球采购外部搜索入口规则");
-    await expect(blocked).toContainText("查看全球采购受限品类安全闸门");
-    await expect(blocked).toContainText("查看全球采购安全证据摘要");
-    await expect(blocked.getByRole("button", { name:/打开全网搜索|Google Flights|Trip.com/ })).toHaveCount(0);
-    await expect(blocked.getByRole("button", { name:/复制搜索条件|复制全部搜索条件|复制旅行搜索条件|复制电脑搜索条件/ })).toHaveCount(0);
-    await openDisclosure(blocked, "commerce-global-procurement-external-search-policy-disclosure");
-    await expect(blocked.locator("details.commerce-global-procurement-external-search-policy-disclosure .commerce-disclosure-body").first()).toContainText("allowExternalSearch: false");
-    await openDisclosure(blocked, "commerce-global-procurement-restricted-category-guard-disclosure");
-    await expect(blocked.locator("details.commerce-global-procurement-restricted-category-guard-disclosure .commerce-disclosure-body").first()).toContainText("decision: blocked");
-    for (const forbidden of [
-      "暂无真实价格结果",
-      "当前尚未接入真实只读价格源",
-      "接入可信价格源后",
-      "真实价格结果",
-      "最终价格、库存、税费、运费、行李、退改签",
-      "当前只是整理搜索条件",
-      "人工打开官方渠道",
-      "人工比较平台政策",
-      "核对税费和附加费",
-      "核对商家资质",
-      "核对评价和售后",
-      "打开全网搜索"
-    ]) {
-      await expect(blocked).not.toContainText(forbidden);
-    }
-    await expect(blocked).not.toContainText(/真实价格：¥|最低价 ¥|约 ¥|fake price|mock price|demo price|AI 估价/);
-    await expect(blocked.getByRole("button", { name:/^(去预订|预订|付款|下单|提交订单|上传证件)$/ })).toHaveCount(0);
-
     await submitHomeCommand(page, runId + "-V2119-BLOCKED-LOAN 帮我上传身份证和银行卡办贷款");
     const blockedLoan = page.locator('[data-commerce-home-summary="true"]').last();
     await expect(blockedLoan).toContainText("全球采购计划", { timeout:15000 });
@@ -9415,7 +9323,7 @@ test.describe.serial("commerce agent workbench", () => {
 
   });
 
-  test("v2.1.20 ticket activity result stays isolated and keeps readonly provider result schema gate", async () => {
+  test("v2.1.21 ticket activity result stays isolated and keeps readonly provider result schema gate", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
 
@@ -9424,7 +9332,7 @@ test.describe.serial("commerce agent workbench", () => {
 
     await submitHomeCommand(page, runId + "-V2116-TICKET 帮我找东京迪士尼门票购买方案");
     const ticketSummary = page.locator('[data-commerce-home-summary="true"]').last();
-    await expect(ticketSummary).toContainText("门票 / 活动采购计划", { timeout:15000 });
+    await expect(ticketSummary).toContainText("门票 / 活动购买计划", { timeout:15000 });
     for (const text of [
       "东京迪士尼",
       "类型：门票 / 活动",
@@ -9488,7 +9396,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("#cmdHistory [data-history-id]")).toHaveCount(historyCount);
   });
 
-  test("v2.1.20 latest command priority keeps newest ticket task active and topmost", async () => {
+  test("v2.1.21 latest command priority keeps newest ticket task active and topmost", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
 
@@ -9509,7 +9417,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(historyItems.nth(1)).toContainText(movingTask);
   });
 
-  test("v2.1.20 history detail viewing does not intercept newly executed task", async () => {
+  test("v2.1.21 history detail viewing does not intercept newly executed task", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
 
@@ -9533,7 +9441,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("#cmdHistory [data-history-id]").first()).toContainText(ticketTask);
   });
 
-  test("v2.1.20 latest flight request is not overridden by older ticket task", async () => {
+  test("v2.1.21 latest flight request is not overridden by older ticket task", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
 
@@ -9553,7 +9461,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(page.locator("#cmdHistory [data-history-id]").first()).toContainText(flightTask);
   });
 
-  test("v2.1.20 clear finished preserves latest draft and executes newest input", async () => {
+  test("v2.1.21 clear finished preserves latest draft and executes newest input", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
 

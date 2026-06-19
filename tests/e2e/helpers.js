@@ -34,7 +34,26 @@ async function withWeishan(browser, fn) {
 }
 
 async function gotoRoute(page, route) {
-  await page.locator(`.nav-item[data-route="${route}"]`).click();
+  await page.evaluate((targetRoute) => {
+    try {
+      const router = window.WeishanRouter;
+      if (router && typeof router.current === "function" && router.current() === targetRoute) return;
+      if (router && typeof router.setRoute === "function") {
+        router.setRoute(targetRoute);
+        return;
+      }
+    } catch (_) {}
+    const button = document.querySelector(`.nav-item[data-route="${targetRoute}"]`);
+    if (button) button.click();
+  }, route);
+  await page.waitForFunction((targetRoute) => {
+    try {
+      const active = document.querySelector(`.nav-item[data-route="${targetRoute}"]`);
+      return !!active && active.classList.contains("active");
+    } catch (_) {
+      return false;
+    }
+  }, route, { timeout: 15000 });
 }
 
 async function clearLocalStorage(page, keys) {

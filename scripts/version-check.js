@@ -266,6 +266,48 @@ function checkLocalSecureStorageInterfaceDraftVersion(results, expectedVersion) 
   );
 }
 
+function checkGlobalProcurementQuickSummaryVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/globalProcurementQuickSummary.js";
+  const file = readText(filePath);
+  if (!file) {
+    results.push({ name: "apps/desktop global procurement quick summary version", pass: false, detail: filePath + " missing" });
+    return;
+  }
+  if (file.__readError) {
+    results.push({ name: "apps/desktop global procurement quick summary version", pass: false, detail: file.__readError });
+    return;
+  }
+  const match = file.match(/GLOBAL_PROCUREMENT_QUICK_SUMMARY_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop global procurement quick summary version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/globalProcurementQuickSummary.js GLOBAL_PROCUREMENT_QUICK_SUMMARY_VERSION"
+  );
+}
+
+function checkGlobalProcurementUserFacingResultCardsVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/globalProcurementUserFacingResultCards.js";
+  const file = readText(filePath);
+  if (!file) {
+    results.push({ name: "apps/desktop global procurement user-facing result cards version", pass: false, detail: filePath + " missing" });
+    return;
+  }
+  if (file.__readError) {
+    results.push({ name: "apps/desktop global procurement user-facing result cards version", pass: false, detail: file.__readError });
+    return;
+  }
+  const match = file.match(/GLOBAL_PROCUREMENT_USER_FACING_RESULT_CARDS_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop global procurement user-facing result cards version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/globalProcurementUserFacingResultCards.js GLOBAL_PROCUREMENT_USER_FACING_RESULT_CARDS_VERSION"
+  );
+}
+
 function checkUserApiPriorityPolicyVersion(results, expectedVersion) {
   const policyPath = "apps/desktop/src/renderer/core/commerceUserApiPriorityPolicy.js";
   const policy = readText(policyPath);
@@ -799,6 +841,8 @@ function runVersionCheck() {
     checkSecureKeyStoragePlanVersion(results, rootPackage.version);
     checkSecureStorageDesignGateVersion(results, rootPackage.version);
     checkLocalSecureStorageInterfaceDraftVersion(results, rootPackage.version);
+    checkGlobalProcurementQuickSummaryVersion(results, rootPackage.version);
+    checkGlobalProcurementUserFacingResultCardsVersion(results, rootPackage.version);
     checkUserApiPriorityPolicyVersion(results, rootPackage.version);
     checkApiBindingSafeShellVersion(results, rootPackage.version);
     checkUserApiProviderCatalogVersion(results, rootPackage.version);

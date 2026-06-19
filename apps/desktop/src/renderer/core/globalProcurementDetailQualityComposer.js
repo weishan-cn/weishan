@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_DETAIL_QUALITY_COMPOSER_VERSION = "2.1.20";
+  const GLOBAL_PROCUREMENT_DETAIL_QUALITY_COMPOSER_VERSION = "2.1.21";
 
   function text(value){
     return String(value || "").trim();
@@ -33,11 +33,11 @@
 
   function categoryTitle(category){
     const map = {
-      flight:"机票搜索结果",
-      hotel:"酒店采购计划",
-      product:"商品采购计划",
-      local_service:"本地服务采购计划",
-      ticket_or_activity:"门票 / 活动采购计划",
+      flight:"机票搜索计划",
+      hotel:"酒店筛选计划",
+      product:"商品比较计划",
+      local_service:"本地服务筛选计划",
+      ticket_or_activity:"门票 / 活动购买计划",
       multi_category_plan:"多品类采购计划",
       restricted_or_blocked:"受限品类采购请求"
     };
