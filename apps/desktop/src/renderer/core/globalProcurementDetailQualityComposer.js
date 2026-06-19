@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_DETAIL_QUALITY_COMPOSER_VERSION = "2.1.19";
+  const GLOBAL_PROCUREMENT_DETAIL_QUALITY_COMPOSER_VERSION = "2.1.20";
 
   function text(value){
     return String(value || "").trim();
@@ -232,7 +232,7 @@
       emptyResultLine:emptyResultLine(category),
       demandSummary,
       currentStatusLine:category === "restricted_or_blocked"
-        ? "该请求涉及受限或高风险品类，当前已阻断。"
+        ? "该请求涉及受限或高风险品类，已停止处理。"
         : "当前为离线采购规划 / 只整理条件 / 不接真实平台。",
       categoryLine:"采购类型 / 类别：" + categoryTitle(category).replace("结果", "").replace("采购请求", ""),
       identifiedConditions:unique(identified),
