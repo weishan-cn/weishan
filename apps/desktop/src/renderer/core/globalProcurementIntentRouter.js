@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_INTENT_ROUTER_VERSION = "2.1.18";
+  const GLOBAL_PROCUREMENT_INTENT_ROUTER_VERSION = "2.1.19";
 
   const categoryLabels = {
     flight:"机票",
@@ -17,7 +17,8 @@
     { pattern:/处方药|管制药|毒品|controlled drug|prescription medicine/i, reason:"controlled drugs / prescription medicine without doctor" },
     { pattern:/赌博|博彩|赌场|开户注册|gambling|casino/i, reason:"gambling" },
     { pattern:/假货|盗版|赃物|counterfeit|stolen goods/i, reason:"counterfeit goods / stolen goods" },
-    { pattern:/上传.*(?:身份证|护照|银行卡)|身份证.*(?:贷款|办理|上传)|护照.*(?:预订|上传)|银行卡.*(?:提交|绑定)/i, reason:"identity upload / bank card submission" },
+    { pattern:/(?:上传.*(?:身份证|护照|银行卡).*(?:贷款|借款|信用贷|办贷款|credit|loan)|(?:身份证|护照|银行卡).*(?:贷款|借款|信用贷|办贷款|credit|loan)|(?:loan|credit).*(?:identity|passport|bank card))/i, reason:"identity upload / bank card submission / loan or credit with identity upload" },
+    { pattern:/上传.*(?:身份证|护照|银行卡)|身份证.*(?:上传)|护照.*(?:预订|上传)|银行卡.*(?:提交|绑定)/i, reason:"identity upload / bank card submission" },
     { pattern:/付款|支付|下单|提交订单|checkout|payment|create order|order action/i, reason:"payment / checkout / order action" }
   ];
 

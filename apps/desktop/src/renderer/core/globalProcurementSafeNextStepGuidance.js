@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_SAFE_NEXT_STEP_GUIDANCE_VERSION = "2.1.18";
+  const GLOBAL_PROCUREMENT_SAFE_NEXT_STEP_GUIDANCE_VERSION = "2.1.19";
 
   function unique(list){
     return Array.from(new Set((Array.isArray(list) ? list : []).filter(Boolean)));
@@ -49,10 +49,14 @@
         "先确认关键日期和预算，再拆分执行"
       ],
       restricted_or_blocked:[
-        "请先确认当地法律法规",
-        "当前不提供购买入口、支付入口或规避建议"
+        "当前不继续整理购买路径",
+        "当前不提供购买入口",
+        "当前不提供外部搜索入口",
+        "当前不提供复制搜索条件",
+        "当前不提供规避建议"
       ]
     };
+    if (category === "restricted_or_blocked") return unique(map.restricted_or_blocked || []);
     return unique((map[category] || []).concat(baseGuidance()));
   }
 
