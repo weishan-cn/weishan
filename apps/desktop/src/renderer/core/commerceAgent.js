@@ -1020,7 +1020,7 @@
     const api = window.WeishanCommerceProviderEndpointAllowlistGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderEndpointAllowlistGateContract ? api.commerceProviderEndpointAllowlistGateContract : {
-      gateVersion:"2.1.21",
+      gateVersion:"2.1.22",
       phase:"provider_endpoint_allowlist_gate",
       gateStatus:"closed",
       allowlistStatus:"draft",
@@ -1046,7 +1046,7 @@
     const api = window.WeishanCommerceReadonlyProviderSandboxGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyProviderSandboxGateContract ? api.commerceReadonlyProviderSandboxGateContract : {
-      version:"2.1.21",
+      version:"2.1.22",
       moduleName:"readonly_provider_sandbox_gate",
       phase:"readonly_provider_sandbox_gate",
       gateStatus:"closed",
@@ -1081,7 +1081,7 @@
     const api = window.WeishanCommerceReadonlyProviderResultSchemaGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyProviderResultSchemaGateContract ? api.commerceReadonlyProviderResultSchemaGateContract : {
-      version:"2.1.21",
+      version:"2.1.22",
       moduleName:"readonly_provider_result_schema_gate",
       phase:"readonly_provider_result_schema_gate",
       gateStatus:"closed",
@@ -1118,7 +1118,7 @@
     const api = window.WeishanCommerceProviderResultSourceLabelGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderResultSourceLabelGateContract ? api.commerceProviderResultSourceLabelGateContract : {
-      version:"2.1.21",
+      version:"2.1.22",
       moduleName:"provider_result_source_label_gate",
       phase:"provider_result_source_label_gate",
       gateStatus:"closed",
@@ -1148,7 +1148,7 @@
     const api = window.WeishanCommercePriceIntegrityTaxesFeesGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commercePriceIntegrityTaxesFeesGateContract ? api.commercePriceIntegrityTaxesFeesGateContract : {
-      version:"2.1.21",
+      version:"2.1.22",
       moduleName:"price_integrity_taxes_fees_gate",
       phase:"price_integrity_taxes_fees_gate",
       gateStatus:"closed",
@@ -1175,7 +1175,7 @@
     const api = window.WeishanCommerceBookingUrlDomainSafetyGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceBookingUrlDomainSafetyGateContract ? api.commerceBookingUrlDomainSafetyGateContract : {
-      version:"2.1.21",
+      version:"2.1.22",
       moduleName:"booking_url_domain_safety_gate",
       phase:"booking_url_domain_safety_gate",
       gateStatus:"closed",
@@ -1205,7 +1205,7 @@
     const api = window.WeishanCommerceManualProviderReviewWorkflow;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceManualProviderReviewWorkflowContract ? api.commerceManualProviderReviewWorkflowContract : {
-      version:"2.1.21",
+      version:"2.1.22",
       moduleName:"manual_provider_review_workflow",
       phase:"manual_provider_review_workflow",
       workflowStatus:"draft_only",
@@ -1233,7 +1233,7 @@
     const api = window.WeishanCommerceProviderActivationReadinessGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderActivationReadinessGateContract ? api.commerceProviderActivationReadinessGateContract : {
-      version:"2.1.21",
+      version:"2.1.22",
       moduleName:"provider_activation_readiness_gate",
       phase:"provider_activation_readiness_gate",
       gateStatus:"blocked",
@@ -1259,7 +1259,7 @@
     const api = window.WeishanCommerceCredentialConsentScopeGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceCredentialConsentScopeGateContract ? api.commerceCredentialConsentScopeGateContract : {
-      version:"2.1.21",
+      version:"2.1.22",
       moduleName:"credential_consent_scope_gate",
       phase:"credential_consent_scope_gate",
       gateStatus:"closed",
@@ -1285,7 +1285,7 @@
     const api = window.WeishanCommerceReadonlyAdapterContractGate;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceReadonlyAdapterContractGateContract ? api.commerceReadonlyAdapterContractGateContract : {
-      version:"2.1.21",
+      version:"2.1.22",
       moduleName:"readonly_adapter_contract_gate",
       phase:"readonly_adapter_contract_gate",
       gateStatus:"closed",
@@ -1310,7 +1310,7 @@
     const api = window.WeishanCommerceProviderGateMatrixDashboard;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderGateMatrixDashboardContract ? api.commerceProviderGateMatrixDashboardContract : {
-      version:"2.1.21", moduleName:"provider_gate_matrix_dashboard", phase:"provider_gate_matrix_dashboard", dashboardStatus:"blocked", mode:"matrix_only", providerActivationState:"no-go", realProviderConnection:"disabled", realProviderSandbox:"disabled", realNetwork:"disabled", realPrice:"disabled", realBookingUrl:"disabled", orderMode:"disabled", paymentMode:"disabled", checkoutMode:"disabled", redacted:true,
+      version:"2.1.22", moduleName:"provider_gate_matrix_dashboard", phase:"provider_gate_matrix_dashboard", dashboardStatus:"blocked", mode:"matrix_only", providerActivationState:"no-go", realProviderConnection:"disabled", realProviderSandbox:"disabled", realNetwork:"disabled", realPrice:"disabled", realBookingUrl:"disabled", orderMode:"disabled", paymentMode:"disabled", checkoutMode:"disabled", redacted:true,
       capabilities:{ canActivateProvider:false, canConnectRealProvider:false, canRunRealProviderSandbox:false, canUseNetwork:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, canCreateOrder:false, canPay:false, canCheckout:false, canUploadIdentity:false, canInputApiKey:false, canSaveApiKey:false, canReadApiKey:false },
       display:{ title:"provider gate matrix dashboard", establishedLine:"provider gate matrix dashboard：dashboard 已建立", statusLine:"status: blocked", modeLine:"mode: matrix only", activationLine:"providerActivationState: no-go", providerConnectionLine:"real provider connection disabled", sandboxLine:"real provider sandbox disabled", networkLine:"real network disabled", priceLine:"real price disabled", bookingUrlLine:"real bookingUrl disabled", orderPaymentLine:"order / payment / checkout disabled", redactedLine:"redacted: true" }
     };
@@ -1322,7 +1322,7 @@
     const api = window.WeishanCommerceProviderNoNetworkRuntimeGuard;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceProviderNoNetworkRuntimeGuardContract ? api.commerceProviderNoNetworkRuntimeGuardContract : {
-      version:"2.1.21", moduleName:"provider_no_network_runtime_guard", phase:"provider_no_network_runtime_guard", guardStatus:"blocked", mode:"no_network_enforcement_draft", providerNetwork:"disabled", redirectFollowMode:"disabled", adapterExecution:"disabled", redacted:true,
+      version:"2.1.22", moduleName:"provider_no_network_runtime_guard", phase:"provider_no_network_runtime_guard", guardStatus:"blocked", mode:"no_network_enforcement_draft", providerNetwork:"disabled", redirectFollowMode:"disabled", adapterExecution:"disabled", redacted:true,
       capabilities:{ canUseFetch:false, canUseXhr:false, canUseWebSocket:false, canUseEventSource:false, canUseSendBeacon:false, canUseElectronNet:false, canUseNodeHttp:false, canUseNodeHttps:false, canResolveDns:false, canFollowRedirect:false, canExecuteAdapter:false, canRunRealProviderSandbox:false, canReadRealProviderResult:false, canDisplayRealPrice:false, canDisplayBookingUrl:false, canCreateOrder:false, canPay:false },
       display:{ title:"provider no-network runtime guard", establishedLine:"provider no-network runtime guard：guard 已建立", statusLine:"status: blocked", modeLine:"mode: no-network enforcement draft", providerNetworkLine:"provider network disabled", fetchLine:"fetch disabled for provider", xhrLine:"XMLHttpRequest disabled for provider", websocketLine:"WebSocket disabled for provider", eventSourceLine:"EventSource disabled for provider", sendBeaconLine:"navigator.sendBeacon disabled for provider", electronNetLine:"Electron net disabled for provider", nodeHttpLine:"Node http/https disabled for provider", dnsLine:"DNS lookup disabled for provider", redirectLine:"redirect follow disabled", adapterLine:"adapter execution disabled", redactedLine:"redacted: true" }
     };
@@ -1334,7 +1334,7 @@
     const api = window.WeishanCommerceOfflineProviderFixtureValidationHarness;
     const raw = state && typeof state === "object" ? state : {};
     const base = api && api.commerceOfflineProviderFixtureValidationHarnessContract ? api.commerceOfflineProviderFixtureValidationHarnessContract : {
-      version:"2.1.21", moduleName:"offline_provider_fixture_validation_harness", phase:"offline_provider_fixture_validation_harness", harnessStatus:"offline_only", mode:"fixture_validation_draft", realProviderFixture:"disabled", realProviderResult:"disabled", realNetwork:"disabled", fakeMockDemoAiPriceDisplay:"disabled", bookingUrlDisplay:"disabled", rawProviderPayloadDisplay:"disabled", unsafeFixturePolicy:"all_blocked", redacted:true,
+      version:"2.1.22", moduleName:"offline_provider_fixture_validation_harness", phase:"offline_provider_fixture_validation_harness", harnessStatus:"offline_only", mode:"fixture_validation_draft", realProviderFixture:"disabled", realProviderResult:"disabled", realNetwork:"disabled", fakeMockDemoAiPriceDisplay:"disabled", bookingUrlDisplay:"disabled", rawProviderPayloadDisplay:"disabled", unsafeFixturePolicy:"all_blocked", redacted:true,
       capabilities:{ canUseRealProviderFixture:false, canReadRealProviderResult:false, canUseNetwork:false, canDisplayFakePrice:false, canDisplayMockPrice:false, canDisplayDemoPrice:false, canDisplayAiEstimatedPrice:false, canDisplayRealPrice:false, canDisplayAvailability:false, canDisplayBookingUrl:false, canDisplayRawProviderPayload:false, canCreateOrder:false, canPay:false },
       display:{ title:"offline provider fixture validation harness", establishedLine:"offline provider fixture validation harness：harness 已建立", statusLine:"status: offline only", modeLine:"mode: fixture validation draft", realFixtureLine:"real provider fixture disabled", realResultLine:"real provider result disabled", networkLine:"real network disabled", fakePriceLine:"fake/mock/demo/AI price display disabled", bookingUrlLine:"bookingUrl display disabled", rawPayloadLine:"raw provider payload display disabled", unsafeLine:"all unsafe fixtures blocked", redactedLine:"redacted: true" }
     };
@@ -1347,7 +1347,7 @@
     const raw = state && typeof state === "object" ? state : {};
     if (api && typeof api.buildProviderComplianceDecisionReport === "function") return api.buildProviderComplianceDecisionReport(raw);
     return Object.assign({
-      version:"2.1.21",
+      version:"2.1.22",
       contract:{ engineStatus:"blocked", mode:"offline_decision_only", sideEffects:"none", realProviderConnection:"disabled", realNetwork:"disabled", realCredentialRead:"disabled", realPriceDisplay:"disabled", realBookingUrl:"disabled", providerActivationDecision:"no-go", redacted:true },
       decisionInputDraft:{ fields:["providerId", "providerName", "manualReviewState", "credentialConsentState", "endpointAllowlistState", "sandboxState", "redacted: true"] },
       decisionOutputDraft:{ providerActivationDecision:"no-go", priceDisplayDecision:"withheld", bookingUrlDecision:"forbidden", networkDecision:"blocked", credentialDecision:"blocked", adapterExecutionDecision:"disabled", redacted:true },
@@ -1365,7 +1365,7 @@
     const raw = state && typeof state === "object" ? state : {};
     if (api && typeof api.buildOfflineProviderFixtureRunnerDisplay === "function") return api.buildOfflineProviderFixtureRunnerDisplay(raw);
     return Object.assign({
-      version:"2.1.21",
+      version:"2.1.22",
       contract:{ runnerStatus:"offline_only", mode:"deterministic_fixture_runner", realProviderFixture:"disabled", realProviderResult:"disabled", realNetwork:"disabled", realPrice:"disabled", fakeMockDemoAiPriceDisplay:"disabled", bookingUrlDisplay:"disabled", rawProviderPayloadDisplay:"disabled", redacted:true },
       pipeline:["loadOfflineFixtureDescriptor", "redactOfflineFixture", "evaluateProviderComplianceReadiness", "compareExpectedDecision", "emitOfflineFixtureRunnerAuditEvent"],
       fixtureCategories:["schema_missing_field", "source_label_missing_evidence", "price_integrity_missing_currency", "booking_url_unknown_host", "network_fetch_attempt", "raw_provider_payload_attempt"],
@@ -1381,7 +1381,7 @@
     const raw = state && typeof state === "object" ? state : {};
     if (api && typeof api.buildNoNetworkSentinelAuditDisplay === "function") return api.buildNoNetworkSentinelAuditDisplay(raw);
     return Object.assign({
-      version:"2.1.21",
+      version:"2.1.22",
       contract:{ sentinelStatus:"blocked", mode:"static_no_network_audit", globalMonkeyPatch:"disabled", providerNetworkCall:"disabled", fetchAttempt:"blocked", xhrAttempt:"blocked", websocketAttempt:"blocked", redacted:true },
       sentinelScope:["provider adapters", "provider sandbox", "offline fixture runner", "provider compliance decision engine"],
       blockedPrimitives:["fetch", "XMLHttpRequest", "WebSocket", "EventSource", "navigator.sendBeacon", "Electron net", "Node http", "Node https", "DNS lookup", "redirect follow", "provider write action call"],
@@ -1397,7 +1397,7 @@
     const raw = state && typeof state === "object" ? state : {};
     if (api && typeof api.buildProviderComplianceEvidenceReport === "function") return api.buildProviderComplianceEvidenceReport(raw);
     return Object.assign({
-      version:"2.1.21",
+      version:"2.1.22",
       contract:{ reportStatus:"blocked", mode:"offline_evidence_only", providerActivationState:"no-go", realProviderApproval:"none", credentialConsentApproval:"none", realSecureStorage:"disabled", realEndpointConnection:"disabled", realSandbox:"disabled", realProviderResult:"disabled", realPrice:"disabled", realBookingUrl:"disabled", redacted:true },
       evidenceSections:["gateMatrixEvidence", "activationReadinessEvidence", "credentialConsentEvidence", "offlineFixtureRunnerEvidence", "noNetworkSentinelEvidence"],
       evidenceSummary:{ providerActivationState:"no-go", decisionEngineState:"blocked / no-go", fixtureRunnerState:"offline only / PASS", noNetworkSentinelState:"blocked", redacted:true },
@@ -1413,13 +1413,13 @@
     const raw = state && typeof state === "object" ? state : {};
     if (api && typeof api.buildLocalSafetyEvidenceConsole === "function") return api.buildLocalSafetyEvidenceConsole(raw);
     return Object.assign({
-      version:"2.1.21",
+      version:"2.1.22",
       contract:{ status:"local evidence only", mode:"offline safety summary", providerActivationState:"no-go", releaseEvidenceState:"local only", redacted:true },
-      releaseEvidence:{ appVersion:"2.1.21", expectedGitTag:"v2.1.21", releasePostcheckState:"local only", workingTreeState:"clean required", distAppVersion:"2.1.21", applicationsAppVersion:"2.1.21", uiAcceptanceState:"manual evidence required", schemaVersion:"2.1.21", redacted:true },
+      releaseEvidence:{ appVersion:"2.1.22", expectedGitTag:"v2.1.22", releasePostcheckState:"local only", workingTreeState:"clean required", distAppVersion:"2.1.22", applicationsAppVersion:"2.1.22", uiAcceptanceState:"manual evidence required", schemaVersion:"2.1.22", redacted:true },
       settingsAuthEvidence:{ localAuthMode:"enabled", passwordVerifier:"enabled", legacyPlainPasswordMigration:"compatible", localRecoveryMode:"no-network", localRecoveryEmailSend:"disabled", localRecoverySecretRead:"disabled", localRecoveryFormPreserved:"required", localRecoveryRouteStable:"required", aiKeyConfigLockedWhenUnauthenticated:"required", rawPasswordDisplay:"forbidden", rawTokenDisplay:"forbidden", rawApiKeyDisplay:"forbidden" },
       commerceEvidence:{ commerceFlightIntent:"enabled", flightOriginParsing:"上海", flightDestinationParsing:"成都", flightDateParsing:"7 月 15 日", flightSortPreference:"低价优先", realPriceResult:"unavailable", fakeMockDemoAiPrice:"forbidden", bookingUrl:"forbidden", providerActivationState:"no-go", offlineFixtureRunnerState:"PASS", networkAttemptCount:0, realProviderCallCount:0, realPriceDisplayedCount:0, bookingUrlDisplayedCount:0 },
       safetyRedlineEvidence:{ apiKeyInput:"disabled", credentialInput:"disabled", endpointInput:"disabled", testConnection:"disabled", Keychain:"disabled", safeStorage:"disabled", envSecretWrite:"forbidden", localStorageSecretWrite:"forbidden", sessionStorageSecretWrite:"forbidden", realNetwork:"disabled", providerSandbox:"disabled", realProviderResult:"disabled", realPrice:"disabled", bookingUrl:"disabled", orderPaymentCheckout:"disabled", identityBankCardFlow:"disabled" },
-      audit:{ localSafetyEvidenceConsoleAuditDraft:{ eventType:"LOCAL_SAFETY_EVIDENCE_CONSOLE_DRAFT", schemaVersion:"2.1.21", appVersion:"2.1.21", evidenceState:"local evidence only", providerActivationState:"no-go", releasePostcheckState:"local only", fixtureRunnerState:"PASS", settingsAuthState:"local auth evidence only", blockedReason:"real_provider_and_secret_access_disabled", generatedAt:"local_only", redacted:true } },
+      audit:{ localSafetyEvidenceConsoleAuditDraft:{ eventType:"LOCAL_SAFETY_EVIDENCE_CONSOLE_DRAFT", schemaVersion:"2.1.22", appVersion:"2.1.22", evidenceState:"local evidence only", providerActivationState:"no-go", releasePostcheckState:"local only", fixtureRunnerState:"PASS", settingsAuthState:"local auth evidence only", blockedReason:"real_provider_and_secret_access_disabled", generatedAt:"local_only", redacted:true } },
       redacted:true
     }, raw);
   }
@@ -1428,21 +1428,21 @@
     const api = window.WeishanCommerceManualUiAcceptanceAssistant;
     const raw = state && typeof state === "object" ? state : {};
     if (api && typeof api.buildManualUiAcceptanceAssistant === "function") return api.buildManualUiAcceptanceAssistant(raw);
-    return Object.assign({ version:"2.1.21", contract:{ status:"manual assist only", mode:"no automation guarantee", redacted:true }, manualSteps:[], screenshotPaths:[], passFailRules:[], audit:{ manualUiAcceptanceAssistantAuditDraft:{ eventType:"MANUAL_UI_ACCEPTANCE_ASSISTANT_DRAFT", redacted:true } }, redacted:true }, raw);
+    return Object.assign({ version:"2.1.22", contract:{ status:"manual assist only", mode:"no automation guarantee", redacted:true }, manualSteps:[], screenshotPaths:[], passFailRules:[], audit:{ manualUiAcceptanceAssistantAuditDraft:{ eventType:"MANUAL_UI_ACCEPTANCE_ASSISTANT_DRAFT", redacted:true } }, redacted:true }, raw);
   }
 
   function createNoSecretPersistenceGuard(state){
     const api = window.WeishanCommerceNoSecretPersistenceGuard;
     const raw = state && typeof state === "object" ? state : {};
     if (api && typeof api.buildNoSecretPersistenceGuard === "function") return api.buildNoSecretPersistenceGuard(raw);
-    return Object.assign({ version:"2.1.21", contract:{ status:"local static scan only", mode:"no real secret access", redacted:true }, scanScope:[], blockedPatterns:[], currentScanResult:{ scanResult:"PASS", blockedPatternCount:0, realSecretReadCount:0, keychainAccessCount:0, safeStorageAccessCount:0, envSecretWriteCount:0, localStorageSecretWriteCount:0, sessionStorageSecretWriteCount:0, rawPasswordPersistenceCount:0, rawApiKeyDisplayCount:0, redacted:true }, audit:{ noSecretPersistenceGuardAuditDraft:{ eventType:"NO_SECRET_PERSISTENCE_GUARD_SCAN_DRAFT", blockedPatternCount:0, redacted:true } }, redacted:true }, raw);
+    return Object.assign({ version:"2.1.22", contract:{ status:"local static scan only", mode:"no real secret access", redacted:true }, scanScope:[], blockedPatterns:[], currentScanResult:{ scanResult:"PASS", blockedPatternCount:0, realSecretReadCount:0, keychainAccessCount:0, safeStorageAccessCount:0, envSecretWriteCount:0, localStorageSecretWriteCount:0, sessionStorageSecretWriteCount:0, rawPasswordPersistenceCount:0, rawApiKeyDisplayCount:0, redacted:true }, audit:{ noSecretPersistenceGuardAuditDraft:{ eventType:"NO_SECRET_PERSISTENCE_GUARD_SCAN_DRAFT", blockedPatternCount:0, redacted:true } }, redacted:true }, raw);
   }
 
   function createSettingsAuthLocalSecurityEvidence(state){
     const api = window.WeishanSettingsAuthLocalSecurityEvidence;
     const raw = state && typeof state === "object" ? state : {};
     if (api && typeof api.buildSettingsAuthLocalSecurityEvidence === "function") return api.buildSettingsAuthLocalSecurityEvidence(raw);
-    return Object.assign({ version:"2.1.21", contract:{ status:"local auth evidence only", mode:"no cloud auth", localRegister:"enabled", localLogin:"enabled", localRecoveryNotice:"enabled", passwordVerifier:"enabled", legacyPlainPasswordMigration:"compatible", realEmailSending:"disabled", realNetwork:"disabled", realKeyRead:"disabled", redacted:true }, recoveryNoticeDraft:["本地模式不联网", "本地模式不发邮件", "本地模式不读取密钥", "找回密码不会清空表单", "找回密码不会跳路由"], authSafetyBoundaries:["raw password display forbidden", "raw password persistence forbidden", "passwordVerifier only"], audit:{ settingsAuthLocalSecurityEvidenceAuditDraft:{ eventType:"SETTINGS_AUTH_LOCAL_SECURITY_EVIDENCE_DRAFT", redacted:true } }, redacted:true }, raw);
+    return Object.assign({ version:"2.1.22", contract:{ status:"local auth evidence only", mode:"no cloud auth", localRegister:"enabled", localLogin:"enabled", localRecoveryNotice:"enabled", passwordVerifier:"enabled", legacyPlainPasswordMigration:"compatible", realEmailSending:"disabled", realNetwork:"disabled", realKeyRead:"disabled", redacted:true }, recoveryNoticeDraft:["本地模式不联网", "本地模式不发邮件", "本地模式不读取密钥", "找回密码不会清空表单", "找回密码不会跳路由"], authSafetyBoundaries:["raw password display forbidden", "raw password persistence forbidden", "passwordVerifier only"], audit:{ settingsAuthLocalSecurityEvidenceAuditDraft:{ eventType:"SETTINGS_AUTH_LOCAL_SECURITY_EVIDENCE_DRAFT", redacted:true } }, redacted:true }, raw);
   }
 
   function createUserApiPriorityPolicyState(state){
@@ -1717,7 +1717,7 @@
       return intent;
     }
     return {
-      routerVersion:"2.1.21",
+      routerVersion:"2.1.22",
       phase:"global_procurement_intent_router",
       intentType:"offline_procurement_planning",
       category:"unknown_procurement",
@@ -1746,7 +1746,7 @@
     const plan = api && typeof api.composeGlobalProcurementPlan === "function"
       ? api.composeGlobalProcurementPlan(intent)
       : {
-        composerVersion:"2.1.21",
+        composerVersion:"2.1.22",
         phase:"global_procurement_plan_composer",
         title:"全球采购计划",
         status:intent && intent.category === "restricted_or_blocked" ? "blocked" : "offline_planning_only",
@@ -1769,7 +1769,7 @@
     const checklist = api && typeof api.buildGlobalProcurementMissingInfoChecklist === "function"
       ? api.buildGlobalProcurementMissingInfoChecklist(intent)
       : {
-        checklistVersion:"2.1.21",
+        checklistVersion:"2.1.22",
         phase:"global_procurement_missing_info_checklist",
         category:intent && intent.category || "unknown_procurement",
         title:"全球采购待补充信息清单",
@@ -1789,7 +1789,7 @@
     const guidance = api && typeof api.buildGlobalProcurementSafeNextStepGuidance === "function"
       ? api.buildGlobalProcurementSafeNextStepGuidance(intent)
       : {
-        guidanceVersion:"2.1.21",
+        guidanceVersion:"2.1.22",
         phase:"global_procurement_safe_next_step_guidance",
         category:intent && intent.category || "unknown_procurement",
         title:"全球采购安全下一步建议",
@@ -1811,7 +1811,7 @@
     const policy = api && typeof api.buildGlobalProcurementExternalSearchPolicy === "function"
       ? api.buildGlobalProcurementExternalSearchPolicy(intent)
       : {
-        policyVersion:"2.1.21",
+        policyVersion:"2.1.22",
         phase:"global_procurement_external_search_policy",
         category:intent && intent.category || "unknown_procurement",
         title:"全球采购外部搜索入口规则",
@@ -1833,7 +1833,7 @@
     const detail = api && typeof api.composeGlobalProcurementDetailQuality === "function"
       ? api.composeGlobalProcurementDetailQuality(intent)
       : {
-        detailQualityVersion:"2.1.21",
+        detailQualityVersion:"2.1.22",
         phase:"global_procurement_detail_quality_composer",
         category:intent && intent.category || "unknown_procurement",
         title:"全球采购计划",
@@ -1858,7 +1858,7 @@
     const guard = api && typeof api.buildGlobalProcurementRestrictedCategoryGuard === "function"
       ? api.buildGlobalProcurementRestrictedCategoryGuard(intent)
       : {
-        guardVersion:"2.1.21",
+        guardVersion:"2.1.22",
         phase:"global_procurement_restricted_category_guard",
         status:"active",
         mode:"local policy only",
@@ -1883,7 +1883,7 @@
     const summary = api && typeof api.buildGlobalProcurementEvidenceSafetySummary === "function"
       ? api.buildGlobalProcurementEvidenceSafetySummary()
       : {
-        summaryVersion:"2.1.21",
+        summaryVersion:"2.1.22",
         phase:"global_procurement_evidence_safety_summary",
         status:"offline planning only",
         realProvider:"disabled",
@@ -1900,9 +1900,79 @@
         evidenceLines:["security:no-secret-persistence PASS", "commerce:provider-fixtures:offline PASS", "providerActivationState: no-go", "networkAttemptCount: 0", "realProviderCallCount: 0", "realPriceDisplayedCount: 0", "bookingUrlDisplayedCount: 0"],
         auditDraft:{ eventType:"GLOBAL_PROCUREMENT_EVIDENCE_SAFETY_SUMMARY_DRAFT", redacted:true },
         redacted:true
-      };
+    };
     if (api && typeof api.assertGlobalProcurementEvidenceSafetySummarySafe === "function") api.assertGlobalProcurementEvidenceSafetySummarySafe(summary);
     return summary;
+  }
+
+  function createGlobalProcurementDecisionWorkspace(intent, plan, detailQuality){
+    const api = window.WeishanGlobalProcurementDecisionWorkspace;
+    const workspace = api && typeof api.buildGlobalProcurementDecisionWorkspace === "function"
+      ? api.buildGlobalProcurementDecisionWorkspace({
+        globalProcurementIntent:intent,
+        globalProcurementPlan:plan,
+        globalProcurementDetailQuality:detailQuality
+      })
+      : {
+        decisionWorkspaceVersion:"2.1.22",
+        phase:"global_procurement_decision_workspace",
+        workspaceStatus:"workspace_only",
+        gateStatus:"closed",
+        mode:"offline_decision_only",
+        summary:{
+          title:"全球采购决策工作台",
+          statusLine:"决策工作台：已建立",
+          currentStatusLine:"当前状态：只整理采购决策，不连接真实 provider。",
+          redacted:true
+        },
+        comparisonDimensions:["价格 / 总到手价", "来源可信度", "更新时间", "结果类型", "bookingUrl 安全性", "安全边界"],
+        decisionRule:"默认优先真实、可信、可验证的结果；当前仅做离线决策整理。",
+        candidateSchema:["providerId", "providerName", "sourceType", "sourceUrlHost", "title", "currency", "price", "updatedAt", "readonlyEvidence", "redacted: true"],
+        recommendationTemplate:["平台名称", "价格", "更新时间", "可信度", "点击跳转外部平台 / 官网", "必要安全提示"],
+        executionBoundary:["不连接真实 provider", "不读取 API key", "不连接 endpoint", "不发起网络请求", "不显示真实价格", "不生成 bookingUrl", "不付款", "不下单", "不保存身份证 / 银行卡"],
+        riskNotice:["未接入真实 provider 时只做采购决策整理，不做真实结果展示", "禁止把 draft 当真实结果", "禁止输出 fake/mock/demo/AI 估价", "禁止展示 raw provider payload"],
+        nextSteps:["先完成 sandbox gate", "再完成 endpoint allowlist gate", "再完成 key 生命周期", "再完成脱敏规则", "再完成本机安全存储", "再完成 API 绑定准备状态"],
+        linkage:["sandbox gate", "endpoint allowlist gate", "key 生命周期", "脱敏规则", "本机安全存储", "API 绑定准备状态"],
+        auditDraft:{ eventType:"GLOBAL_PROCUREMENT_DECISION_WORKSPACE_DRAFT", decision:"offline_decision_only", redacted:true },
+        capabilities:{
+          canShowWorkspace:true,
+          canShowCurrentStatus:true,
+          canShowComparisonDimensions:true,
+          canShowDecisionRule:true,
+          canShowCandidateSchema:true,
+          canShowRecommendationTemplate:true,
+          canShowExecutionBoundary:true,
+          canShowRiskNotice:true,
+          canShowNextSteps:true,
+          canShowLinkage:true,
+          canUseRealProvider:false,
+          canUseNetwork:false,
+          canReadApiKey:false,
+          canUseEndpoint:false,
+          canReturnPrice:false,
+          canReturnBookingUrl:false,
+          canCreateOrder:false,
+          canPay:false,
+          canStoreIdentity:false
+        },
+        display:{
+          summaryTitle:"全球采购决策工作台",
+          statusLine:"决策工作台：已建立",
+          currentStatusLine:"当前状态：只整理采购决策，不连接真实 provider。",
+          decisionRuleLine:"decisionRule：默认优先真实、可信、可验证的结果；当前仅做离线决策整理。",
+          comparisonDimensionsLine:"comparisonDimensions：价格 / 总到手价、来源可信度、更新时间、结果类型、bookingUrl 安全性、安全边界。",
+          candidateSchemaLine:"candidateSchema：providerId / providerName / sourceType / sourceUrlHost / title / currency / price / updatedAt / readonlyEvidence。",
+          recommendationTemplateLine:"recommendationTemplate：平台名称 / 价格 / 更新时间 / 可信度 / 点击跳转外部平台 / 必要安全提示。",
+          executionBoundaryLine:"executionBoundary：不连接真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不显示真实价格，不生成 bookingUrl，不付款，不下单，不保存身份证 / 银行卡。",
+          riskNoticeLine:"riskNotice：禁止 fake/mock/demo/AI 估价，禁止 raw payload，禁止把 draft 当真实结果。",
+          nextStepsLine:"nextSteps：先完成 sandbox gate，再完成 endpoint allowlist gate，再完成 key 生命周期，再完成脱敏规则，再完成本机安全存储，再完成 API 绑定准备状态。",
+          linkageLine:"linkage：sandbox gate / endpoint allowlist gate / key 生命周期 / 脱敏规则 / 本机安全存储 / API 绑定准备状态。",
+          redactedLine:"redacted: true"
+        },
+        redacted:true
+      };
+    if (api && typeof api.assertGlobalProcurementDecisionWorkspaceSafe === "function") api.assertGlobalProcurementDecisionWorkspaceSafe(workspace);
+    return workspace;
   }
 
   function supportsReadonlyProviderResultSchemaGate(category){
@@ -2002,6 +2072,7 @@
     let next = String(value || "");
     if (side === "origin") next = next.replace(/.*?(?:\d{1,2}\s*月\s*\d{1,2}\s*日|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天])/, "");
     next = next
+      .replace(/^日/, "")
       .replace(/^(帮我|请|想|我要|需要|找|买|购买|订|预定|预订|订票|买票|从|出发|低价|最便宜|的)+/g, "")
       .replace(/(机票|飞机票|航空票|航班|酒店|住宿|火车票|高铁票|邮轮|游轮|公务机|私人飞机|包机|商品|电商|低价|最便宜|的).*$/g, "")
       .trim();
@@ -2011,7 +2082,7 @@
   function normalizeCommerceDate(value){
     const raw = String(value || "").trim();
     const cn = raw.match(/^(\d{1,2})\s*月\s*(\d{1,2})\s*日$/);
-    if (cn) return Number(cn[1]) + "月" + Number(cn[2]) + "日";
+    if (cn) return Number(cn[1]) + " 月 " + Number(cn[2]) + " 日";
     const numeric = raw.match(/^(\d{4})\s*([-\/])\s*(\d{1,2})\s*\2\s*(\d{1,2})$/);
     if (numeric) return numeric[1] + numeric[2] + Number(numeric[3]) + numeric[2] + Number(numeric[4]);
     return raw.replace(/\s+/g, " ");
@@ -2022,6 +2093,7 @@
     const datePattern = "(\\d{4}\\s*[-/]\\s*\\d{1,2}\\s*[-/]\\s*\\d{1,2}|\\d{1,2}\\s*月\\s*\\d{1,2}\\s*日|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天])";
     const placePattern = "([\\u4e00-\\u9fa5A-Za-z]{2,24})";
     const dateMatch = raw.match(new RegExp(datePattern));
+    const routeText = raw.replace(new RegExp("^\\s*" + datePattern + "\\s*"), "");
     let routeMatch = raw.match(new RegExp(datePattern + "\\s*" + placePattern + "\\s*(?:到|飞往|飞|去)\\s*" + placePattern, "i"));
     if (routeMatch) {
       return {
@@ -2030,7 +2102,7 @@
         dateText:normalizeCommerceDate(routeMatch[1] || "")
       };
     }
-    routeMatch = raw.match(new RegExp(placePattern + "\\s*(?:到|飞往|飞|去)\\s*" + placePattern + "\\s*" + datePattern, "i"));
+    routeMatch = routeText.match(new RegExp(placePattern + "\\s*(?:到|飞往|飞|去)\\s*" + placePattern + "\\s*" + datePattern, "i"));
     if (routeMatch) {
       return {
         originText:cleanPlaceName(routeMatch[1], "origin"),
@@ -2038,7 +2110,7 @@
         dateText:normalizeCommerceDate(routeMatch[3] || "")
       };
     }
-    routeMatch = raw.match(/([\u4e00-\u9fa5A-Za-z]{2,24})\s*(?:到|飞往|飞|去)\s*([\u4e00-\u9fa5A-Za-z]{2,24})/);
+    routeMatch = routeText.match(/([\u4e00-\u9fa5A-Za-z]{2,24})\s*(?:到|飞往|飞|去)\s*([\u4e00-\u9fa5A-Za-z]{2,24})/);
     return {
       originText:routeMatch ? cleanPlaceName(routeMatch[1], "origin") : "",
       destinationText:routeMatch ? cleanPlaceName(routeMatch[2], "destination") : "",
@@ -2164,6 +2236,7 @@
     const globalProcurementSafeNextStepGuidance = createGlobalProcurementSafeNextStepGuidance(globalProcurementIntent);
     const globalProcurementExternalSearchPolicy = createGlobalProcurementExternalSearchPolicy(globalProcurementIntent);
     const globalProcurementDetailQuality = createGlobalProcurementDetailQuality(globalProcurementIntent);
+    const globalProcurementDecisionWorkspace = createGlobalProcurementDecisionWorkspace(globalProcurementIntent, globalProcurementPlan, globalProcurementDetailQuality);
     const globalProcurementRestrictedCategoryGuard = createGlobalProcurementRestrictedCategoryGuard(globalProcurementIntent);
     const globalProcurementEvidenceSafetySummary = createGlobalProcurementEvidenceSafetySummary();
     const createdAt = nowIso();
@@ -2190,6 +2263,7 @@
       globalProcurementSafeNextStepGuidance,
       globalProcurementExternalSearchPolicy,
       globalProcurementDetailQuality,
+      globalProcurementDecisionWorkspace,
       globalProcurementRestrictedCategoryGuard,
       globalProcurementEvidenceSafetySummary,
       searchStatus:"no_provider",
@@ -2262,6 +2336,7 @@
     const globalProcurementSafeNextStepGuidance = base.globalProcurementSafeNextStepGuidance && typeof base.globalProcurementSafeNextStepGuidance === "object" ? base.globalProcurementSafeNextStepGuidance : createGlobalProcurementSafeNextStepGuidance(globalProcurementIntent);
     const globalProcurementExternalSearchPolicy = base.globalProcurementExternalSearchPolicy && typeof base.globalProcurementExternalSearchPolicy === "object" ? base.globalProcurementExternalSearchPolicy : createGlobalProcurementExternalSearchPolicy(globalProcurementIntent);
     const globalProcurementDetailQuality = base.globalProcurementDetailQuality && typeof base.globalProcurementDetailQuality === "object" ? base.globalProcurementDetailQuality : createGlobalProcurementDetailQuality(globalProcurementIntent);
+    const globalProcurementDecisionWorkspace = base.globalProcurementDecisionWorkspace && typeof base.globalProcurementDecisionWorkspace === "object" ? base.globalProcurementDecisionWorkspace : createGlobalProcurementDecisionWorkspace(globalProcurementIntent, globalProcurementPlan, globalProcurementDetailQuality);
     const globalProcurementRestrictedCategoryGuard = base.globalProcurementRestrictedCategoryGuard && typeof base.globalProcurementRestrictedCategoryGuard === "object" ? base.globalProcurementRestrictedCategoryGuard : createGlobalProcurementRestrictedCategoryGuard(globalProcurementIntent);
     const globalProcurementEvidenceSafetySummary = base.globalProcurementEvidenceSafetySummary && typeof base.globalProcurementEvidenceSafetySummary === "object" ? base.globalProcurementEvidenceSafetySummary : createGlobalProcurementEvidenceSafetySummary();
     const createdAt = base.createdAt || nowIso();
@@ -2288,6 +2363,7 @@
       globalProcurementSafeNextStepGuidance,
       globalProcurementExternalSearchPolicy,
       globalProcurementDetailQuality,
+      globalProcurementDecisionWorkspace,
       globalProcurementRestrictedCategoryGuard,
       globalProcurementEvidenceSafetySummary,
       searchStatus:String(base.searchStatus || "no_provider"),
@@ -2444,6 +2520,7 @@
       globalProcurementSafeNextStepGuidance:safe.globalProcurementSafeNextStepGuidance,
       globalProcurementExternalSearchPolicy:safe.globalProcurementExternalSearchPolicy,
       globalProcurementDetailQuality:safe.globalProcurementDetailQuality,
+      globalProcurementDecisionWorkspace:safe.globalProcurementDecisionWorkspace,
       globalProcurementRestrictedCategoryGuard:safe.globalProcurementRestrictedCategoryGuard,
       globalProcurementEvidenceSafetySummary:safe.globalProcurementEvidenceSafetySummary,
       searchStatus:safe.searchStatus,
@@ -2504,7 +2581,7 @@
       if (category === "ecommerce") return (fields.productQuery || fields.normalizedQuery || "商品") + "搜索已阻断";
       return (safe.categoryLabel || "全球采购") + "计划已阻断";
     }
-    if (category === "flight") return done ? "机票搜索已完成" : "机票搜索已生成";
+    if (category === "flight") return "机票搜索结果";
     if (category === "ecommerce") {
       const query = fields.productQuery || fields.normalizedQuery || "商品";
       return query + (done ? "搜索已完成" : "搜索已生成");

@@ -2045,6 +2045,29 @@
     return disclosure("查看全球采购用户结果卡片规则", body, "commerce-global-procurement-user-facing-result-cards-disclosure");
   }
 
+  function globalProcurementDecisionWorkspaceDisclosure(task){
+    const workspace = task && task.globalProcurementDecisionWorkspace;
+    if (!workspace) return "";
+    const display = workspace.display || {};
+    const body = `<section class="commerce-global-procurement-decision-workspace" aria-label="全球采购决策工作台">
+      <h4>全球采购决策工作台</h4>
+      <p>${esc(display.statusLine || "决策工作台：已建立")}</p>
+      <p>${esc(display.currentStatusLine || "当前状态：只整理采购决策，不连接真实 provider。")}</p>
+      <p>${esc(display.decisionRuleLine || "decisionRule：默认优先真实、可信、可验证的结果；当前仅做离线决策整理。")}</p>
+      <h5>comparisonDimensions</h5>${listHtml(workspace.comparisonDimensions || [])}
+      <h5>decisionRule</h5><p>${esc(workspace.decisionRule || "默认优先真实、可信、可验证的结果；当前仅做离线决策整理。")}</p>
+      <h5>candidateSchema</h5>${listHtml(workspace.candidateSchema || [])}
+      <h5>recommendationTemplate</h5>${listHtml(workspace.recommendationTemplate || [])}
+      <h5>executionBoundary</h5>${listHtml(workspace.executionBoundary || [])}
+      <h5>riskNotice</h5>${listHtml(workspace.riskNotice || [])}
+      <h5>nextSteps</h5>${listHtml(workspace.nextSteps || [])}
+      <h5>linkage</h5>${listHtml(workspace.linkage || [])}
+      <p>${esc(display.redactedLine || "redacted: true")}</p>
+      <p>sandbox gate / endpoint allowlist gate / key 生命周期 / 脱敏规则 / 本机安全存储 / API 绑定准备状态</p>
+    </section>`;
+    return disclosure("查看全球采购决策工作台", body, "commerce-global-procurement-decision-workspace-disclosure");
+  }
+
   function globalProcurementUserFacingCopyButtons(card){
     const actions = Array.isArray(card && card.copyActions) ? card.copyActions.filter((item) => item && item.label && item.text) : [];
     if (!actions.length) return "";
@@ -2079,8 +2102,11 @@
       ${(card.identifiedConditions || []).length ? `<h5>已整理条件</h5>${listHtml(card.identifiedConditions || [])}` : ""}
       ${(card.missingInfo || []).length ? `<h5>仍待人工确认</h5>${listHtml(card.missingInfo || [])}` : ""}
       ${globalProcurementUserFacingSubCardsHtml(card)}
+      ${commerceSecureKeyStoragePlanDisclosure(task)}
       ${(card.disabledLines || []).length ? `<h5>当前未开放</h5>${listHtml(card.disabledLines || [])}` : ""}
       ${(card.nextStepLines || []).length ? `<h5>人工下一步</h5>${listHtml(card.nextStepLines || [])}` : ""}
+      ${commerceReadonlyProviderSandboxGateDisclosure(task)}
+      ${globalProcurementDecisionWorkspaceDisclosure(task)}
       <p>redacted: true</p>
     </section>`;
   }
@@ -2382,7 +2408,7 @@
     const raw = String(task && (task.inputSummary || task.rawInput || task.title || task.text) || "");
     const origin = String(normalized.originText || "").trim();
     const destination = String(normalized.destinationText || "").trim();
-    const date = String(normalized.dateText || normalized.timing || "").trim();
+    const date = String(normalized.dateText || normalized.timing || "").trim().replace(/\s+/g, "");
     const dateDisplay = date.replace(/^(\d{1,2})月(\d{1,2})日$/, "$1 月 $2 日");
     const lowPrice = /最便宜|低价|便宜/.test(raw) || /低价优先/.test(String(normalized.constraints || ""));
     return {
@@ -2397,7 +2423,7 @@
   function commerceIsSimpleFlightTask(task){
     const raw = String(task && (task.inputSummary || task.rawInput || task.title || task.text) || "");
     const fields = commerceSimpleFlightFields(task);
-    return !!(task && task.category === "flight" && fields.origin && fields.destination && /\d{1,2}月\d{1,2}日/.test(fields.date) && !/(酒店|住宿|电脑|商品|剪视频|内存|硬盘|采购计划)/.test(raw));
+    return !!(task && task.category === "flight" && fields.origin && fields.destination && /\d{1,2}\s*月\s*\d{1,2}\s*日/.test(fields.date) && !/(酒店|住宿|电脑|商品|剪视频|内存|硬盘|采购计划)/.test(raw));
   }
 
   function commerceSimpleFlightEnglishCity(value){
@@ -3233,6 +3259,7 @@
     const implementationSteps = Array.isArray(display.implementationSteps) ? display.implementationSteps : [];
     const riskModelItems = Array.isArray(display.riskModelItems) ? display.riskModelItems : [];
     const body = `<section class="commerce-secure-key-storage-plan-panel" aria-label="安全密钥存储方案">
+      <p class="commerce-secure-key-storage-plan-title-hint">查看安全密钥存储方案</p>
       <h4>${esc(display.summaryTitle || "安全密钥存储方案")}</h4>
       <p>${esc(display.planStatusLine || "安全密钥存储方案：计划中")}</p>
       <p>${esc(display.currentStatusLine || "当前状态：安全密钥存储仍处于方案阶段，当前版本不会保存真实 API key。")}</p>
@@ -4123,7 +4150,7 @@
     const gate = task && task.providerEndpointAllowlistGate || null;
     if (api && typeof api.buildProviderEndpointAllowlistGateDisplay === "function") return api.buildProviderEndpointAllowlistGateDisplay(gate);
     return gate && typeof gate === "object" ? gate : {
-      gateVersion:"2.1.21",
+      gateVersion:"2.1.22",
       gateStatus:"closed",
       allowlistStatus:"draft",
       display:{ title:"provider endpoint allowlist 闸门", establishedLine:"endpoint allowlist 闸门：已建立", gateStatusLine:"闸门状态：关闭", allowlistStatusLine:"allowlist 状态：草案", endpointConnectionLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", providerSandboxLine:"provider sandbox：未开放", priceLine:"真实价格读取：未开放", bookingUrlLine:"bookingUrl 读取：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", readonlyProviderSandboxGateLine:"只读 provider sandbox gate：已建立", realSandboxRunLine:"真实 sandbox 运行：未开放", realProviderConnectionLine:"真实 provider 连接：未开放", realNetworkLine:"真实网络：未开放", nextStepLine:"只读 provider sandbox gate：已建立。下一步：只读 provider result schema gate；只读 provider result schema gate：已建立。下一步：provider result source label gate", safetyLine:"当前版本仍不能连接真实 endpoint、不能测试连接、不能联网、不能读取真实价格" },
@@ -4187,7 +4214,7 @@
     const gate = task && task.readonlyProviderSandboxGate || null;
     if (api && typeof api.buildReadonlyProviderSandboxGateDisplay === "function") return api.buildReadonlyProviderSandboxGateDisplay(gate);
     return gate && typeof gate === "object" ? gate : {
-      version:"2.1.21",
+      version:"2.1.22",
       gateStatus:"closed",
       sandboxStatus:"draft_only",
       display:{ title:"只读 provider sandbox gate", establishedLine:"只读 provider sandbox gate：已建立", gateStatusLine:"gate 状态：关闭", sandboxStatusLine:"sandbox 状态：草案", realSandboxRunLine:"真实 sandbox 运行：未开放", realProviderConnectionLine:"真实 provider 连接：未开放", endpointConnectionLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", priceLine:"真实价格读取：未开放", availabilityLine:"availability 读取：未开放", bookingUrlLine:"bookingUrl 读取：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", nextStepLine:"下一步：只读 provider result schema gate；只读 provider result schema gate：已建立。下一步：provider result source label gate", safetyLine:"当前版本仍不能运行真实 sandbox、不能连接真实 endpoint、不能联网、不能读取真实价格" },
@@ -4255,7 +4282,7 @@
     const gate = task && task.readonlyProviderResultSchemaGate || null;
     if (api && typeof api.buildReadonlyProviderResultSchemaGateDisplay === "function") return api.buildReadonlyProviderResultSchemaGateDisplay(gate);
     return gate && typeof gate === "object" ? gate : {
-      version:"2.1.21",
+      version:"2.1.22",
       gateStatus:"closed",
       schemaStatus:"draft_only",
       display:{ title:"只读 provider result schema gate", establishedLine:"只读 provider result schema gate：已建立", gateStatusLine:"gate 状态：关闭 / closed", schemaStatusLine:"schema 状态：草案 / draft", realProviderResultLine:"真实 provider result 读取：未开放", realPriceLine:"真实价格显示：未开放", availabilityLine:"availability 显示：未开放", bookingUrlLine:"bookingUrl 显示：未开放", rawPayloadLine:"raw provider payload 显示：禁止", realSandboxLine:"真实 sandbox 运行：未开放", endpointLine:"真实 endpoint 连接：未开放", networkLine:"真实网络请求：未开放", orderLine:"下单：禁止", paymentLine:"付款：禁止", identityLine:"身份上传：禁止", nextStepLine:"下一步：provider result source label gate", safetyLine:"当前版本仍不能读取真实 provider result、不能显示真实价格、不能显示 bookingUrl。" },
@@ -4325,7 +4352,7 @@
     const gate = task && task.providerResultSourceLabelGate || null;
     if (api && typeof api.buildProviderResultSourceLabelGateDisplay === "function") return api.buildProviderResultSourceLabelGateDisplay(gate);
     return gate && typeof gate === "object" ? gate : {
-      version:"2.1.21",
+      version:"2.1.22",
       gateStatus:"closed",
       mode:"draft_only",
       display:{ title:"provider result source label gate", establishedLine:"provider result source label gate：已建立", gateStatusLine:"gate 状态：关闭 / closed", modeLine:"mode: draft only", sourceLabelLine:"real provider source label 未开放", providerResultLine:"real provider result 未读取", networkLine:"real network disabled", safetyLine:"当前版本仍不读取真实 provider result，不显示真实来源标签，不联网，不显示真实价格。" },
@@ -4333,7 +4360,7 @@
       sourceTypeDraft:{ sourceTypes:["user_bound_api", "weishan_readonly_provider", "public_search", "manual_reviewed_source", "blocked_unknown_source", "no_provider"] },
       visibleSourceLabelDraft:{ labels:["来源：未接入真实 provider", "Provider：未绑定 / 未连接", "Source host：未连接真实来源", "Updated at：无真实更新时间", "Evidence：readonlyEvidence draft only", "Trust state：closed / pending review"] },
       blockRules:{ rules:["缺 providerId 阻断", "缺 providerName 阻断", "缺 sourceUrlHost 阻断", "缺 updatedAt 阻断", "缺 readonlyEvidence 阻断", "unknown host 阻断", "short URL 阻断", "credential query params 阻断", "token / apiKey / secret 参数阻断", "raw provider URL with secrets 阻断", "raw provider payload 阻断"] },
-      audit:{ sourceLabelAuditDraft:{ eventType:"SOURCE_LABEL_GATE_EVALUATION_DRAFT", schemaVersion:"2.1.21", gateState:"closed", blockedReason:"source_label_gate_closed", sourceUrlHost:"none", resultObservedAt:"none", redacted:true } },
+      audit:{ sourceLabelAuditDraft:{ eventType:"SOURCE_LABEL_GATE_EVALUATION_DRAFT", schemaVersion:"2.1.22", gateState:"closed", blockedReason:"source_label_gate_closed", sourceUrlHost:"none", resultObservedAt:"none", redacted:true } },
       linkage:["只读 provider result schema gate", "只读 provider sandbox gate", "provider endpoint allowlist gate", "key 生命周期", "密钥脱敏规则", "本机安全存储", "API 绑定准备状态"]
     };
   }
@@ -4379,7 +4406,7 @@
     const gate = task && task.priceIntegrityTaxesFeesGate || null;
     if (api && typeof api.buildPriceIntegrityTaxesFeesGateDisplay === "function") return api.buildPriceIntegrityTaxesFeesGateDisplay(gate);
     return gate && typeof gate === "object" ? gate : {
-      version:"2.1.21",
+      version:"2.1.22",
       gateStatus:"closed",
       mode:"draft_only",
       display:{ title:"price integrity / taxes / fees gate", establishedLine:"price integrity / taxes / fees gate：已建立", gateStatusLine:"gate 状态：关闭 / closed", modeLine:"mode: draft only", realPriceLine:"real price display disabled", providerPriceLine:"real provider price disabled", taxFeeLine:"tax / fee verification disabled until readonly provider result is available", safetyLine:"当前版本仍隐藏价格，只显示暂无真实价格结果，不显示虚构价格或非真实报价。" },
@@ -4388,7 +4415,7 @@
       currentPricePolicy:{ policy:["当前版本仍隐藏价格", "当前只显示“暂无真实价格结果”", "当前不得显示 fake price", "当前不得显示 mock price", "当前不得显示 demo price", "当前不得显示 AI 估价", "当前不得显示最低价 / 约 ¥xxx / estimated price", "当前不得根据不完整来源计算最低价"] },
       taxFeeCompletenessRules:{ rules:["baseFare、taxes、fees、total 必须可追溯", "税费缺失则 price withheld", "税费未知则 price withheld", "币种缺失则 price withheld", "更新时间缺失则 price withheld", "provider evidence 缺失则 price withheld", "source label 缺失则 price withheld"] },
       riskScan:{ priceIntegrityRiskScanDraft:["missingCurrency", "missingTaxes", "missingFees", "missingUpdatedAt", "missingReadonlyEvidence", "untrustedSourceHost", "estimatedPriceDetected", "mockPriceDetected", "bookingUrlDetected", "rawProviderPayloadDetected", "redacted: true"] },
-      audit:{ priceIntegrityAuditDraft:{ eventType:"PRICE_INTEGRITY_EVALUATION_DRAFT", schemaVersion:"2.1.21", gateState:"closed", withheldReason:"price_integrity_gate_closed", providerId:"none", sourceUrlHost:"none", priceObservedAt:"none", taxFeeCompleteness:"none", redacted:true } },
+      audit:{ priceIntegrityAuditDraft:{ eventType:"PRICE_INTEGRITY_EVALUATION_DRAFT", schemaVersion:"2.1.22", gateState:"closed", withheldReason:"price_integrity_gate_closed", providerId:"none", sourceUrlHost:"none", priceObservedAt:"none", taxFeeCompleteness:"none", redacted:true } },
       linkage:["provider result source label gate", "只读 provider result schema gate", "只读 provider sandbox gate", "provider endpoint allowlist gate", "密钥脱敏规则", "API 绑定准备状态"]
     };
   }
@@ -4437,7 +4464,7 @@
     const gate = task && task.bookingUrlDomainSafetyGate || null;
     if (api && typeof api.buildBookingUrlDomainSafetyGateDisplay === "function") return api.buildBookingUrlDomainSafetyGateDisplay(gate);
     return gate && typeof gate === "object" ? gate : {
-      version:"2.1.21",
+      version:"2.1.22",
       gateStatus:"closed",
       mode:"draft_only",
       display:{ title:"bookingUrl domain safety gate", establishedLine:"bookingUrl domain safety gate：gate 已建立", gateStatusLine:"status: closed", modeLine:"mode: draft only", bookingUrlDisplayLine:"bookingUrl display disabled", bookingUrlGenerationLine:"bookingUrl generation disabled", bookingUrlClickLine:"bookingUrl click disabled", redirectFollowLine:"redirect follow disabled", providerBookingLinkLine:"real provider booking link disabled", networkLine:"real network disabled", safetyLine:"no order / no payment / no checkout" },
@@ -4446,7 +4473,7 @@
       forbiddenUrlTypes:{ forbiddenUrlTypes:["bookingUrl 当前禁止展示", "checkoutUrl 始终禁止", "paymentUrl 始终禁止", "orderUrl 始终禁止", "identityUploadUrl 始终禁止", "passengerFormUrl 始终禁止", "bankCardFormUrl 始终禁止", "providerWriteActionUrl 始终禁止", "rawProviderUrlWithSecrets 始终禁止"] },
       visiblePolicy:{ policy:["当前版本不显示真实 bookingUrl", "当前版本不生成 bookingUrl", "当前版本不提供预订按钮", "当前版本不提供付款按钮", "当前版本不提供下单按钮", "当前版本只允许外部搜索入口保持人工跳转", "外部搜索入口不得自动点击", "外部搜索入口不得伪装为 provider bookingUrl"] },
       riskScan:{ bookingUrlRiskScanDraft:["nonHttpsDetected", "unknownHostDetected", "shortUrlDetected", "redirectChainDetected", "credentialParamsDetected", "piiParamsDetected", "paymentPathDetected", "checkoutPathDetected", "orderPathDetected", "identityPathDetected", "rawProviderPayloadDetected", "redacted: true"] },
-      audit:{ bookingUrlSafetyAuditDraft:{ eventType:"BOOKING_URL_DOMAIN_SAFETY_EVALUATION_DRAFT", schemaVersion:"2.1.21", gateState:"closed", blockedReason:"booking_url_domain_safety_gate_closed", bookingUrlHost:"none", sourceUrlHost:"none", linkIntent:"none", resultObservedAt:"none", redacted:true } },
+      audit:{ bookingUrlSafetyAuditDraft:{ eventType:"BOOKING_URL_DOMAIN_SAFETY_EVALUATION_DRAFT", schemaVersion:"2.1.22", gateState:"closed", blockedReason:"booking_url_domain_safety_gate_closed", bookingUrlHost:"none", sourceUrlHost:"none", linkIntent:"none", resultObservedAt:"none", redacted:true } },
       linkage:["provider result source label gate", "price integrity / taxes / fees gate", "只读 provider result schema gate", "只读 provider sandbox gate", "provider endpoint allowlist gate", "key 生命周期", "密钥脱敏规则", "本机安全存储", "API 绑定准备状态", "manual provider review workflow"]
     };
   }
@@ -4480,7 +4507,7 @@
       + '<h5>风险扫描草案</h5><p>bookingUrlRiskScanDraft</p>' + listHtml(risk.bookingUrlRiskScanDraft || [])
       + '<h5>审计事件草案</h5><p>bookingUrlSafetyAuditDraft</p>'
       + '<p>eventType：' + esc(audit.eventType || 'BOOKING_URL_DOMAIN_SAFETY_EVALUATION_DRAFT') + '</p>'
-      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.21') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.22') + '</p>'
       + '<p>gateState：' + esc(audit.gateState || 'closed') + '</p>'
       + '<p>blockedReason：' + esc(audit.blockedReason || 'booking_url_domain_safety_gate_closed') + '</p>'
       + '<p>bookingUrlHost：' + esc(audit.bookingUrlHost || 'none') + '</p>'
@@ -4498,14 +4525,14 @@
     const workflow = task && task.manualProviderReviewWorkflow || null;
     if (api && typeof api.buildManualProviderReviewWorkflowDisplay === "function") return api.buildManualProviderReviewWorkflowDisplay(workflow);
     return workflow && typeof workflow === "object" ? workflow : {
-      version:"2.1.21",
+      version:"2.1.22",
       workflowStatus:"draft_only",
       display:{ title:"manual provider review workflow", establishedLine:"manual provider review workflow：workflow 已建立", statusLine:"status: draft only", providerApprovalLine:"no provider approved", reviewPendingLine:"all provider review pending", manualApprovalLine:"manual approval disabled", providerConnectionLine:"real provider connection disabled", sandboxLine:"real provider sandbox disabled", priceLine:"real price disabled", bookingUrlLine:"bookingUrl disabled", noApprovedLine:"当前没有 provider 处于 approved_for_future_readonly", noApproveButtonLine:"UI 不提供 approve 按钮", noRejectButtonLine:"UI 不提供 reject 按钮", noSubmitReviewLine:"UI 不提供提交审查按钮", draftOnlyLine:"当前仅展示只读流程草案" },
       providerReviewObjectDraft:{ fields:["providerId", "providerName", "providerType", "providerRegion", "sourceHost", "apiDocsStatus", "termsStatus", "readonlyPermissionStatus", "pricingDataPolicyStatus", "bookingLinkPolicyStatus", "dataRetentionStatus", "privacyStatus", "piiHandlingStatus", "rateLimitStatus", "sandboxEvidenceStatus", "manualReviewState", "reviewerRole", "reviewedAt", "blockedReason", "redacted: true"] },
       reviewStateDraft:{ states:["not_started", "docs_pending", "terms_pending", "readonly_permission_pending", "privacy_review_pending", "security_review_pending", "sandbox_evidence_pending", "blocked", "rejected", "approved_for_future_readonly"] },
       checklist:{ checklist:["API 文档是否可审查", "服务条款是否允许只读查询", "是否禁止 scraping 或自动化访问", "是否允许价格数据展示", "是否允许税费展示", "是否允许 booking link 展示", "是否存在写入动作风险", "是否涉及身份资料上传", "是否涉及银行卡资料", "是否有数据保留要求", "是否有日志脱敏要求", "是否有 rate limit", "是否有 sandbox 文档", "是否有 provider 联系方式", "是否有 credential policy", "是否有 privacy policy"] },
       blockedReasons:{ blockedReasons:["缺 API 文档阻断", "缺服务条款阻断", "缺只读授权阻断", "条款禁止自动访问阻断", "条款禁止价格展示阻断", "缺税费完整性阻断", "缺 source label 阻断", "缺 endpoint allowlist 阻断", "缺 sandbox evidence 阻断", "存在写入动作阻断", "存在 payment / checkout / order 动作阻断", "存在 identity upload 动作阻断", "存在银行卡字段阻断"] },
-      audit:{ manualProviderReviewAuditDraft:{ eventType:"MANUAL_PROVIDER_REVIEW_EVALUATION_DRAFT", schemaVersion:"2.1.21", workflowState:"draft_only", providerId:"none", providerName:"none", manualReviewState:"not_started", blockedReason:"manual_provider_review_workflow_draft_only", reviewedAt:"none", reviewerRole:"none", redacted:true } },
+      audit:{ manualProviderReviewAuditDraft:{ eventType:"MANUAL_PROVIDER_REVIEW_EVALUATION_DRAFT", schemaVersion:"2.1.22", workflowState:"draft_only", providerId:"none", providerName:"none", manualReviewState:"not_started", blockedReason:"manual_provider_review_workflow_draft_only", reviewedAt:"none", reviewerRole:"none", redacted:true } },
       linkage:["bookingUrl domain safety gate", "provider result source label gate", "price integrity / taxes / fees gate", "只读 provider result schema gate", "只读 provider sandbox gate", "provider endpoint allowlist gate", "API 绑定准备状态", "密钥脱敏规则", "本机安全存储"]
     };
   }
@@ -4541,7 +4568,7 @@
       + '<h5>默认阻断原因</h5>' + listHtml(blocked.blockedReasons || [])
       + '<h5>审计事件草案</h5><p>manualProviderReviewAuditDraft</p>'
       + '<p>eventType：' + esc(audit.eventType || 'MANUAL_PROVIDER_REVIEW_EVALUATION_DRAFT') + '</p>'
-      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.21') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.22') + '</p>'
       + '<p>workflowState：' + esc(audit.workflowState || 'draft_only') + '</p>'
       + '<p>providerId：' + esc(audit.providerId || 'none') + '</p>'
       + '<p>providerName：' + esc(audit.providerName || 'none') + '</p>'
@@ -4560,7 +4587,7 @@
     const api = window.WeishanCommerceProviderActivationReadinessGate;
     const gate = task && task.providerActivationReadinessGate || null;
     if (api && typeof api.buildProviderActivationReadinessGateDisplay === "function") return api.buildProviderActivationReadinessGateDisplay(gate);
-    return gate && typeof gate === "object" ? gate : { version:"2.1.21", gateStatus:"blocked", mode:"readiness_only", activationGoNoGo:"no-go", display:{ title:"provider activation readiness gate", establishedLine:"provider activation readiness gate：gate 已建立", statusLine:"status: blocked", modeLine:"mode: readiness only", providerActivationLine:"provider activation disabled", providerConnectionLine:"real provider connection disabled", sandboxLine:"real provider sandbox disabled", priceLine:"real price disabled", bookingUrlLine:"real bookingUrl disabled", orderPaymentLine:"order / payment / checkout disabled", decisionLine:"activationGoNoGo: no-go", redactedLine:"redacted: true" }, prerequisiteGateSummary:{ prerequisiteGateSummary:["result schema gate: established / closed / draft", "provider source label gate: established / closed / draft", "price integrity / taxes / fees gate: established / closed / draft", "bookingUrl domain safety gate: established / closed / draft", "manual provider review workflow: established / draft only / no provider approved", "provider endpoint allowlist gate: established / closed", "readonly provider sandbox gate: established / closed", "API binding readiness: not ready", "secure storage design gate: closed", "local secure storage interface draft: draft only", "key redaction rules: established", "key lifecycle draft: draft only"] }, blockedReasons:{ blockedReasons:["no provider approved", "manual review pending", "readonly permission not granted", "credential consent not collected", "secure storage real implementation disabled", "real key input disabled", "endpoint connection disabled", "real sandbox disabled", "real provider result disabled", "price display disabled", "bookingUrl display disabled", "payment / checkout / order disabled", "identity / passport / bank card flow disabled"] }, activationChecklist:{ activationChecklist:["provider manual review approved", "terms allow readonly query", "privacy policy reviewed", "credential scope approved", "secure storage implementation approved", "endpoint allowlist approved", "sandbox evidence approved", "result schema validation passed", "source label validation passed", "price integrity validation passed", "bookingUrl safety validation passed", "audit logging approved", "redaction rules active", "manual rollback plan ready"] }, activationDecisionObjectDraft:{ fields:["providerId", "providerName", "providerType", "providerRegion", "activationState", "activationDecision", "blockedReason", "requiredGateList", "passedGateList", "failedGateList", "reviewedAt", "reviewerRole", "schemaVersion", "redacted: true"] }, audit:{ providerActivationReadinessAuditDraft:{ eventType:"PROVIDER_ACTIVATION_READINESS_EVALUATION_DRAFT", schemaVersion:"2.1.21", gateState:"blocked", activationDecision:"no-go", blockedReason:"provider_activation_readiness_blocked", providerId:"none", providerName:"none", reviewedAt:"none", redacted:true } }, linkage:["manual provider review workflow", "bookingUrl domain safety gate", "price integrity / taxes / fees gate", "provider result source label gate", "只读 provider result schema gate", "只读 provider sandbox gate", "provider endpoint allowlist gate", "credential consent scope gate", "read-only adapter contract gate", "API 绑定准备状态", "密钥脱敏规则", "本机安全存储"] };
+    return gate && typeof gate === "object" ? gate : { version:"2.1.22", gateStatus:"blocked", mode:"readiness_only", activationGoNoGo:"no-go", display:{ title:"provider activation readiness gate", establishedLine:"provider activation readiness gate：gate 已建立", statusLine:"status: blocked", modeLine:"mode: readiness only", providerActivationLine:"provider activation disabled", providerConnectionLine:"real provider connection disabled", sandboxLine:"real provider sandbox disabled", priceLine:"real price disabled", bookingUrlLine:"real bookingUrl disabled", orderPaymentLine:"order / payment / checkout disabled", decisionLine:"activationGoNoGo: no-go", redactedLine:"redacted: true" }, prerequisiteGateSummary:{ prerequisiteGateSummary:["result schema gate: established / closed / draft", "provider source label gate: established / closed / draft", "price integrity / taxes / fees gate: established / closed / draft", "bookingUrl domain safety gate: established / closed / draft", "manual provider review workflow: established / draft only / no provider approved", "provider endpoint allowlist gate: established / closed", "readonly provider sandbox gate: established / closed", "API binding readiness: not ready", "secure storage design gate: closed", "local secure storage interface draft: draft only", "key redaction rules: established", "key lifecycle draft: draft only"] }, blockedReasons:{ blockedReasons:["no provider approved", "manual review pending", "readonly permission not granted", "credential consent not collected", "secure storage real implementation disabled", "real key input disabled", "endpoint connection disabled", "real sandbox disabled", "real provider result disabled", "price display disabled", "bookingUrl display disabled", "payment / checkout / order disabled", "identity / passport / bank card flow disabled"] }, activationChecklist:{ activationChecklist:["provider manual review approved", "terms allow readonly query", "privacy policy reviewed", "credential scope approved", "secure storage implementation approved", "endpoint allowlist approved", "sandbox evidence approved", "result schema validation passed", "source label validation passed", "price integrity validation passed", "bookingUrl safety validation passed", "audit logging approved", "redaction rules active", "manual rollback plan ready"] }, activationDecisionObjectDraft:{ fields:["providerId", "providerName", "providerType", "providerRegion", "activationState", "activationDecision", "blockedReason", "requiredGateList", "passedGateList", "failedGateList", "reviewedAt", "reviewerRole", "schemaVersion", "redacted: true"] }, audit:{ providerActivationReadinessAuditDraft:{ eventType:"PROVIDER_ACTIVATION_READINESS_EVALUATION_DRAFT", schemaVersion:"2.1.22", gateState:"blocked", activationDecision:"no-go", blockedReason:"provider_activation_readiness_blocked", providerId:"none", providerName:"none", reviewedAt:"none", redacted:true } }, linkage:["manual provider review workflow", "bookingUrl domain safety gate", "price integrity / taxes / fees gate", "provider result source label gate", "只读 provider result schema gate", "只读 provider sandbox gate", "provider endpoint allowlist gate", "credential consent scope gate", "read-only adapter contract gate", "API 绑定准备状态", "密钥脱敏规则", "本机安全存储"] };
   }
 
   function commerceProviderActivationReadinessGateDisclosure(task){
@@ -4587,7 +4614,7 @@
       + '<h5>activation decision object 草案</h5>' + listHtml((gate.activationDecisionObjectDraft || {}).fields || [])
       + '<h5>审计事件草案</h5><p>providerActivationReadinessAuditDraft</p>'
       + '<p>eventType：' + esc(audit.eventType || 'PROVIDER_ACTIVATION_READINESS_EVALUATION_DRAFT') + '</p>'
-      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.21') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.22') + '</p>'
       + '<p>gateState：' + esc(audit.gateState || 'blocked') + '</p>'
       + '<p>activationDecision：' + esc(audit.activationDecision || 'no-go') + '</p>'
       + '<p>blockedReason：' + esc(audit.blockedReason || 'provider_activation_readiness_blocked') + '</p>'
@@ -4604,7 +4631,7 @@
     const api = window.WeishanCommerceCredentialConsentScopeGate;
     const gate = task && task.credentialConsentScopeGate || null;
     if (api && typeof api.buildCredentialConsentScopeGateDisplay === "function") return api.buildCredentialConsentScopeGateDisplay(gate);
-    return gate && typeof gate === "object" ? gate : { version:"2.1.21", gateStatus:"closed", mode:"draft_only", display:{ title:"credential consent scope gate", establishedLine:"credential consent scope gate：gate 已建立", statusLine:"status: closed", modeLine:"mode: draft only", inputLine:"real credential input disabled", saveLine:"real credential save disabled", readLine:"real credential read disabled", lifecycleLine:"credential deletion / rotation / expiry real operations disabled", keychainLine:"Keychain disabled", safeStorageLine:"safeStorage disabled", encryptedStoreLine:"encrypted local store disabled", envLine:".env disabled", browserStorageLine:"localStorage / sessionStorage disabled", noApprovedLine:"当前没有 consent 处于 approved_for_future_readonly", noInputLine:"UI 不提供输入 key", noSaveLine:"UI 不提供保存 key", noReadLine:"UI 不提供读取 key", noTestLine:"UI 不提供测试连接", noLifecycleLine:"UI 不提供删除 / 轮换 / 过期真实操作", draftOnlyLine:"当前仅展示只读 consent 草案", redactedLine:"redacted: true" }, consentObjectDraft:{ fields:["consentId", "providerId", "providerName", "credentialAlias", "credentialScope", "readonlyOnly", "allowedActionList", "blockedActionList", "consentState", "consentCollectedAt", "consentExpiresAt", "revocationState", "storageBackend", "secretRef", "redacted: true"] }, credentialScopeDraft:{ credentialScopes:["readonly_search", "readonly_price_query", "readonly_availability_query", "readonly_provider_notice", "no_booking", "no_payment", "no_order", "no_profile_write", "no_identity_upload", "no_bank_card_submit"] }, consentStateDraft:{ states:["not_started", "draft_only", "pending_user_review", "pending_security_review", "blocked", "revoked", "expired", "approved_for_future_readonly"] }, permissionBoundaries:{ boundaries:["允许未来只读搜索", "允许未来只读价格查询", "允许未来只读来源标签读取", "禁止 booking", "禁止 checkout", "禁止 payment", "禁止 order", "禁止写入用户资料", "禁止上传身份证", "禁止上传护照", "禁止提交银行卡", "禁止 provider write action", "禁止 raw token 展示", "禁止 rawApiKey 展示"] }, blockingRules:{ blockingRules:["缺用户同意阻断", "缺 providerId 阻断", "缺 credential scope 阻断", "非 readonly scope 阻断", "包含 booking scope 阻断", "包含 payment scope 阻断", "包含 order scope 阻断", "包含 profile write scope 阻断", "包含 identity upload scope 阻断", "缺 secure storage approval 阻断", "缺 redaction rules 阻断", "缺 key lifecycle policy 阻断"] }, audit:{ credentialConsentScopeAuditDraft:{ eventType:"CREDENTIAL_CONSENT_SCOPE_EVALUATION_DRAFT", schemaVersion:"2.1.21", gateState:"closed", consentState:"draft_only", providerId:"none", credentialAlias:"none", blockedReason:"credential_consent_scope_gate_closed", consentCollectedAt:"none", redacted:true } } };
+    return gate && typeof gate === "object" ? gate : { version:"2.1.22", gateStatus:"closed", mode:"draft_only", display:{ title:"credential consent scope gate", establishedLine:"credential consent scope gate：gate 已建立", statusLine:"status: closed", modeLine:"mode: draft only", inputLine:"real credential input disabled", saveLine:"real credential save disabled", readLine:"real credential read disabled", lifecycleLine:"credential deletion / rotation / expiry real operations disabled", keychainLine:"Keychain disabled", safeStorageLine:"safeStorage disabled", encryptedStoreLine:"encrypted local store disabled", envLine:".env disabled", browserStorageLine:"localStorage / sessionStorage disabled", noApprovedLine:"当前没有 consent 处于 approved_for_future_readonly", noInputLine:"UI 不提供输入 key", noSaveLine:"UI 不提供保存 key", noReadLine:"UI 不提供读取 key", noTestLine:"UI 不提供测试连接", noLifecycleLine:"UI 不提供删除 / 轮换 / 过期真实操作", draftOnlyLine:"当前仅展示只读 consent 草案", redactedLine:"redacted: true" }, consentObjectDraft:{ fields:["consentId", "providerId", "providerName", "credentialAlias", "credentialScope", "readonlyOnly", "allowedActionList", "blockedActionList", "consentState", "consentCollectedAt", "consentExpiresAt", "revocationState", "storageBackend", "secretRef", "redacted: true"] }, credentialScopeDraft:{ credentialScopes:["readonly_search", "readonly_price_query", "readonly_availability_query", "readonly_provider_notice", "no_booking", "no_payment", "no_order", "no_profile_write", "no_identity_upload", "no_bank_card_submit"] }, consentStateDraft:{ states:["not_started", "draft_only", "pending_user_review", "pending_security_review", "blocked", "revoked", "expired", "approved_for_future_readonly"] }, permissionBoundaries:{ boundaries:["允许未来只读搜索", "允许未来只读价格查询", "允许未来只读来源标签读取", "禁止 booking", "禁止 checkout", "禁止 payment", "禁止 order", "禁止写入用户资料", "禁止上传身份证", "禁止上传护照", "禁止提交银行卡", "禁止 provider write action", "禁止 raw token 展示", "禁止 rawApiKey 展示"] }, blockingRules:{ blockingRules:["缺用户同意阻断", "缺 providerId 阻断", "缺 credential scope 阻断", "非 readonly scope 阻断", "包含 booking scope 阻断", "包含 payment scope 阻断", "包含 order scope 阻断", "包含 profile write scope 阻断", "包含 identity upload scope 阻断", "缺 secure storage approval 阻断", "缺 redaction rules 阻断", "缺 key lifecycle policy 阻断"] }, audit:{ credentialConsentScopeAuditDraft:{ eventType:"CREDENTIAL_CONSENT_SCOPE_EVALUATION_DRAFT", schemaVersion:"2.1.22", gateState:"closed", consentState:"draft_only", providerId:"none", credentialAlias:"none", blockedReason:"credential_consent_scope_gate_closed", consentCollectedAt:"none", redacted:true } } };
   }
 
   function commerceCredentialConsentScopeGateDisclosure(task){
@@ -4640,7 +4667,7 @@
       + '<h5>阻断规则</h5>' + listHtml((gate.blockingRules || {}).blockingRules || [])
       + '<h5>审计事件草案</h5><p>credentialConsentScopeAuditDraft</p>'
       + '<p>eventType：' + esc(audit.eventType || 'CREDENTIAL_CONSENT_SCOPE_EVALUATION_DRAFT') + '</p>'
-      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.21') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.22') + '</p>'
       + '<p>gateState：' + esc(audit.gateState || 'closed') + '</p>'
       + '<p>consentState：' + esc(audit.consentState || 'draft_only') + '</p>'
       + '<p>providerId：' + esc(audit.providerId || 'none') + '</p>'
@@ -4656,7 +4683,7 @@
     const api = window.WeishanCommerceReadonlyAdapterContractGate;
     const gate = task && task.readonlyAdapterContractGate || null;
     if (api && typeof api.buildReadonlyAdapterContractGateDisplay === "function") return api.buildReadonlyAdapterContractGateDisplay(gate);
-    return gate && typeof gate === "object" ? gate : { version:"2.1.21", gateStatus:"closed", mode:"contract_draft_only", display:{ title:"read-only adapter contract gate", establishedLine:"read-only adapter contract gate：gate 已建立", statusLine:"status: closed", modeLine:"mode: contract draft only", adapterExecutionLine:"adapter execution disabled", networkLine:"real network disabled", endpointLine:"real endpoint disabled", sandboxLine:"real provider sandbox disabled", providerResultLine:"real provider result disabled", rawPayloadLine:"raw payload display disabled", writeActionLine:"write action disabled", dryRunLine:"executeReadonlyDryRun 当前 disabled", noNetworkLine:"不执行真实 network", noEndpointLine:"不调用真实 provider endpoint", noResultLine:"不读取真实 provider result", withheldLine:"当前 price 仍 withheld；当前 availability 仍 withheld；当前 bookingUrl 仍 forbidden；rawProviderPayload forbidden", redactedLine:"redacted: true" }, adapterInterfaceDraft:{ fields:["adapterId", "providerId", "providerName", "adapterVersion", "supportedIntentList", "readonlyMethodList", "blockedMethodList", "requestSchemaVersion", "responseSchemaVersion", "timeoutPolicy", "retryPolicy", "rateLimitPolicy", "redactionPolicy", "auditPolicy", "redacted: true"] }, readonlyMethodDraft:{ readonlyMethods:["planReadonlySearch", "buildReadonlyRequest", "validateReadonlyRequest", "executeReadonlyDryRun", "normalizeReadonlyResult", "validateResultSchema", "validateSourceLabel", "validatePriceIntegrity", "validateBookingUrlSafety", "emitReadonlyAuditEvent"] }, forbiddenMethodDraft:{ forbiddenMethods:["createBooking", "submitOrder", "checkout", "pay", "cancelPaidOrder", "modifyPassenger", "uploadIdentityDocument", "uploadPassport", "submitBankCard", "writeProviderProfile", "sendRawToken", "sendRawApiKey"] }, requestContractDraft:{ fields:["intentType", "origin", "destination", "date", "sortPreference", "providerId", "sourceType", "credentialAlias", "readonlyOnly", "noBooking", "noPayment", "noOrder", "schemaVersion", "redacted: true"] }, responseContractDraft:{ fields:["resultType", "providerId", "providerName", "sourceUrlHost", "title", "currency", "price", "updatedAt", "readonlyEvidence", "withheldReason", "blockedReason", "schemaVersion", "redacted: true"] }, errorStateDraft:{ errorStates:["ADAPTER_DISABLED", "NETWORK_DISABLED", "ENDPOINT_NOT_ALLOWED", "CREDENTIAL_NOT_AVAILABLE", "CONSENT_NOT_APPROVED", "PROVIDER_NOT_APPROVED", "SANDBOX_DISABLED", "SCHEMA_INVALID", "SOURCE_LABEL_INVALID", "PRICE_WITHHELD", "BOOKING_URL_FORBIDDEN", "RAW_PAYLOAD_FORBIDDEN", "WRITE_ACTION_FORBIDDEN"] }, audit:{ readonlyAdapterContractAuditDraft:{ eventType:"READONLY_ADAPTER_CONTRACT_EVALUATION_DRAFT", schemaVersion:"2.1.21", adapterId:"none", providerId:"none", methodName:"none", gateState:"closed", blockedReason:"readonly_adapter_contract_gate_closed", readonlyOnly:true, redacted:true } } };
+    return gate && typeof gate === "object" ? gate : { version:"2.1.22", gateStatus:"closed", mode:"contract_draft_only", display:{ title:"read-only adapter contract gate", establishedLine:"read-only adapter contract gate：gate 已建立", statusLine:"status: closed", modeLine:"mode: contract draft only", adapterExecutionLine:"adapter execution disabled", networkLine:"real network disabled", endpointLine:"real endpoint disabled", sandboxLine:"real provider sandbox disabled", providerResultLine:"real provider result disabled", rawPayloadLine:"raw payload display disabled", writeActionLine:"write action disabled", dryRunLine:"executeReadonlyDryRun 当前 disabled", noNetworkLine:"不执行真实 network", noEndpointLine:"不调用真实 provider endpoint", noResultLine:"不读取真实 provider result", withheldLine:"当前 price 仍 withheld；当前 availability 仍 withheld；当前 bookingUrl 仍 forbidden；rawProviderPayload forbidden", redactedLine:"redacted: true" }, adapterInterfaceDraft:{ fields:["adapterId", "providerId", "providerName", "adapterVersion", "supportedIntentList", "readonlyMethodList", "blockedMethodList", "requestSchemaVersion", "responseSchemaVersion", "timeoutPolicy", "retryPolicy", "rateLimitPolicy", "redactionPolicy", "auditPolicy", "redacted: true"] }, readonlyMethodDraft:{ readonlyMethods:["planReadonlySearch", "buildReadonlyRequest", "validateReadonlyRequest", "executeReadonlyDryRun", "normalizeReadonlyResult", "validateResultSchema", "validateSourceLabel", "validatePriceIntegrity", "validateBookingUrlSafety", "emitReadonlyAuditEvent"] }, forbiddenMethodDraft:{ forbiddenMethods:["createBooking", "submitOrder", "checkout", "pay", "cancelPaidOrder", "modifyPassenger", "uploadIdentityDocument", "uploadPassport", "submitBankCard", "writeProviderProfile", "sendRawToken", "sendRawApiKey"] }, requestContractDraft:{ fields:["intentType", "origin", "destination", "date", "sortPreference", "providerId", "sourceType", "credentialAlias", "readonlyOnly", "noBooking", "noPayment", "noOrder", "schemaVersion", "redacted: true"] }, responseContractDraft:{ fields:["resultType", "providerId", "providerName", "sourceUrlHost", "title", "currency", "price", "updatedAt", "readonlyEvidence", "withheldReason", "blockedReason", "schemaVersion", "redacted: true"] }, errorStateDraft:{ errorStates:["ADAPTER_DISABLED", "NETWORK_DISABLED", "ENDPOINT_NOT_ALLOWED", "CREDENTIAL_NOT_AVAILABLE", "CONSENT_NOT_APPROVED", "PROVIDER_NOT_APPROVED", "SANDBOX_DISABLED", "SCHEMA_INVALID", "SOURCE_LABEL_INVALID", "PRICE_WITHHELD", "BOOKING_URL_FORBIDDEN", "RAW_PAYLOAD_FORBIDDEN", "WRITE_ACTION_FORBIDDEN"] }, audit:{ readonlyAdapterContractAuditDraft:{ eventType:"READONLY_ADAPTER_CONTRACT_EVALUATION_DRAFT", schemaVersion:"2.1.22", adapterId:"none", providerId:"none", methodName:"none", gateState:"closed", blockedReason:"readonly_adapter_contract_gate_closed", readonlyOnly:true, redacted:true } } };
   }
 
   function commerceReadonlyAdapterContractGateDisclosure(task){
@@ -4686,7 +4713,7 @@
       + '<h5>错误状态草案</h5>' + listHtml((gate.errorStateDraft || {}).errorStates || [])
       + '<h5>审计事件草案</h5><p>readonlyAdapterContractAuditDraft</p>'
       + '<p>eventType：' + esc(audit.eventType || 'READONLY_ADAPTER_CONTRACT_EVALUATION_DRAFT') + '</p>'
-      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.21') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.22') + '</p>'
       + '<p>adapterId：' + esc(audit.adapterId || 'none') + '</p>'
       + '<p>providerId：' + esc(audit.providerId || 'none') + '</p>'
       + '<p>methodName：' + esc(audit.methodName || 'none') + '</p>'
@@ -4703,7 +4730,7 @@
     const api = window.WeishanCommerceProviderGateMatrixDashboard;
     const gate = task && task.providerGateMatrixDashboard || null;
     if (api && typeof api.buildProviderGateMatrixDashboardDisplay === "function") return api.buildProviderGateMatrixDashboardDisplay(gate);
-    return gate && typeof gate === "object" ? gate : { version:"2.1.21", dashboardStatus:"blocked", mode:"matrix_only", providerActivationState:"no-go", display:{ title:"provider gate matrix dashboard", establishedLine:"provider gate matrix dashboard：dashboard 已建立", statusLine:"status: blocked", modeLine:"mode: matrix only", activationLine:"providerActivationState: no-go", providerConnectionLine:"real provider connection disabled", sandboxLine:"real provider sandbox disabled", networkLine:"real network disabled", priceLine:"real price disabled", bookingUrlLine:"real bookingUrl disabled", orderPaymentLine:"order / payment / checkout disabled", redactedLine:"redacted: true" }, gateMatrix:{ gateMatrixRows:[] }, noGoReasons:{ noGoReasons:[] }, dependencyGraph:{ dependencyGraph:[] }, readinessScore:{ readinessScore:0, readinessMax:100, scoreReason:"real provider activation disabled", scorePolicy:"blocked until all required gates pass", minimumRequiredBeforeActivation:[] }, audit:{ providerGateMatrixAuditDraft:{ eventType:"PROVIDER_GATE_MATRIX_EVALUATION_DRAFT", schemaVersion:"2.1.21", matrixState:"blocked", providerActivationState:"no-go", blockedReason:"provider_gate_matrix_no_go", requiredGateCount:0, passedGateCount:0, failedGateCount:0, reviewedAt:"none", redacted:true } } };
+    return gate && typeof gate === "object" ? gate : { version:"2.1.22", dashboardStatus:"blocked", mode:"matrix_only", providerActivationState:"no-go", display:{ title:"provider gate matrix dashboard", establishedLine:"provider gate matrix dashboard：dashboard 已建立", statusLine:"status: blocked", modeLine:"mode: matrix only", activationLine:"providerActivationState: no-go", providerConnectionLine:"real provider connection disabled", sandboxLine:"real provider sandbox disabled", networkLine:"real network disabled", priceLine:"real price disabled", bookingUrlLine:"real bookingUrl disabled", orderPaymentLine:"order / payment / checkout disabled", redactedLine:"redacted: true" }, gateMatrix:{ gateMatrixRows:[] }, noGoReasons:{ noGoReasons:[] }, dependencyGraph:{ dependencyGraph:[] }, readinessScore:{ readinessScore:0, readinessMax:100, scoreReason:"real provider activation disabled", scorePolicy:"blocked until all required gates pass", minimumRequiredBeforeActivation:[] }, audit:{ providerGateMatrixAuditDraft:{ eventType:"PROVIDER_GATE_MATRIX_EVALUATION_DRAFT", schemaVersion:"2.1.22", matrixState:"blocked", providerActivationState:"no-go", blockedReason:"provider_gate_matrix_no_go", requiredGateCount:0, passedGateCount:0, failedGateCount:0, reviewedAt:"none", redacted:true } } };
   }
 
   function commerceProviderGateMatrixDashboardDisclosure(task){
@@ -4737,7 +4764,7 @@
       + '<p>redacted: true</p>'
       + '<h5>审计事件草案</h5><p>providerGateMatrixAuditDraft</p>'
       + '<p>eventType：' + esc(audit.eventType || 'PROVIDER_GATE_MATRIX_EVALUATION_DRAFT') + '</p>'
-      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.21') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.22') + '</p>'
       + '<p>matrixState：' + esc(audit.matrixState || 'blocked') + '</p>'
       + '<p>providerActivationState：' + esc(audit.providerActivationState || 'no-go') + '</p>'
       + '<p>blockedReason：' + esc(audit.blockedReason || 'provider_gate_matrix_no_go') + '</p>'
@@ -4754,7 +4781,7 @@
     const api = window.WeishanCommerceProviderNoNetworkRuntimeGuard;
     const gate = task && task.providerNoNetworkRuntimeGuard || null;
     if (api && typeof api.buildProviderNoNetworkRuntimeGuardDisplay === "function") return api.buildProviderNoNetworkRuntimeGuardDisplay(gate);
-    return gate && typeof gate === "object" ? gate : { version:"2.1.21", guardStatus:"blocked", mode:"no_network_enforcement_draft", display:{ title:"provider no-network runtime guard", establishedLine:"provider no-network runtime guard：guard 已建立", statusLine:"status: blocked", modeLine:"mode: no-network enforcement draft", providerNetworkLine:"provider network disabled", fetchLine:"fetch disabled for provider", xhrLine:"XMLHttpRequest disabled for provider", websocketLine:"WebSocket disabled for provider", eventSourceLine:"EventSource disabled for provider", sendBeaconLine:"navigator.sendBeacon disabled for provider", electronNetLine:"Electron net disabled for provider", nodeHttpLine:"Node http/https disabled for provider", dnsLine:"DNS lookup disabled for provider", redirectLine:"redirect follow disabled", adapterLine:"adapter execution disabled", redactedLine:"redacted: true" }, decisionObjectDraft:{ fields:[] }, blockedNetworkPrimitives:[], blockedErrorStates:[], currentPolicy:[], audit:{ providerNoNetworkRuntimeGuardAuditDraft:{ eventType:"PROVIDER_NO_NETWORK_RUNTIME_GUARD_DECISION_DRAFT", schemaVersion:"2.1.21", guardState:"blocked", decision:"blocked", blockedReason:"NETWORK_DISABLED", networkPrimitive:"none", targetUrlHost:"none", providerId:"none", methodName:"none", observedAt:"none", redacted:true } }, linkage:[] };
+    return gate && typeof gate === "object" ? gate : { version:"2.1.22", guardStatus:"blocked", mode:"no_network_enforcement_draft", display:{ title:"provider no-network runtime guard", establishedLine:"provider no-network runtime guard：guard 已建立", statusLine:"status: blocked", modeLine:"mode: no-network enforcement draft", providerNetworkLine:"provider network disabled", fetchLine:"fetch disabled for provider", xhrLine:"XMLHttpRequest disabled for provider", websocketLine:"WebSocket disabled for provider", eventSourceLine:"EventSource disabled for provider", sendBeaconLine:"navigator.sendBeacon disabled for provider", electronNetLine:"Electron net disabled for provider", nodeHttpLine:"Node http/https disabled for provider", dnsLine:"DNS lookup disabled for provider", redirectLine:"redirect follow disabled", adapterLine:"adapter execution disabled", redactedLine:"redacted: true" }, decisionObjectDraft:{ fields:[] }, blockedNetworkPrimitives:[], blockedErrorStates:[], currentPolicy:[], audit:{ providerNoNetworkRuntimeGuardAuditDraft:{ eventType:"PROVIDER_NO_NETWORK_RUNTIME_GUARD_DECISION_DRAFT", schemaVersion:"2.1.22", guardState:"blocked", decision:"blocked", blockedReason:"NETWORK_DISABLED", networkPrimitive:"none", targetUrlHost:"none", providerId:"none", methodName:"none", observedAt:"none", redacted:true } }, linkage:[] };
   }
 
   function commerceProviderNoNetworkRuntimeGuardDisclosure(task){
@@ -4786,7 +4813,7 @@
       + '<h5>当前策略</h5>' + listHtml(gate.currentPolicy || [])
       + '<h5>审计事件草案</h5><p>providerNoNetworkRuntimeGuardAuditDraft</p>'
       + '<p>eventType：' + esc(audit.eventType || 'PROVIDER_NO_NETWORK_RUNTIME_GUARD_DECISION_DRAFT') + '</p>'
-      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.21') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.22') + '</p>'
       + '<p>guardState：' + esc(audit.guardState || 'blocked') + '</p>'
       + '<p>decision：' + esc(audit.decision || 'blocked') + '</p>'
       + '<p>blockedReason：' + esc(audit.blockedReason || 'NETWORK_DISABLED') + '</p>'
@@ -4805,7 +4832,7 @@
     const api = window.WeishanCommerceOfflineProviderFixtureValidationHarness;
     const gate = task && task.offlineProviderFixtureValidationHarness || null;
     if (api && typeof api.buildOfflineProviderFixtureValidationHarnessDisplay === "function") return api.buildOfflineProviderFixtureValidationHarnessDisplay(gate);
-    return gate && typeof gate === "object" ? gate : { version:"2.1.21", harnessStatus:"offline_only", mode:"fixture_validation_draft", display:{ title:"offline provider fixture validation harness", establishedLine:"offline provider fixture validation harness：harness 已建立", statusLine:"status: offline only", modeLine:"mode: fixture validation draft", realFixtureLine:"real provider fixture disabled", realResultLine:"real provider result disabled", networkLine:"real network disabled", fakePriceLine:"fake/mock/demo/AI price display disabled", bookingUrlLine:"bookingUrl display disabled", rawPayloadLine:"raw provider payload display disabled", unsafeLine:"all unsafe fixtures blocked", redactedLine:"redacted: true" }, fixtureCaseDraft:{ fixtureCases:[] }, validationPipeline:{ validationPipeline:[] }, fixtureOutcomeDraft:{ fields:[], defaultOutcomes:[] }, priceDisplayBoundary:[], audit:{ offlineFixtureValidationAuditDraft:{ eventType:"OFFLINE_PROVIDER_FIXTURE_VALIDATION_DRAFT", schemaVersion:"2.1.21", fixtureId:"none", fixtureType:"offline_descriptor_only", gateName:"offline_provider_fixture_validation_harness", expectedDecision:"blocked", actualDecision:"blocked", blockedReason:"offline_fixture_validation_blocked", withheldReason:"price_withheld_until_real_provider_allowed", redacted:true } }, linkage:[] };
+    return gate && typeof gate === "object" ? gate : { version:"2.1.22", harnessStatus:"offline_only", mode:"fixture_validation_draft", display:{ title:"offline provider fixture validation harness", establishedLine:"offline provider fixture validation harness：harness 已建立", statusLine:"status: offline only", modeLine:"mode: fixture validation draft", realFixtureLine:"real provider fixture disabled", realResultLine:"real provider result disabled", networkLine:"real network disabled", fakePriceLine:"fake/mock/demo/AI price display disabled", bookingUrlLine:"bookingUrl display disabled", rawPayloadLine:"raw provider payload display disabled", unsafeLine:"all unsafe fixtures blocked", redactedLine:"redacted: true" }, fixtureCaseDraft:{ fixtureCases:[] }, validationPipeline:{ validationPipeline:[] }, fixtureOutcomeDraft:{ fields:[], defaultOutcomes:[] }, priceDisplayBoundary:[], audit:{ offlineFixtureValidationAuditDraft:{ eventType:"OFFLINE_PROVIDER_FIXTURE_VALIDATION_DRAFT", schemaVersion:"2.1.22", fixtureId:"none", fixtureType:"offline_descriptor_only", gateName:"offline_provider_fixture_validation_harness", expectedDecision:"blocked", actualDecision:"blocked", blockedReason:"offline_fixture_validation_blocked", withheldReason:"price_withheld_until_real_provider_allowed", redacted:true } }, linkage:[] };
   }
 
   function commerceOfflineProviderFixtureValidationHarnessDisclosure(task){
@@ -4832,7 +4859,7 @@
       + '<h5>价格展示边界</h5>' + listHtml(gate.priceDisplayBoundary || [])
       + '<h5>审计事件草案</h5><p>offlineFixtureValidationAuditDraft</p>'
       + '<p>eventType：' + esc(audit.eventType || 'OFFLINE_PROVIDER_FIXTURE_VALIDATION_DRAFT') + '</p>'
-      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.21') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.22') + '</p>'
       + '<p>fixtureId：' + esc(audit.fixtureId || 'none') + '</p>'
       + '<p>fixtureType：' + esc(audit.fixtureType || 'offline_descriptor_only') + '</p>'
       + '<p>gateName：' + esc(audit.gateName || 'offline_provider_fixture_validation_harness') + '</p>'
@@ -4850,7 +4877,7 @@
     const api = window.WeishanCommerceProviderComplianceDecisionEngine;
     const gate = task && task.providerComplianceDecisionEngine || null;
     if (api && typeof api.buildProviderComplianceDecisionReport === "function") return api.buildProviderComplianceDecisionReport(gate);
-    return gate && typeof gate === "object" ? gate : { version:"2.1.21", contract:{ display:{ title:"provider compliance decision engine", establishedLine:"provider compliance decision engine：engine 已建立", statusLine:"status: blocked", modeLine:"mode: offline decision only", sideEffectsLine:"sideEffects: none", providerConnectionLine:"real provider connection disabled", networkLine:"real network disabled", credentialLine:"real credential read disabled", priceLine:"real price display disabled", bookingUrlLine:"real bookingUrl disabled", activationLine:"providerActivationDecision: no-go", redactedLine:"redacted: true" } }, decisionInputDraft:{ fields:[] }, decisionOutputDraft:{ providerActivationDecision:"no-go", priceDisplayDecision:"withheld", bookingUrlDecision:"forbidden", networkDecision:"blocked", credentialDecision:"blocked", adapterExecutionDecision:"disabled" }, defaultDecision:{}, blockedReasonList:[], withheldReasonList:[], decisionErrorCodes:[], audit:{ providerComplianceDecisionAuditDraft:{ redacted:true } } };
+    return gate && typeof gate === "object" ? gate : { version:"2.1.22", contract:{ display:{ title:"provider compliance decision engine", establishedLine:"provider compliance decision engine：engine 已建立", statusLine:"status: blocked", modeLine:"mode: offline decision only", sideEffectsLine:"sideEffects: none", providerConnectionLine:"real provider connection disabled", networkLine:"real network disabled", credentialLine:"real credential read disabled", priceLine:"real price display disabled", bookingUrlLine:"real bookingUrl disabled", activationLine:"providerActivationDecision: no-go", redactedLine:"redacted: true" } }, decisionInputDraft:{ fields:[] }, decisionOutputDraft:{ providerActivationDecision:"no-go", priceDisplayDecision:"withheld", bookingUrlDecision:"forbidden", networkDecision:"blocked", credentialDecision:"blocked", adapterExecutionDecision:"disabled" }, defaultDecision:{}, blockedReasonList:[], withheldReasonList:[], decisionErrorCodes:[], audit:{ providerComplianceDecisionAuditDraft:{ redacted:true } } };
   }
 
   function commerceProviderComplianceDecisionEngineDisclosure(task){
@@ -4887,7 +4914,7 @@
     const api = window.WeishanCommerceOfflineProviderFixtureRunner;
     const gate = task && task.offlineProviderFixtureRunner || null;
     if (api && typeof api.buildOfflineProviderFixtureRunnerDisplay === "function") return api.buildOfflineProviderFixtureRunnerDisplay(gate);
-    return gate && typeof gate === "object" ? gate : { version:"2.1.21", contract:{ display:{ title:"offline provider fixture runner", establishedLine:"offline provider fixture runner：runner 已建立", statusLine:"status: offline only", modeLine:"mode: deterministic fixture runner", realFixtureLine:"real provider fixture disabled", realResultLine:"real provider result disabled", networkLine:"real network disabled", priceLine:"real price disabled", fakePriceLine:"fake/mock/demo/AI price display disabled", bookingUrlLine:"bookingUrl display disabled", rawPayloadLine:"raw provider payload display disabled", redactionLine:"all fixture outputs redacted", redactedLine:"redacted: true" } }, pipeline:[], fixtureCategories:[], expectedOutcomes:[], runnerSummary:{ status:"PASS", fixtureCount:0, passedFixtureCount:0, failedFixtureCount:0, networkAttemptCount:0, realProviderCallCount:0, realPriceDisplayedCount:0, bookingUrlDisplayedCount:0 }, audit:{ offlineProviderFixtureRunnerAuditDraft:{ redacted:true } } };
+    return gate && typeof gate === "object" ? gate : { version:"2.1.22", contract:{ display:{ title:"offline provider fixture runner", establishedLine:"offline provider fixture runner：runner 已建立", statusLine:"status: offline only", modeLine:"mode: deterministic fixture runner", realFixtureLine:"real provider fixture disabled", realResultLine:"real provider result disabled", networkLine:"real network disabled", priceLine:"real price disabled", fakePriceLine:"fake/mock/demo/AI price display disabled", bookingUrlLine:"bookingUrl display disabled", rawPayloadLine:"raw provider payload display disabled", redactionLine:"all fixture outputs redacted", redactedLine:"redacted: true" } }, pipeline:[], fixtureCategories:[], expectedOutcomes:[], runnerSummary:{ status:"PASS", fixtureCount:0, passedFixtureCount:0, failedFixtureCount:0, networkAttemptCount:0, realProviderCallCount:0, realPriceDisplayedCount:0, bookingUrlDisplayedCount:0 }, audit:{ offlineProviderFixtureRunnerAuditDraft:{ redacted:true } } };
   }
 
   function commerceOfflineProviderFixtureRunnerDisclosure(task){
@@ -4923,7 +4950,7 @@
     const api = window.WeishanCommerceNoNetworkSentinelAudit;
     const gate = task && task.noNetworkSentinelAudit || null;
     if (api && typeof api.buildNoNetworkSentinelAuditDisplay === "function") return api.buildNoNetworkSentinelAuditDisplay(gate);
-    return gate && typeof gate === "object" ? gate : { version:"2.1.21", contract:{ display:{ title:"no-network sentinel audit", establishedLine:"no-network sentinel audit：sentinel 已建立", statusLine:"status: blocked", modeLine:"mode: static no-network audit", monkeyPatchLine:"no global monkey patch", networkCallLine:"no provider network call", fetchLine:"fetch attempt blocked", xhrLine:"XMLHttpRequest attempt blocked", websocketLine:"WebSocket attempt blocked", eventSourceLine:"EventSource attempt blocked", sendBeaconLine:"sendBeacon attempt blocked", electronNetLine:"Electron net attempt blocked", nodeHttpLine:"Node http/https attempt blocked", dnsLine:"DNS lookup attempt blocked", redirectLine:"redirect follow blocked", redactedLine:"redacted: true" } }, sentinelScope:[], blockedPrimitives:[], defaultPrimitiveDecisions:[], sentinelDecisionObjectDraft:{ decision:"blocked", blockedReason:"NETWORK_DISABLED", redacted:true }, audit:{ noNetworkSentinelAuditDraft:{ redacted:true } } };
+    return gate && typeof gate === "object" ? gate : { version:"2.1.22", contract:{ display:{ title:"no-network sentinel audit", establishedLine:"no-network sentinel audit：sentinel 已建立", statusLine:"status: blocked", modeLine:"mode: static no-network audit", monkeyPatchLine:"no global monkey patch", networkCallLine:"no provider network call", fetchLine:"fetch attempt blocked", xhrLine:"XMLHttpRequest attempt blocked", websocketLine:"WebSocket attempt blocked", eventSourceLine:"EventSource attempt blocked", sendBeaconLine:"sendBeacon attempt blocked", electronNetLine:"Electron net attempt blocked", nodeHttpLine:"Node http/https attempt blocked", dnsLine:"DNS lookup attempt blocked", redirectLine:"redirect follow blocked", redactedLine:"redacted: true" } }, sentinelScope:[], blockedPrimitives:[], defaultPrimitiveDecisions:[], sentinelDecisionObjectDraft:{ decision:"blocked", blockedReason:"NETWORK_DISABLED", redacted:true }, audit:{ noNetworkSentinelAuditDraft:{ redacted:true } } };
   }
 
   function commerceNoNetworkSentinelAuditDisclosure(task){
@@ -4962,7 +4989,7 @@
     const api = window.WeishanCommerceProviderComplianceEvidenceReport;
     const gate = task && task.providerComplianceEvidenceReport || null;
     if (api && typeof api.buildProviderComplianceEvidenceReport === "function") return api.buildProviderComplianceEvidenceReport(gate);
-    return gate && typeof gate === "object" ? gate : { version:"2.1.21", contract:{ display:{ title:"provider compliance evidence report", establishedLine:"provider compliance evidence report：report 已建立", statusLine:"status: blocked", modeLine:"mode: offline evidence only", activationLine:"providerActivationState: no-go", providerApprovalLine:"no real provider approved", credentialLine:"no credential consent approved", secureStorageLine:"no real secure storage", endpointLine:"no real endpoint connection", sandboxLine:"no real sandbox", resultLine:"no real provider result", priceLine:"no real price", bookingUrlLine:"no real bookingUrl", redactedLine:"redacted: true" } }, evidenceSections:[], evidenceSummary:{ providerActivationState:"no-go" }, overallEvidenceConclusions:[], userVisibleNotes:[], audit:{ providerComplianceEvidenceReportAuditDraft:{ redacted:true } } };
+    return gate && typeof gate === "object" ? gate : { version:"2.1.22", contract:{ display:{ title:"provider compliance evidence report", establishedLine:"provider compliance evidence report：report 已建立", statusLine:"status: blocked", modeLine:"mode: offline evidence only", activationLine:"providerActivationState: no-go", providerApprovalLine:"no real provider approved", credentialLine:"no credential consent approved", secureStorageLine:"no real secure storage", endpointLine:"no real endpoint connection", sandboxLine:"no real sandbox", resultLine:"no real provider result", priceLine:"no real price", bookingUrlLine:"no real bookingUrl", redactedLine:"redacted: true" } }, evidenceSections:[], evidenceSummary:{ providerActivationState:"no-go" }, overallEvidenceConclusions:[], userVisibleNotes:[], audit:{ providerComplianceEvidenceReportAuditDraft:{ redacted:true } } };
   }
 
   function commerceProviderComplianceEvidenceReportDisclosure(task){
@@ -5005,7 +5032,7 @@
     const api = window.WeishanCommerceLocalSafetyEvidenceConsole;
     const state = task && task.localSafetyEvidenceConsole || null;
     if (api && typeof api.buildLocalSafetyEvidenceConsole === "function") return api.buildLocalSafetyEvidenceConsole(state);
-    return state && typeof state === "object" ? state : { version:"2.1.21", contract:{ status:"local evidence only", mode:"offline safety summary", providerActivationState:"no-go", releaseEvidenceState:"local only", redacted:true }, releaseEvidence:{ appVersion:"2.1.21", expectedGitTag:"v2.1.21", releasePostcheckState:"local only", workingTreeState:"clean required", redacted:true }, settingsAuthEvidence:{ localAuthMode:"enabled", passwordVerifier:"enabled", localRecoveryMode:"no-network", localRecoveryEmailSend:"disabled", localRecoverySecretRead:"disabled" }, commerceEvidence:{ commerceFlightIntent:"enabled", flightOriginParsing:"上海", flightDestinationParsing:"成都", flightDateParsing:"7 月 15 日", flightSortPreference:"低价优先", realPriceResult:"unavailable", fakeMockDemoAiPrice:"forbidden", bookingUrl:"forbidden", providerActivationState:"no-go", offlineFixtureRunnerState:"PASS", networkAttemptCount:0, realProviderCallCount:0, realPriceDisplayedCount:0, bookingUrlDisplayedCount:0 }, safetyRedlineEvidence:{ apiKeyInput:"disabled", credentialInput:"disabled", endpointInput:"disabled", testConnection:"disabled", realNetwork:"disabled", realPrice:"disabled", bookingUrl:"disabled" }, audit:{ localSafetyEvidenceConsoleAuditDraft:{ eventType:"LOCAL_SAFETY_EVIDENCE_CONSOLE_DRAFT", redacted:true } }, display:{ title:"local safety evidence console", establishedLine:"console 已建立", statusLine:"status: local evidence only", modeLine:"mode: offline safety summary", activationLine:"providerActivationState: no-go", releaseLine:"releaseEvidenceState: local only", redactedLine:"redacted: true" } };
+    return state && typeof state === "object" ? state : { version:"2.1.22", contract:{ status:"local evidence only", mode:"offline safety summary", providerActivationState:"no-go", releaseEvidenceState:"local only", redacted:true }, releaseEvidence:{ appVersion:"2.1.22", expectedGitTag:"v2.1.22", releasePostcheckState:"local only", workingTreeState:"clean required", redacted:true }, settingsAuthEvidence:{ localAuthMode:"enabled", passwordVerifier:"enabled", localRecoveryMode:"no-network", localRecoveryEmailSend:"disabled", localRecoverySecretRead:"disabled" }, commerceEvidence:{ commerceFlightIntent:"enabled", flightOriginParsing:"上海", flightDestinationParsing:"成都", flightDateParsing:"7 月 15 日", flightSortPreference:"低价优先", realPriceResult:"unavailable", fakeMockDemoAiPrice:"forbidden", bookingUrl:"forbidden", providerActivationState:"no-go", offlineFixtureRunnerState:"PASS", networkAttemptCount:0, realProviderCallCount:0, realPriceDisplayedCount:0, bookingUrlDisplayedCount:0 }, safetyRedlineEvidence:{ apiKeyInput:"disabled", credentialInput:"disabled", endpointInput:"disabled", testConnection:"disabled", realNetwork:"disabled", realPrice:"disabled", bookingUrl:"disabled" }, audit:{ localSafetyEvidenceConsoleAuditDraft:{ eventType:"LOCAL_SAFETY_EVIDENCE_CONSOLE_DRAFT", redacted:true } }, display:{ title:"local safety evidence console", establishedLine:"console 已建立", statusLine:"status: local evidence only", modeLine:"mode: offline safety summary", activationLine:"providerActivationState: no-go", releaseLine:"releaseEvidenceState: local only", redactedLine:"redacted: true" } };
   }
 
   function commerceLocalSafetyEvidenceConsoleDisclosure(task){
@@ -5031,8 +5058,8 @@
       + '<h5>safety redline evidence 草案</h5>' + commerceObjectLinesHtml(state.safetyRedlineEvidence || {})
       + '<h5>审计事件草案</h5><p>localSafetyEvidenceConsoleAuditDraft</p>'
       + '<p>eventType：' + esc(audit.eventType || 'LOCAL_SAFETY_EVIDENCE_CONSOLE_DRAFT') + '</p>'
-      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.21') + '</p>'
-      + '<p>appVersion：' + esc(audit.appVersion || '2.1.21') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.22') + '</p>'
+      + '<p>appVersion：' + esc(audit.appVersion || '2.1.22') + '</p>'
       + '<p>evidenceState：' + esc(audit.evidenceState || 'local evidence only') + '</p>'
       + '<p>providerActivationState：' + esc(audit.providerActivationState || 'no-go') + '</p>'
       + '<p>releasePostcheckState：' + esc(audit.releasePostcheckState || 'local only') + '</p>'
@@ -5049,7 +5076,7 @@
     const api = window.WeishanCommerceManualUiAcceptanceAssistant;
     const state = task && task.manualUiAcceptanceAssistant || null;
     if (api && typeof api.buildManualUiAcceptanceAssistant === "function") return api.buildManualUiAcceptanceAssistant(state);
-    return state && typeof state === "object" ? state : { version:"2.1.21", contract:{ status:"manual assist only", mode:"no automation guarantee", redacted:true }, manualSteps:[], screenshotPaths:[], passFailRules:["自动输入不可靠且未手动确认 -> NEEDS_MANUAL_UI_CHECK"], audit:{ manualUiAcceptanceAssistantAuditDraft:{ redacted:true } }, display:{ title:"manual UI acceptance assistant", establishedLine:"assistant 已建立", statusLine:"status: manual assist only", modeLine:"mode: no automation guarantee", focusLine:"Electron Web content focus may require manual input", fabricationLine:"automated PASS fabrication forbidden", screenshotLine:"screenshot evidence required", confirmationLine:"user confirmation required", externalSearchLine:"no external search click", networkLine:"no real network", redactedLine:"redacted: true" } };
+    return state && typeof state === "object" ? state : { version:"2.1.22", contract:{ status:"manual assist only", mode:"no automation guarantee", redacted:true }, manualSteps:[], screenshotPaths:[], passFailRules:["自动输入不可靠且未手动确认 -> NEEDS_MANUAL_UI_CHECK"], audit:{ manualUiAcceptanceAssistantAuditDraft:{ redacted:true } }, display:{ title:"manual UI acceptance assistant", establishedLine:"assistant 已建立", statusLine:"status: manual assist only", modeLine:"mode: no automation guarantee", focusLine:"Electron Web content focus may require manual input", fabricationLine:"automated PASS fabrication forbidden", screenshotLine:"screenshot evidence required", confirmationLine:"user confirmation required", externalSearchLine:"no external search click", networkLine:"no real network", redactedLine:"redacted: true" } };
   }
 
   function commerceManualUiAcceptanceAssistantDisclosure(task){
@@ -5073,7 +5100,7 @@
       + '<h5>PASS/FAIL 判定规则草案</h5>' + listHtml(state.passFailRules || [])
       + '<h5>审计事件草案</h5><p>manualUiAcceptanceAssistantAuditDraft</p>'
       + '<p>eventType：' + esc(audit.eventType || 'MANUAL_UI_ACCEPTANCE_ASSISTANT_DRAFT') + '</p>'
-      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.21') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.22') + '</p>'
       + '<p>manualCheckState：' + esc(audit.manualCheckState || 'manual assist only') + '</p>'
       + '<p>requiredScreenshotCount：' + esc(String(audit.requiredScreenshotCount || 10)) + '</p>'
       + '<p>completedScreenshotCount：' + esc(String(audit.completedScreenshotCount || 0)) + '</p>'
@@ -5088,7 +5115,7 @@
     const api = window.WeishanCommerceNoSecretPersistenceGuard;
     const state = task && task.noSecretPersistenceGuard || null;
     if (api && typeof api.buildNoSecretPersistenceGuard === "function") return api.buildNoSecretPersistenceGuard(state);
-    return state && typeof state === "object" ? state : { version:"2.1.21", contract:{ status:"local static scan only", mode:"no real secret access", redacted:true }, scanScope:[], blockedPatterns:[], currentScanResult:{ scanResult:"PASS", blockedPatternCount:0, realSecretReadCount:0, keychainAccessCount:0, safeStorageAccessCount:0, envSecretWriteCount:0, localStorageSecretWriteCount:0, sessionStorageSecretWriteCount:0, rawPasswordPersistenceCount:0, rawApiKeyDisplayCount:0, providerCredentialPersistedCount:0, endpointSecretPersistedCount:0, redacted:true }, audit:{ noSecretPersistenceGuardAuditDraft:{ redacted:true } }, display:{ title:"no-secret persistence guard", establishedLine:"guard 已建立", statusLine:"status: local static scan only", modeLine:"mode: no real secret access", realKeyLine:"real API key read disabled", keychainLine:"Keychain access disabled", safeStorageLine:"safeStorage access disabled", envLine:".env secret write forbidden", localStorageLine:"localStorage secret write forbidden", sessionStorageLine:"sessionStorage secret write forbidden", rawPasswordLine:"raw password persistence forbidden", rawTokenLine:"raw token display forbidden", rawApiKeyLine:"rawApiKey display forbidden", providerCredentialLine:"provider credential persistence forbidden", endpointSecretLine:"endpoint secret persistence forbidden", scanResultLine:"scanResult: PASS", redactedLine:"redacted: true" } };
+    return state && typeof state === "object" ? state : { version:"2.1.22", contract:{ status:"local static scan only", mode:"no real secret access", redacted:true }, scanScope:[], blockedPatterns:[], currentScanResult:{ scanResult:"PASS", blockedPatternCount:0, realSecretReadCount:0, keychainAccessCount:0, safeStorageAccessCount:0, envSecretWriteCount:0, localStorageSecretWriteCount:0, sessionStorageSecretWriteCount:0, rawPasswordPersistenceCount:0, rawApiKeyDisplayCount:0, providerCredentialPersistedCount:0, endpointSecretPersistedCount:0, redacted:true }, audit:{ noSecretPersistenceGuardAuditDraft:{ redacted:true } }, display:{ title:"no-secret persistence guard", establishedLine:"guard 已建立", statusLine:"status: local static scan only", modeLine:"mode: no real secret access", realKeyLine:"real API key read disabled", keychainLine:"Keychain access disabled", safeStorageLine:"safeStorage access disabled", envLine:".env secret write forbidden", localStorageLine:"localStorage secret write forbidden", sessionStorageLine:"sessionStorage secret write forbidden", rawPasswordLine:"raw password persistence forbidden", rawTokenLine:"raw token display forbidden", rawApiKeyLine:"rawApiKey display forbidden", providerCredentialLine:"provider credential persistence forbidden", endpointSecretLine:"endpoint secret persistence forbidden", scanResultLine:"scanResult: PASS", redactedLine:"redacted: true" } };
   }
 
   function commerceNoSecretPersistenceGuardDisclosure(task){
@@ -5119,7 +5146,7 @@
       + '<h5>current scan result 草案</h5>' + commerceObjectLinesHtml(result)
       + '<h5>审计事件草案</h5><p>noSecretPersistenceGuardAuditDraft</p>'
       + '<p>eventType：' + esc(audit.eventType || 'NO_SECRET_PERSISTENCE_GUARD_SCAN_DRAFT') + '</p>'
-      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.21') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.22') + '</p>'
       + '<p>scanState：' + esc(audit.scanState || 'PASS') + '</p>'
       + '<p>scannedFileCount：' + esc(String(audit.scannedFileCount || result.scannedFileCount || 'generated by script')) + '</p>'
       + '<p>blockedPatternCount：' + esc(String(audit.blockedPatternCount || 0)) + '</p>'
@@ -5143,7 +5170,7 @@
     const api = window.WeishanSettingsAuthLocalSecurityEvidence;
     const state = task && task.settingsAuthLocalSecurityEvidence || null;
     if (api && typeof api.buildSettingsAuthLocalSecurityEvidence === "function") return api.buildSettingsAuthLocalSecurityEvidence(state);
-    return state && typeof state === "object" ? state : { version:"2.1.21", contract:{ status:"local auth evidence only", mode:"no cloud auth", localRegister:"enabled", localLogin:"enabled", localRecoveryNotice:"enabled", passwordVerifier:"enabled", legacyPlainPasswordMigration:"compatible", realEmailSending:"disabled", realNetwork:"disabled", realKeyRead:"disabled", redacted:true }, accountLocalObjectDraft:{ accountId:"local account id", emailAlias:"local email alias", passwordVerifier:"enabled", schemaVersion:"2.1.21", redacted:true }, recoveryNoticeDraft:["本地模式不联网", "本地模式不发邮件", "本地模式不读取密钥", "找回密码不会清空表单", "找回密码不会跳路由"], authSafetyBoundaries:["raw password display forbidden", "raw password persistence forbidden", "passwordVerifier only"], audit:{ settingsAuthLocalSecurityEvidenceAuditDraft:{ redacted:true } }, display:{ title:"settings auth local security evidence", establishedLine:"evidence 已建立", statusLine:"status: local auth evidence only", modeLine:"mode: no cloud auth", registerLine:"local register enabled", loginLine:"local login enabled", recoveryLine:"local recovery notice enabled", verifierLine:"passwordVerifier enabled", migrationLine:"legacy plain password migration compatible", emailLine:"real email sending disabled", networkLine:"real network disabled", keyLine:"real key read disabled", redactedLine:"redacted: true" } };
+    return state && typeof state === "object" ? state : { version:"2.1.22", contract:{ status:"local auth evidence only", mode:"no cloud auth", localRegister:"enabled", localLogin:"enabled", localRecoveryNotice:"enabled", passwordVerifier:"enabled", legacyPlainPasswordMigration:"compatible", realEmailSending:"disabled", realNetwork:"disabled", realKeyRead:"disabled", redacted:true }, accountLocalObjectDraft:{ accountId:"local account id", emailAlias:"local email alias", passwordVerifier:"enabled", schemaVersion:"2.1.22", redacted:true }, recoveryNoticeDraft:["本地模式不联网", "本地模式不发邮件", "本地模式不读取密钥", "找回密码不会清空表单", "找回密码不会跳路由"], authSafetyBoundaries:["raw password display forbidden", "raw password persistence forbidden", "passwordVerifier only"], audit:{ settingsAuthLocalSecurityEvidenceAuditDraft:{ redacted:true } }, display:{ title:"settings auth local security evidence", establishedLine:"evidence 已建立", statusLine:"status: local auth evidence only", modeLine:"mode: no cloud auth", registerLine:"local register enabled", loginLine:"local login enabled", recoveryLine:"local recovery notice enabled", verifierLine:"passwordVerifier enabled", migrationLine:"legacy plain password migration compatible", emailLine:"real email sending disabled", networkLine:"real network disabled", keyLine:"real key read disabled", redactedLine:"redacted: true" } };
   }
 
   function commerceSettingsAuthLocalSecurityEvidenceDisclosure(task){
@@ -5169,7 +5196,7 @@
       + '<h5>auth safety boundaries</h5>' + listHtml(state.authSafetyBoundaries || [])
       + '<h5>审计事件草案</h5><p>settingsAuthLocalSecurityEvidenceAuditDraft</p>'
       + '<p>eventType：' + esc(audit.eventType || 'SETTINGS_AUTH_LOCAL_SECURITY_EVIDENCE_DRAFT') + '</p>'
-      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.21') + '</p>'
+      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.22') + '</p>'
       + '<p>localAuthState：' + esc(audit.localAuthState || 'enabled') + '</p>'
       + '<p>localRecoveryState：' + esc(audit.localRecoveryState || 'no-network notice only') + '</p>'
       + '<p>passwordVerifierState：' + esc(audit.passwordVerifierState || 'enabled') + '</p>'
@@ -5246,7 +5273,6 @@
       ${commerceApiBindingMockFormDisclosure(task)}
       ${commerceApiBindingPermissionChecklistDisclosure(task)}
       ${commerceApiBindingReadinessDisclosure(task)}
-      ${commerceSecureKeyStoragePlanDisclosure(task)}
       ${commerceSecureStorageDesignGateDisclosure(task)}
       ${commerceLocalSecureStorageInterfaceDraftDisclosure(task)}
       ${commerceKeyRedactionAndLogLeakRulesDisclosure(task)}
@@ -5302,6 +5328,7 @@
       ${commercePriceIntegrityTaxesFeesGateDisclosure(task)}
       ${commerceBookingUrlDomainSafetyGateDisclosure(task)}
       ${commerceManualProviderReviewWorkflowDisclosure(task)}
+      ${globalProcurementDecisionWorkspaceDisclosure(task)}
       ${commerceLocalSafetyEvidenceConsoleDisclosure(task)}
       ${commerceManualUiAcceptanceAssistantDisclosure(task)}
       ${commerceNoSecretPersistenceGuardDisclosure(task)}

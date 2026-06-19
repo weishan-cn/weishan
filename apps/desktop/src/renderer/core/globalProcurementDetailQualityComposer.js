@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_DETAIL_QUALITY_COMPOSER_VERSION = "2.1.21";
+  const GLOBAL_PROCUREMENT_DETAIL_QUALITY_COMPOSER_VERSION = "2.1.22";
 
   function text(value){
     return String(value || "").trim();
@@ -96,7 +96,7 @@
           routeOrigin ? "出发地：" + routeOrigin : "",
           routeDestination ? "目的地：" + routeDestination : "",
           date ? "出发日期：" + date : "",
-          text(safeIntent.sortPreference) ? "排序偏好：" + text(safeIntent.sortPreference) : ""
+          text(safeIntent.sortPreference) ? "排序：" + text(safeIntent.sortPreference) : ""
         ]),
         missingInfo:["人数", "舱位", "是否直飞", "是否托运行李", "时间偏好"],
         safeGuidance:["人工比较航空公司官网 / Google Flights / Trip.com / 携程", "确认退改签、行李、税费"],
@@ -173,7 +173,7 @@
         text(safeIntent.origin) ? "出发地：" + text(safeIntent.origin) : "",
         text(safeIntent.destination) ? "目的地：" + text(safeIntent.destination) : "",
         text(safeIntent.date) ? "出发日期：" + text(safeIntent.date) : "",
-        text(safeIntent.sortPreference) ? "排序偏好：" + text(safeIntent.sortPreference) : ""
+        text(safeIntent.sortPreference) ? "排序：" + text(safeIntent.sortPreference) : ""
       );
       demandSummary = "围绕机票条件做离线采购规划，先整理路线、日期和低价偏好，再由用户人工去可信渠道确认。";
     } else if (category === "hotel") {

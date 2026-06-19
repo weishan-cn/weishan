@@ -1090,6 +1090,20 @@ const REQUIRED_PHRASES = [
   "marker:manual ui acceptance assistant",
   "marker:no secret persistence guard",
   "marker:settings auth local security evidence",
+  "v2.1.22：Global Procurement Decision Workspace Bundle / 全球采购决策工作台包",
+  "commerceGlobalProcurementDecisionWorkspace.js",
+  "查看全球采购决策工作台",
+  "决策工作台：已建立",
+  "当前状态：只整理采购决策，不连接真实 provider。",
+  "comparisonDimensions",
+  "decisionRule",
+  "candidateSchema",
+  "recommendationTemplate",
+  "executionBoundary",
+  "riskNotice",
+  "nextSteps",
+  "sandbox gate / endpoint allowlist gate / key 生命周期 / 脱敏规则 / 本机安全存储 / API 绑定准备状态",
+  "redacted: true",
 ];
 
 function main() {

@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_INTENT_ROUTER_VERSION = "2.1.21";
+  const GLOBAL_PROCUREMENT_INTENT_ROUTER_VERSION = "2.1.22";
 
   const categoryLabels = {
     flight:"机票",
@@ -77,10 +77,14 @@
     return list.length ? list : [category];
   }
 
-  function extractRoute(text){
+  function stripRouteDatePrefix(text){
     const raw = String(text || "");
-    const datePrefix = "(?:\\d{1,2}\\s*月\\s*\\d{1,2}\\s*日|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天]?)?\\s*";
-    const route = raw.match(new RegExp(datePrefix + "([\\u4e00-\\u9fa5A-Za-z]{2,24})\\s*(?:到|飞往|飞|去)\\s*([\\u4e00-\\u9fa5A-Za-z]{2,24})"));
+    return raw.replace(/^\s*(?:\d{1,2}\s*月\s*\d{1,2}\s*日|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天]?)\s*/, "");
+  }
+
+  function extractRoute(text){
+    const raw = stripRouteDatePrefix(text);
+    const route = raw.match(/([\u4e00-\u9fa5A-Za-z]{2,24})\s*(?:到|飞往|飞|去)\s*([\u4e00-\u9fa5A-Za-z]{2,24})/);
     return {
       origin:route ? sanitize(route[1]).replace(/^(日|从)/, "") : "",
       destination:route ? sanitize(route[2]).replace(/(最便宜|低价|机票|航班|飞机票).*$/, "").trim() : ""

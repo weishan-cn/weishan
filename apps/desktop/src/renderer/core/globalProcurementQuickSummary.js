@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_QUICK_SUMMARY_VERSION = "2.1.21";
+  const GLOBAL_PROCUREMENT_QUICK_SUMMARY_VERSION = "2.1.22";
 
   function text(value){
     return String(value || "").trim();

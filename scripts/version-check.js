@@ -308,6 +308,27 @@ function checkGlobalProcurementUserFacingResultCardsVersion(results, expectedVer
   );
 }
 
+function checkGlobalProcurementDecisionWorkspaceVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/commerceGlobalProcurementDecisionWorkspace.js";
+  const file = readText(filePath);
+  if (!file) {
+    results.push({ name: "apps/desktop global procurement decision workspace version", pass: false, detail: filePath + " missing" });
+    return;
+  }
+  if (file.__readError) {
+    results.push({ name: "apps/desktop global procurement decision workspace version", pass: false, detail: file.__readError });
+    return;
+  }
+  const match = file.match(/DECISION_WORKSPACE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop global procurement decision workspace version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceGlobalProcurementDecisionWorkspace.js DECISION_WORKSPACE_VERSION"
+  );
+}
+
 function checkUserApiPriorityPolicyVersion(results, expectedVersion) {
   const policyPath = "apps/desktop/src/renderer/core/commerceUserApiPriorityPolicy.js";
   const policy = readText(policyPath);
@@ -843,6 +864,7 @@ function runVersionCheck() {
     checkLocalSecureStorageInterfaceDraftVersion(results, rootPackage.version);
     checkGlobalProcurementQuickSummaryVersion(results, rootPackage.version);
     checkGlobalProcurementUserFacingResultCardsVersion(results, rootPackage.version);
+    checkGlobalProcurementDecisionWorkspaceVersion(results, rootPackage.version);
     checkUserApiPriorityPolicyVersion(results, rootPackage.version);
     checkApiBindingSafeShellVersion(results, rootPackage.version);
     checkUserApiProviderCatalogVersion(results, rootPackage.version);
