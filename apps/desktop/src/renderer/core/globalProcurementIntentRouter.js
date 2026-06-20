@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_INTENT_ROUTER_VERSION = "2.1.22";
+  const GLOBAL_PROCUREMENT_INTENT_ROUTER_VERSION = "2.1.23";
 
   const categoryLabels = {
     flight:"机票",
@@ -50,7 +50,7 @@
       return "restricted_or_blocked";
     }
     const hasFlight = /机票|航班|飞机票|上海到成都|飞往|飞|flight/i.test(raw);
-    const hasHotel = /酒店|住宿|民宿|住两晚|hotel/i.test(raw);
+    const hasHotel = /酒店|住宿|民宿|住一晚|住两晚|住三晚|入住|附近住|订房|找房间|找酒店|hotel/i.test(raw);
     const hasProduct = /iPhone|MacBook|电脑|手机|商品|耳机|相机|显示器|键盘|电商|product/i.test(raw);
     const hasService = /搬家公司|保洁|维修|服务|local service/i.test(raw);
     const hasTicket = /门票|迪士尼|演唱会|ticket|activity/i.test(raw);
@@ -69,7 +69,7 @@
     const list = [];
     if (category === "restricted_or_blocked") return ["restricted_or_blocked"];
     if (/机票|航班|飞机票|飞往|飞|flight/i.test(raw)) list.push("flight");
-    if (/酒店|住宿|民宿|hotel/i.test(raw)) list.push("hotel");
+    if (/酒店|住宿|民宿|住一晚|住两晚|住三晚|入住|附近住|订房|找房间|找酒店|hotel/i.test(raw)) list.push("hotel");
     if (/iPhone|MacBook|电脑|手机|商品|耳机|相机|显示器|键盘|电商|product/i.test(raw)) list.push("product");
     if (/搬家公司|保洁|维修|服务|local service/i.test(raw)) list.push("local_service");
     if (/门票|迪士尼|演唱会|ticket|activity/i.test(raw)) list.push("ticket_or_activity");

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const DECISION_WORKSPACE_VERSION = "2.1.22";
+  const DECISION_WORKSPACE_VERSION = "2.1.23";
   const PHASE = "global_procurement_decision_workspace";
 
   function clone(value) {
@@ -75,7 +75,7 @@
     return [
       "未接入真实 provider 时只做采购决策整理，不做真实结果展示",
       "禁止把 draft 当真实结果",
-      "禁止输出 fake/mock/demo/AI 估价",
+      "禁止输出不真实报价或估算价格",
       "禁止展示 raw provider payload"
     ];
   }
@@ -136,7 +136,7 @@
       candidateSchemaLine: "candidateSchema：providerId / providerName / sourceType / sourceUrlHost / title / currency / price / updatedAt / readonlyEvidence。",
       recommendationTemplateLine: "recommendationTemplate：平台名称 / 价格 / 更新时间 / 可信度 / 点击跳转外部平台 / 必要安全提示。",
       executionBoundaryLine: "executionBoundary：不连接真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不显示真实价格，不生成 bookingUrl，不付款，不下单，不保存身份证 / 银行卡。",
-      riskNoticeLine: "riskNotice：禁止 fake/mock/demo/AI 估价，禁止 raw payload，禁止把 draft 当真实结果。",
+      riskNoticeLine: "riskNotice：禁止不真实报价，禁止 raw payload，禁止把 draft 当真实结果。",
       nextStepsLine: "nextSteps：先完成 sandbox gate，再完成 endpoint allowlist gate，再完成 key 生命周期，再完成脱敏规则，再完成本机安全存储，再完成 API 绑定准备状态。",
       linkageLine: "linkage：sandbox gate / endpoint allowlist gate / key 生命周期 / 脱敏规则 / 本机安全存储 / API 绑定准备状态。",
       redactedLine: "redacted: true"
@@ -194,7 +194,7 @@
       candidateSchemaLine: display.candidateSchemaLine || "candidateSchema：providerId / providerName / sourceType / sourceUrlHost / title / currency / price / updatedAt / readonlyEvidence。",
       recommendationTemplateLine: display.recommendationTemplateLine || "recommendationTemplate：平台名称 / 价格 / 更新时间 / 可信度 / 点击跳转外部平台 / 必要安全提示。",
       executionBoundaryLine: display.executionBoundaryLine || "executionBoundary：不连接真实 provider，不读取 API key，不连接 endpoint，不发起网络请求，不显示真实价格，不生成 bookingUrl，不付款，不下单，不保存身份证 / 银行卡。",
-      riskNoticeLine: display.riskNoticeLine || "riskNotice：禁止 fake/mock/demo/AI 估价，禁止 raw payload，禁止把 draft 当真实结果。",
+      riskNoticeLine: display.riskNoticeLine || "riskNotice：禁止不真实报价，禁止 raw payload，禁止把 draft 当真实结果。",
       nextStepsLine: display.nextStepsLine || "nextSteps：先完成 sandbox gate，再完成 endpoint allowlist gate，再完成 key 生命周期，再完成脱敏规则，再完成本机安全存储，再完成 API 绑定准备状态。",
       linkageLine: display.linkageLine || "linkage：sandbox gate / endpoint allowlist gate / key 生命周期 / 脱敏规则 / 本机安全存储 / API 绑定准备状态。",
       redactedLine: display.redactedLine || "redacted: true",

@@ -47,6 +47,7 @@ function runCore() {
   runStep("Version check", "npm", ["run", "version:check"]);
   runStep("Healthcheck", "npm", ["run", "healthcheck"]);
   runStep("API tests", "npm", ["run", "test:api"]);
+  runStep("Commerce core tests", "npm", ["run", "test:commerce-core"]);
   runStep("Project check", "npm", ["run", "check"]);
   runStep("Git diff check", "git", ["diff", "--check"]);
 }

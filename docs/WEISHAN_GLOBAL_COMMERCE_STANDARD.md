@@ -2172,9 +2172,9 @@ v2.1.21 新增 `globalProcurementQuickSummary.js` 和 `globalProcurementUserFaci
 - marker:global procurement result cards no payment
 - marker:global procurement result cards no order submit
 
-## v2.1.22：Global Procurement Decision Workspace Bundle / 全球采购决策工作台包
+## v2.1.23：Global Procurement Decision Workspace Bundle / 全球采购决策工作台包
 
-v2.1.22 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全球采购结果进一步整理为“决策工作台”：默认只展示采购决策维度、决策规则、候选 schema、推荐模板、执行边界、风险提示、下一步与联动关系，强调当前只做离线采购决策整理，不连接真实 provider，不读取 API key，不连接 endpoint，不联网，不显示真实价格，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
+v2.1.23 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全球采购结果进一步整理为“决策工作台”：默认只展示采购决策维度、决策规则、候选 schema、推荐模板、执行边界、风险提示、下一步与联动关系，强调当前只做离线采购决策整理，不连接真实 provider，不读取 API key，不连接 endpoint，不联网，不显示真实价格，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
 
 - marker:global procurement decision workspace
 - marker:global procurement decision workspace established

@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_DETAIL_QUALITY_COMPOSER_VERSION = "2.1.22";
+  const GLOBAL_PROCUREMENT_DETAIL_QUALITY_COMPOSER_VERSION = "2.1.23";
 
   function text(value){
     return String(value || "").trim();
@@ -12,6 +12,7 @@
   function toCnNights(raw){
     const direct = String(raw || "").match(/(\d+)\s*晚/);
     if (direct) return Number(direct[1]) + " 晚";
+    if (/一晚/.test(String(raw || ""))) return "1 晚";
     if (/两晚/.test(String(raw || ""))) return "2 晚";
     if (/三晚/.test(String(raw || ""))) return "3 晚";
     return "";
@@ -103,7 +104,7 @@
         disabled:["真实价格：未开放", "bookingUrl：未开放", "付款 / 下单：禁止"]
       });
     }
-    if (/酒店|住宿|hotel/.test(raw)) {
+    if (/酒店|住宿|民宿|住一晚|住两晚|住三晚|入住|附近住|订房|找房间|找酒店|hotel/.test(raw)) {
       plans.push({
         title:"酒店",
         identifiedConditions:unique([

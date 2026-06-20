@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_QUICK_SUMMARY_VERSION = "2.1.22";
+  const GLOBAL_PROCUREMENT_QUICK_SUMMARY_VERSION = "2.1.23";
 
   function text(value){
     return String(value || "").trim();
@@ -47,7 +47,9 @@
       return "我已整理好住宿筛选条件：" + join([
         location || "目标区域待补充",
         date ? (date + "入住") : "",
-        /两晚|2 晚/.test(String(safe.searchQueryDraft || "")) ? "住两晚" : ""
+        /一晚|1 晚/.test(String(safe.searchQueryDraft || "")) ? "住一晚" : "",
+        /两晚|2 晚/.test(String(safe.searchQueryDraft || "")) ? "住两晚" : "",
+        /三晚|3 晚/.test(String(safe.searchQueryDraft || "")) ? "住三晚" : ""
       ]) + "。当前不返回真实房价。";
     }
     if (category === "product") {
