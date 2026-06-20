@@ -1,14 +1,14 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION = "2.1.30";
+  const PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION = "2.1.31";
 
   const CATEGORY_DEFINITIONS = {
     flight_provider: {
       displayName: "机票 Provider",
       category: "flight",
       candidateDirections: ["用户自带 API", "weishan 候选只读价格源", "官方航空公司渠道", "合规 OTA 只读接口"],
-      gaps: ["manual provider review workflow: v1", "manual review state: approved_for_limited_beta", "limited real price UI beta: flight_only", "limited beta display gate: draft-ready", "limited beta price display: guarded only", "real credential not connected", "production provider activation disabled", "endpoint allowlist enforcement draft-ready", "sandbox real-key dry run gate draft-ready", "sandbox response schema gate draft-ready", "real provider result schema validation draft-ready", "provider result source label gate draft-ready", "price integrity / taxes / fees gate draft-ready", "real price display gate guarded-display-ready", "production price display disabled", "bookingUrl display disabled", "sandbox dry run transport simulated only", "read-only adapter contract draft-ready", "credential consent scope gate draft-ready", "no-secret persistence guard 必须持续 PASS", "no-network runtime guard 必须持续 PASS"]
+      gaps: ["manual provider review workflow: v1", "manual review state: approved_for_limited_beta", "limited real price UI beta: flight_only", "limited beta kill switch: active", "rollback guard: active", "manual booking handoff: manual-only", "beta rollback state: not_needed", "limited beta display gate: draft-ready", "limited beta price display: guarded only", "real credential not connected", "production provider activation disabled", "endpoint allowlist enforcement draft-ready", "sandbox real-key dry run gate draft-ready", "sandbox response schema gate draft-ready", "real provider result schema validation draft-ready", "provider result source label gate draft-ready", "price integrity / taxes / fees gate draft-ready", "real price display gate guarded-display-ready", "production price display disabled", "bookingUrl display disabled", "sandbox dry run transport simulated only", "read-only adapter contract draft-ready", "credential consent scope gate draft-ready", "no-secret persistence guard 必须持续 PASS", "no-network runtime guard 必须持续 PASS"]
     },
     hotel_provider: {
       displayName: "酒店 Provider",
@@ -123,6 +123,9 @@
     const restricted = providerCategory === "restricted_provider";
     const manualApi = window.WeishanManualProviderReviewWorkflowV1;
     const betaApi = window.WeishanLimitedRealPriceUiBetaGate;
+    const killApi = window.WeishanLimitedBetaKillSwitch;
+    const rollbackApi = window.WeishanLimitedBetaRollbackGuard;
+    const handoffApi = window.WeishanManualBookingHandoff;
     const manualReview = providerCategory === "flight_provider" && manualApi && typeof manualApi.evaluateManualProviderReviewForBeta === "function"
       ? manualApi.evaluateManualProviderReviewForBeta(manualApi.buildSampleFlightProviderReview())
       : { allowedForLimitedBeta:false, manualReviewState:restricted ? "blocked" : "not_started", blockedReason:restricted ? "restricted category blocked" : "limited beta flight only", redacted:true };
@@ -137,7 +140,25 @@
       })
       : { displayDecision:providerCategory === "flight_provider" ? "allow_limited_beta_price_card" : (restricted ? "blocked" : "withheld"), redacted:true };
     const limitedBetaReady = providerCategory === "flight_provider" && manualReview.manualReviewState === "approved_for_limited_beta" && betaDecision.displayDecision === "allow_limited_beta_price_card";
-    const rowFinalDecision = restricted ? "blocked" : (limitedBetaReady ? "limited-beta-ready" : "no-go");
+    const killVisibility = killApi && typeof killApi.evaluateLimitedBetaVisibility === "function"
+      ? killApi.evaluateLimitedBetaVisibility({ category:definition.category, providerCategory:definition.category, providerId:providerCategory === "flight_provider" ? "flight_provider" : providerCategory, surface:"ordinary_result_card" })
+      : { priceCardVisible:limitedBetaReady, killSwitchState:restricted ? "blocked" : "enabled", priceCardHidden:!limitedBetaReady, redacted:true };
+    const rollbackDecision = rollbackApi && typeof rollbackApi.evaluateLimitedBetaRollbackGuard === "function"
+      ? rollbackApi.evaluateLimitedBetaRollbackGuard({
+        providerCategory: definition.category,
+        providerId: providerCategory === "flight_provider" ? "flight_provider" : providerCategory,
+        schemaValidation:{ validationDecision:providerCategory === "flight_provider" ? "pass" : "withheld" },
+        sourceLabelValidation:{ validationDecision:providerCategory === "flight_provider" ? "pass" : "withheld" },
+        priceIntegrityValidation:{ validationDecision:providerCategory === "flight_provider" ? "pass" : "withheld" },
+        manualProviderReview: manualReview,
+        killSwitchState: killVisibility.killSwitchState
+      })
+      : { rollbackDecision:restricted ? "rollback_active" : "not_needed", fallbackSurface:"offline_planning_only", redacted:true };
+    const handoff = handoffApi && typeof handoffApi.buildManualBookingHandoff === "function"
+      ? handoffApi.buildManualBookingHandoff({ providerCategory:definition.category, providerId:providerCategory === "flight_provider" ? "flight_provider" : providerCategory, rollbackDecision:rollbackDecision.rollbackDecision })
+      : { status:providerCategory === "flight_provider" ? "manual_only" : (restricted ? "blocked" : "not_allowed"), redacted:true };
+    const killSwitchAllows = limitedBetaReady && killVisibility.priceCardVisible === true && rollbackDecision.rollbackDecision === "not_needed";
+    const rowFinalDecision = restricted ? "blocked" : (killSwitchAllows ? "limited-beta-ready" : (limitedBetaReady ? "limited-beta-disabled-by-kill-switch" : "no-go"));
     return clone({
       providerCategory,
       providerLabel: definition.displayName,
@@ -175,6 +196,10 @@
         manualProviderReviewWorkflow: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "v1" : "not allowed"),
         manualReviewState: manualReview.manualReviewState || (restricted ? "blocked" : "not_started"),
         limitedRealPriceUiBeta: restricted ? "blocked" : (providerCategory === "flight_provider" ? "flight_only" : "not allowed"),
+        limitedBetaKillSwitch: restricted ? "blocked" : (providerCategory === "flight_provider" ? "active" : "not allowed"),
+        rollbackGuard: "active",
+        manualBookingHandoff: restricted ? "blocked" : (providerCategory === "flight_provider" ? "manual-only" : "not allowed"),
+        betaRollbackState: restricted ? "rollback_active" : rollbackDecision.rollbackDecision,
         limitedBetaDisplayGate: restricted ? "blocked" : (providerCategory === "flight_provider" ? "draft-ready" : "not allowed"),
         limitedBetaPriceDisplay: restricted ? "blocked" : (providerCategory === "flight_provider" ? "guarded only" : "not allowed"),
         productionPriceDisplay: "disabled",
@@ -213,6 +238,10 @@
         manualProviderReviewWorkflow: providerCategory === "flight_provider" ? "v1" : "not allowed",
         manualReviewState: manualReview.manualReviewState || "not_started",
         limitedRealPriceUiBeta: providerCategory === "flight_provider" ? "flight_only" : "not allowed",
+        limitedBetaKillSwitch: providerCategory === "flight_provider" ? "active" : "not allowed",
+        rollbackGuard: "active",
+        manualBookingHandoff: providerCategory === "flight_provider" ? "manual-only" : "not allowed",
+        betaRollbackState: rollbackDecision.rollbackDecision,
         limitedBetaDisplayGate: providerCategory === "flight_provider" ? "draft-ready" : "not allowed",
         limitedBetaPriceDisplay: providerCategory === "flight_provider" ? "guarded only" : "not allowed",
         sandboxTestPriceDisplay: providerCategory === "flight_provider" ? "guarded only" : "not_started",
@@ -226,6 +255,9 @@
       decision,
       manualReview,
       limitedBetaDisplayGateDecision: betaDecision,
+      limitedBetaKillSwitch: killVisibility,
+      rollbackGuard: rollbackDecision,
+      manualBookingHandoff: handoff,
       finalDecision: rowFinalDecision,
       decisionReason: rowFinalDecision === "limited-beta-ready" ? "flight limited beta guarded display ready" : (decision.decisionReason || (restricted ? "restricted category blocked" : "readiness gates incomplete")),
       missingRequiredGates: decision.missingRequirements || [],
@@ -286,7 +318,7 @@
       categoryRows: rows,
       providerRows: rows,
       readinessMatrix: {
-        columns: ["provider category", "provider type", "current status", "credential consent scope gate", "read-only adapter contract", "flight adapter v1", "endpoint allowlist enforcement", "sandbox real-key dry run gate", "sandbox response schema gate", "real provider result schema validation", "provider result source label gate", "price integrity / taxes / fees gate", "manual provider review workflow", "manual review state", "limited real price UI beta", "limited beta display gate", "limited beta price display", "production price display", "bookingUrl display", "sandbox dry run transport", "schema gate", "source label gate", "credential storage", "final decision"],
+        columns: ["provider category", "provider type", "current status", "credential consent scope gate", "read-only adapter contract", "flight adapter v1", "endpoint allowlist enforcement", "sandbox real-key dry run gate", "sandbox response schema gate", "real provider result schema validation", "provider result source label gate", "price integrity / taxes / fees gate", "manual provider review workflow", "manual review state", "limited real price UI beta", "limited beta kill switch", "rollback guard", "manual booking handoff", "beta rollback state", "limited beta display gate", "limited beta price display", "production price display", "bookingUrl display", "sandbox dry run transport", "schema gate", "source label gate", "credential storage", "final decision"],
         rows: rows.map((row) => [
           row.providerCategory,
           row.providerType,
@@ -303,6 +335,10 @@
           row.readinessMatrix.manualProviderReviewWorkflow,
           row.readinessMatrix.manualReviewState,
           row.readinessMatrix.limitedRealPriceUiBeta,
+          row.readinessMatrix.limitedBetaKillSwitch,
+          row.readinessMatrix.rollbackGuard,
+          row.readinessMatrix.manualBookingHandoff,
+          row.readinessMatrix.betaRollbackState,
           row.readinessMatrix.limitedBetaDisplayGate,
           row.readinessMatrix.limitedBetaPriceDisplay,
           row.readinessMatrix.productionPriceDisplay,

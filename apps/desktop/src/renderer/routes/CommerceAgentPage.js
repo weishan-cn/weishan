@@ -2164,6 +2164,10 @@
         <p>manual provider review workflow: ${esc((row.readinessMatrix || {}).manualProviderReviewWorkflow || "not allowed")}</p>
         <p>manual review state: ${esc((row.readinessMatrix || {}).manualReviewState || "not_started")}</p>
         <p>limited real price UI beta: ${esc((row.readinessMatrix || {}).limitedRealPriceUiBeta || "not allowed")}</p>
+        <p>limited beta kill switch: ${esc((row.readinessMatrix || {}).limitedBetaKillSwitch || "not allowed")}</p>
+        <p>rollback guard: ${esc((row.readinessMatrix || {}).rollbackGuard || "active")}</p>
+        <p>manual booking handoff: ${esc((row.readinessMatrix || {}).manualBookingHandoff || "not allowed")}</p>
+        <p>beta rollback state: ${esc((row.readinessMatrix || {}).betaRollbackState || "not_needed")}</p>
         <p>limited beta display gate: ${esc((row.readinessMatrix || {}).limitedBetaDisplayGate || "not allowed")}</p>
         <p>limited beta price display: ${esc((row.readinessMatrix || {}).limitedBetaPriceDisplay || "not allowed")}</p>
         <p>production price display: ${esc((row.readinessMatrix || {}).productionPriceDisplay || "disabled")}</p>
@@ -2213,7 +2217,7 @@
     const state = api && typeof api.buildSecureApiKeyStorageConsole === "function"
       ? api.buildSecureApiKeyStorageConsole()
       : {
-        version:"2.1.30",
+        version:"2.1.31",
         status:"secure local storage only",
         mode:"no provider connection",
         realProvider:"disabled",
@@ -2377,6 +2381,9 @@
       ${commerceManualProviderReviewWorkflowDisclosure(task)}
       ${commerceManualProviderReviewWorkflowV1Disclosure(task)}
       ${commerceLimitedRealPriceUiBetaGateDisclosure(task)}
+      ${commerceLimitedBetaKillSwitchDisclosure(task)}
+      ${commerceLimitedBetaRollbackGuardDisclosure(task)}
+      ${commerceManualBookingHandoffDisclosure(task)}
       ${commerceProviderActivationReadinessGateDisclosure(task)}
       ${commerceCredentialConsentScopeGateDisclosure(task)}
       ${commerceReadonlyAdapterContractGateDisclosure(task)}
@@ -2480,6 +2487,9 @@
       ${commerceManualProviderReviewWorkflowDisclosure(task)}
       ${commerceManualProviderReviewWorkflowV1Disclosure(task)}
       ${commerceLimitedRealPriceUiBetaGateDisclosure(task)}
+      ${commerceLimitedBetaKillSwitchDisclosure(task)}
+      ${commerceLimitedBetaRollbackGuardDisclosure(task)}
+      ${commerceManualBookingHandoffDisclosure(task)}
       ${commerceProviderActivationReadinessGateDisclosure(task)}
       ${commerceCredentialConsentScopeGateDisclosure(task)}
       ${commerceReadonlyAdapterContractGateDisclosure(task)}
@@ -2660,6 +2670,9 @@
       ${commerceManualProviderReviewWorkflowDisclosure(task)}
       ${commerceManualProviderReviewWorkflowV1Disclosure(task)}
       ${commerceLimitedRealPriceUiBetaGateDisclosure(task)}
+      ${commerceLimitedBetaKillSwitchDisclosure(task)}
+      ${commerceLimitedBetaRollbackGuardDisclosure(task)}
+      ${commerceManualBookingHandoffDisclosure(task)}
       ${commerceProviderActivationReadinessGateDisclosure(task)}
       ${commerceCredentialConsentScopeGateDisclosure(task)}
       ${commerceReadonlyAdapterContractGateDisclosure(task)}
@@ -5123,6 +5136,123 @@
     return disclosure('查看 Limited Real Price UI Beta Gate', body, 'commerce-limited-real-price-ui-beta-gate-disclosure');
   }
 
+  function commerceLimitedBetaKillSwitchDisclosure(){
+    const api = window.WeishanLimitedBetaKillSwitch;
+    const draft = api && typeof api.buildLimitedBetaKillSwitchDraft === "function" ? api.buildLimitedBetaKillSwitchDraft() : null;
+    if (!draft) return "";
+    const state = draft.state || {};
+    const categories = state.categoryOverrides || {};
+    const surfaces = state.surfaceOverrides || {};
+    const audit = draft.auditDraft || {};
+    const body = '<section class="commerce-limited-beta-kill-switch-panel" aria-label="Limited Beta Kill Switch">'
+      + '<h4>Limited Beta Kill Switch</h4>'
+      + '<p>status: active</p>'
+      + '<p>globalLimitedBetaEnabled: ' + esc(String(state.globalLimitedBetaEnabled === true)) + '</p>'
+      + '<p>flight beta: ' + esc(String(categories.flight === true)) + '</p>'
+      + '<p>product beta: false</p>'
+      + '<p>hotel beta: false</p>'
+      + '<p>restricted beta: false</p>'
+      + '<p>ordinary result card beta: ' + esc(String(surfaces.ordinary_result_card === true)) + '</p>'
+      + '<p>killSwitchState: ' + esc(state.killSwitchState || 'enabled') + '</p>'
+      + '<p>rollbackState: not_needed</p>'
+      + '<p>reason: ' + esc(state.reason || 'limited beta enabled for flight only') + '</p>'
+      + '<p>updatedAt: ' + esc(state.updatedAt || 'local draft') + '</p>'
+      + '<p>redacted: true</p>'
+      + '<div class="commerce-actions-row">'
+      + '<button type="button" data-commerce-limited-beta-action="off">关闭 Limited Beta</button>'
+      + '<button type="button" data-commerce-limited-beta-action="on">恢复 Limited Beta</button>'
+      + '<button type="button" data-commerce-limited-beta-action="rollback">强制回滚到离线计划</button>'
+      + '</div>'
+      + '<p>关闭 Limited Beta：隐藏所有 Limited Beta 价格卡片。</p>'
+      + '<p>恢复 Limited Beta：仅恢复 flight beta，不恢复其它品类。</p>'
+      + '<p>强制回滚：进入 rollback_active，必须显示暂无真实价格结果。</p>'
+      + '<h5>audit draft</h5>'
+      + '<p>' + esc(audit.eventType || 'LIMITED_BETA_KILL_SWITCH_AUDIT_DRAFT') + '</p>'
+      + '<p>priceCardHiddenCount: ' + esc(String(audit.priceCardHiddenCount || 0)) + '</p>'
+      + '<p>restoredCount: ' + esc(String(audit.restoredCount || 0)) + '</p>'
+      + '<p>forcedRollbackCount: ' + esc(String(audit.forcedRollbackCount || 0)) + '</p>'
+      + '<p>bookingUrlDisplayedCount: 0</p>'
+      + '<p>paymentAttemptCount: 0</p>'
+      + '<p>orderAttemptCount: 0</p>'
+      + '<p>identityUploadAttemptCount: 0</p>'
+      + '<p>redacted: true</p>'
+      + '</section>';
+    return disclosure('查看 Limited Beta Kill Switch', body, 'commerce-limited-beta-kill-switch-disclosure');
+  }
+
+  function commerceLimitedBetaRollbackGuardDisclosure(){
+    const api = window.WeishanLimitedBetaRollbackGuard;
+    const draft = api && typeof api.buildLimitedBetaRollbackGuardDraft === "function" ? api.buildLimitedBetaRollbackGuardDraft() : null;
+    if (!draft) return "";
+    const audit = draft.auditDraft || {};
+    const body = '<section class="commerce-limited-beta-rollback-guard-panel" aria-label="Limited Beta Rollback Guard">'
+      + '<h4>Limited Beta Rollback Guard</h4>'
+      + '<p>status: rollback protection active</p>'
+      + '<p>bookingUrl trigger: enabled</p>'
+      + '<p>payment/order trigger: enabled</p>'
+      + '<p>identity upload trigger: enabled</p>'
+      + '<p>restricted category trigger: enabled</p>'
+      + '<p>non-flight beta trigger: enabled</p>'
+      + '<p>schema/source/price gate fail trigger: enabled</p>'
+      + '<p>network attempt trigger: enabled</p>'
+      + '<p>raw payload trigger: enabled</p>'
+      + '<p>redacted: true</p>'
+      + '<h5>rollback triggers</h5>' + list(draft.triggers || [])
+      + '<h5>current rollback decision</h5>' + commerceObjectLinesHtml(draft.currentRollbackDecision || {})
+      + '<p>fallback surface: offline_planning_only</p>'
+      + '<h5>audit draft</h5>'
+      + '<p>' + esc(audit.eventType || 'LIMITED_BETA_ROLLBACK_GUARD_AUDIT_DRAFT') + '</p>'
+      + '<p>rollbackDecision: ' + esc(audit.rollbackDecision || 'rollback_active') + '</p>'
+      + '<p>rollbackReason: ' + esc(audit.rollbackReason || 'bookingUrl/payment/order url present') + '</p>'
+      + '<p>bookingUrlHidden: true</p>'
+      + '<p>paymentDisabled: true</p>'
+      + '<p>orderDisabled: true</p>'
+      + '<p>identityUploadDisabled: true</p>'
+      + '<p>redacted: true</p>'
+      + '</section>';
+    return disclosure('查看 Limited Beta Rollback Guard', body, 'commerce-limited-beta-rollback-guard-disclosure');
+  }
+
+  function commerceManualBookingHandoffDisclosure(){
+    const api = window.WeishanManualBookingHandoff;
+    const killApi = window.WeishanLimitedBetaKillSwitch;
+    const visibility = killApi && typeof killApi.evaluateLimitedBetaVisibility === "function"
+      ? killApi.evaluateLimitedBetaVisibility({ category:"flight", providerId:"flight_provider", surface:"ordinary_result_card" })
+      : { priceCardVisible:true };
+    const rollbackActive = visibility.priceCardVisible !== true || visibility.killSwitchState === "rollback_active";
+    const handoff = api && typeof api.buildManualBookingHandoff === "function" ? api.buildManualBookingHandoff({ rollbackActive }) : null;
+    if (!handoff || handoff.status !== "manual_only") return "";
+    const audit = handoff.auditDraft || {};
+    const body = '<section class="commerce-manual-booking-handoff-panel" aria-label="Manual Booking Handoff">'
+      + '<h4>Manual Booking Handoff</h4>'
+      + '<p>status: manual handoff only</p>'
+      + '<p>no auto open</p>'
+      + '<p>no bookingUrl</p>'
+      + '<p>no payment</p>'
+      + '<p>no order</p>'
+      + '<p>no identity upload</p>'
+      + '<p>no bank card save</p>'
+      + '<p>user must verify on official platform</p>'
+      + '<p>redacted: true</p>'
+      + '<h5>搜索条件</h5>' + commerceObjectLinesHtml(handoff.searchConditions || {})
+      + '<h5>价格证据摘要</h5>' + commerceObjectLinesHtml(handoff.priceEvidenceSummary || {})
+      + '<h5>用户核对清单</h5>' + list(handoff.userChecklist || [])
+      + '<button type="button" class="cmd-btn gray commerce-result-summary-copy-btn" data-commerce-copy-kind="manualBookingHandoff" data-commerce-copy-text="' + commerceEncodedCopyText(handoff.copyPayload || '') + '">复制人工核对清单</button>'
+      + '<p>请用户自行打开官方航空公司或可信平台核对。</p>'
+      + '<p>weishan 不自动跳转、不付款、不下单。</p>'
+      + '<h5>audit draft</h5>'
+      + '<p>' + esc(audit.eventType || 'MANUAL_BOOKING_HANDOFF_AUDIT_DRAFT') + '</p>'
+      + '<p>copyChecklistCount: ' + esc(String(audit.copyChecklistCount || 0)) + '</p>'
+      + '<p>autoOpenAttemptCount: 0</p>'
+      + '<p>bookingUrlGeneratedCount: 0</p>'
+      + '<p>paymentAttemptCount: 0</p>'
+      + '<p>orderAttemptCount: 0</p>'
+      + '<p>identityUploadAttemptCount: 0</p>'
+      + '<p>redacted: true</p>'
+      + '</section>';
+    return disclosure('查看 Manual Booking Handoff', body, 'commerce-manual-booking-handoff-disclosure');
+  }
+
 
   function commerceProviderActivationReadinessGateDisplay(task){
     const api = window.WeishanCommerceProviderActivationReadinessGate;
@@ -5871,6 +6001,9 @@
       ${commerceManualProviderReviewWorkflowDisclosure(task)}
       ${commerceManualProviderReviewWorkflowV1Disclosure(task)}
       ${commerceLimitedRealPriceUiBetaGateDisclosure(task)}
+      ${commerceLimitedBetaKillSwitchDisclosure(task)}
+      ${commerceLimitedBetaRollbackGuardDisclosure(task)}
+      ${commerceManualBookingHandoffDisclosure(task)}
       ${commerceProviderActivationReadinessGateDisclosure(task)}
       ${commerceCredentialConsentScopeGateDisclosure(task)}
       ${commerceReadonlyAdapterContractGateDisclosure(task)}
@@ -5898,6 +6031,8 @@
     const betaApi = window.WeishanLimitedRealPriceUiBetaGate;
     const manualApi = window.WeishanManualProviderReviewWorkflowV1;
     const priceApi = window.WeishanPriceIntegrityTaxesFeesGateV1;
+    const killApi = window.WeishanLimitedBetaKillSwitch;
+    const rollbackApi = window.WeishanLimitedBetaRollbackGuard;
     if (!betaApi || typeof betaApi.buildLimitedBetaFlightPriceCandidate !== "function" || typeof betaApi.evaluateLimitedRealPriceUiBetaGate !== "function" || typeof betaApi.buildLimitedBetaPriceCard !== "function") return "";
     const candidate = betaApi.buildLimitedBetaFlightPriceCandidate();
     const manualProviderReview = manualApi && typeof manualApi.evaluateManualProviderReviewForBeta === "function"
@@ -5913,6 +6048,43 @@
       schemaValidation:{ validationDecision:"pass" },
       displaySurface:"ordinary_result_card"
     });
+    const killVisibility = killApi && typeof killApi.evaluateLimitedBetaVisibility === "function"
+      ? killApi.evaluateLimitedBetaVisibility({ category:"flight", providerCategory:"flight", providerId:"flight_provider", surface:"ordinary_result_card" })
+      : { priceCardVisible:true, killSwitchState:"enabled", redacted:true };
+    const rollbackDecision = rollbackApi && typeof rollbackApi.evaluateLimitedBetaRollbackGuard === "function"
+      ? rollbackApi.evaluateLimitedBetaRollbackGuard({
+        candidate,
+        providerCategory:"flight",
+        providerId:"flight_provider",
+        manualProviderReview,
+        priceIntegrityValidation,
+        sourceLabelValidation:{ validationDecision:"pass" },
+        schemaValidation:{ validationDecision:"pass" },
+        killSwitchState:killVisibility.killSwitchState
+      })
+      : { rollbackDecision:"not_needed", redacted:true };
+    if (killVisibility.priceCardVisible !== true) {
+      const rollbackActive = killVisibility.killSwitchState === "rollback_active" || killVisibility.killSwitchState === "forced_off";
+      return `<section class="commerce-guarded-price-card is-withheld" aria-label="Limited Beta 已关闭">
+        <h5>${rollbackActive ? "已回滚到离线计划" : "Limited Beta 已关闭"}</h5>
+        <p>暂无真实价格结果</p>
+        <p>当前不展示价格</p>
+        <p>原因：${esc(killVisibility.reason || "limited beta disabled")}</p>
+        <p>rollbackReason：${esc(rollbackActive ? (killVisibility.reason || "forced rollback to offline planning") : "not_needed")}</p>
+        <p>仅整理搜索条件 / 暂无真实价格结果。</p>
+        <p>不显示 bookingUrl，不提供预订、付款、下单或证件 / 银行卡上传入口。</p>
+      </section>`;
+    }
+    if (rollbackDecision.rollbackDecision === "rollback_active") {
+      return `<section class="commerce-guarded-price-card is-withheld" aria-label="Limited Beta Rollback Active">
+        <h5>已回滚到离线计划</h5>
+        <p>暂无真实价格结果</p>
+        <p>当前不展示价格</p>
+        <p>rollbackReason：${esc(rollbackDecision.rollbackReason || "rollback guard active")}</p>
+        <p>仅整理搜索条件 / 暂无真实价格结果。</p>
+        <p>不显示 bookingUrl，不提供预订、付款、下单或证件 / 银行卡上传入口。</p>
+      </section>`;
+    }
     const card = betaApi.buildLimitedBetaPriceCard(candidate, decision);
     if (!card || card.visible !== true) {
       const reason = card && card.reason || "Provider 人工审查未通过 / 未完成";
@@ -5975,6 +6147,9 @@
       ${commerceManualProviderReviewWorkflowDisclosure(task)}
       ${commerceManualProviderReviewWorkflowV1Disclosure(task)}
       ${commerceLimitedRealPriceUiBetaGateDisclosure(task)}
+      ${commerceLimitedBetaKillSwitchDisclosure(task)}
+      ${commerceLimitedBetaRollbackGuardDisclosure(task)}
+      ${commerceManualBookingHandoffDisclosure(task)}
       ${globalProcurementDecisionWorkspaceDisclosure(task)}
     </section>`;
     return disclosure("查看其它安全规则折叠面板", body, "commerce-simple-flight-advanced-debug-disclosure");
@@ -6565,6 +6740,18 @@
       const checklistButton = target && target.closest("[data-commerce-copy-kind]");
       if (checklistButton && host.contains(checklistButton)) {
         copyCommerceActionableChecklist(checklistButton.getAttribute("data-commerce-copy-kind") || "", commerceDecodedInlineCopyText(checklistButton, "data-commerce-copy-text"));
+        return;
+      }
+      const limitedBetaActionButton = target && target.closest("[data-commerce-limited-beta-action]");
+      if (limitedBetaActionButton && host.contains(limitedBetaActionButton)) {
+        const action = limitedBetaActionButton.getAttribute("data-commerce-limited-beta-action") || "";
+        const api = window.WeishanLimitedBetaKillSwitch;
+        if (api) {
+          if (action === "off" && typeof api.turnOffLimitedBeta === "function") api.turnOffLimitedBeta("local user disabled limited beta from UI");
+          if (action === "on" && typeof api.turnOnLimitedBeta === "function") api.turnOnLimitedBeta("local user restored flight limited beta from UI");
+          if (action === "rollback" && typeof api.forceRollback === "function") api.forceRollback("local user forced rollback to offline planning");
+        }
+        render(host);
         return;
       }
       const templateButton = target && target.closest("[data-commerce-template-kind]");

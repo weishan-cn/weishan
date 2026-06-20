@@ -20,6 +20,9 @@ const windowRef = loadRendererCore([
   "apps/desktop/src/renderer/core/providerConnectionReadinessDecisionEngine.js",
   "apps/desktop/src/renderer/core/manualProviderReviewWorkflowV1.js",
   "apps/desktop/src/renderer/core/limitedRealPriceUiBetaGate.js",
+  "apps/desktop/src/renderer/core/limitedBetaKillSwitch.js",
+  "apps/desktop/src/renderer/core/limitedBetaRollbackGuard.js",
+  "apps/desktop/src/renderer/core/manualBookingHandoff.js",
   "apps/desktop/src/renderer/core/providerConnectionReadinessConsole.js"
 ]);
 
@@ -81,7 +84,7 @@ function main() {
   assert.equal(paymentDecision.decisionReason, "forbidden capability requested");
 
   const consoleState = consoleApi.buildProviderConnectionReadinessConsole();
-  assert.equal(consoleState.consoleVersion, "2.1.30");
+  assert.equal(consoleState.consoleVersion, "2.1.31");
   assert.equal(consoleState.status, "readiness console only");
   assert.equal(consoleState.mode, "offline planning only");
   assert.equal(consoleState.realProvider, "disabled");
@@ -141,6 +144,10 @@ function main() {
         assert.equal(row.credentialStorage.limitedRealPriceUiBeta, "flight_only");
         assert.equal(row.credentialStorage.limitedBetaDisplayGate, "draft-ready");
         assert.equal(row.credentialStorage.limitedBetaPriceDisplay, "guarded only");
+        assert.equal(row.credentialStorage.limitedBetaKillSwitch, "active");
+        assert.equal(row.credentialStorage.rollbackGuard, "active");
+        assert.equal(row.credentialStorage.manualBookingHandoff, "manual-only");
+        assert.equal(row.credentialStorage.betaRollbackState, "not_needed");
         assert.equal(row.credentialStorage.sandboxTestPriceDisplay, "guarded only");
         assert.equal(row.credentialStorage.productionPriceDisplay, "disabled");
         assert.equal(row.credentialStorage.bookingUrlDisplay, "disabled");
@@ -161,6 +168,10 @@ function main() {
         assert.equal(row.readinessMatrix.limitedRealPriceUiBeta, "flight_only");
         assert.equal(row.readinessMatrix.limitedBetaDisplayGate, "draft-ready");
         assert.equal(row.readinessMatrix.limitedBetaPriceDisplay, "guarded only");
+        assert.equal(row.readinessMatrix.limitedBetaKillSwitch, "active");
+        assert.equal(row.readinessMatrix.rollbackGuard, "active");
+        assert.equal(row.readinessMatrix.manualBookingHandoff, "manual-only");
+        assert.equal(row.readinessMatrix.betaRollbackState, "not_needed");
         assert.equal(row.readinessMatrix.sandboxTestPriceDisplay, "guarded only");
         assert.equal(row.readinessMatrix.productionPriceDisplay, "disabled");
         assert.equal(row.readinessMatrix.bookingUrlDisplay, "disabled");
@@ -195,6 +206,10 @@ function main() {
   assert.equal(flightRow.credentialStorage.limitedRealPriceUiBeta, "flight_only");
   assert.equal(flightRow.credentialStorage.limitedBetaDisplayGate, "draft-ready");
   assert.equal(flightRow.credentialStorage.limitedBetaPriceDisplay, "guarded only");
+  assert.equal(flightRow.credentialStorage.limitedBetaKillSwitch, "active");
+  assert.equal(flightRow.credentialStorage.rollbackGuard, "active");
+  assert.equal(flightRow.credentialStorage.manualBookingHandoff, "manual-only");
+  assert.equal(flightRow.credentialStorage.betaRollbackState, "not_needed");
   assert.equal(flightRow.credentialStorage.sandboxTestPriceDisplay, "guarded only");
   assert.equal(flightRow.credentialStorage.productionPriceDisplay, "disabled");
   assert.equal(flightRow.credentialStorage.bookingUrlDisplay, "disabled");
@@ -208,6 +223,10 @@ function main() {
   assert.equal(flightRow.readinessMatrix.limitedRealPriceUiBeta, "flight_only");
   assert.equal(flightRow.readinessMatrix.limitedBetaDisplayGate, "draft-ready");
   assert.equal(flightRow.readinessMatrix.limitedBetaPriceDisplay, "guarded only");
+  assert.equal(flightRow.readinessMatrix.limitedBetaKillSwitch, "active");
+  assert.equal(flightRow.readinessMatrix.rollbackGuard, "active");
+  assert.equal(flightRow.readinessMatrix.manualBookingHandoff, "manual-only");
+  assert.equal(flightRow.readinessMatrix.betaRollbackState, "not_needed");
   assert.equal(flightRow.readinessMatrix.sandboxTestPriceDisplay, "guarded only");
   assert.equal(flightRow.readinessMatrix.productionPriceDisplay, "disabled");
   assert.equal(flightRow.readinessMatrix.bookingUrlDisplay, "disabled");

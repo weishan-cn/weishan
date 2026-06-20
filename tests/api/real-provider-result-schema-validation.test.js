@@ -35,7 +35,7 @@ function expectBlocked(overrides, hit) {
 }
 
 function main() {
-  assert.equal(api.REAL_PROVIDER_RESULT_SCHEMA_VALIDATION_VERSION, "2.1.30");
+  assert.equal(api.REAL_PROVIDER_RESULT_SCHEMA_VALIDATION_VERSION, "2.1.31");
   const draft = api.buildRealProviderResultSchemaValidationDraft();
   assert.equal(draft.status, "validation gate only");
   assert.equal(draft.mode, "no ordinary result exposure");
