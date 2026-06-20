@@ -2103,7 +2103,12 @@
         <p>flight adapter v1: ${esc((row.readinessMatrix || {}).flightAdapterV1 || "not_started")}</p>
         <p>endpoint allowlist enforcement: ${esc((row.readinessMatrix || {}).endpointAllowlistEnforcement || (row.readinessMatrix || {}).endpointAllowlist || "missing")}</p>
         <p>sandbox real-key dry run gate: ${esc((row.readinessMatrix || {}).sandboxRealKeyDryRunGate || (row.readinessMatrix || {}).sandboxGate || "missing")}</p>
+        <p>sandbox response schema gate: ${esc((row.readinessMatrix || {}).sandboxResponseSchemaGate || "missing")}</p>
+        <p>real provider result schema validation: ${esc((row.readinessMatrix || {}).realProviderResultSchemaValidation || "missing")}</p>
+        <p>provider result source label gate: ${esc((row.readinessMatrix || {}).providerResultSourceLabelGate || (row.readinessMatrix || {}).sourceLabelGate || "missing")}</p>
         <p>sandbox dry run transport: ${esc((row.readinessMatrix || {}).sandboxDryRunTransport || "disabled")}</p>
+        <p>schema gate: ${esc((row.readinessMatrix || {}).schemaGate || "missing")}</p>
+        <p>source label gate: ${esc((row.readinessMatrix || {}).sourceLabelGate || "missing")}</p>
         <p>real credential connected: ${esc(((row.credentialStorage || {}).realCredentialConnected) || "no")}</p>
         <p>real provider disabled</p>
         <p>real network disabled</p>
@@ -2111,8 +2116,10 @@
         <p>real endpoint disabled</p>
         <p>production endpoint: disabled</p>
         <p>real price disabled</p>
+        <p>price exposure: disabled</p>
         <p>availability disabled</p>
         <p>bookingUrl disabled</p>
+        <p>bookingUrl exposure: disabled</p>
         <p>ordinary result exposure: disabled</p>
         <p>payment disabled</p>
         <p>order disabled</p>
@@ -2142,7 +2149,7 @@
     const state = api && typeof api.buildSecureApiKeyStorageConsole === "function"
       ? api.buildSecureApiKeyStorageConsole()
       : {
-        version:"2.1.27",
+        version:"2.1.28",
         status:"secure local storage only",
         mode:"no provider connection",
         realProvider:"disabled",
@@ -2309,6 +2316,9 @@
       ${commerceReadOnlyProviderAdapterV1Disclosure(task)}
       ${commerceEndpointAllowlistEnforcementDisclosure(task)}
       ${commerceProviderSandboxRealKeyDryRunGateDisclosure(task)}
+      ${commerceSandboxResponseSchemaGateDisclosure(task)}
+      ${commerceRealProviderResultSchemaValidationDisclosure(task)}
+      ${commerceProviderResultSourceLabelGateDisclosure(task)}
       ${commerceProviderGateMatrixDashboardDisclosure(task)}
       ${commerceProviderNoNetworkRuntimeGuardDisclosure(task)}
       ${commerceOfflineProviderFixtureValidationHarnessDisclosure(task)}
@@ -2527,6 +2537,9 @@
       ${commerceReadOnlyProviderAdapterV1Disclosure(task)}
       ${commerceEndpointAllowlistEnforcementDisclosure(task)}
       ${commerceProviderSandboxRealKeyDryRunGateDisclosure(task)}
+      ${commerceSandboxResponseSchemaGateDisclosure(task)}
+      ${commerceRealProviderResultSchemaValidationDisclosure(task)}
+      ${commerceProviderResultSourceLabelGateDisclosure(task)}
       ${commerceProviderGateMatrixDashboardDisclosure(task)}
       ${commerceProviderNoNetworkRuntimeGuardDisclosure(task)}
       ${commerceOfflineProviderFixtureValidationHarnessDisclosure(task)}
@@ -4999,6 +5012,7 @@
     const metadata = api && typeof api.getAdapterMetadata === "function" ? api.getAdapterMetadata() : { adapterId:'flight_readonly_provider_adapter_v1', providerCategory:'flight', providerName:'flight_provider', mode:'offline_fixture_only', networkPolicy:'disabled', credentialPolicy:'metadata_only', endpointPolicy:'disabled', bookingUrlPolicy:'disabled', paymentPolicy:'disabled', orderPolicy:'disabled', identityUploadPolicy:'disabled', redacted:true };
     const contract = contractApi && typeof contractApi.buildAdapterContract === "function" ? contractApi.buildAdapterContract(metadata) : { allowedMethods:['getAdapterMetadata','validateCredentialScope','validateReadinessGates','runOfflineFixtureSearch','normalizeProviderResult','validateResultSchema','attachSourceLabel','runDryRun'], blockedMethods:['connect','fetch','request','post','createOrder','pay','checkout','uploadIdentity','revealCredential','exportCredential','testEndpoint'], auditDraft:{ eventType:'READ_ONLY_PROVIDER_ADAPTER_V1_DRAFT', redacted:true } };
     const audit = api && typeof api.buildAuditDraft === "function" ? api.buildAuditDraft(1) : contract.auditDraft || {};
+    const displayEvaluation = api && typeof api.evaluateResultForConsoleOnlyDisplay === "function" ? api.evaluateResultForConsoleOnlyDisplay(result) : { sandboxResponseSchemaValidation:'pass', realProviderResultSchemaValidation:'withheld', sourceLabelValidation:'pass', ordinaryResultExposure:'disabled', priceExposure:'disabled', availabilityExposure:'disabled', bookingUrlExposure:'disabled', resultDisplayDecision:'console-only', resultDisplayReason:'validated sandbox-shaped result remains withheld from ordinary result surface', redacted:true };
     const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
     const objectHtml = function(obj){ return '<ul>' + Object.keys(obj || {}).map(function(key){ return '<li>' + esc(key) + ': ' + esc(typeof obj[key] === 'object' ? JSON.stringify(obj[key]) : String(obj[key])) + '</li>'; }).join('') + '</ul>'; };
     const body = '<section class="commerce-readonly-provider-adapter-v1-panel" aria-label="Read-Only Provider Adapter V1">'
@@ -5009,6 +5023,7 @@
       + '<h5>allowed methods</h5>' + listHtml(contract.allowedMethods || [])
       + '<h5>blocked methods</h5>' + listHtml(contract.blockedMethods || [])
       + '<h5>offline fixture dry run</h5>' + objectHtml({ status:'PASS', fixtureOnly:result.fixtureOnly, realProvider:result.realProvider, realNetwork:result.realNetwork, realPrice:result.realPrice, availability:result.availability, bookingUrl:result.bookingUrl, redacted:result.redacted })
+      + '<h5>schema / source label / display decision</h5>' + objectHtml(displayEvaluation)
       + '<h5>normalized result schema</h5>' + objectHtml(result)
       + '<h5>source label gate</h5><p>sourceLabel: ' + esc(result.sourceLabel || 'offline fixture / no real provider') + '</p>'
       + '<h5>audit draft</h5><p>READ_ONLY_PROVIDER_ADAPTER_V1_DRAFT</p>' + objectHtml(audit)
@@ -5119,6 +5134,107 @@
       + '<p>redacted: true</p>'
       + '</section>';
     return disclosure('查看 Provider Sandbox Real-Key Dry Run Gate', body, 'commerce-provider-sandbox-real-key-dry-run-gate-disclosure');
+  }
+
+  function commerceSandboxResponseSchemaGateDisclosure(task){
+    const api = window.WeishanProviderSandboxResponseSchemaGate;
+    const state = api && typeof api.buildProviderSandboxResponseSchemaGateDraft === 'function' ? api.buildProviderSandboxResponseSchemaGateDraft() : { status:'schema validation only', mode:'console-only', schemaVersion:'provider_result_schema_v1', requiredFields:['providerId','providerName','providerCategory','resultType','sourceType','sourceUrlHost','updatedAt','readonlyEvidence','sandboxOnly','redacted'], forbiddenFields:['bookingUrl','checkoutUrl','paymentUrl','orderUrl','rawProviderPayload','rawHeaders','authorizationHeader','passengerIdentity','passportNumber','bankCardNumber'], sampleBlockedResponseReasons:['forbidden fields present'], auditDraft:{ eventType:'SANDBOX_RESPONSE_SCHEMA_GATE_DRAFT', ordinaryResultExposureCount:0, priceExposureCount:0, availabilityExposureCount:0, bookingUrlExposureCount:0, rawPayloadExposureCount:0, realPriceDisplayedCount:0, realProviderCallCount:0, networkAttemptCount:0, redacted:true }, redacted:true };
+    const audit = state.auditDraft || {};
+    const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
+    const objectHtml = function(obj){ return '<ul>' + Object.keys(obj || {}).map(function(key){ return '<li>' + esc(key) + ': ' + esc(typeof obj[key] === 'object' ? JSON.stringify(obj[key]) : String(obj[key])) + '</li>'; }).join('') + '</ul>'; };
+    const body = '<section class="commerce-sandbox-response-schema-gate-panel" aria-label="Sandbox Response Schema Gate">'
+      + '<h4>Sandbox Response Schema Gate</h4>'
+      + '<p>status: schema validation only</p>'
+      + '<p>mode: console-only</p>'
+      + '<p>schemaVersion: ' + esc(state.schemaVersion || 'provider_result_schema_v1') + '</p>'
+      + '<p>ordinary result exposure disabled</p>'
+      + '<p>price exposure disabled</p>'
+      + '<p>availability exposure disabled</p>'
+      + '<p>bookingUrl exposure disabled</p>'
+      + '<p>raw payload display forbidden</p>'
+      + '<p>redacted: true</p>'
+      + '<h5>required fields</h5>' + listHtml(state.requiredFields || [])
+      + '<h5>forbidden fields</h5>' + listHtml(state.forbiddenFields || [])
+      + '<h5>sample valid sandbox response</h5>' + objectHtml(state.sampleValidSandboxResponse || {})
+      + '<h5>sample blocked response reasons</h5>' + listHtml(state.sampleBlockedResponseReasons || [])
+      + '<h5>schema validation audit</h5><p>SANDBOX_RESPONSE_SCHEMA_GATE_DRAFT</p>'
+      + '<p>ordinaryResultExposureCount: ' + esc(String(audit.ordinaryResultExposureCount || 0)) + '</p>'
+      + '<p>priceExposureCount: ' + esc(String(audit.priceExposureCount || 0)) + '</p>'
+      + '<p>availabilityExposureCount: ' + esc(String(audit.availabilityExposureCount || 0)) + '</p>'
+      + '<p>bookingUrlExposureCount: ' + esc(String(audit.bookingUrlExposureCount || 0)) + '</p>'
+      + '<p>rawPayloadExposureCount: ' + esc(String(audit.rawPayloadExposureCount || 0)) + '</p>'
+      + '<p>realPriceDisplayedCount: ' + esc(String(audit.realPriceDisplayedCount || 0)) + '</p>'
+      + '<p>realProviderCallCount: ' + esc(String(audit.realProviderCallCount || 0)) + '</p>'
+      + '<p>networkAttemptCount: ' + esc(String(audit.networkAttemptCount || 0)) + '</p>'
+      + '<p>redacted: true</p>'
+      + '</section>';
+    return disclosure('查看 Sandbox Response Schema Gate', body, 'commerce-sandbox-response-schema-gate-disclosure');
+  }
+
+  function commerceRealProviderResultSchemaValidationDisclosure(task){
+    const api = window.WeishanRealProviderResultSchemaValidation;
+    const state = api && typeof api.buildRealProviderResultSchemaValidationDraft === 'function' ? api.buildRealProviderResultSchemaValidationDraft() : { status:'validation gate only', mode:'no ordinary result exposure', validationPipeline:['redact raw candidate','forbidden field scan','required field scan','resultType allowlist','providerCategory allowlist','source label validation','price exposure gate','bookingUrl exposure gate','ordinary result exposure gate','audit event'], blockedResultExamples:['raw payload blocked'], withheldResultPolicy:['console-only'], resultDisplayDecision:'withheld', auditDraft:{ eventType:'REAL_PROVIDER_RESULT_SCHEMA_VALIDATION_DRAFT', ordinaryResultExposureCount:0, priceExposureCount:0, availabilityExposureCount:0, bookingUrlExposureCount:0, rawPayloadExposureCount:0, realPriceDisplayedCount:0, rawProviderPayloadDisplayedCount:0, paymentAttemptCount:0, orderAttemptCount:0, identityUploadAttemptCount:0, redacted:true }, redacted:true };
+    const audit = state.auditDraft || {};
+    const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
+    const body = '<section class="commerce-real-provider-result-schema-validation-panel" aria-label="Real Provider Result Schema Validation">'
+      + '<h4>Real Provider Result Schema Validation</h4>'
+      + '<p>status: validation gate only</p>'
+      + '<p>mode: no ordinary result exposure</p>'
+      + '<p>real provider result display disabled</p>'
+      + '<p>real price display disabled</p>'
+      + '<p>availability display disabled</p>'
+      + '<p>bookingUrl display disabled</p>'
+      + '<p>raw provider payload display forbidden</p>'
+      + '<p>redacted: true</p>'
+      + '<h5>validation pipeline</h5>' + listHtml(state.validationPipeline || [])
+      + '<h5>blocked result examples</h5>' + listHtml(state.blockedResultExamples || [])
+      + '<h5>withheld result policy</h5>' + listHtml(state.withheldResultPolicy || [])
+      + '<p>result display decision: ' + esc(state.resultDisplayDecision || 'withheld') + '</p>'
+      + '<h5>audit draft</h5><p>REAL_PROVIDER_RESULT_SCHEMA_VALIDATION_DRAFT</p>'
+      + '<p>ordinaryResultExposureCount: ' + esc(String(audit.ordinaryResultExposureCount || 0)) + '</p>'
+      + '<p>priceExposureCount: ' + esc(String(audit.priceExposureCount || 0)) + '</p>'
+      + '<p>availabilityExposureCount: ' + esc(String(audit.availabilityExposureCount || 0)) + '</p>'
+      + '<p>bookingUrlExposureCount: ' + esc(String(audit.bookingUrlExposureCount || 0)) + '</p>'
+      + '<p>rawPayloadExposureCount: ' + esc(String(audit.rawPayloadExposureCount || 0)) + '</p>'
+      + '<p>realPriceDisplayedCount: ' + esc(String(audit.realPriceDisplayedCount || 0)) + '</p>'
+      + '<p>rawProviderPayloadDisplayedCount: ' + esc(String(audit.rawProviderPayloadDisplayedCount || 0)) + '</p>'
+      + '<p>paymentAttemptCount: ' + esc(String(audit.paymentAttemptCount || 0)) + '</p>'
+      + '<p>orderAttemptCount: ' + esc(String(audit.orderAttemptCount || 0)) + '</p>'
+      + '<p>identityUploadAttemptCount: ' + esc(String(audit.identityUploadAttemptCount || 0)) + '</p>'
+      + '<p>redacted: true</p>'
+      + '</section>';
+    return disclosure('查看 Real Provider Result Schema Validation', body, 'commerce-real-provider-result-schema-validation-disclosure');
+  }
+
+  function commerceProviderResultSourceLabelGateDisclosure(task){
+    const api = window.WeishanProviderResultSourceLabelGate;
+    const state = api && typeof api.buildProviderResultSourceLabelGateDraft === 'function' ? api.buildProviderResultSourceLabelGateDraft() : { status:'source label validation only', mode:'required before display', requiredFields:['providerId','providerName','sourceUrlHost','updatedAt','readonlyEvidence'], allowedSourceType:['sandbox_provider','no_provider'], blockedSourceType:['blocked_unknown_source','raw_ai_estimate','unknown_site','short_url','public_search_result_as_provider','unreviewed_provider'], sourceTrustState:['sandbox_verified','draft_only','pending_manual_review','blocked'], auditDraft:{ eventType:'PROVIDER_RESULT_SOURCE_LABEL_GATE_DRAFT', unknownSourceBlockedCount:0, shortUrlBlockedCount:0, credentialParamBlockedCount:0, rawAiEstimateBlockedCount:0, publicSearchMasqueradeBlockedCount:0, redacted:true }, redacted:true };
+    const audit = state.auditDraft || {};
+    const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
+    const body = '<section class="commerce-provider-result-source-label-gate-panel" aria-label="Provider Result Source Label Gate">'
+      + '<h4>Provider Result Source Label Gate</h4>'
+      + '<p>status: source label validation only</p>'
+      + '<p>mode: required before display</p>'
+      + '<p>source label required</p>'
+      + '<p>unknown source blocked</p>'
+      + '<p>short URL blocked</p>'
+      + '<p>credential params blocked</p>'
+      + '<p>raw AI estimate blocked</p>'
+      + '<p>public search result cannot masquerade as provider result</p>'
+      + '<p>redacted: true</p>'
+      + '<h5>required source label fields</h5>' + listHtml(state.requiredFields || [])
+      + '<h5>allowed sourceType</h5>' + listHtml(state.allowedSourceType || [])
+      + '<h5>blocked sourceType</h5>' + listHtml(state.blockedSourceType || [])
+      + '<h5>sourceTrustState</h5>' + listHtml(state.sourceTrustState || [])
+      + '<h5>source label audit</h5><p>PROVIDER_RESULT_SOURCE_LABEL_GATE_DRAFT</p>'
+      + '<p>unknownSourceBlockedCount: ' + esc(String(audit.unknownSourceBlockedCount || 0)) + '</p>'
+      + '<p>shortUrlBlockedCount: ' + esc(String(audit.shortUrlBlockedCount || 0)) + '</p>'
+      + '<p>credentialParamBlockedCount: ' + esc(String(audit.credentialParamBlockedCount || 0)) + '</p>'
+      + '<p>rawAiEstimateBlockedCount: ' + esc(String(audit.rawAiEstimateBlockedCount || 0)) + '</p>'
+      + '<p>publicSearchMasqueradeBlockedCount: ' + esc(String(audit.publicSearchMasqueradeBlockedCount || 0)) + '</p>'
+      + '<p>redacted: true</p>'
+      + '</section>';
+    return disclosure('查看 Provider Result Source Label Gate', body, 'commerce-provider-result-source-label-gate-disclosure');
   }
 
   function commerceProviderGateMatrixDashboardDisplay(task){
@@ -5687,6 +5803,9 @@
       ${commerceReadOnlyProviderAdapterV1Disclosure(task)}
       ${commerceEndpointAllowlistEnforcementDisclosure(task)}
       ${commerceProviderSandboxRealKeyDryRunGateDisclosure(task)}
+      ${commerceSandboxResponseSchemaGateDisclosure(task)}
+      ${commerceRealProviderResultSchemaValidationDisclosure(task)}
+      ${commerceProviderResultSourceLabelGateDisclosure(task)}
       ${commerceProviderGateMatrixDashboardDisclosure(task)}
       ${commerceProviderNoNetworkRuntimeGuardDisclosure(task)}
       ${commerceOfflineProviderFixtureValidationHarnessDisclosure(task)}

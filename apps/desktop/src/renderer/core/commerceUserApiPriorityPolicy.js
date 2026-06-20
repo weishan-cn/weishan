@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const POLICY_VERSION = "2.1.27";
+  const POLICY_VERSION = "2.1.28";
   const PHASE = "user_api_priority_search_policy";
 
   function clone(value) {

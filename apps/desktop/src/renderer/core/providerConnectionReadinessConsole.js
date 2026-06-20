@@ -1,14 +1,14 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION = "2.1.27";
+  const PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION = "2.1.28";
 
   const CATEGORY_DEFINITIONS = {
     flight_provider: {
       displayName: "机票 Provider",
       category: "flight",
       candidateDirections: ["用户自带 API", "weishan 候选只读价格源", "官方航空公司渠道", "合规 OTA 只读接口"],
-      gaps: ["endpoint allowlist enforcement draft-ready", "sandbox real-key dry run gate draft-ready", "sandbox dry run transport simulated only", "read-only adapter contract draft-ready", "result schema gate 未完成", "source label gate 未完成", "price integrity / taxes / fees gate 未完成", "bookingUrl domain safety gate 未完成", "manual provider review 未完成", "credential consent scope gate draft-ready", "no-secret persistence guard 必须持续 PASS", "no-network runtime guard 必须持续 PASS"]
+      gaps: ["endpoint allowlist enforcement draft-ready", "sandbox real-key dry run gate draft-ready", "sandbox response schema gate draft-ready", "real provider result schema validation draft-ready", "provider result source label gate draft-ready", "sandbox dry run transport simulated only", "read-only adapter contract draft-ready", "price integrity gate 未完成", "real credential not connected", "manual provider review 未完成", "credential consent scope gate draft-ready", "no-secret persistence guard 必须持续 PASS", "no-network runtime guard 必须持续 PASS"]
     },
     hotel_provider: {
       displayName: "酒店 Provider",
@@ -58,8 +58,8 @@
       safetyGates: {
         endpointAllowlist: providerCategory === "flight_provider",
         sandboxGate: providerCategory === "flight_provider",
-        schemaGate: providerCategory !== "restricted_provider" ? false : true,
-        sourceLabelGate: false,
+        schemaGate: providerCategory === "flight_provider" || providerCategory === "restricted_provider",
+        sourceLabelGate: providerCategory === "flight_provider",
         priceIntegrityGate: false
       },
       credentialState: {
@@ -68,7 +68,7 @@
         consentApproved: false,
         consentState: providerCategory === "flight_provider" ? "draft_ready" : "missing"
       },
-      adapterState: { readonlyAdapterApproved: false, adapterContractState: providerCategory === "flight_provider" ? "draft_ready" : "missing", flightAdapterV1State: providerCategory === "flight_provider" ? "offline_fixture_ready" : "not_started", endpointAllowlistEnforcementState: providerCategory === "flight_provider" ? "draft_ready" : "missing", sandboxRealKeyDryRunGateState: providerCategory === "flight_provider" ? "draft_ready" : "missing", sandboxDryRunTransport: providerCategory === "flight_provider" ? "simulated_only" : "disabled" },
+      adapterState: { readonlyAdapterApproved: false, adapterContractState: providerCategory === "flight_provider" ? "draft_ready" : "missing", flightAdapterV1State: providerCategory === "flight_provider" ? "offline_fixture_ready" : "not_started", endpointAllowlistEnforcementState: providerCategory === "flight_provider" ? "draft_ready" : "missing", sandboxRealKeyDryRunGateState: providerCategory === "flight_provider" ? "draft_ready" : "missing", sandboxResponseSchemaGateState: providerCategory === "flight_provider" ? "draft_ready" : "missing", realProviderResultSchemaValidationState: providerCategory === "flight_provider" ? "draft_ready" : "missing", providerResultSourceLabelGateState: providerCategory === "flight_provider" ? "draft_ready" : "missing", sandboxDryRunTransport: providerCategory === "flight_provider" ? "simulated_only" : "disabled" },
       manualReviewState: { approved: false }
     };
     const decision = engine && typeof engine.evaluateProviderConnectionReadiness === "function"
@@ -145,8 +145,11 @@
         sandboxGate: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "controlled dry-run ready" : "not_started"),
         sandboxRealKeyDryRunGate: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "draft-ready" : "not_started"),
         sandboxDryRunTransport: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "simulated only" : "disabled"),
-        schemaGate: restricted ? "not allowed" : "draft",
-        sourceLabelGate: restricted ? "not allowed" : "draft",
+        schemaGate: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "draft-ready" : "not_started"),
+        sourceLabelGate: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "draft-ready" : "not_started"),
+        sandboxResponseSchemaGate: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "draft-ready" : "not_started"),
+        realProviderResultSchemaValidation: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "draft-ready" : "not_started"),
+        providerResultSourceLabelGate: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "draft-ready" : "not_started"),
         priceIntegrityGate: restricted ? "not allowed" : "draft",
         bookingUrlSafety: restricted ? "not allowed" : "closed",
         credentialStorage: restricted ? "not allowed" : "secure storage implementation ready",
@@ -174,6 +177,9 @@
         flightAdapterV1: providerCategory === "flight_provider" ? "offline fixture ready" : "not_started",
         endpointAllowlistEnforcement: providerCategory === "flight_provider" ? "draft-ready" : "not_started",
         sandboxRealKeyDryRunGate: providerCategory === "flight_provider" ? "draft-ready" : "not_started",
+        sandboxResponseSchemaGate: providerCategory === "flight_provider" ? "draft-ready" : "not_started",
+        realProviderResultSchemaValidation: providerCategory === "flight_provider" ? "draft-ready" : "not_started",
+        providerResultSourceLabelGate: providerCategory === "flight_provider" ? "draft-ready" : "not_started",
         sandboxDryRunTransport: providerCategory === "flight_provider" ? "simulated only" : "disabled",
         credentialPlaintextDisplay: "disabled",
         credentialExport: "disabled",
@@ -240,7 +246,7 @@
       categoryRows: rows,
       providerRows: rows,
       readinessMatrix: {
-        columns: ["provider category", "provider type", "current status", "credential consent scope gate", "read-only adapter contract", "flight adapter v1", "endpoint allowlist enforcement", "sandbox real-key dry run gate", "sandbox dry run transport", "schema gate", "credential storage", "final decision"],
+        columns: ["provider category", "provider type", "current status", "credential consent scope gate", "read-only adapter contract", "flight adapter v1", "endpoint allowlist enforcement", "sandbox real-key dry run gate", "sandbox response schema gate", "real provider result schema validation", "provider result source label gate", "sandbox dry run transport", "schema gate", "source label gate", "credential storage", "final decision"],
         rows: rows.map((row) => [
           row.providerCategory,
           row.providerType,
@@ -250,8 +256,12 @@
           row.readinessMatrix.flightAdapterV1,
           row.readinessMatrix.endpointAllowlistEnforcement || row.readinessMatrix.endpointAllowlist,
           row.readinessMatrix.sandboxRealKeyDryRunGate || row.readinessMatrix.sandboxGate,
+          row.readinessMatrix.sandboxResponseSchemaGate,
+          row.readinessMatrix.realProviderResultSchemaValidation,
+          row.readinessMatrix.providerResultSourceLabelGate,
           row.readinessMatrix.sandboxDryRunTransport,
           row.readinessMatrix.schemaGate,
+          row.readinessMatrix.sourceLabelGate,
           row.readinessMatrix.credentialStorage,
           row.finalDecision
         ])

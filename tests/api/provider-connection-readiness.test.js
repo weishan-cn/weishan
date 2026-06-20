@@ -79,7 +79,7 @@ function main() {
   assert.equal(paymentDecision.decisionReason, "forbidden capability requested");
 
   const consoleState = consoleApi.buildProviderConnectionReadinessConsole();
-  assert.equal(consoleState.consoleVersion, "2.1.27");
+  assert.equal(consoleState.consoleVersion, "2.1.28");
   assert.equal(consoleState.status, "readiness console only");
   assert.equal(consoleState.mode, "offline planning only");
   assert.equal(consoleState.realProvider, "disabled");
@@ -129,12 +129,20 @@ function main() {
         assert.equal(row.credentialStorage.flightAdapterV1, "offline fixture ready");
         assert.equal(row.credentialStorage.endpointAllowlistEnforcement, "draft-ready");
         assert.equal(row.credentialStorage.sandboxRealKeyDryRunGate, "draft-ready");
+        assert.equal(row.credentialStorage.sandboxResponseSchemaGate, "draft-ready");
+        assert.equal(row.credentialStorage.realProviderResultSchemaValidation, "draft-ready");
+        assert.equal(row.credentialStorage.providerResultSourceLabelGate, "draft-ready");
         assert.equal(row.credentialStorage.sandboxDryRunTransport, "simulated only");
         assert.equal(row.readinessMatrix.credentialConsent, "draft-ready");
         assert.equal(row.readinessMatrix.readonlyAdapter, "draft-ready");
         assert.equal(row.readinessMatrix.flightAdapterV1, "offline fixture ready");
         assert.equal(row.readinessMatrix.endpointAllowlistEnforcement, "draft-ready");
         assert.equal(row.readinessMatrix.sandboxRealKeyDryRunGate, "draft-ready");
+        assert.equal(row.readinessMatrix.sandboxResponseSchemaGate, "draft-ready");
+        assert.equal(row.readinessMatrix.realProviderResultSchemaValidation, "draft-ready");
+        assert.equal(row.readinessMatrix.providerResultSourceLabelGate, "draft-ready");
+        assert.equal(row.readinessMatrix.schemaGate, "draft-ready");
+        assert.equal(row.readinessMatrix.sourceLabelGate, "draft-ready");
         assert.equal(row.readinessMatrix.sandboxDryRunTransport, "simulated only");
       } else {
         assert.equal(row.credentialStorage.credentialConsent, "missing");
@@ -154,7 +162,12 @@ function main() {
   assert.equal(flightRow.credentialStorage.flightAdapterV1, "offline fixture ready");
   assert.equal(flightRow.credentialStorage.endpointAllowlistEnforcement, "draft-ready");
   assert.equal(flightRow.credentialStorage.sandboxRealKeyDryRunGate, "draft-ready");
+  assert.equal(flightRow.credentialStorage.sandboxResponseSchemaGate, "draft-ready");
+  assert.equal(flightRow.credentialStorage.realProviderResultSchemaValidation, "draft-ready");
+  assert.equal(flightRow.credentialStorage.providerResultSourceLabelGate, "draft-ready");
   assert.equal(flightRow.credentialStorage.sandboxDryRunTransport, "simulated only");
+  assert.equal(flightRow.readinessMatrix.schemaGate, "draft-ready");
+  assert.equal(flightRow.readinessMatrix.sourceLabelGate, "draft-ready");
   assert.equal(flightRow.finalDecision, "no-go");
   assert.equal(consoleState.categoryRows.find((row) => row.providerCategory === "restricted_provider").finalDecision, "blocked");
   assert.equal(consoleState.readinessMatrix.rows.length, 6);

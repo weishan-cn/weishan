@@ -2174,7 +2174,7 @@ v2.1.21 新增 `globalProcurementQuickSummary.js` 和 `globalProcurementUserFaci
 
 ## v2.1.23：Global Procurement Decision Workspace Bundle / 全球采购决策工作台包
 
-v2.1.27 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全球采购结果进一步整理为“决策工作台”：默认只展示采购决策维度、决策规则、候选 schema、推荐模板、执行边界、风险提示、下一步与联动关系，强调当前只做离线采购决策整理，不连接真实 provider，不读取 API key，不连接 endpoint，不联网，不显示真实价格，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
+v2.1.28 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全球采购结果进一步整理为“决策工作台”：默认只展示采购决策维度、决策规则、候选 schema、推荐模板、执行边界、风险提示、下一步与联动关系，强调当前只做离线采购决策整理，不连接真实 provider，不读取 API key，不连接 endpoint，不联网，不显示真实价格，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
 
 - marker:global procurement decision workspace
 - marker:global procurement decision workspace established
@@ -2193,9 +2193,9 @@ v2.1.27 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全
 - sandbox gate / endpoint allowlist gate / key 生命周期 / 脱敏规则 / 本机安全存储 / API 绑定准备状态
 - redacted: true
 
-## v2.1.27：Provider Connection Readiness Console / Provider 接入准备控制台
+## v2.1.28：Provider Connection Readiness Console / Provider 接入准备控制台
 
-v2.1.27 新增 `providerConnectionReadinessConsole.js` 和 `providerConnectionReadinessDecisionEngine.js`。本阶段只做 Provider 接入准备状态汇总、离线 go/no-go 决策矩阵和审计草案展示；仍不接真实 provider，不读取或保存 API key，不连接 endpoint，不联网，不显示真实价格，不显示 availability，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
+v2.1.28 新增 `providerConnectionReadinessConsole.js` 和 `providerConnectionReadinessDecisionEngine.js`。本阶段只做 Provider 接入准备状态汇总、离线 go/no-go 决策矩阵和审计草案展示；仍不接真实 provider，不读取或保存 API key，不连接 endpoint，不联网，不显示真实价格，不显示 availability，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
 
 - marker:provider connection readiness console
 - marker:provider connection readiness decision engine
@@ -2239,9 +2239,9 @@ v2.1.27 新增 `providerConnectionReadinessConsole.js` 和 `providerConnectionRe
 - redacted: true
 
 
-## v2.1.27：Secure API Key Storage Implementation / 安全 API Key 存储实现
+## v2.1.28：Secure API Key Storage Implementation / 安全 API Key 存储实现
 
-v2.1.27 新增主进程 `secureApiKeyStorage.js` 和渲染层 `commerceSecureApiKeyStorageConsole.js`。本阶段只验证本机加密存储能力：使用 Electron safeStorage 可用时加密测试占位凭据，落盘文件为 `secure-provider-credentials.v1.json.enc`，返回 UI 的内容仅限 metadata only，不展示、不导出、不复制、不记录明文。safeStorage 不可用时必须返回 storage unavailable，plaintextFallback:false，不允许明文 fallback。
+v2.1.28 新增主进程 `secureApiKeyStorage.js` 和渲染层 `commerceSecureApiKeyStorageConsole.js`。本阶段只验证本机加密存储能力：使用 Electron safeStorage 可用时加密测试占位凭据，落盘文件为 `secure-provider-credentials.v1.json.enc`，返回 UI 的内容仅限 metadata only，不展示、不导出、不复制、不记录明文。safeStorage 不可用时必须返回 storage unavailable，plaintextFallback:false，不允许明文 fallback。
 
 - marker:secure api key storage implementation
 - marker:secure api key storage console
@@ -2287,11 +2287,11 @@ v2.1.27 新增主进程 `secureApiKeyStorage.js` 和渲染层 `commerceSecureApi
 
 安全红线保持：不输入、保存、读取真实 API key；不连接真实 provider；不连接 endpoint；不联网；不显示真实价格、fake/mock/demo/AI 估价；不生成 bookingUrl / checkoutUrl / paymentUrl / orderUrl；不预订、不付款、不下单；不上传或保存身份证、护照或银行卡。
 
-## v2.1.27：Credential Consent Scope Gate + Read-Only Provider Adapter V1
+## v2.1.28：Credential Consent Scope Gate + Read-Only Provider Adapter V1
 
-v2.1.27 新增 `credentialConsentScopeGate.js`、`readOnlyProviderAdapterContract.js` 和 `flightReadOnlyProviderAdapterV1.js`。本阶段只允许建立授权范围草案、只读 provider adapter 合同和机票离线 fixture adapter；不连接真实 provider，不读取或保存真实 API key，不连接 endpoint，不发起网络请求，不返回真实价格、availability 或 bookingUrl，不创建订单，不付款，不上传身份信息。
+v2.1.28 新增 `credentialConsentScopeGate.js`、`readOnlyProviderAdapterContract.js` 和 `flightReadOnlyProviderAdapterV1.js`。本阶段只允许建立授权范围草案、只读 provider adapter 合同和机票离线 fixture adapter；不连接真实 provider，不读取或保存真实 API key，不连接 endpoint，不发起网络请求，不返回真实价格、availability 或 bookingUrl，不创建订单，不付款，不上传身份信息。
 
-- marker:credential consent scope gate v2.1.27 allowed scopes
+- marker:credential consent scope gate v2.1.28 allowed scopes
 - marker:credential consent scope gate no provider connection
 - marker:read only provider adapter contract v1
 - marker:flight readonly provider adapter v1
@@ -2328,9 +2328,9 @@ v2.1.27 新增 `credentialConsentScopeGate.js`、`readOnlyProviderAdapterContrac
 - identity upload disabled
 
 
-## v2.1.27 Endpoint Allowlist Enforcement V1 + Provider Sandbox Real-Key Dry Run Gate
+## v2.1.28 Endpoint Allowlist Enforcement V1 + Provider Sandbox Real-Key Dry Run Gate
 
-- v2.1.27：Endpoint Allowlist Enforcement V1 + Provider Sandbox Real-Key Dry Run Gate
+- v2.1.28：Endpoint Allowlist Enforcement V1 + Provider Sandbox Real-Key Dry Run Gate
 - providerEndpointAllowlistEnforcement.js
 - providerSandboxRealKeyDryRunGate.js
 - 查看 Endpoint Allowlist Enforcement V1
@@ -2351,10 +2351,56 @@ v2.1.27 新增 `credentialConsentScopeGate.js`、`readOnlyProviderAdapterContrac
 - marker:endpoint allowlist enforcement all blocked
 - marker:provider sandbox real-key dry run gate
 - marker:provider sandbox real-key dry run gate all blocked
-- marker:v2.1.27 endpoint sandbox gates home ui
-- marker:v2.1.27 endpoint sandbox gates detail ui
+- marker:v2.1.28 endpoint sandbox gates home ui
+- marker:v2.1.28 endpoint sandbox gates detail ui
 - marker:endpoint allowlist enforcement core test
 - marker:provider sandbox real-key dry run gate core test
-- marker:v2.1.27 endpoint sandbox gates e2e
+- marker:v2.1.28 endpoint sandbox gates e2e
 
 安全边界：仅允许 sandbox/test key 进入本机安全存储能力验证；禁止 production key，禁止 production endpoint，禁止普通结果页展示 dry-run 结果，禁止真实价格、availability、bookingUrl、checkoutUrl、paymentUrl、orderUrl、预订、付款、下单、证件或银行卡上传。默认 dry-run transport 为 simulated，networkAttemptCount 和 realEndpointConnectCount 必须保持 0。
+
+## v2.1.28：Sandbox Response Schema + Source Label Gate + Real Provider Result Schema Validation
+
+v2.1.28 新增 `providerSandboxResponseSchemaGate.js`、`realProviderResultSchemaValidation.js` 和 `providerResultSourceLabelGate.js`。本阶段只验证 sandbox response schema、真实 provider-shaped result schema 与 source label，不把任何 provider 结果放入普通结果面；不展示真实价格、availability、bookingUrl、raw payload、headers、body、证件、银行卡、付款或下单入口。
+
+- v2.1.28：Sandbox Response Schema + Source Label Gate + Real Provider Result Schema Validation
+- providerSandboxResponseSchemaGate.js
+- realProviderResultSchemaValidation.js
+- providerResultSourceLabelGate.js
+- 查看 Sandbox Response Schema Gate
+- 查看 Real Provider Result Schema Validation
+- 查看 Provider Result Source Label Gate
+- Sandbox Response Schema Gate
+- Real Provider Result Schema Validation
+- Provider Result Source Label Gate
+- schema validation only
+- validation gate only
+- source label validation only
+- provider_result_schema_v1
+- SANDBOX_RESPONSE_SCHEMA_GATE_DRAFT
+- REAL_PROVIDER_RESULT_SCHEMA_VALIDATION_DRAFT
+- PROVIDER_RESULT_SOURCE_LABEL_GATE_DRAFT
+- real provider result display disabled
+- real price display disabled
+- availability display disabled
+- bookingUrl display disabled
+- raw provider payload display forbidden
+- source label required
+- unknown source blocked
+- short URL blocked
+- credential params blocked
+- public search result cannot masquerade as provider result
+- marker:provider sandbox response schema gate
+- marker:provider sandbox response schema gate all blocked
+- marker:real provider result schema validation
+- marker:real provider result schema validation all blocked
+- marker:provider result source label gate
+- marker:provider result source label gate blocked sources
+- marker:v2.1.28 schema source gates home ui
+- marker:v2.1.28 schema source gates detail ui
+- marker:sandbox response schema gate core test
+- marker:real provider result schema validation core test
+- marker:provider result source label gate core test
+- marker:v2.1.28 schema source gates e2e
+
+安全边界：schema pass 仍只能作为 console-only / validation-only / source-label-only 证据，不代表真实 provider 已接入；真实 provider result、真实价格、availability、bookingUrl、checkoutUrl、paymentUrl、orderUrl、rawProviderPayload、rawHeaders、rawRequest、rawResponse、authorization header、credential query params、passportNumber、bankCardNumber 和 passengerIdentity 必须保持禁止展示。所有审计事件必须 redacted: true，普通结果页仍只在没有可信真实价格源时显示“暂无真实价格结果”。

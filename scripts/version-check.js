@@ -824,6 +824,33 @@ function checkProviderSandboxRealKeyDryRunGateVersion(results, expectedVersion) 
   addCheck(results, "apps/desktop provider sandbox real-key dry run gate version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerSandboxRealKeyDryRunGate.js PROVIDER_SANDBOX_REAL_KEY_DRY_RUN_GATE_VERSION");
 }
 
+function checkProviderSandboxResponseSchemaGateVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/providerSandboxResponseSchemaGate.js";
+  const gate = readText(gatePath);
+  if (!gate) { results.push({ name:"apps/desktop provider sandbox response schema gate version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider sandbox response schema gate version", pass:false, detail:gate.__readError }); return; }
+  const match = gate.match(/PROVIDER_SANDBOX_RESPONSE_SCHEMA_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop provider sandbox response schema gate version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerSandboxResponseSchemaGate.js PROVIDER_SANDBOX_RESPONSE_SCHEMA_GATE_VERSION");
+}
+
+function checkRealProviderResultSchemaValidationVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/realProviderResultSchemaValidation.js";
+  const gate = readText(gatePath);
+  if (!gate) { results.push({ name:"apps/desktop real provider result schema validation version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop real provider result schema validation version", pass:false, detail:gate.__readError }); return; }
+  const match = gate.match(/REAL_PROVIDER_RESULT_SCHEMA_VALIDATION_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop real provider result schema validation version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/realProviderResultSchemaValidation.js REAL_PROVIDER_RESULT_SCHEMA_VALIDATION_VERSION");
+}
+
+function checkProviderResultSourceLabelGateV2128Version(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/providerResultSourceLabelGate.js";
+  const gate = readText(gatePath);
+  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.28 version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.28 version", pass:false, detail:gate.__readError }); return; }
+  const match = gate.match(/PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop provider result source label gate v2.1.28 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
+}
+
 function checkProviderGateMatrixDashboardVersion(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/commerceProviderGateMatrixDashboard.js";
   const gate = readText(gatePath);
@@ -1019,6 +1046,9 @@ function runVersionCheck() {
     checkFlightReadOnlyProviderAdapterV1Version(results, rootPackage.version);
     checkProviderEndpointAllowlistEnforcementVersion(results, rootPackage.version);
     checkProviderSandboxRealKeyDryRunGateVersion(results, rootPackage.version);
+    checkProviderSandboxResponseSchemaGateVersion(results, rootPackage.version);
+    checkRealProviderResultSchemaValidationVersion(results, rootPackage.version);
+    checkProviderResultSourceLabelGateV2128Version(results, rootPackage.version);
     checkProviderGateMatrixDashboardVersion(results, rootPackage.version);
     checkProviderNoNetworkRuntimeGuardVersion(results, rootPackage.version);
     checkOfflineProviderFixtureValidationHarnessVersion(results, rootPackage.version);
