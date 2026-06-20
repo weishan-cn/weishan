@@ -2174,7 +2174,7 @@ v2.1.21 新增 `globalProcurementQuickSummary.js` 和 `globalProcurementUserFaci
 
 ## v2.1.23：Global Procurement Decision Workspace Bundle / 全球采购决策工作台包
 
-v2.1.23 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全球采购结果进一步整理为“决策工作台”：默认只展示采购决策维度、决策规则、候选 schema、推荐模板、执行边界、风险提示、下一步与联动关系，强调当前只做离线采购决策整理，不连接真实 provider，不读取 API key，不连接 endpoint，不联网，不显示真实价格，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
+v2.1.24 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全球采购结果进一步整理为“决策工作台”：默认只展示采购决策维度、决策规则、候选 schema、推荐模板、执行边界、风险提示、下一步与联动关系，强调当前只做离线采购决策整理，不连接真实 provider，不读取 API key，不连接 endpoint，不联网，不显示真实价格，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
 
 - marker:global procurement decision workspace
 - marker:global procurement decision workspace established
@@ -2191,4 +2191,49 @@ v2.1.23 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全
 - riskNotice
 - nextSteps
 - sandbox gate / endpoint allowlist gate / key 生命周期 / 脱敏规则 / 本机安全存储 / API 绑定准备状态
+- redacted: true
+
+## v2.1.24：Provider Connection Readiness Console / Provider 接入准备控制台
+
+v2.1.24 新增 `providerConnectionReadinessConsole.js` 和 `providerConnectionReadinessDecisionEngine.js`。本阶段只做 Provider 接入准备状态汇总、离线 go/no-go 决策矩阵和审计草案展示；仍不接真实 provider，不读取或保存 API key，不连接 endpoint，不联网，不显示真实价格，不显示 availability，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
+
+- marker:provider connection readiness console
+- marker:provider connection readiness decision engine
+- marker:provider connection readiness categories
+- marker:provider connection readiness all disabled
+- marker:provider connection readiness home ui
+- marker:provider connection readiness detail ui
+- marker:provider connection readiness core test
+- marker:provider connection readiness e2e smoke
+- 查看 Provider 接入准备控制台
+- Provider 接入准备控制台
+- status: readiness console only
+- mode: offline planning only
+- flight_provider
+- hotel_provider
+- product_provider
+- local_service_provider
+- ticket_activity_provider
+- restricted_provider
+- final decision: no-go
+- final decision: blocked
+- real provider disabled
+- real network disabled
+- real API key disabled
+- real endpoint disabled
+- real price disabled
+- availability disabled
+- bookingUrl disabled
+- payment disabled
+- order disabled
+- identity upload disabled
+- PROVIDER_CONNECTION_READINESS_CONSOLE_DRAFT
+- networkAttemptCount: 0
+- realApiKeyReadCount: 0
+- realEndpointConnectCount: 0
+- realPriceReturnCount: 0
+- bookingUrlReturnCount: 0
+- paymentAttemptCount: 0
+- orderAttemptCount: 0
+- identityUploadAttemptCount: 0
 - redacted: true

@@ -841,6 +841,24 @@ function checkSettingsAuthLocalSecurityEvidenceVersion(results, expectedVersion)
   addCheck(results, "apps/desktop settings auth local security evidence version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/modules/account/settingsAuthLocalSecurityEvidence.js SETTINGS_AUTH_LOCAL_SECURITY_EVIDENCE_VERSION");
 }
 
+function checkProviderConnectionReadinessConsoleVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/providerConnectionReadinessConsole.js";
+  const gate = readText(gatePath);
+  if (!gate) { results.push({ name:"apps/desktop provider connection readiness console version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider connection readiness console version", pass:false, detail:gate.__readError }); return; }
+  const match = gate.match(/PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop provider connection readiness console version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerConnectionReadinessConsole.js PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION");
+}
+
+function checkProviderConnectionReadinessDecisionEngineVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/providerConnectionReadinessDecisionEngine.js";
+  const gate = readText(gatePath);
+  if (!gate) { results.push({ name:"apps/desktop provider connection readiness decision engine version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider connection readiness decision engine version", pass:false, detail:gate.__readError }); return; }
+  const match = gate.match(/PROVIDER_CONNECTION_READINESS_DECISION_ENGINE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop provider connection readiness decision engine version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerConnectionReadinessDecisionEngine.js PROVIDER_CONNECTION_READINESS_DECISION_ENGINE_VERSION");
+}
+
 function runVersionCheck() {
   const results = [];
 
@@ -894,6 +912,8 @@ function runVersionCheck() {
     checkManualUiAcceptanceAssistantVersion(results, rootPackage.version);
     checkNoSecretPersistenceGuardVersion(results, rootPackage.version);
     checkSettingsAuthLocalSecurityEvidenceVersion(results, rootPackage.version);
+    checkProviderConnectionReadinessConsoleVersion(results, rootPackage.version);
+    checkProviderConnectionReadinessDecisionEngineVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {
