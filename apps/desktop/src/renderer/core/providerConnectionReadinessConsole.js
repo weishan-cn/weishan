@@ -1,14 +1,14 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION = "2.1.29";
+  const PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION = "2.1.30";
 
   const CATEGORY_DEFINITIONS = {
     flight_provider: {
       displayName: "机票 Provider",
       category: "flight",
       candidateDirections: ["用户自带 API", "weishan 候选只读价格源", "官方航空公司渠道", "合规 OTA 只读接口"],
-      gaps: ["real credential not connected", "manual provider review", "production provider activation disabled", "endpoint allowlist enforcement draft-ready", "sandbox real-key dry run gate draft-ready", "sandbox response schema gate draft-ready", "real provider result schema validation draft-ready", "provider result source label gate draft-ready", "price integrity / taxes / fees gate draft-ready", "real price display gate guarded-display-ready", "sandbox/test price display guarded only", "production price display disabled", "bookingUrl display disabled", "sandbox dry run transport simulated only", "read-only adapter contract draft-ready", "credential consent scope gate draft-ready", "no-secret persistence guard 必须持续 PASS", "no-network runtime guard 必须持续 PASS"]
+      gaps: ["manual provider review workflow: v1", "manual review state: approved_for_limited_beta", "limited real price UI beta: flight_only", "limited beta display gate: draft-ready", "limited beta price display: guarded only", "real credential not connected", "production provider activation disabled", "endpoint allowlist enforcement draft-ready", "sandbox real-key dry run gate draft-ready", "sandbox response schema gate draft-ready", "real provider result schema validation draft-ready", "provider result source label gate draft-ready", "price integrity / taxes / fees gate draft-ready", "real price display gate guarded-display-ready", "production price display disabled", "bookingUrl display disabled", "sandbox dry run transport simulated only", "read-only adapter contract draft-ready", "credential consent scope gate draft-ready", "no-secret persistence guard 必须持续 PASS", "no-network runtime guard 必须持续 PASS"]
     },
     hotel_provider: {
       displayName: "酒店 Provider",
@@ -113,6 +113,7 @@
   }
 
   function finalDecision(providerCategory) {
+    if (providerCategory === "flight_provider") return "limited-beta-ready";
     return providerCategory === "restricted_provider" ? "blocked" : "no-go";
   }
 
@@ -120,13 +121,30 @@
     const definition = CATEGORY_DEFINITIONS[providerCategory];
     const decision = buildDecision(providerCategory);
     const restricted = providerCategory === "restricted_provider";
+    const manualApi = window.WeishanManualProviderReviewWorkflowV1;
+    const betaApi = window.WeishanLimitedRealPriceUiBetaGate;
+    const manualReview = providerCategory === "flight_provider" && manualApi && typeof manualApi.evaluateManualProviderReviewForBeta === "function"
+      ? manualApi.evaluateManualProviderReviewForBeta(manualApi.buildSampleFlightProviderReview())
+      : { allowedForLimitedBeta:false, manualReviewState:restricted ? "blocked" : "not_started", blockedReason:restricted ? "restricted category blocked" : "limited beta flight only", redacted:true };
+    const betaDecision = betaApi && typeof betaApi.evaluateLimitedRealPriceUiBetaGate === "function"
+      ? betaApi.evaluateLimitedRealPriceUiBetaGate({
+        candidate: betaApi.buildLimitedBetaFlightPriceCandidate ? betaApi.buildLimitedBetaFlightPriceCandidate({ providerId:providerCategory, providerCategory:definition.category }) : { providerId:providerCategory, providerCategory:definition.category },
+        manualProviderReview: manualReview,
+        priceIntegrityValidation:{ validationDecision:providerCategory === "flight_provider" ? "pass" : "withheld" },
+        sourceLabelValidation:{ validationDecision:providerCategory === "flight_provider" ? "pass" : "withheld" },
+        schemaValidation:{ validationDecision:providerCategory === "flight_provider" ? "pass" : "withheld" },
+        displaySurface:"ordinary_result_card"
+      })
+      : { displayDecision:providerCategory === "flight_provider" ? "allow_limited_beta_price_card" : (restricted ? "blocked" : "withheld"), redacted:true };
+    const limitedBetaReady = providerCategory === "flight_provider" && manualReview.manualReviewState === "approved_for_limited_beta" && betaDecision.displayDecision === "allow_limited_beta_price_card";
+    const rowFinalDecision = restricted ? "blocked" : (limitedBetaReady ? "limited-beta-ready" : "no-go");
     return clone({
       providerCategory,
       providerLabel: definition.displayName,
       providerName: definition.displayName,
       providerType: definition.category,
       displayName: definition.displayName,
-      currentStatus: providerStatus(providerCategory),
+      currentStatus: limitedBetaReady ? "limited_beta_ready" : providerStatus(providerCategory),
       candidateDirections: definition.candidateDirections,
       canPrepare: restricted ? ["安全阻断说明", "受限品类审计证据"] : ["只读 schema 草案", "离线 fixture", "人工审核材料", "安全闸门检查清单"],
       currentGaps: definition.gaps,
@@ -154,6 +172,11 @@
         priceIntegrityTaxesFeesGate: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "draft-ready" : "not_started"),
         realPriceDisplayGate: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "guarded-display-ready" : "not_started"),
         sandboxTestPriceDisplay: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "guarded only" : "not_started"),
+        manualProviderReviewWorkflow: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "v1" : "not allowed"),
+        manualReviewState: manualReview.manualReviewState || (restricted ? "blocked" : "not_started"),
+        limitedRealPriceUiBeta: restricted ? "blocked" : (providerCategory === "flight_provider" ? "flight_only" : "not allowed"),
+        limitedBetaDisplayGate: restricted ? "blocked" : (providerCategory === "flight_provider" ? "draft-ready" : "not allowed"),
+        limitedBetaPriceDisplay: restricted ? "blocked" : (providerCategory === "flight_provider" ? "guarded only" : "not allowed"),
         productionPriceDisplay: "disabled",
         bookingUrlDisplay: "disabled",
         bookingUrlSafety: restricted ? "not allowed" : "closed",
@@ -165,7 +188,7 @@
         sandboxDryRunTransport: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "simulated only" : "disabled"),
         realCredentialConnected: restricted ? "not allowed" : "no",
         manualReview: restricted ? "not allowed" : "missing",
-        finalDecision: decision.finalDecision || finalDecision(providerCategory)
+        finalDecision: rowFinalDecision
       },
       credentialStorage: restricted ? {
         secureStorageImplementation: "not allowed",
@@ -187,23 +210,30 @@
         providerResultSourceLabelGate: providerCategory === "flight_provider" ? "draft-ready" : "not_started",
         priceIntegrityTaxesFeesGate: providerCategory === "flight_provider" ? "draft-ready" : "not_started",
         realPriceDisplayGate: providerCategory === "flight_provider" ? "guarded-display-ready" : "not_started",
+        manualProviderReviewWorkflow: providerCategory === "flight_provider" ? "v1" : "not allowed",
+        manualReviewState: manualReview.manualReviewState || "not_started",
+        limitedRealPriceUiBeta: providerCategory === "flight_provider" ? "flight_only" : "not allowed",
+        limitedBetaDisplayGate: providerCategory === "flight_provider" ? "draft-ready" : "not allowed",
+        limitedBetaPriceDisplay: providerCategory === "flight_provider" ? "guarded only" : "not allowed",
         sandboxTestPriceDisplay: providerCategory === "flight_provider" ? "guarded only" : "not_started",
         productionPriceDisplay: "disabled",
         bookingUrlDisplay: "disabled",
         sandboxDryRunTransport: providerCategory === "flight_provider" ? "simulated only" : "disabled",
         credentialPlaintextDisplay: "disabled",
         credentialExport: "disabled",
-        finalDecision: "no-go"
+        finalDecision: rowFinalDecision
       },
       decision,
-      finalDecision: decision.finalDecision || finalDecision(providerCategory),
-      decisionReason: decision.decisionReason || (restricted ? "restricted category blocked" : "readiness gates incomplete"),
+      manualReview,
+      limitedBetaDisplayGateDecision: betaDecision,
+      finalDecision: rowFinalDecision,
+      decisionReason: rowFinalDecision === "limited-beta-ready" ? "flight limited beta guarded display ready" : (decision.decisionReason || (restricted ? "restricted category blocked" : "readiness gates incomplete")),
       missingRequiredGates: decision.missingRequirements || [],
       realProvider: "disabled",
       realNetwork: "disabled",
       realApiKey: "disabled",
       realEndpoint: "disabled",
-      realPrice: providerCategory === "flight_provider" ? "guarded_sandbox_test_only" : "disabled",
+      realPrice: providerCategory === "flight_provider" ? "limited_beta_guarded_only" : "disabled",
       availability: "disabled",
       bookingUrl: "disabled",
       payment: "disabled",
@@ -246,7 +276,7 @@
       realNetwork: "disabled",
       realApiKey: "disabled",
       realEndpoint: "disabled",
-      realPrice: "guarded_sandbox_test_only",
+      realPrice: "limited_beta_guarded_only",
       availability: "disabled",
       bookingUrl: "disabled",
       payment: "disabled",
@@ -256,7 +286,7 @@
       categoryRows: rows,
       providerRows: rows,
       readinessMatrix: {
-        columns: ["provider category", "provider type", "current status", "credential consent scope gate", "read-only adapter contract", "flight adapter v1", "endpoint allowlist enforcement", "sandbox real-key dry run gate", "sandbox response schema gate", "real provider result schema validation", "provider result source label gate", "price integrity / taxes / fees gate", "real price display gate", "sandbox/test price display", "production price display", "bookingUrl display", "sandbox dry run transport", "schema gate", "source label gate", "credential storage", "final decision"],
+        columns: ["provider category", "provider type", "current status", "credential consent scope gate", "read-only adapter contract", "flight adapter v1", "endpoint allowlist enforcement", "sandbox real-key dry run gate", "sandbox response schema gate", "real provider result schema validation", "provider result source label gate", "price integrity / taxes / fees gate", "manual provider review workflow", "manual review state", "limited real price UI beta", "limited beta display gate", "limited beta price display", "production price display", "bookingUrl display", "sandbox dry run transport", "schema gate", "source label gate", "credential storage", "final decision"],
         rows: rows.map((row) => [
           row.providerCategory,
           row.providerType,
@@ -270,8 +300,11 @@
           row.readinessMatrix.realProviderResultSchemaValidation,
           row.readinessMatrix.providerResultSourceLabelGate,
           row.readinessMatrix.priceIntegrityTaxesFeesGate || row.readinessMatrix.priceIntegrityGate,
-          row.readinessMatrix.realPriceDisplayGate,
-          row.readinessMatrix.sandboxTestPriceDisplay,
+          row.readinessMatrix.manualProviderReviewWorkflow,
+          row.readinessMatrix.manualReviewState,
+          row.readinessMatrix.limitedRealPriceUiBeta,
+          row.readinessMatrix.limitedBetaDisplayGate,
+          row.readinessMatrix.limitedBetaPriceDisplay,
           row.readinessMatrix.productionPriceDisplay,
           row.readinessMatrix.bookingUrlDisplay,
           row.readinessMatrix.sandboxDryRunTransport,
@@ -290,7 +323,7 @@
         realNetworkLine: "real network disabled",
         realApiKeyLine: "real API key disabled",
         realEndpointLine: "real endpoint disabled",
-        realPriceLine: "real price guarded sandbox/test only; production price disabled",
+        realPriceLine: "limited beta real price guarded only; production price disabled",
         availabilityLine: "availability disabled",
         bookingUrlLine: "bookingUrl disabled",
         paymentLine: "payment disabled",
@@ -313,11 +346,12 @@
     ["realProvider", "realNetwork", "realApiKey", "realEndpoint", "availability", "bookingUrl", "payment", "order", "identityUpload"].forEach((key) => {
       if (safe[key] !== "disabled") throw new Error("provider readiness console must keep " + key + " disabled");
     });
-    if (safe.realPrice !== "guarded_sandbox_test_only" && safe.realPrice !== "disabled") throw new Error("provider readiness console must only allow guarded sandbox/test price display");
+    if (safe.realPrice !== "limited_beta_guarded_only" && safe.realPrice !== "guarded_sandbox_test_only" && safe.realPrice !== "disabled") throw new Error("provider readiness console must only allow guarded limited beta display");
     list(safe.providerRows).forEach((row) => {
-      if (row.finalDecision !== "no-go" && row.finalDecision !== "blocked") throw new Error("provider readiness final decision must stay no-go or blocked");
+      if (row.finalDecision !== "no-go" && row.finalDecision !== "blocked" && row.finalDecision !== "limited-beta-ready") throw new Error("provider readiness final decision must stay limited-beta-ready, no-go, or blocked");
       if (row.providerCategory === "restricted_provider" && row.finalDecision !== "blocked") throw new Error("restricted provider must stay blocked");
-      if (row.providerCategory !== "restricted_provider" && row.finalDecision !== "no-go") throw new Error("normal provider must stay no-go");
+      if (row.providerCategory === "flight_provider" && row.finalDecision !== "limited-beta-ready") throw new Error("flight provider must be limited-beta-ready");
+      if (row.providerCategory !== "restricted_provider" && row.providerCategory !== "flight_provider" && row.finalDecision !== "no-go") throw new Error("non-flight provider must stay no-go");
     });
     if (audit.realProviderCallCount !== 0 || audit.networkAttemptCount !== 0 || audit.realApiKeyReadCount !== 0 || audit.realEndpointConnectCount !== 0 || audit.realPriceDisplayedCount !== 0 || audit.realPriceReturnCount !== 0 || audit.bookingUrlDisplayedCount !== 0 || audit.bookingUrlReturnCount !== 0 || audit.paymentAttemptCount !== 0 || audit.orderAttemptCount !== 0 || audit.identityUploadAttemptCount !== 0) {
       throw new Error("provider readiness audit counters must stay zero");

@@ -1,5 +1,5 @@
 (function(){
-  const PROVIDER_COMPLIANCE_DECISION_ENGINE_VERSION = "2.1.29";
+  const PROVIDER_COMPLIANCE_DECISION_ENGINE_VERSION = "2.1.30";
 
   const decisionInputDraftFields = [
     "providerId",

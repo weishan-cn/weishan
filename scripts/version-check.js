@@ -721,6 +721,48 @@ function checkManualProviderReviewWorkflowVersion(results, expectedVersion) {
   );
 }
 
+function checkManualProviderReviewWorkflowV1Version(results, expectedVersion) {
+  const workflowPath = "apps/desktop/src/renderer/core/manualProviderReviewWorkflowV1.js";
+  const workflow = readText(workflowPath);
+  if (!workflow) {
+    results.push({ name: "apps/desktop manual provider review workflow v1 version", pass: false, detail: workflowPath + " missing" });
+    return;
+  }
+  if (workflow.__readError) {
+    results.push({ name: "apps/desktop manual provider review workflow v1 version", pass: false, detail: workflow.__readError });
+    return;
+  }
+  const match = workflow.match(/MANUAL_PROVIDER_REVIEW_WORKFLOW_V1_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop manual provider review workflow v1 version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/manualProviderReviewWorkflowV1.js MANUAL_PROVIDER_REVIEW_WORKFLOW_V1_VERSION"
+  );
+}
+
+function checkLimitedRealPriceUiBetaGateVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/limitedRealPriceUiBetaGate.js";
+  const gate = readText(gatePath);
+  if (!gate) {
+    results.push({ name: "apps/desktop limited real price UI beta gate version", pass: false, detail: gatePath + " missing" });
+    return;
+  }
+  if (gate.__readError) {
+    results.push({ name: "apps/desktop limited real price UI beta gate version", pass: false, detail: gate.__readError });
+    return;
+  }
+  const match = gate.match(/LIMITED_REAL_PRICE_UI_BETA_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop limited real price UI beta gate version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/limitedRealPriceUiBetaGate.js LIMITED_REAL_PRICE_UI_BETA_GATE_VERSION"
+  );
+}
+
 function checkProviderActivationReadinessGateVersion(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/commerceProviderActivationReadinessGate.js";
   const gate = readText(gatePath);
@@ -887,10 +929,10 @@ function checkRealProviderResultSchemaValidationVersion(results, expectedVersion
 function checkProviderResultSourceLabelGateV2128Version(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/providerResultSourceLabelGate.js";
   const gate = readText(gatePath);
-  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.29 version", pass:false, detail:gatePath + " missing" }); return; }
-  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.29 version", pass:false, detail:gate.__readError }); return; }
+  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.30 version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.30 version", pass:false, detail:gate.__readError }); return; }
   const match = gate.match(/PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION\s*=\s*["']([^"']+)["']/);
-  addCheck(results, "apps/desktop provider result source label gate v2.1.29 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
+  addCheck(results, "apps/desktop provider result source label gate v2.1.30 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
 }
 
 function checkProviderGateMatrixDashboardVersion(results, expectedVersion) {
@@ -1082,6 +1124,8 @@ function runVersionCheck() {
     checkRealPriceDisplayGateVersion(results, rootPackage.version);
     checkBookingUrlDomainSafetyGateVersion(results, rootPackage.version);
     checkManualProviderReviewWorkflowVersion(results, rootPackage.version);
+    checkManualProviderReviewWorkflowV1Version(results, rootPackage.version);
+    checkLimitedRealPriceUiBetaGateVersion(results, rootPackage.version);
     checkProviderActivationReadinessGateVersion(results, rootPackage.version);
     checkCredentialConsentScopeGateVersion(results, rootPackage.version);
     checkCredentialConsentScopeGateCoreVersion(results, rootPackage.version);

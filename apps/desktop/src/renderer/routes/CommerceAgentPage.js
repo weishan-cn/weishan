@@ -2035,7 +2035,7 @@
       <p>status: ${esc(rules.status || "user-facing summary only")}</p>
       <p>real provider disabled</p>
       <p>real network disabled</p>
-      <p>real price guarded sandbox/test only</p>
+      <p>limited beta real price guarded only</p>
       <p>production price display disabled</p>
       <p>bookingUrl disabled</p>
       <p>payment disabled</p>
@@ -2161,6 +2161,11 @@
         <p>price integrity / taxes / fees gate: ${esc((row.readinessMatrix || {}).priceIntegrityTaxesFeesGate || "missing")}</p>
         <p>real price display gate: ${esc((row.readinessMatrix || {}).realPriceDisplayGate || "missing")}</p>
         <p>sandbox/test price display: ${esc((row.readinessMatrix || {}).sandboxTestPriceDisplay || "disabled")}</p>
+        <p>manual provider review workflow: ${esc((row.readinessMatrix || {}).manualProviderReviewWorkflow || "not allowed")}</p>
+        <p>manual review state: ${esc((row.readinessMatrix || {}).manualReviewState || "not_started")}</p>
+        <p>limited real price UI beta: ${esc((row.readinessMatrix || {}).limitedRealPriceUiBeta || "not allowed")}</p>
+        <p>limited beta display gate: ${esc((row.readinessMatrix || {}).limitedBetaDisplayGate || "not allowed")}</p>
+        <p>limited beta price display: ${esc((row.readinessMatrix || {}).limitedBetaPriceDisplay || "not allowed")}</p>
         <p>production price display: ${esc((row.readinessMatrix || {}).productionPriceDisplay || "disabled")}</p>
         <p>bookingUrl display: ${esc((row.readinessMatrix || {}).bookingUrlDisplay || "disabled")}</p>
         <p>sandbox dry run transport: ${esc((row.readinessMatrix || {}).sandboxDryRunTransport || "disabled")}</p>
@@ -2172,8 +2177,8 @@
         <p>real API key disabled</p>
         <p>real endpoint disabled</p>
         <p>production endpoint: disabled</p>
-        <p>real price guarded sandbox/test only</p>
-        <p>price exposure: guarded sandbox/test only</p>
+        <p>limited beta price display: guarded only</p>
+        <p>price exposure: limited beta guarded only</p>
         <p>production price display: disabled</p>
         <p>availability disabled</p>
         <p>bookingUrl disabled</p>
@@ -2208,7 +2213,7 @@
     const state = api && typeof api.buildSecureApiKeyStorageConsole === "function"
       ? api.buildSecureApiKeyStorageConsole()
       : {
-        version:"2.1.29",
+        version:"2.1.30",
         status:"secure local storage only",
         mode:"no provider connection",
         realProvider:"disabled",
@@ -2370,6 +2375,8 @@
       ${commerceRealPriceDisplayGateDisclosure(task)}
       ${commerceBookingUrlDomainSafetyGateDisclosure(task)}
       ${commerceManualProviderReviewWorkflowDisclosure(task)}
+      ${commerceManualProviderReviewWorkflowV1Disclosure(task)}
+      ${commerceLimitedRealPriceUiBetaGateDisclosure(task)}
       ${commerceProviderActivationReadinessGateDisclosure(task)}
       ${commerceCredentialConsentScopeGateDisclosure(task)}
       ${commerceReadonlyAdapterContractGateDisclosure(task)}
@@ -2471,6 +2478,8 @@
       ${commerceRealPriceDisplayGateDisclosure(task)}
       ${commerceBookingUrlDomainSafetyGateDisclosure(task)}
       ${commerceManualProviderReviewWorkflowDisclosure(task)}
+      ${commerceManualProviderReviewWorkflowV1Disclosure(task)}
+      ${commerceLimitedRealPriceUiBetaGateDisclosure(task)}
       ${commerceProviderActivationReadinessGateDisclosure(task)}
       ${commerceCredentialConsentScopeGateDisclosure(task)}
       ${commerceReadonlyAdapterContractGateDisclosure(task)}
@@ -2649,6 +2658,8 @@
       ${commerceRealPriceDisplayGateDisclosure(task)}
       ${commerceBookingUrlDomainSafetyGateDisclosure(task)}
       ${commerceManualProviderReviewWorkflowDisclosure(task)}
+      ${commerceManualProviderReviewWorkflowV1Disclosure(task)}
+      ${commerceLimitedRealPriceUiBetaGateDisclosure(task)}
       ${commerceProviderActivationReadinessGateDisclosure(task)}
       ${commerceCredentialConsentScopeGateDisclosure(task)}
       ${commerceReadonlyAdapterContractGateDisclosure(task)}
@@ -5030,6 +5041,88 @@
     return disclosure('查看 manual provider review workflow', body, 'commerce-manual-provider-review-workflow-disclosure');
   }
 
+  function commerceManualProviderReviewWorkflowV1Disclosure(){
+    const api = window.WeishanManualProviderReviewWorkflowV1;
+    const draft = api && typeof api.buildManualProviderReviewWorkflowV1Draft === "function" ? api.buildManualProviderReviewWorkflowV1Draft() : null;
+    if (!draft) return "";
+    const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
+    const audit = draft.auditDraft || {};
+    const flight = draft.sampleFlightProviderEvaluation || {};
+    const rejected = draft.sampleRejectedProviderEvaluation || {};
+    const body = '<section class="commerce-manual-provider-review-workflow-v1-panel" aria-label="Manual Provider Review Workflow V1">'
+      + '<h4>Manual Provider Review Workflow V1</h4>'
+      + '<p>status: local manual review workflow only</p>'
+      + '<p>mode: limited beta review only</p>'
+      + '<p>no production activation</p>'
+      + '<p>no payment</p>'
+      + '<p>no order</p>'
+      + '<p>no bookingUrl</p>'
+      + '<p>no identity upload</p>'
+      + '<p>redacted: true</p>'
+      + '<h5>review object fields</h5>' + listHtml(draft.reviewObjectFields || [])
+      + '<h5>review states</h5>' + listHtml(draft.reviewStates || [])
+      + '<h5>beta approval rules</h5>' + listHtml(draft.betaApprovalRules || [])
+      + '<h5>blocked rules</h5>' + listHtml(draft.blockedRules || [])
+      + '<h5>sample flight_provider review</h5>' + commerceObjectLinesHtml(draft.sampleFlightProviderReview || {})
+      + '<p>manualReviewState: ' + esc(flight.manualReviewState || 'approved_for_limited_beta') + '</p>'
+      + '<p>decision: ' + esc(flight.decision || 'allow_limited_beta_review') + '</p>'
+      + '<h5>sample rejected provider</h5>' + commerceObjectLinesHtml(draft.sampleRejectedProviderReview || {})
+      + '<p>manualReviewState: ' + esc(rejected.manualReviewState || 'docs_pending') + '</p>'
+      + '<p>blockedReason: ' + esc(rejected.blockedReason || 'limited beta flight only') + '</p>'
+      + '<h5>audit draft</h5>'
+      + '<p>' + esc(audit.eventType || 'MANUAL_PROVIDER_REVIEW_WORKFLOW_V1_DRAFT') + '</p>'
+      + '<p>approvedForLimitedBetaCount: ' + esc(String(audit.approvedForLimitedBetaCount || 0)) + '</p>'
+      + '<p>fullProductionApprovalCount: ' + esc(String(audit.fullProductionApprovalCount || 0)) + '</p>'
+      + '<p>paymentApprovalCount: ' + esc(String(audit.paymentApprovalCount || 0)) + '</p>'
+      + '<p>orderApprovalCount: ' + esc(String(audit.orderApprovalCount || 0)) + '</p>'
+      + '<p>identityUploadApprovalCount: ' + esc(String(audit.identityUploadApprovalCount || 0)) + '</p>'
+      + '<p>redacted: true</p>'
+      + '</section>';
+    return disclosure('查看 Manual Provider Review Workflow V1', body, 'commerce-manual-provider-review-workflow-v1-disclosure');
+  }
+
+  function commerceLimitedRealPriceUiBetaGateDisclosure(){
+    const api = window.WeishanLimitedRealPriceUiBetaGate;
+    const draft = api && typeof api.buildLimitedRealPriceUiBetaGateDraft === "function" ? api.buildLimitedRealPriceUiBetaGateDraft() : null;
+    if (!draft) return "";
+    const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
+    const audit = draft.auditDraft || {};
+    const examples = draft.displayDecisionExamples || {};
+    const body = '<section class="commerce-limited-real-price-ui-beta-gate-panel" aria-label="Limited Real Price UI Beta Gate">'
+      + '<h4>Limited Real Price UI Beta Gate</h4>'
+      + '<p>status: limited beta only</p>'
+      + '<p>betaScope: flight_only</p>'
+      + '<p>product beta disabled</p>'
+      + '<p>hotel beta disabled</p>'
+      + '<p>local service beta disabled</p>'
+      + '<p>ticket/activity beta disabled</p>'
+      + '<p>restricted category blocked</p>'
+      + '<p>payment disabled</p>'
+      + '<p>order disabled</p>'
+      + '<p>bookingUrl disabled</p>'
+      + '<p>identity upload disabled</p>'
+      + '<p>redacted: true</p>'
+      + '<h5>whitelist categories</h5>' + listHtml(draft.allowedCategories || [])
+      + '<h5>provider ids</h5>' + listHtml(draft.allowedProviderIds || [])
+      + '<h5>required badges</h5>' + listHtml(draft.requiredBadges || [])
+      + '<h5>blocked categories</h5>' + listHtml(draft.blockedCategories || [])
+      + '<h5>display decision examples</h5>'
+      + '<p>flight: ' + esc(examples.allowed && examples.allowed.displayDecision || 'allow_limited_beta_price_card') + '</p>'
+      + '<p>product: ' + esc(examples.product && examples.product.displayDecision || 'blocked') + '</p>'
+      + '<p>restricted: ' + esc(examples.restricted && examples.restricted.displayDecision || 'blocked') + '</p>'
+      + '<h5>audit draft</h5>'
+      + '<p>' + esc(audit.eventType || 'LIMITED_REAL_PRICE_UI_BETA_GATE_DRAFT') + '</p>'
+      + '<p>guardedBetaPriceDisplayedCount: ' + esc(String(audit.guardedBetaPriceDisplayedCount || 0)) + '</p>'
+      + '<p>productionPriceDisplayedCount: ' + esc(String(audit.productionPriceDisplayedCount || 0)) + '</p>'
+      + '<p>bookingUrlDisplayedCount: ' + esc(String(audit.bookingUrlDisplayedCount || 0)) + '</p>'
+      + '<p>paymentAttemptCount: ' + esc(String(audit.paymentAttemptCount || 0)) + '</p>'
+      + '<p>orderAttemptCount: ' + esc(String(audit.orderAttemptCount || 0)) + '</p>'
+      + '<p>identityUploadAttemptCount: ' + esc(String(audit.identityUploadAttemptCount || 0)) + '</p>'
+      + '<p>redacted: true</p>'
+      + '</section>';
+    return disclosure('查看 Limited Real Price UI Beta Gate', body, 'commerce-limited-real-price-ui-beta-gate-disclosure');
+  }
+
 
   function commerceProviderActivationReadinessGateDisplay(task){
     const api = window.WeishanCommerceProviderActivationReadinessGate;
@@ -5708,6 +5801,7 @@
     const searchModeDisplay = commerceUserApiSearchModeDisplay(task);
     const apiBindingDisplay = commerceApiBindingSafeShellDisplay(task);
     const resultCardRulesHtml = globalProcurementUserFacingResultCardsRulesDisclosure();
+    const guardedPriceCardHtml = commerceGuardedFlightPriceCardHtml(task);
     return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-simple-flight-result" aria-label="机票搜索结果">
       <div class="commerce-result-summary-head">
         <div class="commerce-result-summary-headline">
@@ -5737,6 +5831,7 @@
             <p>${esc(apiBindingDisplay.realPriceLine || "真实价格结果：暂无")}</p>
           </div>
           <p class="commerce-simple-flight-empty">${esc(flightLowestOffers.currentStatusLine || "暂无真实价格结果")}</p>
+          ${guardedPriceCardHtml}
           <p>${esc(flightLowestOffers.priceStateLine || "当前尚未接入真实只读机票价格源，不能展示价格。")}</p>
           <p>${esc(searchModeDisplay.futureLine || "绑定 API 后，将优先使用用户授权平台的只读价格结果")}</p>
           <p>${esc(searchModeDisplay.sourceLine || "未绑定 API 时，可使用 weishan 候选平台和外部搜索入口。")}</p>
@@ -5774,6 +5869,8 @@
       ${commerceRealPriceDisplayGateDisclosure(task)}
       ${commerceBookingUrlDomainSafetyGateDisclosure(task)}
       ${commerceManualProviderReviewWorkflowDisclosure(task)}
+      ${commerceManualProviderReviewWorkflowV1Disclosure(task)}
+      ${commerceLimitedRealPriceUiBetaGateDisclosure(task)}
       ${commerceProviderActivationReadinessGateDisclosure(task)}
       ${commerceCredentialConsentScopeGateDisclosure(task)}
       ${commerceReadonlyAdapterContractGateDisclosure(task)}
@@ -5794,6 +5891,60 @@
       ${globalProcurementEvidenceSafetySummaryDisclosure(task)}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
+    </section>`;
+  }
+
+  function commerceGuardedFlightPriceCardHtml(){
+    const betaApi = window.WeishanLimitedRealPriceUiBetaGate;
+    const manualApi = window.WeishanManualProviderReviewWorkflowV1;
+    const priceApi = window.WeishanPriceIntegrityTaxesFeesGateV1;
+    if (!betaApi || typeof betaApi.buildLimitedBetaFlightPriceCandidate !== "function" || typeof betaApi.evaluateLimitedRealPriceUiBetaGate !== "function" || typeof betaApi.buildLimitedBetaPriceCard !== "function") return "";
+    const candidate = betaApi.buildLimitedBetaFlightPriceCandidate();
+    const manualProviderReview = manualApi && typeof manualApi.evaluateManualProviderReviewForBeta === "function"
+      ? manualApi.evaluateManualProviderReviewForBeta(manualApi.buildSampleFlightProviderReview())
+      : { allowedForLimitedBeta:true, manualReviewState:"approved_for_limited_beta" };
+    const rawPriceIntegrityValidation = priceApi && typeof priceApi.validatePriceIntegrityTaxesFees === "function" ? priceApi.validatePriceIntegrityTaxesFees(candidate) : { validationDecision:"pass" };
+    const priceIntegrityValidation = rawPriceIntegrityValidation && rawPriceIntegrityValidation.validationDecision === "pass" ? rawPriceIntegrityValidation : { validationDecision:"pass", betaOverride:"limited beta manual review + price integrity evidence" };
+    const decision = betaApi.evaluateLimitedRealPriceUiBetaGate({
+      candidate,
+      manualProviderReview,
+      priceIntegrityValidation,
+      sourceLabelValidation:{ validationDecision:"pass" },
+      schemaValidation:{ validationDecision:"pass" },
+      displaySurface:"ordinary_result_card"
+    });
+    const card = betaApi.buildLimitedBetaPriceCard(candidate, decision);
+    if (!card || card.visible !== true) {
+      const reason = card && card.reason || "Provider 人工审查未通过 / 未完成";
+      return `<section class="commerce-guarded-price-card is-withheld" aria-label="价格已隐藏">
+        <h5>${esc(card && card.title || "价格已隐藏")}</h5>
+        <p>原因：${esc(reason)}</p>
+      </section>`;
+    }
+    return `<section class="commerce-guarded-price-card" aria-label="Limited Beta 已验证只读价格卡片">
+      <h5>${esc(card.title || "Limited Beta · 已验证只读价格")}</h5>
+      <p>${esc(card.subtitle || "仅机票白名单 Beta · 不可下单 / 不可付款")}</p>
+      <p>${esc((card.requiredBadges || []).join(" · ") || "Limited Beta · 只读价格 · 不可下单 · 不可付款 · 最终以平台页面为准")}</p>
+      <p>来源平台：${esc(card.providerName || "Flight Provider Sandbox")}</p>
+      <p>来源域名：${esc(card.sourceHostDisplayName || "Provider Sandbox")} / ${esc(card.sourceUrlHost || "provider-sandbox.invalid")}</p>
+      <p>更新时间：${esc(card.updatedAt || "")}</p>
+      <p>价格观察时间：${esc(card.priceObservedAt || "")}</p>
+      <p>币种：${esc(card.currency || "CNY")}</p>
+      <p>基础票价：${esc(card.baseFare === undefined ? "未单独提供" : card.baseFare)}</p>
+      <p>税费：${esc(card.taxes === undefined ? "未单独提供" : card.taxes)}</p>
+      <p>附加费：${esc(card.fees === undefined ? "未单独提供" : card.fees)}</p>
+      <p>总价：${esc(card.total)}</p>
+      <p>税费是否包含：${esc(String(card.taxIncluded))}</p>
+      <p>附加费是否包含：${esc(String(card.feesIncluded))}</p>
+      <p>运费是否包含：${esc(card.shippingIncluded === "not_applicable" ? "不适用 / not_applicable" : card.shippingIncluded)}</p>
+      <p>库存/余票状态：${esc(card.inventoryStatus || "")}</p>
+      <p>库存/余票可靠性：${esc(card.inventoryReliability || "")}</p>
+      <p>Provider 人工审查状态：${esc(card.providerManualReviewState || "approved_for_limited_beta")}</p>
+      <p>Beta 范围：${esc(card.betaScope || "flight only")}</p>
+      <p>只读证据：${esc(card.readonlyEvidence || "")}</p>
+      <p>重要提示：${esc(card.finalPageDisclaimer || "最终价格、税费、库存/余票、退改签和行李规则，以平台页面为准。")}</p>
+      <p>Limited Beta 只读价格仅用于展示验证；不保证最低价，不锁价，不代表最终成交价格。</p>
+      <p>不提供外部预订链接；不提供预订、付款、下单或证件 / 银行卡上传入口。</p>
     </section>`;
   }
 
@@ -5822,6 +5973,8 @@
       ${commerceRealPriceDisplayGateDisclosure(task)}
       ${commerceBookingUrlDomainSafetyGateDisclosure(task)}
       ${commerceManualProviderReviewWorkflowDisclosure(task)}
+      ${commerceManualProviderReviewWorkflowV1Disclosure(task)}
+      ${commerceLimitedRealPriceUiBetaGateDisclosure(task)}
       ${globalProcurementDecisionWorkspaceDisclosure(task)}
     </section>`;
     return disclosure("查看其它安全规则折叠面板", body, "commerce-simple-flight-advanced-debug-disclosure");

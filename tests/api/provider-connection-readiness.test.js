@@ -18,6 +18,8 @@ function loadRendererCore(files) {
 
 const windowRef = loadRendererCore([
   "apps/desktop/src/renderer/core/providerConnectionReadinessDecisionEngine.js",
+  "apps/desktop/src/renderer/core/manualProviderReviewWorkflowV1.js",
+  "apps/desktop/src/renderer/core/limitedRealPriceUiBetaGate.js",
   "apps/desktop/src/renderer/core/providerConnectionReadinessConsole.js"
 ]);
 
@@ -79,14 +81,14 @@ function main() {
   assert.equal(paymentDecision.decisionReason, "forbidden capability requested");
 
   const consoleState = consoleApi.buildProviderConnectionReadinessConsole();
-  assert.equal(consoleState.consoleVersion, "2.1.29");
+  assert.equal(consoleState.consoleVersion, "2.1.30");
   assert.equal(consoleState.status, "readiness console only");
   assert.equal(consoleState.mode, "offline planning only");
   assert.equal(consoleState.realProvider, "disabled");
   assert.equal(consoleState.realNetwork, "disabled");
   assert.equal(consoleState.realApiKey, "disabled");
   assert.equal(consoleState.realEndpoint, "disabled");
-  assert.equal(consoleState.realPrice, "guarded_sandbox_test_only");
+  assert.equal(consoleState.realPrice, "limited_beta_guarded_only");
   assert.equal(consoleState.availability, "disabled");
   assert.equal(consoleState.bookingUrl, "disabled");
   assert.equal(consoleState.payment, "disabled");
@@ -109,7 +111,7 @@ function main() {
     assert.equal(row.realNetwork, "disabled");
     assert.equal(row.realApiKey, "disabled");
     assert.equal(row.realEndpoint, "disabled");
-    assert.equal(row.realPrice, row.providerCategory === "flight_provider" ? "guarded_sandbox_test_only" : "disabled");
+    assert.equal(row.realPrice, row.providerCategory === "flight_provider" ? "limited_beta_guarded_only" : "disabled");
     assert.equal(row.availability, "disabled");
     assert.equal(row.bookingUrl, "disabled");
     assert.equal(row.payment, "disabled");
@@ -134,6 +136,11 @@ function main() {
         assert.equal(row.credentialStorage.providerResultSourceLabelGate, "draft-ready");
         assert.equal(row.credentialStorage.priceIntegrityTaxesFeesGate, "draft-ready");
         assert.equal(row.credentialStorage.realPriceDisplayGate, "guarded-display-ready");
+        assert.equal(row.credentialStorage.manualProviderReviewWorkflow, "v1");
+        assert.equal(row.credentialStorage.manualReviewState, "approved_for_limited_beta");
+        assert.equal(row.credentialStorage.limitedRealPriceUiBeta, "flight_only");
+        assert.equal(row.credentialStorage.limitedBetaDisplayGate, "draft-ready");
+        assert.equal(row.credentialStorage.limitedBetaPriceDisplay, "guarded only");
         assert.equal(row.credentialStorage.sandboxTestPriceDisplay, "guarded only");
         assert.equal(row.credentialStorage.productionPriceDisplay, "disabled");
         assert.equal(row.credentialStorage.bookingUrlDisplay, "disabled");
@@ -149,6 +156,11 @@ function main() {
         assert.equal(row.readinessMatrix.priceIntegrityGate, "draft-ready");
         assert.equal(row.readinessMatrix.priceIntegrityTaxesFeesGate, "draft-ready");
         assert.equal(row.readinessMatrix.realPriceDisplayGate, "guarded-display-ready");
+        assert.equal(row.readinessMatrix.manualProviderReviewWorkflow, "v1");
+        assert.equal(row.readinessMatrix.manualReviewState, "approved_for_limited_beta");
+        assert.equal(row.readinessMatrix.limitedRealPriceUiBeta, "flight_only");
+        assert.equal(row.readinessMatrix.limitedBetaDisplayGate, "draft-ready");
+        assert.equal(row.readinessMatrix.limitedBetaPriceDisplay, "guarded only");
         assert.equal(row.readinessMatrix.sandboxTestPriceDisplay, "guarded only");
         assert.equal(row.readinessMatrix.productionPriceDisplay, "disabled");
         assert.equal(row.readinessMatrix.bookingUrlDisplay, "disabled");
@@ -161,7 +173,7 @@ function main() {
         assert.equal(row.credentialStorage.flightAdapterV1, "not_started");
       }
     }
-    assert.equal(["no-go", "blocked"].includes(row.finalDecision), true);
+    assert.equal(["limited-beta-ready", "no-go", "blocked"].includes(row.finalDecision), true);
   }
 
   assert.equal(consoleState.categoryRows.filter((row) => row.finalDecision === "blocked").length, 1);
@@ -178,6 +190,11 @@ function main() {
   assert.equal(flightRow.credentialStorage.providerResultSourceLabelGate, "draft-ready");
   assert.equal(flightRow.credentialStorage.priceIntegrityTaxesFeesGate, "draft-ready");
   assert.equal(flightRow.credentialStorage.realPriceDisplayGate, "guarded-display-ready");
+  assert.equal(flightRow.credentialStorage.manualProviderReviewWorkflow, "v1");
+  assert.equal(flightRow.credentialStorage.manualReviewState, "approved_for_limited_beta");
+  assert.equal(flightRow.credentialStorage.limitedRealPriceUiBeta, "flight_only");
+  assert.equal(flightRow.credentialStorage.limitedBetaDisplayGate, "draft-ready");
+  assert.equal(flightRow.credentialStorage.limitedBetaPriceDisplay, "guarded only");
   assert.equal(flightRow.credentialStorage.sandboxTestPriceDisplay, "guarded only");
   assert.equal(flightRow.credentialStorage.productionPriceDisplay, "disabled");
   assert.equal(flightRow.credentialStorage.bookingUrlDisplay, "disabled");
@@ -186,13 +203,18 @@ function main() {
   assert.equal(flightRow.readinessMatrix.sourceLabelGate, "draft-ready");
   assert.equal(flightRow.readinessMatrix.priceIntegrityGate, "draft-ready");
   assert.equal(flightRow.readinessMatrix.realPriceDisplayGate, "guarded-display-ready");
+  assert.equal(flightRow.readinessMatrix.manualProviderReviewWorkflow, "v1");
+  assert.equal(flightRow.readinessMatrix.manualReviewState, "approved_for_limited_beta");
+  assert.equal(flightRow.readinessMatrix.limitedRealPriceUiBeta, "flight_only");
+  assert.equal(flightRow.readinessMatrix.limitedBetaDisplayGate, "draft-ready");
+  assert.equal(flightRow.readinessMatrix.limitedBetaPriceDisplay, "guarded only");
   assert.equal(flightRow.readinessMatrix.sandboxTestPriceDisplay, "guarded only");
   assert.equal(flightRow.readinessMatrix.productionPriceDisplay, "disabled");
   assert.equal(flightRow.readinessMatrix.bookingUrlDisplay, "disabled");
-  assert.equal(flightRow.finalDecision, "no-go");
+  assert.equal(flightRow.finalDecision, "limited-beta-ready");
   assert.equal(consoleState.categoryRows.find((row) => row.providerCategory === "restricted_provider").finalDecision, "blocked");
   assert.equal(consoleState.readinessMatrix.rows.length, 6);
-  assert.equal(consoleState.readinessMatrix.rows.some((row) => row.includes("flight_provider") && row.includes("draft-ready") && row.includes("offline fixture ready") && row.includes("simulated only") && row.includes("secure storage implementation ready") && row.includes("no-go")), true);
+  assert.equal(consoleState.readinessMatrix.rows.some((row) => row.includes("flight_provider") && row.includes("draft-ready") && row.includes("approved_for_limited_beta") && row.includes("flight_only") && row.includes("simulated only") && row.includes("secure storage implementation ready") && row.includes("limited-beta-ready")), true);
   assert.equal(consoleState.readinessMatrix.rows.some((row) => row.includes("restricted_provider") && row.includes("blocked")), true);
   assert.equal(consoleState.auditDraft.approvedProviderCount, 0);
   assert.equal(consoleState.auditDraft.connectedProviderCount, 0);

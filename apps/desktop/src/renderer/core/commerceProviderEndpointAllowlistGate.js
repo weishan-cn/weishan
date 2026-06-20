@@ -1,5 +1,5 @@
 (function(){
-  const ALLOWLIST_GATE_VERSION = "2.1.29";
+  const ALLOWLIST_GATE_VERSION = "2.1.30";
 
   const providerCategories = {
     flightProviders:["Google Flights", "Trip.com / 携程", "Skyscanner", "Kayak", "Expedia"],

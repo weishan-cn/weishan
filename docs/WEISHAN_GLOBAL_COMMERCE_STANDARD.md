@@ -2174,7 +2174,7 @@ v2.1.21 新增 `globalProcurementQuickSummary.js` 和 `globalProcurementUserFaci
 
 ## v2.1.23：Global Procurement Decision Workspace Bundle / 全球采购决策工作台包
 
-v2.1.29 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全球采购结果进一步整理为“决策工作台”：默认只展示采购决策维度、决策规则、候选 schema、推荐模板、执行边界、风险提示、下一步与联动关系，强调当前只做离线采购决策整理，不连接真实 provider，不读取 API key，不连接 endpoint，不联网，不显示真实价格，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
+v2.1.30 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全球采购结果进一步整理为“决策工作台”：默认只展示采购决策维度、决策规则、候选 schema、推荐模板、执行边界、风险提示、下一步与联动关系，强调当前只做离线采购决策整理，不连接真实 provider，不读取 API key，不连接 endpoint，不联网，不显示真实价格，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
 
 - marker:global procurement decision workspace
 - marker:global procurement decision workspace established
@@ -2195,7 +2195,7 @@ v2.1.29 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全
 
 ## v2.1.28：Provider Connection Readiness Console / Provider 接入准备控制台
 
-v2.1.29 新增 `providerConnectionReadinessConsole.js` 和 `providerConnectionReadinessDecisionEngine.js`。本阶段只做 Provider 接入准备状态汇总、离线 go/no-go 决策矩阵和审计草案展示；仍不接真实 provider，不读取或保存 API key，不连接 endpoint，不联网，不显示真实价格，不显示 availability，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
+v2.1.30 新增 `providerConnectionReadinessConsole.js` 和 `providerConnectionReadinessDecisionEngine.js`。本阶段只做 Provider 接入准备状态汇总、离线 go/no-go 决策矩阵和审计草案展示；仍不接真实 provider，不读取或保存 API key，不连接 endpoint，不联网，不显示真实价格，不显示 availability，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
 
 - marker:provider connection readiness console
 - marker:provider connection readiness decision engine
@@ -2239,9 +2239,9 @@ v2.1.29 新增 `providerConnectionReadinessConsole.js` 和 `providerConnectionRe
 - redacted: true
 
 
-## v2.1.29：Secure API Key Storage Implementation / 安全 API Key 存储实现
+## v2.1.30：Secure API Key Storage Implementation / 安全 API Key 存储实现
 
-v2.1.29 新增主进程 `secureApiKeyStorage.js` 和渲染层 `commerceSecureApiKeyStorageConsole.js`。本阶段只验证本机加密存储能力：使用 Electron safeStorage 可用时加密测试占位凭据，落盘文件为 `secure-provider-credentials.v1.json.enc`，返回 UI 的内容仅限 metadata only，不展示、不导出、不复制、不记录明文。safeStorage 不可用时必须返回 storage unavailable，plaintextFallback:false，不允许明文 fallback。
+v2.1.30 新增主进程 `secureApiKeyStorage.js` 和渲染层 `commerceSecureApiKeyStorageConsole.js`。本阶段只验证本机加密存储能力：使用 Electron safeStorage 可用时加密测试占位凭据，落盘文件为 `secure-provider-credentials.v1.json.enc`，返回 UI 的内容仅限 metadata only，不展示、不导出、不复制、不记录明文。safeStorage 不可用时必须返回 storage unavailable，plaintextFallback:false，不允许明文 fallback。
 
 - marker:secure api key storage implementation
 - marker:secure api key storage console
@@ -2289,9 +2289,9 @@ v2.1.29 新增主进程 `secureApiKeyStorage.js` 和渲染层 `commerceSecureApi
 
 ## v2.1.28：Credential Consent Scope Gate + Read-Only Provider Adapter V1
 
-v2.1.29 新增 `credentialConsentScopeGate.js`、`readOnlyProviderAdapterContract.js` 和 `flightReadOnlyProviderAdapterV1.js`。本阶段只允许建立授权范围草案、只读 provider adapter 合同和机票离线 fixture adapter；不连接真实 provider，不读取或保存真实 API key，不连接 endpoint，不发起网络请求，不返回真实价格、availability 或 bookingUrl，不创建订单，不付款，不上传身份信息。
+v2.1.30 新增 `credentialConsentScopeGate.js`、`readOnlyProviderAdapterContract.js` 和 `flightReadOnlyProviderAdapterV1.js`。本阶段只允许建立授权范围草案、只读 provider adapter 合同和机票离线 fixture adapter；不连接真实 provider，不读取或保存真实 API key，不连接 endpoint，不发起网络请求，不返回真实价格、availability 或 bookingUrl，不创建订单，不付款，不上传身份信息。
 
-- marker:credential consent scope gate v2.1.29 allowed scopes
+- marker:credential consent scope gate v2.1.30 allowed scopes
 - marker:credential consent scope gate no provider connection
 - marker:read only provider adapter contract v1
 - marker:flight readonly provider adapter v1
@@ -2351,17 +2351,17 @@ v2.1.29 新增 `credentialConsentScopeGate.js`、`readOnlyProviderAdapterContrac
 - marker:endpoint allowlist enforcement all blocked
 - marker:provider sandbox real-key dry run gate
 - marker:provider sandbox real-key dry run gate all blocked
-- marker:v2.1.29 endpoint sandbox gates home ui
-- marker:v2.1.29 endpoint sandbox gates detail ui
+- marker:v2.1.30 endpoint sandbox gates home ui
+- marker:v2.1.30 endpoint sandbox gates detail ui
 - marker:endpoint allowlist enforcement core test
 - marker:provider sandbox real-key dry run gate core test
-- marker:v2.1.29 endpoint sandbox gates e2e
+- marker:v2.1.30 endpoint sandbox gates e2e
 
 安全边界：仅允许 sandbox/test key 进入本机安全存储能力验证；禁止 production key，禁止 production endpoint，禁止普通结果页展示 dry-run 结果，禁止真实价格、availability、bookingUrl、checkoutUrl、paymentUrl、orderUrl、预订、付款、下单、证件或银行卡上传。默认 dry-run transport 为 simulated，networkAttemptCount 和 realEndpointConnectCount 必须保持 0。
 
 ## v2.1.28：Sandbox Response Schema + Source Label Gate + Real Provider Result Schema Validation
 
-v2.1.29 新增 `providerSandboxResponseSchemaGate.js`、`realProviderResultSchemaValidation.js` 和 `providerResultSourceLabelGate.js`。本阶段只验证 sandbox response schema、真实 provider-shaped result schema 与 source label，不把任何 provider 结果放入普通结果面；不展示真实价格、availability、bookingUrl、raw payload、headers、body、证件、银行卡、付款或下单入口。
+v2.1.30 新增 `providerSandboxResponseSchemaGate.js`、`realProviderResultSchemaValidation.js` 和 `providerResultSourceLabelGate.js`。本阶段只验证 sandbox response schema、真实 provider-shaped result schema 与 source label，不把任何 provider 结果放入普通结果面；不展示真实价格、availability、bookingUrl、raw payload、headers、body、证件、银行卡、付款或下单入口。
 
 - v2.1.28：Sandbox Response Schema + Source Label Gate + Real Provider Result Schema Validation
 - providerSandboxResponseSchemaGate.js
@@ -2396,20 +2396,20 @@ v2.1.29 新增 `providerSandboxResponseSchemaGate.js`、`realProviderResultSchem
 - marker:real provider result schema validation all blocked
 - marker:provider result source label gate
 - marker:provider result source label gate blocked sources
-- marker:v2.1.29 schema source gates home ui
-- marker:v2.1.29 schema source gates detail ui
+- marker:v2.1.30 schema source gates home ui
+- marker:v2.1.30 schema source gates detail ui
 - marker:sandbox response schema gate core test
 - marker:real provider result schema validation core test
 - marker:provider result source label gate core test
-- marker:v2.1.29 schema source gates e2e
+- marker:v2.1.30 schema source gates e2e
 
 安全边界：schema pass 仍只能作为 console-only / validation-only / source-label-only 证据，不代表真实 provider 已接入；真实 provider result、真实价格、availability、bookingUrl、checkoutUrl、paymentUrl、orderUrl、rawProviderPayload、rawHeaders、rawRequest、rawResponse、authorization header、credential query params、passportNumber、bankCardNumber 和 passengerIdentity 必须保持禁止展示。所有审计事件必须 redacted: true，普通结果页仍只在没有可信真实价格源时显示“暂无真实价格结果”。
 
-## v2.1.29：Price Integrity / Taxes / Fees Gate V1 + Real Price Display Gate
+## v2.1.30：Price Integrity / Taxes / Fees Gate V1 + Real Price Display Gate
 
-v2.1.29 新增 `priceIntegrityTaxesFeesGate.js` 和 `realPriceDisplayGate.js`。本阶段只允许经过 schema pass、source label pass、price integrity pass 的 sandbox/test provider price 以 guarded card 形式展示；生产真实价格、用户绑定真实 API 价格和 provider readonly price 仍需人工复核、真实凭据和 provider 激活后才可进入普通结果面。所有价格卡必须显示来源平台、来源域名、更新时间、价格观察时间、币种、基础票价、税费、附加费、总价、税费/费用/运费包含状态、库存/余票可靠性、只读证据和“最终以平台页面为准”的提示。
+v2.1.30 新增 `priceIntegrityTaxesFeesGate.js` 和 `realPriceDisplayGate.js`。本阶段只允许经过 schema pass、source label pass、price integrity pass 的 sandbox/test provider price 以 guarded card 形式展示；生产真实价格、用户绑定真实 API 价格和 provider readonly price 仍需人工复核、真实凭据和 provider 激活后才可进入普通结果面。所有价格卡必须显示来源平台、来源域名、更新时间、价格观察时间、币种、基础票价、税费、附加费、总价、税费/费用/运费包含状态、库存/余票可靠性、只读证据和“最终以平台页面为准”的提示。
 
-- v2.1.29：Price Integrity / Taxes / Fees Gate V1 + Real Price Display Gate
+- v2.1.30：Price Integrity / Taxes / Fees Gate V1 + Real Price Display Gate
 - priceIntegrityTaxesFeesGate.js
 - realPriceDisplayGate.js
 - 查看 Price Integrity / Taxes / Fees Gate V1
@@ -2435,10 +2435,73 @@ v2.1.29 新增 `priceIntegrityTaxesFeesGate.js` 和 `realPriceDisplayGate.js`。
 - marker:price integrity taxes fees gate v1 blocks fake booking
 - marker:real price display gate
 - marker:real price display gate no transaction
-- marker:v2.1.29 price integrity real display home ui
-- marker:v2.1.29 price integrity real display detail ui
+- marker:v2.1.30 price integrity real display home ui
+- marker:v2.1.30 price integrity real display detail ui
 - marker:price integrity taxes fees gate v1 core test
 - marker:real price display gate core test
-- marker:v2.1.29 price integrity real display e2e
+- marker:v2.1.30 price integrity real display e2e
 
 安全边界：guarded card 只用于 sandbox/test provider price display，不代表生产 provider 已接入，不允许展示 bookingUrl、checkoutUrl、paymentUrl、orderUrl、预订、付款、下单、证件或银行卡上传入口。fake/mock/demo/AI/estimated price、未知来源价格、public search snippet price、manual user entered price 必须被阻断。审计事件中 productionPriceDisplayedCount、bookingUrlDisplayedCount、paymentAttemptCount、orderAttemptCount、identityUploadAttemptCount 和 rawProviderPayloadDisplayedCount 必须保持 0。
+
+## v2.1.30：Manual Provider Review Workflow V1 + Limited Real Price UI Beta
+
+v2.1.30 新增 `manualProviderReviewWorkflowV1.js` 和 `limitedRealPriceUiBetaGate.js`。本阶段只允许 `flight_provider` / `flight` 在本地人工审查对象全部通过时进入 `approved_for_limited_beta`，并只允许普通机票结果面展示 `Limited Beta · 已验证只读价格` 的只读价格卡。该卡仍为受控 Beta 展示，不代表生产 provider 已接入，不允许 bookingUrl、付款、下单、身份上传或任何写入动作。
+
+- v2.1.30：Manual Provider Review Workflow V1 + Limited Real Price UI Beta
+- manualProviderReviewWorkflowV1.js
+- limitedRealPriceUiBetaGate.js
+- 查看 Manual Provider Review Workflow V1
+- 查看 Limited Real Price UI Beta Gate
+- Manual Provider Review Workflow V1
+- Limited Real Price UI Beta Gate
+- status: local manual review workflow only
+- mode: limited beta review only
+- approved_for_limited_beta
+- approved_for_future_readonly
+- no production activation
+- no payment
+- no order
+- no bookingUrl
+- no identity upload
+- limited_real_price_ui_beta_gate
+- betaScope: flight_only
+- product beta disabled
+- hotel beta disabled
+- local service beta disabled
+- ticket/activity beta disabled
+- restricted category blocked
+- Limited Beta · 已验证只读价格
+- 仅机票白名单 Beta · 不可下单 / 不可付款
+- 来源平台
+- 来源域名
+- 更新时间
+- 价格观察时间
+- 基础票价
+- 税费
+- 附加费
+- 总价
+- Provider 人工审查状态
+- Beta 范围：flight only
+- 最终以平台页面为准
+- MANUAL_PROVIDER_REVIEW_WORKFLOW_V1_DRAFT
+- LIMITED_REAL_PRICE_UI_BETA_GATE_DRAFT
+- guardedBetaPriceDisplayedCount
+- fullProductionApprovalCount: 0
+- productionPriceDisplayedCount: 0
+- bookingUrlDisplayedCount: 0
+- paymentAttemptCount: 0
+- orderAttemptCount: 0
+- identityUploadAttemptCount: 0
+- redacted: true
+- marker:manual provider review workflow v1
+- marker:manual provider review workflow v1 counters safe
+- marker:limited real price ui beta gate
+- marker:limited real price ui beta flight only
+- marker:limited real price ui beta no transaction
+- marker:v2.1.30 limited beta home ui
+- marker:v2.1.30 limited beta detail ui
+- marker:manual provider review workflow v1 core test
+- marker:limited real price ui beta gate core test
+- marker:v2.1.30 limited beta e2e
+
+安全边界：Limited Beta 仍只开放机票白名单展示面；商品、酒店、本地服务、门票/活动不得进入 beta，受限品类必须 blocked。所有生产价格、真实 provider 激活、bookingUrl、checkoutUrl、paymentUrl、orderUrl、预订、付款、下单、证件或银行卡上传入口必须保持禁止。所有审计事件必须 redacted: true，生产/交易/身份相关计数必须保持 0。
