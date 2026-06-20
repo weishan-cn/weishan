@@ -2174,7 +2174,7 @@ v2.1.21 新增 `globalProcurementQuickSummary.js` 和 `globalProcurementUserFaci
 
 ## v2.1.23：Global Procurement Decision Workspace Bundle / 全球采购决策工作台包
 
-v2.1.25 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全球采购结果进一步整理为“决策工作台”：默认只展示采购决策维度、决策规则、候选 schema、推荐模板、执行边界、风险提示、下一步与联动关系，强调当前只做离线采购决策整理，不连接真实 provider，不读取 API key，不连接 endpoint，不联网，不显示真实价格，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
+v2.1.26 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全球采购结果进一步整理为“决策工作台”：默认只展示采购决策维度、决策规则、候选 schema、推荐模板、执行边界、风险提示、下一步与联动关系，强调当前只做离线采购决策整理，不连接真实 provider，不读取 API key，不连接 endpoint，不联网，不显示真实价格，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
 
 - marker:global procurement decision workspace
 - marker:global procurement decision workspace established
@@ -2193,9 +2193,9 @@ v2.1.25 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全
 - sandbox gate / endpoint allowlist gate / key 生命周期 / 脱敏规则 / 本机安全存储 / API 绑定准备状态
 - redacted: true
 
-## v2.1.25：Provider Connection Readiness Console / Provider 接入准备控制台
+## v2.1.26：Provider Connection Readiness Console / Provider 接入准备控制台
 
-v2.1.25 新增 `providerConnectionReadinessConsole.js` 和 `providerConnectionReadinessDecisionEngine.js`。本阶段只做 Provider 接入准备状态汇总、离线 go/no-go 决策矩阵和审计草案展示；仍不接真实 provider，不读取或保存 API key，不连接 endpoint，不联网，不显示真实价格，不显示 availability，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
+v2.1.26 新增 `providerConnectionReadinessConsole.js` 和 `providerConnectionReadinessDecisionEngine.js`。本阶段只做 Provider 接入准备状态汇总、离线 go/no-go 决策矩阵和审计草案展示；仍不接真实 provider，不读取或保存 API key，不连接 endpoint，不联网，不显示真实价格，不显示 availability，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
 
 - marker:provider connection readiness console
 - marker:provider connection readiness decision engine
@@ -2239,9 +2239,9 @@ v2.1.25 新增 `providerConnectionReadinessConsole.js` 和 `providerConnectionRe
 - redacted: true
 
 
-## v2.1.25：Secure API Key Storage Implementation / 安全 API Key 存储实现
+## v2.1.26：Secure API Key Storage Implementation / 安全 API Key 存储实现
 
-v2.1.25 新增主进程 `secureApiKeyStorage.js` 和渲染层 `commerceSecureApiKeyStorageConsole.js`。本阶段只验证本机加密存储能力：使用 Electron safeStorage 可用时加密测试占位凭据，落盘文件为 `secure-provider-credentials.v1.json.enc`，返回 UI 的内容仅限 metadata only，不展示、不导出、不复制、不记录明文。safeStorage 不可用时必须返回 storage unavailable，plaintextFallback:false，不允许明文 fallback。
+v2.1.26 新增主进程 `secureApiKeyStorage.js` 和渲染层 `commerceSecureApiKeyStorageConsole.js`。本阶段只验证本机加密存储能力：使用 Electron safeStorage 可用时加密测试占位凭据，落盘文件为 `secure-provider-credentials.v1.json.enc`，返回 UI 的内容仅限 metadata only，不展示、不导出、不复制、不记录明文。safeStorage 不可用时必须返回 storage unavailable，plaintextFallback:false，不允许明文 fallback。
 
 - marker:secure api key storage implementation
 - marker:secure api key storage console
@@ -2286,3 +2286,43 @@ v2.1.25 新增主进程 `secureApiKeyStorage.js` 和渲染层 `commerceSecureApi
 - redacted: true
 
 安全红线保持：不输入、保存、读取真实 API key；不连接真实 provider；不连接 endpoint；不联网；不显示真实价格、fake/mock/demo/AI 估价；不生成 bookingUrl / checkoutUrl / paymentUrl / orderUrl；不预订、不付款、不下单；不上传或保存身份证、护照或银行卡。
+
+## v2.1.26：Credential Consent Scope Gate + Read-Only Provider Adapter V1
+
+v2.1.26 新增 `credentialConsentScopeGate.js`、`readOnlyProviderAdapterContract.js` 和 `flightReadOnlyProviderAdapterV1.js`。本阶段只允许建立授权范围草案、只读 provider adapter 合同和机票离线 fixture adapter；不连接真实 provider，不读取或保存真实 API key，不连接 endpoint，不发起网络请求，不返回真实价格、availability 或 bookingUrl，不创建订单，不付款，不上传身份信息。
+
+- marker:credential consent scope gate v2.1.26 allowed scopes
+- marker:credential consent scope gate no provider connection
+- marker:read only provider adapter contract v1
+- marker:flight readonly provider adapter v1
+- marker:read only provider adapter v1 offline fixture
+- marker:read only provider adapter v1 no network
+- marker:read only provider adapter v1 no price
+- marker:read only provider adapter v1 no booking url
+- marker:read only provider adapter v1 e2e
+- 查看 Credential Consent Scope Gate
+- 查看 Read-Only Provider Adapter V1
+- credential consent scope gate: draft-ready
+- read-only adapter contract: draft-ready
+- flight adapter v1: offline fixture ready
+- CREDENTIAL_CONSENT_SCOPE_GATE_DRAFT
+- READ_ONLY_PROVIDER_ADAPTER_V1_DRAFT
+- readonly_search
+- readonly_price
+- source_label_display
+- write_api
+- create_order
+- plaintext_key_export
+- real_network_call
+- offline_fixture_only
+- flight_provider_offline_fixture_result
+- offline fixture / no real provider
+- real provider disabled
+- real network disabled
+- real endpoint disabled
+- real price disabled
+- availability disabled
+- bookingUrl disabled
+- payment disabled
+- order disabled
+- identity upload disabled

@@ -721,6 +721,27 @@ function checkCredentialConsentScopeGateVersion(results, expectedVersion) {
   );
 }
 
+function checkCredentialConsentScopeGateCoreVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/credentialConsentScopeGate.js";
+  const gate = readText(gatePath);
+  if (!gate) {
+    results.push({ name: "apps/desktop credential consent scope gate core version", pass: false, detail: gatePath + " missing" });
+    return;
+  }
+  if (gate.__readError) {
+    results.push({ name: "apps/desktop credential consent scope gate core version", pass: false, detail: gate.__readError });
+    return;
+  }
+  const match = gate.match(/CREDENTIAL_CONSENT_SCOPE_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop credential consent scope gate core version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/credentialConsentScopeGate.js CREDENTIAL_CONSENT_SCOPE_GATE_VERSION"
+  );
+}
+
 function checkReadonlyAdapterContractGateVersion(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/commerceReadonlyAdapterContractGate.js";
   const gate = readText(gatePath);
@@ -739,6 +760,48 @@ function checkReadonlyAdapterContractGateVersion(results, expectedVersion) {
     expectedVersion,
     match && match[1],
     "package.json must match apps/desktop/src/renderer/core/commerceReadonlyAdapterContractGate.js READONLY_ADAPTER_CONTRACT_GATE_VERSION"
+  );
+}
+
+function checkReadOnlyProviderAdapterContractVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/readOnlyProviderAdapterContract.js";
+  const gate = readText(gatePath);
+  if (!gate) {
+    results.push({ name: "apps/desktop read-only provider adapter contract version", pass: false, detail: gatePath + " missing" });
+    return;
+  }
+  if (gate.__readError) {
+    results.push({ name: "apps/desktop read-only provider adapter contract version", pass: false, detail: gate.__readError });
+    return;
+  }
+  const match = gate.match(/READ_ONLY_PROVIDER_ADAPTER_CONTRACT_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop read-only provider adapter contract version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/readOnlyProviderAdapterContract.js READ_ONLY_PROVIDER_ADAPTER_CONTRACT_VERSION"
+  );
+}
+
+function checkFlightReadOnlyProviderAdapterV1Version(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/adapters/flightReadOnlyProviderAdapterV1.js";
+  const gate = readText(gatePath);
+  if (!gate) {
+    results.push({ name: "apps/desktop flight read-only provider adapter v1 version", pass: false, detail: gatePath + " missing" });
+    return;
+  }
+  if (gate.__readError) {
+    results.push({ name: "apps/desktop flight read-only provider adapter v1 version", pass: false, detail: gate.__readError });
+    return;
+  }
+  const match = gate.match(/FLIGHT_READONLY_PROVIDER_ADAPTER_V1_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop flight read-only provider adapter v1 version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/adapters/flightReadOnlyProviderAdapterV1.js FLIGHT_READONLY_PROVIDER_ADAPTER_V1_VERSION"
   );
 }
 
@@ -931,7 +994,10 @@ function runVersionCheck() {
     checkManualProviderReviewWorkflowVersion(results, rootPackage.version);
     checkProviderActivationReadinessGateVersion(results, rootPackage.version);
     checkCredentialConsentScopeGateVersion(results, rootPackage.version);
+    checkCredentialConsentScopeGateCoreVersion(results, rootPackage.version);
     checkReadonlyAdapterContractGateVersion(results, rootPackage.version);
+    checkReadOnlyProviderAdapterContractVersion(results, rootPackage.version);
+    checkFlightReadOnlyProviderAdapterV1Version(results, rootPackage.version);
     checkProviderGateMatrixDashboardVersion(results, rootPackage.version);
     checkProviderNoNetworkRuntimeGuardVersion(results, rootPackage.version);
     checkOfflineProviderFixtureValidationHarnessVersion(results, rootPackage.version);

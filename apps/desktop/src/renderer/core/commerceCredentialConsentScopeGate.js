@@ -1,119 +1,28 @@
-(function(){
-  const CREDENTIAL_CONSENT_SCOPE_GATE_VERSION = "2.1.25";
+;(function () {
+  "use strict";
 
-  const consentObjectFields = [
-    "consentId", "providerId", "providerName", "credentialAlias", "credentialScope", "readonlyOnly", "allowedActionList", "blockedActionList", "consentState", "consentCollectedAt", "consentExpiresAt", "revocationState", "storageBackend", "secretRef", "redacted: true"
-  ];
-
-  const credentialScopes = [
-    "readonly_search", "readonly_price_query", "readonly_availability_query", "readonly_provider_notice", "no_booking", "no_payment", "no_order", "no_profile_write", "no_identity_upload", "no_bank_card_submit"
-  ];
-
-  const consentStates = [
-    "not_started", "draft_only", "pending_user_review", "pending_security_review", "blocked", "revoked", "expired", "approved_for_future_readonly"
-  ];
-
-  const permissionBoundaries = [
-    "允许未来只读搜索", "允许未来只读价格查询", "允许未来只读来源标签读取", "禁止 booking", "禁止 checkout", "禁止 payment", "禁止 order", "禁止写入用户资料", "禁止上传身份证", "禁止上传护照", "禁止提交银行卡", "禁止 provider write action", "禁止 raw token 展示", "禁止 rawApiKey 展示"
-  ];
-
-  const blockingRules = [
-    "缺用户同意阻断", "缺 providerId 阻断", "缺 credential scope 阻断", "非 readonly scope 阻断", "包含 booking scope 阻断", "包含 payment scope 阻断", "包含 order scope 阻断", "包含 profile write scope 阻断", "包含 identity upload scope 阻断", "缺 secure storage approval 阻断", "缺 redaction rules 阻断", "缺 key lifecycle policy 阻断"
-  ];
-
-  const commerceCredentialConsentScopeGateContract = {
-    version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION,
-    moduleName:"credential_consent_scope_gate",
-    phase:"credential_consent_scope_gate",
-    gateStatus:"closed",
-    mode:"draft_only",
-    realCredentialInput:"disabled",
-    realCredentialSave:"disabled",
-    realCredentialRead:"disabled",
-    credentialLifecycleRealOperations:"disabled",
-    keychainMode:"disabled",
-    safeStorageMode:"disabled",
-    encryptedLocalStoreMode:"disabled",
-    envMode:"disabled",
-    browserStorageMode:"disabled",
-    redacted:true,
-    capabilities:{
-      canShowCredentialConsentScopeGate:true,
-      canShowConsentObjectDraft:true,
-      canShowCredentialScopeDraft:true,
-      canShowConsentStateDraft:true,
-      canShowPermissionBoundaries:true,
-      canShowBlockingRules:true,
-      canShowAuditDraft:true,
-      canInputCredential:false,
-      canSaveCredential:false,
-      canReadCredential:false,
-      canTestConnection:false,
-      canDeleteRealCredential:false,
-      canRotateRealCredential:false,
-      canExpireRealCredential:false,
-      canUseKeychain:false,
-      canUseSafeStorage:false,
-      canUseEncryptedLocalStore:false,
-      canWriteEnv:false,
-      canWriteLocalStorage:false,
-      canWriteSessionStorage:false,
-      canUseNetwork:false,
-      canConnectEndpoint:false,
-      canCreateOrder:false,
-      canPay:false,
-      canUploadIdentity:false
-    },
-    display:{
-      title:"credential consent scope gate",
-      establishedLine:"credential consent scope gate：gate 已建立",
-      statusLine:"status: closed",
-      modeLine:"mode: draft only",
-      inputLine:"real credential input disabled",
-      saveLine:"real credential save disabled",
-      readLine:"real credential read disabled",
-      lifecycleLine:"credential deletion / rotation / expiry real operations disabled",
-      keychainLine:"Keychain disabled",
-      safeStorageLine:"safeStorage disabled",
-      encryptedStoreLine:"encrypted local store disabled",
-      envLine:".env disabled",
-      browserStorageLine:"localStorage / sessionStorage disabled",
-      noApprovedLine:"当前没有 consent 处于 approved_for_future_readonly",
-      noInputLine:"UI 不提供输入 key",
-      noSaveLine:"UI 不提供保存 key",
-      noReadLine:"UI 不提供读取 key",
-      noTestLine:"UI 不提供测试连接",
-      noLifecycleLine:"UI 不提供删除 / 轮换 / 过期真实操作",
-      draftOnlyLine:"当前仅展示只读 consent 草案",
-      redactedLine:"redacted: true"
-    }
-  };
-
-  function clone(value){ return JSON.parse(JSON.stringify(value)); }
-
-  function buildCredentialConsentObjectDraft(){ return { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, fields:consentObjectFields.slice(), redacted:true }; }
-  function buildCredentialScopeDraft(){ return { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, credentialScopes:credentialScopes.slice(), redacted:true }; }
-  function buildCredentialConsentStateDraft(){ return { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, states:consentStates.slice(), approvedForFutureReadonlyCount:0, redacted:true }; }
-  function buildCredentialPermissionBoundaryDraft(){ return { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, boundaries:permissionBoundaries.slice(), redacted:true }; }
-  function buildCredentialConsentBlockingRulesDraft(){ return { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, blockingRules:blockingRules.slice(), redacted:true }; }
-  function buildCredentialConsentScopeAuditDraft(){
-    return { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, credentialConsentScopeAuditDraft:{ eventType:"CREDENTIAL_CONSENT_SCOPE_EVALUATION_DRAFT", schemaVersion:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, gateState:"closed", consentState:"draft_only", providerId:"none", credentialAlias:"none", blockedReason:"credential_consent_scope_gate_closed", consentCollectedAt:"none", redacted:true }, redacted:true };
+  const CREDENTIAL_CONSENT_SCOPE_GATE_VERSION = "2.1.26";
+  const core = window.WeishanCredentialConsentScopeGate;
+  function clone(value) { return JSON.parse(JSON.stringify(value)); }
+  function fallbackCore() {
+    const ALLOWED_SCOPES = ["readonly_search", "readonly_price", "readonly_availability_metadata", "readonly_inventory", "result_analysis", "source_label_display"];
+    const FORBIDDEN_SCOPES = ["write_api", "create_order", "payment", "checkout", "booking", "identity_upload", "passport_upload", "bank_card_save", "background_silent_call", "plaintext_key_export", "provider_endpoint_test", "real_network_call"];
+    const REQUIRED_CONFIRMATIONS = ["我确认该 API 仅用于只读搜索和价格读取", "我理解 weishan 不会替我付款", "我理解 weishan 不会替我下单", "我理解 weishan 不会上传身份证、护照或银行卡", "我理解最终价格以外部平台页面为准", "我理解当前版本不会连接真实 endpoint", "我理解当前版本不会返回真实价格", "我理解当前版本不会保存或使用真实 API key"];
+    return { ALLOWED_SCOPES, FORBIDDEN_SCOPES, REQUIRED_CONFIRMATIONS, buildCredentialConsentScopeGate:function(){ return { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, status:"credential consent gate only", phase:"credential_consent_scope_gate", mode:"no provider connection", consentState:"draft_ready", allowedScopes:ALLOWED_SCOPES, forbiddenScopes:FORBIDDEN_SCOPES, requiredConfirmations:REQUIRED_CONFIRMATIONS, checkedConfirmations:[], checkedConfirmationCount:0, submitRealBindingAllowed:false, finalDecision:"no-go", realProvider:"disabled", realNetwork:"disabled", realEndpoint:"disabled", realPrice:"disabled", bookingUrl:"disabled", payment:"disabled", order:"disabled", identityUpload:"disabled", plaintextKeyExport:"disabled", redacted:true }; }, buildCredentialConsentScopeAuditDraft:function(gate){ return { eventType:"CREDENTIAL_CONSENT_SCOPE_GATE_DRAFT", allowedScopes:gate.allowedScopes || ALLOWED_SCOPES, forbiddenScopes:gate.forbiddenScopes || FORBIDDEN_SCOPES, requiredConfirmations:gate.requiredConfirmations || REQUIRED_CONFIRMATIONS, consentSubmittedCount:0, realCredentialUsedCount:0, providerConnectionCount:0, networkAttemptCount:0, realEndpointConnectCount:0, realPriceDisplayedCount:0, bookingUrlDisplayedCount:0, paymentAttemptCount:0, orderAttemptCount:0, identityUploadAttemptCount:0, redacted:true }; }, assertCredentialConsentScopeGateSafe:function(){ return true; } };
   }
-  function evaluateCredentialConsentScopeDraft(){
-    return { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, allowed:false, gateStatus:"closed", decision:"blocked", blockedReason:"credential_consent_scope_gate_closed", canInputCredential:false, canSaveCredential:false, canReadCredential:false, canTestConnection:false, canUseNetwork:false, redacted:true };
-  }
-  function assertCredentialConsentScopeGateSafe(gate){
-    const target = gate && typeof gate === "object" ? gate : commerceCredentialConsentScopeGateContract;
-    const caps = target.capabilities || {};
-    if (target.gateStatus !== "closed") throw new Error("credential consent scope gate must stay closed");
-    ["realCredentialInput", "realCredentialSave", "realCredentialRead", "credentialLifecycleRealOperations", "keychainMode", "safeStorageMode", "encryptedLocalStoreMode", "envMode", "browserStorageMode"].forEach(function(key){ if (target[key] !== "disabled") throw new Error(key + " must be disabled"); });
-    ["canInputCredential", "canSaveCredential", "canReadCredential", "canTestConnection", "canDeleteRealCredential", "canRotateRealCredential", "canExpireRealCredential", "canUseKeychain", "canUseSafeStorage", "canUseEncryptedLocalStore", "canWriteEnv", "canWriteLocalStorage", "canWriteSessionStorage", "canUseNetwork", "canConnectEndpoint", "canCreateOrder", "canPay", "canUploadIdentity"].forEach(function(key){ if (caps[key] !== false) throw new Error(key + " must stay false"); });
-    return true;
-  }
+  const api = core || fallbackCore();
+  function buildCredentialConsentObjectDraft(){ return { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, fields:["consentId", "providerId", "credentialAlias", "allowedScopes", "forbiddenScopes", "requiredConfirmations", "consentState", "finalDecision", "redacted: true"], redacted:true }; }
+  function buildCredentialScopeDraft(){ return { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, credentialScopes:api.ALLOWED_SCOPES.slice(), forbiddenScopes:api.FORBIDDEN_SCOPES.slice(), redacted:true }; }
+  function buildCredentialConsentStateDraft(){ return { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, states:["draft_ready", "missing", "submitted_blocked"], submittedCount:0, approvedForFutureReadonlyCount:0, redacted:true }; }
+  function buildCredentialPermissionBoundaryDraft(){ return { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, boundaries:api.FORBIDDEN_SCOPES.map(function(scope){ return scope + " forbidden"; }), redacted:true }; }
+  function buildCredentialConsentBlockingRulesDraft(){ return { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, blockingRules:["real provider disabled", "real network disabled", "real endpoint disabled", "real price disabled", "bookingUrl disabled", "payment/order disabled", "identity upload disabled", "plaintext key export disabled"], redacted:true }; }
+  function buildCredentialConsentScopeAuditDraft(gate){ return { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, credentialConsentScopeAuditDraft:api.buildCredentialConsentScopeAuditDraft(gate || api.buildCredentialConsentScopeGate()), redacted:true }; }
+  function evaluateCredentialConsentScopeDraft(gate){ const safe = api.buildCredentialConsentScopeGate(gate); return { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, allowed:false, gateStatus:"draft-ready", decision:"no-go", consentState:safe.consentState, blockedReason:"credential_consent_scope_gate_only", canInputCredential:false, canSaveCredential:false, canReadCredential:false, canTestConnection:false, canUseNetwork:false, redacted:true }; }
+  function assertCredentialConsentScopeGateSafe(gate){ return api.assertCredentialConsentScopeGateSafe(gate || api.buildCredentialConsentScopeGate()); }
   function buildCredentialConsentScopeGateDisplay(gate){
-    const base = Object.assign({}, commerceCredentialConsentScopeGateContract, gate && typeof gate === "object" ? gate : {});
-    return Object.assign({}, clone(base), { consentObjectDraft:buildCredentialConsentObjectDraft(), credentialScopeDraft:buildCredentialScopeDraft(), consentStateDraft:buildCredentialConsentStateDraft(), permissionBoundaries:buildCredentialPermissionBoundaryDraft(), blockingRules:buildCredentialConsentBlockingRulesDraft(), audit:buildCredentialConsentScopeAuditDraft(), evaluation:evaluateCredentialConsentScopeDraft() });
+    const safe = api.buildCredentialConsentScopeGate(gate);
+    const audit = api.buildCredentialConsentScopeAuditDraft(safe);
+    return Object.assign({}, clone(safe), { version:CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, moduleName:"credential_consent_scope_gate", gateStatus:"draft-ready", status:"credential consent gate only", mode:"no provider connection", display:{ title:"API 授权范围同意闸门", establishedLine:"credential consent scope gate：draft-ready", statusLine:"status: credential consent gate only", modeLine:"mode: no provider connection", realProviderLine:"real provider disabled", networkLine:"real network disabled", endpointLine:"real endpoint disabled", priceLine:"real price disabled", bookingUrlLine:"bookingUrl disabled", paymentLine:"payment disabled", orderLine:"order disabled", identityLine:"identity upload disabled", plaintextLine:"plaintext key export disabled", redactedLine:"redacted: true" }, consentObjectDraft:buildCredentialConsentObjectDraft(), credentialScopeDraft:buildCredentialScopeDraft(), consentStateDraft:buildCredentialConsentStateDraft(), permissionBoundaries:buildCredentialPermissionBoundaryDraft(), blockingRules:buildCredentialConsentBlockingRulesDraft(), audit:{ credentialConsentScopeAuditDraft:audit }, evaluation:evaluateCredentialConsentScopeDraft(safe), capabilities:{ canShowCredentialConsentScopeGate:true, canToggleTestConfirmations:true, canSubmitRealBinding:false, canInputCredential:false, canSaveCredential:false, canReadCredential:false, canTestConnection:false, canUseNetwork:false, canConnectEndpoint:false, canCreateOrder:false, canPay:false, canUploadIdentity:false } });
   }
-
-  window.WeishanCommerceCredentialConsentScopeGate = { CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, commerceCredentialConsentScopeGateContract, buildCredentialConsentObjectDraft, buildCredentialScopeDraft, buildCredentialConsentStateDraft, buildCredentialPermissionBoundaryDraft, buildCredentialConsentBlockingRulesDraft, buildCredentialConsentScopeAuditDraft, evaluateCredentialConsentScopeDraft, assertCredentialConsentScopeGateSafe, buildCredentialConsentScopeGateDisplay };
+  window.WeishanCommerceCredentialConsentScopeGate = { CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, commerceCredentialConsentScopeGateContract:buildCredentialConsentScopeGateDisplay(), buildCredentialConsentObjectDraft, buildCredentialScopeDraft, buildCredentialConsentStateDraft, buildCredentialPermissionBoundaryDraft, buildCredentialConsentBlockingRulesDraft, buildCredentialConsentScopeAuditDraft, evaluateCredentialConsentScopeDraft, assertCredentialConsentScopeGateSafe, buildCredentialConsentScopeGateDisplay };
 })();

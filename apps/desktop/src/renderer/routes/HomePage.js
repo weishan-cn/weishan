@@ -2098,6 +2098,10 @@
         <p>final decision: ${esc(row.finalDecision || "no-go")}</p>
         <p>decision reason: ${esc(row.decisionReason || "readiness gates incomplete")}</p>
         <p>missing gates: ${esc((row.missingRequiredGates || []).join(" / ") || "manual review required")}</p>
+        <p>credential consent scope gate: ${esc((row.readinessMatrix || {}).credentialConsent || "missing")}</p>
+        <p>read-only adapter contract: ${esc((row.readinessMatrix || {}).readonlyAdapter || "missing")}</p>
+        <p>flight adapter v1: ${esc((row.readinessMatrix || {}).flightAdapterV1 || "not_started")}</p>
+        <p>real credential connected: ${esc(((row.credentialStorage || {}).realCredentialConnected) || "no")}</p>
         <p>real provider disabled</p>
         <p>real network disabled</p>
         <p>real API key disabled</p>
@@ -2133,7 +2137,7 @@
     const state = api && typeof api.buildSecureApiKeyStorageConsole === "function"
       ? api.buildSecureApiKeyStorageConsole()
       : {
-        version:"2.1.25",
+        version:"2.1.26",
         status:"secure local storage only",
         mode:"no provider connection",
         realProvider:"disabled",
@@ -2297,6 +2301,7 @@
       ${commerceProviderActivationReadinessGateDisclosure(task)}
       ${commerceCredentialConsentScopeGateDisclosure(task)}
       ${commerceReadonlyAdapterContractGateDisclosure(task)}
+      ${commerceReadOnlyProviderAdapterV1Disclosure(task)}
       ${commerceProviderGateMatrixDashboardDisclosure(task)}
       ${commerceProviderNoNetworkRuntimeGuardDisclosure(task)}
       ${commerceOfflineProviderFixtureValidationHarnessDisclosure(task)}
@@ -2512,6 +2517,7 @@
       ${commerceProviderActivationReadinessGateDisclosure(task)}
       ${commerceCredentialConsentScopeGateDisclosure(task)}
       ${commerceReadonlyAdapterContractGateDisclosure(task)}
+      ${commerceReadOnlyProviderAdapterV1Disclosure(task)}
       ${commerceProviderGateMatrixDashboardDisclosure(task)}
       ${commerceProviderNoNetworkRuntimeGuardDisclosure(task)}
       ${commerceOfflineProviderFixtureValidationHarnessDisclosure(task)}
@@ -4892,44 +4898,42 @@
     const display = gate.display || {};
     const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
     const audit = gate.audit && gate.audit.credentialConsentScopeAuditDraft || {};
-    const body = '<section class="commerce-credential-consent-scope-gate-panel" aria-label="credential consent scope gate">'
-      + '<h4>' + esc(display.title || 'credential consent scope gate') + '</h4>'
-      + '<p>' + esc(display.establishedLine || 'credential consent scope gate：gate 已建立') + '</p>'
-      + '<p>' + esc(display.statusLine || 'status: closed') + '</p>'
-      + '<p>' + esc(display.modeLine || 'mode: draft only') + '</p>'
-      + '<p>' + esc(display.inputLine || 'real credential input disabled') + '</p>'
-      + '<p>' + esc(display.saveLine || 'real credential save disabled') + '</p>'
-      + '<p>' + esc(display.readLine || 'real credential read disabled') + '</p>'
-      + '<p>' + esc(display.lifecycleLine || 'credential deletion / rotation / expiry real operations disabled') + '</p>'
-      + '<p>' + esc(display.keychainLine || 'Keychain disabled') + '</p>'
-      + '<p>' + esc(display.safeStorageLine || 'safeStorage disabled') + '</p>'
-      + '<p>' + esc(display.encryptedStoreLine || 'encrypted local store disabled') + '</p>'
-      + '<p>' + esc(display.envLine || '.env disabled') + '</p>'
-      + '<p>' + esc(display.browserStorageLine || 'localStorage / sessionStorage disabled') + '</p>'
-      + '<h5>未来 consent object 草案</h5>' + listHtml((gate.consentObjectDraft || {}).fields || [])
-      + '<h5>credential scope 草案</h5>' + listHtml((gate.credentialScopeDraft || {}).credentialScopes || [])
-      + '<h5>consent state 草案</h5>' + listHtml((gate.consentStateDraft || {}).states || [])
-      + '<p>' + esc(display.noApprovedLine || '当前没有 consent 处于 approved_for_future_readonly') + '</p>'
-      + '<p>' + esc(display.noInputLine || 'UI 不提供输入 key') + '</p>'
-      + '<p>' + esc(display.noSaveLine || 'UI 不提供保存 key') + '</p>'
-      + '<p>' + esc(display.noReadLine || 'UI 不提供读取 key') + '</p>'
-      + '<p>' + esc(display.noTestLine || 'UI 不提供测试连接') + '</p>'
-      + '<p>' + esc(display.noLifecycleLine || 'UI 不提供删除 / 轮换 / 过期真实操作') + '</p>'
-      + '<p>' + esc(display.draftOnlyLine || '当前仅展示只读 consent 草案') + '</p>'
-      + '<h5>权限边界</h5>' + listHtml((gate.permissionBoundaries || {}).boundaries || [])
-      + '<h5>阻断规则</h5>' + listHtml((gate.blockingRules || {}).blockingRules || [])
-      + '<h5>审计事件草案</h5><p>credentialConsentScopeAuditDraft</p>'
-      + '<p>eventType：' + esc(audit.eventType || 'CREDENTIAL_CONSENT_SCOPE_EVALUATION_DRAFT') + '</p>'
-      + '<p>schemaVersion：' + esc(audit.schemaVersion || '2.1.24') + '</p>'
-      + '<p>gateState：' + esc(audit.gateState || 'closed') + '</p>'
-      + '<p>consentState：' + esc(audit.consentState || 'draft_only') + '</p>'
-      + '<p>providerId：' + esc(audit.providerId || 'none') + '</p>'
-      + '<p>credentialAlias：' + esc(audit.credentialAlias || 'none') + '</p>'
-      + '<p>blockedReason：' + esc(audit.blockedReason || 'credential_consent_scope_gate_closed') + '</p>'
-      + '<p>consentCollectedAt：' + esc(audit.consentCollectedAt || 'none') + '</p>'
+    const body = '<section class="commerce-credential-consent-scope-gate-panel" aria-label="API 授权范围同意闸门">'
+      + '<h4>' + esc(display.title || 'API 授权范围同意闸门') + '</h4>'
+      + '<p>' + esc(display.establishedLine || 'credential consent scope gate：draft-ready') + '</p>'
+      + '<p>' + esc(display.statusLine || 'status: credential consent gate only') + '</p>'
+      + '<p>' + esc(display.modeLine || 'mode: no provider connection') + '</p>'
+      + '<p>' + esc(display.realProviderLine || 'real provider disabled') + '</p>'
+      + '<p>' + esc(display.networkLine || 'real network disabled') + '</p>'
+      + '<p>' + esc(display.endpointLine || 'real endpoint disabled') + '</p>'
+      + '<p>' + esc(display.priceLine || 'real price disabled') + '</p>'
+      + '<p>' + esc(display.bookingUrlLine || 'bookingUrl disabled') + '</p>'
+      + '<p>' + esc(display.paymentLine || 'payment disabled') + '</p>'
+      + '<p>' + esc(display.orderLine || 'order disabled') + '</p>'
+      + '<p>' + esc(display.identityLine || 'identity upload disabled') + '</p>'
+      + '<p>' + esc(display.plaintextLine || 'plaintext key export disabled') + '</p>'
+      + '<p>' + esc(display.redactedLine || 'redacted: true') + '</p>'
+      + '<h5>允许的只读权限</h5>' + listHtml(gate.allowedScopes || [])
+      + '<h5>永久禁止的权限</h5>' + listHtml(gate.forbiddenScopes || [])
+      + '<h5>绑定前必须确认的事项</h5>' + listHtml(gate.requiredConfirmations || [])
+      + '<p>consentState: ' + esc(gate.consentState || 'draft_ready') + '</p>'
+      + '<p>test draft only: true</p><p>submit real binding allowed: false</p><p>finalDecision: ' + esc(gate.finalDecision || 'no-go') + '</p>'
+      + '<div class="commerce-inline-actions" aria-label="授权范围测试操作"><button class="cmd-btn gray" type="button">生成授权范围草案</button><button class="cmd-btn gray" type="button">勾选全部测试确认项</button><button class="cmd-btn gray" type="button">清空测试确认项</button></div>'
+      + '<h5>审计事件草案</h5><p>CREDENTIAL_CONSENT_SCOPE_GATE_DRAFT</p>'
+      + '<p>eventType：' + esc(audit.eventType || 'CREDENTIAL_CONSENT_SCOPE_GATE_DRAFT') + '</p>'
+      + '<p>consentSubmittedCount：' + esc(String(audit.consentSubmittedCount || 0)) + '</p>'
+      + '<p>realCredentialUsedCount：' + esc(String(audit.realCredentialUsedCount || 0)) + '</p>'
+      + '<p>providerConnectionCount：' + esc(String(audit.providerConnectionCount || 0)) + '</p>'
+      + '<p>networkAttemptCount：' + esc(String(audit.networkAttemptCount || 0)) + '</p>'
+      + '<p>realEndpointConnectCount：' + esc(String(audit.realEndpointConnectCount || 0)) + '</p>'
+      + '<p>realPriceDisplayedCount：' + esc(String(audit.realPriceDisplayedCount || 0)) + '</p>'
+      + '<p>bookingUrlDisplayedCount：' + esc(String(audit.bookingUrlDisplayedCount || 0)) + '</p>'
+      + '<p>paymentAttemptCount：' + esc(String(audit.paymentAttemptCount || 0)) + '</p>'
+      + '<p>orderAttemptCount：' + esc(String(audit.orderAttemptCount || 0)) + '</p>'
+      + '<p>identityUploadAttemptCount：' + esc(String(audit.identityUploadAttemptCount || 0)) + '</p>'
       + '<p>redacted: true</p>'
       + '</section>';
-    return disclosure('查看 credential consent scope gate', body, 'commerce-credential-consent-scope-gate-disclosure');
+    return disclosure('查看 credential consent scope gate / API 授权范围同意闸门', body, 'commerce-credential-consent-scope-gate-disclosure');
   }
 
   function commerceReadonlyAdapterContractGateDisplay(task){
@@ -4976,6 +4980,31 @@
       + '<p>redacted: true</p>'
       + '</section>';
     return disclosure('查看 read-only adapter contract gate', body, 'commerce-readonly-adapter-contract-gate-disclosure');
+  }
+
+
+  function commerceReadOnlyProviderAdapterV1Disclosure(task){
+    const api = window.WeishanFlightReadOnlyProviderAdapterV1;
+    const contractApi = window.WeishanReadOnlyProviderAdapterContract;
+    const result = api && typeof api.runDryRun === "function" ? api.runDryRun({ text:'7 月 15 日上海到成都最便宜的机票' }) : { adapterId:'flight_readonly_provider_adapter_v1', providerCategory:'flight', sourceLabel:'offline fixture / no real provider', resultSchemaVersion:'provider_result_schema_v1', fixtureOnly:true, realProvider:false, realNetwork:false, realPrice:false, availability:false, bookingUrl:null, payment:false, order:false, identityUpload:false, redacted:true };
+    const metadata = api && typeof api.getAdapterMetadata === "function" ? api.getAdapterMetadata() : { adapterId:'flight_readonly_provider_adapter_v1', providerCategory:'flight', providerName:'flight_provider', mode:'offline_fixture_only', networkPolicy:'disabled', credentialPolicy:'metadata_only', endpointPolicy:'disabled', bookingUrlPolicy:'disabled', paymentPolicy:'disabled', orderPolicy:'disabled', identityUploadPolicy:'disabled', redacted:true };
+    const contract = contractApi && typeof contractApi.buildAdapterContract === "function" ? contractApi.buildAdapterContract(metadata) : { allowedMethods:['getAdapterMetadata','validateCredentialScope','validateReadinessGates','runOfflineFixtureSearch','normalizeProviderResult','validateResultSchema','attachSourceLabel','runDryRun'], blockedMethods:['connect','fetch','request','post','createOrder','pay','checkout','uploadIdentity','revealCredential','exportCredential','testEndpoint'], auditDraft:{ eventType:'READ_ONLY_PROVIDER_ADAPTER_V1_DRAFT', redacted:true } };
+    const audit = api && typeof api.buildAuditDraft === "function" ? api.buildAuditDraft(1) : contract.auditDraft || {};
+    const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
+    const objectHtml = function(obj){ return '<ul>' + Object.keys(obj || {}).map(function(key){ return '<li>' + esc(key) + ': ' + esc(typeof obj[key] === 'object' ? JSON.stringify(obj[key]) : String(obj[key])) + '</li>'; }).join('') + '</ul>'; };
+    const body = '<section class="commerce-readonly-provider-adapter-v1-panel" aria-label="Read-Only Provider Adapter V1">'
+      + '<h4>Read-Only Provider Adapter V1</h4>'
+      + '<p>status: offline fixture adapter only</p><p>provider: flight_provider</p><p>adapterId: ' + esc(metadata.adapterId || 'flight_readonly_provider_adapter_v1') + '</p>'
+      + '<p>real provider disabled</p><p>real network disabled</p><p>real credential disabled</p><p>real endpoint disabled</p><p>real price disabled</p><p>availability disabled</p><p>bookingUrl disabled</p><p>payment disabled</p><p>order disabled</p><p>identity upload disabled</p><p>redacted: true</p>'
+      + '<h5>adapter contract</h5>' + objectHtml(metadata)
+      + '<h5>allowed methods</h5>' + listHtml(contract.allowedMethods || [])
+      + '<h5>blocked methods</h5>' + listHtml(contract.blockedMethods || [])
+      + '<h5>offline fixture dry run</h5>' + objectHtml({ status:'PASS', fixtureOnly:result.fixtureOnly, realProvider:result.realProvider, realNetwork:result.realNetwork, realPrice:result.realPrice, availability:result.availability, bookingUrl:result.bookingUrl, redacted:result.redacted })
+      + '<h5>normalized result schema</h5>' + objectHtml(result)
+      + '<h5>source label gate</h5><p>sourceLabel: ' + esc(result.sourceLabel || 'offline fixture / no real provider') + '</p>'
+      + '<h5>audit draft</h5><p>READ_ONLY_PROVIDER_ADAPTER_V1_DRAFT</p>' + objectHtml(audit)
+      + '</section>';
+    return disclosure('查看 Read-Only Provider Adapter V1', body, 'commerce-readonly-provider-adapter-v1-disclosure');
   }
 
 
@@ -5542,6 +5571,7 @@
       ${commerceProviderActivationReadinessGateDisclosure(task)}
       ${commerceCredentialConsentScopeGateDisclosure(task)}
       ${commerceReadonlyAdapterContractGateDisclosure(task)}
+      ${commerceReadOnlyProviderAdapterV1Disclosure(task)}
       ${commerceProviderGateMatrixDashboardDisclosure(task)}
       ${commerceProviderNoNetworkRuntimeGuardDisclosure(task)}
       ${commerceOfflineProviderFixtureValidationHarnessDisclosure(task)}

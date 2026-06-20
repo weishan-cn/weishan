@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CONNECTION_READINESS_DECISION_ENGINE_VERSION = "2.1.25";
+  const PROVIDER_CONNECTION_READINESS_DECISION_ENGINE_VERSION = "2.1.26";
 
   function text(value) {
     return String(value || "").trim();
@@ -87,7 +87,7 @@
     miss("sourceLabelGate", "source label gate");
     miss("priceIntegrityGate", "price integrity gate");
 
-    if (credentialState.consentApproved !== true) {
+    if (credentialState.consentApproved !== true && credentialState.consentState !== "draft_ready") {
       missingRequirements.push("credential consent");
       reasons.push("credential consent missing");
     }
@@ -99,7 +99,7 @@
       missingRequirements.push("real credential not connected");
       reasons.push("real credential not connected");
     }
-    if (adapterState.readonlyAdapterApproved !== true) {
+    if (adapterState.readonlyAdapterApproved !== true && adapterState.adapterContractState !== "draft_ready") {
       missingRequirements.push("read-only adapter contract");
       reasons.push("read-only adapter contract missing");
     }
@@ -145,7 +145,9 @@
       credentialStorage: {
         secureStorageImplementation: credentialState.secureStorageImplementationReady === true ? "ready" : "missing",
         realCredentialConnected: "no",
-        credentialConsent: credentialState.consentApproved === true ? "approved" : "missing",
+        credentialConsent: credentialState.consentApproved === true ? "approved" : (credentialState.consentState === "draft_ready" ? "draft-ready" : "missing"),
+        readonlyAdapterContract: adapterState.adapterContractState === "draft_ready" ? "draft-ready" : "missing",
+        flightAdapterV1: adapterState.flightAdapterV1State === "offline_fixture_ready" ? "offline fixture ready" : "not_started",
         credentialPlaintextDisplay: "disabled",
         credentialExport: "disabled",
         finalDecision: decision

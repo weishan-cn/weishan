@@ -1,14 +1,14 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION = "2.1.25";
+  const PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION = "2.1.26";
 
   const CATEGORY_DEFINITIONS = {
     flight_provider: {
       displayName: "机票 Provider",
       category: "flight",
       candidateDirections: ["用户自带 API", "weishan 候选只读价格源", "官方航空公司渠道", "合规 OTA 只读接口"],
-      gaps: ["provider endpoint allowlist 未完成", "read-only adapter contract 未完成", "sandbox gate 未完成", "result schema gate 未完成", "source label gate 未完成", "price integrity / taxes / fees gate 未完成", "bookingUrl domain safety gate 未完成", "manual provider review 未完成", "credential consent scope 未完成", "no-secret persistence guard 必须持续 PASS", "no-network runtime guard 必须持续 PASS"]
+      gaps: ["provider endpoint allowlist 未完成", "read-only adapter contract draft-ready", "sandbox gate 未完成", "result schema gate 未完成", "source label gate 未完成", "price integrity / taxes / fees gate 未完成", "bookingUrl domain safety gate 未完成", "manual provider review 未完成", "credential consent scope gate draft-ready", "no-secret persistence guard 必须持续 PASS", "no-network runtime guard 必须持续 PASS"]
     },
     hotel_provider: {
       displayName: "酒店 Provider",
@@ -65,9 +65,10 @@
       credentialState: {
         secureStorageImplementationReady: providerCategory !== "restricted_provider",
         realCredentialConnected: false,
-        consentApproved: false
+        consentApproved: false,
+        consentState: providerCategory === "flight_provider" ? "draft_ready" : "missing"
       },
-      adapterState: { readonlyAdapterApproved: false },
+      adapterState: { readonlyAdapterApproved: false, adapterContractState: providerCategory === "flight_provider" ? "draft_ready" : "missing", flightAdapterV1State: providerCategory === "flight_provider" ? "offline_fixture_ready" : "not_started" },
       manualReviewState: { approved: false }
     };
     const decision = engine && typeof engine.evaluateProviderConnectionReadiness === "function"
@@ -138,7 +139,7 @@
       readinessMatrix: {
         providerType: definition.displayName,
         currentStatus: providerStatus(providerCategory),
-        readonlyAdapter: restricted ? "not allowed" : "missing",
+        readonlyAdapter: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "draft-ready" : "missing"),
         endpointAllowlist: restricted ? "not allowed" : "missing",
         sandboxGate: restricted ? "not allowed" : "missing",
         schemaGate: restricted ? "not allowed" : "draft",
@@ -146,7 +147,8 @@
         priceIntegrityGate: restricted ? "not allowed" : "draft",
         bookingUrlSafety: restricted ? "not allowed" : "closed",
         credentialStorage: restricted ? "not allowed" : "secure storage implementation ready",
-        credentialConsent: restricted ? "not allowed" : "missing",
+        credentialConsent: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "draft-ready" : "missing"),
+        flightAdapterV1: restricted ? "not allowed" : (providerCategory === "flight_provider" ? "offline fixture ready" : "not_started"),
         realCredentialConnected: restricted ? "not allowed" : "no",
         manualReview: restricted ? "not allowed" : "missing",
         finalDecision: decision.finalDecision || finalDecision(providerCategory)
@@ -161,7 +163,9 @@
       } : {
         secureStorageImplementation: "ready",
         realCredentialConnected: "no",
-        credentialConsent: "missing",
+        credentialConsent: providerCategory === "flight_provider" ? "draft-ready" : "missing",
+        readonlyAdapterContract: providerCategory === "flight_provider" ? "draft-ready" : "missing",
+        flightAdapterV1: providerCategory === "flight_provider" ? "offline fixture ready" : "not_started",
         credentialPlaintextDisplay: "disabled",
         credentialExport: "disabled",
         finalDecision: "no-go"
@@ -227,11 +231,14 @@
       categoryRows: rows,
       providerRows: rows,
       readinessMatrix: {
-        columns: ["provider category", "provider type", "current status", "endpoint allowlist", "sandbox gate", "schema gate", "credential storage", "final decision"],
+        columns: ["provider category", "provider type", "current status", "credential consent scope gate", "read-only adapter contract", "flight adapter v1", "endpoint allowlist", "sandbox gate", "schema gate", "credential storage", "final decision"],
         rows: rows.map((row) => [
           row.providerCategory,
           row.providerType,
           row.currentStatus,
+          row.readinessMatrix.credentialConsent,
+          row.readinessMatrix.readonlyAdapter,
+          row.readinessMatrix.flightAdapterV1,
           row.readinessMatrix.endpointAllowlist,
           row.readinessMatrix.sandboxGate,
           row.readinessMatrix.schemaGate,
@@ -254,6 +261,9 @@
         paymentLine: "payment disabled",
         orderLine: "order disabled",
         identityUploadLine: "identity upload disabled",
+        consentLine: "credential consent scope gate: draft-ready",
+        adapterLine: "read-only adapter contract: draft-ready",
+        flightAdapterLine: "flight adapter v1: offline fixture ready",
         redactedLine: "redacted: true"
       },
       redacted: true
