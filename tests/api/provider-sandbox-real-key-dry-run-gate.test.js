@@ -23,6 +23,8 @@ function assertNoDangerousSurface(value) {
 const windowRef = loadRendererCore([
   "apps/desktop/src/renderer/core/providerEndpointAllowlistEnforcement.js",
   "apps/desktop/src/renderer/core/providerSandboxRealKeyDryRunGate.js",
+  "apps/desktop/src/renderer/core/priceIntegrityTaxesFeesGate.js",
+  "apps/desktop/src/renderer/core/realPriceDisplayGate.js",
   "apps/desktop/src/renderer/core/adapters/flightReadOnlyProviderAdapterV1.js"
 ]);
 const gateApi = windowRef.WeishanProviderSandboxRealKeyDryRunGate;
@@ -36,7 +38,7 @@ const base = {
   sandboxKey:"WEISHAN_SANDBOX_TEST_KEY_000000"
 };
 function main() {
-  assert.equal(gateApi.PROVIDER_SANDBOX_REAL_KEY_DRY_RUN_GATE_VERSION, "2.1.28");
+  assert.equal(gateApi.PROVIDER_SANDBOX_REAL_KEY_DRY_RUN_GATE_VERSION, "2.1.29");
   const missingConsent = gateApi.evaluateSandboxRealKeyDryRunGate(Object.assign({}, base, { credentialScopeConsent:false, consentState:"missing" }));
   assert.equal(missingConsent.dryRunDecision, "blocked");
   assert.equal(missingConsent.blockedReason, "credential consent missing");
@@ -112,8 +114,11 @@ function main() {
   assert.equal(adapterRun.networkAttemptCount, 0);
   assert.equal(adapterRun.realEndpointConnectCount, 0);
   assert.equal(adapterRun.resultExposure, "console-only");
-  assert.equal(adapterRun.priceExposure, "disabled");
+  assert.equal(adapterRun.priceExposure, "guarded_sandbox_test_price");
   assert.equal(adapterRun.bookingUrlExposure, "disabled");
+  assert.equal(adapterRun.priceIntegrityValidation.validationDecision, "pass");
+  assert.equal(adapterRun.realPriceDisplayDecision.displayDecision, "allow");
+  assert.equal(adapterRun.guardedPriceCard.visible, true);
 
   const slot = gateApi.buildSandboxKeySlotState({ status:"sandbox_saved", keyFingerprint:"abc12345", keyLast4:"0000" });
   assert.equal(slot.providerId, "flight_provider_sandbox_key");

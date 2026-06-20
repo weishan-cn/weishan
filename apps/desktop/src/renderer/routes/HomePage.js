@@ -2027,7 +2027,8 @@
       <p>status: ${esc(rules.status || "user-facing summary only")}</p>
       <p>real provider disabled</p>
       <p>real network disabled</p>
-      <p>real price disabled</p>
+      <p>real price guarded sandbox/test only</p>
+      <p>production price display disabled</p>
       <p>bookingUrl disabled</p>
       <p>payment disabled</p>
       <p>order disabled</p>
@@ -2083,7 +2084,8 @@
       <p>real network disabled</p>
       <p>real API key disabled</p>
       <p>real endpoint disabled</p>
-      <p>real price disabled</p>
+      <p>real price guarded sandbox/test only</p>
+      <p>production price display disabled</p>
       <p>availability disabled</p>
       <p>bookingUrl disabled</p>
       <p>payment disabled</p>
@@ -2106,6 +2108,10 @@
         <p>sandbox response schema gate: ${esc((row.readinessMatrix || {}).sandboxResponseSchemaGate || "missing")}</p>
         <p>real provider result schema validation: ${esc((row.readinessMatrix || {}).realProviderResultSchemaValidation || "missing")}</p>
         <p>provider result source label gate: ${esc((row.readinessMatrix || {}).providerResultSourceLabelGate || (row.readinessMatrix || {}).sourceLabelGate || "missing")}</p>
+        <p>price integrity / taxes / fees gate: ${esc((row.readinessMatrix || {}).priceIntegrityTaxesFeesGate || (row.readinessMatrix || {}).priceIntegrityGate || "missing")}</p>
+        <p>real price display gate: ${esc((row.readinessMatrix || {}).realPriceDisplayGate || "missing")}</p>
+        <p>sandbox/test price display: ${esc((row.readinessMatrix || {}).sandboxTestPriceDisplay || "disabled")}</p>
+        <p>production price display: ${esc((row.readinessMatrix || {}).productionPriceDisplay || "disabled")}</p>
         <p>sandbox dry run transport: ${esc((row.readinessMatrix || {}).sandboxDryRunTransport || "disabled")}</p>
         <p>schema gate: ${esc((row.readinessMatrix || {}).schemaGate || "missing")}</p>
         <p>source label gate: ${esc((row.readinessMatrix || {}).sourceLabelGate || "missing")}</p>
@@ -2115,10 +2121,12 @@
         <p>real API key disabled</p>
         <p>real endpoint disabled</p>
         <p>production endpoint: disabled</p>
-        <p>real price disabled</p>
-        <p>price exposure: disabled</p>
+        <p>real price guarded sandbox/test only</p>
+        <p>price exposure: guarded sandbox/test only</p>
+        <p>production price display: disabled</p>
         <p>availability disabled</p>
         <p>bookingUrl disabled</p>
+        <p>bookingUrl display: disabled</p>
         <p>bookingUrl exposure: disabled</p>
         <p>ordinary result exposure: disabled</p>
         <p>payment disabled</p>
@@ -2149,7 +2157,7 @@
     const state = api && typeof api.buildSecureApiKeyStorageConsole === "function"
       ? api.buildSecureApiKeyStorageConsole()
       : {
-        version:"2.1.28",
+        version:"2.1.29",
         status:"secure local storage only",
         mode:"no provider connection",
         realProvider:"disabled",
@@ -4705,6 +4713,7 @@
     const gate = commercePriceIntegrityTaxesFeesGateDisplay(task);
     const display = gate.display || {};
     const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
+    const v1 = gate.v1 || {};
     const quote = gate.quoteRequiredFields || {};
     const prereq = gate.displayPrerequisites || {};
     const policy = gate.currentPricePolicy || {};
@@ -4712,13 +4721,38 @@
     const risk = gate.riskScan || {};
     const audit = gate.audit && gate.audit.priceIntegrityAuditDraft || {};
     const body = '<section class="commerce-price-integrity-taxes-fees-gate-panel" aria-label="price integrity / taxes / fees gate">'
-      + '<h4>' + esc(display.title || 'price integrity / taxes / fees gate') + '</h4>'
+      + '<h4>' + esc(display.title || 'Price Integrity / Taxes / Fees Gate V1') + '</h4>'
+      + '<p>Price Integrity / Taxes / Fees Gate V1</p>'
+      + '<p>status: price integrity validation only</p>'
+      + '<p>schemaVersion: price_integrity_v1</p>'
+      + '<p>source label required</p>'
+      + '<p>schema validation required</p>'
+      + '<p>currency required</p>'
+      + '<p>total required</p>'
+      + '<p>updatedAt required</p>'
+      + '<p>priceObservedAt required</p>'
+      + '<p>tax fee completeness required</p>'
+      + '<p>shipping status required</p>'
+      + '<p>inventory reliability required</p>'
+      + '<p>final page disclaimer required</p>'
+      + '<p>fake/mock/demo/AI price blocked</p>'
+      + '<p>bookingUrl blocked</p>'
+      + '<p>payment/order/checkout blocked</p>'
+      + '<p>redacted: true</p>'
       + '<p>' + esc(display.establishedLine || 'price integrity / taxes / fees gate：已建立') + '</p>'
       + '<p>' + esc(display.gateStatusLine || 'gate 状态：关闭 / closed') + '</p>'
       + '<p>' + esc(display.modeLine || 'mode: draft only') + '</p>'
       + '<p>' + esc(display.realPriceLine || 'real price display disabled') + '</p>'
       + '<p>' + esc(display.providerPriceLine || 'real provider price disabled') + '</p>'
       + '<p>' + esc(display.taxFeeLine || 'tax / fee verification disabled until readonly provider result is available') + '</p>'
+      + '<h5>allowed quote types</h5>' + listHtml(v1.allowedQuoteTypes || ['sandbox_verified_price','user_bound_api_readonly_price','provider_readonly_price'])
+      + '<h5>currently withheld quote types</h5>' + listHtml(v1.currentlyWithheldQuoteTypes || ['user_bound_api_readonly_price','provider_readonly_price'])
+      + '<h5>required fields</h5>' + listHtml(v1.requiredFields || quote.requiredFields || [])
+      + '<h5>withheld rules</h5>' + listHtml(v1.withheldRules || [])
+      + '<h5>blocked rules</h5>' + listHtml(v1.blockedRules || [])
+      + '<h5>sample pass candidate</h5><p>quoteType：sandbox_verified_price</p><p>validationDecision：' + esc(v1.samplePassValidation && v1.samplePassValidation.validationDecision || 'pass') + '</p><p>displayEligibility：' + esc(v1.samplePassValidation && v1.samplePassValidation.displayEligibility || 'eligible_for_guarded_display') + '</p>'
+      + '<h5>sample withheld candidate</h5><p>validationDecision：' + esc(v1.sampleWithheldValidation && v1.sampleWithheldValidation.validationDecision || 'withheld') + '</p><p>价格已隐藏</p>'
+      + '<h5>sample blocked candidate</h5><p>validationDecision：' + esc(v1.sampleBlockedValidation && v1.sampleBlockedValidation.validationDecision || 'blocked') + '</p><p>价格结果已阻断</p>'
       + '<h5>未来 price quote 必填字段草案</h5>' + listHtml(quote.requiredFields || [])
       + '<h5>价格显示前置条件</h5>' + listHtml(prereq.prerequisites || []) + '<p>' + esc(prereq.decisionWithoutPrerequisites || 'price withheld') + '</p>'
       + '<h5>当前价格策略</h5>' + listHtml(policy.policy || [])
@@ -4734,10 +4768,52 @@
       + '<p>priceObservedAt：' + esc(audit.priceObservedAt || 'none') + '</p>'
       + '<p>taxFeeCompleteness：' + esc(audit.taxFeeCompleteness || 'none') + '</p>'
       + '<p>redacted: true</p>'
+      + '<h5>audit draft</h5><p>PRICE_INTEGRITY_TAXES_FEES_GATE_V1_DRAFT</p>'
       + '<h5>与前置 gate 联动</h5>' + listHtml(gate.linkage || [])
       + '<p>' + esc(display.safetyLine || '当前版本仍隐藏价格，只显示暂无真实价格结果，不显示虚构价格或非真实报价。') + '</p>'
       + '</section>';
-    return disclosure('查看 price integrity / taxes / fees gate', body, 'commerce-price-integrity-taxes-fees-gate-disclosure');
+    return disclosure('查看 Price Integrity / Taxes / Fees Gate V1', body, 'commerce-price-integrity-taxes-fees-gate-disclosure');
+  }
+
+  function commerceRealPriceDisplayGateDisplay(){
+    const api = window.WeishanRealPriceDisplayGate;
+    if (api && typeof api.buildRealPriceDisplayGateDraft === "function") return api.buildRealPriceDisplayGateDraft();
+    return { status:"guarded real price display only", sandboxTestPriceDisplay:"guarded only", productionPriceDisplay:"disabled", ordinaryResultDisplay:"guarded card only", bookingUrl:"disabled", payment:"disabled", order:"disabled", identityUpload:"disabled", rawPayload:"forbidden", requiredBadges:["来源平台", "更新时间", "币种", "税费状态", "费用状态", "运费状态", "库存/余票可靠性", "最终以平台页面为准"], forbiddenActions:["bookingUrl", "payment", "order", "checkout", "identityUpload"], auditDraft:{ eventType:"REAL_PRICE_DISPLAY_GATE_DRAFT", guardedPriceCardDisplayedCount:1, productionPriceDisplayedCount:0, bookingUrlDisplayedCount:0, paymentAttemptCount:0, orderAttemptCount:0, identityUploadAttemptCount:0, rawProviderPayloadDisplayedCount:0, redacted:true }, redacted:true };
+  }
+
+  function commerceRealPriceDisplayGateDisclosure(){
+    const gate = commerceRealPriceDisplayGateDisplay();
+    const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
+    const audit = gate.auditDraft || {};
+    const body = '<section class="commerce-real-price-display-gate-panel" aria-label="Real Price Display Gate">'
+      + '<h4>Real Price Display Gate</h4>'
+      + '<p>status: guarded real price display only</p>'
+      + '<p>sandbox/test price display: guarded only</p>'
+      + '<p>production price display: disabled</p>'
+      + '<p>ordinary result display: guarded card only</p>'
+      + '<p>bookingUrl disabled</p>'
+      + '<p>payment disabled</p>'
+      + '<p>order disabled</p>'
+      + '<p>identity upload disabled</p>'
+      + '<p>raw payload forbidden</p>'
+      + '<p>redacted: true</p>'
+      + '<h5>display decision rules</h5>' + listHtml(gate.displayDecisionRules || [])
+      + '<h5>required badges</h5>' + listHtml(gate.requiredBadges || [])
+      + '<h5>forbidden actions</h5>' + listHtml(gate.forbiddenActions || [])
+      + '<h5>guarded price card example</h5><p>已验证真实价格</p><p>Sandbox/Test Provider Price · 非生产成交价</p><p>最终以平台页面为准</p>'
+      + '<h5>withheld price example</h5><p>价格已隐藏</p>'
+      + '<h5>blocked price example</h5><p>价格结果已阻断</p>'
+      + '<h5>audit draft</h5><p>' + esc(audit.eventType || 'REAL_PRICE_DISPLAY_GATE_DRAFT') + '</p>'
+      + '<p>guardedPriceCardDisplayedCount: ' + esc(audit.guardedPriceCardDisplayedCount === undefined ? 1 : audit.guardedPriceCardDisplayedCount) + '</p>'
+      + '<p>productionPriceDisplayedCount: 0</p>'
+      + '<p>bookingUrlDisplayedCount: 0</p>'
+      + '<p>paymentAttemptCount: 0</p>'
+      + '<p>orderAttemptCount: 0</p>'
+      + '<p>identityUploadAttemptCount: 0</p>'
+      + '<p>rawProviderPayloadDisplayedCount: 0</p>'
+      + '<p>redacted: true</p>'
+      + '</section>';
+    return disclosure('查看 Real Price Display Gate', body, 'commerce-real-price-display-gate-disclosure');
   }
 
   function commerceBookingUrlDomainSafetyGateDisplay(task){
@@ -5008,11 +5084,11 @@
   function commerceReadOnlyProviderAdapterV1Disclosure(task){
     const api = window.WeishanFlightReadOnlyProviderAdapterV1;
     const contractApi = window.WeishanReadOnlyProviderAdapterContract;
-    const result = api && typeof api.runDryRun === "function" ? api.runDryRun({ text:'7 月 15 日上海到成都最便宜的机票' }) : { adapterId:'flight_readonly_provider_adapter_v1', providerCategory:'flight', sourceLabel:'offline fixture / no real provider', resultSchemaVersion:'provider_result_schema_v1', fixtureOnly:true, realProvider:false, realNetwork:false, realPrice:false, availability:false, bookingUrl:null, payment:false, order:false, identityUpload:false, redacted:true };
+    const result = api && typeof api.runSandboxDryRunWithSimulatedTransport === "function" ? api.runSandboxDryRunWithSimulatedTransport({ text:'7 月 15 日上海到成都最便宜的机票' }) : (api && typeof api.runDryRun === "function" ? api.runDryRun({ text:'7 月 15 日上海到成都最便宜的机票' }) : { adapterId:'flight_readonly_provider_adapter_v1', providerCategory:'flight', sourceLabel:'offline fixture / no real provider', resultSchemaVersion:'provider_result_schema_v1', fixtureOnly:true, realProvider:false, realNetwork:false, realPrice:false, availability:false, bookingUrl:null, payment:false, order:false, identityUpload:false, redacted:true });
     const metadata = api && typeof api.getAdapterMetadata === "function" ? api.getAdapterMetadata() : { adapterId:'flight_readonly_provider_adapter_v1', providerCategory:'flight', providerName:'flight_provider', mode:'offline_fixture_only', networkPolicy:'disabled', credentialPolicy:'metadata_only', endpointPolicy:'disabled', bookingUrlPolicy:'disabled', paymentPolicy:'disabled', orderPolicy:'disabled', identityUploadPolicy:'disabled', redacted:true };
     const contract = contractApi && typeof contractApi.buildAdapterContract === "function" ? contractApi.buildAdapterContract(metadata) : { allowedMethods:['getAdapterMetadata','validateCredentialScope','validateReadinessGates','runOfflineFixtureSearch','normalizeProviderResult','validateResultSchema','attachSourceLabel','runDryRun'], blockedMethods:['connect','fetch','request','post','createOrder','pay','checkout','uploadIdentity','revealCredential','exportCredential','testEndpoint'], auditDraft:{ eventType:'READ_ONLY_PROVIDER_ADAPTER_V1_DRAFT', redacted:true } };
     const audit = api && typeof api.buildAuditDraft === "function" ? api.buildAuditDraft(1) : contract.auditDraft || {};
-    const displayEvaluation = api && typeof api.evaluateResultForConsoleOnlyDisplay === "function" ? api.evaluateResultForConsoleOnlyDisplay(result) : { sandboxResponseSchemaValidation:'pass', realProviderResultSchemaValidation:'withheld', sourceLabelValidation:'pass', ordinaryResultExposure:'disabled', priceExposure:'disabled', availabilityExposure:'disabled', bookingUrlExposure:'disabled', resultDisplayDecision:'console-only', resultDisplayReason:'validated sandbox-shaped result remains withheld from ordinary result surface', redacted:true };
+    const displayEvaluation = { sandboxResponseSchemaValidation:result.sandboxResponseSchemaValidation || result.schemaValidation || 'pass', realProviderResultSchemaValidation:result.realProviderResultSchemaValidation || 'withheld', sourceLabelValidation:result.sourceLabelValidation || 'pass', ordinaryResultExposure:result.ordinaryResultExposure || 'guarded_price_card_only', priceExposure:result.priceExposure || 'guarded_sandbox_test_price', availabilityExposure:result.availabilityExposure || 'provider_reported_only', bookingUrlExposure:result.bookingUrlExposure || 'disabled', resultDisplayDecision:result.resultDisplayDecision || 'guarded-card-only', resultDisplayReason:result.resultDisplayReason || 'sandbox verified price may render as guarded non-production card only', priceIntegrityValidation:result.priceIntegrityValidation || null, realPriceDisplayDecision:result.realPriceDisplayDecision || null, guardedPriceCard:result.guardedPriceCard || null, redacted:true };
     const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
     const objectHtml = function(obj){ return '<ul>' + Object.keys(obj || {}).map(function(key){ return '<li>' + esc(key) + ': ' + esc(typeof obj[key] === 'object' ? JSON.stringify(obj[key]) : String(obj[key])) + '</li>'; }).join('') + '</ul>'; };
     const body = '<section class="commerce-readonly-provider-adapter-v1-panel" aria-label="Read-Only Provider Adapter V1">'
@@ -5022,7 +5098,7 @@
       + '<h5>adapter contract</h5>' + objectHtml(metadata)
       + '<h5>allowed methods</h5>' + listHtml(contract.allowedMethods || [])
       + '<h5>blocked methods</h5>' + listHtml(contract.blockedMethods || [])
-      + '<h5>offline fixture dry run</h5>' + objectHtml({ status:'PASS', fixtureOnly:result.fixtureOnly, realProvider:result.realProvider, realNetwork:result.realNetwork, realPrice:result.realPrice, availability:result.availability, bookingUrl:result.bookingUrl, redacted:result.redacted })
+      + '<h5>offline fixture dry run</h5>' + objectHtml({ status:'PASS', fixtureOnly:result.fixtureOnly === undefined ? true : result.fixtureOnly, realProvider:result.realProvider === undefined ? false : result.realProvider, realNetwork:result.realNetwork === undefined ? false : result.realNetwork, realPrice:result.realPrice === undefined ? false : result.realPrice, availability:result.availability === undefined ? false : result.availability, bookingUrl:result.bookingUrl === undefined ? null : result.bookingUrl, redacted:result.redacted === undefined ? true : result.redacted })
       + '<h5>schema / source label / display decision</h5>' + objectHtml(displayEvaluation)
       + '<h5>normalized result schema</h5>' + objectHtml(result)
       + '<h5>source label gate</h5><p>sourceLabel: ' + esc(result.sourceLabel || 'offline fixture / no real provider') + '</p>'
@@ -5727,6 +5803,7 @@
     const searchModeDisplay = commerceUserApiSearchModeDisplay(task);
     const apiBindingDisplay = commerceApiBindingSafeShellDisplay(task);
     const resultCardRulesHtml = globalProcurementUserFacingResultCardsRulesDisclosure();
+    const guardedPriceCardHtml = commerceGuardedFlightPriceCardHtml(task);
     // marker:one screen actionable checklist collapsed
     // disclosure("查看可执行清单") ... commerceActionableChecklistPanelHtml
     // marker:one screen platform templates collapsed
@@ -5760,6 +5837,7 @@
             <p>${esc(apiBindingDisplay.realPriceLine || "真实价格结果：暂无")}</p>
           </div>
           <p class="commerce-simple-flight-empty">${esc(flightLowestOffers.currentStatusLine || "暂无真实价格结果")}</p>
+          ${guardedPriceCardHtml}
           <p>${esc(flightLowestOffers.priceStateLine || "当前尚未接入真实只读机票价格源，不能展示价格。")}</p>
           <p>${esc(searchModeDisplay.futureLine || "绑定 API 后，将优先使用用户授权平台的只读价格结果")}</p>
           <p>${esc(searchModeDisplay.sourceLine || "未绑定 API 时，可使用 weishan 候选平台和外部搜索入口。")}</p>
@@ -5795,6 +5873,7 @@
       ${commerceReadonlyProviderResultSchemaGateDisclosure(task)}
       ${commerceProviderResultSourceLabelGateDisclosure(task)}
       ${commercePriceIntegrityTaxesFeesGateDisclosure(task)}
+      ${commerceRealPriceDisplayGateDisclosure(task)}
       ${commerceBookingUrlDomainSafetyGateDisclosure(task)}
       ${commerceManualProviderReviewWorkflowDisclosure(task)}
       ${commerceProviderActivationReadinessGateDisclosure(task)}
@@ -5846,6 +5925,7 @@
       ${commerceReadonlyProviderResultSchemaGateDisclosure(task)}
       ${commerceProviderResultSourceLabelGateDisclosure(task)}
       ${commercePriceIntegrityTaxesFeesGateDisclosure(task)}
+      ${commerceRealPriceDisplayGateDisclosure(task)}
       ${commerceBookingUrlDomainSafetyGateDisclosure(task)}
       ${commerceManualProviderReviewWorkflowDisclosure(task)}
       ${globalProcurementDecisionWorkspaceDisclosure(task)}
@@ -5855,6 +5935,40 @@
       ${commerceSettingsAuthLocalSecurityEvidenceDisclosure(task)}
     </section>`;
     return disclosure("查看其它安全规则折叠面板", body, "commerce-simple-flight-advanced-debug-disclosure");
+  }
+
+  function commerceGuardedFlightPriceCardHtml(){
+    const adapter = window.WeishanFlightReadOnlyProviderAdapterV1;
+    if (!adapter || typeof adapter.buildSandboxVerifiedPriceCandidate !== "function" || typeof adapter.buildGuardedPriceCard !== "function") return "";
+    const card = adapter.buildGuardedPriceCard(adapter.buildSandboxVerifiedPriceCandidate());
+    if (!card || card.visible !== true) {
+      const reasons = Array.isArray(card && card.reasons) ? card.reasons : ["price integrity validation incomplete"];
+      return `<section class="commerce-guarded-price-card is-withheld" aria-label="价格已隐藏">
+        <h5>${esc(card && card.title || "价格已隐藏")}</h5>
+        <p>原因：${esc(reasons.join(" / "))}</p>
+      </section>`;
+    }
+    return `<section class="commerce-guarded-price-card" aria-label="已验证真实价格卡片">
+      <h5>${esc(card.title || "已验证真实价格")}</h5>
+      <p>${esc(card.badge || "Sandbox/Test Provider Price · 非生产成交价")}</p>
+      <p>来源平台：${esc(card.providerName || "Flight Provider Sandbox")}</p>
+      <p>来源域名：${esc(card.sourceHostDisplayName || "Provider Sandbox")} / ${esc(card.sourceUrlHost || "provider-sandbox.invalid")}</p>
+      <p>更新时间：${esc(card.updatedAt || "")}</p>
+      <p>价格观察时间：${esc(card.priceObservedAt || "")}</p>
+      <p>币种：${esc(card.currency || "CNY")}</p>
+      <p>基础票价：${esc(card.baseFare === undefined ? "未单独提供" : card.baseFare)}</p>
+      <p>税费：${esc(card.taxes === undefined ? "未单独提供" : card.taxes)}</p>
+      <p>附加费：${esc(card.fees === undefined ? "未单独提供" : card.fees)}</p>
+      <p>总价：${esc(card.total)}</p>
+      <p>税费是否包含：${esc(String(card.taxIncluded))}</p>
+      <p>附加费是否包含：${esc(String(card.feesIncluded))}</p>
+      <p>运费是否包含：${esc(card.shippingIncluded === "not_applicable" ? "不适用 / not_applicable" : card.shippingIncluded)}</p>
+      <p>库存/余票状态：${esc(card.inventoryStatus || "")}</p>
+      <p>库存/余票可靠性：${esc(card.inventoryReliability || "")}</p>
+      <p>只读证据：${esc(card.readonlyEvidence || "")}</p>
+      <p>重要提示：${esc(card.finalPageDisclaimer || "最终价格、税费、库存/余票、退改签和行李规则，以平台页面为准。")}</p>
+      <p>不显示 bookingUrl；不提供预订、付款、下单或证件 / 银行卡上传入口。</p>
+    </section>`;
   }
 
   function commerceDecodedInlineValue(button, attr){

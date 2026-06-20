@@ -29,6 +29,8 @@ const windowRef = loadRendererCore([
   "apps/desktop/src/renderer/core/providerResultSourceLabelGate.js",
   "apps/desktop/src/renderer/core/providerSandboxResponseSchemaGate.js",
   "apps/desktop/src/renderer/core/realProviderResultSchemaValidation.js",
+  "apps/desktop/src/renderer/core/priceIntegrityTaxesFeesGate.js",
+  "apps/desktop/src/renderer/core/realPriceDisplayGate.js",
   "apps/desktop/src/renderer/core/readOnlyProviderAdapterContract.js",
   "apps/desktop/src/renderer/core/commerceReadonlyAdapterContractGate.js",
   "apps/desktop/src/renderer/core/adapters/flightReadOnlyProviderAdapterV1.js"
@@ -39,9 +41,9 @@ const gateApi = windowRef.WeishanCommerceReadonlyAdapterContractGate;
 const flightApi = windowRef.WeishanFlightReadOnlyProviderAdapterV1;
 
 function main() {
-  assert.equal(contractApi.READ_ONLY_PROVIDER_ADAPTER_CONTRACT_VERSION, "2.1.28");
+  assert.equal(contractApi.READ_ONLY_PROVIDER_ADAPTER_CONTRACT_VERSION, "2.1.29");
   const contract = contractApi.buildAdapterContract();
-  assert.equal(contract.contractVersion, "2.1.28");
+  assert.equal(contract.contractVersion, "2.1.29");
   assert.equal(contract.phase, "read_only_provider_adapter_contract_v1");
   assert.equal(contract.status, "adapter contract draft-ready");
   assert.equal(contract.mode, "offline_fixture_only");
@@ -112,7 +114,7 @@ function main() {
   assert.equal(contractApi.assertReadOnlyProviderAdapterContractSafe(contract), true);
 
   const gate = gateApi.buildReadonlyAdapterContractGateDisplay();
-  assert.equal(gate.version, "2.1.28");
+  assert.equal(gate.version, "2.1.29");
   assert.equal(gate.gateStatus, "draft-ready");
   assert.equal(gate.adapterExecution, "offline fixture only");
   assert.equal(gate.realNetwork, "disabled");
@@ -124,7 +126,7 @@ function main() {
   assert.equal(gate.capabilities.canPay, false);
   assert.equal(gateApi.assertReadonlyAdapterContractGateSafe(gate), true);
 
-  assert.equal(flightApi.FLIGHT_READONLY_PROVIDER_ADAPTER_V1_VERSION, "2.1.28");
+  assert.equal(flightApi.FLIGHT_READONLY_PROVIDER_ADAPTER_V1_VERSION, "2.1.29");
   const metadata = flightApi.getAdapterMetadata();
   assert.equal(metadata.adapterId, "flight_readonly_provider_adapter_v1");
   assert.equal(metadata.providerCategory, "flight");
@@ -135,9 +137,15 @@ function main() {
   assert.equal(metadata.sandboxResponseSchemaGate, "draft-ready");
   assert.equal(metadata.realProviderResultSchemaValidation, "draft-ready");
   assert.equal(metadata.providerResultSourceLabelGate, "draft-ready");
-  assert.equal(metadata.ordinaryResultExposure, "disabled");
-  assert.equal(metadata.priceExposure, "disabled");
-  assert.equal(metadata.availabilityExposure, "disabled");
+  assert.equal(metadata.priceIntegrityTaxesFeesGate, "draft-ready");
+  assert.equal(metadata.realPriceDisplayGate, "guarded-display-ready");
+  assert.equal(metadata.ordinaryResultExposure, "guarded_price_card_only");
+  assert.equal(metadata.priceExposure, "guarded_sandbox_test_price");
+  assert.equal(metadata.availabilityExposure, "provider_reported_only");
+  assert.equal(metadata.bookingUrlPolicy, "disabled");
+  assert.equal(metadata.paymentPolicy, "disabled");
+  assert.equal(metadata.orderPolicy, "disabled");
+  assert.equal(metadata.identityUploadPolicy, "disabled");
   assert.equal(metadata.redacted, true);
 
   const fixture = flightApi.runOfflineFixtureSearch("7 月 15 日上海到成都最便宜的机票");
@@ -175,14 +183,18 @@ function main() {
   assert.equal(simulatedDryRun.networkAttemptCount, 0);
   assert.equal(simulatedDryRun.realEndpointConnectCount, 0);
   assert.equal(simulatedDryRun.resultExposure, "console-only");
-  assert.equal(simulatedDryRun.priceExposure, "disabled");
+  assert.equal(simulatedDryRun.priceExposure, "guarded_sandbox_test_price");
   assert.equal(simulatedDryRun.bookingUrlExposure, "disabled");
   assert.equal(simulatedDryRun.sandboxResponseSchemaValidation, "pass");
   assert.equal(simulatedDryRun.realProviderResultSchemaValidation, "withheld");
   assert.equal(simulatedDryRun.sourceLabelValidation, "pass");
   assert.equal(simulatedDryRun.resultDisplayDecision, "console-only");
-  assert.equal(simulatedDryRun.ordinaryResultExposure, "disabled");
-  assert.equal(simulatedDryRun.availabilityExposure, "disabled");
+  assert.equal(simulatedDryRun.ordinaryResultExposure, "guarded_price_card_only");
+  assert.equal(simulatedDryRun.availabilityExposure, "provider_reported_only");
+  assert.equal(simulatedDryRun.priceIntegrityValidation.validationDecision, "pass");
+  assert.equal(simulatedDryRun.realPriceDisplayDecision.displayDecision, "allow");
+  assert.equal(simulatedDryRun.guardedPriceCard.visible, true);
+  assert.equal(simulatedDryRun.guardedPriceCard.title, "已验证真实价格");
 
   const labelled = flightApi.attachProviderSourceLabel(fixture);
   assert.equal(labelled.resultType, "flight_offer");

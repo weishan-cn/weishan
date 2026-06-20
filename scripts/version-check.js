@@ -637,6 +637,48 @@ function checkPriceIntegrityTaxesFeesGateVersion(results, expectedVersion) {
   );
 }
 
+function checkPriceIntegrityTaxesFeesGateV1Version(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/priceIntegrityTaxesFeesGate.js";
+  const gate = readText(gatePath);
+  if (!gate) {
+    results.push({ name: "apps/desktop price integrity taxes fees gate v1 version", pass: false, detail: gatePath + " missing" });
+    return;
+  }
+  if (gate.__readError) {
+    results.push({ name: "apps/desktop price integrity taxes fees gate v1 version", pass: false, detail: gate.__readError });
+    return;
+  }
+  const match = gate.match(/PRICE_INTEGRITY_TAXES_FEES_GATE_V1_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop price integrity taxes fees gate v1 version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/priceIntegrityTaxesFeesGate.js PRICE_INTEGRITY_TAXES_FEES_GATE_V1_VERSION"
+  );
+}
+
+function checkRealPriceDisplayGateVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/realPriceDisplayGate.js";
+  const gate = readText(gatePath);
+  if (!gate) {
+    results.push({ name: "apps/desktop real price display gate version", pass: false, detail: gatePath + " missing" });
+    return;
+  }
+  if (gate.__readError) {
+    results.push({ name: "apps/desktop real price display gate version", pass: false, detail: gate.__readError });
+    return;
+  }
+  const match = gate.match(/REAL_PRICE_DISPLAY_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop real price display gate version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/realPriceDisplayGate.js REAL_PRICE_DISPLAY_GATE_VERSION"
+  );
+}
+
 function checkBookingUrlDomainSafetyGateVersion(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/commerceBookingUrlDomainSafetyGate.js";
   const gate = readText(gatePath);
@@ -845,10 +887,10 @@ function checkRealProviderResultSchemaValidationVersion(results, expectedVersion
 function checkProviderResultSourceLabelGateV2128Version(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/providerResultSourceLabelGate.js";
   const gate = readText(gatePath);
-  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.28 version", pass:false, detail:gatePath + " missing" }); return; }
-  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.28 version", pass:false, detail:gate.__readError }); return; }
+  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.29 version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.29 version", pass:false, detail:gate.__readError }); return; }
   const match = gate.match(/PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION\s*=\s*["']([^"']+)["']/);
-  addCheck(results, "apps/desktop provider result source label gate v2.1.28 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
+  addCheck(results, "apps/desktop provider result source label gate v2.1.29 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
 }
 
 function checkProviderGateMatrixDashboardVersion(results, expectedVersion) {
@@ -1036,6 +1078,8 @@ function runVersionCheck() {
     checkReadonlyProviderResultSchemaGateVersion(results, rootPackage.version);
     checkProviderResultSourceLabelGateVersion(results, rootPackage.version);
     checkPriceIntegrityTaxesFeesGateVersion(results, rootPackage.version);
+    checkPriceIntegrityTaxesFeesGateV1Version(results, rootPackage.version);
+    checkRealPriceDisplayGateVersion(results, rootPackage.version);
     checkBookingUrlDomainSafetyGateVersion(results, rootPackage.version);
     checkManualProviderReviewWorkflowVersion(results, rootPackage.version);
     checkProviderActivationReadinessGateVersion(results, rootPackage.version);

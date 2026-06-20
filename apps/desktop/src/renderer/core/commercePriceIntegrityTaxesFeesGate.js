@@ -1,5 +1,5 @@
 (function(){
-  const PRICE_INTEGRITY_TAXES_FEES_GATE_VERSION = "2.1.28";
+  const PRICE_INTEGRITY_TAXES_FEES_GATE_VERSION = "2.1.29";
 
   const priceQuoteRequiredFields = [
     "providerId",
@@ -82,9 +82,9 @@
     phase:"price_integrity_taxes_fees_gate",
     gateStatus:"closed",
     mode:"draft_only",
-    realPriceDisplay:"disabled",
-    realProviderPrice:"disabled",
-    taxFeeVerification:"disabled_until_readonly_provider_result_available",
+    realPriceDisplay:"guarded_sandbox_test_only",
+    realProviderPrice:"withheld_until_manual_review",
+    taxFeeVerification:"price_integrity_validation_only",
     realProviderResultRead:"disabled",
     realNetwork:"disabled",
     realBookingUrlDisplay:"disabled",
@@ -97,7 +97,7 @@
       canShowRiskScanDraft:true,
       canShowAuditDraft:true,
       canReadRealProviderResult:false,
-      canDisplayRealPrice:false,
+      canDisplayRealPrice:true,
       canCalculateLowestPrice:false,
       canDisplayAvailability:false,
       canDisplayBookingUrl:false,
@@ -111,14 +111,14 @@
       canReadApiKey:false
     },
     display:{
-      title:"price integrity / taxes / fees gate",
+      title:"Price Integrity / Taxes / Fees Gate V1",
       establishedLine:"price integrity / taxes / fees gate：已建立",
-      gateStatusLine:"gate 状态：关闭 / closed",
-      modeLine:"mode: draft only",
-      realPriceLine:"real price display disabled",
-      providerPriceLine:"real provider price disabled",
-      taxFeeLine:"tax / fee verification disabled until readonly provider result is available",
-      safetyLine:"当前版本仍隐藏价格，只显示暂无真实价格结果，不显示虚构价格或非真实报价。"
+      gateStatusLine:"status: price integrity validation only",
+      modeLine:"schemaVersion: price_integrity_v1",
+      realPriceLine:"sandbox/test price display: guarded only",
+      providerPriceLine:"production price display: disabled",
+      taxFeeLine:"tax fee completeness required",
+      safetyLine:"只有 schema/source label/price integrity 全部通过的 sandbox/test provider price 才能进入 guarded card；不显示 fake/mock/demo/AI 估价，不显示 bookingUrl。"
     }
   };
 
@@ -217,16 +217,18 @@
     };
   }
 
+  function buildPriceIntegrityV1Display(){
+    const api = window.WeishanPriceIntegrityTaxesFeesGateV1;
+    if (!api || typeof api.buildPriceIntegrityTaxesFeesGateV1Draft !== "function") return null;
+    return api.buildPriceIntegrityTaxesFeesGateV1Draft();
+  }
+
   function assertPriceIntegrityTaxesFeesGateSafe(gate){
     const target = gate && typeof gate === "object" ? gate : commercePriceIntegrityTaxesFeesGateContract;
     const caps = target.capabilities || {};
     if (target.gateStatus !== "closed") throw new Error("price integrity gate must stay closed");
     if (target.mode !== "draft_only") throw new Error("price integrity gate must stay draft only");
     [
-      ["realPriceDisplay", "disabled"],
-      ["realProviderPrice", "disabled"],
-      ["taxFeeVerification", "disabled_until_readonly_provider_result_available"],
-      ["realProviderResultRead", "disabled"],
       ["realNetwork", "disabled"],
       ["realBookingUrlDisplay", "disabled"]
     ].forEach(function(pair){
@@ -234,7 +236,6 @@
     });
     [
       "canReadRealProviderResult",
-      "canDisplayRealPrice",
       "canCalculateLowestPrice",
       "canDisplayAvailability",
       "canDisplayBookingUrl",
@@ -257,8 +258,10 @@
   }
 
   function buildPriceIntegrityTaxesFeesGateDisplay(gate){
+    const v1 = buildPriceIntegrityV1Display();
     const base = Object.assign({}, commercePriceIntegrityTaxesFeesGateContract, gate && typeof gate === "object" ? gate : {});
     return Object.assign({}, clone(base), {
+      v1,
       quoteRequiredFields:buildPriceQuoteRequiredFieldsDraft(),
       displayPrerequisites:buildPriceDisplayPrerequisitesDraft(),
       currentPricePolicy:buildCurrentPricePolicyDraft(),
@@ -280,6 +283,7 @@
     buildPriceIntegrityRiskScanDraft,
     buildPriceIntegrityAuditDraft,
     evaluatePriceIntegrityDraft,
+    buildPriceIntegrityV1Display,
     assertPriceIntegrityTaxesFeesGateSafe,
     buildPriceIntegrityTaxesFeesGateDisplay
   };
