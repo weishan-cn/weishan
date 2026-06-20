@@ -2174,7 +2174,7 @@ v2.1.21 新增 `globalProcurementQuickSummary.js` 和 `globalProcurementUserFaci
 
 ## v2.1.23：Global Procurement Decision Workspace Bundle / 全球采购决策工作台包
 
-v2.1.24 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全球采购结果进一步整理为“决策工作台”：默认只展示采购决策维度、决策规则、候选 schema、推荐模板、执行边界、风险提示、下一步与联动关系，强调当前只做离线采购决策整理，不连接真实 provider，不读取 API key，不连接 endpoint，不联网，不显示真实价格，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
+v2.1.25 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全球采购结果进一步整理为“决策工作台”：默认只展示采购决策维度、决策规则、候选 schema、推荐模板、执行边界、风险提示、下一步与联动关系，强调当前只做离线采购决策整理，不连接真实 provider，不读取 API key，不连接 endpoint，不联网，不显示真实价格，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
 
 - marker:global procurement decision workspace
 - marker:global procurement decision workspace established
@@ -2193,9 +2193,9 @@ v2.1.24 新增 `commerceGlobalProcurementDecisionWorkspace.js`。本阶段把全
 - sandbox gate / endpoint allowlist gate / key 生命周期 / 脱敏规则 / 本机安全存储 / API 绑定准备状态
 - redacted: true
 
-## v2.1.24：Provider Connection Readiness Console / Provider 接入准备控制台
+## v2.1.25：Provider Connection Readiness Console / Provider 接入准备控制台
 
-v2.1.24 新增 `providerConnectionReadinessConsole.js` 和 `providerConnectionReadinessDecisionEngine.js`。本阶段只做 Provider 接入准备状态汇总、离线 go/no-go 决策矩阵和审计草案展示；仍不接真实 provider，不读取或保存 API key，不连接 endpoint，不联网，不显示真实价格，不显示 availability，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
+v2.1.25 新增 `providerConnectionReadinessConsole.js` 和 `providerConnectionReadinessDecisionEngine.js`。本阶段只做 Provider 接入准备状态汇总、离线 go/no-go 决策矩阵和审计草案展示；仍不接真实 provider，不读取或保存 API key，不连接 endpoint，不联网，不显示真实价格，不显示 availability，不生成 bookingUrl，不预订，不付款，不下单，不上传或保存身份证、护照或银行卡。
 
 - marker:provider connection readiness console
 - marker:provider connection readiness decision engine
@@ -2237,3 +2237,52 @@ v2.1.24 新增 `providerConnectionReadinessConsole.js` 和 `providerConnectionRe
 - orderAttemptCount: 0
 - identityUploadAttemptCount: 0
 - redacted: true
+
+
+## v2.1.25：Secure API Key Storage Implementation / 安全 API Key 存储实现
+
+v2.1.25 新增主进程 `secureApiKeyStorage.js` 和渲染层 `commerceSecureApiKeyStorageConsole.js`。本阶段只验证本机加密存储能力：使用 Electron safeStorage 可用时加密测试占位凭据，落盘文件为 `secure-provider-credentials.v1.json.enc`，返回 UI 的内容仅限 metadata only，不展示、不导出、不复制、不记录明文。safeStorage 不可用时必须返回 storage unavailable，plaintextFallback:false，不允许明文 fallback。
+
+- marker:secure api key storage implementation
+- marker:secure api key storage console
+- marker:secure api key storage metadata only
+- marker:secure api key storage encrypted blob
+- marker:secure api key storage no plaintext fallback
+- marker:secure api key storage no real api key
+- marker:secure api key storage no network
+- marker:secure api key storage no endpoint
+- marker:secure api key storage no price
+- marker:secure api key storage no booking url
+- marker:secure api key storage no payment
+- marker:secure api key storage no order
+- marker:secure api key storage no identity upload
+- marker:secure api key storage self test
+- 查看安全 API Key 存储控制台
+- 安全 API Key 存储控制台
+- 请勿输入真实 API Key。本版本仅用于本机安全存储能力验证。
+- status: secure local storage only
+- mode: no provider connection
+- providerId
+- encryptedBlob
+- keyFingerprint
+- keyLast4
+- metadata only
+- plaintextFallback:false
+- SECURE_API_KEY_STORAGE_IMPLEMENTATION_DRAFT
+- plaintextPersistedCount: 0
+- plaintextDisplayedCount: 0
+- plaintextExportedCount: 0
+- localStorageSecretCount: 0
+- sessionStorageSecretCount: 0
+- realApiKeyInputCount: 0
+- realProviderCallCount: 0
+- networkAttemptCount: 0
+- realEndpointConnectCount: 0
+- realPriceDisplayedCount: 0
+- bookingUrlDisplayedCount: 0
+- paymentAttemptCount: 0
+- orderAttemptCount: 0
+- identityUploadAttemptCount: 0
+- redacted: true
+
+安全红线保持：不输入、保存、读取真实 API key；不连接真实 provider；不连接 endpoint；不联网；不显示真实价格、fake/mock/demo/AI 估价；不生成 bookingUrl / checkoutUrl / paymentUrl / orderUrl；不预订、不付款、不下单；不上传或保存身份证、护照或银行卡。

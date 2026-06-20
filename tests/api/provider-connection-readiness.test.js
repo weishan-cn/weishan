@@ -57,6 +57,11 @@ function main() {
   assert.equal(normalDecision.auditDraft.orderAttemptCount, 0);
   assert.equal(normalDecision.auditDraft.identityUploadAttemptCount, 0);
   assert.equal(normalDecision.auditDraft.redacted, true);
+  assert.equal(normalDecision.credentialStorage.secureStorageImplementation, "missing");
+  assert.equal(normalDecision.credentialStorage.realCredentialConnected, "no");
+  assert.equal(normalDecision.credentialStorage.credentialConsent, "missing");
+  assert.equal(normalDecision.credentialStorage.credentialPlaintextDisplay, "disabled");
+  assert.equal(normalDecision.credentialStorage.credentialExport, "disabled");
   assert.equal(decisionApi.assertProviderConnectionReadinessDecisionSafe(normalDecision), true);
 
   const restrictedDecision = decisionApi.evaluateProviderConnectionReadiness({ providerCategory:"restricted_provider" });
@@ -72,7 +77,7 @@ function main() {
   assert.equal(paymentDecision.decisionReason, "forbidden capability requested");
 
   const consoleState = consoleApi.buildProviderConnectionReadinessConsole();
-  assert.equal(consoleState.consoleVersion, "2.1.24");
+  assert.equal(consoleState.consoleVersion, "2.1.25");
   assert.equal(consoleState.status, "readiness console only");
   assert.equal(consoleState.mode, "offline planning only");
   assert.equal(consoleState.realProvider, "disabled");
@@ -108,13 +113,23 @@ function main() {
     assert.equal(row.payment, "disabled");
     assert.equal(row.order, "disabled");
     assert.equal(row.identityUpload, "disabled");
+    assert.equal(row.credentialStorage.credentialPlaintextDisplay, "disabled");
+    assert.equal(row.credentialStorage.credentialExport, "disabled");
+    if (row.providerCategory === "restricted_provider") {
+      assert.equal(row.credentialStorage.secureStorageImplementation, "not allowed");
+      assert.equal(row.credentialStorage.realCredentialConnected, "not allowed");
+    } else {
+      assert.equal(row.credentialStorage.secureStorageImplementation, "ready");
+      assert.equal(row.credentialStorage.realCredentialConnected, "no");
+      assert.equal(row.credentialStorage.credentialConsent, "missing");
+    }
     assert.equal(["no-go", "blocked"].includes(row.finalDecision), true);
   }
 
   assert.equal(consoleState.categoryRows.filter((row) => row.finalDecision === "blocked").length, 1);
   assert.equal(consoleState.categoryRows.find((row) => row.providerCategory === "restricted_provider").finalDecision, "blocked");
   assert.equal(consoleState.readinessMatrix.rows.length, 6);
-  assert.equal(consoleState.readinessMatrix.rows.some((row) => row.includes("flight_provider") && row.includes("no-go")), true);
+  assert.equal(consoleState.readinessMatrix.rows.some((row) => row.includes("flight_provider") && row.includes("secure storage implementation ready") && row.includes("no-go")), true);
   assert.equal(consoleState.readinessMatrix.rows.some((row) => row.includes("restricted_provider") && row.includes("blocked")), true);
   assert.equal(consoleState.auditDraft.approvedProviderCount, 0);
   assert.equal(consoleState.auditDraft.connectedProviderCount, 0);

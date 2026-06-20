@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION = "2.1.24";
+  const PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION = "2.1.25";
 
   const CATEGORY_DEFINITIONS = {
     flight_provider: {
@@ -62,7 +62,11 @@
         sourceLabelGate: false,
         priceIntegrityGate: false
       },
-      credentialState: { consentApproved: false },
+      credentialState: {
+        secureStorageImplementationReady: providerCategory !== "restricted_provider",
+        realCredentialConnected: false,
+        consentApproved: false
+      },
       adapterState: { readonlyAdapterApproved: false },
       manualReviewState: { approved: false }
     };
@@ -130,7 +134,7 @@
         : ["real provider connection", "real network", "real API key", "real endpoint", "real price", "availability", "bookingUrl", "payment", "order", "identity upload"],
       nextStageRequirements: restricted
         ? ["保持永久 blocked", "只展示安全阻断", "不进入接入准备流程"]
-        : ["完成 endpoint allowlist", "完成 sandbox gate", "完成 result schema gate", "完成 source label gate", "完成 price integrity gate", "完成 credential consent", "完成人工审核"],
+        : ["完成 endpoint allowlist", "完成 sandbox gate", "完成 result schema gate", "完成 source label gate", "完成 price integrity gate", "连接真实凭据前完成人工 consent", "完成人工审核"],
       readinessMatrix: {
         providerType: definition.displayName,
         currentStatus: providerStatus(providerCategory),
@@ -141,9 +145,26 @@
         sourceLabelGate: restricted ? "not allowed" : "draft",
         priceIntegrityGate: restricted ? "not allowed" : "draft",
         bookingUrlSafety: restricted ? "not allowed" : "closed",
+        credentialStorage: restricted ? "not allowed" : "secure storage implementation ready",
         credentialConsent: restricted ? "not allowed" : "missing",
+        realCredentialConnected: restricted ? "not allowed" : "no",
         manualReview: restricted ? "not allowed" : "missing",
         finalDecision: decision.finalDecision || finalDecision(providerCategory)
+      },
+      credentialStorage: restricted ? {
+        secureStorageImplementation: "not allowed",
+        realCredentialConnected: "not allowed",
+        credentialConsent: "not allowed",
+        credentialPlaintextDisplay: "disabled",
+        credentialExport: "disabled",
+        finalDecision: "blocked"
+      } : {
+        secureStorageImplementation: "ready",
+        realCredentialConnected: "no",
+        credentialConsent: "missing",
+        credentialPlaintextDisplay: "disabled",
+        credentialExport: "disabled",
+        finalDecision: "no-go"
       },
       decision,
       finalDecision: decision.finalDecision || finalDecision(providerCategory),
@@ -206,7 +227,7 @@
       categoryRows: rows,
       providerRows: rows,
       readinessMatrix: {
-        columns: ["provider category", "provider type", "current status", "endpoint allowlist", "sandbox gate", "schema gate", "final decision"],
+        columns: ["provider category", "provider type", "current status", "endpoint allowlist", "sandbox gate", "schema gate", "credential storage", "final decision"],
         rows: rows.map((row) => [
           row.providerCategory,
           row.providerType,
@@ -214,6 +235,7 @@
           row.readinessMatrix.endpointAllowlist,
           row.readinessMatrix.sandboxGate,
           row.readinessMatrix.schemaGate,
+          row.readinessMatrix.credentialStorage,
           row.finalDecision
         ])
       },

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CONNECTION_READINESS_DECISION_ENGINE_VERSION = "2.1.24";
+  const PROVIDER_CONNECTION_READINESS_DECISION_ENGINE_VERSION = "2.1.25";
 
   function text(value) {
     return String(value || "").trim();
@@ -50,6 +50,14 @@
         realProvider: "disabled",
         realNetwork: "disabled",
         realApiKey: "disabled",
+        credentialStorage: {
+          secureStorageImplementation: "not allowed",
+          realCredentialConnected: "not allowed",
+          credentialConsent: "not allowed",
+          credentialPlaintextDisplay: "disabled",
+          credentialExport: "disabled",
+          finalDecision: "blocked"
+        },
         realEndpoint: "disabled",
         realPrice: "disabled",
         availability: "disabled",
@@ -82,6 +90,14 @@
     if (credentialState.consentApproved !== true) {
       missingRequirements.push("credential consent");
       reasons.push("credential consent missing");
+    }
+    if (credentialState.secureStorageImplementationReady !== true) {
+      missingRequirements.push("secure storage implementation");
+      reasons.push("secure storage implementation missing");
+    }
+    if (credentialState.realCredentialConnected !== true) {
+      missingRequirements.push("real credential not connected");
+      reasons.push("real credential not connected");
     }
     if (adapterState.readonlyAdapterApproved !== true) {
       missingRequirements.push("read-only adapter contract");
@@ -126,6 +142,14 @@
       realProvider: "disabled",
       realNetwork: "disabled",
       realApiKey: "disabled",
+      credentialStorage: {
+        secureStorageImplementation: credentialState.secureStorageImplementationReady === true ? "ready" : "missing",
+        realCredentialConnected: "no",
+        credentialConsent: credentialState.consentApproved === true ? "approved" : "missing",
+        credentialPlaintextDisplay: "disabled",
+        credentialExport: "disabled",
+        finalDecision: decision
+      },
       realEndpoint: "disabled",
       realPrice: "disabled",
       availability: "disabled",

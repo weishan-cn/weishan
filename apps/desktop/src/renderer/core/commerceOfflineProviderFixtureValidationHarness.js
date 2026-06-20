@@ -1,5 +1,5 @@
 (function(){
-  const OFFLINE_PROVIDER_FIXTURE_VALIDATION_HARNESS_VERSION = "2.1.24";
+  const OFFLINE_PROVIDER_FIXTURE_VALIDATION_HARNESS_VERSION = "2.1.25";
 
   const fixtureCases = [
     "missing_provider_id_fixture",

@@ -7,6 +7,16 @@ const ROOT = path.resolve(__dirname, "..");
 const STANDARD_PATH = path.join(ROOT, "docs/WEISHAN_GLOBAL_COMMERCE_STANDARD.md");
 
 const REQUIRED_PHRASES = [
+  "marker:secure api key storage implementation",
+  "SECURE_API_KEY_STORAGE_IMPLEMENTATION_DRAFT",
+  "请勿输入真实 API Key。本版本仅用于本机安全存储能力验证。",
+  "查看安全 API Key 存储控制台",
+  "plaintextFallback:false",
+  "encryptedBlob",
+  "metadata only",
+  "secure-provider-credentials.v1.json.enc",
+  "安全 API Key 存储控制台",
+  "Secure API Key Storage Implementation",
   "全球个人数字采购代理",
   "不是 eBay 工具",
   "不是单一平台工具",
@@ -1103,7 +1113,7 @@ const REQUIRED_PHRASES = [
   "riskNotice",
   "nextSteps",
   "sandbox gate / endpoint allowlist gate / key 生命周期 / 脱敏规则 / 本机安全存储 / API 绑定准备状态",
-  "v2.1.24：Provider Connection Readiness Console / Provider 接入准备控制台",
+  "v2.1.25：Provider Connection Readiness Console / Provider 接入准备控制台",
   "providerConnectionReadinessConsole.js",
   "providerConnectionReadinessDecisionEngine.js",
   "查看 Provider 接入准备控制台",

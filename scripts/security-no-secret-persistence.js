@@ -30,7 +30,9 @@ const allowedFixturePatterns = [
   /DEMO_[A-Z_]+_SHOULD_NOT_APPEAR/,
   /\[REDACTED_[A-Z_]+\]/,
   /dummy secret/i,
-  /local-ui-check-v219@example\.local/
+  /local-ui-check-v219@example\.local/,
+  /WEISHAN_TEST_CREDENTIAL_PLACEHOLDER_\d{6}/,
+  /WEISHAN_LOCAL_STORAGE_SELF_TEST_VALUE_\d{6}/
 ];
 
 const allowedPolicyTextPatterns = [

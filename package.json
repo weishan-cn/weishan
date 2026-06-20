@@ -1,6 +1,6 @@
 {
   "name": "weishan-desktop",
-  "version": "2.1.24",
+  "version": "2.1.25",
   "private": true,
   "scripts": {
     "install:all": "npm install --prefix apps/server && npm install --prefix apps/desktop",
@@ -24,7 +24,7 @@
     "test:api": "node tests/api/cloud-adapter.test.js",
     "test:e2e": "playwright test",
     "test:e2e:cloud": "playwright test tests/e2e/cloud-settings.spec.js",
-    "test:commerce-core": "node tests/api/global-procurement-user-facing.test.js && node tests/api/provider-connection-readiness.test.js",
+    "test:commerce-core": "node tests/api/global-procurement-user-facing.test.js && node tests/api/provider-connection-readiness.test.js && node tests/api/secure-api-key-storage.test.js",
     "test:e2e:commerce-agent": "playwright test tests/e2e/commerce-agent.spec.js --grep \"@commerce-smoke|@latest-command-priority\" --workers=1 --timeout=60000",
     "test:e2e:desktop-assistant": "playwright test tests/e2e/desktop-assistant.spec.js",
     "test:e2e:dispatch": "playwright test tests/e2e/dispatch-router.spec.js",

@@ -859,6 +859,37 @@ function checkProviderConnectionReadinessDecisionEngineVersion(results, expected
   addCheck(results, "apps/desktop provider connection readiness decision engine version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerConnectionReadinessDecisionEngine.js PROVIDER_CONNECTION_READINESS_DECISION_ENGINE_VERSION");
 }
 
+
+function checkSecureApiKeyStorageMainVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/main/secureApiKeyStorage.js";
+  const file = readText(filePath);
+  if (!file) {
+    results.push({ name: "apps/desktop secure API key storage main version", pass: false, detail: filePath + " missing" });
+    return;
+  }
+  if (file.__readError) {
+    results.push({ name: "apps/desktop secure API key storage main version", pass: false, detail: file.__readError });
+    return;
+  }
+  const match = file.match(/SECURE_API_KEY_STORAGE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop secure API key storage main version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/main/secureApiKeyStorage.js SECURE_API_KEY_STORAGE_VERSION");
+}
+
+function checkSecureApiKeyStorageConsoleVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/commerceSecureApiKeyStorageConsole.js";
+  const file = readText(filePath);
+  if (!file) {
+    results.push({ name: "apps/desktop secure API key storage console version", pass: false, detail: filePath + " missing" });
+    return;
+  }
+  if (file.__readError) {
+    results.push({ name: "apps/desktop secure API key storage console version", pass: false, detail: file.__readError });
+    return;
+  }
+  const match = file.match(/SECURE_API_KEY_STORAGE_CONSOLE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop secure API key storage console version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/commerceSecureApiKeyStorageConsole.js SECURE_API_KEY_STORAGE_CONSOLE_VERSION");
+}
+
 function runVersionCheck() {
   const results = [];
 
@@ -914,6 +945,8 @@ function runVersionCheck() {
     checkSettingsAuthLocalSecurityEvidenceVersion(results, rootPackage.version);
     checkProviderConnectionReadinessConsoleVersion(results, rootPackage.version);
     checkProviderConnectionReadinessDecisionEngineVersion(results, rootPackage.version);
+    checkSecureApiKeyStorageMainVersion(results, rootPackage.version);
+    checkSecureApiKeyStorageConsoleVersion(results, rootPackage.version);
   }
 
   results.forEach((item) => {

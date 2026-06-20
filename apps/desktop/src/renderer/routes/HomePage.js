@@ -2128,6 +2128,98 @@
     return disclosure("查看 Provider 接入准备控制台", body, "commerce-provider-connection-readiness-console-disclosure");
   }
 
+  function commerceSecureApiKeyStorageConsoleDisclosure(task){
+    const api = window.WeishanSecureApiKeyStorageConsole;
+    const state = api && typeof api.buildSecureApiKeyStorageConsole === "function"
+      ? api.buildSecureApiKeyStorageConsole()
+      : {
+        version:"2.1.25",
+        status:"secure local storage only",
+        mode:"no provider connection",
+        realProvider:"disabled",
+        realNetwork:"disabled",
+        realEndpoint:"disabled",
+        realPrice:"disabled",
+        availability:"disabled",
+        bookingUrl:"disabled",
+        payment:"disabled",
+        order:"disabled",
+        identityUpload:"disabled",
+        plaintextDisplay:"disabled",
+        plaintextExport:"disabled",
+        providerKeySlots:[],
+        auditDraft:{ eventType:"SECURE_API_KEY_STORAGE_IMPLEMENTATION_DRAFT", storageProvider:"electron_safeStorage", storageAvailable:true, plaintextPersistedCount:0, plaintextDisplayedCount:0, plaintextExportedCount:0, plaintextLoggedCount:0, localStorageSecretCount:0, sessionStorageSecretCount:0, realApiKeyInputCount:0, realProviderCallCount:0, networkAttemptCount:0, realEndpointConnectCount:0, realPriceDisplayedCount:0, bookingUrlDisplayedCount:0, paymentAttemptCount:0, orderAttemptCount:0, identityUploadAttemptCount:0, redacted:true },
+        display:{ title:"安全 API Key 存储控制台", warning:"请勿输入真实 API Key。本版本仅用于本机安全存储能力验证。" },
+        redacted:true
+      };
+    if (api && typeof api.assertSecureApiKeyStorageConsoleSafe === "function") api.assertSecureApiKeyStorageConsoleSafe(state);
+    const display = state.display || {};
+    const audit = state.auditDraft || {};
+    const auditValue = (value) => esc(String(value === undefined || value === null ? 0 : value));
+    const slots = Array.isArray(state.providerKeySlots) ? state.providerKeySlots : [];
+    const slotHtml = slots.map((slot) => `<section class="commerce-result-summary-checklist-card" data-secure-api-key-slot="${esc(slot.providerId || "")}">
+      <h6>${esc(slot.label || slot.providerId || "Provider Key")}</h6>
+      <p>providerId: ${esc(slot.providerId || "")}</p>
+      <p data-secure-api-key-slot-status>status: ${esc(slot.status || "empty")}</p>
+      <p data-secure-api-key-slot-fingerprint>keyFingerprint: ${esc(slot.keyFingerprint || "")}</p>
+      <p data-secure-api-key-slot-last4>keyLast4: ${esc(slot.keyLast4 || "")}</p>
+      <p>createdAt: ${esc(slot.createdAt || "")}</p>
+      <p data-secure-api-key-slot-updated>updatedAt: ${esc(slot.updatedAt || "")}</p>
+      <p>expiresAt: ${esc(slot.expiresAt || "")}</p>
+      <p>storage: encrypted local only</p>
+      <p data-secure-api-key-slot-decision>final decision: ${esc(slot.finalDecision || "storage-missing")}</p>
+      <div class="commerce-one-screen-actions">
+        <button class="cmd-btn gray" type="button" data-secure-api-key-storage-action="save" data-secure-api-key-provider-id="${esc(slot.providerId || "")}">保存测试占位 Key</button>
+        <button class="cmd-btn gray" type="button" data-secure-api-key-storage-action="rotate" data-secure-api-key-provider-id="${esc(slot.providerId || "")}">轮换测试占位 Key</button>
+        <button class="cmd-btn gray" type="button" data-secure-api-key-storage-action="delete" data-secure-api-key-provider-id="${esc(slot.providerId || "")}">删除 Key</button>
+      </div>
+    </section>`).join("");
+    const body = `<section class="commerce-secure-api-key-storage-console" data-secure-api-key-storage-console aria-label="安全 API Key 存储控制台">
+      <h4>${esc(display.title || "安全 API Key 存储控制台")}</h4>
+      <p>${esc(display.warning || "请勿输入真实 API Key。本版本仅用于本机安全存储能力验证。")}</p>
+      <p>status: ${esc(state.status || "secure local storage only")}</p>
+      <p>mode: ${esc(state.mode || "no provider connection")}</p>
+      <p>real provider disabled</p>
+      <p>real network disabled</p>
+      <p>real endpoint disabled</p>
+      <p>real price disabled</p>
+      <p>bookingUrl disabled</p>
+      <p>payment disabled</p>
+      <p>order disabled</p>
+      <p>identity upload disabled</p>
+      <p>plaintext display disabled</p>
+      <p>plaintext export disabled</p>
+      <p>redacted: true</p>
+      <div class="commerce-one-screen-actions">
+        <button class="cmd-btn gray" type="button" data-secure-api-key-storage-action="self-test">运行安全存储自检</button>
+      </div>
+      <p data-secure-api-key-storage-feedback aria-live="polite">metadata only · redacted: true</p>
+      <h5>provider key slots</h5>
+      <div class="commerce-result-summary-checklist-grid">${slotHtml}</div>
+      <h5>audit draft</h5>
+      <p>${esc(audit.eventType || "SECURE_API_KEY_STORAGE_IMPLEMENTATION_DRAFT")}</p>
+      <p>storageProvider: ${esc(audit.storageProvider || "electron_safeStorage")}</p>
+      <p>storageAvailable: ${esc(String(audit.storageAvailable !== false))}</p>
+      <p>plaintextPersistedCount: ${auditValue(audit.plaintextPersistedCount)}</p>
+      <p>plaintextDisplayedCount: ${auditValue(audit.plaintextDisplayedCount)}</p>
+      <p>plaintextExportedCount: ${auditValue(audit.plaintextExportedCount)}</p>
+      <p>plaintextLoggedCount: ${auditValue(audit.plaintextLoggedCount)}</p>
+      <p>localStorageSecretCount: ${auditValue(audit.localStorageSecretCount)}</p>
+      <p>sessionStorageSecretCount: ${auditValue(audit.sessionStorageSecretCount)}</p>
+      <p>realApiKeyInputCount: ${auditValue(audit.realApiKeyInputCount)}</p>
+      <p>realProviderCallCount: ${auditValue(audit.realProviderCallCount)}</p>
+      <p>networkAttemptCount: ${auditValue(audit.networkAttemptCount)}</p>
+      <p>realEndpointConnectCount: ${auditValue(audit.realEndpointConnectCount)}</p>
+      <p>realPriceDisplayedCount: ${auditValue(audit.realPriceDisplayedCount)}</p>
+      <p>bookingUrlDisplayedCount: ${auditValue(audit.bookingUrlDisplayedCount)}</p>
+      <p>paymentAttemptCount: ${auditValue(audit.paymentAttemptCount)}</p>
+      <p>orderAttemptCount: ${auditValue(audit.orderAttemptCount)}</p>
+      <p>identityUploadAttemptCount: ${auditValue(audit.identityUploadAttemptCount)}</p>
+      <p>redacted: true</p>
+    </section>`;
+    return disclosure("查看安全 API Key 存储控制台", body, "commerce-secure-api-key-storage-console-disclosure");
+  }
+
   function globalProcurementDecisionWorkspaceSummaryHtml(task){
     const workspace = task && task.globalProcurementDecisionWorkspace;
     if (!workspace) return "";
@@ -2192,6 +2284,7 @@
       ${commerceSecureKeyStoragePlanDisclosure(task)}
       ${commerceSecureStorageDesignGateDisclosure(task)}
       ${commerceLocalSecureStorageInterfaceDraftDisclosure(task)}
+      ${commerceSecureApiKeyStorageConsoleDisclosure(task)}
       ${commerceKeyRedactionAndLogLeakRulesDisclosure(task)}
       ${commerceKeyLifecycleDraftDisclosure(task)}
       ${commerceProviderEndpointAllowlistGateDisclosure(task)}
@@ -2406,6 +2499,7 @@
       ${commerceSecureKeyStoragePlanDisclosure(task)}
       ${commerceSecureStorageDesignGateDisclosure(task)}
       ${commerceLocalSecureStorageInterfaceDraftDisclosure(task)}
+      ${commerceSecureApiKeyStorageConsoleDisclosure(task)}
       ${commerceKeyRedactionAndLogLeakRulesDisclosure(task)}
       ${commerceKeyLifecycleDraftDisclosure(task)}
       ${commerceProviderEndpointAllowlistGateDisclosure(task)}
@@ -2464,6 +2558,7 @@
     const globalGuardHtml = globalProcurementRestrictedCategoryGuardDisclosure(task);
     const globalEvidenceHtml = globalProcurementEvidenceSafetySummaryDisclosure(task);
     const providerConnectionReadinessHtml = providerConnectionReadinessConsoleDisclosure(task);
+    const secureApiKeyStorageHtml = commerceSecureApiKeyStorageConsoleDisclosure(task);
     const resultCardRulesHtml = globalProcurementUserFacingResultCardsRulesDisclosure();
     return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-ticket-activity-result" aria-label="门票 / 活动购买计划">
       <div class="commerce-result-summary-head">
@@ -2495,6 +2590,7 @@
       </div>
       ${resultCardRulesHtml}
       ${commerceReadonlyProviderResultSchemaGateDisclosure(task)}
+      ${secureApiKeyStorageHtml}
       ${providerConnectionReadinessHtml}
       ${globalGuardHtml}
       ${globalEvidenceHtml}
@@ -2526,6 +2622,7 @@
     const globalGuardHtml = globalProcurementRestrictedCategoryGuardDisclosure(task);
     const globalEvidenceHtml = globalProcurementEvidenceSafetySummaryDisclosure(task);
     const providerConnectionReadinessHtml = providerConnectionReadinessConsoleDisclosure(task);
+    const secureApiKeyStorageHtml = commerceSecureApiKeyStorageConsoleDisclosure(task);
     const resultCardRulesHtml = globalProcurementUserFacingResultCardsRulesDisclosure();
     return `<section class="commerce-result-summary-panel commerce-one-screen-result" aria-label="最终结果">
       <div class="commerce-result-summary-head">
@@ -5431,6 +5528,7 @@
       ${commerceApiBindingReadinessDisclosure(task)}
       ${commerceSecureStorageDesignGateDisclosure(task)}
       ${commerceLocalSecureStorageInterfaceDraftDisclosure(task)}
+      ${commerceSecureApiKeyStorageConsoleDisclosure(task)}
       ${commerceKeyRedactionAndLogLeakRulesDisclosure(task)}
       ${commerceKeyLifecycleDraftDisclosure(task)}
       ${simpleFlightAdvancedDebugDisclosure(task)}
@@ -5476,6 +5574,7 @@
       ${commerceSecureKeyStoragePlanDisclosure(task)}
       ${commerceSecureStorageDesignGateDisclosure(task)}
       ${commerceLocalSecureStorageInterfaceDraftDisclosure(task)}
+      ${commerceSecureApiKeyStorageConsoleDisclosure(task)}
       ${commerceKeyRedactionAndLogLeakRulesDisclosure(task)}
       ${commerceKeyLifecycleDraftDisclosure(task)}
       ${commerceProviderEndpointAllowlistGateDisclosure(task)}
