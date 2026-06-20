@@ -8,7 +8,7 @@ const ROOT = path.resolve(__dirname, "../..");
 function loadRendererCore(files) {
   const window = {};
   window.window = window;
-  const context = vm.createContext({ window, console });
+  const context = vm.createContext({ window, console, URL });
   for (const file of files) {
     const source = fs.readFileSync(path.join(ROOT, file), "utf8");
     vm.runInContext(source, context, { filename:file });
@@ -24,6 +24,8 @@ function assertNoDangerousSurface(value) {
 }
 
 const windowRef = loadRendererCore([
+  "apps/desktop/src/renderer/core/providerEndpointAllowlistEnforcement.js",
+  "apps/desktop/src/renderer/core/providerSandboxRealKeyDryRunGate.js",
   "apps/desktop/src/renderer/core/readOnlyProviderAdapterContract.js",
   "apps/desktop/src/renderer/core/commerceReadonlyAdapterContractGate.js",
   "apps/desktop/src/renderer/core/adapters/flightReadOnlyProviderAdapterV1.js"
@@ -34,9 +36,9 @@ const gateApi = windowRef.WeishanCommerceReadonlyAdapterContractGate;
 const flightApi = windowRef.WeishanFlightReadOnlyProviderAdapterV1;
 
 function main() {
-  assert.equal(contractApi.READ_ONLY_PROVIDER_ADAPTER_CONTRACT_VERSION, "2.1.26");
+  assert.equal(contractApi.READ_ONLY_PROVIDER_ADAPTER_CONTRACT_VERSION, "2.1.27");
   const contract = contractApi.buildAdapterContract();
-  assert.equal(contract.contractVersion, "2.1.26");
+  assert.equal(contract.contractVersion, "2.1.27");
   assert.equal(contract.phase, "read_only_provider_adapter_contract_v1");
   assert.equal(contract.status, "adapter contract draft-ready");
   assert.equal(contract.mode, "offline_fixture_only");
@@ -103,7 +105,7 @@ function main() {
   assert.equal(contractApi.assertReadOnlyProviderAdapterContractSafe(contract), true);
 
   const gate = gateApi.buildReadonlyAdapterContractGateDisplay();
-  assert.equal(gate.version, "2.1.26");
+  assert.equal(gate.version, "2.1.27");
   assert.equal(gate.gateStatus, "draft-ready");
   assert.equal(gate.adapterExecution, "offline fixture only");
   assert.equal(gate.realNetwork, "disabled");
@@ -115,7 +117,7 @@ function main() {
   assert.equal(gate.capabilities.canPay, false);
   assert.equal(gateApi.assertReadonlyAdapterContractGateSafe(gate), true);
 
-  assert.equal(flightApi.FLIGHT_READONLY_PROVIDER_ADAPTER_V1_VERSION, "2.1.26");
+  assert.equal(flightApi.FLIGHT_READONLY_PROVIDER_ADAPTER_V1_VERSION, "2.1.27");
   const metadata = flightApi.getAdapterMetadata();
   assert.equal(metadata.adapterId, "flight_readonly_provider_adapter_v1");
   assert.equal(metadata.providerCategory, "flight");
@@ -148,6 +150,20 @@ function main() {
     assert.equal(blocked.status, "blocked");
     assert.equal(blocked.redacted, true);
   }
+
+  const endpointDecision = flightApi.validateEndpointAllowlist("https://provider-sandbox.invalid/sandbox/dry-run");
+  assert.equal(endpointDecision.finalDecision, "allowlisted_sandbox_only");
+  const preparedDryRun = flightApi.prepareSandboxDryRun({ endpointCandidate:"https://provider-sandbox.invalid/sandbox/dry-run", credentialScopeConsent:true, sandboxKey:"WEISHAN_SANDBOX_TEST_KEY_000000" });
+  assert.equal(preparedDryRun.dryRunDecision, "ready");
+  const simulatedDryRun = flightApi.runSandboxDryRunWithSimulatedTransport({ endpointCandidate:"https://provider-sandbox.invalid/sandbox/dry-run", credentialScopeConsent:true, sandboxKey:"WEISHAN_SANDBOX_TEST_KEY_000000" });
+  assert.equal(simulatedDryRun.dryRunDecision, "pass");
+  assert.equal(simulatedDryRun.transport, "simulated");
+  assert.equal(simulatedDryRun.realNetwork, false);
+  assert.equal(simulatedDryRun.networkAttemptCount, 0);
+  assert.equal(simulatedDryRun.realEndpointConnectCount, 0);
+  assert.equal(simulatedDryRun.resultExposure, "console-only");
+  assert.equal(simulatedDryRun.priceExposure, "disabled");
+  assert.equal(simulatedDryRun.bookingUrlExposure, "disabled");
 
   const flightAudit = flightApi.buildAuditDraft();
   assert.equal(flightAudit.eventType, "READ_ONLY_PROVIDER_ADAPTER_V1_DRAFT");

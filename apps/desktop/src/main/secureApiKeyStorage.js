@@ -9,15 +9,18 @@ try {
   electron = {};
 }
 
-const SECURE_API_KEY_STORAGE_VERSION = "2.1.26";
+const SECURE_API_KEY_STORAGE_VERSION = "2.1.27";
 const STORE_FILE = "secure-provider-credentials.v1.json.enc";
 const TEST_CREDENTIAL_PREFIX = "WEISHAN_TEST_CREDENTIAL_PLACEHOLDER_";
 const SELF_TEST_PREFIX = "WEISHAN_LOCAL_STORAGE_SELF_TEST_VALUE_";
 const DEFAULT_TEST_CREDENTIAL = TEST_CREDENTIAL_PREFIX + "000000";
 const DEFAULT_SELF_TEST_CREDENTIAL = SELF_TEST_PREFIX + "000000";
+const SANDBOX_TEST_CREDENTIAL_PREFIX = "WEISHAN_SANDBOX_TEST_KEY_";
+const DEFAULT_SANDBOX_TEST_CREDENTIAL = SANDBOX_TEST_CREDENTIAL_PREFIX + "000000";
 
 const PROVIDER_SLOTS = Object.freeze([
   { providerId:"flight_provider_key", label:"机票 Provider Key" },
+  { providerId:"flight_provider_sandbox_key", label:"机票 Provider Sandbox/Test Key" },
   { providerId:"hotel_provider_key", label:"酒店 Provider Key" },
   { providerId:"product_provider_key", label:"商品 Provider Key" },
   { providerId:"local_service_provider_key", label:"本地服务 Provider Key" },
@@ -68,7 +71,8 @@ function cleanProviderId(providerId) {
 function isAllowedTestCredential(value) {
   const text = String(value || "");
   return new RegExp("^" + TEST_CREDENTIAL_PREFIX + "\\d{6}$").test(text)
-    || new RegExp("^" + SELF_TEST_PREFIX + "\\d{6}$").test(text);
+    || new RegExp("^" + SELF_TEST_PREFIX + "\\d{6}$").test(text)
+    || new RegExp("^" + SANDBOX_TEST_CREDENTIAL_PREFIX + "[A-Z0-9_-]{6,48}$", "i").test(text);
 }
 
 function isRealLookingCredential(value) {
@@ -101,7 +105,7 @@ function metadataFromRecord(record) {
     storageVersion:String(record.storageVersion || SECURE_API_KEY_STORAGE_VERSION),
     encryptionProvider:String(record.encryptionProvider || ""),
     storage:"encrypted local only",
-    finalDecision:record.status === "saved" ? "storage-ready" : String(record.finalDecision || "storage-missing"),
+    finalDecision:record.status === "sandbox_saved" ? "sandbox-key-ready" : (record.status === "saved" ? "storage-ready" : String(record.finalDecision || "storage-missing")),
     redacted:true
   };
 }
@@ -118,7 +122,7 @@ function emptyMetadata(providerId, status, storageProvider) {
     storageVersion:SECURE_API_KEY_STORAGE_VERSION,
     encryptionProvider:storageProvider || "electron_safeStorage",
     storage:"encrypted local only",
-    finalDecision:status === "storage_unavailable" ? "storage-unavailable" : "storage-missing",
+    finalDecision:status === "blocked_production_key_risk" ? "blocked" : (status === "sandbox_saved" ? "sandbox-key-ready" : (status === "storage_unavailable" ? "storage-unavailable" : "storage-missing")),
     redacted:true
   };
 }
@@ -225,9 +229,12 @@ function createSecureApiKeyStorageService(options = {}) {
     if (!current.storageAvailable) {
       return { ok:false, error:"STORAGE_UNAVAILABLE", metadata:emptyMetadata(safeProviderId, "storage_unavailable", current.storageProvider), redacted:true };
     }
-    const value = String(credential || DEFAULT_TEST_CREDENTIAL);
-    if (!isAllowedTestCredential(value) || isRealLookingCredential(value)) {
-      return { ok:false, error:"TEST_CREDENTIAL_ONLY", metadata:emptyMetadata(safeProviderId, "empty", current.storageProvider), redacted:true };
+    const value = String(credential || (safeProviderId === "flight_provider_sandbox_key" ? DEFAULT_SANDBOX_TEST_CREDENTIAL : DEFAULT_TEST_CREDENTIAL));
+    if (isRealLookingCredential(value)) {
+      return { ok:false, error:"PRODUCTION_KEY_RISK_BLOCKED", metadata:emptyMetadata(safeProviderId, "blocked_production_key_risk", current.storageProvider), redacted:true };
+    }
+    if (!isAllowedTestCredential(value)) {
+      return { ok:false, error:"SANDBOX_OR_TEST_CREDENTIAL_ONLY", metadata:emptyMetadata(safeProviderId, "empty", current.storageProvider), redacted:true };
     }
     const encrypted = encryptCredential(value);
     if (!encrypted.ok) return { ok:false, error:encrypted.error, metadata:emptyMetadata(safeProviderId, "storage_unavailable", current.storageProvider), redacted:true };
@@ -242,7 +249,7 @@ function createSecureApiKeyStorageService(options = {}) {
       expiresAt:"",
       keyFingerprint:fingerprintFor(value),
       keyLast4:last4(value),
-      status:"saved",
+      status:safeProviderId === "flight_provider_sandbox_key" ? "sandbox_saved" : "saved",
       storageVersion:SECURE_API_KEY_STORAGE_VERSION,
       encryptionProvider:current.storageProvider,
       redacted:true
@@ -341,7 +348,8 @@ function createSecureApiKeyStorageService(options = {}) {
       isRealLookingCredential,
       decryptCredential,
       createAuditDraft,
-      PROVIDER_SLOTS
+      PROVIDER_SLOTS,
+      SANDBOX_TEST_CREDENTIAL_PREFIX
     }
   };
 }

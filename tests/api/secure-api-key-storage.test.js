@@ -48,7 +48,7 @@ function assertMetadataOnly(value) {
 }
 
 function main() {
-  assert.equal(SECURE_API_KEY_STORAGE_VERSION, "2.1.26");
+  assert.equal(SECURE_API_KEY_STORAGE_VERSION, "2.1.27");
 
   const { service, safeStorage, storePath } = makeService();
   const initial = service.getProviderKeyStatus("flight_provider_key");
@@ -74,7 +74,7 @@ function main() {
   const diskRecord = JSON.parse(diskText).records.flight_provider_key;
   assert.equal(typeof diskRecord.encryptedBlob, "string");
   assert.equal(diskRecord.redacted, true);
-  assert.equal(diskRecord.storageVersion, "2.1.26");
+  assert.equal(diskRecord.storageVersion, "2.1.27");
   assert.equal(diskRecord.encryptionProvider, "electron_safeStorage");
   assert.equal(Object.prototype.hasOwnProperty.call(diskRecord, "credential"), false);
   assert.equal(Object.prototype.hasOwnProperty.call(diskRecord, "apiKey"), false);
@@ -83,7 +83,8 @@ function main() {
   const listed = service.listProviderKeys();
   assert.equal(listed.ok, true);
   assert.equal(listed.metadataOnly, true);
-  assert.equal(listed.slots.length, 5);
+  assert.equal(listed.slots.length, 6);
+  assert.equal(listed.slots.some((slot) => slot.providerId === "flight_provider_sandbox_key"), true);
   assert.equal(listed.auditDraft.plaintextPersistedCount, 0);
   assert.equal(listed.auditDraft.plaintextDisplayedCount, 0);
   assert.equal(listed.auditDraft.plaintextExportedCount, 0);
@@ -118,8 +119,17 @@ function main() {
   const fakeRealLooking = "sk-" + "real-looking-key-1234567890";
   const realLooking = service.saveProviderKey("flight_provider_key", fakeRealLooking);
   assert.equal(realLooking.ok, false);
-  assert.equal(realLooking.error, "TEST_CREDENTIAL_ONLY");
+  assert.equal(realLooking.error, "PRODUCTION_KEY_RISK_BLOCKED");
+  assert.equal(realLooking.metadata.status, "blocked_production_key_risk");
   assertNoPlaintext(realLooking, fakeRealLooking);
+
+  const sandboxSaved = service.saveProviderKey("flight_provider_sandbox_key", "WEISHAN_SANDBOX_TEST_KEY_ABC123");
+  assert.equal(sandboxSaved.ok, true);
+  assert.equal(sandboxSaved.metadata.status, "sandbox_saved");
+  assert.equal(sandboxSaved.metadata.providerId, "flight_provider_sandbox_key");
+  assert.equal(sandboxSaved.metadata.finalDecision, "sandbox-key-ready");
+  assert.equal(sandboxSaved.metadata.keyLast4, "C123");
+  assertMetadataOnly(sandboxSaved);
 
   const selfTest = service.runSecureStorageSelfTest();
   assert.equal(selfTest.ok, true);

@@ -1,10 +1,11 @@
 ;(function () {
   "use strict";
 
-  const SECURE_API_KEY_STORAGE_CONSOLE_VERSION = "2.1.26";
+  const SECURE_API_KEY_STORAGE_CONSOLE_VERSION = "2.1.27";
 
   const PROVIDER_KEY_SLOTS = [
     { providerId:"flight_provider_key", label:"机票 Provider Key" },
+    { providerId:"flight_provider_sandbox_key", label:"机票 Provider Sandbox/Test Key" },
     { providerId:"hotel_provider_key", label:"酒店 Provider Key" },
     { providerId:"product_provider_key", label:"商品 Provider Key" },
     { providerId:"local_service_provider_key", label:"本地服务 Provider Key" },
@@ -148,7 +149,12 @@
     }
     try {
       let result = null;
-      if (action === "save" && typeof bridge.saveProviderKey === "function") result = await bridge.saveProviderKey(providerId);
+      if (action === "save" && typeof bridge.saveProviderKey === "function") {
+        const input = root.querySelector("[data-secure-api-key-sandbox-input]");
+        const credential = input ? input.value : "";
+        result = await bridge.saveProviderKey(providerId, credential);
+        if (input) input.value = "";
+      }
       else if (action === "rotate" && typeof bridge.rotateProviderKey === "function") result = await bridge.rotateProviderKey(providerId);
       else if (action === "delete" && typeof bridge.deleteProviderKey === "function") result = await bridge.deleteProviderKey(providerId);
       else if (action === "self-test" && typeof bridge.runSecureStorageSelfTest === "function") result = await bridge.runSecureStorageSelfTest();

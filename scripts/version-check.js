@@ -805,6 +805,25 @@ function checkFlightReadOnlyProviderAdapterV1Version(results, expectedVersion) {
   );
 }
 
+
+function checkProviderEndpointAllowlistEnforcementVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/providerEndpointAllowlistEnforcement.js";
+  const gate = readText(gatePath);
+  if (!gate) { results.push({ name:"apps/desktop provider endpoint allowlist enforcement version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider endpoint allowlist enforcement version", pass:false, detail:gate.__readError }); return; }
+  const match = gate.match(/PROVIDER_ENDPOINT_ALLOWLIST_ENFORCEMENT_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop provider endpoint allowlist enforcement version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerEndpointAllowlistEnforcement.js PROVIDER_ENDPOINT_ALLOWLIST_ENFORCEMENT_VERSION");
+}
+
+function checkProviderSandboxRealKeyDryRunGateVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/providerSandboxRealKeyDryRunGate.js";
+  const gate = readText(gatePath);
+  if (!gate) { results.push({ name:"apps/desktop provider sandbox real-key dry run gate version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider sandbox real-key dry run gate version", pass:false, detail:gate.__readError }); return; }
+  const match = gate.match(/PROVIDER_SANDBOX_REAL_KEY_DRY_RUN_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop provider sandbox real-key dry run gate version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerSandboxRealKeyDryRunGate.js PROVIDER_SANDBOX_REAL_KEY_DRY_RUN_GATE_VERSION");
+}
+
 function checkProviderGateMatrixDashboardVersion(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/commerceProviderGateMatrixDashboard.js";
   const gate = readText(gatePath);
@@ -998,6 +1017,8 @@ function runVersionCheck() {
     checkReadonlyAdapterContractGateVersion(results, rootPackage.version);
     checkReadOnlyProviderAdapterContractVersion(results, rootPackage.version);
     checkFlightReadOnlyProviderAdapterV1Version(results, rootPackage.version);
+    checkProviderEndpointAllowlistEnforcementVersion(results, rootPackage.version);
+    checkProviderSandboxRealKeyDryRunGateVersion(results, rootPackage.version);
     checkProviderGateMatrixDashboardVersion(results, rootPackage.version);
     checkProviderNoNetworkRuntimeGuardVersion(results, rootPackage.version);
     checkOfflineProviderFixtureValidationHarnessVersion(results, rootPackage.version);

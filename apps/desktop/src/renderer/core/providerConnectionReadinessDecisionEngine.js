@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CONNECTION_READINESS_DECISION_ENGINE_VERSION = "2.1.26";
+  const PROVIDER_CONNECTION_READINESS_DECISION_ENGINE_VERSION = "2.1.27";
 
   function text(value) {
     return String(value || "").trim();
@@ -148,6 +148,9 @@
         credentialConsent: credentialState.consentApproved === true ? "approved" : (credentialState.consentState === "draft_ready" ? "draft-ready" : "missing"),
         readonlyAdapterContract: adapterState.adapterContractState === "draft_ready" ? "draft-ready" : "missing",
         flightAdapterV1: adapterState.flightAdapterV1State === "offline_fixture_ready" ? "offline fixture ready" : "not_started",
+        endpointAllowlistEnforcement: adapterState.endpointAllowlistEnforcementState === "draft_ready" ? "draft-ready" : "missing",
+        sandboxRealKeyDryRunGate: adapterState.sandboxRealKeyDryRunGateState === "draft_ready" ? "draft-ready" : "missing",
+        sandboxDryRunTransport: adapterState.sandboxDryRunTransport === "simulated_only" ? "simulated only" : "disabled",
         credentialPlaintextDisplay: "disabled",
         credentialExport: "disabled",
         finalDecision: decision

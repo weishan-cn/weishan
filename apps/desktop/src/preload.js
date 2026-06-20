@@ -45,7 +45,7 @@ contextBridge.exposeInMainWorld("weishan", {
 
 contextBridge.exposeInMainWorld("weishanSecureApiKeyStorage", {
   listProviderKeys: () => ipcRenderer.invoke("secure-api-key:list"),
-  saveProviderKey: (providerId) => ipcRenderer.invoke("secure-api-key:save", { providerId:String(providerId || "") }),
+  saveProviderKey: (providerId, credential) => ipcRenderer.invoke("secure-api-key:save", { providerId:String(providerId || ""), credential:String(credential || "") }),
   deleteProviderKey: (providerId) => ipcRenderer.invoke("secure-api-key:delete", { providerId:String(providerId || "") }),
   rotateProviderKey: (providerId) => ipcRenderer.invoke("secure-api-key:rotate", { providerId:String(providerId || "") }),
   getProviderKeyStatus: (providerId) => ipcRenderer.invoke("secure-api-key:get-status", { providerId:String(providerId || "") }),

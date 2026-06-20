@@ -2101,14 +2101,19 @@
         <p>credential consent scope gate: ${esc((row.readinessMatrix || {}).credentialConsent || "missing")}</p>
         <p>read-only adapter contract: ${esc((row.readinessMatrix || {}).readonlyAdapter || "missing")}</p>
         <p>flight adapter v1: ${esc((row.readinessMatrix || {}).flightAdapterV1 || "not_started")}</p>
+        <p>endpoint allowlist enforcement: ${esc((row.readinessMatrix || {}).endpointAllowlistEnforcement || (row.readinessMatrix || {}).endpointAllowlist || "missing")}</p>
+        <p>sandbox real-key dry run gate: ${esc((row.readinessMatrix || {}).sandboxRealKeyDryRunGate || (row.readinessMatrix || {}).sandboxGate || "missing")}</p>
+        <p>sandbox dry run transport: ${esc((row.readinessMatrix || {}).sandboxDryRunTransport || "disabled")}</p>
         <p>real credential connected: ${esc(((row.credentialStorage || {}).realCredentialConnected) || "no")}</p>
         <p>real provider disabled</p>
         <p>real network disabled</p>
         <p>real API key disabled</p>
         <p>real endpoint disabled</p>
+        <p>production endpoint: disabled</p>
         <p>real price disabled</p>
         <p>availability disabled</p>
         <p>bookingUrl disabled</p>
+        <p>ordinary result exposure: disabled</p>
         <p>payment disabled</p>
         <p>order disabled</p>
         <p>identity upload disabled</p>
@@ -2137,7 +2142,7 @@
     const state = api && typeof api.buildSecureApiKeyStorageConsole === "function"
       ? api.buildSecureApiKeyStorageConsole()
       : {
-        version:"2.1.26",
+        version:"2.1.27",
         status:"secure local storage only",
         mode:"no provider connection",
         realProvider:"disabled",
@@ -2302,6 +2307,8 @@
       ${commerceCredentialConsentScopeGateDisclosure(task)}
       ${commerceReadonlyAdapterContractGateDisclosure(task)}
       ${commerceReadOnlyProviderAdapterV1Disclosure(task)}
+      ${commerceEndpointAllowlistEnforcementDisclosure(task)}
+      ${commerceProviderSandboxRealKeyDryRunGateDisclosure(task)}
       ${commerceProviderGateMatrixDashboardDisclosure(task)}
       ${commerceProviderNoNetworkRuntimeGuardDisclosure(task)}
       ${commerceOfflineProviderFixtureValidationHarnessDisclosure(task)}
@@ -2518,6 +2525,8 @@
       ${commerceCredentialConsentScopeGateDisclosure(task)}
       ${commerceReadonlyAdapterContractGateDisclosure(task)}
       ${commerceReadOnlyProviderAdapterV1Disclosure(task)}
+      ${commerceEndpointAllowlistEnforcementDisclosure(task)}
+      ${commerceProviderSandboxRealKeyDryRunGateDisclosure(task)}
       ${commerceProviderGateMatrixDashboardDisclosure(task)}
       ${commerceProviderNoNetworkRuntimeGuardDisclosure(task)}
       ${commerceOfflineProviderFixtureValidationHarnessDisclosure(task)}
@@ -5008,6 +5017,110 @@
   }
 
 
+
+  function commerceEndpointAllowlistEnforcementDisclosure(task){
+    const api = window.WeishanProviderEndpointAllowlistEnforcement;
+    const state = api && typeof api.buildEndpointAllowlistEnforcementDraft === "function" ? api.buildEndpointAllowlistEnforcementDraft("flight_provider") : { status:"endpoint allowlist enforcement only", mode:"sandbox allowlist only", productionEndpoint:"disabled", arbitraryEndpoint:"disabled", redirect:"disabled", credentialQueryParams:"disabled", paymentOrderCheckoutEndpoint:"disabled", identityUploadEndpoint:"disabled", finalDecision:"no-go / sandbox-only", flightProviderAllowlistDraft:{ allowedSandboxHosts:["provider-sandbox.invalid"], allowedSandboxPaths:["/sandbox/dry-run"], blockedProductionHosts:["production-provider.invalid"], blockedPathPatterns:["payment","order","checkout","identity"] }, auditDraft:{ eventType:"ENDPOINT_ALLOWLIST_ENFORCEMENT_V1_DRAFT", networkAttemptCount:0, realEndpointConnectCount:0, redacted:true }, redacted:true };
+    const rule = state.flightProviderAllowlistDraft || {};
+    const audit = state.auditDraft || {};
+    const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(typeof item === 'string' ? item : JSON.stringify(item)) + '</li>'; }).join('') + '</ul>'; };
+    const objectHtml = function(obj){ return '<ul>' + Object.keys(obj || {}).map(function(key){ return '<li>' + esc(key) + ': ' + esc(typeof obj[key] === 'object' ? JSON.stringify(obj[key]) : String(obj[key])) + '</li>'; }).join('') + '</ul>'; };
+    const body = '<section class="commerce-endpoint-allowlist-enforcement-panel" aria-label="Endpoint Allowlist 强制闸门">'
+      + '<h4>Endpoint Allowlist Enforcement V1 / Endpoint Allowlist 强制闸门</h4>'
+      + '<p>status: endpoint allowlist enforcement only</p>'
+      + '<p>mode: sandbox allowlist only</p>'
+      + '<p>production endpoint disabled</p>'
+      + '<p>arbitrary endpoint disabled</p>'
+      + '<p>redirect disabled</p>'
+      + '<p>credential query params disabled</p>'
+      + '<p>payment/order/checkout endpoint disabled</p>'
+      + '<p>identity upload endpoint disabled</p>'
+      + '<p>redacted: true</p>'
+      + '<h5>flight_provider allowlist draft</h5>'
+      + '<p>allowed sandbox hosts</p>' + listHtml(rule.allowedSandboxHosts || [])
+      + '<p>allowed sandbox paths</p>' + listHtml(rule.allowedSandboxPaths || [])
+      + '<p>blocked production hosts</p>' + listHtml(rule.blockedProductionHosts || [])
+      + '<p>blocked path patterns</p>' + listHtml(rule.blockedPathPatterns || [])
+      + '<h5>endpoint validation examples</h5>' + objectHtml(state.validationExample || {})
+      + '<p>final decision: ' + esc(state.finalDecision || 'no-go / sandbox-only') + '</p>'
+      + '<h5>audit draft</h5><p>ENDPOINT_ALLOWLIST_ENFORCEMENT_V1_DRAFT</p>'
+      + '<p>arbitraryEndpointBlockedCount: ' + esc(String(audit.arbitraryEndpointBlockedCount || 0)) + '</p>'
+      + '<p>productionEndpointBlockedCount: ' + esc(String(audit.productionEndpointBlockedCount || 0)) + '</p>'
+      + '<p>credentialQueryParamBlockedCount: ' + esc(String(audit.credentialQueryParamBlockedCount || 0)) + '</p>'
+      + '<p>redirectBlockedCount: ' + esc(String(audit.redirectBlockedCount || 0)) + '</p>'
+      + '<p>realEndpointConnectCount: ' + esc(String(audit.realEndpointConnectCount || 0)) + '</p>'
+      + '<p>networkAttemptCount: ' + esc(String(audit.networkAttemptCount || 0)) + '</p>'
+      + '<p>redacted: true</p>'
+      + '</section>';
+    return disclosure('查看 Endpoint Allowlist Enforcement V1 / 查看 Endpoint Allowlist 强制闸门', body, 'commerce-endpoint-allowlist-enforcement-disclosure');
+  }
+
+  function commerceProviderSandboxRealKeyDryRunGateDisclosure(task){
+    const api = window.WeishanProviderSandboxRealKeyDryRunGate;
+    const input = { providerCategory:'flight', providerId:'flight_provider', adapterId:'flight_readonly_provider_adapter_v1', endpointCandidate:'https://provider-sandbox.invalid/sandbox/dry-run', credentialScopeConsent:true, sandboxKey:'WEISHAN_SANDBOX_TEST_KEY_000000' };
+    const gate = api && typeof api.evaluateSandboxRealKeyDryRunGate === 'function' ? api.evaluateSandboxRealKeyDryRunGate(input) : { status:'sandbox real-key dry-run gate only', mode:'controlled sandbox only', dryRunDecision:'ready', resultExposurePolicy:'console-only', ordinaryResultExposure:'disabled', realPriceExposure:'disabled', bookingUrlExposure:'disabled', productionEndpoint:'disabled', productionKey:'disabled', payment:false, order:false, identityUpload:false, redacted:true };
+    const dryRun = api && typeof api.runSandboxDryRunGateWithSimulatedTransport === 'function' ? api.runSandboxDryRunGateWithSimulatedTransport(input) : { dryRunDecision:'pass', dryRunTransport:'simulated', transport:'simulated', realNetwork:false, networkAttemptCount:0, realEndpointConnectCount:0, endpointConnectCount:0, schemaValidation:'pass', sourceLabelValidation:'pass', resultExposure:'console-only', ordinaryResultExposure:'disabled', realPriceExposure:'disabled', bookingUrlExposure:'disabled', redacted:true };
+    const audit = dryRun.auditDraft || gate.auditDraft || {};
+    const listHtml = function(items){ return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){ return '<li>' + esc(item) + '</li>'; }).join('') + '</ul>'; };
+    const body = '<section class="commerce-provider-sandbox-real-key-dry-run-gate-panel" data-secure-api-key-storage-console="true" aria-label="Provider 沙箱测试 Key Dry Run 闸门">'
+      + '<h4>Provider 沙箱测试 Key Dry Run 闸门</h4>'
+      + '<p>status: sandbox real-key dry-run gate only</p>'
+      + '<p>mode: controlled sandbox only</p>'
+      + '<p>ordinary result exposure disabled</p>'
+      + '<p>real price exposure disabled</p>'
+      + '<p>bookingUrl exposure disabled</p>'
+      + '<p>payment disabled</p>'
+      + '<p>order disabled</p>'
+      + '<p>identity upload disabled</p>'
+      + '<p>production endpoint disabled</p>'
+      + '<p>production key disabled</p>'
+      + '<p>redacted: true</p>'
+      + '<p>仅允许输入 provider sandbox/test key</p>'
+      + '<p>不要输入生产 key</p>'
+      + '<p>不会连接生产 endpoint</p>'
+      + '<p>不会把 dry-run 结果展示到普通全球采购结果页</p>'
+      + '<p>不会返回真实价格</p>'
+      + '<p>不会生成 bookingUrl</p>'
+      + '<p>不会付款或下单</p>'
+      + '<label class="commerce-field-label">Sandbox/Test Key<input type="password" data-secure-api-key-sandbox-input="true" placeholder="仅限 provider sandbox/test key；不要填写生产 API key" autocomplete="off" /></label>'
+      + '<div class="commerce-inline-actions" aria-label="Provider 沙箱测试 Key 操作">'
+      + '<button class="cmd-btn gray" type="button" data-secure-api-key-storage-action="save" data-secure-api-key-provider-id="flight_provider_sandbox_key">保存沙箱测试 Key</button>'
+      + '<button class="cmd-btn gray" type="button" data-secure-api-key-storage-action="delete" data-secure-api-key-provider-id="flight_provider_sandbox_key">删除沙箱测试 Key</button>'
+      + '<button class="cmd-btn gray" type="button" data-provider-sandbox-dry-run-action="simulated-check">运行沙箱 Dry Run Gate 检查</button>'
+      + '<button class="cmd-btn gray" type="button">查看 Dry Run 审计</button>'
+      + '</div>'
+      + '<p data-secure-api-key-storage-feedback="true">keyFingerprint: ' + esc(gate.keyFingerprint || '') + ' · keyLast4: ' + esc(gate.keyLast4 || '') + ' · redacted: true</p>'
+      + '<h5>禁止按钮 / 永久禁止动作</h5>' + listHtml(['连接真实 Provider','测试生产 endpoint','获取真实价格','启用普通结果页真实价格','生成 bookingUrl','下单','付款'])
+      + '<h5>Simulated sandbox dry-run</h5>'
+      + '<p>dryRunDecision: ' + esc(dryRun.dryRunDecision || 'pass') + '</p>'
+      + '<p>transport: simulated</p>'
+      + '<p>dryRunTransport: simulated</p>'
+      + '<p>realNetwork: false</p>'
+      + '<p>networkAttemptCount: ' + esc(String(dryRun.networkAttemptCount || 0)) + '</p>'
+      + '<p>realEndpointConnectCount: ' + esc(String(dryRun.realEndpointConnectCount || dryRun.endpointConnectCount || 0)) + '</p>'
+      + '<p>endpointConnectCount: ' + esc(String(dryRun.endpointConnectCount || 0)) + '</p>'
+      + '<p>credentialReadCount: ' + esc(String(dryRun.credentialReadCount || 0)) + '</p>'
+      + '<p>onlySecureStorageMetadataReadCount: ' + esc(String(dryRun.onlySecureStorageMetadataReadCount || 0)) + '</p>'
+      + '<p>schemaValidation: ' + esc(dryRun.schemaValidation || 'pass') + '</p>'
+      + '<p>sourceLabelValidation: ' + esc(dryRun.sourceLabelValidation || 'pass') + '</p>'
+      + '<p>resultExposure: console-only</p>'
+      + '<p>ordinaryResultExposure: disabled</p>'
+      + '<p>realPriceExposure: disabled</p>'
+      + '<p>bookingUrlExposure: disabled</p>'
+      + '<h5>audit draft</h5><p>PROVIDER_SANDBOX_REAL_KEY_DRY_RUN_GATE_DRAFT</p>'
+      + '<p>realCredentialPlaintextDisplayedCount: ' + esc(String(audit.realCredentialPlaintextDisplayedCount || 0)) + '</p>'
+      + '<p>realCredentialPlaintextExportedCount: ' + esc(String(audit.realCredentialPlaintextExportedCount || 0)) + '</p>'
+      + '<p>realPriceDisplayedCount: ' + esc(String(audit.realPriceDisplayedCount || 0)) + '</p>'
+      + '<p>bookingUrlDisplayedCount: ' + esc(String(audit.bookingUrlDisplayedCount || 0)) + '</p>'
+      + '<p>paymentAttemptCount: ' + esc(String(audit.paymentAttemptCount || 0)) + '</p>'
+      + '<p>orderAttemptCount: ' + esc(String(audit.orderAttemptCount || 0)) + '</p>'
+      + '<p>identityUploadAttemptCount: ' + esc(String(audit.identityUploadAttemptCount || 0)) + '</p>'
+      + '<p>ordinaryResultExposureCount: ' + esc(String(audit.ordinaryResultExposureCount || 0)) + '</p>'
+      + '<p>redacted: true</p>'
+      + '</section>';
+    return disclosure('查看 Provider Sandbox Real-Key Dry Run Gate', body, 'commerce-provider-sandbox-real-key-dry-run-gate-disclosure');
+  }
+
   function commerceProviderGateMatrixDashboardDisplay(task){
     const api = window.WeishanCommerceProviderGateMatrixDashboard;
     const gate = task && task.providerGateMatrixDashboard || null;
@@ -5572,6 +5685,8 @@
       ${commerceCredentialConsentScopeGateDisclosure(task)}
       ${commerceReadonlyAdapterContractGateDisclosure(task)}
       ${commerceReadOnlyProviderAdapterV1Disclosure(task)}
+      ${commerceEndpointAllowlistEnforcementDisclosure(task)}
+      ${commerceProviderSandboxRealKeyDryRunGateDisclosure(task)}
       ${commerceProviderGateMatrixDashboardDisclosure(task)}
       ${commerceProviderNoNetworkRuntimeGuardDisclosure(task)}
       ${commerceOfflineProviderFixtureValidationHarnessDisclosure(task)}

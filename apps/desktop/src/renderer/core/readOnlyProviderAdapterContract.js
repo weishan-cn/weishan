@@ -1,6 +1,6 @@
 ;(function () {
   "use strict";
-  const READ_ONLY_PROVIDER_ADAPTER_CONTRACT_VERSION = "2.1.26";
+  const READ_ONLY_PROVIDER_ADAPTER_CONTRACT_VERSION = "2.1.27";
   const ALLOWED_METHODS = ["getAdapterMetadata", "validateCredentialScope", "validateReadinessGates", "runOfflineFixtureSearch", "normalizeProviderResult", "validateResultSchema", "attachSourceLabel", "runDryRun"];
   const BLOCKED_METHODS = ["connect", "fetch", "request", "post", "createOrder", "pay", "checkout", "uploadIdentity", "revealCredential", "exportCredential", "testEndpoint"];
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
