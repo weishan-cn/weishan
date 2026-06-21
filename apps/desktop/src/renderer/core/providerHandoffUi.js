@@ -1,5 +1,5 @@
 (function(){
-  const PROVIDER_HANDOFF_UI_VERSION = "2.1.35";
+  const PROVIDER_HANDOFF_UI_VERSION = "2.1.36";
   const SAFE_ACTIONS = ["manual_confirm", "copy_search_conditions", "external_search_manual", "provider_handoff_preview"];
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value){ return String(value == null ? "" : value).trim(); }
@@ -22,11 +22,11 @@
       "燃油附加费：" + row("燃油附加费"),
       "机场建设费 / 民航发展基金：" + row("机场建设费 / 民航发展基金"),
       "平台服务费：" + row("平台服务费"),
+      "税费：" + row("税费"),
+      "其它附加费：" + row("其它附加费"),
       "优惠 / 补贴：" + row("优惠 / 补贴"),
       "最终应付总价：" + row("最终应付总价"),
-      "税费库存：" + text(source.taxFeeSummary || "最终以平台页面为准") + "；" + text(source.inventoryReliability || "最终以平台页面为准"),
-      "请用户自行去官方平台核对票面价、燃油附加费、机场建设费、平台服务费、优惠 / 补贴、最终应付总价、行李和退改签。",
-      "最终价格、库存、税费、行李和退改签以平台页面为准。",
+      "请用户自行打开官方航空公司或可信平台，核对出发地 / 目的地 / 日期、是否直达、票面价、燃油附加费、机场建设费、平台服务费、税费、优惠 / 补贴、最终应付总价、行李规则、退改签规则、余票 / 座位状态。",
       "weishan 不收款、不下单。"
     ];
     return lines.join("\n");

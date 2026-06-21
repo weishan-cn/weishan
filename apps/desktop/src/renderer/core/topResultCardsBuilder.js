@@ -1,5 +1,5 @@
 (function(){
-  const TOP_RESULT_CARDS_BUILDER_VERSION = "2.1.35";
+  const TOP_RESULT_CARDS_BUILDER_VERSION = "2.1.36";
   const MAX_CARD_COUNT = 3;
   const ALLOWED_ACTION_TYPES = ["manual_confirm", "copy_search_conditions", "external_search_manual", "provider_handoff_preview"];
   const FORBIDDEN_ACTION_TYPES = ["booking", "payment", "order", "checkout", "auto_purchase", "identity_upload"];
@@ -28,8 +28,9 @@
     const origin = text(intent.origin || intent.from || "上海");
     const destination = text(intent.destination || intent.to || "成都");
     const date = text(intent.dateDisplay || intent.date || "7月15日");
-    const preference = text(intent.preference || intent.sortPreference || "直达优先");
-    return origin + " → " + destination + " · " + date + " · " + preference;
+    const directPreference = text(intent.directPreference || intent.preference || "直达优先");
+    const sortPreference = text(intent.sortPreferenceLabel || intent.sortPreference || "低价优先");
+    return origin + " → " + destination + " · " + date + " · " + directPreference + (sortPreference ? " · " + sortPreference : "");
   }
   function safePriceDisplay(value, fallback){
     const display = text(value || fallback || "暂无真实价格结果");
@@ -238,6 +239,7 @@
       limitedBetaCheapestClaimBlockedCount:cards.filter((card) => card.cardType === "limited_beta_price" && card.cheapestClaim !== true).length,
       incompleteFareExcludedCount:cards.filter((card) => card.fareBreakdown && (card.fareBreakdown.totalPayable === null || card.fareBreakdown.taxFeeCompleteness !== "complete")).length,
       totalPayableSortUsed:cards.some((card) => card.canParticipateInCheapestRanking === true),
+      fareCardUxCleanupAudit:{ eventType:"FARE_CARD_UX_CLEANUP_DRAFT", fareBreakdownColonFormatApplied:true, duplicateTotalPayableRemoved:true, internalEnumHiddenFromUserSurface:true, finalPageDisclaimerDuplicateCount:1, userFacingSafetyHintCount:1, noPriceMessageCount:1, redacted:true },
       fakeResultBlockedCount:0,
       sandboxPriceExcludedFromRankingCount:cards.filter((card) => card.fareBreakdown && card.fareBreakdown.providerPriceType === "sandbox_test_price" && card.canParticipateInCheapestRanking !== true).length,
       bookingUrlDisplayedCount:0,

@@ -7,10 +7,12 @@ function load(files){ const window = {}; window.window = window; const context =
 function main(){
   const windowRef = load(["apps/desktop/src/renderer/core/flightFareBreakdown.js", "apps/desktop/src/renderer/core/cheapestTruthGuard.js", "apps/desktop/src/renderer/core/topResultCardsBuilder.js", "apps/desktop/src/renderer/core/cleanResultSurfaceV2.js"]);
   const api = windowRef.WeishanCleanResultSurfaceV2;
-  assert.equal(api.CLEAN_RESULT_SURFACE_V2_VERSION, "2.1.35");
-  const flight = api.buildCleanResultSurfaceV2({ procurementCategory:"flight", normalizedSearchIntent:{ category:"flight", origin:"上海", destination:"成都", dateDisplay:"7月15日", preference:"直达优先" }, limitedBetaResult:{ enabled:true, priceDisplay:"¥1010" }, sortPreference:"低价优先" });
+  assert.equal(api.CLEAN_RESULT_SURFACE_V2_VERSION, "2.1.36");
+  const flight = api.buildCleanResultSurfaceV2({ procurementCategory:"flight", normalizedSearchIntent:{ category:"flight", origin:"上海", destination:"成都", dateDisplay:"7 月 15 日", preference:"直达优先", sortPreference:"低价优先" }, limitedBetaResult:{ enabled:true, priceDisplay:"¥1010" }, sortPreference:"低价优先" });
   assert.equal(flight.summaryTitle, "上海 → 成都");
-  assert.match(flight.summarySubtitle, /7月15日/);
+  assert.match(flight.summarySubtitle, /7 月 15 日/);
+  assert.doesNotMatch(flight.summaryTitle, /成都直达/);
+  assert.doesNotMatch(flight.summarySubtitle, /not_ranked_as_real_cheapest|Cheapest Truth Guard/);
   assert.equal(flight.surfaceMode, "top_results");
   assert.equal(flight.resultCardCount, 1);
   assert.equal(flight.duplicateNoPriceMessageCount, 0);
@@ -36,6 +38,8 @@ function main(){
     assert.equal(surface.audit.paymentButtonDisplayedCount, 0);
     assert.equal(surface.audit.orderButtonDisplayedCount, 0);
     assert.equal(surface.audit.identityUploadDisplayedCount, 0);
+    assert.equal(surface.audit.internalDebugLabelVisibleCount, 0);
+    assert.equal(surface.audit.handoffAreaGrouped, true);
     assert.equal(surface.audit.redacted, true);
     assert.equal(surface.userFacingSafetyHintCount <= 2, true);
     assert.equal(api.assertCleanResultSurfaceV2Safe(surface), true);

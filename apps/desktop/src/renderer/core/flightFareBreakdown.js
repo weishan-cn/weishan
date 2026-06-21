@@ -1,5 +1,5 @@
 (function(){
-  const FLIGHT_FARE_BREAKDOWN_VERSION = "2.1.35";
+  const FLIGHT_FARE_BREAKDOWN_VERSION = "2.1.36";
   const UNKNOWN_FINAL_PAGE = "未单独提供 / 以平台页面为准";
   const WITHHELD_PRICE_LABEL = "价格暂不展示";
   const ALLOWED_PRICE_TYPES = ["production_price", "limited_beta_price", "sandbox_test_price", "unknown"];
@@ -18,6 +18,12 @@
   function completeness(value){
     const raw = text(value || "unknown");
     return ["complete", "partial", "unknown"].includes(raw) ? raw : "unknown";
+  }
+  function completenessLabel(value){
+    const raw = completeness(value);
+    if (raw === "complete") return "完整";
+    if (raw === "partial") return "部分完整 / 以平台页面为准";
+    return "未单独提供 / 以平台页面为准";
   }
   function money(value, currency){
     const n = numberOrNull(value);
@@ -62,6 +68,7 @@
     const safe = fare && typeof fare === "object" ? fare : {};
     const currency = text(safe.currency || "CNY") || "CNY";
     return [
+      { label:"最终应付总价", value:safe.totalPayable === null || safe.totalPayable === undefined ? WITHHELD_PRICE_LABEL : money(safe.totalPayable, currency) },
       { label:"票面价", value:nullableMoney(safe.baseFare, currency) },
       { label:"燃油附加费", value:nullableMoney(safe.fuelSurcharge, currency) },
       { label:"机场建设费 / 民航发展基金", value:nullableMoney(safe.airportConstructionFee !== null && safe.airportConstructionFee !== undefined ? safe.airportConstructionFee : safe.civilAviationDevelopmentFund, currency) },
@@ -69,10 +76,21 @@
       { label:"税费", value:nullableMoney(safe.taxes, currency) },
       { label:"其它附加费", value:nullableMoney(safe.otherFees, currency) },
       { label:"优惠 / 补贴", value:safe.discount === null && safe.subsidy === null ? "未提供" : nullableMoney((numberOrNull(safe.discount) || 0) + (numberOrNull(safe.subsidy) || 0), currency) },
-      { label:"最终应付总价", value:safe.totalPayable === null || safe.totalPayable === undefined ? WITHHELD_PRICE_LABEL : money(safe.totalPayable, currency) },
-      { label:"税费完整性", value:text(safe.taxFeeCompleteness || "unknown") },
-      { label:"最终以平台页面为准", value:text(safe.finalPageDisclaimer || "最终以平台页面为准") }
+      { label:"税费完整性", value:completenessLabel(safe.taxFeeCompleteness) }
     ];
+  }
+  function buildFareCardUxCleanupAuditDraft(input){
+    const safe = input && typeof input === "object" ? input : {};
+    return clone({
+      eventType:"FARE_CARD_UX_CLEANUP_DRAFT",
+      fareBreakdownColonFormatApplied:true,
+      duplicateTotalPayableRemoved:true,
+      internalEnumHiddenFromUserSurface:true,
+      finalPageDisclaimerDuplicateCount:Number(safe.finalPageDisclaimerDuplicateCount || 1),
+      userFacingSafetyHintCount:Number(safe.userFacingSafetyHintCount || 1),
+      noPriceMessageCount:Number(safe.noPriceMessageCount || 1),
+      redacted:true
+    });
   }
   function buildFlightFareBreakdownAuditDraft(input){
     const safe = input && typeof input === "object" ? input : {};
@@ -110,6 +128,7 @@
     normalizeFlightFareBreakdown,
     buildFlightFareBreakdownRows,
     buildFlightFareBreakdownAuditDraft,
+    buildFareCardUxCleanupAuditDraft,
     assertFlightFareBreakdownSafe
   };
 })();

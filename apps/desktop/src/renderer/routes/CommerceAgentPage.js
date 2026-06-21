@@ -2225,7 +2225,7 @@
     const state = api && typeof api.buildSecureApiKeyStorageConsole === "function"
       ? api.buildSecureApiKeyStorageConsole()
       : {
-        version:"2.1.35",
+        version:"2.1.36",
         status:"secure local storage only",
         mode:"no provider connection",
         realProvider:"disabled",
@@ -2841,16 +2841,21 @@
   function commerceSimpleFlightFields(task){
     const normalized = task && (task.normalizedFields || task.normalized) || {};
     const raw = String(task && (task.inputSummary || task.rawInput || task.title || task.text) || "");
-    const origin = String(normalized.originText || "").trim();
-    const destination = String(normalized.destinationText || "").trim();
-    const date = String(normalized.dateText || normalized.timing || "").trim().replace(/\s+/g, "");
+    const parser = window.WeishanFlightIntentParser;
+    const parsed = parser && typeof parser.parseFlightIntent === "function" ? parser.parseFlightIntent(raw) : null;
+    const origin = String(normalized.originText || parsed && parsed.origin || "").trim();
+    const destination = String(normalized.destinationText || parsed && parsed.destination || "").trim();
+    const date = String(normalized.dateText || normalized.timing || parsed && parsed.departureDate || "").trim().replace(/\s+/g, "");
     const dateDisplay = date.replace(/^(\d{1,2})月(\d{1,2})日$/, "$1 月 $2 日");
-    const lowPrice = /最便宜|低价|便宜/.test(raw) || /低价优先/.test(String(normalized.constraints || ""));
+    const directOnly = normalized.directOnly === true || parsed && parsed.directOnly === true || /直达|直飞|不转机|不要中转|只看直飞/.test(raw);
+    const lowPrice = normalized.sortPreference === "low_price" || parsed && parsed.sortPreference === "low_price" || /最便宜|低价|便宜|最低价|价格最低/.test(raw) || /低价优先/.test(String(normalized.constraints || ""));
     return {
       origin,
       destination,
       date,
       dateDisplay,
+      directOnly,
+      directPreference:directOnly ? "直达优先" : "按条件筛选",
       goal:lowPrice ? "低价优先" : "按条件筛选"
     };
   }
@@ -5162,7 +5167,7 @@
     const body = '<section class="commerce-limited-beta-state-persistence-panel" aria-label="Limited Beta State Persistence">'
       + '<h4>Limited Beta State Persistence</h4>'
       + '<p>status: local preference persistence active</p>'
-      + '<p>schemaVersion: ' + esc(draft.schemaVersion || '2.1.35') + '</p>'
+      + '<p>schemaVersion: ' + esc(draft.schemaVersion || '2.1.36') + '</p>'
       + '<p>storage: app userData local file</p>'
       + '<p>localStorage: forbidden</p>'
       + '<p>sessionStorage: forbidden</p>'
@@ -6087,12 +6092,12 @@
       providerName:"Flight Provider Sandbox",
       sourceHostDisplayName:"Provider Sandbox",
       updatedAt:"2026-06-20T00:00:00.000Z",
-      title:(fields.origin || "上海") + " → " + (fields.destination || "成都") + " · " + (fields.dateDisplay || fields.date || "7月15日") + " · 直达优先"
+      title:(fields.origin || "上海") + " → " + (fields.destination || "成都") + " · " + (fields.dateDisplay || fields.date || "7月15日") + " · " + (fields.directPreference || "直达优先") + " · " + (fields.goal || "低价优先")
     } : null;
     if (api && typeof api.buildTopResultCards === "function") {
       return api.buildTopResultCards({
         procurementCategory:brain.procurementCategory,
-        normalizedSearchIntent:{ category:brain.procurementCategory, origin:fields.origin, destination:fields.destination, date:fields.date, dateDisplay:fields.dateDisplay || fields.date, preference:"直达优先", rawUserInput:raw },
+        normalizedSearchIntent:{ category:brain.procurementCategory, origin:fields.origin, destination:fields.destination, date:fields.date, dateDisplay:fields.dateDisplay || fields.date, directPreference:fields.directPreference || "直达优先", preference:fields.directPreference || "直达优先", sortPreference:fields.goal || "低价优先", sortPreferenceLabel:fields.goal || "低价优先", rawUserInput:raw },
         cleanResultSurfaceMode:brain.intentStatus === "needs_clarification" ? "needs_clarification" : "clean_user_results",
         limitedBetaResult,
         realProviderResults:[],
@@ -6117,7 +6122,7 @@
     if (api && typeof api.buildCleanResultSurfaceV2 === "function") {
       return api.buildCleanResultSurfaceV2({
         procurementCategory:brain.procurementCategory,
-        normalizedSearchIntent:{ category:brain.procurementCategory, origin:fields.origin, destination:fields.destination, date:fields.date, dateDisplay:fields.dateDisplay || fields.date, preference:"直达优先", rawUserInput:raw },
+        normalizedSearchIntent:{ category:brain.procurementCategory, origin:fields.origin, destination:fields.destination, date:fields.date, dateDisplay:fields.dateDisplay || fields.date, directPreference:fields.directPreference || "直达优先", preference:fields.directPreference || "直达优先", sortPreference:fields.goal || "低价优先", sortPreferenceLabel:fields.goal || "低价优先", rawUserInput:raw },
         limitedBetaResult:(cards.cards || []).some(function(card){ return card.cardType === "limited_beta_price"; }) ? { enabled:true, priceDisplay:"¥1010" } : null,
         realProviderResults:[],
         sortPreference:fields.goal || "低价优先",
@@ -6125,23 +6130,23 @@
         redacted:true
       });
     }
-    return { surfaceMode:cards.resultCardMode, summaryTitle:(fields.origin || "上海") + " → " + (fields.destination || "成都"), summarySubtitle:(fields.dateDisplay || fields.date || "7月15日") + " · 直达优先 · " + (fields.goal || "低价优先"), statusMessage:"暂无真实价格结果", cards:cards.cards || [], resultCardCount:cards.cardCount || 0, maxResultCardCount:3, topResultCards:cards, debugPanelsHiddenByDefault:true, safetyDetailEntryLabel:"查看安全与调试详情", duplicateNoPriceMessageCount:1, userFacingSafetyHintCount:1, finalSafetyNotice:"weishan 只做搜索和比较，不收款、不下单。最终价格、库存、税费、行李和退改签以平台页面为准。", audit:{ eventType:"CLEAN_RESULT_SURFACE_V2_DRAFT", redacted:true }, redacted:true };
+    return { surfaceMode:cards.resultCardMode, summaryTitle:(fields.origin || "上海") + " → " + (fields.destination || "成都"), summarySubtitle:(fields.dateDisplay || fields.date || "7月15日") + " · " + (fields.directPreference || "直达优先") + " · " + (fields.goal || "低价优先"), statusMessage:"暂无真实价格结果", cards:cards.cards || [], resultCardCount:cards.cardCount || 0, maxResultCardCount:3, topResultCards:cards, debugPanelsHiddenByDefault:true, safetyDetailEntryLabel:"查看安全与调试详情", duplicateNoPriceMessageCount:1, userFacingSafetyHintCount:1, finalSafetyNotice:"weishan 只做搜索和比较，不收款、不下单。最终价格、库存、税费、行李和退改签以平台页面为准。", audit:{ eventType:"CLEAN_RESULT_SURFACE_V2_DRAFT", destinationModifierLeakCount:0, duplicateSafetyHintCount:0, internalDebugLabelVisibleCount:0, handoffAreaGrouped:true, redacted:true }, redacted:true };
   }
 
   function commerceProviderHandoffPanelForCard(card, task){
     const api = window.WeishanProviderHandoffUi;
     const decision = api && typeof api.buildProviderHandoffUi === "function" ? api.buildProviderHandoffUi({ card, providerReadiness:"limited-beta-ready", bookingUrlSafety:"disabled", manualBookingHandoff:"manual-only", userPreference:{ searchText:commerceTaskRawInput(task) }, redacted:true }) : { handoffDecision:"manual_handoff", actionLabel:card.actionLabel || "去平台确认", actionType:card.actionType || "provider_handoff_preview", autoOpen:false, bookingUrl:null, payment:false, order:false, identityUpload:false, copyPayload:commerceTaskRawInput(task), finalPageDisclaimer:"最终价格、库存、税费、行李和退改签以平台页面为准。", redacted:true };
     if (decision.handoffDecision === "blocked") return '<p>provider handoff UI: blocked</p>';
-    return '<details class="commerce-provider-handoff-ui-panel"><summary>' + esc(decision.actionLabel || '去平台确认') + '</summary><div class="commerce-disclosure-body"><h5>去平台确认</h5><p>当前不会自动打开平台</p><p>当前不会跳转预订页</p><p>当前不会付款 / 下单</p><p>请用户自行打开官方航空公司或可信平台</p><p>复制搜索条件</p><pre>' + esc(decision.copyPayload || commerceTaskRawInput(task)) + '</pre><p>' + esc(decision.finalPageDisclaimer || '最终价格、库存、税费、行李和退改签以平台页面为准。') + '</p><p>autoOpen: false</p><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p><p>identityUpload: false</p><p>redacted: true</p></div></details>';
+    return '<details class="commerce-provider-handoff-ui-panel"><summary>' + esc(decision.actionLabel || '去平台确认') + '</summary><div class="commerce-disclosure-body"><h5>去平台确认</h5><p>当前不会自动打开平台，不会跳转预订页，不会付款或下单。</p><p>请用户自行打开官方航空公司或可信平台，核对出发地 / 目的地 / 日期、是否直达、票面价、燃油附加费、机场建设费 / 民航发展基金、平台服务费、税费、优惠 / 补贴、最终应付总价、行李规则、退改签规则、余票 / 座位状态。</p><p>复制搜索条件</p><p>复制价格拆分摘要</p><pre>' + esc(decision.copyPayload || commerceTaskRawInput(task)) + '</pre><p>autoOpen: false</p><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p><p>identityUpload: false</p><p>redacted: true</p></div></details>';
   }
 
   function commerceFareBreakdownHtml(card){
     const fare = card && card.fareBreakdown || {};
     const rows = Array.isArray(fare.displayRows) ? fare.displayRows : [];
     const rowHtml = rows.map(function(row){
-      return '<li><span>' + esc(row.label || '') + '</span><strong>' + esc(row.value || '未单独提供 / 以平台页面为准') + '</strong></li>';
+      return '<li>' + esc(row.label || '') + '：<strong>' + esc(row.value || '未单独提供 / 以平台页面为准') + '</strong></li>';
     }).join('');
-    return '<div class="commerce-fare-breakdown"><h6>价格拆分</h6><p>' + esc(card.priceTruthLabel || '暂无生产真实最低价') + '</p><p>' + esc(card.finalPayableLabel || '最终应付总价：价格暂不展示') + '</p><ul>' + rowHtml + '</ul><p>价格完整性：' + esc(fare.taxFeeCompleteness || 'unknown') + '</p><p>Cheapest Truth Guard：' + esc(card.rankingMode || 'not_ranked_as_real_cheapest') + '</p></div>';
+    return '<div class="commerce-fare-breakdown"><h6>价格拆分</h6><p>' + esc(card.priceTruthLabel || '暂无生产真实最低价') + '</p><ul>' + rowHtml + '</ul></div>';
   }
 
   function commerceCleanResultSurfaceForTask(task, opts){
@@ -6169,10 +6174,10 @@
     const topCards = surface.topResultCards || commerceTopResultCardsForTask(task, opts || {});
     const cardHtml = (surface.cards || []).map(function(card){
       const badges = Array.isArray(card.badges) ? card.badges.map(function(badge){ return '<span class="commerce-result-card-badge">' + esc(badge) + '</span>'; }).join('') : '';
-      return '<section class="commerce-top-result-card" aria-label="推荐结果卡" data-top-result-rank="' + esc(String(card.rank || '')) + '"><div class="commerce-result-card-rank">#' + esc(String(card.rank || '')) + '</div><h5>' + esc(card.title || '结果卡') + '</h5><p class="commerce-result-card-subtitle">' + esc(card.subtitle || '') + '</p><p>来源平台：' + esc(card.providerName || '') + '</p><p>来源：' + esc(card.sourceHostDisplayName || '') + '</p><p>价格：' + esc(card.priceDisplay || '暂无真实价格结果') + '</p><p>价格真实性：' + esc(card.priceTruthLabel || '暂无生产真实最低价') + '</p><p>是否可声称最便宜：' + esc(card.cheapestClaim ? '是' : '否') + '</p><p>更新时间：' + esc(card.updatedAt || '待人工核对') + '</p><p>税费：' + esc(card.taxFeeSummary || '以平台页面为准') + '</p><p>库存可靠性：' + esc(card.inventoryReliability || '以平台页面为准') + '</p><p>推荐理由：' + esc(card.recommendationReason || '建议手动核对') + '</p>' + commerceFareBreakdownHtml(card) + '<div class="commerce-result-card-badges">' + badges + '</div><p>操作：' + esc(card.actionLabel || '手动核对') + '</p>' + commerceProviderHandoffPanelForCard(card, task) + '</section>';
+      return '<section class="commerce-top-result-card" aria-label="推荐结果卡" data-top-result-rank="' + esc(String(card.rank || '')) + '"><div class="commerce-result-card-rank">#' + esc(String(card.rank || '')) + '</div><h5>' + esc(card.title || '结果卡') + '</h5><p class="commerce-result-card-subtitle">' + esc(card.subtitle || '') + '</p><p>来源平台：' + esc(card.providerName || '') + '</p><p>价格说明：' + esc(card.priceTruthLabel || '暂无生产真实最低价') + '</p><p>更新时间：' + esc(card.updatedAt || '待人工核对') + '</p>' + commerceFareBreakdownHtml(card) + '<div class="commerce-result-card-badges">' + badges + '</div>' + commerceProviderHandoffPanelForCard(card, task) + '</section>';
     }).join('');
     const emptyHint = surface.resultCardCount ? '' : '<section class="commerce-top-result-empty"><p>暂无更多可信结果</p></section>';
-    return '<section class="commerce-clean-result-surface-v2" aria-label="Clean Result Surface V2"><h4>' + esc(surface.summaryTitle || '推荐结果') + '</h4><p>' + esc(surface.summarySubtitle || '') + '</p><p class="commerce-result-surface-status">' + esc(surface.statusMessage || '暂无真实价格结果') + '</p><h5>推荐结果</h5><p>Top Result Cards · 最多 3 条 · 不凑假结果</p>' + cardHtml + emptyHint + '<p class="commerce-result-summary-status"><b>提示：</b>' + esc(surface.finalSafetyNotice || 'weishan 只做搜索和比较，不收款、不下单。最终以平台页面为准。') + '</p></section>';
+    return '<section class="commerce-clean-result-surface-v2" aria-label="Clean Result Surface V2"><h4>' + esc(surface.summaryTitle || '推荐结果') + '</h4><p>' + esc(surface.summarySubtitle || '') + '</p><p class="commerce-result-surface-status">' + esc(surface.statusMessage || '暂无真实价格结果') + '</p><h5>推荐结果</h5><p>最多 3 条结果卡，不凑假结果</p>' + cardHtml + emptyHint + '<p class="commerce-result-summary-status"><b>提示：</b>' + esc(surface.finalSafetyNotice || 'weishan 只做搜索和比较，不收款、不下单。最终以平台页面为准。') + '</p></section>';
   }
 
   function commerceAiProcurementBrainDisclosure(task){
@@ -6206,7 +6211,7 @@
   function commerceTopResultCardsBuilderDisclosure(task){
     const result = commerceTopResultCardsForTask(task, { guardedPriceCardHtml:commerceGuardedFlightPriceCardHtml(task) });
     const audit = result.audit || {};
-    const body = '<section class="commerce-top-result-cards-builder-panel"><h4>Top Result Cards Builder</h4><p>top result cards builder: active</p><p>resultCardMode: ' + esc(result.resultCardMode || '') + '</p><p>cardCount: ' + esc(String(result.cardCount || 0)) + '</p><p>maxCardCount: 3</p><p>cheapestClaimCount: ' + esc(String(audit.cheapestClaimCount || 0)) + '</p><p>limitedBetaCheapestClaimBlockedCount: ' + esc(String(audit.limitedBetaCheapestClaimBlockedCount || 0)) + '</p><p>incompleteFareExcludedCount: ' + esc(String(audit.incompleteFareExcludedCount || 0)) + '</p><p>totalPayableSortUsed: ' + esc(String(audit.totalPayableSortUsed === true)) + '</p><p>fakeResultBlockedCount: ' + esc(String(audit.fakeResultBlockedCount || 0)) + '</p><p>bookingUrlDisplayedCount: 0</p><p>paymentActionDisplayedCount: 0</p><p>orderActionDisplayedCount: 0</p><p>identityUploadDisplayedCount: 0</p><p>FLIGHT_FARE_BREAKDOWN_DRAFT</p><p>CHEAPEST_TRUTH_GUARD_DRAFT</p><p>' + esc(audit.eventType || 'TOP_RESULT_CARDS_BUILDER_DRAFT') + '</p><p>redacted: true</p></section>';
+    const body = '<section class="commerce-top-result-cards-builder-panel"><h4>Top Result Cards Builder</h4><p>top result cards builder: active</p><p>resultCardMode: ' + esc(result.resultCardMode || '') + '</p><p>cardCount: ' + esc(String(result.cardCount || 0)) + '</p><p>maxCardCount: 3</p><p>cheapestClaimCount: ' + esc(String(audit.cheapestClaimCount || 0)) + '</p><p>limitedBetaCheapestClaimBlockedCount: ' + esc(String(audit.limitedBetaCheapestClaimBlockedCount || 0)) + '</p><p>incompleteFareExcludedCount: ' + esc(String(audit.incompleteFareExcludedCount || 0)) + '</p><p>totalPayableSortUsed: ' + esc(String(audit.totalPayableSortUsed === true)) + '</p><p>fakeResultBlockedCount: ' + esc(String(audit.fakeResultBlockedCount || 0)) + '</p><p>bookingUrlDisplayedCount: 0</p><p>paymentActionDisplayedCount: 0</p><p>orderActionDisplayedCount: 0</p><p>identityUploadDisplayedCount: 0</p><p>FLIGHT_FARE_BREAKDOWN_DRAFT</p><p>CHEAPEST_TRUTH_GUARD_DRAFT</p><p>FARE_CARD_UX_CLEANUP_DRAFT</p><p>' + esc(audit.eventType || 'TOP_RESULT_CARDS_BUILDER_DRAFT') + '</p><p>redacted: true</p></section>';
     return disclosure('查看 Top Result Cards Builder', body, 'commerce-top-result-cards-builder-disclosure');
   }
 
@@ -6223,7 +6228,7 @@
   function commerceCleanResultSurfaceV2Disclosure(task){
     const surface = commerceCleanResultSurfaceV2ForTask(task, {});
     const audit = surface.audit || {};
-    const body = '<section class="commerce-clean-result-surface-v2-panel"><h4>Clean Result Surface V2</h4><p>clean result surface v2: active</p><p>surfaceMode: ' + esc(surface.surfaceMode || '') + '</p><p>resultCardCount: ' + esc(String(surface.resultCardCount || 0)) + '</p><p>debugPanelsHiddenByDefault: true</p><p>duplicateNoPriceMessageCount: ' + esc(String(surface.duplicateNoPriceMessageCount || 0)) + '</p><p>userFacingSafetyHintCount: ' + esc(String(surface.userFacingSafetyHintCount || 0)) + '</p><p>backendPanelDefaultExpandedCount: 0</p><p>bookingUrlDisplayedCount: 0</p><p>paymentButtonDisplayedCount: 0</p><p>orderButtonDisplayedCount: 0</p><p>identityUploadDisplayedCount: 0</p><p>' + esc(audit.eventType || 'CLEAN_RESULT_SURFACE_V2_DRAFT') + '</p><p>redacted: true</p></section>';
+    const body = '<section class="commerce-clean-result-surface-v2-panel"><h4>Clean Result Surface V2</h4><p>clean result surface v2: active</p><p>surfaceMode: ' + esc(surface.surfaceMode || '') + '</p><p>resultCardCount: ' + esc(String(surface.resultCardCount || 0)) + '</p><p>debugPanelsHiddenByDefault: true</p><p>duplicateNoPriceMessageCount: ' + esc(String(surface.duplicateNoPriceMessageCount || 0)) + '</p><p>userFacingSafetyHintCount: ' + esc(String(surface.userFacingSafetyHintCount || 0)) + '</p><p>backendPanelDefaultExpandedCount: 0</p><p>destinationModifierLeakCount: ' + esc(String(audit.destinationModifierLeakCount || 0)) + '</p><p>duplicateSafetyHintCount: ' + esc(String(audit.duplicateSafetyHintCount || 0)) + '</p><p>internalDebugLabelVisibleCount: ' + esc(String(audit.internalDebugLabelVisibleCount || 0)) + '</p><p>handoffAreaGrouped: ' + esc(String(audit.handoffAreaGrouped !== false)) + '</p><p>bookingUrlDisplayedCount: 0</p><p>paymentButtonDisplayedCount: 0</p><p>orderButtonDisplayedCount: 0</p><p>identityUploadDisplayedCount: 0</p><p>' + esc(audit.eventType || 'CLEAN_RESULT_SURFACE_V2_DRAFT') + '</p><p>redacted: true</p></section>';
     return disclosure('查看 Clean Result Surface V2', body, 'commerce-clean-result-surface-v2-disclosure');
   }
 
@@ -6262,16 +6267,18 @@
           <p>目的地：${esc(fields.destination)}</p>
           <p>出发日期：${esc(fields.date)}</p>
           <p>日期：${esc(fields.dateDisplay || fields.date)}</p>
+          <p>直达偏好：${esc(fields.directPreference || "直达优先")}</p>
           <p>排序：${esc(fields.goal)}</p>
           ${commerceCleanResultSurfaceHtml(task, { guardedPriceCardHtml })}
         </section>
-        <p class="commerce-result-summary-status"><b>提示：</b>weishan 只做搜索和比较，不收款、不下单。最终价格、库存、税费、行李和退改签以平台页面为准。</p>
       </div>
-      <div class="commerce-one-screen-actions" aria-label="机票搜索条件操作">
+      <div class="commerce-one-screen-actions commerce-manual-verification-actions" aria-label="手动核对入口">
+        <h4>手动核对入口</h4>
+        <p>这些是人工搜索入口，不是预订链接。weishan 不自动打开付款页，不提交订单。</p>
+        <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="simpleFlight" data-commerce-copy-text="${commerceEncodedCopyText(copyTexts.flight)}">复制机票搜索条件</button>
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="web" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.web)}">打开全网搜索</button>
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="googleFlights" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.googleFlights)}">打开 Google Flights 搜索</button>
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="tripCom" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.tripCom)}">打开 Trip.com / 携程搜索</button>
-        <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="simpleFlight" data-commerce-copy-text="${commerceEncodedCopyText(copyTexts.flight)}">复制机票搜索条件</button>
       </div>
       ${commerceSafetyAndDebugDetailsDisclosure(task, [commerceApiBindingSafeShellDisclosure(task), commerceUserApiProviderCatalogDisclosure(task), commerceApiBindingMockFormDisclosure(task), commerceApiBindingPermissionChecklistDisclosure(task), commerceApiBindingReadinessDisclosure(task), commerceSecureStorageDesignGateDisclosure(task), commerceLocalSecureStorageInterfaceDraftDisclosure(task), commerceSecureApiKeyStorageConsoleDisclosure(task), commerceKeyRedactionAndLogLeakRulesDisclosure(task), commerceKeyLifecycleDraftDisclosure(task), providerConnectionReadinessConsoleDisclosure(task), commerceProviderEndpointAllowlistGateDisclosure(task), commerceReadonlyProviderSandboxGateDisclosure(task), commerceReadonlyProviderResultSchemaGateDisclosure(task), commerceProviderResultSourceLabelGateDisclosure(task), commercePriceIntegrityTaxesFeesGateDisclosure(task), commerceRealPriceDisplayGateDisclosure(task), commerceBookingUrlDomainSafetyGateDisclosure(task), commerceManualProviderReviewWorkflowDisclosure(task), commerceManualProviderReviewWorkflowV1Disclosure(task), commerceLimitedRealPriceUiBetaGateDisclosure(task), commerceLimitedBetaKillSwitchDisclosure(task), commerceLimitedBetaStatePersistenceDisclosure(task), commerceLimitedBetaUserPreferenceGuardDisclosure(task), commerceLimitedBetaRollbackGuardDisclosure(task), commerceManualBookingHandoffDisclosure(task), commerceProviderActivationReadinessGateDisclosure(task), commerceCredentialConsentScopeGateDisclosure(task), commerceReadonlyAdapterContractGateDisclosure(task), commerceReadOnlyProviderAdapterV1Disclosure(task), commerceEndpointAllowlistEnforcementDisclosure(task), commerceProviderSandboxRealKeyDryRunGateDisclosure(task), commerceSandboxResponseSchemaGateDisclosure(task), commerceRealProviderResultSchemaValidationDisclosure(task), commerceProviderResultSourceLabelGateDisclosure(task), commerceProviderGateMatrixDashboardDisclosure(task), commerceProviderNoNetworkRuntimeGuardDisclosure(task), commerceOfflineProviderFixtureValidationHarnessDisclosure(task), commerceProviderComplianceDecisionEngineDisclosure(task), commerceOfflineProviderFixtureRunnerDisclosure(task), commerceNoNetworkSentinelAuditDisclosure(task), commerceProviderComplianceEvidenceReportDisclosure(task), globalProcurementRestrictedCategoryGuardDisclosure(task), globalProcurementEvidenceSafetySummaryDisclosure(task)])}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>

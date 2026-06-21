@@ -16,7 +16,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightFareBreakdown.js"]);
   const api = windowRef.WeishanFlightFareBreakdown;
-  assert.equal(api.FLIGHT_FARE_BREAKDOWN_VERSION, "2.1.35");
+  assert.equal(api.FLIGHT_FARE_BREAKDOWN_VERSION, "2.1.36");
 
   const fare = api.normalizeFlightFareBreakdown({
     currency:"CNY",
@@ -34,18 +34,18 @@ function main() {
   assert.equal(fare.priceWithheld, false);
   assert.equal(fare.redacted, true);
   assert.deepEqual(Array.from(fare.displayRows.map((row) => row.label).slice(0, 8)), [
+    "最终应付总价",
     "票面价",
     "燃油附加费",
     "机场建设费 / 民航发展基金",
     "平台服务费",
     "税费",
     "其它附加费",
-    "优惠 / 补贴",
-    "最终应付总价"
+    "优惠 / 补贴"
   ]);
   assert.equal(fare.displayRows.some((row) => row.label === "税费完整性"), true);
-  assert.equal(fare.displayRows.some((row) => row.label === "最终以平台页面为准"), true);
   assert.match(fare.displayRows.find((row) => row.label === "燃油附加费").value, /未单独提供/);
+  assert.equal(fare.displayRows.find((row) => row.label === "税费完整性").value, "部分完整 / 以平台页面为准");
   assert.equal(fare.audit.eventType, "FLIGHT_FARE_BREAKDOWN_DRAFT");
   assert.equal(fare.audit.redacted, true);
   assert.equal(api.assertFlightFareBreakdownSafe(fare), true);

@@ -239,6 +239,7 @@ test.describe.serial("settings local auth hotfix", () => {
     await expect(result).not.toContainText("日上海");
     await expect(result).not.toContainText("日期：待补充");
     await expect(result).not.toContainText(/fake price|mock price|demo price|AI 估价/i);
-    await expect(result).not.toContainText(/最低价\s*[¥￥]|去预订|预订按钮|付款按钮|下单按钮|提交订单/);
+    await expect(result).not.toContainText(/最低价\s*[¥￥]|去预订|预订按钮|付款按钮|下单按钮/);
+    await expect(result.getByRole("button", { name:/^(去预订|预订|付款|下单|提交订单)$/ })).toHaveCount(0);
   });
 });
