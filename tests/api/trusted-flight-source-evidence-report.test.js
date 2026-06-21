@@ -62,11 +62,11 @@ function main() {
   );
 
   const api = windowRef.WeishanTrustedFlightSourceEvidenceReport;
-  assert.equal(api.TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION, "2.1.41");
+  assert.equal(api.TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION, "2.1.42");
 
   const report = api.buildTrustedFlightSourceEvidenceReport();
   assert.equal(report.reportName, "trusted_flight_source_evidence_report_v1");
-  assert.equal(report.appVersion, "2.1.41");
+  assert.equal(report.appVersion, "2.1.42");
   assert.equal(report.status, "evidence_report_only");
   assert.equal(report.mode, "read_only");
   assert.equal(report.generatedAt, null);
@@ -76,11 +76,13 @@ function main() {
   assert.equal(report.registry.fixtureOnlyCount, 1);
   assert.equal(report.registry.productionProviderCount, 0);
   assert.equal(report.registry.providers.length, 3);
-  assert.equal(report.registry.providers.every((provider) => provider.capabilitySummary.providerConfirmationLink === "disabled"), true);
-  assert.equal(report.deepLinkGate.providerConfirmationLink, "disabled");
+  assert.equal(report.registry.providers.filter((provider) => provider.accessMode === "manual_search_only").every((provider) => provider.capabilitySummary.providerConfirmationLink === "confirmation_required"), true);
+  assert.equal(report.registry.providers.find((provider) => provider.accessMode === "fixture_only").capabilitySummary.providerConfirmationLink, "disabled");
+  assert.equal(report.deepLinkGate.providerConfirmationLink, "confirmation_required");
+  assert.equal(report.deepLinkGate.safeProviderHandoffUrl.startsWith("https://www.google.com/travel/flights"), true);
   assert.equal(report.deepLinkGate.bookingUrl, null);
   assert.equal(report.deepLinkGate.autoOpen, false);
-  assert.equal(report.confirmationUi.continueButtonDisabled, true);
+  assert.equal(report.confirmationUi.continueButtonDisabled, false);
   assert.equal(report.confirmationUi.cancelButtonEnabled, true);
   assert.equal(report.safety.productionProviderAggregation, "disabled");
   assert.equal(report.safety.payment, "disabled");
@@ -89,9 +91,10 @@ function main() {
   assert.equal(report.safety.tokenExposure, "redacted");
   assert.equal(report.safety.apiKeyExposure, "redacted");
   assert.equal(report.readiness.limitedBetaReady, true);
+  assert.equal(report.readiness.safeProviderHandoffReady, true);
   assert.equal(report.readiness.realPriceClaimAllowed, false);
   assert.equal(report.readiness.bookingClaimAllowed, false);
-  assert.equal(report.readiness.finalDecision, "limited_beta_skeleton_ready");
+  assert.equal(report.readiness.finalDecision, "safe_provider_handoff_ready");
   assert.equal(report.redacted, true);
 
   const summary = api.summarizeTrustedFlightSourceEvidence(report);
@@ -104,15 +107,17 @@ function main() {
   assert.equal(summary.realPriceClaimAllowed, false);
   assert.equal(summary.bookingClaimAllowed, false);
   assert.equal(summary.limitedBetaReady, true);
-  assert.equal(summary.finalDecision, "limited_beta_skeleton_ready");
+  assert.equal(summary.safeProviderHandoffReady, true);
+  assert.equal(summary.finalDecision, "safe_provider_handoff_ready");
   assert.equal(summary.redacted, true);
 
   const readiness = api.evaluateTrustedFlightSourceLimitedBetaReadiness(report);
   assert.equal(readiness.limitedBetaReady, true);
+  assert.equal(readiness.safeProviderHandoffReady, true);
   assert.equal(readiness.userFacingClaimAllowed, false);
   assert.equal(readiness.realPriceClaimAllowed, false);
   assert.equal(readiness.bookingClaimAllowed, false);
-  assert.equal(readiness.finalDecision, "limited_beta_skeleton_ready");
+  assert.equal(readiness.finalDecision, "safe_provider_handoff_ready");
   assert.equal(readiness.redacted, true);
 
   const blockedReadiness = api.evaluateTrustedFlightSourceLimitedBetaReadiness({ registry: { sourceCount: 0 } });
@@ -122,7 +127,7 @@ function main() {
   const audit = api.getTrustedFlightSourceEvidenceReportAuditDraft();
   assert.equal(audit.eventType, "TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_DRAFT");
   assert.equal(audit.reportName, "trusted_flight_source_evidence_report_v1");
-  assert.equal(audit.appVersion, "2.1.41");
+  assert.equal(audit.appVersion, "2.1.42");
   assert.equal(audit.mode, "read_only");
   assert.equal(audit.generatedAt, null);
   assert.equal(audit.sourceCount, 3);
@@ -134,7 +139,8 @@ function main() {
   assert.equal(audit.realPriceClaimAllowed, false);
   assert.equal(audit.bookingClaimAllowed, false);
   assert.equal(audit.limitedBetaReady, true);
-  assert.equal(audit.finalDecision, "limited_beta_skeleton_ready");
+  assert.equal(audit.safeProviderHandoffReady, true);
+  assert.equal(audit.finalDecision, "safe_provider_handoff_ready");
   assert.equal(audit.redacted, true);
 
   assert.equal(api.assertTrustedFlightSourceEvidenceReportSafe(report), true);
@@ -146,7 +152,7 @@ function main() {
 
   const serialized = JSON.stringify(report);
   assert.equal(serialized.includes("http://"), false);
-  assert.equal(serialized.includes("https://"), false);
+  assert.equal(serialized.includes("https://www.google.com/travel/flights"), true);
   assert.equal(serialized.includes("checkoutUrl"), false);
   assert.equal(serialized.includes("paymentUrl"), false);
   assert.equal(serialized.includes("orderUrl"), false);

@@ -2175,7 +2175,7 @@
     const state = api && typeof api.buildSecureApiKeyStorageConsole === "function"
       ? api.buildSecureApiKeyStorageConsole()
       : {
-        version:"2.1.39",
+        version:"2.1.42",
         status:"secure local storage only",
         mode:"no provider connection",
         realProvider:"disabled",
@@ -5070,7 +5070,7 @@
     const body = '<section class="commerce-limited-beta-state-persistence-panel" aria-label="Limited Beta State Persistence">'
       + '<h4>Limited Beta State Persistence</h4>'
       + '<p>status: local preference persistence active</p>'
-      + '<p>schemaVersion: ' + esc(draft.schemaVersion || '2.1.39') + '</p>'
+      + '<p>schemaVersion: ' + esc(draft.schemaVersion || '2.1.42') + '</p>'
       + '<p>storage: app userData local file</p>'
       + '<p>localStorage: forbidden</p>'
       + '<p>sessionStorage: forbidden</p>'

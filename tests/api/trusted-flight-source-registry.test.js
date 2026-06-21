@@ -18,12 +18,13 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/trustedFlightSourceRegistry.js"]);
   const api = windowRef.WeishanTrustedFlightSourceRegistry;
-  assert.equal(api.TRUSTED_FLIGHT_SOURCE_REGISTRY_VERSION, "2.1.41");
+  assert.equal(api.TRUSTED_FLIGHT_SOURCE_REGISTRY_VERSION, "2.1.42");
 
   const registry = api.getTrustedFlightSourceRegistry();
   assert.equal(registry.phase, "trusted_flight_source_registry_skeleton_only");
   assert.equal(registry.status, "skeleton only");
   assert.equal(registry.productionProvider, "disabled");
+  assert.equal(registry.safeProviderHandoffPolicy, "confirmation_required");
   assert.equal(registry.canUseNetwork, false);
   assert.equal(registry.canUseApiKey, false);
   assert.equal(registry.canConnectEndpoint, false);
@@ -38,6 +39,7 @@ function main() {
   const google = api.getTrustedFlightSourceById("google_flights_search");
   assert.equal(google.accessMode, "manual_search_only");
   assert.equal(google.productionProvider, "disabled");
+  assert.equal(google.safeProviderHandoffUrl.startsWith("https://www.google.com/travel/flights"), true);
   assert.equal(google.bookingUrl, false);
   assert.equal(google.payment, false);
   assert.equal(google.order, false);
@@ -50,11 +52,14 @@ function main() {
   const trip = api.evaluateTrustedFlightSourceReadiness("trip_com_ctrip_search");
   assert.equal(trip.readinessDecision, "manual_search_only");
   assert.equal(trip.productionProvider, "disabled");
+  assert.equal(trip.providerConfirmationRequired, true);
+  assert.equal(trip.safeProviderHandoffUrl.startsWith("https://www.trip.com/flights"), true);
   assert.equal(trip.redacted, true);
 
   const fixture = api.evaluateTrustedFlightSourceReadiness("trusted_flight_fixture");
   assert.equal(fixture.readinessDecision, "fixture_only");
   assert.equal(fixture.productionProvider, "disabled");
+  assert.equal(fixture.safeProviderHandoffUrl, null);
   assert.equal(fixture.redacted, true);
 
   const blocked = api.evaluateTrustedFlightSourceReadiness("unknown_provider");
@@ -67,6 +72,7 @@ function main() {
   assert.equal(audit.trustedSourceCount, 3);
   assert.equal(audit.manualSearchOnlyCount, 2);
   assert.equal(audit.fixtureOnlyCount, 1);
+  assert.equal(audit.safeProviderHandoffReadyCount, 2);
   assert.equal(audit.productionProviderDisabledCount, 3);
   assert.equal(audit.bookingUrlDisplayedCount, 0);
   assert.equal(audit.paymentAttemptCount, 0);
@@ -78,6 +84,7 @@ function main() {
 
   assert.equal(api.assertTrustedFlightSourceRegistrySafe(registry), true);
   assert.equal(JSON.stringify(registry).includes("bookingUrl"), true);
+  assert.equal(JSON.stringify(registry).includes("safeProviderHandoffPolicy"), true);
   assert.equal(JSON.stringify(registry).includes("rawApiKey"), false);
 
   console.log("TRUSTED_FLIGHT_SOURCE_REGISTRY_CORE PASS");

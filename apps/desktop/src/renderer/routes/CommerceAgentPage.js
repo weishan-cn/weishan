@@ -3,6 +3,7 @@
   let selectedTaskId = "";
   let lastViewedTaskId = "";
   let pendingSafeExternalSearchConfirmation = null;
+  let pendingSafeProviderHandoffConfirmation = null;
 
   function esc(s){
     return String(s || "").replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; });
@@ -2938,6 +2939,24 @@
       web:"https://www.google.com/search?q=" + encodeURIComponent(zhQuery),
       googleFlights:"https://www.google.com/travel/flights?q=" + encodeURIComponent(enQuery),
       tripCom:"https://www.trip.com/flights/search/?q=" + encodeURIComponent(enQuery)
+    };
+  }
+
+  function commerceSafeProviderHandoffCandidateForTask(task){
+    const fields = commerceSimpleFlightFields(task);
+    const externalUrls = commerceSimpleFlightExternalSearchUrls(task);
+    return {
+      providerId: "google_flights_search",
+      providerName: "Google Flights",
+      providerType: "flight_search",
+      searchOnly: true,
+      safeProviderHandoffUrl: externalUrls.googleFlights || "",
+      taskId: task && task.taskId || task && task.id || "",
+      taskTitle: commerceTaskRawInput(task),
+      origin: fields.origin,
+      destination: fields.destination,
+      departureDate: fields.date,
+      restrictedCategory: false
     };
   }
 
@@ -6191,13 +6210,7 @@
 
 
   function commerceProviderHandoffPanelForCard(card, task){
-    const api = window.WeishanProviderHandoffUi;
-    const decision = api && typeof api.buildProviderHandoffUserSurface === "function" ? api.buildProviderHandoffUserSurface({ card, providerReadiness:"limited-beta-ready", bookingUrlSafety:"disabled", manualBookingHandoff:"manual-only", userPreference:{ searchText:commerceTaskRawInput(task) }, redacted:true }) : { visible:true, title:"去平台确认", intro:"当前不会自动打开平台，不会跳转预订页，不会付款或下单。", coreChecklist:["路线：" + (card.title || "上海 → 成都").replace(/\s*·.*$/, ""), "日期：7 月 15 日", "最终应付总价：¥1010", "票面价 / 税费 / 附加费：以卡片价格拆分为准", "燃油/机建费：以平台页面为准"], actions:["复制搜索条件", "复制价格拆分摘要"], fullChecklist:["核对出发地 / 目的地 / 日期", "核对是否直达", "核对票面价、税费和附加费", "核对最终应付总价", "核对行李、退改签、余票 / 座位状态", "核对平台域名", "不向未知平台提交身份证、护照或银行卡"] };
-    if (decision.visible === false) return "";
-    const checklist = (decision.coreChecklist || []).map(function(item){ return '<li>' + esc(item) + '</li>'; }).join('');
-    const fullChecklist = (decision.fullChecklist || []).map(function(item){ return '<li>' + esc(item) + '</li>'; }).join('');
-    const actions = (decision.actions || ["复制搜索条件", "复制价格拆分摘要"]).map(function(item){ return '<span class="commerce-provider-handoff-action">' + esc(item) + '</span>'; }).join(' ');
-    return '<details class="commerce-provider-handoff-ui-panel commerce-provider-handoff-ui-v3"><summary>' + esc(decision.title || '去平台确认') + '</summary><div class="commerce-disclosure-body"><h5>去平台确认</h5><p>' + esc(decision.intro || '当前不会自动打开平台，不会跳转预订页，不会付款或下单。') + '</p><h6>核心核对</h6><ul>' + checklist + '</ul><div class="commerce-provider-handoff-actions">' + actions + '</div><details class="commerce-provider-handoff-note"><summary>查看完整核对清单</summary><ul>' + fullChecklist + '</ul></details></div></details>';
+    return safeProviderHandoffConfirmationHtml(task);
   }
 
 
@@ -6242,7 +6255,7 @@
     const cardHtml = cards.map(function(card, index){
       const visual = visualCards[index] || (window.WeishanResultCardVisualFormatter && window.WeishanResultCardVisualFormatter.buildResultCardVisualModel ? window.WeishanResultCardVisualFormatter.buildResultCardVisualModel({ card, fareBreakdown:card.fareBreakdown, sortIntent:{ origin:fields.origin, destination:fields.destination, dateDisplay:fields.dateDisplay || fields.date, directPreference:fields.directPreference || '直达优先', sortLabel:fields.sortLabel || fields.goal || '低价优先' } }) : null) || {};
       const badges = Array.isArray(visual.badges || card.badges) ? (visual.badges || card.badges).map(function(badge){ return '<span class="commerce-result-card-badge">' + esc(badge) + '</span>'; }).join(' ') : '';
-      return '<section class="commerce-top-result-card commerce-top-result-card-polished commerce-compact-flight-card-v1" aria-label="推荐结果卡" data-top-result-rank="' + esc(String(card.rank || '')) + '"><div class="commerce-result-card-rank">#' + esc(String(visual.rank || card.rank || '')) + '</div><p class="commerce-result-card-primary-price">' + esc(visual.primaryPrice || card.priceDisplay || '暂无真实价格结果') + '</p><h5 class="commerce-result-card-route">' + esc(visual.routeLine || card.title || '结果卡') + '</h5><p class="commerce-result-card-meta">' + esc(visual.metaLine || surface.summarySubtitle || '') + '</p><p class="commerce-result-card-subtitle">' + esc(visual.priceTruthText || visual.priceSubtext || card.priceTruthLabel || '不代表真实最低价') + '</p><p class="commerce-fare-summary-line">' + esc(visual.fareSummary || visual.fareSummaryLine || '') + '</p><p class="commerce-fare-caveat-line">' + esc(visual.feeCaveat || visual.compactFareBreakdown && visual.compactFareBreakdown.caveatLine || '燃油/机建费：以平台页面为准') + '</p><p class="commerce-result-provider-line">' + esc(visual.providerLine || ('Flight Provider Sandbox · 更新时间 2026-06-20 00:00')) + '</p><div class="commerce-result-card-badges">' + badges + '</div><div class="commerce-result-card-actions"><span>去平台确认</span> <span>复制搜索条件</span></div>' + commerceFareBreakdownHtml(card, visual) + commerceProviderHandoffPanelForCard(card, task) + '</section>';
+      return '<section class="commerce-top-result-card commerce-top-result-card-polished commerce-compact-flight-card-v1" aria-label="推荐结果卡" data-top-result-rank="' + esc(String(card.rank || '')) + '"><div class="commerce-result-card-rank">#' + esc(String(visual.rank || card.rank || '')) + '</div><p class="commerce-result-card-primary-price">' + esc(visual.primaryPrice || card.priceDisplay || '暂无真实价格结果') + '</p><h5 class="commerce-result-card-route">' + esc(visual.routeLine || card.title || '结果卡') + '</h5><p class="commerce-result-card-meta">' + esc(visual.metaLine || surface.summarySubtitle || '') + '</p><p class="commerce-result-card-subtitle">' + esc(visual.priceTruthText || visual.priceSubtext || card.priceTruthLabel || '不代表真实最低价') + '</p><p class="commerce-fare-summary-line">' + esc(visual.fareSummary || visual.fareSummaryLine || '') + '</p><p class="commerce-fare-caveat-line">' + esc(visual.feeCaveat || visual.compactFareBreakdown && visual.compactFareBreakdown.caveatLine || '燃油/机建费：以平台页面为准') + '</p><p class="commerce-result-provider-line">' + esc(visual.providerLine || ('Flight Provider Sandbox · 更新时间 2026-06-20 00:00')) + '</p><div class="commerce-result-card-badges">' + badges + '</div><div class="commerce-result-card-actions"><button type="button" class="cmd-btn gray commerce-safe-provider-handoff-btn" data-commerce-safe-provider-handoff-request="true" data-commerce-safe-provider-handoff-kind="googleFlights" data-commerce-safe-provider-handoff-url="' + commerceEncodedExternalUrl(externalUrls.googleFlights) + '">去平台确认</button> <span>复制搜索条件</span></div>' + commerceFareBreakdownHtml(card, visual) + commerceProviderHandoffPanelForCard(card, task) + '</section>';
     }).join('');
     const emptyHint = surface.resultCardCount ? '' : '<section class="commerce-top-result-empty"><p>暂无更多可信结果</p></section>';
     return '<section class="commerce-clean-result-surface-v4" aria-label="Clean Result Surface V4"><h4>' + esc(surface.summaryTitle || '推荐结果') + '</h4><p>' + esc(surface.summarySubtitle || '') + '</p><p class="commerce-result-surface-status">' + esc(surfaceV4.statusMessage || surface.statusMessage || surfaceV3.statusMessage || '暂无真实价格结果') + '</p><p class="commerce-result-card-subtitle">' + esc(surfaceV4.priceTruthText || 'Limited Beta 只读验证价，不代表真实最低价。') + '</p><h5>推荐结果</h5>' + cardHtml + emptyHint + '<p class="commerce-result-summary-status commerce-result-safety-line"><b>提示：</b>' + esc(surfaceV4.safetyLine || surface.finalSafetyNotice || 'weishan 只做搜索和比较，不收款、不下单。最终以平台页面为准。') + '</p></section>';
@@ -6285,13 +6298,19 @@
   }
 
   function commerceProviderHandoffUiDisclosure(task){
-    const cards = commerceTopResultCardsForTask(task, { guardedPriceCardHtml:commerceGuardedFlightPriceCardHtml(task) }).cards || [];
-    const first = cards[0] || { actionLabel:'手动核对', actionType:'copy_search_conditions', title:commerceTaskRawInput(task), bookingUrl:null };
-    const api = window.WeishanProviderHandoffUi;
-    const decision = api && typeof api.buildProviderHandoffUi === 'function' ? api.buildProviderHandoffUi({ card:first, providerReadiness:'limited-beta-ready', bookingUrlSafety:'disabled', userPreference:{ searchText:commerceTaskRawInput(task) }, redacted:true }) : { handoffDecision:'manual_handoff', actionLabel:first.actionLabel || '手动核对', actionType:first.actionType || 'copy_search_conditions', autoOpen:false, bookingUrl:null, payment:false, order:false, identityUpload:false, audit:{ eventType:'PROVIDER_HANDOFF_UI_DRAFT', redacted:true }, redacted:true };
-    const audit = decision.audit || {};
-    const body = '<section class="commerce-provider-handoff-ui-debug-panel"><h4>Provider Handoff UI</h4><p>provider handoff UI: manual-only</p><p>handoffDecision: ' + esc(decision.handoffDecision || '') + '</p><p>actionLabel: ' + esc(decision.actionLabel || '') + '</p><p>actionType: ' + esc(decision.actionType || '') + '</p><p>autoOpen: false</p><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p><p>identityUpload: false</p><p>copyPayloadGeneratedCount: ' + esc(String(audit.copyPayloadGeneratedCount || 0)) + '</p><p>finalPageDisclaimerPresent: true</p><p>' + esc(audit.eventType || 'PROVIDER_HANDOFF_UI_DRAFT') + '</p><p>redacted: true</p></section>';
-    return disclosure('查看 Provider Handoff UI', body, 'commerce-provider-handoff-ui-disclosure');
+    const gateApi = window.WeishanSafeProviderDeepLinkHandoffGate;
+    const uiApi = window.WeishanProviderConfirmationHandoffUi;
+    const candidate = commerceSafeProviderHandoffCandidateForTask(task);
+    const gate = gateApi && typeof gateApi.buildSafeProviderHandoffUrlGate === "function"
+      ? gateApi.buildSafeProviderHandoffUrlGate(candidate)
+      : { status:"blocked", candidateDecision:"blocked", providerConfirmationLink:"disabled", safeProviderHandoffUrl:null, autoOpen:false, bookingUrl:null, payment:"blocked", checkout:"blocked", order:"blocked", identityUpload:"blocked", realProvider:"disabled", realNetwork:"disabled", redacted:true, audit:{ eventType:"SAFE_PROVIDER_HANDOFF_URL_GATE_DRAFT", redacted:true } };
+    const ui = uiApi && typeof uiApi.buildProviderConfirmationHandoffUiModel === "function"
+      ? uiApi.buildProviderConfirmationHandoffUiModel(gate)
+      : { title:"前往平台确认", status:"blocked", summary:"当前确认页被阻断，不能打开平台确认页。", candidateDecision:"blocked", providerConfirmationLink:"disabled", continueButtonDisabled:true, cancelButtonEnabled:true, noAutoOpen:true, noBookingUrl:true, bookingUrl:null, noPayment:true, noOrder:true, noIdentityUpload:true, showInMainFlow:false, redacted:true };
+    const gateAudit = gate.audit || {};
+    const uiAudit = uiApi && typeof uiApi.getProviderConfirmationHandoffUiAuditDraft === "function" ? uiApi.getProviderConfirmationHandoffUiAuditDraft(gate) : { eventType:"PROVIDER_CONFIRMATION_HANDOFF_UI_DRAFT", redacted:true };
+    const body = '<section class="commerce-provider-handoff-ui-debug-panel"><h4>Safe Provider Handoff</h4><p>safe provider handoff: confirmation_required</p><p>providerConfirmationLink: ' + esc(gate.providerConfirmationLink || 'disabled') + '</p><p>safeProviderHandoffUrl: ' + esc(gate.safeProviderHandoffUrl ? 'confirmation_required' : 'disabled') + '</p><p>status: ' + esc(gate.status || 'blocked') + '</p><p>candidateDecision: ' + esc(gate.candidateDecision || 'blocked') + '</p><p>autoOpen: false</p><p>bookingUrl: null</p><p>payment: blocked</p><p>order: blocked</p><p>identityUpload: blocked</p><p>trustedHost: ' + esc(gate.safeProviderHandoffHost || '') + '</p><p>gateAudit: ' + esc(gateAudit.eventType || 'SAFE_PROVIDER_HANDOFF_URL_GATE_DRAFT') + '</p><p>uiStatus: ' + esc(ui.status || 'blocked') + '</p><p>uiAudit: ' + esc(uiAudit.eventType || 'PROVIDER_CONFIRMATION_HANDOFF_UI_DRAFT') + '</p><p>redacted: true</p></section>';
+    return disclosure('查看 Safe Provider Handoff', body, 'commerce-safe-provider-handoff-disclosure');
   }
 
   function commerceCleanResultSurfaceV2Disclosure(task){
@@ -6362,6 +6381,7 @@
         <h4>手动核对入口</h4>
         <p>这些是人工搜索入口，不是预订链接。weishan 不自动打开、不付款、不下单。</p>
         <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="simpleFlight" data-commerce-copy-text="${commerceEncodedCopyText(copyTexts.flight)}">复制机票搜索条件</button>
+        <button class="cmd-btn gray commerce-safe-provider-handoff-btn" type="button" data-commerce-safe-provider-handoff-request="true" data-commerce-safe-provider-handoff-kind="googleFlights" data-commerce-safe-provider-handoff-url="${commerceEncodedExternalUrl(externalUrls.googleFlights)}">去平台确认</button>
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="web" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.web)}">打开全网搜索</button>
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="googleFlights" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.googleFlights)}">打开 Google Flights 搜索</button>
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="tripCom" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.tripCom)}">打开 Trip.com / 携程搜索</button>
@@ -6559,6 +6579,24 @@
     const pending = pendingSafeExternalSearchConfirmationForTask(task);
     if (!handoff || !pending || typeof handoff.renderExternalSearchConfirmationHtml !== "function") return "";
     return handoff.renderExternalSearchConfirmationHtml(pending);
+  }
+
+  function clearPendingSafeProviderHandoffConfirmation(){
+    pendingSafeProviderHandoffConfirmation = null;
+  }
+
+  function pendingSafeProviderHandoffConfirmationForTask(task){
+    if (!pendingSafeProviderHandoffConfirmation || !task) return null;
+    const taskId = String(task.taskId || task.id || "");
+    if (!taskId) return null;
+    return pendingSafeProviderHandoffConfirmation.taskId === taskId ? pendingSafeProviderHandoffConfirmation : null;
+  }
+
+  function safeProviderHandoffConfirmationHtml(task){
+    const api = window.WeishanProviderConfirmationHandoffUi;
+    const pending = pendingSafeProviderHandoffConfirmationForTask(task);
+    if (!api || !pending || typeof api.renderProviderConfirmationHandoffHtml !== "function") return "";
+    return api.renderProviderConfirmationHandoffHtml(pending);
   }
 
   let commerceExternalSearchFeedbackTimer = 0;
@@ -7112,6 +7150,38 @@
 
     const commerceDelegatedClickHandler = (event) => {
       const target = event.target && event.target.closest ? event.target : null;
+      const safeProviderButton = target && target.closest("[data-commerce-safe-provider-handoff-request]");
+      if (safeProviderButton && host.contains(safeProviderButton)) {
+        const taskScope = safeProviderButton.closest("[data-commerce-task-id]");
+        pendingSafeProviderHandoffConfirmation = {
+          taskId: taskScope && taskScope.getAttribute("data-commerce-task-id") || "",
+          taskTitle: taskScope && taskScope.getAttribute("data-commerce-task-title") || "",
+          kind: safeProviderButton.getAttribute("data-commerce-safe-provider-handoff-kind") || "googleFlights",
+          url: commerceDecodedInlineValue(safeProviderButton, "data-commerce-safe-provider-handoff-url")
+        };
+        render(host);
+        return;
+      }
+      const safeProviderConfirmButton = target && target.closest("[data-commerce-safe-provider-handoff-confirm]");
+      if (safeProviderConfirmButton && host.contains(safeProviderConfirmButton)) {
+        const gateApi = window.WeishanSafeProviderDeepLinkHandoffGate;
+        const pending = pendingSafeProviderHandoffConfirmation;
+        if (!pending || !gateApi || typeof gateApi.openTrustedProviderHandoffUrl !== "function") return;
+        pendingSafeProviderHandoffConfirmation = null;
+        Promise.resolve(gateApi.openTrustedProviderHandoffUrl(pending.url)).then((result) => {
+          const ok = !!(result && result.ok);
+          render(host);
+          showCommerceExternalSearchFeedback(host, ok ? "已确认并打开可信平台确认页，请在外部平台继续确认" : "可信平台确认页未打开，请手动打开可信页面继续确认", !ok);
+        });
+        return;
+      }
+      const safeProviderCancelButton = target && target.closest("[data-commerce-safe-provider-handoff-cancel]");
+      if (safeProviderCancelButton && host.contains(safeProviderCancelButton)) {
+        pendingSafeProviderHandoffConfirmation = null;
+        render(host);
+        showCommerceExternalSearchFeedback(host, "已取消平台确认，可继续查看或复制搜索条件", false);
+        return;
+      }
       const externalButton = target && target.closest("[data-commerce-external-search-url]");
       if (externalButton && host.contains(externalButton)) {
         const taskScope = externalButton.closest("[data-commerce-task-id]");
@@ -7182,12 +7252,14 @@
       if (api && api.clearCommerceTasks) api.clearCommerceTasks();
       selectedTaskId = "";
       pendingSafeExternalSearchConfirmation = null;
+      pendingSafeProviderHandoffConfirmation = null;
       record("commerceAgent.allTasksCleared", { inputSummary:"清理全部采购计划", status:"cleared" }, "用户已清理全部全球采购计划。");
       render(host);
     });
     host.querySelectorAll(".commerce-view-task").forEach((button) => {
       button.addEventListener("click", () => {
         selectedTaskId = button.getAttribute("data-task-id") || "";
+        pendingSafeProviderHandoffConfirmation = null;
         render(host);
       });
     });
@@ -7198,6 +7270,7 @@
         const next = tasks.filter((task) => task.taskId !== taskId);
         if (api && api.saveCommerceTasks) api.saveCommerceTasks(next);
         if (selectedTaskId === taskId) selectedTaskId = next[0] && next[0].taskId || "";
+        pendingSafeProviderHandoffConfirmation = null;
         record("commerceAgent.taskCleared", Object.assign({}, target || {}, { status:"cleared" }), "用户已清理单个全球采购计划。");
         render(host);
       });
@@ -7285,6 +7358,7 @@
           candidates:sorted,
           resultStatus:"rendered"
         }));
+        pendingSafeProviderHandoffConfirmation = null;
         render(host);
       });
     });

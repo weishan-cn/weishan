@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION = "2.1.41";
+  const TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION = "2.1.42";
   const REPORT_NAME = "trusted_flight_source_evidence_report_v1";
   const PHASE = "trusted_flight_source_evidence_report_v1";
 
@@ -56,13 +56,17 @@
           providerName: providerName,
           providerType: providerType,
           searchOnly: accessMode === "manual_search_only",
-          url: null,
+          safeProviderHandoffUrl: text(source && source.safeProviderHandoffUrl || ""),
           restrictedCategory: false
         })
-      : { providerConfirmationLink: "disabled", bookingUrl: null, autoOpen: false };
+      : { providerConfirmationLink: "disabled", safeProviderHandoffUrl: null, bookingUrl: null, autoOpen: false };
     const confirmationUi = typeof confirmationUiApi.buildProviderConfirmationHandoffUiModel === "function"
-      ? confirmationUiApi.buildProviderConfirmationHandoffUiModel({ candidateDecision: deepLinkGate.candidateDecision || "blocked" })
-      : { status: "stub only", continueButtonDisabled: true, cancelButtonEnabled: true, noAutoOpen: true, noBookingUrl: true, noPayment: true, noOrder: true, noIdentityUpload: true };
+      ? confirmationUiApi.buildProviderConfirmationHandoffUiModel({
+          candidateDecision: deepLinkGate.candidateDecision || "blocked",
+          providerConfirmationLink: deepLinkGate.providerConfirmationLink || "disabled",
+          safeProviderHandoffUrl: deepLinkGate.safeProviderHandoffUrl || null
+        })
+      : { status: "blocked", continueButtonDisabled: true, cancelButtonEnabled: true, noAutoOpen: true, noBookingUrl: true, noPayment: true, noOrder: true, noIdentityUpload: true, safeProviderHandoffUrl: null };
 
     return clone({
       providerId: providerId,
@@ -73,15 +77,18 @@
       capabilitySummary: {
         searchOnly: accessMode === "manual_search_only",
         readPrice: false,
-        providerConfirmationLink: "disabled",
+        providerConfirmationLink: deepLinkGate.providerConfirmationLink || "disabled",
+        safeProviderHandoffUrl: deepLinkGate.safeProviderHandoffUrl || null,
         booking: false,
         payment: false,
         order: false,
         identityUpload: false
       },
       deepLinkGate: {
-        status: deepLinkGate.status || "skeleton only",
+        status: deepLinkGate.status || "blocked",
         providerConfirmationLink: deepLinkGate.providerConfirmationLink || "disabled",
+        candidateDecision: deepLinkGate.candidateDecision || "blocked",
+        safeProviderHandoffUrl: deepLinkGate.safeProviderHandoffUrl || null,
         bookingUrl: deepLinkGate.bookingUrl == null ? null : null,
         autoOpen: deepLinkGate.autoOpen === true,
         payment: false,
@@ -97,7 +104,8 @@
         noBookingUrl: confirmationUi.noBookingUrl !== false,
         noPayment: confirmationUi.noPayment !== false,
         noOrder: confirmationUi.noOrder !== false,
-        noIdentityUpload: confirmationUi.noIdentityUpload !== false
+        noIdentityUpload: confirmationUi.noIdentityUpload !== false,
+        safeProviderHandoffUrl: confirmationUi.safeProviderHandoffUrl || null
       },
       redacted: true
     });
@@ -126,6 +134,8 @@
       return {
         status: "skeleton only",
         providerConfirmationLink: "disabled",
+        candidateDecision: "blocked",
+        safeProviderHandoffUrl: null,
         autoOpen: false,
         bookingUrl: null,
         payment: "blocked",
@@ -141,7 +151,9 @@
       const confirmationUiApi = getConfirmationUiApi();
       if (typeof confirmationUiApi.buildProviderConfirmationHandoffUiModel === "function") {
         return confirmationUiApi.buildProviderConfirmationHandoffUiModel({
-          candidateDecision: deepLinkGate.candidateDecision || "blocked"
+          candidateDecision: deepLinkGate.candidateDecision || "blocked",
+          providerConfirmationLink: deepLinkGate.providerConfirmationLink || "disabled",
+          safeProviderHandoffUrl: deepLinkGate.safeProviderHandoffUrl || null
         });
       }
       return {
@@ -177,6 +189,8 @@
       deepLinkGate: {
         status: deepLinkGate.status || "skeleton_only",
         providerConfirmationLink: deepLinkGate.providerConfirmationLink || "disabled",
+        candidateDecision: deepLinkGate.candidateDecision || "blocked",
+        safeProviderHandoffUrl: deepLinkGate.safeProviderHandoffUrl || null,
         bookingUrl: null,
         autoOpen: false,
         payment: false,
@@ -193,6 +207,7 @@
         cancelButtonEnabled: confirmationUi.cancelButtonEnabled !== false,
         noAutoOpen: confirmationUi.noAutoOpen !== false,
         noBookingUrl: confirmationUi.noBookingUrl !== false,
+        safeProviderHandoffUrl: confirmationUi.safeProviderHandoffUrl || null,
         bookingUrl: null,
         noPayment: confirmationUi.noPayment !== false,
         noOrder: confirmationUi.noOrder !== false,
@@ -213,10 +228,11 @@
       },
       readiness: {
         limitedBetaReady: sources.length === 3 && manualSearchOnlyCount === 2 && fixtureOnlyCount === 1 && productionProviderCount === 0,
+        safeProviderHandoffReady: sources.length === 3 && manualSearchOnlyCount === 2 && fixtureOnlyCount === 1 && productionProviderCount === 0,
         userFacingClaimAllowed: false,
         realPriceClaimAllowed: false,
         bookingClaimAllowed: false,
-        finalDecision: "blocked",
+        finalDecision: "safe_provider_handoff_ready",
         redacted: true
       },
       redacted: true
@@ -237,8 +253,8 @@
     const fixtureOnlyCount = Number(registry.fixtureOnlyCount || 0);
     const productionProviderCount = Number(registry.productionProviderCount || 0);
     const limitedBetaReady = sourceCount === 3 && manualSearchOnlyCount === 2 && fixtureOnlyCount === 1 && productionProviderCount === 0 &&
-      deepLinkGate.providerConfirmationLink === "disabled" &&
-      confirmationUi.continueButtonDisabled === true &&
+      deepLinkGate.providerConfirmationLink !== "disabled" &&
+      confirmationUi.continueButtonDisabled === false &&
       confirmationUi.cancelButtonEnabled === true &&
       safety.productionProviderAggregation === "disabled" &&
       safety.realProviderNetwork === "disabled";
@@ -257,7 +273,8 @@
       realPriceClaimAllowed: false,
       bookingClaimAllowed: false,
       limitedBetaReady: limitedBetaReady,
-      finalDecision: limitedBetaReady ? "limited_beta_skeleton_ready" : "blocked",
+      safeProviderHandoffReady: limitedBetaReady,
+      finalDecision: limitedBetaReady ? "safe_provider_handoff_ready" : "blocked",
       redacted: report.redacted === true
     });
   }
@@ -270,6 +287,7 @@
         reportName: REPORT_NAME,
         appVersion: TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION,
         limitedBetaReady: false,
+        safeProviderHandoffReady: false,
         userFacingClaimAllowed: false,
         realPriceClaimAllowed: false,
         bookingClaimAllowed: false,
@@ -281,10 +299,11 @@
       reportName: REPORT_NAME,
       appVersion: TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION,
       limitedBetaReady: true,
+      safeProviderHandoffReady: true,
       userFacingClaimAllowed: false,
       realPriceClaimAllowed: false,
       bookingClaimAllowed: false,
-      finalDecision: "limited_beta_skeleton_ready",
+      finalDecision: "safe_provider_handoff_ready",
       redacted: true
     });
   }
@@ -307,6 +326,7 @@
       realPriceClaimAllowed: summary.realPriceClaimAllowed,
       bookingClaimAllowed: summary.bookingClaimAllowed,
       limitedBetaReady: summary.limitedBetaReady,
+      safeProviderHandoffReady: summary.safeProviderHandoffReady,
       finalDecision: summary.finalDecision,
       redacted: true
     });
@@ -319,8 +339,9 @@
     if (report.reportName !== REPORT_NAME) throw new Error("trusted flight source evidence report name mismatch");
     if (report.mode !== "read_only") throw new Error("trusted flight source evidence report must stay read only");
     if (!report.registry || report.registry.sourceCount !== 3) throw new Error("trusted flight source evidence registry must keep three sources");
-    if (report.deepLinkGate.providerConfirmationLink !== "disabled" || report.deepLinkGate.bookingUrl !== null) throw new Error("trusted flight source evidence deep link gate must stay disabled");
-    if (report.confirmationUi.continueButtonDisabled !== true || report.confirmationUi.cancelButtonEnabled !== true) throw new Error("trusted flight source evidence confirmation ui must stay stubbed");
+    if (report.deepLinkGate.bookingUrl !== null) throw new Error("trusted flight source evidence deep link gate must not expose bookingUrl");
+    if (report.deepLinkGate.safeProviderHandoffUrl && !/^https:\/\//i.test(report.deepLinkGate.safeProviderHandoffUrl)) throw new Error("trusted flight source evidence deep link gate must keep safe provider handoff url https");
+    if (report.confirmationUi.cancelButtonEnabled !== true || report.confirmationUi.noPayment !== true || report.confirmationUi.noOrder !== true || report.confirmationUi.noIdentityUpload !== true) throw new Error("trusted flight source evidence confirmation ui must stay safe");
     if (report.safety.productionProviderAggregation !== "disabled" || report.safety.realProviderNetwork !== "disabled") throw new Error("trusted flight source evidence safety must stay disabled");
     if (summary.realPriceClaimAllowed !== false || summary.bookingClaimAllowed !== false) throw new Error("trusted flight source evidence must not claim real price or booking");
     return true;

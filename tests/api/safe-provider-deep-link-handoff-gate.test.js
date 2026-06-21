@@ -18,17 +18,18 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/safeProviderDeepLinkHandoffGate.js"]);
   const api = windowRef.WeishanSafeProviderDeepLinkHandoffGate;
-  assert.equal(api.SAFE_PROVIDER_DEEP_LINK_HANDOFF_GATE_VERSION, "2.1.41");
+  assert.equal(api.SAFE_PROVIDER_DEEP_LINK_HANDOFF_GATE_VERSION, "2.1.42");
 
   const safe = api.evaluateSafeProviderDeepLinkHandoff({
     providerId: "google_flights_search",
     providerName: "Google Flights",
     searchOnly: true,
-    url: "https://www.google.com/travel/flights"
+    safeProviderHandoffUrl: "https://www.google.com/travel/flights"
   });
-  assert.equal(safe.status, "skeleton only");
-  assert.equal(safe.candidateDecision, "confirmation_stub");
-  assert.equal(safe.providerConfirmationLink, "disabled");
+  assert.equal(safe.status, "confirmation_required");
+  assert.equal(safe.candidateDecision, "safe_provider_handoff_ready");
+  assert.equal(safe.providerConfirmationLink, "confirmation_required");
+  assert.equal(safe.safeProviderHandoffUrl.startsWith("https://www.google.com/travel/flights"), true);
   assert.equal(safe.userConfirmationRequired, true);
   assert.equal(safe.autoOpen, false);
   assert.equal(safe.bookingUrl, null);
@@ -44,10 +45,11 @@ function main() {
     providerId: "unknown",
     providerName: "Unknown",
     searchOnly: true,
-    url: "http://bit.ly/should-block?apiKey=secret",
+    safeProviderHandoffUrl: "http://bit.ly/should-block?apiKey=secret",
     restrictedCategory: true
   });
   assert.equal(blocked.candidateDecision, "blocked");
+  assert.equal(blocked.status, "blocked");
   assert.equal(blocked.autoOpen, false);
   assert.equal(blocked.bookingUrl, null);
   assert.equal(blocked.providerConfirmationLink, "disabled");
@@ -58,9 +60,10 @@ function main() {
   assert.equal(blocked.blockedReasons.includes("restricted category blocked"), true);
 
   const audit = api.getSafeProviderDeepLinkHandoffGateAuditDraft({ providerId: "google_flights_search", searchOnly: true, url: "https://www.google.com/travel/flights" });
-  assert.equal(audit.eventType, "SAFE_PROVIDER_DEEP_LINK_HANDOFF_GATE_DRAFT");
+  assert.equal(audit.eventType, "SAFE_PROVIDER_HANDOFF_URL_GATE_DRAFT");
   assert.equal(audit.userConfirmationRequired, true);
   assert.equal(audit.autoOpen, false);
+  assert.equal(audit.safeProviderHandoffUrlDisplayedCount, 0);
   assert.equal(audit.bookingUrlDisplayedCount, 0);
   assert.equal(audit.paymentActionDisplayedCount, 0);
   assert.equal(audit.orderActionDisplayedCount, 0);
@@ -69,7 +72,9 @@ function main() {
 
   assert.equal(api.assertSafeProviderDeepLinkHandoffGateSafe(safe), true);
   assert.equal(JSON.stringify(safe).includes("bookingUrl"), true);
+  assert.equal(JSON.stringify(safe).includes("safeProviderHandoffUrl"), true);
   assert.equal(JSON.stringify(safe).includes("rawApiKey"), false);
+  assert.equal(typeof api.openTrustedProviderHandoffUrl, "function");
 
   console.log("SAFE_PROVIDER_DEEP_LINK_HANDOFF_GATE_CORE PASS");
 }
