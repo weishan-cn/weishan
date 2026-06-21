@@ -7,7 +7,7 @@ function load(files){ const window = {}; window.window = window; const context =
 function main(){
   const windowRef = load(["apps/desktop/src/renderer/core/flightFareBreakdown.js", "apps/desktop/src/renderer/core/resultBadgeFormatter.js", "apps/desktop/src/renderer/core/resultCardVisualFormatter.js", "apps/desktop/src/renderer/core/cleanResultSurfaceV3.js"]);
   const api = windowRef.WeishanCleanResultSurfaceV3;
-  assert.equal(api.CLEAN_RESULT_SURFACE_V3_VERSION, "2.1.37");
+  assert.equal(api.CLEAN_RESULT_SURFACE_V3_VERSION, "2.1.38");
   const fare = windowRef.WeishanFlightFareBreakdown.normalizeFlightFareBreakdown({ baseFare:860, taxes:110, otherFees:40, totalPayable:1010, providerPriceType:"limited_beta_price", taxFeeCompleteness:"partial" });
   const surface = api.buildCleanResultSurfaceV3({ procurementCategory:"flight", statusMessage:"暂无生产真实最低价，不代表真实最低价", sortIntent:{ origin:"上海", destination:"成都", dateDisplay:"7 月 15 日", directPreference:"直达优先", sortLabel:"低价优先" }, cards:[{ rank:1, title:"上海 → 成都 · 7 月 15 日 · 直达优先 · 低价优先", providerName:"Flight Provider Sandbox", priceDisplay:"¥1010", priceTruthLabel:"Limited Beta 只读验证价，不代表真实最低价", fareBreakdown:fare, badges:["Limited Beta", "只读价格", "不可下单", "最终以平台页面为准"] }] });
   assert.equal(surface.surfaceVersion, "v3");

@@ -1,0 +1,41 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+const ROOT = path.resolve(__dirname, "../..");
+function load(files){
+  const window = {};
+  window.window = window;
+  const context = vm.createContext({ window, console });
+  for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file });
+  return window;
+}
+function main(){
+  const windowRef = load([
+    "apps/desktop/src/renderer/core/resultBadgeFormatter.js",
+    "apps/desktop/src/renderer/core/flightFareBreakdown.js",
+    "apps/desktop/src/renderer/core/compactFlightResultCardV1.js"
+  ]);
+  const api = windowRef.WeishanCompactFlightResultCardV1;
+  assert.equal(api.COMPACT_FLIGHT_RESULT_CARD_V1_VERSION, "2.1.38");
+  const fare = windowRef.WeishanFlightFareBreakdown.normalizeFlightFareBreakdown({ baseFare:860, taxes:110, otherFees:40, totalPayable:1010, providerPriceType:"limited_beta_price", taxFeeCompleteness:"partial" });
+  const card = api.buildCompactFlightResultCard({ origin:"上海", destination:"成都", dateDisplay:"7 月 15 日", directPreference:"直达优先", sortLabel:"低价优先", fareBreakdown:fare });
+  assert.equal(card.cardVersion, "compact_flight_result_card_v1");
+  assert.equal(card.primaryPrice, "¥1010");
+  assert.equal(card.routeLine, "上海 → 成都");
+  assert.equal(card.metaLine, "7 月 15 日 · 直达优先 · 低价优先");
+  assert.equal(card.fareSummary, "票面价 ¥860｜税费 ¥110｜附加费 ¥40");
+  assert.equal(card.detailFareBreakdownCollapsedByDefault, true);
+  assert.deepEqual(Array.from(card.badges), ["Limited Beta", "只读价格", "不可下单", "以平台页面为准"]);
+  assert.equal(card.badgeDisplayText, "[Limited Beta] [只读价格] [不可下单] [以平台页面为准]");
+  assert.equal(card.badgeDisplayText.includes("Limited Beta只读价格"), false);
+  assert.equal(card.bookingUrl, null);
+  assert.equal(card.payment, false);
+  assert.equal(card.order, false);
+  assert.equal(card.identityUpload, false);
+  assert.equal(card.audit.eventType, "COMPACT_FLIGHT_RESULT_CARD_V1_DRAFT");
+  assert.equal(card.audit.redacted, true);
+  assert.equal(api.assertCompactFlightResultCardSafe(card), true);
+  console.log("COMPACT_FLIGHT_RESULT_CARD_V1_CORE PASS");
+}
+main();

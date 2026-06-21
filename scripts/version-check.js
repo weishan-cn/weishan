@@ -1013,10 +1013,10 @@ function checkRealProviderResultSchemaValidationVersion(results, expectedVersion
 function checkProviderResultSourceLabelGateV2128Version(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/providerResultSourceLabelGate.js";
   const gate = readText(gatePath);
-  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.37 version", pass:false, detail:gatePath + " missing" }); return; }
-  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.37 version", pass:false, detail:gate.__readError }); return; }
+  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.38 version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.38 version", pass:false, detail:gate.__readError }); return; }
   const match = gate.match(/PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION\s*=\s*["']([^"']+)["']/);
-  addCheck(results, "apps/desktop provider result source label gate v2.1.37 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
+  addCheck(results, "apps/desktop provider result source label gate v2.1.38 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
 }
 
 function checkProviderGateMatrixDashboardVersion(results, expectedVersion) {
@@ -1303,6 +1303,51 @@ function checkCleanResultSurfaceV3Version(results, expectedVersion) {
   addCheck(results, "apps/desktop clean result surface v3 version", expectedVersion, match && match[1], "package.json must match cleanResultSurfaceV3.js");
 }
 
+function checkUserSurfaceDebugFieldFilterVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/userSurfaceDebugFieldFilter.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop user surface debug field filter version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop user surface debug field filter version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/USER_SURFACE_DEBUG_FIELD_FILTER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop user surface debug field filter version", expectedVersion, match && match[1], "package.json must match userSurfaceDebugFieldFilter.js");
+}
+
+function checkCompactFlightResultCardV1Version(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/compactFlightResultCardV1.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop compact flight result card v1 version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop compact flight result card v1 version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/COMPACT_FLIGHT_RESULT_CARD_V1_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop compact flight result card v1 version", expectedVersion, match && match[1], "package.json must match compactFlightResultCardV1.js");
+}
+
+function checkManualVerificationGroupVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/manualVerificationGroup.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop manual verification group version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop manual verification group version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/MANUAL_VERIFICATION_GROUP_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop manual verification group version", expectedVersion, match && match[1], "package.json must match manualVerificationGroup.js");
+}
+
+function checkTaskHistorySummaryFormatterVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/taskHistorySummaryFormatter.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop task history summary formatter version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop task history summary formatter version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/TASK_HISTORY_SUMMARY_FORMATTER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop task history summary formatter version", expectedVersion, match && match[1], "package.json must match taskHistorySummaryFormatter.js");
+}
+
+function checkCleanResultSurfaceV4Version(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/cleanResultSurfaceV4.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop clean result surface v4 version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop clean result surface v4 version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/CLEAN_RESULT_SURFACE_V4_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop clean result surface v4 version", expectedVersion, match && match[1], "package.json must match cleanResultSurfaceV4.js");
+}
+
 function runVersionCheck() {
   const results = [];
 
@@ -1387,6 +1432,11 @@ function runVersionCheck() {
     checkResultCardVisualFormatterVersion(results, rootPackage.version);
     checkUserFacingTextDedupeVersion(results, rootPackage.version);
     checkCleanResultSurfaceV3Version(results, rootPackage.version);
+    checkUserSurfaceDebugFieldFilterVersion(results, rootPackage.version);
+    checkCompactFlightResultCardV1Version(results, rootPackage.version);
+    checkManualVerificationGroupVersion(results, rootPackage.version);
+    checkTaskHistorySummaryFormatterVersion(results, rootPackage.version);
+    checkCleanResultSurfaceV4Version(results, rootPackage.version);
   }
 
   results.forEach((item) => {

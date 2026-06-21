@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const RULES_VERSION = "2.1.37";
+  const RULES_VERSION = "2.1.38";
   const MODULE_NAME = "key_redaction_and_log_leak_prevention_rules";
   const PHASE = "redaction_rules";
 

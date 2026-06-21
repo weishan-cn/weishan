@@ -1,5 +1,5 @@
 (function(){
-  const PROVIDER_HANDOFF_UI_VERSION = "2.1.37";
+  const PROVIDER_HANDOFF_UI_VERSION = "2.1.38";
   const SAFE_ACTIONS = ["manual_confirm", "copy_search_conditions", "external_search_manual", "provider_handoff_preview"];
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value){ return String(value == null ? "" : value).trim(); }
@@ -58,6 +58,64 @@
       redacted:true
     });
   }
+  function buildManualHandoffUxV3AuditDraft(input){
+    const safe = input && typeof input === "object" ? input : {};
+    return clone({
+      eventType:"MANUAL_HANDOFF_UX_V3_DRAFT",
+      handoffDecision:text(safe.handoffDecision || "manual_handoff"),
+      compact:true,
+      checklistCollapsedByDefault:true,
+      copySearchConditionsAvailable:safe.copySearchConditionsAvailable !== false,
+      copyFareBreakdownAvailable:safe.copyFareBreakdownAvailable !== false,
+      autoOpen:false,
+      bookingUrlDisplayedCount:0,
+      paymentActionDisplayedCount:0,
+      orderActionDisplayedCount:0,
+      identityUploadDisplayedCount:0,
+      redacted:true
+    });
+  }
+  function buildProviderHandoffUserSurface(input){
+    const safe = input && typeof input === "object" ? input : {};
+    const decision = buildProviderHandoffUi(safe);
+    if (decision.handoffDecision === "blocked" || decision.showHandoffPanel === false) {
+      return clone({ visible:false, title:"去平台确认", audit:buildManualHandoffUxV3AuditDraft({ handoffDecision:"blocked" }), redacted:true });
+    }
+    const card = safe.card || {};
+    const fare = card.fareBreakdown || {};
+    function row(label){
+      const rows = Array.isArray(fare.displayRows) ? fare.displayRows : [];
+      const found = rows.find((item) => item && item.label === label);
+      return found ? found.value : "以平台页面为准";
+    }
+    return clone({
+      visible:true,
+      title:"去平台确认",
+      intro:"当前不会自动打开平台，不会跳转预订页，不会付款或下单。",
+      coreChecklist:[
+        "路线：" + text(card.routeLine || card.title || "上海 → 成都").replace(/\s*·.*$/, ""),
+        "日期：" + text(safe.dateDisplay || "7 月 15 日"),
+        "最终应付总价：" + row("最终应付总价"),
+        "票面价 / 税费 / 附加费：以卡片价格拆分为准",
+        "燃油/机建费：以平台页面为准"
+      ],
+      actions:["复制搜索条件", "复制价格拆分摘要"],
+      fullChecklistCollapsedByDefault:true,
+      fullChecklist:[
+        "核对出发地 / 目的地 / 日期",
+        "核对是否直达",
+        "核对票面价、税费和附加费",
+        "核对最终应付总价",
+        "核对行李、退改签、余票 / 座位状态",
+        "核对平台域名",
+        "不向未知平台提交身份证、护照或银行卡"
+      ],
+      manualExplanation:decision.manualExplanation,
+      copyPayload:decision.copyPayload,
+      audit:buildManualHandoffUxV3AuditDraft({ handoffDecision:decision.handoffDecision, copySearchConditionsAvailable:true, copyFareBreakdownAvailable:true }),
+      redacted:true
+    });
+  }
   function buildProviderHandoffUi(input){
     const safe = input && typeof input === "object" ? input : {};
     const card = safe.card || {};
@@ -84,6 +142,7 @@
       finalPageDisclaimer:"最终价格、库存、税费、行李和退改签以平台页面为准。weishan 不付款、不下单。",
       audit:buildProviderHandoffUiAuditDraft({ handoffDecision:blocked ? "blocked" : "manual_handoff", actionLabel:card.actionLabel || "去平台确认", actionType, copyPayloadGeneratedCount:copyPayload ? 1 : 0 }),
       manualHandoffUxV2Audit:buildManualHandoffUxV2AuditDraft({ handoffDecision:blocked ? "blocked" : "manual_handoff", compactChecklistVisible:!blocked, copySearchConditionsAvailable:!blocked, copyFareBreakdownAvailable:!blocked }),
+      manualHandoffUxV3Audit:buildManualHandoffUxV3AuditDraft({ handoffDecision:blocked ? "blocked" : "manual_handoff", copySearchConditionsAvailable:!blocked, copyFareBreakdownAvailable:!blocked }),
       redacted:true
     };
     return clone(result);
@@ -118,5 +177,5 @@
     if (v2Audit.eventType && (v2Audit.autoOpen !== false || v2Audit.bookingUrlDisplayedCount !== 0 || v2Audit.paymentAttemptCount !== 0 || v2Audit.orderAttemptCount !== 0 || v2Audit.identityUploadAttemptCount !== 0)) throw new Error("manual handoff ux v2 audit counters unsafe");
     return true;
   }
-  window.WeishanProviderHandoffUi = { PROVIDER_HANDOFF_UI_VERSION, buildProviderHandoffUi, buildProviderHandoffUiAuditDraft, buildManualHandoffUxV2AuditDraft, assertProviderHandoffUiSafe };
+  window.WeishanProviderHandoffUi = { PROVIDER_HANDOFF_UI_VERSION, buildProviderHandoffUi, buildProviderHandoffUserSurface, buildProviderHandoffUiAuditDraft, buildManualHandoffUxV2AuditDraft, buildManualHandoffUxV3AuditDraft, assertProviderHandoffUiSafe };
 })();
