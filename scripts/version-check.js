@@ -203,6 +203,27 @@ function checkFlightSandboxProviderMatrixVersion(results, expectedVersion) {
   );
 }
 
+function checkTrustedFlightSourceEvidenceReportVersion(results, expectedVersion) {
+  const reportPath = "apps/desktop/src/renderer/core/trustedFlightSourceEvidenceReport.js";
+  const report = readText(reportPath);
+  if (!report) {
+    results.push({ name: "apps/desktop trusted flight source evidence report version", pass: false, detail: reportPath + " missing" });
+    return;
+  }
+  if (report.__readError) {
+    results.push({ name: "apps/desktop trusted flight source evidence report version", pass: false, detail: report.__readError });
+    return;
+  }
+  const match = report.match(/TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop trusted flight source evidence report version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/trustedFlightSourceEvidenceReport.js TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION"
+  );
+}
+
 function checkSecureKeyStoragePlanVersion(results, expectedVersion) {
   const planPath = "apps/desktop/src/renderer/core/commerceSecureKeyStoragePlan.js";
   const plan = readText(planPath);
@@ -1387,6 +1408,7 @@ function runVersionCheck() {
     checkFlightReadonlyStubAdapterVersion(results, rootPackage.version);
     checkFlightSandboxDryRunVersion(results, rootPackage.version);
     checkFlightSandboxProviderMatrixVersion(results, rootPackage.version);
+    checkTrustedFlightSourceEvidenceReportVersion(results, rootPackage.version);
     checkSecureKeyStoragePlanVersion(results, rootPackage.version);
     checkSecureStorageDesignGateVersion(results, rootPackage.version);
     checkLocalSecureStorageInterfaceDraftVersion(results, rootPackage.version);

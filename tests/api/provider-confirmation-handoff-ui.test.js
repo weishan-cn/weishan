@@ -18,7 +18,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/providerConfirmationHandoffUi.js"]);
   const api = windowRef.WeishanProviderConfirmationHandoffUi;
-  assert.equal(api.PROVIDER_CONFIRMATION_HANDOFF_UI_VERSION, "2.1.40");
+  assert.equal(api.PROVIDER_CONFIRMATION_HANDOFF_UI_VERSION, "2.1.41");
 
   const ui = api.buildProviderConfirmationHandoffUiModel({ candidateDecision: "confirmation_stub" });
   assert.equal(ui.phase, "provider_confirmation_handoff_ui_stub");

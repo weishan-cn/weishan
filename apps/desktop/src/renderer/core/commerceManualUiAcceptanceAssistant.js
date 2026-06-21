@@ -1,5 +1,5 @@
 (function(){
-  const MANUAL_UI_ACCEPTANCE_ASSISTANT_VERSION = "2.1.40";
+  const MANUAL_UI_ACCEPTANCE_ASSISTANT_VERSION = "2.1.41";
 
   const manualSteps = [
     "打开 /Applications/weishan.app",
@@ -16,16 +16,16 @@
   ];
 
   const screenshotPaths = [
-    "/tmp/weishan-v2.1.40-ui-acceptance/01_app_launched.png",
-    "/tmp/weishan-v2.1.40-ui-acceptance/02_settings_auth.png",
-    "/tmp/weishan-v2.1.40-ui-acceptance/03_commerce_flight_result.png",
-    "/tmp/weishan-v2.1.40-ui-acceptance/04_local_safety_evidence_console.png",
-    "/tmp/weishan-v2.1.40-ui-acceptance/05_manual_ui_acceptance_assistant.png",
-    "/tmp/weishan-v2.1.40-ui-acceptance/06_no_secret_persistence_guard.png",
-    "/tmp/weishan-v2.1.40-ui-acceptance/07_settings_auth_local_security_evidence.png",
-    "/tmp/weishan-v2.1.40-ui-acceptance/08_no_forbidden_controls.png",
-    "/tmp/weishan-v2.1.40-ui-acceptance/09_history_reopen.png",
-    "/tmp/weishan-v2.1.40-ui-acceptance/10_compound_request.png"
+    "/tmp/weishan-v2.1.41-ui-acceptance/01_app_launched.png",
+    "/tmp/weishan-v2.1.41-ui-acceptance/02_settings_auth.png",
+    "/tmp/weishan-v2.1.41-ui-acceptance/03_commerce_flight_result.png",
+    "/tmp/weishan-v2.1.41-ui-acceptance/04_local_safety_evidence_console.png",
+    "/tmp/weishan-v2.1.41-ui-acceptance/05_manual_ui_acceptance_assistant.png",
+    "/tmp/weishan-v2.1.41-ui-acceptance/06_no_secret_persistence_guard.png",
+    "/tmp/weishan-v2.1.41-ui-acceptance/07_settings_auth_local_security_evidence.png",
+    "/tmp/weishan-v2.1.41-ui-acceptance/08_no_forbidden_controls.png",
+    "/tmp/weishan-v2.1.41-ui-acceptance/09_history_reopen.png",
+    "/tmp/weishan-v2.1.41-ui-acceptance/10_compound_request.png"
   ];
 
   const passFailRules = [

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const TRUSTED_FLIGHT_SOURCE_REGISTRY_VERSION = "2.1.40";
+  const TRUSTED_FLIGHT_SOURCE_REGISTRY_VERSION = "2.1.41";
   const PHASE = "trusted_flight_source_registry_skeleton_only";
 
   const TRUSTED_SOURCES = [
