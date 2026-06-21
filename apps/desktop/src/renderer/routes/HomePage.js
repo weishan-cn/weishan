@@ -267,9 +267,11 @@
             body.innerHTML = "";
             try {
               body.innerHTML = decodeURIComponent(template.dataset.commerceDisclosureHtml || "");
+              hydrateDisclosureSections(body);
             } catch (err) {
               body.textContent = template.dataset.commerceDisclosureHtml || "";
             }
+            hydrateDisclosureSections(body);
             details.dataset.weishanDisclosureLoaded = "true";
           }
           body.hidden = false;
@@ -2172,7 +2174,7 @@
     const state = api && typeof api.buildSecureApiKeyStorageConsole === "function"
       ? api.buildSecureApiKeyStorageConsole()
       : {
-        version:"2.1.32",
+        version:"2.1.33",
         status:"secure local storage only",
         mode:"no provider connection",
         realProvider:"disabled",
@@ -5048,7 +5050,7 @@
     const body = '<section class="commerce-limited-beta-state-persistence-panel" aria-label="Limited Beta State Persistence">'
       + '<h4>Limited Beta State Persistence</h4>'
       + '<p>status: local preference persistence active</p>'
-      + '<p>schemaVersion: ' + esc(draft.schemaVersion || '2.1.32') + '</p>'
+      + '<p>schemaVersion: ' + esc(draft.schemaVersion || '2.1.33') + '</p>'
       + '<p>storage: app userData local file</p>'
       + '<p>localStorage: forbidden</p>'
       + '<p>sessionStorage: forbidden</p>'
@@ -6105,6 +6107,119 @@
     return disclosure('查看 settings auth local security evidence', body, 'commerce-settings-auth-local-security-evidence-disclosure');
   }
 
+
+  function commerceTaskRawInput(task){
+    return String(task && (task.inputSummary || task.rawInput || task.title || task.text) || "");
+  }
+
+  function commerceAiBrainDecisionForTask(task){
+    const api = window.WeishanAiProcurementBrainOrchestrator;
+    const raw = commerceTaskRawInput(task);
+    const category = task && task.globalProcurementIntent && task.globalProcurementIntent.category || task && task.category || "";
+    const restricted = category === "restricted_or_blocked" || task && task.status === "blocked";
+    if (api && typeof api.orchestrateAiProcurementBrain === "function") {
+      return api.orchestrateAiProcurementBrain({
+        rawUserInput:raw,
+        userLocale:"zh-CN",
+        currentCategoryHint:category === "ecommerce" ? "product" : category,
+        userAiApiState:{ aiApiTokenConfigured:false, metadataOnly:true, redacted:true },
+        providerReadinessState:{ productionProviderReady:false, limitedBetaFlightReady:true, redacted:true },
+        limitedBetaPreferenceState:{ metadataOnly:true, redacted:true },
+        restrictedCategoryDecision:restricted ? "blocked" : "allow",
+        networkPolicy:{ enabled:true, mode:"safe_readonly_planning" },
+        currentTime:new Date().toISOString(),
+        redacted:true
+      });
+    }
+    return { intentStatus:restricted ? "blocked" : "ready", procurementCategory:category || "multi_category_plan", confidence:0.7, missingFields:[], clarificationQuestion:"", resultSurfaceMode:restricted ? "blocked_safety_card" : "clean_user_results", preferredReasoningBackend:"local_rules", backendDecisionReason:"local fallback", allowExternalSearch:!restricted, allowProviderReadOnly:!restricted && category === "flight", allowPayment:false, allowOrder:false, allowIdentityUpload:false, redacted:true };
+  }
+
+  function commerceAiBackendDecisionForTask(task){
+    const brain = commerceAiBrainDecisionForTask(task);
+    return brain.aiBackendDecision || { backendDecision:brain.preferredReasoningBackend || "local_rules", reason:brain.backendDecisionReason || "local fallback", tokenReadMode:"not_available", tokenPlaintextDisplayed:false, tokenLogged:false, networkAllowed:brain.preferredReasoningBackend === "safe_network_search", paymentDisabled:true, orderDisabled:true, identityUploadDisabled:true, redacted:true };
+  }
+
+  function commerceClarificationDecisionForTask(task){
+    const brain = commerceAiBrainDecisionForTask(task);
+    return brain.clarificationGateDecision || { clarificationDecision:brain.intentStatus === "needs_clarification" ? "ask_user" : "not_needed", missingFields:brain.missingFields || [], questionText:brain.clarificationQuestion || "", suggestedQuickReplies:[], fakeResultPrevented:brain.intentStatus === "needs_clarification", redacted:true };
+  }
+
+  function commerceShouldShowClarification(task){
+    return commerceAiBrainDecisionForTask(task).intentStatus === "needs_clarification";
+  }
+
+  function commerceCleanResultSurfaceForTask(task, opts){
+    const api = window.WeishanCleanResultSurfaceV1;
+    const brain = commerceAiBrainDecisionForTask(task);
+    const html = opts && opts.guardedPriceCardHtml || "";
+    const visibleLimitedBeta = !!html && !/is-withheld/.test(html);
+    if (api && typeof api.buildCleanResultSurfaceV1 === "function") {
+      return api.buildCleanResultSurfaceV1({
+        brainDecision:brain,
+        procurementCategory:brain.procurementCategory,
+        limitedBetaAvailable:visibleLimitedBeta,
+        limitedBetaPriceDisplay:"Limited Beta 只读验证价",
+        killSwitchState:/Limited Beta 已关闭/.test(html) ? "disabled" : "enabled",
+        rollbackState:/已回滚到离线计划/.test(html) ? "rollback_active" : "not_needed",
+        restrictedCategoryDecision:brain.intentStatus === "blocked" ? "blocked" : "allow",
+        redacted:true
+      });
+    }
+    return { resultSurfaceMode:brain.intentStatus === "blocked" ? "blocked" : (brain.intentStatus === "needs_clarification" ? "needs_clarification" : "no_real_price"), resultCards:[], resultCardCount:0, maxResultCardCount:3, noPriceMessage:"暂无真实价格结果", duplicateNoPriceMessageCount:1, debugPanelsHiddenByDefault:true, bookingUrlDisplayedCount:0, paymentActionDisplayedCount:0, orderActionDisplayedCount:0, identityUploadDisplayedCount:0, finalSafetyNotice:"weishan 只做搜索和比较，不收款、不下单。最终价格、库存、税费、行李和退改签以平台页面为准。", redacted:true };
+  }
+
+  function commerceCleanResultSurfaceHtml(task, opts){
+    const surface = commerceCleanResultSurfaceForTask(task, opts || {});
+    const brain = commerceAiBrainDecisionForTask(task);
+    const guarded = opts && opts.guardedPriceCardHtml || "";
+    const cardHtml = (surface.resultCards || []).map(function(card){
+      return '<section class="commerce-clean-result-card" aria-label="简洁结果卡"><h5>' + esc(card.title || '结果卡') + '</h5><p>来源平台：' + esc(card.providerName || '') + '</p><p>价格：' + esc(card.priceDisplay || '暂无真实价格结果') + '</p><p>更新时间：' + esc(card.updatedAt || '待人工核对') + '</p><p>税费：' + esc(card.taxFeeSummary || '以平台页面为准') + '</p><p>库存可靠性：' + esc(card.inventoryReliability || '以平台页面为准') + '</p><p>推荐理由：' + esc(card.recommendationReason || '建议手动核对') + '</p><p>操作：' + esc(card.actionLabel || '手动核对') + '</p></section>';
+    }).join('');
+    const limitedBetaHtml = surface.resultSurfaceMode === "ready_with_results" ? guarded : "";
+    const clarificationHtml = surface.resultSurfaceMode === "needs_clarification" ? '<section class="commerce-clean-clarification-card"><h5>请先补充关键信息</h5><p>' + esc(brain.clarificationQuestion || '请补充关键采购条件。') + '</p>' + listHtml(brain.missingFields || []) + '</section>' : "";
+    const blockedHtml = surface.resultSurfaceMode === "blocked" ? '<section class="commerce-clean-blocked-card"><h5>安全阻断</h5><p>该请求涉及受限品类，仅显示安全阻断，不提供采购结果、复制搜索条件或外部搜索入口。</p></section>' : "";
+    return '<section class="commerce-clean-result-surface-v1" aria-label="Clean Result Surface V1"><h4>简洁结果</h4><p>AI 大脑采购编排：active</p><p>preferred backend: ' + esc(brain.preferredReasoningBackend || 'local_rules') + '</p><p>' + esc(surface.noPriceMessage || '暂无真实价格结果') + '</p>' + clarificationHtml + blockedHtml + limitedBetaHtml + cardHtml + '<p class="commerce-result-summary-status"><b>提示：</b>' + esc(surface.finalSafetyNotice || 'weishan 只做搜索和比较，不收款、不下单。最终以平台页面为准。') + '</p></section>';
+  }
+
+  function commerceAiProcurementBrainDisclosure(task){
+    const brain = commerceAiBrainDecisionForTask(task);
+    const audit = window.WeishanAiProcurementBrainOrchestrator && window.WeishanAiProcurementBrainOrchestrator.buildAiProcurementBrainAuditDraft ? window.WeishanAiProcurementBrainOrchestrator.buildAiProcurementBrainAuditDraft({ rawUserInput:commerceTaskRawInput(task), currentCategoryHint:brain.procurementCategory, userAiApiState:{ aiApiTokenConfigured:false }, networkPolicy:{ enabled:true }, restrictedCategoryDecision:brain.intentStatus === "blocked" ? "blocked" : "allow", redacted:true }) : { eventType:"AI_PROCUREMENT_BRAIN_ORCHESTRATOR_DRAFT", redacted:true };
+    const body = '<section class="commerce-ai-procurement-brain-panel"><h4>AI Procurement Brain</h4><p>ai procurement brain: active</p><p>intentStatus: ' + esc(brain.intentStatus) + '</p><p>procurementCategory: ' + esc(brain.procurementCategory) + '</p><p>confidence: ' + esc(String(brain.confidence || '')) + '</p><p>preferred backend: ' + esc(brain.preferredReasoningBackend || '') + '</p><p>allowExternalSearch: ' + esc(String(brain.allowExternalSearch)) + '</p><p>allowProviderReadOnly: ' + esc(String(brain.allowProviderReadOnly)) + '</p><p>allowPayment: false</p><p>allowOrder: false</p><p>allowIdentityUpload: false</p><p>' + esc(audit.eventType || 'AI_PROCUREMENT_BRAIN_ORCHESTRATOR_DRAFT') + '</p><p>redacted: true</p></section>';
+    return disclosure('查看 AI Procurement Brain', body, 'commerce-ai-procurement-brain-disclosure');
+  }
+
+  function commerceAiBackendRouterDisclosure(task){
+    const decision = commerceAiBackendDecisionForTask(task);
+    const audit = window.WeishanAiBackendRouter && window.WeishanAiBackendRouter.buildAiBackendRouterAuditDraft ? window.WeishanAiBackendRouter.buildAiBackendRouterAuditDraft({ userAiApiState:{ aiApiTokenConfigured:decision.backendDecision === 'user_ai_token' }, networkPolicy:{ enabled:decision.networkAllowed === true }, taskType:commerceAiBrainDecisionForTask(task).procurementCategory, restrictedCategoryDecision:commerceAiBrainDecisionForTask(task).intentStatus === 'blocked' ? 'blocked' : 'allow', redacted:true }) : { eventType:'AI_BACKEND_ROUTER_DRAFT', redacted:true };
+    const body = '<section class="commerce-ai-backend-router-panel"><h4>AI Backend Router</h4><p>AI 大脑优先级</p><p>user_ai_token / safe_network_search / local_rules</p><p>backendDecision: ' + esc(decision.backendDecision || '') + '</p><p>tokenReadMode: ' + esc(decision.tokenReadMode || '') + '</p><p>tokenPlaintextDisplayed: false</p><p>tokenLogged: false</p><p>networkAllowed: ' + esc(String(decision.networkAllowed === true)) + '</p><p>paymentDisabled: true</p><p>orderDisabled: true</p><p>identityUploadDisabled: true</p><p>' + esc(audit.eventType || 'AI_BACKEND_ROUTER_DRAFT') + '</p><p>redacted: true</p></section>';
+    return disclosure('查看 AI Backend Router', body, 'commerce-ai-backend-router-disclosure');
+  }
+
+  function commerceProcurementClarificationGateDisclosure(task){
+    const decision = commerceClarificationDecisionForTask(task);
+    const audit = window.WeishanProcurementClarificationGate && window.WeishanProcurementClarificationGate.buildProcurementClarificationGateAuditDraft ? window.WeishanProcurementClarificationGate.buildProcurementClarificationGateAuditDraft({ rawUserInput:commerceTaskRawInput(task), procurementCategory:commerceAiBrainDecisionForTask(task).procurementCategory, redacted:true }) : { eventType:'PROCUREMENT_CLARIFICATION_GATE_DRAFT', redacted:true };
+    const body = '<section class="commerce-procurement-clarification-gate-panel"><h4>Procurement Clarification Gate</h4><p>clarification gate: active</p><p>clarificationDecision: ' + esc(decision.clarificationDecision || '') + '</p><p>questionText: ' + esc(decision.questionText || '') + '</p><h5>missingFields</h5>' + listHtml(decision.missingFields || []) + '<h5>suggestedQuickReplies</h5>' + listHtml(decision.suggestedQuickReplies || []) + '<p>fakeResultPrevented: true</p><p>' + esc(audit.eventType || 'PROCUREMENT_CLARIFICATION_GATE_DRAFT') + '</p><p>redacted: true</p></section>';
+    return disclosure('查看 Clarification Gate', body, 'commerce-procurement-clarification-gate-disclosure');
+  }
+
+  function commerceCleanResultSurfaceV1Disclosure(task){
+    const surface = commerceCleanResultSurfaceForTask(task, {});
+    const audit = window.WeishanCleanResultSurfaceV1 && window.WeishanCleanResultSurfaceV1.buildCleanResultSurfaceV1AuditDraft ? window.WeishanCleanResultSurfaceV1.buildCleanResultSurfaceV1AuditDraft({ brainDecision:commerceAiBrainDecisionForTask(task), limitedBetaAvailable:false, redacted:true }) : { eventType:'CLEAN_RESULT_SURFACE_V1_DRAFT', redacted:true };
+    const body = '<section class="commerce-clean-result-surface-v1-panel"><h4>Clean Result Surface V1</h4><p>clean result surface: active</p><p>resultSurfaceMode: ' + esc(surface.resultSurfaceMode || '') + '</p><p>resultCardCount: ' + esc(String(surface.resultCardCount || 0)) + '</p><p>maxResultCardCount: 3</p><p>debugPanelsHiddenByDefault: true</p><p>duplicateNoPriceMessageCount: ' + esc(String(surface.duplicateNoPriceMessageCount || 0)) + '</p><p>bookingUrlDisplayedCount: 0</p><p>paymentActionDisplayedCount: 0</p><p>orderActionDisplayedCount: 0</p><p>identityUploadDisplayedCount: 0</p><p>' + esc(audit.eventType || 'CLEAN_RESULT_SURFACE_V1_DRAFT') + '</p><p>redacted: true</p></section>';
+    return disclosure('查看 Clean Result Surface V1', body, 'commerce-clean-result-surface-v1-disclosure');
+  }
+
+  function commerceSafetyAndDebugDetailsDisclosure(task, extraPanels){
+    const panels = [commerceAiProcurementBrainDisclosure(task), commerceAiBackendRouterDisclosure(task), commerceProcurementClarificationGateDisclosure(task), commerceCleanResultSurfaceV1Disclosure(task)].concat(extraPanels || []).filter(Boolean).join('');
+    return disclosure('查看安全与调试详情', '<section class="commerce-safety-debug-details"><h4>安全与调试详情</h4><p>后台 gate / audit / readiness 默认隐藏；展开后仅用于审计。</p>' + panels + '</section>', 'commerce-simple-flight-advanced-debug-disclosure');
+  }
+
+  function commerceClarificationResultPanelHtml(task){
+    const brain = commerceAiBrainDecisionForTask(task);
+    const clarification = commerceClarificationDecisionForTask(task);
+    return '<section class="commerce-result-summary-panel commerce-one-screen-result commerce-clarification-result" aria-label="采购追问"><div class="commerce-result-summary-head"><div class="commerce-result-summary-headline"><span>AI 大脑采购编排</span><strong>请补充关键信息</strong></div></div><div class="commerce-one-screen-body"><section class="commerce-one-screen-card"><h4>请补充关键信息</h4><p>' + esc(clarification.questionText || brain.clarificationQuestion || '请补充关键采购条件。') + '</p><h5>需要补充</h5>' + listHtml(clarification.missingFields || brain.missingFields || []) + '<p>当前不会生成假结果，不显示价格，不提供 bookingUrl，不付款，不下单。</p></section></div>' + commerceSafetyAndDebugDetailsDisclosure(task, []) + '</section>';
+  }
+
   function commerceSimpleFlightResultPanelHtml(task){
     const fields = commerceSimpleFlightFields(task);
     const copyTexts = commerceSimpleFlightCopyTexts(task);
@@ -6134,32 +6249,9 @@
           <p>出发日期：${esc(fields.date)}</p>
           <p>日期：${esc(fields.dateDisplay || fields.date)}</p>
           <p>排序：${esc(fields.goal)}</p>
-          <div class="commerce-search-mode-summary" aria-label="当前搜索模式">
-            <h5>${esc(searchModeDisplay.title || "当前搜索模式")}</h5>
-            <p>${esc(searchModeDisplay.userApiLine || "用户 API：未绑定")}</p>
-            <p>${esc(searchModeDisplay.candidateProviderLine || "weishan 候选平台：可用")}</p>
-            <p>${esc(searchModeDisplay.realPriceLine || "真实价格结果：暂无")}</p>
-          </div>
-          <div class="commerce-search-mode-summary commerce-api-binding-status" aria-label="API 绑定状态">
-            <h5>${esc(apiBindingDisplay.title || "API 绑定状态")}</h5>
-            <p>${esc(apiBindingDisplay.userApiLine || "用户 API：未绑定")}</p>
-            <p>${esc(apiBindingDisplay.candidateProviderLine || "weishan 候选平台：可用")}</p>
-            <p>${esc(apiBindingDisplay.realPriceLine || "真实价格结果：暂无")}</p>
-          </div>
-          <p class="commerce-simple-flight-empty">${esc(flightLowestOffers.currentStatusLine || "暂无真实价格结果")}</p>
-          ${guardedPriceCardHtml}
-          <p>${esc(flightLowestOffers.priceStateLine || "当前尚未接入真实只读机票价格源，不能展示价格。")}</p>
-          <p>${esc(searchModeDisplay.futureLine || "绑定 API 后，将优先使用用户授权平台的只读价格结果")}</p>
-          <p>${esc(searchModeDisplay.sourceLine || "未绑定 API 时，可使用 weishan 候选平台和外部搜索入口。")}</p>
-          <p>${esc(flightLowestOffers.futureLine || "接入可信价格源后，将只展示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。")}</p>
-          <p>weishan 不收款、不下单、不保存身份证、护照或银行卡。</p>
+          ${commerceCleanResultSurfaceHtml(task, { guardedPriceCardHtml })}
         </section>
-        ${globalProcurementPlanHtml(task)}
-        ${globalProcurementMissingInfoChecklistDisclosure(task)}
-        ${globalProcurementSafeNextStepGuidanceDisclosure(task)}
-        ${globalProcurementExternalSearchPolicyDisclosure(task)}
-        ${resultCardRulesHtml}
-        <p class="commerce-result-summary-status"><b>提示：</b>当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</p>
+        <p class="commerce-result-summary-status"><b>提示：</b>weishan 只做搜索和比较，不收款、不下单。最终价格、库存、税费、行李和退改签以平台页面为准。</p>
       </div>
       <div class="commerce-one-screen-actions" aria-label="机票搜索条件操作">
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="web" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.web)}">打开全网搜索</button>
@@ -6167,54 +6259,7 @@
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="tripCom" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.tripCom)}">打开 Trip.com / 携程搜索</button>
         <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="simpleFlight" data-commerce-copy-text="${commerceEncodedCopyText(copyTexts.flight)}">复制机票搜索条件</button>
       </div>
-      ${commerceApiBindingSafeShellDisclosure(task)}
-      ${commerceUserApiProviderCatalogDisclosure(task)}
-      ${commerceApiBindingMockFormDisclosure(task)}
-      ${commerceApiBindingPermissionChecklistDisclosure(task)}
-      ${commerceApiBindingReadinessDisclosure(task)}
-      ${commerceSecureStorageDesignGateDisclosure(task)}
-      ${commerceLocalSecureStorageInterfaceDraftDisclosure(task)}
-      ${commerceSecureApiKeyStorageConsoleDisclosure(task)}
-      ${commerceKeyRedactionAndLogLeakRulesDisclosure(task)}
-      ${commerceKeyLifecycleDraftDisclosure(task)}
-      ${simpleFlightAdvancedDebugDisclosure(task)}
-      ${commerceProviderEndpointAllowlistGateDisclosure(task)}
-      ${commerceReadonlyProviderSandboxGateDisclosure(task)}
-      ${commerceReadonlyProviderResultSchemaGateDisclosure(task)}
-      ${commerceProviderResultSourceLabelGateDisclosure(task)}
-      ${commercePriceIntegrityTaxesFeesGateDisclosure(task)}
-      ${commerceRealPriceDisplayGateDisclosure(task)}
-      ${commerceBookingUrlDomainSafetyGateDisclosure(task)}
-      ${commerceManualProviderReviewWorkflowDisclosure(task)}
-      ${commerceManualProviderReviewWorkflowV1Disclosure(task)}
-      ${commerceLimitedRealPriceUiBetaGateDisclosure(task)}
-      ${commerceLimitedBetaKillSwitchDisclosure(task)}
-      ${commerceLimitedBetaStatePersistenceDisclosure(task)}
-      ${commerceLimitedBetaUserPreferenceGuardDisclosure(task)}
-      ${commerceLimitedBetaRollbackGuardDisclosure(task)}
-      ${commerceManualBookingHandoffDisclosure(task)}
-      ${commerceProviderActivationReadinessGateDisclosure(task)}
-      ${commerceCredentialConsentScopeGateDisclosure(task)}
-      ${commerceReadonlyAdapterContractGateDisclosure(task)}
-      ${commerceReadOnlyProviderAdapterV1Disclosure(task)}
-      ${commerceEndpointAllowlistEnforcementDisclosure(task)}
-      ${commerceProviderSandboxRealKeyDryRunGateDisclosure(task)}
-      ${commerceSandboxResponseSchemaGateDisclosure(task)}
-      ${commerceRealProviderResultSchemaValidationDisclosure(task)}
-      ${commerceProviderResultSourceLabelGateDisclosure(task)}
-      ${commerceProviderGateMatrixDashboardDisclosure(task)}
-      ${commerceProviderNoNetworkRuntimeGuardDisclosure(task)}
-      ${commerceOfflineProviderFixtureValidationHarnessDisclosure(task)}
-      ${commerceProviderComplianceDecisionEngineDisclosure(task)}
-      ${commerceOfflineProviderFixtureRunnerDisclosure(task)}
-      ${commerceNoNetworkSentinelAuditDisclosure(task)}
-      ${commerceProviderComplianceEvidenceReportDisclosure(task)}
-      ${commerceLocalSafetyEvidenceConsoleDisclosure(task)}
-      ${commerceManualUiAcceptanceAssistantDisclosure(task)}
-      ${commerceNoSecretPersistenceGuardDisclosure(task)}
-      ${commerceSettingsAuthLocalSecurityEvidenceDisclosure(task)}
-      ${globalProcurementRestrictedCategoryGuardDisclosure(task)}
-      ${globalProcurementEvidenceSafetySummaryDisclosure(task)}
+      ${commerceSafetyAndDebugDetailsDisclosure(task, [commerceApiBindingSafeShellDisclosure(task), commerceUserApiProviderCatalogDisclosure(task), commerceApiBindingMockFormDisclosure(task), commerceApiBindingPermissionChecklistDisclosure(task), commerceApiBindingReadinessDisclosure(task), commerceSecureStorageDesignGateDisclosure(task), commerceLocalSecureStorageInterfaceDraftDisclosure(task), commerceSecureApiKeyStorageConsoleDisclosure(task), commerceKeyRedactionAndLogLeakRulesDisclosure(task), commerceKeyLifecycleDraftDisclosure(task), simpleFlightAdvancedDebugDisclosure(task), providerConnectionReadinessConsoleDisclosure(task), commerceProviderEndpointAllowlistGateDisclosure(task), commerceReadonlyProviderSandboxGateDisclosure(task), commerceReadonlyProviderResultSchemaGateDisclosure(task), commerceProviderResultSourceLabelGateDisclosure(task), commercePriceIntegrityTaxesFeesGateDisclosure(task), commerceRealPriceDisplayGateDisclosure(task), commerceBookingUrlDomainSafetyGateDisclosure(task), commerceManualProviderReviewWorkflowDisclosure(task), commerceManualProviderReviewWorkflowV1Disclosure(task), commerceLimitedRealPriceUiBetaGateDisclosure(task), commerceLimitedBetaKillSwitchDisclosure(task), commerceLimitedBetaStatePersistenceDisclosure(task), commerceLimitedBetaUserPreferenceGuardDisclosure(task), commerceLimitedBetaRollbackGuardDisclosure(task), commerceManualBookingHandoffDisclosure(task), commerceProviderActivationReadinessGateDisclosure(task), commerceCredentialConsentScopeGateDisclosure(task), commerceReadonlyAdapterContractGateDisclosure(task), commerceReadOnlyProviderAdapterV1Disclosure(task), commerceEndpointAllowlistEnforcementDisclosure(task), commerceProviderSandboxRealKeyDryRunGateDisclosure(task), commerceSandboxResponseSchemaGateDisclosure(task), commerceRealProviderResultSchemaValidationDisclosure(task), commerceProviderResultSourceLabelGateDisclosure(task), commerceProviderGateMatrixDashboardDisclosure(task), commerceProviderNoNetworkRuntimeGuardDisclosure(task), commerceOfflineProviderFixtureValidationHarnessDisclosure(task), commerceProviderComplianceDecisionEngineDisclosure(task), commerceOfflineProviderFixtureRunnerDisclosure(task), commerceNoNetworkSentinelAuditDisclosure(task), commerceProviderComplianceEvidenceReportDisclosure(task), commerceLocalSafetyEvidenceConsoleDisclosure(task), commerceManualUiAcceptanceAssistantDisclosure(task), commerceNoSecretPersistenceGuardDisclosure(task), commerceSettingsAuthLocalSecurityEvidenceDisclosure(task), globalProcurementRestrictedCategoryGuardDisclosure(task), globalProcurementEvidenceSafetySummaryDisclosure(task)])}
       <p class="commerce-result-summary-status"><b>外部搜索提示：</b>点击后会打开外部搜索或外部平台。实时价格、库存、出票规则和付款均以外部平台为准。weishan 当前不返回价格，不付款，不下单。全网搜索结果由外部搜索引擎提供，weishan 不保证结果网站安全。请优先选择官方平台、知名旅行平台和航空公司官网。</p>
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;
@@ -6436,8 +6481,10 @@
 
   function commerceResultSummaryHomePanel(completionWorkspace, task, options){
     if (!task) return "";
-    const body = commerceIsSimpleFlightTask(task)
-      ? commerceSimpleFlightResultPanelHtml(task)
+    const body = commerceShouldShowClarification(task)
+      ? commerceClarificationResultPanelHtml(task)
+      : commerceIsSimpleFlightTask(task)
+        ? commerceSimpleFlightResultPanelHtml(task)
       : commerceIsRestrictedProcurementTask(task)
         ? commerceRestrictedProcurementResultPanelHtml(task, options)
         : commerceIsTicketActivityTask(task)
@@ -6448,8 +6495,10 @@
 
   function commerceHistoryResultSummaryHomePanel(completionWorkspace, task){
     if (!task) return "";
-    const body = commerceIsSimpleFlightTask(task)
-      ? commerceSimpleFlightResultPanelHtml(task)
+    const body = commerceShouldShowClarification(task)
+      ? commerceClarificationResultPanelHtml(task)
+      : commerceIsSimpleFlightTask(task)
+        ? commerceSimpleFlightResultPanelHtml(task)
       : commerceIsRestrictedProcurementTask(task)
         ? commerceRestrictedProcurementResultPanelHtml(task, { historyMode:true })
         : commerceIsTicketActivityTask(task)

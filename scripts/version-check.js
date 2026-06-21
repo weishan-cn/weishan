@@ -1013,10 +1013,10 @@ function checkRealProviderResultSchemaValidationVersion(results, expectedVersion
 function checkProviderResultSourceLabelGateV2128Version(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/providerResultSourceLabelGate.js";
   const gate = readText(gatePath);
-  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.32 version", pass:false, detail:gatePath + " missing" }); return; }
-  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.32 version", pass:false, detail:gate.__readError }); return; }
+  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.33 version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.33 version", pass:false, detail:gate.__readError }); return; }
   const match = gate.match(/PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION\s*=\s*["']([^"']+)["']/);
-  addCheck(results, "apps/desktop provider result source label gate v2.1.32 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
+  addCheck(results, "apps/desktop provider result source label gate v2.1.33 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
 }
 
 function checkProviderGateMatrixDashboardVersion(results, expectedVersion) {
@@ -1165,6 +1165,43 @@ function checkSecureApiKeyStorageConsoleVersion(results, expectedVersion) {
   }
   const match = file.match(/SECURE_API_KEY_STORAGE_CONSOLE_VERSION\s*=\s*["']([^"']+)["']/);
   addCheck(results, "apps/desktop secure API key storage console version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/commerceSecureApiKeyStorageConsole.js SECURE_API_KEY_STORAGE_CONSOLE_VERSION");
+}
+
+
+function checkAiProcurementBrainOrchestratorVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/aiProcurementBrainOrchestrator.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop AI procurement brain orchestrator version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop AI procurement brain orchestrator version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/AI_PROCUREMENT_BRAIN_ORCHESTRATOR_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop AI procurement brain orchestrator version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/aiProcurementBrainOrchestrator.js AI_PROCUREMENT_BRAIN_ORCHESTRATOR_VERSION");
+}
+
+function checkAiBackendRouterVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/aiBackendRouter.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop AI backend router version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop AI backend router version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/AI_BACKEND_ROUTER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop AI backend router version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/aiBackendRouter.js AI_BACKEND_ROUTER_VERSION");
+}
+
+function checkProcurementClarificationGateVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/procurementClarificationGate.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop procurement clarification gate version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop procurement clarification gate version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/PROCUREMENT_CLARIFICATION_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop procurement clarification gate version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/procurementClarificationGate.js PROCUREMENT_CLARIFICATION_GATE_VERSION");
+}
+
+function checkCleanResultSurfaceV1Version(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/cleanResultSurfaceV1.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop clean result surface v1 version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop clean result surface v1 version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/CLEAN_RESULT_SURFACE_V1_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop clean result surface v1 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/cleanResultSurfaceV1.js CLEAN_RESULT_SURFACE_V1_VERSION");
 }
 
 function runVersionCheck() {
