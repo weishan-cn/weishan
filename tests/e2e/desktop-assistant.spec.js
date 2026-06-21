@@ -110,7 +110,8 @@ test.describe.serial("desktop assistant paused safety framework", () => {
   test("commerce agent route remains active while desktop takeover is paused", async () => {
     await submitHomeCommand(page, runId + " 帮我找 7 月 15 日成都到上海最便宜机票");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索结果");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无生产真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("Limited Beta");
     await expect(currentTaskLogs(page)).not.toContainText("commerceAgent.plan");
     await expect(currentTaskLogs(page)).not.toContainText("realExecution=false");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText(/不收款|不下单/);

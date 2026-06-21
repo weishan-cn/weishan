@@ -1,5 +1,5 @@
 (function(){
-  const AI_BACKEND_ROUTER_VERSION = "2.1.33";
+  const AI_BACKEND_ROUTER_VERSION = "2.1.34";
 
   function bool(value){ return value === true; }
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

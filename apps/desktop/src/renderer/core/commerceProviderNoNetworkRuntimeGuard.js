@@ -1,5 +1,5 @@
 (function(){
-  const PROVIDER_NO_NETWORK_RUNTIME_GUARD_VERSION = "2.1.33";
+  const PROVIDER_NO_NETWORK_RUNTIME_GUARD_VERSION = "2.1.34";
 
   const blockedNetworkPrimitives = [
     "fetch",

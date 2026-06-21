@@ -1,0 +1,41 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+const ROOT = path.resolve(__dirname, "../..");
+function load(files){ const window = {}; window.window = window; const context = vm.createContext({ window, console }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
+function main(){
+  const windowRef = load(["apps/desktop/src/renderer/core/providerHandoffUi.js"]);
+  const api = windowRef.WeishanProviderHandoffUi;
+  assert.equal(api.PROVIDER_HANDOFF_UI_VERSION, "2.1.34");
+  const card = { title:"上海 → 成都 · 7月15日", providerName:"Flight Provider Sandbox", priceDisplay:"¥1010", taxFeeSummary:"税费已包含", inventoryReliability:"sandbox evidence only", actionLabel:"去平台确认", actionType:"provider_handoff_preview", bookingUrl:null };
+  const handoff = api.buildProviderHandoffUi({ card, providerReadiness:"limited-beta-ready", bookingUrlSafety:"disabled", userPreference:{ searchText:"上海 成都 7月15日" }, redacted:true });
+  assert.equal(handoff.handoffDecision, "manual_handoff");
+  assert.equal(["去平台确认", "手动核对", "复制搜索条件"].includes(handoff.actionLabel), true);
+  assert.equal(handoff.actionType, "provider_handoff_preview");
+  assert.equal(handoff.autoOpen, false);
+  assert.equal(handoff.bookingUrl, null);
+  assert.equal(handoff.payment, false);
+  assert.equal(handoff.order, false);
+  assert.equal(handoff.identityUpload, false);
+  assert.match(handoff.copyPayload, /上海 → 成都|上海 成都/);
+  assert.match(handoff.copyPayload, /最终价格、库存、税费/);
+  assert.match(handoff.finalPageDisclaimer, /最终价格、库存、税费/);
+  const restricted = api.buildProviderHandoffUi({ card, restricted:true });
+  assert.equal(restricted.handoffDecision, "blocked");
+  const unsafe = api.buildProviderHandoffUi({ card:Object.assign({}, card, { bookingUrl:"https://unsafe.example/book" }) });
+  assert.equal(unsafe.handoffDecision, "blocked");
+  for (const result of [handoff, restricted, unsafe]) assert.equal(api.assertProviderHandoffUiSafe(result), true);
+  assert.equal(handoff.audit.eventType, "PROVIDER_HANDOFF_UI_DRAFT");
+  assert.equal(handoff.audit.autoOpen, false);
+  assert.equal(handoff.audit.bookingUrlGeneratedCount, 0);
+  assert.equal(handoff.audit.bookingUrlDisplayedCount, 0);
+  assert.equal(handoff.audit.paymentAttemptCount, 0);
+  assert.equal(handoff.audit.orderAttemptCount, 0);
+  assert.equal(handoff.audit.identityUploadAttemptCount, 0);
+  assert.equal(handoff.audit.finalPageDisclaimerPresent, true);
+  assert.equal(handoff.audit.redacted, true);
+  console.log("PROVIDER_HANDOFF_UI_CORE PASS");
+}
+main();
+

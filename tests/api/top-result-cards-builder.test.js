@@ -1,0 +1,50 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+const ROOT = path.resolve(__dirname, "../..");
+function load(files){ const window = {}; window.window = window; const context = vm.createContext({ window, console }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
+function main(){
+  const windowRef = load(["apps/desktop/src/renderer/core/topResultCardsBuilder.js"]);
+  const api = windowRef.WeishanTopResultCardsBuilder;
+  assert.equal(api.TOP_RESULT_CARDS_BUILDER_VERSION, "2.1.34");
+  const clearFlight = api.buildTopResultCards({ procurementCategory:"flight", normalizedSearchIntent:{ category:"flight", origin:"上海", destination:"成都", dateDisplay:"7月15日", preference:"直达优先" }, limitedBetaResult:{ enabled:true, priceDisplay:"¥1010" }, sortPreference:"低价优先", restrictedCategoryDecision:"allow" });
+  assert.equal(clearFlight.resultCardMode, "top_results");
+  assert.equal(clearFlight.cardCount, 1);
+  assert.ok(clearFlight.cardCount <= 3);
+  assert.equal(clearFlight.cards[0].cardType, "limited_beta_price");
+  assert.equal(clearFlight.cards[0].priceDisplay, "¥1010");
+  assert.equal(clearFlight.cards[0].actionType, "provider_handoff_preview");
+  assert.equal(clearFlight.cards[0].bookingUrl, null);
+  assert.equal(clearFlight.cards[0].payment, false);
+  assert.equal(clearFlight.cards[0].order, false);
+  assert.equal(clearFlight.cards[0].identityUpload, false);
+  assert.equal(clearFlight.cards.some((card) => /fake|mock|demo|AI 估价/i.test(card.priceDisplay)), false);
+  const many = api.buildTopResultCards({ procurementCategory:"flight", normalizedSearchIntent:{ category:"flight" }, realProviderResults:[1,2,3,4].map((n) => ({ trusted:true, title:"结果" + n, priceDisplay:"¥" + (900+n), providerName:"Provider" + n })) });
+  assert.equal(many.cardCount, 3);
+  const noFabrication = api.buildTopResultCards({ procurementCategory:"flight", normalizedSearchIntent:{ category:"flight" }, limitedBetaResult:{ enabled:true } });
+  assert.equal(noFabrication.cardCount, 1);
+  assert.equal(noFabrication.cards.some((card) => /第二|第三|fake|mock|demo|AI 估价/i.test(card.title + card.priceDisplay)), false);
+  const product = api.buildTopResultCards({ procurementCategory:"product", normalizedSearchIntent:{ category:"product", productName:"iPhone" }, restrictedCategoryDecision:"allow" });
+  assert.equal(product.resultCardMode, "manual_only");
+  assert.equal(product.cardCount, 1);
+  assert.equal(product.cards[0].priceDisplay, "暂无真实价格结果");
+  const restricted = api.buildTopResultCards({ procurementCategory:"restricted_or_blocked", restrictedCategoryDecision:"blocked" });
+  assert.equal(restricted.resultCardMode, "blocked");
+  assert.equal(restricted.cardCount, 0);
+  const killOff = api.buildTopResultCards({ procurementCategory:"flight", limitedBetaResult:{ enabled:true }, killSwitchState:"disabled" });
+  assert.equal(killOff.resultCardMode, "manual_only");
+  assert.equal(killOff.cards[0].cardType, "manual_check");
+  for (const result of [clearFlight, many, noFabrication, product, restricted, killOff]) assert.equal(api.assertTopResultCardsSafe(result), true);
+  assert.equal(clearFlight.audit.eventType, "TOP_RESULT_CARDS_BUILDER_DRAFT");
+  assert.equal(clearFlight.audit.maxCardCount, 3);
+  assert.equal(clearFlight.audit.fakeResultBlockedCount, 0);
+  assert.equal(clearFlight.audit.bookingUrlDisplayedCount, 0);
+  assert.equal(clearFlight.audit.paymentActionDisplayedCount, 0);
+  assert.equal(clearFlight.audit.orderActionDisplayedCount, 0);
+  assert.equal(clearFlight.audit.identityUploadDisplayedCount, 0);
+  assert.equal(clearFlight.audit.redacted, true);
+  console.log("TOP_RESULT_CARDS_BUILDER_CORE PASS");
+}
+main();
+

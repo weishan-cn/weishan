@@ -1,5 +1,5 @@
 (function(){
-  const PROCUREMENT_CLARIFICATION_GATE_VERSION = "2.1.33";
+  const PROCUREMENT_CLARIFICATION_GATE_VERSION = "2.1.34";
 
   function text(value){ return String(value || "").trim(); }
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -25,7 +25,7 @@
 
   function parseProduct(raw){
     const value = text(raw);
-    const productName = (value.match(/iPhone\s*\d+\s*Pro|iPhone|电脑|MacBook|相机|手机/i) || [""])[0];
+    const productName = (value.match(/iPhone\s*\d+\s*Pro|iPhone\s*\d+|MacBook\s*(?:Air|Pro)?|电脑|相机|手机/i) || [""])[0];
     const region = /美国|日本|中国|香港|韩国|欧洲|英国/.test(value);
     const receiving = /收货|寄到|到中国|到成都|到上海/.test(value);
     return { productName, region, receiving };
