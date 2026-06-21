@@ -11,8 +11,8 @@ function main() {
   const dir = tmpdir();
   const service = createLimitedBetaPreferenceStore({ baseDir:dir });
   const initial = service.getLimitedBetaPreference();
-  assert.equal(initial.preference.schemaVersion, "2.1.36");
-  assert.equal(LIMITED_BETA_PREFERENCE_STORE_VERSION, "2.1.36");
+  assert.equal(initial.preference.schemaVersion, "2.1.37");
+  assert.equal(LIMITED_BETA_PREFERENCE_STORE_VERSION, "2.1.37");
   assert.equal(initial.preference.globalLimitedBetaEnabled, true);
   assert.equal(initial.preference.categoryOverrides.flight, true);
   assert.equal(initial.preference.categoryOverrides.product, false);
@@ -43,7 +43,7 @@ function main() {
   assert.equal(recovered.preference.lastAction, "auto_recovered_invalid_state");
 
   const unsafe = service.setLimitedBetaPreferenceDraft({
-    schemaVersion:"2.1.36",
+    schemaVersion:"2.1.37",
     globalLimitedBetaEnabled:true,
     killSwitchState:"enabled",
     categoryOverrides:{ product:true, hotel:true, local_service:true, ticket_or_activity:true, restricted_or_blocked:true },

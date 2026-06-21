@@ -1013,10 +1013,10 @@ function checkRealProviderResultSchemaValidationVersion(results, expectedVersion
 function checkProviderResultSourceLabelGateV2128Version(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/providerResultSourceLabelGate.js";
   const gate = readText(gatePath);
-  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.36 version", pass:false, detail:gatePath + " missing" }); return; }
-  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.36 version", pass:false, detail:gate.__readError }); return; }
+  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.37 version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.37 version", pass:false, detail:gate.__readError }); return; }
   const match = gate.match(/PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION\s*=\s*["']([^"']+)["']/);
-  addCheck(results, "apps/desktop provider result source label gate v2.1.36 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
+  addCheck(results, "apps/desktop provider result source label gate v2.1.37 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
 }
 
 function checkProviderGateMatrixDashboardVersion(results, expectedVersion) {
@@ -1258,6 +1258,51 @@ function checkCleanResultSurfaceV2Version(results, expectedVersion) {
   addCheck(results, "apps/desktop clean result surface v2 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/cleanResultSurfaceV2.js CLEAN_RESULT_SURFACE_V2_VERSION");
 }
 
+function checkProcurementSortIntentNormalizerVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/procurementSortIntentNormalizer.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop procurement sort intent normalizer version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop procurement sort intent normalizer version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/PROCUREMENT_SORT_INTENT_NORMALIZER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop procurement sort intent normalizer version", expectedVersion, match && match[1], "package.json must match procurementSortIntentNormalizer.js");
+}
+
+function checkResultBadgeFormatterVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/resultBadgeFormatter.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop result badge formatter version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop result badge formatter version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/RESULT_BADGE_FORMATTER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop result badge formatter version", expectedVersion, match && match[1], "package.json must match resultBadgeFormatter.js");
+}
+
+function checkResultCardVisualFormatterVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/resultCardVisualFormatter.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop result card visual formatter version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop result card visual formatter version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/RESULT_CARD_VISUAL_FORMATTER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop result card visual formatter version", expectedVersion, match && match[1], "package.json must match resultCardVisualFormatter.js");
+}
+
+function checkUserFacingTextDedupeVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/userFacingTextDedupe.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop user-facing text dedupe version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop user-facing text dedupe version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/USER_FACING_TEXT_DEDUPE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop user-facing text dedupe version", expectedVersion, match && match[1], "package.json must match userFacingTextDedupe.js");
+}
+
+function checkCleanResultSurfaceV3Version(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/cleanResultSurfaceV3.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop clean result surface v3 version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop clean result surface v3 version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/CLEAN_RESULT_SURFACE_V3_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop clean result surface v3 version", expectedVersion, match && match[1], "package.json must match cleanResultSurfaceV3.js");
+}
+
 function runVersionCheck() {
   const results = [];
 
@@ -1337,6 +1382,11 @@ function runVersionCheck() {
     checkTopResultCardsBuilderVersion(results, rootPackage.version);
     checkProviderHandoffUiVersion(results, rootPackage.version);
     checkCleanResultSurfaceV2Version(results, rootPackage.version);
+    checkProcurementSortIntentNormalizerVersion(results, rootPackage.version);
+    checkResultBadgeFormatterVersion(results, rootPackage.version);
+    checkResultCardVisualFormatterVersion(results, rootPackage.version);
+    checkUserFacingTextDedupeVersion(results, rootPackage.version);
+    checkCleanResultSurfaceV3Version(results, rootPackage.version);
   }
 
   results.forEach((item) => {

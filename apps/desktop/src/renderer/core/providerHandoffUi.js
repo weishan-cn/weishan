@@ -1,5 +1,5 @@
 (function(){
-  const PROVIDER_HANDOFF_UI_VERSION = "2.1.36";
+  const PROVIDER_HANDOFF_UI_VERSION = "2.1.37";
   const SAFE_ACTIONS = ["manual_confirm", "copy_search_conditions", "external_search_manual", "provider_handoff_preview"];
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value){ return String(value == null ? "" : value).trim(); }
@@ -26,10 +26,37 @@
       "其它附加费：" + row("其它附加费"),
       "优惠 / 补贴：" + row("优惠 / 补贴"),
       "最终应付总价：" + row("最终应付总价"),
-      "请用户自行打开官方航空公司或可信平台，核对出发地 / 目的地 / 日期、是否直达、票面价、燃油附加费、机场建设费、平台服务费、税费、优惠 / 补贴、最终应付总价、行李规则、退改签规则、余票 / 座位状态。",
+      "请用户自行打开官方航空公司或可信平台，核对出发地 / 目的地 / 日期、是否直达、票面价、税费、附加费、最终应付总价、行李规则、退改签规则、余票 / 座位状态。",
       "weishan 不收款、不下单。"
     ];
     return lines.join("\n");
+  }
+  function buildCompactChecklist(){
+    return [
+      "核对出发地 / 目的地 / 日期",
+      "核对是否直达",
+      "核对票面价、税费和附加费",
+      "核对最终应付总价",
+      "核对行李、退改签、余票 / 座位状态"
+    ];
+  }
+  function buildManualHandoffUxV2AuditDraft(input){
+    const safe = input && typeof input === "object" ? input : {};
+    return clone({
+      eventType:"MANUAL_HANDOFF_UX_V2_DRAFT",
+      handoffDecision:text(safe.handoffDecision || "manual_handoff"),
+      compactChecklistVisible:safe.compactChecklistVisible !== false,
+      longExplanationCollapsed:true,
+      copySearchConditionsAvailable:safe.copySearchConditionsAvailable !== false,
+      copyFareBreakdownAvailable:safe.copyFareBreakdownAvailable !== false,
+      autoOpen:false,
+      bookingUrlGeneratedCount:0,
+      bookingUrlDisplayedCount:0,
+      paymentAttemptCount:0,
+      orderAttemptCount:0,
+      identityUploadAttemptCount:0,
+      redacted:true
+    });
   }
   function buildProviderHandoffUi(input){
     const safe = input && typeof input === "object" ? input : {};
@@ -43,6 +70,11 @@
       actionLabel:blocked ? "手动核对" : text(card.actionLabel || (actionType === "copy_search_conditions" ? "复制搜索条件" : "去平台确认")),
       actionType:blocked ? "manual_confirm" : actionType,
       showHandoffPanel:!blocked,
+      compactChecklist:buildCompactChecklist(),
+      manualExplanation:"请用户自行打开官方航空公司或可信平台核对；weishan 不自动打开、不跳转预订、不付款、不下单。",
+      copySearchConditionsAvailable:!blocked,
+      copyFareBreakdownAvailable:!blocked,
+      longExplanationCollapsed:true,
       autoOpen:false,
       bookingUrl:null,
       payment:false,
@@ -51,6 +83,7 @@
       copyPayload,
       finalPageDisclaimer:"最终价格、库存、税费、行李和退改签以平台页面为准。weishan 不付款、不下单。",
       audit:buildProviderHandoffUiAuditDraft({ handoffDecision:blocked ? "blocked" : "manual_handoff", actionLabel:card.actionLabel || "去平台确认", actionType, copyPayloadGeneratedCount:copyPayload ? 1 : 0 }),
+      manualHandoffUxV2Audit:buildManualHandoffUxV2AuditDraft({ handoffDecision:blocked ? "blocked" : "manual_handoff", compactChecklistVisible:!blocked, copySearchConditionsAvailable:!blocked, copyFareBreakdownAvailable:!blocked }),
       redacted:true
     };
     return clone(result);
@@ -80,8 +113,10 @@
     if (value.payment !== false || value.order !== false || value.identityUpload !== false) throw new Error("provider handoff must disable payment/order/identity");
     if (/立即预订|去付款|下单|自动购买|上传证件|保存银行卡/.test(value.actionLabel || value.copyPayload || "")) throw new Error("provider handoff contains forbidden copy");
     const audit = value.audit || {};
+    const v2Audit = value.manualHandoffUxV2Audit || {};
     if (audit.autoOpen !== false || audit.bookingUrlGeneratedCount !== 0 || audit.bookingUrlDisplayedCount !== 0 || audit.paymentAttemptCount !== 0 || audit.orderAttemptCount !== 0 || audit.identityUploadAttemptCount !== 0) throw new Error("provider handoff audit counters unsafe");
+    if (v2Audit.eventType && (v2Audit.autoOpen !== false || v2Audit.bookingUrlDisplayedCount !== 0 || v2Audit.paymentAttemptCount !== 0 || v2Audit.orderAttemptCount !== 0 || v2Audit.identityUploadAttemptCount !== 0)) throw new Error("manual handoff ux v2 audit counters unsafe");
     return true;
   }
-  window.WeishanProviderHandoffUi = { PROVIDER_HANDOFF_UI_VERSION, buildProviderHandoffUi, buildProviderHandoffUiAuditDraft, assertProviderHandoffUiSafe };
+  window.WeishanProviderHandoffUi = { PROVIDER_HANDOFF_UI_VERSION, buildProviderHandoffUi, buildProviderHandoffUiAuditDraft, buildManualHandoffUxV2AuditDraft, assertProviderHandoffUiSafe };
 })();

@@ -1,5 +1,5 @@
 (function(){
-  const FLIGHT_FARE_BREAKDOWN_VERSION = "2.1.36";
+  const FLIGHT_FARE_BREAKDOWN_VERSION = "2.1.37";
   const UNKNOWN_FINAL_PAGE = "未单独提供 / 以平台页面为准";
   const WITHHELD_PRICE_LABEL = "价格暂不展示";
   const ALLOWED_PRICE_TYPES = ["production_price", "limited_beta_price", "sandbox_test_price", "unknown"];
@@ -61,6 +61,7 @@
     result.priceWithheld = result.totalPayable === null;
     result.priceDisplay = result.priceWithheld ? WITHHELD_PRICE_LABEL : money(result.totalPayable, currency);
     result.displayRows = buildFlightFareBreakdownRows(result);
+    result.compactFareBreakdown = buildCompactFlightFareBreakdown(result);
     result.audit = buildFlightFareBreakdownAuditDraft(result);
     return clone(result);
   }
@@ -78,6 +79,24 @@
       { label:"优惠 / 补贴", value:safe.discount === null && safe.subsidy === null ? "未提供" : nullableMoney((numberOrNull(safe.discount) || 0) + (numberOrNull(safe.subsidy) || 0), currency) },
       { label:"税费完整性", value:completenessLabel(safe.taxFeeCompleteness) }
     ];
+  }
+  function rowValue(rows, label){
+    const found = rows.find((row) => row && row.label === label);
+    return found ? found.value : UNKNOWN_FINAL_PAGE;
+  }
+  function buildCompactFlightFareBreakdown(fare){
+    const safe = fare && typeof fare === "object" ? fare : {};
+    const rows = Array.isArray(safe.displayRows) ? safe.displayRows : buildFlightFareBreakdownRows(safe);
+    const total = rowValue(rows, "最终应付总价");
+    const base = rowValue(rows, "票面价");
+    const taxes = rowValue(rows, "税费");
+    const other = rowValue(rows, "其它附加费");
+    return clone({
+      primaryLine:"最终应付总价：" + total,
+      summaryLine:"票面价 " + base + "｜税费 " + taxes + "｜附加费 " + other,
+      caveatLine:"燃油/机建费：未单独提供，以平台页面为准",
+      detailRows:["票面价", "燃油附加费", "机场建设费 / 民航发展基金", "平台服务费", "税费", "其它附加费", "优惠 / 补贴", "最终应付总价"].map((label) => [label, rowValue(rows, label)])
+    });
   }
   function buildFareCardUxCleanupAuditDraft(input){
     const safe = input && typeof input === "object" ? input : {};
@@ -127,6 +146,7 @@
     UNKNOWN_FINAL_PAGE,
     normalizeFlightFareBreakdown,
     buildFlightFareBreakdownRows,
+    buildCompactFlightFareBreakdown,
     buildFlightFareBreakdownAuditDraft,
     buildFareCardUxCleanupAuditDraft,
     assertFlightFareBreakdownSafe
