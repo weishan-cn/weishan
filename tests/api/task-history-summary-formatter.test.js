@@ -13,8 +13,8 @@ function load(file){
 function main(){
   const windowRef = load("apps/desktop/src/renderer/core/taskHistorySummaryFormatter.js");
   const api = windowRef.WeishanTaskHistorySummaryFormatter;
-  assert.equal(api.TASK_HISTORY_SUMMARY_FORMATTER_VERSION, "2.1.38");
-  const longPrompt = "任务：v2.1.38 · User Surface Final Cleanup " + "不要显示完整开发指令 ".repeat(20) + "```raw JSON``` token endpoint";
+  assert.equal(api.TASK_HISTORY_SUMMARY_FORMATTER_VERSION, "2.1.39");
+  const longPrompt = "任务：v2.1.39 · User Surface Final Cleanup " + "不要显示完整开发指令 ".repeat(20) + "```raw JSON``` token endpoint";
   const dev = api.buildTaskHistorySummary({ text:longPrompt, status:"done" });
   assert.equal(dev.type, "系统开发任务");
   assert.equal(dev.fullPromptHidden, true);
@@ -31,6 +31,9 @@ function main(){
   const flight = api.buildTaskHistorySummary({ text:"7 月 15 日上海到成都最便宜的机票", category:"flight", status:"done" });
   assert.equal(flight.type, "机票");
   assert.equal(flight.resultSummary, "已生成结果摘要；未下单 / 未付款。");
+  const urlSummary = api.buildTaskHistorySummary({ text:"https://www.google.com/travel/flights?foo=bar", category:"flight", status:"done" });
+  assert.equal(JSON.stringify(urlSummary).includes("https://"), false);
+  assert.equal(JSON.stringify(urlSummary).includes("travel/flights"), false);
   const blocked = api.buildTaskHistorySummary({ text:"帮我买枪", category:"restricted_or_blocked", status:"blocked" });
   assert.equal(blocked.type, "受限品类");
   assert.equal(blocked.resultSummary, "安全阻断；不显示购买路径。");

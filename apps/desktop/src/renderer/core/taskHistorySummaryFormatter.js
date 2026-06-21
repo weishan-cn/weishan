@@ -1,10 +1,13 @@
 (function(){
-  const TASK_HISTORY_SUMMARY_FORMATTER_VERSION = "2.1.38";
+  const TASK_HISTORY_SUMMARY_FORMATTER_VERSION = "2.1.39";
   const MAX_SUMMARY_LENGTH = 120;
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value){ return String(value == null ? "" : value).trim(); }
   function compact(value, max){
-    const cleaned = text(value).replace(/```[\s\S]*?```/g, "代码块已隐藏").replace(/\s+/g, " ");
+    const cleaned = text(value)
+      .replace(/```[\s\S]*?```/g, "代码块已隐藏")
+      .replace(/https?:\/\/[^\s`"'<>()]+/g, "外部链接已隐藏")
+      .replace(/\s+/g, " ");
     const limit = max || MAX_SUMMARY_LENGTH;
     return cleaned.length > limit ? cleaned.slice(0, limit - 1) + "…" : cleaned;
   }

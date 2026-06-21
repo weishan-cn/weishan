@@ -4,6 +4,7 @@
   let commandInputDraft = "";
   let stagedAttachments = [];
   let expandedDesktopTasks = {};
+  let pendingSafeExternalSearchConfirmation = null;
 
   function esc(s){
     return String(s || "").replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; });
@@ -2174,7 +2175,7 @@
     const state = api && typeof api.buildSecureApiKeyStorageConsole === "function"
       ? api.buildSecureApiKeyStorageConsole()
       : {
-        version:"2.1.38",
+        version:"2.1.39",
         status:"secure local storage only",
         mode:"no provider connection",
         realProvider:"disabled",
@@ -5069,7 +5070,7 @@
     const body = '<section class="commerce-limited-beta-state-persistence-panel" aria-label="Limited Beta State Persistence">'
       + '<h4>Limited Beta State Persistence</h4>'
       + '<p>status: local preference persistence active</p>'
-      + '<p>schemaVersion: ' + esc(draft.schemaVersion || '2.1.38') + '</p>'
+      + '<p>schemaVersion: ' + esc(draft.schemaVersion || '2.1.39') + '</p>'
       + '<p>storage: app userData local file</p>'
       + '<p>localStorage: forbidden</p>'
       + '<p>sessionStorage: forbidden</p>'
@@ -6415,7 +6416,7 @@
     // disclosure("查看可执行清单") ... commerceActionableChecklistPanelHtml
     // marker:one screen platform templates collapsed
     // disclosure("查看平台模板") ... commercePlatformSearchTemplatePackHtml
-    return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-simple-flight-result" aria-label="机票搜索结果">
+    return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-simple-flight-result" aria-label="机票搜索结果" data-commerce-task-id="${esc(task && task.taskId || task && task.id || "")}">
       <div class="commerce-result-summary-head">
         <div class="commerce-result-summary-headline">
           <span>真实结果优先</span>
@@ -6437,12 +6438,13 @@
       </div>
       <div class="commerce-one-screen-actions commerce-manual-verification-actions" aria-label="手动核对入口">
         <h4>手动核对入口</h4>
-        <p>这些是人工搜索入口，不是预订链接。weishan 不自动打开付款页，不提交订单。</p>
+        <p>这些是人工搜索入口，不是预订链接。weishan 不自动打开、不付款、不下单。</p>
         <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="simpleFlight" data-commerce-copy-text="${commerceEncodedCopyText(copyTexts.flight)}">复制机票搜索条件</button>
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="web" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.web)}">打开全网搜索</button>
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="googleFlights" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.googleFlights)}">打开 Google Flights 搜索</button>
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="tripCom" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.tripCom)}">打开 Trip.com / 携程搜索</button>
-        <details class="commerce-manual-verification-note"><summary>查看外部搜索安全说明</summary><div class="commerce-disclosure-body"><p>外部搜索由用户手动点击。weishan 不自动打开付款页，不提交订单。请优先选择官方平台、知名旅行平台和航空公司官网。最终价格、库存、出票规则和付款均以外部平台为准。</p></div></details>
+        <details class="commerce-manual-verification-note"><summary>查看外部搜索安全说明</summary><div class="commerce-disclosure-body"><p>外部搜索由用户手动点击，点击后先确认，再打开可信外部搜索链接。weishan 不自动打开、不付款、不下单。请优先选择官方平台、知名旅行平台和航空公司官网。最终价格、库存、出票规则和付款均以外部平台为准。</p></div></details>
+        ${safeExternalSearchConfirmationHtml(task)}
       </div>
       ${commerceSafetyAndDebugDetailsDisclosure(task, [commerceApiBindingSafeShellDisclosure(task), commerceUserApiProviderCatalogDisclosure(task), commerceApiBindingMockFormDisclosure(task), commerceApiBindingPermissionChecklistDisclosure(task), commerceApiBindingReadinessDisclosure(task), commerceSecureStorageDesignGateDisclosure(task), commerceLocalSecureStorageInterfaceDraftDisclosure(task), commerceSecureApiKeyStorageConsoleDisclosure(task), commerceKeyRedactionAndLogLeakRulesDisclosure(task), commerceKeyLifecycleDraftDisclosure(task), simpleFlightAdvancedDebugDisclosure(task), providerConnectionReadinessConsoleDisclosure(task), commerceProviderEndpointAllowlistGateDisclosure(task), commerceReadonlyProviderSandboxGateDisclosure(task), commerceReadonlyProviderResultSchemaGateDisclosure(task), commerceProviderResultSourceLabelGateDisclosure(task), commercePriceIntegrityTaxesFeesGateDisclosure(task), commerceRealPriceDisplayGateDisclosure(task), commerceBookingUrlDomainSafetyGateDisclosure(task), commerceManualProviderReviewWorkflowDisclosure(task), commerceManualProviderReviewWorkflowV1Disclosure(task), commerceLimitedRealPriceUiBetaGateDisclosure(task), commerceLimitedBetaKillSwitchDisclosure(task), commerceLimitedBetaStatePersistenceDisclosure(task), commerceLimitedBetaUserPreferenceGuardDisclosure(task), commerceLimitedBetaRollbackGuardDisclosure(task), commerceManualBookingHandoffDisclosure(task), commerceProviderActivationReadinessGateDisclosure(task), commerceCredentialConsentScopeGateDisclosure(task), commerceReadonlyAdapterContractGateDisclosure(task), commerceReadOnlyProviderAdapterV1Disclosure(task), commerceEndpointAllowlistEnforcementDisclosure(task), commerceProviderSandboxRealKeyDryRunGateDisclosure(task), commerceSandboxResponseSchemaGateDisclosure(task), commerceRealProviderResultSchemaValidationDisclosure(task), commerceProviderResultSourceLabelGateDisclosure(task), commerceProviderGateMatrixDashboardDisclosure(task), commerceProviderNoNetworkRuntimeGuardDisclosure(task), commerceOfflineProviderFixtureValidationHarnessDisclosure(task), commerceProviderComplianceDecisionEngineDisclosure(task), commerceOfflineProviderFixtureRunnerDisclosure(task), commerceNoNetworkSentinelAuditDisclosure(task), commerceProviderComplianceEvidenceReportDisclosure(task), commerceLocalSafetyEvidenceConsoleDisclosure(task), commerceManualUiAcceptanceAssistantDisclosure(task), commerceNoSecretPersistenceGuardDisclosure(task), commerceSettingsAuthLocalSecurityEvidenceDisclosure(task), globalProcurementRestrictedCategoryGuardDisclosure(task), globalProcurementEvidenceSafetySummaryDisclosure(task)])}
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
@@ -6605,6 +6607,10 @@
   }
 
   function commerceOpenTrustedExternalSearch(url){
+    const handoff = window.WeishanSafeExternalSearchHandoff;
+    if (handoff && typeof handoff.openTrustedExternalSearch === "function") {
+      return Promise.resolve(handoff.openTrustedExternalSearch(url)).then((result) => !!(result && result.ok)).catch(() => false);
+    }
     const value = String(url || "");
     if (!commerceIsTrustedExternalSearchUrl(value)) return Promise.resolve(false);
     if (typeof window.__WEISHAN_TEST_OPEN_EXTERNAL__ === "function") {
@@ -6617,6 +6623,24 @@
       return Promise.resolve(window.weishan.openExternal(value)).then(() => true).catch(() => false);
     }
     return Promise.resolve(false);
+  }
+
+  function clearPendingSafeExternalSearchConfirmation(){
+    pendingSafeExternalSearchConfirmation = null;
+  }
+
+  function pendingSafeExternalSearchConfirmationForTask(task){
+    if (!pendingSafeExternalSearchConfirmation || !task) return null;
+    const taskId = String(task.taskId || task.id || "");
+    if (!taskId) return null;
+    return pendingSafeExternalSearchConfirmation.taskId === taskId ? pendingSafeExternalSearchConfirmation : null;
+  }
+
+  function safeExternalSearchConfirmationHtml(task){
+    const handoff = window.WeishanSafeExternalSearchHandoff;
+    const pending = pendingSafeExternalSearchConfirmationForTask(task);
+    if (!handoff || !pending || typeof handoff.renderExternalSearchConfirmationHtml !== "function") return "";
+    return handoff.renderExternalSearchConfirmationHtml(pending);
   }
 
   let commerceExternalSearchFeedbackTimer = 0;
@@ -7135,6 +7159,7 @@
           ev.preventDefault();
           selectedHistoryId = historyBtn.getAttribute("data-history-id") || "";
           selectedHistoryText = historyBtn.getAttribute("data-history-text") || "";
+          pendingSafeExternalSearchConfirmation = null;
           render(currentHost);
           return;
         }
@@ -7143,6 +7168,7 @@
           ev.preventDefault();
           selectedHistoryId = "";
           selectedHistoryText = "";
+          pendingSafeExternalSearchConfirmation = null;
           render(currentHost);
         }
       }, true);
@@ -7155,6 +7181,7 @@
       const attachments = stagedAttachments.slice();
       selectedHistoryId = "";
       selectedHistoryText = "";
+      pendingSafeExternalSearchConfirmation = null;
       window.CommandApi.enqueue(text, { attachments });
       commandInputDraft = "";
       input.value = "";
@@ -7560,10 +7587,34 @@
       }
       const externalButton = target && target.closest("[data-commerce-external-search-url]");
       if (externalButton && host.contains(externalButton)) {
-        const url = commerceDecodedInlineValue(externalButton, "data-commerce-external-search-url");
-        commerceOpenTrustedExternalSearch(url).then(function(ok){
-          showCommerceExternalSearchFeedback(host, ok ? "已打开外部搜索入口，请在外部平台确认实时价格和规则" : "外部搜索入口未打开，请手动复制搜索条件", !ok);
+        const taskScope = externalButton.closest("[data-commerce-task-id]");
+        pendingSafeExternalSearchConfirmation = {
+          taskId: taskScope && taskScope.getAttribute("data-commerce-task-id") || "",
+          taskTitle: taskScope && taskScope.getAttribute("data-commerce-task-title") || "",
+          kind: externalButton.getAttribute("data-commerce-external-search-kind") || "",
+          url: commerceDecodedInlineValue(externalButton, "data-commerce-external-search-url")
+        };
+        render(host);
+        return;
+      }
+      const externalConfirmButton = target && target.closest("[data-commerce-external-search-confirm]");
+      if (externalConfirmButton && host.contains(externalConfirmButton)) {
+        const handoff = window.WeishanSafeExternalSearchHandoff;
+        const pending = pendingSafeExternalSearchConfirmation;
+        if (!pending || !handoff || typeof handoff.openTrustedExternalSearch !== "function") return;
+        pendingSafeExternalSearchConfirmation = null;
+        Promise.resolve(handoff.openTrustedExternalSearch(pending.url)).then((result) => {
+          const ok = !!(result && result.ok);
+          render(host);
+          showCommerceExternalSearchFeedback(host, ok ? "已确认并打开外部搜索入口，请在外部平台确认实时价格和规则" : "外部搜索入口未打开，请手动复制搜索条件", !ok);
         });
+        return;
+      }
+      const externalCancelButton = target && target.closest("[data-commerce-external-search-cancel]");
+      if (externalCancelButton && host.contains(externalCancelButton)) {
+        pendingSafeExternalSearchConfirmation = null;
+        render(host);
+        showCommerceExternalSearchFeedback(host, "已取消外部搜索打开，可继续复制搜索条件", false);
         return;
       }
       const checklistButton = target && target.closest("[data-commerce-copy-kind]");

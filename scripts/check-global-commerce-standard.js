@@ -1222,6 +1222,19 @@ const REQUIRED_PHRASES = [
   "short URL blocked",
   "credential params blocked",
   "public search result cannot masquerade as provider result",
+  "v2.1.39：Safe External Search Handoff V1 + Manual Link Confirmation",
+  "commerceSafeExternalSearchHandoff.js",
+  "查看外部搜索安全说明",
+  "外部搜索由用户手动点击，点击后先确认，再打开可信外部搜索链接。",
+  "外部搜索确认",
+  "当前状态：需要用户手动确认后才会打开外部搜索链接。",
+  "确认打开外部搜索链接",
+  "取消",
+  "weishan 不自动打开、不付款、不下单。",
+  "bookingUrl：disabled",
+  "realNetwork：disabled",
+  "manual_confirmation_required",
+  "safe external search handoff v1",
 ];
 
 function main() {

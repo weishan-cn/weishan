@@ -2655,3 +2655,22 @@ v2.1.38 将用户默认结果面收敛为更紧凑的采购结果卡：机票排
 - marker:v2.1.38 clean result surface v3 core test
 - marker:v2.1.38 no fake mock demo ai price
 - marker:v2.1.38 no booking url payment order identity upload
+## v2.1.39：Safe External Search Handoff V1 + Manual Link Confirmation
+v2.1.39 新增 `commerceSafeExternalSearchHandoff.js`。本阶段只允许用户在手动确认面板中确认后再打开可信外部搜索链接；不会自动打开外部网页，不会生成 bookingUrl，不会付款，不会下单，不会连接真实 provider，不会读取或保存真实 API key，不会联网访问未获信任的外部域名。确认面板与审计文本必须保持 redacted，且只允许展示 manual_confirmation_required、trusted hosts、bookingUrl disabled、payment disabled、order disabled、realNetwork disabled。
+查看外部搜索安全说明
+外部搜索由用户手动点击，点击后先确认，再打开可信外部搜索链接。
+外部搜索确认
+当前状态：需要用户手动确认后才会打开外部搜索链接。
+确认打开外部搜索链接
+取消
+weishan 不自动打开、不付款、不下单。
+bookingUrl：disabled
+realNetwork：disabled
+- marker:safe external search handoff v1
+- marker:safe external search handoff manual confirmation
+- marker:safe external search handoff no auto open
+- marker:safe external search handoff no booking url
+- marker:safe external search handoff no payment
+- marker:safe external search handoff no order submit
+- marker:safe external search handoff trusted hosts
+- marker:safe external search confirmation ui

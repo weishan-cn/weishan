@@ -1,5 +1,5 @@
 (function(){
-  const FLIGHT_FARE_BREAKDOWN_VERSION = "2.1.38";
+  const FLIGHT_FARE_BREAKDOWN_VERSION = "2.1.39";
   const UNKNOWN_FINAL_PAGE = "未单独提供 / 以平台页面为准";
   const WITHHELD_PRICE_LABEL = "价格暂不展示";
   const ALLOWED_PRICE_TYPES = ["production_price", "limited_beta_price", "sandbox_test_price", "unknown"];

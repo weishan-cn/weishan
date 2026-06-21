@@ -847,6 +847,27 @@ function checkManualBookingHandoffVersion(results, expectedVersion) {
   );
 }
 
+function checkSafeExternalSearchHandoffVersion(results, expectedVersion) {
+  const handoffPath = "apps/desktop/src/renderer/core/commerceSafeExternalSearchHandoff.js";
+  const handoff = readText(handoffPath);
+  if (!handoff) {
+    results.push({ name: "apps/desktop safe external search handoff version", pass: false, detail: handoffPath + " missing" });
+    return;
+  }
+  if (handoff.__readError) {
+    results.push({ name: "apps/desktop safe external search handoff version", pass: false, detail: handoff.__readError });
+    return;
+  }
+  const match = handoff.match(/SAFE_EXTERNAL_SEARCH_HANDOFF_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop safe external search handoff version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/commerceSafeExternalSearchHandoff.js SAFE_EXTERNAL_SEARCH_HANDOFF_VERSION"
+  );
+}
+
 function checkProviderActivationReadinessGateVersion(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/commerceProviderActivationReadinessGate.js";
   const gate = readText(gatePath);
@@ -1013,10 +1034,10 @@ function checkRealProviderResultSchemaValidationVersion(results, expectedVersion
 function checkProviderResultSourceLabelGateV2128Version(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/providerResultSourceLabelGate.js";
   const gate = readText(gatePath);
-  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.38 version", pass:false, detail:gatePath + " missing" }); return; }
-  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.38 version", pass:false, detail:gate.__readError }); return; }
+  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.39 version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.39 version", pass:false, detail:gate.__readError }); return; }
   const match = gate.match(/PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION\s*=\s*["']([^"']+)["']/);
-  addCheck(results, "apps/desktop provider result source label gate v2.1.38 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
+  addCheck(results, "apps/desktop provider result source label gate v2.1.39 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
 }
 
 function checkProviderGateMatrixDashboardVersion(results, expectedVersion) {
@@ -1395,6 +1416,7 @@ function runVersionCheck() {
     checkLimitedBetaPreferencePersistenceVersion(results, rootPackage.version);
     checkLimitedBetaRollbackGuardVersion(results, rootPackage.version);
     checkManualBookingHandoffVersion(results, rootPackage.version);
+    checkSafeExternalSearchHandoffVersion(results, rootPackage.version);
     checkProviderActivationReadinessGateVersion(results, rootPackage.version);
     checkCredentialConsentScopeGateVersion(results, rootPackage.version);
     checkCredentialConsentScopeGateCoreVersion(results, rootPackage.version);

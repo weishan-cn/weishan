@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const REAL_PRICE_DISPLAY_GATE_VERSION = "2.1.38";
+  const REAL_PRICE_DISPLAY_GATE_VERSION = "2.1.39";
   const REQUIRED_BADGES = ["来源平台", "更新时间", "币种", "税费状态", "费用状态", "运费状态", "库存/余票可靠性", "最终以平台页面为准"];
   const FORBIDDEN_ACTIONS = ["bookingUrl", "payment", "order", "checkout", "identityUpload"];
   const FORBIDDEN_FIELDS = ["bookingUrl", "checkoutUrl", "paymentUrl", "orderUrl", "createOrderUrl", "holdBookingUrl", "rawProviderPayload", "rawHeaders", "rawResponse", "rawRequest", "payment", "order", "checkout", "identityUpload"];
