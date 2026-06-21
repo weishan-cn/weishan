@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION = "2.1.31";
+  const PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION = "2.1.32";
 
   const CATEGORY_DEFINITIONS = {
     flight_provider: {
@@ -126,6 +126,8 @@
     const killApi = window.WeishanLimitedBetaKillSwitch;
     const rollbackApi = window.WeishanLimitedBetaRollbackGuard;
     const handoffApi = window.WeishanManualBookingHandoff;
+    const preferenceApi = window.WeishanLimitedBetaPreferencePersistence;
+    const preferenceGuardApi = window.WeishanLimitedBetaUserPreferenceGuard;
     const manualReview = providerCategory === "flight_provider" && manualApi && typeof manualApi.evaluateManualProviderReviewForBeta === "function"
       ? manualApi.evaluateManualProviderReviewForBeta(manualApi.buildSampleFlightProviderReview())
       : { allowedForLimitedBeta:false, manualReviewState:restricted ? "blocked" : "not_started", blockedReason:restricted ? "restricted category blocked" : "limited beta flight only", redacted:true };
@@ -140,6 +142,7 @@
       })
       : { displayDecision:providerCategory === "flight_provider" ? "allow_limited_beta_price_card" : (restricted ? "blocked" : "withheld"), redacted:true };
     const limitedBetaReady = providerCategory === "flight_provider" && manualReview.manualReviewState === "approved_for_limited_beta" && betaDecision.displayDecision === "allow_limited_beta_price_card";
+    const preferenceDraft = preferenceApi && typeof preferenceApi.buildPersistenceDraft === "function" ? preferenceApi.buildPersistenceDraft() : null;
     const killVisibility = killApi && typeof killApi.evaluateLimitedBetaVisibility === "function"
       ? killApi.evaluateLimitedBetaVisibility({ category:definition.category, providerCategory:definition.category, providerId:providerCategory === "flight_provider" ? "flight_provider" : providerCategory, surface:"ordinary_result_card" })
       : { priceCardVisible:limitedBetaReady, killSwitchState:restricted ? "blocked" : "enabled", priceCardHidden:!limitedBetaReady, redacted:true };
@@ -157,8 +160,9 @@
     const handoff = handoffApi && typeof handoffApi.buildManualBookingHandoff === "function"
       ? handoffApi.buildManualBookingHandoff({ providerCategory:definition.category, providerId:providerCategory === "flight_provider" ? "flight_provider" : providerCategory, rollbackDecision:rollbackDecision.rollbackDecision })
       : { status:providerCategory === "flight_provider" ? "manual_only" : (restricted ? "blocked" : "not_allowed"), redacted:true };
-    const killSwitchAllows = limitedBetaReady && killVisibility.priceCardVisible === true && rollbackDecision.rollbackDecision === "not_needed";
-    const rowFinalDecision = restricted ? "blocked" : (killSwitchAllows ? "limited-beta-ready" : (limitedBetaReady ? "limited-beta-disabled-by-kill-switch" : "no-go"));
+    const preferenceDecision = preferenceGuardApi && typeof preferenceGuardApi.evaluateLimitedBetaUserPreferenceGuard === "function" ? preferenceGuardApi.evaluateLimitedBetaUserPreferenceGuard({ persistedPreference:preferenceDraft && preferenceDraft.preference, currentRequestCategory:definition.category, providerId:providerCategory === "flight_provider" ? "flight_provider" : providerCategory, restrictedDecision:restricted ? "blocked" : "allow", rollbackDecision:rollbackDecision.rollbackDecision, userConfirmationState:preferenceDraft && preferenceDraft.preference && preferenceDraft.preference.restoreConfirmationPending ? "missing" : "confirmed" }) : { preferenceDecision:"allow", confirmationRequired:false, persistedPreferenceLoaded:false, persistedPreferenceValid:true, redacted:true };
+    const killSwitchAllows = limitedBetaReady && killVisibility.priceCardVisible === true && rollbackDecision.rollbackDecision === "not_needed" && preferenceDecision.preferenceDecision === "allow";
+    const rowFinalDecision = restricted ? "blocked" : (providerCategory !== "flight_provider" ? "no-go" : (rollbackDecision.rollbackDecision === "rollback_active" ? "limited-beta-rollback-active" : (preferenceDecision.preferenceDecision === "withheld" || preferenceDecision.preferenceDecision === "confirmation_required" || killVisibility.killSwitchState === "disabled" ? "limited-beta-disabled-by-user-preference" : (killSwitchAllows ? "limited-beta-ready" : (limitedBetaReady ? "limited-beta-disabled-by-kill-switch" : "no-go")))));
     return clone({
       providerCategory,
       providerLabel: definition.displayName,
@@ -197,6 +201,12 @@
         manualReviewState: manualReview.manualReviewState || (restricted ? "blocked" : "not_started"),
         limitedRealPriceUiBeta: restricted ? "blocked" : (providerCategory === "flight_provider" ? "flight_only" : "not allowed"),
         limitedBetaKillSwitch: restricted ? "blocked" : (providerCategory === "flight_provider" ? "active" : "not allowed"),
+        limitedBetaStatePersistence: restricted ? "blocked" : (providerCategory === "flight_provider" ? "active" : "not allowed"),
+        userPreferenceGuard: restricted ? "blocked" : "active",
+        persistedPreferenceLoaded: preferenceDecision.persistedPreferenceLoaded === true ? "true" : "false",
+        persistedPreferenceValid: preferenceDecision.persistedPreferenceValid !== false ? "true" : "false",
+        restoreConfirmationRequired: "true",
+        betaPreferenceState: preferenceDraft && preferenceDraft.preference ? preferenceDraft.preference.killSwitchState : "enabled",
         rollbackGuard: "active",
         manualBookingHandoff: restricted ? "blocked" : (providerCategory === "flight_provider" ? "manual-only" : "not allowed"),
         betaRollbackState: restricted ? "rollback_active" : rollbackDecision.rollbackDecision,
@@ -239,6 +249,12 @@
         manualReviewState: manualReview.manualReviewState || "not_started",
         limitedRealPriceUiBeta: providerCategory === "flight_provider" ? "flight_only" : "not allowed",
         limitedBetaKillSwitch: providerCategory === "flight_provider" ? "active" : "not allowed",
+        limitedBetaStatePersistence: providerCategory === "flight_provider" ? "active" : "not allowed",
+        userPreferenceGuard: "active",
+        persistedPreferenceLoaded: preferenceDecision.persistedPreferenceLoaded === true ? "true" : "false",
+        persistedPreferenceValid: preferenceDecision.persistedPreferenceValid !== false ? "true" : "false",
+        restoreConfirmationRequired: "true",
+        betaPreferenceState: preferenceDraft && preferenceDraft.preference ? preferenceDraft.preference.killSwitchState : "enabled",
         rollbackGuard: "active",
         manualBookingHandoff: providerCategory === "flight_provider" ? "manual-only" : "not allowed",
         betaRollbackState: rollbackDecision.rollbackDecision,
@@ -258,6 +274,8 @@
       limitedBetaKillSwitch: killVisibility,
       rollbackGuard: rollbackDecision,
       manualBookingHandoff: handoff,
+      limitedBetaStatePersistence: preferenceDraft,
+      userPreferenceGuard: preferenceDecision,
       finalDecision: rowFinalDecision,
       decisionReason: rowFinalDecision === "limited-beta-ready" ? "flight limited beta guarded display ready" : (decision.decisionReason || (restricted ? "restricted category blocked" : "readiness gates incomplete")),
       missingRequiredGates: decision.missingRequirements || [],
@@ -318,7 +336,7 @@
       categoryRows: rows,
       providerRows: rows,
       readinessMatrix: {
-        columns: ["provider category", "provider type", "current status", "credential consent scope gate", "read-only adapter contract", "flight adapter v1", "endpoint allowlist enforcement", "sandbox real-key dry run gate", "sandbox response schema gate", "real provider result schema validation", "provider result source label gate", "price integrity / taxes / fees gate", "manual provider review workflow", "manual review state", "limited real price UI beta", "limited beta kill switch", "rollback guard", "manual booking handoff", "beta rollback state", "limited beta display gate", "limited beta price display", "production price display", "bookingUrl display", "sandbox dry run transport", "schema gate", "source label gate", "credential storage", "final decision"],
+        columns: ["provider category", "provider type", "current status", "credential consent scope gate", "read-only adapter contract", "flight adapter v1", "endpoint allowlist enforcement", "sandbox real-key dry run gate", "sandbox response schema gate", "real provider result schema validation", "provider result source label gate", "price integrity / taxes / fees gate", "manual provider review workflow", "manual review state", "limited real price UI beta", "limited beta kill switch", "limited beta state persistence", "user preference guard", "persisted preference loaded", "persisted preference valid", "restore confirmation required", "beta preference state", "rollback guard", "manual booking handoff", "beta rollback state", "limited beta display gate", "limited beta price display", "production price display", "bookingUrl display", "sandbox dry run transport", "schema gate", "source label gate", "credential storage", "final decision"],
         rows: rows.map((row) => [
           row.providerCategory,
           row.providerType,
@@ -336,6 +354,12 @@
           row.readinessMatrix.manualReviewState,
           row.readinessMatrix.limitedRealPriceUiBeta,
           row.readinessMatrix.limitedBetaKillSwitch,
+          row.readinessMatrix.limitedBetaStatePersistence,
+          row.readinessMatrix.userPreferenceGuard,
+          row.readinessMatrix.persistedPreferenceLoaded,
+          row.readinessMatrix.persistedPreferenceValid,
+          row.readinessMatrix.restoreConfirmationRequired,
+          row.readinessMatrix.betaPreferenceState,
           row.readinessMatrix.rollbackGuard,
           row.readinessMatrix.manualBookingHandoff,
           row.readinessMatrix.betaRollbackState,
@@ -383,10 +407,12 @@
       if (safe[key] !== "disabled") throw new Error("provider readiness console must keep " + key + " disabled");
     });
     if (safe.realPrice !== "limited_beta_guarded_only" && safe.realPrice !== "guarded_sandbox_test_only" && safe.realPrice !== "disabled") throw new Error("provider readiness console must only allow guarded limited beta display");
+    const allowedFinalDecisions = ["no-go", "blocked", "limited-beta-ready", "limited-beta-disabled-by-user-preference", "limited-beta-disabled-by-kill-switch", "limited-beta-rollback-active"];
+    const allowedFlightDecisions = ["limited-beta-ready", "limited-beta-disabled-by-user-preference", "limited-beta-disabled-by-kill-switch", "limited-beta-rollback-active"];
     list(safe.providerRows).forEach((row) => {
-      if (row.finalDecision !== "no-go" && row.finalDecision !== "blocked" && row.finalDecision !== "limited-beta-ready") throw new Error("provider readiness final decision must stay limited-beta-ready, no-go, or blocked");
+      if (allowedFinalDecisions.indexOf(row.finalDecision) < 0) throw new Error("provider readiness final decision must stay in the approved offline/limited-beta set");
       if (row.providerCategory === "restricted_provider" && row.finalDecision !== "blocked") throw new Error("restricted provider must stay blocked");
-      if (row.providerCategory === "flight_provider" && row.finalDecision !== "limited-beta-ready") throw new Error("flight provider must be limited-beta-ready");
+      if (row.providerCategory === "flight_provider" && allowedFlightDecisions.indexOf(row.finalDecision) < 0) throw new Error("flight provider must stay limited-beta-ready or explicitly disabled/rollback");
       if (row.providerCategory !== "restricted_provider" && row.providerCategory !== "flight_provider" && row.finalDecision !== "no-go") throw new Error("non-flight provider must stay no-go");
     });
     if (audit.realProviderCallCount !== 0 || audit.networkAttemptCount !== 0 || audit.realApiKeyReadCount !== 0 || audit.realEndpointConnectCount !== 0 || audit.realPriceDisplayedCount !== 0 || audit.realPriceReturnCount !== 0 || audit.bookingUrlDisplayedCount !== 0 || audit.bookingUrlReturnCount !== 0 || audit.paymentAttemptCount !== 0 || audit.orderAttemptCount !== 0 || audit.identityUploadAttemptCount !== 0) {

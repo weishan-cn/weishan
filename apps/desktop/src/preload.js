@@ -43,6 +43,17 @@ contextBridge.exposeInMainWorld("weishan", {
   }
 });
 
+contextBridge.exposeInMainWorld("weishanLimitedBetaPreference", {
+  getLimitedBetaPreference: () => ipcRenderer.invoke("limited-beta-preference:get"),
+  setLimitedBetaPreferenceDraft: (preference) => ipcRenderer.invoke("limited-beta-preference:set-draft", { preference:preference || {} }),
+  turnOffLimitedBetaPreference: (payload) => ipcRenderer.invoke("limited-beta-preference:turn-off", { reason:String(payload && payload.reason || "") }),
+  requestRestoreLimitedBetaPreference: (payload) => ipcRenderer.invoke("limited-beta-preference:request-restore", { reason:String(payload && payload.reason || "") }),
+  confirmRestoreLimitedBetaPreference: (payload) => ipcRenderer.invoke("limited-beta-preference:confirm-restore", { reason:String(payload && payload.reason || "") }),
+  forceRollbackLimitedBetaPreference: (payload) => ipcRenderer.invoke("limited-beta-preference:force-rollback", { reason:String(payload && payload.reason || "") }),
+  clearLimitedBetaPreference: () => ipcRenderer.invoke("limited-beta-preference:clear"),
+  getLimitedBetaPreferenceAuditDraft: (payload) => ipcRenderer.invoke("limited-beta-preference:audit-draft", { action:String(payload && payload.action || "") })
+});
+
 contextBridge.exposeInMainWorld("weishanSecureApiKeyStorage", {
   listProviderKeys: () => ipcRenderer.invoke("secure-api-key:list"),
   saveProviderKey: (providerId, credential) => ipcRenderer.invoke("secure-api-key:save", { providerId:String(providerId || ""), credential:String(credential || "") }),

@@ -1,6 +1,6 @@
 {
   "name": "weishan-desktop",
-  "version": "2.1.31",
+  "version": "2.1.32",
   "private": true,
   "scripts": {
     "install:all": "npm install --prefix apps/server && npm install --prefix apps/desktop",
@@ -24,7 +24,7 @@
     "test:api": "node tests/api/cloud-adapter.test.js",
     "test:e2e": "playwright test",
     "test:e2e:cloud": "playwright test tests/e2e/cloud-settings.spec.js",
-    "test:commerce-core": "node tests/api/global-procurement-user-facing.test.js && node tests/api/provider-connection-readiness.test.js && node tests/api/secure-api-key-storage.test.js && node tests/api/credential-consent-scope-gate.test.js && node tests/api/read-only-provider-adapter-v1.test.js && node tests/api/provider-endpoint-allowlist-enforcement.test.js && node tests/api/provider-sandbox-real-key-dry-run-gate.test.js && node tests/api/sandbox-response-schema-gate.test.js && node tests/api/real-provider-result-schema-validation.test.js && node tests/api/provider-result-source-label-gate.test.js && node tests/api/price-integrity-taxes-fees-gate.test.js && node tests/api/real-price-display-gate.test.js && node tests/api/manual-provider-review-workflow-v1.test.js && node tests/api/limited-real-price-ui-beta-gate.test.js && node tests/api/limited-beta-kill-switch.test.js && node tests/api/limited-beta-rollback-guard.test.js && node tests/api/manual-booking-handoff.test.js",
+    "test:commerce-core": "node tests/api/global-procurement-user-facing.test.js && node tests/api/provider-connection-readiness.test.js && node tests/api/secure-api-key-storage.test.js && node tests/api/credential-consent-scope-gate.test.js && node tests/api/read-only-provider-adapter-v1.test.js && node tests/api/provider-endpoint-allowlist-enforcement.test.js && node tests/api/provider-sandbox-real-key-dry-run-gate.test.js && node tests/api/sandbox-response-schema-gate.test.js && node tests/api/real-provider-result-schema-validation.test.js && node tests/api/provider-result-source-label-gate.test.js && node tests/api/price-integrity-taxes-fees-gate.test.js && node tests/api/real-price-display-gate.test.js && node tests/api/manual-provider-review-workflow-v1.test.js && node tests/api/limited-real-price-ui-beta-gate.test.js && node tests/api/limited-beta-kill-switch.test.js && node tests/api/limited-beta-rollback-guard.test.js && node tests/api/manual-booking-handoff.test.js && node tests/api/limited-beta-preference-persistence.test.js && node tests/api/limited-beta-user-preference-guard.test.js",
     "test:e2e:commerce-agent": "playwright test tests/e2e/commerce-agent.spec.js --grep \"@commerce-smoke|@latest-command-priority\" --workers=1 --timeout=60000",
     "test:e2e:desktop-assistant": "playwright test tests/e2e/desktop-assistant.spec.js",
     "test:e2e:dispatch": "playwright test tests/e2e/dispatch-router.spec.js",

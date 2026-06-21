@@ -784,6 +784,27 @@ function checkLimitedBetaKillSwitchVersion(results, expectedVersion) {
   );
 }
 
+function checkLimitedBetaPreferencePersistenceVersion(results, expectedVersion) {
+  const paths = [
+    ["apps/desktop limited beta preference persistence version", "apps/desktop/src/renderer/core/limitedBetaPreferencePersistence.js", /LIMITED_BETA_PREFERENCE_PERSISTENCE_VERSION\s*=\s*["']([^"']+)["']/],
+    ["apps/desktop limited beta user preference guard version", "apps/desktop/src/renderer/core/limitedBetaUserPreferenceGuard.js", /LIMITED_BETA_USER_PREFERENCE_GUARD_VERSION\s*=\s*["']([^"']+)["']/],
+    ["apps/desktop limited beta preference store version", "apps/desktop/src/main/limitedBetaPreferenceStore.js", /LIMITED_BETA_PREFERENCE_STORE_VERSION\s*=\s*["']([^"']+)["']/]
+  ];
+  paths.forEach(([name, gatePath, regex]) => {
+    const gate = readText(gatePath);
+    if (!gate) {
+      results.push({ name, pass:false, detail: gatePath + " missing" });
+      return;
+    }
+    if (gate.__readError) {
+      results.push({ name, pass:false, detail: gate.__readError });
+      return;
+    }
+    const match = gate.match(regex);
+    addCheck(results, name, expectedVersion, match && match[1], "package.json must match " + gatePath);
+  });
+}
+
 function checkLimitedBetaRollbackGuardVersion(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/limitedBetaRollbackGuard.js";
   const gate = readText(gatePath);
@@ -992,10 +1013,10 @@ function checkRealProviderResultSchemaValidationVersion(results, expectedVersion
 function checkProviderResultSourceLabelGateV2128Version(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/providerResultSourceLabelGate.js";
   const gate = readText(gatePath);
-  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.31 version", pass:false, detail:gatePath + " missing" }); return; }
-  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.31 version", pass:false, detail:gate.__readError }); return; }
+  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.32 version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.32 version", pass:false, detail:gate.__readError }); return; }
   const match = gate.match(/PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION\s*=\s*["']([^"']+)["']/);
-  addCheck(results, "apps/desktop provider result source label gate v2.1.31 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
+  addCheck(results, "apps/desktop provider result source label gate v2.1.32 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
 }
 
 function checkProviderGateMatrixDashboardVersion(results, expectedVersion) {
@@ -1190,6 +1211,7 @@ function runVersionCheck() {
     checkManualProviderReviewWorkflowV1Version(results, rootPackage.version);
     checkLimitedRealPriceUiBetaGateVersion(results, rootPackage.version);
     checkLimitedBetaKillSwitchVersion(results, rootPackage.version);
+    checkLimitedBetaPreferencePersistenceVersion(results, rootPackage.version);
     checkLimitedBetaRollbackGuardVersion(results, rootPackage.version);
     checkManualBookingHandoffVersion(results, rootPackage.version);
     checkProviderActivationReadinessGateVersion(results, rootPackage.version);

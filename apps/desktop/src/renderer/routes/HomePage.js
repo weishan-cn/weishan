@@ -2115,6 +2115,12 @@
         <p>manual review state: ${esc((row.readinessMatrix || {}).manualReviewState || "not_started")}</p>
         <p>limited real price UI beta: ${esc((row.readinessMatrix || {}).limitedRealPriceUiBeta || "not allowed")}</p>
         <p>limited beta kill switch: ${esc((row.readinessMatrix || {}).limitedBetaKillSwitch || "not allowed")}</p>
+        <p>limited beta state persistence: ${esc((row.readinessMatrix || {}).limitedBetaStatePersistence || "not allowed")}</p>
+        <p>user preference guard: ${esc((row.readinessMatrix || {}).userPreferenceGuard || "active")}</p>
+        <p>persisted preference loaded: ${esc((row.readinessMatrix || {}).persistedPreferenceLoaded || "false")}</p>
+        <p>persisted preference valid: ${esc((row.readinessMatrix || {}).persistedPreferenceValid || "true")}</p>
+        <p>restore confirmation required: ${esc((row.readinessMatrix || {}).restoreConfirmationRequired || "true")}</p>
+        <p>beta preference state: ${esc((row.readinessMatrix || {}).betaPreferenceState || "enabled")}</p>
         <p>rollback guard: ${esc((row.readinessMatrix || {}).rollbackGuard || "active")}</p>
         <p>manual booking handoff: ${esc((row.readinessMatrix || {}).manualBookingHandoff || "not allowed")}</p>
         <p>beta rollback state: ${esc((row.readinessMatrix || {}).betaRollbackState || "not_needed")}</p>
@@ -2166,7 +2172,7 @@
     const state = api && typeof api.buildSecureApiKeyStorageConsole === "function"
       ? api.buildSecureApiKeyStorageConsole()
       : {
-        version:"2.1.31",
+        version:"2.1.32",
         status:"secure local storage only",
         mode:"no provider connection",
         realProvider:"disabled",
@@ -5030,17 +5036,110 @@
     return disclosure('查看 Limited Real Price UI Beta Gate', body, 'commerce-limited-real-price-ui-beta-gate-disclosure');
   }
 
+
+  function commerceLimitedBetaStatePersistenceDisclosure(){
+    const api = window.WeishanLimitedBetaPreferencePersistence;
+    const draft = api && typeof api.buildPersistenceDraft === "function" ? api.buildPersistenceDraft() : null;
+    if (!draft) return "";
+    const pref = draft.preference || {};
+    const cats = pref.categoryOverrides || {};
+    const audit = draft.auditDraft || {};
+    const exportText = api && typeof api.exportRedactedPreferenceSummary === "function" ? api.exportRedactedPreferenceSummary() : JSON.stringify({ redacted:true });
+    const body = '<section class="commerce-limited-beta-state-persistence-panel" aria-label="Limited Beta State Persistence">'
+      + '<h4>Limited Beta State Persistence</h4>'
+      + '<p>status: local preference persistence active</p>'
+      + '<p>schemaVersion: ' + esc(draft.schemaVersion || '2.1.32') + '</p>'
+      + '<p>storage: app userData local file</p>'
+      + '<p>localStorage: forbidden</p>'
+      + '<p>sessionStorage: forbidden</p>'
+      + '<p>.env: forbidden</p>'
+      + '<p>persistedPreferenceLoaded: ' + esc(String(draft.persistedPreferenceLoaded === true)) + '</p>'
+      + '<p>persistedPreferenceValid: ' + esc(String(draft.persistedPreferenceValid !== false)) + '</p>'
+      + '<p>safeFallbackApplied: ' + esc(String(draft.safeFallbackApplied === true)) + '</p>'
+      + '<p>globalLimitedBetaEnabled: ' + esc(String(pref.globalLimitedBetaEnabled === true)) + '</p>'
+      + '<p>flight beta: ' + esc(String(cats.flight === true)) + '</p>'
+      + '<p>product beta: false</p>'
+      + '<p>hotel beta: false</p>'
+      + '<p>restricted beta: false</p>'
+      + '<p>killSwitchState: ' + esc(pref.killSwitchState || 'enabled') + '</p>'
+      + '<p>rollbackState: ' + esc(pref.rollbackState || 'not_needed') + '</p>'
+      + '<p>lastAction: ' + esc(pref.lastAction || 'initial_default') + '</p>'
+      + '<p>updatedAt: ' + esc(pref.updatedAt || 'local preference') + '</p>'
+      + '<p>requiresUserConfirmationForRestore: true</p>'
+      + '<p>redacted: true</p>'
+      + '<div class="commerce-actions-row">'
+      + '<button type="button" data-commerce-limited-beta-action="reload-preference">重新读取本地偏好</button>'
+      + '<button type="button" data-commerce-limited-beta-action="clear-preference">清除 Limited Beta 偏好</button>'
+      + '<button type="button" class="cmd-btn gray commerce-result-summary-copy-btn" data-commerce-copy-kind="limitedBetaPreferenceSummary" data-commerce-copy-text="' + commerceEncodedCopyText(exportText) + '">导出脱敏偏好摘要</button>'
+      + '</div>'
+      + '<h5>audit draft</h5>'
+      + '<p>' + esc(audit.eventType || 'LIMITED_BETA_PREFERENCE_PERSISTENCE_AUDIT_DRAFT') + '</p>'
+      + '<p>localStorageWriteCount: 0</p>'
+      + '<p>sessionStorageWriteCount: 0</p>'
+      + '<p>envWriteCount: 0</p>'
+      + '<p>secretPersistedCount: 0</p>'
+      + '<p>endpointPersistedCount: 0</p>'
+      + '<p>rawPayloadPersistedCount: 0</p>'
+      + '<p>redacted: true</p>'
+      + '</section>';
+    return disclosure('查看 Limited Beta State Persistence', body, 'commerce-limited-beta-state-persistence-disclosure');
+  }
+
+  function commerceLimitedBetaUserPreferenceGuardDisclosure(){
+    const api = window.WeishanLimitedBetaUserPreferenceGuard;
+    const draft = api && typeof api.buildLimitedBetaUserPreferenceGuardDraft === "function" ? api.buildLimitedBetaUserPreferenceGuardDraft() : null;
+    if (!draft) return "";
+    const decision = draft.decision || {};
+    const audit = draft.auditDraft || {};
+    const body = '<section class="commerce-limited-beta-user-preference-guard-panel" aria-label="Limited Beta User Preference Guard">'
+      + '<h4>Limited Beta User Preference Guard</h4>'
+      + '<p>status: user preference guard active</p>'
+      + '<p>restore requires confirmation</p>'
+      + '<p>user preference cannot override safety gates</p>'
+      + '<p>flight only</p>'
+      + '<p>product beta blocked</p>'
+      + '<p>hotel beta blocked</p>'
+      + '<p>restricted blocked</p>'
+      + '<p>bookingUrl disabled</p>'
+      + '<p>payment disabled</p>'
+      + '<p>order disabled</p>'
+      + '<p>identity upload disabled</p>'
+      + '<p>preferenceDecision: ' + esc(decision.preferenceDecision || 'allow') + '</p>'
+      + '<p>confirmationRequired: ' + esc(String(decision.confirmationRequired === true)) + '</p>'
+      + '<p>safeFallbackApplied: ' + esc(String(decision.safeFallbackApplied === true)) + '</p>'
+      + '<p>blockedReason: ' + esc(decision.blockedReason || 'none') + '</p>'
+      + '<p>redacted: true</p>'
+      + '<h5>audit draft</h5>'
+      + '<p>' + esc(audit.eventType || 'LIMITED_BETA_USER_PREFERENCE_GUARD_AUDIT_DRAFT') + '</p>'
+      + '<p>restoreAttemptCount: ' + esc(String(audit.restoreAttemptCount || 0)) + '</p>'
+      + '<p>restoreConfirmedCount: ' + esc(String(audit.restoreConfirmedCount || 0)) + '</p>'
+      + '<p>restoreBlockedCount: ' + esc(String(audit.restoreBlockedCount || 0)) + '</p>'
+      + '<p>unsafePreferenceBlockedCount: ' + esc(String(audit.unsafePreferenceBlockedCount || 0)) + '</p>'
+      + '<p>redacted: true</p>'
+      + '</section>';
+    return disclosure('查看 Limited Beta User Preference Guard', body, 'commerce-limited-beta-user-preference-guard-disclosure');
+  }
+
   function commerceLimitedBetaKillSwitchDisclosure(){
     const api = window.WeishanLimitedBetaKillSwitch;
+    const persistence = window.WeishanLimitedBetaPreferencePersistence;
     const draft = api && typeof api.buildLimitedBetaKillSwitchDraft === "function" ? api.buildLimitedBetaKillSwitchDraft() : null;
     if (!draft) return "";
     const state = draft.state || {};
     const categories = state.categoryOverrides || {};
     const surfaces = state.surfaceOverrides || {};
     const audit = draft.auditDraft || {};
+    const preference = persistence && typeof persistence.buildPersistenceDraft === "function" ? persistence.buildPersistenceDraft() : null;
+    const source = preference && preference.persistedPreferenceLoaded ? '本地持久化' : '默认安全值';
+    const pending = state.restoreConfirmationPending === true;
+    const confirmBlock = pending
+      ? '<section class="commerce-limited-beta-restore-confirmation" data-limited-beta-restore-confirmation="true"><h5>恢复 Limited Beta 确认</h5><p>我确认仅恢复机票 Limited Beta</p><p>我理解 weishan 不提供预订链接</p><p>我理解 weishan 不付款、不下单</p><p>我理解最终以平台页面为准</p><button type="button" data-commerce-limited-beta-action="restore-confirm">确认恢复 Limited Beta</button></section>'
+      : '<p>恢复 Limited Beta 前必须确认。</p>';
     const body = '<section class="commerce-limited-beta-kill-switch-panel" aria-label="Limited Beta Kill Switch">'
       + '<h4>Limited Beta Kill Switch</h4>'
       + '<p>status: active</p>'
+      + '<p>当前状态来自：' + esc(source) + '</p>'
+      + '<p>恢复 Limited Beta 前必须确认</p>'
       + '<p>globalLimitedBetaEnabled: ' + esc(String(state.globalLimitedBetaEnabled === true)) + '</p>'
       + '<p>flight beta: ' + esc(String(categories.flight === true)) + '</p>'
       + '<p>product beta: false</p>'
@@ -5048,22 +5147,25 @@
       + '<p>restricted beta: false</p>'
       + '<p>ordinary result card beta: ' + esc(String(surfaces.ordinary_result_card === true)) + '</p>'
       + '<p>killSwitchState: ' + esc(state.killSwitchState || 'enabled') + '</p>'
-      + '<p>rollbackState: not_needed</p>'
+      + '<p>rollbackState: ' + esc(state.rollbackState || 'not_needed') + '</p>'
       + '<p>reason: ' + esc(state.reason || 'limited beta enabled for flight only') + '</p>'
       + '<p>updatedAt: ' + esc(state.updatedAt || 'local draft') + '</p>'
+      + '<p>requiresUserConfirmationForRestore: true</p>'
       + '<p>redacted: true</p>'
       + '<div class="commerce-actions-row">'
       + '<button type="button" data-commerce-limited-beta-action="off">关闭 Limited Beta</button>'
-      + '<button type="button" data-commerce-limited-beta-action="on">恢复 Limited Beta</button>'
+      + '<button type="button" data-commerce-limited-beta-action="restore-request">恢复 Limited Beta</button>'
       + '<button type="button" data-commerce-limited-beta-action="rollback">强制回滚到离线计划</button>'
       + '</div>'
-      + '<p>关闭 Limited Beta：隐藏所有 Limited Beta 价格卡片。</p>'
+      + confirmBlock
+      + '<p>关闭 Limited Beta：隐藏所有 Limited Beta 价格卡片，并保存本地偏好。</p>'
       + '<p>恢复 Limited Beta：仅恢复 flight beta，不恢复其它品类。</p>'
       + '<p>强制回滚：进入 rollback_active，必须显示暂无真实价格结果。</p>'
       + '<h5>audit draft</h5>'
       + '<p>' + esc(audit.eventType || 'LIMITED_BETA_KILL_SWITCH_AUDIT_DRAFT') + '</p>'
       + '<p>priceCardHiddenCount: ' + esc(String(audit.priceCardHiddenCount || 0)) + '</p>'
       + '<p>restoredCount: ' + esc(String(audit.restoredCount || 0)) + '</p>'
+      + '<p>restoreRequestCount: ' + esc(String(audit.restoreRequestCount || 0)) + '</p>'
       + '<p>forcedRollbackCount: ' + esc(String(audit.forcedRollbackCount || 0)) + '</p>'
       + '<p>bookingUrlDisplayedCount: 0</p>'
       + '<p>paymentAttemptCount: 0</p>'
@@ -6087,6 +6189,8 @@
       ${commerceManualProviderReviewWorkflowV1Disclosure(task)}
       ${commerceLimitedRealPriceUiBetaGateDisclosure(task)}
       ${commerceLimitedBetaKillSwitchDisclosure(task)}
+      ${commerceLimitedBetaStatePersistenceDisclosure(task)}
+      ${commerceLimitedBetaUserPreferenceGuardDisclosure(task)}
       ${commerceLimitedBetaRollbackGuardDisclosure(task)}
       ${commerceManualBookingHandoffDisclosure(task)}
       ${commerceProviderActivationReadinessGateDisclosure(task)}
@@ -6144,6 +6248,8 @@
       ${commerceManualProviderReviewWorkflowV1Disclosure(task)}
       ${commerceLimitedRealPriceUiBetaGateDisclosure(task)}
       ${commerceLimitedBetaKillSwitchDisclosure(task)}
+      ${commerceLimitedBetaStatePersistenceDisclosure(task)}
+      ${commerceLimitedBetaUserPreferenceGuardDisclosure(task)}
       ${commerceLimitedBetaRollbackGuardDisclosure(task)}
       ${commerceManualBookingHandoffDisclosure(task)}
       ${globalProcurementDecisionWorkspaceDisclosure(task)}
@@ -6193,6 +6299,10 @@
       : { rollbackDecision:"not_needed", redacted:true };
     if (killVisibility.priceCardVisible !== true) {
       const rollbackActive = killVisibility.killSwitchState === "rollback_active" || killVisibility.killSwitchState === "forced_off";
+      const restorePending = killVisibility.confirmationRequired === true || killVisibility.killSwitchState === "restore_confirmation_required" || String(killVisibility.reason || "").includes("restore");
+      const restoreConfirmationHtml = restorePending
+        ? '<section class="commerce-limited-beta-restore-confirmation" data-limited-beta-restore-confirmation="true"><h5>恢复 Limited Beta 确认</h5><p>我确认仅恢复机票 Limited Beta</p><p>我理解 weishan 不提供预订链接</p><p>我理解 weishan 不付款、不下单</p><p>我理解最终以平台页面为准</p><button type="button" data-commerce-limited-beta-action="restore-confirm">确认恢复 Limited Beta</button></section>'
+        : "";
       return `<section class="commerce-guarded-price-card is-withheld" aria-label="Limited Beta 已关闭">
         <h5>${rollbackActive ? "已回滚到离线计划" : "Limited Beta 已关闭"}</h5>
         <p>暂无真实价格结果</p>
@@ -6201,6 +6311,7 @@
         <p>rollbackReason：${esc(rollbackActive ? (killVisibility.reason || "forced rollback to offline planning") : "not_needed")}</p>
         <p>仅整理搜索条件 / 暂无真实价格结果。</p>
         <p>不显示 bookingUrl，不提供预订、付款、下单或证件 / 银行卡上传入口。</p>
+        ${restoreConfirmationHtml}
       </section>`;
     }
     if (rollbackDecision.rollbackDecision === "rollback_active") {
@@ -6766,6 +6877,14 @@
     const input = host.querySelector("#commandInput");
     const runBtn = host.querySelector("#runBtn");
 
+    if (!window.__WEISHAN_LIMITED_BETA_PREFERENCE_RENDER_BOUND_HOME__) {
+      window.__WEISHAN_LIMITED_BETA_PREFERENCE_RENDER_BOUND_HOME__ = true;
+      window.addEventListener("weishan:limited-beta-preference-updated", () => {
+        const currentHost = document.querySelector("#pageHost") || host;
+        if (currentHost) render(currentHost);
+      });
+    }
+
     if (!window.__WEISHAN_TASK_HISTORY_RESTORE_BOUND__) {
       window.__WEISHAN_TASK_HISTORY_RESTORE_BOUND__ = true;
       document.addEventListener("click", function(ev){
@@ -7216,12 +7335,19 @@
       if (limitedBetaButton && host.contains(limitedBetaButton)) {
         const action = limitedBetaButton.getAttribute("data-commerce-limited-beta-action") || "";
         const api = window.WeishanLimitedBetaKillSwitch;
+        const persistence = window.WeishanLimitedBetaPreferencePersistence;
+        const jobs = [];
         if (api) {
-          if (action === "off" && typeof api.turnOffLimitedBeta === "function") api.turnOffLimitedBeta("local user disabled limited beta from UI");
-          if (action === "on" && typeof api.turnOnLimitedBeta === "function") api.turnOnLimitedBeta("local user restored flight limited beta from UI");
-          if (action === "rollback" && typeof api.forceRollback === "function") api.forceRollback("local user forced rollback to offline planning");
-          render(host);
+          if (action === "off" && typeof api.turnOffLimitedBeta === "function") jobs.push(api.turnOffLimitedBeta("local user disabled limited beta from UI"));
+          if (action === "restore-request" && typeof api.requestRestoreLimitedBeta === "function") jobs.push(api.requestRestoreLimitedBeta("local user requested flight limited beta restore from UI"));
+          if (action === "restore-confirm" && typeof api.confirmRestoreLimitedBeta === "function") jobs.push(api.confirmRestoreLimitedBeta("local user confirmed flight limited beta restore from UI"));
+          if (action === "rollback" && typeof api.forceRollback === "function") jobs.push(api.forceRollback("local user forced rollback to offline planning"));
+          if (action === "reload-preference" && typeof api.reloadPersistedPreference === "function") jobs.push(api.reloadPersistedPreference());
+          if (action === "clear-preference" && typeof api.clearLimitedBetaPreference === "function") jobs.push(api.clearLimitedBetaPreference());
         }
+        if (persistence && action === "reload-preference" && typeof persistence.loadPersistedPreference === "function") jobs.push(persistence.loadPersistedPreference());
+        Promise.resolve(Promise.all(jobs.map((job) => job && typeof job.then === "function" ? job : Promise.resolve(job)))).finally(() => render(host));
+        render(host);
         return;
       }
       const templateButton = target && target.closest("[data-commerce-template-kind]");

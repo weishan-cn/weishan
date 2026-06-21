@@ -4,6 +4,7 @@ const fs = require("fs");
 const { spawn } = require("child_process");
 const { registerSecureStorageHandlers } = require("./main/secureStorage");
 const { registerSecureApiKeyStorageHandlers } = require("./main/secureApiKeyStorage");
+const { registerLimitedBetaPreferenceHandlers } = require("./main/limitedBetaPreferenceStore");
 
 const APP_NAME = "weishan";
 const APP_ID = "ai.weishan.desktop";
@@ -494,6 +495,7 @@ function registerIpcHandlers() {
   ipcMain.handle("weishan:open-external", async (_event, url) => shell.openExternal(String(url || "")));
   registerSecureStorageHandlers(ipcMain);
   registerSecureApiKeyStorageHandlers(ipcMain);
+  registerLimitedBetaPreferenceHandlers(ipcMain, { app });
 }
 
 function createWindow() {

@@ -23,7 +23,7 @@ const api = windowRef.WeishanLimitedBetaKillSwitch;
 
 function main() {
   api.reset();
-  assert.equal(api.LIMITED_BETA_KILL_SWITCH_VERSION, "2.1.31");
+  assert.equal(api.LIMITED_BETA_KILL_SWITCH_VERSION, "2.1.32");
 
   const draft = api.buildLimitedBetaKillSwitchDraft();
   assert.equal(draft.state.globalLimitedBetaEnabled, true);
@@ -63,7 +63,11 @@ function main() {
   assert.equal(off.globalLimitedBetaEnabled, false);
   assert.equal(api.evaluateLimitedBetaVisibility({ category:"flight", providerId:"flight_provider", surface:"ordinary_result_card" }).priceCardVisible, false);
 
-  const on = api.turnOnLimitedBeta("test restore flight");
+  const requested = api.turnOnLimitedBeta("test restore flight");
+  assert.equal(requested.globalLimitedBetaEnabled, false);
+  assert.equal(requested.restoreConfirmationPending, true);
+  assert.equal(api.evaluateLimitedBetaVisibility({ category:"flight", providerId:"flight_provider", surface:"ordinary_result_card" }).priceCardVisible, false);
+  const on = api.confirmRestoreLimitedBeta("test confirmed restore flight");
   assert.equal(on.globalLimitedBetaEnabled, true);
   assert.equal(on.categoryOverrides.flight, true);
   assert.equal(on.categoryOverrides.product, false);
