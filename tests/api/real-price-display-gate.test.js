@@ -23,7 +23,7 @@ const priceApi = windowRef.WeishanPriceIntegrityTaxesFeesGateV1;
 const displayApi = windowRef.WeishanRealPriceDisplayGate;
 
 function main() {
-  assert.equal(displayApi.REAL_PRICE_DISPLAY_GATE_VERSION, "2.1.39");
+  assert.equal(displayApi.REAL_PRICE_DISPLAY_GATE_VERSION, "2.1.40");
 
   const draft = displayApi.buildRealPriceDisplayGateDraft();
   assert.equal(draft.gateName, "real_price_display_gate");

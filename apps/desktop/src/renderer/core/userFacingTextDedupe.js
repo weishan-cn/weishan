@@ -1,5 +1,5 @@
 (function(){
-  const USER_FACING_TEXT_DEDUPE_VERSION = "2.1.39";
+  const USER_FACING_TEXT_DEDUPE_VERSION = "2.1.40";
   const INTERNAL_DEBUG_LABEL_RE = /Cheapest Truth Guard|not_ranked_as_real_cheapest|canClaimCheapest|canParticipateInCheapestRanking|guardName|internal enum|rollbackDecision JSON|audit draft|raw schema|raw provider payload/;
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value){ return String(value == null ? "" : value).trim(); }

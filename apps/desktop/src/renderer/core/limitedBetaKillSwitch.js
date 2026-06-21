@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const LIMITED_BETA_KILL_SWITCH_VERSION = "2.1.39";
+  const LIMITED_BETA_KILL_SWITCH_VERSION = "2.1.40";
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value === undefined || value === null ? "" : value).trim(); }
   function now() { return new Date().toISOString(); }
