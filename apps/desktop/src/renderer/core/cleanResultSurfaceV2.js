@@ -1,5 +1,5 @@
 (function(){
-  const CLEAN_RESULT_SURFACE_V2_VERSION = "2.1.34";
+  const CLEAN_RESULT_SURFACE_V2_VERSION = "2.1.35";
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value){ return String(value == null ? "" : value).trim(); }
   function list(value){ return Array.isArray(value) ? value.filter(Boolean) : []; }
@@ -34,7 +34,7 @@
     if (mode === "blocked") statusMessage = "安全阻断";
     else if (mode === "needs_clarification") statusMessage = "请补充关键信息";
     else if (hasReal) statusMessage = "已找到 " + cardsResult.cardCount + " 条可信只读价格结果";
-    else if (hasLimitedBeta) statusMessage = "暂无生产真实价格结果；以下为 Limited Beta 只读验证价，仅供展示流程验证。";
+    else if (hasLimitedBeta) statusMessage = "暂无生产真实最低价；以下为 Limited Beta 只读验证价，仅用于展示流程验证，不代表真实最低价。";
     else statusMessage = "暂无真实价格结果；你可以复制搜索条件，前往官方平台手动核对。";
     const safetyHint = "weishan 只做搜索和比较，不收款、不下单。最终价格、库存、税费、行李和退改签以平台页面为准。";
     const audit = buildCleanResultSurfaceV2AuditDraft({ surfaceMode:mode, resultCardCount:cardsResult.cardCount, duplicateNoPriceMessageCount:hasLimitedBeta ? 0 : 1, userFacingSafetyHintCount:1 });
@@ -55,6 +55,7 @@
       finalSafetyNotice:safetyHint,
       productionResultAvailable:hasReal,
       limitedBetaSeparatedFromProduction:hasLimitedBeta,
+      cheapestTruthGuardEnabled:true,
       audit,
       redacted:true
     });
@@ -89,4 +90,3 @@
   }
   window.WeishanCleanResultSurfaceV2 = { CLEAN_RESULT_SURFACE_V2_VERSION, buildCleanResultSurfaceV2, buildCleanResultSurfaceV2AuditDraft, assertCleanResultSurfaceV2Safe };
 })();
-

@@ -234,7 +234,7 @@ test.describe.serial("settings local auth hotfix", () => {
     await expect(result).toContainText("成都");
     await expect(result).toContainText("7 月 15 日");
     await expect(result).toContainText("低价优先");
-    await expect(result).toContainText("暂无生产真实价格结果");
+    await expect(result).toContainText("暂无生产真实最低价");
     await expect(result).toContainText("Limited Beta");
     await expect(result).not.toContainText("日上海");
     await expect(result).not.toContainText("日期：待补充");

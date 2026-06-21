@@ -1013,10 +1013,10 @@ function checkRealProviderResultSchemaValidationVersion(results, expectedVersion
 function checkProviderResultSourceLabelGateV2128Version(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/providerResultSourceLabelGate.js";
   const gate = readText(gatePath);
-  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.34 version", pass:false, detail:gatePath + " missing" }); return; }
-  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.34 version", pass:false, detail:gate.__readError }); return; }
+  if (!gate) { results.push({ name:"apps/desktop provider result source label gate v2.1.35 version", pass:false, detail:gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name:"apps/desktop provider result source label gate v2.1.35 version", pass:false, detail:gate.__readError }); return; }
   const match = gate.match(/PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION\s*=\s*["']([^"']+)["']/);
-  addCheck(results, "apps/desktop provider result source label gate v2.1.34 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
+  addCheck(results, "apps/desktop provider result source label gate v2.1.35 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerResultSourceLabelGate.js PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION");
 }
 
 function checkProviderGateMatrixDashboardVersion(results, expectedVersion) {
@@ -1204,6 +1204,24 @@ function checkCleanResultSurfaceV1Version(results, expectedVersion) {
   addCheck(results, "apps/desktop clean result surface v1 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/cleanResultSurfaceV1.js CLEAN_RESULT_SURFACE_V1_VERSION");
 }
 
+function checkFlightFareBreakdownVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightFareBreakdown.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight fare breakdown version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight fare breakdown version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_FARE_BREAKDOWN_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight fare breakdown version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightFareBreakdown.js FLIGHT_FARE_BREAKDOWN_VERSION");
+}
+
+function checkCheapestTruthGuardVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/cheapestTruthGuard.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop cheapest truth guard version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop cheapest truth guard version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/CHEAPEST_TRUTH_GUARD_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop cheapest truth guard version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/cheapestTruthGuard.js CHEAPEST_TRUTH_GUARD_VERSION");
+}
+
 function checkTopResultCardsBuilderVersion(results, expectedVersion) {
   const filePath = "apps/desktop/src/renderer/core/topResultCardsBuilder.js";
   const file = readText(filePath);
@@ -1304,6 +1322,8 @@ function runVersionCheck() {
     checkProviderConnectionReadinessDecisionEngineVersion(results, rootPackage.version);
     checkSecureApiKeyStorageMainVersion(results, rootPackage.version);
     checkSecureApiKeyStorageConsoleVersion(results, rootPackage.version);
+    checkFlightFareBreakdownVersion(results, rootPackage.version);
+    checkCheapestTruthGuardVersion(results, rootPackage.version);
     checkTopResultCardsBuilderVersion(results, rootPackage.version);
     checkProviderHandoffUiVersion(results, rootPackage.version);
     checkCleanResultSurfaceV2Version(results, rootPackage.version);

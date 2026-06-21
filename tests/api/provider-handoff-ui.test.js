@@ -7,8 +7,8 @@ function load(files){ const window = {}; window.window = window; const context =
 function main(){
   const windowRef = load(["apps/desktop/src/renderer/core/providerHandoffUi.js"]);
   const api = windowRef.WeishanProviderHandoffUi;
-  assert.equal(api.PROVIDER_HANDOFF_UI_VERSION, "2.1.34");
-  const card = { title:"上海 → 成都 · 7月15日", providerName:"Flight Provider Sandbox", priceDisplay:"¥1010", taxFeeSummary:"税费已包含", inventoryReliability:"sandbox evidence only", actionLabel:"去平台确认", actionType:"provider_handoff_preview", bookingUrl:null };
+  assert.equal(api.PROVIDER_HANDOFF_UI_VERSION, "2.1.35");
+  const card = { title:"上海 → 成都 · 7月15日", providerName:"Flight Provider Sandbox", priceDisplay:"¥1010", priceTruthLabel:"Limited Beta 只读验证价，不代表真实最低价", taxFeeSummary:"税费已包含", inventoryReliability:"sandbox evidence only", actionLabel:"去平台确认", actionType:"provider_handoff_preview", bookingUrl:null, fareBreakdown:{ displayRows:[{ label:"票面价", value:"¥860" }, { label:"燃油附加费", value:"未单独提供 / 以平台页面为准" }, { label:"机场建设费 / 民航发展基金", value:"未单独提供 / 以平台页面为准" }, { label:"平台服务费", value:"未单独提供 / 以平台页面为准" }, { label:"优惠 / 补贴", value:"未单独提供 / 以平台页面为准" }, { label:"最终应付总价", value:"¥1010" }] } };
   const handoff = api.buildProviderHandoffUi({ card, providerReadiness:"limited-beta-ready", bookingUrlSafety:"disabled", userPreference:{ searchText:"上海 成都 7月15日" }, redacted:true });
   assert.equal(handoff.handoffDecision, "manual_handoff");
   assert.equal(["去平台确认", "手动核对", "复制搜索条件"].includes(handoff.actionLabel), true);
@@ -19,6 +19,11 @@ function main(){
   assert.equal(handoff.order, false);
   assert.equal(handoff.identityUpload, false);
   assert.match(handoff.copyPayload, /上海 → 成都|上海 成都/);
+  assert.match(handoff.copyPayload, /复制价格拆分摘要/);
+  assert.match(handoff.copyPayload, /票面价：¥860/);
+  assert.match(handoff.copyPayload, /燃油附加费：未单独提供/);
+  assert.match(handoff.copyPayload, /机场建设费 \/ 民航发展基金：未单独提供/);
+  assert.match(handoff.copyPayload, /最终应付总价：¥1010/);
   assert.match(handoff.copyPayload, /最终价格、库存、税费/);
   assert.match(handoff.finalPageDisclaimer, /最终价格、库存、税费/);
   const restricted = api.buildProviderHandoffUi({ card, restricted:true });
@@ -38,4 +43,3 @@ function main(){
   console.log("PROVIDER_HANDOFF_UI_CORE PASS");
 }
 main();
-

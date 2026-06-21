@@ -5,23 +5,34 @@ const vm = require("node:vm");
 const ROOT = path.resolve(__dirname, "../..");
 function load(files){ const window = {}; window.window = window; const context = vm.createContext({ window, console }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
 function main(){
-  const windowRef = load(["apps/desktop/src/renderer/core/topResultCardsBuilder.js"]);
+  const windowRef = load(["apps/desktop/src/renderer/core/flightFareBreakdown.js", "apps/desktop/src/renderer/core/cheapestTruthGuard.js", "apps/desktop/src/renderer/core/topResultCardsBuilder.js"]);
   const api = windowRef.WeishanTopResultCardsBuilder;
-  assert.equal(api.TOP_RESULT_CARDS_BUILDER_VERSION, "2.1.34");
+  assert.equal(api.TOP_RESULT_CARDS_BUILDER_VERSION, "2.1.35");
   const clearFlight = api.buildTopResultCards({ procurementCategory:"flight", normalizedSearchIntent:{ category:"flight", origin:"上海", destination:"成都", dateDisplay:"7月15日", preference:"直达优先" }, limitedBetaResult:{ enabled:true, priceDisplay:"¥1010" }, sortPreference:"低价优先", restrictedCategoryDecision:"allow" });
   assert.equal(clearFlight.resultCardMode, "top_results");
   assert.equal(clearFlight.cardCount, 1);
   assert.ok(clearFlight.cardCount <= 3);
   assert.equal(clearFlight.cards[0].cardType, "limited_beta_price");
   assert.equal(clearFlight.cards[0].priceDisplay, "¥1010");
+  assert.equal(clearFlight.cards[0].finalPayableLabel, "最终应付总价：¥1010");
+  assert.equal(clearFlight.cards[0].priceTruthLabel, "Limited Beta 只读验证价，不代表真实最低价");
+  assert.equal(clearFlight.cards[0].cheapestClaim, false);
+  assert.equal(clearFlight.cards[0].canParticipateInCheapestRanking, false);
+  assert.equal(clearFlight.cards[0].rankingMode, "not_ranked_as_real_cheapest");
+  assert.equal(clearFlight.cards[0].fareBreakdown.redacted, true);
+  assert.equal(clearFlight.cards[0].fareBreakdown.taxFeeCompleteness, "partial");
+  assert.equal(clearFlight.cards[0].fareBreakdown.displayRows.find((row) => row.label === "最终应付总价").value, "¥1010");
   assert.equal(clearFlight.cards[0].actionType, "provider_handoff_preview");
   assert.equal(clearFlight.cards[0].bookingUrl, null);
   assert.equal(clearFlight.cards[0].payment, false);
   assert.equal(clearFlight.cards[0].order, false);
   assert.equal(clearFlight.cards[0].identityUpload, false);
   assert.equal(clearFlight.cards.some((card) => /fake|mock|demo|AI 估价/i.test(card.priceDisplay)), false);
-  const many = api.buildTopResultCards({ procurementCategory:"flight", normalizedSearchIntent:{ category:"flight" }, realProviderResults:[1,2,3,4].map((n) => ({ trusted:true, title:"结果" + n, priceDisplay:"¥" + (900+n), providerName:"Provider" + n })) });
+  const many = api.buildTopResultCards({ procurementCategory:"flight", normalizedSearchIntent:{ category:"flight" }, sortPreference:"低价优先", realProviderResults:[4,2,1,3].map((n) => ({ trusted:true, title:"结果" + n, priceDisplay:"¥" + (900+n), providerName:"Provider" + n, updatedAt:"2026-06-20T00:00:00.000Z", fareBreakdown:{ totalPayable:900+n, providerPriceType:"production_price", taxFeeCompleteness:"complete" } })) });
   assert.equal(many.cardCount, 3);
+  assert.deepEqual(Array.from(many.cards.map((card) => card.fareBreakdown.totalPayable)), [901, 902, 903]);
+  assert.equal(many.cards.every((card) => card.cheapestClaim === true), true);
+  assert.equal(many.audit.totalPayableSortUsed, true);
   const noFabrication = api.buildTopResultCards({ procurementCategory:"flight", normalizedSearchIntent:{ category:"flight" }, limitedBetaResult:{ enabled:true } });
   assert.equal(noFabrication.cardCount, 1);
   assert.equal(noFabrication.cards.some((card) => /第二|第三|fake|mock|demo|AI 估价/i.test(card.title + card.priceDisplay)), false);
@@ -39,6 +50,9 @@ function main(){
   assert.equal(clearFlight.audit.eventType, "TOP_RESULT_CARDS_BUILDER_DRAFT");
   assert.equal(clearFlight.audit.maxCardCount, 3);
   assert.equal(clearFlight.audit.fakeResultBlockedCount, 0);
+  assert.equal(clearFlight.audit.cheapestClaimCount, 0);
+  assert.equal(clearFlight.audit.limitedBetaCheapestClaimBlockedCount, 1);
+  assert.equal(clearFlight.audit.incompleteFareExcludedCount, 1);
   assert.equal(clearFlight.audit.bookingUrlDisplayedCount, 0);
   assert.equal(clearFlight.audit.paymentActionDisplayedCount, 0);
   assert.equal(clearFlight.audit.orderActionDisplayedCount, 0);
@@ -47,4 +61,3 @@ function main(){
   console.log("TOP_RESULT_CARDS_BUILDER_CORE PASS");
 }
 main();
-

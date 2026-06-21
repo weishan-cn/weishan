@@ -179,7 +179,7 @@ test.describe.serial("dispatch router", () => {
     const command = runId + " 帮我预定 7 月 15 日成都到北京机票";
     await submitHomeCommand(page, command);
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索结果");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无生产真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无生产真实最低价");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("Limited Beta");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("北京");
@@ -191,7 +191,7 @@ test.describe.serial("dispatch router", () => {
   test("flight lookup phrasing routes to commerce agent before chat", async () => {
     await submitHomeCommand(page, runId + " 查 7 月 15 日成都到北京机票");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索结果");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无生产真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无生产真实最低价");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("Limited Beta");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("北京");
@@ -199,7 +199,7 @@ test.describe.serial("dispatch router", () => {
 
     await submitHomeCommand(page, runId + " 查一下 7 月 15 日成都到北京的航班");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索结果");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无生产真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无生产真实最低价");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("Limited Beta");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("北京");
