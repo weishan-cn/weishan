@@ -2489,6 +2489,7 @@
       ${commerceSecureApiKeyStorageConsoleDisclosure(task)}
       ${commerceKeyRedactionAndLogLeakRulesDisclosure(task)}
       ${commerceKeyLifecycleDraftDisclosure(task)}
+      ${commerceRealFlightPriceEvidenceReportDisclosure(task)}
       ${commerceProviderEndpointAllowlistGateDisclosure(task)}
       ${commerceReadonlyProviderSandboxGateDisclosure(task)}
       ${commerceReadonlyProviderResultSchemaGateDisclosure(task)}
@@ -6313,6 +6314,33 @@
     return disclosure('查看 Safe Provider Handoff', body, 'commerce-safe-provider-handoff-disclosure');
   }
 
+  function commerceRealFlightPriceEvidenceReportDisclosure(task){
+    const reportApi = window.WeishanRealFlightPriceEvidenceReport;
+    const flightFields = commerceSimpleFlightFields(task);
+    const request = {
+      origin: flightFields.origin || "上海",
+      destination: flightFields.destination || "成都",
+      departureDate: flightFields.date || flightFields.dateDisplay || "2026-07-15",
+      tripType: "one_way",
+      passengerCount: 1,
+      cabinClass: "economy",
+      directOnly: flightFields.directPreference !== "转机优先",
+      sortIntent: flightFields.goal || "低价优先",
+      restrictedCategoryDecision: (task && task.globalProcurementRestrictedCategoryGuard && task.globalProcurementRestrictedCategoryGuard.finalDecision === "blocked") ? "blocked" : "allow"
+    };
+    const report = reportApi && typeof reportApi.buildRealFlightPriceEvidenceReport === "function"
+      ? reportApi.buildRealFlightPriceEvidenceReport(request, { dryRunEnabled:false, hasSecureCredentialReference:false })
+      : { reportName:"real_flight_price_evidence_report_v1", mode:"read_only_beta", userFacingRealPriceEnabled:false, debugEvidenceEnabled:true, provider:{ providerId:"real_flight_fixture", providerName:"Real Flight Fixture", providerMode:"fixture", fareSource:"fixture_read_only" }, fetchSafety:{ status:"allowed", decision:"fixture_provider_allowed", readOnly:true, networkAllowed:false, booking:false, payment:false, order:false, identityUpload:false }, priceQuote:{ currency:"CNY", baseFare:860, taxesAndFees:110, providerFees:40, totalPrice:1010, priceUpdatedAt:"2026-06-20T00:00:00.000Z", freshnessStatus:"fresh", taxFeeIntegrityStatus:"complete", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null }, integrity:{ totalMatchesBreakdown:true, taxFeeIntegrityStatus:"complete", freshnessStatus:"fresh", showableAsRealPrice:false, showableAsCandidateEvidence:true, userFacingCaveatRequired:true, caveat:"价格、库存、税费和规则以平台页面为准。" }, handoff:{ safeProviderHandoffReady:true, safeProviderHandoffUrl:"https://www.google.com/travel/flights", bookingUrl:null, autoOpen:false, requiresConfirmation:true }, safety:{ checkout:"blocked", payment:"blocked", order:"blocked", identityUpload:"blocked", credentialExposure:"redacted" }, readiness:{ betaReady:true, canShowInDebugPanel:true, canReplaceMainResultCard:false, finalDecision:"debug_price_evidence_ready" }, redacted:true };
+    const provider = report.provider || {};
+    const safety = report.fetchSafety || {};
+    const integrity = report.integrity || {};
+    const handoff = report.handoff || {};
+    const readiness = report.readiness || {};
+    const contract = report.providerContract || {};
+    const body = '<section class="commerce-real-flight-price-evidence-report-panel"><h4>Real Flight Price Evidence</h4><p>真实价格证据：只读 beta</p><p>当前仅用于安全验证，不代表已锁价或可出票。</p><p>价格、库存、税费和规则以平台页面为准。</p><p>唯珊不会付款、不会下单、不会上传证件或银行卡。</p><p>providerId: ' + esc(provider.providerId || "real_flight_fixture") + '</p><p>providerName: ' + esc(provider.providerName || "Real Flight Fixture") + '</p><p>providerMode: ' + esc(provider.providerMode || "fixture") + '</p><p>fareSource: ' + esc(provider.fareSource || "fixture_read_only") + '</p><p>contractName: ' + esc(contract.contractName || "real_flight_price_read_only_provider_contract_v1") + '</p><p>fetchSafety: ' + esc(safety.status || "allowed") + '</p><p>readOnly: true</p><p>networkAllowed: ' + esc(String(safety.networkAllowed === true)) + '</p><p>booking: false</p><p>payment: false</p><p>order: false</p><p>identityUpload: false</p><p>price integrity: ' + esc(integrity.taxFeeIntegrityStatus || "complete") + '</p><p>freshness: ' + esc(integrity.freshnessStatus || "fresh") + '</p><p>safeProviderHandoffReady: ' + esc(String(handoff.safeProviderHandoffReady === true)) + '</p><p>bookingUrl: null</p><p>autoOpen: false</p><p>付款：blocked</p><p>下单：blocked</p><p>证件上传：blocked</p><p>userFacingRealPriceEnabled: false</p><p>debugEvidenceEnabled: true</p><p>canReplaceMainResultCard: ' + esc(String(readiness.canReplaceMainResultCard === true)) + '</p><p>finalDecision: ' + esc(readiness.finalDecision || "debug_price_evidence_ready") + '</p><p>redacted: true</p></section>';
+    return disclosure('查看 Real Flight Price Evidence Report', body, 'commerce-real-flight-price-evidence-report-disclosure');
+  }
+
   function commerceCleanResultSurfaceV2Disclosure(task){
     const surface = commerceCleanResultSurfaceV2ForTask(task, {});
     const audit = surface.audit || {};
@@ -6508,6 +6536,7 @@
       ${commerceSecureApiKeyStorageConsoleDisclosure(task)}
       ${commerceKeyRedactionAndLogLeakRulesDisclosure(task)}
       ${commerceKeyLifecycleDraftDisclosure(task)}
+      ${commerceRealFlightPriceEvidenceReportDisclosure(task)}
       ${commerceProviderEndpointAllowlistGateDisclosure(task)}
       ${commerceReadonlyProviderSandboxGateDisclosure(task)}
       ${commerceReadonlyProviderResultSchemaGateDisclosure(task)}

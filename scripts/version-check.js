@@ -224,6 +224,57 @@ function checkTrustedFlightSourceEvidenceReportVersion(results, expectedVersion)
   );
 }
 
+function checkRealFlightPriceReadOnlyProviderContractVersion(results, expectedVersion) {
+  const contractPath = "apps/desktop/src/renderer/core/realFlightPriceReadOnlyProviderContract.js";
+  const contract = readText(contractPath);
+  if (!contract) {
+    results.push({ name: "apps/desktop real flight price read only provider contract version", pass: false, detail: contractPath + " missing" });
+    return;
+  }
+  if (contract.__readError) {
+    results.push({ name: "apps/desktop real flight price read only provider contract version", pass: false, detail: contract.__readError });
+    return;
+  }
+  const match = contract.match(/REAL_FLIGHT_PRICE_READ_ONLY_PROVIDER_CONTRACT_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop real flight price read only provider contract version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/realFlightPriceReadOnlyProviderContract.js REAL_FLIGHT_PRICE_READ_ONLY_PROVIDER_CONTRACT_VERSION");
+}
+
+function checkRealFlightPriceFetchSafetyGateVersion(results, expectedVersion) {
+  const gatePath = "apps/desktop/src/renderer/core/realFlightPriceFetchSafetyGate.js";
+  const gate = readText(gatePath);
+  if (!gate) { results.push({ name: "apps/desktop real flight price fetch safety gate version", pass: false, detail: gatePath + " missing" }); return; }
+  if (gate.__readError) { results.push({ name: "apps/desktop real flight price fetch safety gate version", pass: false, detail: gate.__readError }); return; }
+  const match = gate.match(/REAL_FLIGHT_PRICE_FETCH_SAFETY_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop real flight price fetch safety gate version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/realFlightPriceFetchSafetyGate.js REAL_FLIGHT_PRICE_FETCH_SAFETY_GATE_VERSION");
+}
+
+function checkRealFlightPriceProviderAdapterSlotVersion(results, expectedVersion) {
+  const slotPath = "apps/desktop/src/renderer/core/realFlightPriceProviderAdapterSlot.js";
+  const slot = readText(slotPath);
+  if (!slot) { results.push({ name: "apps/desktop real flight price provider adapter slot version", pass: false, detail: slotPath + " missing" }); return; }
+  if (slot.__readError) { results.push({ name: "apps/desktop real flight price provider adapter slot version", pass: false, detail: slot.__readError }); return; }
+  const match = slot.match(/REAL_FLIGHT_PRICE_PROVIDER_ADAPTER_SLOT_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop real flight price provider adapter slot version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/realFlightPriceProviderAdapterSlot.js REAL_FLIGHT_PRICE_PROVIDER_ADAPTER_SLOT_VERSION");
+}
+
+function checkRealFlightPriceIntegrityGuardVersion(results, expectedVersion) {
+  const guardPath = "apps/desktop/src/renderer/core/realFlightPriceIntegrityGuard.js";
+  const guard = readText(guardPath);
+  if (!guard) { results.push({ name: "apps/desktop real flight price integrity guard version", pass: false, detail: guardPath + " missing" }); return; }
+  if (guard.__readError) { results.push({ name: "apps/desktop real flight price integrity guard version", pass: false, detail: guard.__readError }); return; }
+  const match = guard.match(/REAL_FLIGHT_PRICE_INTEGRITY_GUARD_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop real flight price integrity guard version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/realFlightPriceIntegrityGuard.js REAL_FLIGHT_PRICE_INTEGRITY_GUARD_VERSION");
+}
+
+function checkRealFlightPriceEvidenceReportVersion(results, expectedVersion) {
+  const reportPath = "apps/desktop/src/renderer/core/realFlightPriceEvidenceReport.js";
+  const report = readText(reportPath);
+  if (!report) { results.push({ name: "apps/desktop real flight price evidence report version", pass: false, detail: reportPath + " missing" }); return; }
+  if (report.__readError) { results.push({ name: "apps/desktop real flight price evidence report version", pass: false, detail: report.__readError }); return; }
+  const match = report.match(/REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop real flight price evidence report version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/realFlightPriceEvidenceReport.js REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION");
+}
+
 function checkSecureKeyStoragePlanVersion(results, expectedVersion) {
   const planPath = "apps/desktop/src/renderer/core/commerceSecureKeyStoragePlan.js";
   const plan = readText(planPath);
@@ -1409,6 +1460,11 @@ function runVersionCheck() {
     checkFlightSandboxDryRunVersion(results, rootPackage.version);
     checkFlightSandboxProviderMatrixVersion(results, rootPackage.version);
     checkTrustedFlightSourceEvidenceReportVersion(results, rootPackage.version);
+    checkRealFlightPriceReadOnlyProviderContractVersion(results, rootPackage.version);
+    checkRealFlightPriceFetchSafetyGateVersion(results, rootPackage.version);
+    checkRealFlightPriceProviderAdapterSlotVersion(results, rootPackage.version);
+    checkRealFlightPriceIntegrityGuardVersion(results, rootPackage.version);
+    checkRealFlightPriceEvidenceReportVersion(results, rootPackage.version);
     checkSecureKeyStoragePlanVersion(results, rootPackage.version);
     checkSecureStorageDesignGateVersion(results, rootPackage.version);
     checkLocalSecureStorageInterfaceDraftVersion(results, rootPackage.version);

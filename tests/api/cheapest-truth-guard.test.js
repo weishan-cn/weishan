@@ -20,7 +20,7 @@ function main() {
   ]);
   const fareApi = windowRef.WeishanFlightFareBreakdown;
   const api = windowRef.WeishanCheapestTruthGuard;
-  assert.equal(api.CHEAPEST_TRUTH_GUARD_VERSION, "2.1.42");
+  assert.equal(api.CHEAPEST_TRUTH_GUARD_VERSION, "2.1.43");
 
   const limitedBeta = api.decideCheapestTruth({
     fareBreakdown:fareApi.normalizeFlightFareBreakdown({

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const CONTRACT_VERSION = "2.1.42";
+  const CONTRACT_VERSION = "2.1.43";
   const PHASE = "flight_provider_candidate_registry";
   const DEFAULT_TRUST_STATUS = "candidate_only";
   const DEFAULT_MANUAL_REVIEW_STATUS = "not_reviewed";

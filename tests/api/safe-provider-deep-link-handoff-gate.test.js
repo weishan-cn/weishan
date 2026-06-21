@@ -18,7 +18,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/safeProviderDeepLinkHandoffGate.js"]);
   const api = windowRef.WeishanSafeProviderDeepLinkHandoffGate;
-  assert.equal(api.SAFE_PROVIDER_DEEP_LINK_HANDOFF_GATE_VERSION, "2.1.42");
+  assert.equal(api.SAFE_PROVIDER_DEEP_LINK_HANDOFF_GATE_VERSION, "2.1.43");
 
   const safe = api.evaluateSafeProviderDeepLinkHandoff({
     providerId: "google_flights_search",
