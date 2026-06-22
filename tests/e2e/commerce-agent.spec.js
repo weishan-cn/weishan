@@ -8700,7 +8700,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.1.55 read-only quote refresh button updates local evidence only @commerce-smoke", async () => {
+  test("v2.1.56 read-only quote refresh button updates local evidence only @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate(() => {
       try { window.localStorage.removeItem("weishan.readOnlyQuoteRefreshState.v1"); } catch (_) {}
@@ -8710,15 +8710,21 @@ test.describe.serial("commerce agent workbench", () => {
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2148-REFRESH 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
     await expect(summary).toContainText("只读候选价");
+    await expect(summary).toContainText("候选报价证据摘要");
+    await expect(summary).toContainText("只读候选价 · 平台最终为准");
+    await expect(summary).toContainText("当前导入样本 / 沙盒运行中的候选价格");
+    await expect(summary).toContainText("Top 3 候选报价");
     await expect(summary).toContainText("平台最终为准");
+    await expect(summary).toContainText("未锁价");
     await expect(summary).toContainText("不代表可出票");
+    await expect(summary).toContainText("唯珊不会付款");
 
     const refreshButton = summary.locator("[data-commerce-read-only-quote-refresh]").first();
     await expect(refreshButton).toBeVisible();
     await refreshButton.click();
 
     await expect(summary.locator('[data-commerce-read-only-refresh-summary="true"]').first()).toContainText(/最近一次刷新：(已刷新|安全失败|未运行)/, { timeout:15000 });
-    await expect(summary).toContainText("仅更新候选证据，不代表已锁价或可出票");
+    await expect(summary).toContainText("仅更新候选证据，未锁价，不代表可出票");
     await expect(summary).toContainText("价格、库存、税费和规则以平台页面为准");
     await expect(summary).not.toContainText(/bookingUrl:\s*https?:|checkoutUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
     await expect(summary.getByRole("button", { name:/^(去预订|预订|付款|下单|提交订单|上传证件|上传银行卡)$/ })).toHaveCount(0);
@@ -8729,13 +8735,13 @@ test.describe.serial("commerce agent workbench", () => {
     expect(visible).not.toMatch(/\b(token|key|secret)\b/i);
   });
 
-  test("v2.1.55 local read-only quote evidence recovery stays candidate-only @commerce-smoke", async () => {
+  test("v2.1.56 local read-only quote evidence recovery stays candidate-only @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate((id) => {
       try {
         window.localStorage.setItem("weishan.readOnlyQuoteRefreshState.v1", JSON.stringify({
           stateName:"read_only_quote_refresh_state_v1",
-          appVersion:"2.1.55",
+          appVersion:"2.1.56",
           lastRefreshStatus:"refreshed",
           providerId:"google_flights_search",
           providerName:"Google Flights",
@@ -8793,7 +8799,7 @@ test.describe.serial("commerce agent workbench", () => {
 
 
 
-  test("v2.1.55 multi sandbox quote import ranks and selects read-only candidates @commerce-smoke", async () => {
+  test("v2.1.56 multi sandbox quote import ranks and selects read-only candidates @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate(() => {
       try { window.localStorage.removeItem("weishan.sandboxProviderResponseImportState.v1"); } catch (_) {}
@@ -8802,7 +8808,7 @@ test.describe.serial("commerce agent workbench", () => {
 
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2149-IMPORT 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
-    for (const text of ["只读沙盒导入证据", "已导入沙盒报价证据", "导入响应已脱敏", "不代表已锁价或可出票", "价格、库存、税费和规则以平台页面为准"]) await expect(summary).toContainText(text);
+    for (const text of ["只读沙盒导入证据", "已导入沙盒报价证据", "导入响应已脱敏", "未锁价，不代表可出票", "价格、库存、税费和规则以平台页面为准"]) await expect(summary).toContainText(text);
 
     const debugDetails = summary.locator("details.commerce-simple-flight-advanced-debug-disclosure").first();
     await expect(debugDetails).toBeVisible();
@@ -8838,6 +8844,9 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(auditButton).toBeVisible();
     await auditButton.click();
     await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).toContainText("Redacted JSON Preview", { timeout:15000 });
+    await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).toContainText("Read-Only Quote Session Report Center");
+    await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).toContainText("User-Facing Evidence Summary");
+    await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).toContainText("Safety Quote Evidence Report");
     await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).toContainText("本导出仅为只读候选证据");
     await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).toContainText("不包含原始响应、密钥、交易链接或身份信息");
     await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).not.toContainText(/rawResponse|token|key|secret|bookingUrl|paymentUrl|orderUrl/i);
@@ -8870,7 +8879,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(importConsole.locator('[data-commerce-sandbox-response-import-output="true"]')).toContainText("只读沙盒导入证据", { timeout:15000 });
     await expect(importConsole.locator('[data-commerce-sandbox-response-import-output="true"]')).toContainText("导入响应已脱敏");
     await expect(summary.locator('[data-commerce-sandbox-import-banner="true"]').first()).toContainText("只读沙盒导入证据", { timeout:15000 });
-    await expect(summary.locator('[data-commerce-sandbox-import-banner="true"]').first()).toContainText("仅作为候选证据，不代表已锁价或可出票");
+    await expect(summary.locator('[data-commerce-sandbox-import-banner="true"]').first()).toContainText("仅作为候选证据，未锁价，不代表可出票");
     const topCandidates = summary.locator('[data-commerce-read-only-top-candidates="true"]').first();
     await expect(topCandidates).toContainText("Top 3 候选报价", { timeout:15000 });
     await expect(topCandidates).toContainText("#1 ¥980");

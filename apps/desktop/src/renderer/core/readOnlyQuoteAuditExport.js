@@ -1,10 +1,10 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_AUDIT_EXPORT_VERSION = "2.1.55";
+  const READ_ONLY_QUOTE_AUDIT_EXPORT_VERSION = "2.1.56";
   const EXPORT_NAME = "read_only_quote_audit_export_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
-  const CAVEAT = "本导出仅为只读候选证据，不代表真实最终价、已锁价或可出票。";
+  const CAVEAT = "本导出仅为只读候选证据，平台最终为准，未锁价，不代表可出票。";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value == null ? "" : value).trim(); }
@@ -48,10 +48,17 @@
     return [];
   }
 
+  function reportCenterFrom(session) {
+    const api = window.WeishanReadOnlyQuoteSessionReportCenter || {};
+    if (api && typeof api.buildReadOnlyQuoteSessionReportCenter === "function") return api.buildReadOnlyQuoteSessionReportCenter(session);
+    return null;
+  }
+
   function buildReadOnlyQuoteAuditExport(session, options) {
     const safeOptions = options && typeof options === "object" ? options : {};
     const summary = sessionSummary(session);
     const safe = stripUnsafe(session && typeof session === "object" ? session : {}) || {};
+    const reportCenter = reportCenterFrom(Object.assign({}, safe, { sessionSummary: summary }));
     return clone({
       exportName: EXPORT_NAME,
       appVersion: READ_ONLY_QUOTE_AUDIT_EXPORT_VERSION,
@@ -64,6 +71,10 @@
       historySummary: stripUnsafe(safe.runHistorySummary || summary.history || null),
       deltaSummary: stripUnsafe(safe.quoteDeltaSummary || summary.deltaCompare || null),
       replaySummary: stripUnsafe(safe.replaySummary || summary.replay || null),
+      reportCenterSummary: stripUnsafe(reportCenter ? { reportCenterName: reportCenter.reportCenterName, appVersion: reportCenter.appVersion, status: reportCenter.status, actions: reportCenter.actions } : null),
+      userFacingSummary: stripUnsafe(reportCenter && reportCenter.userFacingSummary || null),
+      safetyReportSummary: stripUnsafe(reportCenter && reportCenter.safetyReport ? { rawResponseStored:false, secretStored:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, identityUpload:false, redacted:true } : null),
+      exportValidationWarnings: ["redacted_json_preview only", "不包含原始响应、密钥、交易链接或身份信息", "平台最终为准", "未锁价", "不代表可出票"],
       safety: {
         rawResponseIncluded: false,
         secretIncluded: false,
@@ -102,6 +113,10 @@
       orderUrlIncluded: false,
       identityIncluded: false,
       caveatPresent: text(safe.caveat).indexOf("本导出仅为只读候选证据") >= 0,
+      reportCenterSummary: !!safe.reportCenterSummary,
+      userFacingSummary: !!safe.userFacingSummary,
+      safetyReportSummary: !!safe.safetyReportSummary,
+      exportValidationWarnings: Array.isArray(safe.exportValidationWarnings) ? safe.exportValidationWarnings.slice(0, 8) : [],
       redacted: true
     });
   }
@@ -112,7 +127,7 @@
     return clone({
       title: "Audit Export",
       previewLabel: "Redacted JSON Preview",
-      actionLabel: "导出脱敏审计预览",
+      actionLabel: "查看脱敏审计预览",
       exportModel: exportModel,
       validation: validation,
       caveat: CAVEAT,

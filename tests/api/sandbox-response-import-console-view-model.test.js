@@ -21,13 +21,15 @@ function main() {
     "apps/desktop/src/renderer/core/readOnlyQuoteDeltaCompare.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteReplayGuard.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteSessionManager.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteEvidenceSummaryFormatter.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteSessionReportCenter.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteAuditExport.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteRunTimeline.js",
     "apps/desktop/src/renderer/core/multiProviderSandboxDryRunOrchestrator.js",
     "apps/desktop/src/renderer/core/sandboxResponseImportConsoleViewModel.js"
   ]);
   const api = windowRef.WeishanSandboxResponseImportConsoleViewModel;
-  assert.equal(api.SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION, "2.1.55");
+  assert.equal(api.SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION, "2.1.56");
   const initial = api.buildSandboxResponseImportConsoleModel();
   assert.equal(initial.status, "idle");
   assert.equal(initial.title, "多 Provider 沙盒报价导入");
@@ -57,9 +59,14 @@ function main() {
   assert.equal(dryRunPreview.dryRunButton.label, "运行沙盒只读报价");
   assert.equal(dryRunPreview.dryRunTopCandidates.length, 3);
   assert.equal(dryRunPreview.runTimelineSummary.timelineName, "read_only_quote_run_timeline_v1");
-  assert.equal(dryRunPreview.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.1.55");
+  assert.equal(dryRunPreview.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.1.56");
   assert.equal(dryRunPreview.auditExportReady, true);
   assert.equal(dryRunPreview.sessionRecoverySummary.title, "Session Recovery");
+  assert.equal(dryRunPreview.reportCenterStatus, "ready");
+  assert.equal(dryRunPreview.reportCenterSummary.reportCenterName, "read_only_quote_session_report_center_v1");
+  assert.equal(dryRunPreview.userFacingEvidenceSummary.title, "候选报价证据摘要");
+  assert.equal(dryRunPreview.safetyReportSummary.rawResponseStored, false);
+  assert.ok(dryRunPreview.evidenceSummaryWarnings.includes("平台最终为准"));
   const imported = api.buildSandboxResponseImportResult(raw);
   assert.equal(imported.status, "accepted");
   assert.equal(imported.importResult.status, "accepted");
@@ -82,6 +89,7 @@ function main() {
   assert.equal(audit.bookingUrl, null);
   assert.equal(audit.autoOpen, false);
   assert.equal(audit.sourceBreakdown.providerCount, 2);
+  assert.equal(audit.reportCenterStatus, "empty");
   console.log("SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL PASS");
 }
 main();

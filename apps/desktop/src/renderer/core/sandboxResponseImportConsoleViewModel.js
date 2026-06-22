@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.55";
+  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.56";
   const CONSOLE_NAME = "sandbox_response_import_console_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -12,6 +12,8 @@
   function getRankingApi() { return window.WeishanReadOnlyQuoteCandidateRanking || {}; }
   function getSelectionApi() { return window.WeishanReadOnlyQuoteCandidateSelection || {}; }
   function getDryRunApi() { return window.WeishanMultiProviderSandboxDryRunOrchestrator || {}; }
+  function getReportCenterApi() { return window.WeishanReadOnlyQuoteSessionReportCenter || {}; }
+  function getEvidenceFormatterApi() { return window.WeishanReadOnlyQuoteEvidenceSummaryFormatter || {}; }
 
   function safety() {
     return {
@@ -32,7 +34,7 @@
   function messages() {
     return {
       helper: "仅支持只读沙盒响应样本。导入前会先校验并脱敏。支持多 Provider 沙盒报价导入。",
-      caveat: "导入结果仅作为候选证据，不代表已锁价或可出票。",
+      caveat: "导入结果仅作为候选证据，未锁价，不代表可出票。",
       platformFinal: "平台最终为准。",
       runSandbox: "支持运行沙盒只读报价。"
     };
@@ -163,6 +165,16 @@
     const auditExportPreview = safe.auditExportPreview && typeof safe.auditExportPreview === "object" ? safe.auditExportPreview : (sandboxDryRunSummary && sandboxDryRunSummary.auditExportPreview && typeof sandboxDryRunSummary.auditExportPreview === "object" ? sandboxDryRunSummary.auditExportPreview : null);
     const auditExportReady = safe.auditExportReady === true || (sandboxDryRunSummary && sandboxDryRunSummary.auditExportReady === true) || !!auditExportPreview;
     const sessionRecoverySummary = safe.sessionRecoverySummary && typeof safe.sessionRecoverySummary === "object" ? safe.sessionRecoverySummary : (sandboxDryRunSummary && sandboxDryRunSummary.sessionRecoverySummary && typeof sandboxDryRunSummary.sessionRecoverySummary === "object" ? sandboxDryRunSummary.sessionRecoverySummary : null);
+    const reportCenterApi = getReportCenterApi();
+    const formatterApi = getEvidenceFormatterApi();
+    const selectedCandidate = safe.selectedCandidate && typeof safe.selectedCandidate === "object" ? safe.selectedCandidate : null;
+    const reportCenterModel = typeof reportCenterApi.buildReadOnlyQuoteSessionReportCenter === "function" ? reportCenterApi.buildReadOnlyQuoteSessionReportCenter({ sessionSummary:sessionSummary, auditExportPreview:auditExportPreview, topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary }) : null;
+    const reportCenterSummary = reportCenterModel ? { reportCenterName:reportCenterModel.reportCenterName, appVersion:reportCenterModel.appVersion, status:reportCenterModel.status, actions:reportCenterModel.actions, redacted:true } : null;
+    const userFacingEvidenceSummary = reportCenterModel && reportCenterModel.userFacingSummary || null;
+    const safetyReportSummary = reportCenterModel && reportCenterModel.safetyReport || null;
+    const evidenceSummaryWarnings = formatterApi.formatReadOnlyQuoteEvidenceWarnings ? formatterApi.formatReadOnlyQuoteEvidenceWarnings({}).warnings : ["平台最终为准", "未锁价", "不代表可出票"];
+    const selectedCandidateUserSummary = formatterApi.formatSelectedCandidateSummary ? formatterApi.formatSelectedCandidateSummary(selectedCandidate || {}) : null;
+    const reportCenterStatus = text(reportCenterModel && reportCenterModel.status || "empty");
     return clone({
       consoleName: CONSOLE_NAME,
       appVersion: SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION,
@@ -192,10 +204,16 @@
       auditExportPreview: auditExportPreview,
       auditExportReady: auditExportReady,
       sessionRecoverySummary: sessionRecoverySummary,
+      reportCenterSummary: reportCenterSummary,
+      userFacingEvidenceSummary: userFacingEvidenceSummary,
+      safetyReportSummary: safetyReportSummary,
+      evidenceSummaryWarnings: evidenceSummaryWarnings,
+      selectedCandidateUserSummary: selectedCandidateUserSummary,
+      reportCenterStatus: reportCenterStatus,
       lastRunId: lastRunId,
       compareStatus: compareStatus,
       replayStatus: replayStatus,
-      selectedCandidate: safe.selectedCandidate && typeof safe.selectedCandidate === "object" ? safe.selectedCandidate : null,
+      selectedCandidate: selectedCandidate,
       actions: Object.assign({ canDryRun: dryRunButton.enabled !== false }, actions(status)),
       safety: safety(),
       messages: messages(),
@@ -383,6 +401,12 @@
       sessionId: model.sessionId || "",
       auditExportReady: model.auditExportReady === true,
       sessionRecoverySummary: model.sessionRecoverySummary || null,
+      reportCenterSummary: model.reportCenterSummary || null,
+      userFacingEvidenceSummary: model.userFacingEvidenceSummary || null,
+      safetyReportSummary: model.safetyReportSummary || null,
+      evidenceSummaryWarnings: model.evidenceSummaryWarnings || [],
+      selectedCandidateUserSummary: model.selectedCandidateUserSummary || null,
+      reportCenterStatus: model.reportCenterStatus || "empty",
       rawInputStored: false,
       rawResponseStored: false,
       canPasteSecretHere: false,
