@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION = "2.1.43";
+  const REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION = "2.1.44";
   const REPORT_NAME = "real_flight_price_evidence_report_v1";
 
   function clone(value) {
@@ -65,12 +65,16 @@
 
   function buildSafeProviderHandoffCandidate(request, quote) {
     const safeProviderGateApi = getSafeProviderGateApi();
+    const registrySource = typeof getRegistryApi().getTrustedFlightSourceById === "function"
+      ? getRegistryApi().getTrustedFlightSourceById("google_flights_search")
+      : null;
+    const safeProviderHandoffUrl = text(registrySource && registrySource.safeProviderHandoffUrl || "");
     const candidate = {
       providerId: "google_flights_search",
       providerName: "Google Flights",
       providerType: "flight_search",
       searchOnly: true,
-      safeProviderHandoffUrl: "https://www.google.com/travel/flights",
+      safeProviderHandoffUrl: safeProviderHandoffUrl || null,
       restrictedCategory: false,
       origin: text(request.origin),
       destination: text(request.destination),
@@ -81,11 +85,11 @@
       return safeProviderGateApi.evaluateSafeProviderDeepLinkHandoff(candidate);
     }
     return clone({
-      status: "confirmation_required",
-      candidateDecision: "safe_provider_handoff_ready",
-      providerConfirmationLink: "confirmation_required",
-      safeProviderHandoffUrl: candidate.safeProviderHandoffUrl,
-      safeProviderHandoffHost: "google.com",
+      status: safeProviderHandoffUrl ? "confirmation_required" : "blocked",
+      candidateDecision: safeProviderHandoffUrl ? "safe_provider_handoff_ready" : "blocked",
+      providerConfirmationLink: safeProviderHandoffUrl ? "confirmation_required" : "disabled",
+      safeProviderHandoffUrl: safeProviderHandoffUrl || null,
+      safeProviderHandoffHost: safeProviderHandoffUrl ? (() => { try { return new URL(safeProviderHandoffUrl).hostname.toLowerCase(); } catch (_) { return ""; } })() : "",
       userConfirmationRequired: true,
       autoOpen: false,
       bookingUrl: null,
@@ -197,7 +201,8 @@
         readiness: { safeProviderHandoffReady: true, realPriceClaimAllowed: false, bookingClaimAllowed: false, finalDecision: "safe_provider_handoff_ready", redacted: true },
         redacted: true
       };
-    const handoffCandidate = priceQuote.handoffCandidate || buildSafeProviderHandoffCandidate(request, priceQuote);
+    const priceQuoteHandoffCandidate = priceQuote.handoffCandidate && priceQuote.handoffCandidate.safeProviderHandoffUrl ? priceQuote.handoffCandidate : null;
+    const handoffCandidate = priceQuoteHandoffCandidate || buildSafeProviderHandoffCandidate(request, priceQuote);
     const safeProviderHandoffReady = handoffCandidate && handoffCandidate.providerConfirmationLink === "confirmation_required" && !!handoffCandidate.safeProviderHandoffUrl;
     const confirmationUi = typeof getConfirmationUiApi().buildProviderConfirmationHandoffUiModel === "function"
       ? getConfirmationUiApi().buildProviderConfirmationHandoffUiModel(handoffCandidate)

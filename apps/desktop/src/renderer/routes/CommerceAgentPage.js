@@ -2938,20 +2938,25 @@
     const enQuery = [enOrigin, "to", enDestination, "flight", enDate, fields.goal === "低价优先" ? "lowest fare" : ""].filter(Boolean).join(" ");
     return {
       web:"https://www.google.com/search?q=" + encodeURIComponent(zhQuery),
-      googleFlights:"https://www.google.com/travel/flights?q=" + encodeURIComponent(enQuery),
+      googleFlights:(function(){ const registryApi = window.WeishanTrustedFlightSourceRegistry; const source = registryApi && typeof registryApi.getTrustedFlightSourceById === "function" ? registryApi.getTrustedFlightSourceById("google_flights_search") : null; const baseUrl = String(source && source.safeProviderHandoffUrl || "").trim(); return baseUrl ? baseUrl + "?q=" + encodeURIComponent(enQuery) : ""; })(),
       tripCom:"https://www.trip.com/flights/search/?q=" + encodeURIComponent(enQuery)
     };
   }
 
   function commerceSafeProviderHandoffCandidateForTask(task){
     const fields = commerceSimpleFlightFields(task);
-    const externalUrls = commerceSimpleFlightExternalSearchUrls(task);
+    const registryApi = window.WeishanTrustedFlightSourceRegistry;
+    const trustedSource = registryApi && typeof registryApi.getTrustedFlightSourceById === "function"
+      ? registryApi.getTrustedFlightSourceById("google_flights_search")
+      : null;
+    const safeProviderHandoffUrl = String(trustedSource && trustedSource.safeProviderHandoffUrl || "").trim();
     return {
       providerId: "google_flights_search",
       providerName: "Google Flights",
       providerType: "flight_search",
       searchOnly: true,
-      safeProviderHandoffUrl: externalUrls.googleFlights || "",
+      safeProviderHandoffUrl: safeProviderHandoffUrl || null,
+      safeProviderHandoffHost: String(trustedSource && trustedSource.safeProviderHandoffHost || "").trim(),
       taskId: task && task.taskId || task && task.id || "",
       taskTitle: commerceTaskRawInput(task),
       origin: fields.origin,
@@ -6119,6 +6124,10 @@
     const brain = commerceAiBrainDecisionForTask(task);
     const raw = commerceTaskRawInput(task);
     const fields = commerceIsSimpleFlightTask(task) ? commerceSimpleFlightFields(task) : {};
+    const safeProviderHandoffCandidate = commerceSafeProviderHandoffCandidateForTask(task);
+    const safeProviderHandoffUrl = safeProviderHandoffCandidate.safeProviderHandoffUrl || null;
+    const safeProviderHandoffDisabled = !safeProviderHandoffUrl;
+    const safeProviderHandoffReason = "当前平台确认链接未通过安全检查";
     const guardedHtml = opts && opts.guardedPriceCardHtml || "";
     const visibleLimitedBeta = !!guardedHtml && !/is-withheld/.test(guardedHtml);
     const limitedBetaResult = visibleLimitedBeta ? {
@@ -6236,7 +6245,7 @@
         brainDecision:brain,
         procurementCategory:brain.procurementCategory,
         limitedBetaAvailable:visibleLimitedBeta,
-        limitedBetaPriceDisplay:"Limited Beta 只读验证价",
+        limitedBetaPriceDisplay:"只读候选价",
         killSwitchState:/Limited Beta 已关闭/.test(html) ? "disabled" : "enabled",
         rollbackState:/已回滚到离线计划/.test(html) ? "rollback_active" : "not_needed",
         restrictedCategoryDecision:brain.intentStatus === "blocked" ? "blocked" : "allow",
@@ -6251,12 +6260,16 @@
     const surfaceV3 = commerceCleanResultSurfaceV3ForTask(task, opts || {});
     const surfaceV4 = commerceCleanResultSurfaceV4ForTask(task, opts || {});
     const fields = commerceIsSimpleFlightTask(task) ? commerceSimpleFlightFields(task) : {};
+    const safeProviderHandoffCandidate = commerceSafeProviderHandoffCandidateForTask(task);
+    const safeProviderHandoffUrl = safeProviderHandoffCandidate.safeProviderHandoffUrl || null;
+    const safeProviderHandoffDisabled = !safeProviderHandoffUrl;
+    const safeProviderHandoffReason = "当前平台确认链接未通过安全检查";
     const visualCards = surfaceV4.compactCards || surfaceV3.visualCards || [];
     const cards = surface.cards || [];
     const cardHtml = cards.map(function(card, index){
       const visual = visualCards[index] || (window.WeishanResultCardVisualFormatter && window.WeishanResultCardVisualFormatter.buildResultCardVisualModel ? window.WeishanResultCardVisualFormatter.buildResultCardVisualModel({ card, fareBreakdown:card.fareBreakdown, sortIntent:{ origin:fields.origin, destination:fields.destination, dateDisplay:fields.dateDisplay || fields.date, directPreference:fields.directPreference || '直达优先', sortLabel:fields.sortLabel || fields.goal || '低价优先' } }) : null) || {};
       const badges = Array.isArray(visual.badges || card.badges) ? (visual.badges || card.badges).map(function(badge){ return '<span class="commerce-result-card-badge">' + esc(badge) + '</span>'; }).join(' ') : '';
-      return '<section class="commerce-top-result-card commerce-top-result-card-polished commerce-compact-flight-card-v1" aria-label="推荐结果卡" data-top-result-rank="' + esc(String(card.rank || '')) + '"><div class="commerce-result-card-rank">#' + esc(String(visual.rank || card.rank || '')) + '</div><p class="commerce-result-card-primary-price">' + esc(visual.primaryPrice || card.priceDisplay || '暂无真实价格结果') + '</p><h5 class="commerce-result-card-route">' + esc(visual.routeLine || card.title || '结果卡') + '</h5><p class="commerce-result-card-meta">' + esc(visual.metaLine || surface.summarySubtitle || '') + '</p><p class="commerce-result-card-subtitle">' + esc(visual.priceTruthText || visual.priceSubtext || card.priceTruthLabel || '不代表真实最低价') + '</p><p class="commerce-fare-summary-line">' + esc(visual.fareSummary || visual.fareSummaryLine || '') + '</p><p class="commerce-fare-caveat-line">' + esc(visual.feeCaveat || visual.compactFareBreakdown && visual.compactFareBreakdown.caveatLine || '燃油/机建费：以平台页面为准') + '</p><p class="commerce-result-provider-line">' + esc(visual.providerLine || ('Flight Provider Sandbox · 更新时间 2026-06-20 00:00')) + '</p><div class="commerce-result-card-badges">' + badges + '</div><div class="commerce-result-card-actions"><button type="button" class="cmd-btn gray commerce-safe-provider-handoff-btn" data-commerce-safe-provider-handoff-request="true" data-commerce-safe-provider-handoff-kind="googleFlights" data-commerce-safe-provider-handoff-url="' + commerceEncodedExternalUrl(externalUrls.googleFlights) + '">去平台确认</button> <span>复制搜索条件</span></div>' + commerceFareBreakdownHtml(card, visual) + commerceProviderHandoffPanelForCard(card, task) + '</section>';
+      return '<section class="commerce-top-result-card commerce-top-result-card-polished commerce-compact-flight-card-v1" aria-label="推荐结果卡" data-top-result-rank="' + esc(String(card.rank || '')) + '"><div class="commerce-result-card-rank">#' + esc(String(visual.rank || card.rank || '')) + '</div><p class="commerce-result-card-primary-price">' + esc(visual.primaryPrice || card.priceDisplay || '暂无真实价格结果') + '</p><h5 class="commerce-result-card-route">' + esc(visual.routeLine || card.title || '结果卡') + '</h5><p class="commerce-result-card-meta">' + esc(visual.metaLine || surface.summarySubtitle || '') + '</p><p class="commerce-result-card-subtitle">' + esc(visual.priceTruthText || visual.priceSubtext || card.priceTruthLabel || '不代表真实最低价') + '</p><p class="commerce-fare-summary-line">' + esc(visual.fareSummary || visual.fareSummaryLine || '') + '</p><p class="commerce-fare-caveat-line">' + esc(visual.feeCaveat || visual.compactFareBreakdown && visual.compactFareBreakdown.caveatLine || '燃油/机建费：以平台页面为准') + '</p><p class="commerce-result-provider-line">' + esc(visual.providerLine || ('Flight Provider Sandbox · 更新时间 2026-06-20 00:00')) + '</p><div class="commerce-result-card-badges">' + badges + '</div><div class="commerce-result-card-actions"><button type="button" class="cmd-btn gray commerce-safe-provider-handoff-btn" data-commerce-safe-provider-handoff-request="true" data-commerce-safe-provider-handoff-kind="googleFlights" data-commerce-safe-provider-handoff-url="' + commerceEncodedExternalUrl(safeProviderHandoffUrl) + '"' + (safeProviderHandoffDisabled ? ' disabled' : '') + '>去平台确认</button> <span>复制搜索条件</span></div>' + (safeProviderHandoffDisabled ? '<p class="commerce-warning">' + esc(safeProviderHandoffReason) + '</p>' : '') + commerceFareBreakdownHtml(card, visual) + commerceProviderHandoffPanelForCard(card, task) + '</section>';
     }).join('');
     const emptyHint = surface.resultCardCount ? '' : '<section class="commerce-top-result-empty"><p>暂无更多可信结果</p></section>';
     return '<section class="commerce-clean-result-surface-v4" aria-label="Clean Result Surface V4"><h4>' + esc(surface.summaryTitle || '推荐结果') + '</h4><p>' + esc(surface.summarySubtitle || '') + '</p><p class="commerce-result-surface-status">' + esc(surfaceV4.statusMessage || surface.statusMessage || surfaceV3.statusMessage || '暂无真实价格结果') + '</p><p class="commerce-result-card-subtitle">' + esc(surfaceV4.priceTruthText || 'Limited Beta 只读验证价，不代表真实最低价。') + '</p><h5>推荐结果</h5>' + cardHtml + emptyHint + '<p class="commerce-result-summary-status commerce-result-safety-line"><b>提示：</b>' + esc(surfaceV4.safetyLine || surface.finalSafetyNotice || 'weishan 只做搜索和比较，不收款、不下单。最终以平台页面为准。') + '</p></section>';
@@ -6330,7 +6343,7 @@
     };
     const report = reportApi && typeof reportApi.buildRealFlightPriceEvidenceReport === "function"
       ? reportApi.buildRealFlightPriceEvidenceReport(request, { dryRunEnabled:false, hasSecureCredentialReference:false })
-      : { reportName:"real_flight_price_evidence_report_v1", mode:"read_only_beta", userFacingRealPriceEnabled:false, debugEvidenceEnabled:true, provider:{ providerId:"real_flight_fixture", providerName:"Real Flight Fixture", providerMode:"fixture", fareSource:"fixture_read_only" }, fetchSafety:{ status:"allowed", decision:"fixture_provider_allowed", readOnly:true, networkAllowed:false, booking:false, payment:false, order:false, identityUpload:false }, priceQuote:{ currency:"CNY", baseFare:860, taxesAndFees:110, providerFees:40, totalPrice:1010, priceUpdatedAt:"2026-06-20T00:00:00.000Z", freshnessStatus:"fresh", taxFeeIntegrityStatus:"complete", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null }, integrity:{ totalMatchesBreakdown:true, taxFeeIntegrityStatus:"complete", freshnessStatus:"fresh", showableAsRealPrice:false, showableAsCandidateEvidence:true, userFacingCaveatRequired:true, caveat:"价格、库存、税费和规则以平台页面为准。" }, handoff:{ safeProviderHandoffReady:true, safeProviderHandoffUrl:"https://www.google.com/travel/flights", bookingUrl:null, autoOpen:false, requiresConfirmation:true }, safety:{ checkout:"blocked", payment:"blocked", order:"blocked", identityUpload:"blocked", credentialExposure:"redacted" }, readiness:{ betaReady:true, canShowInDebugPanel:true, canReplaceMainResultCard:false, finalDecision:"debug_price_evidence_ready" }, redacted:true };
+      : { reportName:"real_flight_price_evidence_report_v1", mode:"read_only_beta", userFacingRealPriceEnabled:false, debugEvidenceEnabled:true, provider:{ providerId:"real_flight_fixture", providerName:"Real Flight Fixture", providerMode:"fixture", fareSource:"fixture_read_only" }, fetchSafety:{ status:"allowed", decision:"fixture_provider_allowed", readOnly:true, networkAllowed:false, booking:false, payment:false, order:false, identityUpload:false }, priceQuote:{ currency:"CNY", baseFare:860, taxesAndFees:110, providerFees:40, totalPrice:1010, priceUpdatedAt:"2026-06-20T00:00:00.000Z", freshnessStatus:"fresh", taxFeeIntegrityStatus:"complete", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null }, integrity:{ totalMatchesBreakdown:true, taxFeeIntegrityStatus:"complete", freshnessStatus:"fresh", showableAsRealPrice:false, showableAsCandidateEvidence:true, userFacingCaveatRequired:true, caveat:"价格、库存、税费和规则以平台页面为准。" }, handoff:{ safeProviderHandoffReady:false, safeProviderHandoffUrl:null, bookingUrl:null, autoOpen:false, requiresConfirmation:true }, safety:{ checkout:"blocked", payment:"blocked", order:"blocked", identityUpload:"blocked", credentialExposure:"redacted" }, readiness:{ betaReady:false, canShowInDebugPanel:true, canReplaceMainResultCard:false, finalDecision:"debug_price_evidence_ready" }, redacted:true };
     const provider = report.provider || {};
     const safety = report.fetchSafety || {};
     const integrity = report.integrity || {};
@@ -6380,6 +6393,11 @@
     const fields = commerceSimpleFlightFields(task);
     const copyTexts = commerceSimpleFlightCopyTexts(task);
     const externalUrls = commerceSimpleFlightExternalSearchUrls(task);
+    const registryApi = window.WeishanTrustedFlightSourceRegistry;
+    const trustedSource = registryApi && typeof registryApi.getTrustedFlightSourceById === "function"
+      ? registryApi.getTrustedFlightSourceById("google_flights_search")
+      : null;
+    const safeProviderHandoffUrl = trustedSource && trustedSource.safeProviderHandoffUrl ? String(trustedSource.safeProviderHandoffUrl).trim() : "";
     const flightLowestOffers = commerceFlightLowestOffersDisplay(task);
     const searchModeDisplay = commerceUserApiSearchModeDisplay(task);
     const apiBindingDisplay = commerceApiBindingSafeShellDisplay(task);
@@ -6409,7 +6427,8 @@
         <h4>手动核对入口</h4>
         <p>这些是人工搜索入口，不是预订链接。weishan 不自动打开、不付款、不下单。</p>
         <button class="cmd-btn gray commerce-result-summary-copy-btn" type="button" data-commerce-copy-kind="simpleFlight" data-commerce-copy-text="${commerceEncodedCopyText(copyTexts.flight)}">复制机票搜索条件</button>
-        <button class="cmd-btn gray commerce-safe-provider-handoff-btn" type="button" data-commerce-safe-provider-handoff-request="true" data-commerce-safe-provider-handoff-kind="googleFlights" data-commerce-safe-provider-handoff-url="${commerceEncodedExternalUrl(externalUrls.googleFlights)}">去平台确认</button>
+        <button class="cmd-btn gray commerce-safe-provider-handoff-btn" type="button" data-commerce-safe-provider-handoff-request="true" data-commerce-safe-provider-handoff-kind="googleFlights" data-commerce-safe-provider-handoff-url="${commerceEncodedExternalUrl(safeProviderHandoffUrl)}"${safeProviderHandoffUrl ? "" : " disabled"}>去平台确认</button>
+        ${safeProviderHandoffUrl ? "" : '<p class="commerce-warning">当前平台确认链接未通过安全检查</p>'}
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="web" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.web)}">打开全网搜索</button>
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="googleFlights" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.googleFlights)}">打开 Google Flights 搜索</button>
         <button class="cmd-btn gray commerce-external-search-btn" type="button" data-commerce-external-search-kind="tripCom" data-commerce-external-search-url="${commerceEncodedExternalUrl(externalUrls.tripCom)}">打开 Trip.com / 携程搜索</button>
@@ -6421,7 +6440,29 @@
     </section>`;
   }
 
-  function commerceGuardedFlightPriceCardHtml(){
+  function commerceGuardedFlightPriceCardHtml(task){
+    const candidateUiApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
+    if (candidateUiApi && typeof candidateUiApi.buildReadOnlyPriceCandidateCardViewModel === "function" && typeof candidateUiApi.renderReadOnlyPriceCandidateCardHtml === "function") {
+      const fields = commerceIsSimpleFlightTask(task) ? commerceSimpleFlightFields(task) : {};
+      const safeProviderHandoffCandidate = commerceSafeProviderHandoffCandidateForTask(task);
+      const candidateModel = candidateUiApi.buildReadOnlyPriceCandidateCardViewModel({
+        task,
+        providerId: safeProviderHandoffCandidate.providerId || "google_flights_search",
+        providerName: safeProviderHandoffCandidate.providerName || "Google Flights",
+        providerType: safeProviderHandoffCandidate.providerType || "flight_search",
+        report: { handoff: { safeProviderHandoffUrl: safeProviderHandoffCandidate.safeProviderHandoffUrl || null } },
+        origin: fields.origin,
+        destination: fields.destination,
+        departureDate: fields.date || fields.dateDisplay || "2026-07-15",
+        dateDisplay: fields.dateDisplay || fields.date || "7 月 15 日",
+        directPreference: fields.directPreference || "直达优先",
+        sortLabel: fields.goal || "低价优先",
+        category: "flight"
+      });
+      if (candidateModel && candidateModel.visible === true) {
+        return candidateUiApi.renderReadOnlyPriceCandidateCardHtml(candidateModel);
+      }
+    }
     const betaApi = window.WeishanLimitedRealPriceUiBetaGate;
     const manualApi = window.WeishanManualProviderReviewWorkflowV1;
     const priceApi = window.WeishanPriceIntegrityTaxesFeesGateV1;
@@ -6461,10 +6502,10 @@
       const rollbackActive = killVisibility.killSwitchState === "rollback_active" || killVisibility.killSwitchState === "forced_off";
       const restorePending = killVisibility.confirmationRequired === true || killVisibility.killSwitchState === "restore_confirmation_required" || String(killVisibility.reason || "").includes("restore");
       const restoreConfirmationHtml = restorePending
-        ? '<section class="commerce-limited-beta-restore-confirmation" data-limited-beta-restore-confirmation="true"><h5>恢复 Limited Beta 确认</h5><p>我确认仅恢复机票 Limited Beta</p><p>我理解 weishan 不提供预订链接</p><p>我理解 weishan 不付款、不下单</p><p>我理解最终以平台页面为准</p><button type="button" data-commerce-limited-beta-action="restore-confirm">确认恢复 Limited Beta</button></section>'
+        ? '<section class="commerce-read-only-price-candidate-restore-confirmation" data-read-only-price-candidate-restore-confirmation="true"><h5>恢复只读候选价确认</h5><p>我确认仅恢复机票只读候选价</p><p>我理解 weishan 不提供预订链接</p><p>我理解 weishan 不付款、不下单</p><p>我理解最终以平台页面为准</p><button type="button" data-commerce-limited-beta-action="restore-confirm">确认恢复只读候选价</button></section>'
         : "";
-      return `<section class="commerce-guarded-price-card is-withheld" aria-label="Limited Beta 已关闭">
-        <h5>${rollbackActive ? "已回滚到离线计划" : "Limited Beta 已关闭"}</h5>
+      return `<section class="commerce-guarded-price-card is-withheld" aria-label="只读候选价已关闭">
+        <h5>${rollbackActive ? "已回滚到离线计划" : "只读候选价已关闭"}</h5>
         <p>暂无真实价格结果</p>
         <p>当前不展示价格</p>
         <p>原因：${esc(killVisibility.reason || "limited beta disabled")}</p>
@@ -6475,7 +6516,7 @@
       </section>`;
     }
     if (rollbackDecision.rollbackDecision === "rollback_active") {
-      return `<section class="commerce-guarded-price-card is-withheld" aria-label="Limited Beta Rollback Active">
+      return `<section class="commerce-guarded-price-card is-withheld" aria-label="只读候选价 Rollback Active">
         <h5>已回滚到离线计划</h5>
         <p>暂无真实价格结果</p>
         <p>当前不展示价格</p>
@@ -6492,10 +6533,10 @@
         <p>原因：${esc(reason)}</p>
       </section>`;
     }
-    return `<section class="commerce-guarded-price-card" aria-label="Limited Beta 已验证只读价格卡片">
-      <h5>${esc(card.title || "Limited Beta · 已验证只读价格")}</h5>
-      <p>${esc(card.subtitle || "仅机票白名单 Beta · 不可下单 / 不可付款")}</p>
-      <p>${esc((card.requiredBadges || []).join(" · ") || "Limited Beta · 只读价格 · 不可下单 · 不可付款 · 最终以平台页面为准")}</p>
+    return `<section class="commerce-guarded-price-card" aria-label="只读候选价卡片">
+      <h5>${esc(card.title || "只读候选价 · 平台最终为准")}</h5>
+      <p>${esc(card.subtitle || "只读候选价 · 不可下单 / 不可付款")}</p>
+      <p>${esc((card.requiredBadges || []).join(" · ") || "只读候选价 · 平台最终为准 · 不可下单 · 不可付款")}</p>
       <p>来源平台：${esc(card.providerName || "Flight Provider Sandbox")}</p>
       <p>来源域名：${esc(card.sourceHostDisplayName || "Provider Sandbox")} / ${esc(card.sourceUrlHost || "provider-sandbox.invalid")}</p>
       <p>更新时间：${esc(card.updatedAt || "")}</p>
@@ -6510,11 +6551,11 @@
       <p>运费是否包含：${esc(card.shippingIncluded === "not_applicable" ? "不适用 / not_applicable" : card.shippingIncluded)}</p>
       <p>库存/余票状态：${esc(card.inventoryStatus || "")}</p>
       <p>库存/余票可靠性：${esc(card.inventoryReliability || "")}</p>
-      <p>Provider 人工审查状态：${esc(card.providerManualReviewState || "approved_for_limited_beta")}</p>
+      <p>Provider 人工审查状态：${esc(card.providerManualReviewState || "approved_for_readonly_candidate")}</p>
       <p>Beta 范围：${esc(card.betaScope || "flight only")}</p>
       <p>只读证据：${esc(card.readonlyEvidence || "")}</p>
       <p>重要提示：${esc(card.finalPageDisclaimer || "最终价格、税费、库存/余票、退改签和行李规则，以平台页面为准。")}</p>
-      <p>Limited Beta 只读价格仅用于展示验证；不保证最低价，不锁价，不代表最终成交价格。</p>
+      <p>只读候选价仅用于展示验证；不保证最低价，不锁价，不代表最终成交价格。</p>
       <p>不提供外部预订链接；不提供预订、付款、下单或证件 / 银行卡上传入口。</p>
     </section>`;
   }
@@ -7197,7 +7238,7 @@
         const pending = pendingSafeProviderHandoffConfirmation;
         if (!pending || !gateApi || typeof gateApi.openTrustedProviderHandoffUrl !== "function") return;
         pendingSafeProviderHandoffConfirmation = null;
-        Promise.resolve(gateApi.openTrustedProviderHandoffUrl(pending.url)).then((result) => {
+        Promise.resolve(gateApi.openTrustedProviderHandoffUrl(pending.url, { userConfirmed:true })).then((result) => {
           const ok = !!(result && result.ok);
           render(host);
           showCommerceExternalSearchFeedback(host, ok ? "已确认并打开可信平台确认页，请在外部平台继续确认" : "可信平台确认页未打开，请手动打开可信页面继续确认", !ok);

@@ -16,7 +16,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightFareBreakdown.js"]);
   const api = windowRef.WeishanFlightFareBreakdown;
-  assert.equal(api.FLIGHT_FARE_BREAKDOWN_VERSION, "2.1.43");
+  assert.equal(api.FLIGHT_FARE_BREAKDOWN_VERSION, "2.1.44");
 
   const fare = api.normalizeFlightFareBreakdown({
     currency:"CNY",
@@ -26,7 +26,7 @@ function main() {
     totalPayable:1010,
     taxFeeCompleteness:"partial",
     providerPriceType:"limited_beta_price",
-    providerPriceLabel:"Limited Beta 只读验证价 / 非生产成交价"
+    providerPriceLabel:"只读候选价 / 平台最终为准"
   });
 
   assert.equal(fare.fareBreakdownVersion, "flight_fare_breakdown_v1");

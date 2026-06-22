@@ -29,7 +29,7 @@ function main() {
   ]);
 
   const api = windowRef.WeishanRealFlightPriceEvidenceReport;
-  assert.equal(api.REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION, "2.1.43");
+  assert.equal(api.REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION, "2.1.44");
 
   const report = api.buildRealFlightPriceEvidenceReport({
     origin: "上海",
@@ -43,7 +43,7 @@ function main() {
   }, { dryRunEnabled: false, hasSecureCredentialReference: false });
 
   assert.equal(report.reportName, "real_flight_price_evidence_report_v1");
-  assert.equal(report.appVersion, "2.1.43");
+  assert.equal(report.appVersion, "2.1.44");
   assert.equal(report.mode, "read_only_beta");
   assert.equal(report.userFacingRealPriceEnabled, false);
   assert.equal(report.debugEvidenceEnabled, true);
@@ -101,7 +101,7 @@ function main() {
 
   const audit = api.getRealFlightPriceEvidenceReportAuditDraft({ origin: "上海", destination: "成都", departureDate: "2026-07-15" }, { dryRunEnabled: false, hasSecureCredentialReference: false });
   assert.equal(audit.eventType, "REAL_FLIGHT_PRICE_EVIDENCE_REPORT_DRAFT");
-  assert.equal(audit.appVersion, "2.1.43");
+  assert.equal(audit.appVersion, "2.1.44");
   assert.equal(audit.mode, "read_only_beta");
   assert.equal(audit.userFacingRealPriceEnabled, false);
   assert.equal(audit.debugEvidenceEnabled, true);

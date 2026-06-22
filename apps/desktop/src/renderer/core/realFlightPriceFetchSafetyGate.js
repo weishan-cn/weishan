@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const REAL_FLIGHT_PRICE_FETCH_SAFETY_GATE_VERSION = "2.1.43";
+  const REAL_FLIGHT_PRICE_FETCH_SAFETY_GATE_VERSION = "2.1.44";
   const PHASE = "real_flight_price_fetch_safety_gate_v1";
   const TRUSTED_PROVIDER_IDS = ["real_flight_fixture", "real_flight_sandbox", "google_flights_search", "trip_com_ctrip_search"];
 

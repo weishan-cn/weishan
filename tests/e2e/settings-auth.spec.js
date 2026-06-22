@@ -235,7 +235,10 @@ test.describe.serial("settings local auth hotfix", () => {
     await expect(result).toContainText("7 月 15 日");
     await expect(result).toContainText("低价优先");
     await expect(result).toContainText("暂无生产真实最低价");
-    await expect(result).toContainText("Limited Beta");
+    await expect(result).toContainText("只读候选价");
+    await expect(result).toContainText("平台最终为准");
+    await expect(result).toContainText("不代表可出票");
+    await expect(result).not.toContainText("Limited Beta");
     await expect(result).not.toContainText("日上海");
     await expect(result).not.toContainText("日期：待补充");
     await expect(result).not.toContainText(/fake price|mock price|demo price|AI 估价/i);

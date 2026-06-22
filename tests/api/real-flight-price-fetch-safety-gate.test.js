@@ -22,7 +22,7 @@ function main() {
   ]);
   const api = windowRef.WeishanRealFlightPriceFetchSafetyGate;
 
-  assert.equal(api.REAL_FLIGHT_PRICE_FETCH_SAFETY_GATE_VERSION, "2.1.43");
+  assert.equal(api.REAL_FLIGHT_PRICE_FETCH_SAFETY_GATE_VERSION, "2.1.44");
 
   const defaultGate = api.evaluateRealFlightPriceFetchSafety({ providerId: "real_flight_fixture", providerMode: "fixture" });
   assert.equal(defaultGate.status, "allowed");
@@ -62,7 +62,7 @@ function main() {
 
   const audit = api.buildRealFlightPriceFetchSafetyAudit({ providerId: "real_flight_fixture", providerMode: "fixture" });
   assert.equal(audit.eventType, "REAL_FLIGHT_PRICE_FETCH_SAFETY_GATE_DRAFT");
-  assert.equal(audit.appVersion, "2.1.43");
+  assert.equal(audit.appVersion, "2.1.44");
   assert.equal(audit.readOnly, true);
   assert.equal(audit.booking, false);
   assert.equal(audit.payment, false);

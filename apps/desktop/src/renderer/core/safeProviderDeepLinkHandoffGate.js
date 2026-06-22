@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SAFE_PROVIDER_DEEP_LINK_HANDOFF_GATE_VERSION = "2.1.43";
+  const SAFE_PROVIDER_DEEP_LINK_HANDOFF_GATE_VERSION = "2.1.44";
   const PHASE = "safe_provider_handoff_url_gate_v1";
   const TRUSTED_HOSTS = ["google.com", "trip.com", "ctrip.com", "skyscanner.com", "kayak.com", "expedia.com", "booking.com"];
   const SHORT_URL_HOSTS = ["bit.ly", "t.co", "tinyurl.com", "goo.gl", "ow.ly", "is.gd", "buff.ly", "cutt.ly", "short.link"];
@@ -42,15 +42,9 @@
 
   function buildDefaultSafeProviderHandoffUrl(candidate) {
     const safe = candidate && typeof candidate === "object" ? candidate : {};
-    const providerId = text(safe.providerId);
     if (text(safe.safeProviderHandoffUrl || safe.confirmationUrl || safe.url || "")) {
       return text(safe.safeProviderHandoffUrl || safe.confirmationUrl || safe.url || "");
     }
-    if (providerId === "google_flights_search") return "https://www.google.com/travel/flights";
-    if (providerId === "trip_com_ctrip_search") return "https://www.trip.com/flights/search";
-    if (providerId === "skyscanner_search") return "https://www.skyscanner.com/flights";
-    if (providerId === "kayak_search") return "https://www.kayak.com/flights";
-    if (providerId === "expedia_search") return "https://www.expedia.com/Flights";
     return "";
   }
 
@@ -167,21 +161,30 @@
     });
   }
 
-  function openTrustedProviderHandoffUrl(url) {
+  function openTrustedProviderHandoffUrl(url, options) {
     const safeUrl = sanitizeSafeProviderHandoffUrl(url);
+    const userConfirmed = options && typeof options === "object" && options.userConfirmed === true;
+    if (!userConfirmed) {
+      return Promise.resolve({
+        ok: false,
+        confirmed: false,
+        reason: "user_confirmation_required",
+        gate: evaluateSafeProviderHandoffUrl({ safeProviderHandoffUrl: url })
+      });
+    }
     if (!safeUrl) {
-      return Promise.resolve({ ok: false, gate: evaluateSafeProviderHandoffUrl({ safeProviderHandoffUrl: url }) });
+      return Promise.resolve({ ok: false, confirmed: true, gate: evaluateSafeProviderHandoffUrl({ safeProviderHandoffUrl: url }) });
     }
     if (typeof window.__WEISHAN_TEST_OPEN_EXTERNAL__ === "function") {
-      return Promise.resolve(window.__WEISHAN_TEST_OPEN_EXTERNAL__(safeUrl)).then(() => ({ ok: true, url: safeUrl })).catch(() => ({ ok: false, url: safeUrl }));
+      return Promise.resolve(window.__WEISHAN_TEST_OPEN_EXTERNAL__(safeUrl)).then(() => ({ ok: true, confirmed: true, url: safeUrl })).catch(() => ({ ok: false, confirmed: true, url: safeUrl }));
     }
     if (window.WeishanAPI && typeof window.WeishanAPI.openExternal === "function") {
-      return Promise.resolve(window.WeishanAPI.openExternal(safeUrl)).then(() => ({ ok: true, url: safeUrl })).catch(() => ({ ok: false, url: safeUrl }));
+      return Promise.resolve(window.WeishanAPI.openExternal(safeUrl)).then(() => ({ ok: true, confirmed: true, url: safeUrl })).catch(() => ({ ok: false, confirmed: true, url: safeUrl }));
     }
     if (window.weishan && typeof window.weishan.openExternal === "function") {
-      return Promise.resolve(window.weishan.openExternal(safeUrl)).then(() => ({ ok: true, url: safeUrl })).catch(() => ({ ok: false, url: safeUrl }));
+      return Promise.resolve(window.weishan.openExternal(safeUrl)).then(() => ({ ok: true, confirmed: true, url: safeUrl })).catch(() => ({ ok: false, confirmed: true, url: safeUrl }));
     }
-    return Promise.resolve({ ok: false, url: safeUrl });
+    return Promise.resolve({ ok: false, confirmed: true, url: safeUrl });
   }
 
   function assertSafeProviderDeepLinkHandoffGateSafe(value) {

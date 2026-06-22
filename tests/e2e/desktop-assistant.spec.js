@@ -111,7 +111,9 @@ test.describe.serial("desktop assistant paused safety framework", () => {
     await submitHomeCommand(page, runId + " 帮我找 7 月 15 日成都到上海最便宜机票");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索结果");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无生产真实最低价");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("Limited Beta");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("只读候选价");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("平台最终为准");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不代表可出票");
     await expect(currentTaskLogs(page)).not.toContainText("commerceAgent.plan");
     await expect(currentTaskLogs(page)).not.toContainText("realExecution=false");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText(/不收款|不下单/);

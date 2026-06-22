@@ -15,10 +15,10 @@ function load(files) {
   return window;
 }
 
-function main() {
+async function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/safeProviderDeepLinkHandoffGate.js"]);
   const api = windowRef.WeishanSafeProviderDeepLinkHandoffGate;
-  assert.equal(api.SAFE_PROVIDER_DEEP_LINK_HANDOFF_GATE_VERSION, "2.1.43");
+  assert.equal(api.SAFE_PROVIDER_DEEP_LINK_HANDOFF_GATE_VERSION, "2.1.44");
 
   const safe = api.evaluateSafeProviderDeepLinkHandoff({
     providerId: "google_flights_search",
@@ -59,6 +59,16 @@ function main() {
   assert.equal(blocked.blockedReasons.includes("credential params blocked"), true);
   assert.equal(blocked.blockedReasons.includes("restricted category blocked"), true);
 
+  const missingUrlBlocked = api.evaluateSafeProviderDeepLinkHandoff({
+    providerId: "google_flights_search",
+    providerName: "Google Flights",
+    searchOnly: true
+  });
+  assert.equal(missingUrlBlocked.status, "blocked");
+  assert.equal(missingUrlBlocked.providerConfirmationLink, "disabled");
+  assert.equal(missingUrlBlocked.safeProviderHandoffUrl, null);
+  assert.equal(missingUrlBlocked.blockedReasons.includes("missing safe provider handoff url"), true);
+
   const audit = api.getSafeProviderDeepLinkHandoffGateAuditDraft({ providerId: "google_flights_search", searchOnly: true, url: "https://www.google.com/travel/flights" });
   assert.equal(audit.eventType, "SAFE_PROVIDER_HANDOFF_URL_GATE_DRAFT");
   assert.equal(audit.userConfirmationRequired, true);
@@ -76,7 +86,21 @@ function main() {
   assert.equal(JSON.stringify(safe).includes("rawApiKey"), false);
   assert.equal(typeof api.openTrustedProviderHandoffUrl, "function");
 
+  const confirmationBlocked = await Promise.resolve(api.openTrustedProviderHandoffUrl("https://www.google.com/travel/flights"));
+  assert.equal(confirmationBlocked.ok, false);
+  assert.equal(confirmationBlocked.confirmed, false);
+  assert.equal(confirmationBlocked.reason, "user_confirmation_required");
+
+  windowRef.__WEISHAN_TEST_OPEN_EXTERNAL__ = () => ({ ok: true });
+  const confirmationOpened = await Promise.resolve(api.openTrustedProviderHandoffUrl("https://www.google.com/travel/flights", { userConfirmed: true }));
+  assert.equal(confirmationOpened.ok, true);
+  assert.equal(confirmationOpened.confirmed, true);
+  assert.equal(confirmationOpened.url.startsWith("https://www.google.com/travel/flights"), true);
+
   console.log("SAFE_PROVIDER_DEEP_LINK_HANDOFF_GATE_CORE PASS");
 }
 
-main();
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

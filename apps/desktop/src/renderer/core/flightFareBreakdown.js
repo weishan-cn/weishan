@@ -1,5 +1,5 @@
 (function(){
-  const FLIGHT_FARE_BREAKDOWN_VERSION = "2.1.43";
+  const FLIGHT_FARE_BREAKDOWN_VERSION = "2.1.44";
   const UNKNOWN_FINAL_PAGE = "未单独提供 / 以平台页面为准";
   const WITHHELD_PRICE_LABEL = "价格暂不展示";
   const ALLOWED_PRICE_TYPES = ["production_price", "limited_beta_price", "sandbox_test_price", "unknown"];
@@ -53,7 +53,7 @@
       subsidy:numberOrNull(safe.subsidy),
       totalPayable:numberOrNull(safe.totalPayable),
       taxFeeCompleteness:completeness(safe.taxFeeCompleteness),
-      providerPriceLabel:text(safe.providerPriceLabel || "Limited Beta 只读验证价 / 非生产成交价"),
+      providerPriceLabel:text(safe.providerPriceLabel || "只读候选价 / 平台最终为准"),
       providerPriceType:priceType(safe.providerPriceType),
       finalPageDisclaimer:text(safe.finalPageDisclaimer || "最终以平台页面为准"),
       redacted:true

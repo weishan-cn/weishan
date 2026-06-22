@@ -17,7 +17,7 @@ function main(){
     "apps/desktop/src/renderer/core/compactFlightResultCardV1.js"
   ]);
   const api = windowRef.WeishanCompactFlightResultCardV1;
-  assert.equal(api.COMPACT_FLIGHT_RESULT_CARD_V1_VERSION, "2.1.43");
+  assert.equal(api.COMPACT_FLIGHT_RESULT_CARD_V1_VERSION, "2.1.44");
   const fare = windowRef.WeishanFlightFareBreakdown.normalizeFlightFareBreakdown({ baseFare:860, taxes:110, otherFees:40, totalPayable:1010, providerPriceType:"limited_beta_price", taxFeeCompleteness:"partial" });
   const card = api.buildCompactFlightResultCard({ origin:"上海", destination:"成都", dateDisplay:"7 月 15 日", directPreference:"直达优先", sortLabel:"低价优先", fareBreakdown:fare });
   assert.equal(card.cardVersion, "compact_flight_result_card_v1");
@@ -26,9 +26,9 @@ function main(){
   assert.equal(card.metaLine, "7 月 15 日 · 直达优先 · 低价优先");
   assert.equal(card.fareSummary, "票面价 ¥860｜税费 ¥110｜附加费 ¥40");
   assert.equal(card.detailFareBreakdownCollapsedByDefault, true);
-  assert.deepEqual(Array.from(card.badges), ["Limited Beta", "只读价格", "不可下单", "以平台页面为准"]);
-  assert.equal(card.badgeDisplayText, "[Limited Beta] [只读价格] [不可下单] [以平台页面为准]");
-  assert.equal(card.badgeDisplayText.includes("Limited Beta只读价格"), false);
+  assert.deepEqual(Array.from(card.badges), ["只读候选价", "平台最终为准", "未锁价", "不代表可出票"]);
+  assert.equal(card.badgeDisplayText, "[只读候选价] [平台最终为准] [未锁价] [不代表可出票]");
+  assert.equal(card.badgeDisplayText.includes("只读候选价平台最终为准"), false);
   assert.equal(card.bookingUrl, null);
   assert.equal(card.payment, false);
   assert.equal(card.order, false);

@@ -8505,7 +8505,7 @@ test.describe.serial("commerce agent workbench", () => {
     const cases = [
       {
         input:runId + "-SMOKE-FLIGHT 购买7月15日上海到成都最便宜的直达机票",
-        expected:["机票搜索结果", "出发地：上海", "目的地：成都", "日期：7 月 15 日", "直达偏好：直达优先", "排序：低价优先", "推荐结果", "Limited Beta", "暂无生产真实最低价", "不代表真实最低价", "去平台确认", "手动核对入口"]
+        expected:["机票搜索结果", "出发地：上海", "目的地：成都", "日期：7 月 15 日", "直达偏好：直达优先", "排序：低价优先", "推荐结果", "只读候选价", "平台最终为准", "未锁价", "不代表可出票", "去平台确认", "手动核对入口"]
       },
       {
         input:runId + "-SMOKE-HOTEL 帮我找成都春熙路附近 7 月 12 日入住 7 月 14 日离店的酒店",
@@ -8543,12 +8543,12 @@ test.describe.serial("commerce agent workbench", () => {
         await expect(flightCard).toContainText("票面价 ¥860｜税费 ¥110｜附加费 ¥40");
         await expect(flightCard).toContainText("燃油/机建费：以平台页面为准");
         await expect(flightCard.locator(".commerce-result-card-badge")).toHaveCount(4);
-        await expect(flightCard).toContainText("Limited Beta");
-        await expect(flightCard).toContainText("只读价格");
-        await expect(flightCard).toContainText("不可下单");
-        await expect(flightCard).toContainText("以平台页面为准");
-        await expect(flightCard).not.toContainText("Limited Beta只读价格不可下单最终以平台页面为准");
-        await expect(flightCard).not.toContainText("Limited Beta只读价格不可下单以平台页面为准");
+        await expect(flightCard).toContainText("只读候选价");
+        await expect(flightCard).toContainText("平台最终为准");
+        await expect(flightCard).toContainText("未锁价");
+        await expect(flightCard).toContainText("不代表可出票");
+        await expect(flightCard).not.toContainText("只读候选价平台最终为准未锁价不代表可出票");
+        await expect(flightCard).not.toContainText("只读候选价平台最终为准未锁价不代表可出票去平台确认");
         await expect(flightCard).not.toContainText("autoOpen: false");
         await expect(flightCard).not.toContainText("payment: false");
         await expect(flightCard).not.toContainText("order: false");
@@ -8601,7 +8601,7 @@ test.describe.serial("commerce agent workbench", () => {
         await handoffNote.evaluate((el) => { if (!el.open) el.open = true; el.setAttribute("open", ""); });
         await expect(handoffNote).toContainText("核对平台域名");
         await expect(handoffNote).toContainText("不向未知平台提交身份证、护照或银行卡");
-        await expect(summary).not.toContainText(/最低价已找到|保证最低价|锁价|最便宜结果/);
+        await expect(summary).not.toContainText(/最低价已找到|保证最低价|最便宜结果/);
       } else {
         await expect(summary).not.toContainText(/¥\s*\d+/);
       }

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const REAL_FLIGHT_PRICE_PROVIDER_ADAPTER_SLOT_VERSION = "2.1.43";
+  const REAL_FLIGHT_PRICE_PROVIDER_ADAPTER_SLOT_VERSION = "2.1.44";
   const SLOT_NAME = "real_flight_price_provider_adapter_slot_v1";
 
   function clone(value) {
@@ -25,7 +25,7 @@
       providerName: "Google Flights",
       providerType: "flight_search",
       searchOnly: true,
-      safeProviderHandoffUrl: "https://www.google.com/travel/flights",
+      safeProviderHandoffUrl: null,
       restrictedCategory: false
     };
     if (typeof gateApi.evaluateSafeProviderDeepLinkHandoff === "function") {
@@ -36,8 +36,8 @@
       status: "confirmation_required",
       candidateDecision: "safe_provider_handoff_ready",
       providerConfirmationLink: "confirmation_required",
-      safeProviderHandoffUrl: candidate.safeProviderHandoffUrl,
-      safeProviderHandoffHost: "google.com",
+      safeProviderHandoffUrl: null,
+      safeProviderHandoffHost: "",
       userConfirmationRequired: true,
       autoOpen: false,
       bookingUrl: null,

@@ -1,5 +1,5 @@
 (function(){
-  const RESULT_CARD_VISUAL_FORMATTER_VERSION = "2.1.43";
+  const RESULT_CARD_VISUAL_FORMATTER_VERSION = "2.1.44";
   const HIDDEN_DEBUG_FIELDS = ["Cheapest Truth Guard", "not_ranked_as_real_cheapest", "canClaimCheapest", "canParticipateInCheapestRanking", "guardName", "internal enum", "rollbackDecision JSON", "audit draft", "raw schema", "raw provider payload"];
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value){ return String(value == null ? "" : value).trim(); }
@@ -30,14 +30,14 @@
     const compact = compactFareBreakdown(fare);
     const routeLine = text(card.title || ((sortIntent.origin || "上海") + " → " + (sortIntent.destination || "成都"))).replace(/\s*·.*$/, "");
     const metaLine = [sortIntent.dateDisplay || "7 月 15 日", sortIntent.directPreference || "直达优先", sortIntent.sortLabel || "低价优先"].filter(Boolean).join(" · ");
-    const badges = window.WeishanResultBadgeFormatter && window.WeishanResultBadgeFormatter.formatResultBadges ? window.WeishanResultBadgeFormatter.formatResultBadges(card.badges || ["Limited Beta", "只读价格", "不可下单", "最终以平台页面为准"]) : { badges:card.badges || [], displayText:"", badgeSeparated:true };
+    const badges = window.WeishanResultBadgeFormatter && window.WeishanResultBadgeFormatter.formatResultBadges ? window.WeishanResultBadgeFormatter.formatResultBadges(card.badges || ["只读候选价", "平台最终为准", "未锁价", "不代表可出票"]) : { badges:card.badges || [], displayText:"", badgeSeparated:true };
     const model = {
       visualCardVersion:"result_card_visual_v1",
       formatterVersion:RESULT_CARD_VISUAL_FORMATTER_VERSION,
       routeLine,
       metaLine,
       primaryPrice:text(card.priceDisplay || "暂无真实价格结果"),
-      priceSubtext:text(card.priceTruthLabel || "Limited Beta 只读验证价，不代表真实最低价"),
+      priceSubtext:text(card.priceTruthLabel || "只读候选价，不代表真实最低价"),
       providerLine:"来源：" + text(card.providerName || "Flight Provider Sandbox"),
       updatedAtLine:"更新时间：" + text(card.updatedAt || "待人工核对").replace("T", " ").replace(/\.\d{3}Z$/, ""),
       fareSummaryLine:compact.summaryLine,
@@ -80,7 +80,7 @@
       if ((value.routeLine + value.metaLine + value.fareSummaryLine + value.badgeDisplayText).includes(field)) throw new Error("visual model leaked internal debug field");
     });
     if (value.bookingUrl !== null || value.payment !== false || value.order !== false || value.identityUpload !== false) throw new Error("visual model unsafe action state");
-    if (/Limited Beta只读价格不可下单/.test(serial)) throw new Error("visual model concatenated badges");
+    if (/只读候选价平台最终为准未锁价不代表可出票/.test(serial)) throw new Error("visual model concatenated badges");
     if (!value.audit || value.audit.redacted !== true) throw new Error("visual audit must be redacted");
     return true;
   }

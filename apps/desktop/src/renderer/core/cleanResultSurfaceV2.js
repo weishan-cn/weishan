@@ -1,5 +1,5 @@
 (function(){
-  const CLEAN_RESULT_SURFACE_V2_VERSION = "2.1.43";
+  const CLEAN_RESULT_SURFACE_V2_VERSION = "2.1.44";
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value){ return String(value == null ? "" : value).trim(); }
   function list(value){ return Array.isArray(value) ? value.filter(Boolean) : []; }
@@ -50,7 +50,7 @@
     if (mode === "blocked") statusMessage = "安全阻断";
     else if (mode === "needs_clarification") statusMessage = "请补充关键信息";
     else if (hasReal) statusMessage = "已找到 " + cardsResult.cardCount + " 条可信只读价格结果";
-    else if (hasLimitedBeta) statusMessage = "暂无生产真实最低价；以下为 Limited Beta 只读验证价，仅用于展示流程验证，不代表真实最低价。";
+    else if (hasLimitedBeta) statusMessage = "暂无生产真实最低价；以下为只读候选价，仅用于展示流程验证，不代表真实最低价。";
     else statusMessage = "暂无真实价格结果；你可以复制搜索条件，前往官方平台手动核对。";
     const hints = dedupeUserFacingSafetyHints([statusMessage, "weishan 只做搜索和比较，不收款、不下单。最终价格、库存、税费、行李和退改签以平台页面为准。"]);
     const safetyHint = hints.find((item) => /^weishan 只做搜索和比较/.test(item)) || "weishan 只做搜索和比较，不收款、不下单。最终价格、库存、税费、行李和退改签以平台页面为准。";

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const MANUAL_BOOKING_HANDOFF_VERSION = "2.1.43";
+  const MANUAL_BOOKING_HANDOFF_VERSION = "2.1.44";
 
   function clone(value) {
     return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;

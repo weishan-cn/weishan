@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CONFIRMATION_HANDOFF_UI_VERSION = "2.1.43";
+  const PROVIDER_CONFIRMATION_HANDOFF_UI_VERSION = "2.1.44";
   const PHASE = "provider_confirmation_handoff_ui_stub";
 
   function clone(value) {
@@ -29,7 +29,7 @@
       status: allowed ? "confirmation_required" : "blocked",
       summary: allowed
         ? "只允许确认后打开可信平台确认页，不自动打开、不付款、不下单。"
-        : "当前确认页被阻断，不能打开平台确认页。",
+        : "当前平台确认链接未通过安全检查，不能打开平台确认页。",
       candidateDecision: text(safe.candidateDecision || (allowed ? "safe_provider_handoff_ready" : "blocked")),
       providerConfirmationLink: allowed ? "confirmation_required" : "disabled",
       safeProviderHandoffUrl: safeProviderHandoffUrl || null,

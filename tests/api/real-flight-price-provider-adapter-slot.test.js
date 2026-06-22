@@ -24,7 +24,7 @@ function main() {
   ]);
   const api = windowRef.WeishanRealFlightPriceProviderAdapterSlot;
 
-  assert.equal(api.REAL_FLIGHT_PRICE_PROVIDER_ADAPTER_SLOT_VERSION, "2.1.43");
+  assert.equal(api.REAL_FLIGHT_PRICE_PROVIDER_ADAPTER_SLOT_VERSION, "2.1.44");
 
   const slot = api.getRealFlightPriceProviderAdapterSlotStatus();
   assert.equal(slot.slotName, "real_flight_price_provider_adapter_slot_v1");
@@ -72,8 +72,8 @@ function main() {
   assert.equal(quote.order, false);
   assert.equal(quote.identityUpload, false);
   assert.equal(quote.redacted, true);
-  assert.equal(quote.handoffCandidate.providerConfirmationLink, "confirmation_required");
-  assert.equal(quote.handoffCandidate.safeProviderHandoffUrl.startsWith("https://www.google.com/travel/flights"), true);
+  assert.equal(quote.handoffCandidate.providerConfirmationLink, "disabled");
+  assert.equal(quote.handoffCandidate.safeProviderHandoffUrl, null);
 
   const sandboxSlot = api.getRealFlightPriceProviderAdapterSlotStatus({ providerMode: "sandbox", dryRunEnabled: true, hasSecureCredentialReference: true });
   assert.equal(sandboxSlot.providerMode, "sandbox");

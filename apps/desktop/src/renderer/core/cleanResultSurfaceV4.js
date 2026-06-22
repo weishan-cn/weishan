@@ -1,5 +1,5 @@
 (function(){
-  const CLEAN_RESULT_SURFACE_V4_VERSION = "2.1.43";
+  const CLEAN_RESULT_SURFACE_V4_VERSION = "2.1.44";
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function buildCleanResultSurfaceV4(input){
     const safe = input && typeof input === "object" ? input : {};
@@ -45,7 +45,7 @@
       compactCards,
       resultCardCount:compactCards.length,
       statusMessage:restricted ? "安全阻断" : "暂无生产真实最低价",
-      priceTruthText:"Limited Beta 只读验证价，不代表真实最低价。",
+      priceTruthText:"只读候选价，不代表真实最低价。",
       safetyLine:"weishan 只做搜索和比较，不收款、不下单。最终价格、库存、税费、行李和退改签以平台页面为准。",
       providerReadiness:{
         flight_provider:{ compactFlightResultCard:"active", userSurfaceDebugFilter:"active", manualHandoffUxV3:"manual-only", manualVerificationGroupV2:"active", taskHistorySummaryFormatter:"active", cleanResultSurfaceV4:"active", bookingUrlHandoff:"disabled", paymentOrder:"disabled", finalDecision:"limited-beta-ready" },

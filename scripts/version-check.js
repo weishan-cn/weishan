@@ -160,6 +160,27 @@ function checkFlightReadonlyStubAdapterVersion(results, expectedVersion) {
   );
 }
 
+function checkReadOnlyPriceCandidateCardViewModelVersion(results, expectedVersion) {
+  const candidatePath = "apps/desktop/src/renderer/core/readOnlyPriceCandidateCardViewModel.js";
+  const candidate = readText(candidatePath);
+  if (!candidate) {
+    results.push({ name: "apps/desktop read only price candidate card view model version", pass: false, detail: candidatePath + " missing" });
+    return;
+  }
+  if (candidate.__readError) {
+    results.push({ name: "apps/desktop read only price candidate card view model version", pass: false, detail: candidate.__readError });
+    return;
+  }
+  const match = candidate.match(/READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(
+    results,
+    "apps/desktop read only price candidate card view model version",
+    expectedVersion,
+    match && match[1],
+    "package.json must match apps/desktop/src/renderer/core/readOnlyPriceCandidateCardViewModel.js READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION"
+  );
+}
+
 function checkFlightSandboxDryRunVersion(results, expectedVersion) {
   const sandboxPath = "apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js";
   const sandbox = readText(sandboxPath);
@@ -1457,6 +1478,7 @@ function runVersionCheck() {
     checkFlightProviderApprovalVersion(results, rootPackage.version);
     checkFlightReadonlyStubPermissionVersion(results, rootPackage.version);
     checkFlightReadonlyStubAdapterVersion(results, rootPackage.version);
+    checkReadOnlyPriceCandidateCardViewModelVersion(results, rootPackage.version);
     checkFlightSandboxDryRunVersion(results, rootPackage.version);
     checkFlightSandboxProviderMatrixVersion(results, rootPackage.version);
     checkTrustedFlightSourceEvidenceReportVersion(results, rootPackage.version);

@@ -1,5 +1,5 @@
 (function(){
-  const TOP_RESULT_CARDS_BUILDER_VERSION = "2.1.43";
+  const TOP_RESULT_CARDS_BUILDER_VERSION = "2.1.44";
   const MAX_CARD_COUNT = 3;
   const ALLOWED_ACTION_TYPES = ["manual_confirm", "copy_search_conditions", "external_search_manual", "provider_handoff_preview"];
   const FORBIDDEN_ACTION_TYPES = ["booking", "payment", "order", "checkout", "auto_purchase", "identity_upload"];
@@ -122,7 +122,7 @@
       rank,
       cardType:"limited_beta_price",
       title:text(candidate.title || cardTitleForFlight(intent)),
-      subtitle:"Limited Beta · 只读价格验证 · 非生产成交价",
+      subtitle:"只读候选价 · 平台最终为准 · 不代表可出票",
       priceDisplay:price,
       fareBreakdown,
       providerPriceType:"limited_beta_price",
@@ -130,18 +130,18 @@
       priceIntegrityDecision:"pass",
       resultSchemaDecision:"pass",
       manualReviewDecision:"draft",
-      priceTruthLabel:"Limited Beta 只读验证价，不代表真实最低价",
+      priceTruthLabel:"只读候选价，不代表真实最低价",
       cheapestClaim:false,
       rankingMode:"not_ranked_as_real_cheapest",
       canParticipateInCheapestRanking:false,
       finalPayableLabel:"最终应付总价：" + (fareBreakdown.priceDisplay || price),
-      providerName:text(candidate.providerName || "Flight Provider Sandbox"),
-      sourceHostDisplayName:text(candidate.sourceHostDisplayName || "Provider Sandbox"),
+      providerName:text(candidate.providerName || "Google Flights"),
+      sourceHostDisplayName:text(candidate.sourceHostDisplayName || "Google Flights"),
       updatedAt:text(candidate.updatedAt || "2026-06-20T00:00:00.000Z"),
       taxFeeSummary:text(candidate.taxFeeSummary || "税费已包含 / 附加费已包含"),
       inventoryReliability:text(candidate.inventoryReliability || "sandbox evidence only / final platform page controls"),
-      recommendationReason:text(candidate.recommendationReason || "当前仅用于验证结果卡展示，不代表最终成交价。"),
-      badges:["Limited Beta", "只读价格", "不可下单", "最终以平台页面为准"],
+      recommendationReason:text(candidate.recommendationReason || "当前仅用于展示候选价，不代表最终成交价。"),
+      badges:["只读候选价", "平台最终为准", "未锁价", "不代表可出票"],
       actionLabel:"去平台确认",
       actionType:"provider_handoff_preview",
       actionSafety:"manual only / no auto open / no bookingUrl"

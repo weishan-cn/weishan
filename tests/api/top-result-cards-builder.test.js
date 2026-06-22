@@ -7,7 +7,7 @@ function load(files){ const window = {}; window.window = window; const context =
 function main(){
   const windowRef = load(["apps/desktop/src/renderer/core/flightFareBreakdown.js", "apps/desktop/src/renderer/core/cheapestTruthGuard.js", "apps/desktop/src/renderer/core/topResultCardsBuilder.js"]);
   const api = windowRef.WeishanTopResultCardsBuilder;
-  assert.equal(api.TOP_RESULT_CARDS_BUILDER_VERSION, "2.1.43");
+  assert.equal(api.TOP_RESULT_CARDS_BUILDER_VERSION, "2.1.44");
   const clearFlight = api.buildTopResultCards({ procurementCategory:"flight", normalizedSearchIntent:{ category:"flight", origin:"上海", destination:"成都", dateDisplay:"7月15日", preference:"直达优先" }, limitedBetaResult:{ enabled:true, priceDisplay:"¥1010" }, sortPreference:"低价优先", restrictedCategoryDecision:"allow" });
   assert.equal(clearFlight.resultCardMode, "top_results");
   assert.equal(clearFlight.cardCount, 1);
@@ -15,7 +15,7 @@ function main(){
   assert.equal(clearFlight.cards[0].cardType, "limited_beta_price");
   assert.equal(clearFlight.cards[0].priceDisplay, "¥1010");
   assert.equal(clearFlight.cards[0].finalPayableLabel, "最终应付总价：¥1010");
-  assert.equal(clearFlight.cards[0].priceTruthLabel, "Limited Beta 只读验证价，不代表真实最低价");
+  assert.equal(clearFlight.cards[0].priceTruthLabel, "只读候选价，不代表真实最低价");
   assert.equal(clearFlight.cards[0].cheapestClaim, false);
   assert.equal(clearFlight.cards[0].canParticipateInCheapestRanking, false);
   assert.equal(clearFlight.cards[0].rankingMode, "not_ranked_as_real_cheapest");
@@ -23,6 +23,7 @@ function main(){
   assert.equal(clearFlight.cards[0].fareBreakdown.taxFeeCompleteness, "partial");
   assert.equal(clearFlight.cards[0].fareBreakdown.displayRows.find((row) => row.label === "最终应付总价").value, "¥1010");
   assert.equal(clearFlight.cards[0].actionType, "provider_handoff_preview");
+  assert.deepEqual(Array.from(clearFlight.cards[0].badges), ["只读候选价", "平台最终为准", "未锁价", "不代表可出票"]);
   assert.equal(clearFlight.cards[0].bookingUrl, null);
   assert.equal(clearFlight.cards[0].payment, false);
   assert.equal(clearFlight.cards[0].order, false);
