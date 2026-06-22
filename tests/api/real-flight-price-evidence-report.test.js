@@ -13,6 +13,7 @@ function main() {
     "apps/desktop/src/renderer/core/providerConfirmationHandoffUi.js",
     "apps/desktop/src/renderer/core/trustedFlightSourceEvidenceReport.js",
     "apps/desktop/src/renderer/core/realFlightPriceReadOnlyProviderContract.js",
+    "apps/desktop/src/renderer/core/providerCredentialReadinessPanel.js",
     "apps/desktop/src/renderer/core/singleFlightProviderSandboxConnector.js",
     "apps/desktop/src/renderer/core/realFlightPriceFetchSafetyGate.js",
     "apps/desktop/src/renderer/core/realFlightPriceProviderAdapterSlot.js",
@@ -21,11 +22,11 @@ function main() {
   ]);
 
   const api = windowRef.WeishanRealFlightPriceEvidenceReport;
-  assert.equal(api.REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION, "2.1.45");
+  assert.equal(api.REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION, "2.1.46");
 
   const report = api.buildRealFlightPriceEvidenceReport({ origin:"上海", destination:"成都", departureDate:"2026-07-15" });
   assert.equal(report.reportName, "real_flight_price_evidence_report_v1");
-  assert.equal(report.appVersion, "2.1.45");
+  assert.equal(report.appVersion, "2.1.46");
   assert.equal(report.mode, "read_only_beta");
   assert.equal(report.userFacingRealPriceEnabled, false);
   assert.equal(report.providerConnector.connectorName, "single_flight_provider_sandbox_connector_v1");
@@ -45,7 +46,14 @@ function main() {
   assert.equal(report.readiness.userFacingRealPriceEnabled, false);
   assert.equal(report.readiness.showableAsRealPrice, false);
   assert.equal(report.readiness.canReplaceMainResultCard, false);
-  assert.equal(report.readiness.finalDecision, "fixture_candidate_card_ready");
+  assert.equal(report.readiness.finalDecision, "fixture_refresh_ready");
+  assert.equal(report.refresh.refreshSupported, true);
+  assert.equal(report.refresh.refreshMode, "fixture");
+  assert.equal(report.refresh.lastRefreshStatus, "not_run");
+  assert.equal(report.refresh.userTriggeredOnly, true);
+  assert.equal(report.refresh.autoRefresh, false);
+  assert.equal(report.credentialReadiness.status, "fixture_ready");
+  assert.equal(report.credentialReadiness.productionProviderEnabled, false);
 
   const sandboxReport = api.buildRealFlightPriceEvidenceReport({ origin:"上海", destination:"成都", departureDate:"2026-07-15", providerMode:"sandbox_read_only" }, { providerMode:"sandbox_read_only", providerId:"google_flights_search", sandboxDryRunEnabled:true, hasSecureCredentialReference:true });
   assert.equal(sandboxReport.mode, "sandbox_read_only_evidence");
@@ -56,7 +64,9 @@ function main() {
   assert.equal(sandboxReport.fetchSafety.status, "allowed");
   assert.equal(sandboxReport.readiness.canUseFixtureEvidence, false);
   assert.equal(sandboxReport.readiness.canUseSandboxReadOnlyEvidence, true);
-  assert.equal(sandboxReport.readiness.finalDecision, "sandbox_read_only_evidence_ready");
+  assert.equal(sandboxReport.readiness.finalDecision, "sandbox_read_only_refresh_ready");
+  assert.equal(sandboxReport.credentialReadiness.status, "sandbox_ready");
+  assert.equal(sandboxReport.refresh.refreshMode, "sandbox_read_only");
   assert.equal(sandboxReport.userFacingRealPriceEnabled, false);
   assert.equal(sandboxReport.readiness.canReplaceMainResultCard, false);
 
@@ -64,7 +74,8 @@ function main() {
   assert.equal(productionReport.providerConnector.providerMode, "production_disabled");
   assert.equal(productionReport.providerConnector.status, "disabled");
   assert.equal(productionReport.providerConnector.productionProviderEnabled, false);
-  assert.equal(productionReport.readiness.finalDecision, "disabled");
+  assert.equal(productionReport.readiness.finalDecision, "refresh_disabled");
+  assert.equal(productionReport.refresh.refreshMode, "disabled");
 
   const blockedReport = api.buildRealFlightPriceEvidenceReport({ restrictedCategoryDecision:"blocked" });
   assert.equal(blockedReport.fetchSafety.status, "blocked");
@@ -74,7 +85,7 @@ function main() {
 
   const summary = api.summarizeRealFlightPriceEvidenceReport(sandboxReport);
   assert.equal(summary.connectorStatus, "sandbox_ready");
-  assert.equal(summary.finalDecision, "sandbox_read_only_evidence_ready");
+  assert.equal(summary.finalDecision, "sandbox_read_only_refresh_ready");
   assert.equal(summary.canReplaceMainResultCard, false);
 
   const readiness = api.evaluateRealFlightPriceBetaReadiness(sandboxReport);
@@ -83,13 +94,15 @@ function main() {
   assert.equal(readiness.showableAsRealPrice, false);
 
   const audit = api.getRealFlightPriceEvidenceReportAuditDraft({ origin:"上海", destination:"成都" });
-  assert.equal(audit.appVersion, "2.1.45");
+  assert.equal(audit.appVersion, "2.1.46");
   assert.equal(audit.connectorStatus, "fixture_ready");
   assert.equal(audit.bookingUrlDisplayedCount, 0);
   assert.equal(audit.paymentAttemptCount, 0);
   assert.equal(audit.orderAttemptCount, 0);
   assert.equal(audit.identityUploadAttemptCount, 0);
   assert.equal(audit.realProviderCallCount, 0);
+  assert.equal(audit.lastRefreshStatus, "not_run");
+  assert.equal(audit.autoRefresh, false);
 
   assert.equal(api.assertRealFlightPriceEvidenceReportSafe(report), true);
   const serialized = JSON.stringify({ report, sandboxReport, productionReport, blockedReport });

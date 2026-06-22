@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SINGLE_FLIGHT_PROVIDER_SANDBOX_CONNECTOR_VERSION = "2.1.45";
+  const SINGLE_FLIGHT_PROVIDER_SANDBOX_CONNECTOR_VERSION = "2.1.46";
   const CONNECTOR_NAME = "single_flight_provider_sandbox_connector_v1";
   const FALLBACK_PROVIDER_IDS = ["google_flights_search", "trip_com_ctrip_search"];
 
@@ -20,6 +20,10 @@
 
   function getRegistryApi() {
     return window.WeishanTrustedFlightSourceRegistry || {};
+  }
+
+  function getCredentialApi() {
+    return window.WeishanProviderCredentialReadinessPanel || {};
   }
 
   function getTrustedProviderIds() {
@@ -75,8 +79,12 @@
     const providerId = normalizeProviderId(safe);
     const source = getTrustedSource(providerId);
     const trustedProvider = !!source && getTrustedProviderIds().includes(providerId);
-    const sandboxDryRunEnabled = safe.sandboxDryRunEnabled === true || safe.dryRunEnabled === true;
-    const hasSecureCredentialReference = safe.hasSecureCredentialReference === true;
+    const credentialApi = getCredentialApi();
+    const credentialReadiness = typeof credentialApi.evaluateProviderCredentialReadiness === "function"
+      ? credentialApi.evaluateProviderCredentialReadiness(Object.assign({}, safe, { providerMode:providerMode, providerId:providerId }))
+      : { status:providerMode === "fixture" ? "fixture_ready" : "disabled", hasSecureCredentialReference:safe.hasSecureCredentialReference === true, sandboxDryRunEnabled:safe.sandboxDryRunEnabled === true || safe.dryRunEnabled === true, networkDryRunAllowed:providerMode === "sandbox_read_only" && safe.networkDryRunAllowed === true, productionProviderEnabled:false, canAttemptReadOnlyRefresh:providerMode === "fixture", missingRequirements:[], redacted:true };
+    const sandboxDryRunEnabled = credentialReadiness.sandboxDryRunEnabled === true;
+    const hasSecureCredentialReference = credentialReadiness.hasSecureCredentialReference === true;
     const restricted = isRestricted(safe);
     let status = "disabled";
     let decision = "disabled";
@@ -96,19 +104,15 @@
       decision = "production_disabled";
       reason = "production provider disabled";
     } else if (providerMode === "sandbox_read_only") {
-      if (!sandboxDryRunEnabled) {
+      if (credentialReadiness.status !== "sandbox_ready") {
         status = "disabled";
-        decision = "disabled_missing_sandbox_dry_run";
-        reason = "sandbox read-only mode requires dry-run";
-      } else if (!hasSecureCredentialReference) {
-        status = "disabled";
-        decision = "disabled_missing_secure_credential_reference";
-        reason = "sandbox read-only mode requires a secure credential reference";
+        decision = !sandboxDryRunEnabled ? "disabled_missing_sandbox_dry_run" : "disabled_missing_secure_credential_reference";
+        reason = "sandbox read-only mode requires credential readiness";
       } else {
         status = "sandbox_ready";
         decision = "sandbox_read_only_ready";
         reason = "sandbox read-only evidence ready";
-        networkAllowed = safe.networkDryRunAllowed === true;
+        networkAllowed = credentialReadiness.networkDryRunAllowed === true;
       }
     } else {
       status = "fixture_ready";
@@ -127,8 +131,11 @@
       reason: reason,
       sandboxDryRunEnabled: sandboxDryRunEnabled,
       hasSecureCredentialReference: hasSecureCredentialReference,
+      credentialReadiness: credentialReadiness,
       trustedProvider: trustedProvider,
       networkAllowed: networkAllowed,
+      networkDryRunAllowed: networkAllowed,
+      canAttemptReadOnlyRefresh: credentialReadiness.canAttemptReadOnlyRefresh === true && status !== "blocked",
       productionProviderEnabled: false,
       readOnly: true,
       canUseFixtureEvidence: status === "fixture_ready",
@@ -172,6 +179,8 @@
       providerMode: readiness.providerMode,
       fareSource: source,
       handoffType: "registry_gate_required",
+      refreshAttemptId: readiness.providerMode === "sandbox_read_only" ? "sandbox-read-only-refresh-001" : "fixture-refresh-001",
+      refreshStatus: quoteStatus || (sandbox ? "sandbox_read_only_stub_ready" : "fixture_ready"),
       route: safeRequest.origin + " -> " + safeRequest.destination,
       departureDate: safeRequest.departureDate,
       tripType: safeRequest.tripType,
@@ -219,6 +228,8 @@
       sandboxDryRunEnabled: readiness.sandboxDryRunEnabled === true,
       hasSecureCredentialReference: readiness.hasSecureCredentialReference === true,
       networkAllowed: readiness.networkAllowed === true,
+      networkDryRunAllowed: readiness.networkDryRunAllowed === true,
+      credentialReadinessStatus: readiness.credentialReadiness && readiness.credentialReadiness.status || "disabled",
       productionProviderEnabled: false,
       readOnly: true,
       booking:false,

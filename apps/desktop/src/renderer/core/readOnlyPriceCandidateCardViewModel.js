@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.45";
+  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.46";
   const PHASE = "read_only_price_candidate_card_view_model_v1";
 
   function clone(value) {
@@ -109,6 +109,10 @@
     const titleLabel = isProductionDisabled ? "生产价格未启用" : (isSandboxReadOnly ? "只读沙盒价" : "只读候选价");
     const candidatePriceLabel = isSandboxReadOnly ? "只读沙盒价" : (isProductionDisabled ? "生产价格未启用" : "候选价");
     const reportHandoff = report.handoff && typeof report.handoff === "object" ? report.handoff : {};
+    const reportRefresh = report.refresh && typeof report.refresh === "object" ? report.refresh : {};
+    const reportCredentialReadiness = report.credentialReadiness && typeof report.credentialReadiness === "object" ? report.credentialReadiness : {};
+    const canRefresh = normalized.restrictedCategory !== true && !isProductionDisabled && (reportCredentialReadiness.status === "fixture_ready" || reportCredentialReadiness.status === "sandbox_ready" || providerMode === "fixture" || providerMode === "sandbox_read_only");
+    const refreshButton = { label:"刷新只读报价", enabled:canRefresh, reason:canRefresh ? "仅更新候选证据，不代表已锁价或可出票" : "当前只读报价刷新未就绪", autoRun:false, payment:false, order:false, identityUpload:false };
     const safeProviderHandoffUrl = text(reportHandoff.safeProviderHandoffUrl || "");
     const gateApi = getGateApi();
     const gate = typeof gateApi.evaluateSafeProviderDeepLinkHandoff === "function"
@@ -167,7 +171,9 @@
       "未锁价",
       "不代表可出票",
       "唯珊不会付款、不会下单、不会上传证件或银行卡",
-      "最终价格、库存、税费、行李和退改签以平台页面为准"
+      "最终价格、库存、税费、行李和退改签以平台页面为准",
+      "仅更新候选证据，不代表已锁价或可出票",
+      "价格、库存、税费和规则以平台页面为准"
     ];
     return clone({
       version: READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION,
@@ -195,6 +201,11 @@
       lockStatusLabel: "未锁价",
       ticketEligibilityLabel: "不代表可出票",
       safetyNotice: "唯珊不会付款、不会下单、不会上传证件或银行卡。",
+      refreshSupported: reportRefresh.refreshSupported !== false,
+      refreshMode: text(reportRefresh.refreshMode || (isProductionDisabled ? "disabled" : (isSandboxReadOnly ? "sandbox_read_only" : "fixture"))),
+      lastRefreshStatus: text(reportRefresh.lastRefreshStatus || "not_run"),
+      credentialReadiness: { status:text(reportCredentialReadiness.status || (isProductionDisabled ? "disabled" : (isSandboxReadOnly ? "sandbox_ready" : "fixture_ready"))), hasSecureCredentialReference:reportCredentialReadiness.hasSecureCredentialReference === true, sandboxDryRunEnabled:reportCredentialReadiness.sandboxDryRunEnabled === true, networkDryRunAllowed:reportCredentialReadiness.networkDryRunAllowed === true, productionProviderEnabled:false, redacted:true },
+      refreshButton: refreshButton,
       breakdownLines: breakdownLines,
       safetyLines: safetyLines,
       actionLabel: "去平台确认",
@@ -263,8 +274,11 @@
       <ul class="commerce-read-only-price-candidate-card-safety">${safetyLines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>
       <p>${escapeHtml(card.safetyNotice || "唯珊不会付款、不会下单、不会上传证件或银行卡。")}</p>
       <div class="commerce-read-only-price-candidate-card-actions">
+        <button type="button" class="cmd-btn gray commerce-read-only-refresh-btn" data-commerce-read-only-quote-refresh="true"${card.refreshButton && card.refreshButton.enabled ? "" : " disabled"}>${escapeHtml(card.refreshButton && card.refreshButton.label || "刷新只读报价")}</button>
         <button type="button" class="cmd-btn gray commerce-safe-provider-handoff-btn" data-commerce-safe-provider-handoff-request="true" data-commerce-safe-provider-handoff-kind="${escapeHtml(card.providerType || "flight_search")}" data-commerce-safe-provider-handoff-url="${escapeHtml(encodeURIComponent(card.safeProviderHandoffUrl || ""))}"${card.confirmationUi && card.confirmationUi.continueButtonDisabled ? " disabled" : ""}>${escapeHtml(card.actionLabel || "去平台确认")}</button>
       </div>
+      <p>${escapeHtml(card.refreshButton && card.refreshButton.reason || "仅更新候选证据，不代表已锁价或可出票")}</p>
+      <p>价格、库存、税费和规则以平台页面为准</p>
       <p>${escapeHtml(card.confirmationPromptLine || "只允许确认后打开可信平台确认页，不自动打开、不付款、不下单。")}</p>
       <p>${escapeHtml(card.platformFinalLabel || "平台最终为准")} · ${escapeHtml(card.lockStatusLabel || "未锁价")} · ${escapeHtml(card.ticketEligibilityLabel || "不代表可出票")}</p>
     </section>`;
@@ -299,6 +313,7 @@
     if (card.priceTruthLabel.indexOf("未锁价") < 0) throw new Error("read only price candidate card must emphasize not locked");
     if (card.priceTruthLabel.indexOf("不代表可出票") < 0) throw new Error("read only price candidate card must emphasize not ticketable");
     if (card.actionLabel !== "去平台确认") throw new Error("read only price candidate card must keep confirmation action label");
+    if (!card.refreshButton || card.refreshButton.autoRun !== false || card.refreshButton.payment !== false || card.refreshButton.order !== false || card.refreshButton.identityUpload !== false) throw new Error("read only price candidate card must keep refresh button manual and safe");
     const serial = JSON.stringify(card);
     if (/fake price|mock price|demo price|AI 估价|全网最低|real final price/i.test(serial)) throw new Error("read only price candidate card must not expose fake or final price claims");
     return true;

@@ -31,14 +31,15 @@ function assertSafePayload(payload) {
 function main() {
   const windowRef = load([
     "apps/desktop/src/renderer/core/trustedFlightSourceRegistry.js",
+    "apps/desktop/src/renderer/core/providerCredentialReadinessPanel.js",
     "apps/desktop/src/renderer/core/singleFlightProviderSandboxConnector.js"
   ]);
   const api = windowRef.WeishanSingleFlightProviderSandboxConnector;
-  assert.equal(api.SINGLE_FLIGHT_PROVIDER_SANDBOX_CONNECTOR_VERSION, "2.1.45");
+  assert.equal(api.SINGLE_FLIGHT_PROVIDER_SANDBOX_CONNECTOR_VERSION, "2.1.46");
 
   const fixture = api.getSingleFlightProviderSandboxConnectorStatus();
   assert.equal(fixture.connectorName, "single_flight_provider_sandbox_connector_v1");
-  assert.equal(fixture.appVersion, "2.1.45");
+  assert.equal(fixture.appVersion, "2.1.46");
   assert.equal(fixture.providerMode, "fixture");
   assert.equal(fixture.status, "fixture_ready");
   assert.equal(fixture.networkAllowed, false);
@@ -48,6 +49,7 @@ function main() {
   const quote = api.fetchSingleFlightProviderSandboxQuote({ origin:"上海", destination:"成都", departureDate:"2026-07-15" });
   assert.equal(quote.status, "fixture_ready");
   assert.equal(quote.fareSource, "fixture_read_only");
+  assert.equal(quote.refreshAttemptId, "fixture-refresh-001");
   assert.equal(quote.currency, "CNY");
   assert.equal(quote.baseFare, 860);
   assert.equal(quote.taxesAndFees, 110);
@@ -67,6 +69,7 @@ function main() {
   assert.equal(sandboxReady.status, "sandbox_ready");
   assert.equal(sandboxReady.networkAllowed, false);
   assert.equal(sandboxReady.canUseSandboxReadOnlyEvidence, true);
+  assert.equal(sandboxReady.credentialReadiness.status, "sandbox_ready");
   assertSafePayload(sandboxReady);
 
   const sandboxQuoteNoNetwork = api.fetchSingleFlightProviderSandboxQuote({ origin:"上海", destination:"成都" }, { providerMode:"sandbox_read_only", providerId:"google_flights_search", sandboxDryRunEnabled:true, hasSecureCredentialReference:true });
@@ -77,6 +80,7 @@ function main() {
   const sandboxQuoteNetwork = api.fetchSingleFlightProviderSandboxQuote({ origin:"上海", destination:"成都" }, { providerMode:"sandbox_read_only", providerId:"google_flights_search", sandboxDryRunEnabled:true, hasSecureCredentialReference:true, networkDryRunAllowed:true });
   assert.equal(sandboxQuoteNetwork.status, "sandbox_read_only_adapter_stub_ready");
   assert.equal(sandboxQuoteNetwork.fareSource, "sandbox_read_only_stub");
+  assert.equal(sandboxQuoteNetwork.refreshAttemptId, "sandbox-read-only-refresh-001");
   assertSafePayload(sandboxQuoteNetwork);
 
   const production = api.evaluateSingleFlightProviderSandboxReadiness({ providerMode:"production", providerId:"google_flights_search", sandboxDryRunEnabled:true, hasSecureCredentialReference:true, networkDryRunAllowed:true });

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION = "2.1.45";
+  const REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION = "2.1.46";
   const REPORT_NAME = "real_flight_price_evidence_report_v1";
 
   function clone(value) {
@@ -28,6 +28,7 @@
   function getSafeProviderGateApi() { return window.WeishanSafeProviderDeepLinkHandoffGate || {}; }
   function getConfirmationUiApi() { return window.WeishanProviderConfirmationHandoffUi || {}; }
   function getConnectorApi() { return window.WeishanSingleFlightProviderSandboxConnector || {}; }
+  function getCredentialApi() { return window.WeishanProviderCredentialReadinessPanel || {}; }
 
   function getDefaultRequest(request) {
     const safe = request && typeof request === "object" ? request : {};
@@ -129,13 +130,14 @@
     };
   }
 
-  function buildReadiness(fetchSafety, integrity, handoffReady, providerMode, connector) {
+  function buildReadiness(fetchSafety, integrity, handoffReady, providerMode, connector, credentialReadiness) {
     const allowed = fetchSafety.status === "allowed" && integrity.showableAsCandidateEvidence === true;
-    const canUseFixtureEvidence = allowed && providerMode === "fixture";
-    const canUseSandboxReadOnlyEvidence = allowed && providerMode === "sandbox_read_only" && connector.status === "sandbox_ready";
+    const credentialCanRefresh = credentialReadiness && credentialReadiness.canAttemptReadOnlyRefresh === true;
+    const canUseFixtureEvidence = allowed && providerMode === "fixture" && credentialCanRefresh;
+    const canUseSandboxReadOnlyEvidence = allowed && providerMode === "sandbox_read_only" && connector.status === "sandbox_ready" && credentialCanRefresh;
     const finalDecision = fetchSafety.status === "blocked"
       ? "blocked"
-      : canUseSandboxReadOnlyEvidence ? "sandbox_read_only_evidence_ready" : canUseFixtureEvidence ? "fixture_candidate_card_ready" : "disabled";
+      : canUseSandboxReadOnlyEvidence ? "sandbox_read_only_refresh_ready" : canUseFixtureEvidence ? "fixture_refresh_ready" : "refresh_disabled";
     return {
       betaReady: allowed && handoffReady === true,
       canUseFixtureEvidence,
@@ -158,7 +160,11 @@
     const integrityApi = getIntegrityApi();
     const trustedEvidenceApi = getTrustedEvidenceApi();
     const connectorApi = getConnectorApi();
+    const credentialApi = getCredentialApi();
     const connectorInput = connectorOptions(request, options);
+    const credentialReadiness = typeof credentialApi.evaluateProviderCredentialReadiness === "function"
+      ? credentialApi.evaluateProviderCredentialReadiness(connectorInput)
+      : { status:connectorInput.providerMode === "fixture" ? "fixture_ready" : "disabled", hasSecureCredentialReference:connectorInput.hasSecureCredentialReference === true, sandboxDryRunEnabled:connectorInput.sandboxDryRunEnabled === true, networkDryRunAllowed:false, productionProviderEnabled:false, canAttemptReadOnlyRefresh:connectorInput.providerMode === "fixture", missingRequirements:[], redacted:true };
     const providerConnector = typeof connectorApi.evaluateSingleFlightProviderSandboxReadiness === "function"
       ? connectorApi.evaluateSingleFlightProviderSandboxReadiness(connectorInput)
       : { connectorName:"single_flight_provider_sandbox_connector_v1", appVersion:REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION, providerId:connectorInput.providerId, providerName:"Google Flights", providerMode:connectorInput.providerMode, status:connectorInput.providerMode === "fixture" ? "fixture_ready" : "disabled", decision:connectorInput.providerMode === "fixture" ? "fixture_read_only_ready" : "disabled", reason:"connector fallback", sandboxDryRunEnabled:false, hasSecureCredentialReference:false, networkAllowed:false, productionProviderEnabled:false, readOnly:true, booking:false, payment:false, order:false, identityUpload:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, redacted:true };
@@ -183,7 +189,9 @@
       ? getConfirmationUiApi().buildProviderConfirmationHandoffUiModel(handoffCandidate)
       : { status:safeProviderHandoffReady ? "confirmation_required" : "blocked", continueButtonDisabled:!safeProviderHandoffReady, cancelButtonEnabled:true, noAutoOpen:true, noBookingUrl:true, noPayment:true, noOrder:true, noIdentityUpload:true, safeProviderHandoffUrl:handoffCandidate.safeProviderHandoffUrl || null, showInMainFlow:false, redacted:true };
     const providerMode = text(priceQuote.providerMode || slotStatus.providerMode || providerConnector.providerMode || "fixture");
-    const readiness = buildReadiness(fetchSafety, integrity, safeProviderHandoffReady, providerMode, providerConnector);
+    const readiness = buildReadiness(fetchSafety, integrity, safeProviderHandoffReady, providerMode, providerConnector, credentialReadiness);
+    const refreshMode = providerMode === "production_disabled" ? "disabled" : providerMode;
+    const lastRefreshStatus = text(options.lastRefreshStatus || (options.refreshTriggered === true ? (readiness.finalDecision === "fixture_refresh_ready" || readiness.finalDecision === "sandbox_read_only_refresh_ready" ? "refreshed" : readiness.finalDecision === "blocked" ? "failed_safe" : "disabled") : "not_run"));
     const report = {
       reportName: REPORT_NAME,
       appVersion: REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION,
@@ -201,7 +209,9 @@
         reason: providerConnector.reason,
         sandboxDryRunEnabled: providerConnector.sandboxDryRunEnabled === true,
         hasSecureCredentialReference: providerConnector.hasSecureCredentialReference === true,
+        credentialReadinessStatus: credentialReadiness.status,
         networkAllowed: providerConnector.networkAllowed === true,
+        networkDryRunAllowed: providerConnector.networkDryRunAllowed === true,
         productionProviderEnabled:false,
         readOnly:true,
         redacted:true
@@ -209,6 +219,8 @@
       providerContract: defaultProviderContract(),
       provider: { providerId:text(priceQuote.providerId || slotStatus.providerId || providerConnector.providerId), providerName:text(priceQuote.providerName || slotStatus.providerName || providerConnector.providerName), providerMode, fareSource:text(priceQuote.fareSource || slotStatus.fareSource || "fixture_read_only") },
       fetchSafety: { status:fetchSafety.status || "disabled", decision:fetchSafety.decision || "disabled", readOnly:true, networkAllowed:fetchSafety.networkAllowed === true, booking:false, payment:false, order:false, identityUpload:false, productionProviderEnabled:false },
+      refresh: { refreshSupported:true, refreshMode:refreshMode, lastRefreshStatus:lastRefreshStatus || "not_run", userTriggeredOnly:true, autoRefresh:false },
+      credentialReadiness: { status:credentialReadiness.status || "disabled", hasSecureCredentialReference:credentialReadiness.hasSecureCredentialReference === true, sandboxDryRunEnabled:credentialReadiness.sandboxDryRunEnabled === true, networkDryRunAllowed:credentialReadiness.networkDryRunAllowed === true, productionProviderEnabled:false, redacted:true },
       priceQuote: { currency:text(priceQuote.currency || "CNY"), fareSource:text(priceQuote.fareSource || slotStatus.fareSource || "fixture_read_only"), baseFare:priceQuote.baseFare, taxesAndFees:priceQuote.taxesAndFees, providerFees:priceQuote.providerFees, totalPrice:priceQuote.totalPrice, priceUpdatedAt:priceQuote.priceUpdatedAt || null, freshnessStatus:priceQuote.freshnessStatus || integrity.freshnessStatus || "unknown_fixture", taxFeeIntegrityStatus:priceQuote.taxFeeIntegrityStatus || integrity.taxFeeIntegrityStatus || "incomplete", handoffType:text(priceQuote.handoffType || "registry_gate_required"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, booking:false, payment:false, order:false, identityUpload:false, redacted:true },
       integrity: { totalMatchesBreakdown:integrity.totalMatchesBreakdown === true, taxFeeIntegrityStatus:integrity.taxFeeIntegrityStatus || "incomplete", freshnessStatus:integrity.freshnessStatus || "unknown_fixture", showableAsRealPrice:false, showableAsCandidateEvidence:integrity.showableAsCandidateEvidence === true, userFacingCaveatRequired:true, caveat:integrity.caveat || "价格、库存、税费和规则以平台页面为准。", redacted:true },
       handoff: { safeProviderHandoffReady, safeProviderHandoffUrl:handoffCandidate.safeProviderHandoffUrl || null, bookingUrl:null, autoOpen:false, requiresConfirmation:true, providerConfirmationLink:handoffCandidate.providerConfirmationLink || "disabled", confirmationUiStatus:confirmationUi.status || "blocked", redacted:true },
@@ -223,7 +235,7 @@
 
   function summarizeRealFlightPriceEvidenceReport(reportInput) {
     const report = reportInput && typeof reportInput === "object" ? reportInput : buildRealFlightPriceEvidenceReport();
-    return clone({ reportName:report.reportName, appVersion:report.appVersion, mode:report.mode, userFacingRealPriceEnabled:false, debugEvidenceEnabled:report.debugEvidenceEnabled === true, providerMode:report.provider && report.provider.providerMode || "fixture", connectorStatus:report.providerConnector && report.providerConnector.status || "disabled", fetchStatus:report.fetchSafety && report.fetchSafety.status || "disabled", showableAsRealPrice:false, showableAsCandidateEvidence:report.integrity && report.integrity.showableAsCandidateEvidence === true, safeProviderHandoffReady:report.handoff && report.handoff.safeProviderHandoffReady === true, canUseFixtureEvidence:report.readiness && report.readiness.canUseFixtureEvidence === true, canUseSandboxReadOnlyEvidence:report.readiness && report.readiness.canUseSandboxReadOnlyEvidence === true, canReplaceMainResultCard:false, finalDecision:report.readiness && report.readiness.finalDecision || "disabled", redacted:true });
+    return clone({ reportName:report.reportName, appVersion:report.appVersion, mode:report.mode, userFacingRealPriceEnabled:false, debugEvidenceEnabled:report.debugEvidenceEnabled === true, providerMode:report.provider && report.provider.providerMode || "fixture", connectorStatus:report.providerConnector && report.providerConnector.status || "disabled", credentialReadinessStatus:report.credentialReadiness && report.credentialReadiness.status || "disabled", refreshMode:report.refresh && report.refresh.refreshMode || "disabled", lastRefreshStatus:report.refresh && report.refresh.lastRefreshStatus || "not_run", fetchStatus:report.fetchSafety && report.fetchSafety.status || "disabled", showableAsRealPrice:false, showableAsCandidateEvidence:report.integrity && report.integrity.showableAsCandidateEvidence === true, safeProviderHandoffReady:report.handoff && report.handoff.safeProviderHandoffReady === true, canUseFixtureEvidence:report.readiness && report.readiness.canUseFixtureEvidence === true, canUseSandboxReadOnlyEvidence:report.readiness && report.readiness.canUseSandboxReadOnlyEvidence === true, canReplaceMainResultCard:false, finalDecision:report.readiness && report.readiness.finalDecision || "refresh_disabled", redacted:true });
   }
 
   function evaluateRealFlightPriceBetaReadiness(reportInput) {
@@ -238,7 +250,7 @@
     const integrity = report.integrity || {};
     const handoff = report.handoff || {};
     const connector = report.providerConnector || {};
-    return clone({ eventType:"REAL_FLIGHT_PRICE_EVIDENCE_REPORT_DRAFT", reportName:REPORT_NAME, appVersion:REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION, mode:report.mode || "read_only_beta", userFacingRealPriceEnabled:false, debugEvidenceEnabled:true, providerMode:text(report.provider && report.provider.providerMode || "fixture"), connectorStatus:text(connector.status || "disabled"), connectorDecision:text(connector.decision || "disabled"), fetchSafetyStatus:text(fetchSafety.status || "disabled"), fetchSafetyDecision:text(fetchSafety.decision || "disabled"), totalMatchesBreakdown:integrity.totalMatchesBreakdown === true, freshnessStatus:text(integrity.freshnessStatus || "unknown_fixture"), taxFeeIntegrityStatus:text(integrity.taxFeeIntegrityStatus || "incomplete"), safeProviderHandoffReady:handoff.safeProviderHandoffReady === true, safeProviderHandoffUrlDisplayedCount:handoff.safeProviderHandoffUrl ? 1 : 0, bookingUrlDisplayedCount:0, paymentAttemptCount:0, orderAttemptCount:0, identityUploadAttemptCount:0, realPriceDisplayedCount:0, realProviderCallCount:0, productionProviderEnabled:false, redacted:true });
+    return clone({ eventType:"REAL_FLIGHT_PRICE_EVIDENCE_REPORT_DRAFT", reportName:REPORT_NAME, appVersion:REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION, mode:report.mode || "read_only_beta", userFacingRealPriceEnabled:false, debugEvidenceEnabled:true, providerMode:text(report.provider && report.provider.providerMode || "fixture"), connectorStatus:text(connector.status || "disabled"), connectorDecision:text(connector.decision || "disabled"), credentialReadinessStatus:text(report.credentialReadiness && report.credentialReadiness.status || "disabled"), refreshMode:text(report.refresh && report.refresh.refreshMode || "disabled"), lastRefreshStatus:text(report.refresh && report.refresh.lastRefreshStatus || "not_run"), fetchSafetyStatus:text(fetchSafety.status || "disabled"), fetchSafetyDecision:text(fetchSafety.decision || "disabled"), totalMatchesBreakdown:integrity.totalMatchesBreakdown === true, freshnessStatus:text(integrity.freshnessStatus || "unknown_fixture"), taxFeeIntegrityStatus:text(integrity.taxFeeIntegrityStatus || "incomplete"), safeProviderHandoffReady:handoff.safeProviderHandoffReady === true, safeProviderHandoffUrlDisplayedCount:handoff.safeProviderHandoffUrl ? 1 : 0, bookingUrlDisplayedCount:0, paymentAttemptCount:0, orderAttemptCount:0, identityUploadAttemptCount:0, realPriceDisplayedCount:0, realProviderCallCount:0, productionProviderEnabled:false, autoRefresh:false, redacted:true });
   }
 
   function assertRealFlightPriceEvidenceReportSafe(value) {
@@ -251,6 +263,8 @@
     if (report.handoff && report.handoff.bookingUrl !== null) throw new Error("real flight price evidence report must not expose bookingUrl");
     if (report.handoff && report.handoff.autoOpen !== false) throw new Error("real flight price evidence report must not auto open");
     if (report.safety && (report.safety.checkout !== "blocked" || report.safety.payment !== "blocked" || report.safety.order !== "blocked" || report.safety.identityUpload !== "blocked")) throw new Error("real flight price evidence report must keep unsafe actions blocked");
+    if (report.refresh && report.refresh.autoRefresh !== false) throw new Error("real flight price evidence report must not auto refresh");
+    if (report.credentialReadiness && report.credentialReadiness.productionProviderEnabled !== false) throw new Error("real flight price evidence report must keep production provider disabled");
     return true;
   }
 

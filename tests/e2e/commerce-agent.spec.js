@@ -8679,6 +8679,7 @@ test.describe.serial("commerce agent workbench", () => {
         const cleanV4Body = debugBody.locator("details.commerce-clean-result-surface-v4-disclosure .commerce-disclosure-body").first();
         for (const text of ["Clean Result Surface V4", "clean result surface v4: active", "compact flight result card: active", "user surface debug filter: active", "manual handoff UX v3: manual-only", "manual verification group v2: active", "task history summary formatter: active", "clean result surface v4: active", "bookingUrl handoff: disabled", "payment/order: disabled", "flight_provider final decision: limited-beta-ready", "其它 provider final decision: no-go", "受限品类 final decision: blocked", "debugFieldLeakCount: 0", "bookingUrlDisplayedCount: 0", "paymentActionDisplayedCount: 0", "orderActionDisplayedCount: 0", "identityUploadDisplayedCount: 0", "USER_SURFACE_FINAL_CLEANUP_DRAFT", "TASK_HISTORY_SUMMARY_FORMATTER_DRAFT", "COMPACT_FLIGHT_RESULT_CARD_V1_DRAFT", "MANUAL_HANDOFF_UX_V3_DRAFT", "MANUAL_VERIFICATION_GROUP_V2_DRAFT", "redacted: true"]) await expect(cleanV4Body).toContainText(text);
 
+
         await openDisclosure(debugBody, "commerce-provider-connection-readiness-console-disclosure");
         const readinessBody = debugBody.locator("details.commerce-provider-connection-readiness-console-disclosure .commerce-disclosure-body").first();
         for (const text of ["Provider 接入准备控制台", "real provider disabled", "real network disabled", "bookingUrl disabled", "payment disabled", "order disabled", "redacted: true"]){

@@ -14,7 +14,7 @@ function main() {
     "apps/desktop/src/renderer/core/readOnlyPriceCandidateCardViewModel.js"
   ]);
   const api = windowRef.WeishanReadOnlyPriceCandidateCardViewModel;
-  assert.equal(api.READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION, "2.1.45");
+  assert.equal(api.READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION, "2.1.46");
 
   const card = api.buildReadOnlyPriceCandidateCardViewModel({ task:{ title:"7月15日上海到成都最便宜的机票" }, providerId:"google_flights_search", providerName:"Google Flights", providerType:"flight_search", report:{ provider:{ providerMode:"fixture" }, handoff:{ safeProviderHandoffUrl:"https://www.google.com/travel/flights" } }, flightFields:{ origin:"上海", destination:"成都", dateDisplay:"7 月 15 日", goal:"低价优先", directPreference:"直达优先" } });
   assert.equal(card.visible, true);
@@ -28,6 +28,12 @@ function main() {
   assert.equal(card.noPayment, true);
   assert.equal(card.noOrder, true);
   assert.equal(card.noIdentityUpload, true);
+  assert.equal(card.refreshButton.label, "刷新只读报价");
+  assert.equal(card.refreshButton.enabled, true);
+  assert.equal(card.refreshButton.autoRun, false);
+  assert.equal(card.refreshButton.payment, false);
+  assert.equal(card.refreshButton.order, false);
+  assert.equal(card.refreshButton.identityUpload, false);
 
   const html = api.renderReadOnlyPriceCandidateCardHtml(card);
   assert.equal(html.includes("只读候选价"), true);
@@ -35,6 +41,9 @@ function main() {
   assert.equal(html.includes("未锁价"), true);
   assert.equal(html.includes("不代表可出票"), true);
   assert.equal(html.includes("去平台确认"), true);
+  assert.equal(html.includes("刷新只读报价"), true);
+  assert.equal(html.includes("仅更新候选证据，不代表已锁价或可出票"), true);
+  assert.equal(html.includes("价格、库存、税费和规则以平台页面为准"), true);
   assert.equal(html.includes("Limited Beta"), false);
   assert.equal(html.includes("bookingUrl"), false);
 
@@ -49,6 +58,7 @@ function main() {
   assert.equal(productionCard.title, "生产价格未启用");
   assert.equal(productionCard.confirmationUi.continueButtonDisabled, true);
   assert.equal(productionCard.safeProviderHandoffUrl, null);
+  assert.equal(productionCard.refreshButton.enabled, false);
 
   const missingUrlCard = api.buildReadOnlyPriceCandidateCardViewModel({ providerId:"google_flights_search", report:{ handoff:{ safeProviderHandoffUrl:null } } });
   assert.equal(missingUrlCard.visible, true);
@@ -57,6 +67,7 @@ function main() {
   assert.equal(missingUrlCard.confirmationUi.continueButtonDisabled, true);
   assert.equal(missingUrlCard.safeProviderHandoffUrl, null);
   assert.equal(missingUrlCard.bookingUrl, null);
+  assert.equal(missingUrlCard.refreshButton.enabled, true);
   assert.equal(missingUrlCard.noAutoOpen, true);
   const missingUrlHtml = api.renderReadOnlyPriceCandidateCardHtml(missingUrlCard);
   assert.equal(missingUrlHtml.includes("当前平台确认链接未通过安全检查"), true);

@@ -16,11 +16,12 @@ function load(files) {
 function main() {
   const windowRef = load([
     "apps/desktop/src/renderer/core/trustedFlightSourceRegistry.js",
+    "apps/desktop/src/renderer/core/providerCredentialReadinessPanel.js",
     "apps/desktop/src/renderer/core/singleFlightProviderSandboxConnector.js",
     "apps/desktop/src/renderer/core/realFlightPriceProviderAdapterSlot.js"
   ]);
   const api = windowRef.WeishanRealFlightPriceProviderAdapterSlot;
-  assert.equal(api.REAL_FLIGHT_PRICE_PROVIDER_ADAPTER_SLOT_VERSION, "2.1.45");
+  assert.equal(api.REAL_FLIGHT_PRICE_PROVIDER_ADAPTER_SLOT_VERSION, "2.1.46");
 
   const slot = api.getRealFlightPriceProviderAdapterSlotStatus();
   assert.equal(slot.slotName, "real_flight_price_provider_adapter_slot_v1");
