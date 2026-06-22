@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const REAL_FLIGHT_PRICE_INTEGRITY_GUARD_VERSION = "2.1.48";
+  const REAL_FLIGHT_PRICE_INTEGRITY_GUARD_VERSION = "2.1.49";
   const CAVEAT = "价格、库存、税费和规则以平台页面为准。";
   const STALE_MINUTES = 24 * 60;
 

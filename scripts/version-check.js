@@ -296,6 +296,24 @@ function checkReadOnlyQuoteRefreshControllerVersion(results, expectedVersion) {
   addCheck(results, "apps/desktop read only quote refresh controller version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/readOnlyQuoteRefreshController.js READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION");
 }
 
+function checkSandboxProviderDryRunHarnessVersion(results, expectedVersion) {
+  const harnessPath = "apps/desktop/src/renderer/core/sandboxProviderDryRunHarness.js";
+  const harness = readText(harnessPath);
+  if (!harness) { results.push({ name: "apps/desktop sandbox provider dry-run harness version", pass: false, detail: harnessPath + " missing" }); return; }
+  if (harness.__readError) { results.push({ name: "apps/desktop sandbox provider dry-run harness version", pass: false, detail: harness.__readError }); return; }
+  const match = harness.match(/SANDBOX_PROVIDER_DRY_RUN_HARNESS_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop sandbox provider dry-run harness version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/sandboxProviderDryRunHarness.js SANDBOX_PROVIDER_DRY_RUN_HARNESS_VERSION");
+}
+
+function checkSandboxProviderResponseImportStateStoreVersion(results, expectedVersion) {
+  const storePath = "apps/desktop/src/renderer/core/sandboxProviderResponseImportStateStore.js";
+  const store = readText(storePath);
+  if (!store) { results.push({ name: "apps/desktop sandbox provider response import state store version", pass: false, detail: storePath + " missing" }); return; }
+  if (store.__readError) { results.push({ name: "apps/desktop sandbox provider response import state store version", pass: false, detail: store.__readError }); return; }
+  const match = store.match(/SANDBOX_PROVIDER_RESPONSE_IMPORT_STATE_STORE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop sandbox provider response import state store version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/sandboxProviderResponseImportStateStore.js SANDBOX_PROVIDER_RESPONSE_IMPORT_STATE_STORE_VERSION");
+}
+
 function checkReadOnlyQuoteInteractiveRefreshUiControllerVersion(results, expectedVersion) {
   const controllerPath = "apps/desktop/src/renderer/core/readOnlyQuoteInteractiveRefreshUiController.js";
   const controller = readText(controllerPath);
@@ -1546,6 +1564,8 @@ function runVersionCheck() {
     checkRealFlightPriceEvidenceReportVersion(results, rootPackage.version);
     checkReadOnlyQuoteRefreshStateStoreVersion(results, rootPackage.version);
     checkReadOnlyQuoteRefreshControllerVersion(results, rootPackage.version);
+    checkSandboxProviderDryRunHarnessVersion(results, rootPackage.version);
+    checkSandboxProviderResponseImportStateStoreVersion(results, rootPackage.version);
     checkReadOnlyQuoteInteractiveRefreshUiControllerVersion(results, rootPackage.version);
     checkSecureKeyStoragePlanVersion(results, rootPackage.version);
     checkSecureStorageDesignGateVersion(results, rootPackage.version);

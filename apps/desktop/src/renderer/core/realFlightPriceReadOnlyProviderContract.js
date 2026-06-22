@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const REAL_FLIGHT_PRICE_READ_ONLY_PROVIDER_CONTRACT_VERSION = "2.1.48";
+  const REAL_FLIGHT_PRICE_READ_ONLY_PROVIDER_CONTRACT_VERSION = "2.1.49";
   const CONTRACT_NAME = "real_flight_price_read_only_provider_contract_v1";
   const REQUIRED_RESPONSE_FIELDS = [
     "providerId",
@@ -28,7 +28,7 @@
     "apiKey",
     "credentialValue"
   ];
-  const ALLOWED_FARE_SOURCES = ["read_only_provider", "sandbox_read_only", "fixture_read_only"];
+  const ALLOWED_FARE_SOURCES = ["read_only_provider", "sandbox_read_only", "sandbox_read_only_stub", "sandbox_read_only_import", "fixture_read_only"];
 
   function clone(value) {
     return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;

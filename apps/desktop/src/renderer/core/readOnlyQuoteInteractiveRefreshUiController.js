@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_INTERACTIVE_REFRESH_UI_CONTROLLER_VERSION = "2.1.48";
+  const READ_ONLY_QUOTE_INTERACTIVE_REFRESH_UI_CONTROLLER_VERSION = "2.1.49";
   const CONTROLLER_NAME = "read_only_quote_interactive_refresh_ui_controller_v1";
 
   function clone(value) {
@@ -163,6 +163,28 @@
     return buildReadOnlyQuoteInteractiveRefreshUiState({ status:"idle", recoveryStatus:recovered ? "recovered" : "unavailable", state:state, recoveredEvidenceSummary:recoveredSummary(state) });
   }
 
+
+  function buildSandboxImportRecoveryUiState(options) {
+    const opts = options && typeof options === "object" ? options : {};
+    const refreshApi = getRefreshApi();
+    const loaded = typeof refreshApi.loadLastSandboxImportEvidence === "function"
+      ? refreshApi.loadLastSandboxImportEvidence(opts)
+      : { state:null, sandboxImportStateSummary:null, redacted:true };
+    const summary = loaded.sandboxImportStateSummary || {};
+    const state = loaded.state || {};
+    return clone({
+      controllerName:CONTROLLER_NAME,
+      appVersion:READ_ONLY_QUOTE_INTERACTIVE_REFRESH_UI_CONTROLLER_VERSION,
+      status:"idle",
+      recoveryStatus:summary.importedEvidenceAvailable === true ? "recovered" : "unavailable",
+      sandboxImportSummary:Object.assign({ supported:true, lastImportStatus:state.lastImportStatus || "not_run", importedEvidenceAvailable:false, rawResponseStored:false, sanitized:true, redacted:true, showableAsRealPrice:false, canReplace:false }, summary, { rawResponseStored:false, sanitized:true, redacted:true, showableAsRealPrice:false, canReplace:false }),
+      importStatusBadge:summary.importStatusBadge || "未导入",
+      importedEvidenceBanner:summary.importedEvidenceBanner || "暂无可显示沙盒导入证据",
+      safety:safety(),
+      redacted:true
+    });
+  }
+
   function buildReadOnlyQuoteInteractiveRefreshAuditDraft(input) {
     const state = buildReadOnlyQuoteInteractiveRefreshUiState(input || {});
     return clone({
@@ -196,6 +218,7 @@
     reduceReadOnlyQuoteRefreshUiEvent,
     buildReadOnlyQuoteRefreshClickResult,
     buildReadOnlyQuoteRecoveryUiState,
+    buildSandboxImportRecoveryUiState,
     buildReadOnlyQuoteInteractiveRefreshAuditDraft
   };
 })();

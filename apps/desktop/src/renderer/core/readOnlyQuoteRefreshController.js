@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION = "2.1.48";
+  const READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION = "2.1.49";
   const CONTROLLER_NAME = "read_only_quote_refresh_controller_v1";
 
   function clone(value) {
@@ -31,6 +31,8 @@
   function getEvidenceApi() { return window.WeishanRealFlightPriceEvidenceReport || {}; }
   function getCandidateCardApi() { return window.WeishanReadOnlyPriceCandidateCardViewModel || {}; }
   function getStateStoreApi() { return window.WeishanReadOnlyQuoteRefreshStateStore || {}; }
+  function getSandboxHarnessApi() { return window.WeishanSandboxProviderDryRunHarness || {}; }
+  function getSandboxImportStateStoreApi() { return window.WeishanSandboxProviderResponseImportStateStore || {}; }
 
   function normalizeTask(task, options) {
     const safe = task && typeof task === "object" ? task : {};
@@ -215,6 +217,128 @@
     return clone(Object.assign({ controllerName:CONTROLLER_NAME, appVersion:READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION, state:state, refreshStateSummary:summary, recoveryStatus:"not_loaded", errorSummary:"", redacted:true }, safety()));
   }
 
+  function buildTaskFromSandboxQuote(quote, options) {
+    const safe = quote && typeof quote === "object" ? quote : {};
+    const route = safe.route && typeof safe.route === "object" ? safe.route : {};
+    const opts = options && typeof options === "object" ? options : {};
+    return buildReadOnlyQuoteRefreshRequest({
+      origin:route.origin || opts.origin || "上海",
+      destination:route.destination || opts.destination || "成都",
+      departureDate:safe.departureDate || opts.departureDate || "2026-07-15",
+      providerId:safe.providerId || opts.providerId || "google_flights_search",
+      providerMode:"sandbox_read_only"
+    }, Object.assign({}, opts, { providerMode:"sandbox_read_only", providerId:safe.providerId || opts.providerId || "google_flights_search" }));
+  }
+
+  function sandboxImportSafetyButton(status) {
+    const accepted = status === "accepted";
+    return { label:"导入沙盒报价证据", enabled:accepted, reason:accepted ? "仅更新候选证据，不代表已锁价或可出票" : "沙盒响应导入未通过安全检查", requiresConfirmation:false, autoRun:false, autoRefresh:false, payment:false, order:false, identityUpload:false };
+  }
+
+  function runReadOnlyQuoteRefreshFromSandboxImport(rawResponse, options) {
+    const opts = options && typeof options === "object" ? options : {};
+    const harnessApi = getSandboxHarnessApi();
+    const evidenceApi = getEvidenceApi();
+    const candidateApi = getCandidateCardApi();
+    try {
+      const imported = typeof harnessApi.importSandboxProviderReadOnlyResponse === "function"
+        ? harnessApi.importSandboxProviderReadOnlyResponse(rawResponse, opts)
+        : { status:"failed_safe", importStatus:"failed_safe", lastImportStatus:"failed_safe", normalizedQuote:null, sanitized:true, rawResponseStored:false, redacted:true };
+      const status = text(imported.lastImportStatus || imported.importStatus || imported.status || "failed_safe");
+      if (status !== "accepted" || !imported.normalizedQuote) {
+        const request = buildReadOnlyQuoteRefreshRequest({}, Object.assign({}, opts, { providerMode:"sandbox_read_only" }));
+        return clone(Object.assign({
+          controllerName:CONTROLLER_NAME,
+          appVersion:READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION,
+          status:status === "blocked" ? "blocked" : (status === "rejected" ? "rejected" : "failed_safe"),
+          lastRefreshStatus:"failed_safe",
+          lastImportStatus:status === "accepted" ? "accepted" : status,
+          request:request,
+          sandboxImport:imported,
+          priceEvidenceReport:null,
+          candidateCard:null,
+          errorSummary:status === "blocked" ? "沙盒导入响应已被安全阻断" : "沙盒导入响应未通过只读校验",
+          showableAsCandidateEvidence:false,
+          showableAsRealPrice:false,
+          canReplace:false,
+          userFacing:false,
+          userTriggeredOnly:true,
+          autoRefresh:false,
+          refreshButton:sandboxImportSafetyButton(status),
+          productionProviderEnabled:false,
+          redacted:true
+        }, safety()));
+      }
+      const quote = imported.normalizedQuote;
+      const request = buildTaskFromSandboxQuote(quote, opts);
+      const report = typeof evidenceApi.buildRealFlightPriceEvidenceReport === "function"
+        ? evidenceApi.buildRealFlightPriceEvidenceReport(request, Object.assign({}, opts, { sandboxImport:imported, sandboxImportQuote:quote, sandboxImportStatus:"accepted", refreshTriggered:true, lastRefreshStatus:"refreshed" }))
+        : null;
+      const card = typeof candidateApi.buildReadOnlyPriceCandidateCardViewModel === "function"
+        ? candidateApi.buildReadOnlyPriceCandidateCardViewModel({ task:request, providerId:quote.providerId, providerMode:"sandbox_read_only", priceQuote:quote, report:report || {}, sandboxImportSummary:report && report.sandboxImport || imported })
+        : null;
+      return clone(Object.assign({
+        controllerName:CONTROLLER_NAME,
+        appVersion:READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION,
+        status:"refreshed",
+        lastRefreshStatus:"refreshed",
+        lastImportStatus:"accepted",
+        request:request,
+        sandboxImport:imported,
+        priceEvidenceReport:report,
+        candidateCard:card,
+        showableAsCandidateEvidence:true,
+        showableAsRealPrice:false,
+        canReplace:false,
+        userFacing:false,
+        userTriggeredOnly:true,
+        autoRefresh:false,
+        refreshButton:sandboxImportSafetyButton("accepted"),
+        productionProviderEnabled:false,
+        redacted:true
+      }, safety(), { safeProviderHandoffUrl:report && report.handoff && report.handoff.safeProviderHandoffReady ? report.handoff.safeProviderHandoffUrl || null : null }));
+    } catch (error) {
+      return clone(Object.assign({ controllerName:CONTROLLER_NAME, appVersion:READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION, status:"failed_safe", lastRefreshStatus:"failed_safe", lastImportStatus:"failed_safe", errorSummary:"沙盒导入刷新失败，已安全降级", showableAsCandidateEvidence:false, showableAsRealPrice:false, canReplace:false, userFacing:false, userTriggeredOnly:true, autoRefresh:false, refreshButton:sandboxImportSafetyButton("failed_safe"), productionProviderEnabled:false, redacted:true }, safety()));
+    }
+  }
+
+  function persistSandboxImportResult(result, storageLike) {
+    const storeApi = getSandboxImportStateStoreApi();
+    if (typeof storeApi.saveSandboxProviderResponseImportState !== "function") return { persistedSandboxImportState:null, sandboxImportStateSummary:null };
+    const persisted = storeApi.saveSandboxProviderResponseImportState(Object.assign({}, result.sandboxImport || {}, {
+      lastImportStatus:result.lastImportStatus || result.status,
+      priceQuote:result.priceEvidenceReport && result.priceEvidenceReport.priceQuote || result.sandboxImport && result.sandboxImport.normalizedQuote || null,
+      normalizedQuote:result.sandboxImport && result.sandboxImport.normalizedQuote || null,
+      safeProviderHandoffReady:result.priceEvidenceReport && result.priceEvidenceReport.handoff && result.priceEvidenceReport.handoff.safeProviderHandoffReady === true,
+      safeProviderHandoffDisplayHost:result.priceEvidenceReport && result.priceEvidenceReport.handoff && result.priceEvidenceReport.handoff.safeProviderHandoffHost || ""
+    }), storageLike);
+    const summary = typeof storeApi.buildSandboxProviderResponseImportStateSummary === "function" ? storeApi.buildSandboxProviderResponseImportStateSummary(persisted) : null;
+    return { persistedSandboxImportState:persisted, sandboxImportStateSummary:summary };
+  }
+
+  function runAndPersistSandboxImportRefresh(rawResponse, options) {
+    const opts = options && typeof options === "object" ? options : {};
+    const result = runReadOnlyQuoteRefreshFromSandboxImport(rawResponse, opts);
+    const persisted = persistSandboxImportResult(result, opts.storageLike);
+    return clone(Object.assign({}, result, persisted, { autoOpen:false, autoRefresh:false, userTriggeredOnly:true }, safety()));
+  }
+
+  function loadLastSandboxImportEvidence(options) {
+    const opts = options && typeof options === "object" ? options : {};
+    const storeApi = getSandboxImportStateStoreApi();
+    const state = typeof storeApi.loadSandboxProviderResponseImportState === "function" ? storeApi.loadSandboxProviderResponseImportState(opts.storageLike) : null;
+    const summary = typeof storeApi.buildSandboxProviderResponseImportStateSummary === "function" ? storeApi.buildSandboxProviderResponseImportStateSummary(state) : null;
+    return clone(Object.assign({ controllerName:CONTROLLER_NAME, appVersion:READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION, state:state, sandboxImportStateSummary:summary, redacted:true }, safety()));
+  }
+
+  function clearLastSandboxImportEvidence(options) {
+    const opts = options && typeof options === "object" ? options : {};
+    const storeApi = getSandboxImportStateStoreApi();
+    const state = typeof storeApi.clearSandboxProviderResponseImportState === "function" ? storeApi.clearSandboxProviderResponseImportState(opts.storageLike) : null;
+    const summary = typeof storeApi.buildSandboxProviderResponseImportStateSummary === "function" ? storeApi.buildSandboxProviderResponseImportStateSummary(state) : null;
+    return clone(Object.assign({ controllerName:CONTROLLER_NAME, appVersion:READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION, state:state, sandboxImportStateSummary:summary, lastImportStatus:"not_run", redacted:true }, safety()));
+  }
+
   function buildReadOnlyQuoteRefreshAuditDraft(task, options) {
     const result = runReadOnlyQuoteRefresh(task, options);
     return clone({
@@ -258,6 +382,10 @@
     runAndPersistReadOnlyQuoteRefresh,
     loadLastReadOnlyQuoteRefreshEvidence,
     clearLastReadOnlyQuoteRefreshEvidence,
+    runReadOnlyQuoteRefreshFromSandboxImport,
+    runAndPersistSandboxImportRefresh,
+    loadLastSandboxImportEvidence,
+    clearLastSandboxImportEvidence,
     buildReadOnlyQuoteRefreshAuditDraft
   };
 })();

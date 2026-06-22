@@ -23,11 +23,11 @@ function main() {
   ]);
 
   const api = windowRef.WeishanRealFlightPriceEvidenceReport;
-  assert.equal(api.REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION, "2.1.48");
+  assert.equal(api.REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION, "2.1.49");
 
   const report = api.buildRealFlightPriceEvidenceReport({ origin:"上海", destination:"成都", departureDate:"2026-07-15" });
   assert.equal(report.reportName, "real_flight_price_evidence_report_v1");
-  assert.equal(report.appVersion, "2.1.48");
+  assert.equal(report.appVersion, "2.1.49");
   assert.equal(report.mode, "read_only_beta");
   assert.equal(report.userFacingRealPriceEnabled, false);
   assert.equal(report.providerConnector.connectorName, "single_flight_provider_sandbox_connector_v1");
@@ -85,6 +85,21 @@ function main() {
   assert.equal(blockedReport.handoff.safeProviderHandoffReady, false);
   assert.equal(blockedReport.handoff.safeProviderHandoffUrl, null);
 
+
+  const importQuote = { providerId:"google_flights_search", providerName:"Google Flights", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import", currency:"CNY", baseFare:860, taxesAndFees:110, providerFees:40, totalPrice:1010, priceUpdatedAt:"2026-06-20T00:00:00.000Z", freshnessMinutes:0, safeProviderHandoffReady:false, safeProviderHandoffUrl:null, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, booking:false, payment:false, order:false, identityUpload:false, redacted:true };
+  const importReport = api.buildRealFlightPriceEvidenceReport({ origin:"上海", destination:"成都", departureDate:"2026-07-15", providerMode:"sandbox_read_only" }, { sandboxImport:{ status:"accepted", importStatus:"accepted", lastImportStatus:"accepted", normalizedQuote:importQuote, rawResponseStored:false, sanitized:true, redacted:true }, sandboxImportQuote:importQuote, sandboxImportStatus:"accepted" });
+  assert.equal(importReport.mode, "sandbox_read_only_import_evidence");
+  assert.equal(importReport.sandboxImport.lastImportStatus, "accepted");
+  assert.equal(importReport.sandboxImport.rawResponseStored, false);
+  assert.equal(importReport.sandboxImport.showableAsRealPrice, false);
+  assert.equal(importReport.readiness.finalDecision, "sandbox_import_evidence_ready");
+  assert.equal(importReport.priceQuote.bookingUrl, null);
+  assert.equal(importReport.handoff.autoOpen, false);
+
+  const rejectedImportReport = api.buildRealFlightPriceEvidenceReport({ providerMode:"sandbox_read_only" }, { sandboxImport:{ status:"rejected", importStatus:"rejected", lastImportStatus:"rejected", rawResponseStored:false, sanitized:true, redacted:true }, sandboxImportStatus:"rejected" });
+  assert.equal(rejectedImportReport.readiness.finalDecision, "sandbox_import_rejected");
+  assert.equal(rejectedImportReport.sandboxImport.importedEvidenceAvailable, false);
+
   const summary = api.summarizeRealFlightPriceEvidenceReport(sandboxReport);
   assert.equal(summary.connectorStatus, "sandbox_ready");
   assert.equal(summary.finalDecision, "sandbox_read_only_refresh_ready");
@@ -96,7 +111,7 @@ function main() {
   assert.equal(readiness.showableAsRealPrice, false);
 
   const audit = api.getRealFlightPriceEvidenceReportAuditDraft({ origin:"上海", destination:"成都" });
-  assert.equal(audit.appVersion, "2.1.48");
+  assert.equal(audit.appVersion, "2.1.49");
   assert.equal(audit.connectorStatus, "fixture_ready");
   assert.equal(audit.bookingUrlDisplayedCount, 0);
   assert.equal(audit.paymentAttemptCount, 0);

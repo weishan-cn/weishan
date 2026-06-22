@@ -8,7 +8,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function memoryStorage() { const data = new Map(); return { getItem:(name) => data.has(name) ? data.get(name) : null, setItem:(name, value) => data.set(name, String(value)), removeItem:(name) => data.delete(name) }; }
 function assertSafe(state) {
   assert.equal(state.controllerName, "read_only_quote_interactive_refresh_ui_controller_v1");
-  assert.equal(state.appVersion, "2.1.48");
+  assert.equal(state.appVersion, "2.1.49");
   assert.equal(state.safety.bookingUrl, null);
   assert.equal(state.safety.checkoutUrl, null);
   assert.equal(state.safety.paymentUrl, null);
@@ -38,6 +38,8 @@ function main() {
     "apps/desktop/src/renderer/core/realFlightPriceFetchSafetyGate.js",
     "apps/desktop/src/renderer/core/realFlightPriceProviderAdapterSlot.js",
     "apps/desktop/src/renderer/core/realFlightPriceIntegrityGuard.js",
+    "apps/desktop/src/renderer/core/sandboxProviderDryRunHarness.js",
+    "apps/desktop/src/renderer/core/sandboxProviderResponseImportStateStore.js",
     "apps/desktop/src/renderer/core/realFlightPriceEvidenceReport.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteRefreshStateStore.js",
     "apps/desktop/src/renderer/core/readOnlyPriceCandidateCardViewModel.js",
@@ -46,7 +48,7 @@ function main() {
   ]);
   const api = windowRef.WeishanReadOnlyQuoteInteractiveRefreshUiController;
   const storeApi = windowRef.WeishanReadOnlyQuoteRefreshStateStore;
-  assert.equal(api.READ_ONLY_QUOTE_INTERACTIVE_REFRESH_UI_CONTROLLER_VERSION, "2.1.48");
+  assert.equal(api.READ_ONLY_QUOTE_INTERACTIVE_REFRESH_UI_CONTROLLER_VERSION, "2.1.49");
 
   const initial = api.buildReadOnlyQuoteInteractiveRefreshUiState();
   assert.equal(initial.status, "idle");
@@ -94,6 +96,15 @@ function main() {
   assert.equal(failed.refreshErrorBanner, "只读报价刷新失败，已安全降级");
   assertSafe(failed);
   windowRef.WeishanRealFlightPriceEvidenceReport.buildRealFlightPriceEvidenceReport = originalEvidence;
+
+
+  const sandboxImport = windowRef.WeishanReadOnlyQuoteRefreshController.runAndPersistSandboxImportRefresh({ providerId:"google_flights_search", providerName:"Google Flights", route:{ origin:"上海", destination:"成都" }, departureDate:"2026-07-15", currency:"CNY", baseFare:860, taxesAndFees:110, providerFees:40, totalPrice:1010, priceUpdatedAt:"2026-06-20T00:00:00.000Z", fareSource:"sandbox_read_only_import", handoffCandidate:{ providerId:"google_flights_search", providerName:"Google Flights", providerType:"flight_search", searchOnly:true, redacted:true } }, { storageLike:storage });
+  assert.equal(sandboxImport.status, "refreshed");
+  const sandboxRecovery = api.buildSandboxImportRecoveryUiState({ storageLike:storage });
+  assert.equal(sandboxRecovery.recoveryStatus, "recovered");
+  assert.equal(sandboxRecovery.sandboxImportSummary.rawResponseStored, false);
+  assert.equal(sandboxRecovery.importedEvidenceBanner.includes("导入响应已脱敏"), true);
+  assert.equal(sandboxRecovery.safety.autoOpen, false);
 
   const disabled = api.buildReadOnlyQuoteRefreshClickResult({ providerMode:"production" }, { providerMode:"production" });
   assert.equal(disabled.status, "disabled");

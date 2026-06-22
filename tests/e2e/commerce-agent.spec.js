@@ -8700,7 +8700,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.1.48 read-only quote refresh button updates local evidence only @commerce-smoke", async () => {
+  test("v2.1.49 read-only quote refresh button updates local evidence only @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate(() => {
       try { window.localStorage.removeItem("weishan.readOnlyQuoteRefreshState.v1"); } catch (_) {}
@@ -8729,13 +8729,13 @@ test.describe.serial("commerce agent workbench", () => {
     expect(visible).not.toMatch(/\b(token|key|secret)\b/i);
   });
 
-  test("v2.1.48 local read-only quote evidence recovery stays candidate-only @commerce-smoke", async () => {
+  test("v2.1.49 local read-only quote evidence recovery stays candidate-only @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate((id) => {
       try {
         window.localStorage.setItem("weishan.readOnlyQuoteRefreshState.v1", JSON.stringify({
           stateName:"read_only_quote_refresh_state_v1",
-          appVersion:"2.1.48",
+          appVersion:"2.1.49",
           lastRefreshStatus:"refreshed",
           providerId:"google_flights_search",
           providerName:"Google Flights",
@@ -8788,6 +8788,47 @@ test.describe.serial("commerce agent workbench", () => {
 
     const visible = await visibleTextWithoutTechnicalDetails(summary);
     expect(visible).not.toMatch(/真实最终价|全网最低|保证最低价|最低价已找到|最便宜结果|已锁价。|可以出票|可直接出票/);
+    expect(visible).not.toMatch(/\b(token|key|secret)\b/i);
+  });
+
+
+
+  test("v2.1.49 sandbox import evidence stays read-only and sanitized @commerce-smoke", async () => {
+    await resetCommerceTasks(page);
+    await page.evaluate(() => {
+      try { window.localStorage.removeItem("weishan.sandboxProviderResponseImportState.v1"); } catch (_) {}
+    });
+    await installOpenExternalMock(page);
+
+    const summary = await createCommerceWorkbenchDetail(page, runId + "-V2149-IMPORT 购买7月15日上海到成都最便宜的直达机票");
+    await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
+    for (const text of ["只读沙盒导入证据", "已导入沙盒报价证据", "导入响应已脱敏", "不代表已锁价或可出票", "价格、库存、税费和规则以平台页面为准"]) await expect(summary).toContainText(text);
+
+    const debugDetails = summary.locator("details.commerce-simple-flight-advanced-debug-disclosure").first();
+    await expect(debugDetails).toBeVisible();
+    await debugDetails.evaluate((node) => { node.open = true; node.dispatchEvent(new Event("toggle")); });
+    const debugBody = debugDetails.locator(".commerce-disclosure-body").first();
+    for (const item of [
+      ["commerce-sandbox-provider-dry-run-harness-disclosure", "Sandbox Provider Dry-Run Harness"],
+      ["commerce-sandbox-response-import-disclosure", "Sandbox Response Import"],
+      ["commerce-last-sandbox-import-evidence-disclosure", "Last Sandbox Import Evidence"],
+      ["commerce-import-sanitization-disclosure", "Import Sanitization"]
+    ]) {
+      await openDisclosure(debugBody, item[0]);
+      await expect(debugBody.locator(`details.${item[0]} .commerce-disclosure-body`).first()).toContainText(item[1]);
+    }
+
+    const importRecovery = await page.evaluate(() => window.WeishanReadOnlyQuoteInteractiveRefreshUiController.buildSandboxImportRecoveryUiState({}));
+    expect(importRecovery.sandboxImportSummary.rawResponseStored).toBe(false);
+    expect(importRecovery.safety.bookingUrl).toBe(null);
+    expect(importRecovery.safety.autoOpen).toBe(false);
+
+    await expect(summary).not.toContainText(/bookingUrl:\s*https?:|checkoutUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
+    await expect(summary.getByRole("button", { name:/^(去预订|预订|付款|下单|提交订单|上传证件|上传银行卡)$/ })).toHaveCount(0);
+    expect(await latestOpenExternalUrl(page)).toBe("");
+
+    const visible = await visibleTextWithoutTechnicalDetails(summary);
+    expect(visible).not.toMatch(/真实最终价|全网最低|保证最低价|最低价已找到|已锁价。|可以出票|可直接出票/);
     expect(visible).not.toMatch(/\b(token|key|secret)\b/i);
   });
 

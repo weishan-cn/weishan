@@ -39,17 +39,19 @@ function main() {
     "apps/desktop/src/renderer/core/realFlightPriceFetchSafetyGate.js",
     "apps/desktop/src/renderer/core/realFlightPriceProviderAdapterSlot.js",
     "apps/desktop/src/renderer/core/realFlightPriceIntegrityGuard.js",
+    "apps/desktop/src/renderer/core/sandboxProviderDryRunHarness.js",
+    "apps/desktop/src/renderer/core/sandboxProviderResponseImportStateStore.js",
     "apps/desktop/src/renderer/core/realFlightPriceEvidenceReport.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteRefreshStateStore.js",
     "apps/desktop/src/renderer/core/readOnlyPriceCandidateCardViewModel.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteRefreshController.js"
   ]);
   const api = windowRef.WeishanReadOnlyQuoteRefreshController;
-  assert.equal(api.READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION, "2.1.48");
+  assert.equal(api.READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION, "2.1.49");
 
   const request = api.buildReadOnlyQuoteRefreshRequest({ origin:"上海", destination:"成都", departureDate:"2026-07-15" });
   assert.equal(request.controllerName, "read_only_quote_refresh_controller_v1");
-  assert.equal(request.appVersion, "2.1.48");
+  assert.equal(request.appVersion, "2.1.49");
   assert.equal(request.autoRun, false);
   assert.equal(request.autoOpen, false);
   assert.equal(request.bookingUrl, null);
@@ -103,6 +105,20 @@ function main() {
   assert.equal(failed.refreshStateSummary.summary, "最近一次刷新：安全失败");
   assert.equal(failed.errorSummary, "只读报价刷新失败，已安全降级");
   windowRef.WeishanRealFlightPriceEvidenceReport.buildRealFlightPriceEvidenceReport = originalEvidence;
+
+
+  const sandboxImported = api.runAndPersistSandboxImportRefresh({ providerId:"google_flights_search", providerName:"Google Flights", route:{ origin:"上海", destination:"成都" }, departureDate:"2026-07-15", currency:"CNY", baseFare:860, taxesAndFees:110, providerFees:40, totalPrice:1010, priceUpdatedAt:"2026-06-20T00:00:00.000Z", fareSource:"sandbox_read_only_import", handoffCandidate:{ providerId:"google_flights_search", providerName:"Google Flights", providerType:"flight_search", searchOnly:true, redacted:true } }, { storageLike:storage });
+  assert.equal(sandboxImported.status, "refreshed");
+  assert.equal(sandboxImported.lastImportStatus, "accepted");
+  assert.equal(sandboxImported.priceEvidenceReport.readiness.finalDecision, "sandbox_import_evidence_ready");
+  assert.equal(sandboxImported.candidateCard.sandboxImportSummary.rawResponseStored, false);
+  assert.equal(sandboxImported.candidateCard.importedEvidenceBanner.includes("导入响应已脱敏"), true);
+  assert.equal(sandboxImported.bookingUrl, null);
+  assert.equal(sandboxImported.autoOpen, false);
+  const lastSandboxImport = api.loadLastSandboxImportEvidence({ storageLike:storage });
+  assert.equal(lastSandboxImport.state.lastImportStatus, "accepted");
+  assert.equal(lastSandboxImport.sandboxImportStateSummary.importedEvidenceAvailable, true);
+  assert.equal(api.clearLastSandboxImportEvidence({ storageLike:storage }).state.lastImportStatus, "not_run");
 
   const audit = api.buildReadOnlyQuoteRefreshAuditDraft({ origin:"上海", destination:"成都" });
   assert.equal(audit.eventType, "READ_ONLY_QUOTE_REFRESH_CONTROLLER_AUDIT_DRAFT");

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.48";
+  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.49";
   const PHASE = "read_only_price_candidate_card_view_model_v1";
 
   function clone(value) {
@@ -122,13 +122,29 @@
     const source = getTrustedSource(text(safe.providerId || safe.source && safe.source.providerId || "google_flights_search"));
     const priceQuote = Object.assign({}, buildDefaultPriceQuote(), safe.priceQuote && typeof safe.priceQuote === "object" ? safe.priceQuote : {});
     const report = safe.report && typeof safe.report === "object" ? safe.report : {};
+    const reportSandboxImport = report.sandboxImport && typeof report.sandboxImport === "object" ? report.sandboxImport : {};
+    const inputSandboxImport = safe.sandboxImportSummary && typeof safe.sandboxImportSummary === "object" ? safe.sandboxImportSummary : {};
+    const sandboxImportSource = Object.keys(inputSandboxImport).length ? inputSandboxImport : reportSandboxImport;
+    const sandboxImportStatus = text(sandboxImportSource.lastImportStatus || sandboxImportSource.importStatus || sandboxImportSource.status || "not_run");
+    const isSandboxImportEvidence = sandboxImportStatus === "accepted" || (safe.priceQuote && safe.priceQuote.fareSource === "sandbox_read_only_import") || report.provider && report.provider.fareSource === "sandbox_read_only_import";
+    const sandboxImportAccepted = sandboxImportStatus === "accepted" || isSandboxImportEvidence;
+    const sandboxImportRejected = sandboxImportStatus === "rejected" || sandboxImportStatus === "blocked" || sandboxImportStatus === "failed_safe";
+    if (sandboxImportRejected) {
+      priceQuote.baseFare = null;
+      priceQuote.taxesAndFees = null;
+      priceQuote.providerFees = null;
+      priceQuote.totalPrice = null;
+      priceQuote.fareSource = "sandbox_read_only_import";
+    }
     const reportProvider = report.provider && typeof report.provider === "object" ? report.provider : {};
     const reportConnector = report.providerConnector && typeof report.providerConnector === "object" ? report.providerConnector : {};
     const providerMode = text(safe.providerMode || reportProvider.providerMode || reportConnector.providerMode || priceQuote.providerMode || "fixture");
     const isSandboxReadOnly = providerMode === "sandbox" || providerMode === "sandbox_read_only";
     const isProductionDisabled = providerMode === "production" || providerMode === "production_disabled";
-    const titleLabel = isProductionDisabled ? "生产价格未启用" : (isSandboxReadOnly ? "只读沙盒价" : "只读候选价");
-    const candidatePriceLabel = isSandboxReadOnly ? "只读沙盒价" : (isProductionDisabled ? "生产价格未启用" : "候选价");
+    const titleLabel = isProductionDisabled ? "生产价格未启用" : (isSandboxImportEvidence ? "只读沙盒导入证据" : (isSandboxReadOnly ? "只读沙盒价" : "只读候选价"));
+    const candidatePriceLabel = isSandboxImportEvidence ? "只读沙盒导入证据" : (isSandboxReadOnly ? "只读沙盒价" : (isProductionDisabled ? "生产价格未启用" : "候选价"));
+    const importStatusBadge = isSandboxImportEvidence ? "只读沙盒导入证据" : (sandboxImportRejected ? (sandboxImportStatus === "blocked" ? "导入响应已阻断" : sandboxImportStatus === "failed_safe" ? "导入安全失败" : "导入响应已拒绝") : "");
+    const importedEvidenceBanner = isSandboxImportEvidence ? "已导入沙盒报价证据 · 导入响应已脱敏 · 不代表已锁价或可出票 · 价格、库存、税费和规则以平台页面为准" : (sandboxImportRejected ? "沙盒导入响应未通过安全检查，不显示候选价" : "");
     const reportHandoff = report.handoff && typeof report.handoff === "object" ? report.handoff : {};
     const reportRefresh = report.refresh && typeof report.refresh === "object" ? report.refresh : {};
     const reportCredentialReadiness = report.credentialReadiness && typeof report.credentialReadiness === "object" ? report.credentialReadiness : {};
@@ -207,6 +223,10 @@
       "平台服务费：" + (priceQuote.providerFees == null ? "未单独提供" : "¥" + priceQuote.providerFees),
       "最终候选价：" + (priceQuote.totalPrice == null ? "暂无真实价格结果" : "¥" + priceQuote.totalPrice)
     ];
+    if (isSandboxImportEvidence) {
+      breakdownLines.unshift("已导入沙盒报价证据");
+      breakdownLines.unshift("只读沙盒导入证据");
+    }
     const safetyLines = [
       "平台最终为准",
       "未锁价",
@@ -216,6 +236,7 @@
       "仅更新候选证据，不代表已锁价或可出票",
       "价格、库存、税费和规则以平台页面为准"
     ];
+    if (isSandboxImportEvidence) safetyLines.unshift("导入响应已脱敏", "已导入沙盒报价证据", "只读沙盒导入证据");
     return clone({
       version: READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION,
       phase: PHASE,
@@ -236,7 +257,7 @@
       sourceUrlHost: text(source.safeProviderHandoffHost || ""),
       candidatePriceSource: text(source.providerName || "Google Flights"),
       candidatePriceSourceMode: text(source.accessMode || "manual_search_only"),
-      candidatePriceEvidence: "read_only_candidate_only",
+      candidatePriceEvidence: isSandboxImportEvidence ? "sandbox_read_only_import" : "read_only_candidate_only",
       candidatePriceLabel: candidatePriceLabel,
       platformFinalLabel: "平台最终为准",
       lockStatusLabel: "未锁价",
@@ -249,6 +270,9 @@
       refreshStateSummary: refreshStateSummary,
       interactiveRefreshState: interactiveRefreshState,
       recoveredEvidenceSummary: interactiveRefreshState.recoveredEvidenceSummary || { available:false, source:"local_redacted_state", showableAsRealPrice:false, showableAsCandidateEvidence:false, canReplaceMainResultCard:false },
+      sandboxImportSummary: { supported:true, lastImportStatus:sandboxImportStatus, importedEvidenceAvailable:isSandboxImportEvidence === true, rawResponseStored:false, sanitized:true, redacted:true, showableAsRealPrice:false, canReplace:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false },
+      importStatusBadge: importStatusBadge,
+      importedEvidenceBanner: importedEvidenceBanner,
       clearRefreshStateButton: Object.assign({ label:"清除刷新状态", enabled:false, autoRun:false, booking:false, payment:false, order:false, identityUpload:false }, interactiveRefreshState.clearRefreshStateButton || {}),
       refreshErrorBanner: interactiveRefreshState.refreshErrorBanner || "",
       providerBindingWizardSummary: providerBindingWizardSummary,
@@ -315,6 +339,8 @@
     return `<section class="commerce-read-only-price-candidate-card" aria-label="只读候选价" data-commerce-read-only-price-candidate-card="true">
       <h5>${escapeHtml(card.title || "只读候选价")}</h5>
       <p>${escapeHtml(card.statusLine || "只读候选价；平台最终为准；未锁价；不代表可出票")}</p>
+      ${card.importStatusBadge ? `<p data-commerce-sandbox-import-status="true">${escapeHtml(card.importStatusBadge)}</p>` : ""}
+      ${card.importedEvidenceBanner ? `<p data-commerce-sandbox-import-banner="true">${escapeHtml(card.importedEvidenceBanner)}</p>` : ""}
       <p class="commerce-read-only-price-candidate-card-price">${escapeHtml(card.priceDisplay || "暂无真实价格结果")}</p>
       <p>${escapeHtml(card.providerName || "Google Flights")} · ${escapeHtml(card.providerType || "flight_search")}</p>
       <p>${escapeHtml(card.routeTitle || "")}</p>
@@ -371,6 +397,7 @@
     if (!card.interactiveRefreshState || card.interactiveRefreshState.safety.autoRefresh !== false || card.interactiveRefreshState.safety.autoOpen !== false) throw new Error("read only price candidate card must keep interactive refresh safe");
     if (!card.clearRefreshStateButton || card.clearRefreshStateButton.autoRun !== false) throw new Error("read only price candidate card must expose safe clear refresh state button");
     if (!card.providerBindingWizardSummary || card.providerBindingWizardSummary.productionProviderEnabled !== false) throw new Error("read only price candidate card must expose safe provider binding wizard summary");
+    if (card.sandboxImportSummary && (card.sandboxImportSummary.rawResponseStored !== false || card.sandboxImportSummary.showableAsRealPrice !== false || card.sandboxImportSummary.autoOpen !== false)) throw new Error("read only price candidate card must keep sandbox import safe");
     const serial = JSON.stringify(card);
     if (/fake price|mock price|demo price|AI 估价|全网最低|real final price/i.test(serial)) throw new Error("read only price candidate card must not expose fake or final price claims");
     return true;
