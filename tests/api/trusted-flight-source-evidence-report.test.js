@@ -62,20 +62,20 @@ function main() {
   );
 
   const api = windowRef.WeishanTrustedFlightSourceEvidenceReport;
-  assert.equal(api.TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION, "2.1.52");
+  assert.equal(api.TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION, "2.1.53");
 
   const report = api.buildTrustedFlightSourceEvidenceReport();
   assert.equal(report.reportName, "trusted_flight_source_evidence_report_v1");
-  assert.equal(report.appVersion, "2.1.52");
+  assert.equal(report.appVersion, "2.1.53");
   assert.equal(report.status, "evidence_report_only");
   assert.equal(report.mode, "read_only");
   assert.equal(report.generatedAt, null);
   assert.equal(report.registry.status, "skeleton_ready");
-  assert.equal(report.registry.sourceCount, 4);
+  assert.equal(report.registry.sourceCount, 6);
   assert.equal(report.registry.manualSearchOnlyCount, 2);
-  assert.equal(report.registry.fixtureOnlyCount, 2);
+  assert.equal(report.registry.fixtureOnlyCount, 4);
   assert.equal(report.registry.productionProviderCount, 0);
-  assert.equal(report.registry.providers.length, 4);
+  assert.equal(report.registry.providers.length, 6);
   assert.equal(report.registry.providers.filter((provider) => provider.accessMode === "manual_search_only").every((provider) => provider.capabilitySummary.providerConfirmationLink === "confirmation_required"), true);
   assert.equal(report.registry.providers.find((provider) => provider.accessMode === "fixture_only").capabilitySummary.providerConfirmationLink, "disabled");
   assert.equal(report.deepLinkGate.providerConfirmationLink, "disabled");
@@ -90,17 +90,17 @@ function main() {
   assert.equal(report.safety.identityUpload, "disabled");
   assert.equal(report.safety.tokenExposure, "redacted");
   assert.equal(report.safety.apiKeyExposure, "redacted");
-  assert.equal(report.readiness.limitedBetaReady, true);
-  assert.equal(report.readiness.safeProviderHandoffReady, true);
+  assert.equal(report.readiness.limitedBetaReady, false);
+  assert.equal(report.readiness.safeProviderHandoffReady, false);
   assert.equal(report.readiness.realPriceClaimAllowed, false);
   assert.equal(report.readiness.bookingClaimAllowed, false);
-  assert.equal(report.readiness.finalDecision, "safe_provider_handoff_ready");
+  assert.equal(report.readiness.finalDecision, "blocked");
   assert.equal(report.redacted, true);
 
   const summary = api.summarizeTrustedFlightSourceEvidence(report);
-  assert.equal(summary.sourceCount, 4);
+  assert.equal(summary.sourceCount, 6);
   assert.equal(summary.manualSearchOnlyCount, 2);
-  assert.equal(summary.fixtureOnlyCount, 2);
+  assert.equal(summary.fixtureOnlyCount, 4);
   assert.equal(summary.productionProviderCount, 0);
   assert.equal(summary.productionProviderAggregation, "disabled");
   assert.equal(summary.realProviderNetwork, "disabled");
@@ -112,12 +112,12 @@ function main() {
   assert.equal(summary.redacted, true);
 
   const readiness = api.evaluateTrustedFlightSourceLimitedBetaReadiness(report);
-  assert.equal(readiness.limitedBetaReady, true);
-  assert.equal(readiness.safeProviderHandoffReady, true);
+  assert.equal(readiness.limitedBetaReady, false);
+  assert.equal(readiness.safeProviderHandoffReady, false);
   assert.equal(readiness.userFacingClaimAllowed, false);
   assert.equal(readiness.realPriceClaimAllowed, false);
   assert.equal(readiness.bookingClaimAllowed, false);
-  assert.equal(readiness.finalDecision, "safe_provider_handoff_ready");
+  assert.equal(readiness.finalDecision, "blocked");
   assert.equal(readiness.redacted, true);
 
   const blockedReadiness = api.evaluateTrustedFlightSourceLimitedBetaReadiness({ registry: { sourceCount: 0 } });
@@ -127,12 +127,12 @@ function main() {
   const audit = api.getTrustedFlightSourceEvidenceReportAuditDraft();
   assert.equal(audit.eventType, "TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_DRAFT");
   assert.equal(audit.reportName, "trusted_flight_source_evidence_report_v1");
-  assert.equal(audit.appVersion, "2.1.52");
+  assert.equal(audit.appVersion, "2.1.53");
   assert.equal(audit.mode, "read_only");
   assert.equal(audit.generatedAt, null);
-  assert.equal(audit.sourceCount, 4);
+  assert.equal(audit.sourceCount, 6);
   assert.equal(audit.manualSearchOnlyCount, 2);
-  assert.equal(audit.fixtureOnlyCount, 2);
+  assert.equal(audit.fixtureOnlyCount, 4);
   assert.equal(audit.productionProviderCount, 0);
   assert.equal(audit.productionProviderAggregation, "disabled");
   assert.equal(audit.realProviderNetwork, "disabled");

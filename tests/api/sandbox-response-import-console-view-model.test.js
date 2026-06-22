@@ -16,10 +16,13 @@ function main() {
     "apps/desktop/src/renderer/core/multiSandboxQuoteImportProcessor.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteCandidateRanking.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteCandidateSelection.js",
+    "apps/desktop/src/renderer/core/sandboxProviderRunMatrix.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteRunTimeline.js",
+    "apps/desktop/src/renderer/core/multiProviderSandboxDryRunOrchestrator.js",
     "apps/desktop/src/renderer/core/sandboxResponseImportConsoleViewModel.js"
   ]);
   const api = windowRef.WeishanSandboxResponseImportConsoleViewModel;
-  assert.equal(api.SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION, "2.1.52");
+  assert.equal(api.SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION, "2.1.53");
   const initial = api.buildSandboxResponseImportConsoleModel();
   assert.equal(initial.status, "idle");
   assert.equal(initial.title, "多 Provider 沙盒报价导入");
@@ -30,6 +33,8 @@ function main() {
     { providerId:"flight_provider_trusted_fixture", providerName:"Trusted Flight Fixture", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import", route:{ origin:"SHA", destination:"CTU" }, departureDate:"2026-07-15", currency:"CNY", baseFare:860, taxesAndFees:110, providerFees:40, totalPrice:1010, priceUpdatedAt:"2026-01-01T00:00:00.000Z", freshnessMinutes:15, handoffCandidate:{ providerId:"google_flights_search", handoffType:"provider_search" } },
     { providerId:"trip_com_sandbox_stub", providerName:"Trip.com Sandbox Stub", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import", trip:{ from:"SHA", to:"CTU", date:"2026-07-15" }, price:{ currency:"CNY", fare:820, tax:120, serviceFee:35, total:975 }, freshness:{ updatedAt:"2026-01-01T00:00:00.000Z", minutes:10 }, handoffCandidate:{ providerId:"trip_com_search", handoffType:"provider_search" } }
   ]);
+  const dryRunApi = windowRef.WeishanMultiProviderSandboxDryRunOrchestrator;
+  const dryRun = dryRunApi.runMultiProviderSandboxDryRun({ title:"购买7月15日上海到成都最便宜的直达机票", origin:"上海", destination:"成都", departureDate:"2026-07-15", directOnly:true, sortIntent:"低价优先" }, {});
   const preview = api.buildSandboxResponseValidationPreview(raw);
   assert.equal(preview.status, "preview_ready");
   assert.equal(preview.preview.validationStatus, "accepted");
@@ -42,6 +47,11 @@ function main() {
   assert.equal(preview.sourceBreakdown.providerCount, 2);
   assert.equal(preview.lowPriceClaim, "当前导入样本中的低价候选");
   assert.equal(preview.rawInputStored, false);
+  const dryRunPreview = api.buildSandboxResponseImportConsoleModel({ sandboxDryRunSummary: dryRun, runTimelineSummary: dryRun.runTimelineSummary, providerRunMatrix: dryRun.providerRunMatrix, dryRunStatus: dryRun.status, dryRunButton:{ label:"运行沙盒只读报价", enabled:true, loading:false, autoRun:false }, dryRunTopCandidates: dryRun.dryRunTopCandidates });
+  assert.equal(dryRunPreview.dryRunStatus, "completed");
+  assert.equal(dryRunPreview.dryRunButton.label, "运行沙盒只读报价");
+  assert.equal(dryRunPreview.dryRunTopCandidates.length, 3);
+  assert.equal(dryRunPreview.runTimelineSummary.timelineName, "read_only_quote_run_timeline_v1");
   const imported = api.buildSandboxResponseImportResult(raw);
   assert.equal(imported.status, "accepted");
   assert.equal(imported.importResult.status, "accepted");
@@ -60,6 +70,7 @@ function main() {
   const audit = api.buildSandboxResponseImportConsoleAuditDraft(imported);
   assert.equal(audit.rawInputStored, false);
   assert.equal(audit.rawResponseStored, false);
+  assert.equal(audit.dryRunStatus, "not_run");
   assert.equal(audit.bookingUrl, null);
   assert.equal(audit.autoOpen, false);
   assert.equal(audit.sourceBreakdown.providerCount, 2);

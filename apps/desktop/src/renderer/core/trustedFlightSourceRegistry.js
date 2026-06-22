@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const TRUSTED_FLIGHT_SOURCE_REGISTRY_VERSION = "2.1.52";
+  const TRUSTED_FLIGHT_SOURCE_REGISTRY_VERSION = "2.1.53";
   const PHASE = "trusted_flight_source_registry_skeleton_only";
   const TRUSTED_PROVIDER_HANOFF_HOSTS = ["google.com", "trip.com", "ctrip.com", "skyscanner.com", "kayak.com", "expedia.com", "booking.com"];
 
@@ -33,6 +33,22 @@
     {
       providerId: "flight_provider_trusted_fixture",
       providerName: "Trusted Flight Fixture",
+      providerType: "fixture",
+      accessMode: "fixture_only",
+      safeProviderHandoffUrl: null,
+      safeProviderHandoffHost: ""
+    },
+    {
+      providerId: "trip_com_sandbox_stub",
+      providerName: "Trip.com Sandbox Stub",
+      providerType: "fixture",
+      accessMode: "fixture_only",
+      safeProviderHandoffUrl: null,
+      safeProviderHandoffHost: ""
+    },
+    {
+      providerId: "airline_official_sandbox_stub",
+      providerName: "Airline Official Sandbox Stub",
       providerType: "fixture",
       accessMode: "fixture_only",
       safeProviderHandoffUrl: null,

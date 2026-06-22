@@ -18,7 +18,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/trustedFlightSourceRegistry.js"]);
   const api = windowRef.WeishanTrustedFlightSourceRegistry;
-  assert.equal(api.TRUSTED_FLIGHT_SOURCE_REGISTRY_VERSION, "2.1.52");
+  assert.equal(api.TRUSTED_FLIGHT_SOURCE_REGISTRY_VERSION, "2.1.53");
 
   const registry = api.getTrustedFlightSourceRegistry();
   assert.equal(registry.phase, "trusted_flight_source_registry_skeleton_only");
@@ -34,7 +34,7 @@ function main() {
   assert.equal(registry.canUploadIdentity, false);
   assert.equal(registry.redacted, true);
   assert.equal(Array.isArray(registry.trustedSources), true);
-  assert.equal(registry.trustedSources.length, 4);
+  assert.equal(registry.trustedSources.length, 6);
 
   const google = api.getTrustedFlightSourceById("google_flights_search");
   assert.equal(google.accessMode, "manual_search_only");
@@ -75,11 +75,11 @@ function main() {
 
   const audit = api.getTrustedFlightSourceRegistryAuditDraft();
   assert.equal(audit.eventType, "TRUSTED_FLIGHT_SOURCE_REGISTRY_DRAFT");
-  assert.equal(audit.trustedSourceCount, 4);
+  assert.equal(audit.trustedSourceCount, 6);
   assert.equal(audit.manualSearchOnlyCount, 2);
-  assert.equal(audit.fixtureOnlyCount, 2);
+  assert.equal(audit.fixtureOnlyCount, 4);
   assert.equal(audit.safeProviderHandoffReadyCount, 2);
-  assert.equal(audit.productionProviderDisabledCount, 4);
+  assert.equal(audit.productionProviderDisabledCount, 6);
   assert.equal(audit.bookingUrlDisplayedCount, 0);
   assert.equal(audit.paymentAttemptCount, 0);
   assert.equal(audit.orderAttemptCount, 0);

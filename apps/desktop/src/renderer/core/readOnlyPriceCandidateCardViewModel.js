@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.52";
+  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.53";
   const PHASE = "read_only_price_candidate_card_view_model_v1";
 
   function clone(value) {
@@ -10,6 +10,13 @@
 
   function text(value) {
     return String(value == null ? "" : value).trim();
+  }
+
+  function toArray(value) {
+    if (Array.isArray(value)) return value.slice();
+    if (!value) return [];
+    if (typeof value.length === "number" && value.length >= 0) return Array.prototype.slice.call(value);
+    return [];
   }
 
   function escapeHtml(value) {
@@ -171,7 +178,7 @@
     const interactiveRefreshState = typeof interactiveApi.buildReadOnlyQuoteInteractiveRefreshUiState === "function"
       ? interactiveApi.buildReadOnlyQuoteInteractiveRefreshUiState(Object.assign({}, safe.interactiveRefreshState || {}, { state:refreshStateInput, status:safe.interactiveRefreshStatus || safe.status || (safe.interactiveRefreshState && safe.interactiveRefreshState.status) || "idle" }))
       : { status:"idle", recoveryStatus:"not_loaded", refreshButton:{ label:"刷新只读报价", enabled:true, loading:false, reason:"仅更新候选证据，不代表已锁价或可出票", autoRun:false }, lastRefreshSummary:{ status:refreshStateSummary.lastRefreshStatus || "not_run" }, recoveredEvidenceSummary:{ available:false, source:"local_redacted_state", showableAsRealPrice:false, showableAsCandidateEvidence:false, canReplaceMainResultCard:false }, refreshErrorBanner:"", clearRefreshStateButton:{ label:"清除刷新状态", enabled:false, autoRun:false }, safety:{ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, autoRefresh:false, booking:false, payment:false, order:false, identityUpload:false, redacted:true }, redacted:true };
-    const topCandidates = (Array.isArray(safe.topCandidates) ? safe.topCandidates : (report.rankingPreview && Array.isArray(report.rankingPreview.topCandidates) ? report.rankingPreview.topCandidates : [])).slice(0, 3).map(function (candidate, index) {
+    const topCandidates = (toArray(safe.dryRunTopCandidates).length ? toArray(safe.dryRunTopCandidates) : (toArray(safe.topCandidates).length ? toArray(safe.topCandidates) : toArray(report.rankingPreview && report.rankingPreview.topCandidates))).slice(0, 3).map(function (candidate, index) {
       const item = candidate && typeof candidate === "object" ? candidate : {};
       return Object.assign({}, item, { rank:item.rank || index + 1, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, identityUpload:false, redacted:true });
     });
@@ -179,6 +186,11 @@
     const sourceBreakdown = safe.sourceBreakdown && typeof safe.sourceBreakdown === "object" ? safe.sourceBreakdown : (rankingPreview.sourceBreakdown && typeof rankingPreview.sourceBreakdown === "object" ? rankingPreview.sourceBreakdown : { providerCount: new Set(topCandidates.map(function (candidate) { return text(candidate.providerId || candidate.providerName || ""); }).filter(Boolean)).size, providerIds: Array.from(new Set(topCandidates.map(function (candidate) { return text(candidate.providerId || ""); }).filter(Boolean))), fareSources: Array.from(new Set(topCandidates.map(function (candidate) { return text(candidate.fareSource || ""); }).filter(Boolean))) });
     const rankingExplanation = safe.rankingExplanation || rankingPreview.rankingExplanation || report.rankingPreview && report.rankingPreview.rankingExplanation || "仅按导入样本中的只读候选证据排序，平台最终为准。";
     const selectedCandidate = safe.selectedCandidate && typeof safe.selectedCandidate === "object" ? safe.selectedCandidate : (report.selectedCandidate && typeof report.selectedCandidate === "object" ? report.selectedCandidate : null);
+    const sandboxDryRunSummary = safe.sandboxDryRunSummary && typeof safe.sandboxDryRunSummary === "object" ? safe.sandboxDryRunSummary : (report.sandboxDryRunSummary && typeof report.sandboxDryRunSummary === "object" ? report.sandboxDryRunSummary : null);
+    const runTimelineSummary = safe.runTimelineSummary && typeof safe.runTimelineSummary === "object" ? safe.runTimelineSummary : (sandboxDryRunSummary && sandboxDryRunSummary.runTimelineSummary && typeof sandboxDryRunSummary.runTimelineSummary === "object" ? sandboxDryRunSummary.runTimelineSummary : (report.runTimelineSummary && typeof report.runTimelineSummary === "object" ? report.runTimelineSummary : null));
+    const dryRunTopCandidates = toArray(safe.dryRunTopCandidates).length ? toArray(safe.dryRunTopCandidates) : (sandboxDryRunSummary && toArray(sandboxDryRunSummary.dryRunTopCandidates).length ? toArray(sandboxDryRunSummary.dryRunTopCandidates) : topCandidates);
+    const dryRunStatus = text(safe.dryRunStatus || (sandboxDryRunSummary && sandboxDryRunSummary.status) || (runTimelineSummary && runTimelineSummary.status) || "not_run");
+    const dryRunButton = safe.dryRunButton && typeof safe.dryRunButton === "object" ? safe.dryRunButton : { label:"运行沙盒只读报价", enabled:true, loading:false, autoRun:false };
     const selectedSourceSummary = text(safe.selectedSourceSummary || (selectedCandidate && selectedCandidate.selectedSourceSummary) || (selectedCandidate ? "来源：" + (text(selectedCandidate.providerName || "") || "只读沙盒") + " / " + (text(selectedCandidate.responseShape || "") || text(selectedCandidate.fareSource || "导入样本")) : "来源：只读沙盒 / 导入样本"));
     const selectedSafeProviderHandoffUrl = selectedCandidate && selectedCandidate.safeProviderHandoffReady === true ? text(selectedCandidate.safeProviderHandoffUrl || "") : "";
     const canRefresh = normalized.restrictedCategory !== true && providerBindingWizardSummary.actions && providerBindingWizardSummary.actions.canAttemptReadOnlyRefresh === true && !isProductionDisabled && interactiveRefreshState.status !== "refreshing";
@@ -287,14 +299,20 @@
       refreshStateSummary: refreshStateSummary,
       interactiveRefreshState: interactiveRefreshState,
       recoveredEvidenceSummary: interactiveRefreshState.recoveredEvidenceSummary || { available:false, source:"local_redacted_state", showableAsRealPrice:false, showableAsCandidateEvidence:false, canReplaceMainResultCard:false },
-      sandboxImportSummary: { supported:true, lastPreviewStatus:sandboxImportPreviewStatus, lastImportStatus:sandboxImportStatus, importedEvidenceAvailable:isSandboxImportEvidence === true, rawResponseStored:false, sanitized:true, redacted:true, showableAsRealPrice:false, canReplace:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false },
-      sandboxImportConsoleSummary: { title:"沙盒响应导入", previewActionLabel:"预览导入结果", confirmActionLabel:"确认导入脱敏证据", clearActionLabel:"清除导入状态", rawResponseStored:false, canSaveRawResponse:false, canPasteSecretHere:false, redacted:true },
+      sandboxImportSummary: { supported:true, lastPreviewStatus:sandboxImportPreviewStatus, lastImportStatus:sandboxImportStatus, importedEvidenceAvailable:isSandboxImportEvidence === true, rawResponseStored:false, sanitized:true, redacted:true, showableAsRealPrice:false, canReplace:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false, dryRunStatus:dryRunStatus, providerRunMatrix:sandboxDryRunSummary && sandboxDryRunSummary.providerRunMatrix || null, runTimelineSummary:runTimelineSummary, sandboxDryRunSummary:sandboxDryRunSummary, dryRunTopCandidates:dryRunTopCandidates },
+      sandboxImportConsoleSummary: { title:"沙盒响应导入", previewActionLabel:"预览导入结果", confirmActionLabel:"确认导入脱敏证据", clearActionLabel:"清除导入状态", runDryButtonLabel:dryRunButton.label || "运行沙盒只读报价", rawResponseStored:false, canSaveRawResponse:false, canPasteSecretHere:false, redacted:true },
       sandboxImportPreviewStatus: sandboxImportPreviewStatus,
       sandboxImportLastStatus: sandboxImportStatus,
       sandboxImportBlockedReason: sandboxImportBlockedReason,
       rankingScope: "导入样本范围",
       lowPriceClaim: "当前导入样本中的低价候选",
-      topCandidates: topCandidates,
+      dryRunStatus: dryRunStatus,
+      dryRunButton: dryRunButton,
+      dryRunTopCandidates: dryRunTopCandidates,
+      sandboxDryRunSummary: sandboxDryRunSummary,
+      runTimelineSummary: runTimelineSummary,
+      providerRunMatrix: sandboxDryRunSummary && sandboxDryRunSummary.providerRunMatrix ? sandboxDryRunSummary.providerRunMatrix : null,
+      topCandidates: dryRunTopCandidates,
       selectedCandidate: selectedCandidate ? Object.assign({}, selectedCandidate, { selectedSourceSummary:selectedSourceSummary, selectionWarning:selectedCandidate.safeProviderHandoffReady === true ? "平台最终为准，不代表已锁价或可出票" : "当前平台确认链接未通过安全检查", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, identityUpload:false, redacted:true }) : null,
       importStatusBadge: importStatusBadge,
       importedEvidenceBanner: importedEvidenceBanner,
@@ -362,7 +380,8 @@
     if (!card || card.visible !== true) return "";
     const breakdownLines = Array.isArray(card.breakdownLines) ? card.breakdownLines : [];
     const safetyLines = Array.isArray(card.safetyLines) ? card.safetyLines : [];
-    const topCandidates = Array.isArray(card.topCandidates) ? card.topCandidates : [];
+    const topCandidates = Array.isArray(card.dryRunTopCandidates) && card.dryRunTopCandidates.length ? card.dryRunTopCandidates : (Array.isArray(card.topCandidates) ? card.topCandidates : []);
+    const dryRunSummaryHtml = card.sandboxDryRunSummary || card.runTimelineSummary ? '<section class="commerce-read-only-sandbox-dry-run" data-commerce-read-only-sandbox-dry-run="true"><h5>本次沙盒运行结果</h5><p>运行沙盒只读报价</p><p>本次沙盒运行结果：' + escapeHtml(card.dryRunStatus || (card.sandboxDryRunSummary && card.sandboxDryRunSummary.status) || "not_run") + '</p><p>Provider 运行矩阵：' + escapeHtml((card.providerRunMatrix && card.providerRunMatrix.matrixName) || (card.sandboxDryRunSummary && card.sandboxDryRunSummary.providerRunMatrix && card.sandboxDryRunSummary.providerRunMatrix.matrixName) || "sandbox_provider_run_matrix_v1") + '</p><p>Quote Run Timeline：' + escapeHtml((card.runTimelineSummary && card.runTimelineSummary.summary) || (card.sandboxDryRunSummary && card.sandboxDryRunSummary.runTimelineSummary && card.sandboxDryRunSummary.runTimelineSummary.summary) || "构建 Provider 运行矩阵 · 生成只读沙盒报价 · 报价归一化 · Top 3 排序 · 候选选择准备") + '</p><p>多 Provider 沙盒运行</p><p>Top 3 候选报价</p></section>' : "";
     const topCandidatesHtml = topCandidates.length ? '<section class="commerce-read-only-top-candidates" data-commerce-read-only-top-candidates="true"><h5>Top 3 候选报价</h5><p>' + escapeHtml(card.lowPriceClaim || "当前导入样本中的低价候选") + '</p><p>Ranking Scope: ' + escapeHtml(card.rankingScope || "导入样本范围") + '</p><p>' + escapeHtml(card.rankingExplanation || "仅按导入样本中的只读候选证据排序，平台最终为准。") + '</p><p>Source Breakdown: ' + escapeHtml('providerCount=' + ((card.sourceBreakdown && card.sourceBreakdown.providerCount) || 0) + '; providerIds=' + (((card.sourceBreakdown && card.sourceBreakdown.providerIds) || []).join(',')) + '; fareSources=' + (((card.sourceBreakdown && card.sourceBreakdown.fareSources) || []).join(','))) + '</p><ol>' + topCandidates.map(function (candidate) {
       const selected = card.selectedCandidate && card.selectedCandidate.quoteId === candidate.quoteId;
       const price = candidate.totalPrice == null ? "暂无真实价格结果" : "¥" + candidate.totalPrice;
@@ -375,6 +394,7 @@
       <p>${escapeHtml(card.statusLine || "只读候选价；平台最终为准；未锁价；不代表可出票")}</p>
       ${card.importStatusBadge ? `<p data-commerce-sandbox-import-status="true">${escapeHtml(card.importStatusBadge)}</p>` : ""}
       ${card.importedEvidenceBanner ? `<p data-commerce-sandbox-import-banner="true">${escapeHtml(card.importedEvidenceBanner)}</p>` : ""}
+      ${dryRunSummaryHtml}
       <p class="commerce-read-only-price-candidate-card-price">${escapeHtml(card.priceDisplay || "暂无真实价格结果")}</p>
       <p>${escapeHtml(card.providerName || "Google Flights")} · ${escapeHtml(card.providerType || "flight_search")}</p>
       <p>${escapeHtml(card.routeTitle || "")}</p>
@@ -387,6 +407,7 @@
       ${card.refreshErrorBanner ? `<p class="commerce-warning" data-commerce-read-only-refresh-error="true">${escapeHtml(card.refreshErrorBanner)}</p>` : ""}
       <p>${escapeHtml(card.providerBindingWizardSummary && card.providerBindingWizardSummary.title || "Provider 沙盒绑定准备")} · ${escapeHtml(card.providerBindingWizardSummary && card.providerBindingWizardSummary.status || "fixture_ready")}</p>
       <div class="commerce-read-only-price-candidate-card-actions">
+        <button type="button" class="cmd-btn gray commerce-run-sandbox-dry-run-btn" data-commerce-run-sandbox-dry-run="true"${card.dryRunButton && card.dryRunButton.enabled === false ? " disabled" : ""}>${escapeHtml(card.dryRunButton && card.dryRunButton.label || "运行沙盒只读报价")}</button>
         <button type="button" class="cmd-btn gray commerce-read-only-refresh-btn" data-commerce-read-only-quote-refresh="true"${card.refreshButton && card.refreshButton.enabled ? "" : " disabled"}>${escapeHtml(card.refreshButton && card.refreshButton.label || "刷新只读报价")}</button>
         <button type="button" class="cmd-btn gray commerce-clear-read-only-refresh-state-btn" data-commerce-clear-read-only-refresh-state="true"${card.clearRefreshStateButton && card.clearRefreshStateButton.enabled ? "" : " disabled"}>${escapeHtml(card.clearRefreshStateButton && card.clearRefreshStateButton.label || "清除刷新状态")}</button>
         <button type="button" class="cmd-btn gray commerce-safe-provider-handoff-btn" data-commerce-safe-provider-handoff-request="true" data-commerce-safe-provider-handoff-kind="${escapeHtml(card.providerType || "flight_search")}" data-commerce-safe-provider-handoff-url="${escapeHtml(encodeURIComponent(card.safeProviderHandoffUrl || ""))}"${card.confirmationUi && card.confirmationUi.continueButtonDisabled ? " disabled" : ""}>${escapeHtml(card.actionLabel || "去平台确认")}</button>
@@ -435,6 +456,8 @@
     if (!card.interactiveRefreshState || card.interactiveRefreshState.safety.autoRefresh !== false || card.interactiveRefreshState.safety.autoOpen !== false) throw new Error("read only price candidate card must keep interactive refresh safe");
     if (!card.clearRefreshStateButton || card.clearRefreshStateButton.autoRun !== false) throw new Error("read only price candidate card must expose safe clear refresh state button");
     if (!card.providerBindingWizardSummary || card.providerBindingWizardSummary.productionProviderEnabled !== false) throw new Error("read only price candidate card must expose safe provider binding wizard summary");
+    if (!card.dryRunButton || typeof card.dryRunButton.label !== "string" || card.dryRunButton.autoRun !== false) throw new Error("read only price candidate card must expose safe dry run button");
+    if (card.sandboxDryRunSummary && (card.sandboxDryRunSummary.rawResponseStored !== false || card.sandboxDryRunSummary.autoOpen !== false)) throw new Error("read only price candidate card must keep sandbox dry run safe");
     if (card.sandboxImportSummary && (card.sandboxImportSummary.rawResponseStored !== false || card.sandboxImportSummary.showableAsRealPrice !== false || card.sandboxImportSummary.autoOpen !== false)) throw new Error("read only price candidate card must keep sandbox import safe");
     const serial = JSON.stringify(card);
     if (/fake price|mock price|demo price|AI 估价|全网最低|real final price/i.test(serial)) throw new Error("read only price candidate card must not expose fake or final price claims");

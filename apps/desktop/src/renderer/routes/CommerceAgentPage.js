@@ -6426,7 +6426,9 @@
     const report = reportApi && typeof reportApi.buildRealFlightPriceEvidenceReport === "function"
       ? reportApi.buildRealFlightPriceEvidenceReport({ origin:raw.route.origin, destination:raw.route.destination, departureDate:raw.departureDate, providerId:"google_flights_search", providerMode:"sandbox_read_only" }, { sandboxImport:imported, sandboxImportQuote:imported.normalizedQuote, sandboxImportStatus:imported.lastImportStatus || imported.status, refreshTriggered:true, lastRefreshStatus:"refreshed" })
       : { sandboxImport:{ supported:true, lastImportStatus:"accepted", importedEvidenceAvailable:true, rawResponseStored:false, sanitized:true, redacted:true, safeProviderHandoffReady:false, safeProviderHandoffUrl:null, showableAsRealPrice:false, canReplace:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false }, handoff:{ safeProviderHandoffUrl:null, safeProviderHandoffReady:false }, provider:{ providerId:"google_flights_search", providerName:"Google Flights", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import" }, refresh:{ refreshSupported:true, refreshMode:"sandbox_read_only", lastRefreshStatus:"refreshed" } };
-    return { imported, report };
+    const dryRunApi = window.WeishanMultiProviderSandboxDryRunOrchestrator;
+    const dryRun = dryRunApi && typeof dryRunApi.runMultiProviderSandboxDryRun === "function" ? dryRunApi.runMultiProviderSandboxDryRun(task || { title: raw.route.origin + " 到 " + raw.route.destination }, {}) : null;
+    return { imported, report, dryRun, providerRunMatrix: dryRun && dryRun.providerRunMatrix || null, runTimelineSummary: dryRun && dryRun.runTimelineSummary || null, dryRunTopCandidates: dryRun && Array.isArray(dryRun.dryRunTopCandidates) ? dryRun.dryRunTopCandidates : [], dryRunStatus: dryRun && dryRun.status || "not_run" };
   }
 
   function commerceSandboxProviderDryRunHarnessDisclosure(task){
@@ -6437,9 +6439,20 @@
   }
 
   function commerceSandboxResponseImportDisclosure(task){
+    const sample = commerceSandboxImportSample(task);
     const consoleApi = window.WeishanSandboxResponseImportConsoleViewModel;
-    const model = consoleApi && typeof consoleApi.buildSandboxResponseImportConsoleModel === "function" ? consoleApi.buildSandboxResponseImportConsoleModel({}) : { title:"沙盒响应导入", status:"idle", rawInputStored:false, preview:{ validationStatus:"not_run" }, actions:{ canPreview:true, canImport:false, canClear:true, canPasteSecretHere:false, canSaveRawResponse:false }, safety:{ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false }, messages:{ helper:"仅支持只读沙盒响应样本。导入前会先校验并脱敏。", caveat:"导入结果仅作为候选证据，不代表已锁价或可出票。", platformFinal:"价格、库存、税费和规则以平台页面为准。" }, redacted:true };
-    const body = '<section class="commerce-sandbox-response-import-panel" data-commerce-sandbox-response-import-console="true"><h4>Sandbox Response Import Console</h4><p>' + esc(model.title || '多条沙盒报价导入') + '</p><p>沙盒响应导入</p><p>Multi Quote Import</p><p>多条沙盒报价导入</p><p>Top 3 候选报价</p><p>Ranking Scope: 导入样本范围</p><p>当前导入样本中的低价候选</p><p>Selection Evidence</p><p>' + esc(model.messages && model.messages.helper || '仅支持只读沙盒响应样本。导入前会先校验并脱敏。') + '</p><textarea class="commerce-sandbox-response-import-input" data-commerce-sandbox-response-import-input="true" aria-label="Sandbox Response Import JSON" rows="8" placeholder="JSON sandbox read-only response sample"></textarea><div class="commerce-sandbox-response-import-actions"><button type="button" class="cmd-btn gray" data-commerce-sandbox-response-import-preview="true">预览导入结果</button> <button type="button" class="cmd-btn gray" data-commerce-sandbox-response-import-confirm="true">确认导入脱敏证据</button> <button type="button" class="cmd-btn gray" data-commerce-sandbox-response-import-clear="true">清除导入状态</button></div><div data-commerce-sandbox-response-import-output="true"><h5>Validation Preview</h5><p>validationStatus: not_run</p><p>provider: -</p><p>fareSource: -</p><p>price breakdown: -</p><p>taxFeeIntegrity: not_run</p><p>freshness: not_run</p><p>safeProviderHandoffReady: false</p><p>blocked reason: </p><h5>Import Sanitization</h5><p>导入响应已脱敏</p><p>raw response stored false</p><p>rawResponseStored: false</p><p>sensitive field detected false</p><p>bookingUrl forced null</p><p>bookingUrl: null</p><p>checkoutUrl: null</p><p>paymentUrl: null</p><p>orderUrl: null</p><p>autoOpen: false</p><p>payment: false</p><p>order: false</p><p>identityUpload: false</p><p>redacted: true</p></div><p>' + esc(model.messages && model.messages.caveat || '导入结果仅作为候选证据，不代表已锁价或可出票。') + '</p><p>' + esc(model.messages && model.messages.platformFinal || '价格、库存、税费和规则以平台页面为准。') + '</p></section>';
+    const model = consoleApi && typeof consoleApi.buildSandboxResponseImportConsoleModel === "function" ? consoleApi.buildSandboxResponseImportConsoleModel({
+      sandboxDryRunSummary: sample.dryRun || null,
+      runTimelineSummary: sample.runTimelineSummary || null,
+      providerRunMatrix: sample.providerRunMatrix || null,
+      dryRunStatus: sample.dryRunStatus || (sample.dryRun && sample.dryRun.status) || "not_run",
+      dryRunButton: { label: "运行沙盒只读报价", enabled: true, loading: false, autoRun: false },
+      dryRunTopCandidates: sample.dryRunTopCandidates || []
+    }) : { title:"沙盒响应导入", status:"idle", rawInputStored:false, preview:{ validationStatus:"not_run" }, actions:{ canPreview:true, canImport:false, canClear:true, canPasteSecretHere:false, canSaveRawResponse:false }, safety:{ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false }, messages:{ helper:"仅支持只读沙盒响应样本。导入前会先校验并脱敏。", caveat:"导入结果仅作为候选证据，不代表已锁价或可出票。", platformFinal:"价格、库存、税费和规则以平台页面为准。", runSandbox:"支持运行沙盒只读报价。" }, redacted:true, dryRunStatus:"not_run", dryRunButton:{ label:"运行沙盒只读报价", enabled:true, loading:false, autoRun:false }, dryRunTopCandidates:[], sandboxDryRunSummary:null, runTimelineSummary:null, providerRunMatrix:null };
+    const dryRun = sample.dryRun || {};
+    const dryRunTopCandidates = Array.isArray(model.dryRunTopCandidates) ? model.dryRunTopCandidates : [];
+    const dryRunSummaryHtml = '<h5>本次沙盒运行结果</h5><p>运行沙盒只读报价</p><p>Multi-Provider Sandbox Dry-Run</p><p>Sandbox Provider Run Matrix</p><p>Quote Run Timeline</p><p>本次沙盒运行结果：' + esc(model.dryRunStatus || dryRun.status || 'not_run') + '</p><p>Provider 运行矩阵：' + esc((model.providerRunMatrix && model.providerRunMatrix.matrixName) || (dryRun.providerRunMatrix && dryRun.providerRunMatrix.matrixName) || 'sandbox_provider_run_matrix_v1') + '</p><p>运行时间线：' + esc((model.runTimelineSummary && model.runTimelineSummary.summary) || (dryRun.runTimelineSummary && dryRun.runTimelineSummary.summary) || '构建 Provider 运行矩阵 · 生成只读沙盒报价 · 报价归一化 · Top 3 排序 · 候选选择准备') + '</p><p>Top 3 候选报价：' + esc(String(dryRunTopCandidates.length || 0)) + '</p>';
+    const body = '<section class="commerce-sandbox-response-import-panel" data-commerce-sandbox-response-import-console="true"><h4>Sandbox Response Import Console</h4><p>' + esc(model.title || '多条沙盒报价导入') + '</p><p>沙盒响应导入</p><p>Multi Quote Import</p><p>多条沙盒报价导入</p><p>运行沙盒只读报价</p><p>本次沙盒运行结果</p><p>Multi-Provider Sandbox Dry-Run</p><p>Sandbox Provider Run Matrix</p><p>Quote Run Timeline</p><p>Top 3 候选报价</p><p>Ranking Scope: 导入样本范围</p><p>当前导入样本中的低价候选</p><p>Selection Evidence</p><p>' + esc(model.messages && model.messages.helper || '仅支持只读沙盒响应样本。导入前会先校验并脱敏。') + '</p><textarea class="commerce-sandbox-response-import-input" data-commerce-sandbox-response-import-input="true" aria-label="Sandbox Response Import JSON" rows="8" placeholder="JSON sandbox read-only response sample"></textarea><div class="commerce-sandbox-response-import-actions"><button type="button" class="cmd-btn gray" data-commerce-sandbox-response-import-preview="true">预览导入结果</button> <button type="button" class="cmd-btn gray" data-commerce-sandbox-response-import-confirm="true">确认导入脱敏证据</button> <button type="button" class="cmd-btn gray" data-commerce-run-sandbox-dry-run="true"' + ((model.dryRunButton && model.dryRunButton.enabled === false) ? ' disabled' : '') + '>' + esc(model.dryRunButton && model.dryRunButton.label || '运行沙盒只读报价') + '</button> <button type="button" class="cmd-btn gray" data-commerce-sandbox-response-import-clear="true">清除导入状态</button></div><div data-commerce-sandbox-response-import-output="true"><h5>Validation Preview</h5><p>validationStatus: not_run</p><p>provider: -</p><p>fareSource: -</p><p>price breakdown: -</p><p>taxFeeIntegrity: not_run</p><p>freshness: not_run</p><p>safeProviderHandoffReady: false</p><p>blocked reason: </p>' + dryRunSummaryHtml + '<h5>Import Sanitization</h5><p>导入响应已脱敏</p><p>raw response stored false</p><p>rawResponseStored: false</p><p>sensitive field detected false</p><p>bookingUrl forced null</p><p>bookingUrl: null</p><p>checkoutUrl: null</p><p>paymentUrl: null</p><p>orderUrl: null</p><p>autoOpen: false</p><p>payment: false</p><p>order: false</p><p>identityUpload: false</p><p>redacted: true</p></div><p>' + esc(model.messages && model.messages.caveat || '导入结果仅作为候选证据，不代表已锁价或可出票。') + '</p><p>' + esc(model.messages && model.messages.platformFinal || '价格、库存、税费和规则以平台页面为准。') + '</p></section>';
     return disclosure('查看 Sandbox Response Import Console', body, 'commerce-sandbox-response-import-disclosure');
   }
 
@@ -6589,6 +6602,12 @@
         report: sandboxImportSample.report || { handoff: { safeProviderHandoffUrl: safeProviderHandoffCandidate.safeProviderHandoffUrl || null } },
         priceQuote: sandboxImportSample.imported && sandboxImportSample.imported.normalizedQuote || null,
         sandboxImportSummary: sandboxImportSample.report && sandboxImportSample.report.sandboxImport || sandboxImportSample.imported || null,
+        sandboxDryRunSummary: sandboxImportSample.dryRun || null,
+        runTimelineSummary: sandboxImportSample.runTimelineSummary || null,
+        dryRunStatus: sandboxImportSample.dryRunStatus || (sandboxImportSample.dryRun && sandboxImportSample.dryRun.status) || "not_run",
+        dryRunButton: { label:"运行沙盒只读报价", enabled:true, loading:false, autoRun:false },
+        dryRunTopCandidates: sandboxImportSample.dryRunTopCandidates || [],
+        providerRunMatrix: sandboxImportSample.providerRunMatrix || null,
         interactiveRefreshState: commerceReadOnlyQuoteInteractiveRecoveryState(task),
         origin: fields.origin,
         destination: fields.destination,
@@ -7400,8 +7419,9 @@
       }
       const sandboxImportPreviewButton = target && target.closest("[data-commerce-sandbox-response-import-preview]");
       const sandboxImportConfirmButton = target && target.closest("[data-commerce-sandbox-response-import-confirm]");
+      const sandboxDryRunButton = target && target.closest("[data-commerce-run-sandbox-dry-run]");
       const sandboxImportClearButton = target && target.closest("[data-commerce-sandbox-response-import-clear]");
-      if ((sandboxImportPreviewButton || sandboxImportConfirmButton || sandboxImportClearButton) && host.contains(sandboxImportPreviewButton || sandboxImportConfirmButton || sandboxImportClearButton)) {
+      if ((sandboxImportPreviewButton || sandboxImportConfirmButton || sandboxDryRunButton || sandboxImportClearButton) && host.contains(sandboxImportPreviewButton || sandboxImportConfirmButton || sandboxDryRunButton || sandboxImportClearButton)) {
         event.preventDefault();
         const panel = (sandboxImportPreviewButton || sandboxImportConfirmButton || sandboxImportClearButton).closest("[data-commerce-sandbox-response-import-console]");
         const input = panel && panel.querySelector("[data-commerce-sandbox-response-import-input]");
@@ -7445,6 +7465,15 @@
           if (input) input.value = "";
           if (output) output.innerHTML = previewHtml({ validationStatus:"not_run" }, "not_run");
           showCommercePlatformTemplateFeedback("已清除导入状态", false);
+          return;
+        }
+        if (sandboxDryRunButton) {
+          const dryRunApi = window.WeishanMultiProviderSandboxDryRunOrchestrator;
+          const dryRun = dryRunApi && typeof dryRunApi.runMultiProviderSandboxDryRun === "function" ? dryRunApi.runMultiProviderSandboxDryRun({ title: rawInput || "运行沙盒只读报价" }, {}) : null;
+          const ranking = dryRun && dryRun.ranking && Array.isArray(dryRun.ranking.topCandidates) ? dryRun.ranking : buildSandboxQuoteRanking(rawInput);
+          const preview = dryRun && Array.isArray(dryRun.quotes) && dryRun.quotes.length ? { validationStatus:"accepted", currency:dryRun.quotes[0].currency, baseFare:dryRun.quotes[0].baseFare, taxesAndFees:dryRun.quotes[0].taxesAndFees, providerFees:dryRun.quotes[0].providerFees, totalPrice:dryRun.quotes[0].totalPrice, fareSource:"sandbox_read_only_import", safeProviderHandoffReady:dryRun.quotes[0].safeProviderHandoffReady } : { validationStatus:"failed_safe", blockedReason:"运行沙盒只读报价未通过安全检查" };
+          if (output) output.innerHTML = previewHtml(preview, dryRun && dryRun.status || "failed_safe", ranking, dryRun && dryRun.selectedCandidate && dryRun.selectedCandidate.selectedQuoteId || "") + '<h5>本次沙盒运行结果</h5><p>运行沙盒只读报价</p><p>Multi-Provider Sandbox Dry-Run</p><p>Sandbox Provider Run Matrix</p><p>Quote Run Timeline</p><p>本次沙盒运行结果：' + esc(dryRun && dryRun.status || 'failed_safe') + '</p><p>Provider 运行矩阵：' + esc(dryRun && dryRun.providerRunMatrix && dryRun.providerRunMatrix.matrixName || 'sandbox_provider_run_matrix_v1') + '</p><p>运行时间线：' + esc(dryRun && dryRun.runTimelineSummary && dryRun.runTimelineSummary.summary || '构建 Provider 运行矩阵 · 生成只读沙盒报价 · 报价归一化 · Top 3 排序 · 候选选择准备') + '</p>';
+          showCommercePlatformTemplateFeedback(dryRun && dryRun.status === "completed" ? "本次沙盒运行结果已生成" : "沙盒只读报价 dry-run 未通过安全检查", !!(dryRun && dryRun.status !== "completed"));
           return;
         }
         if (sandboxImportPreviewButton) {

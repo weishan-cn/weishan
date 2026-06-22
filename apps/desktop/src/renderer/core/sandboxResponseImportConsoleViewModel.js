@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.52";
+  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.53";
   const CONSOLE_NAME = "sandbox_response_import_console_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -11,6 +11,7 @@
   function getMultiImportApi() { return window.WeishanMultiSandboxQuoteImportProcessor || {}; }
   function getRankingApi() { return window.WeishanReadOnlyQuoteCandidateRanking || {}; }
   function getSelectionApi() { return window.WeishanReadOnlyQuoteCandidateSelection || {}; }
+  function getDryRunApi() { return window.WeishanMultiProviderSandboxDryRunOrchestrator || {}; }
 
   function safety() {
     return {
@@ -32,7 +33,8 @@
     return {
       helper: "仅支持只读沙盒响应样本。导入前会先校验并脱敏。支持多 Provider 沙盒报价导入。",
       caveat: "导入结果仅作为候选证据，不代表已锁价或可出票。",
-      platformFinal: "平台最终为准。"
+      platformFinal: "平台最终为准。",
+      runSandbox: "支持运行沙盒只读报价。"
     };
   }
 
@@ -143,6 +145,12 @@
     const status = text(safe.status || "idle");
     const ranking = safe.rankingPreview && typeof safe.rankingPreview === "object" ? safe.rankingPreview : rankingFromQuotes([]);
     const multiQuotePreview = safe.multiQuotePreview && typeof safe.multiQuotePreview === "object" ? safe.multiQuotePreview : buildMultiQuotePreview(null, ranking);
+    const sandboxDryRunSummary = safe.sandboxDryRunSummary && typeof safe.sandboxDryRunSummary === "object" ? safe.sandboxDryRunSummary : null;
+    const runTimelineSummary = safe.runTimelineSummary && typeof safe.runTimelineSummary === "object" ? safe.runTimelineSummary : (sandboxDryRunSummary && sandboxDryRunSummary.runTimelineSummary && typeof sandboxDryRunSummary.runTimelineSummary === "object" ? sandboxDryRunSummary.runTimelineSummary : null);
+    const providerRunMatrix = safe.providerRunMatrix && typeof safe.providerRunMatrix === "object" ? safe.providerRunMatrix : (sandboxDryRunSummary && sandboxDryRunSummary.providerRunMatrix && typeof sandboxDryRunSummary.providerRunMatrix === "object" ? sandboxDryRunSummary.providerRunMatrix : null);
+    const dryRunTopCandidates = Array.isArray(safe.dryRunTopCandidates) ? safe.dryRunTopCandidates : (sandboxDryRunSummary && Array.isArray(sandboxDryRunSummary.dryRunTopCandidates) ? sandboxDryRunSummary.dryRunTopCandidates : (Array.isArray(ranking.topCandidates) ? ranking.topCandidates : []));
+    const dryRunButton = safe.dryRunButton && typeof safe.dryRunButton === "object" ? safe.dryRunButton : { label:"运行沙盒只读报价", enabled:true, loading:false, autoRun:false };
+    const dryRunStatus = text(safe.dryRunStatus || (sandboxDryRunSummary && sandboxDryRunSummary.status) || (runTimelineSummary && runTimelineSummary.status) || "not_run");
     return clone({
       consoleName: CONSOLE_NAME,
       appVersion: SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION,
@@ -157,8 +165,14 @@
       rankingPreview: ranking,
       sourceBreakdown: ranking.sourceBreakdown || { providerCount: 0, providerIds: [], fareSources: [] },
       rankingExplanation: ranking.rankingExplanation || "仅按导入样本中的只读候选证据排序，平台最终为准。",
+      sandboxDryRunSummary: sandboxDryRunSummary,
+      runTimelineSummary: runTimelineSummary,
+      providerRunMatrix: providerRunMatrix,
+      dryRunStatus: dryRunStatus,
+      dryRunButton: dryRunButton,
+      dryRunTopCandidates: dryRunTopCandidates,
       selectedCandidate: safe.selectedCandidate && typeof safe.selectedCandidate === "object" ? safe.selectedCandidate : null,
-      actions: actions(status),
+      actions: Object.assign({ canDryRun: dryRunButton.enabled !== false }, actions(status)),
       safety: safety(),
       messages: messages(),
       redacted: true
@@ -225,6 +239,7 @@
     if (previewModel.preview.validationStatus !== "accepted") {
       return clone(Object.assign({}, previewModel, { status: previewModel.preview.validationStatus, importResult: null }));
     }
+    const safeOptions = options && typeof options === "object" ? options : {};
     const multiApi = getMultiImportApi();
     const result = typeof multiApi.importMultiSandboxQuotes === "function"
       ? multiApi.importMultiSandboxQuotes(rawInput, options)
@@ -246,7 +261,13 @@
       multiQuotePreview: buildMultiQuotePreview(fallbackResult, ranking),
       rankingPreview: ranking,
       sourceBreakdown: ranking.sourceBreakdown,
-      rankingExplanation: ranking.rankingExplanation
+      rankingExplanation: ranking.rankingExplanation,
+      sandboxDryRunSummary: safeOptions.sandboxDryRunSummary || previewModel.sandboxDryRunSummary || null,
+      runTimelineSummary: safeOptions.runTimelineSummary || previewModel.runTimelineSummary || null,
+      providerRunMatrix: safeOptions.providerRunMatrix || previewModel.providerRunMatrix || null,
+      dryRunStatus: safeOptions.dryRunStatus || previewModel.dryRunStatus || "not_run",
+      dryRunButton: safeOptions.dryRunButton || previewModel.dryRunButton || { label:"运行沙盒只读报价", enabled:true, loading:false, autoRun:false },
+      dryRunTopCandidates: safeOptions.dryRunTopCandidates || previewModel.dryRunTopCandidates || []
     }), {
       importResult: {
         status: importStatus,
@@ -274,6 +295,20 @@
     const safeEvent = event && typeof event === "object" ? event : {};
     const type = text(safeEvent.type);
     if (type === "INPUT_CHANGED") return buildSandboxResponseImportConsoleModel({ status: "editing", preview: emptyPreview("not_run", "") });
+    if (type === "DRY_RUN_REQUESTED") {
+      const dryRunApi = getDryRunApi();
+      const task = safeEvent.task && typeof safeEvent.task === "object" ? safeEvent.task : { title: safeEvent.rawInput || safeEvent.text || "" };
+      const dryRun = typeof dryRunApi.runMultiProviderSandboxDryRun === "function" ? dryRunApi.runMultiProviderSandboxDryRun(task, safeEvent.options || {}) : null;
+      return buildSandboxResponseImportConsoleModel(Object.assign({}, current, {
+        status: dryRun && dryRun.status === "blocked" ? "blocked" : (dryRun && dryRun.status === "failed_safe" ? "failed_safe" : "dry_run_ready"),
+        sandboxDryRunSummary: dryRun,
+        runTimelineSummary: dryRun && dryRun.runTimelineSummary ? dryRun.runTimelineSummary : null,
+        providerRunMatrix: dryRun && dryRun.providerRunMatrix ? dryRun.providerRunMatrix : null,
+        dryRunStatus: dryRun && dryRun.status ? dryRun.status : "not_run",
+        dryRunButton: { label: "运行沙盒只读报价", enabled: true, loading: false, autoRun: false },
+        dryRunTopCandidates: dryRun && Array.isArray(dryRun.dryRunTopCandidates) ? dryRun.dryRunTopCandidates : (dryRun && dryRun.ranking && Array.isArray(dryRun.ranking.topCandidates) ? dryRun.ranking.topCandidates : [])
+      }));
+    }
     if (type === "PREVIEW_REQUESTED") return buildSandboxResponseValidationPreview(safeEvent.rawInput || safeEvent.text || "", safeEvent.options || {});
     if (type === "IMPORT_CONFIRMED") return buildSandboxResponseImportResult(safeEvent.rawInput || safeEvent.text || "", safeEvent.options || {});
     if (type === "CANDIDATE_SELECTED") {
@@ -301,6 +336,12 @@
       topCandidateCount: model.rankingPreview && Array.isArray(model.rankingPreview.topCandidates) ? model.rankingPreview.topCandidates.length : 0,
       sourceBreakdown: model.sourceBreakdown,
       rankingExplanation: model.rankingExplanation,
+      dryRunStatus: model.dryRunStatus,
+      dryRunButton: model.dryRunButton,
+      dryRunTopCandidates: Array.isArray(model.dryRunTopCandidates) ? model.dryRunTopCandidates : [],
+      sandboxDryRunSummary: model.sandboxDryRunSummary || null,
+      runTimelineSummary: model.runTimelineSummary || null,
+      providerRunMatrix: model.providerRunMatrix || null,
       rawInputStored: false,
       rawResponseStored: false,
       canPasteSecretHere: false,

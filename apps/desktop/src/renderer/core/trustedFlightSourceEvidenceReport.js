@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION = "2.1.52";
+  const TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION = "2.1.53";
   const REPORT_NAME = "trusted_flight_source_evidence_report_v1";
   const PHASE = "trusted_flight_source_evidence_report_v1";
 
@@ -338,7 +338,7 @@
     if (report.redacted !== true) throw new Error("trusted flight source evidence report must stay redacted");
     if (report.reportName !== REPORT_NAME) throw new Error("trusted flight source evidence report name mismatch");
     if (report.mode !== "read_only") throw new Error("trusted flight source evidence report must stay read only");
-    if (!report.registry || report.registry.sourceCount !== 4) throw new Error("trusted flight source evidence registry must keep four sources");
+    if (!report.registry || report.registry.sourceCount !== 6) throw new Error("trusted flight source evidence registry must keep six sources");
     if (report.deepLinkGate.bookingUrl !== null) throw new Error("trusted flight source evidence deep link gate must not expose bookingUrl");
     if (report.deepLinkGate.safeProviderHandoffUrl && !/^https:\/\//i.test(report.deepLinkGate.safeProviderHandoffUrl)) throw new Error("trusted flight source evidence deep link gate must keep safe provider handoff url https");
     if (report.confirmationUi.cancelButtonEnabled !== true || report.confirmationUi.noPayment !== true || report.confirmationUi.noOrder !== true || report.confirmationUi.noIdentityUpload !== true) throw new Error("trusted flight source evidence confirmation ui must stay safe");

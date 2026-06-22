@@ -1,5 +1,5 @@
 (function(){
-  const BOOKING_URL_DOMAIN_SAFETY_GATE_VERSION = "2.1.52";
+  const BOOKING_URL_DOMAIN_SAFETY_GATE_VERSION = "2.1.53";
 
   const bookingUrlSafetyFields = [
     "providerId",
