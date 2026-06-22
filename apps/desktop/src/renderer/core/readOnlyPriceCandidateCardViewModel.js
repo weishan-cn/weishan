@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.49";
+  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.50";
   const PHASE = "read_only_price_candidate_card_view_model_v1";
 
   function clone(value) {
@@ -126,6 +126,8 @@
     const inputSandboxImport = safe.sandboxImportSummary && typeof safe.sandboxImportSummary === "object" ? safe.sandboxImportSummary : {};
     const sandboxImportSource = Object.keys(inputSandboxImport).length ? inputSandboxImport : reportSandboxImport;
     const sandboxImportStatus = text(sandboxImportSource.lastImportStatus || sandboxImportSource.importStatus || sandboxImportSource.status || "not_run");
+    const sandboxImportPreviewStatus = text(sandboxImportSource.lastPreviewStatus || sandboxImportSource.previewStatus || sandboxImportSource.validationStatus || "not_run");
+    const sandboxImportBlockedReason = text(sandboxImportSource.lastBlockedReason || sandboxImportSource.blockedReason || sandboxImportSource.reason || "");
     const isSandboxImportEvidence = sandboxImportStatus === "accepted" || (safe.priceQuote && safe.priceQuote.fareSource === "sandbox_read_only_import") || report.provider && report.provider.fareSource === "sandbox_read_only_import";
     const sandboxImportAccepted = sandboxImportStatus === "accepted" || isSandboxImportEvidence;
     const sandboxImportRejected = sandboxImportStatus === "rejected" || sandboxImportStatus === "blocked" || sandboxImportStatus === "failed_safe";
@@ -143,8 +145,9 @@
     const isProductionDisabled = providerMode === "production" || providerMode === "production_disabled";
     const titleLabel = isProductionDisabled ? "生产价格未启用" : (isSandboxImportEvidence ? "只读沙盒导入证据" : (isSandboxReadOnly ? "只读沙盒价" : "只读候选价"));
     const candidatePriceLabel = isSandboxImportEvidence ? "只读沙盒导入证据" : (isSandboxReadOnly ? "只读沙盒价" : (isProductionDisabled ? "生产价格未启用" : "候选价"));
-    const importStatusBadge = isSandboxImportEvidence ? "只读沙盒导入证据" : (sandboxImportRejected ? (sandboxImportStatus === "blocked" ? "导入响应已阻断" : sandboxImportStatus === "failed_safe" ? "导入安全失败" : "导入响应已拒绝") : "");
-    const importedEvidenceBanner = isSandboxImportEvidence ? "已导入沙盒报价证据 · 导入响应已脱敏 · 不代表已锁价或可出票 · 价格、库存、税费和规则以平台页面为准" : (sandboxImportRejected ? "沙盒导入响应未通过安全检查，不显示候选价" : "");
+    const importStatusBadge = isSandboxImportEvidence ? "只读沙盒导入证据" : (sandboxImportRejected ? (sandboxImportStatus === "blocked" ? "导入被阻断" : sandboxImportStatus === "failed_safe" ? "导入失败，已安全降级" : "导入响应已拒绝") : "");
+    const importedEvidenceBanner = isSandboxImportEvidence ? "只读沙盒导入证据 · 已导入沙盒报价证据 · 导入响应已脱敏 · 仅作为候选证据，不代表已锁价或可出票 · 价格、库存、税费和规则以平台页面为准" : (sandboxImportRejected ? (sandboxImportStatus === "blocked" ? "导入被阻断" : "导入失败，已安全降级") : "");
+    const importEvidenceBanner = importedEvidenceBanner;
     const reportHandoff = report.handoff && typeof report.handoff === "object" ? report.handoff : {};
     const reportRefresh = report.refresh && typeof report.refresh === "object" ? report.refresh : {};
     const reportCredentialReadiness = report.credentialReadiness && typeof report.credentialReadiness === "object" ? report.credentialReadiness : {};
@@ -270,9 +273,14 @@
       refreshStateSummary: refreshStateSummary,
       interactiveRefreshState: interactiveRefreshState,
       recoveredEvidenceSummary: interactiveRefreshState.recoveredEvidenceSummary || { available:false, source:"local_redacted_state", showableAsRealPrice:false, showableAsCandidateEvidence:false, canReplaceMainResultCard:false },
-      sandboxImportSummary: { supported:true, lastImportStatus:sandboxImportStatus, importedEvidenceAvailable:isSandboxImportEvidence === true, rawResponseStored:false, sanitized:true, redacted:true, showableAsRealPrice:false, canReplace:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false },
+      sandboxImportSummary: { supported:true, lastPreviewStatus:sandboxImportPreviewStatus, lastImportStatus:sandboxImportStatus, importedEvidenceAvailable:isSandboxImportEvidence === true, rawResponseStored:false, sanitized:true, redacted:true, showableAsRealPrice:false, canReplace:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false },
+      sandboxImportConsoleSummary: { title:"沙盒响应导入", previewActionLabel:"预览导入结果", confirmActionLabel:"确认导入脱敏证据", clearActionLabel:"清除导入状态", rawResponseStored:false, canSaveRawResponse:false, canPasteSecretHere:false, redacted:true },
+      sandboxImportPreviewStatus: sandboxImportPreviewStatus,
+      sandboxImportLastStatus: sandboxImportStatus,
+      sandboxImportBlockedReason: sandboxImportBlockedReason,
       importStatusBadge: importStatusBadge,
       importedEvidenceBanner: importedEvidenceBanner,
+      importEvidenceBanner: importEvidenceBanner,
       clearRefreshStateButton: Object.assign({ label:"清除刷新状态", enabled:false, autoRun:false, booking:false, payment:false, order:false, identityUpload:false }, interactiveRefreshState.clearRefreshStateButton || {}),
       refreshErrorBanner: interactiveRefreshState.refreshErrorBanner || "",
       providerBindingWizardSummary: providerBindingWizardSummary,

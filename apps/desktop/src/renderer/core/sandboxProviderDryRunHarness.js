@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SANDBOX_PROVIDER_DRY_RUN_HARNESS_VERSION = "2.1.49";
+  const SANDBOX_PROVIDER_DRY_RUN_HARNESS_VERSION = "2.1.50";
   const HARNESS_NAME = "sandbox_provider_dry_run_harness_v1";
   const SAFE_FARE_SOURCES = ["sandbox_read_only_import", "sandbox_read_only", "fixture_read_only"];
   const UNSAFE_NAME_RE = /(token|key|secret|password|session|auth|credential)/i;
@@ -48,8 +48,8 @@
     Object.keys(value).forEach(function (name) {
       const full = path ? path + "." + name : name;
       if (UNSAFE_NAME_RE.test(name)) findings.unsafeNames.push(full);
-      if (TRANSACTION_NAME_RE.test(name)) findings.transactionNames.push(full);
       const next = value[name];
+      if (TRANSACTION_NAME_RE.test(name) && next != null && text(next) !== "") findings.transactionNames.push(full);
       if (typeof next === "string" && TRANSACTION_VALUE_RE.test(next)) findings.transactionValues.push(full);
       if (next && typeof next === "object") walkUnsafeFields(next, full, findings);
     });
@@ -59,6 +59,42 @@
     const findings = { unsafeNames:[], transactionNames:[], transactionValues:[] };
     walkUnsafeFields(rawResponse, "", findings);
     return findings;
+  }
+
+  function detectSensitiveFieldsInSandboxResponse(rawInput) {
+    const rawText = typeof rawInput === "string" ? rawInput : JSON.stringify(rawInput || {});
+    const sensitive = UNSAFE_NAME_RE.test(rawText);
+    const transaction = /"(?:bookingUrl|checkoutUrl|paymentUrl|orderUrl|ticketUrl|reservationUrl)"\s*:\s*"[^"]+"/i.test(rawText);
+    return clone({
+      sensitiveDetected:sensitive,
+      transactionDetected:transaction,
+      blocked:sensitive || transaction,
+      reason:sensitive ? "sensitive credential-like field detected" : (transaction ? "transaction URL field detected" : ""),
+      rawInputStored:false,
+      rawResponseStored:false,
+      redacted:true
+    });
+  }
+
+  function validateRawSandboxResponseBeforeParse(rawInput) {
+    try {
+      const findings = detectSensitiveFieldsInSandboxResponse(rawInput);
+      if (findings.sensitiveDetected) return blockedStatus("sensitive credential-like field detected", { detection:findings });
+      if (findings.transactionDetected) return blockedStatus("transaction URL field detected", { detection:findings });
+      if (typeof rawInput === "string") JSON.parse(rawInput);
+      return clone({ status:"accepted", importStatus:"accepted", reason:"raw sandbox response passed pre-parse scan", rawInputStored:false, rawResponseStored:false, redacted:true });
+    } catch (error) {
+      return blockedStatus("malformed JSON safe downgrade", { status:"failed_safe", importStatus:"failed_safe", lastImportStatus:"failed_safe", errorCode:"SANDBOX_IMPORT_PARSE_FAILED_SAFE" });
+    }
+  }
+
+  function buildSandboxResponseBlockedPreview(reason, options) {
+    const opts = options && typeof options === "object" ? options : {};
+    return blockedStatus(reason || "sandbox response import blocked", {
+      providerId:text(opts.providerId || ""),
+      providerName:text(opts.providerName || ""),
+      preview:{ available:true, validationStatus:"blocked", blockedReason:reason || "sandbox response import blocked", rawResponseStored:false, redacted:true }
+    });
   }
 
   function getTrustedSource(providerId) {
@@ -192,7 +228,11 @@
 
   function importSandboxProviderReadOnlyResponse(rawResponse, options) {
     try {
-      const raw = rawResponse && typeof rawResponse === "object" ? rawResponse : {};
+      if (typeof rawResponse === "string") {
+        const rawValidation = validateRawSandboxResponseBeforeParse(rawResponse, options);
+        if (rawValidation.status === "blocked" || rawValidation.status === "failed_safe") return rawValidation;
+      }
+      const raw = typeof rawResponse === "string" ? JSON.parse(rawResponse) : (rawResponse && typeof rawResponse === "object" ? rawResponse : {});
       const findings = detectUnsafe(raw);
       if (findings.unsafeNames.length) return blockedStatus("provider response contains unsafe credential-shaped fields", { unsafeFieldCount:findings.unsafeNames.length });
       if (findings.transactionNames.length || findings.transactionValues.length) return blockedStatus("provider response contains transaction URL fields", { transactionFieldCount:findings.transactionNames.length + findings.transactionValues.length });
@@ -287,6 +327,9 @@
     SANDBOX_PROVIDER_DRY_RUN_HARNESS_VERSION,
     HARNESS_NAME,
     buildSandboxProviderDryRunHarnessStatus,
+    validateRawSandboxResponseBeforeParse,
+    detectSensitiveFieldsInSandboxResponse,
+    buildSandboxResponseBlockedPreview,
     importSandboxProviderReadOnlyResponse,
     normalizeSandboxProviderDryRunQuote,
     validateSandboxProviderDryRunQuote,

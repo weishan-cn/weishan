@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION = "2.1.49";
+  const TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION = "2.1.50";
   const REPORT_NAME = "trusted_flight_source_evidence_report_v1";
   const PHASE = "trusted_flight_source_evidence_report_v1";
 
@@ -227,8 +227,8 @@
         redacted: true
       },
       readiness: {
-        limitedBetaReady: sources.length === 3 && manualSearchOnlyCount === 2 && fixtureOnlyCount === 1 && productionProviderCount === 0,
-        safeProviderHandoffReady: sources.length === 3 && manualSearchOnlyCount === 2 && fixtureOnlyCount === 1 && productionProviderCount === 0,
+        limitedBetaReady: sources.length === 4 && manualSearchOnlyCount === 2 && fixtureOnlyCount === 2 && productionProviderCount === 0,
+        safeProviderHandoffReady: sources.length === 4 && manualSearchOnlyCount === 2 && fixtureOnlyCount === 2 && productionProviderCount === 0,
         userFacingClaimAllowed: false,
         realPriceClaimAllowed: false,
         bookingClaimAllowed: false,
@@ -252,7 +252,7 @@
     const manualSearchOnlyCount = Number(registry.manualSearchOnlyCount || 0);
     const fixtureOnlyCount = Number(registry.fixtureOnlyCount || 0);
     const productionProviderCount = Number(registry.productionProviderCount || 0);
-    const limitedBetaReady = sourceCount === 3 && manualSearchOnlyCount === 2 && fixtureOnlyCount === 1 && productionProviderCount === 0 &&
+    const limitedBetaReady = sourceCount === 4 && manualSearchOnlyCount === 2 && fixtureOnlyCount === 2 && productionProviderCount === 0 &&
       deepLinkGate.providerConfirmationLink !== "disabled" &&
       confirmationUi.continueButtonDisabled === false &&
       confirmationUi.cancelButtonEnabled === true &&
@@ -282,7 +282,7 @@
   function evaluateTrustedFlightSourceLimitedBetaReadiness(reportInput) {
     const report = reportInput && typeof reportInput === "object" ? reportInput : buildTrustedFlightSourceEvidenceReport();
     const summary = summarizeTrustedFlightSourceEvidence(report);
-    if (summary.sourceCount !== 3 || summary.manualSearchOnlyCount !== 2 || summary.fixtureOnlyCount !== 1 || summary.productionProviderCount !== 0) {
+    if (summary.sourceCount !== 4 || summary.manualSearchOnlyCount !== 2 || summary.fixtureOnlyCount !== 2 || summary.productionProviderCount !== 0) {
       return clone({
         reportName: REPORT_NAME,
         appVersion: TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION,
@@ -338,7 +338,7 @@
     if (report.redacted !== true) throw new Error("trusted flight source evidence report must stay redacted");
     if (report.reportName !== REPORT_NAME) throw new Error("trusted flight source evidence report name mismatch");
     if (report.mode !== "read_only") throw new Error("trusted flight source evidence report must stay read only");
-    if (!report.registry || report.registry.sourceCount !== 3) throw new Error("trusted flight source evidence registry must keep three sources");
+    if (!report.registry || report.registry.sourceCount !== 4) throw new Error("trusted flight source evidence registry must keep four sources");
     if (report.deepLinkGate.bookingUrl !== null) throw new Error("trusted flight source evidence deep link gate must not expose bookingUrl");
     if (report.deepLinkGate.safeProviderHandoffUrl && !/^https:\/\//i.test(report.deepLinkGate.safeProviderHandoffUrl)) throw new Error("trusted flight source evidence deep link gate must keep safe provider handoff url https");
     if (report.confirmationUi.cancelButtonEnabled !== true || report.confirmationUi.noPayment !== true || report.confirmationUi.noOrder !== true || report.confirmationUi.noIdentityUpload !== true) throw new Error("trusted flight source evidence confirmation ui must stay safe");

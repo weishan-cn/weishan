@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION = "2.1.49";
+  const READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION = "2.1.50";
   const CONTROLLER_NAME = "read_only_quote_refresh_controller_v1";
 
   function clone(value) {
@@ -33,6 +33,7 @@
   function getStateStoreApi() { return window.WeishanReadOnlyQuoteRefreshStateStore || {}; }
   function getSandboxHarnessApi() { return window.WeishanSandboxProviderDryRunHarness || {}; }
   function getSandboxImportStateStoreApi() { return window.WeishanSandboxProviderResponseImportStateStore || {}; }
+  function getSandboxImportConsoleApi() { return window.WeishanSandboxResponseImportConsoleViewModel || {}; }
 
   function normalizeTask(task, options) {
     const safe = task && typeof task === "object" ? task : {};
@@ -323,6 +324,63 @@
     return clone(Object.assign({}, result, persisted, { autoOpen:false, autoRefresh:false, userTriggeredOnly:true }, safety()));
   }
 
+  function previewSandboxImportRefresh(rawInput, options) {
+    const opts = options && typeof options === "object" ? options : {};
+    const consoleApi = getSandboxImportConsoleApi();
+    const preview = typeof consoleApi.buildSandboxResponseValidationPreview === "function"
+      ? consoleApi.buildSandboxResponseValidationPreview(rawInput, opts)
+      : { status:"failed_safe", preview:{ validationStatus:"failed_safe", blockedReason:"sandbox import console unavailable" }, rawInputStored:false, rawResponseStored:false, redacted:true };
+    return clone(Object.assign({
+      controllerName:CONTROLLER_NAME,
+      appVersion:READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION,
+      status:preview.status === "preview_ready" ? "preview_ready" : (preview.preview && preview.preview.validationStatus || preview.status || "failed_safe"),
+      lastPreviewStatus:preview.preview && preview.preview.validationStatus || "failed_safe",
+      preview:preview.preview || null,
+      rawInputStored:false,
+      rawResponseStored:false,
+      userTriggeredOnly:true,
+      autoRefresh:false,
+      canReplace:false,
+      showableAsRealPrice:false,
+      showableAsCandidateEvidence:false,
+      redacted:true
+    }, safety()));
+  }
+
+  function confirmSandboxImportRefresh(rawInput, options) {
+    const opts = options && typeof options === "object" ? options : {};
+    const consoleApi = getSandboxImportConsoleApi();
+    const importModel = typeof consoleApi.buildSandboxResponseImportResult === "function"
+      ? consoleApi.buildSandboxResponseImportResult(rawInput, opts)
+      : { status:"failed_safe", importResult:null, preview:{ validationStatus:"failed_safe", blockedReason:"sandbox import console unavailable" } };
+    if (!importModel.importResult || importModel.importResult.status !== "accepted" || !importModel.importResult.sanitizedQuote) {
+      return clone(Object.assign({
+        controllerName:CONTROLLER_NAME,
+        appVersion:READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION,
+        status:importModel.status === "blocked" ? "blocked" : (importModel.status === "rejected" ? "rejected" : "failed_safe"),
+        lastImportStatus:importModel.status === "blocked" ? "blocked" : (importModel.status === "rejected" ? "rejected" : "failed_safe"),
+        preview:importModel.preview || null,
+        sandboxImportConsole:importModel,
+        candidateCard:null,
+        errorSummary:importModel.preview && importModel.preview.blockedReason || "导入失败，已安全降级",
+        rawInputStored:false,
+        rawResponseStored:false,
+        userTriggeredOnly:true,
+        autoRefresh:false,
+        canReplace:false,
+        showableAsRealPrice:false,
+        showableAsCandidateEvidence:false,
+        redacted:true
+      }, safety()));
+    }
+    const result = runAndPersistSandboxImportRefresh(importModel.importResult.sanitizedQuote, opts);
+    return clone(Object.assign({}, result, { sandboxImportConsole:importModel, lastPreviewStatus:"accepted", rawInputStored:false, rawResponseStored:false }, safety()));
+  }
+
+  function clearSandboxImportRefresh(options) {
+    return clearLastSandboxImportEvidence(options);
+  }
+
   function loadLastSandboxImportEvidence(options) {
     const opts = options && typeof options === "object" ? options : {};
     const storeApi = getSandboxImportStateStoreApi();
@@ -384,6 +442,9 @@
     clearLastReadOnlyQuoteRefreshEvidence,
     runReadOnlyQuoteRefreshFromSandboxImport,
     runAndPersistSandboxImportRefresh,
+    previewSandboxImportRefresh,
+    confirmSandboxImportRefresh,
+    clearSandboxImportRefresh,
     loadLastSandboxImportEvidence,
     clearLastSandboxImportEvidence,
     buildReadOnlyQuoteRefreshAuditDraft

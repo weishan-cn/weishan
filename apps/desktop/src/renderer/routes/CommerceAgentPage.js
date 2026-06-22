@@ -6377,7 +6377,7 @@
     const flightFields = commerceSimpleFlightFields(task);
     const model = api && typeof api.buildProviderSandboxBindingWizardModel === "function"
       ? api.buildProviderSandboxBindingWizardModel({ providerId:"google_flights_search", providerName:"Google Flights", providerMode:"fixture", origin:flightFields.origin, destination:flightFields.destination, restrictedCategoryDecision:(task && task.globalProcurementRestrictedCategoryGuard && task.globalProcurementRestrictedCategoryGuard.finalDecision === "blocked") ? "blocked" : "allow" })
-      : { wizardName:"provider_sandbox_binding_wizard_v1", appVersion:"2.1.49", title:"Provider 沙盒绑定准备", status:"fixture_ready", steps:[{ stepId:"provider_selected", label:"选择只读 Provider", status:"complete" }, { stepId:"read_only_refresh_ready", label:"只读报价刷新准备", status:"complete" }], actions:{ canAttemptReadOnlyRefresh:true, canEnableProductionProvider:false, canEnterSecretHere:false, canSaveSecretHere:false }, productionProviderEnabled:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, redacted:true };
+      : { wizardName:"provider_sandbox_binding_wizard_v1", appVersion:"2.1.50", title:"Provider 沙盒绑定准备", status:"fixture_ready", steps:[{ stepId:"provider_selected", label:"选择只读 Provider", status:"complete" }, { stepId:"read_only_refresh_ready", label:"只读报价刷新准备", status:"complete" }], actions:{ canAttemptReadOnlyRefresh:true, canEnableProductionProvider:false, canEnterSecretHere:false, canSaveSecretHere:false }, productionProviderEnabled:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, redacted:true };
     const steps = Array.isArray(model.steps) ? model.steps : [];
     const body = '<section class="commerce-provider-sandbox-binding-wizard-panel"><h4>Provider Sandbox Binding Wizard</h4><p>' + esc(model.title || 'Provider 沙盒绑定准备') + '</p><p>wizardName: ' + esc(model.wizardName || 'provider_sandbox_binding_wizard_v1') + '</p><p>wizardStatus: ' + esc(model.status || 'fixture_ready') + '</p><p>providerId: ' + esc(model.providerId || 'google_flights_search') + '</p><p>providerMode: ' + esc(model.providerMode || 'fixture') + '</p><p>canAttemptReadOnlyRefresh: ' + esc(String(model.actions && model.actions.canAttemptReadOnlyRefresh === true)) + '</p><p>canEnableProductionProvider: false</p><p>canEnterSecretHere: false</p><p>canSaveSecretHere: false</p><ul>' + steps.map(function(step){ return '<li>' + esc(step.label || step.stepId || '') + '：' + esc(step.status || 'pending') + '</li>'; }).join('') + '</ul><p>bookingUrl: null</p><p>autoOpen: false</p><p>payment: false</p><p>order: false</p><p>identityUpload: false</p><p>redacted: true</p></section>';
     return disclosure('查看 Provider Sandbox Binding Wizard', body, 'commerce-provider-sandbox-binding-wizard-disclosure');
@@ -6437,10 +6437,10 @@
   }
 
   function commerceSandboxResponseImportDisclosure(task){
-    const sample = commerceSandboxImportSample(task);
-    const imported = sample.imported || {};
-    const body = '<section class="commerce-sandbox-response-import-panel"><h4>Sandbox Response Import</h4><p>已导入沙盒报价证据</p><p>导入响应已脱敏</p><p>status: ' + esc(imported.lastImportStatus || imported.importStatus || imported.status || 'accepted') + '</p><p>safeProviderHandoffReady: ' + esc(String(imported.safeProviderHandoffReady === true)) + '</p><p>rawResponseStored: false</p><p>不代表已锁价或可出票</p><p>价格、库存、税费和规则以平台页面为准</p><p>bookingUrl: null</p><p>autoOpen: false</p><p>payment: false</p><p>order: false</p><p>identityUpload: false</p><p>redacted: true</p></section>';
-    return disclosure('查看 Sandbox Response Import', body, 'commerce-sandbox-response-import-disclosure');
+    const consoleApi = window.WeishanSandboxResponseImportConsoleViewModel;
+    const model = consoleApi && typeof consoleApi.buildSandboxResponseImportConsoleModel === "function" ? consoleApi.buildSandboxResponseImportConsoleModel({}) : { title:"沙盒响应导入", status:"idle", rawInputStored:false, preview:{ validationStatus:"not_run" }, actions:{ canPreview:true, canImport:false, canClear:true, canPasteSecretHere:false, canSaveRawResponse:false }, safety:{ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false }, messages:{ helper:"仅支持只读沙盒响应样本。导入前会先校验并脱敏。", caveat:"导入结果仅作为候选证据，不代表已锁价或可出票。", platformFinal:"价格、库存、税费和规则以平台页面为准。" }, redacted:true };
+    const body = '<section class="commerce-sandbox-response-import-panel" data-commerce-sandbox-response-import-console="true"><h4>Sandbox Response Import Console</h4><p>' + esc(model.title || '沙盒响应导入') + '</p><p>沙盒响应导入</p><p>' + esc(model.messages && model.messages.helper || '仅支持只读沙盒响应样本。导入前会先校验并脱敏。') + '</p><textarea class="commerce-sandbox-response-import-input" data-commerce-sandbox-response-import-input="true" aria-label="Sandbox Response Import JSON" rows="8" placeholder="JSON sandbox read-only response sample"></textarea><div class="commerce-sandbox-response-import-actions"><button type="button" class="cmd-btn gray" data-commerce-sandbox-response-import-preview="true">预览导入结果</button> <button type="button" class="cmd-btn gray" data-commerce-sandbox-response-import-confirm="true">确认导入脱敏证据</button> <button type="button" class="cmd-btn gray" data-commerce-sandbox-response-import-clear="true">清除导入状态</button></div><div data-commerce-sandbox-response-import-output="true"><h5>Validation Preview</h5><p>validationStatus: not_run</p><p>provider: -</p><p>fareSource: -</p><p>price breakdown: -</p><p>taxFeeIntegrity: not_run</p><p>freshness: not_run</p><p>safeProviderHandoffReady: false</p><p>blocked reason: </p><h5>Import Sanitization</h5><p>导入响应已脱敏</p><p>raw response stored false</p><p>rawResponseStored: false</p><p>sensitive field detected false</p><p>bookingUrl forced null</p><p>bookingUrl: null</p><p>checkoutUrl: null</p><p>paymentUrl: null</p><p>orderUrl: null</p><p>autoOpen: false</p><p>payment: false</p><p>order: false</p><p>identityUpload: false</p><p>redacted: true</p></div><p>' + esc(model.messages && model.messages.caveat || '导入结果仅作为候选证据，不代表已锁价或可出票。') + '</p><p>' + esc(model.messages && model.messages.platformFinal || '价格、库存、税费和规则以平台页面为准。') + '</p></section>';
+    return disclosure('查看 Sandbox Response Import Console', body, 'commerce-sandbox-response-import-disclosure');
   }
 
   function commerceLastSandboxImportEvidenceDisclosure(task){
@@ -7397,6 +7397,43 @@
         clearRefreshButton.disabled = true;
         showCommercePlatformTemplateFeedback("已清除刷新状态", false);
         return;
+      }
+      const sandboxImportPreviewButton = target && target.closest("[data-commerce-sandbox-response-import-preview]");
+      const sandboxImportConfirmButton = target && target.closest("[data-commerce-sandbox-response-import-confirm]");
+      const sandboxImportClearButton = target && target.closest("[data-commerce-sandbox-response-import-clear]");
+      if ((sandboxImportPreviewButton || sandboxImportConfirmButton || sandboxImportClearButton) && host.contains(sandboxImportPreviewButton || sandboxImportConfirmButton || sandboxImportClearButton)) {
+        event.preventDefault();
+        const panel = (sandboxImportPreviewButton || sandboxImportConfirmButton || sandboxImportClearButton).closest("[data-commerce-sandbox-response-import-console]");
+        const input = panel && panel.querySelector("[data-commerce-sandbox-response-import-input]");
+        const output = panel && panel.querySelector("[data-commerce-sandbox-response-import-output]");
+        const rawInput = input ? input.value : "";
+        const refreshApi = window.WeishanReadOnlyQuoteRefreshController;
+        function previewHtml(preview, status){
+          const safe = preview || {};
+          const priceLine = [safe.currency || "", safe.baseFare, safe.taxesAndFees, safe.providerFees, safe.totalPrice].filter((item) => item !== null && item !== undefined && item !== "").join(" / ");
+          return '<h5>Validation Preview</h5><p>validationStatus: ' + esc(safe.validationStatus || status || 'not_run') + '</p><p>provider: ' + esc([safe.providerId || '', safe.providerName || ''].filter(Boolean).join(' / ') || '-') + '</p><p>fareSource: ' + esc(safe.fareSource || '-') + '</p><p>price breakdown: ' + esc(priceLine || '-') + '</p><p>taxFeeIntegrity: ' + esc(safe.taxFeeIntegrityStatus || 'not_run') + '</p><p>freshness: ' + esc(safe.freshnessStatus || 'not_run') + '</p><p>safeProviderHandoffReady: ' + esc(String(safe.safeProviderHandoffReady === true)) + '</p><p>blocked reason: ' + esc(safe.blockedReason || '') + '</p><h5>Import Sanitization</h5><p>导入响应已脱敏</p><p>raw response stored false</p><p>rawResponseStored: false</p><p>sensitive field detected ' + esc(String((safe.blockedReason || '').indexOf('sensitive') >= 0)) + '</p><p>bookingUrl forced null</p><p>bookingUrl: null</p><p>checkoutUrl: null</p><p>paymentUrl: null</p><p>orderUrl: null</p><p>autoOpen: false</p><p>payment: false</p><p>order: false</p><p>identityUpload: false</p><p>redacted: true</p>';
+        }
+        if (sandboxImportClearButton) {
+          if (refreshApi && typeof refreshApi.clearSandboxImportRefresh === "function") refreshApi.clearSandboxImportRefresh({});
+          if (input) input.value = "";
+          if (output) output.innerHTML = previewHtml({ validationStatus:"not_run" }, "not_run");
+          showCommercePlatformTemplateFeedback("已清除导入状态", false);
+          return;
+        }
+        if (sandboxImportPreviewButton) {
+          const result = refreshApi && typeof refreshApi.previewSandboxImportRefresh === "function" ? refreshApi.previewSandboxImportRefresh(rawInput, {}) : { status:"failed_safe", preview:{ validationStatus:"failed_safe", blockedReason:"导入失败，已安全降级" } };
+          if (output) output.innerHTML = previewHtml(result.preview, result.status);
+          showCommercePlatformTemplateFeedback(result.status === "preview_ready" ? "预览导入结果已生成" : "沙盒响应导入未通过安全检查", result.status !== "preview_ready");
+          return;
+        }
+        if (sandboxImportConfirmButton) {
+          const result = refreshApi && typeof refreshApi.confirmSandboxImportRefresh === "function" ? refreshApi.confirmSandboxImportRefresh(rawInput, {}) : { status:"failed_safe", preview:{ validationStatus:"failed_safe", blockedReason:"导入失败，已安全降级" }, candidateCard:null };
+          if (output) output.innerHTML = previewHtml(result.preview || result.sandboxImportConsole && result.sandboxImportConsole.preview, result.lastImportStatus || result.status) + '<p>' + esc(result.status === 'refreshed' ? '只读沙盒导入证据 · 导入响应已脱敏' : (result.status === 'blocked' ? '导入被阻断' : '导入失败，已安全降级')) + '</p>';
+          const banner = host.querySelector('[data-commerce-sandbox-import-banner]');
+          if (banner && result.status === 'refreshed') banner.textContent = '只读沙盒导入证据 · 导入响应已脱敏 · 仅作为候选证据，不代表已锁价或可出票 · 价格、库存、税费和规则以平台页面为准';
+          showCommercePlatformTemplateFeedback(result.status === "refreshed" ? "确认导入脱敏证据完成" : (result.status === "blocked" ? "导入被阻断" : "导入失败，已安全降级"), result.status !== "refreshed");
+          return;
+        }
       }
       const safeProviderButton = target && target.closest("[data-commerce-safe-provider-handoff-request]");
       if (safeProviderButton && host.contains(safeProviderButton)) {

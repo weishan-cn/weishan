@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SANDBOX_PROVIDER_RESPONSE_IMPORT_STATE_STORE_VERSION = "2.1.49";
+  const SANDBOX_PROVIDER_RESPONSE_IMPORT_STATE_STORE_VERSION = "2.1.50";
   const STATE_NAME = "sandbox_provider_response_import_state_v1";
   const STORAGE_KEY = "weishan.sandboxProviderResponseImportState.v1";
   const FORBIDDEN_NAME_RE = /(token|key|secret|password|session|auth|credential|rawProviderResponse|rawResponse|rawPayload|identity|passport|bank|card)/i;
@@ -26,7 +26,11 @@
     return {
       stateName:STATE_NAME,
       appVersion:SANDBOX_PROVIDER_RESPONSE_IMPORT_STATE_STORE_VERSION,
+      lastPreviewStatus:"not_run",
       lastImportStatus:"not_run",
+      lastImportSummary:null,
+      lastBlockedReason:"",
+      lastSanitizationReport:{ rawResponseStored:false, sensitiveFieldDetected:false, transactionUrlForcedNull:true, redacted:true },
       importedEvidenceAvailable:false,
       providerId:"google_flights_search",
       providerName:"Google Flights",
@@ -63,7 +67,11 @@
     const empty = safeEmptyState();
     const status = normalizeStatus(source.lastImportStatus || source.importStatus || source.status);
     return clone(Object.assign({}, empty, {
+      lastPreviewStatus:normalizeStatus(source.lastPreviewStatus || source.previewStatus || "not_run"),
       lastImportStatus:status,
+      lastImportSummary:status === "accepted" && quote.totalPrice != null ? { providerId:text(quote.providerId || source.providerId || empty.providerId), providerName:text(quote.providerName || source.providerName || empty.providerName), fareSource:text(quote.fareSource || source.fareSource || empty.fareSource), currency:text(quote.currency || source.currency || empty.currency), totalPrice:quote.totalPrice, redacted:true } : null,
+      lastBlockedReason:status === "blocked" || status === "rejected" || status === "failed_safe" ? text(source.lastBlockedReason || source.reason || (Array.isArray(source.blockedReasons) ? source.blockedReasons.join("; ") : "")) : "",
+      lastSanitizationReport:{ rawResponseStored:false, sensitiveFieldDetected:source.sensitiveFieldDetected === true || source.unsafeFieldCount > 0, transactionUrlForcedNull:true, redacted:true },
       importedEvidenceAvailable:status === "accepted" && quote.totalPrice != null,
       providerId:text(quote.providerId || source.providerId || empty.providerId),
       providerName:text(quote.providerName || source.providerName || empty.providerName),
@@ -148,7 +156,11 @@
       summary:label(safe.lastImportStatus),
       importedEvidenceAvailable:safe.importedEvidenceAvailable === true,
       importStatusBadge:safe.lastImportStatus === "accepted" ? "只读沙盒导入证据" : label(safe.lastImportStatus),
-      importedEvidenceBanner:safe.importedEvidenceAvailable ? "已导入沙盒报价证据 · 导入响应已脱敏 · 不代表已锁价或可出票" : "暂无可显示沙盒导入证据",
+      importedEvidenceBanner:safe.importedEvidenceAvailable ? "只读沙盒导入证据 · 导入响应已脱敏 · 不代表已锁价或可出票" : (safe.lastImportStatus === "blocked" ? "导入被阻断" : (safe.lastImportStatus === "failed_safe" ? "导入失败，已安全降级" : "暂无可显示沙盒导入证据")),
+      lastPreviewStatus:safe.lastPreviewStatus,
+      lastImportSummary:safe.lastImportSummary,
+      lastBlockedReason:safe.lastBlockedReason,
+      lastSanitizationReport:safe.lastSanitizationReport,
       providerLabel:safe.providerName + " · " + safe.providerMode,
       rawResponseStored:false,
       sanitized:true,

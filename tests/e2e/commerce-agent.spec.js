@@ -8700,7 +8700,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.1.49 read-only quote refresh button updates local evidence only @commerce-smoke", async () => {
+  test("v2.1.50 read-only quote refresh button updates local evidence only @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate(() => {
       try { window.localStorage.removeItem("weishan.readOnlyQuoteRefreshState.v1"); } catch (_) {}
@@ -8729,13 +8729,13 @@ test.describe.serial("commerce agent workbench", () => {
     expect(visible).not.toMatch(/\b(token|key|secret)\b/i);
   });
 
-  test("v2.1.49 local read-only quote evidence recovery stays candidate-only @commerce-smoke", async () => {
+  test("v2.1.50 local read-only quote evidence recovery stays candidate-only @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate((id) => {
       try {
         window.localStorage.setItem("weishan.readOnlyQuoteRefreshState.v1", JSON.stringify({
           stateName:"read_only_quote_refresh_state_v1",
-          appVersion:"2.1.49",
+          appVersion:"2.1.50",
           lastRefreshStatus:"refreshed",
           providerId:"google_flights_search",
           providerName:"Google Flights",
@@ -8793,7 +8793,7 @@ test.describe.serial("commerce agent workbench", () => {
 
 
 
-  test("v2.1.49 sandbox import evidence stays read-only and sanitized @commerce-smoke", async () => {
+  test("v2.1.50 sandbox import evidence stays read-only and sanitized @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate(() => {
       try { window.localStorage.removeItem("weishan.sandboxProviderResponseImportState.v1"); } catch (_) {}
@@ -8810,13 +8810,42 @@ test.describe.serial("commerce agent workbench", () => {
     const debugBody = debugDetails.locator(".commerce-disclosure-body").first();
     for (const item of [
       ["commerce-sandbox-provider-dry-run-harness-disclosure", "Sandbox Provider Dry-Run Harness"],
-      ["commerce-sandbox-response-import-disclosure", "Sandbox Response Import"],
+      ["commerce-sandbox-response-import-disclosure", "Sandbox Response Import Console"],
       ["commerce-last-sandbox-import-evidence-disclosure", "Last Sandbox Import Evidence"],
       ["commerce-import-sanitization-disclosure", "Import Sanitization"]
     ]) {
       await openDisclosure(debugBody, item[0]);
       await expect(debugBody.locator(`details.${item[0]} .commerce-disclosure-body`).first()).toContainText(item[1]);
     }
+
+    const importConsole = debugBody.locator("details.commerce-sandbox-response-import-disclosure .commerce-disclosure-body").first();
+    for (const text of ["沙盒响应导入", "预览导入结果", "确认导入脱敏证据", "Validation Preview", "Import Sanitization", "raw response stored false", "rawResponseStored: false", "bookingUrl forced null"]) await expect(importConsole).toContainText(text);
+    await expect(importConsole).not.toContainText(/\b(token|key|secret)\b/i);
+    const validSandboxJson = JSON.stringify({
+      providerId:"flight_provider_trusted_fixture",
+      providerName:"Trusted Flight Fixture",
+      providerMode:"sandbox_read_only",
+      fareSource:"sandbox_read_only_import",
+      route:{ origin:"SHA", destination:"CTU" },
+      departureDate:"2026-07-15",
+      currency:"CNY",
+      baseFare:860,
+      taxesAndFees:110,
+      providerFees:40,
+      totalPrice:1010,
+      priceUpdatedAt:"2026-01-01T00:00:00.000Z",
+      freshnessMinutes:15,
+      handoffCandidate:{ providerId:"google_flights_search", handoffType:"provider_search" }
+    }, null, 2);
+    await importConsole.locator('[data-commerce-sandbox-response-import-input="true"]').fill(validSandboxJson);
+    await importConsole.locator('[data-commerce-sandbox-response-import-preview="true"]').click();
+    await expect(importConsole.locator('[data-commerce-sandbox-response-import-output="true"]')).toContainText("validationStatus: accepted", { timeout:15000 });
+    await expect(importConsole.locator('[data-commerce-sandbox-response-import-output="true"]')).toContainText("price breakdown: CNY / 860 / 110 / 40 / 1010");
+    await importConsole.locator('[data-commerce-sandbox-response-import-confirm="true"]').click();
+    await expect(importConsole.locator('[data-commerce-sandbox-response-import-output="true"]')).toContainText("只读沙盒导入证据", { timeout:15000 });
+    await expect(importConsole.locator('[data-commerce-sandbox-response-import-output="true"]')).toContainText("导入响应已脱敏");
+    await expect(summary.locator('[data-commerce-sandbox-import-banner="true"]').first()).toContainText("只读沙盒导入证据", { timeout:15000 });
+    await expect(summary.locator('[data-commerce-sandbox-import-banner="true"]').first()).toContainText("仅作为候选证据，不代表已锁价或可出票");
 
     const importRecovery = await page.evaluate(() => window.WeishanReadOnlyQuoteInteractiveRefreshUiController.buildSandboxImportRecoveryUiState({}));
     expect(importRecovery.sandboxImportSummary.rawResponseStored).toBe(false);

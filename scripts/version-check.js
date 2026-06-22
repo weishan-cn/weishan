@@ -314,6 +314,15 @@ function checkSandboxProviderResponseImportStateStoreVersion(results, expectedVe
   addCheck(results, "apps/desktop sandbox provider response import state store version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/sandboxProviderResponseImportStateStore.js SANDBOX_PROVIDER_RESPONSE_IMPORT_STATE_STORE_VERSION");
 }
 
+function checkSandboxResponseImportConsoleViewModelVersion(results, expectedVersion) {
+  const consolePath = "apps/desktop/src/renderer/core/sandboxResponseImportConsoleViewModel.js";
+  const consoleModel = readText(consolePath);
+  if (!consoleModel) { results.push({ name: "apps/desktop sandbox response import console view model version", pass: false, detail: consolePath + " missing" }); return; }
+  if (consoleModel.__readError) { results.push({ name: "apps/desktop sandbox response import console view model version", pass: false, detail: consoleModel.__readError }); return; }
+  const match = consoleModel.match(/SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop sandbox response import console view model version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/sandboxResponseImportConsoleViewModel.js SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION");
+}
+
 function checkReadOnlyQuoteInteractiveRefreshUiControllerVersion(results, expectedVersion) {
   const controllerPath = "apps/desktop/src/renderer/core/readOnlyQuoteInteractiveRefreshUiController.js";
   const controller = readText(controllerPath);
@@ -1566,6 +1575,7 @@ function runVersionCheck() {
     checkReadOnlyQuoteRefreshControllerVersion(results, rootPackage.version);
     checkSandboxProviderDryRunHarnessVersion(results, rootPackage.version);
     checkSandboxProviderResponseImportStateStoreVersion(results, rootPackage.version);
+    checkSandboxResponseImportConsoleViewModelVersion(results, rootPackage.version);
     checkReadOnlyQuoteInteractiveRefreshUiControllerVersion(results, rootPackage.version);
     checkSecureKeyStoragePlanVersion(results, rootPackage.version);
     checkSecureStorageDesignGateVersion(results, rootPackage.version);
