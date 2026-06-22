@@ -1,0 +1,155 @@
+;(function () {
+  "use strict";
+
+  const READ_ONLY_QUOTE_AUDIT_EXPORT_VERSION = "2.1.55";
+  const EXPORT_NAME = "read_only_quote_audit_export_v1";
+  const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
+  const CAVEAT = "本导出仅为只读候选证据，不代表真实最终价、已锁价或可出票。";
+
+  function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
+  function text(value) { return String(value == null ? "" : value).trim(); }
+
+  function stripUnsafe(value) {
+    if (Array.isArray(value)) return value.map(stripUnsafe).filter(function (item) { return item !== undefined; });
+    if (!value || typeof value !== "object") return value;
+    const result = {};
+    Object.keys(value).forEach(function (name) {
+      if (FORBIDDEN_NAME_RE.test(name)) return;
+      const next = stripUnsafe(value[name]);
+      if (next !== undefined) result[name] = next;
+    });
+    return result;
+  }
+
+  function containsForbidden(value) {
+    if (Array.isArray(value)) return value.some(containsForbidden);
+    if (!value || typeof value !== "object") return false;
+    return Object.keys(value).some(function (name) {
+      const next = value[name];
+      const allowedSafetyFlag = /Included$|Stored$/.test(name) && next === false;
+      const allowedNullUrl = /Url$/.test(name) && next === null;
+      if (FORBIDDEN_NAME_RE.test(name) && !allowedSafetyFlag && !allowedNullUrl) return true;
+      return containsForbidden(next);
+    });
+  }
+
+  function sessionSummary(session) {
+    const api = window.WeishanReadOnlyQuoteSessionManager || {};
+    if (api && typeof api.buildReadOnlyQuoteSessionSummary === "function") return api.buildReadOnlyQuoteSessionSummary(session);
+    return stripUnsafe(session && typeof session === "object" ? session : {});
+  }
+
+  function topCandidatesFrom(session) {
+    const safe = session && typeof session === "object" ? session : {};
+    const dryRunCandidates = safe.dryRunTopCandidates || (safe.ranking && safe.ranking.topCandidates) || (safe.sandboxDryRunSummary && safe.sandboxDryRunSummary.dryRunTopCandidates);
+    if (Array.isArray(dryRunCandidates)) return stripUnsafe(dryRunCandidates.slice(0, 3));
+    const summary = safe.sessionSummary || safe;
+    if (summary.dryRun && summary.dryRun.selectedCandidate) return [stripUnsafe(summary.dryRun.selectedCandidate)];
+    return [];
+  }
+
+  function buildReadOnlyQuoteAuditExport(session, options) {
+    const safeOptions = options && typeof options === "object" ? options : {};
+    const summary = sessionSummary(session);
+    const safe = stripUnsafe(session && typeof session === "object" ? session : {}) || {};
+    return clone({
+      exportName: EXPORT_NAME,
+      appVersion: READ_ONLY_QUOTE_AUDIT_EXPORT_VERSION,
+      exportType: "redacted_json_preview",
+      generatedAt: safeOptions.generatedAt || null,
+      sessionSummary: summary,
+      runTimelineSummary: stripUnsafe(safe.runTimelineSummary || safe.timelineSummary || summary.runTimelineSummary || null),
+      topCandidates: topCandidatesFrom(session),
+      selectedCandidate: stripUnsafe(safe.selectedCandidate || summary.selection || null),
+      historySummary: stripUnsafe(safe.runHistorySummary || summary.history || null),
+      deltaSummary: stripUnsafe(safe.quoteDeltaSummary || summary.deltaCompare || null),
+      replaySummary: stripUnsafe(safe.replaySummary || summary.replay || null),
+      safety: {
+        rawResponseIncluded: false,
+        secretIncluded: false,
+        bookingUrlIncluded: false,
+        paymentUrlIncluded: false,
+        orderUrlIncluded: false,
+        identityIncluded: false,
+        redacted: true
+      },
+      caveat: CAVEAT,
+      redacted: true
+    });
+  }
+
+  function validateReadOnlyQuoteAuditExport(exportModel) {
+    const safe = exportModel && typeof exportModel === "object" ? exportModel : {};
+    const valid = safe.exportName === EXPORT_NAME &&
+      safe.appVersion === READ_ONLY_QUOTE_AUDIT_EXPORT_VERSION &&
+      safe.exportType === "redacted_json_preview" &&
+      safe.generatedAt === null &&
+      safe.redacted === true &&
+      safe.safety && safe.safety.rawResponseIncluded === false &&
+      safe.safety.secretIncluded === false &&
+      safe.safety.bookingUrlIncluded === false &&
+      safe.safety.paymentUrlIncluded === false &&
+      safe.safety.orderUrlIncluded === false &&
+      safe.safety.identityIncluded === false &&
+      !containsForbidden(safe);
+    return clone({
+      valid: valid,
+      status: valid ? "pass" : "blocked",
+      rawResponseIncluded: false,
+      secretIncluded: false,
+      bookingUrlIncluded: false,
+      paymentUrlIncluded: false,
+      orderUrlIncluded: false,
+      identityIncluded: false,
+      caveatPresent: text(safe.caveat).indexOf("本导出仅为只读候选证据") >= 0,
+      redacted: true
+    });
+  }
+
+  function buildReadOnlyQuoteAuditExportPreview(session, options) {
+    const exportModel = buildReadOnlyQuoteAuditExport(session, options);
+    const validation = validateReadOnlyQuoteAuditExport(exportModel);
+    return clone({
+      title: "Audit Export",
+      previewLabel: "Redacted JSON Preview",
+      actionLabel: "导出脱敏审计预览",
+      exportModel: exportModel,
+      validation: validation,
+      caveat: CAVEAT,
+      safetyLine: "不包含原始响应、密钥、交易链接或身份信息",
+      fileWrite: false,
+      upload: false,
+      redacted: true
+    });
+  }
+
+  function buildReadOnlyQuoteAuditExportAuditDraft(session, options) {
+    const preview = buildReadOnlyQuoteAuditExportPreview(session, options);
+    return clone({
+      eventType: "READ_ONLY_QUOTE_AUDIT_EXPORT_DRAFT",
+      exportName: EXPORT_NAME,
+      appVersion: READ_ONLY_QUOTE_AUDIT_EXPORT_VERSION,
+      exportType: "redacted_json_preview",
+      validationStatus: preview.validation.status,
+      rawResponseIncluded: false,
+      secretIncluded: false,
+      bookingUrlIncluded: false,
+      paymentUrlIncluded: false,
+      orderUrlIncluded: false,
+      identityIncluded: false,
+      fileWrite: false,
+      upload: false,
+      caveat: CAVEAT,
+      redacted: true
+    });
+  }
+
+  window.WeishanReadOnlyQuoteAuditExport = {
+    READ_ONLY_QUOTE_AUDIT_EXPORT_VERSION,
+    EXPORT_NAME,
+    buildReadOnlyQuoteAuditExport,
+    validateReadOnlyQuoteAuditExport,
+    buildReadOnlyQuoteAuditExportPreview,
+    buildReadOnlyQuoteAuditExportAuditDraft
+  };
+})();

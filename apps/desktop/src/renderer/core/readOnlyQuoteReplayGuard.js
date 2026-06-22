@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_REPLAY_GUARD_VERSION = "2.1.54";
+  const READ_ONLY_QUOTE_REPLAY_GUARD_VERSION = "2.1.55";
   const REPLAY_GUARD_NAME = "read_only_quote_replay_guard_v1";
 
   function clone(value) {
@@ -106,7 +106,20 @@
     if (!entry || availability.status !== "available") {
       return clone(Object.assign({}, availability, {
         replaySummary: availability.status === "failed_safe" ? "Replay Guard：历史损坏，已安全失败" : "Replay Guard：暂无可回放的本地脱敏运行历史",
-        replayedRun: null
+        replayedRun: null,
+        sessionEventPayload: {
+          type: "REPLAY_COMPLETED",
+          eventType: "REPLAY_COMPLETED",
+          status: availability.status,
+          replaySource: "local_redacted_run_history",
+          bookingUrl: null,
+          checkoutUrl: null,
+          paymentUrl: null,
+          orderUrl: null,
+          rawResponseStored: false,
+          secretStored: false,
+          redacted: true
+        }
       }));
     }
     const replayedRun = sanitizeReplayedRun(entry);
@@ -124,6 +137,20 @@
       payment: false,
       order: false,
       identityUpload: false,
+      sessionEventPayload: {
+        type: "REPLAY_COMPLETED",
+        eventType: "REPLAY_COMPLETED",
+        status: "available",
+        replaySource: "local_redacted_run_history",
+        runId: replayedRun.runId,
+        bookingUrl: null,
+        checkoutUrl: null,
+        paymentUrl: null,
+        orderUrl: null,
+        rawResponseStored: false,
+        secretStored: false,
+        redacted: true
+      },
       redacted: true
     }));
   }

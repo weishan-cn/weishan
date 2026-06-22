@@ -15,14 +15,19 @@ function main() {
     "apps/desktop/src/renderer/core/readOnlyQuoteCandidateRanking.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteCandidateSelection.js",
     "apps/desktop/src/renderer/core/sandboxProviderRunMatrix.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteRunHistoryStore.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteDeltaCompare.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteReplayGuard.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteSessionManager.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteAuditExport.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteRunTimeline.js",
     "apps/desktop/src/renderer/core/multiProviderSandboxDryRunOrchestrator.js"
   ]);
   const api = windowRef.WeishanMultiProviderSandboxDryRunOrchestrator;
-  assert.equal(api.MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION, "2.1.54");
+  assert.equal(api.MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION, "2.1.55");
   const task = { title:"购买7月15日上海到成都最便宜的直达机票", origin:"上海", destination:"成都", departureDate:"2026-07-15", directOnly:true, sortIntent:"低价优先" };
   const result = api.runMultiProviderSandboxDryRun(task, {});
-  assert.equal(result.appVersion, "2.1.54");
+  assert.equal(result.appVersion, "2.1.55");
   assert.equal(result.status, "completed");
   assert.equal(result.generatedQuoteCount, 3);
   assert.equal(result.acceptedQuoteCount, 3);
@@ -40,6 +45,12 @@ function main() {
   assert.equal(result.runTimelineSummary.timelineName, "read_only_quote_run_timeline_v1");
   assert.equal(result.runTimelineSummary.rawResponseStored, false);
   assert.equal(result.runTimelineSummary.redacted, true);
+  assert.equal(result.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.1.55");
+  assert.equal(result.sessionStatus, "updated");
+  assert.equal(result.auditExportReady, true);
+  assert.equal(result.auditExportPreview.previewLabel, "Redacted JSON Preview");
+  assert.equal(result.sessionRecoverySummary.title, "Session Recovery");
+  assert.equal(result.sessionEventPayload.eventType, "DRY_RUN_COMPLETED");
   const blocked = api.runMultiProviderSandboxDryRun({ title:"帮我买枪" }, {});
   assert.equal(blocked.status, "blocked");
   const failedSafe = api.runMultiProviderSandboxDryRun(null, {});

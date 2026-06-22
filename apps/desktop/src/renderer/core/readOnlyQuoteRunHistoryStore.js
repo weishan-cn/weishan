@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_RUN_HISTORY_STORE_VERSION = "2.1.54";
+  const READ_ONLY_QUOTE_RUN_HISTORY_STORE_VERSION = "2.1.55";
   const STATE_NAME = "read_only_quote_run_history_store_v1";
   const STORAGE_KEY = "weishan.readOnlyQuoteRunHistory.v1";
   const FORBIDDEN_NAME_RE = /(token|key|secret|password|session|auth|credential|rawProviderResponse|rawResponse|rawPayload|identity|passport|bank|card|bookingUrl|checkoutUrl|paymentUrl|orderUrl)/i;
@@ -196,12 +196,26 @@
     const nextIndex = number(safeOptions.runIndex) || current.history.length + 1;
     const entry = sanitizeReadOnlyQuoteRunHistoryEntry(Object.assign({}, runResult, { runIndex: nextIndex }));
     const nextHistory = pruneReadOnlyQuoteRunHistory(current.history.concat([entry]), MAX_HISTORY_COUNT);
-    return saveReadOnlyQuoteRunHistory({
+    const saved = saveReadOnlyQuoteRunHistory({
       stateName: STATE_NAME,
       appVersion: READ_ONLY_QUOTE_RUN_HISTORY_STORE_VERSION,
       history: nextHistory,
       redacted: true
     }, storageLike);
+    saved.sessionEventPayload = {
+      type: "HISTORY_APPENDED",
+      eventType: "HISTORY_APPENDED",
+      runId: entry.runId,
+      historySummary: buildReadOnlyQuoteRunHistorySummary(saved),
+      rawResponseStored: false,
+      secretStored: false,
+      bookingUrl: null,
+      checkoutUrl: null,
+      paymentUrl: null,
+      orderUrl: null,
+      redacted: true
+    };
+    return clone(saved);
   }
 
   function clearReadOnlyQuoteRunHistory(storageLike) {

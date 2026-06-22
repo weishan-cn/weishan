@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.54";
+  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.55";
   const PHASE = "read_only_price_candidate_card_view_model_v1";
 
   function clone(value) {
@@ -197,6 +197,12 @@
     const lastRunId = text(safe.lastRunId || (sandboxDryRunSummary && sandboxDryRunSummary.lastRunId) || (runHistorySummary && runHistorySummary.latestRunId) || "");
     const compareStatus = text(safe.compareStatus || (sandboxDryRunSummary && sandboxDryRunSummary.compareStatus) || (quoteDeltaSummary && (quoteDeltaSummary.compareStatus || quoteDeltaSummary.status)) || "not_enough_history");
     const replayStatus = text(safe.replayStatus || (sandboxDryRunSummary && sandboxDryRunSummary.replayStatus) || (replaySummary && replaySummary.status) || "unavailable");
+    const sessionSummary = safe.sessionSummary && typeof safe.sessionSummary === "object" ? safe.sessionSummary : (sandboxDryRunSummary && sandboxDryRunSummary.sessionSummary && typeof sandboxDryRunSummary.sessionSummary === "object" ? sandboxDryRunSummary.sessionSummary : (report.sessionSummary && typeof report.sessionSummary === "object" ? report.sessionSummary : null));
+    const sessionStatus = text(safe.sessionStatus || (sandboxDryRunSummary && sandboxDryRunSummary.sessionStatus) || (sessionSummary && sessionSummary.status) || "");
+    const sessionId = text(safe.sessionId || (sandboxDryRunSummary && sandboxDryRunSummary.sessionId) || (sessionSummary && sessionSummary.sessionId) || "");
+    const auditExportPreview = safe.auditExportPreview && typeof safe.auditExportPreview === "object" ? safe.auditExportPreview : (sandboxDryRunSummary && sandboxDryRunSummary.auditExportPreview && typeof sandboxDryRunSummary.auditExportPreview === "object" ? sandboxDryRunSummary.auditExportPreview : null);
+    const auditExportReady = safe.auditExportReady === true || (sandboxDryRunSummary && sandboxDryRunSummary.auditExportReady === true) || !!auditExportPreview;
+    const sessionRecoverySummary = safe.sessionRecoverySummary && typeof safe.sessionRecoverySummary === "object" ? safe.sessionRecoverySummary : (sandboxDryRunSummary && sandboxDryRunSummary.sessionRecoverySummary && typeof sandboxDryRunSummary.sessionRecoverySummary === "object" ? sandboxDryRunSummary.sessionRecoverySummary : (sessionSummary ? { title:"Session Recovery", available:true, sessionId:sessionId, status:sessionStatus || "updated", replaySource:"local_redacted_run_history", autoOpen:false, networkAllowed:false, redacted:true } : null));
     const selectedSourceSummary = text(safe.selectedSourceSummary || (selectedCandidate && selectedCandidate.selectedSourceSummary) || (selectedCandidate ? "来源：" + (text(selectedCandidate.providerName || "") || "只读沙盒") + " / " + (text(selectedCandidate.responseShape || "") || text(selectedCandidate.fareSource || "导入样本")) : "来源：只读沙盒 / 导入样本"));
     const selectedSafeProviderHandoffUrl = selectedCandidate && selectedCandidate.safeProviderHandoffReady === true ? text(selectedCandidate.safeProviderHandoffUrl || "") : "";
     const canRefresh = normalized.restrictedCategory !== true && providerBindingWizardSummary.actions && providerBindingWizardSummary.actions.canAttemptReadOnlyRefresh === true && !isProductionDisabled && interactiveRefreshState.status !== "refreshing";
@@ -305,7 +311,7 @@
       refreshStateSummary: refreshStateSummary,
       interactiveRefreshState: interactiveRefreshState,
       recoveredEvidenceSummary: interactiveRefreshState.recoveredEvidenceSummary || { available:false, source:"local_redacted_state", showableAsRealPrice:false, showableAsCandidateEvidence:false, canReplaceMainResultCard:false },
-      sandboxImportSummary: { supported:true, lastPreviewStatus:sandboxImportPreviewStatus, lastImportStatus:sandboxImportStatus, importedEvidenceAvailable:isSandboxImportEvidence === true, rawResponseStored:false, sanitized:true, redacted:true, showableAsRealPrice:false, canReplace:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false, dryRunStatus:dryRunStatus, providerRunMatrix:sandboxDryRunSummary && sandboxDryRunSummary.providerRunMatrix || null, runTimelineSummary:runTimelineSummary, sandboxDryRunSummary:sandboxDryRunSummary, dryRunTopCandidates:dryRunTopCandidates, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary, lastRunId:lastRunId, compareStatus:compareStatus, replayStatus:replayStatus },
+      sandboxImportSummary: { supported:true, lastPreviewStatus:sandboxImportPreviewStatus, lastImportStatus:sandboxImportStatus, importedEvidenceAvailable:isSandboxImportEvidence === true, rawResponseStored:false, sanitized:true, redacted:true, showableAsRealPrice:false, canReplace:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false, dryRunStatus:dryRunStatus, providerRunMatrix:sandboxDryRunSummary && sandboxDryRunSummary.providerRunMatrix || null, runTimelineSummary:runTimelineSummary, sandboxDryRunSummary:sandboxDryRunSummary, dryRunTopCandidates:dryRunTopCandidates, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary, sessionSummary:sessionSummary, sessionStatus:sessionStatus, sessionId:sessionId, auditExportPreview:auditExportPreview, auditExportReady:auditExportReady, sessionRecoverySummary:sessionRecoverySummary, lastRunId:lastRunId, compareStatus:compareStatus, replayStatus:replayStatus },
       sandboxImportConsoleSummary: { title:"沙盒响应导入", previewActionLabel:"预览导入结果", confirmActionLabel:"确认导入脱敏证据", clearActionLabel:"清除导入状态", runDryButtonLabel:dryRunButton.label || "运行沙盒只读报价", rawResponseStored:false, canSaveRawResponse:false, canPasteSecretHere:false, redacted:true },
       sandboxImportPreviewStatus: sandboxImportPreviewStatus,
       sandboxImportLastStatus: sandboxImportStatus,
@@ -318,6 +324,12 @@
       runHistorySummary: runHistorySummary,
       quoteDeltaSummary: quoteDeltaSummary,
       replaySummary: replaySummary,
+      sessionSummary: sessionSummary,
+      sessionStatus: sessionStatus,
+      sessionId: sessionId,
+      auditExportPreview: auditExportPreview,
+      auditExportReady: auditExportReady,
+      sessionRecoverySummary: sessionRecoverySummary,
       lastRunId: lastRunId,
       compareStatus: compareStatus,
       replayStatus: replayStatus,
@@ -394,6 +406,7 @@
     const safetyLines = Array.isArray(card.safetyLines) ? card.safetyLines : [];
     const topCandidates = Array.isArray(card.dryRunTopCandidates) && card.dryRunTopCandidates.length ? card.dryRunTopCandidates : (Array.isArray(card.topCandidates) ? card.topCandidates : []);
     const dryRunSummaryHtml = card.sandboxDryRunSummary || card.runTimelineSummary ? '<section class="commerce-read-only-sandbox-dry-run" data-commerce-read-only-sandbox-dry-run="true"><h5>本次沙盒运行结果</h5><p>运行沙盒只读报价</p><p>本次沙盒运行结果：' + escapeHtml(card.dryRunStatus || (card.sandboxDryRunSummary && card.sandboxDryRunSummary.status) || "not_run") + '</p><p>Provider 运行矩阵：' + escapeHtml((card.providerRunMatrix && card.providerRunMatrix.matrixName) || (card.sandboxDryRunSummary && card.sandboxDryRunSummary.providerRunMatrix && card.sandboxDryRunSummary.providerRunMatrix.matrixName) || "sandbox_provider_run_matrix_v1") + '</p><p>Quote Run Timeline：' + escapeHtml((card.runTimelineSummary && card.runTimelineSummary.summary) || (card.sandboxDryRunSummary && card.sandboxDryRunSummary.runTimelineSummary && card.sandboxDryRunSummary.runTimelineSummary.summary) || "构建 Provider 运行矩阵 · 生成只读沙盒报价 · 报价归一化 · Top 3 排序 · 候选选择准备") + '</p><p>多 Provider 沙盒运行</p><p>Top 3 候选报价</p></section>' : "";
+    const sessionSummaryHtml = card.sessionSummary ? '<section class="commerce-read-only-quote-session" data-commerce-read-only-quote-session="true"><h5>当前只读报价会话</h5><p>Read-Only Quote Session</p><p>只读报价会话</p><p>sessionId: ' + escapeHtml(card.sessionId || card.sessionSummary.sessionId || '') + '</p><p>sessionStatus: ' + escapeHtml(card.sessionStatus || card.sessionSummary.status || 'updated') + '</p><p>Session Timeline</p><p>Audit Export</p><p>Session Recovery</p><p>本导出仅为只读候选证据</p><p>不代表真实最终价、已锁价或可出票</p><p>不包含原始响应、密钥、交易链接或身份信息</p></section>' : '';
     const historySummaryHtml = card.runHistorySummary || card.quoteDeltaSummary || card.replaySummary ? '<section class="commerce-read-only-run-history" data-commerce-read-only-run-history="true"><h5>运行历史</h5><p>Read-Only Quote Run History</p><p>最近一次沙盒运行：' + escapeHtml((card.runHistorySummary && card.runHistorySummary.summary) || '运行历史：暂无本地只读沙盒运行记录') + '</p><p>Last Run Timeline：' + escapeHtml((card.runTimelineSummary && card.runTimelineSummary.summary) || '构建 Provider 运行矩阵 · 生成只读沙盒报价 · 报价归一化 · Top 3 排序 · 候选选择准备') + '</p><p>本地只读沙盒运行对比：' + escapeHtml((card.quoteDeltaSummary && card.quoteDeltaSummary.summary) || '本地只读沙盒运行对比：历史不足') + '</p><p>Replay Guard：' + escapeHtml((card.replaySummary && card.replaySummary.replaySummary) || (card.replaySummary && card.replaySummary.summary) || 'Replay Guard：暂无可回放的本地脱敏运行历史') + '</p><p>Replay 只恢复候选证据，不重新请求 provider</p><p>平台最终为准</p><p>未锁价</p><p>不代表可出票</p><p>compareStatus: ' + escapeHtml(card.compareStatus || 'not_enough_history') + '</p><p>replayStatus: ' + escapeHtml(card.replayStatus || 'unavailable') + '</p><p>lastRunId: ' + escapeHtml(card.lastRunId || '') + '</p></section>' : '';
     const topCandidatesHtml = topCandidates.length ? '<section class="commerce-read-only-top-candidates" data-commerce-read-only-top-candidates="true"><h5>Top 3 候选报价</h5><p>' + escapeHtml(card.lowPriceClaim || "当前导入样本中的低价候选") + '</p><p>Ranking Scope: ' + escapeHtml(card.rankingScope || "导入样本范围") + '</p><p>' + escapeHtml(card.rankingExplanation || "仅按导入样本中的只读候选证据排序，平台最终为准。") + '</p><p>Source Breakdown: ' + escapeHtml('providerCount=' + ((card.sourceBreakdown && card.sourceBreakdown.providerCount) || 0) + '; providerIds=' + (((card.sourceBreakdown && card.sourceBreakdown.providerIds) || []).join(',')) + '; fareSources=' + (((card.sourceBreakdown && card.sourceBreakdown.fareSources) || []).join(','))) + '</p><ol>' + topCandidates.map(function (candidate) {
       const selected = card.selectedCandidate && card.selectedCandidate.quoteId === candidate.quoteId;
@@ -414,6 +427,7 @@
       <ul class="commerce-read-only-price-candidate-card-breakdown">${breakdownLines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>
       <ul class="commerce-read-only-price-candidate-card-safety">${safetyLines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>
       ${topCandidatesHtml}
+      ${sessionSummaryHtml}
       <p>${escapeHtml(card.safetyNotice || "唯珊不会付款、不会下单、不会上传证件或银行卡。")}</p>
       <p data-commerce-read-only-refresh-summary="true">${escapeHtml(card.interactiveRefreshState && card.interactiveRefreshState.lastRefreshStatusLabel ? ("最近一次刷新：" + card.interactiveRefreshState.lastRefreshStatusLabel) : (card.refreshStateSummary && card.refreshStateSummary.summary || ("最近一次刷新：" + (card.lastRefreshStatusLabel || "未运行"))))}</p>
       ${card.recoveredEvidenceSummary && card.recoveredEvidenceSummary.available ? `<p data-commerce-read-only-recovered-evidence="true">已恢复最近一次只读证据</p>` : ""}
@@ -423,7 +437,8 @@
         <button type="button" class="cmd-btn gray commerce-run-sandbox-dry-run-btn" data-commerce-run-sandbox-dry-run="true"${card.dryRunButton && card.dryRunButton.enabled === false ? " disabled" : ""}>${escapeHtml(card.dryRunButton && card.dryRunButton.label || "运行沙盒只读报价")}</button>
         <button type="button" class="cmd-btn gray commerce-read-only-refresh-btn" data-commerce-read-only-quote-refresh="true"${card.refreshButton && card.refreshButton.enabled ? "" : " disabled"}>${escapeHtml(card.refreshButton && card.refreshButton.label || "刷新只读报价")}</button>
         <button type="button" class="cmd-btn gray commerce-clear-read-only-refresh-state-btn" data-commerce-clear-read-only-refresh-state="true"${card.clearRefreshStateButton && card.clearRefreshStateButton.enabled ? "" : " disabled"}>${escapeHtml(card.clearRefreshStateButton && card.clearRefreshStateButton.label || "清除刷新状态")}</button>
-        <button type="button" class="cmd-btn gray commerce-replay-read-only-run-btn" data-commerce-replay-last-read-only-run="true"${card.replaySummary && card.replaySummary.canReplay === false ? " disabled" : ""}>恢复最近一次只读运行</button>
+        <button type="button" class="cmd-btn gray commerce-replay-read-only-run-btn" data-commerce-replay-last-read-only-run="true" data-commerce-recover-read-only-quote-session="true"${card.replaySummary && card.replaySummary.canReplay === false && !card.sessionSummary ? " disabled" : ""}>恢复最近一次只读会话</button>
+        <button type="button" class="cmd-btn gray commerce-read-only-audit-export-btn" data-commerce-read-only-audit-export-preview="true"${card.auditExportReady ? "" : " disabled"}>导出脱敏审计预览</button>
         <button type="button" class="cmd-btn gray commerce-safe-provider-handoff-btn" data-commerce-safe-provider-handoff-request="true" data-commerce-safe-provider-handoff-kind="${escapeHtml(card.providerType || "flight_search")}" data-commerce-safe-provider-handoff-url="${escapeHtml(encodeURIComponent(card.safeProviderHandoffUrl || ""))}"${card.confirmationUi && card.confirmationUi.continueButtonDisabled ? " disabled" : ""}>${escapeHtml(card.actionLabel || "去平台确认")}</button>
       </div>
       <p>${escapeHtml(card.refreshButton && card.refreshButton.reason || "仅更新候选证据，不代表已锁价或可出票")}</p>

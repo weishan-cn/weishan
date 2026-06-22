@@ -17,12 +17,17 @@ function main() {
     "apps/desktop/src/renderer/core/readOnlyQuoteCandidateRanking.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteCandidateSelection.js",
     "apps/desktop/src/renderer/core/sandboxProviderRunMatrix.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteRunHistoryStore.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteDeltaCompare.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteReplayGuard.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteSessionManager.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteAuditExport.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteRunTimeline.js",
     "apps/desktop/src/renderer/core/multiProviderSandboxDryRunOrchestrator.js",
     "apps/desktop/src/renderer/core/sandboxResponseImportConsoleViewModel.js"
   ]);
   const api = windowRef.WeishanSandboxResponseImportConsoleViewModel;
-  assert.equal(api.SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION, "2.1.54");
+  assert.equal(api.SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION, "2.1.55");
   const initial = api.buildSandboxResponseImportConsoleModel();
   assert.equal(initial.status, "idle");
   assert.equal(initial.title, "多 Provider 沙盒报价导入");
@@ -52,6 +57,9 @@ function main() {
   assert.equal(dryRunPreview.dryRunButton.label, "运行沙盒只读报价");
   assert.equal(dryRunPreview.dryRunTopCandidates.length, 3);
   assert.equal(dryRunPreview.runTimelineSummary.timelineName, "read_only_quote_run_timeline_v1");
+  assert.equal(dryRunPreview.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.1.55");
+  assert.equal(dryRunPreview.auditExportReady, true);
+  assert.equal(dryRunPreview.sessionRecoverySummary.title, "Session Recovery");
   const imported = api.buildSandboxResponseImportResult(raw);
   assert.equal(imported.status, "accepted");
   assert.equal(imported.importResult.status, "accepted");

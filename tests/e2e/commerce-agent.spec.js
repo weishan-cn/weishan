@@ -8700,7 +8700,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.1.54 read-only quote refresh button updates local evidence only @commerce-smoke", async () => {
+  test("v2.1.55 read-only quote refresh button updates local evidence only @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate(() => {
       try { window.localStorage.removeItem("weishan.readOnlyQuoteRefreshState.v1"); } catch (_) {}
@@ -8729,13 +8729,13 @@ test.describe.serial("commerce agent workbench", () => {
     expect(visible).not.toMatch(/\b(token|key|secret)\b/i);
   });
 
-  test("v2.1.54 local read-only quote evidence recovery stays candidate-only @commerce-smoke", async () => {
+  test("v2.1.55 local read-only quote evidence recovery stays candidate-only @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate((id) => {
       try {
         window.localStorage.setItem("weishan.readOnlyQuoteRefreshState.v1", JSON.stringify({
           stateName:"read_only_quote_refresh_state_v1",
-          appVersion:"2.1.54",
+          appVersion:"2.1.55",
           lastRefreshStatus:"refreshed",
           providerId:"google_flights_search",
           providerName:"Google Flights",
@@ -8793,7 +8793,7 @@ test.describe.serial("commerce agent workbench", () => {
 
 
 
-  test("v2.1.54 multi sandbox quote import ranks and selects read-only candidates @commerce-smoke", async () => {
+  test("v2.1.55 multi sandbox quote import ranks and selects read-only candidates @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate(() => {
       try { window.localStorage.removeItem("weishan.sandboxProviderResponseImportState.v1"); } catch (_) {}
@@ -8821,6 +8821,36 @@ test.describe.serial("commerce agent workbench", () => {
     const importConsole = debugBody.locator("details.commerce-sandbox-response-import-disclosure .commerce-disclosure-body").first();
     for (const text of ["沙盒响应导入", "预览导入结果", "确认导入脱敏证据", "Validation Preview", "Import Sanitization", "raw response stored false", "rawResponseStored: false", "bookingUrl forced null"]) await expect(importConsole).toContainText(text);
     await expect(importConsole).not.toContainText(/\b(token|key|secret)\b/i);
+
+    await importConsole.locator('[data-commerce-run-sandbox-dry-run="true"]').click();
+    const importOutput = importConsole.locator('[data-commerce-sandbox-response-import-output="true"]');
+    await expect(importOutput).toContainText("当前只读报价会话", { timeout:15000 });
+    await expect(importOutput).toContainText("Read-Only Quote Session");
+    await expect(importOutput).toContainText("Audit Export");
+    await expect(importOutput).toContainText("Session Recovery");
+    await expect(importOutput).toContainText("本导出仅为只读候选证据");
+    await expect(importOutput).toContainText("不包含原始响应、密钥、交易链接或身份信息");
+    await expect(importOutput).not.toContainText(/token\s*[:=]|key\s*[:=]|secret\s*[:=]/i);
+    await expect(importOutput).not.toContainText(/bookingUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
+    expect(await latestOpenExternalUrl(page)).toBe("");
+
+    const auditButton = summary.locator('[data-commerce-read-only-audit-export-preview="true"]').first();
+    await expect(auditButton).toBeVisible();
+    await auditButton.click();
+    await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).toContainText("Redacted JSON Preview", { timeout:15000 });
+    await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).toContainText("本导出仅为只读候选证据");
+    await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).toContainText("不包含原始响应、密钥、交易链接或身份信息");
+    await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).not.toContainText(/rawResponse|token|key|secret|bookingUrl|paymentUrl|orderUrl/i);
+    expect(await latestOpenExternalUrl(page)).toBe("");
+
+    const recoverButton = summary.locator('[data-commerce-recover-read-only-quote-session="true"]').first();
+    await expect(recoverButton).toBeVisible();
+    await recoverButton.click();
+    await expect(summary.locator('[data-commerce-read-only-session-recovery-output="true"]').first()).toContainText("Session Recovery", { timeout:15000 });
+    await expect(summary.locator('[data-commerce-read-only-session-recovery-output="true"]').first()).toContainText("当前只读报价会话");
+    await expect(summary.locator('[data-commerce-read-only-session-recovery-output="true"]').first()).toContainText("不付款、不下单、不出票");
+    expect(await latestOpenExternalUrl(page)).toBe("");
+
     const quote = (quoteId, baseFare, taxesAndFees, providerFees, totalPrice, freshnessMinutes) => ({ providerId:"flight_provider_trusted_fixture", providerName:"Trusted Flight Fixture", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import", route:{ origin:"SHA", destination:"CTU" }, departureDate:"2026-07-15", currency:"CNY", baseFare, taxesAndFees, providerFees, totalPrice, priceUpdatedAt:"2026-01-01T00:00:00.000Z", freshnessMinutes, quoteId, handoffCandidate:{ providerId:"google_flights_search", handoffType:"provider_search" } });
     const validSandboxJson = JSON.stringify([
       quote("q1010", 860, 110, 40, 1010, 15),
@@ -9004,6 +9034,8 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(summary).not.toContainText("去平台确认");
       await expect(summary).not.toContainText("Top 3 候选报价");
       await expect(summary).not.toContainText("Sandbox Response Import Console");
+      await expect(summary).not.toContainText("Read-Only Quote Session");
+      await expect(summary).not.toContainText("Audit Export");
       if (item.input.includes("SMOKE-GUN")) {
         await expect(summary).toContainText("查看 Provider 接入准备控制台");
         await openDisclosure(summary, "commerce-provider-connection-readiness-console-disclosure");

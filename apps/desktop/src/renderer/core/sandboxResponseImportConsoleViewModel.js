@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.54";
+  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.55";
   const CONSOLE_NAME = "sandbox_response_import_console_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -157,6 +157,12 @@
     const lastRunId = text(safe.lastRunId || (sandboxDryRunSummary && sandboxDryRunSummary.lastRunId) || (runHistorySummary && runHistorySummary.latestRunId) || "");
     const compareStatus = text(safe.compareStatus || (sandboxDryRunSummary && sandboxDryRunSummary.compareStatus) || (quoteDeltaSummary && (quoteDeltaSummary.compareStatus || quoteDeltaSummary.status)) || "not_enough_history");
     const replayStatus = text(safe.replayStatus || (sandboxDryRunSummary && sandboxDryRunSummary.replayStatus) || (replaySummary && replaySummary.status) || "unavailable");
+    const sessionSummary = safe.sessionSummary && typeof safe.sessionSummary === "object" ? safe.sessionSummary : (sandboxDryRunSummary && sandboxDryRunSummary.sessionSummary && typeof sandboxDryRunSummary.sessionSummary === "object" ? sandboxDryRunSummary.sessionSummary : null);
+    const sessionStatus = text(safe.sessionStatus || (sandboxDryRunSummary && sandboxDryRunSummary.sessionStatus) || (sessionSummary && sessionSummary.status) || "");
+    const sessionId = text(safe.sessionId || (sandboxDryRunSummary && sandboxDryRunSummary.sessionId) || (sessionSummary && sessionSummary.sessionId) || "");
+    const auditExportPreview = safe.auditExportPreview && typeof safe.auditExportPreview === "object" ? safe.auditExportPreview : (sandboxDryRunSummary && sandboxDryRunSummary.auditExportPreview && typeof sandboxDryRunSummary.auditExportPreview === "object" ? sandboxDryRunSummary.auditExportPreview : null);
+    const auditExportReady = safe.auditExportReady === true || (sandboxDryRunSummary && sandboxDryRunSummary.auditExportReady === true) || !!auditExportPreview;
+    const sessionRecoverySummary = safe.sessionRecoverySummary && typeof safe.sessionRecoverySummary === "object" ? safe.sessionRecoverySummary : (sandboxDryRunSummary && sandboxDryRunSummary.sessionRecoverySummary && typeof sandboxDryRunSummary.sessionRecoverySummary === "object" ? sandboxDryRunSummary.sessionRecoverySummary : null);
     return clone({
       consoleName: CONSOLE_NAME,
       appVersion: SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION,
@@ -180,6 +186,12 @@
       runHistorySummary: runHistorySummary,
       quoteDeltaSummary: quoteDeltaSummary,
       replaySummary: replaySummary,
+      sessionSummary: sessionSummary,
+      sessionStatus: sessionStatus,
+      sessionId: sessionId,
+      auditExportPreview: auditExportPreview,
+      auditExportReady: auditExportReady,
+      sessionRecoverySummary: sessionRecoverySummary,
       lastRunId: lastRunId,
       compareStatus: compareStatus,
       replayStatus: replayStatus,
@@ -279,7 +291,13 @@
       providerRunMatrix: safeOptions.providerRunMatrix || previewModel.providerRunMatrix || null,
       dryRunStatus: safeOptions.dryRunStatus || previewModel.dryRunStatus || "not_run",
       dryRunButton: safeOptions.dryRunButton || previewModel.dryRunButton || { label:"运行沙盒只读报价", enabled:true, loading:false, autoRun:false },
-      dryRunTopCandidates: safeOptions.dryRunTopCandidates || previewModel.dryRunTopCandidates || []
+      dryRunTopCandidates: safeOptions.dryRunTopCandidates || previewModel.dryRunTopCandidates || [],
+      sessionSummary: safeOptions.sessionSummary || previewModel.sessionSummary || null,
+      sessionStatus: safeOptions.sessionStatus || previewModel.sessionStatus || "",
+      sessionId: safeOptions.sessionId || previewModel.sessionId || "",
+      auditExportPreview: safeOptions.auditExportPreview || previewModel.auditExportPreview || null,
+      auditExportReady: safeOptions.auditExportReady === true || previewModel.auditExportReady === true,
+      sessionRecoverySummary: safeOptions.sessionRecoverySummary || previewModel.sessionRecoverySummary || null
     }), {
       importResult: {
         status: importStatus,
@@ -318,7 +336,13 @@
         providerRunMatrix: dryRun && dryRun.providerRunMatrix ? dryRun.providerRunMatrix : null,
         dryRunStatus: dryRun && dryRun.status ? dryRun.status : "not_run",
         dryRunButton: { label: "运行沙盒只读报价", enabled: true, loading: false, autoRun: false },
-        dryRunTopCandidates: dryRun && Array.isArray(dryRun.dryRunTopCandidates) ? dryRun.dryRunTopCandidates : (dryRun && dryRun.ranking && Array.isArray(dryRun.ranking.topCandidates) ? dryRun.ranking.topCandidates : [])
+        dryRunTopCandidates: dryRun && Array.isArray(dryRun.dryRunTopCandidates) ? dryRun.dryRunTopCandidates : (dryRun && dryRun.ranking && Array.isArray(dryRun.ranking.topCandidates) ? dryRun.ranking.topCandidates : []),
+        sessionSummary: dryRun && dryRun.sessionSummary || null,
+        sessionStatus: dryRun && dryRun.sessionStatus || "",
+        sessionId: dryRun && dryRun.sessionId || "",
+        auditExportPreview: dryRun && dryRun.auditExportPreview || null,
+        auditExportReady: dryRun && dryRun.auditExportReady === true,
+        sessionRecoverySummary: dryRun && dryRun.sessionRecoverySummary || null
       }));
     }
     if (type === "PREVIEW_REQUESTED") return buildSandboxResponseValidationPreview(safeEvent.rawInput || safeEvent.text || "", safeEvent.options || {});
@@ -354,6 +378,11 @@
       sandboxDryRunSummary: model.sandboxDryRunSummary || null,
       runTimelineSummary: model.runTimelineSummary || null,
       providerRunMatrix: model.providerRunMatrix || null,
+      sessionSummary: model.sessionSummary || null,
+      sessionStatus: model.sessionStatus || "",
+      sessionId: model.sessionId || "",
+      auditExportReady: model.auditExportReady === true,
+      sessionRecoverySummary: model.sessionRecoverySummary || null,
       rawInputStored: false,
       rawResponseStored: false,
       canPasteSecretHere: false,

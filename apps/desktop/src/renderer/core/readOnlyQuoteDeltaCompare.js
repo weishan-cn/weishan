@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_DELTA_COMPARE_VERSION = "2.1.54";
+  const READ_ONLY_QUOTE_DELTA_COMPARE_VERSION = "2.1.55";
   const COMPARE_NAME = "read_only_quote_delta_compare_v1";
 
   function clone(value) {
@@ -106,6 +106,19 @@
         payment: false,
         order: false,
         identityUpload: false,
+        sessionEventPayload: {
+          type: "DELTA_COMPARED",
+          eventType: "DELTA_COMPARED",
+          status: "not_enough_history",
+          claim: "仅比较本地只读沙盒运行结果",
+          bookingUrl: null,
+          checkoutUrl: null,
+          paymentUrl: null,
+          orderUrl: null,
+          rawResponseStored: false,
+          secretStored: false,
+          redacted: true
+        },
         redacted: true
       });
     }
@@ -159,6 +172,21 @@
       payment: false,
       order: false,
       identityUpload: false,
+      sessionEventPayload: {
+        type: "DELTA_COMPARED",
+        eventType: "DELTA_COMPARED",
+        status: "compared",
+        claim: "仅比较本地只读沙盒运行结果",
+        previousRunId: runIdOf(previousRun),
+        currentRunId: runIdOf(currentRun),
+        bookingUrl: null,
+        checkoutUrl: null,
+        paymentUrl: null,
+        orderUrl: null,
+        rawResponseStored: false,
+        secretStored: false,
+        redacted: true
+      },
       redacted: true
     });
   }

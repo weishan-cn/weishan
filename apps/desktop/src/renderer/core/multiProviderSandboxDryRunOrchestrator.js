@@ -1,9 +1,9 @@
 ;(function () {
   "use strict";
 
-  const MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION = "2.1.54";
+  const MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION = "2.1.55";
   const ORCHESTRATOR_NAME = "multi_provider_sandbox_dry_run_orchestrator_v1";
-  const RUN_ID = "deterministic-v2.1.54-read-only-sandbox-run";
+  const RUN_ID = "deterministic-v2.1.55-read-only-sandbox-run";
 
   function clone(value) {
     return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;
@@ -22,6 +22,8 @@
   function getHistoryStoreApi() { return window.WeishanReadOnlyQuoteRunHistoryStore || {}; }
   function getDeltaCompareApi() { return window.WeishanReadOnlyQuoteDeltaCompare || {}; }
   function getReplayGuardApi() { return window.WeishanReadOnlyQuoteReplayGuard || {}; }
+  function getSessionApi() { return window.WeishanReadOnlyQuoteSessionManager || {}; }
+  function getAuditExportApi() { return window.WeishanReadOnlyQuoteAuditExport || {}; }
   function makeRunId(runIndex) {
     const index = Number(runIndex);
     return RUN_ID + (Number.isFinite(index) && index > 0 ? "-" + index : "");
@@ -133,6 +135,8 @@
     const deltaApi = getDeltaCompareApi();
     const replayApi = getReplayGuardApi();
     const timelineApi = getTimelineApi();
+    const sessionApi = getSessionApi();
+    const auditExportApi = getAuditExportApi();
     const storageLike = safeOptions.storageLike || (typeof window !== "undefined" && window.localStorage ? window.localStorage : null);
     const existingHistory = typeof historyApi.loadReadOnlyQuoteRunHistory === "function" ? historyApi.loadReadOnlyQuoteRunHistory(storageLike) : { history: [] };
     const existingList = Array.isArray(existingHistory.history) ? existingHistory.history.slice() : [];
@@ -155,9 +159,25 @@
     const deltaSummary = typeof deltaApi.buildReadOnlyQuoteDeltaSummary === "function" ? deltaApi.buildReadOnlyQuoteDeltaSummary(delta || { status: historyList.length > 1 ? "compared" : "not_enough_history", previousRunId: previousRun ? text(previousRun.runId || "") : null, currentRunId: currentRunId, topCandidateDelta: { previousTotalPrice: null, currentTotalPrice: null, deltaAmount: null, deltaDirection: "unknown", previousProviderName: "", currentProviderName: "", providerChanged: false }, rankChanges: [], warnings:["价格、库存、税费和规则以平台页面为准。", "本对比仅基于本地只读沙盒运行结果，不代表真实最终价。"], canClaimLowestAcrossWeb:false, canClaimFinalBookablePrice:false, canReplaceMainResultCard:false, bookingUrl:null, payment:false, order:false, identityUpload:false, redacted:true }, safeOptions) : { compareName:"read_only_quote_delta_compare_v1", appVersion:MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION, status: historyList.length > 1 ? "compared" : "not_enough_history", scope:"local_read_only_sandbox_runs", claim:"仅比较本地只读沙盒运行结果", previousRunId: previousRun ? text(previousRun.runId || "") : null, currentRunId: currentRunId, topCandidateDelta:{ previousTotalPrice:null, currentTotalPrice:null, deltaAmount:null, deltaDirection:"unknown", previousProviderName:"", currentProviderName:"", providerChanged:false }, rankChanges:[], warnings:["价格、库存、税费和规则以平台页面为准。", "本对比仅基于本地只读沙盒运行结果，不代表真实最终价。"], canClaimLowestAcrossWeb:false, canClaimFinalBookablePrice:false, canReplaceMainResultCard:false, bookingUrl:null, payment:false, order:false, identityUpload:false, redacted:true, summary: historyList.length > 1 ? "本地只读沙盒运行对比：存在差异" : "本地只读沙盒运行对比：历史不足", compareStatus: historyList.length > 1 ? "compared" : "not_enough_history" };
     const replayState = typeof replayApi.evaluateReadOnlyQuoteReplayAvailability === "function" ? replayApi.evaluateReadOnlyQuoteReplayAvailability(historyState, safeOptions) : { replayGuardName:"read_only_quote_replay_guard_v1", appVersion:MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION, status:historyList.length ? "available" : "unavailable", replaySource:"local_redacted_run_history", replayedRunId:historyList.length ? text(historyList[historyList.length - 1].runId || currentRunId) : null, replayedCandidateCount:currentRun.topCandidates.length, canReplay:historyList.length > 0 && currentRun.topCandidates.length > 0, userTriggeredOnly:true, autoReplay:false, autoOpen:false, bookingUrl:null, payment:false, order:false, identityUpload:false, redacted:true };
     const replaySummary = typeof replayApi.replayLastReadOnlyQuoteRun === "function" ? replayApi.replayLastReadOnlyQuoteRun(historyState, safeOptions) : Object.assign({}, replayState, { replaySummary: historyList.length ? "Replay 只恢复候选证据，不重新请求 provider" : "Replay Guard：暂无可回放的本地脱敏运行历史", replayedRun: historyList.length ? syntheticEntry : null });
-    const timelineInput = Object.assign({}, safeResult, { runHistorySummary: historySummary, quoteDeltaSummary: deltaSummary, replaySummary: replaySummary, lastRunId: historySummary.latestRunId || currentRunId, compareStatus: deltaSummary.compareStatus || deltaSummary.status || "not_enough_history", replayStatus: replayState.status || "unavailable", replayReady: replayState.canReplay === true });
+    let quoteSession = typeof sessionApi.createReadOnlyQuoteSession === "function" ? sessionApi.createReadOnlyQuoteSession({
+      userIntentSummary: safeResult.request || {},
+      route: safeResult.request ? [safeResult.request.origin, safeResult.request.destination].filter(Boolean).join(" → ") : "",
+      departureDate: safeResult.request && safeResult.request.departureDate || "",
+      directOnly: safeResult.request && safeResult.request.directOnly === true,
+      sortIntent: safeResult.request && safeResult.request.sortIntent || ""
+    }) : null;
+    if (quoteSession && typeof sessionApi.updateReadOnlyQuoteSession === "function") {
+      quoteSession = sessionApi.updateReadOnlyQuoteSession(quoteSession, { type:"DRY_RUN_COMPLETED", result:safeResult, runId:currentRunId });
+      quoteSession = sessionApi.updateReadOnlyQuoteSession(quoteSession, { type:"HISTORY_APPENDED", historySummary:historySummary, runId:currentRunId });
+      quoteSession = sessionApi.updateReadOnlyQuoteSession(quoteSession, { type:"DELTA_COMPARED", deltaSummary:deltaSummary, runId:currentRunId });
+      quoteSession = sessionApi.updateReadOnlyQuoteSession(quoteSession, { type:"REPLAY_COMPLETED", replaySummary:replaySummary, runId:currentRunId });
+      if (safeResult.selectedCandidate) quoteSession = sessionApi.updateReadOnlyQuoteSession(quoteSession, { type:"CANDIDATE_SELECTED", selectedCandidate:safeResult.selectedCandidate, runId:currentRunId });
+    }
+    const sessionSummary = quoteSession && typeof sessionApi.buildReadOnlyQuoteSessionSummary === "function" ? sessionApi.buildReadOnlyQuoteSessionSummary(quoteSession) : null;
+    const auditExportPreview = sessionSummary && typeof auditExportApi.buildReadOnlyQuoteAuditExportPreview === "function" ? auditExportApi.buildReadOnlyQuoteAuditExportPreview(Object.assign({}, safeResult, { sessionSummary:sessionSummary, runHistorySummary:historySummary, quoteDeltaSummary:deltaSummary, replaySummary:replaySummary })) : null;
+    const timelineInput = Object.assign({}, safeResult, { runHistorySummary: historySummary, quoteDeltaSummary: deltaSummary, replaySummary: replaySummary, sessionSummary: sessionSummary, auditExportReady: !!auditExportPreview, lastRunId: historySummary.latestRunId || currentRunId, compareStatus: deltaSummary.compareStatus || deltaSummary.status || "not_enough_history", replayStatus: replayState.status || "unavailable", replayReady: replayState.canReplay === true });
     safeResult.runTimelineSummary = typeof timelineApi.buildReadOnlyQuoteRunTimeline === "function"
-      ? timelineApi.buildReadOnlyQuoteRunTimeline(timelineInput, { runId: currentRunId, runIndex: nextIndex, runHistorySummary: historySummary, quoteDeltaSummary: deltaSummary, replaySummary: replaySummary })
+      ? timelineApi.buildReadOnlyQuoteRunTimeline(timelineInput, { runId: currentRunId, runIndex: nextIndex, runHistorySummary: historySummary, quoteDeltaSummary: deltaSummary, replaySummary: replaySummary, sessionSummary: sessionSummary, auditExportReady: !!auditExportPreview })
       : { timelineName: "read_only_quote_run_timeline_v1", appVersion: MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION, runId: currentRunId, status: text(safeResult.status || "completed"), steps: [], summary: "构建 Provider 运行矩阵 · 生成只读沙盒报价 · 报价归一化 · Top 3 排序 · 候选选择准备 · Run History · Quote Delta Compare · Replay Guard", rawResponseStored: false, productionProviderEnabled: false, bookingUrl: null, payment: false, order: false, identityUpload: false, redacted: true };
     safeResult.historyEntry = syntheticEntry;
     safeResult.runHistorySummary = historySummary;
@@ -167,6 +187,26 @@
     safeResult.compareStatus = deltaSummary.compareStatus || deltaSummary.status || "not_enough_history";
     safeResult.replayStatus = replayState.status || "unavailable";
     safeResult.replayReady = replayState.canReplay === true;
+    safeResult.quoteSession = quoteSession;
+    safeResult.sessionSummary = sessionSummary;
+    safeResult.sessionStatus = sessionSummary && sessionSummary.status || "";
+    safeResult.sessionId = sessionSummary && sessionSummary.sessionId || "";
+    safeResult.auditExportPreview = auditExportPreview;
+    safeResult.auditExportReady = !!auditExportPreview;
+    safeResult.sessionRecoverySummary = sessionSummary ? { title:"Session Recovery", available:true, sessionId:sessionSummary.sessionId, status:sessionSummary.status, replaySource:"local_redacted_run_history", autoOpen:false, networkAllowed:false, redacted:true } : null;
+    safeResult.sessionEventPayload = {
+      type: "DRY_RUN_COMPLETED",
+      eventType: "DRY_RUN_COMPLETED",
+      runId: currentRunId,
+      sessionId: safeResult.sessionId,
+      rawResponseStored: false,
+      secretStored: false,
+      bookingUrl: null,
+      checkoutUrl: null,
+      paymentUrl: null,
+      orderUrl: null,
+      redacted: true
+    };
     safeResult.history = historyList;
     safeResult.rawResponseStored = false;
     safeResult.autoOpen = false;

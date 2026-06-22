@@ -1,0 +1,48 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+const ROOT = path.resolve(__dirname, "../..");
+function load(files) { const window = {}; window.window = window; const context = vm.createContext({ window, console }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
+function main() {
+  const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteSessionManager.js"]);
+  const api = windowRef.WeishanReadOnlyQuoteSessionManager;
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_MANAGER_VERSION, "2.1.55");
+  let session = api.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15", directOnly:true, sortIntent:"低价优先" });
+  assert.equal(session.sessionName, "read_only_quote_session_v1");
+  assert.equal(session.appVersion, "2.1.55");
+  assert.equal(session.sessionId, "deterministic-read-only-quote-session-v2.1.55");
+  assert.equal(session.status, "open");
+  session = api.updateReadOnlyQuoteSession(session, { type:"DRY_RUN_COMPLETED", runId:"run-1", result:{ runId:"run-1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"Provider A", totalPrice:930, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"Provider A", token:"secret" } } });
+  assert.equal(session.dryRun.available, true);
+  assert.equal(session.dryRun.runId, "run-1");
+  assert.equal(session.dryRun.topCandidateCount, 1);
+  assert.equal(session.dryRun.selectedCandidate.bookingUrl, null);
+  session = api.updateReadOnlyQuoteSession(session, { type:"SANDBOX_IMPORT_ACCEPTED", importResult:{ acceptedCount:2, rejectedCount:1, blockedCount:0, rawResponse:{ nope:true } } });
+  assert.equal(session.sandboxImport.available, true);
+  assert.equal(session.sandboxImport.acceptedCount, 2);
+  session = api.updateReadOnlyQuoteSession(session, { type:"CANDIDATE_SELECTED", selectedCandidate:{ selectedQuoteId:"q1", selectedProviderName:"Provider A", paymentUrl:"https://blocked.example" } });
+  assert.equal(session.selection.selected, true);
+  assert.equal(session.selection.autoOpen, false);
+  session = api.updateReadOnlyQuoteSession(session, { type:"HISTORY_APPENDED", historySummary:{ totalRunCount:1, latestRunId:"run-1" } });
+  assert.equal(session.history.available, true);
+  session = api.updateReadOnlyQuoteSession(session, { type:"DELTA_COMPARED", deltaSummary:{ status:"compared" } });
+  assert.equal(session.deltaCompare.available, true);
+  assert.equal(session.deltaCompare.claim, "仅比较本地只读沙盒运行结果");
+  session = api.updateReadOnlyQuoteSession(session, { type:"REPLAY_COMPLETED", replaySummary:{ status:"available" } });
+  assert.equal(session.replay.available, true);
+  session = api.closeReadOnlyQuoteSession(session);
+  assert.equal(session.status, "closed");
+  const failed = api.updateReadOnlyQuoteSession(session, { type:"UNKNOWN_EVENT", secret:"abc" });
+  assert.equal(failed.status, "failed_safe");
+  assert.equal(failed.safety.bookingUrl, null);
+  assert.equal(failed.safety.rawResponseStored, false);
+  assert.equal(failed.safety.secretStored, false);
+  assert.equal(failed.redacted, true);
+  const summary = api.buildReadOnlyQuoteSessionSummary(failed);
+  assert.equal(summary.bookingUrl, null);
+  assert.equal(JSON.stringify(summary).includes("abc"), false);
+  assert.equal(JSON.stringify(summary).includes("token"), false);
+  console.log("READ_ONLY_QUOTE_SESSION_MANAGER PASS");
+}
+main();

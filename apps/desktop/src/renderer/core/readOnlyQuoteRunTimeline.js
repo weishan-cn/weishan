@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_RUN_TIMELINE_VERSION = "2.1.54";
+  const READ_ONLY_QUOTE_RUN_TIMELINE_VERSION = "2.1.55";
   const TIMELINE_NAME = "read_only_quote_run_timeline_v1";
 
   function clone(value) {
@@ -20,13 +20,16 @@
     const replayReady = input && input.replayReady === true;
     return [
       { stepId: "run_matrix_built", label: "构建 Provider 运行矩阵", status: "completed" },
+      { stepId: "session_created", label: "Read-Only Quote Session", status: input && input.sessionSummary ? "completed" : "not_run" },
       { stepId: "sandbox_quotes_generated", label: "生成只读沙盒报价", status: laterStatus },
       { stepId: "quotes_normalized", label: "报价归一化", status: laterStatus },
       { stepId: "quotes_ranked", label: "Top 3 排序", status: laterStatus },
+      { stepId: "session_updated", label: "只读报价会话已更新", status: input && input.sessionSummary ? "completed" : "not_run" },
       { stepId: "run_history_sanitized", label: "运行历史已脱敏", status: historyReady ? "completed" : "not_run" },
       { stepId: "run_history_persisted", label: "运行历史已保存", status: historyReady ? "completed" : "not_run" },
       { stepId: "quote_delta_compared", label: "本地只读沙盒运行对比", status: deltaReady ? "completed" : "not_run" },
       { stepId: "replay_guard_ready", label: "Replay Guard", status: replayReady ? "completed" : "not_run" },
+      { stepId: "audit_export_ready", label: "Audit Export", status: input && input.auditExportReady === true ? "completed" : "not_run" },
       { stepId: "selection_ready", label: "候选选择准备", status: laterStatus }
     ];
   }
@@ -40,7 +43,7 @@
     return clone({
       timelineName: TIMELINE_NAME,
       appVersion: READ_ONLY_QUOTE_RUN_TIMELINE_VERSION,
-      runId: text(safe.runId || "deterministic-v2.1.54-read-only-sandbox-run"),
+      runId: text(safe.runId || "deterministic-v2.1.55-read-only-sandbox-run"),
       status: text(safe.status || (failedSafeCount > 0 ? "failed_safe" : (blockedCount > 0 ? "blocked" : "completed"))),
       summary: steps.map(function (step) { return text(step.label || step.stepId || "step"); }).join(" · "),
       completedCount: completedCount,
@@ -53,6 +56,8 @@
       compareStatus: text(safe.compareStatus || (safe.quoteDeltaSummary && (safe.quoteDeltaSummary.compareStatus || safe.quoteDeltaSummary.status)) || "not_enough_history"),
       replayStatus: text(safe.replayStatus || (safe.replaySummary && safe.replaySummary.status) || "unavailable"),
       lastRunId: text(safe.lastRunId || (safe.runHistorySummary && safe.runHistorySummary.latestRunId) || ""),
+      sessionSummary: safe.sessionSummary && typeof safe.sessionSummary === "object" ? clone(safe.sessionSummary) : null,
+      auditExportReady: safe.auditExportReady === true,
       rawResponseStored: false,
       productionProviderEnabled: false,
       bookingUrl: null,
@@ -69,12 +74,14 @@
     const overallStatus = text(safe.status || safeOptions.status || "completed");
     const steps = defaultSteps(overallStatus, Object.assign({}, safe, safeOptions));
     const summary = summarizeReadOnlyQuoteRunTimeline({
-      runId: text(safe.runId || safeOptions.runId || "deterministic-v2.1.54-read-only-sandbox-run"),
+      runId: text(safe.runId || safeOptions.runId || "deterministic-v2.1.55-read-only-sandbox-run"),
       status: overallStatus,
       steps: steps,
       runHistorySummary: safe.runHistorySummary || safeOptions.runHistorySummary || null,
       quoteDeltaSummary: safe.quoteDeltaSummary || safeOptions.quoteDeltaSummary || null,
       replaySummary: safe.replaySummary || safeOptions.replaySummary || null,
+      sessionSummary: safe.sessionSummary || safeOptions.sessionSummary || null,
+      auditExportReady: safe.auditExportReady === true || safeOptions.auditExportReady === true,
       compareStatus: safe.compareStatus || safeOptions.compareStatus || "not_enough_history",
       replayStatus: safe.replayStatus || safeOptions.replayStatus || "unavailable",
       lastRunId: safe.lastRunId || safeOptions.lastRunId || (safe.runHistorySummary && safe.runHistorySummary.latestRunId) || ""
@@ -92,6 +99,8 @@
       compareStatus: summary.compareStatus,
       replayStatus: summary.replayStatus,
       lastRunId: summary.lastRunId,
+      sessionSummary: summary.sessionSummary,
+      auditExportReady: summary.auditExportReady,
       rawResponseStored: false,
       productionProviderEnabled: false,
       bookingUrl: null,
