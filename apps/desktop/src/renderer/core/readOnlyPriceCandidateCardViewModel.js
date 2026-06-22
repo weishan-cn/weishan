@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.47";
+  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.48";
   const PHASE = "read_only_price_candidate_card_view_model_v1";
 
   function clone(value) {
@@ -36,6 +36,10 @@
 
   function getRefreshStateStoreApi() {
     return window.WeishanReadOnlyQuoteRefreshStateStore || {};
+  }
+
+  function getInteractiveRefreshUiApi() {
+    return window.WeishanReadOnlyQuoteInteractiveRefreshUiController || {};
   }
 
   function lastRefreshStatusLabel(status) {
@@ -144,8 +148,12 @@
     const providerBindingWizardSummary = typeof wizardApi.buildProviderSandboxBindingWizardModel === "function"
       ? wizardApi.buildProviderSandboxBindingWizardModel(Object.assign({}, safe, reportCredentialReadiness, { providerId:source.providerId, providerName:source.providerName, providerMode:providerMode, restrictedCategory:normalized.restrictedCategory }))
       : { wizardName:"provider_sandbox_binding_wizard_v1", title:"Provider 沙盒绑定准备", status:isProductionDisabled ? "disabled" : (isSandboxReadOnly ? (reportCredentialReadiness.status === "sandbox_ready" ? "sandbox_ready" : "needs_setup") : "fixture_ready"), missingRequirements:[], steps:[], actions:{ canAttemptReadOnlyRefresh:!isProductionDisabled && !normalized.restrictedCategory }, productionProviderEnabled:false, redacted:true };
-    const canRefresh = normalized.restrictedCategory !== true && providerBindingWizardSummary.actions && providerBindingWizardSummary.actions.canAttemptReadOnlyRefresh === true && !isProductionDisabled;
-    const refreshButton = { label:"刷新只读报价", enabled:canRefresh, reason:canRefresh ? "仅更新候选证据，不代表已锁价或可出票" : "当前只读报价刷新未就绪", autoRun:false, autoRefresh:false, payment:false, order:false, identityUpload:false };
+    const interactiveApi = getInteractiveRefreshUiApi();
+    const interactiveRefreshState = typeof interactiveApi.buildReadOnlyQuoteInteractiveRefreshUiState === "function"
+      ? interactiveApi.buildReadOnlyQuoteInteractiveRefreshUiState(Object.assign({}, safe.interactiveRefreshState || {}, { state:refreshStateInput, status:safe.interactiveRefreshStatus || safe.status || (safe.interactiveRefreshState && safe.interactiveRefreshState.status) || "idle" }))
+      : { status:"idle", recoveryStatus:"not_loaded", refreshButton:{ label:"刷新只读报价", enabled:true, loading:false, reason:"仅更新候选证据，不代表已锁价或可出票", autoRun:false }, lastRefreshSummary:{ status:refreshStateSummary.lastRefreshStatus || "not_run" }, recoveredEvidenceSummary:{ available:false, source:"local_redacted_state", showableAsRealPrice:false, showableAsCandidateEvidence:false, canReplaceMainResultCard:false }, refreshErrorBanner:"", clearRefreshStateButton:{ label:"清除刷新状态", enabled:false, autoRun:false }, safety:{ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, autoRefresh:false, booking:false, payment:false, order:false, identityUpload:false, redacted:true }, redacted:true };
+    const canRefresh = normalized.restrictedCategory !== true && providerBindingWizardSummary.actions && providerBindingWizardSummary.actions.canAttemptReadOnlyRefresh === true && !isProductionDisabled && interactiveRefreshState.status !== "refreshing";
+    const refreshButton = { label:interactiveRefreshState.refreshButton && interactiveRefreshState.refreshButton.label || "刷新只读报价", enabled:canRefresh && interactiveRefreshState.refreshButton && interactiveRefreshState.refreshButton.enabled !== false, loading:interactiveRefreshState.refreshButton && interactiveRefreshState.refreshButton.loading === true, reason:interactiveRefreshState.refreshButton && interactiveRefreshState.refreshButton.reason || (canRefresh ? "仅更新候选证据，不代表已锁价或可出票" : "当前只读报价刷新未就绪"), autoRun:false, autoRefresh:false, payment:false, order:false, identityUpload:false };
     const safeProviderHandoffUrl = text(reportHandoff.safeProviderHandoffUrl || "");
     const gateApi = getGateApi();
     const gate = typeof gateApi.evaluateSafeProviderDeepLinkHandoff === "function"
@@ -239,6 +247,10 @@
       lastRefreshStatus: text(refreshStateSummary.lastRefreshStatus || reportRefresh.lastRefreshStatus || "not_run"),
       lastRefreshStatusLabel: lastRefreshStatusLabel(refreshStateSummary.lastRefreshStatus || reportRefresh.lastRefreshStatus || "not_run"),
       refreshStateSummary: refreshStateSummary,
+      interactiveRefreshState: interactiveRefreshState,
+      recoveredEvidenceSummary: interactiveRefreshState.recoveredEvidenceSummary || { available:false, source:"local_redacted_state", showableAsRealPrice:false, showableAsCandidateEvidence:false, canReplaceMainResultCard:false },
+      clearRefreshStateButton: Object.assign({ label:"清除刷新状态", enabled:false, autoRun:false, booking:false, payment:false, order:false, identityUpload:false }, interactiveRefreshState.clearRefreshStateButton || {}),
+      refreshErrorBanner: interactiveRefreshState.refreshErrorBanner || "",
       providerBindingWizardSummary: providerBindingWizardSummary,
       credentialReadiness: { status:text(reportCredentialReadiness.status || (isProductionDisabled ? "disabled" : (isSandboxReadOnly ? "sandbox_ready" : "fixture_ready"))), hasSecureCredentialReference:reportCredentialReadiness.hasSecureCredentialReference === true, sandboxDryRunEnabled:reportCredentialReadiness.sandboxDryRunEnabled === true, networkDryRunAllowed:reportCredentialReadiness.networkDryRunAllowed === true, productionProviderEnabled:false, redacted:true },
       refreshButton: refreshButton,
@@ -309,10 +321,13 @@
       <ul class="commerce-read-only-price-candidate-card-breakdown">${breakdownLines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>
       <ul class="commerce-read-only-price-candidate-card-safety">${safetyLines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>
       <p>${escapeHtml(card.safetyNotice || "唯珊不会付款、不会下单、不会上传证件或银行卡。")}</p>
-      <p>${escapeHtml(card.refreshStateSummary && card.refreshStateSummary.summary || ("最近一次刷新：" + (card.lastRefreshStatusLabel || "未运行")))}</p>
+      <p data-commerce-read-only-refresh-summary="true">${escapeHtml(card.interactiveRefreshState && card.interactiveRefreshState.lastRefreshStatusLabel ? ("最近一次刷新：" + card.interactiveRefreshState.lastRefreshStatusLabel) : (card.refreshStateSummary && card.refreshStateSummary.summary || ("最近一次刷新：" + (card.lastRefreshStatusLabel || "未运行"))))}</p>
+      ${card.recoveredEvidenceSummary && card.recoveredEvidenceSummary.available ? `<p data-commerce-read-only-recovered-evidence="true">已恢复最近一次只读证据</p>` : ""}
+      ${card.refreshErrorBanner ? `<p class="commerce-warning" data-commerce-read-only-refresh-error="true">${escapeHtml(card.refreshErrorBanner)}</p>` : ""}
       <p>${escapeHtml(card.providerBindingWizardSummary && card.providerBindingWizardSummary.title || "Provider 沙盒绑定准备")} · ${escapeHtml(card.providerBindingWizardSummary && card.providerBindingWizardSummary.status || "fixture_ready")}</p>
       <div class="commerce-read-only-price-candidate-card-actions">
         <button type="button" class="cmd-btn gray commerce-read-only-refresh-btn" data-commerce-read-only-quote-refresh="true"${card.refreshButton && card.refreshButton.enabled ? "" : " disabled"}>${escapeHtml(card.refreshButton && card.refreshButton.label || "刷新只读报价")}</button>
+        <button type="button" class="cmd-btn gray commerce-clear-read-only-refresh-state-btn" data-commerce-clear-read-only-refresh-state="true"${card.clearRefreshStateButton && card.clearRefreshStateButton.enabled ? "" : " disabled"}>${escapeHtml(card.clearRefreshStateButton && card.clearRefreshStateButton.label || "清除刷新状态")}</button>
         <button type="button" class="cmd-btn gray commerce-safe-provider-handoff-btn" data-commerce-safe-provider-handoff-request="true" data-commerce-safe-provider-handoff-kind="${escapeHtml(card.providerType || "flight_search")}" data-commerce-safe-provider-handoff-url="${escapeHtml(encodeURIComponent(card.safeProviderHandoffUrl || ""))}"${card.confirmationUi && card.confirmationUi.continueButtonDisabled ? " disabled" : ""}>${escapeHtml(card.actionLabel || "去平台确认")}</button>
       </div>
       <p>${escapeHtml(card.refreshButton && card.refreshButton.reason || "仅更新候选证据，不代表已锁价或可出票")}</p>
@@ -353,6 +368,8 @@
     if (card.actionLabel !== "去平台确认") throw new Error("read only price candidate card must keep confirmation action label");
     if (!card.refreshButton || card.refreshButton.autoRun !== false || card.refreshButton.autoRefresh !== false || card.refreshButton.payment !== false || card.refreshButton.order !== false || card.refreshButton.identityUpload !== false) throw new Error("read only price candidate card must keep refresh button manual and safe");
     if (!card.refreshStateSummary || card.refreshStateSummary.showableAsRealPrice !== false || card.refreshStateSummary.autoOpen !== false) throw new Error("read only price candidate card must keep refresh state safe");
+    if (!card.interactiveRefreshState || card.interactiveRefreshState.safety.autoRefresh !== false || card.interactiveRefreshState.safety.autoOpen !== false) throw new Error("read only price candidate card must keep interactive refresh safe");
+    if (!card.clearRefreshStateButton || card.clearRefreshStateButton.autoRun !== false) throw new Error("read only price candidate card must expose safe clear refresh state button");
     if (!card.providerBindingWizardSummary || card.providerBindingWizardSummary.productionProviderEnabled !== false) throw new Error("read only price candidate card must expose safe provider binding wizard summary");
     const serial = JSON.stringify(card);
     if (/fake price|mock price|demo price|AI 估价|全网最低|real final price/i.test(serial)) throw new Error("read only price candidate card must not expose fake or final price claims");

@@ -45,11 +45,11 @@ function main() {
     "apps/desktop/src/renderer/core/readOnlyQuoteRefreshController.js"
   ]);
   const api = windowRef.WeishanReadOnlyQuoteRefreshController;
-  assert.equal(api.READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION, "2.1.47");
+  assert.equal(api.READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION, "2.1.48");
 
   const request = api.buildReadOnlyQuoteRefreshRequest({ origin:"上海", destination:"成都", departureDate:"2026-07-15" });
   assert.equal(request.controllerName, "read_only_quote_refresh_controller_v1");
-  assert.equal(request.appVersion, "2.1.47");
+  assert.equal(request.appVersion, "2.1.48");
   assert.equal(request.autoRun, false);
   assert.equal(request.autoOpen, false);
   assert.equal(request.bookingUrl, null);
@@ -90,7 +90,9 @@ function main() {
   assert.equal(persisted.status, "refreshed");
   assert.equal(persisted.persistedRefreshState.lastRefreshStatus, "refreshed");
   assert.equal(persisted.refreshStateSummary.summary, "最近一次刷新：已刷新");
-  assert.equal(api.loadLastReadOnlyQuoteRefreshEvidence({ storageLike:storage }).state.lastRefreshStatus, "refreshed");
+  const loadedEvidence = api.loadLastReadOnlyQuoteRefreshEvidence({ storageLike:storage });
+  assert.equal(loadedEvidence.state.lastRefreshStatus, "refreshed");
+  assert.equal(loadedEvidence.storageHealth.status, "healthy");
   assert.equal(api.clearLastReadOnlyQuoteRefreshEvidence({ storageLike:storage }).state.lastRefreshStatus, "not_run");
 
   const originalEvidence = windowRef.WeishanRealFlightPriceEvidenceReport.buildRealFlightPriceEvidenceReport;
@@ -99,6 +101,7 @@ function main() {
   assert.equal(failed.status, "failed_safe");
   assert.equal(failed.persistedRefreshState.lastRefreshStatus, "failed_safe");
   assert.equal(failed.refreshStateSummary.summary, "最近一次刷新：安全失败");
+  assert.equal(failed.errorSummary, "只读报价刷新失败，已安全降级");
   windowRef.WeishanRealFlightPriceEvidenceReport.buildRealFlightPriceEvidenceReport = originalEvidence;
 
   const audit = api.buildReadOnlyQuoteRefreshAuditDraft({ origin:"上海", destination:"成都" });

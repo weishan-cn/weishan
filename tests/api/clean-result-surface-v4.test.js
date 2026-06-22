@@ -20,7 +20,7 @@ function main(){
     "apps/desktop/src/renderer/core/cleanResultSurfaceV4.js"
   ]);
   const api = windowRef.WeishanCleanResultSurfaceV4;
-  assert.equal(api.CLEAN_RESULT_SURFACE_V4_VERSION, "2.1.47");
+  assert.equal(api.CLEAN_RESULT_SURFACE_V4_VERSION, "2.1.48");
   const fare = windowRef.WeishanFlightFareBreakdown.normalizeFlightFareBreakdown({ baseFare:860, taxes:110, otherFees:40, totalPayable:1010, providerPriceType:"limited_beta_price", taxFeeCompleteness:"partial" });
   const surface = api.buildCleanResultSurfaceV4({ sortIntent:{ origin:"上海", destination:"成都", dateDisplay:"7 月 15 日", directPreference:"直达优先", sortLabel:"低价优先" }, cards:[{ rank:1, priceDisplay:"¥1010", priceTruthLabel:"只读候选价，不代表真实最低价", fareBreakdown:fare, badges:["只读候选价", "平台最终为准", "未锁价", "不代表可出票"] }] });
   assert.equal(surface.surfaceVersion, "v4");
@@ -30,6 +30,7 @@ function main(){
   assert.equal(surface.longExternalSearchHintCollapsed, true);
   assert.equal(surface.compactCards[0].routeLine, "上海 → 成都");
   assert.equal(surface.compactCards[0].badgeDisplayText, "[只读候选价] [平台最终为准] [未锁价] [不代表可出票]");
+  assert.deepEqual(Array.from(surface.compactCards[0].actions), ["刷新只读报价", "去平台确认", "复制搜索条件"]);
   assert.equal(surface.manualVerificationGroup.longExternalSearchHintCollapsed, true);
   assert.equal(surface.providerReadiness.flight_provider.cleanResultSurfaceV4, "active");
   assert.equal(surface.providerReadiness.flight_provider.finalDecision, "limited-beta-ready");

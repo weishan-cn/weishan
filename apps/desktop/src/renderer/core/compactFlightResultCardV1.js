@@ -1,5 +1,5 @@
 (function(){
-  const COMPACT_FLIGHT_RESULT_CARD_V1_VERSION = "2.1.47";
+  const COMPACT_FLIGHT_RESULT_CARD_V1_VERSION = "2.1.48";
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value){ return String(value == null ? "" : value).trim(); }
   function rowValue(fare, label){
@@ -29,7 +29,7 @@
       providerLine:text(safe.providerLine || ("Flight Provider Sandbox · 更新时间 " + text(safe.updatedAtDisplay || "2026-06-20 00:00"))),
       badges:badgesResult.badges,
       badgeDisplayText:badgesResult.displayText,
-      actions:["去平台确认", "复制搜索条件"],
+      actions:["刷新只读报价", "去平台确认", "复制搜索条件"],
       detailFareBreakdownCollapsedByDefault:true,
       detailRows:[
         ["票面价", rowValue(fare, "票面价")],
@@ -46,6 +46,8 @@
       payment:false,
       order:false,
       identityUpload:false,
+      autoOpen:false,
+      autoRefresh:false,
       audit:buildCompactFlightResultCardAuditDraft({ badgeSeparated:badgesResult.badgeSeparated !== false }),
       redacted:true
     };

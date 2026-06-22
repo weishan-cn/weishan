@@ -25,7 +25,7 @@ const betaApi = windowRef.WeishanLimitedRealPriceUiBetaGate;
 const priceApi = windowRef.WeishanPriceIntegrityTaxesFeesGateV1;
 
 function main() {
-  assert.equal(betaApi.LIMITED_REAL_PRICE_UI_BETA_GATE_VERSION, "2.1.47");
+  assert.equal(betaApi.LIMITED_REAL_PRICE_UI_BETA_GATE_VERSION, "2.1.48");
   assert.equal(JSON.stringify(betaApi.ALLOWED_CATEGORIES), JSON.stringify(["flight"]));
   assert.equal(JSON.stringify(betaApi.ALLOWED_PROVIDER_IDS), JSON.stringify(["flight_provider"]));
   assert.equal(betaApi.REQUIRED_BADGES.includes("Limited Beta"), true);

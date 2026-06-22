@@ -8,7 +8,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function memoryStorage() { const data = new Map(); return { getItem:(name) => data.has(name) ? data.get(name) : null, setItem:(name, value) => data.set(name, String(value)), removeItem:(name) => data.delete(name) }; }
 function assertSafe(state) {
   assert.equal(state.stateName, "read_only_quote_refresh_state_v1");
-  assert.equal(state.appVersion, "2.1.47");
+  assert.equal(state.appVersion, "2.1.48");
   assert.equal(state.showableAsRealPrice, false);
   assert.equal(state.canReplaceMainResultCard, false);
   assert.equal(state.bookingUrl, null);
@@ -25,7 +25,7 @@ function assertSafe(state) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteRefreshStateStore.js"]);
   const api = windowRef.WeishanReadOnlyQuoteRefreshStateStore;
-  assert.equal(api.READ_ONLY_QUOTE_REFRESH_STATE_STORE_VERSION, "2.1.47");
+  assert.equal(api.READ_ONLY_QUOTE_REFRESH_STATE_STORE_VERSION, "2.1.48");
   assert.equal(api.STORAGE_KEY, "weishan.readOnlyQuoteRefreshState.v1");
 
   const unsafe = api.sanitizeReadOnlyQuoteRefreshState({
@@ -60,9 +60,12 @@ function main() {
   for (const word of ["apiToken", "password", "sessionAuth", "rawProviderResponse", "rawCredentialReference", "bankCard"]) assert.equal(serialized.includes(word), false);
 
   const storage = memoryStorage();
+  assert.equal(api.buildReadOnlyQuoteRefreshStorageHealth(storage).status, "empty");
   const saved = api.saveReadOnlyQuoteRefreshState({ lastRefreshStatus:"failed_safe", providerMode:"fixture", showableAsCandidateEvidence:true }, storage);
   assertSafe(saved);
   assert.equal(saved.lastRefreshStatus, "failed_safe");
+  assert.equal(api.buildReadOnlyQuoteRefreshStorageHealth(storage).status, "healthy");
+  assert.equal(api.validateReadOnlyQuoteRefreshStoredState(saved).valid, true);
   const loaded = api.loadReadOnlyQuoteRefreshState(storage);
   assert.equal(loaded.lastRefreshStatus, "failed_safe");
   assert.equal(loaded.showableAsCandidateEvidence, true);
@@ -72,10 +75,16 @@ function main() {
   assert.equal(summary.bookingUrl, null);
 
   storage.setItem(api.STORAGE_KEY, "{bad json");
+  assert.equal(api.buildReadOnlyQuoteRefreshStorageHealth(storage).status, "corrupted");
   assert.equal(api.loadReadOnlyQuoteRefreshState(storage).lastRefreshStatus, "not_run");
+  storage.setItem(api.STORAGE_KEY, JSON.stringify({ stateName:"old_state", appVersion:"0.0.1", lastRefreshStatus:"refreshed", showableAsCandidateEvidence:true }));
+  assert.equal(api.buildReadOnlyQuoteRefreshStorageHealth(storage).status, "schema_mismatch");
+  assert.equal(api.loadReadOnlyQuoteRefreshState(storage).lastRefreshStatus, "not_run");
+  assert.equal(api.migrateReadOnlyQuoteRefreshStateIfNeeded({ stateName:"old_state", appVersion:"0.0.1", lastRefreshStatus:"refreshed" }).lastRefreshStatus, "not_run");
   const store = api.createReadOnlyQuoteRefreshStateStore(storage);
   store.save({ lastRefreshStatus:"disabled" });
   assert.equal(store.load().lastRefreshStatus, "disabled");
+  assert.equal(store.health().status, "healthy");
   assert.equal(store.clear().lastRefreshStatus, "not_run");
   console.log("READ_ONLY_QUOTE_REFRESH_STATE_STORE_CORE PASS");
 }

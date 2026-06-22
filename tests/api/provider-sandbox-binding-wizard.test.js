@@ -26,13 +26,14 @@ function assertSafe(model) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/providerSandboxBindingWizard.js"]);
   const api = windowRef.WeishanProviderSandboxBindingWizard;
-  assert.equal(api.PROVIDER_SANDBOX_BINDING_WIZARD_VERSION, "2.1.47");
+  assert.equal(api.PROVIDER_SANDBOX_BINDING_WIZARD_VERSION, "2.1.48");
 
   const fixture = api.buildProviderSandboxBindingWizardModel();
   assert.equal(fixture.wizardName, "provider_sandbox_binding_wizard_v1");
   assert.equal(fixture.title, "Provider 沙盒绑定准备");
   assert.equal(fixture.status, "fixture_ready");
   assert.equal(fixture.actions.canAttemptReadOnlyRefresh, true);
+  assert.equal(fixture.autoOpen, false);
   assert.equal(fixture.actions.canEnableProductionProvider, false);
   assert.equal(fixture.steps.find((step) => step.stepId === "provider_selected").status, "complete");
   assert.equal(fixture.steps.find((step) => step.stepId === "read_only_refresh_ready").status, "complete");

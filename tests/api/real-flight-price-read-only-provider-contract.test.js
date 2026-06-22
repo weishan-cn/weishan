@@ -19,11 +19,11 @@ function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/realFlightPriceReadOnlyProviderContract.js"]);
   const api = windowRef.WeishanRealFlightPriceReadOnlyProviderContract;
 
-  assert.equal(api.REAL_FLIGHT_PRICE_READ_ONLY_PROVIDER_CONTRACT_VERSION, "2.1.47");
+  assert.equal(api.REAL_FLIGHT_PRICE_READ_ONLY_PROVIDER_CONTRACT_VERSION, "2.1.48");
 
   const contract = api.getRealFlightPriceReadOnlyProviderContract();
   assert.equal(contract.contractName, "real_flight_price_read_only_provider_contract_v1");
-  assert.equal(contract.appVersion, "2.1.47");
+  assert.equal(contract.appVersion, "2.1.48");
   assert.equal(contract.mode, "read_only");
   assert.equal(contract.readOnly, true);
   assert.equal(contract.capabilities.searchFlights, true);
@@ -85,7 +85,7 @@ function main() {
 
   const audit = api.buildRealFlightPriceProviderContractAuditDraft(valid);
   assert.equal(audit.eventType, "REAL_FLIGHT_PRICE_READ_ONLY_PROVIDER_CONTRACT_DRAFT");
-  assert.equal(audit.appVersion, "2.1.47");
+  assert.equal(audit.appVersion, "2.1.48");
   assert.equal(audit.readOnly, true);
   assert.equal(audit.bookingDisplayedCount, 0);
   assert.equal(audit.paymentDisplayedCount, 0);

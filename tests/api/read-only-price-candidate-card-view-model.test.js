@@ -13,10 +13,11 @@ function main() {
     "apps/desktop/src/renderer/core/providerConfirmationHandoffUi.js",
     "apps/desktop/src/renderer/core/providerSandboxBindingWizard.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteRefreshStateStore.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteInteractiveRefreshUiController.js",
     "apps/desktop/src/renderer/core/readOnlyPriceCandidateCardViewModel.js"
   ]);
   const api = windowRef.WeishanReadOnlyPriceCandidateCardViewModel;
-  assert.equal(api.READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION, "2.1.47");
+  assert.equal(api.READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION, "2.1.48");
 
   const card = api.buildReadOnlyPriceCandidateCardViewModel({ task:{ title:"7月15日上海到成都最便宜的机票" }, providerId:"google_flights_search", providerName:"Google Flights", providerType:"flight_search", report:{ provider:{ providerMode:"fixture" }, handoff:{ safeProviderHandoffUrl:"https://www.google.com/travel/flights" } }, flightFields:{ origin:"上海", destination:"成都", dateDisplay:"7 月 15 日", goal:"低价优先", directPreference:"直达优先" } });
   assert.equal(card.visible, true);
@@ -39,6 +40,8 @@ function main() {
   assert.equal(card.refreshButton.autoRefresh, false);
   assert.equal(card.refreshStateSummary.summary, "最近一次刷新：未运行");
   assert.equal(card.providerBindingWizardSummary.title, "Provider 沙盒绑定准备");
+  assert.equal(card.interactiveRefreshState.status, "idle");
+  assert.equal(card.clearRefreshStateButton.label, "清除刷新状态");
 
   const html = api.renderReadOnlyPriceCandidateCardHtml(card);
   assert.equal(html.includes("只读候选价"), true);
@@ -47,12 +50,21 @@ function main() {
   assert.equal(html.includes("不代表可出票"), true);
   assert.equal(html.includes("去平台确认"), true);
   assert.equal(html.includes("刷新只读报价"), true);
+  assert.equal(html.includes("清除刷新状态"), true);
   assert.equal(html.includes("最近一次刷新：未运行"), true);
   assert.equal(html.includes("Provider 沙盒绑定准备"), true);
   assert.equal(html.includes("仅更新候选证据，不代表已锁价或可出票"), true);
   assert.equal(html.includes("价格、库存、税费和规则以平台页面为准"), true);
   assert.equal(html.includes("Limited Beta"), false);
   assert.equal(html.includes("bookingUrl"), false);
+
+  const failedCard = api.buildReadOnlyPriceCandidateCardViewModel({ interactiveRefreshState:{ status:"failed_safe", refreshErrorBanner:"只读报价刷新失败，已安全降级" }, report:{ handoff:{ safeProviderHandoffUrl:null } } });
+  assert.equal(failedCard.refreshErrorBanner, "只读报价刷新失败，已安全降级");
+  assert.equal(api.renderReadOnlyPriceCandidateCardHtml(failedCard).includes("只读报价刷新失败，已安全降级"), true);
+
+  const recoveredCard = api.buildReadOnlyPriceCandidateCardViewModel({ interactiveRefreshState:{ status:"idle", recoveryStatus:"recovered", state:{ lastRefreshStatus:"refreshed", showableAsCandidateEvidence:true }, recoveredEvidenceSummary:{ available:true, source:"local_redacted_state", showableAsRealPrice:false, showableAsCandidateEvidence:true, canReplaceMainResultCard:false } }, report:{ handoff:{ safeProviderHandoffUrl:null } } });
+  assert.equal(recoveredCard.recoveredEvidenceSummary.available, true);
+  assert.equal(api.renderReadOnlyPriceCandidateCardHtml(recoveredCard).includes("已恢复最近一次只读证据"), true);
 
   const sandboxCard = api.buildReadOnlyPriceCandidateCardViewModel({ providerId:"google_flights_search", providerName:"Google Flights", providerType:"flight_search", providerMode:"sandbox_read_only", report:{ provider:{ providerMode:"sandbox_read_only" }, handoff:{ safeProviderHandoffUrl:"https://www.google.com/travel/flights" } } });
   assert.equal(sandboxCard.title, "只读沙盒价");

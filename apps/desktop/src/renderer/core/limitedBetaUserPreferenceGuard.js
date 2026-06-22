@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const LIMITED_BETA_USER_PREFERENCE_GUARD_VERSION = "2.1.47";
+  const LIMITED_BETA_USER_PREFERENCE_GUARD_VERSION = "2.1.48";
   const counters = { restoreAttemptCount:0, restoreConfirmedCount:0, restoreBlockedCount:0, unsafePreferenceBlockedCount:0 };
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value === undefined || value === null ? "" : value).trim(); }

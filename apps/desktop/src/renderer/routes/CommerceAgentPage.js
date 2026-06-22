@@ -273,6 +273,12 @@
     </details>`;
   }
 
+  function listHtml(items){
+    return '<ul>' + (Array.isArray(items) ? items : []).map(function(item){
+      return '<li>' + esc(typeof item === "string" ? item : JSON.stringify(item)) + '</li>';
+    }).join('') + '</ul>';
+  }
+
   function technicalDetailsDisclosure(body, className){
     return body ? disclosure("查看技术细节", body, className || "commerce-technical-disclosure") : "";
   }
@@ -6198,6 +6204,13 @@
     return { surfaceVersion:"v3", compactCardsEnabled:true, longExternalSearchHintCollapsed:true, manualVerificationGroupEnabled:brain.intentStatus !== "blocked", debugPanelsHiddenByDefault:true, visualCards:cards.map(function(card){ return formatter && typeof formatter.buildResultCardVisualModel === "function" ? formatter.buildResultCardVisualModel({ card, fareBreakdown:card.fareBreakdown, sortIntent, procurementCategory:brain.procurementCategory }) : card; }), resultCardCount:cards.length, maxResultCardCount:3, statusMessage:surface.statusMessage || "暂无生产真实最低价", safetyLine:"weishan 只做搜索和比较，不收款、不下单。最终价格、库存、税费、行李和退改签以平台页面为准。", audit:{ eventType:"CLEAN_RESULT_SURFACE_V3_DRAFT", compactCardsEnabled:true, manualVerificationGroupEnabled:brain.intentStatus !== "blocked", longExternalSearchHintCollapsed:true, duplicateSafetyHintCount:0, internalDebugLabelVisibleCount:0, bookingUrlDisplayedCount:0, paymentActionDisplayedCount:0, orderActionDisplayedCount:0, identityUploadDisplayedCount:0, redacted:true }, redacted:true };
   }
 
+  function commerceObjectLinesHtml(obj){
+    return '<ul>' + Object.keys(obj || {}).map(function(key){
+      return '<li>' + esc(key) + ': ' + esc(String(obj[key])) + '</li>';
+    }).join('') + '</ul>';
+  }
+
+
   function commerceCleanResultSurfaceV4ForTask(task, opts){
     const api = window.WeishanCleanResultSurfaceV4;
     const brain = commerceAiBrainDecisionForTask(task);
@@ -6265,11 +6278,14 @@
     const safeProviderHandoffDisabled = !safeProviderHandoffUrl;
     const safeProviderHandoffReason = "当前平台确认链接未通过安全检查";
     const visualCards = surfaceV4.compactCards || surfaceV3.visualCards || [];
+    const refreshRecoveryState = commerceReadOnlyQuoteInteractiveRecoveryState(task);
+    const refreshSummaryLine = "最近一次刷新：" + (refreshRecoveryState.lastRefreshStatusLabel || "未运行");
+    const recoveredEvidenceLine = refreshRecoveryState.recoveredEvidenceSummary && refreshRecoveryState.recoveredEvidenceSummary.available ? '<p data-commerce-read-only-recovered-evidence="true">已恢复最近一次只读证据</p>' : "";
     const cards = surface.cards || [];
     const cardHtml = cards.map(function(card, index){
       const visual = visualCards[index] || (window.WeishanResultCardVisualFormatter && window.WeishanResultCardVisualFormatter.buildResultCardVisualModel ? window.WeishanResultCardVisualFormatter.buildResultCardVisualModel({ card, fareBreakdown:card.fareBreakdown, sortIntent:{ origin:fields.origin, destination:fields.destination, dateDisplay:fields.dateDisplay || fields.date, directPreference:fields.directPreference || '直达优先', sortLabel:fields.sortLabel || fields.goal || '低价优先' } }) : null) || {};
       const badges = Array.isArray(visual.badges || card.badges) ? (visual.badges || card.badges).map(function(badge){ return '<span class="commerce-result-card-badge">' + esc(badge) + '</span>'; }).join(' ') : '';
-      return '<section class="commerce-top-result-card commerce-top-result-card-polished commerce-compact-flight-card-v1" aria-label="推荐结果卡" data-top-result-rank="' + esc(String(card.rank || '')) + '"><div class="commerce-result-card-rank">#' + esc(String(visual.rank || card.rank || '')) + '</div><p class="commerce-result-card-primary-price">' + esc(visual.primaryPrice || card.priceDisplay || '暂无真实价格结果') + '</p><h5 class="commerce-result-card-route">' + esc(visual.routeLine || card.title || '结果卡') + '</h5><p class="commerce-result-card-meta">' + esc(visual.metaLine || surface.summarySubtitle || '') + '</p><p class="commerce-result-card-subtitle">' + esc(visual.priceTruthText || visual.priceSubtext || card.priceTruthLabel || '不代表真实最低价') + '</p><p class="commerce-fare-summary-line">' + esc(visual.fareSummary || visual.fareSummaryLine || '') + '</p><p class="commerce-fare-caveat-line">' + esc(visual.feeCaveat || visual.compactFareBreakdown && visual.compactFareBreakdown.caveatLine || '燃油/机建费：以平台页面为准') + '</p><p class="commerce-result-provider-line">' + esc(visual.providerLine || ('Flight Provider Sandbox · 更新时间 2026-06-20 00:00')) + '</p><div class="commerce-result-card-badges">' + badges + '</div><div class="commerce-result-card-actions"><button type="button" class="cmd-btn gray commerce-read-only-refresh-btn" data-commerce-read-only-quote-refresh="true">刷新只读报价</button> <button type="button" class="cmd-btn gray commerce-safe-provider-handoff-btn" data-commerce-safe-provider-handoff-request="true" data-commerce-safe-provider-handoff-kind="googleFlights" data-commerce-safe-provider-handoff-url="' + commerceEncodedExternalUrl(safeProviderHandoffUrl) + '"' + (safeProviderHandoffDisabled ? ' disabled' : '') + '>去平台确认</button> <span>复制搜索条件</span></div><p>最近一次刷新：未运行</p><p>Provider 沙盒绑定准备</p><p>仅更新候选证据，不代表已锁价或可出票</p><p>价格、库存、税费和规则以平台页面为准</p>' + (safeProviderHandoffDisabled ? '<p class="commerce-warning">' + esc(safeProviderHandoffReason) + '</p>' : '') + commerceFareBreakdownHtml(card, visual) + commerceProviderHandoffPanelForCard(card, task) + '</section>';
+      return '<section class="commerce-top-result-card commerce-top-result-card-polished commerce-compact-flight-card-v1" aria-label="推荐结果卡" data-top-result-rank="' + esc(String(card.rank || '')) + '"><div class="commerce-result-card-rank">#' + esc(String(visual.rank || card.rank || '')) + '</div><p class="commerce-result-card-primary-price">' + esc(visual.primaryPrice || card.priceDisplay || '暂无真实价格结果') + '</p><h5 class="commerce-result-card-route">' + esc(visual.routeLine || card.title || '结果卡') + '</h5><p class="commerce-result-card-meta">' + esc(visual.metaLine || surface.summarySubtitle || '') + '</p><p class="commerce-result-card-subtitle">' + esc(visual.priceTruthText || visual.priceSubtext || card.priceTruthLabel || '不代表真实最低价') + '</p><p class="commerce-fare-summary-line">' + esc(visual.fareSummary || visual.fareSummaryLine || '') + '</p><p class="commerce-fare-caveat-line">' + esc(visual.feeCaveat || visual.compactFareBreakdown && visual.compactFareBreakdown.caveatLine || '燃油/机建费：以平台页面为准') + '</p><p class="commerce-result-provider-line">' + esc(visual.providerLine || ('Flight Provider Sandbox · 更新时间 2026-06-20 00:00')) + '</p><div class="commerce-result-card-badges">' + badges + '</div><div class="commerce-result-card-actions"><button type="button" class="cmd-btn gray commerce-read-only-refresh-btn" data-commerce-read-only-quote-refresh="true">刷新只读报价</button> <button type="button" class="cmd-btn gray commerce-safe-provider-handoff-btn" data-commerce-safe-provider-handoff-request="true" data-commerce-safe-provider-handoff-kind="googleFlights" data-commerce-safe-provider-handoff-url="' + commerceEncodedExternalUrl(safeProviderHandoffUrl) + '"' + (safeProviderHandoffDisabled ? ' disabled' : '') + '>去平台确认</button> <span>复制搜索条件</span></div><p data-commerce-read-only-refresh-summary="true">' + esc(refreshSummaryLine) + '</p>' + recoveredEvidenceLine + '<p>Provider 沙盒绑定准备</p><p>仅更新候选证据，不代表已锁价或可出票</p><p>价格、库存、税费和规则以平台页面为准</p>' + (safeProviderHandoffDisabled ? '<p class="commerce-warning">' + esc(safeProviderHandoffReason) + '</p>' : '') + commerceFareBreakdownHtml(card, visual) + commerceProviderHandoffPanelForCard(card, task) + '</section>';
     }).join('');
     const emptyHint = surface.resultCardCount ? '' : '<section class="commerce-top-result-empty"><p>暂无更多可信结果</p></section>';
     return '<section class="commerce-clean-result-surface-v4" aria-label="Clean Result Surface V4"><h4>' + esc(surface.summaryTitle || '推荐结果') + '</h4><p>' + esc(surface.summarySubtitle || '') + '</p><p class="commerce-result-surface-status">' + esc(surfaceV4.statusMessage || surface.statusMessage || surfaceV3.statusMessage || '暂无真实价格结果') + '</p><p class="commerce-result-card-subtitle">' + esc(surfaceV4.priceTruthText || 'Limited Beta 只读验证价，不代表真实最低价。') + '</p><h5>推荐结果</h5>' + cardHtml + emptyHint + '<p class="commerce-result-summary-status commerce-result-safety-line"><b>提示：</b>' + esc(surfaceV4.safetyLine || surface.finalSafetyNotice || 'weishan 只做搜索和比较，不收款、不下单。最终以平台页面为准。') + '</p></section>';
@@ -6328,12 +6344,40 @@
   }
 
 
+
+  function commerceReadOnlyQuoteInteractiveRecoveryState(){
+    const api = window.WeishanReadOnlyQuoteInteractiveRefreshUiController;
+    if (api && typeof api.buildReadOnlyQuoteRecoveryUiState === "function") return api.buildReadOnlyQuoteRecoveryUiState({});
+    return { status:"idle", recoveryStatus:"not_loaded", lastRefreshStatusLabel:"未运行", recoveredEvidenceSummary:{ available:false, showableAsRealPrice:false, showableAsCandidateEvidence:false, canReplaceMainResultCard:false }, safety:{ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, autoRefresh:false, booking:false, payment:false, order:false, identityUpload:false, redacted:true }, redacted:true };
+  }
+
+  function commerceReadOnlyQuoteInteractiveRefreshDisclosure(task){
+    const api = window.WeishanReadOnlyQuoteInteractiveRefreshUiController;
+    const state = api && typeof api.buildReadOnlyQuoteRecoveryUiState === "function" ? api.buildReadOnlyQuoteRecoveryUiState({}) : commerceReadOnlyQuoteInteractiveRecoveryState();
+    const body = '<section class="commerce-interactive-read-only-quote-refresh-panel"><h4>Interactive Read-Only Quote Refresh</h4><p>status: ' + esc(state.status || 'idle') + '</p><p>recoveryStatus: ' + esc(state.recoveryStatus || 'not_loaded') + '</p><p>刷新只读报价</p><p>最近一次刷新：' + esc(state.lastRefreshStatusLabel || '未运行') + '</p><p>autoRefresh: false</p><p>autoOpen: false</p><p>bookingUrl: null</p><p>checkoutUrl: null</p><p>paymentUrl: null</p><p>orderUrl: null</p><p>payment: false</p><p>order: false</p><p>identityUpload: false</p><p>redacted: true</p></section>';
+    return disclosure('查看 Interactive Read-Only Quote Refresh', body, 'commerce-interactive-read-only-quote-refresh-disclosure');
+  }
+
+  function commerceLocalEvidenceRecoveryDisclosure(task){
+    const state = commerceReadOnlyQuoteInteractiveRecoveryState(task);
+    const recovered = state.recoveredEvidenceSummary || {};
+    const body = '<section class="commerce-local-evidence-recovery-panel"><h4>Local Evidence Recovery</h4><p>Last Recovered Evidence</p><p>' + (recovered.available ? '已恢复最近一次只读证据' : '暂无可恢复只读证据') + '</p><p>source: local_redacted_state</p><p>showableAsRealPrice: false</p><p>showableAsCandidateEvidence: ' + esc(String(recovered.showableAsCandidateEvidence === true)) + '</p><p>canReplaceMainResultCard: false</p><p>autoRefresh: false</p><p>autoOpen: false</p><p>redacted: true</p></section>';
+    return disclosure('查看 Local Evidence Recovery', body, 'commerce-local-evidence-recovery-disclosure');
+  }
+
+  function commerceRefreshStorageHealthDisclosure(task){
+    const api = window.WeishanReadOnlyQuoteRefreshStateStore;
+    const health = api && typeof api.buildReadOnlyQuoteRefreshStorageHealth === "function" ? api.buildReadOnlyQuoteRefreshStorageHealth() : { status:"unavailable", corrupted:false, schemaMismatch:false, redacted:true };
+    const body = '<section class="commerce-refresh-storage-health-panel"><h4>Refresh Storage Health</h4><p>status: ' + esc(health.status || 'unavailable') + '</p><p>corrupted: ' + esc(String(health.corrupted === true)) + '</p><p>schemaMismatch: ' + esc(String(health.schemaMismatch === true)) + '</p><p>safeEmpty: ' + esc(String(health.safeEmpty === true)) + '</p><p>bookingUrl: null</p><p>autoOpen: false</p><p>redacted: true</p></section>';
+    return disclosure('查看 Refresh Storage Health', body, 'commerce-refresh-storage-health-disclosure');
+  }
+
   function commerceProviderSandboxBindingWizardDisclosure(task){
     const api = window.WeishanProviderSandboxBindingWizard;
     const flightFields = commerceSimpleFlightFields(task);
     const model = api && typeof api.buildProviderSandboxBindingWizardModel === "function"
       ? api.buildProviderSandboxBindingWizardModel({ providerId:"google_flights_search", providerName:"Google Flights", providerMode:"fixture", origin:flightFields.origin, destination:flightFields.destination, restrictedCategoryDecision:(task && task.globalProcurementRestrictedCategoryGuard && task.globalProcurementRestrictedCategoryGuard.finalDecision === "blocked") ? "blocked" : "allow" })
-      : { wizardName:"provider_sandbox_binding_wizard_v1", appVersion:"2.1.47", title:"Provider 沙盒绑定准备", status:"fixture_ready", steps:[{ stepId:"provider_selected", label:"选择只读 Provider", status:"complete" }, { stepId:"read_only_refresh_ready", label:"只读报价刷新准备", status:"complete" }], actions:{ canAttemptReadOnlyRefresh:true, canEnableProductionProvider:false, canEnterSecretHere:false, canSaveSecretHere:false }, productionProviderEnabled:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, redacted:true };
+      : { wizardName:"provider_sandbox_binding_wizard_v1", appVersion:"2.1.48", title:"Provider 沙盒绑定准备", status:"fixture_ready", steps:[{ stepId:"provider_selected", label:"选择只读 Provider", status:"complete" }, { stepId:"read_only_refresh_ready", label:"只读报价刷新准备", status:"complete" }], actions:{ canAttemptReadOnlyRefresh:true, canEnableProductionProvider:false, canEnterSecretHere:false, canSaveSecretHere:false }, productionProviderEnabled:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, redacted:true };
     const steps = Array.isArray(model.steps) ? model.steps : [];
     const body = '<section class="commerce-provider-sandbox-binding-wizard-panel"><h4>Provider Sandbox Binding Wizard</h4><p>' + esc(model.title || 'Provider 沙盒绑定准备') + '</p><p>wizardName: ' + esc(model.wizardName || 'provider_sandbox_binding_wizard_v1') + '</p><p>wizardStatus: ' + esc(model.status || 'fixture_ready') + '</p><p>providerId: ' + esc(model.providerId || 'google_flights_search') + '</p><p>providerMode: ' + esc(model.providerMode || 'fixture') + '</p><p>canAttemptReadOnlyRefresh: ' + esc(String(model.actions && model.actions.canAttemptReadOnlyRefresh === true)) + '</p><p>canEnableProductionProvider: false</p><p>canEnterSecretHere: false</p><p>canSaveSecretHere: false</p><ul>' + steps.map(function(step){ return '<li>' + esc(step.label || step.stepId || '') + '：' + esc(step.status || 'pending') + '</li>'; }).join('') + '</ul><p>bookingUrl: null</p><p>autoOpen: false</p><p>payment: false</p><p>order: false</p><p>identityUpload: false</p><p>redacted: true</p></section>';
     return disclosure('查看 Provider Sandbox Binding Wizard', body, 'commerce-provider-sandbox-binding-wizard-disclosure');
@@ -6469,7 +6513,7 @@
         <details class="commerce-manual-verification-note"><summary>查看外部搜索安全说明</summary><div class="commerce-disclosure-body"><p>外部搜索由用户手动点击，点击后先确认，再打开可信外部搜索链接。weishan 不自动打开、不付款、不下单。请优先选择官方平台、知名旅行平台和航空公司官网。最终价格、库存、出票规则和付款均以外部平台为准。</p></div></details>
         ${safeExternalSearchConfirmationHtml(task)}
       </div>
-      ${commerceSafetyAndDebugDetailsDisclosure(task, [commerceApiBindingSafeShellDisclosure(task), commerceUserApiProviderCatalogDisclosure(task), commerceApiBindingMockFormDisclosure(task), commerceApiBindingPermissionChecklistDisclosure(task), commerceApiBindingReadinessDisclosure(task), commerceSecureStorageDesignGateDisclosure(task), commerceLocalSecureStorageInterfaceDraftDisclosure(task), commerceSecureApiKeyStorageConsoleDisclosure(task), commerceKeyRedactionAndLogLeakRulesDisclosure(task), commerceKeyLifecycleDraftDisclosure(task), providerConnectionReadinessConsoleDisclosure(task), commerceProviderEndpointAllowlistGateDisclosure(task), commerceReadonlyProviderSandboxGateDisclosure(task), commerceReadonlyProviderResultSchemaGateDisclosure(task), commerceProviderResultSourceLabelGateDisclosure(task), commercePriceIntegrityTaxesFeesGateDisclosure(task), commerceRealPriceDisplayGateDisclosure(task), commerceBookingUrlDomainSafetyGateDisclosure(task), commerceManualProviderReviewWorkflowDisclosure(task), commerceManualProviderReviewWorkflowV1Disclosure(task), commerceLimitedRealPriceUiBetaGateDisclosure(task), commerceLimitedBetaKillSwitchDisclosure(task), commerceLimitedBetaStatePersistenceDisclosure(task), commerceLimitedBetaUserPreferenceGuardDisclosure(task), commerceLimitedBetaRollbackGuardDisclosure(task), commerceManualBookingHandoffDisclosure(task), commerceProviderActivationReadinessGateDisclosure(task), commerceCredentialConsentScopeGateDisclosure(task), commerceReadonlyAdapterContractGateDisclosure(task), commerceReadOnlyProviderAdapterV1Disclosure(task), commerceProviderSandboxBindingWizardDisclosure(task), commerceReadOnlyQuoteRefreshStateDisclosure(task), commerceRealFlightPriceEvidenceReportDisclosure(task), commerceLastRefreshEvidenceDisclosure(task), commerceEndpointAllowlistEnforcementDisclosure(task), commerceProviderSandboxRealKeyDryRunGateDisclosure(task), commerceSandboxResponseSchemaGateDisclosure(task), commerceRealProviderResultSchemaValidationDisclosure(task), commerceProviderResultSourceLabelGateDisclosure(task), commerceProviderGateMatrixDashboardDisclosure(task), commerceProviderNoNetworkRuntimeGuardDisclosure(task), commerceOfflineProviderFixtureValidationHarnessDisclosure(task), commerceProviderComplianceDecisionEngineDisclosure(task), commerceOfflineProviderFixtureRunnerDisclosure(task), commerceNoNetworkSentinelAuditDisclosure(task), commerceProviderComplianceEvidenceReportDisclosure(task), globalProcurementRestrictedCategoryGuardDisclosure(task), globalProcurementEvidenceSafetySummaryDisclosure(task)])}
+      ${commerceSafetyAndDebugDetailsDisclosure(task, [commerceApiBindingSafeShellDisclosure(task), commerceUserApiProviderCatalogDisclosure(task), commerceApiBindingMockFormDisclosure(task), commerceApiBindingPermissionChecklistDisclosure(task), commerceApiBindingReadinessDisclosure(task), commerceSecureStorageDesignGateDisclosure(task), commerceLocalSecureStorageInterfaceDraftDisclosure(task), commerceSecureApiKeyStorageConsoleDisclosure(task), commerceKeyRedactionAndLogLeakRulesDisclosure(task), commerceKeyLifecycleDraftDisclosure(task), providerConnectionReadinessConsoleDisclosure(task), commerceProviderEndpointAllowlistGateDisclosure(task), commerceReadonlyProviderSandboxGateDisclosure(task), commerceReadonlyProviderResultSchemaGateDisclosure(task), commerceProviderResultSourceLabelGateDisclosure(task), commercePriceIntegrityTaxesFeesGateDisclosure(task), commerceRealPriceDisplayGateDisclosure(task), commerceBookingUrlDomainSafetyGateDisclosure(task), commerceManualProviderReviewWorkflowDisclosure(task), commerceManualProviderReviewWorkflowV1Disclosure(task), commerceLimitedRealPriceUiBetaGateDisclosure(task), commerceLimitedBetaKillSwitchDisclosure(task), commerceLimitedBetaStatePersistenceDisclosure(task), commerceLimitedBetaUserPreferenceGuardDisclosure(task), commerceLimitedBetaRollbackGuardDisclosure(task), commerceManualBookingHandoffDisclosure(task), commerceProviderActivationReadinessGateDisclosure(task), commerceCredentialConsentScopeGateDisclosure(task), commerceReadonlyAdapterContractGateDisclosure(task), commerceReadOnlyProviderAdapterV1Disclosure(task), commerceProviderSandboxBindingWizardDisclosure(task), commerceReadOnlyQuoteInteractiveRefreshDisclosure(task), commerceLocalEvidenceRecoveryDisclosure(task), commerceRefreshStorageHealthDisclosure(task), commerceReadOnlyQuoteRefreshStateDisclosure(task), commerceRealFlightPriceEvidenceReportDisclosure(task), commerceLastRefreshEvidenceDisclosure(task), commerceEndpointAllowlistEnforcementDisclosure(task), commerceProviderSandboxRealKeyDryRunGateDisclosure(task), commerceSandboxResponseSchemaGateDisclosure(task), commerceRealProviderResultSchemaValidationDisclosure(task), commerceProviderResultSourceLabelGateDisclosure(task), commerceProviderGateMatrixDashboardDisclosure(task), commerceProviderNoNetworkRuntimeGuardDisclosure(task), commerceOfflineProviderFixtureValidationHarnessDisclosure(task), commerceProviderComplianceDecisionEngineDisclosure(task), commerceOfflineProviderFixtureRunnerDisclosure(task), commerceNoNetworkSentinelAuditDisclosure(task), commerceProviderComplianceEvidenceReportDisclosure(task), globalProcurementRestrictedCategoryGuardDisclosure(task), globalProcurementEvidenceSafetySummaryDisclosure(task)])}
       <p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p>
     </section>`;
   }
@@ -6485,6 +6529,7 @@
         providerName: safeProviderHandoffCandidate.providerName || "Google Flights",
         providerType: safeProviderHandoffCandidate.providerType || "flight_search",
         report: { handoff: { safeProviderHandoffUrl: safeProviderHandoffCandidate.safeProviderHandoffUrl || null } },
+        interactiveRefreshState: commerceReadOnlyQuoteInteractiveRecoveryState(task),
         origin: fields.origin,
         destination: fields.destination,
         departureDate: fields.date || fields.dateDisplay || "2026-07-15",
@@ -7254,6 +7299,45 @@
 
     const commerceDelegatedClickHandler = (event) => {
       const target = event.target && event.target.closest ? event.target : null;
+      const readOnlyRefreshButton = target && target.closest("[data-commerce-read-only-quote-refresh]");
+      if (readOnlyRefreshButton && host.contains(readOnlyRefreshButton)) {
+        event.preventDefault();
+        const taskScope = readOnlyRefreshButton.closest("[data-commerce-task-id]");
+        const taskId = taskScope && taskScope.getAttribute("data-commerce-task-id") || selectedTaskId || "";
+        const targetTask = tasks.find((task) => task.taskId === taskId) || tasks.find((task) => task.taskId === selectedTaskId) || tasks[0] || {};
+        const uiApi = window.WeishanReadOnlyQuoteInteractiveRefreshUiController;
+        readOnlyRefreshButton.disabled = true;
+        readOnlyRefreshButton.textContent = "正在刷新只读报价";
+        const card = readOnlyRefreshButton.closest("[data-commerce-read-only-price-candidate-card], .commerce-top-result-card");
+        const summary = card && card.querySelector("[data-commerce-read-only-refresh-summary]");
+        if (summary) summary.textContent = "正在刷新只读报价";
+        const result = uiApi && typeof uiApi.buildReadOnlyQuoteRefreshClickResult === "function" ? uiApi.buildReadOnlyQuoteRefreshClickResult(targetTask, {}) : { status:"failed_safe", lastRefreshStatusLabel:"安全失败", refreshErrorBanner:"只读报价刷新失败，已安全降级", recoveredEvidenceSummary:{ available:false }, safety:{ autoOpen:false, autoRefresh:false } };
+        if (summary) summary.textContent = "最近一次刷新：" + (result.lastRefreshStatusLabel || (result.status === "refreshed" ? "已刷新" : result.status === "failed_safe" ? "安全失败" : "未运行"));
+        if (card && result.status === "failed_safe" && !card.querySelector("[data-commerce-read-only-refresh-error]")) card.insertAdjacentHTML("beforeend", '<p class="commerce-warning" data-commerce-read-only-refresh-error="true">只读报价刷新失败，已安全降级</p>');
+        if (card && result.recoveredEvidenceSummary && result.recoveredEvidenceSummary.available && !card.querySelector("[data-commerce-read-only-recovered-evidence]")) card.insertAdjacentHTML("beforeend", '<p data-commerce-read-only-recovered-evidence="true">已恢复最近一次只读证据</p>');
+        readOnlyRefreshButton.textContent = "刷新只读报价";
+        readOnlyRefreshButton.disabled = result.status === "disabled" || result.status === "blocked";
+        const clearButton = card && card.querySelector("[data-commerce-clear-read-only-refresh-state]");
+        if (clearButton) clearButton.disabled = false;
+        showCommercePlatformTemplateFeedback(result.status === "refreshed" ? "只读报价已刷新，仅更新候选证据" : (result.status === "failed_safe" ? "只读报价刷新失败，已安全降级" : "当前只读报价刷新未就绪"), result.status === "failed_safe");
+        return;
+      }
+      const clearRefreshButton = target && target.closest("[data-commerce-clear-read-only-refresh-state]");
+      if (clearRefreshButton && host.contains(clearRefreshButton)) {
+        event.preventDefault();
+        const refreshApi = window.WeishanReadOnlyQuoteRefreshController;
+        if (refreshApi && typeof refreshApi.clearLastReadOnlyQuoteRefreshEvidence === "function") refreshApi.clearLastReadOnlyQuoteRefreshEvidence({});
+        const card = clearRefreshButton.closest("[data-commerce-read-only-price-candidate-card], .commerce-top-result-card");
+        const summary = card && card.querySelector("[data-commerce-read-only-refresh-summary]");
+        if (summary) summary.textContent = "最近一次刷新：未运行";
+        const recovered = card && card.querySelector("[data-commerce-read-only-recovered-evidence]");
+        if (recovered) recovered.remove();
+        const error = card && card.querySelector("[data-commerce-read-only-refresh-error]");
+        if (error) error.remove();
+        clearRefreshButton.disabled = true;
+        showCommercePlatformTemplateFeedback("已清除刷新状态", false);
+        return;
+      }
       const safeProviderButton = target && target.closest("[data-commerce-safe-provider-handoff-request]");
       if (safeProviderButton && host.contains(safeProviderButton)) {
         const taskScope = safeProviderButton.closest("[data-commerce-task-id]");
