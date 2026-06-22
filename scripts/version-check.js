@@ -260,6 +260,15 @@ function checkRealFlightPriceReadOnlyProviderContractVersion(results, expectedVe
   addCheck(results, "apps/desktop real flight price read only provider contract version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/realFlightPriceReadOnlyProviderContract.js REAL_FLIGHT_PRICE_READ_ONLY_PROVIDER_CONTRACT_VERSION");
 }
 
+function checkSingleFlightProviderSandboxConnectorVersion(results, expectedVersion) {
+  const connectorPath = "apps/desktop/src/renderer/core/singleFlightProviderSandboxConnector.js";
+  const connector = readText(connectorPath);
+  if (!connector) { results.push({ name: "apps/desktop single flight provider sandbox connector version", pass: false, detail: connectorPath + " missing" }); return; }
+  if (connector.__readError) { results.push({ name: "apps/desktop single flight provider sandbox connector version", pass: false, detail: connector.__readError }); return; }
+  const match = connector.match(/SINGLE_FLIGHT_PROVIDER_SANDBOX_CONNECTOR_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop single flight provider sandbox connector version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/singleFlightProviderSandboxConnector.js SINGLE_FLIGHT_PROVIDER_SANDBOX_CONNECTOR_VERSION");
+}
+
 function checkRealFlightPriceFetchSafetyGateVersion(results, expectedVersion) {
   const gatePath = "apps/desktop/src/renderer/core/realFlightPriceFetchSafetyGate.js";
   const gate = readText(gatePath);
@@ -1483,6 +1492,7 @@ function runVersionCheck() {
     checkFlightSandboxProviderMatrixVersion(results, rootPackage.version);
     checkTrustedFlightSourceEvidenceReportVersion(results, rootPackage.version);
     checkRealFlightPriceReadOnlyProviderContractVersion(results, rootPackage.version);
+    checkSingleFlightProviderSandboxConnectorVersion(results, rootPackage.version);
     checkRealFlightPriceFetchSafetyGateVersion(results, rootPackage.version);
     checkRealFlightPriceProviderAdapterSlotVersion(results, rootPackage.version);
     checkRealFlightPriceIntegrityGuardVersion(results, rootPackage.version);

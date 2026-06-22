@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.44";
+  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.45";
   const PHASE = "read_only_price_candidate_card_view_model_v1";
 
   function clone(value) {
@@ -101,6 +101,13 @@
     const source = getTrustedSource(text(safe.providerId || safe.source && safe.source.providerId || "google_flights_search"));
     const priceQuote = Object.assign({}, buildDefaultPriceQuote(), safe.priceQuote && typeof safe.priceQuote === "object" ? safe.priceQuote : {});
     const report = safe.report && typeof safe.report === "object" ? safe.report : {};
+    const reportProvider = report.provider && typeof report.provider === "object" ? report.provider : {};
+    const reportConnector = report.providerConnector && typeof report.providerConnector === "object" ? report.providerConnector : {};
+    const providerMode = text(safe.providerMode || reportProvider.providerMode || reportConnector.providerMode || priceQuote.providerMode || "fixture");
+    const isSandboxReadOnly = providerMode === "sandbox" || providerMode === "sandbox_read_only";
+    const isProductionDisabled = providerMode === "production" || providerMode === "production_disabled";
+    const titleLabel = isProductionDisabled ? "生产价格未启用" : (isSandboxReadOnly ? "只读沙盒价" : "只读候选价");
+    const candidatePriceLabel = isSandboxReadOnly ? "只读沙盒价" : (isProductionDisabled ? "生产价格未启用" : "候选价");
     const reportHandoff = report.handoff && typeof report.handoff === "object" ? report.handoff : {};
     const safeProviderHandoffUrl = text(reportHandoff.safeProviderHandoffUrl || "");
     const gateApi = getGateApi();
@@ -168,11 +175,13 @@
       visible,
       restrictedCategory: normalized.restrictedCategory,
       cardType: "read_only_price_candidate",
-      title: "只读候选价",
+      title: titleLabel,
       routeTitle,
       priceDisplay: priceQuote.totalPrice == null ? "暂无真实价格结果" : "¥" + priceQuote.totalPrice,
-      priceTruthLabel: "只读候选价 · 平台最终为准 · 未锁价 · 不代表可出票",
-      statusLine: "只读候选价；平台最终为准；未锁价；不代表可出票",
+      priceTruthLabel: titleLabel + " · 平台最终为准 · 未锁价 · 不代表可出票",
+      statusLine: titleLabel + "；平台最终为准；未锁价；不代表可出票",
+      providerMode: isProductionDisabled ? "production_disabled" : (isSandboxReadOnly ? "sandbox_read_only" : "fixture"),
+      providerModeLabel: titleLabel,
       providerName: text(source.providerName || "Google Flights"),
       providerType: text(source.providerType || "flight_search"),
       sourceType: text(source.accessMode || "manual_search_only"),
@@ -181,7 +190,7 @@
       candidatePriceSource: text(source.providerName || "Google Flights"),
       candidatePriceSourceMode: text(source.accessMode || "manual_search_only"),
       candidatePriceEvidence: "read_only_candidate_only",
-      candidatePriceLabel: "候选价",
+      candidatePriceLabel: candidatePriceLabel,
       platformFinalLabel: "平台最终为准",
       lockStatusLabel: "未锁价",
       ticketEligibilityLabel: "不代表可出票",

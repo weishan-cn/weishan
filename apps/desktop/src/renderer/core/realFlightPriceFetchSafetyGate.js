@@ -1,9 +1,8 @@
 ;(function () {
   "use strict";
 
-  const REAL_FLIGHT_PRICE_FETCH_SAFETY_GATE_VERSION = "2.1.44";
+  const REAL_FLIGHT_PRICE_FETCH_SAFETY_GATE_VERSION = "2.1.45";
   const PHASE = "real_flight_price_fetch_safety_gate_v1";
-  const TRUSTED_PROVIDER_IDS = ["real_flight_fixture", "real_flight_sandbox", "google_flights_search", "trip_com_ctrip_search"];
 
   function clone(value) {
     return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;
@@ -13,77 +12,45 @@
     return String(value == null ? "" : value).trim();
   }
 
-  function getTrustedRegistryIds() {
-    const api = window.WeishanTrustedFlightSourceRegistry || {};
-    if (typeof api.getTrustedFlightSourceRegistry === "function") {
-      const registry = api.getTrustedFlightSourceRegistry() || {};
-      const sources = Array.isArray(registry.trustedSources) ? registry.trustedSources : [];
-      return sources.map((source) => text(source && source.providerId)).filter(Boolean);
-    }
-    return TRUSTED_PROVIDER_IDS.slice();
-  }
-
-  function isTrustedProvider(providerId) {
-    const id = text(providerId);
-    if (!id) return false;
-    return getTrustedRegistryIds().includes(id) || TRUSTED_PROVIDER_IDS.includes(id);
-  }
-
   function normalizeProviderMode(providerMode) {
-    const mode = text(providerMode);
-    if (mode === "sandbox") return "sandbox";
+    const mode = text(providerMode || "fixture");
+    if (mode === "sandbox" || mode === "sandbox_read_only") return "sandbox_read_only";
     if (mode === "production" || mode === "production_disabled") return "production_disabled";
     return "fixture";
   }
 
+  function getConnectorApi() {
+    return window.WeishanSingleFlightProviderSandboxConnector || {};
+  }
+
+  function connectorReadiness(candidate) {
+    const api = getConnectorApi();
+    const providerMode = normalizeProviderMode(candidate.providerMode || candidate.mode);
+    const input = Object.assign({}, candidate, { providerMode: providerMode, sandboxDryRunEnabled:candidate.sandboxDryRunEnabled === true || candidate.dryRunEnabled === true });
+    if (typeof api.evaluateSingleFlightProviderSandboxReadiness === "function") return api.evaluateSingleFlightProviderSandboxReadiness(input);
+    return { connectorName:"single_flight_provider_sandbox_connector_v1", appVersion:REAL_FLIGHT_PRICE_FETCH_SAFETY_GATE_VERSION, providerId:text(candidate.providerId), providerName:text(candidate.providerName || candidate.providerId || "unknown provider"), providerMode:providerMode, status:providerMode === "fixture" ? "fixture_ready" : "disabled", decision:providerMode === "fixture" ? "fixture_read_only_ready" : "disabled", reason:"connector fallback", networkAllowed:false, productionProviderEnabled:false, readOnly:true, booking:false, payment:false, order:false, identityUpload:false, redacted:true };
+  }
+
   function evaluateRealFlightPriceFetchSafety(candidateInput) {
     const candidate = candidateInput && typeof candidateInput === "object" ? candidateInput : {};
-    const providerId = text(candidate.providerId);
-    const providerName = text(candidate.providerName || providerId || "unknown provider");
-    const providerMode = normalizeProviderMode(candidate.providerMode || candidate.mode);
-    const restrictedCategory = candidate.restrictedCategoryDecision === "blocked" || candidate.restrictedCategory === true || candidate.category === "restricted_provider";
-    const dryRunEnabled = candidate.dryRunEnabled === true;
-    const hasSecureCredentialReference = candidate.hasSecureCredentialReference === true;
-    const trustedProvider = isTrustedProvider(providerId);
-    const blockedReasons = [];
+    const connector = connectorReadiness(candidate);
     let status = "disabled";
-    let decision = "disabled_missing_secure_credential";
-    let reason = "missing secure credential reference";
-    let networkAllowed = false;
-
-    if (restrictedCategory) {
+    let decision = connector.decision || "disabled";
+    let reason = connector.reason || "connector disabled";
+    if (connector.status === "blocked") {
       status = "blocked";
-      decision = "blocked_restricted_category";
-      reason = "restricted category blocked";
-      blockedReasons.push(reason);
-    } else if (!trustedProvider) {
-      status = "blocked";
-      decision = "blocked_unknown_provider";
-      reason = "unknown provider blocked";
-      blockedReasons.push(reason);
-    } else if (providerMode === "production_disabled") {
-      status = "disabled";
-      decision = "production_disabled";
-      reason = "production provider disabled";
-    } else if (providerMode === "sandbox") {
-      if (!hasSecureCredentialReference) {
-        status = "disabled";
-        decision = "disabled_missing_secure_credential";
-        reason = "missing secure credential reference";
-      } else if (dryRunEnabled) {
-        status = "allowed";
-        decision = "sandbox_dry_run_allowed";
-        reason = "sandbox dry-run allowed";
-        networkAllowed = true;
-      } else {
-        status = "disabled";
-        decision = "disabled_missing_dry_run_flag";
-        reason = "sandbox requires dryRunEnabled";
-      }
-    } else {
+    } else if (connector.status === "fixture_ready") {
       status = "allowed";
       decision = "fixture_provider_allowed";
       reason = "fixture provider allowed";
+    } else if (connector.status === "sandbox_ready") {
+      status = "allowed";
+      decision = connector.networkAllowed === true ? "sandbox_read_only_network_dry_run_allowed" : "sandbox_read_only_ready_network_disabled";
+      reason = connector.networkAllowed === true ? "sandbox read-only dry-run allowed" : "sandbox read-only ready but network disabled";
+    } else if (connector.providerMode === "production_disabled") {
+      status = "disabled";
+      decision = "production_disabled";
+      reason = "production provider disabled";
     }
 
     return clone({
@@ -91,16 +58,18 @@
       appVersion: REAL_FLIGHT_PRICE_FETCH_SAFETY_GATE_VERSION,
       status: status,
       decision: decision,
-      providerId: providerId,
-      providerName: providerName,
-      providerMode: providerMode,
+      providerId: connector.providerId,
+      providerName: connector.providerName,
+      providerMode: connector.providerMode,
       reason: reason,
       readOnly: true,
-      networkAllowed: networkAllowed,
+      networkAllowed: connector.networkAllowed === true,
       booking: false,
       payment: false,
       order: false,
       identityUpload: false,
+      productionProviderEnabled:false,
+      providerConnector: connector,
       redacted: true
     });
   }
@@ -123,8 +92,8 @@
       payment: false,
       order: false,
       identityUpload: false,
+      productionProviderEnabled:false,
       realProviderCallCount: 0,
-      realApiKeyReadCount: 0,
       realEndpointConnectCount: 0,
       bookingUrlDisplayedCount: 0,
       paymentAttemptCount: 0,
@@ -139,11 +108,11 @@
   }
 
   function assertRealFlightPriceFetchSafetyGateSafe(value) {
-    const gate = value && typeof value === "object" ? value : evaluateRealFlightPriceFetchSafety({ providerId: "real_flight_fixture", providerMode: "fixture" });
+    const gate = value && typeof value === "object" ? value : evaluateRealFlightPriceFetchSafety({ providerId: "google_flights_search", providerMode: "fixture" });
     if (gate.redacted !== true) throw new Error("real flight price fetch safety gate must stay redacted");
     if (gate.readOnly !== true) throw new Error("real flight price fetch safety gate must stay read only");
-    if (gate.booking !== false || gate.payment !== false || gate.order !== false || gate.identityUpload !== false) throw new Error("real flight price fetch safety gate must block booking/payment/order/identity upload");
-    if (gate.providerMode === "sandbox" && gate.status === "allowed" && gate.networkAllowed !== true) throw new Error("sandbox dry-run allowed gate must allow network");
+    if (gate.booking !== false || gate.payment !== false || gate.order !== false || gate.identityUpload !== false) throw new Error("real flight price fetch safety gate must block unsafe actions");
+    if (gate.productionProviderEnabled !== false) throw new Error("real flight price fetch safety gate must keep production provider disabled");
     return true;
   }
 
