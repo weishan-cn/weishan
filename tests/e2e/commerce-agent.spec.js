@@ -8700,7 +8700,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.1.53 read-only quote refresh button updates local evidence only @commerce-smoke", async () => {
+  test("v2.1.54 read-only quote refresh button updates local evidence only @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate(() => {
       try { window.localStorage.removeItem("weishan.readOnlyQuoteRefreshState.v1"); } catch (_) {}
@@ -8729,13 +8729,13 @@ test.describe.serial("commerce agent workbench", () => {
     expect(visible).not.toMatch(/\b(token|key|secret)\b/i);
   });
 
-  test("v2.1.53 local read-only quote evidence recovery stays candidate-only @commerce-smoke", async () => {
+  test("v2.1.54 local read-only quote evidence recovery stays candidate-only @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate((id) => {
       try {
         window.localStorage.setItem("weishan.readOnlyQuoteRefreshState.v1", JSON.stringify({
           stateName:"read_only_quote_refresh_state_v1",
-          appVersion:"2.1.53",
+          appVersion:"2.1.54",
           lastRefreshStatus:"refreshed",
           providerId:"google_flights_search",
           providerName:"Google Flights",
@@ -8793,7 +8793,7 @@ test.describe.serial("commerce agent workbench", () => {
 
 
 
-  test("v2.1.53 multi sandbox quote import ranks and selects read-only candidates @commerce-smoke", async () => {
+  test("v2.1.54 multi sandbox quote import ranks and selects read-only candidates @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate(() => {
       try { window.localStorage.removeItem("weishan.sandboxProviderResponseImportState.v1"); } catch (_) {}

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_RUN_TIMELINE_VERSION = "2.1.53";
+  const READ_ONLY_QUOTE_RUN_TIMELINE_VERSION = "2.1.54";
   const TIMELINE_NAME = "read_only_quote_run_timeline_v1";
 
   function clone(value) {
@@ -12,14 +12,21 @@
     return String(value == null ? "" : value).trim();
   }
 
-  function defaultSteps(status) {
+  function defaultSteps(status, input) {
     const overall = text(status || "completed");
     const laterStatus = overall === "blocked" ? "blocked" : (overall === "failed_safe" ? "failed_safe" : "completed");
+    const historyReady = input && input.runHistorySummary && Number(input.runHistorySummary.totalRunCount || 0) > 0;
+    const deltaReady = text(input && (input.compareStatus || input.quoteDeltaSummary && input.quoteDeltaSummary.compareStatus || input.quoteDeltaSummary && input.quoteDeltaSummary.status)) === "compared";
+    const replayReady = input && input.replayReady === true;
     return [
       { stepId: "run_matrix_built", label: "构建 Provider 运行矩阵", status: "completed" },
       { stepId: "sandbox_quotes_generated", label: "生成只读沙盒报价", status: laterStatus },
       { stepId: "quotes_normalized", label: "报价归一化", status: laterStatus },
       { stepId: "quotes_ranked", label: "Top 3 排序", status: laterStatus },
+      { stepId: "run_history_sanitized", label: "运行历史已脱敏", status: historyReady ? "completed" : "not_run" },
+      { stepId: "run_history_persisted", label: "运行历史已保存", status: historyReady ? "completed" : "not_run" },
+      { stepId: "quote_delta_compared", label: "本地只读沙盒运行对比", status: deltaReady ? "completed" : "not_run" },
+      { stepId: "replay_guard_ready", label: "Replay Guard", status: replayReady ? "completed" : "not_run" },
       { stepId: "selection_ready", label: "候选选择准备", status: laterStatus }
     ];
   }
@@ -33,13 +40,19 @@
     return clone({
       timelineName: TIMELINE_NAME,
       appVersion: READ_ONLY_QUOTE_RUN_TIMELINE_VERSION,
-      runId: text(safe.runId || "deterministic-v2.1.53-read-only-sandbox-run"),
+      runId: text(safe.runId || "deterministic-v2.1.54-read-only-sandbox-run"),
       status: text(safe.status || (failedSafeCount > 0 ? "failed_safe" : (blockedCount > 0 ? "blocked" : "completed"))),
       summary: steps.map(function (step) { return text(step.label || step.stepId || "step"); }).join(" · "),
       completedCount: completedCount,
       blockedCount: blockedCount,
       failedSafeCount: failedSafeCount,
       stepCount: steps.length,
+      runHistorySummary: safe.runHistorySummary && typeof safe.runHistorySummary === "object" ? clone(safe.runHistorySummary) : null,
+      quoteDeltaSummary: safe.quoteDeltaSummary && typeof safe.quoteDeltaSummary === "object" ? clone(safe.quoteDeltaSummary) : null,
+      replaySummary: safe.replaySummary && typeof safe.replaySummary === "object" ? clone(safe.replaySummary) : null,
+      compareStatus: text(safe.compareStatus || (safe.quoteDeltaSummary && (safe.quoteDeltaSummary.compareStatus || safe.quoteDeltaSummary.status)) || "not_enough_history"),
+      replayStatus: text(safe.replayStatus || (safe.replaySummary && safe.replaySummary.status) || "unavailable"),
+      lastRunId: text(safe.lastRunId || (safe.runHistorySummary && safe.runHistorySummary.latestRunId) || ""),
       rawResponseStored: false,
       productionProviderEnabled: false,
       bookingUrl: null,
@@ -54,11 +67,17 @@
     const safe = runResult && typeof runResult === "object" ? runResult : {};
     const safeOptions = options && typeof options === "object" ? options : {};
     const overallStatus = text(safe.status || safeOptions.status || "completed");
-    const steps = defaultSteps(overallStatus);
+    const steps = defaultSteps(overallStatus, Object.assign({}, safe, safeOptions));
     const summary = summarizeReadOnlyQuoteRunTimeline({
-      runId: text(safe.runId || safeOptions.runId || "deterministic-v2.1.53-read-only-sandbox-run"),
+      runId: text(safe.runId || safeOptions.runId || "deterministic-v2.1.54-read-only-sandbox-run"),
       status: overallStatus,
-      steps: steps
+      steps: steps,
+      runHistorySummary: safe.runHistorySummary || safeOptions.runHistorySummary || null,
+      quoteDeltaSummary: safe.quoteDeltaSummary || safeOptions.quoteDeltaSummary || null,
+      replaySummary: safe.replaySummary || safeOptions.replaySummary || null,
+      compareStatus: safe.compareStatus || safeOptions.compareStatus || "not_enough_history",
+      replayStatus: safe.replayStatus || safeOptions.replayStatus || "unavailable",
+      lastRunId: safe.lastRunId || safeOptions.lastRunId || (safe.runHistorySummary && safe.runHistorySummary.latestRunId) || ""
     });
     return clone({
       timelineName: TIMELINE_NAME,
@@ -67,6 +86,12 @@
       status: overallStatus,
       steps: steps,
       summary: summary.summary,
+      runHistorySummary: summary.runHistorySummary,
+      quoteDeltaSummary: summary.quoteDeltaSummary,
+      replaySummary: summary.replaySummary,
+      compareStatus: summary.compareStatus,
+      replayStatus: summary.replayStatus,
+      lastRunId: summary.lastRunId,
       rawResponseStored: false,
       productionProviderEnabled: false,
       bookingUrl: null,
@@ -102,6 +127,9 @@
       completedCount: safe.completedCount,
       blockedCount: safe.blockedCount,
       failedSafeCount: safe.failedSafeCount,
+      compareStatus: safe.compareStatus,
+      replayStatus: safe.replayStatus,
+      lastRunId: safe.lastRunId,
       rawResponseStored: false,
       bookingUrl: null,
       payment: false,

@@ -22,7 +22,7 @@ function main() {
   ]);
   const gateApi = windowRef.WeishanSafeProviderDeepLinkHandoffGate;
   const api = windowRef.WeishanProviderConfirmationHandoffUi;
-  assert.equal(api.PROVIDER_CONFIRMATION_HANDOFF_UI_VERSION, "2.1.53");
+  assert.equal(api.PROVIDER_CONFIRMATION_HANDOFF_UI_VERSION, "2.1.54");
 
   const gate = gateApi.evaluateSafeProviderDeepLinkHandoff({
     providerId: "google_flights_search",

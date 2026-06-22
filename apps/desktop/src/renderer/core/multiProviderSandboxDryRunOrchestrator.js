@@ -1,9 +1,9 @@
 ;(function () {
   "use strict";
 
-  const MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION = "2.1.53";
+  const MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION = "2.1.54";
   const ORCHESTRATOR_NAME = "multi_provider_sandbox_dry_run_orchestrator_v1";
-  const RUN_ID = "deterministic-v2.1.53-read-only-sandbox-run";
+  const RUN_ID = "deterministic-v2.1.54-read-only-sandbox-run";
 
   function clone(value) {
     return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;
@@ -19,6 +19,13 @@
   function getRankingApi() { return window.WeishanReadOnlyQuoteCandidateRanking || {}; }
   function getSelectionApi() { return window.WeishanReadOnlyQuoteCandidateSelection || {}; }
   function getTimelineApi() { return window.WeishanReadOnlyQuoteRunTimeline || {}; }
+  function getHistoryStoreApi() { return window.WeishanReadOnlyQuoteRunHistoryStore || {}; }
+  function getDeltaCompareApi() { return window.WeishanReadOnlyQuoteDeltaCompare || {}; }
+  function getReplayGuardApi() { return window.WeishanReadOnlyQuoteReplayGuard || {}; }
+  function makeRunId(runIndex) {
+    const index = Number(runIndex);
+    return RUN_ID + (Number.isFinite(index) && index > 0 ? "-" + index : "");
+  }
 
   function isRestrictedTask(task) {
     const raw = text(task && (task.rawInput || task.inputSummary || task.title || task.text || ""));
@@ -96,7 +103,7 @@
       appVersion: MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION,
       status: status,
       runMode: "read_only_sandbox",
-      runId: RUN_ID,
+      runId: makeRunId(safeOptions.runIndex),
       providerRunMatrix: safeOptions.providerRunMatrix || null,
       generatedQuoteCount: normalizedQuotes.length,
       acceptedQuoteCount: normalizedQuotes.length,
@@ -113,10 +120,58 @@
       redacted: true
     };
     runResult.runTimelineSummary = typeof timelineApi.buildReadOnlyQuoteRunTimeline === "function"
-      ? timelineApi.buildReadOnlyQuoteRunTimeline(runResult, { runId: RUN_ID })
-      : { timelineName: "read_only_quote_run_timeline_v1", appVersion: MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION, runId: RUN_ID, status: status, steps: [], summary: "构建 Provider 运行矩阵 · 生成只读沙盒报价 · 报价归一化 · Top 3 排序 · 候选选择准备", rawResponseStored: false,
+      ? timelineApi.buildReadOnlyQuoteRunTimeline(runResult, { runId: makeRunId(safeOptions.runIndex) })
+      : { timelineName: "read_only_quote_run_timeline_v1", appVersion: MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION, runId: makeRunId(safeOptions.runIndex), status: status, steps: [], summary: "构建 Provider 运行矩阵 · 生成只读沙盒报价 · 报价归一化 · Top 3 排序 · 候选选择准备", rawResponseStored: false,
       autoOpen: false, productionProviderEnabled: false, bookingUrl: null, payment: false, order: false, identityUpload: false, redacted: true };
-    return clone(runResult);
+    return clone(decorateMultiProviderSandboxDryRunResult(runResult, safeOptions));
+  }
+
+  function decorateMultiProviderSandboxDryRunResult(result, options) {
+    const safeResult = clone(result || {});
+    const safeOptions = options && typeof options === "object" ? options : {};
+    const historyApi = getHistoryStoreApi();
+    const deltaApi = getDeltaCompareApi();
+    const replayApi = getReplayGuardApi();
+    const timelineApi = getTimelineApi();
+    const storageLike = safeOptions.storageLike || (typeof window !== "undefined" && window.localStorage ? window.localStorage : null);
+    const existingHistory = typeof historyApi.loadReadOnlyQuoteRunHistory === "function" ? historyApi.loadReadOnlyQuoteRunHistory(storageLike) : { history: [] };
+    const existingList = Array.isArray(existingHistory.history) ? existingHistory.history.slice() : [];
+    const nextIndex = Number(safeOptions.runIndex) || Number(safeResult.runIndex) || (existingList.length + 1);
+    const currentRunId = text(safeOptions.runId || safeResult.runId || makeRunId(nextIndex));
+    safeResult.runIndex = nextIndex;
+    safeResult.runId = currentRunId;
+    const syntheticEntry = typeof historyApi.sanitizeReadOnlyQuoteRunHistoryEntry === "function"
+      ? historyApi.sanitizeReadOnlyQuoteRunHistoryEntry(Object.assign({}, safeResult, { runId: currentRunId, runIndex: nextIndex }))
+      : { historyEntryName:"read_only_quote_run_history_entry_v1", appVersion:MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION, runId:currentRunId, runIndex:nextIndex, runMode:"read_only_sandbox", status:text(safeResult.status || "not_run"), topCandidates:Array.isArray(safeResult.dryRunTopCandidates) ? safeResult.dryRunTopCandidates.slice(0, 3) : [], selectedCandidate:safeResult.selectedCandidate || null, timelineSummary:safeResult.runTimelineSummary || null, rawResponseStored:false, productionProviderEnabled:false, networkAllowed:false, redacted:true };
+    let historyState = existingHistory;
+    if (safeOptions.persistToHistory === true && typeof historyApi.appendReadOnlyQuoteRunHistory === "function") {
+      historyState = historyApi.appendReadOnlyQuoteRunHistory(safeResult, storageLike, { runIndex: nextIndex });
+    }
+    const historyList = Array.isArray(historyState.history) ? historyState.history.slice() : existingList.slice();
+    const previousRun = historyList.length > 1 ? historyList[historyList.length - 2] : (existingList.length ? existingList[existingList.length - 1] : null);
+    const currentRun = historyList.length && text(historyList[historyList.length - 1].runId || "") === currentRunId ? historyList[historyList.length - 1] : syntheticEntry;
+    const historySummary = typeof historyApi.buildReadOnlyQuoteRunHistorySummary === "function" ? historyApi.buildReadOnlyQuoteRunHistorySummary(historyState) : { historyStoreName:"read_only_quote_run_history_store_v1", appVersion:MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION, totalRunCount:historyList.length, latestRunId:historyList.length ? text(historyList[historyList.length - 1].runId || currentRunId) : currentRunId, latestRunIndex:historyList.length ? Number(historyList[historyList.length - 1].runIndex || historyList.length) : nextIndex, latestStatus:historyList.length ? text(historyList[historyList.length - 1].status || safeResult.status || "not_run") : text(safeResult.status || "not_run"), latestTopCandidateCount:historyList.length && Array.isArray(historyList[historyList.length - 1].topCandidates) ? historyList[historyList.length - 1].topCandidates.length : (Array.isArray(currentRun.topCandidates) ? currentRun.topCandidates.length : 0), recentRunIds:historyList.map(function (entry) { return text(entry.runId || ""); }), summary:historyList.length ? ("运行历史：最近一次沙盒运行 " + text(historyList[historyList.length - 1].runId || "未命名") + " · " + text(historyList[historyList.length - 1].status || "not_run") + " · Top 3 候选报价 " + String((historyList[historyList.length - 1].topCandidates || []).length || 0)) : "运行历史：暂无本地只读沙盒运行记录", redacted:true };
+    const delta = previousRun && typeof deltaApi.compareReadOnlyQuoteRuns === "function" ? deltaApi.compareReadOnlyQuoteRuns(previousRun, currentRun, safeOptions) : null;
+    const deltaSummary = typeof deltaApi.buildReadOnlyQuoteDeltaSummary === "function" ? deltaApi.buildReadOnlyQuoteDeltaSummary(delta || { status: historyList.length > 1 ? "compared" : "not_enough_history", previousRunId: previousRun ? text(previousRun.runId || "") : null, currentRunId: currentRunId, topCandidateDelta: { previousTotalPrice: null, currentTotalPrice: null, deltaAmount: null, deltaDirection: "unknown", previousProviderName: "", currentProviderName: "", providerChanged: false }, rankChanges: [], warnings:["价格、库存、税费和规则以平台页面为准。", "本对比仅基于本地只读沙盒运行结果，不代表真实最终价。"], canClaimLowestAcrossWeb:false, canClaimFinalBookablePrice:false, canReplaceMainResultCard:false, bookingUrl:null, payment:false, order:false, identityUpload:false, redacted:true }, safeOptions) : { compareName:"read_only_quote_delta_compare_v1", appVersion:MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION, status: historyList.length > 1 ? "compared" : "not_enough_history", scope:"local_read_only_sandbox_runs", claim:"仅比较本地只读沙盒运行结果", previousRunId: previousRun ? text(previousRun.runId || "") : null, currentRunId: currentRunId, topCandidateDelta:{ previousTotalPrice:null, currentTotalPrice:null, deltaAmount:null, deltaDirection:"unknown", previousProviderName:"", currentProviderName:"", providerChanged:false }, rankChanges:[], warnings:["价格、库存、税费和规则以平台页面为准。", "本对比仅基于本地只读沙盒运行结果，不代表真实最终价。"], canClaimLowestAcrossWeb:false, canClaimFinalBookablePrice:false, canReplaceMainResultCard:false, bookingUrl:null, payment:false, order:false, identityUpload:false, redacted:true, summary: historyList.length > 1 ? "本地只读沙盒运行对比：存在差异" : "本地只读沙盒运行对比：历史不足", compareStatus: historyList.length > 1 ? "compared" : "not_enough_history" };
+    const replayState = typeof replayApi.evaluateReadOnlyQuoteReplayAvailability === "function" ? replayApi.evaluateReadOnlyQuoteReplayAvailability(historyState, safeOptions) : { replayGuardName:"read_only_quote_replay_guard_v1", appVersion:MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION, status:historyList.length ? "available" : "unavailable", replaySource:"local_redacted_run_history", replayedRunId:historyList.length ? text(historyList[historyList.length - 1].runId || currentRunId) : null, replayedCandidateCount:currentRun.topCandidates.length, canReplay:historyList.length > 0 && currentRun.topCandidates.length > 0, userTriggeredOnly:true, autoReplay:false, autoOpen:false, bookingUrl:null, payment:false, order:false, identityUpload:false, redacted:true };
+    const replaySummary = typeof replayApi.replayLastReadOnlyQuoteRun === "function" ? replayApi.replayLastReadOnlyQuoteRun(historyState, safeOptions) : Object.assign({}, replayState, { replaySummary: historyList.length ? "Replay 只恢复候选证据，不重新请求 provider" : "Replay Guard：暂无可回放的本地脱敏运行历史", replayedRun: historyList.length ? syntheticEntry : null });
+    const timelineInput = Object.assign({}, safeResult, { runHistorySummary: historySummary, quoteDeltaSummary: deltaSummary, replaySummary: replaySummary, lastRunId: historySummary.latestRunId || currentRunId, compareStatus: deltaSummary.compareStatus || deltaSummary.status || "not_enough_history", replayStatus: replayState.status || "unavailable", replayReady: replayState.canReplay === true });
+    safeResult.runTimelineSummary = typeof timelineApi.buildReadOnlyQuoteRunTimeline === "function"
+      ? timelineApi.buildReadOnlyQuoteRunTimeline(timelineInput, { runId: currentRunId, runIndex: nextIndex, runHistorySummary: historySummary, quoteDeltaSummary: deltaSummary, replaySummary: replaySummary })
+      : { timelineName: "read_only_quote_run_timeline_v1", appVersion: MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION, runId: currentRunId, status: text(safeResult.status || "completed"), steps: [], summary: "构建 Provider 运行矩阵 · 生成只读沙盒报价 · 报价归一化 · Top 3 排序 · 候选选择准备 · Run History · Quote Delta Compare · Replay Guard", rawResponseStored: false, productionProviderEnabled: false, bookingUrl: null, payment: false, order: false, identityUpload: false, redacted: true };
+    safeResult.historyEntry = syntheticEntry;
+    safeResult.runHistorySummary = historySummary;
+    safeResult.quoteDeltaSummary = deltaSummary;
+    safeResult.replaySummary = replaySummary;
+    safeResult.lastRunId = historySummary.latestRunId || currentRunId;
+    safeResult.compareStatus = deltaSummary.compareStatus || deltaSummary.status || "not_enough_history";
+    safeResult.replayStatus = replayState.status || "unavailable";
+    safeResult.replayReady = replayState.canReplay === true;
+    safeResult.history = historyList;
+    safeResult.rawResponseStored = false;
+    safeResult.autoOpen = false;
+    safeResult.redacted = true;
+    return clone(safeResult);
   }
 
   function runMultiProviderSandboxDryRun(task, options) {

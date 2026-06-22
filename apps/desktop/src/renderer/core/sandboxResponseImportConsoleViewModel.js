@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.53";
+  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.54";
   const CONSOLE_NAME = "sandbox_response_import_console_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -151,6 +151,12 @@
     const dryRunTopCandidates = Array.isArray(safe.dryRunTopCandidates) ? safe.dryRunTopCandidates : (sandboxDryRunSummary && Array.isArray(sandboxDryRunSummary.dryRunTopCandidates) ? sandboxDryRunSummary.dryRunTopCandidates : (Array.isArray(ranking.topCandidates) ? ranking.topCandidates : []));
     const dryRunButton = safe.dryRunButton && typeof safe.dryRunButton === "object" ? safe.dryRunButton : { label:"运行沙盒只读报价", enabled:true, loading:false, autoRun:false };
     const dryRunStatus = text(safe.dryRunStatus || (sandboxDryRunSummary && sandboxDryRunSummary.status) || (runTimelineSummary && runTimelineSummary.status) || "not_run");
+    const runHistorySummary = safe.runHistorySummary && typeof safe.runHistorySummary === "object" ? safe.runHistorySummary : (sandboxDryRunSummary && sandboxDryRunSummary.runHistorySummary && typeof sandboxDryRunSummary.runHistorySummary === "object" ? sandboxDryRunSummary.runHistorySummary : null);
+    const quoteDeltaSummary = safe.quoteDeltaSummary && typeof safe.quoteDeltaSummary === "object" ? safe.quoteDeltaSummary : (sandboxDryRunSummary && sandboxDryRunSummary.quoteDeltaSummary && typeof sandboxDryRunSummary.quoteDeltaSummary === "object" ? sandboxDryRunSummary.quoteDeltaSummary : null);
+    const replaySummary = safe.replaySummary && typeof safe.replaySummary === "object" ? safe.replaySummary : (sandboxDryRunSummary && sandboxDryRunSummary.replaySummary && typeof sandboxDryRunSummary.replaySummary === "object" ? sandboxDryRunSummary.replaySummary : null);
+    const lastRunId = text(safe.lastRunId || (sandboxDryRunSummary && sandboxDryRunSummary.lastRunId) || (runHistorySummary && runHistorySummary.latestRunId) || "");
+    const compareStatus = text(safe.compareStatus || (sandboxDryRunSummary && sandboxDryRunSummary.compareStatus) || (quoteDeltaSummary && (quoteDeltaSummary.compareStatus || quoteDeltaSummary.status)) || "not_enough_history");
+    const replayStatus = text(safe.replayStatus || (sandboxDryRunSummary && sandboxDryRunSummary.replayStatus) || (replaySummary && replaySummary.status) || "unavailable");
     return clone({
       consoleName: CONSOLE_NAME,
       appVersion: SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION,
@@ -171,6 +177,12 @@
       dryRunStatus: dryRunStatus,
       dryRunButton: dryRunButton,
       dryRunTopCandidates: dryRunTopCandidates,
+      runHistorySummary: runHistorySummary,
+      quoteDeltaSummary: quoteDeltaSummary,
+      replaySummary: replaySummary,
+      lastRunId: lastRunId,
+      compareStatus: compareStatus,
+      replayStatus: replayStatus,
       selectedCandidate: safe.selectedCandidate && typeof safe.selectedCandidate === "object" ? safe.selectedCandidate : null,
       actions: Object.assign({ canDryRun: dryRunButton.enabled !== false }, actions(status)),
       safety: safety(),
