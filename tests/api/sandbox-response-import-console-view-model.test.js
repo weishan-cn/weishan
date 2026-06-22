@@ -32,10 +32,13 @@ function main() {
     "apps/desktop/src/renderer/core/realFlightPriceReadOnlyProviderContract.js",
     "apps/desktop/src/renderer/core/realFlightPriceIntegrityGuard.js",
     "apps/desktop/src/renderer/core/sandboxProviderDryRunHarness.js",
+    "apps/desktop/src/renderer/core/multiSandboxQuoteImportProcessor.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteCandidateRanking.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteCandidateSelection.js",
     "apps/desktop/src/renderer/core/sandboxResponseImportConsoleViewModel.js"
   ]);
   const api = windowRef.WeishanSandboxResponseImportConsoleViewModel;
-  assert.equal(api.SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION, "2.1.50");
+  assert.equal(api.SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION, "2.1.51");
 
   const initial = api.buildSandboxResponseImportConsoleModel();
   assert.equal(initial.status, "idle");
@@ -58,6 +61,14 @@ function main() {
   assert.equal(imported.importResult.status, "accepted");
   assert.equal(imported.importResult.sanitizedQuote.totalPrice, 1010);
   assert.equal(imported.importResult.rawResponseStored, false);
+
+  const arrayPreview = api.buildSandboxResponseValidationPreview(JSON.stringify([validResponse(), Object.assign(validResponse(), { totalPrice:1020, baseFare:900, taxesAndFees:100, providerFees:20 })]));
+  assert.equal(arrayPreview.status, "preview_ready");
+  assert.equal(arrayPreview.multiQuotePreview.totalInputCount, 2);
+  assert.equal(Array.isArray(arrayPreview.rankingPreview.topCandidates), true);
+  assert.equal(arrayPreview.rankingPreview.topCandidates.length, 2);
+  assert.equal(arrayPreview.lowPriceClaim, "当前导入样本中的低价候选");
+  assert.equal(JSON.stringify(arrayPreview).includes("全网最低"), false);
 
   const invalid = api.buildSandboxResponseValidationPreview("{ nope");
   assert.equal(invalid.status, "failed_safe");

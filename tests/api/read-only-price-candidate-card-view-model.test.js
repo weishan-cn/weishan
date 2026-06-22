@@ -17,7 +17,7 @@ function main() {
     "apps/desktop/src/renderer/core/readOnlyPriceCandidateCardViewModel.js"
   ]);
   const api = windowRef.WeishanReadOnlyPriceCandidateCardViewModel;
-  assert.equal(api.READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION, "2.1.50");
+  assert.equal(api.READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION, "2.1.51");
 
   const card = api.buildReadOnlyPriceCandidateCardViewModel({ task:{ title:"7月15日上海到成都最便宜的机票" }, providerId:"google_flights_search", providerName:"Google Flights", providerType:"flight_search", report:{ provider:{ providerMode:"fixture" }, handoff:{ safeProviderHandoffUrl:"https://www.google.com/travel/flights" } }, flightFields:{ origin:"上海", destination:"成都", dateDisplay:"7 月 15 日", goal:"低价优先", directPreference:"直达优先" } });
   assert.equal(card.visible, true);
@@ -85,6 +85,17 @@ function main() {
   const importHtml = api.renderReadOnlyPriceCandidateCardHtml(importCard);
   assert.equal(importHtml.includes("导入响应已脱敏"), true);
   assert.equal(importHtml.includes("不代表已锁价或可出票"), true);
+
+  const rankedCard = api.buildReadOnlyPriceCandidateCardViewModel({ topCandidates:[{ rank:1, quoteId:"q980", providerName:"Trusted Flight Fixture", fareSource:"sandbox_read_only_import", currency:"CNY", baseFare:830, taxesAndFees:110, providerFees:40, totalPrice:980, safeProviderHandoffReady:true, safeProviderHandoffUrl:"https://www.google.com/travel/flights", bookingUrl:null, payment:false, order:false, identityUpload:false, redacted:true }], selectedCandidate:{ quoteId:"q980", safeProviderHandoffReady:true, safeProviderHandoffUrl:"https://www.google.com/travel/flights" }, report:{ handoff:{ safeProviderHandoffUrl:null } } });
+  assert.equal(rankedCard.topCandidates.length, 1);
+  assert.equal(rankedCard.lowPriceClaim, "当前导入样本中的低价候选");
+  assert.equal(rankedCard.rankingScope, "导入样本范围");
+  const rankedHtml = api.renderReadOnlyPriceCandidateCardHtml(rankedCard);
+  assert.equal(rankedHtml.includes("Top 3 候选报价"), true);
+  assert.equal(rankedHtml.includes("选择该候选"), true);
+  assert.equal(rankedHtml.includes("已选择该候选"), true);
+  assert.equal(rankedHtml.includes("当前导入样本中的低价候选"), true);
+  assert.equal(rankedHtml.includes("全网最低"), false);
 
   const rejectedImportCard = api.buildReadOnlyPriceCandidateCardViewModel({ report:{ sandboxImport:{ lastImportStatus:"blocked", importedEvidenceAvailable:false, rawResponseStored:false, sanitized:true, redacted:true }, handoff:{ safeProviderHandoffUrl:null } } });
   assert.equal(rejectedImportCard.priceDisplay, "暂无真实价格结果");

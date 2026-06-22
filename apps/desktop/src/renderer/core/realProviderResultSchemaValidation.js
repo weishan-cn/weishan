@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const REAL_PROVIDER_RESULT_SCHEMA_VALIDATION_VERSION = "2.1.50";
+  const REAL_PROVIDER_RESULT_SCHEMA_VALIDATION_VERSION = "2.1.51";
   const SCHEMA_VERSION = "provider_result_schema_v1";
   const REQUIRED_FIELDS = ["providerId", "providerName", "providerCategory", "resultType", "sourceType", "sourceUrlHost", "updatedAt", "readonlyEvidence"];
   const ALLOWED_RESULT_TYPES = ["flight_offer", "provider_notice", "no_result", "blocked_result", "schema_error"];

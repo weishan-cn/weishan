@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.50";
+  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.51";
   const PHASE = "read_only_price_candidate_card_view_model_v1";
 
   function clone(value) {
@@ -171,9 +171,15 @@
     const interactiveRefreshState = typeof interactiveApi.buildReadOnlyQuoteInteractiveRefreshUiState === "function"
       ? interactiveApi.buildReadOnlyQuoteInteractiveRefreshUiState(Object.assign({}, safe.interactiveRefreshState || {}, { state:refreshStateInput, status:safe.interactiveRefreshStatus || safe.status || (safe.interactiveRefreshState && safe.interactiveRefreshState.status) || "idle" }))
       : { status:"idle", recoveryStatus:"not_loaded", refreshButton:{ label:"刷新只读报价", enabled:true, loading:false, reason:"仅更新候选证据，不代表已锁价或可出票", autoRun:false }, lastRefreshSummary:{ status:refreshStateSummary.lastRefreshStatus || "not_run" }, recoveredEvidenceSummary:{ available:false, source:"local_redacted_state", showableAsRealPrice:false, showableAsCandidateEvidence:false, canReplaceMainResultCard:false }, refreshErrorBanner:"", clearRefreshStateButton:{ label:"清除刷新状态", enabled:false, autoRun:false }, safety:{ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, autoRefresh:false, booking:false, payment:false, order:false, identityUpload:false, redacted:true }, redacted:true };
+    const topCandidates = (Array.isArray(safe.topCandidates) ? safe.topCandidates : (report.rankingPreview && Array.isArray(report.rankingPreview.topCandidates) ? report.rankingPreview.topCandidates : [])).slice(0, 3).map(function (candidate, index) {
+      const item = candidate && typeof candidate === "object" ? candidate : {};
+      return Object.assign({}, item, { rank:item.rank || index + 1, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, identityUpload:false, redacted:true });
+    });
+    const selectedCandidate = safe.selectedCandidate && typeof safe.selectedCandidate === "object" ? safe.selectedCandidate : (report.selectedCandidate && typeof report.selectedCandidate === "object" ? report.selectedCandidate : null);
+    const selectedSafeProviderHandoffUrl = selectedCandidate && selectedCandidate.safeProviderHandoffReady === true ? text(selectedCandidate.safeProviderHandoffUrl || "") : "";
     const canRefresh = normalized.restrictedCategory !== true && providerBindingWizardSummary.actions && providerBindingWizardSummary.actions.canAttemptReadOnlyRefresh === true && !isProductionDisabled && interactiveRefreshState.status !== "refreshing";
     const refreshButton = { label:interactiveRefreshState.refreshButton && interactiveRefreshState.refreshButton.label || "刷新只读报价", enabled:canRefresh && interactiveRefreshState.refreshButton && interactiveRefreshState.refreshButton.enabled !== false, loading:interactiveRefreshState.refreshButton && interactiveRefreshState.refreshButton.loading === true, reason:interactiveRefreshState.refreshButton && interactiveRefreshState.refreshButton.reason || (canRefresh ? "仅更新候选证据，不代表已锁价或可出票" : "当前只读报价刷新未就绪"), autoRun:false, autoRefresh:false, payment:false, order:false, identityUpload:false };
-    const safeProviderHandoffUrl = text(reportHandoff.safeProviderHandoffUrl || "");
+    const safeProviderHandoffUrl = text(selectedSafeProviderHandoffUrl || reportHandoff.safeProviderHandoffUrl || "");
     const gateApi = getGateApi();
     const gate = typeof gateApi.evaluateSafeProviderDeepLinkHandoff === "function"
       ? gateApi.evaluateSafeProviderDeepLinkHandoff({
@@ -278,6 +284,10 @@
       sandboxImportPreviewStatus: sandboxImportPreviewStatus,
       sandboxImportLastStatus: sandboxImportStatus,
       sandboxImportBlockedReason: sandboxImportBlockedReason,
+      rankingScope: "导入样本范围",
+      lowPriceClaim: "当前导入样本中的低价候选",
+      topCandidates: topCandidates,
+      selectedCandidate: selectedCandidate ? Object.assign({}, selectedCandidate, { bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, identityUpload:false, redacted:true }) : null,
       importStatusBadge: importStatusBadge,
       importedEvidenceBanner: importedEvidenceBanner,
       importEvidenceBanner: importEvidenceBanner,
@@ -344,6 +354,12 @@
     if (!card || card.visible !== true) return "";
     const breakdownLines = Array.isArray(card.breakdownLines) ? card.breakdownLines : [];
     const safetyLines = Array.isArray(card.safetyLines) ? card.safetyLines : [];
+    const topCandidates = Array.isArray(card.topCandidates) ? card.topCandidates : [];
+    const topCandidatesHtml = topCandidates.length ? '<section class="commerce-read-only-top-candidates" data-commerce-read-only-top-candidates="true"><h5>Top 3 候选报价</h5><p>' + escapeHtml(card.lowPriceClaim || "当前导入样本中的低价候选") + '</p><p>Ranking Scope: ' + escapeHtml(card.rankingScope || "导入样本范围") + '</p><ol>' + topCandidates.map(function (candidate) {
+      const selected = card.selectedCandidate && card.selectedCandidate.quoteId === candidate.quoteId;
+      const price = candidate.totalPrice == null ? "暂无真实价格结果" : "¥" + candidate.totalPrice;
+      return '<li><strong>#' + escapeHtml(String(candidate.rank || "")) + ' '+ escapeHtml(price) + '</strong><p>票面价：' + escapeHtml(candidate.baseFare == null ? "-" : String(candidate.baseFare)) + ' · 税费：' + escapeHtml(candidate.taxesAndFees == null ? "-" : String(candidate.taxesAndFees)) + ' · 平台费：' + escapeHtml(candidate.providerFees == null ? "-" : String(candidate.providerFees)) + '</p><p>平台最终为准 · 未锁价 · 不代表可出票</p><button type="button" class="cmd-btn gray" data-commerce-select-read-only-quote-candidate="true" data-commerce-select-read-only-quote-candidate-id="' + escapeHtml(candidate.quoteId || "") + '" data-commerce-safe-provider-handoff-url="' + escapeHtml(encodeURIComponent(candidate.safeProviderHandoffUrl || "")) + '">选择该候选</button>' + (selected ? '<p data-commerce-selected-candidate="true">已选择该候选</p>' : '') + '</li>';
+    }).join("") + '</ol><p>Selection Evidence</p></section>' : "";
     return `<section class="commerce-read-only-price-candidate-card" aria-label="只读候选价" data-commerce-read-only-price-candidate-card="true">
       <h5>${escapeHtml(card.title || "只读候选价")}</h5>
       <p>${escapeHtml(card.statusLine || "只读候选价；平台最终为准；未锁价；不代表可出票")}</p>
@@ -354,6 +370,7 @@
       <p>${escapeHtml(card.routeTitle || "")}</p>
       <ul class="commerce-read-only-price-candidate-card-breakdown">${breakdownLines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>
       <ul class="commerce-read-only-price-candidate-card-safety">${safetyLines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>
+      ${topCandidatesHtml}
       <p>${escapeHtml(card.safetyNotice || "唯珊不会付款、不会下单、不会上传证件或银行卡。")}</p>
       <p data-commerce-read-only-refresh-summary="true">${escapeHtml(card.interactiveRefreshState && card.interactiveRefreshState.lastRefreshStatusLabel ? ("最近一次刷新：" + card.interactiveRefreshState.lastRefreshStatusLabel) : (card.refreshStateSummary && card.refreshStateSummary.summary || ("最近一次刷新：" + (card.lastRefreshStatusLabel || "未运行"))))}</p>
       ${card.recoveredEvidenceSummary && card.recoveredEvidenceSummary.available ? `<p data-commerce-read-only-recovered-evidence="true">已恢复最近一次只读证据</p>` : ""}
