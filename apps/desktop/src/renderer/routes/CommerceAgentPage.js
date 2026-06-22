@@ -7410,40 +7410,35 @@
         const refreshApi = window.WeishanReadOnlyQuoteRefreshController;
         function buildSandboxQuoteRanking(rawText){
           try {
-            const parsed = JSON.parse(rawText || "null");
-            const items = Array.isArray(parsed) ? parsed : [parsed];
-            if (/token|key|secret|password|session|auth/i.test(rawText || "")) return { status:"blocked", topCandidates:[], reason:"sensitive field detected" };
-            const registryApi = window.WeishanTrustedFlightSourceRegistry;
-            const gateApi = window.WeishanSafeProviderDeepLinkHandoffGate;
-            const quotes = items.map(function(item, index){
-              const raw = item && typeof item === "object" ? item : {};
-              const baseFare = Number(raw.baseFare);
-              const taxesAndFees = Number(raw.taxesAndFees);
-              const providerFees = raw.providerFees == null ? 0 : Number(raw.providerFees);
-              const totalPrice = Number(raw.totalPrice);
-              if (!raw.currency || !Number.isFinite(baseFare) || !Number.isFinite(taxesAndFees) || !Number.isFinite(providerFees) || !Number.isFinite(totalPrice) || Math.abs(totalPrice - baseFare - taxesAndFees - providerFees) > 0.0001) return null;
-              const handoffCandidate = raw.handoffCandidate && typeof raw.handoffCandidate === "object" ? raw.handoffCandidate : {};
-              const handoffProviderId = String(handoffCandidate.providerId || "google_flights_search");
-              const source = registryApi && typeof registryApi.getTrustedFlightSourceById === "function" ? registryApi.getTrustedFlightSourceById(handoffProviderId) : null;
-              const gate = gateApi && typeof gateApi.evaluateSafeProviderDeepLinkHandoff === "function" ? gateApi.evaluateSafeProviderDeepLinkHandoff({ providerId:handoffProviderId, providerName:source && source.providerName || raw.providerName || "", providerType:source && source.providerType || "flight_search", searchOnly:true, safeProviderHandoffUrl:source && source.safeProviderHandoffUrl || null, restrictedCategory:false, fareSource:raw.fareSource || "sandbox_read_only_import" }) : { providerConfirmationLink:"disabled", safeProviderHandoffUrl:null };
-              const ready = gate && gate.providerConfirmationLink === "confirmation_required" && !!gate.safeProviderHandoffUrl;
-              return { quoteId:String(raw.quoteId || ("sandbox_quote_" + (index + 1))), providerName:String(raw.providerName || "Trusted Flight Fixture"), fareSource:String(raw.fareSource || "sandbox_read_only_import"), currency:String(raw.currency || "CNY"), baseFare:baseFare, taxesAndFees:taxesAndFees, providerFees:providerFees, totalPrice:totalPrice, freshnessMinutes:Number(raw.freshnessMinutes || 0), safeProviderHandoffReady:ready, safeProviderHandoffUrl:ready ? gate.safeProviderHandoffUrl : null };
-            }).filter(Boolean).sort(function(a, b){ return (a.totalPrice - b.totalPrice) || (a.freshnessMinutes - b.freshnessMinutes) || (a.providerFees - b.providerFees); }).slice(0, 3).map(function(item, index){ item.rank = index + 1; return item; });
-            return { status:quotes.length ? "accepted" : "rejected", topCandidates:quotes, reason:quotes.length ? "" : "sandbox quote validation rejected" };
-          } catch (_) { return { status:"failed_safe", topCandidates:[], reason:"导入失败，已安全降级" }; }
+            const processorApi = window.WeishanMultiSandboxQuoteImportProcessor;
+            const rankingApi = window.WeishanReadOnlyQuoteCandidateRanking;
+            const importResult = processorApi && typeof processorApi.importMultiSandboxQuotes === "function" ? processorApi.importMultiSandboxQuotes(rawText, {}) : { status:"failed_safe", quotes:[], errors:[], sourceBreakdown:{ providerCount:0, providerIds:[], fareSources:[] }, reason:"沙盒导入处理器不可用" };
+            const ranking = rankingApi && typeof rankingApi.buildTopReadOnlyQuoteCandidates === "function" ? rankingApi.buildTopReadOnlyQuoteCandidates(importResult.quotes || [], { rankingScope:"imported_sandbox_quotes_only" }) : { status:importResult.status || "failed_safe", topCandidates:[], sourceBreakdown:importResult.sourceBreakdown || { providerCount:0, providerIds:[], fareSources:[] }, rankingExplanation:"仅按导入样本中的只读候选证据排序，平台最终为准。" };
+            const status = importResult.status === "accepted" || importResult.status === "partial" || ranking.topCandidates.length ? "accepted" : (importResult.status === "blocked" ? "blocked" : (importResult.status === "failed_safe" ? "failed_safe" : "rejected"));
+            return {
+              status: status,
+              topCandidates: ranking.topCandidates || [],
+              sourceBreakdown: ranking.sourceBreakdown || importResult.sourceBreakdown || { providerCount:0, providerIds:[], fareSources:[] },
+              rankingExplanation: ranking.rankingExplanation || "仅按导入样本中的只读候选证据排序，平台最终为准。",
+              reason: importResult.reason || (importResult.errors && importResult.errors[0] && importResult.errors[0].reason) || ""
+            };
+          } catch (_) { return { status:"failed_safe", topCandidates:[], sourceBreakdown:{ providerCount:0, providerIds:[], fareSources:[] }, rankingExplanation:"仅按导入样本中的只读候选证据排序，平台最终为准。", reason:"导入失败，已安全降级" }; }
         }
         function topCandidatesHtml(ranking, selectedId){
           const candidates = ranking && Array.isArray(ranking.topCandidates) ? ranking.topCandidates : [];
           if (!candidates.length) return "";
-          return '<section class="commerce-read-only-top-candidates" data-commerce-read-only-top-candidates="true"><h5>Top 3 候选报价</h5><p>当前导入样本中的低价候选</p><p>Ranking Scope: 导入样本范围</p><ol>' + candidates.map(function(candidate){
-            const selected = selectedId && selectedId === candidate.quoteId;
-            return '<li data-commerce-read-only-top-candidate="true"><strong>#' + esc(String(candidate.rank)) + ' ¥' + esc(String(candidate.totalPrice)) + '</strong><p>票面价：' + esc(String(candidate.baseFare)) + ' · 税费：' + esc(String(candidate.taxesAndFees)) + ' · 平台费：' + esc(String(candidate.providerFees)) + '</p><p>平台最终为准 · 未锁价 · 不代表可出票</p><button type="button" class="cmd-btn gray" data-commerce-select-read-only-quote-candidate="true" data-commerce-select-read-only-quote-candidate-id="' + esc(candidate.quoteId) + '" data-commerce-safe-provider-handoff-url="' + commerceEncodedExternalUrl(candidate.safeProviderHandoffUrl || "") + '">选择该候选</button>' + (selected ? '<p data-commerce-selected-candidate="true">已选择该候选</p>' : '') + '</li>';
+          const breakdown = ranking && ranking.sourceBreakdown ? ranking.sourceBreakdown : { providerCount:0, providerIds:[], fareSources:[] };
+          return '<section class="commerce-read-only-top-candidates" data-commerce-read-only-top-candidates="true"><h5>Top 3 候选报价</h5><p>当前导入样本中的低价候选</p><p>Ranking Scope: 导入样本范围</p><p>' + esc(ranking && ranking.rankingExplanation || '仅按导入样本中的只读候选证据排序，平台最终为准。') + '</p><p>Source Breakdown: providerCount=' + esc(String(breakdown.providerCount || 0)) + '; providerIds=' + esc((breakdown.providerIds || []).join(',')) + '; fareSources=' + esc((breakdown.fareSources || []).join(',')) + '</p><ol>' + candidates.map(function(candidate){
+            const selected = String(selectedId || "") === String(candidate.quoteId || "");
+            const sourceLine = [candidate.providerName || '', candidate.responseShape || 'unsupported', candidate.fareSource || 'sandbox_read_only_import'].filter(Boolean).join(' · ');
+            return '<li data-commerce-read-only-top-candidate="true"><strong>#' + esc(String(candidate.rank)) + ' ¥' + esc(String(candidate.totalPrice)) + '</strong><p>' + esc(sourceLine) + '</p><p>票面价：' + esc(String(candidate.baseFare)) + ' · 税费：' + esc(String(candidate.taxesAndFees)) + ' · 平台费：' + esc(String(candidate.providerFees)) + '</p><p>平台最终为准 · 未锁价 · 不代表可出票</p><button type="button" class="cmd-btn gray" data-commerce-select-read-only-quote-candidate="true" data-commerce-select-read-only-quote-candidate-id="' + esc(candidate.quoteId) + '" data-commerce-safe-provider-handoff-url="' + commerceEncodedExternalUrl(candidate.safeProviderHandoffUrl || "") + '" data-commerce-selected-source-summary="' + commerceEncodedExternalUrl(candidate.selectedSourceSummary || candidate.sourceSummary || sourceLine) + '">选择该候选</button>' + (selected ? '<p data-commerce-selected-candidate="true">已选择该候选</p><p data-commerce-selected-source-summary="true">' + esc(candidate.selectedSourceSummary || candidate.sourceSummary || sourceLine) + '</p>' : '') + '</li>';
           }).join("") + '</ol><p>Selection Evidence</p></section>';
         }
-        function previewHtml(preview, status, ranking){
+        function previewHtml(preview, status, ranking, selectedId){
           const safe = preview || {};
           const priceLine = [safe.currency || "", safe.baseFare, safe.taxesAndFees, safe.providerFees, safe.totalPrice].filter((item) => item !== null && item !== undefined && item !== "").join(" / ");
-          return '<h5>Validation Preview</h5><p>validationStatus: ' + esc(safe.validationStatus || status || 'not_run') + '</p><p>provider: ' + esc([safe.providerId || '', safe.providerName || ''].filter(Boolean).join(' / ') || '-') + '</p><p>fareSource: ' + esc(safe.fareSource || '-') + '</p><p>price breakdown: ' + esc(priceLine || '-') + '</p><p>taxFeeIntegrity: ' + esc(safe.taxFeeIntegrityStatus || 'not_run') + '</p><p>freshness: ' + esc(safe.freshnessStatus || 'not_run') + '</p><p>safeProviderHandoffReady: ' + esc(String(safe.safeProviderHandoffReady === true)) + '</p><p>blocked reason: ' + esc(safe.blockedReason || '') + '</p>' + topCandidatesHtml(ranking, '') + '<h5>Import Sanitization</h5><p>导入响应已脱敏</p><p>raw response stored false</p><p>rawResponseStored: false</p><p>sensitive field detected ' + esc(String((safe.blockedReason || '').indexOf('sensitive') >= 0)) + '</p><p>bookingUrl forced null</p><p>bookingUrl: null</p><p>checkoutUrl: null</p><p>paymentUrl: null</p><p>orderUrl: null</p><p>autoOpen: false</p><p>payment: false</p><p>order: false</p><p>identityUpload: false</p><p>redacted: true</p>';
+          const breakdown = ranking && ranking.sourceBreakdown ? ranking.sourceBreakdown : { providerCount:0, providerIds:[], fareSources:[] };
+          return '<h5>Multi Provider 沙盒报价导入</h5><p>validationStatus: ' + esc(safe.validationStatus || status || 'not_run') + '</p><p>Provider 来源: ' + esc([safe.providerId || '', safe.providerName || ''].filter(Boolean).join(' / ') || '-') + '</p><p>响应格式: ' + esc(safe.responseShape || '-') + '</p><p>fareSource: ' + esc(safe.fareSource || '-') + '</p><p>price breakdown: ' + esc(priceLine || '-') + '</p><p>Source Breakdown: providerCount=' + esc(String(breakdown.providerCount || 0)) + '; providerIds=' + esc((breakdown.providerIds || []).join(',')) + '; fareSources=' + esc((breakdown.fareSources || []).join(',')) + '</p><p>rankingExplanation: ' + esc(ranking && ranking.rankingExplanation || '仅按导入样本中的只读候选证据排序，平台最终为准。') + '</p><p>taxFeeIntegrity: ' + esc(safe.taxFeeIntegrityStatus || 'not_run') + '</p><p>freshness: ' + esc(safe.freshnessStatus || 'not_run') + '</p><p>safeProviderHandoffReady: ' + esc(String(safe.safeProviderHandoffReady === true)) + '</p><p>blocked reason: ' + esc(safe.blockedReason || '') + '</p>' + topCandidatesHtml(ranking, selectedId || '') + '<h5>Import Sanitization</h5><p>导入响应已脱敏</p><p>raw response stored false</p><p>rawResponseStored: false</p><p>sensitive field detected ' + esc(String((safe.blockedReason || '').indexOf('sensitive') >= 0)) + '</p><p>bookingUrl forced null</p><p>bookingUrl: null</p><p>checkoutUrl: null</p><p>paymentUrl: null</p><p>orderUrl: null</p><p>autoOpen: false</p><p>payment: false</p><p>order: false</p><p>identityUpload: false</p><p>redacted: true</p>';
         }
         if (sandboxImportClearButton) {
           if (refreshApi && typeof refreshApi.clearSandboxImportRefresh === "function") refreshApi.clearSandboxImportRefresh({});
@@ -7478,13 +7473,24 @@
       const selectCandidateButton = target && target.closest("[data-commerce-select-read-only-quote-candidate]");
       if (selectCandidateButton && host.contains(selectCandidateButton)) {
         event.preventDefault();
-        const card = selectCandidateButton.closest("[data-commerce-read-only-price-candidate-card], .commerce-top-result-card, [data-commerce-sandbox-response-import-console]");
+        const card = selectCandidateButton.closest("[data-commerce-read-only-price-candidate-card], .commerce-top-result-card, [data-commerce-read-only-top-candidates], [data-commerce-sandbox-response-import-console]");
         if (card) {
-          card.querySelectorAll("[data-commerce-selected-candidate]").forEach((node) => node.remove());
-          selectCandidateButton.insertAdjacentHTML("afterend", '<p data-commerce-selected-candidate="true">已选择该候选</p>');
-          const safeUrl = commerceDecodedInlineValue(selectCandidateButton, "data-commerce-safe-provider-handoff-url");
+          const panel = selectCandidateButton.closest("[data-commerce-sandbox-response-import-console]");
+          const input = panel && panel.querySelector("[data-commerce-sandbox-response-import-input]");
+          const output = panel && panel.querySelector("[data-commerce-sandbox-response-import-output]");
+          const selectedSourceSummary = commerceDecodedInlineValue(selectCandidateButton, "data-commerce-selected-source-summary") || "来源：只读沙盒 / 导入样本";
+          const selectedId = commerceDecodedInlineValue(selectCandidateButton, "data-commerce-select-read-only-quote-candidate-id") || "";
+          const rawInput = input ? input.value : "";
+          const ranking = buildSandboxQuoteRanking(rawInput);
+          const selectedCandidate = (ranking.topCandidates || []).find((candidate) => String(candidate.quoteId || "") === String(selectedId || ""));
+          const preview = selectedCandidate ? { validationStatus:"accepted", currency:selectedCandidate.currency, baseFare:selectedCandidate.baseFare, taxesAndFees:selectedCandidate.taxesAndFees, providerFees:selectedCandidate.providerFees, totalPrice:selectedCandidate.totalPrice, fareSource:selectedCandidate.fareSource || "sandbox_read_only_import", safeProviderHandoffReady:selectedCandidate.safeProviderHandoffReady } : { validationStatus:"accepted" };
+          if (output) output.innerHTML = previewHtml(preview, "selected", ranking, selectedId);
+          selectCandidateButton.textContent = "已选择该候选";
+          card.querySelectorAll("[data-commerce-selected-candidate], [data-commerce-selected-source-summary]").forEach((node) => node.remove());
+          card.insertAdjacentHTML("beforeend", '<p data-commerce-selected-candidate="true">已选择该候选</p><p data-commerce-selected-source-summary="true">' + esc(selectedSourceSummary) + '</p>');
           const handoffButton = host.querySelector(".commerce-top-result-card [data-commerce-safe-provider-handoff-request], [data-commerce-read-only-price-candidate-card] [data-commerce-safe-provider-handoff-request]");
           if (handoffButton) {
+            const safeUrl = commerceDecodedInlineValue(selectCandidateButton, "data-commerce-safe-provider-handoff-url");
             handoffButton.setAttribute("data-commerce-safe-provider-handoff-url", commerceEncodedExternalUrl(safeUrl || ""));
             handoffButton.disabled = !safeUrl;
           }

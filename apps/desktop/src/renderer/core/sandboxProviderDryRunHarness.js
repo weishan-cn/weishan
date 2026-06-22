@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SANDBOX_PROVIDER_DRY_RUN_HARNESS_VERSION = "2.1.51";
+  const SANDBOX_PROVIDER_DRY_RUN_HARNESS_VERSION = "2.1.52";
   const HARNESS_NAME = "sandbox_provider_dry_run_harness_v1";
   const SAFE_FARE_SOURCES = ["sandbox_read_only_import", "sandbox_read_only", "fixture_read_only"];
   const UNSAFE_NAME_RE = /(token|key|secret|password|session|auth|credential)/i;
@@ -97,10 +97,32 @@
     });
   }
 
+  function getMultiProviderRegistryApi() {
+    return window.WeishanMultiProviderSandboxAdapterRegistry || {};
+  }
+
   function getTrustedSource(providerId) {
     const registryApi = getRegistryApi();
-    if (typeof registryApi.getTrustedFlightSourceById === "function") return registryApi.getTrustedFlightSourceById(providerId);
-    return { providerId:text(providerId), providerName:text(providerId || "Unknown provider"), accessMode:"blocked", sourceBlocked:true, safeProviderHandoffUrl:null, safeProviderHandoffHost:"", redacted:true };
+    const trusted = typeof registryApi.getTrustedFlightSourceById === "function" ? registryApi.getTrustedFlightSourceById(providerId) : null;
+    if (trusted && trusted.sourceBlocked !== true && trusted.accessMode !== "blocked") return trusted;
+    const multiRegistryApi = getMultiProviderRegistryApi();
+    if (typeof multiRegistryApi.getSandboxAdapterProfile === "function") {
+      const profile = multiRegistryApi.getSandboxAdapterProfile(providerId);
+      if (profile && profile.status !== "blocked") {
+        return {
+          providerId: text(profile.providerId || providerId),
+          providerName: text(profile.providerName || providerId || "Unknown provider"),
+          providerType: text(profile.adapterType === "search_handoff_only" ? "flight_search" : "flight_search"),
+          accessMode: text(profile.providerMode || "sandbox_read_only"),
+          safeProviderHandoffUrl: profile.safeProviderHandoffUrl || null,
+          safeProviderHandoffHost: profile.safeProviderHandoffUrl ? text(new URL(profile.safeProviderHandoffUrl).hostname) : "",
+          sourceBlocked: false,
+          unknownProviderBlocked: false,
+          redacted: true
+        };
+      }
+    }
+    return trusted || { providerId:text(providerId), providerName:text(providerId || "Unknown provider"), accessMode:"blocked", sourceBlocked:true, safeProviderHandoffUrl:null, safeProviderHandoffHost:"", redacted:true };
   }
 
   function buildSafeHandoff(raw, trusted) {

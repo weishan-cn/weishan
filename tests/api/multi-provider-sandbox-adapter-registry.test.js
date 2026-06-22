@@ -1,0 +1,44 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+const ROOT = path.resolve(__dirname, "../..");
+function load(files) { const window = {}; window.window = window; const context = vm.createContext({ window, console, URL }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
+function main() {
+  const windowRef = load(["apps/desktop/src/renderer/core/trustedFlightSourceRegistry.js", "apps/desktop/src/renderer/core/multiProviderSandboxAdapterRegistry.js"]);
+  const api = windowRef.WeishanMultiProviderSandboxAdapterRegistry;
+  assert.equal(api.MULTI_PROVIDER_SANDBOX_ADAPTER_REGISTRY_VERSION, "2.1.52");
+  const registry = api.getMultiProviderSandboxAdapterRegistry();
+  assert.equal(registry.registryName, "multi_provider_sandbox_adapter_registry_v1");
+  assert.equal(registry.appVersion, "2.1.52");
+  assert.equal(registry.providers.length, 4);
+  assert.equal(JSON.stringify(registry.providers.map((item) => item.providerId)), JSON.stringify(["flight_provider_trusted_fixture", "google_flights_search", "trip_com_sandbox_stub", "airline_official_sandbox_stub"]));
+  const google = api.getSandboxAdapterProfile("google_flights_search");
+  assert.equal(google.status, "handoff_only");
+  assert.equal(google.responseShape, "no_price_reading");
+  assert.equal(google.safeProviderHandoffUrl, "https://www.google.com/travel/flights");
+  const trip = api.getSandboxAdapterProfile("trip_com_sandbox_stub");
+  assert.equal(trip.status, "stub_ready");
+  assert.equal(trip.responseShape, "trip_com_stub_quote");
+  const airline = api.getSandboxAdapterProfile("airline_official_sandbox_stub");
+  assert.equal(airline.status, "stub_ready");
+  assert.equal(airline.responseShape, "airline_official_stub_quote");
+  const unknown = api.evaluateSandboxAdapterReadiness("unknown_provider");
+  assert.equal(unknown.status, "blocked");
+  assert.equal(unknown.safeProviderHandoffUrl, null);
+  assert.equal(unknown.bookingUrl, null);
+  assert.equal(unknown.checkoutUrl, null);
+  assert.equal(unknown.paymentUrl, null);
+  assert.equal(unknown.orderUrl, null);
+  assert.equal(unknown.productionProviderEnabled, false);
+  assert.equal(unknown.booking, false);
+  assert.equal(unknown.payment, false);
+  assert.equal(unknown.order, false);
+  assert.equal(unknown.identityUpload, false);
+  const audit = api.buildMultiProviderSandboxAdapterRegistryAuditDraft();
+  assert.equal(audit.rawResponseStored, false);
+  const serial = JSON.stringify([registry, google, trip, airline, unknown, audit]);
+  assert.equal(/token|key|secret|endpoint/i.test(serial), false);
+  console.log("MULTI_PROVIDER_SANDBOX_ADAPTER_REGISTRY PASS");
+}
+main();
