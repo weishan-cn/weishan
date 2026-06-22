@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION = "2.1.46";
+  const READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION = "2.1.47";
   const CONTROLLER_NAME = "read_only_quote_refresh_controller_v1";
 
   function clone(value) {
@@ -30,6 +30,7 @@
   function getIntegrityApi() { return window.WeishanRealFlightPriceIntegrityGuard || {}; }
   function getEvidenceApi() { return window.WeishanRealFlightPriceEvidenceReport || {}; }
   function getCandidateCardApi() { return window.WeishanReadOnlyPriceCandidateCardViewModel || {}; }
+  function getStateStoreApi() { return window.WeishanReadOnlyQuoteRefreshStateStore || {}; }
 
   function normalizeTask(task, options) {
     const safe = task && typeof task === "object" ? task : {};
@@ -100,10 +101,12 @@
       priceEvidenceReport:null,
       candidateCard:null,
       userFacing:false,
+      userTriggeredOnly:true,
+      autoRefresh:false,
       canReplace:false,
       showableAsRealPrice:false,
       showableAsCandidateEvidence:available,
-      refreshButton:{ label:"刷新只读报价", enabled:available, reason:available ? "可手动刷新只读候选证据" : "当前只读报价刷新未就绪", requiresConfirmation:false, autoRun:false, payment:false, order:false, identityUpload:false },
+      refreshButton:{ label:"刷新只读报价", enabled:available, reason:available ? "可手动刷新只读候选证据" : "当前只读报价刷新未就绪", requiresConfirmation:false, autoRun:false, autoRefresh:false, payment:false, order:false, identityUpload:false },
       productionProviderEnabled:false,
       redacted:true
     }, safety()));
@@ -150,12 +153,63 @@
         showableAsRealPrice:false,
         canReplace:false,
         userFacing:false,
-        refreshButton:{ label:"刷新只读报价", enabled:true, reason:"仅更新候选证据，不代表已锁价或可出票", requiresConfirmation:false, autoRun:false, payment:false, order:false, identityUpload:false },
+        userTriggeredOnly:true,
+        autoRefresh:false,
+        lastRefreshStatus:"refreshed",
+        refreshButton:{ label:"刷新只读报价", enabled:true, reason:"仅更新候选证据，不代表已锁价或可出票", requiresConfirmation:false, autoRun:false, autoRefresh:false, payment:false, order:false, identityUpload:false },
         redacted:true
       }, safety(), { safeProviderHandoffUrl:report && report.handoff ? report.handoff.safeProviderHandoffUrl || null : null }));
     } catch (error) {
-      return clone(Object.assign({}, availability, { status:"failed_safe", reason:"read-only quote refresh failed safe", errorCode:"READ_ONLY_REFRESH_FAILED_SAFE", showableAsCandidateEvidence:false, redacted:true }, safety()));
+      return clone(Object.assign({}, availability, { status:"failed_safe", lastRefreshStatus:"failed_safe", reason:"read-only quote refresh failed safe", errorCode:"READ_ONLY_REFRESH_FAILED_SAFE", showableAsCandidateEvidence:false, userTriggeredOnly:true, autoRefresh:false, redacted:true }, safety()));
     }
+  }
+
+  function persistRefreshResult(result, storageLike) {
+    const storeApi = getStateStoreApi();
+    if (typeof storeApi.saveReadOnlyQuoteRefreshState !== "function") return { persistedRefreshState:null, refreshStateSummary:null };
+    const persisted = storeApi.saveReadOnlyQuoteRefreshState(Object.assign({}, result, {
+      lastRefreshStatus:result.status === "refreshed" ? "refreshed" : (result.status === "failed_safe" ? "failed_safe" : result.status),
+      priceEvidenceReport:result.priceEvidenceReport || null,
+      priceQuote:result.priceEvidenceReport && result.priceEvidenceReport.priceQuote || null,
+      provider:result.priceEvidenceReport && result.priceEvidenceReport.provider || null,
+      handoff:result.priceEvidenceReport && result.priceEvidenceReport.handoff || null,
+      integrity:result.integrity || result.priceEvidenceReport && result.priceEvidenceReport.integrity || null
+    }), storageLike);
+    const summary = typeof storeApi.buildReadOnlyQuoteRefreshStateSummary === "function"
+      ? storeApi.buildReadOnlyQuoteRefreshStateSummary(persisted)
+      : null;
+    return { persistedRefreshState:persisted, refreshStateSummary:summary };
+  }
+
+  function runAndPersistReadOnlyQuoteRefresh(task, options) {
+    const opts = options && typeof options === "object" ? options : {};
+    const result = runReadOnlyQuoteRefresh(task, opts);
+    const persisted = persistRefreshResult(result, opts.storageLike);
+    return clone(Object.assign({}, result, persisted, { autoOpen:false, autoRefresh:false, userTriggeredOnly:true }, safety()));
+  }
+
+  function loadLastReadOnlyQuoteRefreshEvidence(options) {
+    const opts = options && typeof options === "object" ? options : {};
+    const storeApi = getStateStoreApi();
+    const state = typeof storeApi.loadReadOnlyQuoteRefreshState === "function"
+      ? storeApi.loadReadOnlyQuoteRefreshState(opts.storageLike)
+      : null;
+    const summary = typeof storeApi.buildReadOnlyQuoteRefreshStateSummary === "function"
+      ? storeApi.buildReadOnlyQuoteRefreshStateSummary(state)
+      : null;
+    return clone(Object.assign({ controllerName:CONTROLLER_NAME, appVersion:READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION, state:state, refreshStateSummary:summary, redacted:true }, safety()));
+  }
+
+  function clearLastReadOnlyQuoteRefreshEvidence(options) {
+    const opts = options && typeof options === "object" ? options : {};
+    const storeApi = getStateStoreApi();
+    const state = typeof storeApi.clearReadOnlyQuoteRefreshState === "function"
+      ? storeApi.clearReadOnlyQuoteRefreshState(opts.storageLike)
+      : null;
+    const summary = typeof storeApi.buildReadOnlyQuoteRefreshStateSummary === "function"
+      ? storeApi.buildReadOnlyQuoteRefreshStateSummary(state)
+      : null;
+    return clone(Object.assign({ controllerName:CONTROLLER_NAME, appVersion:READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION, state:state, refreshStateSummary:summary, redacted:true }, safety()));
   }
 
   function buildReadOnlyQuoteRefreshAuditDraft(task, options) {
@@ -173,6 +227,8 @@
       autoRun:false,
       autoRefresh:false,
       userFacing:false,
+      userTriggeredOnly:true,
+      autoRefresh:false,
       canReplace:false,
       showableAsRealPrice:false,
       showableAsCandidateEvidence:result.showableAsCandidateEvidence === true,
@@ -196,6 +252,9 @@
     buildReadOnlyQuoteRefreshRequest,
     evaluateReadOnlyQuoteRefreshAvailability,
     runReadOnlyQuoteRefresh,
+    runAndPersistReadOnlyQuoteRefresh,
+    loadLastReadOnlyQuoteRefreshEvidence,
+    clearLastReadOnlyQuoteRefreshEvidence,
     buildReadOnlyQuoteRefreshAuditDraft
   };
 })();

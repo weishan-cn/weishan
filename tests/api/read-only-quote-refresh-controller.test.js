@@ -19,6 +19,7 @@ function assertSafety(payload) {
   assert.equal(payload.refreshButton.label, "刷新只读报价");
   assert.equal(payload.refreshButton.requiresConfirmation, false);
   assert.equal(payload.refreshButton.autoRun, false);
+  assert.equal(payload.refreshButton.autoRefresh, false);
   assert.equal(payload.refreshButton.payment, false);
   assert.equal(payload.refreshButton.order, false);
   assert.equal(payload.refreshButton.identityUpload, false);
@@ -30,6 +31,7 @@ function main() {
     "apps/desktop/src/renderer/core/trustedFlightSourceRegistry.js",
     "apps/desktop/src/renderer/core/safeProviderDeepLinkHandoffGate.js",
     "apps/desktop/src/renderer/core/providerConfirmationHandoffUi.js",
+    "apps/desktop/src/renderer/core/providerSandboxBindingWizard.js",
     "apps/desktop/src/renderer/core/providerCredentialReadinessPanel.js",
     "apps/desktop/src/renderer/core/singleFlightProviderSandboxConnector.js",
     "apps/desktop/src/renderer/core/trustedFlightSourceEvidenceReport.js",
@@ -38,15 +40,16 @@ function main() {
     "apps/desktop/src/renderer/core/realFlightPriceProviderAdapterSlot.js",
     "apps/desktop/src/renderer/core/realFlightPriceIntegrityGuard.js",
     "apps/desktop/src/renderer/core/realFlightPriceEvidenceReport.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteRefreshStateStore.js",
     "apps/desktop/src/renderer/core/readOnlyPriceCandidateCardViewModel.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteRefreshController.js"
   ]);
   const api = windowRef.WeishanReadOnlyQuoteRefreshController;
-  assert.equal(api.READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION, "2.1.46");
+  assert.equal(api.READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION, "2.1.47");
 
   const request = api.buildReadOnlyQuoteRefreshRequest({ origin:"上海", destination:"成都", departureDate:"2026-07-15" });
   assert.equal(request.controllerName, "read_only_quote_refresh_controller_v1");
-  assert.equal(request.appVersion, "2.1.46");
+  assert.equal(request.appVersion, "2.1.47");
   assert.equal(request.autoRun, false);
   assert.equal(request.autoOpen, false);
   assert.equal(request.bookingUrl, null);
@@ -81,6 +84,22 @@ function main() {
   assert.equal(blocked.status, "blocked");
   assert.equal(blocked.showableAsCandidateEvidence, false);
   assertSafety(blocked);
+
+  const storage = (() => { const data = new Map(); return { getItem:(name) => data.has(name) ? data.get(name) : null, setItem:(name, value) => data.set(name, String(value)), removeItem:(name) => data.delete(name) }; })();
+  const persisted = api.runAndPersistReadOnlyQuoteRefresh({ origin:"上海", destination:"成都" }, { storageLike:storage });
+  assert.equal(persisted.status, "refreshed");
+  assert.equal(persisted.persistedRefreshState.lastRefreshStatus, "refreshed");
+  assert.equal(persisted.refreshStateSummary.summary, "最近一次刷新：已刷新");
+  assert.equal(api.loadLastReadOnlyQuoteRefreshEvidence({ storageLike:storage }).state.lastRefreshStatus, "refreshed");
+  assert.equal(api.clearLastReadOnlyQuoteRefreshEvidence({ storageLike:storage }).state.lastRefreshStatus, "not_run");
+
+  const originalEvidence = windowRef.WeishanRealFlightPriceEvidenceReport.buildRealFlightPriceEvidenceReport;
+  windowRef.WeishanRealFlightPriceEvidenceReport.buildRealFlightPriceEvidenceReport = () => { throw new Error("safe failure"); };
+  const failed = api.runAndPersistReadOnlyQuoteRefresh({ origin:"上海", destination:"成都" }, { storageLike:storage });
+  assert.equal(failed.status, "failed_safe");
+  assert.equal(failed.persistedRefreshState.lastRefreshStatus, "failed_safe");
+  assert.equal(failed.refreshStateSummary.summary, "最近一次刷新：安全失败");
+  windowRef.WeishanRealFlightPriceEvidenceReport.buildRealFlightPriceEvidenceReport = originalEvidence;
 
   const audit = api.buildReadOnlyQuoteRefreshAuditDraft({ origin:"上海", destination:"成都" });
   assert.equal(audit.eventType, "READ_ONLY_QUOTE_REFRESH_CONTROLLER_AUDIT_DRAFT");

@@ -260,6 +260,24 @@ function checkRealFlightPriceReadOnlyProviderContractVersion(results, expectedVe
   addCheck(results, "apps/desktop real flight price read only provider contract version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/realFlightPriceReadOnlyProviderContract.js REAL_FLIGHT_PRICE_READ_ONLY_PROVIDER_CONTRACT_VERSION");
 }
 
+function checkProviderSandboxBindingWizardVersion(results, expectedVersion) {
+  const wizardPath = "apps/desktop/src/renderer/core/providerSandboxBindingWizard.js";
+  const wizard = readText(wizardPath);
+  if (!wizard) { results.push({ name: "apps/desktop provider sandbox binding wizard version", pass: false, detail: wizardPath + " missing" }); return; }
+  if (wizard.__readError) { results.push({ name: "apps/desktop provider sandbox binding wizard version", pass: false, detail: wizard.__readError }); return; }
+  const match = wizard.match(/PROVIDER_SANDBOX_BINDING_WIZARD_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop provider sandbox binding wizard version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/providerSandboxBindingWizard.js PROVIDER_SANDBOX_BINDING_WIZARD_VERSION");
+}
+
+function checkReadOnlyQuoteRefreshStateStoreVersion(results, expectedVersion) {
+  const storePath = "apps/desktop/src/renderer/core/readOnlyQuoteRefreshStateStore.js";
+  const store = readText(storePath);
+  if (!store) { results.push({ name: "apps/desktop read only quote refresh state store version", pass: false, detail: storePath + " missing" }); return; }
+  if (store.__readError) { results.push({ name: "apps/desktop read only quote refresh state store version", pass: false, detail: store.__readError }); return; }
+  const match = store.match(/READ_ONLY_QUOTE_REFRESH_STATE_STORE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop read only quote refresh state store version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/readOnlyQuoteRefreshStateStore.js READ_ONLY_QUOTE_REFRESH_STATE_STORE_VERSION");
+}
+
 function checkProviderCredentialReadinessPanelVersion(results, expectedVersion) {
   const panelPath = "apps/desktop/src/renderer/core/providerCredentialReadinessPanel.js";
   const panel = readText(panelPath);
@@ -1510,12 +1528,14 @@ function runVersionCheck() {
     checkFlightSandboxProviderMatrixVersion(results, rootPackage.version);
     checkTrustedFlightSourceEvidenceReportVersion(results, rootPackage.version);
     checkRealFlightPriceReadOnlyProviderContractVersion(results, rootPackage.version);
+    checkProviderSandboxBindingWizardVersion(results, rootPackage.version);
     checkProviderCredentialReadinessPanelVersion(results, rootPackage.version);
     checkSingleFlightProviderSandboxConnectorVersion(results, rootPackage.version);
     checkRealFlightPriceFetchSafetyGateVersion(results, rootPackage.version);
     checkRealFlightPriceProviderAdapterSlotVersion(results, rootPackage.version);
     checkRealFlightPriceIntegrityGuardVersion(results, rootPackage.version);
     checkRealFlightPriceEvidenceReportVersion(results, rootPackage.version);
+    checkReadOnlyQuoteRefreshStateStoreVersion(results, rootPackage.version);
     checkReadOnlyQuoteRefreshControllerVersion(results, rootPackage.version);
     checkSecureKeyStoragePlanVersion(results, rootPackage.version);
     checkSecureStorageDesignGateVersion(results, rootPackage.version);

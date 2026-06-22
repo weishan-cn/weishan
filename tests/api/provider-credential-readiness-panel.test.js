@@ -25,24 +25,27 @@ function assertSafety(panel) {
 }
 
 function main() {
-  const windowRef = load(["apps/desktop/src/renderer/core/providerCredentialReadinessPanel.js"]);
+  const windowRef = load(["apps/desktop/src/renderer/core/providerSandboxBindingWizard.js", "apps/desktop/src/renderer/core/providerCredentialReadinessPanel.js"]);
   const api = windowRef.WeishanProviderCredentialReadinessPanel;
-  assert.equal(api.PROVIDER_CREDENTIAL_READINESS_PANEL_VERSION, "2.1.46");
+  assert.equal(api.PROVIDER_CREDENTIAL_READINESS_PANEL_VERSION, "2.1.47");
 
   const fixture = api.buildProviderCredentialReadinessPanel();
   assert.equal(fixture.panelName, "provider_credential_readiness_panel_v1");
-  assert.equal(fixture.appVersion, "2.1.46");
+  assert.equal(fixture.appVersion, "2.1.47");
   assert.equal(fixture.providerMode, "fixture");
   assert.equal(fixture.status, "fixture_ready");
   assert.equal(fixture.canAttemptReadOnlyRefresh, true);
   assert.equal(fixture.networkDryRunAllowed, false);
   assert.equal(fixture.missingRequirements.length, 0);
+  assert.equal(fixture.wizardSummary.title, "Provider 沙盒绑定准备");
+  assert.equal(fixture.wizardSummary.status, "fixture_ready");
   assertSafety(fixture);
 
   const sandboxMissing = api.evaluateProviderCredentialReadiness({ providerMode:"sandbox_read_only" });
   assert.equal(sandboxMissing.status, "disabled");
-  assert.equal(sandboxMissing.missingRequirements.includes("secure_credential_reference"), true);
-  assert.equal(sandboxMissing.missingRequirements.includes("sandbox_dry_run_enabled"), true);
+  assert.equal(sandboxMissing.missingRequirements.includes("需要安全凭据引用"), true);
+  assert.equal(sandboxMissing.missingRequirements.includes("需要启用沙盒干跑"), true);
+  assert.equal(sandboxMissing.wizardSummary.status, "needs_setup");
   assert.equal(sandboxMissing.canAttemptReadOnlyRefresh, false);
   assertSafety(sandboxMissing);
 
@@ -51,6 +54,7 @@ function main() {
   assert.equal(sandboxReady.status, "sandbox_ready");
   assert.equal(sandboxReady.canAttemptReadOnlyRefresh, true);
   assert.equal(sandboxReady.networkDryRunAllowed, true);
+  assert.equal(sandboxReady.wizardSummary.status, "sandbox_ready");
   assertSafety(sandboxReady);
 
   const production = api.evaluateProviderCredentialReadiness({ providerMode:"production", hasSecureCredentialReference:true, sandboxDryRunEnabled:true, networkDryRunAllowed:true });
@@ -58,6 +62,7 @@ function main() {
   assert.equal(production.status, "disabled");
   assert.equal(production.canAttemptReadOnlyRefresh, false);
   assert.equal(production.productionProviderEnabled, false);
+  assert.equal(production.missingRequirements.includes("生产 Provider 暂未启用"), true);
   assertSafety(production);
 
   const blocked = api.evaluateProviderCredentialReadiness({ restrictedCategoryDecision:"blocked" });

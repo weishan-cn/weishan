@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CREDENTIAL_READINESS_PANEL_VERSION = "2.1.46";
+  const PROVIDER_CREDENTIAL_READINESS_PANEL_VERSION = "2.1.47";
   const PANEL_NAME = "provider_credential_readiness_panel_v1";
 
   function clone(value) {
@@ -22,6 +22,10 @@
   function isRestricted(options) {
     const safe = options && typeof options === "object" ? options : {};
     return safe.restrictedCategory === true || safe.restrictedCategoryDecision === "blocked" || safe.category === "restricted_provider" || safe.category === "restricted_or_blocked";
+  }
+
+  function getWizardApi() {
+    return window.WeishanProviderSandboxBindingWizard || {};
   }
 
   function baseSafety() {
@@ -45,6 +49,10 @@
     const sandboxDryRunEnabled = safe.sandboxDryRunEnabled === true || safe.dryRunEnabled === true;
     const networkDryRunAllowed = providerMode === "sandbox_read_only" && safe.networkDryRunAllowed === true;
     const missingRequirements = [];
+    const wizardApi = getWizardApi();
+    const wizard = typeof wizardApi.buildProviderSandboxBindingWizardModel === "function"
+      ? wizardApi.buildProviderSandboxBindingWizardModel(Object.assign({}, safe, { providerMode }))
+      : null;
     let status = "disabled";
     let canAttemptReadOnlyRefresh = false;
     let reason = "provider credential readiness disabled";
@@ -52,14 +60,14 @@
     if (isRestricted(safe)) {
       status = "blocked";
       reason = "restricted category blocked";
-      missingRequirements.push("allowed_category");
+      missingRequirements.push("当前品类已被安全阻断");
     } else if (providerMode === "fixture") {
       status = "fixture_ready";
       reason = "fixture read-only refresh ready";
       canAttemptReadOnlyRefresh = true;
     } else if (providerMode === "sandbox_read_only") {
-      if (!hasSecureCredentialReference) missingRequirements.push("secure_credential_reference");
-      if (!sandboxDryRunEnabled) missingRequirements.push("sandbox_dry_run_enabled");
+      if (!sandboxDryRunEnabled) missingRequirements.push("需要启用沙盒干跑");
+      if (!hasSecureCredentialReference) missingRequirements.push("需要安全凭据引用");
       if (missingRequirements.length === 0) {
         status = "sandbox_ready";
         reason = "sandbox read-only refresh ready";
@@ -71,8 +79,34 @@
     } else {
       status = "disabled";
       reason = "production provider disabled";
-      missingRequirements.push("production_provider_disabled");
+      missingRequirements.push("生产 Provider 暂未启用");
     }
+
+    const wizardSummary = wizard ? {
+      wizardName:wizard.wizardName,
+      title:wizard.title,
+      status:wizard.status,
+      steps:wizard.steps,
+      canAttemptReadOnlyRefresh:wizard.actions && wizard.actions.canAttemptReadOnlyRefresh === true,
+      canEnableProductionProvider:false,
+      canEnterSecretHere:false,
+      canSaveSecretHere:false,
+      missingRequirements:wizard.missingRequirements || missingRequirements,
+      productionProviderEnabled:false,
+      redacted:true
+    } : {
+      wizardName:"provider_sandbox_binding_wizard_v1",
+      title:"Provider 沙盒绑定准备",
+      status:status,
+      steps:[],
+      canAttemptReadOnlyRefresh:canAttemptReadOnlyRefresh,
+      canEnableProductionProvider:false,
+      canEnterSecretHere:false,
+      canSaveSecretHere:false,
+      missingRequirements:missingRequirements,
+      productionProviderEnabled:false,
+      redacted:true
+    };
 
     return clone({
       panelName:PANEL_NAME,
@@ -87,6 +121,7 @@
       productionProviderEnabled:false,
       canAttemptReadOnlyRefresh:canAttemptReadOnlyRefresh,
       missingRequirements:missingRequirements,
+      wizardSummary:wizardSummary,
       safety:baseSafety(),
       bookingUrl:null,
       checkoutUrl:null,
@@ -116,6 +151,8 @@
       productionProviderEnabled:false,
       canAttemptReadOnlyRefresh:readiness.canAttemptReadOnlyRefresh === true,
       missingRequirements:readiness.missingRequirements || [],
+      wizardStatus:readiness.wizardSummary && readiness.wizardSummary.status || readiness.status,
+      wizardSummary:readiness.wizardSummary || null,
       safety:baseSafety(),
       bookingUrl:null,
       checkoutUrl:null,

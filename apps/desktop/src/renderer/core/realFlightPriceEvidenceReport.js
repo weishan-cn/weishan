@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION = "2.1.46";
+  const REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION = "2.1.47";
   const REPORT_NAME = "real_flight_price_evidence_report_v1";
 
   function clone(value) {
@@ -220,7 +220,7 @@
       provider: { providerId:text(priceQuote.providerId || slotStatus.providerId || providerConnector.providerId), providerName:text(priceQuote.providerName || slotStatus.providerName || providerConnector.providerName), providerMode, fareSource:text(priceQuote.fareSource || slotStatus.fareSource || "fixture_read_only") },
       fetchSafety: { status:fetchSafety.status || "disabled", decision:fetchSafety.decision || "disabled", readOnly:true, networkAllowed:fetchSafety.networkAllowed === true, booking:false, payment:false, order:false, identityUpload:false, productionProviderEnabled:false },
       refresh: { refreshSupported:true, refreshMode:refreshMode, lastRefreshStatus:lastRefreshStatus || "not_run", userTriggeredOnly:true, autoRefresh:false },
-      credentialReadiness: { status:credentialReadiness.status || "disabled", hasSecureCredentialReference:credentialReadiness.hasSecureCredentialReference === true, sandboxDryRunEnabled:credentialReadiness.sandboxDryRunEnabled === true, networkDryRunAllowed:credentialReadiness.networkDryRunAllowed === true, productionProviderEnabled:false, redacted:true },
+      credentialReadiness: { status:credentialReadiness.status || "disabled", hasSecureCredentialReference:credentialReadiness.hasSecureCredentialReference === true, sandboxDryRunEnabled:credentialReadiness.sandboxDryRunEnabled === true, networkDryRunAllowed:credentialReadiness.networkDryRunAllowed === true, productionProviderEnabled:false, wizardSummary:credentialReadiness.wizardSummary || null, redacted:true },
       priceQuote: { currency:text(priceQuote.currency || "CNY"), fareSource:text(priceQuote.fareSource || slotStatus.fareSource || "fixture_read_only"), baseFare:priceQuote.baseFare, taxesAndFees:priceQuote.taxesAndFees, providerFees:priceQuote.providerFees, totalPrice:priceQuote.totalPrice, priceUpdatedAt:priceQuote.priceUpdatedAt || null, freshnessStatus:priceQuote.freshnessStatus || integrity.freshnessStatus || "unknown_fixture", taxFeeIntegrityStatus:priceQuote.taxFeeIntegrityStatus || integrity.taxFeeIntegrityStatus || "incomplete", handoffType:text(priceQuote.handoffType || "registry_gate_required"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, booking:false, payment:false, order:false, identityUpload:false, redacted:true },
       integrity: { totalMatchesBreakdown:integrity.totalMatchesBreakdown === true, taxFeeIntegrityStatus:integrity.taxFeeIntegrityStatus || "incomplete", freshnessStatus:integrity.freshnessStatus || "unknown_fixture", showableAsRealPrice:false, showableAsCandidateEvidence:integrity.showableAsCandidateEvidence === true, userFacingCaveatRequired:true, caveat:integrity.caveat || "价格、库存、税费和规则以平台页面为准。", redacted:true },
       handoff: { safeProviderHandoffReady, safeProviderHandoffUrl:handoffCandidate.safeProviderHandoffUrl || null, bookingUrl:null, autoOpen:false, requiresConfirmation:true, providerConfirmationLink:handoffCandidate.providerConfirmationLink || "disabled", confirmationUiStatus:confirmationUi.status || "blocked", redacted:true },
