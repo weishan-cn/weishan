@@ -6652,6 +6652,8 @@
     const sentinelApi = window.WeishanFlightWorkflowSafetyRegressionSentinel || {};
     const operatorApi = window.WeishanFlightWorkflowOperatorConsole || {};
     const operatorViewModelApi = window.WeishanFlightWorkflowOperatorConsoleViewModel || {};
+    const scenarioSimulatorApi = window.WeishanFlightWorkflowScenarioSimulator || {};
+    const safetyTestMatrixApi = window.WeishanFlightWorkflowSafetyTestMatrixConsole || {};
     const auditInput = Object.assign({}, workflow, { rawText:null, rawInput:null, rawUserText:null, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, blockedActions:blockedActions, actionQueueSummary:actionQueue, progressTimelineSummary:timeline });
     const auditReview = typeof auditApi.buildFlightWorkflowAuditReviewCenter === "function" ? auditApi.buildFlightWorkflowAuditReviewCenter(auditInput) : null;
     const safeExportPreview = typeof exportApi.buildFlightWorkflowSafeSessionExportPreview === "function" ? exportApi.buildFlightWorkflowSafeSessionExportPreview(Object.assign({}, auditInput, { auditReviewSummary:auditReview })) : null;
@@ -6660,6 +6662,8 @@
     const finalSafeHandoffPacket = typeof finalPacketApi.buildFlightWorkflowFinalSafeHandoffPacket === "function" ? finalPacketApi.buildFlightWorkflowFinalSafeHandoffPacket(Object.assign({}, auditInput, { auditReviewSummary:auditReview, safetyRegressionSummary:safetyRegressionSummary, humanReviewChecklistSummary:humanReviewChecklist })) : null;
     const handoffPacketPolicy = typeof packetPolicyApi.evaluateFlightWorkflowHandoffPacketPolicy === "function" ? packetPolicyApi.evaluateFlightWorkflowHandoffPacketPolicy({ finalSafeHandoffPacketSummary:finalSafeHandoffPacket, safetyRegressionSummary:safetyRegressionSummary }) : null;
     const operatorConsole = typeof operatorApi.buildFlightWorkflowOperatorConsole === "function" ? operatorApi.buildFlightWorkflowOperatorConsole(Object.assign({}, auditInput, { auditReviewSummary:auditReview, safeSessionExportPreview:safeExportPreview, safetyRegressionSummary:safetyRegressionSummary, humanReviewChecklistSummary:humanReviewChecklist, finalSafeHandoffPacketSummary:finalSafeHandoffPacket, handoffPacketPolicyDecision:handoffPacketPolicy })) : null;
+    const scenarioSimulation = typeof scenarioSimulatorApi.runFlightWorkflowScenarioSimulationSuite === "function" ? scenarioSimulatorApi.runFlightWorkflowScenarioSimulationSuite(Object.assign({}, auditInput, { auditReviewSummary:auditReview, safeSessionExportPreview:safeExportPreview, safetyRegressionSummary:safetyRegressionSummary, humanReviewChecklistSummary:humanReviewChecklist, finalSafeHandoffPacketSummary:finalSafeHandoffPacket, handoffPacketPolicyDecision:handoffPacketPolicy, operatorConsoleSummary:operatorConsole })) : null;
+    const safetyTestMatrix = typeof safetyTestMatrixApi.buildFlightWorkflowSafetyTestMatrixConsole === "function" ? safetyTestMatrixApi.buildFlightWorkflowSafetyTestMatrixConsole({ results: scenarioSimulation && Array.isArray(scenarioSimulation.results) ? scenarioSimulation.results : [] }) : null;
     const operatorViewModel = typeof operatorViewModelApi.buildFlightWorkflowOperatorConsoleViewModel === "function" ? operatorViewModelApi.buildFlightWorkflowOperatorConsoleViewModel({ operatorConsoleSummary:operatorConsole }) : null;
     const riskBadges = typeof badgeApi.buildFlightWorkflowRiskBadges === "function" ? badgeApi.buildFlightWorkflowRiskBadges({ auditReview:auditReview, safeSessionExportPreview:safeExportPreview, humanReviewChecklistSummary:humanReviewChecklist, finalSafeHandoffPacketSummary:finalSafeHandoffPacket, handoffPacketPolicyDecision:handoffPacketPolicy, safetyRegressionSummary:safetyRegressionSummary, operatorConsoleSummary:operatorConsole, tradingBlocked:true, requiresConfirmation:true }) : null;
     function auditReviewHtml(){
@@ -6678,7 +6682,7 @@
     }
     function operatorConsoleHtml(){
       const line = operatorConsole && operatorConsole.userFacingSummary && operatorConsole.userFacingSummary.resultLabel || '存在需要注意的项目';
-      return '<section class="commerce-flight-operator-console" data-commerce-flight-operator-console="true"><h5>机票工作流运营控制台</h5><p>工作流状态</p><p>安全状态</p><p>安全回归</p><p>最近事件</p><p>已阻断动作</p><p>平台确认准备状态</p><p>' + esc(line) + '</p><p>安全回归通过</p><p>无交易链接</p><p>无付款/下单/出票</p><p>无证件/银行卡/登录凭据</p><p>无密钥或原始响应</p><p>无自动打开或自动刷新</p><p>唯珊只提供只读候选证据，不付款、不下单、不出票</p><button type="button" class="cmd-btn gray" data-commerce-flight-operator-console-show="true">查看运营控制台</button><button type="button" class="cmd-btn gray" data-commerce-flight-safety-regression-show="true">查看安全回归检查</button><div data-commerce-flight-operator-console-output="true"><p>机票工作流运营控制台</p><p>工作流状态</p><p>安全状态</p><p>平台确认准备状态</p></div><div data-commerce-flight-safety-regression-output="true"><p>安全回归</p><p>安全回归通过</p><p>无交易链接</p><p>无付款/下单/出票</p><p>无证件/银行卡/登录凭据</p><p>无密钥或原始响应</p><p>无自动打开或自动刷新</p></div></section>';
+      return '<section class="commerce-flight-operator-console" data-commerce-flight-operator-console="true"><h5>机票工作流运营控制台</h5><p>工作流状态</p><p>安全状态</p><p>安全回归</p><p>场景模拟</p><p>安全测试矩阵</p><p>最近事件</p><p>已阻断动作</p><p>平台确认准备状态</p><p>' + esc(line) + '</p><p>安全回归通过</p><p>无交易链接</p><p>无付款/下单/出票</p><p>无证件/银行卡/登录凭据</p><p>无密钥或原始响应</p><p>无自动打开或自动刷新</p><p>场景模拟仅用于安全回归，不代表真实票价、库存或可出票</p><p>安全测试矩阵仅为本地安全回归检查，不代表真实票价或可出票</p><p>唯珊只提供只读候选证据，不付款、不下单、不出票</p><button type="button" class="cmd-btn gray" data-commerce-flight-operator-console-show="true">查看运营控制台</button><button type="button" class="cmd-btn gray" data-commerce-flight-safety-regression-show="true">查看安全回归检查</button><button type="button" class="cmd-btn gray" data-commerce-flight-scenario-simulator-show="true">查看场景模拟</button><button type="button" class="cmd-btn gray" data-commerce-flight-safety-test-matrix-show="true">查看安全测试矩阵</button><div data-commerce-flight-operator-console-output="true"><p>机票工作流运营控制台</p><p>工作流状态</p><p>安全状态</p><p>平台确认准备状态</p></div><div data-commerce-flight-safety-regression-output="true"><p>安全回归</p><p>安全回归通过</p><p>无交易链接</p><p>无付款/下单/出票</p><p>无证件/银行卡/登录凭据</p><p>无密钥或原始响应</p><p>无自动打开或自动刷新</p></div><div data-commerce-flight-scenario-simulator-output="true"><p>机票工作流场景模拟</p><p>完整机票请求</p><p>缺少出发地</p><p>缺少目的地</p><p>缺少日期</p><p>平台价格变化</p><p>平台库存变化</p><p>敏感输入阻断</p><p>受限品类阻断</p><p>损坏账本恢复</p><p>非法交易链接阻断</p><p>非法密钥阻断</p><p>非法付款动作</p><p>平台确认需要确认</p><p>恢复脱敏状态</p><p>未知动作安全降级</p><p>场景模拟仅用于安全回归，不代表真实票价、库存或可出票</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p></div><div data-commerce-flight-safety-test-matrix-output="true"><p>安全测试矩阵</p><p>场景数</p><p>通过</p><p>警告</p><p>失败</p><p>安全测试矩阵仅为本地安全回归检查，不代表真实票价或可出票</p></div></section>';
     }
     function riskBadgeHtml(){
       const line = riskBadges && riskBadges.summaryLabel || '只读安全 / 安全回归通过 / 运营控制台正常 / 需要二次确认 / 交易动作已阻断 / 不可导出 / 仍需复核';
@@ -7619,6 +7623,26 @@
         const output = workflowPanel.querySelector("[data-commerce-flight-safety-regression-output]") || workflowPanel;
         output.innerHTML = '<p>安全回归</p><p>安全回归通过</p><p>无交易链接</p><p>无付款/下单/出票</p><p>无证件/银行卡/登录凭据</p><p>无密钥或原始响应</p><p>无自动打开或自动刷新</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p>';
         showCommercePlatformTemplateFeedback("已显示安全回归检查", false);
+        return;
+      }
+      const flightScenarioSimulatorButton = target && target.closest("[data-commerce-flight-scenario-simulator-show]");
+      if (flightScenarioSimulatorButton && host.contains(flightScenarioSimulatorButton)) {
+        event.preventDefault();
+        const workflowPanel = flightScenarioSimulatorButton.closest("[data-commerce-flight-evidence-workflow]") || flightScenarioSimulatorButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = workflowPanel.querySelector("[data-commerce-flight-scenario-simulator-output]") || workflowPanel;
+        const scenarioSummary = scenarioSimulation && scenarioSimulation.summary || scenarioSimulation || {};
+        output.innerHTML = '<p>机票工作流场景模拟</p><p>场景数：' + esc(String(scenarioSummary.scenarioCount || 0)) + '</p><p>通过：' + esc(String(scenarioSummary.passedCount || 0)) + '</p><p>警告：' + esc(String(scenarioSummary.warningCount || 0)) + '</p><p>失败：' + esc(String(scenarioSummary.failedCount || 0)) + '</p><p>完整机票请求</p><p>缺少出发地</p><p>缺少目的地</p><p>缺少日期</p><p>平台价格变化</p><p>平台库存变化</p><p>敏感输入阻断</p><p>受限品类阻断</p><p>损坏账本恢复</p><p>非法交易链接阻断</p><p>非法密钥阻断</p><p>非法付款动作</p><p>平台确认需要确认</p><p>恢复脱敏状态</p><p>未知动作安全降级</p><p>场景模拟仅用于安全回归，不代表真实票价、库存或可出票</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p>';
+        showCommercePlatformTemplateFeedback("已显示场景模拟", false);
+        return;
+      }
+      const flightSafetyTestMatrixButton = target && target.closest("[data-commerce-flight-safety-test-matrix-show]");
+      if (flightSafetyTestMatrixButton && host.contains(flightSafetyTestMatrixButton)) {
+        event.preventDefault();
+        const workflowPanel = flightSafetyTestMatrixButton.closest("[data-commerce-flight-evidence-workflow]") || flightSafetyTestMatrixButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = workflowPanel.querySelector("[data-commerce-flight-safety-test-matrix-output]") || workflowPanel;
+        const matrixSummary = safetyTestMatrix && safetyTestMatrix.summary || safetyTestMatrix || {};
+        output.innerHTML = '<p>安全测试矩阵</p><p>场景数：' + esc(String(matrixSummary.scenarioCount || 0)) + '</p><p>通过：' + esc(String(matrixSummary.passedCount || 0)) + '</p><p>警告：' + esc(String(matrixSummary.warningCount || 0)) + '</p><p>失败：' + esc(String(matrixSummary.failedCount || 0)) + '</p><p>完整机票请求</p><p>缺少出发地</p><p>缺少目的地</p><p>缺少日期</p><p>平台价格变化</p><p>平台库存变化</p><p>敏感输入阻断</p><p>受限品类阻断</p><p>非法交易链接阻断</p><p>非法密钥阻断</p><p>非法付款动作</p><p>平台确认需要确认</p><p>恢复脱敏状态</p><p>未知动作安全降级</p><p>安全测试矩阵仅为本地安全回归检查，不代表真实票价或可出票</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p>';
+        showCommercePlatformTemplateFeedback("已显示安全测试矩阵", false);
         return;
       }
       const flightSafeActionCancelButton = target && target.closest("[data-commerce-flight-safe-action-cancel]");

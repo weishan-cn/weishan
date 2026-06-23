@@ -1,6 +1,6 @@
 {
   "name": "weishan-desktop",
-  "version": "2.1.67",
+  "version": "2.1.68",
   "private": true,
   "scripts": {
     "install:all": "npm install --prefix apps/server && npm install --prefix apps/desktop",

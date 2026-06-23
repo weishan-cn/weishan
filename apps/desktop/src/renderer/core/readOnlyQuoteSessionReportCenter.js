@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.67";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.68";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -50,6 +50,8 @@
   function sentinelApi() { return window.WeishanFlightWorkflowSafetyRegressionSentinel || {}; }
   function operatorApi() { return window.WeishanFlightWorkflowOperatorConsole || {}; }
   function operatorViewModelApi() { return window.WeishanFlightWorkflowOperatorConsoleViewModel || {}; }
+  function scenarioSimulatorApi() { return window.WeishanFlightWorkflowScenarioSimulator || {}; }
+  function safetyTestMatrixApi() { return window.WeishanFlightWorkflowSafetyTestMatrixConsole || {}; }
 
   function safeText(value) {
     return text(value).replace(FORBIDDEN_TEXT_RE, "保守候选证据");
@@ -130,7 +132,9 @@
       finalReviewBadges: stripUnsafe(safe.finalReviewBadges || []),
       safetyRegressionSummary: stripUnsafe(safe.safetyRegressionSummary || null),
       operatorConsoleSummary: stripUnsafe(safe.operatorConsoleSummary || null),
-      operatorConsoleViewModel: stripUnsafe(safe.operatorConsoleViewModel || null)
+      operatorConsoleViewModel: stripUnsafe(safe.operatorConsoleViewModel || null),
+      scenarioSimulationSummary: stripUnsafe(safe.scenarioSimulationSummary || null),
+      safetyTestMatrixSummary: stripUnsafe(safe.safetyTestMatrixSummary || null)
     };
   }
 
@@ -169,6 +173,8 @@
     const safetyRegressionSummary = workflow.safetyRegressionSummary || safe.safetyRegressionSummary || (typeof sentinelApi().buildFlightWorkflowSafetyRegressionReport === "function" ? sentinelApi().buildFlightWorkflowSafetyRegressionReport(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview })) : null);
     const operatorConsoleSummary = workflow.operatorConsoleSummary || safe.operatorConsoleSummary || (typeof operatorApi().buildFlightWorkflowOperatorConsole === "function" ? operatorApi().buildFlightWorkflowOperatorConsole(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview, humanReviewChecklistSummary:humanReviewChecklistSummary, finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, handoffPacketPolicyDecision:handoffPacketPolicyDecision, safetyRegressionSummary:safetyRegressionSummary })) : null);
     const operatorConsoleViewModel = workflow.operatorConsoleViewModel || safe.operatorConsoleViewModel || (typeof operatorViewModelApi().buildFlightWorkflowOperatorConsoleViewModel === "function" ? operatorViewModelApi().buildFlightWorkflowOperatorConsoleViewModel({ operatorConsoleSummary:operatorConsoleSummary }) : null);
+    const scenarioSimulationSummary = workflow.scenarioSimulationSummary || safe.scenarioSimulationSummary || null;
+    const safetyTestMatrixSummary = workflow.safetyTestMatrixSummary || safe.safetyTestMatrixSummary || null;
     const finalReviewBadges = workflow.finalReviewBadges || safe.finalReviewBadges || riskBadgeModel && riskBadgeModel.badges || [];
     return clone({
       title: "候选报价证据摘要",
@@ -222,6 +228,8 @@
       safetyRegressionSummary: safetyRegressionSummary ? { title:"安全回归", line:safetyRegressionSummary.status === "pass" ? "安全回归通过" : "安全回归失败", checkCount:(safetyRegressionSummary.checks || []).length || 0, redacted:true } : null,
       operatorConsoleSummary: operatorConsoleSummary ? { title:"机票工作流运营控制台", line:operatorConsoleSummary.userFacingSummary && operatorConsoleSummary.userFacingSummary.resultLabel || "存在需要注意的项目", status:operatorConsoleSummary.status, redacted:true } : null,
       operatorConsoleViewModel: operatorConsoleViewModel,
+      scenarioSimulationSummary: scenarioSimulationSummary,
+      safetyTestMatrixSummary: safetyTestMatrixSummary,
       platformCheckWarnings: stripUnsafe(decisionAssistant && decisionAssistant.platformCheckWarnings || (safe.manualPlatformCheckEvidence ? ["平台核对结果已记录", "平台最终为准"] : ["仍需平台确认"])),
       workflowStateSummary: workflowFields(safe).workflowStateSummary,
       clarificationSummary: workflowFields(safe).clarificationSummary,
@@ -408,6 +416,8 @@
       safetyRegressionSummary: report.safetyReport.safetyRegressionSummary || null,
       operatorConsoleSummary: report.safetyReport.operatorConsoleSummary || null,
       operatorConsoleViewModel: report.safetyReport.operatorConsoleViewModel || null,
+      scenarioSimulationSummary: report.safetyReport.scenarioSimulationSummary || null,
+      safetyTestMatrixSummary: report.safetyReport.safetyTestMatrixSummary || null,
       continuitySummary: report.safetyReport.continuitySummary || null,
       confirmationStateSummary: report.safetyReport.confirmationStateSummary || null,
       recoverySummary: report.safetyReport.recoverySummary || null,

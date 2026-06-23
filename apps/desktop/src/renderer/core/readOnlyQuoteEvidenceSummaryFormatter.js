@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.67";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.68";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -216,6 +216,8 @@
       canResumeWorkflow: safe.canResumeWorkflow === true,
       resumeActions: stripUnsafe(Array.isArray(safe.resumeActions) ? safe.resumeActions : (safe.resumeCoachSummary && safe.resumeCoachSummary.allowedActions || [])),
       workflowStepList: stripUnsafe(safe.workflowStepList || []),
+      scenarioSimulationSummary: stripUnsafe(safe.scenarioSimulationSummary || null),
+      safetyTestMatrixSummary: stripUnsafe(safe.safetyTestMatrixSummary || null),
       missingFields: Array.isArray(safe.missingFields) ? safe.missingFields.map(safeLine) : [],
       clarificationQuestions: questions,
       workflowUserMessage: safeLine(safe.workflowUserMessage || (questions.length ? "需要补充信息。信息完整后再生成候选证据。" : "候选证据已生成，平台最终为准。")),
@@ -257,6 +259,16 @@
     return clone({ title:"安全回归", line:safeLine(safe.status === "pass" ? "安全回归通过" : "安全回归失败"), sectionLabels:["无交易链接", "无付款/下单/出票", "无证件/银行卡/登录凭据", "无密钥或原始响应", "无自动打开或自动刷新"], bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
+  function formatFlightWorkflowScenarioSimulationSummary(input) {
+    const safe = stripUnsafe(input && typeof input === "object" ? input : {}) || {};
+    return clone({ title:"机票工作流场景模拟", line:safeLine(safe.userFacingSummary && safe.userFacingSummary.resultLabel || (safe.status === "pass" ? "场景模拟通过" : (safe.status === "warning" ? "场景模拟存在警告" : (safe.status === "fail" ? "场景模拟存在失败项" : "场景模拟已记录")))), scenarioCount:Number(safe.scenarioCount || 0), passedCount:Number(safe.passedCount || 0), warningCount:Number(safe.warningCount || 0), failedCount:Number(safe.failedCount || 0), blockedCount:Number(safe.blockedCount || 0), sectionLabels:["完整机票请求", "缺少出发地", "缺少目的地", "缺少日期", "平台价格变化", "平台库存变化", "敏感输入阻断", "受限品类阻断"], caveat:"场景模拟仅用于安全回归，不代表真实票价、库存或可出票。", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatFlightWorkflowSafetyTestMatrixSummary(input) {
+    const safe = stripUnsafe(input && typeof input === "object" ? input : {}) || {};
+    return clone({ title:"安全测试矩阵", line:safeLine(safe.userFacingSummary && safe.userFacingSummary.resultLabel || (safe.status === "pass" ? "全部通过" : (safe.status === "warning" ? "存在警告" : (safe.status === "fail" ? "存在失败项" : "未知")))), scenarioCount:Number(safe.scenarioCount || 0), passedCount:Number(safe.passedCount || 0), warningCount:Number(safe.warningCount || 0), failedCount:Number(safe.failedCount || 0), blockedCount:Number(safe.blockedCount || 0), sectionLabels:["完整机票请求", "缺少出发地", "缺少目的地", "缺少日期", "非法交易链接阻断", "非法密钥阻断", "非法付款动作", "平台确认需要确认"], caveat:"该矩阵仅为本地安全回归检查，不代表真实票价或可出票。", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -296,6 +308,8 @@
     formatFlightWorkflowFinalSafeHandoffPacketSummary,
     formatFlightWorkflowOperatorConsoleSummary,
     formatFlightWorkflowSafetyRegressionSummary,
+    formatFlightWorkflowScenarioSimulationSummary,
+    formatFlightWorkflowSafetyTestMatrixSummary,
     buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft
   };
 })();
