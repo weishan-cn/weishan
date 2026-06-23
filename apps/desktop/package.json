@@ -1,6 +1,6 @@
 {
   "name": "weishan",
-  "version": "2.1.60",
+  "version": "2.1.61",
   "main": "src/main.js",
   "scripts": {
     "dev": "electron .",

@@ -1510,6 +1510,42 @@ function checkCleanResultSurfaceV1Version(results, expectedVersion) {
   addCheck(results, "apps/desktop clean result surface v1 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/cleanResultSurfaceV1.js CLEAN_RESULT_SURFACE_V1_VERSION");
 }
 
+function checkFlightWorkflowStateMachineVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowStateMachine.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow state machine version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow state machine version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_STATE_MACHINE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow state machine version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowStateMachine.js FLIGHT_WORKFLOW_STATE_MACHINE_VERSION");
+}
+
+function checkFlightClarificationLoopVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightClarificationLoop.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight clarification loop version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight clarification loop version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_CLARIFICATION_LOOP_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight clarification loop version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightClarificationLoop.js FLIGHT_CLARIFICATION_LOOP_VERSION");
+}
+
+function checkFlightWorkflowStateStoreVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowStateStore.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow state store version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow state store version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_STATE_STORE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow state store version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowStateStore.js FLIGHT_WORKFLOW_STATE_STORE_VERSION");
+}
+
+function checkFlightWorkflowUiPresenterVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowUiPresenter.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow UI presenter version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow UI presenter version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_UI_PRESENTER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow UI presenter version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowUiPresenter.js FLIGHT_WORKFLOW_UI_PRESENTER_VERSION");
+}
+
 function checkFlightIntentNormalizerVersion(results, expectedVersion) {
   const filePath = "apps/desktop/src/renderer/core/flightIntentNormalizer.js";
   const file = readText(filePath);
@@ -1784,6 +1820,10 @@ function runVersionCheck() {
     checkSecureApiKeyStorageConsoleVersion(results, rootPackage.version);
     checkFlightIntentParserVersion(results, rootPackage.version);
     checkFlightIntentNormalizerVersion(results, rootPackage.version);
+    checkFlightWorkflowStateMachineVersion(results, rootPackage.version);
+    checkFlightClarificationLoopVersion(results, rootPackage.version);
+    checkFlightWorkflowStateStoreVersion(results, rootPackage.version);
+    checkFlightWorkflowUiPresenterVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowOrchestratorVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowStatusPresenterVersion(results, rootPackage.version);
     checkFlightFareBreakdownVersion(results, rootPackage.version);

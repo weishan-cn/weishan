@@ -1,5 +1,5 @@
 (function(){
-  const USER_SURFACE_DEBUG_FIELD_FILTER_VERSION = "2.1.60";
+  const USER_SURFACE_DEBUG_FIELD_FILTER_VERSION = "2.1.61";
   const BLOCKED_DEBUG_FIELDS = [
     "autoOpen: false",
     "payment: false",

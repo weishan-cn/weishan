@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_DECISION_ASSISTANT_VERSION = "2.1.60";
+  const READ_ONLY_QUOTE_DECISION_ASSISTANT_VERSION = "2.1.61";
   const ASSISTANT_NAME = "read_only_quote_decision_assistant_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|真实最终价|已锁价|可以出票|可直接出票|付款|下单/i;
@@ -148,8 +148,20 @@
     });
   }
 
-  function emptyOutput(status) {
+  function workflowFields(input) {
+    const safe = input && typeof input === "object" ? input : {};
     return {
+      workflowStateSummary: stripUnsafe(safe.workflowStateSummary || null),
+      clarificationSummary: stripUnsafe(safe.clarificationSummary || null),
+      workflowStepList: stripUnsafe(safe.workflowStepList || null),
+      missingFields: Array.isArray(safe.missingFields) ? safe.missingFields.map(safeText) : [],
+      clarificationQuestions: Array.isArray(safe.clarificationQuestions) ? safe.clarificationQuestions.map(safeText) : [],
+      workflowUserMessage: safeText(safe.workflowUserMessage || "")
+    };
+  }
+
+  function emptyOutput(status, input) {
+    return Object.assign({
       assistantName: ASSISTANT_NAME,
       appVersion: READ_ONLY_QUOTE_DECISION_ASSISTANT_VERSION,
       status: status,
@@ -187,7 +199,7 @@
         redacted: true
       },
       redacted: true
-    };
+    }, workflowFields(input));
   }
 
   function sanitizeReadOnlyQuoteDecisionAssistantOutput(input) {
@@ -205,9 +217,9 @@
 
   function buildReadOnlyQuoteDecisionAssistant(input) {
     try {
-      if (!input || typeof input !== "object" || Array.isArray(input)) return clone(emptyOutput("failed_safe"));
+      if (!input || typeof input !== "object" || Array.isArray(input)) return clone(emptyOutput("failed_safe", input));
       const candidates = topCandidatesFrom(input);
-      if (!candidates.length) return clone(emptyOutput("empty"));
+      if (!candidates.length) return clone(emptyOutput("empty", input));
       const decision = evaluateReadOnlyQuoteCandidateDecision(candidates, { selectedCandidate: input.selectedCandidate });
       const reasoning = buildReadOnlyQuoteRecommendationExplanation(decision, input);
       const recommended = decision.recommendedCandidate;
@@ -227,6 +239,12 @@
         confidenceLabelSummary: stripUnsafe(input.confidenceLabelSummary || null),
         safeNextStepSummary: stripUnsafe(input.safeNextStepSummary || null),
         platformCheckOutcomeSummary: stripUnsafe(input.platformCheckOutcomeSummary || null),
+        workflowStateSummary: stripUnsafe(input.workflowStateSummary || null),
+        clarificationSummary: stripUnsafe(input.clarificationSummary || null),
+        workflowStepList: stripUnsafe(input.workflowStepList || null),
+        missingFields: Array.isArray(input.missingFields) ? input.missingFields.map(safeText) : [],
+        clarificationQuestions: Array.isArray(input.clarificationQuestions) ? input.clarificationQuestions.map(safeText) : [],
+        workflowUserMessage: safeText(input.workflowUserMessage || ""),
         platformCheckWarnings: input.manualPlatformCheckEvidence ? ["平台核对结果已记录", "平台最终为准"] : ["仍需平台确认"],
         comparison: {
           candidateCount: decision.candidateCount,
@@ -287,6 +305,12 @@
       safeNextStepSummary: model.safeNextStepSummary || null,
       platformCheckOutcomeSummary: model.platformCheckOutcomeSummary || null,
       platformCheckWarnings: model.platformCheckWarnings || [],
+      workflowStateSummary: model.workflowStateSummary || null,
+      clarificationSummary: model.clarificationSummary || null,
+      workflowStepList: model.workflowStepList || null,
+      missingFields: model.missingFields || [],
+      clarificationQuestions: model.clarificationQuestions || [],
+      workflowUserMessage: model.workflowUserMessage || "",
       bookingUrl: null,
       checkoutUrl: null,
       paymentUrl: null,

@@ -29,14 +29,18 @@ function main() {
     "apps/desktop/src/renderer/core/readOnlyCandidateConfidenceLabeler.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteSafeNextStepCoach.js",
     "apps/desktop/src/renderer/core/flightIntentNormalizer.js",
+    "apps/desktop/src/renderer/core/flightWorkflowStateMachine.js",
+    "apps/desktop/src/renderer/core/flightClarificationLoop.js",
+    "apps/desktop/src/renderer/core/flightWorkflowStateStore.js",
+    "apps/desktop/src/renderer/core/flightWorkflowUiPresenter.js",
     "apps/desktop/src/renderer/core/flightEvidenceWorkflowStatusPresenter.js",
     "apps/desktop/src/renderer/core/flightEvidenceWorkflowOrchestrator.js"
   ]);
   const api = windowRef.WeishanFlightEvidenceWorkflowOrchestrator;
-  assert.equal(api.FLIGHT_EVIDENCE_WORKFLOW_ORCHESTRATOR_VERSION, "2.1.60");
+  assert.equal(api.FLIGHT_EVIDENCE_WORKFLOW_ORCHESTRATOR_VERSION, "2.1.61");
   const ready = api.runFlightEvidenceWorkflow({ rawText:"帮我查7月15日上海到成都最便宜的直达机票" });
   assert.equal(ready.orchestratorName, "flight_evidence_workflow_orchestrator_v1");
-  assert.equal(ready.workflowId, "deterministic-flight-evidence-workflow-v2.1.60");
+  assert.equal(ready.workflowId, "deterministic-flight-evidence-workflow-v2.1.61");
   assert.equal(ready.status, "ready");
   assert.equal(ready.flightIntentSummary.status, "ready");
   assert.equal(ready.safety.dryRunRan, true);
@@ -45,6 +49,9 @@ function main() {
   assert.equal(ready.selectedCandidate.rank, 1);
   assert.equal(ready.selectedCandidate.recommendationType, "candidate_evidence_only");
   assert.ok(ready.workflowSteps.map((step) => step.label).includes("生成 Top 3 候选"));
+  assert.equal(ready.workflowStateSummary.status, "provider_confirmation_ready");
+  assert.equal(ready.workflowStepList.find((step) => step.label === "生成候选证据").status, "completed");
+  assert.equal(ready.workflowUserMessage, "候选证据已生成，平台最终为准。");
   assert.ok(ready.decisionAssistant.reasoning.primaryReason.includes("候选"));
   assert.equal(ready.bookingUrl, null);
   const summary = api.buildFlightEvidenceWorkflowSummary(ready);
@@ -54,7 +61,14 @@ function main() {
   assert.equal(incomplete.status, "needs_clarification");
   assert.equal(incomplete.safety.dryRunRan, false);
   assert.equal(incomplete.topCandidates.length, 0);
-  assert.ok(incomplete.clarificationQuestions.join(" ").includes("出发地"));
+  assert.ok(incomplete.clarificationQuestions.join(" ").includes("从哪里出发？"));
+  assert.equal(incomplete.workflowStateSummary.status, "needs_clarification");
+  assert.equal(incomplete.safety.dryRunAllowed, false);
+  assert.ok(incomplete.workflowUserMessage.includes("信息完整后再生成候选证据"));
+  const answered = api.runFlightEvidenceWorkflow({ rawText:"帮我查7月15日到成都机票", clarificationAnswer:{ text:"上海" } });
+  assert.equal(answered.status, "ready");
+  assert.equal(answered.workflowStateSummary.status, "provider_confirmation_ready");
+  assert.equal(answered.topCandidates.length, 3);
   const blocked = api.runFlightEvidenceWorkflow({ rawText:"帮我买枪" });
   assert.equal(blocked.status, "blocked");
   assert.equal(blocked.safety.dryRunRan, false);

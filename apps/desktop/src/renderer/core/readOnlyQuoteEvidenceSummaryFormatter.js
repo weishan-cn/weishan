@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.60";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.61";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -189,6 +189,27 @@
     });
   }
 
+  function formatFlightWorkflowSummary(input) {
+    const safe = stripUnsafe(input && typeof input === "object" ? input : {}) || {};
+    const questions = Array.isArray(safe.clarificationQuestions) ? safe.clarificationQuestions.map(safeLine).filter(Boolean) : [];
+    return clone({
+      formatterName: FORMATTER_NAME,
+      appVersion: READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION,
+      title: "机票请求工作流",
+      workflowStateSummary: stripUnsafe(safe.workflowStateSummary || null),
+      clarificationSummary: stripUnsafe(safe.clarificationSummary || null),
+      workflowStepList: stripUnsafe(safe.workflowStepList || []),
+      missingFields: Array.isArray(safe.missingFields) ? safe.missingFields.map(safeLine) : [],
+      clarificationQuestions: questions,
+      workflowUserMessage: safeLine(safe.workflowUserMessage || (questions.length ? "需要补充信息。信息完整后再生成候选证据。" : "候选证据已生成，平台最终为准。")),
+      bookingUrl:null,
+      checkoutUrl:null,
+      paymentUrl:null,
+      orderUrl:null,
+      redacted:true
+    });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -221,6 +242,7 @@
     formatDecisionReasoning,
     formatCandidateComparisonSummary,
     formatProviderConfirmationWarning,
+    formatFlightWorkflowSummary,
     buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft
   };
 })();

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_INTENT_NORMALIZER_VERSION = "2.1.60";
+  const FLIGHT_INTENT_NORMALIZER_VERSION = "2.1.61";
   const NORMALIZER_NAME = "flight_intent_normalizer_v1";
   const RESTRICTED_RE = /(帮我买枪|买枪|枪支|武器|火药|炸药|弹药|firearm|weapon|ammunition|explosive)/i;
   const FLIGHT_RE = /(机票|航班|飞机|飞|flight|到)/i;
@@ -11,7 +11,7 @@
   function text(value) { return String(value == null ? "" : value).trim(); }
 
   function sanitizeText(value) {
-    return text(value).replace(/(token|key|secret|password|bookingUrl|paymentUrl|orderUrl)s*[:=]s*S+/ig, "$1:redacted");
+    return text(value).replace(/(token|key|secret|password|bookingUrl|paymentUrl|orderUrl)\s*[:=]\s*\S+/ig, "$1:redacted");
   }
 
   function parseRoute(raw) {

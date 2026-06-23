@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.60";
+  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.61";
   const PHASE = "read_only_price_candidate_card_view_model_v1";
 
   function clone(value) {
@@ -238,7 +238,14 @@
     const reconciliationApi = getReconciliationApi();
     const confidenceApi = getConfidenceLabelerApi();
     const coachApi = getSafeNextStepCoachApi();
-    const decisionAssistant = typeof decisionApi.buildReadOnlyQuoteDecisionAssistant === "function" ? decisionApi.buildReadOnlyQuoteDecisionAssistant({ topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, sessionSummary:sessionSummary, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary }) : null;
+    const workflowStateSummary = safe.workflowStateSummary && typeof safe.workflowStateSummary === "object" ? safe.workflowStateSummary : null;
+    const clarificationSummary = safe.clarificationSummary && typeof safe.clarificationSummary === "object" ? safe.clarificationSummary : null;
+    const workflowStepList = Array.isArray(safe.workflowStepList) ? safe.workflowStepList.slice() : [];
+    const missingFields = Array.isArray(safe.missingFields) ? safe.missingFields.slice() : [];
+    const clarificationQuestions = Array.isArray(safe.clarificationQuestions) ? safe.clarificationQuestions.slice() : [];
+    const workflowUserMessage = text(safe.workflowUserMessage || "");
+    const workflowMeta = { workflowStateSummary:workflowStateSummary, clarificationSummary:clarificationSummary, workflowStepList:workflowStepList, missingFields:missingFields, clarificationQuestions:clarificationQuestions, workflowUserMessage:workflowUserMessage };
+    const decisionAssistant = typeof decisionApi.buildReadOnlyQuoteDecisionAssistant === "function" ? decisionApi.buildReadOnlyQuoteDecisionAssistant(Object.assign({ topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, sessionSummary:sessionSummary, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary }, workflowMeta)) : null;
     const candidateComparison = typeof comparisonApi.buildReadOnlyQuoteCandidateComparison === "function" ? comparisonApi.buildReadOnlyQuoteCandidateComparison(dryRunTopCandidates) : null;
     const decisionAssistantSummary = formatterApi.formatDecisionReasoning && decisionAssistant ? formatterApi.formatDecisionReasoning(decisionAssistant) : null;
     const candidateComparisonSummary = formatterApi.formatCandidateComparisonSummary && candidateComparison ? formatterApi.formatCandidateComparisonSummary(candidateComparison) : null;
@@ -257,7 +264,7 @@
     const confidenceLabelSummary = typeof confidenceApi.buildReadOnlyCandidateConfidenceLabel === "function" ? confidenceApi.buildReadOnlyCandidateConfidenceLabel({ selectedCandidate:selectedCandidate || dryRunTopCandidates[0] || priceQuote, safeProviderHandoffReady:!!safeProviderHandoffUrl, handoffChecklistSummary:handoffChecklist, manualPlatformCheckEvidence:manualPlatformCheck, platformCheckDelta:platformCheckDelta, reconciliationSummary:reconciliationSummary }) : null;
     const safeNextStepSummary = typeof coachApi.buildReadOnlyQuoteSafeNextStepCoach === "function" ? coachApi.buildReadOnlyQuoteSafeNextStepCoach({ selectedCandidate:selectedCandidate || dryRunTopCandidates[0] || priceQuote, reconciliationSummary:reconciliationSummary, confidenceLabelSummary:confidenceLabelSummary }) : null;
     const platformCheckOutcomeSummary = reconciliationSummary ? { title:"平台核对结果", status:reconciliationSummary.status, confidenceLabel:reconciliationSummary.confidenceLabel, nextStep:reconciliationSummary.nextStep, platformFinal:true, redacted:true } : null;
-    const reportCenterModel = typeof reportCenterApi.buildReadOnlyQuoteSessionReportCenter === "function" ? reportCenterApi.buildReadOnlyQuoteSessionReportCenter({ sessionSummary:sessionSummary, auditExportPreview:auditExportPreview, topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary, routeSummary:normalized.origin + " → " + normalized.destination, departureDate:normalized.departureDate, handoffChecklistSummary:handoffChecklist, handoffReceiptSummary:handoffReceipt, manualPlatformCheckSummary:manualPlatformCheck, platformCheckDeltaSummary:platformCheckDeltaSummary, reconciliationSummary:reconciliationSummary, confidenceLabelSummary:confidenceLabelSummary, safeNextStepSummary:safeNextStepSummary, platformCheckOutcomeSummary:platformCheckOutcomeSummary, manualPlatformCheckEvidence:manualPlatformCheck, platformCheckDelta:platformCheckDelta }) : null;
+    const reportCenterModel = typeof reportCenterApi.buildReadOnlyQuoteSessionReportCenter === "function" ? reportCenterApi.buildReadOnlyQuoteSessionReportCenter(Object.assign({ sessionSummary:sessionSummary, auditExportPreview:auditExportPreview, topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary, routeSummary:normalized.origin + " → " + normalized.destination, departureDate:normalized.departureDate, handoffChecklistSummary:handoffChecklist, handoffReceiptSummary:handoffReceipt, manualPlatformCheckSummary:manualPlatformCheck, platformCheckDeltaSummary:platformCheckDeltaSummary, reconciliationSummary:reconciliationSummary, confidenceLabelSummary:confidenceLabelSummary, safeNextStepSummary:safeNextStepSummary, platformCheckOutcomeSummary:platformCheckOutcomeSummary, manualPlatformCheckEvidence:manualPlatformCheck, platformCheckDelta:platformCheckDelta }, workflowMeta)) : null;
     const userFacingEvidenceSummary = reportCenterModel && reportCenterModel.userFacingSummary || null;
     const safetyReportSummary = reportCenterModel && reportCenterModel.safetyReport || null;
     const evidenceSummaryWarnings = formatterApi.formatReadOnlyQuoteEvidenceWarnings ? formatterApi.formatReadOnlyQuoteEvidenceWarnings({}).warnings : ["平台最终为准", "未锁价", "不代表可出票", "唯珊不会付款、不会下单、不会上传证件或银行卡"];
@@ -370,6 +377,12 @@
       refreshStateSummary: refreshStateSummary,
       interactiveRefreshState: interactiveRefreshState,
       recoveredEvidenceSummary: interactiveRefreshState.recoveredEvidenceSummary || { available:false, source:"local_redacted_state", showableAsRealPrice:false, showableAsCandidateEvidence:false, canReplaceMainResultCard:false },
+      workflowStateSummary: workflowStateSummary,
+      clarificationSummary: clarificationSummary,
+      workflowStepList: workflowStepList,
+      missingFields: missingFields,
+      clarificationQuestions: clarificationQuestions,
+      workflowUserMessage: workflowUserMessage,
       sandboxImportSummary: { supported:true, lastPreviewStatus:sandboxImportPreviewStatus, lastImportStatus:sandboxImportStatus, importedEvidenceAvailable:isSandboxImportEvidence === true, rawResponseStored:false, sanitized:true, redacted:true, showableAsRealPrice:false, canReplace:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false, dryRunStatus:dryRunStatus, providerRunMatrix:sandboxDryRunSummary && sandboxDryRunSummary.providerRunMatrix || null, runTimelineSummary:runTimelineSummary, sandboxDryRunSummary:sandboxDryRunSummary, dryRunTopCandidates:dryRunTopCandidates, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary, sessionSummary:sessionSummary, sessionStatus:sessionStatus, sessionId:sessionId, auditExportPreview:auditExportPreview, auditExportReady:auditExportReady, sessionRecoverySummary:sessionRecoverySummary, reportCenterSummary:reportCenterSummary, userFacingEvidenceSummary:userFacingEvidenceSummary, safetyReportSummary:safetyReportSummary, evidenceSummaryWarnings:evidenceSummaryWarnings, selectedCandidateUserSummary:selectedCandidateUserSummary, decisionAssistantSummary:decisionAssistantSummary, candidateComparisonSummary:candidateComparisonSummary, recommendationExplanation:recommendationExplanation, decisionSafetyWarnings:decisionSafetyWarnings, candidateComparisonTable:candidateComparisonTable, providerConfirmationWarning:providerConfirmationWarning, handoffChecklistSummary:handoffChecklist, handoffReceiptSummary:handoffReceipt, manualPlatformCheckSummary:manualPlatformCheck, platformCheckDeltaSummary:platformCheckDeltaSummary, platformCheckDelta:platformCheckDelta, reconciliationSummary:reconciliationSummary, confidenceLabelSummary:confidenceLabelSummary, safeNextStepSummary:safeNextStepSummary, platformCheckOutcomeSummary:platformCheckOutcomeSummary, platformCheckWarnings:platformCheckDeltaSummary && platformCheckDeltaSummary.warnings || ["平台最终为准"], reportCenterStatus:reportCenterStatus, lastRunId:lastRunId, compareStatus:compareStatus, replayStatus:replayStatus },
       sandboxImportConsoleSummary: { title:"沙盒响应导入", previewActionLabel:"预览导入结果", confirmActionLabel:"确认导入脱敏证据", clearActionLabel:"清除导入状态", runDryButtonLabel:dryRunButton.label || "运行沙盒只读报价", rawResponseStored:false, canSaveRawResponse:false, canPasteSecretHere:false, redacted:true },
       sandboxImportPreviewStatus: sandboxImportPreviewStatus,
