@@ -10,7 +10,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowFeedbackTrendRadar.js",
     "apps/desktop/src/renderer/core/flightWorkflowBetaCohortViewModel.js"
   ]).WeishanFlightWorkflowBetaCohortViewModel;
-  assert.equal(api.FLIGHT_WORKFLOW_BETA_COHORT_VIEW_MODEL_VERSION, "2.1.74");
+  assert.equal(api.FLIGHT_WORKFLOW_BETA_COHORT_VIEW_MODEL_VERSION, "2.1.75");
   const model = api.buildFlightWorkflowBetaCohortViewModel({
     betaCohortSummary:{ status:"ready", cohortHealth:{ sessionCount:4, usableFeedbackCount:4 }, rows:[{ rowId:"sessions", label:"验收会话", value:"4", status:"pass" }], findings:[{ findingId:"ready", severity:"info", title:"可以扩大只读测试", message:"token abc https://blocked.example" }], userFacingSummary:{ resultLabel:"可以扩大只读测试", redacted:true }, redacted:true },
     feedbackTrendSummary:{ status:"ready", trends:{ overallTrend:"positive" }, signals:[{ signalId:"safety", label:"安全文案理解", value:"understood", status:"pass" }], recommendation:{ label:"可以扩大只读测试", redacted:true }, redacted:true }

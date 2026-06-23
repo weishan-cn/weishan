@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.74";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.75";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -82,6 +82,14 @@
       if (onboarding.status === "allowed" || onboarding.decision && onboarding.decision.canEnterReadOnlyPilot === true) badges.push(badge("pilot_entry_allowed", "可以进入只读试点", "info"));
       if (onboarding.status === "blocked" || onboarding.status === "failed_safe") badges.push(badge("pilot_entry_blocked", "暂不可进入只读试点", "blocked"));
       if (onboarding.guardName || consent.consentFlowName) badges.push(badge("pilot_consent_not_transaction", "只读试点不代表交易授权", "info"));
+      const issueIntake = safe.issueIntakeSummary || releaseReadiness.issueIntakeSummary || {};
+      const supportFallback = safe.supportFallbackSummary || releaseReadiness.supportFallbackSummary || {};
+      const pilotSupport = safe.pilotSupportSummary || releaseReadiness.pilotSupportSummary || {};
+      if (issueIntake.status === "ready" || issueIntake.status === "redacted" || pilotSupport.viewModelName) badges.push(badge("pilot_support_redacted", "问题反馈已脱敏", "info"));
+      if (supportFallback.status === "ready") badges.push(badge("pilot_support_ready", "支持兜底正常", "info"));
+      if (supportFallback.status === "needs_review" || supportFallback.status === "blocked" || issueIntake.status === "blocked") badges.push(badge("pilot_support_internal_review", "需要内部复核", "warning"));
+      if (issueIntake.issueCategory === "platform_mismatch") badges.push(badge("pilot_platform_mismatch", "平台核对差异待处理", "warning"));
+      if (issueIntake.issueCategory === "safety_copy_unclear") badges.push(badge("pilot_safety_copy_review", "安全文案需优化", "warning"));
       if (beta.status === "blocked" || guided.status === "blocked" || guided.status === "failed_safe") badges.push(badge("beta_acceptance_blocked", "Beta 验收被阻断", "blocked"));
       if (copyStatus === "pass" || releaseReadiness.copyValidationStatus === "pass") badges.push(badge("safety_copy_unified", "安全文案已统一", "info"));
       badges.push(badge("not_exportable", "不可导出", "warning"));
