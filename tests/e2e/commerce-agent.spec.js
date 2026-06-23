@@ -8741,7 +8741,7 @@ test.describe.serial("commerce agent workbench", () => {
       try {
         window.localStorage.setItem("weishan.readOnlyQuoteRefreshState.v1", JSON.stringify({
           stateName:"read_only_quote_refresh_state_v1",
-          appVersion:"2.1.69",
+          appVersion:"2.1.70",
           lastRefreshStatus:"refreshed",
           providerId:"google_flights_search",
           providerName:"Google Flights",
@@ -9027,7 +9027,6 @@ test.describe.serial("commerce agent workbench", () => {
     }
     await expect(summary).not.toContainText(/全网最低|最低价保证|真实最终价|已锁价|可以出票|可直接出票/);
     await expect(summary).not.toContainText(/bookingUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:|token\s*[:=]|key\s*[:=]|secret\s*[:=]/i);
-    await expect(summary).not.toContainText(/bookingUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
     await expect(summary).not.toContainText(/token\s*[:=]|key\s*[:=]|secret\s*[:=]/i);
     await expect(summary).not.toContainText(/下载文件|保存文件/);
     await expect(summary.getByRole("button", { name:/^(付款|下单|提交订单|上传证件|上传银行卡)$/ })).toHaveCount(0);
@@ -9068,10 +9067,10 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.1.69 flight workflow release readiness dashboard stays local @commerce-smoke", async () => {
+  test("v2.1.70 flight workflow release readiness dashboard stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2169-READY 购买7月15日上海到成都最便宜的直达机票");
-    for (const text of ["机票工作流运营控制台", "场景模拟", "安全测试矩阵", "查看场景模拟", "查看安全测试矩阵", "场景模拟仅用于安全回归，不代表真实票价、库存或可出票", "安全测试矩阵仅为本地安全回归检查，不代表真实票价或可出票", "机票工作流发布就绪总览", "查看发布就绪总览", "发布状态", "安全红线", "安全矩阵", "用户复核摘要", "仍被禁止的能力", "安全文案已统一", "当前仍是只读候选证据流程", "不代表真实票价、库存或可出票", "唯珊不会付款、不会下单、不会出票", "唯珊不会上传证件、银行卡或登录凭据"]) {
+    for (const text of ["机票工作流运营控制台", "场景模拟", "安全测试矩阵", "查看场景模拟", "查看安全测试矩阵", "场景模拟仅用于安全回归，不代表真实票价、库存或可出票", "安全测试矩阵仅为本地安全回归检查，不代表真实票价或可出票", "机票工作流发布就绪总览", "查看发布就绪总览", "发布状态", "安全红线", "安全矩阵", "用户复核摘要", "仍被禁止的能力", "安全文案已统一", "当前仍是只读候选证据流程", "不代表真实票价、库存或可出票", "唯珊不会付款、不会下单、不会出票", "唯珊不会上传证件、银行卡或登录凭据", "只读 Beta 验收", "只读 Beta 用户测试", "验收步骤", "用户测试", "填写测试反馈", "测试反馈已脱敏", "确认不会付款、下单或出票", "测试过程不会付款、不会下单、不会出票"]) {
       await expect(summary).toContainText(text, { timeout:15000 });
     }
     await summary.locator('[data-commerce-flight-scenario-simulator-show="true"]').first().click();
@@ -9091,6 +9090,15 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(releaseOutput).toContainText("bookingUrl:null");
     await expect(releaseOutput).toContainText("payment:false");
     await expect(releaseOutput).toContainText("order:false");
+    await summary.locator('[data-commerce-flight-beta-acceptance-start="true"]').first().click();
+    const betaOutput = summary.locator('[data-commerce-flight-beta-acceptance-output="true"]').first();
+    await expect(betaOutput).toContainText("只读 Beta 用户测试", { timeout:15000 });
+    await expect(betaOutput).toContainText("确认不会付款、下单或出票");
+    await expect(betaOutput).toContainText("填写测试反馈");
+    await summary.locator('[data-commerce-flight-beta-feedback-submit="true"]').first().click();
+    await expect(betaOutput).toContainText("测试反馈已脱敏", { timeout:15000 });
+    await expect(betaOutput).toContainText("不会保存原始用户反馈");
+    await expect(summary).not.toContainText(/下载文件|保存文件/);
     await expect(summary).not.toContainText(/bookingUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
     await expect(summary).not.toContainText(/全网最低|最低价保证|已锁价|真实最终价|立即购买|直接下单|一键出票/);
     const visible = await visibleTextWithoutTechnicalDetails(summary);
@@ -9105,6 +9113,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).toContainText("安全限制");
     await expect(summary).not.toContainText("场景模拟");
     await expect(summary).not.toContainText("安全测试矩阵");
+    await expect(summary).not.toContainText("开始只读 Beta 验收");
+    await expect(summary).toContainText(/安全阻断|安全限制/);
     await expect(summary.getByRole("button", { name:/^(付款|下单|提交订单|出票|上传证件|上传银行卡)$/ })).toHaveCount(0);
   });
 

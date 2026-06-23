@@ -1,5 +1,5 @@
 (function(){
-  const TOP_RESULT_CARDS_BUILDER_VERSION = "2.1.69";
+  const TOP_RESULT_CARDS_BUILDER_VERSION = "2.1.70";
   const MAX_CARD_COUNT = 3;
   const ALLOWED_ACTION_TYPES = ["manual_confirm", "copy_search_conditions", "external_search_manual", "provider_handoff_preview"];
   const FORBIDDEN_ACTION_TYPES = ["booking", "payment", "order", "checkout", "auto_purchase", "identity_upload"];

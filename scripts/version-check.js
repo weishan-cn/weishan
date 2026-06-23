@@ -1782,6 +1782,43 @@ function checkFlightWorkflowReleaseReadinessDashboardVersion(results, expectedVe
   addCheck(results, "apps/desktop flight workflow release readiness dashboard version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowReleaseReadinessDashboard.js FLIGHT_WORKFLOW_RELEASE_READINESS_DASHBOARD_VERSION");
 }
 
+
+function checkFlightWorkflowBetaFeedbackSanitizerVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowBetaFeedbackSanitizer.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow beta feedback sanitizer version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow beta feedback sanitizer version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_BETA_FEEDBACK_SANITIZER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow beta feedback sanitizer version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowBetaFeedbackSanitizer.js FLIGHT_WORKFLOW_BETA_FEEDBACK_SANITIZER_VERSION");
+}
+
+function checkFlightWorkflowGuidedUserTestModeVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowGuidedUserTestMode.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow guided user test mode version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow guided user test mode version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_GUIDED_USER_TEST_MODE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow guided user test mode version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowGuidedUserTestMode.js FLIGHT_WORKFLOW_GUIDED_USER_TEST_MODE_VERSION");
+}
+
+function checkFlightWorkflowBetaAcceptancePackVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowBetaAcceptancePack.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow beta acceptance pack version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow beta acceptance pack version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_BETA_ACCEPTANCE_PACK_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow beta acceptance pack version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowBetaAcceptancePack.js FLIGHT_WORKFLOW_BETA_ACCEPTANCE_PACK_VERSION");
+}
+
+function checkFlightWorkflowBetaAcceptanceViewModelVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowBetaAcceptanceViewModel.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow beta acceptance view model version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow beta acceptance view model version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_BETA_ACCEPTANCE_VIEW_MODEL_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow beta acceptance view model version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowBetaAcceptanceViewModel.js FLIGHT_WORKFLOW_BETA_ACCEPTANCE_VIEW_MODEL_VERSION");
+}
+
 function checkFlightIntentNormalizerVersion(results, expectedVersion) {
   const filePath = "apps/desktop/src/renderer/core/flightIntentNormalizer.js";
   const file = readText(filePath);
@@ -2086,6 +2123,10 @@ function runVersionCheck() {
     checkFlightWorkflowReleaseReadinessDashboardVersion(results, rootPackage.version);
     checkFlightWorkflowUserSafetyCopyRegistryVersion(results, rootPackage.version);
     checkFlightWorkflowReleaseReadinessViewModelVersion(results, rootPackage.version);
+    checkFlightWorkflowBetaFeedbackSanitizerVersion(results, rootPackage.version);
+    checkFlightWorkflowGuidedUserTestModeVersion(results, rootPackage.version);
+    checkFlightWorkflowBetaAcceptancePackVersion(results, rootPackage.version);
+    checkFlightWorkflowBetaAcceptanceViewModelVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowOrchestratorVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowStatusPresenterVersion(results, rootPackage.version);
     checkFlightFareBreakdownVersion(results, rootPackage.version);

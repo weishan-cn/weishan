@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowHumanReviewChecklist.js"]);
   const api = windowRef.WeishanFlightWorkflowHumanReviewChecklist;
-  assert.equal(api.FLIGHT_WORKFLOW_HUMAN_REVIEW_CHECKLIST_VERSION, "2.1.69");
+  assert.equal(api.FLIGHT_WORKFLOW_HUMAN_REVIEW_CHECKLIST_VERSION, "2.1.70");
   const ready = api.buildFlightWorkflowHumanReviewChecklist({ routeSummary:"上海 → 成都", departureDate:"2026-07-15", selectedCandidate:{ providerName:"sandbox" }, manualPlatformCheckSummary:{ status:"checked" }, auditReviewSummary:{ status:"ready" }, bookingUrl:null, payment:false, order:false });
   assert.equal(ready.checklistName, "flight_workflow_human_review_checklist_v1");
   assert.equal(ready.status, "ready");
