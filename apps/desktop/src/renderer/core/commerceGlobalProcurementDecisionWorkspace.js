@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const DECISION_WORKSPACE_VERSION = "2.1.59";
+  const DECISION_WORKSPACE_VERSION = "2.1.60";
   const PHASE = "global_procurement_decision_workspace";
 
   function clone(value) {

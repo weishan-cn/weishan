@@ -1510,6 +1510,33 @@ function checkCleanResultSurfaceV1Version(results, expectedVersion) {
   addCheck(results, "apps/desktop clean result surface v1 version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/cleanResultSurfaceV1.js CLEAN_RESULT_SURFACE_V1_VERSION");
 }
 
+function checkFlightIntentNormalizerVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightIntentNormalizer.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight intent normalizer version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight intent normalizer version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_INTENT_NORMALIZER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight intent normalizer version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightIntentNormalizer.js FLIGHT_INTENT_NORMALIZER_VERSION");
+}
+
+function checkFlightEvidenceWorkflowOrchestratorVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightEvidenceWorkflowOrchestrator.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight evidence workflow orchestrator version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight evidence workflow orchestrator version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_EVIDENCE_WORKFLOW_ORCHESTRATOR_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight evidence workflow orchestrator version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightEvidenceWorkflowOrchestrator.js FLIGHT_EVIDENCE_WORKFLOW_ORCHESTRATOR_VERSION");
+}
+
+function checkFlightEvidenceWorkflowStatusPresenterVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightEvidenceWorkflowStatusPresenter.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight evidence workflow status presenter version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight evidence workflow status presenter version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_EVIDENCE_WORKFLOW_STATUS_PRESENTER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight evidence workflow status presenter version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightEvidenceWorkflowStatusPresenter.js FLIGHT_EVIDENCE_WORKFLOW_STATUS_PRESENTER_VERSION");
+}
+
 function checkFlightIntentParserVersion(results, expectedVersion) {
   const filePath = "apps/desktop/src/renderer/core/flightIntentParser.js";
   const file = readText(filePath);
@@ -1756,6 +1783,9 @@ function runVersionCheck() {
     checkSecureApiKeyStorageMainVersion(results, rootPackage.version);
     checkSecureApiKeyStorageConsoleVersion(results, rootPackage.version);
     checkFlightIntentParserVersion(results, rootPackage.version);
+    checkFlightIntentNormalizerVersion(results, rootPackage.version);
+    checkFlightEvidenceWorkflowOrchestratorVersion(results, rootPackage.version);
+    checkFlightEvidenceWorkflowStatusPresenterVersion(results, rootPackage.version);
     checkFlightFareBreakdownVersion(results, rootPackage.version);
     checkCheapestTruthGuardVersion(results, rootPackage.version);
     checkTopResultCardsBuilderVersion(results, rootPackage.version);

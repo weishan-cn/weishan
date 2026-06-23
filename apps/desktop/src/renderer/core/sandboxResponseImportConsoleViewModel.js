@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.59";
+  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.60";
   const CONSOLE_NAME = "sandbox_response_import_console_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -182,7 +182,14 @@
     const confidenceApi = getConfidenceLabelerApi();
     const coachApi = getSafeNextStepCoachApi();
     const selectedCandidate = safe.selectedCandidate && typeof safe.selectedCandidate === "object" ? safe.selectedCandidate : null;
-    const decisionAssistant = typeof decisionApi.buildReadOnlyQuoteDecisionAssistant === "function" ? decisionApi.buildReadOnlyQuoteDecisionAssistant({ topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, sessionSummary:sessionSummary, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary }) : null;
+    const flightIntentSummary = safe.flightIntentSummary || null;
+    const workflowSummary = safe.workflowSummary || null;
+    const workflowSteps = safe.workflowSteps || [];
+    const workflowStatus = safe.workflowStatus || "";
+    const routeSummary = safe.routeSummary || "";
+    const tripSummary = safe.tripSummary || "";
+    const clarificationQuestions = safe.clarificationQuestions || [];
+    const decisionAssistant = typeof decisionApi.buildReadOnlyQuoteDecisionAssistant === "function" ? decisionApi.buildReadOnlyQuoteDecisionAssistant({ topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, sessionSummary:sessionSummary, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary, flightIntentSummary:flightIntentSummary, workflowSummary:workflowSummary, workflowSteps:workflowSteps, workflowStatus:workflowStatus, routeSummary:routeSummary, tripSummary:tripSummary, clarificationQuestions:clarificationQuestions }) : null;
     const candidateComparison = typeof comparisonApi.buildReadOnlyQuoteCandidateComparison === "function" ? comparisonApi.buildReadOnlyQuoteCandidateComparison(dryRunTopCandidates) : null;
     const decisionAssistantSummary = formatterApi.formatDecisionReasoning && decisionAssistant ? formatterApi.formatDecisionReasoning(decisionAssistant) : null;
     const candidateComparisonSummary = formatterApi.formatCandidateComparisonSummary && candidateComparison ? formatterApi.formatCandidateComparisonSummary(candidateComparison) : null;
@@ -197,7 +204,7 @@
     const confidenceLabelSummary = typeof confidenceApi.buildReadOnlyCandidateConfidenceLabel === "function" ? confidenceApi.buildReadOnlyCandidateConfidenceLabel({ selectedCandidate:selectedCandidate || dryRunTopCandidates[0] || {}, safeProviderHandoffReady:true, manualPlatformCheckEvidence:manualPlatformCheckSummary, platformCheckDelta:platformCheckDelta, reconciliationSummary:reconciliationSummary }) : null;
     const safeNextStepSummary = typeof coachApi.buildReadOnlyQuoteSafeNextStepCoach === "function" ? coachApi.buildReadOnlyQuoteSafeNextStepCoach({ reconciliationSummary:reconciliationSummary, confidenceLabelSummary:confidenceLabelSummary }) : null;
     const platformCheckOutcomeSummary = reconciliationSummary ? { title:"平台核对结果", status:reconciliationSummary.status, confidenceLabel:reconciliationSummary.confidenceLabel, nextStep:reconciliationSummary.nextStep, platformFinal:true, redacted:true } : null;
-    const reportCenterModel = typeof reportCenterApi.buildReadOnlyQuoteSessionReportCenter === "function" ? reportCenterApi.buildReadOnlyQuoteSessionReportCenter({ sessionSummary:sessionSummary, auditExportPreview:auditExportPreview, topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary }) : null;
+    const reportCenterModel = typeof reportCenterApi.buildReadOnlyQuoteSessionReportCenter === "function" ? reportCenterApi.buildReadOnlyQuoteSessionReportCenter({ sessionSummary:sessionSummary, auditExportPreview:auditExportPreview, topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary, flightIntentSummary:flightIntentSummary, workflowSummary:workflowSummary, workflowSteps:workflowSteps, workflowStatus:workflowStatus, routeSummary:routeSummary, tripSummary:tripSummary, clarificationQuestions:clarificationQuestions }) : null;
     const reportCenterSummary = reportCenterModel ? { reportCenterName:reportCenterModel.reportCenterName, appVersion:reportCenterModel.appVersion, status:reportCenterModel.status, actions:reportCenterModel.actions, redacted:true } : null;
     const userFacingEvidenceSummary = reportCenterModel && reportCenterModel.userFacingSummary || null;
     const safetyReportSummary = reportCenterModel && reportCenterModel.safetyReport || null;
@@ -234,6 +241,13 @@
       auditExportReady: auditExportReady,
       sessionRecoverySummary: sessionRecoverySummary,
       reportCenterSummary: reportCenterSummary,
+      flightIntentSummary: flightIntentSummary,
+      workflowSummary: workflowSummary,
+      workflowSteps: workflowSteps,
+      workflowStatus: workflowStatus,
+      routeSummary: routeSummary,
+      tripSummary: tripSummary,
+      clarificationQuestions: clarificationQuestions,
       userFacingEvidenceSummary: userFacingEvidenceSummary,
       safetyReportSummary: safetyReportSummary,
       evidenceSummaryWarnings: evidenceSummaryWarnings,

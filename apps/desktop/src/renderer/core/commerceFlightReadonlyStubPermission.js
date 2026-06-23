@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PERMISSION_VERSION = "2.1.59";
+  const PERMISSION_VERSION = "2.1.60";
   const PHASE = "flight_readonly_stub_permission";
   const DEFAULT_OVERALL_STATUS = "not_granted";
   const DEFAULT_CURRENT_STAGE = "approval_required";

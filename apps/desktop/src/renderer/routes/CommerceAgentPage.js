@@ -6571,6 +6571,21 @@
     return '<section class="commerce-result-summary-panel commerce-one-screen-result commerce-clarification-result" aria-label="采购追问"><div class="commerce-result-summary-head"><div class="commerce-result-summary-headline"><span>AI 大脑采购编排</span><strong>请补充关键信息</strong></div></div><div class="commerce-one-screen-body"><section class="commerce-one-screen-card"><h4>请补充关键信息</h4><p>' + esc(clarification.questionText || brain.clarificationQuestion || '请补充关键采购条件。') + '</p><h5>需要补充</h5>' + listHtml(clarification.missingFields || brain.missingFields || []) + '<p>当前不会生成假结果，不显示价格，不提供 bookingUrl，不付款，不下单。</p></section></div>' + commerceSafetyAndDebugDetailsDisclosure(task, []) + '</section>';
   }
 
+  function commerceFlightWorkflowPanelHtml(task){
+    const workflowApi = window.WeishanFlightEvidenceWorkflowOrchestrator;
+    const presenterApi = window.WeishanFlightEvidenceWorkflowStatusPresenter;
+    const raw = String(task && (task.inputSummary || task.rawInput || task.title || task.text) || "");
+    const workflow = workflowApi && typeof workflowApi.runFlightEvidenceWorkflow === "function" ? workflowApi.runFlightEvidenceWorkflow({ rawText:raw }) : null;
+    if (!workflow || workflow.workflowStatus === "blocked") return "";
+    const presenter = presenterApi && typeof presenterApi.buildFlightEvidenceWorkflowStatusPresenter === "function" ? presenterApi.buildFlightEvidenceWorkflowStatusPresenter(workflow) : workflow;
+    const steps = Array.isArray(presenter.steps) ? presenter.steps : [];
+    if (workflow.workflowStatus === "needs_clarification") {
+      const questions = workflow.clarificationQuestions || presenter.clarificationQuestions || ["请补充出发地或目的地。"];
+      return '<section class="commerce-flight-evidence-workflow" data-commerce-flight-evidence-workflow="true"><h4>需要补充信息</h4><p>识别机票需求</p><p>' + esc(questions.join(" ")) + '</p><p>未运行只读沙盒报价</p><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p></section>';
+    }
+    return '<section class="commerce-flight-evidence-workflow" data-commerce-flight-evidence-workflow="true"><h4>机票请求工作流</h4><p>识别机票需求</p><p>路线：' + esc(workflow.routeSummary || presenter.routeSummary || "") + '</p><p>' + esc(workflow.tripSummary || presenter.tripSummary || "") + '</p><ul>' + steps.map(function(step){ return '<li>' + esc(step.label || "") + ' · ' + esc(step.statusLabel || step.status || "") + '</li>'; }).join('') + '</ul><p>生成 Top 3 候选</p><p>推荐理由</p><p>候选对比</p><p>候选价置信标签</p><p>下一步安全建议</p><p>平台最终为准</p><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p></section>';
+  }
+
   function commerceSimpleFlightResultPanelHtml(task){
     const fields = commerceSimpleFlightFields(task);
     const copyTexts = commerceSimpleFlightCopyTexts(task);
@@ -6585,6 +6600,9 @@
     const apiBindingDisplay = commerceApiBindingSafeShellDisplay(task);
     const resultCardRulesHtml = globalProcurementUserFacingResultCardsRulesDisclosure();
     const guardedPriceCardHtml = commerceGuardedFlightPriceCardHtml(task);
+    const flightWorkflowHtml = commerceFlightWorkflowPanelHtml(task);
+    const workflowNeedsClarification = flightWorkflowHtml.indexOf("需要补充信息") >= 0;
+    if (workflowNeedsClarification) return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-simple-flight-result" aria-label="机票搜索结果" data-commerce-task-id="${esc(task && task.taskId || task && task.id || "")}"><div class="commerce-result-summary-head"><div class="commerce-result-summary-headline"><span>机票请求工作流</span><strong>需要补充信息</strong></div></div><div class="commerce-one-screen-body"><section class="commerce-one-screen-card">${flightWorkflowHtml}</section></div>${commerceSafetyAndDebugDetailsDisclosure(task, [])}<p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p></section>`;
     return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-simple-flight-result" aria-label="机票搜索结果" data-commerce-task-id="${esc(task && task.taskId || task && task.id || "")}">
       <div class="commerce-result-summary-head">
         <div class="commerce-result-summary-headline">
@@ -6602,6 +6620,7 @@
           <p>日期：${esc(fields.dateDisplay || fields.date)}</p>
           <p>直达偏好：${esc(fields.directPreference || "直达优先")}</p>
           <p>排序：${esc(fields.goal)}</p>
+          ${flightWorkflowHtml}
           ${commerceCleanResultSurfaceHtml(task, { guardedPriceCardHtml })}
           <section class="commerce-manual-platform-check" data-commerce-manual-platform-check="true"><h5>记录平台核对结果</h5><p>Platform Check Evidence</p><label>observedTotalPrice <input data-commerce-manual-platform-check-total="true" aria-label="observedTotalPrice" value="1010"></label><label>currency <input data-commerce-manual-platform-check-currency="true" aria-label="currency" value="CNY"></label><label>userNote <textarea data-commerce-manual-platform-check-note="true" aria-label="userNote"></textarea></label><button type="button" class="cmd-btn gray" data-commerce-manual-platform-check-save="true">记录平台核对结果</button><div data-commerce-manual-platform-check-output="true"><p>平台核对结果已记录</p><p>平台核对汇总</p><p>候选价置信标签</p><p>高一致 / 有差异 / 需重新核对 / 不可确认</p><p>下一步安全建议</p><p>平台核对差异</p><p>平台最终为准</p><p>唯珊不会付款、不会下单、不会上传证件或银行卡</p><p>secretStored: false</p></div></section>
         </section>
