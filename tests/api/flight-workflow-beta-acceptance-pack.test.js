@@ -17,13 +17,16 @@ function readyInput(extra = {}) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowBetaAcceptancePack.js"]);
   const api = windowRef.WeishanFlightWorkflowBetaAcceptancePack;
-  assert.equal(api.FLIGHT_WORKFLOW_BETA_ACCEPTANCE_PACK_VERSION, "2.1.70");
-  const ready = api.buildFlightWorkflowBetaAcceptancePack(readyInput());
+  assert.equal(api.FLIGHT_WORKFLOW_BETA_ACCEPTANCE_PACK_VERSION, "2.1.71");
+  const ready = api.buildFlightWorkflowBetaAcceptancePack(readyInput({ feedbackReviewSummary:{ status:"ready", feedbackHealth:{ safetyCopyUnderstood:true } }, acceptanceSessionSummary:{ status:"completed" }, nextAcceptanceStep:"本次验收已完成" }));
   assert.equal(ready.status, "ready");
   assert.equal(ready.acceptanceReadiness.safeForGuidedUserTest, true);
   assert.ok(ready.acceptanceSteps.length >= 6);
   assert.ok(ready.forbiddenCapabilities.includes("付款"));
   assert.equal(ready.bookingUrl, null);
+  assert.equal(ready.feedbackReviewSummary.status, "ready");
+  assert.equal(ready.acceptanceSessionSummary.status, "completed");
+  assert.equal(ready.nextAcceptanceStep, "本次验收已完成");
   const review = api.buildFlightWorkflowBetaAcceptancePack(readyInput({ humanReviewChecklistSummary:{ status:"needs_review", redacted:true } }));
   assert.equal(review.status, "needs_review");
   const releaseBlocked = api.buildFlightWorkflowBetaAcceptancePack(readyInput({ releaseReadinessSummary:{ status:"blocked", releaseReady:false, safeForUserFacingBeta:false, redacted:true }, releaseReadinessBlocked:true }));

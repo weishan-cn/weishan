@@ -8741,7 +8741,7 @@ test.describe.serial("commerce agent workbench", () => {
       try {
         window.localStorage.setItem("weishan.readOnlyQuoteRefreshState.v1", JSON.stringify({
           stateName:"read_only_quote_refresh_state_v1",
-          appVersion:"2.1.70",
+          appVersion:"2.1.71",
           lastRefreshStatus:"refreshed",
           providerId:"google_flights_search",
           providerName:"Google Flights",
@@ -9067,10 +9067,10 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.1.70 flight workflow release readiness dashboard stays local @commerce-smoke", async () => {
+  test("v2.1.71 flight workflow release readiness dashboard stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2169-READY 购买7月15日上海到成都最便宜的直达机票");
-    for (const text of ["机票工作流运营控制台", "场景模拟", "安全测试矩阵", "查看场景模拟", "查看安全测试矩阵", "场景模拟仅用于安全回归，不代表真实票价、库存或可出票", "安全测试矩阵仅为本地安全回归检查，不代表真实票价或可出票", "机票工作流发布就绪总览", "查看发布就绪总览", "发布状态", "安全红线", "安全矩阵", "用户复核摘要", "仍被禁止的能力", "安全文案已统一", "当前仍是只读候选证据流程", "不代表真实票价、库存或可出票", "唯珊不会付款、不会下单、不会出票", "唯珊不会上传证件、银行卡或登录凭据", "只读 Beta 验收", "只读 Beta 用户测试", "验收步骤", "用户测试", "填写测试反馈", "测试反馈已脱敏", "确认不会付款、下单或出票", "测试过程不会付款、不会下单、不会出票"]) {
+    for (const text of ["机票工作流运营控制台", "场景模拟", "安全测试矩阵", "查看场景模拟", "查看安全测试矩阵", "场景模拟仅用于安全回归，不代表真实票价、库存或可出票", "安全测试矩阵仅为本地安全回归检查，不代表真实票价或可出票", "机票工作流发布就绪总览", "查看发布就绪总览", "发布状态", "安全红线", "安全矩阵", "用户复核摘要", "仍被禁止的能力", "安全文案已统一", "当前仍是只读候选证据流程", "不代表真实票价、库存或可出票", "唯珊不会付款、不会下单、不会出票", "唯珊不会上传证件、银行卡或登录凭据", "只读 Beta 验收", "只读 Beta 用户测试", "验收步骤", "用户测试", "填写测试反馈", "测试反馈已脱敏", "确认不会付款、下单或出票", "测试过程不会付款、不会下单、不会出票", "只读 Beta 验收复核", "测试反馈汇总", "反馈可用于验收参考", "仍需补充反馈", "反馈已脱敏", "验收会话摘要", "本次验收已完成", "验收进行中", "仍需复核", "下一步建议", "验收复核只用于改进只读候选证据流程"]) {
       await expect(summary).toContainText(text, { timeout:15000 });
     }
     await summary.locator('[data-commerce-flight-scenario-simulator-show="true"]').first().click();
@@ -9098,6 +9098,16 @@ test.describe.serial("commerce agent workbench", () => {
     await summary.locator('[data-commerce-flight-beta-feedback-submit="true"]').first().click();
     await expect(betaOutput).toContainText("测试反馈已脱敏", { timeout:15000 });
     await expect(betaOutput).toContainText("不会保存原始用户反馈");
+    await summary.locator('[data-commerce-flight-beta-review-show="true"]').first().click();
+    const reviewOutput = summary.locator('[data-commerce-flight-beta-review-output="true"]').first();
+    await expect(reviewOutput).toContainText("只读 Beta 验收复核", { timeout:15000 });
+    await expect(reviewOutput).toContainText("验收会话摘要");
+    await expect(reviewOutput).toContainText("下一步建议");
+    await summary.locator('[data-commerce-flight-beta-feedback-review-show="true"]').first().click();
+    const feedbackReviewOutput = summary.locator('[data-commerce-flight-beta-feedback-review-output="true"]').first();
+    await expect(feedbackReviewOutput).toContainText("测试反馈汇总", { timeout:15000 });
+    await expect(feedbackReviewOutput).toContainText("反馈可用于验收参考");
+    await expect(feedbackReviewOutput).toContainText("反馈已脱敏");
     await expect(summary).not.toContainText(/下载文件|保存文件/);
     await expect(summary).not.toContainText(/bookingUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
     await expect(summary).not.toContainText(/全网最低|最低价保证|已锁价|真实最终价|立即购买|直接下单|一键出票/);

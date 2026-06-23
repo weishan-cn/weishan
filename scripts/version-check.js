@@ -1819,6 +1819,33 @@ function checkFlightWorkflowBetaAcceptanceViewModelVersion(results, expectedVers
   addCheck(results, "apps/desktop flight workflow beta acceptance view model version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowBetaAcceptanceViewModel.js FLIGHT_WORKFLOW_BETA_ACCEPTANCE_VIEW_MODEL_VERSION");
 }
 
+function checkFlightWorkflowBetaFeedbackReviewCenterVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowBetaFeedbackReviewCenter.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow beta feedback review center version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow beta feedback review center version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_BETA_FEEDBACK_REVIEW_CENTER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow beta feedback review center version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowBetaFeedbackReviewCenter.js FLIGHT_WORKFLOW_BETA_FEEDBACK_REVIEW_CENTER_VERSION");
+}
+
+function checkFlightWorkflowAcceptanceSessionSummaryVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowAcceptanceSessionSummary.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow acceptance session summary version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow acceptance session summary version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_ACCEPTANCE_SESSION_SUMMARY_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow acceptance session summary version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowAcceptanceSessionSummary.js FLIGHT_WORKFLOW_ACCEPTANCE_SESSION_SUMMARY_VERSION");
+}
+
+function checkFlightWorkflowBetaAcceptanceReviewViewModelVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowBetaAcceptanceReviewViewModel.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow beta acceptance review view model version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow beta acceptance review view model version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_BETA_ACCEPTANCE_REVIEW_VIEW_MODEL_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow beta acceptance review view model version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowBetaAcceptanceReviewViewModel.js FLIGHT_WORKFLOW_BETA_ACCEPTANCE_REVIEW_VIEW_MODEL_VERSION");
+}
+
 function checkFlightIntentNormalizerVersion(results, expectedVersion) {
   const filePath = "apps/desktop/src/renderer/core/flightIntentNormalizer.js";
   const file = readText(filePath);
@@ -2127,6 +2154,9 @@ function runVersionCheck() {
     checkFlightWorkflowGuidedUserTestModeVersion(results, rootPackage.version);
     checkFlightWorkflowBetaAcceptancePackVersion(results, rootPackage.version);
     checkFlightWorkflowBetaAcceptanceViewModelVersion(results, rootPackage.version);
+    checkFlightWorkflowBetaFeedbackReviewCenterVersion(results, rootPackage.version);
+    checkFlightWorkflowAcceptanceSessionSummaryVersion(results, rootPackage.version);
+    checkFlightWorkflowBetaAcceptanceReviewViewModelVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowOrchestratorVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowStatusPresenterVersion(results, rootPackage.version);
     checkFlightFareBreakdownVersion(results, rootPackage.version);

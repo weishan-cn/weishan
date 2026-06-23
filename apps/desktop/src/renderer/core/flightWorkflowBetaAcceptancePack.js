@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_BETA_ACCEPTANCE_PACK_VERSION = "2.1.70";
+  const FLIGHT_WORKFLOW_BETA_ACCEPTANCE_PACK_VERSION = "2.1.71";
   const PACK_NAME = "flight_workflow_beta_acceptance_pack_v1";
   const FORBIDDEN_CLAIM_RE = /全网最低|最低价保证|已锁价|可出票|真实最终价|立即购买|直接下单|一键出票/i;
 
@@ -125,7 +125,7 @@
       fileWrite:false,
       download:false,
       redacted:true
-    }, stripUnsafe({ releaseReadinessSummary:safe.releaseReadinessSummary, operatorConsoleSummary:safe.operatorConsoleSummary, scenarioMatrixSummary:safe.scenarioMatrixSummary, humanReviewChecklistSummary:safe.humanReviewChecklistSummary, finalSafeHandoffPacketSummary:safe.finalSafeHandoffPacketSummary, userSafetyCopySummary:safe.userSafetyCopySummary })));
+    }, stripUnsafe({ releaseReadinessSummary:safe.releaseReadinessSummary, operatorConsoleSummary:safe.operatorConsoleSummary, scenarioMatrixSummary:safe.scenarioMatrixSummary, humanReviewChecklistSummary:safe.humanReviewChecklistSummary, finalSafeHandoffPacketSummary:safe.finalSafeHandoffPacketSummary, userSafetyCopySummary:safe.userSafetyCopySummary, feedbackReviewSummary:safe.feedbackReviewSummary, acceptanceSessionSummary:safe.acceptanceSessionSummary, acceptanceReviewStatus:safe.acceptanceReviewStatus, betaFeedbackHealth:safe.betaFeedbackHealth, nextAcceptanceStep:safe.nextAcceptanceStep })));
   }
   function buildFlightWorkflowBetaAcceptancePack(input) {
     try {
@@ -133,7 +133,7 @@
       const readiness = evaluateFlightWorkflowBetaAcceptanceReadiness(input);
       const status = statusFor(readiness);
       const label = status === "ready" ? "可以开始用户验收" : (status === "needs_review" ? "仍需复核" : "暂不可验收");
-      return sanitizeFlightWorkflowBetaAcceptancePack({ packName:PACK_NAME, appVersion:FLIGHT_WORKFLOW_BETA_ACCEPTANCE_PACK_VERSION, status:status, acceptanceReadiness:readiness, acceptanceSteps:buildFlightWorkflowBetaAcceptanceSteps(input), userFacingSummary:{ title:"只读 Beta 验收包", resultLabel:label, caveat:"该验收只覆盖只读候选证据流程，不代表真实票价、库存或可出票。", redacted:true }, forbiddenCapabilities:forbiddenCapabilities(), releaseReadinessSummary:releaseOf(input), operatorConsoleSummary:operatorOf(input), scenarioMatrixSummary:matrixOf(input), humanReviewChecklistSummary:reviewOf(input), finalSafeHandoffPacketSummary:packetOf(input), userSafetyCopySummary:copyOf(input), safety:safety(), redacted:true });
+      return sanitizeFlightWorkflowBetaAcceptancePack({ packName:PACK_NAME, appVersion:FLIGHT_WORKFLOW_BETA_ACCEPTANCE_PACK_VERSION, status:status, acceptanceReadiness:readiness, acceptanceSteps:buildFlightWorkflowBetaAcceptanceSteps(input), userFacingSummary:{ title:"只读 Beta 验收包", resultLabel:label, caveat:"该验收只覆盖只读候选证据流程，不代表真实票价、库存或可出票。", redacted:true }, forbiddenCapabilities:forbiddenCapabilities(), releaseReadinessSummary:releaseOf(input), operatorConsoleSummary:operatorOf(input), scenarioMatrixSummary:matrixOf(input), humanReviewChecklistSummary:reviewOf(input), finalSafeHandoffPacketSummary:packetOf(input), userSafetyCopySummary:copyOf(input), feedbackReviewSummary:input.feedbackReviewSummary, acceptanceSessionSummary:input.acceptanceSessionSummary, acceptanceReviewStatus:input.acceptanceReviewStatus || status, betaFeedbackHealth:input.betaFeedbackHealth || input.feedbackReviewSummary && input.feedbackReviewSummary.feedbackHealth, nextAcceptanceStep:input.nextAcceptanceStep || label, safety:safety(), redacted:true });
     } catch (error) {
       return sanitizeFlightWorkflowBetaAcceptancePack({ status:"failed_safe", acceptanceSteps:[], acceptanceReadiness:{ safeForGuidedUserTest:false, redacted:true } });
     }
