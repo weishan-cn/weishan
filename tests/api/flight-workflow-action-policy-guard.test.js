@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowActionPolicyGuard.js"]);
   const api = windowRef.WeishanFlightWorkflowActionPolicyGuard;
-  assert.equal(api.FLIGHT_WORKFLOW_ACTION_POLICY_GUARD_VERSION, "2.1.65");
+  assert.equal(api.FLIGHT_WORKFLOW_ACTION_POLICY_GUARD_VERSION, "2.1.66");
   const local = api.evaluateFlightWorkflowActionPolicy({ actionId:"run_read_only_quotes", actionLabel:"运行只读报价" }, {});
   assert.equal(local.status, "allowed");
   assert.equal(local.actionType, "local_only");

@@ -8,7 +8,7 @@ const api = load("apps/desktop/src/renderer/core/platformCheckReconciliationCent
 function model(evidence, candidate = { totalPrice:1000, currency:"CNY", providerName:"Trusted" }) {
   return api.buildPlatformCheckReconciliationCenter({ selectedCandidate:candidate, manualPlatformCheckEvidence:evidence, handoffReceiptSummary:{ providerName:"Trusted", displayHost:"example.com", userConfirmed:true } });
 }
-assert.equal(model(null).appVersion, "2.1.65");
+assert.equal(model(null).appVersion, "2.1.66");
 assert.equal(model(null).status, "no_platform_check");
 assert.equal(model(null).reconciliationResult.confidenceLabel, "不可确认");
 assert.equal(model({ status:"accepted", observedCurrency:"CNY", observedTotalPrice:1000, observedInventoryStatus:"available" }).status, "matched");

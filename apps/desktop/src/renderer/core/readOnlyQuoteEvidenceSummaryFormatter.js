@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.65";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.66";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -237,6 +237,16 @@
     return clone({ title:"脱敏会话摘要预览", line:safeLine(safe.readinessLabel || "仅预览，不写入文件"), sectionLabels:["工作流摘要", "候选证据摘要", "安全审计摘要"], canWriteFile:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
+  function formatFlightWorkflowHumanReviewChecklistSummary(input) {
+    const safe = stripUnsafe(input && typeof input === "object" ? input : {}) || {};
+    return clone({ title:"前往平台前请人工复核", line:safeLine(safe.userFacingSummary && safe.userFacingSummary.line || safe.line || "仍需补充复核"), sectionLabels:["人工复核清单", "已确认项", "未完成项"], bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatFlightWorkflowFinalSafeHandoffPacketSummary(input) {
+    const safe = stripUnsafe(input && typeof input === "object" ? input : {}) || {};
+    return clone({ title:"最终安全交接包", line:safeLine(safe.userFacingSummary && safe.userFacingSummary.line || safe.line || "仍需补充复核"), sectionLabels:["行程摘要", "候选证据摘要", "平台核对摘要", "安全限制摘要"], canOpenExternalPlatform:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -272,6 +282,8 @@
     formatFlightWorkflowSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
+    formatFlightWorkflowHumanReviewChecklistSummary,
+    formatFlightWorkflowFinalSafeHandoffPacketSummary,
     buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft
   };
 })();

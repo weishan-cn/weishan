@@ -7,16 +7,17 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafeSessionExportPreview.js"]);
   const api = windowRef.WeishanFlightWorkflowSafeSessionExportPreview;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFE_SESSION_EXPORT_PREVIEW_VERSION, "2.1.65");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFE_SESSION_EXPORT_PREVIEW_VERSION, "2.1.66");
   const preview = api.buildFlightWorkflowSafeSessionExportPreview({ workflowStateSummary:{ workflowId:"wf1" }, currentStage:"decision", topCandidates:[{ providerName:"A", totalPrice:980, bookingUrl:null }], selectedCandidate:{ providerName:"A" }, auditReviewSummary:{ userFacingSummary:{ resultLabel:"安全检查通过" } } });
   assert.equal(preview.previewName, "flight_workflow_safe_session_export_preview_v1");
   assert.equal(preview.status, "ready");
   assert.equal(preview.canWriteFile, false);
   assert.equal(preview.canDownload, false);
-  assert.equal(preview.sections.length, 3);
+  assert.equal(preview.sections.length, 4);
   assert.equal(preview.sections[0].title, "工作流摘要");
   assert.equal(preview.sections[1].title, "候选证据摘要");
   assert.equal(preview.sections[2].title, "安全审计摘要");
+  assert.equal(preview.sections[3].title, "最终安全交接包预览");
   assert.equal(JSON.stringify(preview).includes("不包含证件、银行卡、登录凭据或密钥"), true);
   assert.equal(JSON.stringify(preview).includes("不包含付款、下单、出票链接"), true);
   const notReady = api.buildFlightWorkflowSafeSessionExportPreview({ topCandidates:[{ providerName:"A" }] });

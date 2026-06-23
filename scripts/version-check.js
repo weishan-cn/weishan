@@ -1664,6 +1664,33 @@ function checkFlightWorkflowRiskBadgeBuilderVersion(results, expectedVersion) {
   addCheck(results, "apps/desktop flight workflow risk badge builder version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION");
 }
 
+function checkFlightWorkflowHumanReviewChecklistVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowHumanReviewChecklist.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow human review checklist version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow human review checklist version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_HUMAN_REVIEW_CHECKLIST_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow human review checklist version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowHumanReviewChecklist.js FLIGHT_WORKFLOW_HUMAN_REVIEW_CHECKLIST_VERSION");
+}
+
+function checkFlightWorkflowFinalSafeHandoffPacketVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowFinalSafeHandoffPacket.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow final safe handoff packet version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow final safe handoff packet version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_FINAL_SAFE_HANDOFF_PACKET_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow final safe handoff packet version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowFinalSafeHandoffPacket.js FLIGHT_WORKFLOW_FINAL_SAFE_HANDOFF_PACKET_VERSION");
+}
+
+function checkFlightWorkflowHandoffPacketPolicyGuardVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowHandoffPacketPolicyGuard.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow handoff packet policy guard version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow handoff packet policy guard version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_HANDOFF_PACKET_POLICY_GUARD_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow handoff packet policy guard version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowHandoffPacketPolicyGuard.js FLIGHT_WORKFLOW_HANDOFF_PACKET_POLICY_GUARD_VERSION");
+}
+
 function checkFlightIntentNormalizerVersion(results, expectedVersion) {
   const filePath = "apps/desktop/src/renderer/core/flightIntentNormalizer.js";
   const file = readText(filePath);
@@ -1955,6 +1982,9 @@ function runVersionCheck() {
     checkFlightWorkflowAuditReviewCenterVersion(results, rootPackage.version);
     checkFlightWorkflowSafeSessionExportPreviewVersion(results, rootPackage.version);
     checkFlightWorkflowRiskBadgeBuilderVersion(results, rootPackage.version);
+    checkFlightWorkflowHumanReviewChecklistVersion(results, rootPackage.version);
+    checkFlightWorkflowFinalSafeHandoffPacketVersion(results, rootPackage.version);
+    checkFlightWorkflowHandoffPacketPolicyGuardVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowOrchestratorVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowStatusPresenterVersion(results, rootPackage.version);
     checkFlightFareBreakdownVersion(results, rootPackage.version);

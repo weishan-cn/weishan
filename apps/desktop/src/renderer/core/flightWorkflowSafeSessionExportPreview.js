@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SAFE_SESSION_EXPORT_PREVIEW_VERSION = "2.1.65";
+  const FLIGHT_WORKFLOW_SAFE_SESSION_EXPORT_PREVIEW_VERSION = "2.1.66";
   const PREVIEW_NAME = "flight_workflow_safe_session_export_preview_v1";
   const FORBIDDEN_NAME_RE = /(rawText|rawUserText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|apiKey|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
@@ -55,7 +55,8 @@
     return clone([
       { sectionId:"workflow_summary", title:"工作流摘要", rows:[row("workflowId", safe.workflowId || safe.workflowStateSummary && safe.workflowStateSummary.workflowId || "redacted"), row("currentStage", safe.currentStage || safe.workflowStageLabel || safe.continuitySummary && safe.continuitySummary.currentStage || ""), row("safety", "不包含付款、下单、出票链接")], redacted:true },
       { sectionId:"candidate_summary", title:"候选证据摘要", rows:[row("topCandidateCount", String(candidates.length || safe.topCandidateCount || 0)), row("selectedCandidate", safe.selectedCandidateSummary && safe.selectedCandidateSummary.line || safe.selectedCandidate && safe.selectedCandidate.providerName || "只读候选证据"), row("caveat", "平台最终为准，未锁价，不代表可出票")], redacted:true },
-      { sectionId:"audit_summary", title:"安全审计摘要", rows:[row("result", audit.userFacingSummary && audit.userFacingSummary.resultLabel || audit.resultLabel || "安全检查通过"), row("credential", "不包含证件、银行卡、登录凭据或密钥"), row("links", "不包含付款、下单、出票链接")], redacted:true }
+      { sectionId:"audit_summary", title:"安全审计摘要", rows:[row("result", audit.userFacingSummary && audit.userFacingSummary.resultLabel || audit.resultLabel || "安全检查通过"), row("credential", "不包含证件、银行卡、登录凭据或密钥"), row("links", "不包含付款、下单、出票链接")], redacted:true },
+      { sectionId:"handoff_packet_preview", title:"最终安全交接包预览", rows:[row("finalReviewStatus", safe.finalReviewStatus || safe.finalSafeHandoffPacketSummary && safe.finalSafeHandoffPacketSummary.status || "仍需复核"), row("platform", "平台页面结果为准"), row("safety", "唯珊不会付款、不会下单、不会出票")], redacted:true }
     ]);
   }
   function buildFlightWorkflowSafeSessionExportPreview(input) {

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.65";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.66";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -19,6 +19,13 @@
       if (health.hasConfirmationRequiredActions || safe.requiresConfirmation === true) badges.push(badge("confirmation_required", "需要二次确认", "warning"));
       if (health.hasBlockedActions || health.hasPaymentRisk || health.hasOrderRisk || health.hasTicketingRisk || safe.tradingBlocked === true) badges.push(badge("trading_blocked", "交易动作已阻断", "blocked"));
       if (health.hasSensitiveInputBlocked || health.hasIdentityUploadRisk) badges.push(badge("sensitive_input_blocked", "敏感输入已阻断", "blocked"));
+      const checklist = safe.humanReviewChecklistSummary || safe.humanReviewChecklist || {};
+      const packet = safe.finalSafeHandoffPacketSummary || safe.finalSafeHandoffPacket || {};
+      const policy = safe.handoffPacketPolicyDecision || {};
+      if (checklist.status === "ready") badges.push(badge("human_review_done", "人工复核完成", "info"));
+      if (checklist.status === "needs_review" || packet.status === "needs_review" || policy.status === "needs_review") badges.push(badge("human_review_needed", "仍需复核", "warning"));
+      if (packet.status === "ready" && policy.status === "allowed") badges.push(badge("platform_confirmation_ready", "可进入平台确认", "info"));
+      if (packet.status === "blocked" || policy.status === "blocked") badges.push(badge("handoff_packet_blocked", "交接包已阻断", "blocked"));
       if (preview.status === "ready" || safe.canPreviewExport === true) badges.push(badge("export_preview", "可预览脱敏摘要", "info"));
       badges.push(badge("not_exportable", "不可导出", "warning"));
       return clone({ builderName:BUILDER_NAME, appVersion:FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, status:health.overall === "blocked" ? "blocked" : "ready", badges:badges, summaryLabel:summarizeFlightWorkflowRiskBadges(badges).summaryLabel, safety:safety(), bookingUrl:null, redacted:true });

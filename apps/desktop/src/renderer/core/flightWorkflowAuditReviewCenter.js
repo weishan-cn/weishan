@@ -1,9 +1,9 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_AUDIT_REVIEW_CENTER_VERSION = "2.1.65";
+  const FLIGHT_WORKFLOW_AUDIT_REVIEW_CENTER_VERSION = "2.1.66";
   const CENTER_NAME = "flight_workflow_audit_review_center_v1";
-  const DEFAULT_WORKFLOW_ID = "deterministic-flight-workflow-audit-review-v2.1.65";
+  const DEFAULT_WORKFLOW_ID = "deterministic-flight-workflow-audit-review-v2.1.66";
   const FORBIDDEN_NAME_RE = /(rawText|rawUserText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|apiKey|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
 
@@ -68,7 +68,8 @@
   function evaluateFlightWorkflowAuditHealth(input) {
     if (!input || typeof input !== "object" || Array.isArray(input)) return { overall:"unknown", hasBlockedActions:false, hasConfirmationRequiredActions:false, hasSensitiveInputBlocked:false, hasRawResponseRisk:false, hasSecretRisk:false, hasTradingUrlRisk:false, hasAutoOpenRisk:false, hasPaymentRisk:false, hasOrderRisk:false, hasTicketingRisk:false, hasIdentityUploadRisk:false };
     const risk = scanRisk(input);
-    const hasBlockedActions = blockedActionsOf(input).length > 0 || input.actionPolicyDecision && input.actionPolicyDecision.blocked === true || input.actionExecutionResult && input.actionExecutionResult.status === "blocked";
+    const hasPacketPolicyBlocked = input.handoffPacketPolicyDecision && input.handoffPacketPolicyDecision.status === "blocked" || input.finalSafeHandoffPacketSummary && input.finalSafeHandoffPacketSummary.status === "blocked";
+    const hasBlockedActions = hasPacketPolicyBlocked || blockedActionsOf(input).length > 0 || input.actionPolicyDecision && input.actionPolicyDecision.blocked === true || input.actionExecutionResult && input.actionExecutionResult.status === "blocked";
     const health = { overall:"pass", hasBlockedActions:hasBlockedActions, hasConfirmationRequiredActions:hasConfirmation(input), hasSensitiveInputBlocked:risk.hasSensitiveInputBlocked, hasRawResponseRisk:risk.hasRawResponseRisk, hasSecretRisk:risk.hasSecretRisk, hasTradingUrlRisk:risk.hasTradingUrlRisk, hasAutoOpenRisk:risk.hasAutoOpenRisk, hasPaymentRisk:risk.hasPaymentRisk, hasOrderRisk:risk.hasOrderRisk, hasTicketingRisk:risk.hasTicketingRisk, hasIdentityUploadRisk:risk.hasIdentityUploadRisk || risk.hasCredentialInputRisk };
     if (health.hasRawResponseRisk || health.hasSecretRisk || health.hasTradingUrlRisk || health.hasAutoOpenRisk || health.hasPaymentRisk || health.hasOrderRisk || health.hasTicketingRisk || health.hasIdentityUploadRisk) health.overall = "blocked";
     else if (health.hasBlockedActions || health.hasConfirmationRequiredActions || health.hasSensitiveInputBlocked) health.overall = "warning";
@@ -81,6 +82,7 @@
       const health = evaluateFlightWorkflowAuditHealth(input);
       const findings = [finding("read_only_safe", "info", "只读安全", "唯珊只提供只读候选证据，不付款、不下单、不出票。", "")];
       if (health.hasBlockedActions) findings.push(finding("blocked_actions", "blocked", "动作已安全阻断", "检测到被阻断动作，交易动作已阻断。", "blocked_action"));
+      if (input.handoffPacketPolicyDecision && input.handoffPacketPolicyDecision.status === "blocked" || input.finalSafeHandoffPacketSummary && input.finalSafeHandoffPacketSummary.status === "blocked") findings.push(finding("handoff_packet_blocked", "blocked", "交接包已阻断", "最终安全交接包已被策略阻断。", "handoff_packet_blocked"));
       if (health.hasConfirmationRequiredActions) findings.push(finding("provider_confirmation", "warning", "外部平台操作需要二次确认", "前往平台确认只返回确认提示，不自动打开。", "open_provider_confirmation"));
       if (health.hasSensitiveInputBlocked) findings.push(finding("sensitive_input_blocked", "blocked", "敏感输入已阻断", "不包含证件、银行卡、登录凭据或密钥。", ""));
       if (health.hasRawResponseRisk) findings.push(finding("raw_response_risk", "blocked", "raw response 风险", "raw provider response 不允许进入审计或导出预览。", ""));
@@ -105,7 +107,7 @@
       const health = evaluateFlightWorkflowAuditHealth(input);
       const status = health.overall === "blocked" ? "blocked" : (health.overall === "warning" ? "warning" : "ready");
       const findings = buildFlightWorkflowAuditFindings(input);
-      return sanitizeFlightWorkflowAuditReview({ centerName:CENTER_NAME, appVersion:FLIGHT_WORKFLOW_AUDIT_REVIEW_CENTER_VERSION, status:status, workflowId:safeText(input.workflowId || input.workflowStateSummary && input.workflowStateSummary.workflowId || DEFAULT_WORKFLOW_ID), auditHealth:health, findings:findings, userFacingSummary:buildFlightWorkflowAuditReviewSummary(input), eventLedgerSummary:stripUnsafe(input.eventLedgerSummary || null), actionPolicySummary:stripUnsafe(input.actionPolicyDecision || input.actionExecutionResult && input.actionExecutionResult.actionPolicyDecision || null), confirmationSummary:stripUnsafe(input.confirmationSummary || input.confirmationStateSummary || input.actionExecutionResult && input.actionExecutionResult.confirmation || null), blockedActionSummary:{ title:"被阻断动作", blockedActions:stripUnsafe(blockedActionsOf(input)), redacted:true }, safety:safety(), redacted:true });
+      return sanitizeFlightWorkflowAuditReview({ centerName:CENTER_NAME, appVersion:FLIGHT_WORKFLOW_AUDIT_REVIEW_CENTER_VERSION, status:status, workflowId:safeText(input.workflowId || input.workflowStateSummary && input.workflowStateSummary.workflowId || DEFAULT_WORKFLOW_ID), auditHealth:health, findings:findings, userFacingSummary:buildFlightWorkflowAuditReviewSummary(input), eventLedgerSummary:stripUnsafe(input.eventLedgerSummary || null), actionPolicySummary:stripUnsafe(input.actionPolicyDecision || input.actionExecutionResult && input.actionExecutionResult.actionPolicyDecision || null), confirmationSummary:stripUnsafe(input.confirmationSummary || input.confirmationStateSummary || input.actionExecutionResult && input.actionExecutionResult.confirmation || null), blockedActionSummary:{ title:"被阻断动作", blockedActions:stripUnsafe(blockedActionsOf(input)), redacted:true }, humanReviewChecklistSummary:stripUnsafe(input.humanReviewChecklistSummary || null), finalSafeHandoffPacketSummary:stripUnsafe(input.finalSafeHandoffPacketSummary || null), handoffPacketPolicyDecision:stripUnsafe(input.handoffPacketPolicyDecision || null), finalReviewStatus:safeText(input.finalReviewStatus || input.finalSafeHandoffPacketSummary && input.finalSafeHandoffPacketSummary.status || ""), finalReviewBadges:stripUnsafe(input.finalReviewBadges || []), safety:safety(), redacted:true });
     } catch (error) {
       return sanitizeFlightWorkflowAuditReview({ centerName:CENTER_NAME, appVersion:FLIGHT_WORKFLOW_AUDIT_REVIEW_CENTER_VERSION, status:"failed_safe", workflowId:DEFAULT_WORKFLOW_ID, auditHealth:evaluateFlightWorkflowAuditHealth(null), findings:buildFlightWorkflowAuditFindings(null), userFacingSummary:buildFlightWorkflowAuditReviewSummary(null), safety:safety(), redacted:true });
     }

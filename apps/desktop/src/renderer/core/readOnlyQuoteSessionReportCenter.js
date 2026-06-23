@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.65";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.66";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -44,6 +44,9 @@
   function workflowAuditApi() { return window.WeishanFlightWorkflowAuditReviewCenter || {}; }
   function safeExportApi() { return window.WeishanFlightWorkflowSafeSessionExportPreview || {}; }
   function riskBadgeApi() { return window.WeishanFlightWorkflowRiskBadgeBuilder || {}; }
+  function humanReviewApi() { return window.WeishanFlightWorkflowHumanReviewChecklist || {}; }
+  function finalPacketApi() { return window.WeishanFlightWorkflowFinalSafeHandoffPacket || {}; }
+  function packetPolicyApi() { return window.WeishanFlightWorkflowHandoffPacketPolicyGuard || {}; }
 
   function safeText(value) {
     return text(value).replace(FORBIDDEN_TEXT_RE, "保守候选证据");
@@ -116,7 +119,12 @@
       lastActionMessage: safeText(safe.lastActionMessage || safe.eventLedgerSummary && safe.eventLedgerSummary.lastActionMessage || ""),
       auditReviewSummary: stripUnsafe(safe.auditReviewSummary || null),
       safeSessionExportPreview: stripUnsafe(safe.safeSessionExportPreview || null),
-      riskBadgeSummary: stripUnsafe(safe.riskBadgeSummary || null)
+      riskBadgeSummary: stripUnsafe(safe.riskBadgeSummary || null),
+      humanReviewChecklistSummary: stripUnsafe(safe.humanReviewChecklistSummary || null),
+      finalSafeHandoffPacketSummary: stripUnsafe(safe.finalSafeHandoffPacketSummary || null),
+      handoffPacketPolicyDecision: stripUnsafe(safe.handoffPacketPolicyDecision || null),
+      finalReviewStatus: safeText(safe.finalReviewStatus || ""),
+      finalReviewBadges: stripUnsafe(safe.finalReviewBadges || [])
     };
   }
 
@@ -146,8 +154,13 @@
     const workflow = workflowFields(safe);
     const auditReviewSummary = workflow.auditReviewSummary || (typeof workflowAuditApi().buildFlightWorkflowAuditReviewCenter === "function" ? workflowAuditApi().buildFlightWorkflowAuditReviewCenter(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected })) : null);
     const safeSessionExportPreview = workflow.safeSessionExportPreview || (typeof safeExportApi().buildFlightWorkflowSafeSessionExportPreview === "function" ? safeExportApi().buildFlightWorkflowSafeSessionExportPreview(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary })) : null);
-    const riskBadgeModel = typeof riskBadgeApi().buildFlightWorkflowRiskBadges === "function" ? riskBadgeApi().buildFlightWorkflowRiskBadges({ auditReview:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview, actionQueueSummary:workflow.actionQueueSummary, actionPolicyDecision:workflow.actionPolicyDecision, actionExecutionResult:workflow.actionExecutionResult, eventLedgerSummary:workflow.eventLedgerSummary, tradingBlocked:true, requiresConfirmation:true }) : null;
+    const humanReviewChecklistSummary = workflow.humanReviewChecklistSummary || safe.humanReviewChecklistSummary || (typeof humanReviewApi().buildFlightWorkflowHumanReviewChecklist === "function" ? humanReviewApi().buildFlightWorkflowHumanReviewChecklist(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary })) : null);
+    const finalSafeHandoffPacketSummary = workflow.finalSafeHandoffPacketSummary || safe.finalSafeHandoffPacketSummary || (typeof finalPacketApi().buildFlightWorkflowFinalSafeHandoffPacket === "function" ? finalPacketApi().buildFlightWorkflowFinalSafeHandoffPacket(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary, humanReviewChecklistSummary:humanReviewChecklistSummary })) : null);
+    const handoffPacketPolicyDecision = workflow.handoffPacketPolicyDecision || safe.handoffPacketPolicyDecision || (typeof packetPolicyApi().evaluateFlightWorkflowHandoffPacketPolicy === "function" ? packetPolicyApi().evaluateFlightWorkflowHandoffPacketPolicy({ finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary }) : null);
+    const finalReviewStatus = workflow.finalReviewStatus || safe.finalReviewStatus || (handoffPacketPolicyDecision && handoffPacketPolicyDecision.status === "allowed" ? "ready" : finalSafeHandoffPacketSummary && finalSafeHandoffPacketSummary.status || "needs_review");
+    const riskBadgeModel = typeof riskBadgeApi().buildFlightWorkflowRiskBadges === "function" ? riskBadgeApi().buildFlightWorkflowRiskBadges({ auditReview:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview, humanReviewChecklistSummary:humanReviewChecklistSummary, finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, handoffPacketPolicyDecision:handoffPacketPolicyDecision, actionQueueSummary:workflow.actionQueueSummary, actionPolicyDecision:workflow.actionPolicyDecision, actionExecutionResult:workflow.actionExecutionResult, eventLedgerSummary:workflow.eventLedgerSummary, tradingBlocked:true, requiresConfirmation:true }) : null;
     const riskBadgeSummary = workflow.riskBadgeSummary || (riskBadgeModel && typeof riskBadgeApi().summarizeFlightWorkflowRiskBadges === "function" ? Object.assign({}, riskBadgeApi().summarizeFlightWorkflowRiskBadges(riskBadgeModel.badges), { badges:riskBadgeModel.badges, line:riskBadgeModel.summaryLabel || riskBadgeApi().summarizeFlightWorkflowRiskBadges(riskBadgeModel.badges).summaryLabel }) : riskBadgeModel);
+    const finalReviewBadges = workflow.finalReviewBadges || safe.finalReviewBadges || riskBadgeModel && riskBadgeModel.badges || [];
     return clone({
       title: "候选报价证据摘要",
       subtitle: "只读候选价 · 平台最终为准",
@@ -192,6 +205,11 @@
       auditReviewSummary: auditReviewSummary ? { title:auditReviewSummary.userFacingSummary && auditReviewSummary.userFacingSummary.title || "本次机票工作流审计", line:auditReviewSummary.userFacingSummary && auditReviewSummary.userFacingSummary.resultLabel || "安全检查通过", redacted:true } : null,
       safeSessionExportPreview: safeSessionExportPreview ? { title:"脱敏会话摘要预览", line:safeSessionExportPreview.status === "ready" ? "仅预览，不写入文件" : "预览未就绪", sectionLabels:["工作流摘要", "候选证据摘要", "安全审计摘要"], canWriteFile:false, redacted:true } : null,
       riskBadgeSummary: riskBadgeSummary ? { line:riskBadgeSummary.line || riskBadgeSummary.summaryLabel || "只读安全", badgeCount:riskBadgeSummary.badgeCount || (Array.isArray(riskBadgeSummary.badges) ? riskBadgeSummary.badges.length : 0), redacted:true } : null,
+      humanReviewChecklistSummary: humanReviewChecklistSummary ? { title:"前往平台前请人工复核", line:humanReviewChecklistSummary.userFacingSummary && humanReviewChecklistSummary.userFacingSummary.line || "仍需补充复核", checkedCount:(humanReviewChecklistSummary.checkedItems || []).length || 0, incompleteCount:(humanReviewChecklistSummary.incompleteItems || []).length || 0, redacted:true } : null,
+      finalSafeHandoffPacketSummary: finalSafeHandoffPacketSummary ? { title:"最终安全交接包", line:finalSafeHandoffPacketSummary.userFacingSummary && finalSafeHandoffPacketSummary.userFacingSummary.line || "仍需补充复核", sectionLabels:["行程摘要", "候选证据摘要", "平台核对摘要", "安全限制摘要"], canOpenExternalPlatform:false, redacted:true } : null,
+      handoffPacketPolicyDecision: handoffPacketPolicyDecision,
+      finalReviewStatus: finalReviewStatus,
+      finalReviewBadges: finalReviewBadges,
       platformCheckWarnings: stripUnsafe(decisionAssistant && decisionAssistant.platformCheckWarnings || (safe.manualPlatformCheckEvidence ? ["平台核对结果已记录", "平台最终为准"] : ["仍需平台确认"])),
       workflowStateSummary: workflowFields(safe).workflowStateSummary,
       clarificationSummary: workflowFields(safe).clarificationSummary,
@@ -234,8 +252,13 @@
     const workflow = workflowFields(safe);
     const auditReviewSummary = workflow.auditReviewSummary || (typeof workflowAuditApi().buildFlightWorkflowAuditReviewCenter === "function" ? workflowAuditApi().buildFlightWorkflowAuditReviewCenter(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected })) : null);
     const safeSessionExportPreview = workflow.safeSessionExportPreview || (typeof safeExportApi().buildFlightWorkflowSafeSessionExportPreview === "function" ? safeExportApi().buildFlightWorkflowSafeSessionExportPreview(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary })) : null);
-    const riskBadgeModel = typeof riskBadgeApi().buildFlightWorkflowRiskBadges === "function" ? riskBadgeApi().buildFlightWorkflowRiskBadges({ auditReview:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview, actionQueueSummary:workflow.actionQueueSummary, actionPolicyDecision:workflow.actionPolicyDecision, actionExecutionResult:workflow.actionExecutionResult, eventLedgerSummary:workflow.eventLedgerSummary, tradingBlocked:true, requiresConfirmation:true }) : null;
+    const humanReviewChecklistSummary = workflow.humanReviewChecklistSummary || safe.humanReviewChecklistSummary || (typeof humanReviewApi().buildFlightWorkflowHumanReviewChecklist === "function" ? humanReviewApi().buildFlightWorkflowHumanReviewChecklist(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary })) : null);
+    const finalSafeHandoffPacketSummary = workflow.finalSafeHandoffPacketSummary || safe.finalSafeHandoffPacketSummary || (typeof finalPacketApi().buildFlightWorkflowFinalSafeHandoffPacket === "function" ? finalPacketApi().buildFlightWorkflowFinalSafeHandoffPacket(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary, humanReviewChecklistSummary:humanReviewChecklistSummary })) : null);
+    const handoffPacketPolicyDecision = workflow.handoffPacketPolicyDecision || safe.handoffPacketPolicyDecision || (typeof packetPolicyApi().evaluateFlightWorkflowHandoffPacketPolicy === "function" ? packetPolicyApi().evaluateFlightWorkflowHandoffPacketPolicy({ finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary }) : null);
+    const finalReviewStatus = workflow.finalReviewStatus || safe.finalReviewStatus || (handoffPacketPolicyDecision && handoffPacketPolicyDecision.status === "allowed" ? "ready" : finalSafeHandoffPacketSummary && finalSafeHandoffPacketSummary.status || "needs_review");
+    const riskBadgeModel = typeof riskBadgeApi().buildFlightWorkflowRiskBadges === "function" ? riskBadgeApi().buildFlightWorkflowRiskBadges({ auditReview:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview, humanReviewChecklistSummary:humanReviewChecklistSummary, finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, handoffPacketPolicyDecision:handoffPacketPolicyDecision, actionQueueSummary:workflow.actionQueueSummary, actionPolicyDecision:workflow.actionPolicyDecision, actionExecutionResult:workflow.actionExecutionResult, eventLedgerSummary:workflow.eventLedgerSummary, tradingBlocked:true, requiresConfirmation:true }) : null;
     const riskBadgeSummary = workflow.riskBadgeSummary || (riskBadgeModel && typeof riskBadgeApi().summarizeFlightWorkflowRiskBadges === "function" ? Object.assign({}, riskBadgeApi().summarizeFlightWorkflowRiskBadges(riskBadgeModel.badges), { badges:riskBadgeModel.badges, line:riskBadgeModel.summaryLabel || riskBadgeApi().summarizeFlightWorkflowRiskBadges(riskBadgeModel.badges).summaryLabel }) : riskBadgeModel);
+    const finalReviewBadges = workflow.finalReviewBadges || safe.finalReviewBadges || riskBadgeModel && riskBadgeModel.badges || [];
     return clone({
       sessionSummary: summary,
       auditExportPreview: stripUnsafe(auditPreview),
@@ -274,6 +297,11 @@
       auditReviewSummary: auditReviewSummary,
       safeSessionExportPreview: safeSessionExportPreview,
       riskBadgeSummary: riskBadgeSummary,
+      humanReviewChecklistSummary: humanReviewChecklistSummary,
+      finalSafeHandoffPacketSummary: finalSafeHandoffPacketSummary,
+      handoffPacketPolicyDecision: handoffPacketPolicyDecision,
+      finalReviewStatus: finalReviewStatus,
+      finalReviewBadges: finalReviewBadges,
       rawResponseStored: false,
       secretStored: false,
       bookingUrl: null,
@@ -354,6 +382,11 @@
       auditReviewSummary: report.safetyReport.auditReviewSummary || null,
       safeSessionExportPreview: report.safetyReport.safeSessionExportPreview || null,
       riskBadgeSummary: report.safetyReport.riskBadgeSummary || null,
+      humanReviewChecklistSummary: report.safetyReport.humanReviewChecklistSummary || null,
+      finalSafeHandoffPacketSummary: report.safetyReport.finalSafeHandoffPacketSummary || null,
+      handoffPacketPolicyDecision: report.safetyReport.handoffPacketPolicyDecision || null,
+      finalReviewStatus: report.safetyReport.finalReviewStatus || "",
+      finalReviewBadges: report.safetyReport.finalReviewBadges || [],
       continuitySummary: report.safetyReport.continuitySummary || null,
       confirmationStateSummary: report.safetyReport.confirmationStateSummary || null,
       recoverySummary: report.safetyReport.recoverySummary || null,
