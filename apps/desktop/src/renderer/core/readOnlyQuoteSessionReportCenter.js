@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.73";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.74";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -145,7 +145,13 @@
       publicPilotChecklistSummary: stripUnsafe(safe.publicPilotChecklistSummary || null),
       pilotReadinessSummary: stripUnsafe(safe.pilotReadinessSummary || null),
       safeForSmallPublicPilot: safe.safeForSmallPublicPilot === true,
-      pilotNextStep: safeText(safe.pilotNextStep || "")
+       pilotNextStep: safeText(safe.pilotNextStep || ""),
+      pilotOnboardingSummary: stripUnsafe(safe.pilotOnboardingSummary || null),
+      readOnlyConsentSummary: stripUnsafe(safe.readOnlyConsentSummary || null),
+      pilotOnboardingViewModel: stripUnsafe(safe.pilotOnboardingViewModel || null),
+      pilotEntryStatus: safeText(safe.pilotEntryStatus || ""),
+      canEnterReadOnlyPilot: safe.canEnterReadOnlyPilot === true,
+      pilotConsentRequired: safe.pilotConsentRequired === true
     };
   }
 
@@ -240,6 +246,12 @@
       safetyRegressionSummary: safetyRegressionSummary ? { title:"安全回归", line:safetyRegressionSummary.status === "pass" ? "安全回归通过" : "安全回归失败", checkCount:(safetyRegressionSummary.checks || []).length || 0, redacted:true } : null,
       operatorConsoleSummary: operatorConsoleSummary ? { title:"机票工作流运营控制台", line:operatorConsoleSummary.userFacingSummary && operatorConsoleSummary.userFacingSummary.resultLabel || "存在需要注意的项目", status:operatorConsoleSummary.status, redacted:true } : null,
       operatorConsoleViewModel: operatorConsoleViewModel,
+      pilotOnboardingSummary: workflow.pilotOnboardingSummary,
+      readOnlyConsentSummary: workflow.readOnlyConsentSummary,
+      pilotOnboardingViewModel: workflow.pilotOnboardingViewModel,
+      pilotEntryStatus: workflow.pilotEntryStatus,
+      canEnterReadOnlyPilot: workflow.canEnterReadOnlyPilot === true,
+      pilotConsentRequired: workflow.pilotConsentRequired === true,
       scenarioSimulationSummary: scenarioSimulationSummary,
       safetyTestMatrixSummary: safetyTestMatrixSummary,
       platformCheckWarnings: stripUnsafe(decisionAssistant && decisionAssistant.platformCheckWarnings || (safe.manualPlatformCheckEvidence ? ["平台核对结果已记录", "平台最终为准"] : ["仍需平台确认"])),
@@ -340,6 +352,12 @@
       safetyRegressionSummary: safetyRegressionSummary,
       operatorConsoleSummary: operatorConsoleSummary,
       operatorConsoleViewModel: operatorConsoleViewModel,
+      pilotOnboardingSummary: workflow.pilotOnboardingSummary,
+      readOnlyConsentSummary: workflow.readOnlyConsentSummary,
+      pilotOnboardingViewModel: workflow.pilotOnboardingViewModel,
+      pilotEntryStatus: workflow.pilotEntryStatus,
+      canEnterReadOnlyPilot: workflow.canEnterReadOnlyPilot === true,
+      pilotConsentRequired: workflow.pilotConsentRequired === true,
       rawResponseStored: false,
       secretStored: false,
       bookingUrl: null,
@@ -428,6 +446,12 @@
       safetyRegressionSummary: report.safetyReport.safetyRegressionSummary || null,
       operatorConsoleSummary: report.safetyReport.operatorConsoleSummary || null,
       operatorConsoleViewModel: report.safetyReport.operatorConsoleViewModel || null,
+      pilotOnboardingSummary: report.safetyReport.pilotOnboardingSummary || null,
+      readOnlyConsentSummary: report.safetyReport.readOnlyConsentSummary || null,
+      pilotOnboardingViewModel: report.safetyReport.pilotOnboardingViewModel || null,
+      pilotEntryStatus: report.safetyReport.pilotEntryStatus || "",
+      canEnterReadOnlyPilot: report.safetyReport.canEnterReadOnlyPilot === true,
+      pilotConsentRequired: report.safetyReport.pilotConsentRequired === true,
       scenarioSimulationSummary: report.safetyReport.scenarioSimulationSummary || null,
       safetyTestMatrixSummary: report.safetyReport.safetyTestMatrixSummary || null,
       continuitySummary: report.safetyReport.continuitySummary || null,

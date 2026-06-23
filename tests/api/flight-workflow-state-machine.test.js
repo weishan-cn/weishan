@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowStateMachine.js"]);
   const api = windowRef.WeishanFlightWorkflowStateMachine;
-  assert.equal(api.FLIGHT_WORKFLOW_STATE_MACHINE_VERSION, "2.1.73");
+  assert.equal(api.FLIGHT_WORKFLOW_STATE_MACHINE_VERSION, "2.1.74");
   const incomplete = api.createFlightWorkflowState({ intent:{ status:"needs_clarification", route:{ destinationCity:"成都" }, departureDate:"2026-07-15", dateDisplay:"7月15日", missingFields:["origin"] } });
   assert.equal(incomplete.status, "needs_clarification");
   assert.equal(incomplete.currentStep, "clarification");
@@ -24,7 +24,7 @@ function main() {
   assert.equal(JSON.stringify(evidenceReady).includes("https://blocked.example"), false);
   assert.equal(JSON.stringify(evidenceReady).includes("abc"), false);
   const summary = api.buildFlightWorkflowStateSummary(evidenceReady);
-  assert.equal(summary.workflowId, "deterministic-flight-workflow-v2.1.73");
+  assert.equal(summary.workflowId, "deterministic-flight-workflow-v2.1.74");
   assert.equal(summary.status, "evidence_ready");
   assert.equal(summary.currentStage, "decision");
   assert.equal(summary.nextStepLabel, "选择候选");

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.73";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.74";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -222,7 +222,13 @@
       publicPilotChecklistSummary: stripUnsafe(safe.publicPilotChecklistSummary || null),
       pilotReadinessSummary: stripUnsafe(safe.pilotReadinessSummary || null),
       safeForSmallPublicPilot: safe.safeForSmallPublicPilot === true,
-      pilotNextStep: safeLine(safe.pilotNextStep || ""),
+       pilotNextStep: safeLine(safe.pilotNextStep || ""),
+      pilotOnboardingSummary: stripUnsafe(safe.pilotOnboardingSummary || null),
+      readOnlyConsentSummary: stripUnsafe(safe.readOnlyConsentSummary || null),
+      pilotOnboardingViewModel: stripUnsafe(safe.pilotOnboardingViewModel || null),
+      pilotEntryStatus: safeLine(safe.pilotEntryStatus || ""),
+      canEnterReadOnlyPilot: safe.canEnterReadOnlyPilot === true,
+      pilotConsentRequired: safe.pilotConsentRequired === true,
       releaseReadinessSummary: stripUnsafe(safe.releaseReadinessSummary || null),
       userSafetyCopySummary: stripUnsafe(safe.userSafetyCopySummary || null),
       forbiddenCapabilitySummary: stripUnsafe(safe.forbiddenCapabilitySummary || null),

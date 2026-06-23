@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.1.73");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.1.74");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -23,6 +23,15 @@ function main() {
   assert.ok(labels.includes("可以小范围扩大只读测试"));
   assert.ok(labels.includes("试点检查清单通过"));
   assert.ok(labels.includes("公开试点仍为只读"));
+  const onboarding = api.buildFlightWorkflowRiskBadges({ pilotOnboardingSummary:{ status:"allowed", decision:{ canEnterReadOnlyPilot:true }, guardName:"flight_workflow_public_pilot_onboarding_guard_v1" }, readOnlyConsentSummary:{ status:"accepted", consentSummary:{ allRequiredAccepted:true }, consentFlowName:"flight_workflow_read_only_user_consent_flow_v1" } });
+  const onboardingLabels = onboarding.badges.map((item) => item.label);
+  assert.ok(onboardingLabels.includes("已确认只读范围"));
+  assert.ok(onboardingLabels.includes("可以进入只读试点"));
+  assert.ok(onboardingLabels.includes("只读试点不代表交易授权"));
+  const missingConsent = api.buildFlightWorkflowRiskBadges({ pilotOnboardingSummary:{ status:"needs_consent", guardName:"flight_workflow_public_pilot_onboarding_guard_v1" }, readOnlyConsentSummary:{ status:"missing_required_items", consentFlowName:"flight_workflow_read_only_user_consent_flow_v1" } });
+  assert.ok(missingConsent.badges.map((item) => item.label).includes("仍需确认只读范围"));
+  const blockedOnboarding = api.buildFlightWorkflowRiskBadges({ pilotOnboardingSummary:{ status:"blocked", guardName:"flight_workflow_public_pilot_onboarding_guard_v1" } });
+  assert.ok(blockedOnboarding.badges.map((item) => item.label).includes("暂不可进入只读试点"));
   const summary = api.summarizeFlightWorkflowRiskBadges(model.badges);
   assert.equal(summary.summaryLabel.includes("只读安全"), true);
   assert.equal(summary.bookingUrl, null);

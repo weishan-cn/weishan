@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_VERSION = "2.1.73";
+  const FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_VERSION = "2.1.74";
   const GATE_NAME = "flight_workflow_beta_expansion_gate_v1";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
   const TRADING_RE = /"(bookingUrl|checkoutUrl|paymentUrl|orderUrl)"\s*:\s*"https?:\/\//i;
@@ -67,7 +67,7 @@
   }
   function sanitizeFlightWorkflowBetaExpansionGate(gate) {
     const safe = gate && typeof gate === "object" ? gate : {};
-    return clone({ gateName:GATE_NAME, appVersion:FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_VERSION, status:safeText(safe.status || "failed_safe"), decision:Object.assign({ decisionId:"blocked", label:"暂不可扩大测试", message:"安全降级。", safeToExpandReadOnlyBeta:false }, safe.decision || {}), criteria:Object.assign({ releaseReadinessReady:false, safetyMatrixPass:false, safetySentinelPass:false, cohortReady:false, feedbackTrendPositive:false, humanReviewReady:false, acceptanceSessionReady:false, noBlockedSafetyRisk:false }, safe.criteria || {}), criteriaRows:toArray(safe.criteriaRows), unmetCriteria:toArray(safe.unmetCriteria).map(safeText), riskNotes:toArray(safe.riskNotes).map(safeText), userFacingSummary:Object.assign({ title:"只读 Beta 扩大测试闸门", resultLabel:"暂不可扩大测试", caveat:"该判断只适用于只读候选证据流程，不代表真实票价、库存或可出票。", redacted:true }, safe.userFacingSummary || {}), safety:safety(), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false, redacted:true });
+    return clone({ gateName:GATE_NAME, appVersion:FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_VERSION, status:safeText(safe.status || "failed_safe"), decision:Object.assign({ decisionId:"blocked", label:"暂不可扩大测试", message:"安全降级。", safeToExpandReadOnlyBeta:false }, safe.decision || {}), criteria:Object.assign({ releaseReadinessReady:false, safetyMatrixPass:false, safetySentinelPass:false, cohortReady:false, feedbackTrendPositive:false, humanReviewReady:false, acceptanceSessionReady:false, noBlockedSafetyRisk:false }, safe.criteria || {}), criteriaRows:toArray(safe.criteriaRows), unmetCriteria:toArray(safe.unmetCriteria).map(safeText), riskNotes:toArray(safe.riskNotes).map(safeText), pilotOnboardingSummary:clone(safe.pilotOnboardingSummary || null), readOnlyConsentSummary:clone(safe.readOnlyConsentSummary || null), pilotEntryStatus:safeText(safe.pilotEntryStatus || ""), canEnterReadOnlyPilot:safe.canEnterReadOnlyPilot === true, pilotConsentRequired:safe.pilotConsentRequired === true, userFacingSummary:Object.assign({ title:"只读 Beta 扩大测试闸门", resultLabel:"暂不可扩大测试", caveat:"该判断只适用于只读候选证据流程，不代表真实票价、库存或可出票。", redacted:true }, safe.userFacingSummary || {}), safety:safety(), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false, redacted:true });
   }
   function buildFlightWorkflowBetaExpansionGate(input) {
     try {
