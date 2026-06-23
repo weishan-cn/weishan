@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.72";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.73";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -66,6 +66,15 @@
       if (cohort.status === "needs_review" || trend.status === "needs_review") badges.push(badge("beta_cohort_watch", "Beta 反馈仍需观察", "warning"));
       if (cohort.findings && JSON.stringify(cohort.findings).indexOf("安全文案理解不足") >= 0 || trend.trends && trend.trends.safetyCopyTrend === "not_understood") badges.push(badge("beta_safety_copy_low", "安全文案理解不足", "warning"));
       if (cohort.findings && JSON.stringify(cohort.findings).indexOf("可用性反馈偏弱") >= 0 || trend.trends && trend.trends.usabilityTrend === "negative") badges.push(badge("beta_usability_low", "可用性反馈偏弱", "warning"));
+      const expansionGate = safe.betaExpansionGateSummary || releaseReadiness.betaExpansionGateSummary || {};
+      const publicPilot = safe.publicPilotChecklistSummary || releaseReadiness.publicPilotChecklistSummary || {};
+      const pilotReadiness = safe.pilotReadinessSummary || releaseReadiness.pilotReadinessSummary || {};
+      if (expansionGate.status === "approved" || expansionGate.decision && expansionGate.decision.safeToExpandReadOnlyBeta === true) badges.push(badge("beta_expansion_approved", "可以小范围扩大只读测试", "info"));
+      if (expansionGate.status === "continue_internal_testing" || publicPilot.status === "needs_internal_testing" || pilotReadiness.status === "needs_internal_testing") badges.push(badge("pilot_continue_internal", "继续内部测试", "warning"));
+      if (expansionGate.status === "needs_review" || publicPilot.status === "needs_review" || pilotReadiness.status === "needs_review") badges.push(badge("pilot_needs_review", "仍需复核", "warning"));
+      if (expansionGate.status === "blocked" || publicPilot.status === "blocked" || pilotReadiness.status === "blocked") badges.push(badge("pilot_blocked", "暂不可扩大测试", "blocked"));
+      if (publicPilot.status === "ready" || publicPilot.readiness && publicPilot.readiness.safeForSmallPublicPilot === true) badges.push(badge("public_pilot_checklist_ready", "试点检查清单通过", "info"));
+      if (publicPilot.checklistName || pilotReadiness.viewModelName || expansionGate.gateName) badges.push(badge("public_pilot_read_only", "公开试点仍为只读", "info"));
       if (beta.status === "blocked" || guided.status === "blocked" || guided.status === "failed_safe") badges.push(badge("beta_acceptance_blocked", "Beta 验收被阻断", "blocked"));
       if (copyStatus === "pass" || releaseReadiness.copyValidationStatus === "pass") badges.push(badge("safety_copy_unified", "安全文案已统一", "info"));
       badges.push(badge("not_exportable", "不可导出", "warning"));

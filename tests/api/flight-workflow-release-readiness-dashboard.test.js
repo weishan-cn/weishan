@@ -6,7 +6,7 @@ const ROOT = path.resolve(__dirname, "../..");
 function load(files) { const window = {}; window.window = window; const context = vm.createContext({ window, console }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
 function readyInput(extra = {}) {
   return Object.assign({
-    releaseVersion:"2.1.72",
+    releaseVersion:"2.1.73",
     scenarioSimulationSuite:{ status:"pass", summary:{ scenarioCount:2, warningCount:0, failedCount:0, blockedCount:0 }, results:[], redacted:true },
     matrixSummary:{ status:"pass", overallHealth:"pass", scenarioCount:2, passedCount:2, warningCount:0, failedCount:0, blockedCount:0, userFacingSummary:{ resultLabel:"全部通过", redacted:true }, redacted:true },
     safetyRegressionSummary:{ status:"pass", checks:[], failures:[], warnings:[], redacted:true },
@@ -14,7 +14,7 @@ function readyInput(extra = {}) {
     humanReviewChecklistSummary:{ status:"ready", redacted:true },
     finalSafeHandoffPacketSummary:{ status:"ready", redacted:true },
     safeSessionExportPreview:{ status:"ready", canWriteFile:false, download:false, redacted:true },
-    operatorConsoleSummary:{ status:"ready", readiness:{ workflowReady:true, evidenceReady:true, auditReady:true, checklistReady:true, handoffPacketReady:true, safetyRegressionPass:true }, userFacingSummary:{ resultLabel:"可以继续只读流程", redacted:true }, redacted:true }
+    operatorConsoleSummary:{ status:"ready", readiness:{ workflowReady:true, evidenceReady:true, auditReady:true, checklistReady:true, handoffPacketReady:true, safetyRegressionPass:true }, userFacingSummary:{ resultLabel:"可以继续只读流程", redacted:true }, redacted:true }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true }, redacted:true }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, redacted:true }, pilotReadinessSummary:{ status:"ready", title:"只读公开试点准备状态", redacted:true }, safeForSmallPublicPilot:true, pilotNextStep:"可以小范围只读试点"
   }, extra);
 }
 function main() {
@@ -29,7 +29,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowReleaseReadinessDashboard.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowReleaseReadinessDashboard;
-  assert.equal(api.FLIGHT_WORKFLOW_RELEASE_READINESS_DASHBOARD_VERSION, "2.1.72");
+  assert.equal(api.FLIGHT_WORKFLOW_RELEASE_READINESS_DASHBOARD_VERSION, "2.1.73");
   const ready = api.buildFlightWorkflowReleaseReadinessDashboard(readyInput());
   assert.equal(ready.status, "ready");
   assert.equal(ready.safeForUserFacingBeta, true);
@@ -37,6 +37,9 @@ function main() {
   assert.ok(ready.forbiddenCapabilities.length >= 4);
   assert.equal(ready.bookingUrl, null);
   assert.equal(ready.payment, false);
+  assert.equal(ready.safeForSmallPublicPilot, true);
+  assert.equal(ready.pilotReadinessSummary.status, "ready");
+  assert.equal(ready.publicPilotChecklistSummary.status, "ready");
   const warning = api.buildFlightWorkflowReleaseReadinessDashboard(readyInput({ humanReviewChecklistSummary:{ status:"needs_review", redacted:true } }));
   assert.equal(warning.status, "warning");
   assert.equal(warning.safeForUserFacingBeta, false);

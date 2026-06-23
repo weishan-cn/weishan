@@ -13,8 +13,8 @@ function load(file){
 function main(){
   const windowRef = load("apps/desktop/src/renderer/core/taskHistorySummaryFormatter.js");
   const api = windowRef.WeishanTaskHistorySummaryFormatter;
-  assert.equal(api.TASK_HISTORY_SUMMARY_FORMATTER_VERSION, "2.1.72");
-  const longPrompt = "任务：v2.1.72 · User Surface Final Cleanup " + "不要显示完整开发指令 ".repeat(20) + "```raw JSON``` token endpoint";
+  assert.equal(api.TASK_HISTORY_SUMMARY_FORMATTER_VERSION, "2.1.73");
+  const longPrompt = "任务：v2.1.73 · User Surface Final Cleanup " + "不要显示完整开发指令 ".repeat(20) + "```raw JSON``` token endpoint";
   const dev = api.buildTaskHistorySummary({ text:longPrompt, status:"done" });
   assert.equal(dev.type, "系统开发任务");
   assert.equal(dev.fullPromptHidden, true);

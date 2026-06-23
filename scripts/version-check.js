@@ -1882,6 +1882,33 @@ function checkFlightWorkflowBetaCohortViewModelVersion(results, expectedVersion)
   addCheck(results, "apps/desktop flight workflow beta cohort view model version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowBetaCohortViewModel.js FLIGHT_WORKFLOW_BETA_COHORT_VIEW_MODEL_VERSION");
 }
 
+function checkFlightWorkflowBetaExpansionGateVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowBetaExpansionGate.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow beta expansion gate version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow beta expansion gate version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow beta expansion gate version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowBetaExpansionGate.js FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_VERSION");
+}
+
+function checkFlightWorkflowReadOnlyPublicPilotChecklistVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowReadOnlyPublicPilotChecklist.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow read only public pilot checklist version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow read only public pilot checklist version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_READ_ONLY_PUBLIC_PILOT_CHECKLIST_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow read only public pilot checklist version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowReadOnlyPublicPilotChecklist.js FLIGHT_WORKFLOW_READ_ONLY_PUBLIC_PILOT_CHECKLIST_VERSION");
+}
+
+function checkFlightWorkflowPilotReadinessViewModelVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowPilotReadinessViewModel.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow pilot readiness view model version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow pilot readiness view model version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_PILOT_READINESS_VIEW_MODEL_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow pilot readiness view model version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowPilotReadinessViewModel.js FLIGHT_WORKFLOW_PILOT_READINESS_VIEW_MODEL_VERSION");
+}
+
 function checkFlightEvidenceWorkflowOrchestratorVersion(results, expectedVersion) {
   const filePath = "apps/desktop/src/renderer/core/flightEvidenceWorkflowOrchestrator.js";
   const file = readText(filePath);
@@ -2187,6 +2214,9 @@ function runVersionCheck() {
     checkFlightWorkflowBetaCohortReviewBoardVersion(results, rootPackage.version);
     checkFlightWorkflowFeedbackTrendRadarVersion(results, rootPackage.version);
     checkFlightWorkflowBetaCohortViewModelVersion(results, rootPackage.version);
+    checkFlightWorkflowBetaExpansionGateVersion(results, rootPackage.version);
+    checkFlightWorkflowReadOnlyPublicPilotChecklistVersion(results, rootPackage.version);
+    checkFlightWorkflowPilotReadinessViewModelVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowOrchestratorVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowStatusPresenterVersion(results, rootPackage.version);
     checkFlightFareBreakdownVersion(results, rootPackage.version);

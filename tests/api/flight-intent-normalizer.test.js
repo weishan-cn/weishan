@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightIntentNormalizer.js"]);
   const api = windowRef.WeishanFlightIntentNormalizer;
-  assert.equal(api.FLIGHT_INTENT_NORMALIZER_VERSION, "2.1.72");
+  assert.equal(api.FLIGHT_INTENT_NORMALIZER_VERSION, "2.1.73");
   const ready = api.normalizeFlightIntent({ rawText:"帮我查7月15日上海到成都最便宜的直达机票" });
   assert.equal(ready.normalizerName, "flight_intent_normalizer_v1");
   assert.equal(ready.status, "ready");
