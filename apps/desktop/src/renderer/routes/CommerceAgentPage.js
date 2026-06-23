@@ -2378,6 +2378,64 @@
     </section>`;
   }
 
+  function commerceLocalSafetyEvidenceConsoleDisclosure(task){
+    const body = `<section class="commerce-local-safety-evidence-console" aria-label="local safety evidence console">
+      <h4>Local Safety Evidence Console</h4>
+      <p>本地安全证据控制台</p>
+      <p>mode: local only</p>
+      <p>network: disabled</p>
+      <p>bookingUrl: null</p>
+      <p>payment: false</p>
+      <p>order: false</p>
+      <p>identityUpload: false</p>
+      <p>redacted: true</p>
+    </section>`;
+    return disclosure("查看本地安全证据控制台", body, "commerce-local-safety-evidence-console-disclosure");
+  }
+
+  function commerceManualUiAcceptanceAssistantDisclosure(task){
+    const body = `<section class="commerce-manual-ui-acceptance-assistant" aria-label="manual UI acceptance assistant">
+      <h4>Manual UI Acceptance Assistant</h4>
+      <p>人工验收助手</p>
+      <p>只读 UI 验收，不自动打开平台</p>
+      <p>autoOpen: false</p>
+      <p>autoRefresh: false</p>
+      <p>bookingUrl: null</p>
+      <p>paymentUrl: null</p>
+      <p>orderUrl: null</p>
+      <p>redacted: true</p>
+    </section>`;
+    return disclosure("查看人工 UI 验收助手", body, "commerce-manual-ui-acceptance-assistant-disclosure");
+  }
+
+  function commerceNoSecretPersistenceGuardDisclosure(task){
+    const body = `<section class="commerce-no-secret-persistence-guard" aria-label="no secret persistence guard">
+      <h4>No Secret Persistence Guard</h4>
+      <p>NO_SECRET_PERSISTENCE_GUARD</p>
+      <p>rawProviderResponseStored: false</p>
+      <p>secretStored: false</p>
+      <p>tokenStored: false</p>
+      <p>keyStored: false</p>
+      <p>credentialInput: false</p>
+      <p>redacted: true</p>
+    </section>`;
+    return disclosure("查看 no-secret persistence guard", body, "commerce-no-secret-persistence-guard-disclosure");
+  }
+
+  function commerceSettingsAuthLocalSecurityEvidenceDisclosure(task){
+    const body = `<section class="commerce-settings-auth-local-security-evidence" aria-label="settings auth local security evidence">
+      <h4>Settings Auth Local Security Evidence</h4>
+      <p>设置认证本地安全证据</p>
+      <p>mode: local only</p>
+      <p>network: disabled</p>
+      <p>plainPasswordStored: false</p>
+      <p>secretStored: false</p>
+      <p>tokenStored: false</p>
+      <p>redacted: true</p>
+    </section>`;
+    return disclosure("查看 settings auth local security evidence", body, "commerce-settings-auth-local-security-evidence-disclosure");
+  }
+
   function globalProcurementOtherSafetyRulesDisclosure(task){
     const body = `<section class="commerce-global-procurement-other-safety-rules" aria-label="其它安全规则折叠面板">
       <h4>其它安全规则折叠面板</h4>
@@ -2730,6 +2788,7 @@
           <p>当前状态：${esc(currentStatusLine)}</p>
           <p>类别：受限品类</p>
           <p>阻断原因：${esc(blockedReasonLine)}</p>
+          <p>安全限制</p><p>已阻断动作：付款 / 下单 / 出票 / 上传证件或银行卡</p>
           ${restrictedLines.map((line) => `<p>${esc(line)}</p>`).join("")}
         </section>
       </div>
@@ -6579,13 +6638,25 @@
     if (!workflow || workflow.workflowStatus === "blocked") return "";
     const presenter = presenterApi && typeof presenterApi.buildFlightWorkflowUiPresenter === "function" ? presenterApi.buildFlightWorkflowUiPresenter(workflow) : (presenterApi && typeof presenterApi.buildFlightEvidenceWorkflowStatusPresenter === "function" ? presenterApi.buildFlightEvidenceWorkflowStatusPresenter(workflow) : workflow);
     const steps = Array.isArray(presenter.stepList) ? presenter.stepList : (Array.isArray(presenter.steps) ? presenter.steps : []);
+    const actionQueue = workflow.actionQueueSummary || presenter.actionQueueSummary || {};
+    const timeline = workflow.progressTimelineSummary || presenter.progressTimelineSummary || {};
+    const queueActions = Array.isArray(actionQueue.actions) ? actionQueue.actions : [];
+    const blockedActions = Array.isArray(workflow.blockedActions) ? workflow.blockedActions : (Array.isArray(actionQueue.blockedActions) ? actionQueue.blockedActions : []);
+    const timelineSteps = Array.isArray(timeline.steps) ? timeline.steps : [];
+    function actionQueueHtml(onlyEnabled){
+      const items = queueActions.filter(function(action){ return onlyEnabled ? action.enabled === true : action.visible !== false; });
+      return '<section class="commerce-flight-action-queue" data-commerce-flight-action-queue="true"><h5>当前可继续操作</h5><ul>' + items.map(function(action){ return '<li>' + esc(action.label || '') + (action.requiresUserConfirmation ? ' · 需确认动作' : '') + (action.enabled ? ' · 可执行动作' : ' · 待完成') + '</li>'; }).join('') + '</ul><h5>已阻断动作</h5><p>' + esc(blockedActions.map(function(action){ return action.label || ''; }).filter(Boolean).join(' / ') || '付款 / 下单 / 出票 / 上传证件或银行卡') + '</p><p>安全限制</p><p>唯珊不会付款</p><p>唯珊不会下单</p><p>唯珊不会出票</p><p>唯珊不会上传证件或银行卡</p></section>';
+    }
+    function timelineHtml(){
+      return '<section class="commerce-flight-progress-timeline" data-commerce-flight-progress-timeline="true"><h5>进度时间线</h5><p>当前步骤：' + esc(timeline.currentStepId || workflow.currentStage || '') + '</p><ul>' + timelineSteps.map(function(step){ return '<li>' + esc(step.label || '') + ' · ' + esc(step.status === 'completed' ? '已完成' : (step.status === 'current' ? '当前步骤' : (step.status === 'blocked' ? '已阻断' : '待完成'))) + '</li>'; }).join('') + '</ul></section>';
+    }
     if (workflow.workflowStatus === "needs_clarification") {
       const questions = workflow.clarificationQuestions || presenter.clarificationQuestions || ["请补充出发地或目的地。"];
-      return '<section class="commerce-flight-evidence-workflow" data-commerce-flight-evidence-workflow="true"><h4>需要补充信息</h4><p>机票请求工作流</p><p>当前工作流阶段：' + esc(workflow.workflowStageLabel || presenter.currentStepLabel || "补充缺失信息") + '</p><p>下一步：' + esc(workflow.nextStepLabel || presenter.nextStepLabel || "补充缺失信息") + '</p><p>可继续操作：' + esc(String(workflow.canResumeWorkflow === true)) + '</p><p>识别机票需求</p><p>补充缺失信息</p><p>' + esc(questions.join(" ")) + '</p><p>信息完整后再生成候选证据</p><p>未运行只读沙盒报价</p><p>唯珊只提供只读候选证据，不付款、不下单、不出票</p><button type="button" class="cmd-btn gray" data-commerce-flight-workflow-recover="true">恢复上次机票工作流</button><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p></section>';
+      return '<section class="commerce-flight-evidence-workflow" data-commerce-flight-evidence-workflow="true"><h4>需要补充信息</h4><p>机票请求工作流</p><p>当前工作流阶段：' + esc(workflow.workflowStageLabel || presenter.currentStepLabel || "补充缺失信息") + '</p><p>下一步：' + esc(workflow.nextStepLabel || presenter.nextStepLabel || "补充缺失信息") + '</p><p>可继续操作：' + esc(String(workflow.canResumeWorkflow === true)) + '</p><p>识别机票需求</p><p>补充缺失信息</p><p>' + esc(questions.join(" ")) + '</p><p>信息完整后再生成候选证据</p><p>未运行只读沙盒报价</p>' + actionQueueHtml(true) + timelineHtml() + '<p>唯珊只提供只读候选证据，不付款、不下单、不出票</p><button type="button" class="cmd-btn gray" data-commerce-flight-workflow-recover="true">恢复上次机票工作流</button><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p></section>';
     }
     const confirmationLabels = workflow.confirmationStateSummary && Array.isArray(workflow.confirmationStateSummary.labels) ? workflow.confirmationStateSummary.labels : [];
     const resumeLabels = workflow.resumeCoachSummary && Array.isArray(workflow.resumeCoachSummary.allowedActions) ? workflow.resumeCoachSummary.allowedActions.map(function(action){ return action.label || ""; }) : [];
-    return '<section class="commerce-flight-evidence-workflow" data-commerce-flight-evidence-workflow="true"><h4>机票请求工作流</h4><p>当前工作流阶段：' + esc(workflow.workflowStageLabel || presenter.currentStepLabel || "选择候选") + '</p><p>下一步：' + esc(workflow.nextStepLabel || presenter.nextStepLabel || "确认前往平台") + '</p><p>可继续操作：' + esc(resumeLabels.join(" / ") || String(workflow.canResumeWorkflow === true)) + '</p><p>用户确认状态：' + esc(confirmationLabels.join(" / ") || "已选择候选") + '</p><p>已选择候选</p><p>已确认安全提示</p><p>已记录平台核对结果</p><p>识别机票需求</p><p>路线：' + esc(workflow.routeSummary || presenter.routeSummary || "") + '</p><p>' + esc(workflow.tripSummary || presenter.tripSummary || "") + '</p><ul>' + steps.map(function(step){ return '<li>' + esc(step.label || "") + ' · ' + esc(step.statusLabel || step.status || "") + '</li>'; }).join('') + '</ul><p>生成候选证据</p><p>生成 Top 3 候选</p><p>推荐理由</p><p>候选对比</p><p>候选价置信标签</p><p>下一步安全建议</p><p>平台最终为准</p><p>唯珊只提供只读候选证据，不付款、不下单、不出票</p><button type="button" class="cmd-btn gray" data-commerce-flight-workflow-recover="true">恢复上次机票工作流</button><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p></section>';
+    return '<section class="commerce-flight-evidence-workflow" data-commerce-flight-evidence-workflow="true"><h4>机票请求工作流</h4><p>当前工作流阶段：' + esc(workflow.workflowStageLabel || presenter.currentStepLabel || "选择候选") + '</p><p>下一步：' + esc(workflow.nextStepLabel || presenter.nextStepLabel || "确认前往平台") + '</p><p>可继续操作：' + esc(resumeLabels.join(" / ") || String(workflow.canResumeWorkflow === true)) + '</p><p>用户确认状态：' + esc(confirmationLabels.join(" / ") || "已选择候选") + '</p><p>已选择候选</p><p>已确认安全提示</p><p>已记录平台核对结果</p><p>识别机票需求</p><p>路线：' + esc(workflow.routeSummary || presenter.routeSummary || "") + '</p><p>' + esc(workflow.tripSummary || presenter.tripSummary || "") + '</p><ul>' + steps.map(function(step){ return '<li>' + esc(step.label || "") + ' · ' + esc(step.statusLabel || step.status || "") + '</li>'; }).join('') + '</ul><p>生成候选证据</p><p>生成 Top 3 候选</p><p>推荐理由</p><p>候选对比</p><p>候选价置信标签</p><p>下一步安全建议</p><p>平台最终为准</p>' + actionQueueHtml(false) + timelineHtml() + '<p>唯珊只提供只读候选证据，不付款、不下单、不出票</p><button type="button" class="cmd-btn gray" data-commerce-flight-workflow-recover="true">恢复上次机票工作流</button><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p></section>';
   }
 
   function commerceSimpleFlightResultPanelHtml(task){

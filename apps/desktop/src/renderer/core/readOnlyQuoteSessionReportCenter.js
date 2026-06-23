@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.62";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.63";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -85,6 +85,16 @@
       confirmationStateSummary: stripUnsafe(safe.confirmationStateSummary || null),
       recoverySummary: stripUnsafe(safe.recoverySummary || null),
       resumeCoachSummary: stripUnsafe(safe.resumeCoachSummary || null),
+      actionQueueSummary: stripUnsafe(safe.actionQueueSummary || safe.actionQueue || null),
+      progressTimelineSummary: stripUnsafe(safe.progressTimelineSummary || safe.progressTimeline || null),
+      safeResumeCenterSummary: stripUnsafe(safe.safeResumeCenterSummary || safe.safeResumeCenter || null),
+      blockedActions: stripUnsafe(Array.isArray(safe.blockedActions) ? safe.blockedActions : (safe.actionQueueSummary && safe.actionQueueSummary.blockedActions || [])),
+      currentActionLabel: safeText(safe.currentActionLabel || ""),
+      nextSafeActionLabel: safeText(safe.nextSafeActionLabel || safe.nextSafeAction || ""),
+      actionQueue: stripUnsafe(safe.actionQueueSummary || safe.actionQueue || null),
+      progressTimeline: stripUnsafe(safe.progressTimelineSummary || safe.progressTimeline || null),
+      safeResumeCenter: stripUnsafe(safe.safeResumeCenterSummary || safe.safeResumeCenter || null),
+      nextSafeAction: safeText(safe.nextSafeActionLabel || safe.nextSafeAction || ""),
       currentStage: safeText(safe.currentStage || ""),
       workflowStageLabel: safeText(safe.workflowStageLabel || safe.continuitySummary && safe.continuitySummary.stageLabel || ""),
       nextStepLabel: safeText(safe.nextStepLabel || ""),
@@ -292,6 +302,11 @@
       confirmationStateSummary: report.safetyReport.confirmationStateSummary || null,
       recoverySummary: report.safetyReport.recoverySummary || null,
       resumeCoachSummary: report.safetyReport.resumeCoachSummary || null,
+      actionQueueSummary: report.safetyReport.actionQueueSummary || null,
+      progressTimelineSummary: report.safetyReport.progressTimelineSummary || null,
+      safeResumeCenterSummary: report.safetyReport.safeResumeCenterSummary || null,
+      blockedActions: report.safetyReport.blockedActions || [],
+      nextSafeAction: report.safetyReport.nextSafeAction || report.safetyReport.nextSafeActionLabel || "",
       currentStage: report.safetyReport.currentStage || "",
       workflowStageLabel: report.safetyReport.workflowStageLabel || "",
       nextStepLabel: report.safetyReport.nextStepLabel || "",

@@ -8,7 +8,7 @@ function forbidden(value) { return /全网最低|最低价保证|已锁价|可�
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteEvidenceSummaryFormatter.js"]);
   const api = windowRef.WeishanReadOnlyQuoteEvidenceSummaryFormatter;
-  assert.equal(api.READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION, "2.1.62");
+  assert.equal(api.READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION, "2.1.63");
   const top = api.formatTopCandidateSummary([{ rank:1, providerName:"A", totalPrice:980, token:"abc" }, { rank:2, providerName:"B", totalPrice:1010 }]);
   assert.equal(top.lines.length, 2);
   assert.equal(top.lines[0].includes("当前导入样本"), false);

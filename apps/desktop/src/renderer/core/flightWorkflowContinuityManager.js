@@ -1,9 +1,9 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION = "2.1.62";
+  const FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION = "2.1.63";
   const CONTINUITY_NAME = "flight_workflow_continuity_manager_v1";
-  const DEFAULT_WORKFLOW_ID = "deterministic-flight-workflow-continuity-v2.1.62";
+  const DEFAULT_WORKFLOW_ID = "deterministic-flight-workflow-continuity-v2.1.63";
   const FORBIDDEN_NAME_RE = /(rawText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|key|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
 
@@ -135,13 +135,25 @@
     return clone(Object.assign({ canResume:false, nextStepId:"failed_safe", nextStepLabel:"安全降级", primaryActionLabel:"不可继续", secondaryActionLabels:[] }, map[status] || map.failed_safe));
   }
 
+  function enrichContinuitySummary(summary, input) {
+    const base = summary && typeof summary === "object" ? summary : {};
+    const actionApi = window.WeishanFlightWorkflowActionQueue || {};
+    const timelineApi = window.WeishanFlightWorkflowProgressTimeline || {};
+    const actionQueueSummary = typeof actionApi.buildFlightWorkflowActionQueue === "function" ? actionApi.buildFlightWorkflowActionQueue(Object.assign({}, input || {}, { continuitySummary:base })) : null;
+    const progressTimelineSummary = typeof timelineApi.buildFlightWorkflowProgressTimeline === "function" ? timelineApi.buildFlightWorkflowProgressTimeline(Object.assign({}, input || {}, { continuitySummary:base })) : null;
+    const safeResumeCenterSummary = input && input.safeResumeCenterSummary || null;
+    const blockedActions = actionQueueSummary && Array.isArray(actionQueueSummary.blockedActions) ? actionQueueSummary.blockedActions : [];
+    const enabledAction = actionQueueSummary && Array.isArray(actionQueueSummary.actions) ? actionQueueSummary.actions.find(function (action) { return action.enabled === true; }) : null;
+    return Object.assign({}, base, { actionQueueSummary:actionQueueSummary, progressTimelineSummary:progressTimelineSummary, safeResumeCenterSummary:safeResumeCenterSummary, blockedActions:blockedActions, currentActionLabel:enabledAction && enabledAction.label || "", nextSafeActionLabel:enabledAction && enabledAction.label || base.resumePlan && base.resumePlan.nextStepLabel || "", actionQueueTitle:"当前可继续操作", progressTimelineTitle:"进度时间线", blockedActionsTitle:"已阻断动作", safetyLimitTitle:"安全限制" });
+  }
+
   function buildFlightWorkflowContinuity(input) {
     try {
       const safe = input && typeof input === "object" ? input : {};
       const status = evaluateFlightWorkflowContinuityState(safe);
       const currentStage = stageFromStatus(status);
       const resumePlan = buildFlightWorkflowResumePlan(status);
-      return sanitizeFlightWorkflowContinuity({
+      return sanitizeFlightWorkflowContinuity(enrichContinuitySummary({
         continuityName:CONTINUITY_NAME,
         appVersion:FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION,
         status:status,
@@ -157,7 +169,7 @@
         reconciliationSummary:stripUnsafe(safe.reconciliationSummary || null),
         safety:safety(),
         redacted:true
-      });
+      }, safe));
     } catch (error) {
       return sanitizeFlightWorkflowContinuity({ continuityName:CONTINUITY_NAME, appVersion:FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION, status:"failed_safe", workflowId:DEFAULT_WORKFLOW_ID, currentStage:"blocked", stageLabel:"安全降级", collectedSummary:{}, missingFields:[], resumePlan:buildFlightWorkflowResumePlan("failed_safe"), safety:safety(), redacted:true });
     }

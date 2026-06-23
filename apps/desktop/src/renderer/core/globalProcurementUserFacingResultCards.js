@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_USER_FACING_RESULT_CARDS_VERSION = "2.1.62";
+  const GLOBAL_PROCUREMENT_USER_FACING_RESULT_CARDS_VERSION = "2.1.63";
 
   function text(value){
     return String(value || "").trim();
@@ -85,6 +85,8 @@
   function disabledLines(category){
     if (category === "restricted_or_blocked") {
       return [
+        "安全限制",
+        "已阻断动作：付款 / 下单 / 出票 / 上传证件或银行卡",
         "当前不继续整理购买路径",
         "当前不提供购买入口",
         "当前不提供外部搜索入口",

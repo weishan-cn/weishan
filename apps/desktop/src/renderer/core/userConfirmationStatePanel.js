@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const USER_CONFIRMATION_STATE_PANEL_VERSION = "2.1.62";
+  const USER_CONFIRMATION_STATE_PANEL_VERSION = "2.1.63";
   const PANEL_NAME = "user_confirmation_state_panel_v1";
   const FORBIDDEN_NAME_RE = /(rawText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
 
@@ -72,7 +72,7 @@
       const safe = input && typeof input === "object" ? input : {};
       const confirmations = confirmationsFor(safe);
       const status = evaluateUserConfirmationState(safe);
-      return clone({ panelName:PANEL_NAME, appVersion:USER_CONFIRMATION_STATE_PANEL_VERSION, status:status, confirmations:confirmations, labels:labelsFor(confirmations), nextRequiredConfirmation:nextRequired(confirmations), safety:safety(), redacted:true });
+      return clone({ panelName:PANEL_NAME, appVersion:USER_CONFIRMATION_STATE_PANEL_VERSION, status:status, confirmations:confirmations, labels:labelsFor(confirmations), nextRequiredConfirmation:nextRequired(confirmations), actionQueueSummary:stripUnsafe(safe.actionQueueSummary || null), progressTimelineSummary:stripUnsafe(safe.progressTimelineSummary || null), safeResumeCenterSummary:stripUnsafe(safe.safeResumeCenterSummary || null), blockedActions:stripUnsafe(safe.blockedActions || []), currentActionLabel:text(safe.currentActionLabel || ""), nextSafeActionLabel:text(safe.nextSafeActionLabel || ""), actionQueueTitle:"当前可继续操作", progressTimelineTitle:"进度时间线", blockedActionsTitle:"已阻断动作", safetyLimitTitle:"安全限制", safety:safety(), redacted:true });
     } catch (error) {
       return clone({ panelName:PANEL_NAME, appVersion:USER_CONFIRMATION_STATE_PANEL_VERSION, status:"failed_safe", confirmations:confirmationsFor({}), labels:[], nextRequiredConfirmation:{ required:true, confirmationType:"select_candidate", message:"确认状态已安全降级。" }, safety:safety(), redacted:true });
     }

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_DECISION_ASSISTANT_VERSION = "2.1.62";
+  const READ_ONLY_QUOTE_DECISION_ASSISTANT_VERSION = "2.1.63";
   const ASSISTANT_NAME = "read_only_quote_decision_assistant_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|真实最终价|已锁价|可以出票|可直接出票|付款|下单/i;
@@ -157,6 +157,16 @@
       confirmationStateSummary: stripUnsafe(safe.confirmationStateSummary || null),
       recoverySummary: stripUnsafe(safe.recoverySummary || null),
       resumeCoachSummary: stripUnsafe(safe.resumeCoachSummary || null),
+      actionQueueSummary: stripUnsafe(safe.actionQueueSummary || safe.actionQueue || null),
+      progressTimelineSummary: stripUnsafe(safe.progressTimelineSummary || safe.progressTimeline || null),
+      safeResumeCenterSummary: stripUnsafe(safe.safeResumeCenterSummary || safe.safeResumeCenter || null),
+      blockedActions: stripUnsafe(Array.isArray(safe.blockedActions) ? safe.blockedActions : (safe.actionQueueSummary && safe.actionQueueSummary.blockedActions || [])),
+      currentActionLabel: safeText(safe.currentActionLabel || ""),
+      nextSafeActionLabel: safeText(safe.nextSafeActionLabel || safe.nextSafeAction || ""),
+      actionQueue: stripUnsafe(safe.actionQueueSummary || safe.actionQueue || null),
+      progressTimeline: stripUnsafe(safe.progressTimelineSummary || safe.progressTimeline || null),
+      safeResumeCenter: stripUnsafe(safe.safeResumeCenterSummary || safe.safeResumeCenter || null),
+      nextSafeAction: safeText(safe.nextSafeActionLabel || safe.nextSafeAction || ""),
       currentStage: safeText(safe.currentStage || ""),
       workflowStageLabel: safeText(safe.workflowStageLabel || safe.continuitySummary && safe.continuitySummary.stageLabel || ""),
       nextStepLabel: safeText(safe.nextStepLabel || ""),
@@ -254,6 +264,16 @@
         confirmationStateSummary: stripUnsafe(input.confirmationStateSummary || null),
         recoverySummary: stripUnsafe(input.recoverySummary || null),
         resumeCoachSummary: stripUnsafe(input.resumeCoachSummary || null),
+        actionQueueSummary: stripUnsafe(input.actionQueueSummary || input.actionQueue || null),
+        progressTimelineSummary: stripUnsafe(input.progressTimelineSummary || input.progressTimeline || null),
+        safeResumeCenterSummary: stripUnsafe(input.safeResumeCenterSummary || input.safeResumeCenter || null),
+        blockedActions: stripUnsafe(Array.isArray(input.blockedActions) ? input.blockedActions : (input.actionQueueSummary && input.actionQueueSummary.blockedActions || [])),
+        currentActionLabel: safeText(input.currentActionLabel || ""),
+        nextSafeActionLabel: safeText(input.nextSafeActionLabel || input.nextSafeAction || ""),
+        actionQueue: stripUnsafe(input.actionQueueSummary || input.actionQueue || null),
+        progressTimeline: stripUnsafe(input.progressTimelineSummary || input.progressTimeline || null),
+        safeResumeCenter: stripUnsafe(input.safeResumeCenterSummary || input.safeResumeCenter || null),
+        nextSafeAction: safeText(input.nextSafeActionLabel || input.nextSafeAction || ""),
         currentStage: safeText(input.currentStage || ""),
         workflowStageLabel: safeText(input.workflowStageLabel || input.continuitySummary && input.continuitySummary.stageLabel || ""),
         nextStepLabel: safeText(input.nextStepLabel || ""),
@@ -329,6 +349,11 @@
       confirmationStateSummary: model.confirmationStateSummary || null,
       recoverySummary: model.recoverySummary || null,
       resumeCoachSummary: model.resumeCoachSummary || null,
+      actionQueueSummary: model.actionQueueSummary || null,
+      progressTimelineSummary: model.progressTimelineSummary || null,
+      safeResumeCenterSummary: model.safeResumeCenterSummary || null,
+      blockedActions: model.blockedActions || [],
+      nextSafeAction: model.nextSafeAction || model.nextSafeActionLabel || "",
       currentStage: model.currentStage || "",
       workflowStageLabel: model.workflowStageLabel || "",
       nextStepLabel: model.nextStepLabel || "",

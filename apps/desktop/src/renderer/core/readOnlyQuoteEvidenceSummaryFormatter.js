@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.62";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.63";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -202,6 +202,14 @@
       confirmationStateSummary: stripUnsafe(safe.confirmationStateSummary || null),
       recoverySummary: stripUnsafe(safe.recoverySummary || null),
       resumeCoachSummary: stripUnsafe(safe.resumeCoachSummary || null),
+      actionQueueSummary: stripUnsafe(safe.actionQueueSummary || safe.actionQueue || null),
+      progressTimelineSummary: stripUnsafe(safe.progressTimelineSummary || safe.progressTimeline || null),
+      safeResumeCenterSummary: stripUnsafe(safe.safeResumeCenterSummary || safe.safeResumeCenter || null),
+      blockedActions: stripUnsafe(Array.isArray(safe.blockedActions) ? safe.blockedActions : (safe.actionQueueSummary && safe.actionQueueSummary.blockedActions || [])),
+      nextSafeAction: safeLine(safe.nextSafeActionLabel || safe.nextSafeAction || ""),
+      actionQueue: stripUnsafe(safe.actionQueueSummary || safe.actionQueue || null),
+      progressTimeline: stripUnsafe(safe.progressTimelineSummary || safe.progressTimeline || null),
+      safeResumeCenter: stripUnsafe(safe.safeResumeCenterSummary || safe.safeResumeCenter || null),
       currentStage: safeLine(safe.currentStage || ""),
       workflowStageLabel: safeLine(safe.workflowStageLabel || safe.continuitySummary && safe.continuitySummary.stageLabel || ""),
       nextStepLabel: safeLine(safe.nextStepLabel || ""),

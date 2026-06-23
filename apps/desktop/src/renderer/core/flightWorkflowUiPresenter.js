@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_UI_PRESENTER_VERSION = "2.1.62";
+  const FLIGHT_WORKFLOW_UI_PRESENTER_VERSION = "2.1.63";
   const PRESENTER_NAME = "flight_workflow_ui_presenter_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -56,7 +56,12 @@
     const state = stateOf(safe);
     const status = statusOf(state);
     const questions = (safe.clarificationQuestions || state.clarificationQuestions || []).map(safeText);
-    return clone({ presenterName:PRESENTER_NAME, appVersion:FLIGHT_WORKFLOW_UI_PRESENTER_VERSION, status, title:"机票请求工作流", workflowStageLabel:"当前工作流阶段", nextStepTitle:"下一步", resumeActionTitle:"可继续操作", recoveryActionLabel:"恢复上次机票工作流", currentStepLabel:currentStepLabel(status), currentStage:currentStageFor(state, status), nextStepLabel:nextStepLabelFor(state, status), canResumeWorkflow:canResumeWorkflowFor(state, status), stepList:buildFlightWorkflowStepList(state), userMessage:buildFlightWorkflowUserMessage(state), clarificationQuestions:questions, primaryAction:status === "needs_clarification" ? "补充缺失信息" : (status === "ready_for_evidence" ? "生成候选证据" : "去平台确认"), secondaryActions:["复制搜索条件"], resumeActions:canResumeWorkflowFor(state, status) ? [nextStepLabelFor(state, status), "恢复上次机票工作流"] : [], safetyCaveat:"唯珊只提供只读候选证据，不付款、不下单、不出票。", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawResponseStored:false, secretStored:false, redacted:true });
+    const actionQueueSummary = safe.actionQueueSummary || state.actionQueueSummary || null;
+    const progressTimelineSummary = safe.progressTimelineSummary || state.progressTimelineSummary || null;
+    const safeResumeCenterSummary = safe.safeResumeCenterSummary || state.safeResumeCenterSummary || null;
+    const blockedActions = actionQueueSummary && Array.isArray(actionQueueSummary.blockedActions) ? actionQueueSummary.blockedActions : (Array.isArray(safe.blockedActions) ? safe.blockedActions : []);
+    const enabledAction = actionQueueSummary && Array.isArray(actionQueueSummary.actions) ? actionQueueSummary.actions.find(function (action) { return action.enabled === true; }) : null;
+    return clone({ presenterName:PRESENTER_NAME, appVersion:FLIGHT_WORKFLOW_UI_PRESENTER_VERSION, status, title:"机票请求工作流", workflowStageLabel:"当前工作流阶段", nextStepTitle:"下一步", resumeActionTitle:"可继续操作", currentActionTitle:"当前可继续操作", progressTimelineTitle:"进度时间线", currentStepTitle:"当前步骤", completedTitle:"已完成", pendingTitle:"待完成", blockedActionsTitle:"已阻断动作", safetyLimitTitle:"安全限制", recoveryActionLabel:"恢复上次机票工作流", actionQueueSummary:actionQueueSummary, progressTimelineSummary:progressTimelineSummary, safeResumeCenterSummary:safeResumeCenterSummary, blockedActions:blockedActions, currentActionLabel:enabledAction && enabledAction.label || "", nextSafeActionLabel:enabledAction && enabledAction.label || nextStepLabelFor(state, status), currentStepLabel:currentStepLabel(status), currentStage:currentStageFor(state, status), nextStepLabel:nextStepLabelFor(state, status), canResumeWorkflow:canResumeWorkflowFor(state, status), stepList:buildFlightWorkflowStepList(state), userMessage:buildFlightWorkflowUserMessage(state), clarificationQuestions:questions, primaryAction:status === "needs_clarification" ? "补充缺失信息" : (status === "ready_for_evidence" ? "生成候选证据" : "去平台确认"), secondaryActions:["复制搜索条件"], resumeActions:canResumeWorkflowFor(state, status) ? [nextStepLabelFor(state, status), "恢复上次机票工作流"] : [], safetyCaveat:"唯珊只提供只读候选证据，不付款、不下单、不出票。", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawResponseStored:false, secretStored:false, redacted:true });
   }
   function buildFlightWorkflowUiPresenterAuditDraft(input) {
     const presenter = buildFlightWorkflowUiPresenter(input || {});

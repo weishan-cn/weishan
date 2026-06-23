@@ -1582,6 +1582,34 @@ function checkFlightWorkflowResumeCoachVersion(results, expectedVersion) {
   addCheck(results, "apps/desktop flight workflow resume coach version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowResumeCoach.js FLIGHT_WORKFLOW_RESUME_COACH_VERSION");
 }
 
+
+function checkFlightWorkflowActionQueueVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowActionQueue.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow action queue version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow action queue version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_ACTION_QUEUE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow action queue version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowActionQueue.js FLIGHT_WORKFLOW_ACTION_QUEUE_VERSION");
+}
+
+function checkFlightWorkflowProgressTimelineVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowProgressTimeline.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow progress timeline version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow progress timeline version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow progress timeline version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowProgressTimeline.js FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION");
+}
+
+function checkFlightWorkflowSafeResumeCenterVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowSafeResumeCenter.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow safe resume center version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow safe resume center version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow safe resume center version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowSafeResumeCenter.js FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_VERSION");
+}
+
 function checkFlightIntentNormalizerVersion(results, expectedVersion) {
   const filePath = "apps/desktop/src/renderer/core/flightIntentNormalizer.js";
   const file = readText(filePath);
@@ -1864,6 +1892,9 @@ function runVersionCheck() {
     checkUserConfirmationStatePanelVersion(results, rootPackage.version);
     checkFlightWorkflowRecoveryStoreVersion(results, rootPackage.version);
     checkFlightWorkflowResumeCoachVersion(results, rootPackage.version);
+    checkFlightWorkflowActionQueueVersion(results, rootPackage.version);
+    checkFlightWorkflowProgressTimelineVersion(results, rootPackage.version);
+    checkFlightWorkflowSafeResumeCenterVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowOrchestratorVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowStatusPresenterVersion(results, rootPackage.version);
     checkFlightFareBreakdownVersion(results, rootPackage.version);

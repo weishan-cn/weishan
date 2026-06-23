@@ -1,9 +1,9 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_EVIDENCE_WORKFLOW_ORCHESTRATOR_VERSION = "2.1.62";
+  const FLIGHT_EVIDENCE_WORKFLOW_ORCHESTRATOR_VERSION = "2.1.63";
   const ORCHESTRATOR_NAME = "flight_evidence_workflow_orchestrator_v1";
-  const WORKFLOW_ID = "deterministic-flight-evidence-workflow-v2.1.62";
+  const WORKFLOW_ID = "deterministic-flight-evidence-workflow-v2.1.63";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value == null ? "" : value).trim(); }
@@ -91,16 +91,30 @@
     const confirmationApi = window.WeishanUserConfirmationStatePanel || {};
     const recoveryApi = window.WeishanFlightWorkflowRecoveryStore || {};
     const resumeApi = window.WeishanFlightWorkflowResumeCoach || {};
+    const actionApi = window.WeishanFlightWorkflowActionQueue || {};
+    const timelineApi = window.WeishanFlightWorkflowProgressTimeline || {};
+    const resumeCenterApi = window.WeishanFlightWorkflowSafeResumeCenter || {};
     const continuitySummary = typeof continuityApi.buildFlightWorkflowContinuity === "function" ? continuityApi.buildFlightWorkflowContinuity(continuityInput) : null;
     const confirmationStateSummary = typeof confirmationApi.buildUserConfirmationStatePanel === "function" ? confirmationApi.buildUserConfirmationStatePanel(continuityInput) : null;
     const recoverySummary = typeof recoveryApi.sanitizeFlightWorkflowRecoveryState === "function" ? recoveryApi.sanitizeFlightWorkflowRecoveryState(Object.assign({}, continuityInput, { continuitySummary:continuitySummary })) : null;
     const resumeCoachSummary = typeof resumeApi.buildFlightWorkflowResumeCoach === "function" ? resumeApi.buildFlightWorkflowResumeCoach({ continuitySummary:continuitySummary, confirmationStateSummary:confirmationStateSummary, recoverySummary:recoverySummary }) : null;
+    const actionQueueSummary = typeof actionApi.buildFlightWorkflowActionQueue === "function" ? actionApi.buildFlightWorkflowActionQueue(Object.assign({}, continuityInput, { continuitySummary:continuitySummary, confirmationStateSummary:confirmationStateSummary, recoverySummary:recoverySummary, resumeCoachSummary:resumeCoachSummary })) : null;
+    const progressTimelineSummary = typeof timelineApi.buildFlightWorkflowProgressTimeline === "function" ? timelineApi.buildFlightWorkflowProgressTimeline(Object.assign({}, continuityInput, { continuitySummary:continuitySummary })) : null;
+    const safeResumeCenterSummary = typeof resumeCenterApi.buildFlightWorkflowSafeResumeCenter === "function" ? resumeCenterApi.buildFlightWorkflowSafeResumeCenter({ recoverySummary:recoverySummary, continuitySummary:continuitySummary }) : null;
+    const blockedActions = actionQueueSummary && Array.isArray(actionQueueSummary.blockedActions) ? actionQueueSummary.blockedActions : [];
+    const enabledAction = actionQueueSummary && Array.isArray(actionQueueSummary.actions) ? actionQueueSummary.actions.find(function (action) { return action.enabled === true; }) : null;
     const resumeActions = resumeCoachSummary && Array.isArray(resumeCoachSummary.allowedActions) ? resumeCoachSummary.allowedActions : [];
     return sanitizeFlightEvidenceWorkflow(Object.assign({}, base, {
       continuitySummary:continuitySummary,
       confirmationStateSummary:confirmationStateSummary,
       recoverySummary:recoverySummary,
       resumeCoachSummary:resumeCoachSummary,
+      actionQueueSummary:actionQueueSummary,
+      progressTimelineSummary:progressTimelineSummary,
+      safeResumeCenterSummary:safeResumeCenterSummary,
+      blockedActions:blockedActions,
+      currentActionLabel:enabledAction && enabledAction.label || "",
+      nextSafeActionLabel:enabledAction && enabledAction.label || continuitySummary && continuitySummary.resumePlan && continuitySummary.resumePlan.nextStepLabel || "",
       currentStage:continuitySummary && continuitySummary.currentStage || base.currentStage || "",
       workflowStageLabel:continuitySummary && continuitySummary.stageLabel || base.workflowStageLabel || "",
       nextStepLabel:continuitySummary && continuitySummary.resumePlan && continuitySummary.resumePlan.nextStepLabel || base.nextStepLabel || "",
@@ -164,12 +178,12 @@
 
   function buildFlightEvidenceWorkflowSummary(input) {
     const workflow = input && input.orchestratorName === ORCHESTRATOR_NAME ? input : runFlightEvidenceWorkflow(input);
-    return clone({ title:"机票请求工作流", status:workflow.status, workflowStatus:workflow.workflowStatus, routeSummary:workflow.routeSummary || "", tripSummary:workflow.tripSummary || "", flightIntentSummary:workflow.flightIntentSummary || null, workflowStateSummary:workflow.workflowStateSummary || null, clarificationSummary:workflow.clarificationSummary || null, continuitySummary:workflow.continuitySummary || null, confirmationStateSummary:workflow.confirmationStateSummary || null, recoverySummary:workflow.recoverySummary || null, resumeCoachSummary:workflow.resumeCoachSummary || null, currentStage:workflow.currentStage || "", workflowStageLabel:workflow.workflowStageLabel || "", nextStepLabel:workflow.nextStepLabel || "", canResumeWorkflow:workflow.canResumeWorkflow === true, resumeActions:workflow.resumeActions || [], workflowSteps:workflow.workflowSteps || [], workflowStepList:workflow.workflowStepList || [], workflowUserMessage:workflow.workflowUserMessage || "", missingFields:workflow.missingFields || [], clarificationQuestions:workflow.clarificationQuestions || [], topCandidateCount:(workflow.topCandidates || []).length, selectedCandidateRank:workflow.selectedCandidate && workflow.selectedCandidate.rank || null, selectedCandidateProvider:workflow.selectedCandidate && workflow.selectedCandidate.providerName || "", decisionAvailable:!!workflow.decisionAssistant, confidenceLabel:workflow.confidenceLabelSummary && workflow.confidenceLabelSummary.confidenceLabel || "不可确认", nextStep:workflow.nextStepLabel || workflow.safeNextStepSummary && workflow.safeNextStepSummary.recommendation || "前往平台确认", safeProviderHandoffReady:workflow.safeProviderHandoffReady === true, platformFinal:true, bookingUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+    return clone({ title:"机票请求工作流", status:workflow.status, workflowStatus:workflow.workflowStatus, routeSummary:workflow.routeSummary || "", tripSummary:workflow.tripSummary || "", flightIntentSummary:workflow.flightIntentSummary || null, workflowStateSummary:workflow.workflowStateSummary || null, clarificationSummary:workflow.clarificationSummary || null, continuitySummary:workflow.continuitySummary || null, confirmationStateSummary:workflow.confirmationStateSummary || null, recoverySummary:workflow.recoverySummary || null, resumeCoachSummary:workflow.resumeCoachSummary || null, actionQueueSummary:workflow.actionQueueSummary || null, progressTimelineSummary:workflow.progressTimelineSummary || null, safeResumeCenterSummary:workflow.safeResumeCenterSummary || null, blockedActions:workflow.blockedActions || [], currentActionLabel:workflow.currentActionLabel || "", nextSafeActionLabel:workflow.nextSafeActionLabel || "", currentStage:workflow.currentStage || "", workflowStageLabel:workflow.workflowStageLabel || "", nextStepLabel:workflow.nextStepLabel || "", canResumeWorkflow:workflow.canResumeWorkflow === true, resumeActions:workflow.resumeActions || [], actionQueue:workflow.actionQueueSummary || null, progressTimeline:workflow.progressTimelineSummary || null, safeResumeCenter:workflow.safeResumeCenterSummary || null, nextSafeAction:workflow.nextSafeActionLabel || "", workflowSteps:workflow.workflowSteps || [], workflowStepList:workflow.workflowStepList || [], workflowUserMessage:workflow.workflowUserMessage || "", missingFields:workflow.missingFields || [], clarificationQuestions:workflow.clarificationQuestions || [], topCandidateCount:(workflow.topCandidates || []).length, selectedCandidateRank:workflow.selectedCandidate && workflow.selectedCandidate.rank || null, selectedCandidateProvider:workflow.selectedCandidate && workflow.selectedCandidate.providerName || "", decisionAvailable:!!workflow.decisionAssistant, confidenceLabel:workflow.confidenceLabelSummary && workflow.confidenceLabelSummary.confidenceLabel || "不可确认", nextStep:workflow.nextStepLabel || workflow.safeNextStepSummary && workflow.safeNextStepSummary.recommendation || "前往平台确认", safeProviderHandoffReady:workflow.safeProviderHandoffReady === true, platformFinal:true, bookingUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
   function buildFlightEvidenceWorkflowAuditDraft(input) {
     const workflow = input && input.orchestratorName === ORCHESTRATOR_NAME ? input : runFlightEvidenceWorkflow(input);
-    return clone({ eventType:"FLIGHT_EVIDENCE_WORKFLOW_AUDIT_DRAFT", orchestratorName:ORCHESTRATOR_NAME, appVersion:FLIGHT_EVIDENCE_WORKFLOW_ORCHESTRATOR_VERSION, workflowId:WORKFLOW_ID, status:workflow.status, workflowStatus:workflow.workflowStatus, routeSummary:workflow.routeSummary || "", tripSummary:workflow.tripSummary || "", workflowStateSummary:workflow.workflowStateSummary || null, clarificationSummary:workflow.clarificationSummary || null, continuitySummary:workflow.continuitySummary || null, confirmationStateSummary:workflow.confirmationStateSummary || null, recoverySummary:workflow.recoverySummary || null, resumeCoachSummary:workflow.resumeCoachSummary || null, currentStage:workflow.currentStage || "", nextStepLabel:workflow.nextStepLabel || "", canResumeWorkflow:workflow.canResumeWorkflow === true, stepCount:(workflow.workflowSteps || []).length, topCandidateCount:(workflow.topCandidates || []).length, dryRunRan:workflow.safety && workflow.safety.dryRunRan === true, networkAllowed:false, rawResponseStored:false, secretStored:false, bookingUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+    return clone({ eventType:"FLIGHT_EVIDENCE_WORKFLOW_AUDIT_DRAFT", orchestratorName:ORCHESTRATOR_NAME, appVersion:FLIGHT_EVIDENCE_WORKFLOW_ORCHESTRATOR_VERSION, workflowId:WORKFLOW_ID, status:workflow.status, workflowStatus:workflow.workflowStatus, routeSummary:workflow.routeSummary || "", tripSummary:workflow.tripSummary || "", workflowStateSummary:workflow.workflowStateSummary || null, clarificationSummary:workflow.clarificationSummary || null, continuitySummary:workflow.continuitySummary || null, confirmationStateSummary:workflow.confirmationStateSummary || null, recoverySummary:workflow.recoverySummary || null, resumeCoachSummary:workflow.resumeCoachSummary || null, actionQueueSummary:workflow.actionQueueSummary || null, progressTimelineSummary:workflow.progressTimelineSummary || null, safeResumeCenterSummary:workflow.safeResumeCenterSummary || null, blockedActions:workflow.blockedActions || [], currentActionLabel:workflow.currentActionLabel || "", nextSafeActionLabel:workflow.nextSafeActionLabel || "", currentStage:workflow.currentStage || "", nextStepLabel:workflow.nextStepLabel || "", canResumeWorkflow:workflow.canResumeWorkflow === true, stepCount:(workflow.workflowSteps || []).length, topCandidateCount:(workflow.topCandidates || []).length, dryRunRan:workflow.safety && workflow.safety.dryRunRan === true, networkAllowed:false, rawResponseStored:false, secretStored:false, bookingUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
   function sanitizeFlightEvidenceWorkflow(input) {

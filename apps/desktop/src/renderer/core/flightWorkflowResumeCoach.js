@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RESUME_COACH_VERSION = "2.1.62";
+  const FLIGHT_WORKFLOW_RESUME_COACH_VERSION = "2.1.63";
   const COACH_NAME = "flight_workflow_resume_coach_v1";
   const FORBIDDEN_ACTIONS = ["付款", "下单", "出票", "上传证件", "上传银行卡", "输入登录凭据"];
 
@@ -48,11 +48,22 @@
       const continuity = continuityOf(input || {});
       const blocked = continuity.status === "blocked";
       const failed = continuity.status === "failed_safe";
+      const actionApi = window.WeishanFlightWorkflowActionQueue || {};
+      const timelineApi = window.WeishanFlightWorkflowProgressTimeline || {};
+      const actionQueueSummary = typeof actionApi.buildFlightWorkflowActionQueue === "function" ? actionApi.buildFlightWorkflowActionQueue({ continuitySummary:continuity, recoverySummary:input && input.recoverySummary || null }) : null;
+      const progressTimelineSummary = typeof timelineApi.buildFlightWorkflowProgressTimeline === "function" ? timelineApi.buildFlightWorkflowProgressTimeline({ continuitySummary:continuity }) : null;
+      const safeResumeCenterSummary = input && input.safeResumeCenterSummary || null;
+      const blockedActions = actionQueueSummary && Array.isArray(actionQueueSummary.blockedActions) ? actionQueueSummary.blockedActions : [];
+      const enabledAction = actionQueueSummary && Array.isArray(actionQueueSummary.actions) ? actionQueueSummary.actions.find(function (action) { return action.enabled === true; }) : null;
       return clone({
         coachName:COACH_NAME,
         appVersion:FLIGHT_WORKFLOW_RESUME_COACH_VERSION,
         status:blocked ? "blocked" : (failed ? "failed_safe" : "ready"),
-        recommendation:safeText(recommendationFor(continuity.status)),
+        title:"当前可继续操作", progressTimelineTitle:"进度时间线", blockedActionsTitle:"已阻断动作", safetyLimitTitle:"安全限制", currentActionLabel:enabledAction && enabledAction.label || "", nextSafeActionLabel:enabledAction && enabledAction.label || continuity.resumePlan && continuity.resumePlan.nextStepLabel || "", recommendation:safeText(recommendationFor(continuity.status)),
+        actionQueueSummary:actionQueueSummary,
+        progressTimelineSummary:progressTimelineSummary,
+        safeResumeCenterSummary:safeResumeCenterSummary,
+        blockedActions:blockedActions,
         allowedActions:buildFlightWorkflowResumeActions({ continuitySummary:continuity }),
         forbiddenActions:FORBIDDEN_ACTIONS.slice(),
         caveat:"唯珊只提供只读候选证据和平台核对辅助，不付款、不下单、不出票。",
