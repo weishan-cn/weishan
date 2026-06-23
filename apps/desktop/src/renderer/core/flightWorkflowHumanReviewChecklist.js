@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_HUMAN_REVIEW_CHECKLIST_VERSION = "2.1.66";
+  const FLIGHT_WORKFLOW_HUMAN_REVIEW_CHECKLIST_VERSION = "2.1.67";
   const CHECKLIST_NAME = "flight_workflow_human_review_checklist_v1";
   const FORBIDDEN_NAME_RE = /(rawText|rawUserText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|apiKey|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
@@ -50,7 +50,7 @@
   function candidateReviewed(input) { return !!(input.selectedCandidate || input.selectedCandidateSummary || toArray(input.topCandidates || input.dryRunTopCandidates).length); }
   function platformReviewed(input) { return !!(input.manualPlatformCheckSummary || input.manualPlatformCheckEvidence || input.platformCheckOutcomeSummary || input.reconciliationSummary); }
   function platformMismatch(input) { const textBlob = JSON.stringify(stripUnsafe(input.platformCheckDeltaSummary || input.reconciliationSummary || input.platformCheckOutcomeSummary || input.manualPlatformCheckSummary || input.manualPlatformCheckEvidence || {})); return /mismatch|different|差异|不一致|价格变化/.test(textBlob); }
-  function auditBlocked(input) { const audit = input.auditReviewSummary || input.auditReview || input.auditReviewCenter || {}; return audit.status === "blocked" || audit.auditHealth && audit.auditHealth.overall === "blocked" || input.handoffPacketPolicyDecision && input.handoffPacketPolicyDecision.status === "blocked"; }
+  function auditBlocked(input) { const audit = input.auditReviewSummary || input.auditReview || input.auditReviewCenter || {}; const sentinel = input.safetyRegressionSummary || input.sentinelReport || {}; return audit.status === "blocked" || audit.auditHealth && audit.auditHealth.overall === "blocked" || input.handoffPacketPolicyDecision && input.handoffPacketPolicyDecision.status === "blocked" || sentinel.status === "fail" || sentinel.status === "failed_safe"; }
   function evaluateFlightWorkflowHumanReviewReadiness(input) {
     if (!input || typeof input !== "object" || Array.isArray(input)) return clone({ status:"failed_safe", routeReviewed:false, dateReviewed:false, candidateReviewed:false, platformCheckReviewed:false, safetyReviewed:false, hasPlatformMismatch:false, safeToProceedToPlatformConfirmation:false, blockedReasons:["malformed_input"], needsReviewReasons:["malformed_input"], redacted:true });
     const risks = scanRisk(input);
@@ -78,7 +78,7 @@
     ]);
   }
   function buildFlightWorkflowHumanReviewChecklist(input) {
-    if (!input || typeof input !== "object" || Array.isArray(input)) return sanitizeFlightWorkflowHumanReviewChecklist({ checklistName:CHECKLIST_NAME, appVersion:FLIGHT_WORKFLOW_HUMAN_REVIEW_CHECKLIST_VERSION, status:"failed_safe", reviewTitle:"前往平台前请人工复核", reviewItems:[], checkedItems:[], incompleteItems:[], blockedItems:[item("malformed_input", "安全降级", false, "交接包已阻断")], readiness:evaluateFlightWorkflowHumanReviewReadiness(null), userFacingSummary:{ title:"前往平台前请人工复核", line:"交接包已阻断", caveat:"平台页面结果为准；唯珊不会付款、不会下单、不会出票。", redacted:true }, safety:safety(), redacted:true });
+    if (!input || typeof input !== "object" || Array.isArray(input)) return sanitizeFlightWorkflowHumanReviewChecklist({ checklistName:CHECKLIST_NAME, appVersion:FLIGHT_WORKFLOW_HUMAN_REVIEW_CHECKLIST_VERSION, status:"failed_safe", reviewTitle:"前往平台前请人工复核", reviewItems:[], checkedItems:[], incompleteItems:[], blockedItems:[item("malformed_input", "安全降级", false, "交接包已阻断")], readiness:evaluateFlightWorkflowHumanReviewReadiness(null), userFacingSummary:{ title:"前往平台前请人工复核", line:"交接包已阻断", caveat:"平台页面结果为准；唯珊不会付款、不会下单、不会出票。", redacted:true }, operatorConsoleSummary:null, safetyRegressionSummary:null, sentinelStatus:"", operatorReadiness:null, nextOperatorAction:null, safety:safety(), redacted:true });
     try {
       const readiness = evaluateFlightWorkflowHumanReviewReadiness(input || {});
       const items = buildFlightWorkflowHumanReviewItems(input || {});
@@ -90,7 +90,7 @@
     safe.checklistName = CHECKLIST_NAME; safe.appVersion = FLIGHT_WORKFLOW_HUMAN_REVIEW_CHECKLIST_VERSION;
     safe.reviewItems = toArray(safe.reviewItems).map(stripUnsafe); safe.checkedItems = toArray(safe.checkedItems).map(stripUnsafe); safe.incompleteItems = toArray(safe.incompleteItems).map(stripUnsafe); safe.blockedItems = toArray(safe.blockedItems).map(stripUnsafe);
     safe.userFacingSummary = Object.assign({ title:"前往平台前请人工复核", line:"仍需补充复核", caveat:"平台页面结果为准；唯珊不会付款、不会下单、不会出票。" }, stripUnsafe(safe.userFacingSummary || {}));
-    safe.safety = Object.assign(safety(), stripUnsafe(safe.safety || {}));
+    safe.operatorConsoleSummary = stripUnsafe(safe.operatorConsoleSummary || null); safe.safetyRegressionSummary = stripUnsafe(safe.safetyRegressionSummary || null); safe.sentinelStatus = safeText(safe.sentinelStatus || safe.safetyRegressionSummary && safe.safetyRegressionSummary.status || ""); safe.operatorReadiness = stripUnsafe(safe.operatorReadiness || null); safe.nextOperatorAction = stripUnsafe(safe.nextOperatorAction || null); safe.safety = Object.assign(safety(), stripUnsafe(safe.safety || {}));
     safe.bookingUrl = null; safe.checkoutUrl = null; safe.paymentUrl = null; safe.orderUrl = null; safe.canOpenExternalPlatform = false; safe.payment = false; safe.order = false; safe.ticketing = false; safe.identityUpload = false; safe.credentialInput = false; safe.rawResponseStored = false; safe.rawUserTextStored = false; safe.secretStored = false; safe.redacted = true;
     return clone(safe);
   }

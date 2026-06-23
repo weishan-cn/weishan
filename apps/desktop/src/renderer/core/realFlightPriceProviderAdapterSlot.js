@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const REAL_FLIGHT_PRICE_PROVIDER_ADAPTER_SLOT_VERSION = "2.1.66";
+  const REAL_FLIGHT_PRICE_PROVIDER_ADAPTER_SLOT_VERSION = "2.1.67";
   const SLOT_NAME = "real_flight_price_provider_adapter_slot_v1";
 
   function clone(value) {

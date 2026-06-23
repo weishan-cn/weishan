@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const MANUAL_PLATFORM_CHECK_CAPTURE_VERSION = "2.1.66";
+  const MANUAL_PLATFORM_CHECK_CAPTURE_VERSION = "2.1.67";
   const EVIDENCE_NAME = "manual_platform_check_evidence_v1";
   const SENSITIVE_FIELDS = ["passport", "idCard", "bankCard", "cardNumber", "cvv", "password", "token", "apiKey", "secret", "session", "auth", "orderId", "paymentId", "bookingReference", "rawHtml", "screenshotPath"];
   const SENSITIVE_TEXT_RE = /passport|护照|身份证|identity|idcard|bankcard|银行卡|cardnumber|card\s*number|cvv|password|token|apikey|api[_-]?key|secret|session|auth|credential|login|orderid|paymentid|bookingreference|rawhtml|screenshot|sk-|pk-|live_/i;

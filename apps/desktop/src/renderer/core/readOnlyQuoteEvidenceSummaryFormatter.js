@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.66";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.67";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -247,6 +247,16 @@
     return clone({ title:"最终安全交接包", line:safeLine(safe.userFacingSummary && safe.userFacingSummary.line || safe.line || "仍需补充复核"), sectionLabels:["行程摘要", "候选证据摘要", "平台核对摘要", "安全限制摘要"], canOpenExternalPlatform:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
+  function formatFlightWorkflowOperatorConsoleSummary(input) {
+    const safe = stripUnsafe(input && typeof input === "object" ? input : {}) || {};
+    return clone({ title:"机票工作流运营控制台", line:safeLine(safe.userFacingSummary && safe.userFacingSummary.resultLabel || safe.line || "存在需要注意的项目"), sectionLabels:["工作流状态", "安全状态", "最近事件", "已阻断动作", "平台确认准备状态"], bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatFlightWorkflowSafetyRegressionSummary(input) {
+    const safe = stripUnsafe(input && typeof input === "object" ? input : {}) || {};
+    return clone({ title:"安全回归", line:safeLine(safe.status === "pass" ? "安全回归通过" : "安全回归失败"), sectionLabels:["无交易链接", "无付款/下单/出票", "无证件/银行卡/登录凭据", "无密钥或原始响应", "无自动打开或自动刷新"], bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -284,6 +294,8 @@
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,
     formatFlightWorkflowFinalSafeHandoffPacketSummary,
+    formatFlightWorkflowOperatorConsoleSummary,
+    formatFlightWorkflowSafetyRegressionSummary,
     buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft
   };
 })();

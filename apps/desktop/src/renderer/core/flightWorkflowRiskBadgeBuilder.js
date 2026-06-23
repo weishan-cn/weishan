@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.66";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.67";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -22,6 +22,12 @@
       const checklist = safe.humanReviewChecklistSummary || safe.humanReviewChecklist || {};
       const packet = safe.finalSafeHandoffPacketSummary || safe.finalSafeHandoffPacket || {};
       const policy = safe.handoffPacketPolicyDecision || {};
+      const sentinel = safe.safetyRegressionSummary || safe.sentinelReport || {};
+      const operator = safe.operatorConsoleSummary || {};
+      if (sentinel.status === "pass") badges.push(badge("safety_regression_pass", "安全回归通过", "info"));
+      if (sentinel.status === "fail" || sentinel.status === "failed_safe") badges.push(badge("safety_regression_fail", "安全回归失败", "blocked"));
+      if (operator.status === "ready") badges.push(badge("operator_console_ready", "运营控制台正常", "info"));
+      if (operator.status === "warning" || checklist.status === "needs_review") badges.push(badge("manual_review_required", "需要人工复核", "warning"));
       if (checklist.status === "ready") badges.push(badge("human_review_done", "人工复核完成", "info"));
       if (checklist.status === "needs_review" || packet.status === "needs_review" || policy.status === "needs_review") badges.push(badge("human_review_needed", "仍需复核", "warning"));
       if (packet.status === "ready" && policy.status === "allowed") badges.push(badge("platform_confirmation_ready", "可进入平台确认", "info"));
