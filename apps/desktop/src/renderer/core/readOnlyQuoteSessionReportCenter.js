@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.63";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.64";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -103,7 +103,13 @@
       workflowStepList: stripUnsafe(safe.workflowStepList || null),
       missingFields: Array.isArray(safe.missingFields) ? safe.missingFields.map(safeText) : [],
       clarificationQuestions: Array.isArray(safe.clarificationQuestions) ? safe.clarificationQuestions.map(safeText) : [],
-      workflowUserMessage: safeText(safe.workflowUserMessage || "")
+      workflowUserMessage: safeText(safe.workflowUserMessage || ""),
+      actionExecutionResult: stripUnsafe(safe.actionExecutionResult || null),
+      actionPolicyDecision: stripUnsafe(safe.actionPolicyDecision || null),
+      eventLedgerSummary: stripUnsafe(safe.eventLedgerSummary || null),
+      lastActionId: safeText(safe.lastActionId || safe.eventLedgerSummary && safe.eventLedgerSummary.lastActionId || ""),
+      lastActionStatus: safeText(safe.lastActionStatus || safe.eventLedgerSummary && safe.eventLedgerSummary.lastActionStatus || ""),
+      lastActionMessage: safeText(safe.lastActionMessage || safe.eventLedgerSummary && safe.eventLedgerSummary.lastActionMessage || "")
     };
   }
 
@@ -165,6 +171,12 @@
       missingFields: workflowFields(safe).missingFields,
       clarificationQuestions: workflowFields(safe).clarificationQuestions,
       workflowUserMessage: workflowFields(safe).workflowUserMessage,
+      actionExecutionResult: workflowFields(safe).actionExecutionResult,
+      actionPolicyDecision: workflowFields(safe).actionPolicyDecision,
+      eventLedgerSummary: workflowFields(safe).eventLedgerSummary,
+      lastActionId: workflowFields(safe).lastActionId,
+      lastActionStatus: workflowFields(safe).lastActionStatus,
+      lastActionMessage: workflowFields(safe).lastActionMessage,
       platformCheckWarnings: stripUnsafe(decisionAssistant && decisionAssistant.platformCheckWarnings || (safe.manualPlatformCheckEvidence ? ["平台核对结果已记录", "平台最终为准"] : ["仍需平台确认"])),
       workflowStateSummary: workflowFields(safe).workflowStateSummary,
       clarificationSummary: workflowFields(safe).clarificationSummary,
@@ -181,6 +193,12 @@
       missingFields: workflowFields(safe).missingFields,
       clarificationQuestions: workflowFields(safe).clarificationQuestions,
       workflowUserMessage: workflowFields(safe).workflowUserMessage,
+      actionExecutionResult: workflowFields(safe).actionExecutionResult,
+      actionPolicyDecision: workflowFields(safe).actionPolicyDecision,
+      eventLedgerSummary: workflowFields(safe).eventLedgerSummary,
+      lastActionId: workflowFields(safe).lastActionId,
+      lastActionStatus: workflowFields(safe).lastActionStatus,
+      lastActionMessage: workflowFields(safe).lastActionMessage,
       labels: ["只读候选价", "平台最终为准", "未锁价", "不代表可出票"],
       caveat: "价格、库存、税费和规则以平台页面为准。唯珊不会付款、不会下单、不会上传证件或银行卡。",
       canClaimLowestAcrossWeb: false,
@@ -227,6 +245,12 @@
       missingFields: workflowFields(safe).missingFields,
       clarificationQuestions: workflowFields(safe).clarificationQuestions,
       workflowUserMessage: workflowFields(safe).workflowUserMessage,
+      actionExecutionResult: workflowFields(safe).actionExecutionResult,
+      actionPolicyDecision: workflowFields(safe).actionPolicyDecision,
+      eventLedgerSummary: workflowFields(safe).eventLedgerSummary,
+      lastActionId: workflowFields(safe).lastActionId,
+      lastActionStatus: workflowFields(safe).lastActionStatus,
+      lastActionMessage: workflowFields(safe).lastActionMessage,
       rawResponseStored: false,
       secretStored: false,
       bookingUrl: null,
@@ -298,6 +322,12 @@
       missingFields: report.safetyReport.missingFields || [],
       clarificationQuestions: report.safetyReport.clarificationQuestions || [],
       workflowUserMessage: report.safetyReport.workflowUserMessage || "",
+      actionExecutionResult: report.safetyReport.actionExecutionResult || null,
+      actionPolicyDecision: report.safetyReport.actionPolicyDecision || null,
+      eventLedgerSummary: report.safetyReport.eventLedgerSummary || null,
+      lastActionId: report.safetyReport.lastActionId || "",
+      lastActionStatus: report.safetyReport.lastActionStatus || "",
+      lastActionMessage: report.safetyReport.lastActionMessage || "",
       continuitySummary: report.safetyReport.continuitySummary || null,
       confirmationStateSummary: report.safetyReport.confirmationStateSummary || null,
       recoverySummary: report.safetyReport.recoverySummary || null,

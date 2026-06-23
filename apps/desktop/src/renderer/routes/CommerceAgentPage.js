@@ -6645,7 +6645,11 @@
     const timelineSteps = Array.isArray(timeline.steps) ? timeline.steps : [];
     function actionQueueHtml(onlyEnabled){
       const items = queueActions.filter(function(action){ return onlyEnabled ? action.enabled === true : action.visible !== false; });
-      return '<section class="commerce-flight-action-queue" data-commerce-flight-action-queue="true"><h5>当前可继续操作</h5><ul>' + items.map(function(action){ return '<li>' + esc(action.label || '') + (action.requiresUserConfirmation ? ' · 需确认动作' : '') + (action.enabled ? ' · 可执行动作' : ' · 待完成') + '</li>'; }).join('') + '</ul><h5>已阻断动作</h5><p>' + esc(blockedActions.map(function(action){ return action.label || ''; }).filter(Boolean).join(' / ') || '付款 / 下单 / 出票 / 上传证件或银行卡') + '</p><p>安全限制</p><p>唯珊不会付款</p><p>唯珊不会下单</p><p>唯珊不会出票</p><p>唯珊不会上传证件或银行卡</p></section>';
+      const lastActionId = actionQueue.lastActionId || workflow.lastActionId || "";
+      const lastActionStatus = actionQueue.lastActionStatus || workflow.lastActionStatus || "";
+      const lastActionMessage = actionQueue.lastActionMessage || workflow.lastActionMessage || "";
+      const eventCount = actionQueue.eventLedgerSummary && actionQueue.eventLedgerSummary.totalEvents || workflow.eventLedgerSummary && workflow.eventLedgerSummary.totalEvents || 0;
+      return '<section class="commerce-flight-action-queue" data-commerce-flight-action-queue="true"><h5>安全动作队列</h5><h5>当前可继续操作</h5><ul>' + items.map(function(action){ return '<li>' + esc(action.label || '') + (action.requiresUserConfirmation ? ' · 需确认动作' : '') + (action.enabled ? ' · 可执行动作' : ' · 待完成') + ' <button type="button" class="cmd-btn gray" data-commerce-flight-safe-action="' + esc(action.actionId || '') + '" data-commerce-flight-safe-action-label="' + esc(action.label || '') + '"' + (action.enabled || action.actionId === 'blocked_action' ? '' : ' disabled') + '>' + esc(action.label || '执行动作') + '</button></li>'; }).join('') + '</ul><section class="commerce-flight-action-execution-result" data-commerce-flight-action-execution-result="true"><h5>动作执行结果</h5><p data-commerce-flight-action-status="true">' + esc(lastActionMessage || '最近动作：暂无') + '</p><p>最近动作：<span data-commerce-flight-last-action="true">' + esc(lastActionId || '暂无') + ' / ' + esc(lastActionStatus || '未执行') + '</span></p><p>事件记录：<span data-commerce-flight-event-ledger="true">' + esc(String(eventCount)) + '</span></p><p>本动作不会付款、不会下单、不会出票</p><p>外部平台操作需要二次确认</p><button type="button" class="cmd-btn gray" data-commerce-flight-safe-action-cancel="true">取消</button></section><h5>已阻断动作</h5><p>' + esc(blockedActions.map(function(action){ return action.label || ''; }).filter(Boolean).join(' / ') || '付款 / 下单 / 出票 / 上传证件或银行卡') + '</p><p>安全限制</p><p>动作已被安全阻断</p><p>唯珊不会付款</p><p>唯珊不会下单</p><p>唯珊不会出票</p><p>唯珊不会上传证件或银行卡</p></section>';
     }
     function timelineHtml(){
       return '<section class="commerce-flight-progress-timeline" data-commerce-flight-progress-timeline="true"><h5>进度时间线</h5><p>当前步骤：' + esc(timeline.currentStepId || workflow.currentStage || '') + '</p><ul>' + timelineSteps.map(function(step){ return '<li>' + esc(step.label || '') + ' · ' + esc(step.status === 'completed' ? '已完成' : (step.status === 'current' ? '当前步骤' : (step.status === 'blocked' ? '已阻断' : '待完成'))) + '</li>'; }).join('') + '</ul></section>';
@@ -7505,6 +7509,31 @@
 
     const commerceDelegatedClickHandler = (event) => {
       const target = event.target && event.target.closest ? event.target : null;
+      const flightSafeActionButton = target && target.closest("[data-commerce-flight-safe-action]");
+      if (flightSafeActionButton && host.contains(flightSafeActionButton)) {
+        event.preventDefault();
+        const routerApi = window.WeishanFlightWorkflowSafeActionExecutionRouter;
+        const actionId = flightSafeActionButton.getAttribute("data-commerce-flight-safe-action") || "blocked_action";
+        const actionLabel = flightSafeActionButton.getAttribute("data-commerce-flight-safe-action-label") || flightSafeActionButton.textContent || actionId;
+        const workflowPanel = flightSafeActionButton.closest("[data-commerce-flight-evidence-workflow]") || host;
+        const resultPanel = workflowPanel.querySelector("[data-commerce-flight-action-execution-result]") || workflowPanel;
+        const result = routerApi && typeof routerApi.routeFlightWorkflowSafeAction === "function" ? routerApi.routeFlightWorkflowSafeAction({ actionId:actionId, actionLabel:actionLabel }, { currentStage:"workflow", storageLike:window.localStorage }) : { status:"failed_safe", actionId:actionId, result:{ actionMessage:"动作已安全降级" }, eventLedgerSummary:null, confirmation:{ required:false }, safety:{ autoOpen:false, payment:false, order:false, ticketing:false } };
+        const message = result.status === "executed_local" ? "动作已执行" : (result.status === "confirmation_required" ? "需要确认后继续" : (result.status === "blocked" ? "动作已被安全阻断" : "动作已安全降级"));
+        const eventCount = result.eventLedgerSummary && result.eventLedgerSummary.totalEvents || 0;
+        if (resultPanel) {
+          resultPanel.innerHTML = '<h5>动作执行结果</h5><p data-commerce-flight-action-status="true">' + esc(message) + '</p><p>最近动作：<span data-commerce-flight-last-action="true">' + esc(result.actionId || actionId) + ' / ' + esc(result.status || 'failed_safe') + '</span></p><p>事件记录：<span data-commerce-flight-event-ledger="true">' + esc(String(eventCount)) + '</span></p><p>' + esc(result.result && result.result.nextStep || '') + '</p><p>本动作不会付款、不会下单、不会出票</p><p>外部平台操作需要二次确认</p><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p><button type="button" class="cmd-btn gray" data-commerce-flight-safe-action-cancel="true">取消</button>';
+        }
+        showCommercePlatformTemplateFeedback(message, result.status === "blocked" || result.status === "failed_safe");
+        return;
+      }
+      const flightSafeActionCancelButton = target && target.closest("[data-commerce-flight-safe-action-cancel]");
+      if (flightSafeActionCancelButton && host.contains(flightSafeActionCancelButton)) {
+        event.preventDefault();
+        const resultPanel = flightSafeActionCancelButton.closest("[data-commerce-flight-action-execution-result]");
+        if (resultPanel) resultPanel.querySelector("[data-commerce-flight-action-status]").textContent = "需要确认后继续：已取消外部平台操作";
+        showCommercePlatformTemplateFeedback("已取消外部平台操作", false);
+        return;
+      }
       const readOnlyRefreshButton = target && target.closest("[data-commerce-read-only-quote-refresh]");
       if (readOnlyRefreshButton && host.contains(readOnlyRefreshButton)) {
         event.preventDefault();

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RESUME_COACH_VERSION = "2.1.63";
+  const FLIGHT_WORKFLOW_RESUME_COACH_VERSION = "2.1.64";
   const COACH_NAME = "flight_workflow_resume_coach_v1";
   const FORBIDDEN_ACTIONS = ["付款", "下单", "出票", "上传证件", "上传银行卡", "输入登录凭据"];
 
@@ -63,6 +63,12 @@
         actionQueueSummary:actionQueueSummary,
         progressTimelineSummary:progressTimelineSummary,
         safeResumeCenterSummary:safeResumeCenterSummary,
+        actionExecutionResult:input && input.actionExecutionResult || continuity.actionExecutionResult || null,
+        actionPolicyDecision:input && input.actionPolicyDecision || continuity.actionPolicyDecision || null,
+        eventLedgerSummary:input && input.eventLedgerSummary || continuity.eventLedgerSummary || null,
+        lastActionId:safeText(input && input.lastActionId || continuity.lastActionId || ""),
+        lastActionStatus:safeText(input && input.lastActionStatus || continuity.lastActionStatus || ""),
+        lastActionMessage:safeText(input && input.lastActionMessage || continuity.lastActionMessage || ""),
         blockedActions:blockedActions,
         allowedActions:buildFlightWorkflowResumeActions({ continuitySummary:continuity }),
         forbiddenActions:FORBIDDEN_ACTIONS.slice(),
@@ -80,7 +86,7 @@
 
   function buildFlightWorkflowResumeCoachAuditDraft(input) {
     const coach = buildFlightWorkflowResumeCoach(input || {});
-    return clone({ eventType:"FLIGHT_WORKFLOW_RESUME_COACH_AUDIT_DRAFT", coachName:COACH_NAME, appVersion:FLIGHT_WORKFLOW_RESUME_COACH_VERSION, status:coach.status, actionCount:coach.allowedActions.length, forbiddenActions:coach.forbiddenActions, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, identityUpload:false, redacted:true });
+    return clone({ eventType:"FLIGHT_WORKFLOW_RESUME_COACH_AUDIT_DRAFT", coachName:COACH_NAME, appVersion:FLIGHT_WORKFLOW_RESUME_COACH_VERSION, status:coach.status, actionCount:coach.allowedActions.length, forbiddenActions:coach.forbiddenActions, lastActionId:coach.lastActionId || "", lastActionStatus:coach.lastActionStatus || "", lastActionMessage:coach.lastActionMessage || "", eventLedgerSummary:coach.eventLedgerSummary || null, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, identityUpload:false, redacted:true });
   }
 
   window.WeishanFlightWorkflowResumeCoach = { FLIGHT_WORKFLOW_RESUME_COACH_VERSION, COACH_NAME, buildFlightWorkflowResumeCoach, buildFlightWorkflowResumeActions, buildFlightWorkflowResumeCoachAuditDraft };

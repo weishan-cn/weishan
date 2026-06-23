@@ -8700,7 +8700,7 @@ test.describe.serial("commerce agent workbench", () => {
     }
   });
 
-  test("v2.1.63 read-only quote refresh button updates local evidence only @commerce-smoke", async () => {
+  test("v2.1.64 read-only quote refresh button updates local evidence only @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate(() => {
       try { window.localStorage.removeItem("weishan.readOnlyQuoteRefreshState.v1"); } catch (_) {}
@@ -8735,13 +8735,13 @@ test.describe.serial("commerce agent workbench", () => {
     expect(visible).not.toMatch(/\b(token|key|secret)\b/i);
   });
 
-  test("v2.1.63 local read-only quote evidence recovery stays candidate-only @commerce-smoke", async () => {
+  test("v2.1.64 local read-only quote evidence recovery stays candidate-only @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate((id) => {
       try {
         window.localStorage.setItem("weishan.readOnlyQuoteRefreshState.v1", JSON.stringify({
           stateName:"read_only_quote_refresh_state_v1",
-          appVersion:"2.1.63",
+          appVersion:"2.1.64",
           lastRefreshStatus:"refreshed",
           providerId:"google_flights_search",
           providerName:"Google Flights",
@@ -8799,7 +8799,7 @@ test.describe.serial("commerce agent workbench", () => {
 
 
 
-  test("v2.1.63 multi sandbox quote import ranks and selects read-only candidates @commerce-smoke", async () => {
+  test("v2.1.64 multi sandbox quote import ranks and selects read-only candidates @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.evaluate(() => {
       try { window.localStorage.removeItem("weishan.sandboxProviderResponseImportState.v1"); } catch (_) {}
@@ -9018,11 +9018,11 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(body).not.toContainText(/真实价格|bookingUrl:\s*https?:|paymentUrl|checkoutUrl|orderUrl/);
   });
 
-  test("v2.1.63 decision assistant visible on read-only candidates @commerce-smoke", async () => {
+  test("v2.1.64 decision assistant visible on read-only candidates @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2157-DECISION 购买7月15日上海到成都最便宜的直达机票");
-    for (const text of ["机票请求工作流", "当前工作流阶段", "当前可继续操作", "进度时间线", "当前步骤", "下一步", "可继续操作", "已阻断动作", "运行只读报价", "选择候选", "前往平台确认", "记录平台核对结果", "唯珊不会付款", "唯珊不会下单", "唯珊不会出票", "唯珊不会上传证件或银行卡", "已选择候选", "恢复上次机票工作流", "唯珊只提供只读候选证据，不付款、不下单、不出票", "识别机票需求", "上海 到 成都", "生成候选证据", "生成 Top 3 候选", "推荐理由", "候选对比", "候选价置信标签", "下一步安全建议", "本地只读候选证据中较低", "平台最终为准", "未锁价", "不代表可出票", "仍需前往平台确认"]) {
+    for (const text of ["机票请求工作流", "当前工作流阶段", "当前可继续操作", "安全动作队列", "动作执行结果", "最近动作", "事件记录", "本动作不会付款、不会下单、不会出票", "外部平台操作需要二次确认", "进度时间线", "当前步骤", "下一步", "可继续操作", "已阻断动作", "运行只读报价", "选择候选", "前往平台确认", "记录平台核对结果", "唯珊不会付款", "唯珊不会下单", "唯珊不会出票", "唯珊不会上传证件或银行卡", "已选择候选", "恢复上次机票工作流", "唯珊只提供只读候选证据，不付款、不下单、不出票", "识别机票需求", "上海 到 成都", "生成候选证据", "生成 Top 3 候选", "推荐理由", "候选对比", "候选价置信标签", "下一步安全建议", "本地只读候选证据中较低", "平台最终为准", "未锁价", "不代表可出票", "仍需前往平台确认"]) {
       await expect(summary).toContainText(text, { timeout:15000 });
     }
     await expect(summary).not.toContainText(/全网最低|最低价保证|真实最终价|已锁价|可以出票|可直接出票/);
@@ -9030,12 +9030,31 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).not.toContainText(/bookingUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
     await expect(summary).not.toContainText(/token\s*[:=]|key\s*[:=]|secret\s*[:=]/i);
     await expect(summary.getByRole("button", { name:/^(付款|下单|提交订单|上传证件|上传银行卡)$/ })).toHaveCount(0);
+    const runReadOnlyAction = summary.locator('[data-commerce-flight-safe-action="run_read_only_quotes"]').first();
+    if ((await runReadOnlyAction.count()) && await runReadOnlyAction.isEnabled()) {
+      await runReadOnlyAction.click();
+      await expect(summary).toContainText("动作已执行", { timeout:15000 });
+      await expect(summary).toContainText("事件记录");
+    }
+    const providerConfirmAction = summary.locator('[data-commerce-flight-safe-action="open_provider_confirmation"]').first();
+    if ((await providerConfirmAction.count()) && await providerConfirmAction.isEnabled()) {
+      await providerConfirmAction.click();
+      await expect(summary).toContainText("需要确认后继续", { timeout:15000 });
+      await expect(summary).toContainText("外部平台操作需要二次确认");
+    }
+    const blockedAction = summary.locator('[data-commerce-flight-safe-action="blocked_action"]').first();
+    if (await blockedAction.count()) {
+      await blockedAction.click();
+      await expect(summary).toContainText("动作已被安全阻断", { timeout:15000 });
+    }
+    await summary.locator('[data-commerce-flight-safe-action-cancel="true"]').first().click();
+    await expect(summary).toContainText("已取消外部平台操作", { timeout:15000 });
     await summary.getByRole("button", { name:"恢复上次机票工作流" }).first().click();
     await expect(summary).toContainText("当前工作流阶段");
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.1.63 safe handoff checklist and receipt cancel keeps platform closed @commerce-smoke", async () => {
+  test("v2.1.64 safe handoff checklist and receipt cancel keeps platform closed @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2157-EVIDENCE 购买7月15日上海到成都最便宜的直达机票");
@@ -9054,7 +9073,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.1.63 manual platform check capture stays local and blocks sensitive input @commerce-smoke", async () => {
+  test("v2.1.64 manual platform check capture stays local and blocks sensitive input @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2158-MANUAL-CHECK 购买7月15日上海到成都最便宜的直达机票");
@@ -9079,7 +9098,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.1.63 incomplete and restricted flight workflow stay blocked @commerce-smoke", async () => {
+  test("v2.1.64 incomplete and restricted flight workflow stay blocked @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     const incomplete = await createCommerceWorkbenchDetail(page, runId + "-V2160-INCOMPLETE 帮我查7月15日机票");

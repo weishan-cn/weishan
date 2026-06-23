@@ -1,9 +1,9 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION = "2.1.63";
+  const FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION = "2.1.64";
   const CONTINUITY_NAME = "flight_workflow_continuity_manager_v1";
-  const DEFAULT_WORKFLOW_ID = "deterministic-flight-workflow-continuity-v2.1.63";
+  const DEFAULT_WORKFLOW_ID = "deterministic-flight-workflow-continuity-v2.1.64";
   const FORBIDDEN_NAME_RE = /(rawText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|key|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
 
@@ -167,6 +167,12 @@
         handoffReceiptSummary:stripUnsafe(safe.handoffReceiptSummary || safe.handoffReceipt || null),
         platformCheckSummary:stripUnsafe(safe.platformCheckSummary || safe.manualPlatformCheckSummary || safe.manualPlatformCheckEvidence || null),
         reconciliationSummary:stripUnsafe(safe.reconciliationSummary || null),
+        actionExecutionResult:stripUnsafe(safe.actionExecutionResult || null),
+        actionPolicyDecision:stripUnsafe(safe.actionPolicyDecision || null),
+        eventLedgerSummary:stripUnsafe(safe.eventLedgerSummary || null),
+        lastActionId:safeText(safe.lastActionId || safe.eventLedgerSummary && safe.eventLedgerSummary.lastActionId || ""),
+        lastActionStatus:safeText(safe.lastActionStatus || safe.eventLedgerSummary && safe.eventLedgerSummary.lastActionStatus || ""),
+        lastActionMessage:safeText(safe.lastActionMessage || safe.eventLedgerSummary && safe.eventLedgerSummary.lastActionMessage || ""),
         safety:safety(),
         redacted:true
       }, safe));
@@ -180,6 +186,12 @@
     safe.continuityName = CONTINUITY_NAME;
     safe.appVersion = FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION;
     safe.workflowId = safe.workflowId || DEFAULT_WORKFLOW_ID;
+    safe.actionExecutionResult = stripUnsafe(safe.actionExecutionResult || null);
+    safe.actionPolicyDecision = stripUnsafe(safe.actionPolicyDecision || null);
+    safe.eventLedgerSummary = stripUnsafe(safe.eventLedgerSummary || null);
+    safe.lastActionId = safeText(safe.lastActionId || "");
+    safe.lastActionStatus = safeText(safe.lastActionStatus || "");
+    safe.lastActionMessage = safeText(safe.lastActionMessage || "");
     safe.safety = Object.assign(safety(), stripUnsafe(safe.safety || {}));
     safe.bookingUrl = null;
     safe.checkoutUrl = null;
@@ -193,7 +205,7 @@
 
   function buildFlightWorkflowContinuityAuditDraft(input) {
     const continuity = buildFlightWorkflowContinuity(input || {});
-    return clone({ eventType:"FLIGHT_WORKFLOW_CONTINUITY_AUDIT_DRAFT", continuityName:CONTINUITY_NAME, appVersion:FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION, status:continuity.status, currentStage:continuity.currentStage, nextStepId:continuity.resumePlan && continuity.resumePlan.nextStepId || "", canResume:continuity.resumePlan && continuity.resumePlan.canResume === true, rawResponseStored:false, secretStored:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, identityUpload:false, redacted:true });
+    return clone({ eventType:"FLIGHT_WORKFLOW_CONTINUITY_AUDIT_DRAFT", continuityName:CONTINUITY_NAME, appVersion:FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION, status:continuity.status, currentStage:continuity.currentStage, nextStepId:continuity.resumePlan && continuity.resumePlan.nextStepId || "", canResume:continuity.resumePlan && continuity.resumePlan.canResume === true, lastActionId:continuity.lastActionId || "", lastActionStatus:continuity.lastActionStatus || "", lastActionMessage:continuity.lastActionMessage || "", eventLedgerSummary:continuity.eventLedgerSummary || null, rawResponseStored:false, secretStored:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, identityUpload:false, redacted:true });
   }
 
   window.WeishanFlightWorkflowContinuityManager = { FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION, CONTINUITY_NAME, buildFlightWorkflowContinuity, evaluateFlightWorkflowContinuityState, buildFlightWorkflowResumePlan, sanitizeFlightWorkflowContinuity, buildFlightWorkflowContinuityAuditDraft };

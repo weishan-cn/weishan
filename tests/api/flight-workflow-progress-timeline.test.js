@@ -9,7 +9,7 @@ function current(timeline) { return timeline.steps.find((step) => step.status ==
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowProgressTimeline.js"]);
   const api = windowRef.WeishanFlightWorkflowProgressTimeline;
-  assert.equal(api.FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION, "2.1.63");
+  assert.equal(api.FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION, "2.1.64");
   const clarification = api.buildFlightWorkflowProgressTimeline({ status:"needs_clarification" });
   assert.equal(clarification.steps[0].status, "completed");
   assert.equal(current(clarification).stepId, "clarification");
@@ -17,6 +17,9 @@ function main() {
   assert.equal(current(api.buildFlightWorkflowProgressTimeline({ status:"evidence_ready" })).stepId, "decision");
   assert.equal(current(api.buildFlightWorkflowProgressTimeline({ status:"provider_confirmation_ready" })).stepId, "provider_confirmation");
   assert.equal(current(api.buildFlightWorkflowProgressTimeline({ status:"awaiting_platform_check" })).stepId, "platform_check");
+  const withLedger = api.buildFlightWorkflowProgressTimeline({ status:"evidence_ready", eventLedgerSummary:{ lastActionId:"run_read_only_quotes", lastActionStatus:"executed_local", lastActionMessage:"动作已执行" } });
+  assert.equal(withLedger.lastActionId, "run_read_only_quotes");
+  assert.equal(withLedger.lastActionMessage, "动作已执行");
   const blocked = api.buildFlightWorkflowProgressTimeline({ status:"blocked" });
   assert.equal(blocked.status, "blocked");
   assert.ok(blocked.blockedCount > 0);

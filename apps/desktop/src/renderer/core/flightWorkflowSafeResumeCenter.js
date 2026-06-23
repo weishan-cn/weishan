@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_VERSION = "2.1.63";
+  const FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_VERSION = "2.1.64";
   const CENTER_NAME = "flight_workflow_safe_resume_center_v1";
   const FORBIDDEN_RE = /https?:\/\/\S+|token|key|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -57,14 +57,14 @@
     try {
       const availability = evaluateFlightWorkflowResumeAvailability(input || {});
       const preview = availability === "available" || availability === "blocked" ? buildFlightWorkflowResumePreview(input || {}) : null;
-      return clone({ centerName:CENTER_NAME, appVersion:FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_VERSION, title:"恢复上次机票工作流", status:availability, resumeSource:"local_redacted_workflow_state", resumePreview:preview, actions:{ canResume:availability === "available", canClear:true, autoResume:false, autoOpen:false }, safety:safety(), redacted:true });
+      return clone({ centerName:CENTER_NAME, appVersion:FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_VERSION, title:"恢复上次机票工作流", status:availability, resumeSource:"local_redacted_workflow_state", resumePreview:preview, actions:{ canResume:availability === "available", canClear:true, autoResume:false, autoOpen:false }, actionExecutionResult:stripUnsafe((input || {}).actionExecutionResult || null), actionPolicyDecision:stripUnsafe((input || {}).actionPolicyDecision || null), eventLedgerSummary:stripUnsafe((input || {}).eventLedgerSummary || null), lastActionId:safeText((input || {}).lastActionId || (input || {}).eventLedgerSummary && (input || {}).eventLedgerSummary.lastActionId || ""), lastActionStatus:safeText((input || {}).lastActionStatus || (input || {}).eventLedgerSummary && (input || {}).eventLedgerSummary.lastActionStatus || ""), lastActionMessage:safeText((input || {}).lastActionMessage || (input || {}).eventLedgerSummary && (input || {}).eventLedgerSummary.lastActionMessage || ""), safety:safety(), redacted:true });
     } catch (error) {
       return clone({ centerName:CENTER_NAME, appVersion:FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_VERSION, status:"failed_safe", resumeSource:"local_redacted_workflow_state", resumePreview:null, actions:{ canResume:false, canClear:true, autoResume:false, autoOpen:false }, safety:safety(), redacted:true });
     }
   }
   function buildFlightWorkflowSafeResumeCenterAuditDraft(input) {
     const center = buildFlightWorkflowSafeResumeCenter(input || {});
-    return clone({ eventType:"FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_AUDIT_DRAFT", centerName:CENTER_NAME, appVersion:FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_VERSION, status:center.status, canResume:center.actions.canResume === true, autoResume:false, autoOpen:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, identityUpload:false, rawResponseStored:false, secretStored:false, redacted:true });
+    return clone({ eventType:"FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_AUDIT_DRAFT", centerName:CENTER_NAME, appVersion:FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_VERSION, status:center.status, canResume:center.actions.canResume === true, lastActionId:center.lastActionId || "", lastActionStatus:center.lastActionStatus || "", lastActionMessage:center.lastActionMessage || "", eventLedgerSummary:center.eventLedgerSummary || null, autoResume:false, autoOpen:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, identityUpload:false, rawResponseStored:false, secretStored:false, redacted:true });
   }
   window.WeishanFlightWorkflowSafeResumeCenter = { FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_VERSION, CENTER_NAME, buildFlightWorkflowSafeResumeCenter, evaluateFlightWorkflowResumeAvailability, buildFlightWorkflowResumePreview, buildFlightWorkflowSafeResumeCenterAuditDraft };
 })();

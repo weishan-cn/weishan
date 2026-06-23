@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const LIMITED_REAL_PRICE_UI_BETA_GATE_VERSION = "2.1.63";
+  const LIMITED_REAL_PRICE_UI_BETA_GATE_VERSION = "2.1.64";
   const REQUIRED_BADGES = ["Limited Beta", "只读价格", "不可下单", "不可付款", "最终以平台页面为准"];
   const ALLOWED_CATEGORIES = ["flight"];
   const ALLOWED_PROVIDER_IDS = ["flight_provider"];

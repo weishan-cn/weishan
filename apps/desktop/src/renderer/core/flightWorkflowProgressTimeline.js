@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION = "2.1.63";
+  const FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION = "2.1.64";
   const TIMELINE_NAME = "flight_workflow_progress_timeline_v1";
   const STEPS = [
     ["intent", "识别机票需求"],
@@ -66,7 +66,7 @@
     try {
       const status = statusOf(input || {});
       const currentStepId = currentStepFor(status);
-      return sanitizeFlightWorkflowProgressTimeline(withCounts({ timelineName:TIMELINE_NAME, appVersion:FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION, title:"进度时间线", currentStepTitle:"当前步骤", completedTitle:"已完成", pendingTitle:"待完成", blockedTitle:"已阻断", status:status === "blocked" ? "blocked" : (status === "failed_safe" ? "failed_safe" : "ready"), currentStepId:currentStepId, steps:buildSteps(currentStepId, status), safety:safety(), redacted:true }));
+      return sanitizeFlightWorkflowProgressTimeline(withCounts({ timelineName:TIMELINE_NAME, appVersion:FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION, title:"进度时间线", currentStepTitle:"当前步骤", completedTitle:"已完成", pendingTitle:"待完成", blockedTitle:"已阻断", status:status === "blocked" ? "blocked" : (status === "failed_safe" ? "failed_safe" : "ready"), currentStepId:currentStepId, steps:buildSteps(currentStepId, status), actionExecutionResult:stripUnsafe((input || {}).actionExecutionResult || null), actionPolicyDecision:stripUnsafe((input || {}).actionPolicyDecision || null), eventLedgerSummary:stripUnsafe((input || {}).eventLedgerSummary || null), lastActionId:safeText((input || {}).lastActionId || (input || {}).eventLedgerSummary && (input || {}).eventLedgerSummary.lastActionId || ""), lastActionStatus:safeText((input || {}).lastActionStatus || (input || {}).eventLedgerSummary && (input || {}).eventLedgerSummary.lastActionStatus || ""), lastActionMessage:safeText((input || {}).lastActionMessage || (input || {}).eventLedgerSummary && (input || {}).eventLedgerSummary.lastActionMessage || ""), safety:safety(), redacted:true }));
     } catch (error) {
       return sanitizeFlightWorkflowProgressTimeline(withCounts({ timelineName:TIMELINE_NAME, appVersion:FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION, status:"failed_safe", currentStepId:"intent", steps:buildSteps("intent", "failed_safe"), safety:safety(), redacted:true }));
     }
@@ -87,13 +87,19 @@
     safe.timelineName = TIMELINE_NAME; safe.appVersion = FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION;
     safe.steps = Array.isArray(safe.steps) ? safe.steps.map(stripUnsafe) : [];
     const counted = withCounts(safe);
+    counted.actionExecutionResult = stripUnsafe(counted.actionExecutionResult || null);
+    counted.actionPolicyDecision = stripUnsafe(counted.actionPolicyDecision || null);
+    counted.eventLedgerSummary = stripUnsafe(counted.eventLedgerSummary || null);
+    counted.lastActionId = safeText(counted.lastActionId || "");
+    counted.lastActionStatus = safeText(counted.lastActionStatus || "");
+    counted.lastActionMessage = safeText(counted.lastActionMessage || "");
     counted.safety = Object.assign(safety(), stripUnsafe(counted.safety || {}));
     counted.bookingUrl = null; counted.checkoutUrl = null; counted.paymentUrl = null; counted.orderUrl = null; counted.rawResponseStored = false; counted.secretStored = false; counted.redacted = true;
     return clone(counted);
   }
   function buildFlightWorkflowProgressTimelineAuditDraft(input) {
     const timeline = buildFlightWorkflowProgressTimeline(input || {});
-    return clone({ eventType:"FLIGHT_WORKFLOW_PROGRESS_TIMELINE_AUDIT_DRAFT", timelineName:TIMELINE_NAME, appVersion:FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION, status:timeline.status, currentStepId:timeline.currentStepId, completedCount:timeline.completedCount, pendingCount:timeline.pendingCount, blockedCount:timeline.blockedCount, bookingUrl:null, payment:false, order:false, identityUpload:false, rawResponseStored:false, secretStored:false, redacted:true });
+    return clone({ eventType:"FLIGHT_WORKFLOW_PROGRESS_TIMELINE_AUDIT_DRAFT", timelineName:TIMELINE_NAME, appVersion:FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION, status:timeline.status, currentStepId:timeline.currentStepId, completedCount:timeline.completedCount, pendingCount:timeline.pendingCount, blockedCount:timeline.blockedCount, lastActionId:timeline.lastActionId || "", lastActionStatus:timeline.lastActionStatus || "", lastActionMessage:timeline.lastActionMessage || "", eventLedgerSummary:timeline.eventLedgerSummary || null, bookingUrl:null, payment:false, order:false, identityUpload:false, rawResponseStored:false, secretStored:false, redacted:true });
   }
   window.WeishanFlightWorkflowProgressTimeline = { FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION, TIMELINE_NAME, buildFlightWorkflowProgressTimeline, updateFlightWorkflowProgressTimeline, summarizeFlightWorkflowProgressTimeline, buildFlightWorkflowProgressTimelineAuditDraft };
 })();
