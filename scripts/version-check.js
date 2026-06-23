@@ -265,6 +265,33 @@ function checkPlatformCheckDeltaCompareVersion(results, expectedVersion) {
   addCheck(results, "apps/desktop platform check delta compare version", expectedVersion, match && match[1], "package.json must match platformCheckDeltaCompare.js");
 }
 
+function checkPlatformCheckReconciliationCenterVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/platformCheckReconciliationCenter.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop platform check reconciliation center version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop platform check reconciliation center version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/PLATFORM_CHECK_RECONCILIATION_CENTER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop platform check reconciliation center version", expectedVersion, match && match[1], "package.json must match platformCheckReconciliationCenter.js");
+}
+
+function checkReadOnlyCandidateConfidenceLabelerVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/readOnlyCandidateConfidenceLabeler.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop read only candidate confidence labeler version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop read only candidate confidence labeler version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/READ_ONLY_CANDIDATE_CONFIDENCE_LABELER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop read only candidate confidence labeler version", expectedVersion, match && match[1], "package.json must match readOnlyCandidateConfidenceLabeler.js");
+}
+
+function checkReadOnlyQuoteSafeNextStepCoachVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/readOnlyQuoteSafeNextStepCoach.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop read only quote safe next step coach version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop read only quote safe next step coach version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/READ_ONLY_QUOTE_SAFE_NEXT_STEP_COACH_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop read only quote safe next step coach version", expectedVersion, match && match[1], "package.json must match readOnlyQuoteSafeNextStepCoach.js");
+}
+
 function checkFlightSandboxDryRunVersion(results, expectedVersion) {
   const sandboxPath = "apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js";
   const sandbox = readText(sandboxPath);
@@ -1652,6 +1679,9 @@ function runVersionCheck() {
     checkProviderHandoffReceiptStoreVersion(results, rootPackage.version);
     checkManualPlatformCheckCaptureVersion(results, rootPackage.version);
     checkPlatformCheckDeltaCompareVersion(results, rootPackage.version);
+    checkPlatformCheckReconciliationCenterVersion(results, rootPackage.version);
+    checkReadOnlyCandidateConfidenceLabelerVersion(results, rootPackage.version);
+    checkReadOnlyQuoteSafeNextStepCoachVersion(results, rootPackage.version);
     checkFlightSandboxDryRunVersion(results, rootPackage.version);
     checkFlightSandboxProviderMatrixVersion(results, rootPackage.version);
     checkTrustedFlightSourceEvidenceReportVersion(results, rootPackage.version);

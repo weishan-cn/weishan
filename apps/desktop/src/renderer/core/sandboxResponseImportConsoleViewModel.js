@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.58";
+  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.59";
   const CONSOLE_NAME = "sandbox_response_import_console_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -18,6 +18,9 @@
   function getCandidateComparisonApi() { return window.WeishanReadOnlyQuoteCandidateComparisonExplainer || {}; }
   function getManualPlatformCheckApi() { return window.WeishanManualPlatformCheckCapture || {}; }
   function getPlatformDeltaApi() { return window.WeishanPlatformCheckDeltaCompare || {}; }
+  function getReconciliationApi() { return window.WeishanPlatformCheckReconciliationCenter || {}; }
+  function getConfidenceLabelerApi() { return window.WeishanReadOnlyCandidateConfidenceLabeler || {}; }
+  function getSafeNextStepCoachApi() { return window.WeishanReadOnlyQuoteSafeNextStepCoach || {}; }
 
   function safety() {
     return {
@@ -175,6 +178,9 @@
     const comparisonApi = getCandidateComparisonApi();
     const manualCheckApi = getManualPlatformCheckApi();
     const deltaApi = getPlatformDeltaApi();
+    const reconciliationApi = getReconciliationApi();
+    const confidenceApi = getConfidenceLabelerApi();
+    const coachApi = getSafeNextStepCoachApi();
     const selectedCandidate = safe.selectedCandidate && typeof safe.selectedCandidate === "object" ? safe.selectedCandidate : null;
     const decisionAssistant = typeof decisionApi.buildReadOnlyQuoteDecisionAssistant === "function" ? decisionApi.buildReadOnlyQuoteDecisionAssistant({ topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, sessionSummary:sessionSummary, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary }) : null;
     const candidateComparison = typeof comparisonApi.buildReadOnlyQuoteCandidateComparison === "function" ? comparisonApi.buildReadOnlyQuoteCandidateComparison(dryRunTopCandidates) : null;
@@ -187,6 +193,10 @@
     const manualPlatformCheckSummary = typeof manualCheckApi.buildManualPlatformCheckEvidence === "function" ? manualCheckApi.buildManualPlatformCheckEvidence(Object.assign({ providerName:selectedCandidate && selectedCandidate.providerName || "可信平台", observedCurrency:selectedCandidate && selectedCandidate.currency || "CNY", observedTotalPrice:selectedCandidate && selectedCandidate.totalPrice, observedInventoryStatus:"unknown" }, safe.manualPlatformCheckInput || {})) : null;
     const platformCheckDelta = typeof deltaApi.compareCandidateWithManualPlatformCheck === "function" ? deltaApi.compareCandidateWithManualPlatformCheck(selectedCandidate || dryRunTopCandidates[0] || {}, manualPlatformCheckSummary || {}) : null;
     const platformCheckDeltaSummary = typeof deltaApi.buildPlatformCheckDeltaSummary === "function" ? deltaApi.buildPlatformCheckDeltaSummary(platformCheckDelta) : null;
+    const reconciliationSummary = typeof reconciliationApi.buildPlatformCheckReconciliationSummary === "function" ? reconciliationApi.buildPlatformCheckReconciliationSummary({ selectedCandidate:selectedCandidate || dryRunTopCandidates[0] || {}, manualPlatformCheckEvidence:manualPlatformCheckSummary, platformCheckDelta:platformCheckDelta }) : null;
+    const confidenceLabelSummary = typeof confidenceApi.buildReadOnlyCandidateConfidenceLabel === "function" ? confidenceApi.buildReadOnlyCandidateConfidenceLabel({ selectedCandidate:selectedCandidate || dryRunTopCandidates[0] || {}, safeProviderHandoffReady:true, manualPlatformCheckEvidence:manualPlatformCheckSummary, platformCheckDelta:platformCheckDelta, reconciliationSummary:reconciliationSummary }) : null;
+    const safeNextStepSummary = typeof coachApi.buildReadOnlyQuoteSafeNextStepCoach === "function" ? coachApi.buildReadOnlyQuoteSafeNextStepCoach({ reconciliationSummary:reconciliationSummary, confidenceLabelSummary:confidenceLabelSummary }) : null;
+    const platformCheckOutcomeSummary = reconciliationSummary ? { title:"平台核对结果", status:reconciliationSummary.status, confidenceLabel:reconciliationSummary.confidenceLabel, nextStep:reconciliationSummary.nextStep, platformFinal:true, redacted:true } : null;
     const reportCenterModel = typeof reportCenterApi.buildReadOnlyQuoteSessionReportCenter === "function" ? reportCenterApi.buildReadOnlyQuoteSessionReportCenter({ sessionSummary:sessionSummary, auditExportPreview:auditExportPreview, topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary }) : null;
     const reportCenterSummary = reportCenterModel ? { reportCenterName:reportCenterModel.reportCenterName, appVersion:reportCenterModel.appVersion, status:reportCenterModel.status, actions:reportCenterModel.actions, redacted:true } : null;
     const userFacingEvidenceSummary = reportCenterModel && reportCenterModel.userFacingSummary || null;
@@ -236,6 +246,10 @@
       providerConfirmationWarning: providerConfirmationWarning,
       manualPlatformCheckSummary: manualPlatformCheckSummary,
       platformCheckDeltaSummary: platformCheckDeltaSummary,
+      reconciliationSummary: reconciliationSummary,
+      confidenceLabelSummary: confidenceLabelSummary,
+      safeNextStepSummary: safeNextStepSummary,
+      platformCheckOutcomeSummary: platformCheckOutcomeSummary,
       platformCheckWarnings: platformCheckDeltaSummary && platformCheckDeltaSummary.warnings || ["平台最终为准"],
       reportCenterStatus: reportCenterStatus,
       lastRunId: lastRunId,

@@ -6603,7 +6603,7 @@
           <p>直达偏好：${esc(fields.directPreference || "直达优先")}</p>
           <p>排序：${esc(fields.goal)}</p>
           ${commerceCleanResultSurfaceHtml(task, { guardedPriceCardHtml })}
-          <section class="commerce-manual-platform-check" data-commerce-manual-platform-check="true"><h5>记录平台核对结果</h5><p>Platform Check Evidence</p><label>observedTotalPrice <input data-commerce-manual-platform-check-total="true" aria-label="observedTotalPrice" value="1010"></label><label>currency <input data-commerce-manual-platform-check-currency="true" aria-label="currency" value="CNY"></label><label>userNote <textarea data-commerce-manual-platform-check-note="true" aria-label="userNote"></textarea></label><button type="button" class="cmd-btn gray" data-commerce-manual-platform-check-save="true">记录平台核对结果</button><div data-commerce-manual-platform-check-output="true"><p>平台核对结果已记录</p><p>平台核对差异</p><p>平台最终为准</p><p>唯珊不会付款、不会下单、不会上传证件或银行卡</p><p>secretStored: false</p></div></section>
+          <section class="commerce-manual-platform-check" data-commerce-manual-platform-check="true"><h5>记录平台核对结果</h5><p>Platform Check Evidence</p><label>observedTotalPrice <input data-commerce-manual-platform-check-total="true" aria-label="observedTotalPrice" value="1010"></label><label>currency <input data-commerce-manual-platform-check-currency="true" aria-label="currency" value="CNY"></label><label>userNote <textarea data-commerce-manual-platform-check-note="true" aria-label="userNote"></textarea></label><button type="button" class="cmd-btn gray" data-commerce-manual-platform-check-save="true">记录平台核对结果</button><div data-commerce-manual-platform-check-output="true"><p>平台核对结果已记录</p><p>平台核对汇总</p><p>候选价置信标签</p><p>高一致 / 有差异 / 需重新核对 / 不可确认</p><p>下一步安全建议</p><p>平台核对差异</p><p>平台最终为准</p><p>唯珊不会付款、不会下单、不会上传证件或银行卡</p><p>secretStored: false</p></div></section>
         </section>
       </div>
       <div class="commerce-one-screen-actions commerce-manual-verification-actions" aria-label="手动核对入口">
@@ -7604,14 +7604,20 @@
         const panel = manualPlatformCheckButton.closest("[data-commerce-manual-platform-check]");
         const captureApi = window.WeishanManualPlatformCheckCapture;
         const deltaApi = window.WeishanPlatformCheckDeltaCompare;
+        const reconciliationApi = window.WeishanPlatformCheckReconciliationCenter;
+        const confidenceApi = window.WeishanReadOnlyCandidateConfidenceLabeler;
+        const coachApi = window.WeishanReadOnlyQuoteSafeNextStepCoach;
         const total = panel && panel.querySelector("[data-commerce-manual-platform-check-total]");
         const currency = panel && panel.querySelector("[data-commerce-manual-platform-check-currency]");
         const note = panel && panel.querySelector("[data-commerce-manual-platform-check-note]");
         const evidence = captureApi && typeof captureApi.buildManualPlatformCheckEvidence === "function" ? captureApi.buildManualPlatformCheckEvidence({ observedTotalPrice:total && total.value, observedCurrency:currency && currency.value, userNote:note && note.value, observedInventoryStatus:"unknown" }) : { status:"failed_safe", sensitiveInputBlocked:true };
         const delta = deltaApi && typeof deltaApi.compareCandidateWithManualPlatformCheck === "function" ? deltaApi.compareCandidateWithManualPlatformCheck({ totalPrice:1010 }, evidence) : null;
         const summary = deltaApi && typeof deltaApi.buildPlatformCheckDeltaSummary === "function" ? deltaApi.buildPlatformCheckDeltaSummary(delta) : { line:"平台核对差异：暂无可比较的手动平台核对结果" };
+        const reconciliation = reconciliationApi && typeof reconciliationApi.buildPlatformCheckReconciliationSummary === "function" ? reconciliationApi.buildPlatformCheckReconciliationSummary({ selectedCandidate:{ totalPrice:1010, currency:"CNY", providerName:"只读候选" }, manualPlatformCheckEvidence:evidence, platformCheckDelta:delta }) : null;
+        const confidence = confidenceApi && typeof confidenceApi.buildReadOnlyCandidateConfidenceLabel === "function" ? confidenceApi.buildReadOnlyCandidateConfidenceLabel({ safeProviderHandoffReady:true, manualPlatformCheckEvidence:evidence, platformCheckDelta:delta, reconciliationSummary:reconciliation }) : null;
+        const coach = coachApi && typeof coachApi.buildReadOnlyQuoteSafeNextStepCoach === "function" ? coachApi.buildReadOnlyQuoteSafeNextStepCoach({ reconciliationSummary:reconciliation, confidenceLabelSummary:confidence }) : null;
         const output = panel && panel.querySelector("[data-commerce-manual-platform-check-output]");
-        if (output) output.innerHTML = evidence.status === "blocked" ? "<p>敏感输入被阻断</p><p>secretStored: false</p><p>平台最终为准</p>" : "<p>平台核对结果已记录</p><p>" + esc(summary.line || "平台核对差异") + "</p><p>平台核对差异</p><p>平台最终为准</p><p>未锁价</p><p>不代表可出票</p><p>secretStored: false</p>";
+        if (output) output.innerHTML = evidence.status === "blocked" ? "<p>敏感输入已阻断</p><p>secretStored: false</p><p>平台最终为准</p>" : "<p>平台核对结果已记录</p><p>平台核对汇总</p><p>" + esc(reconciliation && reconciliation.line || "平台最终为准") + "</p><p>候选价置信标签</p><p>" + esc(confidence && confidence.confidenceLabel || "不可确认") + "</p><p>" + esc(summary.line || "平台核对差异") + "</p><p>平台核对差异</p><p>平台页面结果与候选价存在差异，平台最终为准</p><p>下一步安全建议</p><p>" + esc(coach && coach.recommendation || "重新核对平台页面") + "</p><p>重新核对平台页面</p><p>重新运行只读报价</p><p>平台最终为准</p><p>未锁价</p><p>不代表可出票</p><p>secretStored: false</p>";
         return;
       }
       const safeProviderButton = target && target.closest("[data-commerce-safe-provider-handoff-request]");

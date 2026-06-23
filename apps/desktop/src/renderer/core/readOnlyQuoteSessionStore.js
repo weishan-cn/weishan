@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_STORE_VERSION = "2.1.58";
+  const READ_ONLY_QUOTE_SESSION_STORE_VERSION = "2.1.59";
   const STORAGE_KEY = "weishan.readOnlyQuoteSession.v1";
   const STORE_NAME = "read_only_quote_session_store_v1";
   const FORBIDDEN_NAME_RE = /(token|key|secret|password|sessionToken|auth|credential|rawProviderResponse|rawResponse|rawPayload|identity|passport|bank|card|bookingUrl|checkoutUrl|paymentUrl|orderUrl)/i;

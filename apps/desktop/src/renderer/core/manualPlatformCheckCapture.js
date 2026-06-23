@@ -1,10 +1,10 @@
 ;(function () {
   "use strict";
 
-  const MANUAL_PLATFORM_CHECK_CAPTURE_VERSION = "2.1.58";
+  const MANUAL_PLATFORM_CHECK_CAPTURE_VERSION = "2.1.59";
   const EVIDENCE_NAME = "manual_platform_check_evidence_v1";
   const SENSITIVE_FIELDS = ["passport", "idCard", "bankCard", "cardNumber", "cvv", "password", "token", "apiKey", "secret", "session", "auth", "orderId", "paymentId", "bookingReference", "rawHtml", "screenshotPath"];
-  const SENSITIVE_TEXT_RE = /passport|idcard|bankcard|cardnumber|cvv|password|token|apikey|api[_-]?key|secret|session|auth|orderid|paymentid|bookingreference|rawhtml|screenshotpath|sk-|pk-|live_/i;
+  const SENSITIVE_TEXT_RE = /passport|护照|身份证|identity|idcard|bankcard|银行卡|cardnumber|card\s*number|cvv|password|token|apikey|api[_-]?key|secret|session|auth|credential|login|orderid|paymentid|bookingreference|rawhtml|screenshot|sk-|pk-|live_/i;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value == null ? "" : value).trim(); }
   function number(value) { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : null; }
@@ -33,10 +33,12 @@
       observedCurrency:text(safe.observedCurrency || ""),
       observedTotalPrice:number(safe.observedTotalPrice),
       observedBreakdown:{ baseFare:number(safe.observedBaseFare), taxesAndFees:number(safe.observedTaxesAndFees), providerFees:number(safe.observedProviderFees), redacted:true },
-      observedInventoryStatus:["available", "changed", "unknown"].includes(text(safe.observedInventoryStatus)) ? text(safe.observedInventoryStatus) : "unknown",
+      observedInventoryStatus:["available", "changed", "unavailable", "unknown"].includes(text(safe.observedInventoryStatus)) ? text(safe.observedInventoryStatus) : "unknown",
       observedRulesChanged:safe.observedRulesChanged === true || text(safe.observedRulesChanged) === "true",
       sanitizedUserNote:validation.status === "blocked" ? "[已阻断敏感字段]" : sanitizeNote(safe.userNote || ""),
       sensitiveInputBlocked:validation.sensitiveInputBlocked === true,
+      confidenceLabel:"不可确认",
+      confidenceLevel:"unknown",
       caveat:"该结果由用户手动记录，仅用于本地核对，不代表唯珊完成预订或付款。",
       safety:{ payment:false, order:false, identityUpload:false, rawHtmlStored:false, screenshotStored:false, secretStored:false, redacted:true },
       redacted:true

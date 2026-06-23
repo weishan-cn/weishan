@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_DECISION_ASSISTANT_VERSION = "2.1.58";
+  const READ_ONLY_QUOTE_DECISION_ASSISTANT_VERSION = "2.1.59";
   const ASSISTANT_NAME = "read_only_quote_decision_assistant_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|真实最终价|已锁价|可以出票|可直接出票|付款|下单/i;
@@ -142,6 +142,8 @@
       riskWarnings: buildWarnings(candidate),
       platformCheckLine: options && options.manualPlatformCheckEvidence ? "平台核对结果已记录" : "仍需平台确认",
       platformDeltaLine: options && options.platformCheckDelta && options.platformCheckDelta.deltaDirection && options.platformCheckDelta.deltaDirection !== "same" && options.platformCheckDelta.deltaDirection !== "unknown" ? "平台页面结果与候选价存在差异，平台最终为准" : "平台最终为准",
+      confidenceLine: options && options.confidenceLabelSummary && options.confidenceLabelSummary.confidenceLabel ? "候选价置信标签：" + safeText(options.confidenceLabelSummary.confidenceLabel) : "候选价置信标签：不可确认",
+      nextStepLine: options && options.safeNextStepSummary && options.safeNextStepSummary.recommendation ? "下一步安全建议：" + safeText(options.safeNextStepSummary.recommendation) : "下一步安全建议：前往平台继续核对",
       redacted: true
     });
   }
@@ -221,6 +223,10 @@
         handoffReceiptSummary: stripUnsafe(input.handoffReceiptSummary || input.handoffReceipt || null),
         manualPlatformCheckSummary: stripUnsafe(input.manualPlatformCheckSummary || input.manualPlatformCheckEvidence || null),
         platformCheckDeltaSummary: stripUnsafe(input.platformCheckDeltaSummary || input.platformCheckDelta || null),
+        reconciliationSummary: stripUnsafe(input.reconciliationSummary || input.platformCheckReconciliation || null),
+        confidenceLabelSummary: stripUnsafe(input.confidenceLabelSummary || null),
+        safeNextStepSummary: stripUnsafe(input.safeNextStepSummary || null),
+        platformCheckOutcomeSummary: stripUnsafe(input.platformCheckOutcomeSummary || null),
         platformCheckWarnings: input.manualPlatformCheckEvidence ? ["平台核对结果已记录", "平台最终为准"] : ["仍需平台确认"],
         comparison: {
           candidateCount: decision.candidateCount,
@@ -276,6 +282,10 @@
       handoffReceiptSummary: model.handoffReceiptSummary || null,
       manualPlatformCheckSummary: model.manualPlatformCheckSummary || null,
       platformCheckDeltaSummary: model.platformCheckDeltaSummary || null,
+      reconciliationSummary: model.reconciliationSummary || null,
+      confidenceLabelSummary: model.confidenceLabelSummary || null,
+      safeNextStepSummary: model.safeNextStepSummary || null,
+      platformCheckOutcomeSummary: model.platformCheckOutcomeSummary || null,
       platformCheckWarnings: model.platformCheckWarnings || [],
       bookingUrl: null,
       checkoutUrl: null,
