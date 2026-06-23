@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.75";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.76";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -90,6 +90,15 @@
       if (supportFallback.status === "needs_review" || supportFallback.status === "blocked" || issueIntake.status === "blocked") badges.push(badge("pilot_support_internal_review", "需要内部复核", "warning"));
       if (issueIntake.issueCategory === "platform_mismatch") badges.push(badge("pilot_platform_mismatch", "平台核对差异待处理", "warning"));
       if (issueIntake.issueCategory === "safety_copy_unclear") badges.push(badge("pilot_safety_copy_review", "安全文案需优化", "warning"));
+      const issueReview = safe.issueReviewSummary || releaseReadiness.issueReviewSummary || {};
+      const issueHealth = issueReview.issueHealth || {};
+      const supportTriage = safe.supportTriageSummary || releaseReadiness.supportTriageSummary || {};
+      const triage = supportTriage.triage || {};
+      if (issueReview.status === "ready" || safe.pilotIssueReviewStatus === "ready") badges.push(badge("pilot_issue_review_ready", "问题可用于改进参考", "info"));
+      if (issueReview.status === "needs_review" || supportTriage.status === "needs_internal_review" || safe.issueRequiresInternalReview === true || issueHealth.requiresInternalReview === true || triage.requiresInternalReview === true) badges.push(badge("pilot_issue_internal_review", "问题需要内部复核", "warning"));
+      if (safe.issueAffectsPilotExpansion === true || issueHealth.affectsPilotExpansion === true || triage.affectsPilotExpansion === true) badges.push(badge("pilot_issue_affects_expansion", "问题影响试点扩大", "warning"));
+      if (supportTriage.status === "ready" || triage.triageId) badges.push(badge("pilot_issue_triage_done", "问题分流完成", "info"));
+      if (issueReview.status === "blocked" || supportTriage.status === "blocked") badges.push(badge("pilot_issue_blocked", "问题已安全阻断", "blocked"));
       if (beta.status === "blocked" || guided.status === "blocked" || guided.status === "failed_safe") badges.push(badge("beta_acceptance_blocked", "Beta 验收被阻断", "blocked"));
       if (copyStatus === "pass" || releaseReadiness.copyValidationStatus === "pass") badges.push(badge("safety_copy_unified", "安全文案已统一", "info"));
       badges.push(badge("not_exportable", "不可导出", "warning"));

@@ -2098,6 +2098,14 @@ function checkCleanResultSurfaceV4Version(results, expectedVersion) {
   addCheck(results, "apps/desktop clean result surface v4 version", expectedVersion, match && match[1], "package.json must match cleanResultSurfaceV4.js");
 }
 
+function checkConstVersion(results, expectedVersion, name, filePath, constName) {
+  const file = readText(filePath);
+  if (!file) { results.push({ name:name, pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:name, pass:false, detail:file.__readError }); return; }
+  const match = file.match(new RegExp(constName + "\\s*=\\s*[\"']([^\"']+)[\"']"));
+  addCheck(results, name, expectedVersion, match && match[1], "package.json must match " + filePath + " " + constName);
+}
+
 function runVersionCheck() {
   const results = [];
 
@@ -2247,6 +2255,12 @@ function runVersionCheck() {
     checkFlightWorkflowPublicPilotOnboardingGuardVersion(results, rootPackage.version);
     checkFlightWorkflowReadOnlyUserConsentFlowVersion(results, rootPackage.version);
     checkFlightWorkflowPilotOnboardingViewModelVersion(results, rootPackage.version);
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow safe issue intake flow version", "apps/desktop/src/renderer/core/flightWorkflowSafeIssueIntakeFlow.js", "FLIGHT_WORKFLOW_SAFE_ISSUE_INTAKE_FLOW_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow support fallback recommendation engine version", "apps/desktop/src/renderer/core/flightWorkflowSupportFallbackRecommendationEngine.js", "FLIGHT_WORKFLOW_SUPPORT_FALLBACK_RECOMMENDATION_ENGINE_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow pilot support view model version", "apps/desktop/src/renderer/core/flightWorkflowPilotSupportViewModel.js", "FLIGHT_WORKFLOW_PILOT_SUPPORT_VIEW_MODEL_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow public pilot issue review board version", "apps/desktop/src/renderer/core/flightWorkflowPublicPilotIssueReviewBoard.js", "FLIGHT_WORKFLOW_PUBLIC_PILOT_ISSUE_REVIEW_BOARD_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow support triage dashboard version", "apps/desktop/src/renderer/core/flightWorkflowSupportTriageDashboard.js", "FLIGHT_WORKFLOW_SUPPORT_TRIAGE_DASHBOARD_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow pilot issue review view model version", "apps/desktop/src/renderer/core/flightWorkflowPilotIssueReviewViewModel.js", "FLIGHT_WORKFLOW_PILOT_ISSUE_REVIEW_VIEW_MODEL_VERSION");
     checkFlightEvidenceWorkflowOrchestratorVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowStatusPresenterVersion(results, rootPackage.version);
     checkFlightFareBreakdownVersion(results, rootPackage.version);

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_VERSION = "2.1.75";
+  const FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_VERSION = "2.1.76";
   const GATE_NAME = "flight_workflow_beta_expansion_gate_v1";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
   const TRADING_RE = /"(bookingUrl|checkoutUrl|paymentUrl|orderUrl)"\s*:\s*"https?:\/\//i;
@@ -23,6 +23,8 @@
     const trend = summary(safe, ["feedbackTrendSummary", "trendRadarSummary"]);
     const human = summary(safe, ["humanReviewChecklistSummary", "humanReview", "humanReviewSummary"]);
     const acceptance = summary(safe, ["acceptanceSessionSummary", "betaAcceptanceSummary", "acceptanceSummary"]);
+    const issueReview = summary(safe, ["issueReviewSummary", "issueReviewBoard"]);
+    const issueHealth = issueReview.issueHealth || {};
     const releaseReadinessReady = release.status === "ready" || release.releaseReady === true || release.safeForUserFacingBeta === true;
     const safetyMatrixPass = safe.safetyMatrixPass === true || matrix.status === "pass" || matrix.status === "ready" || matrix.overallHealth === "pass" || matrix.overallHealth === "ready";
     const safetySentinelPass = safe.safetySentinelPass === true || sentinel.status === "pass" || sentinel.status === "ready";
@@ -31,7 +33,7 @@
     const humanReviewReady = human.status === "ready" || safe.humanReviewReady === true;
     const acceptanceSessionReady = acceptance.status === "completed" || acceptance.status === "ready" || acceptance.safeForGuidedUserTest === true || acceptance.safeForUserFacingBeta === true;
     const safetyCopyLow = trend.trends && trend.trends.safetyCopyTrend === "not_understood" || cohort.findings && JSON.stringify(cohort.findings).indexOf("安全文案理解不足") >= 0 || safe.safetyCopyUnderstood === false;
-    const blockedSafety = blockedInput(safe) || matrix.status === "fail" || matrix.status === "blocked" || matrix.overallHealth === "fail" || Number(matrix.failedCount || 0) > 0 || Number(matrix.blockedCount || 0) > 0 || sentinel.status === "fail" || sentinel.status === "failed_safe" || release.status === "blocked" || release.status === "failed_safe";
+    const blockedSafety = blockedInput(safe) || matrix.status === "fail" || matrix.status === "blocked" || matrix.overallHealth === "fail" || Number(matrix.failedCount || 0) > 0 || Number(matrix.blockedCount || 0) > 0 || sentinel.status === "fail" || sentinel.status === "failed_safe" || release.status === "blocked" || release.status === "failed_safe" || issueReview.status === "blocked";
     const criteria = { releaseReadinessReady:releaseReadinessReady, safetyMatrixPass:safetyMatrixPass, safetySentinelPass:safetySentinelPass, cohortReady:cohortReady, feedbackTrendPositive:feedbackTrendPositive, humanReviewReady:humanReviewReady, acceptanceSessionReady:acceptanceSessionReady, noBlockedSafetyRisk:!blockedSafety };
     const unmet = [];
     Object.keys(criteria).forEach(function (name) { if (!criteria[name]) unmet.push(name); });
@@ -40,6 +42,8 @@
     if (cohort.status === "needs_more_feedback") riskNotes.push("Beta 批次仍需更多反馈。");
     if (trend.status === "insufficient_data") riskNotes.push("反馈趋势数据不足。");
     if (safetyCopyLow) riskNotes.push("安全文案理解不足。");
+    if (issueHealth.affectsPilotExpansion === true || safe.issueAffectsPilotExpansion === true) riskNotes.push("问题影响试点扩大。");
+    if (issueHealth.requiresInternalReview === true || safe.issueRequiresInternalReview === true) riskNotes.push("问题需要内部复核。");
     if (human.status === "needs_review" || human.status === "warning") riskNotes.push("人工复核仍需完成。");
     let status = "needs_review";
     let decisionId = "continue_internal_testing";
@@ -50,7 +54,7 @@
     else if (safetyCopyLow) { status = "needs_review"; decisionId = "improve_safety_copy"; label = "仍需复核"; message = "先改进安全文案理解，再考虑扩大只读测试。"; }
     else if (human.status === "needs_review" || human.status === "warning" || !humanReviewReady) { status = "needs_review"; decisionId = "continue_internal_testing"; label = "仍需复核"; message = "人工复核未完成，暂不扩大只读测试。"; }
     else if (Object.keys(criteria).every(function (name) { return criteria[name] === true; })) { status = "approved"; decisionId = "expand_read_only_beta"; label = "可以小范围扩大只读测试"; message = "只读 Beta 扩大测试条件已满足。"; }
-    return clone({ status:status, decision:{ decisionId:decisionId, label:label, message:message, safeToExpandReadOnlyBeta:status === "approved" }, criteria:criteria, unmetCriteria:unmet, riskNotes:riskNotes, redacted:true });
+    return clone({ issueAffectsPilotExpansion:issueHealth.affectsPilotExpansion === true || safe.issueAffectsPilotExpansion === true, issueRequiresInternalReview:issueHealth.requiresInternalReview === true || safe.issueRequiresInternalReview === true, status:status, decision:{ decisionId:decisionId, label:label, message:message, safeToExpandReadOnlyBeta:status === "approved" }, criteria:criteria, unmetCriteria:unmet, riskNotes:riskNotes, redacted:true });
   }
   function buildFlightWorkflowBetaExpansionCriteria(input) {
     const decision = evaluateFlightWorkflowBetaExpansionDecision(input || {});
@@ -67,14 +71,14 @@
   }
   function sanitizeFlightWorkflowBetaExpansionGate(gate) {
     const safe = gate && typeof gate === "object" ? gate : {};
-    return clone({ gateName:GATE_NAME, appVersion:FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_VERSION, status:safeText(safe.status || "failed_safe"), decision:Object.assign({ decisionId:"blocked", label:"暂不可扩大测试", message:"安全降级。", safeToExpandReadOnlyBeta:false }, safe.decision || {}), criteria:Object.assign({ releaseReadinessReady:false, safetyMatrixPass:false, safetySentinelPass:false, cohortReady:false, feedbackTrendPositive:false, humanReviewReady:false, acceptanceSessionReady:false, noBlockedSafetyRisk:false }, safe.criteria || {}), criteriaRows:toArray(safe.criteriaRows), unmetCriteria:toArray(safe.unmetCriteria).map(safeText), riskNotes:toArray(safe.riskNotes).map(safeText), pilotOnboardingSummary:clone(safe.pilotOnboardingSummary || null), readOnlyConsentSummary:clone(safe.readOnlyConsentSummary || null), pilotEntryStatus:safeText(safe.pilotEntryStatus || ""), canEnterReadOnlyPilot:safe.canEnterReadOnlyPilot === true, pilotConsentRequired:safe.pilotConsentRequired === true, userFacingSummary:Object.assign({ title:"只读 Beta 扩大测试闸门", resultLabel:"暂不可扩大测试", caveat:"该判断只适用于只读候选证据流程，不代表真实票价、库存或可出票。", redacted:true }, safe.userFacingSummary || {}), safety:safety(), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false, redacted:true });
+    return clone({ gateName:GATE_NAME, appVersion:FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_VERSION, status:safeText(safe.status || "failed_safe"), decision:Object.assign({ decisionId:"blocked", label:"暂不可扩大测试", message:"安全降级。", safeToExpandReadOnlyBeta:false }, safe.decision || {}), criteria:Object.assign({ releaseReadinessReady:false, safetyMatrixPass:false, safetySentinelPass:false, cohortReady:false, feedbackTrendPositive:false, humanReviewReady:false, acceptanceSessionReady:false, noBlockedSafetyRisk:false }, safe.criteria || {}), criteriaRows:toArray(safe.criteriaRows), unmetCriteria:toArray(safe.unmetCriteria).map(safeText), issueReviewSummary:clone(safe.issueReviewSummary || null), supportTriageSummary:clone(safe.supportTriageSummary || null), issueAffectsPilotExpansion:safe.issueAffectsPilotExpansion === true, issueRequiresInternalReview:safe.issueRequiresInternalReview === true, riskNotes:toArray(safe.riskNotes).map(safeText), pilotOnboardingSummary:clone(safe.pilotOnboardingSummary || null), readOnlyConsentSummary:clone(safe.readOnlyConsentSummary || null), pilotEntryStatus:safeText(safe.pilotEntryStatus || ""), canEnterReadOnlyPilot:safe.canEnterReadOnlyPilot === true, pilotConsentRequired:safe.pilotConsentRequired === true, userFacingSummary:Object.assign({ title:"只读 Beta 扩大测试闸门", resultLabel:"暂不可扩大测试", caveat:"该判断只适用于只读候选证据流程，不代表真实票价、库存或可出票。", redacted:true }, safe.userFacingSummary || {}), safety:safety(), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false, redacted:true });
   }
   function buildFlightWorkflowBetaExpansionGate(input) {
     try {
       if (!input || typeof input !== "object" || Array.isArray(input)) return sanitizeFlightWorkflowBetaExpansionGate({ status:"failed_safe", riskNotes:["输入格式异常。"] });
       const evaluation = evaluateFlightWorkflowBetaExpansionDecision(input);
       const resultLabel = evaluation.status === "approved" ? "可以小范围扩大只读测试" : (evaluation.status === "continue_internal_testing" ? "继续内部测试" : (evaluation.status === "blocked" ? "暂不可扩大测试" : "仍需复核"));
-      return sanitizeFlightWorkflowBetaExpansionGate({ status:evaluation.status, decision:evaluation.decision, criteria:evaluation.criteria, criteriaRows:buildFlightWorkflowBetaExpansionCriteria(input), unmetCriteria:evaluation.unmetCriteria, riskNotes:evaluation.riskNotes, userFacingSummary:{ title:"只读 Beta 扩大测试闸门", resultLabel:resultLabel, caveat:"该判断只适用于只读候选证据流程，不代表真实票价、库存或可出票。", redacted:true } });
+      return sanitizeFlightWorkflowBetaExpansionGate({ status:evaluation.status, decision:evaluation.decision, criteria:evaluation.criteria, criteriaRows:buildFlightWorkflowBetaExpansionCriteria(input), unmetCriteria:evaluation.unmetCriteria, issueAffectsPilotExpansion:evaluation.issueAffectsPilotExpansion, issueRequiresInternalReview:evaluation.issueRequiresInternalReview, issueReviewSummary:input.issueReviewSummary || null, supportTriageSummary:input.supportTriageSummary || null, riskNotes:evaluation.riskNotes, userFacingSummary:{ title:"只读 Beta 扩大测试闸门", resultLabel:resultLabel, caveat:"该判断只适用于只读候选证据流程，不代表真实票价、库存或可出票。", redacted:true } });
     } catch (error) { return sanitizeFlightWorkflowBetaExpansionGate({ status:"failed_safe" }); }
   }
   function buildFlightWorkflowBetaExpansionGateAuditDraft(input) { const gate = buildFlightWorkflowBetaExpansionGate(input || {}); return clone({ eventType:"FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_AUDIT_DRAFT", gateName:GATE_NAME, appVersion:FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_VERSION, status:gate.status, decisionId:gate.decision.decisionId, safeToExpandReadOnlyBeta:gate.decision.safeToExpandReadOnlyBeta === true, unmetCriteria:gate.unmetCriteria, riskNotes:gate.riskNotes, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, autoRefresh:false, payment:false, order:false, ticketing:false, identityUpload:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, fileWrite:false, download:false, redacted:true }); }

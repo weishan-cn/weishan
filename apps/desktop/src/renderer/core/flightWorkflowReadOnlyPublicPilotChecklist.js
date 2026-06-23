@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_PUBLIC_PILOT_CHECKLIST_VERSION = "2.1.75";
+  const FLIGHT_WORKFLOW_READ_ONLY_PUBLIC_PILOT_CHECKLIST_VERSION = "2.1.76";
   const CHECKLIST_NAME = "flight_workflow_read_only_public_pilot_checklist_v1";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
   const TRADING_RE = /"(bookingUrl|checkoutUrl|paymentUrl|orderUrl)"\s*:\s*"https?:\/\//i;
@@ -22,13 +22,16 @@
     const userReviewReady = safe.userReviewReady === false ? false : (safe.userReviewReady === true || safe.humanReviewReady === true || !!(safe.humanReviewChecklistSummary && safe.humanReviewChecklistSummary.status === "ready"));
     const forbiddenCapabilitiesVisible = safe.forbiddenCapabilitiesVisible !== false;
     const supportFallbackReady = safe.supportFallbackReady !== false;
-    const blocked = blockedInput(safe) || scenarioMatrixReady === false || gate.status === "blocked";
-    const readiness = { betaExpansionApproved:betaExpansionApproved, safetyCopyReady:safetyCopyReady, scenarioMatrixReady:scenarioMatrixReady, userReviewReady:userReviewReady, forbiddenCapabilitiesVisible:forbiddenCapabilitiesVisible, supportFallbackReady:supportFallbackReady, safeForSmallPublicPilot:false };
-    readiness.safeForSmallPublicPilot = !blocked && betaExpansionApproved && safetyCopyReady && scenarioMatrixReady && userReviewReady && forbiddenCapabilitiesVisible && supportFallbackReady;
+    const issueReview = safe.issueReviewSummary || safe.issueReviewBoard || {};
+    const issueHealth = issueReview.issueHealth || {};
+    const issueReviewReady = issueReview.status !== "blocked";
+    const blocked = blockedInput(safe) || scenarioMatrixReady === false || gate.status === "blocked" || issueReview.status === "blocked";
+    const readiness = { betaExpansionApproved:betaExpansionApproved, safetyCopyReady:safetyCopyReady, scenarioMatrixReady:scenarioMatrixReady, userReviewReady:userReviewReady, forbiddenCapabilitiesVisible:forbiddenCapabilitiesVisible, supportFallbackReady:supportFallbackReady && issueReviewReady, issueReviewReady:issueReviewReady, issueRequiresInternalReview:issueHealth.requiresInternalReview === true, issueAffectsPilotExpansion:issueHealth.affectsPilotExpansion === true, safeForSmallPublicPilot:false };
+    readiness.safeForSmallPublicPilot = !blocked && betaExpansionApproved && safetyCopyReady && scenarioMatrixReady && userReviewReady && forbiddenCapabilitiesVisible && supportFallbackReady && issueReviewReady;
     let status = "needs_review";
     if (blocked) status = "blocked";
     else if (!betaExpansionApproved) status = "needs_internal_testing";
-    else if (!safetyCopyReady || !userReviewReady || !forbiddenCapabilitiesVisible || !supportFallbackReady) status = "needs_review";
+    else if (!safetyCopyReady || !userReviewReady || !forbiddenCapabilitiesVisible || !supportFallbackReady || !issueReviewReady) status = "needs_review";
     else if (readiness.safeForSmallPublicPilot) status = "ready";
     return clone({ status:status, readiness:readiness, redacted:true });
   }
@@ -45,7 +48,7 @@
   }
   function sanitizeFlightWorkflowPublicPilotChecklist(checklist) {
     const safe = checklist && typeof checklist === "object" ? checklist : {};
-    return clone({ checklistName:CHECKLIST_NAME, appVersion:FLIGHT_WORKFLOW_READ_ONLY_PUBLIC_PILOT_CHECKLIST_VERSION, status:safeText(safe.status || "failed_safe"), readiness:Object.assign({ betaExpansionApproved:false, safetyCopyReady:false, scenarioMatrixReady:false, userReviewReady:false, forbiddenCapabilitiesVisible:false, supportFallbackReady:false, safeForSmallPublicPilot:false }, safe.readiness || {}), checklistItems:toArray(safe.checklistItems).map(function (entry) { return item(entry.itemId || "item", entry.label || "", entry.status || "needs_review", entry.message || ""); }), blockedItems:toArray(safe.blockedItems).map(function (entry) { return item(entry.itemId || "blocked", entry.label || "", "blocked", entry.message || ""); }), pilotOnboardingSummary:clone(safe.pilotOnboardingSummary || null), readOnlyConsentSummary:clone(safe.readOnlyConsentSummary || null), pilotEntryStatus:safeText(safe.pilotEntryStatus || ""), canEnterReadOnlyPilot:safe.canEnterReadOnlyPilot === true, pilotConsentRequired:safe.pilotConsentRequired === true, userFacingSummary:Object.assign({ title:"只读公开试点检查清单", resultLabel:"暂不可试点", caveat:"公开试点仍然只覆盖只读候选证据流程，不提供付款、下单或出票能力。", redacted:true }, safe.userFacingSummary || {}), safety:safety(), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false, redacted:true });
+    return clone({ checklistName:CHECKLIST_NAME, appVersion:FLIGHT_WORKFLOW_READ_ONLY_PUBLIC_PILOT_CHECKLIST_VERSION, status:safeText(safe.status || "failed_safe"), readiness:Object.assign({ betaExpansionApproved:false, safetyCopyReady:false, scenarioMatrixReady:false, userReviewReady:false, forbiddenCapabilitiesVisible:false, supportFallbackReady:false, safeForSmallPublicPilot:false }, safe.readiness || {}), checklistItems:toArray(safe.checklistItems).map(function (entry) { return item(entry.itemId || "item", entry.label || "", entry.status || "needs_review", entry.message || ""); }), blockedItems:toArray(safe.blockedItems).map(function (entry) { return item(entry.itemId || "blocked", entry.label || "", "blocked", entry.message || ""); }), issueReviewSummary:clone(safe.issueReviewSummary || null), supportTriageSummary:clone(safe.supportTriageSummary || null), pilotIssueReviewStatus:safeText(safe.pilotIssueReviewStatus || ""), issueAffectsPilotExpansion:safe.issueAffectsPilotExpansion === true || safe.readiness && safe.readiness.issueAffectsPilotExpansion === true, issueRequiresInternalReview:safe.issueRequiresInternalReview === true || safe.readiness && safe.readiness.issueRequiresInternalReview === true, pilotOnboardingSummary:clone(safe.pilotOnboardingSummary || null), readOnlyConsentSummary:clone(safe.readOnlyConsentSummary || null), pilotEntryStatus:safeText(safe.pilotEntryStatus || ""), canEnterReadOnlyPilot:safe.canEnterReadOnlyPilot === true, pilotConsentRequired:safe.pilotConsentRequired === true, userFacingSummary:Object.assign({ title:"只读公开试点检查清单", resultLabel:"暂不可试点", caveat:"公开试点仍然只覆盖只读候选证据流程，不提供付款、下单或出票能力。", redacted:true }, safe.userFacingSummary || {}), safety:safety(), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false, redacted:true });
   }
   function buildFlightWorkflowReadOnlyPublicPilotChecklist(input) {
     try {
