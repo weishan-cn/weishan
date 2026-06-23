@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CONFIRMATION_HANDOFF_UI_VERSION = "2.1.57";
+  const PROVIDER_CONFIRMATION_HANDOFF_UI_VERSION = "2.1.58";
   const PHASE = "provider_confirmation_handoff_ui_stub";
 
   function clone(value) {
@@ -83,12 +83,13 @@
       <p>candidateDecision：${escapeHtml(ui.candidateDecision || "blocked")}</p>
       <p>可信域名：${escapeHtml(host || "google.com / trip.com / ctrip.com / skyscanner.com / kayak.com / expedia.com / booking.com")}</p>
       <p>safe provider handoff url：confirmation only</p>
+      <section data-commerce-safe-provider-confirmation-checklist="true"><h6>前往平台确认前检查</h6><p>将打开外部可信平台页面</p><p>唯珊不会付款、不会下单</p><p>唯珊不会上传证件或银行卡</p><p>价格、库存、税费和规则以平台页面为准</p><p>平台确认链接已通过安全检查</p></section>
       <p>bookingUrl：null</p>
       <p>payment：blocked</p>
       <p>order：blocked</p>
       <p>identityUpload：blocked</p>
       <div class="commerce-provider-confirmation-handoff-actions">
-        <button type="button" class="cmd-btn primary" data-commerce-safe-provider-handoff-confirm="${ui.continueButtonDisabled ? "false" : "true"}" ${ui.continueButtonDisabled ? "disabled" : ""}>${escapeHtml(ui.confirmButtonLabel || "确认打开可信平台确认页")}</button>
+        <button type="button" class="cmd-btn primary" data-commerce-safe-provider-handoff-confirm="${ui.continueButtonDisabled ? "false" : "true"}" ${ui.continueButtonDisabled ? "disabled" : ""}>${escapeHtml("继续前往平台")}</button>
         <button type="button" class="cmd-btn gray" data-commerce-safe-provider-handoff-cancel="true">${escapeHtml(ui.cancelButtonLabel || "取消")}</button>
       </div>
     </section>`;

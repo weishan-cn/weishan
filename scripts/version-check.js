@@ -229,6 +229,42 @@ function checkReadOnlyQuoteCandidateComparisonExplainerVersion(results, expected
   addCheck(results, "apps/desktop read only quote candidate comparison explainer version", expectedVersion, match && match[1], "package.json must match readOnlyQuoteCandidateComparisonExplainer.js");
 }
 
+function checkSafeProviderConfirmationChecklistVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/safeProviderConfirmationChecklist.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop safe provider confirmation checklist version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop safe provider confirmation checklist version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/SAFE_PROVIDER_CONFIRMATION_CHECKLIST_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop safe provider confirmation checklist version", expectedVersion, match && match[1], "package.json must match safeProviderConfirmationChecklist.js");
+}
+
+function checkProviderHandoffReceiptStoreVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/providerHandoffReceiptStore.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop provider handoff receipt store version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop provider handoff receipt store version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/PROVIDER_HANDOFF_RECEIPT_STORE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop provider handoff receipt store version", expectedVersion, match && match[1], "package.json must match providerHandoffReceiptStore.js");
+}
+
+function checkManualPlatformCheckCaptureVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/manualPlatformCheckCapture.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop manual platform check capture version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop manual platform check capture version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/MANUAL_PLATFORM_CHECK_CAPTURE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop manual platform check capture version", expectedVersion, match && match[1], "package.json must match manualPlatformCheckCapture.js");
+}
+
+function checkPlatformCheckDeltaCompareVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/platformCheckDeltaCompare.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop platform check delta compare version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop platform check delta compare version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/PLATFORM_CHECK_DELTA_COMPARE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop platform check delta compare version", expectedVersion, match && match[1], "package.json must match platformCheckDeltaCompare.js");
+}
+
 function checkFlightSandboxDryRunVersion(results, expectedVersion) {
   const sandboxPath = "apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js";
   const sandbox = readText(sandboxPath);
@@ -1612,6 +1648,10 @@ function runVersionCheck() {
     checkReadOnlyQuoteSessionReportCenterVersion(results, rootPackage.version);
     checkReadOnlyQuoteDecisionAssistantVersion(results, rootPackage.version);
     checkReadOnlyQuoteCandidateComparisonExplainerVersion(results, rootPackage.version);
+    checkSafeProviderConfirmationChecklistVersion(results, rootPackage.version);
+    checkProviderHandoffReceiptStoreVersion(results, rootPackage.version);
+    checkManualPlatformCheckCaptureVersion(results, rootPackage.version);
+    checkPlatformCheckDeltaCompareVersion(results, rootPackage.version);
     checkFlightSandboxDryRunVersion(results, rootPackage.version);
     checkFlightSandboxProviderMatrixVersion(results, rootPackage.version);
     checkTrustedFlightSourceEvidenceReportVersion(results, rootPackage.version);

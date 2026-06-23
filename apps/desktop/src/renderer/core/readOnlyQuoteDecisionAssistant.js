@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_DECISION_ASSISTANT_VERSION = "2.1.57";
+  const READ_ONLY_QUOTE_DECISION_ASSISTANT_VERSION = "2.1.58";
   const ASSISTANT_NAME = "read_only_quote_decision_assistant_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|真实最终价|已锁价|可以出票|可直接出票|付款|下单/i;
@@ -71,7 +71,8 @@
     const warnings = [
       "平台最终为准，价格、库存、税费和规则以平台页面为准。",
       "本推荐仅基于本地只读候选证据，不代表真实最终价。",
-      "未锁价，不代表可出票。"
+      "未锁价，不代表可出票。",
+      "仍需平台确认。"
     ];
     if (candidate && candidate.safeProviderHandoffReady !== true) warnings.push("当前推荐候选的平台确认链接不可用。");
     return warnings.map(safeText);
@@ -139,6 +140,8 @@
       primaryReason: candidate ? "该候选在本次只读候选样本中合计金额较低。" : "暂无可解释的本地只读候选证据。",
       supportingReasons: supportingReasons.map(safeText),
       riskWarnings: buildWarnings(candidate),
+      platformCheckLine: options && options.manualPlatformCheckEvidence ? "平台核对结果已记录" : "仍需平台确认",
+      platformDeltaLine: options && options.platformCheckDelta && options.platformCheckDelta.deltaDirection && options.platformCheckDelta.deltaDirection !== "same" && options.platformCheckDelta.deltaDirection !== "unknown" ? "平台页面结果与候选价存在差异，平台最终为准" : "平台最终为准",
       redacted: true
     });
   }
@@ -214,6 +217,11 @@
         recommendationType: "candidate_evidence_only",
         recommendedCandidate: recommended,
         reasoning: reasoning,
+        handoffChecklistSummary: stripUnsafe(input.handoffChecklistSummary || input.handoffChecklist || null),
+        handoffReceiptSummary: stripUnsafe(input.handoffReceiptSummary || input.handoffReceipt || null),
+        manualPlatformCheckSummary: stripUnsafe(input.manualPlatformCheckSummary || input.manualPlatformCheckEvidence || null),
+        platformCheckDeltaSummary: stripUnsafe(input.platformCheckDeltaSummary || input.platformCheckDelta || null),
+        platformCheckWarnings: input.manualPlatformCheckEvidence ? ["平台核对结果已记录", "平台最终为准"] : ["仍需平台确认"],
         comparison: {
           candidateCount: decision.candidateCount,
           comparedFields: decision.comparedFields,
@@ -264,6 +272,11 @@
       canClaimFinalBookablePrice: false,
       rawResponseStored: false,
       secretStored: false,
+      handoffChecklistSummary: model.handoffChecklistSummary || null,
+      handoffReceiptSummary: model.handoffReceiptSummary || null,
+      manualPlatformCheckSummary: model.manualPlatformCheckSummary || null,
+      platformCheckDeltaSummary: model.platformCheckDeltaSummary || null,
+      platformCheckWarnings: model.platformCheckWarnings || [],
       bookingUrl: null,
       checkoutUrl: null,
       paymentUrl: null,

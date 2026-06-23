@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.57";
+  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.58";
   const CONSOLE_NAME = "sandbox_response_import_console_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -16,6 +16,8 @@
   function getEvidenceFormatterApi() { return window.WeishanReadOnlyQuoteEvidenceSummaryFormatter || {}; }
   function getDecisionAssistantApi() { return window.WeishanReadOnlyQuoteDecisionAssistant || {}; }
   function getCandidateComparisonApi() { return window.WeishanReadOnlyQuoteCandidateComparisonExplainer || {}; }
+  function getManualPlatformCheckApi() { return window.WeishanManualPlatformCheckCapture || {}; }
+  function getPlatformDeltaApi() { return window.WeishanPlatformCheckDeltaCompare || {}; }
 
   function safety() {
     return {
@@ -171,6 +173,8 @@
     const formatterApi = getEvidenceFormatterApi();
     const decisionApi = getDecisionAssistantApi();
     const comparisonApi = getCandidateComparisonApi();
+    const manualCheckApi = getManualPlatformCheckApi();
+    const deltaApi = getPlatformDeltaApi();
     const selectedCandidate = safe.selectedCandidate && typeof safe.selectedCandidate === "object" ? safe.selectedCandidate : null;
     const decisionAssistant = typeof decisionApi.buildReadOnlyQuoteDecisionAssistant === "function" ? decisionApi.buildReadOnlyQuoteDecisionAssistant({ topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, sessionSummary:sessionSummary, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary }) : null;
     const candidateComparison = typeof comparisonApi.buildReadOnlyQuoteCandidateComparison === "function" ? comparisonApi.buildReadOnlyQuoteCandidateComparison(dryRunTopCandidates) : null;
@@ -180,6 +184,9 @@
     const decisionSafetyWarnings = recommendationExplanation && Array.isArray(recommendationExplanation.riskWarnings) ? recommendationExplanation.riskWarnings : ["平台最终为准", "未锁价", "不代表可出票"];
     const candidateComparisonTable = candidateComparison && Array.isArray(candidateComparison.table) ? candidateComparison.table : [];
     const providerConfirmationWarning = formatterApi.formatProviderConfirmationWarning ? formatterApi.formatProviderConfirmationWarning(decisionAssistant && decisionAssistant.recommendedCandidate || selectedCandidate || dryRunTopCandidates[0] || {}) : null;
+    const manualPlatformCheckSummary = typeof manualCheckApi.buildManualPlatformCheckEvidence === "function" ? manualCheckApi.buildManualPlatformCheckEvidence(Object.assign({ providerName:selectedCandidate && selectedCandidate.providerName || "可信平台", observedCurrency:selectedCandidate && selectedCandidate.currency || "CNY", observedTotalPrice:selectedCandidate && selectedCandidate.totalPrice, observedInventoryStatus:"unknown" }, safe.manualPlatformCheckInput || {})) : null;
+    const platformCheckDelta = typeof deltaApi.compareCandidateWithManualPlatformCheck === "function" ? deltaApi.compareCandidateWithManualPlatformCheck(selectedCandidate || dryRunTopCandidates[0] || {}, manualPlatformCheckSummary || {}) : null;
+    const platformCheckDeltaSummary = typeof deltaApi.buildPlatformCheckDeltaSummary === "function" ? deltaApi.buildPlatformCheckDeltaSummary(platformCheckDelta) : null;
     const reportCenterModel = typeof reportCenterApi.buildReadOnlyQuoteSessionReportCenter === "function" ? reportCenterApi.buildReadOnlyQuoteSessionReportCenter({ sessionSummary:sessionSummary, auditExportPreview:auditExportPreview, topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary }) : null;
     const reportCenterSummary = reportCenterModel ? { reportCenterName:reportCenterModel.reportCenterName, appVersion:reportCenterModel.appVersion, status:reportCenterModel.status, actions:reportCenterModel.actions, redacted:true } : null;
     const userFacingEvidenceSummary = reportCenterModel && reportCenterModel.userFacingSummary || null;
@@ -227,6 +234,9 @@
       decisionSafetyWarnings: decisionSafetyWarnings,
       candidateComparisonTable: candidateComparisonTable,
       providerConfirmationWarning: providerConfirmationWarning,
+      manualPlatformCheckSummary: manualPlatformCheckSummary,
+      platformCheckDeltaSummary: platformCheckDeltaSummary,
+      platformCheckWarnings: platformCheckDeltaSummary && platformCheckDeltaSummary.warnings || ["平台最终为准"],
       reportCenterStatus: reportCenterStatus,
       lastRunId: lastRunId,
       compareStatus: compareStatus,
@@ -430,6 +440,9 @@
       decisionSafetyWarnings: model.decisionSafetyWarnings || [],
       candidateComparisonTable: model.candidateComparisonTable || [],
       providerConfirmationWarning: model.providerConfirmationWarning || null,
+      manualPlatformCheckSummary: model.manualPlatformCheckSummary || null,
+      platformCheckDeltaSummary: model.platformCheckDeltaSummary || null,
+      platformCheckWarnings: model.platformCheckWarnings || [],
       reportCenterStatus: model.reportCenterStatus || "empty",
       rawInputStored: false,
       rawResponseStored: false,

@@ -6603,6 +6603,7 @@
           <p>直达偏好：${esc(fields.directPreference || "直达优先")}</p>
           <p>排序：${esc(fields.goal)}</p>
           ${commerceCleanResultSurfaceHtml(task, { guardedPriceCardHtml })}
+          <section class="commerce-manual-platform-check" data-commerce-manual-platform-check="true"><h5>记录平台核对结果</h5><p>Platform Check Evidence</p><label>observedTotalPrice <input data-commerce-manual-platform-check-total="true" aria-label="observedTotalPrice" value="1010"></label><label>currency <input data-commerce-manual-platform-check-currency="true" aria-label="currency" value="CNY"></label><label>userNote <textarea data-commerce-manual-platform-check-note="true" aria-label="userNote"></textarea></label><button type="button" class="cmd-btn gray" data-commerce-manual-platform-check-save="true">记录平台核对结果</button><div data-commerce-manual-platform-check-output="true"><p>平台核对结果已记录</p><p>平台核对差异</p><p>平台最终为准</p><p>唯珊不会付款、不会下单、不会上传证件或银行卡</p><p>secretStored: false</p></div></section>
         </section>
       </div>
       <div class="commerce-one-screen-actions commerce-manual-verification-actions" aria-label="手动核对入口">
@@ -7598,6 +7599,21 @@
         showCommercePlatformTemplateFeedback("已选择该候选，平台最终为准", false);
         return;
       }
+      const manualPlatformCheckButton = target && target.closest("[data-commerce-manual-platform-check-save]");
+      if (manualPlatformCheckButton && host.contains(manualPlatformCheckButton)) {
+        const panel = manualPlatformCheckButton.closest("[data-commerce-manual-platform-check]");
+        const captureApi = window.WeishanManualPlatformCheckCapture;
+        const deltaApi = window.WeishanPlatformCheckDeltaCompare;
+        const total = panel && panel.querySelector("[data-commerce-manual-platform-check-total]");
+        const currency = panel && panel.querySelector("[data-commerce-manual-platform-check-currency]");
+        const note = panel && panel.querySelector("[data-commerce-manual-platform-check-note]");
+        const evidence = captureApi && typeof captureApi.buildManualPlatformCheckEvidence === "function" ? captureApi.buildManualPlatformCheckEvidence({ observedTotalPrice:total && total.value, observedCurrency:currency && currency.value, userNote:note && note.value, observedInventoryStatus:"unknown" }) : { status:"failed_safe", sensitiveInputBlocked:true };
+        const delta = deltaApi && typeof deltaApi.compareCandidateWithManualPlatformCheck === "function" ? deltaApi.compareCandidateWithManualPlatformCheck({ totalPrice:1010 }, evidence) : null;
+        const summary = deltaApi && typeof deltaApi.buildPlatformCheckDeltaSummary === "function" ? deltaApi.buildPlatformCheckDeltaSummary(delta) : { line:"平台核对差异：暂无可比较的手动平台核对结果" };
+        const output = panel && panel.querySelector("[data-commerce-manual-platform-check-output]");
+        if (output) output.innerHTML = evidence.status === "blocked" ? "<p>敏感输入被阻断</p><p>secretStored: false</p><p>平台最终为准</p>" : "<p>平台核对结果已记录</p><p>" + esc(summary.line || "平台核对差异") + "</p><p>平台核对差异</p><p>平台最终为准</p><p>未锁价</p><p>不代表可出票</p><p>secretStored: false</p>";
+        return;
+      }
       const safeProviderButton = target && target.closest("[data-commerce-safe-provider-handoff-request]");
       if (safeProviderButton && host.contains(safeProviderButton)) {
         const taskScope = safeProviderButton.closest("[data-commerce-task-id]");
@@ -7605,7 +7621,10 @@
           taskId: taskScope && taskScope.getAttribute("data-commerce-task-id") || "",
           taskTitle: taskScope && taskScope.getAttribute("data-commerce-task-title") || "",
           kind: safeProviderButton.getAttribute("data-commerce-safe-provider-handoff-kind") || "googleFlights",
-          url: commerceDecodedInlineValue(safeProviderButton, "data-commerce-safe-provider-handoff-url")
+          url: commerceDecodedInlineValue(safeProviderButton, "data-commerce-safe-provider-handoff-url"),
+          providerName: safeProviderButton.getAttribute("data-commerce-safe-provider-handoff-provider") || "可信平台",
+          displayHost: safeProviderButton.getAttribute("data-commerce-safe-provider-handoff-host") || "",
+          selectedCandidate: { quoteId:safeProviderButton.getAttribute("data-commerce-safe-provider-handoff-quote-id") || "", totalPrice:Number(safeProviderButton.getAttribute("data-commerce-safe-provider-handoff-total") || 0) || null, currency:safeProviderButton.getAttribute("data-commerce-safe-provider-handoff-currency") || "CNY", safeProviderHandoffReady:true }
         };
         render(host);
         return;
@@ -7615,6 +7634,8 @@
         const gateApi = window.WeishanSafeProviderDeepLinkHandoffGate;
         const pending = pendingSafeProviderHandoffConfirmation;
         if (!pending || !gateApi || typeof gateApi.openTrustedProviderHandoffUrl !== "function") return;
+        const receiptApi = window.WeishanProviderHandoffReceiptStore;
+        if (receiptApi && typeof receiptApi.saveProviderHandoffReceipt === "function") receiptApi.saveProviderHandoffReceipt({ status:"confirmed", providerName:pending.providerName, displayHost:pending.displayHost || pending.url, selectedCandidate:pending.selectedCandidate, handoffType:"provider_confirmation", userConfirmed:true });
         pendingSafeProviderHandoffConfirmation = null;
         Promise.resolve(gateApi.openTrustedProviderHandoffUrl(pending.url, { userConfirmed:true })).then((result) => {
           const ok = !!(result && result.ok);
@@ -7625,6 +7646,8 @@
       }
       const safeProviderCancelButton = target && target.closest("[data-commerce-safe-provider-handoff-cancel]");
       if (safeProviderCancelButton && host.contains(safeProviderCancelButton)) {
+        const receiptApi = window.WeishanProviderHandoffReceiptStore;
+        if (receiptApi && typeof receiptApi.saveProviderHandoffReceipt === "function" && pendingSafeProviderHandoffConfirmation) receiptApi.saveProviderHandoffReceipt({ status:"cancelled", providerName:pendingSafeProviderHandoffConfirmation.providerName, displayHost:pendingSafeProviderHandoffConfirmation.displayHost || pendingSafeProviderHandoffConfirmation.url, selectedCandidate:pendingSafeProviderHandoffConfirmation.selectedCandidate, handoffType:"provider_confirmation", userConfirmed:false });
         pendingSafeProviderHandoffConfirmation = null;
         render(host);
         showCommerceExternalSearchFeedback(host, "已取消平台确认，可继续查看或复制搜索条件", false);

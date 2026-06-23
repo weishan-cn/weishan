@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_AUDIT_EXPORT_VERSION = "2.1.57";
+  const READ_ONLY_QUOTE_AUDIT_EXPORT_VERSION = "2.1.58";
   const EXPORT_NAME = "read_only_quote_audit_export_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const CAVEAT = "本导出仅为只读候选证据，平台最终为准，未锁价，不代表可出票。";
@@ -77,6 +77,11 @@
       candidateComparisonSummary: stripUnsafe(reportCenter && reportCenter.safetyReport && reportCenter.safetyReport.candidateComparisonSummary || null),
       recommendationExplanation: stripUnsafe(reportCenter && reportCenter.safetyReport && reportCenter.safetyReport.recommendationExplanation || null),
       decisionSafetyWarnings: stripUnsafe(reportCenter && reportCenter.safetyReport && reportCenter.safetyReport.decisionSafetyWarnings || []),
+      handoffChecklistSummary: stripUnsafe(reportCenter && reportCenter.safetyReport && reportCenter.safetyReport.handoffChecklistSummary || safe.handoffChecklistSummary || null),
+      handoffReceiptSummary: stripUnsafe(reportCenter && reportCenter.safetyReport && reportCenter.safetyReport.handoffReceiptSummary || safe.handoffReceiptSummary || null),
+      manualPlatformCheckSummary: stripUnsafe(reportCenter && reportCenter.safetyReport && reportCenter.safetyReport.manualPlatformCheckSummary || safe.manualPlatformCheckSummary || null),
+      platformCheckDeltaSummary: stripUnsafe(reportCenter && reportCenter.safetyReport && reportCenter.safetyReport.platformCheckDeltaSummary || safe.platformCheckDeltaSummary || null),
+      platformCheckWarnings: stripUnsafe(reportCenter && reportCenter.safetyReport && reportCenter.safetyReport.platformCheckWarnings || []),
       safetyReportSummary: stripUnsafe(reportCenter && reportCenter.safetyReport ? { rawResponseStored:false, secretStored:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, identityUpload:false, redacted:true } : null),
       exportValidationWarnings: ["redacted_json_preview only", "不包含原始响应、密钥、交易链接或身份信息", "平台最终为准", "未锁价", "不代表可出票"],
       safety: {
@@ -124,6 +129,10 @@
       candidateComparisonSummary: !!safe.candidateComparisonSummary,
       recommendationExplanation: !!safe.recommendationExplanation,
       decisionSafetyWarnings: Array.isArray(safe.decisionSafetyWarnings) ? safe.decisionSafetyWarnings.slice(0, 8) : [],
+      handoffChecklistSummary: !!safe.handoffChecklistSummary,
+      handoffReceiptSummary: !!safe.handoffReceiptSummary,
+      manualPlatformCheckSummary: !!safe.manualPlatformCheckSummary,
+      platformCheckDeltaSummary: !!safe.platformCheckDeltaSummary,
       exportValidationWarnings: Array.isArray(safe.exportValidationWarnings) ? safe.exportValidationWarnings.slice(0, 8) : [],
       redacted: true
     });

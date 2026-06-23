@@ -1,5 +1,5 @@
 (function(){
-  const FLIGHT_INTENT_PARSER_VERSION = "2.1.57";
+  const FLIGHT_INTENT_PARSER_VERSION = "2.1.58";
   const DATE_RE = /(\d{4}\s*[-/]\s*\d{1,2}\s*[-/]\s*\d{1,2}|\d{1,2}\s*月\s*\d{1,2}\s*日|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天]?)/;
   const DESTINATION_STOP_RE = "(?:直达|直飞|不转机|不要中转|只看直飞|最便宜|最低价|低价|价格最低|商务舱|经济舱|头等舱|机票|飞机票|航空票|航班|$)";
   const DESTINATION_MODIFIER_RE = /(直达|直飞|不转机|不要中转|只看直飞|最便宜|最低价|低价|价格最低|商务舱|经济舱|头等舱|机票|飞机票|航空票|航班|的)+/g;

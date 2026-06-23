@@ -22,7 +22,7 @@ function main() {
   ]);
   const gateApi = windowRef.WeishanSafeProviderDeepLinkHandoffGate;
   const api = windowRef.WeishanProviderConfirmationHandoffUi;
-  assert.equal(api.PROVIDER_CONFIRMATION_HANDOFF_UI_VERSION, "2.1.57");
+  assert.equal(api.PROVIDER_CONFIRMATION_HANDOFF_UI_VERSION, "2.1.58");
 
   const gate = gateApi.evaluateSafeProviderDeepLinkHandoff({
     providerId: "google_flights_search",
@@ -57,7 +57,9 @@ function main() {
   assert.equal(summary.redacted, true);
 
   const html = api.renderProviderConfirmationHandoffHtml(gate);
-  assert.equal(html.includes("确认打开可信平台确认页"), true);
+  assert.equal(html.includes("继续前往平台"), true);
+  assert.equal(html.includes("前往平台确认前检查"), true);
+  assert.equal(html.includes("唯珊不会付款、不会下单"), true);
   assert.equal(html.includes("取消"), true);
   assert.equal(html.includes("bookingUrl"), true);
   assert.equal(html.includes("payment：blocked"), true);
