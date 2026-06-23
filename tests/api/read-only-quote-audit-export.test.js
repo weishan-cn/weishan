@@ -5,13 +5,13 @@ const vm = require("node:vm");
 const ROOT = path.resolve(__dirname, "../..");
 function load(files) { const window = {}; window.window = window; const context = vm.createContext({ window, console }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
 function main() {
-  const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteSessionManager.js", "apps/desktop/src/renderer/core/readOnlyQuoteEvidenceSummaryFormatter.js", "apps/desktop/src/renderer/core/readOnlyQuoteSessionReportCenter.js", "apps/desktop/src/renderer/core/readOnlyQuoteAuditExport.js"]);
+  const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteSessionManager.js", "apps/desktop/src/renderer/core/readOnlyQuoteEvidenceSummaryFormatter.js", "apps/desktop/src/renderer/core/readOnlyQuoteDecisionAssistant.js", "apps/desktop/src/renderer/core/readOnlyQuoteCandidateComparisonExplainer.js", "apps/desktop/src/renderer/core/readOnlyQuoteSessionReportCenter.js", "apps/desktop/src/renderer/core/readOnlyQuoteAuditExport.js"]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteAuditExport;
-  assert.equal(api.READ_ONLY_QUOTE_AUDIT_EXPORT_VERSION, "2.1.56");
+  assert.equal(api.READ_ONLY_QUOTE_AUDIT_EXPORT_VERSION, "2.1.57");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:930 }], selectedCandidate:{ quoteId:"q1", providerName:"A" } } });
   const model = api.buildReadOnlyQuoteAuditExport({ sessionSummary: manager.buildReadOnlyQuoteSessionSummary(session), dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:930, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A" }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(model.appVersion, "2.1.56");
+  assert.equal(model.appVersion, "2.1.57");
   assert.equal(model.exportType, "redacted_json_preview");
   assert.equal(model.generatedAt, null);
   assert.ok(model.sessionSummary);
@@ -23,6 +23,10 @@ function main() {
   assert.ok(model.reportCenterSummary);
   assert.ok(model.userFacingSummary);
   assert.ok(model.safetyReportSummary);
+  assert.ok(model.decisionAssistantSummary);
+  assert.ok(model.candidateComparisonSummary);
+  assert.ok(model.recommendationExplanation);
+  assert.ok(Array.isArray(model.decisionSafetyWarnings));
   assert.ok(Array.isArray(model.exportValidationWarnings));
   assert.equal(model.safety.rawResponseIncluded, false);
   assert.equal(model.safety.secretIncluded, false);

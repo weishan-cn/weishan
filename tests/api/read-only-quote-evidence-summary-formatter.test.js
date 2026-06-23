@@ -8,7 +8,7 @@ function forbidden(value) { return /全网最低|最低价保证|已锁价|可�
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteEvidenceSummaryFormatter.js"]);
   const api = windowRef.WeishanReadOnlyQuoteEvidenceSummaryFormatter;
-  assert.equal(api.READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION, "2.1.56");
+  assert.equal(api.READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION, "2.1.57");
   const top = api.formatTopCandidateSummary([{ rank:1, providerName:"A", totalPrice:980, token:"abc" }, { rank:2, providerName:"B", totalPrice:1010 }]);
   assert.equal(top.lines.length, 2);
   assert.equal(top.lines[0].includes("当前导入样本"), false);
@@ -26,6 +26,15 @@ function main() {
   assert.ok(warnings.warnings.includes("未锁价"));
   assert.ok(warnings.warnings.includes("不代表可出票"));
   assert.equal(forbidden(warnings), false);
+  const decisionSummary = api.formatDecisionReasoning({ reasoning:{ primaryReason:"该候选在本次只读候选样本中合计金额较低。", supportingReasons:["价格拆分完整。"], riskWarnings:["平台最终为准", "未锁价，不代表可出票"] } });
+  assert.equal(decisionSummary.title, "推荐理由");
+  assert.equal(decisionSummary.canClaimLowestAcrossWeb, false);
+  const comparisonSummary = api.formatCandidateComparisonSummary({ table:[{ rank:1, providerName:"A", totalPrice:930, handoffStatus:"ready" }], summary:{ lowestInLocalSampleRank:1 } });
+  assert.equal(comparisonSummary.title, "候选对比");
+  assert.equal(comparisonSummary.lines[0].includes("仍需前往平台确认"), true);
+  const warning = api.formatProviderConfirmationWarning({ safeProviderHandoffReady:true });
+  assert.equal(warning.providerConfirmationRequiresUserConfirm, true);
+  assert.equal(warning.bookingUrl, null);
   const audit = api.buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft({});
   assert.equal(audit.payment, false);
   assert.equal(audit.order, false);

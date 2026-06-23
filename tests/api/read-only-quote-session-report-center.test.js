@@ -9,17 +9,19 @@ function main() {
     "apps/desktop/src/renderer/core/readOnlyQuoteSessionManager.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteAuditExport.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteEvidenceSummaryFormatter.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteDecisionAssistant.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteCandidateComparisonExplainer.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteSessionReportCenter.js"
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.1.56");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.1.57");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "2.1.56");
+  assert.equal(ready.appVersion, "2.1.57");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -39,6 +41,11 @@ function main() {
   assert.equal(ready.actions.canPayHere, false);
   assert.equal(ready.actions.canOrderHere, false);
   assert.equal(ready.actions.canUploadIdentityHere, false);
+  assert.ok(ready.userFacingSummary.decisionAssistantSummary);
+  assert.ok(ready.userFacingSummary.candidateComparisonSummary);
+  assert.ok(ready.safetyReport.decisionAssistantSummary);
+  assert.ok(ready.safetyReport.candidateComparisonSummary);
+  assert.ok(Array.isArray(ready.safetyReport.decisionSafetyWarnings));
   const userFacing = JSON.stringify(ready.userFacingSummary);
   assert.equal(/rawResponse|token|key|secret|bookingUrl|paymentUrl|orderUrl/i.test(userFacing), false);
   assert.equal(/全网最低|已锁价|可以出票|可直接出票|真实最终价/.test(userFacing), false);

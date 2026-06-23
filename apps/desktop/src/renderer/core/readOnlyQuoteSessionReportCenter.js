@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.56";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.57";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -31,6 +31,14 @@
 
   function auditApi() {
     return window.WeishanReadOnlyQuoteAuditExport || {};
+  }
+
+  function decisionApi() {
+    return window.WeishanReadOnlyQuoteDecisionAssistant || {};
+  }
+
+  function comparisonApi() {
+    return window.WeishanReadOnlyQuoteCandidateComparisonExplainer || {};
   }
 
   function safeText(value) {
@@ -87,6 +95,10 @@
     const selected = safe.selectedCandidate || (summary && summary.dryRun && summary.dryRun.selectedCandidate) || (summary && summary.selection) || null;
     const selectedSummary = formatter.formatSelectedCandidateSummary ? formatter.formatSelectedCandidateSummary(selected || {}) : { line:"尚未选择候选报价。平台最终为准，未锁价，不代表可出票。", selected:false, redacted:true };
     const topSummary = formatter.formatTopCandidateSummary ? formatter.formatTopCandidateSummary(candidates) : { lines:[], redacted:true };
+    const decisionAssistant = typeof decisionApi().buildReadOnlyQuoteDecisionAssistant === "function" ? decisionApi().buildReadOnlyQuoteDecisionAssistant(Object.assign({}, safe, { topCandidates:candidates, selectedCandidate:selected })) : null;
+    const candidateComparison = typeof comparisonApi().buildReadOnlyQuoteCandidateComparison === "function" ? comparisonApi().buildReadOnlyQuoteCandidateComparison(candidates) : null;
+    const decisionAssistantSummary = formatter.formatDecisionReasoning && decisionAssistant ? formatter.formatDecisionReasoning(decisionAssistant) : null;
+    const candidateComparisonSummary = formatter.formatCandidateComparisonSummary && candidateComparison ? formatter.formatCandidateComparisonSummary(candidateComparison) : null;
     return clone({
       title: "候选报价证据摘要",
       subtitle: "只读候选价 · 平台最终为准",
@@ -95,6 +107,10 @@
       topCandidateCount: candidates.length,
       topCandidateSummary: topSummary,
       selectedCandidateSummary: selectedSummary,
+      decisionAssistantSummary: decisionAssistantSummary,
+      candidateComparisonSummary: candidateComparisonSummary,
+      recommendationExplanation: decisionAssistant && decisionAssistant.reasoning || null,
+      decisionSafetyWarnings: decisionAssistant && decisionAssistant.reasoning && decisionAssistant.reasoning.riskWarnings || ["平台最终为准", "未锁价", "不代表可出票"],
       labels: ["只读候选价", "平台最终为准", "未锁价", "不代表可出票"],
       caveat: "价格、库存、税费和规则以平台页面为准。唯珊不会付款、不会下单、不会上传证件或银行卡。",
       canClaimLowestAcrossWeb: false,
@@ -108,12 +124,20 @@
     const safe = stripUnsafe(input && typeof input === "object" ? input : {}) || {};
     const summary = resolveSessionSummary(safe);
     const auditPreview = safe.auditExportPreview ;
+    const candidates = safeCandidates(safe);
+    const selected = safe.selectedCandidate || summary && summary.selection || null;
+    const decisionAssistant = typeof decisionApi().buildReadOnlyQuoteDecisionAssistant === "function" ? decisionApi().buildReadOnlyQuoteDecisionAssistant(Object.assign({}, safe, { topCandidates:candidates, selectedCandidate:selected })) : null;
+    const candidateComparison = typeof comparisonApi().buildReadOnlyQuoteCandidateComparison === "function" ? comparisonApi().buildReadOnlyQuoteCandidateComparison(candidates) : null;
     return clone({
       sessionSummary: summary,
       auditExportPreview: stripUnsafe(auditPreview),
       historySummary: stripUnsafe(safe.runHistorySummary || safe.historySummary || summary && summary.history || null),
       deltaSummary: stripUnsafe(safe.quoteDeltaSummary || safe.deltaSummary || summary && summary.deltaCompare || null),
       replaySummary: stripUnsafe(safe.replaySummary || summary && summary.replay || null),
+      decisionAssistantSummary: stripUnsafe(decisionAssistant ? { assistantName:decisionAssistant.assistantName, appVersion:decisionAssistant.appVersion, status:decisionAssistant.status, recommendationType:decisionAssistant.recommendationType, recommendedCandidate:decisionAssistant.recommendedCandidate, actions:decisionAssistant.actions, safety:decisionAssistant.safety, redacted:true } : null),
+      candidateComparisonSummary: stripUnsafe(candidateComparison ? { explainerName:candidateComparison.explainerName, appVersion:candidateComparison.appVersion, status:candidateComparison.status, table:candidateComparison.table, summary:candidateComparison.summary, forbiddenClaims:candidateComparison.forbiddenClaims, redacted:true } : null),
+      recommendationExplanation: stripUnsafe(decisionAssistant && decisionAssistant.reasoning || null),
+      decisionSafetyWarnings: decisionAssistant && decisionAssistant.reasoning && Array.isArray(decisionAssistant.reasoning.riskWarnings) ? decisionAssistant.reasoning.riskWarnings.slice(0, 6) : ["平台最终为准", "未锁价", "不代表可出票"],
       rawResponseStored: false,
       secretStored: false,
       bookingUrl: null,
@@ -166,6 +190,10 @@
       appVersion: READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION,
       status: report.status,
       topCandidateCount: report.userFacingSummary.topCandidateCount,
+      decisionAssistantSummary: report.safetyReport.decisionAssistantSummary,
+      candidateComparisonSummary: report.safetyReport.candidateComparisonSummary,
+      recommendationExplanation: report.safetyReport.recommendationExplanation,
+      decisionSafetyWarnings: report.safetyReport.decisionSafetyWarnings,
       canOpenProviderConfirmation: report.actions.canOpenProviderConfirmation,
       providerConfirmationRequiresUserConfirm: true,
       rawResponseStored: false,

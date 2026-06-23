@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.56";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.57";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -123,6 +123,72 @@
     });
   }
 
+  function formatDecisionReasoning(decision) {
+    const safe = stripUnsafe(decision && typeof decision === "object" ? decision : {}) || {};
+    const reasoning = safe.reasoning && typeof safe.reasoning === "object" ? safe.reasoning : safe;
+    const primaryReason = safeLine(reasoning.primaryReason || "该候选在本次只读候选样本中合计金额较低。");
+    const supportingReasons = Array.isArray(reasoning.supportingReasons) ? reasoning.supportingReasons.map(safeLine).filter(Boolean) : [
+      "价格拆分完整。",
+      "平台最终为准。",
+      "未锁价，不代表可出票。"
+    ];
+    const riskWarnings = Array.isArray(reasoning.riskWarnings) ? reasoning.riskWarnings.map(safeLine).filter(Boolean) : [
+      "价格、库存、税费和规则以平台页面为准。",
+      "本推荐仅基于本地只读候选证据，不代表真实最终价。",
+      "未锁价，不代表可出票。"
+    ];
+    return clone({
+      formatterName: FORMATTER_NAME,
+      appVersion: READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION,
+      title: "推荐理由",
+      primaryReason: primaryReason,
+      supportingReasons: supportingReasons,
+      riskWarnings: riskWarnings,
+      line: safeLine(primaryReason + " 平台最终为准，未锁价，不代表可出票。"),
+      canClaimLowestAcrossWeb: false,
+      canClaimFinalBookablePrice: false,
+      redacted: true
+    });
+  }
+
+  function formatCandidateComparisonSummary(comparison) {
+    const safe = stripUnsafe(comparison && typeof comparison === "object" ? comparison : {}) || {};
+    const table = Array.isArray(safe.table) ? safe.table.slice(0, 3) : [];
+    const summary = safe.summary && typeof safe.summary === "object" ? safe.summary : {};
+    return clone({
+      formatterName: FORMATTER_NAME,
+      appVersion: READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION,
+      title: "候选对比",
+      candidateCount: table.length,
+      lines: table.map(function (candidate) {
+        return "#" + String(candidate.rank || "") + " " + (candidate.providerName || "只读候选") + " · " + priceLine(candidate) + " · " + (candidate.handoffStatus === "ready" ? "仍需前往平台确认" : "平台确认链接不可用") + " · 平台最终为准 · 未锁价 · 不代表可出票";
+      }),
+      lowestInLocalSampleRank: summary.lowestInLocalSampleRank || null,
+      caveat: safeLine(summary.caveat || "仅比较本地只读候选样本，平台最终为准。"),
+      forbiddenClaims: { lowestAcrossWeb:false, finalBookablePrice:false, priceLocked:false, ticketAvailable:false },
+      redacted: true
+    });
+  }
+
+  function formatProviderConfirmationWarning(candidate) {
+    const safe = stripUnsafe(candidate && typeof candidate === "object" ? candidate : {}) || {};
+    const ready = safe.safeProviderHandoffReady === true || safe.handoffStatus === "ready";
+    return clone({
+      formatterName: FORMATTER_NAME,
+      appVersion: READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION,
+      title: "仍需前往平台确认",
+      ready: ready,
+      warning: ready ? "仍需前往平台确认，平台最终为准，未锁价，不代表可出票。" : "当前推荐候选的平台确认链接不可用。平台最终为准，未锁价，不代表可出票。",
+      providerConfirmationRequiresUserConfirm: true,
+      autoOpen: false,
+      bookingUrl: null,
+      checkoutUrl: null,
+      paymentUrl: null,
+      orderUrl: null,
+      redacted: true
+    });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -152,6 +218,9 @@
     formatDeltaSummary,
     formatReplaySummary,
     formatReadOnlyQuoteEvidenceWarnings,
+    formatDecisionReasoning,
+    formatCandidateComparisonSummary,
+    formatProviderConfirmationWarning,
     buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft
   };
 })();

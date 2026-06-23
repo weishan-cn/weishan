@@ -211,6 +211,24 @@ function checkReadOnlyQuoteSessionReportCenterVersion(results, expectedVersion) 
   addCheck(results, "apps/desktop read only quote session report center version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/readOnlyQuoteSessionReportCenter.js READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION");
 }
 
+function checkReadOnlyQuoteDecisionAssistantVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/readOnlyQuoteDecisionAssistant.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop read only quote decision assistant version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop read only quote decision assistant version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/READ_ONLY_QUOTE_DECISION_ASSISTANT_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop read only quote decision assistant version", expectedVersion, match && match[1], "package.json must match readOnlyQuoteDecisionAssistant.js");
+}
+
+function checkReadOnlyQuoteCandidateComparisonExplainerVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/readOnlyQuoteCandidateComparisonExplainer.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop read only quote candidate comparison explainer version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop read only quote candidate comparison explainer version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/READ_ONLY_QUOTE_CANDIDATE_COMPARISON_EXPLAINER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop read only quote candidate comparison explainer version", expectedVersion, match && match[1], "package.json must match readOnlyQuoteCandidateComparisonExplainer.js");
+}
+
 function checkFlightSandboxDryRunVersion(results, expectedVersion) {
   const sandboxPath = "apps/desktop/src/renderer/core/commerceFlightSandboxDryRun.js";
   const sandbox = readText(sandboxPath);
@@ -1592,6 +1610,8 @@ function runVersionCheck() {
     checkReadOnlyPriceCandidateCardViewModelVersion(results, rootPackage.version);
     checkReadOnlyQuoteEvidenceSummaryFormatterVersion(results, rootPackage.version);
     checkReadOnlyQuoteSessionReportCenterVersion(results, rootPackage.version);
+    checkReadOnlyQuoteDecisionAssistantVersion(results, rootPackage.version);
+    checkReadOnlyQuoteCandidateComparisonExplainerVersion(results, rootPackage.version);
     checkFlightSandboxDryRunVersion(results, rootPackage.version);
     checkFlightSandboxProviderMatrixVersion(results, rootPackage.version);
     checkTrustedFlightSourceEvidenceReportVersion(results, rootPackage.version);

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.56";
+  const SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION = "2.1.57";
   const CONSOLE_NAME = "sandbox_response_import_console_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -14,6 +14,8 @@
   function getDryRunApi() { return window.WeishanMultiProviderSandboxDryRunOrchestrator || {}; }
   function getReportCenterApi() { return window.WeishanReadOnlyQuoteSessionReportCenter || {}; }
   function getEvidenceFormatterApi() { return window.WeishanReadOnlyQuoteEvidenceSummaryFormatter || {}; }
+  function getDecisionAssistantApi() { return window.WeishanReadOnlyQuoteDecisionAssistant || {}; }
+  function getCandidateComparisonApi() { return window.WeishanReadOnlyQuoteCandidateComparisonExplainer || {}; }
 
   function safety() {
     return {
@@ -167,7 +169,17 @@
     const sessionRecoverySummary = safe.sessionRecoverySummary && typeof safe.sessionRecoverySummary === "object" ? safe.sessionRecoverySummary : (sandboxDryRunSummary && sandboxDryRunSummary.sessionRecoverySummary && typeof sandboxDryRunSummary.sessionRecoverySummary === "object" ? sandboxDryRunSummary.sessionRecoverySummary : null);
     const reportCenterApi = getReportCenterApi();
     const formatterApi = getEvidenceFormatterApi();
+    const decisionApi = getDecisionAssistantApi();
+    const comparisonApi = getCandidateComparisonApi();
     const selectedCandidate = safe.selectedCandidate && typeof safe.selectedCandidate === "object" ? safe.selectedCandidate : null;
+    const decisionAssistant = typeof decisionApi.buildReadOnlyQuoteDecisionAssistant === "function" ? decisionApi.buildReadOnlyQuoteDecisionAssistant({ topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, sessionSummary:sessionSummary, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary }) : null;
+    const candidateComparison = typeof comparisonApi.buildReadOnlyQuoteCandidateComparison === "function" ? comparisonApi.buildReadOnlyQuoteCandidateComparison(dryRunTopCandidates) : null;
+    const decisionAssistantSummary = formatterApi.formatDecisionReasoning && decisionAssistant ? formatterApi.formatDecisionReasoning(decisionAssistant) : null;
+    const candidateComparisonSummary = formatterApi.formatCandidateComparisonSummary && candidateComparison ? formatterApi.formatCandidateComparisonSummary(candidateComparison) : null;
+    const recommendationExplanation = decisionAssistant && decisionAssistant.reasoning || null;
+    const decisionSafetyWarnings = recommendationExplanation && Array.isArray(recommendationExplanation.riskWarnings) ? recommendationExplanation.riskWarnings : ["平台最终为准", "未锁价", "不代表可出票"];
+    const candidateComparisonTable = candidateComparison && Array.isArray(candidateComparison.table) ? candidateComparison.table : [];
+    const providerConfirmationWarning = formatterApi.formatProviderConfirmationWarning ? formatterApi.formatProviderConfirmationWarning(decisionAssistant && decisionAssistant.recommendedCandidate || selectedCandidate || dryRunTopCandidates[0] || {}) : null;
     const reportCenterModel = typeof reportCenterApi.buildReadOnlyQuoteSessionReportCenter === "function" ? reportCenterApi.buildReadOnlyQuoteSessionReportCenter({ sessionSummary:sessionSummary, auditExportPreview:auditExportPreview, topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary }) : null;
     const reportCenterSummary = reportCenterModel ? { reportCenterName:reportCenterModel.reportCenterName, appVersion:reportCenterModel.appVersion, status:reportCenterModel.status, actions:reportCenterModel.actions, redacted:true } : null;
     const userFacingEvidenceSummary = reportCenterModel && reportCenterModel.userFacingSummary || null;
@@ -209,6 +221,12 @@
       safetyReportSummary: safetyReportSummary,
       evidenceSummaryWarnings: evidenceSummaryWarnings,
       selectedCandidateUserSummary: selectedCandidateUserSummary,
+      decisionAssistantSummary: decisionAssistantSummary,
+      candidateComparisonSummary: candidateComparisonSummary,
+      recommendationExplanation: recommendationExplanation,
+      decisionSafetyWarnings: decisionSafetyWarnings,
+      candidateComparisonTable: candidateComparisonTable,
+      providerConfirmationWarning: providerConfirmationWarning,
       reportCenterStatus: reportCenterStatus,
       lastRunId: lastRunId,
       compareStatus: compareStatus,
@@ -406,6 +424,12 @@
       safetyReportSummary: model.safetyReportSummary || null,
       evidenceSummaryWarnings: model.evidenceSummaryWarnings || [],
       selectedCandidateUserSummary: model.selectedCandidateUserSummary || null,
+      decisionAssistantSummary: model.decisionAssistantSummary || null,
+      candidateComparisonSummary: model.candidateComparisonSummary || null,
+      recommendationExplanation: model.recommendationExplanation || null,
+      decisionSafetyWarnings: model.decisionSafetyWarnings || [],
+      candidateComparisonTable: model.candidateComparisonTable || [],
+      providerConfirmationWarning: model.providerConfirmationWarning || null,
       reportCenterStatus: model.reportCenterStatus || "empty",
       rawInputStored: false,
       rawResponseStored: false,

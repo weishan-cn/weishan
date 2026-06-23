@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.56";
+  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.57";
   const PHASE = "read_only_price_candidate_card_view_model_v1";
 
   function clone(value) {
@@ -55,6 +55,14 @@
 
   function getEvidenceFormatterApi() {
     return window.WeishanReadOnlyQuoteEvidenceSummaryFormatter || {};
+  }
+
+  function getDecisionAssistantApi() {
+    return window.WeishanReadOnlyQuoteDecisionAssistant || {};
+  }
+
+  function getCandidateComparisonApi() {
+    return window.WeishanReadOnlyQuoteCandidateComparisonExplainer || {};
   }
 
   function lastRefreshStatusLabel(status) {
@@ -213,6 +221,16 @@
     const sessionRecoverySummary = safe.sessionRecoverySummary && typeof safe.sessionRecoverySummary === "object" ? safe.sessionRecoverySummary : (sandboxDryRunSummary && sandboxDryRunSummary.sessionRecoverySummary && typeof sandboxDryRunSummary.sessionRecoverySummary === "object" ? sandboxDryRunSummary.sessionRecoverySummary : (sessionSummary ? { title:"Session Recovery", available:true, sessionId:sessionId, status:sessionStatus || "updated", replaySource:"local_redacted_run_history", autoOpen:false, networkAllowed:false, redacted:true } : null));
     const reportCenterApi = getReportCenterApi();
     const formatterApi = getEvidenceFormatterApi();
+    const decisionApi = getDecisionAssistantApi();
+    const comparisonApi = getCandidateComparisonApi();
+    const decisionAssistant = typeof decisionApi.buildReadOnlyQuoteDecisionAssistant === "function" ? decisionApi.buildReadOnlyQuoteDecisionAssistant({ topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, sessionSummary:sessionSummary, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary }) : null;
+    const candidateComparison = typeof comparisonApi.buildReadOnlyQuoteCandidateComparison === "function" ? comparisonApi.buildReadOnlyQuoteCandidateComparison(dryRunTopCandidates) : null;
+    const decisionAssistantSummary = formatterApi.formatDecisionReasoning && decisionAssistant ? formatterApi.formatDecisionReasoning(decisionAssistant) : null;
+    const candidateComparisonSummary = formatterApi.formatCandidateComparisonSummary && candidateComparison ? formatterApi.formatCandidateComparisonSummary(candidateComparison) : null;
+    const recommendationExplanation = decisionAssistant && decisionAssistant.reasoning || null;
+    const decisionSafetyWarnings = recommendationExplanation && Array.isArray(recommendationExplanation.riskWarnings) ? recommendationExplanation.riskWarnings : ["平台最终为准", "未锁价", "不代表可出票"];
+    const candidateComparisonTable = candidateComparison && Array.isArray(candidateComparison.table) ? candidateComparison.table : [];
+    const providerConfirmationWarning = formatterApi.formatProviderConfirmationWarning ? formatterApi.formatProviderConfirmationWarning(decisionAssistant && decisionAssistant.recommendedCandidate || selectedCandidate || dryRunTopCandidates[0] || {}) : null;
     const reportCenterModel = typeof reportCenterApi.buildReadOnlyQuoteSessionReportCenter === "function" ? reportCenterApi.buildReadOnlyQuoteSessionReportCenter({ sessionSummary:sessionSummary, auditExportPreview:auditExportPreview, topCandidates:dryRunTopCandidates, selectedCandidate:selectedCandidate, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary, routeSummary:normalized.origin + " → " + normalized.destination, departureDate:normalized.departureDate }) : null;
     const userFacingEvidenceSummary = reportCenterModel && reportCenterModel.userFacingSummary || null;
     const safetyReportSummary = reportCenterModel && reportCenterModel.safetyReport || null;
@@ -328,7 +346,7 @@
       refreshStateSummary: refreshStateSummary,
       interactiveRefreshState: interactiveRefreshState,
       recoveredEvidenceSummary: interactiveRefreshState.recoveredEvidenceSummary || { available:false, source:"local_redacted_state", showableAsRealPrice:false, showableAsCandidateEvidence:false, canReplaceMainResultCard:false },
-      sandboxImportSummary: { supported:true, lastPreviewStatus:sandboxImportPreviewStatus, lastImportStatus:sandboxImportStatus, importedEvidenceAvailable:isSandboxImportEvidence === true, rawResponseStored:false, sanitized:true, redacted:true, showableAsRealPrice:false, canReplace:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false, dryRunStatus:dryRunStatus, providerRunMatrix:sandboxDryRunSummary && sandboxDryRunSummary.providerRunMatrix || null, runTimelineSummary:runTimelineSummary, sandboxDryRunSummary:sandboxDryRunSummary, dryRunTopCandidates:dryRunTopCandidates, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary, sessionSummary:sessionSummary, sessionStatus:sessionStatus, sessionId:sessionId, auditExportPreview:auditExportPreview, auditExportReady:auditExportReady, sessionRecoverySummary:sessionRecoverySummary, reportCenterSummary:reportCenterSummary, userFacingEvidenceSummary:userFacingEvidenceSummary, safetyReportSummary:safetyReportSummary, evidenceSummaryWarnings:evidenceSummaryWarnings, selectedCandidateUserSummary:selectedCandidateUserSummary, reportCenterStatus:reportCenterStatus, lastRunId:lastRunId, compareStatus:compareStatus, replayStatus:replayStatus },
+      sandboxImportSummary: { supported:true, lastPreviewStatus:sandboxImportPreviewStatus, lastImportStatus:sandboxImportStatus, importedEvidenceAvailable:isSandboxImportEvidence === true, rawResponseStored:false, sanitized:true, redacted:true, showableAsRealPrice:false, canReplace:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false, dryRunStatus:dryRunStatus, providerRunMatrix:sandboxDryRunSummary && sandboxDryRunSummary.providerRunMatrix || null, runTimelineSummary:runTimelineSummary, sandboxDryRunSummary:sandboxDryRunSummary, dryRunTopCandidates:dryRunTopCandidates, runHistorySummary:runHistorySummary, quoteDeltaSummary:quoteDeltaSummary, replaySummary:replaySummary, sessionSummary:sessionSummary, sessionStatus:sessionStatus, sessionId:sessionId, auditExportPreview:auditExportPreview, auditExportReady:auditExportReady, sessionRecoverySummary:sessionRecoverySummary, reportCenterSummary:reportCenterSummary, userFacingEvidenceSummary:userFacingEvidenceSummary, safetyReportSummary:safetyReportSummary, evidenceSummaryWarnings:evidenceSummaryWarnings, selectedCandidateUserSummary:selectedCandidateUserSummary, decisionAssistantSummary:decisionAssistantSummary, candidateComparisonSummary:candidateComparisonSummary, recommendationExplanation:recommendationExplanation, decisionSafetyWarnings:decisionSafetyWarnings, candidateComparisonTable:candidateComparisonTable, providerConfirmationWarning:providerConfirmationWarning, reportCenterStatus:reportCenterStatus, lastRunId:lastRunId, compareStatus:compareStatus, replayStatus:replayStatus },
       sandboxImportConsoleSummary: { title:"沙盒响应导入", previewActionLabel:"预览导入结果", confirmActionLabel:"确认导入脱敏证据", clearActionLabel:"清除导入状态", runDryButtonLabel:dryRunButton.label || "运行沙盒只读报价", rawResponseStored:false, canSaveRawResponse:false, canPasteSecretHere:false, redacted:true },
       sandboxImportPreviewStatus: sandboxImportPreviewStatus,
       sandboxImportLastStatus: sandboxImportStatus,
@@ -352,6 +370,12 @@
       safetyReportSummary: safetyReportSummary,
       evidenceSummaryWarnings: evidenceSummaryWarnings,
       selectedCandidateUserSummary: selectedCandidateUserSummary,
+      decisionAssistantSummary: decisionAssistantSummary,
+      candidateComparisonSummary: candidateComparisonSummary,
+      recommendationExplanation: recommendationExplanation,
+      decisionSafetyWarnings: decisionSafetyWarnings,
+      candidateComparisonTable: candidateComparisonTable,
+      providerConfirmationWarning: providerConfirmationWarning,
       reportCenterStatus: reportCenterStatus,
       lastRunId: lastRunId,
       compareStatus: compareStatus,
@@ -371,6 +395,8 @@
       refreshButton: refreshButton,
       breakdownLines: breakdownLines,
       safetyLines: safetyLines,
+      decisionAssistant: decisionAssistant,
+      candidateComparison: candidateComparison,
       actionLabel: "去平台确认",
       safeProviderHandoffUrl: gate.safeProviderHandoffUrl || null,
       safeProviderHandoffHost: gate.safeProviderHandoffHost || "",
@@ -432,6 +458,8 @@
     const sessionSummaryHtml = card.sessionSummary ? '<section class="commerce-read-only-quote-session" data-commerce-read-only-quote-session="true"><h5>当前只读报价会话</h5><p>Read-Only Quote Session</p><p>只读报价会话</p><p>sessionId: ' + escapeHtml(card.sessionId || card.sessionSummary.sessionId || '') + '</p><p>sessionStatus: ' + escapeHtml(card.sessionStatus || card.sessionSummary.status || 'updated') + '</p><p>Session Timeline</p><p>Audit Export</p><p>Session Recovery</p><p>本导出仅为只读候选证据</p><p>平台最终为准，未锁价，不代表可出票</p><p>不包含原始响应、密钥、交易链接或身份信息</p></section>' : '';
     const historySummaryHtml = card.runHistorySummary || card.quoteDeltaSummary || card.replaySummary ? '<section class="commerce-read-only-run-history" data-commerce-read-only-run-history="true"><h5>运行历史</h5><p>Read-Only Quote Run History</p><p>最近一次沙盒运行：' + escapeHtml((card.runHistorySummary && card.runHistorySummary.summary) || '运行历史：暂无本地只读沙盒运行记录') + '</p><p>Last Run Timeline：' + escapeHtml((card.runTimelineSummary && card.runTimelineSummary.summary) || '构建 Provider 运行矩阵 · 生成只读沙盒报价 · 报价归一化 · Top 3 排序 · 候选选择准备') + '</p><p>本地只读沙盒运行对比：' + escapeHtml((card.quoteDeltaSummary && card.quoteDeltaSummary.summary) || '本地只读沙盒运行对比：历史不足') + '</p><p>Replay Guard：' + escapeHtml((card.replaySummary && card.replaySummary.replaySummary) || (card.replaySummary && card.replaySummary.summary) || 'Replay Guard：暂无可回放的本地脱敏运行历史') + '</p><p>Replay 只恢复候选证据，不重新请求 provider</p><p>平台最终为准</p><p>未锁价</p><p>不代表可出票</p><p>compareStatus: ' + escapeHtml(card.compareStatus || 'not_enough_history') + '</p><p>replayStatus: ' + escapeHtml(card.replayStatus || 'unavailable') + '</p><p>lastRunId: ' + escapeHtml(card.lastRunId || '') + '</p></section>' : '';
     const userFacingEvidenceHtml = card.userFacingEvidenceSummary ? '<section class="commerce-read-only-user-evidence-summary" data-commerce-read-only-user-evidence-summary="true"><h5>' + escapeHtml(card.userFacingEvidenceSummary.title || '候选报价证据摘要') + '</h5><p>' + escapeHtml(card.userFacingEvidenceSummary.subtitle || '只读候选价 · 平台最终为准') + '</p><p>当前导入样本 / 沙盒运行中的候选价格</p><p>Top 3 候选报价：' + escapeHtml(String(card.userFacingEvidenceSummary.topCandidateCount || 0)) + '</p><p>' + escapeHtml(card.selectedCandidateUserSummary && card.selectedCandidateUserSummary.line || (card.userFacingEvidenceSummary.selectedCandidateSummary && card.userFacingEvidenceSummary.selectedCandidateSummary.line) || '尚未选择候选报价。平台最终为准，未锁价，不代表可出票。') + '</p><ul>' + (Array.isArray(card.userFacingEvidenceSummary.labels) ? card.userFacingEvidenceSummary.labels : ['只读候选价', '平台最终为准', '未锁价', '不代表可出票']).map(function(label){ return '<li>' + escapeHtml(label) + '</li>'; }).join('') + '</ul><p>' + escapeHtml(card.userFacingEvidenceSummary.caveat || '价格、库存、税费和规则以平台页面为准。唯珊不会付款、不会下单、不会上传证件或银行卡。') + '</p></section>' : '';
+    const decisionAssistantHtml = card.decisionAssistantSummary ? '<section class="commerce-read-only-decision-assistant" data-commerce-read-only-decision-assistant="true"><h5>推荐理由</h5><p>Read-Only Quote Decision Assistant</p><p>' + escapeHtml(card.decisionAssistantSummary.primaryReason || '该候选在本次只读候选样本中合计金额较低。') + '</p><p>本地只读候选证据中较低</p><ul>' + (Array.isArray(card.decisionAssistantSummary.supportingReasons) ? card.decisionAssistantSummary.supportingReasons : ['价格拆分完整。', '平台最终为准。', '未锁价，不代表可出票。']).map(function(line){ return '<li>' + escapeHtml(line) + '</li>'; }).join('') + '</ul><ul>' + (Array.isArray(card.decisionSafetyWarnings) ? card.decisionSafetyWarnings : ['平台最终为准', '未锁价', '不代表可出票']).map(function(line){ return '<li>' + escapeHtml(line) + '</li>'; }).join('') + '</ul><p>' + escapeHtml(card.providerConfirmationWarning && card.providerConfirmationWarning.warning || '仍需前往平台确认，平台最终为准，未锁价，不代表可出票。') + '</p></section>' : '';
+    const candidateComparisonHtml = card.candidateComparisonSummary ? '<section class="commerce-read-only-candidate-comparison" data-commerce-read-only-candidate-comparison="true"><h5>候选对比</h5><p>Candidate Comparison</p><p>' + escapeHtml(card.candidateComparisonSummary.caveat || '仅比较本地只读候选样本，平台最终为准。') + '</p><ul>' + (Array.isArray(card.candidateComparisonSummary.lines) ? card.candidateComparisonSummary.lines : []).map(function(line){ return '<li>' + escapeHtml(line) + '</li>'; }).join('') + '</ul><p>仍需前往平台确认</p></section>' : '';
     const topCandidatesHtml = topCandidates.length ? '<section class="commerce-read-only-top-candidates" data-commerce-read-only-top-candidates="true"><h5>Top 3 候选报价</h5><p>' + escapeHtml(card.lowPriceClaim || "当前导入样本中的低价候选") + '</p><p>Ranking Scope: ' + escapeHtml(card.rankingScope || "导入样本范围") + '</p><p>' + escapeHtml(card.rankingExplanation || "仅按导入样本中的只读候选证据排序，平台最终为准。") + '</p><p>Source Breakdown: ' + escapeHtml('providerCount=' + ((card.sourceBreakdown && card.sourceBreakdown.providerCount) || 0) + '; providerIds=' + (((card.sourceBreakdown && card.sourceBreakdown.providerIds) || []).join(',')) + '; fareSources=' + (((card.sourceBreakdown && card.sourceBreakdown.fareSources) || []).join(','))) + '</p><ol>' + topCandidates.map(function (candidate) {
       const selected = card.selectedCandidate && card.selectedCandidate.quoteId === candidate.quoteId;
       const price = candidate.totalPrice == null ? "暂无真实价格结果" : "¥" + candidate.totalPrice;
@@ -446,6 +474,8 @@
       ${card.importedEvidenceBanner ? `<p data-commerce-sandbox-import-banner="true">${escapeHtml(card.importedEvidenceBanner)}</p>` : ""}
       ${dryRunSummaryHtml}
       ${userFacingEvidenceHtml}
+      ${decisionAssistantHtml}
+      ${candidateComparisonHtml}
       <p class="commerce-read-only-price-candidate-card-price">${escapeHtml(card.priceDisplay || "暂无真实价格结果")}</p>
       <p>${escapeHtml(card.providerName || "Google Flights")} · ${escapeHtml(card.providerType || "flight_search")}</p>
       <p>${escapeHtml(card.routeTitle || "")}</p>
@@ -507,6 +537,10 @@
     if (!card.sourceBreakdown || typeof card.sourceBreakdown.providerCount !== "number" || !Array.isArray(card.sourceBreakdown.providerIds) || !Array.isArray(card.sourceBreakdown.fareSources)) throw new Error("read only price candidate card must expose source breakdown");
     if (typeof card.rankingExplanation !== "string" || card.rankingExplanation.indexOf("平台最终为准") < 0) throw new Error("read only price candidate card must expose ranking explanation");
     if (typeof card.selectedSourceSummary !== "string") throw new Error("read only price candidate card must expose selected source summary");
+    if (!card.decisionAssistantSummary || card.decisionAssistantSummary.title !== "推荐理由") throw new Error("read only price candidate card must expose decision assistant summary");
+    if (!card.candidateComparisonSummary || card.candidateComparisonSummary.title !== "候选对比") throw new Error("read only price candidate card must expose candidate comparison summary");
+    if (!Array.isArray(card.candidateComparisonTable)) throw new Error("read only price candidate card must expose candidate comparison table");
+    if (!card.providerConfirmationWarning || card.providerConfirmationWarning.providerConfirmationRequiresUserConfirm !== true) throw new Error("read only price candidate card must keep provider confirmation warning");
     if (!card.interactiveRefreshState || card.interactiveRefreshState.safety.autoRefresh !== false || card.interactiveRefreshState.safety.autoOpen !== false) throw new Error("read only price candidate card must keep interactive refresh safe");
     if (!card.clearRefreshStateButton || card.clearRefreshStateButton.autoRun !== false) throw new Error("read only price candidate card must expose safe clear refresh state button");
     if (!card.providerBindingWizardSummary || card.providerBindingWizardSummary.productionProviderEnabled !== false) throw new Error("read only price candidate card must expose safe provider binding wizard summary");

@@ -22,6 +22,8 @@ function main() {
     "apps/desktop/src/renderer/core/readOnlyQuoteReplayGuard.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteSessionManager.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteEvidenceSummaryFormatter.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteDecisionAssistant.js",
+    "apps/desktop/src/renderer/core/readOnlyQuoteCandidateComparisonExplainer.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteSessionReportCenter.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteAuditExport.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteRunTimeline.js",
@@ -29,7 +31,7 @@ function main() {
     "apps/desktop/src/renderer/core/sandboxResponseImportConsoleViewModel.js"
   ]);
   const api = windowRef.WeishanSandboxResponseImportConsoleViewModel;
-  assert.equal(api.SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION, "2.1.56");
+  assert.equal(api.SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION, "2.1.57");
   const initial = api.buildSandboxResponseImportConsoleModel();
   assert.equal(initial.status, "idle");
   assert.equal(initial.title, "多 Provider 沙盒报价导入");
@@ -59,7 +61,7 @@ function main() {
   assert.equal(dryRunPreview.dryRunButton.label, "运行沙盒只读报价");
   assert.equal(dryRunPreview.dryRunTopCandidates.length, 3);
   assert.equal(dryRunPreview.runTimelineSummary.timelineName, "read_only_quote_run_timeline_v1");
-  assert.equal(dryRunPreview.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.1.56");
+  assert.equal(dryRunPreview.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.1.57");
   assert.equal(dryRunPreview.auditExportReady, true);
   assert.equal(dryRunPreview.sessionRecoverySummary.title, "Session Recovery");
   assert.equal(dryRunPreview.reportCenterStatus, "ready");
@@ -67,6 +69,10 @@ function main() {
   assert.equal(dryRunPreview.userFacingEvidenceSummary.title, "候选报价证据摘要");
   assert.equal(dryRunPreview.safetyReportSummary.rawResponseStored, false);
   assert.ok(dryRunPreview.evidenceSummaryWarnings.includes("平台最终为准"));
+  assert.equal(dryRunPreview.decisionAssistantSummary.title, "推荐理由");
+  assert.equal(dryRunPreview.candidateComparisonSummary.title, "候选对比");
+  assert.ok(Array.isArray(dryRunPreview.candidateComparisonTable));
+  assert.equal(dryRunPreview.providerConfirmationWarning.providerConfirmationRequiresUserConfirm, true);
   const imported = api.buildSandboxResponseImportResult(raw);
   assert.equal(imported.status, "accepted");
   assert.equal(imported.importResult.status, "accepted");
