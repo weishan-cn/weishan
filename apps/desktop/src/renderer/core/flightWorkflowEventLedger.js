@@ -1,11 +1,11 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_EVENT_LEDGER_VERSION = "2.1.64";
+  const FLIGHT_WORKFLOW_EVENT_LEDGER_VERSION = "2.1.65";
   const LEDGER_NAME = "flight_workflow_event_ledger_v1";
   const EVENT_NAME = "flight_workflow_event_entry_v1";
   const STORAGE_KEY = "weishan.flightWorkflowEventLedger.v1";
-  const DEFAULT_WORKFLOW_ID = "deterministic-flight-workflow-event-ledger-v2.1.64";
+  const DEFAULT_WORKFLOW_ID = "deterministic-flight-workflow-event-ledger-v2.1.65";
   const FORBIDDEN_NAME_RE = /(rawText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|key|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
 
@@ -27,7 +27,8 @@
     });
     return result;
   }
-  function safety() { return { bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, rawResponseStored:false, secretStored:false, redacted:true }; }
+  function safety() { return { bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, redacted:true }; }
+  function redactionSummary() { return { rawResponseStored:false, rawUserTextStored:false, secretStored:false, tradingUrlStored:false, identityStored:false, redacted:true }; }
   function read(storageLike) {
     if (!storageLike || typeof storageLike.getItem !== "function") return [];
     try {
@@ -45,7 +46,7 @@
       return true;
     } catch (error) { return false; }
   }
-  function eventIdFor(index) { return "deterministic-flight-workflow-event-v2.1.64-" + String(index); }
+  function eventIdFor(index) { return "deterministic-flight-workflow-event-v2.1.65-" + String(index); }
   function sanitizeFlightWorkflowEvent(entry) {
     const safe = stripUnsafe(entry && typeof entry === "object" ? entry : {}) || {};
     return clone({
@@ -61,6 +62,10 @@
       stageAfter:safeText(safe.stageAfter || safe.stageBefore || ""),
       message:safeText(safe.message || ""),
       redactedPayloadSummary:stripUnsafe(safe.redactedPayloadSummary || {}),
+      redactionSummary:Object.assign(redactionSummary(), stripUnsafe(safe.redactionSummary || {})),
+      auditFindingHints:stripUnsafe(safe.auditFindingHints || []),
+      exportSafeSummary:stripUnsafe(Object.assign({ actionId:safe.actionId || "", status:safe.status || "", canWriteFile:false, canDownload:false, bookingUrl:null, payment:false, order:false, redacted:true }, safe.exportSafeSummary || {})),
+      riskBadgeHints:stripUnsafe(safe.riskBadgeHints || ["只读安全"]),
       safety:Object.assign(safety(), stripUnsafe(safe.safety || {})),
       bookingUrl:null,
       checkoutUrl:null,
@@ -101,11 +106,11 @@
   function buildFlightWorkflowEventLedgerSummary(events) {
     const list = pruneFlightWorkflowEventLedger(events, 20);
     const last = list[list.length - 1] || null;
-    return clone({ title:"事件记录", totalEvents:list.length, lastActionId:last && last.actionId || "", lastActionStatus:last && last.status || "", lastActionMessage:last && last.message || "", recentEvents:list.slice(-5).map(function (event) { return { eventType:event.eventType, actionId:event.actionId, status:event.status, message:event.message, redacted:true }; }), safety:safety(), redacted:true });
+    return clone({ title:"事件记录", totalEvents:list.length, lastActionId:last && last.actionId || "", lastActionStatus:last && last.status || "", lastActionMessage:last && last.message || "", redactionSummary:last && last.redactionSummary || redactionSummary(), recentEvents:list.slice(-5).map(function (event) { return { eventType:event.eventType, actionId:event.actionId, status:event.status, message:event.message, redactionSummary:event.redactionSummary || redactionSummary(), redacted:true }; }), safety:safety(), redacted:true });
   }
   function buildFlightWorkflowEventLedgerAuditDraft(events) {
     const summary = buildFlightWorkflowEventLedgerSummary(events || []);
-    return clone({ eventType:"FLIGHT_WORKFLOW_EVENT_LEDGER_AUDIT_DRAFT", ledgerName:LEDGER_NAME, appVersion:FLIGHT_WORKFLOW_EVENT_LEDGER_VERSION, storageKey:STORAGE_KEY, eventCount:summary.totalEvents, lastActionId:summary.lastActionId, lastActionStatus:summary.lastActionStatus, rawResponseStored:false, secretStored:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, redacted:true });
+    return clone({ eventType:"FLIGHT_WORKFLOW_EVENT_LEDGER_AUDIT_DRAFT", ledgerName:LEDGER_NAME, appVersion:FLIGHT_WORKFLOW_EVENT_LEDGER_VERSION, storageKey:STORAGE_KEY, eventCount:summary.totalEvents, lastActionId:summary.lastActionId, lastActionStatus:summary.lastActionStatus, rawResponseStored:false, rawUserTextStored:false, secretStored:false, redactionSummary:redactionSummary(), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, redacted:true });
   }
 
   window.WeishanFlightWorkflowEventLedger = { FLIGHT_WORKFLOW_EVENT_LEDGER_VERSION, LEDGER_NAME, STORAGE_KEY, createFlightWorkflowEventLedger, appendFlightWorkflowEvent, loadFlightWorkflowEventLedger, clearFlightWorkflowEventLedger, pruneFlightWorkflowEventLedger, sanitizeFlightWorkflowEvent, buildFlightWorkflowEventLedgerSummary, buildFlightWorkflowEventLedgerAuditDraft };

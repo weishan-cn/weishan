@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.64";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.65";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -40,6 +40,10 @@
   function comparisonApi() {
     return window.WeishanReadOnlyQuoteCandidateComparisonExplainer || {};
   }
+
+  function workflowAuditApi() { return window.WeishanFlightWorkflowAuditReviewCenter || {}; }
+  function safeExportApi() { return window.WeishanFlightWorkflowSafeSessionExportPreview || {}; }
+  function riskBadgeApi() { return window.WeishanFlightWorkflowRiskBadgeBuilder || {}; }
 
   function safeText(value) {
     return text(value).replace(FORBIDDEN_TEXT_RE, "保守候选证据");
@@ -109,7 +113,10 @@
       eventLedgerSummary: stripUnsafe(safe.eventLedgerSummary || null),
       lastActionId: safeText(safe.lastActionId || safe.eventLedgerSummary && safe.eventLedgerSummary.lastActionId || ""),
       lastActionStatus: safeText(safe.lastActionStatus || safe.eventLedgerSummary && safe.eventLedgerSummary.lastActionStatus || ""),
-      lastActionMessage: safeText(safe.lastActionMessage || safe.eventLedgerSummary && safe.eventLedgerSummary.lastActionMessage || "")
+      lastActionMessage: safeText(safe.lastActionMessage || safe.eventLedgerSummary && safe.eventLedgerSummary.lastActionMessage || ""),
+      auditReviewSummary: stripUnsafe(safe.auditReviewSummary || null),
+      safeSessionExportPreview: stripUnsafe(safe.safeSessionExportPreview || null),
+      riskBadgeSummary: stripUnsafe(safe.riskBadgeSummary || null)
     };
   }
 
@@ -136,6 +143,11 @@
     const candidateComparison = typeof comparisonApi().buildReadOnlyQuoteCandidateComparison === "function" ? comparisonApi().buildReadOnlyQuoteCandidateComparison(candidates) : null;
     const decisionAssistantSummary = formatter.formatDecisionReasoning && decisionAssistant ? formatter.formatDecisionReasoning(decisionAssistant) : null;
     const candidateComparisonSummary = formatter.formatCandidateComparisonSummary && candidateComparison ? formatter.formatCandidateComparisonSummary(candidateComparison) : null;
+    const workflow = workflowFields(safe);
+    const auditReviewSummary = workflow.auditReviewSummary || (typeof workflowAuditApi().buildFlightWorkflowAuditReviewCenter === "function" ? workflowAuditApi().buildFlightWorkflowAuditReviewCenter(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected })) : null);
+    const safeSessionExportPreview = workflow.safeSessionExportPreview || (typeof safeExportApi().buildFlightWorkflowSafeSessionExportPreview === "function" ? safeExportApi().buildFlightWorkflowSafeSessionExportPreview(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary })) : null);
+    const riskBadgeModel = typeof riskBadgeApi().buildFlightWorkflowRiskBadges === "function" ? riskBadgeApi().buildFlightWorkflowRiskBadges({ auditReview:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview, actionQueueSummary:workflow.actionQueueSummary, actionPolicyDecision:workflow.actionPolicyDecision, actionExecutionResult:workflow.actionExecutionResult, eventLedgerSummary:workflow.eventLedgerSummary, tradingBlocked:true, requiresConfirmation:true }) : null;
+    const riskBadgeSummary = workflow.riskBadgeSummary || (riskBadgeModel && typeof riskBadgeApi().summarizeFlightWorkflowRiskBadges === "function" ? Object.assign({}, riskBadgeApi().summarizeFlightWorkflowRiskBadges(riskBadgeModel.badges), { badges:riskBadgeModel.badges, line:riskBadgeModel.summaryLabel || riskBadgeApi().summarizeFlightWorkflowRiskBadges(riskBadgeModel.badges).summaryLabel }) : riskBadgeModel);
     return clone({
       title: "候选报价证据摘要",
       subtitle: "只读候选价 · 平台最终为准",
@@ -177,6 +189,9 @@
       lastActionId: workflowFields(safe).lastActionId,
       lastActionStatus: workflowFields(safe).lastActionStatus,
       lastActionMessage: workflowFields(safe).lastActionMessage,
+      auditReviewSummary: auditReviewSummary ? { title:auditReviewSummary.userFacingSummary && auditReviewSummary.userFacingSummary.title || "本次机票工作流审计", line:auditReviewSummary.userFacingSummary && auditReviewSummary.userFacingSummary.resultLabel || "安全检查通过", redacted:true } : null,
+      safeSessionExportPreview: safeSessionExportPreview ? { title:"脱敏会话摘要预览", line:safeSessionExportPreview.status === "ready" ? "仅预览，不写入文件" : "预览未就绪", sectionLabels:["工作流摘要", "候选证据摘要", "安全审计摘要"], canWriteFile:false, redacted:true } : null,
+      riskBadgeSummary: riskBadgeSummary ? { line:riskBadgeSummary.line || riskBadgeSummary.summaryLabel || "只读安全", badgeCount:riskBadgeSummary.badgeCount || (Array.isArray(riskBadgeSummary.badges) ? riskBadgeSummary.badges.length : 0), redacted:true } : null,
       platformCheckWarnings: stripUnsafe(decisionAssistant && decisionAssistant.platformCheckWarnings || (safe.manualPlatformCheckEvidence ? ["平台核对结果已记录", "平台最终为准"] : ["仍需平台确认"])),
       workflowStateSummary: workflowFields(safe).workflowStateSummary,
       clarificationSummary: workflowFields(safe).clarificationSummary,
@@ -216,6 +231,11 @@
     const selected = safe.selectedCandidate || summary && summary.selection || null;
     const decisionAssistant = typeof decisionApi().buildReadOnlyQuoteDecisionAssistant === "function" ? decisionApi().buildReadOnlyQuoteDecisionAssistant(Object.assign({}, safe, { topCandidates:candidates, selectedCandidate:selected })) : null;
     const candidateComparison = typeof comparisonApi().buildReadOnlyQuoteCandidateComparison === "function" ? comparisonApi().buildReadOnlyQuoteCandidateComparison(candidates) : null;
+    const workflow = workflowFields(safe);
+    const auditReviewSummary = workflow.auditReviewSummary || (typeof workflowAuditApi().buildFlightWorkflowAuditReviewCenter === "function" ? workflowAuditApi().buildFlightWorkflowAuditReviewCenter(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected })) : null);
+    const safeSessionExportPreview = workflow.safeSessionExportPreview || (typeof safeExportApi().buildFlightWorkflowSafeSessionExportPreview === "function" ? safeExportApi().buildFlightWorkflowSafeSessionExportPreview(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary })) : null);
+    const riskBadgeModel = typeof riskBadgeApi().buildFlightWorkflowRiskBadges === "function" ? riskBadgeApi().buildFlightWorkflowRiskBadges({ auditReview:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview, actionQueueSummary:workflow.actionQueueSummary, actionPolicyDecision:workflow.actionPolicyDecision, actionExecutionResult:workflow.actionExecutionResult, eventLedgerSummary:workflow.eventLedgerSummary, tradingBlocked:true, requiresConfirmation:true }) : null;
+    const riskBadgeSummary = workflow.riskBadgeSummary || (riskBadgeModel && typeof riskBadgeApi().summarizeFlightWorkflowRiskBadges === "function" ? Object.assign({}, riskBadgeApi().summarizeFlightWorkflowRiskBadges(riskBadgeModel.badges), { badges:riskBadgeModel.badges, line:riskBadgeModel.summaryLabel || riskBadgeApi().summarizeFlightWorkflowRiskBadges(riskBadgeModel.badges).summaryLabel }) : riskBadgeModel);
     return clone({
       sessionSummary: summary,
       auditExportPreview: stripUnsafe(auditPreview),
@@ -251,6 +271,9 @@
       lastActionId: workflowFields(safe).lastActionId,
       lastActionStatus: workflowFields(safe).lastActionStatus,
       lastActionMessage: workflowFields(safe).lastActionMessage,
+      auditReviewSummary: auditReviewSummary,
+      safeSessionExportPreview: safeSessionExportPreview,
+      riskBadgeSummary: riskBadgeSummary,
       rawResponseStored: false,
       secretStored: false,
       bookingUrl: null,
@@ -328,6 +351,9 @@
       lastActionId: report.safetyReport.lastActionId || "",
       lastActionStatus: report.safetyReport.lastActionStatus || "",
       lastActionMessage: report.safetyReport.lastActionMessage || "",
+      auditReviewSummary: report.safetyReport.auditReviewSummary || null,
+      safeSessionExportPreview: report.safetyReport.safeSessionExportPreview || null,
+      riskBadgeSummary: report.safetyReport.riskBadgeSummary || null,
       continuitySummary: report.safetyReport.continuitySummary || null,
       confirmationStateSummary: report.safetyReport.confirmationStateSummary || null,
       recoverySummary: report.safetyReport.recoverySummary || null,

@@ -8,12 +8,15 @@ function storage() { const data = {}; return { getItem:(key) => Object.prototype
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowActionPolicyGuard.js", "apps/desktop/src/renderer/core/flightWorkflowEventLedger.js", "apps/desktop/src/renderer/core/flightWorkflowSafeActionExecutionRouter.js"]);
   const api = windowRef.WeishanFlightWorkflowSafeActionExecutionRouter;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFE_ACTION_EXECUTION_ROUTER_VERSION, "2.1.64");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFE_ACTION_EXECUTION_ROUTER_VERSION, "2.1.65");
   const store = storage();
   const local = api.routeFlightWorkflowSafeAction({ actionId:"run_read_only_quotes", actionLabel:"运行只读报价" }, { storageLike:store, rawText:"secret token abc" });
   assert.equal(local.status, "executed_local");
   assert.equal(local.result.actionMessage, "动作已执行");
   assert.equal(local.safety.bookingUrl, null);
+  assert.equal(local.redactionSummary.rawUserTextStored, false);
+  assert.equal(local.exportSafeSummary.canWriteFile, false);
+  assert.ok(local.riskBadgeHints.includes("只读安全"));
   assert.equal(local.eventLedgerSummary.totalEvents, 2);
   const confirmation = api.routeFlightWorkflowSafeAction({ actionId:"open_provider_confirmation", actionLabel:"前往平台确认" }, { storageLike:store });
   assert.equal(confirmation.status, "confirmation_required");

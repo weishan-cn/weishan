@@ -6643,6 +6643,23 @@
     const queueActions = Array.isArray(actionQueue.actions) ? actionQueue.actions : [];
     const blockedActions = Array.isArray(workflow.blockedActions) ? workflow.blockedActions : (Array.isArray(actionQueue.blockedActions) ? actionQueue.blockedActions : []);
     const timelineSteps = Array.isArray(timeline.steps) ? timeline.steps : [];
+    const auditApi = window.WeishanFlightWorkflowAuditReviewCenter || {};
+    const exportApi = window.WeishanFlightWorkflowSafeSessionExportPreview || {};
+    const badgeApi = window.WeishanFlightWorkflowRiskBadgeBuilder || {};
+    const auditInput = Object.assign({}, workflow, { rawText:null, rawInput:null, rawUserText:null, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, blockedActions:blockedActions, actionQueueSummary:actionQueue, progressTimelineSummary:timeline });
+    const auditReview = typeof auditApi.buildFlightWorkflowAuditReviewCenter === "function" ? auditApi.buildFlightWorkflowAuditReviewCenter(auditInput) : null;
+    const safeExportPreview = typeof exportApi.buildFlightWorkflowSafeSessionExportPreview === "function" ? exportApi.buildFlightWorkflowSafeSessionExportPreview(Object.assign({}, auditInput, { auditReviewSummary:auditReview })) : null;
+    const riskBadges = typeof badgeApi.buildFlightWorkflowRiskBadges === "function" ? badgeApi.buildFlightWorkflowRiskBadges({ auditReview:auditReview, safeSessionExportPreview:safeExportPreview, tradingBlocked:true, requiresConfirmation:true }) : null;
+    function auditReviewHtml(){
+      return '<section class="commerce-flight-workflow-audit-review" data-commerce-flight-workflow-audit-review="true"><h5>本次机票工作流审计</h5><p>' + esc(auditReview && auditReview.userFacingSummary && auditReview.userFacingSummary.resultLabel || '安全检查通过') + '</p><p>安全检查通过</p><p>动作已安全阻断</p><p>外部平台操作需要二次确认</p><p>只读安全</p><p>交易动作已阻断</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><button type="button" class="cmd-btn gray" data-commerce-flight-audit-review-show="true">查看工作流审计</button><div data-commerce-flight-audit-review-output="true"><p>本次机票工作流审计</p><p>只读安全</p></div></section>';
+    }
+    function safeExportPreviewHtml(){
+      return '<section class="commerce-flight-safe-session-export-preview" data-commerce-flight-safe-session-export-preview="true"><h5>脱敏会话摘要预览</h5><p>工作流摘要</p><p>候选证据摘要</p><p>安全审计摘要</p><p>不包含证件、银行卡、登录凭据或密钥</p><p>不包含付款、下单、出票链接</p><p>canWriteFile:false</p><p>bookingUrl:null</p><button type="button" class="cmd-btn gray" data-commerce-flight-safe-export-preview-show="true">查看脱敏摘要预览</button><div data-commerce-flight-safe-export-preview-output="true"><p>仅预览，不写入文件</p></div></section>';
+    }
+    function riskBadgeHtml(){
+      const line = riskBadges && riskBadges.summaryLabel || '只读安全 / 需要二次确认 / 交易动作已阻断 / 不可导出';
+      return '<section class="commerce-flight-risk-badges" data-commerce-flight-risk-badges="true"><h5>安全标签</h5><p>' + esc(line) + '</p><p>只读安全</p><p>交易动作已阻断</p><p>不可导出</p></section>';
+    }
     function actionQueueHtml(onlyEnabled){
       const items = queueActions.filter(function(action){ return onlyEnabled ? action.enabled === true : action.visible !== false; });
       const lastActionId = actionQueue.lastActionId || workflow.lastActionId || "";
@@ -6656,11 +6673,11 @@
     }
     if (workflow.workflowStatus === "needs_clarification") {
       const questions = workflow.clarificationQuestions || presenter.clarificationQuestions || ["请补充出发地或目的地。"];
-      return '<section class="commerce-flight-evidence-workflow" data-commerce-flight-evidence-workflow="true"><h4>需要补充信息</h4><p>机票请求工作流</p><p>当前工作流阶段：' + esc(workflow.workflowStageLabel || presenter.currentStepLabel || "补充缺失信息") + '</p><p>下一步：' + esc(workflow.nextStepLabel || presenter.nextStepLabel || "补充缺失信息") + '</p><p>可继续操作：' + esc(String(workflow.canResumeWorkflow === true)) + '</p><p>识别机票需求</p><p>补充缺失信息</p><p>' + esc(questions.join(" ")) + '</p><p>信息完整后再生成候选证据</p><p>未运行只读沙盒报价</p>' + actionQueueHtml(true) + timelineHtml() + '<p>唯珊只提供只读候选证据，不付款、不下单、不出票</p><button type="button" class="cmd-btn gray" data-commerce-flight-workflow-recover="true">恢复上次机票工作流</button><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p></section>';
+      return '<section class="commerce-flight-evidence-workflow" data-commerce-flight-evidence-workflow="true"><h4>需要补充信息</h4><p>机票请求工作流</p><p>当前工作流阶段：' + esc(workflow.workflowStageLabel || presenter.currentStepLabel || "补充缺失信息") + '</p><p>下一步：' + esc(workflow.nextStepLabel || presenter.nextStepLabel || "补充缺失信息") + '</p><p>可继续操作：' + esc(String(workflow.canResumeWorkflow === true)) + '</p><p>识别机票需求</p><p>补充缺失信息</p><p>' + esc(questions.join(" ")) + '</p><p>信息完整后再生成候选证据</p><p>未运行只读沙盒报价</p>' + actionQueueHtml(true) + timelineHtml() + auditReviewHtml() + safeExportPreviewHtml() + riskBadgeHtml() + '<p>唯珊只提供只读候选证据，不付款、不下单、不出票</p><button type="button" class="cmd-btn gray" data-commerce-flight-workflow-recover="true">恢复上次机票工作流</button><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p></section>';
     }
     const confirmationLabels = workflow.confirmationStateSummary && Array.isArray(workflow.confirmationStateSummary.labels) ? workflow.confirmationStateSummary.labels : [];
     const resumeLabels = workflow.resumeCoachSummary && Array.isArray(workflow.resumeCoachSummary.allowedActions) ? workflow.resumeCoachSummary.allowedActions.map(function(action){ return action.label || ""; }) : [];
-    return '<section class="commerce-flight-evidence-workflow" data-commerce-flight-evidence-workflow="true"><h4>机票请求工作流</h4><p>当前工作流阶段：' + esc(workflow.workflowStageLabel || presenter.currentStepLabel || "选择候选") + '</p><p>下一步：' + esc(workflow.nextStepLabel || presenter.nextStepLabel || "确认前往平台") + '</p><p>可继续操作：' + esc(resumeLabels.join(" / ") || String(workflow.canResumeWorkflow === true)) + '</p><p>用户确认状态：' + esc(confirmationLabels.join(" / ") || "已选择候选") + '</p><p>已选择候选</p><p>已确认安全提示</p><p>已记录平台核对结果</p><p>识别机票需求</p><p>路线：' + esc(workflow.routeSummary || presenter.routeSummary || "") + '</p><p>' + esc(workflow.tripSummary || presenter.tripSummary || "") + '</p><ul>' + steps.map(function(step){ return '<li>' + esc(step.label || "") + ' · ' + esc(step.statusLabel || step.status || "") + '</li>'; }).join('') + '</ul><p>生成候选证据</p><p>生成 Top 3 候选</p><p>推荐理由</p><p>候选对比</p><p>候选价置信标签</p><p>下一步安全建议</p><p>平台最终为准</p>' + actionQueueHtml(false) + timelineHtml() + '<p>唯珊只提供只读候选证据，不付款、不下单、不出票</p><button type="button" class="cmd-btn gray" data-commerce-flight-workflow-recover="true">恢复上次机票工作流</button><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p></section>';
+    return '<section class="commerce-flight-evidence-workflow" data-commerce-flight-evidence-workflow="true"><h4>机票请求工作流</h4><p>当前工作流阶段：' + esc(workflow.workflowStageLabel || presenter.currentStepLabel || "选择候选") + '</p><p>下一步：' + esc(workflow.nextStepLabel || presenter.nextStepLabel || "确认前往平台") + '</p><p>可继续操作：' + esc(resumeLabels.join(" / ") || String(workflow.canResumeWorkflow === true)) + '</p><p>用户确认状态：' + esc(confirmationLabels.join(" / ") || "已选择候选") + '</p><p>已选择候选</p><p>已确认安全提示</p><p>已记录平台核对结果</p><p>识别机票需求</p><p>路线：' + esc(workflow.routeSummary || presenter.routeSummary || "") + '</p><p>' + esc(workflow.tripSummary || presenter.tripSummary || "") + '</p><ul>' + steps.map(function(step){ return '<li>' + esc(step.label || "") + ' · ' + esc(step.statusLabel || step.status || "") + '</li>'; }).join('') + '</ul><p>生成候选证据</p><p>生成 Top 3 候选</p><p>推荐理由</p><p>候选对比</p><p>候选价置信标签</p><p>下一步安全建议</p><p>平台最终为准</p>' + actionQueueHtml(false) + timelineHtml() + auditReviewHtml() + safeExportPreviewHtml() + riskBadgeHtml() + '<p>唯珊只提供只读候选证据，不付款、不下单、不出票</p><button type="button" class="cmd-btn gray" data-commerce-flight-workflow-recover="true">恢复上次机票工作流</button><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p></section>';
   }
 
   function commerceSimpleFlightResultPanelHtml(task){
@@ -7524,6 +7541,24 @@
           resultPanel.innerHTML = '<h5>动作执行结果</h5><p data-commerce-flight-action-status="true">' + esc(message) + '</p><p>最近动作：<span data-commerce-flight-last-action="true">' + esc(result.actionId || actionId) + ' / ' + esc(result.status || 'failed_safe') + '</span></p><p>事件记录：<span data-commerce-flight-event-ledger="true">' + esc(String(eventCount)) + '</span></p><p>' + esc(result.result && result.result.nextStep || '') + '</p><p>本动作不会付款、不会下单、不会出票</p><p>外部平台操作需要二次确认</p><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p><button type="button" class="cmd-btn gray" data-commerce-flight-safe-action-cancel="true">取消</button>';
         }
         showCommercePlatformTemplateFeedback(message, result.status === "blocked" || result.status === "failed_safe");
+        return;
+      }
+      const flightAuditReviewButton = target && target.closest("[data-commerce-flight-audit-review-show]");
+      if (flightAuditReviewButton && host.contains(flightAuditReviewButton)) {
+        event.preventDefault();
+        const workflowPanel = flightAuditReviewButton.closest("[data-commerce-flight-evidence-workflow]") || flightAuditReviewButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = workflowPanel.querySelector("[data-commerce-flight-audit-review-output]") || workflowPanel;
+        output.innerHTML = '<p>本次机票工作流审计</p><p>安全检查通过</p><p>只读安全</p><p>交易动作已阻断</p><p>外部平台操作需要二次确认</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p>';
+        showCommercePlatformTemplateFeedback("已显示工作流审计", false);
+        return;
+      }
+      const flightSafeExportPreviewButton = target && target.closest("[data-commerce-flight-safe-export-preview-show]");
+      if (flightSafeExportPreviewButton && host.contains(flightSafeExportPreviewButton)) {
+        event.preventDefault();
+        const workflowPanel = flightSafeExportPreviewButton.closest("[data-commerce-flight-evidence-workflow]") || flightSafeExportPreviewButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = workflowPanel.querySelector("[data-commerce-flight-safe-export-preview-output]") || workflowPanel;
+        output.innerHTML = '<p>脱敏会话摘要预览</p><p>工作流摘要</p><p>候选证据摘要</p><p>安全审计摘要</p><p>不包含证件、银行卡、登录凭据或密钥</p><p>不包含付款、下单、出票链接</p><p>canWriteFile:false</p><p>bookingUrl:null</p>';
+        showCommercePlatformTemplateFeedback("已显示脱敏会话摘要预览", false);
         return;
       }
       const flightSafeActionCancelButton = target && target.closest("[data-commerce-flight-safe-action-cancel]");

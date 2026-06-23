@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_ACTION_POLICY_GUARD_VERSION = "2.1.64";
+  const FLIGHT_WORKFLOW_ACTION_POLICY_GUARD_VERSION = "2.1.65";
   const GUARD_NAME = "flight_workflow_action_policy_guard_v1";
   const SUPPORTED_ACTIONS = ["answer_clarification", "run_read_only_quotes", "select_candidate", "open_provider_confirmation", "record_platform_check", "resume_workflow", "clear_workflow", "view_audit_preview", "blocked_action"];
   const LOCAL_ONLY_ACTIONS = ["answer_clarification", "run_read_only_quotes", "select_candidate", "record_platform_check", "resume_workflow", "clear_workflow", "view_audit_preview"];
@@ -26,7 +26,8 @@
     });
     return result;
   }
-  function safety() { return { localOnly:true, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, autoRefresh:false, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, secretStored:false, redacted:true }; }
+  function safety() { return { localOnly:true, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, autoRefresh:false, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, redacted:true }; }
+  function redactionSummary() { return { rawResponseStored:false, rawUserTextStored:false, secretStored:false, tradingUrlStored:false, identityStored:false, redacted:true }; }
   function actionIdOf(action) { return safeText(action && (action.actionId || action.id || action.type) || ""); }
   function actionLabelOf(action) { return safeText(action && (action.actionLabel || action.label || action.title) || actionIdOf(action)); }
   function actionText(action) { return [actionIdOf(action), actionLabelOf(action), safeText(action && action.actionType || "")].join(" "); }
@@ -63,6 +64,10 @@
       reason:messageMap[status] || messageMap.failed_safe,
       userFacingMessage:messageMap[status] || messageMap.failed_safe,
       safety:Object.assign(safety(), { localOnly:status !== "requires_confirmation" }),
+      redactionSummary:redactionSummary(),
+      auditFindingHints:status === "blocked" ? ["动作已安全阻断"] : (status === "requires_confirmation" ? ["外部平台操作需要二次确认"] : []),
+      exportSafeSummary:{ actionId:id, status:status, actionType:actionType, canWriteFile:false, canDownload:false, bookingUrl:null, payment:false, order:false, redacted:true },
+      riskBadgeHints:status === "blocked" ? ["交易动作已阻断"] : (status === "requires_confirmation" ? ["需要二次确认"] : ["只读安全"]),
       bookingUrl:null,
       checkoutUrl:null,
       paymentUrl:null,
@@ -76,13 +81,17 @@
   function buildFlightWorkflowActionPolicyGuardAuditDraft(input) {
     const safe = input && typeof input === "object" ? input : {};
     const decision = safe.actionPolicyDecision || buildFlightWorkflowActionPolicyDecision(safe.action || safe, safe.context || {});
-    return clone({ eventType:"FLIGHT_WORKFLOW_ACTION_POLICY_GUARD_AUDIT_DRAFT", guardName:GUARD_NAME, appVersion:FLIGHT_WORKFLOW_ACTION_POLICY_GUARD_VERSION, actionId:decision.actionId || "", status:decision.status || "failed_safe", actionType:decision.actionType || "blocked", message:decision.userFacingMessage || "动作已被安全阻断。", safety:safety(), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, secretStored:false, redacted:true });
+    return clone({ eventType:"FLIGHT_WORKFLOW_ACTION_POLICY_GUARD_AUDIT_DRAFT", guardName:GUARD_NAME, appVersion:FLIGHT_WORKFLOW_ACTION_POLICY_GUARD_VERSION, actionId:decision.actionId || "", status:decision.status || "failed_safe", actionType:decision.actionType || "blocked", message:decision.userFacingMessage || "动作已被安全阻断。", safety:safety(), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, redactionSummary:redactionSummary(), redacted:true });
   }
   function sanitizeFlightWorkflowActionPolicyDecision(input) {
     const safe = stripUnsafe(input && typeof input === "object" ? input : {}) || {};
     safe.guardName = GUARD_NAME;
     safe.appVersion = FLIGHT_WORKFLOW_ACTION_POLICY_GUARD_VERSION;
     safe.safety = Object.assign(safety(), stripUnsafe(safe.safety || {}));
+    safe.redactionSummary = Object.assign(redactionSummary(), stripUnsafe(safe.redactionSummary || {}));
+    safe.auditFindingHints = stripUnsafe(safe.auditFindingHints || []);
+    safe.exportSafeSummary = stripUnsafe(Object.assign({ actionId:safe.actionId || "", status:safe.status || "", canWriteFile:false, canDownload:false, bookingUrl:null, payment:false, order:false, redacted:true }, safe.exportSafeSummary || {}));
+    safe.riskBadgeHints = stripUnsafe(safe.riskBadgeHints || []);
     safe.bookingUrl = null;
     safe.checkoutUrl = null;
     safe.paymentUrl = null;

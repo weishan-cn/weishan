@@ -7,11 +7,14 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowActionPolicyGuard.js"]);
   const api = windowRef.WeishanFlightWorkflowActionPolicyGuard;
-  assert.equal(api.FLIGHT_WORKFLOW_ACTION_POLICY_GUARD_VERSION, "2.1.64");
+  assert.equal(api.FLIGHT_WORKFLOW_ACTION_POLICY_GUARD_VERSION, "2.1.65");
   const local = api.evaluateFlightWorkflowActionPolicy({ actionId:"run_read_only_quotes", actionLabel:"运行只读报价" }, {});
   assert.equal(local.status, "allowed");
   assert.equal(local.actionType, "local_only");
   assert.equal(local.safety.bookingUrl, null);
+  assert.equal(local.redactionSummary.rawUserTextStored, false);
+  assert.equal(local.exportSafeSummary.canWriteFile, false);
+  assert.ok(local.riskBadgeHints.includes("只读安全"));
   const confirmation = api.evaluateFlightWorkflowActionPolicy({ actionId:"open_provider_confirmation" }, {});
   assert.equal(confirmation.status, "requires_confirmation");
   assert.equal(confirmation.reason, "外部平台操作需要二次确认。");

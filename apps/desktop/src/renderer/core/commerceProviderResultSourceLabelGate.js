@@ -1,5 +1,5 @@
 (function(){
-  const PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION = "2.1.64";
+  const PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION = "2.1.65";
 
   const sourceLabelRequiredFields = [
     "providerId",

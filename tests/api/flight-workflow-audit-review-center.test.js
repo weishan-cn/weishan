@@ -1,0 +1,43 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+const ROOT = path.resolve(__dirname, "../..");
+function load(files) { const window = {}; window.window = window; const context = vm.createContext({ window, console }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
+function main() {
+  const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowAuditReviewCenter.js"]);
+  const api = windowRef.WeishanFlightWorkflowAuditReviewCenter;
+  assert.equal(api.FLIGHT_WORKFLOW_AUDIT_REVIEW_CENTER_VERSION, "2.1.65");
+  const ready = api.buildFlightWorkflowAuditReviewCenter({ workflowStateSummary:{ workflowId:"wf1" }, actionQueueSummary:{ blockedActions:[{ label:"付款" }] }, actionPolicyDecision:{ status:"requires_confirmation" }, sensitiveInputBlocked:true, bookingUrl:null, payment:false, order:false, rawUserTextStored:false });
+  assert.equal(ready.centerName, "flight_workflow_audit_review_center_v1");
+  assert.equal(ready.status, "warning");
+  assert.equal(ready.userFacingSummary.title, "本次机票工作流审计");
+  assert.equal(ready.userFacingSummary.resultLabel, "存在需要注意的项目");
+  assert.equal(ready.auditHealth.hasBlockedActions, true);
+  assert.equal(ready.auditHealth.hasConfirmationRequiredActions, true);
+  assert.ok(ready.findings.some((item) => item.title === "只读安全"));
+  assert.ok(ready.findings.some((item) => item.title === "动作已安全阻断"));
+  assert.ok(ready.findings.some((item) => item.title === "外部平台操作需要二次确认"));
+  assert.equal(ready.bookingUrl, null);
+  assert.equal(ready.payment, false);
+  assert.equal(ready.order, false);
+  assert.equal(ready.rawUserTextStored, false);
+  const blocked = api.buildFlightWorkflowAuditReviewCenter({ rawProviderResponse:{ token:"abc" }, bookingUrl:"https://blocked.example", payment:true, identityUpload:true });
+  assert.equal(blocked.status, "blocked");
+  const safeJson = JSON.stringify(blocked);
+  assert.equal(safeJson.includes("abc"), false);
+  assert.equal(safeJson.includes("https://blocked.example"), false);
+  assert.equal(safeJson.includes("bookingUrl\":null"), true);
+  assert.equal(api.buildFlightWorkflowAuditReviewCenter({ token:"abc" }).auditHealth.hasSecretRisk, true);
+  assert.equal(api.buildFlightWorkflowAuditReviewCenter({ token:"abc" }).status, "blocked");
+  assert.equal(api.buildFlightWorkflowAuditReviewCenter({ payment:true }).auditHealth.hasPaymentRisk, true);
+  assert.equal(api.buildFlightWorkflowAuditReviewCenter({ order:true }).auditHealth.hasOrderRisk, true);
+  assert.equal(api.buildFlightWorkflowAuditReviewCenter({ ticketing:true }).auditHealth.hasTicketingRisk, true);
+  assert.equal(api.buildFlightWorkflowAuditReviewCenter({ passportNumber:"P123" }).auditHealth.hasIdentityUploadRisk, true);
+  assert.equal(api.buildFlightWorkflowAuditReviewCenter({ bookingUrl:"https://blocked.example" }).auditHealth.hasTradingUrlRisk, true);
+  assert.equal(api.buildFlightWorkflowAuditReviewCenter({ rawUserText:"secret text" }).rawUserTextStored, false);
+  const malformed = api.buildFlightWorkflowAuditReviewCenter(null);
+  assert.equal(malformed.status, "failed_safe");
+  console.log("FLIGHT_WORKFLOW_AUDIT_REVIEW_CENTER PASS");
+}
+main();

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SAFE_ACTION_EXECUTION_ROUTER_VERSION = "2.1.64";
+  const FLIGHT_WORKFLOW_SAFE_ACTION_EXECUTION_ROUTER_VERSION = "2.1.65";
   const ROUTER_NAME = "flight_workflow_safe_action_execution_router_v1";
   const FORBIDDEN_NAME_RE = /(rawText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|key|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
@@ -23,7 +23,8 @@
     });
     return result;
   }
-  function safety(localOnly) { return { localOnly:localOnly !== false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, autoRefresh:false, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, secretStored:false, redacted:true }; }
+  function safety(localOnly) { return { localOnly:localOnly !== false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, autoRefresh:false, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, redacted:true }; }
+  function redactionSummary() { return { rawResponseStored:false, rawUserTextStored:false, secretStored:false, tradingUrlStored:false, identityStored:false, redacted:true }; }
   function actionIdOf(action) { return safeText(action && (action.actionId || action.id || action.type) || ""); }
   function actionLabelOf(action) { return safeText(action && (action.actionLabel || action.label || action.title) || actionIdOf(action)); }
   function currentStage(context) { const safe = context && typeof context === "object" ? context : {}; return safeText(safe.currentStage || safe.stage || safe.workflowStage || safe.workflowStateSummary && safe.workflowStateSummary.currentStage || safe.continuitySummary && safe.continuitySummary.currentStage || ""); }
@@ -66,6 +67,10 @@
       confirmation:{ required:status === "confirmation_required", confirmationType:status === "confirmation_required" ? "provider_handoff" : "none", title:status === "confirmation_required" ? "需要确认后继续" : "", message:status === "confirmation_required" ? "外部平台操作需要二次确认，本动作不会付款、不会下单、不会出票。" : "" },
       actionPolicyDecision:decision,
       eventLedgerSummary:(context || {}).eventLedgerSummary || null,
+      redactionSummary:redactionSummary(),
+      auditFindingHints:status === "blocked" ? ["动作已安全阻断"] : (status === "confirmation_required" ? ["外部平台操作需要二次确认"] : []),
+      exportSafeSummary:{ actionId:id, actionLabel:label, status:status, actionMessage:messageFor(status), canWriteFile:false, canDownload:false, bookingUrl:null, payment:false, order:false, redacted:true },
+      riskBadgeHints:status === "blocked" ? ["交易动作已阻断"] : (status === "confirmation_required" ? ["需要二次确认"] : ["只读安全"]),
       safety:safety(status !== "confirmation_required"),
       redacted:true
     });
@@ -80,12 +85,12 @@
   }
   function routeFlightWorkflowSafeAction(action, context) {
     const safeContext = context && typeof context === "object" ? context : {};
-    const requested = { eventType:"action_requested", actionId:actionIdOf(action || {}), actionLabel:actionLabelOf(action || {}), status:"requested", stageBefore:currentStage(safeContext), stageAfter:currentStage(safeContext), message:"安全动作已请求", redactedPayloadSummary:{ actionId:actionIdOf(action || {}), redacted:true } };
+    const requested = { eventType:"action_requested", actionId:actionIdOf(action || {}), actionLabel:actionLabelOf(action || {}), status:"requested", stageBefore:currentStage(safeContext), stageAfter:currentStage(safeContext), message:"安全动作已请求", redactedPayloadSummary:{ actionId:actionIdOf(action || {}), redacted:true }, redactionSummary:redactionSummary(), exportSafeSummary:{ actionId:actionIdOf(action || {}), status:"requested", canWriteFile:false, canDownload:false, bookingUrl:null, payment:false, order:false, redacted:true }, riskBadgeHints:["只读安全"] };
     const result = buildFlightWorkflowSafeActionResult(action || {}, safeContext);
     const ledgerApi = window.WeishanFlightWorkflowEventLedger || {};
     if (safeContext.storageLike && typeof ledgerApi.appendFlightWorkflowEvent === "function") {
       ledgerApi.appendFlightWorkflowEvent(requested, safeContext.storageLike);
-      const appended = ledgerApi.appendFlightWorkflowEvent({ eventType:eventTypeFor(result.status), actionId:result.actionId, actionLabel:result.actionLabel, status:result.status, stageBefore:currentStage(safeContext), stageAfter:result.result && result.result.updatedSummary && result.result.updatedSummary.currentStage || currentStage(safeContext), message:result.result && result.result.actionMessage || messageFor(result.status), redactedPayloadSummary:{ nextStep:result.result && result.result.nextStep || "", redacted:true }, safety:result.safety }, safeContext.storageLike);
+      const appended = ledgerApi.appendFlightWorkflowEvent({ eventType:eventTypeFor(result.status), actionId:result.actionId, actionLabel:result.actionLabel, status:result.status, stageBefore:currentStage(safeContext), stageAfter:result.result && result.result.updatedSummary && result.result.updatedSummary.currentStage || currentStage(safeContext), message:result.result && result.result.actionMessage || messageFor(result.status), redactedPayloadSummary:{ nextStep:result.result && result.result.nextStep || "", redacted:true }, safety:result.safety, redactionSummary:result.redactionSummary, auditFindingHints:result.auditFindingHints, exportSafeSummary:result.exportSafeSummary, riskBadgeHints:result.riskBadgeHints }, safeContext.storageLike);
       result.eventLedgerSummary = appended && appended.summary || result.eventLedgerSummary;
     }
     return sanitizeFlightWorkflowSafeActionResult(result);
@@ -96,12 +101,17 @@
     safe.appVersion = FLIGHT_WORKFLOW_SAFE_ACTION_EXECUTION_ROUTER_VERSION;
     safe.result = Object.assign({ workflowState:{}, actionMessage:"动作已安全降级", nextStep:"停止", updatedSummary:{ redacted:true } }, stripUnsafe(safe.result || {}));
     safe.confirmation = Object.assign({ required:false, confirmationType:"none", title:"", message:"" }, stripUnsafe(safe.confirmation || {}));
+    safe.redactionSummary = Object.assign(redactionSummary(), stripUnsafe(safe.redactionSummary || {}));
+    safe.auditFindingHints = stripUnsafe(safe.auditFindingHints || []);
+    safe.exportSafeSummary = stripUnsafe(Object.assign({ actionId:safe.actionId || "", status:safe.status || "", canWriteFile:false, canDownload:false, bookingUrl:null, payment:false, order:false, redacted:true }, safe.exportSafeSummary || {}));
+    safe.riskBadgeHints = stripUnsafe(safe.riskBadgeHints || []);
     safe.safety = Object.assign(safety(safe.status !== "confirmation_required"), stripUnsafe(safe.safety || {}));
     safe.bookingUrl = null;
     safe.checkoutUrl = null;
     safe.paymentUrl = null;
     safe.orderUrl = null;
     safe.rawResponseStored = false;
+    safe.rawUserTextStored = false;
     safe.secretStored = false;
     safe.redacted = true;
     return clone(safe);
@@ -109,7 +119,7 @@
   function buildFlightWorkflowSafeActionExecutionAuditDraft(input) {
     const safe = input && typeof input === "object" ? input : {};
     const result = safe.actionExecutionResult || buildFlightWorkflowSafeActionResult(safe.action || safe, safe.context || {});
-    return clone({ eventType:"FLIGHT_WORKFLOW_SAFE_ACTION_EXECUTION_AUDIT_DRAFT", routerName:ROUTER_NAME, appVersion:FLIGHT_WORKFLOW_SAFE_ACTION_EXECUTION_ROUTER_VERSION, status:result.status, actionId:result.actionId || "", actionType:result.actionType || "blocked", confirmationRequired:!!(result.confirmation && result.confirmation.required), lastActionMessage:result.result && result.result.actionMessage || "", safety:safety(result.status !== "confirmation_required"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, autoRefresh:false, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, secretStored:false, redacted:true });
+    return clone({ eventType:"FLIGHT_WORKFLOW_SAFE_ACTION_EXECUTION_AUDIT_DRAFT", routerName:ROUTER_NAME, appVersion:FLIGHT_WORKFLOW_SAFE_ACTION_EXECUTION_ROUTER_VERSION, status:result.status, actionId:result.actionId || "", actionType:result.actionType || "blocked", confirmationRequired:!!(result.confirmation && result.confirmation.required), lastActionMessage:result.result && result.result.actionMessage || "", safety:safety(result.status !== "confirmation_required"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, autoRefresh:false, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, redactionSummary:redactionSummary(), redacted:true });
   }
 
   window.WeishanFlightWorkflowSafeActionExecutionRouter = { FLIGHT_WORKFLOW_SAFE_ACTION_EXECUTION_ROUTER_VERSION, ROUTER_NAME, routeFlightWorkflowSafeAction, evaluateFlightWorkflowSafeAction, buildFlightWorkflowSafeActionResult, buildFlightWorkflowSafeActionExecutionAuditDraft, sanitizeFlightWorkflowSafeActionResult };

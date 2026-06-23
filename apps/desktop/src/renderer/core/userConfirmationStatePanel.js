@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const USER_CONFIRMATION_STATE_PANEL_VERSION = "2.1.64";
+  const USER_CONFIRMATION_STATE_PANEL_VERSION = "2.1.65";
   const PANEL_NAME = "user_confirmation_state_panel_v1";
   const FORBIDDEN_NAME_RE = /(rawText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
 
