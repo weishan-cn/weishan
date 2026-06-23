@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_DECISION_ASSISTANT_VERSION = "2.1.61";
+  const READ_ONLY_QUOTE_DECISION_ASSISTANT_VERSION = "2.1.62";
   const ASSISTANT_NAME = "read_only_quote_decision_assistant_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|真实最终价|已锁价|可以出票|可直接出票|付款|下单/i;
@@ -153,6 +153,15 @@
     return {
       workflowStateSummary: stripUnsafe(safe.workflowStateSummary || null),
       clarificationSummary: stripUnsafe(safe.clarificationSummary || null),
+      continuitySummary: stripUnsafe(safe.continuitySummary || null),
+      confirmationStateSummary: stripUnsafe(safe.confirmationStateSummary || null),
+      recoverySummary: stripUnsafe(safe.recoverySummary || null),
+      resumeCoachSummary: stripUnsafe(safe.resumeCoachSummary || null),
+      currentStage: safeText(safe.currentStage || ""),
+      workflowStageLabel: safeText(safe.workflowStageLabel || safe.continuitySummary && safe.continuitySummary.stageLabel || ""),
+      nextStepLabel: safeText(safe.nextStepLabel || ""),
+      canResumeWorkflow: safe.canResumeWorkflow === true,
+      resumeActions: stripUnsafe(Array.isArray(safe.resumeActions) ? safe.resumeActions : (safe.resumeCoachSummary && safe.resumeCoachSummary.allowedActions || [])),
       workflowStepList: stripUnsafe(safe.workflowStepList || null),
       missingFields: Array.isArray(safe.missingFields) ? safe.missingFields.map(safeText) : [],
       clarificationQuestions: Array.isArray(safe.clarificationQuestions) ? safe.clarificationQuestions.map(safeText) : [],
@@ -241,6 +250,15 @@
         platformCheckOutcomeSummary: stripUnsafe(input.platformCheckOutcomeSummary || null),
         workflowStateSummary: stripUnsafe(input.workflowStateSummary || null),
         clarificationSummary: stripUnsafe(input.clarificationSummary || null),
+        continuitySummary: stripUnsafe(input.continuitySummary || null),
+        confirmationStateSummary: stripUnsafe(input.confirmationStateSummary || null),
+        recoverySummary: stripUnsafe(input.recoverySummary || null),
+        resumeCoachSummary: stripUnsafe(input.resumeCoachSummary || null),
+        currentStage: safeText(input.currentStage || ""),
+        workflowStageLabel: safeText(input.workflowStageLabel || input.continuitySummary && input.continuitySummary.stageLabel || ""),
+        nextStepLabel: safeText(input.nextStepLabel || ""),
+        canResumeWorkflow: input.canResumeWorkflow === true,
+        resumeActions: stripUnsafe(Array.isArray(input.resumeActions) ? input.resumeActions : (input.resumeCoachSummary && input.resumeCoachSummary.allowedActions || [])),
         workflowStepList: stripUnsafe(input.workflowStepList || null),
         missingFields: Array.isArray(input.missingFields) ? input.missingFields.map(safeText) : [],
         clarificationQuestions: Array.isArray(input.clarificationQuestions) ? input.clarificationQuestions.map(safeText) : [],
@@ -307,6 +325,15 @@
       platformCheckWarnings: model.platformCheckWarnings || [],
       workflowStateSummary: model.workflowStateSummary || null,
       clarificationSummary: model.clarificationSummary || null,
+      continuitySummary: model.continuitySummary || null,
+      confirmationStateSummary: model.confirmationStateSummary || null,
+      recoverySummary: model.recoverySummary || null,
+      resumeCoachSummary: model.resumeCoachSummary || null,
+      currentStage: model.currentStage || "",
+      workflowStageLabel: model.workflowStageLabel || "",
+      nextStepLabel: model.nextStepLabel || "",
+      canResumeWorkflow: model.canResumeWorkflow === true,
+      resumeActions: model.resumeActions || [],
       workflowStepList: model.workflowStepList || null,
       missingFields: model.missingFields || [],
       clarificationQuestions: model.clarificationQuestions || [],

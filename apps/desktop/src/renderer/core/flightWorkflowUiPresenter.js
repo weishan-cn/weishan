@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_UI_PRESENTER_VERSION = "2.1.61";
+  const FLIGHT_WORKFLOW_UI_PRESENTER_VERSION = "2.1.62";
   const PRESENTER_NAME = "flight_workflow_ui_presenter_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -38,16 +38,29 @@
     if (status === "blocked") return "安全阻断";
     return "识别机票需求";
   }
+  function currentStageFor(state, status) {
+    return safeText(state.currentStage || state.currentStep || (status === "manual_platform_check_ready" ? "platform_check" : status || "intent"));
+  }
+
+  function nextStepLabelFor(state, status) {
+    return safeText(state.nextStepLabel || currentStepLabel(status));
+  }
+
+  function canResumeWorkflowFor(state, status) {
+    if (state.canResumeWorkflow === true) return true;
+    return /^(needs_clarification|ready_for_evidence|evidence_running|evidence_ready|provider_confirmation_ready|manual_platform_check_ready|ready)$/.test(status || "");
+  }
+
   function buildFlightWorkflowUiPresenter(input) {
     const safe = input && typeof input === "object" ? input : {};
     const state = stateOf(safe);
     const status = statusOf(state);
     const questions = (safe.clarificationQuestions || state.clarificationQuestions || []).map(safeText);
-    return clone({ presenterName:PRESENTER_NAME, appVersion:FLIGHT_WORKFLOW_UI_PRESENTER_VERSION, status, title:"机票请求工作流", currentStepLabel:currentStepLabel(status), stepList:buildFlightWorkflowStepList(state), userMessage:buildFlightWorkflowUserMessage(state), clarificationQuestions:questions, primaryAction:status === "needs_clarification" ? "补充缺失信息" : (status === "ready_for_evidence" ? "生成候选证据" : "去平台确认"), secondaryActions:["复制搜索条件"], safetyCaveat:"唯珊不会付款、不会下单、不会上传证件或银行卡。", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawResponseStored:false, secretStored:false, redacted:true });
+    return clone({ presenterName:PRESENTER_NAME, appVersion:FLIGHT_WORKFLOW_UI_PRESENTER_VERSION, status, title:"机票请求工作流", workflowStageLabel:"当前工作流阶段", nextStepTitle:"下一步", resumeActionTitle:"可继续操作", recoveryActionLabel:"恢复上次机票工作流", currentStepLabel:currentStepLabel(status), currentStage:currentStageFor(state, status), nextStepLabel:nextStepLabelFor(state, status), canResumeWorkflow:canResumeWorkflowFor(state, status), stepList:buildFlightWorkflowStepList(state), userMessage:buildFlightWorkflowUserMessage(state), clarificationQuestions:questions, primaryAction:status === "needs_clarification" ? "补充缺失信息" : (status === "ready_for_evidence" ? "生成候选证据" : "去平台确认"), secondaryActions:["复制搜索条件"], resumeActions:canResumeWorkflowFor(state, status) ? [nextStepLabelFor(state, status), "恢复上次机票工作流"] : [], safetyCaveat:"唯珊只提供只读候选证据，不付款、不下单、不出票。", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawResponseStored:false, secretStored:false, redacted:true });
   }
   function buildFlightWorkflowUiPresenterAuditDraft(input) {
     const presenter = buildFlightWorkflowUiPresenter(input || {});
-    return clone({ eventType:"FLIGHT_WORKFLOW_UI_PRESENTER_AUDIT_DRAFT", presenterName:PRESENTER_NAME, appVersion:FLIGHT_WORKFLOW_UI_PRESENTER_VERSION, status:presenter.status, currentStepLabel:presenter.currentStepLabel, stepCount:presenter.stepList.length, questionCount:presenter.clarificationQuestions.length, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawResponseStored:false, secretStored:false, redacted:true });
+    return clone({ eventType:"FLIGHT_WORKFLOW_UI_PRESENTER_AUDIT_DRAFT", presenterName:PRESENTER_NAME, appVersion:FLIGHT_WORKFLOW_UI_PRESENTER_VERSION, status:presenter.status, currentStepLabel:presenter.currentStepLabel, currentStage:presenter.currentStage, nextStepLabel:presenter.nextStepLabel, canResumeWorkflow:presenter.canResumeWorkflow === true, stepCount:presenter.stepList.length, questionCount:presenter.clarificationQuestions.length, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawResponseStored:false, secretStored:false, redacted:true });
   }
   window.WeishanFlightWorkflowUiPresenter = { FLIGHT_WORKFLOW_UI_PRESENTER_VERSION, PRESENTER_NAME, buildFlightWorkflowUiPresenter, buildFlightWorkflowStepList, buildFlightWorkflowUserMessage, buildFlightWorkflowUiPresenterAuditDraft };
 })();

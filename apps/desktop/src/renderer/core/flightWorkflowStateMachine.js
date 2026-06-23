@@ -1,9 +1,9 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_STATE_MACHINE_VERSION = "2.1.61";
+  const FLIGHT_WORKFLOW_STATE_MACHINE_VERSION = "2.1.62";
   const STATE_MACHINE_NAME = "flight_workflow_state_machine_v1";
-  const WORKFLOW_ID = "deterministic-flight-workflow-v2.1.61";
+  const WORKFLOW_ID = "deterministic-flight-workflow-v2.1.62";
   const STEP_ORDER = ["intent", "clarification", "evidence", "decision", "handoff", "manual_platform_check"];
   const FORBIDDEN_NAME_RE = /(rawText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
   const FORBIDDEN_TEXT_RE = /(token|key|secret|password|身份证|护照|银行卡|cardNumber|passport|credential)/ig;
@@ -93,6 +93,27 @@
     return "pending";
   }
 
+  function currentStageFor(status, currentStep) {
+    if (status === "blocked" || status === "failed_safe") return status;
+    if (currentStep === "manual_platform_check") return "platform_check";
+    return currentStep || "intent";
+  }
+
+  function nextStepLabelFor(status, currentStep) {
+    if (status === "needs_clarification") return "补充缺失信息";
+    if (status === "ready_for_evidence" || status === "evidence_running") return "生成候选证据";
+    if (status === "evidence_ready") return "选择候选";
+    if (status === "provider_confirmation_ready") return "确认前往平台";
+    if (status === "manual_platform_check_ready") return "记录平台核对结果";
+    if (status === "blocked") return "安全阻断";
+    if (status === "failed_safe") return "安全降级";
+    return currentStep === "handoff" ? "确认前往平台" : "识别机票需求";
+  }
+
+  function canResumeWorkflowFor(status) {
+    return /^(needs_clarification|ready_for_evidence|evidence_running|evidence_ready|provider_confirmation_ready|manual_platform_check_ready)$/.test(status || "");
+  }
+
   function finalize(input) {
     const safe = input && typeof input === "object" ? input : {};
     const intent = normalizeIntent(safe.intent || {});
@@ -163,6 +184,7 @@
       if (type === "EVIDENCE_READY") return finalize(Object.assign({}, current, { status:"evidence_ready", currentStep:"decision", evidenceSummary:stripUnsafe(safeEvent.evidenceSummary || safeEvent.workflowSummary || safeEvent.payload || null), selectedCandidate:stripUnsafe(safeEvent.selectedCandidate || current.selectedCandidate || null) }));
       if (type === "CANDIDATE_SELECTED") return finalize(Object.assign({}, current, { status:"provider_confirmation_ready", currentStep:"handoff", selectedCandidate:stripUnsafe(safeEvent.selectedCandidate || safeEvent.candidate || null) }));
       if (type === "PROVIDER_CONFIRMATION_REQUESTED") return finalize(Object.assign({}, current, { status:"provider_confirmation_ready", currentStep:"handoff" }));
+      if (type === "USER_CONFIRMED_PROVIDER_HANDOFF" || type === "PROVIDER_HANDOFF_CONFIRMED") return finalize(Object.assign({}, current, { status:"manual_platform_check_ready", currentStep:"manual_platform_check" }));
       if (type === "MANUAL_PLATFORM_CHECK_RECORDED") return finalize(Object.assign({}, current, { status:"manual_platform_check_ready", currentStep:"manual_platform_check", evidenceSummary:stripUnsafe(safeEvent.evidenceSummary || current.evidenceSummary || null) }));
       return finalize(Object.assign({}, current, { status:"failed_safe", workflowWarnings:["unknown event: " + safeText(type || "unknown")] }));
     } catch (error) {
@@ -172,7 +194,7 @@
 
   function buildFlightWorkflowStateSummary(state) {
     const safe = createFlightWorkflowState(state || {});
-    return clone({ stateMachineName:STATE_MACHINE_NAME, appVersion:FLIGHT_WORKFLOW_STATE_MACHINE_VERSION, workflowId:safe.workflowId, status:safe.status, currentStep:safe.currentStep, completedSteps:safe.completedSteps, pendingSteps:safe.pendingSteps, collectedFields:safe.collectedFields, missingFields:safe.missingFields, clarificationQuestions:safe.clarificationQuestions, routeSummary:safe.intent && safe.intent.routeSummary || "", tripSummary:safe.intent && safe.intent.tripSummary || "", selectedCandidate:safe.selectedCandidate || null, evidenceSummary:safe.evidenceSummary || null, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+    return clone({ stateMachineName:STATE_MACHINE_NAME, appVersion:FLIGHT_WORKFLOW_STATE_MACHINE_VERSION, workflowId:safe.workflowId, status:safe.status, currentStep:safe.currentStep, currentStage:currentStageFor(safe.status, safe.currentStep), nextStepLabel:nextStepLabelFor(safe.status, safe.currentStep), canResumeWorkflow:canResumeWorkflowFor(safe.status), completedSteps:safe.completedSteps, pendingSteps:safe.pendingSteps, collectedFields:safe.collectedFields, missingFields:safe.missingFields, clarificationQuestions:safe.clarificationQuestions, routeSummary:safe.intent && safe.intent.routeSummary || "", tripSummary:safe.intent && safe.intent.tripSummary || "", selectedCandidate:safe.selectedCandidate || null, evidenceSummary:safe.evidenceSummary || null, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
   function buildFlightWorkflowStateMachineAuditDraft(input) {

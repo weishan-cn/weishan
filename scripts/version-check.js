@@ -1546,6 +1546,42 @@ function checkFlightWorkflowUiPresenterVersion(results, expectedVersion) {
   addCheck(results, "apps/desktop flight workflow UI presenter version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowUiPresenter.js FLIGHT_WORKFLOW_UI_PRESENTER_VERSION");
 }
 
+function checkFlightWorkflowContinuityManagerVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowContinuityManager.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow continuity manager version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow continuity manager version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow continuity manager version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowContinuityManager.js FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION");
+}
+
+function checkUserConfirmationStatePanelVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/userConfirmationStatePanel.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop user confirmation state panel version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop user confirmation state panel version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/USER_CONFIRMATION_STATE_PANEL_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop user confirmation state panel version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/userConfirmationStatePanel.js USER_CONFIRMATION_STATE_PANEL_VERSION");
+}
+
+function checkFlightWorkflowRecoveryStoreVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowRecoveryStore.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow recovery store version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow recovery store version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_RECOVERY_STORE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow recovery store version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowRecoveryStore.js FLIGHT_WORKFLOW_RECOVERY_STORE_VERSION");
+}
+
+function checkFlightWorkflowResumeCoachVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowResumeCoach.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow resume coach version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow resume coach version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_RESUME_COACH_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow resume coach version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowResumeCoach.js FLIGHT_WORKFLOW_RESUME_COACH_VERSION");
+}
+
 function checkFlightIntentNormalizerVersion(results, expectedVersion) {
   const filePath = "apps/desktop/src/renderer/core/flightIntentNormalizer.js";
   const file = readText(filePath);
@@ -1824,6 +1860,10 @@ function runVersionCheck() {
     checkFlightClarificationLoopVersion(results, rootPackage.version);
     checkFlightWorkflowStateStoreVersion(results, rootPackage.version);
     checkFlightWorkflowUiPresenterVersion(results, rootPackage.version);
+    checkFlightWorkflowContinuityManagerVersion(results, rootPackage.version);
+    checkUserConfirmationStatePanelVersion(results, rootPackage.version);
+    checkFlightWorkflowRecoveryStoreVersion(results, rootPackage.version);
+    checkFlightWorkflowResumeCoachVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowOrchestratorVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowStatusPresenterVersion(results, rootPackage.version);
     checkFlightFareBreakdownVersion(results, rootPackage.version);

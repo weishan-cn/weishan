@@ -14,7 +14,7 @@ function load(files) {
 
 function pref(overrides) {
   return Object.assign({
-    schemaVersion:"2.1.61",
+    schemaVersion:"2.1.62",
     globalLimitedBetaEnabled:true,
     killSwitchState:"enabled",
     rollbackState:"not_needed",
@@ -31,7 +31,7 @@ function pref(overrides) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/limitedBetaPreferencePersistence.js", "apps/desktop/src/renderer/core/limitedBetaUserPreferenceGuard.js"]);
   const api = windowRef.WeishanLimitedBetaUserPreferenceGuard;
-  assert.equal(api.LIMITED_BETA_USER_PREFERENCE_GUARD_VERSION, "2.1.61");
+  assert.equal(api.LIMITED_BETA_USER_PREFERENCE_GUARD_VERSION, "2.1.62");
 
   assert.equal(api.evaluateLimitedBetaUserPreferenceGuard({ persistedPreference:pref(), currentRequestCategory:"flight", providerId:"flight_provider", userConfirmationState:"confirmed" }).preferenceDecision, "allow");
   assert.equal(api.evaluateLimitedBetaUserPreferenceGuard({ persistedPreference:pref({ globalLimitedBetaEnabled:false, killSwitchState:"disabled" }), currentRequestCategory:"flight", providerId:"flight_provider", userConfirmationState:"confirmed" }).preferenceDecision, "withheld");

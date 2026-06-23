@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.61";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.62";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -198,6 +198,15 @@
       title: "机票请求工作流",
       workflowStateSummary: stripUnsafe(safe.workflowStateSummary || null),
       clarificationSummary: stripUnsafe(safe.clarificationSummary || null),
+      continuitySummary: stripUnsafe(safe.continuitySummary || null),
+      confirmationStateSummary: stripUnsafe(safe.confirmationStateSummary || null),
+      recoverySummary: stripUnsafe(safe.recoverySummary || null),
+      resumeCoachSummary: stripUnsafe(safe.resumeCoachSummary || null),
+      currentStage: safeLine(safe.currentStage || ""),
+      workflowStageLabel: safeLine(safe.workflowStageLabel || safe.continuitySummary && safe.continuitySummary.stageLabel || ""),
+      nextStepLabel: safeLine(safe.nextStepLabel || ""),
+      canResumeWorkflow: safe.canResumeWorkflow === true,
+      resumeActions: stripUnsafe(Array.isArray(safe.resumeActions) ? safe.resumeActions : (safe.resumeCoachSummary && safe.resumeCoachSummary.allowedActions || [])),
       workflowStepList: stripUnsafe(safe.workflowStepList || []),
       missingFields: Array.isArray(safe.missingFields) ? safe.missingFields.map(safeLine) : [],
       clarificationQuestions: questions,
