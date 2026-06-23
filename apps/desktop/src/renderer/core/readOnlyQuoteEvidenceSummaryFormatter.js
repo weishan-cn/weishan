@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.68";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.69";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -218,6 +218,11 @@
       workflowStepList: stripUnsafe(safe.workflowStepList || []),
       scenarioSimulationSummary: stripUnsafe(safe.scenarioSimulationSummary || null),
       safetyTestMatrixSummary: stripUnsafe(safe.safetyTestMatrixSummary || null),
+      releaseReadinessSummary: stripUnsafe(safe.releaseReadinessSummary || null),
+      userSafetyCopySummary: stripUnsafe(safe.userSafetyCopySummary || null),
+      forbiddenCapabilitySummary: stripUnsafe(safe.forbiddenCapabilitySummary || null),
+      userFacingBetaReadiness: stripUnsafe(safe.userFacingBetaReadiness || null),
+      copyValidationStatus: safeLine(safe.copyValidationStatus || ""),
       missingFields: Array.isArray(safe.missingFields) ? safe.missingFields.map(safeLine) : [],
       clarificationQuestions: questions,
       workflowUserMessage: safeLine(safe.workflowUserMessage || (questions.length ? "需要补充信息。信息完整后再生成候选证据。" : "候选证据已生成，平台最终为准。")),

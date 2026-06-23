@@ -1718,6 +1718,70 @@ function checkFlightWorkflowOperatorConsoleViewModelVersion(results, expectedVer
   addCheck(results, "apps/desktop flight workflow operator console view model version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowOperatorConsoleViewModel.js FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VIEW_MODEL_VERSION");
 }
 
+function checkFlightWorkflowScenarioFixtureBuilderVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowScenarioFixtureBuilder.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow scenario fixture builder version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow scenario fixture builder version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_SCENARIO_FIXTURE_BUILDER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow scenario fixture builder version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowScenarioFixtureBuilder.js FLIGHT_WORKFLOW_SCENARIO_FIXTURE_BUILDER_VERSION");
+}
+
+function checkFlightWorkflowSafetyTestMatrixConsoleVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowSafetyTestMatrixConsole.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow safety test matrix console version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow safety test matrix console version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_SAFETY_TEST_MATRIX_CONSOLE_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow safety test matrix console version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowSafetyTestMatrixConsole.js FLIGHT_WORKFLOW_SAFETY_TEST_MATRIX_CONSOLE_VERSION");
+}
+
+function checkFlightWorkflowScenarioSimulatorPresenterVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowScenarioSimulatorPresenter.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow scenario simulator presenter version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow scenario simulator presenter version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_SCENARIO_SIMULATOR_PRESENTER_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow scenario simulator presenter version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowScenarioSimulatorPresenter.js FLIGHT_WORKFLOW_SCENARIO_SIMULATOR_PRESENTER_VERSION");
+}
+
+function checkFlightWorkflowScenarioSimulatorVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowScenarioSimulator.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow scenario simulator version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow scenario simulator version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_SCENARIO_SIMULATOR_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow scenario simulator version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowScenarioSimulator.js FLIGHT_WORKFLOW_SCENARIO_SIMULATOR_VERSION");
+}
+
+
+function checkFlightWorkflowUserSafetyCopyRegistryVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowUserSafetyCopyRegistry.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow user safety copy registry version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow user safety copy registry version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_USER_SAFETY_COPY_REGISTRY_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow user safety copy registry version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowUserSafetyCopyRegistry.js FLIGHT_WORKFLOW_USER_SAFETY_COPY_REGISTRY_VERSION");
+}
+
+function checkFlightWorkflowReleaseReadinessViewModelVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowReleaseReadinessViewModel.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow release readiness view model version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow release readiness view model version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_RELEASE_READINESS_VIEW_MODEL_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow release readiness view model version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowReleaseReadinessViewModel.js FLIGHT_WORKFLOW_RELEASE_READINESS_VIEW_MODEL_VERSION");
+}
+
+function checkFlightWorkflowReleaseReadinessDashboardVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowReleaseReadinessDashboard.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow release readiness dashboard version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow release readiness dashboard version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_RELEASE_READINESS_DASHBOARD_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow release readiness dashboard version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowReleaseReadinessDashboard.js FLIGHT_WORKFLOW_RELEASE_READINESS_DASHBOARD_VERSION");
+}
+
 function checkFlightIntentNormalizerVersion(results, expectedVersion) {
   const filePath = "apps/desktop/src/renderer/core/flightIntentNormalizer.js";
   const file = readText(filePath);
@@ -2015,6 +2079,13 @@ function runVersionCheck() {
     checkFlightWorkflowSafetyRegressionSentinelVersion(results, rootPackage.version);
     checkFlightWorkflowOperatorConsoleVersion(results, rootPackage.version);
     checkFlightWorkflowOperatorConsoleViewModelVersion(results, rootPackage.version);
+    checkFlightWorkflowScenarioFixtureBuilderVersion(results, rootPackage.version);
+    checkFlightWorkflowSafetyTestMatrixConsoleVersion(results, rootPackage.version);
+    checkFlightWorkflowScenarioSimulatorPresenterVersion(results, rootPackage.version);
+    checkFlightWorkflowScenarioSimulatorVersion(results, rootPackage.version);
+    checkFlightWorkflowReleaseReadinessDashboardVersion(results, rootPackage.version);
+    checkFlightWorkflowUserSafetyCopyRegistryVersion(results, rootPackage.version);
+    checkFlightWorkflowReleaseReadinessViewModelVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowOrchestratorVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowStatusPresenterVersion(results, rootPackage.version);
     checkFlightFareBreakdownVersion(results, rootPackage.version);

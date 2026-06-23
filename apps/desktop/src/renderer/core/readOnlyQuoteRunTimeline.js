@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_RUN_TIMELINE_VERSION = "2.1.68";
+  const READ_ONLY_QUOTE_RUN_TIMELINE_VERSION = "2.1.69";
   const TIMELINE_NAME = "read_only_quote_run_timeline_v1";
 
   function clone(value) {
@@ -43,7 +43,7 @@
     return clone({
       timelineName: TIMELINE_NAME,
       appVersion: READ_ONLY_QUOTE_RUN_TIMELINE_VERSION,
-      runId: text(safe.runId || "deterministic-v2.1.68-read-only-sandbox-run"),
+      runId: text(safe.runId || "deterministic-v2.1.69-read-only-sandbox-run"),
       status: text(safe.status || (failedSafeCount > 0 ? "failed_safe" : (blockedCount > 0 ? "blocked" : "completed"))),
       summary: steps.map(function (step) { return text(step.label || step.stepId || "step"); }).join(" · "),
       completedCount: completedCount,
@@ -74,7 +74,7 @@
     const overallStatus = text(safe.status || safeOptions.status || "completed");
     const steps = defaultSteps(overallStatus, Object.assign({}, safe, safeOptions));
     const summary = summarizeReadOnlyQuoteRunTimeline({
-      runId: text(safe.runId || safeOptions.runId || "deterministic-v2.1.68-read-only-sandbox-run"),
+      runId: text(safe.runId || safeOptions.runId || "deterministic-v2.1.69-read-only-sandbox-run"),
       status: overallStatus,
       steps: steps,
       runHistorySummary: safe.runHistorySummary || safeOptions.runHistorySummary || null,

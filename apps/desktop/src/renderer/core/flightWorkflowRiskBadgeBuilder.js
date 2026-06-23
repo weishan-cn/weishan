@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.68";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.69";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -33,6 +33,18 @@
       if (packet.status === "ready" && policy.status === "allowed") badges.push(badge("platform_confirmation_ready", "可进入平台确认", "info"));
       if (packet.status === "blocked" || policy.status === "blocked") badges.push(badge("handoff_packet_blocked", "交接包已阻断", "blocked"));
       if (preview.status === "ready" || safe.canPreviewExport === true) badges.push(badge("export_preview", "可预览脱敏摘要", "info"));
+      const releaseReadiness = safe.releaseReadinessSummary || safe.releaseReadiness || {};
+      const betaReadiness = safe.userFacingBetaReadiness || releaseReadiness.userFacingBetaReadiness || {};
+      const copyStatus = safe.copyValidationStatus || releaseReadiness.copyValidationStatus || "";
+      if (releaseReadiness.status === "ready" || betaReadiness.safeForUserFacingBeta === true || releaseReadiness.safeForUserFacingBeta === true) {
+        badges.push(badge("release_ready", "发布就绪", "info"));
+        badges.push(badge("read_only_beta_ready", "只读 Beta 可验收", "info"));
+      } else if (releaseReadiness.status === "warning" || betaReadiness.status === "warning") {
+        badges.push(badge("release_needs_review", "仍需复核", "warning"));
+      } else if (releaseReadiness.status === "blocked" || releaseReadiness.status === "failed_safe" || betaReadiness.status === "blocked") {
+        badges.push(badge("release_not_ready", "暂不可验收", "blocked"));
+      }
+      if (copyStatus === "pass" || releaseReadiness.copyValidationStatus === "pass") badges.push(badge("safety_copy_unified", "安全文案已统一", "info"));
       badges.push(badge("not_exportable", "不可导出", "warning"));
       return clone({ builderName:BUILDER_NAME, appVersion:FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, status:health.overall === "blocked" ? "blocked" : "ready", badges:badges, summaryLabel:summarizeFlightWorkflowRiskBadges(badges).summaryLabel, safety:safety(), bookingUrl:null, redacted:true });
     } catch (error) {

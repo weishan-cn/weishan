@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION = "2.1.68";
+  const FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION = "2.1.69";
   const TIMELINE_NAME = "flight_workflow_progress_timeline_v1";
   const STEPS = [
     ["intent", "识别机票需求"],

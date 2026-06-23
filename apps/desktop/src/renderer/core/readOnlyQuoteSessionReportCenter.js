@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.68";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.69";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -52,6 +52,7 @@
   function operatorViewModelApi() { return window.WeishanFlightWorkflowOperatorConsoleViewModel || {}; }
   function scenarioSimulatorApi() { return window.WeishanFlightWorkflowScenarioSimulator || {}; }
   function safetyTestMatrixApi() { return window.WeishanFlightWorkflowSafetyTestMatrixConsole || {}; }
+  function releaseReadinessApi() { return window.WeishanFlightWorkflowReleaseReadinessDashboard || {}; }
 
   function safeText(value) {
     return text(value).replace(FORBIDDEN_TEXT_RE, "保守候选证据");
@@ -134,7 +135,12 @@
       operatorConsoleSummary: stripUnsafe(safe.operatorConsoleSummary || null),
       operatorConsoleViewModel: stripUnsafe(safe.operatorConsoleViewModel || null),
       scenarioSimulationSummary: stripUnsafe(safe.scenarioSimulationSummary || null),
-      safetyTestMatrixSummary: stripUnsafe(safe.safetyTestMatrixSummary || null)
+      safetyTestMatrixSummary: stripUnsafe(safe.safetyTestMatrixSummary || null),
+      releaseReadinessSummary: stripUnsafe(safe.releaseReadinessSummary || null),
+      userSafetyCopySummary: stripUnsafe(safe.userSafetyCopySummary || null),
+      forbiddenCapabilitySummary: stripUnsafe(safe.forbiddenCapabilitySummary || null),
+      userFacingBetaReadiness: stripUnsafe(safe.userFacingBetaReadiness || null),
+      copyValidationStatus: safeText(safe.copyValidationStatus || "")
     };
   }
 
@@ -175,6 +181,7 @@
     const operatorConsoleViewModel = workflow.operatorConsoleViewModel || safe.operatorConsoleViewModel || (typeof operatorViewModelApi().buildFlightWorkflowOperatorConsoleViewModel === "function" ? operatorViewModelApi().buildFlightWorkflowOperatorConsoleViewModel({ operatorConsoleSummary:operatorConsoleSummary }) : null);
     const scenarioSimulationSummary = workflow.scenarioSimulationSummary || safe.scenarioSimulationSummary || null;
     const safetyTestMatrixSummary = workflow.safetyTestMatrixSummary || safe.safetyTestMatrixSummary || null;
+    const releaseReadinessSummary = workflow.releaseReadinessSummary || safe.releaseReadinessSummary || (typeof releaseReadinessApi().buildFlightWorkflowReleaseReadinessDashboard === "function" ? releaseReadinessApi().buildFlightWorkflowReleaseReadinessDashboard(Object.assign({}, safe, workflow, { scenarioSimulationSummary:scenarioSimulationSummary, safetyTestMatrixSummary:safetyTestMatrixSummary, auditReviewSummary:auditReviewSummary, humanReviewChecklistSummary:humanReviewChecklistSummary, finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, safeSessionExportPreview:safeSessionExportPreview, operatorConsoleSummary:operatorConsoleSummary })) : null);
     const finalReviewBadges = workflow.finalReviewBadges || safe.finalReviewBadges || riskBadgeModel && riskBadgeModel.badges || [];
     return clone({
       title: "候选报价证据摘要",

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SAFETY_TEST_MATRIX_CONSOLE_VERSION = "2.1.68";
+  const FLIGHT_WORKFLOW_SAFETY_TEST_MATRIX_CONSOLE_VERSION = "2.1.69";
   const MATRIX_NAME = "flight_workflow_safety_test_matrix_console_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -135,6 +135,8 @@
     });
   }
 
+  function stripReleaseField(value) { return value && typeof value === "object" ? clone(value) : (value == null ? null : safeText(value)); }
+
   function buildFlightWorkflowSafetyTestMatrixConsole(input) {
     const safe = input && typeof input === "object" ? input : {};
     const rows = buildFlightWorkflowSafetyTestMatrixRows(safe.results || safe.scenarioSimulationResults || []);
@@ -152,6 +154,11 @@
       blockedCount: health.blockedCount,
       rows: rows,
       failedRows: failedRows,
+      releaseReadinessSummary: stripReleaseField(safe.releaseReadinessSummary || null),
+      userSafetyCopySummary: stripReleaseField(safe.userSafetyCopySummary || null),
+      forbiddenCapabilitySummary: stripReleaseField(safe.forbiddenCapabilitySummary || null),
+      userFacingBetaReadiness: stripReleaseField(safe.userFacingBetaReadiness || null),
+      copyValidationStatus: safeText(safe.copyValidationStatus || ""),
       userFacingSummary: {
         title: "安全测试矩阵",
         resultLabel: health.overallHealth === "pass" ? "全部通过" : (health.overallHealth === "warning" ? "存在警告" : (health.overallHealth === "fail" ? "存在失败项" : "未知")),
@@ -206,6 +213,11 @@
       rows: toArray(safe.rows).map(function (row) { return clone(rowStatus(row) && { scenarioId: safeText(row.scenarioId || ""), scenarioLabel: safeText(row.scenarioLabel || ""), expectedOutcome: safeText(row.expectedOutcome || ""), actualOutcome: safeText(row.actualOutcome || ""), status: rowStatus(row), safetyChecks: checkSafety(row), message: safeText(row.message || ""), redacted: true }); }),
       failedRows: toArray(safe.failedRows).map(function (row) { return clone({ scenarioId: safeText(row.scenarioId || ""), scenarioLabel: safeText(row.scenarioLabel || ""), expectedOutcome: safeText(row.expectedOutcome || ""), actualOutcome: safeText(row.actualOutcome || ""), status: rowStatus(row), safetyChecks: checkSafety(row), message: safeText(row.message || ""), redacted: true }); }),
       userFacingSummary: Object.assign({ title: "安全测试矩阵", resultLabel: "未知", caveat: "该矩阵仅为本地安全回归检查，不代表真实票价或可出票。" }, clone(safe.userFacingSummary || {})),
+      releaseReadinessSummary: stripReleaseField(safe.releaseReadinessSummary || null),
+      userSafetyCopySummary: stripReleaseField(safe.userSafetyCopySummary || null),
+      forbiddenCapabilitySummary: stripReleaseField(safe.forbiddenCapabilitySummary || null),
+      userFacingBetaReadiness: stripReleaseField(safe.userFacingBetaReadiness || null),
+      copyValidationStatus: safeText(safe.copyValidationStatus || ""),
       safety: Object.assign(safety(), clone(safe.safety || {})),
       bookingUrl: null,
       checkoutUrl: null,

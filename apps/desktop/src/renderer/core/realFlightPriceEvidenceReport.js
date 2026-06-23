@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION = "2.1.68";
+  const REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION = "2.1.69";
   const REPORT_NAME = "real_flight_price_evidence_report_v1";
 
   function clone(value) {
