@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION = "2.1.71";
+  const READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION = "2.1.72";
   const CONTROLLER_NAME = "read_only_quote_refresh_controller_v1";
 
   function clone(value) {

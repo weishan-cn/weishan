@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.71";
+  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "2.1.72";
   const PHASE = "read_only_price_candidate_card_view_model_v1";
 
   function clone(value) {
@@ -291,8 +291,8 @@
     const handoffPacketPolicyDecision = typeof packetPolicyApi.evaluateFlightWorkflowHandoffPacketPolicy === "function" ? packetPolicyApi.evaluateFlightWorkflowHandoffPacketPolicy({ finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, safetyRegressionSummary:safetyRegressionSummary }) : null;
     const operatorConsoleSummary = typeof operatorApi.buildFlightWorkflowOperatorConsole === "function" ? operatorApi.buildFlightWorkflowOperatorConsole(Object.assign({}, sentinelInput, { safetyRegressionSummary:safetyRegressionSummary, humanReviewChecklistSummary:humanReviewChecklistSummary, finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, handoffPacketPolicyDecision:handoffPacketPolicyDecision })) : null;
     const operatorConsoleViewModel = typeof operatorViewModelApi.buildFlightWorkflowOperatorConsoleViewModel === "function" ? operatorViewModelApi.buildFlightWorkflowOperatorConsoleViewModel({ operatorConsoleSummary:operatorConsoleSummary }) : null;
-    const userSafetyCopySummary = typeof safetyCopyApi.buildFlightWorkflowSafetyCopySet === "function" ? safetyCopyApi.buildFlightWorkflowSafetyCopySet({ releaseVersion:"2.1.71" }) : null;
-    const releaseReadinessSummary = typeof releaseReadinessApi.buildFlightWorkflowReleaseReadinessDashboard === "function" ? releaseReadinessApi.buildFlightWorkflowReleaseReadinessDashboard(Object.assign({}, sentinelInput, { releaseVersion:"2.1.71", safetyRegressionSummary:safetyRegressionSummary, auditReviewSummary:workflowAuditReviewSummary, humanReviewChecklistSummary:humanReviewChecklistSummary, finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, safeSessionExportPreview:safeSessionExportPreview, operatorConsoleSummary:operatorConsoleSummary, userSafetyCopySummary:userSafetyCopySummary })) : null;
+    const userSafetyCopySummary = typeof safetyCopyApi.buildFlightWorkflowSafetyCopySet === "function" ? safetyCopyApi.buildFlightWorkflowSafetyCopySet({ releaseVersion:"2.1.72" }) : null;
+    const releaseReadinessSummary = typeof releaseReadinessApi.buildFlightWorkflowReleaseReadinessDashboard === "function" ? releaseReadinessApi.buildFlightWorkflowReleaseReadinessDashboard(Object.assign({}, sentinelInput, { releaseVersion:"2.1.72", safetyRegressionSummary:safetyRegressionSummary, auditReviewSummary:workflowAuditReviewSummary, humanReviewChecklistSummary:humanReviewChecklistSummary, finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, safeSessionExportPreview:safeSessionExportPreview, operatorConsoleSummary:operatorConsoleSummary, userSafetyCopySummary:userSafetyCopySummary })) : null;
     const forbiddenCapabilitySummary = releaseReadinessSummary && releaseReadinessSummary.forbiddenCapabilitySummary || null;
     const userFacingBetaReadiness = releaseReadinessSummary && releaseReadinessSummary.userFacingBetaReadiness || null;
     const copyValidationStatus = text(releaseReadinessSummary && releaseReadinessSummary.copyValidationStatus || "");

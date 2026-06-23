@@ -22,7 +22,7 @@ const windowRef = loadRendererCore([
 const api = windowRef.WeishanLimitedBetaRollbackGuard;
 
 function main() {
-  assert.equal(api.LIMITED_BETA_ROLLBACK_GUARD_VERSION, "2.1.71");
+  assert.equal(api.LIMITED_BETA_ROLLBACK_GUARD_VERSION, "2.1.72");
 
   const safe = api.evaluateLimitedBetaRollbackGuard({
     providerCategory:"flight",

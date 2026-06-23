@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.71";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.72";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -58,6 +58,14 @@
       if (sessionSummary.status === "completed") badges.push(badge("acceptance_session_completed", "验收会话完成", "info"));
       if (sessionSummary.status === "needs_review" || sessionSummary.status === "in_progress") badges.push(badge("acceptance_session_needs_review", "验收仍需复核", "warning"));
       if (feedbackReview.status === "blocked" || sessionSummary.status === "blocked") badges.push(badge("acceptance_session_blocked", "验收已阻断", "blocked"));
+      const cohort = safe.betaCohortSummary || releaseReadiness.betaCohortSummary || {};
+      const trend = safe.feedbackTrendSummary || releaseReadiness.feedbackTrendSummary || {};
+      const cohortHealth = cohort.cohortHealth || {};
+      if (cohort.status === "ready" || cohortHealth.safeToExpandBeta === true || trend.recommendation && trend.recommendation.recommendationId === "expand_read_only_beta") badges.push(badge("beta_cohort_expand_ready", "Beta 反馈可扩大测试", "info"));
+      if (cohort.status === "needs_more_feedback" || trend.status === "insufficient_data") badges.push(badge("beta_cohort_insufficient", "趋势数据不足", "warning"));
+      if (cohort.status === "needs_review" || trend.status === "needs_review") badges.push(badge("beta_cohort_watch", "Beta 反馈仍需观察", "warning"));
+      if (cohort.findings && JSON.stringify(cohort.findings).indexOf("安全文案理解不足") >= 0 || trend.trends && trend.trends.safetyCopyTrend === "not_understood") badges.push(badge("beta_safety_copy_low", "安全文案理解不足", "warning"));
+      if (cohort.findings && JSON.stringify(cohort.findings).indexOf("可用性反馈偏弱") >= 0 || trend.trends && trend.trends.usabilityTrend === "negative") badges.push(badge("beta_usability_low", "可用性反馈偏弱", "warning"));
       if (beta.status === "blocked" || guided.status === "blocked" || guided.status === "failed_safe") badges.push(badge("beta_acceptance_blocked", "Beta 验收被阻断", "blocked"));
       if (copyStatus === "pass" || releaseReadiness.copyValidationStatus === "pass") badges.push(badge("safety_copy_unified", "安全文案已统一", "info"));
       badges.push(badge("not_exportable", "不可导出", "warning"));

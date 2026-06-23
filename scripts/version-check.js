@@ -1855,6 +1855,33 @@ function checkFlightIntentNormalizerVersion(results, expectedVersion) {
   addCheck(results, "apps/desktop flight intent normalizer version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightIntentNormalizer.js FLIGHT_INTENT_NORMALIZER_VERSION");
 }
 
+function checkFlightWorkflowBetaCohortReviewBoardVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowBetaCohortReviewBoard.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow beta cohort review board version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow beta cohort review board version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_BETA_COHORT_REVIEW_BOARD_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow beta cohort review board version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowBetaCohortReviewBoard.js FLIGHT_WORKFLOW_BETA_COHORT_REVIEW_BOARD_VERSION");
+}
+
+function checkFlightWorkflowFeedbackTrendRadarVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowFeedbackTrendRadar.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow feedback trend radar version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow feedback trend radar version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_FEEDBACK_TREND_RADAR_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow feedback trend radar version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowFeedbackTrendRadar.js FLIGHT_WORKFLOW_FEEDBACK_TREND_RADAR_VERSION");
+}
+
+function checkFlightWorkflowBetaCohortViewModelVersion(results, expectedVersion) {
+  const filePath = "apps/desktop/src/renderer/core/flightWorkflowBetaCohortViewModel.js";
+  const file = readText(filePath);
+  if (!file) { results.push({ name:"apps/desktop flight workflow beta cohort view model version", pass:false, detail:filePath + " missing" }); return; }
+  if (file.__readError) { results.push({ name:"apps/desktop flight workflow beta cohort view model version", pass:false, detail:file.__readError }); return; }
+  const match = file.match(/FLIGHT_WORKFLOW_BETA_COHORT_VIEW_MODEL_VERSION\s*=\s*["']([^"']+)["']/);
+  addCheck(results, "apps/desktop flight workflow beta cohort view model version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/renderer/core/flightWorkflowBetaCohortViewModel.js FLIGHT_WORKFLOW_BETA_COHORT_VIEW_MODEL_VERSION");
+}
+
 function checkFlightEvidenceWorkflowOrchestratorVersion(results, expectedVersion) {
   const filePath = "apps/desktop/src/renderer/core/flightEvidenceWorkflowOrchestrator.js";
   const file = readText(filePath);
@@ -2157,6 +2184,9 @@ function runVersionCheck() {
     checkFlightWorkflowBetaFeedbackReviewCenterVersion(results, rootPackage.version);
     checkFlightWorkflowAcceptanceSessionSummaryVersion(results, rootPackage.version);
     checkFlightWorkflowBetaAcceptanceReviewViewModelVersion(results, rootPackage.version);
+    checkFlightWorkflowBetaCohortReviewBoardVersion(results, rootPackage.version);
+    checkFlightWorkflowFeedbackTrendRadarVersion(results, rootPackage.version);
+    checkFlightWorkflowBetaCohortViewModelVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowOrchestratorVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowStatusPresenterVersion(results, rootPackage.version);
     checkFlightFareBreakdownVersion(results, rootPackage.version);
