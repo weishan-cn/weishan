@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.79";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.80";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -307,13 +307,13 @@
     const safe = input && typeof input === "object" ? input : {};
     const snapshot = safe.pilotReadinessSnapshotSummary || safe.publicPilotReadinessSnapshotSummary || safe.snapshotSummary || {};
     const playbook = safe.supportPlaybookSummary || safe.supportPlaybookConsoleSummary || {};
-    return clone({ title:"只读试点状态快照", line:safeLine(obj(snapshot.userFacingSummary).resultLabel || snapshot.status || "需要复核"), sectionLabels:["试点状态", "支持准备", "问题趋势", "下一步", "试点邀请闸门", "测试用户批次", "只读邀请视图模型", "beta expansion gate", "public pilot checklist", "pilot onboarding guard", "issue pattern radar", "support readiness gate", "issue review board", "support triage dashboard", "operator console", "safety regression sentinel"], caveat:"该快照只适用于只读候选证据流程，不代表真实票价、库存或可出票。", supportPlaybookStatus:text(playbook.status || "ready"), pilotSnapshotStatus:text(snapshot.status || ""), pilotSnapshotNextStep:safeLine(obj(snapshot.userFacingSummary).resultLabel || snapshot.status || "需要复核"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, redacted:true });
+    return clone({ title:"只读试点状态快照", line:safeLine(obj(snapshot.userFacingSummary).resultLabel || snapshot.status || "需要复核"), sectionLabels:["试点状态", "支持准备", "问题趋势", "下一步", "试点邀请闸门", "测试用户批次", "只读邀请视图模型", "只读试点进度追踪", "只读试点里程碑", "beta expansion gate", "public pilot checklist", "pilot onboarding guard", "issue pattern radar", "support readiness gate", "issue review board", "support triage dashboard", "operator console", "safety regression sentinel"], caveat:"该快照只适用于只读候选证据流程，不代表真实票价、库存或可出票。", supportPlaybookStatus:text(playbook.status || "ready"), pilotSnapshotStatus:text(snapshot.status || ""), pilotSnapshotNextStep:safeLine(obj(snapshot.userFacingSummary).resultLabel || snapshot.status || "需要复核"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, redacted:true });
   }
 
   function formatSupportPlaybookConsoleSummary(input) {
     const safe = input && typeof input === "object" ? input : {};
     const playbook = safe.supportPlaybookSummary || safe.supportPlaybookConsoleSummary || {};
-    return clone({ title:"只读试点支持处理手册", line:safeLine(obj(playbook.userFacingSummary).resultLabel || playbook.status || "支持处理路径已准备"), sectionLabels:["看不懂候选证据", "平台页面与候选证据不一致", "安全说明不清楚", "只读范围确认无法完成", "反馈填写异常", "禁止动作", "试点邀请闸门", "测试用户批次", "只读邀请视图模型"], forbiddenSupportActions:Array.isArray(playbook.forbiddenSupportActions) ? playbook.forbiddenSupportActions.slice() : ["代用户付款", "代用户下单", "承诺出票", "索要证件或银行卡", "索要登录凭据", "提供真实客服工单编号"], caveat:"该手册只用于只读试点问题处理，不代表客服工单、交易请求或出票请求。", supportPlaybookStatus:text(playbook.status || ""), supportPlaybookNextStep:safeLine(obj(playbook.userFacingSummary).resultLabel || playbook.status || "支持处理路径已准备"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, redacted:true });
+    return clone({ title:"只读试点支持处理手册", line:safeLine(obj(playbook.userFacingSummary).resultLabel || playbook.status || "支持处理路径已准备"), sectionLabels:["看不懂候选证据", "平台页面与候选证据不一致", "安全说明不清楚", "只读范围确认无法完成", "反馈填写异常", "禁止动作", "试点邀请闸门", "测试用户批次", "只读邀请视图模型", "只读试点进度追踪", "只读试点里程碑"], forbiddenSupportActions:Array.isArray(playbook.forbiddenSupportActions) ? playbook.forbiddenSupportActions.slice() : ["代用户付款", "代用户下单", "承诺出票", "索要证件或银行卡", "索要登录凭据", "提供真实客服工单编号"], caveat:"该手册只用于只读试点问题处理，不代表客服工单、交易请求或出票请求。", supportPlaybookStatus:text(playbook.status || ""), supportPlaybookNextStep:safeLine(obj(playbook.userFacingSummary).resultLabel || playbook.status || "支持处理路径已准备"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, redacted:true });
   }
 
   function formatReadOnlyPilotInvitationGateSummary(input) {
@@ -332,7 +332,25 @@
   function formatPilotInvitationViewModelSummary(input) {
     const safe = input && typeof input === "object" ? input : {};
     const vm = safe.pilotInvitationViewModelSummary || safe.pilotInvitationSummary || {};
-    return clone({ title:"只读试点邀请与测试批次", line:safeLine(obj(vm).title || obj(vm.userFacingSummary).resultLabel || vm.status || "需要复核"), sectionLabels:["试点邀请", "测试用户批次", "只读确认", "问题与支持"], invitationGateName:text(vm.invitationGateName || "flight_workflow_read_only_pilot_invitation_gate_v1"), cohortConsoleName:text(vm.cohortConsoleName || "flight_workflow_tester_cohort_enrollment_console_v1"), cardCount:Array.isArray(vm.cards) ? vm.cards.length : Number(vm.cardCount || 0), cohortRowCount:Array.isArray(vm.cohortRows) ? vm.cohortRows.length : Number(vm.cohortRowCount || 0), riskRowCount:Array.isArray(vm.riskRows) ? vm.riskRows.length : Number(vm.riskRowCount || 0), caveat:safeLine(obj(vm).caveat || "该视图模型只用于只读试点邀请与测试批次登记，不代表真实身份、联系方式、证件、支付或外部平台链接。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, invitationUrl:null, redacted:true });
+    return clone({ title:"只读试点邀请与测试批次", line:safeLine(obj(vm).title || obj(vm.userFacingSummary).resultLabel || vm.status || "需要复核"), sectionLabels:["试点邀请", "测试用户批次", "只读确认", "问题与支持", "只读试点进度追踪", "只读试点里程碑"], invitationGateName:text(vm.invitationGateName || "flight_workflow_read_only_pilot_invitation_gate_v1"), cohortConsoleName:text(vm.cohortConsoleName || "flight_workflow_tester_cohort_enrollment_console_v1"), cardCount:Array.isArray(vm.cards) ? vm.cards.length : Number(vm.cardCount || 0), cohortRowCount:Array.isArray(vm.cohortRows) ? vm.cohortRows.length : Number(vm.cohortRowCount || 0), riskRowCount:Array.isArray(vm.riskRows) ? vm.riskRows.length : Number(vm.riskRowCount || 0), caveat:safeLine(obj(vm).caveat || "该视图模型只用于只读试点邀请与测试批次登记，不代表真实身份、联系方式、证件、支付或外部平台链接。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, invitationUrl:null, redacted:true });
+  }
+
+  function formatPublicPilotCohortProgressTrackerSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const tracker = safe.cohortProgressSummary || safe.cohortProgressTrackerSummary || {};
+    return clone({ title:"只读试点进度追踪", line:safeLine(obj(tracker).progressLabel || obj(tracker.userFacingSummary).resultLabel || "仍需更多测试者"), sectionLabels:["完成进度", "问题状态", "下一批测试", "只读试点里程碑"], cohortId:text(tracker.cohortId || "tester-cohort-001"), totalCount:Number(tracker.totalCount || 0), invitedCount:Number(tracker.invitedCount || 0), consentedCount:Number(tracker.consentedCount || 0), feedbackReadyCount:Number(tracker.feedbackReadyCount || 0), blockedCount:Number(tracker.blockedCount || 0), progressPercent:Number(tracker.progressPercent || 0), safeToAdvanceNextCohort:tracker.safeToAdvanceNextCohort === true, caveat:"该追踪器只用于只读试点批次进度追踪，不保存真实身份、联系方式、证件、支付或外部平台链接。", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, invitationUrl:null, redacted:true });
+  }
+
+  function formatReadOnlyTrialMilestoneBoardSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const board = safe.trialMilestoneSummary || safe.trialMilestoneBoardSummary || {};
+    return clone({ title:"只读试点里程碑", line:safeLine(obj(board).nextBatchLabel || obj(board.userFacingSummary).resultLabel || "仍需更多测试者"), sectionLabels:["发布就绪确认", "试点进入确认", "测试批次启动", "反馈收集完成", "问题复核完成", "下一批测试准备"], milestoneCount:Number(board.milestoneCount || 0), completedCount:Number(board.completedCount || 0), pendingCount:Number(board.pendingCount || 0), blockedCount:Number(board.blockedCount || 0), safeToAdvanceNextCohort:board.safeToAdvanceNextCohort === true, caveat:"该里程碑板只追踪脱敏测试槽位，不保存真实身份、不发送真实邀请。", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, invitationUrl:null, redacted:true });
+  }
+
+  function formatCohortProgressViewModelSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const vm = safe.cohortProgressViewModelSummary || safe.cohortProgressSummary || {};
+    return clone({ title:"只读试点进度追踪", line:safeLine(obj(vm).title || obj(vm.userFacingSummary).resultLabel || "仍需更多测试者"), sectionLabels:["只读试点进度追踪", "测试批次进度", "只读试点里程碑", "下一批测试"], trackerName:text(vm.trackerName || "flight_workflow_public_pilot_cohort_progress_tracker_v1"), boardName:text(vm.boardName || "flight_workflow_read_only_trial_milestone_board_v1"), caveat:safeLine(obj(vm).caveat || "该视图模型只用于只读试点进度追踪，不保存真实身份、不发送真实邀请。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, invitationUrl:null, redacted:true });
   }
 
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
@@ -374,6 +392,9 @@
     formatPilotInvitationViewModelSummary,
     formatPublicPilotReadinessSnapshotSummary,
     formatSupportPlaybookConsoleSummary,
+    formatPublicPilotCohortProgressTrackerSummary,
+    formatReadOnlyTrialMilestoneBoardSummary,
+    formatCohortProgressViewModelSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,

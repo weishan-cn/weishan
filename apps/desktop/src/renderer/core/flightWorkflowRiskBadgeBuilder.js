@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.79";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.80";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -102,11 +102,19 @@
       if (issueReview.status === "blocked" || supportTriage.status === "blocked") badges.push(badge("pilot_issue_blocked", "问题已安全阻断", "blocked"));
       const issuePattern = obj(safe.issuePatternSummary);
       const supportReadiness = obj(safe.supportReadinessSummary);
+      const cohortProgress = obj(safe.cohortProgressSummary);
+      const trialMilestone = obj(safe.trialMilestoneSummary);
       if (issuePattern.status === "ready" || safe.issuePatternStatus === "ready") badges.push(badge("pilot_issue_pattern_ready", "试点问题趋势正常", "info"));
       if (issuePattern.status === "needs_review" || safe.repeatedIssueRisk === true) badges.push(badge("pilot_issue_pattern_repeated", "发现高频问题", "warning"));
       if (supportReadiness.status === "ready" || safe.supportReadyForPublicPilot === true) badges.push(badge("support_readiness_ready", "支持兜底准备就绪", "info"));
       if (supportReadiness.status === "continue_small_pilot" || safe.supportReadinessStatus === "continue_small_pilot") badges.push(badge("support_readiness_small_pilot", "继续小范围试点", "warning"));
       if (supportReadiness.status === "needs_review" || safe.supportReadinessStatus === "needs_review") badges.push(badge("support_readiness_pause_expansion", "需要暂停扩大测试", "warning"));
+      if (cohortProgress.status === "ready" || safe.cohortProgressStatus === "ready") badges.push(badge("cohort_progress_ready", "测试批次进度正常", "info"));
+      if (cohortProgress.status === "needs_review" || safe.cohortProgressStatus === "needs_review") badges.push(badge("cohort_progress_in_progress", "测试批次仍在进行", "warning"));
+      if (cohortProgress.status === "needs_more_testers" || safe.cohortProgressStatus === "needs_more_testers") badges.push(badge("cohort_progress_needs_more", "仍需更多测试者", "warning"));
+      if (trialMilestone.status === "ready" || safe.trialMilestoneStatus === "ready") badges.push(badge("trial_milestone_ready", "下一批测试已准备", "info"));
+      if (trialMilestone.status === "needs_review" || safe.trialMilestoneStatus === "needs_review") badges.push(badge("trial_milestone_review", "测试批次仍在进行", "warning"));
+      if (trialMilestone.status === "blocked" || safe.trialMilestoneStatus === "blocked") badges.push(badge("trial_milestone_blocked", "测试批次已阻断", "blocked"));
       if (beta.status === "blocked" || guided.status === "blocked" || guided.status === "failed_safe") badges.push(badge("beta_acceptance_blocked", "Beta 验收被阻断", "blocked"));
       if (copyStatus === "pass" || releaseReadiness.copyValidationStatus === "pass") badges.push(badge("safety_copy_unified", "安全文案已统一", "info"));
       badges.push(badge("not_exportable", "不可导出", "warning"));

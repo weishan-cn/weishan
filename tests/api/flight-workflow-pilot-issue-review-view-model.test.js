@@ -14,7 +14,7 @@ function main() {
   const triage = window.WeishanFlightWorkflowSupportTriageDashboard.buildFlightWorkflowSupportTriageDashboard({ issueCategory:"platform_mismatch", issueReviewBoard:board });
   const api = window.WeishanFlightWorkflowPilotIssueReviewViewModel;
   const vm = api.buildFlightWorkflowPilotIssueReviewViewModel({ issueReviewBoard:board, supportTriageDashboard:triage });
-  assert.equal(api.FLIGHT_WORKFLOW_PILOT_ISSUE_REVIEW_VIEW_MODEL_VERSION, "2.1.79");
+  assert.equal(api.FLIGHT_WORKFLOW_PILOT_ISSUE_REVIEW_VIEW_MODEL_VERSION, "2.1.80");
   assert.equal(vm.title, "只读试点问题复核");
   assert.ok(vm.cards.find((card) => card.cardId === "issue"));
   assert.ok(vm.cards.find((card) => card.cardId === "triage"));

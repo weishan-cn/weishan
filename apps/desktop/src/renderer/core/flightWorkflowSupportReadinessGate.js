@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SUPPORT_READINESS_GATE_VERSION = "2.1.79";
+  const FLIGHT_WORKFLOW_SUPPORT_READINESS_GATE_VERSION = "2.1.80";
   const GATE_NAME = "flight_workflow_support_readiness_gate_v1";
   const CAVEAT = "该判断只适用于只读试点问题处理，不代表客服工单或交易能力。";
 
@@ -20,6 +20,8 @@
   function pilotInvitation(input) { const safe = obj(input); return first(safe.pilotInvitationViewModelSummary, safe.pilotInvitationSummary); }
   function snapshot(input) { const safe = obj(input); return first(safe.pilotReadinessSnapshotSummary, safe.publicPilotReadinessSnapshotSummary, safe.snapshotSummary); }
   function playbook(input) { const safe = obj(input); return first(safe.supportPlaybookSummary, safe.supportPlaybookConsoleSummary, safe.playbookSummary); }
+  function cohortProgress(input) { const safe = obj(input); return first(safe.cohortProgressSummary, safe.cohortProgressTrackerSummary, safe.publicPilotCohortProgressTrackerSummary); }
+  function trialMilestone(input) { const safe = obj(input); return first(safe.trialMilestoneSummary, safe.trialMilestoneBoardSummary, safe.readOnlyTrialMilestoneBoardSummary); }
   function hasTradingUrl(value) {
     const safe = obj(value);
     return Boolean(safe.bookingUrl || safe.checkoutUrl || safe.paymentUrl || safe.orderUrl || (safe.safety && (safe.safety.bookingUrl || safe.safety.checkoutUrl || safe.safety.paymentUrl || safe.safety.orderUrl)));
@@ -36,6 +38,8 @@
     const pivm = pilotInvitation(safe);
     const s = snapshot(safe);
     const p = playbook(safe);
+    const cp = cohortProgress(safe);
+    const tm = trialMilestone(safe);
     const pattern = obj(r.patternSummary);
     const health = obj(r.issuePatternHealth);
     const readiness = obj(c.readiness);
@@ -50,6 +54,11 @@
       safetyCopyStable:pattern.dominantPattern !== "safety_copy_unclear" && safe.safetyCopyStable !== false && p.status !== "blocked",
       noSensitiveLeakRisk:noSensitiveLeakRisk,
       noTradingRisk:noTradingRisk,
+      cohortProgressSummary:clone(cp),
+      trialMilestoneSummary:clone(tm),
+      cohortProgressStatus:text(cp.status || ""),
+      trialMilestoneStatus:text(tm.status || ""),
+      safeToAdvanceNextCohort:tm.safeToAdvanceNextCohort === true || cp.safeToAdvanceNextCohort === true,
       pilotReadinessSnapshotSummary:clone(s),
       pilotInvitationGateSummary:clone(ig),
       testerCohortEnrollmentConsoleSummary:clone(tc),
@@ -103,6 +112,11 @@
       riskNotes:Array.isArray(safe.riskNotes) ? safe.riskNotes.map(text) : [],
       pilotReadinessSnapshotSummary:clone(safe.pilotReadinessSnapshotSummary || null),
       supportPlaybookSummary:clone(safe.supportPlaybookSummary || null),
+      cohortProgressSummary:clone(safe.cohortProgressSummary || null),
+      trialMilestoneSummary:clone(safe.trialMilestoneSummary || null),
+      cohortProgressStatus:text(safe.cohortProgressStatus || ""),
+      trialMilestoneStatus:text(safe.trialMilestoneStatus || ""),
+      safeToAdvanceNextCohort:safe.safeToAdvanceNextCohort === true || obj(safe.cohortProgressSummary).safeToAdvanceNextCohort === true || obj(safe.trialMilestoneSummary).safeToAdvanceNextCohort === true,
       pilotSnapshotStatus:text(safe.pilotSnapshotStatus || ""),
       supportPlaybookStatus:text(safe.supportPlaybookStatus || ""),
       pilotSnapshotNextStep:text(safe.pilotSnapshotNextStep || ""),

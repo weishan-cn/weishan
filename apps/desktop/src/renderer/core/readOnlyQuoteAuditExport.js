@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_AUDIT_EXPORT_VERSION = "2.1.79";
+  const READ_ONLY_QUOTE_AUDIT_EXPORT_VERSION = "2.1.80";
   const EXPORT_NAME = "read_only_quote_audit_export_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const CAVEAT = "本导出仅为只读候选证据，平台最终为准，未锁价，不代表可出票。";

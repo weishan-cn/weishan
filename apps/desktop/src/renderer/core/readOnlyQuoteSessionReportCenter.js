@@ -1,13 +1,14 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.79";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.80";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value == null ? "" : value).trim(); }
+  function obj(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
 
   function stripUnsafe(value) {
     if (Array.isArray(value)) return value.map(stripUnsafe).filter(function (item) { return item !== undefined; });
@@ -147,6 +148,8 @@
       betaExpansionGateSummary: stripUnsafe(safe.betaExpansionGateSummary || null),
       publicPilotChecklistSummary: stripUnsafe(safe.publicPilotChecklistSummary || null),
       pilotReadinessSummary: stripUnsafe(safe.pilotReadinessSummary || null),
+      cohortProgressSummary: stripUnsafe(safe.cohortProgressSummary || null),
+      trialMilestoneSummary: stripUnsafe(safe.trialMilestoneSummary || null),
       safeForSmallPublicPilot: safe.safeForSmallPublicPilot === true,
        pilotNextStep: safeText(safe.pilotNextStep || ""),
       pilotOnboardingSummary: stripUnsafe(safe.pilotOnboardingSummary || null),
@@ -160,6 +163,9 @@
       pilotInvitationGateSummary: stripUnsafe(safe.pilotInvitationGateSummary || null),
       testerCohortEnrollmentConsoleSummary: stripUnsafe(safe.testerCohortEnrollmentConsoleSummary || null),
       pilotInvitationViewModelSummary: stripUnsafe(safe.pilotInvitationViewModelSummary || null),
+      cohortProgressStatus: safeText(safe.cohortProgressStatus || ""),
+      trialMilestoneStatus: safeText(safe.trialMilestoneStatus || ""),
+      safeToAdvanceNextCohort: safe.safeToAdvanceNextCohort === true || obj(safe.cohortProgressSummary).safeToAdvanceNextCohort === true || obj(safe.trialMilestoneSummary).safeToAdvanceNextCohort === true,
       pilotSnapshotStatus: safeText(safe.pilotSnapshotStatus || ""),
       supportPlaybookStatus: safeText(safe.supportPlaybookStatus || ""),
       pilotSnapshotNextStep: safeText(safe.pilotSnapshotNextStep || ""),
@@ -474,9 +480,14 @@
       pilotConsentRequired: report.safetyReport.pilotConsentRequired === true,
       pilotReadinessSnapshotSummary: report.safetyReport.pilotReadinessSnapshotSummary || null,
       supportPlaybookSummary: report.safetyReport.supportPlaybookSummary || null,
+      cohortProgressSummary: report.safetyReport.cohortProgressSummary || null,
+      trialMilestoneSummary: report.safetyReport.trialMilestoneSummary || null,
       pilotInvitationGateSummary: report.safetyReport.pilotInvitationGateSummary || null,
       testerCohortEnrollmentConsoleSummary: report.safetyReport.testerCohortEnrollmentConsoleSummary || null,
       pilotInvitationViewModelSummary: report.safetyReport.pilotInvitationViewModelSummary || null,
+      cohortProgressStatus: report.safetyReport.cohortProgressStatus || "",
+      trialMilestoneStatus: report.safetyReport.trialMilestoneStatus || "",
+      safeToAdvanceNextCohort: report.safetyReport.safeToAdvanceNextCohort === true,
       pilotSnapshotStatus: report.safetyReport.pilotSnapshotStatus || "",
       supportPlaybookStatus: report.safetyReport.supportPlaybookStatus || "",
       pilotSnapshotNextStep: report.safetyReport.pilotSnapshotNextStep || "",

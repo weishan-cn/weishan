@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PUBLIC_PILOT_READINESS_SNAPSHOT_VERSION = "2.1.79";
+  const FLIGHT_WORKFLOW_PUBLIC_PILOT_READINESS_SNAPSHOT_VERSION = "2.1.80";
   const SNAPSHOT_NAME = "flight_workflow_public_pilot_readiness_snapshot_v1";
   const CAVEAT = "该快照只适用于只读候选证据流程，不代表真实票价、库存或可出票。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
@@ -22,6 +22,8 @@
   function invitationGate(input) { const safe = obj(input); return first(safe.pilotInvitationGateSummary, safe.readOnlyPilotInvitationGateSummary, safe.invitationGateSummary); }
   function testerCohort(input) { const safe = obj(input); return first(safe.testerCohortEnrollmentConsoleSummary, safe.testerCohortSummary, safe.cohortSummary); }
   function pilotInvitation(input) { const safe = obj(input); return first(safe.pilotInvitationViewModelSummary, safe.pilotInvitationSummary); }
+  function cohortProgressTracker(input) { const safe = obj(input); return first(safe.cohortProgressSummary, safe.cohortProgressTrackerSummary, safe.publicPilotCohortProgressTrackerSummary); }
+  function trialMilestoneBoard(input) { const safe = obj(input); return first(safe.trialMilestoneSummary, safe.trialMilestoneBoardSummary, safe.readOnlyTrialMilestoneBoardSummary); }
   function issuePattern(input) { const safe = obj(input); return first(safe.issuePatternSummary, safe.issuePatternRadar, safe.issuePatternViewModelSummary); }
   function supportReadiness(input) { const safe = obj(input); return first(safe.supportReadinessSummary, safe.supportReadinessGate); }
   function issueReview(input) { const safe = obj(input); return first(safe.issueReviewSummary, safe.issueReviewBoard, safe.publicPilotIssueReviewBoard); }
@@ -37,6 +39,8 @@
     const invitationGateSummary = invitationGate(safe);
     const testerCohortSummary = testerCohort(safe);
     const pilotInvitationSummary = pilotInvitation(safe);
+    const cohortProgressTrackerSummary = cohortProgressTracker(safe);
+    const trialMilestoneBoardSummary = trialMilestoneBoard(safe);
     const issuePatternSummary = issuePattern(safe);
     const supportReadinessSummary = supportReadiness(safe);
     const issueReviewSummary = issueReview(safe);
@@ -44,7 +48,7 @@
     const operatorSummary = operator(safe);
     const sentinelSummary = sentinel(safe);
     const safetySummary = obj(safe.safety || sentinelSummary.safety || {});
-    const blockedRisk = safe.rawUserTextStored === true || safe.rawResponseStored === true || safe.secretStored === true || safetySummary.rawUserTextStored === true || safetySummary.rawResponseStored === true || safetySummary.secretStored === true || hasTradingUrl(safe) || hasTradingUrl(betaSummary) || hasTradingUrl(checklistSummary) || hasTradingUrl(onboardingSummary) || hasTradingUrl(invitationGateSummary) || hasTradingUrl(testerCohortSummary) || hasTradingUrl(pilotInvitationSummary) || hasTradingUrl(issuePatternSummary) || hasTradingUrl(supportReadinessSummary) || hasTradingUrl(issueReviewSummary) || hasTradingUrl(triageSummary) || hasTradingUrl(operatorSummary) || hasTradingUrl(sentinelSummary);
+    const blockedRisk = safe.rawUserTextStored === true || safe.rawResponseStored === true || safe.secretStored === true || safetySummary.rawUserTextStored === true || safetySummary.rawResponseStored === true || safetySummary.secretStored === true || hasTradingUrl(safe) || hasTradingUrl(betaSummary) || hasTradingUrl(checklistSummary) || hasTradingUrl(onboardingSummary) || hasTradingUrl(invitationGateSummary) || hasTradingUrl(testerCohortSummary) || hasTradingUrl(pilotInvitationSummary) || hasTradingUrl(cohortProgressTrackerSummary) || hasTradingUrl(trialMilestoneBoardSummary) || hasTradingUrl(issuePatternSummary) || hasTradingUrl(supportReadinessSummary) || hasTradingUrl(issueReviewSummary) || hasTradingUrl(triageSummary) || hasTradingUrl(operatorSummary) || hasTradingUrl(sentinelSummary);
     const safetyMatrixPass = safe.safetyMatrixPass === true || obj(safe.safetyTestMatrixSummary).status === "pass" || obj(safe.safetyTestMatrixSummary).status === "ready" || sentinelPass(sentinelSummary) || sentinelPass(safe.safetyRegressionSummary);
     const betaExpansionApproved = safe.betaExpansionApproved === true || betaSummary.status === "approved" || obj(betaSummary.decision).safeToExpandReadOnlyBeta === true;
     const onboardingReady = safe.onboardingReady === true || obj(onboardingSummary.decision).canEnterReadOnlyPilot === true || onboardingSummary.status === "allowed";
@@ -81,6 +85,11 @@
       invitationGateSummary: clone(invitationGateSummary),
       testerCohortEnrollmentConsoleSummary: clone(testerCohortSummary),
       pilotInvitationViewModelSummary: clone(pilotInvitationSummary),
+      cohortProgressSummary: clone(cohortProgressTrackerSummary),
+      trialMilestoneSummary: clone(trialMilestoneBoardSummary),
+      cohortProgressStatus: text(cohortProgressTrackerSummary.status || ""),
+      trialMilestoneStatus: text(trialMilestoneBoardSummary.status || ""),
+      safeToAdvanceNextCohort: trialMilestoneBoardSummary.safeToAdvanceNextCohort === true || cohortProgressTrackerSummary.safeToAdvanceNextCohort === true,
       issueReviewSummary: clone(issueReviewSummary),
       supportTriageSummary: clone(triageSummary),
       operatorConsoleSummary: clone(operatorSummary),
@@ -105,6 +114,8 @@
       row("beta_expansion", "beta expansion gate", obj(betaSummary.userFacingSummary).resultLabel || obj(betaSummary.decision).label || betaSummary.status || "continue_internal_testing", betaSummary.status === "blocked" ? "blocked" : (betaSummary.status === "approved" ? "pass" : "warning")),
       row("onboarding", "pilot onboarding guard", obj(onboardingSummary.userFacingSummary).resultLabel || obj(onboardingSummary.decision).label || onboardingSummary.status || "needs_review", onboardingSummary.status === "allowed" ? "pass" : (onboardingSummary.status === "blocked" ? "blocked" : "warning")),
       row("support", "support readiness gate", obj(supportReadinessSummary.userFacingSummary).resultLabel || obj(supportReadinessSummary.decision).label || supportReadinessSummary.status || "continue_small_pilot", supportReadinessSummary.status === "ready" ? "pass" : (supportReadinessSummary.status === "blocked" ? "blocked" : "warning")),
+      row("cohort_progress", "只读试点进度追踪", obj(cohortProgressTrackerSummary.userFacingSummary).resultLabel || cohortProgressTrackerSummary.cohortProgressStatus || "仍需更多测试者", cohortProgressTrackerSummary.status === "blocked" ? "blocked" : (cohortProgressTrackerSummary.status === "ready" ? "pass" : "warning")),
+      row("trial_milestone", "只读试点里程碑", obj(trialMilestoneBoardSummary.userFacingSummary).resultLabel || trialMilestoneBoardSummary.trialMilestoneStatus || "仍需更多测试者", trialMilestoneBoardSummary.status === "blocked" ? "blocked" : (trialMilestoneBoardSummary.status === "ready" ? "pass" : "warning")),
       row("issue_pattern", "issue pattern radar", obj(issuePatternSummary.userFacingSummary).resultLabel || obj(issuePatternSummary.patternSummary).message || issuePatternSummary.status || "insufficient_data", issuePatternSummary.status === "ready" ? "pass" : (issuePatternSummary.status === "needs_review" ? "warning" : "pass")),
       row("issue_review", "issue review board", obj(issueReviewSummary.userFacingSummary).resultLabel || issueReviewSummary.status || "ready", issueReviewSummary.status === "blocked" ? "blocked" : (issueReviewSummary.status === "needs_review" ? "warning" : "pass")),
       row("support_triage", "support triage dashboard", obj(triageSummary.userFacingSummary).resultLabel || obj(triageSummary.triage).label || triageSummary.status || "ready", triageSummary.status === "blocked" ? "blocked" : (triageSummary.status === "needs_internal_review" ? "warning" : "pass")),
@@ -129,6 +140,11 @@
       pilotInvitationGateSummary: clone(safe.pilotInvitationGateSummary || null),
       testerCohortEnrollmentConsoleSummary: clone(safe.testerCohortEnrollmentConsoleSummary || null),
       pilotInvitationViewModelSummary: clone(safe.pilotInvitationViewModelSummary || null),
+      cohortProgressSummary: clone(safe.cohortProgressSummary || null),
+      trialMilestoneSummary: clone(safe.trialMilestoneSummary || null),
+      cohortProgressStatus: text(safe.cohortProgressStatus || ""),
+      trialMilestoneStatus: text(safe.trialMilestoneStatus || ""),
+      safeToAdvanceNextCohort: safe.safeToAdvanceNextCohort === true || obj(safe.cohortProgressSummary).safeToAdvanceNextCohort === true || obj(safe.trialMilestoneSummary).safeToAdvanceNextCohort === true,
       pilotSnapshotStatus: text(safe.pilotSnapshotStatus || status),
       pilotInvitationStatus: text(safe.pilotInvitationStatus || ""),
       testerCohortStatus: text(safe.testerCohortStatus || ""),
@@ -150,6 +166,11 @@
         safety: safety(),
         pilotSnapshotStatus: health.status,
         supportPlaybookStatus: obj(input && input.supportPlaybookSummary).status || "ready",
+        cohortProgressSummary: health.cohortProgressSummary,
+        trialMilestoneSummary: health.trialMilestoneSummary,
+        cohortProgressStatus: health.cohortProgressStatus,
+        trialMilestoneStatus: health.trialMilestoneStatus,
+        safeToAdvanceNextCohort: health.safeToAdvanceNextCohort,
         pilotSnapshotNextStep: label
       });
     } catch (error) {
