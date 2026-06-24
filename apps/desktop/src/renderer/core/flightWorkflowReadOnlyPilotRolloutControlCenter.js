@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_VERSION = "2.1.81";
+  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_VERSION = "2.1.82";
   const CENTER_NAME = "flight_workflow_read_only_pilot_rollout_control_center_v1";
   const CAVEAT = "该控制中心只管理只读试点流程，不代表真实账号、客服工单、交易请求或出票能力。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText|真实姓名|手机号|邮箱/ig;
@@ -34,13 +34,15 @@
       playbook: buildIf(safe, "WeishanFlightWorkflowSupportPlaybookConsole", "buildFlightWorkflowSupportPlaybookConsole", ["supportPlaybookSummary", "supportPlaybookConsoleSummary", "playbookSummary"]),
       issuePattern: buildIf(safe, "WeishanFlightWorkflowPublicPilotIssuePatternRadar", "buildFlightWorkflowPublicPilotIssuePatternRadar", ["issuePatternSummary", "issuePatternRadar", "issuePatternViewModelSummary"]),
       supportReadiness: buildIf(safe, "WeishanFlightWorkflowSupportReadinessGate", "buildFlightWorkflowSupportReadinessGate", ["supportReadinessSummary", "supportReadinessGate"]),
-      sentinel: buildIf(safe, "WeishanFlightWorkflowSafetyRegressionSentinel", "buildFlightWorkflowSafetyRegressionReport", ["safetyRegressionSummary", "safetyRegressionSentinel", "sentinelReport"])
+      sentinel: buildIf(safe, "WeishanFlightWorkflowSafetyRegressionSentinel", "buildFlightWorkflowSafetyRegressionReport", ["safetyRegressionSummary", "safetyRegressionSentinel", "sentinelReport"]),
+      pilotOps: buildIf(safe, "WeishanFlightWorkflowReadOnlyPilotOpsSummary", "buildFlightWorkflowReadOnlyPilotOpsSummary", ["pilotOpsSummary", "readOnlyPilotOpsSummary", "pilotOps"]),
+      nextCohortDecision: buildIf(safe, "WeishanFlightWorkflowNextCohortDecisionBoard", "buildFlightWorkflowNextCohortDecisionBoard", ["nextCohortDecisionSummary", "nextCohortDecisionBoard", "decisionBoard"])
     };
   }
   function evaluateFlightWorkflowReadOnlyPilotRolloutDecision(input) {
     const safe = obj(input);
     const parts = collect(safe);
-    const values = [safe, parts.cohortProgress, parts.milestone, parts.invitation, parts.testerCohort, parts.snapshot, parts.playbook, parts.issuePattern, parts.supportReadiness, parts.sentinel];
+    const values = [safe, parts.cohortProgress, parts.milestone, parts.invitation, parts.testerCohort, parts.snapshot, parts.playbook, parts.issuePattern, parts.supportReadiness, parts.sentinel, parts.pilotOps, parts.nextCohortDecision];
     const rolloutHealth = {
       cohortProgressReady: safe.cohortProgressReady === true || parts.cohortProgress.status === "ready" || parts.cohortProgress.cohortProgressStatus === "ready",
       milestoneReady: safe.milestoneReady === true || parts.milestone.status === "ready" || parts.milestone.trialMilestoneStatus === "ready",
@@ -57,6 +59,8 @@
     if (!rolloutHealth.noSensitiveDataRisk) blockedReasons.push("sensitive_data_risk");
     if (!rolloutHealth.noTradingRisk) blockedReasons.push("trading_risk");
     if (!rolloutHealth.noOpenBlockingIssue) blockedReasons.push("open_blocking_issue");
+    if (parts.pilotOps.status === "blocked") blockedReasons.push("pilot_ops_blocked");
+    if (parts.nextCohortDecision.status === "blocked") blockedReasons.push("next_cohort_blocked");
     let decisionId = "continue_current_batch";
     let status = "continue_current_batch";
     let label = "继续当前小范围试点";
@@ -69,10 +73,10 @@
       status = "needs_review"; decisionId = "internal_review"; label = "需要内部复核"; message = "支持准备未完全就绪，需要内部复核。";
     } else if (!rolloutHealth.issuePatternStable) {
       status = "pause_expansion"; decisionId = "pause_expansion"; label = "暂停扩大测试"; message = "问题趋势不稳定，暂停进入下一批。";
-    } else if (Object.keys(rolloutHealth).every(function (key) { return rolloutHealth[key] === true; })) {
+    } else if (parts.pilotOps.status === "healthy" || parts.nextCohortDecision.status === "advance" || Object.keys(rolloutHealth).every(function (key) { return rolloutHealth[key] === true; })) {
       status = "ready"; decisionId = "advance_next_cohort"; label = "可以进入下一批只读测试"; message = "只读试点发布控制条件已满足。";
     }
-    return clone({ status, decision:{ decisionId, label, message, safeToAdvanceNextCohort:decisionId === "advance_next_cohort", safeToContinueCurrentPilot:status === "ready" || status === "continue_current_batch" }, rolloutHealth, blockedReasons, parts, redacted:true });
+    return clone({ status, decision:{ decisionId, label, message, safeToAdvanceNextCohort:decisionId === "advance_next_cohort", safeToContinueCurrentPilot:status === "ready" || status === "continue_current_batch" }, rolloutHealth, blockedReasons, pilotOpsSummary:clone(parts.pilotOps), nextCohortDecisionSummary:clone(parts.nextCohortDecision), pilotOpsStatus:text(parts.pilotOps.status || ""), nextCohortDecisionStatus:text(parts.nextCohortDecision.status || ""), pilotOpsPrimaryRisk:clone(parts.pilotOps.primaryRisk || null), parts, redacted:true });
   }
   function row(rowId, label, value, status) { return { rowId, label:text(label), value:text(value), status:/^(pass|warning|blocked)$/.test(status) ? status : "warning", redacted:true }; }
   function buildFlightWorkflowReadOnlyPilotRolloutControlRows(input) {
@@ -84,6 +88,8 @@
       row("invitation", "试点邀请闸门", health.invitationReady ? "邀请闸门只读就绪" : "不发送真实邀请", health.invitationReady ? "pass" : "warning"),
       row("support", "支持准备", health.supportReady ? "支持准备就绪" : "需要内部复核", health.supportReady ? "pass" : "warning"),
       row("issue_pattern", "问题风险", health.issuePatternStable ? "问题趋势稳定" : "暂停扩大测试", health.issuePatternStable ? "pass" : "warning"),
+      row("pilot_ops", "试点运营摘要", health.safeToContinuePilot ? "试点运行健康" : (health.supportReady ? "继续当前批次" : "需要内部复核"), health.pilotOpsStatus === "blocked" ? "blocked" : health.pilotOpsStatus === "healthy" ? "pass" : "warning"),
+      row("next_cohort", "下一批决策", health.safeToAdvanceNextCohort ? "可以进入下一批只读测试" : (health.nextCohortDecisionStatus === "pause" ? "暂停扩大测试" : "继续当前批次"), health.nextCohortDecisionStatus === "blocked" ? "blocked" : health.nextCohortDecisionStatus === "advance" ? "pass" : "warning"),
       row("safety", "安全哨兵", health.safetySentinelPass && health.noSensitiveDataRisk && health.noTradingRisk ? "发布控制正常" : "已阻断", health.safetySentinelPass && health.noSensitiveDataRisk && health.noTradingRisk ? "pass" : "blocked")
     ]);
   }
@@ -91,7 +97,7 @@
     const safe = obj(center);
     const status = /^(ready|continue_current_batch|pause_expansion|needs_review|blocked|failed_safe)$/.test(safe.status) ? safe.status : "failed_safe";
     const decision = obj(safe.decision);
-    return clone({ centerName:CENTER_NAME, appVersion:FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_VERSION, status, decision:{ decisionId:text(decision.decisionId || "blocked"), label:text(decision.label || "已阻断"), message:text(decision.message || "安全降级。"), safeToAdvanceNextCohort:decision.safeToAdvanceNextCohort === true, safeToContinueCurrentPilot:decision.safeToContinueCurrentPilot === true }, rolloutHealth:Object.assign({ cohortProgressReady:false, milestoneReady:false, invitationReady:false, supportReady:false, issuePatternStable:false, safetySentinelPass:false, noOpenBlockingIssue:false, noSensitiveDataRisk:false, noTradingRisk:false }, obj(safe.rolloutHealth)), rows:toArray(safe.rows).map(function (item) { return row(item.rowId || "row", item.label || "", item.value || "", item.status); }), blockedReasons:toArray(safe.blockedReasons).map(text), userFacingSummary:Object.assign({ title:"只读试点发布控制中心", resultLabel:status === "ready" ? "可以进入下一批只读测试" : status === "continue_current_batch" ? "继续当前小范围试点" : status === "pause_expansion" ? "暂停扩大测试" : status === "needs_review" ? "需要内部复核" : "已阻断", caveat:CAVEAT, redacted:true }, obj(safe.userFacingSummary)), safety:Object.assign(safety(), obj(safe.safety)), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true });
+    return clone({ centerName:CENTER_NAME, appVersion:FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_VERSION, status, decision:{ decisionId:text(decision.decisionId || "blocked"), label:text(decision.label || "已阻断"), message:text(decision.message || "安全降级。"), safeToAdvanceNextCohort:decision.safeToAdvanceNextCohort === true, safeToContinueCurrentPilot:decision.safeToContinueCurrentPilot === true }, rolloutHealth:Object.assign({ cohortProgressReady:false, milestoneReady:false, invitationReady:false, supportReady:false, issuePatternStable:false, safetySentinelPass:false, noOpenBlockingIssue:false, noSensitiveDataRisk:false, noTradingRisk:false }, obj(safe.rolloutHealth)), rows:toArray(safe.rows).map(function (item) { return row(item.rowId || "row", item.label || "", item.value || "", item.status); }), blockedReasons:toArray(safe.blockedReasons).map(text), pilotOpsSummary:clone(safe.pilotOpsSummary || null), nextCohortDecisionSummary:clone(safe.nextCohortDecisionSummary || null), pilotOpsStatus:text(safe.pilotOpsStatus || ""), nextCohortDecisionStatus:text(safe.nextCohortDecisionStatus || ""), pilotOpsPrimaryRisk:clone(safe.pilotOpsPrimaryRisk || null), userFacingSummary:Object.assign({ title:"只读试点发布控制中心", resultLabel:status === "ready" ? "可以进入下一批只读测试" : status === "continue_current_batch" ? "继续当前小范围试点" : status === "pause_expansion" ? "暂停扩大测试" : status === "needs_review" ? "需要内部复核" : "已阻断", caveat:CAVEAT, redacted:true }, obj(safe.userFacingSummary)), safety:Object.assign(safety(), obj(safe.safety)), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true });
   }
   function buildFlightWorkflowReadOnlyPilotRolloutControlCenter(input) {
     try {
@@ -102,7 +108,7 @@
       return sanitizeFlightWorkflowReadOnlyPilotRolloutControlCenter({ status:"failed_safe", decision:{ decisionId:"blocked", label:"已阻断", message:"安全降级。", safeToAdvanceNextCohort:false, safeToContinueCurrentPilot:false }, rows:[], blockedReasons:["failed_safe"] });
     }
   }
-  function buildFlightWorkflowReadOnlyPilotRolloutControlCenterAuditDraft(input) { const center = buildFlightWorkflowReadOnlyPilotRolloutControlCenter(input || {}); return clone({ eventType:"FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_AUDIT_DRAFT", centerName:CENTER_NAME, appVersion:FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_VERSION, status:center.status, decisionId:center.decision.decisionId, blockedReasons:center.blockedReasons, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true }); }
+  function buildFlightWorkflowReadOnlyPilotRolloutControlCenterAuditDraft(input) { const center = buildFlightWorkflowReadOnlyPilotRolloutControlCenter(input || {}); return clone({ eventType:"FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_AUDIT_DRAFT", centerName:CENTER_NAME, appVersion:FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_VERSION, status:center.status, decisionId:center.decision.decisionId, blockedReasons:center.blockedReasons, pilotOpsStatus:center.pilotOpsStatus, nextCohortDecisionStatus:center.nextCohortDecisionStatus, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true }); }
 
   window.WeishanFlightWorkflowReadOnlyPilotRolloutControlCenter = { FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_VERSION, CENTER_NAME, buildFlightWorkflowReadOnlyPilotRolloutControlCenter, evaluateFlightWorkflowReadOnlyPilotRolloutDecision, buildFlightWorkflowReadOnlyPilotRolloutControlRows, buildFlightWorkflowReadOnlyPilotRolloutControlCenterAuditDraft, sanitizeFlightWorkflowReadOnlyPilotRolloutControlCenter };
 })();

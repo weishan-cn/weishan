@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_TRIAL_MILESTONE_BOARD_VERSION = "2.1.81";
+  const FLIGHT_WORKFLOW_READ_ONLY_TRIAL_MILESTONE_BOARD_VERSION = "2.1.82";
   const BOARD_NAME = "flight_workflow_read_only_trial_milestone_board_v1";
   const CAVEAT = "该里程碑板只追踪脱敏测试槽位，不保存真实身份、不发送真实邀请。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
@@ -80,6 +80,11 @@
       cohortProgressSummary: clone(trackerSummary),
       rolloutControlSummary: clone(safe.rolloutControlSummary || null),
       cohortHealthSummary: clone(safe.cohortHealthSummary || null),
+      pilotOpsSummary: clone(safe.pilotOpsSummary || null),
+      nextCohortDecisionSummary: clone(safe.nextCohortDecisionSummary || null),
+      pilotOpsStatus: text(safe.pilotOpsStatus || ""),
+      nextCohortDecisionStatus: text(safe.nextCohortDecisionStatus || ""),
+      pilotOpsPrimaryRisk: clone(safe.pilotOpsPrimaryRisk || null),
       rolloutDecisionStatus: text(safe.rolloutDecisionStatus || obj(safe.rolloutControlSummary).status || ""),
       cohortHealthStatus: text(safe.cohortHealthStatus || obj(safe.cohortHealthSummary).status || ""),
       rolloutNextStep: text(safe.rolloutNextStep || obj(obj(safe.rolloutControlSummary).decision).label || ""),
@@ -128,7 +133,7 @@
   }
   function buildFlightWorkflowReadOnlyTrialMilestoneBoardAuditDraft(input) {
     const board = buildFlightWorkflowReadOnlyTrialMilestoneBoard(input || {});
-    return clone({ eventType:"FLIGHT_WORKFLOW_READ_ONLY_TRIAL_MILESTONE_BOARD_AUDIT_DRAFT", boardName:BOARD_NAME, appVersion:FLIGHT_WORKFLOW_READ_ONLY_TRIAL_MILESTONE_BOARD_VERSION, status:board.status, trialMilestoneStatus:board.trialMilestoneStatus, cohortProgressStatus:board.cohortProgressStatus, safeToAdvanceNextCohort:board.safeToAdvanceNextCohort === true, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true });
+    return clone({ eventType:"FLIGHT_WORKFLOW_READ_ONLY_TRIAL_MILESTONE_BOARD_AUDIT_DRAFT", boardName:BOARD_NAME, appVersion:FLIGHT_WORKFLOW_READ_ONLY_TRIAL_MILESTONE_BOARD_VERSION, status:board.status, trialMilestoneStatus:board.trialMilestoneStatus, cohortProgressStatus:board.cohortProgressStatus, pilotOpsStatus:board.pilotOpsStatus, nextCohortDecisionStatus:board.nextCohortDecisionStatus, safeToAdvanceNextCohort:board.safeToAdvanceNextCohort === true, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true });
   }
   window.WeishanFlightWorkflowReadOnlyTrialMilestoneBoard = { FLIGHT_WORKFLOW_READ_ONLY_TRIAL_MILESTONE_BOARD_VERSION, BOARD_NAME, buildFlightWorkflowReadOnlyTrialMilestoneBoard, evaluateFlightWorkflowReadOnlyTrialMilestoneBoard, buildFlightWorkflowReadOnlyTrialMilestoneBoardAuditDraft, sanitizeFlightWorkflowReadOnlyTrialMilestoneBoard };
 })();

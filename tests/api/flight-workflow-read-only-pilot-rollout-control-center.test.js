@@ -8,17 +8,22 @@ function json(value) { return JSON.stringify(value); }
 function main() {
   const windowRef = load([
     "apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js",
+    "apps/desktop/src/renderer/core/flightWorkflowReadOnlyPilotOpsSummary.js",
+    "apps/desktop/src/renderer/core/flightWorkflowNextCohortDecisionBoard.js",
     "apps/desktop/src/renderer/core/flightWorkflowReadOnlyPilotRolloutControlCenter.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowReadOnlyPilotRolloutControlCenter;
-  assert.equal(api.FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_VERSION, "2.1.81");
-  const ready = api.buildFlightWorkflowReadOnlyPilotRolloutControlCenter({ cohortProgressReady:true, milestoneReady:true, invitationReady:true, supportReady:true, issuePatternStable:true, safetySentinelPass:true, noOpenBlockingIssue:true, noSensitiveDataRisk:true, noTradingRisk:true });
+  assert.equal(api.FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_VERSION, "2.1.82");
+  const ready = api.buildFlightWorkflowReadOnlyPilotRolloutControlCenter({ cohortProgressReady:true, milestoneReady:true, invitationReady:true, supportReady:true, issuePatternStable:true, safetySentinelPass:true, noOpenBlockingIssue:true, noSensitiveDataRisk:true, noTradingRisk:true, cohortProgressSummary:{ status:"ready", redacted:true }, trialMilestoneSummary:{ status:"ready", safeToAdvanceNextCohort:true, redacted:true }, pilotReadinessSnapshotSummary:{ status:"ready", redacted:true } });
   assert.equal(ready.status, "ready");
   assert.equal(ready.decision.decisionId, "advance_next_cohort");
   assert.equal(ready.decision.safeToAdvanceNextCohort, true);
   assert.equal(ready.rolloutHealth.cohortProgressReady, true);
   assert.equal(ready.blockedReasons.length, 0);
-  assert.equal(ready.appVersion, "2.1.81");
+  assert.equal(ready.appVersion, "2.1.82");
+  assert.ok(ready.pilotOpsStatus);
+  assert.ok(ready.nextCohortDecisionStatus);
+  assert.ok(ready.pilotOpsPrimaryRisk);
   const cohortIncomplete = api.buildFlightWorkflowReadOnlyPilotRolloutControlCenter({ cohortProgressReady:false, milestoneReady:true, invitationReady:true, supportReady:true, issuePatternStable:true, safetySentinelPass:true, noOpenBlockingIssue:true, noSensitiveDataRisk:true, noTradingRisk:true });
   assert.equal(cohortIncomplete.status, "continue_current_batch");
   assert.equal(cohortIncomplete.decision.decisionId, "continue_current_batch");

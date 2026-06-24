@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_BETA_COHORT_VIEW_MODEL_VERSION = "2.1.81";
+  const FLIGHT_WORKFLOW_BETA_COHORT_VIEW_MODEL_VERSION = "2.1.82";
   const VIEW_MODEL_NAME = "flight_workflow_beta_cohort_view_model_v1";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

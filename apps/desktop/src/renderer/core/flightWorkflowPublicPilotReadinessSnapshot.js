@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PUBLIC_PILOT_READINESS_SNAPSHOT_VERSION = "2.1.81";
+  const FLIGHT_WORKFLOW_PUBLIC_PILOT_READINESS_SNAPSHOT_VERSION = "2.1.82";
   const SNAPSHOT_NAME = "flight_workflow_public_pilot_readiness_snapshot_v1";
   const CAVEAT = "该快照只适用于只读候选证据流程，不代表真实票价、库存或可出票。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
@@ -28,6 +28,8 @@
   function supportReadiness(input) { const safe = obj(input); return first(safe.supportReadinessSummary, safe.supportReadinessGate); }
   function rolloutControl(input) { const safe = obj(input); return first(safe.rolloutControlSummary, safe.readOnlyPilotRolloutControlCenter); }
   function cohortHealth(input) { const safe = obj(input); return first(safe.cohortHealthSummary, safe.cohortHealthDashboard); }
+  function pilotOps(input) { const safe = obj(input); return first(safe.pilotOpsSummary, safe.readOnlyPilotOpsSummary); }
+  function nextCohortDecision(input) { const safe = obj(input); return first(safe.nextCohortDecisionSummary, safe.nextCohortDecisionBoard); }
   function issueReview(input) { const safe = obj(input); return first(safe.issueReviewSummary, safe.issueReviewBoard, safe.publicPilotIssueReviewBoard); }
   function triage(input) { const safe = obj(input); return first(safe.supportTriageSummary, safe.supportTriageDashboard); }
   function operator(input) { const safe = obj(input); return first(safe.operatorConsoleSummary, safe.operatorConsoleViewModel); }
@@ -47,12 +49,14 @@
     const supportReadinessSummary = supportReadiness(safe);
     const rolloutControlSummary = rolloutControl(safe);
     const cohortHealthSummary = cohortHealth(safe);
+    const pilotOpsSummary = pilotOps(safe);
+    const nextCohortDecisionSummary = nextCohortDecision(safe);
     const issueReviewSummary = issueReview(safe);
     const triageSummary = triage(safe);
     const operatorSummary = operator(safe);
     const sentinelSummary = sentinel(safe);
     const safetySummary = obj(safe.safety || sentinelSummary.safety || {});
-    const blockedRisk = safe.rawUserTextStored === true || safe.rawResponseStored === true || safe.secretStored === true || safetySummary.rawUserTextStored === true || safetySummary.rawResponseStored === true || safetySummary.secretStored === true || hasTradingUrl(safe) || hasTradingUrl(betaSummary) || hasTradingUrl(checklistSummary) || hasTradingUrl(onboardingSummary) || hasTradingUrl(invitationGateSummary) || hasTradingUrl(testerCohortSummary) || hasTradingUrl(pilotInvitationSummary) || hasTradingUrl(cohortProgressTrackerSummary) || hasTradingUrl(trialMilestoneBoardSummary) || hasTradingUrl(issuePatternSummary) || hasTradingUrl(supportReadinessSummary) || hasTradingUrl(issueReviewSummary) || hasTradingUrl(triageSummary) || hasTradingUrl(operatorSummary) || hasTradingUrl(sentinelSummary);
+    const blockedRisk = safe.rawUserTextStored === true || safe.rawResponseStored === true || safe.secretStored === true || safetySummary.rawUserTextStored === true || safetySummary.rawResponseStored === true || safetySummary.secretStored === true || hasTradingUrl(safe) || hasTradingUrl(betaSummary) || hasTradingUrl(checklistSummary) || hasTradingUrl(onboardingSummary) || hasTradingUrl(invitationGateSummary) || hasTradingUrl(testerCohortSummary) || hasTradingUrl(pilotInvitationSummary) || hasTradingUrl(cohortProgressTrackerSummary) || hasTradingUrl(trialMilestoneBoardSummary) || hasTradingUrl(issuePatternSummary) || hasTradingUrl(supportReadinessSummary) || hasTradingUrl(issueReviewSummary) || hasTradingUrl(triageSummary) || hasTradingUrl(operatorSummary) || hasTradingUrl(sentinelSummary) || hasTradingUrl(pilotOpsSummary) || hasTradingUrl(nextCohortDecisionSummary);
     const safetyMatrixPass = safe.safetyMatrixPass === true || obj(safe.safetyTestMatrixSummary).status === "pass" || obj(safe.safetyTestMatrixSummary).status === "ready" || sentinelPass(sentinelSummary) || sentinelPass(safe.safetyRegressionSummary);
     const betaExpansionApproved = safe.betaExpansionApproved === true || betaSummary.status === "approved" || obj(betaSummary.decision).safeToExpandReadOnlyBeta === true;
     const onboardingReady = safe.onboardingReady === true || obj(onboardingSummary.decision).canEnterReadOnlyPilot === true || onboardingSummary.status === "allowed";
@@ -88,6 +92,11 @@
       supportReadinessSummary: clone(supportReadinessSummary),
       rolloutControlSummary: clone(rolloutControlSummary),
       cohortHealthSummary: clone(cohortHealthSummary),
+      pilotOpsSummary: clone(pilotOpsSummary),
+      nextCohortDecisionSummary: clone(nextCohortDecisionSummary),
+      pilotOpsStatus: text(pilotOpsSummary.status || ""),
+      nextCohortDecisionStatus: text(nextCohortDecisionSummary.status || ""),
+      pilotOpsPrimaryRisk: clone(obj(pilotOpsSummary).primaryRisk || null),
       rolloutDecisionStatus: text(rolloutControlSummary.status || ""),
       cohortHealthStatus: text(cohortHealthSummary.status || ""),
       rolloutNextStep: text(obj(rolloutControlSummary.decision).label || obj(rolloutControlSummary.userFacingSummary).resultLabel || ""),
@@ -164,6 +173,11 @@
       supportPlaybookStatus: text(safe.supportPlaybookStatus || "ready"),
       rolloutControlSummary: clone(safe.rolloutControlSummary || null),
       cohortHealthSummary: clone(safe.cohortHealthSummary || null),
+      pilotOpsSummary: clone(safe.pilotOpsSummary || null),
+      nextCohortDecisionSummary: clone(safe.nextCohortDecisionSummary || null),
+      pilotOpsStatus: text(safe.pilotOpsStatus || obj(safe.pilotOpsSummary).status || ""),
+      nextCohortDecisionStatus: text(safe.nextCohortDecisionStatus || obj(safe.nextCohortDecisionSummary).status || ""),
+      pilotOpsPrimaryRisk: clone(safe.pilotOpsPrimaryRisk || obj(safe.pilotOpsSummary).primaryRisk || null),
       rolloutDecisionStatus: text(safe.rolloutDecisionStatus || obj(safe.rolloutControlSummary).status || ""),
       cohortHealthStatus: text(safe.cohortHealthStatus || obj(safe.cohortHealthSummary).status || ""),
       rolloutNextStep: text(safe.rolloutNextStep || obj(obj(safe.rolloutControlSummary).decision).label || ""),
@@ -199,7 +213,12 @@
         cohortHealthSummary: health.cohortHealthSummary,
         rolloutDecisionStatus: health.rolloutDecisionStatus,
         cohortHealthStatus: health.cohortHealthStatus,
-        rolloutNextStep: health.rolloutNextStep
+        rolloutNextStep: health.rolloutNextStep,
+        pilotOpsSummary: health.pilotOpsSummary,
+        nextCohortDecisionSummary: health.nextCohortDecisionSummary,
+        pilotOpsStatus: health.pilotOpsStatus,
+        nextCohortDecisionStatus: health.nextCohortDecisionStatus,
+        pilotOpsPrimaryRisk: health.pilotOpsPrimaryRisk
       });
     } catch (error) {
       return sanitizeFlightWorkflowPublicPilotReadinessSnapshot({ status: "failed_safe", rows: [], snapshotHealth: {}, userFacingSummary: { title: "只读试点状态快照", resultLabel: "需要复核", caveat: CAVEAT, redacted: true } });
@@ -215,6 +234,8 @@
       rowCount: snapshot.rows.length,
       safetyMatrixPass: snapshot.snapshotHealth.safetyMatrixPass === true,
       safeToContinuePublicPilot: snapshot.snapshotHealth.safeToContinuePublicPilot === true,
+      pilotOpsStatus: snapshot.pilotOpsStatus,
+      nextCohortDecisionStatus: snapshot.nextCohortDecisionStatus,
       bookingUrl: null,
       checkoutUrl: null,
       paymentUrl: null,

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_ROLLOUT_CONTROL_VIEW_MODEL_VERSION = "2.1.81";
+  const FLIGHT_WORKFLOW_ROLLOUT_CONTROL_VIEW_MODEL_VERSION = "2.1.82";
   const VIEW_MODEL_NAME = "flight_workflow_rollout_control_view_model_v1";
   const CAVEAT = "该页面只管理只读试点流程，不保存真实身份、不发送真实邀请、不提供交易能力。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|真实姓名|手机号|邮箱/ig;
@@ -14,18 +14,26 @@
   function row(rowId, label, value, status) { return { rowId, label:text(label), value:text(value), status:/^(pass|warning|blocked)$/.test(status) ? status : "warning", redacted:true }; }
   function rolloutApi() { return window.WeishanFlightWorkflowReadOnlyPilotRolloutControlCenter || {}; }
   function cohortApi() { return window.WeishanFlightWorkflowCohortHealthDashboard || {}; }
+  function pilotOpsApi() { return window.WeishanFlightWorkflowReadOnlyPilotOpsSummary || {}; }
+  function decisionApi() { return window.WeishanFlightWorkflowNextCohortDecisionBoard || {}; }
   function buildRollout(input) { const safe = obj(input); if (safe.rolloutControlSummary && typeof safe.rolloutControlSummary === "object") return safe.rolloutControlSummary; const api = rolloutApi(); return typeof api.buildFlightWorkflowReadOnlyPilotRolloutControlCenter === "function" ? api.buildFlightWorkflowReadOnlyPilotRolloutControlCenter(safe) : {}; }
   function buildCohort(input) { const safe = obj(input); if (safe.cohortHealthSummary && typeof safe.cohortHealthSummary === "object") return safe.cohortHealthSummary; const api = cohortApi(); return typeof api.buildFlightWorkflowCohortHealthDashboard === "function" ? api.buildFlightWorkflowCohortHealthDashboard(safe) : {}; }
+  function buildPilotOps(input) { const safe = obj(input); if (safe.pilotOpsSummary && typeof safe.pilotOpsSummary === "object") return safe.pilotOpsSummary; const api = pilotOpsApi(); return typeof api.buildFlightWorkflowReadOnlyPilotOpsSummary === "function" ? api.buildFlightWorkflowReadOnlyPilotOpsSummary(safe) : {}; }
+  function buildDecision(input) { const safe = obj(input); if (safe.nextCohortDecisionSummary && typeof safe.nextCohortDecisionSummary === "object") return safe.nextCohortDecisionSummary; const api = decisionApi(); return typeof api.buildFlightWorkflowNextCohortDecisionBoard === "function" ? api.buildFlightWorkflowNextCohortDecisionBoard(safe) : {}; }
   function buildFlightWorkflowRolloutControlCards(input) {
     const rollout = buildRollout(input || {});
     const cohort = buildCohort(input || {});
-    const decision = obj(rollout.decision);
+    const pilotOps = buildPilotOps(input || {});
+    const nextDecision = buildDecision(input || {});
+    const rolloutDecision = obj(rollout.decision);
     const cohortSummary = obj(cohort.userFacingSummary);
     return clone([
-      card("rollout", "发布控制", decision.label || obj(rollout.userFacingSummary).resultLabel || "继续当前小范围试点"),
+      card("rollout", "发布控制", rolloutDecision.label || obj(rollout.userFacingSummary).resultLabel || "继续当前小范围试点"),
       card("cohort_health", "批次健康", cohortSummary.resultLabel || "批次进行中"),
+      card("pilot_ops", "试点运营摘要", obj(pilotOps.userFacingSummary).resultLabel || "试点运行健康"),
+      card("next_cohort", "下一批决策", obj(nextDecision.userFacingSummary).resultLabel || obj(nextDecision.decision).label || "继续当前批次"),
       card("issues", "问题风险", rollout.status === "pause_expansion" ? "暂停扩大测试" : rollout.status === "blocked" ? "已阻断" : "发布控制正常"),
-      card("next_step", "下一步", decision.safeToAdvanceNextCohort ? "可以进入下一批只读测试" : decision.label || "继续当前小范围试点")
+      card("next_step", "下一步", nextDecision.decision && nextDecision.decision.safeToAdvanceNextCohort ? "可以进入下一批只读测试" : (nextDecision.decision && nextDecision.decision.label) || "继续当前小范围试点")
     ]);
   }
   function buildFlightWorkflowRolloutControlRows(input) {

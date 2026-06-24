@@ -8,14 +8,18 @@ function main() {
   const windowRef = load([
     "apps/desktop/src/renderer/core/flightWorkflowReadOnlyPilotRolloutControlCenter.js",
     "apps/desktop/src/renderer/core/flightWorkflowCohortHealthDashboard.js",
+    "apps/desktop/src/renderer/core/flightWorkflowReadOnlyPilotOpsSummary.js",
+    "apps/desktop/src/renderer/core/flightWorkflowNextCohortDecisionBoard.js",
     "apps/desktop/src/renderer/core/flightWorkflowRolloutControlViewModel.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowRolloutControlViewModel;
-  assert.equal(api.FLIGHT_WORKFLOW_ROLLOUT_CONTROL_VIEW_MODEL_VERSION, "2.1.81");
+  assert.equal(api.FLIGHT_WORKFLOW_ROLLOUT_CONTROL_VIEW_MODEL_VERSION, "2.1.82");
   const vmModel = api.buildFlightWorkflowRolloutControlViewModel({ cohortProgressReady:true, milestoneReady:true, invitationReady:true, supportReady:true, issuePatternStable:true, safetySentinelPass:true, noOpenBlockingIssue:true, noSensitiveDataRisk:true, noTradingRisk:true, testerSlotCount:5, eligibleSlotCount:5, consentCompletionRatio:0.9, feedbackCompletionRatio:0.8, issueResolutionRatio:1 });
   assert.equal(vmModel.title, "只读试点发布控制中心");
   assert.equal(vmModel.cards.some((card) => card.cardId === "rollout" && card.label === "发布控制"), true);
   assert.equal(vmModel.cards.some((card) => card.cardId === "cohort_health" && card.label === "批次健康"), true);
+  assert.equal(vmModel.cards.some((card) => card.cardId === "pilot_ops" && card.label === "试点运营摘要"), true);
+  assert.equal(vmModel.cards.some((card) => card.cardId === "next_cohort" && card.label === "下一批决策"), true);
   assert.equal(vmModel.cards.some((card) => card.cardId === "issues" && card.label === "问题风险"), true);
   assert.equal(vmModel.cards.some((card) => card.cardId === "next_step" && card.label === "下一步"), true);
   assert.ok(vmModel.rolloutRows.length > 0);

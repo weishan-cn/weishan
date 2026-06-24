@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.81";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.82";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -125,6 +125,18 @@
       if (cohortHealthDashboard.status === "healthy" || safe.cohortHealthStatus === "healthy") badges.push(badge("cohort_health_healthy", "批次健康", "info"));
       if (cohortHealthDashboard.status === "needs_review" || safe.cohortHealthStatus === "needs_review") badges.push(badge("cohort_health_review", "批次需要复核", "warning"));
       if (cohortHealthDashboard.status === "blocked") badges.push(badge("cohort_health_blocked", "批次已阻断", "blocked"));
+      const pilotOpsSummary = safe.pilotOpsSummary || safe.readOnlyPilotOpsSummary || {};
+      const nextCohortDecision = safe.nextCohortDecisionSummary || safe.nextCohortDecisionBoard || {};
+      if (pilotOpsSummary.status === "healthy" || safe.pilotOpsStatus === "healthy") badges.push(badge("pilot_ops_healthy", "试点运行健康", "info"));
+      if (pilotOpsSummary.status === "continue_current_batch" || safe.pilotOpsStatus === "continue_current_batch") badges.push(badge("pilot_ops_continue_current", "继续当前批次", "warning"));
+      if (pilotOpsSummary.status === "pause_expansion" || safe.pilotOpsStatus === "pause_expansion") badges.push(badge("pilot_ops_pause_expansion", "暂停扩大测试", "warning"));
+      if (pilotOpsSummary.status === "needs_review" || safe.pilotOpsStatus === "needs_review") badges.push(badge("pilot_ops_needs_review", "运营需要复核", "warning"));
+      if (pilotOpsSummary.status === "blocked" || safe.pilotOpsStatus === "blocked") badges.push(badge("pilot_ops_blocked", "试点运营已阻断", "blocked"));
+      if (obj(nextCohortDecision.decision).decisionId === "advance_next_cohort" || nextCohortDecision.status === "advance") badges.push(badge("next_cohort_advance", "下一批可推进", "info"));
+      if (nextCohortDecision.status === "continue_current" || safe.nextCohortDecisionStatus === "continue_current") badges.push(badge("next_cohort_continue", "继续当前批次", "warning"));
+      if (nextCohortDecision.status === "pause" || safe.nextCohortDecisionStatus === "pause") badges.push(badge("next_cohort_pause", "暂停扩大测试", "warning"));
+      if (nextCohortDecision.status === "needs_review" || safe.nextCohortDecisionStatus === "needs_review") badges.push(badge("next_cohort_needs_review", "运营需要复核", "warning"));
+      if (nextCohortDecision.status === "blocked" || safe.nextCohortDecisionStatus === "blocked") badges.push(badge("next_cohort_blocked", "试点运营已阻断", "blocked"));
       if (beta.status === "blocked" || guided.status === "blocked" || guided.status === "failed_safe") badges.push(badge("beta_acceptance_blocked", "Beta 验收被阻断", "blocked"));
       if (copyStatus === "pass" || releaseReadiness.copyValidationStatus === "pass") badges.push(badge("safety_copy_unified", "安全文案已统一", "info"));
       badges.push(badge("not_exportable", "不可导出", "warning"));

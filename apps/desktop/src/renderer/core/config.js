@@ -1,6 +1,6 @@
 (function(){
   window.WeishanConfig = {
-    version: "2.1.81",
+    version: "2.1.82",
     localFirst: true,
     backend: {
       metadataBaseUrl: "",

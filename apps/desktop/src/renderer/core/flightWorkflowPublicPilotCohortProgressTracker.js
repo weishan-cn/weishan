@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PUBLIC_PILOT_COHORT_PROGRESS_TRACKER_VERSION = "2.1.81";
+  const FLIGHT_WORKFLOW_PUBLIC_PILOT_COHORT_PROGRESS_TRACKER_VERSION = "2.1.82";
   const TRACKER_NAME = "flight_workflow_public_pilot_cohort_progress_tracker_v1";
   const CAVEAT = "该追踪器只用于只读试点批次进度追踪，不保存真实身份、联系方式、证件、支付或外部平台链接。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
@@ -110,6 +110,11 @@
       trialMilestoneSummary: trialMilestoneSummary,
       rolloutControlSummary: clone(safe.rolloutControlSummary || null),
       cohortHealthSummary: clone(safe.cohortHealthSummary || null),
+      pilotOpsSummary: clone(safe.pilotOpsSummary || null),
+      nextCohortDecisionSummary: clone(safe.nextCohortDecisionSummary || null),
+      pilotOpsStatus: text(safe.pilotOpsStatus || ""),
+      nextCohortDecisionStatus: text(safe.nextCohortDecisionStatus || ""),
+      pilotOpsPrimaryRisk: clone(safe.pilotOpsPrimaryRisk || null),
       rolloutDecisionStatus: text(safe.rolloutDecisionStatus || obj(safe.rolloutControlSummary).status || ""),
       cohortHealthStatus: text(safe.cohortHealthStatus || obj(safe.cohortHealthSummary).status || ""),
       rolloutNextStep: text(safe.rolloutNextStep || obj(obj(safe.rolloutControlSummary).decision).label || ""),
@@ -157,14 +162,14 @@
   function buildFlightWorkflowPublicPilotCohortProgressTracker(input) {
     try {
       const evaluation = evaluateFlightWorkflowPublicPilotCohortProgressTracker(input || {});
-      return sanitizeFlightWorkflowPublicPilotCohortProgressTracker(evaluation);
+      return sanitizeFlightWorkflowPublicPilotCohortProgressTracker(Object.assign({}, evaluation, { pilotOpsSummary:evaluation.pilotOpsSummary, nextCohortDecisionSummary:evaluation.nextCohortDecisionSummary, pilotOpsStatus:evaluation.pilotOpsStatus, nextCohortDecisionStatus:evaluation.nextCohortDecisionStatus, pilotOpsPrimaryRisk:evaluation.pilotOpsPrimaryRisk }));
     } catch (error) {
       return sanitizeFlightWorkflowPublicPilotCohortProgressTracker({ status:"failed_safe", cohortProgressSummary:{}, trialMilestoneSummary:{}, rows:[], safeToAdvanceNextCohort:false, userFacingSummary:{ title:"只读试点进度追踪", resultLabel:"仍需更多测试者", caveat:CAVEAT, redacted:true } });
     }
   }
   function buildFlightWorkflowPublicPilotCohortProgressTrackerAuditDraft(input) {
     const tracker = buildFlightWorkflowPublicPilotCohortProgressTracker(input || {});
-    return clone({ eventType:"FLIGHT_WORKFLOW_PUBLIC_PILOT_COHORT_PROGRESS_TRACKER_AUDIT_DRAFT", trackerName:TRACKER_NAME, appVersion:FLIGHT_WORKFLOW_PUBLIC_PILOT_COHORT_PROGRESS_TRACKER_VERSION, status:tracker.status, cohortProgressStatus:tracker.cohortProgressStatus, trialMilestoneStatus:tracker.trialMilestoneStatus, safeToAdvanceNextCohort:tracker.safeToAdvanceNextCohort === true, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true });
+    return clone({ eventType:"FLIGHT_WORKFLOW_PUBLIC_PILOT_COHORT_PROGRESS_TRACKER_AUDIT_DRAFT", trackerName:TRACKER_NAME, appVersion:FLIGHT_WORKFLOW_PUBLIC_PILOT_COHORT_PROGRESS_TRACKER_VERSION, status:tracker.status, cohortProgressStatus:tracker.cohortProgressStatus, trialMilestoneStatus:tracker.trialMilestoneStatus, pilotOpsStatus:tracker.pilotOpsStatus, nextCohortDecisionStatus:tracker.nextCohortDecisionStatus, safeToAdvanceNextCohort:tracker.safeToAdvanceNextCohort === true, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true });
   }
   window.WeishanFlightWorkflowPublicPilotCohortProgressTracker = { FLIGHT_WORKFLOW_PUBLIC_PILOT_COHORT_PROGRESS_TRACKER_VERSION, TRACKER_NAME, buildFlightWorkflowPublicPilotCohortProgressTracker, evaluateFlightWorkflowPublicPilotCohortProgressTracker, buildFlightWorkflowPublicPilotCohortProgressTrackerRows:buildRows, buildFlightWorkflowPublicPilotCohortProgressTrackerAuditDraft, sanitizeFlightWorkflowPublicPilotCohortProgressTracker };
 })();
