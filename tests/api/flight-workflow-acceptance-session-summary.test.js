@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowAcceptanceSessionSummary.js"]);
   const api = windowRef.WeishanFlightWorkflowAcceptanceSessionSummary;
-  assert.equal(api.FLIGHT_WORKFLOW_ACCEPTANCE_SESSION_SUMMARY_VERSION, "2.1.80");
+  assert.equal(api.FLIGHT_WORKFLOW_ACCEPTANCE_SESSION_SUMMARY_VERSION, "2.1.81");
   const completed = api.buildFlightWorkflowAcceptanceSessionSummary({
     betaAcceptancePack:{ status:"ready", userFacingSummary:{ resultLabel:"可以开始用户验收", redacted:true } },
     guidedUserTestMode:{ status:"completed", userFacingSummary:{ resultLabel:"测试已完成", redacted:true } },

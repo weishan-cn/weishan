@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_TESTER_COHORT_ENROLLMENT_CONSOLE_VERSION = "2.1.80";
+  const FLIGHT_WORKFLOW_TESTER_COHORT_ENROLLMENT_CONSOLE_VERSION = "2.1.81";
   const CONSOLE_NAME = "flight_workflow_tester_cohort_enrollment_console_v1";
   const CAVEAT = "该控制台只用于只读试点测试用户批次登记，不保存真实身份、联系方式、证件、支付或外部平台链接。";
 
@@ -115,6 +115,11 @@
     return clone({
       status: status,
       cohort: cohort,
+      rolloutControlSummary: clone(safe.rolloutControlSummary || null),
+      cohortHealthSummary: clone(safe.cohortHealthSummary || null),
+      rolloutDecisionStatus: text(safe.rolloutDecisionStatus || obj(safe.rolloutControlSummary).status || ""),
+      cohortHealthStatus: text(safe.cohortHealthStatus || obj(safe.cohortHealthSummary).status || ""),
+      rolloutNextStep: text(safe.rolloutNextStep || obj(obj(safe.rolloutControlSummary).decision).label || ""),
       rows: rows,
       userFacingSummary: {
         title: "测试用户批次登记控制台",
@@ -135,11 +140,28 @@
       appVersion: FLIGHT_WORKFLOW_TESTER_COHORT_ENROLLMENT_CONSOLE_VERSION,
       status: status,
       cohort: Object.assign({ cohortId:"tester-cohort-001", totalCount:0, invitedCount:0, consentedCount:0, feedbackReadyCount:0, blockedCount:0, realIdentityStored:false, redacted:true }, safe.cohort || {}),
+      rolloutControlSummary: clone(safe.rolloutControlSummary || null),
+      cohortHealthSummary: clone(safe.cohortHealthSummary || null),
+      rolloutDecisionStatus: text(safe.rolloutDecisionStatus || obj(safe.rolloutControlSummary).status || ""),
+      cohortHealthStatus: text(safe.cohortHealthStatus || obj(safe.cohortHealthSummary).status || ""),
+      rolloutNextStep: text(safe.rolloutNextStep || obj(obj(safe.rolloutControlSummary).decision).label || ""),
       rows: toArray(safe.rows).map(function (item) {
         return buildRowFromInput(item, 0);
       }),
       userFacingSummary: Object.assign({ title:"测试用户批次登记控制台", resultLabel:status === "ready" ? "测试用户批次可用" : (status === "needs_more_testers" ? "仍需更多测试用户" : status === "needs_review" ? "需要复核后登记" : status === "blocked" ? "测试批次已阻断" : "仍需更多测试用户"), caveat:CAVEAT, redacted:true }, safe.userFacingSummary || {}),
       safety: Object.assign(safety(), safe.safety || {}),
+      bookingUrl:null,
+      checkoutUrl:null,
+      paymentUrl:null,
+      orderUrl:null,
+      invitationUrl:null,
+      rawUserTextStored:false,
+      rawResponseStored:false,
+      secretStored:false,
+      fileWrite:false,
+      download:false,
+      autoOpen:false,
+      autoRefresh:false,
       invitationGateSummary: clone(safe.invitationGateSummary || null),
       pilotInvitationViewModelSummary: clone(safe.pilotInvitationViewModelSummary || null),
       redacted: true

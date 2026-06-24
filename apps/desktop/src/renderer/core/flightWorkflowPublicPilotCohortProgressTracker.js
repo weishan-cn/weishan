@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PUBLIC_PILOT_COHORT_PROGRESS_TRACKER_VERSION = "2.1.80";
+  const FLIGHT_WORKFLOW_PUBLIC_PILOT_COHORT_PROGRESS_TRACKER_VERSION = "2.1.81";
   const TRACKER_NAME = "flight_workflow_public_pilot_cohort_progress_tracker_v1";
   const CAVEAT = "该追踪器只用于只读试点批次进度追踪，不保存真实身份、联系方式、证件、支付或外部平台链接。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
@@ -108,6 +108,11 @@
       trialMilestoneStatus: status,
       cohortProgressSummary: tracker,
       trialMilestoneSummary: trialMilestoneSummary,
+      rolloutControlSummary: clone(safe.rolloutControlSummary || null),
+      cohortHealthSummary: clone(safe.cohortHealthSummary || null),
+      rolloutDecisionStatus: text(safe.rolloutDecisionStatus || obj(safe.rolloutControlSummary).status || ""),
+      cohortHealthStatus: text(safe.cohortHealthStatus || obj(safe.cohortHealthSummary).status || ""),
+      rolloutNextStep: text(safe.rolloutNextStep || obj(obj(safe.rolloutControlSummary).decision).label || ""),
       safeToAdvanceNextCohort: safeToAdvanceNextCohort,
       userFacingSummary: { title:"只读试点进度追踪", resultLabel: progressLabel, caveat:CAVEAT, redacted:true },
       safety: safety(),
@@ -128,6 +133,11 @@
       trialMilestoneStatus: text(safe.trialMilestoneStatus || status),
       cohortProgressSummary: Object.assign({ cohortId:"tester-cohort-001", totalCount:0, invitedCount:0, consentedCount:0, feedbackReadyCount:0, blockedCount:0, progressPercent:0, progressLabel:"仍需更多测试者", nextStepLabel:"仍需更多测试者", safeToAdvanceNextCohort:false, redacted:true }, cohortProgressSummary),
       trialMilestoneSummary: Object.assign({ milestoneCount:0, completedCount:0, pendingCount:0, blockedCount:0, latestMilestoneLabel:"下一批测试准备", nextBatchLabel:"仍需更多测试者", safeToAdvanceNextCohort:false, milestones:[], redacted:true }, trialMilestoneSummary),
+      rolloutControlSummary: clone(safe.rolloutControlSummary || null),
+      cohortHealthSummary: clone(safe.cohortHealthSummary || null),
+      rolloutDecisionStatus: text(safe.rolloutDecisionStatus || obj(safe.rolloutControlSummary).status || ""),
+      cohortHealthStatus: text(safe.cohortHealthStatus || obj(safe.cohortHealthSummary).status || ""),
+      rolloutNextStep: text(safe.rolloutNextStep || obj(obj(safe.rolloutControlSummary).decision).label || ""),
       safeToAdvanceNextCohort: safe.safeToAdvanceNextCohort === true || cohortProgressSummary.safeToAdvanceNextCohort === true || trialMilestoneSummary.safeToAdvanceNextCohort === true,
       rows: Array.isArray(safe.rows) ? safe.rows.map(function (item) { return { rowId:text(item.rowId || "row"), label:text(item.label || ""), value:text(item.value || ""), status:item.status === "blocked" ? "blocked" : (item.status === "warning" ? "warning" : "pass"), redacted:true }; }) : [],
       userFacingSummary: Object.assign({ title:"只读试点进度追踪", resultLabel: status === "ready" ? "测试批次进度正常" : (status === "needs_more_testers" ? "仍需更多测试者" : status === "needs_review" ? "测试批次仍在进行" : status === "blocked" ? "测试批次已阻断" : "仍需更多测试者"), caveat:CAVEAT, redacted:true }, safe.userFacingSummary || {}),

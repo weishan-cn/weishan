@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_COHORT_PROGRESS_VIEW_MODEL_VERSION = "2.1.80";
+  const FLIGHT_WORKFLOW_COHORT_PROGRESS_VIEW_MODEL_VERSION = "2.1.81";
   const VIEW_MODEL_NAME = "flight_workflow_cohort_progress_view_model_v1";
   const CAVEAT = "该视图模型只用于只读试点进度追踪，不保存真实身份、不发送真实邀请。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
@@ -84,6 +84,11 @@
         boardSummary: boardSummary,
         cohortProgressSummary: progress,
         trialMilestoneSummary: obj(boardSummary.trialMilestoneSummary),
+        rolloutControlSummary: clone(safe.rolloutControlSummary || null),
+        cohortHealthSummary: clone(safe.cohortHealthSummary || null),
+        rolloutDecisionStatus: text(safe.rolloutDecisionStatus || obj(safe.rolloutControlSummary).status || ""),
+        cohortHealthStatus: text(safe.cohortHealthStatus || obj(safe.cohortHealthSummary).status || ""),
+        rolloutNextStep: text(safe.rolloutNextStep || obj(obj(safe.rolloutControlSummary).decision).label || ""),
         safeToAdvanceNextCohort: boardSummary.safeToAdvanceNextCohort === true || trackerSummary.safeToAdvanceNextCohort === true,
         invitationGateSummary: gateSummary,
         testerCohortEnrollmentConsoleSummary: cohortSummary,
@@ -115,6 +120,11 @@
       boardSummary: clone(safe.boardSummary || null),
       cohortProgressSummary: clone(safe.cohortProgressSummary || null),
       trialMilestoneSummary: clone(safe.trialMilestoneSummary || null),
+      rolloutControlSummary: clone(safe.rolloutControlSummary || null),
+      cohortHealthSummary: clone(safe.cohortHealthSummary || null),
+      rolloutDecisionStatus: text(safe.rolloutDecisionStatus || obj(safe.rolloutControlSummary).status || ""),
+      cohortHealthStatus: text(safe.cohortHealthStatus || obj(safe.cohortHealthSummary).status || ""),
+      rolloutNextStep: text(safe.rolloutNextStep || obj(obj(safe.rolloutControlSummary).decision).label || ""),
       safeToAdvanceNextCohort: safe.safeToAdvanceNextCohort === true,
       invitationGateSummary: clone(safe.invitationGateSummary || null),
       testerCohortEnrollmentConsoleSummary: clone(safe.testerCohortEnrollmentConsoleSummary || null),

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_TRIAL_MILESTONE_BOARD_VERSION = "2.1.80";
+  const FLIGHT_WORKFLOW_READ_ONLY_TRIAL_MILESTONE_BOARD_VERSION = "2.1.81";
   const BOARD_NAME = "flight_workflow_read_only_trial_milestone_board_v1";
   const CAVEAT = "该里程碑板只追踪脱敏测试槽位，不保存真实身份、不发送真实邀请。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
@@ -78,6 +78,11 @@
       cohortProgressStatus: trackerSummary.cohortProgressStatus || trackerSummary.status || status,
       trialMilestoneSummary: summary,
       cohortProgressSummary: clone(trackerSummary),
+      rolloutControlSummary: clone(safe.rolloutControlSummary || null),
+      cohortHealthSummary: clone(safe.cohortHealthSummary || null),
+      rolloutDecisionStatus: text(safe.rolloutDecisionStatus || obj(safe.rolloutControlSummary).status || ""),
+      cohortHealthStatus: text(safe.cohortHealthStatus || obj(safe.cohortHealthSummary).status || ""),
+      rolloutNextStep: text(safe.rolloutNextStep || obj(obj(safe.rolloutControlSummary).decision).label || ""),
       safeToAdvanceNextCohort: safeToAdvanceNextCohort,
       rows: boardRows(milestones),
       userFacingSummary: { title:"只读试点里程碑", resultLabel: status === "ready" ? "可以进入下一批只读测试" : (status === "needs_more_testers" ? "仍需更多测试者" : (status === "blocked" ? "测试批次已阻断" : "仍需更多测试者")), caveat:CAVEAT, redacted:true },
@@ -96,6 +101,11 @@
       cohortProgressStatus: text(safe.cohortProgressStatus || status),
       trialMilestoneSummary: Object.assign({ milestoneCount:0, completedCount:0, pendingCount:0, blockedCount:0, latestMilestoneLabel:"下一批测试准备", nextBatchLabel:"仍需更多测试者", safeToAdvanceNextCohort:false, milestones:[], redacted:true }, obj(safe.trialMilestoneSummary)),
       cohortProgressSummary: clone(safe.cohortProgressSummary || null),
+      rolloutControlSummary: clone(safe.rolloutControlSummary || null),
+      cohortHealthSummary: clone(safe.cohortHealthSummary || null),
+      rolloutDecisionStatus: text(safe.rolloutDecisionStatus || obj(safe.rolloutControlSummary).status || ""),
+      cohortHealthStatus: text(safe.cohortHealthStatus || obj(safe.cohortHealthSummary).status || ""),
+      rolloutNextStep: text(safe.rolloutNextStep || obj(obj(safe.rolloutControlSummary).decision).label || ""),
       safeToAdvanceNextCohort: safe.safeToAdvanceNextCohort === true || obj(safe.trialMilestoneSummary).safeToAdvanceNextCohort === true,
       rows: Array.isArray(safe.rows) ? safe.rows.map(function (item) { return { milestoneId:text(item.milestoneId || "milestone"), label:text(item.label || ""), status:item.status === "blocked" ? "blocked" : (item.status === "pass" ? "pass" : "warning"), redacted:true }; }) : [],
       userFacingSummary: Object.assign({ title:"只读试点里程碑", resultLabel: status === "ready" ? "可以进入下一批只读测试" : (status === "needs_more_testers" ? "仍需更多测试者" : (status === "blocked" ? "测试批次已阻断" : "仍需更多测试者")), caveat:CAVEAT, redacted:true }, safe.userFacingSummary || {}),

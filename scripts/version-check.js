@@ -2270,6 +2270,9 @@ function runVersionCheck() {
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow public pilot readiness snapshot version", "apps/desktop/src/renderer/core/flightWorkflowPublicPilotReadinessSnapshot.js", "FLIGHT_WORKFLOW_PUBLIC_PILOT_READINESS_SNAPSHOT_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow support playbook console version", "apps/desktop/src/renderer/core/flightWorkflowSupportPlaybookConsole.js", "FLIGHT_WORKFLOW_SUPPORT_PLAYBOOK_CONSOLE_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow pilot snapshot view model version", "apps/desktop/src/renderer/core/flightWorkflowPilotSnapshotViewModel.js", "FLIGHT_WORKFLOW_PILOT_SNAPSHOT_VIEW_MODEL_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow read only pilot rollout control center version", "apps/desktop/src/renderer/core/flightWorkflowReadOnlyPilotRolloutControlCenter.js", "FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow cohort health dashboard version", "apps/desktop/src/renderer/core/flightWorkflowCohortHealthDashboard.js", "FLIGHT_WORKFLOW_COHORT_HEALTH_DASHBOARD_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow rollout control view model version", "apps/desktop/src/renderer/core/flightWorkflowRolloutControlViewModel.js", "FLIGHT_WORKFLOW_ROLLOUT_CONTROL_VIEW_MODEL_VERSION");
     checkFlightEvidenceWorkflowOrchestratorVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowStatusPresenterVersion(results, rootPackage.version);
     checkFlightFareBreakdownVersion(results, rootPackage.version);

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.80";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.81";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -353,6 +353,19 @@
     return clone({ title:"只读试点进度追踪", line:safeLine(obj(vm).title || obj(vm.userFacingSummary).resultLabel || "仍需更多测试者"), sectionLabels:["只读试点进度追踪", "测试批次进度", "只读试点里程碑", "下一批测试"], trackerName:text(vm.trackerName || "flight_workflow_public_pilot_cohort_progress_tracker_v1"), boardName:text(vm.boardName || "flight_workflow_read_only_trial_milestone_board_v1"), caveat:safeLine(obj(vm).caveat || "该视图模型只用于只读试点进度追踪，不保存真实身份、不发送真实邀请。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, invitationUrl:null, redacted:true });
   }
 
+  function formatReadOnlyPilotRolloutControlCenterSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const center = safe.rolloutControlSummary || safe.readOnlyPilotRolloutControlCenter || {};
+    return clone({ title:"只读试点发布控制中心", line:safeLine(obj(center.userFacingSummary).resultLabel || obj(center.decision).label || "继续当前小范围试点"), sectionLabels:["发布控制", "批次健康", "问题风险", "下一步"], decisionId:text(obj(center.decision).decisionId || "continue_current_batch"), safeToAdvanceNextCohort:obj(center.decision).safeToAdvanceNextCohort === true, status:text(center.status || "continue_current_batch"), caveat:safeLine(obj(center.userFacingSummary).caveat || "该控制中心只管理只读试点流程，不代表真实账号、客服工单、交易请求或出票能力。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatCohortHealthDashboardSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const dashboard = safe.cohortHealthSummary || safe.cohortHealthDashboard || {};
+    const health = obj(dashboard.cohortHealth);
+    return clone({ title:"测试批次健康看板", line:safeLine(obj(dashboard.userFacingSummary).resultLabel || "批次进行中"), sectionLabels:["测试者数量", "只读确认", "反馈完成", "问题处理", "敏感数据风险", "真实身份风险"], testerSlotCount:Number(health.testerSlotCount || 0), healthyEnoughForNextCohort:health.healthyEnoughForNextCohort === true, status:text(dashboard.status || "in_progress"), caveat:safeLine(obj(dashboard.userFacingSummary).caveat || "该看板只统计脱敏测试槽位，不保存真实身份或联系方式。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -395,6 +408,8 @@
     formatPublicPilotCohortProgressTrackerSummary,
     formatReadOnlyTrialMilestoneBoardSummary,
     formatCohortProgressViewModelSummary,
+    formatReadOnlyPilotRolloutControlCenterSummary,
+    formatCohortHealthDashboardSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,

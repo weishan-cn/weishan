@@ -1,6 +1,6 @@
 {
   "name": "@weishan/server",
-  "version": "2.1.80",
+  "version": "2.1.81",
   "type": "module",
   "scripts": {
     "dev": "node src/server.js",

@@ -6,7 +6,7 @@ const ROOT = path.resolve(__dirname, "../..");
 function load(files) { const window = {}; window.window = window; const context = vm.createContext({ window, console }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
 function readyInput(extra = {}) {
   return Object.assign({
-    releaseVersion:"2.1.80",
+    releaseVersion:"2.1.81",
     scenarioSimulationSuite:{ status:"pass", summary:{ scenarioCount:2, warningCount:0, failedCount:0, blockedCount:0 }, results:[], redacted:true },
     matrixSummary:{ status:"pass", overallHealth:"pass", scenarioCount:2, passedCount:2, warningCount:0, failedCount:0, blockedCount:0, userFacingSummary:{ resultLabel:"全部通过", redacted:true }, redacted:true },
     safetyRegressionSummary:{ status:"pass", checks:[], failures:[], warnings:[], redacted:true },
@@ -29,7 +29,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowReleaseReadinessDashboard.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowReleaseReadinessDashboard;
-  assert.equal(api.FLIGHT_WORKFLOW_RELEASE_READINESS_DASHBOARD_VERSION, "2.1.80");
+  assert.equal(api.FLIGHT_WORKFLOW_RELEASE_READINESS_DASHBOARD_VERSION, "2.1.81");
   const ready = api.buildFlightWorkflowReleaseReadinessDashboard(readyInput());
   assert.equal(ready.status, "ready");
   assert.equal(ready.safeForUserFacingBeta, true);

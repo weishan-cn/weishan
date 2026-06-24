@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PUBLIC_PILOT_READINESS_SNAPSHOT_VERSION = "2.1.80";
+  const FLIGHT_WORKFLOW_PUBLIC_PILOT_READINESS_SNAPSHOT_VERSION = "2.1.81";
   const SNAPSHOT_NAME = "flight_workflow_public_pilot_readiness_snapshot_v1";
   const CAVEAT = "该快照只适用于只读候选证据流程，不代表真实票价、库存或可出票。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
@@ -26,6 +26,8 @@
   function trialMilestoneBoard(input) { const safe = obj(input); return first(safe.trialMilestoneSummary, safe.trialMilestoneBoardSummary, safe.readOnlyTrialMilestoneBoardSummary); }
   function issuePattern(input) { const safe = obj(input); return first(safe.issuePatternSummary, safe.issuePatternRadar, safe.issuePatternViewModelSummary); }
   function supportReadiness(input) { const safe = obj(input); return first(safe.supportReadinessSummary, safe.supportReadinessGate); }
+  function rolloutControl(input) { const safe = obj(input); return first(safe.rolloutControlSummary, safe.readOnlyPilotRolloutControlCenter); }
+  function cohortHealth(input) { const safe = obj(input); return first(safe.cohortHealthSummary, safe.cohortHealthDashboard); }
   function issueReview(input) { const safe = obj(input); return first(safe.issueReviewSummary, safe.issueReviewBoard, safe.publicPilotIssueReviewBoard); }
   function triage(input) { const safe = obj(input); return first(safe.supportTriageSummary, safe.supportTriageDashboard); }
   function operator(input) { const safe = obj(input); return first(safe.operatorConsoleSummary, safe.operatorConsoleViewModel); }
@@ -43,6 +45,8 @@
     const trialMilestoneBoardSummary = trialMilestoneBoard(safe);
     const issuePatternSummary = issuePattern(safe);
     const supportReadinessSummary = supportReadiness(safe);
+    const rolloutControlSummary = rolloutControl(safe);
+    const cohortHealthSummary = cohortHealth(safe);
     const issueReviewSummary = issueReview(safe);
     const triageSummary = triage(safe);
     const operatorSummary = operator(safe);
@@ -82,6 +86,11 @@
       pilotOnboardingSummary: clone(onboardingSummary),
       issuePatternSummary: clone(issuePatternSummary),
       supportReadinessSummary: clone(supportReadinessSummary),
+      rolloutControlSummary: clone(rolloutControlSummary),
+      cohortHealthSummary: clone(cohortHealthSummary),
+      rolloutDecisionStatus: text(rolloutControlSummary.status || ""),
+      cohortHealthStatus: text(cohortHealthSummary.status || ""),
+      rolloutNextStep: text(obj(rolloutControlSummary.decision).label || obj(rolloutControlSummary.userFacingSummary).resultLabel || ""),
       invitationGateSummary: clone(invitationGateSummary),
       testerCohortEnrollmentConsoleSummary: clone(testerCohortSummary),
       pilotInvitationViewModelSummary: clone(pilotInvitationSummary),
@@ -105,6 +114,8 @@
     const onboardingSummary = obj(health.pilotOnboardingSummary);
     const issuePatternSummary = obj(health.issuePatternSummary);
     const supportReadinessSummary = obj(health.supportReadinessSummary);
+    const cohortProgressTrackerSummary = obj(health.cohortProgressSummary);
+    const trialMilestoneBoardSummary = obj(health.trialMilestoneSummary);
     const issueReviewSummary = obj(health.issueReviewSummary);
     const triageSummary = obj(health.supportTriageSummary);
     const operatorSummary = obj(health.operatorConsoleSummary);
@@ -151,6 +162,18 @@
       pilotSnapshotNextStep: text(safe.pilotSnapshotNextStep || summaryLabel),
       pilotInvitationNextStep: text(safe.pilotInvitationNextStep || summaryLabel),
       supportPlaybookStatus: text(safe.supportPlaybookStatus || "ready"),
+      rolloutControlSummary: clone(safe.rolloutControlSummary || null),
+      cohortHealthSummary: clone(safe.cohortHealthSummary || null),
+      rolloutDecisionStatus: text(safe.rolloutDecisionStatus || obj(safe.rolloutControlSummary).status || ""),
+      cohortHealthStatus: text(safe.cohortHealthStatus || obj(safe.cohortHealthSummary).status || ""),
+      rolloutNextStep: text(safe.rolloutNextStep || obj(obj(safe.rolloutControlSummary).decision).label || ""),
+      bookingUrl: null,
+      checkoutUrl: null,
+      paymentUrl: null,
+      orderUrl: null,
+      rawUserTextStored: false,
+      rawResponseStored: false,
+      secretStored: false,
       redacted: true
     });
   }
@@ -172,6 +195,11 @@
         trialMilestoneStatus: health.trialMilestoneStatus,
         safeToAdvanceNextCohort: health.safeToAdvanceNextCohort,
         pilotSnapshotNextStep: label
+        ,rolloutControlSummary: health.rolloutControlSummary,
+        cohortHealthSummary: health.cohortHealthSummary,
+        rolloutDecisionStatus: health.rolloutDecisionStatus,
+        cohortHealthStatus: health.cohortHealthStatus,
+        rolloutNextStep: health.rolloutNextStep
       });
     } catch (error) {
       return sanitizeFlightWorkflowPublicPilotReadinessSnapshot({ status: "failed_safe", rows: [], snapshotHealth: {}, userFacingSummary: { title: "只读试点状态快照", resultLabel: "需要复核", caveat: CAVEAT, redacted: true } });

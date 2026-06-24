@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.80";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.81";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -171,7 +171,13 @@
       pilotSnapshotNextStep: safeText(safe.pilotSnapshotNextStep || ""),
       pilotInvitationStatus: safeText(safe.pilotInvitationStatus || ""),
       testerCohortStatus: safeText(safe.testerCohortStatus || ""),
-      pilotInvitationNextStep: safeText(safe.pilotInvitationNextStep || "")
+      pilotInvitationNextStep: safeText(safe.pilotInvitationNextStep || ""),
+      rolloutControlSummary: stripUnsafe(safe.rolloutControlSummary || null),
+      cohortHealthSummary: stripUnsafe(safe.cohortHealthSummary || null),
+      rolloutControlViewModel: stripUnsafe(safe.rolloutControlViewModel || null),
+      rolloutDecisionStatus: safeText(safe.rolloutDecisionStatus || ""),
+      cohortHealthStatus: safeText(safe.cohortHealthStatus || ""),
+      rolloutNextStep: safeText(safe.rolloutNextStep || "")
     };
   }
 
@@ -494,6 +500,12 @@
       pilotInvitationStatus: report.safetyReport.pilotInvitationStatus || "",
       testerCohortStatus: report.safetyReport.testerCohortStatus || "",
       pilotInvitationNextStep: report.safetyReport.pilotInvitationNextStep || "",
+      rolloutControlSummary: report.safetyReport.rolloutControlSummary || null,
+      cohortHealthSummary: report.safetyReport.cohortHealthSummary || null,
+      rolloutControlViewModel: report.safetyReport.rolloutControlViewModel || null,
+      rolloutDecisionStatus: report.safetyReport.rolloutDecisionStatus || "",
+      cohortHealthStatus: report.safetyReport.cohortHealthStatus || "",
+      rolloutNextStep: report.safetyReport.rolloutNextStep || "",
       scenarioSimulationSummary: report.safetyReport.scenarioSimulationSummary || null,
       safetyTestMatrixSummary: report.safetyReport.safetyTestMatrixSummary || null,
       continuitySummary: report.safetyReport.continuitySummary || null,

@@ -8,7 +8,7 @@ function storage() { const data = {}; return { getItem:(key) => Object.prototype
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowEventLedger.js"]);
   const api = windowRef.WeishanFlightWorkflowEventLedger;
-  assert.equal(api.FLIGHT_WORKFLOW_EVENT_LEDGER_VERSION, "2.1.80");
+  assert.equal(api.FLIGHT_WORKFLOW_EVENT_LEDGER_VERSION, "2.1.81");
   const store = storage();
   const appended = api.appendFlightWorkflowEvent({ eventType:"action_executed", actionId:"run_read_only_quotes", actionLabel:"运行只读报价", status:"executed_local", rawProviderResponse:{ token:"abc" }, bookingUrl:"https://blocked.example" }, store);
   assert.equal(appended.status, "appended");
@@ -16,7 +16,7 @@ function main() {
   assert.equal(appended.event.safety.bookingUrl, null);
   const loaded = api.loadFlightWorkflowEventLedger(store);
   assert.equal(loaded.length, 1);
-  assert.equal(loaded[0].eventId, "deterministic-flight-workflow-event-v2.1.80-1");
+  assert.equal(loaded[0].eventId, "deterministic-flight-workflow-event-v2.1.81-1");
   const summary = api.buildFlightWorkflowEventLedgerSummary(loaded);
   assert.equal(summary.title, "事件记录");
   assert.equal(summary.lastActionId, "run_read_only_quotes");

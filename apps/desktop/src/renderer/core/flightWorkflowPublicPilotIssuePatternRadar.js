@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PUBLIC_PILOT_ISSUE_PATTERN_RADAR_VERSION = "2.1.80";
+  const FLIGHT_WORKFLOW_PUBLIC_PILOT_ISSUE_PATTERN_RADAR_VERSION = "2.1.81";
   const RADAR_NAME = "flight_workflow_public_pilot_issue_pattern_radar_v1";
   const CAVEAT = "问题趋势仅用于改进只读候选证据流程，不代表真实票价、库存或交易结果。";
   const SENSITIVE_RE = /token|apiKey|key|secret|password|credential|身份证|护照|银行卡|登录凭据|passport|cardNumber|https?:\/\/\S+/i;

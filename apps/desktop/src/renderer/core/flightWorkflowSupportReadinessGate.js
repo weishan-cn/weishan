@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SUPPORT_READINESS_GATE_VERSION = "2.1.80";
+  const FLIGHT_WORKFLOW_SUPPORT_READINESS_GATE_VERSION = "2.1.81";
   const GATE_NAME = "flight_workflow_support_readiness_gate_v1";
   const CAVEAT = "该判断只适用于只读试点问题处理，不代表客服工单或交易能力。";
 
@@ -112,6 +112,11 @@
       riskNotes:Array.isArray(safe.riskNotes) ? safe.riskNotes.map(text) : [],
       pilotReadinessSnapshotSummary:clone(safe.pilotReadinessSnapshotSummary || null),
       supportPlaybookSummary:clone(safe.supportPlaybookSummary || null),
+      rolloutControlSummary:clone(safe.rolloutControlSummary || null),
+      cohortHealthSummary:clone(safe.cohortHealthSummary || null),
+      rolloutDecisionStatus:text(safe.rolloutDecisionStatus || obj(safe.rolloutControlSummary).status || ""),
+      cohortHealthStatus:text(safe.cohortHealthStatus || obj(safe.cohortHealthSummary).status || ""),
+      rolloutNextStep:text(safe.rolloutNextStep || obj(obj(safe.rolloutControlSummary).decision).label || ""),
       cohortProgressSummary:clone(safe.cohortProgressSummary || null),
       trialMilestoneSummary:clone(safe.trialMilestoneSummary || null),
       cohortProgressStatus:text(safe.cohortProgressStatus || ""),

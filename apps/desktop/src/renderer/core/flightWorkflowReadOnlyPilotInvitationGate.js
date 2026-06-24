@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_INVITATION_GATE_VERSION = "2.1.80";
+  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_INVITATION_GATE_VERSION = "2.1.81";
   const GATE_NAME = "flight_workflow_read_only_pilot_invitation_gate_v1";
   const CAVEAT = "该判断只用于只读试点邀请与测试批次登记，不代表真实身份、联系方式、证件、支付或外部平台链接。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
@@ -140,6 +140,11 @@
       },
       testerSlot: slot,
       eligibility: eligibility,
+      rolloutControlSummary: clone(safe.rolloutControlSummary || null),
+      cohortHealthSummary: clone(safe.cohortHealthSummary || null),
+      rolloutDecisionStatus: text(safe.rolloutDecisionStatus || obj(safe.rolloutControlSummary).status || ""),
+      cohortHealthStatus: text(safe.cohortHealthStatus || obj(safe.cohortHealthSummary).status || ""),
+      rolloutNextStep: text(safe.rolloutNextStep || obj(obj(safe.rolloutControlSummary).decision).label || ""),
       requirements: [
         { requirementId:"pilot_snapshot_ready", label:"试点状态快照就绪", satisfied:eligibility.pilotSnapshotReady === true, redacted:true },
         { requirementId:"support_playbook_ready", label:"支持处理手册就绪", satisfied:eligibility.supportPlaybookReady === true, redacted:true },
@@ -169,6 +174,11 @@
       decision: Object.assign({ decisionId:"blocked", label:label, message:"安全降级。", testerSlotEligible:false }, safe.decision || {}),
       testerSlot: Object.assign({ slotId:"tester-slot-001", slotType:"invited_tester", realIdentityStored:false, redacted:true }, safe.testerSlot || {}),
       eligibility: Object.assign({ pilotSnapshotReady:false, supportPlaybookReady:false, onboardingConsentReady:false, noOpenBlockingIssue:false, noSensitiveDataRisk:false, safeToInviteTesterSlot:false }, safe.eligibility || {}),
+      rolloutControlSummary: clone(safe.rolloutControlSummary || null),
+      cohortHealthSummary: clone(safe.cohortHealthSummary || null),
+      rolloutDecisionStatus: text(safe.rolloutDecisionStatus || obj(safe.rolloutControlSummary).status || ""),
+      cohortHealthStatus: text(safe.cohortHealthStatus || obj(safe.cohortHealthSummary).status || ""),
+      rolloutNextStep: text(safe.rolloutNextStep || obj(obj(safe.rolloutControlSummary).decision).label || ""),
       requirements: toArray(safe.requirements).map(function (item) {
         return {
           requirementId: text(item.requirementId || ""),

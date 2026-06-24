@@ -6,7 +6,7 @@ const ROOT = path.resolve(__dirname, "../..");
 function load(files) { const window = {}; window.window = window; const context = vm.createContext({ window, console }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
 function main() {
   const api = load(["apps/desktop/src/renderer/core/flightWorkflowSupportFallbackRecommendationEngine.js"]).WeishanFlightWorkflowSupportFallbackRecommendationEngine;
-  assert.equal(api.FLIGHT_WORKFLOW_SUPPORT_FALLBACK_RECOMMENDATION_ENGINE_VERSION, "2.1.80");
+  assert.equal(api.FLIGHT_WORKFLOW_SUPPORT_FALLBACK_RECOMMENDATION_ENGINE_VERSION, "2.1.81");
   const cases = { candidate_unclear:"review_evidence", platform_mismatch:"record_platform_check", safety_copy_unclear:"review_safety_copy", consent_blocked:"retry_consent", feedback_error:"internal_review" };
   for (const [category, rec] of Object.entries(cases)) {
     const result = api.buildFlightWorkflowSupportFallbackRecommendation({ issueIntakeSummary:{ status:"ready", issueCategory:category } });
