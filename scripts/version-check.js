@@ -2264,6 +2264,9 @@ function runVersionCheck() {
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow public pilot issue pattern radar version", "apps/desktop/src/renderer/core/flightWorkflowPublicPilotIssuePatternRadar.js", "FLIGHT_WORKFLOW_PUBLIC_PILOT_ISSUE_PATTERN_RADAR_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow support readiness gate version", "apps/desktop/src/renderer/core/flightWorkflowSupportReadinessGate.js", "FLIGHT_WORKFLOW_SUPPORT_READINESS_GATE_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow issue pattern view model version", "apps/desktop/src/renderer/core/flightWorkflowIssuePatternViewModel.js", "FLIGHT_WORKFLOW_ISSUE_PATTERN_VIEW_MODEL_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow public pilot readiness snapshot version", "apps/desktop/src/renderer/core/flightWorkflowPublicPilotReadinessSnapshot.js", "FLIGHT_WORKFLOW_PUBLIC_PILOT_READINESS_SNAPSHOT_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow support playbook console version", "apps/desktop/src/renderer/core/flightWorkflowSupportPlaybookConsole.js", "FLIGHT_WORKFLOW_SUPPORT_PLAYBOOK_CONSOLE_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow pilot snapshot view model version", "apps/desktop/src/renderer/core/flightWorkflowPilotSnapshotViewModel.js", "FLIGHT_WORKFLOW_PILOT_SNAPSHOT_VIEW_MODEL_VERSION");
     checkFlightEvidenceWorkflowOrchestratorVersion(results, rootPackage.version);
     checkFlightEvidenceWorkflowStatusPresenterVersion(results, rootPackage.version);
     checkFlightFareBreakdownVersion(results, rootPackage.version);

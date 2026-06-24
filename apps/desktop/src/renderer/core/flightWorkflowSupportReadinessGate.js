@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SUPPORT_READINESS_GATE_VERSION = "2.1.77";
+  const FLIGHT_WORKFLOW_SUPPORT_READINESS_GATE_VERSION = "2.1.78";
   const GATE_NAME = "flight_workflow_support_readiness_gate_v1";
   const CAVEAT = "该判断只适用于只读试点问题处理，不代表客服工单或交易能力。";
 
@@ -15,6 +15,8 @@
   function triage(input) { const safe = obj(input); return first(safe.supportTriageDashboard, safe.supportTriageSummary, safe.triageDashboard); }
   function checklist(input) { const safe = obj(input); return first(safe.publicPilotChecklistSummary, safe.publicPilotChecklist, safe.checklist); }
   function betaGate(input) { const safe = obj(input); return first(safe.betaExpansionGateSummary, safe.betaExpansionGate, safe.expansionGate); }
+  function snapshot(input) { const safe = obj(input); return first(safe.pilotReadinessSnapshotSummary, safe.publicPilotReadinessSnapshotSummary, safe.snapshotSummary); }
+  function playbook(input) { const safe = obj(input); return first(safe.supportPlaybookSummary, safe.supportPlaybookConsoleSummary, safe.playbookSummary); }
   function hasTradingUrl(value) {
     const safe = obj(value);
     return Boolean(safe.bookingUrl || safe.checkoutUrl || safe.paymentUrl || safe.orderUrl || (safe.safety && (safe.safety.bookingUrl || safe.safety.checkoutUrl || safe.safety.paymentUrl || safe.safety.orderUrl)));
@@ -26,27 +28,35 @@
     const t = triage(safe);
     const c = checklist(safe);
     const g = betaGate(safe);
+    const s = snapshot(safe);
+    const p = playbook(safe);
     const pattern = obj(r.patternSummary);
     const health = obj(r.issuePatternHealth);
     const readiness = obj(c.readiness);
     const decision = obj(g.decision);
-    const noSensitiveLeakRisk = safe.rawUserTextStored !== true && safe.rawResponseStored !== true && safe.secretStored !== true && obj(r.safety).rawUserTextStored !== true && obj(r.safety).secretStored !== true;
-    const noTradingRisk = !hasTradingUrl(safe) && !hasTradingUrl(r) && !hasTradingUrl(b) && !hasTradingUrl(t);
+    const noSensitiveLeakRisk = safe.rawUserTextStored !== true && safe.rawResponseStored !== true && safe.secretStored !== true && obj(r.safety).rawUserTextStored !== true && obj(r.safety).secretStored !== true && obj(s).rawUserTextStored !== true && obj(s).secretStored !== true && obj(p).rawUserTextStored !== true && obj(p).secretStored !== true;
+    const noTradingRisk = !hasTradingUrl(safe) && !hasTradingUrl(r) && !hasTradingUrl(b) && !hasTradingUrl(t) && !hasTradingUrl(s) && !hasTradingUrl(p);
     return clone({
       issuePatternReady:r.status === "ready" || r.status === "insufficient_data",
       noRepeatedBlockingIssue:r.status !== "blocked" && pattern.severity !== "blocked" && health.blockedIssueCount !== true && Number(health.blockedIssueCount || 0) === 0,
       triageReady:t.status === "ready" || t.status === "needs_internal_review",
-      supportFallbackReady:safe.supportFallbackReady === true || readiness.supportFallbackReady === true || (c.status === "ready" && b.status !== "blocked"),
-      safetyCopyStable:pattern.dominantPattern !== "safety_copy_unclear" && safe.safetyCopyStable !== false,
+      supportFallbackReady:safe.supportFallbackReady === true || readiness.supportFallbackReady === true || (c.status === "ready" && b.status !== "blocked" && p.status !== "blocked"),
+      safetyCopyStable:pattern.dominantPattern !== "safety_copy_unclear" && safe.safetyCopyStable !== false && p.status !== "blocked",
       noSensitiveLeakRisk:noSensitiveLeakRisk,
-      noTradingRisk:noTradingRisk
+      noTradingRisk:noTradingRisk,
+      pilotReadinessSnapshotSummary:clone(s),
+      supportPlaybookSummary:clone(p),
+      pilotSnapshotStatus:text(s.status || ""),
+      supportPlaybookStatus:text(p.status || ""),
+      pilotSnapshotNextStep:text(obj(s.userFacingSummary).resultLabel || obj(p.userFacingSummary).resultLabel || "继续小范围试点")
     });
   }
   function evaluateFlightWorkflowSupportReadiness(input) {
     const safe = obj(input);
     const r = radar(safe);
     const criteria = buildFlightWorkflowSupportReadinessCriteria(safe);
-    const unmetCriteria = Object.keys(criteria).filter(function (key) { return criteria[key] !== true; });
+    const criteriaKeys = ["issuePatternReady", "noRepeatedBlockingIssue", "triageReady", "supportFallbackReady", "safetyCopyStable", "noSensitiveLeakRisk", "noTradingRisk"];
+    const unmetCriteria = criteriaKeys.filter(function (key) { return criteria[key] !== true; });
     const pattern = obj(r.patternSummary);
     let status = "ready";
     let decisionId = "continue_public_pilot";
@@ -80,6 +90,11 @@
       criteria:criteria,
       unmetCriteria:Array.isArray(safe.unmetCriteria) ? safe.unmetCriteria.map(text) : [],
       riskNotes:Array.isArray(safe.riskNotes) ? safe.riskNotes.map(text) : [],
+      pilotReadinessSnapshotSummary:clone(safe.pilotReadinessSnapshotSummary || null),
+      supportPlaybookSummary:clone(safe.supportPlaybookSummary || null),
+      pilotSnapshotStatus:text(safe.pilotSnapshotStatus || ""),
+      supportPlaybookStatus:text(safe.supportPlaybookStatus || ""),
+      pilotSnapshotNextStep:text(safe.pilotSnapshotNextStep || ""),
       userFacingSummary:{ title:"试点支持准备闸门", resultLabel:labelFor(status), caveat:CAVEAT },
       safety:safety(),
       redacted:true
@@ -89,7 +104,7 @@
     try {
       const evaluation = evaluateFlightWorkflowSupportReadiness(input || {});
       const riskNotes = evaluation.unmetCriteria.map(function (key) { return key === "supportFallbackReady" ? "支持兜底仍需观察" : key === "safetyCopyStable" ? "安全文案仍需复核" : key === "issuePatternReady" ? "问题趋势数据仍不足" : key === "noTradingRisk" ? "检测到交易字段风险" : key === "noSensitiveLeakRisk" ? "检测到敏感泄露风险" : "需要复核：" + key; });
-      return sanitizeFlightWorkflowSupportReadinessGate({ status:evaluation.status, decision:{ decisionId:evaluation.decisionId, label:labelFor(evaluation.status), message:messageFor(evaluation), supportReadyForPublicPilot:evaluation.supportReadyForPublicPilot }, criteria:evaluation.criteria, unmetCriteria:evaluation.unmetCriteria, riskNotes:riskNotes });
+      return sanitizeFlightWorkflowSupportReadinessGate({ status:evaluation.status, decision:{ decisionId:evaluation.decisionId, label:labelFor(evaluation.status), message:messageFor(evaluation), supportReadyForPublicPilot:evaluation.supportReadyForPublicPilot }, criteria:evaluation.criteria, unmetCriteria:evaluation.unmetCriteria, riskNotes:riskNotes, pilotReadinessSnapshotSummary:evaluation.pilotReadinessSnapshotSummary, supportPlaybookSummary:evaluation.supportPlaybookSummary, pilotSnapshotStatus:evaluation.pilotSnapshotStatus, supportPlaybookStatus:evaluation.supportPlaybookStatus, pilotSnapshotNextStep:evaluation.pilotSnapshotNextStep });
     } catch (error) {
       return sanitizeFlightWorkflowSupportReadinessGate({ status:"failed_safe", decision:{ decisionId:"blocked", label:"已阻断", message:"支持准备输入异常，已安全降级。", supportReadyForPublicPilot:false }, criteria:{}, unmetCriteria:["failed_safe"], riskNotes:["支持准备输入异常"] });
     }

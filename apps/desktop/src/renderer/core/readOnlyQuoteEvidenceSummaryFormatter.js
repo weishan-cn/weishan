@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.77";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.78";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -222,7 +222,12 @@
       publicPilotChecklistSummary: stripUnsafe(safe.publicPilotChecklistSummary || null),
       pilotReadinessSummary: stripUnsafe(safe.pilotReadinessSummary || null),
       safeForSmallPublicPilot: safe.safeForSmallPublicPilot === true,
-       pilotNextStep: safeLine(safe.pilotNextStep || ""),
+      pilotNextStep: safeLine(safe.pilotNextStep || ""),
+      pilotReadinessSnapshotSummary: stripUnsafe(safe.pilotReadinessSnapshotSummary || safe.publicPilotReadinessSnapshotSummary || safe.snapshotSummary || null),
+      supportPlaybookSummary: stripUnsafe(safe.supportPlaybookSummary || safe.supportPlaybookConsoleSummary || null),
+      pilotSnapshotStatus: safeLine(safe.pilotSnapshotStatus || ""),
+      supportPlaybookStatus: safeLine(safe.supportPlaybookStatus || ""),
+      pilotSnapshotNextStep: safeLine(safe.pilotSnapshotNextStep || ""),
       pilotOnboardingSummary: stripUnsafe(safe.pilotOnboardingSummary || null),
       readOnlyConsentSummary: stripUnsafe(safe.readOnlyConsentSummary || null),
       pilotOnboardingViewModel: stripUnsafe(safe.pilotOnboardingViewModel || null),
@@ -292,6 +297,19 @@
     return clone({ title:"试点问题趋势雷达", line:safeLine(pattern.userFacingSummary && pattern.userFacingSummary.resultLabel || readiness.userFacingSummary && readiness.userFacingSummary.resultLabel || "暂无明显共性问题"), sectionLabels:["问题数量", "主要问题趋势", "支持准备", "试点支持准备闸门"], caveat:"问题趋势仅用于改进只读候选证据流程，不代表客服工单、交易请求或出票请求。", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, redacted:true });
   }
 
+  function formatPublicPilotReadinessSnapshotSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const snapshot = safe.pilotReadinessSnapshotSummary || safe.publicPilotReadinessSnapshotSummary || safe.snapshotSummary || {};
+    const playbook = safe.supportPlaybookSummary || safe.supportPlaybookConsoleSummary || {};
+    return clone({ title:"只读试点状态快照", line:safeLine(obj(snapshot.userFacingSummary).resultLabel || snapshot.status || "需要复核"), sectionLabels:["试点状态", "支持准备", "问题趋势", "下一步", "beta expansion gate", "public pilot checklist", "pilot onboarding guard", "issue pattern radar", "support readiness gate", "issue review board", "support triage dashboard", "operator console", "safety regression sentinel"], caveat:"该快照只适用于只读候选证据流程，不代表真实票价、库存或可出票。", supportPlaybookStatus:text(playbook.status || "ready"), pilotSnapshotStatus:text(snapshot.status || ""), pilotSnapshotNextStep:safeLine(obj(snapshot.userFacingSummary).resultLabel || snapshot.status || "需要复核"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, redacted:true });
+  }
+
+  function formatSupportPlaybookConsoleSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const playbook = safe.supportPlaybookSummary || safe.supportPlaybookConsoleSummary || {};
+    return clone({ title:"只读试点支持处理手册", line:safeLine(obj(playbook.userFacingSummary).resultLabel || playbook.status || "支持处理路径已准备"), sectionLabels:["看不懂候选证据", "平台页面与候选证据不一致", "安全说明不清楚", "只读范围确认无法完成", "反馈填写异常", "禁止动作"], forbiddenSupportActions:Array.isArray(playbook.forbiddenSupportActions) ? playbook.forbiddenSupportActions.slice() : ["代用户付款", "代用户下单", "承诺出票", "索要证件或银行卡", "索要登录凭据", "提供真实客服工单编号"], caveat:"该手册只用于只读试点问题处理，不代表客服工单、交易请求或出票请求。", supportPlaybookStatus:text(playbook.status || ""), supportPlaybookNextStep:safeLine(obj(playbook.userFacingSummary).resultLabel || playbook.status || "支持处理路径已准备"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -326,6 +344,8 @@
     formatProviderConfirmationWarning,
     formatFlightWorkflowSummary,
     formatIssuePatternSupportSummary,
+    formatPublicPilotReadinessSnapshotSummary,
+    formatSupportPlaybookConsoleSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,

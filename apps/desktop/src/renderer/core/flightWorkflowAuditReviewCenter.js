@@ -1,9 +1,9 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_AUDIT_REVIEW_CENTER_VERSION = "2.1.77";
+  const FLIGHT_WORKFLOW_AUDIT_REVIEW_CENTER_VERSION = "2.1.78";
   const CENTER_NAME = "flight_workflow_audit_review_center_v1";
-  const DEFAULT_WORKFLOW_ID = "deterministic-flight-workflow-audit-review-v2.1.77";
+  const DEFAULT_WORKFLOW_ID = "deterministic-flight-workflow-audit-review-v2.1.78";
   const FORBIDDEN_NAME_RE = /(rawText|rawUserText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|apiKey|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
 

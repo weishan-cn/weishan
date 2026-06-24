@@ -1,5 +1,5 @@
 (function(){
-  const RESULT_CARD_VISUAL_FORMATTER_VERSION = "2.1.77";
+  const RESULT_CARD_VISUAL_FORMATTER_VERSION = "2.1.78";
   const HIDDEN_DEBUG_FIELDS = ["Cheapest Truth Guard", "not_ranked_as_real_cheapest", "canClaimCheapest", "canParticipateInCheapestRanking", "guardName", "internal enum", "rollbackDecision JSON", "audit draft", "raw schema", "raw provider payload"];
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value){ return String(value == null ? "" : value).trim(); }
