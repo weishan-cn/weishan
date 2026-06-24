@@ -1,11 +1,12 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.76";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.77";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value == null ? "" : value).trim(); }
+  function obj(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
   function safeText(value) { return text(value).replace(FORBIDDEN_TEXT_RE, "redacted"); }
   function safety() { return { bookingUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, secretStored:false, redacted:true }; }
   function badge(badgeId, label, severity) { return { badgeId:badgeId, label:label, severity:severity || "info", redacted:true }; }
@@ -99,6 +100,13 @@
       if (safe.issueAffectsPilotExpansion === true || issueHealth.affectsPilotExpansion === true || triage.affectsPilotExpansion === true) badges.push(badge("pilot_issue_affects_expansion", "问题影响试点扩大", "warning"));
       if (supportTriage.status === "ready" || triage.triageId) badges.push(badge("pilot_issue_triage_done", "问题分流完成", "info"));
       if (issueReview.status === "blocked" || supportTriage.status === "blocked") badges.push(badge("pilot_issue_blocked", "问题已安全阻断", "blocked"));
+      const issuePattern = obj(safe.issuePatternSummary);
+      const supportReadiness = obj(safe.supportReadinessSummary);
+      if (issuePattern.status === "ready" || safe.issuePatternStatus === "ready") badges.push(badge("pilot_issue_pattern_ready", "试点问题趋势正常", "info"));
+      if (issuePattern.status === "needs_review" || safe.repeatedIssueRisk === true) badges.push(badge("pilot_issue_pattern_repeated", "发现高频问题", "warning"));
+      if (supportReadiness.status === "ready" || safe.supportReadyForPublicPilot === true) badges.push(badge("support_readiness_ready", "支持兜底准备就绪", "info"));
+      if (supportReadiness.status === "continue_small_pilot" || safe.supportReadinessStatus === "continue_small_pilot") badges.push(badge("support_readiness_small_pilot", "继续小范围试点", "warning"));
+      if (supportReadiness.status === "needs_review" || safe.supportReadinessStatus === "needs_review") badges.push(badge("support_readiness_pause_expansion", "需要暂停扩大测试", "warning"));
       if (beta.status === "blocked" || guided.status === "blocked" || guided.status === "failed_safe") badges.push(badge("beta_acceptance_blocked", "Beta 验收被阻断", "blocked"));
       if (copyStatus === "pass" || releaseReadiness.copyValidationStatus === "pass") badges.push(badge("safety_copy_unified", "安全文案已统一", "info"));
       badges.push(badge("not_exportable", "不可导出", "warning"));

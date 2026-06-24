@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.76";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.77";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -285,6 +285,13 @@
     return clone({ title:"安全测试矩阵", line:safeLine(safe.userFacingSummary && safe.userFacingSummary.resultLabel || (safe.status === "pass" ? "全部通过" : (safe.status === "warning" ? "存在警告" : (safe.status === "fail" ? "存在失败项" : "未知")))), scenarioCount:Number(safe.scenarioCount || 0), passedCount:Number(safe.passedCount || 0), warningCount:Number(safe.warningCount || 0), failedCount:Number(safe.failedCount || 0), blockedCount:Number(safe.blockedCount || 0), sectionLabels:["完整机票请求", "缺少出发地", "缺少目的地", "缺少日期", "非法交易链接阻断", "非法密钥阻断", "非法付款动作", "平台确认需要确认"], caveat:"该矩阵仅为本地安全回归检查，不代表真实票价或可出票。", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
+  function formatIssuePatternSupportSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const pattern = safe.issuePatternSummary || {};
+    const readiness = safe.supportReadinessSummary || {};
+    return clone({ title:"试点问题趋势雷达", line:safeLine(pattern.userFacingSummary && pattern.userFacingSummary.resultLabel || readiness.userFacingSummary && readiness.userFacingSummary.resultLabel || "暂无明显共性问题"), sectionLabels:["问题数量", "主要问题趋势", "支持准备", "试点支持准备闸门"], caveat:"问题趋势仅用于改进只读候选证据流程，不代表客服工单、交易请求或出票请求。", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -318,6 +325,7 @@
     formatCandidateComparisonSummary,
     formatProviderConfirmationWarning,
     formatFlightWorkflowSummary,
+    formatIssuePatternSupportSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,

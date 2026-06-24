@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.76";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.77";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -394,6 +394,12 @@
         canOrderHere: false,
         canUploadIdentityHere: false
       },
+      issuePatternSummary: clone(safe.issuePatternSummary || null),
+      supportReadinessSummary: clone(safe.supportReadinessSummary || null),
+      issuePatternStatus: text(safe.issuePatternStatus || safe.issuePatternSummary && safe.issuePatternSummary.status || ""),
+      supportReadinessStatus: text(safe.supportReadinessStatus || safe.supportReadinessSummary && safe.supportReadinessSummary.status || ""),
+      supportReadyForPublicPilot: safe.supportReadyForPublicPilot === true || safe.supportReadinessSummary && safe.supportReadinessSummary.decision && safe.supportReadinessSummary.decision.supportReadyForPublicPilot === true,
+      repeatedIssueRisk: safe.repeatedIssueRisk === true || safe.issuePatternSummary && safe.issuePatternSummary.issuePatternHealth && safe.issuePatternSummary.issuePatternHealth.hasRepeatedPattern === true,
       redacted: true
     });
   }

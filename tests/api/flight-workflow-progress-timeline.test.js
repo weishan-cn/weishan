@@ -9,7 +9,7 @@ function current(timeline) { return timeline.steps.find((step) => step.status ==
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowProgressTimeline.js"]);
   const api = windowRef.WeishanFlightWorkflowProgressTimeline;
-  assert.equal(api.FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION, "2.1.76");
+  assert.equal(api.FLIGHT_WORKFLOW_PROGRESS_TIMELINE_VERSION, "2.1.77");
   const clarification = api.buildFlightWorkflowProgressTimeline({ status:"needs_clarification" });
   assert.equal(clarification.steps[0].status, "completed");
   assert.equal(current(clarification).stepId, "clarification");
