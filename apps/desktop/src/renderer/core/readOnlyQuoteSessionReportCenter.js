@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.82";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.83";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -160,8 +160,13 @@
       pilotConsentRequired: safe.pilotConsentRequired === true,
       pilotReadinessSnapshotSummary: stripUnsafe(safe.pilotReadinessSnapshotSummary || null),
       supportPlaybookSummary: stripUnsafe(safe.supportPlaybookSummary || null),
+      pilotExitCriteriaSummary: stripUnsafe(safe.pilotExitCriteriaSummary || null),
+      launchCandidateReadinessSummary: stripUnsafe(safe.launchCandidateReadinessSummary || null),
       pilotOpsSummary: stripUnsafe(safe.pilotOpsSummary || safe.readOnlyPilotOpsSummary || null),
       nextCohortDecisionSummary: stripUnsafe(safe.nextCohortDecisionSummary || safe.nextCohortDecisionBoard || null),
+      launchCandidateStatus: safeText(safe.launchCandidateStatus || ""),
+      readyForLaunchCandidate: safe.readyForLaunchCandidate === true,
+      launchCandidateNextStep: safeText(safe.launchCandidateNextStep || ""),
       pilotOpsStatus: safeText(safe.pilotOpsStatus || ""),
       nextCohortDecisionStatus: safeText(safe.nextCohortDecisionStatus || ""),
       pilotOpsPrimaryRisk: stripUnsafe(safe.pilotOpsPrimaryRisk || null),
@@ -179,8 +184,13 @@
       pilotInvitationNextStep: safeText(safe.pilotInvitationNextStep || ""),
       rolloutControlSummary: stripUnsafe(safe.rolloutControlSummary || null),
       cohortHealthSummary: stripUnsafe(safe.cohortHealthSummary || null),
+      pilotExitCriteriaSummary: stripUnsafe(safe.pilotExitCriteriaSummary || null),
+      launchCandidateReadinessSummary: stripUnsafe(safe.launchCandidateReadinessSummary || null),
       pilotOpsSummary: stripUnsafe(safe.pilotOpsSummary || null),
       nextCohortDecisionSummary: stripUnsafe(safe.nextCohortDecisionSummary || null),
+      launchCandidateStatus: safeText(safe.launchCandidateStatus || ""),
+      readyForLaunchCandidate: safe.readyForLaunchCandidate === true,
+      launchCandidateNextStep: safeText(safe.launchCandidateNextStep || ""),
       pilotOpsStatus: safeText(safe.pilotOpsStatus || ""),
       nextCohortDecisionStatus: safeText(safe.nextCohortDecisionStatus || ""),
       pilotOpsPrimaryRisk: stripUnsafe(safe.pilotOpsPrimaryRisk || null),
@@ -226,6 +236,8 @@
     const safetyRegressionSummary = workflow.safetyRegressionSummary || safe.safetyRegressionSummary || (typeof sentinelApi().buildFlightWorkflowSafetyRegressionReport === "function" ? sentinelApi().buildFlightWorkflowSafetyRegressionReport(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview })) : null);
     const operatorConsoleSummary = workflow.operatorConsoleSummary || safe.operatorConsoleSummary || (typeof operatorApi().buildFlightWorkflowOperatorConsole === "function" ? operatorApi().buildFlightWorkflowOperatorConsole(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview, humanReviewChecklistSummary:humanReviewChecklistSummary, finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, handoffPacketPolicyDecision:handoffPacketPolicyDecision, safetyRegressionSummary:safetyRegressionSummary })) : null);
     const operatorConsoleViewModel = workflow.operatorConsoleViewModel || safe.operatorConsoleViewModel || (typeof operatorViewModelApi().buildFlightWorkflowOperatorConsoleViewModel === "function" ? operatorViewModelApi().buildFlightWorkflowOperatorConsoleViewModel({ operatorConsoleSummary:operatorConsoleSummary }) : null);
+    const pilotExitCriteriaSummary = workflow.pilotExitCriteriaSummary || safe.pilotExitCriteriaSummary || null;
+    const launchCandidateReadinessSummary = workflow.launchCandidateReadinessSummary || safe.launchCandidateReadinessSummary || null;
     const scenarioSimulationSummary = workflow.scenarioSimulationSummary || safe.scenarioSimulationSummary || null;
     const safetyTestMatrixSummary = workflow.safetyTestMatrixSummary || safe.safetyTestMatrixSummary || null;
     const releaseReadinessSummary = workflow.releaseReadinessSummary || safe.releaseReadinessSummary || (typeof releaseReadinessApi().buildFlightWorkflowReleaseReadinessDashboard === "function" ? releaseReadinessApi().buildFlightWorkflowReleaseReadinessDashboard(Object.assign({}, safe, workflow, { scenarioSimulationSummary:scenarioSimulationSummary, safetyTestMatrixSummary:safetyTestMatrixSummary, auditReviewSummary:auditReviewSummary, humanReviewChecklistSummary:humanReviewChecklistSummary, finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, safeSessionExportPreview:safeSessionExportPreview, operatorConsoleSummary:operatorConsoleSummary })) : null);
@@ -282,6 +294,11 @@
       safetyRegressionSummary: safetyRegressionSummary ? { title:"安全回归", line:safetyRegressionSummary.status === "pass" ? "安全回归通过" : "安全回归失败", checkCount:(safetyRegressionSummary.checks || []).length || 0, redacted:true } : null,
       operatorConsoleSummary: operatorConsoleSummary ? { title:"机票工作流运营控制台", line:operatorConsoleSummary.userFacingSummary && operatorConsoleSummary.userFacingSummary.resultLabel || "存在需要注意的项目", status:operatorConsoleSummary.status, redacted:true } : null,
       operatorConsoleViewModel: operatorConsoleViewModel,
+      pilotExitCriteriaSummary: pilotExitCriteriaSummary ? { title:"只读试点退出条件", line:pilotExitCriteriaSummary.userFacingSummary && pilotExitCriteriaSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
+      launchCandidateReadinessSummary: launchCandidateReadinessSummary ? { title:"只读发布候选准备板", line:launchCandidateReadinessSummary.userFacingSummary && launchCandidateReadinessSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
+      launchCandidateStatus: workflow.launchCandidateStatus || safe.launchCandidateStatus || "",
+      readyForLaunchCandidate: workflow.readyForLaunchCandidate === true || safe.readyForLaunchCandidate === true,
+      launchCandidateNextStep: workflow.launchCandidateNextStep || safe.launchCandidateNextStep || "",
       pilotOnboardingSummary: workflow.pilotOnboardingSummary,
       readOnlyConsentSummary: workflow.readOnlyConsentSummary,
       pilotOnboardingViewModel: workflow.pilotOnboardingViewModel,
@@ -512,9 +529,14 @@
       pilotInvitationNextStep: report.safetyReport.pilotInvitationNextStep || "",
       rolloutControlSummary: report.safetyReport.rolloutControlSummary || null,
       cohortHealthSummary: report.safetyReport.cohortHealthSummary || null,
+      pilotExitCriteriaSummary: report.safetyReport.pilotExitCriteriaSummary || null,
+      launchCandidateReadinessSummary: report.safetyReport.launchCandidateReadinessSummary || null,
       rolloutControlViewModel: report.safetyReport.rolloutControlViewModel || null,
       rolloutDecisionStatus: report.safetyReport.rolloutDecisionStatus || "",
       cohortHealthStatus: report.safetyReport.cohortHealthStatus || "",
+      launchCandidateStatus: report.safetyReport.launchCandidateStatus || "",
+      readyForLaunchCandidate: report.safetyReport.readyForLaunchCandidate === true,
+      launchCandidateNextStep: report.safetyReport.launchCandidateNextStep || "",
       rolloutNextStep: report.safetyReport.rolloutNextStep || "",
       scenarioSimulationSummary: report.safetyReport.scenarioSimulationSummary || null,
       safetyTestMatrixSummary: report.safetyReport.safetyTestMatrixSummary || null,

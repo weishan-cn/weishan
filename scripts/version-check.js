@@ -2125,6 +2125,9 @@ function runVersionCheck() {
     checkReadOnlyPriceCandidateCardViewModelVersion(results, rootPackage.version);
     checkReadOnlyQuoteEvidenceSummaryFormatterVersion(results, rootPackage.version);
     checkReadOnlyQuoteSessionReportCenterVersion(results, rootPackage.version);
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow read only pilot exit criteria version", "apps/desktop/src/renderer/core/flightWorkflowReadOnlyPilotExitCriteria.js", "FLIGHT_WORKFLOW_READ_ONLY_PILOT_EXIT_CRITERIA_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow launch candidate readiness board version", "apps/desktop/src/renderer/core/flightWorkflowLaunchCandidateReadinessBoard.js", "FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_READINESS_BOARD_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow launch candidate view model version", "apps/desktop/src/renderer/core/flightWorkflowLaunchCandidateViewModel.js", "FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_VIEW_MODEL_VERSION");
     checkReadOnlyQuoteDecisionAssistantVersion(results, rootPackage.version);
     checkReadOnlyQuoteCandidateComparisonExplainerVersion(results, rootPackage.version);
     checkSafeProviderConfirmationChecklistVersion(results, rootPackage.version);

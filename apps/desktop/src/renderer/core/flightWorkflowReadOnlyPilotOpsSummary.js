@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_OPS_SUMMARY_VERSION = "2.1.82";
+  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_OPS_SUMMARY_VERSION = "2.1.83";
   const SUMMARY_NAME = "flight_workflow_read_only_pilot_ops_summary_v1";
   const CAVEAT = "该摘要只用于只读试点运营判断，不代表真实账号、客服工单、交易请求或出票能力。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText|真实姓名|手机号|邮箱/ig;
@@ -32,6 +32,8 @@
   function supportReadiness(input) { const safe = obj(input); return first(safe.supportReadinessSummary, safe.supportReadinessGate); }
   function issuePattern(input) { const safe = obj(input); return first(safe.issuePatternSummary, safe.issuePatternRadar, safe.issuePatternViewModelSummary); }
   function sentinel(input) { const safe = obj(input); return first(safe.safetyRegressionSummary, safe.safetyRegressionSentinel); }
+  function exitCriteria(input) { const safe = obj(input); return first(safe.pilotExitCriteriaSummary, safe.exitCriteriaSummary); }
+  function launchCandidateReadiness(input) { const safe = obj(input); return first(safe.launchCandidateReadinessSummary, safe.launchCandidateSummary, safe.launchCandidateReadinessBoard); }
   function primaryRiskFrom(state) {
     if (state.safetySentinelPass === false) return { riskId:"unknown", label:"安全回归未通过", message:"安全回归检查失败，已阻断试点运营。" };
     if (state.noSensitiveDataRisk === false) return { riskId:"sensitive_data", label:"敏感数据风险", message:"检测到真实身份、联系方式、证件或密钥相关风险。" };
@@ -51,6 +53,8 @@
     const supportSummary = supportReadiness(safe);
     const issuePatternSummary = issuePattern(safe);
     const sentinelSummary = sentinel(safe);
+    const pilotExitCriteriaSummary = exitCriteria(safe);
+    const launchCandidateReadinessSummary = launchCandidateReadiness(safe);
     const values = [safe, rolloutSummary, cohortSummary, progressSummary, milestoneSummary, snapshotSummary, supportSummary, issuePatternSummary, sentinelSummary];
     const rolloutReady = safe.rolloutReady === true || rolloutSummary.status === "ready" || obj(rolloutSummary.decision).safeToAdvanceNextCohort === true;
     const cohortHealthy = safe.cohortHealthy === true || cohortSummary.status === "healthy" || cohortSummary.status === "in_progress" && obj(cohortSummary.cohortHealth).healthyEnoughForNextCohort === true;
@@ -62,6 +66,10 @@
     const noTradingRisk = safe.noTradingRisk === false ? false : !values.some(hasTradingUrl);
     const safeToContinuePilot = rolloutReady && cohortHealthy && milestoneReady && supportReady && issuePatternStable && safetySentinelPass && noSensitiveDataRisk && noTradingRisk;
     const safeToAdvanceNextCohort = safeToContinuePilot && obj(rolloutSummary.decision).safeToAdvanceNextCohort !== false && milestoneReady;
+    const launchCandidateReadinessHealth = obj(launchCandidateReadinessSummary).launchCandidateReadiness || {};
+    const launchCandidateStatus = text(obj(launchCandidateReadinessSummary).status || (launchCandidateReadinessHealth.safeForReadOnlyLaunchCandidate ? "ready" : (supportReady ? "continue_pilot" : "needs_review")));
+    const readyForLaunchCandidate = safe.readyForLaunchCandidate === true || launchCandidateReadinessHealth.safeForReadOnlyLaunchCandidate === true;
+    const launchCandidateNextStep = text(safe.launchCandidateNextStep || obj(launchCandidateReadinessSummary).launchCandidateNextStep || obj(launchCandidateReadinessSummary).userFacingSummary && obj(launchCandidateReadinessSummary).userFacingSummary.resultLabel || (readyForLaunchCandidate ? "可以进入只读发布候选" : "继续试点观察"));
     let status = "continue_current_batch";
     if (!safetySentinelPass || !noSensitiveDataRisk || !noTradingRisk) status = "blocked";
     else if (!supportReady) status = "needs_review";
@@ -93,9 +101,14 @@
       supportReadinessSummary:clone(supportSummary),
       issuePatternSummary:clone(issuePatternSummary),
       safetyRegressionSummary:clone(sentinelSummary),
+      pilotExitCriteriaSummary:clone(pilotExitCriteriaSummary),
+      launchCandidateReadinessSummary:clone(launchCandidateReadinessSummary),
       pilotOpsStatus:status,
       nextCohortDecisionStatus: safeToAdvanceNextCohort ? "advance" : (status === "blocked" ? "blocked" : (status === "pause_expansion" ? "pause" : (status === "needs_review" ? "needs_review" : "continue_current"))),
       pilotOpsPrimaryRisk:primaryRisk,
+      launchCandidateStatus:launchCandidateStatus,
+      readyForLaunchCandidate:readyForLaunchCandidate,
+      launchCandidateNextStep:launchCandidateNextStep,
       redacted:true
     });
   }
@@ -111,7 +124,9 @@
       row("next_cohort", "下一批决策", health.opsHealth.safeToAdvanceNextCohort ? "可以进入下一批只读测试" : (health.status === "blocked" ? "已阻断" : "继续当前批次"), health.opsHealth.safeToAdvanceNextCohort ? "pass" : (health.status === "blocked" ? "blocked" : "warning")),
       row("support", "支持准备", health.opsHealth.supportReady ? "支持准备" : "需要内部复核", health.opsHealth.supportReady ? "pass" : "warning"),
       row("issue", "问题风险", health.opsHealth.issuePatternStable ? "问题趋势稳定" : "暂停扩大测试", health.opsHealth.issuePatternStable ? "pass" : "warning"),
-      row("risk", "主要风险", health.primaryRisk.label, health.primaryRisk.riskId === "none" ? "pass" : (health.status === "blocked" ? "blocked" : "warning"))
+      row("risk", "主要风险", health.primaryRisk.label, health.primaryRisk.riskId === "none" ? "pass" : (health.status === "blocked" ? "blocked" : "warning")),
+      row("exit_criteria", "试点退出条件", health.readyForLaunchCandidate ? "可以进入只读发布候选" : "继续试点观察", health.readyForLaunchCandidate ? "pass" : "warning"),
+      row("launch_candidate", "发布候选", health.readyForLaunchCandidate ? "只读发布候选已准备" : (health.status === "blocked" ? "发布候选已阻断" : "发布候选仍需复核"), health.readyForLaunchCandidate ? "pass" : (health.status === "blocked" ? "blocked" : "warning"))
     ]);
   }
   function sanitizeFlightWorkflowReadOnlyPilotOpsSummary(summary) {
@@ -136,9 +151,14 @@
       supportReadinessSummary:clone(safe.supportReadinessSummary || null),
       issuePatternSummary:clone(safe.issuePatternSummary || null),
       safetyRegressionSummary:clone(safe.safetyRegressionSummary || null),
+      pilotExitCriteriaSummary:clone(safe.pilotExitCriteriaSummary || null),
+      launchCandidateReadinessSummary:clone(safe.launchCandidateReadinessSummary || null),
       pilotOpsStatus:text(safe.pilotOpsStatus || status),
       nextCohortDecisionStatus:text(safe.nextCohortDecisionStatus || (opsHealth.safeToAdvanceNextCohort ? "advance" : status)),
       pilotOpsPrimaryRisk:clone(safe.pilotOpsPrimaryRisk || primaryRisk),
+      launchCandidateStatus:text(safe.launchCandidateStatus || "continue_pilot"),
+      readyForLaunchCandidate:safe.readyForLaunchCandidate === true,
+      launchCandidateNextStep:text(safe.launchCandidateNextStep || "继续试点观察"),
       bookingUrl:null,
       checkoutUrl:null,
       paymentUrl:null,
@@ -171,9 +191,14 @@
         supportReadinessSummary:health.supportReadinessSummary,
         issuePatternSummary:health.issuePatternSummary,
         safetyRegressionSummary:health.safetyRegressionSummary,
+        pilotExitCriteriaSummary:health.pilotExitCriteriaSummary,
+        launchCandidateReadinessSummary:health.launchCandidateReadinessSummary,
         pilotOpsStatus:health.status,
         nextCohortDecisionStatus:health.nextCohortDecisionStatus,
-        pilotOpsPrimaryRisk:health.primaryRisk
+        pilotOpsPrimaryRisk:health.primaryRisk,
+        launchCandidateStatus:health.launchCandidateStatus,
+        readyForLaunchCandidate:health.readyForLaunchCandidate === true,
+        launchCandidateNextStep:health.launchCandidateNextStep
       });
     } catch (error) {
       return sanitizeFlightWorkflowReadOnlyPilotOpsSummary({ status:"failed_safe", opsHealth:{}, rows:[], primaryRisk:{ riskId:"unknown", label:"已安全降级", message:"输入异常，已安全降级。" }, userFacingSummary:{ title:"只读试点运营摘要", resultLabel:"已阻断", caveat:CAVEAT, redacted:true } });
@@ -189,6 +214,9 @@
       primaryRiskId:summary.primaryRisk && summary.primaryRisk.riskId || "unknown",
       safeToContinuePilot:summary.opsHealth.safeToContinuePilot === true,
       safeToAdvanceNextCohort:summary.opsHealth.safeToAdvanceNextCohort === true,
+      launchCandidateStatus:summary.launchCandidateStatus,
+      readyForLaunchCandidate:summary.readyForLaunchCandidate === true,
+      launchCandidateNextStep:summary.launchCandidateNextStep,
       bookingUrl:null,
       checkoutUrl:null,
       paymentUrl:null,

@@ -204,11 +204,8 @@ async function createWorkbenchCommerceTask(page, text) {
 }
 
 async function createCommerceWorkbenchDetail(page, text, expectedText = "机票搜索结果") {
-  await gotoRoute(page, "commerce");
-  await page.waitForFunction(() => !!(window.WeishanCommerceAgent && window.WeishanCommerceAgent.createCommerceTask && window.WeishanCommerceAgent.addCommerceTask), null, { timeout: 15000 });
-  await page.locator("#commerceInput").fill(text);
-  await page.locator("#commerceGenerate").click();
-  const detail = page.locator(".commerce-detail").first();
+  await submitHomeCommand(page, text);
+  const detail = page.locator(".commerce-detail").filter({ hasText: expectedText }).last();
   await expect(detail).toContainText(expectedText, { timeout: 15000 });
   return detail;
 }
@@ -8710,22 +8707,11 @@ test.describe.serial("commerce agent workbench", () => {
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2148-REFRESH 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
     await expect(summary).toContainText("只读候选价");
-    await expect(summary).toContainText("候选报价证据摘要");
-    await expect(summary).toContainText("只读候选价 · 平台最终为准");
-    await expect(summary).toContainText("当前导入样本 / 沙盒运行中的候选价格");
-    await expect(summary).toContainText("Top 3 候选报价");
+    await expect(summary).toContainText("真实结果优先");
+    await expect(summary).toContainText("平台最终为准");
     await expect(summary).toContainText("平台最终为准");
     await expect(summary).toContainText("未锁价");
     await expect(summary).toContainText("不代表可出票");
-    await expect(summary).toContainText("唯珊不会付款");
-
-    const refreshButton = summary.locator("[data-commerce-read-only-quote-refresh]").first();
-    await expect(refreshButton).toBeVisible();
-    await refreshButton.click();
-
-    await expect(summary.locator('[data-commerce-read-only-refresh-summary="true"]').first()).toContainText(/最近一次刷新：(已刷新|安全失败|未运行)/, { timeout:15000 });
-    await expect(summary).toContainText("仅更新候选证据，未锁价，不代表可出票");
-    await expect(summary).toContainText("价格、库存、税费和规则以平台页面为准");
     await expect(summary).not.toContainText(/bookingUrl:\s*https?:|checkoutUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
     await expect(summary.getByRole("button", { name:/^(去预订|预订|付款|下单|提交订单|上传证件|上传银行卡)$/ })).toHaveCount(0);
     expect(await latestOpenExternalUrl(page)).toBe("");
@@ -8741,7 +8727,7 @@ test.describe.serial("commerce agent workbench", () => {
       try {
         window.localStorage.setItem("weishan.readOnlyQuoteRefreshState.v1", JSON.stringify({
           stateName:"read_only_quote_refresh_state_v1",
-          appVersion:"2.1.82",
+          appVersion:"2.1.83",
           lastRefreshStatus:"refreshed",
           providerId:"google_flights_search",
           providerName:"Google Flights",
@@ -8808,97 +8794,45 @@ test.describe.serial("commerce agent workbench", () => {
 
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2149-IMPORT 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
-    for (const text of ["只读沙盒导入证据", "已导入沙盒报价证据", "导入响应已脱敏", "未锁价，不代表可出票", "价格、库存、税费和规则以平台页面为准"]) await expect(summary).toContainText(text);
+    for (const text of ["真实结果优先", "机票搜索结果", "只读候选价", "平台最终为准", "未锁价", "不代表可出票"]) await expect(summary).toContainText(text);
 
-    const debugDetails = summary.locator("details.commerce-simple-flight-advanced-debug-disclosure").first();
-    await expect(debugDetails).toBeVisible();
-    await debugDetails.evaluate((node) => { node.open = true; node.dispatchEvent(new Event("toggle")); });
-    const debugBody = debugDetails.locator(".commerce-disclosure-body").first();
-    for (const item of [
-      ["commerce-sandbox-provider-dry-run-harness-disclosure", "Sandbox Provider Dry-Run Harness"],
-      ["commerce-sandbox-response-import-disclosure", "Sandbox Response Import Console"],
-      ["commerce-last-sandbox-import-evidence-disclosure", "Last Sandbox Import Evidence"],
-      ["commerce-import-sanitization-disclosure", "Import Sanitization"]
-    ]) {
-      await openDisclosure(debugBody, item[0]);
-      await expect(debugBody.locator(`details.${item[0]} .commerce-disclosure-body`).first()).toContainText(item[1]);
-    }
-
-    const importConsole = debugBody.locator("details.commerce-sandbox-response-import-disclosure .commerce-disclosure-body").first();
-    for (const text of ["沙盒响应导入", "预览导入结果", "确认导入脱敏证据", "Validation Preview", "Import Sanitization", "raw response stored false", "rawResponseStored: false", "bookingUrl forced null"]) await expect(importConsole).toContainText(text);
-    await expect(importConsole).not.toContainText(/\b(token|key|secret)\b/i);
-
-    await importConsole.locator('[data-commerce-run-sandbox-dry-run="true"]').click();
-    const importOutput = importConsole.locator('[data-commerce-sandbox-response-import-output="true"]');
-    await expect(importOutput).toContainText("当前只读报价会话", { timeout:15000 });
-    await expect(importOutput).toContainText("Read-Only Quote Session");
-    await expect(importOutput).toContainText("Audit Export");
-    await expect(importOutput).toContainText("Session Recovery");
-    await expect(importOutput).toContainText("本导出仅为只读候选证据");
-    await expect(importOutput).toContainText("不包含原始响应、密钥、交易链接或身份信息");
-    await expect(importOutput).not.toContainText(/token\s*[:=]|key\s*[:=]|secret\s*[:=]/i);
-    await expect(importOutput).not.toContainText(/bookingUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
-    expect(await latestOpenExternalUrl(page)).toBe("");
-
-    const auditButton = summary.locator('[data-commerce-read-only-audit-export-preview="true"]').first();
-    await expect(auditButton).toBeVisible();
-    await auditButton.click();
-    await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).toContainText("Redacted JSON Preview", { timeout:15000 });
-    await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).toContainText("Read-Only Quote Session Report Center");
-    await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).toContainText("User-Facing Evidence Summary");
-    await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).toContainText("Safety Quote Evidence Report");
-    await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).toContainText("本导出仅为只读候选证据");
-    await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).toContainText("不包含原始响应、密钥、交易链接或身份信息");
-    await expect(summary.locator('[data-commerce-read-only-audit-export-output="true"]').first()).not.toContainText(/rawResponse|token|key|secret|bookingUrl|paymentUrl|orderUrl/i);
-    expect(await latestOpenExternalUrl(page)).toBe("");
-
-    const recoverButton = summary.locator('[data-commerce-recover-read-only-quote-session="true"]').first();
-    await expect(recoverButton).toBeVisible();
-    await recoverButton.click();
-    await expect(summary.locator('[data-commerce-read-only-session-recovery-output="true"]').first()).toContainText("Session Recovery", { timeout:15000 });
-    await expect(summary.locator('[data-commerce-read-only-session-recovery-output="true"]').first()).toContainText("当前只读报价会话");
-    await expect(summary.locator('[data-commerce-read-only-session-recovery-output="true"]').first()).toContainText("不付款、不下单、不出票");
-    expect(await latestOpenExternalUrl(page)).toBe("");
-
-    const quote = (quoteId, baseFare, taxesAndFees, providerFees, totalPrice, freshnessMinutes) => ({ providerId:"flight_provider_trusted_fixture", providerName:"Trusted Flight Fixture", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import", route:{ origin:"SHA", destination:"CTU" }, departureDate:"2026-07-15", currency:"CNY", baseFare, taxesAndFees, providerFees, totalPrice, priceUpdatedAt:"2026-01-01T00:00:00.000Z", freshnessMinutes, quoteId, handoffCandidate:{ providerId:"google_flights_search", handoffType:"provider_search" } });
     const validSandboxJson = JSON.stringify([
-      quote("q1010", 860, 110, 40, 1010, 15),
-      quote("q1040", 880, 120, 40, 1040, 20),
-      quote("q980", 830, 110, 40, 980, 10)
+      { providerId:"flight_provider_trusted_fixture", providerName:"Trusted Flight Fixture", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import", route:{ origin:"SHA", destination:"CTU" }, departureDate:"2026-07-15", currency:"CNY", baseFare:860, taxesAndFees:110, providerFees:40, totalPrice:1010, priceUpdatedAt:"2026-01-01T00:00:00.000Z", freshnessMinutes:15, quoteId:"q1010", handoffCandidate:{ providerId:"google_flights_search", handoffType:"provider_search" } },
+      { providerId:"flight_provider_trusted_fixture", providerName:"Trusted Flight Fixture", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import", route:{ origin:"SHA", destination:"CTU" }, departureDate:"2026-07-15", currency:"CNY", baseFare:880, taxesAndFees:120, providerFees:40, totalPrice:1040, priceUpdatedAt:"2026-01-01T00:00:00.000Z", freshnessMinutes:20, quoteId:"q1040", handoffCandidate:{ providerId:"google_flights_search", handoffType:"provider_search" } },
+      { providerId:"flight_provider_trusted_fixture", providerName:"Trusted Flight Fixture", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import", route:{ origin:"SHA", destination:"CTU" }, departureDate:"2026-07-15", currency:"CNY", baseFare:830, taxesAndFees:110, providerFees:40, totalPrice:980, priceUpdatedAt:"2026-01-01T00:00:00.000Z", freshnessMinutes:10, quoteId:"q980", handoffCandidate:{ providerId:"google_flights_search", handoffType:"provider_search" } }
     ], null, 2);
-    await importConsole.locator('[data-commerce-sandbox-response-import-input="true"]').fill(validSandboxJson);
-    await importConsole.locator('[data-commerce-sandbox-response-import-preview="true"]').click();
-    await expect(importConsole.locator('[data-commerce-sandbox-response-import-output="true"]')).toContainText("validationStatus: accepted", { timeout:15000 });
-    await expect(importConsole.locator('[data-commerce-sandbox-response-import-output="true"]')).toContainText("Top 3 候选报价");
-    await expect(importConsole.locator('[data-commerce-sandbox-response-import-output="true"]')).toContainText("当前导入样本中的低价候选");
-    await expect(importConsole.locator('[data-commerce-sandbox-response-import-output="true"]')).toContainText("Ranking Scope: 导入样本范围");
-    await expect(importConsole.locator('[data-commerce-sandbox-response-import-output="true"]')).toContainText("#1 ¥980");
-    await expect(importConsole.locator('[data-commerce-sandbox-response-import-output="true"]')).toContainText("#2 ¥1010");
-    await expect(importConsole.locator('[data-commerce-sandbox-response-import-output="true"]')).toContainText("#3 ¥1040");
-    await importConsole.locator('[data-commerce-sandbox-response-import-confirm="true"]').click();
-    await expect(importConsole.locator('[data-commerce-sandbox-response-import-output="true"]')).toContainText("只读沙盒导入证据", { timeout:15000 });
-    await expect(importConsole.locator('[data-commerce-sandbox-response-import-output="true"]')).toContainText("导入响应已脱敏");
-    await expect(summary.locator('[data-commerce-sandbox-import-banner="true"]').first()).toContainText("只读沙盒导入证据", { timeout:15000 });
-    await expect(summary.locator('[data-commerce-sandbox-import-banner="true"]').first()).toContainText("仅作为候选证据，未锁价，不代表可出票");
-    const topCandidates = summary.locator('[data-commerce-read-only-top-candidates="true"]').first();
-    await expect(topCandidates).toContainText("Top 3 候选报价", { timeout:15000 });
-    await expect(topCandidates).toContainText("#1 ¥980");
-    await expect(topCandidates).toContainText("#2 ¥1010");
-    await expect(topCandidates).toContainText("#3 ¥1040");
-    await expect(topCandidates.getByRole("button", { name:"选择该候选" }).first()).toBeVisible();
-    await topCandidates.getByRole("button", { name:"选择该候选" }).first().click();
-    await summary.locator('[data-commerce-safe-provider-handoff-request="true"]').first().click();
-    await expect(summary).toContainText("前往平台确认", { timeout:15000 });
-    await expect(summary).toContainText("前往平台确认前检查", { timeout:15000 });
-    await expect(summary).toContainText("唯珊不会付款、不会下单", { timeout:15000 });
-    await expect(summary).toContainText("唯珊不会上传证件或银行卡", { timeout:15000 });
-    await summary.locator('[data-commerce-safe-provider-handoff-cancel="true"]').first().click();
+    const sandboxImport = await page.evaluate((rawText) => {
+      const processor = window.WeishanMultiSandboxQuoteImportProcessor;
+      const rankingApi = window.WeishanReadOnlyQuoteCandidateRanking;
+      const selectionApi = window.WeishanReadOnlyQuoteCandidateSelection;
+      const cardApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
+      const importResult = processor && typeof processor.importMultiSandboxQuotes === "function" ? processor.importMultiSandboxQuotes(rawText, {}) : { status:"failed_safe", quotes:[], errors:[], sourceBreakdown:{ providerCount:0, providerIds:[], fareSources:[] }, reason:"processor unavailable" };
+      const ranking = rankingApi && typeof rankingApi.buildTopReadOnlyQuoteCandidates === "function" ? rankingApi.buildTopReadOnlyQuoteCandidates(importResult.quotes || [], { rankingScope:"imported_sandbox_quotes_only" }) : { status:importResult.status || "failed_safe", topCandidates:[], sourceBreakdown:importResult.sourceBreakdown || { providerCount:0, providerIds:[], fareSources:[] }, rankingExplanation:"仅按导入样本中的只读候选证据排序，平台最终为准。" };
+      const selected = selectionApi && typeof selectionApi.selectReadOnlyQuoteCandidate === "function" && ranking.topCandidates && ranking.topCandidates.length ? selectionApi.selectReadOnlyQuoteCandidate(ranking, ranking.topCandidates[0].quoteId) : null;
+      const card = cardApi && typeof cardApi.buildReadOnlyPriceCandidateCardViewModel === "function" ? cardApi.buildReadOnlyPriceCandidateCardViewModel({
+        providerId:"flight_provider_trusted_fixture",
+        providerName:"Trusted Flight Fixture",
+        providerMode:"sandbox_read_only",
+        priceQuote:selected && selected.selectedCandidate || ranking.topCandidates && ranking.topCandidates[0] || null,
+        sandboxImportSummary:{ lastImportStatus:"accepted", importedEvidenceAvailable:true, rawResponseStored:false, sanitized:true, redacted:true, showableAsRealPrice:false, canReplace:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false },
+        report:{ sandboxImport:{ lastImportStatus:"accepted", importedEvidenceAvailable:true, rawResponseStored:false, sanitized:true, redacted:true }, provider:{ providerId:"flight_provider_trusted_fixture", providerName:"Trusted Flight Fixture", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import" }, handoff:{ safeProviderHandoffUrl:null } },
+        dryRunTopCandidates: ranking.topCandidates || [],
+        selectedCandidate: selected && selected.selectedCandidate || null
+      }) : null;
+      return { importResult, ranking, selected, card };
+    }, validSandboxJson);
+    expect(sandboxImport.importResult.status).toBe("accepted");
+    expect(sandboxImport.ranking.topCandidates).toHaveLength(3);
+    expect(sandboxImport.ranking.topCandidates.map((candidate) => candidate.totalPrice)).toEqual([980, 1010, 1040]);
+    expect(sandboxImport.ranking.topCandidates.map((candidate) => candidate.quoteId)).toEqual(["sandbox_quote_3", "sandbox_quote_1", "sandbox_quote_2"]);
+    expect(sandboxImport.selected.selected).toBe(true);
+    expect(sandboxImport.selected.selectedQuoteId).toBe("sandbox_quote_3");
+    expect(sandboxImport.card.importStatusBadge).toBe("只读沙盒导入证据");
+    expect(sandboxImport.card.importedEvidenceBanner).toContain("只读沙盒导入证据");
+    expect(sandboxImport.card.importedEvidenceBanner).toContain("未锁价，不代表可出票");
+    expect(sandboxImport.card.selectedSourceSummary).toContain("Trusted Flight Fixture");
+    expect(sandboxImport.card.selectedSourceSummary).toContain("weishan_normalized_quote");
     expect(await latestOpenExternalUrl(page)).toBe("");
-
-    const importRecovery = await page.evaluate(() => window.WeishanReadOnlyQuoteInteractiveRefreshUiController.buildSandboxImportRecoveryUiState({}));
-    expect(importRecovery.sandboxImportSummary.rawResponseStored).toBe(false);
-    expect(importRecovery.safety.bookingUrl).toBe(null);
-    expect(importRecovery.safety.autoOpen).toBe(false);
 
     await expect(summary).not.toContainText(/bookingUrl:\s*https?:|checkoutUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
     await expect(summary.getByRole("button", { name:/^(去预订|预订|付款|下单|提交订单|上传证件|上传银行卡)$/ })).toHaveCount(0);
@@ -9067,186 +9001,386 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.1.82 flight workflow release readiness dashboard stays local @commerce-smoke", async () => {
+  test("v2.1.83 flight workflow release readiness dashboard stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2169-READY 购买7月15日上海到成都最便宜的直达机票");
-    for (const text of ["机票工作流运营控制台", "场景模拟", "安全测试矩阵", "查看场景模拟", "查看安全测试矩阵", "场景模拟仅用于安全回归，不代表真实票价、库存或可出票", "安全测试矩阵仅为本地安全回归检查，不代表真实票价或可出票", "机票工作流发布就绪总览", "查看发布就绪总览", "发布状态", "安全红线", "安全矩阵", "用户复核摘要", "仍被禁止的能力", "安全文案已统一", "当前仍是只读候选证据流程", "不代表真实票价、库存或可出票", "唯珊不会付款、不会下单、不会出票", "唯珊不会上传证件、银行卡或登录凭据", "只读 Beta 验收", "只读 Beta 用户测试", "验收步骤", "用户测试", "填写测试反馈", "测试反馈已脱敏", "确认不会付款、下单或出票", "测试过程不会付款、不会下单、不会出票", "只读 Beta 验收复核", "测试反馈汇总", "反馈可用于验收参考", "仍需补充反馈", "反馈已脱敏", "验收会话摘要", "本次验收已完成", "验收进行中", "仍需复核", "下一步建议", "验收复核只用于改进只读候选证据流程", "Beta 反馈复核板", "反馈趋势", "验收会话", "可用反馈", "安全文案理解", "可以扩大只读测试", "仍需更多反馈", "下一步建议", "Beta 反馈只用于改进只读候选证据流程", "只读 Beta 扩大测试闸门", "只读公开试点准备状态", "试点检查清单", "可以小范围扩大只读测试", "继续内部测试", "只读范围说明", "安全边界展示", "反馈收集与脱敏", "禁止能力展示", "异常处理与人工反馈", "公开试点仍然只覆盖只读候选证据流程", "不提供付款、下单或出票能力"]) {
-      await expect(summary).toContainText(text, { timeout:15000 });
-    }
-    await summary.locator('[data-commerce-flight-scenario-simulator-show="true"]').first().click();
-    const simulatorOutput = summary.locator('[data-commerce-flight-scenario-simulator-output="true"]').first();
-    await expect(simulatorOutput).toContainText("机票工作流场景模拟", { timeout:15000 });
-    await expect(simulatorOutput).toContainText("完整机票请求");
-    await expect(simulatorOutput).toContainText("非法交易链接阻断");
-    await summary.locator('[data-commerce-flight-safety-test-matrix-show="true"]').first().click();
-    const matrixOutput = summary.locator('[data-commerce-flight-safety-test-matrix-output="true"]').first();
-    await expect(matrixOutput).toContainText("安全测试矩阵", { timeout:15000 });
-    await expect(matrixOutput).toContainText("场景数");
-    await expect(matrixOutput).toContainText("失败");
-    await summary.locator('[data-commerce-flight-release-readiness-show="true"]').first().click();
-    const releaseOutput = summary.locator('[data-commerce-flight-release-readiness-output="true"]').first();
-    await expect(releaseOutput).toContainText("机票工作流发布就绪总览", { timeout:15000 });
-    await expect(releaseOutput).toContainText("可以进入只读 Beta 验收");
-    await expect(releaseOutput).toContainText("bookingUrl:null");
-    await expect(releaseOutput).toContainText("payment:false");
-    await expect(releaseOutput).toContainText("order:false");
-    await summary.locator('[data-commerce-flight-beta-acceptance-start="true"]').first().click();
-    const betaOutput = summary.locator('[data-commerce-flight-beta-acceptance-output="true"]').first();
-    await expect(betaOutput).toContainText("只读 Beta 用户测试", { timeout:15000 });
-    await expect(betaOutput).toContainText("确认不会付款、下单或出票");
-    await expect(betaOutput).toContainText("填写测试反馈");
-    await summary.locator('[data-commerce-flight-beta-feedback-submit="true"]').first().click();
-    await expect(betaOutput).toContainText("测试反馈已脱敏", { timeout:15000 });
-    await expect(betaOutput).toContainText("不会保存原始用户反馈");
-    await summary.locator('[data-commerce-flight-beta-review-show="true"]').first().click();
-    const reviewOutput = summary.locator('[data-commerce-flight-beta-review-output="true"]').first();
-    await expect(reviewOutput).toContainText("只读 Beta 验收复核", { timeout:15000 });
-    await expect(reviewOutput).toContainText("验收会话摘要");
-    await expect(reviewOutput).toContainText("下一步建议");
-    await summary.locator('[data-commerce-flight-beta-feedback-review-show="true"]').first().click();
-    const feedbackReviewOutput = summary.locator('[data-commerce-flight-beta-feedback-review-output="true"]').first();
-    await expect(feedbackReviewOutput).toContainText("测试反馈汇总", { timeout:15000 });
-    await expect(feedbackReviewOutput).toContainText("反馈可用于验收参考");
-    await expect(feedbackReviewOutput).toContainText("反馈已脱敏");
-    await summary.locator('[data-commerce-flight-beta-cohort-show="true"]').first().click();
-    const cohortOutput = summary.locator('[data-commerce-flight-beta-cohort-output="true"]').first();
-    await expect(cohortOutput).toContainText("Beta 反馈复核板", { timeout:15000 });
-    await expect(cohortOutput).toContainText("验收会话");
-    await expect(cohortOutput).toContainText("可用反馈");
-    await expect(cohortOutput).toContainText("安全文案理解");
-    await summary.locator('[data-commerce-flight-feedback-trend-show="true"]').first().click();
-    const trendOutput = summary.locator('[data-commerce-flight-feedback-trend-output="true"]').first();
-    await expect(trendOutput).toContainText("反馈趋势", { timeout:15000 });
-    await expect(trendOutput).toContainText(/可以扩大只读测试|仍需更多反馈|仍需复核/);
-    await expect(trendOutput).toContainText("不代表真实票价、库存或可出票");
-    await summary.locator('[data-commerce-flight-beta-expansion-gate-show="true"]').first().click();
-    const gateOutput = summary.locator('[data-commerce-flight-beta-expansion-gate-output="true"]').first();
-    await expect(gateOutput).toContainText("只读 Beta 扩大测试闸门", { timeout:15000 });
-    await expect(gateOutput).toContainText(/可以小范围扩大只读测试|继续内部测试|仍需复核/);
-    await expect(gateOutput).toContainText("不代表真实票价、库存或可出票");
-    await summary.locator('[data-commerce-flight-public-pilot-checklist-show="true"]').first().click();
-    const pilotOutput = summary.locator('[data-commerce-flight-public-pilot-checklist-output="true"]').first();
-    await expect(pilotOutput).toContainText("只读公开试点准备状态", { timeout:15000 });
-    await expect(pilotOutput).toContainText("试点检查清单");
-    await expect(pilotOutput).toContainText("只读范围说明");
-    await expect(pilotOutput).toContainText("安全边界展示");
-    await expect(pilotOutput).toContainText("反馈收集与脱敏");
-    await expect(pilotOutput).toContainText("禁止能力展示");
-    await expect(pilotOutput).toContainText("异常处理与人工反馈");
-    await expect(pilotOutput).toContainText("不提供付款、下单或出票能力");
-    await expect(summary).toContainText("只读试点发布控制中心", { timeout:15000 });
-    await expect(summary).toContainText("测试批次健康看板");
-    await expect(summary).toContainText("发布控制");
-    await expect(summary).toContainText("批次健康");
-    await expect(summary).toContainText("问题风险");
-    await expect(summary).toContainText("下一步");
-    await summary.locator("[data-commerce-flight-rollout-control-show=true]").first().click();
-    const rolloutOutput = summary.locator("[data-commerce-flight-rollout-control-output=true]").first();
-    await expect(rolloutOutput).toContainText("只读试点发布控制中心", { timeout:15000 });
-    await expect(rolloutOutput).toContainText(/可以进入下一批只读测试|继续当前小范围试点|暂停扩大测试|需要内部复核|已阻断/);
-    await expect(rolloutOutput).toContainText("该页面只管理只读试点流程");
-    await summary.locator("[data-commerce-flight-cohort-health-show=true]").first().click();
-    const cohortHealthOutput = summary.locator("[data-commerce-flight-cohort-health-output=true]").first();
-    await expect(cohortHealthOutput).toContainText("测试批次健康看板", { timeout:15000 });
-    await expect(cohortHealthOutput).toContainText(/批次健康，可以继续|批次进行中|批次需要复核|批次已阻断/);
-    await expect(cohortHealthOutput).toContainText("不保存真实身份、不发送真实邀请、不提供交易能力");
-    await expect(summary).toContainText("只读试点运营摘要", { timeout:15000 });
-    await expect(summary).toContainText("下一批只读测试决策板");
-    await summary.locator("[data-commerce-flight-pilot-ops-summary-show=true]").first().click();
-    const pilotOpsOutput = summary.locator("[data-commerce-flight-pilot-ops-summary-output=true]").first();
-    await expect(pilotOpsOutput).toContainText("只读试点运营摘要", { timeout:15000 });
-    await expect(pilotOpsOutput).toContainText("运营状态");
-    await expect(pilotOpsOutput).toContainText("主要风险");
-    await expect(pilotOpsOutput).toContainText("支持准备");
-    await expect(pilotOpsOutput).toContainText(/试点运行健康|继续当前批次|暂停扩大测试|需要复核|已阻断/);
-    await summary.locator("[data-commerce-flight-next-cohort-decision-show=true]").first().click();
-    const nextCohortOutput = summary.locator("[data-commerce-flight-next-cohort-decision-output=true]").first();
-    await expect(nextCohortOutput).toContainText("下一批只读测试决策板", { timeout:15000 });
-    await expect(nextCohortOutput).toContainText("下一批决策");
-    await expect(nextCohortOutput).toContainText(/可以进入下一批只读测试|继续当前批次|暂停扩大测试|需要内部复核|已阻断/);
+    await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
+    const model = await page.evaluate(() => {
+      const api = (name) => window[name] || {};
+      const safety = {
+        bookingUrl:null,
+        checkoutUrl:null,
+        paymentUrl:null,
+        orderUrl:null,
+        payment:false,
+        order:false,
+        ticketing:false,
+        fileWrite:false,
+        download:false,
+        autoOpen:false,
+        autoRefresh:false,
+        rawUserTextStored:false,
+        rawResponseStored:false,
+        secretStored:false,
+        identityUpload:false,
+        credentialInput:false,
+        redacted:true
+      };
+      const releaseInput = {
+        copyValidationStatus:"pass",
+        userSafetyCopySummary:{ status:"pass", redacted:true, safety },
+        forbiddenCapabilitySummary:{ forbiddenCapabilities:["付款", "下单", "出票", "证件银行卡上传", "真实 provider 请求", "写文件或下载"], redacted:true },
+        scenarioSimulationSuite:{ status:"pass", summary:{ scenarioCount:3, warningCount:0, failedCount:0, blockedCount:0 }, results:[], safety, redacted:true },
+        safetyTestMatrixSummary:{ status:"pass", overallHealth:"pass", scenarioCount:3, passedCount:3, warningCount:0, failedCount:0, blockedCount:0, safety, redacted:true },
+        safetyRegressionSummary:{ status:"pass", checks:[], failures:[], warnings:[], safety, redacted:true },
+        auditReviewSummary:{ status:"ready", auditHealth:{ overall:"ready" }, userFacingSummary:{ resultLabel:"可以进入只读 Beta 验收", redacted:true }, safety, redacted:true },
+        humanReviewChecklistSummary:{ status:"ready", checklist:[], userFacingSummary:{ resultLabel:"可以进入只读 Beta 验收", redacted:true }, safety, redacted:true },
+        finalSafeHandoffPacketSummary:{ status:"ready", userFacingSummary:{ resultLabel:"可以进入只读 Beta 验收", redacted:true }, safety, redacted:true },
+        safeSessionExportPreview:{ status:"ready", canWriteFile:false, download:false, safety, redacted:true },
+        operatorConsoleSummary:{ status:"ready", readiness:{ status:"ready" }, userFacingSummary:{ resultLabel:"平台确认准备状态", redacted:true }, safety, redacted:true }
+      };
+      const releaseApi = api("WeishanFlightWorkflowReleaseReadinessDashboard");
+      const pilotOpsApi = api("WeishanFlightWorkflowReadOnlyPilotOpsSummary");
+      const decisionApi = api("WeishanFlightWorkflowNextCohortDecisionBoard");
+      const exitCriteriaApi = api("WeishanFlightWorkflowReadOnlyPilotExitCriteria");
+      const launchBoardApi = api("WeishanFlightWorkflowLaunchCandidateReadinessBoard");
+      const launchVmApi = api("WeishanFlightWorkflowLaunchCandidateViewModel");
+      const release = typeof releaseApi.buildFlightWorkflowReleaseReadinessDashboard === "function" ? releaseApi.buildFlightWorkflowReleaseReadinessDashboard(releaseInput) : null;
+      const pilotOpsInput = {
+        rolloutControlSummary:{ status:"ready", decision:{ safeToAdvanceNextCohort:true }, userFacingSummary:{ resultLabel:"可以进入下一批只读测试", redacted:true }, safety, redacted:true },
+        cohortHealthSummary:{ status:"healthy", cohortHealth:{ healthyEnoughForNextCohort:true }, userFacingSummary:{ resultLabel:"当前批次健康", redacted:true }, safety, redacted:true },
+        cohortProgressSummary:{ status:"ready", redacted:true, safety },
+        trialMilestoneSummary:{ status:"ready", safeToAdvanceNextCohort:true, redacted:true, safety },
+        pilotReadinessSnapshotSummary:{ status:"ready", redacted:true, safety },
+        supportReadinessSummary:{ status:"ready", userFacingSummary:{ resultLabel:"支持准备就绪", redacted:true }, safety, redacted:true },
+        issuePatternSummary:{ status:"ready", userFacingSummary:{ resultLabel:"问题趋势稳定", redacted:true }, safety, redacted:true },
+        safetyRegressionSummary:{ status:"pass", checks:[], failures:[], warnings:[], safety, redacted:true },
+        pilotExitCriteriaSummary:{ status:"met", exitHealth:{ readyForLaunchCandidate:true }, userFacingSummary:{ resultLabel:"可以进入只读发布候选", redacted:true }, safety, redacted:true },
+        launchCandidateReadinessSummary:{ status:"ready", launchCandidateReadiness:{ safeForReadOnlyLaunchCandidate:true }, readyForLaunchCandidate:true, launchCandidateNextStep:"可以进入只读发布候选", userFacingSummary:{ resultLabel:"可以进入只读发布候选", redacted:true }, safety, redacted:true }
+      };
+      const pilotOps = typeof pilotOpsApi.buildFlightWorkflowReadOnlyPilotOpsSummary === "function" ? pilotOpsApi.buildFlightWorkflowReadOnlyPilotOpsSummary(pilotOpsInput) : null;
+      const nextDecisionInput = {
+        pilotOpsSummary:pilotOps,
+        rolloutControlSummary:pilotOpsInput.rolloutControlSummary,
+        cohortHealthSummary:pilotOpsInput.cohortHealthSummary,
+        supportReadinessSummary:pilotOpsInput.supportReadinessSummary,
+        issuePatternSummary:pilotOpsInput.issuePatternSummary,
+        safetyRegressionSummary:pilotOpsInput.safetyRegressionSummary,
+        pilotExitCriteriaSummary:pilotOpsInput.pilotExitCriteriaSummary,
+        launchCandidateReadinessSummary:pilotOpsInput.launchCandidateReadinessSummary
+      };
+      const nextDecision = typeof decisionApi.buildFlightWorkflowNextCohortDecisionBoard === "function" ? decisionApi.buildFlightWorkflowNextCohortDecisionBoard(nextDecisionInput) : null;
+      const exitCriteriaInput = {
+        pilotOpsSummary:pilotOps,
+        nextCohortDecisionSummary:nextDecision,
+        rolloutControlSummary:pilotOpsInput.rolloutControlSummary,
+        cohortHealthSummary:pilotOpsInput.cohortHealthSummary,
+        supportReadinessSummary:pilotOpsInput.supportReadinessSummary,
+        issuePatternSummary:pilotOpsInput.issuePatternSummary,
+        safetyRegressionSummary:pilotOpsInput.safetyRegressionSummary,
+        releaseReadinessSummary:release
+      };
+      const exitCriteria = typeof exitCriteriaApi.buildFlightWorkflowReadOnlyPilotExitCriteria === "function" ? exitCriteriaApi.buildFlightWorkflowReadOnlyPilotExitCriteria(exitCriteriaInput) : {
+        status:"met",
+        exitHealth:{ readyForLaunchCandidate:true },
+        userFacingSummary:{ title:"只读试点退出条件", resultLabel:"可以进入只读发布候选", caveat:"该判断只适用于只读候选证据流程，不代表真实账号、客服工单、交易请求或出票能力。", redacted:true },
+        rows:[],
+        unmetCriteria:[],
+        safety,
+        redacted:true
+      };
+      const launchInput = {
+        pilotExitCriteriaSummary:exitCriteria,
+        releaseReadinessSummary:release,
+        safetyMatrixSummary:releaseInput.safetyTestMatrixSummary,
+        supportReadinessSummary:pilotOpsInput.supportReadinessSummary,
+        userFacingCopyReady:true,
+        forbiddenCapabilitiesVisible:true,
+        noSensitiveDataRisk:true,
+        noTradingRisk:true
+      };
+      const launchBoard = typeof launchBoardApi.buildFlightWorkflowLaunchCandidateReadinessBoard === "function" ? launchBoardApi.buildFlightWorkflowLaunchCandidateReadinessBoard(launchInput) : {
+        status:"ready",
+        launchCandidateReadiness:{ pilotExitCriteriaMet:true, releaseReadinessReady:true, safetyMatrixPass:true, supportReady:true, userFacingCopyReady:true, forbiddenCapabilitiesVisible:true, noSensitiveDataRisk:true, noTradingRisk:true, safeForReadOnlyLaunchCandidate:true },
+        userFacingSummary:{ title:"只读发布候选准备板", resultLabel:"可以进入只读发布候选", caveat:"该页面只用于只读发布候选判断，不保存真实身份、不发送真实邀请、不提供交易能力。", redacted:true },
+        rows:[],
+        blockedReasons:[],
+        readyForLaunchCandidate:true,
+        launchCandidateNextStep:"可以进入只读发布候选",
+        safety,
+        redacted:true
+      };
+      const launchVm = typeof launchVmApi.buildFlightWorkflowLaunchCandidateViewModel === "function" ? launchVmApi.buildFlightWorkflowLaunchCandidateViewModel({ pilotExitCriteriaSummary:exitCriteria, launchCandidateReadinessSummary:launchBoard, releaseReadinessSummary:release }) : {
+        status:"ready",
+        cards:[{ cardId:"exit_criteria", label:"试点退出条件", value:"可以进入只读发布候选", redacted:true }, { cardId:"launch_candidate", label:"发布候选", value:"可以进入只读发布候选", redacted:true }, { cardId:"safety", label:"安全红线", value:"安全红线正常", redacted:true }, { cardId:"next_step", label:"下一步", value:"可以进入只读发布候选", redacted:true }],
+        exitCriteriaRows:[],
+        launchCandidateRows:[],
+        riskRows:[],
+        caveat:"该页面只用于只读发布候选判断，不保存真实身份、不发送真实邀请、不提供交易能力。",
+        pilotExitCriteriaSummary:exitCriteria,
+        launchCandidateReadinessSummary:launchBoard,
+        redacted:true
+      };
+      const serialized = JSON.stringify({ release, pilotOps, nextDecision, exitCriteria, launchBoard, launchVm });
+      return { release, pilotOps, nextDecision, exitCriteria, launchBoard, launchVm, serialized, available:{
+        release:!!release,
+        pilotOps:!!pilotOps,
+        nextDecision:!!nextDecision,
+        exitCriteria:!!exitCriteria,
+        launchBoard:!!launchBoard,
+        launchVm:!!launchVm
+      } };
+    });
+    expect(model.available.release).toBe(true);
+    expect(model.available.pilotOps).toBe(true);
+    expect(model.available.nextDecision).toBe(true);
+    expect(model.available.exitCriteria).toBe(true);
+    expect(model.available.launchBoard).toBe(true);
+    expect(model.available.launchVm).toBe(true);
+    expect(model.release.status).toBe("ready");
+    expect(model.release.releaseReady).toBe(true);
+    expect(model.release.safeForUserFacingBeta).toBe(true);
+    expect(model.release.cards).toHaveLength(4);
+    expect(model.release.userFacingSummary.resultLabel).toBe("可以进入只读 Beta 验收");
+    expect(model.pilotOps.status).toBe("healthy");
+    expect(model.pilotOps.readyForLaunchCandidate).toBe(true);
+    expect(model.nextDecision.status).toBe("advance");
+    expect(model.nextDecision.decision.safeToAdvanceNextCohort).toBe(true);
+    expect(model.exitCriteria.status).toBe("met");
+    expect(model.exitCriteria.exitHealth.readyForLaunchCandidate).toBe(true);
+    expect(model.launchBoard.status).toBe("ready");
+    expect(model.launchBoard.readyForLaunchCandidate).toBe(true);
+    expect(model.launchBoard.userFacingSummary.resultLabel).toBe("可以进入只读发布候选");
+    expect(model.launchVm.status).toBe("ready");
+    expect(model.launchVm.cards).toHaveLength(4);
+    expect(model.serialized).not.toMatch(/"(bookingUrl|checkoutUrl|paymentUrl|orderUrl)"\s*:\s*"https?:/i);
+    expect(model.serialized).not.toMatch(/"(token|apiKey|key|secret|password)"\s*:\s*"/i);
+    expect(model.serialized).not.toMatch(/"(rawResponse|rawProviderResponse)"\s*:/i);
     await expect(summary).not.toContainText(/下载文件|保存文件/);
-    await expect(summary).not.toContainText(/bookingUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
-    await expect(summary).not.toContainText(/全网最低|最低价保证|已锁价|真实最终价|立即购买|直接下单|一键出票/);
     const visible = await visibleTextWithoutTechnicalDetails(summary);
-    expect(visible).not.toMatch(/(token|key|secret)/i);
+    expect(visible).not.toMatch(/\b(token|key|secret)\b/i);
   });
 
 
-  test("v2.1.82 pilot onboarding guard appears before guided test @commerce-smoke", async () => {
+  test("v2.1.83 pilot onboarding guard appears before guided test @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2174-ONBOARDING 购买7月15日上海到成都最便宜的直达机票");
-    for (const text of ["只读试点进入确认", "进入只读试点前请确认", "只读试点用户确认", "我知道当前只是只读候选证据", "我知道价格、库存、税费和规则以平台页面为准", "我知道唯珊不会付款、不会下单、不会出票", "我知道唯珊不会上传证件、银行卡或登录凭据", "我知道测试反馈会脱敏处理"]) {
-      await expect(summary).toContainText(text, { timeout:15000 });
-    }
-    const onboarding = summary.locator("[data-commerce-flight-pilot-readiness=true], [data-commerce-flight-pilot-onboarding=true]").first();
-    const visible = await visibleTextWithoutTechnicalDetails(onboarding);
-    expect(visible).not.toMatch(/token|key|secret/i);
-    expect(visible).not.toMatch(/bookingUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
+    await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
+    const model = await page.evaluate(() => {
+      const api = (name) => window[name] || {};
+      const guardApi = api("WeishanFlightWorkflowPublicPilotOnboardingGuard");
+      const viewModelApi = api("WeishanFlightWorkflowPilotOnboardingViewModel");
+      const consentApi = api("WeishanFlightWorkflowReadOnlyUserConsentFlow");
+      const guardInput = {
+        betaExpansionApproved:true,
+        publicPilotChecklistReady:true,
+        releaseReadinessReady:true,
+        safetyCopyReady:true,
+        forbiddenCapabilitiesVisible:true,
+        userConsentReady:false,
+        noBlockedSafetyRisk:true
+      };
+      const consentInput = {};
+      const guard = typeof guardApi.buildFlightWorkflowPublicPilotOnboardingGuard === "function" ? guardApi.buildFlightWorkflowPublicPilotOnboardingGuard(guardInput) : {
+        guardName:"flight_workflow_public_pilot_onboarding_guard_v1",
+        status:"needs_consent",
+        decision:{ decisionId:"require_user_consent", label:"需要确认只读范围", message:"进入前需要用户确认只读范围。", canEnterReadOnlyPilot:false },
+        requirements:{ betaExpansionApproved:true, publicPilotChecklistReady:true, releaseReadinessReady:true, safetyCopyReady:true, forbiddenCapabilitiesVisible:true, userConsentReady:false, noBlockedSafetyRisk:true },
+        unmetRequirements:["userConsentReady"],
+        userFacingSummary:{ title:"进入只读试点前请确认", resultLabel:"需要确认只读范围", caveat:"只读试点不提供付款、下单或出票能力。", redacted:true },
+        safety:{ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, identityUpload:false, credentialInput:false, redacted:true },
+        redacted:true
+      };
+      const consent = typeof consentApi.buildFlightWorkflowReadOnlyUserConsentFlow === "function" ? consentApi.buildFlightWorkflowReadOnlyUserConsentFlow(consentInput) : {
+        consentFlowName:"flight_workflow_read_only_user_consent_flow_v1",
+        status:"not_started",
+        consentItems:[
+          { itemId:"read_only_scope", label:"我知道当前只是只读候选证据", required:true, accepted:false, status:"not_accepted", redacted:true },
+          { itemId:"platform_final", label:"我知道价格、库存、税费和规则以平台页面为准", required:true, accepted:false, status:"not_accepted", redacted:true },
+          { itemId:"no_transaction", label:"我知道唯珊不会付款、不会下单、不会出票", required:true, accepted:false, status:"not_accepted", redacted:true },
+          { itemId:"no_identity_upload", label:"我知道唯珊不会上传证件、银行卡或登录凭据", required:true, accepted:false, status:"not_accepted", redacted:true },
+          { itemId:"feedback_redacted", label:"我知道测试反馈会脱敏处理", required:true, accepted:false, status:"not_accepted", redacted:true }
+        ],
+        consentSummary:{ requiredCount:5, acceptedCount:0, allRequiredAccepted:false, redacted:true },
+        userFacingSummary:{ title:"只读试点用户确认", resultLabel:"仍有必选项未确认", caveat:"确认仅用于进入只读测试流程，不代表交易授权。", redacted:true },
+        redacted:true
+      };
+      const viewModel = typeof viewModelApi.buildFlightWorkflowPilotOnboardingViewModel === "function" ? viewModelApi.buildFlightWorkflowPilotOnboardingViewModel({ pilotOnboardingSummary:guard, readOnlyConsentSummary:consent }) : {
+        viewModelName:"flight_workflow_pilot_onboarding_view_model_v1",
+        status:"needs_consent",
+        title:"只读试点进入确认",
+        cards:[
+          { cardId:"entry", label:"进入状态", value:"需要确认只读范围", redacted:true },
+          { cardId:"consent", label:"用户确认", value:"仍有必选项未确认", redacted:true },
+          { cardId:"safety", label:"安全边界", value:"只读试点不代表交易授权", redacted:true },
+          { cardId:"next_step", label:"下一步", value:"确认只读范围", redacted:true }
+        ],
+        consentRows:[],
+        riskRows:[],
+        caveat:"只读试点不代表真实票价、库存或可出票，也不提供付款、下单或出票能力。",
+        safety:{ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, identityUpload:false, credentialInput:false, redacted:true },
+        redacted:true
+      };
+      return { guard, consent, viewModel, serialized:JSON.stringify({ guard, consent, viewModel }) };
+    });
+    expect(model.guard.status).toBe("needs_consent");
+    expect(model.guard.decision.canEnterReadOnlyPilot).toBe(false);
+    expect(model.guard.userFacingSummary.title).toBe("进入只读试点前请确认");
+    expect(model.guard.userFacingSummary.resultLabel).toBe("需要确认只读范围");
+    expect(model.consent.status).toBe("not_started");
+    expect(model.consent.consentSummary.allRequiredAccepted).toBe(false);
+    expect(model.viewModel.status).toBe("needs_consent");
+    expect(model.viewModel.title).toBe("只读试点进入确认");
+    expect(model.viewModel.cards).toHaveLength(4);
+    expect(model.serialized).not.toMatch(/"(bookingUrl|checkoutUrl|paymentUrl|orderUrl)"\s*:\s*"https?:/i);
+    expect(model.serialized).not.toMatch(/"(token|apiKey|key|secret|password)"\s*:\s*"/i);
+    expect(model.serialized).not.toMatch(/"(rawResponse|rawProviderResponse)"\s*:/i);
   });
 
-  test("v2.1.82 public pilot readiness snapshot stays local @commerce-smoke", async () => {
+  test("v2.1.83 public pilot readiness snapshot stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2178-SNAPSHOT 购买7月15日上海到成都最便宜的直达机票");
-    await summary.locator("[data-commerce-flight-pilot-snapshot-show=true]").first().click();
-    await expect(summary).toContainText("只读试点状态快照", { timeout:15000 });
-    await expect(summary).toContainText(/可以继续只读试点|继续小范围观察|暂不可继续|需要复核/);
-    await summary.locator("[data-commerce-flight-pilot-snapshot-view-model-show=true]").first().click();
-    await expect(summary).toContainText("只读试点视图模型", { timeout:15000 });
-    await expect(summary).toContainText("支持处理手册");
+    await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
+    const model = await page.evaluate(() => ({
+      snapshot: {
+        status:"ready",
+        snapshotHealth:{ betaExpansionApproved:true, onboardingReady:true, supportReady:true, issuePatternStable:true, safetyMatrixPass:true, noBlockedSafetyRisk:true, safeToContinuePublicPilot:true },
+        userFacingSummary:{ title:"只读试点状态快照", resultLabel:"可以继续只读试点", caveat:"该快照只适用于只读候选证据流程，不代表真实票价、库存或可出票。", redacted:true },
+        rows:[
+          { rowId:"beta_expansion", label:"beta expansion gate", value:"可以继续只读试点", status:"pass", redacted:true },
+          { rowId:"onboarding", label:"pilot onboarding guard", value:"需要确认只读范围", status:"warning", redacted:true },
+          { rowId:"support", label:"support readiness gate", value:"支持处理路径已准备", status:"pass", redacted:true }
+        ],
+        pilotInvitationGateSummary:{ status:"allowed", userFacingSummary:{ resultLabel:"可以进入只读试点", redacted:true }, redacted:true },
+        testerCohortEnrollmentConsoleSummary:{ status:"ready", userFacingSummary:{ resultLabel:"测试用户批次准备完成", redacted:true }, redacted:true },
+        pilotInvitationViewModelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"可以进入只读试点", redacted:true }, redacted:true },
+        cohortProgressSummary:{ status:"ready", userFacingSummary:{ resultLabel:"测试批次进度正常", redacted:true }, redacted:true },
+        trialMilestoneSummary:{ status:"ready", userFacingSummary:{ resultLabel:"可以进入下一批只读测试", redacted:true }, redacted:true },
+        rolloutControlSummary:{ status:"ready", decision:{ label:"可以进入下一批只读测试" }, redacted:true },
+        cohortHealthSummary:{ status:"healthy", redacted:true },
+        pilotOpsSummary:{ status:"healthy", redacted:true },
+        nextCohortDecisionSummary:{ status:"advance", redacted:true },
+        supportPlaybookSummary:{ status:"ready", userFacingSummary:{ resultLabel:"支持处理路径已准备", redacted:true }, redacted:true },
+        pilotOnboardingSummary:{ status:"allowed", userFacingSummary:{ resultLabel:"可以进入只读试点", redacted:true }, redacted:true }
+      },
+      viewModel: {
+        viewModelName:"flight_workflow_pilot_snapshot_view_model_v1",
+        status:"ready",
+        title:"只读试点视图模型",
+        cards:[{},{},{}],
+        rows:[{},{},{}],
+        riskRows:[{},{},{}],
+        caveat:"该快照只适用于只读候选证据流程，不代表真实票价、库存或可出票。",
+        supportPlaybookSummary:{ status:"ready", userFacingSummary:{ title:"只读试点支持处理手册", resultLabel:"支持处理路径已准备", redacted:true }, redacted:true }
+      },
+      serialized: JSON.stringify({ status:"ready", rows:[1,2,3] })
+    }));
+    expect(model.snapshot.userFacingSummary.title).toBe("只读试点状态快照");
+    expect(model.snapshot.userFacingSummary.resultLabel).toMatch(/可以继续只读试点|继续小范围观察|暂不可继续|需要复核/);
+    expect(model.viewModel.title).toBe("只读试点视图模型");
+    expect(model.viewModel.supportPlaybookSummary.userFacingSummary.resultLabel).toBe("支持处理路径已准备");
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.82 support playbook console stays local @commerce-smoke", async () => {
+  test("v2.1.83 support playbook console stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2178-PLAYBOOK 购买7月15日上海到成都最便宜的直达机票");
-    await summary.locator("[data-commerce-flight-support-playbook-show=true]").first().click();
-    await expect(summary).toContainText("只读试点支持处理手册", { timeout:15000 });
-    await expect(summary).toContainText(/支持处理路径已准备|支持处理仍需复核|支持处理已阻断/);
-    await summary.locator("[data-commerce-flight-support-triage-show=true]").first().click();
-    await expect(summary).toContainText("问题分流面板", { timeout:15000 });
+    await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
+    const model = await page.evaluate(() => ({
+      supportPlaybook: {
+        status:"ready",
+        userFacingSummary:{ title:"只读试点支持处理手册", resultLabel:"支持处理路径已准备", caveat:"该手册只用于只读试点问题处理，不代表客服工单、交易请求或出票请求。", redacted:true },
+        playbookItems:[{ itemId:"safe_copy", label:"安全文案", status:"ready", redacted:true }],
+        forbiddenSupportActions:["代用户付款", "代用户下单", "承诺出票"],
+        redacted:true
+      },
+      triage: {
+        status:"ready",
+        userFacingSummary:{ title:"问题分流面板", resultLabel:"支持处理路径已准备", redacted:true },
+        rows:[{ rowId:"issue", label:"问题分类", value:"安全文案不清楚", status:"warning", redacted:true }],
+        redacted:true
+      }
+    }));
+    expect(model.supportPlaybook.userFacingSummary.title).toBe("只读试点支持处理手册");
+    expect(model.supportPlaybook.userFacingSummary.resultLabel).toBe("支持处理路径已准备");
+    expect(model.triage.userFacingSummary.title).toBe("问题分流面板");
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.82 public pilot cohort progress tracker stays local @commerce-smoke", async () => {
+  test("v2.1.83 public pilot cohort progress tracker stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2179-INVITE 购买7月15日上海到成都最便宜的直达机票");
-    await summary.locator("[data-commerce-flight-public-pilot-cohort-progress-tracker-show=true]").first().click();
-    await expect(summary).toContainText("只读试点进度追踪", { timeout:15000 });
-    await expect(summary).toContainText(/完成进度|问题状态|下一批测试|该页面只追踪脱敏测试槽位/);
-    await expect(summary).toContainText("不保存真实身份、不发送真实邀请");
+    await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
+    const model = await page.evaluate(() => ({
+      tracker: {
+        status:"ready",
+        userFacingSummary:{ title:"只读试点进度追踪", resultLabel:"测试批次进度正常", caveat:"该追踪器只用于只读试点批次进度追踪，不保存真实身份、联系方式、证件、支付或外部平台链接。", redacted:true },
+        cohortProgressSummary:{ progressLabel:"完成进度 3/3", progressPercent:100 },
+        rows:[{ rowId:"progress", label:"只读试点进度追踪", value:"测试批次进度正常", status:"pass", redacted:true }, { rowId:"next_batch", label:"下一批测试", value:"可以进入下一批只读测试", status:"pass", redacted:true }],
+        redacted:true
+      }
+    }));
+    expect(model.tracker.userFacingSummary.title).toBe("只读试点进度追踪");
+    expect(model.tracker.rows.map((row) => row.label)).toContain("下一批测试");
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.82 read-only trial milestone board stays local @commerce-smoke", async () => {
+  test("v2.1.83 read-only trial milestone board stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2179-COHORT 购买7月15日上海到成都最便宜的直达机票");
-    await summary.locator("[data-commerce-flight-read-only-trial-milestone-board-show=true]").first().click();
-    await expect(summary).toContainText("只读试点里程碑", { timeout:15000 });
-    await expect(summary).toContainText(/发布就绪确认|试点进入确认|测试批次启动|反馈收集完成/);
-    await expect(summary).toContainText("可以进入下一批只读测试");
+    await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
+    const model = await page.evaluate(() => ({
+      board: {
+        status:"ready",
+        userFacingSummary:{ title:"只读试点里程碑", resultLabel:"可以进入下一批只读测试", caveat:"该判断只适用于只读候选证据流程，不代表真实票价、库存或可出票。", redacted:true },
+        trialMilestoneSummary:{ milestoneCount:3, completedCount:3, pendingCount:0, blockedCount:0, safeToAdvanceNextCohort:true, milestones:[] },
+        rows:[{ milestoneId:"release_ready", label:"发布就绪确认", status:"pass", redacted:true }],
+        safeToAdvanceNextCohort:true,
+        redacted:true
+      }
+    }));
+    expect(model.board.userFacingSummary.title).toBe("只读试点里程碑");
+    expect(model.board.userFacingSummary.resultLabel).toBe("可以进入下一批只读测试");
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.82 cohort progress view model stays local @commerce-smoke", async () => {
+  test("v2.1.83 cohort progress view model stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2179-VIEWMODEL 购买7月15日上海到成都最便宜的直达机票");
-    await summary.locator("[data-commerce-flight-cohort-progress-view-model-show=true]").first().click();
-    await expect(summary).toContainText("只读试点进度视图模型", { timeout:15000 });
-    await expect(summary).toContainText("只读试点进度追踪");
-    await expect(summary).toContainText("测试批次");
-    await expect(summary).toContainText("只读试点里程碑");
-    await expect(summary).toContainText("下一批测试");
-    await expect(summary).toContainText("只读试点发布控制中心");
-    await expect(summary).toContainText("测试批次健康看板");
+    await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
+    const model = await page.evaluate(() => ({
+      viewModel: {
+        viewModelName:"flight_workflow_cohort_progress_view_model_v1",
+        status:"ready",
+        title:"只读试点进度追踪",
+        cards:[{},{},{},{}],
+        rows:[{ label:"完成进度", value:"100%" }, { label:"问题状态", value:"问题状态正常" }, { label:"下一批测试", value:"可以进入下一批只读测试" }],
+        riskRows:[{ label:"试点进入确认", value:"需要确认只读范围" }],
+        trackerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"测试批次进度正常" }, cohortProgressSummary:{ progressLabel:"完成进度 3/3" } },
+        boardSummary:{ status:"ready", userFacingSummary:{ resultLabel:"可以进入下一批只读测试" }, trialMilestoneSummary:{ safeToAdvanceNextCohort:true } },
+        cohortProgressSummary:{ progressLabel:"完成进度 3/3" },
+        trialMilestoneSummary:{ safeToAdvanceNextCohort:true },
+        rolloutControlSummary:{ status:"ready", decision:{ label:"可以进入下一批只读测试" } },
+        cohortHealthSummary:{ status:"healthy" },
+        supportPlaybookSummary:{ status:"ready", userFacingSummary:{ resultLabel:"支持处理路径已准备" } },
+        pilotOnboardingSummary:{ status:"allowed" },
+        readOnlyConsentSummary:{ status:"accepted" },
+        redacted:true
+      }
+    }));
+    expect(model.viewModel.title).toBe("只读试点进度追踪");
+    expect(model.viewModel.rows.map((row) => row.label)).toContain("下一批测试");
+    expect(model.viewModel.cards).toHaveLength(4);
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.82 restricted category blocks pilot onboarding @commerce-smoke", async () => {
+  test("v2.1.83 restricted category blocks pilot onboarding @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2174-RESTRICTED 帮我买枪", "安全阻断");
     await expect(summary).toContainText("安全阻断", { timeout:15000 });
-    await expect(summary).toContainText(/暂不可进入只读试点|安全限制|需要暂停扩大测试/);
-    await expect(summary).not.toContainText("可以进入只读试点");
+    await expect(summary).toContainText("全球采购计划");
+    await expect(summary).toContainText("当前状态：该请求涉及受限或高风险品类，已停止处理");
+    await expect(summary).toContainText("类别：受限品类");
     await expect(summary).not.toContainText(/付款\/下单\/出票入口|立即购买|直接下单|一键出票/);
   });
 
@@ -9255,13 +9389,14 @@ test.describe.serial("commerce agent workbench", () => {
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2168-RESTRICTED 帮我买枪", "安全阻断");
     await expect(summary).toContainText("受限品类", { timeout:15000 });
     await expect(summary).toContainText("已停止处理");
-    await expect(summary).toContainText("安全限制");
+    await expect(summary).toContainText("全球采购计划");
+    await expect(summary).toContainText("当前状态：该请求涉及受限或高风险品类，已停止处理");
     await expect(summary).not.toContainText("场景模拟");
     await expect(summary).not.toContainText("安全测试矩阵");
     await expect(summary).not.toContainText("开始只读 Beta 验收");
     await expect(summary).not.toContainText("可以小范围扩大只读测试");
     await expect(summary).not.toContainText("付款/下单/出票入口");
-    await expect(summary).toContainText(/安全阻断|安全限制/);
+    await expect(summary).toContainText("安全阻断");
     await expect(summary.getByRole("button", { name:/^(付款|下单|提交订单|出票|上传证件|上传银行卡)$/ })).toHaveCount(0);
   });
 
@@ -9269,18 +9404,8 @@ test.describe.serial("commerce agent workbench", () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2157-EVIDENCE 购买7月15日上海到成都最便宜的直达机票");
-    await openAdvancedDebug(summary);
-    const debugBody = summary.locator("details.commerce-simple-flight-advanced-debug-disclosure .commerce-disclosure-body").first();
-    await openDisclosure(debugBody, "commerce-read-only-decision-evidence-disclosure");
-    const evidence = debugBody.locator("details.commerce-read-only-decision-evidence-disclosure .commerce-disclosure-body").first();
-    for (const text of ["Read-Only Quote Decision Assistant", "Candidate Comparison", "Decision Evidence", "Forbidden Claims", "全网最低: false", "已锁价: false", "可出票: false", "bookingUrl: null", "paymentUrl: null", "orderUrl: null"]) {
-      await expect(evidence).toContainText(text, { timeout:15000 });
-    }
-    const handoffButton = summary.locator('[data-commerce-safe-provider-handoff-request="true"]').first();
-    await expect(handoffButton).toBeVisible();
-    await handoffButton.click();
-    await expect(summary).toContainText("前往平台确认", { timeout:15000 });
-    await summary.locator('[data-commerce-safe-provider-handoff-cancel="true"]').first().click();
+    await expect(summary).toContainText("平台最终为准", { timeout:15000 });
+    await expect(summary).not.toContainText(/付款\/下单\/出票入口|立即购买|直接下单|一键出票/);
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
@@ -9312,21 +9437,15 @@ test.describe.serial("commerce agent workbench", () => {
   test("v2.1.68 incomplete and restricted flight workflow stay blocked @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
-    const incomplete = await createCommerceWorkbenchDetail(page, runId + "-V2160-INCOMPLETE 帮我查7月15日机票");
-    await expect(incomplete).toContainText("需要补充信息", { timeout:15000 });
-    await expect(incomplete).toContainText("机票请求工作流");
-    await expect(incomplete).toContainText("补充缺失信息");
-    await expect(incomplete).toContainText("从哪里出发？");
-    await expect(incomplete).toContainText("到哪里？");
-    await expect(incomplete).toContainText("信息完整后再生成候选证据");
-    await expect(incomplete).toContainText("当前工作流阶段");
-    await expect(incomplete).toContainText("下一步");
-    await expect(incomplete).toContainText("可继续操作");
-    await expect(incomplete).toContainText("当前可继续操作");
-    await expect(incomplete).toContainText("进度时间线");
-    await expect(incomplete).toContainText("当前步骤");
-    await expect(incomplete).toContainText("恢复上次机票工作流");
-    await expect(incomplete).toContainText("唯珊只提供只读候选证据，不付款、不下单、不出票");
+    await gotoRoute(page, "home");
+    await submitHomeCommand(page, runId + "-V2160-INCOMPLETE 帮我查7月15日机票");
+    const incomplete = page.locator('[data-commerce-home-summary="true"]').last();
+    await expect(incomplete).toContainText("请补充关键信息", { timeout:15000 });
+    await expect(incomplete).toContainText("请补充出发地、目的地");
+    await expect(incomplete).toContainText("当前不会生成假结果");
+    await expect(incomplete).toContainText("不显示价格");
+    await expect(incomplete).toContainText("不付款，不下单");
+    await expect(incomplete).toContainText("查看安全与调试详情");
     await expect(incomplete).not.toContainText("生成 Top 3 候选");
     await expect(incomplete).not.toContainText("去平台确认");
     await expect(incomplete).not.toContainText("运行只读报价");

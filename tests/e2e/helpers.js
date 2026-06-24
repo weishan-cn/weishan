@@ -99,10 +99,7 @@ async function gotoRoute(page, route) {
         if (!window[name]) window[name] = {};
       }
       const loadOnce = (globalName, src) => new Promise((resolve) => {
-        if (window[globalName]) {
-          resolve();
-          return;
-        }
+        try { delete window[globalName]; } catch (_) { window[globalName] = undefined; }
         const script = document.createElement("script");
         script.src = src;
         script.onload = () => resolve();

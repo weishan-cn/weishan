@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_NEXT_COHORT_DECISION_BOARD_VERSION = "2.1.82";
+  const FLIGHT_WORKFLOW_NEXT_COHORT_DECISION_BOARD_VERSION = "2.1.83";
   const BOARD_NAME = "flight_workflow_next_cohort_decision_board_v1";
   const CAVEAT = "该决策只适用于只读试点节奏，不代表真实账号、邀请、交易或出票能力。";
 
@@ -19,6 +19,8 @@
   function supportReadiness(input) { const safe = obj(input); return first(safe.supportReadinessSummary, safe.supportReadinessGate); }
   function issuePattern(input) { const safe = obj(input); return first(safe.issuePatternSummary, safe.issuePatternRadar, safe.issuePatternViewModelSummary); }
   function sentinel(input) { const safe = obj(input); return first(safe.safetyRegressionSummary, safe.safetyRegressionSentinel); }
+  function exitCriteria(input) { const safe = obj(input); return first(safe.pilotExitCriteriaSummary, safe.exitCriteriaSummary); }
+  function launchCandidateReadiness(input) { const safe = obj(input); return first(safe.launchCandidateReadinessSummary, safe.launchCandidateSummary, safe.launchCandidateReadinessBoard); }
   function hasTradingUrl(value) {
     const safe = obj(value);
     const nested = obj(safe.safety);
@@ -39,16 +41,20 @@
     const support = supportReadiness(safe);
     const pattern = issuePattern(safe);
     const sent = sentinel(safe);
+    const exitCriteriaSummary = exitCriteria(safe);
+    const launchCandidateReadinessSummary = launchCandidateReadiness(safe);
     const opsHealth = obj(ops.opsHealth);
     const criteria = {
-      opsHealthy: safe.opsHealthy === true || ops.status === "healthy",
+      opsHealthy: safe.opsHealthy === true || ops.status === "healthy" || obj(opsHealth).safeToContinuePilot === true,
       rolloutReady: safe.rolloutReady === true || opsHealth.rolloutReady === true || rollout.status === "ready" || obj(rollout.decision).safeToAdvanceNextCohort === true,
       cohortHealthy: safe.cohortHealthy === true || opsHealth.cohortHealthy === true || cohort.status === "healthy",
       supportReady: safe.supportReady === true || opsHealth.supportReady === true || support.status === "ready",
       issuePatternStable: safe.issuePatternStable === true || opsHealth.issuePatternStable === true || pattern.status === "ready",
       noOpenBlockingIssue: safe.noOpenBlockingIssue === true || (support.status !== "blocked" && pattern.status !== "blocked" && obj(ops.primaryRisk).riskId !== "unknown"),
       noSensitiveDataRisk: safe.noSensitiveDataRisk === true || opsHealth.noSensitiveDataRisk === true,
-      noTradingRisk: safe.noTradingRisk === true || opsHealth.noTradingRisk === true
+      noTradingRisk: safe.noTradingRisk === true || opsHealth.noTradingRisk === true,
+      pilotExitCriteriaMet: safe.pilotExitCriteriaMet === true || obj(exitCriteriaSummary.exitHealth).readyForLaunchCandidate === true || exitCriteriaSummary.status === "met",
+      releaseReadinessReady: safe.releaseReadinessReady === true || obj(launchCandidateReadinessSummary).releaseReadinessReady === true || obj(launchCandidateReadinessSummary).status === "ready"
     };
     const allTrue = Object.keys(criteria).every(function (key) { return criteria[key] === true; });
     const blocked = !criteria.noSensitiveDataRisk || !criteria.noTradingRisk || sent.status === "fail" || sent.status === "failed_safe" || obj(ops.primaryRisk).riskId === "sensitive_data" || obj(ops.primaryRisk).riskId === "trading_risk";
@@ -100,6 +106,11 @@
       supportReadinessSummary:clone(support),
       issuePatternSummary:clone(pattern),
       safetyRegressionSummary:clone(sent),
+      pilotExitCriteriaSummary:clone(exitCriteriaSummary),
+      launchCandidateReadinessSummary:clone(launchCandidateReadinessSummary),
+      launchCandidateStatus:obj(launchCandidateReadinessSummary).status || (criteria.pilotExitCriteriaMet && criteria.releaseReadinessReady ? "ready" : "continue_pilot"),
+      readyForLaunchCandidate:obj(launchCandidateReadinessSummary).launchCandidateReadiness && obj(launchCandidateReadinessSummary).launchCandidateReadiness.safeForReadOnlyLaunchCandidate === true,
+      launchCandidateNextStep:text(obj(launchCandidateReadinessSummary).launchCandidateNextStep || (criteria.pilotExitCriteriaMet ? "继续试点观察" : "继续试点观察")),
       userFacingSummary:{ title:"下一批只读测试决策板", resultLabel:status === "advance" ? "可以进入下一批只读测试" : status === "continue_current" ? "继续当前批次" : status === "pause" ? "暂停扩大测试" : status === "needs_review" ? "需要内部复核" : "已阻断", caveat:CAVEAT, redacted:true },
       safety:safety(),
       redacted:true
@@ -133,6 +144,11 @@
       supportReadinessSummary:clone(safe.supportReadinessSummary || null),
       issuePatternSummary:clone(safe.issuePatternSummary || null),
       safetyRegressionSummary:clone(safe.safetyRegressionSummary || null),
+      pilotExitCriteriaSummary:clone(safe.pilotExitCriteriaSummary || null),
+      launchCandidateReadinessSummary:clone(safe.launchCandidateReadinessSummary || null),
+      launchCandidateStatus:text(safe.launchCandidateStatus || "continue_pilot"),
+      readyForLaunchCandidate:safe.readyForLaunchCandidate === true,
+      launchCandidateNextStep:text(safe.launchCandidateNextStep || "继续试点观察"),
       userFacingSummary:Object.assign({ title:"下一批只读测试决策板", resultLabel:status === "advance" ? "可以进入下一批只读测试" : status === "continue_current" ? "继续当前批次" : status === "pause" ? "暂停扩大测试" : status === "needs_review" ? "需要内部复核" : "已阻断", caveat:CAVEAT, redacted:true }, obj(safe.userFacingSummary)),
       safety:Object.assign(safety(), obj(safe.safety)),
       bookingUrl:null,
@@ -164,6 +180,11 @@
         supportReadinessSummary:decision.supportReadinessSummary,
         issuePatternSummary:decision.issuePatternSummary,
         safetyRegressionSummary:decision.safetyRegressionSummary,
+        pilotExitCriteriaSummary:decision.pilotExitCriteriaSummary,
+        launchCandidateReadinessSummary:decision.launchCandidateReadinessSummary,
+        launchCandidateStatus:decision.launchCandidateStatus,
+        readyForLaunchCandidate:decision.readyForLaunchCandidate === true,
+        launchCandidateNextStep:decision.launchCandidateNextStep,
         userFacingSummary:decision.userFacingSummary,
         safety:safety()
       });
@@ -180,6 +201,9 @@
       status:board.status,
       decisionId:board.decision.decisionId,
       safeToAdvanceNextCohort:board.decision.safeToAdvanceNextCohort === true,
+      launchCandidateStatus:board.launchCandidateStatus,
+      readyForLaunchCandidate:board.readyForLaunchCandidate === true,
+      launchCandidateNextStep:board.launchCandidateNextStep,
       bookingUrl:null,
       checkoutUrl:null,
       paymentUrl:null,

@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowBetaFeedbackSanitizer.js"]);
   const api = windowRef.WeishanFlightWorkflowBetaFeedbackSanitizer;
-  assert.equal(api.FLIGHT_WORKFLOW_BETA_FEEDBACK_SANITIZER_VERSION, "2.1.82");
+  assert.equal(api.FLIGHT_WORKFLOW_BETA_FEEDBACK_SANITIZER_VERSION, "2.1.83");
   const safe = api.sanitizeFlightWorkflowBetaFeedback({ usabilityRating:"good", clarityRating:"ok", safetyCopyUnderstood:true, userComment:"流程清楚" });
   assert.equal(safe.status, "ready");
   assert.equal(safe.safety.rawUserTextStored, false);

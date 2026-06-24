@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.82";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.83";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -109,6 +109,13 @@
       if (supportReadiness.status === "ready" || safe.supportReadyForPublicPilot === true) badges.push(badge("support_readiness_ready", "支持兜底准备就绪", "info"));
       if (supportReadiness.status === "continue_small_pilot" || safe.supportReadinessStatus === "continue_small_pilot") badges.push(badge("support_readiness_small_pilot", "继续小范围试点", "warning"));
       if (supportReadiness.status === "needs_review" || safe.supportReadinessStatus === "needs_review") badges.push(badge("support_readiness_pause_expansion", "需要暂停扩大测试", "warning"));
+      const pilotExitCriteria = obj(safe.pilotExitCriteriaSummary || safe.exitCriteriaSummary);
+      const launchCandidateReadiness = obj(safe.launchCandidateReadinessSummary || safe.launchCandidateSummary);
+      if (pilotExitCriteria.status === "met" || pilotExitCriteria.exitHealth && pilotExitCriteria.exitHealth.readyForLaunchCandidate === true) badges.push(badge("pilot_exit_criteria_met", "试点退出条件已满足", "info"));
+      if (pilotExitCriteria.status === "continue_pilot" || safe.pilotExitCriteriaStatus === "continue_pilot") badges.push(badge("pilot_exit_criteria_continue", "继续试点观察", "warning"));
+      if (launchCandidateReadiness.status === "ready" || launchCandidateReadiness.launchCandidateReadiness && launchCandidateReadiness.launchCandidateReadiness.safeForReadOnlyLaunchCandidate === true) badges.push(badge("launch_candidate_ready", "只读发布候选已准备", "info"));
+      if (launchCandidateReadiness.status === "needs_review" || safe.launchCandidateStatus === "needs_review") badges.push(badge("launch_candidate_review", "发布候选仍需复核", "warning"));
+      if (launchCandidateReadiness.status === "blocked" || safe.launchCandidateStatus === "blocked") badges.push(badge("launch_candidate_blocked", "发布候选已阻断", "blocked"));
       if (cohortProgress.status === "ready" || safe.cohortProgressStatus === "ready") badges.push(badge("cohort_progress_ready", "测试批次进度正常", "info"));
       if (cohortProgress.status === "needs_review" || safe.cohortProgressStatus === "needs_review") badges.push(badge("cohort_progress_in_progress", "测试批次仍在进行", "warning"));
       if (cohortProgress.status === "needs_more_testers" || safe.cohortProgressStatus === "needs_more_testers") badges.push(badge("cohort_progress_needs_more", "仍需更多测试者", "warning"));

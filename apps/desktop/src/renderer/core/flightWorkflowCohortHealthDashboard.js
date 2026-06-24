@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_COHORT_HEALTH_DASHBOARD_VERSION = "2.1.82";
+  const FLIGHT_WORKFLOW_COHORT_HEALTH_DASHBOARD_VERSION = "2.1.83";
   const DASHBOARD_NAME = "flight_workflow_cohort_health_dashboard_v1";
   const CAVEAT = "该看板只统计脱敏测试槽位，不保存真实身份或联系方式。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|真实姓名|手机号|邮箱/ig;
@@ -41,7 +41,10 @@
     else if (blockedSlotCount > 0 || sensitiveRiskCount > 0 || (issueResolutionRatio < 0.7 && openIssueCount > 0)) status = "needs_review";
     else if (testerSlotCount === 0 || consentCompletionRatio < 0.8 || feedbackCompletionRatio < 0.6) status = "in_progress";
     const cohortHealth = { testerSlotCount, eligibleSlotCount, consentCompletionRatio, feedbackCompletionRatio, issueResolutionRatio, blockedSlotCount, sensitiveRiskCount, realIdentityRisk, healthyEnoughForNextCohort:status === "healthy" };
-    return clone({ status, cohortHealth, redacted:true });
+    const pilotExitCriteriaSummary = safe.pilotExitCriteriaSummary || null;
+    const launchCandidateReadinessSummary = safe.launchCandidateReadinessSummary || null;
+    const readyForLaunchCandidate = Boolean(obj(launchCandidateReadinessSummary).launchCandidateReadiness && obj(launchCandidateReadinessSummary).launchCandidateReadiness.safeForReadOnlyLaunchCandidate);
+    return clone({ status, cohortHealth, pilotExitCriteriaSummary:clone(pilotExitCriteriaSummary), launchCandidateReadinessSummary:clone(launchCandidateReadinessSummary), launchCandidateStatus:text(safe.launchCandidateStatus || (readyForLaunchCandidate ? "ready" : "continue_pilot")), readyForLaunchCandidate:readyForLaunchCandidate, launchCandidateNextStep:text(safe.launchCandidateNextStep || (readyForLaunchCandidate ? "可以进入只读发布候选" : "继续试点观察")), redacted:true });
   }
   function buildFlightWorkflowCohortHealthRows(input) {
     const evaluation = evaluateFlightWorkflowCohortHealth(input || {});
@@ -58,7 +61,7 @@
   function sanitizeFlightWorkflowCohortHealthDashboard(dashboard) {
     const safe = obj(dashboard);
     const status = /^(healthy|in_progress|needs_review|blocked|failed_safe)$/.test(safe.status) ? safe.status : "failed_safe";
-    return clone({ dashboardName:DASHBOARD_NAME, appVersion:FLIGHT_WORKFLOW_COHORT_HEALTH_DASHBOARD_VERSION, status, cohortHealth:Object.assign({ testerSlotCount:0, eligibleSlotCount:0, consentCompletionRatio:0, feedbackCompletionRatio:0, issueResolutionRatio:0, blockedSlotCount:0, sensitiveRiskCount:0, realIdentityRisk:false, healthyEnoughForNextCohort:false }, obj(safe.cohortHealth)), rows:toArray(safe.rows).map(function (item) { return row(item.rowId || "row", item.label || "", item.value || "", item.status); }), userFacingSummary:Object.assign({ title:"测试批次健康看板", resultLabel:status === "healthy" ? "批次健康，可以继续" : status === "in_progress" ? "批次进行中" : status === "needs_review" ? "批次需要复核" : "批次已阻断", caveat:CAVEAT, redacted:true }, obj(safe.userFacingSummary)), pilotOpsSummary:clone(safe.pilotOpsSummary || null), nextCohortDecisionSummary:clone(safe.nextCohortDecisionSummary || null), pilotOpsStatus:text(safe.pilotOpsStatus || ""), nextCohortDecisionStatus:text(safe.nextCohortDecisionStatus || ""), pilotOpsPrimaryRisk:clone(safe.pilotOpsPrimaryRisk || null), safety:Object.assign(safety(), obj(safe.safety)), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true });
+    return clone({ dashboardName:DASHBOARD_NAME, appVersion:FLIGHT_WORKFLOW_COHORT_HEALTH_DASHBOARD_VERSION, status, cohortHealth:Object.assign({ testerSlotCount:0, eligibleSlotCount:0, consentCompletionRatio:0, feedbackCompletionRatio:0, issueResolutionRatio:0, blockedSlotCount:0, sensitiveRiskCount:0, realIdentityRisk:false, healthyEnoughForNextCohort:false }, obj(safe.cohortHealth)), rows:toArray(safe.rows).map(function (item) { return row(item.rowId || "row", item.label || "", item.value || "", item.status); }), userFacingSummary:Object.assign({ title:"测试批次健康看板", resultLabel:status === "healthy" ? "批次健康，可以继续" : status === "in_progress" ? "批次进行中" : status === "needs_review" ? "批次需要复核" : "批次已阻断", caveat:CAVEAT, redacted:true }, obj(safe.userFacingSummary)), pilotOpsSummary:clone(safe.pilotOpsSummary || null), nextCohortDecisionSummary:clone(safe.nextCohortDecisionSummary || null), pilotExitCriteriaSummary:clone(safe.pilotExitCriteriaSummary || null), launchCandidateReadinessSummary:clone(safe.launchCandidateReadinessSummary || null), pilotOpsStatus:text(safe.pilotOpsStatus || ""), nextCohortDecisionStatus:text(safe.nextCohortDecisionStatus || ""), pilotOpsPrimaryRisk:clone(safe.pilotOpsPrimaryRisk || null), launchCandidateStatus:text(safe.launchCandidateStatus || ""), readyForLaunchCandidate:safe.readyForLaunchCandidate === true, launchCandidateNextStep:text(safe.launchCandidateNextStep || ""), safety:Object.assign(safety(), obj(safe.safety)), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true });
   }
   function buildFlightWorkflowCohortHealthDashboard(input) {
     try {

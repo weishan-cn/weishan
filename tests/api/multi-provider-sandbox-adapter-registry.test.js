@@ -7,10 +7,10 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/trustedFlightSourceRegistry.js", "apps/desktop/src/renderer/core/multiProviderSandboxAdapterRegistry.js"]);
   const api = windowRef.WeishanMultiProviderSandboxAdapterRegistry;
-  assert.equal(api.MULTI_PROVIDER_SANDBOX_ADAPTER_REGISTRY_VERSION, "2.1.82");
+  assert.equal(api.MULTI_PROVIDER_SANDBOX_ADAPTER_REGISTRY_VERSION, "2.1.83");
   const registry = api.getMultiProviderSandboxAdapterRegistry();
   assert.equal(registry.registryName, "multi_provider_sandbox_adapter_registry_v1");
-  assert.equal(registry.appVersion, "2.1.82");
+  assert.equal(registry.appVersion, "2.1.83");
   assert.equal(registry.providers.length, 4);
   assert.equal(JSON.stringify(registry.providers.map((item) => item.providerId)), JSON.stringify(["flight_provider_trusted_fixture", "google_flights_search", "trip_com_sandbox_stub", "airline_official_sandbox_stub"]));
   const google = api.getSandboxAdapterProfile("google_flights_search");
