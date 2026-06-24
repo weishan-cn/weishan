@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.78";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.79";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -224,10 +224,16 @@
       safeForSmallPublicPilot: safe.safeForSmallPublicPilot === true,
       pilotNextStep: safeLine(safe.pilotNextStep || ""),
       pilotReadinessSnapshotSummary: stripUnsafe(safe.pilotReadinessSnapshotSummary || safe.publicPilotReadinessSnapshotSummary || safe.snapshotSummary || null),
+      pilotInvitationGateSummary: stripUnsafe(safe.pilotInvitationGateSummary || safe.readOnlyPilotInvitationGateSummary || null),
+      testerCohortEnrollmentConsoleSummary: stripUnsafe(safe.testerCohortEnrollmentConsoleSummary || null),
+      pilotInvitationViewModelSummary: stripUnsafe(safe.pilotInvitationViewModelSummary || null),
       supportPlaybookSummary: stripUnsafe(safe.supportPlaybookSummary || safe.supportPlaybookConsoleSummary || null),
       pilotSnapshotStatus: safeLine(safe.pilotSnapshotStatus || ""),
-      supportPlaybookStatus: safeLine(safe.supportPlaybookStatus || ""),
+      pilotInvitationStatus: safeLine(safe.pilotInvitationStatus || ""),
+      testerCohortStatus: safeLine(safe.testerCohortStatus || ""),
       pilotSnapshotNextStep: safeLine(safe.pilotSnapshotNextStep || ""),
+      pilotInvitationNextStep: safeLine(safe.pilotInvitationNextStep || ""),
+      supportPlaybookStatus: safeLine(safe.supportPlaybookStatus || ""),
       pilotOnboardingSummary: stripUnsafe(safe.pilotOnboardingSummary || null),
       readOnlyConsentSummary: stripUnsafe(safe.readOnlyConsentSummary || null),
       pilotOnboardingViewModel: stripUnsafe(safe.pilotOnboardingViewModel || null),
@@ -301,13 +307,32 @@
     const safe = input && typeof input === "object" ? input : {};
     const snapshot = safe.pilotReadinessSnapshotSummary || safe.publicPilotReadinessSnapshotSummary || safe.snapshotSummary || {};
     const playbook = safe.supportPlaybookSummary || safe.supportPlaybookConsoleSummary || {};
-    return clone({ title:"只读试点状态快照", line:safeLine(obj(snapshot.userFacingSummary).resultLabel || snapshot.status || "需要复核"), sectionLabels:["试点状态", "支持准备", "问题趋势", "下一步", "beta expansion gate", "public pilot checklist", "pilot onboarding guard", "issue pattern radar", "support readiness gate", "issue review board", "support triage dashboard", "operator console", "safety regression sentinel"], caveat:"该快照只适用于只读候选证据流程，不代表真实票价、库存或可出票。", supportPlaybookStatus:text(playbook.status || "ready"), pilotSnapshotStatus:text(snapshot.status || ""), pilotSnapshotNextStep:safeLine(obj(snapshot.userFacingSummary).resultLabel || snapshot.status || "需要复核"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, redacted:true });
+    return clone({ title:"只读试点状态快照", line:safeLine(obj(snapshot.userFacingSummary).resultLabel || snapshot.status || "需要复核"), sectionLabels:["试点状态", "支持准备", "问题趋势", "下一步", "试点邀请闸门", "测试用户批次", "只读邀请视图模型", "beta expansion gate", "public pilot checklist", "pilot onboarding guard", "issue pattern radar", "support readiness gate", "issue review board", "support triage dashboard", "operator console", "safety regression sentinel"], caveat:"该快照只适用于只读候选证据流程，不代表真实票价、库存或可出票。", supportPlaybookStatus:text(playbook.status || "ready"), pilotSnapshotStatus:text(snapshot.status || ""), pilotSnapshotNextStep:safeLine(obj(snapshot.userFacingSummary).resultLabel || snapshot.status || "需要复核"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, redacted:true });
   }
 
   function formatSupportPlaybookConsoleSummary(input) {
     const safe = input && typeof input === "object" ? input : {};
     const playbook = safe.supportPlaybookSummary || safe.supportPlaybookConsoleSummary || {};
-    return clone({ title:"只读试点支持处理手册", line:safeLine(obj(playbook.userFacingSummary).resultLabel || playbook.status || "支持处理路径已准备"), sectionLabels:["看不懂候选证据", "平台页面与候选证据不一致", "安全说明不清楚", "只读范围确认无法完成", "反馈填写异常", "禁止动作"], forbiddenSupportActions:Array.isArray(playbook.forbiddenSupportActions) ? playbook.forbiddenSupportActions.slice() : ["代用户付款", "代用户下单", "承诺出票", "索要证件或银行卡", "索要登录凭据", "提供真实客服工单编号"], caveat:"该手册只用于只读试点问题处理，不代表客服工单、交易请求或出票请求。", supportPlaybookStatus:text(playbook.status || ""), supportPlaybookNextStep:safeLine(obj(playbook.userFacingSummary).resultLabel || playbook.status || "支持处理路径已准备"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, redacted:true });
+    return clone({ title:"只读试点支持处理手册", line:safeLine(obj(playbook.userFacingSummary).resultLabel || playbook.status || "支持处理路径已准备"), sectionLabels:["看不懂候选证据", "平台页面与候选证据不一致", "安全说明不清楚", "只读范围确认无法完成", "反馈填写异常", "禁止动作", "试点邀请闸门", "测试用户批次", "只读邀请视图模型"], forbiddenSupportActions:Array.isArray(playbook.forbiddenSupportActions) ? playbook.forbiddenSupportActions.slice() : ["代用户付款", "代用户下单", "承诺出票", "索要证件或银行卡", "索要登录凭据", "提供真实客服工单编号"], caveat:"该手册只用于只读试点问题处理，不代表客服工单、交易请求或出票请求。", supportPlaybookStatus:text(playbook.status || ""), supportPlaybookNextStep:safeLine(obj(playbook.userFacingSummary).resultLabel || playbook.status || "支持处理路径已准备"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, rawUserTextStored:false, rawResponseStored:false, secretStored:false, redacted:true });
+  }
+
+  function formatReadOnlyPilotInvitationGateSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const gate = safe.pilotInvitationGateSummary || safe.readOnlyPilotInvitationGateSummary || safe.invitationGateSummary || {};
+    return clone({ title:"只读试点邀请闸门", line:safeLine(obj(gate.userFacingSummary).resultLabel || obj(gate.decision).label || gate.status || "待邀请"), sectionLabels:["试点邀请", "测试用户批次", "只读范围确认", "支持复核", "安全限制"], testerSlotId:text(obj(gate.testerSlot).slotId || "tester-slot-001"), invitationStatus:text(gate.status || "waitlist"), invitationDecision:text(obj(gate.decision).message || obj(gate.decision).label || "当前只读试点邀请条件仍需复核。"), caveat:safeLine(obj(gate.userFacingSummary).caveat || "该判断只用于只读试点邀请与测试批次登记，不代表真实身份、联系方式、证件、支付或外部平台链接。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, invitationUrl:null, redacted:true });
+  }
+
+  function formatTesterCohortEnrollmentConsoleSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const consoleModel = safe.testerCohortEnrollmentConsoleSummary || safe.testerCohortSummary || safe.cohortSummary || {};
+    const cohort = obj(consoleModel.cohort);
+    return clone({ title:"测试用户批次登记控制台", line:safeLine(obj(consoleModel.userFacingSummary).resultLabel || consoleModel.status || "仍需更多测试用户"), sectionLabels:["测试批次", "邀请状态", "只读确认", "反馈状态"], cohortId:text(cohort.cohortId || "tester-cohort-001"), totalCount:Number(cohort.totalCount || 0), invitedCount:Number(cohort.invitedCount || 0), consentedCount:Number(cohort.consentedCount || 0), feedbackReadyCount:Number(cohort.feedbackReadyCount || 0), blockedCount:Number(cohort.blockedCount || 0), caveat:safeLine(obj(consoleModel.userFacingSummary).caveat || "该控制台只用于只读试点测试用户批次登记，不保存真实身份、联系方式、证件、支付或外部平台链接。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, invitationUrl:null, redacted:true });
+  }
+
+  function formatPilotInvitationViewModelSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const vm = safe.pilotInvitationViewModelSummary || safe.pilotInvitationSummary || {};
+    return clone({ title:"只读试点邀请与测试批次", line:safeLine(obj(vm).title || obj(vm.userFacingSummary).resultLabel || vm.status || "需要复核"), sectionLabels:["试点邀请", "测试用户批次", "只读确认", "问题与支持"], invitationGateName:text(vm.invitationGateName || "flight_workflow_read_only_pilot_invitation_gate_v1"), cohortConsoleName:text(vm.cohortConsoleName || "flight_workflow_tester_cohort_enrollment_console_v1"), cardCount:Array.isArray(vm.cards) ? vm.cards.length : Number(vm.cardCount || 0), cohortRowCount:Array.isArray(vm.cohortRows) ? vm.cohortRows.length : Number(vm.cohortRowCount || 0), riskRowCount:Array.isArray(vm.riskRows) ? vm.riskRows.length : Number(vm.riskRowCount || 0), caveat:safeLine(obj(vm).caveat || "该视图模型只用于只读试点邀请与测试批次登记，不代表真实身份、联系方式、证件、支付或外部平台链接。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, invitationUrl:null, redacted:true });
   }
 
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
@@ -344,6 +369,9 @@
     formatProviderConfirmationWarning,
     formatFlightWorkflowSummary,
     formatIssuePatternSupportSummary,
+    formatReadOnlyPilotInvitationGateSummary,
+    formatTesterCohortEnrollmentConsoleSummary,
+    formatPilotInvitationViewModelSummary,
     formatPublicPilotReadinessSnapshotSummary,
     formatSupportPlaybookConsoleSummary,
     formatFlightWorkflowAuditReviewSummary,

@@ -26,7 +26,7 @@ function assertSafe(model) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/providerSandboxBindingWizard.js"]);
   const api = windowRef.WeishanProviderSandboxBindingWizard;
-  assert.equal(api.PROVIDER_SANDBOX_BINDING_WIZARD_VERSION, "2.1.78");
+  assert.equal(api.PROVIDER_SANDBOX_BINDING_WIZARD_VERSION, "2.1.79");
 
   const fixture = api.buildProviderSandboxBindingWizardModel();
   assert.equal(fixture.wizardName, "provider_sandbox_binding_wizard_v1");

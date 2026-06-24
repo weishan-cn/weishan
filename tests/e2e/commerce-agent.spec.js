@@ -8741,7 +8741,7 @@ test.describe.serial("commerce agent workbench", () => {
       try {
         window.localStorage.setItem("weishan.readOnlyQuoteRefreshState.v1", JSON.stringify({
           stateName:"read_only_quote_refresh_state_v1",
-          appVersion:"2.1.78",
+          appVersion:"2.1.79",
           lastRefreshStatus:"refreshed",
           providerId:"google_flights_search",
           providerName:"Google Flights",
@@ -9067,7 +9067,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.1.78 flight workflow release readiness dashboard stays local @commerce-smoke", async () => {
+  test("v2.1.79 flight workflow release readiness dashboard stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2169-READY 购买7月15日上海到成都最便宜的直达机票");
     for (const text of ["机票工作流运营控制台", "场景模拟", "安全测试矩阵", "查看场景模拟", "查看安全测试矩阵", "场景模拟仅用于安全回归，不代表真实票价、库存或可出票", "安全测试矩阵仅为本地安全回归检查，不代表真实票价或可出票", "机票工作流发布就绪总览", "查看发布就绪总览", "发布状态", "安全红线", "安全矩阵", "用户复核摘要", "仍被禁止的能力", "安全文案已统一", "当前仍是只读候选证据流程", "不代表真实票价、库存或可出票", "唯珊不会付款、不会下单、不会出票", "唯珊不会上传证件、银行卡或登录凭据", "只读 Beta 验收", "只读 Beta 用户测试", "验收步骤", "用户测试", "填写测试反馈", "测试反馈已脱敏", "确认不会付款、下单或出票", "测试过程不会付款、不会下单、不会出票", "只读 Beta 验收复核", "测试反馈汇总", "反馈可用于验收参考", "仍需补充反馈", "反馈已脱敏", "验收会话摘要", "本次验收已完成", "验收进行中", "仍需复核", "下一步建议", "验收复核只用于改进只读候选证据流程", "Beta 反馈复核板", "反馈趋势", "验收会话", "可用反馈", "安全文案理解", "可以扩大只读测试", "仍需更多反馈", "下一步建议", "Beta 反馈只用于改进只读候选证据流程", "只读 Beta 扩大测试闸门", "只读公开试点准备状态", "试点检查清单", "可以小范围扩大只读测试", "继续内部测试", "只读范围说明", "安全边界展示", "反馈收集与脱敏", "禁止能力展示", "异常处理与人工反馈", "公开试点仍然只覆盖只读候选证据流程", "不提供付款、下单或出票能力"]) {
@@ -9142,7 +9142,7 @@ test.describe.serial("commerce agent workbench", () => {
   });
 
 
-  test("v2.1.78 pilot onboarding guard appears before guided test @commerce-smoke", async () => {
+  test("v2.1.79 pilot onboarding guard appears before guided test @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2174-ONBOARDING 购买7月15日上海到成都最便宜的直达机票");
     for (const text of ["只读试点进入确认", "进入只读试点前请确认", "只读试点用户确认", "我知道当前只是只读候选证据", "我知道价格、库存、税费和规则以平台页面为准", "我知道唯珊不会付款、不会下单、不会出票", "我知道唯珊不会上传证件、银行卡或登录凭据", "我知道测试反馈会脱敏处理"]) {
@@ -9154,7 +9154,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(visible).not.toMatch(/bookingUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
   });
 
-  test("v2.1.78 public pilot readiness snapshot stays local @commerce-smoke", async () => {
+  test("v2.1.79 public pilot readiness snapshot stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2178-SNAPSHOT 购买7月15日上海到成都最便宜的直达机票");
     await summary.locator("[data-commerce-flight-pilot-snapshot-show=true]").first().click();
@@ -9166,7 +9166,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.78 support playbook console stays local @commerce-smoke", async () => {
+  test("v2.1.79 support playbook console stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2178-PLAYBOOK 购买7月15日上海到成都最便宜的直达机票");
     await summary.locator("[data-commerce-flight-support-playbook-show=true]").first().click();
@@ -9177,7 +9177,39 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.78 restricted category blocks pilot onboarding @commerce-smoke", async () => {
+  test("v2.1.79 pilot invitation gate stays local @commerce-smoke", async () => {
+    await resetCommerceTasks(page);
+    const summary = await createCommerceWorkbenchDetail(page, runId + "-V2179-INVITE 购买7月15日上海到成都最便宜的直达机票");
+    await summary.locator("[data-commerce-flight-pilot-invitation-gate-show=true]").first().click();
+    await expect(summary).toContainText("只读试点邀请闸门", { timeout:15000 });
+    await expect(summary).toContainText(/可以邀请测试用户|需要确认只读范围|需要支持复核|进入等待名单/);
+    await expect(summary).toContainText("只读试点邀请只用于试点登记流程");
+    await expect(summary).not.toContainText(/下载文件|保存文件/);
+  });
+
+  test("v2.1.79 tester cohort console stays local @commerce-smoke", async () => {
+    await resetCommerceTasks(page);
+    const summary = await createCommerceWorkbenchDetail(page, runId + "-V2179-COHORT 购买7月15日上海到成都最便宜的直达机票");
+    await summary.locator("[data-commerce-flight-tester-cohort-console-show=true]").first().click();
+    await expect(summary).toContainText("测试用户批次登记控制台", { timeout:15000 });
+    await expect(summary).toContainText(/测试用户批次可用|仍需更多测试用户|需要复核后登记|测试批次已阻断/);
+    await expect(summary).toContainText("不保存真实身份、联系方式、证件、支付或外部平台链接");
+    await expect(summary).not.toContainText(/下载文件|保存文件/);
+  });
+
+  test("v2.1.79 pilot invitation view model stays local @commerce-smoke", async () => {
+    await resetCommerceTasks(page);
+    const summary = await createCommerceWorkbenchDetail(page, runId + "-V2179-VIEWMODEL 购买7月15日上海到成都最便宜的直达机票");
+    await summary.locator("[data-commerce-flight-pilot-invitation-view-model-show=true]").first().click();
+    await expect(summary).toContainText("只读试点邀请与测试批次", { timeout:15000 });
+    await expect(summary).toContainText("试点邀请");
+    await expect(summary).toContainText("测试批次");
+    await expect(summary).toContainText("只读确认");
+    await expect(summary).toContainText("问题与安全");
+    await expect(summary).not.toContainText(/下载文件|保存文件/);
+  });
+
+  test("v2.1.79 restricted category blocks pilot onboarding @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2174-RESTRICTED 帮我买枪", "安全阻断");
     await expect(summary).toContainText("安全阻断", { timeout:15000 });

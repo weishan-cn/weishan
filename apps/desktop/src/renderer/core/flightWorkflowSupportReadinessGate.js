@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SUPPORT_READINESS_GATE_VERSION = "2.1.78";
+  const FLIGHT_WORKFLOW_SUPPORT_READINESS_GATE_VERSION = "2.1.79";
   const GATE_NAME = "flight_workflow_support_readiness_gate_v1";
   const CAVEAT = "该判断只适用于只读试点问题处理，不代表客服工单或交易能力。";
 
@@ -15,6 +15,9 @@
   function triage(input) { const safe = obj(input); return first(safe.supportTriageDashboard, safe.supportTriageSummary, safe.triageDashboard); }
   function checklist(input) { const safe = obj(input); return first(safe.publicPilotChecklistSummary, safe.publicPilotChecklist, safe.checklist); }
   function betaGate(input) { const safe = obj(input); return first(safe.betaExpansionGateSummary, safe.betaExpansionGate, safe.expansionGate); }
+  function invitationGate(input) { const safe = obj(input); return first(safe.pilotInvitationGateSummary, safe.readOnlyPilotInvitationGateSummary, safe.invitationGateSummary); }
+  function testerCohort(input) { const safe = obj(input); return first(safe.testerCohortEnrollmentConsoleSummary, safe.testerCohortSummary, safe.cohortSummary); }
+  function pilotInvitation(input) { const safe = obj(input); return first(safe.pilotInvitationViewModelSummary, safe.pilotInvitationSummary); }
   function snapshot(input) { const safe = obj(input); return first(safe.pilotReadinessSnapshotSummary, safe.publicPilotReadinessSnapshotSummary, safe.snapshotSummary); }
   function playbook(input) { const safe = obj(input); return first(safe.supportPlaybookSummary, safe.supportPlaybookConsoleSummary, safe.playbookSummary); }
   function hasTradingUrl(value) {
@@ -28,6 +31,9 @@
     const t = triage(safe);
     const c = checklist(safe);
     const g = betaGate(safe);
+    const ig = invitationGate(safe);
+    const tc = testerCohort(safe);
+    const pivm = pilotInvitation(safe);
     const s = snapshot(safe);
     const p = playbook(safe);
     const pattern = obj(r.patternSummary);
@@ -45,10 +51,15 @@
       noSensitiveLeakRisk:noSensitiveLeakRisk,
       noTradingRisk:noTradingRisk,
       pilotReadinessSnapshotSummary:clone(s),
+      pilotInvitationGateSummary:clone(ig),
+      testerCohortEnrollmentConsoleSummary:clone(tc),
+      pilotInvitationViewModelSummary:clone(pivm),
       supportPlaybookSummary:clone(p),
       pilotSnapshotStatus:text(s.status || ""),
-      supportPlaybookStatus:text(p.status || ""),
-      pilotSnapshotNextStep:text(obj(s.userFacingSummary).resultLabel || obj(p.userFacingSummary).resultLabel || "继续小范围试点")
+      pilotInvitationStatus:text(ig.status || ""),
+      testerCohortStatus:text(tc.status || ""),
+      pilotSnapshotNextStep:text(obj(s.userFacingSummary).resultLabel || obj(p.userFacingSummary).resultLabel || "继续小范围试点"),
+      pilotInvitationNextStep:text(obj(obj(ig.userFacingSummary)).resultLabel || obj(ig.decision).label || "待邀请")
     });
   }
   function evaluateFlightWorkflowSupportReadiness(input) {

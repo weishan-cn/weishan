@@ -2255,6 +2255,9 @@ function runVersionCheck() {
     checkFlightWorkflowPublicPilotOnboardingGuardVersion(results, rootPackage.version);
     checkFlightWorkflowReadOnlyUserConsentFlowVersion(results, rootPackage.version);
     checkFlightWorkflowPilotOnboardingViewModelVersion(results, rootPackage.version);
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow read only pilot invitation gate version", "apps/desktop/src/renderer/core/flightWorkflowReadOnlyPilotInvitationGate.js", "FLIGHT_WORKFLOW_READ_ONLY_PILOT_INVITATION_GATE_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow tester cohort enrollment console version", "apps/desktop/src/renderer/core/flightWorkflowTesterCohortEnrollmentConsole.js", "FLIGHT_WORKFLOW_TESTER_COHORT_ENROLLMENT_CONSOLE_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow pilot invitation view model version", "apps/desktop/src/renderer/core/flightWorkflowPilotInvitationViewModel.js", "FLIGHT_WORKFLOW_PILOT_INVITATION_VIEW_MODEL_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow safe issue intake flow version", "apps/desktop/src/renderer/core/flightWorkflowSafeIssueIntakeFlow.js", "FLIGHT_WORKFLOW_SAFE_ISSUE_INTAKE_FLOW_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow support fallback recommendation engine version", "apps/desktop/src/renderer/core/flightWorkflowSupportFallbackRecommendationEngine.js", "FLIGHT_WORKFLOW_SUPPORT_FALLBACK_RECOMMENDATION_ENGINE_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow pilot support view model version", "apps/desktop/src/renderer/core/flightWorkflowPilotSupportViewModel.js", "FLIGHT_WORKFLOW_PILOT_SUPPORT_VIEW_MODEL_VERSION");

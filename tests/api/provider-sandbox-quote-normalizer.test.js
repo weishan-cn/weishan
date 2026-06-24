@@ -12,7 +12,7 @@ function main() {
     "apps/desktop/src/renderer/core/providerSandboxQuoteNormalizer.js"
   ]);
   const api = windowRef.WeishanProviderSandboxQuoteNormalizer;
-  assert.equal(api.PROVIDER_SANDBOX_QUOTE_NORMALIZER_VERSION, "2.1.78");
+  assert.equal(api.PROVIDER_SANDBOX_QUOTE_NORMALIZER_VERSION, "2.1.79");
   const normalized = api.normalizeProviderSandboxQuote({ providerId:"flight_provider_trusted_fixture", providerName:"Trusted Flight Fixture", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import", route:{ origin:"SHA", destination:"CTU", display:"SHA → CTU" }, departureDate:"2026-07-15", currency:"CNY", baseFare:860, taxesAndFees:110, providerFees:40, totalPrice:1010, priceUpdatedAt:"2026-01-01T00:00:00.000Z", freshnessMinutes:15, handoffCandidate:{ providerId:"google_flights_search", handoffType:"provider_search" } });
   assert.equal(normalized.status, "normalized");
   assert.equal(normalized.responseShape, "weishan_normalized_quote");

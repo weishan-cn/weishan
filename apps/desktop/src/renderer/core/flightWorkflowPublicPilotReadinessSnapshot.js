@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PUBLIC_PILOT_READINESS_SNAPSHOT_VERSION = "2.1.78";
+  const FLIGHT_WORKFLOW_PUBLIC_PILOT_READINESS_SNAPSHOT_VERSION = "2.1.79";
   const SNAPSHOT_NAME = "flight_workflow_public_pilot_readiness_snapshot_v1";
   const CAVEAT = "该快照只适用于只读候选证据流程，不代表真实票价、库存或可出票。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
@@ -19,6 +19,9 @@
   function beta(input) { const safe = obj(input); return first(safe.betaExpansionGateSummary, safe.betaExpansionGate, safe.expansionGateSummary); }
   function checklist(input) { const safe = obj(input); return first(safe.publicPilotChecklistSummary, safe.publicPilotChecklist, safe.pilotReadinessSummary, safe.pilotReadinessViewModel); }
   function onboarding(input) { const safe = obj(input); return first(safe.pilotOnboardingSummary, safe.pilotOnboardingGuard, safe.pilotOnboardingViewModel); }
+  function invitationGate(input) { const safe = obj(input); return first(safe.pilotInvitationGateSummary, safe.readOnlyPilotInvitationGateSummary, safe.invitationGateSummary); }
+  function testerCohort(input) { const safe = obj(input); return first(safe.testerCohortEnrollmentConsoleSummary, safe.testerCohortSummary, safe.cohortSummary); }
+  function pilotInvitation(input) { const safe = obj(input); return first(safe.pilotInvitationViewModelSummary, safe.pilotInvitationSummary); }
   function issuePattern(input) { const safe = obj(input); return first(safe.issuePatternSummary, safe.issuePatternRadar, safe.issuePatternViewModelSummary); }
   function supportReadiness(input) { const safe = obj(input); return first(safe.supportReadinessSummary, safe.supportReadinessGate); }
   function issueReview(input) { const safe = obj(input); return first(safe.issueReviewSummary, safe.issueReviewBoard, safe.publicPilotIssueReviewBoard); }
@@ -31,6 +34,9 @@
     const betaSummary = beta(safe);
     const checklistSummary = checklist(safe);
     const onboardingSummary = onboarding(safe);
+    const invitationGateSummary = invitationGate(safe);
+    const testerCohortSummary = testerCohort(safe);
+    const pilotInvitationSummary = pilotInvitation(safe);
     const issuePatternSummary = issuePattern(safe);
     const supportReadinessSummary = supportReadiness(safe);
     const issueReviewSummary = issueReview(safe);
@@ -38,7 +44,7 @@
     const operatorSummary = operator(safe);
     const sentinelSummary = sentinel(safe);
     const safetySummary = obj(safe.safety || sentinelSummary.safety || {});
-    const blockedRisk = safe.rawUserTextStored === true || safe.rawResponseStored === true || safe.secretStored === true || safetySummary.rawUserTextStored === true || safetySummary.rawResponseStored === true || safetySummary.secretStored === true || hasTradingUrl(safe) || hasTradingUrl(betaSummary) || hasTradingUrl(checklistSummary) || hasTradingUrl(onboardingSummary) || hasTradingUrl(issuePatternSummary) || hasTradingUrl(supportReadinessSummary) || hasTradingUrl(issueReviewSummary) || hasTradingUrl(triageSummary) || hasTradingUrl(operatorSummary) || hasTradingUrl(sentinelSummary);
+    const blockedRisk = safe.rawUserTextStored === true || safe.rawResponseStored === true || safe.secretStored === true || safetySummary.rawUserTextStored === true || safetySummary.rawResponseStored === true || safetySummary.secretStored === true || hasTradingUrl(safe) || hasTradingUrl(betaSummary) || hasTradingUrl(checklistSummary) || hasTradingUrl(onboardingSummary) || hasTradingUrl(invitationGateSummary) || hasTradingUrl(testerCohortSummary) || hasTradingUrl(pilotInvitationSummary) || hasTradingUrl(issuePatternSummary) || hasTradingUrl(supportReadinessSummary) || hasTradingUrl(issueReviewSummary) || hasTradingUrl(triageSummary) || hasTradingUrl(operatorSummary) || hasTradingUrl(sentinelSummary);
     const safetyMatrixPass = safe.safetyMatrixPass === true || obj(safe.safetyTestMatrixSummary).status === "pass" || obj(safe.safetyTestMatrixSummary).status === "ready" || sentinelPass(sentinelSummary) || sentinelPass(safe.safetyRegressionSummary);
     const betaExpansionApproved = safe.betaExpansionApproved === true || betaSummary.status === "approved" || obj(betaSummary.decision).safeToExpandReadOnlyBeta === true;
     const onboardingReady = safe.onboardingReady === true || obj(onboardingSummary.decision).canEnterReadOnlyPilot === true || onboardingSummary.status === "allowed";
@@ -72,6 +78,9 @@
       pilotOnboardingSummary: clone(onboardingSummary),
       issuePatternSummary: clone(issuePatternSummary),
       supportReadinessSummary: clone(supportReadinessSummary),
+      invitationGateSummary: clone(invitationGateSummary),
+      testerCohortEnrollmentConsoleSummary: clone(testerCohortSummary),
+      pilotInvitationViewModelSummary: clone(pilotInvitationSummary),
       issueReviewSummary: clone(issueReviewSummary),
       supportTriageSummary: clone(triageSummary),
       operatorConsoleSummary: clone(operatorSummary),
@@ -117,9 +126,15 @@
       rows: Array.isArray(safe.rows) ? safe.rows.map(function (item) { return row(item.rowId, item.label, item.value, item.status); }) : [],
       userFacingSummary: Object.assign({ title: "只读试点状态快照", resultLabel: summaryLabel, caveat: CAVEAT, redacted: true }, safe.userFacingSummary || {}),
       safety: Object.assign(safety(), safe.safety || {}),
+      pilotInvitationGateSummary: clone(safe.pilotInvitationGateSummary || null),
+      testerCohortEnrollmentConsoleSummary: clone(safe.testerCohortEnrollmentConsoleSummary || null),
+      pilotInvitationViewModelSummary: clone(safe.pilotInvitationViewModelSummary || null),
       pilotSnapshotStatus: text(safe.pilotSnapshotStatus || status),
-      supportPlaybookStatus: text(safe.supportPlaybookStatus || "ready"),
+      pilotInvitationStatus: text(safe.pilotInvitationStatus || ""),
+      testerCohortStatus: text(safe.testerCohortStatus || ""),
       pilotSnapshotNextStep: text(safe.pilotSnapshotNextStep || summaryLabel),
+      pilotInvitationNextStep: text(safe.pilotInvitationNextStep || summaryLabel),
+      supportPlaybookStatus: text(safe.supportPlaybookStatus || "ready"),
       redacted: true
     });
   }

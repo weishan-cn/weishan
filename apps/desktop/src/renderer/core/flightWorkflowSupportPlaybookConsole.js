@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SUPPORT_PLAYBOOK_CONSOLE_VERSION = "2.1.78";
+  const FLIGHT_WORKFLOW_SUPPORT_PLAYBOOK_CONSOLE_VERSION = "2.1.79";
   const CONSOLE_NAME = "flight_workflow_support_playbook_console_v1";
   const CAVEAT = "该手册只用于只读试点问题处理，不代表客服工单、交易请求或出票请求。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
@@ -12,6 +12,9 @@
   function toArray(value) { return Array.isArray(value) ? value.slice() : []; }
   function safety() { return { bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true }; }
   function first() { for (let index = 0; index < arguments.length; index += 1) { const value = obj(arguments[index]); if (Object.keys(value).length) return value; } return {}; }
+  function invitationGate(input) { const safe = obj(input); return first(safe.pilotInvitationGateSummary, safe.readOnlyPilotInvitationGateSummary, safe.invitationGateSummary); }
+  function testerCohort(input) { const safe = obj(input); return first(safe.testerCohortEnrollmentConsoleSummary, safe.testerCohortSummary, safe.cohortSummary); }
+  function pilotInvitation(input) { const safe = obj(input); return first(safe.pilotInvitationViewModelSummary, safe.pilotInvitationSummary); }
   function issuePattern(input) { const safe = obj(input); return first(safe.issuePatternSummary, safe.issuePatternRadar, safe.issuePatternViewModelSummary); }
   function issueReview(input) { const safe = obj(input); return first(safe.issueReviewSummary, safe.issueReviewBoard, safe.publicPilotIssueReviewBoard); }
   function triage(input) { const safe = obj(input); return first(safe.supportTriageSummary, safe.supportTriageDashboard); }
@@ -40,6 +43,9 @@
   function buildFlightWorkflowSupportPlaybookItems(input) {
     const safe = obj(input);
     const issueCategory = categoryOf(safe);
+    const invitationGateSummary = invitationGate(safe);
+    const testerCohortSummary = testerCohort(safe);
+    const pilotInvitationSummary = pilotInvitation(safe);
     const issuePatternSummary = issuePattern(safe);
     const supportReadinessSummary = supportReadiness(safe);
     const issueReviewSummary = issueReview(safe);
@@ -63,7 +69,7 @@
     const issueReviewSummary = issueReview(safe);
     const triageSummary = triage(safe);
     const supportFallbackSummary = supportFallback(safe);
-    const blockedRisk = safe.rawUserTextStored === true || safe.rawResponseStored === true || safe.secretStored === true || hasTradingUrl(safe) || hasTradingUrl(issuePatternSummary) || hasTradingUrl(issueReviewSummary) || hasTradingUrl(triageSummary) || hasTradingUrl(supportReadinessSummary) || hasTradingUrl(supportFallbackSummary);
+    const blockedRisk = safe.rawUserTextStored === true || safe.rawResponseStored === true || safe.secretStored === true || hasTradingUrl(safe) || hasTradingUrl(invitationGateSummary) || hasTradingUrl(testerCohortSummary) || hasTradingUrl(pilotInvitationSummary) || hasTradingUrl(issuePatternSummary) || hasTradingUrl(issueReviewSummary) || hasTradingUrl(triageSummary) || hasTradingUrl(supportReadinessSummary) || hasTradingUrl(supportFallbackSummary);
     const blocked = blockedRisk || issuePatternSummary.status === "blocked" || issueReviewSummary.status === "blocked" || triageSummary.status === "blocked" || supportReadinessSummary.status === "blocked" || supportFallbackSummary.status === "blocked";
     const needsReview = !blocked && (issuePatternSummary.status === "needs_review" || supportReadinessSummary.status === "needs_review" || issueReviewSummary.status === "needs_review" || triageSummary.status === "needs_internal_review" || supportFallbackSummary.status === "needs_review");
     const playbookReady = !blocked && !needsReview && playbookItems.length > 0;
@@ -74,6 +80,9 @@
       forbiddenSupportActions: ["代用户付款", "代用户下单", "承诺出票", "索要证件或银行卡", "索要登录凭据", "提供真实客服工单编号"],
       supportPlaybookReady: playbookReady,
       issueCategory: categoryOf(safe),
+      pilotInvitationGateSummary: clone(invitationGateSummary),
+      testerCohortEnrollmentConsoleSummary: clone(testerCohortSummary),
+      pilotInvitationViewModelSummary: clone(pilotInvitationSummary),
       redacted: true
     });
   }
@@ -98,6 +107,9 @@
       safety: Object.assign(safety(), safe.safety || {}),
       supportPlaybookStatus: text(safe.supportPlaybookStatus || status),
       supportPlaybookNextStep: text(safe.supportPlaybookNextStep || (status === "ready" ? "支持处理路径已准备" : (status === "needs_review" ? "支持处理仍需复核" : "支持处理已阻断"))),
+      pilotInvitationGateSummary: clone(safe.pilotInvitationGateSummary || null),
+      testerCohortEnrollmentConsoleSummary: clone(safe.testerCohortEnrollmentConsoleSummary || null),
+      pilotInvitationViewModelSummary: clone(safe.pilotInvitationViewModelSummary || null),
       redacted: true
     });
   }
@@ -112,7 +124,10 @@
         userFacingSummary: { title: "只读试点支持处理手册", resultLabel: resultLabel, caveat: CAVEAT, redacted: true },
         safety: safety(),
         supportPlaybookStatus: evaluation.status,
-        supportPlaybookNextStep: resultLabel
+        supportPlaybookNextStep: resultLabel,
+        pilotInvitationGateSummary: invitationGate(input || {}),
+        testerCohortEnrollmentConsoleSummary: testerCohort(input || {}),
+        pilotInvitationViewModelSummary: pilotInvitation(input || {})
       });
     } catch (error) {
       return sanitizeFlightWorkflowSupportPlaybookConsole({ status: "failed_safe", playbookItems: [], forbiddenSupportActions: ["代用户付款", "代用户下单", "承诺出票", "索要证件或银行卡", "索要登录凭据", "提供真实客服工单编号"], userFacingSummary: { title: "只读试点支持处理手册", resultLabel: "支持处理已阻断", caveat: CAVEAT, redacted: true } });

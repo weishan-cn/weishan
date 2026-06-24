@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PILOT_SNAPSHOT_VIEW_MODEL_VERSION = "2.1.78";
+  const FLIGHT_WORKFLOW_PILOT_SNAPSHOT_VIEW_MODEL_VERSION = "2.1.79";
   const VIEW_MODEL_NAME = "flight_workflow_pilot_snapshot_view_model_v1";
   const CAVEAT = "该快照只用于只读试点管理，不代表真实票价、库存、客服工单或出票能力。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
@@ -11,17 +11,24 @@
   function text(value) { return String(value == null ? "" : value).replace(SENSITIVE_RE, "redacted").trim(); }
   function toArray(value) { return Array.isArray(value) ? value.slice() : []; }
   function first() { for (let index = 0; index < arguments.length; index += 1) { const value = obj(arguments[index]); if (Object.keys(value).length) return value; } return {}; }
+  function invitationGateApi() { return window.WeishanFlightWorkflowReadOnlyPilotInvitationGate || {}; }
+  function cohortApi() { return window.WeishanFlightWorkflowTesterCohortEnrollmentConsole || {}; }
+  function invitationViewModelApi() { return window.WeishanFlightWorkflowPilotInvitationViewModel || {}; }
   function snapshotApi() { return window.WeishanFlightWorkflowPublicPilotReadinessSnapshot || {}; }
   function playbookApi() { return window.WeishanFlightWorkflowSupportPlaybookConsole || {}; }
   function snapshot(input) { const safe = obj(input); return first(safe.pilotReadinessSnapshotSummary, safe.publicPilotReadinessSnapshotSummary, safe.snapshotSummary, safe.readinessSnapshotSummary, typeof snapshotApi().buildFlightWorkflowPublicPilotReadinessSnapshot === "function" ? snapshotApi().buildFlightWorkflowPublicPilotReadinessSnapshot(safe) : null); }
   function playbook(input) { const safe = obj(input); return first(safe.supportPlaybookSummary, safe.playbookSummary, safe.supportPlaybookConsoleSummary, typeof playbookApi().buildFlightWorkflowSupportPlaybookConsole === "function" ? playbookApi().buildFlightWorkflowSupportPlaybookConsole(safe) : null); }
-  function statusOf(snapshotSummary, playbookSummary) {
+  function statusOf(snapshotSummary, playbookSummary, invitationGateSummary, cohortSummary, invitationViewSummary) {
     const snapshotStatus = text(obj(snapshotSummary).status || "failed_safe");
     const playbookStatus = text(obj(playbookSummary).status || "ready");
-    if (snapshotStatus === "blocked" || playbookStatus === "blocked") return "blocked";
-    if (snapshotStatus === "needs_review" || playbookStatus === "needs_review") return "needs_review";
+    const invitationStatus = text(obj(invitationGateSummary).status || "waitlist");
+    const cohortStatus = text(obj(cohortSummary).status || "needs_more_testers");
+    const invitationViewStatus = text(obj(invitationViewSummary).status || "ready");
+    if (snapshotStatus === "blocked" || playbookStatus === "blocked" || invitationStatus === "blocked" || cohortStatus === "blocked" || invitationViewStatus === "blocked") return "blocked";
+    if (invitationStatus === "needs_consent" || invitationViewStatus === "needs_consent") return "needs_consent";
+    if (snapshotStatus === "needs_review" || playbookStatus === "needs_review" || invitationStatus === "needs_support_review" || cohortStatus === "needs_review" || invitationViewStatus === "needs_review") return "needs_review";
     if (snapshotStatus === "failed_safe" || playbookStatus === "failed_safe") return "failed_safe";
-    if (snapshotStatus === "continue_small_pilot") return "continue_small_pilot";
+    if (snapshotStatus === "continue_small_pilot" || invitationStatus === "waitlist" || cohortStatus === "needs_more_testers") return "continue_small_pilot";
     return "ready";
   }
   function card(cardId, label, value) { return { cardId: cardId, label: text(label), value: text(value), redacted: true }; }
@@ -29,10 +36,16 @@
   function rowsFromPlaybook(playbookSummary) { return clone(toArray(obj(playbookSummary).playbookItems).map(function (item) { return { rowId: text(item.itemId || "item"), label: text(item.issueLabel || ""), value: text(item.actionLabel || ""), status: item.status === "blocked" ? "blocked" : (item.status === "warning" ? "warning" : "pass"), redacted: true }; })); }
   function forbiddenRows(playbookSummary) { return clone(toArray(obj(playbookSummary).forbiddenSupportActions).map(function (item, index) { return { rowId: "forbidden_" + index, label: "禁止动作", value: text(item), status: "blocked", redacted: true }; })); }
   function buildFlightWorkflowPilotSnapshotCards(input) {
+    const invitationGateSummary = invitationGateApi().buildFlightWorkflowReadOnlyPilotInvitationGate ? invitationGateApi().buildFlightWorkflowReadOnlyPilotInvitationGate(input || {}) : first((input || {}).pilotInvitationGateSummary, (input || {}).readOnlyPilotInvitationGateSummary, (input || {}).invitationGateSummary);
+    const cohortSummary = cohortApi().buildFlightWorkflowTesterCohortEnrollmentConsole ? cohortApi().buildFlightWorkflowTesterCohortEnrollmentConsole(input || {}) : first((input || {}).testerCohortEnrollmentConsoleSummary, (input || {}).testerCohortSummary, (input || {}).cohortSummary);
+    const invitationViewSummary = invitationViewModelApi().buildFlightWorkflowPilotInvitationViewModel ? invitationViewModelApi().buildFlightWorkflowPilotInvitationViewModel(input || {}) : first((input || {}).pilotInvitationViewModelSummary, (input || {}).pilotInvitationSummary);
     const snapshotSummary = snapshot(input || {});
     const playbookSummary = playbook(input || {});
-    const status = statusOf(snapshotSummary, playbookSummary);
+    const status = statusOf(snapshotSummary, playbookSummary, invitationGateSummary, cohortSummary, invitationViewSummary);
     return clone([
+      card("invitation_gate", "试点邀请", obj(invitationGateSummary.userFacingSummary).resultLabel || obj(invitationGateSummary.decision).label || invitationGateSummary.status || status),
+      card("tester_cohort", "测试批次", obj(cohortSummary.userFacingSummary).resultLabel || cohortSummary.status || "仍需更多测试用户"),
+      card("pilot_invitation", "只读邀请", obj(invitationViewSummary.userFacingSummary).resultLabel || invitationViewSummary.status || "需要复核"),
       card("pilot", "试点状态", obj(snapshotSummary.userFacingSummary).resultLabel || status),
       card("support", "支持准备", obj(playbookSummary.userFacingSummary).resultLabel || playbookSummary.status || "支持处理路径已准备"),
       card("issues", "问题趋势", obj(snapshotSummary.issuePatternSummary).userFacingSummary && obj(snapshotSummary.issuePatternSummary.userFacingSummary).resultLabel || obj(snapshotSummary.issuePatternSummary).patternSummary && obj(snapshotSummary.issuePatternSummary).patternSummary.message || "暂无明显共性问题"),
@@ -41,6 +54,10 @@
   }
   function buildFlightWorkflowPilotSnapshotRows(input) { return rowsFromSnapshot(snapshot(input || {})); }
   function buildFlightWorkflowSupportPlaybookRows(input) { return rowsFromPlaybook(playbook(input || {})); }
+  function buildFlightWorkflowInvitationGateRows(input) {
+    const gate = invitationGateApi().buildFlightWorkflowReadOnlyPilotInvitationGate ? invitationGateApi().buildFlightWorkflowReadOnlyPilotInvitationGate(input || {}) : first((input || {}).pilotInvitationGateSummary, (input || {}).readOnlyPilotInvitationGateSummary, (input || {}).invitationGateSummary);
+    return clone([{ rowId:"invitation_gate", label:"试点邀请", value:obj(gate.userFacingSummary).resultLabel || gate.status || "待邀请", status:gate.status === "blocked" ? "blocked" : (gate.status === "eligible" ? "pass" : "warning"), redacted:true }, { rowId:"tester_cohort", label:"测试批次", value:obj((input || {}).testerCohortEnrollmentConsoleSummary || {}).userFacingSummary && obj((input || {}).testerCohortEnrollmentConsoleSummary.userFacingSummary).resultLabel || obj((input || {}).testerCohortSummary || {}).status || "仍需更多测试用户", status:obj((input || {}).testerCohortEnrollmentConsoleSummary || {}).status === "ready" ? "pass" : "warning", redacted:true }]);
+  }
   function sanitizeFlightWorkflowPilotSnapshotViewModel(vm) {
     const safe = obj(vm);
     const status = /^(ready|continue_small_pilot|needs_review|blocked|failed_safe)$/.test(safe.status) ? safe.status : "failed_safe";
@@ -53,6 +70,9 @@
       snapshotRows: toArray(safe.snapshotRows),
       playbookRows: toArray(safe.playbookRows),
       forbiddenSupportRows: toArray(safe.forbiddenSupportRows),
+      invitationGateSummary: clone(safe.pilotInvitationGateSummary || null),
+      testerCohortEnrollmentConsoleSummary: clone(safe.testerCohortEnrollmentConsoleSummary || null),
+      pilotInvitationViewModelSummary: clone(safe.pilotInvitationViewModelSummary || null),
       caveat: text(safe.caveat || CAVEAT),
       redacted: true,
       snapshotName: text(safe.snapshotName || "flight_workflow_public_pilot_readiness_snapshot_v1"),
@@ -74,6 +94,9 @@
         playbookRows: buildFlightWorkflowSupportPlaybookRows(input || {}),
         forbiddenSupportRows: forbiddenRows(playbookSummary),
         caveat: CAVEAT,
+        invitationGateSummary: invitationGateApi().buildFlightWorkflowReadOnlyPilotInvitationGate ? invitationGateApi().buildFlightWorkflowReadOnlyPilotInvitationGate(input || {}) : first((input || {}).pilotInvitationGateSummary, (input || {}).readOnlyPilotInvitationGateSummary, (input || {}).invitationGateSummary),
+        testerCohortEnrollmentConsoleSummary: cohortApi().buildFlightWorkflowTesterCohortEnrollmentConsole ? cohortApi().buildFlightWorkflowTesterCohortEnrollmentConsole(input || {}) : first((input || {}).testerCohortEnrollmentConsoleSummary, (input || {}).testerCohortSummary),
+        pilotInvitationViewModelSummary: invitationViewModelApi().buildFlightWorkflowPilotInvitationViewModel ? invitationViewModelApi().buildFlightWorkflowPilotInvitationViewModel(input || {}) : first((input || {}).pilotInvitationViewModelSummary, (input || {}).pilotInvitationSummary),
         snapshotName: obj(snapshotSummary).snapshotName || "flight_workflow_public_pilot_readiness_snapshot_v1",
         playbookName: obj(playbookSummary).playbookName || "flight_workflow_support_playbook_console_v1",
         redacted: true
@@ -115,6 +138,7 @@
     buildFlightWorkflowPilotSnapshotCards,
     buildFlightWorkflowPilotSnapshotRows,
     buildFlightWorkflowSupportPlaybookRows,
+    buildFlightWorkflowInvitationGateRows,
     buildFlightWorkflowPilotSnapshotViewModelAuditDraft,
     sanitizeFlightWorkflowPilotSnapshotViewModel
   };

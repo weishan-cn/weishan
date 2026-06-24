@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.78";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.79";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -50,6 +50,9 @@
   function sentinelApi() { return window.WeishanFlightWorkflowSafetyRegressionSentinel || {}; }
   function operatorApi() { return window.WeishanFlightWorkflowOperatorConsole || {}; }
   function operatorViewModelApi() { return window.WeishanFlightWorkflowOperatorConsoleViewModel || {}; }
+  function invitationGateApi() { return window.WeishanFlightWorkflowReadOnlyPilotInvitationGate || {}; }
+  function testerCohortEnrollmentConsoleApi() { return window.WeishanFlightWorkflowTesterCohortEnrollmentConsole || {}; }
+  function pilotInvitationViewModelApi() { return window.WeishanFlightWorkflowPilotInvitationViewModel || {}; }
   function scenarioSimulatorApi() { return window.WeishanFlightWorkflowScenarioSimulator || {}; }
   function safetyTestMatrixApi() { return window.WeishanFlightWorkflowSafetyTestMatrixConsole || {}; }
   function releaseReadinessApi() { return window.WeishanFlightWorkflowReleaseReadinessDashboard || {}; }
@@ -154,9 +157,15 @@
       pilotConsentRequired: safe.pilotConsentRequired === true,
       pilotReadinessSnapshotSummary: stripUnsafe(safe.pilotReadinessSnapshotSummary || null),
       supportPlaybookSummary: stripUnsafe(safe.supportPlaybookSummary || null),
+      pilotInvitationGateSummary: stripUnsafe(safe.pilotInvitationGateSummary || null),
+      testerCohortEnrollmentConsoleSummary: stripUnsafe(safe.testerCohortEnrollmentConsoleSummary || null),
+      pilotInvitationViewModelSummary: stripUnsafe(safe.pilotInvitationViewModelSummary || null),
       pilotSnapshotStatus: safeText(safe.pilotSnapshotStatus || ""),
       supportPlaybookStatus: safeText(safe.supportPlaybookStatus || ""),
-      pilotSnapshotNextStep: safeText(safe.pilotSnapshotNextStep || "")
+      pilotSnapshotNextStep: safeText(safe.pilotSnapshotNextStep || ""),
+      pilotInvitationStatus: safeText(safe.pilotInvitationStatus || ""),
+      testerCohortStatus: safeText(safe.testerCohortStatus || ""),
+      pilotInvitationNextStep: safeText(safe.pilotInvitationNextStep || "")
     };
   }
 
@@ -465,9 +474,15 @@
       pilotConsentRequired: report.safetyReport.pilotConsentRequired === true,
       pilotReadinessSnapshotSummary: report.safetyReport.pilotReadinessSnapshotSummary || null,
       supportPlaybookSummary: report.safetyReport.supportPlaybookSummary || null,
+      pilotInvitationGateSummary: report.safetyReport.pilotInvitationGateSummary || null,
+      testerCohortEnrollmentConsoleSummary: report.safetyReport.testerCohortEnrollmentConsoleSummary || null,
+      pilotInvitationViewModelSummary: report.safetyReport.pilotInvitationViewModelSummary || null,
       pilotSnapshotStatus: report.safetyReport.pilotSnapshotStatus || "",
       supportPlaybookStatus: report.safetyReport.supportPlaybookStatus || "",
       pilotSnapshotNextStep: report.safetyReport.pilotSnapshotNextStep || "",
+      pilotInvitationStatus: report.safetyReport.pilotInvitationStatus || "",
+      testerCohortStatus: report.safetyReport.testerCohortStatus || "",
+      pilotInvitationNextStep: report.safetyReport.pilotInvitationNextStep || "",
       scenarioSimulationSummary: report.safetyReport.scenarioSimulationSummary || null,
       safetyTestMatrixSummary: report.safetyReport.safetyTestMatrixSummary || null,
       continuitySummary: report.safetyReport.continuitySummary || null,
