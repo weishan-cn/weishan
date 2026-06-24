@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.83";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.84";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -162,6 +162,8 @@
       supportPlaybookSummary: stripUnsafe(safe.supportPlaybookSummary || null),
       pilotExitCriteriaSummary: stripUnsafe(safe.pilotExitCriteriaSummary || null),
       launchCandidateReadinessSummary: stripUnsafe(safe.launchCandidateReadinessSummary || null),
+      freezeGateSummary: stripUnsafe(safe.freezeGateSummary || null),
+      evidenceFreezePackSummary: stripUnsafe(safe.evidenceFreezePackSummary || null),
       pilotOpsSummary: stripUnsafe(safe.pilotOpsSummary || safe.readOnlyPilotOpsSummary || null),
       nextCohortDecisionSummary: stripUnsafe(safe.nextCohortDecisionSummary || safe.nextCohortDecisionBoard || null),
       launchCandidateStatus: safeText(safe.launchCandidateStatus || ""),
@@ -186,6 +188,8 @@
       cohortHealthSummary: stripUnsafe(safe.cohortHealthSummary || null),
       pilotExitCriteriaSummary: stripUnsafe(safe.pilotExitCriteriaSummary || null),
       launchCandidateReadinessSummary: stripUnsafe(safe.launchCandidateReadinessSummary || null),
+      freezeGateSummary: stripUnsafe(safe.freezeGateSummary || null),
+      evidenceFreezePackSummary: stripUnsafe(safe.evidenceFreezePackSummary || null),
       pilotOpsSummary: stripUnsafe(safe.pilotOpsSummary || null),
       nextCohortDecisionSummary: stripUnsafe(safe.nextCohortDecisionSummary || null),
       launchCandidateStatus: safeText(safe.launchCandidateStatus || ""),
@@ -231,10 +235,10 @@
     const finalSafeHandoffPacketSummary = workflow.finalSafeHandoffPacketSummary || safe.finalSafeHandoffPacketSummary || (typeof finalPacketApi().buildFlightWorkflowFinalSafeHandoffPacket === "function" ? finalPacketApi().buildFlightWorkflowFinalSafeHandoffPacket(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary, humanReviewChecklistSummary:humanReviewChecklistSummary })) : null);
     const handoffPacketPolicyDecision = workflow.handoffPacketPolicyDecision || safe.handoffPacketPolicyDecision || (typeof packetPolicyApi().evaluateFlightWorkflowHandoffPacketPolicy === "function" ? packetPolicyApi().evaluateFlightWorkflowHandoffPacketPolicy({ finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary }) : null);
     const finalReviewStatus = workflow.finalReviewStatus || safe.finalReviewStatus || (handoffPacketPolicyDecision && handoffPacketPolicyDecision.status === "allowed" ? "ready" : finalSafeHandoffPacketSummary && finalSafeHandoffPacketSummary.status || "needs_review");
-    const riskBadgeModel = typeof riskBadgeApi().buildFlightWorkflowRiskBadges === "function" ? riskBadgeApi().buildFlightWorkflowRiskBadges({ auditReview:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview, humanReviewChecklistSummary:humanReviewChecklistSummary, finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, handoffPacketPolicyDecision:handoffPacketPolicyDecision, actionQueueSummary:workflow.actionQueueSummary, actionPolicyDecision:workflow.actionPolicyDecision, actionExecutionResult:workflow.actionExecutionResult, eventLedgerSummary:workflow.eventLedgerSummary, tradingBlocked:true, requiresConfirmation:true }) : null;
+    const riskBadgeModel = typeof riskBadgeApi().buildFlightWorkflowRiskBadges === "function" ? riskBadgeApi().buildFlightWorkflowRiskBadges({ auditReview:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview, humanReviewChecklistSummary:humanReviewChecklistSummary, finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, handoffPacketPolicyDecision:handoffPacketPolicyDecision, actionQueueSummary:workflow.actionQueueSummary, actionPolicyDecision:workflow.actionPolicyDecision, actionExecutionResult:workflow.actionExecutionResult, eventLedgerSummary:workflow.eventLedgerSummary, freezeGateSummary:workflow.freezeGateSummary, evidenceFreezePackSummary:workflow.evidenceFreezePackSummary, tradingBlocked:true, requiresConfirmation:true }) : null;
     const riskBadgeSummary = workflow.riskBadgeSummary || (riskBadgeModel && typeof riskBadgeApi().summarizeFlightWorkflowRiskBadges === "function" ? Object.assign({}, riskBadgeApi().summarizeFlightWorkflowRiskBadges(riskBadgeModel.badges), { badges:riskBadgeModel.badges, line:riskBadgeModel.summaryLabel || riskBadgeApi().summarizeFlightWorkflowRiskBadges(riskBadgeModel.badges).summaryLabel }) : riskBadgeModel);
-    const safetyRegressionSummary = workflow.safetyRegressionSummary || safe.safetyRegressionSummary || (typeof sentinelApi().buildFlightWorkflowSafetyRegressionReport === "function" ? sentinelApi().buildFlightWorkflowSafetyRegressionReport(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview })) : null);
-    const operatorConsoleSummary = workflow.operatorConsoleSummary || safe.operatorConsoleSummary || (typeof operatorApi().buildFlightWorkflowOperatorConsole === "function" ? operatorApi().buildFlightWorkflowOperatorConsole(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview, humanReviewChecklistSummary:humanReviewChecklistSummary, finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, handoffPacketPolicyDecision:handoffPacketPolicyDecision, safetyRegressionSummary:safetyRegressionSummary })) : null);
+    const safetyRegressionSummary = workflow.safetyRegressionSummary || safe.safetyRegressionSummary || (typeof sentinelApi().buildFlightWorkflowSafetyRegressionReport === "function" ? sentinelApi().buildFlightWorkflowSafetyRegressionReport(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview, freezeGateSummary:workflow.freezeGateSummary, evidenceFreezePackSummary:workflow.evidenceFreezePackSummary })) : null);
+    const operatorConsoleSummary = workflow.operatorConsoleSummary || safe.operatorConsoleSummary || (typeof operatorApi().buildFlightWorkflowOperatorConsole === "function" ? operatorApi().buildFlightWorkflowOperatorConsole(Object.assign({}, safe, workflow, { topCandidates:candidates, selectedCandidate:selected, auditReviewSummary:auditReviewSummary, safeSessionExportPreview:safeSessionExportPreview, humanReviewChecklistSummary:humanReviewChecklistSummary, finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, handoffPacketPolicyDecision:handoffPacketPolicyDecision, safetyRegressionSummary:safetyRegressionSummary, freezeGateSummary:workflow.freezeGateSummary, evidenceFreezePackSummary:workflow.evidenceFreezePackSummary })) : null);
     const operatorConsoleViewModel = workflow.operatorConsoleViewModel || safe.operatorConsoleViewModel || (typeof operatorViewModelApi().buildFlightWorkflowOperatorConsoleViewModel === "function" ? operatorViewModelApi().buildFlightWorkflowOperatorConsoleViewModel({ operatorConsoleSummary:operatorConsoleSummary }) : null);
     const pilotExitCriteriaSummary = workflow.pilotExitCriteriaSummary || safe.pilotExitCriteriaSummary || null;
     const launchCandidateReadinessSummary = workflow.launchCandidateReadinessSummary || safe.launchCandidateReadinessSummary || null;
@@ -296,6 +300,8 @@
       operatorConsoleViewModel: operatorConsoleViewModel,
       pilotExitCriteriaSummary: pilotExitCriteriaSummary ? { title:"只读试点退出条件", line:pilotExitCriteriaSummary.userFacingSummary && pilotExitCriteriaSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
       launchCandidateReadinessSummary: launchCandidateReadinessSummary ? { title:"只读发布候选准备板", line:launchCandidateReadinessSummary.userFacingSummary && launchCandidateReadinessSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
+      freezeGateSummary: workflow.freezeGateSummary ? { title:"只读发布候选冻结检查", line:workflow.freezeGateSummary.userFacingSummary && workflow.freezeGateSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
+      evidenceFreezePackSummary: workflow.evidenceFreezePackSummary ? { title:"证据冻结包", line:workflow.evidenceFreezePackSummary.userFacingSummary && workflow.evidenceFreezePackSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
       launchCandidateStatus: workflow.launchCandidateStatus || safe.launchCandidateStatus || "",
       readyForLaunchCandidate: workflow.readyForLaunchCandidate === true || safe.readyForLaunchCandidate === true,
       launchCandidateNextStep: workflow.launchCandidateNextStep || safe.launchCandidateNextStep || "",

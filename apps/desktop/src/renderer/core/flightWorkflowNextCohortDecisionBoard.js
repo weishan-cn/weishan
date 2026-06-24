@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_NEXT_COHORT_DECISION_BOARD_VERSION = "2.1.83";
+  const FLIGHT_WORKFLOW_NEXT_COHORT_DECISION_BOARD_VERSION = "2.1.84";
   const BOARD_NAME = "flight_workflow_next_cohort_decision_board_v1";
   const CAVEAT = "该决策只适用于只读试点节奏，不代表真实账号、邀请、交易或出票能力。";
 
@@ -146,6 +146,8 @@
       safetyRegressionSummary:clone(safe.safetyRegressionSummary || null),
       pilotExitCriteriaSummary:clone(safe.pilotExitCriteriaSummary || null),
       launchCandidateReadinessSummary:clone(safe.launchCandidateReadinessSummary || null),
+      freezeGateSummary:clone(safe.freezeGateSummary || null),
+      evidenceFreezePackSummary:clone(safe.evidenceFreezePackSummary || null),
       launchCandidateStatus:text(safe.launchCandidateStatus || "continue_pilot"),
       readyForLaunchCandidate:safe.readyForLaunchCandidate === true,
       launchCandidateNextStep:text(safe.launchCandidateNextStep || "继续试点观察"),
@@ -182,6 +184,8 @@
         safetyRegressionSummary:decision.safetyRegressionSummary,
         pilotExitCriteriaSummary:decision.pilotExitCriteriaSummary,
         launchCandidateReadinessSummary:decision.launchCandidateReadinessSummary,
+        freezeGateSummary:decision.freezeGateSummary,
+        evidenceFreezePackSummary:decision.evidenceFreezePackSummary,
         launchCandidateStatus:decision.launchCandidateStatus,
         readyForLaunchCandidate:decision.readyForLaunchCandidate === true,
         launchCandidateNextStep:decision.launchCandidateNextStep,

@@ -1,6 +1,6 @@
 ;(function () {
   "use strict";
-  const PROVIDER_ENDPOINT_ALLOWLIST_ENFORCEMENT_VERSION = "2.1.83";
+  const PROVIDER_ENDPOINT_ALLOWLIST_ENFORCEMENT_VERSION = "2.1.84";
   const CREDENTIAL_QUERY_PARAMS = ["api_key", "apikey", "apiKey", "key", "token", "access_token", "refresh_token", "client_secret", "clientSecret", "authorization", "password", "secret"];
   const BLOCKED_PATH_PATTERNS = ["payment", "payments", "order", "orders", "checkout", "booking", "identity", "passport", "bank-card", "bankcard", "card", "upload"];
   const ALLOWLIST = {

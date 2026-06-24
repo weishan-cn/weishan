@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_READINESS_BOARD_VERSION = "2.1.83";
+  const FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_READINESS_BOARD_VERSION = "2.1.84";
   const BOARD_NAME = "flight_workflow_launch_candidate_readiness_board_v1";
   const CAVEAT = "发布候选仍然只覆盖只读候选证据流程，不提供付款、下单或出票能力。";
 
@@ -117,6 +117,8 @@
       safetyMatrixSummary:clone(safetyMatrixSummary),
       operatorConsoleSummary:clone(operatorConsoleSummary),
       supportReadinessSummary:clone(supportReadinessSummary),
+      freezeGateSummary:clone(safe.freezeGateSummary || null),
+      evidenceFreezePackSummary:clone(safe.evidenceFreezePackSummary || null),
       launchCandidateStatus:status,
       readyForLaunchCandidate:safeForReadOnlyLaunchCandidate,
       launchCandidateNextStep:safeForReadOnlyLaunchCandidate ? "可以进入只读发布候选" : (status === "continue_pilot" ? "继续试点观察" : status === "needs_review" ? "需要复核" : "暂不可进入"),
@@ -149,6 +151,8 @@
       safetyMatrixSummary:clone(safe.safetyMatrixSummary || null),
       operatorConsoleSummary:clone(safe.operatorConsoleSummary || null),
       supportReadinessSummary:clone(safe.supportReadinessSummary || null),
+      freezeGateSummary:clone(safe.freezeGateSummary || null),
+      evidenceFreezePackSummary:clone(safe.evidenceFreezePackSummary || null),
       launchCandidateStatus:text(safe.launchCandidateStatus || status),
       readyForLaunchCandidate:safe.readyForLaunchCandidate === true || readiness.safeForReadOnlyLaunchCandidate === true,
       launchCandidateNextStep:text(safe.launchCandidateNextStep || (status === "ready" ? "可以进入只读发布候选" : status === "continue_pilot" ? "继续试点观察" : status === "needs_review" ? "需要复核" : "暂不可进入")),

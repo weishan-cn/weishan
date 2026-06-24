@@ -11,7 +11,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowPilotOnboardingViewModel.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowPilotOnboardingViewModel;
-  assert.equal(api.FLIGHT_WORKFLOW_PILOT_ONBOARDING_VIEW_MODEL_VERSION, "2.1.83");
+  assert.equal(api.FLIGHT_WORKFLOW_PILOT_ONBOARDING_VIEW_MODEL_VERSION, "2.1.84");
   const vmModel = api.buildFlightWorkflowPilotOnboardingViewModel({ betaExpansionApproved:true, publicPilotChecklistReady:true, releaseReadinessReady:true, safetyCopyReady:true, forbiddenCapabilitiesVisible:true, userConsentReady:true, noBlockedSafetyRisk:true, acceptedItems:{ read_only_scope:true, platform_final:true, no_transaction:true, no_identity_upload:true, feedback_redacted:true } });
   assert.equal(vmModel.title, "只读试点进入确认");
   assert.ok(vmModel.cards.some((x) => x.cardId === "entry"));

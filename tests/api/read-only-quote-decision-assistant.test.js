@@ -8,7 +8,7 @@ function serial(value) { return JSON.stringify(value); }
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteDecisionAssistant.js"]);
   const api = windowRef.WeishanReadOnlyQuoteDecisionAssistant;
-  assert.equal(api.READ_ONLY_QUOTE_DECISION_ASSISTANT_VERSION, "2.1.83");
+  assert.equal(api.READ_ONLY_QUOTE_DECISION_ASSISTANT_VERSION, "2.1.84");
   const empty = api.buildReadOnlyQuoteDecisionAssistant({ topCandidates:[] });
   assert.equal(empty.status, "empty");
   const malformed = api.buildReadOnlyQuoteDecisionAssistant(null);
@@ -18,7 +18,7 @@ function main() {
     { quoteId:"q2", rank:2, providerName:"B", totalPrice:950, baseFare:800, taxesAndFees:120, providerFees:30, freshnessMinutes:4, safeProviderHandoffReady:true },
     { quoteId:"q3", rank:3, providerName:"C", totalPrice:990, baseFare:830, taxesAndFees:120, providerFees:40, freshnessMinutes:12, safeProviderHandoffReady:false }
   ] });
-  assert.equal(model.appVersion, "2.1.83");
+  assert.equal(model.appVersion, "2.1.84");
   assert.equal(model.status, "ready");
   assert.equal(model.recommendedCandidate.rank, 1);
   assert.equal(model.recommendationType, "candidate_evidence_only");

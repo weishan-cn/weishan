@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_OPS_SUMMARY_VERSION = "2.1.83";
+  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_OPS_SUMMARY_VERSION = "2.1.84";
   const SUMMARY_NAME = "flight_workflow_read_only_pilot_ops_summary_v1";
   const CAVEAT = "该摘要只用于只读试点运营判断，不代表真实账号、客服工单、交易请求或出票能力。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText|真实姓名|手机号|邮箱/ig;
@@ -153,6 +153,8 @@
       safetyRegressionSummary:clone(safe.safetyRegressionSummary || null),
       pilotExitCriteriaSummary:clone(safe.pilotExitCriteriaSummary || null),
       launchCandidateReadinessSummary:clone(safe.launchCandidateReadinessSummary || null),
+      freezeGateSummary:clone(safe.freezeGateSummary || null),
+      evidenceFreezePackSummary:clone(safe.evidenceFreezePackSummary || null),
       pilotOpsStatus:text(safe.pilotOpsStatus || status),
       nextCohortDecisionStatus:text(safe.nextCohortDecisionStatus || (opsHealth.safeToAdvanceNextCohort ? "advance" : status)),
       pilotOpsPrimaryRisk:clone(safe.pilotOpsPrimaryRisk || primaryRisk),
@@ -193,6 +195,8 @@
         safetyRegressionSummary:health.safetyRegressionSummary,
         pilotExitCriteriaSummary:health.pilotExitCriteriaSummary,
         launchCandidateReadinessSummary:health.launchCandidateReadinessSummary,
+        freezeGateSummary:health.freezeGateSummary,
+        evidenceFreezePackSummary:health.evidenceFreezePackSummary,
         pilotOpsStatus:health.status,
         nextCohortDecisionStatus:health.nextCohortDecisionStatus,
         pilotOpsPrimaryRisk:health.primaryRisk,

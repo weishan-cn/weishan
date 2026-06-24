@@ -8727,7 +8727,7 @@ test.describe.serial("commerce agent workbench", () => {
       try {
         window.localStorage.setItem("weishan.readOnlyQuoteRefreshState.v1", JSON.stringify({
           stateName:"read_only_quote_refresh_state_v1",
-          appVersion:"2.1.83",
+          appVersion:"2.1.84",
           lastRefreshStatus:"refreshed",
           providerId:"google_flights_search",
           providerName:"Google Flights",
@@ -9001,7 +9001,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.1.83 flight workflow release readiness dashboard stays local @commerce-smoke", async () => {
+  test("v2.1.84 flight workflow release readiness dashboard stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2169-READY 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
@@ -9162,7 +9162,7 @@ test.describe.serial("commerce agent workbench", () => {
   });
 
 
-  test("v2.1.83 pilot onboarding guard appears before guided test @commerce-smoke", async () => {
+  test("v2.1.84 pilot onboarding guard appears before guided test @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2174-ONBOARDING 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
@@ -9237,7 +9237,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(model.serialized).not.toMatch(/"(rawResponse|rawProviderResponse)"\s*:/i);
   });
 
-  test("v2.1.83 public pilot readiness snapshot stays local @commerce-smoke", async () => {
+  test("v2.1.84 public pilot readiness snapshot stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2178-SNAPSHOT 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
@@ -9282,7 +9282,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.83 support playbook console stays local @commerce-smoke", async () => {
+  test("v2.1.84 support playbook console stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2178-PLAYBOOK 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
@@ -9307,7 +9307,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.83 public pilot cohort progress tracker stays local @commerce-smoke", async () => {
+  test("v2.1.84 public pilot cohort progress tracker stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2179-INVITE 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
@@ -9325,7 +9325,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.83 read-only trial milestone board stays local @commerce-smoke", async () => {
+  test("v2.1.84 read-only trial milestone board stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2179-COHORT 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
@@ -9344,7 +9344,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.83 cohort progress view model stays local @commerce-smoke", async () => {
+  test("v2.1.84 cohort progress view model stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2179-VIEWMODEL 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
@@ -9374,7 +9374,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.83 restricted category blocks pilot onboarding @commerce-smoke", async () => {
+  test("v2.1.84 restricted category blocks pilot onboarding @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2174-RESTRICTED 帮我买枪", "安全阻断");
     await expect(summary).toContainText("安全阻断", { timeout:15000 });

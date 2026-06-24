@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_EXIT_CRITERIA_VERSION = "2.1.83";
+  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_EXIT_CRITERIA_VERSION = "2.1.84";
   const CRITERIA_NAME = "flight_workflow_read_only_pilot_exit_criteria_v1";
   const CAVEAT = "该判断只适用于只读候选证据流程，不代表真实账号、客服工单、交易请求或出票能力。";
 
@@ -127,6 +127,8 @@
       issuePatternSummary:clone(issuePatternSummary),
       safetyRegressionSummary:clone(safetyRegressionSummary),
       releaseReadinessSummary:clone(releaseReadinessSummary),
+      freezeGateSummary:clone(safe.freezeGateSummary || null),
+      evidenceFreezePackSummary:clone(safe.evidenceFreezePackSummary || null),
       bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true
     });
   }
@@ -158,6 +160,8 @@
       issuePatternSummary:clone(safe.issuePatternSummary || null),
       safetyRegressionSummary:clone(safe.safetyRegressionSummary || null),
       releaseReadinessSummary:clone(safe.releaseReadinessSummary || null),
+      freezeGateSummary:clone(safe.freezeGateSummary || null),
+      evidenceFreezePackSummary:clone(safe.evidenceFreezePackSummary || null),
       safety:Object.assign(safety(), obj(safe.safety)),
       bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true
     });

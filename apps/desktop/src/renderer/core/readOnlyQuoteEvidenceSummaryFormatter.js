@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.83";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.84";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -230,6 +230,8 @@
       supportPlaybookSummary: stripUnsafe(safe.supportPlaybookSummary || safe.supportPlaybookConsoleSummary || null),
       pilotOpsSummary: stripUnsafe(safe.pilotOpsSummary || safe.readOnlyPilotOpsSummary || null),
       nextCohortDecisionSummary: stripUnsafe(safe.nextCohortDecisionSummary || safe.nextCohortDecisionBoard || null),
+      freezeGateSummary: stripUnsafe(safe.freezeGateSummary || null),
+      evidenceFreezePackSummary: stripUnsafe(safe.evidenceFreezePackSummary || null),
       pilotOpsStatus: safeLine(safe.pilotOpsStatus || ""),
       nextCohortDecisionStatus: safeLine(safe.nextCohortDecisionStatus || ""),
       pilotOpsPrimaryRisk: stripUnsafe(safe.pilotOpsPrimaryRisk || null),

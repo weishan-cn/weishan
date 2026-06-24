@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.83";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.84";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -111,11 +111,20 @@
       if (supportReadiness.status === "needs_review" || safe.supportReadinessStatus === "needs_review") badges.push(badge("support_readiness_pause_expansion", "需要暂停扩大测试", "warning"));
       const pilotExitCriteria = obj(safe.pilotExitCriteriaSummary || safe.exitCriteriaSummary);
       const launchCandidateReadiness = obj(safe.launchCandidateReadinessSummary || safe.launchCandidateSummary);
+      const freezeGateSummary = obj(safe.freezeGateSummary || safe.launchCandidateFreezeGateSummary);
+      const evidenceFreezePackSummary = obj(safe.evidenceFreezePackSummary || safe.freezePackSummary);
       if (pilotExitCriteria.status === "met" || pilotExitCriteria.exitHealth && pilotExitCriteria.exitHealth.readyForLaunchCandidate === true) badges.push(badge("pilot_exit_criteria_met", "试点退出条件已满足", "info"));
       if (pilotExitCriteria.status === "continue_pilot" || safe.pilotExitCriteriaStatus === "continue_pilot") badges.push(badge("pilot_exit_criteria_continue", "继续试点观察", "warning"));
       if (launchCandidateReadiness.status === "ready" || launchCandidateReadiness.launchCandidateReadiness && launchCandidateReadiness.launchCandidateReadiness.safeForReadOnlyLaunchCandidate === true) badges.push(badge("launch_candidate_ready", "只读发布候选已准备", "info"));
       if (launchCandidateReadiness.status === "needs_review" || safe.launchCandidateStatus === "needs_review") badges.push(badge("launch_candidate_review", "发布候选仍需复核", "warning"));
       if (launchCandidateReadiness.status === "blocked" || safe.launchCandidateStatus === "blocked") badges.push(badge("launch_candidate_blocked", "发布候选已阻断", "blocked"));
+      if (freezeGateSummary.status === "frozen") badges.push(badge("launch_candidate_frozen", "只读发布候选已冻结", "info"));
+      if (freezeGateSummary.status === "ready_to_freeze") badges.push(badge("launch_candidate_ready_to_freeze", "准备冻结只读发布候选", "info"));
+      if (freezeGateSummary.status === "needs_review") badges.push(badge("launch_candidate_freeze_review", "冻结仍需复核", "warning"));
+      if (freezeGateSummary.status === "blocked") badges.push(badge("launch_candidate_freeze_blocked", "冻结已阻断", "blocked"));
+      if (evidenceFreezePackSummary.status === "ready") badges.push(badge("evidence_freeze_pack_ready", "证据冻结包已就绪", "info"));
+      if (evidenceFreezePackSummary.status === "needs_review") badges.push(badge("evidence_freeze_pack_review", "证据冻结仍需复核", "warning"));
+      if (evidenceFreezePackSummary.status === "blocked") badges.push(badge("evidence_freeze_pack_blocked", "证据冻结包已阻断", "blocked"));
       if (cohortProgress.status === "ready" || safe.cohortProgressStatus === "ready") badges.push(badge("cohort_progress_ready", "测试批次进度正常", "info"));
       if (cohortProgress.status === "needs_review" || safe.cohortProgressStatus === "needs_review") badges.push(badge("cohort_progress_in_progress", "测试批次仍在进行", "warning"));
       if (cohortProgress.status === "needs_more_testers" || safe.cohortProgressStatus === "needs_more_testers") badges.push(badge("cohort_progress_needs_more", "仍需更多测试者", "warning"));

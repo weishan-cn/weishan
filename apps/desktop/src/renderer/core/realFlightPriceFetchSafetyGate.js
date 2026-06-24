@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const REAL_FLIGHT_PRICE_FETCH_SAFETY_GATE_VERSION = "2.1.83";
+  const REAL_FLIGHT_PRICE_FETCH_SAFETY_GATE_VERSION = "2.1.84";
   const PHASE = "real_flight_price_fetch_safety_gate_v1";
 
   function clone(value) {
