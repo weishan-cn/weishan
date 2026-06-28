@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.90";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.91";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -139,6 +139,9 @@
       const sameItemMatcherSummary = obj(safe.sameItemMatcherSummary);
       const duplicateCandidateMergerSummary = obj(safe.duplicateCandidateMergerSummary);
       const coveredLowestCandidateBoardSummary = obj(safe.coveredLowestCandidateBoardSummary);
+      const externalDeepLinkSafetySummary = obj(safe.externalDeepLinkSafetySummary);
+      const searchParameterPrefillSummary = obj(safe.searchParameterPrefillSummary);
+      const jumpToPlatformHandoffPreviewSummary = obj(safe.jumpToPlatformHandoffPreviewSummary);
       if (rcCandidateReview.status === "ready_for_review" || safe.safeToStartRcReview === true) badges.push(badge("rc_review_ready", "可以开始 RC 复核", "info"));
       if (rcCandidateReview.status === "evidence_incomplete" || rcEvidenceReview.status === "incomplete") badges.push(badge("rc_review_incomplete", "证据仍需补充", "warning"));
       if (rcCandidateReview.status === "needs_safety_review" || rcEvidenceReview.status === "needs_review") badges.push(badge("rc_review_safety_review", "需要安全复核", "warning"));
@@ -183,6 +186,20 @@
       if (coveredLowestCandidateBoardSummary.status === "needs_review") badges.push(badge("covered_lowest_board_review", "已覆盖来源较低候选价仍需复核", "warning"));
       if (coveredLowestCandidateBoardSummary.status === "blocked" || coveredLowestCandidateBoardSummary.status === "failed_safe") badges.push(badge("covered_lowest_board_blocked", "已覆盖来源较低候选价已阻断", "blocked"));
       if (safe.safeToProceedWithDeepLinkSafetyGate === true || coveredLowestCandidateBoardSummary.safeToProceedWithDeepLinkSafetyGate === true) badges.push(badge("deep_link_safety_gate_ready", "跳转前安全门已准备", "info"));
+      if (externalDeepLinkSafetySummary.status === "safe") badges.push(badge("external_deep_link_safety_ready", "跳转安全结构已准备", "info"));
+      if (externalDeepLinkSafetySummary.status === "needs_review") badges.push(badge("external_deep_link_safety_review", "跳转安全仍需复核", "warning"));
+      if (externalDeepLinkSafetySummary.status === "blocked") badges.push(badge("external_deep_link_safety_blocked", "跳转已阻断", "blocked"));
+      if (searchParameterPrefillSummary.status === "safe") badges.push(badge("search_prefill_safe", "预填边界安全", "info"));
+      if (searchParameterPrefillSummary.status === "needs_review") badges.push(badge("search_prefill_review", "预填边界仍需复核", "warning"));
+      if (searchParameterPrefillSummary.status === "blocked") badges.push(badge("search_prefill_blocked", "预填边界已阻断", "blocked"));
+      if (jumpToPlatformHandoffPreviewSummary.status === "ready") badges.push(badge("handoff_preview_ready", "跳转至平台查看", "info"));
+      if (jumpToPlatformHandoffPreviewSummary.status === "needs_review") badges.push(badge("handoff_preview_review", "跳转预览仍需复核", "warning"));
+      if (jumpToPlatformHandoffPreviewSummary.status === "blocked") badges.push(badge("handoff_preview_blocked", "跳转预览已阻断", "blocked"));
+      if (jumpToPlatformHandoffPreviewSummary.status) badges.push(badge("handoff_prefill_copy", "可带入搜索条件", "info"));
+      if (jumpToPlatformHandoffPreviewSummary.status) badges.push(badge("handoff_self_checkout", "平台自行下单", "info"));
+      if (externalDeepLinkSafetySummary.status || searchParameterPrefillSummary.status) badges.push(badge("handoff_no_platform_account_storage", "不保存平台账号", "info"));
+      if (externalDeepLinkSafetySummary.status || searchParameterPrefillSummary.status) badges.push(badge("handoff_no_identity_bank_storage", "不保存证件银行卡", "info"));
+      if (jumpToPlatformHandoffPreviewSummary.status) badges.push(badge("handoff_preview_not_ordering", "跳转预览不代表下单能力", "warning"));
       if (cohortProgress.status === "ready" || safe.cohortProgressStatus === "ready") badges.push(badge("cohort_progress_ready", "测试批次进度正常", "info"));
       if (cohortProgress.status === "needs_review" || safe.cohortProgressStatus === "needs_review") badges.push(badge("cohort_progress_in_progress", "测试批次仍在进行", "warning"));
       if (cohortProgress.status === "needs_more_testers" || safe.cohortProgressStatus === "needs_more_testers") badges.push(badge("cohort_progress_needs_more", "仍需更多测试者", "warning"));

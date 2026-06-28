@@ -8006,6 +8006,33 @@
         showCommercePlatformTemplateFeedback("已显示跳转边界", false);
         return;
       }
+      const globalShoppingDeepLinkSafetyButton = target && target.closest("[data-commerce-global-shopping-deep-link-safety-show]");
+      if (globalShoppingDeepLinkSafetyButton && host.contains(globalShoppingDeepLinkSafetyButton)) {
+        event.preventDefault();
+        const panel = globalShoppingDeepLinkSafetyButton.closest("[data-commerce-global-shopping-product-goal]") || globalShoppingDeepLinkSafetyButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-deep-link-safety-output]") || panel;
+        output.innerHTML = '<p>外部平台跳转安全闸门</p><p>跳转安全结构已准备</p><p>目标平台</p><p>平台自行下单</p><p>不保存平台账号</p><p>不保存证件银行卡</p><p>不保存支付凭证</p><p>本轮仅生成只读 sandbox 跳转候选，不打开真实平台</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示跳转安全", false);
+        return;
+      }
+      const globalShoppingPrefillGateButton = target && target.closest("[data-commerce-global-shopping-prefill-gate-show]");
+      if (globalShoppingPrefillGateButton && host.contains(globalShoppingPrefillGateButton)) {
+        event.preventDefault();
+        const panel = globalShoppingPrefillGateButton.closest("[data-commerce-global-shopping-product-goal]") || globalShoppingPrefillGateButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-prefill-gate-output]") || panel;
+        output.innerHTML = '<p>搜索参数预填闸门</p><p>预填边界安全</p><p>可带入搜索条件</p><p>Weishan 仅可携带非敏感搜索条件</p><p>用户需在平台自行确认价格、填写必要资料并完成下单</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示预填边界", false);
+        return;
+      }
+      const globalShoppingHandoffPreviewButton = target && target.closest("[data-commerce-global-shopping-handoff-preview-show]");
+      if (globalShoppingHandoffPreviewButton && host.contains(globalShoppingHandoffPreviewButton)) {
+        event.preventDefault();
+        const panel = globalShoppingHandoffPreviewButton.closest("[data-commerce-global-shopping-product-goal]") || globalShoppingHandoffPreviewButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-handoff-preview-output]") || panel;
+        output.innerHTML = '<p>跳转至平台查看</p><p>目标平台</p><p>可带入搜索条件</p><p>平台自行下单</p><p>安全边界</p><p>Weishan 仅可携带非敏感搜索条件</p><p>用户需在平台自行确认价格、登录、填写资料并完成下单</p><p>不保存平台账号</p><p>不保存证件银行卡</p><p>不保存支付凭证</p><p>本轮仅展示只读跳转预览，不打开真实平台</p><p>跳转预览不代表下单能力</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示跳转预览", false);
+        return;
+      }
       const pilotInvitationGateButton = target && target.closest("[data-commerce-flight-pilot-invitation-gate-show]");
       if (pilotInvitationGateButton && host.contains(pilotInvitationGateButton)) {
         event.preventDefault();

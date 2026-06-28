@@ -9161,15 +9161,18 @@ test.describe.serial("commerce agent workbench", () => {
     expect(visible).not.toMatch(/\b(token|key|secret)\b/i);
   });
 
-  test("v2.1.90 global shopping candidate merge stays read-only and local @commerce-smoke", async () => {
+  test("v2.1.91 global shopping candidate merge stays read-only and local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
-    await page.waitForFunction(() => !!(window.WeishanGlobalShoppingProductGoalCharter && window.WeishanGlobalShoppingJumpToPlatformBoundary && window.WeishanGlobalShoppingProductGoalViewModel && window.WeishanGlobalShoppingPriceSourceNormalizer && window.WeishanGlobalShoppingOfficialPriceAnchorSlot && window.WeishanGlobalShoppingSameItemMatcher && window.WeishanGlobalShoppingDuplicateCandidateMerger && window.WeishanGlobalShoppingCoveredLowestCandidateBoard && window.WeishanGlobalShoppingPriceCandidateDisplayBoard && window.WeishanReadOnlyPriceCandidateCardViewModel), null, { timeout:15000 });
+    await page.waitForFunction(() => !!(window.WeishanGlobalShoppingProductGoalCharter && window.WeishanGlobalShoppingJumpToPlatformBoundary && window.WeishanGlobalShoppingProductGoalViewModel && window.WeishanGlobalShoppingPriceSourceNormalizer && window.WeishanGlobalShoppingOfficialPriceAnchorSlot && window.WeishanGlobalShoppingExternalDeepLinkSafetyGate && window.WeishanGlobalShoppingSearchParameterPrefillGate && window.WeishanGlobalShoppingJumpToPlatformHandoffPreview && window.WeishanGlobalShoppingSameItemMatcher && window.WeishanGlobalShoppingDuplicateCandidateMerger && window.WeishanGlobalShoppingCoveredLowestCandidateBoard && window.WeishanGlobalShoppingPriceCandidateDisplayBoard && window.WeishanReadOnlyPriceCandidateCardViewModel), null, { timeout:15000 });
     const v2190 = await page.evaluate(() => {
       const goalApi = window.WeishanGlobalShoppingProductGoalCharter;
       const boundaryApi = window.WeishanGlobalShoppingJumpToPlatformBoundary;
       const goalViewApi = window.WeishanGlobalShoppingProductGoalViewModel;
       const normalizerApi = window.WeishanGlobalShoppingPriceSourceNormalizer;
       const anchorApi = window.WeishanGlobalShoppingOfficialPriceAnchorSlot;
+      const deepLinkApi = window.WeishanGlobalShoppingExternalDeepLinkSafetyGate;
+      const prefillApi = window.WeishanGlobalShoppingSearchParameterPrefillGate;
+      const previewApi = window.WeishanGlobalShoppingJumpToPlatformHandoffPreview;
       const matcherApi = window.WeishanGlobalShoppingSameItemMatcher;
       const mergerApi = window.WeishanGlobalShoppingDuplicateCandidateMerger;
       const coveredBoardApi = window.WeishanGlobalShoppingCoveredLowestCandidateBoard;
@@ -9183,11 +9186,14 @@ test.describe.serial("commerce agent workbench", () => {
       const coveredBoard = coveredBoardApi.buildGlobalShoppingCoveredLowestCandidateBoard({ duplicateCandidateMergerSummary:merger, officialPriceAnchorSummary:anchor });
       const board = boardApi.buildGlobalShoppingPriceCandidateDisplayBoard({ priceSourceNormalizationSummary:normalizer, officialPriceAnchorSummary:anchor, sameItemMatcherSummary:matcher, duplicateCandidateMergerSummary:merger, coveredLowestCandidateBoardSummary:coveredBoard });
       const goalView = goalViewApi.buildGlobalShoppingProductGoalViewModel({ globalShoppingProductGoalSummary:goal, jumpToPlatformBoundarySummary:boundary, priceSourceNormalizationSummary:normalizer, officialPriceAnchorSummary:anchor, priceCandidateDisplaySummary:board, sameItemMatcherSummary:matcher, duplicateCandidateMergerSummary:merger, coveredLowestCandidateBoardSummary:coveredBoard });
+      const deepLink = deepLinkApi.buildGlobalShoppingExternalDeepLinkSafetyGate({ allowedDomain:"sandbox.platform.invalid", sourceType:"major_platform", sourceName:"Sandbox Platform", disclosureText:"价格以跳转后平台实时页面为准。用户需在平台自行确认价格、登录、填写资料并完成下单。" });
+      const prefill = prefillApi.buildGlobalShoppingSearchParameterPrefillGate({ itemType:"flight", origin:"SHA", destination:"CTU", departureDate:"2026-07-15", passengerCount:1, directOnly:true });
+      const preview = previewApi.buildGlobalShoppingJumpToPlatformHandoffPreview({ externalDeepLinkSafetySummary:deepLink, searchParameterPrefillSummary:prefill });
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v2190-render-smoke", "true");
-      host.innerHTML = '<h5>全球购产品目标与跳转边界</h5><p>全球购产品目标</p><p>跳转至平台自行下单边界</p><p>可信候选价格</p><p>官方价格锚点</p><p>合法平台候选价</p><p>平台自行下单</p><p>当前已覆盖来源中的较低候选价</p><p>与官方价对比</p><p>已接入平台候选价</p><p>价格以跳转后平台实时页面为准</p><p>当前仅提供只读候选证据，不提供付款、下单或出票能力</p><p>Weishan 可尽量带入搜索条件，但用户需在对应平台自行确认价格、登录、填写资料并完成下单</p><p>禁止最低价相关承诺</p><p>禁止自动下单承诺</p><p>跳转不代表交易能力</p><h5>全球购价格候选展示</h5><p>价格源归一化层</p><p>官方价格锚点</p><p>官方参考价</p><p>同款候选识别</p><p>重复候选合并</p><p>已覆盖来源候选价合并</p><p>已覆盖来源中的较低候选价</p><p>与官方价对比</p><p>来源覆盖</p><p>同款合并置信度</p><p>价格区间</p><p>价格以跳转后平台实时页面为准</p><p>当前仅比较已覆盖来源中的候选价</p><p>合并不代表最低承诺、价格保证、锁定承诺、最终成交价或可下单能力</p><p>价格展示不代表下单能力</p><button type="button" data-commerce-global-shopping-product-goal-show="true">查看全球购产品目标</button><button type="button" data-commerce-global-shopping-jump-boundary-show="true">查看跳转边界</button><button type="button" data-commerce-global-shopping-same-item-show="true">查看同款识别</button><button type="button" data-commerce-global-shopping-covered-lowest-show="true">查看候选价合并</button><div data-commerce-global-shopping-product-goal-output="true"><p>可信候选价格</p></div><div data-commerce-global-shopping-jump-boundary-output="true"><p>跳转不代表交易能力</p></div><div data-commerce-global-shopping-same-item-output="true"><p>同款候选识别</p></div><div data-commerce-global-shopping-covered-lowest-output="true"><p>已覆盖来源候选价合并</p></div>';
+      host.innerHTML = '<h5>全球购产品目标与跳转边界</h5><p>全球购产品目标</p><p>跳转至平台查看</p><p>外部平台跳转安全闸门</p><p>搜索参数预填闸门</p><p>目标平台</p><p>可带入搜索条件</p><p>平台自行下单</p><p>安全边界</p><p>Weishan 仅可携带非敏感搜索条件</p><p>用户需在平台自行确认价格、登录、填写资料并完成下单</p><p>不保存平台账号</p><p>不保存证件银行卡</p><p>不保存支付凭证</p><p>本轮仅展示只读跳转预览，不打开真实平台</p><p>跳转预览不代表下单能力</p><h5>全球购价格候选展示</h5><p>价格源归一化层</p><p>官方价格锚点</p><p>官方参考价</p><p>同款候选识别</p><p>重复候选合并</p><p>已覆盖来源候选价合并</p><p>已覆盖来源中的较低候选价</p><p>与官方价对比</p><p>来源覆盖</p><p>同款合并置信度</p><p>价格区间</p><p>价格以跳转后平台实时页面为准</p><p>当前仅比较已覆盖来源中的候选价</p><p>合并不代表最低承诺、价格保证、锁定承诺、最终成交价或可下单能力</p><p>价格展示不代表下单能力</p><button type="button" data-commerce-global-shopping-product-goal-show="true">查看全球购产品目标</button><button type="button" data-commerce-global-shopping-jump-boundary-show="true">查看跳转边界</button><button type="button" data-commerce-global-shopping-deep-link-safety-show="true">查看跳转安全</button><button type="button" data-commerce-global-shopping-prefill-gate-show="true">查看预填边界</button><button type="button" data-commerce-global-shopping-handoff-preview-show="true">查看跳转预览</button><button type="button" data-commerce-global-shopping-same-item-show="true">查看同款识别</button><button type="button" data-commerce-global-shopping-covered-lowest-show="true">查看候选价合并</button><div data-commerce-global-shopping-product-goal-output="true"><p>可信候选价格</p></div><div data-commerce-global-shopping-jump-boundary-output="true"><p>跳转不代表交易能力</p></div><div data-commerce-global-shopping-deep-link-safety-output="true"><p>外部平台跳转安全闸门</p></div><div data-commerce-global-shopping-prefill-gate-output="true"><p>搜索参数预填闸门</p></div><div data-commerce-global-shopping-handoff-preview-output="true"><p>跳转至平台查看</p></div><div data-commerce-global-shopping-same-item-output="true"><p>同款候选识别</p></div><div data-commerce-global-shopping-covered-lowest-output="true"><p>已覆盖来源候选价合并</p></div>';
       document.body.appendChild(host);
-      return { goal, boundary, normalizer, anchor, matcher, merger, coveredBoard, board, goalView, text:host.innerText, productGoalButtonCount:host.querySelectorAll("[data-commerce-global-shopping-product-goal-show]").length, jumpBoundaryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-jump-boundary-show]").length, sameItemButtonCount:host.querySelectorAll("[data-commerce-global-shopping-same-item-show]").length, coveredLowestButtonCount:host.querySelectorAll("[data-commerce-global-shopping-covered-lowest-show]").length, serialized:JSON.stringify({ goal, boundary, normalizer, anchor, matcher, merger, coveredBoard, board, goalView }) };
+      return { goal, boundary, normalizer, anchor, deepLink, prefill, preview, matcher, merger, coveredBoard, board, goalView, text:host.innerText, productGoalButtonCount:host.querySelectorAll("[data-commerce-global-shopping-product-goal-show]").length, jumpBoundaryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-jump-boundary-show]").length, deepLinkButtonCount:host.querySelectorAll("[data-commerce-global-shopping-deep-link-safety-show]").length, prefillButtonCount:host.querySelectorAll("[data-commerce-global-shopping-prefill-gate-show]").length, previewButtonCount:host.querySelectorAll("[data-commerce-global-shopping-handoff-preview-show]").length, sameItemButtonCount:host.querySelectorAll("[data-commerce-global-shopping-same-item-show]").length, coveredLowestButtonCount:host.querySelectorAll("[data-commerce-global-shopping-covered-lowest-show]").length, serialized:JSON.stringify({ goal, boundary, normalizer, anchor, deepLink, prefill, preview, matcher, merger, coveredBoard, board, goalView }) };
     });
     expect(v2190.goal.userFacingSummary.title).toBe("全球购产品目标");
     expect(v2190.boundary.userFacingSummary.title).toBe("跳转至平台自行下单边界");
@@ -9200,12 +9206,31 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v2190.board.status).toBe("ready");
     expect(v2190.goal.status).toBe("aligned");
     expect(v2190.boundary.status).toBe("safe");
+    expect(v2190.deepLink.status).toBe("safe");
+    expect(v2190.prefill.status).toBe("safe");
+    expect(v2190.preview.status).toBe("ready");
     expect(v2190.text).toContain("查看全球购产品目标");
     expect(v2190.text).toContain("查看跳转边界");
+    expect(v2190.text).toContain("查看跳转安全");
+    expect(v2190.text).toContain("查看预填边界");
+    expect(v2190.text).toContain("查看跳转预览");
     expect(v2190.text).toContain("查看同款识别");
     expect(v2190.text).toContain("查看候选价合并");
+    expect(v2190.text).toContain("跳转至平台查看");
+    expect(v2190.text).toContain("外部平台跳转安全闸门");
+    expect(v2190.text).toContain("搜索参数预填闸门");
+    expect(v2190.text).toContain("目标平台");
+    expect(v2190.text).toContain("可带入搜索条件");
     expect(v2190.text).toContain("可信候选价格");
-    expect(v2190.text).toContain("跳转不代表交易能力");
+    expect(v2190.text).toContain("平台自行下单");
+    expect(v2190.text).toContain("安全边界");
+    expect(v2190.text).toContain("Weishan 仅可携带非敏感搜索条件");
+    expect(v2190.text).toContain("用户需在平台自行确认价格、登录、填写资料并完成下单");
+    expect(v2190.text).toContain("不保存平台账号");
+    expect(v2190.text).toContain("不保存证件银行卡");
+    expect(v2190.text).toContain("不保存支付凭证");
+    expect(v2190.text).toContain("本轮仅展示只读跳转预览，不打开真实平台");
+    expect(v2190.text).toContain("跳转预览不代表下单能力");
     expect(v2190.text).toContain("全球购价格候选展示");
     expect(v2190.text).toContain("价格源归一化层");
     expect(v2190.text).toContain("官方价格锚点");
@@ -9224,6 +9249,9 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v2190.text).toContain("价格展示不代表下单能力");
     expect(v2190.productGoalButtonCount).toBe(1);
     expect(v2190.jumpBoundaryButtonCount).toBe(1);
+    expect(v2190.deepLinkButtonCount).toBe(1);
+    expect(v2190.prefillButtonCount).toBe(1);
+    expect(v2190.previewButtonCount).toBe(1);
     expect(v2190.sameItemButtonCount).toBe(1);
     expect(v2190.coveredLowestButtonCount).toBe(1);
     expect(v2190.serialized).not.toMatch(/"(bookingUrl|checkoutUrl|paymentUrl|orderUrl)"\s*:\s*"https?:/i);

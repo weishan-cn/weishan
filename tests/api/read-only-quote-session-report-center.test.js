@@ -29,6 +29,9 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingJumpToPlatformBoundary.js",
     "apps/desktop/src/renderer/core/globalShoppingPriceSourceNormalizer.js",
     "apps/desktop/src/renderer/core/globalShoppingOfficialPriceAnchorSlot.js",
+    "apps/desktop/src/renderer/core/globalShoppingExternalDeepLinkSafetyGate.js",
+    "apps/desktop/src/renderer/core/globalShoppingSearchParameterPrefillGate.js",
+    "apps/desktop/src/renderer/core/globalShoppingJumpToPlatformHandoffPreview.js",
     "apps/desktop/src/renderer/core/globalShoppingSameItemMatcher.js",
     "apps/desktop/src/renderer/core/globalShoppingDuplicateCandidateMerger.js",
     "apps/desktop/src/renderer/core/globalShoppingCoveredLowestCandidateBoard.js",
@@ -40,13 +43,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.1.90");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.1.91");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "2.1.90");
+  assert.equal(ready.appVersion, "2.1.91");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -109,6 +112,9 @@ function main() {
   const merger = windowRef.WeishanGlobalShoppingDuplicateCandidateMerger.buildGlobalShoppingDuplicateCandidateMerger({ sameItemMatcherSummary:sameItemMatcher });
   const anchor = windowRef.WeishanGlobalShoppingOfficialPriceAnchorSlot.buildGlobalShoppingOfficialPriceAnchorSlot({ priceSourceNormalizationSummary:normalizer });
   const coveredBoard = windowRef.WeishanGlobalShoppingCoveredLowestCandidateBoard.buildGlobalShoppingCoveredLowestCandidateBoard({ duplicateCandidateMergerSummary:merger, officialPriceAnchorSummary:anchor });
+  const deepLink = windowRef.WeishanGlobalShoppingExternalDeepLinkSafetyGate.buildGlobalShoppingExternalDeepLinkSafetyGate({ allowedDomain:"sandbox.platform.invalid", sourceType:"major_platform", sourceName:"Sandbox Platform", disclosureText:"价格以跳转后平台实时页面为准。用户需在平台自行确认价格、登录、填写资料并完成下单。" });
+  const prefill = windowRef.WeishanGlobalShoppingSearchParameterPrefillGate.buildGlobalShoppingSearchParameterPrefillGate({ itemType:"flight", origin:"SHA", destination:"CTU", departureDate:"2026-07-15", passengerCount:1 });
+  const preview = windowRef.WeishanGlobalShoppingJumpToPlatformHandoffPreview.buildGlobalShoppingJumpToPlatformHandoffPreview({ externalDeepLinkSafetySummary:deepLink, searchParameterPrefillSummary:prefill });
   const globalReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     globalShoppingProductGoalSummary:globalGoal,
@@ -119,10 +125,17 @@ function main() {
     sameItemMatcherSummary:sameItemMatcher,
     duplicateCandidateMergerSummary:merger,
     coveredLowestCandidateBoardSummary:coveredBoard,
+    externalDeepLinkSafetySummary:deepLink,
+    searchParameterPrefillSummary:prefill,
+    jumpToPlatformHandoffPreviewSummary:preview,
     globalShoppingGoalStatus:"aligned",
     jumpBoundaryStatus:"safe",
     safeToProceedWithJumpToPlatformMvp:true,
-    safeToProceedWithDeepLinkSafetyGate:true
+    safeToProceedWithDeepLinkSafetyGate:true,
+    externalDeepLinkSafetyStatus:"safe",
+    searchPrefillStatus:"safe",
+    handoffPreviewStatus:"ready",
+    safeToProceedWithSandboxDeepLinkCandidate:true
   });
   assert.equal(globalReady.userFacingSummary.globalShoppingProductGoalSummary.title, "全球购产品目标");
   assert.equal(globalReady.userFacingSummary.jumpToPlatformBoundarySummary.title, "跳转至平台自行下单边界");
@@ -130,10 +143,17 @@ function main() {
   assert.equal(globalReady.userFacingSummary.sameItemMatcherSummary.title, "同款候选识别");
   assert.equal(globalReady.userFacingSummary.duplicateCandidateMergerSummary.title, "重复候选合并");
   assert.equal(globalReady.userFacingSummary.coveredLowestCandidateBoardSummary.title, "已覆盖来源候选价合并");
+  assert.equal(globalReady.userFacingSummary.externalDeepLinkSafetySummary.title, "外部平台跳转安全闸门");
+  assert.equal(globalReady.userFacingSummary.searchParameterPrefillSummary.title, "搜索参数预填闸门");
+  assert.equal(globalReady.userFacingSummary.jumpToPlatformHandoffPreviewSummary.title, "跳转至平台查看");
   assert.equal(globalReady.userFacingSummary.globalShoppingGoalStatus, "aligned");
   assert.equal(globalReady.userFacingSummary.jumpBoundaryStatus, "safe");
   assert.equal(globalReady.userFacingSummary.safeToProceedWithJumpToPlatformMvp, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithDeepLinkSafetyGate, true);
+  assert.equal(globalReady.userFacingSummary.externalDeepLinkSafetyStatus, "safe");
+  assert.equal(globalReady.userFacingSummary.searchPrefillStatus, "safe");
+  assert.equal(globalReady.userFacingSummary.handoffPreviewStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.safeToProceedWithSandboxDeepLinkCandidate, true);
   const withOnboarding = api.buildReadOnlyQuoteSessionReportCenter({ sessionSummary:summary, pilotOnboardingSummary:{ status:"allowed", redacted:true }, readOnlyConsentSummary:{ status:"accepted", redacted:true }, pilotEntryStatus:"allowed", canEnterReadOnlyPilot:true, pilotConsentRequired:false });
   assert.equal(withOnboarding.safetyReport.pilotEntryStatus, "allowed");
   assert.equal(withOnboarding.safetyReport.canEnterReadOnlyPilot, true);

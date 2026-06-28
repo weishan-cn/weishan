@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_COVERED_LOWEST_CANDIDATE_BOARD_VERSION = "2.1.90";
+  const GLOBAL_SHOPPING_COVERED_LOWEST_CANDIDATE_BOARD_VERSION = "2.1.91";
   const BOARD_NAME = "global_shopping_covered_lowest_candidate_board_v1";
   const CAVEAT = "当前仅比较已覆盖来源中的候选价，不代表最低承诺、价格保证、锁定承诺、最终成交价或可下单能力。";
 
@@ -121,6 +121,13 @@
       caveat:CAVEAT,
       duplicateCandidateMergerSummary:clone(merger),
       officialPriceAnchorSummary:clone(officialAnchorSummary(safe)),
+      externalDeepLinkSafetySummary:clone(safe.externalDeepLinkSafetySummary || null),
+      searchParameterPrefillSummary:clone(safe.searchParameterPrefillSummary || null),
+      jumpToPlatformHandoffPreviewSummary:clone(safe.jumpToPlatformHandoffPreviewSummary || null),
+      externalDeepLinkSafetyStatus:text(safe.externalDeepLinkSafetyStatus || obj(safe.externalDeepLinkSafetySummary).status || ""),
+      searchPrefillStatus:text(safe.searchPrefillStatus || obj(safe.searchParameterPrefillSummary).status || ""),
+      handoffPreviewStatus:text(safe.handoffPreviewStatus || obj(safe.jumpToPlatformHandoffPreviewSummary).status || ""),
+      safeToProceedWithSandboxDeepLinkCandidate:safe.safeToProceedWithSandboxDeepLinkCandidate === true,
       blockedReasons:blocked ? ["unsafe_covered_lowest_board_detected"] : [],
       safety:safety(safe.safety),
       redacted:true

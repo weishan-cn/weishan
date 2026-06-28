@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.90";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.91";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -191,14 +191,21 @@
       sameItemMatcherSummary: stripUnsafe(safe.sameItemMatcherSummary || null),
       duplicateCandidateMergerSummary: stripUnsafe(safe.duplicateCandidateMergerSummary || null),
       coveredLowestCandidateBoardSummary: stripUnsafe(safe.coveredLowestCandidateBoardSummary || null),
+      externalDeepLinkSafetySummary: stripUnsafe(safe.externalDeepLinkSafetySummary || null),
+      searchParameterPrefillSummary: stripUnsafe(safe.searchParameterPrefillSummary || null),
+      jumpToPlatformHandoffPreviewSummary: stripUnsafe(safe.jumpToPlatformHandoffPreviewSummary || null),
       priceNormalizationStatus: safeText(safe.priceNormalizationStatus || safe.priceSourceNormalizationSummary && safe.priceSourceNormalizationSummary.status || ""),
       officialPriceAnchorStatus: safeText(safe.officialPriceAnchorStatus || safe.officialPriceAnchorSummary && safe.officialPriceAnchorSummary.status || ""),
       priceCandidateDisplayStatus: safeText(safe.priceCandidateDisplayStatus || safe.priceCandidateDisplaySummary && safe.priceCandidateDisplaySummary.status || ""),
       sameItemMatcherStatus: safeText(safe.sameItemMatcherStatus || safe.sameItemMatcherSummary && safe.sameItemMatcherSummary.status || ""),
       duplicateMergeStatus: safeText(safe.duplicateMergeStatus || safe.duplicateCandidateMergerSummary && safe.duplicateCandidateMergerSummary.status || ""),
       coveredLowestStatus: safeText(safe.coveredLowestStatus || safe.coveredLowestCandidateBoardSummary && safe.coveredLowestCandidateBoardSummary.status || ""),
+      externalDeepLinkSafetyStatus: safeText(safe.externalDeepLinkSafetyStatus || safe.externalDeepLinkSafetySummary && safe.externalDeepLinkSafetySummary.status || ""),
+      searchPrefillStatus: safeText(safe.searchPrefillStatus || safe.searchParameterPrefillSummary && safe.searchParameterPrefillSummary.status || ""),
+      handoffPreviewStatus: safeText(safe.handoffPreviewStatus || safe.jumpToPlatformHandoffPreviewSummary && safe.jumpToPlatformHandoffPreviewSummary.status || ""),
       safeToProceedWithPriceProviderSandbox: safe.safeToProceedWithPriceProviderSandbox === true,
       safeToProceedWithDeepLinkSafetyGate: safe.safeToProceedWithDeepLinkSafetyGate === true,
+      safeToProceedWithSandboxDeepLinkCandidate: safe.safeToProceedWithSandboxDeepLinkCandidate === true,
       globalShoppingGoalStatus: safeText(safe.globalShoppingGoalStatus || safe.globalShoppingProductGoalSummary && safe.globalShoppingProductGoalSummary.status || ""),
       jumpBoundaryStatus: safeText(safe.jumpBoundaryStatus || safe.jumpToPlatformBoundarySummary && safe.jumpToPlatformBoundarySummary.status || ""),
       safeToProceedWithJumpToPlatformMvp: safe.safeToProceedWithJumpToPlatformMvp === true,
@@ -382,6 +389,9 @@
       sameItemMatcherSummary: workflow.sameItemMatcherSummary ? { title:"同款候选识别", line:workflow.sameItemMatcherSummary.userFacingSummary && workflow.sameItemMatcherSummary.userFacingSummary.resultLabel || "同款识别仍需复核", redacted:true } : null,
       duplicateCandidateMergerSummary: workflow.duplicateCandidateMergerSummary ? { title:"重复候选合并", line:workflow.duplicateCandidateMergerSummary.userFacingSummary && workflow.duplicateCandidateMergerSummary.userFacingSummary.resultLabel || "重复候选仍需复核", redacted:true } : null,
       coveredLowestCandidateBoardSummary: workflow.coveredLowestCandidateBoardSummary ? { title:"已覆盖来源候选价合并", line:workflow.coveredLowestCandidateBoardSummary.caveat || "当前仅比较已覆盖来源中的候选价", redacted:true } : null,
+      externalDeepLinkSafetySummary: workflow.externalDeepLinkSafetySummary ? { title:"外部平台跳转安全闸门", line:workflow.externalDeepLinkSafetySummary.userFacingSummary && workflow.externalDeepLinkSafetySummary.userFacingSummary.resultLabel || "跳转安全仍需复核", redacted:true } : null,
+      searchParameterPrefillSummary: workflow.searchParameterPrefillSummary ? { title:"搜索参数预填闸门", line:workflow.searchParameterPrefillSummary.userFacingSummary && workflow.searchParameterPrefillSummary.userFacingSummary.resultLabel || "预填边界仍需复核", redacted:true } : null,
+      jumpToPlatformHandoffPreviewSummary: workflow.jumpToPlatformHandoffPreviewSummary ? { title:"跳转至平台查看", line:workflow.jumpToPlatformHandoffPreviewSummary.caveat || "本轮仅展示只读跳转预览，不打开真实平台", redacted:true } : null,
       rcReviewStatus: workflow.rcReviewStatus || safe.rcReviewStatus || "",
       rcEvidenceStatus: workflow.rcEvidenceStatus || safe.rcEvidenceStatus || "",
       rcRegressionStatus: workflow.rcRegressionStatus || safe.rcRegressionStatus || "",
@@ -400,8 +410,12 @@
       sameItemMatcherStatus: workflow.sameItemMatcherStatus || safe.sameItemMatcherStatus || "",
       duplicateMergeStatus: workflow.duplicateMergeStatus || safe.duplicateMergeStatus || "",
       coveredLowestStatus: workflow.coveredLowestStatus || safe.coveredLowestStatus || "",
+      externalDeepLinkSafetyStatus: workflow.externalDeepLinkSafetyStatus || safe.externalDeepLinkSafetyStatus || "",
+      searchPrefillStatus: workflow.searchPrefillStatus || safe.searchPrefillStatus || "",
+      handoffPreviewStatus: workflow.handoffPreviewStatus || safe.handoffPreviewStatus || "",
       safeToProceedWithPriceProviderSandbox: workflow.safeToProceedWithPriceProviderSandbox === true || safe.safeToProceedWithPriceProviderSandbox === true,
       safeToProceedWithDeepLinkSafetyGate: workflow.safeToProceedWithDeepLinkSafetyGate === true || safe.safeToProceedWithDeepLinkSafetyGate === true,
+      safeToProceedWithSandboxDeepLinkCandidate: workflow.safeToProceedWithSandboxDeepLinkCandidate === true || safe.safeToProceedWithSandboxDeepLinkCandidate === true,
       launchCandidateStatus: workflow.launchCandidateStatus || safe.launchCandidateStatus || "",
       readyForLaunchCandidate: workflow.readyForLaunchCandidate === true || safe.readyForLaunchCandidate === true,
       launchCandidateNextStep: workflow.launchCandidateNextStep || safe.launchCandidateNextStep || "",

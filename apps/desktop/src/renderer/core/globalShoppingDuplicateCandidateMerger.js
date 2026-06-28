@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_DUPLICATE_CANDIDATE_MERGER_VERSION = "2.1.90";
+  const GLOBAL_SHOPPING_DUPLICATE_CANDIDATE_MERGER_VERSION = "2.1.91";
   const MERGER_NAME = "global_shopping_duplicate_candidate_merger_v1";
   const CAVEAT = "合并结果只覆盖当前已接入或 fixture 来源，不代表全网覆盖或最低价承诺。";
 
@@ -159,6 +159,13 @@
         caveat:CAVEAT,
         redacted:true
       },
+      externalDeepLinkSafetySummary:clone(safe.externalDeepLinkSafetySummary || null),
+      searchParameterPrefillSummary:clone(safe.searchParameterPrefillSummary || null),
+      jumpToPlatformHandoffPreviewSummary:clone(safe.jumpToPlatformHandoffPreviewSummary || null),
+      externalDeepLinkSafetyStatus:text(safe.externalDeepLinkSafetyStatus || obj(safe.externalDeepLinkSafetySummary).status || ""),
+      searchPrefillStatus:text(safe.searchPrefillStatus || obj(safe.searchParameterPrefillSummary).status || ""),
+      handoffPreviewStatus:text(safe.handoffPreviewStatus || obj(safe.jumpToPlatformHandoffPreviewSummary).status || ""),
+      safeToProceedWithSandboxDeepLinkCandidate:safe.safeToProceedWithSandboxDeepLinkCandidate === true,
       safety:safety(safe.safety),
       redacted:true
     });

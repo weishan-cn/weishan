@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SAME_ITEM_MATCHER_VERSION = "2.1.90";
+  const GLOBAL_SHOPPING_SAME_ITEM_MATCHER_VERSION = "2.1.91";
   const MATCHER_NAME = "global_shopping_same_item_matcher_v1";
   const CAVEAT = "当前只处理只读 fixture 候选，不代表真实平台库存、最终价、锁价或可下单能力。";
   const ITEM_TYPES = ["flight", "hotel", "product", "local_service", "unknown"];
@@ -251,6 +251,13 @@
         caveat:CAVEAT,
         redacted:true
       },
+      externalDeepLinkSafetySummary:clone(safe.externalDeepLinkSafetySummary || null),
+      searchParameterPrefillSummary:clone(safe.searchParameterPrefillSummary || null),
+      jumpToPlatformHandoffPreviewSummary:clone(safe.jumpToPlatformHandoffPreviewSummary || null),
+      externalDeepLinkSafetyStatus:text(safe.externalDeepLinkSafetyStatus || obj(safe.externalDeepLinkSafetySummary).status || ""),
+      searchPrefillStatus:text(safe.searchPrefillStatus || obj(safe.searchParameterPrefillSummary).status || ""),
+      handoffPreviewStatus:text(safe.handoffPreviewStatus || obj(safe.jumpToPlatformHandoffPreviewSummary).status || ""),
+      safeToProceedWithSandboxDeepLinkCandidate:safe.safeToProceedWithSandboxDeepLinkCandidate === true,
       safety:safety(safe.safety),
       redacted:true
     });

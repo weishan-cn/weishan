@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.1.90");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.1.91");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -56,8 +56,12 @@ function main() {
     sameItemMatcherSummary:{ status:"ready" },
     duplicateCandidateMergerSummary:{ status:"merged" },
     coveredLowestCandidateBoardSummary:{ status:"ready" },
+    externalDeepLinkSafetySummary:{ status:"safe" },
+    searchParameterPrefillSummary:{ status:"safe" },
+    jumpToPlatformHandoffPreviewSummary:{ status:"ready" },
     safeToProceedWithDeepLinkSafetyGate:true,
-    safeToProceedWithJumpToPlatformMvp:true
+    safeToProceedWithJumpToPlatformMvp:true,
+    safeToProceedWithSandboxDeepLinkCandidate:true
   }).badges.map((item) => item.label);
   assert.ok(globalLabels.includes("全球购目标已对齐"));
   assert.ok(globalLabels.includes("跳转平台边界安全"));
@@ -65,7 +69,14 @@ function main() {
   assert.ok(globalLabels.includes("重复候选合并已准备"));
   assert.ok(globalLabels.includes("已覆盖来源较低候选价已准备"));
   assert.ok(globalLabels.includes("跳转前安全门已准备"));
+  assert.ok(globalLabels.includes("跳转安全结构已准备"));
+  assert.ok(globalLabels.includes("预填边界安全"));
+  assert.ok(globalLabels.includes("跳转至平台查看"));
+  assert.ok(globalLabels.includes("可带入搜索条件"));
   assert.ok(globalLabels.includes("用户在平台自行下单"));
+  assert.ok(globalLabels.includes("不保存平台账号"));
+  assert.ok(globalLabels.includes("不保存证件银行卡"));
+  assert.ok(globalLabels.includes("跳转预览不代表下单能力"));
   assert.ok(globalLabels.includes("禁止最低价相关承诺"));
   assert.ok(globalLabels.includes("禁止自动下单承诺"));
   assert.ok(globalLabels.includes("跳转不代表交易能力"));
