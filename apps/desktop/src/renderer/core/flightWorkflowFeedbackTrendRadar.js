@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_FEEDBACK_TREND_RADAR_VERSION = "2.1.93";
+  const FLIGHT_WORKFLOW_FEEDBACK_TREND_RADAR_VERSION = "2.1.94";
   const RADAR_NAME = "flight_workflow_feedback_trend_radar_v1";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
   const TRADING_RE = /"(bookingUrl|checkoutUrl|paymentUrl|orderUrl)"\s*:\s*"https?:\/\//i;

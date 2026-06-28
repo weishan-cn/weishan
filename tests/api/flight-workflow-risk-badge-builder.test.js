@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.1.93");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.1.94");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -67,6 +67,12 @@ function main() {
     platformAvailabilitySummary:{ status:"available" },
     partnerLinkPolicySummary:{ status:"compliant" },
     sandboxHandoffViewModelSummary:{ status:"ready", safeToProceedWithPartnerFixtureAdapter:true },
+    sandboxProviderResponseContractSummary:{ status:"ready" },
+    pricePipelineOrchestratorSummary:{ status:"ready" },
+    readOnlyCandidateJourneySummary:{ status:"ready" },
+    sandboxProviderResponseContractStatus:"ready",
+    pricePipelineStatus:"ready",
+    readOnlyCandidateJourneyStatus:"ready",
     safeToProceedWithDeepLinkSafetyGate:true,
     safeToProceedWithReadOnlyPriceProviderSandbox:true,
     safeToProceedWithJumpToPlatformMvp:true,
@@ -77,10 +83,17 @@ function main() {
   assert.ok(globalLabels.includes("Provider fixture 已准备"));
   assert.ok(globalLabels.includes("Provider 凭据边界安全"));
   assert.ok(globalLabels.includes("Sandbox 价格 Feed 已准备"));
+  assert.ok(globalLabels.includes("Provider 响应合同已准备"));
+  assert.ok(globalLabels.includes("只读价格流水线已准备"));
+  assert.ok(globalLabels.includes("全球购只读候选旅程已准备"));
   assert.ok(globalLabels.includes("不读取生产密钥"));
   assert.ok(globalLabels.includes("不保存 raw provider response"));
   assert.ok(globalLabels.includes("Fixture feed 可进入价格归一化"));
   assert.ok(globalLabels.includes("Provider fixture 不代表真实价格"));
+  assert.ok(globalLabels.includes("Raw provider response 不持久化"));
+  assert.ok(globalLabels.includes("Fixture 数据进入候选旅程"));
+  assert.ok(globalLabels.includes("价格流水线不代表真实价格"));
+  assert.ok(globalLabels.includes("候选旅程不代表下单能力"));
   assert.ok(globalLabels.includes("跳转平台边界安全"));
   assert.ok(globalLabels.includes("同款候选识别已准备"));
   assert.ok(globalLabels.includes("重复候选合并已准备"));

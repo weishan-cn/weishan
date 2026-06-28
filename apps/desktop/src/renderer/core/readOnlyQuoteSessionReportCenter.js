@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.93";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.94";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -188,6 +188,9 @@
       legalProviderFixtureSummary: stripUnsafe(safe.legalProviderFixtureSummary || null),
       providerCredentialSafetySummary: stripUnsafe(safe.providerCredentialSafetySummary || null),
       sandboxPriceFeedSummary: stripUnsafe(safe.sandboxPriceFeedSummary || null),
+      sandboxProviderResponseContractSummary: stripUnsafe(safe.sandboxProviderResponseContractSummary || null),
+      pricePipelineOrchestratorSummary: stripUnsafe(safe.pricePipelineOrchestratorSummary || null),
+      readOnlyCandidateJourneySummary: stripUnsafe(safe.readOnlyCandidateJourneySummary || null),
       providerFixtureViewModelSummary: stripUnsafe(safe.providerFixtureViewModelSummary || null),
       priceSourceNormalizationSummary: stripUnsafe(safe.priceSourceNormalizationSummary || null),
       officialPriceAnchorSummary: stripUnsafe(safe.officialPriceAnchorSummary || null),
@@ -211,6 +214,9 @@
       legalProviderFixtureStatus: safeText(safe.legalProviderFixtureStatus || safe.legalProviderFixtureSummary && safe.legalProviderFixtureSummary.status || ""),
       providerCredentialSafetyStatus: safeText(safe.providerCredentialSafetyStatus || safe.providerCredentialSafetySummary && safe.providerCredentialSafetySummary.status || ""),
       sandboxPriceFeedStatus: safeText(safe.sandboxPriceFeedStatus || safe.sandboxPriceFeedSummary && safe.sandboxPriceFeedSummary.status || ""),
+      sandboxProviderResponseContractStatus: safeText(safe.sandboxProviderResponseContractStatus || safe.sandboxProviderResponseContractSummary && safe.sandboxProviderResponseContractSummary.status || ""),
+      pricePipelineStatus: safeText(safe.pricePipelineStatus || safe.pricePipelineOrchestratorSummary && safe.pricePipelineOrchestratorSummary.status || ""),
+      readOnlyCandidateJourneyStatus: safeText(safe.readOnlyCandidateJourneyStatus || safe.readOnlyCandidateJourneySummary && safe.readOnlyCandidateJourneySummary.status || ""),
       externalDeepLinkSafetyStatus: safeText(safe.externalDeepLinkSafetyStatus || safe.externalDeepLinkSafetySummary && safe.externalDeepLinkSafetySummary.status || ""),
       searchPrefillStatus: safeText(safe.searchPrefillStatus || safe.searchParameterPrefillSummary && safe.searchParameterPrefillSummary.status || ""),
       handoffPreviewStatus: safeText(safe.handoffPreviewStatus || safe.jumpToPlatformHandoffPreviewSummary && safe.jumpToPlatformHandoffPreviewSummary.status || ""),
@@ -223,6 +229,7 @@
       safeToProceedWithDeepLinkSafetyGate: safe.safeToProceedWithDeepLinkSafetyGate === true,
       safeToProceedWithSandboxDeepLinkCandidate: safe.safeToProceedWithSandboxDeepLinkCandidate === true,
       safeToProceedWithPartnerFixtureAdapter: safe.safeToProceedWithPartnerFixtureAdapter === true,
+      safeToProceedWithRealReadOnlyProviderSandbox: safe.safeToProceedWithRealReadOnlyProviderSandbox === true,
       globalShoppingGoalStatus: safeText(safe.globalShoppingGoalStatus || safe.globalShoppingProductGoalSummary && safe.globalShoppingProductGoalSummary.status || ""),
       jumpBoundaryStatus: safeText(safe.jumpBoundaryStatus || safe.jumpToPlatformBoundarySummary && safe.jumpToPlatformBoundarySummary.status || ""),
       safeToProceedWithJumpToPlatformMvp: safe.safeToProceedWithJumpToPlatformMvp === true,
@@ -403,6 +410,9 @@
       legalProviderFixtureSummary: workflow.legalProviderFixtureSummary ? { title:"合法 Provider Fixture 适配器", line:workflow.legalProviderFixtureSummary.userFacingSummary && workflow.legalProviderFixtureSummary.userFacingSummary.resultLabel || "Provider fixture 仍需复核", redacted:true } : null,
       providerCredentialSafetySummary: workflow.providerCredentialSafetySummary ? { title:"Provider 凭据安全复核", line:workflow.providerCredentialSafetySummary.userFacingSummary && workflow.providerCredentialSafetySummary.userFacingSummary.resultLabel || "Provider 凭据边界仍需复核", redacted:true } : null,
       sandboxPriceFeedSummary: workflow.sandboxPriceFeedSummary ? { title:"Sandbox 价格 Feed 闸门", line:workflow.sandboxPriceFeedSummary.userFacingSummary && workflow.sandboxPriceFeedSummary.userFacingSummary.resultLabel || "Sandbox 价格 Feed 仍需复核", redacted:true } : null,
+      sandboxProviderResponseContractSummary: workflow.sandboxProviderResponseContractSummary ? { title:"Sandbox Provider 响应合同", line:workflow.sandboxProviderResponseContractSummary.userFacingSummary && workflow.sandboxProviderResponseContractSummary.userFacingSummary.resultLabel || "Provider 响应合同仍需复核", redacted:true } : null,
+      pricePipelineOrchestratorSummary: workflow.pricePipelineOrchestratorSummary ? { title:"全球购只读价格流水线", line:workflow.pricePipelineOrchestratorSummary.userFacingSummary && workflow.pricePipelineOrchestratorSummary.userFacingSummary.resultLabel || "只读价格流水线仍需复核", redacted:true } : null,
+      readOnlyCandidateJourneySummary: workflow.readOnlyCandidateJourneySummary ? { title:"全球购只读候选旅程", line:workflow.readOnlyCandidateJourneySummary.userFacingSummary && workflow.readOnlyCandidateJourneySummary.userFacingSummary.resultLabel || "全球购只读候选旅程仍需复核", redacted:true } : null,
       providerFixtureViewModelSummary: workflow.providerFixtureViewModelSummary ? { title:"合法 Provider Fixture 与 Sandbox 价格 Feed", line:workflow.providerFixtureViewModelSummary.title || "合法 Provider Fixture 与 Sandbox 价格 Feed", redacted:true } : null,
       priceSourceNormalizationSummary: workflow.priceSourceNormalizationSummary ? { title:"价格源归一化层", line:workflow.priceSourceNormalizationSummary.userFacingSummary && workflow.priceSourceNormalizationSummary.userFacingSummary.resultLabel || "价格归一化仍需复核", redacted:true } : null,
       officialPriceAnchorSummary: workflow.officialPriceAnchorSummary ? { title:"官方价格锚点", line:workflow.officialPriceAnchorSummary.userFacingSummary && workflow.officialPriceAnchorSummary.userFacingSummary.resultLabel || "官方价仍需复核", redacted:true } : null,
@@ -438,6 +448,9 @@
       legalProviderFixtureStatus: workflow.legalProviderFixtureStatus || safe.legalProviderFixtureStatus || "",
       providerCredentialSafetyStatus: workflow.providerCredentialSafetyStatus || safe.providerCredentialSafetyStatus || "",
       sandboxPriceFeedStatus: workflow.sandboxPriceFeedStatus || safe.sandboxPriceFeedStatus || "",
+      sandboxProviderResponseContractStatus: workflow.sandboxProviderResponseContractStatus || safe.sandboxProviderResponseContractStatus || "",
+      pricePipelineStatus: workflow.pricePipelineStatus || safe.pricePipelineStatus || "",
+      readOnlyCandidateJourneyStatus: workflow.readOnlyCandidateJourneyStatus || safe.readOnlyCandidateJourneyStatus || "",
       externalDeepLinkSafetyStatus: workflow.externalDeepLinkSafetyStatus || safe.externalDeepLinkSafetyStatus || "",
       searchPrefillStatus: workflow.searchPrefillStatus || safe.searchPrefillStatus || "",
       handoffPreviewStatus: workflow.handoffPreviewStatus || safe.handoffPreviewStatus || "",
@@ -450,6 +463,7 @@
       safeToProceedWithDeepLinkSafetyGate: workflow.safeToProceedWithDeepLinkSafetyGate === true || safe.safeToProceedWithDeepLinkSafetyGate === true,
       safeToProceedWithSandboxDeepLinkCandidate: workflow.safeToProceedWithSandboxDeepLinkCandidate === true || safe.safeToProceedWithSandboxDeepLinkCandidate === true,
       safeToProceedWithPartnerFixtureAdapter: workflow.safeToProceedWithPartnerFixtureAdapter === true || safe.safeToProceedWithPartnerFixtureAdapter === true,
+      safeToProceedWithRealReadOnlyProviderSandbox: workflow.safeToProceedWithRealReadOnlyProviderSandbox === true || safe.safeToProceedWithRealReadOnlyProviderSandbox === true,
       launchCandidateStatus: workflow.launchCandidateStatus || safe.launchCandidateStatus || "",
       readyForLaunchCandidate: workflow.readyForLaunchCandidate === true || safe.readyForLaunchCandidate === true,
       launchCandidateNextStep: workflow.launchCandidateNextStep || safe.launchCandidateNextStep || "",

@@ -30,6 +30,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingLegalProviderFixtureAdapter.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderCredentialSafetyReview.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxPriceFeedGate.js",
+    "apps/desktop/src/renderer/core/globalShoppingSandboxProviderResponseContract.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderFixtureViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingPriceSourceNormalizer.js",
     "apps/desktop/src/renderer/core/globalShoppingOfficialPriceAnchorSlot.js",
@@ -42,6 +43,8 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingSameItemMatcher.js",
     "apps/desktop/src/renderer/core/globalShoppingDuplicateCandidateMerger.js",
     "apps/desktop/src/renderer/core/globalShoppingCoveredLowestCandidateBoard.js",
+    "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js",
+    "apps/desktop/src/renderer/core/globalShoppingReadOnlyCandidateJourneyBoard.js",
     "apps/desktop/src/renderer/core/globalShoppingProductGoalViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxHandoffViewModel.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteSessionReportCenter.js",
@@ -51,13 +54,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.1.93");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.1.94");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "2.1.93");
+  assert.equal(ready.appVersion, "2.1.94");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -117,6 +120,7 @@ function main() {
   const legalProviderFixture = windowRef.WeishanGlobalShoppingLegalProviderFixtureAdapter.buildGlobalShoppingLegalProviderFixtureAdapter({ providerId:"provider_1", providerName:"Fixture Provider", providerType:"official", providerLegalStatus:"allowed", providerStatus:"fixture", itemType:"flight", officialFixturePrice:{ title:"SHA-CTU", basePrice:900 } });
   const credentialSafety = windowRef.WeishanGlobalShoppingProviderCredentialSafetyReview.buildGlobalShoppingProviderCredentialSafetyReview({ providerStatus:"fixture" });
   const sandboxPriceFeed = windowRef.WeishanGlobalShoppingSandboxPriceFeedGate.buildGlobalShoppingSandboxPriceFeedGate({ legalProviderFixtureSummary:legalProviderFixture, providerCredentialSafetySummary:credentialSafety, normalizedSourceInputs:legalProviderFixture.normalizedSourceInputs });
+  const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({ providerFixture:legalProviderFixture, credentialSafetyReview:credentialSafety, sandboxPriceFeedGate:sandboxPriceFeed, normalizedSourceInputs:legalProviderFixture.normalizedSourceInputs, officialFixturePrice:{ title:"SHA-CTU", basePrice:900 }, partnerFixturePrices:[{ title:"Partner Fixture", basePrice:899 }] });
   const providerFixtureVm = windowRef.WeishanGlobalShoppingProviderFixtureViewModel.buildGlobalShoppingProviderFixtureViewModel({ legalProviderFixtureSummary:legalProviderFixture, providerCredentialSafetySummary:credentialSafety, sandboxPriceFeedSummary:sandboxPriceFeed });
   const goalView = windowRef.WeishanGlobalShoppingProductGoalViewModel.buildGlobalShoppingProductGoalViewModel({ globalShoppingProductGoalSummary:globalGoal, jumpToPlatformBoundarySummary:jumpBoundary });
   const normalizer = windowRef.WeishanGlobalShoppingPriceSourceNormalizer.buildGlobalShoppingPriceSourceNormalizer();
@@ -131,6 +135,8 @@ function main() {
   const sandbox = windowRef.WeishanGlobalShoppingSandboxDeepLinkCandidate.buildGlobalShoppingSandboxDeepLinkCandidate({ sourceName:"Sandbox Platform", sourceType:"major_platform", allowedDomain:"sandbox.platform.invalid", itemType:"flight", searchParameterPrefillSummary:prefill, partnerLinkPolicySummary:partner, platformAvailabilitySummary:availability });
   const preview = windowRef.WeishanGlobalShoppingJumpToPlatformHandoffPreview.buildGlobalShoppingJumpToPlatformHandoffPreview({ externalDeepLinkSafetySummary:deepLink, searchParameterPrefillSummary:prefill, sandboxDeepLinkCandidateSummary:sandbox, platformAvailabilitySummary:availability, partnerLinkPolicySummary:partner });
   const sandboxVm = windowRef.WeishanGlobalShoppingSandboxHandoffViewModel.buildGlobalShoppingSandboxHandoffViewModel({ sandboxDeepLinkCandidateSummary:sandbox, platformAvailabilitySummary:availability, partnerLinkPolicySummary:partner });
+  const pipeline = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator.buildGlobalShoppingPricePipelineOrchestrator({ legalProviderFixtureSummary:legalProviderFixture, providerCredentialSafetyReview:credentialSafety, sandboxPriceFeedGate:sandboxPriceFeed, sandboxProviderResponseContract:responseContract, priceSourceNormalizer:normalizer, officialPriceAnchorSlot:anchor, sameItemMatcher:sameItemMatcher, duplicateCandidateMerger:merger, coveredLowestCandidateBoard:coveredBoard, sandboxHandoffViewModel:sandboxVm });
+  const journey = windowRef.WeishanGlobalShoppingReadOnlyCandidateJourneyBoard.buildGlobalShoppingReadOnlyCandidateJourneyBoard({ pricePipelineOrchestratorSummary:pipeline, legalProviderFixtureSummary:legalProviderFixture, coveredLowestCandidateBoardSummary:coveredBoard, sandboxHandoffViewModelSummary:sandboxVm });
   const globalReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     globalShoppingProductGoalSummary:globalGoal,
@@ -139,6 +145,9 @@ function main() {
     legalProviderFixtureSummary:legalProviderFixture,
     providerCredentialSafetySummary:credentialSafety,
     sandboxPriceFeedSummary:sandboxPriceFeed,
+    sandboxProviderResponseContractSummary:responseContract,
+    pricePipelineOrchestratorSummary:pipeline,
+    readOnlyCandidateJourneySummary:journey,
     providerFixtureViewModelSummary:providerFixtureVm,
     priceSourceNormalizationSummary:normalizer,
     officialPriceAnchorSummary:anchor,
@@ -157,7 +166,11 @@ function main() {
     legalProviderFixtureStatus:"ready",
     providerCredentialSafetyStatus:"ready",
     sandboxPriceFeedStatus:"ready",
+    sandboxProviderResponseContractStatus:"ready",
+    pricePipelineStatus:"ready",
+    readOnlyCandidateJourneyStatus:"ready",
     safeToProceedWithReadOnlyPriceProviderSandbox:true,
+    safeToProceedWithRealReadOnlyProviderSandbox:true,
     safeToProceedWithJumpToPlatformMvp:true,
     safeToProceedWithDeepLinkSafetyGate:true,
     externalDeepLinkSafetyStatus:"safe",
@@ -176,6 +189,9 @@ function main() {
   assert.equal(globalReady.userFacingSummary.legalProviderFixtureSummary.title, "合法 Provider Fixture 适配器");
   assert.equal(globalReady.userFacingSummary.providerCredentialSafetySummary.title, "Provider 凭据安全复核");
   assert.equal(globalReady.userFacingSummary.sandboxPriceFeedSummary.title, "Sandbox 价格 Feed 闸门");
+  assert.equal(globalReady.userFacingSummary.sandboxProviderResponseContractSummary.title, "Sandbox Provider 响应合同");
+  assert.equal(globalReady.userFacingSummary.pricePipelineOrchestratorSummary.title, "全球购只读价格流水线");
+  assert.equal(globalReady.userFacingSummary.readOnlyCandidateJourneySummary.title, "全球购只读候选旅程");
   assert.equal(globalReady.userFacingSummary.providerFixtureViewModelSummary.title, "合法 Provider Fixture 与 Sandbox 价格 Feed");
   assert.equal(globalReady.userFacingSummary.sameItemMatcherSummary.title, "同款候选识别");
   assert.equal(globalReady.userFacingSummary.duplicateCandidateMergerSummary.title, "重复候选合并");
@@ -193,7 +209,11 @@ function main() {
   assert.equal(globalReady.userFacingSummary.legalProviderFixtureStatus, "ready");
   assert.equal(globalReady.userFacingSummary.providerCredentialSafetyStatus, "ready");
   assert.equal(globalReady.userFacingSummary.sandboxPriceFeedStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.sandboxProviderResponseContractStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.pricePipelineStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.readOnlyCandidateJourneyStatus, "ready");
   assert.equal(globalReady.userFacingSummary.safeToProceedWithReadOnlyPriceProviderSandbox, true);
+  assert.equal(globalReady.userFacingSummary.safeToProceedWithRealReadOnlyProviderSandbox, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithDeepLinkSafetyGate, true);
   assert.equal(globalReady.userFacingSummary.externalDeepLinkSafetyStatus, "safe");
   assert.equal(globalReady.userFacingSummary.searchPrefillStatus, "safe");

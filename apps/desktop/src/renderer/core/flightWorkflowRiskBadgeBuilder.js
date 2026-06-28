@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.93";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.94";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -150,6 +150,9 @@
       const providerCredentialSafetySummary = obj(safe.providerCredentialSafetySummary);
       const sandboxPriceFeedSummary = obj(safe.sandboxPriceFeedSummary);
       const providerFixtureViewModelSummary = obj(safe.providerFixtureViewModelSummary);
+      const sandboxProviderResponseContractSummary = obj(safe.sandboxProviderResponseContractSummary);
+      const pricePipelineOrchestratorSummary = obj(safe.pricePipelineOrchestratorSummary);
+      const readOnlyCandidateJourneySummary = obj(safe.readOnlyCandidateJourneySummary);
       if (rcCandidateReview.status === "ready_for_review" || safe.safeToStartRcReview === true) badges.push(badge("rc_review_ready", "可以开始 RC 复核", "info"));
       if (rcCandidateReview.status === "evidence_incomplete" || rcEvidenceReview.status === "incomplete") badges.push(badge("rc_review_incomplete", "证据仍需补充", "warning"));
       if (rcCandidateReview.status === "needs_safety_review" || rcEvidenceReview.status === "needs_review") badges.push(badge("rc_review_safety_review", "需要安全复核", "warning"));
@@ -231,10 +234,23 @@
       if (sandboxPriceFeedSummary.status === "ready") badges.push(badge("sandbox_price_feed_ready", "Sandbox 价格 Feed 已准备", "info"));
       if (sandboxPriceFeedSummary.status === "needs_review") badges.push(badge("sandbox_price_feed_review", "Sandbox 价格 Feed 仍需复核", "warning"));
       if (sandboxPriceFeedSummary.status === "blocked") badges.push(badge("sandbox_price_feed_blocked", "Sandbox 价格 Feed 已阻断", "blocked"));
+      if (sandboxProviderResponseContractSummary.status === "ready") badges.push(badge("sandbox_provider_response_contract_ready", "Provider 响应合同已准备", "info"));
+      if (sandboxProviderResponseContractSummary.status === "needs_review") badges.push(badge("sandbox_provider_response_contract_review", "Provider 响应合同仍需复核", "warning"));
+      if (sandboxProviderResponseContractSummary.status === "blocked") badges.push(badge("sandbox_provider_response_contract_blocked", "Provider 响应合同已阻断", "blocked"));
+      if (pricePipelineOrchestratorSummary.status === "ready") badges.push(badge("price_pipeline_ready", "只读价格流水线已准备", "info"));
+      if (pricePipelineOrchestratorSummary.status === "needs_review") badges.push(badge("price_pipeline_review", "只读价格流水线仍需复核", "warning"));
+      if (pricePipelineOrchestratorSummary.status === "blocked") badges.push(badge("price_pipeline_blocked", "只读价格流水线已阻断", "blocked"));
+      if (readOnlyCandidateJourneySummary.status === "ready") badges.push(badge("candidate_journey_ready", "全球购只读候选旅程已准备", "info"));
+      if (readOnlyCandidateJourneySummary.status === "needs_review") badges.push(badge("candidate_journey_review", "全球购只读候选旅程仍需复核", "warning"));
+      if (readOnlyCandidateJourneySummary.status === "blocked") badges.push(badge("candidate_journey_blocked", "全球购只读候选旅程已阻断", "blocked"));
       if (providerCredentialSafetySummary.status || sandboxPriceFeedSummary.status) badges.push(badge("provider_no_prod_key", "不读取生产密钥", "info"));
       if (legalProviderFixtureSummary.status || providerCredentialSafetySummary.status || sandboxPriceFeedSummary.status) badges.push(badge("provider_no_raw_response", "不保存 raw provider response", "info"));
       if (sandboxPriceFeedSummary.status) badges.push(badge("sandbox_feed_normalization_ready", "Fixture feed 可进入价格归一化", "info"));
       if (providerFixtureViewModelSummary.status || legalProviderFixtureSummary.status) badges.push(badge("provider_fixture_not_real_price", "Provider fixture 不代表真实价格", "warning"));
+      if (sandboxProviderResponseContractSummary.status || pricePipelineOrchestratorSummary.status) badges.push(badge("provider_response_not_persisted", "Raw provider response 不持久化", "info"));
+      if (pricePipelineOrchestratorSummary.status || readOnlyCandidateJourneySummary.status) badges.push(badge("fixture_enters_candidate_journey", "Fixture 数据进入候选旅程", "info"));
+      if (pricePipelineOrchestratorSummary.status) badges.push(badge("price_pipeline_not_real_price", "价格流水线不代表真实价格", "warning"));
+      if (readOnlyCandidateJourneySummary.status) badges.push(badge("candidate_journey_not_ordering", "候选旅程不代表下单能力", "warning"));
       if (safe.safeToProceedWithPartnerFixtureAdapter === true || sandboxHandoffViewModelSummary.safeToProceedWithPartnerFixtureAdapter === true) badges.push(badge("partner_fixture_adapter_ready", "合作/联盟链接可继续只读接入", "info"));
       if (cohortProgress.status === "ready" || safe.cohortProgressStatus === "ready") badges.push(badge("cohort_progress_ready", "测试批次进度正常", "info"));
       if (cohortProgress.status === "needs_review" || safe.cohortProgressStatus === "needs_review") badges.push(badge("cohort_progress_in_progress", "测试批次仍在进行", "warning"));

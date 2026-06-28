@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRODUCT_GOAL_CHARTER_VERSION = "2.1.93";
+  const GLOBAL_SHOPPING_PRODUCT_GOAL_CHARTER_VERSION = "2.1.94";
   const CHARTER_NAME = "global_shopping_product_goal_charter_v1";
   const SUMMARY_CAVEAT = "Weishan 只提供候选价格、官方价对比、归一化、风险提示和平台跳转辅助，不替用户付款、下单或出票。";
   const DEFAULT_RECOMMENDED_COPY = {

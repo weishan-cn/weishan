@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_EXIT_CRITERIA_VERSION = "2.1.93";
+  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_EXIT_CRITERIA_VERSION = "2.1.94";
   const CRITERIA_NAME = "flight_workflow_read_only_pilot_exit_criteria_v1";
   const CAVEAT = "该判断只适用于只读候选证据流程，不代表真实账号、客服工单、交易请求或出票能力。";
 
