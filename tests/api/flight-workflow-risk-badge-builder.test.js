@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.1.91");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.1.92");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -59,9 +59,14 @@ function main() {
     externalDeepLinkSafetySummary:{ status:"safe" },
     searchParameterPrefillSummary:{ status:"safe" },
     jumpToPlatformHandoffPreviewSummary:{ status:"ready" },
+    sandboxDeepLinkCandidateSummary:{ status:"ready" },
+    platformAvailabilitySummary:{ status:"available" },
+    partnerLinkPolicySummary:{ status:"compliant" },
+    sandboxHandoffViewModelSummary:{ status:"ready", safeToProceedWithPartnerFixtureAdapter:true },
     safeToProceedWithDeepLinkSafetyGate:true,
     safeToProceedWithJumpToPlatformMvp:true,
-    safeToProceedWithSandboxDeepLinkCandidate:true
+    safeToProceedWithSandboxDeepLinkCandidate:true,
+    safeToProceedWithPartnerFixtureAdapter:true
   }).badges.map((item) => item.label);
   assert.ok(globalLabels.includes("全球购目标已对齐"));
   assert.ok(globalLabels.includes("跳转平台边界安全"));
@@ -77,6 +82,13 @@ function main() {
   assert.ok(globalLabels.includes("不保存平台账号"));
   assert.ok(globalLabels.includes("不保存证件银行卡"));
   assert.ok(globalLabels.includes("跳转预览不代表下单能力"));
+  assert.ok(globalLabels.includes("Sandbox 跳转候选已准备"));
+  assert.ok(globalLabels.includes("平台候选可展示"));
+  assert.ok(globalLabels.includes("合作链接政策合规"));
+  assert.ok(globalLabels.includes("合作链接不代表最低价"));
+  assert.ok(globalLabels.includes("平台页面为实时价格准绳"));
+  assert.ok(globalLabels.includes("Sandbox 跳转不打开真实平台"));
+  assert.ok(globalLabels.includes("平台可用不代表官方背书"));
   assert.ok(globalLabels.includes("禁止最低价相关承诺"));
   assert.ok(globalLabels.includes("禁止自动下单承诺"));
   assert.ok(globalLabels.includes("跳转不代表交易能力"));

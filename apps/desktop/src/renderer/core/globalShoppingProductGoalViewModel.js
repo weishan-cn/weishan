@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRODUCT_GOAL_VIEW_MODEL_VERSION = "2.1.91";
+  const GLOBAL_SHOPPING_PRODUCT_GOAL_VIEW_MODEL_VERSION = "2.1.92";
   const VIEW_MODEL_NAME = "global_shopping_product_goal_view_model_v1";
   const CAVEAT = "Weishan 帮用户找价、比价、归一化和跳转平台；用户需在平台自行完成下单。Weishan 不处理付款、下单或出票。";
 
@@ -90,6 +90,42 @@
       ? boardApi.buildGlobalShoppingCoveredLowestCandidateBoard(Object.assign({}, safe, { duplicateCandidateMergerSummary:merger, officialPriceAnchorSummary:anchor }))
       : {};
   }
+  function sandboxDeepLinkCandidateSummary(input) {
+    const safe = obj(input);
+    if (Object.keys(obj(safe.sandboxDeepLinkCandidateSummary)).length) return obj(safe.sandboxDeepLinkCandidateSummary);
+    const sandboxApi = api("WeishanGlobalShoppingSandboxDeepLinkCandidate");
+    return typeof sandboxApi.buildGlobalShoppingSandboxDeepLinkCandidate === "function"
+      ? sandboxApi.buildGlobalShoppingSandboxDeepLinkCandidate(safe)
+      : {};
+  }
+  function platformAvailabilitySummary(input) {
+    const safe = obj(input);
+    if (Object.keys(obj(safe.platformAvailabilitySummary)).length) return obj(safe.platformAvailabilitySummary);
+    const gateApi = api("WeishanGlobalShoppingPlatformAvailabilityGate");
+    return typeof gateApi.buildGlobalShoppingPlatformAvailabilityGate === "function"
+      ? gateApi.buildGlobalShoppingPlatformAvailabilityGate(safe)
+      : {};
+  }
+  function partnerLinkPolicySummary(input) {
+    const safe = obj(input);
+    if (Object.keys(obj(safe.partnerLinkPolicySummary)).length) return obj(safe.partnerLinkPolicySummary);
+    const policyApi = api("WeishanGlobalShoppingPartnerLinkPolicy");
+    return typeof policyApi.buildGlobalShoppingPartnerLinkPolicy === "function"
+      ? policyApi.buildGlobalShoppingPartnerLinkPolicy(safe)
+      : {};
+  }
+  function sandboxHandoffViewModelSummary(input, sandbox, availability, partner) {
+    const safe = obj(input);
+    if (Object.keys(obj(safe.sandboxHandoffViewModelSummary)).length) return obj(safe.sandboxHandoffViewModelSummary);
+    const modelApi = api("WeishanGlobalShoppingSandboxHandoffViewModel");
+    return typeof modelApi.buildGlobalShoppingSandboxHandoffViewModel === "function"
+      ? modelApi.buildGlobalShoppingSandboxHandoffViewModel(Object.assign({}, safe, {
+        sandboxDeepLinkCandidateSummary:sandbox,
+        platformAvailabilitySummary:availability,
+        partnerLinkPolicySummary:partner
+      }))
+      : {};
+  }
   function buildGlobalShoppingProductGoalCards(input) {
     const goal = productGoalSummary(input || {});
     const boundary = jumpBoundarySummary(input || {});
@@ -101,7 +137,8 @@
       card("price_normalization", "价格源归一化层", priceSourceNormalizationSummary(input || {}).userFacingSummary && priceSourceNormalizationSummary(input || {}).userFacingSummary.resultLabel || "价格归一化仍需复核"),
       card("same_item_matcher", "同款候选识别", sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {})).userFacingSummary && sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {})).userFacingSummary.resultLabel || "同款识别仍需复核"),
       card("duplicate_merge", "重复候选合并", duplicateCandidateMergerSummary(input || {}, sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {}))).userFacingSummary && duplicateCandidateMergerSummary(input || {}, sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {}))).userFacingSummary.resultLabel || "重复候选仍需复核"),
-      card("covered_lowest_board", "已覆盖来源候选价合并", coveredLowestCandidateBoardSummary(input || {}, duplicateCandidateMergerSummary(input || {}, sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {}))), officialPriceAnchorSummary(input || {}, priceSourceNormalizationSummary(input || {}))).title || "已覆盖来源候选价合并")
+      card("covered_lowest_board", "已覆盖来源候选价合并", coveredLowestCandidateBoardSummary(input || {}, duplicateCandidateMergerSummary(input || {}, sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {}))), officialPriceAnchorSummary(input || {}, priceSourceNormalizationSummary(input || {}))).title || "已覆盖来源候选价合并"),
+      card("sandbox_handoff", "Sandbox 跳转候选与平台可用性", sandboxHandoffViewModelSummary(input || {}, sandboxDeepLinkCandidateSummary(input || {}), platformAvailabilitySummary(input || {}), partnerLinkPolicySummary(input || {})).title || "Sandbox 跳转候选与平台可用性")
     ]);
   }
   function buildGlobalShoppingProductGoalRows(input) {
@@ -143,9 +180,13 @@
       const matcher = sameItemMatcherSummary(safe, normalizer);
       const merger = duplicateCandidateMergerSummary(safe, matcher);
       const coveredBoard = coveredLowestCandidateBoardSummary(safe, merger, anchor);
-      const status = goal.status === "blocked" || boundary.status === "blocked" || normalizer.status === "blocked" || anchor.status === "blocked" || displayBoard.status === "blocked" || matcher.status === "blocked" || merger.status === "blocked" || coveredBoard.status === "blocked"
+      const sandbox = sandboxDeepLinkCandidateSummary(safe);
+      const availability = platformAvailabilitySummary(safe);
+      const partner = partnerLinkPolicySummary(safe);
+      const sandboxHandoff = sandboxHandoffViewModelSummary(safe, sandbox, availability, partner);
+      const status = goal.status === "blocked" || boundary.status === "blocked" || normalizer.status === "blocked" || anchor.status === "blocked" || displayBoard.status === "blocked" || matcher.status === "blocked" || merger.status === "blocked" || coveredBoard.status === "blocked" || sandbox.status === "blocked" || availability.status === "blocked" || partner.status === "blocked" || sandboxHandoff.status === "blocked"
         ? "blocked"
-        : (goal.status === "needs_review" || boundary.status === "needs_review" || normalizer.status === "needs_review" || anchor.status === "needs_review" || anchor.status === "missing_official" || displayBoard.status === "needs_review" || matcher.status === "needs_review" || merger.status === "needs_review" || coveredBoard.status === "needs_review" ? "needs_review" : "aligned");
+        : (goal.status === "needs_review" || boundary.status === "needs_review" || normalizer.status === "needs_review" || anchor.status === "needs_review" || anchor.status === "missing_official" || displayBoard.status === "needs_review" || matcher.status === "needs_review" || merger.status === "needs_review" || coveredBoard.status === "needs_review" || sandbox.status === "needs_review" || availability.status === "needs_review" || partner.status === "needs_review" || sandboxHandoff.status === "needs_review" ? "needs_review" : "aligned");
       return clone({
         viewModelName:VIEW_MODEL_NAME,
         appVersion:GLOBAL_SHOPPING_PRODUCT_GOAL_VIEW_MODEL_VERSION,
@@ -165,14 +206,24 @@
         sameItemMatcherSummary:clone(matcher),
         duplicateCandidateMergerSummary:clone(merger),
         coveredLowestCandidateBoardSummary:clone(coveredBoard),
+        sandboxDeepLinkCandidateSummary:clone(sandbox),
+        platformAvailabilitySummary:clone(availability),
+        partnerLinkPolicySummary:clone(partner),
+        sandboxHandoffViewModelSummary:clone(sandboxHandoff),
         priceNormalizationStatus:text(normalizer.status || ""),
         officialPriceAnchorStatus:text(anchor.status || ""),
         priceCandidateDisplayStatus:text(displayBoard.status || ""),
         sameItemMatcherStatus:text(matcher.status || ""),
         duplicateMergeStatus:text(merger.status || ""),
         coveredLowestStatus:text(coveredBoard.status || ""),
+        sandboxDeepLinkStatus:text(sandbox.status || ""),
+        platformAvailabilityStatus:text(availability.status || ""),
+        partnerLinkPolicyStatus:text(partner.status || ""),
+        sandboxHandoffStatus:text(sandboxHandoff.status || ""),
         safeToProceedWithPriceProviderSandbox:normalizer.status === "ready" && anchor.status === "anchored" && displayBoard.status === "ready",
         safeToProceedWithDeepLinkSafetyGate:matcher.status === "ready" && merger.status === "merged" && coveredBoard.status === "ready",
+        safeToProceedWithSandboxDeepLinkCandidate:sandbox.status === "ready" && availability.status === "available" && partner.status === "compliant",
+        safeToProceedWithPartnerFixtureAdapter:sandbox.status === "ready" && availability.status === "available" && partner.status === "compliant" && sandboxHandoff.status === "ready",
         redacted:true
       });
     } catch (error) {
@@ -183,11 +234,11 @@
         title:"全球购产品目标与跳转边界",
         cards:[],
         productGoalRows:[],
-        jumpBoundaryRows:[],
-        forbiddenCopyRows:[],
-        recommendedCopyRows:[],
-        caveat:CAVEAT,
-        redacted:true
+      jumpBoundaryRows:[],
+      forbiddenCopyRows:[],
+      recommendedCopyRows:[],
+      caveat:CAVEAT,
+      redacted:true
       });
     }
   }

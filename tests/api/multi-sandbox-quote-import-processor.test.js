@@ -17,7 +17,7 @@ function main() {
     "apps/desktop/src/renderer/core/readOnlyQuoteCandidateRanking.js"
   ]);
   const api = windowRef.WeishanMultiSandboxQuoteImportProcessor;
-  assert.equal(api.MULTI_SANDBOX_QUOTE_IMPORT_PROCESSOR_VERSION, "2.1.91");
+  assert.equal(api.MULTI_SANDBOX_QUOTE_IMPORT_PROCESSOR_VERSION, "2.1.92");
   const mixed = api.importMultiSandboxQuotes(JSON.stringify([
     { providerId:"flight_provider_trusted_fixture", providerName:"Trusted Flight Fixture", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import", route:{ origin:"SHA", destination:"CTU" }, departureDate:"2026-07-15", currency:"CNY", baseFare:860, taxesAndFees:110, providerFees:40, totalPrice:1010, priceUpdatedAt:"2026-01-01T00:00:00.000Z", freshnessMinutes:15, handoffCandidate:{ providerId:"google_flights_search", handoffType:"provider_search" } },
     { providerId:"trip_com_sandbox_stub", providerName:"Trip.com Sandbox Stub", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import", trip:{ from:"SHA", to:"CTU", date:"2026-07-15" }, price:{ currency:"CNY", fare:820, tax:120, serviceFee:35, total:975 }, freshness:{ updatedAt:"2026-01-01T00:00:00.000Z", minutes:10 }, handoffCandidate:{ providerId:"trip_com_search", handoffType:"provider_search" } },

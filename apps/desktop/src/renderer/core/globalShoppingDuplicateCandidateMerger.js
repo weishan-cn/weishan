@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_DUPLICATE_CANDIDATE_MERGER_VERSION = "2.1.91";
+  const GLOBAL_SHOPPING_DUPLICATE_CANDIDATE_MERGER_VERSION = "2.1.92";
   const MERGER_NAME = "global_shopping_duplicate_candidate_merger_v1";
   const CAVEAT = "合并结果只覆盖当前已接入或 fixture 来源，不代表全网覆盖或最低价承诺。";
 

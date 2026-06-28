@@ -8029,8 +8029,35 @@
         event.preventDefault();
         const panel = globalShoppingHandoffPreviewButton.closest("[data-commerce-global-shopping-product-goal]") || globalShoppingHandoffPreviewButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
         const output = panel.querySelector("[data-commerce-global-shopping-handoff-preview-output]") || panel;
-        output.innerHTML = '<p>跳转至平台查看</p><p>目标平台</p><p>可带入搜索条件</p><p>平台自行下单</p><p>安全边界</p><p>Weishan 仅可携带非敏感搜索条件</p><p>用户需在平台自行确认价格、登录、填写资料并完成下单</p><p>不保存平台账号</p><p>不保存证件银行卡</p><p>不保存支付凭证</p><p>本轮仅展示只读跳转预览，不打开真实平台</p><p>跳转预览不代表下单能力</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        output.innerHTML = '<p>跳转至平台查看</p><p>目标平台</p><p>可带入搜索条件</p><p>平台自行下单</p><p>安全边界</p><p>合作链接披露</p><p>平台页面为实时价格准绳</p><p>Weishan 仅可携带非敏感搜索条件</p><p>用户需在平台自行确认价格、登录、填写资料并完成下单</p><p>不保存平台账号</p><p>不保存证件银行卡</p><p>不保存支付凭证</p><p>本轮仅展示只读跳转预览，不打开真实平台</p><p>跳转预览不代表下单能力</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
         showCommercePlatformTemplateFeedback("已显示跳转预览", false);
+        return;
+      }
+      const globalShoppingSandboxCandidateButton = target && target.closest("[data-commerce-global-shopping-sandbox-candidate-show]");
+      if (globalShoppingSandboxCandidateButton && host.contains(globalShoppingSandboxCandidateButton)) {
+        event.preventDefault();
+        const panel = globalShoppingSandboxCandidateButton.closest("[data-commerce-global-shopping-product-goal]") || globalShoppingSandboxCandidateButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-sandbox-candidate-output]") || panel;
+        output.innerHTML = '<p>Sandbox 跳转候选</p><p>Sandbox 跳转候选已准备</p><p>fixtureOnly:true</p><p>sandboxOnly:true</p><p>readOnly:true</p><p>disabledToOpen:true</p><p>Sandbox 跳转不打开真实平台</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Sandbox 跳转候选", false);
+        return;
+      }
+      const globalShoppingPlatformAvailabilityButton = target && target.closest("[data-commerce-global-shopping-platform-availability-show]");
+      if (globalShoppingPlatformAvailabilityButton && host.contains(globalShoppingPlatformAvailabilityButton)) {
+        event.preventDefault();
+        const panel = globalShoppingPlatformAvailabilityButton.closest("[data-commerce-global-shopping-product-goal]") || globalShoppingPlatformAvailabilityButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-platform-availability-output]") || panel;
+        output.innerHTML = '<p>平台可用性</p><p>平台候选可展示</p><p>平台可用不代表官方背书</p><p>平台页面为实时价格准绳</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示平台可用性", false);
+        return;
+      }
+      const globalShoppingPartnerPolicyButton = target && target.closest("[data-commerce-global-shopping-partner-policy-show]");
+      if (globalShoppingPartnerPolicyButton && host.contains(globalShoppingPartnerPolicyButton)) {
+        event.preventDefault();
+        const panel = globalShoppingPartnerPolicyButton.closest("[data-commerce-global-shopping-product-goal]") || globalShoppingPartnerPolicyButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-partner-policy-output]") || panel;
+        output.innerHTML = '<p>合作/联盟链接政策</p><p>合作链接政策合规</p><p>部分平台链接未来可能属于合作或联盟链接</p><p>Weishan 可能获得佣金，但不会因此提高展示价格</p><p>合作或联盟链接不代表平台、品牌或商家对 Weishan 的官方背书</p><p>合作链接不代表最低价</p><p>平台页面为实时价格准绳</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示合作链接政策", false);
         return;
       }
       const pilotInvitationGateButton = target && target.closest("[data-commerce-flight-pilot-invitation-gate-show]");

@@ -1,5 +1,5 @@
 (function(){
-  const NO_SECRET_PERSISTENCE_GUARD_VERSION = "2.1.91";
+  const NO_SECRET_PERSISTENCE_GUARD_VERSION = "2.1.92";
 
   const scanScope = [
     "repo source files",

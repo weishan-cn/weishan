@@ -1,14 +1,14 @@
 (function(){
-  const LOCAL_SAFETY_EVIDENCE_CONSOLE_VERSION = "2.1.91";
+  const LOCAL_SAFETY_EVIDENCE_CONSOLE_VERSION = "2.1.92";
 
   const releaseEvidenceDraft = {
-    appVersion:"2.1.91",
-    expectedGitTag:"v2.1.91",
-    expectedCommit:"local HEAD after v2.1.91 commit",
+    appVersion:"2.1.92",
+    expectedGitTag:"v2.1.92",
+    expectedCommit:"local HEAD after v2.1.92 commit",
     releasePostcheckState:"local only",
     workingTreeState:"clean required",
-    distAppVersion:"2.1.91",
-    applicationsAppVersion:"2.1.91",
+    distAppVersion:"2.1.92",
+    applicationsAppVersion:"2.1.92",
     uiAcceptanceState:"manual evidence required",
     schemaVersion:LOCAL_SAFETY_EVIDENCE_CONSOLE_VERSION,
     redacted:true

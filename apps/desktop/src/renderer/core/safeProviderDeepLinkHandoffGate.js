@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SAFE_PROVIDER_DEEP_LINK_HANDOFF_GATE_VERSION = "2.1.91";
+  const SAFE_PROVIDER_DEEP_LINK_HANDOFF_GATE_VERSION = "2.1.92";
   const PHASE = "safe_provider_handoff_url_gate_v1";
   const TRUSTED_HOSTS = ["google.com", "trip.com", "ctrip.com", "skyscanner.com", "kayak.com", "expedia.com", "booking.com"];
   const SHORT_URL_HOSTS = ["bit.ly", "t.co", "tinyurl.com", "goo.gl", "ow.ly", "is.gd", "buff.ly", "cutt.ly", "short.link"];
