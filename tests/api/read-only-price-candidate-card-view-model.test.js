@@ -34,10 +34,17 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowAuditReviewCenter.js",
     "apps/desktop/src/renderer/core/flightWorkflowSafeSessionExportPreview.js",
     "apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js",
+    "apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js",
+    "apps/desktop/src/renderer/core/flightWorkflowOperatorConsole.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteSessionReportCenter.js",
+    "apps/desktop/src/renderer/core/flightWorkflowReadOnlyLaunchCandidateFreezeGate.js",
+    "apps/desktop/src/renderer/core/flightWorkflowEvidenceFreezePack.js",
     "apps/desktop/src/renderer/core/flightWorkflowRcCandidateReviewConsole.js",
     "apps/desktop/src/renderer/core/flightWorkflowRcEvidenceReviewChecklist.js",
     "apps/desktop/src/renderer/core/flightWorkflowRcReviewViewModel.js",
+    "apps/desktop/src/renderer/core/flightWorkflowRcRegressionAuditPack.js",
+    "apps/desktop/src/renderer/core/flightWorkflowReadOnlyReleaseRiskLedger.js",
+    "apps/desktop/src/renderer/core/flightWorkflowRcRegressionViewModel.js",
     "apps/desktop/src/renderer/core/flightWorkflowReadOnlyUserConsentFlow.js",
     "apps/desktop/src/renderer/core/flightWorkflowPublicPilotOnboardingGuard.js",
     "apps/desktop/src/renderer/core/flightWorkflowPilotOnboardingViewModel.js",
@@ -55,7 +62,7 @@ function main() {
   const api = windowRef.WeishanReadOnlyPriceCandidateCardViewModel;
   const dryRunApi = windowRef.WeishanMultiProviderSandboxDryRunOrchestrator;
   const dryRun = dryRunApi.runMultiProviderSandboxDryRun({ title:"购买7月15日上海到成都最便宜的直达机票", origin:"上海", destination:"成都", departureDate:"2026-07-15", directOnly:true, sortIntent:"低价优先" }, {});
-  assert.equal(api.READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION, "2.1.85");
+  assert.equal(api.READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION, "2.1.86");
   const card = api.buildReadOnlyPriceCandidateCardViewModel({ continuitySummary:{ status:"resumable", currentStage:"decision", stageLabel:"选择候选", resumePlan:{ nextStepLabel:"确认前往平台", canResume:true } }, confirmationStateSummary:{ labels:["已选择候选"] }, recoverySummary:{ status:"resumable" }, resumeCoachSummary:{ allowedActions:[{ label:"前往平台确认" }] }, currentStage:"decision", workflowStageLabel:"选择候选", nextStepLabel:"确认前往平台", canResumeWorkflow:true, resumeActions:[{ label:"前往平台确认" }], blockedActions:[{ label:"付款" }], actionPolicyDecision:{ status:"requires_confirmation" }, workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sandboxDryRunSummary:dryRun, runTimelineSummary:dryRun.runTimelineSummary, providerRunMatrix:dryRun.providerRunMatrix, dryRunStatus:dryRun.status, dryRunButton:{ label:"运行沙盒只读报价", enabled:true, loading:false, autoRun:false }, dryRunTopCandidates:dryRun.dryRunTopCandidates, task:{ title:"7月15日上海到成都最便宜的机票" }, providerId:"google_flights_search", providerName:"Google Flights", providerType:"flight_search", report:{ provider:{ providerMode:"fixture" }, handoff:{ safeProviderHandoffUrl:"https://www.google.com/travel/flights" }, rankingPreview:{ sourceBreakdown:{ providerCount:3, providerIds:["flight_provider_trusted_fixture","trip_com_sandbox_stub","airline_official_sandbox_stub"], fareSources:["sandbox_read_only_import"] }, rankingExplanation:"仅按导入样本中的只读候选证据排序，平台最终为准。" }, selectedCandidate:{ providerName:"Airline Official Sandbox Stub", responseShape:"airline_official_stub_quote", selectedSourceSummary:"来源：Airline Official Sandbox Stub / airline_official_stub_quote" } }, sourceBreakdown:{ providerCount:3, providerIds:["flight_provider_trusted_fixture","trip_com_sandbox_stub","airline_official_sandbox_stub"], fareSources:["sandbox_read_only_import"] }, selectedSourceSummary:"来源：Airline Official Sandbox Stub / airline_official_stub_quote", rankingExplanation:"仅按导入样本中的只读候选证据排序，平台最终为准。", flightFields:{ origin:"上海", destination:"成都", dateDisplay:"7 月 15 日", goal:"低价优先", directPreference:"直达优先" }, topCandidates:[{ rank:1, quoteId:"q930", providerName:"Airline Official Sandbox Stub", responseShape:"airline_official_stub_quote", fareSource:"sandbox_read_only_import", currency:"CNY", baseFare:780, taxesAndFees:130, providerFees:20, totalPrice:930, safeProviderHandoffReady:true, safeProviderHandoffUrl:"https://www.google.com/travel/flights", bookingUrl:null, payment:false, order:false, identityUpload:false, redacted:true }] });
   assert.equal(card.visible, true);
   assert.equal(card.title, "只读候选价");
@@ -81,9 +88,14 @@ function main() {
   assert.equal(card.rolloutControlSummary.centerName, "flight_workflow_read_only_pilot_rollout_control_center_v1");
   assert.equal(card.cohortHealthSummary.dashboardName, "flight_workflow_cohort_health_dashboard_v1");
   assert.equal(card.rolloutControlViewModel.title, "只读试点发布控制中心");
-  assert.equal(card.rcReviewStatus, "evidence_incomplete");
+  assert.equal(card.rcReviewStatus, "blocked");
   assert.equal(card.safeToStartRcReview, false);
   assert.equal(card.rcReviewViewModelSummary.title, "只读 RC 候选复核");
+  assert.equal(card.rcRegressionAuditSummary.userFacingSummary.title, "只读 RC 回归审计包");
+  assert.equal(card.releaseRiskLedgerSummary.userFacingSummary.title, "只读发布风险台账");
+  assert.equal(card.rcRegressionViewModelSummary.title, "只读 RC 回归审计");
+  assert.equal(card.rcRegressionStatus, "blocked");
+  assert.equal(card.releaseRiskStatus, "needs_review");
   assert.equal(card.confirmationUi.continueButtonDisabled, false);
   assert.equal(card.bookingUrl, null);
   const cardWithLedger = api.buildReadOnlyPriceCandidateCardViewModel({ eventLedgerSummary:{ lastActionId:"record_platform_check", lastActionStatus:"executed_local", lastActionMessage:"动作已执行" } });
@@ -110,7 +122,7 @@ function main() {
   assert.equal(card.providerBindingWizardSummary.title, "Provider 沙盒绑定准备");
   assert.equal(card.interactiveRefreshState.status, "idle");
   assert.equal(card.clearRefreshStateButton.label, "清除刷新状态");
-  assert.equal(card.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.1.85");
+  assert.equal(card.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.1.86");
   assert.equal(card.sessionStatus, "updated");
   assert.equal(card.auditExportReady, true);
   assert.equal(card.sessionRecoverySummary.title, "Session Recovery");
@@ -176,6 +188,13 @@ function main() {
   assert.equal(html.includes("只读 RC 候选复核控制台"), true);
   assert.equal(html.includes("只读 RC 候选复核"), true);
   assert.equal(html.includes("只读 RC 证据复核清单"), true);
+  assert.equal(html.includes("只读 RC 回归审计"), true);
+  assert.equal(html.includes("只读 RC 回归审计包"), true);
+  assert.equal(html.includes("只读发布风险台账"), true);
+  assert.equal(html.includes("回归审计"), true);
+  assert.equal(html.includes("发布风险"), true);
+  assert.equal(html.includes("RC 回归审计通过"), true);
+  assert.equal(html.includes("回归不代表交易能力"), true);
   assert.equal(html.includes("复核不代表交易能力"), true);
   assert.equal(html.includes("重新核对平台页面"), true);
   assert.equal(html.includes("当前只读报价会话"), true);
@@ -226,6 +245,8 @@ function main() {
   assert.equal(commerceAgentPageSource.includes('safeProviderHandoffCandidate.safeProviderHandoffUrl || "https://www.google.com/travel/flights"'), false);
   assert.equal(commerceAgentPageSource.includes("[data-commerce-flight-rc-review-show]"), true);
   assert.equal(commerceAgentPageSource.includes("[data-commerce-flight-rc-evidence-review-show]"), true);
+  assert.equal(commerceAgentPageSource.includes("[data-commerce-flight-rc-regression-show]"), true);
+  assert.equal(commerceAgentPageSource.includes("[data-commerce-flight-release-risk-ledger-show]"), true);
   console.log("READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_CORE PASS");
 }
 main();

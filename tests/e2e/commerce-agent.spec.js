@@ -8727,7 +8727,7 @@ test.describe.serial("commerce agent workbench", () => {
       try {
         window.localStorage.setItem("weishan.readOnlyQuoteRefreshState.v1", JSON.stringify({
           stateName:"read_only_quote_refresh_state_v1",
-          appVersion:"2.1.85",
+          appVersion:"2.1.86",
           lastRefreshStatus:"refreshed",
           providerId:"google_flights_search",
           providerName:"Google Flights",
@@ -9001,7 +9001,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.1.85 flight workflow release readiness dashboard stays local @commerce-smoke", async () => {
+  test("v2.1.86 flight workflow release readiness dashboard stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2169-READY 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
@@ -9161,7 +9161,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(visible).not.toMatch(/\b(token|key|secret)\b/i);
   });
 
-  test("v2.1.85 RC review console stays read-only and local @commerce-smoke", async () => {
+  test("v2.1.86 RC review console stays read-only and local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2185-RC-REVIEW 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
@@ -9169,6 +9169,9 @@ test.describe.serial("commerce agent workbench", () => {
       const reviewApi = window.WeishanFlightWorkflowRcCandidateReviewConsole;
       const checklistApi = window.WeishanFlightWorkflowRcEvidenceReviewChecklist;
       const viewModelApi = window.WeishanFlightWorkflowRcReviewViewModel;
+      const regressionApi = window.WeishanFlightWorkflowRcRegressionAuditPack;
+      const ledgerApi = window.WeishanFlightWorkflowReadOnlyReleaseRiskLedger;
+      const regressionViewApi = window.WeishanFlightWorkflowRcRegressionViewModel;
       const review = reviewApi && typeof reviewApi.buildFlightWorkflowRcCandidateReviewConsole === "function"
         ? reviewApi.buildFlightWorkflowRcCandidateReviewConsole({})
         : null;
@@ -9178,18 +9181,35 @@ test.describe.serial("commerce agent workbench", () => {
       const viewModel = viewModelApi && typeof viewModelApi.buildFlightWorkflowRcReviewViewModel === "function"
         ? viewModelApi.buildFlightWorkflowRcReviewViewModel({ rcCandidateReviewSummary:review, rcEvidenceReviewSummary:checklist })
         : null;
+      const regression = regressionApi && typeof regressionApi.buildFlightWorkflowRcRegressionAuditPack === "function"
+        ? regressionApi.buildFlightWorkflowRcRegressionAuditPack({ rcCandidateReviewSummary:review, rcEvidenceReviewSummary:checklist, commerceAgentSmokeBounded:true, commerceAgentSmokeCount:18, dispatchSmokePass:true, dispatchSmokePassedCount:18, versionCheckPass:true, versionCheckStatus:"pass" })
+        : null;
+      const ledger = ledgerApi && typeof ledgerApi.buildFlightWorkflowReadOnlyReleaseRiskLedger === "function"
+        ? ledgerApi.buildFlightWorkflowReadOnlyReleaseRiskLedger({ rcRegressionAuditSummary:regression, rcCandidateReviewSummary:review, rcEvidenceReviewSummary:checklist, copyValidationStatus:"pass" })
+        : null;
+      const regressionViewModel = regressionViewApi && typeof regressionViewApi.buildFlightWorkflowRcRegressionViewModel === "function"
+        ? regressionViewApi.buildFlightWorkflowRcRegressionViewModel({ rcRegressionAuditSummary:regression, releaseRiskLedgerSummary:ledger })
+        : null;
       return {
         review,
         checklist,
         viewModel,
-        serialized: JSON.stringify({ review, checklist, viewModel })
+        regression,
+        ledger,
+        regressionViewModel,
+        serialized: JSON.stringify({ review, checklist, viewModel, regression, ledger, regressionViewModel })
       };
     });
     expect(model.review.userFacingSummary.title).toBe("只读 RC 候选复核控制台");
     expect(model.checklist.userFacingSummary.title).toBe("只读 RC 证据复核清单");
     expect(model.viewModel.title).toBe("只读 RC 候选复核");
+    expect(model.regression.userFacingSummary.title).toBe("只读 RC 回归审计包");
+    expect(model.ledger.userFacingSummary.title).toBe("只读发布风险台账");
+    expect(model.regressionViewModel.title).toBe("只读 RC 回归审计");
     expect(model.viewModel.cards.length).toBe(4);
     expect(model.serialized).toMatch(/复核不代表交易能力/);
+    expect(model.serialized).toMatch(/只读 RC 回归审计包/);
+    expect(model.serialized).toMatch(/只读发布风险台账/);
     expect(model.serialized).not.toMatch(/"(bookingUrl|checkoutUrl|paymentUrl|orderUrl)"\s*:\s*"https?:/i);
     expect(model.serialized).not.toMatch(/"(token|apiKey|key|secret|password)"\s*:\s*"/i);
     expect(model.serialized).not.toMatch(/"(rawResponse|rawProviderResponse|rawUserText)"\s*:/i);
@@ -9197,7 +9217,7 @@ test.describe.serial("commerce agent workbench", () => {
   });
 
 
-  test("v2.1.85 pilot onboarding guard appears before guided test @commerce-smoke", async () => {
+  test("v2.1.86 pilot onboarding guard appears before guided test @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2174-ONBOARDING 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
@@ -9272,7 +9292,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(model.serialized).not.toMatch(/"(rawResponse|rawProviderResponse)"\s*:/i);
   });
 
-  test("v2.1.85 public pilot readiness snapshot stays local @commerce-smoke", async () => {
+  test("v2.1.86 public pilot readiness snapshot stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2178-SNAPSHOT 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
@@ -9317,7 +9337,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.85 support playbook console stays local @commerce-smoke", async () => {
+  test("v2.1.86 support playbook console stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2178-PLAYBOOK 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
@@ -9342,7 +9362,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.85 public pilot cohort progress tracker stays local @commerce-smoke", async () => {
+  test("v2.1.86 public pilot cohort progress tracker stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2179-INVITE 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
@@ -9360,7 +9380,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.85 read-only trial milestone board stays local @commerce-smoke", async () => {
+  test("v2.1.86 read-only trial milestone board stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2179-COHORT 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
@@ -9379,7 +9399,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.85 cohort progress view model stays local @commerce-smoke", async () => {
+  test("v2.1.86 cohort progress view model stays local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2179-VIEWMODEL 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
@@ -9409,7 +9429,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).not.toContainText(/下载文件|保存文件/);
   });
 
-  test("v2.1.85 restricted category blocks pilot onboarding @commerce-smoke", async () => {
+  test("v2.1.86 restricted category blocks pilot onboarding @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2174-RESTRICTED 帮我买枪", "安全阻断");
     await expect(summary).toContainText("安全阻断", { timeout:15000 });

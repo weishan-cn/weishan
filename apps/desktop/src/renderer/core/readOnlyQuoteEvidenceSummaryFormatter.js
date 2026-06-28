@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.85";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.86";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -233,6 +233,12 @@
       nextCohortDecisionSummary: stripUnsafe(safe.nextCohortDecisionSummary || safe.nextCohortDecisionBoard || null),
       freezeGateSummary: stripUnsafe(safe.freezeGateSummary || null),
       evidenceFreezePackSummary: stripUnsafe(safe.evidenceFreezePackSummary || null),
+      rcRegressionAuditSummary: stripUnsafe(safe.rcRegressionAuditSummary || null),
+      releaseRiskLedgerSummary: stripUnsafe(safe.releaseRiskLedgerSummary || null),
+      rcRegressionViewModelSummary: stripUnsafe(safe.rcRegressionViewModelSummary || null),
+      rcRegressionStatus: safeLine(safe.rcRegressionStatus || ""),
+      releaseRiskStatus: safeLine(safe.releaseRiskStatus || ""),
+      safeToContinueReleaseCandidate: safe.safeToContinueReleaseCandidate === true,
       pilotOpsStatus: safeLine(safe.pilotOpsStatus || ""),
       nextCohortDecisionStatus: safeLine(safe.nextCohortDecisionStatus || ""),
       pilotOpsPrimaryRisk: stripUnsafe(safe.pilotOpsPrimaryRisk || null),
@@ -409,6 +415,24 @@
     return clone({ title:"只读 RC 候选复核", line:safeLine(viewModel.title || obj(viewModel.userFacingSummary).resultLabel || "只读 RC 候选复核"), sectionLabels:["候选复核", "证据复核", "安全红线", "下一步"], status:text(viewModel.status || "evidence_incomplete"), caveat:safeLine(viewModel.caveat || "该页面只用于只读 RC 候选复核，不保存真实身份、不发送真实邀请、不提供交易能力。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
+  function formatRcRegressionAuditSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.rcRegressionAuditSummary || safe.auditPackSummary || (safe.status || safe.userFacingSummary ? safe : {});
+    return clone({ title:"只读 RC 回归审计包", line:safeLine(obj(summary.userFacingSummary).resultLabel || "RC 回归仍需复核"), sectionLabels:["回归审计", "发布风险", "安全红线", "冻结检查"], status:text(summary.status || "needs_review"), caveat:"回归不代表交易能力。", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatReleaseRiskLedgerSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.releaseRiskLedgerSummary || safe.riskLedgerSummary || (safe.status || safe.userFacingSummary ? safe : {});
+    return clone({ title:"只读发布风险台账", line:safeLine(obj(summary.userFacingSummary).resultLabel || "发布风险待处理"), sectionLabels:["回归审计", "发布风险", "安全红线", "下一步"], status:text(summary.status || "needs_review"), caveat:"回归不代表交易能力。", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatRcRegressionViewModelSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const viewModel = safe.rcRegressionViewModelSummary || safe.viewModelSummary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"只读 RC 回归审计", line:safeLine(viewModel.title || obj(viewModel.userFacingSummary).resultLabel || "只读 RC 回归审计"), sectionLabels:["回归审计", "发布风险", "安全红线", "下一步"], status:text(viewModel.status || "needs_review"), caveat:safeLine(viewModel.caveat || "该页面只用于只读 RC 回归审计，不保存真实身份、不发送真实邀请、不提供交易能力。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -458,6 +482,9 @@
     formatRcCandidateReviewSummary,
     formatRcEvidenceReviewChecklistSummary,
     formatRcReviewViewModelSummary,
+    formatRcRegressionAuditSummary,
+    formatReleaseRiskLedgerSummary,
+    formatRcRegressionViewModelSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,

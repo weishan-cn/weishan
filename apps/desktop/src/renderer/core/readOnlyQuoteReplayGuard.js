@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_REPLAY_GUARD_VERSION = "2.1.85";
+  const READ_ONLY_QUOTE_REPLAY_GUARD_VERSION = "2.1.86";
   const REPLAY_GUARD_NAME = "read_only_quote_replay_guard_v1";
 
   function clone(value) {

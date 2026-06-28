@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PILOT_INVITATION_VIEW_MODEL_VERSION = "2.1.85";
+  const FLIGHT_WORKFLOW_PILOT_INVITATION_VIEW_MODEL_VERSION = "2.1.86";
   const VIEW_MODEL_NAME = "flight_workflow_pilot_invitation_view_model_v1";
   const CAVEAT = "该视图模型只用于只读试点邀请与测试批次登记，不代表真实身份、联系方式、证件、支付或外部平台链接。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;

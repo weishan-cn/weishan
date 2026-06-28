@@ -1,14 +1,16 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION = "2.1.85";
+  const FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION = "2.1.86";
   const SENTINEL_NAME = "flight_workflow_safety_regression_sentinel_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   const SECRET_VALUE_RE = /token|apiKey|secret|password|sk-|pk-|live_|prod_/i;
   const CLAIM_RE = /全网最低|最低价保证|已锁价|可出票|真实最终价/i;
   const TRADING_URL_RE = /bookingUrl|checkoutUrl|paymentUrl|orderUrl/i;
   const TRUE_RISK_RE = /payment|order|ticketing|identityUpload|credentialInput|autoOpen|autoRefresh|rawResponseStored|rawUserTextStored|secretStored|fileWrite|download/i;
-  const SECRET_NAME_RE = /token|apiKey|secret|password|auth|credential|rawProviderResponse|rawResponse|rawPayload|rawText|rawUserText|rawInput/i;
+  function isSecretFieldName(name) {
+    return /^(token|apiKey|secret|password|auth|credential|rawProviderResponse|rawResponse|rawPayload|rawText|rawUserText|rawInput)$/i.test(String(name || ""));
+  }
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value == null ? "" : value).trim(); }
   function safeText(value) { return text(value).replace(FORBIDDEN_TEXT_RE, "redacted"); }
@@ -30,7 +32,7 @@
       if (/(rawResponseStored|rawUserTextStored|secretStored)$/i.test(name) && value === true) addUnique(failures, failure("no_secret_or_raw_response", fieldPath, "secret_or_raw_storage_true"));
       if (/(autoOpen|autoRefresh)$/i.test(name) && value === true) addUnique(failures, failure("no_auto_open_or_refresh", fieldPath, "auto_action_true"));
       if (/(fileWrite|download)$/i.test(name) && value === true) addUnique(failures, failure("no_export_or_file_write", fieldPath, "file_or_download_true"));
-      if (SECRET_NAME_RE.test(name) && value && value !== false) addUnique(failures, failure("no_secret_or_raw_response", fieldPath, "secret_or_raw_field_present"));
+      if (isSecretFieldName(name) && value && value !== false) addUnique(failures, failure("no_secret_or_raw_response", fieldPath, "secret_or_raw_field_present"));
       if (typeof value === "string") {
         if (SECRET_VALUE_RE.test(value)) addUnique(failures, failure("no_secret_or_raw_response", fieldPath, "secret_like_text"));
         if (CLAIM_RE.test(value)) addUnique(failures, failure("no_final_price_claims", fieldPath, "forbidden_price_or_ticketing_claim"));
@@ -58,6 +60,8 @@
       const rcCandidateReviewSummary = input.rcCandidateReviewSummary || input.rcReviewConsoleSummary || null;
       const rcEvidenceReviewSummary = input.rcEvidenceReviewSummary || input.rcEvidenceChecklistSummary || null;
       const rcReviewViewModelSummary = input.rcReviewViewModelSummary || null;
+      const rcRegressionAuditSummary = input.rcRegressionAuditSummary || null;
+      const releaseRiskLedgerSummary = input.releaseRiskLedgerSummary || null;
       const checks = [
         check("no_trading_urls", "无交易链接", failures),
         check("no_payment_order_ticketing", "无付款/下单/出票", failures),
@@ -68,14 +72,14 @@
         check("no_export_or_file_write", "无真实导出或写文件", failures)
       ];
       const status = failures.length ? "fail" : (scan.warnings && scan.warnings.length ? "warning" : "pass");
-      return sanitizeReport({ sentinelName:SENTINEL_NAME, appVersion:FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, status:status, checks:checks, failures:failures, warnings:scan.warnings || [], pilotExitCriteriaSummary:pilotExitCriteriaSummary, launchCandidateReadinessSummary:launchCandidateReadinessSummary, freezeGateSummary:freezeGateSummary, evidenceFreezePackSummary:evidenceFreezePackSummary, rcCandidateReviewSummary:rcCandidateReviewSummary, rcEvidenceReviewSummary:rcEvidenceReviewSummary, rcReviewViewModelSummary:rcReviewViewModelSummary, safety:safety(), redacted:true });
+      return sanitizeReport({ sentinelName:SENTINEL_NAME, appVersion:FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, status:status, checks:checks, failures:failures, warnings:scan.warnings || [], pilotExitCriteriaSummary:pilotExitCriteriaSummary, launchCandidateReadinessSummary:launchCandidateReadinessSummary, freezeGateSummary:freezeGateSummary, evidenceFreezePackSummary:evidenceFreezePackSummary, rcCandidateReviewSummary:rcCandidateReviewSummary, rcEvidenceReviewSummary:rcEvidenceReviewSummary, rcReviewViewModelSummary:rcReviewViewModelSummary, rcRegressionAuditSummary:rcRegressionAuditSummary, releaseRiskLedgerSummary:releaseRiskLedgerSummary, safety:safety(), redacted:true });
     } catch (error) {
       return sanitizeReport({ sentinelName:SENTINEL_NAME, appVersion:FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, status:"failed_safe", checks:[], failures:[failure("failed_safe", "sentinel", "failed_safe")], warnings:[], safety:safety(), redacted:true });
     }
   }
   function sanitizeReport(report) {
     const safe = report && typeof report === "object" ? report : {};
-    return clone({ sentinelName:SENTINEL_NAME, appVersion:FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, status:safe.status || "failed_safe", checks:toArray(safe.checks).map(function (item) { return { checkId:safeText(item.checkId || ""), label:safeText(item.label || ""), status:item.status === "fail" ? "fail" : "pass", message:safeText(item.message || ""), redacted:true }; }), failures:toArray(safe.failures).map(function (item) { return failure(item.checkId || "failure", item.field || "", item.riskType || "risk"); }), warnings:toArray(safe.warnings).map(function (item) { return { warningId:safeText(item.warningId || "warning"), message:safeText(item.message || ""), redacted:true }; }), pilotExitCriteriaSummary:clone(safe.pilotExitCriteriaSummary || null), launchCandidateReadinessSummary:clone(safe.launchCandidateReadinessSummary || null), freezeGateSummary:clone(safe.freezeGateSummary || null), evidenceFreezePackSummary:clone(safe.evidenceFreezePackSummary || null), rcCandidateReviewSummary:clone(safe.rcCandidateReviewSummary || null), rcEvidenceReviewSummary:clone(safe.rcEvidenceReviewSummary || null), rcReviewViewModelSummary:clone(safe.rcReviewViewModelSummary || null), safety:Object.assign(safety(), safe.safety || {}), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, autoRefresh:false, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, fileWrite:false, download:false, redacted:true });
+    return clone({ sentinelName:SENTINEL_NAME, appVersion:FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, status:safe.status || "failed_safe", checks:toArray(safe.checks).map(function (item) { return { checkId:safeText(item.checkId || ""), label:safeText(item.label || ""), status:item.status === "fail" ? "fail" : "pass", message:safeText(item.message || ""), redacted:true }; }), failures:toArray(safe.failures).map(function (item) { return failure(item.checkId || "failure", item.field || "", item.riskType || "risk"); }), warnings:toArray(safe.warnings).map(function (item) { return { warningId:safeText(item.warningId || "warning"), message:safeText(item.message || ""), redacted:true }; }), pilotExitCriteriaSummary:clone(safe.pilotExitCriteriaSummary || null), launchCandidateReadinessSummary:clone(safe.launchCandidateReadinessSummary || null), freezeGateSummary:clone(safe.freezeGateSummary || null), evidenceFreezePackSummary:clone(safe.evidenceFreezePackSummary || null), rcCandidateReviewSummary:clone(safe.rcCandidateReviewSummary || null), rcEvidenceReviewSummary:clone(safe.rcEvidenceReviewSummary || null), rcReviewViewModelSummary:clone(safe.rcReviewViewModelSummary || null), rcRegressionAuditSummary:clone(safe.rcRegressionAuditSummary || null), releaseRiskLedgerSummary:clone(safe.releaseRiskLedgerSummary || null), safety:Object.assign(safety(), safe.safety || {}), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, autoRefresh:false, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, fileWrite:false, download:false, redacted:true });
   }
   function runFlightWorkflowSafetyRegressionSentinel(input) { return buildFlightWorkflowSafetyRegressionReport(input); }
   function buildFlightWorkflowSafetyRegressionSentinelAuditDraft(input) { const report = buildFlightWorkflowSafetyRegressionReport(input || {}); return clone({ eventType:"FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_AUDIT_DRAFT", sentinelName:SENTINEL_NAME, appVersion:FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, status:report.status, failureCount:report.failures.length, warningCount:report.warnings.length, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, autoRefresh:false, payment:false, order:false, ticketing:false, identityUpload:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, fileWrite:false, download:false, redacted:true }); }

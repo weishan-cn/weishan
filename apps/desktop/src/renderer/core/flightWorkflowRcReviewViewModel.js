@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RC_REVIEW_VIEW_MODEL_VERSION = "2.1.85";
+  const FLIGHT_WORKFLOW_RC_REVIEW_VIEW_MODEL_VERSION = "2.1.86";
   const VIEW_MODEL_NAME = "flight_workflow_rc_review_view_model_v1";
   const CAVEAT = "该页面只用于只读 RC 候选复核，不保存真实身份、不发送真实邀请、不提供交易能力。";
 
@@ -30,6 +30,20 @@
       ? api("WeishanFlightWorkflowRcEvidenceReviewChecklist").buildFlightWorkflowRcEvidenceReviewChecklist(safe)
       : {};
   }
+  function regressionAuditOf(input) {
+    const safe = obj(input);
+    if (safe.rcRegressionAuditSummary) return safe.rcRegressionAuditSummary;
+    return typeof api("WeishanFlightWorkflowRcRegressionAuditPack").buildFlightWorkflowRcRegressionAuditPack === "function"
+      ? api("WeishanFlightWorkflowRcRegressionAuditPack").buildFlightWorkflowRcRegressionAuditPack(safe)
+      : {};
+  }
+  function releaseRiskOf(input) {
+    const safe = obj(input);
+    if (safe.releaseRiskLedgerSummary) return safe.releaseRiskLedgerSummary;
+    return typeof api("WeishanFlightWorkflowReadOnlyReleaseRiskLedger").buildFlightWorkflowReadOnlyReleaseRiskLedger === "function"
+      ? api("WeishanFlightWorkflowReadOnlyReleaseRiskLedger").buildFlightWorkflowReadOnlyReleaseRiskLedger(safe)
+      : {};
+  }
   function buildFlightWorkflowRcReviewRows(input) {
     const review = reviewConsoleOf(input || {});
     return toArray(review.rows).map(function (item) { return row(item.rowId || "row", item.label || "", item.value || "", item.status); });
@@ -41,11 +55,13 @@
   function buildFlightWorkflowRcReviewCards(input) {
     const review = reviewConsoleOf(input || {});
     const checklist = checklistOf(input || {});
+    const regressionAudit = regressionAuditOf(input || {});
+    const releaseRisk = releaseRiskOf(input || {});
     return clone([
       card("candidate_review", "候选复核", obj(review.userFacingSummary).resultLabel || review.status || "证据仍需补充"),
       card("evidence_review", "证据复核", obj(checklist.userFacingSummary).resultLabel || checklist.status || "证据仍需补充"),
-      card("safety", "安全红线", review.status === "blocked" || checklist.status === "blocked" ? "RC 复核已阻断" : "复核不代表交易能力"),
-      card("next_step", "下一步", obj(review.reviewDecision).label || obj(review.userFacingSummary).resultLabel || "证据仍需补充")
+      card("safety", "安全红线", review.status === "blocked" || checklist.status === "blocked" || regressionAudit.status === "blocked" || releaseRisk.status === "blocked" ? "RC 复核已阻断" : "复核不代表交易能力"),
+      card("next_step", "下一步", obj(releaseRisk.userFacingSummary).resultLabel || obj(regressionAudit.userFacingSummary).resultLabel || obj(review.reviewDecision).label || obj(review.userFacingSummary).resultLabel || "证据仍需补充")
     ]);
   }
   function sanitizeFlightWorkflowRcReviewViewModel(vm) {
@@ -62,6 +78,8 @@
       caveat:text(safe.caveat || CAVEAT),
       rcCandidateReviewSummary:clone(safe.rcCandidateReviewSummary || null),
       rcEvidenceReviewSummary:clone(safe.rcEvidenceReviewSummary || null),
+      rcRegressionAuditSummary:clone(safe.rcRegressionAuditSummary || null),
+      releaseRiskLedgerSummary:clone(safe.releaseRiskLedgerSummary || null),
       bookingUrl:null,
       checkoutUrl:null,
       paymentUrl:null,
@@ -80,6 +98,8 @@
     try {
       const review = reviewConsoleOf(input || {});
       const checklist = checklistOf(input || {});
+      const regressionAudit = regressionAuditOf(input || {});
+      const releaseRisk = releaseRiskOf(input || {});
       const status = review.status === "blocked" || checklist.status === "blocked"
         ? "blocked"
         : review.status === "ready_for_review" && checklist.status === "complete"
@@ -95,11 +115,15 @@
         evidenceRows:buildFlightWorkflowRcEvidenceRowsForView(input || {}),
         riskRows:[
           row("safety", "安全红线", review.status === "blocked" || checklist.status === "blocked" ? "RC 复核已阻断" : "复核不代表交易能力", review.status === "blocked" || checklist.status === "blocked" ? "blocked" : "pass"),
-          row("next_step", "下一步", obj(review.reviewDecision).label || obj(checklist.userFacingSummary).resultLabel || "证据仍需补充", status === "ready_for_review" ? "pass" : (status === "blocked" ? "blocked" : "warning"))
+          row("regression_audit", "回归审计", obj(regressionAudit.userFacingSummary).resultLabel || regressionAudit.status || "仍需复核", regressionAudit.status === "passed" ? "pass" : (regressionAudit.status === "blocked" ? "blocked" : "warning")),
+          row("release_risk", "发布风险", obj(releaseRisk.userFacingSummary).resultLabel || releaseRisk.status || "存在待复核风险", releaseRisk.status === "clear" ? "pass" : (releaseRisk.status === "blocked" ? "blocked" : "warning")),
+          row("next_step", "下一步", obj(releaseRisk.userFacingSummary).resultLabel || obj(regressionAudit.userFacingSummary).resultLabel || obj(review.reviewDecision).label || obj(checklist.userFacingSummary).resultLabel || "证据仍需补充", status === "ready_for_review" && releaseRisk.status === "clear" ? "pass" : (review.status === "blocked" || checklist.status === "blocked" || releaseRisk.status === "blocked" ? "blocked" : "warning"))
         ],
         caveat:CAVEAT,
         rcCandidateReviewSummary:review,
         rcEvidenceReviewSummary:checklist,
+        rcRegressionAuditSummary:regressionAudit,
+        releaseRiskLedgerSummary:releaseRisk,
         redacted:true
       });
     } catch (error) {
