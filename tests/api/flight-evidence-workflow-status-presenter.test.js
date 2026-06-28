@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightEvidenceWorkflowStatusPresenter.js"]);
   const api = windowRef.WeishanFlightEvidenceWorkflowStatusPresenter;
-  assert.equal(api.FLIGHT_EVIDENCE_WORKFLOW_STATUS_PRESENTER_VERSION, "2.1.87");
+  assert.equal(api.FLIGHT_EVIDENCE_WORKFLOW_STATUS_PRESENTER_VERSION, "2.1.88");
   const presenter = api.buildFlightEvidenceWorkflowStatusPresenter({ status:"ready", routeSummary:"上海 到 成都", tripSummary:"上海 到 成都 · 7月15日", workflowSteps:[{ id:"intent_normalized", status:"completed" }, { id:"top_candidates", status:"completed" }, { id:"handoff_readiness", status:"completed" }] });
   assert.equal(presenter.presenterName, "flight_evidence_workflow_status_presenter_v1");
   assert.equal(presenter.title, "机票请求工作流");

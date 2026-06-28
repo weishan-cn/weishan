@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.87";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.88";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -182,6 +182,12 @@
       safeToStartRcReview: safe.safeToStartRcReview === true,
       safeToContinueReleaseCandidate: safe.safeToContinueReleaseCandidate === true,
       safeToFinalizeUserFacingCopy: safe.safeToFinalizeUserFacingCopy === true,
+      globalShoppingProductGoalSummary: stripUnsafe(safe.globalShoppingProductGoalSummary || null),
+      jumpToPlatformBoundarySummary: stripUnsafe(safe.jumpToPlatformBoundarySummary || null),
+      globalShoppingProductGoalViewModelSummary: stripUnsafe(safe.globalShoppingProductGoalViewModelSummary || null),
+      globalShoppingGoalStatus: safeText(safe.globalShoppingGoalStatus || safe.globalShoppingProductGoalSummary && safe.globalShoppingProductGoalSummary.status || ""),
+      jumpBoundaryStatus: safeText(safe.jumpBoundaryStatus || safe.jumpToPlatformBoundarySummary && safe.jumpToPlatformBoundarySummary.status || ""),
+      safeToProceedWithJumpToPlatformMvp: safe.safeToProceedWithJumpToPlatformMvp === true,
       pilotOpsSummary: stripUnsafe(safe.pilotOpsSummary || safe.readOnlyPilotOpsSummary || null),
       nextCohortDecisionSummary: stripUnsafe(safe.nextCohortDecisionSummary || safe.nextCohortDecisionBoard || null),
       launchCandidateStatus: safeText(safe.launchCandidateStatus || ""),
@@ -226,6 +232,12 @@
       safeToStartRcReview: safe.safeToStartRcReview === true,
       safeToContinueReleaseCandidate: safe.safeToContinueReleaseCandidate === true,
       safeToFinalizeUserFacingCopy: safe.safeToFinalizeUserFacingCopy === true,
+      globalShoppingProductGoalSummary: stripUnsafe(safe.globalShoppingProductGoalSummary || null),
+      jumpToPlatformBoundarySummary: stripUnsafe(safe.jumpToPlatformBoundarySummary || null),
+      globalShoppingProductGoalViewModelSummary: stripUnsafe(safe.globalShoppingProductGoalViewModelSummary || null),
+      globalShoppingGoalStatus: safeText(safe.globalShoppingGoalStatus || safe.globalShoppingProductGoalSummary && safe.globalShoppingProductGoalSummary.status || ""),
+      jumpBoundaryStatus: safeText(safe.jumpBoundaryStatus || safe.jumpToPlatformBoundarySummary && safe.jumpToPlatformBoundarySummary.status || ""),
+      safeToProceedWithJumpToPlatformMvp: safe.safeToProceedWithJumpToPlatformMvp === true,
       pilotOpsSummary: stripUnsafe(safe.pilotOpsSummary || null),
       nextCohortDecisionSummary: stripUnsafe(safe.nextCohortDecisionSummary || null),
       launchCandidateStatus: safeText(safe.launchCandidateStatus || ""),
@@ -347,6 +359,9 @@
       rcCopyFinalizationSummary: workflow.rcCopyFinalizationSummary ? { title:"只读 RC 用户可见文案定稿", line:workflow.rcCopyFinalizationSummary.userFacingSummary && workflow.rcCopyFinalizationSummary.userFacingSummary.resultLabel || "RC 文案仍需复核", redacted:true } : null,
       safetyDisclosureReviewSummary: workflow.safetyDisclosureReviewSummary ? { title:"安全披露复核板", line:workflow.safetyDisclosureReviewSummary.userFacingSummary && workflow.safetyDisclosureReviewSummary.userFacingSummary.resultLabel || "安全披露仍需复核", redacted:true } : null,
       rcCopyReviewViewModelSummary: workflow.rcCopyReviewViewModelSummary ? { title:"只读 RC 文案定稿与安全披露", line:workflow.rcCopyReviewViewModelSummary.title || "只读 RC 文案定稿与安全披露", redacted:true } : null,
+      globalShoppingProductGoalSummary: workflow.globalShoppingProductGoalSummary ? { title:"全球购产品目标", line:workflow.globalShoppingProductGoalSummary.userFacingSummary && workflow.globalShoppingProductGoalSummary.userFacingSummary.resultLabel || "产品目标仍需复核", redacted:true } : null,
+      jumpToPlatformBoundarySummary: workflow.jumpToPlatformBoundarySummary ? { title:"跳转至平台自行下单边界", line:workflow.jumpToPlatformBoundarySummary.userFacingSummary && workflow.jumpToPlatformBoundarySummary.userFacingSummary.resultLabel || "跳转边界仍需复核", redacted:true } : null,
+      globalShoppingProductGoalViewModelSummary: workflow.globalShoppingProductGoalViewModelSummary ? { title:"全球购产品目标与跳转边界", line:workflow.globalShoppingProductGoalViewModelSummary.title || "全球购产品目标与跳转边界", redacted:true } : null,
       rcReviewStatus: workflow.rcReviewStatus || safe.rcReviewStatus || "",
       rcEvidenceStatus: workflow.rcEvidenceStatus || safe.rcEvidenceStatus || "",
       rcRegressionStatus: workflow.rcRegressionStatus || safe.rcRegressionStatus || "",
@@ -356,6 +371,9 @@
       safeToStartRcReview: workflow.safeToStartRcReview === true || safe.safeToStartRcReview === true,
       safeToContinueReleaseCandidate: workflow.safeToContinueReleaseCandidate === true || safe.safeToContinueReleaseCandidate === true,
       safeToFinalizeUserFacingCopy: workflow.safeToFinalizeUserFacingCopy === true || safe.safeToFinalizeUserFacingCopy === true,
+      globalShoppingGoalStatus: workflow.globalShoppingGoalStatus || safe.globalShoppingGoalStatus || "",
+      jumpBoundaryStatus: workflow.jumpBoundaryStatus || safe.jumpBoundaryStatus || "",
+      safeToProceedWithJumpToPlatformMvp: workflow.safeToProceedWithJumpToPlatformMvp === true || safe.safeToProceedWithJumpToPlatformMvp === true,
       launchCandidateStatus: workflow.launchCandidateStatus || safe.launchCandidateStatus || "",
       readyForLaunchCandidate: workflow.readyForLaunchCandidate === true || safe.readyForLaunchCandidate === true,
       launchCandidateNextStep: workflow.launchCandidateNextStep || safe.launchCandidateNextStep || "",

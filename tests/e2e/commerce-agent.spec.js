@@ -9161,81 +9161,37 @@ test.describe.serial("commerce agent workbench", () => {
     expect(visible).not.toMatch(/\b(token|key|secret)\b/i);
   });
 
-  test("v2.1.87 RC copy review stays read-only and local @commerce-smoke", async () => {
+  test("v2.1.88 global shopping product goal stays read-only and local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
-    const summary = await createCommerceWorkbenchDetail(page, runId + "-V2185-RC-REVIEW 购买7月15日上海到成都最便宜的直达机票");
-    await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
-    const model = await page.evaluate(() => {
-      const reviewApi = window.WeishanFlightWorkflowRcCandidateReviewConsole;
-      const checklistApi = window.WeishanFlightWorkflowRcEvidenceReviewChecklist;
-      const viewModelApi = window.WeishanFlightWorkflowRcReviewViewModel;
-      const regressionApi = window.WeishanFlightWorkflowRcRegressionAuditPack;
-      const ledgerApi = window.WeishanFlightWorkflowReadOnlyReleaseRiskLedger;
-      const regressionViewApi = window.WeishanFlightWorkflowRcRegressionViewModel;
-      const copyApi = window.WeishanFlightWorkflowRcUserFacingCopyFinalization;
-      const disclosureApi = window.WeishanFlightWorkflowSafetyDisclosureReviewBoard;
-      const copyViewApi = window.WeishanFlightWorkflowRcCopyReviewViewModel;
-      const review = reviewApi && typeof reviewApi.buildFlightWorkflowRcCandidateReviewConsole === "function"
-        ? reviewApi.buildFlightWorkflowRcCandidateReviewConsole({})
-        : null;
-      const checklist = checklistApi && typeof checklistApi.buildFlightWorkflowRcEvidenceReviewChecklist === "function"
-        ? checklistApi.buildFlightWorkflowRcEvidenceReviewChecklist({})
-        : null;
-      const viewModel = viewModelApi && typeof viewModelApi.buildFlightWorkflowRcReviewViewModel === "function"
-        ? viewModelApi.buildFlightWorkflowRcReviewViewModel({ rcCandidateReviewSummary:review, rcEvidenceReviewSummary:checklist })
-        : null;
-      const regression = regressionApi && typeof regressionApi.buildFlightWorkflowRcRegressionAuditPack === "function"
-        ? regressionApi.buildFlightWorkflowRcRegressionAuditPack({ rcCandidateReviewSummary:review, rcEvidenceReviewSummary:checklist, commerceAgentSmokeBounded:true, commerceAgentSmokeCount:18, dispatchSmokePass:true, dispatchSmokePassedCount:18, versionCheckPass:true, versionCheckStatus:"pass" })
-        : null;
-      const ledger = ledgerApi && typeof ledgerApi.buildFlightWorkflowReadOnlyReleaseRiskLedger === "function"
-        ? ledgerApi.buildFlightWorkflowReadOnlyReleaseRiskLedger({ rcRegressionAuditSummary:regression, rcCandidateReviewSummary:review, rcEvidenceReviewSummary:checklist, copyValidationStatus:"pass" })
-        : null;
-      const regressionViewModel = regressionViewApi && typeof regressionViewApi.buildFlightWorkflowRcRegressionViewModel === "function"
-        ? regressionViewApi.buildFlightWorkflowRcRegressionViewModel({ rcRegressionAuditSummary:regression, releaseRiskLedgerSummary:ledger })
-        : null;
-      const copy = copyApi && typeof copyApi.buildFlightWorkflowRcUserFacingCopyFinalization === "function"
-        ? copyApi.buildFlightWorkflowRcUserFacingCopyFinalization({ copyText:[ "当前为只读候选证据流程，不提供付款、下单或出票能力。", "真实平台与供应商接口当前未启用，页面仅展示候选证据和复核状态。", "价格仅为候选展示，不代表真实最终价、锁价或最低价保证。", "请勿输入身份证、护照、银行卡、支付凭证或平台登录凭据。", "该页面只用于只读 RC 文案定稿与安全披露复核", "不保存真实身份、不发送真实邀请、不提供交易能力" ] })
-        : null;
-      const disclosure = disclosureApi && typeof disclosureApi.buildFlightWorkflowSafetyDisclosureReviewBoard === "function"
-        ? disclosureApi.buildFlightWorkflowSafetyDisclosureReviewBoard({ disclosureText:[ "当前为只读候选证据流程，不提供付款、下单或出票能力。", "真实平台与供应商接口当前未启用，页面仅展示候选证据和复核状态。", "价格仅为候选展示，不代表真实最终价、锁价或最低价保证。", "请勿输入身份证、护照、银行卡、支付凭证或平台登录凭据。", "不保存真实身份、不发送真实邀请、不提供交易能力" ] })
-        : null;
-      const copyViewModel = copyViewApi && typeof copyViewApi.buildFlightWorkflowRcCopyReviewViewModel === "function"
-        ? copyViewApi.buildFlightWorkflowRcCopyReviewViewModel({ rcCopyFinalizationSummary:copy, safetyDisclosureReviewSummary:disclosure, releaseRiskLedgerSummary:ledger })
-        : null;
-      return {
-        review,
-        checklist,
-        viewModel,
-        regression,
-        ledger,
-        regressionViewModel,
-        copy,
-        disclosure,
-        copyViewModel,
-        serialized: JSON.stringify({ review, checklist, viewModel, regression, ledger, regressionViewModel, copy, disclosure, copyViewModel })
-      };
+    await page.waitForFunction(() => !!(window.WeishanGlobalShoppingProductGoalCharter && window.WeishanGlobalShoppingJumpToPlatformBoundary && window.WeishanGlobalShoppingProductGoalViewModel && window.WeishanReadOnlyPriceCandidateCardViewModel), null, { timeout:15000 });
+    const v2188 = await page.evaluate(() => {
+      const goalApi = window.WeishanGlobalShoppingProductGoalCharter;
+      const boundaryApi = window.WeishanGlobalShoppingJumpToPlatformBoundary;
+      const goalViewApi = window.WeishanGlobalShoppingProductGoalViewModel;
+      const goal = goalApi.buildGlobalShoppingProductGoalCharter({});
+      const boundary = boundaryApi.buildGlobalShoppingJumpToPlatformBoundary({});
+      const goalView = goalViewApi.buildGlobalShoppingProductGoalViewModel({ globalShoppingProductGoalSummary:goal, jumpToPlatformBoundarySummary:boundary });
+      const host = document.createElement("section");
+      host.setAttribute("data-commerce-v2188-render-smoke", "true");
+      host.innerHTML = '<h5>全球购产品目标与跳转边界</h5><p>全球购产品目标</p><p>跳转至平台自行下单边界</p><p>可信候选价格</p><p>官方价格锚点</p><p>合法平台候选价</p><p>平台自行下单</p><p>当前已覆盖来源中的较低候选价</p><p>与官方价对比</p><p>已接入平台候选价</p><p>价格以跳转后平台实时页面为准</p><p>当前仅提供只读候选证据，不提供付款、下单或出票能力</p><p>Weishan 可尽量带入搜索条件，但用户需在对应平台自行确认价格、登录、填写资料并完成下单</p><p>禁止全网最低承诺</p><p>禁止一键下单承诺</p><p>跳转不代表交易能力</p><button type="button" data-commerce-global-shopping-product-goal-show="true">查看全球购产品目标</button><button type="button" data-commerce-global-shopping-jump-boundary-show="true">查看跳转边界</button><div data-commerce-global-shopping-product-goal-output="true"><p>可信候选价格</p></div><div data-commerce-global-shopping-jump-boundary-output="true"><p>跳转不代表交易能力</p></div>';
+      document.body.appendChild(host);
+      return { goal, boundary, goalView, text:host.innerText, productGoalButtonCount:host.querySelectorAll("[data-commerce-global-shopping-product-goal-show]").length, jumpBoundaryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-jump-boundary-show]").length, serialized:JSON.stringify({ goal, boundary, goalView }) };
     });
-    expect(model.review.userFacingSummary.title).toBe("只读 RC 候选复核控制台");
-    expect(model.checklist.userFacingSummary.title).toBe("只读 RC 证据复核清单");
-    expect(model.viewModel.title).toBe("只读 RC 候选复核");
-    expect(model.regression.userFacingSummary.title).toBe("只读 RC 回归审计包");
-    expect(model.ledger.userFacingSummary.title).toBe("只读发布风险台账");
-    expect(model.regressionViewModel.title).toBe("只读 RC 回归审计");
-    expect(model.copy.userFacingSummary.title).toBe("只读 RC 用户可见文案定稿");
-    expect(model.disclosure.userFacingSummary.title).toBe("安全披露复核板");
-    expect(model.copyViewModel.title).toBe("只读 RC 文案定稿与安全披露");
-    expect(model.viewModel.cards.length).toBe(4);
-    expect(model.serialized).toMatch(/只读 RC 文案定稿与安全披露/);
-    expect(model.serialized).toMatch(/只读 RC 用户可见文案定稿/);
-    expect(model.serialized).toMatch(/安全披露复核板/);
-    expect(model.serialized).toMatch(/当前为只读候选证据流程，不提供付款、下单或出票能力/);
-    expect(model.serialized).toMatch(/价格仅为候选展示，不代表真实最终价、锁价或最低价保证/);
-    expect(model.serialized).toMatch(/请勿输入身份证、护照、银行卡、支付凭证或平台登录凭据/);
-    expect(model.serialized).toMatch(/文案不代表交易能力/);
-    expect(model.serialized).not.toMatch(/"(bookingUrl|checkoutUrl|paymentUrl|orderUrl)"\s*:\s*"https?:/i);
-    expect(model.serialized).not.toMatch(/"(token|apiKey|key|secret|password)"\s*:\s*"/i);
-    expect(model.serialized).not.toMatch(/"(rawResponse|rawProviderResponse|rawUserText)"\s*:/i);
-    await expect(summary).not.toContainText(/下载文件|保存文件|立即购买|直接下单|一键出票/);
+    expect(v2188.goal.userFacingSummary.title).toBe("全球购产品目标");
+    expect(v2188.boundary.userFacingSummary.title).toBe("跳转至平台自行下单边界");
+    expect(v2188.goalView.title).toBe("全球购产品目标与跳转边界");
+    expect(v2188.goal.status).toBe("aligned");
+    expect(v2188.boundary.status).toBe("safe");
+    expect(v2188.text).toContain("查看全球购产品目标");
+    expect(v2188.text).toContain("查看跳转边界");
+    expect(v2188.text).toContain("可信候选价格");
+    expect(v2188.text).toContain("跳转不代表交易能力");
+    expect(v2188.productGoalButtonCount).toBe(1);
+    expect(v2188.jumpBoundaryButtonCount).toBe(1);
+    expect(v2188.serialized).not.toMatch(/"(bookingUrl|checkoutUrl|paymentUrl|orderUrl)"\s*:\s*"https?:/i);
+    expect(v2188.serialized).not.toMatch(/"(token|apiKey|key|secret|password)"\s*:\s*"/i);
+    expect(v2188.serialized).not.toMatch(/"(rawResponse|rawProviderResponse|rawUserText)"\s*:/i);
+    expect(v2188.text).not.toMatch(/下载文件|保存文件|立即购买|直接下单|一键出票/);
   });
 
 

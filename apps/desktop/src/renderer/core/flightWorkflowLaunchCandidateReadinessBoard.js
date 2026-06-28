@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_READINESS_BOARD_VERSION = "2.1.87";
+  const FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_READINESS_BOARD_VERSION = "2.1.88";
   const BOARD_NAME = "flight_workflow_launch_candidate_readiness_board_v1";
   const CAVEAT = "发布候选仍然只覆盖只读候选证据流程，不提供付款、下单或出票能力。";
 

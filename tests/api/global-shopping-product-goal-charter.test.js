@@ -1,0 +1,43 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+const ROOT = path.resolve(__dirname, "../..");
+function load(files) { const window = {}; window.window = window; const context = vm.createContext({ window, console }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
+function main() {
+  const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProductGoalCharter.js"]);
+  const api = windowRef.WeishanGlobalShoppingProductGoalCharter;
+  assert.equal(api.GLOBAL_SHOPPING_PRODUCT_GOAL_CHARTER_VERSION, "2.1.88");
+  const aligned = api.buildGlobalShoppingProductGoalCharter();
+  assert.equal(aligned.appVersion, "2.1.88");
+  assert.equal(aligned.status, "aligned");
+  assert.equal(aligned.productGoals.findTrustedCandidatePrices, true);
+  assert.equal(aligned.productGoals.showOfficialPriceAnchor, true);
+  assert.equal(aligned.productGoals.normalizeTaxShippingServiceCurrency, true);
+  assert.equal(api.buildGlobalShoppingProductGoalCharter({ productGoals:{ findTrustedCandidatePrices:false } }).status, "needs_review");
+  assert.equal(api.buildGlobalShoppingProductGoalCharter({ productGoals:{ showOfficialPriceAnchor:false } }).status, "needs_review");
+  assert.equal(api.buildGlobalShoppingProductGoalCharter({ productGoals:{ normalizeTaxShippingServiceCurrency:false } }).status, "needs_review");
+  assert.equal(api.buildGlobalShoppingProductGoalCharter({ productGoals:{ noPaymentNoOrderNoTicketing:false } }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingProductGoalCharter({ productGoals:{ doNotStoreUserAccountIdentityBankPaymentCredential:false } }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingProductGoalCharter({ forbiddenPromises:{ noWholeNetworkLowestClaim:false } }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingProductGoalCharter({ forbiddenPromises:{ noLowestPriceGuarantee:false } }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingProductGoalCharter({ forbiddenPromises:{ noLockedPriceClaim:false } }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingProductGoalCharter({ forbiddenPromises:{ noOneClickOrderClaim:false } }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingProductGoalCharter({ forbiddenPromises:{ noOneClickTicketingClaim:false } }).status, "blocked");
+  assert.equal(aligned.recommendedCopy.coveredLowestCandidate, "当前已覆盖来源中的较低候选价");
+  assert.equal(aligned.recommendedCopy.officialComparison, "与官方价对比");
+  assert.equal(aligned.recommendedCopy.connectedPlatformCandidate, "已接入平台候选价");
+  assert.equal(aligned.recommendedCopy.platformRealtimePrice, "价格以跳转后平台实时页面为准");
+  assert.equal(aligned.recommendedCopy.readOnlyEvidence, "当前仅提供只读候选证据，不提供付款、下单或出票能力");
+  const serialized = JSON.stringify(api.buildGlobalShoppingProductGoalCharter({ realName:"张三", phone:"13800000000", email:"a@example.test", bookingUrl:"https://blocked.example", paymentUrl:"https://blocked.example", orderUrl:"https://blocked.example", token:"abc", apiKey:"abc", secret:"abc" }));
+  assert.equal(/张三|13800000000|a@example\.test/.test(serialized), false);
+  assert.equal(/https:\/\/blocked\.example/.test(serialized), false);
+  assert.equal(/"bookingUrl":"https?:|"paymentUrl":"https?:|"orderUrl":"https?:/.test(serialized), false);
+  assert.equal(/"token":"abc"|"apiKey":"abc"|"secret":"abc"/.test(serialized), false);
+  assert.equal(aligned.safety.bookingUrl, null);
+  assert.equal(aligned.safety.payment, false);
+  assert.equal(aligned.safety.order, false);
+  assert.equal(aligned.safety.ticketing, false);
+  console.log("GLOBAL_SHOPPING_PRODUCT_GOAL_CHARTER PASS");
+}
+main();

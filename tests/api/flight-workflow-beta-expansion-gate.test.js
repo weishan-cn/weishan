@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function readyInput(extra = {}) { return Object.assign({ releaseReadinessSummary:{ status:"ready", releaseReady:true, safeForUserFacingBeta:true, redacted:true }, safetyTestMatrixSummary:{ status:"pass", overallHealth:"pass", failedCount:0, blockedCount:0, redacted:true }, safetyRegressionSummary:{ status:"pass", redacted:true }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true }, findings:[], redacted:true }, feedbackTrendSummary:{ status:"ready", trends:{ overallTrend:"positive", safetyCopyTrend:"understood" }, recommendation:{ recommendationId:"expand_read_only_beta", label:"可以扩大只读测试" }, redacted:true }, humanReviewChecklistSummary:{ status:"ready", redacted:true }, acceptanceSessionSummary:{ status:"completed", redacted:true } }, extra); }
 function main() {
   const api = load(["apps/desktop/src/renderer/core/flightWorkflowBetaExpansionGate.js"]).WeishanFlightWorkflowBetaExpansionGate;
-  assert.equal(api.FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_VERSION, "2.1.87");
+  assert.equal(api.FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_VERSION, "2.1.88");
   const approved = api.buildFlightWorkflowBetaExpansionGate(readyInput());
   assert.equal(approved.status, "approved");
   assert.equal(approved.decision.decisionId, "expand_read_only_beta");

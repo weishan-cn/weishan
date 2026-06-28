@@ -1,0 +1,45 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+const ROOT = path.resolve(__dirname, "../..");
+function load(files) { const window = {}; window.window = window; const context = vm.createContext({ window, console }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
+function main() {
+  const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingJumpToPlatformBoundary.js"]);
+  const api = windowRef.WeishanGlobalShoppingJumpToPlatformBoundary;
+  assert.equal(api.GLOBAL_SHOPPING_JUMP_TO_PLATFORM_BOUNDARY_VERSION, "2.1.88");
+  const safe = api.buildGlobalShoppingJumpToPlatformBoundary();
+  assert.equal(safe.appVersion, "2.1.88");
+  assert.equal(safe.status, "safe");
+  assert.equal(api.buildGlobalShoppingJumpToPlatformBoundary({ handoffBoundary:{ canOpenExternalPlatformNow:true } }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingJumpToPlatformBoundary({ handoffBoundary:{ canSubmitOrder:true } }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingJumpToPlatformBoundary({ handoffBoundary:{ canPay:true } }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingJumpToPlatformBoundary({ handoffBoundary:{ canTicket:true } }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingJumpToPlatformBoundary({ handoffBoundary:{ canStorePlatformAccount:true } }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingJumpToPlatformBoundary({ handoffBoundary:{ canStoreIdentityDocument:true } }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingJumpToPlatformBoundary({ handoffBoundary:{ canStoreBankCard:true } }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingJumpToPlatformBoundary({ handoffBoundary:{ canStorePaymentCredential:true } }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingJumpToPlatformBoundary({ handoffBoundary:{ userCompletesCheckoutOnPlatform:false } }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingJumpToPlatformBoundary({ handoffBoundary:{ platformRealtimePageIsSourceOfTruth:false } }).status, "blocked");
+  assert.equal(safe.prefillPolicy.allowOriginDestinationDatePeople, true);
+  assert.equal(safe.prefillPolicy.allowProductModelSkuQuantity, true);
+  assert.equal(safe.prefillPolicy.allowHotelDatesRoomGuestCount, true);
+  assert.equal(safe.prefillPolicy.allowNonSensitivePreference, true);
+  assert.equal(safe.prefillPolicy.denyRealName, true);
+  assert.equal(safe.prefillPolicy.denyPhone, true);
+  assert.equal(safe.prefillPolicy.denyEmail, true);
+  assert.equal(safe.prefillPolicy.denyPassport, true);
+  assert.equal(safe.prefillPolicy.denyIdCard, true);
+  assert.equal(safe.prefillPolicy.denyBankCard, true);
+  assert.equal(safe.prefillPolicy.denyPaymentCredential, true);
+  assert.equal(safe.prefillPolicy.denyPlatformPassword, true);
+  const serialized = JSON.stringify(api.buildGlobalShoppingJumpToPlatformBoundary({ realName:"张三", phone:"13800000000", email:"a@example.test", token:"abc", apiKey:"abc", secret:"abc" }));
+  assert.equal(/张三|13800000000|a@example\.test/.test(serialized), false);
+  assert.equal(/"token":"abc"|"apiKey":"abc"|"secret":"abc"/.test(serialized), false);
+  assert.equal(safe.safety.bookingUrl, null);
+  assert.equal(safe.safety.autoOpen, false);
+  assert.equal(safe.safety.payment, false);
+  assert.equal(safe.safety.order, false);
+  console.log("GLOBAL_SHOPPING_JUMP_TO_PLATFORM_BOUNDARY PASS");
+}
+main();

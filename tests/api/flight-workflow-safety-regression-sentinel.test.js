@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js"]);
   const api = windowRef.WeishanFlightWorkflowSafetyRegressionSentinel;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "2.1.87");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "2.1.88");
   const safe = api.buildFlightWorkflowSafetyRegressionReport({ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, autoOpen:false, autoRefresh:false, fileWrite:false, download:false, note:"平台最终为准" });
   assert.equal(safe.sentinelName, "flight_workflow_safety_regression_sentinel_v1");
   assert.equal(safe.status, "pass");
@@ -36,6 +36,14 @@ function main() {
   const copy = api.buildFlightWorkflowSafetyRegressionReport({ rcCopyFinalizationSummary:{ bookingUrl:null, payment:false, rawUserTextStored:false, secretStored:false }, safetyDisclosureReviewSummary:{ orderUrl:null, fileWrite:false, download:false }, rcCopyReviewViewModelSummary:{ checkoutUrl:null, autoOpen:false } });
   assert.equal(copy.status, "pass");
   assert.equal(copy.rcCopyFinalizationSummary.bookingUrl, null);
+  const global = api.buildFlightWorkflowSafetyRegressionReport({
+    globalShoppingProductGoalSummary:{ status:"aligned", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
+    jumpToPlatformBoundarySummary:{ status:"safe", safety:{ checkoutUrl:null, autoOpen:false, payment:false, order:false, ticketing:false } },
+    globalShoppingProductGoalViewModelSummary:{ status:"aligned", bookingUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false }
+  });
+  assert.equal(global.status, "pass");
+  assert.equal(global.globalShoppingProductGoalSummary.status, "aligned");
+  assert.equal(global.jumpToPlatformBoundarySummary.status, "safe");
   console.log("FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL PASS");
 }
 main();

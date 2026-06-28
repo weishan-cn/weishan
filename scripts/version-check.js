@@ -2125,6 +2125,9 @@ function runVersionCheck() {
     checkReadOnlyPriceCandidateCardViewModelVersion(results, rootPackage.version);
     checkReadOnlyQuoteEvidenceSummaryFormatterVersion(results, rootPackage.version);
     checkReadOnlyQuoteSessionReportCenterVersion(results, rootPackage.version);
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping product goal charter version", "apps/desktop/src/renderer/core/globalShoppingProductGoalCharter.js", "GLOBAL_SHOPPING_PRODUCT_GOAL_CHARTER_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping jump to platform boundary version", "apps/desktop/src/renderer/core/globalShoppingJumpToPlatformBoundary.js", "GLOBAL_SHOPPING_JUMP_TO_PLATFORM_BOUNDARY_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping product goal view model version", "apps/desktop/src/renderer/core/globalShoppingProductGoalViewModel.js", "GLOBAL_SHOPPING_PRODUCT_GOAL_VIEW_MODEL_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow read only launch candidate freeze gate version", "apps/desktop/src/renderer/core/flightWorkflowReadOnlyLaunchCandidateFreezeGate.js", "FLIGHT_WORKFLOW_READ_ONLY_LAUNCH_CANDIDATE_FREEZE_GATE_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow evidence freeze pack version", "apps/desktop/src/renderer/core/flightWorkflowEvidenceFreezePack.js", "FLIGHT_WORKFLOW_EVIDENCE_FREEZE_PACK_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow launch candidate freeze view model version", "apps/desktop/src/renderer/core/flightWorkflowLaunchCandidateFreezeViewModel.js", "FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_FREEZE_VIEW_MODEL_VERSION");

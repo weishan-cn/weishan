@@ -48,6 +48,9 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowRcUserFacingCopyFinalization.js",
     "apps/desktop/src/renderer/core/flightWorkflowSafetyDisclosureReviewBoard.js",
     "apps/desktop/src/renderer/core/flightWorkflowRcCopyReviewViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingProductGoalCharter.js",
+    "apps/desktop/src/renderer/core/globalShoppingJumpToPlatformBoundary.js",
+    "apps/desktop/src/renderer/core/globalShoppingProductGoalViewModel.js",
     "apps/desktop/src/renderer/core/flightWorkflowReadOnlyUserConsentFlow.js",
     "apps/desktop/src/renderer/core/flightWorkflowPublicPilotOnboardingGuard.js",
     "apps/desktop/src/renderer/core/flightWorkflowPilotOnboardingViewModel.js",
@@ -65,7 +68,7 @@ function main() {
   const api = windowRef.WeishanReadOnlyPriceCandidateCardViewModel;
   const dryRunApi = windowRef.WeishanMultiProviderSandboxDryRunOrchestrator;
   const dryRun = dryRunApi.runMultiProviderSandboxDryRun({ title:"购买7月15日上海到成都最便宜的直达机票", origin:"上海", destination:"成都", departureDate:"2026-07-15", directOnly:true, sortIntent:"低价优先" }, {});
-  assert.equal(api.READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION, "2.1.87");
+  assert.equal(api.READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION, "2.1.88");
   const card = api.buildReadOnlyPriceCandidateCardViewModel({ continuitySummary:{ status:"resumable", currentStage:"decision", stageLabel:"选择候选", resumePlan:{ nextStepLabel:"确认前往平台", canResume:true } }, confirmationStateSummary:{ labels:["已选择候选"] }, recoverySummary:{ status:"resumable" }, resumeCoachSummary:{ allowedActions:[{ label:"前往平台确认" }] }, currentStage:"decision", workflowStageLabel:"选择候选", nextStepLabel:"确认前往平台", canResumeWorkflow:true, resumeActions:[{ label:"前往平台确认" }], blockedActions:[{ label:"付款" }], actionPolicyDecision:{ status:"requires_confirmation" }, workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sandboxDryRunSummary:dryRun, runTimelineSummary:dryRun.runTimelineSummary, providerRunMatrix:dryRun.providerRunMatrix, dryRunStatus:dryRun.status, dryRunButton:{ label:"运行沙盒只读报价", enabled:true, loading:false, autoRun:false }, dryRunTopCandidates:dryRun.dryRunTopCandidates, task:{ title:"7月15日上海到成都最便宜的机票" }, providerId:"google_flights_search", providerName:"Google Flights", providerType:"flight_search", report:{ provider:{ providerMode:"fixture" }, handoff:{ safeProviderHandoffUrl:"https://www.google.com/travel/flights" }, rankingPreview:{ sourceBreakdown:{ providerCount:3, providerIds:["flight_provider_trusted_fixture","trip_com_sandbox_stub","airline_official_sandbox_stub"], fareSources:["sandbox_read_only_import"] }, rankingExplanation:"仅按导入样本中的只读候选证据排序，平台最终为准。" }, selectedCandidate:{ providerName:"Airline Official Sandbox Stub", responseShape:"airline_official_stub_quote", selectedSourceSummary:"来源：Airline Official Sandbox Stub / airline_official_stub_quote" } }, sourceBreakdown:{ providerCount:3, providerIds:["flight_provider_trusted_fixture","trip_com_sandbox_stub","airline_official_sandbox_stub"], fareSources:["sandbox_read_only_import"] }, selectedSourceSummary:"来源：Airline Official Sandbox Stub / airline_official_stub_quote", rankingExplanation:"仅按导入样本中的只读候选证据排序，平台最终为准。", flightFields:{ origin:"上海", destination:"成都", dateDisplay:"7 月 15 日", goal:"低价优先", directPreference:"直达优先" }, topCandidates:[{ rank:1, quoteId:"q930", providerName:"Airline Official Sandbox Stub", responseShape:"airline_official_stub_quote", fareSource:"sandbox_read_only_import", currency:"CNY", baseFare:780, taxesAndFees:130, providerFees:20, totalPrice:930, safeProviderHandoffReady:true, safeProviderHandoffUrl:"https://www.google.com/travel/flights", bookingUrl:null, payment:false, order:false, identityUpload:false, redacted:true }] });
   assert.equal(card.visible, true);
   assert.equal(card.title, "只读候选价");
@@ -105,6 +108,12 @@ function main() {
   assert.equal(card.rcCopyReviewStatus, "finalized");
   assert.equal(card.safetyDisclosureStatus, "approved");
   assert.equal(card.safeToFinalizeUserFacingCopy, true);
+  assert.equal(card.globalShoppingProductGoalSummary.userFacingSummary.title, "全球购产品目标");
+  assert.equal(card.jumpToPlatformBoundarySummary.userFacingSummary.title, "跳转至平台自行下单边界");
+  assert.equal(card.globalShoppingProductGoalViewModelSummary.title, "全球购产品目标与跳转边界");
+  assert.equal(card.globalShoppingGoalStatus, "aligned");
+  assert.equal(card.jumpBoundaryStatus, "safe");
+  assert.equal(card.safeToProceedWithJumpToPlatformMvp, true);
   assert.equal(card.confirmationUi.continueButtonDisabled, false);
   assert.equal(card.bookingUrl, null);
   const cardWithLedger = api.buildReadOnlyPriceCandidateCardViewModel({ eventLedgerSummary:{ lastActionId:"record_platform_check", lastActionStatus:"executed_local", lastActionMessage:"动作已执行" } });
@@ -131,7 +140,7 @@ function main() {
   assert.equal(card.providerBindingWizardSummary.title, "Provider 沙盒绑定准备");
   assert.equal(card.interactiveRefreshState.status, "idle");
   assert.equal(card.clearRefreshStateButton.label, "清除刷新状态");
-  assert.equal(card.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.1.87");
+  assert.equal(card.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.1.88");
   assert.equal(card.sessionStatus, "updated");
   assert.equal(card.auditExportReady, true);
   assert.equal(card.sessionRecoverySummary.title, "Session Recovery");
@@ -203,6 +212,24 @@ function main() {
   assert.equal(html.includes("只读 RC 文案定稿与安全披露"), true);
   assert.equal(html.includes("只读 RC 用户可见文案定稿"), true);
   assert.equal(html.includes("安全披露复核板"), true);
+  assert.equal(html.includes("全球购产品目标与跳转边界"), true);
+  assert.equal(html.includes("全球购产品目标"), true);
+  assert.equal(html.includes("跳转至平台自行下单边界"), true);
+  assert.equal(html.includes("可信候选价格"), true);
+  assert.equal(html.includes("官方价格锚点"), true);
+  assert.equal(html.includes("合法平台候选价"), true);
+  assert.equal(html.includes("平台自行下单"), true);
+  assert.equal(html.includes("当前已覆盖来源中的较低候选价"), true);
+  assert.equal(html.includes("与官方价对比"), true);
+  assert.equal(html.includes("已接入平台候选价"), true);
+  assert.equal(html.includes("价格以跳转后平台实时页面为准"), true);
+  assert.equal(html.includes("当前仅提供只读候选证据，不提供付款、下单或出票能力"), true);
+  assert.equal(html.includes("Weishan 可尽量带入搜索条件，但用户需在对应平台自行确认价格、登录、填写资料并完成下单"), true);
+  assert.equal(html.includes("禁止全网最低承诺"), true);
+  assert.equal(html.includes("禁止一键下单承诺"), true);
+  assert.equal(html.includes("跳转不代表交易能力"), true);
+  assert.equal(html.includes("查看全球购产品目标"), true);
+  assert.equal(html.includes("查看跳转边界"), true);
   assert.equal(html.includes("回归审计"), true);
   assert.equal(html.includes("发布风险"), true);
   assert.equal(html.includes("RC 回归审计通过"), true);
@@ -240,7 +267,7 @@ function main() {
   assert.equal(rankedHtml.includes("当前导入样本中的低价候选"), true);
   assert.equal(rankedHtml.includes("运行沙盒只读报价"), true);
   assert.equal(rankedHtml.includes("本次沙盒运行结果"), true);
-  assert.equal(rankedHtml.includes("全网最低"), false);
+  assert.equal(/(^|[^禁止])全网最低承诺/.test(rankedHtml), false);
   const missingUrlCard = api.buildReadOnlyPriceCandidateCardViewModel({ providerId:"google_flights_search", report:{ handoff:{ safeProviderHandoffUrl:null } } });
   assert.equal(missingUrlCard.visible, true);
   assert.equal(missingUrlCard.gate.status, "blocked");
@@ -264,6 +291,8 @@ function main() {
   assert.equal(commerceAgentPageSource.includes("[data-commerce-flight-release-risk-ledger-show]"), true);
   assert.equal(commerceAgentPageSource.includes("[data-commerce-flight-rc-copy-review-show]"), true);
   assert.equal(commerceAgentPageSource.includes("[data-commerce-flight-safety-disclosure-review-show]"), true);
+  assert.equal(commerceAgentPageSource.includes("[data-commerce-global-shopping-product-goal-show]"), true);
+  assert.equal(commerceAgentPageSource.includes("[data-commerce-global-shopping-jump-boundary-show]"), true);
   console.log("READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_CORE PASS");
 }
 main();

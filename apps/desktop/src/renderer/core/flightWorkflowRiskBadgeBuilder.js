@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.87";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.88";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -131,6 +131,8 @@
       const releaseRiskLedger = obj(safe.releaseRiskLedgerSummary);
       const rcCopyFinalization = obj(safe.rcCopyFinalizationSummary);
       const safetyDisclosureReview = obj(safe.safetyDisclosureReviewSummary);
+      const globalShoppingProductGoalSummary = obj(safe.globalShoppingProductGoalSummary);
+      const jumpToPlatformBoundarySummary = obj(safe.jumpToPlatformBoundarySummary);
       if (rcCandidateReview.status === "ready_for_review" || safe.safeToStartRcReview === true) badges.push(badge("rc_review_ready", "可以开始 RC 复核", "info"));
       if (rcCandidateReview.status === "evidence_incomplete" || rcEvidenceReview.status === "incomplete") badges.push(badge("rc_review_incomplete", "证据仍需补充", "warning"));
       if (rcCandidateReview.status === "needs_safety_review" || rcEvidenceReview.status === "needs_review") badges.push(badge("rc_review_safety_review", "需要安全复核", "warning"));
@@ -147,6 +149,16 @@
       if (safetyDisclosureReview.status === "needs_review") badges.push(badge("safety_disclosure_needs_review", "安全披露仍需复核", "warning"));
       if (safetyDisclosureReview.status === "blocked") badges.push(badge("safety_disclosure_blocked", "安全披露已阻断", "blocked"));
       if (rcCopyFinalization.finalizationName || safetyDisclosureReview.boardName) badges.push(badge("copy_disclosure_read_only", "文案不代表交易能力", "info"));
+      if (globalShoppingProductGoalSummary.status === "aligned") badges.push(badge("global_shopping_goal_aligned", "全球购目标已对齐", "info"));
+      if (globalShoppingProductGoalSummary.status === "needs_review") badges.push(badge("global_shopping_goal_review", "全球购目标仍需复核", "warning"));
+      if (globalShoppingProductGoalSummary.status === "blocked") badges.push(badge("global_shopping_goal_blocked", "全球购目标已阻断", "blocked"));
+      if (jumpToPlatformBoundarySummary.status === "safe") badges.push(badge("jump_boundary_safe", "跳转平台边界安全", "info"));
+      if (jumpToPlatformBoundarySummary.status === "needs_review") badges.push(badge("jump_boundary_review", "跳转平台边界仍需复核", "warning"));
+      if (jumpToPlatformBoundarySummary.status === "blocked") badges.push(badge("jump_boundary_blocked", "跳转平台边界已阻断", "blocked"));
+      if (globalShoppingProductGoalSummary.status || jumpToPlatformBoundarySummary.status) badges.push(badge("user_checkout_on_platform", "用户在平台自行下单", "info"));
+      if (globalShoppingProductGoalSummary.status || jumpToPlatformBoundarySummary.status) badges.push(badge("no_lowest_claim", "禁止全网最低承诺", "warning"));
+      if (globalShoppingProductGoalSummary.status || jumpToPlatformBoundarySummary.status) badges.push(badge("no_one_click_order_claim", "禁止一键下单承诺", "warning"));
+      if (globalShoppingProductGoalSummary.status || jumpToPlatformBoundarySummary.status) badges.push(badge("jump_not_transaction", "跳转不代表交易能力", "info"));
       if (cohortProgress.status === "ready" || safe.cohortProgressStatus === "ready") badges.push(badge("cohort_progress_ready", "测试批次进度正常", "info"));
       if (cohortProgress.status === "needs_review" || safe.cohortProgressStatus === "needs_review") badges.push(badge("cohort_progress_in_progress", "测试批次仍在进行", "warning"));
       if (cohortProgress.status === "needs_more_testers" || safe.cohortProgressStatus === "needs_more_testers") badges.push(badge("cohort_progress_needs_more", "仍需更多测试者", "warning"));

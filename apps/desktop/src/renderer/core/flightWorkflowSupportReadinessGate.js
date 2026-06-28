@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SUPPORT_READINESS_GATE_VERSION = "2.1.87";
+  const FLIGHT_WORKFLOW_SUPPORT_READINESS_GATE_VERSION = "2.1.88";
   const GATE_NAME = "flight_workflow_support_readiness_gate_v1";
   const CAVEAT = "该判断只适用于只读试点问题处理，不代表客服工单或交易能力。";
 

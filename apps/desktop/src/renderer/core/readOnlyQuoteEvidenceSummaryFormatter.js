@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.87";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.88";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -239,12 +239,18 @@
       rcCopyFinalizationSummary: stripUnsafe(safe.rcCopyFinalizationSummary || null),
       safetyDisclosureReviewSummary: stripUnsafe(safe.safetyDisclosureReviewSummary || null),
       rcCopyReviewViewModelSummary: stripUnsafe(safe.rcCopyReviewViewModelSummary || null),
+      globalShoppingProductGoalSummary: stripUnsafe(safe.globalShoppingProductGoalSummary || null),
+      jumpToPlatformBoundarySummary: stripUnsafe(safe.jumpToPlatformBoundarySummary || null),
+      globalShoppingProductGoalViewModelSummary: stripUnsafe(safe.globalShoppingProductGoalViewModelSummary || null),
       rcRegressionStatus: safeLine(safe.rcRegressionStatus || ""),
       releaseRiskStatus: safeLine(safe.releaseRiskStatus || ""),
       safeToContinueReleaseCandidate: safe.safeToContinueReleaseCandidate === true,
       rcCopyReviewStatus: safeLine(safe.rcCopyReviewStatus || ""),
       safetyDisclosureStatus: safeLine(safe.safetyDisclosureStatus || ""),
       safeToFinalizeUserFacingCopy: safe.safeToFinalizeUserFacingCopy === true,
+      globalShoppingGoalStatus: safeLine(safe.globalShoppingGoalStatus || ""),
+      jumpBoundaryStatus: safeLine(safe.jumpBoundaryStatus || ""),
+      safeToProceedWithJumpToPlatformMvp: safe.safeToProceedWithJumpToPlatformMvp === true,
       pilotOpsStatus: safeLine(safe.pilotOpsStatus || ""),
       nextCohortDecisionStatus: safeLine(safe.nextCohortDecisionStatus || ""),
       pilotOpsPrimaryRisk: stripUnsafe(safe.pilotOpsPrimaryRisk || null),

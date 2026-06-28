@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RC_COPY_REVIEW_VIEW_MODEL_VERSION = "2.1.87";
+  const FLIGHT_WORKFLOW_RC_COPY_REVIEW_VIEW_MODEL_VERSION = "2.1.88";
   const VIEW_MODEL_NAME = "flight_workflow_rc_copy_review_view_model_v1";
   const CAVEAT = "该页面只用于只读 RC 文案定稿与安全披露复核，不保存真实身份、不发送真实邀请、不提供交易能力。";
 
@@ -36,6 +36,12 @@
     const safe = obj(input);
     return obj(safe.releaseRiskLedgerSummary);
   }
+  function globalShoppingGoalOf(input) {
+    return obj(obj(input).globalShoppingProductGoalSummary);
+  }
+  function jumpBoundaryOf(input) {
+    return obj(obj(input).jumpToPlatformBoundarySummary);
+  }
   function buildFlightWorkflowRcCopyReviewRows(input) {
     const summary = copyFinalizationOf(input || {});
     return toArray(summary.copyRows).map(function (item) { return row(item.rowId, item.label, item.value, item.status); });
@@ -47,9 +53,13 @@
   function buildFlightWorkflowRcCopyReviewCards(input) {
     const copySummary = copyFinalizationOf(input || {});
     const disclosureSummary = disclosureOf(input || {});
+    const globalShoppingGoalSummary = globalShoppingGoalOf(input || {});
+    const jumpBoundarySummary = jumpBoundaryOf(input || {});
     return clone([
       card("copy_finalization", "文案定稿", obj(copySummary.userFacingSummary).resultLabel || copySummary.status || "文案仍需复核"),
       card("safety_disclosure", "安全披露", obj(disclosureSummary.userFacingSummary).resultLabel || disclosureSummary.status || "安全披露仍需复核"),
+      card("global_shopping_goal", "全球购目标", obj(globalShoppingGoalSummary.userFacingSummary).resultLabel || globalShoppingGoalSummary.status || "产品目标仍需复核"),
+      card("jump_boundary", "跳转边界", obj(jumpBoundarySummary.userFacingSummary).resultLabel || jumpBoundarySummary.status || "跳转边界仍需复核"),
       card("forbidden_copy", "禁用措辞", toArray(copySummary.forbiddenCopyFindings).length ? "发现危险文案" : "文案不代表交易能力"),
       card("next_step", "下一步", disclosureSummary.status === "approved" && copySummary.status === "finalized" ? "RC 文案可以定稿" : obj(disclosureSummary.userFacingSummary).resultLabel || obj(copySummary.userFacingSummary).resultLabel || "仍需复核")
     ]);
@@ -59,6 +69,8 @@
       const copySummary = copyFinalizationOf(input || {});
       const disclosureSummary = disclosureOf(input || {});
       const releaseRiskSummary = releaseRiskOf(input || {});
+      const globalShoppingGoalSummary = globalShoppingGoalOf(input || {});
+      const jumpBoundarySummary = jumpBoundaryOf(input || {});
       const status = copySummary.status === "blocked" || disclosureSummary.status === "blocked"
         ? "blocked"
         : copySummary.status === "finalized" && disclosureSummary.status === "approved"
@@ -77,6 +89,11 @@
         rcCopyFinalizationSummary:clone(copySummary),
         safetyDisclosureReviewSummary:clone(disclosureSummary),
         releaseRiskLedgerSummary:clone(releaseRiskSummary),
+        globalShoppingProductGoalSummary:clone(globalShoppingGoalSummary),
+        jumpToPlatformBoundarySummary:clone(jumpBoundarySummary),
+        globalShoppingGoalStatus:text(obj(globalShoppingGoalSummary).status || ""),
+        jumpBoundaryStatus:text(obj(jumpBoundarySummary).status || ""),
+        safeToProceedWithJumpToPlatformMvp:obj(globalShoppingGoalSummary).safeToProceedWithJumpToPlatformMvp === true && obj(jumpBoundarySummary).safeToProceedWithJumpToPlatformMvp === true,
         bookingUrl:null,
         checkoutUrl:null,
         paymentUrl:null,

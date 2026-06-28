@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_BETA_FEEDBACK_REVIEW_CENTER_VERSION = "2.1.87";
+  const FLIGHT_WORKFLOW_BETA_FEEDBACK_REVIEW_CENTER_VERSION = "2.1.88";
   const REVIEW_CENTER_NAME = "flight_workflow_beta_feedback_review_center_v1";
   const SENSITIVE_TEXT_RE = /https?:\/\/\S+|(?:token|apiKey|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport/ig;
   const TRADING_URL_RE = /bookingUrl|checkoutUrl|paymentUrl|orderUrl/i;

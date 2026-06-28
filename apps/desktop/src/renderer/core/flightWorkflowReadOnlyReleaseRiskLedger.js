@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_RELEASE_RISK_LEDGER_VERSION = "2.1.87";
+  const FLIGHT_WORKFLOW_READ_ONLY_RELEASE_RISK_LEDGER_VERSION = "2.1.88";
   const LEDGER_NAME = "flight_workflow_read_only_release_risk_ledger_v1";
   const CAVEAT = "该风险台账只用于只读发布候选判断，不代表真实交易、订单、客服工单或出票能力。";
 
@@ -171,6 +171,11 @@
       rcCopyReviewStatus:text(safe.rcCopyReviewStatus || safe.rcCopyFinalizationSummary && safe.rcCopyFinalizationSummary.status || ""),
       safetyDisclosureStatus:text(safe.safetyDisclosureStatus || safe.safetyDisclosureReviewSummary && safe.safetyDisclosureReviewSummary.status || ""),
       safeToFinalizeUserFacingCopy:safe.safeToFinalizeUserFacingCopy === true,
+      globalShoppingProductGoalSummary:clone(safe.globalShoppingProductGoalSummary || null),
+      jumpToPlatformBoundarySummary:clone(safe.jumpToPlatformBoundarySummary || null),
+      globalShoppingGoalStatus:text(safe.globalShoppingGoalStatus || safe.globalShoppingProductGoalSummary && safe.globalShoppingProductGoalSummary.status || ""),
+      jumpBoundaryStatus:text(safe.jumpBoundaryStatus || safe.jumpToPlatformBoundarySummary && safe.jumpToPlatformBoundarySummary.status || ""),
+      safeToProceedWithJumpToPlatformMvp:safe.safeToProceedWithJumpToPlatformMvp === true,
       rcRegressionAuditSummary:clone(rcRegressionAuditSummary),
       rcCandidateReviewSummary:clone(rcCandidateReviewSummary),
       rcEvidenceReviewSummary:clone(rcEvidenceReviewSummary),
@@ -212,6 +217,11 @@
       rcCopyReviewStatus:text(safe.rcCopyReviewStatus || ""),
       safetyDisclosureStatus:text(safe.safetyDisclosureStatus || ""),
       safeToFinalizeUserFacingCopy:safe.safeToFinalizeUserFacingCopy === true,
+      globalShoppingProductGoalSummary:clone(safe.globalShoppingProductGoalSummary || null),
+      jumpToPlatformBoundarySummary:clone(safe.jumpToPlatformBoundarySummary || null),
+      globalShoppingGoalStatus:text(safe.globalShoppingGoalStatus || ""),
+      jumpBoundaryStatus:text(safe.jumpBoundaryStatus || ""),
+      safeToProceedWithJumpToPlatformMvp:safe.safeToProceedWithJumpToPlatformMvp === true,
       rcRegressionAuditSummary:clone(safe.rcRegressionAuditSummary || null),
       rcCandidateReviewSummary:clone(safe.rcCandidateReviewSummary || null),
       rcEvidenceReviewSummary:clone(safe.rcEvidenceReviewSummary || null),
