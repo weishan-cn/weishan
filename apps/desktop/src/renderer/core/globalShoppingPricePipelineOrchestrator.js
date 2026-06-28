@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.1.94";
+  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.1.95";
   const ORCHESTRATOR_NAME = "global_shopping_price_pipeline_orchestrator_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -78,6 +78,31 @@
       sandboxPriceFeedGate:sandboxPriceFeedSummary,
       normalizedSourceInputs:toArray(legalProviderFixtureSummary.normalizedSourceInputs || safe.normalizedSourceInputs)
     }));
+    const readOnlyProviderSandboxConnectorSummary = resolveSummary(safe, "readOnlyProviderSandboxConnector", "WeishanGlobalShoppingReadOnlyProviderSandboxConnector", "buildGlobalShoppingReadOnlyProviderSandboxConnector", {
+      providerFixture:legalProviderFixtureSummary,
+      providerCredentialSafetyReview:providerCredentialSafetySummary,
+      sandboxPriceFeedGate:sandboxPriceFeedSummary,
+      providerResponseContract:sandboxProviderResponseContractSummary,
+      connectorMode:text(safe.connectorMode || "fixture"),
+      fixturePayload:obj(safe.fixturePayload || {
+        providerId:obj(legalProviderFixtureSummary).providerId || "global_fixture_provider",
+        providerName:obj(legalProviderFixtureSummary).providerName || "Global Shopping Fixture Sandbox",
+        connectorMode:"fixture"
+      }),
+      replayPayload:obj(safe.replayPayload || {})
+    });
+    const fixtureReplayConsoleSummary = resolveSummary(safe, "fixtureReplayConsole", "WeishanGlobalShoppingFixtureReplayConsole", "buildGlobalShoppingFixtureReplayConsole", {
+      connectorSummary:readOnlyProviderSandboxConnectorSummary,
+      replayMode:text(safe.replayMode || "fixture"),
+      replayPayload:obj(safe.replayPayload || {
+        replayId:"fixture_replay_pipeline",
+        replayMode:"fixture",
+        providerId:obj(legalProviderFixtureSummary).providerId || "global_fixture_provider",
+        providerName:obj(legalProviderFixtureSummary).providerName || "Global Shopping Fixture Sandbox",
+        redacted:true,
+        normalizedSourceInputs:toArray(legalProviderFixtureSummary.normalizedSourceInputs)
+      })
+    });
     const priceSourceNormalizationSummary = resolveSummary(safe, "priceSourceNormalizer", "WeishanGlobalShoppingPriceSourceNormalizer", "buildGlobalShoppingPriceSourceNormalizer", safe);
     const officialPriceAnchorSummary = resolveSummary(safe, "officialPriceAnchorSlot", "WeishanGlobalShoppingOfficialPriceAnchorSlot", "buildGlobalShoppingOfficialPriceAnchorSlot", {
       normalizedCandidates:toArray(priceSourceNormalizationSummary.normalizedCandidates)
@@ -94,6 +119,8 @@
     });
     const sandboxHandoffViewModelSummary = resolveSummary(safe, "sandboxHandoffViewModel", "WeishanGlobalShoppingSandboxHandoffViewModel", "buildGlobalShoppingSandboxHandoffViewModel", safe);
     const pipelineHealth = {
+      providerConnectorReady:statusOf(readOnlyProviderSandboxConnectorSummary) === "ready",
+      fixtureReplayReady:statusOf(fixtureReplayConsoleSummary) === "ready",
       providerFixtureReady:statusOf(legalProviderFixtureSummary) === "ready",
       credentialSafetyPass:statusOf(providerCredentialSafetySummary) === "ready",
       sandboxFeedReady:statusOf(sandboxPriceFeedSummary) === "ready",
@@ -115,6 +142,8 @@
       noExternalOpen:safe.openExternal !== true && safe.autoOpen !== true
     };
     const blockedReasons = [];
+    if (statusOf(readOnlyProviderSandboxConnectorSummary) === "blocked") blockedReasons.push("provider_connector_blocked");
+    if (statusOf(fixtureReplayConsoleSummary) === "blocked") blockedReasons.push("fixture_replay_blocked");
     if (!pipelineHealth.noRealProvider) blockedReasons.push("real_provider_detected");
     if (!pipelineHealth.noNetwork) blockedReasons.push("network_detected");
     if (!pipelineHealth.noRawResponsePersistence) blockedReasons.push("raw_response_persistence_detected");
@@ -124,7 +153,7 @@
     if (!pipelineHealth.noOrder) blockedReasons.push("order_detected");
     if (!pipelineHealth.noTicketing) blockedReasons.push("ticketing_detected");
     if (!pipelineHealth.noExternalOpen) blockedReasons.push("external_open_detected");
-    const review = !pipelineHealth.providerFixtureReady || !pipelineHealth.credentialSafetyPass || !pipelineHealth.sandboxFeedReady || !pipelineHealth.responseContractReady || !pipelineHealth.priceNormalizationReady || !pipelineHealth.officialAnchorReady || !pipelineHealth.sameItemMatcherReady || !pipelineHealth.duplicateMergeReady || !pipelineHealth.coveredLowestReady || !pipelineHealth.sandboxHandoffReady;
+    const review = !pipelineHealth.providerConnectorReady || !pipelineHealth.fixtureReplayReady || !pipelineHealth.providerFixtureReady || !pipelineHealth.credentialSafetyPass || !pipelineHealth.sandboxFeedReady || !pipelineHealth.responseContractReady || !pipelineHealth.priceNormalizationReady || !pipelineHealth.officialAnchorReady || !pipelineHealth.sameItemMatcherReady || !pipelineHealth.duplicateMergeReady || !pipelineHealth.coveredLowestReady || !pipelineHealth.sandboxHandoffReady;
     return clone({
       pipelineHealth:pipelineHealth,
       pipelineStages:buildGlobalShoppingPricePipelineRows({
@@ -132,6 +161,8 @@
         providerCredentialSafetySummary:providerCredentialSafetySummary,
         sandboxPriceFeedSummary:sandboxPriceFeedSummary,
         sandboxProviderResponseContractSummary:sandboxProviderResponseContractSummary,
+        readOnlyProviderSandboxConnectorSummary:readOnlyProviderSandboxConnectorSummary,
+        fixtureReplayConsoleSummary:fixtureReplayConsoleSummary,
         priceSourceNormalizationSummary:priceSourceNormalizationSummary,
         officialPriceAnchorSummary:officialPriceAnchorSummary,
         sameItemMatcherSummary:sameItemMatcherSummary,
@@ -141,12 +172,16 @@
       }),
       readyOutputs:{
         canShowFixtureCandidatePrices:pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady,
+        canShowFixtureReplay:pipelineHealth.fixtureReplayReady,
         canShowOfficialAnchor:pipelineHealth.officialAnchorReady,
         canShowCoveredLowestCandidate:pipelineHealth.coveredLowestReady,
         canShowSandboxHandoffPreview:pipelineHealth.sandboxHandoffReady,
-        canProceedToReadOnlyProviderSandbox:pipelineHealth.providerFixtureReady && pipelineHealth.credentialSafetyPass && pipelineHealth.sandboxFeedReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.officialAnchorReady && pipelineHealth.sameItemMatcherReady && pipelineHealth.duplicateMergeReady && pipelineHealth.coveredLowestReady && pipelineHealth.sandboxHandoffReady
+        canProceedToReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.providerFixtureReady && pipelineHealth.credentialSafetyPass && pipelineHealth.sandboxFeedReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.officialAnchorReady && pipelineHealth.sameItemMatcherReady && pipelineHealth.duplicateMergeReady && pipelineHealth.coveredLowestReady && pipelineHealth.sandboxHandoffReady,
+        safeToProceedWithFirstRealReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.coveredLowestReady
       },
       blockedReasons:blockedReasons,
+      readOnlyProviderSandboxConnectorSummary:clone(readOnlyProviderSandboxConnectorSummary),
+      fixtureReplayConsoleSummary:clone(fixtureReplayConsoleSummary),
       legalProviderFixtureSummary:clone(legalProviderFixtureSummary),
       providerCredentialSafetySummary:clone(providerCredentialSafetySummary),
       sandboxPriceFeedSummary:clone(sandboxPriceFeedSummary),
@@ -164,6 +199,8 @@
   function buildGlobalShoppingPricePipelineRows(input) {
     const safe = obj(input);
     return clone([
+      row("provider_connector", "Provider Connector", statusOf(safe.readOnlyProviderSandboxConnectorSummary) === "ready" ? "pass" : (statusOf(safe.readOnlyProviderSandboxConnectorSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.readOnlyProviderSandboxConnectorSummary).userFacingSummary).resultLabel || "只读 Provider Connector 仍需复核"),
+      row("fixture_replay", "Fixture 回放", statusOf(safe.fixtureReplayConsoleSummary) === "ready" ? "pass" : (statusOf(safe.fixtureReplayConsoleSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.fixtureReplayConsoleSummary).userFacingSummary).resultLabel || "Fixture 回放仍需复核"),
       row("provider_fixture", "Provider fixture", statusOf(safe.legalProviderFixtureSummary) === "ready" ? "pass" : "warning", obj(obj(safe.legalProviderFixtureSummary).userFacingSummary).resultLabel || "Provider fixture 仍需复核"),
       row("credential_safety", "凭据安全", statusOf(safe.providerCredentialSafetySummary) === "ready" ? "pass" : "warning", obj(obj(safe.providerCredentialSafetySummary).userFacingSummary).resultLabel || "Provider 凭据边界仍需复核"),
       row("sandbox_feed", "Sandbox feed", statusOf(safe.sandboxPriceFeedSummary) === "ready" ? "pass" : "warning", obj(obj(safe.sandboxPriceFeedSummary).userFacingSummary).resultLabel || "Sandbox 价格 Feed 仍需复核"),
@@ -195,6 +232,8 @@
         redacted:true
       },
       safety:safety(safe.safety),
+      readOnlyProviderSandboxConnectorSummary:linkedSummary(evaluation.readOnlyProviderSandboxConnectorSummary),
+      fixtureReplayConsoleSummary:linkedSummary(evaluation.fixtureReplayConsoleSummary),
       legalProviderFixtureSummary:linkedSummary(evaluation.legalProviderFixtureSummary),
       providerCredentialSafetySummary:linkedSummary(evaluation.providerCredentialSafetySummary),
       sandboxPriceFeedSummary:linkedSummary(evaluation.sandboxPriceFeedSummary),

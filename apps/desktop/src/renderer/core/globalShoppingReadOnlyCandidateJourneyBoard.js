@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_READ_ONLY_CANDIDATE_JOURNEY_BOARD_VERSION = "2.1.94";
+  const GLOBAL_SHOPPING_READ_ONLY_CANDIDATE_JOURNEY_BOARD_VERSION = "2.1.95";
   const BOARD_NAME = "global_shopping_read_only_candidate_journey_board_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -123,10 +123,14 @@
   function buildGlobalShoppingReadOnlyCandidateJourneyCards(input) {
     const safe = obj(input);
     const pipeline = resolvePipeline(safe);
+    const connectorSummary = obj(safe.readOnlyProviderSandboxConnectorSummary || pipeline.readOnlyProviderSandboxConnectorSummary);
+    const replaySummary = obj(safe.fixtureReplayConsoleSummary || pipeline.fixtureReplayConsoleSummary);
     const coveredLowest = obj(safe.coveredLowestCandidateBoardSummary || pipeline.coveredLowestCandidateBoardSummary);
     const sandboxHandoff = obj(safe.sandboxHandoffViewModelSummary || pipeline.sandboxHandoffViewModelSummary);
     const providerFixture = obj(safe.legalProviderFixtureSummary || pipeline.legalProviderFixtureSummary);
     return clone([
+      card("provider_connector", "Provider Connector", obj(obj(connectorSummary).userFacingSummary).resultLabel || "只读 Provider Connector 仍需复核"),
+      card("fixture_replay", "Fixture 回放", obj(obj(replaySummary).userFacingSummary).resultLabel || "Fixture 回放仍需复核"),
       card("provider_fixture", "Provider Fixture", obj(obj(providerFixture).userFacingSummary).resultLabel || "Provider fixture 仍需复核"),
       card("price_pipeline", "价格流水线", obj(obj(pipeline).userFacingSummary).resultLabel || "只读价格流水线仍需复核"),
       card("covered_lowest", "已覆盖来源较低候选价", obj(obj(coveredLowest).userFacingSummary).resultLabel || "当前仅比较已覆盖来源中的候选价"),
@@ -142,6 +146,8 @@
   function buildGlobalShoppingReadOnlyCandidateJourneyRows(input) {
     const safe = obj(input);
     const pipeline = resolvePipeline(safe);
+    const connectorSummary = obj(safe.readOnlyProviderSandboxConnectorSummary || pipeline.readOnlyProviderSandboxConnectorSummary);
+    const replaySummary = obj(safe.fixtureReplayConsoleSummary || pipeline.fixtureReplayConsoleSummary);
     const providerFixture = obj(safe.legalProviderFixtureSummary || pipeline.legalProviderFixtureSummary);
     const credential = obj(safe.providerCredentialSafetySummary || pipeline.providerCredentialSafetySummary);
     const feed = obj(safe.sandboxPriceFeedSummary || pipeline.sandboxPriceFeedSummary);
@@ -153,6 +159,8 @@
     const coveredLowest = obj(safe.coveredLowestCandidateBoardSummary || pipeline.coveredLowestCandidateBoardSummary);
     const sandboxHandoff = obj(safe.sandboxHandoffViewModelSummary || pipeline.sandboxHandoffViewModelSummary);
     return clone([
+      row("provider_connector", "Provider Connector", obj(obj(connectorSummary).userFacingSummary).resultLabel || "只读 Provider Connector 仍需复核", statusOf(connectorSummary) === "ready" ? "pass" : "warning"),
+      row("fixture_replay", "Fixture 回放", obj(obj(replaySummary).userFacingSummary).resultLabel || "Fixture 回放仍需复核", statusOf(replaySummary) === "ready" ? "pass" : "warning"),
       row("provider_fixture", "Provider fixture", obj(obj(providerFixture).userFacingSummary).resultLabel || "Provider fixture 仍需复核", statusOf(providerFixture) === "ready" ? "pass" : "warning"),
       row("credential_safety", "凭据安全", obj(obj(credential).userFacingSummary).resultLabel || "Provider 凭据边界仍需复核", statusOf(credential) === "ready" ? "pass" : "warning"),
       row("sandbox_feed", "Sandbox feed", obj(obj(feed).userFacingSummary).resultLabel || "Sandbox 价格 Feed 仍需复核", statusOf(feed) === "ready" ? "pass" : "warning"),
@@ -168,14 +176,16 @@
   function sanitizeGlobalShoppingReadOnlyCandidateJourneyBoard(board) {
     const safe = obj(board);
     const pipeline = resolvePipeline(safe);
+    const connectorSummary = obj(safe.readOnlyProviderSandboxConnectorSummary || pipeline.readOnlyProviderSandboxConnectorSummary);
+    const replaySummary = obj(safe.fixtureReplayConsoleSummary || pipeline.fixtureReplayConsoleSummary);
     const coveredLowest = obj(safe.coveredLowestCandidateBoardSummary || pipeline.coveredLowestCandidateBoardSummary);
     const sandboxHandoff = obj(safe.sandboxHandoffViewModelSummary || pipeline.sandboxHandoffViewModelSummary);
     const providerFixture = obj(safe.legalProviderFixtureSummary || pipeline.legalProviderFixtureSummary);
     const displayCopy = collectDisplayCopy(safe);
     const forbiddenCopy = /全网最低|最低价保证|锁价|真实最终价|立即购买|直接下单|一键下单|一键出票/i.test(displayCopy);
-    const unsafe = forbiddenCopy || hasUnsafeBoundary(safe) || hasUnsafeBoundary(pipeline) || hasUnsafeBoundary(coveredLowest) || hasUnsafeBoundary(sandboxHandoff) || hasUnsafeBoundary(providerFixture);
-    const blocked = statusOf(pipeline) === "blocked" || unsafe;
-    const needsReview = !blocked && (!Object.keys(pipeline).length || !Object.keys(providerFixture).length || !Object.keys(coveredLowest).length || !Object.keys(sandboxHandoff).length || statusOf(pipeline) === "needs_review");
+    const unsafe = forbiddenCopy || hasUnsafeBoundary(safe) || hasUnsafeBoundary(pipeline) || hasUnsafeBoundary(connectorSummary) || hasUnsafeBoundary(replaySummary) || hasUnsafeBoundary(coveredLowest) || hasUnsafeBoundary(sandboxHandoff) || hasUnsafeBoundary(providerFixture);
+    const blocked = statusOf(pipeline) === "blocked" || statusOf(connectorSummary) === "blocked" || statusOf(replaySummary) === "blocked" || unsafe;
+    const needsReview = !blocked && (!Object.keys(pipeline).length || !Object.keys(connectorSummary).length || !Object.keys(replaySummary).length || !Object.keys(providerFixture).length || !Object.keys(coveredLowest).length || !Object.keys(sandboxHandoff).length || statusOf(pipeline) === "needs_review");
     const status = /^(ready|needs_review|blocked|failed_safe)$/.test(text(safe.status)) ? text(safe.status) : (blocked ? "blocked" : (needsReview ? "needs_review" : "ready"));
     return clone({
       boardName:BOARD_NAME,
@@ -186,6 +196,8 @@
       journeyRows:toArray(safe.journeyRows).length ? toArray(safe.journeyRows) : buildGlobalShoppingReadOnlyCandidateJourneyRows(safe),
       pipelineStageRows:toArray(safe.pipelineStageRows).length ? toArray(safe.pipelineStageRows) : buildGlobalShoppingPipelineStageRowsForView(safe),
       disclosureRows:toArray(safe.disclosureRows).length ? toArray(safe.disclosureRows) : [
+        row("provider_connector", "只读 Provider Connector", "不读取生产密钥，不联网，不暴露 raw response", "pass"),
+        row("fixture_replay", "Fixture 回放控制台", "Replay 不代表真实 provider 调用", "pass"),
         row("read_only_only", "当前仅展示只读 fixture/sandbox 候选旅程", "不请求真实平台，不处理付款、下单或出票", "pass"),
         row("raw_response", "Raw provider response 不持久化", "仅输出脱敏摘要", "pass"),
         row("price_caveat", "价格流水线不代表真实价格", "价格以未来跳转后平台实时页面为准", "pass")
@@ -196,6 +208,8 @@
       ],
       caveat:"当前仅展示只读 fixture/sandbox 候选旅程，不请求真实平台，不处理付款、下单或出票。价格以未来跳转后平台实时页面为准。",
       pricePipelineOrchestratorSummary:linkedSummary(pipeline),
+      readOnlyProviderSandboxConnectorSummary:linkedSummary(connectorSummary),
+      fixtureReplayConsoleSummary:linkedSummary(replaySummary),
       legalProviderFixtureSummary:linkedSummary(providerFixture),
       coveredLowestCandidateBoardSummary:linkedSummary(coveredLowest),
       sandboxHandoffViewModelSummary:linkedSummary(sandboxHandoff),

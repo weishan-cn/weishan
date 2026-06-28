@@ -30,7 +30,7 @@ function blockedWith(overrides) {
 }
 
 function main() {
-  assert.equal(api.PROVIDER_SANDBOX_RESPONSE_SCHEMA_GATE_VERSION, "2.1.94");
+  assert.equal(api.PROVIDER_SANDBOX_RESPONSE_SCHEMA_GATE_VERSION, "2.1.95");
   const draft = api.buildProviderSandboxResponseSchemaGateDraft();
   assert.equal(draft.status, "schema validation only");
   assert.equal(draft.mode, "console-only");

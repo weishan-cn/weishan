@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.94";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.95";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -146,6 +146,9 @@
       const platformAvailabilitySummary = obj(safe.platformAvailabilitySummary);
       const partnerLinkPolicySummary = obj(safe.partnerLinkPolicySummary);
       const sandboxHandoffViewModelSummary = obj(safe.sandboxHandoffViewModelSummary);
+      const readOnlyProviderSandboxConnectorSummary = obj(safe.readOnlyProviderSandboxConnectorSummary);
+      const fixtureReplayConsoleSummary = obj(safe.fixtureReplayConsoleSummary);
+      const normalizedPriceCandidateBoardSummary = obj(safe.normalizedPriceCandidateBoardSummary);
       const legalProviderFixtureSummary = obj(safe.legalProviderFixtureSummary);
       const providerCredentialSafetySummary = obj(safe.providerCredentialSafetySummary);
       const sandboxPriceFeedSummary = obj(safe.sandboxPriceFeedSummary);
@@ -224,6 +227,19 @@
       if (platformAvailabilitySummary.status) badges.push(badge("platform_realtime_truth", "平台页面为实时价格准绳", "info"));
       if (sandboxDeepLinkCandidateSummary.status) badges.push(badge("sandbox_link_no_open", "Sandbox 跳转不打开真实平台", "info"));
       if (platformAvailabilitySummary.status) badges.push(badge("platform_no_endorsement", "平台可用不代表官方背书", "warning"));
+      if (readOnlyProviderSandboxConnectorSummary.status === "ready") badges.push(badge("readonly_provider_connector_ready", "只读 Provider Connector 已准备", "info"));
+      if (readOnlyProviderSandboxConnectorSummary.status === "needs_review") badges.push(badge("readonly_provider_connector_review", "只读 Provider Connector 仍需复核", "warning"));
+      if (readOnlyProviderSandboxConnectorSummary.status === "blocked") badges.push(badge("readonly_provider_connector_blocked", "只读 Provider Connector 已阻断", "blocked"));
+      if (fixtureReplayConsoleSummary.status === "ready") badges.push(badge("fixture_replay_ready", "Fixture 回放已准备", "info"));
+      if (fixtureReplayConsoleSummary.status === "needs_review") badges.push(badge("fixture_replay_review", "Fixture 回放仍需复核", "warning"));
+      if (fixtureReplayConsoleSummary.status === "blocked") badges.push(badge("fixture_replay_blocked", "Fixture 回放已阻断", "blocked"));
+      if (normalizedPriceCandidateBoardSummary.status === "ready") badges.push(badge("normalized_price_candidate_board_ready", "归一化价格候选板已准备", "info"));
+      if (normalizedPriceCandidateBoardSummary.status === "needs_review") badges.push(badge("normalized_price_candidate_board_review", "归一化价格候选板仍需复核", "warning"));
+      if (normalizedPriceCandidateBoardSummary.status === "blocked") badges.push(badge("normalized_price_candidate_board_blocked", "归一化价格候选板已阻断", "blocked"));
+      if (readOnlyProviderSandboxConnectorSummary.status || fixtureReplayConsoleSummary.status || normalizedPriceCandidateBoardSummary.status) badges.push(badge("fixture_replay_not_real_provider", "Replay 不代表真实 provider 调用", "warning"));
+      if (readOnlyProviderSandboxConnectorSummary.status || legalProviderFixtureSummary.status || providerCredentialSafetySummary.status) badges.push(badge("connector_no_prod_key", "Connector 不读取生产密钥", "info"));
+      if (normalizedPriceCandidateBoardSummary.status || pricePipelineOrchestratorSummary.status) badges.push(badge("normalized_candidate_not_real_price", "归一化候选不代表真实价格", "warning"));
+      if (normalizedPriceCandidateBoardSummary.status || readOnlyCandidateJourneySummary.status) badges.push(badge("normalized_candidate_not_ordering", "价格候选板不代表下单能力", "warning"));
       if (sandboxHandoffViewModelSummary.status === "ready") badges.push(badge("sandbox_handoff_ready", "Sandbox 跳转候选与平台可用性已准备", "info"));
       if (legalProviderFixtureSummary.status === "ready") badges.push(badge("legal_provider_fixture_ready", "Provider fixture 已准备", "info"));
       if (legalProviderFixtureSummary.status === "needs_review") badges.push(badge("legal_provider_fixture_review", "Provider fixture 仍需复核", "warning"));

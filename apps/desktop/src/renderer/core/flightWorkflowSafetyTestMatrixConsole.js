@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SAFETY_TEST_MATRIX_CONSOLE_VERSION = "2.1.94";
+  const FLIGHT_WORKFLOW_SAFETY_TEST_MATRIX_CONSOLE_VERSION = "2.1.95";
   const MATRIX_NAME = "flight_workflow_safety_test_matrix_console_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

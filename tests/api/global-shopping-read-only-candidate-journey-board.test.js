@@ -18,18 +18,21 @@ function load(files) {
 function main() {
   const windowRef = load([
     "apps/desktop/src/renderer/core/globalShoppingSandboxProviderResponseContract.js",
+    "apps/desktop/src/renderer/core/globalShoppingReadOnlyProviderSandboxConnector.js",
+    "apps/desktop/src/renderer/core/globalShoppingFixtureReplayConsole.js",
     "apps/desktop/src/renderer/core/globalShoppingPriceSourceNormalizer.js",
     "apps/desktop/src/renderer/core/globalShoppingOfficialPriceAnchorSlot.js",
     "apps/desktop/src/renderer/core/globalShoppingSameItemMatcher.js",
     "apps/desktop/src/renderer/core/globalShoppingDuplicateCandidateMerger.js",
     "apps/desktop/src/renderer/core/globalShoppingCoveredLowestCandidateBoard.js",
+    "apps/desktop/src/renderer/core/globalShoppingNormalizedPriceCandidateBoard.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxHandoffViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js",
     "apps/desktop/src/renderer/core/globalShoppingReadOnlyCandidateJourneyBoard.js"
   ]);
   const pipelineApi = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
   const boardApi = windowRef.WeishanGlobalShoppingReadOnlyCandidateJourneyBoard;
-  assert.equal(boardApi.GLOBAL_SHOPPING_READ_ONLY_CANDIDATE_JOURNEY_BOARD_VERSION, "2.1.94");
+  assert.equal(boardApi.GLOBAL_SHOPPING_READ_ONLY_CANDIDATE_JOURNEY_BOARD_VERSION, "2.1.95");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -39,11 +42,31 @@ function main() {
     officialFixturePrice:{ title:"Official Fixture", basePrice:920 },
     partnerFixturePrices:[{ title:"Partner Fixture", basePrice:899 }]
   });
+  const connector = windowRef.WeishanGlobalShoppingReadOnlyProviderSandboxConnector.buildGlobalShoppingReadOnlyProviderSandboxConnector({
+    providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
+    providerCredentialSafetyReview:{ status:"ready" },
+    sandboxPriceFeedGate:{ status:"ready" },
+    providerResponseContract:responseContract
+  });
+  const replay = windowRef.WeishanGlobalShoppingFixtureReplayConsole.buildGlobalShoppingFixtureReplayConsole({
+    connectorSummary:connector,
+    replayPayload:{
+      replayId:"fixture_replay_journey",
+      replayMode:"fixture",
+      providerId:"fixture_provider",
+      providerName:"Fixture Provider",
+      redacted:true
+    }
+  });
   const normalization = windowRef.WeishanGlobalShoppingPriceSourceNormalizer.buildGlobalShoppingPriceSourceNormalizer({});
   const anchor = windowRef.WeishanGlobalShoppingOfficialPriceAnchorSlot.buildGlobalShoppingOfficialPriceAnchorSlot({ normalizedCandidates:normalization.normalizedCandidates });
   const matcher = windowRef.WeishanGlobalShoppingSameItemMatcher.buildGlobalShoppingSameItemMatcher({ normalizedCandidates:normalization.normalizedCandidates });
   const merger = windowRef.WeishanGlobalShoppingDuplicateCandidateMerger.buildGlobalShoppingDuplicateCandidateMerger({ sameItemMatcherSummary:matcher });
   const covered = windowRef.WeishanGlobalShoppingCoveredLowestCandidateBoard.buildGlobalShoppingCoveredLowestCandidateBoard({ duplicateCandidateMergerSummary:merger, officialPriceAnchorSummary:anchor });
+  const normalizedBoard = windowRef.WeishanGlobalShoppingNormalizedPriceCandidateBoard.buildGlobalShoppingNormalizedPriceCandidateBoard({
+    readOnlyProviderSandboxConnectorSummary:connector,
+    fixtureReplayConsoleSummary:replay
+  });
   const handoff = windowRef.WeishanGlobalShoppingSandboxHandoffViewModel.buildGlobalShoppingSandboxHandoffViewModel({
     sandboxDeepLinkCandidateSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox 跳转候选已准备", redacted:true } },
     platformAvailabilitySummary:{ status:"available", userFacingSummary:{ resultLabel:"平台候选可展示", redacted:true } },
@@ -57,11 +80,14 @@ function main() {
     providerCredentialSafetyReview:{ status:"ready", userFacingSummary:{ resultLabel:"Provider 凭据边界安全", redacted:true } },
     sandboxPriceFeedGate:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox 价格 Feed 已准备", redacted:true } },
     sandboxProviderResponseContract:responseContract,
+    readOnlyProviderSandboxConnector:connector,
+    fixtureReplayConsole:replay,
     priceSourceNormalizer:normalization,
     officialPriceAnchorSlot:anchor,
     sameItemMatcher:matcher,
     duplicateCandidateMerger:merger,
     coveredLowestCandidateBoard:covered,
+    normalizedPriceCandidateBoard:normalizedBoard,
     sandboxHandoffViewModel:handoff
   });
 
@@ -71,7 +97,7 @@ function main() {
     coveredLowestCandidateBoardSummary:covered,
     sandboxHandoffViewModelSummary:handoff
   });
-  assert.equal(board.appVersion, "2.1.94");
+  assert.equal(board.appVersion, "2.1.95");
   assert.equal(board.status, "ready");
   assert.equal(board.title, "全球购只读候选旅程");
   assert.equal(board.cards.find((item) => item.cardId === "provider_fixture").label, "Provider Fixture");
