@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.86";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.87";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -236,9 +236,15 @@
       rcRegressionAuditSummary: stripUnsafe(safe.rcRegressionAuditSummary || null),
       releaseRiskLedgerSummary: stripUnsafe(safe.releaseRiskLedgerSummary || null),
       rcRegressionViewModelSummary: stripUnsafe(safe.rcRegressionViewModelSummary || null),
+      rcCopyFinalizationSummary: stripUnsafe(safe.rcCopyFinalizationSummary || null),
+      safetyDisclosureReviewSummary: stripUnsafe(safe.safetyDisclosureReviewSummary || null),
+      rcCopyReviewViewModelSummary: stripUnsafe(safe.rcCopyReviewViewModelSummary || null),
       rcRegressionStatus: safeLine(safe.rcRegressionStatus || ""),
       releaseRiskStatus: safeLine(safe.releaseRiskStatus || ""),
       safeToContinueReleaseCandidate: safe.safeToContinueReleaseCandidate === true,
+      rcCopyReviewStatus: safeLine(safe.rcCopyReviewStatus || ""),
+      safetyDisclosureStatus: safeLine(safe.safetyDisclosureStatus || ""),
+      safeToFinalizeUserFacingCopy: safe.safeToFinalizeUserFacingCopy === true,
       pilotOpsStatus: safeLine(safe.pilotOpsStatus || ""),
       nextCohortDecisionStatus: safeLine(safe.nextCohortDecisionStatus || ""),
       pilotOpsPrimaryRisk: stripUnsafe(safe.pilotOpsPrimaryRisk || null),
@@ -433,6 +439,24 @@
     return clone({ title:"只读 RC 回归审计", line:safeLine(viewModel.title || obj(viewModel.userFacingSummary).resultLabel || "只读 RC 回归审计"), sectionLabels:["回归审计", "发布风险", "安全红线", "下一步"], status:text(viewModel.status || "needs_review"), caveat:safeLine(viewModel.caveat || "该页面只用于只读 RC 回归审计，不保存真实身份、不发送真实邀请、不提供交易能力。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
+  function formatRcUserFacingCopyFinalizationSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.rcCopyFinalizationSummary || safe.finalizationSummary || (safe.status || safe.userFacingSummary ? safe : {});
+    return clone({ title:"只读 RC 用户可见文案定稿", line:safeLine(obj(summary.userFacingSummary).resultLabel || "RC 文案仍需复核"), sectionLabels:["文案定稿", "安全披露", "禁用措辞", "下一步"], status:text(summary.status || "needs_review"), caveat:"文案不代表交易能力。", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatSafetyDisclosureReviewBoardSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.safetyDisclosureReviewSummary || safe.reviewBoardSummary || (safe.status || safe.userFacingSummary ? safe : {});
+    return clone({ title:"安全披露复核板", line:safeLine(obj(summary.userFacingSummary).resultLabel || "安全披露仍需复核"), sectionLabels:["安全披露", "禁用措辞", "敏感信息", "下一步"], status:text(summary.status || "needs_review"), caveat:"文案不代表交易能力。", bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatRcCopyReviewViewModelSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const viewModel = safe.rcCopyReviewViewModelSummary || safe.viewModelSummary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"只读 RC 文案定稿与安全披露", line:safeLine(viewModel.title || obj(viewModel.userFacingSummary).resultLabel || "只读 RC 文案定稿与安全披露"), sectionLabels:["文案定稿", "安全披露", "禁用措辞", "下一步"], status:text(viewModel.status || "needs_review"), caveat:safeLine(viewModel.caveat || "该页面只用于只读 RC 文案定稿与安全披露复核，不保存真实身份、不发送真实邀请、不提供交易能力。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -485,6 +509,9 @@
     formatRcRegressionAuditSummary,
     formatReleaseRiskLedgerSummary,
     formatRcRegressionViewModelSummary,
+    formatRcUserFacingCopyFinalizationSummary,
+    formatSafetyDisclosureReviewBoardSummary,
+    formatRcCopyReviewViewModelSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,

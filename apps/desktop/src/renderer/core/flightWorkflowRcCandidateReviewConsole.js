@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RC_CANDIDATE_REVIEW_CONSOLE_VERSION = "2.1.86";
+  const FLIGHT_WORKFLOW_RC_CANDIDATE_REVIEW_CONSOLE_VERSION = "2.1.87";
   const CONSOLE_NAME = "flight_workflow_rc_candidate_review_console_v1";
   const CAVEAT = "该控制台只用于只读 RC 候选复核，不代表真实账号、客服工单、交易请求或出票能力。";
 
@@ -224,6 +224,11 @@
         caveat:CAVEAT,
         redacted:true
       },
+      rcCopyFinalizationSummary:clone(safe.rcCopyFinalizationSummary || null),
+      safetyDisclosureReviewSummary:clone(safe.safetyDisclosureReviewSummary || null),
+      rcCopyReviewStatus:text(safe.rcCopyReviewStatus || safe.rcCopyFinalizationSummary && safe.rcCopyFinalizationSummary.status || ""),
+      safetyDisclosureStatus:text(safe.safetyDisclosureStatus || safe.safetyDisclosureReviewSummary && safe.safetyDisclosureReviewSummary.status || ""),
+      safeToFinalizeUserFacingCopy:safe.safeToFinalizeUserFacingCopy === true,
       freezeGateSummary:clone(freezeGateSummary),
       evidenceFreezePackSummary:clone(evidenceFreezePackSummary),
       launchCandidateReadinessSummary:clone(launchCandidateReadinessSummary),
@@ -273,6 +278,11 @@
         caveat:summary.caveat || CAVEAT,
         redacted:true
       },
+      rcCopyFinalizationSummary:clone(safe.rcCopyFinalizationSummary || null),
+      safetyDisclosureReviewSummary:clone(safe.safetyDisclosureReviewSummary || null),
+      rcCopyReviewStatus:text(safe.rcCopyReviewStatus || ""),
+      safetyDisclosureStatus:text(safe.safetyDisclosureStatus || ""),
+      safeToFinalizeUserFacingCopy:safe.safeToFinalizeUserFacingCopy === true,
       freezeGateSummary:clone(safe.freezeGateSummary || null),
       evidenceFreezePackSummary:clone(safe.evidenceFreezePackSummary || null),
       launchCandidateReadinessSummary:clone(safe.launchCandidateReadinessSummary || null),

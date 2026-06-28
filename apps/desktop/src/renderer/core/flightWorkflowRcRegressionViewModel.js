@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RC_REGRESSION_VIEW_MODEL_VERSION = "2.1.86";
+  const FLIGHT_WORKFLOW_RC_REGRESSION_VIEW_MODEL_VERSION = "2.1.87";
   const VIEW_MODEL_NAME = "flight_workflow_rc_regression_view_model_v1";
   const CAVEAT = "该页面只用于只读 RC 回归审计，不保存真实身份、不发送真实邀请、不提供交易能力。";
 
@@ -78,6 +78,11 @@
         caveat:CAVEAT,
         rcRegressionAuditSummary:clone(pack),
         releaseRiskLedgerSummary:clone(ledger),
+        rcCopyFinalizationSummary:clone(obj(input).rcCopyFinalizationSummary || pack.rcCopyFinalizationSummary || ledger.rcCopyFinalizationSummary || null),
+        safetyDisclosureReviewSummary:clone(obj(input).safetyDisclosureReviewSummary || pack.safetyDisclosureReviewSummary || ledger.safetyDisclosureReviewSummary || null),
+        rcCopyReviewStatus:text(obj(input).rcCopyReviewStatus || pack.rcCopyReviewStatus || ledger.rcCopyReviewStatus || ""),
+        safetyDisclosureStatus:text(obj(input).safetyDisclosureStatus || pack.safetyDisclosureStatus || ledger.safetyDisclosureStatus || ""),
+        safeToFinalizeUserFacingCopy:obj(input).safeToFinalizeUserFacingCopy === true || pack.safeToFinalizeUserFacingCopy === true || ledger.safeToFinalizeUserFacingCopy === true,
         bookingUrl:null,
         checkoutUrl:null,
         paymentUrl:null,

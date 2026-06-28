@@ -6698,7 +6698,7 @@
     const betaCohortSummary = typeof betaCohortApi.buildFlightWorkflowBetaCohortReviewBoard === "function" ? betaCohortApi.buildFlightWorkflowBetaCohortReviewBoard({ sessions:cohortFeedbackSamples }) : null;
     const feedbackTrendSummary = typeof feedbackTrendApi.buildFlightWorkflowFeedbackTrendRadar === "function" ? feedbackTrendApi.buildFlightWorkflowFeedbackTrendRadar({ feedback:cohortFeedbackSamples }) : null;
     const betaCohortViewModel = typeof betaCohortViewModelApi.buildFlightWorkflowBetaCohortViewModel === "function" ? betaCohortViewModelApi.buildFlightWorkflowBetaCohortViewModel({ betaCohortSummary:betaCohortSummary, feedbackTrendSummary:feedbackTrendSummary }) : null;
-    const releaseReadiness = typeof releaseDashboardApi.buildFlightWorkflowReleaseReadinessDashboard === "function" ? releaseDashboardApi.buildFlightWorkflowReleaseReadinessDashboard({ releaseVersion:"2.1.86", scenarioSimulationSuite:scenarioSimulation, matrixSummary:safetyTestMatrix, safetyRegressionSummary:safetyRegressionSummary, auditReviewSummary:auditReview, humanReviewChecklistSummary:humanReviewChecklist, finalSafeHandoffPacketSummary:finalSafeHandoffPacket, safeSessionExportPreview:safeExportPreview, operatorConsoleSummary:operatorConsole, betaCohortSummary:betaCohortSummary, feedbackTrendSummary:feedbackTrendSummary, cohortReviewStatus:betaCohortSummary && betaCohortSummary.status, betaExpansionReadiness:betaCohortSummary && betaCohortSummary.cohortHealth && betaCohortSummary.cohortHealth.safeToExpandBeta, betaCohortRecommendation:feedbackTrendSummary && feedbackTrendSummary.recommendation && feedbackTrendSummary.recommendation.label }) : null;
+    const releaseReadiness = typeof releaseDashboardApi.buildFlightWorkflowReleaseReadinessDashboard === "function" ? releaseDashboardApi.buildFlightWorkflowReleaseReadinessDashboard({ releaseVersion:"2.1.87", scenarioSimulationSuite:scenarioSimulation, matrixSummary:safetyTestMatrix, safetyRegressionSummary:safetyRegressionSummary, auditReviewSummary:auditReview, humanReviewChecklistSummary:humanReviewChecklist, finalSafeHandoffPacketSummary:finalSafeHandoffPacket, safeSessionExportPreview:safeExportPreview, operatorConsoleSummary:operatorConsole, betaCohortSummary:betaCohortSummary, feedbackTrendSummary:feedbackTrendSummary, cohortReviewStatus:betaCohortSummary && betaCohortSummary.status, betaExpansionReadiness:betaCohortSummary && betaCohortSummary.cohortHealth && betaCohortSummary.cohortHealth.safeToExpandBeta, betaCohortRecommendation:feedbackTrendSummary && feedbackTrendSummary.recommendation && feedbackTrendSummary.recommendation.label }) : null;
     const releaseViewModel = typeof releaseViewModelApi.buildFlightWorkflowReleaseReadinessViewModel === "function" ? releaseViewModelApi.buildFlightWorkflowReleaseReadinessViewModel({ releaseReadinessSummary:releaseReadiness }) : null;
     const betaAcceptancePack = typeof betaPackApi.buildFlightWorkflowBetaAcceptancePack === "function" ? betaPackApi.buildFlightWorkflowBetaAcceptancePack({ releaseReadinessSummary:releaseReadiness, operatorConsoleSummary:operatorConsole, safetyTestMatrixSummary:safetyTestMatrix, humanReviewChecklistSummary:humanReviewChecklist, finalSafeHandoffPacketSummary:finalSafeHandoffPacket }) : null;
     const guidedUserTestMode = typeof guidedTestApi.buildFlightWorkflowGuidedUserTestMode === "function" ? guidedTestApi.buildFlightWorkflowGuidedUserTestMode({}) : null;
@@ -7967,6 +7967,24 @@
         const output = panel.querySelector("[data-commerce-flight-release-risk-ledger-output]") || panel;
         output.innerHTML = '<p>只读发布风险台账</p><p>回归审计</p><p>发布风险</p><p>安全红线</p><p>暂无阻断风险</p><p>发布风险待处理</p><p>发布风险已阻断</p><p>回归不代表交易能力</p><p>该页面只用于只读 RC 回归审计</p><p>不保存真实身份、不发送真实邀请、不提供交易能力</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
         showCommercePlatformTemplateFeedback("已显示发布风险台账", false);
+        return;
+      }
+      const flightRcCopyReviewButton = target && target.closest("[data-commerce-flight-rc-copy-review-show]");
+      if (flightRcCopyReviewButton && host.contains(flightRcCopyReviewButton)) {
+        event.preventDefault();
+        const panel = flightRcCopyReviewButton.closest("[data-commerce-flight-rc-copy-review]") || flightRcCopyReviewButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-flight-rc-copy-review-output]") || panel;
+        output.innerHTML = '<p>只读 RC 文案定稿与安全披露</p><p>只读 RC 用户可见文案定稿</p><p>文案定稿</p><p>安全披露</p><p>禁用措辞</p><p>RC 文案可以定稿</p><p>RC 文案仍需复核</p><p>文案不代表交易能力</p><p>当前为只读候选证据流程，不提供付款、下单或出票能力</p><p>价格仅为候选展示，不代表真实最终价、锁价或最低价保证</p><p>请勿输入身份证、护照、银行卡、支付凭证或平台登录凭据</p><p>该页面只用于只读 RC 文案定稿与安全披露复核</p><p>不保存真实身份、不发送真实邀请、不提供交易能力</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 RC 文案定稿", false);
+        return;
+      }
+      const flightSafetyDisclosureReviewButton = target && target.closest("[data-commerce-flight-safety-disclosure-review-show]");
+      if (flightSafetyDisclosureReviewButton && host.contains(flightSafetyDisclosureReviewButton)) {
+        event.preventDefault();
+        const panel = flightSafetyDisclosureReviewButton.closest("[data-commerce-flight-rc-copy-review]") || flightSafetyDisclosureReviewButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-flight-safety-disclosure-review-output]") || panel;
+        output.innerHTML = '<p>安全披露复核板</p><p>安全披露通过</p><p>安全披露仍需复核</p><p>安全披露已阻断</p><p>文案不代表交易能力</p><p>不保存真实身份、不发送真实邀请、不提供交易能力</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示安全披露复核", false);
         return;
       }
       const pilotInvitationGateButton = target && target.closest("[data-commerce-flight-pilot-invitation-gate-show]");

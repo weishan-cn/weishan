@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.86";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.87";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -129,6 +129,8 @@
       const rcEvidenceReview = obj(safe.rcEvidenceReviewSummary);
       const rcRegressionAudit = obj(safe.rcRegressionAuditSummary);
       const releaseRiskLedger = obj(safe.releaseRiskLedgerSummary);
+      const rcCopyFinalization = obj(safe.rcCopyFinalizationSummary);
+      const safetyDisclosureReview = obj(safe.safetyDisclosureReviewSummary);
       if (rcCandidateReview.status === "ready_for_review" || safe.safeToStartRcReview === true) badges.push(badge("rc_review_ready", "可以开始 RC 复核", "info"));
       if (rcCandidateReview.status === "evidence_incomplete" || rcEvidenceReview.status === "incomplete") badges.push(badge("rc_review_incomplete", "证据仍需补充", "warning"));
       if (rcCandidateReview.status === "needs_safety_review" || rcEvidenceReview.status === "needs_review") badges.push(badge("rc_review_safety_review", "需要安全复核", "warning"));
@@ -139,6 +141,12 @@
       if (releaseRiskLedger.status === "clear") badges.push(badge("release_risk_clear", "暂无阻断风险", "info"));
       if (releaseRiskLedger.status === "open_risks" || releaseRiskLedger.status === "needs_review") badges.push(badge("release_risk_pending", "发布风险待处理", "warning"));
       if (releaseRiskLedger.status === "blocked") badges.push(badge("release_risk_blocked", "发布风险已阻断", "blocked"));
+      if (rcCopyFinalization.status === "finalized") badges.push(badge("rc_copy_finalized", "RC 文案可以定稿", "info"));
+      if (rcCopyFinalization.status === "needs_review") badges.push(badge("rc_copy_needs_review", "RC 文案仍需复核", "warning"));
+      if (safetyDisclosureReview.status === "approved") badges.push(badge("safety_disclosure_approved", "安全披露通过", "info"));
+      if (safetyDisclosureReview.status === "needs_review") badges.push(badge("safety_disclosure_needs_review", "安全披露仍需复核", "warning"));
+      if (safetyDisclosureReview.status === "blocked") badges.push(badge("safety_disclosure_blocked", "安全披露已阻断", "blocked"));
+      if (rcCopyFinalization.finalizationName || safetyDisclosureReview.boardName) badges.push(badge("copy_disclosure_read_only", "文案不代表交易能力", "info"));
       if (cohortProgress.status === "ready" || safe.cohortProgressStatus === "ready") badges.push(badge("cohort_progress_ready", "测试批次进度正常", "info"));
       if (cohortProgress.status === "needs_review" || safe.cohortProgressStatus === "needs_review") badges.push(badge("cohort_progress_in_progress", "测试批次仍在进行", "warning"));
       if (cohortProgress.status === "needs_more_testers" || safe.cohortProgressStatus === "needs_more_testers") badges.push(badge("cohort_progress_needs_more", "仍需更多测试者", "warning"));

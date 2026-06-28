@@ -8,7 +8,7 @@ function forbidden(value) { return /全网最低|最低价保证|已锁价|可�
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteEvidenceSummaryFormatter.js"]);
   const api = windowRef.WeishanReadOnlyQuoteEvidenceSummaryFormatter;
-  assert.equal(api.READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION, "2.1.86");
+  assert.equal(api.READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION, "2.1.87");
   const top = api.formatTopCandidateSummary([{ rank:1, providerName:"A", totalPrice:980, token:"abc" }, { rank:2, providerName:"B", totalPrice:1010 }]);
   assert.equal(top.lines.length, 2);
   assert.equal(top.lines[0].includes("当前导入样本"), false);
@@ -48,6 +48,12 @@ function main() {
   assert.equal(releaseRisk.title, "只读发布风险台账");
   const rcRegressionVm = api.formatRcRegressionViewModelSummary({ status:"clear", title:"只读 RC 回归审计", caveat:"该页面只用于只读 RC 回归审计" });
   assert.equal(rcRegressionVm.title, "只读 RC 回归审计");
+  const rcCopy = api.formatRcUserFacingCopyFinalizationSummary({ status:"finalized", userFacingSummary:{ resultLabel:"文案可以定稿" } });
+  assert.equal(rcCopy.title, "只读 RC 用户可见文案定稿");
+  const disclosure = api.formatSafetyDisclosureReviewBoardSummary({ status:"approved", userFacingSummary:{ resultLabel:"安全披露通过" } });
+  assert.equal(disclosure.title, "安全披露复核板");
+  const rcCopyVm = api.formatRcCopyReviewViewModelSummary({ status:"approved", title:"只读 RC 文案定稿与安全披露", caveat:"该页面只用于只读 RC 文案定稿与安全披露复核" });
+  assert.equal(rcCopyVm.title, "只读 RC 文案定稿与安全披露");
   const audit = api.buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft({});
   assert.equal(audit.payment, false);
   assert.equal(audit.order, false);

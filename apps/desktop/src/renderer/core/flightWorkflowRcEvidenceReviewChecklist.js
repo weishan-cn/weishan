@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RC_EVIDENCE_REVIEW_CHECKLIST_VERSION = "2.1.86";
+  const FLIGHT_WORKFLOW_RC_EVIDENCE_REVIEW_CHECKLIST_VERSION = "2.1.87";
   const CHECKLIST_NAME = "flight_workflow_rc_evidence_review_checklist_v1";
   const CAVEAT = "该清单只复核只读证据，不生成真实导出文件，不代表真实交易或出票能力。";
 
@@ -174,6 +174,11 @@
         caveat:CAVEAT,
         redacted:true
       },
+      rcCopyFinalizationSummary:clone(safe.rcCopyFinalizationSummary || null),
+      safetyDisclosureReviewSummary:clone(safe.safetyDisclosureReviewSummary || null),
+      rcCopyReviewStatus:text(safe.rcCopyReviewStatus || safe.rcCopyFinalizationSummary && safe.rcCopyFinalizationSummary.status || ""),
+      safetyDisclosureStatus:text(safe.safetyDisclosureStatus || safe.safetyDisclosureReviewSummary && safe.safetyDisclosureReviewSummary.status || ""),
+      safeToFinalizeUserFacingCopy:safe.safeToFinalizeUserFacingCopy === true,
       freezeGateSummary:clone(freezeGateSummary),
       evidenceFreezePackSummary:clone(evidenceFreezePackSummary),
       releaseReadinessSummary:clone(releaseReadinessSummary),
@@ -212,6 +217,11 @@
         caveat:summary.caveat || CAVEAT,
         redacted:true
       },
+      rcCopyFinalizationSummary:clone(safe.rcCopyFinalizationSummary || null),
+      safetyDisclosureReviewSummary:clone(safe.safetyDisclosureReviewSummary || null),
+      rcCopyReviewStatus:text(safe.rcCopyReviewStatus || ""),
+      safetyDisclosureStatus:text(safe.safetyDisclosureStatus || ""),
+      safeToFinalizeUserFacingCopy:safe.safeToFinalizeUserFacingCopy === true,
       freezeGateSummary:clone(safe.freezeGateSummary || null),
       evidenceFreezePackSummary:clone(safe.evidenceFreezePackSummary || null),
       releaseReadinessSummary:clone(safe.releaseReadinessSummary || null),

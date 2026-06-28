@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function ready(extra = {}) { return Object.assign({ betaExpansionApproved:true, publicPilotChecklistReady:true, releaseReadinessReady:true, safetyCopyReady:true, forbiddenCapabilitiesVisible:true, userConsentReady:true, noBlockedSafetyRisk:true }, extra); }
 function main() {
   const api = load(["apps/desktop/src/renderer/core/flightWorkflowPublicPilotOnboardingGuard.js"]).WeishanFlightWorkflowPublicPilotOnboardingGuard;
-  assert.equal(api.FLIGHT_WORKFLOW_PUBLIC_PILOT_ONBOARDING_GUARD_VERSION, "2.1.86");
+  assert.equal(api.FLIGHT_WORKFLOW_PUBLIC_PILOT_ONBOARDING_GUARD_VERSION, "2.1.87");
   const allowed = api.buildFlightWorkflowPublicPilotOnboardingGuard(ready());
   assert.equal(allowed.status, "allowed");
   assert.equal(allowed.decision.decisionId, "allow_read_only_pilot_entry");

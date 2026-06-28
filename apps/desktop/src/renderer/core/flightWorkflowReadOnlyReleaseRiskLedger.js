@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_RELEASE_RISK_LEDGER_VERSION = "2.1.86";
+  const FLIGHT_WORKFLOW_READ_ONLY_RELEASE_RISK_LEDGER_VERSION = "2.1.87";
   const LEDGER_NAME = "flight_workflow_read_only_release_risk_ledger_v1";
   const CAVEAT = "该风险台账只用于只读发布候选判断，不代表真实交易、订单、客服工单或出票能力。";
 
@@ -120,7 +120,8 @@
     if (obj(rcRegressionAuditSummary.auditHealth).noDownloadRisk === false) risks.push(risk("download_risk", "release_process", "下载风险", "blocked", "blocked", "检测到下载风险，已阻断。"));
     if (rcEvidenceReviewSummary.status === "incomplete") risks.push(risk("evidence_incomplete", "evidence", "证据仍需补充", "medium", "needs_review", "只读证据链仍需补充。"));
     if (rcRegressionAuditSummary.status === "needs_review") risks.push(risk("regression_incomplete", "regression", "回归仍需复核", "medium", "needs_review", "RC 回归审计仍需复核。"));
-    if (safe.copyValidationStatus === "warning" || safe.copyValidationStatus === "needs_review") risks.push(risk("ui_copy_gap", "ui_copy", "UI 文案仍需复核", "low", "open", "只读文案仍需统一复核。"));
+    if (safe.copyValidationStatus === "warning" || safe.copyValidationStatus === "needs_review" || obj(safe.rcCopyFinalizationSummary).status === "needs_review" || obj(safe.safetyDisclosureReviewSummary).status === "needs_review") risks.push(risk("ui_copy_gap", "ui_copy", "UI 文案仍需复核", "low", "open", "只读文案仍需统一复核。"));
+    if (obj(safe.rcCopyFinalizationSummary).status === "blocked" || obj(safe.safetyDisclosureReviewSummary).status === "blocked") risks.push(risk("copy_disclosure_blocked", "safety", "文案或安全披露已阻断", "blocked", "blocked", "检测到危险文案或安全披露风险，已阻断。"));
     if (freezeGateSummary.status === "needs_review") risks.push(risk("freeze_gate_review", "release_process", "冻结检查仍需复核", "medium", "needs_review", "发布候选冻结检查仍需复核。"));
     if (evidenceFreezePackSummary.status === "needs_review") risks.push(risk("evidence_pack_review", "evidence", "证据冻结仍需复核", "medium", "needs_review", "证据冻结包仍需复核。"));
     if (!risks.length) risks.push(risk("no_open_risks", "release_process", "暂无阻断风险", "low", "closed", "当前未发现阻断风险。"));
@@ -165,6 +166,11 @@
         caveat:CAVEAT,
         redacted:true
       },
+      rcCopyFinalizationSummary:clone(safe.rcCopyFinalizationSummary || null),
+      safetyDisclosureReviewSummary:clone(safe.safetyDisclosureReviewSummary || null),
+      rcCopyReviewStatus:text(safe.rcCopyReviewStatus || safe.rcCopyFinalizationSummary && safe.rcCopyFinalizationSummary.status || ""),
+      safetyDisclosureStatus:text(safe.safetyDisclosureStatus || safe.safetyDisclosureReviewSummary && safe.safetyDisclosureReviewSummary.status || ""),
+      safeToFinalizeUserFacingCopy:safe.safeToFinalizeUserFacingCopy === true,
       rcRegressionAuditSummary:clone(rcRegressionAuditSummary),
       rcCandidateReviewSummary:clone(rcCandidateReviewSummary),
       rcEvidenceReviewSummary:clone(rcEvidenceReviewSummary),
@@ -201,6 +207,11 @@
         caveat:summary.caveat || CAVEAT,
         redacted:true
       },
+      rcCopyFinalizationSummary:clone(safe.rcCopyFinalizationSummary || null),
+      safetyDisclosureReviewSummary:clone(safe.safetyDisclosureReviewSummary || null),
+      rcCopyReviewStatus:text(safe.rcCopyReviewStatus || ""),
+      safetyDisclosureStatus:text(safe.safetyDisclosureStatus || ""),
+      safeToFinalizeUserFacingCopy:safe.safeToFinalizeUserFacingCopy === true,
       rcRegressionAuditSummary:clone(safe.rcRegressionAuditSummary || null),
       rcCandidateReviewSummary:clone(safe.rcCandidateReviewSummary || null),
       rcEvidenceReviewSummary:clone(safe.rcEvidenceReviewSummary || null),
@@ -234,6 +245,7 @@
       status:ledger.status,
       riskCount:ledger.risks.length,
       blockedRiskCount:ledger.riskSummary.blockedRisks,
+      safeToFinalizeUserFacingCopy:ledger.safeToFinalizeUserFacingCopy === true,
       bookingUrl:null,
       checkoutUrl:null,
       paymentUrl:null,
