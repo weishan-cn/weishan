@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRODUCT_GOAL_CHARTER_VERSION = "2.1.88";
+  const GLOBAL_SHOPPING_PRODUCT_GOAL_CHARTER_VERSION = "2.1.89";
   const CHARTER_NAME = "global_shopping_product_goal_charter_v1";
   const SUMMARY_CAVEAT = "Weishan 只提供候选价格、官方价对比、归一化、风险提示和平台跳转辅助，不替用户付款、下单或出票。";
   const DEFAULT_RECOMMENDED_COPY = {
@@ -133,8 +133,8 @@
       row("platform_final", "平台实时价格为准", productGoals.platformRealTimePriceAsFinal ? recommendedCopy.platformRealtimePrice : "缺少平台实时价格为准提示", productGoals.platformRealTimePriceAsFinal ? "pass" : "warning"),
       row("no_payment", "不付款/不下单/不出票", productGoals.noPaymentNoOrderNoTicketing ? recommendedCopy.readOnlyEvidence : "交易边界已失守", productGoals.noPaymentNoOrderNoTicketing ? "pass" : "blocked"),
       row("no_sensitive_storage", "不存储身份与支付凭据", productGoals.doNotStoreUserAccountIdentityBankPaymentCredential ? "敏感身份与支付凭据不存储" : "敏感身份与支付凭据边界已失守", productGoals.doNotStoreUserAccountIdentityBankPaymentCredential ? "pass" : "blocked"),
-      row("no_lowest_claim", "禁止全网最低承诺", forbiddenPromises.noWholeNetworkLowestClaim ? "已阻断全网最低承诺" : "存在全网最低承诺风险", forbiddenPromises.noWholeNetworkLowestClaim ? "pass" : "blocked"),
-      row("no_one_click_order", "禁止一键下单承诺", forbiddenPromises.noOneClickOrderClaim ? "已阻断一键下单承诺" : "存在一键下单承诺风险", forbiddenPromises.noOneClickOrderClaim ? "pass" : "blocked")
+      row("no_lowest_claim", "禁止最低价相关承诺", forbiddenPromises.noWholeNetworkLowestClaim ? "已阻断最低价相关承诺" : "存在最低价相关承诺风险", forbiddenPromises.noWholeNetworkLowestClaim ? "pass" : "blocked"),
+      row("no_one_click_order", "禁止自动下单承诺", forbiddenPromises.noOneClickOrderClaim ? "已阻断自动下单承诺" : "存在自动下单承诺风险", forbiddenPromises.noOneClickOrderClaim ? "pass" : "blocked")
     ]);
   }
   function sanitizeGlobalShoppingProductGoalCharter(charter) {

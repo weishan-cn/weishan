@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RELEASE_READINESS_VIEW_MODEL_VERSION = "2.1.88";
+  const FLIGHT_WORKFLOW_RELEASE_READINESS_VIEW_MODEL_VERSION = "2.1.89";
   const VIEW_MODEL_NAME = "flight_workflow_release_readiness_view_model_v1";
   const SENSITIVE_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证号|护照号|银行卡号|credential|passport|cardNumber/ig;
 

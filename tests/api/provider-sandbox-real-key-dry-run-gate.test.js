@@ -38,7 +38,7 @@ const base = {
   sandboxKey:"WEISHAN_SANDBOX_TEST_KEY_000000"
 };
 function main() {
-  assert.equal(gateApi.PROVIDER_SANDBOX_REAL_KEY_DRY_RUN_GATE_VERSION, "2.1.88");
+  assert.equal(gateApi.PROVIDER_SANDBOX_REAL_KEY_DRY_RUN_GATE_VERSION, "2.1.89");
   const missingConsent = gateApi.evaluateSandboxRealKeyDryRunGate(Object.assign({}, base, { credentialScopeConsent:false, consentState:"missing" }));
   assert.equal(missingConsent.dryRunDecision, "blocked");
   assert.equal(missingConsent.blockedReason, "credential consent missing");

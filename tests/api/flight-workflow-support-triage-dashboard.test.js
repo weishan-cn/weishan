@@ -13,7 +13,7 @@ function assertNoSensitive(value) {
 }
 function main() {
   const api = load(["apps/desktop/src/renderer/core/flightWorkflowSupportTriageDashboard.js"]).WeishanFlightWorkflowSupportTriageDashboard;
-  assert.equal(api.FLIGHT_WORKFLOW_SUPPORT_TRIAGE_DASHBOARD_VERSION, "2.1.88");
+  assert.equal(api.FLIGHT_WORKFLOW_SUPPORT_TRIAGE_DASHBOARD_VERSION, "2.1.89");
   const cases = [
     ["candidate_unclear", "evidence_review"],
     ["platform_mismatch", "platform_check_review"],

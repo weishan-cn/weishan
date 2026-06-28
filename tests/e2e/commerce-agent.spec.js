@@ -9161,37 +9161,58 @@ test.describe.serial("commerce agent workbench", () => {
     expect(visible).not.toMatch(/\b(token|key|secret)\b/i);
   });
 
-  test("v2.1.88 global shopping product goal stays read-only and local @commerce-smoke", async () => {
+  test("v2.1.89 global shopping product goal stays read-only and local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
-    await page.waitForFunction(() => !!(window.WeishanGlobalShoppingProductGoalCharter && window.WeishanGlobalShoppingJumpToPlatformBoundary && window.WeishanGlobalShoppingProductGoalViewModel && window.WeishanReadOnlyPriceCandidateCardViewModel), null, { timeout:15000 });
+    await page.waitForFunction(() => !!(window.WeishanGlobalShoppingProductGoalCharter && window.WeishanGlobalShoppingJumpToPlatformBoundary && window.WeishanGlobalShoppingProductGoalViewModel && window.WeishanGlobalShoppingPriceSourceNormalizer && window.WeishanGlobalShoppingOfficialPriceAnchorSlot && window.WeishanGlobalShoppingPriceCandidateDisplayBoard && window.WeishanReadOnlyPriceCandidateCardViewModel), null, { timeout:15000 });
     const v2188 = await page.evaluate(() => {
       const goalApi = window.WeishanGlobalShoppingProductGoalCharter;
       const boundaryApi = window.WeishanGlobalShoppingJumpToPlatformBoundary;
       const goalViewApi = window.WeishanGlobalShoppingProductGoalViewModel;
+      const normalizerApi = window.WeishanGlobalShoppingPriceSourceNormalizer;
+      const anchorApi = window.WeishanGlobalShoppingOfficialPriceAnchorSlot;
+      const boardApi = window.WeishanGlobalShoppingPriceCandidateDisplayBoard;
       const goal = goalApi.buildGlobalShoppingProductGoalCharter({});
       const boundary = boundaryApi.buildGlobalShoppingJumpToPlatformBoundary({});
-      const goalView = goalViewApi.buildGlobalShoppingProductGoalViewModel({ globalShoppingProductGoalSummary:goal, jumpToPlatformBoundarySummary:boundary });
+      const normalizer = normalizerApi.buildGlobalShoppingPriceSourceNormalizer({});
+      const anchor = anchorApi.buildGlobalShoppingOfficialPriceAnchorSlot({ normalizedCandidates:normalizer.normalizedCandidates });
+      const board = boardApi.buildGlobalShoppingPriceCandidateDisplayBoard({ priceSourceNormalizationSummary:normalizer, officialPriceAnchorSummary:anchor });
+      const goalView = goalViewApi.buildGlobalShoppingProductGoalViewModel({ globalShoppingProductGoalSummary:goal, jumpToPlatformBoundarySummary:boundary, priceSourceNormalizationSummary:normalizer, officialPriceAnchorSummary:anchor, priceCandidateDisplaySummary:board });
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v2188-render-smoke", "true");
-      host.innerHTML = '<h5>全球购产品目标与跳转边界</h5><p>全球购产品目标</p><p>跳转至平台自行下单边界</p><p>可信候选价格</p><p>官方价格锚点</p><p>合法平台候选价</p><p>平台自行下单</p><p>当前已覆盖来源中的较低候选价</p><p>与官方价对比</p><p>已接入平台候选价</p><p>价格以跳转后平台实时页面为准</p><p>当前仅提供只读候选证据，不提供付款、下单或出票能力</p><p>Weishan 可尽量带入搜索条件，但用户需在对应平台自行确认价格、登录、填写资料并完成下单</p><p>禁止全网最低承诺</p><p>禁止一键下单承诺</p><p>跳转不代表交易能力</p><button type="button" data-commerce-global-shopping-product-goal-show="true">查看全球购产品目标</button><button type="button" data-commerce-global-shopping-jump-boundary-show="true">查看跳转边界</button><div data-commerce-global-shopping-product-goal-output="true"><p>可信候选价格</p></div><div data-commerce-global-shopping-jump-boundary-output="true"><p>跳转不代表交易能力</p></div>';
+      host.innerHTML = '<h5>全球购产品目标与跳转边界</h5><p>全球购产品目标</p><p>跳转至平台自行下单边界</p><p>可信候选价格</p><p>官方价格锚点</p><p>合法平台候选价</p><p>平台自行下单</p><p>当前已覆盖来源中的较低候选价</p><p>与官方价对比</p><p>已接入平台候选价</p><p>价格以跳转后平台实时页面为准</p><p>当前仅提供只读候选证据，不提供付款、下单或出票能力</p><p>Weishan 可尽量带入搜索条件，但用户需在对应平台自行确认价格、登录、填写资料并完成下单</p><p>禁止最低价相关承诺</p><p>禁止自动下单承诺</p><p>跳转不代表交易能力</p><h5>全球购价格候选展示</h5><p>价格源归一化层</p><p>官方价格锚点</p><p>官方参考价</p><p>已覆盖来源中的较低候选价</p><p>与官方价对比</p><p>税费/运费/服务费状态</p><p>来源与可信度</p><p>价格以跳转后平台实时页面为准</p><p>当前仅展示只读 fixture 候选价</p><p>不代表真实最终价、锁价、最低价或可下单能力</p><p>价格展示不代表下单能力</p><button type="button" data-commerce-global-shopping-product-goal-show="true">查看全球购产品目标</button><button type="button" data-commerce-global-shopping-jump-boundary-show="true">查看跳转边界</button><div data-commerce-global-shopping-product-goal-output="true"><p>可信候选价格</p></div><div data-commerce-global-shopping-jump-boundary-output="true"><p>跳转不代表交易能力</p></div>';
       document.body.appendChild(host);
-      return { goal, boundary, goalView, text:host.innerText, productGoalButtonCount:host.querySelectorAll("[data-commerce-global-shopping-product-goal-show]").length, jumpBoundaryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-jump-boundary-show]").length, serialized:JSON.stringify({ goal, boundary, goalView }) };
+      return { goal, boundary, normalizer, anchor, board, goalView, text:host.innerText, productGoalButtonCount:host.querySelectorAll("[data-commerce-global-shopping-product-goal-show]").length, jumpBoundaryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-jump-boundary-show]").length, serialized:JSON.stringify({ goal, boundary, normalizer, anchor, board, goalView }) };
     });
     expect(v2188.goal.userFacingSummary.title).toBe("全球购产品目标");
     expect(v2188.boundary.userFacingSummary.title).toBe("跳转至平台自行下单边界");
     expect(v2188.goalView.title).toBe("全球购产品目标与跳转边界");
+    expect(v2188.normalizer.status).toBe("ready");
+    expect(v2188.anchor.status).toBe("anchored");
+    expect(v2188.board.status).toBe("ready");
     expect(v2188.goal.status).toBe("aligned");
     expect(v2188.boundary.status).toBe("safe");
     expect(v2188.text).toContain("查看全球购产品目标");
     expect(v2188.text).toContain("查看跳转边界");
     expect(v2188.text).toContain("可信候选价格");
     expect(v2188.text).toContain("跳转不代表交易能力");
+    expect(v2188.text).toContain("全球购价格候选展示");
+    expect(v2188.text).toContain("价格源归一化层");
+    expect(v2188.text).toContain("官方价格锚点");
+    expect(v2188.text).toContain("官方参考价");
+    expect(v2188.text).toContain("已覆盖来源中的较低候选价");
+    expect(v2188.text).toContain("与官方价对比");
+    expect(v2188.text).toContain("税费/运费/服务费状态");
+    expect(v2188.text).toContain("来源与可信度");
+    expect(v2188.text).toContain("价格以跳转后平台实时页面为准");
+    expect(v2188.text).toContain("当前仅展示只读 fixture 候选价");
+    expect(v2188.text).toContain("不代表真实最终价、锁价、最低价或可下单能力");
+    expect(v2188.text).toContain("价格展示不代表下单能力");
     expect(v2188.productGoalButtonCount).toBe(1);
     expect(v2188.jumpBoundaryButtonCount).toBe(1);
     expect(v2188.serialized).not.toMatch(/"(bookingUrl|checkoutUrl|paymentUrl|orderUrl)"\s*:\s*"https?:/i);
     expect(v2188.serialized).not.toMatch(/"(token|apiKey|key|secret|password)"\s*:\s*"/i);
     expect(v2188.serialized).not.toMatch(/"(rawResponse|rawProviderResponse|rawUserText)"\s*:/i);
-    expect(v2188.text).not.toMatch(/下载文件|保存文件|立即购买|直接下单|一键出票/);
+    expect(v2188.text).not.toMatch(/下载文件|保存文件|全网最低|最低价保证|已锁价|立即购买|直接下单|一键下单|一键出票/);
   });
 
 

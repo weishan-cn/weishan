@@ -1,5 +1,5 @@
 (function(){
-  const PROCUREMENT_CLARIFICATION_GATE_VERSION = "2.1.88";
+  const PROCUREMENT_CLARIFICATION_GATE_VERSION = "2.1.89";
 
   function text(value){ return String(value || "").trim(); }
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

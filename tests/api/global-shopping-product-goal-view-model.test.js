@@ -8,12 +8,15 @@ function main() {
   const windowRef = load([
     "apps/desktop/src/renderer/core/globalShoppingProductGoalCharter.js",
     "apps/desktop/src/renderer/core/globalShoppingJumpToPlatformBoundary.js",
+    "apps/desktop/src/renderer/core/globalShoppingPriceSourceNormalizer.js",
+    "apps/desktop/src/renderer/core/globalShoppingOfficialPriceAnchorSlot.js",
+    "apps/desktop/src/renderer/core/globalShoppingPriceCandidateDisplayBoard.js",
     "apps/desktop/src/renderer/core/globalShoppingProductGoalViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProductGoalViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PRODUCT_GOAL_VIEW_MODEL_VERSION, "2.1.88");
+  assert.equal(api.GLOBAL_SHOPPING_PRODUCT_GOAL_VIEW_MODEL_VERSION, "2.1.89");
   const model = api.buildGlobalShoppingProductGoalViewModel();
-  assert.equal(model.appVersion, "2.1.88");
+  assert.equal(model.appVersion, "2.1.89");
   assert.equal(model.title, "全球购产品目标与跳转边界");
   assert.equal(model.cards.find((item) => item.cardId === "trusted_price").label, "可信候选价格");
   assert.equal(model.cards.find((item) => item.cardId === "official_anchor").label, "官方价格锚点");
@@ -21,8 +24,8 @@ function main() {
   assert.equal(model.cards.find((item) => item.cardId === "jump_boundary").label, "平台自行下单");
   assert.ok(model.productGoalRows.length >= 8);
   assert.ok(model.jumpBoundaryRows.length >= 8);
-  assert.ok(model.forbiddenCopyRows.some((item) => item.label === "禁止全网最低承诺"));
-  assert.ok(model.forbiddenCopyRows.some((item) => item.label === "禁止一键下单承诺"));
+  assert.ok(model.forbiddenCopyRows.some((item) => item.label === "禁止最低价相关承诺"));
+  assert.ok(model.forbiddenCopyRows.some((item) => item.label === "禁止自动下单承诺"));
   assert.ok(model.recommendedCopyRows.some((item) => item.label === "价格以跳转后平台实时页面为准"));
   assert.ok(model.caveat.includes("Weishan 不处理付款、下单或出票"));
   const serialized = JSON.stringify(api.buildGlobalShoppingProductGoalViewModel({ realName:"张三", phone:"13800000000", email:"a@example.test", token:"abc", apiKey:"abc", secret:"abc", bookingUrl:"https://blocked.example", paymentUrl:"https://blocked.example", orderUrl:"https://blocked.example" }));

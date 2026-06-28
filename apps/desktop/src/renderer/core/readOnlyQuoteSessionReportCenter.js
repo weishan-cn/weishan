@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.88";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.89";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -185,6 +185,13 @@
       globalShoppingProductGoalSummary: stripUnsafe(safe.globalShoppingProductGoalSummary || null),
       jumpToPlatformBoundarySummary: stripUnsafe(safe.jumpToPlatformBoundarySummary || null),
       globalShoppingProductGoalViewModelSummary: stripUnsafe(safe.globalShoppingProductGoalViewModelSummary || null),
+      priceSourceNormalizationSummary: stripUnsafe(safe.priceSourceNormalizationSummary || null),
+      officialPriceAnchorSummary: stripUnsafe(safe.officialPriceAnchorSummary || null),
+      priceCandidateDisplaySummary: stripUnsafe(safe.priceCandidateDisplaySummary || null),
+      priceNormalizationStatus: safeText(safe.priceNormalizationStatus || safe.priceSourceNormalizationSummary && safe.priceSourceNormalizationSummary.status || ""),
+      officialPriceAnchorStatus: safeText(safe.officialPriceAnchorStatus || safe.officialPriceAnchorSummary && safe.officialPriceAnchorSummary.status || ""),
+      priceCandidateDisplayStatus: safeText(safe.priceCandidateDisplayStatus || safe.priceCandidateDisplaySummary && safe.priceCandidateDisplaySummary.status || ""),
+      safeToProceedWithPriceProviderSandbox: safe.safeToProceedWithPriceProviderSandbox === true,
       globalShoppingGoalStatus: safeText(safe.globalShoppingGoalStatus || safe.globalShoppingProductGoalSummary && safe.globalShoppingProductGoalSummary.status || ""),
       jumpBoundaryStatus: safeText(safe.jumpBoundaryStatus || safe.jumpToPlatformBoundarySummary && safe.jumpToPlatformBoundarySummary.status || ""),
       safeToProceedWithJumpToPlatformMvp: safe.safeToProceedWithJumpToPlatformMvp === true,
@@ -362,6 +369,9 @@
       globalShoppingProductGoalSummary: workflow.globalShoppingProductGoalSummary ? { title:"全球购产品目标", line:workflow.globalShoppingProductGoalSummary.userFacingSummary && workflow.globalShoppingProductGoalSummary.userFacingSummary.resultLabel || "产品目标仍需复核", redacted:true } : null,
       jumpToPlatformBoundarySummary: workflow.jumpToPlatformBoundarySummary ? { title:"跳转至平台自行下单边界", line:workflow.jumpToPlatformBoundarySummary.userFacingSummary && workflow.jumpToPlatformBoundarySummary.userFacingSummary.resultLabel || "跳转边界仍需复核", redacted:true } : null,
       globalShoppingProductGoalViewModelSummary: workflow.globalShoppingProductGoalViewModelSummary ? { title:"全球购产品目标与跳转边界", line:workflow.globalShoppingProductGoalViewModelSummary.title || "全球购产品目标与跳转边界", redacted:true } : null,
+      priceSourceNormalizationSummary: workflow.priceSourceNormalizationSummary ? { title:"价格源归一化层", line:workflow.priceSourceNormalizationSummary.userFacingSummary && workflow.priceSourceNormalizationSummary.userFacingSummary.resultLabel || "价格归一化仍需复核", redacted:true } : null,
+      officialPriceAnchorSummary: workflow.officialPriceAnchorSummary ? { title:"官方价格锚点", line:workflow.officialPriceAnchorSummary.userFacingSummary && workflow.officialPriceAnchorSummary.userFacingSummary.resultLabel || "官方价仍需复核", redacted:true } : null,
+      priceCandidateDisplaySummary: workflow.priceCandidateDisplaySummary ? { title:"全球购价格候选展示", line:workflow.priceCandidateDisplaySummary.caveat || "当前仅展示只读 fixture 候选价", redacted:true } : null,
       rcReviewStatus: workflow.rcReviewStatus || safe.rcReviewStatus || "",
       rcEvidenceStatus: workflow.rcEvidenceStatus || safe.rcEvidenceStatus || "",
       rcRegressionStatus: workflow.rcRegressionStatus || safe.rcRegressionStatus || "",
@@ -374,6 +384,10 @@
       globalShoppingGoalStatus: workflow.globalShoppingGoalStatus || safe.globalShoppingGoalStatus || "",
       jumpBoundaryStatus: workflow.jumpBoundaryStatus || safe.jumpBoundaryStatus || "",
       safeToProceedWithJumpToPlatformMvp: workflow.safeToProceedWithJumpToPlatformMvp === true || safe.safeToProceedWithJumpToPlatformMvp === true,
+      priceNormalizationStatus: workflow.priceNormalizationStatus || safe.priceNormalizationStatus || "",
+      officialPriceAnchorStatus: workflow.officialPriceAnchorStatus || safe.officialPriceAnchorStatus || "",
+      priceCandidateDisplayStatus: workflow.priceCandidateDisplayStatus || safe.priceCandidateDisplayStatus || "",
+      safeToProceedWithPriceProviderSandbox: workflow.safeToProceedWithPriceProviderSandbox === true || safe.safeToProceedWithPriceProviderSandbox === true,
       launchCandidateStatus: workflow.launchCandidateStatus || safe.launchCandidateStatus || "",
       readyForLaunchCandidate: workflow.readyForLaunchCandidate === true || safe.readyForLaunchCandidate === true,
       launchCandidateNextStep: workflow.launchCandidateNextStep || safe.launchCandidateNextStep || "",
