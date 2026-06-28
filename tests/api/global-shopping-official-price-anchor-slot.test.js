@@ -7,13 +7,13 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPriceSourceNormalizer.js", "apps/desktop/src/renderer/core/globalShoppingOfficialPriceAnchorSlot.js"]);
   const api = windowRef.WeishanGlobalShoppingOfficialPriceAnchorSlot;
-  assert.equal(api.GLOBAL_SHOPPING_OFFICIAL_PRICE_ANCHOR_SLOT_VERSION, "2.1.89");
+  assert.equal(api.GLOBAL_SHOPPING_OFFICIAL_PRICE_ANCHOR_SLOT_VERSION, "2.1.90");
   const normalizedCandidates = windowRef.WeishanGlobalShoppingPriceSourceNormalizer.normalizeGlobalShoppingPriceSources({ sources:[
     { candidateId:"official", sourceType:"official", sourceName:"Official", basePrice:100, taxAmount:10, shippingFee:0, platformFee:0, serviceFee:0, paymentFee:0, baggageFee:0, couponDiscount:0, currency:"CNY", lastCheckedAt:"fixture", confidence:"high" },
     { candidateId:"covered", sourceType:"aggregator", sourceName:"Covered", basePrice:90, taxAmount:5, shippingFee:0, platformFee:0, serviceFee:0, paymentFee:0, baggageFee:0, couponDiscount:0, currency:"CNY", lastCheckedAt:"fixture", confidence:"medium" }
   ]});
   const slot = api.buildGlobalShoppingOfficialPriceAnchorSlot({ normalizedCandidates });
-  assert.equal(slot.appVersion, "2.1.89");
+  assert.equal(slot.appVersion, "2.1.90");
   assert.equal(slot.status, "anchored");
   assert.equal(slot.officialAnchor.hasOfficialPrice, true);
   assert.equal(slot.comparison.lowestCoveredCandidateId, "covered");

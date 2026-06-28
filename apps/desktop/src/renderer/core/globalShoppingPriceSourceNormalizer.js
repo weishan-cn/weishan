@@ -1,11 +1,12 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRICE_SOURCE_NORMALIZER_VERSION = "2.1.89";
+  const GLOBAL_SHOPPING_PRICE_SOURCE_NORMALIZER_VERSION = "2.1.90";
   const NORMALIZER_NAME = "global_shopping_price_source_normalizer_v1";
   const SOURCE_TYPES = ["official", "authorized", "aggregator", "user_submitted", "fixture"];
   const FEE_FIELDS = ["taxAmount", "shippingFee", "platformFee", "serviceFee", "paymentFee", "baggageFee"];
-  const CAVEAT = "当前只处理只读 fixture 候选价，不代表真实最终价、锁价、最低价或可下单能力。";
+  const CAVEAT = "当前只处理只读 fixture 候选价，不代表最终成交价、锁定承诺、最低承诺或可下单能力。";
+  const PASS_THROUGH_TEXT_FIELDS = ["brand", "model", "sku", "gtin", "upc", "ean", "mpn", "capacity", "color", "size", "countryVersion", "flightNumber", "departureDate", "originAirport", "destinationAirport", "departureTime", "arrivalTime", "cabinClass", "baggageRule", "hotelId", "hotelName", "address", "checkIn", "checkOut", "roomType", "occupancy", "cancellationPolicy"];
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function obj(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
@@ -23,6 +24,10 @@
     return value !== undefined && value !== null && value !== "" && Number.isFinite(Number(value));
   }
   function bool(value, defaultValue) { return value === undefined ? defaultValue : value === true; }
+  function geo(value) {
+    const safe = obj(value);
+    return { lat:hasNumber(safe.lat) ? Number(safe.lat) : null, lng:hasNumber(safe.lng) ? Number(safe.lng) : null, redacted:true };
+  }
   function safety(overrides) {
     return Object.assign({
       fileWrite:false,
@@ -80,7 +85,7 @@
     const timestampProvided = Boolean(text(source.lastCheckedAt));
     const normalizedTotal = numberOrZero(source.basePrice) + FEE_FIELDS.reduce(function (sum, field) { return sum + numberOrZero(source[field]); }, 0) - numberOrZero(source.couponDiscount);
     const completeness = completenessFor(source, baseProvided, currencyProvided, timestampProvided);
-    return clone({
+    const normalized = {
       candidateId:text(source.candidateId || source.id || "candidate_fixture_1"),
       sourceId:text(source.sourceId || source.providerId || "fixture_source"),
       sourceName:text(source.sourceName || source.providerName || "Fixture Source"),
@@ -108,18 +113,25 @@
       priceCompleteness:completeness,
       lastCheckedAt:text(source.lastCheckedAt || ""),
       confidence:/^(high|medium|low|needs_review)$/.test(text(source.confidence)) ? text(source.confidence) : (completeness === "complete" ? "high" : "needs_review"),
+      breakfastIncluded:bool(source.breakfastIncluded, false),
+      geo:geo(source.geo),
       caveat:text(source.caveat || CAVEAT),
       bookingUrl:null,
       checkoutUrl:null,
       paymentUrl:null,
       orderUrl:null,
       redacted:true
-    });
+    };
+    PASS_THROUGH_TEXT_FIELDS.forEach(function (field) { normalized[field] = text(source[field] || ""); });
+    return clone(normalized);
   }
   function normalizeGlobalShoppingPriceSources(input) {
     const safe = obj(input);
     const sources = toArray(safe.sources || safe.priceSources || safe.candidates || safe.normalizedCandidates);
-    const fallback = [{ candidateId:"official_fixture", sourceType:"official", sourceName:"官方 fixture", itemType:"flight", title:"官方参考价", basePrice:1000, taxAmount:80, shippingFee:0, platformFee:0, serviceFee:20, paymentFee:0, baggageFee:0, couponDiscount:0, currency:"CNY", lastCheckedAt:"fixture-only", confidence:"high" }, { candidateId:"covered_fixture", sourceType:"aggregator", sourceName:"覆盖来源 fixture", itemType:"flight", title:"已覆盖来源中的较低候选价", basePrice:930, taxAmount:70, shippingFee:0, platformFee:15, serviceFee:20, paymentFee:0, baggageFee:0, couponDiscount:10, currency:"CNY", lastCheckedAt:"fixture-only", confidence:"medium" }];
+    const fallback = [
+      { candidateId:"official_fixture", sourceType:"official", sourceName:"官方 fixture", itemType:"flight", title:"官方参考价", basePrice:1000, taxAmount:80, shippingFee:0, platformFee:0, serviceFee:20, paymentFee:0, baggageFee:0, couponDiscount:0, currency:"CNY", lastCheckedAt:"fixture-only", confidence:"high", flightNumber:"MU5401", departureDate:"2026-07-15", originAirport:"SHA", destinationAirport:"CTU", cabinClass:"economy", baggageRule:"20kg" },
+      { candidateId:"covered_fixture", sourceType:"aggregator", sourceName:"覆盖来源 fixture", itemType:"flight", title:"已覆盖来源中的较低候选价", basePrice:930, taxAmount:70, shippingFee:0, platformFee:15, serviceFee:20, paymentFee:0, baggageFee:0, couponDiscount:10, currency:"CNY", lastCheckedAt:"fixture-only", confidence:"medium", flightNumber:"MU5401", departureDate:"2026-07-15", originAirport:"SHA", destinationAirport:"CTU", cabinClass:"economy", baggageRule:"20kg" }
+    ];
     return clone((sources.length ? sources : fallback).map(normalizeGlobalShoppingPriceSource));
   }
   function evaluateGlobalShoppingPriceCompleteness(input) {

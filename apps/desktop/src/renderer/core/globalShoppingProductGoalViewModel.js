@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRODUCT_GOAL_VIEW_MODEL_VERSION = "2.1.89";
+  const GLOBAL_SHOPPING_PRODUCT_GOAL_VIEW_MODEL_VERSION = "2.1.90";
   const VIEW_MODEL_NAME = "global_shopping_product_goal_view_model_v1";
   const CAVEAT = "Weishan 帮用户找价、比价、归一化和跳转平台；用户需在平台自行完成下单。Weishan 不处理付款、下单或出票。";
 
@@ -66,6 +66,30 @@
       ? boardApi.buildGlobalShoppingPriceCandidateDisplayBoard(Object.assign({}, safe, { priceSourceNormalizationSummary:normalizer, officialPriceAnchorSummary:anchor }))
       : {};
   }
+  function sameItemMatcherSummary(input, normalizer) {
+    const safe = obj(input);
+    if (Object.keys(obj(safe.sameItemMatcherSummary)).length) return obj(safe.sameItemMatcherSummary);
+    const matcherApi = api("WeishanGlobalShoppingSameItemMatcher");
+    return typeof matcherApi.buildGlobalShoppingSameItemMatcher === "function"
+      ? matcherApi.buildGlobalShoppingSameItemMatcher(Object.assign({}, safe, { normalizedCandidates:normalizer && normalizer.normalizedCandidates || [] }))
+      : {};
+  }
+  function duplicateCandidateMergerSummary(input, matcher) {
+    const safe = obj(input);
+    if (Object.keys(obj(safe.duplicateCandidateMergerSummary)).length) return obj(safe.duplicateCandidateMergerSummary);
+    const mergerApi = api("WeishanGlobalShoppingDuplicateCandidateMerger");
+    return typeof mergerApi.buildGlobalShoppingDuplicateCandidateMerger === "function"
+      ? mergerApi.buildGlobalShoppingDuplicateCandidateMerger(Object.assign({}, safe, { sameItemMatcherSummary:matcher }))
+      : {};
+  }
+  function coveredLowestCandidateBoardSummary(input, merger, anchor) {
+    const safe = obj(input);
+    if (Object.keys(obj(safe.coveredLowestCandidateBoardSummary)).length) return obj(safe.coveredLowestCandidateBoardSummary);
+    const boardApi = api("WeishanGlobalShoppingCoveredLowestCandidateBoard");
+    return typeof boardApi.buildGlobalShoppingCoveredLowestCandidateBoard === "function"
+      ? boardApi.buildGlobalShoppingCoveredLowestCandidateBoard(Object.assign({}, safe, { duplicateCandidateMergerSummary:merger, officialPriceAnchorSummary:anchor }))
+      : {};
+  }
   function buildGlobalShoppingProductGoalCards(input) {
     const goal = productGoalSummary(input || {});
     const boundary = jumpBoundarySummary(input || {});
@@ -75,7 +99,9 @@
       card("covered_platforms", "合法平台候选价", goal.productGoals && goal.productGoals.showMultipleLegalPlatformCandidates ? "已对齐" : "仍需复核"),
       card("jump_boundary", "平台自行下单", boundary.userFacingSummary && boundary.userFacingSummary.resultLabel || "跳转边界仍需复核"),
       card("price_normalization", "价格源归一化层", priceSourceNormalizationSummary(input || {}).userFacingSummary && priceSourceNormalizationSummary(input || {}).userFacingSummary.resultLabel || "价格归一化仍需复核"),
-      card("price_display_board", "全球购价格候选展示", priceCandidateDisplaySummary(input || {}, priceSourceNormalizationSummary(input || {}), officialPriceAnchorSummary(input || {}, priceSourceNormalizationSummary(input || {}))).title || "全球购价格候选展示")
+      card("same_item_matcher", "同款候选识别", sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {})).userFacingSummary && sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {})).userFacingSummary.resultLabel || "同款识别仍需复核"),
+      card("duplicate_merge", "重复候选合并", duplicateCandidateMergerSummary(input || {}, sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {}))).userFacingSummary && duplicateCandidateMergerSummary(input || {}, sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {}))).userFacingSummary.resultLabel || "重复候选仍需复核"),
+      card("covered_lowest_board", "已覆盖来源候选价合并", coveredLowestCandidateBoardSummary(input || {}, duplicateCandidateMergerSummary(input || {}, sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {}))), officialPriceAnchorSummary(input || {}, priceSourceNormalizationSummary(input || {}))).title || "已覆盖来源候选价合并")
     ]);
   }
   function buildGlobalShoppingProductGoalRows(input) {
@@ -114,9 +140,12 @@
       const normalizer = priceSourceNormalizationSummary(safe);
       const anchor = officialPriceAnchorSummary(safe, normalizer);
       const displayBoard = priceCandidateDisplaySummary(safe, normalizer, anchor);
-      const status = goal.status === "blocked" || boundary.status === "blocked" || normalizer.status === "blocked" || anchor.status === "blocked" || displayBoard.status === "blocked"
+      const matcher = sameItemMatcherSummary(safe, normalizer);
+      const merger = duplicateCandidateMergerSummary(safe, matcher);
+      const coveredBoard = coveredLowestCandidateBoardSummary(safe, merger, anchor);
+      const status = goal.status === "blocked" || boundary.status === "blocked" || normalizer.status === "blocked" || anchor.status === "blocked" || displayBoard.status === "blocked" || matcher.status === "blocked" || merger.status === "blocked" || coveredBoard.status === "blocked"
         ? "blocked"
-        : (goal.status === "needs_review" || boundary.status === "needs_review" || normalizer.status === "needs_review" || anchor.status === "needs_review" || anchor.status === "missing_official" || displayBoard.status === "needs_review" ? "needs_review" : "aligned");
+        : (goal.status === "needs_review" || boundary.status === "needs_review" || normalizer.status === "needs_review" || anchor.status === "needs_review" || anchor.status === "missing_official" || displayBoard.status === "needs_review" || matcher.status === "needs_review" || merger.status === "needs_review" || coveredBoard.status === "needs_review" ? "needs_review" : "aligned");
       return clone({
         viewModelName:VIEW_MODEL_NAME,
         appVersion:GLOBAL_SHOPPING_PRODUCT_GOAL_VIEW_MODEL_VERSION,
@@ -133,10 +162,17 @@
         priceSourceNormalizationSummary:clone(normalizer),
         officialPriceAnchorSummary:clone(anchor),
         priceCandidateDisplaySummary:clone(displayBoard),
+        sameItemMatcherSummary:clone(matcher),
+        duplicateCandidateMergerSummary:clone(merger),
+        coveredLowestCandidateBoardSummary:clone(coveredBoard),
         priceNormalizationStatus:text(normalizer.status || ""),
         officialPriceAnchorStatus:text(anchor.status || ""),
         priceCandidateDisplayStatus:text(displayBoard.status || ""),
+        sameItemMatcherStatus:text(matcher.status || ""),
+        duplicateMergeStatus:text(merger.status || ""),
+        coveredLowestStatus:text(coveredBoard.status || ""),
         safeToProceedWithPriceProviderSandbox:normalizer.status === "ready" && anchor.status === "anchored" && displayBoard.status === "ready",
+        safeToProceedWithDeepLinkSafetyGate:matcher.status === "ready" && merger.status === "merged" && coveredBoard.status === "ready",
         redacted:true
       });
     } catch (error) {
@@ -168,6 +204,9 @@
       priceNormalizationStatus:model.priceNormalizationStatus || "",
       officialPriceAnchorStatus:model.officialPriceAnchorStatus || "",
       priceCandidateDisplayStatus:model.priceCandidateDisplayStatus || "",
+      sameItemMatcherStatus:model.sameItemMatcherStatus || "",
+      duplicateMergeStatus:model.duplicateMergeStatus || "",
+      coveredLowestStatus:model.coveredLowestStatus || "",
       bookingUrl:null,
       checkoutUrl:null,
       paymentUrl:null,

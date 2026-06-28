@@ -1,11 +1,11 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFICIAL_PRICE_ANCHOR_SLOT_VERSION = "2.1.89";
+  const GLOBAL_SHOPPING_OFFICIAL_PRICE_ANCHOR_SLOT_VERSION = "2.1.90";
   const SLOT_NAME = "global_shopping_official_price_anchor_slot_v1";
   const OFFICIAL_CAVEAT = "官方价仅作参考，价格以官方平台实时页面为准。";
-  const COMPARISON_CAVEAT = "当前仅比较已覆盖来源中的候选价，不代表全网最低或锁价。";
-  const SUMMARY_CAVEAT = "官方价格只作为参考锚点，不代表真实最终价、锁价、最低价或可下单能力。";
+  const COMPARISON_CAVEAT = "当前仅比较已覆盖来源中的候选价，不代表最低承诺或锁定承诺。";
+  const SUMMARY_CAVEAT = "官方价格只作为参考锚点，不代表最终成交价、锁定承诺、价格保证或可下单能力。";
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function obj(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
   function toArray(value) { return Array.isArray(value) ? value.slice() : []; }

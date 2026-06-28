@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowHumanReviewChecklist.js", "apps/desktop/src/renderer/core/flightWorkflowFinalSafeHandoffPacket.js"]);
   const api = windowRef.WeishanFlightWorkflowFinalSafeHandoffPacket;
-  assert.equal(api.FLIGHT_WORKFLOW_FINAL_SAFE_HANDOFF_PACKET_VERSION, "2.1.89");
+  assert.equal(api.FLIGHT_WORKFLOW_FINAL_SAFE_HANDOFF_PACKET_VERSION, "2.1.90");
   const checklist = windowRef.WeishanFlightWorkflowHumanReviewChecklist.buildFlightWorkflowHumanReviewChecklist({ routeSummary:"上海 → 成都", departureDate:"2026-07-15", selectedCandidate:{ providerName:"sandbox" }, manualPlatformCheckSummary:{ status:"checked" } });
   const ready = api.buildFlightWorkflowFinalSafeHandoffPacket({ routeSummary:"上海 → 成都", departureDate:"2026-07-15", selectedCandidate:{ providerName:"sandbox" }, humanReviewChecklistSummary:checklist, bookingUrl:null, payment:false });
   assert.equal(ready.packetName, "flight_workflow_final_safe_handoff_packet_v1");

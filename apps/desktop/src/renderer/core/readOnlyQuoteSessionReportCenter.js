@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.89";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.90";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -188,10 +188,17 @@
       priceSourceNormalizationSummary: stripUnsafe(safe.priceSourceNormalizationSummary || null),
       officialPriceAnchorSummary: stripUnsafe(safe.officialPriceAnchorSummary || null),
       priceCandidateDisplaySummary: stripUnsafe(safe.priceCandidateDisplaySummary || null),
+      sameItemMatcherSummary: stripUnsafe(safe.sameItemMatcherSummary || null),
+      duplicateCandidateMergerSummary: stripUnsafe(safe.duplicateCandidateMergerSummary || null),
+      coveredLowestCandidateBoardSummary: stripUnsafe(safe.coveredLowestCandidateBoardSummary || null),
       priceNormalizationStatus: safeText(safe.priceNormalizationStatus || safe.priceSourceNormalizationSummary && safe.priceSourceNormalizationSummary.status || ""),
       officialPriceAnchorStatus: safeText(safe.officialPriceAnchorStatus || safe.officialPriceAnchorSummary && safe.officialPriceAnchorSummary.status || ""),
       priceCandidateDisplayStatus: safeText(safe.priceCandidateDisplayStatus || safe.priceCandidateDisplaySummary && safe.priceCandidateDisplaySummary.status || ""),
+      sameItemMatcherStatus: safeText(safe.sameItemMatcherStatus || safe.sameItemMatcherSummary && safe.sameItemMatcherSummary.status || ""),
+      duplicateMergeStatus: safeText(safe.duplicateMergeStatus || safe.duplicateCandidateMergerSummary && safe.duplicateCandidateMergerSummary.status || ""),
+      coveredLowestStatus: safeText(safe.coveredLowestStatus || safe.coveredLowestCandidateBoardSummary && safe.coveredLowestCandidateBoardSummary.status || ""),
       safeToProceedWithPriceProviderSandbox: safe.safeToProceedWithPriceProviderSandbox === true,
+      safeToProceedWithDeepLinkSafetyGate: safe.safeToProceedWithDeepLinkSafetyGate === true,
       globalShoppingGoalStatus: safeText(safe.globalShoppingGoalStatus || safe.globalShoppingProductGoalSummary && safe.globalShoppingProductGoalSummary.status || ""),
       jumpBoundaryStatus: safeText(safe.jumpBoundaryStatus || safe.jumpToPlatformBoundarySummary && safe.jumpToPlatformBoundarySummary.status || ""),
       safeToProceedWithJumpToPlatformMvp: safe.safeToProceedWithJumpToPlatformMvp === true,
@@ -372,6 +379,9 @@
       priceSourceNormalizationSummary: workflow.priceSourceNormalizationSummary ? { title:"价格源归一化层", line:workflow.priceSourceNormalizationSummary.userFacingSummary && workflow.priceSourceNormalizationSummary.userFacingSummary.resultLabel || "价格归一化仍需复核", redacted:true } : null,
       officialPriceAnchorSummary: workflow.officialPriceAnchorSummary ? { title:"官方价格锚点", line:workflow.officialPriceAnchorSummary.userFacingSummary && workflow.officialPriceAnchorSummary.userFacingSummary.resultLabel || "官方价仍需复核", redacted:true } : null,
       priceCandidateDisplaySummary: workflow.priceCandidateDisplaySummary ? { title:"全球购价格候选展示", line:workflow.priceCandidateDisplaySummary.caveat || "当前仅展示只读 fixture 候选价", redacted:true } : null,
+      sameItemMatcherSummary: workflow.sameItemMatcherSummary ? { title:"同款候选识别", line:workflow.sameItemMatcherSummary.userFacingSummary && workflow.sameItemMatcherSummary.userFacingSummary.resultLabel || "同款识别仍需复核", redacted:true } : null,
+      duplicateCandidateMergerSummary: workflow.duplicateCandidateMergerSummary ? { title:"重复候选合并", line:workflow.duplicateCandidateMergerSummary.userFacingSummary && workflow.duplicateCandidateMergerSummary.userFacingSummary.resultLabel || "重复候选仍需复核", redacted:true } : null,
+      coveredLowestCandidateBoardSummary: workflow.coveredLowestCandidateBoardSummary ? { title:"已覆盖来源候选价合并", line:workflow.coveredLowestCandidateBoardSummary.caveat || "当前仅比较已覆盖来源中的候选价", redacted:true } : null,
       rcReviewStatus: workflow.rcReviewStatus || safe.rcReviewStatus || "",
       rcEvidenceStatus: workflow.rcEvidenceStatus || safe.rcEvidenceStatus || "",
       rcRegressionStatus: workflow.rcRegressionStatus || safe.rcRegressionStatus || "",
@@ -387,7 +397,11 @@
       priceNormalizationStatus: workflow.priceNormalizationStatus || safe.priceNormalizationStatus || "",
       officialPriceAnchorStatus: workflow.officialPriceAnchorStatus || safe.officialPriceAnchorStatus || "",
       priceCandidateDisplayStatus: workflow.priceCandidateDisplayStatus || safe.priceCandidateDisplayStatus || "",
+      sameItemMatcherStatus: workflow.sameItemMatcherStatus || safe.sameItemMatcherStatus || "",
+      duplicateMergeStatus: workflow.duplicateMergeStatus || safe.duplicateMergeStatus || "",
+      coveredLowestStatus: workflow.coveredLowestStatus || safe.coveredLowestStatus || "",
       safeToProceedWithPriceProviderSandbox: workflow.safeToProceedWithPriceProviderSandbox === true || safe.safeToProceedWithPriceProviderSandbox === true,
+      safeToProceedWithDeepLinkSafetyGate: workflow.safeToProceedWithDeepLinkSafetyGate === true || safe.safeToProceedWithDeepLinkSafetyGate === true,
       launchCandidateStatus: workflow.launchCandidateStatus || safe.launchCandidateStatus || "",
       readyForLaunchCandidate: workflow.readyForLaunchCandidate === true || safe.readyForLaunchCandidate === true,
       launchCandidateNextStep: workflow.launchCandidateNextStep || safe.launchCandidateNextStep || "",
