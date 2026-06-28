@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.1.95";
+  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.1.96";
   const ORCHESTRATOR_NAME = "global_shopping_price_pipeline_orchestrator_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -117,6 +117,43 @@
       duplicateCandidateMergerSummary:duplicateCandidateMergerSummary,
       officialPriceAnchorSummary:officialPriceAnchorSummary
     });
+    const realProviderSandboxGateSummary = resolveSummary(safe, "realProviderSandboxGateSummary", "WeishanGlobalShoppingReadOnlyRealProviderSandboxGate", "buildGlobalShoppingReadOnlyRealProviderSandboxGate", {
+      readOnlyProviderSandboxConnectorSummary:readOnlyProviderSandboxConnectorSummary,
+      fixtureReplayConsoleSummary:fixtureReplayConsoleSummary,
+      normalizedPriceCandidateBoardSummary:obj(safe.normalizedPriceCandidateBoardSummary),
+      sandboxProviderResponseContractSummary:sandboxProviderResponseContractSummary,
+      pricePipelineOrchestratorSummary:{ status:"ready" },
+      providerCredentialSafetySummary:providerCredentialSafetySummary,
+      sandboxPriceFeedSummary:sandboxPriceFeedSummary
+    });
+    const providerRequestEnvelopeSummary = resolveSummary(safe, "providerRequestEnvelopeSummary", "WeishanGlobalShoppingProviderRequestEnvelopeBuilder", "buildGlobalShoppingProviderRequestEnvelopeBuilder", {
+      providerId:obj(legalProviderFixtureSummary).providerId || "global_fixture_provider",
+      providerName:obj(legalProviderFixtureSummary).providerName || "Global Shopping Fixture Sandbox",
+      requestMode:"sandbox_ready",
+      itemType:"flight",
+      origin:"SHA",
+      destination:"CTU",
+      departureDate:"2026-07-15",
+      passengerCount:1,
+      directOnly:true,
+      nonSensitivePreference:"cheapest_direct_first",
+      userRegion:"CN",
+      destinationRegion:"CN",
+      currency:"CNY",
+      locale:"zh-CN",
+      requestCreatedAt:"redacted_now"
+    });
+    const providerCallAuditLedgerSummary = resolveSummary(safe, "providerCallAuditLedgerSummary", "WeishanGlobalShoppingProviderCallAuditLedger", "buildGlobalShoppingProviderCallAuditLedger", {
+      providerId:obj(legalProviderFixtureSummary).providerId || "global_fixture_provider",
+      providerName:obj(legalProviderFixtureSummary).providerName || "Global Shopping Fixture Sandbox",
+      requestMode:"sandbox_ready",
+      auditEntries:[{ auditId:"audit_1", providerId:obj(legalProviderFixtureSummary).providerId || "global_fixture_provider", providerName:obj(legalProviderFixtureSummary).providerName || "Global Shopping Fixture Sandbox", requestMode:"sandbox_ready", callStatus:"not_sent", redacted:true, timestamp:"redacted_now", safetyStatus:"redacted_safe" }]
+    });
+    const providerSandboxReadinessViewModelSummary = resolveSummary(safe, "providerSandboxReadinessViewModelSummary", "WeishanGlobalShoppingProviderSandboxReadinessViewModel", "buildGlobalShoppingProviderSandboxReadinessViewModel", {
+      realProviderSandboxGateSummary:realProviderSandboxGateSummary,
+      providerRequestEnvelopeSummary:providerRequestEnvelopeSummary,
+      providerCallAuditLedgerSummary:providerCallAuditLedgerSummary
+    });
     const sandboxHandoffViewModelSummary = resolveSummary(safe, "sandboxHandoffViewModel", "WeishanGlobalShoppingSandboxHandoffViewModel", "buildGlobalShoppingSandboxHandoffViewModel", safe);
     const pipelineHealth = {
       providerConnectorReady:statusOf(readOnlyProviderSandboxConnectorSummary) === "ready",
@@ -130,6 +167,10 @@
       sameItemMatcherReady:statusOf(sameItemMatcherSummary) === "ready",
       duplicateMergeReady:statusOf(duplicateCandidateMergerSummary) === "merged" || statusOf(duplicateCandidateMergerSummary) === "ready",
       coveredLowestReady:statusOf(coveredLowestCandidateBoardSummary) === "ready",
+      realProviderSandboxGateReady:statusOf(realProviderSandboxGateSummary) === "ready",
+      providerRequestEnvelopeReady:statusOf(providerRequestEnvelopeSummary) === "ready",
+      providerCallAuditLedgerReady:statusOf(providerCallAuditLedgerSummary) === "ready",
+      providerSandboxReadinessReady:statusOf(providerSandboxReadinessViewModelSummary) === "ready",
       sandboxHandoffReady:statusOf(sandboxHandoffViewModelSummary) === "ready",
       noRealProvider:safe.realProviderEnabled !== true && safe.productionProviderEnabled !== true && safe.noRealProvider !== false,
       noNetwork:safe.networkEnabled !== true && safe.noNetwork !== false,
@@ -176,8 +217,10 @@
         canShowOfficialAnchor:pipelineHealth.officialAnchorReady,
         canShowCoveredLowestCandidate:pipelineHealth.coveredLowestReady,
         canShowSandboxHandoffPreview:pipelineHealth.sandboxHandoffReady,
+        canShowProviderSandboxReadiness:pipelineHealth.providerSandboxReadinessReady,
         canProceedToReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.providerFixtureReady && pipelineHealth.credentialSafetyPass && pipelineHealth.sandboxFeedReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.officialAnchorReady && pipelineHealth.sameItemMatcherReady && pipelineHealth.duplicateMergeReady && pipelineHealth.coveredLowestReady && pipelineHealth.sandboxHandoffReady,
-        safeToProceedWithFirstRealReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.coveredLowestReady
+        safeToProceedWithFirstRealReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.coveredLowestReady,
+        safeToProceedWithFirstReadOnlySandboxDryRun:pipelineHealth.realProviderSandboxGateReady && pipelineHealth.providerRequestEnvelopeReady && pipelineHealth.providerCallAuditLedgerReady && pipelineHealth.providerSandboxReadinessReady
       },
       blockedReasons:blockedReasons,
       readOnlyProviderSandboxConnectorSummary:clone(readOnlyProviderSandboxConnectorSummary),
@@ -191,6 +234,10 @@
       sameItemMatcherSummary:clone(sameItemMatcherSummary),
       duplicateCandidateMergerSummary:clone(duplicateCandidateMergerSummary),
       coveredLowestCandidateBoardSummary:clone(coveredLowestCandidateBoardSummary),
+      realProviderSandboxGateSummary:clone(realProviderSandboxGateSummary),
+      providerRequestEnvelopeSummary:clone(providerRequestEnvelopeSummary),
+      providerCallAuditLedgerSummary:clone(providerCallAuditLedgerSummary),
+      providerSandboxReadinessViewModelSummary:clone(providerSandboxReadinessViewModelSummary),
       sandboxHandoffViewModelSummary:clone(sandboxHandoffViewModelSummary),
       status:blockedReasons.length ? "blocked" : (review ? "needs_review" : "ready"),
       redacted:true
@@ -210,6 +257,10 @@
       row("same_item", "同款识别", statusOf(safe.sameItemMatcherSummary) === "ready" ? "pass" : "warning", obj(obj(safe.sameItemMatcherSummary).userFacingSummary).resultLabel || "同款识别仍需复核"),
       row("duplicate_merge", "候选合并", /^(merged|ready)$/.test(statusOf(safe.duplicateCandidateMergerSummary)) ? "pass" : "warning", obj(obj(safe.duplicateCandidateMergerSummary).userFacingSummary).resultLabel || "重复候选仍需复核"),
       row("covered_lowest", "已覆盖来源较低候选价", statusOf(safe.coveredLowestCandidateBoardSummary) === "ready" ? "pass" : "warning", obj(obj(safe.coveredLowestCandidateBoardSummary).userFacingSummary).resultLabel || "当前仅比较已覆盖来源中的候选价"),
+      row("sandbox_gate", "真实只读 Provider Sandbox 闸门", statusOf(safe.realProviderSandboxGateSummary) === "ready" ? "pass" : (statusOf(safe.realProviderSandboxGateSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.realProviderSandboxGateSummary).userFacingSummary).resultLabel || "仍需复核"),
+      row("request_envelope", "Provider 请求封装", statusOf(safe.providerRequestEnvelopeSummary) === "ready" ? "pass" : (statusOf(safe.providerRequestEnvelopeSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.providerRequestEnvelopeSummary).userFacingSummary).resultLabel || "仍需复核"),
+      row("audit_ledger", "Provider 调用审计台账", statusOf(safe.providerCallAuditLedgerSummary) === "ready" ? "pass" : (statusOf(safe.providerCallAuditLedgerSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.providerCallAuditLedgerSummary).userFacingSummary).resultLabel || "仍需复核"),
+      row("sandbox_readiness", "真实只读 Provider Sandbox 准备", statusOf(safe.providerSandboxReadinessViewModelSummary) === "ready" ? "pass" : (statusOf(safe.providerSandboxReadinessViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.providerSandboxReadinessViewModelSummary).title || "真实只读 Provider Sandbox 准备"),
       row("sandbox_handoff", "Sandbox 跳转预览", statusOf(safe.sandboxHandoffViewModelSummary) === "ready" ? "pass" : "warning", obj(obj(safe.sandboxHandoffViewModelSummary).userFacingSummary).resultLabel || "Sandbox 跳转候选与平台可用性仍需复核")
     ]);
   }
@@ -243,6 +294,10 @@
       sameItemMatcherSummary:linkedSummary(evaluation.sameItemMatcherSummary),
       duplicateCandidateMergerSummary:linkedSummary(evaluation.duplicateCandidateMergerSummary),
       coveredLowestCandidateBoardSummary:linkedSummary(evaluation.coveredLowestCandidateBoardSummary),
+      realProviderSandboxGateSummary:linkedSummary(evaluation.realProviderSandboxGateSummary),
+      providerRequestEnvelopeSummary:linkedSummary(evaluation.providerRequestEnvelopeSummary),
+      providerCallAuditLedgerSummary:linkedSummary(evaluation.providerCallAuditLedgerSummary),
+      providerSandboxReadinessViewModelSummary:linkedSummary(evaluation.providerSandboxReadinessViewModelSummary),
       sandboxHandoffViewModelSummary:linkedSummary(evaluation.sandboxHandoffViewModelSummary),
       redacted:true
     });

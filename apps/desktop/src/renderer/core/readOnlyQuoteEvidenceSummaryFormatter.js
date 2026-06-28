@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.95";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.96";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -245,6 +245,10 @@
       readOnlyProviderSandboxConnectorSummary: stripUnsafe(safe.readOnlyProviderSandboxConnectorSummary || null),
       fixtureReplayConsoleSummary: stripUnsafe(safe.fixtureReplayConsoleSummary || null),
       normalizedPriceCandidateBoardSummary: stripUnsafe(safe.normalizedPriceCandidateBoardSummary || null),
+      realProviderSandboxGateSummary: stripUnsafe(safe.realProviderSandboxGateSummary || null),
+      providerRequestEnvelopeSummary: stripUnsafe(safe.providerRequestEnvelopeSummary || null),
+      providerCallAuditLedgerSummary: stripUnsafe(safe.providerCallAuditLedgerSummary || null),
+      providerSandboxReadinessViewModelSummary: stripUnsafe(safe.providerSandboxReadinessViewModelSummary || null),
       legalProviderFixtureSummary: stripUnsafe(safe.legalProviderFixtureSummary || null),
       providerCredentialSafetySummary: stripUnsafe(safe.providerCredentialSafetySummary || null),
       sandboxPriceFeedSummary: stripUnsafe(safe.sandboxPriceFeedSummary || null),
@@ -264,6 +268,10 @@
       readOnlyProviderSandboxConnectorStatus: safeLine(safe.readOnlyProviderSandboxConnectorStatus || ""),
       fixtureReplayStatus: safeLine(safe.fixtureReplayStatus || ""),
       normalizedPriceCandidateBoardStatus: safeLine(safe.normalizedPriceCandidateBoardStatus || ""),
+      realProviderSandboxGateStatus: safeLine(safe.realProviderSandboxGateStatus || ""),
+      providerRequestEnvelopeStatus: safeLine(safe.providerRequestEnvelopeStatus || ""),
+      providerCallAuditLedgerStatus: safeLine(safe.providerCallAuditLedgerStatus || ""),
+      providerSandboxReadinessStatus: safeLine(safe.providerSandboxReadinessStatus || ""),
       legalProviderFixtureStatus: safeLine(safe.legalProviderFixtureStatus || ""),
       providerCredentialSafetyStatus: safeLine(safe.providerCredentialSafetyStatus || ""),
       sandboxPriceFeedStatus: safeLine(safe.sandboxPriceFeedStatus || ""),
@@ -275,6 +283,7 @@
       sandboxHandoffStatus: safeLine(safe.sandboxHandoffStatus || ""),
       safeToProceedWithPartnerFixtureAdapter: safe.safeToProceedWithPartnerFixtureAdapter === true,
       safeToProceedWithFirstRealReadOnlyProviderSandbox: safe.safeToProceedWithFirstRealReadOnlyProviderSandbox === true,
+      safeToProceedWithFirstReadOnlySandboxDryRun: safe.safeToProceedWithFirstReadOnlySandboxDryRun === true,
       pilotOpsStatus: safeLine(safe.pilotOpsStatus || ""),
       nextCohortDecisionStatus: safeLine(safe.nextCohortDecisionStatus || ""),
       pilotOpsPrimaryRisk: stripUnsafe(safe.pilotOpsPrimaryRisk || null),

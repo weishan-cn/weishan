@@ -18,7 +18,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/trustedFlightSourceRegistry.js"]);
   const api = windowRef.WeishanTrustedFlightSourceRegistry;
-  assert.equal(api.TRUSTED_FLIGHT_SOURCE_REGISTRY_VERSION, "2.1.95");
+  assert.equal(api.TRUSTED_FLIGHT_SOURCE_REGISTRY_VERSION, "2.1.96");
 
   const registry = api.getTrustedFlightSourceRegistry();
   assert.equal(registry.phase, "trusted_flight_source_registry_skeleton_only");

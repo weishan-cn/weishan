@@ -14,9 +14,9 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPriceCandidateDisplayBoard.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPriceCandidateDisplayBoard;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_CANDIDATE_DISPLAY_BOARD_VERSION, "2.1.95");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_CANDIDATE_DISPLAY_BOARD_VERSION, "2.1.96");
   const board = api.buildGlobalShoppingPriceCandidateDisplayBoard();
-  assert.equal(board.appVersion, "2.1.95");
+  assert.equal(board.appVersion, "2.1.96");
   assert.equal(board.status, "ready");
   assert.equal(board.title, "全球购价格候选展示");
   assert.equal(board.cards.find((item) => item.cardId === "official_price").label, "官方参考价");

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const MATRIX_VERSION = "2.1.95";
+  const MATRIX_VERSION = "2.1.96";
   const PHASE = "flight_sandbox_provider_matrix";
   const DEFAULT_MATRIX_STATUS = "readiness_matrix_only";
 

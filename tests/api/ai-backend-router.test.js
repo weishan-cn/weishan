@@ -15,7 +15,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/aiBackendRouter.js"]);
   const api = windowRef.WeishanAiBackendRouter;
-  assert.equal(api.AI_BACKEND_ROUTER_VERSION, "2.1.95");
+  assert.equal(api.AI_BACKEND_ROUTER_VERSION, "2.1.96");
   assert.equal(api.routeAiBackend({ userAiApiState:{ aiApiTokenConfigured:true }, networkPolicy:{ enabled:true } }).backendDecision, "user_ai_token");
   assert.equal(api.routeAiBackend({ networkPolicy:{ enabled:true } }).backendDecision, "safe_network_search");
   assert.equal(api.routeAiBackend({ networkPolicy:{ enabled:false } }).backendDecision, "local_rules");
