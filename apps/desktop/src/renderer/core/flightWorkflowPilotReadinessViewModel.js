@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PILOT_READINESS_VIEW_MODEL_VERSION = "2.1.84";
+  const FLIGHT_WORKFLOW_PILOT_READINESS_VIEW_MODEL_VERSION = "2.1.85";
   const VIEW_MODEL_NAME = "flight_workflow_pilot_readiness_view_model_v1";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

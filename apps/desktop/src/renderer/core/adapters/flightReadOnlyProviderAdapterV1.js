@@ -1,6 +1,6 @@
 ;(function () {
   "use strict";
-  const FLIGHT_READONLY_PROVIDER_ADAPTER_V1_VERSION = "2.1.84";
+  const FLIGHT_READONLY_PROVIDER_ADAPTER_V1_VERSION = "2.1.85";
   const ADAPTER_ID = "flight_readonly_provider_adapter_v1";
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
   function metadata() { return clone({ version:FLIGHT_READONLY_PROVIDER_ADAPTER_V1_VERSION, adapterId:ADAPTER_ID, providerCategory:"flight", providerName:"flight_provider", mode:"offline_fixture_only", networkPolicy:"disabled", credentialPolicy:"metadata_only", endpointPolicy:"disabled", resultPolicy:"normalized_draft_only", sandboxResponseSchemaGate:"draft-ready", realProviderResultSchemaValidation:"draft-ready", providerResultSourceLabelGate:"draft-ready", priceIntegrityTaxesFeesGate:"draft-ready", realPriceDisplayGate:"guarded-display-ready", ordinaryResultExposure:"guarded_price_card_only", priceExposure:"guarded_sandbox_test_price", availabilityExposure:"provider_reported_only", bookingUrlPolicy:"disabled", paymentPolicy:"disabled", orderPolicy:"disabled", identityUploadPolicy:"disabled", redacted:true }); }

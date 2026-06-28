@@ -16,22 +16,27 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowEvidenceFreezePack.js"]);
   const api = windowRef.WeishanFlightWorkflowEvidenceFreezePack;
-  assert.equal(api.FLIGHT_WORKFLOW_EVIDENCE_FREEZE_PACK_VERSION, "2.1.84");
+  assert.equal(api.FLIGHT_WORKFLOW_EVIDENCE_FREEZE_PACK_VERSION, "2.1.85");
   const pack = api.buildFlightWorkflowEvidenceFreezePack({
     releaseReadinessSummary:{ status:"ready", safeForUserFacingBeta:true },
     launchCandidateReadinessSummary:{ status:"ready", launchCandidateReadiness:{ safeForReadOnlyLaunchCandidate:true } },
     safetyRegressionSummary:{ status:"pass" },
     operatorConsoleSummary:{ status:"ready" },
     pilotOpsSummary:{ status:"healthy" },
-    supportReadinessSummary:{ status:"ready" }
+    supportReadinessSummary:{ status:"ready" },
+    rcCandidateReviewSummary:{ status:"ready_for_review", userFacingSummary:{ resultLabel:"可以开始 RC 复核", redacted:true }, safeToStartRcReview:true, redacted:true },
+    rcEvidenceReviewSummary:{ status:"complete", userFacingSummary:{ resultLabel:"证据完整", redacted:true }, redacted:true }
   });
   assert.equal(pack.status, "ready");
   assert.equal(pack.safeToFreeze, true);
   assert.equal(pack.userFacingSummary.resultLabel, "证据冻结包已就绪");
   assert.equal(pack.freezePackNextStep, "可以冻结证据包");
+  assert.equal(pack.rcReviewStatus, "ready_for_review");
+  assert.equal(pack.rcEvidenceStatus, "complete");
+  assert.equal(pack.safeToStartRcReview, true);
   assert.equal(pack.canWriteFile, false);
   assert.equal(pack.canDownload, false);
-  const audit = api.buildFlightWorkflowEvidenceFreezePackAuditDraft({ releaseReadinessSummary:{ status:"ready", safeForUserFacingBeta:true }, launchCandidateReadinessSummary:{ status:"ready", launchCandidateReadiness:{ safeForReadOnlyLaunchCandidate:true } }, safetyRegressionSummary:{ status:"pass" }, operatorConsoleSummary:{ status:"ready" }, pilotOpsSummary:{ status:"healthy" }, supportReadinessSummary:{ status:"ready" } });
+  const audit = api.buildFlightWorkflowEvidenceFreezePackAuditDraft({ releaseReadinessSummary:{ status:"ready", safeForUserFacingBeta:true }, launchCandidateReadinessSummary:{ status:"ready", launchCandidateReadiness:{ safeForReadOnlyLaunchCandidate:true } }, safetyRegressionSummary:{ status:"pass" }, operatorConsoleSummary:{ status:"ready" }, pilotOpsSummary:{ status:"healthy" }, supportReadinessSummary:{ status:"ready" }, rcCandidateReviewSummary:{ status:"ready_for_review", userFacingSummary:{ resultLabel:"可以开始 RC 复核", redacted:true }, safeToStartRcReview:true, redacted:true }, rcEvidenceReviewSummary:{ status:"complete", userFacingSummary:{ resultLabel:"证据完整", redacted:true }, redacted:true } });
   assert.equal(audit.eventType, "FLIGHT_WORKFLOW_EVIDENCE_FREEZE_PACK_AUDIT_DRAFT");
   assert.equal(audit.status, "ready");
   assert.equal(audit.safeToFreeze, true);

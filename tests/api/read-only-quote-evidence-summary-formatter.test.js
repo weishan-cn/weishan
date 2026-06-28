@@ -8,7 +8,7 @@ function forbidden(value) { return /全网最低|最低价保证|已锁价|可�
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteEvidenceSummaryFormatter.js"]);
   const api = windowRef.WeishanReadOnlyQuoteEvidenceSummaryFormatter;
-  assert.equal(api.READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION, "2.1.84");
+  assert.equal(api.READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION, "2.1.85");
   const top = api.formatTopCandidateSummary([{ rank:1, providerName:"A", totalPrice:980, token:"abc" }, { rank:2, providerName:"B", totalPrice:1010 }]);
   assert.equal(top.lines.length, 2);
   assert.equal(top.lines[0].includes("当前导入样本"), false);
@@ -35,6 +35,13 @@ function main() {
   const warning = api.formatProviderConfirmationWarning({ safeProviderHandoffReady:true });
   assert.equal(warning.providerConfirmationRequiresUserConfirm, true);
   assert.equal(warning.bookingUrl, null);
+  const rcReview = api.formatRcCandidateReviewSummary({ status:"ready_for_review", reviewDecision:{ label:"可以开始 RC 复核" }, userFacingSummary:{ resultLabel:"可以开始 RC 复核" } });
+  assert.equal(rcReview.title, "只读 RC 候选复核控制台");
+  assert.equal(rcReview.line.includes("可以开始 RC 复核"), true);
+  const rcEvidence = api.formatRcEvidenceReviewChecklistSummary({ status:"complete", userFacingSummary:{ resultLabel:"证据完整" } });
+  assert.equal(rcEvidence.title, "只读 RC 证据复核清单");
+  const rcVm = api.formatRcReviewViewModelSummary({ status:"ready_for_review", title:"只读 RC 候选复核", caveat:"该页面只用于只读 RC 候选复核" });
+  assert.equal(rcVm.title, "只读 RC 候选复核");
   const audit = api.buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft({});
   assert.equal(audit.payment, false);
   assert.equal(audit.order, false);

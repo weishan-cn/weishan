@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_INVITATION_GATE_VERSION = "2.1.84";
+  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_INVITATION_GATE_VERSION = "2.1.85";
   const GATE_NAME = "flight_workflow_read_only_pilot_invitation_gate_v1";
   const CAVEAT = "该判断只用于只读试点邀请与测试批次登记，不代表真实身份、联系方式、证件、支付或外部平台链接。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;

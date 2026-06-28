@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_EVIDENCE_FREEZE_PACK_VERSION = "2.1.84";
+  const FLIGHT_WORKFLOW_EVIDENCE_FREEZE_PACK_VERSION = "2.1.85";
   const PACK_NAME = "flight_workflow_evidence_freeze_pack_v1";
   const CAVEAT = "证据冻结包只用于只读发布候选流程，不保存真实身份、不发送真实邀请、不提供交易能力。";
 
@@ -102,6 +102,11 @@
       operatorConsoleSummary:clone(operatorConsoleSummary),
       pilotOpsSummary:clone(pilotOpsSummary),
       supportReadinessSummary:clone(supportReadinessSummary),
+      rcCandidateReviewSummary:clone(safe.rcCandidateReviewSummary || null),
+      rcEvidenceReviewSummary:clone(safe.rcEvidenceReviewSummary || null),
+      rcReviewStatus:text(safe.rcReviewStatus || (obj(safe.rcCandidateReviewSummary).status || "")),
+      rcEvidenceStatus:text(safe.rcEvidenceStatus || (obj(safe.rcEvidenceReviewSummary).status || "")),
+      safeToStartRcReview:safe.safeToStartRcReview === true || obj(safe.rcCandidateReviewSummary).safeToStartRcReview === true,
       safety:safety(),
       canWriteFile:false,
       canDownload:false,
@@ -133,6 +138,11 @@
       operatorConsoleSummary:clone(safe.operatorConsoleSummary || null),
       pilotOpsSummary:clone(safe.pilotOpsSummary || null),
       supportReadinessSummary:clone(safe.supportReadinessSummary || null),
+      rcCandidateReviewSummary:clone(safe.rcCandidateReviewSummary || null),
+      rcEvidenceReviewSummary:clone(safe.rcEvidenceReviewSummary || null),
+      rcReviewStatus:text(safe.rcReviewStatus || (obj(safe.rcCandidateReviewSummary).status || "")),
+      rcEvidenceStatus:text(safe.rcEvidenceStatus || (obj(safe.rcEvidenceReviewSummary).status || "")),
+      safeToStartRcReview:safe.safeToStartRcReview === true || obj(safe.rcCandidateReviewSummary).safeToStartRcReview === true,
       canWriteFile:false,
       canDownload:false,
       freezePackNextStep:text(safe.freezePackNextStep || (status === "ready" ? "可以冻结证据包" : status === "blocked" ? "暂停冻结并复核安全红线" : "继续补充证据")),

@@ -15,7 +15,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/procurementClarificationGate.js"]);
   const api = windowRef.WeishanProcurementClarificationGate;
-  assert.equal(api.PROCUREMENT_CLARIFICATION_GATE_VERSION, "2.1.84");
+  assert.equal(api.PROCUREMENT_CLARIFICATION_GATE_VERSION, "2.1.85");
   const vagueFlight = api.evaluateProcurementClarificationGate({ rawUserInput:"帮我买机票" });
   assert.equal(vagueFlight.clarificationDecision, "ask_user");
   assert.deepEqual(Array.from(vagueFlight.missingFields), ["出发地", "目的地", "日期"]);

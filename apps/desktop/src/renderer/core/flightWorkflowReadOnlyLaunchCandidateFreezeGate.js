@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_LAUNCH_CANDIDATE_FREEZE_GATE_VERSION = "2.1.84";
+  const FLIGHT_WORKFLOW_READ_ONLY_LAUNCH_CANDIDATE_FREEZE_GATE_VERSION = "2.1.85";
   const GATE_NAME = "flight_workflow_read_only_launch_candidate_freeze_gate_v1";
   const CAVEAT = "该页面只用于只读发布候选冻结判断，不保存真实身份、不发送真实邀请、不提供交易能力。";
 
@@ -121,6 +121,11 @@
       evidenceFreezePackSummary:clone(evidenceFreezePackSummary),
       freezeGateNextStep:status === "frozen" ? "继续后续封版工作" : status === "ready_to_freeze" ? "可以冻结只读发布候选" : status === "continue_pilot" ? "继续试点观察" : status === "needs_review" ? "需要复核" : "暂停冻结并复核安全红线",
       freezeGateStatus:status,
+      rcCandidateReviewSummary:clone(safe.rcCandidateReviewSummary || null),
+      rcEvidenceReviewSummary:clone(safe.rcEvidenceReviewSummary || null),
+      rcReviewStatus:text(safe.rcReviewStatus || (obj(safe.rcCandidateReviewSummary).status || "")),
+      rcEvidenceStatus:text(safe.rcEvidenceStatus || (obj(safe.rcEvidenceReviewSummary).status || "")),
+      safeToStartRcReview:safe.safeToStartRcReview === true || obj(safe.rcCandidateReviewSummary).safeToStartRcReview === true,
       bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true
     });
   }
@@ -153,6 +158,11 @@
       evidenceFreezePackSummary:clone(safe.evidenceFreezePackSummary || null),
       freezeGateNextStep:text(safe.freezeGateNextStep || (status === "frozen" ? "继续后续封版工作" : status === "ready_to_freeze" ? "可以冻结只读发布候选" : status === "continue_pilot" ? "继续试点观察" : status === "needs_review" ? "需要复核" : "暂停冻结并复核安全红线")),
       freezeGateStatus:text(safe.freezeGateStatus || status),
+      rcCandidateReviewSummary:clone(safe.rcCandidateReviewSummary || null),
+      rcEvidenceReviewSummary:clone(safe.rcEvidenceReviewSummary || null),
+      rcReviewStatus:text(safe.rcReviewStatus || (obj(safe.rcCandidateReviewSummary).status || "")),
+      rcEvidenceStatus:text(safe.rcEvidenceStatus || (obj(safe.rcEvidenceReviewSummary).status || "")),
+      safeToStartRcReview:safe.safeToStartRcReview === true || obj(safe.rcCandidateReviewSummary).safeToStartRcReview === true,
       safety:Object.assign(safety(), obj(safe.safety)),
       bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true
     });

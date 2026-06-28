@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js"]);
   const api = windowRef.WeishanFlightWorkflowSafetyRegressionSentinel;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "2.1.84");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "2.1.85");
   const safe = api.buildFlightWorkflowSafetyRegressionReport({ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, autoOpen:false, autoRefresh:false, fileWrite:false, download:false, note:"平台最终为准" });
   assert.equal(safe.sentinelName, "flight_workflow_safety_regression_sentinel_v1");
   assert.equal(safe.status, "pass");
@@ -30,6 +30,9 @@ function main() {
   assert.equal(json.includes("abc"), false);
   const pilot = api.buildFlightWorkflowSafetyRegressionReport({ betaExpansionGateSummary:{ bookingUrl:null, payment:false, rawUserTextStored:false, secretStored:false }, publicPilotChecklistSummary:{ download:false, fileWrite:false }, pilotReadinessSummary:{ paymentUrl:null, orderUrl:null }, pilotOnboardingSummary:{ bookingUrl:null, paymentUrl:null, rawUserTextStored:false, secretStored:false }, readOnlyConsentSummary:{ orderUrl:null, fileWrite:false, download:false }, pilotOnboardingViewModel:{ checkoutUrl:null, autoOpen:false } });
   assert.equal(pilot.status, "pass");
+  const rc = api.buildFlightWorkflowSafetyRegressionReport({ rcCandidateReviewSummary:{ bookingUrl:null, payment:false, rawUserTextStored:false, secretStored:false }, rcEvidenceReviewSummary:{ orderUrl:null, fileWrite:false, download:false }, rcReviewViewModelSummary:{ checkoutUrl:null, autoOpen:false } });
+  assert.equal(rc.status, "pass");
+  assert.equal(rc.rcCandidateReviewSummary.bookingUrl, null);
   console.log("FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL PASS");
 }
 main();

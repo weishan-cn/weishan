@@ -1,6 +1,6 @@
 ;(function () {
   "use strict";
-  const PLATFORM_CHECK_DELTA_COMPARE_VERSION = "2.1.84";
+  const PLATFORM_CHECK_DELTA_COMPARE_VERSION = "2.1.85";
   const COMPARE_NAME = "platform_check_delta_compare_v1";
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function number(value) { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : null; }

@@ -16,6 +16,9 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js",
     "apps/desktop/src/renderer/core/flightWorkflowReadOnlyPilotOpsSummary.js",
     "apps/desktop/src/renderer/core/flightWorkflowNextCohortDecisionBoard.js",
+    "apps/desktop/src/renderer/core/flightWorkflowRcCandidateReviewConsole.js",
+    "apps/desktop/src/renderer/core/flightWorkflowRcEvidenceReviewChecklist.js",
+    "apps/desktop/src/renderer/core/flightWorkflowRcReviewViewModel.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteSessionReportCenter.js",
     "apps/desktop/src/renderer/core/flightWorkflowReadOnlyUserConsentFlow.js",
     "apps/desktop/src/renderer/core/flightWorkflowPublicPilotOnboardingGuard.js",
@@ -23,13 +26,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.1.84");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.1.85");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "2.1.84");
+  assert.equal(ready.appVersion, "2.1.85");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -54,6 +57,10 @@ function main() {
   assert.ok(ready.safetyReport.riskBadgeSummary.line.includes("只读安全"));
   assert.ok(ready.safetyReport.riskBadgeSummary.line.includes("交易动作已阻断"));
   assert.equal(ready.safetyReport.readOnlyConsentSummary, null);
+  const rcReady = api.buildReadOnlyQuoteSessionReportCenter({ sessionSummary:summary, rcCandidateReviewSummary:{ status:"ready_for_review", reviewDecision:{ label:"可以开始 RC 复核" }, userFacingSummary:{ resultLabel:"可以开始 RC 复核", redacted:true }, safeToStartRcReview:true, redacted:true }, rcEvidenceReviewSummary:{ status:"complete", userFacingSummary:{ resultLabel:"证据完整", redacted:true }, redacted:true }, rcReviewViewModelSummary:{ status:"ready_for_review", title:"只读 RC 候选复核", caveat:"该页面只用于只读 RC 候选复核，不保存真实身份、不发送真实邀请、不提供交易能力。", redacted:true }, rcReviewStatus:"ready_for_review", rcEvidenceStatus:"complete", safeToStartRcReview:true });
+  assert.equal(rcReady.safetyReport.rcReviewStatus, "ready_for_review");
+  assert.equal(rcReady.safetyReport.rcEvidenceStatus, "complete");
+  assert.equal(rcReady.userFacingSummary.safeToStartRcReview, true);
   const withOnboarding = api.buildReadOnlyQuoteSessionReportCenter({ sessionSummary:summary, pilotOnboardingSummary:{ status:"allowed", redacted:true }, readOnlyConsentSummary:{ status:"accepted", redacted:true }, pilotEntryStatus:"allowed", canEnterReadOnlyPilot:true, pilotConsentRequired:false });
   assert.equal(withOnboarding.safetyReport.pilotEntryStatus, "allowed");
   assert.equal(withOnboarding.safetyReport.canEnterReadOnlyPilot, true);

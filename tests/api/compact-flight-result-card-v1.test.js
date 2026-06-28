@@ -17,7 +17,7 @@ function main(){
     "apps/desktop/src/renderer/core/compactFlightResultCardV1.js"
   ]);
   const api = windowRef.WeishanCompactFlightResultCardV1;
-  assert.equal(api.COMPACT_FLIGHT_RESULT_CARD_V1_VERSION, "2.1.84");
+  assert.equal(api.COMPACT_FLIGHT_RESULT_CARD_V1_VERSION, "2.1.85");
   const fare = windowRef.WeishanFlightFareBreakdown.normalizeFlightFareBreakdown({ baseFare:860, taxes:110, otherFees:40, totalPayable:1010, providerPriceType:"limited_beta_price", taxFeeCompleteness:"partial" });
   const card = api.buildCompactFlightResultCard({ origin:"上海", destination:"成都", dateDisplay:"7 月 15 日", directPreference:"直达优先", sortLabel:"低价优先", fareBreakdown:fare });
   assert.equal(card.cardVersion, "compact_flight_result_card_v1");

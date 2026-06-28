@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.84";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.1.85";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -9,6 +9,7 @@
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value == null ? "" : value).trim(); }
   function number(value) { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : null; }
+  function obj(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
 
   function stripUnsafe(value) {
     if (Array.isArray(value)) return value.map(stripUnsafe).filter(function (item) { return item !== undefined; });
@@ -390,6 +391,24 @@
     return clone({ title:"只读发布候选准备板", line:safeLine(obj(board.userFacingSummary).resultLabel || "继续试点观察"), sectionLabels:["试点退出条件", "发布就绪", "安全矩阵", "支持准备", "发布文案", "安全红线"], safeForReadOnlyLaunchCandidate:readiness.safeForReadOnlyLaunchCandidate === true, status:text(board.status || "continue_pilot"), caveat:safeLine(obj(board.userFacingSummary).caveat || "发布候选仍然只覆盖只读候选证据流程，不提供付款、下单或出票能力。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
+  function formatRcCandidateReviewSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const review = safe.rcCandidateReviewSummary || safe.reviewConsoleSummary || (safe.status || safe.userFacingSummary ? safe : {});
+    return clone({ title:"只读 RC 候选复核控制台", line:safeLine(obj(review.userFacingSummary).resultLabel || "证据仍需补充"), sectionLabels:["冻结检查", "证据复核", "候选准备", "试点退出", "发布就绪", "安全红线"], safeToStartRcReview:review.safeToStartRcReview === true, status:text(review.status || "evidence_incomplete"), caveat:safeLine(obj(review.userFacingSummary).caveat || "该控制台只用于只读 RC 候选复核，不代表真实账号、客服工单、交易请求或出票能力。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatRcEvidenceReviewChecklistSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const checklist = safe.rcEvidenceReviewSummary || safe.checklistSummary || (safe.status || safe.userFacingSummary ? safe : {});
+    return clone({ title:"只读 RC 证据复核清单", line:safeLine(obj(checklist.userFacingSummary).resultLabel || "证据仍需补充"), sectionLabels:["发布就绪证据", "候选复核证据", "安全证据", "试点证据", "冻结决策", "阻断原因复核"], status:text(checklist.status || "incomplete"), caveat:safeLine(obj(checklist.userFacingSummary).caveat || "该清单只复核只读证据，不生成真实导出文件，不代表真实交易或出票能力。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatRcReviewViewModelSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const viewModel = safe.rcReviewViewModelSummary || safe.viewModelSummary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"只读 RC 候选复核", line:safeLine(viewModel.title || obj(viewModel.userFacingSummary).resultLabel || "只读 RC 候选复核"), sectionLabels:["候选复核", "证据复核", "安全红线", "下一步"], status:text(viewModel.status || "evidence_incomplete"), caveat:safeLine(viewModel.caveat || "该页面只用于只读 RC 候选复核，不保存真实身份、不发送真实邀请、不提供交易能力。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -436,6 +455,9 @@
     formatCohortHealthDashboardSummary,
     formatReadOnlyPilotExitCriteriaSummary,
     formatLaunchCandidateReadinessSummary,
+    formatRcCandidateReviewSummary,
+    formatRcEvidenceReviewChecklistSummary,
+    formatRcReviewViewModelSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,

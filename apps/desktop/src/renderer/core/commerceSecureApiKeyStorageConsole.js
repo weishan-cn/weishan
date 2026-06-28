@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SECURE_API_KEY_STORAGE_CONSOLE_VERSION = "2.1.84";
+  const SECURE_API_KEY_STORAGE_CONSOLE_VERSION = "2.1.85";
 
   const PROVIDER_KEY_SLOTS = [
     { providerId:"flight_provider_key", label:"机票 Provider Key" },

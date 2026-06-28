@@ -21,7 +21,7 @@ function main() {
     "apps/desktop/src/renderer/core/realFlightPriceProviderAdapterSlot.js"
   ]);
   const api = windowRef.WeishanRealFlightPriceProviderAdapterSlot;
-  assert.equal(api.REAL_FLIGHT_PRICE_PROVIDER_ADAPTER_SLOT_VERSION, "2.1.84");
+  assert.equal(api.REAL_FLIGHT_PRICE_PROVIDER_ADAPTER_SLOT_VERSION, "2.1.85");
 
   const slot = api.getRealFlightPriceProviderAdapterSlotStatus();
   assert.equal(slot.slotName, "real_flight_price_provider_adapter_slot_v1");

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_CLARIFICATION_LOOP_VERSION = "2.1.84";
+  const FLIGHT_CLARIFICATION_LOOP_VERSION = "2.1.85";
   const CLARIFICATION_NAME = "flight_clarification_loop_v1";
   const RESTRICTED_RE = /(枪|武器|火药|炸药|弹药|身份证|护照|银行卡|密码|登录|credential|password|passport|card)/i;
   const CITY_NAMES = ["上海", "成都", "北京", "广州", "深圳", "杭州", "东京", "南京", "重庆", "西安"];

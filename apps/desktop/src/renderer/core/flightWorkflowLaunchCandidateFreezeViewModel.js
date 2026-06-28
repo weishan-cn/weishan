@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_FREEZE_VIEW_MODEL_VERSION = "2.1.84";
+  const FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_FREEZE_VIEW_MODEL_VERSION = "2.1.85";
   const VIEW_MODEL_NAME = "flight_workflow_launch_candidate_freeze_view_model_v1";
   const CAVEAT = "该页面只用于只读发布候选冻结判断，不保存真实身份、不发送真实邀请、不提供交易能力。";
 
@@ -72,6 +72,11 @@
       evidenceFreezePackSummary:clone(safe.evidenceFreezePackSummary || null),
       pilotExitCriteriaSummary:clone(safe.pilotExitCriteriaSummary || null),
       launchCandidateReadinessSummary:clone(safe.launchCandidateReadinessSummary || null),
+      rcCandidateReviewSummary:clone(safe.rcCandidateReviewSummary || null),
+      rcEvidenceReviewSummary:clone(safe.rcEvidenceReviewSummary || null),
+      rcReviewStatus:text(safe.rcReviewStatus || (obj(safe.rcCandidateReviewSummary).status || obj(safe.freezeGateSummary).rcReviewStatus || obj(safe.evidenceFreezePackSummary).rcReviewStatus || "")),
+      rcEvidenceStatus:text(safe.rcEvidenceStatus || (obj(safe.rcEvidenceReviewSummary).status || obj(safe.freezeGateSummary).rcEvidenceStatus || obj(safe.evidenceFreezePackSummary).rcEvidenceStatus || "")),
+      safeToStartRcReview:safe.safeToStartRcReview === true || obj(safe.rcCandidateReviewSummary).safeToStartRcReview === true || obj(safe.freezeGateSummary).safeToStartRcReview === true || obj(safe.evidenceFreezePackSummary).safeToStartRcReview === true,
       bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, fileWrite:false, download:false, autoOpen:false, autoRefresh:false, redacted:true
     });
   }
@@ -93,6 +98,11 @@
         evidenceFreezePackSummary:pack,
         pilotExitCriteriaSummary:gate.pilotExitCriteriaSummary || launchCandidate.pilotExitCriteriaSummary || null,
         launchCandidateReadinessSummary:gate.launchCandidateReadinessSummary || launchCandidate,
+        rcCandidateReviewSummary:input && input.rcCandidateReviewSummary || null,
+        rcEvidenceReviewSummary:input && input.rcEvidenceReviewSummary || null,
+        rcReviewStatus:input && input.rcReviewStatus || gate.rcReviewStatus || pack.rcReviewStatus || "",
+        rcEvidenceStatus:input && input.rcEvidenceStatus || gate.rcEvidenceStatus || pack.rcEvidenceStatus || "",
+        safeToStartRcReview:input && input.safeToStartRcReview === true || gate.safeToStartRcReview === true || pack.safeToStartRcReview === true,
         redacted:true
       });
     } catch (error) {

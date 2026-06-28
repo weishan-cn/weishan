@@ -6698,7 +6698,7 @@
     const betaCohortSummary = typeof betaCohortApi.buildFlightWorkflowBetaCohortReviewBoard === "function" ? betaCohortApi.buildFlightWorkflowBetaCohortReviewBoard({ sessions:cohortFeedbackSamples }) : null;
     const feedbackTrendSummary = typeof feedbackTrendApi.buildFlightWorkflowFeedbackTrendRadar === "function" ? feedbackTrendApi.buildFlightWorkflowFeedbackTrendRadar({ feedback:cohortFeedbackSamples }) : null;
     const betaCohortViewModel = typeof betaCohortViewModelApi.buildFlightWorkflowBetaCohortViewModel === "function" ? betaCohortViewModelApi.buildFlightWorkflowBetaCohortViewModel({ betaCohortSummary:betaCohortSummary, feedbackTrendSummary:feedbackTrendSummary }) : null;
-    const releaseReadiness = typeof releaseDashboardApi.buildFlightWorkflowReleaseReadinessDashboard === "function" ? releaseDashboardApi.buildFlightWorkflowReleaseReadinessDashboard({ releaseVersion:"2.1.84", scenarioSimulationSuite:scenarioSimulation, matrixSummary:safetyTestMatrix, safetyRegressionSummary:safetyRegressionSummary, auditReviewSummary:auditReview, humanReviewChecklistSummary:humanReviewChecklist, finalSafeHandoffPacketSummary:finalSafeHandoffPacket, safeSessionExportPreview:safeExportPreview, operatorConsoleSummary:operatorConsole, betaCohortSummary:betaCohortSummary, feedbackTrendSummary:feedbackTrendSummary, cohortReviewStatus:betaCohortSummary && betaCohortSummary.status, betaExpansionReadiness:betaCohortSummary && betaCohortSummary.cohortHealth && betaCohortSummary.cohortHealth.safeToExpandBeta, betaCohortRecommendation:feedbackTrendSummary && feedbackTrendSummary.recommendation && feedbackTrendSummary.recommendation.label }) : null;
+    const releaseReadiness = typeof releaseDashboardApi.buildFlightWorkflowReleaseReadinessDashboard === "function" ? releaseDashboardApi.buildFlightWorkflowReleaseReadinessDashboard({ releaseVersion:"2.1.85", scenarioSimulationSuite:scenarioSimulation, matrixSummary:safetyTestMatrix, safetyRegressionSummary:safetyRegressionSummary, auditReviewSummary:auditReview, humanReviewChecklistSummary:humanReviewChecklist, finalSafeHandoffPacketSummary:finalSafeHandoffPacket, safeSessionExportPreview:safeExportPreview, operatorConsoleSummary:operatorConsole, betaCohortSummary:betaCohortSummary, feedbackTrendSummary:feedbackTrendSummary, cohortReviewStatus:betaCohortSummary && betaCohortSummary.status, betaExpansionReadiness:betaCohortSummary && betaCohortSummary.cohortHealth && betaCohortSummary.cohortHealth.safeToExpandBeta, betaCohortRecommendation:feedbackTrendSummary && feedbackTrendSummary.recommendation && feedbackTrendSummary.recommendation.label }) : null;
     const releaseViewModel = typeof releaseViewModelApi.buildFlightWorkflowReleaseReadinessViewModel === "function" ? releaseViewModelApi.buildFlightWorkflowReleaseReadinessViewModel({ releaseReadinessSummary:releaseReadiness }) : null;
     const betaAcceptancePack = typeof betaPackApi.buildFlightWorkflowBetaAcceptancePack === "function" ? betaPackApi.buildFlightWorkflowBetaAcceptancePack({ releaseReadinessSummary:releaseReadiness, operatorConsoleSummary:operatorConsole, safetyTestMatrixSummary:safetyTestMatrix, humanReviewChecklistSummary:humanReviewChecklist, finalSafeHandoffPacketSummary:finalSafeHandoffPacket }) : null;
     const guidedUserTestMode = typeof guidedTestApi.buildFlightWorkflowGuidedUserTestMode === "function" ? guidedTestApi.buildFlightWorkflowGuidedUserTestMode({}) : null;
@@ -7931,6 +7931,24 @@
         const api = window.WeishanFlightWorkflowLaunchCandidateReadinessBoard;
         const model = api && typeof api.buildFlightWorkflowLaunchCandidateReadinessBoard === "function" ? api.buildFlightWorkflowLaunchCandidateReadinessBoard({ pilotExitCriteriaSummary: pilotExitCriteriaSummary, releaseReadinessSummary: releaseReadiness, safetyMatrixSummary: safetyTestMatrix, operatorConsoleSummary: operatorConsole, supportReadinessSummary: supportReadinessSummary, pilotOpsSummary: pilotOpsSummary, nextCohortDecisionSummary: nextCohortDecisionSummary, rolloutControlSummary: rolloutControlSummary, cohortHealthSummary: cohortHealthSummary, safetyRegressionSummary: safetyRegressionSummary }) : { userFacingSummary: { resultLabel: "继续试点观察" } };
         output.innerHTML = '<p>只读发布候选准备板</p><p>' + esc((model.userFacingSummary && model.userFacingSummary.resultLabel) || model.status || '继续试点观察') + '</p><p>可以进入只读发布候选</p><p>继续试点观察</p><p>需要复核</p><p>暂不可进入</p>';
+        return;
+      }
+      const flightRcReviewButton = target && target.closest("[data-commerce-flight-rc-review-show]");
+      if (flightRcReviewButton && host.contains(flightRcReviewButton)) {
+        event.preventDefault();
+        const panel = flightRcReviewButton.closest("[data-commerce-flight-rc-review]") || flightRcReviewButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-flight-rc-review-output]") || panel;
+        output.innerHTML = '<p>只读 RC 候选复核控制台</p><p>只读 RC 候选复核</p><p>候选复核</p><p>证据复核</p><p>安全红线</p><p>可以开始 RC 复核</p><p>证据仍需补充</p><p>需要安全复核</p><p>RC 复核已阻断</p><p>复核不代表交易能力</p><p>该页面只用于只读 RC 候选复核</p><p>不保存真实身份、不发送真实邀请、不提供交易能力</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 RC 候选复核控制台", false);
+        return;
+      }
+      const flightRcEvidenceReviewButton = target && target.closest("[data-commerce-flight-rc-evidence-review-show]");
+      if (flightRcEvidenceReviewButton && host.contains(flightRcEvidenceReviewButton)) {
+        event.preventDefault();
+        const panel = flightRcEvidenceReviewButton.closest("[data-commerce-flight-rc-evidence-review]") || flightRcEvidenceReviewButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-flight-rc-evidence-review-output]") || panel;
+        output.innerHTML = '<p>只读 RC 证据复核清单</p><p>候选复核</p><p>证据复核</p><p>安全红线</p><p>证据完整</p><p>证据仍需补充</p><p>需要复核</p><p>已阻断</p><p>复核不代表交易能力</p><p>该页面只用于只读 RC 候选复核</p><p>不保存真实身份、不发送真实邀请、不提供交易能力</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 RC 证据复核清单", false);
         return;
       }
       const pilotInvitationGateButton = target && target.closest("[data-commerce-flight-pilot-invitation-gate-show]");

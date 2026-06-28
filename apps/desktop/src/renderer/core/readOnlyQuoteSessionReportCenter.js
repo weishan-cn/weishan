@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.84";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.85";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -164,6 +164,12 @@
       launchCandidateReadinessSummary: stripUnsafe(safe.launchCandidateReadinessSummary || null),
       freezeGateSummary: stripUnsafe(safe.freezeGateSummary || null),
       evidenceFreezePackSummary: stripUnsafe(safe.evidenceFreezePackSummary || null),
+      rcCandidateReviewSummary: stripUnsafe(safe.rcCandidateReviewSummary || null),
+      rcEvidenceReviewSummary: stripUnsafe(safe.rcEvidenceReviewSummary || null),
+      rcReviewViewModelSummary: stripUnsafe(safe.rcReviewViewModelSummary || null),
+      rcReviewStatus: safeText(safe.rcReviewStatus || safe.rcCandidateReviewSummary && safe.rcCandidateReviewSummary.status || ""),
+      rcEvidenceStatus: safeText(safe.rcEvidenceStatus || safe.rcEvidenceReviewSummary && safe.rcEvidenceReviewSummary.status || ""),
+      safeToStartRcReview: safe.safeToStartRcReview === true,
       pilotOpsSummary: stripUnsafe(safe.pilotOpsSummary || safe.readOnlyPilotOpsSummary || null),
       nextCohortDecisionSummary: stripUnsafe(safe.nextCohortDecisionSummary || safe.nextCohortDecisionBoard || null),
       launchCandidateStatus: safeText(safe.launchCandidateStatus || ""),
@@ -190,6 +196,12 @@
       launchCandidateReadinessSummary: stripUnsafe(safe.launchCandidateReadinessSummary || null),
       freezeGateSummary: stripUnsafe(safe.freezeGateSummary || null),
       evidenceFreezePackSummary: stripUnsafe(safe.evidenceFreezePackSummary || null),
+      rcCandidateReviewSummary: stripUnsafe(safe.rcCandidateReviewSummary || null),
+      rcEvidenceReviewSummary: stripUnsafe(safe.rcEvidenceReviewSummary || null),
+      rcReviewViewModelSummary: stripUnsafe(safe.rcReviewViewModelSummary || null),
+      rcReviewStatus: safeText(safe.rcReviewStatus || safe.rcCandidateReviewSummary && safe.rcCandidateReviewSummary.status || ""),
+      rcEvidenceStatus: safeText(safe.rcEvidenceStatus || safe.rcEvidenceReviewSummary && safe.rcEvidenceReviewSummary.status || ""),
+      safeToStartRcReview: safe.safeToStartRcReview === true,
       pilotOpsSummary: stripUnsafe(safe.pilotOpsSummary || null),
       nextCohortDecisionSummary: stripUnsafe(safe.nextCohortDecisionSummary || null),
       launchCandidateStatus: safeText(safe.launchCandidateStatus || ""),
@@ -302,6 +314,12 @@
       launchCandidateReadinessSummary: launchCandidateReadinessSummary ? { title:"只读发布候选准备板", line:launchCandidateReadinessSummary.userFacingSummary && launchCandidateReadinessSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
       freezeGateSummary: workflow.freezeGateSummary ? { title:"只读发布候选冻结检查", line:workflow.freezeGateSummary.userFacingSummary && workflow.freezeGateSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
       evidenceFreezePackSummary: workflow.evidenceFreezePackSummary ? { title:"证据冻结包", line:workflow.evidenceFreezePackSummary.userFacingSummary && workflow.evidenceFreezePackSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
+      rcCandidateReviewSummary: workflow.rcCandidateReviewSummary ? { title:"只读 RC 候选复核控制台", line:workflow.rcCandidateReviewSummary.userFacingSummary && workflow.rcCandidateReviewSummary.userFacingSummary.resultLabel || "证据仍需补充", redacted:true } : null,
+      rcEvidenceReviewSummary: workflow.rcEvidenceReviewSummary ? { title:"只读 RC 证据复核清单", line:workflow.rcEvidenceReviewSummary.userFacingSummary && workflow.rcEvidenceReviewSummary.userFacingSummary.resultLabel || "证据仍需补充", redacted:true } : null,
+      rcReviewViewModelSummary: workflow.rcReviewViewModelSummary ? { title:"只读 RC 候选复核", line:workflow.rcReviewViewModelSummary.title || "只读 RC 候选复核", redacted:true } : null,
+      rcReviewStatus: workflow.rcReviewStatus || safe.rcReviewStatus || "",
+      rcEvidenceStatus: workflow.rcEvidenceStatus || safe.rcEvidenceStatus || "",
+      safeToStartRcReview: workflow.safeToStartRcReview === true || safe.safeToStartRcReview === true,
       launchCandidateStatus: workflow.launchCandidateStatus || safe.launchCandidateStatus || "",
       readyForLaunchCandidate: workflow.readyForLaunchCandidate === true || safe.readyForLaunchCandidate === true,
       launchCandidateNextStep: workflow.launchCandidateNextStep || safe.launchCandidateNextStep || "",
@@ -411,6 +429,12 @@
       safetyRegressionSummary: safetyRegressionSummary,
       operatorConsoleSummary: operatorConsoleSummary,
       operatorConsoleViewModel: operatorConsoleViewModel,
+      rcCandidateReviewSummary: workflow.rcCandidateReviewSummary || safe.rcCandidateReviewSummary || null,
+      rcEvidenceReviewSummary: workflow.rcEvidenceReviewSummary || safe.rcEvidenceReviewSummary || null,
+      rcReviewViewModelSummary: workflow.rcReviewViewModelSummary || safe.rcReviewViewModelSummary || null,
+      rcReviewStatus: workflow.rcReviewStatus || safe.rcReviewStatus || "",
+      rcEvidenceStatus: workflow.rcEvidenceStatus || safe.rcEvidenceStatus || "",
+      safeToStartRcReview: workflow.safeToStartRcReview === true || safe.safeToStartRcReview === true,
       pilotOnboardingSummary: workflow.pilotOnboardingSummary,
       readOnlyConsentSummary: workflow.readOnlyConsentSummary,
       pilotOnboardingViewModel: workflow.pilotOnboardingViewModel,
@@ -537,6 +561,12 @@
       cohortHealthSummary: report.safetyReport.cohortHealthSummary || null,
       pilotExitCriteriaSummary: report.safetyReport.pilotExitCriteriaSummary || null,
       launchCandidateReadinessSummary: report.safetyReport.launchCandidateReadinessSummary || null,
+      rcCandidateReviewSummary: report.safetyReport.rcCandidateReviewSummary || null,
+      rcEvidenceReviewSummary: report.safetyReport.rcEvidenceReviewSummary || null,
+      rcReviewViewModelSummary: report.safetyReport.rcReviewViewModelSummary || null,
+      rcReviewStatus: report.safetyReport.rcReviewStatus || "",
+      rcEvidenceStatus: report.safetyReport.rcEvidenceStatus || "",
+      safeToStartRcReview: report.safetyReport.safeToStartRcReview === true,
       rolloutControlViewModel: report.safetyReport.rolloutControlViewModel || null,
       rolloutDecisionStatus: report.safetyReport.rolloutDecisionStatus || "",
       cohortHealthStatus: report.safetyReport.cohortHealthStatus || "",

@@ -19,7 +19,7 @@ const windowRef = loadRendererCore(["apps/desktop/src/renderer/core/manualProvid
 const api = windowRef.WeishanManualProviderReviewWorkflowV1;
 
 function main() {
-  assert.equal(api.MANUAL_PROVIDER_REVIEW_WORKFLOW_V1_VERSION, "2.1.84");
+  assert.equal(api.MANUAL_PROVIDER_REVIEW_WORKFLOW_V1_VERSION, "2.1.85");
   assert.equal(api.REVIEW_STATES.includes("approved_for_limited_beta"), true);
   assert.equal(api.REVIEW_STATES.includes("approved_for_future_readonly"), true);
 
