@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js", "apps/desktop/src/renderer/core/flightWorkflowOperatorConsole.js"]);
   const api = windowRef.WeishanFlightWorkflowOperatorConsole;
-  assert.equal(api.FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION, "2.1.92");
+  assert.equal(api.FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION, "2.1.93");
   const base = { workflowId:"wf1", workflowStateSummary:{ workflowId:"wf1" }, topCandidates:[{ providerName:"sandbox", bookingUrl:null }], selectedCandidate:{ providerName:"sandbox" }, auditReviewSummary:{ status:"ready", auditHealth:{ overall:"pass" } }, humanReviewChecklistSummary:{ status:"ready" }, finalSafeHandoffPacketSummary:{ status:"ready" }, handoffPacketPolicyDecision:{ status:"allowed" }, safetyRegressionSummary:{ status:"pass", checks:[] }, eventLedgerSummary:{ recentEvents:[{ eventType:"handoff_packet_prepared", status:"ready" }] }, blockedActions:[] };
   const ready = api.buildFlightWorkflowOperatorConsole(base);
   assert.equal(ready.consoleName, "flight_workflow_operator_console_v1");
@@ -18,12 +18,18 @@ function main() {
   assert.equal(ready.bookingUrl, null);
   assert.ok(ready.sections.some((section) => section.sectionId === "pilot_ops"));
   const globalRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {
+    legalProviderFixtureSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider fixture 已准备" } },
+    providerCredentialSafetySummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider 凭据边界安全" } },
+    sandboxPriceFeedSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox 价格 Feed 已准备" } },
     sameItemMatcherSummary:{ status:"ready", userFacingSummary:{ resultLabel:"同款识别结构已准备" } },
     duplicateCandidateMergerSummary:{ status:"merged", userFacingSummary:{ resultLabel:"重复候选已合并" } },
     coveredLowestCandidateBoardSummary:{ status:"ready", userFacingSummary:{ resultLabel:"已覆盖来源候选价合并已准备" } },
     safeToProceedWithDeepLinkSafetyGate:true
   })).sections.find((section) => section.sectionId === "global_shopping_price");
   assert.ok(globalRows.rows.some((item) => item.label === "同款候选识别"));
+  assert.ok(globalRows.rows.some((item) => item.label === "Provider fixture"));
+  assert.ok(globalRows.rows.some((item) => item.label === "凭据安全"));
+  assert.ok(globalRows.rows.some((item) => item.label === "Sandbox 价格 Feed"));
   assert.ok(globalRows.rows.some((item) => item.label === "重复候选合并"));
   assert.ok(globalRows.rows.some((item) => item.label === "已覆盖来源候选价合并"));
   const handoffRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {

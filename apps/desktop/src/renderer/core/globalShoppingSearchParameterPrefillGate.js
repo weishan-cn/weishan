@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SEARCH_PARAMETER_PREFILL_GATE_VERSION = "2.1.92";
+  const GLOBAL_SHOPPING_SEARCH_PARAMETER_PREFILL_GATE_VERSION = "2.1.93";
   const GATE_NAME = "global_shopping_search_parameter_prefill_gate_v1";
   const ITEM_TYPES = ["flight", "hotel", "product", "local_service", "unknown"];
 

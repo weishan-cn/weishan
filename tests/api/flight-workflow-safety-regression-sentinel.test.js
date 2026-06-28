@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js"]);
   const api = windowRef.WeishanFlightWorkflowSafetyRegressionSentinel;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "2.1.92");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "2.1.93");
   const safe = api.buildFlightWorkflowSafetyRegressionReport({ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, autoOpen:false, autoRefresh:false, fileWrite:false, download:false, note:"平台最终为准" });
   assert.equal(safe.sentinelName, "flight_workflow_safety_regression_sentinel_v1");
   assert.equal(safe.status, "pass");
@@ -40,6 +40,10 @@ function main() {
     globalShoppingProductGoalSummary:{ status:"aligned", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
     jumpToPlatformBoundarySummary:{ status:"safe", safety:{ checkoutUrl:null, autoOpen:false, payment:false, order:false, ticketing:false } },
     globalShoppingProductGoalViewModelSummary:{ status:"aligned", bookingUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false },
+    legalProviderFixtureSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
+    providerCredentialSafetySummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
+    sandboxPriceFeedSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
+    providerFixtureViewModelSummary:{ status:"ready", bookingUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false },
     sameItemMatcherSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
     duplicateCandidateMergerSummary:{ status:"merged", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
     coveredLowestCandidateBoardSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
@@ -53,6 +57,9 @@ function main() {
   });
   assert.equal(global.status, "pass");
   assert.equal(global.globalShoppingProductGoalSummary.status, "aligned");
+  assert.equal(global.legalProviderFixtureSummary.status, "ready");
+  assert.equal(global.providerCredentialSafetySummary.status, "ready");
+  assert.equal(global.sandboxPriceFeedSummary.status, "ready");
   assert.equal(global.jumpToPlatformBoundarySummary.status, "safe");
   assert.equal(global.sameItemMatcherSummary.status, "ready");
   assert.equal(global.externalDeepLinkSafetySummary.status, "safe");

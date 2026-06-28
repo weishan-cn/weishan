@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRODUCT_GOAL_VIEW_MODEL_VERSION = "2.1.92";
+  const GLOBAL_SHOPPING_PRODUCT_GOAL_VIEW_MODEL_VERSION = "2.1.93";
   const VIEW_MODEL_NAME = "global_shopping_product_goal_view_model_v1";
   const CAVEAT = "Weishan 帮用户找价、比价、归一化和跳转平台；用户需在平台自行完成下单。Weishan 不处理付款、下单或出票。";
 
@@ -126,9 +126,52 @@
       }))
       : {};
   }
+  function legalProviderFixtureSummary(input) {
+    const safe = obj(input);
+    if (Object.keys(obj(safe.legalProviderFixtureSummary)).length) return obj(safe.legalProviderFixtureSummary);
+    const adapterApi = api("WeishanGlobalShoppingLegalProviderFixtureAdapter");
+    return typeof adapterApi.buildGlobalShoppingLegalProviderFixtureAdapter === "function"
+      ? adapterApi.buildGlobalShoppingLegalProviderFixtureAdapter(safe)
+      : {};
+  }
+  function providerCredentialSafetySummary(input) {
+    const safe = obj(input);
+    if (Object.keys(obj(safe.providerCredentialSafetySummary)).length) return obj(safe.providerCredentialSafetySummary);
+    const reviewApi = api("WeishanGlobalShoppingProviderCredentialSafetyReview");
+    return typeof reviewApi.buildGlobalShoppingProviderCredentialSafetyReview === "function"
+      ? reviewApi.buildGlobalShoppingProviderCredentialSafetyReview(safe)
+      : {};
+  }
+  function sandboxPriceFeedSummary(input, legal, credential) {
+    const safe = obj(input);
+    if (Object.keys(obj(safe.sandboxPriceFeedSummary)).length) return obj(safe.sandboxPriceFeedSummary);
+    const gateApi = api("WeishanGlobalShoppingSandboxPriceFeedGate");
+    return typeof gateApi.buildGlobalShoppingSandboxPriceFeedGate === "function"
+      ? gateApi.buildGlobalShoppingSandboxPriceFeedGate(Object.assign({}, safe, {
+        legalProviderFixtureSummary:legal,
+        providerCredentialSafetySummary:credential,
+        normalizedSourceInputs:legal && legal.normalizedSourceInputs || []
+      }))
+      : {};
+  }
+  function providerFixtureViewModelSummary(input, legal, credential, feed) {
+    const safe = obj(input);
+    if (Object.keys(obj(safe.providerFixtureViewModelSummary)).length) return obj(safe.providerFixtureViewModelSummary);
+    const viewModelApi = api("WeishanGlobalShoppingProviderFixtureViewModel");
+    return typeof viewModelApi.buildGlobalShoppingProviderFixtureViewModel === "function"
+      ? viewModelApi.buildGlobalShoppingProviderFixtureViewModel(Object.assign({}, safe, {
+        legalProviderFixtureSummary:legal,
+        providerCredentialSafetySummary:credential,
+        sandboxPriceFeedSummary:feed
+      }))
+      : {};
+  }
   function buildGlobalShoppingProductGoalCards(input) {
     const goal = productGoalSummary(input || {});
     const boundary = jumpBoundarySummary(input || {});
+    const legal = legalProviderFixtureSummary(input || {});
+    const credential = providerCredentialSafetySummary(input || {});
+    const feed = sandboxPriceFeedSummary(input || {}, legal, credential);
     return clone([
       card("trusted_price", "可信候选价格", goal.productGoals && goal.productGoals.findTrustedCandidatePrices ? "已对齐" : "仍需复核"),
       card("official_anchor", "官方价格锚点", goal.productGoals && goal.productGoals.showOfficialPriceAnchor ? "已对齐" : "仍需复核"),
@@ -138,6 +181,7 @@
       card("same_item_matcher", "同款候选识别", sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {})).userFacingSummary && sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {})).userFacingSummary.resultLabel || "同款识别仍需复核"),
       card("duplicate_merge", "重复候选合并", duplicateCandidateMergerSummary(input || {}, sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {}))).userFacingSummary && duplicateCandidateMergerSummary(input || {}, sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {}))).userFacingSummary.resultLabel || "重复候选仍需复核"),
       card("covered_lowest_board", "已覆盖来源候选价合并", coveredLowestCandidateBoardSummary(input || {}, duplicateCandidateMergerSummary(input || {}, sameItemMatcherSummary(input || {}, priceSourceNormalizationSummary(input || {}))), officialPriceAnchorSummary(input || {}, priceSourceNormalizationSummary(input || {}))).title || "已覆盖来源候选价合并"),
+      card("provider_fixture_view", "合法 Provider Fixture 与 Sandbox 价格 Feed", providerFixtureViewModelSummary(input || {}, legal, credential, feed).title || "合法 Provider Fixture 与 Sandbox 价格 Feed"),
       card("sandbox_handoff", "Sandbox 跳转候选与平台可用性", sandboxHandoffViewModelSummary(input || {}, sandboxDeepLinkCandidateSummary(input || {}), platformAvailabilitySummary(input || {}), partnerLinkPolicySummary(input || {})).title || "Sandbox 跳转候选与平台可用性")
     ]);
   }
@@ -180,13 +224,17 @@
       const matcher = sameItemMatcherSummary(safe, normalizer);
       const merger = duplicateCandidateMergerSummary(safe, matcher);
       const coveredBoard = coveredLowestCandidateBoardSummary(safe, merger, anchor);
+      const legal = legalProviderFixtureSummary(safe);
+      const credential = providerCredentialSafetySummary(safe);
+      const feed = sandboxPriceFeedSummary(safe, legal, credential);
       const sandbox = sandboxDeepLinkCandidateSummary(safe);
       const availability = platformAvailabilitySummary(safe);
       const partner = partnerLinkPolicySummary(safe);
       const sandboxHandoff = sandboxHandoffViewModelSummary(safe, sandbox, availability, partner);
-      const status = goal.status === "blocked" || boundary.status === "blocked" || normalizer.status === "blocked" || anchor.status === "blocked" || displayBoard.status === "blocked" || matcher.status === "blocked" || merger.status === "blocked" || coveredBoard.status === "blocked" || sandbox.status === "blocked" || availability.status === "blocked" || partner.status === "blocked" || sandboxHandoff.status === "blocked"
+      const fixtureView = providerFixtureViewModelSummary(safe, legal, credential, feed);
+      const status = goal.status === "blocked" || boundary.status === "blocked" || normalizer.status === "blocked" || anchor.status === "blocked" || displayBoard.status === "blocked" || matcher.status === "blocked" || merger.status === "blocked" || coveredBoard.status === "blocked" || legal.status === "blocked" || credential.status === "blocked" || feed.status === "blocked" || fixtureView.status === "blocked" || sandbox.status === "blocked" || availability.status === "blocked" || partner.status === "blocked" || sandboxHandoff.status === "blocked"
         ? "blocked"
-        : (goal.status === "needs_review" || boundary.status === "needs_review" || normalizer.status === "needs_review" || anchor.status === "needs_review" || anchor.status === "missing_official" || displayBoard.status === "needs_review" || matcher.status === "needs_review" || merger.status === "needs_review" || coveredBoard.status === "needs_review" || sandbox.status === "needs_review" || availability.status === "needs_review" || partner.status === "needs_review" || sandboxHandoff.status === "needs_review" ? "needs_review" : "aligned");
+        : (goal.status === "needs_review" || boundary.status === "needs_review" || normalizer.status === "needs_review" || anchor.status === "needs_review" || anchor.status === "missing_official" || displayBoard.status === "needs_review" || matcher.status === "needs_review" || merger.status === "needs_review" || coveredBoard.status === "needs_review" || legal.status === "needs_review" || credential.status === "needs_review" || feed.status === "needs_review" || fixtureView.status === "needs_review" || sandbox.status === "needs_review" || availability.status === "needs_review" || partner.status === "needs_review" || sandboxHandoff.status === "needs_review" ? "needs_review" : "aligned");
       return clone({
         viewModelName:VIEW_MODEL_NAME,
         appVersion:GLOBAL_SHOPPING_PRODUCT_GOAL_VIEW_MODEL_VERSION,
@@ -206,6 +254,10 @@
         sameItemMatcherSummary:clone(matcher),
         duplicateCandidateMergerSummary:clone(merger),
         coveredLowestCandidateBoardSummary:clone(coveredBoard),
+        legalProviderFixtureSummary:clone(legal),
+        providerCredentialSafetySummary:clone(credential),
+        sandboxPriceFeedSummary:clone(feed),
+        providerFixtureViewModelSummary:clone(fixtureView),
         sandboxDeepLinkCandidateSummary:clone(sandbox),
         platformAvailabilitySummary:clone(availability),
         partnerLinkPolicySummary:clone(partner),
@@ -216,14 +268,18 @@
         sameItemMatcherStatus:text(matcher.status || ""),
         duplicateMergeStatus:text(merger.status || ""),
         coveredLowestStatus:text(coveredBoard.status || ""),
+        legalProviderFixtureStatus:text(legal.status || ""),
+        providerCredentialSafetyStatus:text(credential.status || ""),
+        sandboxPriceFeedStatus:text(feed.status || ""),
         sandboxDeepLinkStatus:text(sandbox.status || ""),
         platformAvailabilityStatus:text(availability.status || ""),
         partnerLinkPolicyStatus:text(partner.status || ""),
         sandboxHandoffStatus:text(sandboxHandoff.status || ""),
-        safeToProceedWithPriceProviderSandbox:normalizer.status === "ready" && anchor.status === "anchored" && displayBoard.status === "ready",
+        safeToProceedWithPriceProviderSandbox:normalizer.status === "ready" && anchor.status === "anchored" && displayBoard.status === "ready" && legal.status === "ready" && credential.status === "ready" && feed.status === "ready",
+        safeToProceedWithReadOnlyPriceProviderSandbox:legal.status === "ready" && credential.status === "ready" && feed.status === "ready",
         safeToProceedWithDeepLinkSafetyGate:matcher.status === "ready" && merger.status === "merged" && coveredBoard.status === "ready",
-        safeToProceedWithSandboxDeepLinkCandidate:sandbox.status === "ready" && availability.status === "available" && partner.status === "compliant",
-        safeToProceedWithPartnerFixtureAdapter:sandbox.status === "ready" && availability.status === "available" && partner.status === "compliant" && sandboxHandoff.status === "ready",
+        safeToProceedWithSandboxDeepLinkCandidate:legal.status === "ready" && credential.status === "ready" && feed.status === "ready" && sandbox.status === "ready" && availability.status === "available" && partner.status === "compliant",
+        safeToProceedWithPartnerFixtureAdapter:legal.status === "ready" && credential.status === "ready" && feed.status === "ready" && sandbox.status === "ready" && availability.status === "available" && partner.status === "compliant" && sandboxHandoff.status === "ready",
         redacted:true
       });
     } catch (error) {

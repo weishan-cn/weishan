@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_INTERACTIVE_REFRESH_UI_CONTROLLER_VERSION = "2.1.92";
+  const READ_ONLY_QUOTE_INTERACTIVE_REFRESH_UI_CONTROLLER_VERSION = "2.1.93";
   const CONTROLLER_NAME = "read_only_quote_interactive_refresh_ui_controller_v1";
 
   function clone(value) {

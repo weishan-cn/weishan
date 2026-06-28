@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.92";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.93";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -146,6 +146,10 @@
       const platformAvailabilitySummary = obj(safe.platformAvailabilitySummary);
       const partnerLinkPolicySummary = obj(safe.partnerLinkPolicySummary);
       const sandboxHandoffViewModelSummary = obj(safe.sandboxHandoffViewModelSummary);
+      const legalProviderFixtureSummary = obj(safe.legalProviderFixtureSummary);
+      const providerCredentialSafetySummary = obj(safe.providerCredentialSafetySummary);
+      const sandboxPriceFeedSummary = obj(safe.sandboxPriceFeedSummary);
+      const providerFixtureViewModelSummary = obj(safe.providerFixtureViewModelSummary);
       if (rcCandidateReview.status === "ready_for_review" || safe.safeToStartRcReview === true) badges.push(badge("rc_review_ready", "可以开始 RC 复核", "info"));
       if (rcCandidateReview.status === "evidence_incomplete" || rcEvidenceReview.status === "incomplete") badges.push(badge("rc_review_incomplete", "证据仍需补充", "warning"));
       if (rcCandidateReview.status === "needs_safety_review" || rcEvidenceReview.status === "needs_review") badges.push(badge("rc_review_safety_review", "需要安全复核", "warning"));
@@ -218,6 +222,19 @@
       if (sandboxDeepLinkCandidateSummary.status) badges.push(badge("sandbox_link_no_open", "Sandbox 跳转不打开真实平台", "info"));
       if (platformAvailabilitySummary.status) badges.push(badge("platform_no_endorsement", "平台可用不代表官方背书", "warning"));
       if (sandboxHandoffViewModelSummary.status === "ready") badges.push(badge("sandbox_handoff_ready", "Sandbox 跳转候选与平台可用性已准备", "info"));
+      if (legalProviderFixtureSummary.status === "ready") badges.push(badge("legal_provider_fixture_ready", "Provider fixture 已准备", "info"));
+      if (legalProviderFixtureSummary.status === "needs_review") badges.push(badge("legal_provider_fixture_review", "Provider fixture 仍需复核", "warning"));
+      if (legalProviderFixtureSummary.status === "blocked") badges.push(badge("legal_provider_fixture_blocked", "Provider fixture 已阻断", "blocked"));
+      if (providerCredentialSafetySummary.status === "ready") badges.push(badge("provider_credential_safety_ready", "Provider 凭据边界安全", "info"));
+      if (providerCredentialSafetySummary.status === "needs_review") badges.push(badge("provider_credential_safety_review", "Provider 凭据边界仍需复核", "warning"));
+      if (providerCredentialSafetySummary.status === "blocked") badges.push(badge("provider_credential_safety_blocked", "Provider 凭据边界已阻断", "blocked"));
+      if (sandboxPriceFeedSummary.status === "ready") badges.push(badge("sandbox_price_feed_ready", "Sandbox 价格 Feed 已准备", "info"));
+      if (sandboxPriceFeedSummary.status === "needs_review") badges.push(badge("sandbox_price_feed_review", "Sandbox 价格 Feed 仍需复核", "warning"));
+      if (sandboxPriceFeedSummary.status === "blocked") badges.push(badge("sandbox_price_feed_blocked", "Sandbox 价格 Feed 已阻断", "blocked"));
+      if (providerCredentialSafetySummary.status || sandboxPriceFeedSummary.status) badges.push(badge("provider_no_prod_key", "不读取生产密钥", "info"));
+      if (legalProviderFixtureSummary.status || providerCredentialSafetySummary.status || sandboxPriceFeedSummary.status) badges.push(badge("provider_no_raw_response", "不保存 raw provider response", "info"));
+      if (sandboxPriceFeedSummary.status) badges.push(badge("sandbox_feed_normalization_ready", "Fixture feed 可进入价格归一化", "info"));
+      if (providerFixtureViewModelSummary.status || legalProviderFixtureSummary.status) badges.push(badge("provider_fixture_not_real_price", "Provider fixture 不代表真实价格", "warning"));
       if (safe.safeToProceedWithPartnerFixtureAdapter === true || sandboxHandoffViewModelSummary.safeToProceedWithPartnerFixtureAdapter === true) badges.push(badge("partner_fixture_adapter_ready", "合作/联盟链接可继续只读接入", "info"));
       if (cohortProgress.status === "ready" || safe.cohortProgressStatus === "ready") badges.push(badge("cohort_progress_ready", "测试批次进度正常", "info"));
       if (cohortProgress.status === "needs_review" || safe.cohortProgressStatus === "needs_review") badges.push(badge("cohort_progress_in_progress", "测试批次仍在进行", "warning"));

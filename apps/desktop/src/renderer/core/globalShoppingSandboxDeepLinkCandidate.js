@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_DEEP_LINK_CANDIDATE_VERSION = "2.1.92";
+  const GLOBAL_SHOPPING_SANDBOX_DEEP_LINK_CANDIDATE_VERSION = "2.1.93";
   const CANDIDATE_NAME = "global_shopping_sandbox_deep_link_candidate_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

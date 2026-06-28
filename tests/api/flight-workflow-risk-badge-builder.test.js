@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.1.92");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.1.93");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -53,6 +53,10 @@ function main() {
   const globalLabels = api.buildFlightWorkflowRiskBadges({
     globalShoppingProductGoalSummary:{ status:"aligned" },
     jumpToPlatformBoundarySummary:{ status:"safe" },
+    legalProviderFixtureSummary:{ status:"ready" },
+    providerCredentialSafetySummary:{ status:"ready" },
+    sandboxPriceFeedSummary:{ status:"ready" },
+    providerFixtureViewModelSummary:{ status:"ready" },
     sameItemMatcherSummary:{ status:"ready" },
     duplicateCandidateMergerSummary:{ status:"merged" },
     coveredLowestCandidateBoardSummary:{ status:"ready" },
@@ -64,11 +68,19 @@ function main() {
     partnerLinkPolicySummary:{ status:"compliant" },
     sandboxHandoffViewModelSummary:{ status:"ready", safeToProceedWithPartnerFixtureAdapter:true },
     safeToProceedWithDeepLinkSafetyGate:true,
+    safeToProceedWithReadOnlyPriceProviderSandbox:true,
     safeToProceedWithJumpToPlatformMvp:true,
     safeToProceedWithSandboxDeepLinkCandidate:true,
     safeToProceedWithPartnerFixtureAdapter:true
   }).badges.map((item) => item.label);
   assert.ok(globalLabels.includes("全球购目标已对齐"));
+  assert.ok(globalLabels.includes("Provider fixture 已准备"));
+  assert.ok(globalLabels.includes("Provider 凭据边界安全"));
+  assert.ok(globalLabels.includes("Sandbox 价格 Feed 已准备"));
+  assert.ok(globalLabels.includes("不读取生产密钥"));
+  assert.ok(globalLabels.includes("不保存 raw provider response"));
+  assert.ok(globalLabels.includes("Fixture feed 可进入价格归一化"));
+  assert.ok(globalLabels.includes("Provider fixture 不代表真实价格"));
   assert.ok(globalLabels.includes("跳转平台边界安全"));
   assert.ok(globalLabels.includes("同款候选识别已准备"));
   assert.ok(globalLabels.includes("重复候选合并已准备"));

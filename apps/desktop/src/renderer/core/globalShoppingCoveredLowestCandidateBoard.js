@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_COVERED_LOWEST_CANDIDATE_BOARD_VERSION = "2.1.92";
+  const GLOBAL_SHOPPING_COVERED_LOWEST_CANDIDATE_BOARD_VERSION = "2.1.93";
   const BOARD_NAME = "global_shopping_covered_lowest_candidate_board_v1";
   const CAVEAT = "当前仅比较已覆盖来源中的候选价，不代表最低承诺、价格保证、锁定承诺、最终成交价或可下单能力。";
 
@@ -128,6 +128,9 @@
       platformAvailabilitySummary:clone(safe.platformAvailabilitySummary || null),
       partnerLinkPolicySummary:clone(safe.partnerLinkPolicySummary || null),
       sandboxHandoffViewModelSummary:clone(safe.sandboxHandoffViewModelSummary || null),
+      legalProviderFixtureSummary:clone(safe.legalProviderFixtureSummary || null),
+      providerCredentialSafetySummary:clone(safe.providerCredentialSafetySummary || null),
+      sandboxPriceFeedSummary:clone(safe.sandboxPriceFeedSummary || null),
       externalDeepLinkSafetyStatus:text(safe.externalDeepLinkSafetyStatus || obj(safe.externalDeepLinkSafetySummary).status || ""),
       searchPrefillStatus:text(safe.searchPrefillStatus || obj(safe.searchParameterPrefillSummary).status || ""),
       handoffPreviewStatus:text(safe.handoffPreviewStatus || obj(safe.jumpToPlatformHandoffPreviewSummary).status || ""),
@@ -135,6 +138,10 @@
       platformAvailabilityStatus:text(safe.platformAvailabilityStatus || obj(safe.platformAvailabilitySummary).status || ""),
       partnerLinkPolicyStatus:text(safe.partnerLinkPolicyStatus || obj(safe.partnerLinkPolicySummary).status || ""),
       sandboxHandoffStatus:text(safe.sandboxHandoffStatus || obj(safe.sandboxHandoffViewModelSummary).status || ""),
+      legalProviderFixtureStatus:text(safe.legalProviderFixtureStatus || obj(safe.legalProviderFixtureSummary).status || ""),
+      providerCredentialSafetyStatus:text(safe.providerCredentialSafetyStatus || obj(safe.providerCredentialSafetySummary).status || ""),
+      sandboxPriceFeedStatus:text(safe.sandboxPriceFeedStatus || obj(safe.sandboxPriceFeedSummary).status || ""),
+      safeToProceedWithReadOnlyPriceProviderSandbox:safe.safeToProceedWithReadOnlyPriceProviderSandbox === true,
       safeToProceedWithSandboxDeepLinkCandidate:safe.safeToProceedWithSandboxDeepLinkCandidate === true,
       safeToProceedWithPartnerFixtureAdapter:safe.safeToProceedWithPartnerFixtureAdapter === true,
       blockedReasons:blocked ? ["unsafe_covered_lowest_board_detected"] : [],

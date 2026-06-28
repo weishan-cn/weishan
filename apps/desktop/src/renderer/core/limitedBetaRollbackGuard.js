@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const LIMITED_BETA_ROLLBACK_GUARD_VERSION = "2.1.92";
+  const LIMITED_BETA_ROLLBACK_GUARD_VERSION = "2.1.93";
   const URL_FIELDS = ["bookingUrl", "checkoutUrl", "paymentUrl", "orderUrl", "createOrderUrl", "holdBookingUrl"];
   const IDENTITY_FIELDS = ["identityUpload", "passengerIdentity", "passport", "passportNumber", "bankCard", "bankCardNumber"];
 
