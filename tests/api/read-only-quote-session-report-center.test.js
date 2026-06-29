@@ -46,6 +46,9 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderCoverageDashboard.js",
     "apps/desktop/src/renderer/core/globalShoppingReadOnlySourceTrustScore.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderCoverageViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingReadOnlyProviderSandboxIntegrationGate.js",
+    "apps/desktop/src/renderer/core/globalShoppingSandboxPriceCandidateSession.js",
+    "apps/desktop/src/renderer/core/globalShoppingSandboxPriceCandidateResultBoard.js",
     "apps/desktop/src/renderer/core/globalShoppingLegalProviderFixtureAdapter.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderCredentialSafetyReview.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxPriceFeedGate.js",
@@ -73,13 +76,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.1.99");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.2.0");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "2.1.99");
+  assert.equal(ready.appVersion, "2.2.0");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -174,6 +177,9 @@ function main() {
   const coverageDashboard = windowRef.WeishanGlobalShoppingProviderCoverageDashboard.buildGlobalShoppingProviderCoverageDashboard({ adapterRegistrySummary:adapterRegistry, firstSandboxProviderConnectorSummary:firstSandboxConnector, normalizedSourceInputs:responseNormalizer.normalizedSourceInputs });
   const sourceTrust = windowRef.WeishanGlobalShoppingReadOnlySourceTrustScore.buildGlobalShoppingReadOnlySourceTrustScore({ dryRunProviderResponseNormalizerSummary:responseNormalizer });
   const coverageViewModel = windowRef.WeishanGlobalShoppingProviderCoverageViewModel.buildGlobalShoppingProviderCoverageViewModel({ firstSandboxProviderConnectorSummary:firstSandboxConnector, providerCoverageDashboardSummary:coverageDashboard, readOnlySourceTrustScoreSummary:sourceTrust, safeToProceedWithFirstReadOnlyProviderSandboxIntegration:true });
+  const integrationGate = windowRef.WeishanGlobalShoppingReadOnlyProviderSandboxIntegrationGate.buildGlobalShoppingReadOnlyProviderSandboxIntegrationGate({ legalProviderFixtureSummary:legalProviderFixture, providerCredentialSafetySummary:credentialSafety, sandboxPriceFeedSummary:sandboxPriceFeed, firstSandboxProviderConnectorSummary:firstSandboxConnector, providerAdapterRegistrySummary:adapterRegistry, providerSandboxDryRunHarnessSummary:dryRunHarness, providerSandboxSafetyKillSwitchSummary:killSwitch, providerCoverageDashboardSummary:coverageDashboard, readOnlySourceTrustScoreSummary:sourceTrust, pricePipelineOrchestratorSummary:{ status:"ready", redacted:true }, jumpToPlatformHandoffPreviewSummary:preview });
+  const sandboxSession = windowRef.WeishanGlobalShoppingSandboxPriceCandidateSession.buildGlobalShoppingSandboxPriceCandidateSession({ readOnlyProviderSandboxIntegrationGateSummary:integrationGate, firstSandboxProviderConnectorSummary:firstSandboxConnector, providerCoverageDashboardSummary:coverageDashboard, readOnlySourceTrustScoreSummary:sourceTrust, pricePipelineOrchestratorSummary:{ status:"ready", officialPriceAnchorSummary:anchor, coveredLowestCandidateBoardSummary:coveredBoard, redacted:true }, coveredLowestCandidateBoardSummary:coveredBoard, jumpToPlatformHandoffPreviewSummary:preview, officialPriceAnchorSummary:anchor });
+  const sandboxResultBoard = windowRef.WeishanGlobalShoppingSandboxPriceCandidateResultBoard.buildGlobalShoppingSandboxPriceCandidateResultBoard({ sandboxPriceCandidateSessionSummary:sandboxSession, officialPriceAnchorSummary:anchor, coveredLowestCandidateBoardSummary:coveredBoard, readOnlySourceTrustScoreSummary:sourceTrust, jumpToPlatformHandoffPreviewSummary:preview, pricePipelineOrchestratorSummary:pipeline });
   const globalReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     globalShoppingProductGoalSummary:globalGoal,
@@ -198,6 +204,9 @@ function main() {
     providerCoverageDashboardSummary:coverageDashboard,
     readOnlySourceTrustScoreSummary:sourceTrust,
     providerCoverageViewModelSummary:coverageViewModel,
+    readOnlyProviderSandboxIntegrationGateSummary:integrationGate,
+    sandboxPriceCandidateSessionSummary:sandboxSession,
+    sandboxPriceCandidateResultBoardSummary:sandboxResultBoard,
     legalProviderFixtureSummary:legalProviderFixture,
     providerCredentialSafetySummary:credentialSafety,
     sandboxPriceFeedSummary:sandboxPriceFeed,
@@ -244,12 +253,16 @@ function main() {
     providerCoverageStatus:"ready",
     sourceTrustStatus:"ready",
     providerCoverageViewModelStatus:"ready",
+    providerSandboxIntegrationGateStatus:"ready",
+    sandboxPriceCandidateSessionStatus:"ready",
+    sandboxPriceCandidateResultBoardStatus:"ready",
     safeToProceedWithReadOnlyPriceProviderSandbox:true,
     safeToProceedWithFirstRealReadOnlyProviderSandbox:true,
     safeToProceedWithFirstReadOnlySandboxDryRun:true,
     safeToProceedWithFirstProviderSandboxFixtureDryRun:true,
     safeToProceedWithFirstSandboxProviderConnectorImplementation:true,
     safeToProceedWithFirstReadOnlyProviderSandboxIntegration:true,
+    safeToProceedWithSandboxCandidateUserPreview:true,
     safeToProceedWithRealReadOnlyProviderSandbox:true,
     safeToProceedWithJumpToPlatformMvp:true,
     safeToProceedWithDeepLinkSafetyGate:true,
@@ -284,6 +297,9 @@ function main() {
   assert.equal(globalReady.userFacingSummary.providerCoverageDashboardSummary.title, "Provider 覆盖看板");
   assert.equal(globalReady.userFacingSummary.readOnlySourceTrustScoreSummary.title, "只读来源可信度评分");
   assert.equal(globalReady.userFacingSummary.providerCoverageViewModelSummary.title, "Provider 覆盖与来源可信度");
+  assert.equal(globalReady.userFacingSummary.readOnlyProviderSandboxIntegrationGateSummary.title, "只读 Provider Sandbox 接入闸门");
+  assert.equal(globalReady.userFacingSummary.sandboxPriceCandidateSessionSummary.title, "Sandbox 价格候选会话");
+  assert.equal(globalReady.userFacingSummary.sandboxPriceCandidateResultBoardSummary.title, "Sandbox 价格候选结果");
   assert.equal(globalReady.userFacingSummary.providerFixtureViewModelSummary.title, "合法 Provider Fixture 与 Sandbox 价格 Feed");
   assert.equal(globalReady.userFacingSummary.sameItemMatcherSummary.title, "同款候选识别");
   assert.equal(globalReady.userFacingSummary.duplicateCandidateMergerSummary.title, "重复候选合并");
@@ -308,6 +324,10 @@ function main() {
   assert.equal(globalReady.userFacingSummary.providerCoverageStatus, "ready");
   assert.equal(globalReady.userFacingSummary.sourceTrustStatus, "ready");
   assert.equal(globalReady.userFacingSummary.providerCoverageViewModelStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.providerSandboxIntegrationGateStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.sandboxPriceCandidateSessionStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.sandboxPriceCandidateResultBoardStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.safeToProceedWithSandboxCandidateUserPreview, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithFirstSandboxProviderConnectorImplementation, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithFirstReadOnlyProviderSandboxIntegration, true);
   assert.equal(globalReady.userFacingSummary.sandboxPriceFeedStatus, "ready");

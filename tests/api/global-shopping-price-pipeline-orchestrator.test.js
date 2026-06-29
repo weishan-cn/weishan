@@ -31,10 +31,13 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderCoverageDashboard.js",
     "apps/desktop/src/renderer/core/globalShoppingReadOnlySourceTrustScore.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderCoverageViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingReadOnlyProviderSandboxIntegrationGate.js",
+    "apps/desktop/src/renderer/core/globalShoppingSandboxPriceCandidateSession.js",
+    "apps/desktop/src/renderer/core/globalShoppingSandboxPriceCandidateResultBoard.js",
     "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.1.99");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.2.0");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -109,10 +112,10 @@ function main() {
     readOnlySourceTrustScoreSummary:sourceTrust,
     providerCoverageViewModelSummary:coverageViewModel
   });
-  assert.equal(ready.appVersion, "2.1.99");
+  assert.equal(ready.appVersion, "2.2.0");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "只读价格流水线已准备");
-  assert.equal(ready.pipelineStages.length, 20);
+  assert.equal(ready.pipelineStages.length, 23);
   assert.equal(ready.readyOutputs.canShowFixtureCandidatePrices, true);
   assert.equal(ready.readyOutputs.canShowFixtureReplay, true);
   assert.equal(ready.readyOutputs.canShowOfficialAnchor, true);
@@ -129,8 +132,12 @@ function main() {
   assert.equal(ready.providerCoverageDashboardSummary.userFacingSummary.title, "Provider 覆盖看板");
   assert.equal(ready.readOnlySourceTrustScoreSummary.userFacingSummary.title, "只读来源可信度评分");
   assert.equal(ready.providerCoverageViewModelSummary.title, "Provider 覆盖与来源可信度");
+  assert.equal(ready.readOnlyProviderSandboxIntegrationGateSummary.userFacingSummary.title, "只读 Provider Sandbox 接入闸门");
+  assert.equal(ready.sandboxPriceCandidateSessionSummary.userFacingSummary.title, "Sandbox 价格候选会话");
+  assert.equal(ready.sandboxPriceCandidateResultBoardSummary.title, "Sandbox 价格候选结果");
   assert.equal(ready.readyOutputs.safeToProceedWithFirstSandboxProviderConnectorImplementation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithFirstReadOnlyProviderSandboxIntegration, true);
+  assert.equal(ready.readyOutputs.safeToProceedWithSandboxCandidateUserPreview, true);
 
   assert.equal(api.buildGlobalShoppingPricePipelineOrchestrator({
     providerCredentialSafetyReview:{ status:"ready" },

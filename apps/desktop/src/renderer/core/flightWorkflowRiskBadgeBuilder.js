@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.99";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.2.0";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -161,6 +161,9 @@
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
       const providerAdapterRegistryViewModelSummary = obj(safe.providerAdapterRegistryViewModelSummary);
+      const readOnlyProviderSandboxIntegrationGateSummary = obj(safe.readOnlyProviderSandboxIntegrationGateSummary);
+      const sandboxPriceCandidateSessionSummary = obj(safe.sandboxPriceCandidateSessionSummary);
+      const sandboxPriceCandidateResultBoardSummary = obj(safe.sandboxPriceCandidateResultBoardSummary);
       const legalProviderFixtureSummary = obj(safe.legalProviderFixtureSummary);
       const providerCredentialSafetySummary = obj(safe.providerCredentialSafetySummary);
       const sandboxPriceFeedSummary = obj(safe.sandboxPriceFeedSummary);
@@ -288,6 +291,19 @@
       if (providerAdapterRegistryViewModelSummary.status || providerAdapterRegistrySummary.status) badges.push(badge("provider_adapter_registry_not_connected", "Adapter 注册不代表真实 provider 接通", "warning"));
       if (readOnlyProviderSandboxConnectorSummary.status || fixtureReplayConsoleSummary.status || normalizedPriceCandidateBoardSummary.status) badges.push(badge("fixture_replay_not_real_provider", "Replay 不代表真实 provider 调用", "warning"));
       if (readOnlyProviderSandboxConnectorSummary.status || legalProviderFixtureSummary.status || providerCredentialSafetySummary.status) badges.push(badge("connector_no_prod_key", "Connector 不读取生产密钥", "info"));
+      if (readOnlyProviderSandboxIntegrationGateSummary.status === "ready") badges.push(badge("provider_sandbox_integration_gate_ready", "只读 Provider Sandbox 接入闸门已准备", "info"));
+      if (readOnlyProviderSandboxIntegrationGateSummary.status === "needs_review") badges.push(badge("provider_sandbox_integration_gate_review", "只读 Provider Sandbox 接入闸门仍需复核", "warning"));
+      if (readOnlyProviderSandboxIntegrationGateSummary.status === "blocked") badges.push(badge("provider_sandbox_integration_gate_blocked", "只读 Provider Sandbox 接入闸门已阻断", "blocked"));
+      if (sandboxPriceCandidateSessionSummary.status === "ready") badges.push(badge("sandbox_price_candidate_session_ready", "Sandbox 价格候选会话已准备", "info"));
+      if (sandboxPriceCandidateSessionSummary.status === "needs_review") badges.push(badge("sandbox_price_candidate_session_review", "Sandbox 价格候选会话仍需复核", "warning"));
+      if (sandboxPriceCandidateSessionSummary.status === "blocked") badges.push(badge("sandbox_price_candidate_session_blocked", "Sandbox 价格候选会话已阻断", "blocked"));
+      if (sandboxPriceCandidateResultBoardSummary.status === "ready") badges.push(badge("sandbox_price_candidate_result_ready", "Sandbox 价格候选结果已准备", "info"));
+      if (sandboxPriceCandidateResultBoardSummary.status === "needs_review") badges.push(badge("sandbox_price_candidate_result_review", "Sandbox 价格候选结果仍需复核", "warning"));
+      if (sandboxPriceCandidateResultBoardSummary.status === "blocked") badges.push(badge("sandbox_price_candidate_result_blocked", "Sandbox 价格候选结果已阻断", "blocked"));
+      if (sandboxPriceCandidateResultBoardSummary.status || sandboxPriceCandidateSessionSummary.status) badges.push(badge("sandbox_result_not_real_price", "Sandbox 结果不代表真实价格", "warning"));
+      if (sandboxPriceCandidateResultBoardSummary.status || sandboxPriceCandidateSessionSummary.status) badges.push(badge("sandbox_result_not_lowest", "候选结果不代表全网最低", "warning"));
+      if (sandboxPriceCandidateResultBoardSummary.status || sandboxPriceCandidateSessionSummary.status) badges.push(badge("sandbox_result_not_ordering", "候选结果不代表下单能力", "warning"));
+      if (sandboxPriceCandidateResultBoardSummary.status || readOnlyProviderSandboxIntegrationGateSummary.status) badges.push(badge("sandbox_result_platform_truth", "价格以未来平台实时页面为准", "info"));
       if (normalizedPriceCandidateBoardSummary.status || pricePipelineOrchestratorSummary.status) badges.push(badge("normalized_candidate_not_real_price", "归一化候选不代表真实价格", "warning"));
       if (normalizedPriceCandidateBoardSummary.status || readOnlyCandidateJourneySummary.status) badges.push(badge("normalized_candidate_not_ordering", "价格候选板不代表下单能力", "warning"));
       if (sandboxHandoffViewModelSummary.status === "ready") badges.push(badge("sandbox_handoff_ready", "Sandbox 跳转候选与平台可用性已准备", "info"));
@@ -318,6 +334,7 @@
       if (pricePipelineOrchestratorSummary.status) badges.push(badge("price_pipeline_not_real_price", "价格流水线不代表真实价格", "warning"));
       if (readOnlyCandidateJourneySummary.status) badges.push(badge("candidate_journey_not_ordering", "候选旅程不代表下单能力", "warning"));
       if (safe.safeToProceedWithPartnerFixtureAdapter === true || sandboxHandoffViewModelSummary.safeToProceedWithPartnerFixtureAdapter === true) badges.push(badge("partner_fixture_adapter_ready", "合作/联盟链接可继续只读接入", "info"));
+      if (safe.safeToProceedWithSandboxCandidateUserPreview === true) badges.push(badge("sandbox_candidate_user_preview_ready", "可继续只读 Sandbox 候选展示", "info"));
       if (cohortProgress.status === "ready" || safe.cohortProgressStatus === "ready") badges.push(badge("cohort_progress_ready", "测试批次进度正常", "info"));
       if (cohortProgress.status === "needs_review" || safe.cohortProgressStatus === "needs_review") badges.push(badge("cohort_progress_in_progress", "测试批次仍在进行", "warning"));
       if (cohortProgress.status === "needs_more_testers" || safe.cohortProgressStatus === "needs_more_testers") badges.push(badge("cohort_progress_needs_more", "仍需更多测试者", "warning"));

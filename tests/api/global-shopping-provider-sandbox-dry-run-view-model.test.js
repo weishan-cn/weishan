@@ -23,7 +23,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderSandboxDryRunViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderSandboxDryRunViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_DRY_RUN_VIEW_MODEL_VERSION, "2.1.99");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_DRY_RUN_VIEW_MODEL_VERSION, "2.2.0");
 
   const dryRun = windowRef.WeishanGlobalShoppingProviderSandboxDryRunHarness.buildGlobalShoppingProviderSandboxDryRunHarness({
     providerRequestEnvelopeSummary:{ status:"ready", requestEnvelope:{ providerId:"provider_1", providerName:"Fixture Provider" } },
@@ -43,7 +43,7 @@ function main() {
     firstReadOnlyProviderAdapterShellSummary:adapter,
     providerSandboxSafetyKillSwitchSummary:killSwitch
   });
-  assert.equal(ready.appVersion, "2.1.99");
+  assert.equal(ready.appVersion, "2.2.0");
   assert.equal(ready.status, "ready");
   assert.equal(ready.title, "Provider Sandbox 干跑准备");
   assert.equal(ready.cards.length, 4);

@@ -16,7 +16,7 @@ function load(file) {
 function main() {
   const windowRef = load("apps/desktop/src/renderer/core/globalShoppingFirstReadOnlyProviderAdapterShell.js");
   const api = windowRef.WeishanGlobalShoppingFirstReadOnlyProviderAdapterShell;
-  assert.equal(api.GLOBAL_SHOPPING_FIRST_READ_ONLY_PROVIDER_ADAPTER_SHELL_VERSION, "2.1.99");
+  assert.equal(api.GLOBAL_SHOPPING_FIRST_READ_ONLY_PROVIDER_ADAPTER_SHELL_VERSION, "2.2.0");
 
   const ready = api.buildGlobalShoppingFirstReadOnlyProviderAdapterShell({
     providerId:"provider_1",
@@ -24,7 +24,7 @@ function main() {
     adapterMode:"dry_run",
     providerType:"fixture"
   });
-  assert.equal(ready.appVersion, "2.1.99");
+  assert.equal(ready.appVersion, "2.2.0");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "第一个只读 Provider Adapter 外壳");
   assert.equal(ready.rows.length, 9);

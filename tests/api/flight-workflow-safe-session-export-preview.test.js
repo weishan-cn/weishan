@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafeSessionExportPreview.js"]);
   const api = windowRef.WeishanFlightWorkflowSafeSessionExportPreview;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFE_SESSION_EXPORT_PREVIEW_VERSION, "2.1.99");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFE_SESSION_EXPORT_PREVIEW_VERSION, "2.2.0");
   const preview = api.buildFlightWorkflowSafeSessionExportPreview({ workflowStateSummary:{ workflowId:"wf1" }, currentStage:"decision", topCandidates:[{ providerName:"A", totalPrice:980, bookingUrl:null }], selectedCandidate:{ providerName:"A" }, auditReviewSummary:{ userFacingSummary:{ resultLabel:"安全检查通过" } } });
   assert.equal(preview.previewName, "flight_workflow_safe_session_export_preview_v1");
   assert.equal(preview.status, "ready");

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.99";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.2.0";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -204,6 +204,9 @@
       providerCoverageDashboardSummary: stripUnsafe(safe.providerCoverageDashboardSummary || null),
       readOnlySourceTrustScoreSummary: stripUnsafe(safe.readOnlySourceTrustScoreSummary || null),
       providerCoverageViewModelSummary: stripUnsafe(safe.providerCoverageViewModelSummary || null),
+      readOnlyProviderSandboxIntegrationGateSummary: stripUnsafe(safe.readOnlyProviderSandboxIntegrationGateSummary || null),
+      sandboxPriceCandidateSessionSummary: stripUnsafe(safe.sandboxPriceCandidateSessionSummary || null),
+      sandboxPriceCandidateResultBoardSummary: stripUnsafe(safe.sandboxPriceCandidateResultBoardSummary || null),
       legalProviderFixtureSummary: stripUnsafe(safe.legalProviderFixtureSummary || null),
       providerCredentialSafetySummary: stripUnsafe(safe.providerCredentialSafetySummary || null),
       sandboxPriceFeedSummary: stripUnsafe(safe.sandboxPriceFeedSummary || null),
@@ -243,6 +246,9 @@
       providerCoverageStatus: safeText(safe.providerCoverageStatus || safe.providerCoverageDashboardSummary && safe.providerCoverageDashboardSummary.status || ""),
       sourceTrustStatus: safeText(safe.sourceTrustStatus || safe.readOnlySourceTrustScoreSummary && safe.readOnlySourceTrustScoreSummary.status || ""),
       providerCoverageViewModelStatus: safeText(safe.providerCoverageViewModelStatus || safe.providerCoverageViewModelSummary && safe.providerCoverageViewModelSummary.status || ""),
+      providerSandboxIntegrationGateStatus: safeText(safe.providerSandboxIntegrationGateStatus || safe.readOnlyProviderSandboxIntegrationGateSummary && safe.readOnlyProviderSandboxIntegrationGateSummary.status || ""),
+      sandboxPriceCandidateSessionStatus: safeText(safe.sandboxPriceCandidateSessionStatus || safe.sandboxPriceCandidateSessionSummary && safe.sandboxPriceCandidateSessionSummary.status || ""),
+      sandboxPriceCandidateResultBoardStatus: safeText(safe.sandboxPriceCandidateResultBoardStatus || safe.sandboxPriceCandidateResultBoardSummary && safe.sandboxPriceCandidateResultBoardSummary.status || ""),
       priceNormalizationStatus: safeText(safe.priceNormalizationStatus || safe.priceSourceNormalizationSummary && safe.priceSourceNormalizationSummary.status || ""),
       officialPriceAnchorStatus: safeText(safe.officialPriceAnchorStatus || safe.officialPriceAnchorSummary && safe.officialPriceAnchorSummary.status || ""),
       priceCandidateDisplayStatus: safeText(safe.priceCandidateDisplayStatus || safe.priceCandidateDisplaySummary && safe.priceCandidateDisplaySummary.status || ""),
@@ -269,6 +275,7 @@
       safeToProceedWithFirstProviderSandboxFixtureDryRun: safe.safeToProceedWithFirstProviderSandboxFixtureDryRun === true,
       safeToProceedWithFirstSandboxProviderConnectorImplementation: safe.safeToProceedWithFirstSandboxProviderConnectorImplementation === true,
       safeToProceedWithFirstReadOnlyProviderSandboxIntegration: safe.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true,
+      safeToProceedWithSandboxCandidateUserPreview: safe.safeToProceedWithSandboxCandidateUserPreview === true,
       safeToProceedWithDeepLinkSafetyGate: safe.safeToProceedWithDeepLinkSafetyGate === true,
       safeToProceedWithSandboxDeepLinkCandidate: safe.safeToProceedWithSandboxDeepLinkCandidate === true,
       safeToProceedWithPartnerFixtureAdapter: safe.safeToProceedWithPartnerFixtureAdapter === true,
@@ -439,11 +446,18 @@
       providerCoverageDashboardSummary: workflow.providerCoverageDashboardSummary || safe.providerCoverageDashboardSummary ? { title:"Provider 覆盖看板", line:workflow.providerCoverageDashboardSummary && workflow.providerCoverageDashboardSummary.userFacingSummary && workflow.providerCoverageDashboardSummary.userFacingSummary.resultLabel || safe.providerCoverageDashboardSummary && safe.providerCoverageDashboardSummary.userFacingSummary && safe.providerCoverageDashboardSummary.userFacingSummary.resultLabel || "Provider 覆盖仍需复核", redacted:true } : null,
       readOnlySourceTrustScoreSummary: workflow.readOnlySourceTrustScoreSummary || safe.readOnlySourceTrustScoreSummary ? { title:"只读来源可信度评分", line:workflow.readOnlySourceTrustScoreSummary && workflow.readOnlySourceTrustScoreSummary.userFacingSummary && workflow.readOnlySourceTrustScoreSummary.userFacingSummary.resultLabel || safe.readOnlySourceTrustScoreSummary && safe.readOnlySourceTrustScoreSummary.userFacingSummary && safe.readOnlySourceTrustScoreSummary.userFacingSummary.resultLabel || "来源可信度仍需复核", redacted:true } : null,
       providerCoverageViewModelSummary: providerCoverageSummary,
+      readOnlyProviderSandboxIntegrationGateSummary: workflow.readOnlyProviderSandboxIntegrationGateSummary || safe.readOnlyProviderSandboxIntegrationGateSummary ? { title:"只读 Provider Sandbox 接入闸门", line:workflow.readOnlyProviderSandboxIntegrationGateSummary && workflow.readOnlyProviderSandboxIntegrationGateSummary.userFacingSummary && workflow.readOnlyProviderSandboxIntegrationGateSummary.userFacingSummary.resultLabel || safe.readOnlyProviderSandboxIntegrationGateSummary && safe.readOnlyProviderSandboxIntegrationGateSummary.userFacingSummary && safe.readOnlyProviderSandboxIntegrationGateSummary.userFacingSummary.resultLabel || "只读 Provider Sandbox 接入闸门仍需复核", redacted:true } : null,
+      sandboxPriceCandidateSessionSummary: workflow.sandboxPriceCandidateSessionSummary || safe.sandboxPriceCandidateSessionSummary ? { title:"Sandbox 价格候选会话", line:workflow.sandboxPriceCandidateSessionSummary && workflow.sandboxPriceCandidateSessionSummary.userFacingSummary && workflow.sandboxPriceCandidateSessionSummary.userFacingSummary.resultLabel || safe.sandboxPriceCandidateSessionSummary && safe.sandboxPriceCandidateSessionSummary.userFacingSummary && safe.sandboxPriceCandidateSessionSummary.userFacingSummary.resultLabel || "Sandbox 价格候选会话仍需复核", redacted:true } : null,
+      sandboxPriceCandidateResultBoardSummary: workflow.sandboxPriceCandidateResultBoardSummary || safe.sandboxPriceCandidateResultBoardSummary ? { title:"Sandbox 价格候选结果", line:workflow.sandboxPriceCandidateResultBoardSummary && workflow.sandboxPriceCandidateResultBoardSummary.caveat || safe.sandboxPriceCandidateResultBoardSummary && safe.sandboxPriceCandidateResultBoardSummary.caveat || "当前仅展示只读 sandbox 候选结果，不代表真实价格、全网最低、最低价保证、锁价、可订、付款、下单或出票能力。", redacted:true } : null,
       firstSandboxProviderConnectorStatus: workflow.firstSandboxProviderConnectorStatus || safe.firstSandboxProviderConnectorStatus || "",
       providerCoverageStatus: workflow.providerCoverageStatus || safe.providerCoverageStatus || "",
       sourceTrustStatus: workflow.sourceTrustStatus || safe.sourceTrustStatus || "",
       providerCoverageViewModelStatus: workflow.providerCoverageViewModelStatus || safe.providerCoverageViewModelStatus || "",
+      providerSandboxIntegrationGateStatus: workflow.providerSandboxIntegrationGateStatus || safe.providerSandboxIntegrationGateStatus || "",
+      sandboxPriceCandidateSessionStatus: workflow.sandboxPriceCandidateSessionStatus || safe.sandboxPriceCandidateSessionStatus || "",
+      sandboxPriceCandidateResultBoardStatus: workflow.sandboxPriceCandidateResultBoardStatus || safe.sandboxPriceCandidateResultBoardStatus || "",
       safeToProceedWithFirstReadOnlyProviderSandboxIntegration: workflow.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true || safe.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true,
+      safeToProceedWithSandboxCandidateUserPreview: workflow.safeToProceedWithSandboxCandidateUserPreview === true || safe.safeToProceedWithSandboxCandidateUserPreview === true,
       pilotExitCriteriaSummary: pilotExitCriteriaSummary ? { title:"只读试点退出条件", line:pilotExitCriteriaSummary.userFacingSummary && pilotExitCriteriaSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
       launchCandidateReadinessSummary: launchCandidateReadinessSummary ? { title:"只读发布候选准备板", line:launchCandidateReadinessSummary.userFacingSummary && launchCandidateReadinessSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
       freezeGateSummary: workflow.freezeGateSummary ? { title:"只读发布候选冻结检查", line:workflow.freezeGateSummary.userFacingSummary && workflow.freezeGateSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
@@ -673,6 +687,9 @@
       providerCoverageDashboardSummary: workflow.providerCoverageDashboardSummary || safe.providerCoverageDashboardSummary || null,
       readOnlySourceTrustScoreSummary: workflow.readOnlySourceTrustScoreSummary || safe.readOnlySourceTrustScoreSummary || null,
       providerCoverageViewModelSummary: workflow.providerCoverageViewModelSummary || safe.providerCoverageViewModelSummary || null,
+      readOnlyProviderSandboxIntegrationGateSummary: workflow.readOnlyProviderSandboxIntegrationGateSummary || safe.readOnlyProviderSandboxIntegrationGateSummary || null,
+      sandboxPriceCandidateSessionSummary: workflow.sandboxPriceCandidateSessionSummary || safe.sandboxPriceCandidateSessionSummary || null,
+      sandboxPriceCandidateResultBoardSummary: workflow.sandboxPriceCandidateResultBoardSummary || safe.sandboxPriceCandidateResultBoardSummary || null,
       rcReviewStatus: workflow.rcReviewStatus || safe.rcReviewStatus || "",
       rcEvidenceStatus: workflow.rcEvidenceStatus || safe.rcEvidenceStatus || "",
       rcRegressionStatus: workflow.rcRegressionStatus || safe.rcRegressionStatus || "",
@@ -686,7 +703,11 @@
       providerCoverageStatus: workflow.providerCoverageStatus || safe.providerCoverageStatus || "",
       sourceTrustStatus: workflow.sourceTrustStatus || safe.sourceTrustStatus || "",
       providerCoverageViewModelStatus: workflow.providerCoverageViewModelStatus || safe.providerCoverageViewModelStatus || "",
+      providerSandboxIntegrationGateStatus: workflow.providerSandboxIntegrationGateStatus || safe.providerSandboxIntegrationGateStatus || "",
+      sandboxPriceCandidateSessionStatus: workflow.sandboxPriceCandidateSessionStatus || safe.sandboxPriceCandidateSessionStatus || "",
+      sandboxPriceCandidateResultBoardStatus: workflow.sandboxPriceCandidateResultBoardStatus || safe.sandboxPriceCandidateResultBoardStatus || "",
       safeToProceedWithFirstReadOnlyProviderSandboxIntegration: workflow.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true || safe.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true,
+      safeToProceedWithSandboxCandidateUserPreview: workflow.safeToProceedWithSandboxCandidateUserPreview === true || safe.safeToProceedWithSandboxCandidateUserPreview === true,
       pilotOnboardingSummary: workflow.pilotOnboardingSummary,
       readOnlyConsentSummary: workflow.readOnlyConsentSummary,
       pilotOnboardingViewModel: workflow.pilotOnboardingViewModel,

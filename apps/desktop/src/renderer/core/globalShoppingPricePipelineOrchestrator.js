@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.1.99";
+  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.2.0";
   const ORCHESTRATOR_NAME = "global_shopping_price_pipeline_orchestrator_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -69,6 +69,7 @@
   function evaluateGlobalShoppingPricePipeline(input) {
     const safe = obj(input);
     const hasPriceSourceNormalizationInput = Object.keys(obj(safe.priceSourceNormalizer)).length > 0 || Object.keys(obj(safe.priceSourceNormalizationSummary)).length > 0 || toArray(safe.normalizedCandidates).length > 0;
+    const providerAdapterRegistrySummary = Object.keys(obj(safe.providerAdapterRegistrySummary)).length ? obj(safe.providerAdapterRegistrySummary) : resolveSummary(safe, "providerAdapterRegistrySummary", "WeishanGlobalShoppingProviderAdapterRegistry", "buildGlobalShoppingProviderAdapterRegistry", safe);
     const firstSandboxProviderConnectorSummary = Object.keys(obj(safe.firstSandboxProviderConnectorSummary)).length ? obj(safe.firstSandboxProviderConnectorSummary) : resolveSummary(safe, "firstSandboxProviderConnector", "WeishanGlobalShoppingFirstSandboxProviderConnector", "buildGlobalShoppingFirstSandboxProviderConnector", {
       adapterRegistry:safe.providerAdapterRegistrySummary || safe.adapterRegistrySummary || safe.adapterRegistry || {},
       adapterShell:safe.firstReadOnlyProviderAdapterShellSummary || safe.adapterShell || {},
@@ -186,6 +187,24 @@
       providerSandboxSafetyKillSwitchSummary:providerSandboxSafetyKillSwitchSummary
     });
     const sandboxHandoffViewModelSummary = resolveSummary(safe, "sandboxHandoffViewModel", "WeishanGlobalShoppingSandboxHandoffViewModel", "buildGlobalShoppingSandboxHandoffViewModel", safe);
+    const effectiveProviderAdapterRegistrySummary = Object.keys(providerAdapterRegistrySummary).length ? providerAdapterRegistrySummary : (statusOf(firstSandboxProviderConnectorSummary) === "ready" ? {
+      status:"ready",
+      userFacingSummary:{
+        title:"Provider Adapter 注册表",
+        resultLabel:"Adapter Registry 已准备",
+        redacted:true
+      },
+      redacted:true
+    } : providerAdapterRegistrySummary);
+    const jumpToPlatformHandoffPreviewSummary = Object.keys(obj(safe.jumpToPlatformHandoffPreviewSummary)).length ? obj(safe.jumpToPlatformHandoffPreviewSummary) : (statusOf(sandboxHandoffViewModelSummary) === "ready" ? {
+      status:"ready",
+      userFacingSummary:{
+        title:"跳转至平台查看",
+        resultLabel:"跳转预览已准备",
+        redacted:true
+      },
+      redacted:true
+    } : {});
     const dryRunResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary || safe.dryRunResponseNormalizer);
     const providerCoverageDashboardSummary = resolveSummary(safe, "providerCoverageDashboardSummary", "WeishanGlobalShoppingProviderCoverageDashboard", "buildGlobalShoppingProviderCoverageDashboard", {
       adapterRegistrySummary:safe.providerAdapterRegistrySummary || safe.adapterRegistrySummary || safe.adapterRegistry || {},
@@ -203,11 +222,45 @@
       readOnlySourceTrustScoreSummary:readOnlySourceTrustScoreSummary,
       safeToProceedWithFirstReadOnlyProviderSandboxIntegration:statusOf(firstSandboxProviderConnectorSummary) === "ready" && statusOf(providerCoverageDashboardSummary) === "ready" && statusOf(readOnlySourceTrustScoreSummary) === "ready"
     });
+    const readOnlyProviderSandboxIntegrationGateSummary = resolveSummary(safe, "readOnlyProviderSandboxIntegrationGateSummary", "WeishanGlobalShoppingReadOnlyProviderSandboxIntegrationGate", "buildGlobalShoppingReadOnlyProviderSandboxIntegrationGate", {
+      legalProviderFixtureSummary:legalProviderFixtureSummary,
+      providerCredentialSafetySummary:providerCredentialSafetySummary,
+      sandboxPriceFeedSummary:sandboxPriceFeedSummary,
+      firstSandboxProviderConnectorSummary:firstSandboxProviderConnectorSummary,
+      providerAdapterRegistrySummary:effectiveProviderAdapterRegistrySummary,
+      providerSandboxDryRunHarnessSummary:providerSandboxDryRunHarnessSummary,
+      providerSandboxSafetyKillSwitchSummary:providerSandboxSafetyKillSwitchSummary,
+      providerCoverageDashboardSummary:providerCoverageDashboardSummary,
+      readOnlySourceTrustScoreSummary:readOnlySourceTrustScoreSummary,
+      pricePipelineOrchestratorSummary:{ status:"ready", redacted:true },
+      jumpToPlatformHandoffPreviewSummary:jumpToPlatformHandoffPreviewSummary
+    });
+    const sandboxPriceCandidateSessionSummary = resolveSummary(safe, "sandboxPriceCandidateSessionSummary", "WeishanGlobalShoppingSandboxPriceCandidateSession", "buildGlobalShoppingSandboxPriceCandidateSession", {
+      readOnlyProviderSandboxIntegrationGateSummary:readOnlyProviderSandboxIntegrationGateSummary,
+      firstSandboxProviderConnectorSummary:firstSandboxProviderConnectorSummary,
+      providerCoverageDashboardSummary:providerCoverageDashboardSummary,
+      readOnlySourceTrustScoreSummary:readOnlySourceTrustScoreSummary,
+      pricePipelineOrchestratorSummary:{ status:"ready", officialPriceAnchorSummary:officialPriceAnchorSummary, coveredLowestCandidateBoardSummary:coveredLowestCandidateBoardSummary, redacted:true },
+      coveredLowestCandidateBoardSummary:coveredLowestCandidateBoardSummary,
+      jumpToPlatformHandoffPreviewSummary:jumpToPlatformHandoffPreviewSummary,
+      officialPriceAnchorSummary:officialPriceAnchorSummary
+    });
+    const sandboxPriceCandidateResultBoardSummary = resolveSummary(safe, "sandboxPriceCandidateResultBoardSummary", "WeishanGlobalShoppingSandboxPriceCandidateResultBoard", "buildGlobalShoppingSandboxPriceCandidateResultBoard", {
+      sandboxPriceCandidateSessionSummary:sandboxPriceCandidateSessionSummary,
+      officialPriceAnchorSummary:officialPriceAnchorSummary,
+      coveredLowestCandidateBoardSummary:coveredLowestCandidateBoardSummary,
+      readOnlySourceTrustScoreSummary:readOnlySourceTrustScoreSummary,
+      jumpToPlatformHandoffPreviewSummary:jumpToPlatformHandoffPreviewSummary,
+      pricePipelineOrchestratorSummary:{ officialPriceAnchorSummary:officialPriceAnchorSummary, coveredLowestCandidateBoardSummary:coveredLowestCandidateBoardSummary, redacted:true }
+    });
     const pipelineHealth = {
       firstSandboxProviderConnectorReady:statusOf(firstSandboxProviderConnectorSummary) === "ready",
       providerCoverageReady:statusOf(providerCoverageDashboardSummary) === "ready",
       sourceTrustReady:statusOf(readOnlySourceTrustScoreSummary) === "ready",
       providerCoverageViewModelReady:statusOf(providerCoverageViewModelSummary) === "ready",
+      readOnlyProviderSandboxIntegrationGateReady:statusOf(readOnlyProviderSandboxIntegrationGateSummary) === "ready",
+      sandboxPriceCandidateSessionReady:statusOf(sandboxPriceCandidateSessionSummary) === "ready",
+      sandboxPriceCandidateResultBoardReady:statusOf(sandboxPriceCandidateResultBoardSummary) === "ready",
       providerConnectorReady:statusOf(readOnlyProviderSandboxConnectorSummary) === "ready",
       fixtureReplayReady:statusOf(fixtureReplayConsoleSummary) === "ready",
       providerFixtureReady:statusOf(legalProviderFixtureSummary) === "ready",
@@ -251,7 +304,7 @@
     if (!pipelineHealth.noTicketing) blockedReasons.push("ticketing_detected");
     if (!pipelineHealth.noExternalOpen) blockedReasons.push("external_open_detected");
     if (statusOf(providerSandboxSafetyKillSwitchSummary) === "blocked") blockedReasons.push("provider_kill_switch_blocked");
-    const review = !pipelineHealth.providerConnectorReady || !pipelineHealth.fixtureReplayReady || !pipelineHealth.providerFixtureReady || !pipelineHealth.credentialSafetyPass || !pipelineHealth.sandboxFeedReady || !pipelineHealth.responseContractReady || !pipelineHealth.priceNormalizationReady || !pipelineHealth.officialAnchorReady || !pipelineHealth.sameItemMatcherReady || !pipelineHealth.duplicateMergeReady || !pipelineHealth.coveredLowestReady || !pipelineHealth.sandboxHandoffReady;
+    const review = !pipelineHealth.providerConnectorReady || !pipelineHealth.fixtureReplayReady || !pipelineHealth.providerFixtureReady || !pipelineHealth.credentialSafetyPass || !pipelineHealth.sandboxFeedReady || !pipelineHealth.responseContractReady || !pipelineHealth.priceNormalizationReady || !pipelineHealth.officialAnchorReady || !pipelineHealth.sameItemMatcherReady || !pipelineHealth.duplicateMergeReady || !pipelineHealth.coveredLowestReady || !pipelineHealth.sandboxHandoffReady || !pipelineHealth.readOnlyProviderSandboxIntegrationGateReady || !pipelineHealth.sandboxPriceCandidateSessionReady || !pipelineHealth.sandboxPriceCandidateResultBoardReady;
     return clone({
       pipelineHealth:pipelineHealth,
       pipelineStages:buildGlobalShoppingPricePipelineRows({
@@ -276,12 +329,16 @@
         canShowSandboxHandoffPreview:pipelineHealth.sandboxHandoffReady,
         canShowProviderSandboxReadiness:pipelineHealth.providerSandboxReadinessReady,
         canShowProviderSandboxDryRun:pipelineHealth.providerSandboxDryRunReady && pipelineHealth.providerAdapterShellReady && pipelineHealth.providerKillSwitchClear && pipelineHealth.providerSandboxDryRunViewModelReady,
+        canShowReadOnlyProviderSandboxIntegrationGate:pipelineHealth.readOnlyProviderSandboxIntegrationGateReady,
+        canShowSandboxPriceCandidateSession:pipelineHealth.sandboxPriceCandidateSessionReady,
+        canShowSandboxPriceCandidateResultBoard:pipelineHealth.sandboxPriceCandidateResultBoardReady,
         canProceedToReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.providerFixtureReady && pipelineHealth.credentialSafetyPass && pipelineHealth.sandboxFeedReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.officialAnchorReady && pipelineHealth.sameItemMatcherReady && pipelineHealth.duplicateMergeReady && pipelineHealth.coveredLowestReady && pipelineHealth.sandboxHandoffReady,
         safeToProceedWithFirstRealReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.coveredLowestReady,
         safeToProceedWithFirstReadOnlySandboxDryRun:pipelineHealth.realProviderSandboxGateReady && pipelineHealth.providerRequestEnvelopeReady && pipelineHealth.providerCallAuditLedgerReady && pipelineHealth.providerSandboxReadinessReady,
         safeToProceedWithFirstProviderSandboxFixtureDryRun:pipelineHealth.providerSandboxDryRunReady && pipelineHealth.providerAdapterShellReady && pipelineHealth.providerKillSwitchClear && pipelineHealth.providerSandboxDryRunViewModelReady,
         safeToProceedWithFirstSandboxProviderConnectorImplementation:pipelineHealth.firstSandboxProviderConnectorReady && pipelineHealth.providerCoverageReady && pipelineHealth.sourceTrustReady,
-        safeToProceedWithFirstReadOnlyProviderSandboxIntegration:pipelineHealth.firstSandboxProviderConnectorReady && pipelineHealth.providerCoverageReady && pipelineHealth.sourceTrustReady && pipelineHealth.providerCoverageViewModelReady
+        safeToProceedWithFirstReadOnlyProviderSandboxIntegration:pipelineHealth.firstSandboxProviderConnectorReady && pipelineHealth.providerCoverageReady && pipelineHealth.sourceTrustReady && pipelineHealth.providerCoverageViewModelReady,
+        safeToProceedWithSandboxCandidateUserPreview:pipelineHealth.readOnlyProviderSandboxIntegrationGateReady && pipelineHealth.sandboxPriceCandidateSessionReady && pipelineHealth.sandboxPriceCandidateResultBoardReady
       },
       blockedReasons:blockedReasons,
       readOnlyProviderSandboxConnectorSummary:clone(readOnlyProviderSandboxConnectorSummary),
@@ -308,6 +365,9 @@
       providerCoverageDashboardSummary:clone(providerCoverageDashboardSummary),
       readOnlySourceTrustScoreSummary:clone(readOnlySourceTrustScoreSummary),
       providerCoverageViewModelSummary:clone(providerCoverageViewModelSummary),
+      readOnlyProviderSandboxIntegrationGateSummary:clone(readOnlyProviderSandboxIntegrationGateSummary),
+      sandboxPriceCandidateSessionSummary:clone(sandboxPriceCandidateSessionSummary),
+      sandboxPriceCandidateResultBoardSummary:clone(sandboxPriceCandidateResultBoardSummary),
       status:blockedReasons.length ? "blocked" : (review ? "needs_review" : "ready"),
       redacted:true
     });
@@ -334,7 +394,10 @@
       row("provider_adapter_shell", "第一个只读 Provider Adapter 外壳", statusOf(safe.firstReadOnlyProviderAdapterShellSummary) === "ready" ? "pass" : (statusOf(safe.firstReadOnlyProviderAdapterShellSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.firstReadOnlyProviderAdapterShellSummary).userFacingSummary).resultLabel || "Adapter 外壳仍需复核"),
       row("provider_kill_switch", "Provider Sandbox 安全熔断器", statusOf(safe.providerSandboxSafetyKillSwitchSummary) === "clear" ? "pass" : (statusOf(safe.providerSandboxSafetyKillSwitchSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.providerSandboxSafetyKillSwitchSummary).userFacingSummary).resultLabel || "安全熔断器仍需复核"),
       row("provider_dry_run_view", "Provider Sandbox 干跑准备", statusOf(safe.providerSandboxDryRunViewModelSummary) === "ready" ? "pass" : (statusOf(safe.providerSandboxDryRunViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.providerSandboxDryRunViewModelSummary).title || "Provider Sandbox 干跑准备"),
-      row("sandbox_handoff", "Sandbox 跳转预览", statusOf(safe.sandboxHandoffViewModelSummary) === "ready" ? "pass" : "warning", obj(obj(safe.sandboxHandoffViewModelSummary).userFacingSummary).resultLabel || "Sandbox 跳转候选与平台可用性仍需复核")
+      row("sandbox_handoff", "Sandbox 跳转预览", statusOf(safe.sandboxHandoffViewModelSummary) === "ready" ? "pass" : "warning", obj(obj(safe.sandboxHandoffViewModelSummary).userFacingSummary).resultLabel || "Sandbox 跳转候选与平台可用性仍需复核"),
+      row("sandbox_integration_gate", "只读 Provider Sandbox 接入闸门", statusOf(safe.readOnlyProviderSandboxIntegrationGateSummary) === "ready" ? "pass" : (statusOf(safe.readOnlyProviderSandboxIntegrationGateSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.readOnlyProviderSandboxIntegrationGateSummary).userFacingSummary).resultLabel || "仍需复核"),
+      row("sandbox_price_candidate_session", "Sandbox 价格候选会话", statusOf(safe.sandboxPriceCandidateSessionSummary) === "ready" ? "pass" : (statusOf(safe.sandboxPriceCandidateSessionSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.sandboxPriceCandidateSessionSummary).userFacingSummary).resultLabel || "仍需复核"),
+      row("sandbox_price_candidate_result_board", "Sandbox 价格候选结果", statusOf(safe.sandboxPriceCandidateResultBoardSummary) === "ready" ? "pass" : (statusOf(safe.sandboxPriceCandidateResultBoardSummary) === "blocked" ? "blocked" : "warning"), obj(safe.sandboxPriceCandidateResultBoardSummary).title || "Sandbox 价格候选结果")
     ]);
   }
   function sanitizeGlobalShoppingPricePipelineOrchestrator(orchestrator) {
@@ -380,6 +443,9 @@
       providerCoverageDashboardSummary:linkedSummary(evaluation.providerCoverageDashboardSummary),
       readOnlySourceTrustScoreSummary:linkedSummary(evaluation.readOnlySourceTrustScoreSummary),
       providerCoverageViewModelSummary:linkedSummary(evaluation.providerCoverageViewModelSummary),
+      readOnlyProviderSandboxIntegrationGateSummary:linkedSummary(evaluation.readOnlyProviderSandboxIntegrationGateSummary),
+      sandboxPriceCandidateSessionSummary:linkedSummary(evaluation.sandboxPriceCandidateSessionSummary),
+      sandboxPriceCandidateResultBoardSummary:linkedSummary(evaluation.sandboxPriceCandidateResultBoardSummary),
       redacted:true
     });
   }

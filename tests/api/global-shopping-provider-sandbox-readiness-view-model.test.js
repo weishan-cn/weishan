@@ -21,7 +21,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderSandboxReadinessViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderSandboxReadinessViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_READINESS_VIEW_MODEL_VERSION, "2.1.99");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_READINESS_VIEW_MODEL_VERSION, "2.2.0");
 
   const gate = windowRef.WeishanGlobalShoppingReadOnlyRealProviderSandboxGate.buildGlobalShoppingReadOnlyRealProviderSandboxGate({
     readOnlyProviderSandboxConnectorSummary:{ status:"ready" }, fixtureReplayConsoleSummary:{ status:"ready" }, normalizedPriceCandidateBoardSummary:{ status:"ready" }, providerResponseContractSummary:{ status:"ready" }, pricePipelineOrchestratorSummary:{ status:"ready" }, providerCredentialSafetySummary:{ status:"ready" }, sandboxPriceFeedSummary:{ status:"ready" }
@@ -30,7 +30,7 @@ function main() {
   const ledger = windowRef.WeishanGlobalShoppingProviderCallAuditLedger.buildGlobalShoppingProviderCallAuditLedger({ auditEntries:[{ auditId:"audit_1", providerId:"provider_1", requestMode:"sandbox_ready", callStatus:"dry_run", redacted:true, timestamp:"redacted_now", safetyStatus:"redacted_safe" }] });
 
   const ready = api.buildGlobalShoppingProviderSandboxReadinessViewModel({ realProviderSandboxGateSummary:gate, providerRequestEnvelopeSummary:envelope, providerCallAuditLedgerSummary:ledger });
-  assert.equal(ready.appVersion, "2.1.99");
+  assert.equal(ready.appVersion, "2.2.0");
   assert.equal(ready.status, "ready");
   assert.equal(ready.title, "真实只读 Provider Sandbox 准备");
   assert.equal(ready.cards.length, 4);

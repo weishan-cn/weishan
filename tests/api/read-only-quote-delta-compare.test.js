@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteDeltaCompare.js"]);
   const api = windowRef.WeishanReadOnlyQuoteDeltaCompare;
-  assert.equal(api.READ_ONLY_QUOTE_DELTA_COMPARE_VERSION, "2.1.99");
+  assert.equal(api.READ_ONLY_QUOTE_DELTA_COMPARE_VERSION, "2.2.0");
   const delta = api.compareReadOnlyQuoteRuns({ runId:"r1", topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:1000 }] }, { runId:"r2", topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:930 }] });
   assert.equal(delta.status, "compared");
   assert.equal(delta.claim, "仅比较本地只读沙盒运行结果");

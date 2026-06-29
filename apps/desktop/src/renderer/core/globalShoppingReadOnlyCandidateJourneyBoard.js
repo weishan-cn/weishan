@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_READ_ONLY_CANDIDATE_JOURNEY_BOARD_VERSION = "2.1.99";
+  const GLOBAL_SHOPPING_READ_ONLY_CANDIDATE_JOURNEY_BOARD_VERSION = "2.2.0";
   const BOARD_NAME = "global_shopping_read_only_candidate_journey_board_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -186,11 +186,17 @@
     const providerSandboxReadiness = obj(safe.providerSandboxReadinessViewModelSummary || pipeline.providerSandboxReadinessViewModelSummary);
     const sandboxHandoff = obj(safe.sandboxHandoffViewModelSummary || pipeline.sandboxHandoffViewModelSummary);
     const providerFixture = obj(safe.legalProviderFixtureSummary || pipeline.legalProviderFixtureSummary);
+    const hasJourneyInput = Object.keys(obj(safe.pricePipelineOrchestratorSummary)).length ||
+      Object.keys(obj(safe.readOnlyProviderSandboxConnectorSummary)).length ||
+      Object.keys(obj(safe.fixtureReplayConsoleSummary)).length ||
+      Object.keys(obj(safe.legalProviderFixtureSummary)).length ||
+      Object.keys(obj(safe.coveredLowestCandidateBoardSummary)).length ||
+      Object.keys(obj(safe.sandboxHandoffViewModelSummary)).length;
     const displayCopy = collectDisplayCopy(safe);
     const forbiddenCopy = /全网最低|最低价保证|锁价|真实最终价|立即购买|直接下单|一键下单|一键出票/i.test(displayCopy);
     const unsafe = forbiddenCopy || hasUnsafeBoundary(safe) || hasUnsafeBoundary(pipeline) || hasUnsafeBoundary(connectorSummary) || hasUnsafeBoundary(replaySummary) || hasUnsafeBoundary(coveredLowest) || hasUnsafeBoundary(providerSandboxReadiness) || hasUnsafeBoundary(sandboxHandoff) || hasUnsafeBoundary(providerFixture);
     const blocked = statusOf(pipeline) === "blocked" || statusOf(connectorSummary) === "blocked" || statusOf(replaySummary) === "blocked" || statusOf(providerSandboxReadiness) === "blocked" || unsafe;
-    const needsReview = !blocked && (!Object.keys(pipeline).length || !Object.keys(connectorSummary).length || !Object.keys(replaySummary).length || !Object.keys(providerFixture).length || !Object.keys(coveredLowest).length || !Object.keys(providerSandboxReadiness).length || !Object.keys(sandboxHandoff).length || statusOf(pipeline) === "needs_review");
+    const needsReview = !blocked && (!hasJourneyInput || !Object.keys(pipeline).length || !Object.keys(connectorSummary).length || !Object.keys(replaySummary).length || !Object.keys(providerFixture).length || !Object.keys(coveredLowest).length || !Object.keys(sandboxHandoff).length);
     const status = /^(ready|needs_review|blocked|failed_safe)$/.test(text(safe.status)) ? text(safe.status) : (blocked ? "blocked" : (needsReview ? "needs_review" : "ready"));
     return clone({
       boardName:BOARD_NAME,

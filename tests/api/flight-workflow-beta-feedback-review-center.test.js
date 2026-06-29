@@ -10,7 +10,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowBetaFeedbackReviewCenter.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowBetaFeedbackReviewCenter;
-  assert.equal(api.FLIGHT_WORKFLOW_BETA_FEEDBACK_REVIEW_CENTER_VERSION, "2.1.99");
+  assert.equal(api.FLIGHT_WORKFLOW_BETA_FEEDBACK_REVIEW_CENTER_VERSION, "2.2.0");
   const ready = api.buildFlightWorkflowBetaFeedbackReviewCenter({ feedback:{ usabilityRating:"good", clarityRating:"good", safetyCopyUnderstood:true, userComment:"token abc https://blocked.example" } });
   assert.equal(ready.reviewCenterName, "flight_workflow_beta_feedback_review_center_v1");
   assert.equal(ready.status, "ready");

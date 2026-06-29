@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderCoverageDashboard.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderCoverageDashboard;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_COVERAGE_DASHBOARD_VERSION, "2.1.99");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_COVERAGE_DASHBOARD_VERSION, "2.2.0");
 
   const ready = api.buildGlobalShoppingProviderCoverageDashboard({
     adapterRegistrySummary:{
