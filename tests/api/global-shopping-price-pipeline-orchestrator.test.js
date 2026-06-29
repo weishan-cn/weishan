@@ -45,11 +45,15 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingReadOnlyPlatformHandoffSimulator.js",
     "apps/desktop/src/renderer/core/globalShoppingRedactedSearchParameterPack.js",
     "apps/desktop/src/renderer/core/globalShoppingUserConfirmationChecklist.js",
+    "apps/desktop/src/renderer/core/globalShoppingReadOnlyHandoffPacketPreview.js",
+    "apps/desktop/src/renderer/core/globalShoppingPlatformPreflightSafetyGate.js",
+    "apps/desktop/src/renderer/core/globalShoppingUserActionBoundaryReceipt.js",
+    "apps/desktop/src/renderer/core/globalShoppingHandoffPacketViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingPlatformHandoffSimulationViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.2.3");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.2.4");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -144,10 +148,10 @@ function main() {
     },
     sandboxDecisionReviewViewModelSummary:{ status:"ready", title:"Sandbox 候选决策复核", redacted:true }
   });
-  assert.equal(ready.appVersion, "2.2.3");
+  assert.equal(ready.appVersion, "2.2.4");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "只读价格流水线已准备");
-  assert.equal(ready.pipelineStages.length, 35);
+  assert.equal(ready.pipelineStages.length, 39);
   assert.equal(ready.readyOutputs.canShowFixtureCandidatePrices, true);
   assert.equal(ready.readyOutputs.canShowFixtureReplay, true);
   assert.equal(ready.readyOutputs.canShowOfficialAnchor, true);
@@ -175,11 +179,16 @@ function main() {
   assert.equal(ready.redactedSearchParameterPackSummary.userFacingSummary.title, "脱敏搜索参数包");
   assert.equal(ready.userConfirmationChecklistSummary.userFacingSummary.title, "用户确认清单");
   assert.equal(ready.platformHandoffSimulationViewModelSummary.title, "只读平台交接模拟");
+  assert.equal(ready.readOnlyHandoffPacketPreviewSummary.userFacingSummary.title, "只读交接包预览");
+  assert.equal(ready.platformPreflightSafetyGateSummary.userFacingSummary.title, "平台跳转前安全预检");
+  assert.equal(ready.userActionBoundaryReceiptSummary.userFacingSummary.title, "用户行动边界回执");
+  assert.equal(ready.handoffPacketViewModelSummary.title, "只读交接包与安全预检");
   assert.equal(ready.readyOutputs.safeToProceedWithFirstSandboxProviderConnectorImplementation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithFirstReadOnlyProviderSandboxIntegration, true);
   assert.equal(ready.readyOutputs.safeToProceedWithSandboxCandidateUserPreview, true);
   assert.equal(ready.readyOutputs.safeToProceedWithSandboxDecisionReview, true);
   assert.equal(ready.readyOutputs.safeToProceedWithUserFacingHandoffExplanation, true);
+  assert.equal(ready.readyOutputs.safeToProceedWithManualPlatformReview, true);
 
   assert.equal(api.buildGlobalShoppingPricePipelineOrchestrator({
     providerCredentialSafetyReview:{ status:"ready" },

@@ -1,9 +1,9 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_EVIDENCE_WORKFLOW_ORCHESTRATOR_VERSION = "2.2.3";
+  const FLIGHT_EVIDENCE_WORKFLOW_ORCHESTRATOR_VERSION = "2.2.4";
   const ORCHESTRATOR_NAME = "flight_evidence_workflow_orchestrator_v1";
-  const WORKFLOW_ID = "deterministic-flight-evidence-workflow-v2.2.3";
+  const WORKFLOW_ID = "deterministic-flight-evidence-workflow-v2.2.4";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value == null ? "" : value).trim(); }

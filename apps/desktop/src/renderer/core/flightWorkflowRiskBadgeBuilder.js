@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.2.3";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.2.4";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -337,6 +337,13 @@
       if (userConfirmationChecklistSummary.status) badges.push(badge("user_confirms_realtime_price", "用户必须在平台自行确认实时价格", "warning"));
       if (platformHandoffSimulationViewModelSummary.status || readOnlyPlatformHandoffSimulatorSummary.status) badges.push(badge("handoff_no_login_payment_order_ticket", "Weishan 不替用户登录、付款、下单或出票", "warning"));
       if (readOnlyPlatformHandoffSimulatorSummary.status || platformHandoffSimulationViewModelSummary.status) badges.push(badge("handoff_simulator_no_open", "交接模拟不打开平台", "info"));
+      if (safe.readOnlyHandoffPacketPreviewSummary && safe.readOnlyHandoffPacketPreviewSummary.status === "ready") badges.push(badge("handoff_packet_preview_ready", "只读交接包预览已准备", "info"));
+      if (safe.platformPreflightSafetyGateSummary && safe.platformPreflightSafetyGateSummary.status === "clear") badges.push(badge("platform_preflight_gate_clear", "平台跳转前安全预检未触发阻断", "info"));
+      if (safe.userActionBoundaryReceiptSummary && safe.userActionBoundaryReceiptSummary.status === "ready") badges.push(badge("user_action_boundary_receipt_ready", "用户行动边界回执已准备", "info"));
+      if (safe.handoffPacketViewModelSummary && safe.handoffPacketViewModelSummary.status) badges.push(badge("handoff_packet_no_export", "交接包不导出、不下载、不上传", "warning"));
+      if (safe.platformPreflightSafetyGateSummary && safe.platformPreflightSafetyGateSummary.status) badges.push(badge("preflight_no_open", "安全预检不打开平台", "info"));
+      if (safe.userActionBoundaryReceiptSummary && safe.userActionBoundaryReceiptSummary.status) badges.push(badge("boundary_receipt_not_order", "回执不是订单、合同或付款授权", "warning"));
+      if (safe.handoffPacketViewModelSummary && safe.handoffPacketViewModelSummary.status) badges.push(badge("user_final_confirmation_required", "用户必须在平台自行完成最终确认", "warning"));
       if (normalizedPriceCandidateBoardSummary.status || pricePipelineOrchestratorSummary.status) badges.push(badge("normalized_candidate_not_real_price", "归一化候选不代表真实价格", "warning"));
       if (normalizedPriceCandidateBoardSummary.status || readOnlyCandidateJourneySummary.status) badges.push(badge("normalized_candidate_not_ordering", "价格候选板不代表下单能力", "warning"));
       if (sandboxHandoffViewModelSummary.status === "ready") badges.push(badge("sandbox_handoff_ready", "Sandbox 跳转候选与平台可用性已准备", "info"));

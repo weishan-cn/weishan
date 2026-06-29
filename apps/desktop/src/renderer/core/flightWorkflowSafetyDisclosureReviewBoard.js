@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SAFETY_DISCLOSURE_REVIEW_BOARD_VERSION = "2.2.3";
+  const FLIGHT_WORKFLOW_SAFETY_DISCLOSURE_REVIEW_BOARD_VERSION = "2.2.4";
   const BOARD_NAME = "flight_workflow_safety_disclosure_review_board_v1";
   const CAVEAT = "该复核板只检查只读 RC 安全披露，不代表真实交易、订单、客服工单或出票能力。";
 

@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderCoverageViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderCoverageViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_COVERAGE_VIEW_MODEL_VERSION, "2.2.3");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_COVERAGE_VIEW_MODEL_VERSION, "2.2.4");
 
   const ready = api.buildGlobalShoppingProviderCoverageViewModel({
     firstSandboxProviderConnectorSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox Connector 已准备", redacted:true }, rows:[{ rowId:"connector", label:"Connector", value:"ready", status:"pass", redacted:true }] },

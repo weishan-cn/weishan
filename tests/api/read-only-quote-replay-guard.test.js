@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteReplayGuard.js"]);
   const api = windowRef.WeishanReadOnlyQuoteReplayGuard;
-  assert.equal(api.READ_ONLY_QUOTE_REPLAY_GUARD_VERSION, "2.2.3");
+  assert.equal(api.READ_ONLY_QUOTE_REPLAY_GUARD_VERSION, "2.2.4");
   const replay = api.replayLastReadOnlyQuoteRun({ history:[{ runId:"r1", topCandidates:[{ quoteId:"q1", providerName:"A" }] }] });
   assert.equal(replay.status, "available");
   assert.equal(replay.sessionEventPayload.eventType, "REPLAY_COMPLETED");

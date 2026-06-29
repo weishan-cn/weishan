@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_READ_ONLY_REAL_PROVIDER_SANDBOX_GATE_VERSION = "2.2.3";
+  const GLOBAL_SHOPPING_READ_ONLY_REAL_PROVIDER_SANDBOX_GATE_VERSION = "2.2.4";
   const GATE_NAME = "global_shopping_read_only_real_provider_sandbox_gate_v1";
   const RESULT_LABELS = {
     ready:"可以准备只读 Provider Sandbox",

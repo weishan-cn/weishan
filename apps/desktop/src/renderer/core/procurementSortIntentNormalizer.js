@@ -1,5 +1,5 @@
 (function(){
-  const PROCUREMENT_SORT_INTENT_NORMALIZER_VERSION = "2.2.3";
+  const PROCUREMENT_SORT_INTENT_NORMALIZER_VERSION = "2.2.4";
   const DIRECT_RE = /直达|直飞|不转机|不中转|不要中转|只看直飞/;
   const LOW_PRICE_RE = /最便宜|最低价|价格低|低价优先|便宜/;
   const FAST_RE = /最快|时间短|耗时短|少耗时/;

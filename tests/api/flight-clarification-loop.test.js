@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightClarificationLoop.js"]);
   const api = windowRef.WeishanFlightClarificationLoop;
-  assert.equal(api.FLIGHT_CLARIFICATION_LOOP_VERSION, "2.2.3");
+  assert.equal(api.FLIGHT_CLARIFICATION_LOOP_VERSION, "2.2.4");
   const prompt = api.buildFlightClarificationPrompt({ status:"needs_clarification", route:{ destinationCity:"成都" }, departureDate:"" });
   assert.equal(prompt.status, "needs_answer");
   assert.deepEqual(Array.from(prompt.questions), ["从哪里出发？", "哪一天出发？"]);

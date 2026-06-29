@@ -9713,12 +9713,58 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary.getByRole("button", { name:/^(付款|下单|提交订单|出票|上传证件|上传银行卡)$/ })).toHaveCount(0);
   });
 
-  test("v2.1.68 safe handoff checklist and receipt cancel keeps platform closed @commerce-smoke", async () => {
+  test("v2.1.68 safe handoff checklist and receipt cancel keeps platform closed @commerce-ui-regression", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2157-EVIDENCE 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("平台最终为准", { timeout:15000 });
     await expect(summary).not.toContainText(/付款\/下单\/出票入口|立即购买|直接下单|一键出票/);
+    expect(await latestOpenExternalUrl(page)).toBe("");
+  });
+
+  test("v2.2.4 read-only handoff packet preview stays local and bounded @commerce-smoke", async () => {
+    await resetCommerceTasks(page);
+    await installOpenExternalMock(page);
+    await page.waitForFunction(() => !!(
+      window.WeishanGlobalShoppingReadOnlyHandoffPacketPreview &&
+      window.WeishanGlobalShoppingPlatformPreflightSafetyGate &&
+      window.WeishanGlobalShoppingUserActionBoundaryReceipt &&
+      window.WeishanGlobalShoppingHandoffPacketViewModel &&
+      window.WeishanReadOnlyPriceCandidateCardViewModel
+    ), null, { timeout:15000 });
+    const v224 = await page.evaluate(() => {
+      const cardApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
+      const host = document.createElement("section");
+      host.setAttribute("data-commerce-v224-render-smoke", "true");
+      host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml({});
+      const section = host.querySelector("[data-commerce-global-shopping-handoff-packet-preview='true']");
+      document.body.appendChild(host);
+      return {
+        text:host.innerText,
+        html:host.innerHTML,
+        sectionText:section ? section.innerText : "",
+        sectionHtml:section ? section.innerHTML : "",
+        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-handoff-packet-preview='true']").length,
+        packetButtonCount:host.querySelectorAll("[data-commerce-global-shopping-handoff-packet-preview-show]").length,
+        preflightButtonCount:host.querySelectorAll("[data-commerce-global-shopping-platform-preflight-gate-show]").length,
+        receiptButtonCount:host.querySelectorAll("[data-commerce-global-shopping-user-action-boundary-receipt-show]").length
+      };
+    });
+    expect(v224.sectionCount).toBe(1);
+    expect(v224.packetButtonCount).toBe(1);
+    expect(v224.preflightButtonCount).toBe(1);
+    expect(v224.receiptButtonCount).toBe(1);
+    expect(v224.text).toContain("只读交接包与安全预检");
+    expect(v224.text).toContain("只读交接包预览已准备");
+    expect(v224.text).toContain("平台跳转前安全预检未触发阻断");
+    expect(v224.text).toContain("用户行动边界回执已准备");
+    expect(v224.text).toContain("交接包不导出、不下载、不上传");
+    expect(v224.text).toContain("安全预检不打开平台");
+    expect(v224.text).toContain("回执不是订单、合同或付款授权");
+    expect(v224.text).toContain("用户必须在平台自行完成最终确认");
+    expect(v224.text).toContain("当前只展示只读交接包、安全预检和行动边界");
+    expect(v224.sectionText).not.toMatch(/立即购买|直接下单|一键下单|一键出票|paymentUrl|orderUrl|checkoutUrl/);
+    expect(v224.sectionHtml).not.toMatch(/https?:\/\//i);
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
