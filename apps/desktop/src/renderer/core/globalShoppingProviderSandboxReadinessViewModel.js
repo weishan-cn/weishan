@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_SANDBOX_READINESS_VIEW_MODEL_VERSION = "2.1.96";
+  const GLOBAL_SHOPPING_PROVIDER_SANDBOX_READINESS_VIEW_MODEL_VERSION = "2.1.97";
   const VIEW_MODEL_NAME = "global_shopping_provider_sandbox_readiness_view_model_v1";
   const CAVEAT = "当前仅准备真实只读 provider sandbox 的请求封装和审计结构，不发送请求，不读取真实密钥，不保存 raw response。";
 

@@ -30,6 +30,14 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingReadOnlyProviderSandboxConnector.js",
     "apps/desktop/src/renderer/core/globalShoppingFixtureReplayConsole.js",
     "apps/desktop/src/renderer/core/globalShoppingNormalizedPriceCandidateBoard.js",
+    "apps/desktop/src/renderer/core/globalShoppingReadOnlyRealProviderSandboxGate.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderRequestEnvelopeBuilder.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderCallAuditLedger.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderSandboxReadinessViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderSandboxSafetyKillSwitch.js",
+    "apps/desktop/src/renderer/core/globalShoppingFirstReadOnlyProviderAdapterShell.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderSandboxDryRunHarness.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderSandboxDryRunViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingLegalProviderFixtureAdapter.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderCredentialSafetyReview.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxPriceFeedGate.js",
@@ -57,13 +65,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.1.96");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.1.97");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "2.1.96");
+  assert.equal(ready.appVersion, "2.1.97");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -126,6 +134,8 @@ function main() {
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({ providerFixture:legalProviderFixture, credentialSafetyReview:credentialSafety, sandboxPriceFeedGate:sandboxPriceFeed, normalizedSourceInputs:legalProviderFixture.normalizedSourceInputs, officialFixturePrice:{ title:"SHA-CTU", basePrice:900 }, partnerFixturePrices:[{ title:"Partner Fixture", basePrice:899 }] });
   const providerFixtureVm = windowRef.WeishanGlobalShoppingProviderFixtureViewModel.buildGlobalShoppingProviderFixtureViewModel({ legalProviderFixtureSummary:legalProviderFixture, providerCredentialSafetySummary:credentialSafety, sandboxPriceFeedSummary:sandboxPriceFeed });
   const goalView = windowRef.WeishanGlobalShoppingProductGoalViewModel.buildGlobalShoppingProductGoalViewModel({ globalShoppingProductGoalSummary:globalGoal, jumpToPlatformBoundarySummary:jumpBoundary });
+  const connector = windowRef.WeishanGlobalShoppingReadOnlyProviderSandboxConnector.buildGlobalShoppingReadOnlyProviderSandboxConnector({ providerFixture:legalProviderFixture, providerCredentialSafetyReview:credentialSafety, sandboxPriceFeedGate:sandboxPriceFeed, providerResponseContract:responseContract, connectorMode:"fixture", fixturePayload:{ providerId:"provider_1", providerName:"Fixture Provider", redacted:true } });
+  const replay = windowRef.WeishanGlobalShoppingFixtureReplayConsole.buildGlobalShoppingFixtureReplayConsole({ connectorSummary:connector, replayPayload:{ replayId:"fixture_replay_report_center", replayMode:"fixture", providerId:"provider_1", providerName:"Fixture Provider", redacted:true } });
   const normalizer = windowRef.WeishanGlobalShoppingPriceSourceNormalizer.buildGlobalShoppingPriceSourceNormalizer();
   const sameItemMatcher = windowRef.WeishanGlobalShoppingSameItemMatcher.buildGlobalShoppingSameItemMatcher({ priceSourceNormalizationSummary:normalizer });
   const merger = windowRef.WeishanGlobalShoppingDuplicateCandidateMerger.buildGlobalShoppingDuplicateCandidateMerger({ sameItemMatcherSummary:sameItemMatcher });
@@ -138,13 +148,32 @@ function main() {
   const sandbox = windowRef.WeishanGlobalShoppingSandboxDeepLinkCandidate.buildGlobalShoppingSandboxDeepLinkCandidate({ sourceName:"Sandbox Platform", sourceType:"major_platform", allowedDomain:"sandbox.platform.invalid", itemType:"flight", searchParameterPrefillSummary:prefill, partnerLinkPolicySummary:partner, platformAvailabilitySummary:availability });
   const preview = windowRef.WeishanGlobalShoppingJumpToPlatformHandoffPreview.buildGlobalShoppingJumpToPlatformHandoffPreview({ externalDeepLinkSafetySummary:deepLink, searchParameterPrefillSummary:prefill, sandboxDeepLinkCandidateSummary:sandbox, platformAvailabilitySummary:availability, partnerLinkPolicySummary:partner });
   const sandboxVm = windowRef.WeishanGlobalShoppingSandboxHandoffViewModel.buildGlobalShoppingSandboxHandoffViewModel({ sandboxDeepLinkCandidateSummary:sandbox, platformAvailabilitySummary:availability, partnerLinkPolicySummary:partner });
-  const pipeline = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator.buildGlobalShoppingPricePipelineOrchestrator({ legalProviderFixtureSummary:legalProviderFixture, providerCredentialSafetyReview:credentialSafety, sandboxPriceFeedGate:sandboxPriceFeed, sandboxProviderResponseContract:responseContract, priceSourceNormalizer:normalizer, officialPriceAnchorSlot:anchor, sameItemMatcher:sameItemMatcher, duplicateCandidateMerger:merger, coveredLowestCandidateBoard:coveredBoard, sandboxHandoffViewModel:sandboxVm });
+  const pipeline = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator.buildGlobalShoppingPricePipelineOrchestrator({ legalProviderFixtureSummary:legalProviderFixture, providerCredentialSafetyReview:credentialSafety, sandboxPriceFeedGate:sandboxPriceFeed, sandboxProviderResponseContract:responseContract, readOnlyProviderSandboxConnector:connector, fixtureReplayConsole:replay, priceSourceNormalizer:normalizer, officialPriceAnchorSlot:anchor, sameItemMatcher:sameItemMatcher, duplicateCandidateMerger:merger, coveredLowestCandidateBoard:coveredBoard, sandboxHandoffViewModel:sandboxVm });
   const journey = windowRef.WeishanGlobalShoppingReadOnlyCandidateJourneyBoard.buildGlobalShoppingReadOnlyCandidateJourneyBoard({ pricePipelineOrchestratorSummary:pipeline, legalProviderFixtureSummary:legalProviderFixture, coveredLowestCandidateBoardSummary:coveredBoard, sandboxHandoffViewModelSummary:sandboxVm });
+  const realSandboxGate = windowRef.WeishanGlobalShoppingReadOnlyRealProviderSandboxGate.buildGlobalShoppingReadOnlyRealProviderSandboxGate({ readOnlyProviderSandboxConnectorSummary:connector, fixtureReplayConsoleSummary:replay, normalizedPriceCandidateBoardSummary:{ status:"ready", title:"归一化价格候选板", redacted:true }, providerResponseContractSummary:responseContract, pricePipelineOrchestratorSummary:pipeline, providerCredentialSafetySummary:credentialSafety, sandboxPriceFeedSummary:sandboxPriceFeed });
+  const requestEnvelope = windowRef.WeishanGlobalShoppingProviderRequestEnvelopeBuilder.buildGlobalShoppingProviderRequestEnvelopeBuilder({ providerId:"provider_1", providerName:"Fixture Provider", requestMode:"sandbox_ready", itemType:"flight", origin:"SHA", destination:"CTU", departureDate:"2026-07-15", passengerCount:1, userRegion:"CN" });
+  const callAudit = windowRef.WeishanGlobalShoppingProviderCallAuditLedger.buildGlobalShoppingProviderCallAuditLedger({ providerId:"provider_1", auditEntries:[{ auditId:"audit_1", providerId:"provider_1", requestMode:"sandbox_ready", callStatus:"dry_run", redacted:true, timestamp:"redacted_now", safetyStatus:"redacted_safe" }] });
+  const readiness = windowRef.WeishanGlobalShoppingProviderSandboxReadinessViewModel.buildGlobalShoppingProviderSandboxReadinessViewModel({ realProviderSandboxGateSummary:realSandboxGate, providerRequestEnvelopeSummary:requestEnvelope, providerCallAuditLedgerSummary:callAudit });
+  const killSwitch = windowRef.WeishanGlobalShoppingProviderSandboxSafetyKillSwitch.buildGlobalShoppingProviderSandboxSafetyKillSwitch({});
+  const adapterShell = windowRef.WeishanGlobalShoppingFirstReadOnlyProviderAdapterShell.buildGlobalShoppingFirstReadOnlyProviderAdapterShell({ providerId:"provider_1", providerName:"Fixture Provider", adapterMode:"dry_run", providerType:"fixture" });
+  const dryRunHarness = windowRef.WeishanGlobalShoppingProviderSandboxDryRunHarness.buildGlobalShoppingProviderSandboxDryRunHarness({ providerRequestEnvelopeSummary:requestEnvelope, realProviderSandboxGateSummary:realSandboxGate, providerCallAuditLedgerSummary:callAudit, providerSandboxSafetyKillSwitchSummary:killSwitch, firstReadOnlyProviderAdapterShellSummary:adapterShell });
+  const dryRunVm = windowRef.WeishanGlobalShoppingProviderSandboxDryRunViewModel.buildGlobalShoppingProviderSandboxDryRunViewModel({ providerSandboxDryRunHarnessSummary:dryRunHarness, firstReadOnlyProviderAdapterShellSummary:adapterShell, providerSandboxSafetyKillSwitchSummary:killSwitch });
   const globalReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     globalShoppingProductGoalSummary:globalGoal,
     jumpToPlatformBoundarySummary:jumpBoundary,
     globalShoppingProductGoalViewModelSummary:goalView,
+    readOnlyProviderSandboxConnectorSummary:connector,
+    fixtureReplayConsoleSummary:replay,
+    normalizedPriceCandidateBoardSummary:{ status:"ready", title:"归一化价格候选板", redacted:true },
+    realProviderSandboxGateSummary:realSandboxGate,
+    providerRequestEnvelopeSummary:requestEnvelope,
+    providerCallAuditLedgerSummary:callAudit,
+    providerSandboxReadinessViewModelSummary:readiness,
+    providerSandboxDryRunHarnessSummary:dryRunHarness,
+    firstReadOnlyProviderAdapterShellSummary:adapterShell,
+    providerSandboxSafetyKillSwitchSummary:killSwitch,
+    providerSandboxDryRunViewModelSummary:dryRunVm,
     legalProviderFixtureSummary:legalProviderFixture,
     providerCredentialSafetySummary:credentialSafety,
     sandboxPriceFeedSummary:sandboxPriceFeed,
@@ -172,7 +201,21 @@ function main() {
     sandboxProviderResponseContractStatus:"ready",
     pricePipelineStatus:"ready",
     readOnlyCandidateJourneyStatus:"ready",
+    readOnlyProviderSandboxConnectorStatus:"ready",
+    fixtureReplayStatus:"ready",
+    normalizedPriceCandidateBoardStatus:"ready",
+    realProviderSandboxGateStatus:"ready",
+    providerRequestEnvelopeStatus:"ready",
+    providerCallAuditLedgerStatus:"ready",
+    providerSandboxReadinessStatus:"ready",
+    providerSandboxDryRunStatus:"ready",
+    providerAdapterShellStatus:"ready",
+    providerKillSwitchStatus:"clear",
+    providerSandboxDryRunViewModelStatus:"ready",
     safeToProceedWithReadOnlyPriceProviderSandbox:true,
+    safeToProceedWithFirstRealReadOnlyProviderSandbox:true,
+    safeToProceedWithFirstReadOnlySandboxDryRun:true,
+    safeToProceedWithFirstProviderSandboxFixtureDryRun:true,
     safeToProceedWithRealReadOnlyProviderSandbox:true,
     safeToProceedWithJumpToPlatformMvp:true,
     safeToProceedWithDeepLinkSafetyGate:true,
@@ -195,6 +238,10 @@ function main() {
   assert.equal(globalReady.userFacingSummary.sandboxProviderResponseContractSummary.title, "Sandbox Provider 响应合同");
   assert.equal(globalReady.userFacingSummary.pricePipelineOrchestratorSummary.title, "全球购只读价格流水线");
   assert.equal(globalReady.userFacingSummary.readOnlyCandidateJourneySummary.title, "全球购只读候选旅程");
+  assert.equal(globalReady.userFacingSummary.providerSandboxDryRunHarnessSummary.title, "Provider Sandbox 干跑框架");
+  assert.equal(globalReady.userFacingSummary.firstReadOnlyProviderAdapterShellSummary.title, "第一个只读 Provider Adapter 外壳");
+  assert.equal(globalReady.userFacingSummary.providerSandboxSafetyKillSwitchSummary.title, "Provider Sandbox 安全熔断器");
+  assert.equal(globalReady.userFacingSummary.providerSandboxDryRunViewModelSummary.title, "Provider Sandbox 干跑准备");
   assert.equal(globalReady.userFacingSummary.providerFixtureViewModelSummary.title, "合法 Provider Fixture 与 Sandbox 价格 Feed");
   assert.equal(globalReady.userFacingSummary.sameItemMatcherSummary.title, "同款候选识别");
   assert.equal(globalReady.userFacingSummary.duplicateCandidateMergerSummary.title, "重复候选合并");
@@ -215,8 +262,13 @@ function main() {
   assert.equal(globalReady.userFacingSummary.sandboxProviderResponseContractStatus, "ready");
   assert.equal(globalReady.userFacingSummary.pricePipelineStatus, "ready");
   assert.equal(globalReady.userFacingSummary.readOnlyCandidateJourneyStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.providerSandboxDryRunStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.providerAdapterShellStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.providerKillSwitchStatus, "clear");
+  assert.equal(globalReady.userFacingSummary.providerSandboxDryRunViewModelStatus, "ready");
   assert.equal(globalReady.userFacingSummary.safeToProceedWithReadOnlyPriceProviderSandbox, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithRealReadOnlyProviderSandbox, true);
+  assert.equal(globalReady.userFacingSummary.safeToProceedWithFirstProviderSandboxFixtureDryRun, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithDeepLinkSafetyGate, true);
   assert.equal(globalReady.userFacingSummary.externalDeepLinkSafetyStatus, "safe");
   assert.equal(globalReady.userFacingSummary.searchPrefillStatus, "safe");

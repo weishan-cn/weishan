@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.1.96");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.1.97");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -70,14 +70,23 @@ function main() {
     sandboxProviderResponseContractSummary:{ status:"ready" },
     pricePipelineOrchestratorSummary:{ status:"ready" },
     readOnlyCandidateJourneySummary:{ status:"ready" },
+    providerSandboxDryRunHarnessSummary:{ status:"ready" },
+    firstReadOnlyProviderAdapterShellSummary:{ status:"ready" },
+    providerSandboxSafetyKillSwitchSummary:{ status:"clear" },
+    providerSandboxDryRunViewModelSummary:{ status:"ready" },
     sandboxProviderResponseContractStatus:"ready",
     pricePipelineStatus:"ready",
     readOnlyCandidateJourneyStatus:"ready",
+    providerSandboxDryRunStatus:"ready",
+    providerAdapterShellStatus:"ready",
+    providerKillSwitchStatus:"clear",
+    providerSandboxDryRunViewModelStatus:"ready",
     safeToProceedWithDeepLinkSafetyGate:true,
     safeToProceedWithReadOnlyPriceProviderSandbox:true,
     safeToProceedWithJumpToPlatformMvp:true,
     safeToProceedWithSandboxDeepLinkCandidate:true,
-    safeToProceedWithPartnerFixtureAdapter:true
+    safeToProceedWithPartnerFixtureAdapter:true,
+    safeToProceedWithFirstProviderSandboxFixtureDryRun:true
   }).badges.map((item) => item.label);
   assert.ok(globalLabels.includes("全球购目标已对齐"));
   assert.ok(globalLabels.includes("Provider fixture 已准备"));
@@ -94,6 +103,13 @@ function main() {
   assert.ok(globalLabels.includes("Fixture 数据进入候选旅程"));
   assert.ok(globalLabels.includes("价格流水线不代表真实价格"));
   assert.ok(globalLabels.includes("候选旅程不代表下单能力"));
+  assert.ok(globalLabels.includes("Provider Sandbox 干跑框架已准备"));
+  assert.ok(globalLabels.includes("第一个只读 Provider Adapter 外壳已准备"));
+  assert.ok(globalLabels.includes("Provider Sandbox 安全熔断器未触发"));
+  assert.ok(globalLabels.includes("Provider Sandbox 干跑准备"));
+  assert.ok(globalLabels.includes("干跑不发送真实请求"));
+  assert.ok(globalLabels.includes("Adapter 外壳不包含真实 endpoint"));
+  assert.ok(globalLabels.includes("干跑不代表真实价格或下单能力"));
   assert.ok(globalLabels.includes("跳转平台边界安全"));
   assert.ok(globalLabels.includes("同款候选识别已准备"));
   assert.ok(globalLabels.includes("重复候选合并已准备"));

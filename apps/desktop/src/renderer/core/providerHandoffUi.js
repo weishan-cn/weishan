@@ -1,5 +1,5 @@
 (function(){
-  const PROVIDER_HANDOFF_UI_VERSION = "2.1.96";
+  const PROVIDER_HANDOFF_UI_VERSION = "2.1.97";
   const SAFE_ACTIONS = ["manual_confirm", "copy_search_conditions", "external_search_manual", "provider_handoff_preview"];
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value){ return String(value == null ? "" : value).trim(); }

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.1.96";
+  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.1.97";
   const ORCHESTRATOR_NAME = "global_shopping_price_pipeline_orchestrator_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -154,6 +154,26 @@
       providerRequestEnvelopeSummary:providerRequestEnvelopeSummary,
       providerCallAuditLedgerSummary:providerCallAuditLedgerSummary
     });
+    const providerSandboxSafetyKillSwitchSummary = resolveSummary(safe, "providerSandboxSafetyKillSwitchSummary", "WeishanGlobalShoppingProviderSandboxSafetyKillSwitch", "buildGlobalShoppingProviderSandboxSafetyKillSwitch", safe);
+    const firstReadOnlyProviderAdapterShellSummary = resolveSummary(safe, "firstReadOnlyProviderAdapterShellSummary", "WeishanGlobalShoppingFirstReadOnlyProviderAdapterShell", "buildGlobalShoppingFirstReadOnlyProviderAdapterShell", {
+      providerId:obj(legalProviderFixtureSummary).providerId || "global_fixture_provider",
+      providerName:obj(legalProviderFixtureSummary).providerName || "Global Shopping Fixture Sandbox",
+      adapterMode:"dry_run",
+      providerType:"fixture"
+    });
+    const providerSandboxDryRunHarnessSummary = resolveSummary(safe, "providerSandboxDryRunHarnessSummary", "WeishanGlobalShoppingProviderSandboxDryRunHarness", "buildGlobalShoppingProviderSandboxDryRunHarness", {
+      providerId:obj(legalProviderFixtureSummary).providerId || "global_fixture_provider",
+      providerName:obj(legalProviderFixtureSummary).providerName || "Global Shopping Fixture Sandbox",
+      providerRequestEnvelopeSummary:providerRequestEnvelopeSummary,
+      realProviderSandboxGateSummary:realProviderSandboxGateSummary,
+      providerCallAuditLedgerSummary:providerCallAuditLedgerSummary,
+      providerSandboxSafetyKillSwitchSummary:providerSandboxSafetyKillSwitchSummary
+    });
+    const providerSandboxDryRunViewModelSummary = resolveSummary(safe, "providerSandboxDryRunViewModelSummary", "WeishanGlobalShoppingProviderSandboxDryRunViewModel", "buildGlobalShoppingProviderSandboxDryRunViewModel", {
+      providerSandboxDryRunHarnessSummary:providerSandboxDryRunHarnessSummary,
+      firstReadOnlyProviderAdapterShellSummary:firstReadOnlyProviderAdapterShellSummary,
+      providerSandboxSafetyKillSwitchSummary:providerSandboxSafetyKillSwitchSummary
+    });
     const sandboxHandoffViewModelSummary = resolveSummary(safe, "sandboxHandoffViewModel", "WeishanGlobalShoppingSandboxHandoffViewModel", "buildGlobalShoppingSandboxHandoffViewModel", safe);
     const pipelineHealth = {
       providerConnectorReady:statusOf(readOnlyProviderSandboxConnectorSummary) === "ready",
@@ -171,6 +191,10 @@
       providerRequestEnvelopeReady:statusOf(providerRequestEnvelopeSummary) === "ready",
       providerCallAuditLedgerReady:statusOf(providerCallAuditLedgerSummary) === "ready",
       providerSandboxReadinessReady:statusOf(providerSandboxReadinessViewModelSummary) === "ready",
+      providerSandboxDryRunReady:statusOf(providerSandboxDryRunHarnessSummary) === "ready",
+      providerAdapterShellReady:statusOf(firstReadOnlyProviderAdapterShellSummary) === "ready",
+      providerKillSwitchClear:statusOf(providerSandboxSafetyKillSwitchSummary) === "clear",
+      providerSandboxDryRunViewModelReady:statusOf(providerSandboxDryRunViewModelSummary) === "ready",
       sandboxHandoffReady:statusOf(sandboxHandoffViewModelSummary) === "ready",
       noRealProvider:safe.realProviderEnabled !== true && safe.productionProviderEnabled !== true && safe.noRealProvider !== false,
       noNetwork:safe.networkEnabled !== true && safe.noNetwork !== false,
@@ -194,6 +218,7 @@
     if (!pipelineHealth.noOrder) blockedReasons.push("order_detected");
     if (!pipelineHealth.noTicketing) blockedReasons.push("ticketing_detected");
     if (!pipelineHealth.noExternalOpen) blockedReasons.push("external_open_detected");
+    if (statusOf(providerSandboxSafetyKillSwitchSummary) === "blocked") blockedReasons.push("provider_kill_switch_blocked");
     const review = !pipelineHealth.providerConnectorReady || !pipelineHealth.fixtureReplayReady || !pipelineHealth.providerFixtureReady || !pipelineHealth.credentialSafetyPass || !pipelineHealth.sandboxFeedReady || !pipelineHealth.responseContractReady || !pipelineHealth.priceNormalizationReady || !pipelineHealth.officialAnchorReady || !pipelineHealth.sameItemMatcherReady || !pipelineHealth.duplicateMergeReady || !pipelineHealth.coveredLowestReady || !pipelineHealth.sandboxHandoffReady;
     return clone({
       pipelineHealth:pipelineHealth,
@@ -218,9 +243,11 @@
         canShowCoveredLowestCandidate:pipelineHealth.coveredLowestReady,
         canShowSandboxHandoffPreview:pipelineHealth.sandboxHandoffReady,
         canShowProviderSandboxReadiness:pipelineHealth.providerSandboxReadinessReady,
+        canShowProviderSandboxDryRun:pipelineHealth.providerSandboxDryRunReady && pipelineHealth.providerAdapterShellReady && pipelineHealth.providerKillSwitchClear && pipelineHealth.providerSandboxDryRunViewModelReady,
         canProceedToReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.providerFixtureReady && pipelineHealth.credentialSafetyPass && pipelineHealth.sandboxFeedReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.officialAnchorReady && pipelineHealth.sameItemMatcherReady && pipelineHealth.duplicateMergeReady && pipelineHealth.coveredLowestReady && pipelineHealth.sandboxHandoffReady,
         safeToProceedWithFirstRealReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.coveredLowestReady,
-        safeToProceedWithFirstReadOnlySandboxDryRun:pipelineHealth.realProviderSandboxGateReady && pipelineHealth.providerRequestEnvelopeReady && pipelineHealth.providerCallAuditLedgerReady && pipelineHealth.providerSandboxReadinessReady
+        safeToProceedWithFirstReadOnlySandboxDryRun:pipelineHealth.realProviderSandboxGateReady && pipelineHealth.providerRequestEnvelopeReady && pipelineHealth.providerCallAuditLedgerReady && pipelineHealth.providerSandboxReadinessReady,
+        safeToProceedWithFirstProviderSandboxFixtureDryRun:pipelineHealth.providerSandboxDryRunReady && pipelineHealth.providerAdapterShellReady && pipelineHealth.providerKillSwitchClear && pipelineHealth.providerSandboxDryRunViewModelReady
       },
       blockedReasons:blockedReasons,
       readOnlyProviderSandboxConnectorSummary:clone(readOnlyProviderSandboxConnectorSummary),
@@ -238,6 +265,10 @@
       providerRequestEnvelopeSummary:clone(providerRequestEnvelopeSummary),
       providerCallAuditLedgerSummary:clone(providerCallAuditLedgerSummary),
       providerSandboxReadinessViewModelSummary:clone(providerSandboxReadinessViewModelSummary),
+      providerSandboxDryRunHarnessSummary:clone(providerSandboxDryRunHarnessSummary),
+      firstReadOnlyProviderAdapterShellSummary:clone(firstReadOnlyProviderAdapterShellSummary),
+      providerSandboxSafetyKillSwitchSummary:clone(providerSandboxSafetyKillSwitchSummary),
+      providerSandboxDryRunViewModelSummary:clone(providerSandboxDryRunViewModelSummary),
       sandboxHandoffViewModelSummary:clone(sandboxHandoffViewModelSummary),
       status:blockedReasons.length ? "blocked" : (review ? "needs_review" : "ready"),
       redacted:true
@@ -261,6 +292,10 @@
       row("request_envelope", "Provider 请求封装", statusOf(safe.providerRequestEnvelopeSummary) === "ready" ? "pass" : (statusOf(safe.providerRequestEnvelopeSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.providerRequestEnvelopeSummary).userFacingSummary).resultLabel || "仍需复核"),
       row("audit_ledger", "Provider 调用审计台账", statusOf(safe.providerCallAuditLedgerSummary) === "ready" ? "pass" : (statusOf(safe.providerCallAuditLedgerSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.providerCallAuditLedgerSummary).userFacingSummary).resultLabel || "仍需复核"),
       row("sandbox_readiness", "真实只读 Provider Sandbox 准备", statusOf(safe.providerSandboxReadinessViewModelSummary) === "ready" ? "pass" : (statusOf(safe.providerSandboxReadinessViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.providerSandboxReadinessViewModelSummary).title || "真实只读 Provider Sandbox 准备"),
+      row("provider_dry_run", "Provider Sandbox 干跑框架", statusOf(safe.providerSandboxDryRunHarnessSummary) === "ready" ? "pass" : (statusOf(safe.providerSandboxDryRunHarnessSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.providerSandboxDryRunHarnessSummary).userFacingSummary).resultLabel || "干跑框架仍需复核"),
+      row("provider_adapter_shell", "第一个只读 Provider Adapter 外壳", statusOf(safe.firstReadOnlyProviderAdapterShellSummary) === "ready" ? "pass" : (statusOf(safe.firstReadOnlyProviderAdapterShellSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.firstReadOnlyProviderAdapterShellSummary).userFacingSummary).resultLabel || "Adapter 外壳仍需复核"),
+      row("provider_kill_switch", "Provider Sandbox 安全熔断器", statusOf(safe.providerSandboxSafetyKillSwitchSummary) === "clear" ? "pass" : (statusOf(safe.providerSandboxSafetyKillSwitchSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.providerSandboxSafetyKillSwitchSummary).userFacingSummary).resultLabel || "安全熔断器仍需复核"),
+      row("provider_dry_run_view", "Provider Sandbox 干跑准备", statusOf(safe.providerSandboxDryRunViewModelSummary) === "ready" ? "pass" : (statusOf(safe.providerSandboxDryRunViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.providerSandboxDryRunViewModelSummary).title || "Provider Sandbox 干跑准备"),
       row("sandbox_handoff", "Sandbox 跳转预览", statusOf(safe.sandboxHandoffViewModelSummary) === "ready" ? "pass" : "warning", obj(obj(safe.sandboxHandoffViewModelSummary).userFacingSummary).resultLabel || "Sandbox 跳转候选与平台可用性仍需复核")
     ]);
   }
@@ -298,6 +333,10 @@
       providerRequestEnvelopeSummary:linkedSummary(evaluation.providerRequestEnvelopeSummary),
       providerCallAuditLedgerSummary:linkedSummary(evaluation.providerCallAuditLedgerSummary),
       providerSandboxReadinessViewModelSummary:linkedSummary(evaluation.providerSandboxReadinessViewModelSummary),
+      providerSandboxDryRunHarnessSummary:linkedSummary(evaluation.providerSandboxDryRunHarnessSummary),
+      firstReadOnlyProviderAdapterShellSummary:linkedSummary(evaluation.firstReadOnlyProviderAdapterShellSummary),
+      providerSandboxSafetyKillSwitchSummary:linkedSummary(evaluation.providerSandboxSafetyKillSwitchSummary),
+      providerSandboxDryRunViewModelSummary:linkedSummary(evaluation.providerSandboxDryRunViewModelSummary),
       sandboxHandoffViewModelSummary:linkedSummary(evaluation.sandboxHandoffViewModelSummary),
       redacted:true
     });

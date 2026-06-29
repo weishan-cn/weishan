@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.96";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.1.97";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -153,6 +153,10 @@
       const providerRequestEnvelopeSummary = obj(safe.providerRequestEnvelopeSummary);
       const providerCallAuditLedgerSummary = obj(safe.providerCallAuditLedgerSummary);
       const providerSandboxReadinessViewModelSummary = obj(safe.providerSandboxReadinessViewModelSummary);
+      const providerSandboxDryRunHarnessSummary = obj(safe.providerSandboxDryRunHarnessSummary);
+      const firstReadOnlyProviderAdapterShellSummary = obj(safe.firstReadOnlyProviderAdapterShellSummary);
+      const providerSandboxSafetyKillSwitchSummary = obj(safe.providerSandboxSafetyKillSwitchSummary);
+      const providerSandboxDryRunViewModelSummary = obj(safe.providerSandboxDryRunViewModelSummary);
       const legalProviderFixtureSummary = obj(safe.legalProviderFixtureSummary);
       const providerCredentialSafetySummary = obj(safe.providerCredentialSafetySummary);
       const sandboxPriceFeedSummary = obj(safe.sandboxPriceFeedSummary);
@@ -253,6 +257,18 @@
       if (providerCallAuditLedgerSummary.status) badges.push(badge("provider_call_audit_no_raw_response", "调用审计不保存 raw response", "info"));
       if (providerSandboxReadinessViewModelSummary.status) badges.push(badge("provider_sandbox_readiness_not_real_price", "Sandbox 准备不代表真实价格", "warning"));
       if (providerSandboxReadinessViewModelSummary.status) badges.push(badge("provider_sandbox_readiness_not_ordering", "Sandbox 准备不代表下单能力", "warning"));
+      if (providerSandboxDryRunHarnessSummary.status === "ready") badges.push(badge("provider_sandbox_dry_run_ready", "Provider Sandbox 干跑框架已准备", "info"));
+      if (providerSandboxDryRunHarnessSummary.status === "needs_review") badges.push(badge("provider_sandbox_dry_run_review", "Provider Sandbox 干跑框架仍需复核", "warning"));
+      if (providerSandboxDryRunHarnessSummary.status === "blocked") badges.push(badge("provider_sandbox_dry_run_blocked", "Provider Sandbox 干跑框架已阻断", "blocked"));
+      if (firstReadOnlyProviderAdapterShellSummary.status === "ready") badges.push(badge("provider_adapter_shell_ready", "第一个只读 Provider Adapter 外壳已准备", "info"));
+      if (firstReadOnlyProviderAdapterShellSummary.status === "needs_review") badges.push(badge("provider_adapter_shell_review", "第一个只读 Provider Adapter 外壳仍需复核", "warning"));
+      if (firstReadOnlyProviderAdapterShellSummary.status === "blocked") badges.push(badge("provider_adapter_shell_blocked", "第一个只读 Provider Adapter 外壳已阻断", "blocked"));
+      if (providerSandboxSafetyKillSwitchSummary.status === "clear") badges.push(badge("provider_kill_switch_clear", "Provider Sandbox 安全熔断器未触发", "info"));
+      if (providerSandboxSafetyKillSwitchSummary.status === "blocked") badges.push(badge("provider_kill_switch_blocked", "安全熔断器阻断真实 provider 风险", "blocked"));
+      if (providerSandboxDryRunViewModelSummary.status === "ready") badges.push(badge("provider_dry_run_view_ready", "Provider Sandbox 干跑准备", "info"));
+      if (providerSandboxDryRunHarnessSummary.status || firstReadOnlyProviderAdapterShellSummary.status || providerSandboxSafetyKillSwitchSummary.status) badges.push(badge("provider_dry_run_no_request", "干跑不发送真实请求", "info"));
+      if (firstReadOnlyProviderAdapterShellSummary.status) badges.push(badge("provider_adapter_no_endpoint", "Adapter 外壳不包含真实 endpoint", "info"));
+      if (providerSandboxDryRunViewModelSummary.status) badges.push(badge("provider_dry_run_not_real_price", "干跑不代表真实价格或下单能力", "warning"));
       if (readOnlyProviderSandboxConnectorSummary.status || fixtureReplayConsoleSummary.status || normalizedPriceCandidateBoardSummary.status) badges.push(badge("fixture_replay_not_real_provider", "Replay 不代表真实 provider 调用", "warning"));
       if (readOnlyProviderSandboxConnectorSummary.status || legalProviderFixtureSummary.status || providerCredentialSafetySummary.status) badges.push(badge("connector_no_prod_key", "Connector 不读取生产密钥", "info"));
       if (normalizedPriceCandidateBoardSummary.status || pricePipelineOrchestratorSummary.status) badges.push(badge("normalized_candidate_not_real_price", "归一化候选不代表真实价格", "warning"));

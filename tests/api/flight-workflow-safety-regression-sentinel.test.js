@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js"]);
   const api = windowRef.WeishanFlightWorkflowSafetyRegressionSentinel;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "2.1.96");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "2.1.97");
   const safe = api.buildFlightWorkflowSafetyRegressionReport({ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, autoOpen:false, autoRefresh:false, fileWrite:false, download:false, note:"平台最终为准" });
   assert.equal(safe.sentinelName, "flight_workflow_safety_regression_sentinel_v1");
   assert.equal(safe.status, "pass");
@@ -46,6 +46,10 @@ function main() {
     sandboxProviderResponseContractSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
     pricePipelineOrchestratorSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
     readOnlyCandidateJourneySummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
+    providerSandboxDryRunHarnessSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
+    firstReadOnlyProviderAdapterShellSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
+    providerSandboxSafetyKillSwitchSummary:{ status:"clear", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
+    providerSandboxDryRunViewModelSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
     providerFixtureViewModelSummary:{ status:"ready", bookingUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false },
     sameItemMatcherSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
     duplicateCandidateMergerSummary:{ status:"merged", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
@@ -66,6 +70,10 @@ function main() {
   assert.equal(global.sandboxProviderResponseContractSummary.status, "ready");
   assert.equal(global.pricePipelineOrchestratorSummary.status, "ready");
   assert.equal(global.readOnlyCandidateJourneySummary.status, "ready");
+  assert.equal(global.providerSandboxDryRunHarnessSummary.status, "ready");
+  assert.equal(global.firstReadOnlyProviderAdapterShellSummary.status, "ready");
+  assert.equal(global.providerSandboxSafetyKillSwitchSummary.status, "clear");
+  assert.equal(global.providerSandboxDryRunViewModelSummary.status, "ready");
   assert.equal(global.jumpToPlatformBoundarySummary.status, "safe");
   assert.equal(global.sameItemMatcherSummary.status, "ready");
   assert.equal(global.externalDeepLinkSafetySummary.status, "safe");

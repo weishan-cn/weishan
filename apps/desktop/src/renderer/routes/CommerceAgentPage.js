@@ -8087,6 +8087,33 @@
         showCommercePlatformTemplateFeedback("已显示调用审计", false);
         return;
       }
+      const globalShoppingProviderDryRunButton = target && target.closest("[data-commerce-global-shopping-provider-dry-run-show]");
+      if (globalShoppingProviderDryRunButton && host.contains(globalShoppingProviderDryRunButton)) {
+        event.preventDefault();
+        const panel = globalShoppingProviderDryRunButton.closest("[data-commerce-global-shopping-provider-sandbox-dry-run]") || globalShoppingProviderDryRunButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-provider-dry-run-output]") || panel;
+        output.innerHTML = '<p>Provider Sandbox 干跑框架</p><p>Provider Sandbox 干跑框架已准备</p><p>干跑不发送真实请求</p><p>当前仅模拟只读 provider sandbox 生命周期</p><p>不发送请求，不读取真实密钥，不保存 raw request 或 raw response</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示干跑框架", false);
+        return;
+      }
+      const globalShoppingAdapterShellButton = target && target.closest("[data-commerce-global-shopping-adapter-shell-show]");
+      if (globalShoppingAdapterShellButton && host.contains(globalShoppingAdapterShellButton)) {
+        event.preventDefault();
+        const panel = globalShoppingAdapterShellButton.closest("[data-commerce-global-shopping-provider-sandbox-dry-run]") || globalShoppingAdapterShellButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-adapter-shell-output]") || panel;
+        output.innerHTML = '<p>第一个只读 Provider Adapter 外壳</p><p>第一个只读 Provider Adapter 外壳已准备</p><p>Adapter 外壳不包含真实 endpoint</p><p>不发送请求，不读取真实密钥，不保存 raw request 或 raw response</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Adapter 外壳", false);
+        return;
+      }
+      const globalShoppingKillSwitchButton = target && target.closest("[data-commerce-global-shopping-kill-switch-show]");
+      if (globalShoppingKillSwitchButton && host.contains(globalShoppingKillSwitchButton)) {
+        event.preventDefault();
+        const panel = globalShoppingKillSwitchButton.closest("[data-commerce-global-shopping-provider-sandbox-dry-run]") || globalShoppingKillSwitchButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-kill-switch-output]") || panel;
+        output.innerHTML = '<p>Provider Sandbox 安全熔断器</p><p>Provider Sandbox 安全熔断器未触发</p><p>安全熔断器阻断真实 provider 风险</p><p>不发送请求，不读取真实密钥，不保存 raw request 或 raw response</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示安全熔断器", false);
+        return;
+      }
       const pilotInvitationGateButton = target && target.closest("[data-commerce-flight-pilot-invitation-gate-show]");
       if (pilotInvitationGateButton && host.contains(pilotInvitationGateButton)) {
         event.preventDefault();

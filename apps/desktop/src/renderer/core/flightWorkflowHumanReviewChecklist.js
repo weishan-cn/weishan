@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_HUMAN_REVIEW_CHECKLIST_VERSION = "2.1.96";
+  const FLIGHT_WORKFLOW_HUMAN_REVIEW_CHECKLIST_VERSION = "2.1.97";
   const CHECKLIST_NAME = "flight_workflow_human_review_checklist_v1";
   const FORBIDDEN_NAME_RE = /(rawText|rawUserText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|apiKey|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;

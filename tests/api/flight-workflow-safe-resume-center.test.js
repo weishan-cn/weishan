@@ -9,7 +9,7 @@ function memoryStorage(raw) { const store = new Map(); if (raw != null) store.se
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowContinuityManager.js", "apps/desktop/src/renderer/core/flightWorkflowRecoveryStore.js", "apps/desktop/src/renderer/core/flightWorkflowSafeResumeCenter.js"]);
   const api = windowRef.WeishanFlightWorkflowSafeResumeCenter;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_VERSION, "2.1.96");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_VERSION, "2.1.97");
   assert.equal(api.buildFlightWorkflowSafeResumeCenter({}).status, "unavailable");
   const recoveryState = { workflowId:"wf1", status:"resumable", currentStage:"decision", stageLabel:"选择候选", selectedCandidate:{ rank:1, token:"abc", bookingUrl:"https://blocked.example" }, collectedSummary:{ routeReady:true, dateReady:true, selectedCandidateReady:true }, missingFields:[] };
   const available = api.buildFlightWorkflowSafeResumeCenter({ recoverySummary:{ status:"loaded", state:recoveryState } });
