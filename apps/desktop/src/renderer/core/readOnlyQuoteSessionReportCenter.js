@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.97";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.98";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -196,6 +196,10 @@
       firstReadOnlyProviderAdapterShellSummary: stripUnsafe(safe.firstReadOnlyProviderAdapterShellSummary || null),
       providerSandboxSafetyKillSwitchSummary: stripUnsafe(safe.providerSandboxSafetyKillSwitchSummary || null),
       providerSandboxDryRunViewModelSummary: stripUnsafe(safe.providerSandboxDryRunViewModelSummary || null),
+      providerAdapterRegistrySummary: stripUnsafe(safe.providerAdapterRegistrySummary || null),
+      dryRunProviderResponseNormalizerSummary: stripUnsafe(safe.dryRunProviderResponseNormalizerSummary || null),
+      sandboxProviderRunbookSummary: stripUnsafe(safe.sandboxProviderRunbookSummary || null),
+      providerAdapterRegistryViewModelSummary: stripUnsafe(safe.providerAdapterRegistryViewModelSummary || null),
       legalProviderFixtureSummary: stripUnsafe(safe.legalProviderFixtureSummary || null),
       providerCredentialSafetySummary: stripUnsafe(safe.providerCredentialSafetySummary || null),
       sandboxPriceFeedSummary: stripUnsafe(safe.sandboxPriceFeedSummary || null),
@@ -227,6 +231,10 @@
       providerAdapterShellStatus: safeText(safe.providerAdapterShellStatus || safe.firstReadOnlyProviderAdapterShellSummary && safe.firstReadOnlyProviderAdapterShellSummary.status || ""),
       providerKillSwitchStatus: safeText(safe.providerKillSwitchStatus || safe.providerSandboxSafetyKillSwitchSummary && safe.providerSandboxSafetyKillSwitchSummary.status || ""),
       providerSandboxDryRunViewModelStatus: safeText(safe.providerSandboxDryRunViewModelStatus || safe.providerSandboxDryRunViewModelSummary && safe.providerSandboxDryRunViewModelSummary.status || ""),
+      providerAdapterRegistryStatus: safeText(safe.providerAdapterRegistryStatus || safe.providerAdapterRegistrySummary && safe.providerAdapterRegistrySummary.status || ""),
+      dryRunResponseNormalizerStatus: safeText(safe.dryRunResponseNormalizerStatus || safe.dryRunProviderResponseNormalizerSummary && safe.dryRunProviderResponseNormalizerSummary.status || ""),
+      sandboxProviderRunbookStatus: safeText(safe.sandboxProviderRunbookStatus || safe.sandboxProviderRunbookSummary && safe.sandboxProviderRunbookSummary.status || ""),
+      providerAdapterRegistryViewModelStatus: safeText(safe.providerAdapterRegistryViewModelStatus || safe.providerAdapterRegistryViewModelSummary && safe.providerAdapterRegistryViewModelSummary.status || ""),
       priceNormalizationStatus: safeText(safe.priceNormalizationStatus || safe.priceSourceNormalizationSummary && safe.priceSourceNormalizationSummary.status || ""),
       officialPriceAnchorStatus: safeText(safe.officialPriceAnchorStatus || safe.officialPriceAnchorSummary && safe.officialPriceAnchorSummary.status || ""),
       priceCandidateDisplayStatus: safeText(safe.priceCandidateDisplayStatus || safe.priceCandidateDisplaySummary && safe.priceCandidateDisplaySummary.status || ""),
@@ -251,6 +259,7 @@
       safeToProceedWithFirstRealReadOnlyProviderSandbox: safe.safeToProceedWithFirstRealReadOnlyProviderSandbox === true,
       safeToProceedWithFirstReadOnlySandboxDryRun: safe.safeToProceedWithFirstReadOnlySandboxDryRun === true,
       safeToProceedWithFirstProviderSandboxFixtureDryRun: safe.safeToProceedWithFirstProviderSandboxFixtureDryRun === true,
+      safeToProceedWithFirstSandboxProviderConnectorImplementation: safe.safeToProceedWithFirstSandboxProviderConnectorImplementation === true,
       safeToProceedWithDeepLinkSafetyGate: safe.safeToProceedWithDeepLinkSafetyGate === true,
       safeToProceedWithSandboxDeepLinkCandidate: safe.safeToProceedWithSandboxDeepLinkCandidate === true,
       safeToProceedWithPartnerFixtureAdapter: safe.safeToProceedWithPartnerFixtureAdapter === true,
@@ -443,6 +452,10 @@
       firstReadOnlyProviderAdapterShellSummary: workflow.firstReadOnlyProviderAdapterShellSummary ? { title:"第一个只读 Provider Adapter 外壳", line:workflow.firstReadOnlyProviderAdapterShellSummary.userFacingSummary && workflow.firstReadOnlyProviderAdapterShellSummary.userFacingSummary.resultLabel || "Adapter 外壳仍需复核", redacted:true } : null,
       providerSandboxSafetyKillSwitchSummary: workflow.providerSandboxSafetyKillSwitchSummary ? { title:"Provider Sandbox 安全熔断器", line:workflow.providerSandboxSafetyKillSwitchSummary.userFacingSummary && workflow.providerSandboxSafetyKillSwitchSummary.userFacingSummary.resultLabel || "安全熔断器仍需复核", redacted:true } : null,
       providerSandboxDryRunViewModelSummary: workflow.providerSandboxDryRunViewModelSummary ? { title:"Provider Sandbox 干跑准备", line:workflow.providerSandboxDryRunViewModelSummary.title || "Provider Sandbox 干跑准备", redacted:true } : null,
+      providerAdapterRegistrySummary: workflow.providerAdapterRegistrySummary ? { title:"Provider Adapter 注册表", line:workflow.providerAdapterRegistrySummary.userFacingSummary && workflow.providerAdapterRegistrySummary.userFacingSummary.resultLabel || "Adapter 注册表仍需复核", redacted:true } : null,
+      dryRunProviderResponseNormalizerSummary: workflow.dryRunProviderResponseNormalizerSummary ? { title:"Dry-Run Provider 响应归一化器", line:workflow.dryRunProviderResponseNormalizerSummary.userFacingSummary && workflow.dryRunProviderResponseNormalizerSummary.userFacingSummary.resultLabel || "响应归一化仍需复核", redacted:true } : null,
+      sandboxProviderRunbookSummary: workflow.sandboxProviderRunbookSummary ? { title:"Sandbox Provider 接入运行手册", line:workflow.sandboxProviderRunbookSummary.userFacingSummary && workflow.sandboxProviderRunbookSummary.userFacingSummary.resultLabel || "接入手册仍需复核", redacted:true } : null,
+      providerAdapterRegistryViewModelSummary: workflow.providerAdapterRegistryViewModelSummary ? { title:"Provider Adapter 注册与接入手册", line:workflow.providerAdapterRegistryViewModelSummary.title || "Provider Adapter 注册与接入手册", redacted:true } : null,
       legalProviderFixtureSummary: workflow.legalProviderFixtureSummary ? { title:"合法 Provider Fixture 适配器", line:workflow.legalProviderFixtureSummary.userFacingSummary && workflow.legalProviderFixtureSummary.userFacingSummary.resultLabel || "Provider fixture 仍需复核", redacted:true } : null,
       providerCredentialSafetySummary: workflow.providerCredentialSafetySummary ? { title:"Provider 凭据安全复核", line:workflow.providerCredentialSafetySummary.userFacingSummary && workflow.providerCredentialSafetySummary.userFacingSummary.resultLabel || "Provider 凭据边界仍需复核", redacted:true } : null,
       sandboxPriceFeedSummary: workflow.sandboxPriceFeedSummary ? { title:"Sandbox 价格 Feed 闸门", line:workflow.sandboxPriceFeedSummary.userFacingSummary && workflow.sandboxPriceFeedSummary.userFacingSummary.resultLabel || "Sandbox 价格 Feed 仍需复核", redacted:true } : null,
@@ -498,6 +511,10 @@
       providerAdapterShellStatus: workflow.providerAdapterShellStatus || safe.providerAdapterShellStatus || "",
       providerKillSwitchStatus: workflow.providerKillSwitchStatus || safe.providerKillSwitchStatus || "",
       providerSandboxDryRunViewModelStatus: workflow.providerSandboxDryRunViewModelStatus || safe.providerSandboxDryRunViewModelStatus || "",
+      providerAdapterRegistryStatus: workflow.providerAdapterRegistryStatus || safe.providerAdapterRegistryStatus || "",
+      dryRunResponseNormalizerStatus: workflow.dryRunResponseNormalizerStatus || safe.dryRunResponseNormalizerStatus || "",
+      sandboxProviderRunbookStatus: workflow.sandboxProviderRunbookStatus || safe.sandboxProviderRunbookStatus || "",
+      providerAdapterRegistryViewModelStatus: workflow.providerAdapterRegistryViewModelStatus || safe.providerAdapterRegistryViewModelStatus || "",
       safeToProceedWithFirstRealReadOnlyProviderSandbox: workflow.safeToProceedWithFirstRealReadOnlyProviderSandbox === true || safe.safeToProceedWithFirstRealReadOnlyProviderSandbox === true,
       safeToProceedWithFirstReadOnlySandboxDryRun: workflow.safeToProceedWithFirstReadOnlySandboxDryRun === true || safe.safeToProceedWithFirstReadOnlySandboxDryRun === true,
       externalDeepLinkSafetyStatus: workflow.externalDeepLinkSafetyStatus || safe.externalDeepLinkSafetyStatus || "",
@@ -510,6 +527,7 @@
       safeToProceedWithPriceProviderSandbox: workflow.safeToProceedWithPriceProviderSandbox === true || safe.safeToProceedWithPriceProviderSandbox === true,
       safeToProceedWithReadOnlyPriceProviderSandbox: workflow.safeToProceedWithReadOnlyPriceProviderSandbox === true || safe.safeToProceedWithReadOnlyPriceProviderSandbox === true,
       safeToProceedWithFirstProviderSandboxFixtureDryRun: workflow.safeToProceedWithFirstProviderSandboxFixtureDryRun === true || safe.safeToProceedWithFirstProviderSandboxFixtureDryRun === true,
+      safeToProceedWithFirstSandboxProviderConnectorImplementation: workflow.safeToProceedWithFirstSandboxProviderConnectorImplementation === true || safe.safeToProceedWithFirstSandboxProviderConnectorImplementation === true,
       safeToProceedWithDeepLinkSafetyGate: workflow.safeToProceedWithDeepLinkSafetyGate === true || safe.safeToProceedWithDeepLinkSafetyGate === true,
       safeToProceedWithSandboxDeepLinkCandidate: workflow.safeToProceedWithSandboxDeepLinkCandidate === true || safe.safeToProceedWithSandboxDeepLinkCandidate === true,
       safeToProceedWithPartnerFixtureAdapter: workflow.safeToProceedWithPartnerFixtureAdapter === true || safe.safeToProceedWithPartnerFixtureAdapter === true,

@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function accepted() { return { acceptedItems:{ read_only_scope:true, platform_final:true, no_transaction:true, no_identity_upload:true, feedback_redacted:true } }; }
 function main() {
   const api = load(["apps/desktop/src/renderer/core/flightWorkflowReadOnlyUserConsentFlow.js"]).WeishanFlightWorkflowReadOnlyUserConsentFlow;
-  assert.equal(api.FLIGHT_WORKFLOW_READ_ONLY_USER_CONSENT_FLOW_VERSION, "2.1.97");
+  assert.equal(api.FLIGHT_WORKFLOW_READ_ONLY_USER_CONSENT_FLOW_VERSION, "2.1.98");
   assert.equal(api.buildFlightWorkflowReadOnlyUserConsentFlow({}).status, "not_started");
   assert.equal(api.buildFlightWorkflowReadOnlyUserConsentFlow({ acceptedItems:{ read_only_scope:true } }).status, "in_progress");
   assert.equal(api.buildFlightWorkflowReadOnlyUserConsentFlow({ started:true }).status, "missing_required_items");

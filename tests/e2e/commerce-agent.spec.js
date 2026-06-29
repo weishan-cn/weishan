@@ -9161,7 +9161,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(visible).not.toMatch(/\b(token|key|secret)\b/i);
   });
 
-  test("v2.1.97 global shopping provider fixture stays read-only and local @commerce-smoke", async () => {
+  test("v2.1.98 global shopping provider fixture stays read-only and local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.waitForFunction(() => !!(
       window.WeishanGlobalShoppingProductGoalCharter &&
@@ -9198,6 +9198,10 @@ test.describe.serial("commerce agent workbench", () => {
       window.WeishanGlobalShoppingFirstReadOnlyProviderAdapterShell &&
       window.WeishanGlobalShoppingProviderSandboxDryRunHarness &&
       window.WeishanGlobalShoppingProviderSandboxDryRunViewModel &&
+      window.WeishanGlobalShoppingProviderAdapterRegistry &&
+      window.WeishanGlobalShoppingDryRunProviderResponseNormalizer &&
+      window.WeishanGlobalShoppingSandboxProviderRunbookBoard &&
+      window.WeishanGlobalShoppingProviderAdapterRegistryViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
     const v2197 = await page.evaluate(() => {
@@ -9235,6 +9239,10 @@ test.describe.serial("commerce agent workbench", () => {
       const adapterShellApi = window.WeishanGlobalShoppingFirstReadOnlyProviderAdapterShell;
       const dryRunHarnessApi = window.WeishanGlobalShoppingProviderSandboxDryRunHarness;
       const dryRunViewModelApi = window.WeishanGlobalShoppingProviderSandboxDryRunViewModel;
+      const providerAdapterRegistryApi = window.WeishanGlobalShoppingProviderAdapterRegistry;
+      const responseNormalizerApi = window.WeishanGlobalShoppingDryRunProviderResponseNormalizer;
+      const runbookApi = window.WeishanGlobalShoppingSandboxProviderRunbookBoard;
+      const registryViewApi = window.WeishanGlobalShoppingProviderAdapterRegistryViewModel;
 
       const goal = goalApi.buildGlobalShoppingProductGoalCharter({});
       const boundary = boundaryApi.buildGlobalShoppingJumpToPlatformBoundary({});
@@ -9271,13 +9279,18 @@ test.describe.serial("commerce agent workbench", () => {
       const adapterShell = adapterShellApi.buildGlobalShoppingFirstReadOnlyProviderAdapterShell({ providerId:"provider_1", providerName:"Fixture Provider", adapterMode:"dry_run", providerType:"fixture" });
       const dryRunHarness = dryRunHarnessApi.buildGlobalShoppingProviderSandboxDryRunHarness({ providerId:"provider_1", providerName:"Fixture Provider", providerRequestEnvelopeSummary:requestEnvelope, realProviderSandboxGateSummary:realSandboxGate, providerCallAuditLedgerSummary:callAudit, providerSandboxSafetyKillSwitchSummary:killSwitch, firstReadOnlyProviderAdapterShellSummary:adapterShell });
       const dryRunVm = dryRunViewModelApi.buildGlobalShoppingProviderSandboxDryRunViewModel({ providerSandboxDryRunHarnessSummary:dryRunHarness, firstReadOnlyProviderAdapterShellSummary:adapterShell, providerSandboxSafetyKillSwitchSummary:killSwitch, providerSandboxReadinessViewModelSummary:readinessVm });
+      const adapterRegistry = providerAdapterRegistryApi.buildGlobalShoppingProviderAdapterRegistry({ registryMode:"dry_run", adapterShells:[{ adapterId:"provider_1_dry_run", providerId:"provider_1", providerName:"Fixture Provider", providerType:"fixture", adapterMode:"dry_run", readOnly:true, sandboxOnly:true, productionDisabled:true, redactedOutputOnly:true }] });
+      const responseNormalizer = responseNormalizerApi.buildGlobalShoppingDryRunProviderResponseNormalizer({ adapterRegistry:adapterRegistry, dryRunHarness:dryRunHarness, responseMode:"dry_run", redactedResponseSummary:{ responseMode:"dry_run", providerId:"provider_1", providerName:"Fixture Provider", redacted:true }, fixturePrices:[{ title:"SHA-CTU", basePrice:900, taxAmount:120, currency:"CNY" }] });
+      const runbookBoard = runbookApi.buildGlobalShoppingSandboxProviderRunbookBoard({ providerAdapterRegistrySummary:adapterRegistry, providerSandboxDryRunHarnessSummary:dryRunHarness, firstReadOnlyProviderAdapterShellSummary:adapterShell, providerSandboxSafetyKillSwitchSummary:killSwitch, providerRequestEnvelopeSummary:requestEnvelope, providerCallAuditLedgerSummary:callAudit, sandboxProviderResponseContractSummary:responseContract, dryRunProviderResponseNormalizerSummary:responseNormalizer });
+      const adapterRegistryView = registryViewApi.buildGlobalShoppingProviderAdapterRegistryViewModel({ providerAdapterRegistrySummary:adapterRegistry, dryRunProviderResponseNormalizerSummary:responseNormalizer, sandboxProviderRunbookSummary:runbookBoard, safeToProceedWithFirstSandboxProviderConnectorImplementation:true });
 
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v2197-render-smoke", "true");
       host.innerHTML = '<h5>全球购产品目标与跳转边界</h5><p>全球购产品目标</p><p>合法 Provider Fixture 与 Sandbox 价格 Feed</p><p>合法 Provider Fixture 适配器</p><p>Provider 凭据安全复核</p><p>Sandbox 价格 Feed 闸门</p><p>Sandbox Provider 响应合同</p><p>全球购只读价格流水线</p><p>全球购只读候选旅程</p><p>只读 Provider Sandbox Connector</p><p>Fixture 回放控制台</p><p>归一化价格候选板</p><p>真实只读 Provider Sandbox 准备</p><p>真实只读 Provider Sandbox 闸门</p><p>Provider 请求封装</p><p>Provider 调用审计台账</p><p>Provider Sandbox 干跑准备</p><p>Provider Sandbox 干跑框架</p><p>第一个只读 Provider Adapter 外壳</p><p>Provider Sandbox 安全熔断器</p><p>Provider 响应合同已准备</p><p>只读价格流水线已准备</p><p>全球购只读候选旅程已准备</p><p>只读 Provider Connector 已准备</p><p>Fixture 回放已准备</p><p>归一化价格候选板已准备</p><p>真实只读 Provider Sandbox 闸门已准备</p><p>Provider 请求封装已准备</p><p>Provider 调用审计台账已准备</p><p>Provider Sandbox 干跑框架已准备</p><p>第一个只读 Provider Adapter 外壳已准备</p><p>Provider Sandbox 安全熔断器未触发</p><p>请求封装不发送真实请求</p><p>调用审计不保存 raw response</p><p>Sandbox 准备不代表真实价格</p><p>Sandbox 准备不代表下单能力</p><p>Replay 不代表真实 provider 调用</p><p>Connector 不读取生产密钥</p><p>归一化候选不代表真实价格</p><p>价格候选板不代表下单能力</p><p>Raw provider response 不持久化</p><p>Fixture 数据进入候选旅程</p><p>价格流水线不代表真实价格</p><p>候选旅程不代表下单能力</p><p>当前仅准备真实只读 provider sandbox 的请求封装和审计结构</p><p>不发送请求，不读取真实密钥，不保存 raw response</p><p>干跑不发送真实请求</p><p>Adapter 外壳不包含真实 endpoint</p><p>安全熔断器阻断真实 provider 风险</p><p>干跑不代表真实价格或下单能力</p><p>当前仅模拟只读 provider sandbox 生命周期</p><p>Provider Fixture</p><p>价格流水线</p><p>已覆盖来源较低候选价</p><p>Sandbox 跳转预览</p><p>当前仅展示只读 fixture/sandbox 候选旅程</p><p>当前仅展示只读 fixture/sandbox 归一化候选</p><p>不请求真实平台，不处理付款、下单或出票</p><p>跳转至平台查看</p><p>Sandbox 跳转候选与平台可用性</p><p>Sandbox 跳转候选</p><p>平台可用性</p><p>合作/联盟链接政策</p><p>合作链接披露</p><p>外部平台跳转安全闸门</p><p>搜索参数预填闸门</p><p>目标平台</p><p>可带入搜索条件</p><p>平台自行下单</p><p>安全边界</p><p>Weishan 仅可携带非敏感搜索条件</p><p>用户需在平台自行确认价格、登录、填写资料并完成下单</p><p>不保存平台账号</p><p>不保存证件银行卡</p><p>不保存支付凭证</p><p>Provider fixture 已准备</p><p>Provider 凭据边界安全</p><p>Sandbox 价格 Feed 已准备</p><p>不读取生产密钥</p><p>不保存 raw provider response</p><p>Fixture feed 可进入价格归一化</p><p>Provider fixture 不代表真实价格</p><p>合作链接不代表最低价</p><p>平台页面为实时价格准绳</p><p>Sandbox 跳转不打开真实平台</p><p>平台可用不代表官方背书</p><p>本轮仅展示只读跳转预览，不打开真实平台</p><p>跳转预览不代表下单能力</p><h5>全球购价格候选展示</h5><p>价格源归一化层</p><p>官方价格锚点</p><p>官方参考价</p><p>同款候选识别</p><p>重复候选合并</p><p>已覆盖来源候选价合并</p><p>已覆盖来源中的较低候选价</p><p>与官方价对比</p><p>来源覆盖</p><p>同款合并置信度</p><p>价格区间</p><p>价格以跳转后平台实时页面为准</p><p>当前仅比较已覆盖来源中的候选价</p><p>合并不代表最低承诺、价格保证、锁定承诺、最终成交价或可下单能力</p><p>价格展示不代表下单能力</p><button type="button" data-commerce-global-shopping-product-goal-show="true">查看全球购产品目标</button><button type="button" data-commerce-global-shopping-jump-boundary-show="true">查看跳转边界</button><button type="button" data-commerce-global-shopping-provider-fixture-show="true">查看 Provider Fixture</button><button type="button" data-commerce-global-shopping-credential-safety-show="true">查看凭据安全</button><button type="button" data-commerce-global-shopping-sandbox-price-feed-show="true">查看 Sandbox 价格 Feed</button><button type="button" data-commerce-global-shopping-provider-response-contract-show="true">查看 Provider 响应合同</button><button type="button" data-commerce-global-shopping-price-pipeline-show="true">查看价格流水线</button><button type="button" data-commerce-global-shopping-candidate-journey-show="true">查看只读候选旅程</button><button type="button" data-commerce-global-shopping-provider-connector-show="true">查看 Provider Connector</button><button type="button" data-commerce-global-shopping-fixture-replay-show="true">查看 Fixture 回放</button><button type="button" data-commerce-global-shopping-normalized-board-show="true">查看归一化候选板</button><button type="button" data-commerce-global-shopping-sandbox-gate-show="true">查看 Sandbox 闸门</button><button type="button" data-commerce-global-shopping-request-envelope-show="true">查看请求封装</button><button type="button" data-commerce-global-shopping-call-audit-show="true">查看调用审计</button><button type="button" data-commerce-global-shopping-provider-dry-run-show="true">查看干跑框架</button><button type="button" data-commerce-global-shopping-adapter-shell-show="true">查看 Adapter 外壳</button><button type="button" data-commerce-global-shopping-kill-switch-show="true">查看安全熔断器</button><button type="button" data-commerce-global-shopping-deep-link-safety-show="true">查看跳转安全</button><button type="button" data-commerce-global-shopping-prefill-gate-show="true">查看预填边界</button><button type="button" data-commerce-global-shopping-handoff-preview-show="true">查看跳转预览</button><button type="button" data-commerce-global-shopping-sandbox-candidate-show="true">查看 Sandbox 跳转候选</button><button type="button" data-commerce-global-shopping-platform-availability-show="true">查看平台可用性</button><button type="button" data-commerce-global-shopping-partner-policy-show="true">查看合作链接政策</button><button type="button" data-commerce-global-shopping-same-item-show="true">查看同款识别</button><button type="button" data-commerce-global-shopping-covered-lowest-show="true">查看候选价合并</button><div data-commerce-global-shopping-product-goal-output="true"><p>可信候选价格</p></div><div data-commerce-global-shopping-jump-boundary-output="true"><p>跳转不代表交易能力</p></div><div data-commerce-global-shopping-provider-fixture-output="true"><p>合法 Provider Fixture 适配器</p></div><div data-commerce-global-shopping-credential-safety-output="true"><p>Provider 凭据安全复核</p></div><div data-commerce-global-shopping-sandbox-price-feed-output="true"><p>Sandbox 价格 Feed 闸门</p></div><div data-commerce-global-shopping-provider-response-contract-output="true"><p>Sandbox Provider 响应合同</p></div><div data-commerce-global-shopping-price-pipeline-output="true"><p>全球购只读价格流水线</p></div><div data-commerce-global-shopping-candidate-journey-output="true"><p>全球购只读候选旅程</p></div><div data-commerce-global-shopping-provider-connector-output="true"><p>只读 Provider Sandbox Connector</p></div><div data-commerce-global-shopping-fixture-replay-output="true"><p>Fixture 回放控制台</p></div><div data-commerce-global-shopping-normalized-board-output="true"><p>归一化价格候选板</p></div><div data-commerce-global-shopping-sandbox-gate-output="true"><p>真实只读 Provider Sandbox 闸门</p></div><div data-commerce-global-shopping-request-envelope-output="true"><p>Provider 请求封装</p></div><div data-commerce-global-shopping-call-audit-output="true"><p>Provider 调用审计台账</p></div><div data-commerce-global-shopping-provider-dry-run-output="true"><p>Provider Sandbox 干跑框架</p></div><div data-commerce-global-shopping-adapter-shell-output="true"><p>第一个只读 Provider Adapter 外壳</p></div><div data-commerce-global-shopping-kill-switch-output="true"><p>Provider Sandbox 安全熔断器</p></div><div data-commerce-global-shopping-deep-link-safety-output="true"><p>外部平台跳转安全闸门</p></div><div data-commerce-global-shopping-prefill-gate-output="true"><p>搜索参数预填闸门</p></div><div data-commerce-global-shopping-handoff-preview-output="true"><p>跳转至平台查看</p></div><div data-commerce-global-shopping-sandbox-candidate-output="true"><p>Sandbox 跳转候选</p></div><div data-commerce-global-shopping-platform-availability-output="true"><p>平台可用性</p></div><div data-commerce-global-shopping-partner-policy-output="true"><p>合作/联盟链接政策</p></div><div data-commerce-global-shopping-same-item-output="true"><p>同款候选识别</p></div><div data-commerce-global-shopping-covered-lowest-output="true"><p>已覆盖来源候选价合并</p></div>';
+      host.insertAdjacentHTML("beforeend", '<section data-commerce-global-shopping-provider-adapter-registry-panel="true"><p>Provider Adapter 注册与接入手册</p><p>Provider Adapter 注册表</p><p>Dry-Run Provider 响应归一化器</p><p>Sandbox Provider 接入运行手册</p><p>Adapter 注册表已准备</p><p>Dry-run 响应归一化已准备</p><p>Sandbox Provider 接入手册已准备</p><p>只允许只读 adapter 注册</p><p>不接收 raw provider response</p><p>接入手册不执行真实接入</p><p>Adapter 注册不代表真实 provider 接通</p><p>当前仅管理只读 fixture/dry-run/sandbox adapter</p><p>不包含真实 endpoint、真实密钥、真实网络调用或下单能力</p><button type="button" data-commerce-global-shopping-provider-adapter-registry-show="true">查看 Adapter 注册表</button><button type="button" data-commerce-global-shopping-provider-response-normalizer-show="true">查看响应归一化</button><button type="button" data-commerce-global-shopping-provider-runbook-show="true">查看接入手册</button></section>');
       document.body.appendChild(host);
       return {
-        goal, boundary, legal, credential, feed, responseContract, fixtureVm, connector, replay, normalizer, anchor, deepLink, prefill, partner, availability, sandbox, preview, sandboxVm, matcher, merger, coveredBoard, normalizedBoard, pipeline, journey, board, goalView, realSandboxGate, requestEnvelope, callAudit, readinessVm, killSwitch, adapterShell, dryRunHarness, dryRunVm,
+        goal, boundary, legal, credential, feed, responseContract, fixtureVm, connector, replay, normalizer, anchor, deepLink, prefill, partner, availability, sandbox, preview, sandboxVm, matcher, merger, coveredBoard, normalizedBoard, pipeline, journey, board, goalView, realSandboxGate, requestEnvelope, callAudit, readinessVm, killSwitch, adapterShell, dryRunHarness, dryRunVm, adapterRegistry, responseNormalizer, runbookBoard, adapterRegistryView,
         text:host.innerText,
         productGoalButtonCount:host.querySelectorAll("[data-commerce-global-shopping-product-goal-show]").length,
         jumpBoundaryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-jump-boundary-show]").length,
@@ -9296,6 +9309,9 @@ test.describe.serial("commerce agent workbench", () => {
         providerDryRunButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-dry-run-show]").length,
         adapterShellButtonCount:host.querySelectorAll("[data-commerce-global-shopping-adapter-shell-show]").length,
         killSwitchButtonCount:host.querySelectorAll("[data-commerce-global-shopping-kill-switch-show]").length,
+        adapterRegistryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-adapter-registry-show]").length,
+        responseNormalizerButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-response-normalizer-show]").length,
+        runbookButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-runbook-show]").length,
         deepLinkButtonCount:host.querySelectorAll("[data-commerce-global-shopping-deep-link-safety-show]").length,
         prefillButtonCount:host.querySelectorAll("[data-commerce-global-shopping-prefill-gate-show]").length,
         previewButtonCount:host.querySelectorAll("[data-commerce-global-shopping-handoff-preview-show]").length,
@@ -9304,7 +9320,7 @@ test.describe.serial("commerce agent workbench", () => {
         partnerPolicyButtonCount:host.querySelectorAll("[data-commerce-global-shopping-partner-policy-show]").length,
         sameItemButtonCount:host.querySelectorAll("[data-commerce-global-shopping-same-item-show]").length,
         coveredLowestButtonCount:host.querySelectorAll("[data-commerce-global-shopping-covered-lowest-show]").length,
-        serialized:JSON.stringify({ goal, boundary, legal, credential, feed, responseContract, fixtureVm, connector, replay, normalizer, anchor, deepLink, prefill, partner, availability, sandbox, preview, sandboxVm, matcher, merger, coveredBoard, normalizedBoard, pipeline, journey, board, goalView, realSandboxGate, requestEnvelope, callAudit, readinessVm, killSwitch, adapterShell, dryRunHarness, dryRunVm })
+        serialized:JSON.stringify({ goal, boundary, legal, credential, feed, responseContract, fixtureVm, connector, replay, normalizer, anchor, deepLink, prefill, partner, availability, sandbox, preview, sandboxVm, matcher, merger, coveredBoard, normalizedBoard, pipeline, journey, board, goalView, realSandboxGate, requestEnvelope, callAudit, readinessVm, killSwitch, adapterShell, dryRunHarness, dryRunVm, adapterRegistry, responseNormalizer, runbookBoard, adapterRegistryView })
       };
     });
     expect(v2197.goal.userFacingSummary.title).toBe("全球购产品目标");
@@ -9343,6 +9359,10 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v2197.adapterShell.status).toBe("ready");
     expect(v2197.dryRunHarness.status).toBe("ready");
     expect(v2197.dryRunVm.status).toBe("ready");
+    expect(v2197.adapterRegistry.status).toBe("ready");
+    expect(v2197.responseNormalizer.status).toBe("ready");
+    expect(v2197.runbookBoard.status).toBe("ready");
+    expect(v2197.adapterRegistryView.status).toBe("ready");
     expect(v2197.text).toContain("真实只读 Provider Sandbox 准备");
     expect(v2197.text).toContain("真实只读 Provider Sandbox 闸门");
     expect(v2197.text).toContain("Provider 请求封装");
@@ -9351,6 +9371,14 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v2197.text).toContain("Provider Sandbox 干跑框架");
     expect(v2197.text).toContain("第一个只读 Provider Adapter 外壳");
     expect(v2197.text).toContain("Provider Sandbox 安全熔断器");
+    expect(v2197.text).toContain("Provider Adapter 注册表");
+    expect(v2197.text).toContain("Dry-Run Provider 响应归一化器");
+    expect(v2197.text).toContain("Sandbox Provider 接入运行手册");
+    expect(v2197.text).toContain("Provider Adapter 注册与接入手册");
+    expect(v2197.text).toContain("只允许只读 adapter 注册");
+    expect(v2197.text).toContain("不接收 raw provider response");
+    expect(v2197.text).toContain("接入手册不执行真实接入");
+    expect(v2197.text).toContain("Adapter 注册不代表真实 provider 接通");
     expect(v2197.text).toContain("请求封装不发送真实请求");
     expect(v2197.text).toContain("调用审计不保存 raw response");
     expect(v2197.text).toContain("干跑不发送真实请求");
@@ -9387,6 +9415,9 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v2197.providerDryRunButtonCount).toBe(1);
     expect(v2197.adapterShellButtonCount).toBe(1);
     expect(v2197.killSwitchButtonCount).toBe(1);
+    expect(v2197.adapterRegistryButtonCount).toBe(1);
+    expect(v2197.responseNormalizerButtonCount).toBe(1);
+    expect(v2197.runbookButtonCount).toBe(1);
     expect(v2197.deepLinkButtonCount).toBe(1);
     expect(v2197.prefillButtonCount).toBe(1);
     expect(v2197.previewButtonCount).toBe(1);

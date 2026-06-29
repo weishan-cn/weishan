@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_NEXT_COHORT_DECISION_BOARD_VERSION = "2.1.97";
+  const FLIGHT_WORKFLOW_NEXT_COHORT_DECISION_BOARD_VERSION = "2.1.98";
   const BOARD_NAME = "flight_workflow_next_cohort_decision_board_v1";
   const CAVEAT = "该决策只适用于只读试点节奏，不代表真实账号、邀请、交易或出票能力。";
 

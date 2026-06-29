@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_USER_CONSENT_FLOW_VERSION = "2.1.97";
+  const FLIGHT_WORKFLOW_READ_ONLY_USER_CONSENT_FLOW_VERSION = "2.1.98";
   const CONSENT_FLOW_NAME = "flight_workflow_read_only_user_consent_flow_v1";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
   const SENSITIVE_INPUT_RE = /身份证|护照|银行卡|passport|cardNumber|credential|password|token|apiKey|secret|登录凭据|证件|银行卡/i;

@@ -61,6 +61,10 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingFirstReadOnlyProviderAdapterShell.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderSandboxDryRunHarness.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderSandboxDryRunViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderAdapterRegistry.js",
+    "apps/desktop/src/renderer/core/globalShoppingDryRunProviderResponseNormalizer.js",
+    "apps/desktop/src/renderer/core/globalShoppingSandboxProviderRunbookBoard.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderAdapterRegistryViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingLegalProviderFixtureAdapter.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderCredentialSafetyReview.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxPriceFeedGate.js",
@@ -99,7 +103,7 @@ function main() {
   const api = windowRef.WeishanReadOnlyPriceCandidateCardViewModel;
   const dryRunApi = windowRef.WeishanMultiProviderSandboxDryRunOrchestrator;
   const dryRun = dryRunApi.runMultiProviderSandboxDryRun({ title:"购买7月15日上海到成都最便宜的直达机票", origin:"上海", destination:"成都", departureDate:"2026-07-15", directOnly:true, sortIntent:"低价优先" }, {});
-  assert.equal(api.READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION, "2.1.97");
+  assert.equal(api.READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION, "2.1.98");
   const card = api.buildReadOnlyPriceCandidateCardViewModel({ continuitySummary:{ status:"resumable", currentStage:"decision", stageLabel:"选择候选", resumePlan:{ nextStepLabel:"确认前往平台", canResume:true } }, confirmationStateSummary:{ labels:["已选择候选"] }, recoverySummary:{ status:"resumable" }, resumeCoachSummary:{ allowedActions:[{ label:"前往平台确认" }] }, currentStage:"decision", workflowStageLabel:"选择候选", nextStepLabel:"确认前往平台", canResumeWorkflow:true, resumeActions:[{ label:"前往平台确认" }], blockedActions:[{ label:"付款" }], actionPolicyDecision:{ status:"requires_confirmation" }, workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sandboxDryRunSummary:dryRun, runTimelineSummary:dryRun.runTimelineSummary, providerRunMatrix:dryRun.providerRunMatrix, dryRunStatus:dryRun.status, dryRunButton:{ label:"运行沙盒只读报价", enabled:true, loading:false, autoRun:false }, dryRunTopCandidates:dryRun.dryRunTopCandidates, task:{ title:"7月15日上海到成都最便宜的机票" }, providerId:"google_flights_search", providerName:"Google Flights", providerType:"flight_search", report:{ provider:{ providerMode:"fixture" }, handoff:{ safeProviderHandoffUrl:"https://www.google.com/travel/flights" }, rankingPreview:{ sourceBreakdown:{ providerCount:3, providerIds:["flight_provider_trusted_fixture","trip_com_sandbox_stub","airline_official_sandbox_stub"], fareSources:["sandbox_read_only_import"] }, rankingExplanation:"仅按导入样本中的只读候选证据排序，平台最终为准。" }, selectedCandidate:{ providerName:"Airline Official Sandbox Stub", responseShape:"airline_official_stub_quote", selectedSourceSummary:"来源：Airline Official Sandbox Stub / airline_official_stub_quote" } }, sourceBreakdown:{ providerCount:3, providerIds:["flight_provider_trusted_fixture","trip_com_sandbox_stub","airline_official_sandbox_stub"], fareSources:["sandbox_read_only_import"] }, selectedSourceSummary:"来源：Airline Official Sandbox Stub / airline_official_stub_quote", rankingExplanation:"仅按导入样本中的只读候选证据排序，平台最终为准。", flightFields:{ origin:"上海", destination:"成都", dateDisplay:"7 月 15 日", goal:"低价优先", directPreference:"直达优先" }, topCandidates:[{ rank:1, quoteId:"q930", providerName:"Airline Official Sandbox Stub", responseShape:"airline_official_stub_quote", fareSource:"sandbox_read_only_import", currency:"CNY", baseFare:780, taxesAndFees:130, providerFees:20, totalPrice:930, safeProviderHandoffReady:true, safeProviderHandoffUrl:"https://www.google.com/travel/flights", bookingUrl:null, payment:false, order:false, identityUpload:false, redacted:true }] });
   assert.equal(card.visible, true);
   assert.equal(card.title, "只读候选价");
@@ -149,6 +153,10 @@ function main() {
   assert.equal(card.firstReadOnlyProviderAdapterShellSummary.userFacingSummary.title, "第一个只读 Provider Adapter 外壳");
   assert.equal(card.providerSandboxSafetyKillSwitchSummary.userFacingSummary.title, "Provider Sandbox 安全熔断器");
   assert.equal(card.providerSandboxDryRunViewModelSummary.title, "Provider Sandbox 干跑准备");
+  assert.equal(card.providerAdapterRegistrySummary.userFacingSummary.title, "Provider Adapter 注册表");
+  assert.equal(card.dryRunProviderResponseNormalizerSummary.userFacingSummary.title, "Dry-Run Provider 响应归一化器");
+  assert.equal(card.sandboxProviderRunbookSummary.userFacingSummary.title, "Sandbox Provider 接入运行手册");
+  assert.equal(card.providerAdapterRegistryViewModelSummary.title, "Provider Adapter 注册与接入手册");
   assert.equal(card.legalProviderFixtureSummary.userFacingSummary.title, "合法 Provider Fixture 适配器");
   assert.equal(card.providerCredentialSafetySummary.userFacingSummary.title, "Provider 凭据安全复核");
   assert.equal(card.sandboxPriceFeedSummary.userFacingSummary.title, "Sandbox 价格 Feed 闸门");
@@ -183,6 +191,10 @@ function main() {
   assert.equal(card.providerAdapterShellStatus, "ready");
   assert.equal(card.providerKillSwitchStatus, "clear");
   assert.equal(card.providerSandboxDryRunViewModelStatus, "ready");
+  assert.equal(card.providerAdapterRegistryStatus, "ready");
+  assert.equal(card.dryRunResponseNormalizerStatus, "ready");
+  assert.equal(card.sandboxProviderRunbookStatus, "ready");
+  assert.equal(card.providerAdapterRegistryViewModelStatus, "ready");
   assert.equal(card.pricePipelineStatus, "ready");
   assert.equal(card.readOnlyCandidateJourneyStatus, "ready");
   assert.equal(card.externalDeepLinkSafetyStatus, "safe");
@@ -191,6 +203,7 @@ function main() {
   assert.equal(card.safeToProceedWithReadOnlyPriceProviderSandbox, true);
   assert.equal(card.safeToProceedWithFirstRealReadOnlyProviderSandbox, true);
   assert.equal(card.safeToProceedWithFirstProviderSandboxFixtureDryRun, true);
+  assert.equal(card.safeToProceedWithFirstSandboxProviderConnectorImplementation, true);
   assert.equal(card.safeToProceedWithDeepLinkSafetyGate, true);
   assert.equal(card.safeToProceedWithSandboxDeepLinkCandidate, true);
   assert.equal(card.safeToProceedWithPartnerFixtureAdapter, true);
@@ -221,7 +234,7 @@ function main() {
   assert.equal(card.providerBindingWizardSummary.title, "Provider 沙盒绑定准备");
   assert.equal(card.interactiveRefreshState.status, "idle");
   assert.equal(card.clearRefreshStateButton.label, "清除刷新状态");
-  assert.equal(card.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.1.97");
+  assert.equal(card.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.1.98");
   assert.equal(card.sessionStatus, "updated");
   assert.equal(card.auditExportReady, true);
   assert.equal(card.sessionRecoverySummary.title, "Session Recovery");
@@ -258,6 +271,11 @@ function main() {
   assert.equal(html.includes("平台核对汇总"), true);
   assert.equal(html.includes("候选价置信标签"), true);
   assert.equal(html.includes("下一步安全建议"), true);
+  assert.equal(html.includes("Provider Adapter 注册表"), true);
+  assert.equal(html.includes("Dry-Run Provider 响应归一化器"), true);
+  assert.equal(html.includes("Sandbox Provider 接入运行手册"), true);
+  assert.equal(html.includes("只允许只读 adapter 注册"), true);
+  assert.equal(html.includes("不接收 raw provider response"), true);
   assert.equal(html.includes("本次机票工作流审计"), true);
   assert.equal(html.includes("安全检查通过"), true);
   assert.equal(html.includes("脱敏会话摘要预览"), true);
