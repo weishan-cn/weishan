@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READINESS_VERSION = "2.2.6";
+  const READINESS_VERSION = "2.2.7";
   const PHASE = "api_binding_readiness_status";
 
   function clone(value) {

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.2.6";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.2.7";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -227,6 +227,10 @@
       platformVerificationProgressTrackerSummary: stripUnsafe(safe.platformVerificationProgressTrackerSummary || null),
       safeNextActionPanelSummary: stripUnsafe(safe.safeNextActionPanelSummary || null),
       userManualReviewViewModelSummary: stripUnsafe(safe.userManualReviewViewModelSummary || null),
+      manualPlatformVisitPreparationCenterSummary: stripUnsafe(safe.manualPlatformVisitPreparationCenterSummary || null),
+      externalPlatformBoundaryBriefSummary: stripUnsafe(safe.externalPlatformBoundaryBriefSummary || null),
+      finalUserSafetyChecklistSummary: stripUnsafe(safe.finalUserSafetyChecklistSummary || null),
+      platformVisitPreparationViewModelSummary: stripUnsafe(safe.platformVisitPreparationViewModelSummary || null),
       legalProviderFixtureSummary: stripUnsafe(safe.legalProviderFixtureSummary || null),
       providerCredentialSafetySummary: stripUnsafe(safe.providerCredentialSafetySummary || null),
       sandboxPriceFeedSummary: stripUnsafe(safe.sandboxPriceFeedSummary || null),
@@ -495,6 +499,10 @@
       platformVerificationProgressTrackerSummary: workflow.platformVerificationProgressTrackerSummary || safe.platformVerificationProgressTrackerSummary ? { title:"平台核对进度追踪", line:workflow.platformVerificationProgressTrackerSummary && workflow.platformVerificationProgressTrackerSummary.userFacingSummary && workflow.platformVerificationProgressTrackerSummary.userFacingSummary.resultLabel || safe.platformVerificationProgressTrackerSummary && safe.platformVerificationProgressTrackerSummary.userFacingSummary && safe.platformVerificationProgressTrackerSummary.userFacingSummary.resultLabel || "平台核对进度仍需复核", redacted:true } : null,
       safeNextActionPanelSummary: workflow.safeNextActionPanelSummary || safe.safeNextActionPanelSummary ? { title:"安全下一步", line:workflow.safeNextActionPanelSummary && workflow.safeNextActionPanelSummary.userFacingSummary && workflow.safeNextActionPanelSummary.userFacingSummary.resultLabel || safe.safeNextActionPanelSummary && safe.safeNextActionPanelSummary.userFacingSummary && safe.safeNextActionPanelSummary.userFacingSummary.resultLabel || "安全下一步仍需复核", redacted:true } : null,
       userManualReviewViewModelSummary: workflow.userManualReviewViewModelSummary || safe.userManualReviewViewModelSummary ? { title:"用户手动复核与安全下一步", line:workflow.userManualReviewViewModelSummary && workflow.userManualReviewViewModelSummary.title || safe.userManualReviewViewModelSummary && safe.userManualReviewViewModelSummary.title || "用户手动复核与安全下一步", redacted:true } : null,
+      manualPlatformVisitPreparationCenterSummary: workflow.manualPlatformVisitPreparationCenterSummary || safe.manualPlatformVisitPreparationCenterSummary ? { title:"手动访问平台准备中心", line:workflow.manualPlatformVisitPreparationCenterSummary && workflow.manualPlatformVisitPreparationCenterSummary.userFacingSummary && workflow.manualPlatformVisitPreparationCenterSummary.userFacingSummary.resultLabel || safe.manualPlatformVisitPreparationCenterSummary && safe.manualPlatformVisitPreparationCenterSummary.userFacingSummary && safe.manualPlatformVisitPreparationCenterSummary.userFacingSummary.resultLabel || "平台访问准备仍需复核", redacted:true } : null,
+      externalPlatformBoundaryBriefSummary: workflow.externalPlatformBoundaryBriefSummary || safe.externalPlatformBoundaryBriefSummary ? { title:"外部平台边界说明", line:workflow.externalPlatformBoundaryBriefSummary && workflow.externalPlatformBoundaryBriefSummary.userFacingSummary && workflow.externalPlatformBoundaryBriefSummary.userFacingSummary.resultLabel || safe.externalPlatformBoundaryBriefSummary && safe.externalPlatformBoundaryBriefSummary.userFacingSummary && safe.externalPlatformBoundaryBriefSummary.userFacingSummary.resultLabel || "平台边界说明仍需复核", redacted:true } : null,
+      finalUserSafetyChecklistSummary: workflow.finalUserSafetyChecklistSummary || safe.finalUserSafetyChecklistSummary ? { title:"最终用户安全清单", line:workflow.finalUserSafetyChecklistSummary && workflow.finalUserSafetyChecklistSummary.userFacingSummary && workflow.finalUserSafetyChecklistSummary.userFacingSummary.resultLabel || safe.finalUserSafetyChecklistSummary && safe.finalUserSafetyChecklistSummary.userFacingSummary && safe.finalUserSafetyChecklistSummary.userFacingSummary.resultLabel || "最终安全清单仍需复核", redacted:true } : null,
+      platformVisitPreparationViewModelSummary: workflow.platformVisitPreparationViewModelSummary || safe.platformVisitPreparationViewModelSummary ? { title:"平台访问准备与最终安全清单", line:workflow.platformVisitPreparationViewModelSummary && workflow.platformVisitPreparationViewModelSummary.title || safe.platformVisitPreparationViewModelSummary && safe.platformVisitPreparationViewModelSummary.title || "平台访问准备与最终安全清单", redacted:true } : null,
       firstSandboxProviderConnectorStatus: workflow.firstSandboxProviderConnectorStatus || safe.firstSandboxProviderConnectorStatus || "",
       providerCoverageStatus: workflow.providerCoverageStatus || safe.providerCoverageStatus || "",
       sourceTrustStatus: workflow.sourceTrustStatus || safe.sourceTrustStatus || "",
@@ -522,11 +530,16 @@
       platformVerificationProgressStatus: workflow.platformVerificationProgressStatus || safe.platformVerificationProgressStatus || "",
       safeNextActionPanelStatus: workflow.safeNextActionPanelStatus || safe.safeNextActionPanelStatus || "",
       userManualReviewViewModelStatus: workflow.userManualReviewViewModelStatus || safe.userManualReviewViewModelStatus || "",
+      manualPlatformVisitPreparationStatus: workflow.manualPlatformVisitPreparationStatus || safe.manualPlatformVisitPreparationStatus || "",
+      externalPlatformBoundaryStatus: workflow.externalPlatformBoundaryStatus || safe.externalPlatformBoundaryStatus || "",
+      finalUserSafetyChecklistStatus: workflow.finalUserSafetyChecklistStatus || safe.finalUserSafetyChecklistStatus || "",
+      platformVisitPreparationViewModelStatus: workflow.platformVisitPreparationViewModelStatus || safe.platformVisitPreparationViewModelStatus || "",
       safeToProceedWithSandboxDecisionReview: workflow.safeToProceedWithSandboxDecisionReview === true || safe.safeToProceedWithSandboxDecisionReview === true,
       safeToProceedWithUserFacingHandoffExplanation: workflow.safeToProceedWithUserFacingHandoffExplanation === true || safe.safeToProceedWithUserFacingHandoffExplanation === true,
       safeToProceedWithManualPlatformReview: workflow.safeToProceedWithManualPlatformReview === true || safe.safeToProceedWithManualPlatformReview === true,
       safeToProceedWithManualPlatformUserEducation: workflow.safeToProceedWithManualPlatformUserEducation === true || safe.safeToProceedWithManualPlatformUserEducation === true,
       safeToProceedWithManualExternalPlatformVisitEducation: workflow.safeToProceedWithManualExternalPlatformVisitEducation === true || safe.safeToProceedWithManualExternalPlatformVisitEducation === true,
+      safeToProceedWithUserLeavingWeishanEducation: workflow.safeToProceedWithUserLeavingWeishanEducation === true || safe.safeToProceedWithUserLeavingWeishanEducation === true,
       safeToProceedWithFirstReadOnlyProviderSandboxIntegration: workflow.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true || safe.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true,
       safeToProceedWithSandboxCandidateUserPreview: workflow.safeToProceedWithSandboxCandidateUserPreview === true || safe.safeToProceedWithSandboxCandidateUserPreview === true,
       pilotExitCriteriaSummary: pilotExitCriteriaSummary ? { title:"只读试点退出条件", line:pilotExitCriteriaSummary.userFacingSummary && pilotExitCriteriaSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,

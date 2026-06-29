@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.2.6";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.2.7";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -187,6 +187,10 @@
       const platformVerificationProgressTrackerSummary = obj(safe.platformVerificationProgressTrackerSummary);
       const safeNextActionPanelSummary = obj(safe.safeNextActionPanelSummary);
       const userManualReviewViewModelSummary = obj(safe.userManualReviewViewModelSummary);
+      const manualPlatformVisitPreparationCenterSummary = obj(safe.manualPlatformVisitPreparationCenterSummary);
+      const externalPlatformBoundaryBriefSummary = obj(safe.externalPlatformBoundaryBriefSummary);
+      const finalUserSafetyChecklistSummary = obj(safe.finalUserSafetyChecklistSummary);
+      const platformVisitPreparationViewModelSummary = obj(safe.platformVisitPreparationViewModelSummary);
       if (rcCandidateReview.status === "ready_for_review" || safe.safeToStartRcReview === true) badges.push(badge("rc_review_ready", "可以开始 RC 复核", "info"));
       if (rcCandidateReview.status === "evidence_incomplete" || rcEvidenceReview.status === "incomplete") badges.push(badge("rc_review_incomplete", "证据仍需补充", "warning"));
       if (rcCandidateReview.status === "needs_safety_review" || rcEvidenceReview.status === "needs_review") badges.push(badge("rc_review_safety_review", "需要安全复核", "warning"));
@@ -252,6 +256,13 @@
       if (safeNextActionPanelSummary.status) badges.push(badge("safe_next_action_no_open", "安全下一步不打开平台", "info"));
       if (safeNextActionPanelSummary.status) badges.push(badge("safe_next_action_no_buy", "下一步不包含购买、下单、付款或出票", "warning"));
       if (userManualReviewViewModelSummary.status) badges.push(badge("user_manual_decision_required", "用户必须自行完成最终平台判断", "warning"));
+      if (manualPlatformVisitPreparationCenterSummary.status === "ready") badges.push(badge("manual_platform_visit_preparation_ready", "手动访问平台准备已完成", "info"));
+      if (externalPlatformBoundaryBriefSummary.status === "ready") badges.push(badge("external_platform_boundary_ready", "外部平台边界说明已准备", "info"));
+      if (finalUserSafetyChecklistSummary.status === "ready") badges.push(badge("final_user_safety_checklist_ready", "最终用户安全清单已准备", "info"));
+      if (externalPlatformBoundaryBriefSummary.status) badges.push(badge("weishan_not_platform", "Weishan 不代表外部平台", "warning"));
+      if (platformVisitPreparationViewModelSummary.status || externalPlatformBoundaryBriefSummary.status) badges.push(badge("platform_final_authority", "平台页面为最终依据", "info"));
+      if (finalUserSafetyChecklistSummary.status) badges.push(badge("final_checklist_no_persist", "最终安全清单不保存用户勾选", "info"));
+      if (platformVisitPreparationViewModelSummary.status) badges.push(badge("leave_weishan_user_decision", "离开 Weishan 后由用户自行判断", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "ready") badges.push(badge("sandbox_deep_link_candidate_ready", "Sandbox 跳转候选已准备", "info"));
       if (sandboxDeepLinkCandidateSummary.status === "needs_review") badges.push(badge("sandbox_deep_link_candidate_review", "Sandbox 跳转候选仍需复核", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "blocked") badges.push(badge("sandbox_deep_link_candidate_blocked", "Sandbox 跳转候选已阻断", "blocked"));

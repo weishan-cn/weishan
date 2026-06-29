@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingFirstSandboxProviderConnector.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingFirstSandboxProviderConnector;
-  assert.equal(api.GLOBAL_SHOPPING_FIRST_SANDBOX_PROVIDER_CONNECTOR_VERSION, "2.2.6");
+  assert.equal(api.GLOBAL_SHOPPING_FIRST_SANDBOX_PROVIDER_CONNECTOR_VERSION, "2.2.7");
 
   const ready = api.buildGlobalShoppingFirstSandboxProviderConnector({
     providerId:"fixture_provider",

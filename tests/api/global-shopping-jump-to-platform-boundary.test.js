@@ -7,9 +7,9 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingJumpToPlatformBoundary.js"]);
   const api = windowRef.WeishanGlobalShoppingJumpToPlatformBoundary;
-  assert.equal(api.GLOBAL_SHOPPING_JUMP_TO_PLATFORM_BOUNDARY_VERSION, "2.2.6");
+  assert.equal(api.GLOBAL_SHOPPING_JUMP_TO_PLATFORM_BOUNDARY_VERSION, "2.2.7");
   const safe = api.buildGlobalShoppingJumpToPlatformBoundary();
-  assert.equal(safe.appVersion, "2.2.6");
+  assert.equal(safe.appVersion, "2.2.7");
   assert.equal(safe.status, "safe");
   assert.equal(api.buildGlobalShoppingJumpToPlatformBoundary({ handoffBoundary:{ canOpenExternalPlatformNow:true } }).status, "blocked");
   assert.equal(api.buildGlobalShoppingJumpToPlatformBoundary({ handoffBoundary:{ canSubmitOrder:true } }).status, "blocked");

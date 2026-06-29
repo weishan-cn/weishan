@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowAuditReviewCenter.js"]);
   const api = windowRef.WeishanFlightWorkflowAuditReviewCenter;
-  assert.equal(api.FLIGHT_WORKFLOW_AUDIT_REVIEW_CENTER_VERSION, "2.2.6");
+  assert.equal(api.FLIGHT_WORKFLOW_AUDIT_REVIEW_CENTER_VERSION, "2.2.7");
   const ready = api.buildFlightWorkflowAuditReviewCenter({ workflowStateSummary:{ workflowId:"wf1" }, actionQueueSummary:{ blockedActions:[{ label:"付款" }] }, actionPolicyDecision:{ status:"requires_confirmation" }, sensitiveInputBlocked:true, bookingUrl:null, payment:false, order:false, rawUserTextStored:false });
   assert.equal(ready.centerName, "flight_workflow_audit_review_center_v1");
   assert.equal(ready.status, "warning");

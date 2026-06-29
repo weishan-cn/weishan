@@ -13,7 +13,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowRolloutControlViewModel.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowRolloutControlViewModel;
-  assert.equal(api.FLIGHT_WORKFLOW_ROLLOUT_CONTROL_VIEW_MODEL_VERSION, "2.2.6");
+  assert.equal(api.FLIGHT_WORKFLOW_ROLLOUT_CONTROL_VIEW_MODEL_VERSION, "2.2.7");
   const vmModel = api.buildFlightWorkflowRolloutControlViewModel({ cohortProgressReady:true, milestoneReady:true, invitationReady:true, supportReady:true, issuePatternStable:true, safetySentinelPass:true, noOpenBlockingIssue:true, noSensitiveDataRisk:true, noTradingRisk:true, testerSlotCount:5, eligibleSlotCount:5, consentCompletionRatio:0.9, feedbackCompletionRatio:0.8, issueResolutionRatio:1 });
   assert.equal(vmModel.title, "只读试点发布控制中心");
   assert.equal(vmModel.cards.some((card) => card.cardId === "rollout" && card.label === "发布控制"), true);

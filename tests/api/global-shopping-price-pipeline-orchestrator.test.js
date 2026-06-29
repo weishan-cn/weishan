@@ -54,10 +54,14 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingSafeNextActionPanel.js",
     "apps/desktop/src/renderer/core/globalShoppingUserManualReviewViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingPlatformHandoffSimulationViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingManualPlatformVisitPreparationCenter.js",
+    "apps/desktop/src/renderer/core/globalShoppingExternalPlatformBoundaryBrief.js",
+    "apps/desktop/src/renderer/core/globalShoppingFinalUserSafetyChecklist.js",
+    "apps/desktop/src/renderer/core/globalShoppingPlatformVisitPreparationViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.2.6");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.2.7");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -168,10 +172,10 @@ function main() {
     safeNextActionPanelSummary:safeNextActionPanel,
     userManualReviewViewModelSummary:userManualReviewViewModel
   });
-  assert.equal(ready.appVersion, "2.2.6");
+  assert.equal(ready.appVersion, "2.2.7");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "只读价格流水线已准备");
-  assert.equal(ready.pipelineStages.length, 47);
+  assert.equal(ready.pipelineStages.length, 51);
   assert.equal(ready.readyOutputs.canShowFixtureCandidatePrices, true);
   assert.equal(ready.readyOutputs.canShowFixtureReplay, true);
   assert.equal(ready.readyOutputs.canShowOfficialAnchor, true);

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_USER_CONFIRMATION_CHECKLIST_VERSION = "2.2.6";
+  const GLOBAL_SHOPPING_USER_CONFIRMATION_CHECKLIST_VERSION = "2.2.7";
   const CHECKLIST_NAME = "global_shopping_user_confirmation_checklist_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
