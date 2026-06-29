@@ -1,5 +1,5 @@
 (function(){
-  const CHEAPEST_TRUTH_GUARD_VERSION = "2.2.5";
+  const CHEAPEST_TRUTH_GUARD_VERSION = "2.2.6";
   const FORBIDDEN_PRICE_RE = /fake|mock|demo|AI\s*估价|estimated\s*price|保证最低价|锁价|最低价已找到/i;
 
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

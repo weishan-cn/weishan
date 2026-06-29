@@ -16,7 +16,7 @@ function load(file) {
 function main() {
   const windowRef = load("apps/desktop/src/renderer/core/globalShoppingManualPlatformReviewViewModel.js");
   const api = windowRef.WeishanGlobalShoppingManualPlatformReviewViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_PLATFORM_REVIEW_VIEW_MODEL_VERSION, "2.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_PLATFORM_REVIEW_VIEW_MODEL_VERSION, "2.2.6");
   const ready = api.buildGlobalShoppingManualPlatformReviewViewModel({
     manualPlatformReviewCockpitSummary:{ status:"ready", userFacingSummary:{ resultLabel:"手动平台复核驾驶舱已准备", redacted:true }, redacted:true },
     handoffAcceptanceWalkthroughSummary:{ status:"ready", userFacingSummary:{ resultLabel:"交接包接受演练已准备", redacted:true }, redacted:true },

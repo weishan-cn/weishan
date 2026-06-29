@@ -32,12 +32,12 @@ const api = windowRef.WeishanCredentialConsentScopeGate;
 const bridge = windowRef.WeishanCommerceCredentialConsentScopeGate;
 
 function main() {
-  assert.equal(api.CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, "2.2.5");
+  assert.equal(api.CREDENTIAL_CONSENT_SCOPE_GATE_VERSION, "2.2.6");
   assert.equal(typeof api.buildCredentialConsentScopeGate, "function");
   assert.equal(typeof api.assertCredentialConsentScopeGateSafe, "function");
 
   const gate = api.buildCredentialConsentScopeGate();
-  assert.equal(gate.gateVersion, "2.2.5");
+  assert.equal(gate.gateVersion, "2.2.6");
   assert.equal(gate.phase, "credential_consent_scope_gate");
   assert.equal(gate.status, "credential consent gate only");
   assert.equal(gate.mode, "no provider connection");
@@ -126,7 +126,7 @@ function main() {
   assert.equal(api.assertCredentialConsentScopeGateSafe(gate), true);
 
   const bridgeGate = bridge.buildCredentialConsentScopeGateDisplay();
-  assert.equal(bridgeGate.gateVersion, "2.2.5");
+  assert.equal(bridgeGate.gateVersion, "2.2.6");
   assert.equal(bridgeGate.status, "credential consent gate only");
   assert.equal(bridgeGate.finalDecision, "no-go");
   assert.equal(bridge.assertCredentialConsentScopeGateSafe(bridgeGate), true);

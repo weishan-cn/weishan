@@ -9722,20 +9722,20 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.2.5 manual platform review stays local and bounded @commerce-smoke", async () => {
+  test("v2.2.6 user manual review flow stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
-      window.WeishanGlobalShoppingManualPlatformReviewCockpit &&
-      window.WeishanGlobalShoppingHandoffAcceptanceWalkthrough &&
-      window.WeishanGlobalShoppingPlatformRealityCheckBoard &&
-      window.WeishanGlobalShoppingManualPlatformReviewViewModel &&
+      window.WeishanGlobalShoppingUserFacingManualReviewFlow &&
+      window.WeishanGlobalShoppingPlatformVerificationProgressTracker &&
+      window.WeishanGlobalShoppingSafeNextActionPanel &&
+      window.WeishanGlobalShoppingUserManualReviewViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
-    const v225 = await page.evaluate(() => {
+    const v226 = await page.evaluate(() => {
       const cardApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
       const host = document.createElement("section");
-      host.setAttribute("data-commerce-v225-render-smoke", "true");
+      host.setAttribute("data-commerce-v226-render-smoke", "true");
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml({});
       const section = host.querySelector("[data-commerce-global-shopping-manual-platform-review='true']");
       document.body.appendChild(host);
@@ -9745,27 +9745,33 @@ test.describe.serial("commerce agent workbench", () => {
         sectionText:section ? section.innerText : "",
         sectionHtml:section ? section.innerHTML : "",
         sectionCount:host.querySelectorAll("[data-commerce-global-shopping-manual-platform-review='true']").length,
-        cockpitButtonCount:host.querySelectorAll("[data-commerce-global-shopping-manual-platform-review-cockpit-show]").length,
-        walkthroughButtonCount:host.querySelectorAll("[data-commerce-global-shopping-handoff-acceptance-walkthrough-show]").length,
-        realityCheckButtonCount:host.querySelectorAll("[data-commerce-global-shopping-platform-reality-check-board-show]").length
+        flowButtonCount:host.querySelectorAll("[data-commerce-global-shopping-user-facing-manual-review-flow-show]").length,
+        progressButtonCount:host.querySelectorAll("[data-commerce-global-shopping-platform-verification-progress-show]").length,
+        nextActionButtonCount:host.querySelectorAll("[data-commerce-global-shopping-safe-next-action-show]").length
       };
     });
-    expect(v225.sectionCount).toBe(1);
-    expect(v225.cockpitButtonCount).toBe(1);
-    expect(v225.walkthroughButtonCount).toBe(1);
-    expect(v225.realityCheckButtonCount).toBe(1);
-    expect(v225.text).toContain("手动平台复核与现实检查");
-    expect(v225.text).toContain("手动平台复核驾驶舱");
-    expect(v225.text).toContain("交接包接受演练");
-    expect(v225.text).toContain("平台真实页面复核清单");
-    expect(v225.text).toContain("接受演练不保存用户确认");
-    expect(v225.text).toContain("平台页面才是最终依据");
-    expect(v225.text).toContain("手动复核不代表下单能力");
-    expect(v225.text).toContain("Weishan 不替用户做最终决定");
-    expect(v225.text).toContain("当前只展示手动复核、接受演练和平台真实页面复核清单");
-    expect(v225.text).toContain("不打开平台，不保存选择，不构成订单、付款授权或签名");
-    expect(v225.sectionText).not.toMatch(/立即购买|直接下单|一键下单|一键出票|paymentUrl|orderUrl|checkoutUrl|bookingUrl/);
-    expect(v225.sectionHtml).not.toMatch(/https?:\/\//i);
+    expect(v226.sectionCount).toBe(1);
+    expect(v226.flowButtonCount).toBe(1);
+    expect(v226.progressButtonCount).toBe(1);
+    expect(v226.nextActionButtonCount).toBe(1);
+    expect(v226.text).toContain("用户手动复核与安全下一步");
+    expect(v226.text).toContain("用户手动复核流程");
+    expect(v226.text).toContain("平台核对进度追踪");
+    expect(v226.text).toContain("安全下一步");
+    expect(v226.text).toContain("手动复核流程");
+    expect(v226.text).toContain("平台核对进度");
+    expect(v226.text).toContain("风险说明");
+    expect(v226.text).toContain("用户手动复核流程已准备");
+    expect(v226.text).toContain("平台核对进度已准备");
+    expect(v226.text).toContain("安全下一步已准备");
+    expect(v226.text).toContain("平台核对进度不保存勾选");
+    expect(v226.text).toContain("安全下一步不打开平台");
+    expect(v226.text).toContain("下一步不包含购买、下单、付款或出票");
+    expect(v226.text).toContain("用户必须自行完成最终平台判断");
+    expect(v226.text).toContain("当前只展示手动复核流程、平台核对进度和安全下一步");
+    expect(v226.text).toContain("不打开平台，不保存选择，不构成订单、付款授权或签名");
+    expect(v226.sectionText).not.toMatch(/立即购买|直接下单|一键下单|一键出票|paymentUrl|orderUrl|checkoutUrl|bookingUrl|token|key|secret/);
+    expect(v226.sectionHtml).not.toMatch(/https?:\/\//i);
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 

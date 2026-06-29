@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_COVERED_LOWEST_CANDIDATE_BOARD_VERSION = "2.2.5";
+  const GLOBAL_SHOPPING_COVERED_LOWEST_CANDIDATE_BOARD_VERSION = "2.2.6";
   const BOARD_NAME = "global_shopping_covered_lowest_candidate_board_v1";
   const CAVEAT = "当前仅比较已覆盖来源中的候选价，不代表最低承诺、价格保证、锁定承诺、最终成交价或可下单能力。";
 

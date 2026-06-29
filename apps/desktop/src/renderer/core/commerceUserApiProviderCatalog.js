@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const CATALOG_VERSION = "2.2.5";
+  const CATALOG_VERSION = "2.2.6";
   const PHASE = "user_api_provider_catalog";
 
   function clone(value) {

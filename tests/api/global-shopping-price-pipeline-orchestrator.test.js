@@ -49,11 +49,15 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPlatformPreflightSafetyGate.js",
     "apps/desktop/src/renderer/core/globalShoppingUserActionBoundaryReceipt.js",
     "apps/desktop/src/renderer/core/globalShoppingHandoffPacketViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingUserFacingManualReviewFlow.js",
+    "apps/desktop/src/renderer/core/globalShoppingPlatformVerificationProgressTracker.js",
+    "apps/desktop/src/renderer/core/globalShoppingSafeNextActionPanel.js",
+    "apps/desktop/src/renderer/core/globalShoppingUserManualReviewViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingPlatformHandoffSimulationViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.2.6");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -104,6 +108,10 @@ function main() {
   const handoffAcceptanceWalkthrough = { status:"ready", userFacingSummary:{ title:"交接包接受演练", resultLabel:"交接包接受演练已准备", redacted:true }, redacted:true };
   const platformRealityCheckBoard = { status:"ready", userFacingSummary:{ title:"平台真实页面复核清单", resultLabel:"平台真实页面复核清单已准备", redacted:true }, redacted:true };
   const manualPlatformReviewViewModel = { status:"ready", title:"手动平台复核与现实检查", userFacingSummary:{ title:"手动平台复核与现实检查", resultLabel:"手动平台复核与现实检查已准备", redacted:true }, redacted:true };
+  const userFacingManualReviewFlow = { status:"ready", userFacingSummary:{ title:"用户手动复核流程", resultLabel:"用户手动复核流程已准备", redacted:true }, redacted:true };
+  const platformVerificationProgressTracker = { status:"ready", userFacingSummary:{ title:"平台核对进度追踪", resultLabel:"平台核对进度已准备", redacted:true }, redacted:true };
+  const safeNextActionPanel = { status:"ready", userFacingSummary:{ title:"安全下一步", resultLabel:"安全下一步已准备", redacted:true }, redacted:true };
+  const userManualReviewViewModel = { status:"ready", title:"用户手动复核与安全下一步", userFacingSummary:{ title:"用户手动复核与安全下一步", resultLabel:"用户手动复核与安全下一步已准备", redacted:true }, redacted:true };
   const firstSandboxConnector = windowRef.WeishanGlobalShoppingFirstSandboxProviderConnector.buildGlobalShoppingFirstSandboxProviderConnector({ providerId:"fixture_provider", providerName:"Fixture Provider", providerType:"fixture", itemType:"flight", connectorMode:"dry_run", adapterRegistry:{ status:"ready", adapters:[{ providerType:"official", itemType:"flight", region:"CN", redacted:true }], redacted:true }, adapterShell:adapterShell, dryRunHarness:dryRunHarness, safetyKillSwitch:killSwitch, requestEnvelope:{ status:"ready", requestEnvelope:{ requestMeta:{ providerId:"fixture_provider", providerName:"Fixture Provider", itemType:"flight" } }, redacted:true }, providerRunbook:{ status:"ready", redacted:true }, normalizedSourceInputs:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", itemType:"flight", redacted:true }] });
   const coverageDashboard = windowRef.WeishanGlobalShoppingProviderCoverageDashboard.buildGlobalShoppingProviderCoverageDashboard({ adapterRegistrySummary:{ adapters:[{ providerType:"official", itemType:"flight", region:"CN", redacted:true }] }, firstSandboxProviderConnectorSummary:firstSandboxConnector, normalizedSourceInputs:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", itemType:"flight", redacted:true }] });
   const sourceTrust = windowRef.WeishanGlobalShoppingReadOnlySourceTrustScore.buildGlobalShoppingReadOnlySourceTrustScore({ sources:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", basePrice:920, currency:"CNY", lastCheckedAt:"redacted_now", redacted:true }] });
@@ -154,12 +162,16 @@ function main() {
     manualPlatformReviewCockpitSummary:manualPlatformReviewCockpit,
     handoffAcceptanceWalkthroughSummary:handoffAcceptanceWalkthrough,
     platformRealityCheckBoardSummary:platformRealityCheckBoard,
-    manualPlatformReviewViewModelSummary:manualPlatformReviewViewModel
+    manualPlatformReviewViewModelSummary:manualPlatformReviewViewModel,
+    userFacingManualReviewFlowSummary:userFacingManualReviewFlow,
+    platformVerificationProgressTrackerSummary:platformVerificationProgressTracker,
+    safeNextActionPanelSummary:safeNextActionPanel,
+    userManualReviewViewModelSummary:userManualReviewViewModel
   });
-  assert.equal(ready.appVersion, "2.2.5");
+  assert.equal(ready.appVersion, "2.2.6");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "只读价格流水线已准备");
-  assert.equal(ready.pipelineStages.length, 43);
+  assert.equal(ready.pipelineStages.length, 47);
   assert.equal(ready.readyOutputs.canShowFixtureCandidatePrices, true);
   assert.equal(ready.readyOutputs.canShowFixtureReplay, true);
   assert.equal(ready.readyOutputs.canShowOfficialAnchor, true);
@@ -195,6 +207,10 @@ function main() {
   assert.equal(ready.handoffAcceptanceWalkthroughSummary.userFacingSummary.title, "交接包接受演练");
   assert.equal(ready.platformRealityCheckBoardSummary.userFacingSummary.title, "平台真实页面复核清单");
   assert.equal(ready.manualPlatformReviewViewModelSummary.title, "手动平台复核与现实检查");
+  assert.equal(ready.userFacingManualReviewFlowSummary.userFacingSummary.title, "用户手动复核流程");
+  assert.equal(ready.platformVerificationProgressTrackerSummary.userFacingSummary.title, "平台核对进度追踪");
+  assert.equal(ready.safeNextActionPanelSummary.userFacingSummary.title, "安全下一步");
+  assert.equal(ready.userManualReviewViewModelSummary.title, "用户手动复核与安全下一步");
   assert.equal(ready.readyOutputs.safeToProceedWithFirstSandboxProviderConnectorImplementation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithFirstReadOnlyProviderSandboxIntegration, true);
   assert.equal(ready.readyOutputs.safeToProceedWithSandboxCandidateUserPreview, true);
@@ -202,6 +218,7 @@ function main() {
   assert.equal(ready.readyOutputs.safeToProceedWithUserFacingHandoffExplanation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithManualPlatformReview, true);
   assert.equal(ready.readyOutputs.safeToProceedWithManualPlatformUserEducation, true);
+  assert.equal(ready.readyOutputs.safeToProceedWithManualExternalPlatformVisitEducation, true);
 
   assert.equal(api.buildGlobalShoppingPricePipelineOrchestrator({
     providerCredentialSafetyReview:{ status:"ready" },

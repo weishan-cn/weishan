@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.2.5";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.2.6";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -183,6 +183,10 @@
       const sandboxProviderResponseContractSummary = obj(safe.sandboxProviderResponseContractSummary);
       const pricePipelineOrchestratorSummary = obj(safe.pricePipelineOrchestratorSummary);
       const readOnlyCandidateJourneySummary = obj(safe.readOnlyCandidateJourneySummary);
+      const userFacingManualReviewFlowSummary = obj(safe.userFacingManualReviewFlowSummary);
+      const platformVerificationProgressTrackerSummary = obj(safe.platformVerificationProgressTrackerSummary);
+      const safeNextActionPanelSummary = obj(safe.safeNextActionPanelSummary);
+      const userManualReviewViewModelSummary = obj(safe.userManualReviewViewModelSummary);
       if (rcCandidateReview.status === "ready_for_review" || safe.safeToStartRcReview === true) badges.push(badge("rc_review_ready", "可以开始 RC 复核", "info"));
       if (rcCandidateReview.status === "evidence_incomplete" || rcEvidenceReview.status === "incomplete") badges.push(badge("rc_review_incomplete", "证据仍需补充", "warning"));
       if (rcCandidateReview.status === "needs_safety_review" || rcEvidenceReview.status === "needs_review") badges.push(badge("rc_review_safety_review", "需要安全复核", "warning"));
@@ -241,6 +245,13 @@
       if (externalDeepLinkSafetySummary.status || searchParameterPrefillSummary.status) badges.push(badge("handoff_no_platform_account_storage", "不保存平台账号", "info"));
       if (externalDeepLinkSafetySummary.status || searchParameterPrefillSummary.status) badges.push(badge("handoff_no_identity_bank_storage", "不保存证件银行卡", "info"));
       if (jumpToPlatformHandoffPreviewSummary.status) badges.push(badge("handoff_preview_not_ordering", "跳转预览不代表下单能力", "warning"));
+      if (userFacingManualReviewFlowSummary.status === "ready") badges.push(badge("user_manual_review_flow_ready", "用户手动复核流程已准备", "info"));
+      if (platformVerificationProgressTrackerSummary.status === "ready") badges.push(badge("platform_verification_progress_ready", "平台核对进度已准备", "info"));
+      if (safeNextActionPanelSummary.status === "ready") badges.push(badge("safe_next_action_ready", "安全下一步已准备", "info"));
+      if (platformVerificationProgressTrackerSummary.status) badges.push(badge("platform_verification_no_persist", "平台核对进度不保存勾选", "info"));
+      if (safeNextActionPanelSummary.status) badges.push(badge("safe_next_action_no_open", "安全下一步不打开平台", "info"));
+      if (safeNextActionPanelSummary.status) badges.push(badge("safe_next_action_no_buy", "下一步不包含购买、下单、付款或出票", "warning"));
+      if (userManualReviewViewModelSummary.status) badges.push(badge("user_manual_decision_required", "用户必须自行完成最终平台判断", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "ready") badges.push(badge("sandbox_deep_link_candidate_ready", "Sandbox 跳转候选已准备", "info"));
       if (sandboxDeepLinkCandidateSummary.status === "needs_review") badges.push(badge("sandbox_deep_link_candidate_review", "Sandbox 跳转候选仍需复核", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "blocked") badges.push(badge("sandbox_deep_link_candidate_blocked", "Sandbox 跳转候选已阻断", "blocked"));

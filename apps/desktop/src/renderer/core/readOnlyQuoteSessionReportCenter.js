@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.2.5";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.2.6";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -223,6 +223,10 @@
       handoffAcceptanceWalkthroughSummary: stripUnsafe(safe.handoffAcceptanceWalkthroughSummary || null),
       platformRealityCheckBoardSummary: stripUnsafe(safe.platformRealityCheckBoardSummary || null),
       manualPlatformReviewViewModelSummary: stripUnsafe(safe.manualPlatformReviewViewModelSummary || null),
+      userFacingManualReviewFlowSummary: stripUnsafe(safe.userFacingManualReviewFlowSummary || null),
+      platformVerificationProgressTrackerSummary: stripUnsafe(safe.platformVerificationProgressTrackerSummary || null),
+      safeNextActionPanelSummary: stripUnsafe(safe.safeNextActionPanelSummary || null),
+      userManualReviewViewModelSummary: stripUnsafe(safe.userManualReviewViewModelSummary || null),
       legalProviderFixtureSummary: stripUnsafe(safe.legalProviderFixtureSummary || null),
       providerCredentialSafetySummary: stripUnsafe(safe.providerCredentialSafetySummary || null),
       sandboxPriceFeedSummary: stripUnsafe(safe.sandboxPriceFeedSummary || null),
@@ -487,6 +491,10 @@
       handoffAcceptanceWalkthroughSummary: workflow.handoffAcceptanceWalkthroughSummary || safe.handoffAcceptanceWalkthroughSummary ? { title:"交接包接受演练", line:workflow.handoffAcceptanceWalkthroughSummary && workflow.handoffAcceptanceWalkthroughSummary.userFacingSummary && workflow.handoffAcceptanceWalkthroughSummary.userFacingSummary.resultLabel || safe.handoffAcceptanceWalkthroughSummary && safe.handoffAcceptanceWalkthroughSummary.userFacingSummary && safe.handoffAcceptanceWalkthroughSummary.userFacingSummary.resultLabel || "交接包接受演练仍需复核", redacted:true } : null,
       platformRealityCheckBoardSummary: workflow.platformRealityCheckBoardSummary || safe.platformRealityCheckBoardSummary ? { title:"平台真实页面复核清单", line:workflow.platformRealityCheckBoardSummary && workflow.platformRealityCheckBoardSummary.userFacingSummary && workflow.platformRealityCheckBoardSummary.userFacingSummary.resultLabel || safe.platformRealityCheckBoardSummary && safe.platformRealityCheckBoardSummary.userFacingSummary && safe.platformRealityCheckBoardSummary.userFacingSummary.resultLabel || "平台真实页面复核清单仍需复核", redacted:true } : null,
       manualPlatformReviewViewModelSummary: workflow.manualPlatformReviewViewModelSummary || safe.manualPlatformReviewViewModelSummary ? { title:"手动平台复核与现实检查", line:workflow.manualPlatformReviewViewModelSummary && workflow.manualPlatformReviewViewModelSummary.title || safe.manualPlatformReviewViewModelSummary && safe.manualPlatformReviewViewModelSummary.title || "手动平台复核与现实检查", redacted:true } : null,
+      userFacingManualReviewFlowSummary: workflow.userFacingManualReviewFlowSummary || safe.userFacingManualReviewFlowSummary ? { title:"用户手动复核流程", line:workflow.userFacingManualReviewFlowSummary && workflow.userFacingManualReviewFlowSummary.userFacingSummary && workflow.userFacingManualReviewFlowSummary.userFacingSummary.resultLabel || safe.userFacingManualReviewFlowSummary && safe.userFacingManualReviewFlowSummary.userFacingSummary && safe.userFacingManualReviewFlowSummary.userFacingSummary.resultLabel || "用户手动复核流程仍需复核", redacted:true } : null,
+      platformVerificationProgressTrackerSummary: workflow.platformVerificationProgressTrackerSummary || safe.platformVerificationProgressTrackerSummary ? { title:"平台核对进度追踪", line:workflow.platformVerificationProgressTrackerSummary && workflow.platformVerificationProgressTrackerSummary.userFacingSummary && workflow.platformVerificationProgressTrackerSummary.userFacingSummary.resultLabel || safe.platformVerificationProgressTrackerSummary && safe.platformVerificationProgressTrackerSummary.userFacingSummary && safe.platformVerificationProgressTrackerSummary.userFacingSummary.resultLabel || "平台核对进度仍需复核", redacted:true } : null,
+      safeNextActionPanelSummary: workflow.safeNextActionPanelSummary || safe.safeNextActionPanelSummary ? { title:"安全下一步", line:workflow.safeNextActionPanelSummary && workflow.safeNextActionPanelSummary.userFacingSummary && workflow.safeNextActionPanelSummary.userFacingSummary.resultLabel || safe.safeNextActionPanelSummary && safe.safeNextActionPanelSummary.userFacingSummary && safe.safeNextActionPanelSummary.userFacingSummary.resultLabel || "安全下一步仍需复核", redacted:true } : null,
+      userManualReviewViewModelSummary: workflow.userManualReviewViewModelSummary || safe.userManualReviewViewModelSummary ? { title:"用户手动复核与安全下一步", line:workflow.userManualReviewViewModelSummary && workflow.userManualReviewViewModelSummary.title || safe.userManualReviewViewModelSummary && safe.userManualReviewViewModelSummary.title || "用户手动复核与安全下一步", redacted:true } : null,
       firstSandboxProviderConnectorStatus: workflow.firstSandboxProviderConnectorStatus || safe.firstSandboxProviderConnectorStatus || "",
       providerCoverageStatus: workflow.providerCoverageStatus || safe.providerCoverageStatus || "",
       sourceTrustStatus: workflow.sourceTrustStatus || safe.sourceTrustStatus || "",
@@ -510,10 +518,15 @@
       handoffAcceptanceWalkthroughStatus: workflow.handoffAcceptanceWalkthroughStatus || safe.handoffAcceptanceWalkthroughStatus || "",
       platformRealityCheckStatus: workflow.platformRealityCheckStatus || safe.platformRealityCheckStatus || "",
       manualPlatformReviewViewModelStatus: workflow.manualPlatformReviewViewModelStatus || safe.manualPlatformReviewViewModelStatus || "",
+      userFacingManualReviewFlowStatus: workflow.userFacingManualReviewFlowStatus || safe.userFacingManualReviewFlowStatus || "",
+      platformVerificationProgressStatus: workflow.platformVerificationProgressStatus || safe.platformVerificationProgressStatus || "",
+      safeNextActionPanelStatus: workflow.safeNextActionPanelStatus || safe.safeNextActionPanelStatus || "",
+      userManualReviewViewModelStatus: workflow.userManualReviewViewModelStatus || safe.userManualReviewViewModelStatus || "",
       safeToProceedWithSandboxDecisionReview: workflow.safeToProceedWithSandboxDecisionReview === true || safe.safeToProceedWithSandboxDecisionReview === true,
       safeToProceedWithUserFacingHandoffExplanation: workflow.safeToProceedWithUserFacingHandoffExplanation === true || safe.safeToProceedWithUserFacingHandoffExplanation === true,
       safeToProceedWithManualPlatformReview: workflow.safeToProceedWithManualPlatformReview === true || safe.safeToProceedWithManualPlatformReview === true,
       safeToProceedWithManualPlatformUserEducation: workflow.safeToProceedWithManualPlatformUserEducation === true || safe.safeToProceedWithManualPlatformUserEducation === true,
+      safeToProceedWithManualExternalPlatformVisitEducation: workflow.safeToProceedWithManualExternalPlatformVisitEducation === true || safe.safeToProceedWithManualExternalPlatformVisitEducation === true,
       safeToProceedWithFirstReadOnlyProviderSandboxIntegration: workflow.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true || safe.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true,
       safeToProceedWithSandboxCandidateUserPreview: workflow.safeToProceedWithSandboxCandidateUserPreview === true || safe.safeToProceedWithSandboxCandidateUserPreview === true,
       pilotExitCriteriaSummary: pilotExitCriteriaSummary ? { title:"只读试点退出条件", line:pilotExitCriteriaSummary.userFacingSummary && pilotExitCriteriaSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,

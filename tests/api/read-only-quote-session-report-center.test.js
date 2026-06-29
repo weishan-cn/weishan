@@ -76,13 +76,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.2.5");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.2.6");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "2.2.5");
+  assert.equal(ready.appVersion, "2.2.6");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -234,6 +234,10 @@ function main() {
     handoffAcceptanceWalkthroughSummary:handoffAcceptanceWalkthrough,
     platformRealityCheckBoardSummary:platformRealityCheckBoard,
     manualPlatformReviewViewModelSummary:manualPlatformReviewViewModel,
+    userFacingManualReviewFlowSummary:{ status:"ready", userFacingSummary:{ title:"用户手动复核流程", resultLabel:"用户手动复核流程已准备", redacted:true }, redacted:true },
+    platformVerificationProgressTrackerSummary:{ status:"ready", userFacingSummary:{ title:"平台核对进度追踪", resultLabel:"平台核对进度已准备", redacted:true }, redacted:true },
+    safeNextActionPanelSummary:{ status:"ready", userFacingSummary:{ title:"安全下一步", resultLabel:"安全下一步已准备", redacted:true }, redacted:true },
+    userManualReviewViewModelSummary:{ status:"ready", title:"用户手动复核与安全下一步", userFacingSummary:{ title:"用户手动复核与安全下一步", resultLabel:"用户手动复核与安全下一步已准备", redacted:true }, redacted:true },
     globalShoppingGoalStatus:"aligned",
     jumpBoundaryStatus:"safe",
     legalProviderFixtureStatus:"ready",
@@ -287,7 +291,12 @@ function main() {
     manualPlatformReviewViewModelStatus:"ready",
     safeToProceedWithSandboxDeepLinkCandidate:true,
     safeToProceedWithPartnerFixtureAdapter:true,
-    safeToProceedWithManualPlatformUserEducation:true
+    safeToProceedWithManualPlatformUserEducation:true,
+    userFacingManualReviewFlowStatus:"ready",
+    platformVerificationProgressStatus:"ready",
+    safeNextActionPanelStatus:"ready",
+    userManualReviewViewModelStatus:"ready",
+    safeToProceedWithManualExternalPlatformVisitEducation:true
   });
   assert.equal(globalReady.userFacingSummary.globalShoppingProductGoalSummary.title, "全球购产品目标");
   assert.equal(globalReady.userFacingSummary.jumpToPlatformBoundarySummary.title, "跳转至平台自行下单边界");
@@ -328,6 +337,10 @@ function main() {
   assert.equal(globalReady.userFacingSummary.handoffAcceptanceWalkthroughSummary.title, "交接包接受演练");
   assert.equal(globalReady.userFacingSummary.platformRealityCheckBoardSummary.title, "平台真实页面复核清单");
   assert.equal(globalReady.userFacingSummary.manualPlatformReviewViewModelSummary.title, "手动平台复核与现实检查");
+  assert.equal(globalReady.userFacingSummary.userFacingManualReviewFlowSummary.title, "用户手动复核流程");
+  assert.equal(globalReady.userFacingSummary.platformVerificationProgressTrackerSummary.title, "平台核对进度追踪");
+  assert.equal(globalReady.userFacingSummary.safeNextActionPanelSummary.title, "安全下一步");
+  assert.equal(globalReady.userFacingSummary.userManualReviewViewModelSummary.title, "用户手动复核与安全下一步");
   assert.equal(globalReady.userFacingSummary.globalShoppingGoalStatus, "aligned");
   assert.equal(globalReady.userFacingSummary.jumpBoundaryStatus, "safe");
   assert.equal(globalReady.userFacingSummary.safeToProceedWithJumpToPlatformMvp, true);
@@ -369,9 +382,14 @@ function main() {
   assert.equal(globalReady.userFacingSummary.handoffAcceptanceWalkthroughStatus, "ready");
   assert.equal(globalReady.userFacingSummary.platformRealityCheckStatus, "ready");
   assert.equal(globalReady.userFacingSummary.manualPlatformReviewViewModelStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.userFacingManualReviewFlowStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.platformVerificationProgressStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.safeNextActionPanelStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.userManualReviewViewModelStatus, "ready");
   assert.equal(globalReady.userFacingSummary.safeToProceedWithSandboxDeepLinkCandidate, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithPartnerFixtureAdapter, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithManualPlatformUserEducation, true);
+  assert.equal(globalReady.userFacingSummary.safeToProceedWithManualExternalPlatformVisitEducation, true);
   const decisionReviewReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     sandboxCandidateComparisonWorkbenchSummary:{ status:"ready", userFacingSummary:{ title:"Sandbox 候选对比工作台", resultLabel:"候选对比已准备", caveat:"当前仅比较脱敏 sandbox 候选。", redacted:true }, redacted:true },

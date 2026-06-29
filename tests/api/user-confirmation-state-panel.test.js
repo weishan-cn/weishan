@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/userConfirmationStatePanel.js"]);
   const api = windowRef.WeishanUserConfirmationStatePanel;
-  assert.equal(api.USER_CONFIRMATION_STATE_PANEL_VERSION, "2.2.5");
+  assert.equal(api.USER_CONFIRMATION_STATE_PANEL_VERSION, "2.2.6");
   const panel = api.buildUserConfirmationStatePanel({ selectedCandidate:{ rank:1 }, handoffChecklistSummary:{ status:"accepted" }, handoffReceiptSummary:{ status:"confirmed", userConfirmed:true }, manualPlatformCheckSummary:{ status:"recorded" } });
   assert.equal(panel.status, "ready");
   assert.equal(panel.confirmations.candidateSelected, true);

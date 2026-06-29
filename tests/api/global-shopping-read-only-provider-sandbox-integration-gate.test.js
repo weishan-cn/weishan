@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingReadOnlyProviderSandboxIntegrationGate.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingReadOnlyProviderSandboxIntegrationGate;
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_PROVIDER_SANDBOX_INTEGRATION_GATE_VERSION, "2.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_PROVIDER_SANDBOX_INTEGRATION_GATE_VERSION, "2.2.6");
 
   const ready = api.buildGlobalShoppingReadOnlyProviderSandboxIntegrationGate({
     legalProviderFixtureSummary:{ status:"ready", redacted:true },

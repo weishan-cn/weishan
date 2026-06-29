@@ -31,7 +31,7 @@ function main() {
     "apps/desktop/src/renderer/core/sandboxResponseImportConsoleViewModel.js"
   ]);
   const api = windowRef.WeishanSandboxResponseImportConsoleViewModel;
-  assert.equal(api.SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION, "2.2.5");
+  assert.equal(api.SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION, "2.2.6");
   const initial = api.buildSandboxResponseImportConsoleModel();
   assert.equal(initial.status, "idle");
   assert.equal(initial.title, "多 Provider 沙盒报价导入");
@@ -61,7 +61,7 @@ function main() {
   assert.equal(dryRunPreview.dryRunButton.label, "运行沙盒只读报价");
   assert.equal(dryRunPreview.dryRunTopCandidates.length, 3);
   assert.equal(dryRunPreview.runTimelineSummary.timelineName, "read_only_quote_run_timeline_v1");
-  assert.equal(dryRunPreview.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.2.5");
+  assert.equal(dryRunPreview.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.2.6");
   assert.equal(dryRunPreview.auditExportReady, true);
   assert.equal(dryRunPreview.sessionRecoverySummary.title, "Session Recovery");
   assert.equal(dryRunPreview.reportCenterStatus, "ready");
