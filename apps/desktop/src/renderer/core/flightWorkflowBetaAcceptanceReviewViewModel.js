@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_BETA_ACCEPTANCE_REVIEW_VIEW_MODEL_VERSION = "2.2.0";
+  const FLIGHT_WORKFLOW_BETA_ACCEPTANCE_REVIEW_VIEW_MODEL_VERSION = "2.2.1";
   const VIEW_MODEL_NAME = "flight_workflow_beta_acceptance_review_view_model_v1";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport/ig;
 

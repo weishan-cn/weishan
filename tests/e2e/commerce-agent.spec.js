@@ -9161,7 +9161,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(visible).not.toMatch(/\b(token|key|secret)\b/i);
   });
 
-  test("v2.2.0 global shopping provider fixture stays read-only and local @commerce-smoke", async () => {
+  test("v2.2.1 global shopping provider fixture stays read-only and local @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await page.waitForFunction(() => !!(
       window.WeishanGlobalShoppingProductGoalCharter &&

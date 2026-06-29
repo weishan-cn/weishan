@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_REQUEST_ENVELOPE_BUILDER_VERSION = "2.2.0";
+  const GLOBAL_SHOPPING_PROVIDER_REQUEST_ENVELOPE_BUILDER_VERSION = "2.2.1";
   const BUILDER_NAME = "global_shopping_provider_request_envelope_builder_v1";
   const RESULT_LABELS = {
     ready:"请求封装已准备",

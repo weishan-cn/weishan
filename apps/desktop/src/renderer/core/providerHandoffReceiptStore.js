@@ -1,10 +1,10 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_HANDOFF_RECEIPT_STORE_VERSION = "2.2.0";
+  const PROVIDER_HANDOFF_RECEIPT_STORE_VERSION = "2.2.1";
   const STORAGE_KEY = "weishan.providerHandoffReceipt.v1";
   const RECEIPT_NAME = "provider_handoff_receipt_v1";
-  const RECEIPT_ID = "deterministic-provider-handoff-receipt-v2.2.0";
+  const RECEIPT_ID = "deterministic-provider-handoff-receipt-v2.2.1";
   const FORBIDDEN_RE = /(token|key|secret|password|auth|credential|passport|idCard|bank|card|rawUrl|rawResponse|rawHtml|screenshot|orderId|paymentId|bookingReference)/i;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value == null ? "" : value).trim(); }

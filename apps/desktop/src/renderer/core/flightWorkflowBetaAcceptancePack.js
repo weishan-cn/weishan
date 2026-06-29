@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_BETA_ACCEPTANCE_PACK_VERSION = "2.2.0";
+  const FLIGHT_WORKFLOW_BETA_ACCEPTANCE_PACK_VERSION = "2.2.1";
   const PACK_NAME = "flight_workflow_beta_acceptance_pack_v1";
   const FORBIDDEN_CLAIM_RE = /全网最低|最低价保证|已锁价|可出票|真实最终价|立即购买|直接下单|一键出票/i;
 

@@ -9,7 +9,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowRcRegressionAuditPack.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowRcRegressionAuditPack;
-  assert.equal(api.FLIGHT_WORKFLOW_RC_REGRESSION_AUDIT_PACK_VERSION, "2.2.0");
+  assert.equal(api.FLIGHT_WORKFLOW_RC_REGRESSION_AUDIT_PACK_VERSION, "2.2.1");
   const model = api.buildFlightWorkflowRcRegressionAuditPack({
     rcCandidateReviewSummary:{ status:"ready_for_review", safeToStartRcReview:true, userFacingSummary:{ resultLabel:"可以开始 RC 复核", redacted:true }, redacted:true },
     rcEvidenceReviewSummary:{ status:"complete", userFacingSummary:{ resultLabel:"证据完整", redacted:true }, redacted:true },

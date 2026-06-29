@@ -23,11 +23,11 @@ function main() {
   ]);
 
   const api = windowRef.WeishanRealFlightPriceEvidenceReport;
-  assert.equal(api.REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION, "2.2.0");
+  assert.equal(api.REAL_FLIGHT_PRICE_EVIDENCE_REPORT_VERSION, "2.2.1");
 
   const report = api.buildRealFlightPriceEvidenceReport({ origin:"上海", destination:"成都", departureDate:"2026-07-15" });
   assert.equal(report.reportName, "real_flight_price_evidence_report_v1");
-  assert.equal(report.appVersion, "2.2.0");
+  assert.equal(report.appVersion, "2.2.1");
   assert.equal(report.mode, "read_only_beta");
   assert.equal(report.userFacingRealPriceEnabled, false);
   assert.equal(report.providerConnector.connectorName, "single_flight_provider_sandbox_connector_v1");
@@ -111,7 +111,7 @@ function main() {
   assert.equal(readiness.showableAsRealPrice, false);
 
   const audit = api.getRealFlightPriceEvidenceReportAuditDraft({ origin:"上海", destination:"成都" });
-  assert.equal(audit.appVersion, "2.2.0");
+  assert.equal(audit.appVersion, "2.2.1");
   assert.equal(audit.connectorStatus, "fixture_ready");
   assert.equal(audit.bookingUrlDisplayedCount, 0);
   assert.equal(audit.paymentAttemptCount, 0);

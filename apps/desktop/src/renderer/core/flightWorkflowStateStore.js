@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_STATE_STORE_VERSION = "2.2.0";
+  const FLIGHT_WORKFLOW_STATE_STORE_VERSION = "2.2.1";
   const STORE_NAME = "flight_workflow_state_store_v1";
   const STORAGE_KEY = "weishan.flightWorkflowState.v1";
   const FORBIDDEN_NAME_RE = /(rawText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;

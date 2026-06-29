@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const LIFECYCLE_VERSION = "2.2.0";
+  const LIFECYCLE_VERSION = "2.2.1";
 
   function clone(value) {
     return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;

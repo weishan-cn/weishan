@@ -9,7 +9,7 @@ function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteSessionManager.js", "apps/desktop/src/renderer/core/readOnlyQuoteSessionStore.js"]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionStore;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_STORE_VERSION, "2.2.0");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_STORE_VERSION, "2.2.1");
   const mem = storage();
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A" }], bookingUrl:"https://blocked.example", token:"abc" } });
   const saved = api.saveReadOnlyQuoteSession(session, mem);
@@ -17,7 +17,7 @@ function main() {
   assert.equal(saved.sessionSummary.bookingUrl, null);
   const loaded = api.loadReadOnlyQuoteSession(mem);
   assert.equal(loaded.available, true);
-  assert.equal(loaded.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.2.0");
+  assert.equal(loaded.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.2.1");
   assert.equal(JSON.stringify(loaded).includes("abc"), false);
   assert.equal(JSON.stringify(loaded).includes("token"), false);
   assert.equal(loaded.sessionSummary.rawResponseStored, false);

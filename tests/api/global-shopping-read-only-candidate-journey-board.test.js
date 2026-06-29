@@ -32,7 +32,7 @@ function main() {
   ]);
   const pipelineApi = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
   const boardApi = windowRef.WeishanGlobalShoppingReadOnlyCandidateJourneyBoard;
-  assert.equal(boardApi.GLOBAL_SHOPPING_READ_ONLY_CANDIDATE_JOURNEY_BOARD_VERSION, "2.2.0");
+  assert.equal(boardApi.GLOBAL_SHOPPING_READ_ONLY_CANDIDATE_JOURNEY_BOARD_VERSION, "2.2.1");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -97,7 +97,7 @@ function main() {
     coveredLowestCandidateBoardSummary:covered,
     sandboxHandoffViewModelSummary:handoff
   });
-  assert.equal(board.appVersion, "2.2.0");
+  assert.equal(board.appVersion, "2.2.1");
   assert.equal(board.status, "ready");
   assert.equal(board.title, "全球购只读候选旅程");
   assert.equal(board.cards.find((item) => item.cardId === "provider_fixture").label, "Provider Fixture");
