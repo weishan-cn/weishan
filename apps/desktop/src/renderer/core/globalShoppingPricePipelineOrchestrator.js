@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.2.2";
+  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.2.3";
   const ORCHESTRATOR_NAME = "global_shopping_price_pipeline_orchestrator_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -318,6 +318,38 @@
       providerEvidenceComparisonMatrix:providerEvidenceComparisonMatrixSummary,
       readOnlyHandoffReadinessDrill:readOnlyHandoffReadinessDrillSummary
     });
+    const redactedSearchParameterPackSummary = resolveSummary(safe, "redactedSearchParameterPackSummary", "WeishanGlobalShoppingRedactedSearchParameterPack", "buildGlobalShoppingRedactedSearchParameterPack", {
+      itemType:text(safe.itemType || "flight"),
+      origin:text(safe.origin || "SHA"),
+      destination:text(safe.destination || "CTU"),
+      departureDate:text(safe.departureDate || "2026-07-15"),
+      passengerCount:safe.passengerCount || 1,
+      currency:text(safe.currency || "CNY"),
+      locale:text(safe.locale || "zh-CN"),
+      region:text(safe.region || "CN"),
+      candidateId:text(obj(obj(sandboxCandidateComparisonWorkbenchSummary).recommendationSummary).recommendedCandidateId || "candidate_a"),
+      sourceType:"sandbox"
+    });
+    const userConfirmationChecklistSummary = resolveSummary(safe, "userConfirmationChecklistSummary", "WeishanGlobalShoppingUserConfirmationChecklist", "buildGlobalShoppingUserConfirmationChecklist", {});
+    const readOnlyPlatformHandoffSimulatorSummary = resolveSummary(safe, "readOnlyPlatformHandoffSimulatorSummary", "WeishanGlobalShoppingReadOnlyPlatformHandoffSimulator", "buildGlobalShoppingReadOnlyPlatformHandoffSimulator", {
+      sandboxDecisionReviewViewModel:sandboxDecisionReviewViewModelSummary,
+      sandboxCandidateComparisonWorkbench:sandboxCandidateComparisonWorkbenchSummary,
+      providerEvidenceComparisonMatrix:providerEvidenceComparisonMatrixSummary,
+      readOnlyHandoffReadinessDrill:readOnlyHandoffReadinessDrillSummary,
+      redactedSearchParameterPackSummary:redactedSearchParameterPackSummary,
+      userConfirmationChecklistSummary:userConfirmationChecklistSummary,
+      itemType:text(safe.itemType || "flight"),
+      origin:text(safe.origin || "SHA"),
+      destination:text(safe.destination || "CTU"),
+      departureDate:text(safe.departureDate || "2026-07-15"),
+      passengerCount:safe.passengerCount || 1,
+      currency:text(safe.currency || "CNY")
+    });
+    const platformHandoffSimulationViewModelSummary = resolveSummary(safe, "platformHandoffSimulationViewModelSummary", "WeishanGlobalShoppingPlatformHandoffSimulationViewModel", "buildGlobalShoppingPlatformHandoffSimulationViewModel", {
+      readOnlyPlatformHandoffSimulatorSummary:readOnlyPlatformHandoffSimulatorSummary,
+      redactedSearchParameterPackSummary:redactedSearchParameterPackSummary,
+      userConfirmationChecklistSummary:userConfirmationChecklistSummary
+    });
     const pipelineHealth = {
       firstSandboxProviderConnectorReady:statusOf(firstSandboxProviderConnectorSummary) === "ready",
       providerCoverageReady:statusOf(providerCoverageDashboardSummary) === "ready",
@@ -334,6 +366,10 @@
       providerEvidenceMatrixReady:statusOf(providerEvidenceComparisonMatrixSummary) === "ready",
       readOnlyHandoffDrillReady:statusOf(readOnlyHandoffReadinessDrillSummary) === "ready",
       sandboxDecisionReviewReady:statusOf(sandboxDecisionReviewViewModelSummary) === "ready",
+      redactedSearchParameterPackReady:statusOf(redactedSearchParameterPackSummary) === "ready",
+      userConfirmationChecklistReady:statusOf(userConfirmationChecklistSummary) === "ready",
+      readOnlyPlatformHandoffSimulatorReady:statusOf(readOnlyPlatformHandoffSimulatorSummary) === "ready",
+      platformHandoffSimulationViewModelReady:statusOf(platformHandoffSimulationViewModelSummary) === "ready",
       providerConnectorReady:statusOf(readOnlyProviderSandboxConnectorSummary) === "ready",
       fixtureReplayReady:statusOf(fixtureReplayConsoleSummary) === "ready",
       providerFixtureReady:statusOf(legalProviderFixtureSummary) === "ready",
@@ -377,7 +413,7 @@
     if (!pipelineHealth.noTicketing) blockedReasons.push("ticketing_detected");
     if (!pipelineHealth.noExternalOpen) blockedReasons.push("external_open_detected");
     if (statusOf(providerSandboxSafetyKillSwitchSummary) === "blocked") blockedReasons.push("provider_kill_switch_blocked");
-    const review = !pipelineHealth.providerConnectorReady || !pipelineHealth.fixtureReplayReady || !pipelineHealth.providerFixtureReady || !pipelineHealth.credentialSafetyPass || !pipelineHealth.sandboxFeedReady || !pipelineHealth.responseContractReady || !pipelineHealth.priceNormalizationReady || !pipelineHealth.officialAnchorReady || !pipelineHealth.sameItemMatcherReady || !pipelineHealth.duplicateMergeReady || !pipelineHealth.coveredLowestReady || !pipelineHealth.sandboxHandoffReady || !pipelineHealth.readOnlyProviderSandboxIntegrationGateReady || !pipelineHealth.sandboxPriceCandidateSessionReady || !pipelineHealth.sandboxPriceCandidateResultBoardReady || !pipelineHealth.sandboxSessionReplayCenterReady || !pipelineHealth.providerEvidenceTraceReady || !pipelineHealth.candidateConfidenceReady || !pipelineHealth.sandboxReplayViewModelReady || !pipelineHealth.sandboxCandidateComparisonReady || !pipelineHealth.providerEvidenceMatrixReady || !pipelineHealth.readOnlyHandoffDrillReady || !pipelineHealth.sandboxDecisionReviewReady;
+    const review = !pipelineHealth.providerConnectorReady || !pipelineHealth.fixtureReplayReady || !pipelineHealth.providerFixtureReady || !pipelineHealth.credentialSafetyPass || !pipelineHealth.sandboxFeedReady || !pipelineHealth.responseContractReady || !pipelineHealth.priceNormalizationReady || !pipelineHealth.officialAnchorReady || !pipelineHealth.sameItemMatcherReady || !pipelineHealth.duplicateMergeReady || !pipelineHealth.coveredLowestReady || !pipelineHealth.sandboxHandoffReady || !pipelineHealth.readOnlyProviderSandboxIntegrationGateReady || !pipelineHealth.sandboxPriceCandidateSessionReady || !pipelineHealth.sandboxPriceCandidateResultBoardReady || !pipelineHealth.sandboxSessionReplayCenterReady || !pipelineHealth.providerEvidenceTraceReady || !pipelineHealth.candidateConfidenceReady || !pipelineHealth.sandboxReplayViewModelReady || !pipelineHealth.sandboxCandidateComparisonReady || !pipelineHealth.providerEvidenceMatrixReady || !pipelineHealth.readOnlyHandoffDrillReady || !pipelineHealth.sandboxDecisionReviewReady || !pipelineHealth.redactedSearchParameterPackReady || !pipelineHealth.userConfirmationChecklistReady || !pipelineHealth.readOnlyPlatformHandoffSimulatorReady || !pipelineHealth.platformHandoffSimulationViewModelReady;
     return clone({
       pipelineHealth:pipelineHealth,
       pipelineStages:buildGlobalShoppingPricePipelineRows({
@@ -413,6 +449,10 @@
         canShowProviderEvidenceComparisonMatrix:pipelineHealth.providerEvidenceMatrixReady,
         canShowReadOnlyHandoffReadinessDrill:pipelineHealth.readOnlyHandoffDrillReady,
         canShowSandboxDecisionReviewViewModel:pipelineHealth.sandboxDecisionReviewReady,
+        canShowReadOnlyPlatformHandoffSimulator:pipelineHealth.readOnlyPlatformHandoffSimulatorReady,
+        canShowRedactedSearchParameterPack:pipelineHealth.redactedSearchParameterPackReady,
+        canShowUserConfirmationChecklist:pipelineHealth.userConfirmationChecklistReady,
+        canShowPlatformHandoffSimulationViewModel:pipelineHealth.platformHandoffSimulationViewModelReady,
         canProceedToReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.providerFixtureReady && pipelineHealth.credentialSafetyPass && pipelineHealth.sandboxFeedReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.officialAnchorReady && pipelineHealth.sameItemMatcherReady && pipelineHealth.duplicateMergeReady && pipelineHealth.coveredLowestReady && pipelineHealth.sandboxHandoffReady,
         safeToProceedWithFirstRealReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.coveredLowestReady,
         safeToProceedWithFirstReadOnlySandboxDryRun:pipelineHealth.realProviderSandboxGateReady && pipelineHealth.providerRequestEnvelopeReady && pipelineHealth.providerCallAuditLedgerReady && pipelineHealth.providerSandboxReadinessReady,
@@ -421,7 +461,8 @@
         safeToProceedWithFirstReadOnlyProviderSandboxIntegration:pipelineHealth.firstSandboxProviderConnectorReady && pipelineHealth.providerCoverageReady && pipelineHealth.sourceTrustReady && pipelineHealth.providerCoverageViewModelReady,
         safeToProceedWithSandboxCandidateUserPreview:pipelineHealth.readOnlyProviderSandboxIntegrationGateReady && pipelineHealth.sandboxPriceCandidateSessionReady && pipelineHealth.sandboxPriceCandidateResultBoardReady,
         safeToProceedWithReadOnlySandboxUserExplanation:pipelineHealth.sandboxSessionReplayCenterReady && pipelineHealth.providerEvidenceTraceReady && pipelineHealth.candidateConfidenceReady && pipelineHealth.sandboxReplayViewModelReady,
-        safeToProceedWithSandboxDecisionReview:pipelineHealth.sandboxCandidateComparisonReady && pipelineHealth.providerEvidenceMatrixReady && pipelineHealth.readOnlyHandoffDrillReady && pipelineHealth.sandboxDecisionReviewReady
+        safeToProceedWithSandboxDecisionReview:pipelineHealth.sandboxCandidateComparisonReady && pipelineHealth.providerEvidenceMatrixReady && pipelineHealth.readOnlyHandoffDrillReady && pipelineHealth.sandboxDecisionReviewReady,
+        safeToProceedWithUserFacingHandoffExplanation:pipelineHealth.sandboxDecisionReviewReady && pipelineHealth.redactedSearchParameterPackReady && pipelineHealth.userConfirmationChecklistReady && pipelineHealth.readOnlyPlatformHandoffSimulatorReady && pipelineHealth.platformHandoffSimulationViewModelReady
       },
       blockedReasons:blockedReasons,
       readOnlyProviderSandboxConnectorSummary:clone(readOnlyProviderSandboxConnectorSummary),
@@ -459,6 +500,10 @@
       providerEvidenceComparisonMatrixSummary:clone(providerEvidenceComparisonMatrixSummary),
       readOnlyHandoffReadinessDrillSummary:clone(readOnlyHandoffReadinessDrillSummary),
       sandboxDecisionReviewViewModelSummary:clone(sandboxDecisionReviewViewModelSummary),
+      redactedSearchParameterPackSummary:clone(redactedSearchParameterPackSummary),
+      userConfirmationChecklistSummary:clone(userConfirmationChecklistSummary),
+      readOnlyPlatformHandoffSimulatorSummary:clone(readOnlyPlatformHandoffSimulatorSummary),
+      platformHandoffSimulationViewModelSummary:clone(platformHandoffSimulationViewModelSummary),
       status:blockedReasons.length ? "blocked" : (review ? "needs_review" : "ready"),
       redacted:true
     });
@@ -496,7 +541,11 @@
       row("sandbox_candidate_comparison", "Sandbox 候选对比工作台", statusOf(safe.sandboxCandidateComparisonWorkbenchSummary) === "ready" ? "pass" : (statusOf(safe.sandboxCandidateComparisonWorkbenchSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.sandboxCandidateComparisonWorkbenchSummary).userFacingSummary).resultLabel || "候选对比仍需复核"),
       row("provider_evidence_matrix", "Provider 证据对比矩阵", statusOf(safe.providerEvidenceComparisonMatrixSummary) === "ready" ? "pass" : (statusOf(safe.providerEvidenceComparisonMatrixSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.providerEvidenceComparisonMatrixSummary).userFacingSummary).resultLabel || "证据矩阵仍需复核"),
       row("handoff_readiness_drill", "只读跳转交接演练", statusOf(safe.readOnlyHandoffReadinessDrillSummary) === "ready" ? "pass" : (statusOf(safe.readOnlyHandoffReadinessDrillSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.readOnlyHandoffReadinessDrillSummary).userFacingSummary).resultLabel || "交接演练仍需复核"),
-      row("sandbox_decision_review", "Sandbox 候选决策复核", statusOf(safe.sandboxDecisionReviewViewModelSummary) === "ready" ? "pass" : (statusOf(safe.sandboxDecisionReviewViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.sandboxDecisionReviewViewModelSummary).title || "Sandbox 候选决策复核")
+      row("sandbox_decision_review", "Sandbox 候选决策复核", statusOf(safe.sandboxDecisionReviewViewModelSummary) === "ready" ? "pass" : (statusOf(safe.sandboxDecisionReviewViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.sandboxDecisionReviewViewModelSummary).title || "Sandbox 候选决策复核"),
+      row("handoff_simulator", "只读平台交接模拟器", statusOf(safe.readOnlyPlatformHandoffSimulatorSummary) === "ready" ? "pass" : (statusOf(safe.readOnlyPlatformHandoffSimulatorSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.readOnlyPlatformHandoffSimulatorSummary).userFacingSummary).resultLabel || "交接模拟仍需复核"),
+      row("redacted_parameter_pack", "脱敏搜索参数包", statusOf(safe.redactedSearchParameterPackSummary) === "ready" ? "pass" : (statusOf(safe.redactedSearchParameterPackSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.redactedSearchParameterPackSummary).userFacingSummary).resultLabel || "搜索参数包仍需复核"),
+      row("user_confirmation_checklist", "用户确认清单", statusOf(safe.userConfirmationChecklistSummary) === "ready" ? "pass" : (statusOf(safe.userConfirmationChecklistSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.userConfirmationChecklistSummary).userFacingSummary).resultLabel || "用户确认清单仍需复核"),
+      row("handoff_view_model", "只读平台交接模拟", statusOf(safe.platformHandoffSimulationViewModelSummary) === "ready" ? "pass" : (statusOf(safe.platformHandoffSimulationViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.platformHandoffSimulationViewModelSummary).title || "只读平台交接模拟")
     ]);
   }
   function sanitizeGlobalShoppingPricePipelineOrchestrator(orchestrator) {
@@ -553,6 +602,15 @@
       providerEvidenceComparisonMatrixSummary:linkedSummary(evaluation.providerEvidenceComparisonMatrixSummary),
       readOnlyHandoffReadinessDrillSummary:linkedSummary(evaluation.readOnlyHandoffReadinessDrillSummary),
       sandboxDecisionReviewViewModelSummary:linkedSummary(evaluation.sandboxDecisionReviewViewModelSummary),
+      redactedSearchParameterPackSummary:linkedSummary(evaluation.redactedSearchParameterPackSummary),
+      userConfirmationChecklistSummary:linkedSummary(evaluation.userConfirmationChecklistSummary),
+      readOnlyPlatformHandoffSimulatorSummary:linkedSummary(evaluation.readOnlyPlatformHandoffSimulatorSummary),
+      platformHandoffSimulationViewModelSummary:linkedSummary(evaluation.platformHandoffSimulationViewModelSummary),
+      redactedSearchParameterPackStatus:text(obj(evaluation.redactedSearchParameterPackSummary).status || ""),
+      userConfirmationChecklistStatus:text(obj(evaluation.userConfirmationChecklistSummary).status || ""),
+      readOnlyPlatformHandoffSimulatorStatus:text(obj(evaluation.readOnlyPlatformHandoffSimulatorSummary).status || ""),
+      platformHandoffSimulationViewModelStatus:text(obj(evaluation.platformHandoffSimulationViewModelSummary).status || ""),
+      safeToProceedWithUserFacingHandoffExplanation:evaluation.readyOutputs.safeToProceedWithUserFacingHandoffExplanation === true,
       redacted:true
     });
   }

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const TRUSTED_FLIGHT_SOURCE_REGISTRY_VERSION = "2.2.2";
+  const TRUSTED_FLIGHT_SOURCE_REGISTRY_VERSION = "2.2.3";
   const PHASE = "trusted_flight_source_registry_skeleton_only";
   const TRUSTED_PROVIDER_HANOFF_HOSTS = ["google.com", "trip.com", "ctrip.com", "skyscanner.com", "kayak.com", "expedia.com", "booking.com"];
 

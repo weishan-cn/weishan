@@ -6,7 +6,7 @@ const ROOT = path.resolve(__dirname, "../..");
 function load(file){ const window = {}; window.window = window; vm.runInContext(fs.readFileSync(path.join(ROOT,file), "utf8"), vm.createContext({ window, console }), { filename:file }); return window; }
 const api = load("apps/desktop/src/renderer/core/readOnlyQuoteSafeNextStepCoach.js").WeishanReadOnlyQuoteSafeNextStepCoach;
 function coach(status, label) { return api.buildReadOnlyQuoteSafeNextStepCoach({ reconciliationSummary:{ status }, confidenceLabelSummary:{ confidenceLabel:label } }); }
-assert.equal(coach("matched", "高一致").appVersion, "2.2.2");
+assert.equal(coach("matched", "高一致").appVersion, "2.2.3");
 assert.equal(coach("matched", "高一致").recommendation, "前往平台继续核对");
 assert.equal(coach("needs_recheck", "需重新核对").recommendation, "重新核对平台页面");
 assert.ok(["前往平台确认", "前往平台继续核对"].includes(coach("no_platform_check", "不可确认").recommendation));

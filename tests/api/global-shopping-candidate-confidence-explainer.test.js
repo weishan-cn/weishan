@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingCandidateConfidenceExplainer.js"]);
   const api = windowRef.WeishanGlobalShoppingCandidateConfidenceExplainer;
-  assert.equal(api.GLOBAL_SHOPPING_CANDIDATE_CONFIDENCE_EXPLAINER_VERSION, "2.2.2");
+  assert.equal(api.GLOBAL_SHOPPING_CANDIDATE_CONFIDENCE_EXPLAINER_VERSION, "2.2.3");
   const ready = api.buildGlobalShoppingCandidateConfidenceExplainer({
     providerEvidenceTrace:{ evidenceItems:[
       { candidateId:"candidate_1", sourceId:"official_anchor", sourceName:"官方参考价", evidenceType:"official_anchor", evidenceStatus:"pass", trustLabel:"high" },

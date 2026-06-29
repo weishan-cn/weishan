@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.2.2";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.2.3";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -211,6 +211,10 @@
       providerEvidenceComparisonMatrixSummary: stripUnsafe(safe.providerEvidenceComparisonMatrixSummary || null),
       readOnlyHandoffReadinessDrillSummary: stripUnsafe(safe.readOnlyHandoffReadinessDrillSummary || null),
       sandboxDecisionReviewViewModelSummary: stripUnsafe(safe.sandboxDecisionReviewViewModelSummary || null),
+      readOnlyPlatformHandoffSimulatorSummary: stripUnsafe(safe.readOnlyPlatformHandoffSimulatorSummary || null),
+      redactedSearchParameterPackSummary: stripUnsafe(safe.redactedSearchParameterPackSummary || null),
+      userConfirmationChecklistSummary: stripUnsafe(safe.userConfirmationChecklistSummary || null),
+      platformHandoffSimulationViewModelSummary: stripUnsafe(safe.platformHandoffSimulationViewModelSummary || null),
       legalProviderFixtureSummary: stripUnsafe(safe.legalProviderFixtureSummary || null),
       providerCredentialSafetySummary: stripUnsafe(safe.providerCredentialSafetySummary || null),
       sandboxPriceFeedSummary: stripUnsafe(safe.sandboxPriceFeedSummary || null),
@@ -463,6 +467,10 @@
       providerEvidenceComparisonMatrixSummary: workflow.providerEvidenceComparisonMatrixSummary || safe.providerEvidenceComparisonMatrixSummary ? { title:"Provider 证据对比矩阵", line:workflow.providerEvidenceComparisonMatrixSummary && workflow.providerEvidenceComparisonMatrixSummary.userFacingSummary && workflow.providerEvidenceComparisonMatrixSummary.userFacingSummary.resultLabel || safe.providerEvidenceComparisonMatrixSummary && safe.providerEvidenceComparisonMatrixSummary.userFacingSummary && safe.providerEvidenceComparisonMatrixSummary.userFacingSummary.resultLabel || "证据矩阵仍需复核", redacted:true } : null,
       readOnlyHandoffReadinessDrillSummary: workflow.readOnlyHandoffReadinessDrillSummary || safe.readOnlyHandoffReadinessDrillSummary ? { title:"只读跳转交接演练", line:workflow.readOnlyHandoffReadinessDrillSummary && workflow.readOnlyHandoffReadinessDrillSummary.userFacingSummary && workflow.readOnlyHandoffReadinessDrillSummary.userFacingSummary.resultLabel || safe.readOnlyHandoffReadinessDrillSummary && safe.readOnlyHandoffReadinessDrillSummary.userFacingSummary && safe.readOnlyHandoffReadinessDrillSummary.userFacingSummary.resultLabel || "交接演练仍需复核", redacted:true } : null,
       sandboxDecisionReviewViewModelSummary: sandboxDecisionReviewSummary,
+      readOnlyPlatformHandoffSimulatorSummary: workflow.readOnlyPlatformHandoffSimulatorSummary || safe.readOnlyPlatformHandoffSimulatorSummary ? { title:"只读平台交接模拟器", line:workflow.readOnlyPlatformHandoffSimulatorSummary && workflow.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary && workflow.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary.resultLabel || safe.readOnlyPlatformHandoffSimulatorSummary && safe.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary && safe.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary.resultLabel || "交接模拟仍需复核", redacted:true } : null,
+      redactedSearchParameterPackSummary: workflow.redactedSearchParameterPackSummary || safe.redactedSearchParameterPackSummary ? { title:"脱敏搜索参数包", line:workflow.redactedSearchParameterPackSummary && workflow.redactedSearchParameterPackSummary.userFacingSummary && workflow.redactedSearchParameterPackSummary.userFacingSummary.resultLabel || safe.redactedSearchParameterPackSummary && safe.redactedSearchParameterPackSummary.userFacingSummary && safe.redactedSearchParameterPackSummary.userFacingSummary.resultLabel || "搜索参数包仍需复核", redacted:true } : null,
+      userConfirmationChecklistSummary: workflow.userConfirmationChecklistSummary || safe.userConfirmationChecklistSummary ? { title:"用户确认清单", line:workflow.userConfirmationChecklistSummary && workflow.userConfirmationChecklistSummary.userFacingSummary && workflow.userConfirmationChecklistSummary.userFacingSummary.resultLabel || safe.userConfirmationChecklistSummary && safe.userConfirmationChecklistSummary.userFacingSummary && safe.userConfirmationChecklistSummary.userFacingSummary.resultLabel || "用户确认清单仍需复核", redacted:true } : null,
+      platformHandoffSimulationViewModelSummary: workflow.platformHandoffSimulationViewModelSummary || safe.platformHandoffSimulationViewModelSummary ? { title:"只读平台交接模拟", line:workflow.platformHandoffSimulationViewModelSummary && workflow.platformHandoffSimulationViewModelSummary.title || safe.platformHandoffSimulationViewModelSummary && safe.platformHandoffSimulationViewModelSummary.title || "只读平台交接模拟", redacted:true } : null,
       firstSandboxProviderConnectorStatus: workflow.firstSandboxProviderConnectorStatus || safe.firstSandboxProviderConnectorStatus || "",
       providerCoverageStatus: workflow.providerCoverageStatus || safe.providerCoverageStatus || "",
       sourceTrustStatus: workflow.sourceTrustStatus || safe.sourceTrustStatus || "",
@@ -474,7 +482,12 @@
       providerEvidenceComparisonMatrixStatus: workflow.providerEvidenceComparisonMatrixStatus || safe.providerEvidenceComparisonMatrixStatus || "",
       readOnlyHandoffReadinessDrillStatus: workflow.readOnlyHandoffReadinessDrillStatus || safe.readOnlyHandoffReadinessDrillStatus || "",
       sandboxDecisionReviewStatus: workflow.sandboxDecisionReviewStatus || safe.sandboxDecisionReviewStatus || "",
+      readOnlyPlatformHandoffSimulatorStatus: workflow.readOnlyPlatformHandoffSimulatorStatus || safe.readOnlyPlatformHandoffSimulatorStatus || "",
+      redactedSearchParameterPackStatus: workflow.redactedSearchParameterPackStatus || safe.redactedSearchParameterPackStatus || "",
+      userConfirmationChecklistStatus: workflow.userConfirmationChecklistStatus || safe.userConfirmationChecklistStatus || "",
+      platformHandoffSimulationViewModelStatus: workflow.platformHandoffSimulationViewModelStatus || safe.platformHandoffSimulationViewModelStatus || "",
       safeToProceedWithSandboxDecisionReview: workflow.safeToProceedWithSandboxDecisionReview === true || safe.safeToProceedWithSandboxDecisionReview === true,
+      safeToProceedWithUserFacingHandoffExplanation: workflow.safeToProceedWithUserFacingHandoffExplanation === true || safe.safeToProceedWithUserFacingHandoffExplanation === true,
       safeToProceedWithFirstReadOnlyProviderSandboxIntegration: workflow.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true || safe.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true,
       safeToProceedWithSandboxCandidateUserPreview: workflow.safeToProceedWithSandboxCandidateUserPreview === true || safe.safeToProceedWithSandboxCandidateUserPreview === true,
       pilotExitCriteriaSummary: pilotExitCriteriaSummary ? { title:"只读试点退出条件", line:pilotExitCriteriaSummary.userFacingSummary && pilotExitCriteriaSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,

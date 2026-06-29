@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_USER_SAFETY_COPY_REGISTRY_VERSION = "2.2.2";
+  const FLIGHT_WORKFLOW_USER_SAFETY_COPY_REGISTRY_VERSION = "2.2.3";
   const REGISTRY_NAME = "flight_workflow_user_safety_copy_registry_v1";
   const REQUIRED_COPY_IDS = [
     "read_only_price_notice",

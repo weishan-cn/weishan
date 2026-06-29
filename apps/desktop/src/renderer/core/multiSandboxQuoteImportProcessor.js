@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const MULTI_SANDBOX_QUOTE_IMPORT_PROCESSOR_VERSION = "2.2.2";
+  const MULTI_SANDBOX_QUOTE_IMPORT_PROCESSOR_VERSION = "2.2.3";
   const PROCESSOR_NAME = "multi_sandbox_quote_import_processor_v1";
   const SENSITIVE_RAW_RE = /(token|key|secret|password|session|auth)/i;
   const TX_URL_RE = /"(bookingUrl|checkoutUrl|paymentUrl|orderUrl)"\s*:\s*"[^"]+"/i;

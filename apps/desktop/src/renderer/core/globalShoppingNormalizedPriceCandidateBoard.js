@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_NORMALIZED_PRICE_CANDIDATE_BOARD_VERSION = "2.2.2";
+  const GLOBAL_SHOPPING_NORMALIZED_PRICE_CANDIDATE_BOARD_VERSION = "2.2.3";
   const BOARD_NAME = "global_shopping_normalized_price_candidate_board_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

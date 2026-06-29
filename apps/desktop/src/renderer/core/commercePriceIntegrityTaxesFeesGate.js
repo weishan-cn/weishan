@@ -1,5 +1,5 @@
 (function(){
-  const PRICE_INTEGRITY_TAXES_FEES_GATE_VERSION = "2.2.2";
+  const PRICE_INTEGRITY_TAXES_FEES_GATE_VERSION = "2.2.3";
 
   const priceQuoteRequiredFields = [
     "providerId",

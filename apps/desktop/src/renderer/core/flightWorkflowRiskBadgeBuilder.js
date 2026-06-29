@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.2.2";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.2.3";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -172,6 +172,10 @@
       const providerEvidenceComparisonMatrixSummary = obj(safe.providerEvidenceComparisonMatrixSummary);
       const readOnlyHandoffReadinessDrillSummary = obj(safe.readOnlyHandoffReadinessDrillSummary);
       const sandboxDecisionReviewViewModelSummary = obj(safe.sandboxDecisionReviewViewModelSummary);
+      const readOnlyPlatformHandoffSimulatorSummary = obj(safe.readOnlyPlatformHandoffSimulatorSummary);
+      const redactedSearchParameterPackSummary = obj(safe.redactedSearchParameterPackSummary);
+      const userConfirmationChecklistSummary = obj(safe.userConfirmationChecklistSummary);
+      const platformHandoffSimulationViewModelSummary = obj(safe.platformHandoffSimulationViewModelSummary);
       const legalProviderFixtureSummary = obj(safe.legalProviderFixtureSummary);
       const providerCredentialSafetySummary = obj(safe.providerCredentialSafetySummary);
       const sandboxPriceFeedSummary = obj(safe.sandboxPriceFeedSummary);
@@ -326,6 +330,13 @@
       if (readOnlyHandoffReadinessDrillSummary.status) badges.push(badge("handoff_drill_no_open", "交接演练不打开平台", "info"));
       if (readOnlyHandoffReadinessDrillSummary.status) badges.push(badge("handoff_params_no_identity_payment", "参数预览不包含身份或支付信息", "info"));
       if (sandboxDecisionReviewViewModelSummary.status) badges.push(badge("decision_review_not_ordering", "决策复核不代表下单能力", "warning"));
+      if (readOnlyPlatformHandoffSimulatorSummary.status === "ready") badges.push(badge("handoff_simulator_ready", "只读平台交接模拟已准备", "info"));
+      if (redactedSearchParameterPackSummary.status === "ready") badges.push(badge("redacted_parameter_pack_ready", "脱敏搜索参数包已准备", "info"));
+      if (userConfirmationChecklistSummary.status === "ready") badges.push(badge("user_confirmation_checklist_ready", "用户确认清单已准备", "info"));
+      if (redactedSearchParameterPackSummary.status) badges.push(badge("redacted_parameter_pack_no_identity_payment", "搜索参数包不包含身份或支付信息", "info"));
+      if (userConfirmationChecklistSummary.status) badges.push(badge("user_confirms_realtime_price", "用户必须在平台自行确认实时价格", "warning"));
+      if (platformHandoffSimulationViewModelSummary.status || readOnlyPlatformHandoffSimulatorSummary.status) badges.push(badge("handoff_no_login_payment_order_ticket", "Weishan 不替用户登录、付款、下单或出票", "warning"));
+      if (readOnlyPlatformHandoffSimulatorSummary.status || platformHandoffSimulationViewModelSummary.status) badges.push(badge("handoff_simulator_no_open", "交接模拟不打开平台", "info"));
       if (normalizedPriceCandidateBoardSummary.status || pricePipelineOrchestratorSummary.status) badges.push(badge("normalized_candidate_not_real_price", "归一化候选不代表真实价格", "warning"));
       if (normalizedPriceCandidateBoardSummary.status || readOnlyCandidateJourneySummary.status) badges.push(badge("normalized_candidate_not_ordering", "价格候选板不代表下单能力", "warning"));
       if (sandboxHandoffViewModelSummary.status === "ready") badges.push(badge("sandbox_handoff_ready", "Sandbox 跳转候选与平台可用性已准备", "info"));

@@ -1,5 +1,5 @@
 (function(){
-  const CLEAN_RESULT_SURFACE_V2_VERSION = "2.2.2";
+  const CLEAN_RESULT_SURFACE_V2_VERSION = "2.2.3";
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value){ return String(value == null ? "" : value).trim(); }
   function list(value){ return Array.isArray(value) ? value.filter(Boolean) : []; }

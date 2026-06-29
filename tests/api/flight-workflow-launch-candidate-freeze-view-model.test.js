@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowLaunchCandidateFreezeViewModel.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowLaunchCandidateFreezeViewModel;
-  assert.equal(api.FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_FREEZE_VIEW_MODEL_VERSION, "2.2.2");
+  assert.equal(api.FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_FREEZE_VIEW_MODEL_VERSION, "2.2.3");
   const vmModel = api.buildFlightWorkflowLaunchCandidateFreezeViewModel({
     freezeGateSummary:{ status:"ready_to_freeze", freezeGateNextStep:"可以冻结只读发布候选", userFacingSummary:{ resultLabel:"准备冻结只读发布候选" }, freezeDecision:{ safeToFreeze:true }, rcReviewStatus:"ready_for_review", rcEvidenceStatus:"complete", safeToStartRcReview:true },
     evidenceFreezePackSummary:{ status:"ready", freezePackNextStep:"可以冻结证据包", userFacingSummary:{ resultLabel:"证据冻结包已就绪" }, safeToFreeze:true, rcReviewStatus:"ready_for_review", rcEvidenceStatus:"complete", safeToStartRcReview:true },

@@ -7,7 +7,7 @@ function load(files){ const window = {}; window.window = window; const context =
 function main(){
   const windowRef = load(["apps/desktop/src/renderer/core/flightFareBreakdown.js", "apps/desktop/src/renderer/core/cheapestTruthGuard.js", "apps/desktop/src/renderer/core/topResultCardsBuilder.js"]);
   const api = windowRef.WeishanTopResultCardsBuilder;
-  assert.equal(api.TOP_RESULT_CARDS_BUILDER_VERSION, "2.2.2");
+  assert.equal(api.TOP_RESULT_CARDS_BUILDER_VERSION, "2.2.3");
   const clearFlight = api.buildTopResultCards({ procurementCategory:"flight", normalizedSearchIntent:{ category:"flight", origin:"上海", destination:"成都", dateDisplay:"7月15日", preference:"直达优先" }, limitedBetaResult:{ enabled:true, priceDisplay:"¥1010" }, sortPreference:"低价优先", restrictedCategoryDecision:"allow" });
   assert.equal(clearFlight.resultCardMode, "top_results");
   assert.equal(clearFlight.cardCount, 1);

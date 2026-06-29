@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PUBLIC_PILOT_ONBOARDING_GUARD_VERSION = "2.2.2";
+  const FLIGHT_WORKFLOW_PUBLIC_PILOT_ONBOARDING_GUARD_VERSION = "2.2.3";
   const GUARD_NAME = "flight_workflow_public_pilot_onboarding_guard_v1";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
   const TRADING_URL_RE = /"(bookingUrl|checkoutUrl|paymentUrl|orderUrl)"\s*:\s*"https?:\/\//i;
