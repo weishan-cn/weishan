@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.2.7";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.2.8";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -307,6 +307,11 @@
       safeToProceedWithFirstReadOnlySandboxDryRun: safe.safeToProceedWithFirstReadOnlySandboxDryRun === true,
       safeToProceedWithManualExternalPlatformVisitEducation: safe.safeToProceedWithManualExternalPlatformVisitEducation === true,
       safeToProceedWithUserLeavingWeishanEducation: safe.safeToProceedWithUserLeavingWeishanEducation === true,
+      externalPlatformExitRampStatus: safeLine(safe.externalPlatformExitRampStatus || ""),
+      manualVisitSafetyBriefStatus: safeLine(safe.manualVisitSafetyBriefStatus || ""),
+      readOnlySessionClosureStatus: safeLine(safe.readOnlySessionClosureStatus || ""),
+      externalPlatformExitViewModelStatus: safeLine(safe.externalPlatformExitViewModelStatus || ""),
+      safeToProceedWithReadOnlySessionClosureEducation: safe.safeToProceedWithReadOnlySessionClosureEducation === true,
       pilotOpsStatus: safeLine(safe.pilotOpsStatus || ""),
       nextCohortDecisionStatus: safeLine(safe.nextCohortDecisionStatus || ""),
       pilotOpsPrimaryRisk: stripUnsafe(safe.pilotOpsPrimaryRisk || null),

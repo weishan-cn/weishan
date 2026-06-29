@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_ISSUE_PATTERN_VIEW_MODEL_VERSION = "2.2.7";
+  const FLIGHT_WORKFLOW_ISSUE_PATTERN_VIEW_MODEL_VERSION = "2.2.8";
   const VIEW_MODEL_NAME = "flight_workflow_issue_pattern_view_model_v1";
   const CAVEAT = "问题趋势仅用于改进只读候选证据流程，不代表客服工单、交易请求或出票请求。";
 

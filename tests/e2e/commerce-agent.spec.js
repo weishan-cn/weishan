@@ -9722,7 +9722,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.2.7 platform visit preparation and final safety stay local and bounded @commerce-smoke", async () => {
+  test("v2.2.8 external platform exit guidance stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9730,30 +9730,34 @@ test.describe.serial("commerce agent workbench", () => {
       window.WeishanGlobalShoppingExternalPlatformBoundaryBrief &&
       window.WeishanGlobalShoppingFinalUserSafetyChecklist &&
       window.WeishanGlobalShoppingPlatformVisitPreparationViewModel &&
+      window.WeishanGlobalShoppingExternalPlatformExitRampPreview &&
+      window.WeishanGlobalShoppingManualVisitSafetyBrief &&
+      window.WeishanGlobalShoppingReadOnlySessionClosurePack &&
+      window.WeishanGlobalShoppingExternalPlatformExitViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
     const v227 = await page.evaluate(() => {
       const cardApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
       const host = document.createElement("section");
-      host.setAttribute("data-commerce-v227-render-smoke", "true");
+      host.setAttribute("data-commerce-v228-render-smoke", "true");
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml({});
-      const section = host.querySelector("[data-commerce-global-shopping-manual-platform-review='true']");
+      const section = host.querySelector("[data-commerce-global-shopping-external-platform-exit='true']");
       document.body.appendChild(host);
       return {
         text:host.innerText,
         html:host.innerHTML,
         sectionText:section ? section.innerText : "",
         sectionHtml:section ? section.innerHTML : "",
-        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-manual-platform-review='true']").length,
-        preparationButtonCount:host.querySelectorAll("[data-commerce-global-shopping-manual-platform-visit-preparation-show]").length,
-        boundaryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-external-platform-boundary-show]").length,
-        checklistButtonCount:host.querySelectorAll("[data-commerce-global-shopping-final-user-safety-checklist-show]").length
+        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-external-platform-exit='true']").length,
+        exitRampButtonCount:host.querySelectorAll("[data-commerce-global-shopping-external-platform-exit-ramp-show]").length,
+        safetyBriefButtonCount:host.querySelectorAll("[data-commerce-global-shopping-manual-visit-safety-brief-show]").length,
+        closurePackButtonCount:host.querySelectorAll("[data-commerce-global-shopping-read-only-session-closure-pack-show]").length
       };
     });
     expect(v227.sectionCount).toBe(1);
-    expect(v227.preparationButtonCount).toBe(1);
-    expect(v227.boundaryButtonCount).toBe(1);
-    expect(v227.checklistButtonCount).toBe(1);
+    expect(v227.exitRampButtonCount).toBe(1);
+    expect(v227.safetyBriefButtonCount).toBe(1);
+    expect(v227.closurePackButtonCount).toBe(1);
     expect(v227.text).toContain("平台访问准备与最终安全清单");
     expect(v227.text).toContain("手动访问平台准备中心");
     expect(v227.text).toContain("外部平台边界说明");

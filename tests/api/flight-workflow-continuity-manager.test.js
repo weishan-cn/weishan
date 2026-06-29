@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowContinuityManager.js"]);
   const api = windowRef.WeishanFlightWorkflowContinuityManager;
-  assert.equal(api.FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION, "2.2.7");
+  assert.equal(api.FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION, "2.2.8");
   const incomplete = api.buildFlightWorkflowContinuity({ flightIntentSummary:{ route:{ destinationCity:"成都" }, departureDate:"2026-07-15" }, missingFields:["origin"] });
   assert.equal(incomplete.status, "needs_clarification");
   assert.equal(incomplete.currentStage, "clarification");

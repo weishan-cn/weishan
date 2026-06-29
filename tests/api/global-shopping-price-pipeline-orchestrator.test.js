@@ -58,10 +58,14 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingExternalPlatformBoundaryBrief.js",
     "apps/desktop/src/renderer/core/globalShoppingFinalUserSafetyChecklist.js",
     "apps/desktop/src/renderer/core/globalShoppingPlatformVisitPreparationViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingExternalPlatformExitRampPreview.js",
+    "apps/desktop/src/renderer/core/globalShoppingManualVisitSafetyBrief.js",
+    "apps/desktop/src/renderer/core/globalShoppingReadOnlySessionClosurePack.js",
+    "apps/desktop/src/renderer/core/globalShoppingExternalPlatformExitViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.2.8");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -172,10 +176,10 @@ function main() {
     safeNextActionPanelSummary:safeNextActionPanel,
     userManualReviewViewModelSummary:userManualReviewViewModel
   });
-  assert.equal(ready.appVersion, "2.2.7");
+  assert.equal(ready.appVersion, "2.2.8");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "只读价格流水线已准备");
-  assert.equal(ready.pipelineStages.length, 51);
+  assert.equal(ready.pipelineStages.length, 55);
   assert.equal(ready.readyOutputs.canShowFixtureCandidatePrices, true);
   assert.equal(ready.readyOutputs.canShowFixtureReplay, true);
   assert.equal(ready.readyOutputs.canShowOfficialAnchor, true);
@@ -215,9 +219,14 @@ function main() {
   assert.equal(ready.platformVerificationProgressTrackerSummary.userFacingSummary.title, "平台核对进度追踪");
   assert.equal(ready.safeNextActionPanelSummary.userFacingSummary.title, "安全下一步");
   assert.equal(ready.userManualReviewViewModelSummary.title, "用户手动复核与安全下一步");
+  assert.equal(ready.externalPlatformExitRampPreviewSummary.userFacingSummary.title, "外部平台退出坡道预览");
+  assert.equal(ready.manualVisitSafetyBriefSummary.userFacingSummary.title, "手动访问安全简报");
+  assert.equal(ready.readOnlySessionClosurePackSummary.userFacingSummary.title, "只读会话关闭包");
+  assert.equal(ready.externalPlatformExitViewModelSummary.title, "外部平台手动访问前最终说明");
   assert.equal(ready.readyOutputs.safeToProceedWithFirstSandboxProviderConnectorImplementation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithFirstReadOnlyProviderSandboxIntegration, true);
   assert.equal(ready.readyOutputs.safeToProceedWithSandboxCandidateUserPreview, true);
+  assert.equal(ready.readyOutputs.safeToProceedWithReadOnlySessionClosureEducation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithSandboxDecisionReview, true);
   assert.equal(ready.readyOutputs.safeToProceedWithUserFacingHandoffExplanation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithManualPlatformReview, true);

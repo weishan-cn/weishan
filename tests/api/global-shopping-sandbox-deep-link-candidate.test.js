@@ -12,12 +12,12 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingSandboxDeepLinkCandidate.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingSandboxDeepLinkCandidate;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_DEEP_LINK_CANDIDATE_VERSION, "2.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_DEEP_LINK_CANDIDATE_VERSION, "2.2.8");
   const partner = windowRef.WeishanGlobalShoppingPartnerLinkPolicy.buildGlobalShoppingPartnerLinkPolicy({ linkRelation:"partner" });
   const availability = windowRef.WeishanGlobalShoppingPlatformAvailabilityGate.buildGlobalShoppingPlatformAvailabilityGate({ sourceName:"Sandbox Platform", sourceType:"major_platform", allowedDomain:"sandbox.platform.invalid", itemType:"flight", relationType:"partner", partnerLinkPolicySummary:partner });
   const prefill = windowRef.WeishanGlobalShoppingSearchParameterPrefillGate.buildGlobalShoppingSearchParameterPrefillGate({ itemType:"flight", origin:"SHA", destination:"CTU", departureDate:"2026-07-15", passengerCount:1 });
   const ready = api.buildGlobalShoppingSandboxDeepLinkCandidate({ sourceName:"Sandbox Platform", sourceType:"major_platform", allowedDomain:"sandbox.platform.invalid", itemType:"flight", searchParameterPrefillSummary:prefill, partnerLinkPolicySummary:partner, platformAvailabilitySummary:availability });
-  assert.equal(ready.appVersion, "2.2.7");
+  assert.equal(ready.appVersion, "2.2.8");
   assert.equal(ready.status, "ready");
   assert.equal(ready.deepLinkCandidate.disabledToOpen, true);
   assert.equal(ready.deepLinkCandidate.bookingUrl, null);

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.2.7";
+  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.2.8";
   const ORCHESTRATOR_NAME = "global_shopping_price_pipeline_orchestrator_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -421,6 +421,27 @@
       externalPlatformBoundaryBriefSummary:externalPlatformBoundaryBriefSummary,
       finalUserSafetyChecklistSummary:finalUserSafetyChecklistSummary
     });
+    const externalPlatformExitRampPreviewSummary = resolveSummary(safe, "externalPlatformExitRampPreviewSummary", "WeishanGlobalShoppingExternalPlatformExitRampPreview", "buildGlobalShoppingExternalPlatformExitRampPreview", {
+      manualPlatformVisitPreparationCenterSummary:manualPlatformVisitPreparationCenterSummary,
+      externalPlatformBoundaryBriefSummary:externalPlatformBoundaryBriefSummary,
+      finalUserSafetyChecklistSummary:finalUserSafetyChecklistSummary,
+      platformVisitPreparationViewModelSummary:platformVisitPreparationViewModelSummary,
+      userFacingManualReviewFlowSummary:userFacingManualReviewFlowSummary,
+      platformVerificationProgressTrackerSummary:platformVerificationProgressTrackerSummary,
+      safeNextActionPanelSummary:safeNextActionPanelSummary,
+      userManualReviewViewModelSummary:userManualReviewViewModelSummary
+    });
+    const manualVisitSafetyBriefSummary = resolveSummary(safe, "manualVisitSafetyBriefSummary", "WeishanGlobalShoppingManualVisitSafetyBrief", "buildGlobalShoppingManualVisitSafetyBrief", safe);
+    const readOnlySessionClosurePackSummary = resolveSummary(safe, "readOnlySessionClosurePackSummary", "WeishanGlobalShoppingReadOnlySessionClosurePack", "buildGlobalShoppingReadOnlySessionClosurePack", {
+      externalPlatformExitRampPreviewSummary:externalPlatformExitRampPreviewSummary,
+      manualVisitSafetyBriefSummary:manualVisitSafetyBriefSummary,
+      platformVisitPreparationViewModelSummary:platformVisitPreparationViewModelSummary
+    });
+    const externalPlatformExitViewModelSummary = resolveSummary(safe, "externalPlatformExitViewModelSummary", "WeishanGlobalShoppingExternalPlatformExitViewModel", "buildGlobalShoppingExternalPlatformExitViewModel", {
+      externalPlatformExitRampPreviewSummary:externalPlatformExitRampPreviewSummary,
+      manualVisitSafetyBriefSummary:manualVisitSafetyBriefSummary,
+      readOnlySessionClosurePackSummary:readOnlySessionClosurePackSummary
+    });
     const pipelineHealth = {
       firstSandboxProviderConnectorReady:statusOf(firstSandboxProviderConnectorSummary) === "ready",
       providerCoverageReady:statusOf(providerCoverageDashboardSummary) === "ready",
@@ -457,6 +478,10 @@
       externalPlatformBoundaryBriefReady:statusOf(externalPlatformBoundaryBriefSummary) === "ready",
       finalUserSafetyChecklistReady:statusOf(finalUserSafetyChecklistSummary) === "ready",
       platformVisitPreparationViewModelReady:statusOf(platformVisitPreparationViewModelSummary) === "ready",
+      externalPlatformExitRampPreviewReady:statusOf(externalPlatformExitRampPreviewSummary) === "ready",
+      manualVisitSafetyBriefReady:statusOf(manualVisitSafetyBriefSummary) === "ready",
+      readOnlySessionClosurePackReady:statusOf(readOnlySessionClosurePackSummary) === "ready",
+      externalPlatformExitViewModelReady:statusOf(externalPlatformExitViewModelSummary) === "ready",
       providerConnectorReady:statusOf(readOnlyProviderSandboxConnectorSummary) === "ready",
       fixtureReplayReady:statusOf(fixtureReplayConsoleSummary) === "ready",
       providerFixtureReady:statusOf(legalProviderFixtureSummary) === "ready",
@@ -500,7 +525,7 @@
     if (!pipelineHealth.noTicketing) blockedReasons.push("ticketing_detected");
     if (!pipelineHealth.noExternalOpen) blockedReasons.push("external_open_detected");
     if (statusOf(providerSandboxSafetyKillSwitchSummary) === "blocked") blockedReasons.push("provider_kill_switch_blocked");
-    const review = !pipelineHealth.providerConnectorReady || !pipelineHealth.fixtureReplayReady || !pipelineHealth.providerFixtureReady || !pipelineHealth.credentialSafetyPass || !pipelineHealth.sandboxFeedReady || !pipelineHealth.responseContractReady || !pipelineHealth.priceNormalizationReady || !pipelineHealth.officialAnchorReady || !pipelineHealth.sameItemMatcherReady || !pipelineHealth.duplicateMergeReady || !pipelineHealth.coveredLowestReady || !pipelineHealth.sandboxHandoffReady || !pipelineHealth.readOnlyProviderSandboxIntegrationGateReady || !pipelineHealth.sandboxPriceCandidateSessionReady || !pipelineHealth.sandboxPriceCandidateResultBoardReady || !pipelineHealth.sandboxSessionReplayCenterReady || !pipelineHealth.providerEvidenceTraceReady || !pipelineHealth.candidateConfidenceReady || !pipelineHealth.sandboxReplayViewModelReady || !pipelineHealth.sandboxCandidateComparisonReady || !pipelineHealth.providerEvidenceMatrixReady || !pipelineHealth.readOnlyHandoffDrillReady || !pipelineHealth.sandboxDecisionReviewReady || !pipelineHealth.redactedSearchParameterPackReady || !pipelineHealth.userConfirmationChecklistReady || !pipelineHealth.readOnlyPlatformHandoffSimulatorReady || !pipelineHealth.platformHandoffSimulationViewModelReady || !pipelineHealth.readOnlyHandoffPacketPreviewReady || !pipelineHealth.platformPreflightSafetyGateReady || !pipelineHealth.userActionBoundaryReceiptReady || !pipelineHealth.handoffPacketViewModelReady || !pipelineHealth.manualPlatformReviewCockpitReady || !pipelineHealth.handoffAcceptanceWalkthroughReady || !pipelineHealth.platformRealityCheckReady || !pipelineHealth.manualPlatformReviewViewModelReady || !pipelineHealth.userFacingManualReviewFlowReady || !pipelineHealth.platformVerificationProgressTrackerReady || !pipelineHealth.safeNextActionPanelReady || !pipelineHealth.userManualReviewViewModelReady || !pipelineHealth.manualPlatformVisitPreparationCenterReady || !pipelineHealth.externalPlatformBoundaryBriefReady || !pipelineHealth.finalUserSafetyChecklistReady || !pipelineHealth.platformVisitPreparationViewModelReady;
+    const review = !pipelineHealth.providerConnectorReady || !pipelineHealth.fixtureReplayReady || !pipelineHealth.providerFixtureReady || !pipelineHealth.credentialSafetyPass || !pipelineHealth.sandboxFeedReady || !pipelineHealth.responseContractReady || !pipelineHealth.priceNormalizationReady || !pipelineHealth.officialAnchorReady || !pipelineHealth.sameItemMatcherReady || !pipelineHealth.duplicateMergeReady || !pipelineHealth.coveredLowestReady || !pipelineHealth.sandboxHandoffReady || !pipelineHealth.readOnlyProviderSandboxIntegrationGateReady || !pipelineHealth.sandboxPriceCandidateSessionReady || !pipelineHealth.sandboxPriceCandidateResultBoardReady || !pipelineHealth.sandboxSessionReplayCenterReady || !pipelineHealth.providerEvidenceTraceReady || !pipelineHealth.candidateConfidenceReady || !pipelineHealth.sandboxReplayViewModelReady || !pipelineHealth.sandboxCandidateComparisonReady || !pipelineHealth.providerEvidenceMatrixReady || !pipelineHealth.readOnlyHandoffDrillReady || !pipelineHealth.sandboxDecisionReviewReady || !pipelineHealth.redactedSearchParameterPackReady || !pipelineHealth.userConfirmationChecklistReady || !pipelineHealth.readOnlyPlatformHandoffSimulatorReady || !pipelineHealth.platformHandoffSimulationViewModelReady || !pipelineHealth.readOnlyHandoffPacketPreviewReady || !pipelineHealth.platformPreflightSafetyGateReady || !pipelineHealth.userActionBoundaryReceiptReady || !pipelineHealth.handoffPacketViewModelReady || !pipelineHealth.manualPlatformReviewCockpitReady || !pipelineHealth.handoffAcceptanceWalkthroughReady || !pipelineHealth.platformRealityCheckReady || !pipelineHealth.manualPlatformReviewViewModelReady || !pipelineHealth.userFacingManualReviewFlowReady || !pipelineHealth.platformVerificationProgressTrackerReady || !pipelineHealth.safeNextActionPanelReady || !pipelineHealth.userManualReviewViewModelReady || !pipelineHealth.manualPlatformVisitPreparationCenterReady || !pipelineHealth.externalPlatformBoundaryBriefReady || !pipelineHealth.finalUserSafetyChecklistReady || !pipelineHealth.platformVisitPreparationViewModelReady || !pipelineHealth.externalPlatformExitRampPreviewReady || !pipelineHealth.manualVisitSafetyBriefReady || !pipelineHealth.readOnlySessionClosurePackReady || !pipelineHealth.externalPlatformExitViewModelReady;
     return clone({
       pipelineHealth:pipelineHealth,
       pipelineStages:buildGlobalShoppingPricePipelineRows({
@@ -556,6 +581,10 @@
         canShowExternalPlatformBoundaryBrief:pipelineHealth.externalPlatformBoundaryBriefReady,
         canShowFinalUserSafetyChecklist:pipelineHealth.finalUserSafetyChecklistReady,
         canShowPlatformVisitPreparationViewModel:pipelineHealth.platformVisitPreparationViewModelReady,
+        canShowExternalPlatformExitRampPreview:pipelineHealth.externalPlatformExitRampPreviewReady,
+        canShowManualVisitSafetyBrief:pipelineHealth.manualVisitSafetyBriefReady,
+        canShowReadOnlySessionClosurePack:pipelineHealth.readOnlySessionClosurePackReady,
+        canShowExternalPlatformExitViewModel:pipelineHealth.externalPlatformExitViewModelReady,
         canProceedToReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.providerFixtureReady && pipelineHealth.credentialSafetyPass && pipelineHealth.sandboxFeedReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.officialAnchorReady && pipelineHealth.sameItemMatcherReady && pipelineHealth.duplicateMergeReady && pipelineHealth.coveredLowestReady && pipelineHealth.sandboxHandoffReady,
         safeToProceedWithFirstRealReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.coveredLowestReady,
         safeToProceedWithFirstReadOnlySandboxDryRun:pipelineHealth.realProviderSandboxGateReady && pipelineHealth.providerRequestEnvelopeReady && pipelineHealth.providerCallAuditLedgerReady && pipelineHealth.providerSandboxReadinessReady,
@@ -569,7 +598,8 @@
         safeToProceedWithManualPlatformReview:pipelineHealth.readOnlyHandoffPacketPreviewReady && pipelineHealth.platformPreflightSafetyGateReady && pipelineHealth.userActionBoundaryReceiptReady && pipelineHealth.handoffPacketViewModelReady,
         safeToProceedWithManualPlatformUserEducation:pipelineHealth.manualPlatformReviewCockpitReady && pipelineHealth.handoffAcceptanceWalkthroughReady && pipelineHealth.platformRealityCheckReady && pipelineHealth.manualPlatformReviewViewModelReady,
         safeToProceedWithManualExternalPlatformVisitEducation:pipelineHealth.userFacingManualReviewFlowReady && pipelineHealth.platformVerificationProgressTrackerReady && pipelineHealth.safeNextActionPanelReady && pipelineHealth.userManualReviewViewModelReady,
-        safeToProceedWithUserLeavingWeishanEducation:pipelineHealth.manualPlatformVisitPreparationCenterReady && pipelineHealth.externalPlatformBoundaryBriefReady && pipelineHealth.finalUserSafetyChecklistReady && pipelineHealth.platformVisitPreparationViewModelReady
+        safeToProceedWithUserLeavingWeishanEducation:pipelineHealth.manualPlatformVisitPreparationCenterReady && pipelineHealth.externalPlatformBoundaryBriefReady && pipelineHealth.finalUserSafetyChecklistReady && pipelineHealth.platformVisitPreparationViewModelReady,
+        safeToProceedWithReadOnlySessionClosureEducation:pipelineHealth.externalPlatformExitRampPreviewReady && pipelineHealth.manualVisitSafetyBriefReady && pipelineHealth.readOnlySessionClosurePackReady && pipelineHealth.externalPlatformExitViewModelReady
       },
       blockedReasons:blockedReasons,
       readOnlyProviderSandboxConnectorSummary:clone(readOnlyProviderSandboxConnectorSummary),
@@ -627,6 +657,10 @@
       externalPlatformBoundaryBriefSummary:clone(externalPlatformBoundaryBriefSummary),
       finalUserSafetyChecklistSummary:clone(finalUserSafetyChecklistSummary),
       platformVisitPreparationViewModelSummary:clone(platformVisitPreparationViewModelSummary),
+      externalPlatformExitRampPreviewSummary:clone(externalPlatformExitRampPreviewSummary),
+      manualVisitSafetyBriefSummary:clone(manualVisitSafetyBriefSummary),
+      readOnlySessionClosurePackSummary:clone(readOnlySessionClosurePackSummary),
+      externalPlatformExitViewModelSummary:clone(externalPlatformExitViewModelSummary),
       status:blockedReasons.length ? "blocked" : (review ? "needs_review" : "ready"),
       redacted:true
     });
@@ -684,7 +718,11 @@
       row("manual_platform_visit_preparation_center", "手动访问平台准备中心", statusOf(safe.manualPlatformVisitPreparationCenterSummary) === "ready" ? "pass" : (statusOf(safe.manualPlatformVisitPreparationCenterSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.manualPlatformVisitPreparationCenterSummary).userFacingSummary).resultLabel || "平台访问准备仍需复核"),
       row("external_platform_boundary_brief", "外部平台边界说明", statusOf(safe.externalPlatformBoundaryBriefSummary) === "ready" ? "pass" : (statusOf(safe.externalPlatformBoundaryBriefSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.externalPlatformBoundaryBriefSummary).userFacingSummary).resultLabel || "平台边界说明仍需复核"),
       row("final_user_safety_checklist", "最终用户安全清单", statusOf(safe.finalUserSafetyChecklistSummary) === "ready" ? "pass" : (statusOf(safe.finalUserSafetyChecklistSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.finalUserSafetyChecklistSummary).userFacingSummary).resultLabel || "最终安全清单仍需复核"),
-      row("platform_visit_preparation_view_model", "平台访问准备与最终安全清单", statusOf(safe.platformVisitPreparationViewModelSummary) === "ready" ? "pass" : (statusOf(safe.platformVisitPreparationViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.platformVisitPreparationViewModelSummary).title || "平台访问准备与最终安全清单")
+      row("platform_visit_preparation_view_model", "平台访问准备与最终安全清单", statusOf(safe.platformVisitPreparationViewModelSummary) === "ready" ? "pass" : (statusOf(safe.platformVisitPreparationViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.platformVisitPreparationViewModelSummary).title || "平台访问准备与最终安全清单"),
+      row("external_platform_exit_ramp_preview", "外部平台退出坡道预览", statusOf(safe.externalPlatformExitRampPreviewSummary) === "ready" ? "pass" : (statusOf(safe.externalPlatformExitRampPreviewSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.externalPlatformExitRampPreviewSummary).userFacingSummary).resultLabel || "外部平台退出坡道仍需复核"),
+      row("manual_visit_safety_brief", "手动访问安全简报", statusOf(safe.manualVisitSafetyBriefSummary) === "ready" ? "pass" : (statusOf(safe.manualVisitSafetyBriefSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.manualVisitSafetyBriefSummary).userFacingSummary).resultLabel || "手动访问安全简报仍需复核"),
+      row("read_only_session_closure_pack", "只读会话关闭包", statusOf(safe.readOnlySessionClosurePackSummary) === "ready" ? "pass" : (statusOf(safe.readOnlySessionClosurePackSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.readOnlySessionClosurePackSummary).userFacingSummary).resultLabel || "只读会话关闭包仍需复核"),
+      row("external_platform_exit_view_model", "外部平台手动访问前最终说明", statusOf(safe.externalPlatformExitViewModelSummary) === "ready" ? "pass" : (statusOf(safe.externalPlatformExitViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.externalPlatformExitViewModelSummary).title || "外部平台手动访问前最终说明")
     ]);
   }
   function sanitizeGlobalShoppingPricePipelineOrchestrator(orchestrator) {
@@ -761,6 +799,10 @@
       externalPlatformBoundaryBriefSummary:linkedSummary(evaluation.externalPlatformBoundaryBriefSummary),
       finalUserSafetyChecklistSummary:linkedSummary(evaluation.finalUserSafetyChecklistSummary),
       platformVisitPreparationViewModelSummary:linkedSummary(evaluation.platformVisitPreparationViewModelSummary),
+      externalPlatformExitRampPreviewSummary:linkedSummary(evaluation.externalPlatformExitRampPreviewSummary),
+      manualVisitSafetyBriefSummary:linkedSummary(evaluation.manualVisitSafetyBriefSummary),
+      readOnlySessionClosurePackSummary:linkedSummary(evaluation.readOnlySessionClosurePackSummary),
+      externalPlatformExitViewModelSummary:linkedSummary(evaluation.externalPlatformExitViewModelSummary),
       redactedSearchParameterPackStatus:text(obj(evaluation.redactedSearchParameterPackSummary).status || ""),
       userConfirmationChecklistStatus:text(obj(evaluation.userConfirmationChecklistSummary).status || ""),
       readOnlyPlatformHandoffSimulatorStatus:text(obj(evaluation.readOnlyPlatformHandoffSimulatorSummary).status || ""),

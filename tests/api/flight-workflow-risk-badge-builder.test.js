@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.2.7");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.2.8");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -169,6 +169,19 @@ function main() {
   assert.ok(userManualReviewLabels.includes("安全下一步不打开平台"));
   assert.ok(userManualReviewLabels.includes("下一步不包含购买、下单、付款或出票"));
   assert.ok(userManualReviewLabels.includes("用户必须自行完成最终平台判断"));
+  const exitLabels = api.buildFlightWorkflowRiskBadges({
+    externalPlatformExitRampPreviewSummary:{ status:"ready" },
+    manualVisitSafetyBriefSummary:{ status:"ready" },
+    readOnlySessionClosurePackSummary:{ status:"ready" },
+    externalPlatformExitViewModelSummary:{ status:"ready", title:"外部平台手动访问前最终说明" }
+  }).badges.map((item) => item.label);
+  assert.ok(exitLabels.includes("外部平台退出坡道已准备"));
+  assert.ok(exitLabels.includes("手动访问安全简报已准备"));
+  assert.ok(exitLabels.includes("只读会话关闭包已准备"));
+  assert.ok(exitLabels.includes("退出坡道不打开平台"));
+  assert.ok(exitLabels.includes("安全简报不保存确认"));
+  assert.ok(exitLabels.includes("会话关闭包不导出、不下载"));
+  assert.ok(exitLabels.includes("关闭包不是合同、订单或付款授权"));
   const decisionReviewLabels = api.buildFlightWorkflowRiskBadges({
     sandboxCandidateComparisonWorkbenchSummary:{ status:"ready" },
     providerEvidenceComparisonMatrixSummary:{ status:"ready" },

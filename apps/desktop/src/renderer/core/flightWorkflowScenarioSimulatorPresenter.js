@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SCENARIO_SIMULATOR_PRESENTER_VERSION = "2.2.7";
+  const FLIGHT_WORKFLOW_SCENARIO_SIMULATOR_PRESENTER_VERSION = "2.2.8";
   const PRESENTER_NAME = "flight_workflow_scenario_simulator_presenter_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

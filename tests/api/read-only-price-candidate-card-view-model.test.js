@@ -122,6 +122,10 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingExternalPlatformBoundaryBrief.js",
     "apps/desktop/src/renderer/core/globalShoppingFinalUserSafetyChecklist.js",
     "apps/desktop/src/renderer/core/globalShoppingPlatformVisitPreparationViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingExternalPlatformExitRampPreview.js",
+    "apps/desktop/src/renderer/core/globalShoppingManualVisitSafetyBrief.js",
+    "apps/desktop/src/renderer/core/globalShoppingReadOnlySessionClosurePack.js",
+    "apps/desktop/src/renderer/core/globalShoppingExternalPlatformExitViewModel.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteAuditExport.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteRunTimeline.js",
     "apps/desktop/src/renderer/core/multiProviderSandboxDryRunOrchestrator.js",
@@ -136,7 +140,7 @@ function main() {
   const decisionReviewViewModelSummary = { status:"ready", title:"Sandbox 候选决策复核", caveat:"当前仅用于复核 sandbox 候选，不代表真实价格、全网最低、锁价、可订、付款、下单或出票能力。", redacted:true };
   const pricePipelineSummary = { status:"ready", userFacingSummary:{ title:"全球购只读价格流水线", resultLabel:"只读价格流水线已准备", redacted:true }, providerEvidenceTraceSummary:{ status:"ready", redacted:true }, candidateConfidenceExplainerSummary:{ status:"ready", redacted:true }, sandboxCandidateComparisonWorkbenchSummary:comparisonWorkbenchSummary, providerEvidenceComparisonMatrixSummary:evidenceComparisonMatrixSummary, readOnlyHandoffReadinessDrillSummary:handoffReadinessDrillSummary, sandboxDecisionReviewViewModelSummary:decisionReviewViewModelSummary, manualPlatformReviewCockpitSummary:{ status:"ready", userFacingSummary:{ title:"手动平台复核驾驶舱", resultLabel:"手动平台复核驾驶舱已准备", redacted:true }, redacted:true }, handoffAcceptanceWalkthroughSummary:{ status:"ready", userFacingSummary:{ title:"交接包接受演练", resultLabel:"交接包接受演练已准备", redacted:true }, redacted:true }, platformRealityCheckBoardSummary:{ status:"ready", userFacingSummary:{ title:"平台真实页面复核清单", resultLabel:"平台真实页面复核清单已准备", redacted:true }, redacted:true }, manualPlatformReviewViewModelSummary:{ status:"ready", title:"手动平台复核与现实检查", redacted:true }, userFacingManualReviewFlowSummary:{ status:"ready", userFacingSummary:{ title:"用户手动复核流程", resultLabel:"用户手动复核流程已准备", redacted:true }, redacted:true }, platformVerificationProgressTrackerSummary:{ status:"ready", userFacingSummary:{ title:"平台核对进度追踪", resultLabel:"平台核对进度已准备", redacted:true }, progressRows:[{ itemId:"price", label:"实时价格", status:"user_must_verify", summary:"到平台后人工核对实时价格", redacted:true }], redacted:true }, safeNextActionPanelSummary:{ status:"ready", userFacingSummary:{ title:"安全下一步", resultLabel:"安全下一步已准备", redacted:true }, safeActionRows:[{ actionId:"manual_verify", label:"到平台后人工核对实时价格", kind:"safe", redacted:true }], forbiddenActionRows:[{ actionId:"forbidden_1", label:"立即购买：已阻断", kind:"blocked", redacted:true }], redacted:true }, userManualReviewViewModelSummary:{ status:"ready", title:"用户手动复核与安全下一步", userFacingSummary:{ title:"用户手动复核与安全下一步", resultLabel:"用户手动复核与安全下一步已准备", redacted:true }, redacted:true }, readyOutputs:{ safeToProceedWithSandboxDecisionReview:true, safeToProceedWithManualPlatformReview:true, safeToProceedWithManualPlatformUserEducation:true, safeToProceedWithManualExternalPlatformVisitEducation:true }, redacted:true };
   const candidateJourneySummary = { status:"ready", title:"全球购只读候选旅程", redacted:true };
-  assert.equal(api.READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION, "2.2.7");
+  assert.equal(api.READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION, "2.2.8");
   const card = api.buildReadOnlyPriceCandidateCardViewModel({ continuitySummary:{ status:"resumable", currentStage:"decision", stageLabel:"选择候选", resumePlan:{ nextStepLabel:"确认前往平台", canResume:true } }, confirmationStateSummary:{ labels:["已选择候选"] }, recoverySummary:{ status:"resumable" }, resumeCoachSummary:{ allowedActions:[{ label:"前往平台确认" }] }, currentStage:"decision", workflowStageLabel:"选择候选", nextStepLabel:"确认前往平台", canResumeWorkflow:true, resumeActions:[{ label:"前往平台确认" }], blockedActions:[{ label:"付款" }], actionPolicyDecision:{ status:"requires_confirmation" }, workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sandboxDryRunSummary:dryRun, runTimelineSummary:dryRun.runTimelineSummary, providerRunMatrix:dryRun.providerRunMatrix, dryRunStatus:dryRun.status, dryRunButton:{ label:"运行沙盒只读报价", enabled:true, loading:false, autoRun:false }, dryRunTopCandidates:dryRun.dryRunTopCandidates, task:{ title:"7月15日上海到成都最便宜的机票" }, providerId:"google_flights_search", providerName:"Google Flights", providerType:"flight_search", providerSandboxDryRunHarnessSummary:{ status:"ready", userFacingSummary:{ title:"Provider Sandbox 干跑框架", resultLabel:"干跑框架已准备", redacted:true }, redacted:true }, pricePipelineOrchestratorSummary:pricePipelineSummary, readOnlyCandidateJourneySummary:candidateJourneySummary, sandboxCandidateComparisonWorkbenchSummary:comparisonWorkbenchSummary, providerEvidenceComparisonMatrixSummary:evidenceComparisonMatrixSummary, readOnlyHandoffReadinessDrillSummary:handoffReadinessDrillSummary, sandboxDecisionReviewViewModelSummary:decisionReviewViewModelSummary, report:{ provider:{ providerMode:"fixture" }, handoff:{ safeProviderHandoffUrl:"https://www.google.com/travel/flights" }, rankingPreview:{ sourceBreakdown:{ providerCount:3, providerIds:["flight_provider_trusted_fixture","trip_com_sandbox_stub","airline_official_sandbox_stub"], fareSources:["sandbox_read_only_import"] }, rankingExplanation:"仅按导入样本中的只读候选证据排序，平台最终为准。" }, selectedCandidate:{ providerName:"Airline Official Sandbox Stub", responseShape:"airline_official_stub_quote", selectedSourceSummary:"来源：Airline Official Sandbox Stub / airline_official_stub_quote" } }, sourceBreakdown:{ providerCount:3, providerIds:["flight_provider_trusted_fixture","trip_com_sandbox_stub","airline_official_sandbox_stub"], fareSources:["sandbox_read_only_import"] }, selectedSourceSummary:"来源：Airline Official Sandbox Stub / airline_official_stub_quote", rankingExplanation:"仅按导入样本中的只读候选证据排序，平台最终为准。", flightFields:{ origin:"上海", destination:"成都", dateDisplay:"7 月 15 日", goal:"低价优先", directPreference:"直达优先" }, topCandidates:[{ rank:1, quoteId:"q930", providerName:"Airline Official Sandbox Stub", responseShape:"airline_official_stub_quote", fareSource:"sandbox_read_only_import", currency:"CNY", baseFare:780, taxesAndFees:130, providerFees:20, totalPrice:930, safeProviderHandoffReady:true, safeProviderHandoffUrl:"https://www.google.com/travel/flights", bookingUrl:null, payment:false, order:false, identityUpload:false, redacted:true }] });
   assert.equal(card.visible, true);
   assert.equal(card.title, "只读候选价");
@@ -218,6 +222,14 @@ function main() {
   assert.equal(card.partnerLinkPolicySummary.userFacingSummary.title, "合作/联盟链接政策");
   assert.equal(card.sandboxHandoffViewModelSummary.title, "Sandbox 跳转候选与平台可用性");
   assert.equal(card.manualPlatformReviewCockpitSummary.userFacingSummary.title, "手动平台复核驾驶舱");
+  assert.equal(card.externalPlatformExitRampPreviewSummary.userFacingSummary.title, "外部平台退出坡道预览");
+  assert.equal(card.manualVisitSafetyBriefSummary.userFacingSummary.title, "手动访问安全简报");
+  assert.equal(card.readOnlySessionClosurePackSummary.userFacingSummary.title, "只读会话关闭包");
+  assert.equal(card.externalPlatformExitViewModelSummary.title, "外部平台手动访问前最终说明");
+  assert.equal(card.externalPlatformExitRampStatus, "ready");
+  assert.equal(card.manualVisitSafetyBriefStatus, "ready");
+  assert.equal(card.readOnlySessionClosureStatus, "ready");
+  assert.equal(card.externalPlatformExitViewModelStatus, "ready");
   assert.equal(card.handoffAcceptanceWalkthroughSummary.userFacingSummary.title, "交接包接受演练");
   assert.equal(card.platformRealityCheckBoardSummary.userFacingSummary.title, "平台真实页面复核清单");
   assert.equal(card.manualPlatformReviewViewModelSummary.title, "手动平台复核与现实检查");
@@ -306,7 +318,7 @@ function main() {
   assert.equal(card.providerBindingWizardSummary.title, "Provider 沙盒绑定准备");
   assert.equal(card.interactiveRefreshState.status, "idle");
   assert.equal(card.clearRefreshStateButton.label, "清除刷新状态");
-  assert.equal(card.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.2.7");
+  assert.equal(card.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.2.8");
   assert.equal(card.sessionStatus, "updated");
   assert.equal(card.auditExportReady, true);
   assert.equal(card.sessionRecoverySummary.title, "Session Recovery");

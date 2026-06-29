@@ -1,5 +1,5 @@
 (function(){
-  const PROVIDER_ACTIVATION_READINESS_GATE_VERSION = "2.2.7";
+  const PROVIDER_ACTIVATION_READINESS_GATE_VERSION = "2.2.8";
 
   const prerequisiteGateSummary = [
     "result schema gate: established / closed / draft",

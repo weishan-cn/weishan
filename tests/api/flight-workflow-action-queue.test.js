@@ -8,7 +8,7 @@ function action(queue, id) { return queue.actions.find((item) => item.actionId =
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowContinuityManager.js", "apps/desktop/src/renderer/core/flightWorkflowActionQueue.js"]);
   const api = windowRef.WeishanFlightWorkflowActionQueue;
-  assert.equal(api.FLIGHT_WORKFLOW_ACTION_QUEUE_VERSION, "2.2.7");
+  assert.equal(api.FLIGHT_WORKFLOW_ACTION_QUEUE_VERSION, "2.2.8");
   assert.equal(action(api.buildFlightWorkflowActionQueue({ status:"needs_clarification" }), "answer_clarification").enabled, true);
   assert.equal(action(api.buildFlightWorkflowActionQueue({ status:"ready_for_evidence" }), "run_read_only_quotes").enabled, true);
   assert.equal(action(api.buildFlightWorkflowActionQueue({ status:"evidence_ready" }), "select_candidate").enabled, true);

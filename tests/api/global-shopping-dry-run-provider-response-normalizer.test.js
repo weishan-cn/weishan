@@ -43,7 +43,7 @@ function main() {
     providerSandboxSafetyKillSwitchSummary:{ status:"clear", redacted:true }
   });
   const api = windowRef.WeishanGlobalShoppingDryRunProviderResponseNormalizer;
-  assert.equal(api.GLOBAL_SHOPPING_DRY_RUN_PROVIDER_RESPONSE_NORMALIZER_VERSION, "2.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_DRY_RUN_PROVIDER_RESPONSE_NORMALIZER_VERSION, "2.2.8");
 
   const firstSandboxConnector = windowRef.WeishanGlobalShoppingFirstSandboxProviderConnector.buildGlobalShoppingFirstSandboxProviderConnector({
     providerId:"global_fixture_provider",
@@ -79,7 +79,7 @@ function main() {
       currency:"CNY"
     }]
   });
-  assert.equal(ready.appVersion, "2.2.7");
+  assert.equal(ready.appVersion, "2.2.8");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "Dry-Run Provider 响应归一化器");
   assert.equal(ready.normalizedSourceInputs.length, 1);
