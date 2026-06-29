@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.2.4");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.2.5");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -133,6 +133,24 @@ function main() {
   assert.ok(globalLabels.includes("禁止最低价相关承诺"));
   assert.ok(globalLabels.includes("禁止自动下单承诺"));
   assert.ok(globalLabels.includes("跳转不代表交易能力"));
+  const manualReviewLabels = api.buildFlightWorkflowRiskBadges({
+    manualPlatformReviewCockpitSummary:{ status:"ready", userFacingSummary:{ resultLabel:"手动平台复核驾驶舱已准备", redacted:true } },
+    handoffAcceptanceWalkthroughSummary:{ status:"ready", userFacingSummary:{ resultLabel:"交接包接受演练已准备", redacted:true } },
+    platformRealityCheckBoardSummary:{ status:"ready", userFacingSummary:{ resultLabel:"平台真实页面复核清单已准备", redacted:true } },
+    manualPlatformReviewViewModelSummary:{ status:"ready", title:"手动平台复核与现实检查", redacted:true },
+    manualPlatformReviewCockpitStatus:"ready",
+    handoffAcceptanceWalkthroughStatus:"ready",
+    platformRealityCheckStatus:"ready",
+    manualPlatformReviewViewModelStatus:"ready",
+    safeToProceedWithManualPlatformUserEducation:true
+  }).badges.map((item) => item.label);
+  assert.ok(manualReviewLabels.includes("手动平台复核驾驶舱已准备"));
+  assert.ok(manualReviewLabels.includes("交接包接受演练已准备"));
+  assert.ok(manualReviewLabels.includes("平台真实页面复核清单已准备"));
+  assert.ok(manualReviewLabels.includes("接受演练不保存用户确认"));
+  assert.ok(manualReviewLabels.includes("平台页面才是最终依据"));
+  assert.ok(manualReviewLabels.includes("手动复核不代表下单能力"));
+  assert.ok(manualReviewLabels.includes("手动平台复核教育已准备"));
   const decisionReviewLabels = api.buildFlightWorkflowRiskBadges({
     sandboxCandidateComparisonWorkbenchSummary:{ status:"ready" },
     providerEvidenceComparisonMatrixSummary:{ status:"ready" },

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_REPLAY_VIEW_MODEL_VERSION = "2.2.4";
+  const GLOBAL_SHOPPING_SANDBOX_REPLAY_VIEW_MODEL_VERSION = "2.2.5";
   const VIEW_MODEL_NAME = "global_shopping_sandbox_replay_view_model_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

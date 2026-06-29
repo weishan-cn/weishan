@@ -53,7 +53,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.2.5");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -100,6 +100,10 @@ function main() {
   const adapterShell = { status:"ready", userFacingSummary:{ title:"第一个只读 Provider Adapter 外壳", resultLabel:"Adapter 外壳已准备", redacted:true }, redacted:true };
   const killSwitch = { status:"clear", userFacingSummary:{ title:"Provider Sandbox 安全熔断器", resultLabel:"安全熔断器未触发", redacted:true }, redacted:true };
   const dryRunViewModel = { status:"ready", title:"Provider Sandbox 干跑准备", redacted:true };
+  const manualPlatformReviewCockpit = { status:"ready", userFacingSummary:{ title:"手动平台复核驾驶舱", resultLabel:"手动平台复核驾驶舱已准备", redacted:true }, redacted:true };
+  const handoffAcceptanceWalkthrough = { status:"ready", userFacingSummary:{ title:"交接包接受演练", resultLabel:"交接包接受演练已准备", redacted:true }, redacted:true };
+  const platformRealityCheckBoard = { status:"ready", userFacingSummary:{ title:"平台真实页面复核清单", resultLabel:"平台真实页面复核清单已准备", redacted:true }, redacted:true };
+  const manualPlatformReviewViewModel = { status:"ready", title:"手动平台复核与现实检查", userFacingSummary:{ title:"手动平台复核与现实检查", resultLabel:"手动平台复核与现实检查已准备", redacted:true }, redacted:true };
   const firstSandboxConnector = windowRef.WeishanGlobalShoppingFirstSandboxProviderConnector.buildGlobalShoppingFirstSandboxProviderConnector({ providerId:"fixture_provider", providerName:"Fixture Provider", providerType:"fixture", itemType:"flight", connectorMode:"dry_run", adapterRegistry:{ status:"ready", adapters:[{ providerType:"official", itemType:"flight", region:"CN", redacted:true }], redacted:true }, adapterShell:adapterShell, dryRunHarness:dryRunHarness, safetyKillSwitch:killSwitch, requestEnvelope:{ status:"ready", requestEnvelope:{ requestMeta:{ providerId:"fixture_provider", providerName:"Fixture Provider", itemType:"flight" } }, redacted:true }, providerRunbook:{ status:"ready", redacted:true }, normalizedSourceInputs:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", itemType:"flight", redacted:true }] });
   const coverageDashboard = windowRef.WeishanGlobalShoppingProviderCoverageDashboard.buildGlobalShoppingProviderCoverageDashboard({ adapterRegistrySummary:{ adapters:[{ providerType:"official", itemType:"flight", region:"CN", redacted:true }] }, firstSandboxProviderConnectorSummary:firstSandboxConnector, normalizedSourceInputs:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", itemType:"flight", redacted:true }] });
   const sourceTrust = windowRef.WeishanGlobalShoppingReadOnlySourceTrustScore.buildGlobalShoppingReadOnlySourceTrustScore({ sources:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", basePrice:920, currency:"CNY", lastCheckedAt:"redacted_now", redacted:true }] });
@@ -146,12 +150,16 @@ function main() {
       rows:[{ rowId:"allowed_parameters", label:"允许参数", value:"origin, destination, date", status:"pass", redacted:true }],
       redacted:true
     },
-    sandboxDecisionReviewViewModelSummary:{ status:"ready", title:"Sandbox 候选决策复核", redacted:true }
+    sandboxDecisionReviewViewModelSummary:{ status:"ready", title:"Sandbox 候选决策复核", redacted:true },
+    manualPlatformReviewCockpitSummary:manualPlatformReviewCockpit,
+    handoffAcceptanceWalkthroughSummary:handoffAcceptanceWalkthrough,
+    platformRealityCheckBoardSummary:platformRealityCheckBoard,
+    manualPlatformReviewViewModelSummary:manualPlatformReviewViewModel
   });
-  assert.equal(ready.appVersion, "2.2.4");
+  assert.equal(ready.appVersion, "2.2.5");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "只读价格流水线已准备");
-  assert.equal(ready.pipelineStages.length, 39);
+  assert.equal(ready.pipelineStages.length, 43);
   assert.equal(ready.readyOutputs.canShowFixtureCandidatePrices, true);
   assert.equal(ready.readyOutputs.canShowFixtureReplay, true);
   assert.equal(ready.readyOutputs.canShowOfficialAnchor, true);
@@ -183,12 +191,17 @@ function main() {
   assert.equal(ready.platformPreflightSafetyGateSummary.userFacingSummary.title, "平台跳转前安全预检");
   assert.equal(ready.userActionBoundaryReceiptSummary.userFacingSummary.title, "用户行动边界回执");
   assert.equal(ready.handoffPacketViewModelSummary.title, "只读交接包与安全预检");
+  assert.equal(ready.manualPlatformReviewCockpitSummary.userFacingSummary.title, "手动平台复核驾驶舱");
+  assert.equal(ready.handoffAcceptanceWalkthroughSummary.userFacingSummary.title, "交接包接受演练");
+  assert.equal(ready.platformRealityCheckBoardSummary.userFacingSummary.title, "平台真实页面复核清单");
+  assert.equal(ready.manualPlatformReviewViewModelSummary.title, "手动平台复核与现实检查");
   assert.equal(ready.readyOutputs.safeToProceedWithFirstSandboxProviderConnectorImplementation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithFirstReadOnlyProviderSandboxIntegration, true);
   assert.equal(ready.readyOutputs.safeToProceedWithSandboxCandidateUserPreview, true);
   assert.equal(ready.readyOutputs.safeToProceedWithSandboxDecisionReview, true);
   assert.equal(ready.readyOutputs.safeToProceedWithUserFacingHandoffExplanation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithManualPlatformReview, true);
+  assert.equal(ready.readyOutputs.safeToProceedWithManualPlatformUserEducation, true);
 
   assert.equal(api.buildGlobalShoppingPricePipelineOrchestrator({
     providerCredentialSafetyReview:{ status:"ready" },

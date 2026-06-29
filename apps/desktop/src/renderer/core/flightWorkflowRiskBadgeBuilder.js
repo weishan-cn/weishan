@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.2.4";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.2.5";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -344,6 +344,13 @@
       if (safe.platformPreflightSafetyGateSummary && safe.platformPreflightSafetyGateSummary.status) badges.push(badge("preflight_no_open", "安全预检不打开平台", "info"));
       if (safe.userActionBoundaryReceiptSummary && safe.userActionBoundaryReceiptSummary.status) badges.push(badge("boundary_receipt_not_order", "回执不是订单、合同或付款授权", "warning"));
       if (safe.handoffPacketViewModelSummary && safe.handoffPacketViewModelSummary.status) badges.push(badge("user_final_confirmation_required", "用户必须在平台自行完成最终确认", "warning"));
+      if (safe.manualPlatformReviewCockpitSummary && safe.manualPlatformReviewCockpitSummary.status === "ready") badges.push(badge("manual_platform_review_cockpit_ready", "手动平台复核驾驶舱已准备", "info"));
+      if (safe.handoffAcceptanceWalkthroughSummary && safe.handoffAcceptanceWalkthroughSummary.status === "ready") badges.push(badge("handoff_acceptance_walkthrough_ready", "交接包接受演练已准备", "info"));
+      if (safe.platformRealityCheckBoardSummary && safe.platformRealityCheckBoardSummary.status === "ready") badges.push(badge("platform_reality_check_ready", "平台真实页面复核清单已准备", "info"));
+      if (safe.manualPlatformReviewViewModelSummary && safe.manualPlatformReviewViewModelSummary.status) badges.push(badge("handoff_acceptance_no_persistence", "接受演练不保存用户确认", "info"));
+      if (safe.manualPlatformReviewViewModelSummary && safe.manualPlatformReviewViewModelSummary.status) badges.push(badge("platform_page_final_truth", "平台页面才是最终依据", "warning"));
+      if (safe.manualPlatformReviewViewModelSummary && safe.manualPlatformReviewViewModelSummary.status) badges.push(badge("manual_review_not_ordering", "手动复核不代表下单能力", "warning"));
+      if (safe.safeToProceedWithManualPlatformUserEducation === true) badges.push(badge("manual_platform_user_education_ready", "手动平台复核教育已准备", "info"));
       if (normalizedPriceCandidateBoardSummary.status || pricePipelineOrchestratorSummary.status) badges.push(badge("normalized_candidate_not_real_price", "归一化候选不代表真实价格", "warning"));
       if (normalizedPriceCandidateBoardSummary.status || readOnlyCandidateJourneySummary.status) badges.push(badge("normalized_candidate_not_ordering", "价格候选板不代表下单能力", "warning"));
       if (sandboxHandoffViewModelSummary.status === "ready") badges.push(badge("sandbox_handoff_ready", "Sandbox 跳转候选与平台可用性已准备", "info"));

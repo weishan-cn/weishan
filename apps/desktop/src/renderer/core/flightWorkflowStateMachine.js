@@ -1,9 +1,9 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_STATE_MACHINE_VERSION = "2.2.4";
+  const FLIGHT_WORKFLOW_STATE_MACHINE_VERSION = "2.2.5";
   const STATE_MACHINE_NAME = "flight_workflow_state_machine_v1";
-  const WORKFLOW_ID = "deterministic-flight-workflow-v2.2.4";
+  const WORKFLOW_ID = "deterministic-flight-workflow-v2.2.5";
   const STEP_ORDER = ["intent", "clarification", "evidence", "decision", "handoff", "manual_platform_check"];
   const FORBIDDEN_NAME_RE = /(rawText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
   const FORBIDDEN_TEXT_RE = /(token|key|secret|password|身份证|护照|银行卡|cardNumber|passport|credential)/ig;

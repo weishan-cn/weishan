@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js"]);
   const api = windowRef.WeishanFlightWorkflowSafetyRegressionSentinel;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "2.2.4");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "2.2.5");
   const safe = api.buildFlightWorkflowSafetyRegressionReport({ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, autoOpen:false, autoRefresh:false, fileWrite:false, download:false, note:"平台最终为准" });
   assert.equal(safe.sentinelName, "flight_workflow_safety_regression_sentinel_v1");
   assert.equal(safe.status, "pass");
@@ -64,7 +64,11 @@ function main() {
     sandboxCandidateComparisonWorkbenchSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
     providerEvidenceComparisonMatrixSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
     readOnlyHandoffReadinessDrillSummary:{ status:"ready", bookingUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false },
-    sandboxDecisionReviewViewModelSummary:{ status:"ready", bookingUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false }
+    sandboxDecisionReviewViewModelSummary:{ status:"ready", bookingUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false },
+    manualPlatformReviewCockpitSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
+    handoffAcceptanceWalkthroughSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
+    platformRealityCheckBoardSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
+    manualPlatformReviewViewModelSummary:{ status:"ready", bookingUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false }
   });
   assert.equal(global.status, "pass");
   assert.equal(global.globalShoppingProductGoalSummary.status, "aligned");
@@ -90,6 +94,10 @@ function main() {
   assert.equal(global.providerEvidenceComparisonMatrixSummary.status, "ready");
   assert.equal(global.readOnlyHandoffReadinessDrillSummary.status, "ready");
   assert.equal(global.sandboxDecisionReviewViewModelSummary.status, "ready");
+  assert.equal(global.manualPlatformReviewCockpitSummary.status, "ready");
+  assert.equal(global.handoffAcceptanceWalkthroughSummary.status, "ready");
+  assert.equal(global.platformRealityCheckBoardSummary.status, "ready");
+  assert.equal(global.manualPlatformReviewViewModelSummary.status, "ready");
   console.log("FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL PASS");
 }
 main();

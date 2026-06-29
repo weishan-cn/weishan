@@ -7,9 +7,9 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingSearchParameterPrefillGate.js"]);
   const api = windowRef.WeishanGlobalShoppingSearchParameterPrefillGate;
-  assert.equal(api.GLOBAL_SHOPPING_SEARCH_PARAMETER_PREFILL_GATE_VERSION, "2.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_SEARCH_PARAMETER_PREFILL_GATE_VERSION, "2.2.5");
   const safe = api.buildGlobalShoppingSearchParameterPrefillGate({ itemType:"flight", origin:"SHA", destination:"CTU", departureDate:"2026-07-15", passengerCount:1, directOnly:true, nonSensitivePreference:"cheapest_direct_first" });
-  assert.equal(safe.appVersion, "2.2.4");
+  assert.equal(safe.appVersion, "2.2.5");
   assert.equal(safe.status, "safe");
   assert.equal(safe.prefillCandidate.allowedParameters.origin, "SHA");
   assert.equal(api.buildGlobalShoppingSearchParameterPrefillGate({ itemType:"hotel", hotelCheckIn:"2026-07-15", hotelCheckOut:"2026-07-16", roomCount:1, guestCount:2 }).status, "safe");

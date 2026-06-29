@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.2.4";
+  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.2.5";
   const ORCHESTRATOR_NAME = "global_shopping_price_pipeline_orchestrator_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -371,6 +371,26 @@
       platformPreflightSafetyGateSummary:platformPreflightSafetyGateSummary,
       userActionBoundaryReceiptSummary:userActionBoundaryReceiptSummary
     });
+    const manualPlatformReviewCockpitSummary = resolveSummary(safe, "manualPlatformReviewCockpitSummary", "WeishanGlobalShoppingManualPlatformReviewCockpit", "buildGlobalShoppingManualPlatformReviewCockpit", {
+      handoffPacketViewModelSummary:handoffPacketViewModelSummary,
+      platformHandoffSimulationViewModelSummary:platformHandoffSimulationViewModelSummary,
+      readOnlyHandoffPacketPreviewSummary:readOnlyHandoffPacketPreviewSummary
+    });
+    const handoffAcceptanceWalkthroughSummary = resolveSummary(safe, "handoffAcceptanceWalkthroughSummary", "WeishanGlobalShoppingHandoffAcceptanceWalkthrough", "buildGlobalShoppingHandoffAcceptanceWalkthrough", {
+      readOnlyHandoffPacketPreviewSummary:readOnlyHandoffPacketPreviewSummary,
+      userActionBoundaryReceiptSummary:userActionBoundaryReceiptSummary,
+      userConfirmationChecklistSummary:userConfirmationChecklistSummary
+    });
+    const platformRealityCheckBoardSummary = resolveSummary(safe, "platformRealityCheckBoardSummary", "WeishanGlobalShoppingPlatformRealityCheckBoard", "buildGlobalShoppingPlatformRealityCheckBoard", {
+      platformPreflightSafetyGateSummary:platformPreflightSafetyGateSummary,
+      userActionBoundaryReceiptSummary:userActionBoundaryReceiptSummary,
+      readOnlyPlatformHandoffSimulatorSummary:readOnlyPlatformHandoffSimulatorSummary
+    });
+    const manualPlatformReviewViewModelSummary = resolveSummary(safe, "manualPlatformReviewViewModelSummary", "WeishanGlobalShoppingManualPlatformReviewViewModel", "buildGlobalShoppingManualPlatformReviewViewModel", {
+      manualPlatformReviewCockpitSummary:manualPlatformReviewCockpitSummary,
+      handoffAcceptanceWalkthroughSummary:handoffAcceptanceWalkthroughSummary,
+      platformRealityCheckBoardSummary:platformRealityCheckBoardSummary
+    });
     const pipelineHealth = {
       firstSandboxProviderConnectorReady:statusOf(firstSandboxProviderConnectorSummary) === "ready",
       providerCoverageReady:statusOf(providerCoverageDashboardSummary) === "ready",
@@ -395,6 +415,10 @@
       platformPreflightSafetyGateReady:statusOf(platformPreflightSafetyGateSummary) === "clear",
       userActionBoundaryReceiptReady:statusOf(userActionBoundaryReceiptSummary) === "ready",
       handoffPacketViewModelReady:statusOf(handoffPacketViewModelSummary) === "ready",
+      manualPlatformReviewCockpitReady:statusOf(manualPlatformReviewCockpitSummary) === "ready",
+      handoffAcceptanceWalkthroughReady:statusOf(handoffAcceptanceWalkthroughSummary) === "ready",
+      platformRealityCheckReady:statusOf(platformRealityCheckBoardSummary) === "ready",
+      manualPlatformReviewViewModelReady:statusOf(manualPlatformReviewViewModelSummary) === "ready",
       providerConnectorReady:statusOf(readOnlyProviderSandboxConnectorSummary) === "ready",
       fixtureReplayReady:statusOf(fixtureReplayConsoleSummary) === "ready",
       providerFixtureReady:statusOf(legalProviderFixtureSummary) === "ready",
@@ -438,7 +462,7 @@
     if (!pipelineHealth.noTicketing) blockedReasons.push("ticketing_detected");
     if (!pipelineHealth.noExternalOpen) blockedReasons.push("external_open_detected");
     if (statusOf(providerSandboxSafetyKillSwitchSummary) === "blocked") blockedReasons.push("provider_kill_switch_blocked");
-    const review = !pipelineHealth.providerConnectorReady || !pipelineHealth.fixtureReplayReady || !pipelineHealth.providerFixtureReady || !pipelineHealth.credentialSafetyPass || !pipelineHealth.sandboxFeedReady || !pipelineHealth.responseContractReady || !pipelineHealth.priceNormalizationReady || !pipelineHealth.officialAnchorReady || !pipelineHealth.sameItemMatcherReady || !pipelineHealth.duplicateMergeReady || !pipelineHealth.coveredLowestReady || !pipelineHealth.sandboxHandoffReady || !pipelineHealth.readOnlyProviderSandboxIntegrationGateReady || !pipelineHealth.sandboxPriceCandidateSessionReady || !pipelineHealth.sandboxPriceCandidateResultBoardReady || !pipelineHealth.sandboxSessionReplayCenterReady || !pipelineHealth.providerEvidenceTraceReady || !pipelineHealth.candidateConfidenceReady || !pipelineHealth.sandboxReplayViewModelReady || !pipelineHealth.sandboxCandidateComparisonReady || !pipelineHealth.providerEvidenceMatrixReady || !pipelineHealth.readOnlyHandoffDrillReady || !pipelineHealth.sandboxDecisionReviewReady || !pipelineHealth.redactedSearchParameterPackReady || !pipelineHealth.userConfirmationChecklistReady || !pipelineHealth.readOnlyPlatformHandoffSimulatorReady || !pipelineHealth.platformHandoffSimulationViewModelReady || !pipelineHealth.readOnlyHandoffPacketPreviewReady || !pipelineHealth.platformPreflightSafetyGateReady || !pipelineHealth.userActionBoundaryReceiptReady || !pipelineHealth.handoffPacketViewModelReady;
+    const review = !pipelineHealth.providerConnectorReady || !pipelineHealth.fixtureReplayReady || !pipelineHealth.providerFixtureReady || !pipelineHealth.credentialSafetyPass || !pipelineHealth.sandboxFeedReady || !pipelineHealth.responseContractReady || !pipelineHealth.priceNormalizationReady || !pipelineHealth.officialAnchorReady || !pipelineHealth.sameItemMatcherReady || !pipelineHealth.duplicateMergeReady || !pipelineHealth.coveredLowestReady || !pipelineHealth.sandboxHandoffReady || !pipelineHealth.readOnlyProviderSandboxIntegrationGateReady || !pipelineHealth.sandboxPriceCandidateSessionReady || !pipelineHealth.sandboxPriceCandidateResultBoardReady || !pipelineHealth.sandboxSessionReplayCenterReady || !pipelineHealth.providerEvidenceTraceReady || !pipelineHealth.candidateConfidenceReady || !pipelineHealth.sandboxReplayViewModelReady || !pipelineHealth.sandboxCandidateComparisonReady || !pipelineHealth.providerEvidenceMatrixReady || !pipelineHealth.readOnlyHandoffDrillReady || !pipelineHealth.sandboxDecisionReviewReady || !pipelineHealth.redactedSearchParameterPackReady || !pipelineHealth.userConfirmationChecklistReady || !pipelineHealth.readOnlyPlatformHandoffSimulatorReady || !pipelineHealth.platformHandoffSimulationViewModelReady || !pipelineHealth.readOnlyHandoffPacketPreviewReady || !pipelineHealth.platformPreflightSafetyGateReady || !pipelineHealth.userActionBoundaryReceiptReady || !pipelineHealth.handoffPacketViewModelReady || !pipelineHealth.manualPlatformReviewCockpitReady || !pipelineHealth.handoffAcceptanceWalkthroughReady || !pipelineHealth.platformRealityCheckReady || !pipelineHealth.manualPlatformReviewViewModelReady;
     return clone({
       pipelineHealth:pipelineHealth,
       pipelineStages:buildGlobalShoppingPricePipelineRows({
@@ -482,6 +506,10 @@
         canShowPlatformPreflightSafetyGate:pipelineHealth.platformPreflightSafetyGateReady,
         canShowUserActionBoundaryReceipt:pipelineHealth.userActionBoundaryReceiptReady,
         canShowHandoffPacketViewModel:pipelineHealth.handoffPacketViewModelReady,
+        canShowManualPlatformReviewCockpit:pipelineHealth.manualPlatformReviewCockpitReady,
+        canShowHandoffAcceptanceWalkthrough:pipelineHealth.handoffAcceptanceWalkthroughReady,
+        canShowPlatformRealityCheckBoard:pipelineHealth.platformRealityCheckReady,
+        canShowManualPlatformReviewViewModel:pipelineHealth.manualPlatformReviewViewModelReady,
         canProceedToReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.providerFixtureReady && pipelineHealth.credentialSafetyPass && pipelineHealth.sandboxFeedReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.officialAnchorReady && pipelineHealth.sameItemMatcherReady && pipelineHealth.duplicateMergeReady && pipelineHealth.coveredLowestReady && pipelineHealth.sandboxHandoffReady,
         safeToProceedWithFirstRealReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.coveredLowestReady,
         safeToProceedWithFirstReadOnlySandboxDryRun:pipelineHealth.realProviderSandboxGateReady && pipelineHealth.providerRequestEnvelopeReady && pipelineHealth.providerCallAuditLedgerReady && pipelineHealth.providerSandboxReadinessReady,
@@ -492,7 +520,8 @@
         safeToProceedWithReadOnlySandboxUserExplanation:pipelineHealth.sandboxSessionReplayCenterReady && pipelineHealth.providerEvidenceTraceReady && pipelineHealth.candidateConfidenceReady && pipelineHealth.sandboxReplayViewModelReady,
         safeToProceedWithSandboxDecisionReview:pipelineHealth.sandboxCandidateComparisonReady && pipelineHealth.providerEvidenceMatrixReady && pipelineHealth.readOnlyHandoffDrillReady && pipelineHealth.sandboxDecisionReviewReady,
         safeToProceedWithUserFacingHandoffExplanation:pipelineHealth.sandboxDecisionReviewReady && pipelineHealth.redactedSearchParameterPackReady && pipelineHealth.userConfirmationChecklistReady && pipelineHealth.readOnlyPlatformHandoffSimulatorReady && pipelineHealth.platformHandoffSimulationViewModelReady,
-        safeToProceedWithManualPlatformReview:pipelineHealth.readOnlyHandoffPacketPreviewReady && pipelineHealth.platformPreflightSafetyGateReady && pipelineHealth.userActionBoundaryReceiptReady && pipelineHealth.handoffPacketViewModelReady
+        safeToProceedWithManualPlatformReview:pipelineHealth.readOnlyHandoffPacketPreviewReady && pipelineHealth.platformPreflightSafetyGateReady && pipelineHealth.userActionBoundaryReceiptReady && pipelineHealth.handoffPacketViewModelReady,
+        safeToProceedWithManualPlatformUserEducation:pipelineHealth.manualPlatformReviewCockpitReady && pipelineHealth.handoffAcceptanceWalkthroughReady && pipelineHealth.platformRealityCheckReady && pipelineHealth.manualPlatformReviewViewModelReady
       },
       blockedReasons:blockedReasons,
       readOnlyProviderSandboxConnectorSummary:clone(readOnlyProviderSandboxConnectorSummary),
@@ -538,6 +567,10 @@
       platformPreflightSafetyGateSummary:clone(platformPreflightSafetyGateSummary),
       userActionBoundaryReceiptSummary:clone(userActionBoundaryReceiptSummary),
       handoffPacketViewModelSummary:clone(handoffPacketViewModelSummary),
+      manualPlatformReviewCockpitSummary:clone(manualPlatformReviewCockpitSummary),
+      handoffAcceptanceWalkthroughSummary:clone(handoffAcceptanceWalkthroughSummary),
+      platformRealityCheckBoardSummary:clone(platformRealityCheckBoardSummary),
+      manualPlatformReviewViewModelSummary:clone(manualPlatformReviewViewModelSummary),
       status:blockedReasons.length ? "blocked" : (review ? "needs_review" : "ready"),
       redacted:true
     });
@@ -583,7 +616,11 @@
       row("handoff_packet_preview", "只读交接包预览", statusOf(safe.readOnlyHandoffPacketPreviewSummary) === "ready" ? "pass" : (statusOf(safe.readOnlyHandoffPacketPreviewSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.readOnlyHandoffPacketPreviewSummary).userFacingSummary).resultLabel || "交接包预览仍需复核"),
       row("platform_preflight_gate", "平台跳转前安全预检", statusOf(safe.platformPreflightSafetyGateSummary) === "clear" ? "pass" : (statusOf(safe.platformPreflightSafetyGateSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.platformPreflightSafetyGateSummary).userFacingSummary).resultLabel || "安全预检仍需复核"),
       row("user_action_boundary_receipt", "用户行动边界回执", statusOf(safe.userActionBoundaryReceiptSummary) === "ready" ? "pass" : (statusOf(safe.userActionBoundaryReceiptSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.userActionBoundaryReceiptSummary).userFacingSummary).resultLabel || "边界回执仍需复核"),
-      row("handoff_packet_view_model", "只读交接包与安全预检", statusOf(safe.handoffPacketViewModelSummary) === "ready" ? "pass" : (statusOf(safe.handoffPacketViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.handoffPacketViewModelSummary).title || "只读交接包与安全预检")
+      row("handoff_packet_view_model", "只读交接包与安全预检", statusOf(safe.handoffPacketViewModelSummary) === "ready" ? "pass" : (statusOf(safe.handoffPacketViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.handoffPacketViewModelSummary).title || "只读交接包与安全预检"),
+      row("manual_platform_review_cockpit", "手动平台复核驾驶舱", statusOf(safe.manualPlatformReviewCockpitSummary) === "ready" ? "pass" : (statusOf(safe.manualPlatformReviewCockpitSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.manualPlatformReviewCockpitSummary).userFacingSummary).resultLabel || "手动平台复核驾驶舱仍需复核"),
+      row("handoff_acceptance_walkthrough", "交接包接受演练", statusOf(safe.handoffAcceptanceWalkthroughSummary) === "ready" ? "pass" : (statusOf(safe.handoffAcceptanceWalkthroughSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.handoffAcceptanceWalkthroughSummary).userFacingSummary).resultLabel || "交接包接受演练仍需复核"),
+      row("platform_reality_check_board", "平台真实页面复核清单", statusOf(safe.platformRealityCheckBoardSummary) === "ready" ? "pass" : (statusOf(safe.platformRealityCheckBoardSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.platformRealityCheckBoardSummary).userFacingSummary).resultLabel || "平台真实页面复核清单仍需复核"),
+      row("manual_platform_review_view_model", "手动平台复核与现实检查", statusOf(safe.manualPlatformReviewViewModelSummary) === "ready" ? "pass" : (statusOf(safe.manualPlatformReviewViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.manualPlatformReviewViewModelSummary).title || "手动平台复核与现实检查")
     ]);
   }
   function sanitizeGlobalShoppingPricePipelineOrchestrator(orchestrator) {
@@ -648,6 +685,10 @@
       platformPreflightSafetyGateSummary:linkedSummary(evaluation.platformPreflightSafetyGateSummary),
       userActionBoundaryReceiptSummary:linkedSummary(evaluation.userActionBoundaryReceiptSummary),
       handoffPacketViewModelSummary:linkedSummary(evaluation.handoffPacketViewModelSummary),
+      manualPlatformReviewCockpitSummary:linkedSummary(evaluation.manualPlatformReviewCockpitSummary),
+      handoffAcceptanceWalkthroughSummary:linkedSummary(evaluation.handoffAcceptanceWalkthroughSummary),
+      platformRealityCheckBoardSummary:linkedSummary(evaluation.platformRealityCheckBoardSummary),
+      manualPlatformReviewViewModelSummary:linkedSummary(evaluation.manualPlatformReviewViewModelSummary),
       redactedSearchParameterPackStatus:text(obj(evaluation.redactedSearchParameterPackSummary).status || ""),
       userConfirmationChecklistStatus:text(obj(evaluation.userConfirmationChecklistSummary).status || ""),
       readOnlyPlatformHandoffSimulatorStatus:text(obj(evaluation.readOnlyPlatformHandoffSimulatorSummary).status || ""),
@@ -656,8 +697,13 @@
       platformPreflightSafetyGateStatus:text(obj(evaluation.platformPreflightSafetyGateSummary).status || ""),
       userActionBoundaryReceiptStatus:text(obj(evaluation.userActionBoundaryReceiptSummary).status || ""),
       handoffPacketViewModelStatus:text(obj(evaluation.handoffPacketViewModelSummary).status || ""),
+      manualPlatformReviewCockpitStatus:text(obj(evaluation.manualPlatformReviewCockpitSummary).status || ""),
+      handoffAcceptanceWalkthroughStatus:text(obj(evaluation.handoffAcceptanceWalkthroughSummary).status || ""),
+      platformRealityCheckStatus:text(obj(evaluation.platformRealityCheckBoardSummary).status || ""),
+      manualPlatformReviewViewModelStatus:text(obj(evaluation.manualPlatformReviewViewModelSummary).status || ""),
       safeToProceedWithUserFacingHandoffExplanation:evaluation.readyOutputs.safeToProceedWithUserFacingHandoffExplanation === true,
       safeToProceedWithManualPlatformReview:evaluation.readyOutputs.safeToProceedWithManualPlatformReview === true,
+      safeToProceedWithManualPlatformUserEducation:evaluation.readyOutputs.safeToProceedWithManualPlatformUserEducation === true,
       redacted:true
     });
   }
