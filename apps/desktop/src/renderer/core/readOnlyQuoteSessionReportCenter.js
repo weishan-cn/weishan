@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.98";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.1.99";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -200,6 +200,10 @@
       dryRunProviderResponseNormalizerSummary: stripUnsafe(safe.dryRunProviderResponseNormalizerSummary || null),
       sandboxProviderRunbookSummary: stripUnsafe(safe.sandboxProviderRunbookSummary || null),
       providerAdapterRegistryViewModelSummary: stripUnsafe(safe.providerAdapterRegistryViewModelSummary || null),
+      firstSandboxProviderConnectorSummary: stripUnsafe(safe.firstSandboxProviderConnectorSummary || null),
+      providerCoverageDashboardSummary: stripUnsafe(safe.providerCoverageDashboardSummary || null),
+      readOnlySourceTrustScoreSummary: stripUnsafe(safe.readOnlySourceTrustScoreSummary || null),
+      providerCoverageViewModelSummary: stripUnsafe(safe.providerCoverageViewModelSummary || null),
       legalProviderFixtureSummary: stripUnsafe(safe.legalProviderFixtureSummary || null),
       providerCredentialSafetySummary: stripUnsafe(safe.providerCredentialSafetySummary || null),
       sandboxPriceFeedSummary: stripUnsafe(safe.sandboxPriceFeedSummary || null),
@@ -235,6 +239,10 @@
       dryRunResponseNormalizerStatus: safeText(safe.dryRunResponseNormalizerStatus || safe.dryRunProviderResponseNormalizerSummary && safe.dryRunProviderResponseNormalizerSummary.status || ""),
       sandboxProviderRunbookStatus: safeText(safe.sandboxProviderRunbookStatus || safe.sandboxProviderRunbookSummary && safe.sandboxProviderRunbookSummary.status || ""),
       providerAdapterRegistryViewModelStatus: safeText(safe.providerAdapterRegistryViewModelStatus || safe.providerAdapterRegistryViewModelSummary && safe.providerAdapterRegistryViewModelSummary.status || ""),
+      firstSandboxProviderConnectorStatus: safeText(safe.firstSandboxProviderConnectorStatus || safe.firstSandboxProviderConnectorSummary && safe.firstSandboxProviderConnectorSummary.status || ""),
+      providerCoverageStatus: safeText(safe.providerCoverageStatus || safe.providerCoverageDashboardSummary && safe.providerCoverageDashboardSummary.status || ""),
+      sourceTrustStatus: safeText(safe.sourceTrustStatus || safe.readOnlySourceTrustScoreSummary && safe.readOnlySourceTrustScoreSummary.status || ""),
+      providerCoverageViewModelStatus: safeText(safe.providerCoverageViewModelStatus || safe.providerCoverageViewModelSummary && safe.providerCoverageViewModelSummary.status || ""),
       priceNormalizationStatus: safeText(safe.priceNormalizationStatus || safe.priceSourceNormalizationSummary && safe.priceSourceNormalizationSummary.status || ""),
       officialPriceAnchorStatus: safeText(safe.officialPriceAnchorStatus || safe.officialPriceAnchorSummary && safe.officialPriceAnchorSummary.status || ""),
       priceCandidateDisplayStatus: safeText(safe.priceCandidateDisplayStatus || safe.priceCandidateDisplaySummary && safe.priceCandidateDisplaySummary.status || ""),
@@ -260,6 +268,7 @@
       safeToProceedWithFirstReadOnlySandboxDryRun: safe.safeToProceedWithFirstReadOnlySandboxDryRun === true,
       safeToProceedWithFirstProviderSandboxFixtureDryRun: safe.safeToProceedWithFirstProviderSandboxFixtureDryRun === true,
       safeToProceedWithFirstSandboxProviderConnectorImplementation: safe.safeToProceedWithFirstSandboxProviderConnectorImplementation === true,
+      safeToProceedWithFirstReadOnlyProviderSandboxIntegration: safe.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true,
       safeToProceedWithDeepLinkSafetyGate: safe.safeToProceedWithDeepLinkSafetyGate === true,
       safeToProceedWithSandboxDeepLinkCandidate: safe.safeToProceedWithSandboxDeepLinkCandidate === true,
       safeToProceedWithPartnerFixtureAdapter: safe.safeToProceedWithPartnerFixtureAdapter === true,
@@ -373,6 +382,7 @@
     const safetyTestMatrixSummary = workflow.safetyTestMatrixSummary || safe.safetyTestMatrixSummary || null;
     const releaseReadinessSummary = workflow.releaseReadinessSummary || safe.releaseReadinessSummary || (typeof releaseReadinessApi().buildFlightWorkflowReleaseReadinessDashboard === "function" ? releaseReadinessApi().buildFlightWorkflowReleaseReadinessDashboard(Object.assign({}, safe, workflow, { scenarioSimulationSummary:scenarioSimulationSummary, safetyTestMatrixSummary:safetyTestMatrixSummary, auditReviewSummary:auditReviewSummary, humanReviewChecklistSummary:humanReviewChecklistSummary, finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, safeSessionExportPreview:safeSessionExportPreview, operatorConsoleSummary:operatorConsoleSummary })) : null);
     const finalReviewBadges = workflow.finalReviewBadges || safe.finalReviewBadges || riskBadgeModel && riskBadgeModel.badges || [];
+    const providerCoverageSummary = formatter.formatGlobalShoppingCoverageSummary ? formatter.formatGlobalShoppingCoverageSummary({ providerCoverageViewModelSummary:workflow.providerCoverageViewModelSummary || safe.providerCoverageViewModelSummary || null }) : null;
     return clone({
       title: "候选报价证据摘要",
       subtitle: "只读候选价 · 平台最终为准",
@@ -425,6 +435,15 @@
       safetyRegressionSummary: safetyRegressionSummary ? { title:"安全回归", line:safetyRegressionSummary.status === "pass" ? "安全回归通过" : "安全回归失败", checkCount:(safetyRegressionSummary.checks || []).length || 0, redacted:true } : null,
       operatorConsoleSummary: operatorConsoleSummary ? { title:"机票工作流运营控制台", line:operatorConsoleSummary.userFacingSummary && operatorConsoleSummary.userFacingSummary.resultLabel || "存在需要注意的项目", status:operatorConsoleSummary.status, redacted:true } : null,
       operatorConsoleViewModel: operatorConsoleViewModel,
+      firstSandboxProviderConnectorSummary: workflow.firstSandboxProviderConnectorSummary || safe.firstSandboxProviderConnectorSummary ? { title:"第一个 Sandbox Provider Connector", line:workflow.firstSandboxProviderConnectorSummary && workflow.firstSandboxProviderConnectorSummary.userFacingSummary && workflow.firstSandboxProviderConnectorSummary.userFacingSummary.resultLabel || safe.firstSandboxProviderConnectorSummary && safe.firstSandboxProviderConnectorSummary.userFacingSummary && safe.firstSandboxProviderConnectorSummary.userFacingSummary.resultLabel || "Sandbox Connector 仍需复核", redacted:true } : null,
+      providerCoverageDashboardSummary: workflow.providerCoverageDashboardSummary || safe.providerCoverageDashboardSummary ? { title:"Provider 覆盖看板", line:workflow.providerCoverageDashboardSummary && workflow.providerCoverageDashboardSummary.userFacingSummary && workflow.providerCoverageDashboardSummary.userFacingSummary.resultLabel || safe.providerCoverageDashboardSummary && safe.providerCoverageDashboardSummary.userFacingSummary && safe.providerCoverageDashboardSummary.userFacingSummary.resultLabel || "Provider 覆盖仍需复核", redacted:true } : null,
+      readOnlySourceTrustScoreSummary: workflow.readOnlySourceTrustScoreSummary || safe.readOnlySourceTrustScoreSummary ? { title:"只读来源可信度评分", line:workflow.readOnlySourceTrustScoreSummary && workflow.readOnlySourceTrustScoreSummary.userFacingSummary && workflow.readOnlySourceTrustScoreSummary.userFacingSummary.resultLabel || safe.readOnlySourceTrustScoreSummary && safe.readOnlySourceTrustScoreSummary.userFacingSummary && safe.readOnlySourceTrustScoreSummary.userFacingSummary.resultLabel || "来源可信度仍需复核", redacted:true } : null,
+      providerCoverageViewModelSummary: providerCoverageSummary,
+      firstSandboxProviderConnectorStatus: workflow.firstSandboxProviderConnectorStatus || safe.firstSandboxProviderConnectorStatus || "",
+      providerCoverageStatus: workflow.providerCoverageStatus || safe.providerCoverageStatus || "",
+      sourceTrustStatus: workflow.sourceTrustStatus || safe.sourceTrustStatus || "",
+      providerCoverageViewModelStatus: workflow.providerCoverageViewModelStatus || safe.providerCoverageViewModelStatus || "",
+      safeToProceedWithFirstReadOnlyProviderSandboxIntegration: workflow.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true || safe.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true,
       pilotExitCriteriaSummary: pilotExitCriteriaSummary ? { title:"只读试点退出条件", line:pilotExitCriteriaSummary.userFacingSummary && pilotExitCriteriaSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
       launchCandidateReadinessSummary: launchCandidateReadinessSummary ? { title:"只读发布候选准备板", line:launchCandidateReadinessSummary.userFacingSummary && launchCandidateReadinessSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
       freezeGateSummary: workflow.freezeGateSummary ? { title:"只读发布候选冻结检查", line:workflow.freezeGateSummary.userFacingSummary && workflow.freezeGateSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
@@ -650,6 +669,10 @@
       rcCopyFinalizationSummary: workflow.rcCopyFinalizationSummary || safe.rcCopyFinalizationSummary || null,
       safetyDisclosureReviewSummary: workflow.safetyDisclosureReviewSummary || safe.safetyDisclosureReviewSummary || null,
       rcCopyReviewViewModelSummary: workflow.rcCopyReviewViewModelSummary || safe.rcCopyReviewViewModelSummary || null,
+      firstSandboxProviderConnectorSummary: workflow.firstSandboxProviderConnectorSummary || safe.firstSandboxProviderConnectorSummary || null,
+      providerCoverageDashboardSummary: workflow.providerCoverageDashboardSummary || safe.providerCoverageDashboardSummary || null,
+      readOnlySourceTrustScoreSummary: workflow.readOnlySourceTrustScoreSummary || safe.readOnlySourceTrustScoreSummary || null,
+      providerCoverageViewModelSummary: workflow.providerCoverageViewModelSummary || safe.providerCoverageViewModelSummary || null,
       rcReviewStatus: workflow.rcReviewStatus || safe.rcReviewStatus || "",
       rcEvidenceStatus: workflow.rcEvidenceStatus || safe.rcEvidenceStatus || "",
       rcRegressionStatus: workflow.rcRegressionStatus || safe.rcRegressionStatus || "",
@@ -659,6 +682,11 @@
       safeToStartRcReview: workflow.safeToStartRcReview === true || safe.safeToStartRcReview === true,
       safeToContinueReleaseCandidate: workflow.safeToContinueReleaseCandidate === true || safe.safeToContinueReleaseCandidate === true,
       safeToFinalizeUserFacingCopy: workflow.safeToFinalizeUserFacingCopy === true || safe.safeToFinalizeUserFacingCopy === true,
+      firstSandboxProviderConnectorStatus: workflow.firstSandboxProviderConnectorStatus || safe.firstSandboxProviderConnectorStatus || "",
+      providerCoverageStatus: workflow.providerCoverageStatus || safe.providerCoverageStatus || "",
+      sourceTrustStatus: workflow.sourceTrustStatus || safe.sourceTrustStatus || "",
+      providerCoverageViewModelStatus: workflow.providerCoverageViewModelStatus || safe.providerCoverageViewModelStatus || "",
+      safeToProceedWithFirstReadOnlyProviderSandboxIntegration: workflow.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true || safe.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true,
       pilotOnboardingSummary: workflow.pilotOnboardingSummary,
       readOnlyConsentSummary: workflow.readOnlyConsentSummary,
       pilotOnboardingViewModel: workflow.pilotOnboardingViewModel,

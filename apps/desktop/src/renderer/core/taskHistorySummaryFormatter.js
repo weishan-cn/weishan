@@ -1,5 +1,5 @@
 (function(){
-  const TASK_HISTORY_SUMMARY_FORMATTER_VERSION = "2.1.98";
+  const TASK_HISTORY_SUMMARY_FORMATTER_VERSION = "2.1.99";
   const MAX_SUMMARY_LENGTH = 120;
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value){ return String(value == null ? "" : value).trim(); }

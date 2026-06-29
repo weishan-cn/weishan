@@ -19,6 +19,7 @@ function main() {
   const windowRef = load([
     "apps/desktop/src/renderer/core/globalShoppingProviderAdapterRegistry.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderSandboxDryRunHarness.js",
+    "apps/desktop/src/renderer/core/globalShoppingFirstSandboxProviderConnector.js",
     "apps/desktop/src/renderer/core/globalShoppingDryRunProviderResponseNormalizer.js"
   ]);
   const registry = windowRef.WeishanGlobalShoppingProviderAdapterRegistry.buildGlobalShoppingProviderAdapterRegistry({
@@ -42,8 +43,22 @@ function main() {
     providerSandboxSafetyKillSwitchSummary:{ status:"clear", redacted:true }
   });
   const api = windowRef.WeishanGlobalShoppingDryRunProviderResponseNormalizer;
-  assert.equal(api.GLOBAL_SHOPPING_DRY_RUN_PROVIDER_RESPONSE_NORMALIZER_VERSION, "2.1.98");
+  assert.equal(api.GLOBAL_SHOPPING_DRY_RUN_PROVIDER_RESPONSE_NORMALIZER_VERSION, "2.1.99");
 
+  const firstSandboxConnector = windowRef.WeishanGlobalShoppingFirstSandboxProviderConnector.buildGlobalShoppingFirstSandboxProviderConnector({
+    providerId:"global_fixture_provider",
+    providerName:"Global Shopping Fixture Sandbox",
+    providerType:"fixture",
+    itemType:"flight",
+    connectorMode:"dry_run",
+    adapterRegistry:registry,
+    adapterShell:{ status:"ready", adapterShell:{ providerId:"global_fixture_provider", providerName:"Global Shopping Fixture Sandbox", providerType:"fixture", itemType:"flight" }, redacted:true },
+    dryRunHarness:harness,
+    safetyKillSwitch:{ status:"clear", redacted:true },
+    requestEnvelope:{ status:"ready", requestEnvelope:{ requestMeta:{ providerId:"global_fixture_provider", providerName:"Global Shopping Fixture Sandbox", itemType:"flight" } }, redacted:true },
+    providerRunbook:{ status:"ready", redacted:true },
+    normalizedSourceInputs:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", itemType:"flight", redacted:true }]
+  });
   const ready = api.buildGlobalShoppingDryRunProviderResponseNormalizer({
     adapterRegistry:registry,
     dryRunHarness:harness,
@@ -64,11 +79,19 @@ function main() {
       currency:"CNY"
     }]
   });
-  assert.equal(ready.appVersion, "2.1.98");
+  assert.equal(ready.appVersion, "2.1.99");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "Dry-Run Provider 响应归一化器");
   assert.equal(ready.normalizedSourceInputs.length, 1);
   assert.equal(ready.responseBoundary.rawResponseAccepted, false);
+  const connectorOnly = api.buildGlobalShoppingDryRunProviderResponseNormalizer({
+    adapterRegistry:registry,
+    dryRunHarness:harness,
+    responseMode:"dry_run",
+    redactedResponseSummary:{ responseMode:"dry_run", providerId:"global_fixture_provider", providerName:"Global Shopping Fixture Sandbox", redacted:true },
+    firstSandboxProviderConnectorSummary:firstSandboxConnector
+  });
+  assert.equal(connectorOnly.normalizedSourceInputs.length, 1);
 
   const review = api.buildGlobalShoppingDryRunProviderResponseNormalizer({
     adapterRegistry:registry,

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const REAL_FLIGHT_PRICE_READ_ONLY_PROVIDER_CONTRACT_VERSION = "2.1.98";
+  const REAL_FLIGHT_PRICE_READ_ONLY_PROVIDER_CONTRACT_VERSION = "2.1.99";
   const CONTRACT_NAME = "real_flight_price_read_only_provider_contract_v1";
   const REQUIRED_RESPONSE_FIELDS = [
     "providerId",

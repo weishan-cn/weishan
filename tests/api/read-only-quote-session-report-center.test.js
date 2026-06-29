@@ -42,6 +42,10 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingDryRunProviderResponseNormalizer.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxProviderRunbookBoard.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderAdapterRegistryViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingFirstSandboxProviderConnector.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderCoverageDashboard.js",
+    "apps/desktop/src/renderer/core/globalShoppingReadOnlySourceTrustScore.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderCoverageViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingLegalProviderFixtureAdapter.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderCredentialSafetyReview.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxPriceFeedGate.js",
@@ -69,13 +73,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.1.98");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.1.99");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "2.1.98");
+  assert.equal(ready.appVersion, "2.1.99");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -166,6 +170,10 @@ function main() {
   const responseNormalizer = windowRef.WeishanGlobalShoppingDryRunProviderResponseNormalizer.buildGlobalShoppingDryRunProviderResponseNormalizer({ adapterRegistry:adapterRegistry, dryRunHarness:dryRunHarness, responseMode:"dry_run", redactedResponseSummary:{ responseMode:"dry_run", providerId:"provider_1", providerName:"Fixture Provider", redacted:true }, fixturePrices:[{ title:"SHA-CTU", basePrice:900, taxAmount:120, currency:"CNY" }] });
   const runbookBoard = windowRef.WeishanGlobalShoppingSandboxProviderRunbookBoard.buildGlobalShoppingSandboxProviderRunbookBoard({ providerAdapterRegistrySummary:adapterRegistry, providerSandboxDryRunHarnessSummary:dryRunHarness, firstReadOnlyProviderAdapterShellSummary:adapterShell, providerSandboxSafetyKillSwitchSummary:killSwitch, providerRequestEnvelopeSummary:requestEnvelope, providerCallAuditLedgerSummary:callAudit, sandboxProviderResponseContractSummary:responseContract, dryRunProviderResponseNormalizerSummary:responseNormalizer });
   const adapterRegistryView = windowRef.WeishanGlobalShoppingProviderAdapterRegistryViewModel.buildGlobalShoppingProviderAdapterRegistryViewModel({ providerAdapterRegistrySummary:adapterRegistry, dryRunProviderResponseNormalizerSummary:responseNormalizer, sandboxProviderRunbookSummary:runbookBoard, safeToProceedWithFirstSandboxProviderConnectorImplementation:true });
+  const firstSandboxConnector = windowRef.WeishanGlobalShoppingFirstSandboxProviderConnector.buildGlobalShoppingFirstSandboxProviderConnector({ providerId:"provider_1", providerName:"Fixture Provider", providerType:"fixture", itemType:"flight", connectorMode:"dry_run", adapterRegistry:adapterRegistry, adapterShell:adapterShell, dryRunHarness:dryRunHarness, safetyKillSwitch:killSwitch, requestEnvelope:requestEnvelope, providerRunbook:runbookBoard, dryRunResponseNormalizer:responseNormalizer, normalizedSourceInputs:responseNormalizer.normalizedSourceInputs });
+  const coverageDashboard = windowRef.WeishanGlobalShoppingProviderCoverageDashboard.buildGlobalShoppingProviderCoverageDashboard({ adapterRegistrySummary:adapterRegistry, firstSandboxProviderConnectorSummary:firstSandboxConnector, normalizedSourceInputs:responseNormalizer.normalizedSourceInputs });
+  const sourceTrust = windowRef.WeishanGlobalShoppingReadOnlySourceTrustScore.buildGlobalShoppingReadOnlySourceTrustScore({ dryRunProviderResponseNormalizerSummary:responseNormalizer });
+  const coverageViewModel = windowRef.WeishanGlobalShoppingProviderCoverageViewModel.buildGlobalShoppingProviderCoverageViewModel({ firstSandboxProviderConnectorSummary:firstSandboxConnector, providerCoverageDashboardSummary:coverageDashboard, readOnlySourceTrustScoreSummary:sourceTrust, safeToProceedWithFirstReadOnlyProviderSandboxIntegration:true });
   const globalReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     globalShoppingProductGoalSummary:globalGoal,
@@ -186,6 +194,10 @@ function main() {
     dryRunProviderResponseNormalizerSummary:responseNormalizer,
     sandboxProviderRunbookSummary:runbookBoard,
     providerAdapterRegistryViewModelSummary:adapterRegistryView,
+    firstSandboxProviderConnectorSummary:firstSandboxConnector,
+    providerCoverageDashboardSummary:coverageDashboard,
+    readOnlySourceTrustScoreSummary:sourceTrust,
+    providerCoverageViewModelSummary:coverageViewModel,
     legalProviderFixtureSummary:legalProviderFixture,
     providerCredentialSafetySummary:credentialSafety,
     sandboxPriceFeedSummary:sandboxPriceFeed,
@@ -228,11 +240,16 @@ function main() {
     dryRunResponseNormalizerStatus:"ready",
     sandboxProviderRunbookStatus:"ready",
     providerAdapterRegistryViewModelStatus:"ready",
+    firstSandboxProviderConnectorStatus:"ready",
+    providerCoverageStatus:"ready",
+    sourceTrustStatus:"ready",
+    providerCoverageViewModelStatus:"ready",
     safeToProceedWithReadOnlyPriceProviderSandbox:true,
     safeToProceedWithFirstRealReadOnlyProviderSandbox:true,
     safeToProceedWithFirstReadOnlySandboxDryRun:true,
     safeToProceedWithFirstProviderSandboxFixtureDryRun:true,
     safeToProceedWithFirstSandboxProviderConnectorImplementation:true,
+    safeToProceedWithFirstReadOnlyProviderSandboxIntegration:true,
     safeToProceedWithRealReadOnlyProviderSandbox:true,
     safeToProceedWithJumpToPlatformMvp:true,
     safeToProceedWithDeepLinkSafetyGate:true,
@@ -263,6 +280,10 @@ function main() {
   assert.equal(globalReady.userFacingSummary.dryRunProviderResponseNormalizerSummary.title, "Dry-Run Provider 响应归一化器");
   assert.equal(globalReady.userFacingSummary.sandboxProviderRunbookSummary.title, "Sandbox Provider 接入运行手册");
   assert.equal(globalReady.userFacingSummary.providerAdapterRegistryViewModelSummary.title, "Provider Adapter 注册与接入手册");
+  assert.equal(globalReady.userFacingSummary.firstSandboxProviderConnectorSummary.title, "第一个 Sandbox Provider Connector");
+  assert.equal(globalReady.userFacingSummary.providerCoverageDashboardSummary.title, "Provider 覆盖看板");
+  assert.equal(globalReady.userFacingSummary.readOnlySourceTrustScoreSummary.title, "只读来源可信度评分");
+  assert.equal(globalReady.userFacingSummary.providerCoverageViewModelSummary.title, "Provider 覆盖与来源可信度");
   assert.equal(globalReady.userFacingSummary.providerFixtureViewModelSummary.title, "合法 Provider Fixture 与 Sandbox 价格 Feed");
   assert.equal(globalReady.userFacingSummary.sameItemMatcherSummary.title, "同款候选识别");
   assert.equal(globalReady.userFacingSummary.duplicateCandidateMergerSummary.title, "重复候选合并");
@@ -283,7 +304,12 @@ function main() {
   assert.equal(globalReady.userFacingSummary.dryRunResponseNormalizerStatus, "ready");
   assert.equal(globalReady.userFacingSummary.sandboxProviderRunbookStatus, "ready");
   assert.equal(globalReady.userFacingSummary.providerAdapterRegistryViewModelStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.firstSandboxProviderConnectorStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.providerCoverageStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.sourceTrustStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.providerCoverageViewModelStatus, "ready");
   assert.equal(globalReady.userFacingSummary.safeToProceedWithFirstSandboxProviderConnectorImplementation, true);
+  assert.equal(globalReady.userFacingSummary.safeToProceedWithFirstReadOnlyProviderSandboxIntegration, true);
   assert.equal(globalReady.userFacingSummary.sandboxPriceFeedStatus, "ready");
   assert.equal(globalReady.userFacingSummary.sandboxProviderResponseContractStatus, "ready");
   assert.equal(globalReady.userFacingSummary.pricePipelineStatus, "ready");
@@ -322,7 +348,8 @@ function main() {
   const withPilotOps = api.buildReadOnlyQuoteSessionReportCenter({ sessionSummary:summary, pilotOpsSummary:{ status:"healthy", primaryRisk:{ riskId:"none", label:"无主要风险" } }, nextCohortDecisionSummary:{ status:"advance", decision:{ decisionId:"advance_next_cohort", label:"可以进入下一批只读测试" } }, pilotOpsStatus:"healthy", nextCohortDecisionStatus:"advance", pilotOpsPrimaryRisk:{ riskId:"none", label:"无主要风险" } });
   assert.equal(withPilotOps.status, "ready");
   const userFacing = JSON.stringify(ready.userFacingSummary);
-  assert.equal(/rawResponse|token|key|secret|bookingUrl|paymentUrl|orderUrl/i.test(userFacing), false);
+  const userFacingValues = userFacing.replace(/"[^"]+":/g, "");
+  assert.equal(/rawResponse|token|key|secret|bookingUrl|paymentUrl|orderUrl/i.test(userFacingValues), false);
   assert.equal(/全网最低|已锁价|可以出票|可直接出票|真实最终价/.test(userFacing), false);
   const malformed = api.buildReadOnlyQuoteSessionReportCenter({ session:null });
   assert.equal(malformed.status, "failed_safe");

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.1.98";
+  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.1.99";
   const ORCHESTRATOR_NAME = "global_shopping_price_pipeline_orchestrator_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -69,6 +69,17 @@
   function evaluateGlobalShoppingPricePipeline(input) {
     const safe = obj(input);
     const hasPriceSourceNormalizationInput = Object.keys(obj(safe.priceSourceNormalizer)).length > 0 || Object.keys(obj(safe.priceSourceNormalizationSummary)).length > 0 || toArray(safe.normalizedCandidates).length > 0;
+    const firstSandboxProviderConnectorSummary = Object.keys(obj(safe.firstSandboxProviderConnectorSummary)).length ? obj(safe.firstSandboxProviderConnectorSummary) : resolveSummary(safe, "firstSandboxProviderConnector", "WeishanGlobalShoppingFirstSandboxProviderConnector", "buildGlobalShoppingFirstSandboxProviderConnector", {
+      adapterRegistry:safe.providerAdapterRegistrySummary || safe.adapterRegistrySummary || safe.adapterRegistry || {},
+      adapterShell:safe.firstReadOnlyProviderAdapterShellSummary || safe.adapterShell || {},
+      dryRunHarness:safe.providerSandboxDryRunHarnessSummary || safe.dryRunHarness || {},
+      safetyKillSwitch:safe.providerSandboxSafetyKillSwitchSummary || safe.safetyKillSwitch || {},
+      requestEnvelope:safe.providerRequestEnvelopeSummary || safe.requestEnvelope || {},
+      providerRunbook:safe.sandboxProviderRunbookSummary || safe.providerRunbook || {},
+      dryRunResponseNormalizer:safe.dryRunProviderResponseNormalizerSummary || safe.dryRunResponseNormalizer || {},
+      fixturePayload:obj(safe.fixturePayload || { providerId:"global_fixture_provider", providerName:"Global Shopping Fixture Sandbox", sourceType:"fixture", itemType:"flight", redacted:true }),
+      normalizedSourceInputs:toArray(safe.normalizedSourceInputs)
+    });
     const legalProviderFixtureSummary = resolveSummary(safe, "legalProviderFixtureSummary", "WeishanGlobalShoppingLegalProviderFixtureAdapter", "buildGlobalShoppingLegalProviderFixtureAdapter", safe);
     const providerCredentialSafetySummary = resolveSummary(safe, "providerCredentialSafetyReview", "WeishanGlobalShoppingProviderCredentialSafetyReview", "buildGlobalShoppingProviderCredentialSafetyReview", safe);
     const sandboxPriceFeedSummary = resolveSummary(safe, "sandboxPriceFeedGate", "WeishanGlobalShoppingSandboxPriceFeedGate", "buildGlobalShoppingSandboxPriceFeedGate", safe);
@@ -175,7 +186,28 @@
       providerSandboxSafetyKillSwitchSummary:providerSandboxSafetyKillSwitchSummary
     });
     const sandboxHandoffViewModelSummary = resolveSummary(safe, "sandboxHandoffViewModel", "WeishanGlobalShoppingSandboxHandoffViewModel", "buildGlobalShoppingSandboxHandoffViewModel", safe);
+    const dryRunResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary || safe.dryRunResponseNormalizer);
+    const providerCoverageDashboardSummary = resolveSummary(safe, "providerCoverageDashboardSummary", "WeishanGlobalShoppingProviderCoverageDashboard", "buildGlobalShoppingProviderCoverageDashboard", {
+      adapterRegistrySummary:safe.providerAdapterRegistrySummary || safe.adapterRegistrySummary || safe.adapterRegistry || {},
+      firstSandboxProviderConnectorSummary:firstSandboxProviderConnectorSummary,
+      coveredLowestCandidateBoardSummary:coveredLowestCandidateBoardSummary,
+      normalizedSourceInputs:toArray(obj(dryRunResponseNormalizerSummary).normalizedSourceInputs || safe.normalizedSourceInputs)
+    });
+    const readOnlySourceTrustScoreSummary = resolveSummary(safe, "readOnlySourceTrustScoreSummary", "WeishanGlobalShoppingReadOnlySourceTrustScore", "buildGlobalShoppingReadOnlySourceTrustScore", {
+      dryRunProviderResponseNormalizerSummary:dryRunResponseNormalizerSummary,
+      sources:toArray(obj(dryRunResponseNormalizerSummary).normalizedSourceInputs || safe.normalizedSourceInputs)
+    });
+    const providerCoverageViewModelSummary = resolveSummary(safe, "providerCoverageViewModelSummary", "WeishanGlobalShoppingProviderCoverageViewModel", "buildGlobalShoppingProviderCoverageViewModel", {
+      firstSandboxProviderConnectorSummary:firstSandboxProviderConnectorSummary,
+      providerCoverageDashboardSummary:providerCoverageDashboardSummary,
+      readOnlySourceTrustScoreSummary:readOnlySourceTrustScoreSummary,
+      safeToProceedWithFirstReadOnlyProviderSandboxIntegration:statusOf(firstSandboxProviderConnectorSummary) === "ready" && statusOf(providerCoverageDashboardSummary) === "ready" && statusOf(readOnlySourceTrustScoreSummary) === "ready"
+    });
     const pipelineHealth = {
+      firstSandboxProviderConnectorReady:statusOf(firstSandboxProviderConnectorSummary) === "ready",
+      providerCoverageReady:statusOf(providerCoverageDashboardSummary) === "ready",
+      sourceTrustReady:statusOf(readOnlySourceTrustScoreSummary) === "ready",
+      providerCoverageViewModelReady:statusOf(providerCoverageViewModelSummary) === "ready",
       providerConnectorReady:statusOf(readOnlyProviderSandboxConnectorSummary) === "ready",
       fixtureReplayReady:statusOf(fixtureReplayConsoleSummary) === "ready",
       providerFixtureReady:statusOf(legalProviderFixtureSummary) === "ready",
@@ -247,7 +279,9 @@
         canProceedToReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.providerFixtureReady && pipelineHealth.credentialSafetyPass && pipelineHealth.sandboxFeedReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.officialAnchorReady && pipelineHealth.sameItemMatcherReady && pipelineHealth.duplicateMergeReady && pipelineHealth.coveredLowestReady && pipelineHealth.sandboxHandoffReady,
         safeToProceedWithFirstRealReadOnlyProviderSandbox:pipelineHealth.providerConnectorReady && pipelineHealth.fixtureReplayReady && pipelineHealth.responseContractReady && pipelineHealth.priceNormalizationReady && pipelineHealth.coveredLowestReady,
         safeToProceedWithFirstReadOnlySandboxDryRun:pipelineHealth.realProviderSandboxGateReady && pipelineHealth.providerRequestEnvelopeReady && pipelineHealth.providerCallAuditLedgerReady && pipelineHealth.providerSandboxReadinessReady,
-        safeToProceedWithFirstProviderSandboxFixtureDryRun:pipelineHealth.providerSandboxDryRunReady && pipelineHealth.providerAdapterShellReady && pipelineHealth.providerKillSwitchClear && pipelineHealth.providerSandboxDryRunViewModelReady
+        safeToProceedWithFirstProviderSandboxFixtureDryRun:pipelineHealth.providerSandboxDryRunReady && pipelineHealth.providerAdapterShellReady && pipelineHealth.providerKillSwitchClear && pipelineHealth.providerSandboxDryRunViewModelReady,
+        safeToProceedWithFirstSandboxProviderConnectorImplementation:pipelineHealth.firstSandboxProviderConnectorReady && pipelineHealth.providerCoverageReady && pipelineHealth.sourceTrustReady,
+        safeToProceedWithFirstReadOnlyProviderSandboxIntegration:pipelineHealth.firstSandboxProviderConnectorReady && pipelineHealth.providerCoverageReady && pipelineHealth.sourceTrustReady && pipelineHealth.providerCoverageViewModelReady
       },
       blockedReasons:blockedReasons,
       readOnlyProviderSandboxConnectorSummary:clone(readOnlyProviderSandboxConnectorSummary),
@@ -270,6 +304,10 @@
       providerSandboxSafetyKillSwitchSummary:clone(providerSandboxSafetyKillSwitchSummary),
       providerSandboxDryRunViewModelSummary:clone(providerSandboxDryRunViewModelSummary),
       sandboxHandoffViewModelSummary:clone(sandboxHandoffViewModelSummary),
+      firstSandboxProviderConnectorSummary:clone(firstSandboxProviderConnectorSummary),
+      providerCoverageDashboardSummary:clone(providerCoverageDashboardSummary),
+      readOnlySourceTrustScoreSummary:clone(readOnlySourceTrustScoreSummary),
+      providerCoverageViewModelSummary:clone(providerCoverageViewModelSummary),
       status:blockedReasons.length ? "blocked" : (review ? "needs_review" : "ready"),
       redacted:true
     });
@@ -338,6 +376,10 @@
       providerSandboxSafetyKillSwitchSummary:linkedSummary(evaluation.providerSandboxSafetyKillSwitchSummary),
       providerSandboxDryRunViewModelSummary:linkedSummary(evaluation.providerSandboxDryRunViewModelSummary),
       sandboxHandoffViewModelSummary:linkedSummary(evaluation.sandboxHandoffViewModelSummary),
+      firstSandboxProviderConnectorSummary:linkedSummary(evaluation.firstSandboxProviderConnectorSummary),
+      providerCoverageDashboardSummary:linkedSummary(evaluation.providerCoverageDashboardSummary),
+      readOnlySourceTrustScoreSummary:linkedSummary(evaluation.readOnlySourceTrustScoreSummary),
+      providerCoverageViewModelSummary:linkedSummary(evaluation.providerCoverageViewModelSummary),
       redacted:true
     });
   }

@@ -1,5 +1,5 @@
 (function(){
-  const MANUAL_PROVIDER_REVIEW_WORKFLOW_VERSION = "2.1.98";
+  const MANUAL_PROVIDER_REVIEW_WORKFLOW_VERSION = "2.1.99";
 
   const providerReviewObjectFields = [
     "providerId",

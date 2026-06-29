@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRICE_CANDIDATE_DISPLAY_BOARD_VERSION = "2.1.98";
+  const GLOBAL_SHOPPING_PRICE_CANDIDATE_DISPLAY_BOARD_VERSION = "2.1.99";
   const BOARD_NAME = "global_shopping_price_candidate_display_board_v1";
   const CAVEAT = "当前仅展示只读 fixture 候选价，价格以跳转后平台实时页面为准，不代表最终成交价、锁定承诺、最低承诺或可下单能力。";
   const FORBIDDEN_RE = /全网最低|最低价保证|已锁价|真实最终价|立即购买|直接下单|一键下单|一键出票|lowest price guarantee|locked price/i;
@@ -37,6 +37,8 @@
     const matcher = buildMatcher(input || {}, normalizer) || {};
     const merger = buildMerger(input || {}, matcher) || {};
     const coveredBoard = buildCoveredBoard(input || {}, merger, anchor) || {};
+    const coverage = obj(obj(input).providerCoverageDashboardSummary);
+    const trust = obj(obj(input).readOnlySourceTrustScoreSummary);
     const official = obj(anchor.officialAnchor);
     const merged = toArray(merger.mergedCandidates)[0] || {};
     const candidates = toArray(normalizer.normalizedCandidates);
@@ -46,7 +48,9 @@
       card("coverage", "来源覆盖", merged.sourceCount == null ? "仍需复核" : String(merged.sourceCount)),
       card("merge_confidence", "同款合并置信度", merged.matchConfidence || "needs_review"),
       card("price_completeness", "税费/运费/服务费状态", candidates.every(function (item) { return item.priceCompleteness === "complete"; }) ? "complete" : "needs_review"),
-      card("display_board", "已覆盖来源候选价合并", coveredBoard.title || "已覆盖来源候选价合并")
+      card("display_board", "已覆盖来源候选价合并", coveredBoard.title || "已覆盖来源候选价合并"),
+      card("provider_coverage", "Provider 覆盖看板", obj(obj(coverage.userFacingSummary)).resultLabel || "Provider 覆盖仍需复核"),
+      card("source_trust", "只读来源可信度评分", obj(obj(trust.userFacingSummary)).resultLabel || "来源可信度仍需复核")
     ]);
   }
   function buildGlobalShoppingPriceCandidateRows(input) {
@@ -91,6 +95,8 @@
       sameItemMatcherSummary:clone(matcher),
       duplicateCandidateMergerSummary:clone(merger),
       coveredLowestCandidateBoardSummary:clone(coveredBoard),
+      providerCoverageDashboardSummary:clone(obj(safe.providerCoverageDashboardSummary)),
+      readOnlySourceTrustScoreSummary:clone(obj(safe.readOnlySourceTrustScoreSummary)),
       sameItemMatcherStatus:text(matcher.status || ""),
       duplicateMergeStatus:text(merger.status || ""),
       coveredLowestStatus:text(coveredBoard.status || ""),

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PILOT_ISSUE_REVIEW_VIEW_MODEL_VERSION = "2.1.98";
+  const FLIGHT_WORKFLOW_PILOT_ISSUE_REVIEW_VIEW_MODEL_VERSION = "2.1.99";
   const VIEW_MODEL_NAME = "flight_workflow_pilot_issue_review_view_model_v1";
   const CAVEAT = "问题复核只用于改进只读候选证据流程，不代表客服工单、交易请求或出票请求。";
 

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_DRY_RUN_PROVIDER_RESPONSE_NORMALIZER_VERSION = "2.1.98";
+  const GLOBAL_SHOPPING_DRY_RUN_PROVIDER_RESPONSE_NORMALIZER_VERSION = "2.1.99";
   const NORMALIZER_NAME = "global_shopping_dry_run_provider_response_normalizer_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -85,6 +85,22 @@
   function collectNormalizedSourceInputs(input) {
     const safe = obj(input);
     const items = [];
+    const connector = obj(safe.firstSandboxProviderConnectorSummary);
+    const connectorInputs = toArray(safe.normalizedSourceInputs).length ? [] : toArray(connector.normalizedSourceInputs);
+    connectorInputs.forEach(function (entry) {
+      items.push(makeSourceInput(entry, entry.sourceType || entry.providerType || "fixture", entry.sourceTrustLevel || "fixture"));
+    });
+    const connectorCount = Number(obj(connector.connectorResult).normalizedSourceInputCount || 0);
+    if (!items.length && connectorCount > 0) {
+      items.push(makeSourceInput({
+        sourceId:text(obj(connector.connectorRuntime).providerId || "connector_fixture_source"),
+        sourceName:text(obj(connector.connectorRuntime).providerName || "Connector Fixture Source"),
+        sourceType:text(obj(connector.connectorRuntime).sourceType || obj(connector.connectorRuntime).providerType || "fixture"),
+        sourceTrustLevel:"fixture",
+        itemType:text(obj(connector.connectorRuntime).itemType || "flight"),
+        title:"Connector redacted fixture summary"
+      }, "fixture", "fixture"));
+    }
     toArray(safe.fixturePrices).forEach(function (entry) { items.push(makeSourceInput(entry, "fixture", "fixture")); });
     if (Object.keys(obj(safe.officialFixturePrice)).length) items.push(makeSourceInput(safe.officialFixturePrice, "official", "official_fixture"));
     toArray(safe.authorizedFixturePrices).forEach(function (entry) { items.push(makeSourceInput(entry, "authorized", "authorized_fixture")); });

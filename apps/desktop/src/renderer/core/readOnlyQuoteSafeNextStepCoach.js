@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SAFE_NEXT_STEP_COACH_VERSION = "2.1.98";
+  const READ_ONLY_QUOTE_SAFE_NEXT_STEP_COACH_VERSION = "2.1.99";
   const COACH_NAME = "read_only_quote_safe_next_step_coach_v1";
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value == null ? "" : value).trim(); }
