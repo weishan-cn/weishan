@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_SANDBOX_DRY_RUN_VIEW_MODEL_VERSION = "2.2.1";
+  const GLOBAL_SHOPPING_PROVIDER_SANDBOX_DRY_RUN_VIEW_MODEL_VERSION = "2.2.2";
   const VIEW_MODEL_NAME = "global_shopping_provider_sandbox_dry_run_view_model_v1";
   const CAVEAT = "当前仅模拟只读 provider sandbox 生命周期，不发送请求，不读取真实密钥，不保存 raw request 或 raw response。";
 

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.2.1";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.2.2";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -168,6 +168,10 @@
       const providerEvidenceTraceSummary = obj(safe.providerEvidenceTraceSummary);
       const candidateConfidenceExplainerSummary = obj(safe.candidateConfidenceExplainerSummary);
       const sandboxReplayViewModelSummary = obj(safe.sandboxReplayViewModelSummary);
+      const sandboxCandidateComparisonWorkbenchSummary = obj(safe.sandboxCandidateComparisonWorkbenchSummary);
+      const providerEvidenceComparisonMatrixSummary = obj(safe.providerEvidenceComparisonMatrixSummary);
+      const readOnlyHandoffReadinessDrillSummary = obj(safe.readOnlyHandoffReadinessDrillSummary);
+      const sandboxDecisionReviewViewModelSummary = obj(safe.sandboxDecisionReviewViewModelSummary);
       const legalProviderFixtureSummary = obj(safe.legalProviderFixtureSummary);
       const providerCredentialSafetySummary = obj(safe.providerCredentialSafetySummary);
       const sandboxPriceFeedSummary = obj(safe.sandboxPriceFeedSummary);
@@ -315,6 +319,13 @@
       if (providerEvidenceTraceSummary.status) badges.push(badge("provider_trace_no_raw_response", "证据链不包含 raw response", "info"));
       if (candidateConfidenceExplainerSummary.status) badges.push(badge("confidence_not_lowest_guarantee", "可信度不代表最低价保证", "warning"));
       if (candidateConfidenceExplainerSummary.status) badges.push(badge("confidence_not_ordering", "可信度不代表可订或可下单", "warning"));
+      if (sandboxCandidateComparisonWorkbenchSummary.status === "ready") badges.push(badge("sandbox_candidate_comparison_ready", "Sandbox 候选对比已准备", "info"));
+      if (providerEvidenceComparisonMatrixSummary.status === "ready") badges.push(badge("provider_evidence_matrix_ready", "Provider 证据矩阵已准备", "info"));
+      if (readOnlyHandoffReadinessDrillSummary.status === "ready") badges.push(badge("handoff_readiness_drill_ready", "只读交接演练已准备", "info"));
+      if (sandboxCandidateComparisonWorkbenchSummary.status) badges.push(badge("candidate_recommendation_not_lowest", "候选推荐不代表最低价保证", "warning"));
+      if (readOnlyHandoffReadinessDrillSummary.status) badges.push(badge("handoff_drill_no_open", "交接演练不打开平台", "info"));
+      if (readOnlyHandoffReadinessDrillSummary.status) badges.push(badge("handoff_params_no_identity_payment", "参数预览不包含身份或支付信息", "info"));
+      if (sandboxDecisionReviewViewModelSummary.status) badges.push(badge("decision_review_not_ordering", "决策复核不代表下单能力", "warning"));
       if (normalizedPriceCandidateBoardSummary.status || pricePipelineOrchestratorSummary.status) badges.push(badge("normalized_candidate_not_real_price", "归一化候选不代表真实价格", "warning"));
       if (normalizedPriceCandidateBoardSummary.status || readOnlyCandidateJourneySummary.status) badges.push(badge("normalized_candidate_not_ordering", "价格候选板不代表下单能力", "warning"));
       if (sandboxHandoffViewModelSummary.status === "ready") badges.push(badge("sandbox_handoff_ready", "Sandbox 跳转候选与平台可用性已准备", "info"));

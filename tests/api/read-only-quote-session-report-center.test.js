@@ -76,13 +76,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.2.1");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.2.2");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "2.2.1");
+  assert.equal(ready.appVersion, "2.2.2");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -350,6 +350,24 @@ function main() {
   assert.equal(globalReady.userFacingSummary.partnerLinkPolicyStatus, "compliant");
   assert.equal(globalReady.userFacingSummary.safeToProceedWithSandboxDeepLinkCandidate, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithPartnerFixtureAdapter, true);
+  const decisionReviewReady = api.buildReadOnlyQuoteSessionReportCenter({
+    sessionSummary:summary,
+    sandboxCandidateComparisonWorkbenchSummary:{ status:"ready", userFacingSummary:{ title:"Sandbox 候选对比工作台", resultLabel:"候选对比已准备", caveat:"当前仅比较脱敏 sandbox 候选。", redacted:true }, redacted:true },
+    providerEvidenceComparisonMatrixSummary:{ status:"ready", userFacingSummary:{ title:"Provider 证据对比矩阵", resultLabel:"证据矩阵已准备", caveat:"当前矩阵只展示脱敏 sandbox 证据摘要。", redacted:true }, redacted:true },
+    readOnlyHandoffReadinessDrillSummary:{ status:"ready", userFacingSummary:{ title:"只读跳转交接演练", resultLabel:"交接演练已准备", caveat:"当前只演练非敏感搜索参数准备度。", redacted:true }, redacted:true },
+    sandboxDecisionReviewViewModelSummary:{ status:"ready", title:"Sandbox 候选决策复核", caveat:"当前仅用于复核 sandbox 候选，不代表真实价格、全网最低、锁价、可订、付款、下单或出票能力。", redacted:true },
+    sandboxCandidateComparisonWorkbenchStatus:"ready",
+    providerEvidenceComparisonMatrixStatus:"ready",
+    readOnlyHandoffReadinessDrillStatus:"ready",
+    sandboxDecisionReviewStatus:"ready",
+    safeToProceedWithSandboxDecisionReview:true
+  });
+  assert.equal(decisionReviewReady.safetyReport.sandboxCandidateComparisonWorkbenchSummary.userFacingSummary.title, "Sandbox 候选对比工作台");
+  assert.equal(decisionReviewReady.safetyReport.providerEvidenceComparisonMatrixSummary.userFacingSummary.title, "Provider 证据对比矩阵");
+  assert.equal(decisionReviewReady.safetyReport.readOnlyHandoffReadinessDrillSummary.userFacingSummary.title, "只读跳转交接演练");
+  assert.equal(decisionReviewReady.safetyReport.sandboxDecisionReviewViewModelSummary.title, "Sandbox 候选决策复核");
+  assert.equal(decisionReviewReady.userFacingSummary.sandboxDecisionReviewStatus, "ready");
+  assert.equal(decisionReviewReady.userFacingSummary.safeToProceedWithSandboxDecisionReview, true);
   const withOnboarding = api.buildReadOnlyQuoteSessionReportCenter({ sessionSummary:summary, pilotOnboardingSummary:{ status:"allowed", redacted:true }, readOnlyConsentSummary:{ status:"accepted", redacted:true }, pilotEntryStatus:"allowed", canEnterReadOnlyPilot:true, pilotConsentRequired:false });
   assert.equal(withOnboarding.safetyReport.pilotEntryStatus, "allowed");
   assert.equal(withOnboarding.safetyReport.canEnterReadOnlyPilot, true);

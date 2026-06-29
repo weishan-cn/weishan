@@ -7,14 +7,14 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js", "apps/desktop/src/renderer/core/flightWorkflowOperatorConsole.js"]);
   const api = windowRef.WeishanFlightWorkflowOperatorConsole;
-  assert.equal(api.FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION, "2.2.1");
+  assert.equal(api.FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION, "2.2.2");
   const base = { workflowId:"wf1", workflowStateSummary:{ workflowId:"wf1" }, topCandidates:[{ providerName:"sandbox", bookingUrl:null }], selectedCandidate:{ providerName:"sandbox" }, auditReviewSummary:{ status:"ready", auditHealth:{ overall:"pass" } }, humanReviewChecklistSummary:{ status:"ready" }, finalSafeHandoffPacketSummary:{ status:"ready" }, handoffPacketPolicyDecision:{ status:"allowed" }, safetyRegressionSummary:{ status:"pass", checks:[] }, eventLedgerSummary:{ recentEvents:[{ eventType:"handoff_packet_prepared", status:"ready" }] }, blockedActions:[] };
   const ready = api.buildFlightWorkflowOperatorConsole(base);
   assert.equal(ready.consoleName, "flight_workflow_operator_console_v1");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "可以继续只读流程");
   assert.equal(ready.nextOperatorAction.enabled, true);
-  assert.equal(JSON.stringify(ready.sections.map((s) => s.sectionId)), JSON.stringify(["workflow_status", "safety_status", "recent_events", "blocked_actions", "handoff_readiness", "rc_review", "global_shopping_goal", "global_shopping_price", "global_shopping_handoff", "pilot_ops", "pilot_readiness", "pilot_onboarding", "issue_review", "issue_pattern"]));
+  assert.equal(JSON.stringify(ready.sections.map((s) => s.sectionId)), JSON.stringify(["workflow_status", "safety_status", "recent_events", "blocked_actions", "handoff_readiness", "rc_review", "global_shopping_goal", "global_shopping_price", "global_shopping_handoff", "global_shopping_decision_review", "pilot_ops", "pilot_readiness", "pilot_onboarding", "issue_review", "issue_pattern"]));
   assert.equal(ready.bookingUrl, null);
   assert.ok(ready.sections.some((section) => section.sectionId === "pilot_ops"));
   const globalRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {
@@ -41,6 +41,17 @@ function main() {
   assert.ok(handoffRows.rows.some((item) => item.label === "跳转安全"));
   assert.ok(handoffRows.rows.some((item) => item.label === "预填边界"));
   assert.ok(handoffRows.rows.some((item) => item.label === "跳转预览"));
+  const decisionReviewRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {
+    sandboxCandidateComparisonWorkbenchSummary:{ status:"ready", userFacingSummary:{ resultLabel:"候选对比已准备" } },
+    providerEvidenceComparisonMatrixSummary:{ status:"ready", userFacingSummary:{ resultLabel:"证据矩阵已准备" } },
+    readOnlyHandoffReadinessDrillSummary:{ status:"ready", userFacingSummary:{ resultLabel:"交接演练已准备" } },
+    sandboxDecisionReviewViewModelSummary:{ status:"ready", title:"Sandbox 候选决策复核" },
+    safeToProceedWithSandboxDecisionReview:true
+  })).sections.find((section) => section.sectionId === "global_shopping_decision_review");
+  assert.ok(decisionReviewRows.rows.some((item) => item.label === "候选对比"));
+  assert.ok(decisionReviewRows.rows.some((item) => item.label === "证据矩阵"));
+  assert.ok(decisionReviewRows.rows.some((item) => item.label === "交接演练"));
+  assert.ok(decisionReviewRows.rows.some((item) => item.label === "安全红线" && item.value === "决策复核不代表下单能力"));
   const rcReady = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, { rcCandidateReviewSummary:{ status:"ready_for_review", userFacingSummary:{ resultLabel:"可以开始 RC 复核", redacted:true }, safeToStartRcReview:true, redacted:true }, rcEvidenceReviewSummary:{ status:"complete", userFacingSummary:{ resultLabel:"证据完整", redacted:true }, redacted:true }, rcReviewStatus:"ready_for_review", rcEvidenceStatus:"complete", safeToStartRcReview:true }));
   assert.ok(rcReady.sections.some((section) => section.sectionId === "rc_review"));
   assert.equal(rcReady.safeToStartRcReview, true);

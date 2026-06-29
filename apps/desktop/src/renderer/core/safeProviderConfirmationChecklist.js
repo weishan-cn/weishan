@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SAFE_PROVIDER_CONFIRMATION_CHECKLIST_VERSION = "2.2.1";
+  const SAFE_PROVIDER_CONFIRMATION_CHECKLIST_VERSION = "2.2.2";
   const CHECKLIST_NAME = "safe_provider_confirmation_checklist_v1";
   const FORBIDDEN_NAME_RE = /(token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|passport|idCard|bank|card|rawUrl|rawResponse|rawHtml|screenshot)/i;
 

@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingSandboxPriceCandidateSession.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingSandboxPriceCandidateSession;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PRICE_CANDIDATE_SESSION_VERSION, "2.2.1");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PRICE_CANDIDATE_SESSION_VERSION, "2.2.2");
 
   const ready = api.buildGlobalShoppingSandboxPriceCandidateSession({
     readOnlyProviderSandboxIntegrationGateSummary:{ status:"ready", redacted:true },

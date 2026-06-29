@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_EVIDENCE_FREEZE_PACK_VERSION = "2.2.1";
+  const FLIGHT_WORKFLOW_EVIDENCE_FREEZE_PACK_VERSION = "2.2.2";
   const PACK_NAME = "flight_workflow_evidence_freeze_pack_v1";
   const CAVEAT = "证据冻结包只用于只读发布候选流程，不保存真实身份、不发送真实邀请、不提供交易能力。";
 

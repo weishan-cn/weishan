@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.2.1";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.2.2";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -207,6 +207,10 @@
       readOnlyProviderSandboxIntegrationGateSummary: stripUnsafe(safe.readOnlyProviderSandboxIntegrationGateSummary || null),
       sandboxPriceCandidateSessionSummary: stripUnsafe(safe.sandboxPriceCandidateSessionSummary || null),
       sandboxPriceCandidateResultBoardSummary: stripUnsafe(safe.sandboxPriceCandidateResultBoardSummary || null),
+      sandboxCandidateComparisonWorkbenchSummary: stripUnsafe(safe.sandboxCandidateComparisonWorkbenchSummary || null),
+      providerEvidenceComparisonMatrixSummary: stripUnsafe(safe.providerEvidenceComparisonMatrixSummary || null),
+      readOnlyHandoffReadinessDrillSummary: stripUnsafe(safe.readOnlyHandoffReadinessDrillSummary || null),
+      sandboxDecisionReviewViewModelSummary: stripUnsafe(safe.sandboxDecisionReviewViewModelSummary || null),
       legalProviderFixtureSummary: stripUnsafe(safe.legalProviderFixtureSummary || null),
       providerCredentialSafetySummary: stripUnsafe(safe.providerCredentialSafetySummary || null),
       sandboxPriceFeedSummary: stripUnsafe(safe.sandboxPriceFeedSummary || null),
@@ -249,6 +253,10 @@
       providerSandboxIntegrationGateStatus: safeText(safe.providerSandboxIntegrationGateStatus || safe.readOnlyProviderSandboxIntegrationGateSummary && safe.readOnlyProviderSandboxIntegrationGateSummary.status || ""),
       sandboxPriceCandidateSessionStatus: safeText(safe.sandboxPriceCandidateSessionStatus || safe.sandboxPriceCandidateSessionSummary && safe.sandboxPriceCandidateSessionSummary.status || ""),
       sandboxPriceCandidateResultBoardStatus: safeText(safe.sandboxPriceCandidateResultBoardStatus || safe.sandboxPriceCandidateResultBoardSummary && safe.sandboxPriceCandidateResultBoardSummary.status || ""),
+      sandboxCandidateComparisonWorkbenchStatus: safeText(safe.sandboxCandidateComparisonWorkbenchStatus || safe.sandboxCandidateComparisonWorkbenchSummary && safe.sandboxCandidateComparisonWorkbenchSummary.status || ""),
+      providerEvidenceComparisonMatrixStatus: safeText(safe.providerEvidenceComparisonMatrixStatus || safe.providerEvidenceComparisonMatrixSummary && safe.providerEvidenceComparisonMatrixSummary.status || ""),
+      readOnlyHandoffReadinessDrillStatus: safeText(safe.readOnlyHandoffReadinessDrillStatus || safe.readOnlyHandoffReadinessDrillSummary && safe.readOnlyHandoffReadinessDrillSummary.status || ""),
+      sandboxDecisionReviewStatus: safeText(safe.sandboxDecisionReviewStatus || safe.sandboxDecisionReviewViewModelSummary && safe.sandboxDecisionReviewViewModelSummary.status || ""),
       priceNormalizationStatus: safeText(safe.priceNormalizationStatus || safe.priceSourceNormalizationSummary && safe.priceSourceNormalizationSummary.status || ""),
       officialPriceAnchorStatus: safeText(safe.officialPriceAnchorStatus || safe.officialPriceAnchorSummary && safe.officialPriceAnchorSummary.status || ""),
       priceCandidateDisplayStatus: safeText(safe.priceCandidateDisplayStatus || safe.priceCandidateDisplaySummary && safe.priceCandidateDisplaySummary.status || ""),
@@ -280,6 +288,7 @@
       safeToProceedWithSandboxDeepLinkCandidate: safe.safeToProceedWithSandboxDeepLinkCandidate === true,
       safeToProceedWithPartnerFixtureAdapter: safe.safeToProceedWithPartnerFixtureAdapter === true,
       safeToProceedWithRealReadOnlyProviderSandbox: safe.safeToProceedWithRealReadOnlyProviderSandbox === true,
+      safeToProceedWithSandboxDecisionReview: safe.safeToProceedWithSandboxDecisionReview === true,
       globalShoppingGoalStatus: safeText(safe.globalShoppingGoalStatus || safe.globalShoppingProductGoalSummary && safe.globalShoppingProductGoalSummary.status || ""),
       jumpBoundaryStatus: safeText(safe.jumpBoundaryStatus || safe.jumpToPlatformBoundarySummary && safe.jumpToPlatformBoundarySummary.status || ""),
       safeToProceedWithJumpToPlatformMvp: safe.safeToProceedWithJumpToPlatformMvp === true,
@@ -390,6 +399,7 @@
     const releaseReadinessSummary = workflow.releaseReadinessSummary || safe.releaseReadinessSummary || (typeof releaseReadinessApi().buildFlightWorkflowReleaseReadinessDashboard === "function" ? releaseReadinessApi().buildFlightWorkflowReleaseReadinessDashboard(Object.assign({}, safe, workflow, { scenarioSimulationSummary:scenarioSimulationSummary, safetyTestMatrixSummary:safetyTestMatrixSummary, auditReviewSummary:auditReviewSummary, humanReviewChecklistSummary:humanReviewChecklistSummary, finalSafeHandoffPacketSummary:finalSafeHandoffPacketSummary, safeSessionExportPreview:safeSessionExportPreview, operatorConsoleSummary:operatorConsoleSummary })) : null);
     const finalReviewBadges = workflow.finalReviewBadges || safe.finalReviewBadges || riskBadgeModel && riskBadgeModel.badges || [];
     const providerCoverageSummary = formatter.formatGlobalShoppingCoverageSummary ? formatter.formatGlobalShoppingCoverageSummary({ providerCoverageViewModelSummary:workflow.providerCoverageViewModelSummary || safe.providerCoverageViewModelSummary || null }) : null;
+    const sandboxDecisionReviewSummary = formatter.formatGlobalShoppingSandboxDecisionReviewSummary ? formatter.formatGlobalShoppingSandboxDecisionReviewSummary({ sandboxDecisionReviewViewModelSummary:workflow.sandboxDecisionReviewViewModelSummary || safe.sandboxDecisionReviewViewModelSummary || null }) : null;
     return clone({
       title: "候选报价证据摘要",
       subtitle: "只读候选价 · 平台最终为准",
@@ -449,6 +459,10 @@
       readOnlyProviderSandboxIntegrationGateSummary: workflow.readOnlyProviderSandboxIntegrationGateSummary || safe.readOnlyProviderSandboxIntegrationGateSummary ? { title:"只读 Provider Sandbox 接入闸门", line:workflow.readOnlyProviderSandboxIntegrationGateSummary && workflow.readOnlyProviderSandboxIntegrationGateSummary.userFacingSummary && workflow.readOnlyProviderSandboxIntegrationGateSummary.userFacingSummary.resultLabel || safe.readOnlyProviderSandboxIntegrationGateSummary && safe.readOnlyProviderSandboxIntegrationGateSummary.userFacingSummary && safe.readOnlyProviderSandboxIntegrationGateSummary.userFacingSummary.resultLabel || "只读 Provider Sandbox 接入闸门仍需复核", redacted:true } : null,
       sandboxPriceCandidateSessionSummary: workflow.sandboxPriceCandidateSessionSummary || safe.sandboxPriceCandidateSessionSummary ? { title:"Sandbox 价格候选会话", line:workflow.sandboxPriceCandidateSessionSummary && workflow.sandboxPriceCandidateSessionSummary.userFacingSummary && workflow.sandboxPriceCandidateSessionSummary.userFacingSummary.resultLabel || safe.sandboxPriceCandidateSessionSummary && safe.sandboxPriceCandidateSessionSummary.userFacingSummary && safe.sandboxPriceCandidateSessionSummary.userFacingSummary.resultLabel || "Sandbox 价格候选会话仍需复核", redacted:true } : null,
       sandboxPriceCandidateResultBoardSummary: workflow.sandboxPriceCandidateResultBoardSummary || safe.sandboxPriceCandidateResultBoardSummary ? { title:"Sandbox 价格候选结果", line:workflow.sandboxPriceCandidateResultBoardSummary && workflow.sandboxPriceCandidateResultBoardSummary.caveat || safe.sandboxPriceCandidateResultBoardSummary && safe.sandboxPriceCandidateResultBoardSummary.caveat || "当前仅展示只读 sandbox 候选结果，不代表真实价格、全网最低、最低价保证、锁价、可订、付款、下单或出票能力。", redacted:true } : null,
+      sandboxCandidateComparisonWorkbenchSummary: workflow.sandboxCandidateComparisonWorkbenchSummary || safe.sandboxCandidateComparisonWorkbenchSummary ? { title:"Sandbox 候选对比工作台", line:workflow.sandboxCandidateComparisonWorkbenchSummary && workflow.sandboxCandidateComparisonWorkbenchSummary.userFacingSummary && workflow.sandboxCandidateComparisonWorkbenchSummary.userFacingSummary.resultLabel || safe.sandboxCandidateComparisonWorkbenchSummary && safe.sandboxCandidateComparisonWorkbenchSummary.userFacingSummary && safe.sandboxCandidateComparisonWorkbenchSummary.userFacingSummary.resultLabel || "候选对比仍需复核", redacted:true } : null,
+      providerEvidenceComparisonMatrixSummary: workflow.providerEvidenceComparisonMatrixSummary || safe.providerEvidenceComparisonMatrixSummary ? { title:"Provider 证据对比矩阵", line:workflow.providerEvidenceComparisonMatrixSummary && workflow.providerEvidenceComparisonMatrixSummary.userFacingSummary && workflow.providerEvidenceComparisonMatrixSummary.userFacingSummary.resultLabel || safe.providerEvidenceComparisonMatrixSummary && safe.providerEvidenceComparisonMatrixSummary.userFacingSummary && safe.providerEvidenceComparisonMatrixSummary.userFacingSummary.resultLabel || "证据矩阵仍需复核", redacted:true } : null,
+      readOnlyHandoffReadinessDrillSummary: workflow.readOnlyHandoffReadinessDrillSummary || safe.readOnlyHandoffReadinessDrillSummary ? { title:"只读跳转交接演练", line:workflow.readOnlyHandoffReadinessDrillSummary && workflow.readOnlyHandoffReadinessDrillSummary.userFacingSummary && workflow.readOnlyHandoffReadinessDrillSummary.userFacingSummary.resultLabel || safe.readOnlyHandoffReadinessDrillSummary && safe.readOnlyHandoffReadinessDrillSummary.userFacingSummary && safe.readOnlyHandoffReadinessDrillSummary.userFacingSummary.resultLabel || "交接演练仍需复核", redacted:true } : null,
+      sandboxDecisionReviewViewModelSummary: sandboxDecisionReviewSummary,
       firstSandboxProviderConnectorStatus: workflow.firstSandboxProviderConnectorStatus || safe.firstSandboxProviderConnectorStatus || "",
       providerCoverageStatus: workflow.providerCoverageStatus || safe.providerCoverageStatus || "",
       sourceTrustStatus: workflow.sourceTrustStatus || safe.sourceTrustStatus || "",
@@ -456,6 +470,11 @@
       providerSandboxIntegrationGateStatus: workflow.providerSandboxIntegrationGateStatus || safe.providerSandboxIntegrationGateStatus || "",
       sandboxPriceCandidateSessionStatus: workflow.sandboxPriceCandidateSessionStatus || safe.sandboxPriceCandidateSessionStatus || "",
       sandboxPriceCandidateResultBoardStatus: workflow.sandboxPriceCandidateResultBoardStatus || safe.sandboxPriceCandidateResultBoardStatus || "",
+      sandboxCandidateComparisonWorkbenchStatus: workflow.sandboxCandidateComparisonWorkbenchStatus || safe.sandboxCandidateComparisonWorkbenchStatus || "",
+      providerEvidenceComparisonMatrixStatus: workflow.providerEvidenceComparisonMatrixStatus || safe.providerEvidenceComparisonMatrixStatus || "",
+      readOnlyHandoffReadinessDrillStatus: workflow.readOnlyHandoffReadinessDrillStatus || safe.readOnlyHandoffReadinessDrillStatus || "",
+      sandboxDecisionReviewStatus: workflow.sandboxDecisionReviewStatus || safe.sandboxDecisionReviewStatus || "",
+      safeToProceedWithSandboxDecisionReview: workflow.safeToProceedWithSandboxDecisionReview === true || safe.safeToProceedWithSandboxDecisionReview === true,
       safeToProceedWithFirstReadOnlyProviderSandboxIntegration: workflow.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true || safe.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true,
       safeToProceedWithSandboxCandidateUserPreview: workflow.safeToProceedWithSandboxCandidateUserPreview === true || safe.safeToProceedWithSandboxCandidateUserPreview === true,
       pilotExitCriteriaSummary: pilotExitCriteriaSummary ? { title:"只读试点退出条件", line:pilotExitCriteriaSummary.userFacingSummary && pilotExitCriteriaSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,
@@ -690,6 +709,10 @@
       readOnlyProviderSandboxIntegrationGateSummary: workflow.readOnlyProviderSandboxIntegrationGateSummary || safe.readOnlyProviderSandboxIntegrationGateSummary || null,
       sandboxPriceCandidateSessionSummary: workflow.sandboxPriceCandidateSessionSummary || safe.sandboxPriceCandidateSessionSummary || null,
       sandboxPriceCandidateResultBoardSummary: workflow.sandboxPriceCandidateResultBoardSummary || safe.sandboxPriceCandidateResultBoardSummary || null,
+      sandboxCandidateComparisonWorkbenchSummary: workflow.sandboxCandidateComparisonWorkbenchSummary || safe.sandboxCandidateComparisonWorkbenchSummary || null,
+      providerEvidenceComparisonMatrixSummary: workflow.providerEvidenceComparisonMatrixSummary || safe.providerEvidenceComparisonMatrixSummary || null,
+      readOnlyHandoffReadinessDrillSummary: workflow.readOnlyHandoffReadinessDrillSummary || safe.readOnlyHandoffReadinessDrillSummary || null,
+      sandboxDecisionReviewViewModelSummary: workflow.sandboxDecisionReviewViewModelSummary || safe.sandboxDecisionReviewViewModelSummary || null,
       rcReviewStatus: workflow.rcReviewStatus || safe.rcReviewStatus || "",
       rcEvidenceStatus: workflow.rcEvidenceStatus || safe.rcEvidenceStatus || "",
       rcRegressionStatus: workflow.rcRegressionStatus || safe.rcRegressionStatus || "",
@@ -706,6 +729,11 @@
       providerSandboxIntegrationGateStatus: workflow.providerSandboxIntegrationGateStatus || safe.providerSandboxIntegrationGateStatus || "",
       sandboxPriceCandidateSessionStatus: workflow.sandboxPriceCandidateSessionStatus || safe.sandboxPriceCandidateSessionStatus || "",
       sandboxPriceCandidateResultBoardStatus: workflow.sandboxPriceCandidateResultBoardStatus || safe.sandboxPriceCandidateResultBoardStatus || "",
+      sandboxCandidateComparisonWorkbenchStatus: workflow.sandboxCandidateComparisonWorkbenchStatus || safe.sandboxCandidateComparisonWorkbenchStatus || "",
+      providerEvidenceComparisonMatrixStatus: workflow.providerEvidenceComparisonMatrixStatus || safe.providerEvidenceComparisonMatrixStatus || "",
+      readOnlyHandoffReadinessDrillStatus: workflow.readOnlyHandoffReadinessDrillStatus || safe.readOnlyHandoffReadinessDrillStatus || "",
+      sandboxDecisionReviewStatus: workflow.sandboxDecisionReviewStatus || safe.sandboxDecisionReviewStatus || "",
+      safeToProceedWithSandboxDecisionReview: workflow.safeToProceedWithSandboxDecisionReview === true || safe.safeToProceedWithSandboxDecisionReview === true,
       safeToProceedWithFirstReadOnlyProviderSandboxIntegration: workflow.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true || safe.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true,
       safeToProceedWithSandboxCandidateUserPreview: workflow.safeToProceedWithSandboxCandidateUserPreview === true || safe.safeToProceedWithSandboxCandidateUserPreview === true,
       pilotOnboardingSummary: workflow.pilotOnboardingSummary,

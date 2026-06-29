@@ -38,10 +38,14 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderEvidenceTrace.js",
     "apps/desktop/src/renderer/core/globalShoppingCandidateConfidenceExplainer.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxReplayViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingSandboxCandidateComparisonWorkbench.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderEvidenceComparisonMatrix.js",
+    "apps/desktop/src/renderer/core/globalShoppingReadOnlyHandoffReadinessDrill.js",
+    "apps/desktop/src/renderer/core/globalShoppingSandboxDecisionReviewViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.2.1");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.2.2");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -114,12 +118,32 @@ function main() {
     firstSandboxProviderConnectorSummary:firstSandboxConnector,
     providerCoverageDashboardSummary:coverageDashboard,
     readOnlySourceTrustScoreSummary:sourceTrust,
-    providerCoverageViewModelSummary:coverageViewModel
+    providerCoverageViewModelSummary:coverageViewModel,
+    sandboxCandidateComparisonWorkbenchSummary:{
+      status:"ready",
+      userFacingSummary:{ title:"Sandbox 候选对比工作台", resultLabel:"候选对比已准备", redacted:true },
+      candidateRows:[{ candidateId:"candidate_a", sourceName:"Official Fixture", confidenceLabel:"high", recommendationLabel:"review_first", caveat:"该候选只表示当前 sandbox 证据下优先复核顺序，不代表最低价保证或交易能力。", redacted:true }],
+      recommendationSummary:{ recommendedCandidateId:"candidate_a", recommendationLabel:"review_first", reason:"Official Fixture 在当前 sandbox 证据下更适合先复核。", redacted:true },
+      redacted:true
+    },
+    providerEvidenceComparisonMatrixSummary:{
+      status:"ready",
+      userFacingSummary:{ title:"Provider 证据对比矩阵", resultLabel:"证据矩阵已准备", redacted:true },
+      matrixRows:[{ candidateId:"candidate_a", sourceName:"Official Fixture", completenessLabel:"完整", caveat:"当前矩阵只展示脱敏 sandbox 证据摘要。", redacted:true }],
+      redacted:true
+    },
+    readOnlyHandoffReadinessDrillSummary:{
+      status:"ready",
+      userFacingSummary:{ title:"只读跳转交接演练", resultLabel:"交接演练已准备", redacted:true },
+      rows:[{ rowId:"allowed_parameters", label:"允许参数", value:"origin, destination, date", status:"pass", redacted:true }],
+      redacted:true
+    },
+    sandboxDecisionReviewViewModelSummary:{ status:"ready", title:"Sandbox 候选决策复核", redacted:true }
   });
-  assert.equal(ready.appVersion, "2.2.1");
+  assert.equal(ready.appVersion, "2.2.2");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "只读价格流水线已准备");
-  assert.equal(ready.pipelineStages.length, 27);
+  assert.equal(ready.pipelineStages.length, 31);
   assert.equal(ready.readyOutputs.canShowFixtureCandidatePrices, true);
   assert.equal(ready.readyOutputs.canShowFixtureReplay, true);
   assert.equal(ready.readyOutputs.canShowOfficialAnchor, true);
@@ -139,9 +163,14 @@ function main() {
   assert.equal(ready.readOnlyProviderSandboxIntegrationGateSummary.userFacingSummary.title, "只读 Provider Sandbox 接入闸门");
   assert.equal(ready.sandboxPriceCandidateSessionSummary.userFacingSummary.title, "Sandbox 价格候选会话");
   assert.equal(ready.sandboxPriceCandidateResultBoardSummary.title, "Sandbox 价格候选结果");
+  assert.equal(ready.sandboxCandidateComparisonWorkbenchSummary.userFacingSummary.title, "Sandbox 候选对比工作台");
+  assert.equal(ready.providerEvidenceComparisonMatrixSummary.userFacingSummary.title, "Provider 证据对比矩阵");
+  assert.equal(ready.readOnlyHandoffReadinessDrillSummary.userFacingSummary.title, "只读跳转交接演练");
+  assert.equal(ready.sandboxDecisionReviewViewModelSummary.title, "Sandbox 候选决策复核");
   assert.equal(ready.readyOutputs.safeToProceedWithFirstSandboxProviderConnectorImplementation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithFirstReadOnlyProviderSandboxIntegration, true);
   assert.equal(ready.readyOutputs.safeToProceedWithSandboxCandidateUserPreview, true);
+  assert.equal(ready.readyOutputs.safeToProceedWithSandboxDecisionReview, true);
 
   assert.equal(api.buildGlobalShoppingPricePipelineOrchestrator({
     providerCredentialSafetyReview:{ status:"ready" },

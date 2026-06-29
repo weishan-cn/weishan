@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.2.1";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.2.2";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -515,6 +515,12 @@
     return clone({ title:"Provider 覆盖与来源可信度", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Provider 覆盖与来源可信度仍需复核"), sectionLabels:["第一个 Sandbox Provider Connector", "Provider 覆盖看板", "只读来源可信度评分", "只读边界"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前仅展示 fixture/dry-run/sandbox provider 覆盖和来源可信度，不代表全网覆盖、官方背书、真实价格或下单能力。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
+  function formatGlobalShoppingSandboxDecisionReviewSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.sandboxDecisionReviewViewModelSummary || safe.viewModelSummary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Sandbox 候选决策复核", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Sandbox 候选决策复核仍需补充"), sectionLabels:["候选对比", "证据矩阵", "交接演练", "下一步"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前仅用于复核 sandbox 候选，不代表真实价格、全网最低、锁价、可订、付款、下单或出票能力。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -571,6 +577,7 @@
     formatSafetyDisclosureReviewBoardSummary,
     formatRcCopyReviewViewModelSummary,
     formatGlobalShoppingCoverageSummary,
+    formatGlobalShoppingSandboxDecisionReviewSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,
