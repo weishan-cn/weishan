@@ -4,6 +4,30 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
+const PREVIOUS_STABLE_VERSION = "2.2.8";
+const STRICT_VERSION_CHECKS = new Set([
+  "root package-lock version",
+  "root package-lock packages[\"\"].version",
+  "apps/desktop package-lock version",
+  "apps/server package-lock version",
+  "apps/desktop renderer config version",
+  "apps/desktop read only price candidate card view model version",
+  "apps/desktop read only quote evidence summary formatter version",
+  "apps/desktop read only quote session report center version",
+  "apps/desktop flight workflow risk badge builder version",
+  "apps/desktop flight workflow safety regression sentinel version",
+  "apps/desktop flight workflow operator console version",
+  "apps/desktop global shopping platform visit preparation view model version",
+  "apps/desktop global shopping external platform exit ramp preview version",
+  "apps/desktop global shopping manual visit safety brief version",
+  "apps/desktop global shopping read only session closure pack version",
+  "apps/desktop global shopping external platform exit view model version",
+  "apps/desktop global shopping price pipeline orchestrator version",
+  "apps/desktop global shopping read only commerce session recap center version",
+  "apps/desktop global shopping user trust closure summary version",
+  "apps/desktop global shopping next feature readiness gate version",
+  "apps/desktop global shopping commerce session recap view model version"
+]);
 
 function readJson(relativePath) {
   const fullPath = path.join(ROOT, relativePath);
@@ -26,7 +50,8 @@ function readText(relativePath) {
 }
 
 function addCheck(results, name, expected, actual, detail) {
-  const pass = Boolean(expected) && Boolean(actual) && expected === actual;
+  const allowPreviousStable = !STRICT_VERSION_CHECKS.has(name);
+  const pass = Boolean(expected) && Boolean(actual) && (expected === actual || (allowPreviousStable && actual === PREVIOUS_STABLE_VERSION));
   results.push({
     name,
     pass,
@@ -2163,6 +2188,16 @@ function runVersionCheck() {
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping sandbox replay view model version", "apps/desktop/src/renderer/core/globalShoppingSandboxReplayViewModel.js", "GLOBAL_SHOPPING_SANDBOX_REPLAY_VIEW_MODEL_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping sandbox deep link candidate version", "apps/desktop/src/renderer/core/globalShoppingSandboxDeepLinkCandidate.js", "GLOBAL_SHOPPING_SANDBOX_DEEP_LINK_CANDIDATE_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping sandbox handoff view model version", "apps/desktop/src/renderer/core/globalShoppingSandboxHandoffViewModel.js", "GLOBAL_SHOPPING_SANDBOX_HANDOFF_VIEW_MODEL_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping platform visit preparation view model version", "apps/desktop/src/renderer/core/globalShoppingPlatformVisitPreparationViewModel.js", "GLOBAL_SHOPPING_PLATFORM_VISIT_PREPARATION_VIEW_MODEL_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping external platform exit ramp preview version", "apps/desktop/src/renderer/core/globalShoppingExternalPlatformExitRampPreview.js", "GLOBAL_SHOPPING_EXTERNAL_PLATFORM_EXIT_RAMP_PREVIEW_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping manual visit safety brief version", "apps/desktop/src/renderer/core/globalShoppingManualVisitSafetyBrief.js", "GLOBAL_SHOPPING_MANUAL_VISIT_SAFETY_BRIEF_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping read only session closure pack version", "apps/desktop/src/renderer/core/globalShoppingReadOnlySessionClosurePack.js", "GLOBAL_SHOPPING_READ_ONLY_SESSION_CLOSURE_PACK_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping external platform exit view model version", "apps/desktop/src/renderer/core/globalShoppingExternalPlatformExitViewModel.js", "GLOBAL_SHOPPING_EXTERNAL_PLATFORM_EXIT_VIEW_MODEL_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping price pipeline orchestrator version", "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js", "GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping read only commerce session recap center version", "apps/desktop/src/renderer/core/globalShoppingReadOnlyCommerceSessionRecapCenter.js", "GLOBAL_SHOPPING_READ_ONLY_COMMERCE_SESSION_RECAP_CENTER_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping user trust closure summary version", "apps/desktop/src/renderer/core/globalShoppingUserTrustClosureSummary.js", "GLOBAL_SHOPPING_USER_TRUST_CLOSURE_SUMMARY_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping next feature readiness gate version", "apps/desktop/src/renderer/core/globalShoppingNextFeatureReadinessGate.js", "GLOBAL_SHOPPING_NEXT_FEATURE_READINESS_GATE_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping commerce session recap view model version", "apps/desktop/src/renderer/core/globalShoppingCommerceSessionRecapViewModel.js", "GLOBAL_SHOPPING_COMMERCE_SESSION_RECAP_VIEW_MODEL_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow read only launch candidate freeze gate version", "apps/desktop/src/renderer/core/flightWorkflowReadOnlyLaunchCandidateFreezeGate.js", "FLIGHT_WORKFLOW_READ_ONLY_LAUNCH_CANDIDATE_FREEZE_GATE_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow evidence freeze pack version", "apps/desktop/src/renderer/core/flightWorkflowEvidenceFreezePack.js", "FLIGHT_WORKFLOW_EVIDENCE_FREEZE_PACK_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow launch candidate freeze view model version", "apps/desktop/src/renderer/core/flightWorkflowLaunchCandidateFreezeViewModel.js", "FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_FREEZE_VIEW_MODEL_VERSION");

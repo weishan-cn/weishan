@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.2.8";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.2.9";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -195,6 +195,10 @@
       const manualVisitSafetyBriefSummary = obj(safe.manualVisitSafetyBriefSummary);
       const readOnlySessionClosurePackSummary = obj(safe.readOnlySessionClosurePackSummary);
       const externalPlatformExitViewModelSummary = obj(safe.externalPlatformExitViewModelSummary);
+      const readOnlyCommerceSessionRecapCenterSummary = obj(safe.readOnlyCommerceSessionRecapCenterSummary);
+      const userTrustClosureSummarySummary = obj(safe.userTrustClosureSummarySummary);
+      const nextFeatureReadinessGateSummary = obj(safe.nextFeatureReadinessGateSummary);
+      const commerceSessionRecapViewModelSummary = obj(safe.commerceSessionRecapViewModelSummary);
       if (rcCandidateReview.status === "ready_for_review" || safe.safeToStartRcReview === true) badges.push(badge("rc_review_ready", "可以开始 RC 复核", "info"));
       if (rcCandidateReview.status === "evidence_incomplete" || rcEvidenceReview.status === "incomplete") badges.push(badge("rc_review_incomplete", "证据仍需补充", "warning"));
       if (rcCandidateReview.status === "needs_safety_review" || rcEvidenceReview.status === "needs_review") badges.push(badge("rc_review_safety_review", "需要安全复核", "warning"));
@@ -274,6 +278,14 @@
       if (manualVisitSafetyBriefSummary.status) badges.push(badge("manual_visit_safety_brief_no_persist", "安全简报不保存确认", "info"));
       if (readOnlySessionClosurePackSummary.status) badges.push(badge("read_only_session_closure_pack_no_export", "会话关闭包不导出、不下载", "info"));
       if (readOnlySessionClosurePackSummary.status || externalPlatformExitViewModelSummary.status) badges.push(badge("read_only_session_closure_not_contract", "关闭包不是合同、订单或付款授权", "warning"));
+      if (readOnlyCommerceSessionRecapCenterSummary.status === "ready") badges.push(badge("commerce_session_recap_center_ready", "只读全球购会话总结已准备", "info"));
+      if (userTrustClosureSummarySummary.status === "ready") badges.push(badge("user_trust_closure_summary_ready", "用户信任闭环摘要已准备", "info"));
+      if (nextFeatureReadinessGateSummary.status === "ready") badges.push(badge("next_feature_readiness_gate_ready", "下一功能准备闸门已准备", "info"));
+      if (commerceSessionRecapViewModelSummary.status === "ready") badges.push(badge("commerce_session_recap_view_model_ready", "只读全球购会话总结与下一步准备已准备", "info"));
+      if (readOnlyCommerceSessionRecapCenterSummary.status) badges.push(badge("commerce_session_recap_no_export", "会话总结不保存、不导出", "info"));
+      if (userTrustClosureSummarySummary.status) badges.push(badge("user_trust_closure_not_confirmation", "信任闭环不构成平台确认", "warning"));
+      if (nextFeatureReadinessGateSummary.status) badges.push(badge("next_feature_readiness_no_provider", "下一功能闸门不接真实 provider", "info"));
+      if (commerceSessionRecapViewModelSummary.status || nextFeatureReadinessGateSummary.status) badges.push(badge("next_step_human_approval_required", "下一步仍需人工审批", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "ready") badges.push(badge("sandbox_deep_link_candidate_ready", "Sandbox 跳转候选已准备", "info"));
       if (sandboxDeepLinkCandidateSummary.status === "needs_review") badges.push(badge("sandbox_deep_link_candidate_review", "Sandbox 跳转候选仍需复核", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "blocked") badges.push(badge("sandbox_deep_link_candidate_blocked", "Sandbox 跳转候选已阻断", "blocked"));

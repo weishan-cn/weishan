@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.2.8";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.2.9";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -235,6 +235,10 @@
       manualVisitSafetyBriefSummary: stripUnsafe(safe.manualVisitSafetyBriefSummary || null),
       readOnlySessionClosurePackSummary: stripUnsafe(safe.readOnlySessionClosurePackSummary || null),
       externalPlatformExitViewModelSummary: stripUnsafe(safe.externalPlatformExitViewModelSummary || null),
+      readOnlyCommerceSessionRecapCenterSummary: stripUnsafe(safe.readOnlyCommerceSessionRecapCenterSummary || null),
+      userTrustClosureSummarySummary: stripUnsafe(safe.userTrustClosureSummarySummary || null),
+      nextFeatureReadinessGateSummary: stripUnsafe(safe.nextFeatureReadinessGateSummary || null),
+      commerceSessionRecapViewModelSummary: stripUnsafe(safe.commerceSessionRecapViewModelSummary || null),
       legalProviderFixtureSummary: stripUnsafe(safe.legalProviderFixtureSummary || null),
       providerCredentialSafetySummary: stripUnsafe(safe.providerCredentialSafetySummary || null),
       sandboxPriceFeedSummary: stripUnsafe(safe.sandboxPriceFeedSummary || null),
@@ -511,6 +515,10 @@
       manualVisitSafetyBriefSummary: workflow.manualVisitSafetyBriefSummary || safe.manualVisitSafetyBriefSummary ? { title:"手动访问安全简报", line:workflow.manualVisitSafetyBriefSummary && workflow.manualVisitSafetyBriefSummary.userFacingSummary && workflow.manualVisitSafetyBriefSummary.userFacingSummary.resultLabel || safe.manualVisitSafetyBriefSummary && safe.manualVisitSafetyBriefSummary.userFacingSummary && safe.manualVisitSafetyBriefSummary.userFacingSummary.resultLabel || "手动访问安全简报仍需复核", redacted:true } : null,
       readOnlySessionClosurePackSummary: workflow.readOnlySessionClosurePackSummary || safe.readOnlySessionClosurePackSummary ? { title:"只读会话关闭包", line:workflow.readOnlySessionClosurePackSummary && workflow.readOnlySessionClosurePackSummary.userFacingSummary && workflow.readOnlySessionClosurePackSummary.userFacingSummary.resultLabel || safe.readOnlySessionClosurePackSummary && safe.readOnlySessionClosurePackSummary.userFacingSummary && safe.readOnlySessionClosurePackSummary.userFacingSummary.resultLabel || "只读会话关闭包仍需复核", redacted:true } : null,
       externalPlatformExitViewModelSummary: workflow.externalPlatformExitViewModelSummary || safe.externalPlatformExitViewModelSummary ? { title:"外部平台手动访问前最终说明", line:workflow.externalPlatformExitViewModelSummary && workflow.externalPlatformExitViewModelSummary.title || safe.externalPlatformExitViewModelSummary && safe.externalPlatformExitViewModelSummary.title || "外部平台手动访问前最终说明", redacted:true } : null,
+      readOnlyCommerceSessionRecapCenterSummary: workflow.readOnlyCommerceSessionRecapCenterSummary || safe.readOnlyCommerceSessionRecapCenterSummary ? { title:"只读全球购会话总结", line:workflow.readOnlyCommerceSessionRecapCenterSummary && workflow.readOnlyCommerceSessionRecapCenterSummary.userFacingSummary && workflow.readOnlyCommerceSessionRecapCenterSummary.userFacingSummary.resultLabel || safe.readOnlyCommerceSessionRecapCenterSummary && safe.readOnlyCommerceSessionRecapCenterSummary.userFacingSummary && safe.readOnlyCommerceSessionRecapCenterSummary.userFacingSummary.resultLabel || "会话总结仍需复核", redacted:true } : null,
+      userTrustClosureSummarySummary: workflow.userTrustClosureSummarySummary || safe.userTrustClosureSummarySummary ? { title:"用户信任闭环摘要", line:workflow.userTrustClosureSummarySummary && workflow.userTrustClosureSummarySummary.userFacingSummary && workflow.userTrustClosureSummarySummary.userFacingSummary.resultLabel || safe.userTrustClosureSummarySummary && safe.userTrustClosureSummarySummary.userFacingSummary && safe.userTrustClosureSummarySummary.userFacingSummary.resultLabel || "信任闭环摘要仍需复核", redacted:true } : null,
+      nextFeatureReadinessGateSummary: workflow.nextFeatureReadinessGateSummary || safe.nextFeatureReadinessGateSummary ? { title:"下一功能准备闸门", line:workflow.nextFeatureReadinessGateSummary && workflow.nextFeatureReadinessGateSummary.userFacingSummary && workflow.nextFeatureReadinessGateSummary.userFacingSummary.resultLabel || safe.nextFeatureReadinessGateSummary && safe.nextFeatureReadinessGateSummary.userFacingSummary && safe.nextFeatureReadinessGateSummary.userFacingSummary.resultLabel || "下一功能准备仍需复核", redacted:true } : null,
+      commerceSessionRecapViewModelSummary: workflow.commerceSessionRecapViewModelSummary || safe.commerceSessionRecapViewModelSummary ? { title:"只读全球购会话总结与下一步准备", line:workflow.commerceSessionRecapViewModelSummary && workflow.commerceSessionRecapViewModelSummary.title || safe.commerceSessionRecapViewModelSummary && safe.commerceSessionRecapViewModelSummary.title || "只读全球购会话总结与下一步准备", redacted:true } : null,
       firstSandboxProviderConnectorStatus: workflow.firstSandboxProviderConnectorStatus || safe.firstSandboxProviderConnectorStatus || "",
       providerCoverageStatus: workflow.providerCoverageStatus || safe.providerCoverageStatus || "",
       sourceTrustStatus: workflow.sourceTrustStatus || safe.sourceTrustStatus || "",
@@ -546,6 +554,10 @@
       manualVisitSafetyBriefStatus: workflow.manualVisitSafetyBriefStatus || safe.manualVisitSafetyBriefStatus || "",
       readOnlySessionClosureStatus: workflow.readOnlySessionClosureStatus || safe.readOnlySessionClosureStatus || "",
       externalPlatformExitViewModelStatus: workflow.externalPlatformExitViewModelStatus || safe.externalPlatformExitViewModelStatus || "",
+      readOnlyCommerceSessionRecapStatus: workflow.readOnlyCommerceSessionRecapStatus || safe.readOnlyCommerceSessionRecapStatus || "",
+      userTrustClosureSummaryStatus: workflow.userTrustClosureSummaryStatus || safe.userTrustClosureSummaryStatus || "",
+      nextFeatureReadinessGateStatus: workflow.nextFeatureReadinessGateStatus || safe.nextFeatureReadinessGateStatus || "",
+      commerceSessionRecapViewModelStatus: workflow.commerceSessionRecapViewModelStatus || safe.commerceSessionRecapViewModelStatus || "",
       safeToProceedWithSandboxDecisionReview: workflow.safeToProceedWithSandboxDecisionReview === true || safe.safeToProceedWithSandboxDecisionReview === true,
       safeToProceedWithUserFacingHandoffExplanation: workflow.safeToProceedWithUserFacingHandoffExplanation === true || safe.safeToProceedWithUserFacingHandoffExplanation === true,
       safeToProceedWithManualPlatformReview: workflow.safeToProceedWithManualPlatformReview === true || safe.safeToProceedWithManualPlatformReview === true,
@@ -553,6 +565,7 @@
       safeToProceedWithManualExternalPlatformVisitEducation: workflow.safeToProceedWithManualExternalPlatformVisitEducation === true || safe.safeToProceedWithManualExternalPlatformVisitEducation === true,
       safeToProceedWithUserLeavingWeishanEducation: workflow.safeToProceedWithUserLeavingWeishanEducation === true || safe.safeToProceedWithUserLeavingWeishanEducation === true,
       safeToProceedWithReadOnlySessionClosureEducation: workflow.safeToProceedWithReadOnlySessionClosureEducation === true || safe.safeToProceedWithReadOnlySessionClosureEducation === true,
+      safeToProceedWithReadOnlyProviderSandboxPlanning: workflow.safeToProceedWithReadOnlyProviderSandboxPlanning === true || safe.safeToProceedWithReadOnlyProviderSandboxPlanning === true,
       safeToProceedWithFirstReadOnlyProviderSandboxIntegration: workflow.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true || safe.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true,
       safeToProceedWithSandboxCandidateUserPreview: workflow.safeToProceedWithSandboxCandidateUserPreview === true || safe.safeToProceedWithSandboxCandidateUserPreview === true,
       pilotExitCriteriaSummary: pilotExitCriteriaSummary ? { title:"只读试点退出条件", line:pilotExitCriteriaSummary.userFacingSummary && pilotExitCriteriaSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,

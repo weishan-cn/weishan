@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.2.8";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.2.9";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -269,6 +269,10 @@
       platformVerificationProgressTrackerSummary: stripUnsafe(safe.platformVerificationProgressTrackerSummary || null),
       safeNextActionPanelSummary: stripUnsafe(safe.safeNextActionPanelSummary || null),
       userManualReviewViewModelSummary: stripUnsafe(safe.userManualReviewViewModelSummary || null),
+      readOnlyCommerceSessionRecapCenterSummary: stripUnsafe(safe.readOnlyCommerceSessionRecapCenterSummary || null),
+      userTrustClosureSummarySummary: stripUnsafe(safe.userTrustClosureSummarySummary || null),
+      nextFeatureReadinessGateSummary: stripUnsafe(safe.nextFeatureReadinessGateSummary || null),
+      commerceSessionRecapViewModelSummary: stripUnsafe(safe.commerceSessionRecapViewModelSummary || null),
       rcRegressionStatus: safeLine(safe.rcRegressionStatus || ""),
       releaseRiskStatus: safeLine(safe.releaseRiskStatus || ""),
       safeToContinueReleaseCandidate: safe.safeToContinueReleaseCandidate === true,
@@ -312,6 +316,11 @@
       readOnlySessionClosureStatus: safeLine(safe.readOnlySessionClosureStatus || ""),
       externalPlatformExitViewModelStatus: safeLine(safe.externalPlatformExitViewModelStatus || ""),
       safeToProceedWithReadOnlySessionClosureEducation: safe.safeToProceedWithReadOnlySessionClosureEducation === true,
+      readOnlyCommerceSessionRecapStatus: safeLine(safe.readOnlyCommerceSessionRecapStatus || ""),
+      userTrustClosureSummaryStatus: safeLine(safe.userTrustClosureSummaryStatus || ""),
+      nextFeatureReadinessGateStatus: safeLine(safe.nextFeatureReadinessGateStatus || ""),
+      commerceSessionRecapViewModelStatus: safeLine(safe.commerceSessionRecapViewModelStatus || ""),
+      safeToProceedWithReadOnlyProviderSandboxPlanning: safe.safeToProceedWithReadOnlyProviderSandboxPlanning === true,
       pilotOpsStatus: safeLine(safe.pilotOpsStatus || ""),
       nextCohortDecisionStatus: safeLine(safe.nextCohortDecisionStatus || ""),
       pilotOpsPrimaryRisk: stripUnsafe(safe.pilotOpsPrimaryRisk || null),

@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.2.8");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.2.9");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -169,6 +169,25 @@ function main() {
   assert.ok(userManualReviewLabels.includes("安全下一步不打开平台"));
   assert.ok(userManualReviewLabels.includes("下一步不包含购买、下单、付款或出票"));
   assert.ok(userManualReviewLabels.includes("用户必须自行完成最终平台判断"));
+  const recapLabels = api.buildFlightWorkflowRiskBadges({
+    readOnlyCommerceSessionRecapCenterSummary:{ status:"ready", userFacingSummary:{ resultLabel:"只读全球购会话总结已准备", redacted:true } },
+    userTrustClosureSummarySummary:{ status:"ready", userFacingSummary:{ resultLabel:"用户信任闭环摘要已准备", redacted:true } },
+    nextFeatureReadinessGateSummary:{ status:"ready", userFacingSummary:{ resultLabel:"下一功能准备闸门已准备", redacted:true } },
+    commerceSessionRecapViewModelSummary:{ status:"ready", title:"只读全球购会话总结与下一步准备", redacted:true },
+    readOnlyCommerceSessionRecapStatus:"ready",
+    userTrustClosureSummaryStatus:"ready",
+    nextFeatureReadinessGateStatus:"ready",
+    commerceSessionRecapViewModelStatus:"ready",
+    safeToProceedWithReadOnlyProviderSandboxPlanning:true
+  }).badges.map((item) => item.label);
+  assert.ok(recapLabels.includes("只读全球购会话总结已准备"));
+  assert.ok(recapLabels.includes("用户信任闭环摘要已准备"));
+  assert.ok(recapLabels.includes("下一功能准备闸门已准备"));
+  assert.ok(recapLabels.includes("只读全球购会话总结与下一步准备已准备"));
+  assert.ok(recapLabels.includes("会话总结不保存、不导出"));
+  assert.ok(recapLabels.includes("信任闭环不构成平台确认"));
+  assert.ok(recapLabels.includes("下一功能闸门不接真实 provider"));
+  assert.ok(recapLabels.includes("下一步仍需人工审批"));
   const exitLabels = api.buildFlightWorkflowRiskBadges({
     externalPlatformExitRampPreviewSummary:{ status:"ready" },
     manualVisitSafetyBriefSummary:{ status:"ready" },
