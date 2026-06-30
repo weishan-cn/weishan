@@ -23,7 +23,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderPilotGovernanceViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderPilotGovernanceViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_PILOT_GOVERNANCE_VIEW_MODEL_VERSION, "2.3.6");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_PILOT_GOVERNANCE_VIEW_MODEL_VERSION, "2.3.7");
 
   const ready = api.buildGlobalShoppingProviderPilotGovernanceViewModel({
     humanControlledSandboxProviderPilotPlannerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Pilot 计划器已准备", redacted:true }, rows:[{ rowId:"planner", label:"Pilot 计划", value:"Pilot 计划器已准备", status:"pass", redacted:true }] },

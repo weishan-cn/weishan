@@ -9722,7 +9722,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.3.6 provider pilot governance stays local and bounded @commerce-smoke", async () => {
+  test("v2.3.7 provider governance console stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9730,21 +9730,27 @@ test.describe.serial("commerce agent workbench", () => {
       window.WeishanGlobalShoppingProviderKillSwitchDrill &&
       window.WeishanGlobalShoppingComplianceEvidencePack &&
       window.WeishanGlobalShoppingProviderPilotGovernanceViewModel &&
+      window.WeishanGlobalShoppingProviderGovernanceConsole &&
+      window.WeishanGlobalShoppingProviderOperatorReviewLoop &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
-    const v236 = await page.evaluate(() => {
+    const v237 = await page.evaluate(() => {
       const cardApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
       const host = document.createElement("section");
-      host.setAttribute("data-commerce-v236-render-smoke", "true");
+      host.setAttribute("data-commerce-v237-render-smoke", "true");
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml({
         humanControlledSandboxProviderPilotPlannerSummary:{ status:"ready", userFacingSummary:{ title:"人工控制 Sandbox Provider Pilot 计划器", resultLabel:"Pilot 计划器已准备", redacted:true }, redacted:true },
         providerKillSwitchDrillSummary:{ status:"ready", userFacingSummary:{ title:"Provider Kill Switch 演练", resultLabel:"Kill Switch 演练已准备", redacted:true }, redacted:true },
         complianceEvidencePackSummary:{ status:"ready", userFacingSummary:{ title:"合规证据包", resultLabel:"合规证据包已准备", redacted:true }, redacted:true },
         providerPilotGovernanceViewModelSummary:{ status:"ready", title:"Provider Pilot 治理与合规证据", redacted:true },
+        providerGovernanceConsoleSummary:{ consoleStatus:"ready_for_human_approval", status:"ready_for_human_approval", userVisibleSummary:{ title:"Provider Governance Console", resultLabel:"可进入人工最终确认", redacted:true }, allowedNextActions:["request_final_human_approval"], blockedActions:[], redacted:true },
+        providerOperatorReviewLoopSummary:{ status:"ready_for_human_approval", userFacingSummary:{ title:"Operator Review Loop", resultLabel:"等待人工最终确认", redacted:true }, redacted:true },
         humanControlledSandboxProviderPilotPlannerStatus:"ready",
         providerKillSwitchDrillStatus:"ready",
         complianceEvidencePackStatus:"ready",
         providerPilotGovernanceViewModelStatus:"ready",
+        providerGovernanceConsoleStatus:"ready_for_human_approval",
+        providerOperatorReviewLoopStatus:"ready_for_human_approval",
         safeToProceedWithHumanAuditSandboxPilotReadinessReview:true
       });
       const section = host.querySelector("[data-commerce-global-shopping-provider-pilot-governance='true']");
@@ -9761,26 +9767,27 @@ test.describe.serial("commerce agent workbench", () => {
         evidenceButtonCount:host.querySelectorAll("[data-commerce-global-shopping-compliance-evidence-pack-show]").length
       };
     });
-    expect(v236.sectionCount).toBe(1);
-    expect(v236.governanceButtonCount).toBe(1);
-    expect(v236.plannerButtonCount).toBe(1);
-    expect(v236.drillButtonCount).toBe(1);
-    expect(v236.evidenceButtonCount).toBe(1);
-    expect(v236.text).toContain("Provider Pilot 治理与合规证据");
-    expect(v236.text).toContain("人工控制 Sandbox Provider Pilot 计划器");
-    expect(v236.text).toContain("Provider Kill Switch 演练");
-    expect(v236.text).toContain("合规证据包");
-    expect(v236.text).toContain("Pilot 计划");
-    expect(v236.text).toContain("Kill Switch");
-    expect(v236.text).toContain("合规证据");
-    expect(v236.text).toContain("Pilot 计划器已准备");
-    expect(v236.text).toContain("Kill Switch 演练已准备");
-    expect(v236.text).toContain("合规证据包已准备");
-    expect(v236.text).toContain("当前只展示 provider pilot 治理和合规证据");
-    expect(v236.text).toContain("不接真实 provider，不读取密钥，不联网，不生成 endpoint，不执行回滚，不导出文件");
-    expect(v236.text).toContain("Human audit 仍需人工复核");
-    expect(v236.sectionText).not.toMatch(/立即购买|直接下单|一键下单|一键出票|授权付款|创建订单|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)禁用真实 provider|paymentUrl|orderUrl|checkoutUrl|bookingUrl|token|key|secret/);
-    expect(v236.sectionHtml).not.toMatch(/https?:\/\//i);
+    expect(v237.sectionCount).toBe(1);
+    expect(v237.governanceButtonCount).toBe(1);
+    expect(v237.plannerButtonCount).toBe(1);
+    expect(v237.drillButtonCount).toBe(1);
+    expect(v237.evidenceButtonCount).toBe(1);
+    expect(v237.text).toContain("Provider Governance Console + Operator Review Loop");
+    expect(v237.text).toContain("Provider Governance Console");
+    expect(v237.text).toContain("Operator Review Loop");
+    expect(v237.text).toContain("人工控制 Sandbox Provider Pilot 计划器");
+    expect(v237.text).toContain("Provider Kill Switch 演练");
+    expect(v237.text).toContain("合规证据包");
+    expect(v237.text).toContain("可进入人工最终确认");
+    expect(v237.text).toContain("等待人工最终确认");
+    expect(v237.text).toContain("allowed next action 列表");
+    expect(v237.text).toContain("blocked action 列表");
+    expect(v237.text).toContain("operator review checklist");
+    expect(v237.text).toContain("当前只展示 provider pilot 治理和运营人工复核循环");
+    expect(v237.text).toContain("不接真实 provider，不读取密钥，不联网，不生成 endpoint，不执行回滚，不导出文件");
+    expect(v237.text).toContain("Human audit 仍需人工复核");
+    expect(v237.sectionText).not.toMatch(/立即购买|直接下单|一键下单|一键出票|授权付款|创建订单|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)禁用真实 provider|paymentUrl|orderUrl|checkoutUrl|bookingUrl|token|key|secret/);
+    expect(v237.sectionHtml).not.toMatch(/https?:\/\//i);
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 

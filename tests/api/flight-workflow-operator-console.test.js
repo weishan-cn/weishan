@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js", "apps/desktop/src/renderer/core/flightWorkflowOperatorConsole.js"]);
   const api = windowRef.WeishanFlightWorkflowOperatorConsole;
-  assert.equal(api.FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION, "2.3.6");
+  assert.equal(api.FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION, "2.3.7");
   const base = { workflowId:"wf1", workflowStateSummary:{ workflowId:"wf1" }, topCandidates:[{ providerName:"sandbox", bookingUrl:null }], selectedCandidate:{ providerName:"sandbox" }, auditReviewSummary:{ status:"ready", auditHealth:{ overall:"pass" } }, humanReviewChecklistSummary:{ status:"ready" }, finalSafeHandoffPacketSummary:{ status:"ready" }, handoffPacketPolicyDecision:{ status:"allowed" }, safetyRegressionSummary:{ status:"pass", checks:[] }, eventLedgerSummary:{ recentEvents:[{ eventType:"handoff_packet_prepared", status:"ready" }] }, blockedActions:[] };
   const ready = api.buildFlightWorkflowOperatorConsole(base);
   assert.equal(ready.consoleName, "flight_workflow_operator_console_v1");
@@ -37,11 +37,16 @@ function main() {
     providerKillSwitchDrillSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Kill Switch 演练已准备", redacted:true } },
     complianceEvidencePackSummary:{ status:"ready", userFacingSummary:{ resultLabel:"合规证据包已准备", redacted:true } },
     providerPilotGovernanceViewModelSummary:{ status:"ready", title:"Provider Pilot 治理与合规证据", redacted:true },
+    providerGovernanceConsoleSummary:{ consoleStatus:"ready_for_human_approval", userVisibleSummary:{ resultLabel:"可进入人工最终确认", redacted:true }, allowedNextActions:["request_final_human_approval"], blockedActions:[], redacted:true },
+    providerOperatorReviewLoopSummary:{ status:"ready_for_human_approval", userFacingSummary:{ resultLabel:"等待人工最终确认", redacted:true }, redacted:true },
     safeToProceedWithHumanAuditSandboxPilotReadinessReview:true
   })).sections.find((section) => section.sectionId === "global_shopping_provider_pilot_governance");
   assert.ok(governanceRows.rows.some((item) => item.label === "Pilot 计划器"));
   assert.ok(governanceRows.rows.some((item) => item.label === "Kill Switch"));
   assert.ok(governanceRows.rows.some((item) => item.label === "合规证据包"));
+  assert.ok(governanceRows.rows.some((item) => item.label === "治理控制台" && item.value === "可进入人工最终确认"));
+  assert.ok(governanceRows.rows.some((item) => item.label === "运营复核循环" && item.value === "等待人工最终确认"));
+  assert.ok(governanceRows.rows.some((item) => item.label === "允许下一步" && item.value === "request_final_human_approval"));
   const handoffRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {
     externalDeepLinkSafetySummary:{ status:"safe", userFacingSummary:{ resultLabel:"跳转安全结构已准备" } },
     searchParameterPrefillSummary:{ status:"safe", userFacingSummary:{ resultLabel:"预填边界安全" } },

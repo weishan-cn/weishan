@@ -8200,7 +8200,7 @@
         event.preventDefault();
         const panel = globalShoppingProviderPilotGovernanceButton.closest("[data-commerce-global-shopping-provider-pilot-governance]") || globalShoppingProviderPilotGovernanceButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
         const output = panel.querySelector("[data-commerce-global-shopping-provider-pilot-governance-output]") || panel;
-        output.innerHTML = '<p>Provider Pilot 治理与合规证据</p><p>治理视图已准备</p><p>当前只展示 provider pilot 治理和合规证据</p><p>不接真实 provider，不读取密钥，不联网，不生成 endpoint，不执行回滚，不导出文件</p><p>Human audit 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        output.innerHTML = '<p>Provider Governance Console</p><p>治理控制台已准备</p><p>Operator Review Loop</p><p>运营复核循环已准备</p><p>allowed next action: review_operator_checklist</p><p>blocked action: none</p><p>operator review checklist 已生成</p><p>当前只展示 provider pilot 治理和运营人工复核循环</p><p>不接真实 provider，不读取密钥，不联网，不生成 endpoint，不执行回滚，不导出文件</p><p>Human audit 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
         showCommercePlatformTemplateFeedback("已显示治理视图", false);
         return;
       }

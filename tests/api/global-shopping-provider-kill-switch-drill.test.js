@@ -24,7 +24,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderKillSwitchDrill.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderKillSwitchDrill;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_KILL_SWITCH_DRILL_VERSION, "2.3.6");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_KILL_SWITCH_DRILL_VERSION, "2.3.7");
 
   const ready = api.buildGlobalShoppingProviderKillSwitchDrill({
     humanControlledSandboxProviderPilotPlannerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Pilot 计划器已准备", redacted:true } },

@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.3.6");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.3.7");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -254,6 +254,18 @@ function main() {
   assert.ok(pilotControlLabels.includes("事故演练不触发真实告警或回滚"));
   assert.ok(pilotControlLabels.includes("阻断矩阵不修改运行配置"));
   assert.ok(pilotControlLabels.includes("Human-controlled pilot 仍需人工审批"));
+  const governanceLabels = api.buildFlightWorkflowRiskBadges({
+    humanControlledSandboxProviderPilotPlannerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Pilot 计划器已准备", redacted:true } },
+    providerKillSwitchDrillSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Kill Switch 演练已准备", redacted:true } },
+    complianceEvidencePackSummary:{ status:"ready", userFacingSummary:{ resultLabel:"合规证据包已准备", redacted:true } },
+    providerGovernanceConsoleSummary:{ consoleStatus:"ready_for_human_approval", userVisibleSummary:{ resultLabel:"可进入人工最终确认", redacted:true }, redacted:true },
+    providerOperatorReviewLoopSummary:{ status:"blocked", userFacingSummary:{ resultLabel:"当前不能继续", redacted:true }, redacted:true },
+    providerGovernanceConsoleStatus:"ready_for_human_approval",
+    providerOperatorReviewLoopStatus:"blocked",
+    safeToProceedWithHumanAuditSandboxPilotReadinessReview:true
+  }).badges.map((item) => item.label);
+  assert.ok(governanceLabels.includes("Provider Governance Console 等待人工最终确认"));
+  assert.ok(governanceLabels.includes("运营复核循环要求暂停"));
   assert.ok(mockRuntimeLabels.includes("Vault 边界合同已准备"));
   assert.ok(mockRuntimeLabels.includes("法务审批流程板已准备"));
   assert.ok(mockRuntimeLabels.includes("Mock Runtime 不接真实 provider"));

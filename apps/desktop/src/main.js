@@ -1,5 +1,6 @@
 const { app, BrowserWindow, Menu, nativeImage, ipcMain, shell, dialog } = require("electron");
 const path = require("path");
+const { pathToFileURL } = require("url");
 const fs = require("fs");
 const { spawn } = require("child_process");
 const { registerSecureStorageHandlers } = require("./main/secureStorage");
@@ -535,7 +536,12 @@ function createWindow() {
   });
   win.once("ready-to-show", () => win.show());
   try { win.webContents.session.clearCache().catch(() => {}); } catch (_) {}
-  win.loadFile(path.join(__dirname, "index.html"), { query: { v: String(Date.now()) } });
+  const rendererEntry = app.isPackaged
+    ? path.join(app.getAppPath(), "src", "index.html")
+    : path.join(__dirname, "index.html");
+  const rendererUrl = pathToFileURL(rendererEntry);
+  rendererUrl.searchParams.set("v", String(Date.now()));
+  win.loadURL(rendererUrl.toString());
 }
 
 app.whenReady().then(createWindow);

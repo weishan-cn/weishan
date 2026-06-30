@@ -80,6 +80,12 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderContractReplayHarness.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderLaunchReadinessBoard.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderLaunchReadinessViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingHumanControlledSandboxProviderPilotPlanner.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderKillSwitchDrill.js",
+    "apps/desktop/src/renderer/core/globalShoppingComplianceEvidencePack.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderPilotGovernanceViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderGovernanceConsole.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderOperatorReviewLoop.js",
     "apps/desktop/src/renderer/core/globalShoppingCommerceSessionRecapViewModel.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteSessionReportCenter.js",
     "apps/desktop/src/renderer/core/flightWorkflowReadOnlyUserConsentFlow.js",
@@ -88,13 +94,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.3.6");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.3.7");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "2.3.6");
+  assert.equal(ready.appVersion, "2.3.7");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -282,6 +288,12 @@ function main() {
     providerContractReplayHarnessSummary:{ status:"ready", userFacingSummary:{ title:"Provider 合同回放器", resultLabel:"Provider 合同回放器已准备", redacted:true }, redacted:true },
     providerLaunchReadinessBoardSummary:{ status:"ready", userFacingSummary:{ title:"Provider 启动准备总闸门", resultLabel:"Provider 启动准备总闸门已准备", redacted:true }, redacted:true },
     providerLaunchReadinessViewModelSummary:{ status:"ready", title:"Provider 启动准备与合同回放", userFacingSummary:{ title:"Provider 启动准备与合同回放", resultLabel:"Provider 启动准备与合同回放已准备", redacted:true }, redacted:true },
+    humanControlledSandboxProviderPilotPlannerSummary:{ status:"ready", userFacingSummary:{ title:"人工控制 Sandbox Provider Pilot 计划器", resultLabel:"Pilot 计划器已准备", redacted:true }, redacted:true },
+    providerKillSwitchDrillSummary:{ status:"ready", userFacingSummary:{ title:"Provider Kill Switch 演练", resultLabel:"Kill Switch 演练已准备", redacted:true }, redacted:true },
+    complianceEvidencePackSummary:{ status:"ready", userFacingSummary:{ title:"合规证据包", resultLabel:"合规证据包已准备", redacted:true }, redacted:true },
+    providerPilotGovernanceViewModelSummary:{ status:"ready", title:"Provider Pilot 治理与合规证据", userFacingSummary:{ title:"Provider Pilot 治理与合规证据", resultLabel:"治理视图已准备", redacted:true }, redacted:true },
+    providerGovernanceConsoleSummary:{ consoleStatus:"ready_for_human_approval", status:"ready_for_human_approval", userVisibleSummary:{ title:"Provider Governance Console", resultLabel:"可进入人工最终确认", redacted:true }, allowedNextActions:["request_final_human_approval"], blockedActions:[], redacted:true },
+    providerOperatorReviewLoopSummary:{ status:"ready_for_human_approval", userFacingSummary:{ title:"Operator Review Loop", resultLabel:"等待人工最终确认", redacted:true }, redacted:true },
     commerceSessionRecapViewModelSummary:{ status:"ready", title:"只读全球购会话总结与下一步准备", userFacingSummary:{ title:"只读全球购会话总结与下一步准备", resultLabel:"只读全球购会话总结与下一步准备已准备", redacted:true }, redacted:true },
     globalShoppingGoalStatus:"aligned",
     jumpBoundaryStatus:"safe",
@@ -361,7 +373,8 @@ function main() {
     safeToProceedWithReadOnlyProviderSandboxPlanning:true,
     safeToProceedWithProviderSandboxContractImplementation:true,
     safeToProceedWithMockAdapterRuntimeHardening:true,
-    safeToProceedWithHumanProviderSandboxApproval:true
+    safeToProceedWithHumanProviderSandboxApproval:true,
+    safeToProceedWithHumanAuditSandboxPilotReadinessReview:true
   });
   assert.equal(globalReady.userFacingSummary.globalShoppingProductGoalSummary.title, "全球购产品目标");
   assert.equal(globalReady.userFacingSummary.jumpToPlatformBoundarySummary.title, "跳转至平台自行下单边界");
@@ -421,6 +434,8 @@ function main() {
   assert.equal(globalReady.userFacingSummary.providerContractReplayHarnessSummary.title, "Provider 合同回放器");
   assert.equal(globalReady.userFacingSummary.providerLaunchReadinessBoardSummary.title, "Provider 启动准备总闸门");
   assert.equal(globalReady.userFacingSummary.providerLaunchReadinessViewModelSummary.title, "Provider 启动准备与合同回放");
+  assert.equal(globalReady.userFacingSummary.providerGovernanceConsoleSummary.title, "Provider Governance Console");
+  assert.equal(globalReady.userFacingSummary.providerOperatorReviewLoopSummary.title, "Operator Review Loop");
   assert.equal(globalReady.userFacingSummary.commerceSessionRecapViewModelSummary.title, "只读全球购会话总结与下一步准备");
   assert.equal(globalReady.userFacingSummary.globalShoppingGoalStatus, "aligned");
   assert.equal(globalReady.userFacingSummary.jumpBoundaryStatus, "safe");
