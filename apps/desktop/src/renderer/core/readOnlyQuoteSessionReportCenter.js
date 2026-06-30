@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.3.0";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.3.1";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -239,6 +239,10 @@
       userTrustClosureSummarySummary: stripUnsafe(safe.userTrustClosureSummarySummary || null),
       nextFeatureReadinessGateSummary: stripUnsafe(safe.nextFeatureReadinessGateSummary || null),
       commerceSessionRecapViewModelSummary: stripUnsafe(safe.commerceSessionRecapViewModelSummary || null),
+      providerLegalReviewDossierSummary: stripUnsafe(safe.providerLegalReviewDossierSummary || null),
+      credentialVaultInterfaceStubSummary: stripUnsafe(safe.credentialVaultInterfaceStubSummary || null),
+      sandboxAdapterContractTestbedSummary: stripUnsafe(safe.sandboxAdapterContractTestbedSummary || null),
+      providerIntegrationPrepViewModelSummary: stripUnsafe(safe.providerIntegrationPrepViewModelSummary || null),
       legalProviderFixtureSummary: stripUnsafe(safe.legalProviderFixtureSummary || null),
       providerCredentialSafetySummary: stripUnsafe(safe.providerCredentialSafetySummary || null),
       sandboxPriceFeedSummary: stripUnsafe(safe.sandboxPriceFeedSummary || null),
@@ -519,6 +523,10 @@
       userTrustClosureSummarySummary: workflow.userTrustClosureSummarySummary || safe.userTrustClosureSummarySummary ? { title:"用户信任闭环摘要", line:workflow.userTrustClosureSummarySummary && workflow.userTrustClosureSummarySummary.userFacingSummary && workflow.userTrustClosureSummarySummary.userFacingSummary.resultLabel || safe.userTrustClosureSummarySummary && safe.userTrustClosureSummarySummary.userFacingSummary && safe.userTrustClosureSummarySummary.userFacingSummary.resultLabel || "信任闭环摘要仍需复核", redacted:true } : null,
       nextFeatureReadinessGateSummary: workflow.nextFeatureReadinessGateSummary || safe.nextFeatureReadinessGateSummary ? { title:"下一功能准备闸门", line:workflow.nextFeatureReadinessGateSummary && workflow.nextFeatureReadinessGateSummary.userFacingSummary && workflow.nextFeatureReadinessGateSummary.userFacingSummary.resultLabel || safe.nextFeatureReadinessGateSummary && safe.nextFeatureReadinessGateSummary.userFacingSummary && safe.nextFeatureReadinessGateSummary.userFacingSummary.resultLabel || "下一功能准备仍需复核", redacted:true } : null,
       commerceSessionRecapViewModelSummary: workflow.commerceSessionRecapViewModelSummary || safe.commerceSessionRecapViewModelSummary ? { title:"只读全球购会话总结与下一步准备", line:workflow.commerceSessionRecapViewModelSummary && workflow.commerceSessionRecapViewModelSummary.title || safe.commerceSessionRecapViewModelSummary && safe.commerceSessionRecapViewModelSummary.title || "只读全球购会话总结与下一步准备", redacted:true } : null,
+      providerLegalReviewDossierSummary: workflow.providerLegalReviewDossierSummary || safe.providerLegalReviewDossierSummary ? { title:"Provider 法务审查档案", line:workflow.providerLegalReviewDossierSummary && workflow.providerLegalReviewDossierSummary.userFacingSummary && workflow.providerLegalReviewDossierSummary.userFacingSummary.resultLabel || safe.providerLegalReviewDossierSummary && safe.providerLegalReviewDossierSummary.userFacingSummary && safe.providerLegalReviewDossierSummary.userFacingSummary.resultLabel || "法务审查仍需复核", redacted:true } : null,
+      credentialVaultInterfaceStubSummary: workflow.credentialVaultInterfaceStubSummary || safe.credentialVaultInterfaceStubSummary ? { title:"凭证保险箱接口桩", line:workflow.credentialVaultInterfaceStubSummary && workflow.credentialVaultInterfaceStubSummary.userFacingSummary && workflow.credentialVaultInterfaceStubSummary.userFacingSummary.resultLabel || safe.credentialVaultInterfaceStubSummary && safe.credentialVaultInterfaceStubSummary.userFacingSummary && safe.credentialVaultInterfaceStubSummary.userFacingSummary.resultLabel || "凭证接口桩仍需复核", redacted:true } : null,
+      sandboxAdapterContractTestbedSummary: workflow.sandboxAdapterContractTestbedSummary || safe.sandboxAdapterContractTestbedSummary ? { title:"Sandbox Adapter 合同测试台", line:workflow.sandboxAdapterContractTestbedSummary && workflow.sandboxAdapterContractTestbedSummary.userFacingSummary && workflow.sandboxAdapterContractTestbedSummary.userFacingSummary.resultLabel || safe.sandboxAdapterContractTestbedSummary && safe.sandboxAdapterContractTestbedSummary.userFacingSummary && safe.sandboxAdapterContractTestbedSummary.userFacingSummary.resultLabel || "Adapter 合同测试仍需复核", redacted:true } : null,
+      providerIntegrationPrepViewModelSummary: workflow.providerIntegrationPrepViewModelSummary || safe.providerIntegrationPrepViewModelSummary ? { title:"Provider 接入前准备", line:workflow.providerIntegrationPrepViewModelSummary && workflow.providerIntegrationPrepViewModelSummary.title || safe.providerIntegrationPrepViewModelSummary && safe.providerIntegrationPrepViewModelSummary.title || "Provider 接入前准备", redacted:true } : null,
       firstSandboxProviderConnectorStatus: workflow.firstSandboxProviderConnectorStatus || safe.firstSandboxProviderConnectorStatus || "",
       providerCoverageStatus: workflow.providerCoverageStatus || safe.providerCoverageStatus || "",
       sourceTrustStatus: workflow.sourceTrustStatus || safe.sourceTrustStatus || "",
@@ -558,6 +566,10 @@
       userTrustClosureSummaryStatus: workflow.userTrustClosureSummaryStatus || safe.userTrustClosureSummaryStatus || "",
       nextFeatureReadinessGateStatus: workflow.nextFeatureReadinessGateStatus || safe.nextFeatureReadinessGateStatus || "",
       commerceSessionRecapViewModelStatus: workflow.commerceSessionRecapViewModelStatus || safe.commerceSessionRecapViewModelStatus || "",
+      providerLegalReviewStatus: workflow.providerLegalReviewStatus || safe.providerLegalReviewStatus || "",
+      credentialVaultInterfaceStatus: workflow.credentialVaultInterfaceStatus || safe.credentialVaultInterfaceStatus || "",
+      sandboxAdapterContractStatus: workflow.sandboxAdapterContractStatus || safe.sandboxAdapterContractStatus || "",
+      providerIntegrationPrepViewModelStatus: workflow.providerIntegrationPrepViewModelStatus || safe.providerIntegrationPrepViewModelStatus || "",
       safeToProceedWithSandboxDecisionReview: workflow.safeToProceedWithSandboxDecisionReview === true || safe.safeToProceedWithSandboxDecisionReview === true,
       safeToProceedWithUserFacingHandoffExplanation: workflow.safeToProceedWithUserFacingHandoffExplanation === true || safe.safeToProceedWithUserFacingHandoffExplanation === true,
       safeToProceedWithManualPlatformReview: workflow.safeToProceedWithManualPlatformReview === true || safe.safeToProceedWithManualPlatformReview === true,
@@ -566,6 +578,7 @@
       safeToProceedWithUserLeavingWeishanEducation: workflow.safeToProceedWithUserLeavingWeishanEducation === true || safe.safeToProceedWithUserLeavingWeishanEducation === true,
       safeToProceedWithReadOnlySessionClosureEducation: workflow.safeToProceedWithReadOnlySessionClosureEducation === true || safe.safeToProceedWithReadOnlySessionClosureEducation === true,
       safeToProceedWithReadOnlyProviderSandboxPlanning: workflow.safeToProceedWithReadOnlyProviderSandboxPlanning === true || safe.safeToProceedWithReadOnlyProviderSandboxPlanning === true,
+      safeToProceedWithProviderSandboxContractImplementation: workflow.safeToProceedWithProviderSandboxContractImplementation === true || safe.safeToProceedWithProviderSandboxContractImplementation === true,
       safeToProceedWithFirstReadOnlyProviderSandboxIntegration: workflow.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true || safe.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true,
       safeToProceedWithSandboxCandidateUserPreview: workflow.safeToProceedWithSandboxCandidateUserPreview === true || safe.safeToProceedWithSandboxCandidateUserPreview === true,
       pilotExitCriteriaSummary: pilotExitCriteriaSummary ? { title:"只读试点退出条件", line:pilotExitCriteriaSummary.userFacingSummary && pilotExitCriteriaSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,

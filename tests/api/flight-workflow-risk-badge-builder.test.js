@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.3.0");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.3.1");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -188,6 +188,24 @@ function main() {
   assert.ok(recapLabels.includes("信任闭环不构成平台确认"));
   assert.ok(recapLabels.includes("下一功能闸门不接真实 provider"));
   assert.ok(recapLabels.includes("下一步仍需人工审批"));
+  const providerPrepLabels = api.buildFlightWorkflowRiskBadges({
+    providerLegalReviewDossierSummary:{ status:"ready", userFacingSummary:{ resultLabel:"法务审查档案已准备", redacted:true } },
+    credentialVaultInterfaceStubSummary:{ status:"ready", userFacingSummary:{ resultLabel:"凭证接口桩已准备", redacted:true } },
+    sandboxAdapterContractTestbedSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Adapter 合同测试台已准备", redacted:true } },
+    providerIntegrationPrepViewModelSummary:{ status:"ready", title:"Provider 接入前准备", redacted:true },
+    providerLegalReviewStatus:"ready",
+    credentialVaultInterfaceStatus:"ready",
+    sandboxAdapterContractStatus:"ready",
+    providerIntegrationPrepViewModelStatus:"ready",
+    safeToProceedWithProviderSandboxContractImplementation:true
+  }).badges.map((item) => item.label);
+  assert.ok(providerPrepLabels.includes("Provider 法务审查档案已准备"));
+  assert.ok(providerPrepLabels.includes("凭证保险箱接口桩已准备"));
+  assert.ok(providerPrepLabels.includes("Sandbox Adapter 合同测试台已准备"));
+  assert.ok(providerPrepLabels.includes("法务审查不代表已合作或已授权"));
+  assert.ok(providerPrepLabels.includes("凭证接口桩不读取真实密钥"));
+  assert.ok(providerPrepLabels.includes("Adapter 合同测试不请求真实 provider"));
+  assert.ok(providerPrepLabels.includes("下一步仍需人工安全审批"));
   const exitLabels = api.buildFlightWorkflowRiskBadges({
     externalPlatformExitRampPreviewSummary:{ status:"ready" },
     manualVisitSafetyBriefSummary:{ status:"ready" },

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.0";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.1";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -203,6 +203,10 @@
       const credentialIsolationReadinessBoardSummary = obj(safe.credentialIsolationReadinessBoardSummary);
       const providerContractSelectionBoardSummary = obj(safe.providerContractSelectionBoardSummary);
       const sandboxProviderPlanningViewModelSummary = obj(safe.sandboxProviderPlanningViewModelSummary);
+      const providerLegalReviewDossierSummary = obj(safe.providerLegalReviewDossierSummary);
+      const credentialVaultInterfaceStubSummary = obj(safe.credentialVaultInterfaceStubSummary);
+      const sandboxAdapterContractTestbedSummary = obj(safe.sandboxAdapterContractTestbedSummary);
+      const providerIntegrationPrepViewModelSummary = obj(safe.providerIntegrationPrepViewModelSummary);
       if (rcCandidateReview.status === "ready_for_review" || safe.safeToStartRcReview === true) badges.push(badge("rc_review_ready", "可以开始 RC 复核", "info"));
       if (rcCandidateReview.status === "evidence_incomplete" || rcEvidenceReview.status === "incomplete") badges.push(badge("rc_review_incomplete", "证据仍需补充", "warning"));
       if (rcCandidateReview.status === "needs_safety_review" || rcEvidenceReview.status === "needs_review") badges.push(badge("rc_review_safety_review", "需要安全复核", "warning"));
@@ -297,6 +301,13 @@
       if (readOnlySandboxProviderIntegrationBlueprintSummary.status || credentialIsolationReadinessBoardSummary.status || providerContractSelectionBoardSummary.status || sandboxProviderPlanningViewModelSummary.status) badges.push(badge("sandbox_provider_credentials_boundary", "凭证隔离不读取真实密钥", "info"));
       if (readOnlySandboxProviderIntegrationBlueprintSummary.status || credentialIsolationReadinessBoardSummary.status || providerContractSelectionBoardSummary.status || sandboxProviderPlanningViewModelSummary.status) badges.push(badge("sandbox_provider_contract_boundary", "Provider 选择不代表已合作或已授权", "warning"));
       if (safe.safeToProceedWithProviderLegalAndCredentialReview === true) badges.push(badge("sandbox_provider_human_review", "下一步仍需人工法务与安全审批", "warning"));
+      if (providerLegalReviewDossierSummary.status === "ready" || safe.providerLegalReviewStatus === "ready") badges.push(badge("provider_legal_review_ready", "Provider 法务审查档案已准备", "info"));
+      if (credentialVaultInterfaceStubSummary.status === "ready" || safe.credentialVaultInterfaceStatus === "ready") badges.push(badge("credential_vault_stub_ready", "凭证保险箱接口桩已准备", "info"));
+      if (sandboxAdapterContractTestbedSummary.status === "ready" || safe.sandboxAdapterContractStatus === "ready") badges.push(badge("sandbox_adapter_contract_ready", "Sandbox Adapter 合同测试台已准备", "info"));
+      if (providerLegalReviewDossierSummary.status || providerIntegrationPrepViewModelSummary.status) badges.push(badge("provider_legal_review_boundary", "法务审查不代表已合作或已授权", "warning"));
+      if (credentialVaultInterfaceStubSummary.status || providerIntegrationPrepViewModelSummary.status) badges.push(badge("credential_vault_stub_boundary", "凭证接口桩不读取真实密钥", "info"));
+      if (sandboxAdapterContractTestbedSummary.status || providerIntegrationPrepViewModelSummary.status) badges.push(badge("sandbox_adapter_contract_boundary", "Adapter 合同测试不请求真实 provider", "info"));
+      if (safe.safeToProceedWithProviderSandboxContractImplementation === true) badges.push(badge("provider_integration_prep_human_review", "下一步仍需人工安全审批", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "ready") badges.push(badge("sandbox_deep_link_candidate_ready", "Sandbox 跳转候选已准备", "info"));
       if (sandboxDeepLinkCandidateSummary.status === "needs_review") badges.push(badge("sandbox_deep_link_candidate_review", "Sandbox 跳转候选仍需复核", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "blocked") badges.push(badge("sandbox_deep_link_candidate_blocked", "Sandbox 跳转候选已阻断", "blocked"));

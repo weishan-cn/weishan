@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_CONTRACT_SELECTION_BOARD_VERSION = "2.3.0";
+  const GLOBAL_SHOPPING_PROVIDER_CONTRACT_SELECTION_BOARD_VERSION = "2.3.1";
   const BOARD_NAME = "global_shopping_provider_contract_selection_board_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

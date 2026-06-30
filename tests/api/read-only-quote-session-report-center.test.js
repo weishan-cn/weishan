@@ -72,6 +72,10 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingReadOnlyCommerceSessionRecapCenter.js",
     "apps/desktop/src/renderer/core/globalShoppingUserTrustClosureSummary.js",
     "apps/desktop/src/renderer/core/globalShoppingNextFeatureReadinessGate.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderLegalReviewDossier.js",
+    "apps/desktop/src/renderer/core/globalShoppingCredentialVaultInterfaceStub.js",
+    "apps/desktop/src/renderer/core/globalShoppingSandboxAdapterContractTestbed.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderIntegrationPrepViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingCommerceSessionRecapViewModel.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteSessionReportCenter.js",
     "apps/desktop/src/renderer/core/flightWorkflowReadOnlyUserConsentFlow.js",
@@ -80,13 +84,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.3.0");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.3.1");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "2.3.0");
+  assert.equal(ready.appVersion, "2.3.1");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -245,6 +249,10 @@ function main() {
     readOnlyCommerceSessionRecapCenterSummary:{ status:"ready", userFacingSummary:{ title:"只读全球购会话总结", resultLabel:"只读全球购会话总结已准备", redacted:true }, rows:[{ rowId:"summary_scope", label:"会话总结不保存、不导出", value:"当前只展示只读会话总结摘要", status:"pass", redacted:true }], redacted:true },
     userTrustClosureSummarySummary:{ status:"ready", userFacingSummary:{ title:"用户信任闭环摘要", resultLabel:"用户信任闭环摘要已准备", redacted:true }, rows:[{ rowId:"trust_boundary", label:"平台页面为最终依据", value:"信任闭环不构成平台确认", status:"pass", redacted:true }], redacted:true },
     nextFeatureReadinessGateSummary:{ status:"ready", userFacingSummary:{ title:"下一功能准备闸门", resultLabel:"下一功能准备闸门已准备", redacted:true }, rows:[{ rowId:"next_boundary", label:"下一功能闸门不接真实 provider", value:"只评估 readiness，不接真实 provider", status:"pass", redacted:true }], redacted:true },
+    providerLegalReviewDossierSummary:{ status:"ready", userFacingSummary:{ title:"Provider 法务审查档案", resultLabel:"法务审查档案已准备", redacted:true }, redacted:true },
+    credentialVaultInterfaceStubSummary:{ status:"ready", userFacingSummary:{ title:"凭证保险箱接口桩", resultLabel:"凭证接口桩已准备", redacted:true }, redacted:true },
+    sandboxAdapterContractTestbedSummary:{ status:"ready", userFacingSummary:{ title:"Sandbox Adapter 合同测试台", resultLabel:"Adapter 合同测试台已准备", redacted:true }, redacted:true },
+    providerIntegrationPrepViewModelSummary:{ status:"ready", title:"Provider 接入前准备", userFacingSummary:{ title:"Provider 接入前准备", resultLabel:"Provider 接入前准备已准备", redacted:true }, redacted:true },
     commerceSessionRecapViewModelSummary:{ status:"ready", title:"只读全球购会话总结与下一步准备", userFacingSummary:{ title:"只读全球购会话总结与下一步准备", resultLabel:"只读全球购会话总结与下一步准备已准备", redacted:true }, redacted:true },
     globalShoppingGoalStatus:"aligned",
     jumpBoundaryStatus:"safe",
@@ -309,7 +317,12 @@ function main() {
     userTrustClosureSummaryStatus:"ready",
     nextFeatureReadinessGateStatus:"ready",
     commerceSessionRecapViewModelStatus:"ready",
-    safeToProceedWithReadOnlyProviderSandboxPlanning:true
+    providerLegalReviewStatus:"ready",
+    credentialVaultInterfaceStatus:"ready",
+    sandboxAdapterContractStatus:"ready",
+    providerIntegrationPrepViewModelStatus:"ready",
+    safeToProceedWithReadOnlyProviderSandboxPlanning:true,
+    safeToProceedWithProviderSandboxContractImplementation:true
   });
   assert.equal(globalReady.userFacingSummary.globalShoppingProductGoalSummary.title, "全球购产品目标");
   assert.equal(globalReady.userFacingSummary.jumpToPlatformBoundarySummary.title, "跳转至平台自行下单边界");
@@ -357,6 +370,10 @@ function main() {
   assert.equal(globalReady.userFacingSummary.readOnlyCommerceSessionRecapCenterSummary.title, "只读全球购会话总结");
   assert.equal(globalReady.userFacingSummary.userTrustClosureSummarySummary.title, "用户信任闭环摘要");
   assert.equal(globalReady.userFacingSummary.nextFeatureReadinessGateSummary.title, "下一功能准备闸门");
+  assert.equal(globalReady.userFacingSummary.providerLegalReviewDossierSummary.title, "Provider 法务审查档案");
+  assert.equal(globalReady.userFacingSummary.credentialVaultInterfaceStubSummary.title, "凭证保险箱接口桩");
+  assert.equal(globalReady.userFacingSummary.sandboxAdapterContractTestbedSummary.title, "Sandbox Adapter 合同测试台");
+  assert.equal(globalReady.userFacingSummary.providerIntegrationPrepViewModelSummary.title, "Provider 接入前准备");
   assert.equal(globalReady.userFacingSummary.commerceSessionRecapViewModelSummary.title, "只读全球购会话总结与下一步准备");
   assert.equal(globalReady.userFacingSummary.globalShoppingGoalStatus, "aligned");
   assert.equal(globalReady.userFacingSummary.jumpBoundaryStatus, "safe");
@@ -406,12 +423,17 @@ function main() {
   assert.equal(globalReady.userFacingSummary.readOnlyCommerceSessionRecapStatus, "ready");
   assert.equal(globalReady.userFacingSummary.userTrustClosureSummaryStatus, "ready");
   assert.equal(globalReady.userFacingSummary.nextFeatureReadinessGateStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.providerLegalReviewStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.credentialVaultInterfaceStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.sandboxAdapterContractStatus, "ready");
+  assert.equal(globalReady.userFacingSummary.providerIntegrationPrepViewModelStatus, "ready");
   assert.equal(globalReady.userFacingSummary.commerceSessionRecapViewModelStatus, "ready");
   assert.equal(globalReady.userFacingSummary.safeToProceedWithSandboxDeepLinkCandidate, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithPartnerFixtureAdapter, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithManualPlatformUserEducation, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithManualExternalPlatformVisitEducation, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithReadOnlyProviderSandboxPlanning, true);
+  assert.equal(globalReady.userFacingSummary.safeToProceedWithProviderSandboxContractImplementation, true);
   const decisionReviewReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     sandboxCandidateComparisonWorkbenchSummary:{ status:"ready", userFacingSummary:{ title:"Sandbox 候选对比工作台", resultLabel:"候选对比已准备", caveat:"当前仅比较脱敏 sandbox 候选。", redacted:true }, redacted:true },

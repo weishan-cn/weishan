@@ -76,10 +76,14 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingCredentialIsolationReadinessBoard.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderContractSelectionBoard.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxProviderPlanningViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderLegalReviewDossier.js",
+    "apps/desktop/src/renderer/core/globalShoppingCredentialVaultInterfaceStub.js",
+    "apps/desktop/src/renderer/core/globalShoppingSandboxAdapterContractTestbed.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderIntegrationPrepViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.3.0");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.3.1");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -191,10 +195,10 @@ function main() {
     safeNextActionPanelSummary:safeNextActionPanel,
     userManualReviewViewModelSummary:userManualReviewViewModel
   });
-  assert.equal(ready.appVersion, "2.3.0");
+  assert.equal(ready.appVersion, "2.3.1");
   assert.equal(ready.status, "needs_review");
   assert.equal(ready.userFacingSummary.resultLabel, "只读价格流水线仍需复核");
-  assert.equal(ready.pipelineStages.length, 63);
+  assert.equal(ready.pipelineStages.length, 67);
   assert.equal(ready.readyOutputs.canShowFixtureCandidatePrices, true);
   assert.equal(ready.readyOutputs.canShowFixtureReplay, true);
   assert.equal(ready.readyOutputs.canShowOfficialAnchor, true);
@@ -207,6 +211,10 @@ function main() {
   assert.equal(ready.firstReadOnlyProviderAdapterShellSummary.userFacingSummary.title, "第一个只读 Provider Adapter 外壳");
   assert.equal(ready.providerSandboxSafetyKillSwitchSummary.userFacingSummary.title, "Provider Sandbox 安全熔断器");
   assert.equal(ready.providerSandboxDryRunViewModelSummary.title, "Provider Sandbox 干跑准备");
+  assert.equal(ready.providerLegalReviewDossierSummary.userFacingSummary.title, "Provider 法务审查档案");
+  assert.equal(ready.credentialVaultInterfaceStubSummary.userFacingSummary.title, "凭证保险箱接口桩");
+  assert.equal(ready.sandboxAdapterContractTestbedSummary.userFacingSummary.title, "Sandbox Adapter 合同测试台");
+  assert.equal(ready.providerIntegrationPrepViewModelSummary.title, "Provider 接入前准备");
   assert.equal(ready.firstSandboxProviderConnectorSummary.userFacingSummary.title, "第一个 Sandbox Provider Connector");
   assert.equal(ready.providerCoverageDashboardSummary.userFacingSummary.title, "Provider 覆盖看板");
   assert.equal(ready.readOnlySourceTrustScoreSummary.userFacingSummary.title, "只读来源可信度评分");
@@ -252,6 +260,7 @@ function main() {
   assert.equal(ready.readyOutputs.safeToProceedWithReadOnlySessionClosureEducation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithReadOnlyProviderSandboxPlanning, true);
   assert.equal(ready.readyOutputs.safeToProceedWithProviderLegalAndCredentialReview, true);
+  assert.equal(ready.readyOutputs.safeToProceedWithProviderSandboxContractImplementation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithSandboxDecisionReview, true);
   assert.equal(ready.readyOutputs.safeToProceedWithUserFacingHandoffExplanation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithManualPlatformReview, true);

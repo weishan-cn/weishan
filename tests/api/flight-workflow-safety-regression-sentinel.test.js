@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js"]);
   const api = windowRef.WeishanFlightWorkflowSafetyRegressionSentinel;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "2.3.0");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "2.3.1");
   const safe = api.buildFlightWorkflowSafetyRegressionReport({ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, autoOpen:false, autoRefresh:false, fileWrite:false, download:false, note:"平台最终为准" });
   assert.equal(safe.sentinelName, "flight_workflow_safety_regression_sentinel_v1");
   assert.equal(safe.status, "pass");
@@ -76,7 +76,11 @@ function main() {
     readOnlyCommerceSessionRecapCenterSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false } },
     userTrustClosureSummarySummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
     nextFeatureReadinessGateSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
-    commerceSessionRecapViewModelSummary:{ status:"ready", bookingUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, fileWrite:false, download:false }
+    commerceSessionRecapViewModelSummary:{ status:"ready", bookingUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, fileWrite:false, download:false },
+    providerLegalReviewDossierSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
+    credentialVaultInterfaceStubSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, credentialInput:false } },
+    sandboxAdapterContractTestbedSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
+    providerIntegrationPrepViewModelSummary:{ status:"ready", bookingUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, fileWrite:false, download:false }
   });
   assert.equal(global.status, "pass");
   assert.equal(global.globalShoppingProductGoalSummary.status, "aligned");
@@ -110,6 +114,10 @@ function main() {
   assert.equal(global.userTrustClosureSummarySummary.status, "ready");
   assert.equal(global.nextFeatureReadinessGateSummary.status, "ready");
   assert.equal(global.commerceSessionRecapViewModelSummary.status, "ready");
+  assert.equal(global.providerLegalReviewDossierSummary.status, "ready");
+  assert.equal(global.credentialVaultInterfaceStubSummary.status, "ready");
+  assert.equal(global.sandboxAdapterContractTestbedSummary.status, "ready");
+  assert.equal(global.providerIntegrationPrepViewModelSummary.status, "ready");
   console.log("FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL PASS");
 }
 main();
