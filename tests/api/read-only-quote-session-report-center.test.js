@@ -94,13 +94,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.4.1");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.5.0");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "2.4.1");
+  assert.equal(ready.appVersion, "2.5.0");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -193,6 +193,31 @@ function main() {
   assert.equal(governanceReleaseReady.safetyReport.sandboxProviderReleaseFreezeGateStatus, "ready");
   assert.equal(governanceReleaseReady.safetyReport.providerGovernanceReleaseViewModelStatus, "ready");
   assert.equal(governanceReleaseReady.userFacingSummary.safeToProceedWithManualGovernanceReleaseDecision, false);
+  const sandboxMilestoneReady = api.buildReadOnlyQuoteSessionReportCenter({
+    sessionSummary:summary,
+    providerSandboxReadinessWorkbenchSummary:{ status:"ready", userFacingSummary:{ title:"Provider Sandbox Readiness Workbench", resultLabel:"Sandbox Readiness Workbench 已准备", redacted:true }, redacted:true },
+    offlineProviderScenarioLabSummary:{ status:"ready", userFacingSummary:{ title:"Offline Provider Scenario Lab", resultLabel:"离线场景实验室已准备", redacted:true }, redacted:true },
+    readOnlyProviderAdapterSdkSkeletonSummary:{ status:"ready", userFacingSummary:{ title:"Read-Only Provider Adapter SDK Skeleton", resultLabel:"只读 Adapter SDK 骨架已准备", redacted:true }, redacted:true },
+    manualActivationCommandCenterSummary:{ status:"ready", userFacingSummary:{ title:"Manual Activation Command Center", resultLabel:"人工激活指挥中心已准备", redacted:true }, redacted:true },
+    providerSandboxMilestoneViewModelSummary:{ status:"ready", title:"Provider Sandbox 里程碑工作台", redacted:true },
+    providerSandboxReadinessWorkbenchStatus:"ready",
+    offlineProviderScenarioLabStatus:"ready",
+    readOnlyProviderAdapterSdkSkeletonStatus:"ready",
+    manualActivationCommandCenterStatus:"ready",
+    providerSandboxMilestoneViewModelStatus:"ready",
+    safeToProceedWithHumanSandboxMilestoneReview:true
+  });
+  assert.equal(sandboxMilestoneReady.safetyReport.providerSandboxReadinessWorkbenchSummary.userFacingSummary.title, "Provider Sandbox Readiness Workbench");
+  assert.equal(sandboxMilestoneReady.safetyReport.offlineProviderScenarioLabSummary.userFacingSummary.title, "Offline Provider Scenario Lab");
+  assert.equal(sandboxMilestoneReady.safetyReport.readOnlyProviderAdapterSdkSkeletonSummary.userFacingSummary.title, "Read-Only Provider Adapter SDK Skeleton");
+  assert.equal(sandboxMilestoneReady.safetyReport.manualActivationCommandCenterSummary.userFacingSummary.title, "Manual Activation Command Center");
+  assert.equal(sandboxMilestoneReady.safetyReport.providerSandboxMilestoneViewModelSummary.title, "Provider Sandbox 里程碑工作台");
+  assert.equal(sandboxMilestoneReady.safetyReport.providerSandboxReadinessWorkbenchStatus, "ready");
+  assert.equal(sandboxMilestoneReady.safetyReport.offlineProviderScenarioLabStatus, "ready");
+  assert.equal(sandboxMilestoneReady.safetyReport.readOnlyProviderAdapterSdkSkeletonStatus, "ready");
+  assert.equal(sandboxMilestoneReady.safetyReport.manualActivationCommandCenterStatus, "ready");
+  assert.equal(sandboxMilestoneReady.safetyReport.providerSandboxMilestoneViewModelStatus, "ready");
+  assert.equal(sandboxMilestoneReady.userFacingSummary.safeToProceedWithHumanSandboxMilestoneReview, true);
   const providerManualReleaseReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     manualGovernanceReleaseDecisionRoomSummary:{ status:"ready", userFacingSummary:{ title:"Manual Governance Release 决策室", resultLabel:"人工发布决策室已准备", redacted:true }, redacted:true },

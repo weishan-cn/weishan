@@ -45,7 +45,7 @@ function main() {
   assert.equal(result.runTimelineSummary.timelineName, "read_only_quote_run_timeline_v1");
   assert.equal(result.runTimelineSummary.rawResponseStored, false);
   assert.equal(result.runTimelineSummary.redacted, true);
-  assert.equal(result.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.4.1");
+  assert.equal(result.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.5.0");
   assert.equal(result.sessionStatus, "updated");
   assert.equal(result.auditExportReady, true);
   assert.equal(result.auditExportPreview.previewLabel, "Redacted JSON Preview");

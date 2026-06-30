@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
-const PREVIOUS_STABLE_VERSION = "2.4.0";
+const PREVIOUS_STABLE_VERSION = "2.4.1";
 const STRICT_VERSION_CHECKS = new Set([
   "root package-lock version",
   "root package-lock packages[\"\"].version",
@@ -41,6 +41,11 @@ const STRICT_VERSION_CHECKS = new Set([
   "apps/desktop global shopping offline sandbox trace inspector version",
   "apps/desktop global shopping mock provider result normalizer version",
   "apps/desktop global shopping manual activation dry run checklist version",
+  "apps/desktop global shopping provider sandbox readiness workbench version",
+  "apps/desktop global shopping offline provider scenario lab version",
+  "apps/desktop global shopping read only provider adapter SDK skeleton version",
+  "apps/desktop global shopping manual activation command center version",
+  "apps/desktop global shopping provider sandbox milestone view model version",
   "apps/desktop global shopping provider sandbox activation view model version",
   "apps/desktop global shopping provider sandbox dry run view model version"
 ]);
@@ -2244,6 +2249,11 @@ function runVersionCheck() {
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping offline sandbox trace inspector version", "apps/desktop/src/renderer/core/globalShoppingOfflineSandboxTraceInspector.js", "GLOBAL_SHOPPING_OFFLINE_SANDBOX_TRACE_INSPECTOR_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping mock provider result normalizer version", "apps/desktop/src/renderer/core/globalShoppingMockProviderResultNormalizer.js", "GLOBAL_SHOPPING_MOCK_PROVIDER_RESULT_NORMALIZER_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping manual activation dry run checklist version", "apps/desktop/src/renderer/core/globalShoppingManualActivationDryRunChecklist.js", "GLOBAL_SHOPPING_MANUAL_ACTIVATION_DRY_RUN_CHECKLIST_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping provider sandbox readiness workbench version", "apps/desktop/src/renderer/core/globalShoppingProviderSandboxReadinessWorkbench.js", "GLOBAL_SHOPPING_PROVIDER_SANDBOX_READINESS_WORKBENCH_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping offline provider scenario lab version", "apps/desktop/src/renderer/core/globalShoppingOfflineProviderScenarioLab.js", "GLOBAL_SHOPPING_OFFLINE_PROVIDER_SCENARIO_LAB_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping read only provider adapter SDK skeleton version", "apps/desktop/src/renderer/core/globalShoppingReadOnlyProviderAdapterSdkSkeleton.js", "GLOBAL_SHOPPING_READ_ONLY_PROVIDER_ADAPTER_SDK_SKELETON_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping manual activation command center version", "apps/desktop/src/renderer/core/globalShoppingManualActivationCommandCenter.js", "GLOBAL_SHOPPING_MANUAL_ACTIVATION_COMMAND_CENTER_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping provider sandbox milestone view model version", "apps/desktop/src/renderer/core/globalShoppingProviderSandboxMilestoneViewModel.js", "GLOBAL_SHOPPING_PROVIDER_SANDBOX_MILESTONE_VIEW_MODEL_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping provider sandbox activation view model version", "apps/desktop/src/renderer/core/globalShoppingProviderSandboxActivationViewModel.js", "GLOBAL_SHOPPING_PROVIDER_SANDBOX_ACTIVATION_VIEW_MODEL_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping provider sandbox dry run view model version", "apps/desktop/src/renderer/core/globalShoppingProviderSandboxDryRunViewModel.js", "GLOBAL_SHOPPING_PROVIDER_SANDBOX_DRY_RUN_VIEW_MODEL_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow read only launch candidate freeze gate version", "apps/desktop/src/renderer/core/flightWorkflowReadOnlyLaunchCandidateFreezeGate.js", "FLIGHT_WORKFLOW_READ_ONLY_LAUNCH_CANDIDATE_FREEZE_GATE_VERSION");

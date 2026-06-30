@@ -61,7 +61,7 @@ function main() {
   assert.equal(dryRunPreview.dryRunButton.label, "运行沙盒只读报价");
   assert.equal(dryRunPreview.dryRunTopCandidates.length, 3);
   assert.equal(dryRunPreview.runTimelineSummary.timelineName, "read_only_quote_run_timeline_v1");
-  assert.equal(dryRunPreview.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.4.1");
+  assert.equal(dryRunPreview.sessionSummary.sessionId, "deterministic-read-only-quote-session-v2.5.0");
   assert.equal(dryRunPreview.auditExportReady, true);
   assert.equal(dryRunPreview.sessionRecoverySummary.title, "Session Recovery");
   assert.equal(dryRunPreview.reportCenterStatus, "ready");

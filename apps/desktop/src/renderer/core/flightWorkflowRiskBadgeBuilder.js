@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.4.1";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.5.0";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -157,6 +157,11 @@
       const firstReadOnlyProviderAdapterShellSummary = obj(safe.firstReadOnlyProviderAdapterShellSummary);
       const providerSandboxSafetyKillSwitchSummary = obj(safe.providerSandboxSafetyKillSwitchSummary);
       const providerSandboxDryRunViewModelSummary = obj(safe.providerSandboxDryRunViewModelSummary);
+      const providerSandboxReadinessWorkbenchSummary = obj(safe.providerSandboxReadinessWorkbenchSummary);
+      const offlineProviderScenarioLabSummary = obj(safe.offlineProviderScenarioLabSummary);
+      const readOnlyProviderAdapterSdkSkeletonSummary = obj(safe.readOnlyProviderAdapterSdkSkeletonSummary);
+      const manualActivationCommandCenterSummary = obj(safe.manualActivationCommandCenterSummary);
+      const providerSandboxMilestoneViewModelSummary = obj(safe.providerSandboxMilestoneViewModelSummary);
       const providerAdapterRegistrySummary = obj(safe.providerAdapterRegistrySummary);
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
@@ -423,6 +428,15 @@
       if (providerSandboxDryRunHarnessSummary.status || firstReadOnlyProviderAdapterShellSummary.status || providerSandboxSafetyKillSwitchSummary.status) badges.push(badge("provider_dry_run_no_request", "干跑不发送真实请求", "info"));
       if (firstReadOnlyProviderAdapterShellSummary.status) badges.push(badge("provider_adapter_no_endpoint", "Adapter 外壳不包含真实 endpoint", "info"));
       if (providerSandboxDryRunViewModelSummary.status) badges.push(badge("provider_dry_run_not_real_price", "干跑不代表真实价格或下单能力", "warning"));
+      if (providerSandboxReadinessWorkbenchSummary.status === "ready" || safe.providerSandboxReadinessWorkbenchStatus === "ready") badges.push(badge("provider_sandbox_readiness_workbench_ready", "Provider Sandbox Readiness Workbench 已准备", "info"));
+      if (offlineProviderScenarioLabSummary.status === "ready" || safe.offlineProviderScenarioLabStatus === "ready") badges.push(badge("offline_provider_scenario_lab_ready", "Offline Provider Scenario Lab 已准备", "info"));
+      if (readOnlyProviderAdapterSdkSkeletonSummary.status === "ready" || safe.readOnlyProviderAdapterSdkSkeletonStatus === "ready") badges.push(badge("read_only_provider_adapter_sdk_skeleton_ready", "Read-Only Provider Adapter SDK Skeleton 已准备", "info"));
+      if (manualActivationCommandCenterSummary.status === "ready" || safe.manualActivationCommandCenterStatus === "ready") badges.push(badge("manual_activation_command_center_ready", "Manual Activation Command Center 已准备", "info"));
+      if (providerSandboxReadinessWorkbenchSummary.status || providerSandboxMilestoneViewModelSummary.status) badges.push(badge("readiness_workbench_no_activation", "Readiness Workbench 不激活 sandbox", "info"));
+      if (offlineProviderScenarioLabSummary.status || providerSandboxMilestoneViewModelSummary.status) badges.push(badge("offline_scenario_lab_no_network_key", "Offline Scenario Lab 不联网、不读密钥", "info"));
+      if (readOnlyProviderAdapterSdkSkeletonSummary.status || providerSandboxMilestoneViewModelSummary.status) badges.push(badge("adapter_sdk_skeleton_no_endpoint", "Adapter SDK Skeleton 不生成 endpoint、不导入真实 SDK", "info"));
+      if (manualActivationCommandCenterSummary.status || providerSandboxMilestoneViewModelSummary.status) badges.push(badge("command_center_no_release_push", "Command Center 不创建 release、不 push", "info"));
+      if ((providerSandboxMilestoneViewModelSummary.status && providerSandboxMilestoneViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanSandboxMilestoneReview === true) badges.push(badge("human_sandbox_milestone_review_required", "Human sandbox milestone review 仍需人工复核", "warning"));
       if (providerAdapterRegistrySummary.status === "ready") badges.push(badge("provider_adapter_registry_ready", "Adapter 注册表已准备", "info"));
       if (providerAdapterRegistrySummary.status === "needs_review") badges.push(badge("provider_adapter_registry_review", "Adapter 注册表仍需复核", "warning"));
       if (providerAdapterRegistrySummary.status === "blocked") badges.push(badge("provider_adapter_registry_blocked", "Adapter 注册表已阻断", "blocked"));

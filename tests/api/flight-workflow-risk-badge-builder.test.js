@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.4.1");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.5.0");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -87,12 +87,23 @@ function main() {
     offlineSandboxTraceInspectorStatus:"ready",
     mockProviderResultNormalizerStatus:"ready",
     manualActivationDryRunChecklistStatus:"ready",
+    providerSandboxReadinessWorkbenchSummary:{ status:"ready" },
+    offlineProviderScenarioLabSummary:{ status:"ready" },
+    readOnlyProviderAdapterSdkSkeletonSummary:{ status:"ready" },
+    manualActivationCommandCenterSummary:{ status:"ready" },
+    providerSandboxMilestoneViewModelSummary:{ status:"ready" },
+    providerSandboxReadinessWorkbenchStatus:"ready",
+    offlineProviderScenarioLabStatus:"ready",
+    readOnlyProviderAdapterSdkSkeletonStatus:"ready",
+    manualActivationCommandCenterStatus:"ready",
+    providerSandboxMilestoneViewModelStatus:"ready",
     safeToProceedWithDeepLinkSafetyGate:true,
     safeToProceedWithReadOnlyPriceProviderSandbox:true,
     safeToProceedWithJumpToPlatformMvp:true,
     safeToProceedWithSandboxDeepLinkCandidate:true,
     safeToProceedWithPartnerFixtureAdapter:true,
-    safeToProceedWithFirstProviderSandboxFixtureDryRun:true
+    safeToProceedWithFirstProviderSandboxFixtureDryRun:true,
+    safeToProceedWithHumanSandboxMilestoneReview:true
   }).badges.map((item) => item.label);
   assert.ok(globalLabels.includes("全球购目标已对齐"));
   assert.ok(globalLabels.includes("Provider fixture 已准备"));
@@ -123,6 +134,15 @@ function main() {
   assert.ok(globalLabels.includes("干跑不发送真实请求"));
   assert.ok(globalLabels.includes("Adapter 外壳不包含真实 endpoint"));
   assert.ok(globalLabels.includes("干跑不代表真实价格或下单能力"));
+  assert.ok(globalLabels.includes("Provider Sandbox Readiness Workbench 已准备"));
+  assert.ok(globalLabels.includes("Offline Provider Scenario Lab 已准备"));
+  assert.ok(globalLabels.includes("Read-Only Provider Adapter SDK Skeleton 已准备"));
+  assert.ok(globalLabels.includes("Manual Activation Command Center 已准备"));
+  assert.ok(globalLabels.includes("Readiness Workbench 不激活 sandbox"));
+  assert.ok(globalLabels.includes("Offline Scenario Lab 不联网、不读密钥"));
+  assert.ok(globalLabels.includes("Adapter SDK Skeleton 不生成 endpoint、不导入真实 SDK"));
+  assert.ok(globalLabels.includes("Command Center 不创建 release、不 push"));
+  assert.ok(globalLabels.includes("Human sandbox milestone review 仍需人工复核"));
   assert.ok(globalLabels.includes("跳转平台边界安全"));
   assert.ok(globalLabels.includes("同款候选识别已准备"));
   assert.ok(globalLabels.includes("重复候选合并已准备"));
