@@ -87,7 +87,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.3.4");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.3.5");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -151,6 +151,10 @@ function main() {
   const providerContractReplayHarnessSummary = { status:"ready", userFacingSummary:{ title:"Provider 合同回放器", resultLabel:"Provider 合同回放器已准备", redacted:true }, redacted:true };
   const providerLaunchReadinessBoardSummary = { status:"ready", userFacingSummary:{ title:"Provider 启动准备总闸门", resultLabel:"Provider 启动准备总闸门已准备", redacted:true }, redacted:true };
   const providerLaunchReadinessViewModelSummary = { status:"ready", title:"Provider 启动准备与合同回放", redacted:true };
+  const providerSandboxPilotControlRoomSummary = { status:"ready", userFacingSummary:{ title:"Provider Sandbox Pilot 控制室", resultLabel:"Sandbox Pilot 控制室已准备", redacted:true }, redacted:true };
+  const mockProviderIncidentDrillSummary = { status:"ready", userFacingSummary:{ title:"Mock Provider 事故演练", resultLabel:"Mock 事故演练已准备", redacted:true }, redacted:true };
+  const productionBlockerMatrixSummary = { status:"ready", userFacingSummary:{ title:"Production 阻断矩阵", resultLabel:"Production 阻断矩阵已准备", redacted:true }, redacted:true };
+  const providerPilotControlViewModelSummary = { status:"ready", title:"Provider Sandbox Pilot 控制与阻断", redacted:true };
   const firstSandboxConnector = windowRef.WeishanGlobalShoppingFirstSandboxProviderConnector.buildGlobalShoppingFirstSandboxProviderConnector({ providerId:"fixture_provider", providerName:"Fixture Provider", providerType:"fixture", itemType:"flight", connectorMode:"dry_run", adapterRegistry:{ status:"ready", adapters:[{ providerType:"official", itemType:"flight", region:"CN", redacted:true }], redacted:true }, adapterShell:adapterShell, dryRunHarness:dryRunHarness, safetyKillSwitch:killSwitch, requestEnvelope:{ status:"ready", requestEnvelope:{ requestMeta:{ providerId:"fixture_provider", providerName:"Fixture Provider", itemType:"flight" } }, redacted:true }, providerRunbook:{ status:"ready", redacted:true }, normalizedSourceInputs:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", itemType:"flight", redacted:true }] });
   const coverageDashboard = windowRef.WeishanGlobalShoppingProviderCoverageDashboard.buildGlobalShoppingProviderCoverageDashboard({ adapterRegistrySummary:{ adapters:[{ providerType:"official", itemType:"flight", region:"CN", redacted:true }] }, firstSandboxProviderConnectorSummary:firstSandboxConnector, normalizedSourceInputs:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", itemType:"flight", redacted:true }] });
   const sourceTrust = windowRef.WeishanGlobalShoppingReadOnlySourceTrustScore.buildGlobalShoppingReadOnlySourceTrustScore({ sources:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", basePrice:920, currency:"CNY", lastCheckedAt:"redacted_now", redacted:true }] });
@@ -213,12 +217,16 @@ function main() {
     mockProviderAdapterRegistryRuntimeSummary:mockProviderAdapterRegistryRuntimeSummary,
     providerContractReplayHarnessSummary:providerContractReplayHarnessSummary,
     providerLaunchReadinessBoardSummary:providerLaunchReadinessBoardSummary,
-    providerLaunchReadinessViewModelSummary:providerLaunchReadinessViewModelSummary
+    providerLaunchReadinessViewModelSummary:providerLaunchReadinessViewModelSummary,
+    providerSandboxPilotControlRoomSummary:providerSandboxPilotControlRoomSummary,
+    mockProviderIncidentDrillSummary:mockProviderIncidentDrillSummary,
+    productionBlockerMatrixSummary:productionBlockerMatrixSummary,
+    providerPilotControlViewModelSummary:providerPilotControlViewModelSummary
   });
-  assert.equal(ready.appVersion, "2.3.4");
+  assert.equal(ready.appVersion, "2.3.5");
   assert.equal(ready.status, "needs_review");
   assert.equal(ready.userFacingSummary.resultLabel, "只读价格流水线仍需复核");
-  assert.equal(ready.pipelineStages.length, 79);
+  assert.equal(ready.pipelineStages.length, 83);
   assert.equal(ready.readyOutputs.canShowFixtureCandidatePrices, true);
   assert.equal(ready.readyOutputs.canShowFixtureReplay, true);
   assert.equal(ready.readyOutputs.canShowOfficialAnchor, true);
@@ -282,6 +290,11 @@ function main() {
   assert.equal(ready.providerContractReplayHarnessSummary.userFacingSummary.title, "Provider 合同回放器");
   assert.equal(ready.providerLaunchReadinessBoardSummary.userFacingSummary.title, "Provider 启动准备总闸门");
   assert.equal(ready.providerLaunchReadinessViewModelSummary.title, "Provider 启动准备与合同回放");
+  assert.equal(ready.providerSandboxPilotControlRoomSummary.userFacingSummary.title, "Provider Sandbox Pilot 控制室");
+  assert.equal(ready.mockProviderIncidentDrillSummary.userFacingSummary.title, "Mock Provider 事故演练");
+  assert.equal(ready.productionBlockerMatrixSummary.userFacingSummary.title, "Production 阻断矩阵");
+  assert.equal(ready.providerPilotControlViewModelSummary.title, "Provider Sandbox Pilot 控制与阻断");
+  assert.equal(ready.readyOutputs.safeToProceedWithHumanControlledSandboxProviderPilotPlan, true);
   assert.equal(ready.humanApprovalSimulationGateSummary.userFacingSummary.title, "人工审批模拟闸门");
   assert.equal(ready.mockProviderLaunchDrillSummary.userFacingSummary.title, "Mock Provider 启动演练");
   assert.equal(ready.sandboxProviderRollbackPlanSummary.userFacingSummary.title, "Sandbox Provider 回滚预案");

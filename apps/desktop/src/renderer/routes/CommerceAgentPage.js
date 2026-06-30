@@ -8168,6 +8168,33 @@
         showCommercePlatformTemplateFeedback("已显示回滚预案", false);
         return;
       }
+      const globalShoppingPilotControlRoomButton = target && target.closest("[data-commerce-global-shopping-pilot-control-room-show]");
+      if (globalShoppingPilotControlRoomButton && host.contains(globalShoppingPilotControlRoomButton)) {
+        event.preventDefault();
+        const panel = globalShoppingPilotControlRoomButton.closest("[data-commerce-global-shopping-provider-pilot-control]") || globalShoppingPilotControlRoomButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-pilot-control-room-output]") || panel;
+        output.innerHTML = '<p>Provider Sandbox Pilot 控制室</p><p>Sandbox Pilot 控制室已准备</p><p>Pilot 控制室不启动真实 provider</p><p>不读取密钥，不联网，不生成 endpoint，不创建审批任务，不发邮件</p><p>Human-controlled pilot 仍需人工审批</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Pilot 控制室", false);
+        return;
+      }
+      const globalShoppingIncidentDrillButton = target && target.closest("[data-commerce-global-shopping-incident-drill-show]");
+      if (globalShoppingIncidentDrillButton && host.contains(globalShoppingIncidentDrillButton)) {
+        event.preventDefault();
+        const panel = globalShoppingIncidentDrillButton.closest("[data-commerce-global-shopping-provider-pilot-control]") || globalShoppingIncidentDrillButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-incident-drill-output]") || panel;
+        output.innerHTML = '<p>Mock Provider 事故演练</p><p>Mock 事故演练已准备</p><p>事故演练不触发真实告警或回滚</p><p>不上传日志，不发邮件，不停服务，不改 git，不删文件</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示事故演练", false);
+        return;
+      }
+      const globalShoppingProductionBlockersButton = target && target.closest("[data-commerce-global-shopping-production-blockers-show]");
+      if (globalShoppingProductionBlockersButton && host.contains(globalShoppingProductionBlockersButton)) {
+        event.preventDefault();
+        const panel = globalShoppingProductionBlockersButton.closest("[data-commerce-global-shopping-provider-pilot-control]") || globalShoppingProductionBlockersButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-production-blockers-output]") || panel;
+        output.innerHTML = '<p>Production 阻断矩阵</p><p>Production 阻断矩阵已准备</p><p>阻断矩阵不修改运行配置</p><p>不启用 provider，不禁用 provider，不读取密钥，不联网，不生成 endpoint</p><p>Human-controlled pilot 仍需人工审批</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示阻断矩阵", false);
+        return;
+      }
       const pilotInvitationGateButton = target && target.closest("[data-commerce-flight-pilot-invitation-gate-show]");
       if (pilotInvitationGateButton && host.contains(pilotInvitationGateButton)) {
         event.preventDefault();

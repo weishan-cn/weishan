@@ -9722,66 +9722,66 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.3.4 provider launch readiness stays local and bounded @commerce-smoke", async () => {
+  test("v2.3.5 provider sandbox pilot control stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
-      window.WeishanGlobalShoppingMockProviderAdapterRegistryRuntime &&
-      window.WeishanGlobalShoppingProviderContractReplayHarness &&
-      window.WeishanGlobalShoppingProviderLaunchReadinessBoard &&
-      window.WeishanGlobalShoppingProviderLaunchReadinessViewModel &&
+      window.WeishanGlobalShoppingProviderSandboxPilotControlRoom &&
+      window.WeishanGlobalShoppingMockProviderIncidentDrill &&
+      window.WeishanGlobalShoppingProductionBlockerMatrix &&
+      window.WeishanGlobalShoppingProviderPilotControlViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
-    const v233 = await page.evaluate(() => {
+    const v235 = await page.evaluate(() => {
       const cardApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
       const host = document.createElement("section");
-      host.setAttribute("data-commerce-v233-render-smoke", "true");
+      host.setAttribute("data-commerce-v235-render-smoke", "true");
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml({
-        mockProviderAdapterRegistryRuntimeSummary:{ status:"ready", userFacingSummary:{ title:"Mock Provider Adapter 注册运行时", resultLabel:"Mock Adapter 注册运行时已准备", redacted:true }, redacted:true },
-        providerContractReplayHarnessSummary:{ status:"ready", userFacingSummary:{ title:"Provider 合同回放器", resultLabel:"Provider 合同回放器已准备", redacted:true }, redacted:true },
-        providerLaunchReadinessBoardSummary:{ status:"ready", userFacingSummary:{ title:"Provider 启动准备总闸门", resultLabel:"Provider 启动准备总闸门已准备", redacted:true }, redacted:true },
-        providerLaunchReadinessViewModelSummary:{ status:"ready", title:"Provider 启动准备与合同回放", redacted:true },
-        mockProviderAdapterRegistryStatus:"ready",
-        providerContractReplayStatus:"ready",
-        providerLaunchReadinessStatus:"ready",
-        providerLaunchReadinessViewModelStatus:"ready",
-        safeToProceedWithHumanProviderSandboxApproval:true
+        providerSandboxPilotControlRoomSummary:{ status:"ready", userFacingSummary:{ title:"Provider Sandbox Pilot 控制室", resultLabel:"Sandbox Pilot 控制室已准备", redacted:true }, redacted:true },
+        mockProviderIncidentDrillSummary:{ status:"ready", userFacingSummary:{ title:"Mock Provider 事故演练", resultLabel:"Mock 事故演练已准备", redacted:true }, redacted:true },
+        productionBlockerMatrixSummary:{ status:"ready", userFacingSummary:{ title:"Production 阻断矩阵", resultLabel:"Production 阻断矩阵已准备", redacted:true }, redacted:true },
+        providerPilotControlViewModelSummary:{ status:"ready", title:"Provider Sandbox Pilot 控制与阻断", redacted:true },
+        providerSandboxPilotControlStatus:"ready",
+        mockProviderIncidentDrillStatus:"ready",
+        productionBlockerMatrixStatus:"ready",
+        providerPilotControlViewModelStatus:"ready",
+        safeToProceedWithHumanControlledSandboxProviderPilotPlan:true
       });
-      const section = host.querySelector("[data-commerce-global-shopping-provider-launch-readiness='true']");
+      const section = host.querySelector("[data-commerce-global-shopping-provider-pilot-control='true']");
       document.body.appendChild(host);
       return {
         text:host.innerText,
         html:host.innerHTML,
         sectionText:section ? section.innerText : "",
         sectionHtml:section ? section.innerHTML : "",
-        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-launch-readiness='true']").length,
-        mockAdapterButtonCount:host.querySelectorAll("[data-commerce-global-shopping-mock-adapter-registry-show]").length,
-        contractReplayButtonCount:host.querySelectorAll("[data-commerce-global-shopping-contract-replay-show]").length,
-        launchReadinessButtonCount:host.querySelectorAll("[data-commerce-global-shopping-launch-readiness-show]").length
+        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-pilot-control='true']").length,
+        pilotControlButtonCount:host.querySelectorAll("[data-commerce-global-shopping-pilot-control-room-show]").length,
+        incidentDrillButtonCount:host.querySelectorAll("[data-commerce-global-shopping-incident-drill-show]").length,
+        blockerButtonCount:host.querySelectorAll("[data-commerce-global-shopping-production-blockers-show]").length
       };
     });
-    expect(v233.sectionCount).toBe(1);
-    expect(v233.mockAdapterButtonCount).toBe(1);
-    expect(v233.contractReplayButtonCount).toBe(1);
-    expect(v233.launchReadinessButtonCount).toBe(1);
-    expect(v233.text).toContain("Provider 启动准备与合同回放");
-    expect(v233.text).toContain("Mock Provider Adapter 注册运行时");
-    expect(v233.text).toContain("Provider 合同回放器");
-    expect(v233.text).toContain("Provider 启动准备总闸门");
-    expect(v233.text).toContain("Mock Adapter 注册");
-    expect(v233.text).toContain("合同回放");
-    expect(v233.text).toContain("启动准备");
-    expect(v233.text).toContain("Mock Provider Adapter 注册运行时已准备");
-    expect(v233.text).toContain("Provider 合同回放器已准备");
-    expect(v233.text).toContain("Provider 启动准备总闸门已准备");
-    expect(v233.text).toContain("Mock Adapter 注册不接真实 provider");
-    expect(v233.text).toContain("合同回放不回放 raw request 或 raw response");
-    expect(v233.text).toContain("启动准备不读取密钥、不联网");
-    expect(v233.text).toContain("真实 sandbox provider 仍需人工审批");
-    expect(v233.text).toContain("当前只展示 provider 启动准备和合同回放");
-    expect(v233.text).toContain("不接真实 provider，不读取密钥，不联网，不打开平台，不启用生产 provider");
-    expect(v233.sectionText).not.toMatch(/立即购买|直接下单|一键下单|一键出票|授权付款|创建订单|读取 API key|生成 endpoint|启用 production provider|创建审批任务|发送邮件|打开外部文档|paymentUrl|orderUrl|checkoutUrl|bookingUrl|token|key|secret/);
-    expect(v233.sectionHtml).not.toMatch(/https?:\/\//i);
+    expect(v235.sectionCount).toBe(1);
+    expect(v235.pilotControlButtonCount).toBe(1);
+    expect(v235.incidentDrillButtonCount).toBe(1);
+    expect(v235.blockerButtonCount).toBe(1);
+    expect(v235.text).toContain("Provider Sandbox Pilot 控制与阻断");
+    expect(v235.text).toContain("Provider Sandbox Pilot 控制室");
+    expect(v235.text).toContain("Mock Provider 事故演练");
+    expect(v235.text).toContain("Production 阻断矩阵");
+    expect(v235.text).toContain("Pilot 控制室");
+    expect(v235.text).toContain("事故演练");
+    expect(v235.text).toContain("阻断矩阵");
+    expect(v235.text).toContain("Sandbox Pilot 控制室已准备");
+    expect(v235.text).toContain("Mock 事故演练已准备");
+    expect(v235.text).toContain("Production 阻断矩阵已准备");
+    expect(v235.text).toContain("Pilot 控制室不启动真实 provider");
+    expect(v235.text).toContain("事故演练不触发真实告警或回滚");
+    expect(v235.text).toContain("阻断矩阵不修改运行配置");
+    expect(v235.text).toContain("Human-controlled pilot 仍需人工审批");
+    expect(v235.text).toContain("当前只展示 sandbox pilot 控制、mock 事故演练和 production 阻断矩阵");
+    expect(v235.text).toContain("不接真实 provider，不读取密钥，不联网，不生成 endpoint，不执行回滚");
+    expect(v235.sectionText).not.toMatch(/立即购买|直接下单|一键下单|一键出票|授权付款|创建订单|读取 API key|(?<!不)生成 endpoint|启用 production provider|创建审批任务|发送邮件|打开外部文档|paymentUrl|orderUrl|checkoutUrl|bookingUrl|token|key|secret/);
+    expect(v235.sectionHtml).not.toMatch(/https?:\/\//i);
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 

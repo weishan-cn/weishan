@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.3.4";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.3.5";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -288,7 +288,7 @@
       humanApprovalSimulationGateSummary: stripUnsafe(safe.humanApprovalSimulationGateSummary || null),
       mockProviderLaunchDrillSummary: stripUnsafe(safe.mockProviderLaunchDrillSummary || null),
       sandboxProviderRollbackPlanSummary: stripUnsafe(safe.sandboxProviderRollbackPlanSummary || null),
-      providerLaunchSimulationViewModelSummary: stripUnsafe(safe.providerLaunchSimulationViewModelSummary || null),
+      providerLaunchSimulationViewModelSummary: stripUnsafe(safe.providerLaunchSimulationViewModelSummary || null), providerSandboxPilotControlRoomSummary: stripUnsafe(safe.providerSandboxPilotControlRoomSummary || null), mockProviderIncidentDrillSummary: stripUnsafe(safe.mockProviderIncidentDrillSummary || null), productionBlockerMatrixSummary: stripUnsafe(safe.productionBlockerMatrixSummary || null), providerPilotControlViewModelSummary: stripUnsafe(safe.providerPilotControlViewModelSummary || null),
       rcRegressionStatus: safeLine(safe.rcRegressionStatus || ""),
       releaseRiskStatus: safeLine(safe.releaseRiskStatus || ""),
       safeToContinueReleaseCandidate: safe.safeToContinueReleaseCandidate === true,
@@ -317,7 +317,7 @@
       providerLaunchSimulationViewModelStatus: safeLine(safe.providerLaunchSimulationViewModelStatus || ""),
       safeToProceedWithReadOnlyPriceProviderSandbox: safe.safeToProceedWithReadOnlyPriceProviderSandbox === true,
       safeToProceedWithFirstSandboxProviderConnectorImplementation: safe.safeToProceedWithFirstSandboxProviderConnectorImplementation === true,
-      safeToProceedWithHumanControlledSandboxProviderPilot: safe.safeToProceedWithHumanControlledSandboxProviderPilot === true,
+      safeToProceedWithHumanControlledSandboxProviderPilot: safe.safeToProceedWithHumanControlledSandboxProviderPilot === true, safeToProceedWithHumanControlledSandboxProviderPilotPlan: safe.safeToProceedWithHumanControlledSandboxProviderPilotPlan === true,
       safeToProceedWithJumpToPlatformMvp: safe.safeToProceedWithJumpToPlatformMvp === true,
       sandboxDeepLinkStatus: safeLine(safe.sandboxDeepLinkStatus || ""),
       platformAvailabilityStatus: safeLine(safe.platformAvailabilityStatus || ""),

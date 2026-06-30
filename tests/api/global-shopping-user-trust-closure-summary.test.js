@@ -16,9 +16,9 @@ function load(file) {
 function main() {
   const windowRef = load("apps/desktop/src/renderer/core/globalShoppingUserTrustClosureSummary.js");
   const api = windowRef.WeishanGlobalShoppingUserTrustClosureSummary;
-  assert.equal(api.GLOBAL_SHOPPING_USER_TRUST_CLOSURE_SUMMARY_VERSION, "2.3.4");
+  assert.equal(api.GLOBAL_SHOPPING_USER_TRUST_CLOSURE_SUMMARY_VERSION, "2.3.5");
   const ready = api.buildGlobalShoppingUserTrustClosureSummary({});
-  assert.equal(ready.appVersion, "2.3.4");
+  assert.equal(ready.appVersion, "2.3.5");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "用户信任闭环摘要");
   assert.equal(ready.trustStatements.some((item) => item.label === "平台页面为最终依据"), true);

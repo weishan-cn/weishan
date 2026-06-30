@@ -24,7 +24,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingMockProviderLaunchDrill.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingMockProviderLaunchDrill;
-  assert.equal(api.GLOBAL_SHOPPING_MOCK_PROVIDER_LAUNCH_DRILL_VERSION, "2.3.4");
+  assert.equal(api.GLOBAL_SHOPPING_MOCK_PROVIDER_LAUNCH_DRILL_VERSION, "2.3.5");
 
   const ready = api.buildGlobalShoppingMockProviderLaunchDrill({
     mockProviderAdapterRegistryRuntimeSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Mock Adapter 注册运行时已准备", redacted:true } },

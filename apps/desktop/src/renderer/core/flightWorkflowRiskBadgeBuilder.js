@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.4";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.5";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -329,6 +329,13 @@
       if (obj(safe.mockProviderLaunchDrillSummary).status || obj(safe.providerLaunchSimulationViewModelSummary).status) badges.push(badge("mock_provider_launch_boundary", "Mock 启动不启动真实 provider", "info"));
       if (obj(safe.sandboxProviderRollbackPlanSummary).status || obj(safe.providerLaunchSimulationViewModelSummary).status) badges.push(badge("sandbox_provider_rollback_boundary", "回滚预案不执行回滚", "warning"));
       if (safe.safeToProceedWithHumanControlledSandboxProviderPilot === true) badges.push(badge("human_controlled_sandbox_provider_pilot", "真实 sandbox provider pilot 仍需人工控制", "warning"));
+      if (obj(safe.providerSandboxPilotControlRoomSummary).status === "ready" || safe.providerSandboxPilotControlStatus === "ready") badges.push(badge("provider_sandbox_pilot_control_room_ready", "Provider Sandbox Pilot 控制室已准备", "info"));
+      if (obj(safe.mockProviderIncidentDrillSummary).status === "ready" || safe.mockProviderIncidentDrillStatus === "ready") badges.push(badge("mock_provider_incident_drill_ready", "Mock Provider 事故演练已准备", "info"));
+      if (obj(safe.productionBlockerMatrixSummary).status === "ready" || safe.productionBlockerMatrixStatus === "ready") badges.push(badge("production_blocker_matrix_ready", "Production 阻断矩阵已准备", "info"));
+      if (obj(safe.providerSandboxPilotControlRoomSummary).status || obj(safe.providerPilotControlViewModelSummary).status) badges.push(badge("provider_sandbox_pilot_control_room_boundary", "Pilot 控制室不启动真实 provider", "info"));
+      if (obj(safe.mockProviderIncidentDrillSummary).status || obj(safe.providerPilotControlViewModelSummary).status) badges.push(badge("mock_provider_incident_drill_boundary", "事故演练不触发真实告警或回滚", "warning"));
+      if (obj(safe.productionBlockerMatrixSummary).status || obj(safe.providerPilotControlViewModelSummary).status) badges.push(badge("production_blocker_matrix_boundary", "阻断矩阵不修改运行配置", "info"));
+      if (safe.safeToProceedWithHumanControlledSandboxProviderPilotPlan === true) badges.push(badge("human_controlled_pilot_plan_human_review", "Human-controlled pilot 仍需人工审批", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "ready") badges.push(badge("sandbox_deep_link_candidate_ready", "Sandbox 跳转候选已准备", "info"));
       if (sandboxDeepLinkCandidateSummary.status === "needs_review") badges.push(badge("sandbox_deep_link_candidate_review", "Sandbox 跳转候选仍需复核", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "blocked") badges.push(badge("sandbox_deep_link_candidate_blocked", "Sandbox 跳转候选已阻断", "blocked"));
