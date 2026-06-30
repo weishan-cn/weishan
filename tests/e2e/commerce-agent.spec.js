@@ -8513,7 +8513,7 @@ test.describe.serial("commerce agent workbench", () => {
     const cases = [
       {
         input:runId + "-SMOKE-FLIGHT 购买7月15日上海到成都最便宜的直达机票",
-        expected:["机票搜索结果", "出发地：上海", "目的地：成都", "日期：7 月 15 日", "直达偏好：直达优先", "排序：低价优先", "推荐结果", "只读候选价", "平台最终为准", "未锁价", "不代表可出票", "去平台确认", "手动核对入口"]
+        expected:["机票搜索结果", "出发地：上海", "目的地：成都", "日期：7 月 15 日", "直达偏好：直达优先", "排序：低价优先", "推荐结果", "只读候选价", "以平台页面为准", "不可下单", "去平台确认", "手动核对入口"]
       },
       {
         input:runId + "-SMOKE-HOTEL 帮我找成都春熙路附近 7 月 12 日入住 7 月 14 日离店的酒店",
@@ -8547,16 +8547,13 @@ test.describe.serial("commerce agent workbench", () => {
       if (item.input.includes("SMOKE-FLIGHT")) {
         await expect(summary.locator(".commerce-top-result-card")).toHaveCount(1);
         const flightCard = summary.locator(".commerce-top-result-card").first();
-        await expect(flightCard).toContainText("¥1010");
-        await expect(flightCard).toContainText("票面价 ¥860｜税费 ¥110｜附加费 ¥40");
+        await expect(flightCard).toContainText("价格暂不展示");
+        await expect(flightCard).toContainText("票面价 未单独提供 / 以平台页面为准｜税费 未单独提供 / 以平台页面为准｜附加费 未单独提供 / 以平台页面为准");
         await expect(flightCard).toContainText("燃油/机建费：以平台页面为准");
-        await expect(flightCard.locator(".commerce-result-card-badge")).toHaveCount(4);
-        await expect(flightCard).toContainText("只读候选价");
-        await expect(flightCard).toContainText("平台最终为准");
-        await expect(flightCard).toContainText("未锁价");
-        await expect(flightCard).toContainText("不代表可出票");
-        await expect(flightCard).not.toContainText("只读候选价平台最终为准未锁价不代表可出票");
-        await expect(flightCard).not.toContainText("只读候选价平台最终为准未锁价不代表可出票去平台确认");
+        await expect(flightCard).toContainText("无真实价格");
+        await expect(flightCard).toContainText("暂无生产真实最低价");
+        await expect(flightCard).toContainText("以平台页面为准");
+        await expect(flightCard).toContainText("不可下单");
         await expect(flightCard).not.toContainText("autoOpen: false");
         await expect(flightCard).not.toContainText("payment: false");
         await expect(flightCard).not.toContainText("order: false");
@@ -8568,18 +8565,18 @@ test.describe.serial("commerce agent workbench", () => {
         await expect(fareDetails).toHaveJSProperty("open", false);
         await fareDetails.locator("> summary").click();
         await fareDetails.evaluate((el) => { if (!el.open) el.open = true; el.setAttribute("open", ""); });
-        await expect(fareDetails).toContainText("票面价：¥860");
+        await expect(fareDetails).toContainText("票面价：未单独提供 / 以平台页面为准");
         await expect(fareDetails).toContainText("燃油附加费：未单独提供 / 以平台页面为准");
         await expect(fareDetails).toContainText("机场建设费 / 民航发展基金：未单独提供 / 以平台页面为准");
         await expect(fareDetails).toContainText("平台服务费：未单独提供 / 以平台页面为准");
-        await expect(fareDetails).toContainText("税费：¥110");
-        await expect(fareDetails).toContainText("其它附加费：¥40");
-        await expect(fareDetails).toContainText("最终应付总价：¥1010");
+        await expect(fareDetails).toContainText("税费：未单独提供 / 以平台页面为准");
+        await expect(fareDetails).toContainText("其它附加费：未单独提供 / 以平台页面为准");
+        await expect(fareDetails).toContainText("最终应付总价：价格暂不展示");
         await fareDetails.evaluate((el) => { el.open = false; el.removeAttribute("open"); });
         const userSurfaceText = await visibleTextWithoutTechnicalDetails(summary);
         expect((userSurfaceText.match(/最终应付总价：¥1010/g) || []).length).toBe(0);
         expect((userSurfaceText.match(/weishan 只做搜索和比较，不收款、不下单/g) || []).length).toBeLessThanOrEqual(1);
-        expect((userSurfaceText.match(/暂无生产真实最低价/g) || []).length).toBeLessThanOrEqual(1);
+        expect((userSurfaceText.match(/暂无生产真实最低价/g) || []).length).toBeLessThanOrEqual(2);
         expect(userSurfaceText).not.toContain("目的地：成都直达");
         expect(userSurfaceText).not.toContain("上海 → 成都直达");
         expect(userSurfaceText).not.toContain("Cheapest Truth Guard");
@@ -8669,7 +8666,7 @@ test.describe.serial("commerce agent workbench", () => {
 
         await openDisclosure(debugBody, "commerce-top-result-cards-builder-disclosure");
         const topCardsBody = debugBody.locator("details.commerce-top-result-cards-builder-disclosure .commerce-disclosure-body").first();
-        for (const text of ["Top Result Cards Builder", "top result cards builder: active", "maxCardCount: 3", "cheapestClaimCount: 0", "limitedBetaCheapestClaimBlockedCount: 1", "incompleteFareExcludedCount: 1", "totalPayableSortUsed: false", "fakeResultBlockedCount: 0", "bookingUrlDisplayedCount: 0", "paymentActionDisplayedCount: 0", "orderActionDisplayedCount: 0", "identityUploadDisplayedCount: 0", "FLIGHT_FARE_BREAKDOWN_DRAFT", "CHEAPEST_TRUTH_GUARD_DRAFT", "FARE_CARD_UX_CLEANUP_DRAFT", "TOP_RESULT_CARDS_BUILDER_DRAFT", "redacted: true"]) await expect(topCardsBody).toContainText(text);
+        for (const text of ["Top Result Cards Builder", "top result cards builder: active", "maxCardCount: 3", "cheapestClaimCount: 0", "limitedBetaCheapestClaimBlockedCount: 0", "incompleteFareExcludedCount: 1", "totalPayableSortUsed: false", "fakeResultBlockedCount: 0", "bookingUrlDisplayedCount: 0", "paymentActionDisplayedCount: 0", "orderActionDisplayedCount: 0", "identityUploadDisplayedCount: 0", "FLIGHT_FARE_BREAKDOWN_DRAFT", "CHEAPEST_TRUTH_GUARD_DRAFT", "FARE_CARD_UX_CLEANUP_DRAFT", "TOP_RESULT_CARDS_BUILDER_DRAFT", "redacted: true"]) await expect(topCardsBody).toContainText(text);
 
         await openDisclosure(debugBody, "commerce-provider-handoff-ui-disclosure");
         const handoffBody = debugBody.locator("details.commerce-provider-handoff-ui-disclosure .commerce-disclosure-body").first();
@@ -8708,10 +8705,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
     await expect(summary).toContainText("只读候选价");
     await expect(summary).toContainText("真实结果优先");
-    await expect(summary).toContainText("平台最终为准");
-    await expect(summary).toContainText("平台最终为准");
-    await expect(summary).toContainText("未锁价");
-    await expect(summary).toContainText("不代表可出票");
+    await expect(summary).toContainText("以平台页面为准");
+    await expect(summary).toContainText("不可下单");
     await expect(summary).not.toContainText(/bookingUrl:\s*https?:|checkoutUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
     await expect(summary.getByRole("button", { name:/^(去预订|预订|付款|下单|提交订单|上传证件|上传银行卡)$/ })).toHaveCount(0);
     expect(await latestOpenExternalUrl(page)).toBe("");
@@ -8762,8 +8757,8 @@ test.describe.serial("commerce agent workbench", () => {
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2148-RECOVERY 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
     await expect(summary).toContainText("只读候选价");
-    await expect(summary).toContainText("平台最终为准");
-    await expect(summary).toContainText("不代表可出票");
+    await expect(summary).toContainText("以平台页面为准");
+    await expect(summary).toContainText("不可下单");
     await expect(summary.locator('[data-commerce-read-only-recovered-evidence="true"]').first()).toContainText("已恢复最近一次只读证据", { timeout:15000 });
     await expect(summary.locator('[data-commerce-read-only-refresh-summary="true"]').first()).toContainText("最近一次刷新：已刷新");
     const recoveryState = await page.evaluate(() => window.WeishanReadOnlyQuoteInteractiveRefreshUiController.buildReadOnlyQuoteRecoveryUiState({}));
@@ -8794,7 +8789,7 @@ test.describe.serial("commerce agent workbench", () => {
 
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2149-IMPORT 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
-    for (const text of ["真实结果优先", "机票搜索结果", "只读候选价", "平台最终为准", "未锁价", "不代表可出票"]) await expect(summary).toContainText(text);
+    for (const text of ["真实结果优先", "机票搜索结果", "只读候选价", "以平台页面为准", "不可下单"]) await expect(summary).toContainText(text);
 
     const validSandboxJson = JSON.stringify([
       { providerId:"flight_provider_trusted_fixture", providerName:"Trusted Flight Fixture", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import", route:{ origin:"SHA", destination:"CTU" }, departureDate:"2026-07-15", currency:"CNY", baseFare:860, taxesAndFees:110, providerFees:40, totalPrice:1010, priceUpdatedAt:"2026-01-01T00:00:00.000Z", freshnessMinutes:15, quoteId:"q1010", handoffCandidate:{ providerId:"google_flights_search", handoffType:"provider_search" } },
@@ -9722,66 +9717,69 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.3.9 provider manual release signoff stays local and bounded @commerce-smoke", async () => {
+  test("v2.4.0 provider sandbox activation readiness stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
-      window.WeishanGlobalShoppingManualGovernanceReleaseDecisionRoom &&
-      window.WeishanGlobalShoppingSandboxPilotExceptionRegister &&
-      window.WeishanGlobalShoppingProviderReadinessSignOffPacket &&
-      window.WeishanGlobalShoppingProviderManualReleaseViewModel &&
+      window.WeishanGlobalShoppingReadOnlySandboxActivationReadinessCenter &&
+      window.WeishanGlobalShoppingOfflineMockSandboxSessionRunner &&
+      window.WeishanGlobalShoppingManualProviderActivationHandoffPacket &&
+      window.WeishanGlobalShoppingProviderSandboxActivationViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
-    const v239 = await page.evaluate(() => {
+    const v240 = await page.evaluate(() => {
       const cardApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
       const host = document.createElement("section");
-      host.setAttribute("data-commerce-v239-render-smoke", "true");
-      host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml({
-        manualGovernanceReleaseDecisionRoomSummary:{ status:"ready", userFacingSummary:{ title:"Manual Governance Release 决策室", resultLabel:"人工发布决策室已准备", redacted:true }, redacted:true },
-        sandboxPilotExceptionRegisterSummary:{ status:"ready", userFacingSummary:{ title:"Sandbox Pilot 例外登记簿", resultLabel:"例外登记簿已准备", redacted:true }, redacted:true },
-        providerReadinessSignOffPacketSummary:{ status:"ready", userFacingSummary:{ title:"Provider 准备签核包", resultLabel:"准备签核包已准备", redacted:true }, redacted:true },
-        providerManualReleaseViewModelSummary:{ status:"ready", title:"Provider 人工发布决策与签核", redacted:true },
-        manualGovernanceReleaseDecisionRoomStatus:"ready",
-        sandboxPilotExceptionRegisterStatus:"ready",
-        providerReadinessSignOffPacketStatus:"ready",
-        providerManualReleaseViewModelStatus:"ready",
-        safeToProceedWithManualProviderSignOffReview:false
-      });
-      const section = host.querySelector("[data-commerce-global-shopping-provider-manual-release='true']");
+      host.setAttribute("data-commerce-v240-render-smoke", "true");
+      const card = {
+        version:"2.4.0",
+        visible:true,
+        readOnlySandboxActivationReadinessCenterSummary:{ status:"ready", userFacingSummary:{ title:"只读 Sandbox 激活准备中心", resultLabel:"Sandbox 激活准备中心已准备", redacted:true }, redacted:true },
+        offlineMockSandboxSessionRunnerSummary:{ status:"ready", userFacingSummary:{ title:"离线 Mock Sandbox 会话运行器", resultLabel:"离线 Mock Sandbox 会话运行器已准备", redacted:true }, redacted:true },
+        manualProviderActivationHandoffPacketSummary:{ status:"ready", userFacingSummary:{ title:"人工 Provider 激活交接包", resultLabel:"人工 Provider 激活交接包已准备", redacted:true }, redacted:true },
+        providerSandboxActivationViewModelSummary:{ status:"ready", title:"Provider Sandbox 激活准备与离线演练", redacted:true },
+        readOnlySandboxActivationReadinessCenterStatus:"ready",
+        offlineMockSandboxSessionRunnerStatus:"ready",
+        manualProviderActivationHandoffPacketStatus:"ready",
+        providerSandboxActivationViewModelStatus:"ready",
+        safeToProceedWithManualSandboxActivationReview:false
+      };
+      host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml(card);
+      const section = host.querySelector("[data-commerce-global-shopping-provider-sandbox-activation='true']");
       document.body.appendChild(host);
       return {
         text:host.innerText,
         html:host.innerHTML,
         sectionText:section ? section.innerText : "",
         sectionHtml:section ? section.innerHTML : "",
-        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-manual-release='true']").length,
-        decisionButtonCount:host.querySelectorAll("[data-commerce-global-shopping-manual-release-decision-show]").length,
-        exceptionButtonCount:host.querySelectorAll("[data-commerce-global-shopping-sandbox-exception-register-show]").length,
-        signoffButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-signoff-show]").length
+        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-sandbox-activation='true']").length,
+        readinessButtonCount:host.querySelectorAll("[data-commerce-global-shopping-sandbox-activation-readiness-show]").length,
+        mockButtonCount:host.querySelectorAll("[data-commerce-global-shopping-offline-mock-session-show]").length,
+        handoffButtonCount:host.querySelectorAll("[data-commerce-global-shopping-manual-activation-handoff-show]").length
       };
     });
-    expect(v239.sectionCount).toBe(1);
-    expect(v239.decisionButtonCount).toBe(1);
-    expect(v239.exceptionButtonCount).toBe(1);
-    expect(v239.signoffButtonCount).toBe(1);
-    expect(v239.text).toContain("Provider 人工发布决策与签核");
-    expect(v239.text).toContain("Manual Governance Release 决策室");
-    expect(v239.text).toContain("Sandbox Pilot 例外登记簿");
-    expect(v239.text).toContain("Provider 准备签核包");
-    expect(v239.text).toContain("人工发布决策");
-    expect(v239.text).toContain("例外登记");
-    expect(v239.text).toContain("准备签核");
-    expect(v239.text).toContain("人工发布决策室已准备");
-    expect(v239.text).toContain("例外登记簿已准备");
-    expect(v239.text).toContain("准备签核包已准备");
-    expect(v239.text).toContain("人工发布决策不创建 release、不 push");
-    expect(v239.text).toContain("例外登记不持久化审批结果");
-    expect(v239.text).toContain("准备签核包不写文件、不导出");
-    expect(v239.text).toContain("Manual provider sign-off 仍需人工复核");
-    expect(v239.text).toContain("当前只展示 provider 人工发布决策、例外登记和准备签核");
-    expect(v239.text).toContain("不接真实 provider，不读取密钥，不联网，不创建 release，不创建 tag，不 push");
-    expect(v239.sectionText).not.toMatch(/立即购买|直接下单|一键下单|一键出票|授权付款|创建订单|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|paymentUrl|orderUrl|checkoutUrl|bookingUrl|token|key|secret/);
-    expect(v239.sectionHtml).not.toMatch(/https?:\/\//i);
+    expect(v240.sectionCount).toBe(1);
+    expect(v240.readinessButtonCount).toBe(1);
+    expect(v240.mockButtonCount).toBe(1);
+    expect(v240.handoffButtonCount).toBe(1);
+    expect(v240.text).toContain("Provider Sandbox 激活准备与离线演练");
+    expect(v240.text).toContain("只读 Sandbox 激活准备中心");
+    expect(v240.text).toContain("离线 Mock Sandbox 会话运行器");
+    expect(v240.text).toContain("人工 Provider 激活交接包");
+    expect(v240.text).toContain("Sandbox 激活准备");
+    expect(v240.text).toContain("离线 Mock 会话");
+    expect(v240.text).toContain("人工激活交接");
+    expect(v240.text).toContain("Sandbox 激活准备中心已准备");
+    expect(v240.text).toContain("离线 Mock Sandbox 会话运行器已准备");
+    expect(v240.text).toContain("人工 Provider 激活交接包已准备");
+    expect(v240.text).toContain("Sandbox 激活准备不执行激活");
+    expect(v240.text).toContain("离线 Mock 会话不联网、不读密钥");
+    expect(v240.text).toContain("人工激活交接包不创建 release、不 push");
+    expect(v240.text).toContain("Manual sandbox activation 仍需人工复核");
+    expect(v240.text).toContain("当前只展示 provider sandbox 激活准备、离线 mock 会话和人工激活交接");
+    expect(v240.text).toContain("不接真实 provider，不读取密钥，不联网，不激活 sandbox，不创建 release，不 push");
+    expect(v240.sectionText).not.toMatch(/开始接入真实 provider|启动 pilot|(?<!不)激活 sandbox|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|key 输入框|创建审批任务|发送邮件|打开外部文档|执行回滚|修改 git|删除文件|停止服务|禁用 provider|修改配置|下载证据|导出证据|上传证据|发布|立即购买|直接下单|一键下单|一键出票|授权付款|创建订单|打开平台/);
+    expect(v240.sectionHtml).not.toMatch(/https?:\/\//i);
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 

@@ -181,8 +181,8 @@ test.describe.serial("dispatch router", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索结果");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无生产真实最低价");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("只读候选价");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("平台最终为准");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不代表可出票");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("以平台页面为准");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不可下单");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("北京");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
@@ -195,8 +195,8 @@ test.describe.serial("dispatch router", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索结果");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无生产真实最低价");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("只读候选价");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("平台最终为准");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不代表可出票");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("以平台页面为准");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不可下单");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("北京");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
@@ -205,8 +205,8 @@ test.describe.serial("dispatch router", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("机票搜索结果");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无生产真实最低价");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("只读候选价");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("平台最终为准");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不代表可出票");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("以平台页面为准");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不可下单");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("成都");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("北京");
     await expect(currentTaskLogs(page)).not.toContainText("chat.answer");

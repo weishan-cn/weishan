@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MANUAL_GOVERNANCE_RELEASE_DECISION_ROOM_VERSION = "2.3.9";
+  const GLOBAL_SHOPPING_MANUAL_GOVERNANCE_RELEASE_DECISION_ROOM_VERSION = "2.4.0";
   const ROOM_NAME = "global_shopping_manual_governance_release_decision_room_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

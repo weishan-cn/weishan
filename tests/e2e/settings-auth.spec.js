@@ -236,8 +236,8 @@ test.describe.serial("settings local auth hotfix", () => {
     await expect(result).toContainText("低价优先");
     await expect(result).toContainText("暂无生产真实最低价");
     await expect(result).toContainText("只读候选价");
-    await expect(result).toContainText("平台最终为准");
-    await expect(result).toContainText("不代表可出票");
+    await expect(result).toContainText("以平台页面为准");
+    await expect(result).toContainText("不可下单");
     await expect(result).not.toContainText("Limited Beta");
     await expect(result).not.toContainText("日上海");
     await expect(result).not.toContainText("日期：待补充");

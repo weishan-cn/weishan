@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingSandboxPilotExceptionRegister.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingSandboxPilotExceptionRegister;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PILOT_EXCEPTION_REGISTER_VERSION, "2.3.9");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PILOT_EXCEPTION_REGISTER_VERSION, "2.4.0");
 
   const ready = api.buildGlobalShoppingSandboxPilotExceptionRegister({
     manualDecisionRoomSummary:{ status:"ready", userFacingSummary:{ resultLabel:"人工发布决策室已准备", redacted:true }, redacted:true },

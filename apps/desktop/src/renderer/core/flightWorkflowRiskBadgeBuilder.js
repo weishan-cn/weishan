@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.9";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.4.0";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -362,6 +362,13 @@
       if (obj(safe.sandboxPilotExceptionRegisterSummary).status || obj(safe.providerManualReleaseViewModelSummary).status) badges.push(badge("sandbox_exception_register_no_persistence", "例外登记不持久化审批结果", "info"));
       if (obj(safe.providerReadinessSignOffPacketSummary).status || obj(safe.providerManualReleaseViewModelSummary).status) badges.push(badge("provider_signoff_packet_no_export", "准备签核包不写文件、不导出", "info"));
       if ((obj(safe.providerManualReleaseViewModelSummary).status && obj(safe.providerManualReleaseViewModelSummary).status !== "blocked") || safe.safeToProceedWithManualProviderSignOffReview === false) badges.push(badge("manual_provider_signoff_required", "Manual provider sign-off 仍需人工复核", "warning"));
+      if (obj(safe.readOnlySandboxActivationReadinessCenterSummary).status === "ready" || safe.readOnlySandboxActivationReadinessCenterStatus === "ready") badges.push(badge("sandbox_activation_readiness_center_ready", "只读 Sandbox 激活准备中心已准备", "info"));
+      if (obj(safe.offlineMockSandboxSessionRunnerSummary).status === "ready" || safe.offlineMockSandboxSessionRunnerStatus === "ready") badges.push(badge("offline_mock_sandbox_session_runner_ready", "离线 Mock Sandbox 会话运行器已准备", "info"));
+      if (obj(safe.manualProviderActivationHandoffPacketSummary).status === "ready" || safe.manualProviderActivationHandoffPacketStatus === "ready") badges.push(badge("manual_provider_activation_handoff_packet_ready", "人工 Provider 激活交接包已准备", "info"));
+      if (obj(safe.readOnlySandboxActivationReadinessCenterSummary).status || obj(safe.providerSandboxActivationViewModelSummary).status) badges.push(badge("sandbox_activation_readiness_no_activation", "Sandbox 激活准备不执行激活", "info"));
+      if (obj(safe.offlineMockSandboxSessionRunnerSummary).status || obj(safe.providerSandboxActivationViewModelSummary).status) badges.push(badge("offline_mock_sandbox_session_no_network_key", "离线 Mock 会话不联网、不读密钥", "info"));
+      if (obj(safe.manualProviderActivationHandoffPacketSummary).status || obj(safe.providerSandboxActivationViewModelSummary).status) badges.push(badge("manual_activation_handoff_no_release_push", "人工激活交接包不创建 release、不 push", "info"));
+      if ((obj(safe.providerSandboxActivationViewModelSummary).status && obj(safe.providerSandboxActivationViewModelSummary).status !== "blocked") || safe.safeToProceedWithManualSandboxActivationReview === false) badges.push(badge("manual_sandbox_activation_review_required", "Manual sandbox activation 仍需人工复核", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "ready") badges.push(badge("sandbox_deep_link_candidate_ready", "Sandbox 跳转候选已准备", "info"));
       if (sandboxDeepLinkCandidateSummary.status === "needs_review") badges.push(badge("sandbox_deep_link_candidate_review", "Sandbox 跳转候选仍需复核", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "blocked") badges.push(badge("sandbox_deep_link_candidate_blocked", "Sandbox 跳转候选已阻断", "blocked"));
