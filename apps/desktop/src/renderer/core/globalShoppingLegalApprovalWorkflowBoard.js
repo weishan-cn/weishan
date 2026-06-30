@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_LEGAL_APPROVAL_WORKFLOW_BOARD_VERSION = "2.3.2";
+  const GLOBAL_SHOPPING_LEGAL_APPROVAL_WORKFLOW_BOARD_VERSION = "2.3.3";
   const BOARD_NAME = "global_shopping_legal_approval_workflow_board_v1";
   const REQUIRED_STAGES = [
     "法务审查",

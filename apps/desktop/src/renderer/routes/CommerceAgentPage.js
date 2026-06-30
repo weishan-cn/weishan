@@ -8114,6 +8114,33 @@
         showCommercePlatformTemplateFeedback("已显示安全熔断器", false);
         return;
       }
+      const globalShoppingMockAdapterRegistryButton = target && target.closest("[data-commerce-global-shopping-mock-adapter-registry-show]");
+      if (globalShoppingMockAdapterRegistryButton && host.contains(globalShoppingMockAdapterRegistryButton)) {
+        event.preventDefault();
+        const panel = globalShoppingMockAdapterRegistryButton.closest("[data-commerce-global-shopping-provider-launch-readiness]") || globalShoppingMockAdapterRegistryButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-mock-adapter-registry-output]") || panel;
+        output.innerHTML = '<p>Mock Provider Adapter 注册运行时</p><p>Mock Adapter 注册运行时已准备</p><p>Mock Adapter 注册不接真实 provider</p><p>只允许 mock / fixture / dry_run / contract_only</p><p>不读取密钥，不联网，不打开平台</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Mock Adapter 注册", false);
+        return;
+      }
+      const globalShoppingContractReplayButton = target && target.closest("[data-commerce-global-shopping-contract-replay-show]");
+      if (globalShoppingContractReplayButton && host.contains(globalShoppingContractReplayButton)) {
+        event.preventDefault();
+        const panel = globalShoppingContractReplayButton.closest("[data-commerce-global-shopping-provider-launch-readiness]") || globalShoppingContractReplayButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-contract-replay-output]") || panel;
+        output.innerHTML = '<p>Provider 合同回放器</p><p>Provider 合同回放器已准备</p><p>合同回放不回放 raw request 或 raw response</p><p>只回放脱敏 contract case</p><p>不读取密钥，不联网，不打开平台</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示合同回放", false);
+        return;
+      }
+      const globalShoppingLaunchReadinessButton = target && target.closest("[data-commerce-global-shopping-launch-readiness-show]");
+      if (globalShoppingLaunchReadinessButton && host.contains(globalShoppingLaunchReadinessButton)) {
+        event.preventDefault();
+        const panel = globalShoppingLaunchReadinessButton.closest("[data-commerce-global-shopping-provider-launch-readiness]") || globalShoppingLaunchReadinessButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-launch-readiness-output]") || panel;
+        output.innerHTML = '<p>Provider 启动准备总闸门</p><p>Provider 启动准备总闸门已准备</p><p>启动准备不读取密钥、不联网</p><p>真实 sandbox provider 仍需人工审批</p><p>不接真实 provider，不打开平台，不启用 production provider</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示启动准备", false);
+        return;
+      }
       const pilotInvitationGateButton = target && target.closest("[data-commerce-flight-pilot-invitation-gate-show]");
       if (pilotInvitationGateButton && host.contains(pilotInvitationGateButton)) {
         event.preventDefault();

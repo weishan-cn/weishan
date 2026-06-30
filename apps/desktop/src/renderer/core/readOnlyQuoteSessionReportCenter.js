@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.3.2";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.3.3";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -247,6 +247,10 @@
       vaultBoundaryContractSummary: stripUnsafe(safe.vaultBoundaryContractSummary || null),
       legalApprovalWorkflowBoardSummary: stripUnsafe(safe.legalApprovalWorkflowBoardSummary || null),
       providerMockRuntimeViewModelSummary: stripUnsafe(safe.providerMockRuntimeViewModelSummary || null),
+      mockProviderAdapterRegistryRuntimeSummary: stripUnsafe(safe.mockProviderAdapterRegistryRuntimeSummary || null),
+      providerContractReplayHarnessSummary: stripUnsafe(safe.providerContractReplayHarnessSummary || null),
+      providerLaunchReadinessBoardSummary: stripUnsafe(safe.providerLaunchReadinessBoardSummary || null),
+      providerLaunchReadinessViewModelSummary: stripUnsafe(safe.providerLaunchReadinessViewModelSummary || null),
       legalProviderFixtureSummary: stripUnsafe(safe.legalProviderFixtureSummary || null),
       providerCredentialSafetySummary: stripUnsafe(safe.providerCredentialSafetySummary || null),
       sandboxPriceFeedSummary: stripUnsafe(safe.sandboxPriceFeedSummary || null),
@@ -535,6 +539,10 @@
       vaultBoundaryContractSummary: workflow.vaultBoundaryContractSummary || safe.vaultBoundaryContractSummary ? { title:"Vault Boundary Contract", line:workflow.vaultBoundaryContractSummary && workflow.vaultBoundaryContractSummary.userFacingSummary && workflow.vaultBoundaryContractSummary.userFacingSummary.resultLabel || safe.vaultBoundaryContractSummary && safe.vaultBoundaryContractSummary.userFacingSummary && safe.vaultBoundaryContractSummary.userFacingSummary.resultLabel || "Vault 边界合同仍需复核", redacted:true } : null,
       legalApprovalWorkflowBoardSummary: workflow.legalApprovalWorkflowBoardSummary || safe.legalApprovalWorkflowBoardSummary ? { title:"法务审批流程板", line:workflow.legalApprovalWorkflowBoardSummary && workflow.legalApprovalWorkflowBoardSummary.userFacingSummary && workflow.legalApprovalWorkflowBoardSummary.userFacingSummary.resultLabel || safe.legalApprovalWorkflowBoardSummary && safe.legalApprovalWorkflowBoardSummary.userFacingSummary && safe.legalApprovalWorkflowBoardSummary.userFacingSummary.resultLabel || "法务审批流程板仍需复核", redacted:true } : null,
       providerMockRuntimeViewModelSummary: workflow.providerMockRuntimeViewModelSummary || safe.providerMockRuntimeViewModelSummary ? { title:"Provider Mock Runtime 与审批准备", line:workflow.providerMockRuntimeViewModelSummary && workflow.providerMockRuntimeViewModelSummary.title || safe.providerMockRuntimeViewModelSummary && safe.providerMockRuntimeViewModelSummary.title || "Provider Mock Runtime 与审批准备", redacted:true } : null,
+      mockProviderAdapterRegistryRuntimeSummary: workflow.mockProviderAdapterRegistryRuntimeSummary || safe.mockProviderAdapterRegistryRuntimeSummary ? { title:"Mock Provider Adapter 注册运行时", line:workflow.mockProviderAdapterRegistryRuntimeSummary && workflow.mockProviderAdapterRegistryRuntimeSummary.userFacingSummary && workflow.mockProviderAdapterRegistryRuntimeSummary.userFacingSummary.resultLabel || safe.mockProviderAdapterRegistryRuntimeSummary && safe.mockProviderAdapterRegistryRuntimeSummary.userFacingSummary && safe.mockProviderAdapterRegistryRuntimeSummary.userFacingSummary.resultLabel || "Mock Adapter 注册仍需复核", redacted:true } : null,
+      providerContractReplayHarnessSummary: workflow.providerContractReplayHarnessSummary || safe.providerContractReplayHarnessSummary ? { title:"Provider 合同回放器", line:workflow.providerContractReplayHarnessSummary && workflow.providerContractReplayHarnessSummary.userFacingSummary && workflow.providerContractReplayHarnessSummary.userFacingSummary.resultLabel || safe.providerContractReplayHarnessSummary && safe.providerContractReplayHarnessSummary.userFacingSummary && safe.providerContractReplayHarnessSummary.userFacingSummary.resultLabel || "合同回放仍需复核", redacted:true } : null,
+      providerLaunchReadinessBoardSummary: workflow.providerLaunchReadinessBoardSummary || safe.providerLaunchReadinessBoardSummary ? { title:"Provider 启动准备总闸门", line:workflow.providerLaunchReadinessBoardSummary && workflow.providerLaunchReadinessBoardSummary.userFacingSummary && workflow.providerLaunchReadinessBoardSummary.userFacingSummary.resultLabel || safe.providerLaunchReadinessBoardSummary && safe.providerLaunchReadinessBoardSummary.userFacingSummary && safe.providerLaunchReadinessBoardSummary.userFacingSummary.resultLabel || "启动准备仍需复核", redacted:true } : null,
+      providerLaunchReadinessViewModelSummary: workflow.providerLaunchReadinessViewModelSummary || safe.providerLaunchReadinessViewModelSummary ? { title:"Provider 启动准备与合同回放", line:workflow.providerLaunchReadinessViewModelSummary && workflow.providerLaunchReadinessViewModelSummary.title || safe.providerLaunchReadinessViewModelSummary && safe.providerLaunchReadinessViewModelSummary.title || "Provider 启动准备与合同回放", redacted:true } : null,
       firstSandboxProviderConnectorStatus: workflow.firstSandboxProviderConnectorStatus || safe.firstSandboxProviderConnectorStatus || "",
       providerCoverageStatus: workflow.providerCoverageStatus || safe.providerCoverageStatus || "",
       sourceTrustStatus: workflow.sourceTrustStatus || safe.sourceTrustStatus || "",
@@ -592,6 +600,7 @@
       safeToProceedWithReadOnlyProviderSandboxPlanning: workflow.safeToProceedWithReadOnlyProviderSandboxPlanning === true || safe.safeToProceedWithReadOnlyProviderSandboxPlanning === true,
       safeToProceedWithProviderSandboxContractImplementation: workflow.safeToProceedWithProviderSandboxContractImplementation === true || safe.safeToProceedWithProviderSandboxContractImplementation === true,
       safeToProceedWithMockAdapterRuntimeHardening: workflow.safeToProceedWithMockAdapterRuntimeHardening === true || safe.safeToProceedWithMockAdapterRuntimeHardening === true,
+      safeToProceedWithHumanProviderSandboxApproval: workflow.safeToProceedWithHumanProviderSandboxApproval === true || safe.safeToProceedWithHumanProviderSandboxApproval === true,
       safeToProceedWithFirstReadOnlyProviderSandboxIntegration: workflow.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true || safe.safeToProceedWithFirstReadOnlyProviderSandboxIntegration === true,
       safeToProceedWithSandboxCandidateUserPreview: workflow.safeToProceedWithSandboxCandidateUserPreview === true || safe.safeToProceedWithSandboxCandidateUserPreview === true,
       pilotExitCriteriaSummary: pilotExitCriteriaSummary ? { title:"只读试点退出条件", line:pilotExitCriteriaSummary.userFacingSummary && pilotExitCriteriaSummary.userFacingSummary.resultLabel || "继续试点观察", redacted:true } : null,

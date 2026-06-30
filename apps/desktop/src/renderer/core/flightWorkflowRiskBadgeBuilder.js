@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.2";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.3";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -315,6 +315,13 @@
       if (obj(safe.vaultBoundaryContractSummary).status || obj(safe.providerMockRuntimeViewModelSummary).status) badges.push(badge("vault_boundary_contract_boundary", "Vault 边界不读取或保存真实密钥", "info"));
       if (obj(safe.legalApprovalWorkflowBoardSummary).status || obj(safe.providerMockRuntimeViewModelSummary).status) badges.push(badge("legal_approval_workflow_boundary", "审批流程不创建任务、不发邮件", "warning"));
       if (safe.safeToProceedWithMockAdapterRuntimeHardening === true) badges.push(badge("provider_mock_runtime_human_review", "下一步仍需人工审批", "warning"));
+      if (obj(safe.mockProviderAdapterRegistryRuntimeSummary).status === "ready" || safe.mockProviderAdapterRegistryStatus === "ready") badges.push(badge("mock_provider_adapter_registry_runtime_ready", "Mock Provider Adapter 注册运行时已准备", "info"));
+      if (obj(safe.providerContractReplayHarnessSummary).status === "ready" || safe.providerContractReplayStatus === "ready") badges.push(badge("provider_contract_replay_harness_ready", "Provider 合同回放器已准备", "info"));
+      if (obj(safe.providerLaunchReadinessBoardSummary).status === "ready" || safe.providerLaunchReadinessStatus === "ready") badges.push(badge("provider_launch_readiness_board_ready", "Provider 启动准备总闸门已准备", "info"));
+      if (obj(safe.mockProviderAdapterRegistryRuntimeSummary).status || obj(safe.providerLaunchReadinessViewModelSummary).status) badges.push(badge("mock_provider_adapter_registry_runtime_boundary", "Mock Adapter 注册不接真实 provider", "info"));
+      if (obj(safe.providerContractReplayHarnessSummary).status || obj(safe.providerLaunchReadinessViewModelSummary).status) badges.push(badge("provider_contract_replay_harness_boundary", "合同回放不回放 raw request 或 raw response", "info"));
+      if (obj(safe.providerLaunchReadinessBoardSummary).status || obj(safe.providerLaunchReadinessViewModelSummary).status) badges.push(badge("provider_launch_readiness_board_boundary", "启动准备不读取密钥、不联网", "warning"));
+      if (safe.safeToProceedWithHumanProviderSandboxApproval === true) badges.push(badge("provider_launch_readiness_human_review", "真实 sandbox provider 仍需人工审批", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "ready") badges.push(badge("sandbox_deep_link_candidate_ready", "Sandbox 跳转候选已准备", "info"));
       if (sandboxDeepLinkCandidateSummary.status === "needs_review") badges.push(badge("sandbox_deep_link_candidate_review", "Sandbox 跳转候选仍需复核", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "blocked") badges.push(badge("sandbox_deep_link_candidate_blocked", "Sandbox 跳转候选已阻断", "blocked"));

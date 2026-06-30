@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.3.2";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.3.3";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -281,6 +281,10 @@
       vaultBoundaryContractSummary: stripUnsafe(safe.vaultBoundaryContractSummary || null),
       legalApprovalWorkflowBoardSummary: stripUnsafe(safe.legalApprovalWorkflowBoardSummary || null),
       providerMockRuntimeViewModelSummary: stripUnsafe(safe.providerMockRuntimeViewModelSummary || null),
+      mockProviderAdapterRegistryRuntimeSummary: stripUnsafe(safe.mockProviderAdapterRegistryRuntimeSummary || null),
+      providerContractReplayHarnessSummary: stripUnsafe(safe.providerContractReplayHarnessSummary || null),
+      providerLaunchReadinessBoardSummary: stripUnsafe(safe.providerLaunchReadinessBoardSummary || null),
+      providerLaunchReadinessViewModelSummary: stripUnsafe(safe.providerLaunchReadinessViewModelSummary || null),
       rcRegressionStatus: safeLine(safe.rcRegressionStatus || ""),
       releaseRiskStatus: safeLine(safe.releaseRiskStatus || ""),
       safeToContinueReleaseCandidate: safe.safeToContinueReleaseCandidate === true,
@@ -337,8 +341,13 @@
       vaultBoundaryContractStatus: safeLine(safe.vaultBoundaryContractStatus || ""),
       legalApprovalWorkflowStatus: safeLine(safe.legalApprovalWorkflowStatus || ""),
       providerMockRuntimeViewModelStatus: safeLine(safe.providerMockRuntimeViewModelStatus || ""),
+      mockProviderAdapterRegistryStatus: safeLine(safe.mockProviderAdapterRegistryStatus || ""),
+      providerContractReplayStatus: safeLine(safe.providerContractReplayStatus || ""),
+      providerLaunchReadinessStatus: safeLine(safe.providerLaunchReadinessStatus || ""),
+      providerLaunchReadinessViewModelStatus: safeLine(safe.providerLaunchReadinessViewModelStatus || ""),
       safeToProceedWithProviderSandboxContractImplementation: safe.safeToProceedWithProviderSandboxContractImplementation === true,
       safeToProceedWithMockAdapterRuntimeHardening: safe.safeToProceedWithMockAdapterRuntimeHardening === true,
+      safeToProceedWithHumanProviderSandboxApproval: safe.safeToProceedWithHumanProviderSandboxApproval === true,
       pilotOpsStatus: safeLine(safe.pilotOpsStatus || ""),
       nextCohortDecisionStatus: safeLine(safe.nextCohortDecisionStatus || ""),
       pilotOpsPrimaryRisk: stripUnsafe(safe.pilotOpsPrimaryRisk || null),

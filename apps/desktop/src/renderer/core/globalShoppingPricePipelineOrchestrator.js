@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.3.2";
+  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.3.3";
   const ORCHESTRATOR_NAME = "global_shopping_price_pipeline_orchestrator_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -524,6 +524,28 @@
       vaultBoundaryContractSummary:vaultBoundaryContractSummary,
       legalApprovalWorkflowBoardSummary:legalApprovalWorkflowBoardSummary
     });
+    const mockProviderAdapterRegistryRuntimeSummary = resolveSummary(safe, "mockProviderAdapterRegistryRuntimeSummary", "WeishanGlobalShoppingMockProviderAdapterRegistryRuntime", "buildGlobalShoppingMockProviderAdapterRegistryRuntime", {
+      sandboxProviderMockRuntimeSummary:sandboxProviderMockRuntimeSummary,
+      sandboxAdapterContractTestbedSummary:sandboxAdapterContractTestbedSummary,
+      providerMockRuntimeViewModelSummary:providerMockRuntimeViewModelSummary
+    });
+    const providerContractReplayHarnessSummary = resolveSummary(safe, "providerContractReplayHarnessSummary", "WeishanGlobalShoppingProviderContractReplayHarness", "buildGlobalShoppingProviderContractReplayHarness", {
+      mockProviderAdapterRegistryRuntimeSummary:mockProviderAdapterRegistryRuntimeSummary,
+      sandboxAdapterContractTestbedSummary:sandboxAdapterContractTestbedSummary,
+      vaultBoundaryContractSummary:vaultBoundaryContractSummary
+    });
+    const providerLaunchReadinessBoardSummary = resolveSummary(safe, "providerLaunchReadinessBoardSummary", "WeishanGlobalShoppingProviderLaunchReadinessBoard", "buildGlobalShoppingProviderLaunchReadinessBoard", {
+      mockProviderAdapterRegistryRuntimeSummary:mockProviderAdapterRegistryRuntimeSummary,
+      providerContractReplayHarnessSummary:providerContractReplayHarnessSummary,
+      legalApprovalWorkflowBoardSummary:legalApprovalWorkflowBoardSummary,
+      vaultBoundaryContractSummary:vaultBoundaryContractSummary,
+      providerLegalReviewDossierSummary:providerLegalReviewDossierSummary
+    });
+    const providerLaunchReadinessViewModelSummary = resolveSummary(safe, "providerLaunchReadinessViewModelSummary", "WeishanGlobalShoppingProviderLaunchReadinessViewModel", "buildGlobalShoppingProviderLaunchReadinessViewModel", {
+      mockProviderAdapterRegistryRuntimeSummary:mockProviderAdapterRegistryRuntimeSummary,
+      providerContractReplayHarnessSummary:providerContractReplayHarnessSummary,
+      providerLaunchReadinessBoardSummary:providerLaunchReadinessBoardSummary
+    });
     const pipelineHealth = {
       firstSandboxProviderConnectorReady:statusOf(firstSandboxProviderConnectorSummary) === "ready",
       providerCoverageReady:statusOf(providerCoverageDashboardSummary) === "ready",
@@ -580,6 +602,10 @@
       vaultBoundaryContractReady:statusOf(vaultBoundaryContractSummary) === "ready",
       legalApprovalWorkflowReady:statusOf(legalApprovalWorkflowBoardSummary) === "ready",
       providerMockRuntimeViewModelReady:statusOf(providerMockRuntimeViewModelSummary) === "ready",
+      mockProviderAdapterRegistryRuntimeReady:statusOf(mockProviderAdapterRegistryRuntimeSummary) === "ready",
+      providerContractReplayHarnessReady:statusOf(providerContractReplayHarnessSummary) === "ready",
+      providerLaunchReadinessBoardReady:statusOf(providerLaunchReadinessBoardSummary) === "ready",
+      providerLaunchReadinessViewModelReady:statusOf(providerLaunchReadinessViewModelSummary) === "ready",
       providerConnectorReady:statusOf(readOnlyProviderSandboxConnectorSummary) === "ready",
       fixtureReplayReady:statusOf(fixtureReplayConsoleSummary) === "ready",
       providerFixtureReady:statusOf(legalProviderFixtureSummary) === "ready",
@@ -631,7 +657,11 @@
     if (statusOf(vaultBoundaryContractSummary) === "blocked") blockedReasons.push("vault_boundary_contract_blocked");
     if (statusOf(legalApprovalWorkflowBoardSummary) === "blocked") blockedReasons.push("legal_approval_workflow_blocked");
     if (statusOf(providerMockRuntimeViewModelSummary) === "blocked") blockedReasons.push("provider_mock_runtime_view_model_blocked");
-    const review = !pipelineHealth.providerConnectorReady || !pipelineHealth.fixtureReplayReady || !pipelineHealth.providerFixtureReady || !pipelineHealth.credentialSafetyPass || !pipelineHealth.sandboxFeedReady || !pipelineHealth.responseContractReady || !pipelineHealth.priceNormalizationReady || !pipelineHealth.officialAnchorReady || !pipelineHealth.sameItemMatcherReady || !pipelineHealth.duplicateMergeReady || !pipelineHealth.coveredLowestReady || !pipelineHealth.sandboxHandoffReady || !pipelineHealth.readOnlyProviderSandboxIntegrationGateReady || !pipelineHealth.sandboxPriceCandidateSessionReady || !pipelineHealth.sandboxPriceCandidateResultBoardReady || !pipelineHealth.sandboxSessionReplayCenterReady || !pipelineHealth.providerEvidenceTraceReady || !pipelineHealth.candidateConfidenceReady || !pipelineHealth.sandboxReplayViewModelReady || !pipelineHealth.sandboxCandidateComparisonReady || !pipelineHealth.providerEvidenceMatrixReady || !pipelineHealth.readOnlyHandoffDrillReady || !pipelineHealth.sandboxDecisionReviewReady || !pipelineHealth.redactedSearchParameterPackReady || !pipelineHealth.userConfirmationChecklistReady || !pipelineHealth.readOnlyPlatformHandoffSimulatorReady || !pipelineHealth.platformHandoffSimulationViewModelReady || !pipelineHealth.readOnlyHandoffPacketPreviewReady || !pipelineHealth.platformPreflightSafetyGateReady || !pipelineHealth.userActionBoundaryReceiptReady || !pipelineHealth.handoffPacketViewModelReady || !pipelineHealth.manualPlatformReviewCockpitReady || !pipelineHealth.handoffAcceptanceWalkthroughReady || !pipelineHealth.platformRealityCheckReady || !pipelineHealth.manualPlatformReviewViewModelReady || !pipelineHealth.userFacingManualReviewFlowReady || !pipelineHealth.platformVerificationProgressTrackerReady || !pipelineHealth.safeNextActionPanelReady || !pipelineHealth.userManualReviewViewModelReady || !pipelineHealth.manualPlatformVisitPreparationCenterReady || !pipelineHealth.externalPlatformBoundaryBriefReady || !pipelineHealth.finalUserSafetyChecklistReady || !pipelineHealth.platformVisitPreparationViewModelReady || !pipelineHealth.externalPlatformExitRampPreviewReady || !pipelineHealth.manualVisitSafetyBriefReady || !pipelineHealth.readOnlySessionClosurePackReady || !pipelineHealth.externalPlatformExitViewModelReady || !pipelineHealth.providerLegalReviewDossierReady || !pipelineHealth.credentialVaultInterfaceReady || !pipelineHealth.sandboxAdapterContractTestbedReady || !pipelineHealth.providerIntegrationPrepViewModelReady || !pipelineHealth.sandboxProviderMockRuntimeReady || !pipelineHealth.vaultBoundaryContractReady || !pipelineHealth.legalApprovalWorkflowReady || !pipelineHealth.providerMockRuntimeViewModelReady;
+    if (statusOf(mockProviderAdapterRegistryRuntimeSummary) === "blocked") blockedReasons.push("mock_provider_adapter_registry_runtime_blocked");
+    if (statusOf(providerContractReplayHarnessSummary) === "blocked") blockedReasons.push("provider_contract_replay_harness_blocked");
+    if (statusOf(providerLaunchReadinessBoardSummary) === "blocked") blockedReasons.push("provider_launch_readiness_board_blocked");
+    if (statusOf(providerLaunchReadinessViewModelSummary) === "blocked") blockedReasons.push("provider_launch_readiness_view_model_blocked");
+    const review = !pipelineHealth.providerConnectorReady || !pipelineHealth.fixtureReplayReady || !pipelineHealth.providerFixtureReady || !pipelineHealth.credentialSafetyPass || !pipelineHealth.sandboxFeedReady || !pipelineHealth.responseContractReady || !pipelineHealth.priceNormalizationReady || !pipelineHealth.officialAnchorReady || !pipelineHealth.sameItemMatcherReady || !pipelineHealth.duplicateMergeReady || !pipelineHealth.coveredLowestReady || !pipelineHealth.sandboxHandoffReady || !pipelineHealth.readOnlyProviderSandboxIntegrationGateReady || !pipelineHealth.sandboxPriceCandidateSessionReady || !pipelineHealth.sandboxPriceCandidateResultBoardReady || !pipelineHealth.sandboxSessionReplayCenterReady || !pipelineHealth.providerEvidenceTraceReady || !pipelineHealth.candidateConfidenceReady || !pipelineHealth.sandboxReplayViewModelReady || !pipelineHealth.sandboxCandidateComparisonReady || !pipelineHealth.providerEvidenceMatrixReady || !pipelineHealth.readOnlyHandoffDrillReady || !pipelineHealth.sandboxDecisionReviewReady || !pipelineHealth.redactedSearchParameterPackReady || !pipelineHealth.userConfirmationChecklistReady || !pipelineHealth.readOnlyPlatformHandoffSimulatorReady || !pipelineHealth.platformHandoffSimulationViewModelReady || !pipelineHealth.readOnlyHandoffPacketPreviewReady || !pipelineHealth.platformPreflightSafetyGateReady || !pipelineHealth.userActionBoundaryReceiptReady || !pipelineHealth.handoffPacketViewModelReady || !pipelineHealth.manualPlatformReviewCockpitReady || !pipelineHealth.handoffAcceptanceWalkthroughReady || !pipelineHealth.platformRealityCheckReady || !pipelineHealth.manualPlatformReviewViewModelReady || !pipelineHealth.userFacingManualReviewFlowReady || !pipelineHealth.platformVerificationProgressTrackerReady || !pipelineHealth.safeNextActionPanelReady || !pipelineHealth.userManualReviewViewModelReady || !pipelineHealth.manualPlatformVisitPreparationCenterReady || !pipelineHealth.externalPlatformBoundaryBriefReady || !pipelineHealth.finalUserSafetyChecklistReady || !pipelineHealth.platformVisitPreparationViewModelReady || !pipelineHealth.externalPlatformExitRampPreviewReady || !pipelineHealth.manualVisitSafetyBriefReady || !pipelineHealth.readOnlySessionClosurePackReady || !pipelineHealth.externalPlatformExitViewModelReady || !pipelineHealth.providerLegalReviewDossierReady || !pipelineHealth.credentialVaultInterfaceReady || !pipelineHealth.sandboxAdapterContractTestbedReady || !pipelineHealth.providerIntegrationPrepViewModelReady || !pipelineHealth.sandboxProviderMockRuntimeReady || !pipelineHealth.vaultBoundaryContractReady || !pipelineHealth.legalApprovalWorkflowReady || !pipelineHealth.providerMockRuntimeViewModelReady || !pipelineHealth.mockProviderAdapterRegistryRuntimeReady || !pipelineHealth.providerContractReplayHarnessReady || !pipelineHealth.providerLaunchReadinessBoardReady || !pipelineHealth.providerLaunchReadinessViewModelReady;
     return clone({
       pipelineHealth:pipelineHealth,
       pipelineStages:buildGlobalShoppingPricePipelineRows({
@@ -709,7 +739,8 @@
         safeToProceedWithReadOnlyProviderSandboxPlanning:pipelineHealth.readOnlyCommerceSessionRecapCenterReady && pipelineHealth.userTrustClosureSummaryReady && pipelineHealth.nextFeatureReadinessGateReady && pipelineHealth.commerceSessionRecapViewModelReady,
         safeToProceedWithProviderLegalAndCredentialReview:pipelineHealth.readOnlySandboxProviderIntegrationBlueprintReady && pipelineHealth.credentialIsolationReadinessReady && pipelineHealth.providerContractSelectionReady && pipelineHealth.sandboxProviderPlanningViewModelReady,
         safeToProceedWithProviderSandboxContractImplementation:pipelineHealth.providerLegalReviewDossierReady && pipelineHealth.credentialVaultInterfaceReady && pipelineHealth.sandboxAdapterContractTestbedReady && pipelineHealth.providerIntegrationPrepViewModelReady,
-        safeToProceedWithMockAdapterRuntimeHardening:pipelineHealth.sandboxProviderMockRuntimeReady && pipelineHealth.vaultBoundaryContractReady && pipelineHealth.legalApprovalWorkflowReady && pipelineHealth.providerMockRuntimeViewModelReady && obj(sandboxProviderMockRuntimeSummary).safeToProceedWithMockAdapterRuntimeHardening === true
+        safeToProceedWithMockAdapterRuntimeHardening:pipelineHealth.sandboxProviderMockRuntimeReady && pipelineHealth.vaultBoundaryContractReady && pipelineHealth.legalApprovalWorkflowReady && pipelineHealth.providerMockRuntimeViewModelReady && obj(sandboxProviderMockRuntimeSummary).safeToProceedWithMockAdapterRuntimeHardening === true,
+        safeToProceedWithHumanProviderSandboxApproval:pipelineHealth.mockProviderAdapterRegistryRuntimeReady && pipelineHealth.providerContractReplayHarnessReady && pipelineHealth.providerLaunchReadinessBoardReady && pipelineHealth.providerLaunchReadinessViewModelReady && obj(providerLaunchReadinessBoardSummary.readinessSummary).readyForHumanSandboxProviderApproval === true
       },
       blockedReasons:blockedReasons,
       readOnlyProviderSandboxConnectorSummary:clone(readOnlyProviderSandboxConnectorSummary),
@@ -787,6 +818,10 @@
       vaultBoundaryContractSummary:clone(vaultBoundaryContractSummary),
       legalApprovalWorkflowBoardSummary:clone(legalApprovalWorkflowBoardSummary),
       providerMockRuntimeViewModelSummary:clone(providerMockRuntimeViewModelSummary),
+      mockProviderAdapterRegistryRuntimeSummary:clone(mockProviderAdapterRegistryRuntimeSummary),
+      providerContractReplayHarnessSummary:clone(providerContractReplayHarnessSummary),
+      providerLaunchReadinessBoardSummary:clone(providerLaunchReadinessBoardSummary),
+      providerLaunchReadinessViewModelSummary:clone(providerLaunchReadinessViewModelSummary),
       status:blockedReasons.length ? "blocked" : (review ? "needs_review" : "ready"),
       redacted:true
     });
@@ -864,7 +899,11 @@
       row("sandbox_provider_mock_runtime", "Sandbox Provider Mock Runtime", statusOf(safe.sandboxProviderMockRuntimeSummary) === "ready" ? "pass" : (statusOf(safe.sandboxProviderMockRuntimeSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.sandboxProviderMockRuntimeSummary).userFacingSummary).resultLabel || "Sandbox Provider Mock Runtime 仍需复核"),
       row("vault_boundary_contract", "Vault Boundary Contract", statusOf(safe.vaultBoundaryContractSummary) === "ready" ? "pass" : (statusOf(safe.vaultBoundaryContractSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.vaultBoundaryContractSummary).userFacingSummary).resultLabel || "Vault 边界合同仍需复核"),
       row("legal_approval_workflow_board", "法务审批流程板", statusOf(safe.legalApprovalWorkflowBoardSummary) === "ready" ? "pass" : (statusOf(safe.legalApprovalWorkflowBoardSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.legalApprovalWorkflowBoardSummary).userFacingSummary).resultLabel || "法务审批流程板仍需复核"),
-      row("provider_mock_runtime_view_model", "Provider Mock Runtime 与审批准备", statusOf(safe.providerMockRuntimeViewModelSummary) === "ready" ? "pass" : (statusOf(safe.providerMockRuntimeViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.providerMockRuntimeViewModelSummary).title || "Provider Mock Runtime 与审批准备")
+      row("provider_mock_runtime_view_model", "Provider Mock Runtime 与审批准备", statusOf(safe.providerMockRuntimeViewModelSummary) === "ready" ? "pass" : (statusOf(safe.providerMockRuntimeViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.providerMockRuntimeViewModelSummary).title || "Provider Mock Runtime 与审批准备"),
+      row("mock_provider_adapter_registry_runtime", "Mock Provider Adapter 注册运行时", statusOf(safe.mockProviderAdapterRegistryRuntimeSummary) === "ready" ? "pass" : (statusOf(safe.mockProviderAdapterRegistryRuntimeSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.mockProviderAdapterRegistryRuntimeSummary).userFacingSummary).resultLabel || "Mock Adapter 注册仍需复核"),
+      row("provider_contract_replay_harness", "Provider 合同回放器", statusOf(safe.providerContractReplayHarnessSummary) === "ready" ? "pass" : (statusOf(safe.providerContractReplayHarnessSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.providerContractReplayHarnessSummary).userFacingSummary).resultLabel || "合同回放仍需复核"),
+      row("provider_launch_readiness_board", "Provider 启动准备总闸门", statusOf(safe.providerLaunchReadinessBoardSummary) === "ready" ? "pass" : (statusOf(safe.providerLaunchReadinessBoardSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.providerLaunchReadinessBoardSummary).userFacingSummary).resultLabel || "启动准备仍需复核"),
+      row("provider_launch_readiness_view_model", "Provider 启动准备与合同回放", statusOf(safe.providerLaunchReadinessViewModelSummary) === "ready" ? "pass" : (statusOf(safe.providerLaunchReadinessViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.providerLaunchReadinessViewModelSummary).title || "Provider 启动准备与合同回放")
     ]);
   }
   function sanitizeGlobalShoppingPricePipelineOrchestrator(orchestrator) {
@@ -961,6 +1000,10 @@
       vaultBoundaryContractSummary:linkedSummary(evaluation.vaultBoundaryContractSummary),
       legalApprovalWorkflowBoardSummary:linkedSummary(evaluation.legalApprovalWorkflowBoardSummary),
       providerMockRuntimeViewModelSummary:linkedSummary(evaluation.providerMockRuntimeViewModelSummary),
+      mockProviderAdapterRegistryRuntimeSummary:linkedSummary(evaluation.mockProviderAdapterRegistryRuntimeSummary),
+      providerContractReplayHarnessSummary:linkedSummary(evaluation.providerContractReplayHarnessSummary),
+      providerLaunchReadinessBoardSummary:linkedSummary(evaluation.providerLaunchReadinessBoardSummary),
+      providerLaunchReadinessViewModelSummary:linkedSummary(evaluation.providerLaunchReadinessViewModelSummary),
       redactedSearchParameterPackStatus:text(obj(evaluation.redactedSearchParameterPackSummary).status || ""),
       userConfirmationChecklistStatus:text(obj(evaluation.userConfirmationChecklistSummary).status || ""),
       readOnlyPlatformHandoffSimulatorStatus:text(obj(evaluation.readOnlyPlatformHandoffSimulatorSummary).status || ""),
@@ -997,6 +1040,10 @@
       vaultBoundaryContractStatus:text(obj(evaluation.vaultBoundaryContractSummary).status || ""),
       legalApprovalWorkflowStatus:text(obj(evaluation.legalApprovalWorkflowBoardSummary).status || ""),
       providerMockRuntimeViewModelStatus:text(obj(evaluation.providerMockRuntimeViewModelSummary).status || ""),
+      mockProviderAdapterRegistryStatus:text(obj(evaluation.mockProviderAdapterRegistryRuntimeSummary).status || ""),
+      providerContractReplayStatus:text(obj(evaluation.providerContractReplayHarnessSummary).status || ""),
+      providerLaunchReadinessStatus:text(obj(evaluation.providerLaunchReadinessBoardSummary).status || ""),
+      providerLaunchReadinessViewModelStatus:text(obj(evaluation.providerLaunchReadinessViewModelSummary).status || ""),
       safeToProceedWithUserFacingHandoffExplanation:evaluation.readyOutputs.safeToProceedWithUserFacingHandoffExplanation === true,
       safeToProceedWithManualPlatformReview:evaluation.readyOutputs.safeToProceedWithManualPlatformReview === true,
       safeToProceedWithManualPlatformUserEducation:evaluation.readyOutputs.safeToProceedWithManualPlatformUserEducation === true,
@@ -1007,6 +1054,7 @@
       safeToProceedWithProviderLegalAndCredentialReview:evaluation.readyOutputs.safeToProceedWithProviderLegalAndCredentialReview === true,
       safeToProceedWithProviderSandboxContractImplementation:evaluation.readyOutputs.safeToProceedWithProviderSandboxContractImplementation === true,
       safeToProceedWithMockAdapterRuntimeHardening:evaluation.readyOutputs.safeToProceedWithMockAdapterRuntimeHardening === true,
+      safeToProceedWithHumanProviderSandboxApproval:evaluation.readyOutputs.safeToProceedWithHumanProviderSandboxApproval === true,
       redacted:true
     });
   }

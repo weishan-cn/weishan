@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.3.2");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.3.3");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -218,6 +218,24 @@ function main() {
     safeToProceedWithMockAdapterRuntimeHardening:true
   }).badges.map((item) => item.label);
   assert.ok(mockRuntimeLabels.includes("Sandbox Provider Mock Runtime 已准备"));
+  const launchReadinessLabels = api.buildFlightWorkflowRiskBadges({
+    mockProviderAdapterRegistryRuntimeSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Mock Adapter 注册运行时已准备", redacted:true } },
+    providerContractReplayHarnessSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider 合同回放器已准备", redacted:true } },
+    providerLaunchReadinessBoardSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider 启动准备总闸门已准备", redacted:true } },
+    providerLaunchReadinessViewModelSummary:{ status:"ready", title:"Provider 启动准备与合同回放", redacted:true },
+    mockProviderAdapterRegistryStatus:"ready",
+    providerContractReplayStatus:"ready",
+    providerLaunchReadinessStatus:"ready",
+    providerLaunchReadinessViewModelStatus:"ready",
+    safeToProceedWithHumanProviderSandboxApproval:true
+  }).badges.map((item) => item.label);
+  assert.ok(launchReadinessLabels.includes("Mock Provider Adapter 注册运行时已准备"));
+  assert.ok(launchReadinessLabels.includes("Provider 合同回放器已准备"));
+  assert.ok(launchReadinessLabels.includes("Provider 启动准备总闸门已准备"));
+  assert.ok(launchReadinessLabels.includes("Mock Adapter 注册不接真实 provider"));
+  assert.ok(launchReadinessLabels.includes("合同回放不回放 raw request 或 raw response"));
+  assert.ok(launchReadinessLabels.includes("启动准备不读取密钥、不联网"));
+  assert.ok(launchReadinessLabels.includes("真实 sandbox provider 仍需人工审批"));
   assert.ok(mockRuntimeLabels.includes("Vault 边界合同已准备"));
   assert.ok(mockRuntimeLabels.includes("法务审批流程板已准备"));
   assert.ok(mockRuntimeLabels.includes("Mock Runtime 不接真实 provider"));

@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingVaultBoundaryContract.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingVaultBoundaryContract;
-  assert.equal(api.GLOBAL_SHOPPING_VAULT_BOUNDARY_CONTRACT_VERSION, "2.3.2");
+  assert.equal(api.GLOBAL_SHOPPING_VAULT_BOUNDARY_CONTRACT_VERSION, "2.3.3");
   const ready = api.buildGlobalShoppingVaultBoundaryContract({});
   assert.equal(ready.status, "ready");
   assert.equal(ready.title, "Vault Boundary Contract");

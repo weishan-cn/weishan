@@ -83,7 +83,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.3.2");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.3.3");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -143,6 +143,10 @@ function main() {
   const vaultBoundaryContractSummary = { status:"ready", userFacingSummary:{ title:"Vault Boundary Contract", resultLabel:"Vault 边界合同已准备", redacted:true }, redacted:true };
   const legalApprovalWorkflowBoardSummary = { status:"ready", userFacingSummary:{ title:"法务审批流程板", resultLabel:"法务审批流程板已准备", redacted:true }, redacted:true };
   const providerMockRuntimeViewModelSummary = { status:"ready", title:"Provider Mock Runtime 与审批准备", userFacingSummary:{ title:"Provider Mock Runtime 与审批准备", resultLabel:"Provider Mock Runtime 与审批准备已准备", redacted:true }, redacted:true };
+  const mockProviderAdapterRegistryRuntimeSummary = { status:"ready", userFacingSummary:{ title:"Mock Provider Adapter 注册运行时", resultLabel:"Mock Adapter 注册运行时已准备", redacted:true }, redacted:true };
+  const providerContractReplayHarnessSummary = { status:"ready", userFacingSummary:{ title:"Provider 合同回放器", resultLabel:"Provider 合同回放器已准备", redacted:true }, redacted:true };
+  const providerLaunchReadinessBoardSummary = { status:"ready", userFacingSummary:{ title:"Provider 启动准备总闸门", resultLabel:"Provider 启动准备总闸门已准备", redacted:true }, redacted:true };
+  const providerLaunchReadinessViewModelSummary = { status:"ready", title:"Provider 启动准备与合同回放", redacted:true };
   const firstSandboxConnector = windowRef.WeishanGlobalShoppingFirstSandboxProviderConnector.buildGlobalShoppingFirstSandboxProviderConnector({ providerId:"fixture_provider", providerName:"Fixture Provider", providerType:"fixture", itemType:"flight", connectorMode:"dry_run", adapterRegistry:{ status:"ready", adapters:[{ providerType:"official", itemType:"flight", region:"CN", redacted:true }], redacted:true }, adapterShell:adapterShell, dryRunHarness:dryRunHarness, safetyKillSwitch:killSwitch, requestEnvelope:{ status:"ready", requestEnvelope:{ requestMeta:{ providerId:"fixture_provider", providerName:"Fixture Provider", itemType:"flight" } }, redacted:true }, providerRunbook:{ status:"ready", redacted:true }, normalizedSourceInputs:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", itemType:"flight", redacted:true }] });
   const coverageDashboard = windowRef.WeishanGlobalShoppingProviderCoverageDashboard.buildGlobalShoppingProviderCoverageDashboard({ adapterRegistrySummary:{ adapters:[{ providerType:"official", itemType:"flight", region:"CN", redacted:true }] }, firstSandboxProviderConnectorSummary:firstSandboxConnector, normalizedSourceInputs:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", itemType:"flight", redacted:true }] });
   const sourceTrust = windowRef.WeishanGlobalShoppingReadOnlySourceTrustScore.buildGlobalShoppingReadOnlySourceTrustScore({ sources:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", basePrice:920, currency:"CNY", lastCheckedAt:"redacted_now", redacted:true }] });
@@ -201,12 +205,16 @@ function main() {
     sandboxProviderMockRuntimeSummary:sandboxProviderMockRuntimeSummary,
     vaultBoundaryContractSummary:vaultBoundaryContractSummary,
     legalApprovalWorkflowBoardSummary:legalApprovalWorkflowBoardSummary,
-    providerMockRuntimeViewModelSummary:providerMockRuntimeViewModelSummary
+    providerMockRuntimeViewModelSummary:providerMockRuntimeViewModelSummary,
+    mockProviderAdapterRegistryRuntimeSummary:mockProviderAdapterRegistryRuntimeSummary,
+    providerContractReplayHarnessSummary:providerContractReplayHarnessSummary,
+    providerLaunchReadinessBoardSummary:providerLaunchReadinessBoardSummary,
+    providerLaunchReadinessViewModelSummary:providerLaunchReadinessViewModelSummary
   });
-  assert.equal(ready.appVersion, "2.3.2");
+  assert.equal(ready.appVersion, "2.3.3");
   assert.equal(ready.status, "needs_review");
   assert.equal(ready.userFacingSummary.resultLabel, "只读价格流水线仍需复核");
-  assert.equal(ready.pipelineStages.length, 71);
+  assert.equal(ready.pipelineStages.length, 75);
   assert.equal(ready.readyOutputs.canShowFixtureCandidatePrices, true);
   assert.equal(ready.readyOutputs.canShowFixtureReplay, true);
   assert.equal(ready.readyOutputs.canShowOfficialAnchor, true);
@@ -266,6 +274,10 @@ function main() {
   assert.equal(ready.vaultBoundaryContractSummary.userFacingSummary.title, "Vault Boundary Contract");
   assert.equal(ready.legalApprovalWorkflowBoardSummary.userFacingSummary.title, "法务审批流程板");
   assert.equal(ready.providerMockRuntimeViewModelSummary.title, "Provider Mock Runtime 与审批准备");
+  assert.equal(ready.mockProviderAdapterRegistryRuntimeSummary.userFacingSummary.title, "Mock Provider Adapter 注册运行时");
+  assert.equal(ready.providerContractReplayHarnessSummary.userFacingSummary.title, "Provider 合同回放器");
+  assert.equal(ready.providerLaunchReadinessBoardSummary.userFacingSummary.title, "Provider 启动准备总闸门");
+  assert.equal(ready.providerLaunchReadinessViewModelSummary.title, "Provider 启动准备与合同回放");
   assert.equal(ready.readyOutputs.safeToProceedWithFirstSandboxProviderConnectorImplementation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithFirstReadOnlyProviderSandboxIntegration, true);
   assert.equal(ready.readyOutputs.safeToProceedWithSandboxCandidateUserPreview, false);

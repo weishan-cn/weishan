@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_PROVIDER_MOCK_RUNTIME_VERSION = "2.3.2";
+  const GLOBAL_SHOPPING_SANDBOX_PROVIDER_MOCK_RUNTIME_VERSION = "2.3.3";
   const RUNTIME_NAME = "global_shopping_sandbox_provider_mock_runtime_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

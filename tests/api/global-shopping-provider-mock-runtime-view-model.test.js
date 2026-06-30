@@ -23,7 +23,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderMockRuntimeViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderMockRuntimeViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_MOCK_RUNTIME_VIEW_MODEL_VERSION, "2.3.2");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_MOCK_RUNTIME_VIEW_MODEL_VERSION, "2.3.3");
   const ready = api.buildGlobalShoppingProviderMockRuntimeViewModel({
     sandboxProviderMockRuntimeSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox Provider Mock Runtime 已准备", redacted:true }, rows:[{ rowId:"mock", label:"Mock Runtime", value:"已准备", status:"pass", redacted:true }], safeToProceedWithMockAdapterRuntimeHardening:true },
     vaultBoundaryContractSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Vault 边界合同已准备", redacted:true }, rows:[{ rowId:"vault", label:"Vault 边界", value:"已准备", status:"pass", redacted:true }] },

@@ -76,6 +76,10 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingCredentialVaultInterfaceStub.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxAdapterContractTestbed.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderIntegrationPrepViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingMockProviderAdapterRegistryRuntime.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderContractReplayHarness.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderLaunchReadinessBoard.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderLaunchReadinessViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingCommerceSessionRecapViewModel.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteSessionReportCenter.js",
     "apps/desktop/src/renderer/core/flightWorkflowReadOnlyUserConsentFlow.js",
@@ -84,13 +88,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.3.2");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.3.3");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "2.3.2");
+  assert.equal(ready.appVersion, "2.3.3");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -257,6 +261,10 @@ function main() {
     vaultBoundaryContractSummary:{ status:"ready", userFacingSummary:{ title:"Vault Boundary Contract", resultLabel:"Vault 边界合同已准备", redacted:true }, redacted:true },
     legalApprovalWorkflowBoardSummary:{ status:"ready", userFacingSummary:{ title:"法务审批流程板", resultLabel:"法务审批流程板已准备", redacted:true }, redacted:true },
     providerMockRuntimeViewModelSummary:{ status:"ready", title:"Provider Mock Runtime 与审批准备", userFacingSummary:{ title:"Provider Mock Runtime 与审批准备", resultLabel:"Provider Mock Runtime 与审批准备已准备", redacted:true }, redacted:true },
+    mockProviderAdapterRegistryRuntimeSummary:{ status:"ready", userFacingSummary:{ title:"Mock Provider Adapter 注册运行时", resultLabel:"Mock Adapter 注册运行时已准备", redacted:true }, redacted:true },
+    providerContractReplayHarnessSummary:{ status:"ready", userFacingSummary:{ title:"Provider 合同回放器", resultLabel:"Provider 合同回放器已准备", redacted:true }, redacted:true },
+    providerLaunchReadinessBoardSummary:{ status:"ready", userFacingSummary:{ title:"Provider 启动准备总闸门", resultLabel:"Provider 启动准备总闸门已准备", redacted:true }, redacted:true },
+    providerLaunchReadinessViewModelSummary:{ status:"ready", title:"Provider 启动准备与合同回放", userFacingSummary:{ title:"Provider 启动准备与合同回放", resultLabel:"Provider 启动准备与合同回放已准备", redacted:true }, redacted:true },
     commerceSessionRecapViewModelSummary:{ status:"ready", title:"只读全球购会话总结与下一步准备", userFacingSummary:{ title:"只读全球购会话总结与下一步准备", resultLabel:"只读全球购会话总结与下一步准备已准备", redacted:true }, redacted:true },
     globalShoppingGoalStatus:"aligned",
     jumpBoundaryStatus:"safe",
@@ -329,9 +337,14 @@ function main() {
     vaultBoundaryContractStatus:"ready",
     legalApprovalWorkflowStatus:"ready",
     providerMockRuntimeViewModelStatus:"ready",
+    mockProviderAdapterRegistryStatus:"ready",
+    providerContractReplayStatus:"ready",
+    providerLaunchReadinessStatus:"ready",
+    providerLaunchReadinessViewModelStatus:"ready",
     safeToProceedWithReadOnlyProviderSandboxPlanning:true,
     safeToProceedWithProviderSandboxContractImplementation:true,
-    safeToProceedWithMockAdapterRuntimeHardening:true
+    safeToProceedWithMockAdapterRuntimeHardening:true,
+    safeToProceedWithHumanProviderSandboxApproval:true
   });
   assert.equal(globalReady.userFacingSummary.globalShoppingProductGoalSummary.title, "全球购产品目标");
   assert.equal(globalReady.userFacingSummary.jumpToPlatformBoundarySummary.title, "跳转至平台自行下单边界");
@@ -387,6 +400,10 @@ function main() {
   assert.equal(globalReady.userFacingSummary.vaultBoundaryContractSummary.title, "Vault Boundary Contract");
   assert.equal(globalReady.userFacingSummary.legalApprovalWorkflowBoardSummary.title, "法务审批流程板");
   assert.equal(globalReady.userFacingSummary.providerMockRuntimeViewModelSummary.title, "Provider Mock Runtime 与审批准备");
+  assert.equal(globalReady.userFacingSummary.mockProviderAdapterRegistryRuntimeSummary.title, "Mock Provider Adapter 注册运行时");
+  assert.equal(globalReady.userFacingSummary.providerContractReplayHarnessSummary.title, "Provider 合同回放器");
+  assert.equal(globalReady.userFacingSummary.providerLaunchReadinessBoardSummary.title, "Provider 启动准备总闸门");
+  assert.equal(globalReady.userFacingSummary.providerLaunchReadinessViewModelSummary.title, "Provider 启动准备与合同回放");
   assert.equal(globalReady.userFacingSummary.commerceSessionRecapViewModelSummary.title, "只读全球购会话总结与下一步准备");
   assert.equal(globalReady.userFacingSummary.globalShoppingGoalStatus, "aligned");
   assert.equal(globalReady.userFacingSummary.jumpBoundaryStatus, "safe");
@@ -452,6 +469,7 @@ function main() {
   assert.equal(globalReady.userFacingSummary.safeToProceedWithReadOnlyProviderSandboxPlanning, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithProviderSandboxContractImplementation, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithMockAdapterRuntimeHardening, true);
+  assert.equal(globalReady.userFacingSummary.safeToProceedWithHumanProviderSandboxApproval, true);
   const decisionReviewReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     sandboxCandidateComparisonWorkbenchSummary:{ status:"ready", userFacingSummary:{ title:"Sandbox 候选对比工作台", resultLabel:"候选对比已准备", caveat:"当前仅比较脱敏 sandbox 候选。", redacted:true }, redacted:true },
