@@ -8195,6 +8195,42 @@
         showCommercePlatformTemplateFeedback("已显示阻断矩阵", false);
         return;
       }
+      const globalShoppingProviderPilotGovernanceButton = target && target.closest("[data-commerce-global-shopping-provider-pilot-governance-show]");
+      if (globalShoppingProviderPilotGovernanceButton && host.contains(globalShoppingProviderPilotGovernanceButton)) {
+        event.preventDefault();
+        const panel = globalShoppingProviderPilotGovernanceButton.closest("[data-commerce-global-shopping-provider-pilot-governance]") || globalShoppingProviderPilotGovernanceButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-provider-pilot-governance-output]") || panel;
+        output.innerHTML = '<p>Provider Pilot 治理与合规证据</p><p>治理视图已准备</p><p>当前只展示 provider pilot 治理和合规证据</p><p>不接真实 provider，不读取密钥，不联网，不生成 endpoint，不执行回滚，不导出文件</p><p>Human audit 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示治理视图", false);
+        return;
+      }
+      const globalShoppingPilotPlannerButton = target && target.closest("[data-commerce-global-shopping-pilot-planner-show]");
+      if (globalShoppingPilotPlannerButton && host.contains(globalShoppingPilotPlannerButton)) {
+        event.preventDefault();
+        const panel = globalShoppingPilotPlannerButton.closest("[data-commerce-global-shopping-provider-pilot-governance]") || globalShoppingPilotPlannerButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-pilot-planner-output]") || panel;
+        output.innerHTML = '<p>人工控制 Sandbox Provider Pilot 计划器</p><p>Pilot 计划器已准备</p><p>Pilot 计划不启动真实 provider</p><p>不读取密钥，不联网，不生成 endpoint，不创建审批任务</p><p>真实 sandbox provider pilot 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Pilot 计划", false);
+        return;
+      }
+      const globalShoppingProviderKillSwitchDrillButton = target && target.closest("[data-commerce-global-shopping-provider-kill-switch-drill-show]");
+      if (globalShoppingProviderKillSwitchDrillButton && host.contains(globalShoppingProviderKillSwitchDrillButton)) {
+        event.preventDefault();
+        const panel = globalShoppingProviderKillSwitchDrillButton.closest("[data-commerce-global-shopping-provider-pilot-governance]") || globalShoppingProviderKillSwitchDrillButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-provider-kill-switch-drill-output]") || panel;
+        output.innerHTML = '<p>Provider Kill Switch 演练</p><p>Kill Switch 演练已准备</p><p>Kill Switch 演练不禁用真实 provider</p><p>不改配置，不执行回滚，不停服务，不上传日志</p><p>当前只展示人工演练步骤与阻断条件</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Kill Switch 演练", false);
+        return;
+      }
+      const globalShoppingComplianceEvidencePackButton = target && target.closest("[data-commerce-global-shopping-compliance-evidence-pack-show]");
+      if (globalShoppingComplianceEvidencePackButton && host.contains(globalShoppingComplianceEvidencePackButton)) {
+        event.preventDefault();
+        const panel = globalShoppingComplianceEvidencePackButton.closest("[data-commerce-global-shopping-provider-pilot-governance]") || globalShoppingComplianceEvidencePackButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-compliance-evidence-pack-output]") || panel;
+        output.innerHTML = '<p>合规证据包</p><p>合规证据包已准备</p><p>合规证据包不写文件、不导出</p><p>不包含密钥、raw provider request 或 raw provider response</p><p>当前只展示只读证据摘要，不发送邮件、不上传外部系统</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示合规证据", false);
+        return;
+      }
       const pilotInvitationGateButton = target && target.closest("[data-commerce-flight-pilot-invitation-gate-show]");
       if (pilotInvitationGateButton && host.contains(pilotInvitationGateButton)) {
         event.preventDefault();

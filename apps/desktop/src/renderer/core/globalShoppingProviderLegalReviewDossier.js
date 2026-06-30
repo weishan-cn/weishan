@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_LEGAL_REVIEW_DOSSIER_VERSION = "2.3.5";
+  const GLOBAL_SHOPPING_PROVIDER_LEGAL_REVIEW_DOSSIER_VERSION = "2.3.6";
   const DOSSIER_NAME = "global_shopping_provider_legal_review_dossier_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

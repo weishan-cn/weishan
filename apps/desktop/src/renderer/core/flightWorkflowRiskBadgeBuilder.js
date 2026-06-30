@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.5";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.6";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -336,6 +336,13 @@
       if (obj(safe.mockProviderIncidentDrillSummary).status || obj(safe.providerPilotControlViewModelSummary).status) badges.push(badge("mock_provider_incident_drill_boundary", "事故演练不触发真实告警或回滚", "warning"));
       if (obj(safe.productionBlockerMatrixSummary).status || obj(safe.providerPilotControlViewModelSummary).status) badges.push(badge("production_blocker_matrix_boundary", "阻断矩阵不修改运行配置", "info"));
       if (safe.safeToProceedWithHumanControlledSandboxProviderPilotPlan === true) badges.push(badge("human_controlled_pilot_plan_human_review", "Human-controlled pilot 仍需人工审批", "warning"));
+      if (obj(safe.humanControlledSandboxProviderPilotPlannerSummary).status === "ready" || safe.humanControlledSandboxProviderPilotPlannerStatus === "ready") badges.push(badge("human_controlled_pilot_planner_ready", "人工控制 Sandbox Provider Pilot 计划器已准备", "info"));
+      if (obj(safe.providerKillSwitchDrillSummary).status === "ready" || safe.providerKillSwitchDrillStatus === "ready") badges.push(badge("provider_kill_switch_drill_ready", "Provider Kill Switch 演练已准备", "info"));
+      if (obj(safe.complianceEvidencePackSummary).status === "ready" || safe.complianceEvidencePackStatus === "ready") badges.push(badge("compliance_evidence_pack_ready", "合规证据包已准备", "info"));
+      if (obj(safe.humanControlledSandboxProviderPilotPlannerSummary).status || obj(safe.providerPilotGovernanceViewModelSummary).status) badges.push(badge("pilot_planner_not_start_real_provider", "Pilot 计划不启动真实 provider", "info"));
+      if (obj(safe.providerKillSwitchDrillSummary).status || obj(safe.providerPilotGovernanceViewModelSummary).status) badges.push(badge("kill_switch_not_disable_real_provider", "Kill Switch 演练不禁用真实 provider", "info"));
+      if (obj(safe.complianceEvidencePackSummary).status || obj(safe.providerPilotGovernanceViewModelSummary).status) badges.push(badge("compliance_evidence_no_export", "合规证据包不写文件、不导出", "info"));
+      if (safe.safeToProceedWithHumanAuditSandboxPilotReadinessReview === true || obj(safe.providerPilotGovernanceViewModelSummary).status === "ready") badges.push(badge("human_audit_review_required", "Human audit 仍需人工复核", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "ready") badges.push(badge("sandbox_deep_link_candidate_ready", "Sandbox 跳转候选已准备", "info"));
       if (sandboxDeepLinkCandidateSummary.status === "needs_review") badges.push(badge("sandbox_deep_link_candidate_review", "Sandbox 跳转候选仍需复核", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "blocked") badges.push(badge("sandbox_deep_link_candidate_blocked", "Sandbox 跳转候选已阻断", "blocked"));

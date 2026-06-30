@@ -24,7 +24,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingReadOnlyCommerceSessionRecapCenter.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingReadOnlyCommerceSessionRecapCenter;
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_COMMERCE_SESSION_RECAP_CENTER_VERSION, "2.3.5");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_COMMERCE_SESSION_RECAP_CENTER_VERSION, "2.3.6");
   const ready = api.buildGlobalShoppingReadOnlyCommerceSessionRecapCenter({
     externalPlatformExitRampPreviewSummary:{ status:"ready", userFacingSummary:{ resultLabel:"外部平台退出坡道已准备", redacted:true } },
     manualVisitSafetyBriefSummary:{ status:"ready", userFacingSummary:{ resultLabel:"手动访问安全简报已准备", redacted:true } },
@@ -39,7 +39,7 @@ function main() {
     readOnlyHandoffPacketPreviewSummary:{ status:"ready", userFacingSummary:{ resultLabel:"交接包预览已准备", redacted:true } },
     userActionBoundaryReceiptSummary:{ status:"ready", userFacingSummary:{ resultLabel:"边界回执已准备", redacted:true } }
   });
-  assert.equal(ready.appVersion, "2.3.5");
+  assert.equal(ready.appVersion, "2.3.6");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "只读全球购会话总结");
   assert.equal(ready.rows.some((row) => row.label === "会话总结不保存、不导出"), true);

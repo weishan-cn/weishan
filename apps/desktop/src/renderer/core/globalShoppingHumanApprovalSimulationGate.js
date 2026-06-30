@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_HUMAN_APPROVAL_SIMULATION_GATE_VERSION = "2.3.5";
+  const GLOBAL_SHOPPING_HUMAN_APPROVAL_SIMULATION_GATE_VERSION = "2.3.6";
   const GATE_NAME = "global_shopping_human_approval_simulation_gate_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
