@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderEvidenceTrace.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderEvidenceTrace;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_EVIDENCE_TRACE_VERSION, "2.3.9");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_EVIDENCE_TRACE_VERSION, "2.4.1");
   const ready = api.buildGlobalShoppingProviderEvidenceTrace({
     sandboxSessionReplayCenter:{ replaySummary:{ hasHandoffPreview:true }, replayBoundary:{ replayMode:"summary_only" }, redacted:true },
     firstSandboxProviderConnector:{ status:"ready", redacted:true },

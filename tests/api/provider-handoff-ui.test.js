@@ -7,7 +7,7 @@ function load(files){ const window = {}; window.window = window; const context =
 function main(){
   const windowRef = load(["apps/desktop/src/renderer/core/providerHandoffUi.js"]);
   const api = windowRef.WeishanProviderHandoffUi;
-  assert.equal(api.PROVIDER_HANDOFF_UI_VERSION, "2.3.9");
+  assert.equal(api.PROVIDER_HANDOFF_UI_VERSION, "2.4.1");
   const card = { title:"上海 → 成都 · 7月15日", providerName:"Flight Provider Sandbox", priceDisplay:"¥1010", priceTruthLabel:"Limited Beta 只读验证价，不代表真实最低价", taxFeeSummary:"税费已包含", inventoryReliability:"sandbox evidence only", actionLabel:"去平台确认", actionType:"provider_handoff_preview", bookingUrl:null, fareBreakdown:{ displayRows:[{ label:"票面价", value:"¥860" }, { label:"燃油附加费", value:"未单独提供 / 以平台页面为准" }, { label:"机场建设费 / 民航发展基金", value:"未单独提供 / 以平台页面为准" }, { label:"平台服务费", value:"未单独提供 / 以平台页面为准" }, { label:"优惠 / 补贴", value:"未单独提供 / 以平台页面为准" }, { label:"最终应付总价", value:"¥1010" }] } };
   const handoff = api.buildProviderHandoffUi({ card, providerReadiness:"limited-beta-ready", bookingUrlSafety:"disabled", userPreference:{ searchText:"上海 成都 7月15日" }, redacted:true });
   assert.equal(handoff.handoffDecision, "manual_handoff");

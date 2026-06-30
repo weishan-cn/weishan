@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.4.0";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.4.1";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -185,6 +185,9 @@
       offlineMockSandboxSessionRunnerSummary: stripUnsafe(safe.offlineMockSandboxSessionRunnerSummary || null),
       manualProviderActivationHandoffPacketSummary: stripUnsafe(safe.manualProviderActivationHandoffPacketSummary || null),
       providerSandboxActivationViewModelSummary: stripUnsafe(safe.providerSandboxActivationViewModelSummary || null),
+      offlineSandboxTraceInspectorSummary: stripUnsafe(safe.offlineSandboxTraceInspectorSummary || null),
+      mockProviderResultNormalizerSummary: stripUnsafe(safe.mockProviderResultNormalizerSummary || null),
+      manualActivationDryRunChecklistSummary: stripUnsafe(safe.manualActivationDryRunChecklistSummary || null),
       rcReviewStatus: safeText(safe.rcReviewStatus || safe.rcCandidateReviewSummary && safe.rcCandidateReviewSummary.status || ""),
       rcEvidenceStatus: safeText(safe.rcEvidenceStatus || safe.rcEvidenceReviewSummary && safe.rcEvidenceReviewSummary.status || ""),
       rcRegressionStatus: safeText(safe.rcRegressionStatus || safe.rcRegressionAuditSummary && safe.rcRegressionAuditSummary.status || ""),
@@ -203,6 +206,9 @@
       offlineMockSandboxSessionRunnerStatus: safeText(safe.offlineMockSandboxSessionRunnerStatus || safe.offlineMockSandboxSessionRunnerSummary && safe.offlineMockSandboxSessionRunnerSummary.status || ""),
       manualProviderActivationHandoffPacketStatus: safeText(safe.manualProviderActivationHandoffPacketStatus || safe.manualProviderActivationHandoffPacketSummary && safe.manualProviderActivationHandoffPacketSummary.status || ""),
       providerSandboxActivationViewModelStatus: safeText(safe.providerSandboxActivationViewModelStatus || safe.providerSandboxActivationViewModelSummary && safe.providerSandboxActivationViewModelSummary.status || ""),
+      offlineSandboxTraceInspectorStatus: safeText(safe.offlineSandboxTraceInspectorStatus || safe.offlineSandboxTraceInspectorSummary && safe.offlineSandboxTraceInspectorSummary.status || ""),
+      mockProviderResultNormalizerStatus: safeText(safe.mockProviderResultNormalizerStatus || safe.mockProviderResultNormalizerSummary && safe.mockProviderResultNormalizerSummary.status || ""),
+      manualActivationDryRunChecklistStatus: safeText(safe.manualActivationDryRunChecklistStatus || safe.manualActivationDryRunChecklistSummary && safe.manualActivationDryRunChecklistSummary.status || ""),
       safeToStartRcReview: safe.safeToStartRcReview === true,
       safeToContinueReleaseCandidate: safe.safeToContinueReleaseCandidate === true,
       safeToFinalizeUserFacingCopy: safe.safeToFinalizeUserFacingCopy === true,
@@ -667,7 +673,10 @@
       providerSandboxDryRunHarnessSummary: workflow.providerSandboxDryRunHarnessSummary ? { title:"Provider Sandbox 干跑框架", line:workflow.providerSandboxDryRunHarnessSummary.userFacingSummary && workflow.providerSandboxDryRunHarnessSummary.userFacingSummary.resultLabel || "Provider Sandbox 干跑框架仍需复核", redacted:true } : null,
       firstReadOnlyProviderAdapterShellSummary: workflow.firstReadOnlyProviderAdapterShellSummary ? { title:"第一个只读 Provider Adapter 外壳", line:workflow.firstReadOnlyProviderAdapterShellSummary.userFacingSummary && workflow.firstReadOnlyProviderAdapterShellSummary.userFacingSummary.resultLabel || "Adapter 外壳仍需复核", redacted:true } : null,
       providerSandboxSafetyKillSwitchSummary: workflow.providerSandboxSafetyKillSwitchSummary ? { title:"Provider Sandbox 安全熔断器", line:workflow.providerSandboxSafetyKillSwitchSummary.userFacingSummary && workflow.providerSandboxSafetyKillSwitchSummary.userFacingSummary.resultLabel || "安全熔断器仍需复核", redacted:true } : null,
-      providerSandboxDryRunViewModelSummary: workflow.providerSandboxDryRunViewModelSummary ? { title:"Provider Sandbox 干跑准备", line:workflow.providerSandboxDryRunViewModelSummary.title || "Provider Sandbox 干跑准备", redacted:true } : null,
+      offlineSandboxTraceInspectorSummary: workflow.offlineSandboxTraceInspectorSummary || safe.offlineSandboxTraceInspectorSummary ? { title:"离线 Sandbox Trace 检查器", line:workflow.offlineSandboxTraceInspectorSummary && workflow.offlineSandboxTraceInspectorSummary.userFacingSummary && workflow.offlineSandboxTraceInspectorSummary.userFacingSummary.resultLabel || safe.offlineSandboxTraceInspectorSummary && safe.offlineSandboxTraceInspectorSummary.userFacingSummary && safe.offlineSandboxTraceInspectorSummary.userFacingSummary.resultLabel || "离线 Trace 检查仍需复核", redacted:true } : null,
+      mockProviderResultNormalizerSummary: workflow.mockProviderResultNormalizerSummary || safe.mockProviderResultNormalizerSummary ? { title:"Mock Provider 结果归一化器", line:workflow.mockProviderResultNormalizerSummary && workflow.mockProviderResultNormalizerSummary.userFacingSummary && workflow.mockProviderResultNormalizerSummary.userFacingSummary.resultLabel || safe.mockProviderResultNormalizerSummary && safe.mockProviderResultNormalizerSummary.userFacingSummary && safe.mockProviderResultNormalizerSummary.userFacingSummary.resultLabel || "Mock 结果归一化仍需复核", redacted:true } : null,
+      manualActivationDryRunChecklistSummary: workflow.manualActivationDryRunChecklistSummary || safe.manualActivationDryRunChecklistSummary ? { title:"人工激活 Dry-run 检查清单", line:workflow.manualActivationDryRunChecklistSummary && workflow.manualActivationDryRunChecklistSummary.userFacingSummary && workflow.manualActivationDryRunChecklistSummary.userFacingSummary.resultLabel || safe.manualActivationDryRunChecklistSummary && safe.manualActivationDryRunChecklistSummary.userFacingSummary && safe.manualActivationDryRunChecklistSummary.userFacingSummary.resultLabel || "激活 Dry-run 仍需复核", redacted:true } : null,
+      providerSandboxDryRunViewModelSummary: workflow.providerSandboxDryRunViewModelSummary ? { title:"Provider Sandbox 离线 Dry-run", line:workflow.providerSandboxDryRunViewModelSummary.title || "Provider Sandbox 离线 Dry-run", redacted:true } : null,
       providerAdapterRegistrySummary: workflow.providerAdapterRegistrySummary ? { title:"Provider Adapter 注册表", line:workflow.providerAdapterRegistrySummary.userFacingSummary && workflow.providerAdapterRegistrySummary.userFacingSummary.resultLabel || "Adapter 注册表仍需复核", redacted:true } : null,
       dryRunProviderResponseNormalizerSummary: workflow.dryRunProviderResponseNormalizerSummary ? { title:"Dry-Run Provider 响应归一化器", line:workflow.dryRunProviderResponseNormalizerSummary.userFacingSummary && workflow.dryRunProviderResponseNormalizerSummary.userFacingSummary.resultLabel || "响应归一化仍需复核", redacted:true } : null,
       sandboxProviderRunbookSummary: workflow.sandboxProviderRunbookSummary ? { title:"Sandbox Provider 接入运行手册", line:workflow.sandboxProviderRunbookSummary.userFacingSummary && workflow.sandboxProviderRunbookSummary.userFacingSummary.resultLabel || "接入手册仍需复核", redacted:true } : null,

@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.4.0");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.4.1");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -74,6 +74,9 @@ function main() {
     firstReadOnlyProviderAdapterShellSummary:{ status:"ready" },
     providerSandboxSafetyKillSwitchSummary:{ status:"clear" },
     providerSandboxDryRunViewModelSummary:{ status:"ready" },
+    offlineSandboxTraceInspectorSummary:{ status:"ready" },
+    mockProviderResultNormalizerSummary:{ status:"ready" },
+    manualActivationDryRunChecklistSummary:{ status:"ready" },
     sandboxProviderResponseContractStatus:"ready",
     pricePipelineStatus:"ready",
     readOnlyCandidateJourneyStatus:"ready",
@@ -81,6 +84,9 @@ function main() {
     providerAdapterShellStatus:"ready",
     providerKillSwitchStatus:"clear",
     providerSandboxDryRunViewModelStatus:"ready",
+    offlineSandboxTraceInspectorStatus:"ready",
+    mockProviderResultNormalizerStatus:"ready",
+    manualActivationDryRunChecklistStatus:"ready",
     safeToProceedWithDeepLinkSafetyGate:true,
     safeToProceedWithReadOnlyPriceProviderSandbox:true,
     safeToProceedWithJumpToPlatformMvp:true,
@@ -106,7 +112,14 @@ function main() {
   assert.ok(globalLabels.includes("Provider Sandbox 干跑框架已准备"));
   assert.ok(globalLabels.includes("第一个只读 Provider Adapter 外壳已准备"));
   assert.ok(globalLabels.includes("Provider Sandbox 安全熔断器未触发"));
-  assert.ok(globalLabels.includes("Provider Sandbox 干跑准备"));
+  assert.ok(globalLabels.includes("Provider Sandbox 离线 Dry-run"));
+  assert.ok(globalLabels.includes("离线 Sandbox Trace 检查器已准备"));
+  assert.ok(globalLabels.includes("Mock Provider 结果归一化器已准备"));
+  assert.ok(globalLabels.includes("人工激活 Dry-run 检查清单已准备"));
+  assert.ok(globalLabels.includes("离线 Trace 检查不保存 raw trace"));
+  assert.ok(globalLabels.includes("Mock 结果归一化不处理真实 provider response"));
+  assert.ok(globalLabels.includes("激活 Dry-run 不激活 sandbox、不创建 release"));
+  assert.ok(globalLabels.includes("Manual sandbox dry-run 仍需人工复核"));
   assert.ok(globalLabels.includes("干跑不发送真实请求"));
   assert.ok(globalLabels.includes("Adapter 外壳不包含真实 endpoint"));
   assert.ok(globalLabels.includes("干跑不代表真实价格或下单能力"));

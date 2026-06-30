@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
-const PREVIOUS_STABLE_VERSION = "2.3.9";
+const PREVIOUS_STABLE_VERSION = "2.4.0";
 const STRICT_VERSION_CHECKS = new Set([
   "root package-lock version",
   "root package-lock packages[\"\"].version",
@@ -34,7 +34,15 @@ const STRICT_VERSION_CHECKS = new Set([
   "apps/desktop global shopping manual governance release decision room version",
   "apps/desktop global shopping sandbox pilot exception register version",
   "apps/desktop global shopping provider readiness sign off packet version",
-  "apps/desktop global shopping provider manual release view model version"
+  "apps/desktop global shopping provider manual release view model version",
+  "apps/desktop global shopping read only sandbox activation readiness center version",
+  "apps/desktop global shopping offline mock sandbox session runner version",
+  "apps/desktop global shopping manual provider activation handoff packet version",
+  "apps/desktop global shopping offline sandbox trace inspector version",
+  "apps/desktop global shopping mock provider result normalizer version",
+  "apps/desktop global shopping manual activation dry run checklist version",
+  "apps/desktop global shopping provider sandbox activation view model version",
+  "apps/desktop global shopping provider sandbox dry run view model version"
 ]);
 
 function readJson(relativePath) {
@@ -2230,6 +2238,14 @@ function runVersionCheck() {
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping sandbox pilot exception register version", "apps/desktop/src/renderer/core/globalShoppingSandboxPilotExceptionRegister.js", "GLOBAL_SHOPPING_SANDBOX_PILOT_EXCEPTION_REGISTER_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping provider readiness sign off packet version", "apps/desktop/src/renderer/core/globalShoppingProviderReadinessSignOffPacket.js", "GLOBAL_SHOPPING_PROVIDER_READINESS_SIGN_OFF_PACKET_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping provider manual release view model version", "apps/desktop/src/renderer/core/globalShoppingProviderManualReleaseViewModel.js", "GLOBAL_SHOPPING_PROVIDER_MANUAL_RELEASE_VIEW_MODEL_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping read only sandbox activation readiness center version", "apps/desktop/src/renderer/core/globalShoppingReadOnlySandboxActivationReadinessCenter.js", "GLOBAL_SHOPPING_READ_ONLY_SANDBOX_ACTIVATION_READINESS_CENTER_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping offline mock sandbox session runner version", "apps/desktop/src/renderer/core/globalShoppingOfflineMockSandboxSessionRunner.js", "GLOBAL_SHOPPING_OFFLINE_MOCK_SANDBOX_SESSION_RUNNER_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping manual provider activation handoff packet version", "apps/desktop/src/renderer/core/globalShoppingManualProviderActivationHandoffPacket.js", "GLOBAL_SHOPPING_MANUAL_PROVIDER_ACTIVATION_HANDOFF_PACKET_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping offline sandbox trace inspector version", "apps/desktop/src/renderer/core/globalShoppingOfflineSandboxTraceInspector.js", "GLOBAL_SHOPPING_OFFLINE_SANDBOX_TRACE_INSPECTOR_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping mock provider result normalizer version", "apps/desktop/src/renderer/core/globalShoppingMockProviderResultNormalizer.js", "GLOBAL_SHOPPING_MOCK_PROVIDER_RESULT_NORMALIZER_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping manual activation dry run checklist version", "apps/desktop/src/renderer/core/globalShoppingManualActivationDryRunChecklist.js", "GLOBAL_SHOPPING_MANUAL_ACTIVATION_DRY_RUN_CHECKLIST_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping provider sandbox activation view model version", "apps/desktop/src/renderer/core/globalShoppingProviderSandboxActivationViewModel.js", "GLOBAL_SHOPPING_PROVIDER_SANDBOX_ACTIVATION_VIEW_MODEL_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping provider sandbox dry run view model version", "apps/desktop/src/renderer/core/globalShoppingProviderSandboxDryRunViewModel.js", "GLOBAL_SHOPPING_PROVIDER_SANDBOX_DRY_RUN_VIEW_MODEL_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow read only launch candidate freeze gate version", "apps/desktop/src/renderer/core/flightWorkflowReadOnlyLaunchCandidateFreezeGate.js", "FLIGHT_WORKFLOW_READ_ONLY_LAUNCH_CANDIDATE_FREEZE_GATE_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow evidence freeze pack version", "apps/desktop/src/renderer/core/flightWorkflowEvidenceFreezePack.js", "FLIGHT_WORKFLOW_EVIDENCE_FREEZE_PACK_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow launch candidate freeze view model version", "apps/desktop/src/renderer/core/flightWorkflowLaunchCandidateFreezeViewModel.js", "FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_FREEZE_VIEW_MODEL_VERSION");

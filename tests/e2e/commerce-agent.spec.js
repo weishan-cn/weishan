@@ -8513,7 +8513,7 @@ test.describe.serial("commerce agent workbench", () => {
     const cases = [
       {
         input:runId + "-SMOKE-FLIGHT 购买7月15日上海到成都最便宜的直达机票",
-        expected:["机票搜索结果", "出发地：上海", "目的地：成都", "日期：7 月 15 日", "直达偏好：直达优先", "排序：低价优先", "推荐结果", "只读候选价", "以平台页面为准", "不可下单", "去平台确认", "手动核对入口"]
+        expected:["机票搜索结果", "出发地：上海", "目的地：成都", "日期：7 月 15 日", "直达偏好：直达优先", "排序：低价优先", "推荐结果", "只读候选价", "以平台页面为准", "不会付款或下单", "去平台确认", "手动核对入口"]
       },
       {
         input:runId + "-SMOKE-HOTEL 帮我找成都春熙路附近 7 月 12 日入住 7 月 14 日离店的酒店",
@@ -8547,13 +8547,11 @@ test.describe.serial("commerce agent workbench", () => {
       if (item.input.includes("SMOKE-FLIGHT")) {
         await expect(summary.locator(".commerce-top-result-card")).toHaveCount(1);
         const flightCard = summary.locator(".commerce-top-result-card").first();
-        await expect(flightCard).toContainText("价格暂不展示");
-        await expect(flightCard).toContainText("票面价 未单独提供 / 以平台页面为准｜税费 未单独提供 / 以平台页面为准｜附加费 未单独提供 / 以平台页面为准");
+        await expect(flightCard).toContainText("只读候选价，不代表真实最低价");
+        await expect(flightCard).toContainText("票面价 ¥860｜税费 ¥110｜附加费 ¥40");
         await expect(flightCard).toContainText("燃油/机建费：以平台页面为准");
-        await expect(flightCard).toContainText("无真实价格");
-        await expect(flightCard).toContainText("暂无生产真实最低价");
         await expect(flightCard).toContainText("以平台页面为准");
-        await expect(flightCard).toContainText("不可下单");
+        await expect(flightCard).toContainText("不会付款或下单");
         await expect(flightCard).not.toContainText("autoOpen: false");
         await expect(flightCard).not.toContainText("payment: false");
         await expect(flightCard).not.toContainText("order: false");
@@ -8565,13 +8563,13 @@ test.describe.serial("commerce agent workbench", () => {
         await expect(fareDetails).toHaveJSProperty("open", false);
         await fareDetails.locator("> summary").click();
         await fareDetails.evaluate((el) => { if (!el.open) el.open = true; el.setAttribute("open", ""); });
-        await expect(fareDetails).toContainText("票面价：未单独提供 / 以平台页面为准");
+        await expect(fareDetails).toContainText("票面价：¥860");
         await expect(fareDetails).toContainText("燃油附加费：未单独提供 / 以平台页面为准");
         await expect(fareDetails).toContainText("机场建设费 / 民航发展基金：未单独提供 / 以平台页面为准");
         await expect(fareDetails).toContainText("平台服务费：未单独提供 / 以平台页面为准");
-        await expect(fareDetails).toContainText("税费：未单独提供 / 以平台页面为准");
-        await expect(fareDetails).toContainText("其它附加费：未单独提供 / 以平台页面为准");
-        await expect(fareDetails).toContainText("最终应付总价：价格暂不展示");
+        await expect(fareDetails).toContainText("税费：¥110");
+        await expect(fareDetails).toContainText("其它附加费：¥40");
+        await expect(fareDetails).toContainText("最终应付总价：¥1010");
         await fareDetails.evaluate((el) => { el.open = false; el.removeAttribute("open"); });
         const userSurfaceText = await visibleTextWithoutTechnicalDetails(summary);
         expect((userSurfaceText.match(/最终应付总价：¥1010/g) || []).length).toBe(0);
@@ -8666,7 +8664,7 @@ test.describe.serial("commerce agent workbench", () => {
 
         await openDisclosure(debugBody, "commerce-top-result-cards-builder-disclosure");
         const topCardsBody = debugBody.locator("details.commerce-top-result-cards-builder-disclosure .commerce-disclosure-body").first();
-        for (const text of ["Top Result Cards Builder", "top result cards builder: active", "maxCardCount: 3", "cheapestClaimCount: 0", "limitedBetaCheapestClaimBlockedCount: 0", "incompleteFareExcludedCount: 1", "totalPayableSortUsed: false", "fakeResultBlockedCount: 0", "bookingUrlDisplayedCount: 0", "paymentActionDisplayedCount: 0", "orderActionDisplayedCount: 0", "identityUploadDisplayedCount: 0", "FLIGHT_FARE_BREAKDOWN_DRAFT", "CHEAPEST_TRUTH_GUARD_DRAFT", "FARE_CARD_UX_CLEANUP_DRAFT", "TOP_RESULT_CARDS_BUILDER_DRAFT", "redacted: true"]) await expect(topCardsBody).toContainText(text);
+        for (const text of ["Top Result Cards Builder", "top result cards builder: active", "maxCardCount: 3", "cheapestClaimCount: 0", "limitedBetaCheapestClaimBlockedCount: 1", "incompleteFareExcludedCount: 1", "totalPayableSortUsed: false", "fakeResultBlockedCount: 0", "bookingUrlDisplayedCount: 0", "paymentActionDisplayedCount: 0", "orderActionDisplayedCount: 0", "identityUploadDisplayedCount: 0", "FLIGHT_FARE_BREAKDOWN_DRAFT", "CHEAPEST_TRUTH_GUARD_DRAFT", "FARE_CARD_UX_CLEANUP_DRAFT", "TOP_RESULT_CARDS_BUILDER_DRAFT", "redacted: true"]) await expect(topCardsBody).toContainText(text);
 
         await openDisclosure(debugBody, "commerce-provider-handoff-ui-disclosure");
         const handoffBody = debugBody.locator("details.commerce-provider-handoff-ui-disclosure .commerce-disclosure-body").first();
@@ -8706,7 +8704,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).toContainText("只读候选价");
     await expect(summary).toContainText("真实结果优先");
     await expect(summary).toContainText("以平台页面为准");
-    await expect(summary).toContainText("不可下单");
+    await expect(summary).toContainText("不会付款或下单");
     await expect(summary).not.toContainText(/bookingUrl:\s*https?:|checkoutUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
     await expect(summary.getByRole("button", { name:/^(去预订|预订|付款|下单|提交订单|上传证件|上传银行卡)$/ })).toHaveCount(0);
     expect(await latestOpenExternalUrl(page)).toBe("");
@@ -8758,7 +8756,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
     await expect(summary).toContainText("只读候选价");
     await expect(summary).toContainText("以平台页面为准");
-    await expect(summary).toContainText("不可下单");
+    await expect(summary).toContainText("不会付款或下单");
     await expect(summary.locator('[data-commerce-read-only-recovered-evidence="true"]').first()).toContainText("已恢复最近一次只读证据", { timeout:15000 });
     await expect(summary.locator('[data-commerce-read-only-refresh-summary="true"]').first()).toContainText("最近一次刷新：已刷新");
     const recoveryState = await page.evaluate(() => window.WeishanReadOnlyQuoteInteractiveRefreshUiController.buildReadOnlyQuoteRecoveryUiState({}));
@@ -8789,7 +8787,7 @@ test.describe.serial("commerce agent workbench", () => {
 
     const summary = await createCommerceWorkbenchDetail(page, runId + "-V2149-IMPORT 购买7月15日上海到成都最便宜的直达机票");
     await expect(summary).toContainText("机票搜索结果", { timeout:15000 });
-    for (const text of ["真实结果优先", "机票搜索结果", "只读候选价", "以平台页面为准", "不可下单"]) await expect(summary).toContainText(text);
+    for (const text of ["真实结果优先", "机票搜索结果", "只读候选价", "以平台页面为准", "不会付款或下单"]) await expect(summary).toContainText(text);
 
     const validSandboxJson = JSON.stringify([
       { providerId:"flight_provider_trusted_fixture", providerName:"Trusted Flight Fixture", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import", route:{ origin:"SHA", destination:"CTU" }, departureDate:"2026-07-15", currency:"CNY", baseFare:860, taxesAndFees:110, providerFees:40, totalPrice:1010, priceUpdatedAt:"2026-01-01T00:00:00.000Z", freshnessMinutes:15, quoteId:"q1010", handoffCandidate:{ providerId:"google_flights_search", handoffType:"provider_search" } },
@@ -8800,21 +8798,24 @@ test.describe.serial("commerce agent workbench", () => {
       const processor = window.WeishanMultiSandboxQuoteImportProcessor;
       const rankingApi = window.WeishanReadOnlyQuoteCandidateRanking;
       const selectionApi = window.WeishanReadOnlyQuoteCandidateSelection;
-      const cardApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
       const importResult = processor && typeof processor.importMultiSandboxQuotes === "function" ? processor.importMultiSandboxQuotes(rawText, {}) : { status:"failed_safe", quotes:[], errors:[], sourceBreakdown:{ providerCount:0, providerIds:[], fareSources:[] }, reason:"processor unavailable" };
       const ranking = rankingApi && typeof rankingApi.buildTopReadOnlyQuoteCandidates === "function" ? rankingApi.buildTopReadOnlyQuoteCandidates(importResult.quotes || [], { rankingScope:"imported_sandbox_quotes_only" }) : { status:importResult.status || "failed_safe", topCandidates:[], sourceBreakdown:importResult.sourceBreakdown || { providerCount:0, providerIds:[], fareSources:[] }, rankingExplanation:"仅按导入样本中的只读候选证据排序，平台最终为准。" };
       const selected = selectionApi && typeof selectionApi.selectReadOnlyQuoteCandidate === "function" && ranking.topCandidates && ranking.topCandidates.length ? selectionApi.selectReadOnlyQuoteCandidate(ranking, ranking.topCandidates[0].quoteId) : null;
-      const card = cardApi && typeof cardApi.buildReadOnlyPriceCandidateCardViewModel === "function" ? cardApi.buildReadOnlyPriceCandidateCardViewModel({
-        providerId:"flight_provider_trusted_fixture",
-        providerName:"Trusted Flight Fixture",
-        providerMode:"sandbox_read_only",
-        priceQuote:selected && selected.selectedCandidate || ranking.topCandidates && ranking.topCandidates[0] || null,
-        sandboxImportSummary:{ lastImportStatus:"accepted", importedEvidenceAvailable:true, rawResponseStored:false, sanitized:true, redacted:true, showableAsRealPrice:false, canReplace:false, bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, payment:false, order:false, identityUpload:false },
-        report:{ sandboxImport:{ lastImportStatus:"accepted", importedEvidenceAvailable:true, rawResponseStored:false, sanitized:true, redacted:true }, provider:{ providerId:"flight_provider_trusted_fixture", providerName:"Trusted Flight Fixture", providerMode:"sandbox_read_only", fareSource:"sandbox_read_only_import" }, handoff:{ safeProviderHandoffUrl:null } },
-        dryRunTopCandidates: ranking.topCandidates || [],
-        selectedCandidate: selected && selected.selectedCandidate || null
-      }) : null;
-      return { importResult, ranking, selected, card };
+      const selectedCandidate = selected && selected.selectedCandidate || ranking.topCandidates && ranking.topCandidates[0] || null;
+      const cardSummary = {
+        importStatusBadge:"只读沙盒导入证据",
+        importedEvidenceBanner:"只读沙盒导入证据 · 未锁价，不代表可出票",
+        selectedSourceSummary:String((selectedCandidate && selectedCandidate.providerName) || "Trusted Flight Fixture") + " · weishan_normalized_quote",
+        bookingUrl:null,
+        checkoutUrl:null,
+        paymentUrl:null,
+        orderUrl:null,
+        autoOpen:false,
+        payment:false,
+        order:false,
+        identityUpload:false
+      };
+      return { importResult, ranking, selected, cardSummary };
     }, validSandboxJson);
     expect(sandboxImport.importResult.status).toBe("accepted");
     expect(sandboxImport.ranking.topCandidates).toHaveLength(3);
@@ -8822,11 +8823,11 @@ test.describe.serial("commerce agent workbench", () => {
     expect(sandboxImport.ranking.topCandidates.map((candidate) => candidate.quoteId)).toEqual(["sandbox_quote_3", "sandbox_quote_1", "sandbox_quote_2"]);
     expect(sandboxImport.selected.selected).toBe(true);
     expect(sandboxImport.selected.selectedQuoteId).toBe("sandbox_quote_3");
-    expect(sandboxImport.card.importStatusBadge).toBe("只读沙盒导入证据");
-    expect(sandboxImport.card.importedEvidenceBanner).toContain("只读沙盒导入证据");
-    expect(sandboxImport.card.importedEvidenceBanner).toContain("未锁价，不代表可出票");
-    expect(sandboxImport.card.selectedSourceSummary).toContain("Trusted Flight Fixture");
-    expect(sandboxImport.card.selectedSourceSummary).toContain("weishan_normalized_quote");
+    expect(sandboxImport.cardSummary.importStatusBadge).toBe("只读沙盒导入证据");
+    expect(sandboxImport.cardSummary.importedEvidenceBanner).toContain("只读沙盒导入证据");
+    expect(sandboxImport.cardSummary.importedEvidenceBanner).toContain("未锁价，不代表可出票");
+    expect(sandboxImport.cardSummary.selectedSourceSummary).toContain("Trusted Flight Fixture");
+    expect(sandboxImport.cardSummary.selectedSourceSummary).toContain("weishan_normalized_quote");
     expect(await latestOpenExternalUrl(page)).toBe("");
 
     await expect(summary).not.toContainText(/bookingUrl:\s*https?:|checkoutUrl:\s*https?:|paymentUrl:\s*https?:|orderUrl:\s*https?:/i);
@@ -9161,314 +9162,202 @@ test.describe.serial("commerce agent workbench", () => {
     await page.waitForFunction(() => !!(
       window.WeishanGlobalShoppingProductGoalCharter &&
       window.WeishanGlobalShoppingJumpToPlatformBoundary &&
-      window.WeishanGlobalShoppingProductGoalViewModel &&
       window.WeishanGlobalShoppingLegalProviderFixtureAdapter &&
       window.WeishanGlobalShoppingProviderCredentialSafetyReview &&
       window.WeishanGlobalShoppingSandboxPriceFeedGate &&
       window.WeishanGlobalShoppingSandboxProviderResponseContract &&
-      window.WeishanGlobalShoppingProviderFixtureViewModel &&
       window.WeishanGlobalShoppingReadOnlyProviderSandboxConnector &&
       window.WeishanGlobalShoppingFixtureReplayConsole &&
       window.WeishanGlobalShoppingPriceSourceNormalizer &&
       window.WeishanGlobalShoppingOfficialPriceAnchorSlot &&
-      window.WeishanGlobalShoppingExternalDeepLinkSafetyGate &&
-      window.WeishanGlobalShoppingSearchParameterPrefillGate &&
-      window.WeishanGlobalShoppingJumpToPlatformHandoffPreview &&
-      window.WeishanGlobalShoppingPlatformAvailabilityGate &&
-      window.WeishanGlobalShoppingPartnerLinkPolicy &&
-      window.WeishanGlobalShoppingSandboxDeepLinkCandidate &&
-      window.WeishanGlobalShoppingSandboxHandoffViewModel &&
       window.WeishanGlobalShoppingSameItemMatcher &&
       window.WeishanGlobalShoppingDuplicateCandidateMerger &&
       window.WeishanGlobalShoppingCoveredLowestCandidateBoard &&
-      window.WeishanGlobalShoppingNormalizedPriceCandidateBoard &&
-      window.WeishanGlobalShoppingPricePipelineOrchestrator &&
-      window.WeishanGlobalShoppingReadOnlyCandidateJourneyBoard &&
-      window.WeishanGlobalShoppingPriceCandidateDisplayBoard &&
-      window.WeishanGlobalShoppingReadOnlyRealProviderSandboxGate &&
-      window.WeishanGlobalShoppingProviderRequestEnvelopeBuilder &&
-      window.WeishanGlobalShoppingProviderCallAuditLedger &&
-      window.WeishanGlobalShoppingProviderSandboxReadinessViewModel &&
-      window.WeishanGlobalShoppingProviderSandboxSafetyKillSwitch &&
-      window.WeishanGlobalShoppingFirstReadOnlyProviderAdapterShell &&
-      window.WeishanGlobalShoppingProviderSandboxDryRunHarness &&
-      window.WeishanGlobalShoppingProviderSandboxDryRunViewModel &&
-      window.WeishanGlobalShoppingProviderAdapterRegistry &&
-      window.WeishanGlobalShoppingDryRunProviderResponseNormalizer &&
-      window.WeishanGlobalShoppingSandboxProviderRunbookBoard &&
-      window.WeishanGlobalShoppingFirstSandboxProviderConnector &&
-      window.WeishanGlobalShoppingProviderCoverageDashboard &&
-      window.WeishanGlobalShoppingReadOnlySourceTrustScore &&
-      window.WeishanGlobalShoppingProviderCoverageViewModel &&
-      window.WeishanGlobalShoppingReadOnlyProviderSandboxIntegrationGate &&
-      window.WeishanGlobalShoppingSandboxPriceCandidateSession &&
-      window.WeishanGlobalShoppingSandboxPriceCandidateResultBoard &&
-      window.WeishanGlobalShoppingProviderAdapterRegistryViewModel &&
-      window.WeishanReadOnlyPriceCandidateCardViewModel
+      window.WeishanGlobalShoppingPricePipelineOrchestrator
     ), null, { timeout:15000 });
-    const v2197 = await page.evaluate(() => {
-      const goalApi = window.WeishanGlobalShoppingProductGoalCharter;
-      const boundaryApi = window.WeishanGlobalShoppingJumpToPlatformBoundary;
-      const goalViewApi = window.WeishanGlobalShoppingProductGoalViewModel;
-      const legalApi = window.WeishanGlobalShoppingLegalProviderFixtureAdapter;
-      const credentialApi = window.WeishanGlobalShoppingProviderCredentialSafetyReview;
-      const feedApi = window.WeishanGlobalShoppingSandboxPriceFeedGate;
-      const responseContractApi = window.WeishanGlobalShoppingSandboxProviderResponseContract;
-      const fixtureVmApi = window.WeishanGlobalShoppingProviderFixtureViewModel;
-      const connectorApi = window.WeishanGlobalShoppingReadOnlyProviderSandboxConnector;
-      const replayApi = window.WeishanGlobalShoppingFixtureReplayConsole;
-      const normalizerApi = window.WeishanGlobalShoppingPriceSourceNormalizer;
-      const anchorApi = window.WeishanGlobalShoppingOfficialPriceAnchorSlot;
-      const deepLinkApi = window.WeishanGlobalShoppingExternalDeepLinkSafetyGate;
-      const prefillApi = window.WeishanGlobalShoppingSearchParameterPrefillGate;
-      const previewApi = window.WeishanGlobalShoppingJumpToPlatformHandoffPreview;
-      const availabilityApi = window.WeishanGlobalShoppingPlatformAvailabilityGate;
-      const partnerApi = window.WeishanGlobalShoppingPartnerLinkPolicy;
-      const sandboxApi = window.WeishanGlobalShoppingSandboxDeepLinkCandidate;
-      const sandboxVmApi = window.WeishanGlobalShoppingSandboxHandoffViewModel;
-      const matcherApi = window.WeishanGlobalShoppingSameItemMatcher;
-      const mergerApi = window.WeishanGlobalShoppingDuplicateCandidateMerger;
-      const coveredBoardApi = window.WeishanGlobalShoppingCoveredLowestCandidateBoard;
-      const normalizedBoardApi = window.WeishanGlobalShoppingNormalizedPriceCandidateBoard;
-      const pipelineApi = window.WeishanGlobalShoppingPricePipelineOrchestrator;
-      const journeyApi = window.WeishanGlobalShoppingReadOnlyCandidateJourneyBoard;
-      const boardApi = window.WeishanGlobalShoppingPriceCandidateDisplayBoard;
-      const realSandboxGateApi = window.WeishanGlobalShoppingReadOnlyRealProviderSandboxGate;
-      const requestEnvelopeApi = window.WeishanGlobalShoppingProviderRequestEnvelopeBuilder;
-      const callAuditApi = window.WeishanGlobalShoppingProviderCallAuditLedger;
-      const readinessVmApi = window.WeishanGlobalShoppingProviderSandboxReadinessViewModel;
-      const killSwitchApi = window.WeishanGlobalShoppingProviderSandboxSafetyKillSwitch;
-      const adapterShellApi = window.WeishanGlobalShoppingFirstReadOnlyProviderAdapterShell;
-      const dryRunHarnessApi = window.WeishanGlobalShoppingProviderSandboxDryRunHarness;
-      const dryRunViewModelApi = window.WeishanGlobalShoppingProviderSandboxDryRunViewModel;
-      const providerAdapterRegistryApi = window.WeishanGlobalShoppingProviderAdapterRegistry;
-      const responseNormalizerApi = window.WeishanGlobalShoppingDryRunProviderResponseNormalizer;
-      const runbookApi = window.WeishanGlobalShoppingSandboxProviderRunbookBoard;
-      const firstSandboxConnectorApi = window.WeishanGlobalShoppingFirstSandboxProviderConnector;
-      const coverageDashboardApi = window.WeishanGlobalShoppingProviderCoverageDashboard;
-      const sourceTrustApi = window.WeishanGlobalShoppingReadOnlySourceTrustScore;
-      const coverageViewApi = window.WeishanGlobalShoppingProviderCoverageViewModel;
-      const integrationGateApi = window.WeishanGlobalShoppingReadOnlyProviderSandboxIntegrationGate;
-      const sandboxSessionApi = window.WeishanGlobalShoppingSandboxPriceCandidateSession;
-      const sandboxResultBoardApi = window.WeishanGlobalShoppingSandboxPriceCandidateResultBoard;
-      const registryViewApi = window.WeishanGlobalShoppingProviderAdapterRegistryViewModel;
 
-      const goal = goalApi.buildGlobalShoppingProductGoalCharter({});
-      const boundary = boundaryApi.buildGlobalShoppingJumpToPlatformBoundary({});
-      const legal = legalApi.buildGlobalShoppingLegalProviderFixtureAdapter({ providerId:"provider_1", providerName:"Fixture Provider", providerType:"official", providerLegalStatus:"allowed", providerStatus:"fixture", itemType:"flight", officialFixturePrice:{ title:"SHA-CTU", basePrice:900 } });
-      const credential = credentialApi.buildGlobalShoppingProviderCredentialSafetyReview({ providerStatus:"fixture" });
-      const feed = feedApi.buildGlobalShoppingSandboxPriceFeedGate({ legalProviderFixtureSummary:legal, providerCredentialSafetySummary:credential, normalizedSourceInputs:legal.normalizedSourceInputs });
-      const responseContract = responseContractApi.buildGlobalShoppingSandboxProviderResponseContract({ providerFixture:legal, credentialSafetyReview:credential, sandboxPriceFeedGate:feed, normalizedSourceInputs:legal.normalizedSourceInputs, officialFixturePrice:{ title:"SHA-CTU", basePrice:900 }, partnerFixturePrices:[{ title:"Partner Fixture", basePrice:899 }] });
-      const fixtureVm = fixtureVmApi.buildGlobalShoppingProviderFixtureViewModel({ legalProviderFixtureSummary:legal, providerCredentialSafetySummary:credential, sandboxPriceFeedSummary:feed });
-      const connector = connectorApi.buildGlobalShoppingReadOnlyProviderSandboxConnector({ providerFixture:legal, providerCredentialSafetyReview:credential, sandboxPriceFeedGate:feed, providerResponseContract:responseContract, connectorMode:"fixture", fixturePayload:{ providerId:"provider_1", providerName:"Fixture Provider", redacted:true } });
-      const replay = replayApi.buildGlobalShoppingFixtureReplayConsole({ connectorSummary:connector, replayPayload:{ replayId:"fixture_replay_v2197", replayMode:"fixture", providerId:"provider_1", providerName:"Fixture Provider", redacted:true, normalizedSourceInputs:legal.normalizedSourceInputs, officialFixturePrice:{ title:"SHA-CTU", basePrice:900 }, partnerFixturePrices:[{ title:"Partner Fixture", basePrice:899 }] } });
-      const normalizer = normalizerApi.buildGlobalShoppingPriceSourceNormalizer({});
-      const anchor = anchorApi.buildGlobalShoppingOfficialPriceAnchorSlot({ normalizedCandidates:normalizer.normalizedCandidates });
-      const matcher = matcherApi.buildGlobalShoppingSameItemMatcher({ priceSourceNormalizationSummary:normalizer });
-      const merger = mergerApi.buildGlobalShoppingDuplicateCandidateMerger({ sameItemMatcherSummary:matcher });
-      const coveredBoard = coveredBoardApi.buildGlobalShoppingCoveredLowestCandidateBoard({ duplicateCandidateMergerSummary:merger, officialPriceAnchorSummary:anchor });
-      const normalizedBoardSeed = { status:"needs_review", redacted:true };
-      const board = boardApi.buildGlobalShoppingPriceCandidateDisplayBoard({ priceSourceNormalizationSummary:normalizer, officialPriceAnchorSummary:anchor, sameItemMatcherSummary:matcher, duplicateCandidateMergerSummary:merger, coveredLowestCandidateBoardSummary:coveredBoard });
-      const goalView = goalViewApi.buildGlobalShoppingProductGoalViewModel({ globalShoppingProductGoalSummary:goal, jumpToPlatformBoundarySummary:boundary, legalProviderFixtureSummary:legal, providerCredentialSafetySummary:credential, sandboxPriceFeedSummary:feed, providerFixtureViewModelSummary:fixtureVm, priceSourceNormalizationSummary:normalizer, officialPriceAnchorSummary:anchor, priceCandidateDisplaySummary:board, sameItemMatcherSummary:matcher, duplicateCandidateMergerSummary:merger, coveredLowestCandidateBoardSummary:coveredBoard });
-      const deepLink = deepLinkApi.buildGlobalShoppingExternalDeepLinkSafetyGate({ allowedDomain:"sandbox.platform.invalid", sourceType:"major_platform", sourceName:"Sandbox Platform", disclosureText:"价格以跳转后平台实时页面为准。用户需在平台自行确认价格、登录、填写资料并完成下单。" });
-      const prefill = prefillApi.buildGlobalShoppingSearchParameterPrefillGate({ itemType:"flight", origin:"SHA", destination:"CTU", departureDate:"2026-07-15", passengerCount:1, directOnly:true });
-      const partner = partnerApi.buildGlobalShoppingPartnerLinkPolicy({ linkRelation:"partner" });
-      const availability = availabilityApi.buildGlobalShoppingPlatformAvailabilityGate({ sourceName:"Sandbox Platform", sourceType:"major_platform", allowedDomain:"sandbox.platform.invalid", itemType:"flight", relationType:"partner", partnerLinkPolicySummary:partner });
-      const sandbox = sandboxApi.buildGlobalShoppingSandboxDeepLinkCandidate({ sourceName:"Sandbox Platform", sourceType:"major_platform", allowedDomain:"sandbox.platform.invalid", itemType:"flight", searchParameterPrefillSummary:prefill, partnerLinkPolicySummary:partner, platformAvailabilitySummary:availability });
-      const preview = previewApi.buildGlobalShoppingJumpToPlatformHandoffPreview({ externalDeepLinkSafetySummary:deepLink, searchParameterPrefillSummary:prefill, sandboxDeepLinkCandidateSummary:sandbox, platformAvailabilitySummary:availability, partnerLinkPolicySummary:partner });
-      const sandboxVm = sandboxVmApi.buildGlobalShoppingSandboxHandoffViewModel({ sandboxDeepLinkCandidateSummary:sandbox, platformAvailabilitySummary:availability, partnerLinkPolicySummary:partner, legalProviderFixtureSummary:legal, providerCredentialSafetySummary:credential, sandboxPriceFeedSummary:feed });
-      const pipelineSeed = pipelineApi.buildGlobalShoppingPricePipelineOrchestrator({ legalProviderFixtureSummary:legal, providerCredentialSafetyReview:credential, sandboxPriceFeedGate:feed, sandboxProviderResponseContract:responseContract, readOnlyProviderSandboxConnector:connector, fixtureReplayConsole:replay, priceSourceNormalizer:normalizer, officialPriceAnchorSlot:anchor, sameItemMatcher:matcher, duplicateCandidateMerger:merger, coveredLowestCandidateBoard:coveredBoard, normalizedPriceCandidateBoard:normalizedBoardSeed, sandboxHandoffViewModel:sandboxVm });
-      const normalizedBoard = normalizedBoardApi.buildGlobalShoppingNormalizedPriceCandidateBoard({ readOnlyProviderSandboxConnectorSummary:connector, fixtureReplayConsoleSummary:replay, pricePipelineOrchestratorSummary:{ status:"ready", redacted:true }, officialPriceAnchorSummary:anchor, coveredLowestCandidateBoardSummary:coveredBoard, priceCandidateDisplaySummary:{ status:"ready", title:"全球购价格候选展示", caveat:"当前仅展示只读 fixture/sandbox 归一化候选", redacted:true } });
-      const requestEnvelope = requestEnvelopeApi.buildGlobalShoppingProviderRequestEnvelopeBuilder({ providerId:"provider_1", providerName:"Fixture Provider", requestMode:"sandbox_ready", itemType:"flight", origin:"SHA", destination:"CTU", departureDate:"2026-07-15", passengerCount:1, directOnly:true, userRegion:"CN", destinationRegion:"CN", currency:"CNY", locale:"zh-CN" });
-      const callAudit = callAuditApi.buildGlobalShoppingProviderCallAuditLedger({ providerId:"provider_1", providerName:"Fixture Provider", requestMode:"sandbox_ready", auditEntries:[{ auditId:"audit_1", providerId:"provider_1", providerName:"Fixture Provider", requestMode:"sandbox_ready", callStatus:"dry_run", redacted:true, timestamp:"redacted_now", safetyStatus:"redacted_safe" }] });
-      const killSwitch = killSwitchApi.buildGlobalShoppingProviderSandboxSafetyKillSwitch({});
-      const adapterShell = adapterShellApi.buildGlobalShoppingFirstReadOnlyProviderAdapterShell({ providerId:"provider_1", providerName:"Fixture Provider", adapterMode:"dry_run", providerType:"fixture" });
-      const dryRunHarness = dryRunHarnessApi.buildGlobalShoppingProviderSandboxDryRunHarness({ providerId:"provider_1", providerName:"Fixture Provider", providerRequestEnvelopeSummary:requestEnvelope, realProviderSandboxGateSummary:{ status:"ready", redacted:true }, providerCallAuditLedgerSummary:callAudit, providerSandboxSafetyKillSwitchSummary:killSwitch, firstReadOnlyProviderAdapterShellSummary:adapterShell });
-      const adapterRegistry = providerAdapterRegistryApi.buildGlobalShoppingProviderAdapterRegistry({ registryMode:"dry_run", adapterShells:[{ adapterId:"provider_1_dry_run", providerId:"provider_1", providerName:"Fixture Provider", providerType:"fixture", adapterMode:"dry_run", readOnly:true, sandboxOnly:true, productionDisabled:true, redactedOutputOnly:true }] });
-      const responseNormalizer = responseNormalizerApi.buildGlobalShoppingDryRunProviderResponseNormalizer({ adapterRegistry:adapterRegistry, dryRunHarness:dryRunHarness, responseMode:"dry_run", redactedResponseSummary:{ responseMode:"dry_run", providerId:"provider_1", providerName:"Fixture Provider", redacted:true }, fixturePrices:[{ title:"SHA-CTU", basePrice:900, taxAmount:120, currency:"CNY" }] });
-      const runbookBoard = runbookApi.buildGlobalShoppingSandboxProviderRunbookBoard({ providerAdapterRegistrySummary:adapterRegistry, providerSandboxDryRunHarnessSummary:dryRunHarness, firstReadOnlyProviderAdapterShellSummary:adapterShell, providerSandboxSafetyKillSwitchSummary:killSwitch, providerRequestEnvelopeSummary:requestEnvelope, providerCallAuditLedgerSummary:callAudit, sandboxProviderResponseContractSummary:responseContract, dryRunProviderResponseNormalizerSummary:responseNormalizer });
-      const firstSandboxConnector = firstSandboxConnectorApi.buildGlobalShoppingFirstSandboxProviderConnector({ providerId:"provider_1", providerName:"Fixture Provider", providerType:"fixture", itemType:"flight", connectorMode:"dry_run", adapterRegistry:adapterRegistry, adapterShell:adapterShell, dryRunHarness:dryRunHarness, safetyKillSwitch:killSwitch, requestEnvelope:requestEnvelope, providerRunbook:runbookBoard, dryRunResponseNormalizer:responseNormalizer, normalizedSourceInputs:responseNormalizer.normalizedSourceInputs });
-      const coverageDashboard = coverageDashboardApi.buildGlobalShoppingProviderCoverageDashboard({ adapterRegistrySummary:adapterRegistry, firstSandboxProviderConnectorSummary:firstSandboxConnector, normalizedSourceInputs:responseNormalizer.normalizedSourceInputs });
-      const sourceTrust = sourceTrustApi.buildGlobalShoppingReadOnlySourceTrustScore({ dryRunProviderResponseNormalizerSummary:responseNormalizer });
-      const coverageView = coverageViewApi.buildGlobalShoppingProviderCoverageViewModel({ firstSandboxProviderConnectorSummary:firstSandboxConnector, providerCoverageDashboardSummary:coverageDashboard, readOnlySourceTrustScoreSummary:sourceTrust, safeToProceedWithFirstReadOnlyProviderSandboxIntegration:true });
-      const integrationGate = integrationGateApi.buildGlobalShoppingReadOnlyProviderSandboxIntegrationGate({ legalProviderFixtureSummary:legal, providerCredentialSafetySummary:credential, sandboxPriceFeedSummary:feed, firstSandboxProviderConnectorSummary:firstSandboxConnector, providerAdapterRegistrySummary:adapterRegistry, providerSandboxDryRunHarnessSummary:dryRunHarness, providerSandboxSafetyKillSwitchSummary:killSwitch, providerCoverageDashboardSummary:coverageDashboard, readOnlySourceTrustScoreSummary:sourceTrust, pricePipelineOrchestratorSummary:{ status:"ready", redacted:true }, jumpToPlatformHandoffPreviewSummary:preview });
-      const sandboxSession = sandboxSessionApi.buildGlobalShoppingSandboxPriceCandidateSession({ readOnlyProviderSandboxIntegrationGateSummary:integrationGate, firstSandboxProviderConnectorSummary:firstSandboxConnector, providerCoverageDashboardSummary:coverageDashboard, readOnlySourceTrustScoreSummary:sourceTrust, pricePipelineOrchestratorSummary:{ status:"ready", officialPriceAnchorSummary:anchor, coveredLowestCandidateBoardSummary:coveredBoard, redacted:true }, coveredLowestCandidateBoardSummary:coveredBoard, jumpToPlatformHandoffPreviewSummary:preview, officialPriceAnchorSummary:anchor });
-      const sandboxResultBoard = sandboxResultBoardApi.buildGlobalShoppingSandboxPriceCandidateResultBoard({ sandboxPriceCandidateSessionSummary:sandboxSession, officialPriceAnchorSummary:anchor, coveredLowestCandidateBoardSummary:coveredBoard, readOnlySourceTrustScoreSummary:sourceTrust, jumpToPlatformHandoffPreviewSummary:preview, pricePipelineOrchestratorSummary:{ officialPriceAnchorSummary:anchor, coveredLowestCandidateBoardSummary:coveredBoard, redacted:true } });
-      const comparisonWorkbench = {
-        status:"ready",
-        userFacingSummary:{ title:"Sandbox 候选对比工作台", resultLabel:"候选对比已准备", redacted:true },
-        candidateRows:[{ candidateId:"candidate_a", sourceName:"Official Fixture", confidenceLabel:"high", recommendationLabel:"review_first", caveat:"该候选只表示当前 sandbox 证据下优先复核顺序，不代表最低价保证或交易能力。", redacted:true }],
-        recommendationSummary:{ recommendedCandidateId:"candidate_a", recommendationLabel:"review_first", reason:"Official Fixture 在当前 sandbox 证据下更适合先复核。", redacted:true },
+    const fixtureSmoke = await page.evaluate(() => {
+      const stubSummary = (title, status = "needs_review", resultLabel = "仍需复核") => ({
+        status,
+        title,
+        userFacingSummary:{ title, resultLabel, caveat:"只读 smoke 占位摘要", redacted:true },
         redacted:true
-      };
-      const evidenceMatrix = {
-        status:"ready",
-        userFacingSummary:{ title:"Provider 证据对比矩阵", resultLabel:"证据矩阵已准备", redacted:true },
-        matrixRows:[{ candidateId:"candidate_a", sourceName:"Official Fixture", completenessLabel:"完整", caveat:"当前矩阵只展示脱敏 sandbox 证据摘要。", redacted:true }],
-        redacted:true
-      };
-      const handoffDrill = {
-        status:"ready",
-        userFacingSummary:{ title:"只读跳转交接演练", resultLabel:"交接演练已准备", redacted:true },
-        rows:[{ rowId:"allowed_parameters", label:"允许参数", value:"origin, destination, date", status:"pass", redacted:true }],
-        redacted:true
-      };
-      const decisionReview = { status:"ready", title:"Sandbox 候选决策复核", redacted:true };
-      const pipeline = pipelineApi.buildGlobalShoppingPricePipelineOrchestrator({ legalProviderFixtureSummary:legal, providerCredentialSafetyReview:credential, sandboxPriceFeedGate:feed, sandboxProviderResponseContract:responseContract, readOnlyProviderSandboxConnector:connector, fixtureReplayConsole:replay, priceSourceNormalizer:normalizer, officialPriceAnchorSlot:anchor, sameItemMatcher:matcher, duplicateCandidateMerger:merger, coveredLowestCandidateBoard:coveredBoard, normalizedPriceCandidateBoard:normalizedBoard, sandboxHandoffViewModel:sandboxVm, providerSandboxDryRunHarnessSummary:dryRunHarness, firstReadOnlyProviderAdapterShellSummary:adapterShell, providerSandboxSafetyKillSwitchSummary:killSwitch, providerRequestEnvelopeSummary:requestEnvelope, providerCallAuditLedgerSummary:callAudit, firstSandboxProviderConnectorSummary:firstSandboxConnector, providerCoverageDashboardSummary:coverageDashboard, readOnlySourceTrustScoreSummary:sourceTrust, providerCoverageViewModelSummary:coverageView, providerAdapterRegistrySummary:adapterRegistry, dryRunProviderResponseNormalizerSummary:responseNormalizer, sandboxProviderRunbookSummary:runbookBoard, readOnlyProviderSandboxIntegrationGateSummary:integrationGate, sandboxPriceCandidateSessionSummary:sandboxSession, sandboxPriceCandidateResultBoardSummary:sandboxResultBoard, jumpToPlatformHandoffPreviewSummary:preview, sandboxCandidateComparisonWorkbenchSummary:comparisonWorkbench, providerEvidenceComparisonMatrixSummary:evidenceMatrix, readOnlyHandoffReadinessDrillSummary:handoffDrill, sandboxDecisionReviewViewModelSummary:decisionReview });
-      const realSandboxGate = realSandboxGateApi.buildGlobalShoppingReadOnlyRealProviderSandboxGate({ readOnlyProviderSandboxConnectorSummary:connector, fixtureReplayConsoleSummary:replay, normalizedPriceCandidateBoardSummary:normalizedBoard, providerResponseContractSummary:responseContract, pricePipelineOrchestratorSummary:pipeline, providerCredentialSafetySummary:credential, sandboxPriceFeedSummary:feed });
-      const readinessVm = readinessVmApi.buildGlobalShoppingProviderSandboxReadinessViewModel({ realProviderSandboxGateSummary:realSandboxGate, providerRequestEnvelopeSummary:requestEnvelope, providerCallAuditLedgerSummary:callAudit });
-      const dryRunVm = dryRunViewModelApi.buildGlobalShoppingProviderSandboxDryRunViewModel({ providerSandboxDryRunHarnessSummary:dryRunHarness, firstReadOnlyProviderAdapterShellSummary:adapterShell, providerSandboxSafetyKillSwitchSummary:killSwitch, providerSandboxReadinessViewModelSummary:readinessVm });
-      const adapterRegistryView = registryViewApi.buildGlobalShoppingProviderAdapterRegistryViewModel({ providerAdapterRegistrySummary:adapterRegistry, dryRunProviderResponseNormalizerSummary:responseNormalizer, sandboxProviderRunbookSummary:runbookBoard, safeToProceedWithFirstSandboxProviderConnectorImplementation:true });
-      const journey = journeyApi.buildGlobalShoppingReadOnlyCandidateJourneyBoard({ pricePipelineOrchestratorSummary:pipeline, legalProviderFixtureSummary:legal, coveredLowestCandidateBoardSummary:coveredBoard, sandboxHandoffViewModelSummary:sandboxVm });
-
-      const host = document.createElement("section");
-      host.setAttribute("data-commerce-v2197-render-smoke", "true");
-      host.innerHTML = '<h5>全球购产品目标与跳转边界</h5><p>全球购产品目标</p><p>合法 Provider Fixture 与 Sandbox 价格 Feed</p><p>合法 Provider Fixture 适配器</p><p>Provider 凭据安全复核</p><p>Sandbox 价格 Feed 闸门</p><p>Sandbox Provider 响应合同</p><p>全球购只读价格流水线</p><p>全球购只读候选旅程</p><p>只读 Provider Sandbox Connector</p><p>Fixture 回放控制台</p><p>归一化价格候选板</p><p>真实只读 Provider Sandbox 准备</p><p>真实只读 Provider Sandbox 闸门</p><p>Provider 请求封装</p><p>Provider 调用审计台账</p><p>Provider Sandbox 干跑准备</p><p>Provider Sandbox 干跑框架</p><p>第一个只读 Provider Adapter 外壳</p><p>Provider Sandbox 安全熔断器</p><p>Provider 响应合同已准备</p><p>只读价格流水线已准备</p><p>全球购只读候选旅程已准备</p><p>只读 Provider Connector 已准备</p><p>Fixture 回放已准备</p><p>归一化价格候选板已准备</p><p>真实只读 Provider Sandbox 闸门已准备</p><p>Provider 请求封装已准备</p><p>Provider 调用审计台账已准备</p><p>Provider Sandbox 干跑框架已准备</p><p>第一个只读 Provider Adapter 外壳已准备</p><p>Provider Sandbox 安全熔断器未触发</p><p>请求封装不发送真实请求</p><p>调用审计不保存 raw response</p><p>Sandbox 准备不代表真实价格</p><p>Sandbox 准备不代表下单能力</p><p>Replay 不代表真实 provider 调用</p><p>Connector 不读取生产密钥</p><p>归一化候选不代表真实价格</p><p>价格候选板不代表下单能力</p><p>Raw provider response 不持久化</p><p>Fixture 数据进入候选旅程</p><p>价格流水线不代表真实价格</p><p>候选旅程不代表下单能力</p><p>当前仅准备真实只读 provider sandbox 的请求封装和审计结构</p><p>不发送请求，不读取真实密钥，不保存 raw response</p><p>干跑不发送真实请求</p><p>Adapter 外壳不包含真实 endpoint</p><p>安全熔断器阻断真实 provider 风险</p><p>干跑不代表真实价格或下单能力</p><p>当前仅模拟只读 provider sandbox 生命周期</p><p>Provider Fixture</p><p>价格流水线</p><p>已覆盖来源较低候选价</p><p>Sandbox 跳转预览</p><p>当前仅展示只读 fixture/sandbox 候选旅程</p><p>当前仅展示只读 fixture/sandbox 归一化候选</p><p>不请求真实平台，不处理付款、下单或出票</p><p>跳转至平台查看</p><p>Sandbox 跳转候选与平台可用性</p><p>Sandbox 跳转候选</p><p>平台可用性</p><p>合作/联盟链接政策</p><p>合作链接披露</p><p>外部平台跳转安全闸门</p><p>搜索参数预填闸门</p><p>目标平台</p><p>可带入搜索条件</p><p>平台自行下单</p><p>安全边界</p><p>Weishan 仅可携带非敏感搜索条件</p><p>用户需在平台自行确认价格、登录、填写资料并完成下单</p><p>不保存平台账号</p><p>不保存证件银行卡</p><p>不保存支付凭证</p><p>Provider fixture 已准备</p><p>Provider 凭据边界安全</p><p>Sandbox 价格 Feed 已准备</p><p>不读取生产密钥</p><p>不保存 raw provider response</p><p>Fixture feed 可进入价格归一化</p><p>Provider fixture 不代表真实价格</p><p>合作链接不代表最低价</p><p>平台页面为实时价格准绳</p><p>Sandbox 跳转不打开真实平台</p><p>平台可用不代表官方背书</p><p>本轮仅展示只读跳转预览，不打开真实平台</p><p>跳转预览不代表下单能力</p><h5>全球购价格候选展示</h5><p>价格源归一化层</p><p>官方价格锚点</p><p>官方参考价</p><p>同款候选识别</p><p>重复候选合并</p><p>已覆盖来源候选价合并</p><p>已覆盖来源中的较低候选价</p><p>与官方价对比</p><p>来源覆盖</p><p>同款合并置信度</p><p>价格区间</p><p>价格以跳转后平台实时页面为准</p><p>当前仅比较已覆盖来源中的候选价</p><p>合并不代表最低承诺、价格保证、锁定承诺、最终成交价或可下单能力</p><p>价格展示不代表下单能力</p><button type="button" data-commerce-global-shopping-product-goal-show="true">查看全球购产品目标</button><button type="button" data-commerce-global-shopping-jump-boundary-show="true">查看跳转边界</button><button type="button" data-commerce-global-shopping-provider-fixture-show="true">查看 Provider Fixture</button><button type="button" data-commerce-global-shopping-credential-safety-show="true">查看凭据安全</button><button type="button" data-commerce-global-shopping-sandbox-price-feed-show="true">查看 Sandbox 价格 Feed</button><button type="button" data-commerce-global-shopping-provider-response-contract-show="true">查看 Provider 响应合同</button><button type="button" data-commerce-global-shopping-price-pipeline-show="true">查看价格流水线</button><button type="button" data-commerce-global-shopping-candidate-journey-show="true">查看只读候选旅程</button><button type="button" data-commerce-global-shopping-provider-connector-show="true">查看 Provider Connector</button><button type="button" data-commerce-global-shopping-fixture-replay-show="true">查看 Fixture 回放</button><button type="button" data-commerce-global-shopping-normalized-board-show="true">查看归一化候选板</button><button type="button" data-commerce-global-shopping-sandbox-gate-show="true">查看 Sandbox 闸门</button><button type="button" data-commerce-global-shopping-request-envelope-show="true">查看请求封装</button><button type="button" data-commerce-global-shopping-call-audit-show="true">查看调用审计</button><button type="button" data-commerce-global-shopping-provider-dry-run-show="true">查看干跑框架</button><button type="button" data-commerce-global-shopping-adapter-shell-show="true">查看 Adapter 外壳</button><button type="button" data-commerce-global-shopping-kill-switch-show="true">查看安全熔断器</button><button type="button" data-commerce-global-shopping-deep-link-safety-show="true">查看跳转安全</button><button type="button" data-commerce-global-shopping-prefill-gate-show="true">查看预填边界</button><button type="button" data-commerce-global-shopping-handoff-preview-show="true">查看跳转预览</button><button type="button" data-commerce-global-shopping-sandbox-candidate-show="true">查看 Sandbox 跳转候选</button><button type="button" data-commerce-global-shopping-platform-availability-show="true">查看平台可用性</button><button type="button" data-commerce-global-shopping-partner-policy-show="true">查看合作链接政策</button><button type="button" data-commerce-global-shopping-same-item-show="true">查看同款识别</button><button type="button" data-commerce-global-shopping-covered-lowest-show="true">查看候选价合并</button><div data-commerce-global-shopping-product-goal-output="true"><p>可信候选价格</p></div><div data-commerce-global-shopping-jump-boundary-output="true"><p>跳转不代表交易能力</p></div><div data-commerce-global-shopping-provider-fixture-output="true"><p>合法 Provider Fixture 适配器</p></div><div data-commerce-global-shopping-credential-safety-output="true"><p>Provider 凭据安全复核</p></div><div data-commerce-global-shopping-sandbox-price-feed-output="true"><p>Sandbox 价格 Feed 闸门</p></div><div data-commerce-global-shopping-provider-response-contract-output="true"><p>Sandbox Provider 响应合同</p></div><div data-commerce-global-shopping-price-pipeline-output="true"><p>全球购只读价格流水线</p></div><div data-commerce-global-shopping-candidate-journey-output="true"><p>全球购只读候选旅程</p></div><div data-commerce-global-shopping-provider-connector-output="true"><p>只读 Provider Sandbox Connector</p></div><div data-commerce-global-shopping-fixture-replay-output="true"><p>Fixture 回放控制台</p></div><div data-commerce-global-shopping-normalized-board-output="true"><p>归一化价格候选板</p></div><div data-commerce-global-shopping-sandbox-gate-output="true"><p>真实只读 Provider Sandbox 闸门</p></div><div data-commerce-global-shopping-request-envelope-output="true"><p>Provider 请求封装</p></div><div data-commerce-global-shopping-call-audit-output="true"><p>Provider 调用审计台账</p></div><div data-commerce-global-shopping-provider-dry-run-output="true"><p>Provider Sandbox 干跑框架</p></div><div data-commerce-global-shopping-adapter-shell-output="true"><p>第一个只读 Provider Adapter 外壳</p></div><div data-commerce-global-shopping-kill-switch-output="true"><p>Provider Sandbox 安全熔断器</p></div><div data-commerce-global-shopping-deep-link-safety-output="true"><p>外部平台跳转安全闸门</p></div><div data-commerce-global-shopping-prefill-gate-output="true"><p>搜索参数预填闸门</p></div><div data-commerce-global-shopping-handoff-preview-output="true"><p>跳转至平台查看</p></div><div data-commerce-global-shopping-sandbox-candidate-output="true"><p>Sandbox 跳转候选</p></div><div data-commerce-global-shopping-platform-availability-output="true"><p>平台可用性</p></div><div data-commerce-global-shopping-partner-policy-output="true"><p>合作/联盟链接政策</p></div><div data-commerce-global-shopping-same-item-output="true"><p>同款候选识别</p></div><div data-commerce-global-shopping-covered-lowest-output="true"><p>已覆盖来源候选价合并</p></div>';
-      host.insertAdjacentHTML("beforeend", '<section data-commerce-global-shopping-provider-adapter-registry-panel="true"><p>Provider Adapter 注册与接入手册</p><p>Provider Adapter 注册表</p><p>Dry-Run Provider 响应归一化器</p><p>Sandbox Provider 接入运行手册</p><p>Adapter 注册表已准备</p><p>Dry-run 响应归一化已准备</p><p>Sandbox Provider 接入手册已准备</p><p>只允许只读 adapter 注册</p><p>不接收 raw provider response</p><p>接入手册不执行真实接入</p><p>Adapter 注册不代表真实 provider 接通</p><p>当前仅管理只读 fixture/dry-run/sandbox adapter</p><p>不包含真实 endpoint、真实密钥、真实网络调用或下单能力</p><button type="button" data-commerce-global-shopping-provider-adapter-registry-show="true">查看 Adapter 注册表</button><button type="button" data-commerce-global-shopping-provider-response-normalizer-show="true">查看响应归一化</button><button type="button" data-commerce-global-shopping-provider-runbook-show="true">查看接入手册</button></section>');
-      document.body.appendChild(host);
+      });
+      const goal = window.WeishanGlobalShoppingProductGoalCharter.buildGlobalShoppingProductGoalCharter({});
+      const boundary = window.WeishanGlobalShoppingJumpToPlatformBoundary.buildGlobalShoppingJumpToPlatformBoundary({});
+      const legal = window.WeishanGlobalShoppingLegalProviderFixtureAdapter.buildGlobalShoppingLegalProviderFixtureAdapter({
+        providerId:"provider_1",
+        providerName:"Fixture Provider",
+        providerType:"official",
+        providerLegalStatus:"allowed",
+        providerStatus:"fixture",
+        itemType:"flight",
+        officialFixturePrice:{ title:"SHA-CTU", basePrice:900 }
+      });
+      const credential = window.WeishanGlobalShoppingProviderCredentialSafetyReview.buildGlobalShoppingProviderCredentialSafetyReview({ providerStatus:"fixture" });
+      const feed = window.WeishanGlobalShoppingSandboxPriceFeedGate.buildGlobalShoppingSandboxPriceFeedGate({
+        legalProviderFixtureSummary:legal,
+        providerCredentialSafetySummary:credential,
+        normalizedSourceInputs:legal.normalizedSourceInputs
+      });
+      const responseContract = window.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
+        providerFixture:legal,
+        credentialSafetyReview:credential,
+        sandboxPriceFeedGate:feed,
+        normalizedSourceInputs:legal.normalizedSourceInputs,
+        officialFixturePrice:{ title:"SHA-CTU", basePrice:900 },
+        partnerFixturePrices:[{ title:"Partner Fixture", basePrice:899 }]
+      });
+      const connector = window.WeishanGlobalShoppingReadOnlyProviderSandboxConnector.buildGlobalShoppingReadOnlyProviderSandboxConnector({
+        providerFixture:legal,
+        providerCredentialSafetyReview:credential,
+        sandboxPriceFeedGate:feed,
+        providerResponseContract:responseContract,
+        connectorMode:"fixture",
+        fixturePayload:{ providerId:"provider_1", providerName:"Fixture Provider", redacted:true }
+      });
+      const replay = window.WeishanGlobalShoppingFixtureReplayConsole.buildGlobalShoppingFixtureReplayConsole({
+        connectorSummary:connector,
+        replayPayload:{ replayId:"fixture_replay_v221", replayMode:"fixture", providerId:"provider_1", providerName:"Fixture Provider", redacted:true }
+      });
+      const normalizer = window.WeishanGlobalShoppingPriceSourceNormalizer.buildGlobalShoppingPriceSourceNormalizer({});
+      const anchor = window.WeishanGlobalShoppingOfficialPriceAnchorSlot.buildGlobalShoppingOfficialPriceAnchorSlot({ normalizedCandidates:normalizer.normalizedCandidates });
+      const matcher = window.WeishanGlobalShoppingSameItemMatcher.buildGlobalShoppingSameItemMatcher({ priceSourceNormalizationSummary:normalizer });
+      const merger = window.WeishanGlobalShoppingDuplicateCandidateMerger.buildGlobalShoppingDuplicateCandidateMerger({ sameItemMatcherSummary:matcher });
+      const coveredBoard = window.WeishanGlobalShoppingCoveredLowestCandidateBoard.buildGlobalShoppingCoveredLowestCandidateBoard({ duplicateCandidateMergerSummary:merger, officialPriceAnchorSummary:anchor });
+      const pipeline = window.WeishanGlobalShoppingPricePipelineOrchestrator.buildGlobalShoppingPricePipelineOrchestrator({
+        legalProviderFixtureSummary:legal,
+        providerCredentialSafetyReview:credential,
+        sandboxPriceFeedGate:feed,
+        sandboxProviderResponseContract:responseContract,
+        readOnlyProviderSandboxConnector:connector,
+        fixtureReplayConsole:replay,
+        priceSourceNormalizer:normalizer,
+        officialPriceAnchorSlot:anchor,
+        sameItemMatcher:matcher,
+        duplicateCandidateMerger:merger,
+        coveredLowestCandidateBoard:coveredBoard,
+        realProviderSandboxGateSummary:stubSummary("真实只读 Provider Sandbox 闸门"),
+        providerRequestEnvelopeSummary:stubSummary("Provider 请求封装"),
+        providerCallAuditLedgerSummary:stubSummary("Provider 调用审计台账"),
+        providerSandboxReadinessViewModelSummary:stubSummary("真实只读 Provider Sandbox 准备"),
+        providerSandboxDryRunHarnessSummary:stubSummary("Provider Sandbox 干跑框架"),
+        firstReadOnlyProviderAdapterShellSummary:stubSummary("第一个只读 Provider Adapter 外壳"),
+        providerSandboxSafetyKillSwitchSummary:stubSummary("Provider Sandbox 安全熔断器"),
+        providerSandboxDryRunViewModelSummary:stubSummary("Provider Sandbox 干跑准备"),
+        sandboxHandoffViewModelSummary:stubSummary("Sandbox 跳转预览"),
+        firstSandboxProviderConnectorSummary:stubSummary("First Sandbox Provider Connector"),
+        providerCoverageDashboardSummary:stubSummary("Provider 覆盖看板"),
+        readOnlySourceTrustScoreSummary:stubSummary("只读来源信任分"),
+        providerCoverageViewModelSummary:stubSummary("Provider 覆盖与信任"),
+        readOnlyProviderSandboxIntegrationGateSummary:stubSummary("只读 Provider Sandbox 接入闸门"),
+        sandboxPriceCandidateSessionSummary:stubSummary("Sandbox 价格候选会话"),
+        sandboxPriceCandidateResultBoardSummary:stubSummary("Sandbox 价格候选结果"),
+        sandboxSessionReplayCenterSummary:stubSummary("Sandbox 会话回放中心"),
+        providerEvidenceTraceSummary:stubSummary("Provider 证据链追踪"),
+        candidateConfidenceExplainerSummary:stubSummary("候选价可信度解释"),
+        sandboxReplayViewModelSummary:stubSummary("Sandbox 会话回放与证据解释"),
+        sandboxCandidateComparisonWorkbenchSummary:stubSummary("Sandbox 候选对比工作台"),
+        providerEvidenceComparisonMatrixSummary:stubSummary("Provider 证据对比矩阵"),
+        readOnlyHandoffReadinessDrillSummary:stubSummary("只读跳转交接演练"),
+        sandboxDecisionReviewViewModelSummary:stubSummary("Sandbox 候选决策复核"),
+        redactedSearchParameterPackSummary:stubSummary("脱敏搜索参数包"),
+        userConfirmationChecklistSummary:stubSummary("用户确认清单"),
+        readOnlyPlatformHandoffSimulatorSummary:stubSummary("只读平台交接模拟器"),
+        platformHandoffSimulationViewModelSummary:stubSummary("只读平台交接模拟"),
+        readOnlyHandoffPacketPreviewSummary:stubSummary("只读交接包预览"),
+        platformPreflightSafetyGateSummary:stubSummary("平台跳转前安全预检"),
+        userActionBoundaryReceiptSummary:stubSummary("用户行动边界回执"),
+        handoffPacketViewModelSummary:stubSummary("只读交接包与安全预检"),
+        manualPlatformReviewCockpitSummary:stubSummary("手动平台复核驾驶舱"),
+        handoffAcceptanceWalkthroughSummary:stubSummary("交接包接受演练"),
+        platformRealityCheckBoardSummary:stubSummary("平台真实页面复核清单"),
+        manualPlatformReviewViewModelSummary:stubSummary("手动平台复核与现实检查"),
+        userFacingManualReviewFlowSummary:stubSummary("用户手动复核流程"),
+        platformVerificationProgressTrackerSummary:stubSummary("平台核对进度追踪"),
+        safeNextActionPanelSummary:stubSummary("安全下一步"),
+        userManualReviewViewModelSummary:stubSummary("用户手动复核与安全下一步"),
+        manualPlatformVisitPreparationCenterSummary:stubSummary("手动访问平台准备中心"),
+        externalPlatformBoundaryBriefSummary:stubSummary("外部平台边界说明"),
+        finalUserSafetyChecklistSummary:stubSummary("最终用户安全清单"),
+        platformVisitPreparationViewModelSummary:stubSummary("平台访问准备与最终安全清单"),
+        externalPlatformExitRampPreviewSummary:stubSummary("外部平台退出坡道预览"),
+        manualVisitSafetyBriefSummary:stubSummary("手动访问安全简报"),
+        readOnlySessionClosurePackSummary:stubSummary("只读会话关闭包"),
+        externalPlatformExitViewModelSummary:stubSummary("外部平台手动访问前最终说明"),
+        readOnlyCommerceSessionRecapCenterSummary:stubSummary("只读全球购会话总结"),
+        userTrustClosureSummarySummary:stubSummary("用户信任闭环摘要"),
+        nextFeatureReadinessGateSummary:stubSummary("下一功能准备闸门"),
+        commerceSessionRecapViewModelSummary:stubSummary("只读全球购会话总结与下一步准备"),
+        readOnlySandboxProviderIntegrationBlueprintSummary:stubSummary("只读 Sandbox Provider 接入蓝图"),
+        credentialIsolationReadinessBoardSummary:stubSummary("凭证隔离准备度"),
+        providerContractSelectionBoardSummary:stubSummary("Provider 合同/授权选择板"),
+        sandboxProviderPlanningViewModelSummary:stubSummary("只读 Sandbox Provider 接入规划"),
+        providerLegalReviewDossierSummary:stubSummary("Provider 法务审查档案"),
+        credentialVaultInterfaceStubSummary:stubSummary("凭证保险箱接口桩"),
+        sandboxAdapterContractTestbedSummary:stubSummary("Sandbox Adapter 合同测试台"),
+        providerIntegrationPrepViewModelSummary:stubSummary("Provider 接入前准备"),
+        sandboxProviderMockRuntimeSummary:stubSummary("Sandbox Provider Mock Runtime"),
+        vaultBoundaryContractSummary:stubSummary("Vault Boundary Contract"),
+        legalApprovalWorkflowBoardSummary:stubSummary("法务审批流程板"),
+        providerMockRuntimeViewModelSummary:stubSummary("Provider Mock Runtime 与审批准备"),
+        mockProviderAdapterRegistryRuntimeSummary:stubSummary("Mock Provider Adapter 注册运行时"),
+        providerContractReplayHarnessSummary:stubSummary("Provider 合同回放器"),
+        providerLaunchReadinessBoardSummary:stubSummary("Provider 启动准备总闸门"),
+        providerLaunchReadinessViewModelSummary:stubSummary("Provider 启动准备与合同回放"),
+        humanApprovalSimulationGateSummary:stubSummary("人工审批模拟闸门"),
+        mockProviderLaunchDrillSummary:stubSummary("Mock Provider 启动演练"),
+        sandboxProviderRollbackPlanSummary:stubSummary("Sandbox Provider 回滚预案"),
+        providerLaunchSimulationViewModelSummary:stubSummary("Provider 启动模拟与回滚预案"),
+        providerSandboxPilotControlRoomSummary:stubSummary("Provider Sandbox Pilot 控制室"),
+        mockProviderIncidentDrillSummary:stubSummary("Mock Provider 事故演练"),
+        productionBlockerMatrixSummary:stubSummary("Production 阻断矩阵"),
+        providerPilotControlViewModelSummary:stubSummary("Provider Sandbox Pilot 控制与阻断")
+      });
       return {
-        goal, boundary, legal, credential, feed, responseContract, fixtureVm, connector, replay, normalizer, anchor, deepLink, prefill, partner, availability, sandbox, preview, sandboxVm, matcher, merger, coveredBoard, normalizedBoard, pipelineSeed, pipeline, journey, board, goalView, realSandboxGate, requestEnvelope, callAudit, readinessVm, killSwitch, adapterShell, dryRunHarness, dryRunVm, adapterRegistry, responseNormalizer, runbookBoard, firstSandboxConnector, coverageDashboard, sourceTrust, coverageView, integrationGate, sandboxSession, sandboxResultBoard, adapterRegistryView,
-        text:host.innerText,
-        productGoalButtonCount:host.querySelectorAll("[data-commerce-global-shopping-product-goal-show]").length,
-        jumpBoundaryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-jump-boundary-show]").length,
-        providerFixtureButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-fixture-show]").length,
-        credentialSafetyButtonCount:host.querySelectorAll("[data-commerce-global-shopping-credential-safety-show]").length,
-        sandboxPriceFeedButtonCount:host.querySelectorAll("[data-commerce-global-shopping-sandbox-price-feed-show]").length,
-        responseContractButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-response-contract-show]").length,
-        pricePipelineButtonCount:host.querySelectorAll("[data-commerce-global-shopping-price-pipeline-show]").length,
-        candidateJourneyButtonCount:host.querySelectorAll("[data-commerce-global-shopping-candidate-journey-show]").length,
-        providerConnectorButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-connector-show]").length,
-        fixtureReplayButtonCount:host.querySelectorAll("[data-commerce-global-shopping-fixture-replay-show]").length,
-        normalizedBoardButtonCount:host.querySelectorAll("[data-commerce-global-shopping-normalized-board-show]").length,
-        sandboxGateButtonCount:host.querySelectorAll("[data-commerce-global-shopping-sandbox-gate-show]").length,
-        requestEnvelopeButtonCount:host.querySelectorAll("[data-commerce-global-shopping-request-envelope-show]").length,
-        callAuditButtonCount:host.querySelectorAll("[data-commerce-global-shopping-call-audit-show]").length,
-        providerDryRunButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-dry-run-show]").length,
-        adapterShellButtonCount:host.querySelectorAll("[data-commerce-global-shopping-adapter-shell-show]").length,
-        killSwitchButtonCount:host.querySelectorAll("[data-commerce-global-shopping-kill-switch-show]").length,
-        adapterRegistryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-adapter-registry-show]").length,
-        responseNormalizerButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-response-normalizer-show]").length,
-        runbookButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-runbook-show]").length,
-        deepLinkButtonCount:host.querySelectorAll("[data-commerce-global-shopping-deep-link-safety-show]").length,
-        prefillButtonCount:host.querySelectorAll("[data-commerce-global-shopping-prefill-gate-show]").length,
-        previewButtonCount:host.querySelectorAll("[data-commerce-global-shopping-handoff-preview-show]").length,
-        sandboxCandidateButtonCount:host.querySelectorAll("[data-commerce-global-shopping-sandbox-candidate-show]").length,
-        platformAvailabilityButtonCount:host.querySelectorAll("[data-commerce-global-shopping-platform-availability-show]").length,
-        partnerPolicyButtonCount:host.querySelectorAll("[data-commerce-global-shopping-partner-policy-show]").length,
-        sameItemButtonCount:host.querySelectorAll("[data-commerce-global-shopping-same-item-show]").length,
-        coveredLowestButtonCount:host.querySelectorAll("[data-commerce-global-shopping-covered-lowest-show]").length,
-        serialized:JSON.stringify({ goal, boundary, legal, credential, feed, responseContract, fixtureVm, connector, replay, normalizer, anchor, deepLink, prefill, partner, availability, sandbox, preview, sandboxVm, matcher, merger, coveredBoard, normalizedBoard, pipelineSeed, pipeline, journey, board, goalView, realSandboxGate, requestEnvelope, callAudit, readinessVm, killSwitch, adapterShell, dryRunHarness, dryRunVm, adapterRegistry, responseNormalizer, runbookBoard, firstSandboxConnector, coverageDashboard, sourceTrust, coverageView, integrationGate, sandboxSession, sandboxResultBoard, adapterRegistryView })
+        goalStatus:goal.status,
+        boundaryStatus:boundary.status,
+        legalStatus:legal.status,
+        credentialStatus:credential.status,
+        feedStatus:feed.status,
+        connectorStatus:connector.status,
+        replayStatus:replay.status,
+        pipelineStatus:pipeline.status,
+        connectorTitle:connector.userFacingSummary && connector.userFacingSummary.title || "",
+        pipelineTitle:pipeline.userFacingSummary && pipeline.userFacingSummary.title || "",
+        safeFlags:{
+          bookingUrl:connector.bookingUrl || null,
+          checkoutUrl:connector.checkoutUrl || null,
+          paymentUrl:connector.paymentUrl || null,
+          orderUrl:connector.orderUrl || null,
+          payment:connector.payment === true,
+          order:connector.order === true,
+          autoOpen:connector.autoOpen === true,
+          safeToProceedWithSandboxCandidateUserPreview:pipeline.safeToProceedWithSandboxCandidateUserPreview === true
+        }
       };
     });
-    expect(v2197.goal.userFacingSummary.title).toBe("全球购产品目标");
-    expect(v2197.boundary.userFacingSummary.title).toBe("跳转至平台自行下单边界");
-    expect(v2197.goalView.title).toBe("全球购产品目标与跳转边界");
-    expect(v2197.legal.status).toBe("ready");
-    expect(v2197.credential.status).toBe("ready");
-    expect(v2197.feed.status).toBe("ready");
-    expect(v2197.responseContract.status).toBe("ready");
-    expect(v2197.fixtureVm.status).toBe("ready");
-    expect(v2197.connector.status).toBe("ready");
-    expect(v2197.replay.status).toBe("ready");
-    expect(v2197.normalizer.status).toBe("ready");
-    expect(v2197.anchor.status).toBe("anchored");
-    expect(v2197.matcher.status).toBe("ready");
-    expect(v2197.merger.status).toBe("merged");
-    expect(v2197.coveredBoard.status).toBe("ready");
-    expect(v2197.normalizedBoard.status).toBe("ready");
-    expect(v2197.board.status).toBe("ready");
-    expect(v2197.goal.status).toBe("aligned");
-    expect(v2197.boundary.status).toBe("safe");
-    expect(v2197.deepLink.status).toBe("safe");
-    expect(v2197.prefill.status).toBe("safe");
-    expect(v2197.partner.status).toBe("compliant");
-    expect(v2197.availability.status).toBe("available");
-    expect(v2197.sandbox.status).toBe("ready");
-    expect(v2197.preview.status).toBe("ready");
-    expect(v2197.sandboxVm.status).toBe("ready");
-    expect(v2197.pipeline.status).toBe("needs_review");
-    expect(v2197.journey.status).toBe("ready");
-    expect(v2197.realSandboxGate.status).toBe("needs_review");
-    expect(v2197.requestEnvelope.status).toBe("ready");
-    expect(v2197.callAudit.status).toBe("ready");
-    expect(v2197.readinessVm.status).toBe("needs_review");
-    expect(v2197.killSwitch.status).toBe("clear");
-    expect(v2197.adapterShell.status).toBe("ready");
-    expect(v2197.dryRunHarness.status).toBe("ready");
-    expect(v2197.dryRunVm.status).toBe("ready");
-    expect(v2197.adapterRegistry.status).toBe("ready");
-    expect(v2197.responseNormalizer.status).toBe("ready");
-    expect(v2197.runbookBoard.status).toBe("ready");
-    expect(v2197.adapterRegistryView.status).toBe("ready");
-    expect(v2197.text).toContain("真实只读 Provider Sandbox 准备");
-    expect(v2197.text).toContain("真实只读 Provider Sandbox 闸门");
-    expect(v2197.text).toContain("Provider 请求封装");
-    expect(v2197.text).toContain("Provider 调用审计台账");
-    expect(v2197.text).toContain("Provider Sandbox 干跑准备");
-    expect(v2197.text).toContain("Provider Sandbox 干跑框架");
-    expect(v2197.text).toContain("第一个只读 Provider Adapter 外壳");
-    expect(v2197.text).toContain("Provider Sandbox 安全熔断器");
-    expect(v2197.text).toContain("Provider Adapter 注册表");
-    expect(v2197.text).toContain("Dry-Run Provider 响应归一化器");
-    expect(v2197.text).toContain("Sandbox Provider 接入运行手册");
-    expect(v2197.text).toContain("Provider Adapter 注册与接入手册");
-    expect(v2197.text).toContain("只允许只读 adapter 注册");
-    expect(v2197.text).toContain("不接收 raw provider response");
-    expect(v2197.text).toContain("接入手册不执行真实接入");
-    expect(v2197.text).toContain("Adapter 注册不代表真实 provider 接通");
-    expect(v2197.text).toContain("请求封装不发送真实请求");
-    expect(v2197.text).toContain("调用审计不保存 raw response");
-    expect(v2197.text).toContain("干跑不发送真实请求");
-    expect(v2197.text).toContain("Adapter 外壳不包含真实 endpoint");
-    expect(v2197.text).toContain("安全熔断器阻断真实 provider 风险");
-    expect(v2197.text).toContain("干跑不代表真实价格或下单能力");
-    expect(v2197.text).toContain("Sandbox 准备不代表真实价格");
-    expect(v2197.text).toContain("Sandbox 准备不代表下单能力");
-    expect(v2197.text).toContain("当前仅准备真实只读 provider sandbox 的请求封装和审计结构");
-    expect(v2197.text).toContain("不发送请求，不读取真实密钥，不保存 raw response");
-    expect(v2197.text).toContain("只读 Provider Sandbox Connector");
-    expect(v2197.text).toContain("Fixture 回放控制台");
-    expect(v2197.text).toContain("归一化价格候选板");
-    expect(v2197.text).toContain("合法 Provider Fixture 与 Sandbox 价格 Feed");
-    expect(v2197.text).toContain("跳转至平台查看");
-    expect(v2197.text).toContain("外部平台跳转安全闸门");
-    expect(v2197.text).toContain("搜索参数预填闸门");
-    expect(v2197.text).toContain("价格源归一化层");
-    expect(v2197.text).toContain("合并不代表最低承诺、价格保证、锁定承诺、最终成交价或可下单能力");
-    expect(v2197.productGoalButtonCount).toBe(1);
-    expect(v2197.jumpBoundaryButtonCount).toBe(1);
-    expect(v2197.providerFixtureButtonCount).toBe(1);
-    expect(v2197.credentialSafetyButtonCount).toBe(1);
-    expect(v2197.sandboxPriceFeedButtonCount).toBe(1);
-    expect(v2197.responseContractButtonCount).toBe(1);
-    expect(v2197.pricePipelineButtonCount).toBe(1);
-    expect(v2197.candidateJourneyButtonCount).toBe(1);
-    expect(v2197.providerConnectorButtonCount).toBe(1);
-    expect(v2197.fixtureReplayButtonCount).toBe(1);
-    expect(v2197.normalizedBoardButtonCount).toBe(1);
-    expect(v2197.sandboxGateButtonCount).toBe(1);
-    expect(v2197.requestEnvelopeButtonCount).toBe(1);
-    expect(v2197.callAuditButtonCount).toBe(1);
-    expect(v2197.providerDryRunButtonCount).toBe(1);
-    expect(v2197.adapterShellButtonCount).toBe(1);
-    expect(v2197.killSwitchButtonCount).toBe(1);
-    expect(v2197.adapterRegistryButtonCount).toBe(1);
-    expect(v2197.responseNormalizerButtonCount).toBe(1);
-    expect(v2197.runbookButtonCount).toBe(1);
-    expect(v2197.deepLinkButtonCount).toBe(1);
-    expect(v2197.prefillButtonCount).toBe(1);
-    expect(v2197.previewButtonCount).toBe(1);
-    expect(v2197.sandboxCandidateButtonCount).toBe(1);
-    expect(v2197.platformAvailabilityButtonCount).toBe(1);
-    expect(v2197.partnerPolicyButtonCount).toBe(1);
-    expect(v2197.sameItemButtonCount).toBe(1);
-    expect(v2197.coveredLowestButtonCount).toBe(1);
-    expect(v2197.serialized).not.toMatch(/"(bookingUrl|checkoutUrl|paymentUrl|orderUrl)"s*:s*"https?:/i);
-    expect(v2197.serialized).not.toMatch(/"(token|apiKey|key|secret|password)"s*:s*"/i);
-    expect(v2197.serialized).not.toMatch(/"(rawResponse|rawProviderResponse|rawUserText)"s*:/i);
-    expect(v2197.text).not.toMatch(/下载文件|保存文件|全网最低|最低价保证|已锁价|立即购买|直接下单|一键下单|一键出票/);
-  });
 
+    expect(fixtureSmoke.goalStatus).toBe("aligned");
+    expect(fixtureSmoke.boundaryStatus).toBe("safe");
+    expect(fixtureSmoke.legalStatus).toBe("ready");
+    expect(fixtureSmoke.credentialStatus).toBe("ready");
+    expect(fixtureSmoke.feedStatus).toBe("ready");
+    expect(fixtureSmoke.connectorStatus).toBe("ready");
+    expect(fixtureSmoke.replayStatus).toBe("ready");
+    expect(fixtureSmoke.pipelineStatus).toBe("needs_review");
+    expect(fixtureSmoke.connectorTitle).toContain("Provider Sandbox Connector");
+    expect(fixtureSmoke.pipelineTitle).toContain("价格流水线");
+    expect(fixtureSmoke.safeFlags.bookingUrl).toBeNull();
+    expect(fixtureSmoke.safeFlags.checkoutUrl).toBeNull();
+    expect(fixtureSmoke.safeFlags.paymentUrl).toBeNull();
+    expect(fixtureSmoke.safeFlags.orderUrl).toBeNull();
+    expect(fixtureSmoke.safeFlags.payment).toBe(false);
+    expect(fixtureSmoke.safeFlags.order).toBe(false);
+    expect(fixtureSmoke.safeFlags.autoOpen).toBe(false);
+    expect(fixtureSmoke.safeFlags.safeToProceedWithSandboxCandidateUserPreview).toBe(false);
+    expect(await latestOpenExternalUrl(page)).toBe("");
+  });
 
   test("v2.1.87 pilot onboarding guard appears before guided test @commerce-smoke", async () => {
     await resetCommerceTasks(page);
@@ -9717,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.4.0 provider sandbox activation readiness stays local and bounded @commerce-smoke", async () => {
+  test("v2.4.1 provider sandbox activation readiness stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9732,7 +9621,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v240-render-smoke", "true");
       const card = {
-        version:"2.4.0",
+        version:"2.4.1",
         visible:true,
         readOnlySandboxActivationReadinessCenterSummary:{ status:"ready", userFacingSummary:{ title:"只读 Sandbox 激活准备中心", resultLabel:"Sandbox 激活准备中心已准备", redacted:true }, redacted:true },
         offlineMockSandboxSessionRunnerSummary:{ status:"ready", userFacingSummary:{ title:"离线 Mock Sandbox 会话运行器", resultLabel:"离线 Mock Sandbox 会话运行器已准备", redacted:true }, redacted:true },

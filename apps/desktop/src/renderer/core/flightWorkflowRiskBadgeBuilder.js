@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.4.0";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.4.1";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -412,7 +412,14 @@
       if (firstReadOnlyProviderAdapterShellSummary.status === "blocked") badges.push(badge("provider_adapter_shell_blocked", "第一个只读 Provider Adapter 外壳已阻断", "blocked"));
       if (providerSandboxSafetyKillSwitchSummary.status === "clear") badges.push(badge("provider_kill_switch_clear", "Provider Sandbox 安全熔断器未触发", "info"));
       if (providerSandboxSafetyKillSwitchSummary.status === "blocked") badges.push(badge("provider_kill_switch_blocked", "安全熔断器阻断真实 provider 风险", "blocked"));
-      if (providerSandboxDryRunViewModelSummary.status === "ready") badges.push(badge("provider_dry_run_view_ready", "Provider Sandbox 干跑准备", "info"));
+      if (obj(safe.offlineSandboxTraceInspectorSummary).status === "ready" || safe.offlineSandboxTraceInspectorStatus === "ready") badges.push(badge("offline_sandbox_trace_inspector_ready", "离线 Sandbox Trace 检查器已准备", "info"));
+      if (obj(safe.mockProviderResultNormalizerSummary).status === "ready" || safe.mockProviderResultNormalizerStatus === "ready") badges.push(badge("mock_provider_result_normalizer_ready", "Mock Provider 结果归一化器已准备", "info"));
+      if (obj(safe.manualActivationDryRunChecklistSummary).status === "ready" || safe.manualActivationDryRunChecklistStatus === "ready") badges.push(badge("manual_activation_dry_run_checklist_ready", "人工激活 Dry-run 检查清单已准备", "info"));
+      if (providerSandboxDryRunViewModelSummary.status === "ready") badges.push(badge("provider_dry_run_view_ready", "Provider Sandbox 离线 Dry-run", "info"));
+      if (obj(safe.offlineSandboxTraceInspectorSummary).status || providerSandboxDryRunViewModelSummary.status) badges.push(badge("offline_trace_no_raw_trace", "离线 Trace 检查不保存 raw trace", "info"));
+      if (obj(safe.mockProviderResultNormalizerSummary).status || providerSandboxDryRunViewModelSummary.status) badges.push(badge("mock_result_normalizer_no_real_response", "Mock 结果归一化不处理真实 provider response", "info"));
+      if (obj(safe.manualActivationDryRunChecklistSummary).status || providerSandboxDryRunViewModelSummary.status) badges.push(badge("manual_activation_dry_run_no_activation", "激活 Dry-run 不激活 sandbox、不创建 release", "info"));
+      if ((providerSandboxDryRunViewModelSummary.status && providerSandboxDryRunViewModelSummary.status !== "blocked") || safe.safeToProceedWithManualSandboxDryRunReview === false) badges.push(badge("manual_sandbox_dry_run_review_required", "Manual sandbox dry-run 仍需人工复核", "warning"));
       if (providerSandboxDryRunHarnessSummary.status || firstReadOnlyProviderAdapterShellSummary.status || providerSandboxSafetyKillSwitchSummary.status) badges.push(badge("provider_dry_run_no_request", "干跑不发送真实请求", "info"));
       if (firstReadOnlyProviderAdapterShellSummary.status) badges.push(badge("provider_adapter_no_endpoint", "Adapter 外壳不包含真实 endpoint", "info"));
       if (providerSandboxDryRunViewModelSummary.status) badges.push(badge("provider_dry_run_not_real_price", "干跑不代表真实价格或下单能力", "warning"));

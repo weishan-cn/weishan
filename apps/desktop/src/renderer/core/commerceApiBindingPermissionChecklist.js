@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const CHECKLIST_VERSION = "2.3.9";
+  const CHECKLIST_VERSION = "2.4.1";
   const PHASE = "api_binding_permission_checklist";
 
   function clone(value) {

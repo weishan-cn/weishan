@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_CREDENTIAL_VAULT_INTERFACE_STUB_VERSION = "2.3.9";
+  const GLOBAL_SHOPPING_CREDENTIAL_VAULT_INTERFACE_STUB_VERSION = "2.4.1";
   const STUB_NAME = "global_shopping_credential_vault_interface_stub_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

@@ -14,9 +14,9 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProductGoalViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProductGoalViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PRODUCT_GOAL_VIEW_MODEL_VERSION, "2.3.9");
+  assert.equal(api.GLOBAL_SHOPPING_PRODUCT_GOAL_VIEW_MODEL_VERSION, "2.4.1");
   const model = api.buildGlobalShoppingProductGoalViewModel();
-  assert.equal(model.appVersion, "2.3.9");
+  assert.equal(model.appVersion, "2.4.1");
   assert.equal(model.title, "全球购产品目标与跳转边界");
   assert.equal(model.cards.find((item) => item.cardId === "trusted_price").label, "可信候选价格");
   assert.equal(model.cards.find((item) => item.cardId === "official_anchor").label, "官方价格锚点");

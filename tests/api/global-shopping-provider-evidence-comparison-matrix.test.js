@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderEvidenceComparisonMatrix.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderEvidenceComparisonMatrix;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_EVIDENCE_COMPARISON_MATRIX_VERSION, "2.3.9");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_EVIDENCE_COMPARISON_MATRIX_VERSION, "2.4.1");
 
   const ready = api.buildGlobalShoppingProviderEvidenceComparisonMatrix({
     providerEvidenceTrace:{
@@ -40,7 +40,7 @@ function main() {
     }
   });
 
-  assert.equal(ready.appVersion, "2.3.9");
+  assert.equal(ready.appVersion, "2.4.1");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "Provider 证据对比矩阵");
   assert.equal(ready.matrixColumns.length, 7);

@@ -12,7 +12,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowBetaAcceptanceViewModel.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowBetaAcceptanceViewModel;
-  assert.equal(api.FLIGHT_WORKFLOW_BETA_ACCEPTANCE_VIEW_MODEL_VERSION, "2.3.9");
+  assert.equal(api.FLIGHT_WORKFLOW_BETA_ACCEPTANCE_VIEW_MODEL_VERSION, "2.4.1");
   const vmModel = api.buildFlightWorkflowBetaAcceptanceViewModel({
     betaAcceptancePack:{ status:"ready", acceptanceSteps:[{ stepId:"enter_flight_request", label:"输入机票需求", status:"pending" }], forbiddenCapabilities:["付款", "下单"], userFacingSummary:{ resultLabel:"可以开始用户验收", redacted:true }, redacted:true },
     guidedUserTestMode:{ status:"not_started", userFacingSummary:{ resultLabel:"测试未开始", redacted:true }, feedbackSummary:{}, redacted:true },

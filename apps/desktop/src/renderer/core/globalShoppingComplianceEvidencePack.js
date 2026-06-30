@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_COMPLIANCE_EVIDENCE_PACK_VERSION = "2.4.0";
+  const GLOBAL_SHOPPING_COMPLIANCE_EVIDENCE_PACK_VERSION = "2.4.1";
   const PACK_NAME = "global_shopping_compliance_evidence_pack_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

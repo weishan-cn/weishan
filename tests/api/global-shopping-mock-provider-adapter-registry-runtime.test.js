@@ -23,7 +23,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingMockProviderAdapterRegistryRuntime.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingMockProviderAdapterRegistryRuntime;
-  assert.equal(api.GLOBAL_SHOPPING_MOCK_PROVIDER_ADAPTER_REGISTRY_RUNTIME_VERSION, "2.3.9");
+  assert.equal(api.GLOBAL_SHOPPING_MOCK_PROVIDER_ADAPTER_REGISTRY_RUNTIME_VERSION, "2.4.1");
 
   const ready = api.buildGlobalShoppingMockProviderAdapterRegistryRuntime({
     sandboxProviderMockRuntimeSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox Provider Mock Runtime 已准备", redacted:true } },

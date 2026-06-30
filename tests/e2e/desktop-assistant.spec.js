@@ -113,7 +113,7 @@ test.describe.serial("desktop assistant paused safety framework", () => {
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无生产真实最低价");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("只读候选价");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("以平台页面为准");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不可下单");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("不会付款或下单");
     await expect(currentTaskLogs(page)).not.toContainText("commerceAgent.plan");
     await expect(currentTaskLogs(page)).not.toContainText("realExecution=false");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText(/不收款|不下单/);

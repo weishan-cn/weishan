@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SCENARIO_SIMULATOR_VERSION = "2.3.9";
+  const FLIGHT_WORKFLOW_SCENARIO_SIMULATOR_VERSION = "2.4.1";
   const SIMULATOR_NAME = "flight_workflow_scenario_simulator_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

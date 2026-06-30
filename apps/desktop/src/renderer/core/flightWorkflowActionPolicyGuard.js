@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_ACTION_POLICY_GUARD_VERSION = "2.3.9";
+  const FLIGHT_WORKFLOW_ACTION_POLICY_GUARD_VERSION = "2.4.1";
   const GUARD_NAME = "flight_workflow_action_policy_guard_v1";
   const SUPPORTED_ACTIONS = ["answer_clarification", "run_read_only_quotes", "select_candidate", "open_provider_confirmation", "record_platform_check", "resume_workflow", "clear_workflow", "view_audit_preview", "blocked_action"];
   const LOCAL_ONLY_ACTIONS = ["answer_clarification", "run_read_only_quotes", "select_candidate", "record_platform_check", "resume_workflow", "clear_workflow", "view_audit_preview"];

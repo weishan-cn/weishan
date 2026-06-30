@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_HUMAN_PILOT_READINESS_LEDGER_VERSION = "2.4.0";
+  const GLOBAL_SHOPPING_HUMAN_PILOT_READINESS_LEDGER_VERSION = "2.4.1";
   const LEDGER_NAME = "global_shopping_human_pilot_readiness_ledger_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
