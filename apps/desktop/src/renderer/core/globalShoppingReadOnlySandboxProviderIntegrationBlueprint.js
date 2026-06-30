@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_READ_ONLY_SANDBOX_PROVIDER_INTEGRATION_BLUEPRINT_VERSION = "2.3.1";
+  const GLOBAL_SHOPPING_READ_ONLY_SANDBOX_PROVIDER_INTEGRATION_BLUEPRINT_VERSION = "2.3.2";
   const BLUEPRINT_NAME = "global_shopping_read_only_sandbox_provider_integration_blueprint_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

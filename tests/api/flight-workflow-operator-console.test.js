@@ -7,14 +7,14 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js", "apps/desktop/src/renderer/core/flightWorkflowOperatorConsole.js"]);
   const api = windowRef.WeishanFlightWorkflowOperatorConsole;
-  assert.equal(api.FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION, "2.3.1");
+  assert.equal(api.FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION, "2.3.2");
   const base = { workflowId:"wf1", workflowStateSummary:{ workflowId:"wf1" }, topCandidates:[{ providerName:"sandbox", bookingUrl:null }], selectedCandidate:{ providerName:"sandbox" }, auditReviewSummary:{ status:"ready", auditHealth:{ overall:"pass" } }, humanReviewChecklistSummary:{ status:"ready" }, finalSafeHandoffPacketSummary:{ status:"ready" }, handoffPacketPolicyDecision:{ status:"allowed" }, safetyRegressionSummary:{ status:"pass", checks:[] }, eventLedgerSummary:{ recentEvents:[{ eventType:"handoff_packet_prepared", status:"ready" }] }, blockedActions:[] };
   const ready = api.buildFlightWorkflowOperatorConsole(base);
   assert.equal(ready.consoleName, "flight_workflow_operator_console_v1");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "可以继续只读流程");
   assert.equal(ready.nextOperatorAction.enabled, true);
-  assert.equal(JSON.stringify(ready.sections.map((s) => s.sectionId)), JSON.stringify(["workflow_status", "safety_status", "recent_events", "blocked_actions", "handoff_readiness", "rc_review", "global_shopping_goal", "global_shopping_price", "global_shopping_handoff", "global_shopping_session_recap", "global_shopping_sandbox_provider_planning", "global_shopping_provider_integration_prep", "global_shopping_decision_review", "pilot_ops", "pilot_readiness", "pilot_onboarding", "issue_review", "issue_pattern"]));
+  assert.equal(JSON.stringify(ready.sections.map((s) => s.sectionId)), JSON.stringify(["workflow_status", "safety_status", "recent_events", "blocked_actions", "handoff_readiness", "rc_review", "global_shopping_goal", "global_shopping_price", "global_shopping_handoff", "global_shopping_session_recap", "global_shopping_sandbox_provider_planning", "global_shopping_provider_integration_prep", "global_shopping_provider_mock_runtime", "global_shopping_decision_review", "pilot_ops", "pilot_readiness", "pilot_onboarding", "issue_review", "issue_pattern"]));
   assert.equal(ready.bookingUrl, null);
   assert.ok(ready.sections.some((section) => section.sectionId === "pilot_ops"));
   const globalRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {
@@ -85,6 +85,17 @@ function main() {
   assert.ok(providerPrepRows.rows.some((item) => item.label === "凭证接口桩"));
   assert.ok(providerPrepRows.rows.some((item) => item.label === "Adapter 合同测试"));
   assert.ok(providerPrepRows.rows.some((item) => item.label === "安全红线" && item.value === "下一步仍需人工安全审批"));
+  const mockRuntimeRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {
+    sandboxProviderMockRuntimeSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox Provider Mock Runtime 已准备", redacted:true }, redacted:true },
+    vaultBoundaryContractSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Vault 边界合同已准备", redacted:true }, redacted:true },
+    legalApprovalWorkflowBoardSummary:{ status:"ready", userFacingSummary:{ resultLabel:"法务审批流程板已准备", redacted:true }, redacted:true },
+    providerMockRuntimeViewModelSummary:{ status:"ready", title:"Provider Mock Runtime 与审批准备", redacted:true },
+    safeToProceedWithMockAdapterRuntimeHardening:true
+  })).sections.find((section) => section.sectionId === "global_shopping_provider_mock_runtime");
+  assert.ok(mockRuntimeRows.rows.some((item) => item.label === "Mock Runtime"));
+  assert.ok(mockRuntimeRows.rows.some((item) => item.label === "Vault 边界"));
+  assert.ok(mockRuntimeRows.rows.some((item) => item.label === "法务审批流程"));
+  assert.ok(mockRuntimeRows.rows.some((item) => item.label === "安全红线" && item.value === "下一步仍需人工审批"));
   const rcReady = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, { rcCandidateReviewSummary:{ status:"ready_for_review", userFacingSummary:{ resultLabel:"可以开始 RC 复核", redacted:true }, safeToStartRcReview:true, redacted:true }, rcEvidenceReviewSummary:{ status:"complete", userFacingSummary:{ resultLabel:"证据完整", redacted:true }, redacted:true }, rcReviewStatus:"ready_for_review", rcEvidenceStatus:"complete", safeToStartRcReview:true }));
   assert.ok(rcReady.sections.some((section) => section.sectionId === "rc_review"));
   assert.equal(rcReady.safeToStartRcReview, true);

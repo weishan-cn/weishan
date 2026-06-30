@@ -83,7 +83,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.3.1");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.3.2");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -139,6 +139,10 @@ function main() {
   const platformVerificationProgressTracker = { status:"ready", userFacingSummary:{ title:"平台核对进度追踪", resultLabel:"平台核对进度已准备", redacted:true }, redacted:true };
   const safeNextActionPanel = { status:"ready", userFacingSummary:{ title:"安全下一步", resultLabel:"安全下一步已准备", redacted:true }, redacted:true };
   const userManualReviewViewModel = { status:"ready", title:"用户手动复核与安全下一步", userFacingSummary:{ title:"用户手动复核与安全下一步", resultLabel:"用户手动复核与安全下一步已准备", redacted:true }, redacted:true };
+  const sandboxProviderMockRuntimeSummary = { status:"ready", userFacingSummary:{ title:"Sandbox Provider Mock Runtime", resultLabel:"Sandbox Provider Mock Runtime 已准备", redacted:true }, safeToProceedWithMockAdapterRuntimeHardening:true, redacted:true };
+  const vaultBoundaryContractSummary = { status:"ready", userFacingSummary:{ title:"Vault Boundary Contract", resultLabel:"Vault 边界合同已准备", redacted:true }, redacted:true };
+  const legalApprovalWorkflowBoardSummary = { status:"ready", userFacingSummary:{ title:"法务审批流程板", resultLabel:"法务审批流程板已准备", redacted:true }, redacted:true };
+  const providerMockRuntimeViewModelSummary = { status:"ready", title:"Provider Mock Runtime 与审批准备", userFacingSummary:{ title:"Provider Mock Runtime 与审批准备", resultLabel:"Provider Mock Runtime 与审批准备已准备", redacted:true }, redacted:true };
   const firstSandboxConnector = windowRef.WeishanGlobalShoppingFirstSandboxProviderConnector.buildGlobalShoppingFirstSandboxProviderConnector({ providerId:"fixture_provider", providerName:"Fixture Provider", providerType:"fixture", itemType:"flight", connectorMode:"dry_run", adapterRegistry:{ status:"ready", adapters:[{ providerType:"official", itemType:"flight", region:"CN", redacted:true }], redacted:true }, adapterShell:adapterShell, dryRunHarness:dryRunHarness, safetyKillSwitch:killSwitch, requestEnvelope:{ status:"ready", requestEnvelope:{ requestMeta:{ providerId:"fixture_provider", providerName:"Fixture Provider", itemType:"flight" } }, redacted:true }, providerRunbook:{ status:"ready", redacted:true }, normalizedSourceInputs:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", itemType:"flight", redacted:true }] });
   const coverageDashboard = windowRef.WeishanGlobalShoppingProviderCoverageDashboard.buildGlobalShoppingProviderCoverageDashboard({ adapterRegistrySummary:{ adapters:[{ providerType:"official", itemType:"flight", region:"CN", redacted:true }] }, firstSandboxProviderConnectorSummary:firstSandboxConnector, normalizedSourceInputs:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", itemType:"flight", redacted:true }] });
   const sourceTrust = windowRef.WeishanGlobalShoppingReadOnlySourceTrustScore.buildGlobalShoppingReadOnlySourceTrustScore({ sources:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", basePrice:920, currency:"CNY", lastCheckedAt:"redacted_now", redacted:true }] });
@@ -193,12 +197,16 @@ function main() {
     userFacingManualReviewFlowSummary:userFacingManualReviewFlow,
     platformVerificationProgressTrackerSummary:platformVerificationProgressTracker,
     safeNextActionPanelSummary:safeNextActionPanel,
-    userManualReviewViewModelSummary:userManualReviewViewModel
+    userManualReviewViewModelSummary:userManualReviewViewModel,
+    sandboxProviderMockRuntimeSummary:sandboxProviderMockRuntimeSummary,
+    vaultBoundaryContractSummary:vaultBoundaryContractSummary,
+    legalApprovalWorkflowBoardSummary:legalApprovalWorkflowBoardSummary,
+    providerMockRuntimeViewModelSummary:providerMockRuntimeViewModelSummary
   });
-  assert.equal(ready.appVersion, "2.3.1");
+  assert.equal(ready.appVersion, "2.3.2");
   assert.equal(ready.status, "needs_review");
   assert.equal(ready.userFacingSummary.resultLabel, "只读价格流水线仍需复核");
-  assert.equal(ready.pipelineStages.length, 67);
+  assert.equal(ready.pipelineStages.length, 71);
   assert.equal(ready.readyOutputs.canShowFixtureCandidatePrices, true);
   assert.equal(ready.readyOutputs.canShowFixtureReplay, true);
   assert.equal(ready.readyOutputs.canShowOfficialAnchor, true);
@@ -254,6 +262,10 @@ function main() {
   assert.equal(ready.credentialIsolationReadinessBoardSummary.userFacingSummary.title, "凭证隔离准备度");
   assert.equal(ready.providerContractSelectionBoardSummary.userFacingSummary.title, "Provider 合同/授权选择板");
   assert.equal(ready.sandboxProviderPlanningViewModelSummary.title, "只读 Sandbox Provider 接入规划");
+  assert.equal(ready.sandboxProviderMockRuntimeSummary.userFacingSummary.title, "Sandbox Provider Mock Runtime");
+  assert.equal(ready.vaultBoundaryContractSummary.userFacingSummary.title, "Vault Boundary Contract");
+  assert.equal(ready.legalApprovalWorkflowBoardSummary.userFacingSummary.title, "法务审批流程板");
+  assert.equal(ready.providerMockRuntimeViewModelSummary.title, "Provider Mock Runtime 与审批准备");
   assert.equal(ready.readyOutputs.safeToProceedWithFirstSandboxProviderConnectorImplementation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithFirstReadOnlyProviderSandboxIntegration, true);
   assert.equal(ready.readyOutputs.safeToProceedWithSandboxCandidateUserPreview, false);
@@ -261,6 +273,7 @@ function main() {
   assert.equal(ready.readyOutputs.safeToProceedWithReadOnlyProviderSandboxPlanning, true);
   assert.equal(ready.readyOutputs.safeToProceedWithProviderLegalAndCredentialReview, true);
   assert.equal(ready.readyOutputs.safeToProceedWithProviderSandboxContractImplementation, true);
+  assert.equal(ready.readyOutputs.safeToProceedWithMockAdapterRuntimeHardening, true);
   assert.equal(ready.readyOutputs.safeToProceedWithSandboxDecisionReview, true);
   assert.equal(ready.readyOutputs.safeToProceedWithUserFacingHandoffExplanation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithManualPlatformReview, true);

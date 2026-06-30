@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.1";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.2";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -308,6 +308,13 @@
       if (credentialVaultInterfaceStubSummary.status || providerIntegrationPrepViewModelSummary.status) badges.push(badge("credential_vault_stub_boundary", "凭证接口桩不读取真实密钥", "info"));
       if (sandboxAdapterContractTestbedSummary.status || providerIntegrationPrepViewModelSummary.status) badges.push(badge("sandbox_adapter_contract_boundary", "Adapter 合同测试不请求真实 provider", "info"));
       if (safe.safeToProceedWithProviderSandboxContractImplementation === true) badges.push(badge("provider_integration_prep_human_review", "下一步仍需人工安全审批", "warning"));
+      if (obj(safe.sandboxProviderMockRuntimeSummary).status === "ready" || safe.sandboxProviderMockRuntimeStatus === "ready") badges.push(badge("sandbox_provider_mock_runtime_ready", "Sandbox Provider Mock Runtime 已准备", "info"));
+      if (obj(safe.vaultBoundaryContractSummary).status === "ready" || safe.vaultBoundaryContractStatus === "ready") badges.push(badge("vault_boundary_contract_ready", "Vault 边界合同已准备", "info"));
+      if (obj(safe.legalApprovalWorkflowBoardSummary).status === "ready" || safe.legalApprovalWorkflowStatus === "ready") badges.push(badge("legal_approval_workflow_ready", "法务审批流程板已准备", "info"));
+      if (obj(safe.sandboxProviderMockRuntimeSummary).status || obj(safe.providerMockRuntimeViewModelSummary).status) badges.push(badge("sandbox_provider_mock_runtime_boundary", "Mock Runtime 不接真实 provider", "info"));
+      if (obj(safe.vaultBoundaryContractSummary).status || obj(safe.providerMockRuntimeViewModelSummary).status) badges.push(badge("vault_boundary_contract_boundary", "Vault 边界不读取或保存真实密钥", "info"));
+      if (obj(safe.legalApprovalWorkflowBoardSummary).status || obj(safe.providerMockRuntimeViewModelSummary).status) badges.push(badge("legal_approval_workflow_boundary", "审批流程不创建任务、不发邮件", "warning"));
+      if (safe.safeToProceedWithMockAdapterRuntimeHardening === true) badges.push(badge("provider_mock_runtime_human_review", "下一步仍需人工审批", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "ready") badges.push(badge("sandbox_deep_link_candidate_ready", "Sandbox 跳转候选已准备", "info"));
       if (sandboxDeepLinkCandidateSummary.status === "needs_review") badges.push(badge("sandbox_deep_link_candidate_review", "Sandbox 跳转候选仍需复核", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "blocked") badges.push(badge("sandbox_deep_link_candidate_blocked", "Sandbox 跳转候选已阻断", "blocked"));
