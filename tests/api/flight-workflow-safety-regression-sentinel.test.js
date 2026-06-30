@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js"]);
   const api = windowRef.WeishanFlightWorkflowSafetyRegressionSentinel;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "2.3.7");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "2.3.8");
   const safe = api.buildFlightWorkflowSafetyRegressionReport({ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, autoOpen:false, autoRefresh:false, fileWrite:false, download:false, note:"平台最终为准" });
   assert.equal(safe.sentinelName, "flight_workflow_safety_regression_sentinel_v1");
   assert.equal(safe.status, "pass");
@@ -94,7 +94,11 @@ function main() {
     complianceEvidencePackSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false } },
     providerPilotGovernanceViewModelSummary:{ status:"ready", bookingUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, fileWrite:false, download:false },
     providerGovernanceConsoleSummary:{ consoleStatus:"ready_for_human_approval", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false } },
-    providerOperatorReviewLoopSummary:{ status:"ready_for_human_approval", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false } }
+    providerOperatorReviewLoopSummary:{ status:"ready_for_human_approval", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false } },
+    providerGovernanceAuditConsoleSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false } },
+    humanPilotReadinessLedgerSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false } },
+    sandboxProviderReleaseFreezeGateSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false } },
+    providerGovernanceReleaseViewModelSummary:{ status:"ready", bookingUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, fileWrite:false, download:false }
   });
   assert.equal(global.status, "pass");
   assert.equal(global.globalShoppingProductGoalSummary.status, "aligned");
@@ -142,6 +146,10 @@ function main() {
   assert.equal(global.providerPilotControlViewModelSummary.status, "ready");
   assert.equal(global.providerGovernanceConsoleSummary.consoleStatus, "ready_for_human_approval");
   assert.equal(global.providerOperatorReviewLoopSummary.status, "ready_for_human_approval");
+  assert.equal(global.providerGovernanceAuditConsoleSummary.status, "ready");
+  assert.equal(global.humanPilotReadinessLedgerSummary.status, "ready");
+  assert.equal(global.sandboxProviderReleaseFreezeGateSummary.status, "ready");
+  assert.equal(global.providerGovernanceReleaseViewModelSummary.status, "ready");
   console.log("FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL PASS");
 }
 main();

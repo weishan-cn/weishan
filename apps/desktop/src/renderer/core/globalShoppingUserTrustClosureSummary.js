@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_USER_TRUST_CLOSURE_SUMMARY_VERSION = "2.3.7";
+  const GLOBAL_SHOPPING_USER_TRUST_CLOSURE_SUMMARY_VERSION = "2.3.8";
   const SUMMARY_NAME = "global_shopping_user_trust_closure_summary_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

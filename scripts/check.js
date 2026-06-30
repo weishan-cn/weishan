@@ -19,7 +19,7 @@ const html = readFileSync(join(root, "apps/desktop/src/index.html"), "utf8");
 const scripts = Array.from(html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi));
 if (!scripts.length) throw new Error("apps/desktop/src/index.html inline script block not found");
 
-const tmp = join(root, ".weishan-index-check.js");
+const tmp = join(root, "scripts", "weishan-index-check.tmp.js");
 for (let i = 0; i < scripts.length; i += 1) {
   writeFileSync(tmp, scripts[i][1]);
   try {

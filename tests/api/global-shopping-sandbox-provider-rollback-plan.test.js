@@ -23,7 +23,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingSandboxProviderRollbackPlan.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingSandboxProviderRollbackPlan;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PROVIDER_ROLLBACK_PLAN_VERSION, "2.3.7");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PROVIDER_ROLLBACK_PLAN_VERSION, "2.3.8");
 
   const ready = api.buildGlobalShoppingSandboxProviderRollbackPlan({
     mockProviderLaunchDrillSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Mock 启动演练已准备", redacted:true } },

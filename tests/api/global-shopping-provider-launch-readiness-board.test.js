@@ -25,7 +25,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderLaunchReadinessBoard.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderLaunchReadinessBoard;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_LAUNCH_READINESS_BOARD_VERSION, "2.3.7");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_LAUNCH_READINESS_BOARD_VERSION, "2.3.8");
 
   const ready = api.buildGlobalShoppingProviderLaunchReadinessBoard({
     mockProviderAdapterRegistryRuntimeSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Mock Adapter 注册运行时已准备", redacted:true } },

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.7";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.8";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -348,6 +348,13 @@
       if (obj(safe.providerKillSwitchDrillSummary).status || obj(safe.providerPilotGovernanceViewModelSummary).status) badges.push(badge("kill_switch_not_disable_real_provider", "Kill Switch 演练不禁用真实 provider", "info"));
       if (obj(safe.complianceEvidencePackSummary).status || obj(safe.providerPilotGovernanceViewModelSummary).status) badges.push(badge("compliance_evidence_no_export", "合规证据包不写文件、不导出", "info"));
       if (safe.safeToProceedWithHumanAuditSandboxPilotReadinessReview === true || obj(safe.providerPilotGovernanceViewModelSummary).status === "ready") badges.push(badge("human_audit_review_required", "Human audit 仍需人工复核", "warning"));
+      if (obj(safe.providerGovernanceAuditConsoleSummary).status === "ready" || safe.providerGovernanceAuditConsoleStatus === "ready") badges.push(badge("provider_governance_audit_console_ready", "Provider Governance 审计控制台已准备", "info"));
+      if (obj(safe.humanPilotReadinessLedgerSummary).status === "ready" || safe.humanPilotReadinessLedgerStatus === "ready") badges.push(badge("human_pilot_readiness_ledger_ready", "Human Pilot 准备台账已准备", "info"));
+      if (obj(safe.sandboxProviderReleaseFreezeGateSummary).status === "ready" || safe.sandboxProviderReleaseFreezeGateStatus === "ready") badges.push(badge("sandbox_provider_release_freeze_gate_ready", "Sandbox Provider Release Freeze Gate 已准备", "info"));
+      if (obj(safe.providerGovernanceAuditConsoleSummary).status || obj(safe.providerGovernanceReleaseViewModelSummary).status) badges.push(badge("provider_governance_audit_console_boundary", "治理审计不写文件、不上传", "info"));
+      if (obj(safe.humanPilotReadinessLedgerSummary).status || obj(safe.providerGovernanceReleaseViewModelSummary).status) badges.push(badge("human_pilot_ledger_boundary", "Human Pilot 台账不持久化审批结果", "info"));
+      if (obj(safe.sandboxProviderReleaseFreezeGateSummary).status || obj(safe.providerGovernanceReleaseViewModelSummary).status) badges.push(badge("provider_release_freeze_boundary", "Release Freeze Gate 不改 git、不 push", "warning"));
+      if ((obj(safe.providerGovernanceReleaseViewModelSummary).status && obj(safe.providerGovernanceReleaseViewModelSummary).status !== "blocked") || safe.safeToProceedWithManualGovernanceReleaseDecision === false) badges.push(badge("manual_governance_release_decision_required", "Manual governance release decision 仍需人工确认", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "ready") badges.push(badge("sandbox_deep_link_candidate_ready", "Sandbox 跳转候选已准备", "info"));
       if (sandboxDeepLinkCandidateSummary.status === "needs_review") badges.push(badge("sandbox_deep_link_candidate_review", "Sandbox 跳转候选仍需复核", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "blocked") badges.push(badge("sandbox_deep_link_candidate_blocked", "Sandbox 跳转候选已阻断", "blocked"));

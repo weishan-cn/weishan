@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.3.7";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "2.3.8";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -239,6 +239,10 @@
       rcCopyFinalizationSummary: stripUnsafe(safe.rcCopyFinalizationSummary || null),
       safetyDisclosureReviewSummary: stripUnsafe(safe.safetyDisclosureReviewSummary || null),
       rcCopyReviewViewModelSummary: stripUnsafe(safe.rcCopyReviewViewModelSummary || null),
+      providerGovernanceAuditConsoleSummary: stripUnsafe(safe.providerGovernanceAuditConsoleSummary || null),
+      humanPilotReadinessLedgerSummary: stripUnsafe(safe.humanPilotReadinessLedgerSummary || null),
+      sandboxProviderReleaseFreezeGateSummary: stripUnsafe(safe.sandboxProviderReleaseFreezeGateSummary || null),
+      providerGovernanceReleaseViewModelSummary: stripUnsafe(safe.providerGovernanceReleaseViewModelSummary || null),
       globalShoppingProductGoalSummary: stripUnsafe(safe.globalShoppingProductGoalSummary || null),
       jumpToPlatformBoundarySummary: stripUnsafe(safe.jumpToPlatformBoundarySummary || null),
       globalShoppingProductGoalViewModelSummary: stripUnsafe(safe.globalShoppingProductGoalViewModelSummary || null),
@@ -288,7 +292,7 @@
       humanApprovalSimulationGateSummary: stripUnsafe(safe.humanApprovalSimulationGateSummary || null),
       mockProviderLaunchDrillSummary: stripUnsafe(safe.mockProviderLaunchDrillSummary || null),
       sandboxProviderRollbackPlanSummary: stripUnsafe(safe.sandboxProviderRollbackPlanSummary || null),
-      providerLaunchSimulationViewModelSummary: stripUnsafe(safe.providerLaunchSimulationViewModelSummary || null), providerSandboxPilotControlRoomSummary: stripUnsafe(safe.providerSandboxPilotControlRoomSummary || null), mockProviderIncidentDrillSummary: stripUnsafe(safe.mockProviderIncidentDrillSummary || null), productionBlockerMatrixSummary: stripUnsafe(safe.productionBlockerMatrixSummary || null), providerPilotControlViewModelSummary: stripUnsafe(safe.providerPilotControlViewModelSummary || null), humanControlledSandboxProviderPilotPlannerSummary: stripUnsafe(safe.humanControlledSandboxProviderPilotPlannerSummary || null), providerKillSwitchDrillSummary: stripUnsafe(safe.providerKillSwitchDrillSummary || null), complianceEvidencePackSummary: stripUnsafe(safe.complianceEvidencePackSummary || null), providerPilotGovernanceViewModelSummary: stripUnsafe(safe.providerPilotGovernanceViewModelSummary || null),
+      providerLaunchSimulationViewModelSummary: stripUnsafe(safe.providerLaunchSimulationViewModelSummary || null), providerSandboxPilotControlRoomSummary: stripUnsafe(safe.providerSandboxPilotControlRoomSummary || null), mockProviderIncidentDrillSummary: stripUnsafe(safe.mockProviderIncidentDrillSummary || null), productionBlockerMatrixSummary: stripUnsafe(safe.productionBlockerMatrixSummary || null), providerPilotControlViewModelSummary: stripUnsafe(safe.providerPilotControlViewModelSummary || null), humanControlledSandboxProviderPilotPlannerSummary: stripUnsafe(safe.humanControlledSandboxProviderPilotPlannerSummary || null), providerKillSwitchDrillSummary: stripUnsafe(safe.providerKillSwitchDrillSummary || null), complianceEvidencePackSummary: stripUnsafe(safe.complianceEvidencePackSummary || null), providerPilotGovernanceViewModelSummary: stripUnsafe(safe.providerPilotGovernanceViewModelSummary || null), providerGovernanceConsoleSummary: stripUnsafe(safe.providerGovernanceConsoleSummary || null), providerOperatorReviewLoopSummary: stripUnsafe(safe.providerOperatorReviewLoopSummary || null), providerGovernanceAuditConsoleSummary: stripUnsafe(safe.providerGovernanceAuditConsoleSummary || null), humanPilotReadinessLedgerSummary: stripUnsafe(safe.humanPilotReadinessLedgerSummary || null), sandboxProviderReleaseFreezeGateSummary: stripUnsafe(safe.sandboxProviderReleaseFreezeGateSummary || null), providerGovernanceReleaseViewModelSummary: stripUnsafe(safe.providerGovernanceReleaseViewModelSummary || null),
       rcRegressionStatus: safeLine(safe.rcRegressionStatus || ""),
       releaseRiskStatus: safeLine(safe.releaseRiskStatus || ""),
       safeToContinueReleaseCandidate: safe.safeToContinueReleaseCandidate === true,
@@ -315,9 +319,13 @@
       mockProviderLaunchDrillStatus: safeLine(safe.mockProviderLaunchDrillStatus || ""),
       sandboxProviderRollbackPlanStatus: safeLine(safe.sandboxProviderRollbackPlanStatus || ""),
       providerLaunchSimulationViewModelStatus: safeLine(safe.providerLaunchSimulationViewModelStatus || ""),
+      providerGovernanceAuditConsoleStatus: safeLine(safe.providerGovernanceAuditConsoleStatus || ""),
+      humanPilotReadinessLedgerStatus: safeLine(safe.humanPilotReadinessLedgerStatus || ""),
+      sandboxProviderReleaseFreezeGateStatus: safeLine(safe.sandboxProviderReleaseFreezeGateStatus || ""),
+      providerGovernanceReleaseViewModelStatus: safeLine(safe.providerGovernanceReleaseViewModelStatus || ""),
       safeToProceedWithReadOnlyPriceProviderSandbox: safe.safeToProceedWithReadOnlyPriceProviderSandbox === true,
       safeToProceedWithFirstSandboxProviderConnectorImplementation: safe.safeToProceedWithFirstSandboxProviderConnectorImplementation === true,
-      safeToProceedWithHumanControlledSandboxProviderPilot: safe.safeToProceedWithHumanControlledSandboxProviderPilot === true, safeToProceedWithHumanControlledSandboxProviderPilotPlan: safe.safeToProceedWithHumanControlledSandboxProviderPilotPlan === true, safeToProceedWithHumanAuditSandboxPilotReadinessReview: safe.safeToProceedWithHumanAuditSandboxPilotReadinessReview === true,
+      safeToProceedWithHumanControlledSandboxProviderPilot: safe.safeToProceedWithHumanControlledSandboxProviderPilot === true, safeToProceedWithHumanControlledSandboxProviderPilotPlan: safe.safeToProceedWithHumanControlledSandboxProviderPilotPlan === true, safeToProceedWithHumanAuditSandboxPilotReadinessReview: safe.safeToProceedWithHumanAuditSandboxPilotReadinessReview === true, safeToProceedWithManualGovernanceReleaseDecision: safe.safeToProceedWithManualGovernanceReleaseDecision === true,
       safeToProceedWithJumpToPlatformMvp: safe.safeToProceedWithJumpToPlatformMvp === true,
       sandboxDeepLinkStatus: safeLine(safe.sandboxDeepLinkStatus || ""),
       platformAvailabilityStatus: safeLine(safe.platformAvailabilityStatus || ""),

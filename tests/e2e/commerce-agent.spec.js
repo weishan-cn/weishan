@@ -9722,7 +9722,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.3.7 provider governance console stays local and bounded @commerce-smoke", async () => {
+  test("v2.3.8 provider governance release gate stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9732,12 +9732,16 @@ test.describe.serial("commerce agent workbench", () => {
       window.WeishanGlobalShoppingProviderPilotGovernanceViewModel &&
       window.WeishanGlobalShoppingProviderGovernanceConsole &&
       window.WeishanGlobalShoppingProviderOperatorReviewLoop &&
+      window.WeishanGlobalShoppingProviderGovernanceAuditConsole &&
+      window.WeishanGlobalShoppingHumanPilotReadinessLedger &&
+      window.WeishanGlobalShoppingSandboxProviderReleaseFreezeGate &&
+      window.WeishanGlobalShoppingProviderGovernanceReleaseViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
-    const v237 = await page.evaluate(() => {
+    const v238 = await page.evaluate(() => {
       const cardApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
       const host = document.createElement("section");
-      host.setAttribute("data-commerce-v237-render-smoke", "true");
+      host.setAttribute("data-commerce-v238-render-smoke", "true");
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml({
         humanControlledSandboxProviderPilotPlannerSummary:{ status:"ready", userFacingSummary:{ title:"人工控制 Sandbox Provider Pilot 计划器", resultLabel:"Pilot 计划器已准备", redacted:true }, redacted:true },
         providerKillSwitchDrillSummary:{ status:"ready", userFacingSummary:{ title:"Provider Kill Switch 演练", resultLabel:"Kill Switch 演练已准备", redacted:true }, redacted:true },
@@ -9745,49 +9749,58 @@ test.describe.serial("commerce agent workbench", () => {
         providerPilotGovernanceViewModelSummary:{ status:"ready", title:"Provider Pilot 治理与合规证据", redacted:true },
         providerGovernanceConsoleSummary:{ consoleStatus:"ready_for_human_approval", status:"ready_for_human_approval", userVisibleSummary:{ title:"Provider Governance Console", resultLabel:"可进入人工最终确认", redacted:true }, allowedNextActions:["request_final_human_approval"], blockedActions:[], redacted:true },
         providerOperatorReviewLoopSummary:{ status:"ready_for_human_approval", userFacingSummary:{ title:"Operator Review Loop", resultLabel:"等待人工最终确认", redacted:true }, redacted:true },
+        providerGovernanceAuditConsoleSummary:{ status:"ready", userFacingSummary:{ title:"Provider Governance 审计控制台", resultLabel:"Provider Governance 审计控制台已准备", redacted:true }, redacted:true },
+        humanPilotReadinessLedgerSummary:{ status:"ready", userFacingSummary:{ title:"Human Pilot 准备台账", resultLabel:"Human Pilot 准备台账已准备", redacted:true }, redacted:true },
+        sandboxProviderReleaseFreezeGateSummary:{ status:"ready", userFacingSummary:{ title:"Sandbox Provider Release Freeze Gate", resultLabel:"Sandbox Provider Release Freeze Gate 已准备", redacted:true }, redacted:true },
+        providerGovernanceReleaseViewModelSummary:{ status:"ready", title:"Provider Governance 发布审计与冻结闸门", redacted:true },
         humanControlledSandboxProviderPilotPlannerStatus:"ready",
         providerKillSwitchDrillStatus:"ready",
         complianceEvidencePackStatus:"ready",
         providerPilotGovernanceViewModelStatus:"ready",
         providerGovernanceConsoleStatus:"ready_for_human_approval",
         providerOperatorReviewLoopStatus:"ready_for_human_approval",
+        providerGovernanceAuditConsoleStatus:"ready",
+        humanPilotReadinessLedgerStatus:"ready",
+        sandboxProviderReleaseFreezeGateStatus:"ready",
+        providerGovernanceReleaseViewModelStatus:"ready",
+        safeToProceedWithManualGovernanceReleaseDecision:false,
         safeToProceedWithHumanAuditSandboxPilotReadinessReview:true
       });
-      const section = host.querySelector("[data-commerce-global-shopping-provider-pilot-governance='true']");
+      const section = host.querySelector("[data-commerce-global-shopping-provider-governance-release='true']");
       document.body.appendChild(host);
       return {
         text:host.innerText,
         html:host.innerHTML,
         sectionText:section ? section.innerText : "",
         sectionHtml:section ? section.innerHTML : "",
-        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-pilot-governance='true']").length,
-        governanceButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-pilot-governance-show]").length,
-        plannerButtonCount:host.querySelectorAll("[data-commerce-global-shopping-pilot-planner-show]").length,
-        drillButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-kill-switch-drill-show]").length,
-        evidenceButtonCount:host.querySelectorAll("[data-commerce-global-shopping-compliance-evidence-pack-show]").length
+        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-governance-release='true']").length,
+        auditButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-governance-audit-show]").length,
+        ledgerButtonCount:host.querySelectorAll("[data-commerce-global-shopping-human-pilot-ledger-show]").length,
+        freezeButtonCount:host.querySelectorAll("[data-commerce-global-shopping-release-freeze-show]").length
       };
     });
-    expect(v237.sectionCount).toBe(1);
-    expect(v237.governanceButtonCount).toBe(1);
-    expect(v237.plannerButtonCount).toBe(1);
-    expect(v237.drillButtonCount).toBe(1);
-    expect(v237.evidenceButtonCount).toBe(1);
-    expect(v237.text).toContain("Provider Governance Console + Operator Review Loop");
-    expect(v237.text).toContain("Provider Governance Console");
-    expect(v237.text).toContain("Operator Review Loop");
-    expect(v237.text).toContain("人工控制 Sandbox Provider Pilot 计划器");
-    expect(v237.text).toContain("Provider Kill Switch 演练");
-    expect(v237.text).toContain("合规证据包");
-    expect(v237.text).toContain("可进入人工最终确认");
-    expect(v237.text).toContain("等待人工最终确认");
-    expect(v237.text).toContain("allowed next action 列表");
-    expect(v237.text).toContain("blocked action 列表");
-    expect(v237.text).toContain("operator review checklist");
-    expect(v237.text).toContain("当前只展示 provider pilot 治理和运营人工复核循环");
-    expect(v237.text).toContain("不接真实 provider，不读取密钥，不联网，不生成 endpoint，不执行回滚，不导出文件");
-    expect(v237.text).toContain("Human audit 仍需人工复核");
-    expect(v237.sectionText).not.toMatch(/立即购买|直接下单|一键下单|一键出票|授权付款|创建订单|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)禁用真实 provider|paymentUrl|orderUrl|checkoutUrl|bookingUrl|token|key|secret/);
-    expect(v237.sectionHtml).not.toMatch(/https?:\/\//i);
+    expect(v238.sectionCount).toBe(1);
+    expect(v238.auditButtonCount).toBe(1);
+    expect(v238.ledgerButtonCount).toBe(1);
+    expect(v238.freezeButtonCount).toBe(1);
+    expect(v238.text).toContain("Provider Governance 发布审计与冻结闸门");
+    expect(v238.text).toContain("Provider Governance 审计控制台");
+    expect(v238.text).toContain("Human Pilot 准备台账");
+    expect(v238.text).toContain("Sandbox Provider Release Freeze Gate");
+    expect(v238.text).toContain("治理审计");
+    expect(v238.text).toContain("Human Pilot 台账");
+    expect(v238.text).toContain("Release Freeze");
+    expect(v238.text).toContain("Provider Governance 审计控制台已准备");
+    expect(v238.text).toContain("Human Pilot 准备台账已准备");
+    expect(v238.text).toContain("Sandbox Provider Release Freeze Gate 已准备");
+    expect(v238.text).toContain("治理审计不写文件、不上传");
+    expect(v238.text).toContain("Human Pilot 台账不持久化审批结果");
+    expect(v238.text).toContain("Release Freeze Gate 不改 git、不 push");
+    expect(v238.text).toContain("Manual governance release decision 仍需人工确认");
+    expect(v238.text).toContain("当前只展示 provider governance 发布审计与冻结闸门");
+    expect(v238.text).toContain("不接真实 provider，不读取密钥，不联网，不改 git，不 push，不导出文件");
+    expect(v238.sectionText).not.toMatch(/立即购买|直接下单|一键下单|一键出票|授权付款|创建订单|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)禁用真实 provider|paymentUrl|orderUrl|checkoutUrl|bookingUrl|token|key|secret/);
+    expect(v238.sectionHtml).not.toMatch(/https?:\/\//i);
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 

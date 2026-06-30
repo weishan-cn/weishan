@@ -8231,6 +8231,33 @@
         showCommercePlatformTemplateFeedback("已显示合规证据", false);
         return;
       }
+      const globalShoppingProviderGovernanceAuditButton = target && target.closest("[data-commerce-global-shopping-provider-governance-audit-show]");
+      if (globalShoppingProviderGovernanceAuditButton && host.contains(globalShoppingProviderGovernanceAuditButton)) {
+        event.preventDefault();
+        const panel = globalShoppingProviderGovernanceAuditButton.closest("[data-commerce-global-shopping-provider-governance-release]") || globalShoppingProviderGovernanceAuditButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-provider-governance-audit-output]") || panel;
+        output.innerHTML = '<p>Provider Governance 审计控制台</p><p>Provider Governance 审计控制台已准备</p><p>治理审计不写文件、不上传</p><p>当前只展示 provider governance 发布审计与冻结闸门</p><p>不接真实 provider，不读取密钥，不联网，不改 git，不 push，不导出文件</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示治理审计", false);
+        return;
+      }
+      const globalShoppingHumanPilotLedgerButton = target && target.closest("[data-commerce-global-shopping-human-pilot-ledger-show]");
+      if (globalShoppingHumanPilotLedgerButton && host.contains(globalShoppingHumanPilotLedgerButton)) {
+        event.preventDefault();
+        const panel = globalShoppingHumanPilotLedgerButton.closest("[data-commerce-global-shopping-provider-governance-release]") || globalShoppingHumanPilotLedgerButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-human-pilot-ledger-output]") || panel;
+        output.innerHTML = '<p>Human Pilot 准备台账</p><p>Human Pilot 准备台账已准备</p><p>Human Pilot 台账不持久化审批结果</p><p>Manual governance release decision 仍需人工确认</p><p>不接真实 provider，不读取密钥，不联网，不改 git，不 push，不导出文件</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Human Pilot 台账", false);
+        return;
+      }
+      const globalShoppingReleaseFreezeButton = target && target.closest("[data-commerce-global-shopping-release-freeze-show]");
+      if (globalShoppingReleaseFreezeButton && host.contains(globalShoppingReleaseFreezeButton)) {
+        event.preventDefault();
+        const panel = globalShoppingReleaseFreezeButton.closest("[data-commerce-global-shopping-provider-governance-release]") || globalShoppingReleaseFreezeButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-release-freeze-output]") || panel;
+        output.innerHTML = '<p>Sandbox Provider Release Freeze Gate</p><p>Sandbox Provider Release Freeze Gate 已准备</p><p>Release Freeze Gate 不改 git、不 push</p><p>Manual governance release decision 仍需人工确认</p><p>不接真实 provider，不读取密钥，不联网，不改 git，不 push，不导出文件</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Release Freeze", false);
+        return;
+      }
       const pilotInvitationGateButton = target && target.closest("[data-commerce-flight-pilot-invitation-gate-show]");
       if (pilotInvitationGateButton && host.contains(pilotInvitationGateButton)) {
         event.preventDefault();

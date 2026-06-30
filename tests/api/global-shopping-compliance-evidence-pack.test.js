@@ -25,7 +25,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingComplianceEvidencePack.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingComplianceEvidencePack;
-  assert.equal(api.GLOBAL_SHOPPING_COMPLIANCE_EVIDENCE_PACK_VERSION, "2.3.7");
+  assert.equal(api.GLOBAL_SHOPPING_COMPLIANCE_EVIDENCE_PACK_VERSION, "2.3.8");
 
   const ready = api.buildGlobalShoppingComplianceEvidencePack({
     humanControlledSandboxProviderPilotPlannerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Pilot 计划器已准备", redacted:true } },

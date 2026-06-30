@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.3.7");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.3.8");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -218,6 +218,24 @@ function main() {
     safeToProceedWithMockAdapterRuntimeHardening:true
   }).badges.map((item) => item.label);
   assert.ok(mockRuntimeLabels.includes("Sandbox Provider Mock Runtime 已准备"));
+  const governanceReleaseLabels = api.buildFlightWorkflowRiskBadges({
+    providerGovernanceAuditConsoleSummary:{ status:"ready", userFacingSummary:{ resultLabel:"治理审计控制台已准备", redacted:true } },
+    humanPilotReadinessLedgerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Human Pilot 准备台账已准备", redacted:true } },
+    sandboxProviderReleaseFreezeGateSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Release Freeze Gate 已准备", redacted:true } },
+    providerGovernanceReleaseViewModelSummary:{ status:"ready", title:"Provider Governance 发布审计与冻结闸门", redacted:true },
+    providerGovernanceAuditConsoleStatus:"ready",
+    humanPilotReadinessLedgerStatus:"ready",
+    sandboxProviderReleaseFreezeGateStatus:"ready",
+    providerGovernanceReleaseViewModelStatus:"ready",
+    safeToProceedWithManualGovernanceReleaseDecision:false
+  }).badges.map((item) => item.label);
+  assert.ok(governanceReleaseLabels.includes("Provider Governance 审计控制台已准备"));
+  assert.ok(governanceReleaseLabels.includes("Human Pilot 准备台账已准备"));
+  assert.ok(governanceReleaseLabels.includes("Sandbox Provider Release Freeze Gate 已准备"));
+  assert.ok(governanceReleaseLabels.includes("治理审计不写文件、不上传"));
+  assert.ok(governanceReleaseLabels.includes("Human Pilot 台账不持久化审批结果"));
+  assert.ok(governanceReleaseLabels.includes("Release Freeze Gate 不改 git、不 push"));
+  assert.ok(governanceReleaseLabels.includes("Manual governance release decision 仍需人工确认"));
   const launchReadinessLabels = api.buildFlightWorkflowRiskBadges({
     mockProviderAdapterRegistryRuntimeSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Mock Adapter 注册运行时已准备", redacted:true } },
     providerContractReplayHarnessSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider 合同回放器已准备", redacted:true } },
