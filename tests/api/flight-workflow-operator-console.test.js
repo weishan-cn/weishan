@@ -7,14 +7,14 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js", "apps/desktop/src/renderer/core/flightWorkflowOperatorConsole.js"]);
   const api = windowRef.WeishanFlightWorkflowOperatorConsole;
-  assert.equal(api.FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION, "2.3.8");
+  assert.equal(api.FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION, "2.3.9");
   const base = { workflowId:"wf1", workflowStateSummary:{ workflowId:"wf1" }, topCandidates:[{ providerName:"sandbox", bookingUrl:null }], selectedCandidate:{ providerName:"sandbox" }, auditReviewSummary:{ status:"ready", auditHealth:{ overall:"pass" } }, humanReviewChecklistSummary:{ status:"ready" }, finalSafeHandoffPacketSummary:{ status:"ready" }, handoffPacketPolicyDecision:{ status:"allowed" }, safetyRegressionSummary:{ status:"pass", checks:[] }, eventLedgerSummary:{ recentEvents:[{ eventType:"handoff_packet_prepared", status:"ready" }] }, blockedActions:[] };
   const ready = api.buildFlightWorkflowOperatorConsole(base);
   assert.equal(ready.consoleName, "flight_workflow_operator_console_v1");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "可以继续只读流程");
   assert.equal(ready.nextOperatorAction.enabled, true);
-  assert.equal(JSON.stringify(ready.sections.map((s) => s.sectionId)), JSON.stringify(["workflow_status", "safety_status", "recent_events", "blocked_actions", "handoff_readiness", "rc_review", "global_shopping_goal", "global_shopping_price", "global_shopping_handoff", "global_shopping_session_recap", "global_shopping_sandbox_provider_planning", "global_shopping_provider_integration_prep", "global_shopping_provider_mock_runtime", "global_shopping_provider_launch_readiness", "global_shopping_provider_launch_simulation", "global_shopping_provider_pilot_control", "global_shopping_provider_pilot_governance", "global_shopping_provider_governance_release", "global_shopping_decision_review", "pilot_ops", "pilot_readiness", "pilot_onboarding", "issue_review", "issue_pattern"]));
+  assert.equal(JSON.stringify(ready.sections.map((s) => s.sectionId)), JSON.stringify(["workflow_status", "safety_status", "recent_events", "blocked_actions", "handoff_readiness", "rc_review", "global_shopping_goal", "global_shopping_price", "global_shopping_handoff", "global_shopping_session_recap", "global_shopping_sandbox_provider_planning", "global_shopping_provider_integration_prep", "global_shopping_provider_mock_runtime", "global_shopping_provider_launch_readiness", "global_shopping_provider_launch_simulation", "global_shopping_provider_pilot_control", "global_shopping_provider_pilot_governance", "global_shopping_provider_governance_release", "global_shopping_provider_manual_release", "global_shopping_decision_review", "pilot_ops", "pilot_readiness", "pilot_onboarding", "issue_review", "issue_pattern"]));
   assert.equal(ready.bookingUrl, null);
   assert.ok(ready.sections.some((section) => section.sectionId === "pilot_ops"));
   const globalRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {
@@ -58,6 +58,18 @@ function main() {
   assert.ok(governanceReleaseRows.rows.some((item) => item.label === "Human Pilot 台账" && item.value === "Human Pilot 准备台账已准备"));
   assert.ok(governanceReleaseRows.rows.some((item) => item.label === "Release Freeze" && item.value === "Sandbox Provider Release Freeze Gate 已准备"));
   assert.ok(governanceReleaseRows.rows.some((item) => item.label === "安全红线" && item.value === "Manual governance release decision 仍需人工确认"));
+  const providerManualReleaseRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {
+    manualGovernanceReleaseDecisionRoomSummary:{ status:"ready", userFacingSummary:{ resultLabel:"人工发布决策室已准备", redacted:true }, redacted:true },
+    sandboxPilotExceptionRegisterSummary:{ status:"ready", userFacingSummary:{ resultLabel:"例外登记簿已准备", redacted:true }, redacted:true },
+    providerReadinessSignOffPacketSummary:{ status:"ready", userFacingSummary:{ resultLabel:"准备签核包已准备", redacted:true }, redacted:true },
+    providerManualReleaseViewModelSummary:{ status:"ready", title:"Provider 人工发布决策与签核", redacted:true },
+    safeToProceedWithManualProviderSignOffReview:false
+  })).sections.find((section) => section.sectionId === "global_shopping_provider_manual_release");
+  assert.ok(providerManualReleaseRows.rows.some((item) => item.label === "人工发布决策" && item.value === "人工发布决策室已准备"));
+  assert.ok(providerManualReleaseRows.rows.some((item) => item.label === "例外登记" && item.value === "例外登记簿已准备"));
+  assert.ok(providerManualReleaseRows.rows.some((item) => item.label === "准备签核" && item.value === "准备签核包已准备"));
+  assert.ok(providerManualReleaseRows.rows.some((item) => item.label === "人工发布视图" && item.value === "Provider 人工发布决策与签核"));
+  assert.ok(providerManualReleaseRows.rows.some((item) => item.label === "安全红线" && item.value === "Manual provider sign-off 仍需人工复核"));
   const handoffRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {
     externalDeepLinkSafetySummary:{ status:"safe", userFacingSummary:{ resultLabel:"跳转安全结构已准备" } },
     searchParameterPrefillSummary:{ status:"safe", userFacingSummary:{ resultLabel:"预填边界安全" } },

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_PRICE_FEED_GATE_VERSION = "2.2.8";
+  const GLOBAL_SHOPPING_SANDBOX_PRICE_FEED_GATE_VERSION = "2.3.9";
   const GATE_NAME = "global_shopping_sandbox_price_feed_gate_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

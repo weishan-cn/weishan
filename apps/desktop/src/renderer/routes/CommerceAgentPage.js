@@ -8258,6 +8258,33 @@
         showCommercePlatformTemplateFeedback("已显示 Release Freeze", false);
         return;
       }
+      const globalShoppingManualReleaseDecisionButton = target && target.closest("[data-commerce-global-shopping-manual-release-decision-show]");
+      if (globalShoppingManualReleaseDecisionButton && host.contains(globalShoppingManualReleaseDecisionButton)) {
+        event.preventDefault();
+        const panel = globalShoppingManualReleaseDecisionButton.closest("[data-commerce-global-shopping-provider-manual-release]") || globalShoppingManualReleaseDecisionButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-manual-release-decision-output]") || panel;
+        output.innerHTML = '<p>Manual Governance Release 决策室</p><p>人工发布决策室已准备</p><p>人工发布决策不创建 release、不 push</p><p>该决策室只展示人工发布决策准备状态，不保存决策，不创建 release，不创建 tag，不 push。</p><p>不接真实 provider，不读取密钥，不联网，不创建 release，不创建 tag，不 push</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示人工发布决策", false);
+        return;
+      }
+      const globalShoppingSandboxExceptionRegisterButton = target && target.closest("[data-commerce-global-shopping-sandbox-exception-register-show]");
+      if (globalShoppingSandboxExceptionRegisterButton && host.contains(globalShoppingSandboxExceptionRegisterButton)) {
+        event.preventDefault();
+        const panel = globalShoppingSandboxExceptionRegisterButton.closest("[data-commerce-global-shopping-provider-manual-release]") || globalShoppingSandboxExceptionRegisterButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-sandbox-exception-register-output]") || panel;
+        output.innerHTML = '<p>Sandbox Pilot 例外登记簿</p><p>例外登记簿已准备</p><p>例外登记不持久化审批结果</p><p>该登记簿只展示 sandbox pilot 例外状态，不持久化例外，不创建审批任务，不启动 pilot。</p><p>不接真实 provider，不读取密钥，不联网，不创建审批任务，不 push</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示例外登记", false);
+        return;
+      }
+      const globalShoppingProviderSignoffButton = target && target.closest("[data-commerce-global-shopping-provider-signoff-show]");
+      if (globalShoppingProviderSignoffButton && host.contains(globalShoppingProviderSignoffButton)) {
+        event.preventDefault();
+        const panel = globalShoppingProviderSignoffButton.closest("[data-commerce-global-shopping-provider-manual-release]") || globalShoppingProviderSignoffButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-provider-signoff-output]") || panel;
+        output.innerHTML = '<p>Provider 准备签核包</p><p>准备签核包已准备</p><p>准备签核包不写文件、不导出</p><p>Manual provider sign-off 仍需人工复核</p><p>该签核包只展示准备度摘要，不写文件，不下载，不保存签核结果，不创建 release，不 push。</p><p>不接真实 provider，不读取密钥，不联网，不创建 release，不创建 tag，不 push</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示准备签核", false);
+        return;
+      }
       const pilotInvitationGateButton = target && target.closest("[data-commerce-flight-pilot-invitation-gate-show]");
       if (pilotInvitationGateButton && host.contains(pilotInvitationGateButton)) {
         event.preventDefault();

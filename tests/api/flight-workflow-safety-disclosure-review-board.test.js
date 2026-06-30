@@ -9,7 +9,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowSafetyDisclosureReviewBoard.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowSafetyDisclosureReviewBoard;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_DISCLOSURE_REVIEW_BOARD_VERSION, "2.2.8");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_DISCLOSURE_REVIEW_BOARD_VERSION, "2.3.9");
   const summary = api.buildFlightWorkflowSafetyDisclosureReviewBoard({
     disclosureText:[
       "当前为只读候选证据流程，不提供付款、下单或出票能力。",

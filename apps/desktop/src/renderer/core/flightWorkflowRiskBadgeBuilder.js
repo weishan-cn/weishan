@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.8";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.9";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -355,6 +355,13 @@
       if (obj(safe.humanPilotReadinessLedgerSummary).status || obj(safe.providerGovernanceReleaseViewModelSummary).status) badges.push(badge("human_pilot_ledger_boundary", "Human Pilot 台账不持久化审批结果", "info"));
       if (obj(safe.sandboxProviderReleaseFreezeGateSummary).status || obj(safe.providerGovernanceReleaseViewModelSummary).status) badges.push(badge("provider_release_freeze_boundary", "Release Freeze Gate 不改 git、不 push", "warning"));
       if ((obj(safe.providerGovernanceReleaseViewModelSummary).status && obj(safe.providerGovernanceReleaseViewModelSummary).status !== "blocked") || safe.safeToProceedWithManualGovernanceReleaseDecision === false) badges.push(badge("manual_governance_release_decision_required", "Manual governance release decision 仍需人工确认", "warning"));
+      if (obj(safe.manualGovernanceReleaseDecisionRoomSummary).status === "ready" || safe.manualGovernanceReleaseDecisionRoomStatus === "ready") badges.push(badge("manual_governance_release_decision_room_ready", "Manual Governance Release 决策室已准备", "info"));
+      if (obj(safe.sandboxPilotExceptionRegisterSummary).status === "ready" || safe.sandboxPilotExceptionRegisterStatus === "ready") badges.push(badge("sandbox_pilot_exception_register_ready", "Sandbox Pilot 例外登记簿已准备", "info"));
+      if (obj(safe.providerReadinessSignOffPacketSummary).status === "ready" || safe.providerReadinessSignOffPacketStatus === "ready") badges.push(badge("provider_readiness_signoff_packet_ready", "Provider 准备签核包已准备", "info"));
+      if (obj(safe.manualGovernanceReleaseDecisionRoomSummary).status || obj(safe.providerManualReleaseViewModelSummary).status) badges.push(badge("manual_provider_release_no_release_push", "人工发布决策不创建 release、不 push", "info"));
+      if (obj(safe.sandboxPilotExceptionRegisterSummary).status || obj(safe.providerManualReleaseViewModelSummary).status) badges.push(badge("sandbox_exception_register_no_persistence", "例外登记不持久化审批结果", "info"));
+      if (obj(safe.providerReadinessSignOffPacketSummary).status || obj(safe.providerManualReleaseViewModelSummary).status) badges.push(badge("provider_signoff_packet_no_export", "准备签核包不写文件、不导出", "info"));
+      if ((obj(safe.providerManualReleaseViewModelSummary).status && obj(safe.providerManualReleaseViewModelSummary).status !== "blocked") || safe.safeToProceedWithManualProviderSignOffReview === false) badges.push(badge("manual_provider_signoff_required", "Manual provider sign-off 仍需人工复核", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "ready") badges.push(badge("sandbox_deep_link_candidate_ready", "Sandbox 跳转候选已准备", "info"));
       if (sandboxDeepLinkCandidateSummary.status === "needs_review") badges.push(badge("sandbox_deep_link_candidate_review", "Sandbox 跳转候选仍需复核", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "blocked") badges.push(badge("sandbox_deep_link_candidate_blocked", "Sandbox 跳转候选已阻断", "blocked"));

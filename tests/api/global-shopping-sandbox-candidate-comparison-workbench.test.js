@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingSandboxCandidateComparisonWorkbench.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingSandboxCandidateComparisonWorkbench;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_CANDIDATE_COMPARISON_WORKBENCH_VERSION, "2.2.8");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_CANDIDATE_COMPARISON_WORKBENCH_VERSION, "2.3.9");
 
   const ready = api.buildGlobalShoppingSandboxCandidateComparisonWorkbench({
     sandboxPriceCandidateResultBoard:{
@@ -56,7 +56,7 @@ function main() {
     }
   });
 
-  assert.equal(ready.appVersion, "2.2.8");
+  assert.equal(ready.appVersion, "2.3.9");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "Sandbox 候选对比工作台");
   assert.equal(ready.comparisonSummary.candidateCount, 2);

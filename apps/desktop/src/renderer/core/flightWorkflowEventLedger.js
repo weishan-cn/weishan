@@ -1,11 +1,11 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_EVENT_LEDGER_VERSION = "2.2.8";
+  const FLIGHT_WORKFLOW_EVENT_LEDGER_VERSION = "2.3.9";
   const LEDGER_NAME = "flight_workflow_event_ledger_v1";
   const EVENT_NAME = "flight_workflow_event_entry_v1";
   const STORAGE_KEY = "weishan.flightWorkflowEventLedger.v1";
-  const DEFAULT_WORKFLOW_ID = "deterministic-flight-workflow-event-ledger-v2.2.8";
+  const DEFAULT_WORKFLOW_ID = "deterministic-flight-workflow-event-ledger-v2.3.9";
   const FORBIDDEN_NAME_RE = /(rawText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|key|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
 
@@ -46,7 +46,7 @@
       return true;
     } catch (error) { return false; }
   }
-  function eventIdFor(index) { return "deterministic-flight-workflow-event-v2.2.8-" + String(index); }
+  function eventIdFor(index) { return "deterministic-flight-workflow-event-v2.3.9-" + String(index); }
   function sanitizeFlightWorkflowEvent(entry) {
     const safe = stripUnsafe(entry && typeof entry === "object" ? entry : {}) || {};
     return clone({

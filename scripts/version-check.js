@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
-const PREVIOUS_STABLE_VERSION = "2.2.8";
+const PREVIOUS_STABLE_VERSION = "2.3.9";
 const STRICT_VERSION_CHECKS = new Set([
   "root package-lock version",
   "root package-lock packages[\"\"].version",
@@ -30,7 +30,11 @@ const STRICT_VERSION_CHECKS = new Set([
   "apps/desktop global shopping provider governance audit console version",
   "apps/desktop global shopping human pilot readiness ledger version",
   "apps/desktop global shopping sandbox provider release freeze gate version",
-  "apps/desktop global shopping provider governance release view model version"
+  "apps/desktop global shopping provider governance release view model version",
+  "apps/desktop global shopping manual governance release decision room version",
+  "apps/desktop global shopping sandbox pilot exception register version",
+  "apps/desktop global shopping provider readiness sign off packet version",
+  "apps/desktop global shopping provider manual release view model version"
 ]);
 
 function readJson(relativePath) {
@@ -2222,6 +2226,10 @@ function runVersionCheck() {
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping human pilot readiness ledger version", "apps/desktop/src/renderer/core/globalShoppingHumanPilotReadinessLedger.js", "GLOBAL_SHOPPING_HUMAN_PILOT_READINESS_LEDGER_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping sandbox provider release freeze gate version", "apps/desktop/src/renderer/core/globalShoppingSandboxProviderReleaseFreezeGate.js", "GLOBAL_SHOPPING_SANDBOX_PROVIDER_RELEASE_FREEZE_GATE_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping provider governance release view model version", "apps/desktop/src/renderer/core/globalShoppingProviderGovernanceReleaseViewModel.js", "GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_RELEASE_VIEW_MODEL_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping manual governance release decision room version", "apps/desktop/src/renderer/core/globalShoppingManualGovernanceReleaseDecisionRoom.js", "GLOBAL_SHOPPING_MANUAL_GOVERNANCE_RELEASE_DECISION_ROOM_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping sandbox pilot exception register version", "apps/desktop/src/renderer/core/globalShoppingSandboxPilotExceptionRegister.js", "GLOBAL_SHOPPING_SANDBOX_PILOT_EXCEPTION_REGISTER_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping provider readiness sign off packet version", "apps/desktop/src/renderer/core/globalShoppingProviderReadinessSignOffPacket.js", "GLOBAL_SHOPPING_PROVIDER_READINESS_SIGN_OFF_PACKET_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping provider manual release view model version", "apps/desktop/src/renderer/core/globalShoppingProviderManualReleaseViewModel.js", "GLOBAL_SHOPPING_PROVIDER_MANUAL_RELEASE_VIEW_MODEL_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow read only launch candidate freeze gate version", "apps/desktop/src/renderer/core/flightWorkflowReadOnlyLaunchCandidateFreezeGate.js", "FLIGHT_WORKFLOW_READ_ONLY_LAUNCH_CANDIDATE_FREEZE_GATE_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow evidence freeze pack version", "apps/desktop/src/renderer/core/flightWorkflowEvidenceFreezePack.js", "FLIGHT_WORKFLOW_EVIDENCE_FREEZE_PACK_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop flight workflow launch candidate freeze view model version", "apps/desktop/src/renderer/core/flightWorkflowLaunchCandidateFreezeViewModel.js", "FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_FREEZE_VIEW_MODEL_VERSION");

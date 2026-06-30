@@ -1,9 +1,9 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_MANAGER_VERSION = "2.2.8";
+  const READ_ONLY_QUOTE_SESSION_MANAGER_VERSION = "2.3.9";
   const SESSION_NAME = "read_only_quote_session_v1";
-  const SESSION_ID = "deterministic-read-only-quote-session-v2.2.8";
+  const SESSION_ID = "deterministic-read-only-quote-session-v2.3.9";
   const FORBIDDEN_NAME_RE = /(token|key|secret|password|sessionToken|auth|credential|rawProviderResponse|rawResponse|rawPayload|identity|passport|bank|card|bookingUrl|checkoutUrl|paymentUrl|orderUrl)/i;
 
   function clone(value) {

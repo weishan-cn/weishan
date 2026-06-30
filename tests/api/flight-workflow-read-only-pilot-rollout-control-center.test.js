@@ -13,14 +13,14 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowReadOnlyPilotRolloutControlCenter.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowReadOnlyPilotRolloutControlCenter;
-  assert.equal(api.FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_VERSION, "2.2.8");
+  assert.equal(api.FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_VERSION, "2.3.9");
   const ready = api.buildFlightWorkflowReadOnlyPilotRolloutControlCenter({ cohortProgressReady:true, milestoneReady:true, invitationReady:true, supportReady:true, issuePatternStable:true, safetySentinelPass:true, noOpenBlockingIssue:true, noSensitiveDataRisk:true, noTradingRisk:true, cohortProgressSummary:{ status:"ready", redacted:true }, trialMilestoneSummary:{ status:"ready", safeToAdvanceNextCohort:true, redacted:true }, pilotReadinessSnapshotSummary:{ status:"ready", redacted:true } });
   assert.equal(ready.status, "ready");
   assert.equal(ready.decision.decisionId, "advance_next_cohort");
   assert.equal(ready.decision.safeToAdvanceNextCohort, true);
   assert.equal(ready.rolloutHealth.cohortProgressReady, true);
   assert.equal(ready.blockedReasons.length, 0);
-  assert.equal(ready.appVersion, "2.2.8");
+  assert.equal(ready.appVersion, "2.3.9");
   assert.ok(ready.pilotOpsStatus);
   assert.ok(ready.nextCohortDecisionStatus);
   assert.ok(ready.pilotOpsPrimaryRisk);

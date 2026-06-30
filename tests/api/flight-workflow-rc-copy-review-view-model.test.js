@@ -9,7 +9,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowRcCopyReviewViewModel.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowRcCopyReviewViewModel;
-  assert.equal(api.FLIGHT_WORKFLOW_RC_COPY_REVIEW_VIEW_MODEL_VERSION, "2.2.8");
+  assert.equal(api.FLIGHT_WORKFLOW_RC_COPY_REVIEW_VIEW_MODEL_VERSION, "2.3.9");
   const model = api.buildFlightWorkflowRcCopyReviewViewModel({
     rcCopyFinalizationSummary:{ status:"finalized", userFacingSummary:{ resultLabel:"文案可以定稿", redacted:true }, copyRows:[{ rowId:"copy", label:"文案定稿", value:"文案可以定稿", status:"pass", redacted:true }], forbiddenCopyFindings:[], redacted:true },
     safetyDisclosureReviewSummary:{ status:"approved", userFacingSummary:{ resultLabel:"安全披露通过", redacted:true }, disclosureRows:[{ rowId:"disclosure", label:"安全披露", value:"安全披露通过", status:"pass", redacted:true }], redacted:true },
