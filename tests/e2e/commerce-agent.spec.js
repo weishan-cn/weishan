@@ -9283,7 +9283,7 @@ test.describe.serial("commerce agent workbench", () => {
       const preview = previewApi.buildGlobalShoppingJumpToPlatformHandoffPreview({ externalDeepLinkSafetySummary:deepLink, searchParameterPrefillSummary:prefill, sandboxDeepLinkCandidateSummary:sandbox, platformAvailabilitySummary:availability, partnerLinkPolicySummary:partner });
       const sandboxVm = sandboxVmApi.buildGlobalShoppingSandboxHandoffViewModel({ sandboxDeepLinkCandidateSummary:sandbox, platformAvailabilitySummary:availability, partnerLinkPolicySummary:partner, legalProviderFixtureSummary:legal, providerCredentialSafetySummary:credential, sandboxPriceFeedSummary:feed });
       const pipelineSeed = pipelineApi.buildGlobalShoppingPricePipelineOrchestrator({ legalProviderFixtureSummary:legal, providerCredentialSafetyReview:credential, sandboxPriceFeedGate:feed, sandboxProviderResponseContract:responseContract, readOnlyProviderSandboxConnector:connector, fixtureReplayConsole:replay, priceSourceNormalizer:normalizer, officialPriceAnchorSlot:anchor, sameItemMatcher:matcher, duplicateCandidateMerger:merger, coveredLowestCandidateBoard:coveredBoard, normalizedPriceCandidateBoard:normalizedBoardSeed, sandboxHandoffViewModel:sandboxVm });
-      const normalizedBoard = normalizedBoardApi.buildGlobalShoppingNormalizedPriceCandidateBoard({ readOnlyProviderSandboxConnectorSummary:connector, fixtureReplayConsoleSummary:replay, pricePipelineOrchestratorSummary:pipelineSeed, officialPriceAnchorSummary:anchor, coveredLowestCandidateBoardSummary:coveredBoard, priceCandidateDisplaySummary:{ status:"ready", title:"全球购价格候选展示", caveat:"当前仅展示只读 fixture/sandbox 归一化候选", redacted:true } });
+      const normalizedBoard = normalizedBoardApi.buildGlobalShoppingNormalizedPriceCandidateBoard({ readOnlyProviderSandboxConnectorSummary:connector, fixtureReplayConsoleSummary:replay, pricePipelineOrchestratorSummary:{ status:"ready", redacted:true }, officialPriceAnchorSummary:anchor, coveredLowestCandidateBoardSummary:coveredBoard, priceCandidateDisplaySummary:{ status:"ready", title:"全球购价格候选展示", caveat:"当前仅展示只读 fixture/sandbox 归一化候选", redacted:true } });
       const requestEnvelope = requestEnvelopeApi.buildGlobalShoppingProviderRequestEnvelopeBuilder({ providerId:"provider_1", providerName:"Fixture Provider", requestMode:"sandbox_ready", itemType:"flight", origin:"SHA", destination:"CTU", departureDate:"2026-07-15", passengerCount:1, directOnly:true, userRegion:"CN", destinationRegion:"CN", currency:"CNY", locale:"zh-CN" });
       const callAudit = callAuditApi.buildGlobalShoppingProviderCallAuditLedger({ providerId:"provider_1", providerName:"Fixture Provider", requestMode:"sandbox_ready", auditEntries:[{ auditId:"audit_1", providerId:"provider_1", providerName:"Fixture Provider", requestMode:"sandbox_ready", callStatus:"dry_run", redacted:true, timestamp:"redacted_now", safetyStatus:"redacted_safe" }] });
       const killSwitch = killSwitchApi.buildGlobalShoppingProviderSandboxSafetyKillSwitch({});
@@ -9722,7 +9722,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.3.3 provider launch readiness stays local and bounded @commerce-smoke", async () => {
+  test("v2.3.4 provider launch readiness stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(

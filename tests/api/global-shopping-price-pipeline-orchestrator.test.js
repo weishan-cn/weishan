@@ -80,10 +80,14 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingCredentialVaultInterfaceStub.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxAdapterContractTestbed.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderIntegrationPrepViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingHumanApprovalSimulationGate.js",
+    "apps/desktop/src/renderer/core/globalShoppingMockProviderLaunchDrill.js",
+    "apps/desktop/src/renderer/core/globalShoppingSandboxProviderRollbackPlan.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderLaunchSimulationViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.3.3");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.3.4");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -211,10 +215,10 @@ function main() {
     providerLaunchReadinessBoardSummary:providerLaunchReadinessBoardSummary,
     providerLaunchReadinessViewModelSummary:providerLaunchReadinessViewModelSummary
   });
-  assert.equal(ready.appVersion, "2.3.3");
+  assert.equal(ready.appVersion, "2.3.4");
   assert.equal(ready.status, "needs_review");
   assert.equal(ready.userFacingSummary.resultLabel, "只读价格流水线仍需复核");
-  assert.equal(ready.pipelineStages.length, 75);
+  assert.equal(ready.pipelineStages.length, 79);
   assert.equal(ready.readyOutputs.canShowFixtureCandidatePrices, true);
   assert.equal(ready.readyOutputs.canShowFixtureReplay, true);
   assert.equal(ready.readyOutputs.canShowOfficialAnchor, true);
@@ -278,6 +282,11 @@ function main() {
   assert.equal(ready.providerContractReplayHarnessSummary.userFacingSummary.title, "Provider 合同回放器");
   assert.equal(ready.providerLaunchReadinessBoardSummary.userFacingSummary.title, "Provider 启动准备总闸门");
   assert.equal(ready.providerLaunchReadinessViewModelSummary.title, "Provider 启动准备与合同回放");
+  assert.equal(ready.humanApprovalSimulationGateSummary.userFacingSummary.title, "人工审批模拟闸门");
+  assert.equal(ready.mockProviderLaunchDrillSummary.userFacingSummary.title, "Mock Provider 启动演练");
+  assert.equal(ready.sandboxProviderRollbackPlanSummary.userFacingSummary.title, "Sandbox Provider 回滚预案");
+  assert.equal(ready.providerLaunchSimulationViewModelSummary.title, "Provider 启动模拟与回滚预案");
+  assert.equal(ready.readyOutputs.safeToProceedWithHumanControlledSandboxProviderPilot, false);
   assert.equal(ready.readyOutputs.safeToProceedWithFirstSandboxProviderConnectorImplementation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithFirstReadOnlyProviderSandboxIntegration, true);
   assert.equal(ready.readyOutputs.safeToProceedWithSandboxCandidateUserPreview, false);

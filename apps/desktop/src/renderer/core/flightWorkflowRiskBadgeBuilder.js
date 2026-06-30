@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.3";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.3.4";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -322,6 +322,13 @@
       if (obj(safe.providerContractReplayHarnessSummary).status || obj(safe.providerLaunchReadinessViewModelSummary).status) badges.push(badge("provider_contract_replay_harness_boundary", "合同回放不回放 raw request 或 raw response", "info"));
       if (obj(safe.providerLaunchReadinessBoardSummary).status || obj(safe.providerLaunchReadinessViewModelSummary).status) badges.push(badge("provider_launch_readiness_board_boundary", "启动准备不读取密钥、不联网", "warning"));
       if (safe.safeToProceedWithHumanProviderSandboxApproval === true) badges.push(badge("provider_launch_readiness_human_review", "真实 sandbox provider 仍需人工审批", "warning"));
+      if (obj(safe.humanApprovalSimulationGateSummary).status === "ready" || safe.humanApprovalSimulationStatus === "ready") badges.push(badge("human_approval_simulation_gate_ready", "人工审批模拟闸门已准备", "info"));
+      if (obj(safe.mockProviderLaunchDrillSummary).status === "ready" || safe.mockProviderLaunchDrillStatus === "ready") badges.push(badge("mock_provider_launch_drill_ready", "Mock Provider 启动演练已准备", "info"));
+      if (obj(safe.sandboxProviderRollbackPlanSummary).status === "ready" || safe.sandboxProviderRollbackPlanStatus === "ready") badges.push(badge("sandbox_provider_rollback_plan_ready", "Sandbox Provider 回滚预案已准备", "info"));
+      if (obj(safe.humanApprovalSimulationGateSummary).status || obj(safe.providerLaunchSimulationViewModelSummary).status) badges.push(badge("human_approval_simulation_boundary", "审批模拟不代表真实审批完成", "warning"));
+      if (obj(safe.mockProviderLaunchDrillSummary).status || obj(safe.providerLaunchSimulationViewModelSummary).status) badges.push(badge("mock_provider_launch_boundary", "Mock 启动不启动真实 provider", "info"));
+      if (obj(safe.sandboxProviderRollbackPlanSummary).status || obj(safe.providerLaunchSimulationViewModelSummary).status) badges.push(badge("sandbox_provider_rollback_boundary", "回滚预案不执行回滚", "warning"));
+      if (safe.safeToProceedWithHumanControlledSandboxProviderPilot === true) badges.push(badge("human_controlled_sandbox_provider_pilot", "真实 sandbox provider pilot 仍需人工控制", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "ready") badges.push(badge("sandbox_deep_link_candidate_ready", "Sandbox 跳转候选已准备", "info"));
       if (sandboxDeepLinkCandidateSummary.status === "needs_review") badges.push(badge("sandbox_deep_link_candidate_review", "Sandbox 跳转候选仍需复核", "warning"));
       if (sandboxDeepLinkCandidateSummary.status === "blocked") badges.push(badge("sandbox_deep_link_candidate_blocked", "Sandbox 跳转候选已阻断", "blocked"));

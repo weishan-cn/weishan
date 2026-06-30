@@ -8141,6 +8141,33 @@
         showCommercePlatformTemplateFeedback("已显示启动准备", false);
         return;
       }
+      const globalShoppingHumanApprovalButton = target && target.closest("[data-commerce-global-shopping-human-approval-show]");
+      if (globalShoppingHumanApprovalButton && host.contains(globalShoppingHumanApprovalButton)) {
+        event.preventDefault();
+        const panel = globalShoppingHumanApprovalButton.closest("[data-commerce-global-shopping-provider-launch-simulation]") || globalShoppingHumanApprovalButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-human-approval-output]") || panel;
+        output.innerHTML = '<p>人工审批模拟闸门</p><p>审批模拟闸门已准备</p><p>审批模拟不代表真实审批完成</p><p>不创建审批任务，不发邮件，不打开外部文档</p><p>真实 sandbox provider pilot 仍需人工控制</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示审批模拟", false);
+        return;
+      }
+      const globalShoppingMockLaunchDrillButton = target && target.closest("[data-commerce-global-shopping-mock-launch-drill-show]");
+      if (globalShoppingMockLaunchDrillButton && host.contains(globalShoppingMockLaunchDrillButton)) {
+        event.preventDefault();
+        const panel = globalShoppingMockLaunchDrillButton.closest("[data-commerce-global-shopping-provider-launch-simulation]") || globalShoppingMockLaunchDrillButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-mock-launch-drill-output]") || panel;
+        output.innerHTML = '<p>Mock Provider 启动演练</p><p>Mock 启动演练已准备</p><p>Mock 启动不启动真实 provider</p><p>不读取密钥，不联网，不生成 endpoint</p><p>不打开平台，不保存启动状态</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示启动演练", false);
+        return;
+      }
+      const globalShoppingRollbackPlanButton = target && target.closest("[data-commerce-global-shopping-rollback-plan-show]");
+      if (globalShoppingRollbackPlanButton && host.contains(globalShoppingRollbackPlanButton)) {
+        event.preventDefault();
+        const panel = globalShoppingRollbackPlanButton.closest("[data-commerce-global-shopping-provider-launch-simulation]") || globalShoppingRollbackPlanButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-rollback-plan-output]") || panel;
+        output.innerHTML = '<p>Sandbox Provider 回滚预案</p><p>回滚预案已准备</p><p>回滚预案不执行回滚</p><p>不改 git，不删文件，不停服务，不修改配置</p><p>真实 sandbox provider pilot 仍需人工控制</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示回滚预案", false);
+        return;
+      }
       const pilotInvitationGateButton = target && target.closest("[data-commerce-flight-pilot-invitation-gate-show]");
       if (pilotInvitationGateButton && host.contains(pilotInvitationGateButton)) {
         event.preventDefault();

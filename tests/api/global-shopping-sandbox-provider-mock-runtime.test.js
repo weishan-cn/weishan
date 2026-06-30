@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingSandboxProviderMockRuntime.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingSandboxProviderMockRuntime;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PROVIDER_MOCK_RUNTIME_VERSION, "2.3.3");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PROVIDER_MOCK_RUNTIME_VERSION, "2.3.4");
   const ready = api.buildGlobalShoppingSandboxProviderMockRuntime({
     providerLegalReviewDossierSummary:{ status:"ready", userFacingSummary:{ resultLabel:"法务审查档案已准备", redacted:true } },
     credentialVaultInterfaceStubSummary:{ status:"ready", userFacingSummary:{ resultLabel:"凭证接口桩已准备", redacted:true } },
