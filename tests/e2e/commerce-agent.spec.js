@@ -9722,7 +9722,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.2.9 commerce session recap stays local and bounded @commerce-smoke", async () => {
+  test("v2.3.0 commerce session recap stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(

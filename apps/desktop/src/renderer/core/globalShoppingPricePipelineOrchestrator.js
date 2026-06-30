@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.2.9";
+  const GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION = "2.3.0";
   const ORCHESTRATOR_NAME = "global_shopping_price_pipeline_orchestrator_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -56,7 +56,7 @@
     const safe = obj(summary);
     return clone({
       status:text(safe.status || ""),
-      title:text(safe.title || ""),
+      title:text(safe.title || obj(safe.userFacingSummary).title || ""),
       userFacingSummary:{
         title:text(obj(safe.userFacingSummary).title || ""),
         resultLabel:text(obj(safe.userFacingSummary).resultLabel || ""),
@@ -132,7 +132,7 @@
     const realProviderSandboxGateSummary = resolveSummary(safe, "realProviderSandboxGateSummary", "WeishanGlobalShoppingReadOnlyRealProviderSandboxGate", "buildGlobalShoppingReadOnlyRealProviderSandboxGate", {
       readOnlyProviderSandboxConnectorSummary:readOnlyProviderSandboxConnectorSummary,
       fixtureReplayConsoleSummary:fixtureReplayConsoleSummary,
-      normalizedPriceCandidateBoardSummary:obj(safe.normalizedPriceCandidateBoardSummary),
+      normalizedPriceCandidateBoardSummary:obj(safe.normalizedPriceCandidateBoardSummary || safe.normalizedPriceCandidateBoard),
       sandboxProviderResponseContractSummary:sandboxProviderResponseContractSummary,
       pricePipelineOrchestratorSummary:{ status:"ready" },
       providerCredentialSafetySummary:providerCredentialSafetySummary,
@@ -442,6 +442,7 @@
       manualVisitSafetyBriefSummary:manualVisitSafetyBriefSummary,
       readOnlySessionClosurePackSummary:readOnlySessionClosurePackSummary
     });
+    const jumpToPlatformBoundarySummary = resolveSummary(safe, "jumpToPlatformBoundarySummary", "WeishanGlobalShoppingJumpToPlatformBoundary", "buildGlobalShoppingJumpToPlatformBoundary", safe);
     const readOnlyCommerceSessionRecapCenterSummary = resolveSummary(safe, "readOnlyCommerceSessionRecapCenterSummary", "WeishanGlobalShoppingReadOnlyCommerceSessionRecapCenter", "buildGlobalShoppingReadOnlyCommerceSessionRecapCenter", {
       externalPlatformExitRampPreviewSummary:externalPlatformExitRampPreviewSummary,
       manualVisitSafetyBriefSummary:manualVisitSafetyBriefSummary,
@@ -470,6 +471,26 @@
       readOnlyCommerceSessionRecapCenterSummary:readOnlyCommerceSessionRecapCenterSummary,
       userTrustClosureSummarySummary:userTrustClosureSummarySummary,
       nextFeatureReadinessGateSummary:nextFeatureReadinessGateSummary
+    });
+    const readOnlySandboxProviderIntegrationBlueprintSummary = resolveSummary(safe, "readOnlySandboxProviderIntegrationBlueprintSummary", "WeishanGlobalShoppingReadOnlySandboxProviderIntegrationBlueprint", "buildGlobalShoppingReadOnlySandboxProviderIntegrationBlueprint", {
+      nextFeatureReadinessGateSummary:nextFeatureReadinessGateSummary,
+      commerceSessionRecapViewModelSummary:commerceSessionRecapViewModelSummary,
+      userTrustClosureSummarySummary:userTrustClosureSummarySummary,
+      safetyRegressionSentinelSummary:safetyRegressionSentinelSummary,
+      providerAdapterRegistrySummary:providerAdapterRegistrySummary,
+      firstSandboxProviderConnectorSummary:firstSandboxProviderConnectorSummary,
+      providerSandboxDryRunHarnessSummary:providerSandboxDryRunHarnessSummary,
+      providerSandboxSafetyKillSwitchSummary:providerSandboxSafetyKillSwitchSummary,
+      providerCredentialSafetySummary:providerCredentialSafetySummary,
+      readOnlySessionClosurePackSummary:readOnlySessionClosurePackSummary,
+      jumpToPlatformBoundarySummary:jumpToPlatformBoundarySummary
+    });
+    const credentialIsolationReadinessBoardSummary = resolveSummary(safe, "credentialIsolationReadinessBoardSummary", "WeishanGlobalShoppingCredentialIsolationReadinessBoard", "buildGlobalShoppingCredentialIsolationReadinessBoard", safe);
+    const providerContractSelectionBoardSummary = resolveSummary(safe, "providerContractSelectionBoardSummary", "WeishanGlobalShoppingProviderContractSelectionBoard", "buildGlobalShoppingProviderContractSelectionBoard", safe);
+    const sandboxProviderPlanningViewModelSummary = resolveSummary(safe, "sandboxProviderPlanningViewModelSummary", "WeishanGlobalShoppingSandboxProviderPlanningViewModel", "buildGlobalShoppingSandboxProviderPlanningViewModel", {
+      readOnlySandboxProviderIntegrationBlueprintSummary:readOnlySandboxProviderIntegrationBlueprintSummary,
+      credentialIsolationReadinessBoardSummary:credentialIsolationReadinessBoardSummary,
+      providerContractSelectionBoardSummary:providerContractSelectionBoardSummary
     });
     const pipelineHealth = {
       firstSandboxProviderConnectorReady:statusOf(firstSandboxProviderConnectorSummary) === "ready",
@@ -515,6 +536,10 @@
       userTrustClosureSummaryReady:statusOf(userTrustClosureSummarySummary) === "ready",
       nextFeatureReadinessGateReady:statusOf(nextFeatureReadinessGateSummary) === "ready",
       commerceSessionRecapViewModelReady:statusOf(commerceSessionRecapViewModelSummary) === "ready",
+      readOnlySandboxProviderIntegrationBlueprintReady:statusOf(readOnlySandboxProviderIntegrationBlueprintSummary) === "ready",
+      credentialIsolationReadinessReady:statusOf(credentialIsolationReadinessBoardSummary) === "ready",
+      providerContractSelectionReady:statusOf(providerContractSelectionBoardSummary) === "ready",
+      sandboxProviderPlanningViewModelReady:statusOf(sandboxProviderPlanningViewModelSummary) === "ready",
       providerConnectorReady:statusOf(readOnlyProviderSandboxConnectorSummary) === "ready",
       fixtureReplayReady:statusOf(fixtureReplayConsoleSummary) === "ready",
       providerFixtureReady:statusOf(legalProviderFixtureSummary) === "ready",
@@ -633,7 +658,8 @@
         safeToProceedWithManualExternalPlatformVisitEducation:pipelineHealth.userFacingManualReviewFlowReady && pipelineHealth.platformVerificationProgressTrackerReady && pipelineHealth.safeNextActionPanelReady && pipelineHealth.userManualReviewViewModelReady,
         safeToProceedWithUserLeavingWeishanEducation:pipelineHealth.manualPlatformVisitPreparationCenterReady && pipelineHealth.externalPlatformBoundaryBriefReady && pipelineHealth.finalUserSafetyChecklistReady && pipelineHealth.platformVisitPreparationViewModelReady,
         safeToProceedWithReadOnlySessionClosureEducation:pipelineHealth.externalPlatformExitRampPreviewReady && pipelineHealth.manualVisitSafetyBriefReady && pipelineHealth.readOnlySessionClosurePackReady && pipelineHealth.externalPlatformExitViewModelReady,
-        safeToProceedWithReadOnlyProviderSandboxPlanning:pipelineHealth.readOnlyCommerceSessionRecapCenterReady && pipelineHealth.userTrustClosureSummaryReady && pipelineHealth.nextFeatureReadinessGateReady && pipelineHealth.commerceSessionRecapViewModelReady
+        safeToProceedWithReadOnlyProviderSandboxPlanning:pipelineHealth.readOnlyCommerceSessionRecapCenterReady && pipelineHealth.userTrustClosureSummaryReady && pipelineHealth.nextFeatureReadinessGateReady && pipelineHealth.commerceSessionRecapViewModelReady,
+        safeToProceedWithProviderLegalAndCredentialReview:pipelineHealth.readOnlySandboxProviderIntegrationBlueprintReady && pipelineHealth.credentialIsolationReadinessReady && pipelineHealth.providerContractSelectionReady && pipelineHealth.sandboxProviderPlanningViewModelReady
       },
       blockedReasons:blockedReasons,
       readOnlyProviderSandboxConnectorSummary:clone(readOnlyProviderSandboxConnectorSummary),
@@ -699,6 +725,10 @@
       userTrustClosureSummarySummary:clone(userTrustClosureSummarySummary),
       nextFeatureReadinessGateSummary:clone(nextFeatureReadinessGateSummary),
       commerceSessionRecapViewModelSummary:clone(commerceSessionRecapViewModelSummary),
+      readOnlySandboxProviderIntegrationBlueprintSummary:clone(readOnlySandboxProviderIntegrationBlueprintSummary),
+      credentialIsolationReadinessBoardSummary:clone(credentialIsolationReadinessBoardSummary),
+      providerContractSelectionBoardSummary:clone(providerContractSelectionBoardSummary),
+      sandboxProviderPlanningViewModelSummary:clone(sandboxProviderPlanningViewModelSummary),
       status:blockedReasons.length ? "blocked" : (review ? "needs_review" : "ready"),
       redacted:true
     });
@@ -764,7 +794,11 @@
       row("read_only_commerce_session_recap_center", "只读全球购会话总结", statusOf(safe.readOnlyCommerceSessionRecapCenterSummary) === "ready" ? "pass" : (statusOf(safe.readOnlyCommerceSessionRecapCenterSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.readOnlyCommerceSessionRecapCenterSummary).userFacingSummary).resultLabel || "会话总结仍需复核"),
       row("user_trust_closure_summary", "用户信任闭环摘要", statusOf(safe.userTrustClosureSummarySummary) === "ready" ? "pass" : (statusOf(safe.userTrustClosureSummarySummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.userTrustClosureSummarySummary).userFacingSummary).resultLabel || "信任闭环摘要仍需复核"),
       row("next_feature_readiness_gate", "下一功能准备闸门", statusOf(safe.nextFeatureReadinessGateSummary) === "ready" ? "pass" : (statusOf(safe.nextFeatureReadinessGateSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.nextFeatureReadinessGateSummary).userFacingSummary).resultLabel || "下一功能准备仍需复核"),
-      row("commerce_session_recap_view_model", "只读全球购会话总结与下一步准备", statusOf(safe.commerceSessionRecapViewModelSummary) === "ready" ? "pass" : (statusOf(safe.commerceSessionRecapViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.commerceSessionRecapViewModelSummary).title || "只读全球购会话总结与下一步准备")
+      row("commerce_session_recap_view_model", "只读全球购会话总结与下一步准备", statusOf(safe.commerceSessionRecapViewModelSummary) === "ready" ? "pass" : (statusOf(safe.commerceSessionRecapViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.commerceSessionRecapViewModelSummary).title || "只读全球购会话总结与下一步准备"),
+      row("sandbox_provider_integration_blueprint", "只读 Sandbox Provider 接入蓝图", statusOf(safe.readOnlySandboxProviderIntegrationBlueprintSummary) === "ready" ? "pass" : (statusOf(safe.readOnlySandboxProviderIntegrationBlueprintSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.readOnlySandboxProviderIntegrationBlueprintSummary).userFacingSummary).resultLabel || "接入蓝图仍需复核"),
+      row("credential_isolation_readiness_board", "凭证隔离准备度", statusOf(safe.credentialIsolationReadinessBoardSummary) === "ready" ? "pass" : (statusOf(safe.credentialIsolationReadinessBoardSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.credentialIsolationReadinessBoardSummary).userFacingSummary).resultLabel || "凭证隔离仍需复核"),
+      row("provider_contract_selection_board", "Provider 合同/授权选择板", statusOf(safe.providerContractSelectionBoardSummary) === "ready" ? "pass" : (statusOf(safe.providerContractSelectionBoardSummary) === "blocked" ? "blocked" : "warning"), obj(obj(safe.providerContractSelectionBoardSummary).userFacingSummary).resultLabel || "Provider 选择仍需复核"),
+      row("sandbox_provider_planning_view_model", "只读 Sandbox Provider 接入规划", statusOf(safe.sandboxProviderPlanningViewModelSummary) === "ready" ? "pass" : (statusOf(safe.sandboxProviderPlanningViewModelSummary) === "blocked" ? "blocked" : "warning"), obj(safe.sandboxProviderPlanningViewModelSummary).title || "只读 Sandbox Provider 接入规划")
     ]);
   }
   function sanitizeGlobalShoppingPricePipelineOrchestrator(orchestrator) {
@@ -849,6 +883,10 @@
       userTrustClosureSummarySummary:linkedSummary(evaluation.userTrustClosureSummarySummary),
       nextFeatureReadinessGateSummary:linkedSummary(evaluation.nextFeatureReadinessGateSummary),
       commerceSessionRecapViewModelSummary:linkedSummary(evaluation.commerceSessionRecapViewModelSummary),
+      readOnlySandboxProviderIntegrationBlueprintSummary:linkedSummary(evaluation.readOnlySandboxProviderIntegrationBlueprintSummary),
+      credentialIsolationReadinessBoardSummary:linkedSummary(evaluation.credentialIsolationReadinessBoardSummary),
+      providerContractSelectionBoardSummary:linkedSummary(evaluation.providerContractSelectionBoardSummary),
+      sandboxProviderPlanningViewModelSummary:linkedSummary(evaluation.sandboxProviderPlanningViewModelSummary),
       redactedSearchParameterPackStatus:text(obj(evaluation.redactedSearchParameterPackSummary).status || ""),
       userConfirmationChecklistStatus:text(obj(evaluation.userConfirmationChecklistSummary).status || ""),
       readOnlyPlatformHandoffSimulatorStatus:text(obj(evaluation.readOnlyPlatformHandoffSimulatorSummary).status || ""),
@@ -873,6 +911,10 @@
       userTrustClosureSummaryStatus:text(obj(evaluation.userTrustClosureSummarySummary).status || ""),
       nextFeatureReadinessGateStatus:text(obj(evaluation.nextFeatureReadinessGateSummary).status || ""),
       commerceSessionRecapViewModelStatus:text(obj(evaluation.commerceSessionRecapViewModelSummary).status || ""),
+      sandboxProviderIntegrationBlueprintStatus:text(obj(evaluation.readOnlySandboxProviderIntegrationBlueprintSummary).status || ""),
+      credentialIsolationReadinessStatus:text(obj(evaluation.credentialIsolationReadinessBoardSummary).status || ""),
+      providerContractSelectionStatus:text(obj(evaluation.providerContractSelectionBoardSummary).status || ""),
+      sandboxProviderPlanningViewModelStatus:text(obj(evaluation.sandboxProviderPlanningViewModelSummary).status || ""),
       safeToProceedWithUserFacingHandoffExplanation:evaluation.readyOutputs.safeToProceedWithUserFacingHandoffExplanation === true,
       safeToProceedWithManualPlatformReview:evaluation.readyOutputs.safeToProceedWithManualPlatformReview === true,
       safeToProceedWithManualPlatformUserEducation:evaluation.readyOutputs.safeToProceedWithManualPlatformUserEducation === true,
@@ -880,6 +922,7 @@
       safeToProceedWithUserLeavingWeishanEducation:evaluation.readyOutputs.safeToProceedWithUserLeavingWeishanEducation === true,
       safeToProceedWithReadOnlySessionClosureEducation:evaluation.readyOutputs.safeToProceedWithReadOnlySessionClosureEducation === true,
       safeToProceedWithReadOnlyProviderSandboxPlanning:evaluation.readyOutputs.safeToProceedWithReadOnlyProviderSandboxPlanning === true,
+      safeToProceedWithProviderLegalAndCredentialReview:evaluation.readyOutputs.safeToProceedWithProviderLegalAndCredentialReview === true,
       redacted:true
     });
   }

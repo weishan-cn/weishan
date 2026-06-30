@@ -27,10 +27,15 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingCoveredLowestCandidateBoard.js",
     "apps/desktop/src/renderer/core/globalShoppingNormalizedPriceCandidateBoard.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxHandoffViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderAdapterRegistry.js",
     "apps/desktop/src/renderer/core/globalShoppingFirstSandboxProviderConnector.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderCoverageDashboard.js",
     "apps/desktop/src/renderer/core/globalShoppingReadOnlySourceTrustScore.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderCoverageViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingReadOnlyRealProviderSandboxGate.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderRequestEnvelopeBuilder.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderCallAuditLedger.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderSandboxReadinessViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingReadOnlyProviderSandboxIntegrationGate.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxPriceCandidateSession.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxPriceCandidateResultBoard.js",
@@ -60,16 +65,21 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPlatformVisitPreparationViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingExternalPlatformExitRampPreview.js",
     "apps/desktop/src/renderer/core/globalShoppingManualVisitSafetyBrief.js",
+    "apps/desktop/src/renderer/core/globalShoppingJumpToPlatformBoundary.js",
     "apps/desktop/src/renderer/core/globalShoppingReadOnlySessionClosurePack.js",
     "apps/desktop/src/renderer/core/globalShoppingExternalPlatformExitViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingReadOnlyCommerceSessionRecapCenter.js",
     "apps/desktop/src/renderer/core/globalShoppingUserTrustClosureSummary.js",
     "apps/desktop/src/renderer/core/globalShoppingNextFeatureReadinessGate.js",
     "apps/desktop/src/renderer/core/globalShoppingCommerceSessionRecapViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingReadOnlySandboxProviderIntegrationBlueprint.js",
+    "apps/desktop/src/renderer/core/globalShoppingCredentialIsolationReadinessBoard.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderContractSelectionBoard.js",
+    "apps/desktop/src/renderer/core/globalShoppingSandboxProviderPlanningViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.2.9");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "2.3.0");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -102,7 +112,8 @@ function main() {
   const covered = windowRef.WeishanGlobalShoppingCoveredLowestCandidateBoard.buildGlobalShoppingCoveredLowestCandidateBoard({ duplicateCandidateMergerSummary:merger, officialPriceAnchorSummary:anchor });
   const normalizedBoard = windowRef.WeishanGlobalShoppingNormalizedPriceCandidateBoard.buildGlobalShoppingNormalizedPriceCandidateBoard({
     readOnlyProviderSandboxConnectorSummary:connector,
-    fixtureReplayConsoleSummary:replay
+    fixtureReplayConsoleSummary:replay,
+    pricePipelineOrchestratorSummary:{ status:"ready", redacted:true }
   });
   const handoff = windowRef.WeishanGlobalShoppingSandboxHandoffViewModel.buildGlobalShoppingSandboxHandoffViewModel({
     sandboxDeepLinkCandidateSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox 跳转候选已准备", redacted:true } },
@@ -180,10 +191,10 @@ function main() {
     safeNextActionPanelSummary:safeNextActionPanel,
     userManualReviewViewModelSummary:userManualReviewViewModel
   });
-  assert.equal(ready.appVersion, "2.2.9");
-  assert.equal(ready.status, "ready");
-  assert.equal(ready.userFacingSummary.resultLabel, "只读价格流水线已准备");
-  assert.equal(ready.pipelineStages.length, 59);
+  assert.equal(ready.appVersion, "2.3.0");
+  assert.equal(ready.status, "needs_review");
+  assert.equal(ready.userFacingSummary.resultLabel, "只读价格流水线仍需复核");
+  assert.equal(ready.pipelineStages.length, 63);
   assert.equal(ready.readyOutputs.canShowFixtureCandidatePrices, true);
   assert.equal(ready.readyOutputs.canShowFixtureReplay, true);
   assert.equal(ready.readyOutputs.canShowOfficialAnchor, true);
@@ -231,11 +242,16 @@ function main() {
   assert.equal(ready.userTrustClosureSummarySummary.userFacingSummary.title, "用户信任闭环摘要");
   assert.equal(ready.nextFeatureReadinessGateSummary.userFacingSummary.title, "下一功能准备闸门");
   assert.equal(ready.commerceSessionRecapViewModelSummary.title, "只读全球购会话总结与下一步准备");
+  assert.equal(ready.readOnlySandboxProviderIntegrationBlueprintSummary.userFacingSummary.title, "只读 Sandbox Provider 接入蓝图");
+  assert.equal(ready.credentialIsolationReadinessBoardSummary.userFacingSummary.title, "凭证隔离准备度");
+  assert.equal(ready.providerContractSelectionBoardSummary.userFacingSummary.title, "Provider 合同/授权选择板");
+  assert.equal(ready.sandboxProviderPlanningViewModelSummary.title, "只读 Sandbox Provider 接入规划");
   assert.equal(ready.readyOutputs.safeToProceedWithFirstSandboxProviderConnectorImplementation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithFirstReadOnlyProviderSandboxIntegration, true);
-  assert.equal(ready.readyOutputs.safeToProceedWithSandboxCandidateUserPreview, true);
+  assert.equal(ready.readyOutputs.safeToProceedWithSandboxCandidateUserPreview, false);
   assert.equal(ready.readyOutputs.safeToProceedWithReadOnlySessionClosureEducation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithReadOnlyProviderSandboxPlanning, true);
+  assert.equal(ready.readyOutputs.safeToProceedWithProviderLegalAndCredentialReview, true);
   assert.equal(ready.readyOutputs.safeToProceedWithSandboxDecisionReview, true);
   assert.equal(ready.readyOutputs.safeToProceedWithUserFacingHandoffExplanation, true);
   assert.equal(ready.readyOutputs.safeToProceedWithManualPlatformReview, true);
