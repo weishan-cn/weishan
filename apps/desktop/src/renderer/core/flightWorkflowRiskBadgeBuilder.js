@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.7.0";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.8.0";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -172,6 +172,11 @@
       const humanApprovalEvidenceBinderSummary = obj(safe.humanApprovalEvidenceBinderSummary);
       const adapterBoundaryLockSummary = obj(safe.adapterBoundaryLockSummary);
       const providerCertificationViewModelSummary = obj(safe.providerCertificationViewModelSummary);
+      const providerOfflineReleaseGateSummary = obj(safe.providerOfflineReleaseGateSummary);
+      const providerCertificationFreezeLedgerSummary = obj(safe.providerCertificationFreezeLedgerSummary);
+      const sandboxActivationReviewPacketSummary = obj(safe.sandboxActivationReviewPacketSummary);
+      const adapterBoundaryDiffInspectorSummary = obj(safe.adapterBoundaryDiffInspectorSummary);
+      const providerOfflineReleaseViewModelSummary = obj(safe.providerOfflineReleaseViewModelSummary);
       const providerAdapterRegistrySummary = obj(safe.providerAdapterRegistrySummary);
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
@@ -465,6 +470,15 @@
       if (humanApprovalEvidenceBinderSummary.status || providerCertificationViewModelSummary.status) badges.push(badge("provider_evidence_binder_no_file_upload", "Evidence Binder 不写文件、不上传", "info"));
       if (adapterBoundaryLockSummary.status || providerCertificationViewModelSummary.status) badges.push(badge("provider_boundary_lock_no_config_mutation", "Boundary Lock 不修改配置、不启用 provider", "info"));
       if ((providerCertificationViewModelSummary.status && providerCertificationViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanCertificationReview === true) badges.push(badge("human_certification_review_required", "Human certification review 仍需人工复核", "warning"));
+      if (providerOfflineReleaseGateSummary.status === "ready" || safe.providerOfflineReleaseGateStatus === "ready") badges.push(badge("provider_offline_release_gate_ready", "Provider Offline Release Gate 已准备", "info"));
+      if (providerCertificationFreezeLedgerSummary.status === "ready" || safe.providerCertificationFreezeLedgerStatus === "ready") badges.push(badge("provider_certification_freeze_ledger_ready", "Provider Certification Freeze Ledger 已准备", "info"));
+      if (sandboxActivationReviewPacketSummary.status === "ready" || safe.sandboxActivationReviewPacketStatus === "ready") badges.push(badge("sandbox_activation_review_packet_ready", "Sandbox Activation Review Packet 已准备", "info"));
+      if (adapterBoundaryDiffInspectorSummary.status === "ready" || safe.adapterBoundaryDiffInspectorStatus === "ready") badges.push(badge("adapter_boundary_diff_inspector_ready", "Adapter Boundary Diff Inspector 已准备", "info"));
+      if (providerOfflineReleaseGateSummary.status || providerOfflineReleaseViewModelSummary.status) badges.push(badge("provider_offline_release_gate_no_release_push", "Offline Release Gate 不创建 release、不 push", "info"));
+      if (providerCertificationFreezeLedgerSummary.status || providerOfflineReleaseViewModelSummary.status) badges.push(badge("provider_certification_freeze_ledger_no_persistence", "Certification Freeze Ledger 不持久化台账", "info"));
+      if (sandboxActivationReviewPacketSummary.status || providerOfflineReleaseViewModelSummary.status) badges.push(badge("sandbox_activation_review_packet_no_activation", "Activation Review Packet 不激活 sandbox", "info"));
+      if (adapterBoundaryDiffInspectorSummary.status || providerOfflineReleaseViewModelSummary.status) badges.push(badge("adapter_boundary_diff_inspector_no_config_mutation", "Boundary Diff Inspector 不修改配置、不启用 provider", "info"));
+      if ((providerOfflineReleaseViewModelSummary.status && providerOfflineReleaseViewModelSummary.status !== "blocked") || safe.safeToProceedWithManualOfflineReleaseReview === true) badges.push(badge("manual_offline_release_review_required", "Manual offline release review 仍需人工复核", "warning"));
       if (providerAdapterRegistrySummary.status === "ready") badges.push(badge("provider_adapter_registry_ready", "Adapter 注册表已准备", "info"));
       if (providerAdapterRegistrySummary.status === "needs_review") badges.push(badge("provider_adapter_registry_review", "Adapter 注册表仍需复核", "warning"));
       if (providerAdapterRegistrySummary.status === "blocked") badges.push(badge("provider_adapter_registry_blocked", "Adapter 注册表已阻断", "blocked"));

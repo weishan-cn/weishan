@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_READ_ONLY_SESSION_CLOSURE_PACK_VERSION = "2.7.0";
+  const GLOBAL_SHOPPING_READ_ONLY_SESSION_CLOSURE_PACK_VERSION = "2.8.0";
   const PACK_NAME = "global_shopping_read_only_session_closure_pack_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

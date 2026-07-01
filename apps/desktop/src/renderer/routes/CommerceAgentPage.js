@@ -8240,6 +8240,42 @@
         showCommercePlatformTemplateFeedback("已显示治理审计", false);
         return;
       }
+      const globalShoppingProviderOfflineReleaseGateButton = target && target.closest("[data-commerce-global-shopping-provider-offline-release-gate-show]");
+      if (globalShoppingProviderOfflineReleaseGateButton && host.contains(globalShoppingProviderOfflineReleaseGateButton)) {
+        event.preventDefault();
+        const panel = globalShoppingProviderOfflineReleaseGateButton.closest("[data-commerce-global-shopping-provider-offline-release]") || globalShoppingProviderOfflineReleaseGateButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-provider-offline-release-gate-output]") || panel;
+        output.innerHTML = '<p>Provider Offline Release Gate</p><p>Provider Offline Release Gate 已准备</p><p>Offline Release Gate 不创建 release、不 push</p><p>当前只展示离线发布准备度，不创建 release，不创建 tag，不 push，不接真实 provider。</p><p>不接真实 provider，不读取密钥，不联网，不创建 release，不 push</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Offline Release Gate", false);
+        return;
+      }
+      const globalShoppingProviderCertificationFreezeLedgerButton = target && target.closest("[data-commerce-global-shopping-provider-certification-freeze-ledger-show]");
+      if (globalShoppingProviderCertificationFreezeLedgerButton && host.contains(globalShoppingProviderCertificationFreezeLedgerButton)) {
+        event.preventDefault();
+        const panel = globalShoppingProviderCertificationFreezeLedgerButton.closest("[data-commerce-global-shopping-provider-offline-release]") || globalShoppingProviderCertificationFreezeLedgerButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-provider-certification-freeze-ledger-output]") || panel;
+        output.innerHTML = '<p>Provider Certification Freeze Ledger</p><p>Provider Certification Freeze Ledger 已准备</p><p>Certification Freeze Ledger 不持久化台账</p><p>当前只展示认证冻结状态，不持久化台账，不保存审批结果，不创建 release，不 push。</p><p>不接真实 provider，不读取密钥，不联网，不创建 release，不 push</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Certification Freeze", false);
+        return;
+      }
+      const globalShoppingSandboxActivationReviewPacketButton = target && target.closest("[data-commerce-global-shopping-sandbox-activation-review-packet-show]");
+      if (globalShoppingSandboxActivationReviewPacketButton && host.contains(globalShoppingSandboxActivationReviewPacketButton)) {
+        event.preventDefault();
+        const panel = globalShoppingSandboxActivationReviewPacketButton.closest("[data-commerce-global-shopping-provider-offline-release]") || globalShoppingSandboxActivationReviewPacketButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-sandbox-activation-review-packet-output]") || panel;
+        output.innerHTML = '<p>Sandbox Activation Review Packet</p><p>Sandbox Activation Review Packet 已准备</p><p>Activation Review Packet 不激活 sandbox</p><p>当前只展示 sandbox 激活复核摘要，不激活 sandbox，不读取密钥，不联网，不创建 release，不 push。</p><p>不接真实 provider，不读取密钥，不联网，不创建 release，不 push</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Activation Review", false);
+        return;
+      }
+      const globalShoppingAdapterBoundaryDiffInspectorButton = target && target.closest("[data-commerce-global-shopping-adapter-boundary-diff-inspector-show]");
+      if (globalShoppingAdapterBoundaryDiffInspectorButton && host.contains(globalShoppingAdapterBoundaryDiffInspectorButton)) {
+        event.preventDefault();
+        const panel = globalShoppingAdapterBoundaryDiffInspectorButton.closest("[data-commerce-global-shopping-provider-offline-release]") || globalShoppingAdapterBoundaryDiffInspectorButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-adapter-boundary-diff-inspector-output]") || panel;
+        output.innerHTML = '<p>Adapter Boundary Diff Inspector</p><p>Adapter Boundary Diff Inspector 已准备</p><p>Boundary Diff Inspector 不修改配置、不启用 provider</p><p>当前只展示 adapter 边界差异，不修改配置，不启用或禁用 provider，不读取密钥。</p><p>Manual offline release review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Boundary Diff", false);
+        return;
+      }
       const globalShoppingHumanPilotLedgerButton = target && target.closest("[data-commerce-global-shopping-human-pilot-ledger-show]");
       if (globalShoppingHumanPilotLedgerButton && host.contains(globalShoppingHumanPilotLedgerButton)) {
         event.preventDefault();
