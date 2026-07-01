@@ -7,14 +7,14 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js", "apps/desktop/src/renderer/core/flightWorkflowOperatorConsole.js"]);
   const api = windowRef.WeishanFlightWorkflowOperatorConsole;
-  assert.equal(api.FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION, "3.7.0");
+  assert.equal(api.FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION, "3.8.0");
   const base = { workflowId:"wf1", workflowStateSummary:{ workflowId:"wf1" }, topCandidates:[{ providerName:"sandbox", bookingUrl:null }], selectedCandidate:{ providerName:"sandbox" }, auditReviewSummary:{ status:"ready", auditHealth:{ overall:"pass" } }, humanReviewChecklistSummary:{ status:"ready" }, finalSafeHandoffPacketSummary:{ status:"ready" }, handoffPacketPolicyDecision:{ status:"allowed" }, safetyRegressionSummary:{ status:"pass", checks:[] }, eventLedgerSummary:{ recentEvents:[{ eventType:"handoff_packet_prepared", status:"ready" }] }, blockedActions:[] };
   const ready = api.buildFlightWorkflowOperatorConsole(base);
   assert.equal(ready.consoleName, "flight_workflow_operator_console_v1");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "可以继续只读流程");
   assert.equal(ready.nextOperatorAction.enabled, true);
-  assert.equal(JSON.stringify(ready.sections.map((s) => s.sectionId)), JSON.stringify(["workflow_status", "safety_status", "recent_events", "blocked_actions", "handoff_readiness", "rc_review", "global_shopping_goal", "global_shopping_price", "global_shopping_handoff", "global_shopping_session_recap", "global_shopping_sandbox_provider_planning", "global_shopping_provider_integration_prep", "global_shopping_provider_mock_runtime", "global_shopping_provider_launch_readiness", "global_shopping_provider_launch_simulation", "global_shopping_provider_pilot_control", "global_shopping_provider_pilot_governance", "global_shopping_provider_governance_release", "global_shopping_provider_manual_release", "global_shopping_provider_sandbox_milestone", "global_shopping_provider_sandbox_release_candidate", "global_shopping_provider_certification", "global_shopping_provider_offline_release", "global_shopping_provider_offline_launch", "global_shopping_provider_final_launch_review", "global_shopping_provider_final_review_console", "global_shopping_provider_final_safety_review", "global_shopping_provider_governance_closure_review", "global_shopping_provider_distribution_readiness_review", "global_shopping_provider_distribution_closure_review", "global_shopping_provider_trust_closure_review", "global_shopping_provider_sandbox_activation", "global_shopping_decision_review", "pilot_ops", "pilot_readiness", "pilot_onboarding", "issue_review", "issue_pattern"]));
+  assert.equal(JSON.stringify(ready.sections.map((s) => s.sectionId)), JSON.stringify(["workflow_status", "safety_status", "recent_events", "blocked_actions", "handoff_readiness", "rc_review", "global_shopping_goal", "global_shopping_price", "global_shopping_handoff", "global_shopping_session_recap", "global_shopping_sandbox_provider_planning", "global_shopping_provider_integration_prep", "global_shopping_provider_mock_runtime", "global_shopping_provider_launch_readiness", "global_shopping_provider_launch_simulation", "global_shopping_provider_pilot_control", "global_shopping_provider_pilot_governance", "global_shopping_provider_governance_release", "global_shopping_provider_manual_release", "global_shopping_provider_sandbox_milestone", "global_shopping_provider_sandbox_release_candidate", "global_shopping_provider_certification", "global_shopping_provider_offline_release", "global_shopping_provider_offline_launch", "global_shopping_provider_final_launch_review", "global_shopping_provider_final_review_console", "global_shopping_provider_final_safety_review", "global_shopping_provider_governance_closure_review", "global_shopping_provider_distribution_readiness_review", "global_shopping_provider_distribution_closure_review", "global_shopping_provider_trust_closure_review", "global_shopping_provider_public_release_review", "global_shopping_provider_sandbox_activation", "global_shopping_decision_review", "pilot_ops", "pilot_readiness", "pilot_onboarding", "issue_review", "issue_pattern"]));
   assert.equal(ready.bookingUrl, null);
   assert.ok(ready.sections.some((section) => section.sectionId === "pilot_ops"));
   const launchControlRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {
@@ -92,6 +92,19 @@ function main() {
   assert.ok(distributionClosureRows.rows.some((item) => item.label === "RC Closure Pack" && item.value === "Offline Release Candidate Closure Pack 已准备"));
   assert.ok(distributionClosureRows.rows.some((item) => item.label === "No-Production Guarantee" && item.value === "Provider No-Production Guarantee Matrix 已准备"));
   assert.ok(distributionClosureRows.rows.some((item) => item.label === "Closure view" && item.value === "Provider Distribution Closure Review"));
+  const publicReleaseRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {
+    providerReadOnlyPublicReleaseCenterSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider Read-Only Public Release Center 已准备", redacted:true }, redacted:true },
+    trustClosureExportPreviewSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Trust Closure Export Preview 已准备", redacted:true }, redacted:true },
+    finalNoProviderBoundaryReceiptSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Final No-Provider Boundary Receipt 已准备", redacted:true }, redacted:true },
+    publicSafetyStatementPreviewSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Safety Statement Preview 已准备", redacted:true }, redacted:true },
+    providerPublicReleaseViewModelSummary:{ status:"ready", title:"Provider Public Release Review", redacted:true },
+    safeToProceedWithHumanPublicReleaseReview:true
+  })).sections.find((section) => section.sectionId === "global_shopping_provider_public_release_review");
+  assert.ok(publicReleaseRows.rows.some((item) => item.label === "Public Release" && item.value === "Provider Read-Only Public Release Center 已准备"));
+  assert.ok(publicReleaseRows.rows.some((item) => item.label === "Export Preview" && item.value === "Trust Closure Export Preview 已准备"));
+  assert.ok(publicReleaseRows.rows.some((item) => item.label === "No-Provider Receipt" && item.value === "Final No-Provider Boundary Receipt 已准备"));
+  assert.ok(publicReleaseRows.rows.some((item) => item.label === "Safety Statement" && item.value === "Public Safety Statement Preview 已准备"));
+  assert.ok(publicReleaseRows.rows.some((item) => item.label === "Release view" && item.value === "Provider Public Release Review"));
   const trustClosureRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {
     providerPublicTrustClosureCenterSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider Public Trust Closure Center 已准备", redacted:true }, redacted:true },
     offlineReleaseMemorySnapshotSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Offline Release Memory Snapshot 已准备", redacted:true }, redacted:true },

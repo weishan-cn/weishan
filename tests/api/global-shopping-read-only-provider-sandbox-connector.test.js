@@ -18,7 +18,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingReadOnlyProviderSandboxConnector.js"]);
   const api = windowRef.WeishanGlobalShoppingReadOnlyProviderSandboxConnector;
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_PROVIDER_SANDBOX_CONNECTOR_VERSION, "3.7.0");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_PROVIDER_SANDBOX_CONNECTOR_VERSION, "3.8.0");
 
   const ready = api.buildGlobalShoppingReadOnlyProviderSandboxConnector({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -28,7 +28,7 @@ function main() {
     connectorMode:"fixture",
     fixturePayload:{ providerId:"fixture_provider", providerName:"Fixture Provider", redacted:true }
   });
-  assert.equal(ready.appVersion, "3.7.0");
+  assert.equal(ready.appVersion, "3.8.0");
   assert.equal(ready.status, "ready");
   assert.equal(ready.connectorBoundary.connectorMode, "fixture");
   assert.equal(ready.connectorBoundary.canCallNetwork, false);

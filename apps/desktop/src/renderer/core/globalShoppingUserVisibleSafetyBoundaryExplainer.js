@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_USER_VISIBLE_SAFETY_BOUNDARY_EXPLAINER_VERSION = "3.7.0";
+  const GLOBAL_SHOPPING_USER_VISIBLE_SAFETY_BOUNDARY_EXPLAINER_VERSION = "3.8.0";
   const EXPLAINER_NAME = "global_shopping_user_visible_safety_boundary_explainer_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_SANDBOX_QUOTE_NORMALIZER_VERSION = "3.7.0";
+  const PROVIDER_SANDBOX_QUOTE_NORMALIZER_VERSION = "3.8.0";
   const NORMALIZER_NAME = "provider_sandbox_quote_normalizer_v1";
 
   function clone(value) {

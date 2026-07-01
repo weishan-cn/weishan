@@ -8528,6 +8528,42 @@
         showCommercePlatformTemplateFeedback("已显示 Safety Boundary", false);
         return;
       }
+      const globalShoppingPublicReleaseButton = target && target.closest("[data-commerce-global-shopping-public-release-show]");
+      if (globalShoppingPublicReleaseButton && host.contains(globalShoppingPublicReleaseButton)) {
+        event.preventDefault();
+        const panel = globalShoppingPublicReleaseButton.closest("[data-commerce-global-shopping-provider-public-release-review]") || globalShoppingPublicReleaseButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-public-release-output]") || panel;
+        output.innerHTML = '<p>Provider Read-Only Public Release Center</p><p>Provider Read-Only Public Release Center 已准备</p><p>Public Release 不创建真实公开发布</p><p>Human public release review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Public Release", false);
+        return;
+      }
+      const globalShoppingExportPreviewButton = target && target.closest("[data-commerce-global-shopping-export-preview-show]");
+      if (globalShoppingExportPreviewButton && host.contains(globalShoppingExportPreviewButton)) {
+        event.preventDefault();
+        const panel = globalShoppingExportPreviewButton.closest("[data-commerce-global-shopping-provider-public-release-review]") || globalShoppingExportPreviewButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-export-preview-output]") || panel;
+        output.innerHTML = '<p>Trust Closure Export Preview</p><p>Trust Closure Export Preview 已准备</p><p>Export Preview 不生成真实导出文件</p><p>Human public release review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Export Preview", false);
+        return;
+      }
+      const globalShoppingNoProviderReceiptButton = target && target.closest("[data-commerce-global-shopping-no-provider-receipt-show]");
+      if (globalShoppingNoProviderReceiptButton && host.contains(globalShoppingNoProviderReceiptButton)) {
+        event.preventDefault();
+        const panel = globalShoppingNoProviderReceiptButton.closest("[data-commerce-global-shopping-provider-public-release-review]") || globalShoppingNoProviderReceiptButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-no-provider-receipt-output]") || panel;
+        output.innerHTML = '<p>Final No-Provider Boundary Receipt</p><p>Final No-Provider Boundary Receipt 已准备</p><p>No-Provider Receipt 不生成真实回执、不打开平台</p><p>Human public release review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 No-Provider Receipt", false);
+        return;
+      }
+      const globalShoppingSafetyStatementButton = target && target.closest("[data-commerce-global-shopping-safety-statement-show]");
+      if (globalShoppingSafetyStatementButton && host.contains(globalShoppingSafetyStatementButton)) {
+        event.preventDefault();
+        const panel = globalShoppingSafetyStatementButton.closest("[data-commerce-global-shopping-provider-public-release-review]") || globalShoppingSafetyStatementButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-safety-statement-output]") || panel;
+        output.innerHTML = '<p>Public Safety Statement Preview</p><p>Public Safety Statement Preview 已准备</p><p>Safety Statement 不承诺最低价、最终价或官方背书</p><p>Human public release review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Safety Statement", false);
+        return;
+      }
       const globalShoppingHumanPilotLedgerButton = target && target.closest("[data-commerce-global-shopping-human-pilot-ledger-show]");
       if (globalShoppingHumanPilotLedgerButton && host.contains(globalShoppingHumanPilotLedgerButton)) {
         event.preventDefault();

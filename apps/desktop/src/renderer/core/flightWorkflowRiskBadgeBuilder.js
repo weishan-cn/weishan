@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "3.7.0";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "3.8.0";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -223,6 +223,11 @@
       const noProviderExecutionFinalGuardSummary = obj(safe.noProviderExecutionFinalGuardSummary);
       const userVisibleSafetyBoundaryExplainerSummary = obj(safe.userVisibleSafetyBoundaryExplainerSummary);
       const providerTrustClosureViewModelSummary = obj(safe.providerTrustClosureViewModelSummary);
+      const providerReadOnlyPublicReleaseCenterSummary = obj(safe.providerReadOnlyPublicReleaseCenterSummary);
+      const trustClosureExportPreviewSummary = obj(safe.trustClosureExportPreviewSummary);
+      const finalNoProviderBoundaryReceiptSummary = obj(safe.finalNoProviderBoundaryReceiptSummary);
+      const publicSafetyStatementPreviewSummary = obj(safe.publicSafetyStatementPreviewSummary);
+      const providerPublicReleaseViewModelSummary = obj(safe.providerPublicReleaseViewModelSummary);
       const providerAdapterRegistrySummary = obj(safe.providerAdapterRegistrySummary);
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
@@ -606,6 +611,15 @@
       if (noProviderExecutionFinalGuardSummary.status || providerTrustClosureViewModelSummary.status) badges.push(badge("no_provider_guard_no_execution", "No-Provider Guard 不执行真实阻断、不打开平台", "info"));
       if (userVisibleSafetyBoundaryExplainerSummary.status || providerTrustClosureViewModelSummary.status) badges.push(badge("safety_boundary_no_price_claim", "Safety Boundary 不承诺最低价、最终价或官方背书", "info"));
       if ((providerTrustClosureViewModelSummary.status && providerTrustClosureViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanTrustClosureReview === true) badges.push(badge("human_trust_closure_review_required", "Human trust closure review 仍需人工复核", "warning"));
+      if (providerReadOnlyPublicReleaseCenterSummary.status) badges.push(badge("provider_read_only_public_release_center_ready", labelOf(providerReadOnlyPublicReleaseCenterSummary, "Provider Read-Only Public Release Center 已准备"), providerReadOnlyPublicReleaseCenterSummary.status === "blocked" ? "blocked" : (providerReadOnlyPublicReleaseCenterSummary.status === "ready" ? "info" : "warning")));
+      if (trustClosureExportPreviewSummary.status) badges.push(badge("trust_closure_export_preview_ready", labelOf(trustClosureExportPreviewSummary, "Trust Closure Export Preview 已准备"), trustClosureExportPreviewSummary.status === "blocked" ? "blocked" : (trustClosureExportPreviewSummary.status === "ready" ? "info" : "warning")));
+      if (finalNoProviderBoundaryReceiptSummary.status) badges.push(badge("final_no_provider_boundary_receipt_ready", labelOf(finalNoProviderBoundaryReceiptSummary, "Final No-Provider Boundary Receipt 已准备"), finalNoProviderBoundaryReceiptSummary.status === "blocked" ? "blocked" : (finalNoProviderBoundaryReceiptSummary.status === "ready" ? "info" : "warning")));
+      if (publicSafetyStatementPreviewSummary.status) badges.push(badge("public_safety_statement_preview_ready", labelOf(publicSafetyStatementPreviewSummary, "Public Safety Statement Preview 已准备"), publicSafetyStatementPreviewSummary.status === "blocked" ? "blocked" : (publicSafetyStatementPreviewSummary.status === "ready" ? "info" : "warning")));
+      if (providerReadOnlyPublicReleaseCenterSummary.status || providerPublicReleaseViewModelSummary.status) badges.push(badge("public_release_no_real_release", "Public Release 不创建真实公开发布", "info"));
+      if (trustClosureExportPreviewSummary.status || providerPublicReleaseViewModelSummary.status) badges.push(badge("export_preview_no_real_file", "Export Preview 不生成真实导出文件", "info"));
+      if (finalNoProviderBoundaryReceiptSummary.status || providerPublicReleaseViewModelSummary.status) badges.push(badge("no_provider_receipt_no_open", "No-Provider Receipt 不生成真实回执、不打开平台", "info"));
+      if (publicSafetyStatementPreviewSummary.status || providerPublicReleaseViewModelSummary.status) badges.push(badge("public_safety_statement_no_price_claim", "Safety Statement 不承诺最低价、最终价或官方背书", "info"));
+      if ((providerPublicReleaseViewModelSummary.status && providerPublicReleaseViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanPublicReleaseReview === true) badges.push(badge("human_public_release_review_required", "Human public release review 仍需人工复核", "warning"));
       if (providerAdapterRegistrySummary.status === "ready") badges.push(badge("provider_adapter_registry_ready", "Adapter 注册表已准备", "info"));
       if (providerAdapterRegistrySummary.status === "needs_review") badges.push(badge("provider_adapter_registry_review", "Adapter 注册表仍需复核", "warning"));
       if (providerAdapterRegistrySummary.status === "blocked") badges.push(badge("provider_adapter_registry_blocked", "Adapter 注册表已阻断", "blocked"));

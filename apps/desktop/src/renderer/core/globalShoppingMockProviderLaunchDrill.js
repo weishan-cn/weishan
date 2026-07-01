@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MOCK_PROVIDER_LAUNCH_DRILL_VERSION = "3.7.0";
+  const GLOBAL_SHOPPING_MOCK_PROVIDER_LAUNCH_DRILL_VERSION = "3.8.0";
   const DRILL_NAME = "global_shopping_mock_provider_launch_drill_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

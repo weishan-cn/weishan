@@ -38,7 +38,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderDistributionFreezeConsole.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderDistributionFreezeConsole;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_DISTRIBUTION_FREEZE_CONSOLE_VERSION, "3.7.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_DISTRIBUTION_FREEZE_CONSOLE_VERSION, "3.8.0");
   const ready = api.buildGlobalShoppingProviderDistributionFreezeConsole({
     offlineDistributionReadinessCenterSummary:readySummary("Offline Distribution Readiness Center", "Offline Distribution Readiness Center 已准备"),
     noActivationEnforcementLedgerSummary:readySummary("No-Activation Enforcement Ledger", "No-Activation Enforcement Ledger 已准备"),

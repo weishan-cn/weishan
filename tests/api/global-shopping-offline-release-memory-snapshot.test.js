@@ -39,7 +39,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineReleaseMemorySnapshot.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineReleaseMemorySnapshot;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_RELEASE_MEMORY_SNAPSHOT_VERSION, "3.7.0");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_RELEASE_MEMORY_SNAPSHOT_VERSION, "3.8.0");
   const ready = api.buildGlobalShoppingOfflineReleaseMemorySnapshot({
     providerPublicTrustClosureCenterSummary:readySummary("Provider Public Trust Closure Center", "Provider Public Trust Closure Center 已准备"),
     providerDistributionFreezeConsoleSummary:readySummary("Provider Distribution Freeze Console", "Provider Distribution Freeze Console 已准备"),

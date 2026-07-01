@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_ACCEPTANCE_SESSION_SUMMARY_VERSION = "3.7.0";
+  const FLIGHT_WORKFLOW_ACCEPTANCE_SESSION_SUMMARY_VERSION = "3.8.0";
   const SUMMARY_NAME = "flight_workflow_acceptance_session_summary_v1";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport/ig;
   const TRADING_FIELD_RE = /(bookingUrl|checkoutUrl|paymentUrl|orderUrl)/i;

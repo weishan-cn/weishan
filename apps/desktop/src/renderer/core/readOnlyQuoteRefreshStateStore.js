@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_REFRESH_STATE_STORE_VERSION = "3.7.0";
+  const READ_ONLY_QUOTE_REFRESH_STATE_STORE_VERSION = "3.8.0";
   const STATE_NAME = "read_only_quote_refresh_state_v1";
   const STORAGE_KEY = "weishan.readOnlyQuoteRefreshState.v1";
   const FORBIDDEN_NAME_RE = /(token|key|secret|password|session|auth|credential|rawProviderResponse|rawResponse|rawPayload|identity|passport|bank|card)/i;

@@ -19,7 +19,7 @@ const windowRef = loadRendererCore(["apps/desktop/src/renderer/core/priceIntegri
 const api = windowRef.WeishanPriceIntegrityTaxesFeesGateV1;
 
 function main() {
-  assert.equal(api.PRICE_INTEGRITY_TAXES_FEES_GATE_V1_VERSION, "3.7.0");
+  assert.equal(api.PRICE_INTEGRITY_TAXES_FEES_GATE_V1_VERSION, "3.8.0");
 
   const draft = api.buildPriceIntegrityTaxesFeesGateV1Draft();
   assert.equal(draft.gateName, "price_integrity_taxes_fees_gate_v1");

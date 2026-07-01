@@ -7,9 +7,9 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPlatformAvailabilityGate.js"]);
   const api = windowRef.WeishanGlobalShoppingPlatformAvailabilityGate;
-  assert.equal(api.GLOBAL_SHOPPING_PLATFORM_AVAILABILITY_GATE_VERSION, "3.7.0");
+  assert.equal(api.GLOBAL_SHOPPING_PLATFORM_AVAILABILITY_GATE_VERSION, "3.8.0");
   const ready = api.buildGlobalShoppingPlatformAvailabilityGate({ sourceName:"Sandbox Platform", sourceType:"major_platform", allowedDomain:"sandbox.platform.invalid", itemType:"flight", relationType:"partner", partnerLinkPolicySummary:{ status:"compliant" } });
-  assert.equal(ready.appVersion, "3.7.0");
+  assert.equal(ready.appVersion, "3.8.0");
   assert.equal(ready.status, "available");
   assert.equal(ready.userFacingSummary.title, "平台可用性");
   assert.equal(api.buildGlobalShoppingPlatformAvailabilityGate({ sourceType:"major_platform", itemType:"flight", partnerLinkPolicySummary:{ status:"compliant" } }).status, "needs_review");

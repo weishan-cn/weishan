@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GATE_VERSION = "3.7.0";
+  const GATE_VERSION = "3.8.0";
   const GATE_NAME = "secure_storage_design_gate";
   const PHASE = "design_gate";
 

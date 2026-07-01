@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SAFE_SESSION_EXPORT_PREVIEW_VERSION = "3.7.0";
+  const FLIGHT_WORKFLOW_SAFE_SESSION_EXPORT_PREVIEW_VERSION = "3.8.0";
   const PREVIEW_NAME = "flight_workflow_safe_session_export_preview_v1";
   const FORBIDDEN_NAME_RE = /(rawText|rawUserText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|apiKey|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;

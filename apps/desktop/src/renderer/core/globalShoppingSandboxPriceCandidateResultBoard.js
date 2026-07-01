@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_PRICE_CANDIDATE_RESULT_BOARD_VERSION = "3.7.0";
+  const GLOBAL_SHOPPING_SANDBOX_PRICE_CANDIDATE_RESULT_BOARD_VERSION = "3.8.0";
   const BOARD_NAME = "global_shopping_sandbox_price_candidate_result_board_v1";
   const CAVEAT = "当前仅展示只读 sandbox 候选结果，不代表真实价格、全网最低、最低价保证、锁价、可订、付款、下单或出票能力。";
   const FORBIDDEN_CLAIM_RE = /全网最低|最低价保证|已锁价|真实最终价|立即购买|直接下单|一键下单|一键出票/i;

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_READ_ONLY_HANDOFF_READINESS_DRILL_VERSION = "3.7.0";
+  const GLOBAL_SHOPPING_READ_ONLY_HANDOFF_READINESS_DRILL_VERSION = "3.8.0";
   const DRILL_NAME = "global_shopping_read_only_handoff_readiness_drill_v1";
   const ALLOWED = ["origin", "destination", "date", "passengerCount", "cabinClass", "hotelCheckIn", "hotelCheckOut", "roomCount", "guestCount", "productBrand", "productModel", "quantity", "currency", "locale", "region"];
   const BLOCKED = ["realName", "phone", "email", "passport", "idCard", "bankCard", "platformPassword", "paymentCredential"];

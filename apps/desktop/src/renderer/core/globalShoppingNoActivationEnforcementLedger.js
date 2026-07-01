@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_NO_ACTIVATION_ENFORCEMENT_LEDGER_VERSION = "3.7.0";
+  const GLOBAL_SHOPPING_NO_ACTIVATION_ENFORCEMENT_LEDGER_VERSION = "3.8.0";
   const LEDGER_NAME = "global_shopping_no_activation_enforcement_ledger_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

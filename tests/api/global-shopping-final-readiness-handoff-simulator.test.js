@@ -40,7 +40,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingFinalReadinessHandoffSimulator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingFinalReadinessHandoffSimulator;
-  assert.equal(api.GLOBAL_SHOPPING_FINAL_READINESS_HANDOFF_SIMULATOR_VERSION, "3.7.0");
+  assert.equal(api.GLOBAL_SHOPPING_FINAL_READINESS_HANDOFF_SIMULATOR_VERSION, "3.8.0");
   const ready = api.buildGlobalShoppingFinalReadinessHandoffSimulator({
     simulatorMode:"readonly",
     offlineProviderGovernanceClosureBoardSummary:readySummary("Offline Provider Governance Closure Board", "Offline Provider Governance Closure Board 已准备"),

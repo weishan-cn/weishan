@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_VERSION = "3.7.0";
+  const FLIGHT_WORKFLOW_SAFE_RESUME_CENTER_VERSION = "3.8.0";
   const CENTER_NAME = "flight_workflow_safe_resume_center_v1";
   const FORBIDDEN_RE = /https?:\/\/\S+|token|key|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

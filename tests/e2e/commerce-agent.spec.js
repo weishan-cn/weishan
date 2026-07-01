@@ -9606,105 +9606,105 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v3.7.0 provider trust closure review stays local and bounded @commerce-smoke", async () => {
+  test("v3.8.0 provider public release review stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
-      window.WeishanGlobalShoppingProviderPublicTrustClosureCenter &&
-      window.WeishanGlobalShoppingOfflineReleaseMemorySnapshot &&
-      window.WeishanGlobalShoppingNoProviderExecutionFinalGuard &&
-      window.WeishanGlobalShoppingUserVisibleSafetyBoundaryExplainer &&
-      window.WeishanGlobalShoppingProviderTrustClosureViewModel &&
+      window.WeishanGlobalShoppingProviderReadOnlyPublicReleaseCenter &&
+      window.WeishanGlobalShoppingTrustClosureExportPreview &&
+      window.WeishanGlobalShoppingFinalNoProviderBoundaryReceipt &&
+      window.WeishanGlobalShoppingPublicSafetyStatementPreview &&
+      window.WeishanGlobalShoppingProviderPublicReleaseViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
-    const v370 = await page.evaluate(() => {
+    const v380 = await page.evaluate(() => {
       const cardApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
       const host = document.createElement("section");
-      host.setAttribute("data-commerce-v370-render-smoke", "true");
+      host.setAttribute("data-commerce-v380-render-smoke", "true");
       const card = {
-        version:"3.7.0",
+        version:"3.8.0",
         visible:true,
-        providerPublicTrustClosureCenterSummary:{ status:"ready", userFacingSummary:{ title:"Provider Public Trust Closure Center", resultLabel:"Provider Public Trust Closure Center 已准备", redacted:true }, rows:[{ rowId:"public_trust_closure", label:"Provider Public Trust Closure Center", value:"Provider Public Trust Closure Center 已准备", status:"pass", redacted:true }], redacted:true },
-        offlineReleaseMemorySnapshotSummary:{ status:"ready", userFacingSummary:{ title:"Offline Release Memory Snapshot", resultLabel:"Offline Release Memory Snapshot 已准备", redacted:true }, rows:[{ rowId:"release_memory", label:"Offline Release Memory Snapshot", value:"Offline Release Memory Snapshot 已准备", status:"pass", redacted:true }], redacted:true },
-        noProviderExecutionFinalGuardSummary:{ status:"ready", userFacingSummary:{ title:"No-Provider-Execution Final Guard", resultLabel:"No-Provider-Execution Final Guard 已准备", redacted:true }, rows:[{ rowId:"no_provider_guard", label:"No-Provider-Execution Final Guard", value:"No-Provider-Execution Final Guard 已准备", status:"pass", redacted:true }], redacted:true },
-        userVisibleSafetyBoundaryExplainerSummary:{ status:"ready", userFacingSummary:{ title:"User-Visible Safety Boundary Explainer", resultLabel:"User-Visible Safety Boundary Explainer 已准备", redacted:true }, rows:[{ rowId:"safety_boundary", label:"User-Visible Safety Boundary Explainer", value:"User-Visible Safety Boundary Explainer 已准备", status:"pass", redacted:true }], redacted:true },
-        providerTrustClosureViewModelSummary:{ status:"ready", title:"Provider Trust Closure Review", redacted:true },
-        providerPublicTrustClosureCenterStatus:"ready",
-        offlineReleaseMemorySnapshotStatus:"ready",
-        noProviderExecutionFinalGuardStatus:"ready",
-        userVisibleSafetyBoundaryExplainerStatus:"ready",
-        providerTrustClosureViewModelStatus:"ready",
-        safeToProceedWithHumanTrustClosureReview:true
+        providerReadOnlyPublicReleaseCenterSummary:{ status:"ready", userFacingSummary:{ title:"Provider Read-Only Public Release Center", resultLabel:"Provider Read-Only Public Release Center 已准备", redacted:true }, rows:[{ rowId:"public_release", label:"Provider Read-Only Public Release Center", value:"Provider Read-Only Public Release Center 已准备", status:"pass", redacted:true }], redacted:true },
+        trustClosureExportPreviewSummary:{ status:"ready", userFacingSummary:{ title:"Trust Closure Export Preview", resultLabel:"Trust Closure Export Preview 已准备", redacted:true }, rows:[{ rowId:"export_preview", label:"Trust Closure Export Preview", value:"Trust Closure Export Preview 已准备", status:"pass", redacted:true }], redacted:true },
+        finalNoProviderBoundaryReceiptSummary:{ status:"ready", userFacingSummary:{ title:"Final No-Provider Boundary Receipt", resultLabel:"Final No-Provider Boundary Receipt 已准备", redacted:true }, rows:[{ rowId:"no_provider_receipt", label:"Final No-Provider Boundary Receipt", value:"Final No-Provider Boundary Receipt 已准备", status:"pass", redacted:true }], redacted:true },
+        publicSafetyStatementPreviewSummary:{ status:"ready", userFacingSummary:{ title:"Public Safety Statement Preview", resultLabel:"Public Safety Statement Preview 已准备", redacted:true }, rows:[{ rowId:"safety_statement", label:"Public Safety Statement Preview", value:"Public Safety Statement Preview 已准备", status:"pass", redacted:true }], redacted:true },
+        providerPublicReleaseViewModelSummary:{ status:"ready", title:"Provider Public Release Review", redacted:true },
+        providerReadOnlyPublicReleaseCenterStatus:"ready",
+        trustClosureExportPreviewStatus:"ready",
+        finalNoProviderBoundaryReceiptStatus:"ready",
+        publicSafetyStatementPreviewStatus:"ready",
+        providerPublicReleaseViewModelStatus:"ready",
+        safeToProceedWithHumanPublicReleaseReview:true
       };
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml(card);
-      const section = host.querySelector("[data-commerce-global-shopping-provider-trust-closure-review='true']");
+      const section = host.querySelector("[data-commerce-global-shopping-provider-public-release-review='true']");
       document.body.appendChild(host);
       return {
         text:host.innerText,
         html:host.innerHTML,
         sectionText:section ? section.innerText : "",
         sectionHtml:section ? section.innerHTML : "",
-        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-trust-closure-review='true']").length,
-        publicTrustClosureButtonCount:host.querySelectorAll("[data-commerce-global-shopping-public-trust-closure-show]").length,
-        releaseMemoryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-release-memory-show]").length,
-        noProviderGuardButtonCount:host.querySelectorAll("[data-commerce-global-shopping-no-provider-guard-show]").length,
-        safetyBoundaryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-safety-boundary-show]").length
+        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-public-release-review='true']").length,
+        publicReleaseButtonCount:host.querySelectorAll("[data-commerce-global-shopping-public-release-show]").length,
+        exportPreviewButtonCount:host.querySelectorAll("[data-commerce-global-shopping-export-preview-show]").length,
+        noProviderReceiptButtonCount:host.querySelectorAll("[data-commerce-global-shopping-no-provider-receipt-show]").length,
+        safetyStatementButtonCount:host.querySelectorAll("[data-commerce-global-shopping-safety-statement-show]").length
       };
     });
-    expect(v370.sectionCount).toBe(1);
-    expect(v370.publicTrustClosureButtonCount).toBe(1);
-    expect(v370.releaseMemoryButtonCount).toBe(1);
-    expect(v370.noProviderGuardButtonCount).toBe(1);
-    expect(v370.safetyBoundaryButtonCount).toBe(1);
-    expect(v370.text).toContain("Provider Trust Closure Review");
-    expect(v370.text).toContain("Provider Public Trust Closure Center");
-    expect(v370.text).toContain("Offline Release Memory Snapshot");
-    expect(v370.text).toContain("No-Provider-Execution Final Guard");
-    expect(v370.text).toContain("User-Visible Safety Boundary Explainer");
-    expect(v370.text).toContain("Public Trust Closure");
-    expect(v370.text).toContain("Release Memory");
-    expect(v370.text).toContain("No-Provider Guard");
-    expect(v370.text).toContain("Safety Boundary");
-    expect(v370.text).toContain("Provider Public Trust Closure Center 已准备");
-    expect(v370.text).toContain("Offline Release Memory Snapshot 已准备");
-    expect(v370.text).toContain("No-Provider-Execution Final Guard 已准备");
-    expect(v370.text).toContain("User-Visible Safety Boundary Explainer 已准备");
-    expect(v370.text).toContain("Public Trust Closure 不生成真实公开声明");
-    expect(v370.text).toContain("Release Memory 不持久化记忆快照");
-    expect(v370.text).toContain("No-Provider Guard 不执行真实阻断、不打开平台");
-    expect(v370.text).toContain("Safety Boundary 不承诺最低价、最终价或官方背书");
-    expect(v370.text).toContain("Human trust closure review 仍需人工复核");
-    expect(v370.text).toContain("当前只展示 provider trust closure review");
-    expect(v370.text).toContain("不接真实 provider，不读取密钥，不联网，不激活 sandbox，不创建 release，不 push，不打开平台");
-    expect(v370.text).not.toMatch(/token|secret|apiKey/i);
-    expect(v370.sectionText).not.toMatch(/bookingUrl|paymentUrl|orderUrl|checkoutUrl/);
-    expect(v370.sectionText).not.toContain("开始接入真实 provider");
-    expect(v370.sectionText).not.toContain("启动 pilot");
-    expect(v370.sectionText).not.toContain("开始激活 sandbox");
-    expect(v370.sectionText).not.toContain("读取 API key");
-    expect(v370.sectionText).not.toContain("生成 endpoint");
-    expect(v370.sectionText).not.toContain("启用 production provider");
-    expect(v370.sectionText).not.toContain("切换 production provider");
-    expect(v370.sectionText).not.toContain("真实 SDK");
-    expect(v370.sectionText).not.toContain("创建 provider client");
-    expect(v370.sectionText).not.toContain("安装依赖");
-    expect(v370.sectionText).not.toContain("key 输入框");
-    expect(v370.sectionText).not.toContain("创建审批任务");
-    expect(v370.sectionText).not.toContain("发送邮件");
-    expect(v370.sectionText).not.toContain("打开外部文档");
-    expect(v370.sectionText).not.toContain("执行回滚");
-    expect(v370.sectionText).not.toContain("立即执行真实阻断");
-    expect(v370.sectionText).not.toContain("修改 git");
-    expect(v370.sectionText).not.toContain("立即创建 release");
-    expect(v370.sectionText).not.toContain("立即创建 tag");
-    expect(v370.sectionText).not.toContain("执行 push");
-    expect(v370.sectionText).not.toContain("立即购买");
-    expect(v370.sectionText).not.toContain("直接下单");
-    expect(v370.sectionText).not.toContain("一键下单");
-    expect(v370.sectionText).not.toContain("一键出票");
-    expect(v370.sectionText).not.toContain("立即打开平台");
-    expect(v370.sectionHtml).not.toContain("https://");
-    expect(v370.sectionHtml).not.toContain("http://");
+    expect(v380.sectionCount).toBe(1);
+    expect(v380.publicReleaseButtonCount).toBe(1);
+    expect(v380.exportPreviewButtonCount).toBe(1);
+    expect(v380.noProviderReceiptButtonCount).toBe(1);
+    expect(v380.safetyStatementButtonCount).toBe(1);
+    expect(v380.text).toContain("Provider Public Release Review");
+    expect(v380.text).toContain("Provider Read-Only Public Release Center");
+    expect(v380.text).toContain("Trust Closure Export Preview");
+    expect(v380.text).toContain("Final No-Provider Boundary Receipt");
+    expect(v380.text).toContain("Public Safety Statement Preview");
+    expect(v380.text).toContain("Public Release");
+    expect(v380.text).toContain("Export Preview");
+    expect(v380.text).toContain("No-Provider Receipt");
+    expect(v380.text).toContain("Safety Statement");
+    expect(v380.text).toContain("Provider Read-Only Public Release Center 已准备");
+    expect(v380.text).toContain("Trust Closure Export Preview 已准备");
+    expect(v380.text).toContain("Final No-Provider Boundary Receipt 已准备");
+    expect(v380.text).toContain("Public Safety Statement Preview 已准备");
+    expect(v380.text).toContain("Public Release 不创建真实公开发布");
+    expect(v380.text).toContain("Export Preview 不生成真实导出文件");
+    expect(v380.text).toContain("No-Provider Receipt 不生成真实回执、不打开平台");
+    expect(v380.text).toContain("Safety Statement 不承诺最低价、最终价或官方背书");
+    expect(v380.text).toContain("Human public release review 仍需人工复核");
+    expect(v380.text).toContain("当前只展示 provider public release review");
+    expect(v380.text).toContain("不接真实 provider，不读取密钥，不联网，不打开平台，不创建 release，不 push，不生成真实导出文件");
+    expect(v380.text).not.toMatch(/token|secret|apiKey/i);
+    expect(v380.sectionText).not.toMatch(/bookingUrl|paymentUrl|orderUrl|checkoutUrl/);
+    expect(v380.sectionText).not.toContain("开始接入真实 provider");
+    expect(v380.sectionText).not.toContain("启动 pilot");
+    expect(v380.sectionText).not.toContain("开始激活 sandbox");
+    expect(v380.sectionText).not.toContain("读取 API key");
+    expect(v380.sectionText).not.toContain("生成 endpoint");
+    expect(v380.sectionText).not.toContain("启用 production provider");
+    expect(v380.sectionText).not.toContain("切换 production provider");
+    expect(v380.sectionText).not.toContain("真实 SDK");
+    expect(v380.sectionText).not.toContain("创建 provider client");
+    expect(v380.sectionText).not.toContain("安装依赖");
+    expect(v380.sectionText).not.toContain("key 输入框");
+    expect(v380.sectionText).not.toContain("创建审批任务");
+    expect(v380.sectionText).not.toContain("发送邮件");
+    expect(v380.sectionText).not.toContain("打开外部文档");
+    expect(v380.sectionText).not.toContain("执行回滚");
+    expect(v380.sectionText).not.toContain("立即执行真实阻断");
+    expect(v380.sectionText).not.toContain("修改 git");
+    expect(v380.sectionText).not.toContain("立即创建 release");
+    expect(v380.sectionText).not.toContain("立即创建 tag");
+    expect(v380.sectionText).not.toContain("执行 push");
+    expect(v380.sectionText).not.toContain("立即购买");
+    expect(v380.sectionText).not.toContain("直接下单");
+    expect(v380.sectionText).not.toContain("一键下单");
+    expect(v380.sectionText).not.toContain("一键出票");
+    expect(v380.sectionText).not.toContain("立即打开平台");
+    expect(v380.sectionHtml).not.toContain("https://");
+    expect(v380.sectionHtml).not.toContain("http://");
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
