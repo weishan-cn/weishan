@@ -1,5 +1,5 @@
 (function(){
-  const MANUAL_UI_ACCEPTANCE_ASSISTANT_VERSION = "2.4.1";
+  const MANUAL_UI_ACCEPTANCE_ASSISTANT_VERSION = "2.6.0";
 
   const manualSteps = [
     "打开 /Applications/weishan.app",

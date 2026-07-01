@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.5.0";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.6.0";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -193,6 +193,11 @@
       readOnlyProviderAdapterSdkSkeletonSummary: stripUnsafe(safe.readOnlyProviderAdapterSdkSkeletonSummary || null),
       manualActivationCommandCenterSummary: stripUnsafe(safe.manualActivationCommandCenterSummary || null),
       providerSandboxMilestoneViewModelSummary: stripUnsafe(safe.providerSandboxMilestoneViewModelSummary || null),
+      offlineProviderAdapterContractKitSummary: stripUnsafe(safe.offlineProviderAdapterContractKitSummary || null),
+      mockSandboxQaMatrixSummary: stripUnsafe(safe.mockSandboxQaMatrixSummary || null),
+      humanActivationRunbookCenterSummary: stripUnsafe(safe.humanActivationRunbookCenterSummary || null),
+      providerAdapterComplianceChecklistSummary: stripUnsafe(safe.providerAdapterComplianceChecklistSummary || null),
+      providerSandboxReleaseCandidateViewModelSummary: stripUnsafe(safe.providerSandboxReleaseCandidateViewModelSummary || null),
       rcReviewStatus: safeText(safe.rcReviewStatus || safe.rcCandidateReviewSummary && safe.rcCandidateReviewSummary.status || ""),
       rcEvidenceStatus: safeText(safe.rcEvidenceStatus || safe.rcEvidenceReviewSummary && safe.rcEvidenceReviewSummary.status || ""),
       rcRegressionStatus: safeText(safe.rcRegressionStatus || safe.rcRegressionAuditSummary && safe.rcRegressionAuditSummary.status || ""),
@@ -219,6 +224,11 @@
       readOnlyProviderAdapterSdkSkeletonStatus: safeText(safe.readOnlyProviderAdapterSdkSkeletonStatus || safe.readOnlyProviderAdapterSdkSkeletonSummary && safe.readOnlyProviderAdapterSdkSkeletonSummary.status || ""),
       manualActivationCommandCenterStatus: safeText(safe.manualActivationCommandCenterStatus || safe.manualActivationCommandCenterSummary && safe.manualActivationCommandCenterSummary.status || ""),
       providerSandboxMilestoneViewModelStatus: safeText(safe.providerSandboxMilestoneViewModelStatus || safe.providerSandboxMilestoneViewModelSummary && safe.providerSandboxMilestoneViewModelSummary.status || ""),
+      offlineProviderAdapterContractKitStatus: safeText(safe.offlineProviderAdapterContractKitStatus || safe.offlineProviderAdapterContractKitSummary && safe.offlineProviderAdapterContractKitSummary.status || ""),
+      mockSandboxQaMatrixStatus: safeText(safe.mockSandboxQaMatrixStatus || safe.mockSandboxQaMatrixSummary && safe.mockSandboxQaMatrixSummary.status || ""),
+      humanActivationRunbookCenterStatus: safeText(safe.humanActivationRunbookCenterStatus || safe.humanActivationRunbookCenterSummary && safe.humanActivationRunbookCenterSummary.status || ""),
+      providerAdapterComplianceChecklistStatus: safeText(safe.providerAdapterComplianceChecklistStatus || safe.providerAdapterComplianceChecklistSummary && safe.providerAdapterComplianceChecklistSummary.status || ""),
+      providerSandboxReleaseCandidateViewModelStatus: safeText(safe.providerSandboxReleaseCandidateViewModelStatus || safe.providerSandboxReleaseCandidateViewModelSummary && safe.providerSandboxReleaseCandidateViewModelSummary.status || ""),
       safeToStartRcReview: safe.safeToStartRcReview === true,
       safeToContinueReleaseCandidate: safe.safeToContinueReleaseCandidate === true,
       safeToFinalizeUserFacingCopy: safe.safeToFinalizeUserFacingCopy === true,
@@ -226,6 +236,7 @@
       safeToProceedWithManualProviderSignOffReview: safe.safeToProceedWithManualProviderSignOffReview === true,
       safeToProceedWithManualSandboxActivationReview: safe.safeToProceedWithManualSandboxActivationReview === true,
       safeToProceedWithHumanSandboxMilestoneReview: safe.safeToProceedWithHumanSandboxMilestoneReview === true,
+      safeToProceedWithManualReleaseCandidateReview: safe.safeToProceedWithManualReleaseCandidateReview === true,
       safeToProceedWithManualGovernanceReleaseDecision: safe.safeToProceedWithManualGovernanceReleaseDecision === true,
       globalShoppingProductGoalSummary: stripUnsafe(safe.globalShoppingProductGoalSummary || null),
       jumpToPlatformBoundarySummary: stripUnsafe(safe.jumpToPlatformBoundarySummary || null),

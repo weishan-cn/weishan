@@ -27,7 +27,7 @@ function main() {
     userConfirmationChecklistSummary:{ status:"ready", redacted:true },
     sandboxDecisionReviewViewModelSummary:{ status:"ready", redacted:true }
   });
-  assert.equal(api.GLOBAL_SHOPPING_PLATFORM_PREFLIGHT_SAFETY_GATE_VERSION, "2.4.1");
+  assert.equal(api.GLOBAL_SHOPPING_PLATFORM_PREFLIGHT_SAFETY_GATE_VERSION, "2.6.0");
   assert.equal(ready.status, "clear");
   assert.equal(ready.userFacingSummary.resultLabel, "安全预检未触发阻断");
   assert.equal(ready.preflightBoundary.canOpenExternalNow, false);

@@ -21,9 +21,9 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingSameItemMatcher.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingSameItemMatcher;
-  assert.equal(api.GLOBAL_SHOPPING_SAME_ITEM_MATCHER_VERSION, "2.4.1");
+  assert.equal(api.GLOBAL_SHOPPING_SAME_ITEM_MATCHER_VERSION, "2.6.0");
   const matcher = api.buildGlobalShoppingSameItemMatcher();
-  assert.equal(matcher.appVersion, "2.4.1");
+  assert.equal(matcher.appVersion, "2.6.0");
   assert.equal(matcher.status, "ready");
   assert.equal(matcher.userFacingSummary.title, "同款候选识别");
   assert.ok(matcher.matchedGroups.length >= 1);

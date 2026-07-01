@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PLATFORM_REALITY_CHECK_BOARD_VERSION = "2.4.1";
+  const GLOBAL_SHOPPING_PLATFORM_REALITY_CHECK_BOARD_VERSION = "2.6.0";
   const BOARD_NAME = "global_shopping_platform_reality_check_board_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

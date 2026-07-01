@@ -16,7 +16,7 @@ function load(file) {
 function main() {
   const windowRef = load("apps/desktop/src/renderer/core/globalShoppingPlatformVerificationProgressTracker.js");
   const api = windowRef.WeishanGlobalShoppingPlatformVerificationProgressTracker;
-  assert.equal(api.GLOBAL_SHOPPING_PLATFORM_VERIFICATION_PROGRESS_TRACKER_VERSION, "2.4.1");
+  assert.equal(api.GLOBAL_SHOPPING_PLATFORM_VERIFICATION_PROGRESS_TRACKER_VERSION, "2.6.0");
   const ready = api.buildGlobalShoppingPlatformVerificationProgressTracker({});
   assert.equal(ready.status, "ready");
   assert.equal(ready.title, "平台核对进度追踪");

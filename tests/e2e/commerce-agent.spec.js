@@ -9606,69 +9606,78 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.4.1 provider sandbox activation readiness stays local and bounded @commerce-smoke", async () => {
+  test("v2.6.0 provider sandbox release candidate stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
-      window.WeishanGlobalShoppingReadOnlySandboxActivationReadinessCenter &&
-      window.WeishanGlobalShoppingOfflineMockSandboxSessionRunner &&
-      window.WeishanGlobalShoppingManualProviderActivationHandoffPacket &&
-      window.WeishanGlobalShoppingProviderSandboxActivationViewModel &&
+      window.WeishanGlobalShoppingOfflineProviderAdapterContractKit &&
+      window.WeishanGlobalShoppingMockSandboxQaMatrix &&
+      window.WeishanGlobalShoppingHumanActivationRunbookCenter &&
+      window.WeishanGlobalShoppingProviderAdapterComplianceChecklist &&
+      window.WeishanGlobalShoppingProviderSandboxReleaseCandidateViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
-    const v240 = await page.evaluate(() => {
+    const v260 = await page.evaluate(() => {
       const cardApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
       const host = document.createElement("section");
-      host.setAttribute("data-commerce-v240-render-smoke", "true");
+      host.setAttribute("data-commerce-v260-render-smoke", "true");
       const card = {
-        version:"2.4.1",
+        version:"2.6.0",
         visible:true,
-        readOnlySandboxActivationReadinessCenterSummary:{ status:"ready", userFacingSummary:{ title:"只读 Sandbox 激活准备中心", resultLabel:"Sandbox 激活准备中心已准备", redacted:true }, redacted:true },
-        offlineMockSandboxSessionRunnerSummary:{ status:"ready", userFacingSummary:{ title:"离线 Mock Sandbox 会话运行器", resultLabel:"离线 Mock Sandbox 会话运行器已准备", redacted:true }, redacted:true },
-        manualProviderActivationHandoffPacketSummary:{ status:"ready", userFacingSummary:{ title:"人工 Provider 激活交接包", resultLabel:"人工 Provider 激活交接包已准备", redacted:true }, redacted:true },
-        providerSandboxActivationViewModelSummary:{ status:"ready", title:"Provider Sandbox 激活准备与离线演练", redacted:true },
-        readOnlySandboxActivationReadinessCenterStatus:"ready",
-        offlineMockSandboxSessionRunnerStatus:"ready",
-        manualProviderActivationHandoffPacketStatus:"ready",
-        providerSandboxActivationViewModelStatus:"ready",
-        safeToProceedWithManualSandboxActivationReview:false
+        offlineProviderAdapterContractKitSummary:{ status:"ready", userFacingSummary:{ title:"Offline Provider Adapter Contract Kit", resultLabel:"离线 Adapter 合同套件已准备", redacted:true }, rows:[{ rowId:"contract", label:"Adapter Contract Kit", value:"离线 Adapter 合同套件已准备", status:"pass", redacted:true }], redacted:true },
+        mockSandboxQaMatrixSummary:{ status:"ready", userFacingSummary:{ title:"Mock Sandbox QA Matrix", resultLabel:"Mock Sandbox QA 矩阵已准备", redacted:true }, rows:[{ rowId:"qa", label:"Mock QA Matrix", value:"Mock Sandbox QA 矩阵已准备", status:"pass", redacted:true }], redacted:true },
+        humanActivationRunbookCenterSummary:{ status:"ready", userFacingSummary:{ title:"Human Activation Runbook Center", resultLabel:"人工激活运行手册已准备", redacted:true }, rows:[{ rowId:"runbook", label:"Human Runbook", value:"人工激活运行手册已准备", status:"pass", redacted:true }], redacted:true },
+        providerAdapterComplianceChecklistSummary:{ status:"ready", userFacingSummary:{ title:"Provider Adapter Compliance Checklist", resultLabel:"Adapter 合规清单已准备", redacted:true }, rows:[{ rowId:"compliance", label:"Adapter Compliance", value:"Adapter 合规清单已准备", status:"pass", redacted:true }], redacted:true },
+        providerSandboxReleaseCandidateViewModelSummary:{ status:"ready", title:"Provider Sandbox Release Candidate", redacted:true },
+        offlineProviderAdapterContractKitStatus:"ready",
+        mockSandboxQaMatrixStatus:"ready",
+        humanActivationRunbookCenterStatus:"ready",
+        providerAdapterComplianceChecklistStatus:"ready",
+        providerSandboxReleaseCandidateViewModelStatus:"ready",
+        safeToProceedWithManualReleaseCandidateReview:false
       };
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml(card);
-      const section = host.querySelector("[data-commerce-global-shopping-provider-sandbox-activation='true']");
+      const section = host.querySelector("[data-commerce-global-shopping-provider-sandbox-release-candidate='true']");
       document.body.appendChild(host);
       return {
         text:host.innerText,
         html:host.innerHTML,
         sectionText:section ? section.innerText : "",
         sectionHtml:section ? section.innerHTML : "",
-        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-sandbox-activation='true']").length,
-        readinessButtonCount:host.querySelectorAll("[data-commerce-global-shopping-sandbox-activation-readiness-show]").length,
-        mockButtonCount:host.querySelectorAll("[data-commerce-global-shopping-offline-mock-session-show]").length,
-        handoffButtonCount:host.querySelectorAll("[data-commerce-global-shopping-manual-activation-handoff-show]").length
+        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-sandbox-release-candidate='true']").length,
+        contractButtonCount:host.querySelectorAll("[data-commerce-global-shopping-offline-provider-adapter-contract-kit-show]").length,
+        qaButtonCount:host.querySelectorAll("[data-commerce-global-shopping-mock-sandbox-qa-matrix-show]").length,
+        runbookButtonCount:host.querySelectorAll("[data-commerce-global-shopping-human-activation-runbook-show]").length,
+        complianceButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-adapter-compliance-show]").length
       };
     });
-    expect(v240.sectionCount).toBe(1);
-    expect(v240.readinessButtonCount).toBe(1);
-    expect(v240.mockButtonCount).toBe(1);
-    expect(v240.handoffButtonCount).toBe(1);
-    expect(v240.text).toContain("Provider Sandbox 激活准备与离线演练");
-    expect(v240.text).toContain("只读 Sandbox 激活准备中心");
-    expect(v240.text).toContain("离线 Mock Sandbox 会话运行器");
-    expect(v240.text).toContain("人工 Provider 激活交接包");
-    expect(v240.text).toContain("Sandbox 激活准备");
-    expect(v240.text).toContain("离线 Mock 会话");
-    expect(v240.text).toContain("人工激活交接");
-    expect(v240.text).toContain("Sandbox 激活准备中心已准备");
-    expect(v240.text).toContain("离线 Mock Sandbox 会话运行器已准备");
-    expect(v240.text).toContain("人工 Provider 激活交接包已准备");
-    expect(v240.text).toContain("Sandbox 激活准备不执行激活");
-    expect(v240.text).toContain("离线 Mock 会话不联网、不读密钥");
-    expect(v240.text).toContain("人工激活交接包不创建 release、不 push");
-    expect(v240.text).toContain("Manual sandbox activation 仍需人工复核");
-    expect(v240.text).toContain("当前只展示 provider sandbox 激活准备、离线 mock 会话和人工激活交接");
-    expect(v240.text).toContain("不接真实 provider，不读取密钥，不联网，不激活 sandbox，不创建 release，不 push");
-    expect(v240.sectionText).not.toMatch(/开始接入真实 provider|启动 pilot|(?<!不)激活 sandbox|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|key 输入框|创建审批任务|发送邮件|打开外部文档|执行回滚|修改 git|删除文件|停止服务|禁用 provider|修改配置|下载证据|导出证据|上传证据|发布|立即购买|直接下单|一键下单|一键出票|授权付款|创建订单|打开平台/);
-    expect(v240.sectionHtml).not.toMatch(/https?:\/\//i);
+    expect(v260.sectionCount).toBe(1);
+    expect(v260.contractButtonCount).toBe(1);
+    expect(v260.qaButtonCount).toBe(1);
+    expect(v260.runbookButtonCount).toBe(1);
+    expect(v260.complianceButtonCount).toBe(1);
+    expect(v260.text).toContain("Provider Sandbox Release Candidate");
+    expect(v260.text).toContain("Offline Provider Adapter Contract Kit");
+    expect(v260.text).toContain("Mock Sandbox QA Matrix");
+    expect(v260.text).toContain("Human Activation Runbook Center");
+    expect(v260.text).toContain("Provider Adapter Compliance Checklist");
+    expect(v260.text).toContain("Adapter Contract Kit");
+    expect(v260.text).toContain("Mock QA Matrix");
+    expect(v260.text).toContain("Human Runbook");
+    expect(v260.text).toContain("Adapter Compliance");
+    expect(v260.text).toContain("离线 Adapter 合同套件已准备");
+    expect(v260.text).toContain("Mock Sandbox QA 矩阵已准备");
+    expect(v260.text).toContain("人工激活运行手册已准备");
+    expect(v260.text).toContain("Adapter 合规清单已准备");
+    expect(v260.text).toContain("Adapter Contract Kit 不生成真实 SDK");
+    expect(v260.text).toContain("Mock QA Matrix 不运行真实 provider");
+    expect(v260.text).toContain("Human Runbook 不创建任务、不激活 sandbox");
+    expect(v260.text).toContain("Adapter Compliance 不创建 provider client");
+    expect(v260.text).toContain("Manual release candidate review 仍需人工复核");
+    expect(v260.text).toContain("当前只展示 provider sandbox release candidate");
+    expect(v260.text).toContain("不接真实 provider，不读取密钥，不联网，不生成 endpoint，不创建 release，不 push");
+    expect(v260.sectionText).not.toMatch(/开始接入真实 provider|启动 pilot|(?<!不)激活 sandbox|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|(?<!不生成)真实 SDK|(?<!不)创建 provider client|安装依赖|key 输入框|创建审批任务|发送邮件|打开外部文档|执行回滚|修改 git|删除文件|停止服务|禁用 provider|修改配置|下载证据|导出证据|上传证据|(?<!不)创建 release|创建 tag|(?<!不 )push|发布|立即购买|直接下单|一键下单|一键出票|授权付款|创建订单|打开平台/);
+    expect(v260.sectionHtml).not.toMatch(/https?:\/\//i);
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 

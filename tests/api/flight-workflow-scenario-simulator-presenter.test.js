@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyTestMatrixConsole.js", "apps/desktop/src/renderer/core/flightWorkflowScenarioSimulatorPresenter.js"]);
   const api = windowRef.WeishanFlightWorkflowScenarioSimulatorPresenter;
-  assert.equal(api.FLIGHT_WORKFLOW_SCENARIO_SIMULATOR_PRESENTER_VERSION, "2.4.1");
+  assert.equal(api.FLIGHT_WORKFLOW_SCENARIO_SIMULATOR_PRESENTER_VERSION, "2.6.0");
   const results = [
     { scenarioId:"complete_flight_request", scenarioLabel:"完整机票请求", status:"pass", expectedOutcome:"pass", actualOutcome:"完整机票请求已完成本地安全模拟。" },
     { scenarioId:"illegal_payment_action", scenarioLabel:"非法付款动作", status:"blocked", expectedOutcome:"blocked", actualOutcome:"非法付款动作已阻断。" }

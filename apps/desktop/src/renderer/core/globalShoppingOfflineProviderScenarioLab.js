@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_PROVIDER_SCENARIO_LAB_VERSION = "2.5.0";
+  const GLOBAL_SHOPPING_OFFLINE_PROVIDER_SCENARIO_LAB_VERSION = "2.6.0";
   const LAB_NAME = "global_shopping_offline_provider_scenario_lab_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

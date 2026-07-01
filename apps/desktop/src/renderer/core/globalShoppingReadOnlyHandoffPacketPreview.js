@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_READ_ONLY_HANDOFF_PACKET_PREVIEW_VERSION = "2.4.1";
+  const GLOBAL_SHOPPING_READ_ONLY_HANDOFF_PACKET_PREVIEW_VERSION = "2.6.0";
   const PACKET_NAME = "global_shopping_read_only_handoff_packet_preview_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SCENARIO_FIXTURE_BUILDER_VERSION = "2.4.1";
+  const FLIGHT_WORKFLOW_SCENARIO_FIXTURE_BUILDER_VERSION = "2.6.0";
   const FIXTURE_BUILDER_NAME = "flight_workflow_scenario_fixture_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   const UNSAFE_TEXT_RE = /token|apiKey|secret|password|sk-|pk-|live_|prod_|身份证|护照|银行卡|https?:\/\//i;

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_VERSION = "2.4.1";
+  const FLIGHT_WORKFLOW_BETA_EXPANSION_GATE_VERSION = "2.6.0";
   const GATE_NAME = "flight_workflow_beta_expansion_gate_v1";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;
   const TRADING_RE = /"(bookingUrl|checkoutUrl|paymentUrl|orderUrl)"\s*:\s*"https?:\/\//i;

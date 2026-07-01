@@ -13,7 +13,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowPublicPilotReadinessSnapshot.js",
     "apps/desktop/src/renderer/core/flightWorkflowReadOnlyPilotOpsSummary.js"
   ]).WeishanFlightWorkflowReadOnlyPilotOpsSummary;
-  assert.equal(api.FLIGHT_WORKFLOW_READ_ONLY_PILOT_OPS_SUMMARY_VERSION, "2.4.1");
+  assert.equal(api.FLIGHT_WORKFLOW_READ_ONLY_PILOT_OPS_SUMMARY_VERSION, "2.6.0");
   const summary = api.buildFlightWorkflowReadOnlyPilotOpsSummary({
     rolloutControlSummary:{ status:"ready", decision:{ safeToAdvanceNextCohort:true }, redacted:true },
     cohortHealthSummary:{ status:"healthy", cohortHealth:{ healthyEnoughForNextCohort:true }, redacted:true },
