@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "3.0.0";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "3.1.0";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -187,6 +187,11 @@
       const humanReleaseEvidenceTimelineSummary = obj(safe.humanReleaseEvidenceTimelineSummary);
       const sandboxActivationFinalReviewBoardSummary = obj(safe.sandboxActivationFinalReviewBoardSummary);
       const providerLaunchControlViewModelSummary = obj(safe.providerLaunchControlViewModelSummary);
+      const providerLaunchAuditSnapshotSummary = obj(safe.providerLaunchAuditSnapshotSummary);
+      const offlinePolicyReplayCenterSummary = obj(safe.offlinePolicyReplayCenterSummary);
+      const humanActivationFinalDossierSummary = obj(safe.humanActivationFinalDossierSummary);
+      const adapterLaunchBoundaryVerifierSummary = obj(safe.adapterLaunchBoundaryVerifierSummary);
+      const providerFinalLaunchReviewViewModelSummary = obj(safe.providerFinalLaunchReviewViewModelSummary);
       const providerAdapterRegistrySummary = obj(safe.providerAdapterRegistrySummary);
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
@@ -507,6 +512,15 @@
       if (humanReleaseEvidenceTimelineSummary.status || providerLaunchControlViewModelSummary.status) badges.push(badge("evidence_timeline_no_persistence", "Evidence Timeline 不持久化时间线", "info"));
       if (sandboxActivationFinalReviewBoardSummary.status || providerLaunchControlViewModelSummary.status) badges.push(badge("final_review_no_activation", "Final Review 不激活 sandbox", "info"));
       if ((providerLaunchControlViewModelSummary.status && providerLaunchControlViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanLaunchControlReview === true) badges.push(badge("human_launch_control_review_required", "Human launch control review 仍需人工复核", "warning"));
+      if (providerLaunchAuditSnapshotSummary.status === "ready" || safe.providerLaunchAuditSnapshotStatus === "ready") badges.push(badge("provider_launch_audit_snapshot_ready", "Provider Launch Audit Snapshot 已准备", "info"));
+      if (offlinePolicyReplayCenterSummary.status === "ready" || safe.offlinePolicyReplayCenterStatus === "ready") badges.push(badge("offline_policy_replay_center_ready", "Offline Policy Replay Center 已准备", "info"));
+      if (humanActivationFinalDossierSummary.status === "ready" || safe.humanActivationFinalDossierStatus === "ready") badges.push(badge("human_activation_final_dossier_ready", "Human Activation Final Dossier 已准备", "info"));
+      if (adapterLaunchBoundaryVerifierSummary.status === "ready" || safe.adapterLaunchBoundaryVerifierStatus === "ready") badges.push(badge("adapter_launch_boundary_verifier_ready", "Adapter Launch Boundary Verifier 已准备", "info"));
+      if (providerLaunchAuditSnapshotSummary.status || providerFinalLaunchReviewViewModelSummary.status) badges.push(badge("provider_launch_audit_snapshot_no_file_write", "Launch Audit 不写文件、不保存真实决策", "info"));
+      if (offlinePolicyReplayCenterSummary.status || providerFinalLaunchReviewViewModelSummary.status) badges.push(badge("offline_policy_replay_no_config_mutation", "Policy Replay 不修改配置、不启用 provider", "info"));
+      if (humanActivationFinalDossierSummary.status || providerFinalLaunchReviewViewModelSummary.status) badges.push(badge("human_activation_final_dossier_no_persistence", "Final Dossier 不持久化档案", "info"));
+      if (adapterLaunchBoundaryVerifierSummary.status || providerFinalLaunchReviewViewModelSummary.status) badges.push(badge("adapter_launch_boundary_verifier_no_endpoint", "Boundary Verifier 不生成 endpoint、不读取密钥", "info"));
+      if ((providerFinalLaunchReviewViewModelSummary.status && providerFinalLaunchReviewViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanFinalLaunchReview === true) badges.push(badge("human_final_launch_review_required", "Human final launch review 仍需人工复核", "warning"));
       if (providerAdapterRegistrySummary.status === "ready") badges.push(badge("provider_adapter_registry_ready", "Adapter 注册表已准备", "info"));
       if (providerAdapterRegistrySummary.status === "needs_review") badges.push(badge("provider_adapter_registry_review", "Adapter 注册表仍需复核", "warning"));
       if (providerAdapterRegistrySummary.status === "blocked") badges.push(badge("provider_adapter_registry_blocked", "Adapter 注册表已阻断", "blocked"));

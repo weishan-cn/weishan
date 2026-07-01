@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js"]);
   const api = windowRef.WeishanFlightWorkflowSafetyRegressionSentinel;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "3.0.0");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "3.1.0");
   const safe = api.buildFlightWorkflowSafetyRegressionReport({ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, autoOpen:false, autoRefresh:false, fileWrite:false, download:false, note:"平台最终为准" });
   assert.equal(safe.sentinelName, "flight_workflow_safety_regression_sentinel_v1");
   assert.equal(safe.status, "pass");
@@ -181,6 +181,19 @@ function main() {
   assert.equal(offlineLaunch.adapterSecurityRegressionGuardSummary.status, "ready");
   assert.equal(offlineLaunch.providerOfflineLaunchChecklistSummary.status, "ready");
   assert.equal(offlineLaunch.providerOfflineLaunchViewModelSummary.status, "ready");
+  const finalLaunchReview = api.buildFlightWorkflowSafetyRegressionReport({
+    providerLaunchAuditSnapshotSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false } },
+    offlinePolicyReplayCenterSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false } },
+    humanActivationFinalDossierSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false } },
+    adapterLaunchBoundaryVerifierSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, autoOpen:false } },
+    providerFinalLaunchReviewViewModelSummary:{ status:"ready", bookingUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, fileWrite:false, download:false }
+  });
+  assert.equal(finalLaunchReview.status, "pass");
+  assert.equal(finalLaunchReview.providerLaunchAuditSnapshotSummary.status, "ready");
+  assert.equal(finalLaunchReview.offlinePolicyReplayCenterSummary.status, "ready");
+  assert.equal(finalLaunchReview.humanActivationFinalDossierSummary.status, "ready");
+  assert.equal(finalLaunchReview.adapterLaunchBoundaryVerifierSummary.status, "ready");
+  assert.equal(finalLaunchReview.providerFinalLaunchReviewViewModelSummary.status, "ready");
   const providerCertification = api.buildFlightWorkflowSafetyRegressionReport({
     offlineProviderCertificationCenterSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
     mockIntegrationRegressionLabSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
