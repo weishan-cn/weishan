@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderSandboxReleaseCandidateViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderSandboxReleaseCandidateViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_RELEASE_CANDIDATE_VIEW_MODEL_VERSION, "2.6.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_RELEASE_CANDIDATE_VIEW_MODEL_VERSION, "2.7.0");
 
   const ready = api.buildGlobalShoppingProviderSandboxReleaseCandidateViewModel({
     offlineProviderAdapterContractKitSummary:readySummary("Offline Provider Adapter Contract Kit", "离线 Adapter 合同套件已准备"),

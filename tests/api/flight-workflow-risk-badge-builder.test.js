@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.6.0");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.7.0");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -269,6 +269,28 @@ function main() {
   assert.ok(governanceReleaseLabels.includes("Human Pilot 台账不持久化审批结果"));
   assert.ok(governanceReleaseLabels.includes("Release Freeze Gate 不改 git、不 push"));
   assert.ok(governanceReleaseLabels.includes("Manual governance release decision 仍需人工确认"));
+  const providerCertificationLabels = api.buildFlightWorkflowRiskBadges({
+    offlineProviderCertificationCenterSummary:{ status:"ready", userFacingSummary:{ resultLabel:"离线 Provider 认证中心已准备", redacted:true } },
+    mockIntegrationRegressionLabSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Mock 集成回归实验室已准备", redacted:true } },
+    humanApprovalEvidenceBinderSummary:{ status:"ready", userFacingSummary:{ resultLabel:"人工审批证据夹已准备", redacted:true } },
+    adapterBoundaryLockSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Adapter 边界锁已准备", redacted:true } },
+    providerCertificationViewModelSummary:{ status:"ready", title:"Provider 离线认证与边界锁", redacted:true },
+    offlineProviderCertificationCenterStatus:"ready",
+    mockIntegrationRegressionLabStatus:"ready",
+    humanApprovalEvidenceBinderStatus:"ready",
+    adapterBoundaryLockStatus:"ready",
+    providerCertificationViewModelStatus:"ready",
+    safeToProceedWithHumanCertificationReview:true
+  }).badges.map((item) => item.label);
+  assert.ok(providerCertificationLabels.includes("Offline Provider Certification Center 已准备"));
+  assert.ok(providerCertificationLabels.includes("Mock Integration Regression Lab 已准备"));
+  assert.ok(providerCertificationLabels.includes("Human Approval Evidence Binder 已准备"));
+  assert.ok(providerCertificationLabels.includes("Adapter Boundary Lock 已准备"));
+  assert.ok(providerCertificationLabels.includes("Certification Center 不生成真实认证文件"));
+  assert.ok(providerCertificationLabels.includes("Regression Lab 不运行真实 provider"));
+  assert.ok(providerCertificationLabels.includes("Evidence Binder 不写文件、不上传"));
+  assert.ok(providerCertificationLabels.includes("Boundary Lock 不修改配置、不启用 provider"));
+  assert.ok(providerCertificationLabels.includes("Human certification review 仍需人工复核"));
   const providerManualReleaseLabels = api.buildFlightWorkflowRiskBadges({
     manualGovernanceReleaseDecisionRoomSummary:{ status:"ready", userFacingSummary:{ resultLabel:"人工发布决策室已准备", redacted:true } },
     sandboxPilotExceptionRegisterSummary:{ status:"ready", userFacingSummary:{ resultLabel:"例外登记簿已准备", redacted:true } },

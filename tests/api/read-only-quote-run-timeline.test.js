@@ -8,7 +8,7 @@ function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteRunTimeline.js"]);
   const api = windowRef.WeishanReadOnlyQuoteRunTimeline;
   assert.equal(api.READ_ONLY_QUOTE_RUN_TIMELINE_VERSION, "2.6.0");
-  const timeline = api.buildReadOnlyQuoteRunTimeline({ runId:"deterministic-v2.6.0-read-only-sandbox-run", status:"completed" });
+  const timeline = api.buildReadOnlyQuoteRunTimeline({ runId:"deterministic-v2.7.0-read-only-sandbox-run", status:"completed" });
   assert.equal(timeline.appVersion, "2.6.0");
   assert.equal(timeline.timelineName, "read_only_quote_run_timeline_v1");
   assert.equal(timeline.rawResponseStored, false);

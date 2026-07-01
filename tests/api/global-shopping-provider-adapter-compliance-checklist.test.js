@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderAdapterComplianceChecklist.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderAdapterComplianceChecklist;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_ADAPTER_COMPLIANCE_CHECKLIST_VERSION, "2.6.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_ADAPTER_COMPLIANCE_CHECKLIST_VERSION, "2.7.0");
 
   const ready = api.buildGlobalShoppingProviderAdapterComplianceChecklist({
     offlineProviderAdapterContractKitSummary:readySummary("离线 Adapter 合同套件", "离线 Adapter 合同套件已准备"),

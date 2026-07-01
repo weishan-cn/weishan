@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderReadinessSignOffPacket.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderReadinessSignOffPacket;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_READINESS_SIGN_OFF_PACKET_VERSION, "2.6.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_READINESS_SIGN_OFF_PACKET_VERSION, "2.7.0");
 
   const ready = api.buildGlobalShoppingProviderReadinessSignOffPacket({
     manualDecisionRoomSummary:{ status:"ready", userFacingSummary:{ resultLabel:"人工发布决策室已准备", redacted:true }, redacted:true },

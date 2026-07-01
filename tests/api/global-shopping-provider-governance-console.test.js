@@ -24,7 +24,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderGovernanceConsole.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderGovernanceConsole;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_CONSOLE_VERSION, "2.6.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_CONSOLE_VERSION, "2.3.7");
 
   const readyForApproval = api.buildGlobalShoppingProviderGovernanceConsole({
     humanControlledSandboxProviderPilotPlannerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Pilot 计划器已准备", redacted:true } },

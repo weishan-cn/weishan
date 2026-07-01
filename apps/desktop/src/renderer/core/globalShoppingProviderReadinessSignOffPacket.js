@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_READINESS_SIGN_OFF_PACKET_VERSION = "2.6.0";
+  const GLOBAL_SHOPPING_PROVIDER_READINESS_SIGN_OFF_PACKET_VERSION = "2.7.0";
   const PACKET_NAME = "global_shopping_provider_readiness_sign_off_packet_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

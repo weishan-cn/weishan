@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingLegalApprovalWorkflowBoard.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingLegalApprovalWorkflowBoard;
-  assert.equal(api.GLOBAL_SHOPPING_LEGAL_APPROVAL_WORKFLOW_BOARD_VERSION, "2.3.3");
+  assert.equal(api.GLOBAL_SHOPPING_LEGAL_APPROVAL_WORKFLOW_BOARD_VERSION, "2.3.4");
   const allStages = [
     "法务审查", "安全审查", "隐私审查", "凭证隔离审查", "Provider 合同审查",
     "数据保留审查", "反爬/平台政策审查", "只读范围审查", "禁止自动下单/支付代理审查", "最终人工 release gate"

@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderOperatorReviewLoop.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderOperatorReviewLoop;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_OPERATOR_REVIEW_LOOP_VERSION, "2.6.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_OPERATOR_REVIEW_LOOP_VERSION, "2.3.7");
 
   const sandboxReady = api.buildGlobalShoppingProviderOperatorReviewLoop({
     providerGovernanceConsoleSummary:{

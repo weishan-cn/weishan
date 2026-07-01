@@ -27,7 +27,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingHumanControlledSandboxProviderPilotPlanner.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingHumanControlledSandboxProviderPilotPlanner;
-  assert.equal(api.GLOBAL_SHOPPING_HUMAN_CONTROLLED_SANDBOX_PROVIDER_PILOT_PLANNER_VERSION, "2.6.0");
+  assert.equal(api.GLOBAL_SHOPPING_HUMAN_CONTROLLED_SANDBOX_PROVIDER_PILOT_PLANNER_VERSION, "2.3.6");
 
   const ready = api.buildGlobalShoppingHumanControlledSandboxProviderPilotPlanner({
     providerSandboxPilotControlRoomSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox Pilot 控制室已准备", redacted:true } },

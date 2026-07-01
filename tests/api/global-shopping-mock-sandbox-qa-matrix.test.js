@@ -22,7 +22,7 @@ function readySummary(title, resultLabel, status = "ready") {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingMockSandboxQaMatrix.js"]);
   const api = windowRef.WeishanGlobalShoppingMockSandboxQaMatrix;
-  assert.equal(api.GLOBAL_SHOPPING_MOCK_SANDBOX_QA_MATRIX_VERSION, "2.6.0");
+  assert.equal(api.GLOBAL_SHOPPING_MOCK_SANDBOX_QA_MATRIX_VERSION, "2.7.0");
 
   const ready = api.buildGlobalShoppingMockSandboxQaMatrix({
     offlineProviderAdapterContractKitSummary:readySummary("离线 Adapter 合同套件", "离线 Adapter 合同套件已准备"),

@@ -9606,78 +9606,78 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.6.0 provider sandbox release candidate stays local and bounded @commerce-smoke", async () => {
+  test("v2.7.0 provider offline certification stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
-      window.WeishanGlobalShoppingOfflineProviderAdapterContractKit &&
-      window.WeishanGlobalShoppingMockSandboxQaMatrix &&
-      window.WeishanGlobalShoppingHumanActivationRunbookCenter &&
-      window.WeishanGlobalShoppingProviderAdapterComplianceChecklist &&
-      window.WeishanGlobalShoppingProviderSandboxReleaseCandidateViewModel &&
+      window.WeishanGlobalShoppingOfflineProviderCertificationCenter &&
+      window.WeishanGlobalShoppingMockIntegrationRegressionLab &&
+      window.WeishanGlobalShoppingHumanApprovalEvidenceBinder &&
+      window.WeishanGlobalShoppingAdapterBoundaryLock &&
+      window.WeishanGlobalShoppingProviderCertificationViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
-    const v260 = await page.evaluate(() => {
+    const v270 = await page.evaluate(() => {
       const cardApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
       const host = document.createElement("section");
-      host.setAttribute("data-commerce-v260-render-smoke", "true");
+      host.setAttribute("data-commerce-v270-render-smoke", "true");
       const card = {
-        version:"2.6.0",
+        version:"2.7.0",
         visible:true,
-        offlineProviderAdapterContractKitSummary:{ status:"ready", userFacingSummary:{ title:"Offline Provider Adapter Contract Kit", resultLabel:"离线 Adapter 合同套件已准备", redacted:true }, rows:[{ rowId:"contract", label:"Adapter Contract Kit", value:"离线 Adapter 合同套件已准备", status:"pass", redacted:true }], redacted:true },
-        mockSandboxQaMatrixSummary:{ status:"ready", userFacingSummary:{ title:"Mock Sandbox QA Matrix", resultLabel:"Mock Sandbox QA 矩阵已准备", redacted:true }, rows:[{ rowId:"qa", label:"Mock QA Matrix", value:"Mock Sandbox QA 矩阵已准备", status:"pass", redacted:true }], redacted:true },
-        humanActivationRunbookCenterSummary:{ status:"ready", userFacingSummary:{ title:"Human Activation Runbook Center", resultLabel:"人工激活运行手册已准备", redacted:true }, rows:[{ rowId:"runbook", label:"Human Runbook", value:"人工激活运行手册已准备", status:"pass", redacted:true }], redacted:true },
-        providerAdapterComplianceChecklistSummary:{ status:"ready", userFacingSummary:{ title:"Provider Adapter Compliance Checklist", resultLabel:"Adapter 合规清单已准备", redacted:true }, rows:[{ rowId:"compliance", label:"Adapter Compliance", value:"Adapter 合规清单已准备", status:"pass", redacted:true }], redacted:true },
-        providerSandboxReleaseCandidateViewModelSummary:{ status:"ready", title:"Provider Sandbox Release Candidate", redacted:true },
-        offlineProviderAdapterContractKitStatus:"ready",
-        mockSandboxQaMatrixStatus:"ready",
-        humanActivationRunbookCenterStatus:"ready",
-        providerAdapterComplianceChecklistStatus:"ready",
-        providerSandboxReleaseCandidateViewModelStatus:"ready",
-        safeToProceedWithManualReleaseCandidateReview:false
+        offlineProviderCertificationCenterSummary:{ status:"ready", userFacingSummary:{ title:"Offline Provider Certification Center", resultLabel:"离线 Provider 认证中心已准备", redacted:true }, rows:[{ rowId:"certification", label:"Certification Center", value:"离线 Provider 认证中心已准备", status:"pass", redacted:true }], redacted:true },
+        mockIntegrationRegressionLabSummary:{ status:"ready", userFacingSummary:{ title:"Mock Integration Regression Lab", resultLabel:"Mock 集成回归实验室已准备", redacted:true }, rows:[{ rowId:"regression", label:"Regression Lab", value:"Mock 集成回归实验室已准备", status:"pass", redacted:true }], redacted:true },
+        humanApprovalEvidenceBinderSummary:{ status:"ready", userFacingSummary:{ title:"Human Approval Evidence Binder", resultLabel:"人工审批证据夹已准备", redacted:true }, rows:[{ rowId:"evidence", label:"Evidence Binder", value:"人工审批证据夹已准备", status:"pass", redacted:true }], redacted:true },
+        adapterBoundaryLockSummary:{ status:"ready", userFacingSummary:{ title:"Adapter Boundary Lock", resultLabel:"Adapter 边界锁已准备", redacted:true }, rows:[{ rowId:"boundary", label:"Boundary Lock", value:"Adapter 边界锁已准备", status:"pass", redacted:true }], redacted:true },
+        providerCertificationViewModelSummary:{ status:"ready", title:"Provider 离线认证与边界锁", redacted:true },
+        offlineProviderCertificationCenterStatus:"ready",
+        mockIntegrationRegressionLabStatus:"ready",
+        humanApprovalEvidenceBinderStatus:"ready",
+        adapterBoundaryLockStatus:"ready",
+        providerCertificationViewModelStatus:"ready",
+        safeToProceedWithHumanCertificationReview:false
       };
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml(card);
-      const section = host.querySelector("[data-commerce-global-shopping-provider-sandbox-release-candidate='true']");
+      const section = host.querySelector("[data-commerce-global-shopping-provider-certification='true']");
       document.body.appendChild(host);
       return {
         text:host.innerText,
         html:host.innerHTML,
         sectionText:section ? section.innerText : "",
         sectionHtml:section ? section.innerHTML : "",
-        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-sandbox-release-candidate='true']").length,
-        contractButtonCount:host.querySelectorAll("[data-commerce-global-shopping-offline-provider-adapter-contract-kit-show]").length,
-        qaButtonCount:host.querySelectorAll("[data-commerce-global-shopping-mock-sandbox-qa-matrix-show]").length,
-        runbookButtonCount:host.querySelectorAll("[data-commerce-global-shopping-human-activation-runbook-show]").length,
-        complianceButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-adapter-compliance-show]").length
+        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-certification='true']").length,
+        certificationButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-certification-center-show]").length,
+        regressionButtonCount:host.querySelectorAll("[data-commerce-global-shopping-mock-integration-regression-lab-show]").length,
+        evidenceButtonCount:host.querySelectorAll("[data-commerce-global-shopping-human-approval-evidence-binder-show]").length,
+        boundaryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-adapter-boundary-lock-show]").length
       };
     });
-    expect(v260.sectionCount).toBe(1);
-    expect(v260.contractButtonCount).toBe(1);
-    expect(v260.qaButtonCount).toBe(1);
-    expect(v260.runbookButtonCount).toBe(1);
-    expect(v260.complianceButtonCount).toBe(1);
-    expect(v260.text).toContain("Provider Sandbox Release Candidate");
-    expect(v260.text).toContain("Offline Provider Adapter Contract Kit");
-    expect(v260.text).toContain("Mock Sandbox QA Matrix");
-    expect(v260.text).toContain("Human Activation Runbook Center");
-    expect(v260.text).toContain("Provider Adapter Compliance Checklist");
-    expect(v260.text).toContain("Adapter Contract Kit");
-    expect(v260.text).toContain("Mock QA Matrix");
-    expect(v260.text).toContain("Human Runbook");
-    expect(v260.text).toContain("Adapter Compliance");
-    expect(v260.text).toContain("离线 Adapter 合同套件已准备");
-    expect(v260.text).toContain("Mock Sandbox QA 矩阵已准备");
-    expect(v260.text).toContain("人工激活运行手册已准备");
-    expect(v260.text).toContain("Adapter 合规清单已准备");
-    expect(v260.text).toContain("Adapter Contract Kit 不生成真实 SDK");
-    expect(v260.text).toContain("Mock QA Matrix 不运行真实 provider");
-    expect(v260.text).toContain("Human Runbook 不创建任务、不激活 sandbox");
-    expect(v260.text).toContain("Adapter Compliance 不创建 provider client");
-    expect(v260.text).toContain("Manual release candidate review 仍需人工复核");
-    expect(v260.text).toContain("当前只展示 provider sandbox release candidate");
-    expect(v260.text).toContain("不接真实 provider，不读取密钥，不联网，不生成 endpoint，不创建 release，不 push");
-    expect(v260.sectionText).not.toMatch(/开始接入真实 provider|启动 pilot|(?<!不)激活 sandbox|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|(?<!不生成)真实 SDK|(?<!不)创建 provider client|安装依赖|key 输入框|创建审批任务|发送邮件|打开外部文档|执行回滚|修改 git|删除文件|停止服务|禁用 provider|修改配置|下载证据|导出证据|上传证据|(?<!不)创建 release|创建 tag|(?<!不 )push|发布|立即购买|直接下单|一键下单|一键出票|授权付款|创建订单|打开平台/);
-    expect(v260.sectionHtml).not.toMatch(/https?:\/\//i);
+    expect(v270.sectionCount).toBe(1);
+    expect(v270.certificationButtonCount).toBe(1);
+    expect(v270.regressionButtonCount).toBe(1);
+    expect(v270.evidenceButtonCount).toBe(1);
+    expect(v270.boundaryButtonCount).toBe(1);
+    expect(v270.text).toContain("Provider 离线认证与边界锁");
+    expect(v270.text).toContain("Offline Provider Certification Center");
+    expect(v270.text).toContain("Mock Integration Regression Lab");
+    expect(v270.text).toContain("Human Approval Evidence Binder");
+    expect(v270.text).toContain("Adapter Boundary Lock");
+    expect(v270.text).toContain("Certification Center");
+    expect(v270.text).toContain("Regression Lab");
+    expect(v270.text).toContain("Evidence Binder");
+    expect(v270.text).toContain("Boundary Lock");
+    expect(v270.text).toContain("离线 Provider 认证中心已准备");
+    expect(v270.text).toContain("Mock 集成回归实验室已准备");
+    expect(v270.text).toContain("人工审批证据夹已准备");
+    expect(v270.text).toContain("Adapter 边界锁已准备");
+    expect(v270.text).toContain("Certification Center 不生成真实认证文件");
+    expect(v270.text).toContain("Regression Lab 不运行真实 provider");
+    expect(v270.text).toContain("Evidence Binder 不写文件、不上传");
+    expect(v270.text).toContain("Boundary Lock 不修改配置、不启用 provider");
+    expect(v270.text).toContain("Human certification review 仍需人工复核");
+    expect(v270.text).toContain("当前只展示 provider 离线认证与边界锁");
+    expect(v270.text).toContain("不接真实 provider，不读取密钥，不联网，不生成 endpoint，不创建 release，不 push");
+    expect(v270.sectionText).not.toMatch(/开始接入真实 provider|启动 pilot|(?<!不)激活 sandbox|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|(?<!不生成)真实认证文件|安装依赖|key 输入框|创建审批任务|发送邮件|打开外部文档|执行回滚|修改 git|删除文件|停止服务|禁用 provider|(?<!不)修改配置|下载证据|导出证据|上传证据|(?<!不)创建 release|创建 tag|(?<!不 )push|发布|立即购买|直接下单|一键下单|一键出票|授权付款|创建订单|打开平台/);
+    expect(v270.sectionHtml).not.toMatch(/https?:\/\//i);
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 

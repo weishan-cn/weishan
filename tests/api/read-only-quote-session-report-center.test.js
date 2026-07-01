@@ -94,13 +94,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.6.0");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "2.7.0");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "2.6.0");
+  assert.equal(ready.appVersion, "2.7.0");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -564,6 +564,31 @@ function main() {
   assert.equal(globalReady.userFacingSummary.safeToProceedWithProviderSandboxContractImplementation, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithMockAdapterRuntimeHardening, true);
   assert.equal(globalReady.userFacingSummary.safeToProceedWithHumanProviderSandboxApproval, true);
+  const providerCertificationReady = api.buildReadOnlyQuoteSessionReportCenter({
+    sessionSummary:summary,
+    offlineProviderCertificationCenterSummary:{ status:"ready", userFacingSummary:{ title:"Offline Provider Certification Center", resultLabel:"离线 Provider 认证中心已准备", redacted:true }, redacted:true },
+    mockIntegrationRegressionLabSummary:{ status:"ready", userFacingSummary:{ title:"Mock Integration Regression Lab", resultLabel:"Mock 集成回归实验室已准备", redacted:true }, redacted:true },
+    humanApprovalEvidenceBinderSummary:{ status:"ready", userFacingSummary:{ title:"Human Approval Evidence Binder", resultLabel:"人工审批证据夹已准备", redacted:true }, redacted:true },
+    adapterBoundaryLockSummary:{ status:"ready", userFacingSummary:{ title:"Adapter Boundary Lock", resultLabel:"Adapter 边界锁已准备", redacted:true }, redacted:true },
+    providerCertificationViewModelSummary:{ status:"ready", title:"Provider 离线认证与边界锁", redacted:true },
+    offlineProviderCertificationCenterStatus:"ready",
+    mockIntegrationRegressionLabStatus:"ready",
+    humanApprovalEvidenceBinderStatus:"ready",
+    adapterBoundaryLockStatus:"ready",
+    providerCertificationViewModelStatus:"ready",
+    safeToProceedWithHumanCertificationReview:true
+  });
+  assert.equal(providerCertificationReady.safetyReport.offlineProviderCertificationCenterSummary.userFacingSummary.title, "Offline Provider Certification Center");
+  assert.equal(providerCertificationReady.safetyReport.mockIntegrationRegressionLabSummary.userFacingSummary.title, "Mock Integration Regression Lab");
+  assert.equal(providerCertificationReady.safetyReport.humanApprovalEvidenceBinderSummary.userFacingSummary.title, "Human Approval Evidence Binder");
+  assert.equal(providerCertificationReady.safetyReport.adapterBoundaryLockSummary.userFacingSummary.title, "Adapter Boundary Lock");
+  assert.equal(providerCertificationReady.safetyReport.providerCertificationViewModelSummary.title, "Provider 离线认证与边界锁");
+  assert.equal(providerCertificationReady.safetyReport.offlineProviderCertificationCenterStatus, "ready");
+  assert.equal(providerCertificationReady.safetyReport.mockIntegrationRegressionLabStatus, "ready");
+  assert.equal(providerCertificationReady.safetyReport.humanApprovalEvidenceBinderStatus, "ready");
+  assert.equal(providerCertificationReady.safetyReport.adapterBoundaryLockStatus, "ready");
+  assert.equal(providerCertificationReady.safetyReport.providerCertificationViewModelStatus, "ready");
+  assert.equal(providerCertificationReady.safetyReport.safeToProceedWithHumanCertificationReview, true);
   const decisionReviewReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     sandboxCandidateComparisonWorkbenchSummary:{ status:"ready", userFacingSummary:{ title:"Sandbox 候选对比工作台", resultLabel:"候选对比已准备", caveat:"当前仅比较脱敏 sandbox 候选。", redacted:true }, redacted:true },

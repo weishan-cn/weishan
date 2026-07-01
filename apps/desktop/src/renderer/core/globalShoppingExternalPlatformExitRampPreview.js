@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_EXTERNAL_PLATFORM_EXIT_RAMP_PREVIEW_VERSION = "2.6.0";
+  const GLOBAL_SHOPPING_EXTERNAL_PLATFORM_EXIT_RAMP_PREVIEW_VERSION = "2.7.0";
   const PREVIEW_NAME = "global_shopping_external_platform_exit_ramp_preview_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

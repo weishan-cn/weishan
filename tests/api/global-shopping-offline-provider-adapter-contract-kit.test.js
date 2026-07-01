@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineProviderAdapterContractKit.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineProviderAdapterContractKit;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_PROVIDER_ADAPTER_CONTRACT_KIT_VERSION, "2.6.0");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_PROVIDER_ADAPTER_CONTRACT_KIT_VERSION, "2.7.0");
 
   const ready = api.buildGlobalShoppingOfflineProviderAdapterContractKit({
     readOnlyProviderAdapterSdkSkeletonSummary:readySummary("只读 Adapter SDK 骨架", "只读 Adapter SDK 骨架已准备"),

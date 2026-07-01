@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.6.0";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.7.0";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -167,6 +167,11 @@
       const humanActivationRunbookCenterSummary = obj(safe.humanActivationRunbookCenterSummary);
       const providerAdapterComplianceChecklistSummary = obj(safe.providerAdapterComplianceChecklistSummary);
       const providerSandboxReleaseCandidateViewModelSummary = obj(safe.providerSandboxReleaseCandidateViewModelSummary);
+      const offlineProviderCertificationCenterSummary = obj(safe.offlineProviderCertificationCenterSummary);
+      const mockIntegrationRegressionLabSummary = obj(safe.mockIntegrationRegressionLabSummary);
+      const humanApprovalEvidenceBinderSummary = obj(safe.humanApprovalEvidenceBinderSummary);
+      const adapterBoundaryLockSummary = obj(safe.adapterBoundaryLockSummary);
+      const providerCertificationViewModelSummary = obj(safe.providerCertificationViewModelSummary);
       const providerAdapterRegistrySummary = obj(safe.providerAdapterRegistrySummary);
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
@@ -451,6 +456,15 @@
       if (humanActivationRunbookCenterSummary.status || providerSandboxReleaseCandidateViewModelSummary.status) badges.push(badge("human_runbook_no_task_activation", "Human Runbook 不创建任务、不激活 sandbox", "info"));
       if (providerAdapterComplianceChecklistSummary.status || providerSandboxReleaseCandidateViewModelSummary.status) badges.push(badge("adapter_compliance_no_provider_client", "Adapter Compliance 不创建 provider client", "info"));
       if ((providerSandboxReleaseCandidateViewModelSummary.status && providerSandboxReleaseCandidateViewModelSummary.status !== "blocked") || safe.safeToProceedWithManualReleaseCandidateReview === true) badges.push(badge("manual_release_candidate_review_required", "Manual release candidate review 仍需人工复核", "warning"));
+      if (offlineProviderCertificationCenterSummary.status === "ready" || safe.offlineProviderCertificationCenterStatus === "ready") badges.push(badge("offline_provider_certification_center_ready", "Offline Provider Certification Center 已准备", "info"));
+      if (mockIntegrationRegressionLabSummary.status === "ready" || safe.mockIntegrationRegressionLabStatus === "ready") badges.push(badge("mock_integration_regression_lab_ready", "Mock Integration Regression Lab 已准备", "info"));
+      if (humanApprovalEvidenceBinderSummary.status === "ready" || safe.humanApprovalEvidenceBinderStatus === "ready") badges.push(badge("human_approval_evidence_binder_ready", "Human Approval Evidence Binder 已准备", "info"));
+      if (adapterBoundaryLockSummary.status === "ready" || safe.adapterBoundaryLockStatus === "ready") badges.push(badge("adapter_boundary_lock_ready", "Adapter Boundary Lock 已准备", "info"));
+      if (offlineProviderCertificationCenterSummary.status || providerCertificationViewModelSummary.status) badges.push(badge("provider_certification_no_real_certification", "Certification Center 不生成真实认证文件", "info"));
+      if (mockIntegrationRegressionLabSummary.status || providerCertificationViewModelSummary.status) badges.push(badge("provider_regression_no_real_provider", "Regression Lab 不运行真实 provider", "info"));
+      if (humanApprovalEvidenceBinderSummary.status || providerCertificationViewModelSummary.status) badges.push(badge("provider_evidence_binder_no_file_upload", "Evidence Binder 不写文件、不上传", "info"));
+      if (adapterBoundaryLockSummary.status || providerCertificationViewModelSummary.status) badges.push(badge("provider_boundary_lock_no_config_mutation", "Boundary Lock 不修改配置、不启用 provider", "info"));
+      if ((providerCertificationViewModelSummary.status && providerCertificationViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanCertificationReview === true) badges.push(badge("human_certification_review_required", "Human certification review 仍需人工复核", "warning"));
       if (providerAdapterRegistrySummary.status === "ready") badges.push(badge("provider_adapter_registry_ready", "Adapter 注册表已准备", "info"));
       if (providerAdapterRegistrySummary.status === "needs_review") badges.push(badge("provider_adapter_registry_review", "Adapter 注册表仍需复核", "warning"));
       if (providerAdapterRegistrySummary.status === "blocked") badges.push(badge("provider_adapter_registry_blocked", "Adapter 注册表已阻断", "blocked"));

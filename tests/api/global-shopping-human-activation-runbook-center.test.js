@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingHumanActivationRunbookCenter.js"]);
   const api = windowRef.WeishanGlobalShoppingHumanActivationRunbookCenter;
-  assert.equal(api.GLOBAL_SHOPPING_HUMAN_ACTIVATION_RUNBOOK_CENTER_VERSION, "2.6.0");
+  assert.equal(api.GLOBAL_SHOPPING_HUMAN_ACTIVATION_RUNBOOK_CENTER_VERSION, "2.7.0");
 
   const ready = api.buildGlobalShoppingHumanActivationRunbookCenter({
     mockSandboxQaMatrixSummary:readySummary("Mock Sandbox QA Matrix", "Mock Sandbox QA 矩阵已准备"),
