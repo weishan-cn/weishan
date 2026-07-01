@@ -19,7 +19,7 @@ function readySummary(title, resultLabel) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingProviderActivationBlockerSentinel.js").WeishanGlobalShoppingProviderActivationBlockerSentinel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_ACTIVATION_BLOCKER_SENTINEL_VERSION, "3.5.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_ACTIVATION_BLOCKER_SENTINEL_VERSION, "3.6.0");
   const ready = api.buildGlobalShoppingProviderActivationBlockerSentinel({
     finalOfflineLaunchReviewConsoleSummary:readySummary("Final Offline Launch Review Console", "Final Offline Launch Review Console 已准备"),
     adapterLaunchBoundaryVerifierSummary:readySummary("Adapter Launch Boundary Verifier", "Adapter Launch Boundary Verifier 已准备"),

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_PROVIDER_RUNBOOK_BOARD_VERSION = "3.5.0";
+  const GLOBAL_SHOPPING_SANDBOX_PROVIDER_RUNBOOK_BOARD_VERSION = "3.6.0";
   const BOARD_NAME = "global_shopping_sandbox_provider_runbook_board_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

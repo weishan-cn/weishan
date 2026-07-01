@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MOCK_INTEGRATION_REGRESSION_LAB_VERSION = "3.5.0";
+  const GLOBAL_SHOPPING_MOCK_INTEGRATION_REGRESSION_LAB_VERSION = "3.6.0";
   const LAB_NAME = "global_shopping_mock_integration_regression_lab_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

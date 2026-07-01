@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderOfflineLaunchViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderOfflineLaunchViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_OFFLINE_LAUNCH_VIEW_MODEL_VERSION, "3.5.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_OFFLINE_LAUNCH_VIEW_MODEL_VERSION, "3.6.0");
 
   const ready = api.buildGlobalShoppingProviderOfflineLaunchViewModel({
     offlineLaunchDecisionSimulatorSummary:readySummary("Offline Launch Decision Simulator", "离线发布决策模拟器已准备"),

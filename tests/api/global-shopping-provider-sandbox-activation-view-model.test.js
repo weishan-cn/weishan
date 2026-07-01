@@ -24,7 +24,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderSandboxActivationViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderSandboxActivationViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_ACTIVATION_VIEW_MODEL_VERSION, "3.5.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_ACTIVATION_VIEW_MODEL_VERSION, "3.6.0");
 
   const ready = api.buildGlobalShoppingProviderSandboxActivationViewModel({
     readOnlySandboxActivationReadinessCenterSummary:readySummary("Sandbox 激活准备中心已准备"),

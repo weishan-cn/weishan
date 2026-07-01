@@ -16,7 +16,7 @@ function load(file) {
 function main() {
   const windowRef = load("apps/desktop/src/renderer/core/globalShoppingFinalUserSafetyChecklist.js");
   const api = windowRef.WeishanGlobalShoppingFinalUserSafetyChecklist;
-  assert.equal(api.GLOBAL_SHOPPING_FINAL_USER_SAFETY_CHECKLIST_VERSION, "3.5.0");
+  assert.equal(api.GLOBAL_SHOPPING_FINAL_USER_SAFETY_CHECKLIST_VERSION, "3.6.0");
 
   const ready = api.buildGlobalShoppingFinalUserSafetyChecklist({});
   assert.equal(ready.status, "ready");

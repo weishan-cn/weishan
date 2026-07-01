@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "3.5.0";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "3.6.0";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -709,6 +709,36 @@
     return clone({ title:"Provider Distribution Readiness Review", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Provider Distribution Readiness Review"), sectionLabels:["Distribution Readiness", "No-Activation Enforcement", "User Trust Summary", "Safety Matrix"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前只展示 provider distribution readiness review。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
+  function formatProviderDistributionFreezeConsoleSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.providerDistributionFreezeConsoleSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Provider Distribution Freeze Console", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Provider Distribution Freeze Console 仍需复核"), sectionLabels:["Distribution Freeze", "Safety Receipt", "RC Closure Pack", "No-Production Guarantee"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Distribution Freeze 不创建真实分发包、不冻结配置。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatUserFacingSafetyReceiptSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.userFacingSafetyReceiptSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"User-Facing Safety Receipt", line:safeLine(obj(summary.userFacingSummary).resultLabel || "User-Facing Safety Receipt 仍需复核"), sectionLabels:["Distribution Freeze", "Safety Receipt", "RC Closure Pack", "No-Production Guarantee"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Safety Receipt 不生成真实回执文件。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatOfflineReleaseCandidateClosurePackSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.offlineReleaseCandidateClosurePackSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Offline Release Candidate Closure Pack", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Offline Release Candidate Closure Pack 仍需复核"), sectionLabels:["Distribution Freeze", "Safety Receipt", "RC Closure Pack", "No-Production Guarantee"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "RC Closure Pack 不创建真实闭包文件。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatProviderNoProductionGuaranteeMatrixSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.providerNoProductionGuaranteeMatrixSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Provider No-Production Guarantee Matrix", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Provider No-Production Guarantee Matrix 仍需复核"), sectionLabels:["Distribution Freeze", "Safety Receipt", "RC Closure Pack", "No-Production Guarantee"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "No-Production Guarantee 不切换 production provider。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatProviderDistributionClosureViewModelSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.providerDistributionClosureViewModelSummary || safe.viewModelSummary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Provider Distribution Closure Review", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Provider Distribution Closure Review"), sectionLabels:["Distribution Freeze", "Safety Receipt", "RC Closure Pack", "No-Production Guarantee"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前只展示 provider distribution closure review。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -786,6 +816,11 @@
     formatFinalUserTrustSummarySummary,
     formatProviderSafetyDistributionMatrixSummary,
     formatProviderDistributionReadinessViewModelSummary,
+    formatProviderDistributionFreezeConsoleSummary,
+    formatUserFacingSafetyReceiptSummary,
+    formatOfflineReleaseCandidateClosurePackSummary,
+    formatProviderNoProductionGuaranteeMatrixSummary,
+    formatProviderDistributionClosureViewModelSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_CALL_AUDIT_LEDGER_VERSION = "3.5.0";
+  const GLOBAL_SHOPPING_PROVIDER_CALL_AUDIT_LEDGER_VERSION = "3.6.0";
   const LEDGER_NAME = "global_shopping_provider_call_audit_ledger_v1";
   const RESULT_LABELS = {
     ready:"调用审计台账已准备",

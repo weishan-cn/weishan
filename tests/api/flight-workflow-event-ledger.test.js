@@ -8,7 +8,7 @@ function storage() { const data = {}; return { getItem:(key) => Object.prototype
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowEventLedger.js"]);
   const api = windowRef.WeishanFlightWorkflowEventLedger;
-  assert.equal(api.FLIGHT_WORKFLOW_EVENT_LEDGER_VERSION, "3.5.0");
+  assert.equal(api.FLIGHT_WORKFLOW_EVENT_LEDGER_VERSION, "3.6.0");
   const store = storage();
   const appended = api.appendFlightWorkflowEvent({ eventType:"action_executed", actionId:"run_read_only_quotes", actionLabel:"运行只读报价", status:"executed_local", rawProviderResponse:{ token:"abc" }, bookingUrl:"https://blocked.example" }, store);
   assert.equal(appended.status, "appended");

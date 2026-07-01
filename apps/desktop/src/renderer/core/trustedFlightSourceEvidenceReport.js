@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION = "3.5.0";
+  const TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION = "3.6.0";
   const REPORT_NAME = "trusted_flight_source_evidence_report_v1";
   const PHASE = "trusted_flight_source_evidence_report_v1";
 

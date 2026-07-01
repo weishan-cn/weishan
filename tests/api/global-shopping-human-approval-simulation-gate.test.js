@@ -24,7 +24,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingHumanApprovalSimulationGate.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingHumanApprovalSimulationGate;
-  assert.equal(api.GLOBAL_SHOPPING_HUMAN_APPROVAL_SIMULATION_GATE_VERSION, "3.5.0");
+  assert.equal(api.GLOBAL_SHOPPING_HUMAN_APPROVAL_SIMULATION_GATE_VERSION, "3.6.0");
 
   const ready = api.buildGlobalShoppingHumanApprovalSimulationGate({
     providerLaunchReadinessBoardSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider 启动准备总闸门已准备", redacted:true } },

@@ -1,13 +1,14 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "3.5.0";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "3.6.0";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value == null ? "" : value).trim(); }
   function obj(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
   function safeText(value) { return text(value).replace(FORBIDDEN_TEXT_RE, "redacted"); }
+  function labelOf(summary, fallback) { const safe = obj(summary); return safeText(safe.userFacingSummary && safe.userFacingSummary.resultLabel || safe.title || fallback || "仍需复核"); }
   function safety() { return { bookingUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, secretStored:false, redacted:true }; }
   function badge(badgeId, label, severity) { return { badgeId:badgeId, label:label, severity:severity || "info", redacted:true }; }
   function healthOf(input) { const safe = input && typeof input === "object" ? input : {}; return safe.auditHealth || safe.auditReview && safe.auditReview.auditHealth || safe.auditReviewCenter && safe.auditReviewCenter.auditHealth || {}; }
@@ -212,6 +213,11 @@
       const finalUserTrustSummarySummary = obj(safe.finalUserTrustSummarySummary);
       const providerSafetyDistributionMatrixSummary = obj(safe.providerSafetyDistributionMatrixSummary);
       const providerDistributionReadinessViewModelSummary = obj(safe.providerDistributionReadinessViewModelSummary);
+      const providerDistributionFreezeConsoleSummary = obj(safe.providerDistributionFreezeConsoleSummary);
+      const userFacingSafetyReceiptSummary = obj(safe.userFacingSafetyReceiptSummary);
+      const offlineReleaseCandidateClosurePackSummary = obj(safe.offlineReleaseCandidateClosurePackSummary);
+      const providerNoProductionGuaranteeMatrixSummary = obj(safe.providerNoProductionGuaranteeMatrixSummary);
+      const providerDistributionClosureViewModelSummary = obj(safe.providerDistributionClosureViewModelSummary);
       const providerAdapterRegistrySummary = obj(safe.providerAdapterRegistrySummary);
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
@@ -577,6 +583,15 @@
       if (finalUserTrustSummarySummary.status || providerDistributionReadinessViewModelSummary.status) badges.push(badge("user_trust_summary_no_user_text", "User Trust Summary 不写文件、不保存用户原文", "info"));
       if (providerSafetyDistributionMatrixSummary.status || providerDistributionReadinessViewModelSummary.status) badges.push(badge("safety_distribution_matrix_no_activation", "Safety Distribution Matrix 不启用 provider、不激活 sandbox", "info"));
       if ((providerDistributionReadinessViewModelSummary.status && providerDistributionReadinessViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanDistributionReadinessReview === true) badges.push(badge("human_distribution_readiness_review_required", "Human distribution readiness review 仍需人工复核", "warning"));
+      if (providerDistributionFreezeConsoleSummary.status) badges.push(badge("provider_distribution_freeze_console_ready", labelOf(providerDistributionFreezeConsoleSummary, "Provider Distribution Freeze Console 已准备"), providerDistributionFreezeConsoleSummary.status === "blocked" ? "blocked" : (providerDistributionFreezeConsoleSummary.status === "ready" ? "info" : "warning")));
+      if (userFacingSafetyReceiptSummary.status) badges.push(badge("user_facing_safety_receipt_ready", labelOf(userFacingSafetyReceiptSummary, "User-Facing Safety Receipt 已准备"), userFacingSafetyReceiptSummary.status === "blocked" ? "blocked" : (userFacingSafetyReceiptSummary.status === "ready" ? "info" : "warning")));
+      if (offlineReleaseCandidateClosurePackSummary.status) badges.push(badge("offline_release_candidate_closure_pack_ready", labelOf(offlineReleaseCandidateClosurePackSummary, "Offline Release Candidate Closure Pack 已准备"), offlineReleaseCandidateClosurePackSummary.status === "blocked" ? "blocked" : (offlineReleaseCandidateClosurePackSummary.status === "ready" ? "info" : "warning")));
+      if (providerNoProductionGuaranteeMatrixSummary.status) badges.push(badge("provider_no_production_guarantee_matrix_ready", labelOf(providerNoProductionGuaranteeMatrixSummary, "Provider No-Production Guarantee Matrix 已准备"), providerNoProductionGuaranteeMatrixSummary.status === "blocked" ? "blocked" : (providerNoProductionGuaranteeMatrixSummary.status === "ready" ? "info" : "warning")));
+      if (providerDistributionFreezeConsoleSummary.status || providerDistributionClosureViewModelSummary.status) badges.push(badge("distribution_freeze_no_real_package", "Distribution Freeze 不创建真实分发包、不冻结配置", "info"));
+      if (userFacingSafetyReceiptSummary.status || providerDistributionClosureViewModelSummary.status) badges.push(badge("safety_receipt_no_real_file", "Safety Receipt 不生成真实回执文件", "info"));
+      if (offlineReleaseCandidateClosurePackSummary.status || providerDistributionClosureViewModelSummary.status) badges.push(badge("rc_closure_pack_no_real_file", "RC Closure Pack 不创建真实闭包文件", "info"));
+      if (providerNoProductionGuaranteeMatrixSummary.status || providerDistributionClosureViewModelSummary.status) badges.push(badge("no_production_guarantee_no_switch", "No-Production Guarantee 不切换 production provider", "info"));
+      if ((providerDistributionClosureViewModelSummary.status && providerDistributionClosureViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanDistributionClosureReview === true) badges.push(badge("human_distribution_closure_review_required", "Human distribution closure review 仍需人工复核", "warning"));
       if (providerAdapterRegistrySummary.status === "ready") badges.push(badge("provider_adapter_registry_ready", "Adapter 注册表已准备", "info"));
       if (providerAdapterRegistrySummary.status === "needs_review") badges.push(badge("provider_adapter_registry_review", "Adapter 注册表仍需复核", "warning"));
       if (providerAdapterRegistrySummary.status === "blocked") badges.push(badge("provider_adapter_registry_blocked", "Adapter 注册表已阻断", "blocked"));

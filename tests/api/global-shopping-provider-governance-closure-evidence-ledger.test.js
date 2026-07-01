@@ -40,7 +40,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderGovernanceClosureEvidenceLedger.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderGovernanceClosureEvidenceLedger;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_CLOSURE_EVIDENCE_LEDGER_VERSION, "3.5.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_CLOSURE_EVIDENCE_LEDGER_VERSION, "3.6.0");
   const ready = api.buildGlobalShoppingProviderGovernanceClosureEvidenceLedger({
     ledgerMode:"readonly",
     offlineProviderGovernanceClosureBoardSummary:readySummary("Offline Provider Governance Closure Board", "Offline Provider Governance Closure Board 已准备"),

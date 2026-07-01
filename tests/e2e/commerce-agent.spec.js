@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v3.5.0 provider distribution readiness review stays local and bounded @commerce-smoke", async () => {
+  test("v3.6.0 provider distribution readiness review stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9622,7 +9622,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v350-render-smoke", "true");
       const card = {
-        version:"3.5.0",
+        version:"3.6.0",
         visible:true,
         offlineDistributionReadinessCenterSummary:{ status:"ready", userFacingSummary:{ title:"Offline Distribution Readiness Center", resultLabel:"Offline Distribution Readiness Center 已准备", redacted:true }, rows:[{ rowId:"distribution_readiness", label:"Offline Distribution Readiness Center", value:"Offline Distribution Readiness Center 已准备", status:"pass", redacted:true }], redacted:true },
         noActivationEnforcementLedgerSummary:{ status:"ready", userFacingSummary:{ title:"No-Activation Enforcement Ledger", resultLabel:"No-Activation Enforcement Ledger 已准备", redacted:true }, rows:[{ rowId:"enforcement", label:"No-Activation Enforcement Ledger", value:"No-Activation Enforcement Ledger 已准备", status:"pass", redacted:true }], redacted:true },

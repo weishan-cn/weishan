@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_COHORT_HEALTH_DASHBOARD_VERSION = "3.5.0";
+  const FLIGHT_WORKFLOW_COHORT_HEALTH_DASHBOARD_VERSION = "3.6.0";
   const DASHBOARD_NAME = "flight_workflow_cohort_health_dashboard_v1";
   const CAVEAT = "该看板只统计脱敏测试槽位，不保存真实身份或联系方式。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|真实姓名|手机号|邮箱/ig;
