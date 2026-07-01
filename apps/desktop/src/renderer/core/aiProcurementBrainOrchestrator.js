@@ -1,5 +1,5 @@
 (function(){
-  const AI_PROCUREMENT_BRAIN_ORCHESTRATOR_VERSION = "2.6.0";
+  const AI_PROCUREMENT_BRAIN_ORCHESTRATOR_VERSION = "3.2.0";
 
   function text(value){ return String(value || "").trim(); }
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

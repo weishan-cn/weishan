@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_COHORT_PROGRESS_VIEW_MODEL_VERSION = "2.6.0";
+  const FLIGHT_WORKFLOW_COHORT_PROGRESS_VIEW_MODEL_VERSION = "3.2.0";
   const VIEW_MODEL_NAME = "flight_workflow_cohort_progress_view_model_v1";
   const CAVEAT = "该视图模型只用于只读试点进度追踪，不保存真实身份、不发送真实邀请。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;

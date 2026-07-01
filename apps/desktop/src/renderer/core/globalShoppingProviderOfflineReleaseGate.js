@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_OFFLINE_RELEASE_GATE_VERSION = "3.1.0";
+  const GLOBAL_SHOPPING_PROVIDER_OFFLINE_RELEASE_GATE_VERSION = "3.2.0";
   const GATE_NAME = "global_shopping_provider_offline_release_gate_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

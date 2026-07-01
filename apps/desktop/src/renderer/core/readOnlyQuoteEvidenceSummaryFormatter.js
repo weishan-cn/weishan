@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "3.1.0";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "3.2.0";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -589,6 +589,36 @@
     return clone({ title:"Sandbox 候选决策复核", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Sandbox 候选决策复核仍需补充"), sectionLabels:["候选对比", "证据矩阵", "交接演练", "下一步"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前仅用于复核 sandbox 候选，不代表真实价格、全网最低、锁价、可订、付款、下单或出票能力。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
+  function formatFinalOfflineLaunchReviewConsoleSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.finalOfflineLaunchReviewConsoleSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Final Offline Launch Review Console", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Final Offline Launch Review Console 仍需复核"), sectionLabels:["Final Review", "Provider Launch Audit", "Offline Policy Replay", "Human Activation Dossier", "Adapter Boundary"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Final Review 不保存真实决策。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatProviderActivationBlockerSentinelSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.providerActivationBlockerSentinelSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Provider Activation Blocker Sentinel", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Provider Activation Blocker Sentinel 仍需复核"), sectionLabels:["Activation Blockers", "Boundary Lock", "Policy Engine", "Security Regression", "Release Freeze"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Activation Blocker 不修改配置、不启用 provider。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatReadOnlyReleaseEvidenceSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.readOnlyReleaseEvidenceSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Read-Only Release Evidence Summary", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Read-Only Release Evidence Summary 仍需复核"), sectionLabels:["Evidence Summary", "Audit Snapshot", "Human Dossier", "Release Timeline", "Verify Evidence"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Evidence Summary 不写文件、不上传。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatOfflineProviderReadinessDecisionMatrixSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.offlineProviderReadinessDecisionMatrixSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Offline Provider Readiness Decision Matrix", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Offline Provider Readiness Decision Matrix 仍需复核"), sectionLabels:["Decision Matrix", "Final Review", "Activation Blockers", "Evidence Summary", "Next Human Review"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Decision Matrix 不创建 release、不 push。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatProviderFinalReviewConsoleViewModelSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.providerFinalReviewConsoleViewModelSummary || safe.viewModelSummary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Provider Final Review Console", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Provider Final Review Console"), sectionLabels:["Final Review", "Activation Blockers", "Evidence Summary", "Decision Matrix"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前只展示 provider final review console。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -646,6 +676,11 @@
     formatRcCopyReviewViewModelSummary,
     formatGlobalShoppingCoverageSummary,
     formatGlobalShoppingSandboxDecisionReviewSummary,
+    formatFinalOfflineLaunchReviewConsoleSummary,
+    formatProviderActivationBlockerSentinelSummary,
+    formatReadOnlyReleaseEvidenceSummary,
+    formatOfflineProviderReadinessDecisionMatrixSummary,
+    formatProviderFinalReviewConsoleViewModelSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,

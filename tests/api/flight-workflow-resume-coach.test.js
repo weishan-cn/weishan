@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowContinuityManager.js", "apps/desktop/src/renderer/core/flightWorkflowResumeCoach.js"]);
   const api = windowRef.WeishanFlightWorkflowResumeCoach;
-  assert.equal(api.FLIGHT_WORKFLOW_RESUME_COACH_VERSION, "2.6.0");
+  assert.equal(api.FLIGHT_WORKFLOW_RESUME_COACH_VERSION, "3.2.0");
   const coach = api.buildFlightWorkflowResumeCoach({ flightIntentSummary:{ route:{ originCity:"上海", destinationCity:"成都" }, departureDate:"2026-07-15" }, selectedCandidate:{ rank:1 } });
   assert.equal(coach.status, "ready");
   assert.ok(coach.allowedActions.map(a => a.label).includes("前往平台确认"));

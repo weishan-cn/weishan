@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "3.1.0";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "3.2.0";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -192,6 +192,11 @@
       const humanActivationFinalDossierSummary = obj(safe.humanActivationFinalDossierSummary);
       const adapterLaunchBoundaryVerifierSummary = obj(safe.adapterLaunchBoundaryVerifierSummary);
       const providerFinalLaunchReviewViewModelSummary = obj(safe.providerFinalLaunchReviewViewModelSummary);
+      const finalOfflineLaunchReviewConsoleSummary = obj(safe.finalOfflineLaunchReviewConsoleSummary);
+      const providerActivationBlockerSentinelSummary = obj(safe.providerActivationBlockerSentinelSummary);
+      const readOnlyReleaseEvidenceSummary = obj(safe.readOnlyReleaseEvidenceSummary);
+      const offlineProviderReadinessDecisionMatrixSummary = obj(safe.offlineProviderReadinessDecisionMatrixSummary);
+      const providerFinalReviewConsoleViewModelSummary = obj(safe.providerFinalReviewConsoleViewModelSummary);
       const providerAdapterRegistrySummary = obj(safe.providerAdapterRegistrySummary);
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
@@ -521,6 +526,15 @@
       if (humanActivationFinalDossierSummary.status || providerFinalLaunchReviewViewModelSummary.status) badges.push(badge("human_activation_final_dossier_no_persistence", "Final Dossier 不持久化档案", "info"));
       if (adapterLaunchBoundaryVerifierSummary.status || providerFinalLaunchReviewViewModelSummary.status) badges.push(badge("adapter_launch_boundary_verifier_no_endpoint", "Boundary Verifier 不生成 endpoint、不读取密钥", "info"));
       if ((providerFinalLaunchReviewViewModelSummary.status && providerFinalLaunchReviewViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanFinalLaunchReview === true) badges.push(badge("human_final_launch_review_required", "Human final launch review 仍需人工复核", "warning"));
+      if (finalOfflineLaunchReviewConsoleSummary.status === "ready" || safe.finalOfflineLaunchReviewConsoleStatus === "ready") badges.push(badge("final_offline_launch_review_console_ready", "Final Offline Launch Review Console 已准备", "info"));
+      if (providerActivationBlockerSentinelSummary.status === "ready" || safe.providerActivationBlockerSentinelStatus === "ready") badges.push(badge("provider_activation_blocker_sentinel_ready", "Provider Activation Blocker Sentinel 已准备", "info"));
+      if (readOnlyReleaseEvidenceSummary.status === "ready" || safe.readOnlyReleaseEvidenceSummaryStatus === "ready") badges.push(badge("read_only_release_evidence_summary_ready", "Read-Only Release Evidence Summary 已准备", "info"));
+      if (offlineProviderReadinessDecisionMatrixSummary.status === "ready" || safe.offlineProviderReadinessDecisionMatrixStatus === "ready") badges.push(badge("offline_provider_readiness_decision_matrix_ready", "Offline Provider Readiness Decision Matrix 已准备", "info"));
+      if (finalOfflineLaunchReviewConsoleSummary.status || providerFinalReviewConsoleViewModelSummary.status) badges.push(badge("final_offline_launch_review_console_no_real_decision", "Final Review 不保存真实决策", "info"));
+      if (providerActivationBlockerSentinelSummary.status || providerFinalReviewConsoleViewModelSummary.status) badges.push(badge("provider_activation_blocker_sentinel_no_mutation", "Activation Blocker 不修改配置、不启用 provider", "info"));
+      if (readOnlyReleaseEvidenceSummary.status || providerFinalReviewConsoleViewModelSummary.status) badges.push(badge("read_only_release_evidence_summary_no_file_write", "Evidence Summary 不写文件、不上传", "info"));
+      if (offlineProviderReadinessDecisionMatrixSummary.status || providerFinalReviewConsoleViewModelSummary.status) badges.push(badge("offline_provider_readiness_decision_matrix_no_release", "Decision Matrix 不创建 release、不 push", "info"));
+      if ((providerFinalReviewConsoleViewModelSummary.status && providerFinalReviewConsoleViewModelSummary.status !== "blocked") || safe.safeToProceedWithFinalOfflineProviderReview === true) badges.push(badge("final_offline_provider_review_required", "Final offline provider review 仍需人工复核", "warning"));
       if (providerAdapterRegistrySummary.status === "ready") badges.push(badge("provider_adapter_registry_ready", "Adapter 注册表已准备", "info"));
       if (providerAdapterRegistrySummary.status === "needs_review") badges.push(badge("provider_adapter_registry_review", "Adapter 注册表仍需复核", "warning"));
       if (providerAdapterRegistrySummary.status === "blocked") badges.push(badge("provider_adapter_registry_blocked", "Adapter 注册表已阻断", "blocked"));

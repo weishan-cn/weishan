@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_ADAPTER_LAUNCH_BOUNDARY_VERIFIER_VERSION = "3.1.0";
+  const GLOBAL_SHOPPING_ADAPTER_LAUNCH_BOUNDARY_VERIFIER_VERSION = "3.2.0";
   const VERIFIER_NAME = "global_shopping_adapter_launch_boundary_verifier_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -77,7 +77,9 @@
     const adapterBoundaryDiffInspectorSummary = resolveSummary(safe, "adapterBoundaryDiffInspectorSummary", "WeishanGlobalShoppingAdapterBoundaryDiffInspector", "buildGlobalShoppingAdapterBoundaryDiffInspector");
     const adapterPolicyEngineSummary = resolveSummary(safe, "adapterPolicyEngineSummary", "WeishanGlobalShoppingAdapterPolicyEngine", "buildGlobalShoppingAdapterPolicyEngine");
     const humanActivationFinalDossierSummary = resolveSummary(safe, "humanActivationFinalDossierSummary", "WeishanGlobalShoppingHumanActivationFinalDossier", "buildGlobalShoppingHumanActivationFinalDossier");
-    const safetySentinelSummary = resolveSummary(safe, "safetySentinelSummary", "WeishanFlightWorkflowSafetyRegressionSentinel", "buildFlightWorkflowSafetyRegressionReport");
+    const safetySentinelSummary = present(safe.safetyRegressionSummary)
+      ? obj(safe.safetyRegressionSummary)
+      : resolveSummary(safe, "safetySentinelSummary", "WeishanFlightWorkflowSafetyRegressionSentinel", "buildFlightWorkflowSafetyRegressionReport");
     return clone([
       gate("offline_policy_replay_center", "Offline Policy Replay Center", present(offlinePolicyReplayCenterSummary) ? offlinePolicyReplayCenterSummary.status : "needs_review", labelOf(offlinePolicyReplayCenterSummary, "Policy Replay Center 仍需复核"), "Policy Replay 不修改配置、不启用 provider。"),
       gate("adapter_boundary_lock", "Adapter Boundary Lock", present(adapterBoundaryLockSummary) ? adapterBoundaryLockSummary.status : "needs_review", labelOf(adapterBoundaryLockSummary, "Adapter 边界锁仍需复核"), "Boundary Verifier 不修改配置。"),
@@ -138,7 +140,7 @@
         hasBoundaryDiffInspector:present(resolveSummary(safe, "adapterBoundaryDiffInspectorSummary", "WeishanGlobalShoppingAdapterBoundaryDiffInspector", "buildGlobalShoppingAdapterBoundaryDiffInspector")),
         hasAdapterPolicyEngine:present(resolveSummary(safe, "adapterPolicyEngineSummary", "WeishanGlobalShoppingAdapterPolicyEngine", "buildGlobalShoppingAdapterPolicyEngine")),
         hasFinalDossier:present(resolveSummary(safe, "humanActivationFinalDossierSummary", "WeishanGlobalShoppingHumanActivationFinalDossier", "buildGlobalShoppingHumanActivationFinalDossier")),
-        hasSafetySentinel:present(resolveSummary(safe, "safetySentinelSummary", "WeishanFlightWorkflowSafetyRegressionSentinel", "buildFlightWorkflowSafetyRegressionReport")),
+        hasSafetySentinel:present(present(safe.safetyRegressionSummary) ? safe.safetyRegressionSummary : resolveSummary(safe, "safetySentinelSummary", "WeishanFlightWorkflowSafetyRegressionSentinel", "buildFlightWorkflowSafetyRegressionReport")),
         boundaryGateCount:gates.length,
         blockedBoundaryCount:directBlockedReasons.length + blockedGates.length,
         needsReviewBoundaryCount:needsReviewGates.length,

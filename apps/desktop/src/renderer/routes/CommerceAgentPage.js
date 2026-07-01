@@ -8348,6 +8348,42 @@
         showCommercePlatformTemplateFeedback("已显示 Boundary Verifier", false);
         return;
       }
+      const globalShoppingFinalReviewButton = target && target.closest("[data-commerce-global-shopping-final-review-show]");
+      if (globalShoppingFinalReviewButton && host.contains(globalShoppingFinalReviewButton)) {
+        event.preventDefault();
+        const panel = globalShoppingFinalReviewButton.closest("[data-commerce-global-shopping-provider-final-review-console]") || globalShoppingFinalReviewButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-final-review-output]") || panel;
+        output.innerHTML = '<p>Final Offline Launch Review Console</p><p>Final Offline Launch Review Console 已准备</p><p>Final Review 不保存真实决策</p><p>当前只展示 provider final review console</p><p>不接真实 provider，不读取密钥，不联网，不激活 sandbox，不创建 release，不 push</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Final Review", false);
+        return;
+      }
+      const globalShoppingActivationBlockersButton = target && target.closest("[data-commerce-global-shopping-activation-blockers-show]");
+      if (globalShoppingActivationBlockersButton && host.contains(globalShoppingActivationBlockersButton)) {
+        event.preventDefault();
+        const panel = globalShoppingActivationBlockersButton.closest("[data-commerce-global-shopping-provider-final-review-console]") || globalShoppingActivationBlockersButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-activation-blockers-output]") || panel;
+        output.innerHTML = '<p>Provider Activation Blocker Sentinel</p><p>Provider Activation Blocker Sentinel 已准备</p><p>Activation Blocker 不修改配置、不启用 provider</p><p>该 Sentinel 只展示 activation blocker 检查，不阻断真实进程，不修改配置，不启用或禁用 provider。</p><p>Final offline provider review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Activation Blockers", false);
+        return;
+      }
+      const globalShoppingEvidenceSummaryButton = target && target.closest("[data-commerce-global-shopping-evidence-summary-show]");
+      if (globalShoppingEvidenceSummaryButton && host.contains(globalShoppingEvidenceSummaryButton)) {
+        event.preventDefault();
+        const panel = globalShoppingEvidenceSummaryButton.closest("[data-commerce-global-shopping-provider-final-review-console]") || globalShoppingEvidenceSummaryButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-evidence-summary-output]") || panel;
+        output.innerHTML = '<p>Read-Only Release Evidence Summary</p><p>Read-Only Release Evidence Summary 已准备</p><p>Evidence Summary 不写文件、不上传</p><p>该 Summary 只展示 release evidence，不写文件，不下载，不上传，不创建 release，不 push。</p><p>Final offline provider review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Evidence Summary", false);
+        return;
+      }
+      const globalShoppingDecisionMatrixButton = target && target.closest("[data-commerce-global-shopping-decision-matrix-show]");
+      if (globalShoppingDecisionMatrixButton && host.contains(globalShoppingDecisionMatrixButton)) {
+        event.preventDefault();
+        const panel = globalShoppingDecisionMatrixButton.closest("[data-commerce-global-shopping-provider-final-review-console]") || globalShoppingDecisionMatrixButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-decision-matrix-output]") || panel;
+        output.innerHTML = '<p>Offline Provider Readiness Decision Matrix</p><p>Offline Provider Readiness Decision Matrix 已准备</p><p>Decision Matrix 不创建 release、不 push</p><p>该 Matrix 只展示离线 readiness 决策矩阵，不创建 release，不创建 tag，不 push，不改 git。</p><p>Final offline provider review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Decision Matrix", false);
+        return;
+      }
       const globalShoppingHumanPilotLedgerButton = target && target.closest("[data-commerce-global-shopping-human-pilot-ledger-show]");
       if (globalShoppingHumanPilotLedgerButton && host.contains(globalShoppingHumanPilotLedgerButton)) {
         event.preventDefault();

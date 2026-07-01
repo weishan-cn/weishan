@@ -11,7 +11,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowBetaAcceptanceReviewViewModel.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowBetaAcceptanceReviewViewModel;
-  assert.equal(api.FLIGHT_WORKFLOW_BETA_ACCEPTANCE_REVIEW_VIEW_MODEL_VERSION, "2.6.0");
+  assert.equal(api.FLIGHT_WORKFLOW_BETA_ACCEPTANCE_REVIEW_VIEW_MODEL_VERSION, "3.2.0");
   const model = api.buildFlightWorkflowBetaAcceptanceReviewViewModel({
     feedbackReviewSummary:{ status:"ready", findings:[{ findingId:"feedback_ready", severity:"info", title:"反馈可用于验收参考", message:"token abc https://blocked.example" }], userFacingSummary:{ resultLabel:"反馈可用于验收参考", redacted:true }, redacted:true },
     acceptanceSessionSummary:{ status:"completed", rows:[{ rowId:"feedback", label:"测试反馈汇总", status:"completed", message:"本次验收已完成" }], nextStepRecommendation:"本次验收已完成", userFacingSummary:{ resultLabel:"本次验收已完成", redacted:true }, redacted:true }

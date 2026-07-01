@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_BETA_ACCEPTANCE_VIEW_MODEL_VERSION = "2.6.0";
+  const FLIGHT_WORKFLOW_BETA_ACCEPTANCE_VIEW_MODEL_VERSION = "3.2.0";
   const VIEW_MODEL_NAME = "flight_workflow_beta_acceptance_view_model_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

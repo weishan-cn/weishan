@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MANUAL_PLATFORM_REVIEW_COCKPIT_VERSION = "2.6.0";
+  const GLOBAL_SHOPPING_MANUAL_PLATFORM_REVIEW_COCKPIT_VERSION = "3.2.0";
   const COCKPIT_NAME = "global_shopping_manual_platform_review_cockpit_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

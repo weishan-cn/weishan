@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderCertificationViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderCertificationViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_CERTIFICATION_VIEW_MODEL_VERSION, "3.1.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_CERTIFICATION_VIEW_MODEL_VERSION, "3.2.0");
 
   const ready = api.buildGlobalShoppingProviderCertificationViewModel({
     offlineProviderCertificationCenterSummary:readySummary("Offline Provider Certification Center", "离线 Provider 认证中心已准备"),

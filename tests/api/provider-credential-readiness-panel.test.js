@@ -27,11 +27,11 @@ function assertSafety(panel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/providerSandboxBindingWizard.js", "apps/desktop/src/renderer/core/providerCredentialReadinessPanel.js"]);
   const api = windowRef.WeishanProviderCredentialReadinessPanel;
-  assert.equal(api.PROVIDER_CREDENTIAL_READINESS_PANEL_VERSION, "2.6.0");
+  assert.equal(api.PROVIDER_CREDENTIAL_READINESS_PANEL_VERSION, "3.2.0");
 
   const fixture = api.buildProviderCredentialReadinessPanel();
   assert.equal(fixture.panelName, "provider_credential_readiness_panel_v1");
-  assert.equal(fixture.appVersion, "2.6.0");
+  assert.equal(fixture.appVersion, "3.2.0");
   assert.equal(fixture.providerMode, "fixture");
   assert.equal(fixture.status, "fixture_ready");
   assert.equal(fixture.canAttemptReadOnlyRefresh, true);

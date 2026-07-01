@@ -23,7 +23,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingUserManualReviewViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingUserManualReviewViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_USER_MANUAL_REVIEW_VIEW_MODEL_VERSION, "2.6.0");
+  assert.equal(api.GLOBAL_SHOPPING_USER_MANUAL_REVIEW_VIEW_MODEL_VERSION, "3.2.0");
   const ready = api.buildGlobalShoppingUserManualReviewViewModel({
     userFacingManualReviewFlowSummary:{ status:"ready", userFacingSummary:{ resultLabel:"用户手动复核流程已准备", redacted:true }, redacted:true },
     platformVerificationProgressTrackerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"平台核对进度已准备", redacted:true }, redacted:true, progressRows:[{ itemId:"price", label:"实时价格", status:"user_must_verify", summary:"到平台后人工核对实时价格", redacted:true }] },

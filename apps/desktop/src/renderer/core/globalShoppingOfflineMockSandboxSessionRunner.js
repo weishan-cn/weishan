@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_MOCK_SANDBOX_SESSION_RUNNER_VERSION = "3.1.0";
+  const GLOBAL_SHOPPING_OFFLINE_MOCK_SANDBOX_SESSION_RUNNER_VERSION = "3.2.0";
   const RUNNER_NAME = "global_shopping_offline_mock_sandbox_session_runner_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

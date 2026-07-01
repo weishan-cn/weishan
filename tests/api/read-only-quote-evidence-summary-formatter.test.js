@@ -8,7 +8,7 @@ function forbidden(value) { return /全网最低|最低价保证|已锁价|可�
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteEvidenceSummaryFormatter.js"]);
   const api = windowRef.WeishanReadOnlyQuoteEvidenceSummaryFormatter;
-  assert.equal(api.READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION, "3.1.0");
+  assert.equal(api.READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION, "3.2.0");
   const top = api.formatTopCandidateSummary([{ rank:1, providerName:"A", totalPrice:980, token:"abc" }, { rank:2, providerName:"B", totalPrice:1010 }]);
   assert.equal(top.lines.length, 2);
   assert.equal(top.lines[0].includes("当前导入样本"), false);
@@ -65,6 +65,16 @@ function main() {
   assert.equal(decisionReview.checkoutUrl, null);
   assert.equal(decisionReview.paymentUrl, null);
   assert.equal(decisionReview.orderUrl, null);
+  const finalReview = api.formatFinalOfflineLaunchReviewConsoleSummary({ status:"needs_review", userFacingSummary:{ resultLabel:"Final Offline Launch Review Console 仍需复核" } });
+  assert.equal(finalReview.title, "Final Offline Launch Review Console");
+  const blocker = api.formatProviderActivationBlockerSentinelSummary({ status:"needs_review", userFacingSummary:{ resultLabel:"Provider Activation Blocker Sentinel 仍需复核" } });
+  assert.equal(blocker.title, "Provider Activation Blocker Sentinel");
+  const evidence = api.formatReadOnlyReleaseEvidenceSummary({ status:"needs_review", userFacingSummary:{ resultLabel:"Read-Only Release Evidence Summary 仍需复核" } });
+  assert.equal(evidence.title, "Read-Only Release Evidence Summary");
+  const decisionMatrix = api.formatOfflineProviderReadinessDecisionMatrixSummary({ status:"needs_review", userFacingSummary:{ resultLabel:"Offline Provider Readiness Decision Matrix 仍需复核" } });
+  assert.equal(decisionMatrix.title, "Offline Provider Readiness Decision Matrix");
+  const finalReviewVm = api.formatProviderFinalReviewConsoleViewModelSummary({ status:"needs_review", title:"Provider Final Review Console", caveat:"当前只展示 provider final review console" });
+  assert.equal(finalReviewVm.title, "Provider Final Review Console");
   const audit = api.buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft({});
   assert.equal(audit.payment, false);
   assert.equal(audit.order, false);

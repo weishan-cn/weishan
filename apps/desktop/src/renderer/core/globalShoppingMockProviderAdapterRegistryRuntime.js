@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MOCK_PROVIDER_ADAPTER_REGISTRY_RUNTIME_VERSION = "2.6.0";
+  const GLOBAL_SHOPPING_MOCK_PROVIDER_ADAPTER_REGISTRY_RUNTIME_VERSION = "3.2.0";
   const RUNTIME_NAME = "global_shopping_mock_provider_adapter_registry_runtime_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

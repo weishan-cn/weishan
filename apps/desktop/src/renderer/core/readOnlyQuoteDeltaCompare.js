@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_DELTA_COMPARE_VERSION = "2.6.0";
+  const READ_ONLY_QUOTE_DELTA_COMPARE_VERSION = "3.2.0";
   const COMPARE_NAME = "read_only_quote_delta_compare_v1";
 
   function clone(value) {

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FORM_VERSION = "2.6.0";
+  const FORM_VERSION = "3.2.0";
   const PHASE = "api_binding_mock_form_disabled_state";
 
   function clone(value) {

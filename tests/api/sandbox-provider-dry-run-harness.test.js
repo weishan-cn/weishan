@@ -32,7 +32,7 @@ function main() {
     "apps/desktop/src/renderer/core/sandboxProviderDryRunHarness.js"
   ]);
   const api = windowRef.WeishanSandboxProviderDryRunHarness;
-  assert.equal(api.SANDBOX_PROVIDER_DRY_RUN_HARNESS_VERSION, "2.6.0");
+  assert.equal(api.SANDBOX_PROVIDER_DRY_RUN_HARNESS_VERSION, "3.2.0");
   const status = api.buildSandboxProviderDryRunHarnessStatus();
   assert.equal(status.rawResponseStored, false);
   assert.equal(status.bookingUrl, null);

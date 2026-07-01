@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v3.1.0 provider final launch review stays local and bounded @commerce-smoke", async () => {
+  test("v3.2.0 provider final review console stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9637,7 +9637,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v310-render-smoke", "true");
       const card = {
-        version:"3.1.0",
+        version:"3.2.0",
         visible:true,
         providerOfflineReleaseGateSummary:{ status:"ready", userFacingSummary:{ title:"Provider Offline Release Gate", resultLabel:"离线发布闸门已准备", redacted:true }, rows:[{ rowId:"release_gate", label:"Offline Release Gate", value:"离线发布闸门已准备", status:"pass", redacted:true }], redacted:true },
         providerCertificationFreezeLedgerSummary:{ status:"ready", userFacingSummary:{ title:"Provider Certification Freeze Ledger", resultLabel:"认证冻结台账已准备", redacted:true }, rows:[{ rowId:"freeze_ledger", label:"Certification Freeze", value:"认证冻结台账已准备", status:"pass", redacted:true }], redacted:true },
@@ -9659,6 +9659,11 @@ test.describe.serial("commerce agent workbench", () => {
         humanActivationFinalDossierSummary:{ status:"needs_review", userFacingSummary:{ title:"Human Activation Final Dossier", resultLabel:"Human Activation Final Dossier 仍需复核", redacted:true }, rows:[{ rowId:"final_dossier", label:"Final Dossier", value:"Human Activation Final Dossier 仍需复核", status:"warning", redacted:true }], redacted:true },
         adapterLaunchBoundaryVerifierSummary:{ status:"needs_review", userFacingSummary:{ title:"Adapter Launch Boundary Verifier", resultLabel:"Adapter Launch Boundary Verifier 仍需复核", redacted:true }, rows:[{ rowId:"boundary_verifier", label:"Boundary Verifier", value:"Adapter Launch Boundary Verifier 仍需复核", status:"warning", redacted:true }], redacted:true },
         providerFinalLaunchReviewViewModelSummary:{ status:"needs_review", title:"Provider Final Launch Review", redacted:true },
+        finalOfflineLaunchReviewConsoleSummary:{ status:"needs_review", userFacingSummary:{ title:"Final Offline Launch Review Console", resultLabel:"Final Offline Launch Review Console 仍需复核", redacted:true }, rows:[{ rowId:"final_review_console", label:"Final Review", value:"Final Offline Launch Review Console 仍需复核", status:"warning", redacted:true }], redacted:true },
+        providerActivationBlockerSentinelSummary:{ status:"needs_review", userFacingSummary:{ title:"Provider Activation Blocker Sentinel", resultLabel:"Provider Activation Blocker Sentinel 仍需复核", redacted:true }, rows:[{ rowId:"activation_blocker", label:"Activation Blockers", value:"Provider Activation Blocker Sentinel 仍需复核", status:"warning", redacted:true }], redacted:true },
+        readOnlyReleaseEvidenceSummary:{ status:"needs_review", userFacingSummary:{ title:"Read-Only Release Evidence Summary", resultLabel:"Read-Only Release Evidence Summary 仍需复核", redacted:true }, rows:[{ rowId:"evidence_summary", label:"Evidence Summary", value:"Read-Only Release Evidence Summary 仍需复核", status:"warning", redacted:true }], redacted:true },
+        offlineProviderReadinessDecisionMatrixSummary:{ status:"needs_review", userFacingSummary:{ title:"Offline Provider Readiness Decision Matrix", resultLabel:"Offline Provider Readiness Decision Matrix 仍需复核", redacted:true }, rows:[{ rowId:"decision_matrix", label:"Decision Matrix", value:"Offline Provider Readiness Decision Matrix 仍需复核", status:"warning", redacted:true }], redacted:true },
+        providerFinalReviewConsoleViewModelSummary:{ status:"needs_review", title:"Provider Final Review Console", redacted:true },
         providerOfflineReleaseGateStatus:"ready",
         providerCertificationFreezeLedgerStatus:"ready",
         sandboxActivationReviewPacketStatus:"ready",
@@ -9682,12 +9687,19 @@ test.describe.serial("commerce agent workbench", () => {
         humanActivationFinalDossierStatus:"needs_review",
         adapterLaunchBoundaryVerifierStatus:"needs_review",
         providerFinalLaunchReviewViewModelStatus:"needs_review",
-        safeToProceedWithHumanFinalLaunchReview:false
+        safeToProceedWithHumanFinalLaunchReview:false,
+        finalOfflineLaunchReviewConsoleStatus:"needs_review",
+        providerActivationBlockerSentinelStatus:"needs_review",
+        readOnlyReleaseEvidenceSummaryStatus:"needs_review",
+        offlineProviderReadinessDecisionMatrixStatus:"needs_review",
+        providerFinalReviewConsoleViewModelStatus:"needs_review",
+        safeToProceedWithFinalOfflineProviderReview:false
       };
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml(card);
       const section = host.querySelector("[data-commerce-global-shopping-provider-offline-release='true']");
       const launchSection = host.querySelector("[data-commerce-global-shopping-provider-offline-launch='true']");
       const finalLaunchReviewSection = host.querySelector("[data-commerce-global-shopping-provider-final-launch-review='true']");
+      const finalReviewConsoleSection = host.querySelector("[data-commerce-global-shopping-provider-final-review-console='true']");
       document.body.appendChild(host);
       return {
         text:host.innerText,
@@ -9701,6 +9713,9 @@ test.describe.serial("commerce agent workbench", () => {
         finalLaunchReviewSectionText:finalLaunchReviewSection ? finalLaunchReviewSection.innerText : "",
         finalLaunchReviewSectionHtml:finalLaunchReviewSection ? finalLaunchReviewSection.innerHTML : "",
         finalLaunchReviewSectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-final-launch-review='true']").length,
+        finalReviewConsoleSectionText:finalReviewConsoleSection ? finalReviewConsoleSection.innerText : "",
+        finalReviewConsoleSectionHtml:finalReviewConsoleSection ? finalReviewConsoleSection.innerHTML : "",
+        finalReviewConsoleSectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-final-review-console='true']").length,
         releaseGateButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-offline-release-gate-show]").length,
         freezeButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-certification-freeze-ledger-show]").length,
         activationButtonCount:host.querySelectorAll("[data-commerce-global-shopping-sandbox-activation-review-packet-show]").length,
@@ -9712,7 +9727,11 @@ test.describe.serial("commerce agent workbench", () => {
         launchAuditButtonCount:host.querySelectorAll("[data-commerce-global-shopping-launch-audit-show]").length,
         policyReplayButtonCount:host.querySelectorAll("[data-commerce-global-shopping-policy-replay-show]").length,
         finalDossierButtonCount:host.querySelectorAll("[data-commerce-global-shopping-final-dossier-show]").length,
-        boundaryVerifierButtonCount:host.querySelectorAll("[data-commerce-global-shopping-boundary-verifier-show]").length
+        boundaryVerifierButtonCount:host.querySelectorAll("[data-commerce-global-shopping-boundary-verifier-show]").length,
+        finalReviewButtonCount:host.querySelectorAll("[data-commerce-global-shopping-final-review-show]").length,
+        activationBlockersButtonCount:host.querySelectorAll("[data-commerce-global-shopping-activation-blockers-show]").length,
+        evidenceSummaryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-evidence-summary-show]").length,
+        decisionMatrixButtonCount:host.querySelectorAll("[data-commerce-global-shopping-decision-matrix-show]").length
       };
     });
     expect(v310.sectionCount).toBe(1);
@@ -9730,6 +9749,11 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v310.policyReplayButtonCount).toBe(1);
     expect(v310.finalDossierButtonCount).toBe(1);
     expect(v310.boundaryVerifierButtonCount).toBe(1);
+    expect(v310.finalReviewConsoleSectionCount).toBe(1);
+    expect(v310.finalReviewButtonCount).toBe(1);
+    expect(v310.activationBlockersButtonCount).toBe(1);
+    expect(v310.evidenceSummaryButtonCount).toBe(1);
+    expect(v310.decisionMatrixButtonCount).toBe(1);
     expect(v310.text).toContain("Provider 离线 Launch 决策与安全守卫");
     expect(v310.text).toContain("Offline Launch Decision Simulator");
     expect(v310.text).toContain("Sandbox Activation Receipt Ledger");
@@ -9740,6 +9764,11 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v310.text).toContain("Offline Policy Replay Center");
     expect(v310.text).toContain("Human Activation Final Dossier");
     expect(v310.text).toContain("Adapter Launch Boundary Verifier");
+    expect(v310.text).toContain("Provider Final Review Console");
+    expect(v310.text).toContain("Final Offline Launch Review Console");
+    expect(v310.text).toContain("Provider Activation Blocker Sentinel");
+    expect(v310.text).toContain("Read-Only Release Evidence Summary");
+    expect(v310.text).toContain("Offline Provider Readiness Decision Matrix");
     expect(v310.text).toContain("Launch Audit");
     expect(v310.text).toContain("Policy Replay");
     expect(v310.text).toContain("Final Dossier");
@@ -9751,10 +9780,18 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v310.text).toContain("Human final launch review 仍需人工复核");
     expect(v310.text).toContain("当前只展示 provider final launch review");
     expect(v310.text).toContain("不接真实 provider，不读取密钥，不联网，不激活 sandbox，不创建 release，不 push");
+    expect(v310.text).toContain("Final Review 不保存真实决策");
+    expect(v310.text).toContain("Activation Blocker 不修改配置、不启用 provider");
+    expect(v310.text).toContain("Evidence Summary 不写文件、不上传");
+    expect(v310.text).toContain("Decision Matrix 不创建 release、不 push");
+    expect(v310.text).toContain("Final offline provider review 仍需人工复核");
+    expect(v310.text).toContain("当前只展示 provider final review console");
     expect(v310.launchSectionText).not.toMatch(/开始接入真实 provider|启动 pilot|(?<!不)激活 sandbox|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|真实 SDK|创建 provider client|安装依赖|key 输入框|创建审批任务|发送邮件|打开外部文档|执行回滚|修改 git|删除文件|停止服务|下载证据|导出证据|上传证据|(?<!不)创建 release|创建 tag|(?<!不 )push|发布到生产|自动发布|合作平台|官方背书|平台授权|已接入 provider|可调用 provider|立即购买|直接下单|一键下单|一键出票|授权付款|创建订单|打开平台/);
     expect(v310.launchSectionHtml).not.toMatch(/https?:\/\//i);
     expect(v310.finalLaunchReviewSectionText).not.toMatch(/开始接入真实 provider|启动 pilot|(?<!不)激活 sandbox|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|真实 SDK|创建 provider client|安装依赖|(?<!不)修改配置|(?<!不)禁用 provider|key 输入框|创建审批任务|发送邮件|打开外部文档|执行回滚|修改 git|删除文件|停止服务|下载证据|导出证据|上传证据|(?<!不)创建 release|创建 tag|(?<!不 )push|发布到生产|自动发布|(?<!不)保存真实决策|(?<!不)持久化档案|立即购买|直接下单|一键下单|一键出票|打开平台/);
     expect(v310.finalLaunchReviewSectionHtml).not.toMatch(/https?:\/\//i);
+    expect(v310.finalReviewConsoleSectionText).not.toMatch(/开始接入真实 provider|启动 pilot|(?<!不)激活 sandbox|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|真实 SDK|创建 provider client|安装依赖|(?<!不)修改配置|(?<!不)禁用 provider|key 输入框|创建审批任务|发送邮件|打开外部文档|执行回滚|修改 git|删除文件|停止服务|下载证据|导出证据|上传证据|(?<!不)创建 release|创建 tag|(?<!不 )push|发布到生产|自动发布|立即购买|直接下单|一键下单|一键出票|打开平台/);
+    expect(v310.finalReviewConsoleSectionHtml).not.toMatch(/https?:\/\//i);
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
