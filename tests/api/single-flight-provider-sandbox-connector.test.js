@@ -35,11 +35,11 @@ function main() {
     "apps/desktop/src/renderer/core/singleFlightProviderSandboxConnector.js"
   ]);
   const api = windowRef.WeishanSingleFlightProviderSandboxConnector;
-  assert.equal(api.SINGLE_FLIGHT_PROVIDER_SANDBOX_CONNECTOR_VERSION, "3.6.0");
+  assert.equal(api.SINGLE_FLIGHT_PROVIDER_SANDBOX_CONNECTOR_VERSION, "3.7.0");
 
   const fixture = api.getSingleFlightProviderSandboxConnectorStatus();
   assert.equal(fixture.connectorName, "single_flight_provider_sandbox_connector_v1");
-  assert.equal(fixture.appVersion, "3.6.0");
+  assert.equal(fixture.appVersion, "3.7.0");
   assert.equal(fixture.providerMode, "fixture");
   assert.equal(fixture.status, "fixture_ready");
   assert.equal(fixture.networkAllowed, false);

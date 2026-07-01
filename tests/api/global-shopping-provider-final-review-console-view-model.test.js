@@ -19,7 +19,7 @@ function readySummary(title, resultLabel) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingProviderFinalReviewConsoleViewModel.js").WeishanGlobalShoppingProviderFinalReviewConsoleViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_FINAL_REVIEW_CONSOLE_VIEW_MODEL_VERSION, "3.6.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_FINAL_REVIEW_CONSOLE_VIEW_MODEL_VERSION, "3.7.0");
   const ready = api.buildGlobalShoppingProviderFinalReviewConsoleViewModel({
     finalOfflineLaunchReviewConsoleSummary:readySummary("Final Offline Launch Review Console", "Final Offline Launch Review Console 已准备"),
     providerActivationBlockerSentinelSummary:readySummary("Provider Activation Blocker Sentinel", "Provider Activation Blocker Sentinel 已准备"),

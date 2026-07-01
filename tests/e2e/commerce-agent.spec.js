@@ -9606,99 +9606,105 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v3.6.0 provider distribution readiness review stays local and bounded @commerce-smoke", async () => {
+  test("v3.7.0 provider trust closure review stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
-      window.WeishanGlobalShoppingOfflineDistributionReadinessCenter &&
-      window.WeishanGlobalShoppingNoActivationEnforcementLedger &&
-      window.WeishanGlobalShoppingFinalUserTrustSummary &&
-      window.WeishanGlobalShoppingProviderSafetyDistributionMatrix &&
-      window.WeishanGlobalShoppingProviderDistributionReadinessViewModel &&
+      window.WeishanGlobalShoppingProviderPublicTrustClosureCenter &&
+      window.WeishanGlobalShoppingOfflineReleaseMemorySnapshot &&
+      window.WeishanGlobalShoppingNoProviderExecutionFinalGuard &&
+      window.WeishanGlobalShoppingUserVisibleSafetyBoundaryExplainer &&
+      window.WeishanGlobalShoppingProviderTrustClosureViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
-    const v350 = await page.evaluate(() => {
+    const v370 = await page.evaluate(() => {
       const cardApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
       const host = document.createElement("section");
-      host.setAttribute("data-commerce-v350-render-smoke", "true");
+      host.setAttribute("data-commerce-v370-render-smoke", "true");
       const card = {
-        version:"3.6.0",
+        version:"3.7.0",
         visible:true,
-        offlineDistributionReadinessCenterSummary:{ status:"ready", userFacingSummary:{ title:"Offline Distribution Readiness Center", resultLabel:"Offline Distribution Readiness Center 已准备", redacted:true }, rows:[{ rowId:"distribution_readiness", label:"Offline Distribution Readiness Center", value:"Offline Distribution Readiness Center 已准备", status:"pass", redacted:true }], redacted:true },
-        noActivationEnforcementLedgerSummary:{ status:"ready", userFacingSummary:{ title:"No-Activation Enforcement Ledger", resultLabel:"No-Activation Enforcement Ledger 已准备", redacted:true }, rows:[{ rowId:"enforcement", label:"No-Activation Enforcement Ledger", value:"No-Activation Enforcement Ledger 已准备", status:"pass", redacted:true }], redacted:true },
-        finalUserTrustSummarySummary:{ status:"ready", userFacingSummary:{ title:"Final User Trust Summary", resultLabel:"Final User Trust Summary 已准备", redacted:true }, rows:[{ rowId:"trust", label:"Final User Trust Summary", value:"Final User Trust Summary 已准备", status:"pass", redacted:true }], redacted:true },
-        providerSafetyDistributionMatrixSummary:{ status:"ready", userFacingSummary:{ title:"Provider Safety Distribution Matrix", resultLabel:"Provider Safety Distribution Matrix 已准备", redacted:true }, rows:[{ rowId:"matrix", label:"Provider Safety Distribution Matrix", value:"Provider Safety Distribution Matrix 已准备", status:"pass", redacted:true }], redacted:true },
-        providerDistributionReadinessViewModelSummary:{ status:"ready", title:"Provider Distribution Readiness Review", redacted:true },
-        offlineDistributionReadinessCenterStatus:"ready",
-        noActivationEnforcementLedgerStatus:"ready",
-        finalUserTrustSummaryStatus:"ready",
-        providerSafetyDistributionMatrixStatus:"ready",
-        providerDistributionReadinessViewModelStatus:"ready",
-        safeToProceedWithHumanDistributionReadinessReview:true
+        providerPublicTrustClosureCenterSummary:{ status:"ready", userFacingSummary:{ title:"Provider Public Trust Closure Center", resultLabel:"Provider Public Trust Closure Center 已准备", redacted:true }, rows:[{ rowId:"public_trust_closure", label:"Provider Public Trust Closure Center", value:"Provider Public Trust Closure Center 已准备", status:"pass", redacted:true }], redacted:true },
+        offlineReleaseMemorySnapshotSummary:{ status:"ready", userFacingSummary:{ title:"Offline Release Memory Snapshot", resultLabel:"Offline Release Memory Snapshot 已准备", redacted:true }, rows:[{ rowId:"release_memory", label:"Offline Release Memory Snapshot", value:"Offline Release Memory Snapshot 已准备", status:"pass", redacted:true }], redacted:true },
+        noProviderExecutionFinalGuardSummary:{ status:"ready", userFacingSummary:{ title:"No-Provider-Execution Final Guard", resultLabel:"No-Provider-Execution Final Guard 已准备", redacted:true }, rows:[{ rowId:"no_provider_guard", label:"No-Provider-Execution Final Guard", value:"No-Provider-Execution Final Guard 已准备", status:"pass", redacted:true }], redacted:true },
+        userVisibleSafetyBoundaryExplainerSummary:{ status:"ready", userFacingSummary:{ title:"User-Visible Safety Boundary Explainer", resultLabel:"User-Visible Safety Boundary Explainer 已准备", redacted:true }, rows:[{ rowId:"safety_boundary", label:"User-Visible Safety Boundary Explainer", value:"User-Visible Safety Boundary Explainer 已准备", status:"pass", redacted:true }], redacted:true },
+        providerTrustClosureViewModelSummary:{ status:"ready", title:"Provider Trust Closure Review", redacted:true },
+        providerPublicTrustClosureCenterStatus:"ready",
+        offlineReleaseMemorySnapshotStatus:"ready",
+        noProviderExecutionFinalGuardStatus:"ready",
+        userVisibleSafetyBoundaryExplainerStatus:"ready",
+        providerTrustClosureViewModelStatus:"ready",
+        safeToProceedWithHumanTrustClosureReview:true
       };
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml(card);
-      const section = host.querySelector("[data-commerce-global-shopping-provider-distribution-readiness-review='true']");
+      const section = host.querySelector("[data-commerce-global-shopping-provider-trust-closure-review='true']");
       document.body.appendChild(host);
       return {
         text:host.innerText,
         html:host.innerHTML,
         sectionText:section ? section.innerText : "",
         sectionHtml:section ? section.innerHTML : "",
-        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-distribution-readiness-review='true']").length,
-        distributionReadinessButtonCount:host.querySelectorAll("[data-commerce-global-shopping-distribution-readiness-show]").length,
-        noActivationEnforcementButtonCount:host.querySelectorAll("[data-commerce-global-shopping-no-activation-enforcement-show]").length,
-        userTrustSummaryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-user-trust-summary-show]").length,
-        safetyMatrixButtonCount:host.querySelectorAll("[data-commerce-global-shopping-safety-matrix-show]").length
+        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-trust-closure-review='true']").length,
+        publicTrustClosureButtonCount:host.querySelectorAll("[data-commerce-global-shopping-public-trust-closure-show]").length,
+        releaseMemoryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-release-memory-show]").length,
+        noProviderGuardButtonCount:host.querySelectorAll("[data-commerce-global-shopping-no-provider-guard-show]").length,
+        safetyBoundaryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-safety-boundary-show]").length
       };
     });
-    expect(v350.sectionCount).toBe(1);
-    expect(v350.distributionReadinessButtonCount).toBe(1);
-    expect(v350.noActivationEnforcementButtonCount).toBe(1);
-    expect(v350.userTrustSummaryButtonCount).toBe(1);
-    expect(v350.safetyMatrixButtonCount).toBe(1);
-    expect(v350.text).toContain("Provider Distribution Readiness Review");
-    expect(v350.text).toContain("Offline Distribution Readiness Center");
-    expect(v350.text).toContain("No-Activation Enforcement Ledger");
-    expect(v350.text).toContain("Final User Trust Summary");
-    expect(v350.text).toContain("Provider Safety Distribution Matrix");
-    expect(v350.text).toContain("Distribution Readiness");
-    expect(v350.text).toContain("No-Activation Enforcement");
-    expect(v350.text).toContain("User Trust Summary");
-    expect(v350.text).toContain("Safety Matrix");
-    expect(v350.text).toContain("Offline Distribution Readiness Center 已准备");
-    expect(v350.text).toContain("No-Activation Enforcement Ledger 已准备");
-    expect(v350.text).toContain("Final User Trust Summary 已准备");
-    expect(v350.text).toContain("Provider Safety Distribution Matrix 已准备");
-    expect(v350.text).toContain("Distribution Readiness 不创建真实分发包");
-    expect(v350.text).toContain("No-Activation Enforcement 不执行真实阻断");
-    expect(v350.text).toContain("User Trust Summary 不写文件、不保存用户原文");
-    expect(v350.text).toContain("Safety Matrix 不启用 provider、不激活 sandbox");
-    expect(v350.text).toContain("Human distribution readiness review 仍需人工复核");
-    expect(v350.text).toContain("当前只展示 provider distribution readiness review");
-    expect(v350.text).toContain("不接真实 provider，不读取密钥，不联网，不激活 sandbox，不创建 release，不 push，不创建真实分发包");
-    expect(v350.text).not.toMatch(/token|secret|apiKey/i);
-    expect(v350.sectionText).not.toMatch(/bookingUrl|paymentUrl|orderUrl|checkoutUrl/);
-    expect(v350.sectionText).not.toContain("开始接入真实 provider");
-    expect(v350.sectionText).not.toContain("启动 pilot");
-    expect(v350.sectionText).not.toContain("读取 API key");
-    expect(v350.sectionText).not.toContain("生成 endpoint");
-    expect(v350.sectionText).not.toContain("启用 production provider");
-    expect(v350.sectionText).not.toContain("真实 SDK");
-    expect(v350.sectionText).not.toContain("创建 provider client");
-    expect(v350.sectionText).not.toContain("安装依赖");
-    expect(v350.sectionText).not.toContain("key 输入框");
-    expect(v350.sectionText).not.toContain("创建审批任务");
-    expect(v350.sectionText).not.toContain("发送邮件");
-    expect(v350.sectionText).not.toContain("打开外部文档");
-    expect(v350.sectionText).not.toContain("执行回滚");
-    expect(v350.sectionText).not.toContain("修改 git");
-    expect(v350.sectionText).not.toContain("立即购买");
-    expect(v350.sectionText).not.toContain("直接下单");
-    expect(v350.sectionText).not.toContain("一键下单");
-    expect(v350.sectionText).not.toContain("一键出票");
-    expect(v350.sectionText).not.toContain("打开平台");
-    expect(v350.sectionHtml).not.toContain("https://");
-    expect(v350.sectionHtml).not.toContain("http://");
+    expect(v370.sectionCount).toBe(1);
+    expect(v370.publicTrustClosureButtonCount).toBe(1);
+    expect(v370.releaseMemoryButtonCount).toBe(1);
+    expect(v370.noProviderGuardButtonCount).toBe(1);
+    expect(v370.safetyBoundaryButtonCount).toBe(1);
+    expect(v370.text).toContain("Provider Trust Closure Review");
+    expect(v370.text).toContain("Provider Public Trust Closure Center");
+    expect(v370.text).toContain("Offline Release Memory Snapshot");
+    expect(v370.text).toContain("No-Provider-Execution Final Guard");
+    expect(v370.text).toContain("User-Visible Safety Boundary Explainer");
+    expect(v370.text).toContain("Public Trust Closure");
+    expect(v370.text).toContain("Release Memory");
+    expect(v370.text).toContain("No-Provider Guard");
+    expect(v370.text).toContain("Safety Boundary");
+    expect(v370.text).toContain("Provider Public Trust Closure Center 已准备");
+    expect(v370.text).toContain("Offline Release Memory Snapshot 已准备");
+    expect(v370.text).toContain("No-Provider-Execution Final Guard 已准备");
+    expect(v370.text).toContain("User-Visible Safety Boundary Explainer 已准备");
+    expect(v370.text).toContain("Public Trust Closure 不生成真实公开声明");
+    expect(v370.text).toContain("Release Memory 不持久化记忆快照");
+    expect(v370.text).toContain("No-Provider Guard 不执行真实阻断、不打开平台");
+    expect(v370.text).toContain("Safety Boundary 不承诺最低价、最终价或官方背书");
+    expect(v370.text).toContain("Human trust closure review 仍需人工复核");
+    expect(v370.text).toContain("当前只展示 provider trust closure review");
+    expect(v370.text).toContain("不接真实 provider，不读取密钥，不联网，不激活 sandbox，不创建 release，不 push，不打开平台");
+    expect(v370.text).not.toMatch(/token|secret|apiKey/i);
+    expect(v370.sectionText).not.toMatch(/bookingUrl|paymentUrl|orderUrl|checkoutUrl/);
+    expect(v370.sectionText).not.toContain("开始接入真实 provider");
+    expect(v370.sectionText).not.toContain("启动 pilot");
+    expect(v370.sectionText).not.toContain("开始激活 sandbox");
+    expect(v370.sectionText).not.toContain("读取 API key");
+    expect(v370.sectionText).not.toContain("生成 endpoint");
+    expect(v370.sectionText).not.toContain("启用 production provider");
+    expect(v370.sectionText).not.toContain("切换 production provider");
+    expect(v370.sectionText).not.toContain("真实 SDK");
+    expect(v370.sectionText).not.toContain("创建 provider client");
+    expect(v370.sectionText).not.toContain("安装依赖");
+    expect(v370.sectionText).not.toContain("key 输入框");
+    expect(v370.sectionText).not.toContain("创建审批任务");
+    expect(v370.sectionText).not.toContain("发送邮件");
+    expect(v370.sectionText).not.toContain("打开外部文档");
+    expect(v370.sectionText).not.toContain("执行回滚");
+    expect(v370.sectionText).not.toContain("立即执行真实阻断");
+    expect(v370.sectionText).not.toContain("修改 git");
+    expect(v370.sectionText).not.toContain("立即创建 release");
+    expect(v370.sectionText).not.toContain("立即创建 tag");
+    expect(v370.sectionText).not.toContain("执行 push");
+    expect(v370.sectionText).not.toContain("立即购买");
+    expect(v370.sectionText).not.toContain("直接下单");
+    expect(v370.sectionText).not.toContain("一键下单");
+    expect(v370.sectionText).not.toContain("一键出票");
+    expect(v370.sectionText).not.toContain("立即打开平台");
+    expect(v370.sectionHtml).not.toContain("https://");
+    expect(v370.sectionHtml).not.toContain("http://");
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 

@@ -26,7 +26,7 @@ function passSafetySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingAdapterSecurityRegressionGuard.js"]);
   const api = windowRef.WeishanGlobalShoppingAdapterSecurityRegressionGuard;
-  assert.equal(api.GLOBAL_SHOPPING_ADAPTER_SECURITY_REGRESSION_GUARD_VERSION, "3.6.0");
+  assert.equal(api.GLOBAL_SHOPPING_ADAPTER_SECURITY_REGRESSION_GUARD_VERSION, "3.7.0");
 
   const ready = api.buildGlobalShoppingAdapterSecurityRegressionGuard({
     adapterBoundaryDiffInspectorSummary:readySummary("Adapter Boundary Diff Inspector", "Adapter 边界差异检查器已准备"),

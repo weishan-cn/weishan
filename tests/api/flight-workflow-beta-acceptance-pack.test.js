@@ -17,7 +17,7 @@ function readyInput(extra = {}) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowBetaAcceptancePack.js"]);
   const api = windowRef.WeishanFlightWorkflowBetaAcceptancePack;
-  assert.equal(api.FLIGHT_WORKFLOW_BETA_ACCEPTANCE_PACK_VERSION, "3.6.0");
+  assert.equal(api.FLIGHT_WORKFLOW_BETA_ACCEPTANCE_PACK_VERSION, "3.7.0");
   const ready = api.buildFlightWorkflowBetaAcceptancePack(readyInput({ feedbackReviewSummary:{ status:"ready", feedbackHealth:{ safetyCopyUnderstood:true } }, acceptanceSessionSummary:{ status:"completed" }, nextAcceptanceStep:"本次验收已完成" }));
   assert.equal(ready.status, "ready");
   assert.equal(ready.acceptanceReadiness.safeForGuidedUserTest, true);

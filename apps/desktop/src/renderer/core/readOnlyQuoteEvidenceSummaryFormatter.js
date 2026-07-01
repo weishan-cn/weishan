@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "3.6.0";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "3.7.0";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -739,6 +739,36 @@
     return clone({ title:"Provider Distribution Closure Review", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Provider Distribution Closure Review"), sectionLabels:["Distribution Freeze", "Safety Receipt", "RC Closure Pack", "No-Production Guarantee"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前只展示 provider distribution closure review。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
+  function formatProviderPublicTrustClosureCenterSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.providerPublicTrustClosureCenterSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Provider Public Trust Closure Center", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Provider Public Trust Closure Center 仍需复核"), sectionLabels:["Public Trust Closure", "Release Memory", "No-Provider Guard", "Safety Boundary"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Public Trust Closure 不生成真实公开声明。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatOfflineReleaseMemorySnapshotSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.offlineReleaseMemorySnapshotSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Offline Release Memory Snapshot", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Offline Release Memory Snapshot 仍需复核"), sectionLabels:["Public Trust Closure", "Release Memory", "No-Provider Guard", "Safety Boundary"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Release Memory 不持久化记忆快照。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatNoProviderExecutionFinalGuardSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.noProviderExecutionFinalGuardSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"No-Provider-Execution Final Guard", line:safeLine(obj(summary.userFacingSummary).resultLabel || "No-Provider-Execution Final Guard 仍需复核"), sectionLabels:["Public Trust Closure", "Release Memory", "No-Provider Guard", "Safety Boundary"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "No-Provider Guard 不执行真实阻断、不打开平台。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatUserVisibleSafetyBoundaryExplainerSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.userVisibleSafetyBoundaryExplainerSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"User-Visible Safety Boundary Explainer", line:safeLine(obj(summary.userFacingSummary).resultLabel || "User-Visible Safety Boundary Explainer 仍需复核"), sectionLabels:["Public Trust Closure", "Release Memory", "No-Provider Guard", "Safety Boundary"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Safety Boundary 不承诺最低价、最终价或官方背书。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatProviderTrustClosureViewModelSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.providerTrustClosureViewModelSummary || safe.viewModelSummary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Provider Trust Closure Review", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Provider Trust Closure Review"), sectionLabels:["Public Trust Closure", "Release Memory", "No-Provider Guard", "Safety Boundary"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前只展示 provider trust closure review。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -821,6 +851,11 @@
     formatOfflineReleaseCandidateClosurePackSummary,
     formatProviderNoProductionGuaranteeMatrixSummary,
     formatProviderDistributionClosureViewModelSummary,
+    formatProviderPublicTrustClosureCenterSummary,
+    formatOfflineReleaseMemorySnapshotSummary,
+    formatNoProviderExecutionFinalGuardSummary,
+    formatUserVisibleSafetyBoundaryExplainerSummary,
+    formatProviderTrustClosureViewModelSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,

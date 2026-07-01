@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingAdapterPolicyEngine.js"]);
   const api = windowRef.WeishanGlobalShoppingAdapterPolicyEngine;
-  assert.equal(api.GLOBAL_SHOPPING_ADAPTER_POLICY_ENGINE_VERSION, "3.6.0");
+  assert.equal(api.GLOBAL_SHOPPING_ADAPTER_POLICY_ENGINE_VERSION, "3.7.0");
 
   const ready = api.buildGlobalShoppingAdapterPolicyEngine({
     offlineProviderLaunchControlTowerSummary:readySummary("Offline Provider Launch Control Tower", "离线 Launch 控制塔已准备"),

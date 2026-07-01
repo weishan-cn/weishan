@@ -1,5 +1,5 @@
 (function(){
-  const PROVIDER_COMPLIANCE_EVIDENCE_REPORT_VERSION = "3.6.0";
+  const PROVIDER_COMPLIANCE_EVIDENCE_REPORT_VERSION = "3.7.0";
 
   const evidenceSections = [
     "gateMatrixEvidence",

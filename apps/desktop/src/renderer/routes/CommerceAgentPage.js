@@ -8492,6 +8492,42 @@
         showCommercePlatformTemplateFeedback("已显示 Safety Matrix", false);
         return;
       }
+      const globalShoppingPublicTrustClosureButton = target && target.closest("[data-commerce-global-shopping-public-trust-closure-show]");
+      if (globalShoppingPublicTrustClosureButton && host.contains(globalShoppingPublicTrustClosureButton)) {
+        event.preventDefault();
+        const panel = globalShoppingPublicTrustClosureButton.closest("[data-commerce-global-shopping-provider-trust-closure-review]") || globalShoppingPublicTrustClosureButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-public-trust-closure-output]") || panel;
+        output.innerHTML = '<p>Provider Public Trust Closure Center</p><p>Provider Public Trust Closure Center 已准备</p><p>Public Trust Closure 不生成真实公开声明</p><p>Human trust closure review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Public Trust Closure", false);
+        return;
+      }
+      const globalShoppingReleaseMemoryButton = target && target.closest("[data-commerce-global-shopping-release-memory-show]");
+      if (globalShoppingReleaseMemoryButton && host.contains(globalShoppingReleaseMemoryButton)) {
+        event.preventDefault();
+        const panel = globalShoppingReleaseMemoryButton.closest("[data-commerce-global-shopping-provider-trust-closure-review]") || globalShoppingReleaseMemoryButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-release-memory-output]") || panel;
+        output.innerHTML = '<p>Offline Release Memory Snapshot</p><p>Offline Release Memory Snapshot 已准备</p><p>Release Memory 不持久化记忆快照</p><p>Human trust closure review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Release Memory", false);
+        return;
+      }
+      const globalShoppingNoProviderGuardButton = target && target.closest("[data-commerce-global-shopping-no-provider-guard-show]");
+      if (globalShoppingNoProviderGuardButton && host.contains(globalShoppingNoProviderGuardButton)) {
+        event.preventDefault();
+        const panel = globalShoppingNoProviderGuardButton.closest("[data-commerce-global-shopping-provider-trust-closure-review]") || globalShoppingNoProviderGuardButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-no-provider-guard-output]") || panel;
+        output.innerHTML = '<p>No-Provider-Execution Final Guard</p><p>No-Provider-Execution Final Guard 已准备</p><p>No-Provider Guard 不执行真实阻断、不打开平台</p><p>Human trust closure review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 No-Provider Guard", false);
+        return;
+      }
+      const globalShoppingSafetyBoundaryButton = target && target.closest("[data-commerce-global-shopping-safety-boundary-show]");
+      if (globalShoppingSafetyBoundaryButton && host.contains(globalShoppingSafetyBoundaryButton)) {
+        event.preventDefault();
+        const panel = globalShoppingSafetyBoundaryButton.closest("[data-commerce-global-shopping-provider-trust-closure-review]") || globalShoppingSafetyBoundaryButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-safety-boundary-output]") || panel;
+        output.innerHTML = '<p>User-Visible Safety Boundary Explainer</p><p>User-Visible Safety Boundary Explainer 已准备</p><p>Safety Boundary 不承诺最低价、最终价或官方背书</p><p>Human trust closure review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Safety Boundary", false);
+        return;
+      }
       const globalShoppingHumanPilotLedgerButton = target && target.closest("[data-commerce-global-shopping-human-pilot-ledger-show]");
       if (globalShoppingHumanPilotLedgerButton && host.contains(globalShoppingHumanPilotLedgerButton)) {
         event.preventDefault();

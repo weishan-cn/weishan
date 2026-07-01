@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_JUMP_TO_PLATFORM_BOUNDARY_VERSION = "3.6.0";
+  const GLOBAL_SHOPPING_JUMP_TO_PLATFORM_BOUNDARY_VERSION = "3.7.0";
   const BOUNDARY_NAME = "global_shopping_jump_to_platform_boundary_v1";
   const SUMMARY_CAVEAT = "Weishan 可尽量带入搜索条件，但用户需在对应平台自行确认价格、登录、填写资料并完成下单。";
 

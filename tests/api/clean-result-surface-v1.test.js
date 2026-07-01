@@ -15,7 +15,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/cleanResultSurfaceV1.js"]);
   const api = windowRef.WeishanCleanResultSurfaceV1;
-  assert.equal(api.CLEAN_RESULT_SURFACE_V1_VERSION, "3.6.0");
+  assert.equal(api.CLEAN_RESULT_SURFACE_V1_VERSION, "3.7.0");
   const ready = api.buildCleanResultSurfaceV1({ brainDecision:{ procurementCategory:"flight", intentStatus:"ready" }, limitedBetaAvailable:true, limitedBetaPriceDisplay:"Limited Beta 只读验证价" });
   assert.equal(ready.resultSurfaceMode, "ready_with_results");
   assert.ok(ready.resultCardCount <= 3);

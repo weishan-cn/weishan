@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "3.6.0");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "3.7.0");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -298,6 +298,28 @@ function main() {
   assert.ok(distributionReadinessLabels.includes("User Trust Summary 不写文件、不保存用户原文"));
   assert.ok(distributionReadinessLabels.includes("Safety Distribution Matrix 不启用 provider、不激活 sandbox"));
   assert.ok(distributionReadinessLabels.includes("Human distribution readiness review 仍需人工复核"));
+  const trustClosureLabels = api.buildFlightWorkflowRiskBadges({
+    providerPublicTrustClosureCenterSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider Public Trust Closure Center 已准备", redacted:true } },
+    offlineReleaseMemorySnapshotSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Offline Release Memory Snapshot 已准备", redacted:true } },
+    noProviderExecutionFinalGuardSummary:{ status:"ready", userFacingSummary:{ resultLabel:"No-Provider-Execution Final Guard 已准备", redacted:true } },
+    userVisibleSafetyBoundaryExplainerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"User-Visible Safety Boundary Explainer 已准备", redacted:true } },
+    providerTrustClosureViewModelSummary:{ status:"ready", title:"Provider Trust Closure Review", redacted:true },
+    providerPublicTrustClosureCenterStatus:"ready",
+    offlineReleaseMemorySnapshotStatus:"ready",
+    noProviderExecutionFinalGuardStatus:"ready",
+    userVisibleSafetyBoundaryExplainerStatus:"ready",
+    providerTrustClosureViewModelStatus:"ready",
+    safeToProceedWithHumanTrustClosureReview:true
+  }).badges.map((item) => item.label);
+  assert.ok(trustClosureLabels.includes("Provider Public Trust Closure Center 已准备"));
+  assert.ok(trustClosureLabels.includes("Offline Release Memory Snapshot 已准备"));
+  assert.ok(trustClosureLabels.includes("No-Provider-Execution Final Guard 已准备"));
+  assert.ok(trustClosureLabels.includes("User-Visible Safety Boundary Explainer 已准备"));
+  assert.ok(trustClosureLabels.includes("Public Trust Closure 不生成真实公开声明"));
+  assert.ok(trustClosureLabels.includes("Release Memory 不持久化记忆快照"));
+  assert.ok(trustClosureLabels.includes("No-Provider Guard 不执行真实阻断、不打开平台"));
+  assert.ok(trustClosureLabels.includes("Safety Boundary 不承诺最低价、最终价或官方背书"));
+  assert.ok(trustClosureLabels.includes("Human trust closure review 仍需人工复核"));
   const manualReviewLabels = api.buildFlightWorkflowRiskBadges({
     manualPlatformReviewCockpitSummary:{ status:"ready", userFacingSummary:{ resultLabel:"手动平台复核驾驶舱已准备", redacted:true } },
     handoffAcceptanceWalkthroughSummary:{ status:"ready", userFacingSummary:{ resultLabel:"交接包接受演练已准备", redacted:true } },
