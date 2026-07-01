@@ -26,7 +26,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingUserFacingManualReviewFlow.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingUserFacingManualReviewFlow;
-  assert.equal(api.GLOBAL_SHOPPING_USER_FACING_MANUAL_REVIEW_FLOW_VERSION, "3.4.0");
+  assert.equal(api.GLOBAL_SHOPPING_USER_FACING_MANUAL_REVIEW_FLOW_VERSION, "3.5.0");
   const ready = api.buildGlobalShoppingUserFacingManualReviewFlow({
     manualPlatformReviewCockpitSummary:{ status:"ready", userFacingSummary:{ resultLabel:"手动平台复核驾驶舱已准备", redacted:true }, redacted:true },
     handoffAcceptanceWalkthroughSummary:{ status:"ready", userFacingSummary:{ resultLabel:"交接包接受演练已准备", redacted:true }, redacted:true },

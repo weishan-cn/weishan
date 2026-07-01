@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION = "3.4.0";
+  const MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION = "3.5.0";
   const ORCHESTRATOR_NAME = "multi_provider_sandbox_dry_run_orchestrator_v1";
   const RUN_ID = "deterministic-v2.4.1-read-only-sandbox-run";
 

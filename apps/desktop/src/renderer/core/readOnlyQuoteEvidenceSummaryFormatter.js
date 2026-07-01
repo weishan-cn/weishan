@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "3.4.0";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "3.5.0";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -679,6 +679,36 @@
     return clone({ title:"Provider Governance Closure Review", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Provider Governance Closure Review"), sectionLabels:["Governance Closure", "No-Activation Seal", "Final Handoff", "Closure Evidence"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前只展示 provider governance closure review。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
+  function formatOfflineDistributionReadinessCenterSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.offlineDistributionReadinessCenterSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Offline Distribution Readiness Center", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Offline Distribution Readiness Center 仍需复核"), sectionLabels:["Distribution Readiness", "No-Activation Enforcement", "User Trust Summary", "Safety Matrix"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Distribution Readiness 不创建真实分发包。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatNoActivationEnforcementLedgerSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.noActivationEnforcementLedgerSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"No-Activation Enforcement Ledger", line:safeLine(obj(summary.userFacingSummary).resultLabel || "No-Activation Enforcement Ledger 仍需复核"), sectionLabels:["Distribution Readiness", "No-Activation Enforcement", "Activation Blockers", "Safety Sentinel"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "No-Activation Enforcement 不执行真实阻断。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatFinalUserTrustSummarySummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.finalUserTrustSummarySummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Final User Trust Summary", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Final User Trust Summary 仍需复核"), sectionLabels:["Distribution Readiness", "User Trust Summary", "Release Evidence", "verify/e2e/build"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "User Trust Summary 不写文件、不保存用户原文。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatProviderSafetyDistributionMatrixSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.providerSafetyDistributionMatrixSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Provider Safety Distribution Matrix", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Provider Safety Distribution Matrix 仍需复核"), sectionLabels:["Distribution Readiness", "No-Activation Enforcement", "User Trust Summary", "Safety Matrix"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Safety Matrix 不启用 provider、不激活 sandbox。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatProviderDistributionReadinessViewModelSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.providerDistributionReadinessViewModelSummary || safe.viewModelSummary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Provider Distribution Readiness Review", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Provider Distribution Readiness Review"), sectionLabels:["Distribution Readiness", "No-Activation Enforcement", "User Trust Summary", "Safety Matrix"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前只展示 provider distribution readiness review。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -751,6 +781,11 @@
     formatFinalReadinessHandoffSimulatorSummary,
     formatProviderGovernanceClosureEvidenceLedgerSummary,
     formatProviderGovernanceClosureViewModelSummary,
+    formatOfflineDistributionReadinessCenterSummary,
+    formatNoActivationEnforcementLedgerSummary,
+    formatFinalUserTrustSummarySummary,
+    formatProviderSafetyDistributionMatrixSummary,
+    formatProviderDistributionReadinessViewModelSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,

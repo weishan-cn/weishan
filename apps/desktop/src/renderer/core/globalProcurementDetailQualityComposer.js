@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_DETAIL_QUALITY_COMPOSER_VERSION = "3.4.0";
+  const GLOBAL_PROCUREMENT_DETAIL_QUALITY_COMPOSER_VERSION = "3.5.0";
 
   function text(value){
     return String(value || "").trim();

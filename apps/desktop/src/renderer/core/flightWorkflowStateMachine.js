@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_STATE_MACHINE_VERSION = "3.4.0";
+  const FLIGHT_WORKFLOW_STATE_MACHINE_VERSION = "3.5.0";
   const STATE_MACHINE_NAME = "flight_workflow_state_machine_v1";
   const WORKFLOW_ID = "deterministic-flight-workflow-v2.4.1";
   const STEP_ORDER = ["intent", "clarification", "evidence", "decision", "handoff", "manual_platform_check"];

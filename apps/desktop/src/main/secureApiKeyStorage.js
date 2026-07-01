@@ -9,7 +9,7 @@ try {
   electron = {};
 }
 
-const SECURE_API_KEY_STORAGE_VERSION = "3.4.0";
+const SECURE_API_KEY_STORAGE_VERSION = "3.5.0";
 const STORE_FILE = "secure-provider-credentials.v1.json.enc";
 const TEST_CREDENTIAL_PREFIX = "WEISHAN_TEST_CREDENTIAL_PLACEHOLDER_";
 const SELF_TEST_PREFIX = "WEISHAN_LOCAL_STORAGE_SELF_TEST_VALUE_";

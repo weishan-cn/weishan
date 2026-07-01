@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_READ_ONLY_RELEASE_EVIDENCE_SUMMARY_VERSION = "3.4.0";
+  const GLOBAL_SHOPPING_READ_ONLY_RELEASE_EVIDENCE_SUMMARY_VERSION = "3.5.0";
   const SUMMARY_NAME = "global_shopping_read_only_release_evidence_summary_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

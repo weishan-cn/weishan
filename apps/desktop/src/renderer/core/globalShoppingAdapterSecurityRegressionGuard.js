@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_ADAPTER_SECURITY_REGRESSION_GUARD_VERSION = "3.4.0";
+  const GLOBAL_SHOPPING_ADAPTER_SECURITY_REGRESSION_GUARD_VERSION = "3.5.0";
   const GUARD_NAME = "global_shopping_adapter_security_regression_guard_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

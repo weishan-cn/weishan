@@ -62,11 +62,11 @@ function main() {
   );
 
   const api = windowRef.WeishanTrustedFlightSourceEvidenceReport;
-  assert.equal(api.TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION, "3.4.0");
+  assert.equal(api.TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_VERSION, "3.5.0");
 
   const report = api.buildTrustedFlightSourceEvidenceReport();
   assert.equal(report.reportName, "trusted_flight_source_evidence_report_v1");
-  assert.equal(report.appVersion, "3.4.0");
+  assert.equal(report.appVersion, "3.5.0");
   assert.equal(report.status, "evidence_report_only");
   assert.equal(report.mode, "read_only");
   assert.equal(report.generatedAt, null);
@@ -127,7 +127,7 @@ function main() {
   const audit = api.getTrustedFlightSourceEvidenceReportAuditDraft();
   assert.equal(audit.eventType, "TRUSTED_FLIGHT_SOURCE_EVIDENCE_REPORT_DRAFT");
   assert.equal(audit.reportName, "trusted_flight_source_evidence_report_v1");
-  assert.equal(audit.appVersion, "3.4.0");
+  assert.equal(audit.appVersion, "3.5.0");
   assert.equal(audit.mode, "read_only");
   assert.equal(audit.generatedAt, null);
   assert.equal(audit.sourceCount, 6);

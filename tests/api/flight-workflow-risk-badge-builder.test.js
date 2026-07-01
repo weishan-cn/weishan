@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "3.4.0");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "3.5.0");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -276,6 +276,28 @@ function main() {
   assert.ok(governanceClosureLabels.includes("Final Handoff 不执行真实交接"));
   assert.ok(governanceClosureLabels.includes("Closure Evidence 不持久化台账、不保存真实 evidence"));
   assert.ok(governanceClosureLabels.includes("Human governance closure review 仍需人工复核"));
+  const distributionReadinessLabels = api.buildFlightWorkflowRiskBadges({
+    offlineDistributionReadinessCenterSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Offline Distribution Readiness Center 已准备", redacted:true } },
+    noActivationEnforcementLedgerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"No-Activation Enforcement Ledger 已准备", redacted:true } },
+    finalUserTrustSummarySummary:{ status:"ready", userFacingSummary:{ resultLabel:"Final User Trust Summary 已准备", redacted:true } },
+    providerSafetyDistributionMatrixSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider Safety Distribution Matrix 已准备", redacted:true } },
+    providerDistributionReadinessViewModelSummary:{ status:"ready", title:"Provider Distribution Readiness Review", redacted:true },
+    offlineDistributionReadinessCenterStatus:"ready",
+    noActivationEnforcementLedgerStatus:"ready",
+    finalUserTrustSummaryStatus:"ready",
+    providerSafetyDistributionMatrixStatus:"ready",
+    providerDistributionReadinessViewModelStatus:"ready",
+    safeToProceedWithHumanDistributionReadinessReview:true
+  }).badges.map((item) => item.label);
+  assert.ok(distributionReadinessLabels.includes("Offline Distribution Readiness Center 已准备"));
+  assert.ok(distributionReadinessLabels.includes("No-Activation Enforcement Ledger 已准备"));
+  assert.ok(distributionReadinessLabels.includes("Final User Trust Summary 已准备"));
+  assert.ok(distributionReadinessLabels.includes("Provider Safety Distribution Matrix 已准备"));
+  assert.ok(distributionReadinessLabels.includes("Distribution Readiness 不创建真实分发包"));
+  assert.ok(distributionReadinessLabels.includes("No-Activation Enforcement 不执行真实阻断"));
+  assert.ok(distributionReadinessLabels.includes("User Trust Summary 不写文件、不保存用户原文"));
+  assert.ok(distributionReadinessLabels.includes("Safety Distribution Matrix 不启用 provider、不激活 sandbox"));
+  assert.ok(distributionReadinessLabels.includes("Human distribution readiness review 仍需人工复核"));
   const manualReviewLabels = api.buildFlightWorkflowRiskBadges({
     manualPlatformReviewCockpitSummary:{ status:"ready", userFacingSummary:{ resultLabel:"手动平台复核驾驶舱已准备", redacted:true } },
     handoffAcceptanceWalkthroughSummary:{ status:"ready", userFacingSummary:{ resultLabel:"交接包接受演练已准备", redacted:true } },

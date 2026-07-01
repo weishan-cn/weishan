@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_FIXTURE_REPLAY_CONSOLE_VERSION = "3.4.0";
+  const GLOBAL_SHOPPING_FIXTURE_REPLAY_CONSOLE_VERSION = "3.5.0";
   const CONSOLE_NAME = "global_shopping_fixture_replay_console_v1";
   const RESULT_LABELS = {
     ready:"Fixture 回放已准备",

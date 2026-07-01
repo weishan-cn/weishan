@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRcCandidateReviewConsole.js"]);
   const api = windowRef.WeishanFlightWorkflowRcCandidateReviewConsole;
-  assert.equal(api.FLIGHT_WORKFLOW_RC_CANDIDATE_REVIEW_CONSOLE_VERSION, "3.4.0");
+  assert.equal(api.FLIGHT_WORKFLOW_RC_CANDIDATE_REVIEW_CONSOLE_VERSION, "3.5.0");
   const ready = api.buildFlightWorkflowRcCandidateReviewConsole({
     freezeGateReady:true,
     evidenceFreezePackReady:true,

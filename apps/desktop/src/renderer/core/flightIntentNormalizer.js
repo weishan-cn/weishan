@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_INTENT_NORMALIZER_VERSION = "3.4.0";
+  const FLIGHT_INTENT_NORMALIZER_VERSION = "3.5.0";
   const NORMALIZER_NAME = "flight_intent_normalizer_v1";
   const RESTRICTED_RE = /(帮我买枪|买枪|枪支|武器|火药|炸药|弹药|firearm|weapon|ammunition|explosive)/i;
   const FLIGHT_RE = /(机票|航班|飞机|飞|flight|到)/i;

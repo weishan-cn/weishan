@@ -8456,6 +8456,42 @@
         showCommercePlatformTemplateFeedback("已显示 Closure Evidence", false);
         return;
       }
+      const globalShoppingDistributionReadinessButton = target && target.closest("[data-commerce-global-shopping-distribution-readiness-show]");
+      if (globalShoppingDistributionReadinessButton && host.contains(globalShoppingDistributionReadinessButton)) {
+        event.preventDefault();
+        const panel = globalShoppingDistributionReadinessButton.closest("[data-commerce-global-shopping-provider-distribution-readiness-review]") || globalShoppingDistributionReadinessButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-distribution-readiness-output]") || panel;
+        output.innerHTML = '<p>Offline Distribution Readiness Center</p><p>Offline Distribution Readiness Center 已准备</p><p>Distribution Readiness 不创建真实分发包</p><p>Human distribution readiness review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Distribution Readiness", false);
+        return;
+      }
+      const globalShoppingNoActivationEnforcementButton = target && target.closest("[data-commerce-global-shopping-no-activation-enforcement-show]");
+      if (globalShoppingNoActivationEnforcementButton && host.contains(globalShoppingNoActivationEnforcementButton)) {
+        event.preventDefault();
+        const panel = globalShoppingNoActivationEnforcementButton.closest("[data-commerce-global-shopping-provider-distribution-readiness-review]") || globalShoppingNoActivationEnforcementButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-no-activation-enforcement-output]") || panel;
+        output.innerHTML = '<p>No-Activation Enforcement Ledger</p><p>No-Activation Enforcement Ledger 已准备</p><p>No-Activation Enforcement 不执行真实阻断</p><p>Human distribution readiness review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 No-Activation Enforcement", false);
+        return;
+      }
+      const globalShoppingUserTrustSummaryButton = target && target.closest("[data-commerce-global-shopping-user-trust-summary-show]");
+      if (globalShoppingUserTrustSummaryButton && host.contains(globalShoppingUserTrustSummaryButton)) {
+        event.preventDefault();
+        const panel = globalShoppingUserTrustSummaryButton.closest("[data-commerce-global-shopping-provider-distribution-readiness-review]") || globalShoppingUserTrustSummaryButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-user-trust-summary-output]") || panel;
+        output.innerHTML = '<p>Final User Trust Summary</p><p>Final User Trust Summary 已准备</p><p>User Trust Summary 不写文件、不保存用户原文</p><p>Human distribution readiness review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 User Trust Summary", false);
+        return;
+      }
+      const globalShoppingSafetyMatrixButton = target && target.closest("[data-commerce-global-shopping-safety-matrix-show]");
+      if (globalShoppingSafetyMatrixButton && host.contains(globalShoppingSafetyMatrixButton)) {
+        event.preventDefault();
+        const panel = globalShoppingSafetyMatrixButton.closest("[data-commerce-global-shopping-provider-distribution-readiness-review]") || globalShoppingSafetyMatrixButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-safety-matrix-output]") || panel;
+        output.innerHTML = '<p>Provider Safety Distribution Matrix</p><p>Provider Safety Distribution Matrix 已准备</p><p>Safety Matrix 不启用 provider、不激活 sandbox</p><p>Human distribution readiness review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Safety Matrix", false);
+        return;
+      }
       const globalShoppingHumanPilotLedgerButton = target && target.closest("[data-commerce-global-shopping-human-pilot-ledger-show]");
       if (globalShoppingHumanPilotLedgerButton && host.contains(globalShoppingHumanPilotLedgerButton)) {
         event.preventDefault();

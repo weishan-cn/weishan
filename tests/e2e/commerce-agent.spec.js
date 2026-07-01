@@ -9606,98 +9606,99 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v3.4.0 provider governance closure review stays local and bounded @commerce-smoke", async () => {
+  test("v3.5.0 provider distribution readiness review stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
-      window.WeishanGlobalShoppingOfflineProviderGovernanceClosureBoard &&
-      window.WeishanGlobalShoppingNoActivationComplianceSeal &&
-      window.WeishanGlobalShoppingFinalReadinessHandoffSimulator &&
-      window.WeishanGlobalShoppingProviderGovernanceClosureEvidenceLedger &&
-      window.WeishanGlobalShoppingProviderGovernanceClosureViewModel &&
-      window.WeishanGlobalShoppingProviderFinalSafetySeal &&
-      window.WeishanGlobalShoppingOfflineActivationWarRoom &&
-      window.WeishanGlobalShoppingReadOnlyProviderReadinessCertificate &&
-      window.WeishanGlobalShoppingProviderNoActivationGuaranteeBoard &&
-      window.WeishanGlobalShoppingProviderActivationBlockerSentinel &&
-      window.WeishanGlobalShoppingAdapterSecurityRegressionGuard &&
-      window.WeishanGlobalShoppingFinalOfflineLaunchReviewConsole &&
-      window.WeishanGlobalShoppingReadOnlyReleaseEvidenceSummary &&
-      window.WeishanGlobalShoppingProviderFinalSafetyViewModel &&
+      window.WeishanGlobalShoppingOfflineDistributionReadinessCenter &&
+      window.WeishanGlobalShoppingNoActivationEnforcementLedger &&
+      window.WeishanGlobalShoppingFinalUserTrustSummary &&
+      window.WeishanGlobalShoppingProviderSafetyDistributionMatrix &&
+      window.WeishanGlobalShoppingProviderDistributionReadinessViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
-    const v310 = await page.evaluate(() => {
+    const v350 = await page.evaluate(() => {
       const cardApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
       const host = document.createElement("section");
-      host.setAttribute("data-commerce-v310-render-smoke", "true");
+      host.setAttribute("data-commerce-v350-render-smoke", "true");
       const card = {
-        version:"3.4.0",
+        version:"3.5.0",
         visible:true,
-        offlineProviderGovernanceClosureBoardSummary:{ status:"ready", userFacingSummary:{ title:"Offline Provider Governance Closure Board", resultLabel:"Offline Provider Governance Closure Board 已准备", redacted:true }, rows:[{ rowId:"closure_board", label:"Offline Provider Governance Closure Board", value:"Offline Provider Governance Closure Board 已准备", status:"pass", redacted:true }], redacted:true },
-        noActivationComplianceSealSummary:{ status:"needs_review", userFacingSummary:{ title:"No-Activation Compliance Seal", resultLabel:"No-Activation Compliance Seal 仍需复核", redacted:true }, rows:[{ rowId:"no_activation_seal", label:"No-Activation Compliance Seal", value:"No-Activation Compliance Seal 仍需复核", status:"warning", redacted:true }], redacted:true },
-        finalReadinessHandoffSimulatorSummary:{ status:"needs_review", userFacingSummary:{ title:"Final Readiness Handoff Simulator", resultLabel:"Final Readiness Handoff Simulator 仍需复核", redacted:true }, rows:[{ rowId:"final_handoff", label:"Final Readiness Handoff Simulator", value:"Final Readiness Handoff Simulator 仍需复核", status:"warning", redacted:true }], redacted:true },
-        providerGovernanceClosureEvidenceLedgerSummary:{ status:"needs_review", userFacingSummary:{ title:"Provider Governance Closure Evidence Ledger", resultLabel:"Provider Governance Closure Evidence Ledger 仍需复核", redacted:true }, rows:[{ rowId:"closure_evidence", label:"Provider Governance Closure Evidence Ledger", value:"Provider Governance Closure Evidence Ledger 仍需复核", status:"warning", redacted:true }], redacted:true },
-        providerGovernanceClosureViewModelSummary:{ status:"needs_review", title:"Provider Governance Closure Review", redacted:true },
-        adapterSecurityRegressionGuardSummary:{ status:"ready", userFacingSummary:{ title:"Adapter Security Regression Guard", resultLabel:"Adapter 安全回归守卫已准备", redacted:true }, rows:[{ rowId:"security_guard", label:"Security Guard", value:"Adapter 安全回归守卫已准备", status:"pass", redacted:true }], redacted:true },
-        finalOfflineLaunchReviewConsoleSummary:{ status:"needs_review", userFacingSummary:{ title:"Final Offline Launch Review Console", resultLabel:"Final Offline Launch Review Console 仍需复核", redacted:true }, rows:[{ rowId:"final_review_console", label:"Final Review", value:"Final Offline Launch Review Console 仍需复核", status:"warning", redacted:true }], redacted:true },
-        providerActivationBlockerSentinelSummary:{ status:"needs_review", userFacingSummary:{ title:"Provider Activation Blocker Sentinel", resultLabel:"Provider Activation Blocker Sentinel 仍需复核", redacted:true }, rows:[{ rowId:"activation_blocker", label:"Activation Blockers", value:"Provider Activation Blocker Sentinel 仍需复核", status:"warning", redacted:true }], redacted:true },
-        readOnlyReleaseEvidenceSummary:{ status:"needs_review", userFacingSummary:{ title:"Read-Only Release Evidence Summary", resultLabel:"Read-Only Release Evidence Summary 仍需复核", redacted:true }, rows:[{ rowId:"evidence_summary", label:"Evidence Summary", value:"Read-Only Release Evidence Summary 仍需复核", status:"warning", redacted:true }], redacted:true },
-        providerFinalSafetySealSummary:{ status:"ready", userFacingSummary:{ title:"Provider Final Safety Seal", resultLabel:"Provider Final Safety Seal 已准备", redacted:true }, rows:[{ rowId:"safety_seal", label:"Safety Seal", value:"Provider Final Safety Seal 已准备", status:"pass", redacted:true }], redacted:true },
-        offlineActivationWarRoomSummary:{ status:"ready", userFacingSummary:{ title:"Offline Activation War Room", resultLabel:"Offline Activation War Room 已准备", redacted:true }, rows:[{ rowId:"activation_war_room", label:"Activation War Room", value:"Offline Activation War Room 已准备", status:"pass", redacted:true }], redacted:true },
-        readOnlyProviderReadinessCertificateSummary:{ status:"ready", userFacingSummary:{ title:"Read-Only Provider Readiness Certificate", resultLabel:"Read-Only Provider Readiness Certificate 已准备", redacted:true }, rows:[{ rowId:"readiness_certificate", label:"Readiness Certificate", value:"Read-Only Provider Readiness Certificate 已准备", status:"pass", redacted:true }], redacted:true },
-        providerNoActivationGuaranteeBoardSummary:{ status:"ready", userFacingSummary:{ title:"Provider No-Activation Guarantee Board", resultLabel:"Provider No-Activation Guarantee Board 已准备", redacted:true }, rows:[{ rowId:"no_activation_guarantee", label:"No-Activation Guarantee", value:"Provider No-Activation Guarantee Board 已准备", status:"pass", redacted:true }], redacted:true },
-        providerFinalSafetyViewModelSummary:{ status:"ready", title:"Provider Final Safety Review", redacted:true },
-        offlineProviderGovernanceClosureBoardStatus:"ready",
-        noActivationComplianceSealStatus:"needs_review",
-        finalReadinessHandoffSimulatorStatus:"needs_review",
-        providerGovernanceClosureEvidenceLedgerStatus:"needs_review",
-        providerGovernanceClosureViewModelStatus:"needs_review",
-        adapterSecurityRegressionGuardStatus:"ready",
-        finalOfflineLaunchReviewConsoleStatus:"needs_review",
-        providerActivationBlockerSentinelStatus:"needs_review",
-        readOnlyReleaseEvidenceSummaryStatus:"needs_review",
-        providerFinalSafetySealStatus:"ready",
-        offlineActivationWarRoomStatus:"ready",
-        readOnlyProviderReadinessCertificateStatus:"ready",
-        providerNoActivationGuaranteeBoardStatus:"ready",
-        providerFinalSafetyViewModelStatus:"ready",
-        safeToProceedWithHumanFinalSafetyReview:true,
-        safeToProceedWithHumanGovernanceClosureReview:false
+        offlineDistributionReadinessCenterSummary:{ status:"ready", userFacingSummary:{ title:"Offline Distribution Readiness Center", resultLabel:"Offline Distribution Readiness Center 已准备", redacted:true }, rows:[{ rowId:"distribution_readiness", label:"Offline Distribution Readiness Center", value:"Offline Distribution Readiness Center 已准备", status:"pass", redacted:true }], redacted:true },
+        noActivationEnforcementLedgerSummary:{ status:"ready", userFacingSummary:{ title:"No-Activation Enforcement Ledger", resultLabel:"No-Activation Enforcement Ledger 已准备", redacted:true }, rows:[{ rowId:"enforcement", label:"No-Activation Enforcement Ledger", value:"No-Activation Enforcement Ledger 已准备", status:"pass", redacted:true }], redacted:true },
+        finalUserTrustSummarySummary:{ status:"ready", userFacingSummary:{ title:"Final User Trust Summary", resultLabel:"Final User Trust Summary 已准备", redacted:true }, rows:[{ rowId:"trust", label:"Final User Trust Summary", value:"Final User Trust Summary 已准备", status:"pass", redacted:true }], redacted:true },
+        providerSafetyDistributionMatrixSummary:{ status:"ready", userFacingSummary:{ title:"Provider Safety Distribution Matrix", resultLabel:"Provider Safety Distribution Matrix 已准备", redacted:true }, rows:[{ rowId:"matrix", label:"Provider Safety Distribution Matrix", value:"Provider Safety Distribution Matrix 已准备", status:"pass", redacted:true }], redacted:true },
+        providerDistributionReadinessViewModelSummary:{ status:"ready", title:"Provider Distribution Readiness Review", redacted:true },
+        offlineDistributionReadinessCenterStatus:"ready",
+        noActivationEnforcementLedgerStatus:"ready",
+        finalUserTrustSummaryStatus:"ready",
+        providerSafetyDistributionMatrixStatus:"ready",
+        providerDistributionReadinessViewModelStatus:"ready",
+        safeToProceedWithHumanDistributionReadinessReview:true
       };
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml(card);
-      const section = host.querySelector("[data-commerce-global-shopping-provider-governance-closure-review='true']");
+      const section = host.querySelector("[data-commerce-global-shopping-provider-distribution-readiness-review='true']");
       document.body.appendChild(host);
       return {
         text:host.innerText,
         html:host.innerHTML,
         sectionText:section ? section.innerText : "",
         sectionHtml:section ? section.innerHTML : "",
-        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-governance-closure-review='true']").length,
-        governanceClosureButtonCount:host.querySelectorAll("[data-commerce-global-shopping-governance-closure-show]").length,
-        noActivationSealButtonCount:host.querySelectorAll("[data-commerce-global-shopping-no-activation-seal-show]").length,
-        finalHandoffButtonCount:host.querySelectorAll("[data-commerce-global-shopping-final-handoff-show]").length,
-        closureEvidenceButtonCount:host.querySelectorAll("[data-commerce-global-shopping-closure-evidence-show]").length
+        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-distribution-readiness-review='true']").length,
+        distributionReadinessButtonCount:host.querySelectorAll("[data-commerce-global-shopping-distribution-readiness-show]").length,
+        noActivationEnforcementButtonCount:host.querySelectorAll("[data-commerce-global-shopping-no-activation-enforcement-show]").length,
+        userTrustSummaryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-user-trust-summary-show]").length,
+        safetyMatrixButtonCount:host.querySelectorAll("[data-commerce-global-shopping-safety-matrix-show]").length
       };
     });
-    expect(v310.sectionCount).toBe(1);
-    expect(v310.governanceClosureButtonCount).toBe(1);
-    expect(v310.noActivationSealButtonCount).toBe(1);
-    expect(v310.finalHandoffButtonCount).toBe(1);
-    expect(v310.closureEvidenceButtonCount).toBe(1);
-    expect(v310.text).toContain("Provider Governance Closure Review");
-    expect(v310.text).toContain("Offline Provider Governance Closure Board");
-    expect(v310.text).toContain("No-Activation Compliance Seal");
-    expect(v310.text).toContain("Final Readiness Handoff Simulator");
-    expect(v310.text).toContain("Provider Governance Closure Evidence Ledger");
-    expect(v310.text).toContain("Governance Closure 不保存真实治理结论");
-    expect(v310.text).toContain("No-Activation Seal 不生成真实封条、不执行真实阻断");
-    expect(v310.text).toContain("Final Handoff 不执行真实交接");
-    expect(v310.text).toContain("Closure Evidence 不持久化台账、不保存真实 evidence");
-    expect(v310.text).toContain("Human governance closure review 仍需人工复核");
-    expect(v310.text).toContain("当前只展示 provider governance closure review");
-    expect(v310.text).toContain("不接真实 provider，不读取密钥，不联网，不激活 sandbox，不创建 release，不 push");
-    expect(v310.sectionText).not.toMatch(/开始接入真实 provider|启动 pilot|(?<!不)激活 sandbox|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|真实 SDK|创建 provider client|安装依赖|(?<!不)修改配置|(?<!不)执行真实阻断|key 输入框|创建审批任务|发送邮件|打开外部文档|执行回滚|修改 git|删除文件|停止服务|下载证据|导出证据|上传证据|(?<!不)创建 release|创建 tag|(?<!不 )push|发布到生产|自动发布|立即购买|直接下单|一键下单|一键出票|打开平台/);
-    expect(v310.sectionHtml).not.toMatch(/https?:\/\//i);
+    expect(v350.sectionCount).toBe(1);
+    expect(v350.distributionReadinessButtonCount).toBe(1);
+    expect(v350.noActivationEnforcementButtonCount).toBe(1);
+    expect(v350.userTrustSummaryButtonCount).toBe(1);
+    expect(v350.safetyMatrixButtonCount).toBe(1);
+    expect(v350.text).toContain("Provider Distribution Readiness Review");
+    expect(v350.text).toContain("Offline Distribution Readiness Center");
+    expect(v350.text).toContain("No-Activation Enforcement Ledger");
+    expect(v350.text).toContain("Final User Trust Summary");
+    expect(v350.text).toContain("Provider Safety Distribution Matrix");
+    expect(v350.text).toContain("Distribution Readiness");
+    expect(v350.text).toContain("No-Activation Enforcement");
+    expect(v350.text).toContain("User Trust Summary");
+    expect(v350.text).toContain("Safety Matrix");
+    expect(v350.text).toContain("Offline Distribution Readiness Center 已准备");
+    expect(v350.text).toContain("No-Activation Enforcement Ledger 已准备");
+    expect(v350.text).toContain("Final User Trust Summary 已准备");
+    expect(v350.text).toContain("Provider Safety Distribution Matrix 已准备");
+    expect(v350.text).toContain("Distribution Readiness 不创建真实分发包");
+    expect(v350.text).toContain("No-Activation Enforcement 不执行真实阻断");
+    expect(v350.text).toContain("User Trust Summary 不写文件、不保存用户原文");
+    expect(v350.text).toContain("Safety Matrix 不启用 provider、不激活 sandbox");
+    expect(v350.text).toContain("Human distribution readiness review 仍需人工复核");
+    expect(v350.text).toContain("当前只展示 provider distribution readiness review");
+    expect(v350.text).toContain("不接真实 provider，不读取密钥，不联网，不激活 sandbox，不创建 release，不 push，不创建真实分发包");
+    expect(v350.text).not.toMatch(/token|secret|apiKey/i);
+    expect(v350.sectionText).not.toMatch(/bookingUrl|paymentUrl|orderUrl|checkoutUrl/);
+    expect(v350.sectionText).not.toContain("开始接入真实 provider");
+    expect(v350.sectionText).not.toContain("启动 pilot");
+    expect(v350.sectionText).not.toContain("读取 API key");
+    expect(v350.sectionText).not.toContain("生成 endpoint");
+    expect(v350.sectionText).not.toContain("启用 production provider");
+    expect(v350.sectionText).not.toContain("真实 SDK");
+    expect(v350.sectionText).not.toContain("创建 provider client");
+    expect(v350.sectionText).not.toContain("安装依赖");
+    expect(v350.sectionText).not.toContain("key 输入框");
+    expect(v350.sectionText).not.toContain("创建审批任务");
+    expect(v350.sectionText).not.toContain("发送邮件");
+    expect(v350.sectionText).not.toContain("打开外部文档");
+    expect(v350.sectionText).not.toContain("执行回滚");
+    expect(v350.sectionText).not.toContain("修改 git");
+    expect(v350.sectionText).not.toContain("立即购买");
+    expect(v350.sectionText).not.toContain("直接下单");
+    expect(v350.sectionText).not.toContain("一键下单");
+    expect(v350.sectionText).not.toContain("一键出票");
+    expect(v350.sectionText).not.toContain("打开平台");
+    expect(v350.sectionHtml).not.toContain("https://");
+    expect(v350.sectionHtml).not.toContain("http://");
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 

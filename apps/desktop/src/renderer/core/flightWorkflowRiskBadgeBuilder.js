@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "3.4.0";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "3.5.0";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -207,6 +207,11 @@
       const finalReadinessHandoffSimulatorSummary = obj(safe.finalReadinessHandoffSimulatorSummary);
       const providerGovernanceClosureEvidenceLedgerSummary = obj(safe.providerGovernanceClosureEvidenceLedgerSummary);
       const providerGovernanceClosureViewModelSummary = obj(safe.providerGovernanceClosureViewModelSummary);
+      const offlineDistributionReadinessCenterSummary = obj(safe.offlineDistributionReadinessCenterSummary);
+      const noActivationEnforcementLedgerSummary = obj(safe.noActivationEnforcementLedgerSummary);
+      const finalUserTrustSummarySummary = obj(safe.finalUserTrustSummarySummary);
+      const providerSafetyDistributionMatrixSummary = obj(safe.providerSafetyDistributionMatrixSummary);
+      const providerDistributionReadinessViewModelSummary = obj(safe.providerDistributionReadinessViewModelSummary);
       const providerAdapterRegistrySummary = obj(safe.providerAdapterRegistrySummary);
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
@@ -563,6 +568,15 @@
       if (finalReadinessHandoffSimulatorSummary.status || providerGovernanceClosureViewModelSummary.status) badges.push(badge("final_handoff_no_execution", "Final Handoff 不执行真实交接", "info"));
       if (providerGovernanceClosureEvidenceLedgerSummary.status || providerGovernanceClosureViewModelSummary.status) badges.push(badge("closure_evidence_no_persistence", "Closure Evidence 不持久化台账、不保存真实 evidence", "info"));
       if ((providerGovernanceClosureViewModelSummary.status && providerGovernanceClosureViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanGovernanceClosureReview === true) badges.push(badge("human_governance_closure_review_required", "Human governance closure review 仍需人工复核", "warning"));
+      if (offlineDistributionReadinessCenterSummary.status === "ready" || safe.offlineDistributionReadinessCenterStatus === "ready") badges.push(badge("offline_distribution_readiness_center_ready", "Offline Distribution Readiness Center 已准备", "info"));
+      if (noActivationEnforcementLedgerSummary.status === "ready" || safe.noActivationEnforcementLedgerStatus === "ready") badges.push(badge("no_activation_enforcement_ledger_ready", "No-Activation Enforcement Ledger 已准备", "info"));
+      if (finalUserTrustSummarySummary.status === "ready" || safe.finalUserTrustSummaryStatus === "ready") badges.push(badge("final_user_trust_summary_ready", "Final User Trust Summary 已准备", "info"));
+      if (providerSafetyDistributionMatrixSummary.status === "ready" || safe.providerSafetyDistributionMatrixStatus === "ready") badges.push(badge("provider_safety_distribution_matrix_ready", "Provider Safety Distribution Matrix 已准备", "info"));
+      if (offlineDistributionReadinessCenterSummary.status || providerDistributionReadinessViewModelSummary.status) badges.push(badge("distribution_readiness_no_real_package", "Distribution Readiness 不创建真实分发包", "info"));
+      if (noActivationEnforcementLedgerSummary.status || providerDistributionReadinessViewModelSummary.status) badges.push(badge("no_activation_enforcement_no_real_block", "No-Activation Enforcement 不执行真实阻断", "info"));
+      if (finalUserTrustSummarySummary.status || providerDistributionReadinessViewModelSummary.status) badges.push(badge("user_trust_summary_no_user_text", "User Trust Summary 不写文件、不保存用户原文", "info"));
+      if (providerSafetyDistributionMatrixSummary.status || providerDistributionReadinessViewModelSummary.status) badges.push(badge("safety_distribution_matrix_no_activation", "Safety Distribution Matrix 不启用 provider、不激活 sandbox", "info"));
+      if ((providerDistributionReadinessViewModelSummary.status && providerDistributionReadinessViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanDistributionReadinessReview === true) badges.push(badge("human_distribution_readiness_review_required", "Human distribution readiness review 仍需人工复核", "warning"));
       if (providerAdapterRegistrySummary.status === "ready") badges.push(badge("provider_adapter_registry_ready", "Adapter 注册表已准备", "info"));
       if (providerAdapterRegistrySummary.status === "needs_review") badges.push(badge("provider_adapter_registry_review", "Adapter 注册表仍需复核", "warning"));
       if (providerAdapterRegistrySummary.status === "blocked") badges.push(badge("provider_adapter_registry_blocked", "Adapter 注册表已阻断", "blocked"));
