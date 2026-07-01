@@ -8420,6 +8420,42 @@
         showCommercePlatformTemplateFeedback("已显示 No-Activation Guarantee", false);
         return;
       }
+      const globalShoppingGovernanceClosureButton = target && target.closest("[data-commerce-global-shopping-governance-closure-show]");
+      if (globalShoppingGovernanceClosureButton && host.contains(globalShoppingGovernanceClosureButton)) {
+        event.preventDefault();
+        const panel = globalShoppingGovernanceClosureButton.closest("[data-commerce-global-shopping-provider-governance-closure-review]") || globalShoppingGovernanceClosureButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-governance-closure-output]") || panel;
+        output.innerHTML = '<p>Offline Provider Governance Closure Board</p><p>Offline Provider Governance Closure Board 已准备</p><p>Governance Closure 不保存真实治理结论</p><p>Human governance closure review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Governance Closure", false);
+        return;
+      }
+      const globalShoppingNoActivationSealButton = target && target.closest("[data-commerce-global-shopping-no-activation-seal-show]");
+      if (globalShoppingNoActivationSealButton && host.contains(globalShoppingNoActivationSealButton)) {
+        event.preventDefault();
+        const panel = globalShoppingNoActivationSealButton.closest("[data-commerce-global-shopping-provider-governance-closure-review]") || globalShoppingNoActivationSealButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-no-activation-seal-output]") || panel;
+        output.innerHTML = '<p>No-Activation Compliance Seal</p><p>No-Activation Compliance Seal 已准备</p><p>No-Activation Seal 不生成真实封条、不执行真实阻断</p><p>Human governance closure review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 No-Activation Seal", false);
+        return;
+      }
+      const globalShoppingFinalHandoffButton = target && target.closest("[data-commerce-global-shopping-final-handoff-show]");
+      if (globalShoppingFinalHandoffButton && host.contains(globalShoppingFinalHandoffButton)) {
+        event.preventDefault();
+        const panel = globalShoppingFinalHandoffButton.closest("[data-commerce-global-shopping-provider-governance-closure-review]") || globalShoppingFinalHandoffButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-final-handoff-output]") || panel;
+        output.innerHTML = '<p>Final Readiness Handoff Simulator</p><p>Final Readiness Handoff Simulator 已准备</p><p>Final Handoff 不执行真实交接</p><p>Human governance closure review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Final Handoff", false);
+        return;
+      }
+      const globalShoppingClosureEvidenceButton = target && target.closest("[data-commerce-global-shopping-closure-evidence-show]");
+      if (globalShoppingClosureEvidenceButton && host.contains(globalShoppingClosureEvidenceButton)) {
+        event.preventDefault();
+        const panel = globalShoppingClosureEvidenceButton.closest("[data-commerce-global-shopping-provider-governance-closure-review]") || globalShoppingClosureEvidenceButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-closure-evidence-output]") || panel;
+        output.innerHTML = '<p>Provider Governance Closure Evidence Ledger</p><p>Provider Governance Closure Evidence Ledger 已准备</p><p>Closure Evidence 不持久化台账、不保存真实 evidence</p><p>Human governance closure review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Closure Evidence", false);
+        return;
+      }
       const globalShoppingHumanPilotLedgerButton = target && target.closest("[data-commerce-global-shopping-human-pilot-ledger-show]");
       if (globalShoppingHumanPilotLedgerButton && host.contains(globalShoppingHumanPilotLedgerButton)) {
         event.preventDefault();

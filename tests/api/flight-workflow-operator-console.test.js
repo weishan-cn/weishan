@@ -7,14 +7,14 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js", "apps/desktop/src/renderer/core/flightWorkflowOperatorConsole.js"]);
   const api = windowRef.WeishanFlightWorkflowOperatorConsole;
-  assert.equal(api.FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION, "3.3.0");
+  assert.equal(api.FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION, "3.4.0");
   const base = { workflowId:"wf1", workflowStateSummary:{ workflowId:"wf1" }, topCandidates:[{ providerName:"sandbox", bookingUrl:null }], selectedCandidate:{ providerName:"sandbox" }, auditReviewSummary:{ status:"ready", auditHealth:{ overall:"pass" } }, humanReviewChecklistSummary:{ status:"ready" }, finalSafeHandoffPacketSummary:{ status:"ready" }, handoffPacketPolicyDecision:{ status:"allowed" }, safetyRegressionSummary:{ status:"pass", checks:[] }, eventLedgerSummary:{ recentEvents:[{ eventType:"handoff_packet_prepared", status:"ready" }] }, blockedActions:[] };
   const ready = api.buildFlightWorkflowOperatorConsole(base);
   assert.equal(ready.consoleName, "flight_workflow_operator_console_v1");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "可以继续只读流程");
   assert.equal(ready.nextOperatorAction.enabled, true);
-  assert.equal(JSON.stringify(ready.sections.map((s) => s.sectionId)), JSON.stringify(["workflow_status", "safety_status", "recent_events", "blocked_actions", "handoff_readiness", "rc_review", "global_shopping_goal", "global_shopping_price", "global_shopping_handoff", "global_shopping_session_recap", "global_shopping_sandbox_provider_planning", "global_shopping_provider_integration_prep", "global_shopping_provider_mock_runtime", "global_shopping_provider_launch_readiness", "global_shopping_provider_launch_simulation", "global_shopping_provider_pilot_control", "global_shopping_provider_pilot_governance", "global_shopping_provider_governance_release", "global_shopping_provider_manual_release", "global_shopping_provider_sandbox_milestone", "global_shopping_provider_sandbox_release_candidate", "global_shopping_provider_certification", "global_shopping_provider_offline_release", "global_shopping_provider_offline_launch", "global_shopping_provider_final_launch_review", "global_shopping_provider_final_review_console", "global_shopping_provider_final_safety_review", "global_shopping_provider_sandbox_activation", "global_shopping_decision_review", "pilot_ops", "pilot_readiness", "pilot_onboarding", "issue_review", "issue_pattern"]));
+  assert.equal(JSON.stringify(ready.sections.map((s) => s.sectionId)), JSON.stringify(["workflow_status", "safety_status", "recent_events", "blocked_actions", "handoff_readiness", "rc_review", "global_shopping_goal", "global_shopping_price", "global_shopping_handoff", "global_shopping_session_recap", "global_shopping_sandbox_provider_planning", "global_shopping_provider_integration_prep", "global_shopping_provider_mock_runtime", "global_shopping_provider_launch_readiness", "global_shopping_provider_launch_simulation", "global_shopping_provider_pilot_control", "global_shopping_provider_pilot_governance", "global_shopping_provider_governance_release", "global_shopping_provider_manual_release", "global_shopping_provider_sandbox_milestone", "global_shopping_provider_sandbox_release_candidate", "global_shopping_provider_certification", "global_shopping_provider_offline_release", "global_shopping_provider_offline_launch", "global_shopping_provider_final_launch_review", "global_shopping_provider_final_review_console", "global_shopping_provider_final_safety_review", "global_shopping_provider_governance_closure_review", "global_shopping_provider_sandbox_activation", "global_shopping_decision_review", "pilot_ops", "pilot_readiness", "pilot_onboarding", "issue_review", "issue_pattern"]));
   assert.equal(ready.bookingUrl, null);
   assert.ok(ready.sections.some((section) => section.sectionId === "pilot_ops"));
   const launchControlRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {
@@ -53,6 +53,19 @@ function main() {
   assert.ok(finalSafetyRows.rows.some((item) => item.label === "Activation War Room"));
   assert.ok(finalSafetyRows.rows.some((item) => item.label === "Readiness Certificate"));
   assert.ok(finalSafetyRows.rows.some((item) => item.label === "No-Activation Guarantee"));
+  const governanceClosureRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {
+    offlineProviderGovernanceClosureBoardSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Offline Provider Governance Closure Board 已准备", redacted:true }, redacted:true },
+    noActivationComplianceSealSummary:{ status:"ready", userFacingSummary:{ resultLabel:"No-Activation Compliance Seal 已准备", redacted:true }, redacted:true },
+    finalReadinessHandoffSimulatorSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Final Readiness Handoff Simulator 已准备", redacted:true }, redacted:true },
+    providerGovernanceClosureEvidenceLedgerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider Governance Closure Evidence Ledger 已准备", redacted:true }, redacted:true },
+    providerGovernanceClosureViewModelSummary:{ status:"ready", title:"Provider Governance Closure Review", redacted:true },
+    safeToProceedWithHumanGovernanceClosureReview:true
+  })).sections.find((section) => section.sectionId === "global_shopping_provider_governance_closure_review");
+  assert.ok(governanceClosureRows.rows.some((item) => item.label === "Governance Closure" && item.value === "Offline Provider Governance Closure Board 已准备"));
+  assert.ok(governanceClosureRows.rows.some((item) => item.label === "No-Activation Seal" && item.value === "No-Activation Compliance Seal 已准备"));
+  assert.ok(governanceClosureRows.rows.some((item) => item.label === "Final Handoff" && item.value === "Final Readiness Handoff Simulator 已准备"));
+  assert.ok(governanceClosureRows.rows.some((item) => item.label === "Closure Evidence" && item.value === "Provider Governance Closure Evidence Ledger 已准备"));
+  assert.ok(governanceClosureRows.rows.some((item) => item.label === "Closure view" && item.value === "Provider Governance Closure Review"));
   const globalRows = api.buildFlightWorkflowOperatorConsole(Object.assign({}, base, {
     legalProviderFixtureSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider fixture 已准备" } },
     providerCredentialSafetySummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider 凭据边界安全" } },

@@ -8,7 +8,7 @@ const api = load("apps/desktop/src/renderer/core/readOnlyCandidateConfidenceLabe
 function label(status, deltaDirection, evidence) {
   return api.buildReadOnlyCandidateConfidenceLabel({ safeProviderHandoffReady:true, reconciliationSummary:{ status }, platformCheckDelta:{ deltaDirection }, manualPlatformCheckEvidence:evidence || { status:"accepted" } });
 }
-assert.equal(label("matched", "same").appVersion, "3.3.0");
+assert.equal(label("matched", "same").appVersion, "3.4.0");
 assert.equal(label("matched", "same").confidenceLabel, "高一致");
 assert.equal(label("price_changed", "up").confidenceLabel, "有差异");
 assert.equal(label("needs_recheck", "up").confidenceLabel, "需重新核对");

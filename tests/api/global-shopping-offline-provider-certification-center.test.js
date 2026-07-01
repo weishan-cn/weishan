@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineProviderCertificationCenter.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineProviderCertificationCenter;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_PROVIDER_CERTIFICATION_CENTER_VERSION, "3.3.0");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_PROVIDER_CERTIFICATION_CENTER_VERSION, "3.4.0");
 
   const ready = api.buildGlobalShoppingOfflineProviderCertificationCenter({
     providerSandboxReleaseCandidateViewModelSummary:readySummary("Provider Sandbox Release Candidate", "Provider Sandbox Release Candidate 已准备"),

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_HANDOFF_VIEW_MODEL_VERSION = "3.3.0";
+  const GLOBAL_SHOPPING_SANDBOX_HANDOFF_VIEW_MODEL_VERSION = "3.4.0";
   const VIEW_MODEL_NAME = "global_shopping_sandbox_handoff_view_model_v1";
   const CAVEAT = "本轮仅展示 Sandbox 跳转候选、平台可用性与 provider fixture 安全准备状态，不打开真实平台。平台页面才是实时价格与最终下单地点。";
 

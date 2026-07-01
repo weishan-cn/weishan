@@ -1,5 +1,5 @@
 (function(){
-  const NO_NETWORK_SENTINEL_AUDIT_VERSION = "3.3.0";
+  const NO_NETWORK_SENTINEL_AUDIT_VERSION = "3.4.0";
 
   const sentinelScope = [
     "provider adapters",

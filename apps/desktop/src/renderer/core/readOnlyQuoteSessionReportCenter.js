@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "3.3.0";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "3.4.0";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -218,6 +218,11 @@
       readOnlyProviderReadinessCertificateSummary: stripUnsafe(safe.readOnlyProviderReadinessCertificateSummary || null),
       providerNoActivationGuaranteeBoardSummary: stripUnsafe(safe.providerNoActivationGuaranteeBoardSummary || null),
       providerFinalSafetyViewModelSummary: stripUnsafe(safe.providerFinalSafetyViewModelSummary || null),
+      offlineProviderGovernanceClosureBoardSummary: stripUnsafe(safe.offlineProviderGovernanceClosureBoardSummary || null),
+      noActivationComplianceSealSummary: stripUnsafe(safe.noActivationComplianceSealSummary || null),
+      finalReadinessHandoffSimulatorSummary: stripUnsafe(safe.finalReadinessHandoffSimulatorSummary || null),
+      providerGovernanceClosureEvidenceLedgerSummary: stripUnsafe(safe.providerGovernanceClosureEvidenceLedgerSummary || null),
+      providerGovernanceClosureViewModelSummary: stripUnsafe(safe.providerGovernanceClosureViewModelSummary || null),
       offlineProviderAdapterContractKitSummary: stripUnsafe(safe.offlineProviderAdapterContractKitSummary || null),
       mockSandboxQaMatrixSummary: stripUnsafe(safe.mockSandboxQaMatrixSummary || null),
       humanActivationRunbookCenterSummary: stripUnsafe(safe.humanActivationRunbookCenterSummary || null),
@@ -279,6 +284,11 @@
       readOnlyProviderReadinessCertificateStatus: safeText(safe.readOnlyProviderReadinessCertificateStatus || safe.readOnlyProviderReadinessCertificateSummary && safe.readOnlyProviderReadinessCertificateSummary.status || ""),
       providerNoActivationGuaranteeBoardStatus: safeText(safe.providerNoActivationGuaranteeBoardStatus || safe.providerNoActivationGuaranteeBoardSummary && safe.providerNoActivationGuaranteeBoardSummary.status || ""),
       providerFinalSafetyViewModelStatus: safeText(safe.providerFinalSafetyViewModelStatus || safe.providerFinalSafetyViewModelSummary && safe.providerFinalSafetyViewModelSummary.status || ""),
+      offlineProviderGovernanceClosureBoardStatus: safeText(safe.offlineProviderGovernanceClosureBoardStatus || safe.offlineProviderGovernanceClosureBoardSummary && safe.offlineProviderGovernanceClosureBoardSummary.status || ""),
+      noActivationComplianceSealStatus: safeText(safe.noActivationComplianceSealStatus || safe.noActivationComplianceSealSummary && safe.noActivationComplianceSealSummary.status || ""),
+      finalReadinessHandoffSimulatorStatus: safeText(safe.finalReadinessHandoffSimulatorStatus || safe.finalReadinessHandoffSimulatorSummary && safe.finalReadinessHandoffSimulatorSummary.status || ""),
+      providerGovernanceClosureEvidenceLedgerStatus: safeText(safe.providerGovernanceClosureEvidenceLedgerStatus || safe.providerGovernanceClosureEvidenceLedgerSummary && safe.providerGovernanceClosureEvidenceLedgerSummary.status || ""),
+      providerGovernanceClosureViewModelStatus: safeText(safe.providerGovernanceClosureViewModelStatus || safe.providerGovernanceClosureViewModelSummary && safe.providerGovernanceClosureViewModelSummary.status || ""),
       offlineProviderAdapterContractKitStatus: safeText(safe.offlineProviderAdapterContractKitStatus || safe.offlineProviderAdapterContractKitSummary && safe.offlineProviderAdapterContractKitSummary.status || ""),
       mockSandboxQaMatrixStatus: safeText(safe.mockSandboxQaMatrixStatus || safe.mockSandboxQaMatrixSummary && safe.mockSandboxQaMatrixSummary.status || ""),
       humanActivationRunbookCenterStatus: safeText(safe.humanActivationRunbookCenterStatus || safe.humanActivationRunbookCenterSummary && safe.humanActivationRunbookCenterSummary.status || ""),
@@ -576,6 +586,11 @@
     const readOnlyProviderReadinessCertificateSummary = formatter.formatReadOnlyProviderReadinessCertificateSummary ? formatter.formatReadOnlyProviderReadinessCertificateSummary({ readOnlyProviderReadinessCertificateSummary:workflow.readOnlyProviderReadinessCertificateSummary || safe.readOnlyProviderReadinessCertificateSummary || null }) : null;
     const providerNoActivationGuaranteeBoardSummary = formatter.formatProviderNoActivationGuaranteeBoardSummary ? formatter.formatProviderNoActivationGuaranteeBoardSummary({ providerNoActivationGuaranteeBoardSummary:workflow.providerNoActivationGuaranteeBoardSummary || safe.providerNoActivationGuaranteeBoardSummary || null }) : null;
     const providerFinalSafetyViewModelSummary = formatter.formatProviderFinalSafetyViewModelSummary ? formatter.formatProviderFinalSafetyViewModelSummary({ providerFinalSafetyViewModelSummary:workflow.providerFinalSafetyViewModelSummary || safe.providerFinalSafetyViewModelSummary || null }) : null;
+    const offlineProviderGovernanceClosureBoardSummary = formatter.formatOfflineProviderGovernanceClosureBoardSummary ? formatter.formatOfflineProviderGovernanceClosureBoardSummary({ offlineProviderGovernanceClosureBoardSummary:workflow.offlineProviderGovernanceClosureBoardSummary || safe.offlineProviderGovernanceClosureBoardSummary || null }) : null;
+    const noActivationComplianceSealSummary = formatter.formatNoActivationComplianceSealSummary ? formatter.formatNoActivationComplianceSealSummary({ noActivationComplianceSealSummary:workflow.noActivationComplianceSealSummary || safe.noActivationComplianceSealSummary || null }) : null;
+    const finalReadinessHandoffSimulatorSummary = formatter.formatFinalReadinessHandoffSimulatorSummary ? formatter.formatFinalReadinessHandoffSimulatorSummary({ finalReadinessHandoffSimulatorSummary:workflow.finalReadinessHandoffSimulatorSummary || safe.finalReadinessHandoffSimulatorSummary || null }) : null;
+    const providerGovernanceClosureEvidenceLedgerSummary = formatter.formatProviderGovernanceClosureEvidenceLedgerSummary ? formatter.formatProviderGovernanceClosureEvidenceLedgerSummary({ providerGovernanceClosureEvidenceLedgerSummary:workflow.providerGovernanceClosureEvidenceLedgerSummary || safe.providerGovernanceClosureEvidenceLedgerSummary || null }) : null;
+    const providerGovernanceClosureViewModelSummary = formatter.formatProviderGovernanceClosureViewModelSummary ? formatter.formatProviderGovernanceClosureViewModelSummary({ providerGovernanceClosureViewModelSummary:workflow.providerGovernanceClosureViewModelSummary || safe.providerGovernanceClosureViewModelSummary || null }) : null;
     return clone({
       title: "候选报价证据摘要",
       subtitle: "只读候选价 · 平台最终为准",
@@ -649,6 +664,11 @@
       readOnlyProviderReadinessCertificateSummary: readOnlyProviderReadinessCertificateSummary,
       providerNoActivationGuaranteeBoardSummary: providerNoActivationGuaranteeBoardSummary,
       providerFinalSafetyViewModelSummary: providerFinalSafetyViewModelSummary,
+      offlineProviderGovernanceClosureBoardSummary: offlineProviderGovernanceClosureBoardSummary,
+      noActivationComplianceSealSummary: noActivationComplianceSealSummary,
+      finalReadinessHandoffSimulatorSummary: finalReadinessHandoffSimulatorSummary,
+      providerGovernanceClosureEvidenceLedgerSummary: providerGovernanceClosureEvidenceLedgerSummary,
+      providerGovernanceClosureViewModelSummary: providerGovernanceClosureViewModelSummary,
       readOnlyPlatformHandoffSimulatorSummary: workflow.readOnlyPlatformHandoffSimulatorSummary || safe.readOnlyPlatformHandoffSimulatorSummary ? { title:"只读平台交接模拟器", line:workflow.readOnlyPlatformHandoffSimulatorSummary && workflow.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary && workflow.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary.resultLabel || safe.readOnlyPlatformHandoffSimulatorSummary && safe.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary && safe.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary.resultLabel || "交接模拟仍需复核", redacted:true } : null,
       redactedSearchParameterPackSummary: workflow.redactedSearchParameterPackSummary || safe.redactedSearchParameterPackSummary ? { title:"脱敏搜索参数包", line:workflow.redactedSearchParameterPackSummary && workflow.redactedSearchParameterPackSummary.userFacingSummary && workflow.redactedSearchParameterPackSummary.userFacingSummary.resultLabel || safe.redactedSearchParameterPackSummary && safe.redactedSearchParameterPackSummary.userFacingSummary && safe.redactedSearchParameterPackSummary.userFacingSummary.resultLabel || "搜索参数包仍需复核", redacted:true } : null,
       userConfirmationChecklistSummary: workflow.userConfirmationChecklistSummary || safe.userConfirmationChecklistSummary ? { title:"用户确认清单", line:workflow.userConfirmationChecklistSummary && workflow.userConfirmationChecklistSummary.userFacingSummary && workflow.userConfirmationChecklistSummary.userFacingSummary.resultLabel || safe.userConfirmationChecklistSummary && safe.userConfirmationChecklistSummary.userFacingSummary && safe.userConfirmationChecklistSummary.userFacingSummary.resultLabel || "用户确认清单仍需复核", redacted:true } : null,
@@ -1018,6 +1038,11 @@
       readOnlyProviderReadinessCertificateSummary: workflow.readOnlyProviderReadinessCertificateSummary || safe.readOnlyProviderReadinessCertificateSummary || null,
       providerNoActivationGuaranteeBoardSummary: workflow.providerNoActivationGuaranteeBoardSummary || safe.providerNoActivationGuaranteeBoardSummary || null,
       providerFinalSafetyViewModelSummary: workflow.providerFinalSafetyViewModelSummary || safe.providerFinalSafetyViewModelSummary || null,
+      offlineProviderGovernanceClosureBoardSummary: workflow.offlineProviderGovernanceClosureBoardSummary || safe.offlineProviderGovernanceClosureBoardSummary || null,
+      noActivationComplianceSealSummary: workflow.noActivationComplianceSealSummary || safe.noActivationComplianceSealSummary || null,
+      finalReadinessHandoffSimulatorSummary: workflow.finalReadinessHandoffSimulatorSummary || safe.finalReadinessHandoffSimulatorSummary || null,
+      providerGovernanceClosureEvidenceLedgerSummary: workflow.providerGovernanceClosureEvidenceLedgerSummary || safe.providerGovernanceClosureEvidenceLedgerSummary || null,
+      providerGovernanceClosureViewModelSummary: workflow.providerGovernanceClosureViewModelSummary || safe.providerGovernanceClosureViewModelSummary || null,
       offlineProviderCertificationCenterSummary: workflow.offlineProviderCertificationCenterSummary || safe.offlineProviderCertificationCenterSummary || null,
       mockIntegrationRegressionLabSummary: workflow.mockIntegrationRegressionLabSummary || safe.mockIntegrationRegressionLabSummary || null,
       humanApprovalEvidenceBinderSummary: workflow.humanApprovalEvidenceBinderSummary || safe.humanApprovalEvidenceBinderSummary || null,
@@ -1069,6 +1094,11 @@
       readOnlyProviderReadinessCertificateStatus: workflow.readOnlyProviderReadinessCertificateStatus || safe.readOnlyProviderReadinessCertificateStatus || "",
       providerNoActivationGuaranteeBoardStatus: workflow.providerNoActivationGuaranteeBoardStatus || safe.providerNoActivationGuaranteeBoardStatus || "",
       providerFinalSafetyViewModelStatus: workflow.providerFinalSafetyViewModelStatus || safe.providerFinalSafetyViewModelStatus || "",
+      offlineProviderGovernanceClosureBoardStatus: workflow.offlineProviderGovernanceClosureBoardStatus || safe.offlineProviderGovernanceClosureBoardStatus || "",
+      noActivationComplianceSealStatus: workflow.noActivationComplianceSealStatus || safe.noActivationComplianceSealStatus || "",
+      finalReadinessHandoffSimulatorStatus: workflow.finalReadinessHandoffSimulatorStatus || safe.finalReadinessHandoffSimulatorStatus || "",
+      providerGovernanceClosureEvidenceLedgerStatus: workflow.providerGovernanceClosureEvidenceLedgerStatus || safe.providerGovernanceClosureEvidenceLedgerStatus || "",
+      providerGovernanceClosureViewModelStatus: workflow.providerGovernanceClosureViewModelStatus || safe.providerGovernanceClosureViewModelStatus || "",
       offlineProviderCertificationCenterStatus: workflow.offlineProviderCertificationCenterStatus || safe.offlineProviderCertificationCenterStatus || "",
       mockIntegrationRegressionLabStatus: workflow.mockIntegrationRegressionLabStatus || safe.mockIntegrationRegressionLabStatus || "",
       humanApprovalEvidenceBinderStatus: workflow.humanApprovalEvidenceBinderStatus || safe.humanApprovalEvidenceBinderStatus || "",
@@ -1083,6 +1113,7 @@
       safeToProceedWithHumanFinalLaunchReview: workflow.safeToProceedWithHumanFinalLaunchReview === true || safe.safeToProceedWithHumanFinalLaunchReview === true,
       safeToProceedWithFinalOfflineProviderReview: workflow.safeToProceedWithFinalOfflineProviderReview === true || safe.safeToProceedWithFinalOfflineProviderReview === true,
       safeToProceedWithHumanFinalSafetyReview: workflow.safeToProceedWithHumanFinalSafetyReview === true || safe.safeToProceedWithHumanFinalSafetyReview === true,
+      safeToProceedWithHumanGovernanceClosureReview: workflow.safeToProceedWithHumanGovernanceClosureReview === true || safe.safeToProceedWithHumanGovernanceClosureReview === true,
       safeToProceedWithHumanCertificationReview: workflow.safeToProceedWithHumanCertificationReview === true || safe.safeToProceedWithHumanCertificationReview === true,
       safeToProceedWithManualGovernanceReleaseDecision: workflow.safeToProceedWithManualGovernanceReleaseDecision === true || safe.safeToProceedWithManualGovernanceReleaseDecision === true,
       firstSandboxProviderConnectorStatus: workflow.firstSandboxProviderConnectorStatus || safe.firstSandboxProviderConnectorStatus || "",

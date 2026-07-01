@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingReadOnlyHandoffReadinessDrill.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingReadOnlyHandoffReadinessDrill;
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_HANDOFF_READINESS_DRILL_VERSION, "3.3.0");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_HANDOFF_READINESS_DRILL_VERSION, "3.4.0");
 
   const ready = api.buildGlobalShoppingReadOnlyHandoffReadinessDrill({
     sandboxCandidateComparisonWorkbench:{ recommendationSummary:{ recommendedCandidateId:"candidate_a" }, redacted:true },
@@ -37,7 +37,7 @@ function main() {
     }
   });
 
-  assert.equal(ready.appVersion, "3.3.0");
+  assert.equal(ready.appVersion, "3.4.0");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "只读跳转交接演练");
   assert.equal(ready.parameterPreview.readinessLabel, "ready");

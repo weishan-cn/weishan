@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_LAUNCH_DECISION_SIMULATOR_VERSION = "3.3.0";
+  const GLOBAL_SHOPPING_OFFLINE_LAUNCH_DECISION_SIMULATOR_VERSION = "3.4.0";
   const SIMULATOR_NAME = "global_shopping_offline_launch_decision_simulator_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

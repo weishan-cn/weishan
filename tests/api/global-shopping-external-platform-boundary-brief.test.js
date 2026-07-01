@@ -16,7 +16,7 @@ function load(file) {
 function main() {
   const windowRef = load("apps/desktop/src/renderer/core/globalShoppingExternalPlatformBoundaryBrief.js");
   const api = windowRef.WeishanGlobalShoppingExternalPlatformBoundaryBrief;
-  assert.equal(api.GLOBAL_SHOPPING_EXTERNAL_PLATFORM_BOUNDARY_BRIEF_VERSION, "3.3.0");
+  assert.equal(api.GLOBAL_SHOPPING_EXTERNAL_PLATFORM_BOUNDARY_BRIEF_VERSION, "3.4.0");
 
   const ready = api.buildGlobalShoppingExternalPlatformBoundaryBrief({});
   assert.equal(ready.status, "ready");

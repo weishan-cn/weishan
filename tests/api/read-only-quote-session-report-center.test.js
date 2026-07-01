@@ -94,13 +94,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "3.3.0");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "3.4.0");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "3.3.0");
+  assert.equal(ready.appVersion, "3.4.0");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -284,6 +284,31 @@ function main() {
   assert.equal(providerManualReleaseReady.userFacingSummary.sandboxPilotExceptionRegisterSummary.title, "Sandbox Pilot 例外登记簿");
   assert.equal(providerManualReleaseReady.userFacingSummary.providerReadinessSignOffPacketSummary.title, "Provider 准备签核包");
   assert.equal(providerManualReleaseReady.userFacingSummary.providerManualReleaseViewModelSummary.title, "Provider 人工发布决策与签核");
+  const governanceClosureReady = api.buildReadOnlyQuoteSessionReportCenter({
+    sessionSummary:summary,
+    offlineProviderGovernanceClosureBoardSummary:{ status:"ready", userFacingSummary:{ title:"Offline Provider Governance Closure Board", resultLabel:"Offline Provider Governance Closure Board 已准备", redacted:true }, redacted:true },
+    noActivationComplianceSealSummary:{ status:"ready", userFacingSummary:{ title:"No-Activation Compliance Seal", resultLabel:"No-Activation Compliance Seal 已准备", redacted:true }, redacted:true },
+    finalReadinessHandoffSimulatorSummary:{ status:"ready", userFacingSummary:{ title:"Final Readiness Handoff Simulator", resultLabel:"Final Readiness Handoff Simulator 已准备", redacted:true }, redacted:true },
+    providerGovernanceClosureEvidenceLedgerSummary:{ status:"ready", userFacingSummary:{ title:"Provider Governance Closure Evidence Ledger", resultLabel:"Provider Governance Closure Evidence Ledger 已准备", redacted:true }, redacted:true },
+    providerGovernanceClosureViewModelSummary:{ status:"ready", title:"Provider Governance Closure Review", redacted:true },
+    offlineProviderGovernanceClosureBoardStatus:"ready",
+    noActivationComplianceSealStatus:"ready",
+    finalReadinessHandoffSimulatorStatus:"ready",
+    providerGovernanceClosureEvidenceLedgerStatus:"ready",
+    providerGovernanceClosureViewModelStatus:"ready",
+    safeToProceedWithHumanGovernanceClosureReview:true
+  });
+  assert.equal(governanceClosureReady.safetyReport.offlineProviderGovernanceClosureBoardSummary.userFacingSummary.title, "Offline Provider Governance Closure Board");
+  assert.equal(governanceClosureReady.safetyReport.noActivationComplianceSealSummary.userFacingSummary.title, "No-Activation Compliance Seal");
+  assert.equal(governanceClosureReady.safetyReport.finalReadinessHandoffSimulatorSummary.userFacingSummary.title, "Final Readiness Handoff Simulator");
+  assert.equal(governanceClosureReady.safetyReport.providerGovernanceClosureEvidenceLedgerSummary.userFacingSummary.title, "Provider Governance Closure Evidence Ledger");
+  assert.equal(governanceClosureReady.safetyReport.providerGovernanceClosureViewModelSummary.title, "Provider Governance Closure Review");
+  assert.equal(governanceClosureReady.safetyReport.offlineProviderGovernanceClosureBoardStatus, "ready");
+  assert.equal(governanceClosureReady.safetyReport.noActivationComplianceSealStatus, "ready");
+  assert.equal(governanceClosureReady.safetyReport.finalReadinessHandoffSimulatorStatus, "ready");
+  assert.equal(governanceClosureReady.safetyReport.providerGovernanceClosureEvidenceLedgerStatus, "ready");
+  assert.equal(governanceClosureReady.safetyReport.providerGovernanceClosureViewModelStatus, "ready");
+  assert.equal(governanceClosureReady.safetyReport.safeToProceedWithHumanGovernanceClosureReview, true);
   const globalGoal = windowRef.WeishanGlobalShoppingProductGoalCharter.buildGlobalShoppingProductGoalCharter();
   const jumpBoundary = windowRef.WeishanGlobalShoppingJumpToPlatformBoundary.buildGlobalShoppingJumpToPlatformBoundary();
   const legalProviderFixture = windowRef.WeishanGlobalShoppingLegalProviderFixtureAdapter.buildGlobalShoppingLegalProviderFixtureAdapter({ providerId:"provider_1", providerName:"Fixture Provider", providerType:"official", providerLegalStatus:"allowed", providerStatus:"fixture", itemType:"flight", officialFixturePrice:{ title:"SHA-CTU", basePrice:900 } });

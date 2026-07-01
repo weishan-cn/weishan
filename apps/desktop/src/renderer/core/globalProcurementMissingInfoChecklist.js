@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_MISSING_INFO_CHECKLIST_VERSION = "3.3.0";
+  const GLOBAL_PROCUREMENT_MISSING_INFO_CHECKLIST_VERSION = "3.4.0";
 
   function unique(list){
     return Array.from(new Set((Array.isArray(list) ? list : []).filter(Boolean)));

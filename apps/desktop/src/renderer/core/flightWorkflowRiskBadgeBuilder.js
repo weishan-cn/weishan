@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "3.3.0";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "3.4.0";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -202,6 +202,11 @@
       const readOnlyProviderReadinessCertificateSummary = obj(safe.readOnlyProviderReadinessCertificateSummary);
       const providerNoActivationGuaranteeBoardSummary = obj(safe.providerNoActivationGuaranteeBoardSummary);
       const providerFinalSafetyViewModelSummary = obj(safe.providerFinalSafetyViewModelSummary);
+      const offlineProviderGovernanceClosureBoardSummary = obj(safe.offlineProviderGovernanceClosureBoardSummary);
+      const noActivationComplianceSealSummary = obj(safe.noActivationComplianceSealSummary);
+      const finalReadinessHandoffSimulatorSummary = obj(safe.finalReadinessHandoffSimulatorSummary);
+      const providerGovernanceClosureEvidenceLedgerSummary = obj(safe.providerGovernanceClosureEvidenceLedgerSummary);
+      const providerGovernanceClosureViewModelSummary = obj(safe.providerGovernanceClosureViewModelSummary);
       const providerAdapterRegistrySummary = obj(safe.providerAdapterRegistrySummary);
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
@@ -549,6 +554,15 @@
       if (readOnlyProviderReadinessCertificateSummary.status || providerFinalSafetyViewModelSummary.status) badges.push(badge("read_only_provider_readiness_certificate_no_persistence", "Readiness Certificate 不持久化证书", "info"));
       if (providerNoActivationGuaranteeBoardSummary.status || providerFinalSafetyViewModelSummary.status) badges.push(badge("provider_no_activation_guarantee_board_no_mutation", "No-Activation Guarantee 不修改配置、不执行真实阻断", "info"));
       if ((providerFinalSafetyViewModelSummary.status && providerFinalSafetyViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanFinalSafetyReview === true) badges.push(badge("human_final_safety_review_required", "Human final safety review 仍需人工复核", "warning"));
+      if (offlineProviderGovernanceClosureBoardSummary.status === "ready" || safe.offlineProviderGovernanceClosureBoardStatus === "ready") badges.push(badge("offline_provider_governance_closure_board_ready", "Offline Provider Governance Closure Board 已准备", "info"));
+      if (noActivationComplianceSealSummary.status === "ready" || safe.noActivationComplianceSealStatus === "ready") badges.push(badge("no_activation_compliance_seal_ready", "No-Activation Compliance Seal 已准备", "info"));
+      if (finalReadinessHandoffSimulatorSummary.status === "ready" || safe.finalReadinessHandoffSimulatorStatus === "ready") badges.push(badge("final_readiness_handoff_simulator_ready", "Final Readiness Handoff Simulator 已准备", "info"));
+      if (providerGovernanceClosureEvidenceLedgerSummary.status === "ready" || safe.providerGovernanceClosureEvidenceLedgerStatus === "ready") badges.push(badge("provider_governance_closure_evidence_ledger_ready", "Provider Governance Closure Evidence Ledger 已准备", "info"));
+      if (offlineProviderGovernanceClosureBoardSummary.status || providerGovernanceClosureViewModelSummary.status) badges.push(badge("governance_closure_no_real_decision", "Governance Closure 不保存真实治理结论", "info"));
+      if (noActivationComplianceSealSummary.status || providerGovernanceClosureViewModelSummary.status) badges.push(badge("no_activation_seal_no_real_block", "No-Activation Seal 不生成真实封条、不执行真实阻断", "info"));
+      if (finalReadinessHandoffSimulatorSummary.status || providerGovernanceClosureViewModelSummary.status) badges.push(badge("final_handoff_no_execution", "Final Handoff 不执行真实交接", "info"));
+      if (providerGovernanceClosureEvidenceLedgerSummary.status || providerGovernanceClosureViewModelSummary.status) badges.push(badge("closure_evidence_no_persistence", "Closure Evidence 不持久化台账、不保存真实 evidence", "info"));
+      if ((providerGovernanceClosureViewModelSummary.status && providerGovernanceClosureViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanGovernanceClosureReview === true) badges.push(badge("human_governance_closure_review_required", "Human governance closure review 仍需人工复核", "warning"));
       if (providerAdapterRegistrySummary.status === "ready") badges.push(badge("provider_adapter_registry_ready", "Adapter 注册表已准备", "info"));
       if (providerAdapterRegistrySummary.status === "needs_review") badges.push(badge("provider_adapter_registry_review", "Adapter 注册表仍需复核", "warning"));
       if (providerAdapterRegistrySummary.status === "blocked") badges.push(badge("provider_adapter_registry_blocked", "Adapter 注册表已阻断", "blocked"));

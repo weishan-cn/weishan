@@ -48,7 +48,7 @@ function assertMetadataOnly(value) {
 }
 
 function main() {
-  assert.equal(SECURE_API_KEY_STORAGE_VERSION, "3.3.0");
+  assert.equal(SECURE_API_KEY_STORAGE_VERSION, "3.4.0");
 
   const { service, safeStorage, storePath } = makeService();
   const initial = service.getProviderKeyStatus("flight_provider_key");
@@ -74,7 +74,7 @@ function main() {
   const diskRecord = JSON.parse(diskText).records.flight_provider_key;
   assert.equal(typeof diskRecord.encryptedBlob, "string");
   assert.equal(diskRecord.redacted, true);
-  assert.equal(diskRecord.storageVersion, "3.3.0");
+  assert.equal(diskRecord.storageVersion, "3.4.0");
   assert.equal(diskRecord.encryptionProvider, "electron_safeStorage");
   assert.equal(Object.prototype.hasOwnProperty.call(diskRecord, "credential"), false);
   assert.equal(Object.prototype.hasOwnProperty.call(diskRecord, "apiKey"), false);

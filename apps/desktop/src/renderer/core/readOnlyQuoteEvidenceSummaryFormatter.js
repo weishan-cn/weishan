@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "3.3.0";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "3.4.0";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -649,6 +649,36 @@
     return clone({ title:"Provider Final Safety Review", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Provider Final Safety Review"), sectionLabels:["Safety Seal", "Activation War Room", "Readiness Certificate", "No-Activation Guarantee"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前只展示 provider final safety review。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
+  function formatOfflineProviderGovernanceClosureBoardSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.offlineProviderGovernanceClosureBoardSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Offline Provider Governance Closure Board", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Offline Provider Governance Closure Board 仍需复核"), sectionLabels:["Governance Closure", "Activation War Room", "Readiness Certificate", "No-Activation Guarantee"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Governance Closure 不保存真实治理结论。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatNoActivationComplianceSealSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.noActivationComplianceSealSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"No-Activation Compliance Seal", line:safeLine(obj(summary.userFacingSummary).resultLabel || "No-Activation Compliance Seal 仍需复核"), sectionLabels:["Governance Closure", "No-Activation Guarantee", "Activation Blockers", "Security Guard"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "No-Activation Seal 不生成真实封条、不执行真实阻断。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatFinalReadinessHandoffSimulatorSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.finalReadinessHandoffSimulatorSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Final Readiness Handoff Simulator", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Final Readiness Handoff Simulator 仍需复核"), sectionLabels:["Governance Closure", "No-Activation Seal", "Final Handoff", "Readiness Certificate"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Final Handoff 不执行真实交接。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatProviderGovernanceClosureEvidenceLedgerSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.providerGovernanceClosureEvidenceLedgerSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Provider Governance Closure Evidence Ledger", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Provider Governance Closure Evidence Ledger 仍需复核"), sectionLabels:["Governance Closure", "No-Activation Seal", "Final Handoff", "Closure Evidence"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Closure Evidence 不持久化台账、不保存真实 evidence。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatProviderGovernanceClosureViewModelSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.providerGovernanceClosureViewModelSummary || safe.viewModelSummary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Provider Governance Closure Review", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Provider Governance Closure Review"), sectionLabels:["Governance Closure", "No-Activation Seal", "Final Handoff", "Closure Evidence"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前只展示 provider governance closure review。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -716,6 +746,11 @@
     formatReadOnlyProviderReadinessCertificateSummary,
     formatProviderNoActivationGuaranteeBoardSummary,
     formatProviderFinalSafetyViewModelSummary,
+    formatOfflineProviderGovernanceClosureBoardSummary,
+    formatNoActivationComplianceSealSummary,
+    formatFinalReadinessHandoffSimulatorSummary,
+    formatProviderGovernanceClosureEvidenceLedgerSummary,
+    formatProviderGovernanceClosureViewModelSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,

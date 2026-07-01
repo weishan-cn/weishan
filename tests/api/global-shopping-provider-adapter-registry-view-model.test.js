@@ -54,7 +54,7 @@ function main() {
     dryRunProviderResponseNormalizerSummary:normalizer
   });
   const api = windowRef.WeishanGlobalShoppingProviderAdapterRegistryViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_ADAPTER_REGISTRY_VIEW_MODEL_VERSION, "3.3.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_ADAPTER_REGISTRY_VIEW_MODEL_VERSION, "3.4.0");
 
   const ready = api.buildGlobalShoppingProviderAdapterRegistryViewModel({
     providerAdapterRegistrySummary:registry,
@@ -62,7 +62,7 @@ function main() {
     sandboxProviderRunbookSummary:runbook,
     safeToProceedWithFirstSandboxProviderConnectorImplementation:true
   });
-  assert.equal(ready.appVersion, "3.3.0");
+  assert.equal(ready.appVersion, "3.4.0");
   assert.equal(ready.status, "ready");
   assert.equal(ready.title, "Provider Adapter 注册与接入手册");
   assert.equal(ready.cards.length, 4);

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_RELEASE_RISK_LEDGER_VERSION = "3.3.0";
+  const FLIGHT_WORKFLOW_READ_ONLY_RELEASE_RISK_LEDGER_VERSION = "3.4.0";
   const LEDGER_NAME = "flight_workflow_read_only_release_risk_ledger_v1";
   const CAVEAT = "该风险台账只用于只读发布候选判断，不代表真实交易、订单、客服工单或出票能力。";
 

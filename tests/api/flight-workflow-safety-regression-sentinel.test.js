@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyRegressionSentinel.js"]);
   const api = windowRef.WeishanFlightWorkflowSafetyRegressionSentinel;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "3.3.0");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION, "3.4.0");
   const safe = api.buildFlightWorkflowSafetyRegressionReport({ bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, credentialInput:false, rawResponseStored:false, rawUserTextStored:false, secretStored:false, autoOpen:false, autoRefresh:false, fileWrite:false, download:false, note:"平台最终为准" });
   assert.equal(safe.sentinelName, "flight_workflow_safety_regression_sentinel_v1");
   assert.equal(safe.status, "pass");
@@ -207,6 +207,19 @@ function main() {
   assert.equal(finalReviewConsole.readOnlyReleaseEvidenceSummary.status, "ready");
   assert.equal(finalReviewConsole.offlineProviderReadinessDecisionMatrixSummary.status, "ready");
   assert.equal(finalReviewConsole.providerFinalReviewConsoleViewModelSummary.status, "ready");
+  const governanceClosure = api.buildFlightWorkflowSafetyRegressionReport({
+    offlineProviderGovernanceClosureBoardSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false } },
+    noActivationComplianceSealSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false } },
+    finalReadinessHandoffSimulatorSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false } },
+    providerGovernanceClosureEvidenceLedgerSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false, fileWrite:false, download:false } },
+    providerGovernanceClosureViewModelSummary:{ status:"ready", bookingUrl:null, paymentUrl:null, orderUrl:null, autoOpen:false, fileWrite:false, download:false }
+  });
+  assert.equal(governanceClosure.status, "pass");
+  assert.equal(governanceClosure.offlineProviderGovernanceClosureBoardSummary.status, "ready");
+  assert.equal(governanceClosure.noActivationComplianceSealSummary.status, "ready");
+  assert.equal(governanceClosure.finalReadinessHandoffSimulatorSummary.status, "ready");
+  assert.equal(governanceClosure.providerGovernanceClosureEvidenceLedgerSummary.status, "ready");
+  assert.equal(governanceClosure.providerGovernanceClosureViewModelSummary.status, "ready");
   const providerCertification = api.buildFlightWorkflowSafetyRegressionReport({
     offlineProviderCertificationCenterSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },
     mockIntegrationRegressionLabSummary:{ status:"ready", safety:{ bookingUrl:null, payment:false, order:false, ticketing:false, rawUserTextStored:false, rawResponseStored:false, secretStored:false } },

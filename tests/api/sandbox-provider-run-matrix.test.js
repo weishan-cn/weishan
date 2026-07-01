@@ -11,9 +11,9 @@ function main() {
     "apps/desktop/src/renderer/core/sandboxProviderRunMatrix.js"
   ]);
   const api = windowRef.WeishanSandboxProviderRunMatrix;
-  assert.equal(api.SANDBOX_PROVIDER_RUN_MATRIX_VERSION, "3.3.0");
+  assert.equal(api.SANDBOX_PROVIDER_RUN_MATRIX_VERSION, "3.4.0");
   const matrix = api.buildSandboxProviderRunMatrix();
-  assert.equal(matrix.appVersion, "3.3.0");
+  assert.equal(matrix.appVersion, "3.4.0");
   assert.equal(matrix.runMode, "read_only_sandbox");
   assert.equal(matrix.productionProviderEnabled, false);
   assert.equal(matrix.networkAllowed, false);
@@ -23,7 +23,7 @@ function main() {
   assert.equal(matrix.providers.find((row) => row.providerId === "google_flights_search").status, "handoff_only");
   assert.equal(api.evaluateSandboxProviderRunEligibility("unknown_provider", { providers: matrix.providers }).status, "blocked");
   const audit = api.buildSandboxProviderRunMatrixAuditDraft();
-  assert.equal(audit.appVersion, "3.3.0");
+  assert.equal(audit.appVersion, "3.4.0");
   assert.equal(audit.bookingUrl, null);
   assert.equal(audit.identityUpload, false);
   console.log("SANDBOX_PROVIDER_RUN_MATRIX PASS");

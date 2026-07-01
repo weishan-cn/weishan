@@ -18,7 +18,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderSandboxPilotControlRoom.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderSandboxPilotControlRoom;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_PILOT_CONTROL_ROOM_VERSION, "3.3.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_PILOT_CONTROL_ROOM_VERSION, "3.4.0");
 
   const ready = api.buildGlobalShoppingProviderSandboxPilotControlRoom({
     humanApprovalSimulationGateSummary:{ status:"ready", userFacingSummary:{ resultLabel:"审批模拟闸门已准备", redacted:true } },

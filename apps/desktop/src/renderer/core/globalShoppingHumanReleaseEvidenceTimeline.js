@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_HUMAN_RELEASE_EVIDENCE_TIMELINE_VERSION = "3.3.0";
+  const GLOBAL_SHOPPING_HUMAN_RELEASE_EVIDENCE_TIMELINE_VERSION = "3.4.0";
   const TIMELINE_NAME = "global_shopping_human_release_evidence_timeline_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

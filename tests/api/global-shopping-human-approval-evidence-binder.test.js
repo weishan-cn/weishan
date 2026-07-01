@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingHumanApprovalEvidenceBinder.js"]);
   const api = windowRef.WeishanGlobalShoppingHumanApprovalEvidenceBinder;
-  assert.equal(api.GLOBAL_SHOPPING_HUMAN_APPROVAL_EVIDENCE_BINDER_VERSION, "3.3.0");
+  assert.equal(api.GLOBAL_SHOPPING_HUMAN_APPROVAL_EVIDENCE_BINDER_VERSION, "3.4.0");
 
   const ready = api.buildGlobalShoppingHumanApprovalEvidenceBinder({
     offlineProviderCertificationCenterSummary:readySummary("Offline Provider Certification Center", "离线 Provider 认证中心已准备"),
