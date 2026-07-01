@@ -26,7 +26,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderSandboxReadinessWorkbench.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderSandboxReadinessWorkbench;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_READINESS_WORKBENCH_VERSION, "2.9.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_READINESS_WORKBENCH_VERSION, "3.0.0");
 
   const ready = api.buildGlobalShoppingProviderSandboxReadinessWorkbench({
     offlineSandboxTraceInspectorSummary:readySummary("离线 Sandbox Trace 检查器", "离线 Trace 检查已准备"),

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_PILOT_EXCEPTION_REGISTER_VERSION = "2.9.0";
+  const GLOBAL_SHOPPING_SANDBOX_PILOT_EXCEPTION_REGISTER_VERSION = "3.0.0";
   const REGISTER_NAME = "global_shopping_sandbox_pilot_exception_register_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

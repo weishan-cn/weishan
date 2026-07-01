@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.9.0";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "3.0.0";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -182,6 +182,11 @@
       const adapterSecurityRegressionGuardSummary = obj(safe.adapterSecurityRegressionGuardSummary);
       const providerOfflineLaunchChecklistSummary = obj(safe.providerOfflineLaunchChecklistSummary);
       const providerOfflineLaunchViewModelSummary = obj(safe.providerOfflineLaunchViewModelSummary);
+      const offlineProviderLaunchControlTowerSummary = obj(safe.offlineProviderLaunchControlTowerSummary);
+      const adapterPolicyEngineSummary = obj(safe.adapterPolicyEngineSummary);
+      const humanReleaseEvidenceTimelineSummary = obj(safe.humanReleaseEvidenceTimelineSummary);
+      const sandboxActivationFinalReviewBoardSummary = obj(safe.sandboxActivationFinalReviewBoardSummary);
+      const providerLaunchControlViewModelSummary = obj(safe.providerLaunchControlViewModelSummary);
       const providerAdapterRegistrySummary = obj(safe.providerAdapterRegistrySummary);
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
@@ -493,6 +498,15 @@
       if (adapterSecurityRegressionGuardSummary.status || providerOfflineLaunchViewModelSummary.status) badges.push(badge("adapter_security_regression_guard_no_config_mutation", "Security Guard 不修改配置、不启用 provider", "info"));
       if (providerOfflineLaunchChecklistSummary.status || providerOfflineLaunchViewModelSummary.status) badges.push(badge("provider_offline_launch_checklist_no_release_push", "Launch Checklist 不创建 release、不 push", "info"));
       if ((providerOfflineLaunchViewModelSummary.status && providerOfflineLaunchViewModelSummary.status !== "blocked") || safe.safeToProceedWithManualOfflineLaunchDecisionReview === true) badges.push(badge("manual_offline_launch_decision_review_required", "Manual offline launch decision 仍需人工复核", "warning"));
+      if (offlineProviderLaunchControlTowerSummary.status === "ready" || safe.offlineProviderLaunchControlTowerStatus === "ready") badges.push(badge("offline_provider_launch_control_tower_ready", "Offline Provider Launch Control Tower 已准备", "info"));
+      if (adapterPolicyEngineSummary.status === "ready" || safe.adapterPolicyEngineStatus === "ready") badges.push(badge("adapter_policy_engine_ready", "Adapter Policy Engine 已准备", "info"));
+      if (humanReleaseEvidenceTimelineSummary.status === "ready" || safe.humanReleaseEvidenceTimelineStatus === "ready") badges.push(badge("human_release_evidence_timeline_ready", "Human Release Evidence Timeline 已准备", "info"));
+      if (sandboxActivationFinalReviewBoardSummary.status === "ready" || safe.sandboxActivationFinalReviewBoardStatus === "ready") badges.push(badge("sandbox_activation_final_review_board_ready", "Sandbox Activation Final Review Board 已准备", "info"));
+      if (offlineProviderLaunchControlTowerSummary.status || providerLaunchControlViewModelSummary.status) badges.push(badge("launch_control_no_real_decision", "Launch Control 不保存真实决策", "info"));
+      if (adapterPolicyEngineSummary.status || providerLaunchControlViewModelSummary.status) badges.push(badge("adapter_policy_no_config_mutation", "Adapter Policy 不修改配置、不启用 provider", "info"));
+      if (humanReleaseEvidenceTimelineSummary.status || providerLaunchControlViewModelSummary.status) badges.push(badge("evidence_timeline_no_persistence", "Evidence Timeline 不持久化时间线", "info"));
+      if (sandboxActivationFinalReviewBoardSummary.status || providerLaunchControlViewModelSummary.status) badges.push(badge("final_review_no_activation", "Final Review 不激活 sandbox", "info"));
+      if ((providerLaunchControlViewModelSummary.status && providerLaunchControlViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanLaunchControlReview === true) badges.push(badge("human_launch_control_review_required", "Human launch control review 仍需人工复核", "warning"));
       if (providerAdapterRegistrySummary.status === "ready") badges.push(badge("provider_adapter_registry_ready", "Adapter 注册表已准备", "info"));
       if (providerAdapterRegistrySummary.status === "needs_review") badges.push(badge("provider_adapter_registry_review", "Adapter 注册表仍需复核", "warning"));
       if (providerAdapterRegistrySummary.status === "blocked") badges.push(badge("provider_adapter_registry_blocked", "Adapter 注册表已阻断", "blocked"));

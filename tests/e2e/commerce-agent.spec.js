@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v2.9.0 provider offline launch decision and activation guard stays local and bounded @commerce-smoke", async () => {
+  test("v3.0.0 provider offline launch decision and activation guard stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9620,6 +9620,11 @@ test.describe.serial("commerce agent workbench", () => {
       window.WeishanGlobalShoppingAdapterSecurityRegressionGuard &&
       window.WeishanGlobalShoppingProviderOfflineLaunchChecklist &&
       window.WeishanGlobalShoppingProviderOfflineLaunchViewModel &&
+      window.WeishanGlobalShoppingOfflineProviderLaunchControlTower &&
+      window.WeishanGlobalShoppingAdapterPolicyEngine &&
+      window.WeishanGlobalShoppingHumanReleaseEvidenceTimeline &&
+      window.WeishanGlobalShoppingSandboxActivationFinalReviewBoard &&
+      window.WeishanGlobalShoppingProviderLaunchControlViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
     const v290 = await page.evaluate(() => {
@@ -9627,7 +9632,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v290-render-smoke", "true");
       const card = {
-        version:"2.9.0",
+        version:"3.0.0",
         visible:true,
         providerOfflineReleaseGateSummary:{ status:"ready", userFacingSummary:{ title:"Provider Offline Release Gate", resultLabel:"离线发布闸门已准备", redacted:true }, rows:[{ rowId:"release_gate", label:"Offline Release Gate", value:"离线发布闸门已准备", status:"pass", redacted:true }], redacted:true },
         providerCertificationFreezeLedgerSummary:{ status:"ready", userFacingSummary:{ title:"Provider Certification Freeze Ledger", resultLabel:"认证冻结台账已准备", redacted:true }, rows:[{ rowId:"freeze_ledger", label:"Certification Freeze", value:"认证冻结台账已准备", status:"pass", redacted:true }], redacted:true },
@@ -9639,6 +9644,11 @@ test.describe.serial("commerce agent workbench", () => {
         adapterSecurityRegressionGuardSummary:{ status:"ready", userFacingSummary:{ title:"Adapter Security Regression Guard", resultLabel:"Adapter 安全回归守卫已准备", redacted:true }, rows:[{ rowId:"security_guard", label:"Security Guard", value:"Adapter 安全回归守卫已准备", status:"pass", redacted:true }], redacted:true },
         providerOfflineLaunchChecklistSummary:{ status:"ready", userFacingSummary:{ title:"Provider Offline Launch Checklist", resultLabel:"离线 Launch Checklist 已准备", redacted:true }, rows:[{ rowId:"launch_checklist", label:"Launch Checklist", value:"离线 Launch Checklist 已准备", status:"pass", redacted:true }], redacted:true },
         providerOfflineLaunchViewModelSummary:{ status:"ready", title:"Provider 离线 Launch 决策与安全守卫", redacted:true },
+        offlineProviderLaunchControlTowerSummary:{ status:"ready", userFacingSummary:{ title:"Offline Provider Launch Control Tower", resultLabel:"离线 Launch 控制塔已准备", redacted:true }, rows:[{ rowId:"launch_control", label:"Launch Control", value:"离线 Launch 控制塔已准备", status:"pass", redacted:true }], redacted:true },
+        adapterPolicyEngineSummary:{ status:"ready", userFacingSummary:{ title:"Adapter Policy Engine", resultLabel:"Adapter 策略引擎已准备", redacted:true }, rows:[{ rowId:"adapter_policy", label:"Adapter Policy", value:"Adapter 策略引擎已准备", status:"pass", redacted:true }], redacted:true },
+        humanReleaseEvidenceTimelineSummary:{ status:"ready", userFacingSummary:{ title:"Human Release Evidence Timeline", resultLabel:"人工发布证据时间线已准备", redacted:true }, rows:[{ rowId:"evidence_timeline", label:"Evidence Timeline", value:"人工发布证据时间线已准备", status:"pass", redacted:true }], redacted:true },
+        sandboxActivationFinalReviewBoardSummary:{ status:"ready", userFacingSummary:{ title:"Sandbox Activation Final Review Board", resultLabel:"Sandbox 激活终审板已准备", redacted:true }, rows:[{ rowId:"final_review", label:"Final Review", value:"Sandbox 激活终审板已准备", status:"pass", redacted:true }], redacted:true },
+        providerLaunchControlViewModelSummary:{ status:"ready", title:"Provider Launch Control Tower", redacted:true },
         providerOfflineReleaseGateStatus:"ready",
         providerCertificationFreezeLedgerStatus:"ready",
         sandboxActivationReviewPacketStatus:"ready",
@@ -9650,11 +9660,18 @@ test.describe.serial("commerce agent workbench", () => {
         adapterSecurityRegressionGuardStatus:"ready",
         providerOfflineLaunchChecklistStatus:"ready",
         providerOfflineLaunchViewModelStatus:"ready",
-        safeToProceedWithManualOfflineLaunchDecisionReview:false
+        safeToProceedWithManualOfflineLaunchDecisionReview:false,
+        offlineProviderLaunchControlTowerStatus:"ready",
+        adapterPolicyEngineStatus:"ready",
+        humanReleaseEvidenceTimelineStatus:"ready",
+        sandboxActivationFinalReviewBoardStatus:"ready",
+        providerLaunchControlViewModelStatus:"ready",
+        safeToProceedWithHumanLaunchControlReview:false
       };
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml(card);
       const section = host.querySelector("[data-commerce-global-shopping-provider-offline-release='true']");
       const launchSection = host.querySelector("[data-commerce-global-shopping-provider-offline-launch='true']");
+      const launchControlSection = host.querySelector("[data-commerce-global-shopping-provider-launch-control='true']");
       document.body.appendChild(host);
       return {
         text:host.innerText,
@@ -9665,6 +9682,9 @@ test.describe.serial("commerce agent workbench", () => {
         launchSectionText:launchSection ? launchSection.innerText : "",
         launchSectionHtml:launchSection ? launchSection.innerHTML : "",
         launchSectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-offline-launch='true']").length,
+        launchControlSectionText:launchControlSection ? launchControlSection.innerText : "",
+        launchControlSectionHtml:launchControlSection ? launchControlSection.innerHTML : "",
+        launchControlSectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-launch-control='true']").length,
         releaseGateButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-offline-release-gate-show]").length,
         freezeButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-certification-freeze-ledger-show]").length,
         activationButtonCount:host.querySelectorAll("[data-commerce-global-shopping-sandbox-activation-review-packet-show]").length,
@@ -9672,7 +9692,11 @@ test.describe.serial("commerce agent workbench", () => {
         launchDecisionButtonCount:host.querySelectorAll("[data-commerce-global-shopping-offline-launch-decision-show]").length,
         activationReceiptButtonCount:host.querySelectorAll("[data-commerce-global-shopping-activation-receipt-show]").length,
         securityGuardButtonCount:host.querySelectorAll("[data-commerce-global-shopping-security-guard-show]").length,
-        launchChecklistButtonCount:host.querySelectorAll("[data-commerce-global-shopping-launch-checklist-show]").length
+        launchChecklistButtonCount:host.querySelectorAll("[data-commerce-global-shopping-launch-checklist-show]").length,
+        launchControlButtonCount:host.querySelectorAll("[data-commerce-global-shopping-launch-control-show]").length,
+        adapterPolicyButtonCount:host.querySelectorAll("[data-commerce-global-shopping-adapter-policy-show]").length,
+        evidenceTimelineButtonCount:host.querySelectorAll("[data-commerce-global-shopping-evidence-timeline-show]").length,
+        finalReviewButtonCount:host.querySelectorAll("[data-commerce-global-shopping-final-review-show]").length
       };
     });
     expect(v290.sectionCount).toBe(1);
@@ -9685,6 +9709,11 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v290.activationReceiptButtonCount).toBe(1);
     expect(v290.securityGuardButtonCount).toBe(1);
     expect(v290.launchChecklistButtonCount).toBe(1);
+    expect(v290.launchControlSectionCount).toBe(1);
+    expect(v290.launchControlButtonCount).toBe(1);
+    expect(v290.adapterPolicyButtonCount).toBe(1);
+    expect(v290.evidenceTimelineButtonCount).toBe(1);
+    expect(v290.finalReviewButtonCount).toBe(1);
     expect(v290.text).toContain("Provider 离线 Launch 决策与安全守卫");
     expect(v290.text).toContain("Offline Launch Decision Simulator");
     expect(v290.text).toContain("Sandbox Activation Receipt Ledger");
@@ -9705,8 +9734,30 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v290.text).toContain("Manual offline launch decision 仍需人工复核");
     expect(v290.text).toContain("当前只展示 provider 离线 launch 决策与安全守卫");
     expect(v290.text).toContain("不接真实 provider，不读取密钥，不联网，不创建 release，不 push");
+    expect(v290.text).toContain("Provider Launch Control Tower");
+    expect(v290.text).toContain("Offline Provider Launch Control Tower");
+    expect(v290.text).toContain("Adapter Policy Engine");
+    expect(v290.text).toContain("Human Release Evidence Timeline");
+    expect(v290.text).toContain("Sandbox Activation Final Review Board");
+    expect(v290.text).toContain("Launch Control");
+    expect(v290.text).toContain("Adapter Policy");
+    expect(v290.text).toContain("Evidence Timeline");
+    expect(v290.text).toContain("Final Review");
+    expect(v290.text).toContain("离线 Launch 控制塔已准备");
+    expect(v290.text).toContain("Adapter 策略引擎已准备");
+    expect(v290.text).toContain("人工发布证据时间线已准备");
+    expect(v290.text).toContain("Sandbox 激活终审板已准备");
+    expect(v290.text).toContain("Launch Control 不保存真实决策");
+    expect(v290.text).toContain("Adapter Policy 不修改配置、不启用 provider");
+    expect(v290.text).toContain("Evidence Timeline 不持久化时间线");
+    expect(v290.text).toContain("Final Review 不激活 sandbox");
+    expect(v290.text).toContain("Human launch control review 仍需人工复核");
+    expect(v290.text).toContain("当前只展示 provider launch control tower");
+    expect(v290.text).toContain("不接真实 provider，不读取密钥，不联网，不激活 sandbox，不创建 release，不 push");
     expect(v290.launchSectionText).not.toMatch(/开始接入真实 provider|启动 pilot|(?<!不)激活 sandbox|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|真实 SDK|创建 provider client|安装依赖|key 输入框|创建审批任务|发送邮件|打开外部文档|执行回滚|修改 git|删除文件|停止服务|下载证据|导出证据|上传证据|(?<!不)创建 release|创建 tag|(?<!不 )push|发布到生产|自动发布|合作平台|官方背书|平台授权|已接入 provider|可调用 provider|立即购买|直接下单|一键下单|一键出票|授权付款|创建订单|打开平台/);
     expect(v290.launchSectionHtml).not.toMatch(/https?:\/\//i);
+    expect(v290.launchControlSectionText).not.toMatch(/开始接入真实 provider|启动 pilot|(?<!不)激活 sandbox|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|真实 SDK|创建 provider client|安装依赖|(?<!不)修改配置|(?<!不)禁用 provider|key 输入框|创建审批任务|发送邮件|打开外部文档|执行回滚|修改 git|删除文件|停止服务|下载证据|导出证据|上传证据|(?<!不)创建 release|创建 tag|(?<!不 )push|发布到生产|自动发布|(?<!不)保存真实决策|(?<!不)保存真实回执|(?<!不)持久化时间线|立即购买|直接下单|一键下单|一键出票|打开平台/);
+    expect(v290.launchControlSectionHtml).not.toMatch(/https?:\/\//i);
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 

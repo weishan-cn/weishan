@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.9.0";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "3.0.0";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -198,6 +198,11 @@
       adapterSecurityRegressionGuardSummary: stripUnsafe(safe.adapterSecurityRegressionGuardSummary || null),
       providerOfflineLaunchChecklistSummary: stripUnsafe(safe.providerOfflineLaunchChecklistSummary || null),
       providerOfflineLaunchViewModelSummary: stripUnsafe(safe.providerOfflineLaunchViewModelSummary || null),
+      offlineProviderLaunchControlTowerSummary: stripUnsafe(safe.offlineProviderLaunchControlTowerSummary || null),
+      adapterPolicyEngineSummary: stripUnsafe(safe.adapterPolicyEngineSummary || null),
+      humanReleaseEvidenceTimelineSummary: stripUnsafe(safe.humanReleaseEvidenceTimelineSummary || null),
+      sandboxActivationFinalReviewBoardSummary: stripUnsafe(safe.sandboxActivationFinalReviewBoardSummary || null),
+      providerLaunchControlViewModelSummary: stripUnsafe(safe.providerLaunchControlViewModelSummary || null),
       offlineProviderAdapterContractKitSummary: stripUnsafe(safe.offlineProviderAdapterContractKitSummary || null),
       mockSandboxQaMatrixSummary: stripUnsafe(safe.mockSandboxQaMatrixSummary || null),
       humanActivationRunbookCenterSummary: stripUnsafe(safe.humanActivationRunbookCenterSummary || null),
@@ -239,6 +244,11 @@
       adapterSecurityRegressionGuardStatus: safeText(safe.adapterSecurityRegressionGuardStatus || safe.adapterSecurityRegressionGuardSummary && safe.adapterSecurityRegressionGuardSummary.status || ""),
       providerOfflineLaunchChecklistStatus: safeText(safe.providerOfflineLaunchChecklistStatus || safe.providerOfflineLaunchChecklistSummary && safe.providerOfflineLaunchChecklistSummary.status || ""),
       providerOfflineLaunchViewModelStatus: safeText(safe.providerOfflineLaunchViewModelStatus || safe.providerOfflineLaunchViewModelSummary && safe.providerOfflineLaunchViewModelSummary.status || ""),
+      offlineProviderLaunchControlTowerStatus: safeText(safe.offlineProviderLaunchControlTowerStatus || safe.offlineProviderLaunchControlTowerSummary && safe.offlineProviderLaunchControlTowerSummary.status || ""),
+      adapterPolicyEngineStatus: safeText(safe.adapterPolicyEngineStatus || safe.adapterPolicyEngineSummary && safe.adapterPolicyEngineSummary.status || ""),
+      humanReleaseEvidenceTimelineStatus: safeText(safe.humanReleaseEvidenceTimelineStatus || safe.humanReleaseEvidenceTimelineSummary && safe.humanReleaseEvidenceTimelineSummary.status || ""),
+      sandboxActivationFinalReviewBoardStatus: safeText(safe.sandboxActivationFinalReviewBoardStatus || safe.sandboxActivationFinalReviewBoardSummary && safe.sandboxActivationFinalReviewBoardSummary.status || ""),
+      providerLaunchControlViewModelStatus: safeText(safe.providerLaunchControlViewModelStatus || safe.providerLaunchControlViewModelSummary && safe.providerLaunchControlViewModelSummary.status || ""),
       offlineProviderAdapterContractKitStatus: safeText(safe.offlineProviderAdapterContractKitStatus || safe.offlineProviderAdapterContractKitSummary && safe.offlineProviderAdapterContractKitSummary.status || ""),
       mockSandboxQaMatrixStatus: safeText(safe.mockSandboxQaMatrixStatus || safe.mockSandboxQaMatrixSummary && safe.mockSandboxQaMatrixSummary.status || ""),
       humanActivationRunbookCenterStatus: safeText(safe.humanActivationRunbookCenterStatus || safe.humanActivationRunbookCenterSummary && safe.humanActivationRunbookCenterSummary.status || ""),
@@ -258,6 +268,7 @@
       safeToProceedWithManualSandboxActivationReview: safe.safeToProceedWithManualSandboxActivationReview === true,
       safeToProceedWithHumanSandboxMilestoneReview: safe.safeToProceedWithHumanSandboxMilestoneReview === true,
       safeToProceedWithManualOfflineLaunchDecisionReview: safe.safeToProceedWithManualOfflineLaunchDecisionReview === true,
+      safeToProceedWithHumanLaunchControlReview: safe.safeToProceedWithHumanLaunchControlReview === true,
       safeToProceedWithManualReleaseCandidateReview: safe.safeToProceedWithManualReleaseCandidateReview === true,
       safeToProceedWithManualGovernanceReleaseDecision: safe.safeToProceedWithManualGovernanceReleaseDecision === true,
       globalShoppingProductGoalSummary: stripUnsafe(safe.globalShoppingProductGoalSummary || null),
@@ -756,6 +767,7 @@
       safeToFinalizeUserFacingCopy: workflow.safeToFinalizeUserFacingCopy === true || safe.safeToFinalizeUserFacingCopy === true,
       safeToProceedWithHumanSandboxMilestoneReview: workflow.safeToProceedWithHumanSandboxMilestoneReview === true || safe.safeToProceedWithHumanSandboxMilestoneReview === true,
       safeToProceedWithManualOfflineLaunchDecisionReview: workflow.safeToProceedWithManualOfflineLaunchDecisionReview === true || safe.safeToProceedWithManualOfflineLaunchDecisionReview === true,
+      safeToProceedWithHumanLaunchControlReview: workflow.safeToProceedWithHumanLaunchControlReview === true || safe.safeToProceedWithHumanLaunchControlReview === true,
       safeToProceedWithManualGovernanceReleaseDecision: workflow.safeToProceedWithManualGovernanceReleaseDecision === true || safe.safeToProceedWithManualGovernanceReleaseDecision === true,
       globalShoppingGoalStatus: workflow.globalShoppingGoalStatus || safe.globalShoppingGoalStatus || "",
       jumpBoundaryStatus: workflow.jumpBoundaryStatus || safe.jumpBoundaryStatus || "",
@@ -932,6 +944,11 @@
       adapterSecurityRegressionGuardSummary: workflow.adapterSecurityRegressionGuardSummary || safe.adapterSecurityRegressionGuardSummary || null,
       providerOfflineLaunchChecklistSummary: workflow.providerOfflineLaunchChecklistSummary || safe.providerOfflineLaunchChecklistSummary || null,
       providerOfflineLaunchViewModelSummary: workflow.providerOfflineLaunchViewModelSummary || safe.providerOfflineLaunchViewModelSummary || null,
+      offlineProviderLaunchControlTowerSummary: workflow.offlineProviderLaunchControlTowerSummary || safe.offlineProviderLaunchControlTowerSummary || null,
+      adapterPolicyEngineSummary: workflow.adapterPolicyEngineSummary || safe.adapterPolicyEngineSummary || null,
+      humanReleaseEvidenceTimelineSummary: workflow.humanReleaseEvidenceTimelineSummary || safe.humanReleaseEvidenceTimelineSummary || null,
+      sandboxActivationFinalReviewBoardSummary: workflow.sandboxActivationFinalReviewBoardSummary || safe.sandboxActivationFinalReviewBoardSummary || null,
+      providerLaunchControlViewModelSummary: workflow.providerLaunchControlViewModelSummary || safe.providerLaunchControlViewModelSummary || null,
       offlineProviderCertificationCenterSummary: workflow.offlineProviderCertificationCenterSummary || safe.offlineProviderCertificationCenterSummary || null,
       mockIntegrationRegressionLabSummary: workflow.mockIntegrationRegressionLabSummary || safe.mockIntegrationRegressionLabSummary || null,
       humanApprovalEvidenceBinderSummary: workflow.humanApprovalEvidenceBinderSummary || safe.humanApprovalEvidenceBinderSummary || null,
@@ -968,6 +985,11 @@
       adapterSecurityRegressionGuardStatus: workflow.adapterSecurityRegressionGuardStatus || safe.adapterSecurityRegressionGuardStatus || "",
       providerOfflineLaunchChecklistStatus: workflow.providerOfflineLaunchChecklistStatus || safe.providerOfflineLaunchChecklistStatus || "",
       providerOfflineLaunchViewModelStatus: workflow.providerOfflineLaunchViewModelStatus || safe.providerOfflineLaunchViewModelStatus || "",
+      offlineProviderLaunchControlTowerStatus: workflow.offlineProviderLaunchControlTowerStatus || safe.offlineProviderLaunchControlTowerStatus || "",
+      adapterPolicyEngineStatus: workflow.adapterPolicyEngineStatus || safe.adapterPolicyEngineStatus || "",
+      humanReleaseEvidenceTimelineStatus: workflow.humanReleaseEvidenceTimelineStatus || safe.humanReleaseEvidenceTimelineStatus || "",
+      sandboxActivationFinalReviewBoardStatus: workflow.sandboxActivationFinalReviewBoardStatus || safe.sandboxActivationFinalReviewBoardStatus || "",
+      providerLaunchControlViewModelStatus: workflow.providerLaunchControlViewModelStatus || safe.providerLaunchControlViewModelStatus || "",
       offlineProviderCertificationCenterStatus: workflow.offlineProviderCertificationCenterStatus || safe.offlineProviderCertificationCenterStatus || "",
       mockIntegrationRegressionLabStatus: workflow.mockIntegrationRegressionLabStatus || safe.mockIntegrationRegressionLabStatus || "",
       humanApprovalEvidenceBinderStatus: workflow.humanApprovalEvidenceBinderStatus || safe.humanApprovalEvidenceBinderStatus || "",
@@ -978,6 +1000,7 @@
       safeToFinalizeUserFacingCopy: workflow.safeToFinalizeUserFacingCopy === true || safe.safeToFinalizeUserFacingCopy === true,
       safeToProceedWithHumanSandboxMilestoneReview: workflow.safeToProceedWithHumanSandboxMilestoneReview === true || safe.safeToProceedWithHumanSandboxMilestoneReview === true,
       safeToProceedWithManualOfflineLaunchDecisionReview: workflow.safeToProceedWithManualOfflineLaunchDecisionReview === true || safe.safeToProceedWithManualOfflineLaunchDecisionReview === true,
+      safeToProceedWithHumanLaunchControlReview: workflow.safeToProceedWithHumanLaunchControlReview === true || safe.safeToProceedWithHumanLaunchControlReview === true,
       safeToProceedWithHumanCertificationReview: workflow.safeToProceedWithHumanCertificationReview === true || safe.safeToProceedWithHumanCertificationReview === true,
       safeToProceedWithManualGovernanceReleaseDecision: workflow.safeToProceedWithManualGovernanceReleaseDecision === true || safe.safeToProceedWithManualGovernanceReleaseDecision === true,
       firstSandboxProviderConnectorStatus: workflow.firstSandboxProviderConnectorStatus || safe.firstSandboxProviderConnectorStatus || "",

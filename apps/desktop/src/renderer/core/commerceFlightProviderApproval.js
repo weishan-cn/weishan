@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const APPROVAL_VERSION = "2.9.0";
+  const APPROVAL_VERSION = "3.0.0";
   const PHASE = "flight_provider_approval";
   const DEFAULT_STATUS = "not_reviewed";
   const DEFAULT_ALLOWED_STAGE = "candidate_only";

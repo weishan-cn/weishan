@@ -8312,6 +8312,42 @@
         showCommercePlatformTemplateFeedback("已显示 Launch Checklist", false);
         return;
       }
+      const globalShoppingLaunchControlButton = target && target.closest("[data-commerce-global-shopping-launch-control-show]");
+      if (globalShoppingLaunchControlButton && host.contains(globalShoppingLaunchControlButton)) {
+        event.preventDefault();
+        const panel = globalShoppingLaunchControlButton.closest("[data-commerce-global-shopping-provider-launch-control]") || globalShoppingLaunchControlButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-launch-control-output]") || panel;
+        output.innerHTML = '<p>Offline Provider Launch Control Tower</p><p>离线 Launch 控制塔已准备</p><p>Launch Control 不保存真实决策</p><p>当前只展示 provider launch control tower</p><p>不接真实 provider，不读取密钥，不联网，不激活 sandbox，不创建 release，不 push</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Launch Control", false);
+        return;
+      }
+      const globalShoppingAdapterPolicyButton = target && target.closest("[data-commerce-global-shopping-adapter-policy-show]");
+      if (globalShoppingAdapterPolicyButton && host.contains(globalShoppingAdapterPolicyButton)) {
+        event.preventDefault();
+        const panel = globalShoppingAdapterPolicyButton.closest("[data-commerce-global-shopping-provider-launch-control]") || globalShoppingAdapterPolicyButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-adapter-policy-output]") || panel;
+        output.innerHTML = '<p>Adapter Policy Engine</p><p>Adapter 策略引擎已准备</p><p>Adapter Policy 不修改配置、不启用 provider</p><p>该策略引擎只展示离线 adapter policy，不修改配置，不启用 provider，不读取密钥。</p><p>不接真实 provider，不读取密钥，不联网，不激活 sandbox，不创建 release，不 push</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Adapter Policy", false);
+        return;
+      }
+      const globalShoppingEvidenceTimelineButton = target && target.closest("[data-commerce-global-shopping-evidence-timeline-show]");
+      if (globalShoppingEvidenceTimelineButton && host.contains(globalShoppingEvidenceTimelineButton)) {
+        event.preventDefault();
+        const panel = globalShoppingEvidenceTimelineButton.closest("[data-commerce-global-shopping-provider-launch-control]") || globalShoppingEvidenceTimelineButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-evidence-timeline-output]") || panel;
+        output.innerHTML = '<p>Human Release Evidence Timeline</p><p>人工发布证据时间线已准备</p><p>Evidence Timeline 不持久化时间线</p><p>该时间线只展示人工发布证据，不持久化时间线，不保存审批结果，不创建 release，不 push。</p><p>不接真实 provider，不读取密钥，不联网，不激活 sandbox，不创建 release，不 push</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Evidence Timeline", false);
+        return;
+      }
+      const globalShoppingFinalReviewButton = target && target.closest("[data-commerce-global-shopping-final-review-show]");
+      if (globalShoppingFinalReviewButton && host.contains(globalShoppingFinalReviewButton)) {
+        event.preventDefault();
+        const panel = globalShoppingFinalReviewButton.closest("[data-commerce-global-shopping-provider-launch-control]") || globalShoppingFinalReviewButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-final-review-output]") || panel;
+        output.innerHTML = '<p>Sandbox Activation Final Review Board</p><p>Sandbox 激活终审板已准备</p><p>Final Review 不激活 sandbox</p><p>该终审板只展示 sandbox 激活最终复核，不激活 sandbox，不读取密钥，不联网，不创建 release，不 push。</p><p>Human launch control review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Final Review", false);
+        return;
+      }
       const globalShoppingHumanPilotLedgerButton = target && target.closest("[data-commerce-global-shopping-human-pilot-ledger-show]");
       if (globalShoppingHumanPilotLedgerButton && host.contains(globalShoppingHumanPilotLedgerButton)) {
         event.preventDefault();

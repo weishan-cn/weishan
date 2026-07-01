@@ -26,7 +26,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingManualActivationCommandCenter.js"]);
   const api = windowRef.WeishanGlobalShoppingManualActivationCommandCenter;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_ACTIVATION_COMMAND_CENTER_VERSION, "2.9.0");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_ACTIVATION_COMMAND_CENTER_VERSION, "3.0.0");
 
   const ready = api.buildGlobalShoppingManualActivationCommandCenter({
     providerSandboxReadinessWorkbenchSummary:readySummary("Provider Sandbox Readiness Workbench", "Sandbox Readiness Workbench 已准备"),
