@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function item(usability="good", clarity="good", understood=true, status="ready") { return { feedbackReviewSummary:{ status, feedbackHealth:{ safetyCopyUnderstood:understood }, ratingSummary:{ usabilityRating:usability, clarityRating:clarity }, redacted:true } }; }
 function main() {
   const api = load(["apps/desktop/src/renderer/core/flightWorkflowBetaCohortReviewBoard.js"]).WeishanFlightWorkflowBetaCohortReviewBoard;
-  assert.equal(api.FLIGHT_WORKFLOW_BETA_COHORT_REVIEW_BOARD_VERSION, "3.2.0");
+  assert.equal(api.FLIGHT_WORKFLOW_BETA_COHORT_REVIEW_BOARD_VERSION, "3.3.0");
   assert.equal(api.buildFlightWorkflowBetaCohortReviewBoard({ sessions:[] }).status, "needs_more_feedback");
   assert.equal(api.buildFlightWorkflowBetaCohortReviewBoard({ sessions:[item(), item()] }).status, "needs_more_feedback");
   const ready = api.buildFlightWorkflowBetaCohortReviewBoard({ sessions:[item(), item(), item("ok", "good", true), item("good", "ok", true)] });

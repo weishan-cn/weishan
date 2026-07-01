@@ -1,0 +1,37 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+
+const ROOT = path.resolve(__dirname, "../..");
+
+function load(file) {
+  const window = {};
+  window.window = window;
+  const context = vm.createContext({ window, console });
+  vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file });
+  return window;
+}
+
+function readySummary(title, resultLabel) {
+  return { status:"ready", title, userFacingSummary:{ title, resultLabel, redacted:true }, rows:[{ rowId:"r1", label:title, value:resultLabel, status:"pass", redacted:true }], redacted:true };
+}
+
+function main() {
+  const api = load("apps/desktop/src/renderer/core/globalShoppingOfflineActivationWarRoom.js").WeishanGlobalShoppingOfflineActivationWarRoom;
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_ACTIVATION_WAR_ROOM_VERSION, "3.3.0");
+  const ready = api.buildGlobalShoppingOfflineActivationWarRoom({
+    providerFinalSafetySealSummary:readySummary("Provider Final Safety Seal", "Provider Final Safety Seal 已准备"),
+    providerActivationBlockerSentinelSummary:readySummary("Provider Activation Blocker Sentinel", "Provider Activation Blocker Sentinel 已准备"),
+    offlineProviderReadinessDecisionMatrixSummary:readySummary("Offline Provider Readiness Decision Matrix", "Offline Provider Readiness Decision Matrix 已准备"),
+    sandboxActivationFinalReviewBoardSummary:readySummary("Sandbox Activation Final Review Board", "Sandbox Activation Final Review Board 已准备"),
+    adapterLaunchBoundaryVerifierSummary:readySummary("Adapter Launch Boundary Verifier", "Adapter Launch Boundary Verifier 已准备")
+  });
+  assert.equal(ready.status, "ready");
+  assert.equal(ready.userFacingSummary.title, "Offline Activation War Room");
+  assert.equal(api.buildGlobalShoppingOfflineActivationWarRoom({ providerFinalSafetySealSummary:readySummary("Provider Final Safety Seal", "ok") }).status, "needs_review");
+  assert.equal(api.buildGlobalShoppingOfflineActivationWarRoom({ createEndpoint:true }).status, "blocked");
+  console.log("GLOBAL_SHOPPING_OFFLINE_ACTIVATION_WAR_ROOM PASS");
+}
+
+main();

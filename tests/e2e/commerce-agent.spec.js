@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v3.2.0 provider final review console stays local and bounded @commerce-smoke", async () => {
+  test("v3.3.0 provider final safety review stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9630,6 +9630,11 @@ test.describe.serial("commerce agent workbench", () => {
       window.WeishanGlobalShoppingHumanActivationFinalDossier &&
       window.WeishanGlobalShoppingAdapterLaunchBoundaryVerifier &&
       window.WeishanGlobalShoppingProviderFinalLaunchReviewViewModel &&
+      window.WeishanGlobalShoppingProviderFinalSafetySeal &&
+      window.WeishanGlobalShoppingOfflineActivationWarRoom &&
+      window.WeishanGlobalShoppingReadOnlyProviderReadinessCertificate &&
+      window.WeishanGlobalShoppingProviderNoActivationGuaranteeBoard &&
+      window.WeishanGlobalShoppingProviderFinalSafetyViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
     const v310 = await page.evaluate(() => {
@@ -9637,7 +9642,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v310-render-smoke", "true");
       const card = {
-        version:"3.2.0",
+        version:"3.3.0",
         visible:true,
         providerOfflineReleaseGateSummary:{ status:"ready", userFacingSummary:{ title:"Provider Offline Release Gate", resultLabel:"离线发布闸门已准备", redacted:true }, rows:[{ rowId:"release_gate", label:"Offline Release Gate", value:"离线发布闸门已准备", status:"pass", redacted:true }], redacted:true },
         providerCertificationFreezeLedgerSummary:{ status:"ready", userFacingSummary:{ title:"Provider Certification Freeze Ledger", resultLabel:"认证冻结台账已准备", redacted:true }, rows:[{ rowId:"freeze_ledger", label:"Certification Freeze", value:"认证冻结台账已准备", status:"pass", redacted:true }], redacted:true },
@@ -9664,6 +9669,11 @@ test.describe.serial("commerce agent workbench", () => {
         readOnlyReleaseEvidenceSummary:{ status:"needs_review", userFacingSummary:{ title:"Read-Only Release Evidence Summary", resultLabel:"Read-Only Release Evidence Summary 仍需复核", redacted:true }, rows:[{ rowId:"evidence_summary", label:"Evidence Summary", value:"Read-Only Release Evidence Summary 仍需复核", status:"warning", redacted:true }], redacted:true },
         offlineProviderReadinessDecisionMatrixSummary:{ status:"needs_review", userFacingSummary:{ title:"Offline Provider Readiness Decision Matrix", resultLabel:"Offline Provider Readiness Decision Matrix 仍需复核", redacted:true }, rows:[{ rowId:"decision_matrix", label:"Decision Matrix", value:"Offline Provider Readiness Decision Matrix 仍需复核", status:"warning", redacted:true }], redacted:true },
         providerFinalReviewConsoleViewModelSummary:{ status:"needs_review", title:"Provider Final Review Console", redacted:true },
+        providerFinalSafetySealSummary:{ status:"ready", userFacingSummary:{ title:"Provider Final Safety Seal", resultLabel:"Provider Final Safety Seal 已准备", redacted:true }, rows:[{ rowId:"safety_seal", label:"Safety Seal", value:"Provider Final Safety Seal 已准备", status:"pass", redacted:true }], redacted:true },
+        offlineActivationWarRoomSummary:{ status:"ready", userFacingSummary:{ title:"Offline Activation War Room", resultLabel:"Offline Activation War Room 已准备", redacted:true }, rows:[{ rowId:"activation_war_room", label:"Activation War Room", value:"Offline Activation War Room 已准备", status:"pass", redacted:true }], redacted:true },
+        readOnlyProviderReadinessCertificateSummary:{ status:"ready", userFacingSummary:{ title:"Read-Only Provider Readiness Certificate", resultLabel:"Read-Only Provider Readiness Certificate 已准备", redacted:true }, rows:[{ rowId:"readiness_certificate", label:"Readiness Certificate", value:"Read-Only Provider Readiness Certificate 已准备", status:"pass", redacted:true }], redacted:true },
+        providerNoActivationGuaranteeBoardSummary:{ status:"ready", userFacingSummary:{ title:"Provider No-Activation Guarantee Board", resultLabel:"Provider No-Activation Guarantee Board 已准备", redacted:true }, rows:[{ rowId:"no_activation_guarantee", label:"No-Activation Guarantee", value:"Provider No-Activation Guarantee Board 已准备", status:"pass", redacted:true }], redacted:true },
+        providerFinalSafetyViewModelSummary:{ status:"ready", title:"Provider Final Safety Review", redacted:true },
         providerOfflineReleaseGateStatus:"ready",
         providerCertificationFreezeLedgerStatus:"ready",
         sandboxActivationReviewPacketStatus:"ready",
@@ -9693,13 +9703,20 @@ test.describe.serial("commerce agent workbench", () => {
         readOnlyReleaseEvidenceSummaryStatus:"needs_review",
         offlineProviderReadinessDecisionMatrixStatus:"needs_review",
         providerFinalReviewConsoleViewModelStatus:"needs_review",
-        safeToProceedWithFinalOfflineProviderReview:false
+        safeToProceedWithFinalOfflineProviderReview:false,
+        providerFinalSafetySealStatus:"ready",
+        offlineActivationWarRoomStatus:"ready",
+        readOnlyProviderReadinessCertificateStatus:"ready",
+        providerNoActivationGuaranteeBoardStatus:"ready",
+        providerFinalSafetyViewModelStatus:"ready",
+        safeToProceedWithHumanFinalSafetyReview:true
       };
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml(card);
       const section = host.querySelector("[data-commerce-global-shopping-provider-offline-release='true']");
       const launchSection = host.querySelector("[data-commerce-global-shopping-provider-offline-launch='true']");
       const finalLaunchReviewSection = host.querySelector("[data-commerce-global-shopping-provider-final-launch-review='true']");
       const finalReviewConsoleSection = host.querySelector("[data-commerce-global-shopping-provider-final-review-console='true']");
+      const finalSafetySection = host.querySelector("[data-commerce-global-shopping-provider-final-safety-review='true']");
       document.body.appendChild(host);
       return {
         text:host.innerText,
@@ -9716,6 +9733,9 @@ test.describe.serial("commerce agent workbench", () => {
         finalReviewConsoleSectionText:finalReviewConsoleSection ? finalReviewConsoleSection.innerText : "",
         finalReviewConsoleSectionHtml:finalReviewConsoleSection ? finalReviewConsoleSection.innerHTML : "",
         finalReviewConsoleSectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-final-review-console='true']").length,
+        finalSafetySectionText:finalSafetySection ? finalSafetySection.innerText : "",
+        finalSafetySectionHtml:finalSafetySection ? finalSafetySection.innerHTML : "",
+        finalSafetySectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-final-safety-review='true']").length,
         releaseGateButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-offline-release-gate-show]").length,
         freezeButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-certification-freeze-ledger-show]").length,
         activationButtonCount:host.querySelectorAll("[data-commerce-global-shopping-sandbox-activation-review-packet-show]").length,
@@ -9731,7 +9751,11 @@ test.describe.serial("commerce agent workbench", () => {
         finalReviewButtonCount:host.querySelectorAll("[data-commerce-global-shopping-final-review-show]").length,
         activationBlockersButtonCount:host.querySelectorAll("[data-commerce-global-shopping-activation-blockers-show]").length,
         evidenceSummaryButtonCount:host.querySelectorAll("[data-commerce-global-shopping-evidence-summary-show]").length,
-        decisionMatrixButtonCount:host.querySelectorAll("[data-commerce-global-shopping-decision-matrix-show]").length
+        decisionMatrixButtonCount:host.querySelectorAll("[data-commerce-global-shopping-decision-matrix-show]").length,
+        finalSafetySealButtonCount:host.querySelectorAll("[data-commerce-global-shopping-final-safety-seal-show]").length,
+        activationWarRoomButtonCount:host.querySelectorAll("[data-commerce-global-shopping-activation-war-room-show]").length,
+        readinessCertificateButtonCount:host.querySelectorAll("[data-commerce-global-shopping-readiness-certificate-show]").length,
+        noActivationGuaranteeButtonCount:host.querySelectorAll("[data-commerce-global-shopping-no-activation-guarantee-show]").length
       };
     });
     expect(v310.sectionCount).toBe(1);
@@ -9754,6 +9778,11 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v310.activationBlockersButtonCount).toBe(1);
     expect(v310.evidenceSummaryButtonCount).toBe(1);
     expect(v310.decisionMatrixButtonCount).toBe(1);
+    expect(v310.finalSafetySectionCount).toBe(1);
+    expect(v310.finalSafetySealButtonCount).toBe(1);
+    expect(v310.activationWarRoomButtonCount).toBe(1);
+    expect(v310.readinessCertificateButtonCount).toBe(1);
+    expect(v310.noActivationGuaranteeButtonCount).toBe(1);
     expect(v310.text).toContain("Provider 离线 Launch 决策与安全守卫");
     expect(v310.text).toContain("Offline Launch Decision Simulator");
     expect(v310.text).toContain("Sandbox Activation Receipt Ledger");
@@ -9786,12 +9815,25 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v310.text).toContain("Decision Matrix 不创建 release、不 push");
     expect(v310.text).toContain("Final offline provider review 仍需人工复核");
     expect(v310.text).toContain("当前只展示 provider final review console");
+    expect(v310.text).toContain("Provider Final Safety Review");
+    expect(v310.text).toContain("Provider Final Safety Seal");
+    expect(v310.text).toContain("Offline Activation War Room");
+    expect(v310.text).toContain("Read-Only Provider Readiness Certificate");
+    expect(v310.text).toContain("Provider No-Activation Guarantee Board");
+    expect(v310.text).toContain("Safety Seal 不生成真实证书、不写文件");
+    expect(v310.text).toContain("Activation War Room 不激活 sandbox、不启用 provider");
+    expect(v310.text).toContain("Readiness Certificate 不持久化证书");
+    expect(v310.text).toContain("No-Activation Guarantee 不修改配置、不执行真实阻断");
+    expect(v310.text).toContain("Human final safety review 仍需人工复核");
+    expect(v310.text).toContain("当前只展示 provider final safety review");
     expect(v310.launchSectionText).not.toMatch(/开始接入真实 provider|启动 pilot|(?<!不)激活 sandbox|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|真实 SDK|创建 provider client|安装依赖|key 输入框|创建审批任务|发送邮件|打开外部文档|执行回滚|修改 git|删除文件|停止服务|下载证据|导出证据|上传证据|(?<!不)创建 release|创建 tag|(?<!不 )push|发布到生产|自动发布|合作平台|官方背书|平台授权|已接入 provider|可调用 provider|立即购买|直接下单|一键下单|一键出票|授权付款|创建订单|打开平台/);
     expect(v310.launchSectionHtml).not.toMatch(/https?:\/\//i);
     expect(v310.finalLaunchReviewSectionText).not.toMatch(/开始接入真实 provider|启动 pilot|(?<!不)激活 sandbox|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|真实 SDK|创建 provider client|安装依赖|(?<!不)修改配置|(?<!不)禁用 provider|key 输入框|创建审批任务|发送邮件|打开外部文档|执行回滚|修改 git|删除文件|停止服务|下载证据|导出证据|上传证据|(?<!不)创建 release|创建 tag|(?<!不 )push|发布到生产|自动发布|(?<!不)保存真实决策|(?<!不)持久化档案|立即购买|直接下单|一键下单|一键出票|打开平台/);
     expect(v310.finalLaunchReviewSectionHtml).not.toMatch(/https?:\/\//i);
     expect(v310.finalReviewConsoleSectionText).not.toMatch(/开始接入真实 provider|启动 pilot|(?<!不)激活 sandbox|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|真实 SDK|创建 provider client|安装依赖|(?<!不)修改配置|(?<!不)禁用 provider|key 输入框|创建审批任务|发送邮件|打开外部文档|执行回滚|修改 git|删除文件|停止服务|下载证据|导出证据|上传证据|(?<!不)创建 release|创建 tag|(?<!不 )push|发布到生产|自动发布|立即购买|直接下单|一键下单|一键出票|打开平台/);
     expect(v310.finalReviewConsoleSectionHtml).not.toMatch(/https?:\/\//i);
+    expect(v310.finalSafetySectionText).not.toMatch(/开始接入真实 provider|启动 pilot|(?<!不)激活 sandbox|(?<!不)读取 API key|(?<!不)生成 endpoint|(?<!不)启用 production provider|真实 SDK|创建 provider client|安装依赖|(?<!不)修改配置|(?<!不)执行真实阻断|key 输入框|创建审批任务|发送邮件|打开外部文档|执行回滚|修改 git|删除文件|停止服务|下载证据|导出证据|上传证据|(?<!不)创建 release|创建 tag|(?<!不 )push|发布到生产|自动发布|立即购买|直接下单|一键下单|一键出票|打开平台/);
+    expect(v310.finalSafetySectionHtml).not.toMatch(/https?:\/\//i);
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 

@@ -6,7 +6,7 @@ const ROOT = path.resolve(__dirname, "../..");
 function load(files) { const window = {}; window.window = window; const context = vm.createContext({ window, console }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
 function main() {
   const api = load(["apps/desktop/src/renderer/core/flightWorkflowSafeIssueIntakeFlow.js"]).WeishanFlightWorkflowSafeIssueIntakeFlow;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFE_ISSUE_INTAKE_FLOW_VERSION, "3.2.0");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFE_ISSUE_INTAKE_FLOW_VERSION, "3.3.0");
   assert.equal(api.buildFlightWorkflowSafeIssueIntakeFlow({}).status, "needs_category");
   for (const category of ["candidate_unclear", "platform_mismatch", "safety_copy_unclear", "consent_blocked", "feedback_error"]) {
     const flow = api.buildFlightWorkflowSafeIssueIntakeFlow({ issueCategory:category });

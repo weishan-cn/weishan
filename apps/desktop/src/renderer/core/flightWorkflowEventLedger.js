@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_EVENT_LEDGER_VERSION = "3.2.0";
+  const FLIGHT_WORKFLOW_EVENT_LEDGER_VERSION = "3.3.0";
   const LEDGER_NAME = "flight_workflow_event_ledger_v1";
   const EVENT_NAME = "flight_workflow_event_entry_v1";
   const STORAGE_KEY = "weishan.flightWorkflowEventLedger.v1";

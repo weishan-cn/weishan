@@ -18,7 +18,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderPilotControlViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderPilotControlViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_PILOT_CONTROL_VIEW_MODEL_VERSION, "3.2.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_PILOT_CONTROL_VIEW_MODEL_VERSION, "3.3.0");
 
   const ready = api.buildGlobalShoppingProviderPilotControlViewModel({
     providerSandboxPilotControlRoomSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox Pilot 控制室已准备", redacted:true }, rows:[{ rowId:"pilot", label:"Pilot 控制室", value:"Sandbox Pilot 控制室已准备", status:"pass", redacted:true }] },

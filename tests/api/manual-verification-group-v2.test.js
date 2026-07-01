@@ -13,7 +13,7 @@ function load(file){
 function main(){
   const windowRef = load("apps/desktop/src/renderer/core/manualVerificationGroup.js");
   const api = windowRef.WeishanManualVerificationGroup;
-  assert.equal(api.MANUAL_VERIFICATION_GROUP_VERSION, "3.2.0");
+  assert.equal(api.MANUAL_VERIFICATION_GROUP_VERSION, "3.3.0");
   const group = api.buildManualVerificationGroup({});
   assert.equal(group.visible, true);
   assert.deepEqual(Array.from(group.actions), ["复制机票搜索条件", "打开全网搜索", "打开 Google Flights", "打开 Trip.com / 携程"]);

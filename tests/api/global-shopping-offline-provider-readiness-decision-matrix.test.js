@@ -19,7 +19,7 @@ function readySummary(title, resultLabel) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingOfflineProviderReadinessDecisionMatrix.js").WeishanGlobalShoppingOfflineProviderReadinessDecisionMatrix;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_PROVIDER_READINESS_DECISION_MATRIX_VERSION, "3.2.0");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_PROVIDER_READINESS_DECISION_MATRIX_VERSION, "3.3.0");
   const ready = api.buildGlobalShoppingOfflineProviderReadinessDecisionMatrix({
     finalOfflineLaunchReviewConsoleSummary:readySummary("Final Offline Launch Review Console", "Final Offline Launch Review Console 已准备"),
     providerActivationBlockerSentinelSummary:readySummary("Provider Activation Blocker Sentinel", "Provider Activation Blocker Sentinel 已准备"),

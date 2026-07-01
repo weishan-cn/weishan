@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "3.2.0";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "3.3.0";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -197,6 +197,11 @@
       const readOnlyReleaseEvidenceSummary = obj(safe.readOnlyReleaseEvidenceSummary);
       const offlineProviderReadinessDecisionMatrixSummary = obj(safe.offlineProviderReadinessDecisionMatrixSummary);
       const providerFinalReviewConsoleViewModelSummary = obj(safe.providerFinalReviewConsoleViewModelSummary);
+      const providerFinalSafetySealSummary = obj(safe.providerFinalSafetySealSummary);
+      const offlineActivationWarRoomSummary = obj(safe.offlineActivationWarRoomSummary);
+      const readOnlyProviderReadinessCertificateSummary = obj(safe.readOnlyProviderReadinessCertificateSummary);
+      const providerNoActivationGuaranteeBoardSummary = obj(safe.providerNoActivationGuaranteeBoardSummary);
+      const providerFinalSafetyViewModelSummary = obj(safe.providerFinalSafetyViewModelSummary);
       const providerAdapterRegistrySummary = obj(safe.providerAdapterRegistrySummary);
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
@@ -535,6 +540,15 @@
       if (readOnlyReleaseEvidenceSummary.status || providerFinalReviewConsoleViewModelSummary.status) badges.push(badge("read_only_release_evidence_summary_no_file_write", "Evidence Summary 不写文件、不上传", "info"));
       if (offlineProviderReadinessDecisionMatrixSummary.status || providerFinalReviewConsoleViewModelSummary.status) badges.push(badge("offline_provider_readiness_decision_matrix_no_release", "Decision Matrix 不创建 release、不 push", "info"));
       if ((providerFinalReviewConsoleViewModelSummary.status && providerFinalReviewConsoleViewModelSummary.status !== "blocked") || safe.safeToProceedWithFinalOfflineProviderReview === true) badges.push(badge("final_offline_provider_review_required", "Final offline provider review 仍需人工复核", "warning"));
+      if (providerFinalSafetySealSummary.status === "ready" || safe.providerFinalSafetySealStatus === "ready") badges.push(badge("provider_final_safety_seal_ready", "Provider Final Safety Seal 已准备", "info"));
+      if (offlineActivationWarRoomSummary.status === "ready" || safe.offlineActivationWarRoomStatus === "ready") badges.push(badge("offline_activation_war_room_ready", "Offline Activation War Room 已准备", "info"));
+      if (readOnlyProviderReadinessCertificateSummary.status === "ready" || safe.readOnlyProviderReadinessCertificateStatus === "ready") badges.push(badge("read_only_provider_readiness_certificate_ready", "Read-Only Provider Readiness Certificate 已准备", "info"));
+      if (providerNoActivationGuaranteeBoardSummary.status === "ready" || safe.providerNoActivationGuaranteeBoardStatus === "ready") badges.push(badge("provider_no_activation_guarantee_board_ready", "Provider No-Activation Guarantee Board 已准备", "info"));
+      if (providerFinalSafetySealSummary.status || providerFinalSafetyViewModelSummary.status) badges.push(badge("provider_final_safety_seal_no_certificate", "Safety Seal 不生成真实证书、不写文件", "info"));
+      if (offlineActivationWarRoomSummary.status || providerFinalSafetyViewModelSummary.status) badges.push(badge("offline_activation_war_room_no_activation", "Activation War Room 不激活 sandbox、不启用 provider", "info"));
+      if (readOnlyProviderReadinessCertificateSummary.status || providerFinalSafetyViewModelSummary.status) badges.push(badge("read_only_provider_readiness_certificate_no_persistence", "Readiness Certificate 不持久化证书", "info"));
+      if (providerNoActivationGuaranteeBoardSummary.status || providerFinalSafetyViewModelSummary.status) badges.push(badge("provider_no_activation_guarantee_board_no_mutation", "No-Activation Guarantee 不修改配置、不执行真实阻断", "info"));
+      if ((providerFinalSafetyViewModelSummary.status && providerFinalSafetyViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanFinalSafetyReview === true) badges.push(badge("human_final_safety_review_required", "Human final safety review 仍需人工复核", "warning"));
       if (providerAdapterRegistrySummary.status === "ready") badges.push(badge("provider_adapter_registry_ready", "Adapter 注册表已准备", "info"));
       if (providerAdapterRegistrySummary.status === "needs_review") badges.push(badge("provider_adapter_registry_review", "Adapter 注册表仍需复核", "warning"));
       if (providerAdapterRegistrySummary.status === "blocked") badges.push(badge("provider_adapter_registry_blocked", "Adapter 注册表已阻断", "blocked"));

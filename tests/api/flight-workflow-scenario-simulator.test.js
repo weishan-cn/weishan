@@ -19,7 +19,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowScenarioSimulator.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowScenarioSimulator;
-  assert.equal(api.FLIGHT_WORKFLOW_SCENARIO_SIMULATOR_VERSION, "3.2.0");
+  assert.equal(api.FLIGHT_WORKFLOW_SCENARIO_SIMULATOR_VERSION, "3.3.0");
   const complete = api.runFlightWorkflowScenarioSimulation("complete_flight_request", { origin:"上海", destination:"成都", departureDate:"2026-07-15" });
   assert.equal(complete.status, "pass");
   assert.equal(complete.expectedOutcome, "pass");

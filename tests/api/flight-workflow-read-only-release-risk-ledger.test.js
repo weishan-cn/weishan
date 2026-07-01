@@ -10,7 +10,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowReadOnlyReleaseRiskLedger.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowReadOnlyReleaseRiskLedger;
-  assert.equal(api.FLIGHT_WORKFLOW_READ_ONLY_RELEASE_RISK_LEDGER_VERSION, "3.2.0");
+  assert.equal(api.FLIGHT_WORKFLOW_READ_ONLY_RELEASE_RISK_LEDGER_VERSION, "3.3.0");
   const model = api.buildFlightWorkflowReadOnlyReleaseRiskLedger({
     rcRegressionAuditSummary:{
       status:"passed",

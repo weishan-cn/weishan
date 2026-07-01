@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_UI_PRESENTER_VERSION = "3.2.0";
+  const FLIGHT_WORKFLOW_UI_PRESENTER_VERSION = "3.3.0";
   const PRESENTER_NAME = "flight_workflow_ui_presenter_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

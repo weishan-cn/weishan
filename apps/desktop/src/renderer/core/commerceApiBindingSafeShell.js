@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SHELL_VERSION = "3.2.0";
+  const SHELL_VERSION = "3.3.0";
   const PHASE = "api_binding_safe_shell";
 
   function clone(value) {

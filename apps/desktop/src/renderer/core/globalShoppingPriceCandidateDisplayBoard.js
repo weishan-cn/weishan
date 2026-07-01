@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRICE_CANDIDATE_DISPLAY_BOARD_VERSION = "3.2.0";
+  const GLOBAL_SHOPPING_PRICE_CANDIDATE_DISPLAY_BOARD_VERSION = "3.3.0";
   const BOARD_NAME = "global_shopping_price_candidate_display_board_v1";
   const CAVEAT = "当前仅展示只读 fixture 候选价，价格以跳转后平台实时页面为准，不代表最终成交价、锁定承诺、最低承诺或可下单能力。";
   const FORBIDDEN_RE = /全网最低|最低价保证|已锁价|真实最终价|立即购买|直接下单|一键下单|一键出票|lowest price guarantee|locked price/i;

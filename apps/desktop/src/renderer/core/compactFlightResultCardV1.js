@@ -1,5 +1,5 @@
 (function(){
-  const COMPACT_FLIGHT_RESULT_CARD_V1_VERSION = "3.2.0";
+  const COMPACT_FLIGHT_RESULT_CARD_V1_VERSION = "3.3.0";
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value){ return String(value == null ? "" : value).trim(); }
   function rowValue(fare, label){

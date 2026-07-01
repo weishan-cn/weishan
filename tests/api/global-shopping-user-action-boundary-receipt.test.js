@@ -16,7 +16,7 @@ function load(file) {
 function main() {
   const windowRef = load("apps/desktop/src/renderer/core/globalShoppingUserActionBoundaryReceipt.js");
   const api = windowRef.WeishanGlobalShoppingUserActionBoundaryReceipt;
-  assert.equal(api.GLOBAL_SHOPPING_USER_ACTION_BOUNDARY_RECEIPT_VERSION, "3.2.0");
+  assert.equal(api.GLOBAL_SHOPPING_USER_ACTION_BOUNDARY_RECEIPT_VERSION, "3.3.0");
   const ready = api.buildGlobalShoppingUserActionBoundaryReceipt({});
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "用户行动边界回执");

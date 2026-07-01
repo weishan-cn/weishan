@@ -8384,6 +8384,42 @@
         showCommercePlatformTemplateFeedback("已显示 Decision Matrix", false);
         return;
       }
+      const globalShoppingFinalSafetySealButton = target && target.closest("[data-commerce-global-shopping-final-safety-seal-show]");
+      if (globalShoppingFinalSafetySealButton && host.contains(globalShoppingFinalSafetySealButton)) {
+        event.preventDefault();
+        const panel = globalShoppingFinalSafetySealButton.closest("[data-commerce-global-shopping-provider-final-safety-review]") || globalShoppingFinalSafetySealButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-final-safety-seal-output]") || panel;
+        output.innerHTML = '<p>Provider Final Safety Seal</p><p>Provider Final Safety Seal 已准备</p><p>Safety Seal 不生成真实证书、不写文件</p><p>该 Safety Seal 只展示只读安全封签摘要，不生成真实证书，不写文件，不保存真实决策。</p><p>Human final safety review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Safety Seal", false);
+        return;
+      }
+      const globalShoppingActivationWarRoomButton = target && target.closest("[data-commerce-global-shopping-activation-war-room-show]");
+      if (globalShoppingActivationWarRoomButton && host.contains(globalShoppingActivationWarRoomButton)) {
+        event.preventDefault();
+        const panel = globalShoppingActivationWarRoomButton.closest("[data-commerce-global-shopping-provider-final-safety-review]") || globalShoppingActivationWarRoomButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-activation-war-room-output]") || panel;
+        output.innerHTML = '<p>Offline Activation War Room</p><p>Offline Activation War Room 已准备</p><p>Activation War Room 不激活 sandbox、不启用 provider</p><p>该 War Room 只展示离线激活准备摘要，不激活 sandbox，不启用 provider，不创建审批任务。</p><p>Human final safety review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Activation War Room", false);
+        return;
+      }
+      const globalShoppingReadinessCertificateButton = target && target.closest("[data-commerce-global-shopping-readiness-certificate-show]");
+      if (globalShoppingReadinessCertificateButton && host.contains(globalShoppingReadinessCertificateButton)) {
+        event.preventDefault();
+        const panel = globalShoppingReadinessCertificateButton.closest("[data-commerce-global-shopping-provider-final-safety-review]") || globalShoppingReadinessCertificateButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-readiness-certificate-output]") || panel;
+        output.innerHTML = '<p>Read-Only Provider Readiness Certificate</p><p>Read-Only Provider Readiness Certificate 已准备</p><p>Readiness Certificate 不持久化证书</p><p>该 Certificate 只展示只读 readiness 摘要，不持久化证书，不导出，不上传，不创建 release。</p><p>Human final safety review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Readiness Certificate", false);
+        return;
+      }
+      const globalShoppingNoActivationGuaranteeButton = target && target.closest("[data-commerce-global-shopping-no-activation-guarantee-show]");
+      if (globalShoppingNoActivationGuaranteeButton && host.contains(globalShoppingNoActivationGuaranteeButton)) {
+        event.preventDefault();
+        const panel = globalShoppingNoActivationGuaranteeButton.closest("[data-commerce-global-shopping-provider-final-safety-review]") || globalShoppingNoActivationGuaranteeButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-no-activation-guarantee-output]") || panel;
+        output.innerHTML = '<p>Provider No-Activation Guarantee Board</p><p>Provider No-Activation Guarantee Board 已准备</p><p>No-Activation Guarantee 不修改配置、不执行真实阻断</p><p>该 Board 只展示 no-activation guarantee，不修改配置，不执行真实阻断，不启用 provider，不创建 release。</p><p>Human final safety review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 No-Activation Guarantee", false);
+        return;
+      }
       const globalShoppingHumanPilotLedgerButton = target && target.closest("[data-commerce-global-shopping-human-pilot-ledger-show]");
       if (globalShoppingHumanPilotLedgerButton && host.contains(globalShoppingHumanPilotLedgerButton)) {
         event.preventDefault();

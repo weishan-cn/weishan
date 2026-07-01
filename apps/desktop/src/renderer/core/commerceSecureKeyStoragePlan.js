@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SECURE_KEY_STORAGE_PLAN_VERSION = "3.2.0";
+  const SECURE_KEY_STORAGE_PLAN_VERSION = "3.3.0";
   const PHASE = "flight_secure_key_storage_plan";
   const DEFAULT_PLAN_STATUS = "plan_only";
   const DEFAULT_CURRENT_STAGE = "design_required";
