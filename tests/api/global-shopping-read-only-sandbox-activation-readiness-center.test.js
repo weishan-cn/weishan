@@ -24,7 +24,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingReadOnlySandboxActivationReadinessCenter.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingReadOnlySandboxActivationReadinessCenter;
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_SANDBOX_ACTIVATION_READINESS_CENTER_VERSION, "2.8.0");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_SANDBOX_ACTIVATION_READINESS_CENTER_VERSION, "2.9.0");
 
   const ready = api.buildGlobalShoppingReadOnlySandboxActivationReadinessCenter({
     manualGovernanceReleaseDecisionRoomSummary:readySummary("人工发布决策室已准备"),

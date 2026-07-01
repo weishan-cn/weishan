@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.8.0";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "2.9.0";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -193,6 +193,11 @@
       readOnlyProviderAdapterSdkSkeletonSummary: stripUnsafe(safe.readOnlyProviderAdapterSdkSkeletonSummary || null),
       manualActivationCommandCenterSummary: stripUnsafe(safe.manualActivationCommandCenterSummary || null),
       providerSandboxMilestoneViewModelSummary: stripUnsafe(safe.providerSandboxMilestoneViewModelSummary || null),
+      offlineLaunchDecisionSimulatorSummary: stripUnsafe(safe.offlineLaunchDecisionSimulatorSummary || null),
+      sandboxActivationReceiptLedgerSummary: stripUnsafe(safe.sandboxActivationReceiptLedgerSummary || null),
+      adapterSecurityRegressionGuardSummary: stripUnsafe(safe.adapterSecurityRegressionGuardSummary || null),
+      providerOfflineLaunchChecklistSummary: stripUnsafe(safe.providerOfflineLaunchChecklistSummary || null),
+      providerOfflineLaunchViewModelSummary: stripUnsafe(safe.providerOfflineLaunchViewModelSummary || null),
       offlineProviderAdapterContractKitSummary: stripUnsafe(safe.offlineProviderAdapterContractKitSummary || null),
       mockSandboxQaMatrixSummary: stripUnsafe(safe.mockSandboxQaMatrixSummary || null),
       humanActivationRunbookCenterSummary: stripUnsafe(safe.humanActivationRunbookCenterSummary || null),
@@ -229,6 +234,11 @@
       readOnlyProviderAdapterSdkSkeletonStatus: safeText(safe.readOnlyProviderAdapterSdkSkeletonStatus || safe.readOnlyProviderAdapterSdkSkeletonSummary && safe.readOnlyProviderAdapterSdkSkeletonSummary.status || ""),
       manualActivationCommandCenterStatus: safeText(safe.manualActivationCommandCenterStatus || safe.manualActivationCommandCenterSummary && safe.manualActivationCommandCenterSummary.status || ""),
       providerSandboxMilestoneViewModelStatus: safeText(safe.providerSandboxMilestoneViewModelStatus || safe.providerSandboxMilestoneViewModelSummary && safe.providerSandboxMilestoneViewModelSummary.status || ""),
+      offlineLaunchDecisionSimulatorStatus: safeText(safe.offlineLaunchDecisionSimulatorStatus || safe.offlineLaunchDecisionSimulatorSummary && safe.offlineLaunchDecisionSimulatorSummary.status || ""),
+      sandboxActivationReceiptLedgerStatus: safeText(safe.sandboxActivationReceiptLedgerStatus || safe.sandboxActivationReceiptLedgerSummary && safe.sandboxActivationReceiptLedgerSummary.status || ""),
+      adapterSecurityRegressionGuardStatus: safeText(safe.adapterSecurityRegressionGuardStatus || safe.adapterSecurityRegressionGuardSummary && safe.adapterSecurityRegressionGuardSummary.status || ""),
+      providerOfflineLaunchChecklistStatus: safeText(safe.providerOfflineLaunchChecklistStatus || safe.providerOfflineLaunchChecklistSummary && safe.providerOfflineLaunchChecklistSummary.status || ""),
+      providerOfflineLaunchViewModelStatus: safeText(safe.providerOfflineLaunchViewModelStatus || safe.providerOfflineLaunchViewModelSummary && safe.providerOfflineLaunchViewModelSummary.status || ""),
       offlineProviderAdapterContractKitStatus: safeText(safe.offlineProviderAdapterContractKitStatus || safe.offlineProviderAdapterContractKitSummary && safe.offlineProviderAdapterContractKitSummary.status || ""),
       mockSandboxQaMatrixStatus: safeText(safe.mockSandboxQaMatrixStatus || safe.mockSandboxQaMatrixSummary && safe.mockSandboxQaMatrixSummary.status || ""),
       humanActivationRunbookCenterStatus: safeText(safe.humanActivationRunbookCenterStatus || safe.humanActivationRunbookCenterSummary && safe.humanActivationRunbookCenterSummary.status || ""),
@@ -247,6 +257,7 @@
       safeToProceedWithManualProviderSignOffReview: safe.safeToProceedWithManualProviderSignOffReview === true,
       safeToProceedWithManualSandboxActivationReview: safe.safeToProceedWithManualSandboxActivationReview === true,
       safeToProceedWithHumanSandboxMilestoneReview: safe.safeToProceedWithHumanSandboxMilestoneReview === true,
+      safeToProceedWithManualOfflineLaunchDecisionReview: safe.safeToProceedWithManualOfflineLaunchDecisionReview === true,
       safeToProceedWithManualReleaseCandidateReview: safe.safeToProceedWithManualReleaseCandidateReview === true,
       safeToProceedWithManualGovernanceReleaseDecision: safe.safeToProceedWithManualGovernanceReleaseDecision === true,
       globalShoppingProductGoalSummary: stripUnsafe(safe.globalShoppingProductGoalSummary || null),
@@ -744,6 +755,7 @@
       safeToContinueReleaseCandidate: workflow.safeToContinueReleaseCandidate === true || safe.safeToContinueReleaseCandidate === true,
       safeToFinalizeUserFacingCopy: workflow.safeToFinalizeUserFacingCopy === true || safe.safeToFinalizeUserFacingCopy === true,
       safeToProceedWithHumanSandboxMilestoneReview: workflow.safeToProceedWithHumanSandboxMilestoneReview === true || safe.safeToProceedWithHumanSandboxMilestoneReview === true,
+      safeToProceedWithManualOfflineLaunchDecisionReview: workflow.safeToProceedWithManualOfflineLaunchDecisionReview === true || safe.safeToProceedWithManualOfflineLaunchDecisionReview === true,
       safeToProceedWithManualGovernanceReleaseDecision: workflow.safeToProceedWithManualGovernanceReleaseDecision === true || safe.safeToProceedWithManualGovernanceReleaseDecision === true,
       globalShoppingGoalStatus: workflow.globalShoppingGoalStatus || safe.globalShoppingGoalStatus || "",
       jumpBoundaryStatus: workflow.jumpBoundaryStatus || safe.jumpBoundaryStatus || "",
@@ -915,6 +927,11 @@
       readOnlyProviderAdapterSdkSkeletonSummary: workflow.readOnlyProviderAdapterSdkSkeletonSummary || safe.readOnlyProviderAdapterSdkSkeletonSummary || null,
       manualActivationCommandCenterSummary: workflow.manualActivationCommandCenterSummary || safe.manualActivationCommandCenterSummary || null,
       providerSandboxMilestoneViewModelSummary: workflow.providerSandboxMilestoneViewModelSummary || safe.providerSandboxMilestoneViewModelSummary || null,
+      offlineLaunchDecisionSimulatorSummary: workflow.offlineLaunchDecisionSimulatorSummary || safe.offlineLaunchDecisionSimulatorSummary || null,
+      sandboxActivationReceiptLedgerSummary: workflow.sandboxActivationReceiptLedgerSummary || safe.sandboxActivationReceiptLedgerSummary || null,
+      adapterSecurityRegressionGuardSummary: workflow.adapterSecurityRegressionGuardSummary || safe.adapterSecurityRegressionGuardSummary || null,
+      providerOfflineLaunchChecklistSummary: workflow.providerOfflineLaunchChecklistSummary || safe.providerOfflineLaunchChecklistSummary || null,
+      providerOfflineLaunchViewModelSummary: workflow.providerOfflineLaunchViewModelSummary || safe.providerOfflineLaunchViewModelSummary || null,
       offlineProviderCertificationCenterSummary: workflow.offlineProviderCertificationCenterSummary || safe.offlineProviderCertificationCenterSummary || null,
       mockIntegrationRegressionLabSummary: workflow.mockIntegrationRegressionLabSummary || safe.mockIntegrationRegressionLabSummary || null,
       humanApprovalEvidenceBinderSummary: workflow.humanApprovalEvidenceBinderSummary || safe.humanApprovalEvidenceBinderSummary || null,
@@ -946,6 +963,11 @@
       readOnlyProviderAdapterSdkSkeletonStatus: workflow.readOnlyProviderAdapterSdkSkeletonStatus || safe.readOnlyProviderAdapterSdkSkeletonStatus || "",
       manualActivationCommandCenterStatus: workflow.manualActivationCommandCenterStatus || safe.manualActivationCommandCenterStatus || "",
       providerSandboxMilestoneViewModelStatus: workflow.providerSandboxMilestoneViewModelStatus || safe.providerSandboxMilestoneViewModelStatus || "",
+      offlineLaunchDecisionSimulatorStatus: workflow.offlineLaunchDecisionSimulatorStatus || safe.offlineLaunchDecisionSimulatorStatus || "",
+      sandboxActivationReceiptLedgerStatus: workflow.sandboxActivationReceiptLedgerStatus || safe.sandboxActivationReceiptLedgerStatus || "",
+      adapterSecurityRegressionGuardStatus: workflow.adapterSecurityRegressionGuardStatus || safe.adapterSecurityRegressionGuardStatus || "",
+      providerOfflineLaunchChecklistStatus: workflow.providerOfflineLaunchChecklistStatus || safe.providerOfflineLaunchChecklistStatus || "",
+      providerOfflineLaunchViewModelStatus: workflow.providerOfflineLaunchViewModelStatus || safe.providerOfflineLaunchViewModelStatus || "",
       offlineProviderCertificationCenterStatus: workflow.offlineProviderCertificationCenterStatus || safe.offlineProviderCertificationCenterStatus || "",
       mockIntegrationRegressionLabStatus: workflow.mockIntegrationRegressionLabStatus || safe.mockIntegrationRegressionLabStatus || "",
       humanApprovalEvidenceBinderStatus: workflow.humanApprovalEvidenceBinderStatus || safe.humanApprovalEvidenceBinderStatus || "",
@@ -955,6 +977,7 @@
       safeToContinueReleaseCandidate: workflow.safeToContinueReleaseCandidate === true || safe.safeToContinueReleaseCandidate === true,
       safeToFinalizeUserFacingCopy: workflow.safeToFinalizeUserFacingCopy === true || safe.safeToFinalizeUserFacingCopy === true,
       safeToProceedWithHumanSandboxMilestoneReview: workflow.safeToProceedWithHumanSandboxMilestoneReview === true || safe.safeToProceedWithHumanSandboxMilestoneReview === true,
+      safeToProceedWithManualOfflineLaunchDecisionReview: workflow.safeToProceedWithManualOfflineLaunchDecisionReview === true || safe.safeToProceedWithManualOfflineLaunchDecisionReview === true,
       safeToProceedWithHumanCertificationReview: workflow.safeToProceedWithHumanCertificationReview === true || safe.safeToProceedWithHumanCertificationReview === true,
       safeToProceedWithManualGovernanceReleaseDecision: workflow.safeToProceedWithManualGovernanceReleaseDecision === true || safe.safeToProceedWithManualGovernanceReleaseDecision === true,
       firstSandboxProviderConnectorStatus: workflow.firstSandboxProviderConnectorStatus || safe.firstSandboxProviderConnectorStatus || "",

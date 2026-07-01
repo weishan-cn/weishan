@@ -8276,6 +8276,42 @@
         showCommercePlatformTemplateFeedback("已显示 Boundary Diff", false);
         return;
       }
+      const globalShoppingOfflineLaunchDecisionButton = target && target.closest("[data-commerce-global-shopping-offline-launch-decision-show]");
+      if (globalShoppingOfflineLaunchDecisionButton && host.contains(globalShoppingOfflineLaunchDecisionButton)) {
+        event.preventDefault();
+        const panel = globalShoppingOfflineLaunchDecisionButton.closest("[data-commerce-global-shopping-provider-offline-launch]") || globalShoppingOfflineLaunchDecisionButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-offline-launch-decision-output]") || panel;
+        output.innerHTML = '<p>Offline Launch Decision Simulator</p><p>离线发布决策模拟器已准备</p><p>Launch Decision 不保存真实决策</p><p>该模拟器只展示离线发布决策准备状态，不保存真实决策，不创建 release，不 push，不接真实 provider。</p><p>不接真实 provider，不读取密钥，不联网，不创建 release，不 push</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Launch Decision", false);
+        return;
+      }
+      const globalShoppingActivationReceiptButton = target && target.closest("[data-commerce-global-shopping-activation-receipt-show]");
+      if (globalShoppingActivationReceiptButton && host.contains(globalShoppingActivationReceiptButton)) {
+        event.preventDefault();
+        const panel = globalShoppingActivationReceiptButton.closest("[data-commerce-global-shopping-provider-offline-launch]") || globalShoppingActivationReceiptButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-activation-receipt-output]") || panel;
+        output.innerHTML = '<p>Sandbox Activation Receipt Ledger</p><p>Sandbox 激活回执台账已准备</p><p>Activation Receipt Ledger 不保存真实回执</p><p>该台账只展示 mock activation receipt，不保存真实回执，不激活 sandbox，不启动 provider。</p><p>不接真实 provider，不读取密钥，不联网，不创建 release，不 push</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Activation Receipt", false);
+        return;
+      }
+      const globalShoppingSecurityGuardButton = target && target.closest("[data-commerce-global-shopping-security-guard-show]");
+      if (globalShoppingSecurityGuardButton && host.contains(globalShoppingSecurityGuardButton)) {
+        event.preventDefault();
+        const panel = globalShoppingSecurityGuardButton.closest("[data-commerce-global-shopping-provider-offline-launch]") || globalShoppingSecurityGuardButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-security-guard-output]") || panel;
+        output.innerHTML = '<p>Adapter Security Regression Guard</p><p>Adapter 安全回归守卫已准备</p><p>Security Guard 不修改配置、不启用 provider</p><p>该守卫只展示 adapter 安全回归状态，不修改配置，不启用或禁用 provider，不读取密钥。</p><p>Manual offline launch decision 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Security Guard", false);
+        return;
+      }
+      const globalShoppingLaunchChecklistButton = target && target.closest("[data-commerce-global-shopping-launch-checklist-show]");
+      if (globalShoppingLaunchChecklistButton && host.contains(globalShoppingLaunchChecklistButton)) {
+        event.preventDefault();
+        const panel = globalShoppingLaunchChecklistButton.closest("[data-commerce-global-shopping-provider-offline-launch]") || globalShoppingLaunchChecklistButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-launch-checklist-output]") || panel;
+        output.innerHTML = '<p>Provider Offline Launch Checklist</p><p>离线 Launch Checklist 已准备</p><p>Launch Checklist 不创建 release、不 push</p><p>该清单只展示离线 launch 检查项，不保存结果，不创建 release，不 push，不激活 sandbox。</p><p>Manual offline launch decision 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Launch Checklist", false);
+        return;
+      }
       const globalShoppingHumanPilotLedgerButton = target && target.closest("[data-commerce-global-shopping-human-pilot-ledger-show]");
       if (globalShoppingHumanPilotLedgerButton && host.contains(globalShoppingHumanPilotLedgerButton)) {
         event.preventDefault();

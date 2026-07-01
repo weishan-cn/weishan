@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.8.0";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "2.9.0";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -177,6 +177,11 @@
       const sandboxActivationReviewPacketSummary = obj(safe.sandboxActivationReviewPacketSummary);
       const adapterBoundaryDiffInspectorSummary = obj(safe.adapterBoundaryDiffInspectorSummary);
       const providerOfflineReleaseViewModelSummary = obj(safe.providerOfflineReleaseViewModelSummary);
+      const offlineLaunchDecisionSimulatorSummary = obj(safe.offlineLaunchDecisionSimulatorSummary);
+      const sandboxActivationReceiptLedgerSummary = obj(safe.sandboxActivationReceiptLedgerSummary);
+      const adapterSecurityRegressionGuardSummary = obj(safe.adapterSecurityRegressionGuardSummary);
+      const providerOfflineLaunchChecklistSummary = obj(safe.providerOfflineLaunchChecklistSummary);
+      const providerOfflineLaunchViewModelSummary = obj(safe.providerOfflineLaunchViewModelSummary);
       const providerAdapterRegistrySummary = obj(safe.providerAdapterRegistrySummary);
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
@@ -479,6 +484,15 @@
       if (sandboxActivationReviewPacketSummary.status || providerOfflineReleaseViewModelSummary.status) badges.push(badge("sandbox_activation_review_packet_no_activation", "Activation Review Packet 不激活 sandbox", "info"));
       if (adapterBoundaryDiffInspectorSummary.status || providerOfflineReleaseViewModelSummary.status) badges.push(badge("adapter_boundary_diff_inspector_no_config_mutation", "Boundary Diff Inspector 不修改配置、不启用 provider", "info"));
       if ((providerOfflineReleaseViewModelSummary.status && providerOfflineReleaseViewModelSummary.status !== "blocked") || safe.safeToProceedWithManualOfflineReleaseReview === true) badges.push(badge("manual_offline_release_review_required", "Manual offline release review 仍需人工复核", "warning"));
+      if (offlineLaunchDecisionSimulatorSummary.status === "ready" || safe.offlineLaunchDecisionSimulatorStatus === "ready") badges.push(badge("offline_launch_decision_simulator_ready", "Offline Launch Decision Simulator 已准备", "info"));
+      if (sandboxActivationReceiptLedgerSummary.status === "ready" || safe.sandboxActivationReceiptLedgerStatus === "ready") badges.push(badge("sandbox_activation_receipt_ledger_ready", "Sandbox Activation Receipt Ledger 已准备", "info"));
+      if (adapterSecurityRegressionGuardSummary.status === "ready" || safe.adapterSecurityRegressionGuardStatus === "ready") badges.push(badge("adapter_security_regression_guard_ready", "Adapter Security Regression Guard 已准备", "info"));
+      if (providerOfflineLaunchChecklistSummary.status === "ready" || safe.providerOfflineLaunchChecklistStatus === "ready") badges.push(badge("provider_offline_launch_checklist_ready", "Provider Offline Launch Checklist 已准备", "info"));
+      if (offlineLaunchDecisionSimulatorSummary.status || providerOfflineLaunchViewModelSummary.status) badges.push(badge("offline_launch_decision_simulator_no_real_decision", "Launch Decision 不保存真实决策", "info"));
+      if (sandboxActivationReceiptLedgerSummary.status || providerOfflineLaunchViewModelSummary.status) badges.push(badge("sandbox_activation_receipt_ledger_no_real_receipt", "Activation Receipt Ledger 不保存真实回执", "info"));
+      if (adapterSecurityRegressionGuardSummary.status || providerOfflineLaunchViewModelSummary.status) badges.push(badge("adapter_security_regression_guard_no_config_mutation", "Security Guard 不修改配置、不启用 provider", "info"));
+      if (providerOfflineLaunchChecklistSummary.status || providerOfflineLaunchViewModelSummary.status) badges.push(badge("provider_offline_launch_checklist_no_release_push", "Launch Checklist 不创建 release、不 push", "info"));
+      if ((providerOfflineLaunchViewModelSummary.status && providerOfflineLaunchViewModelSummary.status !== "blocked") || safe.safeToProceedWithManualOfflineLaunchDecisionReview === true) badges.push(badge("manual_offline_launch_decision_review_required", "Manual offline launch decision 仍需人工复核", "warning"));
       if (providerAdapterRegistrySummary.status === "ready") badges.push(badge("provider_adapter_registry_ready", "Adapter 注册表已准备", "info"));
       if (providerAdapterRegistrySummary.status === "needs_review") badges.push(badge("provider_adapter_registry_review", "Adapter 注册表仍需复核", "warning"));
       if (providerAdapterRegistrySummary.status === "blocked") badges.push(badge("provider_adapter_registry_blocked", "Adapter 注册表已阻断", "blocked"));

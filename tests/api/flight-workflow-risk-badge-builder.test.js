@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.8.0");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "2.9.0");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -166,6 +166,28 @@ function main() {
   assert.ok(globalLabels.includes("禁止最低价相关承诺"));
   assert.ok(globalLabels.includes("禁止自动下单承诺"));
   assert.ok(globalLabels.includes("跳转不代表交易能力"));
+  const offlineLaunchLabels = api.buildFlightWorkflowRiskBadges({
+    offlineLaunchDecisionSimulatorSummary:{ status:"ready", userFacingSummary:{ resultLabel:"离线发布决策模拟器已准备", redacted:true } },
+    sandboxActivationReceiptLedgerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox 激活回执台账已准备", redacted:true } },
+    adapterSecurityRegressionGuardSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Adapter 安全回归守卫已准备", redacted:true } },
+    providerOfflineLaunchChecklistSummary:{ status:"ready", userFacingSummary:{ resultLabel:"离线 Launch Checklist 已准备", redacted:true } },
+    providerOfflineLaunchViewModelSummary:{ status:"ready", title:"Provider 离线 Launch 决策与安全守卫", redacted:true },
+    offlineLaunchDecisionSimulatorStatus:"ready",
+    sandboxActivationReceiptLedgerStatus:"ready",
+    adapterSecurityRegressionGuardStatus:"ready",
+    providerOfflineLaunchChecklistStatus:"ready",
+    providerOfflineLaunchViewModelStatus:"ready",
+    safeToProceedWithManualOfflineLaunchDecisionReview:true
+  }).badges.map((item) => item.label);
+  assert.ok(offlineLaunchLabels.includes("Offline Launch Decision Simulator 已准备"));
+  assert.ok(offlineLaunchLabels.includes("Sandbox Activation Receipt Ledger 已准备"));
+  assert.ok(offlineLaunchLabels.includes("Adapter Security Regression Guard 已准备"));
+  assert.ok(offlineLaunchLabels.includes("Provider Offline Launch Checklist 已准备"));
+  assert.ok(offlineLaunchLabels.includes("Launch Decision 不保存真实决策"));
+  assert.ok(offlineLaunchLabels.includes("Activation Receipt Ledger 不保存真实回执"));
+  assert.ok(offlineLaunchLabels.includes("Security Guard 不修改配置、不启用 provider"));
+  assert.ok(offlineLaunchLabels.includes("Launch Checklist 不创建 release、不 push"));
+  assert.ok(offlineLaunchLabels.includes("Manual offline launch decision 仍需人工复核"));
   const manualReviewLabels = api.buildFlightWorkflowRiskBadges({
     manualPlatformReviewCockpitSummary:{ status:"ready", userFacingSummary:{ resultLabel:"手动平台复核驾驶舱已准备", redacted:true } },
     handoffAcceptanceWalkthroughSummary:{ status:"ready", userFacingSummary:{ resultLabel:"交接包接受演练已准备", redacted:true } },
