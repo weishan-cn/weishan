@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_RELEASE_CANDIDATE_CLOSURE_PACK_VERSION = "4.0.2";
+  const GLOBAL_SHOPPING_OFFLINE_RELEASE_CANDIDATE_CLOSURE_PACK_VERSION = "4.0.3";
   const CLOSURE_PACK_NAME = "global_shopping_offline_release_candidate_closure_pack_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

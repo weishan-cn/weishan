@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RELEASE_READINESS_DASHBOARD_VERSION = "4.0.2";
+  const FLIGHT_WORKFLOW_RELEASE_READINESS_DASHBOARD_VERSION = "4.0.3";
   const DASHBOARD_NAME = "flight_workflow_release_readiness_dashboard_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证号|护照号|银行卡号|credential|passport|cardNumber/ig;
   const FORBIDDEN_CLAIM_RE = /全网最低|最低价保证|已锁价|立即购买|直接下单|一键出票|真实最终价/i;

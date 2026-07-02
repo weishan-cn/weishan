@@ -37,7 +37,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderZeroRuntimeLock.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderZeroRuntimeLock;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_ZERO_RUNTIME_LOCK_VERSION, "4.0.2");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_ZERO_RUNTIME_LOCK_VERSION, "4.0.3");
   const ready = api.buildGlobalShoppingProviderZeroRuntimeLock({
     globalShoppingReadOnlyPublicBetaShellSummary:readySummary("Global Shopping Read-Only Public Beta Shell", "Global Shopping Read-Only Public Beta Shell 已准备"),
     noProviderUserAssurancePanelSummary:readySummary("No-Provider User Assurance Panel", "No-Provider User Assurance Panel 已准备"),

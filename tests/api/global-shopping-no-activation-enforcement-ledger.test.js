@@ -38,7 +38,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingNoActivationEnforcementLedger.js"]);
   const api = windowRef.WeishanGlobalShoppingNoActivationEnforcementLedger;
-  assert.equal(api.GLOBAL_SHOPPING_NO_ACTIVATION_ENFORCEMENT_LEDGER_VERSION, "4.0.2");
+  assert.equal(api.GLOBAL_SHOPPING_NO_ACTIVATION_ENFORCEMENT_LEDGER_VERSION, "4.0.3");
   const ready = api.buildGlobalShoppingNoActivationEnforcementLedger({
     ledgerMode:"offline_mock",
     offlineDistributionReadinessCenterSummary:readySummary("Offline Distribution Readiness Center", "Offline Distribution Readiness Center 已准备"),

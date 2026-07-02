@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_OFFLINE_LAUNCH_CHECKLIST_VERSION = "4.0.2";
+  const GLOBAL_SHOPPING_PROVIDER_OFFLINE_LAUNCH_CHECKLIST_VERSION = "4.0.3";
   const CHECKLIST_NAME = "global_shopping_provider_offline_launch_checklist_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

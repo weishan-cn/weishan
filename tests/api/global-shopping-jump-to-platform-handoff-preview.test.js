@@ -14,14 +14,14 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingJumpToPlatformHandoffPreview.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingJumpToPlatformHandoffPreview;
-  assert.equal(api.GLOBAL_SHOPPING_JUMP_TO_PLATFORM_HANDOFF_PREVIEW_VERSION, "4.0.2");
+  assert.equal(api.GLOBAL_SHOPPING_JUMP_TO_PLATFORM_HANDOFF_PREVIEW_VERSION, "4.0.3");
   const deepLink = windowRef.WeishanGlobalShoppingExternalDeepLinkSafetyGate.buildGlobalShoppingExternalDeepLinkSafetyGate({ allowedDomain:"sandbox.platform.invalid", sourceType:"major_platform", sourceName:"Sandbox Platform", disclosureText:"价格以跳转后平台实时页面为准。用户需在平台自行确认价格、登录、填写资料并完成下单。" });
   const prefill = windowRef.WeishanGlobalShoppingSearchParameterPrefillGate.buildGlobalShoppingSearchParameterPrefillGate({ itemType:"flight", origin:"SHA", destination:"CTU", departureDate:"2026-07-15", passengerCount:1 });
   const partner = windowRef.WeishanGlobalShoppingPartnerLinkPolicy.buildGlobalShoppingPartnerLinkPolicy({ linkRelation:"partner" });
   const availability = windowRef.WeishanGlobalShoppingPlatformAvailabilityGate.buildGlobalShoppingPlatformAvailabilityGate({ sourceName:"Sandbox Platform", sourceType:"major_platform", allowedDomain:"sandbox.platform.invalid", itemType:"flight", relationType:"partner", partnerLinkPolicySummary:partner });
   const sandbox = windowRef.WeishanGlobalShoppingSandboxDeepLinkCandidate.buildGlobalShoppingSandboxDeepLinkCandidate({ sourceName:"Sandbox Platform", sourceType:"major_platform", allowedDomain:"sandbox.platform.invalid", itemType:"flight", searchParameterPrefillSummary:prefill, partnerLinkPolicySummary:partner, platformAvailabilitySummary:availability });
   const ready = api.buildGlobalShoppingJumpToPlatformHandoffPreview({ externalDeepLinkSafetySummary:deepLink, searchParameterPrefillSummary:prefill, sandboxDeepLinkCandidateSummary:sandbox, platformAvailabilitySummary:availability, partnerLinkPolicySummary:partner });
-  assert.equal(ready.appVersion, "4.0.2");
+  assert.equal(ready.appVersion, "4.0.3");
   assert.equal(ready.status, "ready");
   assert.equal(ready.cards[0].label, "目标平台");
   assert.equal(ready.cards[1].label, "可带入搜索条件");

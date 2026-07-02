@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v4.0.2 global shopping public beta review stays local and bounded @commerce-smoke", async () => {
+  test("v4.0.3 global shopping public beta review stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9617,6 +9617,9 @@ test.describe.serial("commerce agent workbench", () => {
       window.WeishanGlobalShoppingProviderZeroRuntimeLock &&
       window.WeishanGlobalShoppingUserTrustLaunchBoard &&
       window.WeishanGlobalShoppingPublicBetaSafetyCopyCenter &&
+      window.WeishanGlobalShoppingPublicBetaFinalGate &&
+      window.WeishanGlobalShoppingReleaseCandidateConfidenceBoard &&
+      window.WeishanGlobalShoppingPublicBetaFinalViewModel &&
       window.WeishanGlobalShoppingPublicBetaViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
@@ -9625,7 +9628,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v401-render-smoke", "true");
       const card = {
-        version:"4.0.2",
+        version:"4.0.3",
         visible:true,
         globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, rows:[{ rowId:"public_beta", label:"Global Shopping Read-Only Public Beta Shell", value:"Global Shopping Read-Only Public Beta Shell 已准备", status:"pass", redacted:true }], redacted:true },
         globalShoppingReadOnlyCandidateEvidenceUnifierSummary:{ status:"ready", userFacingSummary:{ title:"候选价证据", resultLabel:"候选价证据已准备", redacted:true }, rows:[{ rowId:"candidate_evidence", label:"候选价证据", value:"候选价证据已准备", status:"pass", redacted:true }], redacted:true },
@@ -9636,15 +9639,22 @@ test.describe.serial("commerce agent workbench", () => {
         userTrustLaunchBoardSummary:{ status:"ready", userFacingSummary:{ title:"User Trust Launch Board", resultLabel:"User Trust Launch Board 已准备", redacted:true }, rows:[{ rowId:"user_trust_launch", label:"User Trust Launch Board", value:"User Trust Launch Board 已准备", status:"pass", redacted:true }], redacted:true },
         publicBetaSafetyCopyCenterSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Safety Copy Center", resultLabel:"Public Beta Safety Copy Center 已准备", redacted:true }, rows:[{ rowId:"safety_copy", label:"Public Beta Safety Copy Center", value:"Public Beta Safety Copy Center 已准备", status:"pass", redacted:true }], redacted:true },
         globalShoppingPublicBetaUserFacingCopyPolishSummary:{ status:"ready", userFacingSummary:{ title:"全球购 Public Beta", resultLabel:"全球购 Public Beta 已准备", redacted:true }, rows:[{ rowId:"public_beta_copy", label:"全球购 Public Beta", value:"全球购 Public Beta 已准备", status:"pass", redacted:true }], redacted:true },
+        publicBetaFinalGateSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Final Gate", resultLabel:"Public Beta Final Gate 已准备", redacted:true }, rows:[{ rowId:"public_beta_final_gate", label:"Public Beta Final Gate", value:"Public Beta Final Gate 已准备", status:"pass", redacted:true }], redacted:true },
+        releaseCandidateConfidenceBoardSummary:{ status:"ready", userFacingSummary:{ title:"RC Confidence Board", resultLabel:"RC Confidence Board 已准备", redacted:true }, rows:[{ rowId:"release_candidate_confidence_board", label:"RC Confidence Board", value:"RC Confidence Board 已准备", status:"pass", redacted:true }], redacted:true },
+        publicBetaFinalViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Next Manual Review", resultLabel:"下一步仍需人工复核", redacted:true }, rows:[{ rowId:"next_manual_review", label:"Next Manual Review", value:"下一步仍需人工复核", status:"warning", redacted:true }], redacted:true },
         globalShoppingPublicBetaViewModelSummary:{ status:"ready", title:"Global Shopping Public Beta Review", redacted:true },
         globalShoppingReadOnlyPublicBetaShellStatus:"ready",
         providerZeroRuntimeLockStatus:"ready",
         globalShoppingProviderZeroStatusPanelStatus:"ready",
         userTrustLaunchBoardStatus:"ready",
         publicBetaSafetyCopyCenterStatus:"ready",
+        publicBetaFinalGateStatus:"ready",
+        releaseCandidateConfidenceBoardStatus:"ready",
+        publicBetaFinalViewModelStatus:"ready",
         globalShoppingPublicBetaUserFacingCopyPolishStatus:"ready",
         globalShoppingPublicBetaViewModelStatus:"ready",
-        safeToProceedWithHumanPublicBetaReview:true
+        safeToProceedWithHumanPublicBetaReview:true,
+        safeToProceedWithManualPublicBetaReview:true
       };
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml(card);
       const section = host.querySelector("[data-commerce-global-shopping-public-beta-review='true']");
@@ -9678,6 +9688,9 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("Provider-Zero Status Panel");
     expect(v400.text).toContain("User Trust Launch Board");
     expect(v400.text).toContain("Public Beta Safety Copy Center");
+    expect(v400.text).toContain("Public Beta Final Gate");
+    expect(v400.text).toContain("RC Confidence Board");
+    expect(v400.text).toContain("Next Manual Review");
     expect(v400.text).toContain("只读候选价");
     expect(v400.text).toContain("官方价锚点");
     expect(v400.text).toContain("费用归一化");
@@ -9694,9 +9707,20 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("当前仍为只读候选证据");
     expect(v400.text).toContain("当前不提供付款、下单或出票能力");
     expect(v400.text).toContain("Provider-Zero：未接入真实供应商");
+    expect(v400.text).toContain("Provider-Zero 已锁定");
     expect(v400.text).toContain("未读取密钥");
     expect(v400.text).toContain("未联网调用");
+    expect(v400.text).toContain("未生成 endpoint");
+    expect(v400.text).toContain("未打开外部平台");
+    expect(v400.text).toContain("未启用付款");
     expect(v400.text).toContain("未生成订单");
+    expect(v400.text).toContain("未出票");
+    expect(v400.text).toContain("未保存 raw provider 数据");
+    expect(v400.text).toContain("候选价证据已准备");
+    expect(v400.text).toContain("费用归一化已准备");
+    expect(v400.text).toContain("官方价锚点已准备");
+    expect(v400.text).toContain("安全文案通过");
+    expect(v400.text).toContain("用户边界清晰");
     expect(v400.text).toContain("请在对应平台自行确认价格并完成下单");
     expect(v400.text).toContain("Human public beta review 仍需人工复核");
     expect(v400.text).toContain("当前只展示全球购 Public Beta");
@@ -9710,7 +9734,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).not.toContain("一键下单");
     expect(v400.text).not.toContain("一键出票");
     expect(v400.text).not.toContain("授权付款");
-    expect(v400.text).not.toContain("创建订单");
+    expect(v400.text).not.toContain("可创建订单");
     expect(v400.text).not.toContain("官方保证");
     expect(v400.text).not.toContain("官方背书");
     expect(v400.text).not.toContain("平台授权");
@@ -9723,7 +9747,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.sectionText).not.toContain("启动 pilot");
     expect(v400.sectionText).not.toContain("开始激活 sandbox");
     expect(v400.sectionText).not.toContain("读取 API key");
-    expect(v400.sectionText).not.toContain("生成 endpoint");
+    expect(v400.sectionText).not.toContain("已生成 endpoint");
     expect(v400.sectionText).not.toContain("启用 production provider");
     expect(v400.sectionText).not.toContain("切换 production provider");
     expect(v400.sectionText).not.toContain("真实 SDK");

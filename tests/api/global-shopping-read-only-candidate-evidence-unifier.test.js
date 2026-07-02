@@ -15,7 +15,7 @@ function load(file) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingReadOnlyCandidateEvidenceUnifier.js");
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_CANDIDATE_EVIDENCE_UNIFIER_VERSION, "4.0.2");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_CANDIDATE_EVIDENCE_UNIFIER_VERSION, "4.0.3");
   const ready = api.buildGlobalShoppingReadOnlyCandidateEvidenceUnifier({
     candidateId:"candidate-1",
     sourceLabel:"只读样本",
@@ -31,6 +31,7 @@ function main() {
   assert.equal(ready.bookingUrl, null);
   assert.equal(api.buildGlobalShoppingReadOnlyCandidateEvidenceUnifier({ normalizedPrice:200, currency:"CNY" }).status, "needs_review");
   assert.equal(api.buildGlobalShoppingReadOnlyCandidateEvidenceUnifier({ sourceLabel:"只读样本", observedPrice:100, normalizedPrice:120, currency:"CNY", externalUrl:"https://example.com" }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingReadOnlyCandidateEvidenceUnifier({ sourceLabel:"只读样本", observedPrice:100, normalizedPrice:120, currency:"CNY", bookingUrl:"https://example.com/order" }).status, "blocked");
   console.log("GLOBAL_SHOPPING_READ_ONLY_CANDIDATE_EVIDENCE_UNIFIER PASS");
 }
 

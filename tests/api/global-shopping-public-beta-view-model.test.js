@@ -41,10 +41,13 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingOfficialAnchorComparisonView.js",
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaUserFacingCopyPolish.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderZeroStatusPanel.js",
+    "apps/desktop/src/renderer/core/globalShoppingPublicBetaFinalGate.js",
+    "apps/desktop/src/renderer/core/globalShoppingReleaseCandidateConfidenceBoard.js",
+    "apps/desktop/src/renderer/core/globalShoppingPublicBetaFinalViewModel.js",
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_VIEW_MODEL_VERSION, "4.0.2");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_VIEW_MODEL_VERSION, "4.0.3");
   const ready = api.buildGlobalShoppingPublicBetaViewModel({
     globalShoppingReadOnlyPublicBetaShellSummary:readySummary("Global Shopping Read-Only Public Beta Shell", "Global Shopping Read-Only Public Beta Shell 已准备"),
     providerZeroRuntimeLockSummary:readySummary("Provider-Zero Runtime Lock", "Provider-Zero Runtime Lock 已准备"),
@@ -54,13 +57,17 @@ function main() {
     globalShoppingProviderZeroStatusPanelSummary:readySummary("Provider-Zero Status Panel", "Provider-Zero Status Panel 已准备"),
     globalShoppingReadOnlyCandidateEvidenceUnifierSummary:readySummary("候选价证据", "候选价证据已准备"),
     globalShoppingFeeNormalizationViewSummary:readySummary("费用归一化", "费用归一化已准备"),
-    globalShoppingOfficialAnchorComparisonViewSummary:readySummary("官方价锚点", "官方价锚点已准备")
+    globalShoppingOfficialAnchorComparisonViewSummary:readySummary("官方价锚点", "官方价锚点已准备"),
+    publicBetaFinalGateSummary:readySummary("Public Beta Final Gate", "Public Beta Final Gate 已准备"),
+    releaseCandidateConfidenceBoardSummary:readySummary("RC Confidence Board", "RC Confidence Board 已准备"),
+    publicBetaFinalViewModelSummary:readySummary("Next Manual Review", "下一步仍需人工复核")
   });
   assert.equal(ready.viewModelName, "global_shopping_public_beta_view_model_v1");
   assert.equal(ready.status, "ready");
   assert.equal(ready.title, "Global Shopping Public Beta Review");
   assert.equal(ready.safeToProceedWithHumanPublicBetaReview, true);
-  assert.equal(ready.cards.length, 8);
+  assert.equal(ready.safeToProceedWithManualPublicBetaReview, true);
+  assert.equal(ready.cards.length, 11);
   assert.equal(api.buildGlobalShoppingPublicBetaViewModel({ globalShoppingReadOnlyPublicBetaShellSummary:readySummary("Global Shopping Read-Only Public Beta Shell", "Global Shopping Read-Only Public Beta Shell 已准备") }).status, "needs_review");
   console.log("GLOBAL_SHOPPING_PUBLIC_BETA_VIEW_MODEL PASS");
 }

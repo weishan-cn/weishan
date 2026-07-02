@@ -16,7 +16,7 @@ function load(file) {
 function main() {
   const windowRef = load("apps/desktop/src/renderer/core/globalShoppingHandoffPacketViewModel.js");
   const api = windowRef.WeishanGlobalShoppingHandoffPacketViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_HANDOFF_PACKET_VIEW_MODEL_VERSION, "4.0.2");
+  assert.equal(api.GLOBAL_SHOPPING_HANDOFF_PACKET_VIEW_MODEL_VERSION, "4.0.3");
   const ready = api.buildGlobalShoppingHandoffPacketViewModel({
     readOnlyHandoffPacketPreviewSummary:{ status:"ready", userFacingSummary:{ resultLabel:"交接包预览已准备", redacted:true }, rows:[{ rowId:"a", label:"A", value:"B", status:"pass", redacted:true }], redacted:true },
     platformPreflightSafetyGateSummary:{ status:"clear", userFacingSummary:{ resultLabel:"安全预检未触发阻断", redacted:true }, rows:[{ rowId:"b", label:"B", value:"C", status:"pass", redacted:true }], redacted:true },

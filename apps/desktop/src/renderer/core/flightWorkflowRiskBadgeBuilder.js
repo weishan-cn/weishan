@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.0.2";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.0.3";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -243,6 +243,9 @@
       const globalShoppingPublicBetaViewModelSummary = obj(safe.globalShoppingPublicBetaViewModelSummary);
       const globalShoppingPublicBetaUserFacingCopyPolishSummary = obj(safe.globalShoppingPublicBetaUserFacingCopyPolishSummary);
       const globalShoppingProviderZeroStatusPanelSummary = obj(safe.globalShoppingProviderZeroStatusPanelSummary);
+      const publicBetaFinalGateSummary = obj(safe.publicBetaFinalGateSummary);
+      const releaseCandidateConfidenceBoardSummary = obj(safe.releaseCandidateConfidenceBoardSummary);
+      const publicBetaFinalViewModelSummary = obj(safe.publicBetaFinalViewModelSummary);
       const providerAdapterRegistrySummary = obj(safe.providerAdapterRegistrySummary);
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
@@ -661,6 +664,12 @@
       if (userTrustLaunchBoardSummary.status || globalShoppingPublicBetaViewModelSummary.status) badges.push(badge("user_trust_launch_no_real_launch", "User Trust Launch 不执行真实 launch", "info"));
       if (publicBetaSafetyCopyCenterSummary.status || globalShoppingPublicBetaViewModelSummary.status) badges.push(badge("public_beta_safety_copy_no_price_or_endorsement_claim", "Safety Copy 不承诺最低价、最终价或官方背书", "info"));
       if ((globalShoppingPublicBetaViewModelSummary.status && globalShoppingPublicBetaViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanPublicBetaReview === true) badges.push(badge("human_public_beta_review_required", "Human public beta review 仍需人工复核", "warning"));
+      if (publicBetaFinalGateSummary.status) badges.push(badge("public_beta_final_gate_ready", labelOf(publicBetaFinalGateSummary, "Public Beta Final Gate 已准备"), publicBetaFinalGateSummary.status === "blocked" ? "blocked" : (publicBetaFinalGateSummary.status === "ready" ? "info" : "warning")));
+      if (releaseCandidateConfidenceBoardSummary.status) badges.push(badge("release_candidate_confidence_board_ready", labelOf(releaseCandidateConfidenceBoardSummary, "RC Confidence Board 已准备"), releaseCandidateConfidenceBoardSummary.status === "blocked" ? "blocked" : (releaseCandidateConfidenceBoardSummary.status === "ready" ? "info" : "warning")));
+      if (publicBetaFinalViewModelSummary.status) badges.push(badge("public_beta_final_view_model_ready", labelOf(publicBetaFinalViewModelSummary, "Public Beta Final View Model 已准备"), publicBetaFinalViewModelSummary.status === "blocked" ? "blocked" : (publicBetaFinalViewModelSummary.status === "ready" ? "info" : "warning")));
+      if (releaseCandidateConfidenceBoardSummary.status || publicBetaFinalViewModelSummary.status) badges.push(badge("public_beta_rc_locked_capabilities", "Provider-Zero 已锁定 / 未联网 / 未读取密钥 / 未生成 endpoint", "info"));
+      if (releaseCandidateConfidenceBoardSummary.status || publicBetaFinalViewModelSummary.status) badges.push(badge("public_beta_rc_user_boundary", "未打开外部平台 / 未启用付款 / 未创建订单 / 未出票", "info"));
+      if ((publicBetaFinalViewModelSummary.status && publicBetaFinalViewModelSummary.status !== "blocked") || safe.safeToProceedWithManualPublicBetaReview === true) badges.push(badge("public_beta_manual_review_required", "下一步仍需人工复核", "warning"));
       if (providerAdapterRegistrySummary.status === "ready") badges.push(badge("provider_adapter_registry_ready", "Adapter 注册表已准备", "info"));
       if (providerAdapterRegistrySummary.status === "needs_review") badges.push(badge("provider_adapter_registry_review", "Adapter 注册表仍需复核", "warning"));
       if (providerAdapterRegistrySummary.status === "blocked") badges.push(badge("provider_adapter_registry_blocked", "Adapter 注册表已阻断", "blocked"));

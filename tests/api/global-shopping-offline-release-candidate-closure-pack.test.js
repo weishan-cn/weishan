@@ -38,7 +38,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineReleaseCandidateClosurePack.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineReleaseCandidateClosurePack;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_RELEASE_CANDIDATE_CLOSURE_PACK_VERSION, "4.0.2");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_RELEASE_CANDIDATE_CLOSURE_PACK_VERSION, "4.0.3");
   const ready = api.buildGlobalShoppingOfflineReleaseCandidateClosurePack({
     providerDistributionFreezeConsoleSummary:readySummary("Provider Distribution Freeze Console", "Provider Distribution Freeze Console 已准备"),
     userFacingSafetyReceiptSummary:readySummary("User-Facing Safety Receipt", "User-Facing Safety Receipt 已准备"),

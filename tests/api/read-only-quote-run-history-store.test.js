@@ -8,7 +8,7 @@ function storage() { const map = new Map(); return { getItem:k => map.has(k) ? m
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteRunHistoryStore.js"]);
   const api = windowRef.WeishanReadOnlyQuoteRunHistoryStore;
-  assert.equal(api.READ_ONLY_QUOTE_RUN_HISTORY_STORE_VERSION, "4.0.2");
+  assert.equal(api.READ_ONLY_QUOTE_RUN_HISTORY_STORE_VERSION, "4.0.3");
   const mem = storage();
   const saved = api.appendReadOnlyQuoteRunHistory({ runId:"r1", status:"completed", topCandidates:[{ quoteId:"q1", providerName:"A", bookingUrl:"https://blocked.example" }] }, mem);
   assert.equal(saved.history.length, 1);

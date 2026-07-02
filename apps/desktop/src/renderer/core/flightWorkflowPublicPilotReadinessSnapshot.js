@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PUBLIC_PILOT_READINESS_SNAPSHOT_VERSION = "4.0.2";
+  const FLIGHT_WORKFLOW_PUBLIC_PILOT_READINESS_SNAPSHOT_VERSION = "4.0.3";
   const SNAPSHOT_NAME = "flight_workflow_public_pilot_readiness_snapshot_v1";
   const CAVEAT = "该快照只适用于只读候选证据流程，不代表真实票价、库存或可出票。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;

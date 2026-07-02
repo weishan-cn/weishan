@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SUPPORT_FALLBACK_RECOMMENDATION_ENGINE_VERSION = "4.0.2";
+  const FLIGHT_WORKFLOW_SUPPORT_FALLBACK_RECOMMENDATION_ENGINE_VERSION = "4.0.3";
   const ENGINE_NAME = "flight_workflow_support_fallback_recommendation_engine_v1";
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value == null ? "" : value).trim(); }

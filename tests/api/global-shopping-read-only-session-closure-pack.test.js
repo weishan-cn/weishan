@@ -12,13 +12,13 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingReadOnlySessionClosurePack.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingReadOnlySessionClosurePack;
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_SESSION_CLOSURE_PACK_VERSION, "4.0.2");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_SESSION_CLOSURE_PACK_VERSION, "4.0.3");
   const ready = api.buildGlobalShoppingReadOnlySessionClosurePack({
     externalPlatformExitRampPreviewSummary:{ status:"ready", userFacingSummary:{ resultLabel:"外部平台退出坡道已准备", redacted:true } },
     manualVisitSafetyBriefSummary:{ status:"ready", userFacingSummary:{ resultLabel:"手动访问安全简报已准备", redacted:true } },
     platformVisitPreparationViewModelSummary:{ status:"ready", title:"平台访问准备与最终安全清单", redacted:true }
   });
-  assert.equal(ready.appVersion, "4.0.2");
+  assert.equal(ready.appVersion, "4.0.3");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "只读会话关闭包已准备");
   assert.equal(api.buildGlobalShoppingReadOnlySessionClosurePack({}).status, "needs_review");
