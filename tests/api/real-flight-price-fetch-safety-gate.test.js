@@ -9,7 +9,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/trustedFlightSourceRegistry.js", "apps/desktop/src/renderer/core/providerCredentialReadinessPanel.js", "apps/desktop/src/renderer/core/singleFlightProviderSandboxConnector.js", "apps/desktop/src/renderer/core/realFlightPriceFetchSafetyGate.js"]);
   const api = windowRef.WeishanRealFlightPriceFetchSafetyGate;
-  assert.equal(api.REAL_FLIGHT_PRICE_FETCH_SAFETY_GATE_VERSION, "4.0.0");
+  assert.equal(api.REAL_FLIGHT_PRICE_FETCH_SAFETY_GATE_VERSION, "4.0.1");
 
   const fixture = api.evaluateRealFlightPriceFetchSafety({ providerId:"google_flights_search", providerMode:"fixture" });
   assert.equal(fixture.status, "allowed");
@@ -46,7 +46,7 @@ function main() {
   assert.equal(unknown.decision, "blocked_unknown_provider");
 
   const audit = api.buildRealFlightPriceFetchSafetyAudit({ providerId:"google_flights_search", providerMode:"fixture" });
-  assert.equal(audit.appVersion, "4.0.0");
+  assert.equal(audit.appVersion, "4.0.1");
   assert.equal(audit.booking, false);
   assert.equal(audit.payment, false);
   assert.equal(audit.order, false);

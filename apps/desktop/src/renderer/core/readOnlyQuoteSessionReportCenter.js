@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "4.0.0";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "4.0.1";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -253,6 +253,8 @@
       userTrustLaunchBoardSummary: stripUnsafe(safe.userTrustLaunchBoardSummary || null),
       publicBetaSafetyCopyCenterSummary: stripUnsafe(safe.publicBetaSafetyCopyCenterSummary || null),
       globalShoppingPublicBetaViewModelSummary: stripUnsafe(safe.globalShoppingPublicBetaViewModelSummary || null),
+      globalShoppingPublicBetaUserFacingCopyPolishSummary: stripUnsafe(safe.globalShoppingPublicBetaUserFacingCopyPolishSummary || null),
+      globalShoppingProviderZeroStatusPanelSummary: stripUnsafe(safe.globalShoppingProviderZeroStatusPanelSummary || null),
       offlineProviderAdapterContractKitSummary: stripUnsafe(safe.offlineProviderAdapterContractKitSummary || null),
       mockSandboxQaMatrixSummary: stripUnsafe(safe.mockSandboxQaMatrixSummary || null),
       humanActivationRunbookCenterSummary: stripUnsafe(safe.humanActivationRunbookCenterSummary || null),
@@ -349,6 +351,8 @@
       userTrustLaunchBoardStatus: safeText(safe.userTrustLaunchBoardStatus || safe.userTrustLaunchBoardSummary && safe.userTrustLaunchBoardSummary.status || ""),
       publicBetaSafetyCopyCenterStatus: safeText(safe.publicBetaSafetyCopyCenterStatus || safe.publicBetaSafetyCopyCenterSummary && safe.publicBetaSafetyCopyCenterSummary.status || ""),
       globalShoppingPublicBetaViewModelStatus: safeText(safe.globalShoppingPublicBetaViewModelStatus || safe.globalShoppingPublicBetaViewModelSummary && safe.globalShoppingPublicBetaViewModelSummary.status || ""),
+      globalShoppingPublicBetaUserFacingCopyPolishStatus: safeText(safe.globalShoppingPublicBetaUserFacingCopyPolishStatus || safe.globalShoppingPublicBetaUserFacingCopyPolishSummary && safe.globalShoppingPublicBetaUserFacingCopyPolishSummary.status || ""),
+      globalShoppingProviderZeroStatusPanelStatus: safeText(safe.globalShoppingProviderZeroStatusPanelStatus || safe.globalShoppingProviderZeroStatusPanelSummary && safe.globalShoppingProviderZeroStatusPanelSummary.status || ""),
       offlineProviderAdapterContractKitStatus: safeText(safe.offlineProviderAdapterContractKitStatus || safe.offlineProviderAdapterContractKitSummary && safe.offlineProviderAdapterContractKitSummary.status || ""),
       mockSandboxQaMatrixStatus: safeText(safe.mockSandboxQaMatrixStatus || safe.mockSandboxQaMatrixSummary && safe.mockSandboxQaMatrixSummary.status || ""),
       humanActivationRunbookCenterStatus: safeText(safe.humanActivationRunbookCenterStatus || safe.humanActivationRunbookCenterSummary && safe.humanActivationRunbookCenterSummary.status || ""),
@@ -681,6 +685,8 @@
     const userTrustLaunchBoardSummary = formatter.formatUserTrustLaunchBoardSummary ? formatter.formatUserTrustLaunchBoardSummary({ userTrustLaunchBoardSummary:workflow.userTrustLaunchBoardSummary || safe.userTrustLaunchBoardSummary || null }) : null;
     const publicBetaSafetyCopyCenterSummary = formatter.formatPublicBetaSafetyCopyCenterSummary ? formatter.formatPublicBetaSafetyCopyCenterSummary({ publicBetaSafetyCopyCenterSummary:workflow.publicBetaSafetyCopyCenterSummary || safe.publicBetaSafetyCopyCenterSummary || null }) : null;
     const globalShoppingPublicBetaViewModelSummary = formatter.formatGlobalShoppingPublicBetaViewModelSummary ? formatter.formatGlobalShoppingPublicBetaViewModelSummary({ globalShoppingPublicBetaViewModelSummary:workflow.globalShoppingPublicBetaViewModelSummary || safe.globalShoppingPublicBetaViewModelSummary || null }) : null;
+    const globalShoppingPublicBetaUserFacingCopyPolishSummary = stripUnsafe(workflow.globalShoppingPublicBetaUserFacingCopyPolishSummary || safe.globalShoppingPublicBetaUserFacingCopyPolishSummary || null);
+    const globalShoppingProviderZeroStatusPanelSummary = stripUnsafe(workflow.globalShoppingProviderZeroStatusPanelSummary || safe.globalShoppingProviderZeroStatusPanelSummary || null);
     return clone({
       title: "候选报价证据摘要",
       subtitle: "只读候选价 · 平台最终为准",
@@ -789,6 +795,8 @@
       userTrustLaunchBoardSummary: userTrustLaunchBoardSummary,
       publicBetaSafetyCopyCenterSummary: publicBetaSafetyCopyCenterSummary,
       globalShoppingPublicBetaViewModelSummary: globalShoppingPublicBetaViewModelSummary,
+      globalShoppingPublicBetaUserFacingCopyPolishSummary: globalShoppingPublicBetaUserFacingCopyPolishSummary,
+      globalShoppingProviderZeroStatusPanelSummary: globalShoppingProviderZeroStatusPanelSummary,
       globalShoppingReadOnlyPublicBetaShellStatus: workflow.globalShoppingReadOnlyPublicBetaShellStatus || safe.globalShoppingReadOnlyPublicBetaShellStatus || "",
       providerZeroRuntimeLockStatus: workflow.providerZeroRuntimeLockStatus || safe.providerZeroRuntimeLockStatus || "",
       userTrustLaunchBoardStatus: workflow.userTrustLaunchBoardStatus || safe.userTrustLaunchBoardStatus || "",
@@ -1204,6 +1212,8 @@
       userTrustLaunchBoardSummary: workflow.userTrustLaunchBoardSummary || safe.userTrustLaunchBoardSummary || null,
       publicBetaSafetyCopyCenterSummary: workflow.publicBetaSafetyCopyCenterSummary || safe.publicBetaSafetyCopyCenterSummary || null,
       globalShoppingPublicBetaViewModelSummary: workflow.globalShoppingPublicBetaViewModelSummary || safe.globalShoppingPublicBetaViewModelSummary || null,
+      globalShoppingPublicBetaUserFacingCopyPolishSummary: workflow.globalShoppingPublicBetaUserFacingCopyPolishSummary || safe.globalShoppingPublicBetaUserFacingCopyPolishSummary || null,
+      globalShoppingProviderZeroStatusPanelSummary: workflow.globalShoppingProviderZeroStatusPanelSummary || safe.globalShoppingProviderZeroStatusPanelSummary || null,
       offlineProviderCertificationCenterSummary: workflow.offlineProviderCertificationCenterSummary || safe.offlineProviderCertificationCenterSummary || null,
       mockIntegrationRegressionLabSummary: workflow.mockIntegrationRegressionLabSummary || safe.mockIntegrationRegressionLabSummary || null,
       humanApprovalEvidenceBinderSummary: workflow.humanApprovalEvidenceBinderSummary || safe.humanApprovalEvidenceBinderSummary || null,

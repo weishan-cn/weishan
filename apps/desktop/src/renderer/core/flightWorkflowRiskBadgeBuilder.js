@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.0.0";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.0.1";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -238,6 +238,8 @@
       const userTrustLaunchBoardSummary = obj(safe.userTrustLaunchBoardSummary);
       const publicBetaSafetyCopyCenterSummary = obj(safe.publicBetaSafetyCopyCenterSummary);
       const globalShoppingPublicBetaViewModelSummary = obj(safe.globalShoppingPublicBetaViewModelSummary);
+      const globalShoppingPublicBetaUserFacingCopyPolishSummary = obj(safe.globalShoppingPublicBetaUserFacingCopyPolishSummary);
+      const globalShoppingProviderZeroStatusPanelSummary = obj(safe.globalShoppingProviderZeroStatusPanelSummary);
       const providerAdapterRegistrySummary = obj(safe.providerAdapterRegistrySummary);
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
@@ -639,11 +641,15 @@
       if (offlineLaunchReadinessFinalizerSummary.status || providerLaunchReadinessFinalViewModelSummary.status) badges.push(badge("launch_finalizer_no_real_launch", "Launch Finalizer 不执行真实 launch", "info"));
       if (userSafePublicClaimVerifierSummary.status || providerLaunchReadinessFinalViewModelSummary.status) badges.push(badge("claim_verifier_no_price_claim", "Claim Verifier 不承诺最低价、最终价或官方背书", "info"));
       if ((providerLaunchReadinessFinalViewModelSummary.status && providerLaunchReadinessFinalViewModelSummary.status !== "blocked") || safe.safeToProceedWithHumanLaunchReadinessFinalReview === true) badges.push(badge("human_launch_readiness_final_review_required", "Human launch readiness final review 仍需人工复核", "warning"));
+      if (globalShoppingPublicBetaUserFacingCopyPolishSummary.status) badges.push(badge("global_shopping_public_beta_user_facing_copy_polish_ready", labelOf(globalShoppingPublicBetaUserFacingCopyPolishSummary, "全球购 Public Beta 已准备"), globalShoppingPublicBetaUserFacingCopyPolishSummary.status === "blocked" ? "blocked" : (globalShoppingPublicBetaUserFacingCopyPolishSummary.status === "ready" ? "info" : "warning")));
+      if (globalShoppingProviderZeroStatusPanelSummary.status) badges.push(badge("global_shopping_provider_zero_status_panel_ready", labelOf(globalShoppingProviderZeroStatusPanelSummary, "Provider-Zero Status Panel 已准备"), globalShoppingProviderZeroStatusPanelSummary.status === "blocked" ? "blocked" : (globalShoppingProviderZeroStatusPanelSummary.status === "ready" ? "info" : "warning")));
       if (globalShoppingReadOnlyPublicBetaShellSummary.status) badges.push(badge("global_shopping_read_only_public_beta_shell_ready", labelOf(globalShoppingReadOnlyPublicBetaShellSummary, "Global Shopping Read-Only Public Beta Shell 已准备"), globalShoppingReadOnlyPublicBetaShellSummary.status === "blocked" ? "blocked" : (globalShoppingReadOnlyPublicBetaShellSummary.status === "ready" ? "info" : "warning")));
       if (providerZeroRuntimeLockSummary.status) badges.push(badge("provider_zero_runtime_lock_ready", labelOf(providerZeroRuntimeLockSummary, "Provider-Zero Runtime Lock 已准备"), providerZeroRuntimeLockSummary.status === "blocked" ? "blocked" : (providerZeroRuntimeLockSummary.status === "ready" ? "info" : "warning")));
       if (userTrustLaunchBoardSummary.status) badges.push(badge("user_trust_launch_board_ready", labelOf(userTrustLaunchBoardSummary, "User Trust Launch Board 已准备"), userTrustLaunchBoardSummary.status === "blocked" ? "blocked" : (userTrustLaunchBoardSummary.status === "ready" ? "info" : "warning")));
       if (publicBetaSafetyCopyCenterSummary.status) badges.push(badge("public_beta_safety_copy_center_ready", labelOf(publicBetaSafetyCopyCenterSummary, "Public Beta Safety Copy Center 已准备"), publicBetaSafetyCopyCenterSummary.status === "blocked" ? "blocked" : (publicBetaSafetyCopyCenterSummary.status === "ready" ? "info" : "warning")));
       if (globalShoppingReadOnlyPublicBetaShellSummary.status || globalShoppingPublicBetaViewModelSummary.status) badges.push(badge("public_beta_candidate_only_no_transaction", "Public Beta 只提供候选价证据，不付款、不下单、不出票", "info"));
+      if (globalShoppingPublicBetaUserFacingCopyPolishSummary.status || globalShoppingPublicBetaViewModelSummary.status) badges.push(badge("public_beta_user_facing_copy_ready", "全球购 Public Beta / 只读候选价 / 官方价锚点 / 费用归一化", "info"));
+      if (globalShoppingProviderZeroStatusPanelSummary.status || providerZeroRuntimeLockSummary.status) badges.push(badge("provider_zero_status_no_real_provider", "Provider-Zero：未接入真实供应商 / 未读取密钥 / 未联网调用 / 未生成订单", "info"));
       if (providerZeroRuntimeLockSummary.status || globalShoppingPublicBetaViewModelSummary.status) badges.push(badge("provider_zero_lock_no_real_provider", "Provider-Zero Lock 不接真实 provider、不读密钥、不联网", "info"));
       if (userTrustLaunchBoardSummary.status || globalShoppingPublicBetaViewModelSummary.status) badges.push(badge("user_trust_launch_no_real_launch", "User Trust Launch 不执行真实 launch", "info"));
       if (publicBetaSafetyCopyCenterSummary.status || globalShoppingPublicBetaViewModelSummary.status) badges.push(badge("public_beta_safety_copy_no_price_or_endorsement_claim", "Safety Copy 不承诺最低价、最终价或官方背书", "info"));

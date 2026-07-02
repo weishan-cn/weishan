@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_CERTIFICATION_FREEZE_LEDGER_VERSION = "4.0.0";
+  const GLOBAL_SHOPPING_PROVIDER_CERTIFICATION_FREEZE_LEDGER_VERSION = "4.0.1";
   const LEDGER_NAME = "global_shopping_provider_certification_freeze_ledger_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

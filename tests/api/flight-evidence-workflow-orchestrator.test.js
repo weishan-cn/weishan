@@ -41,7 +41,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightEvidenceWorkflowOrchestrator.js"
   ]);
   const api = windowRef.WeishanFlightEvidenceWorkflowOrchestrator;
-  assert.equal(api.FLIGHT_EVIDENCE_WORKFLOW_ORCHESTRATOR_VERSION, "4.0.0");
+  assert.equal(api.FLIGHT_EVIDENCE_WORKFLOW_ORCHESTRATOR_VERSION, "4.0.1");
   const ready = api.runFlightEvidenceWorkflow({ rawText:"帮我查7月15日上海到成都最便宜的直达机票" });
   assert.equal(ready.orchestratorName, "flight_evidence_workflow_orchestrator_v1");
   assert.equal(ready.workflowId, "deterministic-flight-evidence-workflow-v2.4.1");

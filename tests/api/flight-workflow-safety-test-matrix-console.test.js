@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowSafetyTestMatrixConsole.js"]);
   const api = windowRef.WeishanFlightWorkflowSafetyTestMatrixConsole;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_TEST_MATRIX_CONSOLE_VERSION, "4.0.0");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFETY_TEST_MATRIX_CONSOLE_VERSION, "4.0.1");
   const rows = api.buildFlightWorkflowSafetyTestMatrixRows([
     { scenarioId:"complete_flight_request", scenarioLabel:"完整机票请求", status:"pass", expectedOutcome:"pass", actualOutcome:"完成", safetyChecks:{ noTradingUrl:true, noPaymentOrderTicketing:true, noIdentityOrCredential:true, noSecretOrRawResponse:true, noAutoOpen:true, noFileWriteOrDownload:true, noFinalPriceClaim:true } },
     { scenarioId:"missing_date", scenarioLabel:"缺少日期", status:"warning", expectedOutcome:"warning", actualOutcome:"需要补充日期", safetyChecks:{ noTradingUrl:true, noPaymentOrderTicketing:true, noIdentityOrCredential:true, noSecretOrRawResponse:true, noAutoOpen:true, noFileWriteOrDownload:true, noFinalPriceClaim:true } },

@@ -1,5 +1,5 @@
 (function(){
-  const RESULT_BADGE_FORMATTER_VERSION = "4.0.0";
+  const RESULT_BADGE_FORMATTER_VERSION = "4.0.1";
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value){ return String(value == null ? "" : value).trim(); }
   function normalizeBadge(value){

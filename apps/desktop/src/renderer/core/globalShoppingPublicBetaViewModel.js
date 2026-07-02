@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_VIEW_MODEL_VERSION = "4.0.0";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_VIEW_MODEL_VERSION = "4.0.1";
   const VIEW_MODEL_NAME = "global_shopping_public_beta_view_model_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -40,9 +40,11 @@
     const providerZeroRuntimeLockSummary = resolveSummary(safe, "providerZeroRuntimeLockSummary", "WeishanGlobalShoppingProviderZeroRuntimeLock", "buildGlobalShoppingProviderZeroRuntimeLock");
     const userTrustLaunchBoardSummary = resolveSummary(safe, "userTrustLaunchBoardSummary", "WeishanGlobalShoppingUserTrustLaunchBoard", "buildGlobalShoppingUserTrustLaunchBoard");
     const publicBetaSafetyCopyCenterSummary = resolveSummary(safe, "publicBetaSafetyCopyCenterSummary", "WeishanGlobalShoppingPublicBetaSafetyCopyCenter", "buildGlobalShoppingPublicBetaSafetyCopyCenter");
+    const userFacingCopyPolishSummary = resolveSummary(safe, "globalShoppingPublicBetaUserFacingCopyPolishSummary", "WeishanGlobalShoppingPublicBetaUserFacingCopyPolish", "buildGlobalShoppingPublicBetaUserFacingCopyPolish");
+    const providerZeroStatusPanelSummary = resolveSummary(safe, "globalShoppingProviderZeroStatusPanelSummary", "WeishanGlobalShoppingProviderZeroStatusPanel", "buildGlobalShoppingProviderZeroStatusPanel");
     return clone([
-      card("public_beta", "Public Beta", labelOf(publicBetaShellSummary, "Global Shopping Read-Only Public Beta Shell 仍需复核")),
-      card("provider_zero_lock", "Provider-Zero Lock", labelOf(providerZeroRuntimeLockSummary, "Provider-Zero Runtime Lock 仍需复核")),
+      card("public_beta", "Public Beta", labelOf(userFacingCopyPolishSummary, "全球购 Public Beta 仍需复核")),
+      card("provider_zero_lock", "Provider-Zero Lock", labelOf(providerZeroStatusPanelSummary, "Provider-Zero Status Panel 仍需复核")),
       card("user_trust_launch", "User Trust Launch", labelOf(userTrustLaunchBoardSummary, "User Trust Launch Board 仍需复核")),
       card("safety_copy", "Safety Copy", labelOf(publicBetaSafetyCopyCenterSummary, "Public Beta Safety Copy Center 仍需复核")),
       card("risk_disclosure", "风险说明", "Human public beta review 仍需人工复核")
@@ -72,8 +74,8 @@
   function buildGlobalShoppingPublicBetaRows(input) {
     const safe = obj(input);
     return clone([
-      row("global_shopping_public_beta_view_model_status", "Global Shopping Public Beta Review", "当前只展示 Global Shopping Public Beta Review", safe.status === "ready" ? "pass" : (safe.status === "blocked" ? "blocked" : "warning")),
-      row("global_shopping_public_beta_view_model_boundary", "只读边界", "不接真实 provider，不读取密钥，不联网，不打开平台，不创建 release，不 push，不付款、不下单、不出票。", "pass")
+      row("global_shopping_public_beta_view_model_status", "全球购 Public Beta", "当前只展示全球购 Public Beta", safe.status === "ready" ? "pass" : (safe.status === "blocked" ? "blocked" : "warning")),
+      row("global_shopping_public_beta_view_model_boundary", "只读边界", "不接真实 provider，不读取密钥，不联网，不打开平台，不创建 release，不 push，当前不提供付款、下单或出票能力。", "pass")
     ]);
   }
 
@@ -83,11 +85,15 @@
     const providerZeroRuntimeLockSummary = resolveSummary(safe, "providerZeroRuntimeLockSummary", "WeishanGlobalShoppingProviderZeroRuntimeLock", "buildGlobalShoppingProviderZeroRuntimeLock");
     const userTrustLaunchBoardSummary = resolveSummary(safe, "userTrustLaunchBoardSummary", "WeishanGlobalShoppingUserTrustLaunchBoard", "buildGlobalShoppingUserTrustLaunchBoard");
     const publicBetaSafetyCopyCenterSummary = resolveSummary(safe, "publicBetaSafetyCopyCenterSummary", "WeishanGlobalShoppingPublicBetaSafetyCopyCenter", "buildGlobalShoppingPublicBetaSafetyCopyCenter");
+    const userFacingCopyPolishSummary = resolveSummary(safe, "globalShoppingPublicBetaUserFacingCopyPolishSummary", "WeishanGlobalShoppingPublicBetaUserFacingCopyPolish", "buildGlobalShoppingPublicBetaUserFacingCopyPolish");
+    const providerZeroStatusPanelSummary = resolveSummary(safe, "globalShoppingProviderZeroStatusPanelSummary", "WeishanGlobalShoppingProviderZeroStatusPanel", "buildGlobalShoppingProviderZeroStatusPanel");
     const statuses = [
       safeStatus(publicBetaShellSummary.status),
       safeStatus(providerZeroRuntimeLockSummary.status),
       safeStatus(userTrustLaunchBoardSummary.status),
-      safeStatus(publicBetaSafetyCopyCenterSummary.status)
+      safeStatus(publicBetaSafetyCopyCenterSummary.status),
+      safeStatus(userFacingCopyPolishSummary.status),
+      safeStatus(providerZeroStatusPanelSummary.status)
     ];
     const blocked = statuses.indexOf("blocked") >= 0 || statuses.indexOf("failed_safe") >= 0;
     const needsReview =
@@ -95,6 +101,8 @@
       !present(providerZeroRuntimeLockSummary) ||
       !present(userTrustLaunchBoardSummary) ||
       !present(publicBetaSafetyCopyCenterSummary) ||
+      !present(userFacingCopyPolishSummary) ||
+      !present(providerZeroStatusPanelSummary) ||
       statuses.indexOf("needs_review") >= 0;
     const status = blocked ? "blocked" : (needsReview ? "needs_review" : "ready");
     return clone({
@@ -106,25 +114,29 @@
         globalShoppingReadOnlyPublicBetaShellSummary:publicBetaShellSummary,
         providerZeroRuntimeLockSummary:providerZeroRuntimeLockSummary,
         userTrustLaunchBoardSummary:userTrustLaunchBoardSummary,
-        publicBetaSafetyCopyCenterSummary:publicBetaSafetyCopyCenterSummary
+        publicBetaSafetyCopyCenterSummary:publicBetaSafetyCopyCenterSummary,
+        globalShoppingPublicBetaUserFacingCopyPolishSummary:userFacingCopyPolishSummary,
+        globalShoppingProviderZeroStatusPanelSummary:providerZeroStatusPanelSummary
       }),
       publicBetaShellRows:buildGlobalShoppingPublicBetaShellRowsForView({ globalShoppingReadOnlyPublicBetaShellSummary:publicBetaShellSummary }),
       providerZeroLockRows:buildGlobalShoppingProviderZeroLockRowsForView({ providerZeroRuntimeLockSummary:providerZeroRuntimeLockSummary }),
       userTrustLaunchRows:buildGlobalShoppingUserTrustLaunchRowsForView({ userTrustLaunchBoardSummary:userTrustLaunchBoardSummary }),
       safetyCopyRows:buildGlobalShoppingSafetyCopyRowsForView({ publicBetaSafetyCopyCenterSummary:publicBetaSafetyCopyCenterSummary }),
       disclosureRows:toArray(safe.disclosureRows).length ? toArray(safe.disclosureRows) : [
-        row("public_beta_disclosure_candidate_only", "Public Beta", "Public Beta 只提供候选价证据，不付款、不下单、不出票", "pass"),
-        row("public_beta_disclosure_provider_zero", "Provider-Zero Lock", "Provider-Zero Lock 不接真实 provider、不读密钥、不联网", "pass"),
+        row("public_beta_disclosure_candidate_only", "Global Shopping Public Beta", "全球购 Public Beta 只展示只读候选价，当前不提供付款、下单或出票能力", "pass"),
+        row("public_beta_disclosure_provider_zero", "Provider-Zero", "Provider-Zero：未接入真实供应商，未读取密钥，未联网调用，未生成订单", "pass"),
         row("public_beta_disclosure_user_trust", "User Trust Launch", "User Trust Launch 不执行真实 launch", "pass"),
-        row("public_beta_disclosure_safety_copy", "Safety Copy", "Safety Copy 不承诺最低价、最终价或官方背书", "pass"),
+        row("public_beta_disclosure_safety_copy", "Safety Copy", "Safety Copy 不承诺最低价、最终价或官方背书，平台实时页面为准", "pass"),
         row("public_beta_disclosure_manual", "风险说明", "Human public beta review 仍需人工复核", "warning")
       ],
       rows:buildGlobalShoppingPublicBetaRows({ status:status }),
-      caveat:"当前只展示 Global Shopping Public Beta Review，不接真实 provider，不读取密钥，不联网，不打开平台，不创建 release，不 push，不付款、不下单、不出票。",
+      caveat:"当前只展示全球购 Public Beta，不接真实 provider，不读取密钥，不联网，不打开平台，不创建 release，不 push，当前不提供付款、下单或出票能力。",
       globalShoppingReadOnlyPublicBetaShellSummary:clone(publicBetaShellSummary),
       providerZeroRuntimeLockSummary:clone(providerZeroRuntimeLockSummary),
       userTrustLaunchBoardSummary:clone(userTrustLaunchBoardSummary),
       publicBetaSafetyCopyCenterSummary:clone(publicBetaSafetyCopyCenterSummary),
+      globalShoppingPublicBetaUserFacingCopyPolishSummary:clone(userFacingCopyPolishSummary),
+      globalShoppingProviderZeroStatusPanelSummary:clone(providerZeroStatusPanelSummary),
       safeToProceedWithHumanPublicBetaReview:status === "ready",
       externalUrl:null,
       platformUrl:null,

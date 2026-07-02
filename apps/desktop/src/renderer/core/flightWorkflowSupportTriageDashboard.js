@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SUPPORT_TRIAGE_DASHBOARD_VERSION = "4.0.0";
+  const FLIGHT_WORKFLOW_SUPPORT_TRIAGE_DASHBOARD_VERSION = "4.0.1";
   const DASHBOARD_NAME = "flight_workflow_support_triage_dashboard_v1";
   const CAVEAT = "问题分流仅用于本地改进参考，不会提交客服工单或交易请求。";
   const TRIAGE = {

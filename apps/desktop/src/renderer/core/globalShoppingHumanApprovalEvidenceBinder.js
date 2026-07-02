@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_HUMAN_APPROVAL_EVIDENCE_BINDER_VERSION = "4.0.0";
+  const GLOBAL_SHOPPING_HUMAN_APPROVAL_EVIDENCE_BINDER_VERSION = "4.0.1";
   const BINDER_NAME = "global_shopping_human_approval_evidence_binder_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

@@ -16,9 +16,9 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingUserConfirmationChecklist.js"]);
   const api = windowRef.WeishanGlobalShoppingUserConfirmationChecklist;
-  assert.equal(api.GLOBAL_SHOPPING_USER_CONFIRMATION_CHECKLIST_VERSION, "4.0.0");
+  assert.equal(api.GLOBAL_SHOPPING_USER_CONFIRMATION_CHECKLIST_VERSION, "4.0.1");
   const ready = api.buildGlobalShoppingUserConfirmationChecklist({});
-  assert.equal(ready.appVersion, "4.0.0");
+  assert.equal(ready.appVersion, "4.0.1");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "用户确认清单已准备");
   assert.equal(ready.confirmationItems.some((item) => item.category === "price"), true);

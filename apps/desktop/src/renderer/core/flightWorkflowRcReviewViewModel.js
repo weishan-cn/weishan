@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RC_REVIEW_VIEW_MODEL_VERSION = "4.0.0";
+  const FLIGHT_WORKFLOW_RC_REVIEW_VIEW_MODEL_VERSION = "4.0.1";
   const VIEW_MODEL_NAME = "flight_workflow_rc_review_view_model_v1";
   const CAVEAT = "该页面只用于只读 RC 候选复核，不保存真实身份、不发送真实邀请、不提供交易能力。";
 

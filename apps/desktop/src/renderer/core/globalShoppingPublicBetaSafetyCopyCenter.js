@@ -1,14 +1,14 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_SAFETY_COPY_CENTER_VERSION = "4.0.0";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_SAFETY_COPY_CENTER_VERSION = "4.0.1";
   const CENTER_NAME = "global_shopping_public_beta_safety_copy_center_v1";
   const ALLOWED_COPY = [
     "当前已覆盖来源中的较低候选价",
     "与官方价对比",
     "已接入平台候选价",
     "价格以跳转后平台实时页面为准",
-    "当前仅提供只读候选证据，不提供付款、下单或出票能力",
+    "当前不提供付款、下单或出票能力",
     "跳转至平台自行下单",
     "Weishan 可尽量带入搜索条件，但用户需在对应平台自行确认价格、登录、填写资料并完成下单"
   ];
@@ -131,7 +131,7 @@
     return clone([
       row("public_beta_safety_copy_center_status", "Public Beta Safety Copy Center", obj(safe.userFacingSummary).resultLabel || "Public Beta Safety Copy Center 仍需复核", safe.status === "ready" ? "pass" : (safe.status === "blocked" ? "blocked" : "warning")),
       row("public_beta_safety_copy_center_boundary", "Safety Copy 边界", "当前只展示 public beta safety copy center。", "pass"),
-      row("public_beta_safety_copy_center_guard", "只读说明", "Safety Copy 不承诺最低价、最终价或官方背书，不打开平台，不付款、不下单、不出票。", "pass")
+      row("public_beta_safety_copy_center_guard", "只读说明", "Safety Copy 不承诺最低价、最终价或官方背书，平台实时页面为准，当前不提供付款、下单或出票能力。", "pass")
     ].concat(rules));
   }
 
@@ -197,7 +197,7 @@
       userFacingSummary:{
         title:"Public Beta Safety Copy Center",
         resultLabel:status === "ready" ? "Public Beta Safety Copy Center 已准备" : (status === "blocked" ? "Public Beta Safety Copy Center 已阻断" : "Public Beta Safety Copy Center 仍需复核"),
-        caveat:"Safety Copy 不承诺最低价、最终价或官方背书。"
+        caveat:"Safety Copy 不承诺最低价、最终价或官方背书，平台实时页面为准。"
       },
       rows:buildGlobalShoppingPublicBetaSafetyCopyRows({ status:status, userFacingSummary:{ resultLabel:status === "ready" ? "Public Beta Safety Copy Center 已准备" : (status === "blocked" ? "Public Beta Safety Copy Center 已阻断" : "Public Beta Safety Copy Center 仍需复核") }, publicBetaSafetyCopyRules:rules }),
       safety:safety(),

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_ZERO_RUNTIME_LOCK_VERSION = "4.0.0";
+  const GLOBAL_SHOPPING_PROVIDER_ZERO_RUNTIME_LOCK_VERSION = "4.0.1";
   const LOCK_NAME = "global_shopping_provider_zero_runtime_lock_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -88,8 +88,10 @@
     const noProviderExecutionFinalGuardSummary = resolveSummary(safe, "noProviderExecutionFinalGuardSummary", "WeishanGlobalShoppingNoProviderExecutionFinalGuard", "buildGlobalShoppingNoProviderExecutionFinalGuard");
     const providerNoProductionGuaranteeMatrixSummary = resolveSummary(safe, "providerNoProductionGuaranteeMatrixSummary", "WeishanGlobalShoppingProviderNoProductionGuaranteeMatrix", "buildGlobalShoppingProviderNoProductionGuaranteeMatrix");
     const safetyRegressionSummary = resolveSummary(safe, "safetyRegressionSummary", "WeishanFlightWorkflowSafetyRegressionSentinel", "buildFlightWorkflowSafetyRegressionSentinel");
+    const providerZeroStatusPanelSummary = present(safe.providerZeroStatusPanelSummary) ? obj(safe.providerZeroStatusPanelSummary) : {};
     return clone([
       row("public_beta_shell", "Global Shopping Read-Only Public Beta Shell", labelOf(publicBetaShellSummary, "Global Shopping Read-Only Public Beta Shell 仍需复核"), safeStatus(publicBetaShellSummary.status) === "ready" ? "pass" : (safeStatus(publicBetaShellSummary.status) === "blocked" ? "blocked" : "warning")),
+      row("provider_zero_status_panel", "Provider-Zero Status Panel", labelOf(providerZeroStatusPanelSummary, "Provider-Zero Status Panel 仍需复核"), safeStatus(providerZeroStatusPanelSummary.status) === "ready" ? "pass" : (safeStatus(providerZeroStatusPanelSummary.status) === "blocked" ? "blocked" : "warning")),
       row("no_provider_user_assurance_panel", "No-Provider User Assurance Panel", labelOf(noProviderUserAssurancePanelSummary, "No-Provider User Assurance Panel 仍需复核"), safeStatus(noProviderUserAssurancePanelSummary.status) === "ready" ? "pass" : (safeStatus(noProviderUserAssurancePanelSummary.status) === "blocked" ? "blocked" : "warning")),
       row("no_provider_execution_final_guard", "No-Provider-Execution Final Guard", labelOf(noProviderExecutionFinalGuardSummary, "No-Provider-Execution Final Guard 仍需复核"), safeStatus(noProviderExecutionFinalGuardSummary.status) === "ready" ? "pass" : (safeStatus(noProviderExecutionFinalGuardSummary.status) === "blocked" ? "blocked" : "warning")),
       row("provider_no_production_guarantee_matrix", "Provider No-Production Guarantee Matrix", labelOf(providerNoProductionGuaranteeMatrixSummary, "Provider No-Production Guarantee Matrix 仍需复核"), safeStatus(providerNoProductionGuaranteeMatrixSummary.status) === "ready" ? "pass" : (safeStatus(providerNoProductionGuaranteeMatrixSummary.status) === "blocked" ? "blocked" : "warning")),
@@ -103,7 +105,7 @@
     return clone([
       row("provider_zero_runtime_lock_status", "Provider-Zero Runtime Lock", obj(safe.userFacingSummary).resultLabel || "Provider-Zero Runtime Lock 仍需复核", safe.status === "ready" ? "pass" : (safe.status === "blocked" ? "blocked" : "warning")),
       row("provider_zero_runtime_lock_boundary", "Provider-Zero Lock 边界", "当前只展示 provider-zero runtime lock。", "pass"),
-      row("provider_zero_runtime_lock_guard", "只读说明", "不接真实 provider，不读取密钥，不联网，不修改配置，不启用或禁用 provider。", "pass")
+      row("provider_zero_runtime_lock_guard", "只读说明", "Provider-Zero：未接入真实供应商，未读取密钥，未联网调用，未生成订单。", "pass")
     ].concat(rules));
   }
 
@@ -114,8 +116,10 @@
     const noProviderExecutionFinalGuardSummary = resolveSummary(safe, "noProviderExecutionFinalGuardSummary", "WeishanGlobalShoppingNoProviderExecutionFinalGuard", "buildGlobalShoppingNoProviderExecutionFinalGuard");
     const providerNoProductionGuaranteeMatrixSummary = resolveSummary(safe, "providerNoProductionGuaranteeMatrixSummary", "WeishanGlobalShoppingProviderNoProductionGuaranteeMatrix", "buildGlobalShoppingProviderNoProductionGuaranteeMatrix");
     const safetyRegressionSummary = resolveSummary(safe, "safetyRegressionSummary", "WeishanFlightWorkflowSafetyRegressionSentinel", "buildFlightWorkflowSafetyRegressionSentinel");
+    const providerZeroStatusPanelSummary = present(safe.providerZeroStatusPanelSummary) ? obj(safe.providerZeroStatusPanelSummary) : {};
     const rules = buildGlobalShoppingProviderZeroRuntimeLockRules({
       globalShoppingReadOnlyPublicBetaShellSummary:publicBetaShellSummary,
+      providerZeroStatusPanelSummary:providerZeroStatusPanelSummary,
       noProviderUserAssurancePanelSummary:noProviderUserAssurancePanelSummary,
       noProviderExecutionFinalGuardSummary:noProviderExecutionFinalGuardSummary,
       providerNoProductionGuaranteeMatrixSummary:providerNoProductionGuaranteeMatrixSummary,
@@ -174,7 +178,7 @@
       userFacingSummary:{
         title:"Provider-Zero Runtime Lock",
         resultLabel:status === "ready" ? "Provider-Zero Runtime Lock 已准备" : (status === "blocked" ? "Provider-Zero Runtime Lock 已阻断" : "Provider-Zero Runtime Lock 仍需复核"),
-        caveat:"Provider-Zero Lock 不接真实 provider、不读密钥、不联网。"
+        caveat:"Provider-Zero：未接入真实供应商，未读取密钥，未联网调用，未生成订单。"
       },
       rows:buildGlobalShoppingProviderZeroRuntimeLockRows({ status:status, userFacingSummary:{ resultLabel:status === "ready" ? "Provider-Zero Runtime Lock 已准备" : (status === "blocked" ? "Provider-Zero Runtime Lock 已阻断" : "Provider-Zero Runtime Lock 仍需复核") }, providerZeroRuntimeLockRules:rules }),
       globalShoppingReadOnlyPublicBetaShellSummary:clone(publicBetaShellSummary),

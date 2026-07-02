@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_READ_ONLY_PUBLIC_BETA_SHELL_VERSION = "4.0.0";
+  const GLOBAL_SHOPPING_READ_ONLY_PUBLIC_BETA_SHELL_VERSION = "4.0.1";
   const SHELL_NAME = "global_shopping_read_only_public_beta_shell_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -113,10 +113,11 @@
     const safe = obj(input);
     const status = safeStatus(safe.status || "needs_review");
     return clone([
-      row("public_beta_cover_low_candidate", "候选价证据", "当前已覆盖来源中的较低候选价", status === "blocked" ? "blocked" : "pass"),
+      row("public_beta_cover_low_candidate", "只读候选价", "当前已覆盖来源中的较低候选价", status === "blocked" ? "blocked" : "pass"),
       row("public_beta_official_anchor", "官方价锚点", "与官方价对比", status === "blocked" ? "blocked" : "pass"),
-      row("public_beta_realtime_boundary", "价格边界", "价格以跳转后平台实时页面为准", status === "blocked" ? "blocked" : "pass"),
-      row("public_beta_read_only_boundary", "只读边界", "当前仅提供只读候选证据，不提供付款、下单或出票能力", status === "blocked" ? "blocked" : "pass")
+      row("public_beta_fee_normalization", "费用归一化", "费用归一化", status === "blocked" ? "blocked" : "pass"),
+      row("public_beta_realtime_boundary", "平台实时页面为准", "价格以跳转后平台实时页面为准", status === "blocked" ? "blocked" : "pass"),
+      row("public_beta_read_only_boundary", "当前不提供付款、下单或出票能力", "当前不提供付款、下单或出票能力", status === "blocked" ? "blocked" : "pass")
     ]);
   }
 
@@ -127,7 +128,7 @@
     return clone([
       row("global_shopping_read_only_public_beta_shell_status", "Global Shopping Read-Only Public Beta Shell", obj(safe.userFacingSummary).resultLabel || "Global Shopping Read-Only Public Beta Shell 仍需复核", safe.status === "ready" ? "pass" : (safe.status === "blocked" ? "blocked" : "warning")),
       row("global_shopping_read_only_public_beta_shell_boundary", "Public Beta 边界", "当前只展示 global shopping public beta shell。", "pass"),
-      row("global_shopping_read_only_public_beta_shell_guard", "只读说明", "不接真实 provider，不读取密钥，不联网，不打开平台，不付款、不下单、不出票。", "pass")
+      row("global_shopping_read_only_public_beta_shell_guard", "只读说明", "不接真实 provider，不读取密钥，不联网，不打开平台，当前不提供付款、下单或出票能力。", "pass")
     ].concat(capabilities).concat(sections.map(function (item) {
       return row(item.sectionId, item.label, item.summary, item.status === "ready" ? "pass" : (item.status === "blocked" || item.status === "failed_safe" || item.status === "fail" ? "blocked" : "warning"));
     })));
@@ -199,7 +200,7 @@
       userFacingSummary:{
         title:"Global Shopping Read-Only Public Beta Shell",
         resultLabel:status === "ready" ? "Global Shopping Read-Only Public Beta Shell 已准备" : (status === "blocked" ? "Global Shopping Read-Only Public Beta Shell 已阻断" : "Global Shopping Read-Only Public Beta Shell 仍需复核"),
-        caveat:"Public Beta 只提供候选价证据，不付款、不下单、不出票。"
+        caveat:"Public Beta 只提供只读候选价展示，当前不提供付款、下单或出票能力。"
       },
       safety:safety(),
       bookingUrl:null,
