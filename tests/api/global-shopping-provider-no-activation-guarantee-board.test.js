@@ -19,7 +19,7 @@ function readySummary(title, resultLabel) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingProviderNoActivationGuaranteeBoard.js").WeishanGlobalShoppingProviderNoActivationGuaranteeBoard;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_NO_ACTIVATION_GUARANTEE_BOARD_VERSION, "3.9.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_NO_ACTIVATION_GUARANTEE_BOARD_VERSION, "4.0.0");
   const ready = api.buildGlobalShoppingProviderNoActivationGuaranteeBoard({
     providerFinalSafetySealSummary:readySummary("Provider Final Safety Seal", "Provider Final Safety Seal 已准备"),
     offlineActivationWarRoomSummary:readySummary("Offline Activation War Room", "Offline Activation War Room 已准备"),

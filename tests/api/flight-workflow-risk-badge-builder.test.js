@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "3.9.0");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.0.0");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -254,6 +254,23 @@ function main() {
   assert.ok(launchReadinessFinalLabels.includes("Launch Finalizer 不执行真实 launch"));
   assert.ok(launchReadinessFinalLabels.includes("Claim Verifier 不承诺最低价、最终价或官方背书"));
   assert.ok(launchReadinessFinalLabels.includes("Human launch readiness final review 仍需人工复核"));
+  const publicBetaLabels = api.buildFlightWorkflowRiskBadges({
+    globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true } },
+    providerZeroRuntimeLockSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider-Zero Runtime Lock 已准备", redacted:true } },
+    userTrustLaunchBoardSummary:{ status:"ready", userFacingSummary:{ resultLabel:"User Trust Launch Board 已准备", redacted:true } },
+    publicBetaSafetyCopyCenterSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Beta Safety Copy Center 已准备", redacted:true } },
+    globalShoppingPublicBetaViewModelSummary:{ status:"ready", title:"Global Shopping Public Beta Review", redacted:true },
+    safeToProceedWithHumanPublicBetaReview:true
+  }).badges.map((item) => item.label);
+  assert.ok(publicBetaLabels.includes("Global Shopping Read-Only Public Beta Shell 已准备"));
+  assert.ok(publicBetaLabels.includes("Provider-Zero Runtime Lock 已准备"));
+  assert.ok(publicBetaLabels.includes("User Trust Launch Board 已准备"));
+  assert.ok(publicBetaLabels.includes("Public Beta Safety Copy Center 已准备"));
+  assert.ok(publicBetaLabels.includes("Public Beta 只提供候选价证据，不付款、不下单、不出票"));
+  assert.ok(publicBetaLabels.includes("Provider-Zero Lock 不接真实 provider、不读密钥、不联网"));
+  assert.ok(publicBetaLabels.includes("User Trust Launch 不执行真实 launch"));
+  assert.ok(publicBetaLabels.includes("Safety Copy 不承诺最低价、最终价或官方背书"));
+  assert.ok(publicBetaLabels.includes("Human public beta review 仍需人工复核"));
   const finalReviewConsoleLabels = api.buildFlightWorkflowRiskBadges({
     finalOfflineLaunchReviewConsoleSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Final Offline Launch Review Console 已准备", redacted:true } },
     providerActivationBlockerSentinelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider Activation Blocker Sentinel 已准备", redacted:true } },

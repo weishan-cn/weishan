@@ -9606,105 +9606,120 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v3.9.0 provider launch readiness final review stays local and bounded @commerce-smoke", async () => {
+  test("v4.0.0 global shopping public beta review stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
-      window.WeishanGlobalShoppingPublicReleaseEvidenceConsole &&
-      window.WeishanGlobalShoppingNoProviderUserAssurancePanel &&
-      window.WeishanGlobalShoppingOfflineLaunchReadinessFinalizer &&
-      window.WeishanGlobalShoppingUserSafePublicClaimVerifier &&
-      window.WeishanGlobalShoppingProviderLaunchReadinessFinalViewModel &&
+      window.WeishanGlobalShoppingReadOnlyPublicBetaShell &&
+      window.WeishanGlobalShoppingProviderZeroRuntimeLock &&
+      window.WeishanGlobalShoppingUserTrustLaunchBoard &&
+      window.WeishanGlobalShoppingPublicBetaSafetyCopyCenter &&
+      window.WeishanGlobalShoppingPublicBetaViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
-    const v390 = await page.evaluate(() => {
+    const v400 = await page.evaluate(() => {
       const cardApi = window.WeishanReadOnlyPriceCandidateCardViewModel;
       const host = document.createElement("section");
-      host.setAttribute("data-commerce-v390-render-smoke", "true");
+      host.setAttribute("data-commerce-v400-render-smoke", "true");
       const card = {
-        version:"3.9.0",
+        version:"4.0.0",
         visible:true,
-        publicReleaseEvidenceConsoleSummary:{ status:"ready", userFacingSummary:{ title:"Public Release Evidence Console", resultLabel:"Public Release Evidence Console 已准备", redacted:true }, rows:[{ rowId:"release_evidence", label:"Public Release Evidence Console", value:"Public Release Evidence Console 已准备", status:"pass", redacted:true }], redacted:true },
-        noProviderUserAssurancePanelSummary:{ status:"ready", userFacingSummary:{ title:"No-Provider User Assurance Panel", resultLabel:"No-Provider User Assurance Panel 已准备", redacted:true }, rows:[{ rowId:"user_assurance", label:"No-Provider User Assurance Panel", value:"No-Provider User Assurance Panel 已准备", status:"pass", redacted:true }], redacted:true },
-        offlineLaunchReadinessFinalizerSummary:{ status:"ready", userFacingSummary:{ title:"Offline Launch Readiness Finalizer", resultLabel:"Offline Launch Readiness Finalizer 已准备", redacted:true }, rows:[{ rowId:"launch_finalizer", label:"Offline Launch Readiness Finalizer", value:"Offline Launch Readiness Finalizer 已准备", status:"pass", redacted:true }], redacted:true },
-        userSafePublicClaimVerifierSummary:{ status:"ready", userFacingSummary:{ title:"User-Safe Public Claim Verifier", resultLabel:"User-Safe Public Claim Verifier 已准备", redacted:true }, rows:[{ rowId:"claim_verifier", label:"User-Safe Public Claim Verifier", value:"User-Safe Public Claim Verifier 已准备", status:"pass", redacted:true }], redacted:true },
-        providerLaunchReadinessFinalViewModelSummary:{ status:"ready", title:"Provider Launch Readiness Final Review", redacted:true },
-        publicReleaseEvidenceConsoleStatus:"ready",
-        noProviderUserAssurancePanelStatus:"ready",
-        offlineLaunchReadinessFinalizerStatus:"ready",
-        userSafePublicClaimVerifierStatus:"ready",
-        providerLaunchReadinessFinalViewModelStatus:"ready",
-        safeToProceedWithHumanLaunchReadinessFinalReview:true
+        globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, rows:[{ rowId:"public_beta", label:"Global Shopping Read-Only Public Beta Shell", value:"Global Shopping Read-Only Public Beta Shell 已准备", status:"pass", redacted:true }], redacted:true },
+        providerZeroRuntimeLockSummary:{ status:"ready", userFacingSummary:{ title:"Provider-Zero Runtime Lock", resultLabel:"Provider-Zero Runtime Lock 已准备", redacted:true }, rows:[{ rowId:"provider_zero_lock", label:"Provider-Zero Runtime Lock", value:"Provider-Zero Runtime Lock 已准备", status:"pass", redacted:true }], redacted:true },
+        userTrustLaunchBoardSummary:{ status:"ready", userFacingSummary:{ title:"User Trust Launch Board", resultLabel:"User Trust Launch Board 已准备", redacted:true }, rows:[{ rowId:"user_trust_launch", label:"User Trust Launch Board", value:"User Trust Launch Board 已准备", status:"pass", redacted:true }], redacted:true },
+        publicBetaSafetyCopyCenterSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Safety Copy Center", resultLabel:"Public Beta Safety Copy Center 已准备", redacted:true }, rows:[{ rowId:"safety_copy", label:"Public Beta Safety Copy Center", value:"Public Beta Safety Copy Center 已准备", status:"pass", redacted:true }], redacted:true },
+        globalShoppingPublicBetaViewModelSummary:{ status:"ready", title:"Global Shopping Public Beta Review", redacted:true },
+        globalShoppingReadOnlyPublicBetaShellStatus:"ready",
+        providerZeroRuntimeLockStatus:"ready",
+        userTrustLaunchBoardStatus:"ready",
+        publicBetaSafetyCopyCenterStatus:"ready",
+        globalShoppingPublicBetaViewModelStatus:"ready",
+        safeToProceedWithHumanPublicBetaReview:true
       };
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml(card);
-      const section = host.querySelector("[data-commerce-global-shopping-provider-launch-readiness-final-review='true']");
+      const section = host.querySelector("[data-commerce-global-shopping-public-beta-review='true']");
       document.body.appendChild(host);
       return {
         text:host.innerText,
         html:host.innerHTML,
         sectionText:section ? section.innerText : "",
         sectionHtml:section ? section.innerHTML : "",
-        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-provider-launch-readiness-final-review='true']").length,
-        releaseEvidenceButtonCount:host.querySelectorAll("[data-commerce-global-shopping-release-evidence-show]").length,
-        userAssuranceButtonCount:host.querySelectorAll("[data-commerce-global-shopping-user-assurance-show]").length,
-        launchFinalizerButtonCount:host.querySelectorAll("[data-commerce-global-shopping-launch-finalizer-show]").length,
-        claimVerifierButtonCount:host.querySelectorAll("[data-commerce-global-shopping-claim-verifier-show]").length
+        sectionCount:host.querySelectorAll("[data-commerce-global-shopping-public-beta-review='true']").length,
+        publicBetaButtonCount:host.querySelectorAll("[data-commerce-global-shopping-public-beta-show]").length,
+        providerZeroLockButtonCount:host.querySelectorAll("[data-commerce-global-shopping-provider-zero-lock-show]").length,
+        userTrustLaunchButtonCount:host.querySelectorAll("[data-commerce-global-shopping-user-trust-launch-show]").length,
+        safetyCopyButtonCount:host.querySelectorAll("[data-commerce-global-shopping-safety-copy-show]").length
       };
     });
-    expect(v390.sectionCount).toBe(1);
-    expect(v390.releaseEvidenceButtonCount).toBe(1);
-    expect(v390.userAssuranceButtonCount).toBe(1);
-    expect(v390.launchFinalizerButtonCount).toBe(1);
-    expect(v390.claimVerifierButtonCount).toBe(1);
-    expect(v390.text).toContain("Provider Launch Readiness Final Review");
-    expect(v390.text).toContain("Public Release Evidence Console");
-    expect(v390.text).toContain("No-Provider User Assurance Panel");
-    expect(v390.text).toContain("Offline Launch Readiness Finalizer");
-    expect(v390.text).toContain("User-Safe Public Claim Verifier");
-    expect(v390.text).toContain("Release Evidence");
-    expect(v390.text).toContain("User Assurance");
-    expect(v390.text).toContain("Launch Finalizer");
-    expect(v390.text).toContain("Claim Verifier");
-    expect(v390.text).toContain("Public Release Evidence Console 已准备");
-    expect(v390.text).toContain("No-Provider User Assurance Panel 已准备");
-    expect(v390.text).toContain("Offline Launch Readiness Finalizer 已准备");
-    expect(v390.text).toContain("User-Safe Public Claim Verifier 已准备");
-    expect(v390.text).toContain("Release Evidence 不生成真实证据文件");
-    expect(v390.text).toContain("User Assurance 不生成真实用户保证书");
-    expect(v390.text).toContain("Launch Finalizer 不执行真实 launch");
-    expect(v390.text).toContain("Claim Verifier 不承诺最低价、最终价或官方背书");
-    expect(v390.text).toContain("Human launch readiness final review 仍需人工复核");
-    expect(v390.text).toContain("当前只展示 provider launch readiness final review");
-    expect(v390.text).toContain("不接真实 provider，不读取密钥，不联网，不打开平台，不创建 release，不 push，不执行真实 launch");
-    expect(v390.text).not.toMatch(/token|secret|apiKey/i);
-    expect(v390.sectionText).not.toMatch(/bookingUrl|paymentUrl|orderUrl|checkoutUrl/);
-    expect(v390.sectionText).not.toContain("开始接入真实 provider");
-    expect(v390.sectionText).not.toContain("启动 pilot");
-    expect(v390.sectionText).not.toContain("开始激活 sandbox");
-    expect(v390.sectionText).not.toContain("读取 API key");
-    expect(v390.sectionText).not.toContain("生成 endpoint");
-    expect(v390.sectionText).not.toContain("启用 production provider");
-    expect(v390.sectionText).not.toContain("切换 production provider");
-    expect(v390.sectionText).not.toContain("真实 SDK");
-    expect(v390.sectionText).not.toContain("创建 provider client");
-    expect(v390.sectionText).not.toContain("安装依赖");
-    expect(v390.sectionText).not.toContain("key 输入框");
-    expect(v390.sectionText).not.toContain("创建审批任务");
-    expect(v390.sectionText).not.toContain("发送邮件");
-    expect(v390.sectionText).not.toContain("打开外部文档");
-    expect(v390.sectionText).not.toContain("执行回滚");
-    expect(v390.sectionText).not.toContain("立即执行真实阻断");
-    expect(v390.sectionText).not.toContain("修改 git");
-    expect(v390.sectionText).not.toContain("立即创建 release");
-    expect(v390.sectionText).not.toContain("立即创建 tag");
-    expect(v390.sectionText).not.toContain("执行 push");
-    expect(v390.sectionText).not.toContain("立即购买");
-    expect(v390.sectionText).not.toContain("直接下单");
-    expect(v390.sectionText).not.toContain("一键下单");
-    expect(v390.sectionText).not.toContain("一键出票");
-    expect(v390.sectionText).not.toContain("立即打开平台");
-    expect(v390.sectionHtml).not.toContain("https://");
-    expect(v390.sectionHtml).not.toContain("http://");
+    expect(v400.sectionCount).toBe(1);
+    expect(v400.publicBetaButtonCount).toBe(1);
+    expect(v400.providerZeroLockButtonCount).toBe(1);
+    expect(v400.userTrustLaunchButtonCount).toBe(1);
+    expect(v400.safetyCopyButtonCount).toBe(1);
+    expect(v400.text).toContain("Global Shopping Public Beta Review");
+    expect(v400.text).toContain("Global Shopping Read-Only Public Beta Shell");
+    expect(v400.text).toContain("Provider-Zero Runtime Lock");
+    expect(v400.text).toContain("User Trust Launch Board");
+    expect(v400.text).toContain("Public Beta Safety Copy Center");
+    expect(v400.text).toContain("Public Beta");
+    expect(v400.text).toContain("Provider-Zero Lock");
+    expect(v400.text).toContain("User Trust Launch");
+    expect(v400.text).toContain("Safety Copy");
+    expect(v400.text).toContain("Global Shopping Read-Only Public Beta Shell 已准备");
+    expect(v400.text).toContain("Provider-Zero Runtime Lock 已准备");
+    expect(v400.text).toContain("User Trust Launch Board 已准备");
+    expect(v400.text).toContain("Public Beta Safety Copy Center 已准备");
+    expect(v400.text).toContain("Public Beta 只提供候选价证据，不付款、不下单、不出票");
+    expect(v400.text).toContain("Provider-Zero Lock 不接真实 provider、不读密钥、不联网");
+    expect(v400.text).toContain("User Trust Launch 不执行真实 launch");
+    expect(v400.text).toContain("Safety Copy 不承诺最低价、最终价或官方背书");
+    expect(v400.text).toContain("Human public beta review 仍需人工复核");
+    expect(v400.text).toContain("当前只展示 Global Shopping Public Beta Review");
+    expect(v400.text).toContain("不接真实 provider，不读取密钥，不联网，不打开平台，不创建 release，不 push，不付款、不下单、不出票");
+    expect(v400.text).toContain("当前已覆盖来源中的较低候选价");
+    expect(v400.text).toContain("与官方价对比");
+    expect(v400.text).toContain("价格以跳转后平台实时页面为准");
+    expect(v400.text).toContain("当前仅提供只读候选证据，不提供付款、下单或出票能力");
+    expect(v400.text).not.toContain("全网最低");
+    expect(v400.text).not.toContain("最低价保证");
+    expect(v400.text).not.toContain("已锁价");
+    expect(v400.text).not.toContain("真实最终价");
+    expect(v400.text).not.toContain("一键下单");
+    expect(v400.text).not.toContain("一键出票");
+    expect(v400.text).not.toContain("已获得官方背书");
+    expect(v400.text).not.toContain("平台授权");
+    expect(v400.text).not.toContain("已接入 provider");
+    expect(v400.text).not.toContain("可调用 provider");
+    expect(v400.text).not.toContain("已完成真实接入");
+    expect(v400.text).not.toMatch(/token|secret|apiKey/i);
+    expect(v400.sectionText).not.toMatch(/bookingUrl|paymentUrl|orderUrl|checkoutUrl/);
+    expect(v400.sectionText).not.toContain("开始接入真实 provider");
+    expect(v400.sectionText).not.toContain("启动 pilot");
+    expect(v400.sectionText).not.toContain("开始激活 sandbox");
+    expect(v400.sectionText).not.toContain("读取 API key");
+    expect(v400.sectionText).not.toContain("生成 endpoint");
+    expect(v400.sectionText).not.toContain("启用 production provider");
+    expect(v400.sectionText).not.toContain("切换 production provider");
+    expect(v400.sectionText).not.toContain("真实 SDK");
+    expect(v400.sectionText).not.toContain("创建 provider client");
+    expect(v400.sectionText).not.toContain("安装依赖");
+    expect(v400.sectionText).not.toContain("key 输入框");
+    expect(v400.sectionText).not.toContain("创建审批任务");
+    expect(v400.sectionText).not.toContain("发送邮件");
+    expect(v400.sectionText).not.toContain("打开外部文档");
+    expect(v400.sectionText).not.toContain("执行回滚");
+    expect(v400.sectionText).not.toContain("立即执行真实阻断");
+    expect(v400.sectionText).not.toContain("修改 git");
+    expect(v400.sectionText).not.toContain("立即创建 release");
+    expect(v400.sectionText).not.toContain("立即创建 tag");
+    expect(v400.sectionText).not.toContain("执行 push");
+    expect(v400.sectionText).not.toContain("立即购买");
+    expect(v400.sectionText).not.toContain("直接下单");
+    expect(v400.sectionText).not.toContain("一键下单");
+    expect(v400.sectionText).not.toContain("一键出票");
+    expect(v400.sectionText).not.toContain("立即打开平台");
+    expect(v400.sectionHtml).not.toContain("https://");
+    expect(v400.sectionHtml).not.toContain("http://");
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 

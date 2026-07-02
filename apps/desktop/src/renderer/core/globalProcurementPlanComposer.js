@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_PLAN_COMPOSER_VERSION = "3.9.0";
+  const GLOBAL_PROCUREMENT_PLAN_COMPOSER_VERSION = "4.0.0";
 
   function cloneList(list){
     return Array.isArray(list) ? list.slice() : [];

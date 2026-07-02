@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PILOT_SUPPORT_VIEW_MODEL_VERSION = "3.9.0";
+  const FLIGHT_WORKFLOW_PILOT_SUPPORT_VIEW_MODEL_VERSION = "4.0.0";
   const VIEW_MODEL_NAME = "flight_workflow_pilot_support_view_model_v1";
   const CATEGORY_ROWS = [
     ["candidate_unclear", "看不懂候选证据"],

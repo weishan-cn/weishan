@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_SANDBOX_BINDING_WIZARD_VERSION = "3.9.0";
+  const PROVIDER_SANDBOX_BINDING_WIZARD_VERSION = "4.0.0";
   const WIZARD_NAME = "provider_sandbox_binding_wizard_v1";
 
   function clone(value) {

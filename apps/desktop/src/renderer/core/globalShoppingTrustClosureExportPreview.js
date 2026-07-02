@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_TRUST_CLOSURE_EXPORT_PREVIEW_VERSION = "3.9.0";
+  const GLOBAL_SHOPPING_TRUST_CLOSURE_EXPORT_PREVIEW_VERSION = "4.0.0";
   const PREVIEW_NAME = "global_shopping_trust_closure_export_preview_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

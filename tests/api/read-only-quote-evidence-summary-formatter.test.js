@@ -8,7 +8,7 @@ function forbidden(value) { return /全网最低|最低价保证|已锁价|可�
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteEvidenceSummaryFormatter.js"]);
   const api = windowRef.WeishanReadOnlyQuoteEvidenceSummaryFormatter;
-  assert.equal(api.READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION, "3.9.0");
+  assert.equal(api.READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION, "4.0.0");
   const top = api.formatTopCandidateSummary([{ rank:1, providerName:"A", totalPrice:980, token:"abc" }, { rank:2, providerName:"B", totalPrice:1010 }]);
   assert.equal(top.lines.length, 2);
   assert.equal(top.lines[0].includes("当前导入样本"), false);
@@ -85,6 +85,16 @@ function main() {
   assert.equal(claimVerifier.title, "User-Safe Public Claim Verifier");
   const launchReadinessFinalVm = api.formatProviderLaunchReadinessFinalViewModelSummary({ status:"ready", title:"Provider Launch Readiness Final Review", caveat:"当前只展示 provider launch readiness final review" });
   assert.equal(launchReadinessFinalVm.title, "Provider Launch Readiness Final Review");
+  const publicBetaShell = api.formatGlobalShoppingReadOnlyPublicBetaShellSummary({ status:"ready", userFacingSummary:{ resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备" } });
+  assert.equal(publicBetaShell.title, "Global Shopping Read-Only Public Beta Shell");
+  const providerZeroLock = api.formatProviderZeroRuntimeLockSummary({ status:"ready", userFacingSummary:{ resultLabel:"Provider-Zero Runtime Lock 已准备" } });
+  assert.equal(providerZeroLock.title, "Provider-Zero Runtime Lock");
+  const userTrustLaunch = api.formatUserTrustLaunchBoardSummary({ status:"ready", userFacingSummary:{ resultLabel:"User Trust Launch Board 已准备" } });
+  assert.equal(userTrustLaunch.title, "User Trust Launch Board");
+  const safetyCopy = api.formatPublicBetaSafetyCopyCenterSummary({ status:"ready", userFacingSummary:{ resultLabel:"Public Beta Safety Copy Center 已准备" } });
+  assert.equal(safetyCopy.title, "Public Beta Safety Copy Center");
+  const publicBetaVm = api.formatGlobalShoppingPublicBetaViewModelSummary({ status:"ready", title:"Global Shopping Public Beta Review", caveat:"当前只展示 Global Shopping Public Beta Review" });
+  assert.equal(publicBetaVm.title, "Global Shopping Public Beta Review");
   const audit = api.buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft({});
   assert.equal(audit.payment, false);
   assert.equal(audit.order, false);

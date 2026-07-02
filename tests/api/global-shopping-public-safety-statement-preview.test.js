@@ -39,7 +39,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicSafetyStatementPreview.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicSafetyStatementPreview;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_SAFETY_STATEMENT_PREVIEW_VERSION, "3.9.0");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_SAFETY_STATEMENT_PREVIEW_VERSION, "4.0.0");
   const ready = api.buildGlobalShoppingPublicSafetyStatementPreview({
     providerReadOnlyPublicReleaseCenterSummary:readySummary("Provider Read-Only Public Release Center", "Provider Read-Only Public Release Center 已准备"),
     trustClosureExportPreviewSummary:readySummary("Trust Closure Export Preview", "Trust Closure Export Preview 已准备"),

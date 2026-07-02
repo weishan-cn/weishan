@@ -1,6 +1,6 @@
 ;(function () {
   "use strict";
-  const READONLY_ADAPTER_CONTRACT_GATE_VERSION = "3.9.0";
+  const READONLY_ADAPTER_CONTRACT_GATE_VERSION = "4.0.0";
   const core = window.WeishanReadOnlyProviderAdapterContract;
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
   const allowedMethods = core ? core.ALLOWED_METHODS.slice() : ["getAdapterMetadata", "validateCredentialScope", "validateReadinessGates", "runOfflineFixtureSearch", "normalizeProviderResult", "validateResultSchema", "attachSourceLabel", "runDryRun"];

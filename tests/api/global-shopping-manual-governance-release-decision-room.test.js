@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingManualGovernanceReleaseDecisionRoom.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingManualGovernanceReleaseDecisionRoom;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_GOVERNANCE_RELEASE_DECISION_ROOM_VERSION, "3.9.0");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_GOVERNANCE_RELEASE_DECISION_ROOM_VERSION, "4.0.0");
 
   const ready = api.buildGlobalShoppingManualGovernanceReleaseDecisionRoom({
     governanceAuditConsoleSummary:{ status:"ready", userFacingSummary:{ resultLabel:"治理审计控制台已准备", redacted:true }, redacted:true },

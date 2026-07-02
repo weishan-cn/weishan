@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_CANDIDATE_CONFIDENCE_EXPLAINER_VERSION = "3.9.0";
+  const GLOBAL_SHOPPING_CANDIDATE_CONFIDENCE_EXPLAINER_VERSION = "4.0.0";
   const EXPLAINER_NAME = "global_shopping_candidate_confidence_explainer_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

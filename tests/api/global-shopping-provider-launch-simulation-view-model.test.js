@@ -23,7 +23,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderLaunchSimulationViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderLaunchSimulationViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_LAUNCH_SIMULATION_VIEW_MODEL_VERSION, "3.9.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_LAUNCH_SIMULATION_VIEW_MODEL_VERSION, "4.0.0");
 
   const ready = api.buildGlobalShoppingProviderLaunchSimulationViewModel({
     humanApprovalSimulationGateSummary:{ status:"ready", userFacingSummary:{ resultLabel:"审批模拟闸门已准备", redacted:true }, rows:[{ rowId:"approval", label:"人工审批模拟", value:"审批模拟闸门已准备", status:"pass", redacted:true }] },

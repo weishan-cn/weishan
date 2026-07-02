@@ -8600,6 +8600,42 @@
         showCommercePlatformTemplateFeedback("已显示 Claim Verifier", false);
         return;
       }
+      const globalShoppingPublicBetaButton = target && target.closest("[data-commerce-global-shopping-public-beta-show]");
+      if (globalShoppingPublicBetaButton && host.contains(globalShoppingPublicBetaButton)) {
+        event.preventDefault();
+        const panel = globalShoppingPublicBetaButton.closest("[data-commerce-global-shopping-public-beta-review]") || globalShoppingPublicBetaButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-public-beta-output]") || panel;
+        output.innerHTML = '<p>Global Shopping Read-Only Public Beta Shell</p><p>Global Shopping Read-Only Public Beta Shell 已准备</p><p>Public Beta 只提供候选价证据，不付款、不下单、不出票</p><p>当前已覆盖来源中的较低候选价</p><p>与官方价对比</p><p>价格以跳转后平台实时页面为准</p><p>当前仅提供只读候选证据，不提供付款、下单或出票能力</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Public Beta", false);
+        return;
+      }
+      const globalShoppingProviderZeroLockButton = target && target.closest("[data-commerce-global-shopping-provider-zero-lock-show]");
+      if (globalShoppingProviderZeroLockButton && host.contains(globalShoppingProviderZeroLockButton)) {
+        event.preventDefault();
+        const panel = globalShoppingProviderZeroLockButton.closest("[data-commerce-global-shopping-public-beta-review]") || globalShoppingProviderZeroLockButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-provider-zero-lock-output]") || panel;
+        output.innerHTML = '<p>Provider-Zero Runtime Lock</p><p>Provider-Zero Runtime Lock 已准备</p><p>Provider-Zero Lock 不接真实 provider、不读密钥、不联网</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Provider-Zero Lock", false);
+        return;
+      }
+      const globalShoppingUserTrustLaunchButton = target && target.closest("[data-commerce-global-shopping-user-trust-launch-show]");
+      if (globalShoppingUserTrustLaunchButton && host.contains(globalShoppingUserTrustLaunchButton)) {
+        event.preventDefault();
+        const panel = globalShoppingUserTrustLaunchButton.closest("[data-commerce-global-shopping-public-beta-review]") || globalShoppingUserTrustLaunchButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-user-trust-launch-output]") || panel;
+        output.innerHTML = '<p>User Trust Launch Board</p><p>User Trust Launch Board 已准备</p><p>User Trust Launch 不执行真实 launch</p><p>跳转至平台自行下单</p><p>Weishan 可尽量带入搜索条件，但用户需在对应平台自行确认价格、登录、填写资料并完成下单</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 User Trust Launch", false);
+        return;
+      }
+      const globalShoppingSafetyCopyCenterButton = target && target.closest("[data-commerce-global-shopping-safety-copy-show]");
+      if (globalShoppingSafetyCopyCenterButton && host.contains(globalShoppingSafetyCopyCenterButton)) {
+        event.preventDefault();
+        const panel = globalShoppingSafetyCopyCenterButton.closest("[data-commerce-global-shopping-public-beta-review]") || globalShoppingSafetyCopyCenterButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-safety-copy-output]") || panel;
+        output.innerHTML = '<p>Public Beta Safety Copy Center</p><p>Public Beta Safety Copy Center 已准备</p><p>Safety Copy 不承诺最低价、最终价或官方背书</p><p>价格以跳转后平台实时页面为准</p><p>当前仅提供只读候选证据，不提供付款、下单或出票能力</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Safety Copy", false);
+        return;
+      }
       const globalShoppingHumanPilotLedgerButton = target && target.closest("[data-commerce-global-shopping-human-pilot-ledger-show]");
       if (globalShoppingHumanPilotLedgerButton && host.contains(globalShoppingHumanPilotLedgerButton)) {
         event.preventDefault();

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "3.9.0";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "4.0.0";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -829,6 +829,36 @@
     return clone({ title:"Provider Launch Readiness Final Review", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Provider Launch Readiness Final Review"), sectionLabels:["Release Evidence", "User Assurance", "Launch Finalizer", "Claim Verifier"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前只展示 provider launch readiness final review。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
+  function formatGlobalShoppingReadOnlyPublicBetaShellSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.globalShoppingReadOnlyPublicBetaShellSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Global Shopping Read-Only Public Beta Shell", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Global Shopping Read-Only Public Beta Shell 仍需复核"), sectionLabels:["Public Beta", "Provider-Zero Lock", "User Trust Launch", "Safety Copy"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Public Beta 只提供候选价证据，不付款、不下单、不出票。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatProviderZeroRuntimeLockSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.providerZeroRuntimeLockSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Provider-Zero Runtime Lock", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Provider-Zero Runtime Lock 仍需复核"), sectionLabels:["Public Beta", "Provider-Zero Lock", "User Trust Launch", "Safety Copy"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Provider-Zero Lock 不接真实 provider、不读密钥、不联网。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatUserTrustLaunchBoardSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.userTrustLaunchBoardSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"User Trust Launch Board", line:safeLine(obj(summary.userFacingSummary).resultLabel || "User Trust Launch Board 仍需复核"), sectionLabels:["Public Beta", "Provider-Zero Lock", "User Trust Launch", "Safety Copy"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "User Trust Launch 不执行真实 launch。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatPublicBetaSafetyCopyCenterSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.publicBetaSafetyCopyCenterSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Public Beta Safety Copy Center", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Public Beta Safety Copy Center 仍需复核"), sectionLabels:["Public Beta", "Provider-Zero Lock", "User Trust Launch", "Safety Copy"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Safety Copy 不承诺最低价、最终价或官方背书。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatGlobalShoppingPublicBetaViewModelSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.globalShoppingPublicBetaViewModelSummary || safe.viewModelSummary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Global Shopping Public Beta Review", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Global Shopping Public Beta Review"), sectionLabels:["Public Beta", "Provider-Zero Lock", "User Trust Launch", "Safety Copy"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前只展示 Global Shopping Public Beta Review。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -926,6 +956,11 @@
     formatOfflineLaunchReadinessFinalizerSummary,
     formatUserSafePublicClaimVerifierSummary,
     formatProviderLaunchReadinessFinalViewModelSummary,
+    formatGlobalShoppingReadOnlyPublicBetaShellSummary,
+    formatProviderZeroRuntimeLockSummary,
+    formatUserTrustLaunchBoardSummary,
+    formatPublicBetaSafetyCopyCenterSummary,
+    formatGlobalShoppingPublicBetaViewModelSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,

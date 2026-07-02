@@ -94,13 +94,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "3.9.0");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.0.0");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "3.9.0");
+  assert.equal(ready.appVersion, "4.0.0");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -384,6 +384,26 @@ function main() {
   assert.equal(launchReadinessFinalReady.safetyReport.userSafePublicClaimVerifierStatus, "ready");
   assert.equal(launchReadinessFinalReady.safetyReport.providerLaunchReadinessFinalViewModelStatus, "ready");
   assert.equal(launchReadinessFinalReady.userFacingSummary.safeToProceedWithHumanLaunchReadinessFinalReview, true);
+  const publicBetaReady = api.buildReadOnlyQuoteSessionReportCenter({
+    sessionSummary:summary,
+    globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, redacted:true },
+    providerZeroRuntimeLockSummary:{ status:"ready", userFacingSummary:{ title:"Provider-Zero Runtime Lock", resultLabel:"Provider-Zero Runtime Lock 已准备", redacted:true }, redacted:true },
+    userTrustLaunchBoardSummary:{ status:"ready", userFacingSummary:{ title:"User Trust Launch Board", resultLabel:"User Trust Launch Board 已准备", redacted:true }, redacted:true },
+    publicBetaSafetyCopyCenterSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Safety Copy Center", resultLabel:"Public Beta Safety Copy Center 已准备", redacted:true }, redacted:true },
+    globalShoppingPublicBetaViewModelSummary:{ status:"ready", title:"Global Shopping Public Beta Review", redacted:true },
+    globalShoppingReadOnlyPublicBetaShellStatus:"ready",
+    providerZeroRuntimeLockStatus:"ready",
+    userTrustLaunchBoardStatus:"ready",
+    publicBetaSafetyCopyCenterStatus:"ready",
+    globalShoppingPublicBetaViewModelStatus:"ready",
+    safeToProceedWithHumanPublicBetaReview:true
+  });
+  assert.equal(publicBetaReady.safetyReport.globalShoppingReadOnlyPublicBetaShellSummary.userFacingSummary.title, "Global Shopping Read-Only Public Beta Shell");
+  assert.equal(publicBetaReady.safetyReport.providerZeroRuntimeLockSummary.userFacingSummary.title, "Provider-Zero Runtime Lock");
+  assert.equal(publicBetaReady.safetyReport.userTrustLaunchBoardSummary.userFacingSummary.title, "User Trust Launch Board");
+  assert.equal(publicBetaReady.safetyReport.publicBetaSafetyCopyCenterSummary.userFacingSummary.title, "Public Beta Safety Copy Center");
+  assert.equal(publicBetaReady.safetyReport.globalShoppingPublicBetaViewModelSummary.title, "Global Shopping Public Beta Review");
+  assert.equal(publicBetaReady.userFacingSummary.safeToProceedWithHumanPublicBetaReview, true);
   const globalGoal = windowRef.WeishanGlobalShoppingProductGoalCharter.buildGlobalShoppingProductGoalCharter();
   const jumpBoundary = windowRef.WeishanGlobalShoppingJumpToPlatformBoundary.buildGlobalShoppingJumpToPlatformBoundary();
   const legalProviderFixture = windowRef.WeishanGlobalShoppingLegalProviderFixtureAdapter.buildGlobalShoppingLegalProviderFixtureAdapter({ providerId:"provider_1", providerName:"Fixture Provider", providerType:"official", providerLegalStatus:"allowed", providerStatus:"fixture", itemType:"flight", officialFixturePrice:{ title:"SHA-CTU", basePrice:900 } });

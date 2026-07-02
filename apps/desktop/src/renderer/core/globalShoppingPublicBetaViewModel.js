@@ -1,0 +1,197 @@
+;(function () {
+  "use strict";
+
+  const GLOBAL_SHOPPING_PUBLIC_BETA_VIEW_MODEL_VERSION = "4.0.0";
+  const VIEW_MODEL_NAME = "global_shopping_public_beta_view_model_v1";
+
+  function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
+  function obj(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
+  function toArray(value) { return Array.isArray(value) ? value.slice() : []; }
+  function text(value) {
+    return String(value == null ? "" : value)
+      .replace(/https?:\/\/\S+|token|apiKey|key|secret|password|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|externalUrl|platformUrl|providerUrl|endpoint|providerClient|rawTrace|rawResponse|rawRequest|rawUserText/ig, "redacted")
+      .trim();
+  }
+  function present(value) { return Object.keys(obj(value)).length > 0; }
+  function safeStatus(value) { return /^(ready|needs_review|blocked|failed_safe)$/.test(text(value)) ? text(value) : "needs_review"; }
+  function row(rowId, label, value, status) {
+    return { rowId:text(rowId), label:text(label), value:text(value), status:/^(pass|warning|blocked)$/.test(status) ? status : "warning", redacted:true };
+  }
+  function card(cardId, label, value) {
+    return { cardId:text(cardId), label:text(label), value:text(value), redacted:true };
+  }
+  function rowsFor(summary, emptyId, emptyLabel, emptyValue) {
+    return toArray(obj(summary).rows).length ? clone(summary.rows) : [row(emptyId, emptyLabel, emptyValue, "warning")];
+  }
+  function resolveSummary(input, key, apiName, methodName) {
+    const safe = obj(input);
+    if (present(safe[key])) return obj(safe[key]);
+    const api = window[apiName] || {};
+    return typeof api[methodName] === "function" ? obj(api[methodName](safe)) : {};
+  }
+  function labelOf(summary, fallback) {
+    const safe = obj(summary);
+    return text(obj(safe.userFacingSummary).resultLabel || safe.title || fallback || "仍需复核");
+  }
+
+  function buildGlobalShoppingPublicBetaCards(input) {
+    const safe = obj(input);
+    const publicBetaShellSummary = resolveSummary(safe, "globalShoppingReadOnlyPublicBetaShellSummary", "WeishanGlobalShoppingReadOnlyPublicBetaShell", "buildGlobalShoppingReadOnlyPublicBetaShell");
+    const providerZeroRuntimeLockSummary = resolveSummary(safe, "providerZeroRuntimeLockSummary", "WeishanGlobalShoppingProviderZeroRuntimeLock", "buildGlobalShoppingProviderZeroRuntimeLock");
+    const userTrustLaunchBoardSummary = resolveSummary(safe, "userTrustLaunchBoardSummary", "WeishanGlobalShoppingUserTrustLaunchBoard", "buildGlobalShoppingUserTrustLaunchBoard");
+    const publicBetaSafetyCopyCenterSummary = resolveSummary(safe, "publicBetaSafetyCopyCenterSummary", "WeishanGlobalShoppingPublicBetaSafetyCopyCenter", "buildGlobalShoppingPublicBetaSafetyCopyCenter");
+    return clone([
+      card("public_beta", "Public Beta", labelOf(publicBetaShellSummary, "Global Shopping Read-Only Public Beta Shell 仍需复核")),
+      card("provider_zero_lock", "Provider-Zero Lock", labelOf(providerZeroRuntimeLockSummary, "Provider-Zero Runtime Lock 仍需复核")),
+      card("user_trust_launch", "User Trust Launch", labelOf(userTrustLaunchBoardSummary, "User Trust Launch Board 仍需复核")),
+      card("safety_copy", "Safety Copy", labelOf(publicBetaSafetyCopyCenterSummary, "Public Beta Safety Copy Center 仍需复核")),
+      card("risk_disclosure", "风险说明", "Human public beta review 仍需人工复核")
+    ]);
+  }
+
+  function buildGlobalShoppingPublicBetaShellRowsForView(input) {
+    const summary = resolveSummary(input, "globalShoppingReadOnlyPublicBetaShellSummary", "WeishanGlobalShoppingReadOnlyPublicBetaShell", "buildGlobalShoppingReadOnlyPublicBetaShell");
+    return rowsFor(summary, "global_shopping_read_only_public_beta_shell_missing", "Global Shopping Read-Only Public Beta Shell", "Global Shopping Read-Only Public Beta Shell 仍需复核");
+  }
+
+  function buildGlobalShoppingProviderZeroLockRowsForView(input) {
+    const summary = resolveSummary(input, "providerZeroRuntimeLockSummary", "WeishanGlobalShoppingProviderZeroRuntimeLock", "buildGlobalShoppingProviderZeroRuntimeLock");
+    return rowsFor(summary, "provider_zero_runtime_lock_missing", "Provider-Zero Runtime Lock", "Provider-Zero Runtime Lock 仍需复核");
+  }
+
+  function buildGlobalShoppingUserTrustLaunchRowsForView(input) {
+    const summary = resolveSummary(input, "userTrustLaunchBoardSummary", "WeishanGlobalShoppingUserTrustLaunchBoard", "buildGlobalShoppingUserTrustLaunchBoard");
+    return rowsFor(summary, "user_trust_launch_board_missing", "User Trust Launch Board", "User Trust Launch Board 仍需复核");
+  }
+
+  function buildGlobalShoppingSafetyCopyRowsForView(input) {
+    const summary = resolveSummary(input, "publicBetaSafetyCopyCenterSummary", "WeishanGlobalShoppingPublicBetaSafetyCopyCenter", "buildGlobalShoppingPublicBetaSafetyCopyCenter");
+    return rowsFor(summary, "public_beta_safety_copy_center_missing", "Public Beta Safety Copy Center", "Public Beta Safety Copy Center 仍需复核");
+  }
+
+  function buildGlobalShoppingPublicBetaRows(input) {
+    const safe = obj(input);
+    return clone([
+      row("global_shopping_public_beta_view_model_status", "Global Shopping Public Beta Review", "当前只展示 Global Shopping Public Beta Review", safe.status === "ready" ? "pass" : (safe.status === "blocked" ? "blocked" : "warning")),
+      row("global_shopping_public_beta_view_model_boundary", "只读边界", "不接真实 provider，不读取密钥，不联网，不打开平台，不创建 release，不 push，不付款、不下单、不出票。", "pass")
+    ]);
+  }
+
+  function sanitizeGlobalShoppingPublicBetaViewModel(viewModel) {
+    const safe = obj(viewModel);
+    const publicBetaShellSummary = resolveSummary(safe, "globalShoppingReadOnlyPublicBetaShellSummary", "WeishanGlobalShoppingReadOnlyPublicBetaShell", "buildGlobalShoppingReadOnlyPublicBetaShell");
+    const providerZeroRuntimeLockSummary = resolveSummary(safe, "providerZeroRuntimeLockSummary", "WeishanGlobalShoppingProviderZeroRuntimeLock", "buildGlobalShoppingProviderZeroRuntimeLock");
+    const userTrustLaunchBoardSummary = resolveSummary(safe, "userTrustLaunchBoardSummary", "WeishanGlobalShoppingUserTrustLaunchBoard", "buildGlobalShoppingUserTrustLaunchBoard");
+    const publicBetaSafetyCopyCenterSummary = resolveSummary(safe, "publicBetaSafetyCopyCenterSummary", "WeishanGlobalShoppingPublicBetaSafetyCopyCenter", "buildGlobalShoppingPublicBetaSafetyCopyCenter");
+    const statuses = [
+      safeStatus(publicBetaShellSummary.status),
+      safeStatus(providerZeroRuntimeLockSummary.status),
+      safeStatus(userTrustLaunchBoardSummary.status),
+      safeStatus(publicBetaSafetyCopyCenterSummary.status)
+    ];
+    const blocked = statuses.indexOf("blocked") >= 0 || statuses.indexOf("failed_safe") >= 0;
+    const needsReview =
+      !present(publicBetaShellSummary) ||
+      !present(providerZeroRuntimeLockSummary) ||
+      !present(userTrustLaunchBoardSummary) ||
+      !present(publicBetaSafetyCopyCenterSummary) ||
+      statuses.indexOf("needs_review") >= 0;
+    const status = blocked ? "blocked" : (needsReview ? "needs_review" : "ready");
+    return clone({
+      viewModelName:VIEW_MODEL_NAME,
+      appVersion:GLOBAL_SHOPPING_PUBLIC_BETA_VIEW_MODEL_VERSION,
+      status:status,
+      title:"Global Shopping Public Beta Review",
+      cards:buildGlobalShoppingPublicBetaCards({
+        globalShoppingReadOnlyPublicBetaShellSummary:publicBetaShellSummary,
+        providerZeroRuntimeLockSummary:providerZeroRuntimeLockSummary,
+        userTrustLaunchBoardSummary:userTrustLaunchBoardSummary,
+        publicBetaSafetyCopyCenterSummary:publicBetaSafetyCopyCenterSummary
+      }),
+      publicBetaShellRows:buildGlobalShoppingPublicBetaShellRowsForView({ globalShoppingReadOnlyPublicBetaShellSummary:publicBetaShellSummary }),
+      providerZeroLockRows:buildGlobalShoppingProviderZeroLockRowsForView({ providerZeroRuntimeLockSummary:providerZeroRuntimeLockSummary }),
+      userTrustLaunchRows:buildGlobalShoppingUserTrustLaunchRowsForView({ userTrustLaunchBoardSummary:userTrustLaunchBoardSummary }),
+      safetyCopyRows:buildGlobalShoppingSafetyCopyRowsForView({ publicBetaSafetyCopyCenterSummary:publicBetaSafetyCopyCenterSummary }),
+      disclosureRows:toArray(safe.disclosureRows).length ? toArray(safe.disclosureRows) : [
+        row("public_beta_disclosure_candidate_only", "Public Beta", "Public Beta 只提供候选价证据，不付款、不下单、不出票", "pass"),
+        row("public_beta_disclosure_provider_zero", "Provider-Zero Lock", "Provider-Zero Lock 不接真实 provider、不读密钥、不联网", "pass"),
+        row("public_beta_disclosure_user_trust", "User Trust Launch", "User Trust Launch 不执行真实 launch", "pass"),
+        row("public_beta_disclosure_safety_copy", "Safety Copy", "Safety Copy 不承诺最低价、最终价或官方背书", "pass"),
+        row("public_beta_disclosure_manual", "风险说明", "Human public beta review 仍需人工复核", "warning")
+      ],
+      rows:buildGlobalShoppingPublicBetaRows({ status:status }),
+      caveat:"当前只展示 Global Shopping Public Beta Review，不接真实 provider，不读取密钥，不联网，不打开平台，不创建 release，不 push，不付款、不下单、不出票。",
+      globalShoppingReadOnlyPublicBetaShellSummary:clone(publicBetaShellSummary),
+      providerZeroRuntimeLockSummary:clone(providerZeroRuntimeLockSummary),
+      userTrustLaunchBoardSummary:clone(userTrustLaunchBoardSummary),
+      publicBetaSafetyCopyCenterSummary:clone(publicBetaSafetyCopyCenterSummary),
+      safeToProceedWithHumanPublicBetaReview:status === "ready",
+      externalUrl:null,
+      platformUrl:null,
+      providerUrl:null,
+      bookingUrl:null,
+      checkoutUrl:null,
+      paymentUrl:null,
+      orderUrl:null,
+      buyButtonEnabled:false,
+      checkoutButtonEnabled:false,
+      paymentButtonEnabled:false,
+      redacted:true
+    });
+  }
+
+  function buildGlobalShoppingPublicBetaViewModelAuditDraft(input) {
+    const viewModel = buildGlobalShoppingPublicBetaViewModel(input || {});
+    return clone({
+      eventType:"GLOBAL_SHOPPING_PUBLIC_BETA_VIEW_MODEL_AUDIT_DRAFT",
+      viewModelName:VIEW_MODEL_NAME,
+      appVersion:GLOBAL_SHOPPING_PUBLIC_BETA_VIEW_MODEL_VERSION,
+      status:viewModel.status,
+      cardCount:toArray(viewModel.cards).length,
+      disclosureRowCount:toArray(viewModel.disclosureRows).length,
+      bookingUrl:null,
+      checkoutUrl:null,
+      paymentUrl:null,
+      orderUrl:null,
+      externalUrl:null,
+      platformUrl:null,
+      providerUrl:null,
+      payment:false,
+      order:false,
+      ticketing:false,
+      buyButtonEnabled:false,
+      checkoutButtonEnabled:false,
+      paymentButtonEnabled:false,
+      autoOpen:false,
+      autoRefresh:false,
+      fileWrite:false,
+      rawUserTextStored:false,
+      rawResponseStored:false,
+      rawRequestStored:false,
+      secretStored:false,
+      redacted:true
+    });
+  }
+
+  function buildGlobalShoppingPublicBetaViewModel(input) {
+    try {
+      return sanitizeGlobalShoppingPublicBetaViewModel(input || {});
+    } catch (_) {
+      return sanitizeGlobalShoppingPublicBetaViewModel({ status:"failed_safe" });
+    }
+  }
+
+  window.WeishanGlobalShoppingPublicBetaViewModel = {
+    GLOBAL_SHOPPING_PUBLIC_BETA_VIEW_MODEL_VERSION,
+    VIEW_MODEL_NAME,
+    buildGlobalShoppingPublicBetaViewModel,
+    buildGlobalShoppingPublicBetaCards,
+    buildGlobalShoppingPublicBetaRows,
+    buildGlobalShoppingPublicBetaShellRowsForView,
+    buildGlobalShoppingProviderZeroLockRowsForView,
+    buildGlobalShoppingUserTrustLaunchRowsForView,
+    buildGlobalShoppingSafetyCopyRowsForView,
+    buildGlobalShoppingPublicBetaViewModelAuditDraft,
+    sanitizeGlobalShoppingPublicBetaViewModel
+  };
+})();

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MANUAL_ACTIVATION_COMMAND_CENTER_VERSION = "3.9.0";
+  const GLOBAL_SHOPPING_MANUAL_ACTIVATION_COMMAND_CENTER_VERSION = "4.0.0";
   const CENTER_NAME = "global_shopping_manual_activation_command_center_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
