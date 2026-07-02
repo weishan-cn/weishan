@@ -8564,6 +8564,42 @@
         showCommercePlatformTemplateFeedback("已显示 Safety Statement", false);
         return;
       }
+      const globalShoppingReleaseEvidenceButton = target && target.closest("[data-commerce-global-shopping-release-evidence-show]");
+      if (globalShoppingReleaseEvidenceButton && host.contains(globalShoppingReleaseEvidenceButton)) {
+        event.preventDefault();
+        const panel = globalShoppingReleaseEvidenceButton.closest("[data-commerce-global-shopping-provider-launch-readiness-final-review]") || globalShoppingReleaseEvidenceButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-release-evidence-output]") || panel;
+        output.innerHTML = '<p>Public Release Evidence Console</p><p>Public Release Evidence Console 已准备</p><p>Release Evidence 不生成真实证据文件</p><p>Human launch readiness final review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Release Evidence", false);
+        return;
+      }
+      const globalShoppingUserAssuranceButton = target && target.closest("[data-commerce-global-shopping-user-assurance-show]");
+      if (globalShoppingUserAssuranceButton && host.contains(globalShoppingUserAssuranceButton)) {
+        event.preventDefault();
+        const panel = globalShoppingUserAssuranceButton.closest("[data-commerce-global-shopping-provider-launch-readiness-final-review]") || globalShoppingUserAssuranceButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-user-assurance-output]") || panel;
+        output.innerHTML = '<p>No-Provider User Assurance Panel</p><p>No-Provider User Assurance Panel 已准备</p><p>User Assurance 不生成真实用户保证书</p><p>Human launch readiness final review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 User Assurance", false);
+        return;
+      }
+      const globalShoppingLaunchFinalizerButton = target && target.closest("[data-commerce-global-shopping-launch-finalizer-show]");
+      if (globalShoppingLaunchFinalizerButton && host.contains(globalShoppingLaunchFinalizerButton)) {
+        event.preventDefault();
+        const panel = globalShoppingLaunchFinalizerButton.closest("[data-commerce-global-shopping-provider-launch-readiness-final-review]") || globalShoppingLaunchFinalizerButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-launch-finalizer-output]") || panel;
+        output.innerHTML = '<p>Offline Launch Readiness Finalizer</p><p>Offline Launch Readiness Finalizer 已准备</p><p>Launch Finalizer 不执行真实 launch</p><p>Human launch readiness final review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Launch Finalizer", false);
+        return;
+      }
+      const globalShoppingClaimVerifierButton = target && target.closest("[data-commerce-global-shopping-claim-verifier-show]");
+      if (globalShoppingClaimVerifierButton && host.contains(globalShoppingClaimVerifierButton)) {
+        event.preventDefault();
+        const panel = globalShoppingClaimVerifierButton.closest("[data-commerce-global-shopping-provider-launch-readiness-final-review]") || globalShoppingClaimVerifierButton.closest("[data-commerce-read-only-price-candidate-card]") || host;
+        const output = panel.querySelector("[data-commerce-global-shopping-claim-verifier-output]") || panel;
+        output.innerHTML = '<p>User-Safe Public Claim Verifier</p><p>User-Safe Public Claim Verifier 已准备</p><p>Claim Verifier 不承诺最低价、最终价或官方背书</p><p>Human launch readiness final review 仍需人工复核</p><p>bookingUrl:null</p><p>payment:false</p><p>order:false</p><p>download:false</p><p>fileWrite:false</p>';
+        showCommercePlatformTemplateFeedback("已显示 Claim Verifier", false);
+        return;
+      }
       const globalShoppingHumanPilotLedgerButton = target && target.closest("[data-commerce-global-shopping-human-pilot-ledger-show]");
       if (globalShoppingHumanPilotLedgerButton && host.contains(globalShoppingHumanPilotLedgerButton)) {
         event.preventDefault();

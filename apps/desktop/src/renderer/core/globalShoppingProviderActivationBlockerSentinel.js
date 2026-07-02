@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_ACTIVATION_BLOCKER_SENTINEL_VERSION = "3.8.0";
+  const GLOBAL_SHOPPING_PROVIDER_ACTIVATION_BLOCKER_SENTINEL_VERSION = "3.9.0";
   const SENTINEL_NAME = "global_shopping_provider_activation_blocker_sentinel_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

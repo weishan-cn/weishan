@@ -34,7 +34,7 @@ function expectBlocked(endpointCandidate, reason) {
   return decision;
 }
 function main() {
-  assert.equal(api.PROVIDER_ENDPOINT_ALLOWLIST_ENFORCEMENT_VERSION, "3.8.0");
+  assert.equal(api.PROVIDER_ENDPOINT_ALLOWLIST_ENFORCEMENT_VERSION, "3.9.0");
   const draft = api.buildEndpointAllowlistEnforcementDraft("flight_provider");
   assert.equal(draft.status, "endpoint allowlist enforcement only");
   assert.equal(draft.mode, "sandbox allowlist only");

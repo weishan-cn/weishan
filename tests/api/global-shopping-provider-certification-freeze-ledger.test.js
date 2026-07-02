@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderCertificationFreezeLedger.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderCertificationFreezeLedger;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_CERTIFICATION_FREEZE_LEDGER_VERSION, "3.8.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_CERTIFICATION_FREEZE_LEDGER_VERSION, "3.9.0");
 
   const ready = api.buildGlobalShoppingProviderCertificationFreezeLedger({
     providerOfflineReleaseGateSummary:readySummary("Provider Offline Release Gate", "离线发布闸门已准备"),

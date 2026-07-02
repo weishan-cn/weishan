@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineLaunchDecisionSimulator.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineLaunchDecisionSimulator;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_LAUNCH_DECISION_SIMULATOR_VERSION, "3.8.0");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_LAUNCH_DECISION_SIMULATOR_VERSION, "3.9.0");
 
   const ready = api.buildGlobalShoppingOfflineLaunchDecisionSimulator({
     providerOfflineReleaseGateSummary:readySummary("Provider Offline Release Gate", "离线发布闸门已准备"),
@@ -32,7 +32,7 @@ function main() {
     providerOfflineReleaseViewModelSummary:{ status:"ready", title:"Provider 离线发布闸门与激活复核", userFacingSummary:{ title:"Provider 离线发布闸门与激活复核", resultLabel:"发布视图已准备", redacted:true }, rows:[{ rowId:"view", label:"View", value:"发布视图已准备", status:"pass", redacted:true }], redacted:true }
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "3.8.0");
+  assert.equal(ready.appVersion, "3.9.0");
   assert.equal(ready.decisionBoundary.canCreateRelease, false);
   assert.equal(ready.decisionSummary.humanLaunchDecisionRequired, true);
   assert.equal(JSON.stringify(ready).includes("token"), false);

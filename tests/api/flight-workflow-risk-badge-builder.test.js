@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "3.8.0");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "3.9.0");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -232,6 +232,28 @@ function main() {
   assert.ok(finalLaunchReviewLabels.includes("Final Dossier 不持久化档案"));
   assert.ok(finalLaunchReviewLabels.includes("Boundary Verifier 不生成 endpoint、不读取密钥"));
   assert.ok(finalLaunchReviewLabels.includes("Human final launch review 仍需人工复核"));
+  const launchReadinessFinalLabels = api.buildFlightWorkflowRiskBadges({
+    publicReleaseEvidenceConsoleSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Release Evidence Console 已准备", redacted:true } },
+    noProviderUserAssurancePanelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"No-Provider User Assurance Panel 已准备", redacted:true } },
+    offlineLaunchReadinessFinalizerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Offline Launch Readiness Finalizer 已准备", redacted:true } },
+    userSafePublicClaimVerifierSummary:{ status:"ready", userFacingSummary:{ resultLabel:"User-Safe Public Claim Verifier 已准备", redacted:true } },
+    providerLaunchReadinessFinalViewModelSummary:{ status:"ready", title:"Provider Launch Readiness Final Review", redacted:true },
+    publicReleaseEvidenceConsoleStatus:"ready",
+    noProviderUserAssurancePanelStatus:"ready",
+    offlineLaunchReadinessFinalizerStatus:"ready",
+    userSafePublicClaimVerifierStatus:"ready",
+    providerLaunchReadinessFinalViewModelStatus:"ready",
+    safeToProceedWithHumanLaunchReadinessFinalReview:true
+  }).badges.map((item) => item.label);
+  assert.ok(launchReadinessFinalLabels.includes("Public Release Evidence Console 已准备"));
+  assert.ok(launchReadinessFinalLabels.includes("No-Provider User Assurance Panel 已准备"));
+  assert.ok(launchReadinessFinalLabels.includes("Offline Launch Readiness Finalizer 已准备"));
+  assert.ok(launchReadinessFinalLabels.includes("User-Safe Public Claim Verifier 已准备"));
+  assert.ok(launchReadinessFinalLabels.includes("Release Evidence 不生成真实证据文件"));
+  assert.ok(launchReadinessFinalLabels.includes("User Assurance 不生成真实用户保证书"));
+  assert.ok(launchReadinessFinalLabels.includes("Launch Finalizer 不执行真实 launch"));
+  assert.ok(launchReadinessFinalLabels.includes("Claim Verifier 不承诺最低价、最终价或官方背书"));
+  assert.ok(launchReadinessFinalLabels.includes("Human launch readiness final review 仍需人工复核"));
   const finalReviewConsoleLabels = api.buildFlightWorkflowRiskBadges({
     finalOfflineLaunchReviewConsoleSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Final Offline Launch Review Console 已准备", redacted:true } },
     providerActivationBlockerSentinelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider Activation Blocker Sentinel 已准备", redacted:true } },

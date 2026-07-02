@@ -8,7 +8,7 @@ function storage(seed) { const data = Object.assign({}, seed || {}); return { ge
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowStateMachine.js", "apps/desktop/src/renderer/core/flightWorkflowStateStore.js"]);
   const api = windowRef.WeishanFlightWorkflowStateStore;
-  assert.equal(api.FLIGHT_WORKFLOW_STATE_STORE_VERSION, "3.8.0");
+  assert.equal(api.FLIGHT_WORKFLOW_STATE_STORE_VERSION, "3.9.0");
   const fake = storage();
   const state = windowRef.WeishanFlightWorkflowStateMachine.createFlightWorkflowState({ intent:{ status:"ready", route:{ originCity:"上海", destinationCity:"成都" }, departureDate:"2026-07-15" }, bookingUrl:"https://blocked.example", token:"abc" });
   const saved = api.saveFlightWorkflowState(state, fake);

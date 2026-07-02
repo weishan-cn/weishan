@@ -21,7 +21,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPlatformHandoffSimulationViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPlatformHandoffSimulationViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PLATFORM_HANDOFF_SIMULATION_VIEW_MODEL_VERSION, "3.8.0");
+  assert.equal(api.GLOBAL_SHOPPING_PLATFORM_HANDOFF_SIMULATION_VIEW_MODEL_VERSION, "3.9.0");
   const ready = api.buildGlobalShoppingPlatformHandoffSimulationViewModel({
     readOnlyPlatformHandoffSimulatorSummary:windowRef.WeishanGlobalShoppingReadOnlyPlatformHandoffSimulator.buildGlobalShoppingReadOnlyPlatformHandoffSimulator({
       sandboxDecisionReviewViewModel:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox 候选决策复核已准备", redacted:true }, redacted:true },
@@ -33,7 +33,7 @@ function main() {
     redactedSearchParameterPackSummary:windowRef.WeishanGlobalShoppingRedactedSearchParameterPack.buildGlobalShoppingRedactedSearchParameterPack({ itemType:"flight", origin:"SHA", destination:"CTU", departureDate:"2026-07-15", passengerCount:1 }),
     userConfirmationChecklistSummary:windowRef.WeishanGlobalShoppingUserConfirmationChecklist.buildGlobalShoppingUserConfirmationChecklist({})
   });
-  assert.equal(ready.appVersion, "3.8.0");
+  assert.equal(ready.appVersion, "3.9.0");
   assert.equal(ready.status, "ready");
   assert.equal(ready.title, "只读平台交接模拟");
   assert.equal(ready.cards.some((item) => item.cardId === "handoff_simulator"), true);

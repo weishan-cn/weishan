@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MANUAL_PLATFORM_REVIEW_VIEW_MODEL_VERSION = "3.8.0";
+  const GLOBAL_SHOPPING_MANUAL_PLATFORM_REVIEW_VIEW_MODEL_VERSION = "3.9.0";
   const VIEW_MODEL_NAME = "global_shopping_manual_platform_review_view_model_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

@@ -39,7 +39,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingNoProviderExecutionFinalGuard.js"]);
   const api = windowRef.WeishanGlobalShoppingNoProviderExecutionFinalGuard;
-  assert.equal(api.GLOBAL_SHOPPING_NO_PROVIDER_EXECUTION_FINAL_GUARD_VERSION, "3.8.0");
+  assert.equal(api.GLOBAL_SHOPPING_NO_PROVIDER_EXECUTION_FINAL_GUARD_VERSION, "3.9.0");
   const ready = api.buildGlobalShoppingNoProviderExecutionFinalGuard({
     providerPublicTrustClosureCenterSummary:readySummary("Provider Public Trust Closure Center", "Provider Public Trust Closure Center 已准备"),
     offlineReleaseMemorySnapshotSummary:readySummary("Offline Release Memory Snapshot", "Offline Release Memory Snapshot 已准备"),

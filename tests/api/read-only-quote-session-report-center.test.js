@@ -94,13 +94,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "3.8.0");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "3.9.0");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "3.8.0");
+  assert.equal(ready.appVersion, "3.9.0");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -359,6 +359,31 @@ function main() {
   assert.equal(trustClosureReady.safetyReport.userVisibleSafetyBoundaryExplainerStatus, "ready");
   assert.equal(trustClosureReady.safetyReport.providerTrustClosureViewModelStatus, "ready");
   assert.equal(trustClosureReady.safetyReport.safeToProceedWithHumanTrustClosureReview, true);
+  const launchReadinessFinalReady = api.buildReadOnlyQuoteSessionReportCenter({
+    sessionSummary:summary,
+    publicReleaseEvidenceConsoleSummary:{ status:"ready", userFacingSummary:{ title:"Public Release Evidence Console", resultLabel:"Public Release Evidence Console 已准备", redacted:true }, redacted:true },
+    noProviderUserAssurancePanelSummary:{ status:"ready", userFacingSummary:{ title:"No-Provider User Assurance Panel", resultLabel:"No-Provider User Assurance Panel 已准备", redacted:true }, redacted:true },
+    offlineLaunchReadinessFinalizerSummary:{ status:"ready", userFacingSummary:{ title:"Offline Launch Readiness Finalizer", resultLabel:"Offline Launch Readiness Finalizer 已准备", redacted:true }, redacted:true },
+    userSafePublicClaimVerifierSummary:{ status:"ready", userFacingSummary:{ title:"User-Safe Public Claim Verifier", resultLabel:"User-Safe Public Claim Verifier 已准备", redacted:true }, redacted:true },
+    providerLaunchReadinessFinalViewModelSummary:{ status:"ready", title:"Provider Launch Readiness Final Review", redacted:true },
+    publicReleaseEvidenceConsoleStatus:"ready",
+    noProviderUserAssurancePanelStatus:"ready",
+    offlineLaunchReadinessFinalizerStatus:"ready",
+    userSafePublicClaimVerifierStatus:"ready",
+    providerLaunchReadinessFinalViewModelStatus:"ready",
+    safeToProceedWithHumanLaunchReadinessFinalReview:true
+  });
+  assert.equal(launchReadinessFinalReady.safetyReport.publicReleaseEvidenceConsoleSummary.userFacingSummary.title, "Public Release Evidence Console");
+  assert.equal(launchReadinessFinalReady.safetyReport.noProviderUserAssurancePanelSummary.userFacingSummary.title, "No-Provider User Assurance Panel");
+  assert.equal(launchReadinessFinalReady.safetyReport.offlineLaunchReadinessFinalizerSummary.userFacingSummary.title, "Offline Launch Readiness Finalizer");
+  assert.equal(launchReadinessFinalReady.safetyReport.userSafePublicClaimVerifierSummary.userFacingSummary.title, "User-Safe Public Claim Verifier");
+  assert.equal(launchReadinessFinalReady.safetyReport.providerLaunchReadinessFinalViewModelSummary.title, "Provider Launch Readiness Final Review");
+  assert.equal(launchReadinessFinalReady.safetyReport.publicReleaseEvidenceConsoleStatus, "ready");
+  assert.equal(launchReadinessFinalReady.safetyReport.noProviderUserAssurancePanelStatus, "ready");
+  assert.equal(launchReadinessFinalReady.safetyReport.offlineLaunchReadinessFinalizerStatus, "ready");
+  assert.equal(launchReadinessFinalReady.safetyReport.userSafePublicClaimVerifierStatus, "ready");
+  assert.equal(launchReadinessFinalReady.safetyReport.providerLaunchReadinessFinalViewModelStatus, "ready");
+  assert.equal(launchReadinessFinalReady.userFacingSummary.safeToProceedWithHumanLaunchReadinessFinalReview, true);
   const globalGoal = windowRef.WeishanGlobalShoppingProductGoalCharter.buildGlobalShoppingProductGoalCharter();
   const jumpBoundary = windowRef.WeishanGlobalShoppingJumpToPlatformBoundary.buildGlobalShoppingJumpToPlatformBoundary();
   const legalProviderFixture = windowRef.WeishanGlobalShoppingLegalProviderFixtureAdapter.buildGlobalShoppingLegalProviderFixtureAdapter({ providerId:"provider_1", providerName:"Fixture Provider", providerType:"official", providerLegalStatus:"allowed", providerStatus:"fixture", itemType:"flight", officialFixturePrice:{ title:"SHA-CTU", basePrice:900 } });
@@ -624,6 +649,11 @@ function main() {
   assert.equal(globalReady.userFacingSummary.providerGovernanceConsoleSummary.title, "Provider Governance Console");
   assert.equal(globalReady.userFacingSummary.providerOperatorReviewLoopSummary.title, "Operator Review Loop");
   assert.equal(globalReady.userFacingSummary.commerceSessionRecapViewModelSummary.title, "只读全球购会话总结与下一步准备");
+  assert.equal(globalReady.userFacingSummary.publicReleaseEvidenceConsoleSummary.title, "Public Release Evidence Console");
+  assert.equal(globalReady.userFacingSummary.noProviderUserAssurancePanelSummary.title, "No-Provider User Assurance Panel");
+  assert.equal(globalReady.userFacingSummary.offlineLaunchReadinessFinalizerSummary.title, "Offline Launch Readiness Finalizer");
+  assert.equal(globalReady.userFacingSummary.userSafePublicClaimVerifierSummary.title, "User-Safe Public Claim Verifier");
+  assert.equal(globalReady.userFacingSummary.providerLaunchReadinessFinalViewModelSummary.title, "Provider Launch Readiness Final Review");
   assert.equal(globalReady.userFacingSummary.globalShoppingGoalStatus, "aligned");
   assert.equal(globalReady.userFacingSummary.jumpBoundaryStatus, "safe");
   assert.equal(globalReady.userFacingSummary.safeToProceedWithJumpToPlatformMvp, true);

@@ -8,7 +8,7 @@ function forbidden(value) { return /全网最低|最低价保证|已锁价|可�
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteEvidenceSummaryFormatter.js"]);
   const api = windowRef.WeishanReadOnlyQuoteEvidenceSummaryFormatter;
-  assert.equal(api.READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION, "3.8.0");
+  assert.equal(api.READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION, "3.9.0");
   const top = api.formatTopCandidateSummary([{ rank:1, providerName:"A", totalPrice:980, token:"abc" }, { rank:2, providerName:"B", totalPrice:1010 }]);
   assert.equal(top.lines.length, 2);
   assert.equal(top.lines[0].includes("当前导入样本"), false);
@@ -75,6 +75,16 @@ function main() {
   assert.equal(decisionMatrix.title, "Offline Provider Readiness Decision Matrix");
   const finalReviewVm = api.formatProviderFinalReviewConsoleViewModelSummary({ status:"needs_review", title:"Provider Final Review Console", caveat:"当前只展示 provider final review console" });
   assert.equal(finalReviewVm.title, "Provider Final Review Console");
+  const launchReadinessFinal = api.formatPublicReleaseEvidenceConsoleSummary({ status:"ready", userFacingSummary:{ resultLabel:"Public Release Evidence Console 已准备" } });
+  assert.equal(launchReadinessFinal.title, "Public Release Evidence Console");
+  const userAssurance = api.formatNoProviderUserAssurancePanelSummary({ status:"ready", userFacingSummary:{ resultLabel:"No-Provider User Assurance Panel 已准备" } });
+  assert.equal(userAssurance.title, "No-Provider User Assurance Panel");
+  const launchFinalizer = api.formatOfflineLaunchReadinessFinalizerSummary({ status:"ready", userFacingSummary:{ resultLabel:"Offline Launch Readiness Finalizer 已准备" } });
+  assert.equal(launchFinalizer.title, "Offline Launch Readiness Finalizer");
+  const claimVerifier = api.formatUserSafePublicClaimVerifierSummary({ status:"ready", userFacingSummary:{ resultLabel:"User-Safe Public Claim Verifier 已准备" } });
+  assert.equal(claimVerifier.title, "User-Safe Public Claim Verifier");
+  const launchReadinessFinalVm = api.formatProviderLaunchReadinessFinalViewModelSummary({ status:"ready", title:"Provider Launch Readiness Final Review", caveat:"当前只展示 provider launch readiness final review" });
+  assert.equal(launchReadinessFinalVm.title, "Provider Launch Readiness Final Review");
   const audit = api.buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft({});
   assert.equal(audit.payment, false);
   assert.equal(audit.order, false);

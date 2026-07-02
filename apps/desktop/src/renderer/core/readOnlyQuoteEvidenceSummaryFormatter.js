@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "3.8.0";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "3.9.0";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -799,6 +799,36 @@
     return clone({ title:"Provider Public Release Review", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Provider Public Release Review"), sectionLabels:["Public Release", "Export Preview", "No-Provider Receipt", "Safety Statement"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前只展示 provider public release review。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
 
+  function formatPublicReleaseEvidenceConsoleSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.publicReleaseEvidenceConsoleSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Public Release Evidence Console", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Public Release Evidence Console 仍需复核"), sectionLabels:["Release Evidence", "User Assurance", "Launch Finalizer", "Claim Verifier"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Release Evidence 不生成真实证据文件。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatNoProviderUserAssurancePanelSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.noProviderUserAssurancePanelSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"No-Provider User Assurance Panel", line:safeLine(obj(summary.userFacingSummary).resultLabel || "No-Provider User Assurance Panel 仍需复核"), sectionLabels:["Release Evidence", "User Assurance", "Launch Finalizer", "Claim Verifier"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "User Assurance 不生成真实用户保证书。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatOfflineLaunchReadinessFinalizerSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.offlineLaunchReadinessFinalizerSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Offline Launch Readiness Finalizer", line:safeLine(obj(summary.userFacingSummary).resultLabel || "Offline Launch Readiness Finalizer 仍需复核"), sectionLabels:["Release Evidence", "User Assurance", "Launch Finalizer", "Claim Verifier"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Launch Finalizer 不执行真实 launch。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatUserSafePublicClaimVerifierSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.userSafePublicClaimVerifierSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"User-Safe Public Claim Verifier", line:safeLine(obj(summary.userFacingSummary).resultLabel || "User-Safe Public Claim Verifier 仍需复核"), sectionLabels:["Release Evidence", "User Assurance", "Launch Finalizer", "Claim Verifier"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "Claim Verifier 不承诺最低价、最终价或官方背书。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
+  function formatProviderLaunchReadinessFinalViewModelSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.providerLaunchReadinessFinalViewModelSummary || safe.viewModelSummary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"Provider Launch Readiness Final Review", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Provider Launch Readiness Final Review"), sectionLabels:["Release Evidence", "User Assurance", "Launch Finalizer", "Claim Verifier"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前只展示 provider launch readiness final review。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
     return clone({
@@ -891,6 +921,11 @@
     formatFinalNoProviderBoundaryReceiptSummary,
     formatPublicSafetyStatementPreviewSummary,
     formatProviderPublicReleaseViewModelSummary,
+    formatPublicReleaseEvidenceConsoleSummary,
+    formatNoProviderUserAssurancePanelSummary,
+    formatOfflineLaunchReadinessFinalizerSummary,
+    formatUserSafePublicClaimVerifierSummary,
+    formatProviderLaunchReadinessFinalViewModelSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,

@@ -39,7 +39,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingUserVisibleSafetyBoundaryExplainer.js"]);
   const api = windowRef.WeishanGlobalShoppingUserVisibleSafetyBoundaryExplainer;
-  assert.equal(api.GLOBAL_SHOPPING_USER_VISIBLE_SAFETY_BOUNDARY_EXPLAINER_VERSION, "3.8.0");
+  assert.equal(api.GLOBAL_SHOPPING_USER_VISIBLE_SAFETY_BOUNDARY_EXPLAINER_VERSION, "3.9.0");
   const ready = api.buildGlobalShoppingUserVisibleSafetyBoundaryExplainer({
     providerPublicTrustClosureCenterSummary:readySummary("Provider Public Trust Closure Center", "Provider Public Trust Closure Center 已准备"),
     offlineReleaseMemorySnapshotSummary:readySummary("Offline Release Memory Snapshot", "Offline Release Memory Snapshot 已准备"),

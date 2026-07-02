@@ -22,7 +22,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingSandboxAdapterContractTestbed.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingSandboxAdapterContractTestbed;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_ADAPTER_CONTRACT_TESTBED_VERSION, "3.8.0");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_ADAPTER_CONTRACT_TESTBED_VERSION, "3.9.0");
   const ready = api.buildGlobalShoppingSandboxAdapterContractTestbed({
     providerRequestEnvelopeSummary:{ status:"ready", userFacingSummary:{ resultLabel:"request envelope 合同已准备", redacted:true } },
     sandboxProviderResponseContractSummary:{ status:"ready", userFacingSummary:{ resultLabel:"response summary 合同已准备", redacted:true } }
