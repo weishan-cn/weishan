@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "4.0.1";
+  const READ_ONLY_QUOTE_EVIDENCE_SUMMARY_FORMATTER_VERSION = "4.0.2";
   const FORMATTER_NAME = "read_only_quote_evidence_summary_formatter_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买|付款|下单/i;
@@ -858,6 +858,21 @@
     const summary = safe.globalShoppingPublicBetaViewModelSummary || safe.viewModelSummary || (safe.title || safe.status ? safe : {});
     return clone({ title:"Global Shopping Public Beta Review", line:safeLine(summary.title || obj(summary.userFacingSummary).resultLabel || "Global Shopping Public Beta Review"), sectionLabels:["Public Beta", "Provider-Zero Lock", "User Trust Launch", "Safety Copy"], status:text(summary.status || "needs_review"), caveat:safeLine(summary.caveat || "当前只展示 Global Shopping Public Beta Review。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
   }
+  function formatGlobalShoppingCandidateEvidenceSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.globalShoppingReadOnlyCandidateEvidenceUnifierSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"候选价证据", line:safeLine(obj(summary.userFacingSummary).resultLabel || "候选价证据仍需复核"), sectionLabels:["候选价证据", "来源与时间", "可信度", "风险说明"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "当前仍为只读候选证据。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+  function formatGlobalShoppingFeeNormalizationSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.globalShoppingFeeNormalizationViewSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"费用归一化", line:safeLine(obj(summary.userFacingSummary).resultLabel || "费用归一化仍需复核"), sectionLabels:["费用归一化", "含税/不含税", "含运费/不含运费", "服务费说明"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "归一化价格仅用于辅助比较。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
+  function formatGlobalShoppingOfficialAnchorSummary(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const summary = safe.globalShoppingOfficialAnchorComparisonViewSummary || safe.summary || (safe.title || safe.status ? safe : {});
+    return clone({ title:"官方价锚点", line:safeLine(obj(summary.userFacingSummary).resultLabel || "官方价锚点仍需复核"), sectionLabels:["官方价锚点", "来源与时间", "风险说明"], status:text(summary.status || "needs_review"), caveat:safeLine(obj(summary.userFacingSummary).caveat || "官方价锚点只作为只读对比参考。"), bookingUrl:null, checkoutUrl:null, paymentUrl:null, orderUrl:null, redacted:true });
+  }
 
   function buildReadOnlyQuoteEvidenceSummaryFormatterAuditDraft(input) {
     const warnings = formatReadOnlyQuoteEvidenceWarnings(input);
@@ -961,6 +976,9 @@
     formatUserTrustLaunchBoardSummary,
     formatPublicBetaSafetyCopyCenterSummary,
     formatGlobalShoppingPublicBetaViewModelSummary,
+    formatGlobalShoppingCandidateEvidenceSummary,
+    formatGlobalShoppingFeeNormalizationSummary,
+    formatGlobalShoppingOfficialAnchorSummary,
     formatFlightWorkflowAuditReviewSummary,
     formatSafeSessionExportPreviewSummary,
     formatFlightWorkflowHumanReviewChecklistSummary,

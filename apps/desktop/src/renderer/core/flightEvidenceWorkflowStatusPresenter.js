@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_EVIDENCE_WORKFLOW_STATUS_PRESENTER_VERSION = "4.0.1";
+  const FLIGHT_EVIDENCE_WORKFLOW_STATUS_PRESENTER_VERSION = "4.0.2";
   const PRESENTER_NAME = "flight_evidence_workflow_status_presenter_v1";
   const STEP_LABELS = {
     intent_normalized: "识别机票需求",

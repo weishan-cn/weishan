@@ -13,7 +13,7 @@ function assertSafe(value) {
 }
 function main() {
   const api = load(["apps/desktop/src/renderer/core/flightWorkflowPublicPilotIssueReviewBoard.js"]).WeishanFlightWorkflowPublicPilotIssueReviewBoard;
-  assert.equal(api.FLIGHT_WORKFLOW_PUBLIC_PILOT_ISSUE_REVIEW_BOARD_VERSION, "4.0.1");
+  assert.equal(api.FLIGHT_WORKFLOW_PUBLIC_PILOT_ISSUE_REVIEW_BOARD_VERSION, "4.0.2");
   assert.equal(api.buildFlightWorkflowPublicPilotIssueReviewBoard({}).status, "ready");
   assert.equal(api.buildFlightWorkflowPublicPilotIssueReviewBoard({ issueIntake:{ status:"ready", issueCategory:"candidate_unclear" } }).status, "ready");
   assert.equal(api.buildFlightWorkflowPublicPilotIssueReviewBoard({ issueIntake:{ status:"redacted", issueCategory:"other" } }).status, "needs_review");

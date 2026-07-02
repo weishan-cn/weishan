@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_EXTERNAL_PLATFORM_BOUNDARY_BRIEF_VERSION = "4.0.1";
+  const GLOBAL_SHOPPING_EXTERNAL_PLATFORM_BOUNDARY_BRIEF_VERSION = "4.0.2";
   const BRIEF_NAME = "global_shopping_external_platform_boundary_brief_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

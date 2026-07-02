@@ -1,12 +1,19 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_SAFETY_COPY_CENTER_VERSION = "4.0.1";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_SAFETY_COPY_CENTER_VERSION = "4.0.2";
   const CENTER_NAME = "global_shopping_public_beta_safety_copy_center_v1";
   const ALLOWED_COPY = [
-    "当前已覆盖来源中的较低候选价",
+    "当前仍为只读候选证据",
+    "来源与时间",
+    "可信度",
+    "风险说明",
     "与官方价对比",
-    "已接入平台候选价",
+    "含税/不含税",
+    "含运费/不含运费",
+    "服务费说明",
+    "归一化价格仅用于辅助比较",
+    "不代表真实最终价",
     "价格以跳转后平台实时页面为准",
     "当前不提供付款、下单或出票能力",
     "跳转至平台自行下单",

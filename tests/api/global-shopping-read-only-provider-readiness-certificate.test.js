@@ -19,7 +19,7 @@ function readySummary(title, resultLabel) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingReadOnlyProviderReadinessCertificate.js").WeishanGlobalShoppingReadOnlyProviderReadinessCertificate;
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_PROVIDER_READINESS_CERTIFICATE_VERSION, "4.0.1");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_PROVIDER_READINESS_CERTIFICATE_VERSION, "4.0.2");
   const ready = api.buildGlobalShoppingReadOnlyProviderReadinessCertificate({
     providerFinalSafetySealSummary:readySummary("Provider Final Safety Seal", "Provider Final Safety Seal 已准备"),
     offlineActivationWarRoomSummary:readySummary("Offline Activation War Room", "Offline Activation War Room 已准备"),

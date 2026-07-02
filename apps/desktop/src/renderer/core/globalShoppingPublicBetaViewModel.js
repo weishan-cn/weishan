@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_VIEW_MODEL_VERSION = "4.0.1";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_VIEW_MODEL_VERSION = "4.0.2";
   const VIEW_MODEL_NAME = "global_shopping_public_beta_view_model_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -42,11 +42,17 @@
     const publicBetaSafetyCopyCenterSummary = resolveSummary(safe, "publicBetaSafetyCopyCenterSummary", "WeishanGlobalShoppingPublicBetaSafetyCopyCenter", "buildGlobalShoppingPublicBetaSafetyCopyCenter");
     const userFacingCopyPolishSummary = resolveSummary(safe, "globalShoppingPublicBetaUserFacingCopyPolishSummary", "WeishanGlobalShoppingPublicBetaUserFacingCopyPolish", "buildGlobalShoppingPublicBetaUserFacingCopyPolish");
     const providerZeroStatusPanelSummary = resolveSummary(safe, "globalShoppingProviderZeroStatusPanelSummary", "WeishanGlobalShoppingProviderZeroStatusPanel", "buildGlobalShoppingProviderZeroStatusPanel");
+    const candidateEvidenceSummary = resolveSummary(safe, "globalShoppingReadOnlyCandidateEvidenceUnifierSummary", "WeishanGlobalShoppingReadOnlyCandidateEvidenceUnifier", "buildGlobalShoppingReadOnlyCandidateEvidenceUnifier");
+    const feeNormalizationSummary = resolveSummary(safe, "globalShoppingFeeNormalizationViewSummary", "WeishanGlobalShoppingFeeNormalizationView", "buildGlobalShoppingFeeNormalizationView");
+    const officialAnchorSummary = resolveSummary(safe, "globalShoppingOfficialAnchorComparisonViewSummary", "WeishanGlobalShoppingOfficialAnchorComparisonView", "buildGlobalShoppingOfficialAnchorComparisonView");
     return clone([
       card("public_beta", "Public Beta", labelOf(userFacingCopyPolishSummary, "全球购 Public Beta 仍需复核")),
       card("provider_zero_lock", "Provider-Zero Lock", labelOf(providerZeroStatusPanelSummary, "Provider-Zero Status Panel 仍需复核")),
       card("user_trust_launch", "User Trust Launch", labelOf(userTrustLaunchBoardSummary, "User Trust Launch Board 仍需复核")),
       card("safety_copy", "Safety Copy", labelOf(publicBetaSafetyCopyCenterSummary, "Public Beta Safety Copy Center 仍需复核")),
+      card("candidate_evidence", "候选价证据", labelOf(candidateEvidenceSummary, "候选价证据仍需复核")),
+      card("fee_normalization", "费用归一化", labelOf(feeNormalizationSummary, "费用归一化仍需复核")),
+      card("official_anchor", "官方价锚点", labelOf(officialAnchorSummary, "官方价锚点仍需复核")),
       card("risk_disclosure", "风险说明", "Human public beta review 仍需人工复核")
     ]);
   }
@@ -87,13 +93,19 @@
     const publicBetaSafetyCopyCenterSummary = resolveSummary(safe, "publicBetaSafetyCopyCenterSummary", "WeishanGlobalShoppingPublicBetaSafetyCopyCenter", "buildGlobalShoppingPublicBetaSafetyCopyCenter");
     const userFacingCopyPolishSummary = resolveSummary(safe, "globalShoppingPublicBetaUserFacingCopyPolishSummary", "WeishanGlobalShoppingPublicBetaUserFacingCopyPolish", "buildGlobalShoppingPublicBetaUserFacingCopyPolish");
     const providerZeroStatusPanelSummary = resolveSummary(safe, "globalShoppingProviderZeroStatusPanelSummary", "WeishanGlobalShoppingProviderZeroStatusPanel", "buildGlobalShoppingProviderZeroStatusPanel");
+    const candidateEvidenceSummary = resolveSummary(safe, "globalShoppingReadOnlyCandidateEvidenceUnifierSummary", "WeishanGlobalShoppingReadOnlyCandidateEvidenceUnifier", "buildGlobalShoppingReadOnlyCandidateEvidenceUnifier");
+    const feeNormalizationSummary = resolveSummary(safe, "globalShoppingFeeNormalizationViewSummary", "WeishanGlobalShoppingFeeNormalizationView", "buildGlobalShoppingFeeNormalizationView");
+    const officialAnchorSummary = resolveSummary(safe, "globalShoppingOfficialAnchorComparisonViewSummary", "WeishanGlobalShoppingOfficialAnchorComparisonView", "buildGlobalShoppingOfficialAnchorComparisonView");
     const statuses = [
       safeStatus(publicBetaShellSummary.status),
       safeStatus(providerZeroRuntimeLockSummary.status),
       safeStatus(userTrustLaunchBoardSummary.status),
       safeStatus(publicBetaSafetyCopyCenterSummary.status),
       safeStatus(userFacingCopyPolishSummary.status),
-      safeStatus(providerZeroStatusPanelSummary.status)
+      safeStatus(providerZeroStatusPanelSummary.status),
+      safeStatus(candidateEvidenceSummary.status),
+      safeStatus(feeNormalizationSummary.status),
+      safeStatus(officialAnchorSummary.status)
     ];
     const blocked = statuses.indexOf("blocked") >= 0 || statuses.indexOf("failed_safe") >= 0;
     const needsReview =
@@ -103,6 +115,9 @@
       !present(publicBetaSafetyCopyCenterSummary) ||
       !present(userFacingCopyPolishSummary) ||
       !present(providerZeroStatusPanelSummary) ||
+      !present(candidateEvidenceSummary) ||
+      !present(feeNormalizationSummary) ||
+      !present(officialAnchorSummary) ||
       statuses.indexOf("needs_review") >= 0;
     const status = blocked ? "blocked" : (needsReview ? "needs_review" : "ready");
     return clone({
@@ -116,7 +131,10 @@
         userTrustLaunchBoardSummary:userTrustLaunchBoardSummary,
         publicBetaSafetyCopyCenterSummary:publicBetaSafetyCopyCenterSummary,
         globalShoppingPublicBetaUserFacingCopyPolishSummary:userFacingCopyPolishSummary,
-        globalShoppingProviderZeroStatusPanelSummary:providerZeroStatusPanelSummary
+        globalShoppingProviderZeroStatusPanelSummary:providerZeroStatusPanelSummary,
+        globalShoppingReadOnlyCandidateEvidenceUnifierSummary:candidateEvidenceSummary,
+        globalShoppingFeeNormalizationViewSummary:feeNormalizationSummary,
+        globalShoppingOfficialAnchorComparisonViewSummary:officialAnchorSummary
       }),
       publicBetaShellRows:buildGlobalShoppingPublicBetaShellRowsForView({ globalShoppingReadOnlyPublicBetaShellSummary:publicBetaShellSummary }),
       providerZeroLockRows:buildGlobalShoppingProviderZeroLockRowsForView({ providerZeroRuntimeLockSummary:providerZeroRuntimeLockSummary }),
@@ -124,6 +142,9 @@
       safetyCopyRows:buildGlobalShoppingSafetyCopyRowsForView({ publicBetaSafetyCopyCenterSummary:publicBetaSafetyCopyCenterSummary }),
       disclosureRows:toArray(safe.disclosureRows).length ? toArray(safe.disclosureRows) : [
         row("public_beta_disclosure_candidate_only", "Global Shopping Public Beta", "全球购 Public Beta 只展示只读候选价，当前不提供付款、下单或出票能力", "pass"),
+        row("public_beta_disclosure_candidate_evidence", "候选价证据", "当前仍为只读候选证据，来源与时间、可信度、风险说明仅用于辅助复核", "pass"),
+        row("public_beta_disclosure_fee_normalization", "费用归一化", "归一化价格仅用于辅助比较，不代表真实最终价", "pass"),
+        row("public_beta_disclosure_official_anchor", "官方价锚点", "官方价锚点只作为只读对比参考，以平台实时页面为准", "pass"),
         row("public_beta_disclosure_provider_zero", "Provider-Zero", "Provider-Zero：未接入真实供应商，未读取密钥，未联网调用，未生成订单", "pass"),
         row("public_beta_disclosure_user_trust", "User Trust Launch", "User Trust Launch 不执行真实 launch", "pass"),
         row("public_beta_disclosure_safety_copy", "Safety Copy", "Safety Copy 不承诺最低价、最终价或官方背书，平台实时页面为准", "pass"),
@@ -137,6 +158,9 @@
       publicBetaSafetyCopyCenterSummary:clone(publicBetaSafetyCopyCenterSummary),
       globalShoppingPublicBetaUserFacingCopyPolishSummary:clone(userFacingCopyPolishSummary),
       globalShoppingProviderZeroStatusPanelSummary:clone(providerZeroStatusPanelSummary),
+      globalShoppingReadOnlyCandidateEvidenceUnifierSummary:clone(candidateEvidenceSummary),
+      globalShoppingFeeNormalizationViewSummary:clone(feeNormalizationSummary),
+      globalShoppingOfficialAnchorComparisonViewSummary:clone(officialAnchorSummary),
       safeToProceedWithHumanPublicBetaReview:status === "ready",
       externalUrl:null,
       platformUrl:null,

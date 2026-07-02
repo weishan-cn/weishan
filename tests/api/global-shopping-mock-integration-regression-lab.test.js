@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingMockIntegrationRegressionLab.js"]);
   const api = windowRef.WeishanGlobalShoppingMockIntegrationRegressionLab;
-  assert.equal(api.GLOBAL_SHOPPING_MOCK_INTEGRATION_REGRESSION_LAB_VERSION, "4.0.1");
+  assert.equal(api.GLOBAL_SHOPPING_MOCK_INTEGRATION_REGRESSION_LAB_VERSION, "4.0.2");
 
   const ready = api.buildGlobalShoppingMockIntegrationRegressionLab({
     offlineProviderCertificationCenterSummary:readySummary("Offline Provider Certification Center", "离线 Provider 认证中心已准备"),

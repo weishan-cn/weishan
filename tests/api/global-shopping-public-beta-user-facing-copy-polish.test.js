@@ -39,14 +39,14 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaUserFacingCopyPolish.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaUserFacingCopyPolish;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_USER_FACING_COPY_POLISH_VERSION, "4.0.1");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_USER_FACING_COPY_POLISH_VERSION, "4.0.2");
   const ready = api.buildGlobalShoppingPublicBetaUserFacingCopyPolish({
     globalShoppingReadOnlyPublicBetaShellSummary:readySummary("Global Shopping Read-Only Public Beta Shell", "Global Shopping Read-Only Public Beta Shell 已准备"),
     publicBetaSafetyCopyCenterSummary:readySummary("Public Beta Safety Copy Center", "Public Beta Safety Copy Center 已准备"),
     userTrustLaunchBoardSummary:readySummary("User Trust Launch Board", "User Trust Launch Board 已准备")
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.0.1");
+  assert.equal(ready.appVersion, "4.0.2");
   assert.equal(ready.userFacingSummary.title, "全球购 Public Beta");
   assert.equal(ready.externalUrl, null);
   assert.equal(ready.platformUrl, null);

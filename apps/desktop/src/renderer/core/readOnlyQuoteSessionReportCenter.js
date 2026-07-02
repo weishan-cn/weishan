@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "4.0.1";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "4.0.2";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -249,6 +249,9 @@
       userSafePublicClaimVerifierSummary: stripUnsafe(safe.userSafePublicClaimVerifierSummary || null),
       providerLaunchReadinessFinalViewModelSummary: stripUnsafe(safe.providerLaunchReadinessFinalViewModelSummary || null),
       globalShoppingReadOnlyPublicBetaShellSummary: stripUnsafe(safe.globalShoppingReadOnlyPublicBetaShellSummary || null),
+      globalShoppingReadOnlyCandidateEvidenceUnifierSummary: stripUnsafe(safe.globalShoppingReadOnlyCandidateEvidenceUnifierSummary || null),
+      globalShoppingFeeNormalizationViewSummary: stripUnsafe(safe.globalShoppingFeeNormalizationViewSummary || null),
+      globalShoppingOfficialAnchorComparisonViewSummary: stripUnsafe(safe.globalShoppingOfficialAnchorComparisonViewSummary || null),
       providerZeroRuntimeLockSummary: stripUnsafe(safe.providerZeroRuntimeLockSummary || null),
       userTrustLaunchBoardSummary: stripUnsafe(safe.userTrustLaunchBoardSummary || null),
       publicBetaSafetyCopyCenterSummary: stripUnsafe(safe.publicBetaSafetyCopyCenterSummary || null),
@@ -347,6 +350,9 @@
       userSafePublicClaimVerifierStatus: safeText(safe.userSafePublicClaimVerifierStatus || safe.userSafePublicClaimVerifierSummary && safe.userSafePublicClaimVerifierSummary.status || ""),
       providerLaunchReadinessFinalViewModelStatus: safeText(safe.providerLaunchReadinessFinalViewModelStatus || safe.providerLaunchReadinessFinalViewModelSummary && safe.providerLaunchReadinessFinalViewModelSummary.status || ""),
       globalShoppingReadOnlyPublicBetaShellStatus: safeText(safe.globalShoppingReadOnlyPublicBetaShellStatus || safe.globalShoppingReadOnlyPublicBetaShellSummary && safe.globalShoppingReadOnlyPublicBetaShellSummary.status || ""),
+      globalShoppingReadOnlyCandidateEvidenceUnifierStatus: safeText(safe.globalShoppingReadOnlyCandidateEvidenceUnifierStatus || safe.globalShoppingReadOnlyCandidateEvidenceUnifierSummary && safe.globalShoppingReadOnlyCandidateEvidenceUnifierSummary.status || ""),
+      globalShoppingFeeNormalizationViewStatus: safeText(safe.globalShoppingFeeNormalizationViewStatus || safe.globalShoppingFeeNormalizationViewSummary && safe.globalShoppingFeeNormalizationViewSummary.status || ""),
+      globalShoppingOfficialAnchorComparisonViewStatus: safeText(safe.globalShoppingOfficialAnchorComparisonViewStatus || safe.globalShoppingOfficialAnchorComparisonViewSummary && safe.globalShoppingOfficialAnchorComparisonViewSummary.status || ""),
       providerZeroRuntimeLockStatus: safeText(safe.providerZeroRuntimeLockStatus || safe.providerZeroRuntimeLockSummary && safe.providerZeroRuntimeLockSummary.status || ""),
       userTrustLaunchBoardStatus: safeText(safe.userTrustLaunchBoardStatus || safe.userTrustLaunchBoardSummary && safe.userTrustLaunchBoardSummary.status || ""),
       publicBetaSafetyCopyCenterStatus: safeText(safe.publicBetaSafetyCopyCenterStatus || safe.publicBetaSafetyCopyCenterSummary && safe.publicBetaSafetyCopyCenterSummary.status || ""),
@@ -681,6 +687,9 @@
     const userSafePublicClaimVerifierSummary = formatter.formatUserSafePublicClaimVerifierSummary ? formatter.formatUserSafePublicClaimVerifierSummary({ userSafePublicClaimVerifierSummary:workflow.userSafePublicClaimVerifierSummary || safe.userSafePublicClaimVerifierSummary || null }) : null;
     const providerLaunchReadinessFinalViewModelSummary = formatter.formatProviderLaunchReadinessFinalViewModelSummary ? formatter.formatProviderLaunchReadinessFinalViewModelSummary({ providerLaunchReadinessFinalViewModelSummary:workflow.providerLaunchReadinessFinalViewModelSummary || safe.providerLaunchReadinessFinalViewModelSummary || null }) : null;
     const globalShoppingReadOnlyPublicBetaShellSummary = formatter.formatGlobalShoppingReadOnlyPublicBetaShellSummary ? formatter.formatGlobalShoppingReadOnlyPublicBetaShellSummary({ globalShoppingReadOnlyPublicBetaShellSummary:workflow.globalShoppingReadOnlyPublicBetaShellSummary || safe.globalShoppingReadOnlyPublicBetaShellSummary || null }) : null;
+    const globalShoppingReadOnlyCandidateEvidenceUnifierSummary = formatter.formatGlobalShoppingCandidateEvidenceSummary ? formatter.formatGlobalShoppingCandidateEvidenceSummary({ globalShoppingReadOnlyCandidateEvidenceUnifierSummary:workflow.globalShoppingReadOnlyCandidateEvidenceUnifierSummary || safe.globalShoppingReadOnlyCandidateEvidenceUnifierSummary || null }) : null;
+    const globalShoppingFeeNormalizationViewSummary = formatter.formatGlobalShoppingFeeNormalizationSummary ? formatter.formatGlobalShoppingFeeNormalizationSummary({ globalShoppingFeeNormalizationViewSummary:workflow.globalShoppingFeeNormalizationViewSummary || safe.globalShoppingFeeNormalizationViewSummary || null }) : null;
+    const globalShoppingOfficialAnchorComparisonViewSummary = formatter.formatGlobalShoppingOfficialAnchorSummary ? formatter.formatGlobalShoppingOfficialAnchorSummary({ globalShoppingOfficialAnchorComparisonViewSummary:workflow.globalShoppingOfficialAnchorComparisonViewSummary || safe.globalShoppingOfficialAnchorComparisonViewSummary || null }) : null;
     const providerZeroRuntimeLockSummary = formatter.formatProviderZeroRuntimeLockSummary ? formatter.formatProviderZeroRuntimeLockSummary({ providerZeroRuntimeLockSummary:workflow.providerZeroRuntimeLockSummary || safe.providerZeroRuntimeLockSummary || null }) : null;
     const userTrustLaunchBoardSummary = formatter.formatUserTrustLaunchBoardSummary ? formatter.formatUserTrustLaunchBoardSummary({ userTrustLaunchBoardSummary:workflow.userTrustLaunchBoardSummary || safe.userTrustLaunchBoardSummary || null }) : null;
     const publicBetaSafetyCopyCenterSummary = formatter.formatPublicBetaSafetyCopyCenterSummary ? formatter.formatPublicBetaSafetyCopyCenterSummary({ publicBetaSafetyCopyCenterSummary:workflow.publicBetaSafetyCopyCenterSummary || safe.publicBetaSafetyCopyCenterSummary || null }) : null;
@@ -791,6 +800,9 @@
       userSafePublicClaimVerifierSummary: userSafePublicClaimVerifierSummary,
       providerLaunchReadinessFinalViewModelSummary: providerLaunchReadinessFinalViewModelSummary,
       globalShoppingReadOnlyPublicBetaShellSummary: globalShoppingReadOnlyPublicBetaShellSummary,
+      globalShoppingReadOnlyCandidateEvidenceUnifierSummary: globalShoppingReadOnlyCandidateEvidenceUnifierSummary,
+      globalShoppingFeeNormalizationViewSummary: globalShoppingFeeNormalizationViewSummary,
+      globalShoppingOfficialAnchorComparisonViewSummary: globalShoppingOfficialAnchorComparisonViewSummary,
       providerZeroRuntimeLockSummary: providerZeroRuntimeLockSummary,
       userTrustLaunchBoardSummary: userTrustLaunchBoardSummary,
       publicBetaSafetyCopyCenterSummary: publicBetaSafetyCopyCenterSummary,
@@ -1208,6 +1220,9 @@
       userSafePublicClaimVerifierSummary: workflow.userSafePublicClaimVerifierSummary || safe.userSafePublicClaimVerifierSummary || null,
       providerLaunchReadinessFinalViewModelSummary: workflow.providerLaunchReadinessFinalViewModelSummary || safe.providerLaunchReadinessFinalViewModelSummary || null,
       globalShoppingReadOnlyPublicBetaShellSummary: workflow.globalShoppingReadOnlyPublicBetaShellSummary || safe.globalShoppingReadOnlyPublicBetaShellSummary || null,
+      globalShoppingReadOnlyCandidateEvidenceUnifierSummary: workflow.globalShoppingReadOnlyCandidateEvidenceUnifierSummary || safe.globalShoppingReadOnlyCandidateEvidenceUnifierSummary || null,
+      globalShoppingFeeNormalizationViewSummary: workflow.globalShoppingFeeNormalizationViewSummary || safe.globalShoppingFeeNormalizationViewSummary || null,
+      globalShoppingOfficialAnchorComparisonViewSummary: workflow.globalShoppingOfficialAnchorComparisonViewSummary || safe.globalShoppingOfficialAnchorComparisonViewSummary || null,
       providerZeroRuntimeLockSummary: workflow.providerZeroRuntimeLockSummary || safe.providerZeroRuntimeLockSummary || null,
       userTrustLaunchBoardSummary: workflow.userTrustLaunchBoardSummary || safe.userTrustLaunchBoardSummary || null,
       publicBetaSafetyCopyCenterSummary: workflow.publicBetaSafetyCopyCenterSummary || safe.publicBetaSafetyCopyCenterSummary || null,

@@ -14,7 +14,7 @@ function assertSafe(value) {
 function issue(category) { return { status:"ready", issueCategory:category, redacted:true }; }
 function main() {
   const api = load(["apps/desktop/src/renderer/core/flightWorkflowPublicPilotIssuePatternRadar.js"]).WeishanFlightWorkflowPublicPilotIssuePatternRadar;
-  assert.equal(api.FLIGHT_WORKFLOW_PUBLIC_PILOT_ISSUE_PATTERN_RADAR_VERSION, "4.0.1");
+  assert.equal(api.FLIGHT_WORKFLOW_PUBLIC_PILOT_ISSUE_PATTERN_RADAR_VERSION, "4.0.2");
   assert.equal(api.buildFlightWorkflowPublicPilotIssuePatternRadar({}).status, "insufficient_data");
   assert.equal(api.buildFlightWorkflowPublicPilotIssuePatternRadar({ issues:[issue("candidate_unclear"), issue("platform_mismatch")] }).status, "insufficient_data");
   const ready = api.buildFlightWorkflowPublicPilotIssuePatternRadar({ issues:[issue("candidate_unclear"), issue("other"), issue("other"), issue("feedback_error")] });

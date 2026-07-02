@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_TESTER_COHORT_ENROLLMENT_CONSOLE_VERSION = "4.0.1";
+  const FLIGHT_WORKFLOW_TESTER_COHORT_ENROLLMENT_CONSOLE_VERSION = "4.0.2";
   const CONSOLE_NAME = "flight_workflow_tester_cohort_enrollment_console_v1";
   const CAVEAT = "该控制台只用于只读试点测试用户批次登记，不保存真实身份、联系方式、证件、支付或外部平台链接。";
 

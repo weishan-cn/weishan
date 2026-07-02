@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_LAUNCH_READINESS_BOARD_VERSION = "4.0.1";
+  const GLOBAL_SHOPPING_PROVIDER_LAUNCH_READINESS_BOARD_VERSION = "4.0.2";
   const BOARD_NAME = "global_shopping_provider_launch_readiness_board_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
