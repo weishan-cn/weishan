@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_FEE_NORMALIZATION_VIEW_VERSION = "4.0.3";
+  const GLOBAL_SHOPPING_FEE_NORMALIZATION_VIEW_VERSION = "4.0.4";
   const VIEW_NAME = "global_shopping_fee_normalization_view_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, fee_normalization_only:true };
   const FORBIDDEN_COPY_RE = /最终成交价|真实最终价|已锁定|官方可订|官方保证|官方背书|平台授权/i;

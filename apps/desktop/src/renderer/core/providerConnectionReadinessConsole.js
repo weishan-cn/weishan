@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION = "4.0.3";
+  const PROVIDER_CONNECTION_READINESS_CONSOLE_VERSION = "4.0.4";
 
   const CATEGORY_DEFINITIONS = {
     flight_provider: {

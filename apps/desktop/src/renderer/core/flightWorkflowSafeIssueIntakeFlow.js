@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SAFE_ISSUE_INTAKE_FLOW_VERSION = "4.0.3";
+  const FLIGHT_WORKFLOW_SAFE_ISSUE_INTAKE_FLOW_VERSION = "4.0.4";
   const INTAKE_NAME = "flight_workflow_safe_issue_intake_flow_v1";
   const CATEGORY_LABELS = {
     candidate_unclear:"看不懂候选证据",

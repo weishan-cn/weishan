@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RC_REGRESSION_VIEW_MODEL_VERSION = "4.0.3";
+  const FLIGHT_WORKFLOW_RC_REGRESSION_VIEW_MODEL_VERSION = "4.0.4";
   const VIEW_MODEL_NAME = "flight_workflow_rc_regression_view_model_v1";
   const CAVEAT = "该页面只用于只读 RC 回归审计，不保存真实身份、不发送真实邀请、不提供交易能力。";
 

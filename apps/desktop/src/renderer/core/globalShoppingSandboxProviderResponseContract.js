@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_PROVIDER_RESPONSE_CONTRACT_VERSION = "4.0.3";
+  const GLOBAL_SHOPPING_SANDBOX_PROVIDER_RESPONSE_CONTRACT_VERSION = "4.0.4";
   const CONTRACT_NAME = "global_shopping_sandbox_provider_response_contract_v1";
   const RESULT_LABELS = {
     ready:"Provider 响应合同已准备",

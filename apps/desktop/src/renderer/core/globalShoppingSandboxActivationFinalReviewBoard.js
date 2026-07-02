@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_ACTIVATION_FINAL_REVIEW_BOARD_VERSION = "4.0.3";
+  const GLOBAL_SHOPPING_SANDBOX_ACTIVATION_FINAL_REVIEW_BOARD_VERSION = "4.0.4";
   const BOARD_NAME = "global_shopping_sandbox_activation_final_review_board_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

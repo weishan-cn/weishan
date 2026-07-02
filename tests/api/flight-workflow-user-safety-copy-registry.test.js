@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowUserSafetyCopyRegistry.js"]);
   const api = windowRef.WeishanFlightWorkflowUserSafetyCopyRegistry;
-  assert.equal(api.FLIGHT_WORKFLOW_USER_SAFETY_COPY_REGISTRY_VERSION, "4.0.3");
+  assert.equal(api.FLIGHT_WORKFLOW_USER_SAFETY_COPY_REGISTRY_VERSION, "4.0.4");
   const required = ["read_only_price_notice", "platform_final_notice", "no_payment_order_ticketing_notice", "no_identity_upload_notice", "provider_confirmation_notice", "platform_check_difference_notice", "evidence_only_notice", "restricted_category_blocked_notice", "sensitive_input_blocked_notice", "export_preview_notice", "scenario_simulation_notice", "safety_matrix_notice", "release_readiness_notice"];
   const registry = api.buildFlightWorkflowUserSafetyCopyRegistry({});
   assert.equal(registry.registryName, "flight_workflow_user_safety_copy_registry_v1");

@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_EVIDENCE_SAFETY_SUMMARY_VERSION = "4.0.3";
+  const GLOBAL_PROCUREMENT_EVIDENCE_SAFETY_SUMMARY_VERSION = "4.0.4";
 
   function buildGlobalProcurementEvidenceSafetySummary(){
     return {

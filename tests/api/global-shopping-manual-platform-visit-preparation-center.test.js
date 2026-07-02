@@ -26,7 +26,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingManualPlatformVisitPreparationCenter.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingManualPlatformVisitPreparationCenter;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_PLATFORM_VISIT_PREPARATION_CENTER_VERSION, "4.0.3");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_PLATFORM_VISIT_PREPARATION_CENTER_VERSION, "4.0.4");
 
   const ready = api.buildGlobalShoppingManualPlatformVisitPreparationCenter({
     userManualReviewViewModelSummary:{ status:"ready", title:"用户手动复核与安全下一步", redacted:true },

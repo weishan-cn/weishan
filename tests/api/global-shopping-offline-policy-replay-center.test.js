@@ -19,7 +19,7 @@ function readySummary(title, resultLabel) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingOfflinePolicyReplayCenter.js").WeishanGlobalShoppingOfflinePolicyReplayCenter;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_POLICY_REPLAY_CENTER_VERSION, "4.0.3");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_POLICY_REPLAY_CENTER_VERSION, "4.0.4");
   const ready = api.buildGlobalShoppingOfflinePolicyReplayCenter({
     providerLaunchAuditSnapshotSummary:readySummary("Provider Launch Audit Snapshot", "Provider Launch Audit Snapshot 已准备"),
     adapterPolicyEngineSummary:readySummary("Adapter Policy Engine", "Adapter 策略引擎已准备"),

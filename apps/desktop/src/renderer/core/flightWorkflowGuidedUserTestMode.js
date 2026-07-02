@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_GUIDED_USER_TEST_MODE_VERSION = "4.0.3";
+  const FLIGHT_WORKFLOW_GUIDED_USER_TEST_MODE_VERSION = "4.0.4";
   const TEST_MODE_NAME = "flight_workflow_guided_user_test_mode_v1";
   const TEST_ID = "deterministic-flight-guided-user-test-v2.4.1";
   const STEP_DEFS = [

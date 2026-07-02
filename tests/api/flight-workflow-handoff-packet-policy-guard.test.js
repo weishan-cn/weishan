@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowHandoffPacketPolicyGuard.js"]);
   const api = windowRef.WeishanFlightWorkflowHandoffPacketPolicyGuard;
-  assert.equal(api.FLIGHT_WORKFLOW_HANDOFF_PACKET_POLICY_GUARD_VERSION, "4.0.3");
+  assert.equal(api.FLIGHT_WORKFLOW_HANDOFF_PACKET_POLICY_GUARD_VERSION, "4.0.4");
   const allowed = api.evaluateFlightWorkflowHandoffPacketPolicy({ status:"ready", canOpenExternalPlatform:false, bookingUrl:null, payment:false });
   assert.equal(allowed.guardName, "flight_workflow_handoff_packet_policy_guard_v1");
   assert.equal(allowed.status, "allowed");

@@ -11,7 +11,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowRcReviewViewModel.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowRcReviewViewModel;
-  assert.equal(api.FLIGHT_WORKFLOW_RC_REVIEW_VIEW_MODEL_VERSION, "4.0.3");
+  assert.equal(api.FLIGHT_WORKFLOW_RC_REVIEW_VIEW_MODEL_VERSION, "4.0.4");
   const model = api.buildFlightWorkflowRcReviewViewModel({
     rcCandidateReviewSummary:{ status:"ready_for_review", reviewDecision:{ label:"可以开始 RC 复核" }, userFacingSummary:{ resultLabel:"可以开始 RC 复核", redacted:true }, rows:[{ rowId:"freeze_gate", label:"冻结检查", value:"冻结检查已准备", status:"pass", redacted:true }], redacted:true },
     rcEvidenceReviewSummary:{ status:"complete", userFacingSummary:{ resultLabel:"证据完整", redacted:true }, rows:[{ rowId:"release_readiness", label:"发布就绪证据", value:"证据完整", status:"pass", redacted:true }], redacted:true }
