@@ -8,8 +8,8 @@ function main(){
   const windowRef = load(["apps/desktop/src/renderer/core/flightFareBreakdown.js", "apps/desktop/src/renderer/core/resultBadgeFormatter.js", "apps/desktop/src/renderer/core/resultCardVisualFormatter.js"]);
   const api = windowRef.WeishanResultCardVisualFormatter;
   const badgeApi = windowRef.WeishanResultBadgeFormatter;
-  assert.equal(api.RESULT_CARD_VISUAL_FORMATTER_VERSION, "4.1.3");
-  assert.equal(badgeApi.RESULT_BADGE_FORMATTER_VERSION, "4.1.3");
+  assert.equal(api.RESULT_CARD_VISUAL_FORMATTER_VERSION, "4.1.4");
+  assert.equal(badgeApi.RESULT_BADGE_FORMATTER_VERSION, "4.1.4");
   const fare = windowRef.WeishanFlightFareBreakdown.normalizeFlightFareBreakdown({ baseFare:860, taxes:110, otherFees:40, totalPayable:1010, providerPriceType:"limited_beta_price", taxFeeCompleteness:"partial" });
   const model = api.buildResultCardVisualModel({
     procurementCategory:"flight",

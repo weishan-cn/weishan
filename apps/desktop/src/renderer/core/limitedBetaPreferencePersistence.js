@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const LIMITED_BETA_PREFERENCE_PERSISTENCE_VERSION = "4.1.3";
+  const LIMITED_BETA_PREFERENCE_PERSISTENCE_VERSION = "4.1.4";
   const STORE_FILE = "limited-beta-preferences.v1.json";
   const counters = {
     restoreAttemptCount:0,

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_RUN_HISTORY_STORE_VERSION = "4.1.3";
+  const READ_ONLY_QUOTE_RUN_HISTORY_STORE_VERSION = "4.1.4";
   const STATE_NAME = "read_only_quote_run_history_store_v1";
   const STORAGE_KEY = "weishan.readOnlyQuoteRunHistory.v1";
   const FORBIDDEN_NAME_RE = /(token|key|secret|password|session|auth|credential|rawProviderResponse|rawResponse|rawPayload|identity|passport|bank|card|bookingUrl|checkoutUrl|paymentUrl|orderUrl)/i;

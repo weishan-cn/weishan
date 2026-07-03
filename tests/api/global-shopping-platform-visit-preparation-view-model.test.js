@@ -23,7 +23,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPlatformVisitPreparationViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPlatformVisitPreparationViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PLATFORM_VISIT_PREPARATION_VIEW_MODEL_VERSION, "4.1.3");
+  assert.equal(api.GLOBAL_SHOPPING_PLATFORM_VISIT_PREPARATION_VIEW_MODEL_VERSION, "4.1.4");
 
   const ready = api.buildGlobalShoppingPlatformVisitPreparationViewModel({
     manualPlatformVisitPreparationCenterSummary:{ status:"ready", userFacingSummary:{ resultLabel:"平台访问准备已完成", redacted:true }, redacted:true },

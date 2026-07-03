@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PLATFORM_CHECK_RECONCILIATION_CENTER_VERSION = "4.1.3";
+  const PLATFORM_CHECK_RECONCILIATION_CENTER_VERSION = "4.1.4";
   const RECONCILIATION_NAME = "platform_check_reconciliation_center_v1";
   const SENSITIVE_RE = /token|api[_-]?key|secret|password|passport|idcard|identity|bank|card|cvv|auth|credential|orderid|paymentid|rawhtml|screenshot|sk-|pk-|live_/i;
 

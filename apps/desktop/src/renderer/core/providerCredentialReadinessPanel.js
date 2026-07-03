@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CREDENTIAL_READINESS_PANEL_VERSION = "4.1.3";
+  const PROVIDER_CREDENTIAL_READINESS_PANEL_VERSION = "4.1.4";
   const PANEL_NAME = "provider_credential_readiness_panel_v1";
 
   function clone(value) {

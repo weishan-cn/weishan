@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_AUDIT_CONSOLE_VERSION = "4.1.3";
+  const GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_AUDIT_CONSOLE_VERSION = "4.1.4";
   const CONSOLE_NAME = "global_shopping_provider_governance_audit_console_v1";
   const BUILD_GUARD_KEY = "__weishanGlobalShoppingProviderGovernanceAuditConsoleBuilding";
 

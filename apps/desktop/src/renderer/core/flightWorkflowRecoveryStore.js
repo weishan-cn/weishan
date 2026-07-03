@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RECOVERY_STORE_VERSION = "4.1.3";
+  const FLIGHT_WORKFLOW_RECOVERY_STORE_VERSION = "4.1.4";
   const RECOVERY_NAME = "flight_workflow_recovery_state_v1";
   const STORAGE_KEY = "weishan.flightWorkflowRecovery.v1";
   const FORBIDDEN_NAME_RE = /(rawText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;

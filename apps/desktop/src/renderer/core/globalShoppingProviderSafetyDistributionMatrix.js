@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_SAFETY_DISTRIBUTION_MATRIX_VERSION = "4.1.3";
+  const GLOBAL_SHOPPING_PROVIDER_SAFETY_DISTRIBUTION_MATRIX_VERSION = "4.1.4";
   const MATRIX_NAME = "global_shopping_provider_safety_distribution_matrix_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

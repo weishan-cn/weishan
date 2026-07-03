@@ -38,7 +38,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderNoProductionGuaranteeMatrix.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderNoProductionGuaranteeMatrix;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_NO_PRODUCTION_GUARANTEE_MATRIX_VERSION, "4.1.3");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_NO_PRODUCTION_GUARANTEE_MATRIX_VERSION, "4.1.4");
   const ready = api.buildGlobalShoppingProviderNoProductionGuaranteeMatrix({
     providerDistributionFreezeConsoleSummary:readySummary("Provider Distribution Freeze Console", "Provider Distribution Freeze Console 已准备"),
     userFacingSafetyReceiptSummary:readySummary("User-Facing Safety Receipt", "User-Facing Safety Receipt 已准备"),

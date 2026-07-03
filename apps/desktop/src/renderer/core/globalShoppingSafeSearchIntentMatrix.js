@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SAFE_SEARCH_INTENT_MATRIX_VERSION = "4.1.3";
+  const GLOBAL_SHOPPING_SAFE_SEARCH_INTENT_MATRIX_VERSION = "4.1.4";
   const MATRIX_NAME = "global_shopping_safe_search_intent_matrix_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, safe_intent_matrix_only:true };
   const ALLOWED_CATEGORIES = { flight:true, hotel:true, product:true, restricted:true, unsupported:true };

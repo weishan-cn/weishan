@@ -26,7 +26,7 @@ function summary(title, status) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaTrialOperationsViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaTrialOperationsViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_OPERATIONS_VIEW_MODEL_VERSION, "4.1.3");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_OPERATIONS_VIEW_MODEL_VERSION, "4.1.4");
 
   const ready = api.buildGlobalShoppingPublicBetaTrialOperationsViewModel({
     publicBetaTrialOperationsConsoleSummary:summary("Public Beta Trial Operations Console"),

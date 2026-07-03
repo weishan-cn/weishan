@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v4.1.3 public beta trial operations stays local and bounded @commerce-smoke", async () => {
+  test("v4.1.4 public beta trial operations stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9644,7 +9644,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v401-render-smoke", "true");
       const card = {
-        version:"4.1.3",
+        version:"4.1.4",
         visible:true,
         globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, rows:[{ rowId:"public_beta", label:"Global Shopping Read-Only Public Beta Shell", value:"Global Shopping Read-Only Public Beta Shell 已准备", status:"pass", redacted:true }], redacted:true },
         globalShoppingReadOnlyCandidateEvidenceUnifierSummary:{ status:"ready", userFacingSummary:{ title:"候选价证据", resultLabel:"候选价证据已准备", redacted:true }, rows:[{ rowId:"candidate_evidence", label:"候选价证据", value:"候选价证据已准备", status:"pass", redacted:true }], redacted:true },
@@ -9690,6 +9690,10 @@ test.describe.serial("commerce agent workbench", () => {
         manualQaScenarioRunnerSummary:{ status:"ready", userFacingSummary:{ title:"Manual QA Scenario Runner", resultLabel:"Manual QA Scenario Runner 已准备", redacted:true }, rows:[{ rowId:"manual_qa_scenario_runner", label:"Manual QA Scenario Runner", value:"Manual QA Scenario Runner 已准备", status:"pass", redacted:true }], redacted:true },
         offlineFeedbackReviewBoardSummary:{ status:"ready", userFacingSummary:{ title:"Offline Feedback Review Board", resultLabel:"Offline Feedback Review Board 已准备", redacted:true }, rows:[{ rowId:"offline_feedback_review_board", label:"Offline Feedback Review Board", value:"Offline Feedback Review Board 已准备", status:"pass", redacted:true }], redacted:true },
         publicBetaTrialOperationsViewModelSummary:{ status:"ready", title:"Public Beta Trial Operations Console", userFacingSummary:{ title:"Public Beta Trial Operations View Model", resultLabel:"Public Beta Trial Operations View Model 已准备", redacted:true }, rows:[{ rowId:"public_beta_trial_operations_view_model", label:"Public Beta Trial Operations View Model", value:"Public Beta Trial Operations View Model 已准备", status:"pass", redacted:true }], safeToProceedWithManualTrialOperationsReview:true, redacted:true },
+        publicBetaTrialEvidenceLedgerSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Trial Evidence Ledger", resultLabel:"Public Beta Trial Evidence Ledger 已准备", redacted:true }, rows:[{ rowId:"public_beta_trial_evidence_ledger", label:"Public Beta Trial Evidence Ledger", value:"Public Beta Trial Evidence Ledger 已准备", status:"pass", redacted:true }], redacted:true },
+        publicBetaQaDecisionMatrixSummary:{ status:"ready", userFacingSummary:{ title:"QA Decision Matrix", resultLabel:"QA Decision Matrix 已准备", redacted:true }, rows:[{ rowId:"public_beta_qa_decision_matrix", label:"QA Decision Matrix", value:"QA Decision Matrix 已准备", status:"pass", redacted:true }], redacted:true },
+        offlineIssueTriageBoardSummary:{ status:"ready", userFacingSummary:{ title:"Offline Issue Triage Board", resultLabel:"Offline Issue Triage Board 已准备", redacted:true }, rows:[{ rowId:"offline_issue_triage_board", label:"Offline Issue Triage Board", value:"Offline Issue Triage Board 已准备", status:"pass", redacted:true }], redacted:true },
+        publicBetaQaOperationsViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta QA Operations View Model", resultLabel:"Public Beta Trial Evidence Ledger / QA Decision Matrix / Offline Issue Triage Board 已准备", redacted:true }, rows:[{ rowId:"public_beta_qa_operations_view_model", label:"Public Beta QA Operations View Model", value:"Public Beta Trial Evidence Ledger / QA Decision Matrix / Offline Issue Triage Board 已准备", status:"pass", redacted:true }], safeToProceedWithManualQaOperationsReview:true, redacted:true },
         publicBetaOperatorConsoleSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Operator Console", resultLabel:"Provider-Zero 状态通过", redacted:true }, rows:[{ rowId:"public_beta_operator_console", label:"Public Beta Operator Console", value:"Provider-Zero 状态通过", status:"pass", redacted:true }], redacted:true },
         categoryExpansionShellSummary:{ status:"ready", userFacingSummary:{ title:"Category Expansion Shell", resultLabel:"Flight / Hotel / Product 只读外壳已准备", redacted:true }, rows:[{ rowId:"category_expansion_shell", label:"Category Expansion Shell", value:"Flight / Hotel / Product 只读外壳已准备", status:"pass", redacted:true }], redacted:true },
         finalOfflineBetaAuditSummary:{ status:"ready", userFacingSummary:{ title:"Final Offline Beta Audit", resultLabel:"最终离线审计通过", redacted:true }, rows:[{ rowId:"final_offline_beta_audit", label:"Final Offline Beta Audit", value:"最终离线审计通过", status:"pass", redacted:true }], redacted:true },
@@ -9730,6 +9734,10 @@ test.describe.serial("commerce agent workbench", () => {
         manualQaScenarioRunnerStatus:"ready",
         offlineFeedbackReviewBoardStatus:"ready",
         publicBetaTrialOperationsViewModelStatus:"ready",
+        publicBetaTrialEvidenceLedgerStatus:"ready",
+        publicBetaQaDecisionMatrixStatus:"ready",
+        offlineIssueTriageBoardStatus:"ready",
+        publicBetaQaOperationsViewModelStatus:"ready",
         publicBetaOperatorConsoleStatus:"ready",
         categoryExpansionShellStatus:"ready",
         finalOfflineBetaAuditStatus:"ready",
@@ -9752,7 +9760,8 @@ test.describe.serial("commerce agent workbench", () => {
         safeToProceedWithManualRcReview:true,
         safeToProceedWithManualLaunchHandoffReview:true,
         safeToProceedWithManualQaReview:true,
-        safeToProceedWithManualTrialOperationsReview:true
+        safeToProceedWithManualTrialOperationsReview:true,
+        safeToProceedWithManualQaOperationsReview:true
       };
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml(card);
       const section = host.querySelector("[data-commerce-global-shopping-public-beta-review='true']");
@@ -9830,6 +9839,9 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("Public Beta Trial Operations Console");
     expect(v400.text).toContain("Manual QA Scenario Runner");
     expect(v400.text).toContain("Offline Feedback Review Board");
+    expect(v400.text).toContain("Public Beta Trial Evidence Ledger");
+    expect(v400.text).toContain("QA Decision Matrix");
+    expect(v400.text).toContain("Offline Issue Triage Board");
     expect(v400.text).toContain("QA Evidence");
     expect(v400.text).toContain("Feedback Safety");
     expect(v400.text).toContain("No-Transaction Evidence");
@@ -9841,8 +9853,15 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("Locked Capabilities");
     expect(v400.text).toContain("Next Decision Options");
     expect(v400.text).toContain("Continue Testing");
+    expect(v400.text).toContain("Allowed Decisions");
+    expect(v400.text).toContain("Blocked Decisions");
+    expect(v400.text).toContain("Manual Review Items");
+    expect(v400.text).toContain("Manual Review Required");
     expect(v400.text).toContain("当前仍为只读 Public Beta 候选");
     expect(v400.text).toContain("不自动发布、不接 provider、不启用交易");
+    expect(v400.text).toContain("只允许继续测试、人工复核或阻断");
+    expect(v400.text).toContain("问题分流仅为离线视图，不创建真实 issue");
+    expect(v400.text).toContain("不自动发布、不启用 provider、不启用交易");
     expect(v400.text).toContain("可继续人工试用和问题记录");
     expect(v400.text).toContain("既有 secret scan WARN 仅作为已知警告展示");
     expect(v400.text).toContain("当前只是 RC 候选，不创建 release、不 push");

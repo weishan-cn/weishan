@@ -22,7 +22,7 @@ const windowRef = loadRendererCore([
 const api = windowRef.WeishanSafeExternalSearchHandoff;
 
 async function main() {
-  assert.equal(api.SAFE_EXTERNAL_SEARCH_HANDOFF_VERSION, "4.1.3");
+  assert.equal(api.SAFE_EXTERNAL_SEARCH_HANDOFF_VERSION, "4.1.4");
 
   const urls = api.buildTrustedExternalSearchUrls({
     web: "https://www.google.com/search?q=7%E6%9C%887%E6%97%A5",
