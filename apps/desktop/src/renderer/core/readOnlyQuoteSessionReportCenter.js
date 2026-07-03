@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "4.0.5";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "4.0.6";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -261,6 +261,9 @@
       publicBetaUserJourneyShellSummary: stripUnsafe(safe.publicBetaUserJourneyShellSummary || null),
       safeSearchIntentMatrixSummary: stripUnsafe(safe.safeSearchIntentMatrixSummary || null),
       publicBetaUserBoundaryPanelSummary: stripUnsafe(safe.publicBetaUserBoundaryPanelSummary || null),
+      categoryResultSimulatorSummary: stripUnsafe(safe.categoryResultSimulatorSummary || null),
+      readOnlyComparisonBoardSummary: stripUnsafe(safe.readOnlyComparisonBoardSummary || null),
+      resultTrustBadgePanelSummary: stripUnsafe(safe.resultTrustBadgePanelSummary || null),
       publicBetaFinalGateSummary: stripUnsafe(safe.publicBetaFinalGateSummary || null),
       releaseCandidateConfidenceBoardSummary: stripUnsafe(safe.releaseCandidateConfidenceBoardSummary || null),
       publicBetaFinalViewModelSummary: stripUnsafe(safe.publicBetaFinalViewModelSummary || null),
@@ -373,6 +376,9 @@
       publicBetaUserJourneyShellStatus: safeText(safe.publicBetaUserJourneyShellStatus || safe.publicBetaUserJourneyShellSummary && safe.publicBetaUserJourneyShellSummary.status || ""),
       safeSearchIntentMatrixStatus: safeText(safe.safeSearchIntentMatrixStatus || safe.safeSearchIntentMatrixSummary && safe.safeSearchIntentMatrixSummary.status || ""),
       publicBetaUserBoundaryPanelStatus: safeText(safe.publicBetaUserBoundaryPanelStatus || safe.publicBetaUserBoundaryPanelSummary && safe.publicBetaUserBoundaryPanelSummary.status || ""),
+      categoryResultSimulatorStatus: safeText(safe.categoryResultSimulatorStatus || safe.categoryResultSimulatorSummary && safe.categoryResultSimulatorSummary.status || ""),
+      readOnlyComparisonBoardStatus: safeText(safe.readOnlyComparisonBoardStatus || safe.readOnlyComparisonBoardSummary && safe.readOnlyComparisonBoardSummary.status || ""),
+      resultTrustBadgePanelStatus: safeText(safe.resultTrustBadgePanelStatus || safe.resultTrustBadgePanelSummary && safe.resultTrustBadgePanelSummary.status || ""),
       publicBetaFinalGateStatus: safeText(safe.publicBetaFinalGateStatus || safe.publicBetaFinalGateSummary && safe.publicBetaFinalGateSummary.status || ""),
       releaseCandidateConfidenceBoardStatus: safeText(safe.releaseCandidateConfidenceBoardStatus || safe.releaseCandidateConfidenceBoardSummary && safe.releaseCandidateConfidenceBoardSummary.status || ""),
       publicBetaFinalViewModelStatus: safeText(safe.publicBetaFinalViewModelStatus || safe.publicBetaFinalViewModelSummary && safe.publicBetaFinalViewModelSummary.status || ""),
@@ -721,6 +727,9 @@
     const publicBetaUserJourneyShellSummary = stripUnsafe(workflow.publicBetaUserJourneyShellSummary || safe.publicBetaUserJourneyShellSummary || null);
     const safeSearchIntentMatrixSummary = stripUnsafe(workflow.safeSearchIntentMatrixSummary || safe.safeSearchIntentMatrixSummary || null);
     const publicBetaUserBoundaryPanelSummary = stripUnsafe(workflow.publicBetaUserBoundaryPanelSummary || safe.publicBetaUserBoundaryPanelSummary || null);
+    const categoryResultSimulatorSummary = stripUnsafe(workflow.categoryResultSimulatorSummary || safe.categoryResultSimulatorSummary || null);
+    const readOnlyComparisonBoardSummary = stripUnsafe(workflow.readOnlyComparisonBoardSummary || safe.readOnlyComparisonBoardSummary || null);
+    const resultTrustBadgePanelSummary = stripUnsafe(workflow.resultTrustBadgePanelSummary || safe.resultTrustBadgePanelSummary || null);
     const publicBetaFinalGateSummary = stripUnsafe(workflow.publicBetaFinalGateSummary || safe.publicBetaFinalGateSummary || null);
     const releaseCandidateConfidenceBoardSummary = stripUnsafe(workflow.releaseCandidateConfidenceBoardSummary || safe.releaseCandidateConfidenceBoardSummary || null);
     const publicBetaFinalViewModelSummary = stripUnsafe(workflow.publicBetaFinalViewModelSummary || safe.publicBetaFinalViewModelSummary || null);
@@ -845,6 +854,9 @@
       publicBetaUserJourneyShellSummary: publicBetaUserJourneyShellSummary,
       safeSearchIntentMatrixSummary: safeSearchIntentMatrixSummary,
       publicBetaUserBoundaryPanelSummary: publicBetaUserBoundaryPanelSummary,
+      categoryResultSimulatorSummary: categoryResultSimulatorSummary,
+      readOnlyComparisonBoardSummary: readOnlyComparisonBoardSummary,
+      resultTrustBadgePanelSummary: resultTrustBadgePanelSummary,
       publicBetaFinalGateSummary: publicBetaFinalGateSummary,
       releaseCandidateConfidenceBoardSummary: releaseCandidateConfidenceBoardSummary,
       publicBetaFinalViewModelSummary: publicBetaFinalViewModelSummary,
@@ -1287,6 +1299,9 @@
       publicBetaUserJourneyShellSummary: workflow.publicBetaUserJourneyShellSummary || safe.publicBetaUserJourneyShellSummary || null,
       safeSearchIntentMatrixSummary: workflow.safeSearchIntentMatrixSummary || safe.safeSearchIntentMatrixSummary || null,
       publicBetaUserBoundaryPanelSummary: workflow.publicBetaUserBoundaryPanelSummary || safe.publicBetaUserBoundaryPanelSummary || null,
+      categoryResultSimulatorSummary: workflow.categoryResultSimulatorSummary || safe.categoryResultSimulatorSummary || null,
+      readOnlyComparisonBoardSummary: workflow.readOnlyComparisonBoardSummary || safe.readOnlyComparisonBoardSummary || null,
+      resultTrustBadgePanelSummary: workflow.resultTrustBadgePanelSummary || safe.resultTrustBadgePanelSummary || null,
       publicBetaFinalGateSummary: workflow.publicBetaFinalGateSummary || safe.publicBetaFinalGateSummary || null,
       releaseCandidateConfidenceBoardSummary: workflow.releaseCandidateConfidenceBoardSummary || safe.releaseCandidateConfidenceBoardSummary || null,
       publicBetaFinalViewModelSummary: workflow.publicBetaFinalViewModelSummary || safe.publicBetaFinalViewModelSummary || null,

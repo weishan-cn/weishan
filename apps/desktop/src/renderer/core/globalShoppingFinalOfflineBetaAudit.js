@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_FINAL_OFFLINE_BETA_AUDIT_VERSION = "4.0.5";
+  const GLOBAL_SHOPPING_FINAL_OFFLINE_BETA_AUDIT_VERSION = "4.0.6";
   const AUDIT_NAME = "global_shopping_final_offline_beta_audit_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, final_offline_beta_audit_only:true };
   const SAFE_KEYS = ["noProvider", "noNetwork", "noKey", "noEndpoint", "noExternalOpen", "noPayment", "noOrder", "noTicketing", "noRawPersistence", "noReleaseMutation", "userCopySafe"];
@@ -48,6 +48,9 @@
       { sectionId:"user_journey_shell", title:"Public Beta User Journey", status:safeStatus(obj(safe.publicBetaUserJourneyShellSummary).status), redacted:true },
       { sectionId:"safe_intent_matrix", title:"Safe Search Intent Matrix", status:safeStatus(obj(safe.safeSearchIntentMatrixSummary).status), redacted:true },
       { sectionId:"user_boundary_panel", title:"User Boundary Panel", status:safeStatus(obj(safe.publicBetaUserBoundaryPanelSummary).status), redacted:true },
+      { sectionId:"category_result_simulator", title:"Category Result Simulator", status:safeStatus(obj(safe.categoryResultSimulatorSummary).status), redacted:true },
+      { sectionId:"read_only_comparison_board", title:"Read-Only Comparison Board", status:safeStatus(obj(safe.readOnlyComparisonBoardSummary).status), redacted:true },
+      { sectionId:"result_trust_badge_panel", title:"Result Trust Badge", status:safeStatus(obj(safe.resultTrustBadgePanelSummary).status), redacted:true },
       { sectionId:"final_gate", title:"Public Beta Final Gate", status:safeStatus(obj(safe.publicBetaFinalGateSummary).status), redacted:true },
       { sectionId:"rc_board", title:"RC Confidence Board", status:safeStatus(obj(safe.releaseCandidateConfidenceBoardSummary).status), redacted:true },
       { sectionId:"safety_copy", title:"Public Beta Safety Copy Center", status:safeStatus(obj(safe.publicBetaSafetyCopyCenterSummary).status), redacted:true }
@@ -83,6 +86,9 @@
     const publicBetaUserJourneyShellSummary = resolveSummary(safe, "publicBetaUserJourneyShellSummary", "WeishanGlobalShoppingPublicBetaUserJourneyShell", "buildGlobalShoppingPublicBetaUserJourneyShell");
     const safeSearchIntentMatrixSummary = resolveSummary(safe, "safeSearchIntentMatrixSummary", "WeishanGlobalShoppingSafeSearchIntentMatrix", "buildGlobalShoppingSafeSearchIntentMatrix");
     const publicBetaUserBoundaryPanelSummary = resolveSummary(safe, "publicBetaUserBoundaryPanelSummary", "WeishanGlobalShoppingPublicBetaUserBoundaryPanel", "buildGlobalShoppingPublicBetaUserBoundaryPanel");
+    const categoryResultSimulatorSummary = resolveSummary(safe, "categoryResultSimulatorSummary", "WeishanGlobalShoppingCategoryResultSimulator", "buildGlobalShoppingCategoryResultSimulator");
+    const readOnlyComparisonBoardSummary = resolveSummary(safe, "readOnlyComparisonBoardSummary", "WeishanGlobalShoppingReadOnlyComparisonBoard", "buildGlobalShoppingReadOnlyComparisonBoard");
+    const resultTrustBadgePanelSummary = resolveSummary(safe, "resultTrustBadgePanelSummary", "WeishanGlobalShoppingResultTrustBadgePanel", "buildGlobalShoppingResultTrustBadgePanel");
     const publicBetaFinalGateSummary = resolveSummary(safe, "publicBetaFinalGateSummary", "WeishanGlobalShoppingPublicBetaFinalGate", "buildGlobalShoppingPublicBetaFinalGate");
     const releaseCandidateConfidenceBoardSummary = resolveSummary(safe, "releaseCandidateConfidenceBoardSummary", "WeishanGlobalShoppingReleaseCandidateConfidenceBoard", "buildGlobalShoppingReleaseCandidateConfidenceBoard");
     const publicBetaSafetyCopyCenterSummary = resolveSummary(safe, "publicBetaSafetyCopyCenterSummary", "WeishanGlobalShoppingPublicBetaSafetyCopyCenter", "buildGlobalShoppingPublicBetaSafetyCopyCenter");
@@ -106,6 +112,9 @@
       !Object.keys(publicBetaUserJourneyShellSummary).length ||
       !Object.keys(safeSearchIntentMatrixSummary).length ||
       !Object.keys(publicBetaUserBoundaryPanelSummary).length ||
+      !Object.keys(categoryResultSimulatorSummary).length ||
+      !Object.keys(readOnlyComparisonBoardSummary).length ||
+      !Object.keys(resultTrustBadgePanelSummary).length ||
       !Object.keys(publicBetaFinalGateSummary).length ||
       !Object.keys(releaseCandidateConfidenceBoardSummary).length ||
       !Object.keys(publicBetaSafetyCopyCenterSummary).length;
@@ -115,6 +124,9 @@
       safeStatus(publicBetaUserJourneyShellSummary.status) === "blocked" ||
       safeStatus(safeSearchIntentMatrixSummary.status) === "blocked" ||
       safeStatus(publicBetaUserBoundaryPanelSummary.status) === "blocked" ||
+      safeStatus(categoryResultSimulatorSummary.status) === "blocked" ||
+      safeStatus(readOnlyComparisonBoardSummary.status) === "blocked" ||
+      safeStatus(resultTrustBadgePanelSummary.status) === "blocked" ||
       safeStatus(publicBetaFinalGateSummary.status) === "blocked" ||
       safeStatus(releaseCandidateConfidenceBoardSummary.status) === "blocked" ||
       safeStatus(publicBetaSafetyCopyCenterSummary.status) === "blocked";
@@ -138,6 +150,9 @@
         publicBetaUserJourneyShellSummary,
         safeSearchIntentMatrixSummary,
         publicBetaUserBoundaryPanelSummary,
+        categoryResultSimulatorSummary,
+        readOnlyComparisonBoardSummary,
+        resultTrustBadgePanelSummary,
         publicBetaFinalGateSummary,
         releaseCandidateConfidenceBoardSummary,
         publicBetaSafetyCopyCenterSummary

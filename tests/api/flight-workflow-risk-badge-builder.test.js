@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.0.5");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.0.6");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -103,7 +103,10 @@ function main() {
     safeToProceedWithSandboxDeepLinkCandidate:true,
     safeToProceedWithPartnerFixtureAdapter:true,
     safeToProceedWithFirstProviderSandboxFixtureDryRun:true,
-    safeToProceedWithHumanSandboxMilestoneReview:true
+    safeToProceedWithHumanSandboxMilestoneReview:true,
+    categoryResultSimulatorSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Category Result Simulator 已准备", redacted:true } },
+    readOnlyComparisonBoardSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Read-Only Comparison Board 已准备", redacted:true } },
+    resultTrustBadgePanelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Result Trust Badge 已准备", redacted:true } }
   }).badges.map((item) => item.label);
   assert.ok(globalLabels.includes("全球购目标已对齐"));
   assert.ok(globalLabels.includes("Provider fixture 已准备"));
@@ -166,6 +169,10 @@ function main() {
   assert.ok(globalLabels.includes("禁止最低价相关承诺"));
   assert.ok(globalLabels.includes("禁止自动下单承诺"));
   assert.ok(globalLabels.includes("跳转不代表交易能力"));
+  assert.ok(globalLabels.includes("Category Result Simulator 已准备"));
+  assert.ok(globalLabels.includes("Read-Only Comparison Board 已准备"));
+  assert.ok(globalLabels.includes("Result Trust Badge 已准备"));
+  assert.ok(globalLabels.includes("Category Result Simulator / Read-Only Comparison Board / Result Trust Badge"));
   const offlineLaunchLabels = api.buildFlightWorkflowRiskBadges({
     offlineLaunchDecisionSimulatorSummary:{ status:"ready", userFacingSummary:{ resultLabel:"离线发布决策模拟器已准备", redacted:true } },
     sandboxActivationReceiptLedgerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox 激活回执台账已准备", redacted:true } },

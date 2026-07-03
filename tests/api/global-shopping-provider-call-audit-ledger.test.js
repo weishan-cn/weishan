@@ -16,7 +16,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderCallAuditLedger.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderCallAuditLedger;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_CALL_AUDIT_LEDGER_VERSION, "4.0.5");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_CALL_AUDIT_LEDGER_VERSION, "4.0.6");
 
   const ready = api.buildGlobalShoppingProviderCallAuditLedger({
     providerId:"provider_1",
@@ -24,7 +24,7 @@ function main() {
     requestMode:"sandbox_ready",
     auditEntries:[{ auditId:"audit_1", providerId:"provider_1", providerName:"Fixture Provider", requestMode:"sandbox_ready", callStatus:"dry_run", redacted:true, timestamp:"redacted_now", safetyStatus:"redacted_safe" }]
   });
-  assert.equal(ready.appVersion, "4.0.5");
+  assert.equal(ready.appVersion, "4.0.6");
   assert.equal(ready.status, "ready");
   assert.equal(ready.auditLedger.inMemoryOnly, true);
   assert.equal(ready.auditLedger.auditEntries.length, 1);

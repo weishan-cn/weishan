@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_REDACTED_SEARCH_PARAMETER_PACK_VERSION = "4.0.5";
+  const GLOBAL_SHOPPING_REDACTED_SEARCH_PARAMETER_PACK_VERSION = "4.0.6";
   const PACK_NAME = "global_shopping_redacted_search_parameter_pack_v1";
   const ALLOWED_FIELDS = {
     flight:["origin", "destination", "departureDate", "returnDate", "passengerCount", "cabinClass", "directOnly", "currency", "locale", "region"],

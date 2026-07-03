@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_CATEGORY_EXPANSION_SHELL_VERSION = "4.0.5";
+  const GLOBAL_SHOPPING_CATEGORY_EXPANSION_SHELL_VERSION = "4.0.6";
   const SHELL_NAME = "global_shopping_category_expansion_shell_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, category_expansion_only:true };
   const REQUIRED_CATEGORIES = ["flight", "hotel", "product"];
@@ -121,6 +121,7 @@
     const safe = obj(input);
     const intentMatrix = obj(safe.safeSearchIntentMatrixSummary);
     const userBoundaryPanel = obj(safe.publicBetaUserBoundaryPanelSummary);
+    const categoryResultSimulatorSummary = obj(safe.categoryResultSimulatorSummary);
     const categories = {};
     REQUIRED_CATEGORIES.forEach(function (key) {
       if (safe[key] && typeof safe[key] === "object") categories[key] = buildCategory(safe[key], key);
@@ -130,7 +131,7 @@
     const blocked = REQUIRED_CATEGORIES.some(function (key) { return categories[key] && categoryBlocked(categories[key]); }) ||
       safeStatus(intentMatrix.status) === "blocked" ||
       safeStatus(userBoundaryPanel.status) === "blocked";
-    const status = blocked ? "blocked" : ((missing.length || !Object.keys(intentMatrix).length || !Object.keys(userBoundaryPanel).length) ? "needs_review" : "ready");
+    const status = blocked ? "blocked" : ((missing.length || !Object.keys(intentMatrix).length || !Object.keys(userBoundaryPanel).length || !Object.keys(categoryResultSimulatorSummary).length) ? "needs_review" : "ready");
     return clone({
       shellName:SHELL_NAME,
       appVersion:GLOBAL_SHOPPING_CATEGORY_EXPANSION_SHELL_VERSION,
@@ -143,6 +144,7 @@
       cards:buildGlobalShoppingCategoryExpansionCards({ categories }),
       auditDraft:buildGlobalShoppingCategoryExpansionShellAuditDraft({ status, categories }),
       blockedReasons:blocked ? ["category_boundary_violation"] : [],
+      categoryResultSimulatorSummary:clone(categoryResultSimulatorSummary),
       userFacingSummary:{
         title:"Category Expansion Shell",
         resultLabel:status === "ready" ? "Flight / Hotel / Product 只读外壳已准备" : (status === "blocked" ? "Category Expansion Shell 已阻断" : "Category Expansion Shell 仍需复核"),

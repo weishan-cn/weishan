@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_OPERATOR_CONSOLE_VERSION = "4.0.5";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_OPERATOR_CONSOLE_VERSION = "4.0.6";
   const CONSOLE_NAME = "global_shopping_public_beta_operator_console_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, operator_console_only:true };
 
@@ -70,6 +70,9 @@
     const userJourneySummary = resolveSummary(safe, "publicBetaUserJourneyShellSummary", "WeishanGlobalShoppingPublicBetaUserJourneyShell", "buildGlobalShoppingPublicBetaUserJourneyShell");
     const safeIntentSummary = resolveSummary(safe, "safeSearchIntentMatrixSummary", "WeishanGlobalShoppingSafeSearchIntentMatrix", "buildGlobalShoppingSafeSearchIntentMatrix");
     const userBoundarySummary = resolveSummary(safe, "publicBetaUserBoundaryPanelSummary", "WeishanGlobalShoppingPublicBetaUserBoundaryPanel", "buildGlobalShoppingPublicBetaUserBoundaryPanel");
+    const categoryResultSimulatorSummary = resolveSummary(safe, "categoryResultSimulatorSummary", "WeishanGlobalShoppingCategoryResultSimulator", "buildGlobalShoppingCategoryResultSimulator");
+    const readOnlyComparisonBoardSummary = resolveSummary(safe, "readOnlyComparisonBoardSummary", "WeishanGlobalShoppingReadOnlyComparisonBoard", "buildGlobalShoppingReadOnlyComparisonBoard");
+    const resultTrustBadgePanelSummary = resolveSummary(safe, "resultTrustBadgePanelSummary", "WeishanGlobalShoppingResultTrustBadgePanel", "buildGlobalShoppingResultTrustBadgePanel");
     return clone([
       section("public_beta_final_gate", "Public Beta Final Gate", labelOf(finalGateSummary, "Public Beta Final Gate 仍需复核"), finalGateSummary.status),
       section("release_candidate_confidence_board", "RC Confidence Board", labelOf(rcBoardSummary, "RC Confidence Board 仍需复核"), rcBoardSummary.status),
@@ -79,7 +82,10 @@
       section("official_anchor_view", "Official Anchor Comparison View", labelOf(anchorSummary, "官方价锚点仍需复核"), anchorSummary.status),
       section("public_beta_user_journey", "Public Beta User Journey", labelOf(userJourneySummary, "Public Beta User Journey 仍需复核"), userJourneySummary.status),
       section("safe_search_intent_matrix", "Safe Search Intent Matrix", labelOf(safeIntentSummary, "Safe Search Intent Matrix 仍需复核"), safeIntentSummary.status),
-      section("user_boundary_panel", "User Boundary Panel", labelOf(userBoundarySummary, "User Boundary Panel 仍需复核"), userBoundarySummary.status)
+      section("user_boundary_panel", "User Boundary Panel", labelOf(userBoundarySummary, "User Boundary Panel 仍需复核"), userBoundarySummary.status),
+      section("category_result_simulator", "Category Result Simulator", labelOf(categoryResultSimulatorSummary, "Category Result Simulator 仍需复核"), categoryResultSimulatorSummary.status),
+      section("read_only_comparison_board", "Read-Only Comparison Board", labelOf(readOnlyComparisonBoardSummary, "Read-Only Comparison Board 仍需复核"), readOnlyComparisonBoardSummary.status),
+      section("result_trust_badge_panel", "Result Trust Badge", labelOf(resultTrustBadgePanelSummary, "Result Trust Badge 仍需复核"), resultTrustBadgePanelSummary.status)
     ]);
   }
 
@@ -130,7 +136,7 @@
     const directBlockedReasons = blockedReasons(safe);
     const blocked = directBlockedReasons.length > 0 || statuses.indexOf("blocked") >= 0 || statuses.indexOf("failed_safe") >= 0;
     const needsReview =
-      sections.length < 9 ||
+      sections.length < 12 ||
       statuses.indexOf("needs_review") >= 0 ||
       !present(resolveSummary(safe, "publicBetaFinalGateSummary", "WeishanGlobalShoppingPublicBetaFinalGate", "buildGlobalShoppingPublicBetaFinalGate")) ||
       !present(resolveSummary(safe, "releaseCandidateConfidenceBoardSummary", "WeishanGlobalShoppingReleaseCandidateConfidenceBoard", "buildGlobalShoppingReleaseCandidateConfidenceBoard")) ||
@@ -141,6 +147,9 @@
       !present(resolveSummary(safe, "publicBetaUserJourneyShellSummary", "WeishanGlobalShoppingPublicBetaUserJourneyShell", "buildGlobalShoppingPublicBetaUserJourneyShell")) ||
       !present(resolveSummary(safe, "safeSearchIntentMatrixSummary", "WeishanGlobalShoppingSafeSearchIntentMatrix", "buildGlobalShoppingSafeSearchIntentMatrix")) ||
       !present(resolveSummary(safe, "publicBetaUserBoundaryPanelSummary", "WeishanGlobalShoppingPublicBetaUserBoundaryPanel", "buildGlobalShoppingPublicBetaUserBoundaryPanel")) ||
+      !present(resolveSummary(safe, "categoryResultSimulatorSummary", "WeishanGlobalShoppingCategoryResultSimulator", "buildGlobalShoppingCategoryResultSimulator")) ||
+      !present(resolveSummary(safe, "readOnlyComparisonBoardSummary", "WeishanGlobalShoppingReadOnlyComparisonBoard", "buildGlobalShoppingReadOnlyComparisonBoard")) ||
+      !present(resolveSummary(safe, "resultTrustBadgePanelSummary", "WeishanGlobalShoppingResultTrustBadgePanel", "buildGlobalShoppingResultTrustBadgePanel")) ||
       hasMissing;
     const status = blocked ? "blocked" : (needsReview ? "needs_review" : "ready");
     return clone({
@@ -157,11 +166,17 @@
       publicBetaUserJourneyStatus:safeStatus(resolveSummary(safe, "publicBetaUserJourneyShellSummary", "WeishanGlobalShoppingPublicBetaUserJourneyShell", "buildGlobalShoppingPublicBetaUserJourneyShell").status),
       safeSearchIntentMatrixStatus:safeStatus(resolveSummary(safe, "safeSearchIntentMatrixSummary", "WeishanGlobalShoppingSafeSearchIntentMatrix", "buildGlobalShoppingSafeSearchIntentMatrix").status),
       publicBetaUserBoundaryStatus:safeStatus(resolveSummary(safe, "publicBetaUserBoundaryPanelSummary", "WeishanGlobalShoppingPublicBetaUserBoundaryPanel", "buildGlobalShoppingPublicBetaUserBoundaryPanel").status),
+      categoryResultSimulatorStatus:safeStatus(resolveSummary(safe, "categoryResultSimulatorSummary", "WeishanGlobalShoppingCategoryResultSimulator", "buildGlobalShoppingCategoryResultSimulator").status),
+      readOnlyComparisonBoardStatus:safeStatus(resolveSummary(safe, "readOnlyComparisonBoardSummary", "WeishanGlobalShoppingReadOnlyComparisonBoard", "buildGlobalShoppingReadOnlyComparisonBoard").status),
+      resultTrustBadgePanelStatus:safeStatus(resolveSummary(safe, "resultTrustBadgePanelSummary", "WeishanGlobalShoppingResultTrustBadgePanel", "buildGlobalShoppingResultTrustBadgePanel").status),
       lockedCapabilities:[
         "Provider-Zero 状态通过",
         "候选价证据通过",
         "费用归一化通过",
         "官方价锚点通过",
+        "Category Result Simulator",
+        "Read-Only Comparison Board",
+        "Result Trust Badge",
         "只读搜索计划通过",
         "用户边界确认通过",
         "Manual Review Required"
@@ -186,6 +201,7 @@
       buyButtonEnabled:false,
       checkoutButtonEnabled:false,
       paymentButtonEnabled:false,
+      safeToProceedWithManualComparisonReview:status === "ready",
       redacted:true
     });
   }

@@ -40,7 +40,7 @@ function main() {
     noSensitiveDataRisk:true,
     noTradingRisk:true
   });
-  assert.equal(api.FLIGHT_WORKFLOW_PILOT_OPS_VIEW_MODEL_VERSION, "4.0.5");
+  assert.equal(api.FLIGHT_WORKFLOW_PILOT_OPS_VIEW_MODEL_VERSION, "4.0.6");
   const vmModel = api.buildFlightWorkflowPilotOpsViewModel({
     pilotOpsSummary:ops,
     nextCohortDecisionSummary:decision,

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_BETA_FEEDBACK_SANITIZER_VERSION = "4.0.5";
+  const FLIGHT_WORKFLOW_BETA_FEEDBACK_SANITIZER_VERSION = "4.0.6";
   const SANITIZER_NAME = "flight_workflow_beta_feedback_sanitizer_v1";
   const SAFE_RATINGS = ["good", "ok", "bad"];
   const SENSITIVE_RULES = [

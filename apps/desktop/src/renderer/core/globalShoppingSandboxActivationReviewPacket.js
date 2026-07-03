@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_ACTIVATION_REVIEW_PACKET_VERSION = "4.0.5";
+  const GLOBAL_SHOPPING_SANDBOX_ACTIVATION_REVIEW_PACKET_VERSION = "4.0.6";
   const PACKET_NAME = "global_shopping_sandbox_activation_review_packet_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

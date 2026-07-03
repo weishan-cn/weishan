@@ -1,6 +1,6 @@
 ;(function () {
   "use strict";
-  const FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION = "4.0.5";
+  const FLIGHT_WORKFLOW_OPERATOR_CONSOLE_VERSION = "4.0.6";
   const CONSOLE_NAME = "flight_workflow_operator_console_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

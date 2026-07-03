@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingReadOnlySourceTrustScore.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingReadOnlySourceTrustScore;
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_SOURCE_TRUST_SCORE_VERSION, "4.0.5");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_SOURCE_TRUST_SCORE_VERSION, "4.0.6");
 
   const ready = api.buildGlobalShoppingReadOnlySourceTrustScore({
     sources:[

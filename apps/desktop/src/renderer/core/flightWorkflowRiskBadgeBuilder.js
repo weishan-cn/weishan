@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.0.5";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.0.6";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -251,6 +251,9 @@
       const publicBetaUserJourneyShellSummary = obj(safe.publicBetaUserJourneyShellSummary);
       const safeSearchIntentMatrixSummary = obj(safe.safeSearchIntentMatrixSummary);
       const publicBetaUserBoundaryPanelSummary = obj(safe.publicBetaUserBoundaryPanelSummary);
+      const categoryResultSimulatorSummary = obj(safe.categoryResultSimulatorSummary);
+      const readOnlyComparisonBoardSummary = obj(safe.readOnlyComparisonBoardSummary);
+      const resultTrustBadgePanelSummary = obj(safe.resultTrustBadgePanelSummary);
       const finalOfflineBetaAuditSummary = obj(safe.finalOfflineBetaAuditSummary);
       const publicBetaAcceptanceBoardSummary = obj(safe.publicBetaAcceptanceBoardSummary);
       const publicBetaOperatorViewModelSummary = obj(safe.publicBetaOperatorViewModelSummary);
@@ -680,6 +683,9 @@
       if (publicBetaUserJourneyShellSummary.status) badges.push(badge("public_beta_user_journey_ready", labelOf(publicBetaUserJourneyShellSummary, "Public Beta User Journey 已准备"), publicBetaUserJourneyShellSummary.status === "blocked" ? "blocked" : (publicBetaUserJourneyShellSummary.status === "ready" ? "info" : "warning")));
       if (safeSearchIntentMatrixSummary.status) badges.push(badge("safe_search_intent_matrix_ready", labelOf(safeSearchIntentMatrixSummary, "Safe Search Intent Matrix 已准备"), safeSearchIntentMatrixSummary.status === "blocked" ? "blocked" : (safeSearchIntentMatrixSummary.status === "ready" ? "info" : "warning")));
       if (publicBetaUserBoundaryPanelSummary.status) badges.push(badge("user_boundary_panel_ready", labelOf(publicBetaUserBoundaryPanelSummary, "User Boundary Panel 已准备"), publicBetaUserBoundaryPanelSummary.status === "blocked" ? "blocked" : (publicBetaUserBoundaryPanelSummary.status === "ready" ? "info" : "warning")));
+      if (categoryResultSimulatorSummary.status) badges.push(badge("category_result_simulator_ready", labelOf(categoryResultSimulatorSummary, "Category Result Simulator 已准备"), categoryResultSimulatorSummary.status === "blocked" ? "blocked" : (categoryResultSimulatorSummary.status === "ready" ? "info" : "warning")));
+      if (readOnlyComparisonBoardSummary.status) badges.push(badge("read_only_comparison_board_ready", labelOf(readOnlyComparisonBoardSummary, "Read-Only Comparison Board 已准备"), readOnlyComparisonBoardSummary.status === "blocked" ? "blocked" : (readOnlyComparisonBoardSummary.status === "ready" ? "info" : "warning")));
+      if (resultTrustBadgePanelSummary.status) badges.push(badge("result_trust_badge_panel_ready", labelOf(resultTrustBadgePanelSummary, "Result Trust Badge 已准备"), resultTrustBadgePanelSummary.status === "blocked" ? "blocked" : (resultTrustBadgePanelSummary.status === "ready" ? "info" : "warning")));
       if (finalOfflineBetaAuditSummary.status) badges.push(badge("final_offline_beta_audit_ready", labelOf(finalOfflineBetaAuditSummary, "最终离线审计通过"), finalOfflineBetaAuditSummary.status === "blocked" ? "blocked" : (finalOfflineBetaAuditSummary.status === "ready" ? "info" : "warning")));
       if (publicBetaAcceptanceBoardSummary.status) badges.push(badge("public_beta_acceptance_board_ready", labelOf(publicBetaAcceptanceBoardSummary, "Public Beta Acceptance Board 已准备"), publicBetaAcceptanceBoardSummary.status === "blocked" ? "blocked" : (publicBetaAcceptanceBoardSummary.status === "ready" ? "info" : "warning")));
       if (publicBetaOperatorViewModelSummary.status) badges.push(badge("public_beta_operator_view_model_ready", labelOf(publicBetaOperatorViewModelSummary, "仍需人工复核后再决定是否进入下一阶段"), publicBetaOperatorViewModelSummary.status === "blocked" ? "blocked" : (publicBetaOperatorViewModelSummary.status === "ready" ? "info" : "warning")));
@@ -688,6 +694,7 @@
       if (publicBetaUserJourneyShellSummary.status || publicBetaOperatorViewModelSummary.status) badges.push(badge("public_beta_user_journey_shell", "只读搜索计划 / 候选价整理 / 费用归一化步骤 / 官方价锚点步骤 / 用户边界确认", "info"));
       if (safeSearchIntentMatrixSummary.status || publicBetaOperatorViewModelSummary.status) badges.push(badge("public_beta_safe_search_intent_matrix", "Safe Search Intent Matrix 只允许只读搜索计划", "info"));
       if (publicBetaUserBoundaryPanelSummary.status || publicBetaOperatorViewModelSummary.status) badges.push(badge("public_beta_user_boundary_panel", "不保存账号、证件或支付信息 / 用户需在对应平台自行完成下单", "info"));
+      if (categoryResultSimulatorSummary.status || readOnlyComparisonBoardSummary.status || resultTrustBadgePanelSummary.status) badges.push(badge("public_beta_manual_comparison_review", "Category Result Simulator / Read-Only Comparison Board / Result Trust Badge", "info"));
       if (publicBetaOperatorConsoleSummary.status) badges.push(badge("public_beta_operator_console_provider_zero", "Provider-Zero 状态通过 / 候选价证据通过 / 费用归一化通过 / 官方价锚点通过", "info"));
       if (finalOfflineBetaAuditSummary.status || publicBetaAcceptanceBoardSummary.status) badges.push(badge("public_beta_final_offline_beta_audit", "安全文案通过 / 最终离线审计通过", "info"));
       if ((publicBetaOperatorViewModelSummary.status && publicBetaOperatorViewModelSummary.status !== "blocked") || safe.safeToProceedWithManualPublicBetaAcceptanceReview === true) badges.push(badge("public_beta_manual_acceptance_review_required", "仍需人工复核后再决定是否进入下一阶段", "warning"));

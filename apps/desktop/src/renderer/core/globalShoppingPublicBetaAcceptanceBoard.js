@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_BOARD_VERSION = "4.0.5";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_BOARD_VERSION = "4.0.6";
   const BOARD_NAME = "global_shopping_public_beta_acceptance_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, acceptance_board_only:true };
 
@@ -33,6 +33,9 @@
       row("user_journey_ready", "userJourneyReady", safe.userJourneyReady === true ? "true" : "false", safe.userJourneyReady === true ? "pass" : "warning"),
       row("safe_intent_ready", "safeIntentReady", safe.safeIntentReady === true ? "true" : "false", safe.safeIntentReady === true ? "pass" : "warning"),
       row("user_boundary_ready", "userBoundaryReady", safe.userBoundaryReady === true ? "true" : "false", safe.userBoundaryReady === true ? "pass" : "warning"),
+      row("category_result_ready", "categoryResultReady", safe.categoryResultReady === true ? "true" : "false", safe.categoryResultReady === true ? "pass" : "warning"),
+      row("comparison_board_ready", "comparisonBoardReady", safe.comparisonBoardReady === true ? "true" : "false", safe.comparisonBoardReady === true ? "pass" : "warning"),
+      row("trust_badge_ready", "trustBadgeReady", safe.trustBadgeReady === true ? "true" : "false", safe.trustBadgeReady === true ? "pass" : "warning"),
       row("final_audit_ready", "finalAuditReady", safe.finalAuditReady === true ? "true" : "false", safe.finalAuditReady === true ? "pass" : "warning"),
       row("no_payment", "noPayment", safe.noPayment === true ? "true" : "false", safe.noPayment === true ? "pass" : "blocked"),
       row("no_order", "noOrder", safe.noOrder === true ? "true" : "false", safe.noOrder === true ? "pass" : "blocked"),
@@ -74,6 +77,9 @@
       userJourneyReady:safe.userJourneyReady === true,
       safeIntentReady:safe.safeIntentReady === true,
       userBoundaryReady:safe.userBoundaryReady === true,
+      categoryResultReady:safe.categoryResultReady === true,
+      comparisonBoardReady:safe.comparisonBoardReady === true,
+      trustBadgeReady:safe.trustBadgeReady === true,
       finalAuditReady:safe.finalAuditReady === true,
       noPayment:safe.noPayment !== false,
       noOrder:safe.noOrder !== false,
@@ -104,6 +110,9 @@
       criteriaSource.userJourneyReady &&
       criteriaSource.safeIntentReady &&
       criteriaSource.userBoundaryReady &&
+      criteriaSource.categoryResultReady &&
+      criteriaSource.comparisonBoardReady &&
+      criteriaSource.trustBadgeReady &&
       criteriaSource.finalAuditReady &&
       criteriaSource.noPayment &&
       criteriaSource.noOrder &&

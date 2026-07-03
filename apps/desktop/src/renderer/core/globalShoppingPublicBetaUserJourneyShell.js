@@ -1,14 +1,15 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_USER_JOURNEY_SHELL_VERSION = "4.0.5";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_USER_JOURNEY_SHELL_VERSION = "4.0.6";
   const SHELL_NAME = "global_shopping_public_beta_user_journey_shell_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, user_journey_only:true };
   const REQUIRED_KEYS = [
     "operatorConsoleSummary",
     "categoryExpansionShellSummary",
     "finalOfflineBetaAuditSummary",
-    "publicBetaAcceptanceBoardSummary"
+    "publicBetaAcceptanceBoardSummary",
+    "categoryResultSimulatorSummary"
   ];
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -61,6 +62,7 @@
       step("candidate_evidence_step", "候选价整理", text(safe.candidateEvidenceStep || "候选价整理仍需复核"), safe.candidateEvidenceStep ? "ready" : "needs_review"),
       step("fee_normalization_step", "费用归一化步骤", text(safe.feeNormalizationStep || "费用归一化步骤仍需复核"), safe.feeNormalizationStep ? "ready" : "needs_review"),
       step("official_anchor_step", "官方价锚点步骤", text(safe.officialAnchorStep || "官方价锚点步骤仍需复核"), safe.officialAnchorStep ? "ready" : "needs_review"),
+      step("category_result_step", "Category Result Simulator", text(safe.categoryResultStep || "Category Result Simulator 仍需复核"), safe.categoryResultStep ? "ready" : "needs_review"),
       step("user_boundary_step", "用户边界确认", text(safe.userBoundaryStep || "用户边界确认仍需复核"), safe.userBoundaryStep ? "ready" : "needs_review")
     ]);
   }
