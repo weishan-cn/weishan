@@ -87,7 +87,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPricePipelineOrchestrator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "4.0.8");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_PIPELINE_ORCHESTRATOR_VERSION, "4.0.9");
 
   const responseContract = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -223,7 +223,7 @@ function main() {
     productionBlockerMatrixSummary:productionBlockerMatrixSummary,
     providerPilotControlViewModelSummary:providerPilotControlViewModelSummary
   });
-  assert.equal(ready.appVersion, "4.0.8");
+  assert.equal(ready.appVersion, "4.0.9");
   assert.equal(ready.status, "needs_review");
   assert.equal(ready.userFacingSummary.resultLabel, "只读价格流水线仍需复核");
   assert.equal(ready.pipelineStages.length, 83);

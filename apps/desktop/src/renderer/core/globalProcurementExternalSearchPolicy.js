@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_EXTERNAL_SEARCH_POLICY_VERSION = "4.0.8";
+  const GLOBAL_PROCUREMENT_EXTERNAL_SEARCH_POLICY_VERSION = "4.0.9";
 
   function buildGlobalProcurementExternalSearchPolicy(intent){
     const safeIntent = intent && typeof intent === "object" ? intent : {};

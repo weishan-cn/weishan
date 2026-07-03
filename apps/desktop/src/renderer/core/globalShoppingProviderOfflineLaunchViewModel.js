@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_OFFLINE_LAUNCH_VIEW_MODEL_VERSION = "4.0.8";
+  const GLOBAL_SHOPPING_PROVIDER_OFFLINE_LAUNCH_VIEW_MODEL_VERSION = "4.0.9";
   const VIEW_MODEL_NAME = "global_shopping_provider_offline_launch_view_model_v1";
   const BUILD_GUARD_KEY = "__weishanGlobalShoppingProviderOfflineLaunchViewModelBuilding";
 

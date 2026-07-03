@@ -8,7 +8,7 @@ function memoryStorage() { const store = new Map(); return { getItem:k => store.
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowContinuityManager.js", "apps/desktop/src/renderer/core/flightWorkflowRecoveryStore.js"]);
   const api = windowRef.WeishanFlightWorkflowRecoveryStore;
-  assert.equal(api.FLIGHT_WORKFLOW_RECOVERY_STORE_VERSION, "4.0.8");
+  assert.equal(api.FLIGHT_WORKFLOW_RECOVERY_STORE_VERSION, "4.0.9");
   const storage = memoryStorage();
   const saved = api.saveFlightWorkflowRecoveryState({ flightIntentSummary:{ route:{ originCity:"上海", destinationCity:"成都" }, departureDate:"2026-07-15" }, selectedCandidate:{ rank:1, token:"abc", bookingUrl:"https://blocked.example" } }, storage);
   assert.equal(saved.status, "saved");

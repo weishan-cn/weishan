@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION = "4.0.8";
+  const FLIGHT_WORKFLOW_SAFETY_REGRESSION_SENTINEL_VERSION = "4.0.9";
   const SENTINEL_NAME = "flight_workflow_safety_regression_sentinel_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   const SECRET_VALUE_RE = /token|apiKey|secret|password|sk-|pk-|live_|prod_/i;

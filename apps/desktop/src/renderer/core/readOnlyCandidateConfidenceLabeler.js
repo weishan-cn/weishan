@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_CANDIDATE_CONFIDENCE_LABELER_VERSION = "4.0.8";
+  const READ_ONLY_CANDIDATE_CONFIDENCE_LABELER_VERSION = "4.0.9";
   const LABELER_NAME = "read_only_candidate_confidence_labeler_v1";
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value == null ? "" : value).trim(); }

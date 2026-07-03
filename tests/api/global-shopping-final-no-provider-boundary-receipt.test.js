@@ -39,7 +39,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingFinalNoProviderBoundaryReceipt.js"]);
   const api = windowRef.WeishanGlobalShoppingFinalNoProviderBoundaryReceipt;
-  assert.equal(api.GLOBAL_SHOPPING_FINAL_NO_PROVIDER_BOUNDARY_RECEIPT_VERSION, "4.0.8");
+  assert.equal(api.GLOBAL_SHOPPING_FINAL_NO_PROVIDER_BOUNDARY_RECEIPT_VERSION, "4.0.9");
   const ready = api.buildGlobalShoppingFinalNoProviderBoundaryReceipt({
     providerReadOnlyPublicReleaseCenterSummary:readySummary("Provider Read-Only Public Release Center", "Provider Read-Only Public Release Center 已准备"),
     trustClosureExportPreviewSummary:readySummary("Trust Closure Export Preview", "Trust Closure Export Preview 已准备")

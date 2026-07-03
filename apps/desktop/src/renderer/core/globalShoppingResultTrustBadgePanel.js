@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_RESULT_TRUST_BADGE_PANEL_VERSION = "4.0.8";
+  const GLOBAL_SHOPPING_RESULT_TRUST_BADGE_PANEL_VERSION = "4.0.9";
   const PANEL_NAME = "global_shopping_result_trust_badge_panel_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, result_trust_badge_only:true };
   const FORBIDDEN_COPY_RE = /官方认证|平台授权|真实最低价|最终成交价|已接入 provider|可调用 provider|付款|下单|出票|order|payment|checkout/i;

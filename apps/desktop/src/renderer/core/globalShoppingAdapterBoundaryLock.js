@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_ADAPTER_BOUNDARY_LOCK_VERSION = "4.0.8";
+  const GLOBAL_SHOPPING_ADAPTER_BOUNDARY_LOCK_VERSION = "4.0.9";
   const LOCK_NAME = "global_shopping_adapter_boundary_lock_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

@@ -25,7 +25,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaTrialReadinessPack.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaTrialReadinessPack;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_READINESS_PACK_VERSION, "4.0.8");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_READINESS_PACK_VERSION, "4.0.9");
   const ready = api.buildGlobalShoppingPublicBetaTrialReadinessPack({
     packMode:"trial_readiness_pack_only",
     publicBetaUserJourneyShellSummary:summary("Public Beta User Journey"),
@@ -36,7 +36,7 @@ function main() {
     finalOfflineBetaAuditSummary:summary("Final Offline Beta Audit")
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.0.8");
+  assert.equal(ready.appVersion, "4.0.9");
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(JSON.stringify(ready.supportedCategories), JSON.stringify(["flight", "hotel", "product"]));
   assert.equal(ready.externalUrl, null);

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RC_USER_FACING_COPY_FINALIZATION_VERSION = "4.0.8";
+  const FLIGHT_WORKFLOW_RC_USER_FACING_COPY_FINALIZATION_VERSION = "4.0.9";
   const FINALIZATION_NAME = "flight_workflow_rc_user_facing_copy_finalization_v1";
   const CAVEAT = "该定稿只覆盖只读 RC 候选文案，不代表真实账号、客服工单、交易请求或出票能力。";
   const RECOMMENDED_COPY = {

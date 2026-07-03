@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "4.0.8";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "4.0.9";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -280,6 +280,10 @@
       publicBetaTrialScenarioChecklistSummary: stripUnsafe(safe.publicBetaTrialScenarioChecklistSummary || null),
       noTransactionRegressionGuardSummary: stripUnsafe(safe.noTransactionRegressionGuardSummary || null),
       publicBetaQaViewModelSummary: stripUnsafe(safe.publicBetaQaViewModelSummary || null),
+      publicBetaUserOnboardingShellSummary: stripUnsafe(safe.publicBetaUserOnboardingShellSummary || null),
+      visualTrialGuideSummary: stripUnsafe(safe.visualTrialGuideSummary || null),
+      safeFeedbackDraftPanelSummary: stripUnsafe(safe.safeFeedbackDraftPanelSummary || null),
+      publicBetaOnboardingViewModelSummary: stripUnsafe(safe.publicBetaOnboardingViewModelSummary || null),
       offlineProviderAdapterContractKitSummary: stripUnsafe(safe.offlineProviderAdapterContractKitSummary || null),
       mockSandboxQaMatrixSummary: stripUnsafe(safe.mockSandboxQaMatrixSummary || null),
       humanActivationRunbookCenterSummary: stripUnsafe(safe.humanActivationRunbookCenterSummary || null),
@@ -403,6 +407,10 @@
       publicBetaTrialScenarioChecklistStatus: safeText(safe.publicBetaTrialScenarioChecklistStatus || safe.publicBetaTrialScenarioChecklistSummary && safe.publicBetaTrialScenarioChecklistSummary.status || ""),
       noTransactionRegressionGuardStatus: safeText(safe.noTransactionRegressionGuardStatus || safe.noTransactionRegressionGuardSummary && safe.noTransactionRegressionGuardSummary.status || ""),
       publicBetaQaViewModelStatus: safeText(safe.publicBetaQaViewModelStatus || safe.publicBetaQaViewModelSummary && safe.publicBetaQaViewModelSummary.status || ""),
+      publicBetaUserOnboardingShellStatus: safeText(safe.publicBetaUserOnboardingShellStatus || safe.publicBetaUserOnboardingShellSummary && safe.publicBetaUserOnboardingShellSummary.status || ""),
+      visualTrialGuideStatus: safeText(safe.visualTrialGuideStatus || safe.visualTrialGuideSummary && safe.visualTrialGuideSummary.status || ""),
+      safeFeedbackDraftPanelStatus: safeText(safe.safeFeedbackDraftPanelStatus || safe.safeFeedbackDraftPanelSummary && safe.safeFeedbackDraftPanelSummary.status || ""),
+      publicBetaOnboardingViewModelStatus: safeText(safe.publicBetaOnboardingViewModelStatus || safe.publicBetaOnboardingViewModelSummary && safe.publicBetaOnboardingViewModelSummary.status || ""),
       offlineProviderAdapterContractKitStatus: safeText(safe.offlineProviderAdapterContractKitStatus || safe.offlineProviderAdapterContractKitSummary && safe.offlineProviderAdapterContractKitSummary.status || ""),
       mockSandboxQaMatrixStatus: safeText(safe.mockSandboxQaMatrixStatus || safe.mockSandboxQaMatrixSummary && safe.mockSandboxQaMatrixSummary.status || ""),
       humanActivationRunbookCenterStatus: safeText(safe.humanActivationRunbookCenterStatus || safe.humanActivationRunbookCenterSummary && safe.humanActivationRunbookCenterSummary.status || ""),
@@ -762,6 +770,10 @@
     const publicBetaTrialScenarioChecklistSummary = stripUnsafe(workflow.publicBetaTrialScenarioChecklistSummary || safe.publicBetaTrialScenarioChecklistSummary || null);
     const noTransactionRegressionGuardSummary = stripUnsafe(workflow.noTransactionRegressionGuardSummary || safe.noTransactionRegressionGuardSummary || null);
     const publicBetaQaViewModelSummary = stripUnsafe(workflow.publicBetaQaViewModelSummary || safe.publicBetaQaViewModelSummary || null);
+    const publicBetaUserOnboardingShellSummary = stripUnsafe(workflow.publicBetaUserOnboardingShellSummary || safe.publicBetaUserOnboardingShellSummary || null);
+    const visualTrialGuideSummary = stripUnsafe(workflow.visualTrialGuideSummary || safe.visualTrialGuideSummary || null);
+    const safeFeedbackDraftPanelSummary = stripUnsafe(workflow.safeFeedbackDraftPanelSummary || safe.safeFeedbackDraftPanelSummary || null);
+    const publicBetaOnboardingViewModelSummary = stripUnsafe(workflow.publicBetaOnboardingViewModelSummary || safe.publicBetaOnboardingViewModelSummary || null);
     return clone({
       title: "候选报价证据摘要",
       subtitle: "只读候选价 · 平台最终为准",
@@ -897,6 +909,10 @@
       publicBetaTrialScenarioChecklistSummary: publicBetaTrialScenarioChecklistSummary,
       noTransactionRegressionGuardSummary: noTransactionRegressionGuardSummary,
       publicBetaQaViewModelSummary: publicBetaQaViewModelSummary,
+      publicBetaUserOnboardingShellSummary: publicBetaUserOnboardingShellSummary,
+      visualTrialGuideSummary: visualTrialGuideSummary,
+      safeFeedbackDraftPanelSummary: safeFeedbackDraftPanelSummary,
+      publicBetaOnboardingViewModelSummary: publicBetaOnboardingViewModelSummary,
       globalShoppingReadOnlyPublicBetaShellStatus: workflow.globalShoppingReadOnlyPublicBetaShellStatus || safe.globalShoppingReadOnlyPublicBetaShellStatus || "",
       providerZeroRuntimeLockStatus: workflow.providerZeroRuntimeLockStatus || safe.providerZeroRuntimeLockStatus || "",
       userTrustLaunchBoardStatus: workflow.userTrustLaunchBoardStatus || safe.userTrustLaunchBoardStatus || "",
@@ -913,6 +929,10 @@
       finalOfflineBetaAuditStatus: workflow.finalOfflineBetaAuditStatus || safe.finalOfflineBetaAuditStatus || "",
       publicBetaAcceptanceBoardStatus: workflow.publicBetaAcceptanceBoardStatus || safe.publicBetaAcceptanceBoardStatus || "",
       publicBetaOperatorViewModelStatus: workflow.publicBetaOperatorViewModelStatus || safe.publicBetaOperatorViewModelStatus || "",
+      publicBetaUserOnboardingShellStatus: workflow.publicBetaUserOnboardingShellStatus || safe.publicBetaUserOnboardingShellStatus || "",
+      visualTrialGuideStatus: workflow.visualTrialGuideStatus || safe.visualTrialGuideStatus || "",
+      safeFeedbackDraftPanelStatus: workflow.safeFeedbackDraftPanelStatus || safe.safeFeedbackDraftPanelStatus || "",
+      publicBetaOnboardingViewModelStatus: workflow.publicBetaOnboardingViewModelStatus || safe.publicBetaOnboardingViewModelStatus || "",
       readOnlyPlatformHandoffSimulatorSummary: workflow.readOnlyPlatformHandoffSimulatorSummary || safe.readOnlyPlatformHandoffSimulatorSummary ? { title:"只读平台交接模拟器", line:workflow.readOnlyPlatformHandoffSimulatorSummary && workflow.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary && workflow.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary.resultLabel || safe.readOnlyPlatformHandoffSimulatorSummary && safe.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary && safe.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary.resultLabel || "交接模拟仍需复核", redacted:true } : null,
       redactedSearchParameterPackSummary: workflow.redactedSearchParameterPackSummary || safe.redactedSearchParameterPackSummary ? { title:"脱敏搜索参数包", line:workflow.redactedSearchParameterPackSummary && workflow.redactedSearchParameterPackSummary.userFacingSummary && workflow.redactedSearchParameterPackSummary.userFacingSummary.resultLabel || safe.redactedSearchParameterPackSummary && safe.redactedSearchParameterPackSummary.userFacingSummary && safe.redactedSearchParameterPackSummary.userFacingSummary.resultLabel || "搜索参数包仍需复核", redacted:true } : null,
       userConfirmationChecklistSummary: workflow.userConfirmationChecklistSummary || safe.userConfirmationChecklistSummary ? { title:"用户确认清单", line:workflow.userConfirmationChecklistSummary && workflow.userConfirmationChecklistSummary.userFacingSummary && workflow.userConfirmationChecklistSummary.userFacingSummary.resultLabel || safe.userConfirmationChecklistSummary && safe.userConfirmationChecklistSummary.userFacingSummary && safe.userConfirmationChecklistSummary.userFacingSummary.resultLabel || "用户确认清单仍需复核", redacted:true } : null,
@@ -1350,6 +1370,10 @@
       publicBetaTrialScenarioChecklistSummary: workflow.publicBetaTrialScenarioChecklistSummary || safe.publicBetaTrialScenarioChecklistSummary || null,
       noTransactionRegressionGuardSummary: workflow.noTransactionRegressionGuardSummary || safe.noTransactionRegressionGuardSummary || null,
       publicBetaQaViewModelSummary: workflow.publicBetaQaViewModelSummary || safe.publicBetaQaViewModelSummary || null,
+      publicBetaUserOnboardingShellSummary: workflow.publicBetaUserOnboardingShellSummary || safe.publicBetaUserOnboardingShellSummary || null,
+      visualTrialGuideSummary: workflow.visualTrialGuideSummary || safe.visualTrialGuideSummary || null,
+      safeFeedbackDraftPanelSummary: workflow.safeFeedbackDraftPanelSummary || safe.safeFeedbackDraftPanelSummary || null,
+      publicBetaOnboardingViewModelSummary: workflow.publicBetaOnboardingViewModelSummary || safe.publicBetaOnboardingViewModelSummary || null,
       offlineProviderCertificationCenterSummary: workflow.offlineProviderCertificationCenterSummary || safe.offlineProviderCertificationCenterSummary || null,
       mockIntegrationRegressionLabSummary: workflow.mockIntegrationRegressionLabSummary || safe.mockIntegrationRegressionLabSummary || null,
       humanApprovalEvidenceBinderSummary: workflow.humanApprovalEvidenceBinderSummary || safe.humanApprovalEvidenceBinderSummary || null,

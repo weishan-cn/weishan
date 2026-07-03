@@ -22,7 +22,7 @@ const windowRef = loadRendererCore([
 const api = windowRef.WeishanManualBookingHandoff;
 
 function main() {
-  assert.equal(api.MANUAL_BOOKING_HANDOFF_VERSION, "4.0.8");
+  assert.equal(api.MANUAL_BOOKING_HANDOFF_VERSION, "4.0.9");
 
   const handoff = api.buildManualBookingHandoff();
   assert.equal(handoff.status, "manual_only");

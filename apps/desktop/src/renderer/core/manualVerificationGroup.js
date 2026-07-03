@@ -1,5 +1,5 @@
 (function(){
-  const MANUAL_VERIFICATION_GROUP_VERSION = "4.0.8";
+  const MANUAL_VERIFICATION_GROUP_VERSION = "4.0.9";
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function buildManualVerificationGroup(input){
     const safe = input && typeof input === "object" ? input : {};

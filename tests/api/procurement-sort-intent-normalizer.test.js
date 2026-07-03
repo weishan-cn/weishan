@@ -7,7 +7,7 @@ function load(files){ const window = {}; window.window = window; const context =
 function main(){
   const windowRef = load(["apps/desktop/src/renderer/core/flightIntentParser.js", "apps/desktop/src/renderer/core/procurementSortIntentNormalizer.js"]);
   const api = windowRef.WeishanProcurementSortIntentNormalizer;
-  assert.equal(api.PROCUREMENT_SORT_INTENT_NORMALIZER_VERSION, "4.0.8");
+  assert.equal(api.PROCUREMENT_SORT_INTENT_NORMALIZER_VERSION, "4.0.9");
   const directLow = api.normalizeProcurementSortIntent({ rawUserInput:"7 月 15 日上海到成都最便宜的直达机票" });
   assert.equal(directLow.origin, "上海");
   assert.equal(directLow.destination, "成都");

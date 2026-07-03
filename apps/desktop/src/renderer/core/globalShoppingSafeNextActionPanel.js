@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SAFE_NEXT_ACTION_PANEL_VERSION = "4.0.8";
+  const GLOBAL_SHOPPING_SAFE_NEXT_ACTION_PANEL_VERSION = "4.0.9";
   const PANEL_NAME = "global_shopping_safe_next_action_panel_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

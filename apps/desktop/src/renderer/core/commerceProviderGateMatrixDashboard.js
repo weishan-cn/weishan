@@ -1,5 +1,5 @@
 (function(){
-  const PROVIDER_GATE_MATRIX_DASHBOARD_VERSION = "4.0.8";
+  const PROVIDER_GATE_MATRIX_DASHBOARD_VERSION = "4.0.9";
 
   const gateMatrixRows = [
     "API binding readiness: not ready",

@@ -9,7 +9,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowRcUserFacingCopyFinalization.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowRcUserFacingCopyFinalization;
-  assert.equal(api.FLIGHT_WORKFLOW_RC_USER_FACING_COPY_FINALIZATION_VERSION, "4.0.8");
+  assert.equal(api.FLIGHT_WORKFLOW_RC_USER_FACING_COPY_FINALIZATION_VERSION, "4.0.9");
   const summary = api.buildFlightWorkflowRcUserFacingCopyFinalization({
     copyText:[
       "当前为只读候选证据流程，不提供付款、下单或出票能力。",

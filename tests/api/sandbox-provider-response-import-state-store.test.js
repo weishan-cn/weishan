@@ -10,7 +10,7 @@ function memoryStorage() { const data = new Map(); return { getItem:(name) => da
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/sandboxProviderResponseImportStateStore.js"]);
   const api = windowRef.WeishanSandboxProviderResponseImportStateStore;
-  assert.equal(api.SANDBOX_PROVIDER_RESPONSE_IMPORT_STATE_STORE_VERSION, "4.0.8");
+  assert.equal(api.SANDBOX_PROVIDER_RESPONSE_IMPORT_STATE_STORE_VERSION, "4.0.9");
   const storage = memoryStorage();
   const state = api.saveSandboxProviderResponseImportState({
     lastImportStatus:"accepted",

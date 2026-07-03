@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_EVIDENCE_TRACE_VERSION = "4.0.8";
+  const GLOBAL_SHOPPING_PROVIDER_EVIDENCE_TRACE_VERSION = "4.0.9";
   const TRACE_NAME = "global_shopping_provider_evidence_trace_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

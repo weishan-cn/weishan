@@ -23,7 +23,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingReadOnlyHandoffPacketPreview.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingReadOnlyHandoffPacketPreview;
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_HANDOFF_PACKET_PREVIEW_VERSION, "4.0.8");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_HANDOFF_PACKET_PREVIEW_VERSION, "4.0.9");
   const ready = api.buildGlobalShoppingReadOnlyHandoffPacketPreview({
     sandboxDecisionReviewViewModelSummary:{ status:"ready", title:"Sandbox 候选决策复核", redacted:true },
     sandboxCandidateComparisonWorkbenchSummary:{ status:"ready", recommendationSummary:{ recommendedCandidateId:"candidate_a" }, userFacingSummary:{ resultLabel:"候选对比已准备", redacted:true }, redacted:true },

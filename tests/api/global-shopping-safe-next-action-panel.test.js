@@ -16,7 +16,7 @@ function load(file) {
 function main() {
   const windowRef = load("apps/desktop/src/renderer/core/globalShoppingSafeNextActionPanel.js");
   const api = windowRef.WeishanGlobalShoppingSafeNextActionPanel;
-  assert.equal(api.GLOBAL_SHOPPING_SAFE_NEXT_ACTION_PANEL_VERSION, "4.0.8");
+  assert.equal(api.GLOBAL_SHOPPING_SAFE_NEXT_ACTION_PANEL_VERSION, "4.0.9");
   const ready = api.buildGlobalShoppingSafeNextActionPanel({});
   assert.equal(ready.status, "ready");
   assert.equal(ready.title, "安全下一步");
