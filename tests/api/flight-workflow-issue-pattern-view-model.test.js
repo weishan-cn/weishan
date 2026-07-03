@@ -6,7 +6,7 @@ const ROOT = path.resolve(__dirname, "../..");
 function load(files) { const window = {}; window.window = window; const context = vm.createContext({ window, console }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
 function main() {
   const api = load(["apps/desktop/src/renderer/core/flightWorkflowIssuePatternViewModel.js"]).WeishanFlightWorkflowIssuePatternViewModel;
-  assert.equal(api.FLIGHT_WORKFLOW_ISSUE_PATTERN_VIEW_MODEL_VERSION, "4.0.4");
+  assert.equal(api.FLIGHT_WORKFLOW_ISSUE_PATTERN_VIEW_MODEL_VERSION, "4.0.5");
   const vmModel = api.buildFlightWorkflowIssuePatternViewModel({
     issuePatternRadar:{ status:"ready", issuePatternHealth:{ issueCount:4 }, patternSummary:{ dominantPattern:"none", message:"暂无明显共性问题" }, signals:[{ signalId:"issue_count", label:"问题数量", value:"4", status:"pass" }] },
     supportReadinessGate:{ status:"ready", decision:{ label:"支持兜底准备就绪", message:"继续公开只读试点" }, criteria:{ issuePatternReady:true, noTradingRisk:true }, riskNotes:[] }

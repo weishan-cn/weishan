@@ -24,7 +24,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderSandboxDryRunHarness.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderSandboxDryRunHarness;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_DRY_RUN_HARNESS_VERSION, "4.0.4");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_DRY_RUN_HARNESS_VERSION, "4.0.5");
 
   const gate = windowRef.WeishanGlobalShoppingReadOnlyRealProviderSandboxGate.buildGlobalShoppingReadOnlyRealProviderSandboxGate({
     readOnlyProviderSandboxConnectorSummary:{ status:"ready" },
@@ -60,7 +60,7 @@ function main() {
     providerCallAuditLedgerSummary:ledger,
     providerSandboxSafetyKillSwitchSummary:killSwitch
   });
-  assert.equal(ready.appVersion, "4.0.4");
+  assert.equal(ready.appVersion, "4.0.5");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "Provider Sandbox 干跑框架");
   assert.equal(ready.rows.length, 8);

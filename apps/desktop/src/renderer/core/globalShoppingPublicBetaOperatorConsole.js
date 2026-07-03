@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_OPERATOR_CONSOLE_VERSION = "4.0.4";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_OPERATOR_CONSOLE_VERSION = "4.0.5";
   const CONSOLE_NAME = "global_shopping_public_beta_operator_console_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, operator_console_only:true };
 
@@ -67,13 +67,19 @@
     const evidenceSummary = resolveSummary(safe, "globalShoppingReadOnlyCandidateEvidenceUnifierSummary", "WeishanGlobalShoppingReadOnlyCandidateEvidenceUnifier", "buildGlobalShoppingReadOnlyCandidateEvidenceUnifier");
     const feeSummary = resolveSummary(safe, "globalShoppingFeeNormalizationViewSummary", "WeishanGlobalShoppingFeeNormalizationView", "buildGlobalShoppingFeeNormalizationView");
     const anchorSummary = resolveSummary(safe, "globalShoppingOfficialAnchorComparisonViewSummary", "WeishanGlobalShoppingOfficialAnchorComparisonView", "buildGlobalShoppingOfficialAnchorComparisonView");
+    const userJourneySummary = resolveSummary(safe, "publicBetaUserJourneyShellSummary", "WeishanGlobalShoppingPublicBetaUserJourneyShell", "buildGlobalShoppingPublicBetaUserJourneyShell");
+    const safeIntentSummary = resolveSummary(safe, "safeSearchIntentMatrixSummary", "WeishanGlobalShoppingSafeSearchIntentMatrix", "buildGlobalShoppingSafeSearchIntentMatrix");
+    const userBoundarySummary = resolveSummary(safe, "publicBetaUserBoundaryPanelSummary", "WeishanGlobalShoppingPublicBetaUserBoundaryPanel", "buildGlobalShoppingPublicBetaUserBoundaryPanel");
     return clone([
       section("public_beta_final_gate", "Public Beta Final Gate", labelOf(finalGateSummary, "Public Beta Final Gate 仍需复核"), finalGateSummary.status),
       section("release_candidate_confidence_board", "RC Confidence Board", labelOf(rcBoardSummary, "RC Confidence Board 仍需复核"), rcBoardSummary.status),
       section("provider_zero_runtime_lock", "Provider-Zero Runtime Lock", labelOf(providerZeroSummary, "Provider-Zero Runtime Lock 仍需复核"), providerZeroSummary.status),
       section("candidate_evidence_unifier", "Candidate Evidence Unifier", labelOf(evidenceSummary, "候选价证据仍需复核"), evidenceSummary.status),
       section("fee_normalization_view", "Fee Normalization View", labelOf(feeSummary, "费用归一化仍需复核"), feeSummary.status),
-      section("official_anchor_view", "Official Anchor Comparison View", labelOf(anchorSummary, "官方价锚点仍需复核"), anchorSummary.status)
+      section("official_anchor_view", "Official Anchor Comparison View", labelOf(anchorSummary, "官方价锚点仍需复核"), anchorSummary.status),
+      section("public_beta_user_journey", "Public Beta User Journey", labelOf(userJourneySummary, "Public Beta User Journey 仍需复核"), userJourneySummary.status),
+      section("safe_search_intent_matrix", "Safe Search Intent Matrix", labelOf(safeIntentSummary, "Safe Search Intent Matrix 仍需复核"), safeIntentSummary.status),
+      section("user_boundary_panel", "User Boundary Panel", labelOf(userBoundarySummary, "User Boundary Panel 仍需复核"), userBoundarySummary.status)
     ]);
   }
 
@@ -124,7 +130,7 @@
     const directBlockedReasons = blockedReasons(safe);
     const blocked = directBlockedReasons.length > 0 || statuses.indexOf("blocked") >= 0 || statuses.indexOf("failed_safe") >= 0;
     const needsReview =
-      sections.length < 6 ||
+      sections.length < 9 ||
       statuses.indexOf("needs_review") >= 0 ||
       !present(resolveSummary(safe, "publicBetaFinalGateSummary", "WeishanGlobalShoppingPublicBetaFinalGate", "buildGlobalShoppingPublicBetaFinalGate")) ||
       !present(resolveSummary(safe, "releaseCandidateConfidenceBoardSummary", "WeishanGlobalShoppingReleaseCandidateConfidenceBoard", "buildGlobalShoppingReleaseCandidateConfidenceBoard")) ||
@@ -132,6 +138,9 @@
       !present(resolveSummary(safe, "globalShoppingReadOnlyCandidateEvidenceUnifierSummary", "WeishanGlobalShoppingReadOnlyCandidateEvidenceUnifier", "buildGlobalShoppingReadOnlyCandidateEvidenceUnifier")) ||
       !present(resolveSummary(safe, "globalShoppingFeeNormalizationViewSummary", "WeishanGlobalShoppingFeeNormalizationView", "buildGlobalShoppingFeeNormalizationView")) ||
       !present(resolveSummary(safe, "globalShoppingOfficialAnchorComparisonViewSummary", "WeishanGlobalShoppingOfficialAnchorComparisonView", "buildGlobalShoppingOfficialAnchorComparisonView")) ||
+      !present(resolveSummary(safe, "publicBetaUserJourneyShellSummary", "WeishanGlobalShoppingPublicBetaUserJourneyShell", "buildGlobalShoppingPublicBetaUserJourneyShell")) ||
+      !present(resolveSummary(safe, "safeSearchIntentMatrixSummary", "WeishanGlobalShoppingSafeSearchIntentMatrix", "buildGlobalShoppingSafeSearchIntentMatrix")) ||
+      !present(resolveSummary(safe, "publicBetaUserBoundaryPanelSummary", "WeishanGlobalShoppingPublicBetaUserBoundaryPanel", "buildGlobalShoppingPublicBetaUserBoundaryPanel")) ||
       hasMissing;
     const status = blocked ? "blocked" : (needsReview ? "needs_review" : "ready");
     return clone({
@@ -145,11 +154,16 @@
       evidenceStatus:safeStatus(resolveSummary(safe, "globalShoppingReadOnlyCandidateEvidenceUnifierSummary", "WeishanGlobalShoppingReadOnlyCandidateEvidenceUnifier", "buildGlobalShoppingReadOnlyCandidateEvidenceUnifier").status),
       feeNormalizationStatus:safeStatus(resolveSummary(safe, "globalShoppingFeeNormalizationViewSummary", "WeishanGlobalShoppingFeeNormalizationView", "buildGlobalShoppingFeeNormalizationView").status),
       officialAnchorStatus:safeStatus(resolveSummary(safe, "globalShoppingOfficialAnchorComparisonViewSummary", "WeishanGlobalShoppingOfficialAnchorComparisonView", "buildGlobalShoppingOfficialAnchorComparisonView").status),
+      publicBetaUserJourneyStatus:safeStatus(resolveSummary(safe, "publicBetaUserJourneyShellSummary", "WeishanGlobalShoppingPublicBetaUserJourneyShell", "buildGlobalShoppingPublicBetaUserJourneyShell").status),
+      safeSearchIntentMatrixStatus:safeStatus(resolveSummary(safe, "safeSearchIntentMatrixSummary", "WeishanGlobalShoppingSafeSearchIntentMatrix", "buildGlobalShoppingSafeSearchIntentMatrix").status),
+      publicBetaUserBoundaryStatus:safeStatus(resolveSummary(safe, "publicBetaUserBoundaryPanelSummary", "WeishanGlobalShoppingPublicBetaUserBoundaryPanel", "buildGlobalShoppingPublicBetaUserBoundaryPanel").status),
       lockedCapabilities:[
         "Provider-Zero 状态通过",
         "候选价证据通过",
         "费用归一化通过",
         "官方价锚点通过",
+        "只读搜索计划通过",
+        "用户边界确认通过",
         "Manual Review Required"
       ],
       manualReviewRequired:true,

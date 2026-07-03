@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.0.4");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.0.5");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -261,6 +261,9 @@ function main() {
     publicBetaSafetyCopyCenterSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Beta Safety Copy Center 已准备", redacted:true } },
     globalShoppingPublicBetaUserFacingCopyPolishSummary:{ status:"ready", userFacingSummary:{ resultLabel:"全球购 Public Beta 已准备", redacted:true } },
     globalShoppingProviderZeroStatusPanelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider-Zero Status Panel 已准备", redacted:true } },
+    publicBetaUserJourneyShellSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Beta User Journey 已准备", redacted:true } },
+    safeSearchIntentMatrixSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Safe Search Intent Matrix 已准备", redacted:true } },
+    publicBetaUserBoundaryPanelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"User Boundary Panel 已准备", redacted:true } },
     publicBetaFinalGateSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Beta Final Gate 已准备", redacted:true } },
     releaseCandidateConfidenceBoardSummary:{ status:"ready", userFacingSummary:{ resultLabel:"RC Confidence Board 已准备", redacted:true } },
     publicBetaFinalViewModelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"下一步仍需人工复核", redacted:true } },
@@ -270,6 +273,9 @@ function main() {
   }).badges.map((item) => item.label);
   assert.ok(publicBetaLabels.includes("全球购 Public Beta 已准备"));
   assert.ok(publicBetaLabels.includes("Provider-Zero Status Panel 已准备"));
+  assert.ok(publicBetaLabels.includes("Public Beta User Journey 已准备"));
+  assert.ok(publicBetaLabels.includes("Safe Search Intent Matrix 已准备"));
+  assert.ok(publicBetaLabels.includes("User Boundary Panel 已准备"));
   assert.ok(publicBetaLabels.includes("Global Shopping Read-Only Public Beta Shell 已准备"));
   assert.ok(publicBetaLabels.includes("Provider-Zero Runtime Lock 已准备"));
   assert.ok(publicBetaLabels.includes("User Trust Launch Board 已准备"));
@@ -279,6 +285,9 @@ function main() {
   assert.ok(publicBetaLabels.includes("全球购 Public Beta / 只读候选价 / 官方价锚点 / 费用归一化"));
   assert.ok(publicBetaLabels.includes("Provider-Zero：未接入真实供应商 / 未读取密钥 / 未联网调用 / 未生成订单"));
   assert.ok(publicBetaLabels.includes("Public Beta 只提供候选价证据，不付款、不下单、不出票"));
+  assert.ok(publicBetaLabels.includes("只读搜索计划 / 候选价整理 / 费用归一化步骤 / 官方价锚点步骤 / 用户边界确认"));
+  assert.ok(publicBetaLabels.includes("Safe Search Intent Matrix 只允许只读搜索计划"));
+  assert.ok(publicBetaLabels.includes("不保存账号、证件或支付信息 / 用户需在对应平台自行完成下单"));
   assert.ok(publicBetaLabels.includes("Provider-Zero Lock 不接真实 provider、不读密钥、不联网"));
   assert.ok(publicBetaLabels.includes("User Trust Launch 不执行真实 launch"));
   assert.ok(publicBetaLabels.includes("Safety Copy 不承诺最低价、最终价或官方背书"));

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_SAFETY_STATEMENT_PREVIEW_VERSION = "4.0.4";
+  const GLOBAL_SHOPPING_PUBLIC_SAFETY_STATEMENT_PREVIEW_VERSION = "4.0.5";
   const STATEMENT_NAME = "global_shopping_public_safety_statement_preview_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

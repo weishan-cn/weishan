@@ -1,6 +1,6 @@
 ;(function () {
   "use strict";
-  const PROVIDER_SANDBOX_REAL_KEY_DRY_RUN_GATE_VERSION = "4.0.4";
+  const PROVIDER_SANDBOX_REAL_KEY_DRY_RUN_GATE_VERSION = "4.0.5";
   function clone(value){ return JSON.parse(JSON.stringify(value)); }
   function text(value){ return String(value || "").trim(); }
   function fingerprint(value){ let hash = 0; const raw = text(value); for (let i = 0; i < raw.length; i += 1) hash = ((hash << 5) - hash + raw.charCodeAt(i)) | 0; return Math.abs(hash).toString(16).padStart(8, "0").slice(0, 8); }

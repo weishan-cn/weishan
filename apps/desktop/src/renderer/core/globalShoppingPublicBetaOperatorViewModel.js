@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_OPERATOR_VIEW_MODEL_VERSION = "4.0.4";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_OPERATOR_VIEW_MODEL_VERSION = "4.0.5";
   const VIEW_MODEL_NAME = "global_shopping_public_beta_operator_view_model_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -51,11 +51,17 @@
     const safe = obj(input);
     const consoleSummary = resolveSummary(safe, "publicBetaOperatorConsoleSummary", "WeishanGlobalShoppingPublicBetaOperatorConsole", "buildGlobalShoppingPublicBetaOperatorConsole");
     const shellSummary = resolveSummary(safe, "categoryExpansionShellSummary", "WeishanGlobalShoppingCategoryExpansionShell", "buildGlobalShoppingCategoryExpansionShell");
+    const journeySummary = resolveSummary(safe, "publicBetaUserJourneyShellSummary", "WeishanGlobalShoppingPublicBetaUserJourneyShell", "buildGlobalShoppingPublicBetaUserJourneyShell");
+    const intentSummary = resolveSummary(safe, "safeSearchIntentMatrixSummary", "WeishanGlobalShoppingSafeSearchIntentMatrix", "buildGlobalShoppingSafeSearchIntentMatrix");
+    const boundarySummary = resolveSummary(safe, "publicBetaUserBoundaryPanelSummary", "WeishanGlobalShoppingPublicBetaUserBoundaryPanel", "buildGlobalShoppingPublicBetaUserBoundaryPanel");
     const auditSummary = resolveSummary(safe, "finalOfflineBetaAuditSummary", "WeishanGlobalShoppingFinalOfflineBetaAudit", "buildGlobalShoppingFinalOfflineBetaAudit");
     const boardSummary = resolveSummary(safe, "publicBetaAcceptanceBoardSummary", "WeishanGlobalShoppingPublicBetaAcceptanceBoard", "buildGlobalShoppingPublicBetaAcceptanceBoard");
     return clone([
       card("operator_console", "Public Beta Operator Console", labelOf(consoleSummary, "Public Beta Operator Console 仍需复核")),
       card("category_expansion_shell", "Category Expansion Shell", labelOf(shellSummary, "Category Expansion Shell 仍需复核")),
+      card("public_beta_user_journey", "Public Beta User Journey", labelOf(journeySummary, "Public Beta User Journey 仍需复核")),
+      card("safe_search_intent_matrix", "Safe Search Intent Matrix", labelOf(intentSummary, "Safe Search Intent Matrix 仍需复核")),
+      card("user_boundary_panel", "User Boundary Panel", labelOf(boundarySummary, "User Boundary Panel 仍需复核")),
       card("final_offline_beta_audit", "Final Offline Beta Audit", labelOf(auditSummary, "Final Offline Beta Audit 仍需复核")),
       card("public_beta_acceptance_board", "Public Beta Acceptance Board", labelOf(boardSummary, "Public Beta Acceptance Board 仍需复核")),
       card("manual_review_required", "Manual Review Required", "仍需人工复核后再决定是否进入下一阶段")
@@ -87,11 +93,17 @@
     const safe = obj(viewModel);
     const publicBetaOperatorConsoleSummary = resolveSummary(safe, "publicBetaOperatorConsoleSummary", "WeishanGlobalShoppingPublicBetaOperatorConsole", "buildGlobalShoppingPublicBetaOperatorConsole");
     const categoryExpansionShellSummary = resolveSummary(safe, "categoryExpansionShellSummary", "WeishanGlobalShoppingCategoryExpansionShell", "buildGlobalShoppingCategoryExpansionShell");
+    const publicBetaUserJourneyShellSummary = resolveSummary(safe, "publicBetaUserJourneyShellSummary", "WeishanGlobalShoppingPublicBetaUserJourneyShell", "buildGlobalShoppingPublicBetaUserJourneyShell");
+    const safeSearchIntentMatrixSummary = resolveSummary(safe, "safeSearchIntentMatrixSummary", "WeishanGlobalShoppingSafeSearchIntentMatrix", "buildGlobalShoppingSafeSearchIntentMatrix");
+    const publicBetaUserBoundaryPanelSummary = resolveSummary(safe, "publicBetaUserBoundaryPanelSummary", "WeishanGlobalShoppingPublicBetaUserBoundaryPanel", "buildGlobalShoppingPublicBetaUserBoundaryPanel");
     const finalOfflineBetaAuditSummary = resolveSummary(safe, "finalOfflineBetaAuditSummary", "WeishanGlobalShoppingFinalOfflineBetaAudit", "buildGlobalShoppingFinalOfflineBetaAudit");
     const publicBetaAcceptanceBoardSummary = resolveSummary(safe, "publicBetaAcceptanceBoardSummary", "WeishanGlobalShoppingPublicBetaAcceptanceBoard", "buildGlobalShoppingPublicBetaAcceptanceBoard");
     const statuses = [
       safeStatus(publicBetaOperatorConsoleSummary.status),
       safeStatus(categoryExpansionShellSummary.status),
+      safeStatus(publicBetaUserJourneyShellSummary.status),
+      safeStatus(safeSearchIntentMatrixSummary.status),
+      safeStatus(publicBetaUserBoundaryPanelSummary.status),
       safeStatus(finalOfflineBetaAuditSummary.status),
       safeStatus(publicBetaAcceptanceBoardSummary.status)
     ];
@@ -99,6 +111,9 @@
     const needsReview =
       !present(publicBetaOperatorConsoleSummary) ||
       !present(categoryExpansionShellSummary) ||
+      !present(publicBetaUserJourneyShellSummary) ||
+      !present(safeSearchIntentMatrixSummary) ||
+      !present(publicBetaUserBoundaryPanelSummary) ||
       !present(finalOfflineBetaAuditSummary) ||
       !present(publicBetaAcceptanceBoardSummary) ||
       statuses.indexOf("needs_review") >= 0;
@@ -112,6 +127,9 @@
       cards:buildGlobalShoppingPublicBetaOperatorCards({
         publicBetaOperatorConsoleSummary,
         categoryExpansionShellSummary,
+        publicBetaUserJourneyShellSummary,
+        safeSearchIntentMatrixSummary,
+        publicBetaUserBoundaryPanelSummary,
         finalOfflineBetaAuditSummary,
         publicBetaAcceptanceBoardSummary
       }),
@@ -122,6 +140,9 @@
       acceptanceBoardRows:buildGlobalShoppingAcceptanceBoardRowsForView({ publicBetaAcceptanceBoardSummary }),
       publicBetaOperatorConsoleSummary,
       categoryExpansionShellSummary,
+      publicBetaUserJourneyShellSummary,
+      safeSearchIntentMatrixSummary,
+      publicBetaUserBoundaryPanelSummary,
       finalOfflineBetaAuditSummary,
       publicBetaAcceptanceBoardSummary,
       userFacingSummary:{

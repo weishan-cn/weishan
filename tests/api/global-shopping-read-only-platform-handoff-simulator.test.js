@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingReadOnlyPlatformHandoffSimulator.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingReadOnlyPlatformHandoffSimulator;
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_PLATFORM_HANDOFF_SIMULATOR_VERSION, "4.0.4");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_PLATFORM_HANDOFF_SIMULATOR_VERSION, "4.0.5");
   const input = {
     sandboxDecisionReviewViewModel:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox 候选决策复核已准备", redacted:true }, redacted:true },
     sandboxCandidateComparisonWorkbench:{ status:"ready", recommendationSummary:{ recommendedCandidateId:"candidate_a", redacted:true }, userFacingSummary:{ resultLabel:"候选对比已准备", redacted:true }, redacted:true },
@@ -34,7 +34,7 @@ function main() {
     currency:"CNY"
   };
   const ready = api.buildGlobalShoppingReadOnlyPlatformHandoffSimulator(input);
-  assert.equal(ready.appVersion, "4.0.4");
+  assert.equal(ready.appVersion, "4.0.5");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "交接模拟已准备");
   assert.equal(ready.simulationSummary.hasDecisionReview, true);

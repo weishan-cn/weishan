@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_CATEGORY_EXPANSION_SHELL_VERSION = "4.0.4";
+  const GLOBAL_SHOPPING_CATEGORY_EXPANSION_SHELL_VERSION = "4.0.5";
   const SHELL_NAME = "global_shopping_category_expansion_shell_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, category_expansion_only:true };
   const REQUIRED_CATEGORIES = ["flight", "hotel", "product"];
@@ -119,14 +119,18 @@
 
   function evaluateGlobalShoppingCategoryExpansionShell(input) {
     const safe = obj(input);
+    const intentMatrix = obj(safe.safeSearchIntentMatrixSummary);
+    const userBoundaryPanel = obj(safe.publicBetaUserBoundaryPanelSummary);
     const categories = {};
     REQUIRED_CATEGORIES.forEach(function (key) {
       if (safe[key] && typeof safe[key] === "object") categories[key] = buildCategory(safe[key], key);
       else if (safe.categories && safe.categories[key] && typeof safe.categories[key] === "object") categories[key] = buildCategory(safe.categories[key], key);
     });
     const missing = REQUIRED_CATEGORIES.filter(function (key) { return !categories[key]; });
-    const blocked = REQUIRED_CATEGORIES.some(function (key) { return categories[key] && categoryBlocked(categories[key]); });
-    const status = blocked ? "blocked" : (missing.length ? "needs_review" : "ready");
+    const blocked = REQUIRED_CATEGORIES.some(function (key) { return categories[key] && categoryBlocked(categories[key]); }) ||
+      safeStatus(intentMatrix.status) === "blocked" ||
+      safeStatus(userBoundaryPanel.status) === "blocked";
+    const status = blocked ? "blocked" : ((missing.length || !Object.keys(intentMatrix).length || !Object.keys(userBoundaryPanel).length) ? "needs_review" : "ready");
     return clone({
       shellName:SHELL_NAME,
       appVersion:GLOBAL_SHOPPING_CATEGORY_EXPANSION_SHELL_VERSION,
@@ -142,7 +146,7 @@
       userFacingSummary:{
         title:"Category Expansion Shell",
         resultLabel:status === "ready" ? "Flight / Hotel / Product 只读外壳已准备" : (status === "blocked" ? "Category Expansion Shell 已阻断" : "Category Expansion Shell 仍需复核"),
-        caveat:"Flight / Hotel / Product 仍为只读外壳，不提供真实 provider、支付或下单能力。"
+        caveat:"Flight / Hotel / Product 仍为只读外壳，只生成只读搜索计划，不提供真实 provider、支付或下单能力。"
       },
       externalUrl:null,
       platformUrl:null,

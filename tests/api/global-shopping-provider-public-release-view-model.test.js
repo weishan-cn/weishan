@@ -39,7 +39,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderPublicReleaseViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderPublicReleaseViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_PUBLIC_RELEASE_VIEW_MODEL_VERSION, "4.0.4");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_PUBLIC_RELEASE_VIEW_MODEL_VERSION, "4.0.5");
   const ready = api.buildGlobalShoppingProviderPublicReleaseViewModel({
     providerReadOnlyPublicReleaseCenterSummary:readySummary("Provider Read-Only Public Release Center", "Provider Read-Only Public Release Center 已准备"),
     trustClosureExportPreviewSummary:readySummary("Trust Closure Export Preview", "Trust Closure Export Preview 已准备"),
@@ -47,7 +47,7 @@ function main() {
     publicSafetyStatementPreviewSummary:readySummary("Public Safety Statement Preview", "Public Safety Statement Preview 已准备")
   });
   assert.equal(ready.viewModelName, "global_shopping_provider_public_release_view_model_v1");
-  assert.equal(ready.appVersion, "4.0.4");
+  assert.equal(ready.appVersion, "4.0.5");
   assert.equal(ready.status, "ready");
   assert.equal(ready.title, "Provider Public Release Review");
   assert.equal(ready.cards.length, 5);

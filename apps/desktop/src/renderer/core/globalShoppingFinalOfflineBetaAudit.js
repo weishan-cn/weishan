@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_FINAL_OFFLINE_BETA_AUDIT_VERSION = "4.0.4";
+  const GLOBAL_SHOPPING_FINAL_OFFLINE_BETA_AUDIT_VERSION = "4.0.5";
   const AUDIT_NAME = "global_shopping_final_offline_beta_audit_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, final_offline_beta_audit_only:true };
   const SAFE_KEYS = ["noProvider", "noNetwork", "noKey", "noEndpoint", "noExternalOpen", "noPayment", "noOrder", "noTicketing", "noRawPersistence", "noReleaseMutation", "userCopySafe"];
@@ -45,6 +45,9 @@
     return clone([
       { sectionId:"operator_console", title:"Public Beta Operator Console", status:safeStatus(obj(safe.publicBetaOperatorConsoleSummary).status), redacted:true },
       { sectionId:"category_shell", title:"Category Expansion Shell", status:safeStatus(obj(safe.categoryExpansionShellSummary).status), redacted:true },
+      { sectionId:"user_journey_shell", title:"Public Beta User Journey", status:safeStatus(obj(safe.publicBetaUserJourneyShellSummary).status), redacted:true },
+      { sectionId:"safe_intent_matrix", title:"Safe Search Intent Matrix", status:safeStatus(obj(safe.safeSearchIntentMatrixSummary).status), redacted:true },
+      { sectionId:"user_boundary_panel", title:"User Boundary Panel", status:safeStatus(obj(safe.publicBetaUserBoundaryPanelSummary).status), redacted:true },
       { sectionId:"final_gate", title:"Public Beta Final Gate", status:safeStatus(obj(safe.publicBetaFinalGateSummary).status), redacted:true },
       { sectionId:"rc_board", title:"RC Confidence Board", status:safeStatus(obj(safe.releaseCandidateConfidenceBoardSummary).status), redacted:true },
       { sectionId:"safety_copy", title:"Public Beta Safety Copy Center", status:safeStatus(obj(safe.publicBetaSafetyCopyCenterSummary).status), redacted:true }
@@ -77,6 +80,9 @@
     const safe = obj(input);
     const publicBetaOperatorConsoleSummary = resolveSummary(safe, "publicBetaOperatorConsoleSummary", "WeishanGlobalShoppingPublicBetaOperatorConsole", "buildGlobalShoppingPublicBetaOperatorConsole");
     const categoryExpansionShellSummary = resolveSummary(safe, "categoryExpansionShellSummary", "WeishanGlobalShoppingCategoryExpansionShell", "buildGlobalShoppingCategoryExpansionShell");
+    const publicBetaUserJourneyShellSummary = resolveSummary(safe, "publicBetaUserJourneyShellSummary", "WeishanGlobalShoppingPublicBetaUserJourneyShell", "buildGlobalShoppingPublicBetaUserJourneyShell");
+    const safeSearchIntentMatrixSummary = resolveSummary(safe, "safeSearchIntentMatrixSummary", "WeishanGlobalShoppingSafeSearchIntentMatrix", "buildGlobalShoppingSafeSearchIntentMatrix");
+    const publicBetaUserBoundaryPanelSummary = resolveSummary(safe, "publicBetaUserBoundaryPanelSummary", "WeishanGlobalShoppingPublicBetaUserBoundaryPanel", "buildGlobalShoppingPublicBetaUserBoundaryPanel");
     const publicBetaFinalGateSummary = resolveSummary(safe, "publicBetaFinalGateSummary", "WeishanGlobalShoppingPublicBetaFinalGate", "buildGlobalShoppingPublicBetaFinalGate");
     const releaseCandidateConfidenceBoardSummary = resolveSummary(safe, "releaseCandidateConfidenceBoardSummary", "WeishanGlobalShoppingReleaseCandidateConfidenceBoard", "buildGlobalShoppingReleaseCandidateConfidenceBoard");
     const publicBetaSafetyCopyCenterSummary = resolveSummary(safe, "publicBetaSafetyCopyCenterSummary", "WeishanGlobalShoppingPublicBetaSafetyCopyCenter", "buildGlobalShoppingPublicBetaSafetyCopyCenter");
@@ -97,18 +103,24 @@
     const missingSummary =
       !Object.keys(publicBetaOperatorConsoleSummary).length ||
       !Object.keys(categoryExpansionShellSummary).length ||
+      !Object.keys(publicBetaUserJourneyShellSummary).length ||
+      !Object.keys(safeSearchIntentMatrixSummary).length ||
+      !Object.keys(publicBetaUserBoundaryPanelSummary).length ||
       !Object.keys(publicBetaFinalGateSummary).length ||
       !Object.keys(releaseCandidateConfidenceBoardSummary).length ||
       !Object.keys(publicBetaSafetyCopyCenterSummary).length;
     const blockedSummary =
       safeStatus(publicBetaOperatorConsoleSummary.status) === "blocked" ||
       safeStatus(categoryExpansionShellSummary.status) === "blocked" ||
+      safeStatus(publicBetaUserJourneyShellSummary.status) === "blocked" ||
+      safeStatus(safeSearchIntentMatrixSummary.status) === "blocked" ||
+      safeStatus(publicBetaUserBoundaryPanelSummary.status) === "blocked" ||
       safeStatus(publicBetaFinalGateSummary.status) === "blocked" ||
       safeStatus(releaseCandidateConfidenceBoardSummary.status) === "blocked" ||
       safeStatus(publicBetaSafetyCopyCenterSummary.status) === "blocked";
     const safeFailed = SAFE_KEYS.some(function (key) { return base[key] !== true; });
     const status = blockedSummary || safeFailed ? "blocked" : (missingSummary ? "needs_review" : "ready");
-    return clone({
+    return clone(Object.assign({
       auditName:AUDIT_NAME,
       appVersion:GLOBAL_SHOPPING_FINAL_OFFLINE_BETA_AUDIT_VERSION,
       status,
@@ -123,6 +135,9 @@
       sections:buildGlobalShoppingFinalOfflineBetaAuditSections({
         publicBetaOperatorConsoleSummary,
         categoryExpansionShellSummary,
+        publicBetaUserJourneyShellSummary,
+        safeSearchIntentMatrixSummary,
+        publicBetaUserBoundaryPanelSummary,
         publicBetaFinalGateSummary,
         releaseCandidateConfidenceBoardSummary,
         publicBetaSafetyCopyCenterSummary

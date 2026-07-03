@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "4.0.4";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "4.0.5";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -258,6 +258,9 @@
       globalShoppingPublicBetaViewModelSummary: stripUnsafe(safe.globalShoppingPublicBetaViewModelSummary || null),
       globalShoppingPublicBetaUserFacingCopyPolishSummary: stripUnsafe(safe.globalShoppingPublicBetaUserFacingCopyPolishSummary || null),
       globalShoppingProviderZeroStatusPanelSummary: stripUnsafe(safe.globalShoppingProviderZeroStatusPanelSummary || null),
+      publicBetaUserJourneyShellSummary: stripUnsafe(safe.publicBetaUserJourneyShellSummary || null),
+      safeSearchIntentMatrixSummary: stripUnsafe(safe.safeSearchIntentMatrixSummary || null),
+      publicBetaUserBoundaryPanelSummary: stripUnsafe(safe.publicBetaUserBoundaryPanelSummary || null),
       publicBetaFinalGateSummary: stripUnsafe(safe.publicBetaFinalGateSummary || null),
       releaseCandidateConfidenceBoardSummary: stripUnsafe(safe.releaseCandidateConfidenceBoardSummary || null),
       publicBetaFinalViewModelSummary: stripUnsafe(safe.publicBetaFinalViewModelSummary || null),
@@ -367,6 +370,9 @@
       globalShoppingPublicBetaViewModelStatus: safeText(safe.globalShoppingPublicBetaViewModelStatus || safe.globalShoppingPublicBetaViewModelSummary && safe.globalShoppingPublicBetaViewModelSummary.status || ""),
       globalShoppingPublicBetaUserFacingCopyPolishStatus: safeText(safe.globalShoppingPublicBetaUserFacingCopyPolishStatus || safe.globalShoppingPublicBetaUserFacingCopyPolishSummary && safe.globalShoppingPublicBetaUserFacingCopyPolishSummary.status || ""),
       globalShoppingProviderZeroStatusPanelStatus: safeText(safe.globalShoppingProviderZeroStatusPanelStatus || safe.globalShoppingProviderZeroStatusPanelSummary && safe.globalShoppingProviderZeroStatusPanelSummary.status || ""),
+      publicBetaUserJourneyShellStatus: safeText(safe.publicBetaUserJourneyShellStatus || safe.publicBetaUserJourneyShellSummary && safe.publicBetaUserJourneyShellSummary.status || ""),
+      safeSearchIntentMatrixStatus: safeText(safe.safeSearchIntentMatrixStatus || safe.safeSearchIntentMatrixSummary && safe.safeSearchIntentMatrixSummary.status || ""),
+      publicBetaUserBoundaryPanelStatus: safeText(safe.publicBetaUserBoundaryPanelStatus || safe.publicBetaUserBoundaryPanelSummary && safe.publicBetaUserBoundaryPanelSummary.status || ""),
       publicBetaFinalGateStatus: safeText(safe.publicBetaFinalGateStatus || safe.publicBetaFinalGateSummary && safe.publicBetaFinalGateSummary.status || ""),
       releaseCandidateConfidenceBoardStatus: safeText(safe.releaseCandidateConfidenceBoardStatus || safe.releaseCandidateConfidenceBoardSummary && safe.releaseCandidateConfidenceBoardSummary.status || ""),
       publicBetaFinalViewModelStatus: safeText(safe.publicBetaFinalViewModelStatus || safe.publicBetaFinalViewModelSummary && safe.publicBetaFinalViewModelSummary.status || ""),
@@ -712,6 +718,9 @@
     const globalShoppingPublicBetaViewModelSummary = formatter.formatGlobalShoppingPublicBetaViewModelSummary ? formatter.formatGlobalShoppingPublicBetaViewModelSummary({ globalShoppingPublicBetaViewModelSummary:workflow.globalShoppingPublicBetaViewModelSummary || safe.globalShoppingPublicBetaViewModelSummary || null }) : null;
     const globalShoppingPublicBetaUserFacingCopyPolishSummary = stripUnsafe(workflow.globalShoppingPublicBetaUserFacingCopyPolishSummary || safe.globalShoppingPublicBetaUserFacingCopyPolishSummary || null);
     const globalShoppingProviderZeroStatusPanelSummary = stripUnsafe(workflow.globalShoppingProviderZeroStatusPanelSummary || safe.globalShoppingProviderZeroStatusPanelSummary || null);
+    const publicBetaUserJourneyShellSummary = stripUnsafe(workflow.publicBetaUserJourneyShellSummary || safe.publicBetaUserJourneyShellSummary || null);
+    const safeSearchIntentMatrixSummary = stripUnsafe(workflow.safeSearchIntentMatrixSummary || safe.safeSearchIntentMatrixSummary || null);
+    const publicBetaUserBoundaryPanelSummary = stripUnsafe(workflow.publicBetaUserBoundaryPanelSummary || safe.publicBetaUserBoundaryPanelSummary || null);
     const publicBetaFinalGateSummary = stripUnsafe(workflow.publicBetaFinalGateSummary || safe.publicBetaFinalGateSummary || null);
     const releaseCandidateConfidenceBoardSummary = stripUnsafe(workflow.releaseCandidateConfidenceBoardSummary || safe.releaseCandidateConfidenceBoardSummary || null);
     const publicBetaFinalViewModelSummary = stripUnsafe(workflow.publicBetaFinalViewModelSummary || safe.publicBetaFinalViewModelSummary || null);
@@ -833,6 +842,9 @@
       globalShoppingPublicBetaViewModelSummary: globalShoppingPublicBetaViewModelSummary,
       globalShoppingPublicBetaUserFacingCopyPolishSummary: globalShoppingPublicBetaUserFacingCopyPolishSummary,
       globalShoppingProviderZeroStatusPanelSummary: globalShoppingProviderZeroStatusPanelSummary,
+      publicBetaUserJourneyShellSummary: publicBetaUserJourneyShellSummary,
+      safeSearchIntentMatrixSummary: safeSearchIntentMatrixSummary,
+      publicBetaUserBoundaryPanelSummary: publicBetaUserBoundaryPanelSummary,
       publicBetaFinalGateSummary: publicBetaFinalGateSummary,
       releaseCandidateConfidenceBoardSummary: releaseCandidateConfidenceBoardSummary,
       publicBetaFinalViewModelSummary: publicBetaFinalViewModelSummary,
@@ -846,6 +858,9 @@
       userTrustLaunchBoardStatus: workflow.userTrustLaunchBoardStatus || safe.userTrustLaunchBoardStatus || "",
       publicBetaSafetyCopyCenterStatus: workflow.publicBetaSafetyCopyCenterStatus || safe.publicBetaSafetyCopyCenterStatus || "",
       globalShoppingPublicBetaViewModelStatus: workflow.globalShoppingPublicBetaViewModelStatus || safe.globalShoppingPublicBetaViewModelStatus || "",
+      publicBetaUserJourneyShellStatus: workflow.publicBetaUserJourneyShellStatus || safe.publicBetaUserJourneyShellStatus || "",
+      safeSearchIntentMatrixStatus: workflow.safeSearchIntentMatrixStatus || safe.safeSearchIntentMatrixStatus || "",
+      publicBetaUserBoundaryPanelStatus: workflow.publicBetaUserBoundaryPanelStatus || safe.publicBetaUserBoundaryPanelStatus || "",
       publicBetaFinalGateStatus: workflow.publicBetaFinalGateStatus || safe.publicBetaFinalGateStatus || "",
       releaseCandidateConfidenceBoardStatus: workflow.releaseCandidateConfidenceBoardStatus || safe.releaseCandidateConfidenceBoardStatus || "",
       publicBetaFinalViewModelStatus: workflow.publicBetaFinalViewModelStatus || safe.publicBetaFinalViewModelStatus || "",
@@ -1269,6 +1284,9 @@
       globalShoppingPublicBetaViewModelSummary: workflow.globalShoppingPublicBetaViewModelSummary || safe.globalShoppingPublicBetaViewModelSummary || null,
       globalShoppingPublicBetaUserFacingCopyPolishSummary: workflow.globalShoppingPublicBetaUserFacingCopyPolishSummary || safe.globalShoppingPublicBetaUserFacingCopyPolishSummary || null,
       globalShoppingProviderZeroStatusPanelSummary: workflow.globalShoppingProviderZeroStatusPanelSummary || safe.globalShoppingProviderZeroStatusPanelSummary || null,
+      publicBetaUserJourneyShellSummary: workflow.publicBetaUserJourneyShellSummary || safe.publicBetaUserJourneyShellSummary || null,
+      safeSearchIntentMatrixSummary: workflow.safeSearchIntentMatrixSummary || safe.safeSearchIntentMatrixSummary || null,
+      publicBetaUserBoundaryPanelSummary: workflow.publicBetaUserBoundaryPanelSummary || safe.publicBetaUserBoundaryPanelSummary || null,
       publicBetaFinalGateSummary: workflow.publicBetaFinalGateSummary || safe.publicBetaFinalGateSummary || null,
       releaseCandidateConfidenceBoardSummary: workflow.releaseCandidateConfidenceBoardSummary || safe.releaseCandidateConfidenceBoardSummary || null,
       publicBetaFinalViewModelSummary: workflow.publicBetaFinalViewModelSummary || safe.publicBetaFinalViewModelSummary || null,

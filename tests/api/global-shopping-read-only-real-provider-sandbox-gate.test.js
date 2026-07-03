@@ -16,7 +16,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingReadOnlyRealProviderSandboxGate.js"]);
   const api = windowRef.WeishanGlobalShoppingReadOnlyRealProviderSandboxGate;
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_REAL_PROVIDER_SANDBOX_GATE_VERSION, "4.0.4");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_REAL_PROVIDER_SANDBOX_GATE_VERSION, "4.0.5");
 
   const ready = api.buildGlobalShoppingReadOnlyRealProviderSandboxGate({
     readOnlyProviderSandboxConnectorSummary:{ status:"ready" },
@@ -27,7 +27,7 @@ function main() {
     providerCredentialSafetySummary:{ status:"ready" },
     sandboxPriceFeedSummary:{ status:"ready" }
   });
-  assert.equal(ready.appVersion, "4.0.4");
+  assert.equal(ready.appVersion, "4.0.5");
   assert.equal(ready.status, "ready");
   assert.equal(ready.sandboxReadiness.safeToPrepareReadOnlyProviderSandbox, true);
   assert.equal(ready.readinessRows.length, 8);

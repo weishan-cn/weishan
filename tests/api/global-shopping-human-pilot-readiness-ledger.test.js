@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingHumanPilotReadinessLedger.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingHumanPilotReadinessLedger;
-  assert.equal(api.GLOBAL_SHOPPING_HUMAN_PILOT_READINESS_LEDGER_VERSION, "4.0.4");
+  assert.equal(api.GLOBAL_SHOPPING_HUMAN_PILOT_READINESS_LEDGER_VERSION, "4.0.5");
 
   const ready = api.buildGlobalShoppingHumanPilotReadinessLedger({
     governanceAuditConsoleSummary:{ status:"ready", userFacingSummary:{ resultLabel:"治理审计控制台已准备", redacted:true }, redacted:true },

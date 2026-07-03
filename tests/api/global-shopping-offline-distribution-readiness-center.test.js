@@ -38,7 +38,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineDistributionReadinessCenter.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineDistributionReadinessCenter;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_DISTRIBUTION_READINESS_CENTER_VERSION, "4.0.4");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_DISTRIBUTION_READINESS_CENTER_VERSION, "4.0.5");
   const ready = api.buildGlobalShoppingOfflineDistributionReadinessCenter({
     centerMode:"offline_mock",
     offlineProviderGovernanceClosureBoardSummary:readySummary("Offline Provider Governance Closure Board", "Offline Provider Governance Closure Board 已准备"),

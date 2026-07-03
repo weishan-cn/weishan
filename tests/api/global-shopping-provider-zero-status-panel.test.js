@@ -39,13 +39,13 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderZeroStatusPanel.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderZeroStatusPanel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_ZERO_STATUS_PANEL_VERSION, "4.0.4");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_ZERO_STATUS_PANEL_VERSION, "4.0.5");
   const ready = api.buildGlobalShoppingProviderZeroStatusPanel({
     globalShoppingReadOnlyPublicBetaShellSummary:readySummary("Global Shopping Read-Only Public Beta Shell", "Global Shopping Read-Only Public Beta Shell 已准备"),
     providerZeroRuntimeLockSummary:readySummary("Provider-Zero Runtime Lock", "Provider-Zero Runtime Lock 已准备")
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.0.4");
+  assert.equal(ready.appVersion, "4.0.5");
   assert.equal(ready.userFacingSummary.resultLabel, "Provider-Zero Status Panel 已准备");
   assert.equal(ready.rows.some((item) => item.label === "Provider-Zero：未接入真实供应商"), true);
   assert.equal(ready.externalUrl, null);

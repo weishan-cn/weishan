@@ -94,13 +94,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.0.4");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.0.5");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "4.0.4");
+  assert.equal(ready.appVersion, "4.0.5");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -396,6 +396,9 @@ function main() {
     globalShoppingPublicBetaViewModelSummary:{ status:"ready", title:"Global Shopping Public Beta Review", redacted:true },
     globalShoppingPublicBetaUserFacingCopyPolishSummary:{ status:"ready", userFacingSummary:{ title:"全球购 Public Beta", resultLabel:"全球购 Public Beta 已准备", redacted:true }, redacted:true },
     globalShoppingProviderZeroStatusPanelSummary:{ status:"ready", userFacingSummary:{ title:"Provider-Zero Status Panel", resultLabel:"Provider-Zero Status Panel 已准备", redacted:true }, redacted:true },
+    publicBetaUserJourneyShellSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta User Journey", resultLabel:"Public Beta User Journey 已准备", redacted:true }, redacted:true },
+    safeSearchIntentMatrixSummary:{ status:"ready", userFacingSummary:{ title:"Safe Search Intent Matrix", resultLabel:"Safe Search Intent Matrix 已准备", redacted:true }, redacted:true },
+    publicBetaUserBoundaryPanelSummary:{ status:"ready", userFacingSummary:{ title:"User Boundary Panel", resultLabel:"User Boundary Panel 已准备", redacted:true }, redacted:true },
     globalShoppingReadOnlyPublicBetaShellStatus:"ready",
     providerZeroRuntimeLockStatus:"ready",
     userTrustLaunchBoardStatus:"ready",
@@ -406,6 +409,9 @@ function main() {
     globalShoppingPublicBetaViewModelStatus:"ready",
     globalShoppingPublicBetaUserFacingCopyPolishStatus:"ready",
     globalShoppingProviderZeroStatusPanelStatus:"ready",
+    publicBetaUserJourneyShellStatus:"ready",
+    safeSearchIntentMatrixStatus:"ready",
+    publicBetaUserBoundaryPanelStatus:"ready",
     safeToProceedWithHumanPublicBetaReview:true,
     safeToProceedWithManualPublicBetaReview:true
   });
@@ -419,6 +425,9 @@ function main() {
   assert.equal(publicBetaReady.safetyReport.globalShoppingPublicBetaViewModelSummary.title, "Global Shopping Public Beta Review");
   assert.equal(publicBetaReady.safetyReport.globalShoppingPublicBetaUserFacingCopyPolishSummary.userFacingSummary.title, "全球购 Public Beta");
   assert.equal(publicBetaReady.safetyReport.globalShoppingProviderZeroStatusPanelSummary.userFacingSummary.title, "Provider-Zero Status Panel");
+  assert.equal(publicBetaReady.safetyReport.publicBetaUserJourneyShellSummary.userFacingSummary.title, "Public Beta User Journey");
+  assert.equal(publicBetaReady.safetyReport.safeSearchIntentMatrixSummary.userFacingSummary.title, "Safe Search Intent Matrix");
+  assert.equal(publicBetaReady.safetyReport.publicBetaUserBoundaryPanelSummary.userFacingSummary.title, "User Boundary Panel");
   assert.equal(publicBetaReady.userFacingSummary.publicBetaFinalGateStatus, "ready");
   assert.equal(publicBetaReady.userFacingSummary.releaseCandidateConfidenceBoardStatus, "ready");
   assert.equal(publicBetaReady.userFacingSummary.publicBetaFinalViewModelStatus, "ready");

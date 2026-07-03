@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PILOT_OPS_VIEW_MODEL_VERSION = "4.0.4";
+  const FLIGHT_WORKFLOW_PILOT_OPS_VIEW_MODEL_VERSION = "4.0.5";
   const VIEW_MODEL_NAME = "flight_workflow_pilot_ops_view_model_v1";
   const CAVEAT = "该页面只用于只读试点运营判断，不保存真实身份、不发送真实邀请、不提供交易能力。";
 

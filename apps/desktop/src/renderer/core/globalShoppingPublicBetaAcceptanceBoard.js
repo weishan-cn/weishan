@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_BOARD_VERSION = "4.0.4";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_BOARD_VERSION = "4.0.5";
   const BOARD_NAME = "global_shopping_public_beta_acceptance_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, acceptance_board_only:true };
 
@@ -30,6 +30,9 @@
       row("official_anchor_ready", "officialAnchorReady", safe.officialAnchorReady === true ? "true" : "false", safe.officialAnchorReady === true ? "pass" : "warning"),
       row("safety_copy_clean", "safetyCopyClean", safe.safetyCopyClean === true ? "true" : "false", safe.safetyCopyClean === true ? "pass" : "warning"),
       row("category_shell_ready", "categoryShellReady", safe.categoryShellReady === true ? "true" : "false", safe.categoryShellReady === true ? "pass" : "warning"),
+      row("user_journey_ready", "userJourneyReady", safe.userJourneyReady === true ? "true" : "false", safe.userJourneyReady === true ? "pass" : "warning"),
+      row("safe_intent_ready", "safeIntentReady", safe.safeIntentReady === true ? "true" : "false", safe.safeIntentReady === true ? "pass" : "warning"),
+      row("user_boundary_ready", "userBoundaryReady", safe.userBoundaryReady === true ? "true" : "false", safe.userBoundaryReady === true ? "pass" : "warning"),
       row("final_audit_ready", "finalAuditReady", safe.finalAuditReady === true ? "true" : "false", safe.finalAuditReady === true ? "pass" : "warning"),
       row("no_payment", "noPayment", safe.noPayment === true ? "true" : "false", safe.noPayment === true ? "pass" : "blocked"),
       row("no_order", "noOrder", safe.noOrder === true ? "true" : "false", safe.noOrder === true ? "pass" : "blocked"),
@@ -68,6 +71,9 @@
       officialAnchorReady:safe.officialAnchorReady === true,
       safetyCopyClean:safe.safetyCopyClean === true,
       categoryShellReady:safe.categoryShellReady === true,
+      userJourneyReady:safe.userJourneyReady === true,
+      safeIntentReady:safe.safeIntentReady === true,
+      userBoundaryReady:safe.userBoundaryReady === true,
       finalAuditReady:safe.finalAuditReady === true,
       noPayment:safe.noPayment !== false,
       noOrder:safe.noOrder !== false,
@@ -95,6 +101,9 @@
       criteriaSource.officialAnchorReady &&
       criteriaSource.safetyCopyClean &&
       criteriaSource.categoryShellReady &&
+      criteriaSource.userJourneyReady &&
+      criteriaSource.safeIntentReady &&
+      criteriaSource.userBoundaryReady &&
       criteriaSource.finalAuditReady &&
       criteriaSource.noPayment &&
       criteriaSource.noOrder &&

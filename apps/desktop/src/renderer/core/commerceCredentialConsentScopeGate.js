@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const CREDENTIAL_CONSENT_SCOPE_GATE_VERSION = "4.0.4";
+  const CREDENTIAL_CONSENT_SCOPE_GATE_VERSION = "4.0.5";
   const core = window.WeishanCredentialConsentScopeGate;
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
   function fallbackCore() {
