@@ -1,5 +1,5 @@
 (function(){
-  const CLEAN_RESULT_SURFACE_V1_VERSION = "4.0.9";
+  const CLEAN_RESULT_SURFACE_V1_VERSION = "4.1.0";
   const ALLOWED_ACTIONS = ["manual_confirm", "copy_search_conditions", "external_search_manual"];
 
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

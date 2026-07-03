@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_OFFLINE_LAUNCH_CHECKLIST_VERSION = "4.0.9";
+  const GLOBAL_SHOPPING_PROVIDER_OFFLINE_LAUNCH_CHECKLIST_VERSION = "4.1.0";
   const CHECKLIST_NAME = "global_shopping_provider_offline_launch_checklist_v1";
   const BUILD_GUARD_KEY = "__weishanGlobalShoppingProviderOfflineLaunchChecklistBuilding";
 

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_VISUAL_TRIAL_GUIDE_VERSION = "4.0.9";
+  const GLOBAL_SHOPPING_VISUAL_TRIAL_GUIDE_VERSION = "4.1.0";
   const GUIDE_NAME = "global_shopping_visual_trial_guide_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, visual_trial_guide_only:true };
 
@@ -56,7 +56,8 @@
       row("visual_trial_guide_status", "Visual Trial Guide", status === "ready" ? "Visual Trial Guide 已准备" : (status === "blocked" ? "Visual Trial Guide 已阻断" : "Visual Trial Guide 仍需复核"), status === "ready" ? "pass" : (status === "blocked" ? "blocked" : "warning")),
       row("visual_trial_guide_paths", "Readonly Capabilities", "flight / hotel / product 只读路径可人工检查", "pass"),
       row("visual_trial_guide_restricted", "Restricted Category", safe.restrictedCategoryBlock === true ? "restricted category block 已准备" : "restricted category block 仍需复核", safe.restrictedCategoryBlock === true ? "pass" : "warning"),
-      row("visual_trial_guide_privacy", "Privacy Boundary", "不会保存账号、证件或支付信息", "pass")
+      row("visual_trial_guide_privacy", "Privacy Boundary", "不会保存账号、证件或支付信息", "pass"),
+      row("visual_trial_guide_rc", "RC Candidate Boundary", "仍然不接真实 provider、不联网、不启用交易", "warning")
     ]);
   }
 
@@ -79,7 +80,7 @@
       userFacingSummary:{
         title:"Visual Trial Guide",
         resultLabel:status === "ready" ? "Visual Trial Guide 已准备" : (status === "blocked" ? "Visual Trial Guide 已阻断" : "Visual Trial Guide 仍需复核"),
-        caveat:"只做人工检查，不截图、不上传、不打开外部平台。"
+        caveat:"只做人工检查，不创建 release、不 push，不截图、不上传、不打开外部平台；仍然不接真实 provider、不联网、不启用交易。"
       },
       externalUrl:null,
       platformUrl:null,

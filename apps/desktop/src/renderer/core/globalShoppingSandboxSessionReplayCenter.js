@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_SESSION_REPLAY_CENTER_VERSION = "4.0.9";
+  const GLOBAL_SHOPPING_SANDBOX_SESSION_REPLAY_CENTER_VERSION = "4.1.0";
   const CENTER_NAME = "global_shopping_sandbox_session_replay_center_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

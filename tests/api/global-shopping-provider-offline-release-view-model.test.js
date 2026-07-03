@@ -22,7 +22,7 @@ function readySummary(title, resultLabel, status = "ready") {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderOfflineReleaseViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderOfflineReleaseViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_OFFLINE_RELEASE_VIEW_MODEL_VERSION, "4.0.9");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_OFFLINE_RELEASE_VIEW_MODEL_VERSION, "4.1.0");
 
   const ready = api.buildGlobalShoppingProviderOfflineReleaseViewModel({
     providerOfflineReleaseGateSummary:readySummary("Provider Offline Release Gate", "离线发布闸门已准备"),

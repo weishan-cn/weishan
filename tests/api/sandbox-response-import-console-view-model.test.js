@@ -31,7 +31,7 @@ function main() {
     "apps/desktop/src/renderer/core/sandboxResponseImportConsoleViewModel.js"
   ]);
   const api = windowRef.WeishanSandboxResponseImportConsoleViewModel;
-  assert.equal(api.SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION, "4.0.9");
+  assert.equal(api.SANDBOX_RESPONSE_IMPORT_CONSOLE_VIEW_MODEL_VERSION, "4.1.0");
   const initial = api.buildSandboxResponseImportConsoleModel();
   assert.equal(initial.status, "idle");
   assert.equal(initial.title, "多 Provider 沙盒报价导入");

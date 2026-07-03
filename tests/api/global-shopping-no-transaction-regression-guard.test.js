@@ -24,7 +24,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingNoTransactionRegressionGuard.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingNoTransactionRegressionGuard;
-  assert.equal(api.GLOBAL_SHOPPING_NO_TRANSACTION_REGRESSION_GUARD_VERSION, "4.0.9");
+  assert.equal(api.GLOBAL_SHOPPING_NO_TRANSACTION_REGRESSION_GUARD_VERSION, "4.1.0");
   const ready = api.buildGlobalShoppingNoTransactionRegressionGuard({
     publicBetaVisualQaConsoleSummary:summary("Public Beta Visual QA Console"),
     publicBetaTrialScenarioChecklistSummary:summary("Trial Scenario Checklist"),
@@ -43,7 +43,7 @@ function main() {
     providerUrl:null
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.0.9");
+  assert.equal(ready.appVersion, "4.1.0");
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(ready.bookingUrl, null);
   assert.equal(ready.paymentButtonEnabled, false);

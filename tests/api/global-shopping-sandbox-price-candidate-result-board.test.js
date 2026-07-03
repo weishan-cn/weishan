@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingSandboxPriceCandidateResultBoard.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingSandboxPriceCandidateResultBoard;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PRICE_CANDIDATE_RESULT_BOARD_VERSION, "4.0.9");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PRICE_CANDIDATE_RESULT_BOARD_VERSION, "4.1.0");
 
   const ready = api.buildGlobalShoppingSandboxPriceCandidateResultBoard({
     sandboxPriceCandidateSessionSummary:{ status:"ready", sessionSummary:{ officialSourceCount:1, authorizedSourceCount:0, partnerSourceCount:0, affiliateSourceCount:0, aggregatorSourceCount:0, fixtureSourceCount:1, hasCoveredLowestCandidate:true, providerConnectorReady:true, coverageReady:true, sourceTrustReady:true, pricePipelineReady:true }, sessionBoundary:{ sessionMode:"sandbox_ready" }, redacted:true },

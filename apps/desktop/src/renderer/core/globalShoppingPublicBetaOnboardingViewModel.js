@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_ONBOARDING_VIEW_MODEL_VERSION = "4.0.9";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_ONBOARDING_VIEW_MODEL_VERSION = "4.1.0";
   const VIEW_MODEL_NAME = "global_shopping_public_beta_onboarding_view_model_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -54,7 +54,8 @@
       card("safe_feedback_draft", "Safe Feedback Draft", labelOf(feedbackSummary, "Safe Feedback Draft 仍需复核")),
       card("readonly_capabilities", "Readonly Capabilities", "你可以查看候选价、费用归一化和官方价锚点"),
       card("locked_capabilities", "Locked Capabilities", "当前不会付款、下单或出票"),
-      card("privacy_boundary", "Privacy Boundary", "不会保存账号、证件或支付信息")
+      card("privacy_boundary", "Privacy Boundary", "不会保存账号、证件或支付信息"),
+      card("rc_candidate_boundary", "RC Candidate Boundary", "当前只是 RC 候选，不创建 release、不 push")
     ]);
   }
 
@@ -66,7 +67,8 @@
       row("public_beta_onboarding_readonly", "Readonly Capabilities", "你可以查看候选价、费用归一化和官方价锚点", "pass"),
       row("public_beta_onboarding_locked", "Locked Capabilities", "当前不会付款、下单或出票", "warning"),
       row("public_beta_onboarding_privacy", "Privacy Boundary", "不会保存账号、证件或支付信息", "pass"),
-      row("public_beta_onboarding_feedback", "Safe Feedback Draft", "反馈入口目前仅为草稿，不发送、不上传、不保存用户原文", "warning")
+      row("public_beta_onboarding_feedback", "Safe Feedback Draft", "反馈入口目前仅为草稿，不发送、不上传、不保存用户原文", "warning"),
+      row("public_beta_onboarding_rc", "RC Candidate Boundary", "当前只是 RC 候选，不创建 release、不 push", "warning")
     ]);
   }
 
@@ -101,7 +103,7 @@
       userFacingSummary:{
         title:"Public Beta Onboarding View Model",
         resultLabel:status === "ready" ? "Public Beta User Onboarding / Visual Trial Guide / Safe Feedback Draft 已准备" : (status === "blocked" ? "Public Beta Onboarding View Model 已阻断" : "Public Beta Onboarding View Model 仍需复核"),
-        caveat:"不输出反馈发送、上传、下单、付款、出票、provider、release 或 push 入口。"
+        caveat:"不输出反馈发送、上传、下单、付款、出票、provider、release 或 push 入口；当前只是 RC 候选，不创建 release、不 push。"
       },
       externalUrl:null,
       platformUrl:null,

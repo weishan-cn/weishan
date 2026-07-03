@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_HANDOFF_RECEIPT_STORE_VERSION = "4.0.9";
+  const PROVIDER_HANDOFF_RECEIPT_STORE_VERSION = "4.1.0";
   const STORAGE_KEY = "weishan.providerHandoffReceipt.v1";
   const RECEIPT_NAME = "provider_handoff_receipt_v1";
   const RECEIPT_ID = "deterministic-provider-handoff-receipt-v2.4.1";

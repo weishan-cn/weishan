@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_SCENARIO_CHECKLIST_VERSION = "4.0.9";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_SCENARIO_CHECKLIST_VERSION = "4.1.0";
   const CHECKLIST_NAME = "global_shopping_public_beta_trial_scenario_checklist_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, trial_scenario_checklist_only:true };
 
@@ -145,7 +145,7 @@
       userFacingSummary:{
         title:"Trial Scenario Checklist",
         resultLabel:status === "ready" ? "Trial Scenario Checklist 已准备" : (status === "blocked" ? "Trial Scenario Checklist 已阻断" : "Trial Scenario Checklist 仍需复核"),
-        caveat:"Flight / Hotel / Product / Restricted 场景仅做只读试用验证。"
+        caveat:"Flight / Hotel / Product / Restricted 场景仅做只读试用验证；当前只是 RC 候选，不创建 release、不 push。"
       },
       externalUrl:null,
       platformUrl:null,

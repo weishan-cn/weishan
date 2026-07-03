@@ -18,15 +18,16 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingSafeFeedbackDraftPanel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingSafeFeedbackDraftPanel;
-  assert.equal(api.GLOBAL_SHOPPING_SAFE_FEEDBACK_DRAFT_PANEL_VERSION, "4.0.9");
+  assert.equal(api.GLOBAL_SHOPPING_SAFE_FEEDBACK_DRAFT_PANEL_VERSION, "4.1.0");
   const ready = api.buildGlobalShoppingSafeFeedbackDraftPanel({});
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.0.9");
+  assert.equal(ready.appVersion, "4.1.0");
   assert.equal(ready.feedbackEnabled, false);
   assert.equal(ready.uploadEnabled, false);
   assert.equal(ready.emailEnabled, false);
   assert.equal(ready.externalFormUrl, null);
   assert.equal(ready.buyButtonEnabled, false);
+  assert.match(ready.userFacingSummary.caveat, /不创建 release、不 push/);
   assert.equal(api.buildGlobalShoppingSafeFeedbackDraftPanel({
     feedbackSent:true
   }).status, "blocked");

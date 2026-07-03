@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v4.0.9 public beta onboarding review stays local and bounded @commerce-smoke", async () => {
+  test("v4.1.0 public beta rc review stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9640,7 +9640,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v401-render-smoke", "true");
       const card = {
-        version:"4.0.9",
+        version:"4.1.0",
         visible:true,
         globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, rows:[{ rowId:"public_beta", label:"Global Shopping Read-Only Public Beta Shell", value:"Global Shopping Read-Only Public Beta Shell 已准备", status:"pass", redacted:true }], redacted:true },
         globalShoppingReadOnlyCandidateEvidenceUnifierSummary:{ status:"ready", userFacingSummary:{ title:"候选价证据", resultLabel:"候选价证据已准备", redacted:true }, rows:[{ rowId:"candidate_evidence", label:"候选价证据", value:"候选价证据已准备", status:"pass", redacted:true }], redacted:true },
@@ -9672,6 +9672,9 @@ test.describe.serial("commerce agent workbench", () => {
         visualTrialGuideSummary:{ status:"ready", userFacingSummary:{ title:"Visual Trial Guide", resultLabel:"Visual Trial Guide 已准备", redacted:true }, rows:[{ rowId:"visual_trial_guide", label:"Visual Trial Guide", value:"Visual Trial Guide 已准备", status:"pass", redacted:true }], redacted:true },
         safeFeedbackDraftPanelSummary:{ status:"ready", userFacingSummary:{ title:"Safe Feedback Draft", resultLabel:"Safe Feedback Draft 已准备", redacted:true }, rows:[{ rowId:"safe_feedback_draft", label:"Safe Feedback Draft", value:"Safe Feedback Draft 已准备", status:"pass", redacted:true }], redacted:true },
         publicBetaOnboardingViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Onboarding View Model", resultLabel:"Public Beta User Onboarding / Visual Trial Guide / Safe Feedback Draft 已准备", redacted:true }, rows:[{ rowId:"public_beta_onboarding_view_model", label:"Public Beta Onboarding View Model", value:"Public Beta User Onboarding / Visual Trial Guide / Safe Feedback Draft 已准备", status:"pass", redacted:true }], redacted:true },
+        publicBetaRcConsoleSummary:{ status:"manual_review_required", rcStatus:"manual_review_required", userFacingSummary:{ title:"Public Beta RC Console", resultLabel:"Public Beta RC Console 进入人工复核", redacted:true }, rows:[{ rowId:"public_beta_rc_console", label:"Public Beta RC Console", value:"Public Beta RC Console 进入人工复核", status:"warning", redacted:true }], redacted:true },
+        offlineTrialReleaseGateSummary:{ status:"ready", userFacingSummary:{ title:"Offline Trial Release Gate", resultLabel:"Offline Trial Release Gate 已准备", redacted:true }, rows:[{ rowId:"offline_trial_release_gate", label:"Offline Trial Release Gate", value:"Offline Trial Release Gate 已准备", status:"pass", redacted:true }], redacted:true },
+        publicBetaRcViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta RC Console", resultLabel:"Public Beta RC Console / Offline Trial Release Gate 已准备", redacted:true }, rows:[{ rowId:"public_beta_rc_view_model", label:"Public Beta RC View Model", value:"Public Beta RC Console / Offline Trial Release Gate 已准备", status:"pass", redacted:true }], safeToProceedWithManualRcReview:true, redacted:true },
         publicBetaOperatorConsoleSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Operator Console", resultLabel:"Provider-Zero 状态通过", redacted:true }, rows:[{ rowId:"public_beta_operator_console", label:"Public Beta Operator Console", value:"Provider-Zero 状态通过", status:"pass", redacted:true }], redacted:true },
         categoryExpansionShellSummary:{ status:"ready", userFacingSummary:{ title:"Category Expansion Shell", resultLabel:"Flight / Hotel / Product 只读外壳已准备", redacted:true }, rows:[{ rowId:"category_expansion_shell", label:"Category Expansion Shell", value:"Flight / Hotel / Product 只读外壳已准备", status:"pass", redacted:true }], redacted:true },
         finalOfflineBetaAuditSummary:{ status:"ready", userFacingSummary:{ title:"Final Offline Beta Audit", resultLabel:"最终离线审计通过", redacted:true }, rows:[{ rowId:"final_offline_beta_audit", label:"Final Offline Beta Audit", value:"最终离线审计通过", status:"pass", redacted:true }], redacted:true },
@@ -9698,6 +9701,9 @@ test.describe.serial("commerce agent workbench", () => {
         visualTrialGuideStatus:"ready",
         safeFeedbackDraftPanelStatus:"ready",
         publicBetaOnboardingViewModelStatus:"ready",
+        publicBetaRcConsoleStatus:"manual_review_required",
+        offlineTrialReleaseGateStatus:"ready",
+        publicBetaRcViewModelStatus:"ready",
         publicBetaOperatorConsoleStatus:"ready",
         categoryExpansionShellStatus:"ready",
         finalOfflineBetaAuditStatus:"ready",
@@ -9716,7 +9722,8 @@ test.describe.serial("commerce agent workbench", () => {
         safeToProceedWithManualTrialReview:true,
         safeToProceedWithManualVisualQaReview:true,
         safeToProceedWithManualPublicBetaReview:true,
-        safeToProceedWithManualPublicBetaAcceptanceReview:true
+        safeToProceedWithManualPublicBetaAcceptanceReview:true,
+        safeToProceedWithManualRcReview:true
       };
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml(card);
       const section = host.querySelector("[data-commerce-global-shopping-public-beta-review='true']");
@@ -9780,6 +9787,15 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("uploadEnabled:false");
     expect(v400.text).toContain("emailEnabled:false");
     expect(v400.text).toContain("externalFormUrl:null");
+    expect(v400.text).toContain("Public Beta RC Console");
+    expect(v400.text).toContain("Offline Trial Release Gate");
+    expect(v400.text).toContain("No Release Mutation");
+    expect(v400.text).toContain("No Transaction");
+    expect(v400.text).toContain("No Provider");
+    expect(v400.text).toContain("No External Open");
+    expect(v400.text).toContain("当前只是 RC 候选，不创建 release、不 push");
+    expect(v400.text).toContain("人工复核通过后才能进入下一阶段");
+    expect(v400.text).toContain("仍然不接真实 provider、不联网、不启用交易");
     expect(v400.text).toContain("Visual Acceptance");
     expect(v400.text).toContain("Scenario Coverage");
     expect(v400.text).toContain("Transaction Boundary");
@@ -9808,6 +9824,19 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("归一化价格仅用于辅助比较");
     expect(v400.text).toContain("不代表真实最终价");
     expect(v400.text).toContain("全球购 Public Beta 已准备");
+    expect(v400.text).not.toContain("ready_to_publish");
+    expect(v400.text).not.toContain("production_ready");
+    expect(v400.text).not.toContain("auto_release");
+    expect(v400.text).not.toContain("已自动发布");
+    expect(v400.text).not.toContain("已创建 release");
+    expect(v400.text).not.toContain("已 push");
+    expect(v400.text).not.toContain("已上线真实 provider");
+    expect(v400.text).not.toContain("已开启真实交易");
+    expect(v400.text).not.toContain("可付款");
+    expect(v400.text).not.toContain("可下单");
+    expect(v400.text).not.toContain("可以出票");
+    expect(v400.text).not.toContain("立即购买");
+    expect(v400.text).not.toContain("一键预订");
     expect(v400.text).toContain("Provider-Zero Status Panel 已准备");
     expect(v400.text).toContain("User Trust Launch Board 已准备");
     expect(v400.text).toContain("Public Beta Safety Copy Center 已准备");

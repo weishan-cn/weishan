@@ -15,7 +15,7 @@ function assertSafe(value) {
 }
 function main() {
   const api = load(["apps/desktop/src/renderer/core/flightWorkflowSupportReadinessGate.js"]).WeishanFlightWorkflowSupportReadinessGate;
-  assert.equal(api.FLIGHT_WORKFLOW_SUPPORT_READINESS_GATE_VERSION, "4.0.9");
+  assert.equal(api.FLIGHT_WORKFLOW_SUPPORT_READINESS_GATE_VERSION, "4.1.0");
   const ready = api.buildFlightWorkflowSupportReadinessGate(readyInput());
   assert.equal(ready.status, "ready");
   assert.equal(ready.decision.supportReadyForPublicPilot, true);

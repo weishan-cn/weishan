@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_VISUAL_QA_CONSOLE_VERSION = "4.0.9";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_VISUAL_QA_CONSOLE_VERSION = "4.1.0";
   const CONSOLE_NAME = "global_shopping_public_beta_visual_qa_console_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, visual_qa_console_only:true };
   const BLOCKED_COPY_RE = /screenshot|screen capture|upload|payment|order|checkout|ticketing|openExternal|window\.open/i;
@@ -141,7 +141,7 @@
       userFacingSummary:{
         title:"Public Beta Visual QA Console",
         resultLabel:status === "ready" ? "Public Beta Visual QA Console 已准备" : (status === "blocked" ? "Public Beta Visual QA Console 已阻断" : "Public Beta Visual QA Console 仍需复核"),
-        caveat:"仍需人工视觉验收；不截图、不上传、不打开平台。"
+        caveat:"仍需人工视觉验收；不截图、不上传、不打开平台；当前只是 RC 候选，不创建 release、不 push。"
       },
       externalUrl:null,
       platformUrl:null,

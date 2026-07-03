@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_MANUAL_VIEW_MODEL_VERSION = "4.0.9";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_MANUAL_VIEW_MODEL_VERSION = "4.1.0";
   const VIEW_MODEL_NAME = "global_shopping_public_beta_final_manual_view_model_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -53,7 +53,8 @@
       card("final_manual_acceptance_console", "Final Manual Acceptance Console", summaryLabel(acceptanceSummary, "Final Manual Acceptance Console 仍需复核")),
       card("feedback_placeholder", "Feedback Placeholder", summaryLabel(feedbackSummary, "Feedback Placeholder 仍需复核")),
       card("known_limitations", "Known Limitations", "试用范围仅限只读候选价、费用归一化、官方价锚点"),
-      card("manual_review_required", "Manual Review Required", "人工验收后再决定下一阶段")
+      card("manual_review_required", "Manual Review Required", "人工验收后再决定下一阶段"),
+      card("rc_candidate_boundary", "RC Candidate Boundary", "当前只是 RC 候选，不创建 release、不 push")
     ]);
   }
 
@@ -104,7 +105,7 @@
       userFacingSummary:{
         title:"Public Beta Final Manual View Model",
         resultLabel:status === "ready" ? "Public Beta Trial Readiness Pack / Final Manual Acceptance Console / Feedback Placeholder 已准备" : (status === "blocked" ? "Public Beta Final Manual View Model 已阻断" : "Public Beta Final Manual View Model 仍需复核"),
-        caveat:"不自动通过，不自动发布，人工验收后再决定下一阶段。"
+        caveat:"不自动通过，不自动发布，人工验收后再决定下一阶段；当前只是 RC 候选，不创建 release、不 push。"
       },
       safeToProceedWithManualTrialReview:status === "ready",
       externalUrl:null,

@@ -26,7 +26,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingReadOnlyProviderAdapterSdkSkeleton.js"]);
   const api = windowRef.WeishanGlobalShoppingReadOnlyProviderAdapterSdkSkeleton;
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_PROVIDER_ADAPTER_SDK_SKELETON_VERSION, "4.0.9");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_PROVIDER_ADAPTER_SDK_SKELETON_VERSION, "4.1.0");
 
   const ready = api.buildGlobalShoppingReadOnlyProviderAdapterSdkSkeleton({
     offlineProviderScenarioLabSummary:readySummary("Offline Provider Scenario Lab", "离线场景实验室已准备"),

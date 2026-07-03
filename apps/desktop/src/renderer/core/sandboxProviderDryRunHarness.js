@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SANDBOX_PROVIDER_DRY_RUN_HARNESS_VERSION = "4.0.9";
+  const SANDBOX_PROVIDER_DRY_RUN_HARNESS_VERSION = "4.1.0";
   const HARNESS_NAME = "sandbox_provider_dry_run_harness_v1";
   const SAFE_FARE_SOURCES = ["sandbox_read_only_import", "sandbox_read_only", "fixture_read_only"];
   const UNSAFE_NAME_RE = /(token|key|secret|password|session|auth|credential)/i;

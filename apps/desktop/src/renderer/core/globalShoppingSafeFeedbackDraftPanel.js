@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SAFE_FEEDBACK_DRAFT_PANEL_VERSION = "4.0.9";
+  const GLOBAL_SHOPPING_SAFE_FEEDBACK_DRAFT_PANEL_VERSION = "4.1.0";
   const PANEL_NAME = "global_shopping_safe_feedback_draft_panel_v1";
   const ALLOWED_MODES = { disabled:true, draft_only:true, readonly:true, offline_mock:true };
 
@@ -34,7 +34,8 @@
     return clone([
       row("safe_feedback_draft_status", "Safe Feedback Draft", safe.status === "blocked" ? "Safe Feedback Draft 已阻断" : (safe.status === "ready" ? "Safe Feedback Draft 已准备" : "Safe Feedback Draft 仍需复核"), safe.status === "blocked" ? "blocked" : (safe.status === "ready" ? "pass" : "warning")),
       row("safe_feedback_draft_boundary", "Privacy Boundary", "反馈入口目前仅为草稿，不发送、不上传、不保存用户原文", "warning"),
-      row("safe_feedback_draft_switches", "Feedback Enabled", "feedbackEnabled:false / uploadEnabled:false / emailEnabled:false", "pass")
+      row("safe_feedback_draft_switches", "Feedback Enabled", "feedbackEnabled:false / uploadEnabled:false / emailEnabled:false", "pass"),
+      row("safe_feedback_draft_rc_boundary", "RC Candidate Boundary", "当前只是 RC 候选，不创建 release、不 push", "warning")
     ]);
   }
 
@@ -64,7 +65,7 @@
       userFacingSummary:{
         title:"Safe Feedback Draft",
         resultLabel:status === "blocked" ? "Safe Feedback Draft 已阻断" : "Safe Feedback Draft 已准备",
-        caveat:"只展示未来反馈能力说明，不真实发送、不上传、不保存用户原文。"
+        caveat:"只展示未来反馈能力说明，不真实发送、不上传、不保存用户原文；当前只是 RC 候选，不创建 release、不 push。"
       },
       externalUrl:null,
       platformUrl:null,

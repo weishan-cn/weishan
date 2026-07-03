@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MOCK_PROVIDER_RESULT_NORMALIZER_VERSION = "4.0.9";
+  const GLOBAL_SHOPPING_MOCK_PROVIDER_RESULT_NORMALIZER_VERSION = "4.1.0";
   const NORMALIZER_NAME = "global_shopping_mock_provider_result_normalizer_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

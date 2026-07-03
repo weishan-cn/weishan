@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_USER_ONBOARDING_SHELL_VERSION = "4.0.9";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_USER_ONBOARDING_SHELL_VERSION = "4.1.0";
   const SHELL_NAME = "global_shopping_public_beta_user_onboarding_shell_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, onboarding_shell_only:true };
 
@@ -60,7 +60,8 @@
       row("public_beta_user_onboarding_readonly_capabilities", "Readonly Capabilities", "你可以查看候选价、费用归一化和官方价锚点", "pass"),
       row("public_beta_user_onboarding_locked_capabilities", "Locked Capabilities", "当前不会付款、下单或出票", "warning"),
       row("public_beta_user_onboarding_privacy_boundary", "Privacy Boundary", "不会保存账号、证件或支付信息", "pass"),
-      row("public_beta_user_onboarding_feedback_boundary", "Safe Feedback Draft", "反馈入口目前仅为草稿，不发送、不上传、不保存用户原文", "warning")
+      row("public_beta_user_onboarding_feedback_boundary", "Safe Feedback Draft", "反馈入口目前仅为草稿，不发送、不上传、不保存用户原文", "warning"),
+      row("public_beta_user_onboarding_rc_boundary", "RC Candidate Boundary", "当前只是 RC 候选，不创建 release、不 push", "warning")
     ]);
   }
 
@@ -112,7 +113,7 @@
       userFacingSummary:{
         title:"Public Beta User Onboarding",
         resultLabel:status === "ready" ? "Public Beta User Onboarding 已准备" : (status === "blocked" ? "Public Beta User Onboarding 已阻断" : "Public Beta User Onboarding 仍需复核"),
-        caveat:"当前不会付款、下单或出票；反馈入口目前仅为草稿，不发送、不上传、不保存用户原文。"
+        caveat:"当前只是 RC 候选，不创建 release、不 push；当前不会付款、下单或出票；反馈入口目前仅为草稿，不发送、不上传、不保存用户原文。"
       },
       externalUrl:null,
       platformUrl:null,

@@ -19,7 +19,7 @@ function readySummary(title, resultLabel) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingProviderFinalSafetyViewModel.js").WeishanGlobalShoppingProviderFinalSafetyViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_FINAL_SAFETY_VIEW_MODEL_VERSION, "4.0.9");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_FINAL_SAFETY_VIEW_MODEL_VERSION, "4.1.0");
   const ready = api.buildGlobalShoppingProviderFinalSafetyViewModel({
     providerFinalSafetySealSummary:readySummary("Provider Final Safety Seal", "Provider Final Safety Seal 已准备"),
     offlineActivationWarRoomSummary:readySummary("Offline Activation War Room", "Offline Activation War Room 已准备"),

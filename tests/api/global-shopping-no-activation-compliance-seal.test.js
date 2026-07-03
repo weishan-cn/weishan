@@ -43,7 +43,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingNoActivationComplianceSeal.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingNoActivationComplianceSeal;
-  assert.equal(api.GLOBAL_SHOPPING_NO_ACTIVATION_COMPLIANCE_SEAL_VERSION, "4.0.9");
+  assert.equal(api.GLOBAL_SHOPPING_NO_ACTIVATION_COMPLIANCE_SEAL_VERSION, "4.1.0");
   const ready = api.buildGlobalShoppingNoActivationComplianceSeal({
     sealMode:"readonly",
     offlineProviderGovernanceClosureBoardSummary:readySummary("Offline Provider Governance Closure Board", "Offline Provider Governance Closure Board 已准备"),

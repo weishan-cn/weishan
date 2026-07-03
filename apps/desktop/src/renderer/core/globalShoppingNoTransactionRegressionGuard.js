@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_NO_TRANSACTION_REGRESSION_GUARD_VERSION = "4.0.9";
+  const GLOBAL_SHOPPING_NO_TRANSACTION_REGRESSION_GUARD_VERSION = "4.1.0";
   const GUARD_NAME = "global_shopping_no_transaction_regression_guard_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, no_transaction_regression_guard_only:true };
 
@@ -118,7 +118,7 @@
       userFacingSummary:{
         title:"No-Transaction Regression Guard",
         resultLabel:status === "ready" ? "No-Transaction Regression Guard 已准备" : (status === "blocked" ? "No-Transaction Regression Guard 已阻断" : "No-Transaction Regression Guard 仍需复核"),
-        caveat:"交易按钮保持关闭，未生成 booking / payment / order / checkout URL。"
+        caveat:"交易按钮保持关闭，未生成 booking / payment / order / checkout URL；当前只是 RC 候选，不创建 release、不 push。"
       },
       redacted:true
     });

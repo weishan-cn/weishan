@@ -39,7 +39,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingUserSafePublicClaimVerifier.js"]);
   const api = windowRef.WeishanGlobalShoppingUserSafePublicClaimVerifier;
-  assert.equal(api.GLOBAL_SHOPPING_USER_SAFE_PUBLIC_CLAIM_VERIFIER_VERSION, "4.0.9");
+  assert.equal(api.GLOBAL_SHOPPING_USER_SAFE_PUBLIC_CLAIM_VERIFIER_VERSION, "4.1.0");
   const ready = api.buildGlobalShoppingUserSafePublicClaimVerifier({
     publicReleaseEvidenceConsoleSummary:readySummary("Public Release Evidence Console", "Public Release Evidence Console 已准备"),
     noProviderUserAssurancePanelSummary:readySummary("No-Provider User Assurance Panel", "No-Provider User Assurance Panel 已准备"),

@@ -27,7 +27,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaVisualQaConsole.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaVisualQaConsole;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_VISUAL_QA_CONSOLE_VERSION, "4.0.9");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_VISUAL_QA_CONSOLE_VERSION, "4.1.0");
   const ready = api.buildGlobalShoppingPublicBetaVisualQaConsole({
     publicBetaTrialReadinessPackSummary:summary("Public Beta Trial Readiness Pack"),
     finalManualAcceptanceConsoleSummary:summary("Final Manual Acceptance Console"),
@@ -37,7 +37,7 @@ function main() {
     noTransactionButtonsVisible:false
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.0.9");
+  assert.equal(ready.appVersion, "4.1.0");
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(ready.externalUrl, null);
   assert.equal(ready.paymentUrl, null);

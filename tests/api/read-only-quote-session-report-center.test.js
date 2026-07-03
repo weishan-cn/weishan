@@ -87,6 +87,17 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderGovernanceConsole.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderOperatorReviewLoop.js",
     "apps/desktop/src/renderer/core/globalShoppingCommerceSessionRecapViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingPublicBetaVisualQaConsole.js",
+    "apps/desktop/src/renderer/core/globalShoppingPublicBetaTrialScenarioChecklist.js",
+    "apps/desktop/src/renderer/core/globalShoppingNoTransactionRegressionGuard.js",
+    "apps/desktop/src/renderer/core/globalShoppingPublicBetaQaViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingPublicBetaUserOnboardingShell.js",
+    "apps/desktop/src/renderer/core/globalShoppingVisualTrialGuide.js",
+    "apps/desktop/src/renderer/core/globalShoppingSafeFeedbackDraftPanel.js",
+    "apps/desktop/src/renderer/core/globalShoppingPublicBetaOnboardingViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingPublicBetaRcConsole.js",
+    "apps/desktop/src/renderer/core/globalShoppingOfflineTrialReleaseGate.js",
+    "apps/desktop/src/renderer/core/globalShoppingPublicBetaRcViewModel.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteSessionReportCenter.js",
     "apps/desktop/src/renderer/core/flightWorkflowReadOnlyUserConsentFlow.js",
     "apps/desktop/src/renderer/core/flightWorkflowPublicPilotOnboardingGuard.js",
@@ -94,13 +105,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.0.9");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.1.0");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "4.0.9");
+  assert.equal(ready.appVersion, "4.1.0");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -206,6 +217,23 @@ function main() {
   assert.equal(publicBetaComparisonReady.safetyReport.categoryResultSimulatorSummary.userFacingSummary.title, "Category Result Simulator");
   assert.equal(publicBetaComparisonReady.safetyReport.readOnlyComparisonBoardSummary.userFacingSummary.title, "Read-Only Comparison Board");
   assert.equal(publicBetaComparisonReady.safetyReport.resultTrustBadgePanelSummary.userFacingSummary.title, "Result Trust Badge");
+  const publicBetaRcReady = api.buildReadOnlyQuoteSessionReportCenter({
+    sessionSummary:summary,
+    publicBetaRcConsoleSummary:{ status:"manual_review_required", rcStatus:"manual_review_required", userFacingSummary:{ title:"Public Beta RC Console", resultLabel:"Public Beta RC Console 进入人工复核", redacted:true }, redacted:true },
+    offlineTrialReleaseGateSummary:{ status:"ready", userFacingSummary:{ title:"Offline Trial Release Gate", resultLabel:"Offline Trial Release Gate 已准备", redacted:true }, redacted:true },
+    publicBetaRcViewModelSummary:{ status:"ready", title:"Public Beta RC Console", userFacingSummary:{ title:"Public Beta RC Console", resultLabel:"Public Beta RC Console / Offline Trial Release Gate 已准备", redacted:true }, safeToProceedWithManualRcReview:true, redacted:true },
+    publicBetaRcConsoleStatus:"manual_review_required",
+    offlineTrialReleaseGateStatus:"ready",
+    publicBetaRcViewModelStatus:"ready",
+    safeToProceedWithManualRcReview:true
+  });
+  assert.equal(publicBetaRcReady.safetyReport.publicBetaRcConsoleSummary.userFacingSummary.title, "Public Beta RC Console");
+  assert.equal(publicBetaRcReady.safetyReport.offlineTrialReleaseGateSummary.userFacingSummary.title, "Offline Trial Release Gate");
+  assert.equal(publicBetaRcReady.safetyReport.publicBetaRcViewModelSummary.title, "Public Beta RC Console");
+  assert.equal(publicBetaRcReady.safetyReport.publicBetaRcConsoleStatus, "manual_review_required");
+  assert.equal(publicBetaRcReady.safetyReport.offlineTrialReleaseGateStatus, "ready");
+  assert.equal(publicBetaRcReady.safetyReport.publicBetaRcViewModelStatus, "ready");
+  assert.equal(publicBetaRcReady.userFacingSummary.safeToProceedWithManualRcReview, true);
   const sandboxMilestoneReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     providerSandboxReadinessWorkbenchSummary:{ status:"ready", userFacingSummary:{ title:"Provider Sandbox Readiness Workbench", resultLabel:"Sandbox Readiness Workbench 已准备", redacted:true }, redacted:true },
