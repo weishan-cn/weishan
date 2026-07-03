@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRODUCTION_BLOCKER_MATRIX_VERSION = "4.1.2";
+  const GLOBAL_SHOPPING_PRODUCTION_BLOCKER_MATRIX_VERSION = "4.1.3";
   const MATRIX_NAME = "global_shopping_production_blocker_matrix_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

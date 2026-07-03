@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_SANDBOX_RESPONSE_SCHEMA_GATE_VERSION = "4.1.2";
+  const PROVIDER_SANDBOX_RESPONSE_SCHEMA_GATE_VERSION = "4.1.3";
   const SCHEMA_VERSION = "provider_result_schema_v1";
   const ALLOWED_RESULT_TYPES = ["flight_offer", "provider_notice", "no_result", "blocked_result", "schema_error"];
   const REQUIRED_FIELDS = ["providerId", "providerName", "providerCategory", "resultType", "sourceType", "sourceUrlHost", "updatedAt", "readonlyEvidence", "sandboxOnly", "redacted"];

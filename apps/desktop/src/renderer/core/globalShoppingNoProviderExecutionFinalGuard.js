@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_NO_PROVIDER_EXECUTION_FINAL_GUARD_VERSION = "4.1.2";
+  const GLOBAL_SHOPPING_NO_PROVIDER_EXECUTION_FINAL_GUARD_VERSION = "4.1.3";
   const GUARD_NAME = "global_shopping_no_provider_execution_final_guard_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

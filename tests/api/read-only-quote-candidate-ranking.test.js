@@ -40,7 +40,7 @@ function quote(id, totalPrice, freshnessMinutes, providerFees, extra = {}) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteCandidateRanking.js"]);
   const api = windowRef.WeishanReadOnlyQuoteCandidateRanking;
-  assert.equal(api.READ_ONLY_QUOTE_CANDIDATE_RANKING_VERSION, "4.1.2");
+  assert.equal(api.READ_ONLY_QUOTE_CANDIDATE_RANKING_VERSION, "4.1.3");
 
   const ranking = api.buildTopReadOnlyQuoteCandidates([
     quote("q-high", 1200, 3, 20),

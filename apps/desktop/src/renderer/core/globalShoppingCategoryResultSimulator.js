@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_CATEGORY_RESULT_SIMULATOR_VERSION = "4.1.2";
+  const GLOBAL_SHOPPING_CATEGORY_RESULT_SIMULATOR_VERSION = "4.1.3";
   const SIMULATOR_NAME = "global_shopping_category_result_simulator_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, category_result_simulator_only:true };
   const REQUIRED_CATEGORIES = ["flight", "hotel", "product"];

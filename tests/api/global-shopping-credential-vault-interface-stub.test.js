@@ -18,7 +18,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingCredentialVaultInterfaceStub.js"]);
   const api = windowRef.WeishanGlobalShoppingCredentialVaultInterfaceStub;
-  assert.equal(api.GLOBAL_SHOPPING_CREDENTIAL_VAULT_INTERFACE_STUB_VERSION, "4.1.2");
+  assert.equal(api.GLOBAL_SHOPPING_CREDENTIAL_VAULT_INTERFACE_STUB_VERSION, "4.1.3");
   const ready = api.buildGlobalShoppingCredentialVaultInterfaceStub({});
   assert.equal(ready.status, "ready");
   assert.equal(ready.stubName, "global_shopping_credential_vault_interface_stub_v1");

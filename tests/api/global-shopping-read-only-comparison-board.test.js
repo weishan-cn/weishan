@@ -26,7 +26,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingReadOnlyComparisonBoard.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingReadOnlyComparisonBoard;
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_COMPARISON_BOARD_VERSION, "4.1.2");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_COMPARISON_BOARD_VERSION, "4.1.3");
   const ready = api.buildGlobalShoppingReadOnlyComparisonBoard({
     boardMode:"read_only_comparison_only",
     globalShoppingReadOnlyCandidateEvidenceUnifierSummary:readySummary("候选价证据", "候选价证据已准备"),
@@ -35,7 +35,7 @@ function main() {
     categoryResultSimulatorSummary:readySummary("Category Result Simulator", "Category Result Simulator 已准备")
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.1.2");
+  assert.equal(ready.appVersion, "4.1.3");
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(ready.providerZeroLocked, true);
   assert.equal(ready.externalUrl, null);

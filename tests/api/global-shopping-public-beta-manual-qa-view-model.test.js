@@ -31,7 +31,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaManualQaViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaManualQaViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_MANUAL_QA_VIEW_MODEL_VERSION, "4.1.2");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_MANUAL_QA_VIEW_MODEL_VERSION, "4.1.3");
 
   const ready = api.buildGlobalShoppingPublicBetaManualQaViewModel({
     publicBetaManualQaReportCenterSummary:summary("Public Beta Manual QA Report Center"),

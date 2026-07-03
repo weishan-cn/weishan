@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_TRIAL_RELEASE_GATE_VERSION = "4.1.2";
+  const GLOBAL_SHOPPING_OFFLINE_TRIAL_RELEASE_GATE_VERSION = "4.1.3";
   const GATE_NAME = "global_shopping_offline_trial_release_gate_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, offline_trial_gate_only:true };
 

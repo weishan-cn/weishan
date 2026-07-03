@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.1.2";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.1.3";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -753,6 +753,14 @@
       if (obj(safe.publicBetaManualQaReportCenterSummary).status || obj(safe.trialFeedbackSafetyGateSummary).status || obj(safe.publicBetaRcEvidenceSnapshotSummary).status || obj(safe.publicBetaManualQaViewModelSummary).status) badges.push(badge("public_beta_manual_qa_feedback_boundary", "反馈仍为草稿，不发送、不上传、不保存用户原文", "warning"));
       if (obj(safe.publicBetaManualQaReportCenterSummary).status || obj(safe.publicBetaRcEvidenceSnapshotSummary).status || obj(safe.publicBetaManualQaViewModelSummary).status) badges.push(badge("public_beta_manual_qa_snapshot_boundary", "RC 证据快照不写文件、不导出", "warning"));
       if ((obj(safe.publicBetaManualQaViewModelSummary).status && obj(safe.publicBetaManualQaViewModelSummary).status !== "blocked") || safe.safeToProceedWithManualQaReview === true) badges.push(badge("public_beta_manual_qa_manual_review_required", "人工 QA 后再决定下一阶段", "warning"));
+      if (obj(safe.publicBetaTrialOperationsConsoleSummary).status) badges.push(badge("public_beta_trial_operations_console_ready", labelOf(obj(safe.publicBetaTrialOperationsConsoleSummary), "Public Beta Trial Operations Console 仍需复核"), obj(safe.publicBetaTrialOperationsConsoleSummary).status === "blocked" ? "blocked" : (obj(safe.publicBetaTrialOperationsConsoleSummary).status === "ready" ? "info" : "warning")));
+      if (obj(safe.manualQaScenarioRunnerSummary).status) badges.push(badge("public_beta_manual_qa_scenario_runner_ready", labelOf(obj(safe.manualQaScenarioRunnerSummary), "Manual QA Scenario Runner 仍需复核"), obj(safe.manualQaScenarioRunnerSummary).status === "blocked" ? "blocked" : (obj(safe.manualQaScenarioRunnerSummary).status === "ready" ? "info" : "warning")));
+      if (obj(safe.offlineFeedbackReviewBoardSummary).status) badges.push(badge("public_beta_offline_feedback_review_board_ready", labelOf(obj(safe.offlineFeedbackReviewBoardSummary), "Offline Feedback Review Board 仍需复核"), obj(safe.offlineFeedbackReviewBoardSummary).status === "blocked" ? "blocked" : (obj(safe.offlineFeedbackReviewBoardSummary).status === "ready" ? "info" : "warning")));
+      if (obj(safe.publicBetaTrialOperationsViewModelSummary).status) badges.push(badge("public_beta_trial_operations_view_model_ready", labelOf(obj(safe.publicBetaTrialOperationsViewModelSummary), "Public Beta Trial Operations View Model 仍需复核"), obj(safe.publicBetaTrialOperationsViewModelSummary).status === "blocked" ? "blocked" : (obj(safe.publicBetaTrialOperationsViewModelSummary).status === "ready" ? "info" : "warning")));
+      if (obj(safe.manualQaScenarioRunnerSummary).status || obj(safe.publicBetaTrialOperationsViewModelSummary).status) badges.push(badge("public_beta_trial_operations_scenario_coverage", "Flight / Hotel / Product / Restricted / Feedback / No-Transaction / No-Provider 场景已覆盖", "warning"));
+      if (obj(safe.offlineFeedbackReviewBoardSummary).status || obj(safe.publicBetaTrialOperationsViewModelSummary).status) badges.push(badge("public_beta_trial_operations_feedback_boundary", "反馈仍保持关闭，不发送、不上传、不保存用户原文", "warning"));
+      if ((obj(safe.publicBetaTrialOperationsViewModelSummary).status && obj(safe.publicBetaTrialOperationsViewModelSummary).status !== "blocked") || safe.safeToProceedWithManualTrialOperationsReview === true) badges.push(badge("public_beta_trial_operations_manual_review_required", "下一步只能人工复核或继续测试", "warning"));
+      if (obj(safe.publicBetaTrialOperationsConsoleSummary).status || obj(safe.offlineFeedbackReviewBoardSummary).status || obj(safe.publicBetaTrialOperationsViewModelSummary).status) badges.push(badge("public_beta_trial_operations_locked_capabilities", "不自动发布、不接 provider、不启用交易", "warning"));
       if (releaseCandidateConfidenceBoardSummary.status || publicBetaFinalViewModelSummary.status) badges.push(badge("public_beta_rc_locked_capabilities", "Provider-Zero 已锁定 / 未联网 / 未读取密钥 / 未生成 endpoint", "info"));
       if (releaseCandidateConfidenceBoardSummary.status || publicBetaFinalViewModelSummary.status) badges.push(badge("public_beta_rc_user_boundary", "未打开外部平台 / 未启用付款 / 未创建订单 / 未出票", "info"));
       if ((publicBetaFinalViewModelSummary.status && publicBetaFinalViewModelSummary.status !== "blocked") || safe.safeToProceedWithManualPublicBetaReview === true) badges.push(badge("public_beta_manual_review_required", "下一步仍需人工复核", "warning"));

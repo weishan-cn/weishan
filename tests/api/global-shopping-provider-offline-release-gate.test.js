@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderOfflineReleaseGate.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderOfflineReleaseGate;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_OFFLINE_RELEASE_GATE_VERSION, "4.1.2");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_OFFLINE_RELEASE_GATE_VERSION, "4.1.3");
 
   const ready = api.buildGlobalShoppingProviderOfflineReleaseGate({
     offlineProviderCertificationCenterSummary:readySummary("Offline Provider Certification Center", "离线 Provider 认证中心已准备"),
@@ -32,7 +32,7 @@ function main() {
     providerCertificationViewModelSummary:readySummary("Provider Certification View Model", "Provider 离线认证视图已准备")
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.1.2");
+  assert.equal(ready.appVersion, "4.1.3");
   assert.equal(ready.releaseBoundary.canCreateRelease, false);
   assert.equal(ready.releaseSummary.humanReleaseReviewRequired, true);
   assert.equal(JSON.stringify(ready).includes("token"), false);

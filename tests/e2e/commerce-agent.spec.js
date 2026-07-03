@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v4.1.2 public beta rc review stays local and bounded @commerce-smoke", async () => {
+  test("v4.1.3 public beta trial operations stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9632,6 +9632,10 @@ test.describe.serial("commerce agent workbench", () => {
       window.WeishanGlobalShoppingVisualTrialGuide &&
       window.WeishanGlobalShoppingSafeFeedbackDraftPanel &&
       window.WeishanGlobalShoppingPublicBetaOnboardingViewModel &&
+      window.WeishanGlobalShoppingPublicBetaTrialOperationsConsole &&
+      window.WeishanGlobalShoppingManualQaScenarioRunner &&
+      window.WeishanGlobalShoppingOfflineFeedbackReviewBoard &&
+      window.WeishanGlobalShoppingPublicBetaTrialOperationsViewModel &&
       window.WeishanGlobalShoppingPublicBetaViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
@@ -9640,7 +9644,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v401-render-smoke", "true");
       const card = {
-        version:"4.1.2",
+        version:"4.1.3",
         visible:true,
         globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, rows:[{ rowId:"public_beta", label:"Global Shopping Read-Only Public Beta Shell", value:"Global Shopping Read-Only Public Beta Shell 已准备", status:"pass", redacted:true }], redacted:true },
         globalShoppingReadOnlyCandidateEvidenceUnifierSummary:{ status:"ready", userFacingSummary:{ title:"候选价证据", resultLabel:"候选价证据已准备", redacted:true }, rows:[{ rowId:"candidate_evidence", label:"候选价证据", value:"候选价证据已准备", status:"pass", redacted:true }], redacted:true },
@@ -9682,6 +9686,10 @@ test.describe.serial("commerce agent workbench", () => {
         trialFeedbackSafetyGateSummary:{ status:"ready", userFacingSummary:{ title:"Trial Feedback Safety Gate", resultLabel:"Trial Feedback Safety Gate 已准备", redacted:true }, rows:[{ rowId:"trial_feedback_safety_gate", label:"Trial Feedback Safety Gate", value:"Trial Feedback Safety Gate 已准备", status:"pass", redacted:true }], redacted:true },
         publicBetaRcEvidenceSnapshotSummary:{ status:"ready", userFacingSummary:{ title:"RC Evidence Snapshot", resultLabel:"RC Evidence Snapshot 已准备", redacted:true }, rows:[{ rowId:"public_beta_rc_evidence_snapshot", label:"RC Evidence Snapshot", value:"RC Evidence Snapshot 已准备", status:"pass", redacted:true }], redacted:true },
         publicBetaManualQaViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Manual QA View Model", resultLabel:"Public Beta Manual QA Report Center / Trial Feedback Safety Gate / RC Evidence Snapshot 已准备", redacted:true }, rows:[{ rowId:"public_beta_manual_qa_view_model", label:"Public Beta Manual QA View Model", value:"Public Beta Manual QA Report Center / Trial Feedback Safety Gate / RC Evidence Snapshot 已准备", status:"pass", redacted:true }], safeToProceedWithManualQaReview:true, redacted:true },
+        publicBetaTrialOperationsConsoleSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Trial Operations Console", resultLabel:"Public Beta Trial Operations Console 已准备", redacted:true }, rows:[{ rowId:"public_beta_trial_operations_console", label:"Public Beta Trial Operations Console", value:"Public Beta Trial Operations Console 已准备", status:"pass", redacted:true }], redacted:true },
+        manualQaScenarioRunnerSummary:{ status:"ready", userFacingSummary:{ title:"Manual QA Scenario Runner", resultLabel:"Manual QA Scenario Runner 已准备", redacted:true }, rows:[{ rowId:"manual_qa_scenario_runner", label:"Manual QA Scenario Runner", value:"Manual QA Scenario Runner 已准备", status:"pass", redacted:true }], redacted:true },
+        offlineFeedbackReviewBoardSummary:{ status:"ready", userFacingSummary:{ title:"Offline Feedback Review Board", resultLabel:"Offline Feedback Review Board 已准备", redacted:true }, rows:[{ rowId:"offline_feedback_review_board", label:"Offline Feedback Review Board", value:"Offline Feedback Review Board 已准备", status:"pass", redacted:true }], redacted:true },
+        publicBetaTrialOperationsViewModelSummary:{ status:"ready", title:"Public Beta Trial Operations Console", userFacingSummary:{ title:"Public Beta Trial Operations View Model", resultLabel:"Public Beta Trial Operations View Model 已准备", redacted:true }, rows:[{ rowId:"public_beta_trial_operations_view_model", label:"Public Beta Trial Operations View Model", value:"Public Beta Trial Operations View Model 已准备", status:"pass", redacted:true }], safeToProceedWithManualTrialOperationsReview:true, redacted:true },
         publicBetaOperatorConsoleSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Operator Console", resultLabel:"Provider-Zero 状态通过", redacted:true }, rows:[{ rowId:"public_beta_operator_console", label:"Public Beta Operator Console", value:"Provider-Zero 状态通过", status:"pass", redacted:true }], redacted:true },
         categoryExpansionShellSummary:{ status:"ready", userFacingSummary:{ title:"Category Expansion Shell", resultLabel:"Flight / Hotel / Product 只读外壳已准备", redacted:true }, rows:[{ rowId:"category_expansion_shell", label:"Category Expansion Shell", value:"Flight / Hotel / Product 只读外壳已准备", status:"pass", redacted:true }], redacted:true },
         finalOfflineBetaAuditSummary:{ status:"ready", userFacingSummary:{ title:"Final Offline Beta Audit", resultLabel:"最终离线审计通过", redacted:true }, rows:[{ rowId:"final_offline_beta_audit", label:"Final Offline Beta Audit", value:"最终离线审计通过", status:"pass", redacted:true }], redacted:true },
@@ -9718,6 +9726,10 @@ test.describe.serial("commerce agent workbench", () => {
         trialFeedbackSafetyGateStatus:"ready",
         publicBetaRcEvidenceSnapshotStatus:"ready",
         publicBetaManualQaViewModelStatus:"ready",
+        publicBetaTrialOperationsConsoleStatus:"ready",
+        manualQaScenarioRunnerStatus:"ready",
+        offlineFeedbackReviewBoardStatus:"ready",
+        publicBetaTrialOperationsViewModelStatus:"ready",
         publicBetaOperatorConsoleStatus:"ready",
         categoryExpansionShellStatus:"ready",
         finalOfflineBetaAuditStatus:"ready",
@@ -9739,7 +9751,8 @@ test.describe.serial("commerce agent workbench", () => {
         safeToProceedWithManualPublicBetaAcceptanceReview:true,
         safeToProceedWithManualRcReview:true,
         safeToProceedWithManualLaunchHandoffReview:true,
-        safeToProceedWithManualQaReview:true
+        safeToProceedWithManualQaReview:true,
+        safeToProceedWithManualTrialOperationsReview:true
       };
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml(card);
       const section = host.querySelector("[data-commerce-global-shopping-public-beta-review='true']");
@@ -9814,9 +9827,17 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("Public Beta Manual QA Report Center");
     expect(v400.text).toContain("Trial Feedback Safety Gate");
     expect(v400.text).toContain("RC Evidence Snapshot");
+    expect(v400.text).toContain("Public Beta Trial Operations Console");
+    expect(v400.text).toContain("Manual QA Scenario Runner");
+    expect(v400.text).toContain("Offline Feedback Review Board");
     expect(v400.text).toContain("QA Evidence");
     expect(v400.text).toContain("Feedback Safety");
     expect(v400.text).toContain("No-Transaction Evidence");
+    expect(v400.text).toContain("Feedback Review");
+    expect(v400.text).toContain("Next Manual Action");
+    expect(v400.text).toContain("Flight / Hotel / Product / Restricted / Feedback / No-Transaction / No-Provider 场景已覆盖");
+    expect(v400.text).toContain("反馈仍保持关闭，不发送、不上传、不保存用户原文");
+    expect(v400.text).toContain("下一步只能人工复核或继续测试");
     expect(v400.text).toContain("Locked Capabilities");
     expect(v400.text).toContain("Next Decision Options");
     expect(v400.text).toContain("Continue Testing");

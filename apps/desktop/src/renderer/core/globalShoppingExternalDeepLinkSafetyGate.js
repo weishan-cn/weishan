@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_EXTERNAL_DEEP_LINK_SAFETY_GATE_VERSION = "4.1.2";
+  const GLOBAL_SHOPPING_EXTERNAL_DEEP_LINK_SAFETY_GATE_VERSION = "4.1.3";
   const GATE_NAME = "global_shopping_external_deep_link_safety_gate_v1";
   const REALTIME_DISCLOSURE = "价格以跳转后平台实时页面为准";
   const SELF_CHECKOUT_DISCLOSURE = "用户需在平台自行确认价格、登录、填写资料并完成下单";

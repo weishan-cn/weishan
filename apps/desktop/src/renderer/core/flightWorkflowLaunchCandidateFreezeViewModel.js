@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_FREEZE_VIEW_MODEL_VERSION = "4.1.2";
+  const FLIGHT_WORKFLOW_LAUNCH_CANDIDATE_FREEZE_VIEW_MODEL_VERSION = "4.1.3";
   const VIEW_MODEL_NAME = "flight_workflow_launch_candidate_freeze_view_model_v1";
   const CAVEAT = "该页面只用于只读发布候选冻结判断，不保存真实身份、不发送真实邀请、不提供交易能力。";
 
