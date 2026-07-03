@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_VISUAL_QA_CONSOLE_VERSION = "4.1.1";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_VISUAL_QA_CONSOLE_VERSION = "4.1.2";
   const CONSOLE_NAME = "global_shopping_public_beta_visual_qa_console_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, visual_qa_console_only:true };
   const BLOCKED_COPY_RE = /screenshot|screen capture|upload|payment|order|checkout|ticketing|openExternal|window\.open/i;

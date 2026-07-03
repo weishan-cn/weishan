@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_READ_ONLY_COMPARISON_BOARD_VERSION = "4.1.1";
+  const GLOBAL_SHOPPING_READ_ONLY_COMPARISON_BOARD_VERSION = "4.1.2";
   const BOARD_NAME = "global_shopping_read_only_comparison_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, read_only_comparison_only:true };
   const FORBIDDEN_CLAIM_RE = /lowest price|final price|locked price|官方认证|平台授权|官方背书|provider connected|已接入 provider|可调用 provider/i;

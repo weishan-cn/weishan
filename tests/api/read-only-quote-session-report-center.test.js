@@ -108,13 +108,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.1.1");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.1.2");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "4.1.1");
+  assert.equal(ready.appVersion, "4.1.2");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -254,6 +254,27 @@ function main() {
   assert.equal(publicBetaStabilityReady.safetyReport.manualLaunchHandoffPackStatus, "ready");
   assert.equal(publicBetaStabilityReady.safetyReport.manualLaunchHandoffViewModelStatus, "ready");
   assert.equal(publicBetaStabilityReady.userFacingSummary.safeToProceedWithManualLaunchHandoffReview, true);
+  const publicBetaManualQaReady = api.buildReadOnlyQuoteSessionReportCenter({
+    sessionSummary:summary,
+    publicBetaManualQaReportCenterSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Manual QA Report Center", resultLabel:"Public Beta Manual QA Report Center 已准备", redacted:true }, redacted:true },
+    trialFeedbackSafetyGateSummary:{ status:"ready", userFacingSummary:{ title:"Trial Feedback Safety Gate", resultLabel:"Trial Feedback Safety Gate 已准备", redacted:true }, redacted:true },
+    publicBetaRcEvidenceSnapshotSummary:{ status:"ready", userFacingSummary:{ title:"RC Evidence Snapshot", resultLabel:"RC Evidence Snapshot 已准备", redacted:true }, redacted:true },
+    publicBetaManualQaViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Manual QA ViewModel", resultLabel:"Public Beta Manual QA Report Center / Trial Feedback Safety Gate / RC Evidence Snapshot 已准备", redacted:true }, safeToProceedWithManualQaReview:true, redacted:true },
+    publicBetaManualQaReportCenterStatus:"ready",
+    trialFeedbackSafetyGateStatus:"ready",
+    publicBetaRcEvidenceSnapshotStatus:"ready",
+    publicBetaManualQaViewModelStatus:"ready",
+    safeToProceedWithManualQaReview:true
+  });
+  assert.equal(publicBetaManualQaReady.safetyReport.publicBetaManualQaReportCenterSummary.userFacingSummary.title, "Public Beta Manual QA Report Center");
+  assert.equal(publicBetaManualQaReady.safetyReport.trialFeedbackSafetyGateSummary.userFacingSummary.title, "Trial Feedback Safety Gate");
+  assert.equal(publicBetaManualQaReady.safetyReport.publicBetaRcEvidenceSnapshotSummary.userFacingSummary.title, "RC Evidence Snapshot");
+  assert.equal(publicBetaManualQaReady.safetyReport.publicBetaManualQaViewModelSummary.userFacingSummary.resultLabel, "Public Beta Manual QA Report Center / Trial Feedback Safety Gate / RC Evidence Snapshot 已准备");
+  assert.equal(publicBetaManualQaReady.safetyReport.publicBetaManualQaReportCenterStatus, "ready");
+  assert.equal(publicBetaManualQaReady.safetyReport.trialFeedbackSafetyGateStatus, "ready");
+  assert.equal(publicBetaManualQaReady.safetyReport.publicBetaRcEvidenceSnapshotStatus, "ready");
+  assert.equal(publicBetaManualQaReady.safetyReport.publicBetaManualQaViewModelStatus, "ready");
+  assert.equal(publicBetaManualQaReady.userFacingSummary.safeToProceedWithManualQaReview, true);
   const sandboxMilestoneReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     providerSandboxReadinessWorkbenchSummary:{ status:"ready", userFacingSummary:{ title:"Provider Sandbox Readiness Workbench", resultLabel:"Sandbox Readiness Workbench 已准备", redacted:true }, redacted:true },

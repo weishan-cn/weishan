@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingSandboxProviderResponseContract.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingSandboxProviderResponseContract;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PROVIDER_RESPONSE_CONTRACT_VERSION, "4.1.1");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PROVIDER_RESPONSE_CONTRACT_VERSION, "4.1.2");
 
   const ready = api.buildGlobalShoppingSandboxProviderResponseContract({
     providerFixture:{ providerId:"fixture_provider", providerName:"Fixture Provider" },
@@ -30,7 +30,7 @@ function main() {
     officialFixturePrice:{ title:"Official Fixture", basePrice:920 },
     partnerFixturePrices:[{ title:"Partner Fixture", basePrice:899 }]
   });
-  assert.equal(ready.appVersion, "4.1.1");
+  assert.equal(ready.appVersion, "4.1.2");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "Provider 响应合同已准备");
   assert.equal(ready.responseBoundary.fixtureOnly, true);

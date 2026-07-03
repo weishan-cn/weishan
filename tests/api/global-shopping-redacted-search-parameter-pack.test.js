@@ -16,9 +16,9 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingRedactedSearchParameterPack.js"]);
   const api = windowRef.WeishanGlobalShoppingRedactedSearchParameterPack;
-  assert.equal(api.GLOBAL_SHOPPING_REDACTED_SEARCH_PARAMETER_PACK_VERSION, "4.1.1");
+  assert.equal(api.GLOBAL_SHOPPING_REDACTED_SEARCH_PARAMETER_PACK_VERSION, "4.1.2");
   const ready = api.buildGlobalShoppingRedactedSearchParameterPack({ itemType:"flight", origin:"SHA", destination:"CTU", departureDate:"2026-07-15", passengerCount:1, cabinClass:"economy", directOnly:true, currency:"CNY", locale:"zh-CN", region:"CN", candidateId:"candidate_a", sourceType:"official", trustLabel:"trusted", confidenceLabel:"high" });
-  assert.equal(ready.appVersion, "4.1.1");
+  assert.equal(ready.appVersion, "4.1.2");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "搜索参数包已准备");
   assert.ok(ready.allowedParameters.some((item) => item.key === "origin"));

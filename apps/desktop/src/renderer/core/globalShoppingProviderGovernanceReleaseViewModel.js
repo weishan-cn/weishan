@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_RELEASE_VIEW_MODEL_VERSION = "4.1.1";
+  const GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_RELEASE_VIEW_MODEL_VERSION = "4.1.2";
   const VIEW_MODEL_NAME = "global_shopping_provider_governance_release_view_model_v1";
   const BUILD_GUARD_KEY = "__weishanGlobalShoppingProviderGovernanceReleaseViewModelBuilding";
 

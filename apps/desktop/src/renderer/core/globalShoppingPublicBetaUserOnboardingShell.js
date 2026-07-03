@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_USER_ONBOARDING_SHELL_VERSION = "4.1.1";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_USER_ONBOARDING_SHELL_VERSION = "4.1.2";
   const SHELL_NAME = "global_shopping_public_beta_user_onboarding_shell_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, onboarding_shell_only:true };
 

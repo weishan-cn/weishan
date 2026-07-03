@@ -22,9 +22,9 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingDuplicateCandidateMerger.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingDuplicateCandidateMerger;
-  assert.equal(api.GLOBAL_SHOPPING_DUPLICATE_CANDIDATE_MERGER_VERSION, "4.1.1");
+  assert.equal(api.GLOBAL_SHOPPING_DUPLICATE_CANDIDATE_MERGER_VERSION, "4.1.2");
   const merger = api.buildGlobalShoppingDuplicateCandidateMerger();
-  assert.equal(merger.appVersion, "4.1.1");
+  assert.equal(merger.appVersion, "4.1.2");
   assert.equal(merger.status, "merged");
   assert.equal(merger.userFacingSummary.title, "重复候选合并");
   assert.ok(merger.mergedCandidates.length >= 1);

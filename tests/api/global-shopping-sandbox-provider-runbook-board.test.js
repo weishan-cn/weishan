@@ -43,7 +43,7 @@ function main() {
     fixturePrices:[{ title:"SHA-CTU Fixture", basePrice:920, taxAmount:120, currency:"CNY" }]
   });
   const api = windowRef.WeishanGlobalShoppingSandboxProviderRunbookBoard;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PROVIDER_RUNBOOK_BOARD_VERSION, "4.1.1");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PROVIDER_RUNBOOK_BOARD_VERSION, "4.1.2");
 
   const ready = api.buildGlobalShoppingSandboxProviderRunbookBoard({
     providerAdapterRegistrySummary:registry,
@@ -55,7 +55,7 @@ function main() {
     sandboxProviderResponseContractSummary:{ status:"ready", redacted:true },
     dryRunProviderResponseNormalizerSummary:normalizer
   });
-  assert.equal(ready.appVersion, "4.1.1");
+  assert.equal(ready.appVersion, "4.1.2");
   assert.equal(ready.status, "ready");
   assert.equal(ready.title, "Sandbox Provider 接入运行手册");
   assert.equal(ready.runbookStages.length, 6);

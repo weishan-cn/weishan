@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_RUN_TIMELINE_VERSION = "4.1.1";
+  const READ_ONLY_QUOTE_RUN_TIMELINE_VERSION = "4.1.2";
   const TIMELINE_NAME = "read_only_quote_run_timeline_v1";
 
   function clone(value) {

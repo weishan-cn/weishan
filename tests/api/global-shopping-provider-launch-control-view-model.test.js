@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderLaunchControlViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderLaunchControlViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_LAUNCH_CONTROL_VIEW_MODEL_VERSION, "4.1.1");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_LAUNCH_CONTROL_VIEW_MODEL_VERSION, "4.1.2");
 
   const ready = api.buildGlobalShoppingProviderLaunchControlViewModel({
     offlineProviderLaunchControlTowerSummary:readySummary("Offline Provider Launch Control Tower", "离线 Launch 控制塔已准备"),
