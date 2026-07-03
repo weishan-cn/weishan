@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_ISSUE_TRIAGE_BOARD_VERSION = "4.1.6";
+  const GLOBAL_SHOPPING_OFFLINE_ISSUE_TRIAGE_BOARD_VERSION = "4.1.7";
   const BOARD_NAME = "global_shopping_offline_issue_triage_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, offline_issue_triage_only:true };
   const SECRET_VALUE_RE = /(?:token|secret|api[_ -]?key|password)\s*[:=]\s*[\w-]+/i;

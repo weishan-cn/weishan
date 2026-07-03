@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_USER_FACING_MANUAL_REVIEW_FLOW_VERSION = "4.1.6";
+  const GLOBAL_SHOPPING_USER_FACING_MANUAL_REVIEW_FLOW_VERSION = "4.1.7";
   const FLOW_NAME = "global_shopping_user_facing_manual_review_flow_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

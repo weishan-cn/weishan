@@ -31,14 +31,14 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaRcViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaRcViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_RC_VIEW_MODEL_VERSION, "4.1.6");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_RC_VIEW_MODEL_VERSION, "4.1.7");
 
   const ready = api.buildGlobalShoppingPublicBetaRcViewModel({
     publicBetaRcConsoleSummary:summary("Public Beta RC Console", "manual_review_required"),
     offlineTrialReleaseGateSummary:summary("Offline Trial Release Gate", "ready")
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.1.6");
+  assert.equal(ready.appVersion, "4.1.7");
   assert.equal(ready.safeToProceedWithManualRcReview, true);
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(ready.externalUrl, null);

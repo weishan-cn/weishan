@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.1.6";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.1.7";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -769,6 +769,14 @@
       if (obj(safe.manualTrialIssueReviewBoardSummary).status || obj(safe.publicBetaAcceptanceSnapshotViewModelSummary).status) badges.push(badge("manual_trial_issue_review_boundary", "Issue Review / 问题复核仅为离线视图，不创建真实 issue", "warning"));
       if (obj(safe.offlineAcceptanceSnapshotSummary).status || obj(safe.publicBetaAcceptanceSnapshotViewModelSummary).status) badges.push(badge("offline_acceptance_snapshot_boundary", "Acceptance Snapshot / 验收快照不写文件、不导出", "warning"));
       if ((obj(safe.publicBetaAcceptanceSnapshotViewModelSummary).status && obj(safe.publicBetaAcceptanceSnapshotViewModelSummary).status !== "blocked") || safe.safeToProceedWithManualAcceptanceSnapshotReview === true) badges.push(badge("public_beta_acceptance_snapshot_manual_review_required", "仍需人工复核后再决定下一阶段", "warning"));
+      if (obj(safe.publicBetaAcceptanceReviewConsoleSummary).status || obj(safe.publicBetaAcceptanceReviewConsoleSummary).acceptanceReviewStatus) badges.push(badge("public_beta_acceptance_review_console_ready", labelOf(obj(safe.publicBetaAcceptanceReviewConsoleSummary), "Public Beta Acceptance Review Console 仍需复核"), obj(safe.publicBetaAcceptanceReviewConsoleSummary).status === "blocked" ? "blocked" : "warning"));
+      if (obj(safe.offlineTrialClosureBoardSummary).status || obj(safe.offlineTrialClosureBoardSummary).closureStatus) badges.push(badge("offline_trial_closure_board_ready", labelOf(obj(safe.offlineTrialClosureBoardSummary), "Offline Trial Closure Board 仍需复核"), obj(safe.offlineTrialClosureBoardSummary).status === "blocked" ? "blocked" : "warning"));
+      if (obj(safe.noLaunchAssuranceGateSummary).status) badges.push(badge("no_launch_assurance_gate_ready", labelOf(obj(safe.noLaunchAssuranceGateSummary), "No-Launch Assurance Gate 仍需复核"), obj(safe.noLaunchAssuranceGateSummary).status === "blocked" ? "blocked" : (obj(safe.noLaunchAssuranceGateSummary).status === "ready" ? "info" : "warning")));
+      if (obj(safe.publicBetaClosureReviewViewModelSummary).status) badges.push(badge("public_beta_closure_review_view_model_ready", labelOf(obj(safe.publicBetaClosureReviewViewModelSummary), "Public Beta Closure Review View Model 仍需复核"), obj(safe.publicBetaClosureReviewViewModelSummary).status === "blocked" ? "blocked" : (obj(safe.publicBetaClosureReviewViewModelSummary).status === "ready" ? "info" : "warning")));
+      if (obj(safe.publicBetaAcceptanceReviewConsoleSummary).status || obj(safe.publicBetaClosureReviewViewModelSummary).status) badges.push(badge("public_beta_acceptance_review_boundary", "当前不发布、不创建 release、不 push", "warning"));
+      if (obj(safe.offlineTrialClosureBoardSummary).status || obj(safe.publicBetaClosureReviewViewModelSummary).status) badges.push(badge("offline_trial_closure_boundary", "试用闭环仅为离线视图，不关闭真实任务", "warning"));
+      if (obj(safe.noLaunchAssuranceGateSummary).status || obj(safe.publicBetaClosureReviewViewModelSummary).status) badges.push(badge("no_launch_assurance_boundary", "仍不允许启用 provider、付款、下单或发布", "warning"));
+      if ((obj(safe.publicBetaClosureReviewViewModelSummary).status && obj(safe.publicBetaClosureReviewViewModelSummary).status !== "blocked") || safe.safeToProceedWithManualClosureReview === true) badges.push(badge("public_beta_closure_review_manual_review_required", "验收复核后仍需人工决定下一阶段", "warning"));
       if (releaseCandidateConfidenceBoardSummary.status || publicBetaFinalViewModelSummary.status) badges.push(badge("public_beta_rc_locked_capabilities", "Provider-Zero 已锁定 / 未联网 / 未读取密钥 / 未生成 endpoint", "info"));
       if (releaseCandidateConfidenceBoardSummary.status || publicBetaFinalViewModelSummary.status) badges.push(badge("public_beta_rc_user_boundary", "未打开外部平台 / 未启用付款 / 未创建订单 / 未出票", "info"));
       if ((publicBetaFinalViewModelSummary.status && publicBetaFinalViewModelSummary.status !== "blocked") || safe.safeToProceedWithManualPublicBetaReview === true) badges.push(badge("public_beta_manual_review_required", "下一步仍需人工复核", "warning"));

@@ -15,7 +15,7 @@ function load(file) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingPublicBetaAcceptanceBoard.js");
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_BOARD_VERSION, "4.1.6");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_BOARD_VERSION, "4.1.7");
   const ready = api.buildGlobalShoppingPublicBetaAcceptanceBoard({
     providerZeroLocked:true,
     candidateEvidenceReady:true,

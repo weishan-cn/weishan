@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PUBLIC_PILOT_ISSUE_REVIEW_BOARD_VERSION = "4.1.6";
+  const FLIGHT_WORKFLOW_PUBLIC_PILOT_ISSUE_REVIEW_BOARD_VERSION = "4.1.7";
   const BOARD_NAME = "flight_workflow_public_pilot_issue_review_board_v1";
   const CAVEAT = "问题复核只用于改进只读候选证据流程，不代表客服工单、交易请求或出票请求。";
   const SENSITIVE_RE = /token|apiKey|key|secret|password|credential|身份证|护照|银行卡|登录凭据|passport|cardNumber|https?:\/\/\S+/i;

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MANUAL_TRIAL_ISSUE_REVIEW_BOARD_VERSION = "4.1.6";
+  const GLOBAL_SHOPPING_MANUAL_TRIAL_ISSUE_REVIEW_BOARD_VERSION = "4.1.7";
   const BOARD_NAME = "global_shopping_manual_trial_issue_review_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, manual_issue_review_only:true };
   const ALLOWED_BUCKETS = ["ui_copy", "visual_layout", "scenario_gap", "safety_copy", "no_transaction_guard", "feedback_placeholder", "blocked"];

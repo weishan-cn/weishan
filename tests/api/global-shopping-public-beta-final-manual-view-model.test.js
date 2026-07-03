@@ -25,14 +25,14 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaFinalManualViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaFinalManualViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_MANUAL_VIEW_MODEL_VERSION, "4.1.6");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_MANUAL_VIEW_MODEL_VERSION, "4.1.7");
   const ready = api.buildGlobalShoppingPublicBetaFinalManualViewModel({
     publicBetaTrialReadinessPackSummary:summary("Public Beta Trial Readiness Pack"),
     finalManualAcceptanceConsoleSummary:summary("Final Manual Acceptance Console"),
     publicBetaFeedbackPlaceholderSummary:summary("Feedback Placeholder")
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.1.6");
+  assert.equal(ready.appVersion, "4.1.7");
   assert.equal(ready.safeToProceedWithManualTrialReview, true);
   assert.equal(ready.externalUrl, null);
   assert.equal(ready.checkoutUrl, null);

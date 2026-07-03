@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_SUPPORT_PLAYBOOK_CONSOLE_VERSION = "4.1.6";
+  const FLIGHT_WORKFLOW_SUPPORT_PLAYBOOK_CONSOLE_VERSION = "4.1.7";
   const CONSOLE_NAME = "flight_workflow_support_playbook_console_v1";
   const CAVEAT = "该手册只用于只读试点问题处理，不代表客服工单、交易请求或出票请求。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;

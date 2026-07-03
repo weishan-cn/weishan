@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_READ_ONLY_PROVIDER_SANDBOX_CONNECTOR_VERSION = "4.1.6";
+  const GLOBAL_SHOPPING_READ_ONLY_PROVIDER_SANDBOX_CONNECTOR_VERSION = "4.1.7";
   const CONNECTOR_NAME = "global_shopping_read_only_provider_sandbox_connector_v1";
   const RESULT_LABELS = {
     ready:"只读 Provider Connector 已准备",

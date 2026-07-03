@@ -108,13 +108,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.1.6");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.1.7");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "4.1.6");
+  assert.equal(ready.appVersion, "4.1.7");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -298,21 +298,39 @@ function main() {
     manualTrialIssueReviewBoardSummary:{ status:"ready", userFacingSummary:{ title:"Manual Trial Issue Review Board", resultLabel:"Manual Trial Issue Review Board 已准备", redacted:true }, redacted:true },
     offlineAcceptanceSnapshotSummary:{ status:"needs_review", userFacingSummary:{ title:"Offline Acceptance Snapshot", resultLabel:"Offline Acceptance Snapshot 仍需复核", redacted:true }, redacted:true },
     publicBetaAcceptanceSnapshotViewModelSummary:{ status:"needs_review", userFacingSummary:{ title:"Public Beta Acceptance Snapshot View Model", resultLabel:"Public Beta Acceptance Snapshot View Model 仍需复核", redacted:true }, safeToProceedWithManualAcceptanceSnapshotReview:false, redacted:true },
+    publicBetaAcceptanceReviewConsoleSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Public Beta Acceptance Review Console", resultLabel:"Public Beta Acceptance Review Console 需人工复核", redacted:true }, redacted:true },
+    offlineTrialClosureBoardSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Offline Trial Closure Board", resultLabel:"Offline Trial Closure Board 需人工复核", redacted:true }, redacted:true },
+    noLaunchAssuranceGateSummary:{ status:"ready", userFacingSummary:{ title:"No-Launch Assurance Gate", resultLabel:"No-Launch Assurance Gate 已准备", redacted:true }, redacted:true },
+    publicBetaClosureReviewViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Closure Review View Model", resultLabel:"Public Beta Closure Review View Model 已准备", redacted:true }, safeToProceedWithManualClosureReview:true, redacted:true },
     publicBetaFreezeEvidenceStatus:"ready",
     manualTrialIssueReviewStatus:"ready",
     offlineAcceptanceSnapshotStatus:"needs_review",
     publicBetaAcceptanceSnapshotViewModelStatus:"needs_review",
-    safeToProceedWithManualAcceptanceSnapshotReview:false
+    publicBetaAcceptanceReviewConsoleStatus:"manual_review_required",
+    offlineTrialClosureBoardStatus:"manual_review_required",
+    noLaunchAssuranceGateStatus:"ready",
+    publicBetaClosureReviewViewModelStatus:"ready",
+    safeToProceedWithManualAcceptanceSnapshotReview:false,
+    safeToProceedWithManualClosureReview:true
   });
   assert.equal(acceptanceSnapshotReady.safetyReport.publicBetaFreezeEvidenceSummary.title, "Public Beta Freeze Evidence Summary");
   assert.equal(acceptanceSnapshotReady.safetyReport.manualTrialIssueReviewBoardSummary.title, "Manual Trial Issue Review Board");
   assert.equal(acceptanceSnapshotReady.safetyReport.offlineAcceptanceSnapshotSummary.title, "Offline Acceptance Snapshot");
   assert.equal(acceptanceSnapshotReady.safetyReport.publicBetaAcceptanceSnapshotViewModelSummary.line, "Public Beta Acceptance Snapshot View Model 仍需复核");
+  assert.equal(acceptanceSnapshotReady.safetyReport.publicBetaAcceptanceReviewConsoleSummary.title, "Public Beta Acceptance Review Console");
+  assert.equal(acceptanceSnapshotReady.safetyReport.offlineTrialClosureBoardSummary.title, "Offline Trial Closure Board");
+  assert.equal(acceptanceSnapshotReady.safetyReport.noLaunchAssuranceGateSummary.title, "No-Launch Assurance Gate");
+  assert.equal(acceptanceSnapshotReady.safetyReport.publicBetaClosureReviewViewModelSummary.line, "Public Beta Closure Review View Model 已准备");
   assert.equal(acceptanceSnapshotReady.safetyReport.publicBetaFreezeEvidenceStatus, "ready");
   assert.equal(acceptanceSnapshotReady.safetyReport.manualTrialIssueReviewStatus, "ready");
   assert.equal(acceptanceSnapshotReady.safetyReport.offlineAcceptanceSnapshotStatus, "needs_review");
   assert.equal(acceptanceSnapshotReady.safetyReport.publicBetaAcceptanceSnapshotViewModelStatus, "needs_review");
+  assert.equal(acceptanceSnapshotReady.safetyReport.publicBetaAcceptanceReviewConsoleStatus, "manual_review_required");
+  assert.equal(acceptanceSnapshotReady.safetyReport.offlineTrialClosureBoardStatus, "manual_review_required");
+  assert.equal(acceptanceSnapshotReady.safetyReport.noLaunchAssuranceGateStatus, "ready");
+  assert.equal(acceptanceSnapshotReady.safetyReport.publicBetaClosureReviewViewModelStatus, "ready");
   assert.equal(acceptanceSnapshotReady.userFacingSummary.safeToProceedWithManualAcceptanceSnapshotReview, false);
+  assert.equal(acceptanceSnapshotReady.userFacingSummary.safeToProceedWithManualClosureReview, true);
   const sandboxMilestoneReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     providerSandboxReadinessWorkbenchSummary:{ status:"ready", userFacingSummary:{ title:"Provider Sandbox Readiness Workbench", resultLabel:"Sandbox Readiness Workbench 已准备", redacted:true }, redacted:true },

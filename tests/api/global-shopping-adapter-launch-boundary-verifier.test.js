@@ -19,7 +19,7 @@ function readySummary(title, resultLabel) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingAdapterLaunchBoundaryVerifier.js").WeishanGlobalShoppingAdapterLaunchBoundaryVerifier;
-  assert.equal(api.GLOBAL_SHOPPING_ADAPTER_LAUNCH_BOUNDARY_VERIFIER_VERSION, "4.1.6");
+  assert.equal(api.GLOBAL_SHOPPING_ADAPTER_LAUNCH_BOUNDARY_VERIFIER_VERSION, "4.1.7");
   const ready = api.buildGlobalShoppingAdapterLaunchBoundaryVerifier({
     offlinePolicyReplayCenterSummary:readySummary("Offline Policy Replay Center", "Offline Policy Replay Center 已准备"),
     adapterBoundaryLockSummary:readySummary("Adapter Boundary Lock", "Adapter 边界锁已准备"),

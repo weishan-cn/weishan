@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v4.1.6 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
+  test("v4.1.7 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9652,7 +9652,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v401-render-smoke", "true");
       const card = {
-        version:"4.1.6",
+        version:"4.1.7",
         visible:true,
         globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, rows:[{ rowId:"public_beta", label:"Global Shopping Read-Only Public Beta Shell", value:"Global Shopping Read-Only Public Beta Shell 已准备", status:"pass", redacted:true }], redacted:true },
         globalShoppingReadOnlyCandidateEvidenceUnifierSummary:{ status:"ready", userFacingSummary:{ title:"候选价证据", resultLabel:"候选价证据已准备", redacted:true }, rows:[{ rowId:"candidate_evidence", label:"候选价证据", value:"候选价证据已准备", status:"pass", redacted:true }], redacted:true },
@@ -9702,6 +9702,10 @@ test.describe.serial("commerce agent workbench", () => {
         manualTrialIssueReviewBoardSummary:{ status:"ready", userFacingSummary:{ title:"Manual Trial Issue Review Board", resultLabel:"Manual Trial Issue Review Board 已准备", redacted:true }, rows:[{ rowId:"manual_trial_issue_review_board", label:"Manual Trial Issue Review Board", value:"Manual Trial Issue Review Board 已准备", status:"pass", redacted:true }], redacted:true },
         offlineAcceptanceSnapshotSummary:{ status:"needs_review", userFacingSummary:{ title:"Offline Acceptance Snapshot", resultLabel:"Offline Acceptance Snapshot 仍需复核", redacted:true }, rows:[{ rowId:"offline_acceptance_snapshot", label:"Offline Acceptance Snapshot", value:"Offline Acceptance Snapshot 仍需复核", status:"warning", redacted:true }], redacted:true },
         publicBetaAcceptanceSnapshotViewModelSummary:{ status:"needs_review", userFacingSummary:{ title:"Public Beta Acceptance Snapshot View Model", resultLabel:"Public Beta Acceptance Snapshot View Model 仍需复核", redacted:true }, rows:[{ rowId:"public_beta_acceptance_snapshot_view_model", label:"Public Beta Acceptance Snapshot View Model", value:"Public Beta Acceptance Snapshot View Model 仍需复核", status:"warning", redacted:true }], safeToProceedWithManualAcceptanceSnapshotReview:false, redacted:true },
+        publicBetaAcceptanceReviewConsoleSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Public Beta Acceptance Review Console", resultLabel:"Public Beta Acceptance Review Console 需人工复核", redacted:true }, rows:[{ rowId:"public_beta_acceptance_review_console", label:"Public Beta Acceptance Review Console", value:"Public Beta Acceptance Review Console 需人工复核", status:"warning", redacted:true }], redacted:true },
+        offlineTrialClosureBoardSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Offline Trial Closure Board", resultLabel:"Offline Trial Closure Board 需人工复核", redacted:true }, rows:[{ rowId:"offline_trial_closure_board", label:"Offline Trial Closure Board", value:"Offline Trial Closure Board 需人工复核", status:"warning", redacted:true }], redacted:true },
+        noLaunchAssuranceGateSummary:{ status:"ready", userFacingSummary:{ title:"No-Launch Assurance Gate", resultLabel:"No-Launch Assurance Gate 已准备", redacted:true }, rows:[{ rowId:"no_launch_assurance_gate", label:"No-Launch Assurance Gate", value:"No-Launch Assurance Gate 已准备", status:"pass", redacted:true }], redacted:true },
+        publicBetaClosureReviewViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Closure Review View Model", resultLabel:"Public Beta Closure Review View Model 已准备", redacted:true }, rows:[{ rowId:"public_beta_closure_review_view_model", label:"Public Beta Closure Review View Model", value:"Public Beta Closure Review View Model 已准备", status:"pass", redacted:true }], safeToProceedWithManualClosureReview:true, redacted:true },
         publicBetaOperatorConsoleSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Operator Console", resultLabel:"Provider-Zero 状态通过", redacted:true }, rows:[{ rowId:"public_beta_operator_console", label:"Public Beta Operator Console", value:"Provider-Zero 状态通过", status:"pass", redacted:true }], redacted:true },
         categoryExpansionShellSummary:{ status:"ready", userFacingSummary:{ title:"Category Expansion Shell", resultLabel:"Flight / Hotel / Product 只读外壳已准备", redacted:true }, rows:[{ rowId:"category_expansion_shell", label:"Category Expansion Shell", value:"Flight / Hotel / Product 只读外壳已准备", status:"pass", redacted:true }], redacted:true },
         finalOfflineBetaAuditSummary:{ status:"ready", userFacingSummary:{ title:"Final Offline Beta Audit", resultLabel:"最终离线审计通过", redacted:true }, rows:[{ rowId:"final_offline_beta_audit", label:"Final Offline Beta Audit", value:"最终离线审计通过", status:"pass", redacted:true }], redacted:true },
@@ -9746,6 +9750,10 @@ test.describe.serial("commerce agent workbench", () => {
         manualTrialIssueReviewStatus:"ready",
         offlineAcceptanceSnapshotStatus:"needs_review",
         publicBetaAcceptanceSnapshotViewModelStatus:"needs_review",
+        publicBetaAcceptanceReviewConsoleStatus:"manual_review_required",
+        offlineTrialClosureBoardStatus:"manual_review_required",
+        noLaunchAssuranceGateStatus:"ready",
+        publicBetaClosureReviewViewModelStatus:"ready",
         publicBetaOperatorConsoleStatus:"ready",
         categoryExpansionShellStatus:"ready",
         finalOfflineBetaAuditStatus:"ready",
@@ -9770,7 +9778,8 @@ test.describe.serial("commerce agent workbench", () => {
         safeToProceedWithManualQaReview:true,
         safeToProceedWithManualTrialOperationsReview:true,
         safeToProceedWithManualFreezeReview:true,
-        safeToProceedWithManualAcceptanceSnapshotReview:false
+        safeToProceedWithManualAcceptanceSnapshotReview:false,
+        safeToProceedWithManualClosureReview:true
       };
       host.innerHTML = cardApi.renderReadOnlyPriceCandidateCardHtml(card);
       const section = host.querySelector("[data-commerce-global-shopping-public-beta-review='true']");
@@ -9861,6 +9870,16 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("冻结证据仅为只读摘要，不修改配置");
     expect(v400.text).toContain("问题复核仅为离线视图，不创建真实 issue");
     expect(v400.text).toContain("验收快照不写文件、不导出");
+    expect(v400.text).toContain("Public Beta Acceptance Review Console");
+    expect(v400.text).toContain("Offline Trial Closure Board");
+    expect(v400.text).toContain("No-Launch Assurance Gate");
+    expect(v400.text).toContain("Acceptance Review");
+    expect(v400.text).toContain("Trial Closure");
+    expect(v400.text).toContain("No Launch");
+    expect(v400.text).toContain("当前不发布、不创建 release、不 push");
+    expect(v400.text).toContain("试用闭环仅为离线视图，不关闭真实任务");
+    expect(v400.text).toContain("验收复核后仍需人工决定下一阶段");
+    expect(v400.text).toContain("仍不允许启用 provider、付款、下单或发布");
     expect(v400.text).toContain("Visual Acceptance");
     expect(v400.text).toContain("Scenario Coverage");
     expect(v400.text).toContain("Transaction Boundary");
@@ -9901,9 +9920,14 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).not.toContain("enable_provider");
     expect(v400.text).not.toContain("enable_payment");
     expect(v400.text).not.toContain("enable_order");
+    expect(v400.text).not.toContain("已发布");
+    expect(v400.text).not.toContain("已 launch");
     expect(v400.text).not.toContain("已自动发布");
     expect(v400.text).not.toContain("已创建 release");
     expect(v400.text).not.toContain("已 push");
+    expect(v400.text).not.toContain("已关闭真实任务");
+    expect(v400.text).not.toContain("已创建 issue");
+    expect(v400.text).not.toContain("已上传问题");
     expect(v400.text).not.toContain("报告已导出");
     expect(v400.text).not.toContain("快照已保存");
     expect(v400.text).not.toContain("反馈已发送");

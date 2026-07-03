@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.1.6");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.1.7");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -231,7 +231,12 @@ function main() {
     manualTrialIssueReviewBoardSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Manual Trial Issue Review Board 已准备", redacted:true } },
     offlineAcceptanceSnapshotSummary:{ status:"needs_review", userFacingSummary:{ resultLabel:"Offline Acceptance Snapshot 仍需复核", redacted:true } },
     publicBetaAcceptanceSnapshotViewModelSummary:{ status:"needs_review", userFacingSummary:{ resultLabel:"Public Beta Acceptance Snapshot View Model 仍需复核", redacted:true } },
-    safeToProceedWithManualAcceptanceSnapshotReview:false
+    publicBetaAcceptanceReviewConsoleSummary:{ status:"manual_review_required", userFacingSummary:{ resultLabel:"Public Beta Acceptance Review Console 需人工复核", redacted:true } },
+    offlineTrialClosureBoardSummary:{ status:"manual_review_required", userFacingSummary:{ resultLabel:"Offline Trial Closure Board 需人工复核", redacted:true } },
+    noLaunchAssuranceGateSummary:{ status:"ready", userFacingSummary:{ resultLabel:"No-Launch Assurance Gate 已准备", redacted:true } },
+    publicBetaClosureReviewViewModelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Beta Closure Review View Model 已准备", redacted:true } },
+    safeToProceedWithManualAcceptanceSnapshotReview:false,
+    safeToProceedWithManualClosureReview:true
   }).badges.map((item) => item.label);
   assert.ok(qaOperationsLabels.includes("Public Beta Freeze Evidence Summary 已准备"));
   assert.ok(qaOperationsLabels.includes("Manual Trial Issue Review Board 已准备"));
@@ -241,6 +246,14 @@ function main() {
   assert.ok(qaOperationsLabels.includes("Issue Review / 问题复核仅为离线视图，不创建真实 issue"));
   assert.ok(qaOperationsLabels.includes("Acceptance Snapshot / 验收快照不写文件、不导出"));
   assert.ok(qaOperationsLabels.includes("仍需人工复核后再决定下一阶段"));
+  assert.ok(qaOperationsLabels.includes("Public Beta Acceptance Review Console 需人工复核"));
+  assert.ok(qaOperationsLabels.includes("Offline Trial Closure Board 需人工复核"));
+  assert.ok(qaOperationsLabels.includes("No-Launch Assurance Gate 已准备"));
+  assert.ok(qaOperationsLabels.includes("Public Beta Closure Review View Model 已准备"));
+  assert.ok(qaOperationsLabels.includes("当前不发布、不创建 release、不 push"));
+  assert.ok(qaOperationsLabels.includes("试用闭环仅为离线视图，不关闭真实任务"));
+  assert.ok(qaOperationsLabels.includes("仍不允许启用 provider、付款、下单或发布"));
+  assert.ok(qaOperationsLabels.includes("验收复核后仍需人工决定下一阶段"));
   const offlineLaunchLabels = api.buildFlightWorkflowRiskBadges({
     offlineLaunchDecisionSimulatorSummary:{ status:"ready", userFacingSummary:{ resultLabel:"离线发布决策模拟器已准备", redacted:true } },
     sandboxActivationReceiptLedgerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox 激活回执台账已准备", redacted:true } },

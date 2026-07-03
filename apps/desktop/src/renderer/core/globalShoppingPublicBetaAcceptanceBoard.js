@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_BOARD_VERSION = "4.1.6";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_BOARD_VERSION = "4.1.7";
   const BOARD_NAME = "global_shopping_public_beta_acceptance_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, acceptance_board_only:true };
 

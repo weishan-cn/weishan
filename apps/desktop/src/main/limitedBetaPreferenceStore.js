@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const LIMITED_BETA_PREFERENCE_STORE_VERSION = "4.1.6";
+const LIMITED_BETA_PREFERENCE_STORE_VERSION = "4.1.7";
 const PREFERENCE_STORE_FILE = "limited-beta-preferences.v1.json";
 
 function nowIso() {

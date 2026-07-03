@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_HUMAN_ACTIVATION_FINAL_DOSSIER_VERSION = "4.1.6";
+  const GLOBAL_SHOPPING_HUMAN_ACTIVATION_FINAL_DOSSIER_VERSION = "4.1.7";
   const DOSSIER_NAME = "global_shopping_human_activation_final_dossier_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_FEEDBACK_PLACEHOLDER_VERSION = "4.1.6";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_FEEDBACK_PLACEHOLDER_VERSION = "4.1.7";
   const PLACEHOLDER_NAME = "global_shopping_public_beta_feedback_placeholder_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, feedback_placeholder_only:true };
   const BLOCKED_TEXT_RE = /feedback sent|uploaded|saved raw user text|external form|token|key|secret/i;

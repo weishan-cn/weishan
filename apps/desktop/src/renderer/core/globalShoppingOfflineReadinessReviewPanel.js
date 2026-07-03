@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_READINESS_REVIEW_PANEL_VERSION = "4.1.6";
+  const GLOBAL_SHOPPING_OFFLINE_READINESS_REVIEW_PANEL_VERSION = "4.1.7";
   const PANEL_NAME = "global_shopping_offline_readiness_review_panel_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, readiness_review_only:true };
 
