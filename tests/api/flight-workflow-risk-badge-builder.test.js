@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.1.0");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.1.1");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -185,6 +185,18 @@ function main() {
   assert.ok(publicBetaRcLabels.includes("No Release Mutation / 当前只是 RC 候选，不创建 release、不 push"));
   assert.ok(publicBetaRcLabels.includes("No Transaction / 仍然不接真实 provider、不联网、不启用交易"));
   assert.ok(publicBetaRcLabels.includes("人工复核通过后才能进入下一阶段"));
+  const publicBetaStabilityLabels = api.buildFlightWorkflowRiskBadges({
+    publicBetaStabilityAuditSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Beta Stability Audit 已准备", redacted:true } },
+    manualLaunchHandoffPackSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Manual Launch Handoff Pack 已准备", redacted:true } },
+    manualLaunchHandoffViewModelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Beta Stability Audit / Manual Launch Handoff Pack 已准备", redacted:true } },
+    safeToProceedWithManualLaunchHandoffReview:true
+  }).badges.map((item) => item.label);
+  assert.ok(publicBetaStabilityLabels.includes("Public Beta Stability Audit 已准备"));
+  assert.ok(publicBetaStabilityLabels.includes("Manual Launch Handoff Pack 已准备"));
+  assert.ok(publicBetaStabilityLabels.includes("Public Beta Stability Audit / Manual Launch Handoff Pack 已准备"));
+  assert.ok(publicBetaStabilityLabels.includes("Locked Capabilities / 不自动发布、不接 provider、不启用交易"));
+  assert.ok(publicBetaStabilityLabels.includes("Continue Testing / 可继续人工试用和问题记录"));
+  assert.ok(publicBetaStabilityLabels.includes("既有 secret scan WARN 仅作为已知警告展示"));
   const offlineLaunchLabels = api.buildFlightWorkflowRiskBadges({
     offlineLaunchDecisionSimulatorSummary:{ status:"ready", userFacingSummary:{ resultLabel:"离线发布决策模拟器已准备", redacted:true } },
     sandboxActivationReceiptLedgerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox 激活回执台账已准备", redacted:true } },

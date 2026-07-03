@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "4.1.0";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "4.1.1";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -287,6 +287,9 @@
       publicBetaRcConsoleSummary: stripUnsafe(safe.publicBetaRcConsoleSummary || null),
       offlineTrialReleaseGateSummary: stripUnsafe(safe.offlineTrialReleaseGateSummary || null),
       publicBetaRcViewModelSummary: stripUnsafe(safe.publicBetaRcViewModelSummary || null),
+      publicBetaStabilityAuditSummary: stripUnsafe(safe.publicBetaStabilityAuditSummary || null),
+      manualLaunchHandoffPackSummary: stripUnsafe(safe.manualLaunchHandoffPackSummary || null),
+      manualLaunchHandoffViewModelSummary: stripUnsafe(safe.manualLaunchHandoffViewModelSummary || null),
       offlineProviderAdapterContractKitSummary: stripUnsafe(safe.offlineProviderAdapterContractKitSummary || null),
       mockSandboxQaMatrixSummary: stripUnsafe(safe.mockSandboxQaMatrixSummary || null),
       humanActivationRunbookCenterSummary: stripUnsafe(safe.humanActivationRunbookCenterSummary || null),
@@ -417,6 +420,9 @@
       publicBetaRcConsoleStatus: safeText(safe.publicBetaRcConsoleStatus || safe.publicBetaRcConsoleSummary && (safe.publicBetaRcConsoleSummary.rcStatus || safe.publicBetaRcConsoleSummary.status) || ""),
       offlineTrialReleaseGateStatus: safeText(safe.offlineTrialReleaseGateStatus || safe.offlineTrialReleaseGateSummary && safe.offlineTrialReleaseGateSummary.status || ""),
       publicBetaRcViewModelStatus: safeText(safe.publicBetaRcViewModelStatus || safe.publicBetaRcViewModelSummary && safe.publicBetaRcViewModelSummary.status || ""),
+      publicBetaStabilityAuditStatus: safeText(safe.publicBetaStabilityAuditStatus || safe.publicBetaStabilityAuditSummary && safe.publicBetaStabilityAuditSummary.status || ""),
+      manualLaunchHandoffPackStatus: safeText(safe.manualLaunchHandoffPackStatus || safe.manualLaunchHandoffPackSummary && safe.manualLaunchHandoffPackSummary.status || ""),
+      manualLaunchHandoffViewModelStatus: safeText(safe.manualLaunchHandoffViewModelStatus || safe.manualLaunchHandoffViewModelSummary && safe.manualLaunchHandoffViewModelSummary.status || ""),
       offlineProviderAdapterContractKitStatus: safeText(safe.offlineProviderAdapterContractKitStatus || safe.offlineProviderAdapterContractKitSummary && safe.offlineProviderAdapterContractKitSummary.status || ""),
       mockSandboxQaMatrixStatus: safeText(safe.mockSandboxQaMatrixStatus || safe.mockSandboxQaMatrixSummary && safe.mockSandboxQaMatrixSummary.status || ""),
       humanActivationRunbookCenterStatus: safeText(safe.humanActivationRunbookCenterStatus || safe.humanActivationRunbookCenterSummary && safe.humanActivationRunbookCenterSummary.status || ""),
@@ -442,6 +448,7 @@
       safeToProceedWithManualReleaseCandidateReview: safe.safeToProceedWithManualReleaseCandidateReview === true,
       safeToProceedWithManualGovernanceReleaseDecision: safe.safeToProceedWithManualGovernanceReleaseDecision === true,
       safeToProceedWithManualRcReview: safe.safeToProceedWithManualRcReview === true,
+      safeToProceedWithManualLaunchHandoffReview: safe.safeToProceedWithManualLaunchHandoffReview === true,
       globalShoppingProductGoalSummary: stripUnsafe(safe.globalShoppingProductGoalSummary || null),
       jumpToPlatformBoundarySummary: stripUnsafe(safe.jumpToPlatformBoundarySummary || null),
       globalShoppingProductGoalViewModelSummary: stripUnsafe(safe.globalShoppingProductGoalViewModelSummary || null),
@@ -923,6 +930,9 @@
       publicBetaRcConsoleSummary: workflow.publicBetaRcConsoleSummary || safe.publicBetaRcConsoleSummary || null,
       offlineTrialReleaseGateSummary: workflow.offlineTrialReleaseGateSummary || safe.offlineTrialReleaseGateSummary || null,
       publicBetaRcViewModelSummary: workflow.publicBetaRcViewModelSummary || safe.publicBetaRcViewModelSummary || null,
+      publicBetaStabilityAuditSummary: workflow.publicBetaStabilityAuditSummary || safe.publicBetaStabilityAuditSummary || null,
+      manualLaunchHandoffPackSummary: workflow.manualLaunchHandoffPackSummary || safe.manualLaunchHandoffPackSummary || null,
+      manualLaunchHandoffViewModelSummary: workflow.manualLaunchHandoffViewModelSummary || safe.manualLaunchHandoffViewModelSummary || null,
       globalShoppingReadOnlyPublicBetaShellStatus: workflow.globalShoppingReadOnlyPublicBetaShellStatus || safe.globalShoppingReadOnlyPublicBetaShellStatus || "",
       providerZeroRuntimeLockStatus: workflow.providerZeroRuntimeLockStatus || safe.providerZeroRuntimeLockStatus || "",
       userTrustLaunchBoardStatus: workflow.userTrustLaunchBoardStatus || safe.userTrustLaunchBoardStatus || "",
@@ -946,7 +956,11 @@
       publicBetaRcConsoleStatus: workflow.publicBetaRcConsoleStatus || safe.publicBetaRcConsoleStatus || "",
       offlineTrialReleaseGateStatus: workflow.offlineTrialReleaseGateStatus || safe.offlineTrialReleaseGateStatus || "",
       publicBetaRcViewModelStatus: workflow.publicBetaRcViewModelStatus || safe.publicBetaRcViewModelStatus || "",
+      publicBetaStabilityAuditStatus: workflow.publicBetaStabilityAuditStatus || safe.publicBetaStabilityAuditStatus || "",
+      manualLaunchHandoffPackStatus: workflow.manualLaunchHandoffPackStatus || safe.manualLaunchHandoffPackStatus || "",
+      manualLaunchHandoffViewModelStatus: workflow.manualLaunchHandoffViewModelStatus || safe.manualLaunchHandoffViewModelStatus || "",
       safeToProceedWithManualRcReview: workflow.safeToProceedWithManualRcReview === true || safe.safeToProceedWithManualRcReview === true,
+      safeToProceedWithManualLaunchHandoffReview: workflow.safeToProceedWithManualLaunchHandoffReview === true || safe.safeToProceedWithManualLaunchHandoffReview === true,
       readOnlyPlatformHandoffSimulatorSummary: workflow.readOnlyPlatformHandoffSimulatorSummary || safe.readOnlyPlatformHandoffSimulatorSummary ? { title:"只读平台交接模拟器", line:workflow.readOnlyPlatformHandoffSimulatorSummary && workflow.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary && workflow.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary.resultLabel || safe.readOnlyPlatformHandoffSimulatorSummary && safe.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary && safe.readOnlyPlatformHandoffSimulatorSummary.userFacingSummary.resultLabel || "交接模拟仍需复核", redacted:true } : null,
       redactedSearchParameterPackSummary: workflow.redactedSearchParameterPackSummary || safe.redactedSearchParameterPackSummary ? { title:"脱敏搜索参数包", line:workflow.redactedSearchParameterPackSummary && workflow.redactedSearchParameterPackSummary.userFacingSummary && workflow.redactedSearchParameterPackSummary.userFacingSummary.resultLabel || safe.redactedSearchParameterPackSummary && safe.redactedSearchParameterPackSummary.userFacingSummary && safe.redactedSearchParameterPackSummary.userFacingSummary.resultLabel || "搜索参数包仍需复核", redacted:true } : null,
       userConfirmationChecklistSummary: workflow.userConfirmationChecklistSummary || safe.userConfirmationChecklistSummary ? { title:"用户确认清单", line:workflow.userConfirmationChecklistSummary && workflow.userConfirmationChecklistSummary.userFacingSummary && workflow.userConfirmationChecklistSummary.userFacingSummary.resultLabel || safe.userConfirmationChecklistSummary && safe.userConfirmationChecklistSummary.userFacingSummary && safe.userConfirmationChecklistSummary.userFacingSummary.resultLabel || "用户确认清单仍需复核", redacted:true } : null,
@@ -1391,6 +1405,9 @@
       publicBetaRcConsoleSummary: workflow.publicBetaRcConsoleSummary || safe.publicBetaRcConsoleSummary || null,
       offlineTrialReleaseGateSummary: workflow.offlineTrialReleaseGateSummary || safe.offlineTrialReleaseGateSummary || null,
       publicBetaRcViewModelSummary: workflow.publicBetaRcViewModelSummary || safe.publicBetaRcViewModelSummary || null,
+      publicBetaStabilityAuditSummary: workflow.publicBetaStabilityAuditSummary || safe.publicBetaStabilityAuditSummary || null,
+      manualLaunchHandoffPackSummary: workflow.manualLaunchHandoffPackSummary || safe.manualLaunchHandoffPackSummary || null,
+      manualLaunchHandoffViewModelSummary: workflow.manualLaunchHandoffViewModelSummary || safe.manualLaunchHandoffViewModelSummary || null,
       offlineProviderCertificationCenterSummary: workflow.offlineProviderCertificationCenterSummary || safe.offlineProviderCertificationCenterSummary || null,
       mockIntegrationRegressionLabSummary: workflow.mockIntegrationRegressionLabSummary || safe.mockIntegrationRegressionLabSummary || null,
       humanApprovalEvidenceBinderSummary: workflow.humanApprovalEvidenceBinderSummary || safe.humanApprovalEvidenceBinderSummary || null,
@@ -1470,6 +1487,9 @@
       publicBetaRcConsoleStatus: workflow.publicBetaRcConsoleStatus || safe.publicBetaRcConsoleStatus || "",
       offlineTrialReleaseGateStatus: workflow.offlineTrialReleaseGateStatus || safe.offlineTrialReleaseGateStatus || "",
       publicBetaRcViewModelStatus: workflow.publicBetaRcViewModelStatus || safe.publicBetaRcViewModelStatus || "",
+      publicBetaStabilityAuditStatus: workflow.publicBetaStabilityAuditStatus || safe.publicBetaStabilityAuditStatus || "",
+      manualLaunchHandoffPackStatus: workflow.manualLaunchHandoffPackStatus || safe.manualLaunchHandoffPackStatus || "",
+      manualLaunchHandoffViewModelStatus: workflow.manualLaunchHandoffViewModelStatus || safe.manualLaunchHandoffViewModelStatus || "",
       offlineProviderCertificationCenterStatus: workflow.offlineProviderCertificationCenterStatus || safe.offlineProviderCertificationCenterStatus || "",
       mockIntegrationRegressionLabStatus: workflow.mockIntegrationRegressionLabStatus || safe.mockIntegrationRegressionLabStatus || "",
       humanApprovalEvidenceBinderStatus: workflow.humanApprovalEvidenceBinderStatus || safe.humanApprovalEvidenceBinderStatus || "",
@@ -1479,6 +1499,7 @@
       safeToContinueReleaseCandidate: workflow.safeToContinueReleaseCandidate === true || safe.safeToContinueReleaseCandidate === true,
       safeToFinalizeUserFacingCopy: workflow.safeToFinalizeUserFacingCopy === true || safe.safeToFinalizeUserFacingCopy === true,
       safeToProceedWithManualRcReview: workflow.safeToProceedWithManualRcReview === true || safe.safeToProceedWithManualRcReview === true,
+      safeToProceedWithManualLaunchHandoffReview: workflow.safeToProceedWithManualLaunchHandoffReview === true || safe.safeToProceedWithManualLaunchHandoffReview === true,
       safeToProceedWithHumanSandboxMilestoneReview: workflow.safeToProceedWithHumanSandboxMilestoneReview === true || safe.safeToProceedWithHumanSandboxMilestoneReview === true,
       safeToProceedWithManualOfflineLaunchDecisionReview: workflow.safeToProceedWithManualOfflineLaunchDecisionReview === true || safe.safeToProceedWithManualOfflineLaunchDecisionReview === true,
       safeToProceedWithHumanLaunchControlReview: workflow.safeToProceedWithHumanLaunchControlReview === true || safe.safeToProceedWithHumanLaunchControlReview === true,

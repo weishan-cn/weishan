@@ -19,7 +19,7 @@ function readySummary(title, resultLabel) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingOfflineActivationWarRoom.js").WeishanGlobalShoppingOfflineActivationWarRoom;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_ACTIVATION_WAR_ROOM_VERSION, "4.1.0");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_ACTIVATION_WAR_ROOM_VERSION, "4.1.1");
   const ready = api.buildGlobalShoppingOfflineActivationWarRoom({
     providerFinalSafetySealSummary:readySummary("Provider Final Safety Seal", "Provider Final Safety Seal 已准备"),
     providerActivationBlockerSentinelSummary:readySummary("Provider Activation Blocker Sentinel", "Provider Activation Blocker Sentinel 已准备"),

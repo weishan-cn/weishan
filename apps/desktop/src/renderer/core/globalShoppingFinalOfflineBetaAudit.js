@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_FINAL_OFFLINE_BETA_AUDIT_VERSION = "4.1.0";
+  const GLOBAL_SHOPPING_FINAL_OFFLINE_BETA_AUDIT_VERSION = "4.1.1";
   const AUDIT_NAME = "global_shopping_final_offline_beta_audit_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, final_offline_beta_audit_only:true };
   const SAFE_KEYS = ["noProvider", "noNetwork", "noKey", "noEndpoint", "noExternalOpen", "noPayment", "noOrder", "noTicketing", "noRawPersistence", "noReleaseMutation", "userCopySafe"];

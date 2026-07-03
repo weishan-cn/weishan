@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_ADAPTER_BOUNDARY_DIFF_INSPECTOR_VERSION = "4.1.0";
+  const GLOBAL_SHOPPING_ADAPTER_BOUNDARY_DIFF_INSPECTOR_VERSION = "4.1.1";
   const INSPECTOR_NAME = "global_shopping_adapter_boundary_diff_inspector_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_TRIAL_MILESTONE_BOARD_VERSION = "4.1.0";
+  const FLIGHT_WORKFLOW_READ_ONLY_TRIAL_MILESTONE_BOARD_VERSION = "4.1.1";
   const BOARD_NAME = "flight_workflow_read_only_trial_milestone_board_v1";
   const CAVEAT = "该里程碑板只追踪脱敏测试槽位，不保存真实身份、不发送真实邀请。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;

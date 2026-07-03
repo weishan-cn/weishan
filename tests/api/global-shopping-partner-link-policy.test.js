@@ -7,9 +7,9 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPartnerLinkPolicy.js"]);
   const api = windowRef.WeishanGlobalShoppingPartnerLinkPolicy;
-  assert.equal(api.GLOBAL_SHOPPING_PARTNER_LINK_POLICY_VERSION, "4.1.0");
+  assert.equal(api.GLOBAL_SHOPPING_PARTNER_LINK_POLICY_VERSION, "4.1.1");
   const safe = api.buildGlobalShoppingPartnerLinkPolicy({ linkRelation:"partner" });
-  assert.equal(safe.appVersion, "4.1.0");
+  assert.equal(safe.appVersion, "4.1.1");
   assert.equal(safe.status, "compliant");
   assert.equal(safe.userFacingSummary.title, "合作/联盟链接政策");
   assert.equal(api.buildGlobalShoppingPartnerLinkPolicy({ partnerLinkPolicy:{ disclosesPotentialPartnerLink:false } }).status, "needs_review");

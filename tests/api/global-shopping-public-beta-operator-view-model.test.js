@@ -19,7 +19,7 @@ function readySummary(title, resultLabel) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingPublicBetaOperatorViewModel.js");
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_OPERATOR_VIEW_MODEL_VERSION, "4.1.0");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_OPERATOR_VIEW_MODEL_VERSION, "4.1.1");
   const ready = api.buildGlobalShoppingPublicBetaOperatorViewModel({
     publicBetaOperatorConsoleSummary:readySummary("Public Beta Operator Console", "Public Beta Operator Console 已准备"),
     categoryExpansionShellSummary:readySummary("Category Expansion Shell", "Flight / Hotel / Product 只读外壳已准备"),

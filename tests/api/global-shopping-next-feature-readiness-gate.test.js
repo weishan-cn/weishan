@@ -22,7 +22,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingNextFeatureReadinessGate.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingNextFeatureReadinessGate;
-  assert.equal(api.GLOBAL_SHOPPING_NEXT_FEATURE_READINESS_GATE_VERSION, "4.1.0");
+  assert.equal(api.GLOBAL_SHOPPING_NEXT_FEATURE_READINESS_GATE_VERSION, "4.1.1");
   const ready = api.buildGlobalShoppingNextFeatureReadinessGate({
     readOnlyCommerceSessionRecapCenterSummary:{ status:"ready", userFacingSummary:{ resultLabel:"会话总结已准备", redacted:true } },
     userTrustClosureSummarySummary:{ status:"ready", userFacingSummary:{ resultLabel:"信任闭环摘要已准备", redacted:true } },
@@ -31,7 +31,7 @@ function main() {
     finalUserSafetyChecklistSummary:{ status:"ready", userFacingSummary:{ resultLabel:"最终用户安全清单已准备", redacted:true } },
     safetyRegressionSentinelSummary:{ status:"pass", redacted:true }
   });
-  assert.equal(ready.appVersion, "4.1.0");
+  assert.equal(ready.appVersion, "4.1.1");
   assert.equal(ready.status, "ready");
   assert.equal(ready.rows.some((row) => row.label === "下一功能闸门不接真实 provider"), true);
   assert.equal(api.buildGlobalShoppingNextFeatureReadinessGate({ callNetwork:true }).status, "blocked");

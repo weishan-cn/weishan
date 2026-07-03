@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowStateMachine.js"]);
   const api = windowRef.WeishanFlightWorkflowStateMachine;
-  assert.equal(api.FLIGHT_WORKFLOW_STATE_MACHINE_VERSION, "4.1.0");
+  assert.equal(api.FLIGHT_WORKFLOW_STATE_MACHINE_VERSION, "4.1.1");
   const incomplete = api.createFlightWorkflowState({ intent:{ status:"needs_clarification", route:{ destinationCity:"成都" }, departureDate:"2026-07-15", dateDisplay:"7月15日", missingFields:["origin"] } });
   assert.equal(incomplete.status, "needs_clarification");
   assert.equal(incomplete.currentStep, "clarification");

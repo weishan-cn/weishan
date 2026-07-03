@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_ADAPTER_COMPLIANCE_CHECKLIST_VERSION = "4.1.0";
+  const GLOBAL_SHOPPING_PROVIDER_ADAPTER_COMPLIANCE_CHECKLIST_VERSION = "4.1.1";
   const CHECKLIST_NAME = "global_shopping_provider_adapter_compliance_checklist_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_CATEGORY_EXPANSION_SHELL_VERSION = "4.1.0";
+  const GLOBAL_SHOPPING_CATEGORY_EXPANSION_SHELL_VERSION = "4.1.1";
   const SHELL_NAME = "global_shopping_category_expansion_shell_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, category_expansion_only:true };
   const REQUIRED_CATEGORIES = ["flight", "hotel", "product"];

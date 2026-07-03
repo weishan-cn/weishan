@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const CREDENTIAL_CONSENT_SCOPE_GATE_VERSION = "4.1.0";
+  const CREDENTIAL_CONSENT_SCOPE_GATE_VERSION = "4.1.1";
   const ALLOWED_SCOPES = ["readonly_search", "readonly_price", "readonly_availability_metadata", "readonly_inventory", "result_analysis", "source_label_display"];
   const FORBIDDEN_SCOPES = ["write_api", "create_order", "payment", "checkout", "booking", "identity_upload", "passport_upload", "bank_card_save", "background_silent_call", "plaintext_key_export", "provider_endpoint_test", "real_network_call"];
   const REQUIRED_CONFIRMATIONS = ["我确认该 API 仅用于只读搜索和价格读取", "我理解 weishan 不会替我付款", "我理解 weishan 不会替我下单", "我理解 weishan 不会上传身份证、护照或银行卡", "我理解最终价格以外部平台页面为准", "我理解当前版本不会连接真实 endpoint", "我理解当前版本不会返回真实价格", "我理解当前版本不会保存或使用真实 API key"];

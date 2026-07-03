@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_EVIDENCE_WORKFLOW_ORCHESTRATOR_VERSION = "4.1.0";
+  const FLIGHT_EVIDENCE_WORKFLOW_ORCHESTRATOR_VERSION = "4.1.1";
   const ORCHESTRATOR_NAME = "flight_evidence_workflow_orchestrator_v1";
   const WORKFLOW_ID = "deterministic-flight-evidence-workflow-v2.4.1";
 

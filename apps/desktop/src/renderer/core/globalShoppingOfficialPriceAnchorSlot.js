@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFICIAL_PRICE_ANCHOR_SLOT_VERSION = "4.1.0";
+  const GLOBAL_SHOPPING_OFFICIAL_PRICE_ANCHOR_SLOT_VERSION = "4.1.1";
   const SLOT_NAME = "global_shopping_official_price_anchor_slot_v1";
   const OFFICIAL_CAVEAT = "官方价仅作参考，价格以官方平台实时页面为准。";
   const COMPARISON_CAVEAT = "当前仅比较已覆盖来源中的候选价，不代表最低承诺或锁定承诺。";

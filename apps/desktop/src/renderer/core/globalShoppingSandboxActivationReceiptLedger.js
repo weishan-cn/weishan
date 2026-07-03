@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_ACTIVATION_RECEIPT_LEDGER_VERSION = "4.1.0";
+  const GLOBAL_SHOPPING_SANDBOX_ACTIVATION_RECEIPT_LEDGER_VERSION = "4.1.1";
   const LEDGER_NAME = "global_shopping_sandbox_activation_receipt_ledger_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
