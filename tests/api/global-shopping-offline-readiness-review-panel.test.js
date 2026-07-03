@@ -26,7 +26,7 @@ function summary(title, status) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineReadinessReviewPanel.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineReadinessReviewPanel;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_READINESS_REVIEW_PANEL_VERSION, "4.1.5");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_READINESS_REVIEW_PANEL_VERSION, "4.1.6");
 
   const ready = api.buildGlobalShoppingOfflineReadinessReviewPanel({
     publicBetaQaFreezeGateSummary:summary("Public Beta QA Freeze Gate"),

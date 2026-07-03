@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION = "4.1.5";
+  const FLIGHT_WORKFLOW_CONTINUITY_MANAGER_VERSION = "4.1.6";
   const CONTINUITY_NAME = "flight_workflow_continuity_manager_v1";
   const DEFAULT_WORKFLOW_ID = "deterministic-flight-workflow-continuity-v2.4.1";
   const FORBIDDEN_NAME_RE = /(rawText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;

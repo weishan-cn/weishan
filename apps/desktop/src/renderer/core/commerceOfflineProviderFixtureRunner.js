@@ -1,5 +1,5 @@
 (function(){
-  const OFFLINE_PROVIDER_FIXTURE_RUNNER_VERSION = "4.1.5";
+  const OFFLINE_PROVIDER_FIXTURE_RUNNER_VERSION = "4.1.6";
 
   const fixtureCategories = [
     "schema_missing_field",

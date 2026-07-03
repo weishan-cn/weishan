@@ -13,7 +13,7 @@ function load(file){
 function main(){
   const windowRef = load("apps/desktop/src/renderer/core/userSurfaceDebugFieldFilter.js");
   const api = windowRef.WeishanUserSurfaceDebugFieldFilter;
-  assert.equal(api.USER_SURFACE_DEBUG_FIELD_FILTER_VERSION, "4.1.5");
+  assert.equal(api.USER_SURFACE_DEBUG_FIELD_FILTER_VERSION, "4.1.6");
   const raw = "autoOpen: false\npayment: false\norder: false\nidentityUpload: false\nredacted: true\naudit draft\ninternal enum\n用户可见文本";
   const stripped = api.stripDebugText(raw);
   for (const forbidden of ["autoOpen: false", "payment: false", "order: false", "identityUpload: false", "redacted: true", "audit draft", "internal enum"]) {

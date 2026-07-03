@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_ADAPTER_SECURITY_REGRESSION_GUARD_VERSION = "4.1.5";
+  const GLOBAL_SHOPPING_ADAPTER_SECURITY_REGRESSION_GUARD_VERSION = "4.1.6";
   const GUARD_NAME = "global_shopping_adapter_security_regression_guard_v1";
   const BUILD_GUARD_KEY = "__weishanGlobalShoppingAdapterSecurityRegressionGuardBuilding";
 

@@ -26,7 +26,7 @@ function summary(title, status) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaQaDecisionMatrix.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaQaDecisionMatrix;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_QA_DECISION_MATRIX_VERSION, "4.1.5");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_QA_DECISION_MATRIX_VERSION, "4.1.6");
 
   const ready = api.buildGlobalShoppingPublicBetaQaDecisionMatrix({
     publicBetaTrialEvidenceLedgerSummary:summary("Public Beta Trial Evidence Ledger"),

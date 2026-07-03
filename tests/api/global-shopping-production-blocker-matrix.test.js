@@ -18,7 +18,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProductionBlockerMatrix.js"]);
   const api = windowRef.WeishanGlobalShoppingProductionBlockerMatrix;
-  assert.equal(api.GLOBAL_SHOPPING_PRODUCTION_BLOCKER_MATRIX_VERSION, "4.1.5");
+  assert.equal(api.GLOBAL_SHOPPING_PRODUCTION_BLOCKER_MATRIX_VERSION, "4.1.6");
 
   const ready = api.buildGlobalShoppingProductionBlockerMatrix({
     providerSandboxPilotControlRoomSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox Pilot 控制室已准备", redacted:true } },

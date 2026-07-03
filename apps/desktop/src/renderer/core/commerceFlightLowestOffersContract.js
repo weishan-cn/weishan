@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const CONTRACT_VERSION = "4.1.5";
+  const CONTRACT_VERSION = "4.1.6";
   const PHASE = "flight_lowest_two_offers_contract";
   const DEFAULT_PROVIDER_STATUS = "not_configured";
   const DEFAULT_OFFERS_STATUS = "unavailable";

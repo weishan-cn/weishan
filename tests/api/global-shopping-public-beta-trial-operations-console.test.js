@@ -26,7 +26,7 @@ function summary(title, status) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaTrialOperationsConsole.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaTrialOperationsConsole;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_OPERATIONS_CONSOLE_VERSION, "4.1.5");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_OPERATIONS_CONSOLE_VERSION, "4.1.6");
 
   const ready = api.buildGlobalShoppingPublicBetaTrialOperationsConsole({
     publicBetaManualQaReportCenterSummary:summary("Public Beta Manual QA Report Center"),

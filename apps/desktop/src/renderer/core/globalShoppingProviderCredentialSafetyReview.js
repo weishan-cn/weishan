@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_CREDENTIAL_SAFETY_REVIEW_VERSION = "4.1.5";
+  const GLOBAL_SHOPPING_PROVIDER_CREDENTIAL_SAFETY_REVIEW_VERSION = "4.1.6";
   const REVIEW_NAME = "global_shopping_provider_credential_safety_review_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

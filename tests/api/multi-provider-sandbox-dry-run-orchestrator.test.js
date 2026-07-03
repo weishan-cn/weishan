@@ -24,10 +24,10 @@ function main() {
     "apps/desktop/src/renderer/core/multiProviderSandboxDryRunOrchestrator.js"
   ]);
   const api = windowRef.WeishanMultiProviderSandboxDryRunOrchestrator;
-  assert.equal(api.MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION, "4.1.5");
+  assert.equal(api.MULTI_PROVIDER_SANDBOX_DRY_RUN_ORCHESTRATOR_VERSION, "4.1.6");
   const task = { title:"购买7月15日上海到成都最便宜的直达机票", origin:"上海", destination:"成都", departureDate:"2026-07-15", directOnly:true, sortIntent:"低价优先" };
   const result = api.runMultiProviderSandboxDryRun(task, {});
-  assert.equal(result.appVersion, "4.1.5");
+  assert.equal(result.appVersion, "4.1.6");
   assert.equal(result.status, "completed");
   assert.equal(result.generatedQuoteCount, 3);
   assert.equal(result.acceptedQuoteCount, 3);

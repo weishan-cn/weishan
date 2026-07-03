@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_USER_FACING_COPY_POLISH_VERSION = "4.1.5";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_USER_FACING_COPY_POLISH_VERSION = "4.1.6";
   const POLISH_NAME = "global_shopping_public_beta_user_facing_copy_polish_v1";
   const FORBIDDEN_COPY = [
     "全网最低",

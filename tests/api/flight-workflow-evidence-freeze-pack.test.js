@@ -16,7 +16,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowEvidenceFreezePack.js"]);
   const api = windowRef.WeishanFlightWorkflowEvidenceFreezePack;
-  assert.equal(api.FLIGHT_WORKFLOW_EVIDENCE_FREEZE_PACK_VERSION, "4.1.5");
+  assert.equal(api.FLIGHT_WORKFLOW_EVIDENCE_FREEZE_PACK_VERSION, "4.1.6");
   const pack = api.buildFlightWorkflowEvidenceFreezePack({
     releaseReadinessSummary:{ status:"ready", safeForUserFacingBeta:true },
     launchCandidateReadinessSummary:{ status:"ready", launchCandidateReadiness:{ safeForReadOnlyLaunchCandidate:true } },

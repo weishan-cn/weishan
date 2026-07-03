@@ -19,7 +19,7 @@ function readySummary(title, resultLabel) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingReadOnlyReleaseEvidenceSummary.js").WeishanGlobalShoppingReadOnlyReleaseEvidenceSummary;
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_RELEASE_EVIDENCE_SUMMARY_VERSION, "4.1.5");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_RELEASE_EVIDENCE_SUMMARY_VERSION, "4.1.6");
   const ready = api.buildGlobalShoppingReadOnlyReleaseEvidenceSummary({
     finalOfflineLaunchReviewConsoleSummary:readySummary("Final Offline Launch Review Console", "Final Offline Launch Review Console 已准备"),
     providerActivationBlockerSentinelSummary:readySummary("Provider Activation Blocker Sentinel", "Provider Activation Blocker Sentinel 已准备"),

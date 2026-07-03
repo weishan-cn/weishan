@@ -23,7 +23,7 @@ const api = windowRef.WeishanLimitedBetaKillSwitch;
 
 function main() {
   api.reset();
-  assert.equal(api.LIMITED_BETA_KILL_SWITCH_VERSION, "4.1.5");
+  assert.equal(api.LIMITED_BETA_KILL_SWITCH_VERSION, "4.1.6");
 
   const draft = api.buildLimitedBetaKillSwitchDraft();
   assert.equal(draft.state.globalLimitedBetaEnabled, true);

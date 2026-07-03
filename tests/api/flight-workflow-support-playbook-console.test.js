@@ -6,7 +6,7 @@ const ROOT = path.resolve(__dirname, "../..");
 function load(files) { const window = {}; window.window = window; const context = vm.createContext({ window, console }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
 function main() {
   const api = load(["apps/desktop/src/renderer/core/flightWorkflowSupportPlaybookConsole.js"]).WeishanFlightWorkflowSupportPlaybookConsole;
-  assert.equal(api.FLIGHT_WORKFLOW_SUPPORT_PLAYBOOK_CONSOLE_VERSION, "4.1.5");
+  assert.equal(api.FLIGHT_WORKFLOW_SUPPORT_PLAYBOOK_CONSOLE_VERSION, "4.1.6");
   const ready = api.buildFlightWorkflowSupportPlaybookConsole({ issueIntakeSummary:{ issueCategory:"platform_mismatch", redacted:true }, issuePatternSummary:{ status:"needs_review", redacted:true }, issueReviewSummary:{ status:"needs_review", redacted:true }, supportTriageSummary:{ status:"needs_internal_review", redacted:true }, supportReadinessSummary:{ status:"needs_review", redacted:true } });
   assert.equal(ready.status, "needs_review");
   assert.equal(ready.supportPlaybookStatus, "needs_review");

@@ -38,7 +38,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingUserFacingSafetyReceipt.js"]);
   const api = windowRef.WeishanGlobalShoppingUserFacingSafetyReceipt;
-  assert.equal(api.GLOBAL_SHOPPING_USER_FACING_SAFETY_RECEIPT_VERSION, "4.1.5");
+  assert.equal(api.GLOBAL_SHOPPING_USER_FACING_SAFETY_RECEIPT_VERSION, "4.1.6");
   const ready = api.buildGlobalShoppingUserFacingSafetyReceipt({
     providerDistributionFreezeConsoleSummary:readySummary("Provider Distribution Freeze Console", "Provider Distribution Freeze Console 已准备"),
     finalUserTrustSummarySummary:readySummary("Final User Trust Summary", "Final User Trust Summary 已准备"),
