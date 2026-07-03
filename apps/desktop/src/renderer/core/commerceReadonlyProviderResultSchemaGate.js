@@ -1,5 +1,5 @@
 (function(){
-  const READONLY_PROVIDER_RESULT_SCHEMA_GATE_VERSION = "4.0.7";
+  const READONLY_PROVIDER_RESULT_SCHEMA_GATE_VERSION = "4.0.8";
 
   const resultTypes = [
     "flight_offer",

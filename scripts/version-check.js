@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
-const PREVIOUS_STABLE_VERSION = "4.0.7";
+const PREVIOUS_STABLE_VERSION = "4.0.8";
 const STRICT_VERSION_CHECKS = new Set([
   "root package-lock version",
   "root package-lock packages[\"\"].version",

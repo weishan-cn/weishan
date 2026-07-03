@@ -7,9 +7,9 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingExternalDeepLinkSafetyGate.js"]);
   const api = windowRef.WeishanGlobalShoppingExternalDeepLinkSafetyGate;
-  assert.equal(api.GLOBAL_SHOPPING_EXTERNAL_DEEP_LINK_SAFETY_GATE_VERSION, "4.0.7");
+  assert.equal(api.GLOBAL_SHOPPING_EXTERNAL_DEEP_LINK_SAFETY_GATE_VERSION, "4.0.8");
   const safe = api.buildGlobalShoppingExternalDeepLinkSafetyGate({ allowedDomain:"sandbox.platform.invalid", sourceType:"major_platform", sourceName:"Sandbox Platform", userConfirmationRequired:true, sandboxUrl:"sandbox://preview", disclosureText:"价格以跳转后平台实时页面为准。用户需在平台自行确认价格、登录、填写资料并完成下单。" });
-  assert.equal(safe.appVersion, "4.0.7");
+  assert.equal(safe.appVersion, "4.0.8");
   assert.equal(safe.status, "safe");
   assert.equal(api.buildGlobalShoppingExternalDeepLinkSafetyGate({ sourceType:"major_platform" }).status, "needs_review");
   assert.equal(api.buildGlobalShoppingExternalDeepLinkSafetyGate({ allowedDomain:"sandbox.platform.invalid" }).status, "needs_review");

@@ -39,7 +39,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingTrustClosureExportPreview.js"]);
   const api = windowRef.WeishanGlobalShoppingTrustClosureExportPreview;
-  assert.equal(api.GLOBAL_SHOPPING_TRUST_CLOSURE_EXPORT_PREVIEW_VERSION, "4.0.7");
+  assert.equal(api.GLOBAL_SHOPPING_TRUST_CLOSURE_EXPORT_PREVIEW_VERSION, "4.0.8");
   const ready = api.buildGlobalShoppingTrustClosureExportPreview({
     providerReadOnlyPublicReleaseCenterSummary:readySummary("Provider Read-Only Public Release Center", "Provider Read-Only Public Release Center 已准备"),
     providerTrustClosureViewModelSummary:readySummary("Provider Trust Closure Review", "Provider Trust Closure Review 已准备")

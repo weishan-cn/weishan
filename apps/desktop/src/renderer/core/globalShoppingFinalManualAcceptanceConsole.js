@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_FINAL_MANUAL_ACCEPTANCE_CONSOLE_VERSION = "4.0.7";
+  const GLOBAL_SHOPPING_FINAL_MANUAL_ACCEPTANCE_CONSOLE_VERSION = "4.0.8";
   const CONSOLE_NAME = "global_shopping_final_manual_acceptance_console_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, final_manual_acceptance_only:true };
   const BLOCKED_TEXT_RE = /auto_pass|auto_release|production_ready|release|push|activation|file write|export|download|upload|mail|provider|network|key|endpoint|payment|order|ticketing|token|secret/i;

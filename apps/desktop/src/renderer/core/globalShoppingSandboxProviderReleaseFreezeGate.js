@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_PROVIDER_RELEASE_FREEZE_GATE_VERSION = "4.0.7";
+  const GLOBAL_SHOPPING_SANDBOX_PROVIDER_RELEASE_FREEZE_GATE_VERSION = "4.0.8";
   const GATE_NAME = "global_shopping_sandbox_provider_release_freeze_gate_v1";
   const BUILD_GUARD_KEY = "__weishanGlobalShoppingSandboxProviderReleaseFreezeGateBuilding";
 

@@ -27,7 +27,7 @@ function expectBlocked(overrides, reason) {
 }
 
 function main() {
-  assert.equal(api.PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION, "4.0.7");
+  assert.equal(api.PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION, "4.0.8");
   const draft = api.buildProviderResultSourceLabelGateDraft();
   assert.equal(draft.status, "source label validation only");
   assert.equal(draft.mode, "required before display");

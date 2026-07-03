@@ -22,7 +22,7 @@ function readySummary(title, resultLabel, status = "ready") {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingAdapterBoundaryDiffInspector.js"]);
   const api = windowRef.WeishanGlobalShoppingAdapterBoundaryDiffInspector;
-  assert.equal(api.GLOBAL_SHOPPING_ADAPTER_BOUNDARY_DIFF_INSPECTOR_VERSION, "4.0.7");
+  assert.equal(api.GLOBAL_SHOPPING_ADAPTER_BOUNDARY_DIFF_INSPECTOR_VERSION, "4.0.8");
 
   const ready = api.buildGlobalShoppingAdapterBoundaryDiffInspector({
     adapterBoundaryLockSummary:readySummary("Adapter Boundary Lock", "Adapter 边界锁已准备"),

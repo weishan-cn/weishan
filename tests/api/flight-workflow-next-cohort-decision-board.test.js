@@ -38,7 +38,7 @@ function main() {
     noSensitiveDataRisk:true,
     noTradingRisk:true
   });
-  assert.equal(decisionApi.FLIGHT_WORKFLOW_NEXT_COHORT_DECISION_BOARD_VERSION, "4.0.7");
+  assert.equal(decisionApi.FLIGHT_WORKFLOW_NEXT_COHORT_DECISION_BOARD_VERSION, "4.0.8");
   assert.equal(ready.status, "advance");
   assert.equal(ready.userFacingSummary.title, "下一批只读测试决策板");
   assert.equal(ready.userFacingSummary.resultLabel, "可以进入下一批只读测试");

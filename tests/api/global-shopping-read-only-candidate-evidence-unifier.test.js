@@ -15,7 +15,7 @@ function load(file) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingReadOnlyCandidateEvidenceUnifier.js");
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_CANDIDATE_EVIDENCE_UNIFIER_VERSION, "4.0.7");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_CANDIDATE_EVIDENCE_UNIFIER_VERSION, "4.0.8");
   const ready = api.buildGlobalShoppingReadOnlyCandidateEvidenceUnifier({
     candidateId:"candidate-1",
     sourceLabel:"只读样本",

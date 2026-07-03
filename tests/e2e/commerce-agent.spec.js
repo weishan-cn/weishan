@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v4.0.7 public beta trial readiness review stays local and bounded @commerce-smoke", async () => {
+  test("v4.0.8 public beta visual qa review stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9624,6 +9624,10 @@ test.describe.serial("commerce agent workbench", () => {
       window.WeishanGlobalShoppingFinalManualAcceptanceConsole &&
       window.WeishanGlobalShoppingPublicBetaFeedbackPlaceholder &&
       window.WeishanGlobalShoppingPublicBetaFinalManualViewModel &&
+      window.WeishanGlobalShoppingPublicBetaVisualQaConsole &&
+      window.WeishanGlobalShoppingPublicBetaTrialScenarioChecklist &&
+      window.WeishanGlobalShoppingNoTransactionRegressionGuard &&
+      window.WeishanGlobalShoppingPublicBetaQaViewModel &&
       window.WeishanGlobalShoppingPublicBetaViewModel &&
       window.WeishanReadOnlyPriceCandidateCardViewModel
     ), null, { timeout:15000 });
@@ -9632,7 +9636,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v401-render-smoke", "true");
       const card = {
-        version:"4.0.7",
+        version:"4.0.8",
         visible:true,
         globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, rows:[{ rowId:"public_beta", label:"Global Shopping Read-Only Public Beta Shell", value:"Global Shopping Read-Only Public Beta Shell 已准备", status:"pass", redacted:true }], redacted:true },
         globalShoppingReadOnlyCandidateEvidenceUnifierSummary:{ status:"ready", userFacingSummary:{ title:"候选价证据", resultLabel:"候选价证据已准备", redacted:true }, rows:[{ rowId:"candidate_evidence", label:"候选价证据", value:"候选价证据已准备", status:"pass", redacted:true }], redacted:true },
@@ -9656,6 +9660,10 @@ test.describe.serial("commerce agent workbench", () => {
         finalManualAcceptanceConsoleSummary:{ status:"ready", userFacingSummary:{ title:"Final Manual Acceptance Console", resultLabel:"Final Manual Acceptance Console 已准备", redacted:true }, rows:[{ rowId:"final_manual_acceptance_console", label:"Final Manual Acceptance Console", value:"Final Manual Acceptance Console 已准备", status:"pass", redacted:true }], redacted:true },
         publicBetaFeedbackPlaceholderSummary:{ status:"ready", userFacingSummary:{ title:"Feedback Placeholder", resultLabel:"Feedback Placeholder 已准备", redacted:true }, rows:[{ rowId:"feedback_placeholder", label:"Feedback Placeholder", value:"Feedback Placeholder 已准备", status:"pass", redacted:true }], redacted:true },
         publicBetaFinalManualViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Final Manual View Model", resultLabel:"Public Beta Final Manual View Model 已准备", redacted:true }, rows:[{ rowId:"public_beta_final_manual_view_model", label:"Public Beta Final Manual View Model", value:"Public Beta Final Manual View Model 已准备", status:"pass", redacted:true }], redacted:true },
+        publicBetaVisualQaConsoleSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Visual QA Console", resultLabel:"Public Beta Visual QA Console 已准备", redacted:true }, rows:[{ rowId:"public_beta_visual_qa_console", label:"Public Beta Visual QA Console", value:"Public Beta Visual QA Console 已准备", status:"pass", redacted:true }], redacted:true },
+        publicBetaTrialScenarioChecklistSummary:{ status:"ready", userFacingSummary:{ title:"Trial Scenario Checklist", resultLabel:"Trial Scenario Checklist 已准备", redacted:true }, rows:[{ rowId:"public_beta_trial_scenario_checklist", label:"Trial Scenario Checklist", value:"Trial Scenario Checklist 已准备", status:"pass", redacted:true }], redacted:true },
+        noTransactionRegressionGuardSummary:{ status:"ready", userFacingSummary:{ title:"No-Transaction Regression Guard", resultLabel:"No-Transaction Regression Guard 已准备", redacted:true }, rows:[{ rowId:"no_transaction_regression_guard", label:"No-Transaction Regression Guard", value:"No-Transaction Regression Guard 已准备", status:"pass", redacted:true }], redacted:true },
+        publicBetaQaViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta QA View Model", resultLabel:"Public Beta QA View Model 已准备", redacted:true }, rows:[{ rowId:"public_beta_qa_view_model", label:"Public Beta QA View Model", value:"Public Beta QA View Model 已准备", status:"pass", redacted:true }], redacted:true },
         publicBetaOperatorConsoleSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Operator Console", resultLabel:"Provider-Zero 状态通过", redacted:true }, rows:[{ rowId:"public_beta_operator_console", label:"Public Beta Operator Console", value:"Provider-Zero 状态通过", status:"pass", redacted:true }], redacted:true },
         categoryExpansionShellSummary:{ status:"ready", userFacingSummary:{ title:"Category Expansion Shell", resultLabel:"Flight / Hotel / Product 只读外壳已准备", redacted:true }, rows:[{ rowId:"category_expansion_shell", label:"Category Expansion Shell", value:"Flight / Hotel / Product 只读外壳已准备", status:"pass", redacted:true }], redacted:true },
         finalOfflineBetaAuditSummary:{ status:"ready", userFacingSummary:{ title:"Final Offline Beta Audit", resultLabel:"最终离线审计通过", redacted:true }, rows:[{ rowId:"final_offline_beta_audit", label:"Final Offline Beta Audit", value:"最终离线审计通过", status:"pass", redacted:true }], redacted:true },
@@ -9674,6 +9682,10 @@ test.describe.serial("commerce agent workbench", () => {
         finalManualAcceptanceConsoleStatus:"ready",
         publicBetaFeedbackPlaceholderStatus:"ready",
         publicBetaFinalManualViewModelStatus:"ready",
+        publicBetaVisualQaConsoleStatus:"ready",
+        publicBetaTrialScenarioChecklistStatus:"ready",
+        noTransactionRegressionGuardStatus:"ready",
+        publicBetaQaViewModelStatus:"ready",
         publicBetaOperatorConsoleStatus:"ready",
         categoryExpansionShellStatus:"ready",
         finalOfflineBetaAuditStatus:"ready",
@@ -9690,6 +9702,7 @@ test.describe.serial("commerce agent workbench", () => {
         safeToProceedWithHumanPublicBetaReview:true,
         safeToProceedWithManualComparisonReview:true,
         safeToProceedWithManualTrialReview:true,
+        safeToProceedWithManualVisualQaReview:true,
         safeToProceedWithManualPublicBetaReview:true,
         safeToProceedWithManualPublicBetaAcceptanceReview:true
       };
@@ -9738,6 +9751,17 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("Final Manual Acceptance Console");
     expect(v400.text).toContain("Feedback Placeholder");
     expect(v400.text).toContain("Public Beta Final Manual View Model");
+    expect(v400.text).toContain("Public Beta Visual QA Console");
+    expect(v400.text).toContain("Trial Scenario Checklist");
+    expect(v400.text).toContain("No-Transaction Regression Guard");
+    expect(v400.text).toContain("Visual Acceptance");
+    expect(v400.text).toContain("Scenario Coverage");
+    expect(v400.text).toContain("Transaction Boundary");
+    expect(v400.text).toContain("Flight / Hotel / Product / Restricted 场景已覆盖");
+    expect(v400.text).toContain("交易按钮保持关闭");
+    expect(v400.text).toContain("未生成 booking / payment / order / checkout URL");
+    expect(v400.text).toContain("未打开外部平台");
+    expect(v400.text).toContain("仍需人工视觉验收");
     expect(v400.text).toContain("Public Beta Operator Console");
     expect(v400.text).toContain("Category Expansion Shell");
     expect(v400.text).toContain("Final Offline Beta Audit");

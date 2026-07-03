@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_CANDIDATE_COMPARISON_WORKBENCH_VERSION = "4.0.7";
+  const GLOBAL_SHOPPING_SANDBOX_CANDIDATE_COMPARISON_WORKBENCH_VERSION = "4.0.8";
   const WORKBENCH_NAME = "global_shopping_sandbox_candidate_comparison_workbench_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
