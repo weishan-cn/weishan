@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderAdapterRegistry.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderAdapterRegistry;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_ADAPTER_REGISTRY_VERSION, "4.0.6");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_ADAPTER_REGISTRY_VERSION, "4.0.7");
 
   const ready = api.buildGlobalShoppingProviderAdapterRegistry({
     registryMode:"dry_run",
@@ -36,7 +36,7 @@ function main() {
       redactedOutputOnly:true
     }]
   });
-  assert.equal(ready.appVersion, "4.0.6");
+  assert.equal(ready.appVersion, "4.0.7");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "Provider Adapter 注册表");
   assert.equal(ready.rows.length, 6);

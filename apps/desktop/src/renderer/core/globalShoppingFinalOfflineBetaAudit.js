@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_FINAL_OFFLINE_BETA_AUDIT_VERSION = "4.0.6";
+  const GLOBAL_SHOPPING_FINAL_OFFLINE_BETA_AUDIT_VERSION = "4.0.7";
   const AUDIT_NAME = "global_shopping_final_offline_beta_audit_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, final_offline_beta_audit_only:true };
   const SAFE_KEYS = ["noProvider", "noNetwork", "noKey", "noEndpoint", "noExternalOpen", "noPayment", "noOrder", "noTicketing", "noRawPersistence", "noReleaseMutation", "userCopySafe"];
@@ -51,6 +51,10 @@
       { sectionId:"category_result_simulator", title:"Category Result Simulator", status:safeStatus(obj(safe.categoryResultSimulatorSummary).status), redacted:true },
       { sectionId:"read_only_comparison_board", title:"Read-Only Comparison Board", status:safeStatus(obj(safe.readOnlyComparisonBoardSummary).status), redacted:true },
       { sectionId:"result_trust_badge_panel", title:"Result Trust Badge", status:safeStatus(obj(safe.resultTrustBadgePanelSummary).status), redacted:true },
+      { sectionId:"public_beta_trial_readiness_pack", title:"Public Beta Trial Readiness Pack", status:safeStatus(obj(safe.publicBetaTrialReadinessPackSummary).status), redacted:true },
+      { sectionId:"final_manual_acceptance_console", title:"Final Manual Acceptance Console", status:safeStatus(obj(safe.finalManualAcceptanceConsoleSummary).status), redacted:true },
+      { sectionId:"public_beta_feedback_placeholder", title:"Feedback Placeholder", status:safeStatus(obj(safe.publicBetaFeedbackPlaceholderSummary).status), redacted:true },
+      { sectionId:"public_beta_final_manual_view_model", title:"Public Beta Final Manual View Model", status:safeStatus(obj(safe.publicBetaFinalManualViewModelSummary).status), redacted:true },
       { sectionId:"final_gate", title:"Public Beta Final Gate", status:safeStatus(obj(safe.publicBetaFinalGateSummary).status), redacted:true },
       { sectionId:"rc_board", title:"RC Confidence Board", status:safeStatus(obj(safe.releaseCandidateConfidenceBoardSummary).status), redacted:true },
       { sectionId:"safety_copy", title:"Public Beta Safety Copy Center", status:safeStatus(obj(safe.publicBetaSafetyCopyCenterSummary).status), redacted:true }
@@ -89,6 +93,10 @@
     const categoryResultSimulatorSummary = resolveSummary(safe, "categoryResultSimulatorSummary", "WeishanGlobalShoppingCategoryResultSimulator", "buildGlobalShoppingCategoryResultSimulator");
     const readOnlyComparisonBoardSummary = resolveSummary(safe, "readOnlyComparisonBoardSummary", "WeishanGlobalShoppingReadOnlyComparisonBoard", "buildGlobalShoppingReadOnlyComparisonBoard");
     const resultTrustBadgePanelSummary = resolveSummary(safe, "resultTrustBadgePanelSummary", "WeishanGlobalShoppingResultTrustBadgePanel", "buildGlobalShoppingResultTrustBadgePanel");
+    const publicBetaTrialReadinessPackSummary = resolveSummary(safe, "publicBetaTrialReadinessPackSummary", "WeishanGlobalShoppingPublicBetaTrialReadinessPack", "buildGlobalShoppingPublicBetaTrialReadinessPack");
+    const finalManualAcceptanceConsoleSummary = resolveSummary(safe, "finalManualAcceptanceConsoleSummary", "WeishanGlobalShoppingFinalManualAcceptanceConsole", "buildGlobalShoppingFinalManualAcceptanceConsole");
+    const publicBetaFeedbackPlaceholderSummary = resolveSummary(safe, "publicBetaFeedbackPlaceholderSummary", "WeishanGlobalShoppingPublicBetaFeedbackPlaceholder", "buildGlobalShoppingPublicBetaFeedbackPlaceholder");
+    const publicBetaFinalManualViewModelSummary = resolveSummary(safe, "publicBetaFinalManualViewModelSummary", "WeishanGlobalShoppingPublicBetaFinalManualViewModel", "buildGlobalShoppingPublicBetaFinalManualViewModel");
     const publicBetaFinalGateSummary = resolveSummary(safe, "publicBetaFinalGateSummary", "WeishanGlobalShoppingPublicBetaFinalGate", "buildGlobalShoppingPublicBetaFinalGate");
     const releaseCandidateConfidenceBoardSummary = resolveSummary(safe, "releaseCandidateConfidenceBoardSummary", "WeishanGlobalShoppingReleaseCandidateConfidenceBoard", "buildGlobalShoppingReleaseCandidateConfidenceBoard");
     const publicBetaSafetyCopyCenterSummary = resolveSummary(safe, "publicBetaSafetyCopyCenterSummary", "WeishanGlobalShoppingPublicBetaSafetyCopyCenter", "buildGlobalShoppingPublicBetaSafetyCopyCenter");
@@ -115,6 +123,10 @@
       !Object.keys(categoryResultSimulatorSummary).length ||
       !Object.keys(readOnlyComparisonBoardSummary).length ||
       !Object.keys(resultTrustBadgePanelSummary).length ||
+      !Object.keys(publicBetaTrialReadinessPackSummary).length ||
+      !Object.keys(finalManualAcceptanceConsoleSummary).length ||
+      !Object.keys(publicBetaFeedbackPlaceholderSummary).length ||
+      !Object.keys(publicBetaFinalManualViewModelSummary).length ||
       !Object.keys(publicBetaFinalGateSummary).length ||
       !Object.keys(releaseCandidateConfidenceBoardSummary).length ||
       !Object.keys(publicBetaSafetyCopyCenterSummary).length;
@@ -127,6 +139,10 @@
       safeStatus(categoryResultSimulatorSummary.status) === "blocked" ||
       safeStatus(readOnlyComparisonBoardSummary.status) === "blocked" ||
       safeStatus(resultTrustBadgePanelSummary.status) === "blocked" ||
+      safeStatus(publicBetaTrialReadinessPackSummary.status) === "blocked" ||
+      safeStatus(finalManualAcceptanceConsoleSummary.status) === "blocked" ||
+      safeStatus(publicBetaFeedbackPlaceholderSummary.status) === "blocked" ||
+      safeStatus(publicBetaFinalManualViewModelSummary.status) === "blocked" ||
       safeStatus(publicBetaFinalGateSummary.status) === "blocked" ||
       safeStatus(releaseCandidateConfidenceBoardSummary.status) === "blocked" ||
       safeStatus(publicBetaSafetyCopyCenterSummary.status) === "blocked";
@@ -152,8 +168,12 @@
         publicBetaUserBoundaryPanelSummary,
         categoryResultSimulatorSummary,
         readOnlyComparisonBoardSummary,
-        resultTrustBadgePanelSummary,
-        publicBetaFinalGateSummary,
+      resultTrustBadgePanelSummary,
+      publicBetaTrialReadinessPackSummary,
+      finalManualAcceptanceConsoleSummary,
+      publicBetaFeedbackPlaceholderSummary,
+      publicBetaFinalManualViewModelSummary,
+      publicBetaFinalGateSummary,
         releaseCandidateConfidenceBoardSummary,
         publicBetaSafetyCopyCenterSummary
       }),

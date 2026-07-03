@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
-const PREVIOUS_STABLE_VERSION = "3.1.0";
+const PREVIOUS_STABLE_VERSION = "4.0.7";
 const STRICT_VERSION_CHECKS = new Set([
   "root package-lock version",
   "root package-lock packages[\"\"].version",
@@ -2179,6 +2179,10 @@ function runVersionCheck() {
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping category result simulator version", "apps/desktop/src/renderer/core/globalShoppingCategoryResultSimulator.js", "GLOBAL_SHOPPING_CATEGORY_RESULT_SIMULATOR_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping read only comparison board version", "apps/desktop/src/renderer/core/globalShoppingReadOnlyComparisonBoard.js", "GLOBAL_SHOPPING_READ_ONLY_COMPARISON_BOARD_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping result trust badge panel version", "apps/desktop/src/renderer/core/globalShoppingResultTrustBadgePanel.js", "GLOBAL_SHOPPING_RESULT_TRUST_BADGE_PANEL_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta trial readiness pack version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaTrialReadinessPack.js", "GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_READINESS_PACK_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping final manual acceptance console version", "apps/desktop/src/renderer/core/globalShoppingFinalManualAcceptanceConsole.js", "GLOBAL_SHOPPING_FINAL_MANUAL_ACCEPTANCE_CONSOLE_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta feedback placeholder version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaFeedbackPlaceholder.js", "GLOBAL_SHOPPING_PUBLIC_BETA_FEEDBACK_PLACEHOLDER_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta final manual view model version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaFinalManualViewModel.js", "GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_MANUAL_VIEW_MODEL_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping product goal charter version", "apps/desktop/src/renderer/core/globalShoppingProductGoalCharter.js", "GLOBAL_SHOPPING_PRODUCT_GOAL_CHARTER_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping jump to platform boundary version", "apps/desktop/src/renderer/core/globalShoppingJumpToPlatformBoundary.js", "GLOBAL_SHOPPING_JUMP_TO_PLATFORM_BOUNDARY_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping read only provider sandbox connector version", "apps/desktop/src/renderer/core/globalShoppingReadOnlyProviderSandboxConnector.js", "GLOBAL_SHOPPING_READ_ONLY_PROVIDER_SANDBOX_CONNECTOR_VERSION");

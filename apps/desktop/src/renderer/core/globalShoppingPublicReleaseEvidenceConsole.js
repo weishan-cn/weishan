@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_RELEASE_EVIDENCE_CONSOLE_VERSION = "4.0.6";
+  const GLOBAL_SHOPPING_PUBLIC_RELEASE_EVIDENCE_CONSOLE_VERSION = "4.0.7";
   const CONSOLE_NAME = "global_shopping_public_release_evidence_console_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

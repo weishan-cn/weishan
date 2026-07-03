@@ -26,7 +26,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineProviderScenarioLab.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineProviderScenarioLab;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_PROVIDER_SCENARIO_LAB_VERSION, "4.0.6");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_PROVIDER_SCENARIO_LAB_VERSION, "4.0.7");
 
   const ready = api.buildGlobalShoppingOfflineProviderScenarioLab({
     providerSandboxReadinessWorkbenchSummary:readySummary("Provider Sandbox Readiness Workbench", "Sandbox Readiness Workbench 已准备"),

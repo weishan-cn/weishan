@@ -94,13 +94,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.0.6");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.0.7");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "4.0.6");
+  assert.equal(ready.appVersion, "4.0.7");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -412,6 +412,10 @@ function main() {
     publicBetaUserJourneyShellSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta User Journey", resultLabel:"Public Beta User Journey 已准备", redacted:true }, redacted:true },
     safeSearchIntentMatrixSummary:{ status:"ready", userFacingSummary:{ title:"Safe Search Intent Matrix", resultLabel:"Safe Search Intent Matrix 已准备", redacted:true }, redacted:true },
     publicBetaUserBoundaryPanelSummary:{ status:"ready", userFacingSummary:{ title:"User Boundary Panel", resultLabel:"User Boundary Panel 已准备", redacted:true }, redacted:true },
+    publicBetaTrialReadinessPackSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Trial Readiness Pack", resultLabel:"Public Beta Trial Readiness Pack 已准备", redacted:true }, redacted:true },
+    finalManualAcceptanceConsoleSummary:{ status:"ready", userFacingSummary:{ title:"Final Manual Acceptance Console", resultLabel:"Final Manual Acceptance Console 已准备", redacted:true }, redacted:true },
+    publicBetaFeedbackPlaceholderSummary:{ status:"ready", userFacingSummary:{ title:"Feedback Placeholder", resultLabel:"Feedback Placeholder 已准备", redacted:true }, redacted:true },
+    publicBetaFinalManualViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Final Manual View Model", resultLabel:"Public Beta Final Manual View Model 已准备", redacted:true }, redacted:true },
     globalShoppingReadOnlyPublicBetaShellStatus:"ready",
     providerZeroRuntimeLockStatus:"ready",
     userTrustLaunchBoardStatus:"ready",
@@ -425,8 +429,13 @@ function main() {
     publicBetaUserJourneyShellStatus:"ready",
     safeSearchIntentMatrixStatus:"ready",
     publicBetaUserBoundaryPanelStatus:"ready",
+    publicBetaTrialReadinessPackStatus:"ready",
+    finalManualAcceptanceConsoleStatus:"ready",
+    publicBetaFeedbackPlaceholderStatus:"ready",
+    publicBetaFinalManualViewModelStatus:"ready",
     safeToProceedWithHumanPublicBetaReview:true,
-    safeToProceedWithManualPublicBetaReview:true
+    safeToProceedWithManualPublicBetaReview:true,
+    safeToProceedWithManualTrialReview:true
   });
   assert.equal(publicBetaReady.safetyReport.globalShoppingReadOnlyPublicBetaShellSummary.userFacingSummary.title, "Global Shopping Read-Only Public Beta Shell");
   assert.equal(publicBetaReady.safetyReport.providerZeroRuntimeLockSummary.userFacingSummary.title, "Provider-Zero Runtime Lock");
@@ -441,10 +450,10 @@ function main() {
   assert.equal(publicBetaReady.safetyReport.publicBetaUserJourneyShellSummary.userFacingSummary.title, "Public Beta User Journey");
   assert.equal(publicBetaReady.safetyReport.safeSearchIntentMatrixSummary.userFacingSummary.title, "Safe Search Intent Matrix");
   assert.equal(publicBetaReady.safetyReport.publicBetaUserBoundaryPanelSummary.userFacingSummary.title, "User Boundary Panel");
-  assert.equal(publicBetaReady.userFacingSummary.publicBetaFinalGateStatus, "ready");
-  assert.equal(publicBetaReady.userFacingSummary.releaseCandidateConfidenceBoardStatus, "ready");
-  assert.equal(publicBetaReady.userFacingSummary.publicBetaFinalViewModelStatus, "ready");
-  assert.equal(publicBetaReady.userFacingSummary.safeToProceedWithHumanPublicBetaReview, true);
+  assert.equal(publicBetaReady.safetyReport.publicBetaTrialReadinessPackSummary.userFacingSummary.title, "Public Beta Trial Readiness Pack");
+  assert.equal(publicBetaReady.safetyReport.finalManualAcceptanceConsoleSummary.userFacingSummary.title, "Final Manual Acceptance Console");
+  assert.equal(publicBetaReady.safetyReport.publicBetaFeedbackPlaceholderSummary.userFacingSummary.title, "Feedback Placeholder");
+  assert.equal(publicBetaReady.safetyReport.publicBetaFinalManualViewModelSummary.userFacingSummary.title, "Public Beta Final Manual View Model");
   const globalGoal = windowRef.WeishanGlobalShoppingProductGoalCharter.buildGlobalShoppingProductGoalCharter();
   const jumpBoundary = windowRef.WeishanGlobalShoppingJumpToPlatformBoundary.buildGlobalShoppingJumpToPlatformBoundary();
   const legalProviderFixture = windowRef.WeishanGlobalShoppingLegalProviderFixtureAdapter.buildGlobalShoppingLegalProviderFixtureAdapter({ providerId:"provider_1", providerName:"Fixture Provider", providerType:"official", providerLegalStatus:"allowed", providerStatus:"fixture", itemType:"flight", officialFixturePrice:{ title:"SHA-CTU", basePrice:900 } });

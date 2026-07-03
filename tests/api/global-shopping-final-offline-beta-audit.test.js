@@ -19,13 +19,20 @@ function readySummary(title, resultLabel) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingFinalOfflineBetaAudit.js");
-  assert.equal(api.GLOBAL_SHOPPING_FINAL_OFFLINE_BETA_AUDIT_VERSION, "4.0.6");
+  assert.equal(api.GLOBAL_SHOPPING_FINAL_OFFLINE_BETA_AUDIT_VERSION, "4.0.7");
   const ready = api.buildGlobalShoppingFinalOfflineBetaAudit({
     publicBetaOperatorConsoleSummary:readySummary("Public Beta Operator Console", "Public Beta Operator Console 已准备"),
     categoryExpansionShellSummary:readySummary("Category Expansion Shell", "Flight / Hotel / Product 只读外壳已准备"),
     publicBetaUserJourneyShellSummary:readySummary("Public Beta User Journey", "Public Beta User Journey 已准备"),
     safeSearchIntentMatrixSummary:readySummary("Safe Search Intent Matrix", "Safe Search Intent Matrix 已准备"),
     publicBetaUserBoundaryPanelSummary:readySummary("User Boundary Panel", "User Boundary Panel 已准备"),
+    categoryResultSimulatorSummary:readySummary("Category Result Simulator", "Category Result Simulator 已准备"),
+    readOnlyComparisonBoardSummary:readySummary("Read-Only Comparison Board", "Read-Only Comparison Board 已准备"),
+    resultTrustBadgePanelSummary:readySummary("Result Trust Badge", "Result Trust Badge 已准备"),
+    publicBetaTrialReadinessPackSummary:readySummary("Public Beta Trial Readiness Pack", "Public Beta Trial Readiness Pack 已准备"),
+    finalManualAcceptanceConsoleSummary:readySummary("Final Manual Acceptance Console", "Final Manual Acceptance Console 已准备"),
+    publicBetaFeedbackPlaceholderSummary:readySummary("Feedback Placeholder", "Feedback Placeholder 已准备"),
+    publicBetaFinalManualViewModelSummary:readySummary("Public Beta Final Manual View Model", "Public Beta Final Manual View Model 已准备"),
     publicBetaFinalGateSummary:readySummary("Public Beta Final Gate", "Public Beta Final Gate 已准备"),
     releaseCandidateConfidenceBoardSummary:readySummary("RC Confidence Board", "RC Confidence Board 已准备"),
     publicBetaSafetyCopyCenterSummary:readySummary("Public Beta Safety Copy Center", "安全文案通过")
@@ -33,6 +40,10 @@ function main() {
   assert.equal(ready.status, "ready");
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(ready.noProvider, true);
+  assert.equal(ready.publicBetaTrialReadinessPackSummary.userFacingSummary.title, "Public Beta Trial Readiness Pack");
+  assert.equal(ready.finalManualAcceptanceConsoleSummary.userFacingSummary.title, "Final Manual Acceptance Console");
+  assert.equal(ready.publicBetaFeedbackPlaceholderSummary.userFacingSummary.title, "Feedback Placeholder");
+  assert.equal(ready.publicBetaFinalManualViewModelSummary.userFacingSummary.title, "Public Beta Final Manual View Model");
   assert.equal(api.buildGlobalShoppingFinalOfflineBetaAudit({
     publicBetaOperatorConsoleSummary:readySummary("Public Beta Operator Console", "Public Beta Operator Console 已准备")
   }).status, "needs_review");
@@ -42,6 +53,13 @@ function main() {
     publicBetaUserJourneyShellSummary:readySummary("Public Beta User Journey", "Public Beta User Journey 已准备"),
     safeSearchIntentMatrixSummary:readySummary("Safe Search Intent Matrix", "Safe Search Intent Matrix 已准备"),
     publicBetaUserBoundaryPanelSummary:readySummary("User Boundary Panel", "User Boundary Panel 已准备"),
+    categoryResultSimulatorSummary:readySummary("Category Result Simulator", "Category Result Simulator 已准备"),
+    readOnlyComparisonBoardSummary:readySummary("Read-Only Comparison Board", "Read-Only Comparison Board 已准备"),
+    resultTrustBadgePanelSummary:readySummary("Result Trust Badge", "Result Trust Badge 已准备"),
+    publicBetaTrialReadinessPackSummary:readySummary("Public Beta Trial Readiness Pack", "Public Beta Trial Readiness Pack 已准备"),
+    finalManualAcceptanceConsoleSummary:readySummary("Final Manual Acceptance Console", "Final Manual Acceptance Console 已准备"),
+    publicBetaFeedbackPlaceholderSummary:readySummary("Feedback Placeholder", "Feedback Placeholder 已准备"),
+    publicBetaFinalManualViewModelSummary:readySummary("Public Beta Final Manual View Model", "Public Beta Final Manual View Model 已准备"),
     publicBetaFinalGateSummary:readySummary("Public Beta Final Gate", "Public Beta Final Gate 已准备"),
     releaseCandidateConfidenceBoardSummary:readySummary("RC Confidence Board", "RC Confidence Board 已准备"),
     publicBetaSafetyCopyCenterSummary:readySummary("Public Beta Safety Copy Center", "安全文案通过"),

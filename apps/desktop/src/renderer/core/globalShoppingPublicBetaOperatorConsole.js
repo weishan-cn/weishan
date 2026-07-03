@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_OPERATOR_CONSOLE_VERSION = "4.0.6";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_OPERATOR_CONSOLE_VERSION = "4.0.7";
   const CONSOLE_NAME = "global_shopping_public_beta_operator_console_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, operator_console_only:true };
 

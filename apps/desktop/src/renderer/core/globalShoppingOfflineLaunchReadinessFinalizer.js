@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_LAUNCH_READINESS_FINALIZER_VERSION = "4.0.6";
+  const GLOBAL_SHOPPING_OFFLINE_LAUNCH_READINESS_FINALIZER_VERSION = "4.0.7";
   const FINALIZER_NAME = "global_shopping_offline_launch_readiness_finalizer_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

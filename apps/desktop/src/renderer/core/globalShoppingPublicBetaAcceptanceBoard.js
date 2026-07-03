@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_BOARD_VERSION = "4.0.6";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_BOARD_VERSION = "4.0.7";
   const BOARD_NAME = "global_shopping_public_beta_acceptance_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, acceptance_board_only:true };
 
@@ -36,6 +36,10 @@
       row("category_result_ready", "categoryResultReady", safe.categoryResultReady === true ? "true" : "false", safe.categoryResultReady === true ? "pass" : "warning"),
       row("comparison_board_ready", "comparisonBoardReady", safe.comparisonBoardReady === true ? "true" : "false", safe.comparisonBoardReady === true ? "pass" : "warning"),
       row("trust_badge_ready", "trustBadgeReady", safe.trustBadgeReady === true ? "true" : "false", safe.trustBadgeReady === true ? "pass" : "warning"),
+      row("trial_readiness_pack_ready", "trialReadinessPackReady", safe.trialReadinessPackReady === true ? "true" : "false", safe.trialReadinessPackReady === true ? "pass" : "warning"),
+      row("manual_acceptance_console_ready", "manualAcceptanceConsoleReady", safe.manualAcceptanceConsoleReady === true ? "true" : "false", safe.manualAcceptanceConsoleReady === true ? "pass" : "warning"),
+      row("feedback_placeholder_ready", "feedbackPlaceholderReady", safe.feedbackPlaceholderReady === true ? "true" : "false", safe.feedbackPlaceholderReady === true ? "pass" : "warning"),
+      row("final_manual_view_model_ready", "finalManualViewModelReady", safe.finalManualViewModelReady === true ? "true" : "false", safe.finalManualViewModelReady === true ? "pass" : "warning"),
       row("final_audit_ready", "finalAuditReady", safe.finalAuditReady === true ? "true" : "false", safe.finalAuditReady === true ? "pass" : "warning"),
       row("no_payment", "noPayment", safe.noPayment === true ? "true" : "false", safe.noPayment === true ? "pass" : "blocked"),
       row("no_order", "noOrder", safe.noOrder === true ? "true" : "false", safe.noOrder === true ? "pass" : "blocked"),
@@ -80,6 +84,10 @@
       categoryResultReady:safe.categoryResultReady === true,
       comparisonBoardReady:safe.comparisonBoardReady === true,
       trustBadgeReady:safe.trustBadgeReady === true,
+      trialReadinessPackReady:safe.trialReadinessPackReady === true,
+      manualAcceptanceConsoleReady:safe.manualAcceptanceConsoleReady === true,
+      feedbackPlaceholderReady:safe.feedbackPlaceholderReady === true,
+      finalManualViewModelReady:safe.finalManualViewModelReady === true,
       finalAuditReady:safe.finalAuditReady === true,
       noPayment:safe.noPayment !== false,
       noOrder:safe.noOrder !== false,
@@ -113,6 +121,10 @@
       criteriaSource.categoryResultReady &&
       criteriaSource.comparisonBoardReady &&
       criteriaSource.trustBadgeReady &&
+      criteriaSource.trialReadinessPackReady &&
+      criteriaSource.manualAcceptanceConsoleReady &&
+      criteriaSource.feedbackPlaceholderReady &&
+      criteriaSource.finalManualViewModelReady &&
       criteriaSource.finalAuditReady &&
       criteriaSource.noPayment &&
       criteriaSource.noOrder &&

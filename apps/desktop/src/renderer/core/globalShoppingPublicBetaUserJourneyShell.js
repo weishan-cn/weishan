@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_USER_JOURNEY_SHELL_VERSION = "4.0.6";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_USER_JOURNEY_SHELL_VERSION = "4.0.7";
   const SHELL_NAME = "global_shopping_public_beta_user_journey_shell_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, user_journey_only:true };
   const REQUIRED_KEYS = [

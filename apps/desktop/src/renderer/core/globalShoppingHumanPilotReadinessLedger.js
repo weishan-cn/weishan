@@ -1,8 +1,9 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_HUMAN_PILOT_READINESS_LEDGER_VERSION = "4.0.6";
+  const GLOBAL_SHOPPING_HUMAN_PILOT_READINESS_LEDGER_VERSION = "4.0.7";
   const LEDGER_NAME = "global_shopping_human_pilot_readiness_ledger_v1";
+  const BUILD_GUARD_KEY = "__weishanGlobalShoppingHumanPilotReadinessLedgerBuilding";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function obj(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
@@ -23,6 +24,10 @@
     if (present(safe[key])) return obj(safe[key]);
     const api = window[apiName] || {};
     return typeof api[methodName] === "function" ? obj(api[methodName](safe)) : {};
+  }
+  function directSummary(input, key) {
+    const safe = obj(input);
+    return present(safe[key]) ? obj(safe[key]) : {};
   }
   function entry(entryId, label, status, ownerRole, summary, caveat) {
     return {
@@ -80,7 +85,7 @@
 
   function buildGlobalShoppingHumanPilotReadinessLedgerEntries(input) {
     const safe = obj(input);
-    const governanceAuditConsoleSummary = resolveSummary(safe, "governanceAuditConsoleSummary", "WeishanGlobalShoppingProviderGovernanceAuditConsole", "buildGlobalShoppingProviderGovernanceAuditConsole");
+    const governanceAuditConsoleSummary = directSummary(safe, "governanceAuditConsoleSummary");
     const humanControlledPilotPlannerSummary = resolveSummary(safe, "humanControlledPilotPlannerSummary", "WeishanGlobalShoppingHumanControlledSandboxProviderPilotPlanner", "buildGlobalShoppingHumanControlledSandboxProviderPilotPlanner");
     const launchReadinessBoardSummary = resolveSummary(safe, "launchReadinessBoardSummary", "WeishanGlobalShoppingProviderLaunchReadinessBoard", "buildGlobalShoppingProviderLaunchReadinessBoard");
     const legalApprovalWorkflowSummary = resolveSummary(safe, "legalApprovalWorkflowSummary", "WeishanGlobalShoppingLegalApprovalWorkflowBoard", "buildGlobalShoppingLegalApprovalWorkflowBoard");
@@ -243,10 +248,16 @@
   }
 
   function buildGlobalShoppingHumanPilotReadinessLedger(input) {
+    if (window[BUILD_GUARD_KEY] === true) {
+      return sanitizeGlobalShoppingHumanPilotReadinessLedger({ status:"needs_review" });
+    }
+    window[BUILD_GUARD_KEY] = true;
     try {
       return sanitizeGlobalShoppingHumanPilotReadinessLedger(input || {});
     } catch (_) {
       return sanitizeGlobalShoppingHumanPilotReadinessLedger({ status:"failed_safe" });
+    } finally {
+      window[BUILD_GUARD_KEY] = false;
     }
   }
 

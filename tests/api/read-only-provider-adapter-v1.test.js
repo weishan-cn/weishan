@@ -41,9 +41,9 @@ const gateApi = windowRef.WeishanCommerceReadonlyAdapterContractGate;
 const flightApi = windowRef.WeishanFlightReadOnlyProviderAdapterV1;
 
 function main() {
-  assert.equal(contractApi.READ_ONLY_PROVIDER_ADAPTER_CONTRACT_VERSION, "4.0.6");
+  assert.equal(contractApi.READ_ONLY_PROVIDER_ADAPTER_CONTRACT_VERSION, "4.0.7");
   const contract = contractApi.buildAdapterContract();
-  assert.equal(contract.contractVersion, "4.0.6");
+  assert.equal(contract.contractVersion, "4.0.7");
   assert.equal(contract.phase, "read_only_provider_adapter_contract_v1");
   assert.equal(contract.status, "adapter contract draft-ready");
   assert.equal(contract.mode, "offline_fixture_only");
@@ -114,7 +114,7 @@ function main() {
   assert.equal(contractApi.assertReadOnlyProviderAdapterContractSafe(contract), true);
 
   const gate = gateApi.buildReadonlyAdapterContractGateDisplay();
-  assert.equal(gate.version, "4.0.6");
+  assert.equal(gate.version, "4.0.7");
   assert.equal(gate.gateStatus, "draft-ready");
   assert.equal(gate.adapterExecution, "offline fixture only");
   assert.equal(gate.realNetwork, "disabled");
@@ -126,7 +126,7 @@ function main() {
   assert.equal(gate.capabilities.canPay, false);
   assert.equal(gateApi.assertReadonlyAdapterContractGateSafe(gate), true);
 
-  assert.equal(flightApi.FLIGHT_READONLY_PROVIDER_ADAPTER_V1_VERSION, "4.0.6");
+  assert.equal(flightApi.FLIGHT_READONLY_PROVIDER_ADAPTER_V1_VERSION, "4.0.7");
   const metadata = flightApi.getAdapterMetadata();
   assert.equal(metadata.adapterId, "flight_readonly_provider_adapter_v1");
   assert.equal(metadata.providerCategory, "flight");

@@ -1,8 +1,9 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_OFFLINE_LAUNCH_VIEW_MODEL_VERSION = "4.0.6";
+  const GLOBAL_SHOPPING_PROVIDER_OFFLINE_LAUNCH_VIEW_MODEL_VERSION = "4.0.7";
   const VIEW_MODEL_NAME = "global_shopping_provider_offline_launch_view_model_v1";
+  const BUILD_GUARD_KEY = "__weishanGlobalShoppingProviderOfflineLaunchViewModelBuilding";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function obj(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
@@ -159,10 +160,16 @@
   }
 
   function buildGlobalShoppingProviderOfflineLaunchViewModel(input) {
+    if (window[BUILD_GUARD_KEY] === true) {
+      return sanitizeGlobalShoppingProviderOfflineLaunchViewModel({ status:"needs_review" });
+    }
+    window[BUILD_GUARD_KEY] = true;
     try {
       return sanitizeGlobalShoppingProviderOfflineLaunchViewModel(input || {});
     } catch (_) {
       return sanitizeGlobalShoppingProviderOfflineLaunchViewModel({ status:"failed_safe" });
+    } finally {
+      window[BUILD_GUARD_KEY] = false;
     }
   }
 

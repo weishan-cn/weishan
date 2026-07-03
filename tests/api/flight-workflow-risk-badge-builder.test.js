@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.0.6");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.0.7");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -274,9 +274,14 @@ function main() {
     publicBetaFinalGateSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Beta Final Gate 已准备", redacted:true } },
     releaseCandidateConfidenceBoardSummary:{ status:"ready", userFacingSummary:{ resultLabel:"RC Confidence Board 已准备", redacted:true } },
     publicBetaFinalViewModelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"下一步仍需人工复核", redacted:true } },
+    publicBetaTrialReadinessPackSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Beta Trial Readiness Pack 已准备", redacted:true } },
+    finalManualAcceptanceConsoleSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Final Manual Acceptance Console 已准备", redacted:true } },
+    publicBetaFeedbackPlaceholderSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Feedback Placeholder 已准备", redacted:true } },
+    publicBetaFinalManualViewModelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Beta Final Manual View Model 已准备", redacted:true } },
     globalShoppingPublicBetaViewModelSummary:{ status:"ready", title:"Global Shopping Public Beta Review", redacted:true },
     safeToProceedWithHumanPublicBetaReview:true,
-    safeToProceedWithManualPublicBetaReview:true
+    safeToProceedWithManualPublicBetaReview:true,
+    safeToProceedWithManualTrialReview:true
   }).badges.map((item) => item.label);
   assert.ok(publicBetaLabels.includes("全球购 Public Beta 已准备"));
   assert.ok(publicBetaLabels.includes("Provider-Zero Status Panel 已准备"));
@@ -289,6 +294,10 @@ function main() {
   assert.ok(publicBetaLabels.includes("Public Beta Safety Copy Center 已准备"));
   assert.ok(publicBetaLabels.includes("Public Beta Final Gate 已准备"));
   assert.ok(publicBetaLabels.includes("RC Confidence Board 已准备"));
+  assert.ok(publicBetaLabels.includes("Public Beta Trial Readiness Pack 已准备"));
+  assert.ok(publicBetaLabels.includes("Final Manual Acceptance Console 已准备"));
+  assert.ok(publicBetaLabels.includes("Feedback Placeholder 已准备"));
+  assert.ok(publicBetaLabels.includes("Public Beta Final Manual View Model 已准备"));
   assert.ok(publicBetaLabels.includes("全球购 Public Beta / 只读候选价 / 官方价锚点 / 费用归一化"));
   assert.ok(publicBetaLabels.includes("Provider-Zero：未接入真实供应商 / 未读取密钥 / 未联网调用 / 未生成订单"));
   assert.ok(publicBetaLabels.includes("Public Beta 只提供候选价证据，不付款、不下单、不出票"));
@@ -300,6 +309,11 @@ function main() {
   assert.ok(publicBetaLabels.includes("Safety Copy 不承诺最低价、最终价或官方背书"));
   assert.ok(publicBetaLabels.includes("Human public beta review 仍需人工复核"));
   assert.ok(publicBetaLabels.includes("下一步仍需人工复核"));
+  assert.ok(publicBetaLabels.includes("Public Beta Trial Readiness Pack / Final Manual Acceptance Console / Feedback Placeholder"));
+  assert.ok(publicBetaLabels.includes("试用范围：只读候选价、费用归一化、官方价锚点"));
+  assert.ok(publicBetaLabels.includes("锁定能力：provider、联网、付款、下单、出票"));
+  assert.ok(publicBetaLabels.includes("反馈入口暂不发送、不上传、不保存用户原文"));
+  assert.ok(publicBetaLabels.includes("不自动通过 / 不自动发布 / 不保存反馈内容"));
   const finalReviewConsoleLabels = api.buildFlightWorkflowRiskBadges({
     finalOfflineLaunchReviewConsoleSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Final Offline Launch Review Console 已准备", redacted:true } },
     providerActivationBlockerSentinelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider Activation Blocker Sentinel 已准备", redacted:true } },

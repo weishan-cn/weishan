@@ -1,8 +1,9 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_RELEASE_VIEW_MODEL_VERSION = "4.0.6";
+  const GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_RELEASE_VIEW_MODEL_VERSION = "4.0.7";
   const VIEW_MODEL_NAME = "global_shopping_provider_governance_release_view_model_v1";
+  const BUILD_GUARD_KEY = "__weishanGlobalShoppingProviderGovernanceReleaseViewModelBuilding";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function obj(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
@@ -18,6 +19,10 @@
     if (present(safe[key])) return obj(safe[key]);
     const api = window[apiName] || {};
     return typeof api[methodName] === "function" ? obj(api[methodName](safe)) : {};
+  }
+  function directSummary(input, key) {
+    const safe = obj(input);
+    return present(safe[key]) ? obj(safe[key]) : {};
   }
   function card(cardId, label, value) { return { cardId:text(cardId), label:text(label), value:text(value), redacted:true }; }
   function row(rowId, label, value, status) {
@@ -74,9 +79,9 @@
 
   function sanitizeGlobalShoppingProviderGovernanceReleaseViewModel(viewModel) {
     const safe = obj(viewModel);
-    const governanceAuditConsoleSummary = resolveSummary(safe, "governanceAuditConsoleSummary", "WeishanGlobalShoppingProviderGovernanceAuditConsole", "buildGlobalShoppingProviderGovernanceAuditConsole");
-    const humanPilotReadinessLedgerSummary = resolveSummary(safe, "humanPilotReadinessLedgerSummary", "WeishanGlobalShoppingHumanPilotReadinessLedger", "buildGlobalShoppingHumanPilotReadinessLedger");
-    const releaseFreezeGateSummary = resolveSummary(safe, "releaseFreezeGateSummary", "WeishanGlobalShoppingSandboxProviderReleaseFreezeGate", "buildGlobalShoppingSandboxProviderReleaseFreezeGate");
+    const governanceAuditConsoleSummary = directSummary(safe, "governanceAuditConsoleSummary");
+    const humanPilotReadinessLedgerSummary = directSummary(safe, "humanPilotReadinessLedgerSummary");
+    const releaseFreezeGateSummary = directSummary(safe, "releaseFreezeGateSummary");
     const blocked = safe.startRealProvider === true || safe.startPilot === true || safe.showCredentialInput === true || safe.readApiKey === true ||
       safe.network === true || safe.generateEndpoint === true || safe.openExternal === true || safe.windowOpen === true || safe.enableProductionProvider === true ||
       safe.createApprovalTask === true || safe.sendEmail === true || safe.openExternalDocument === true || safe.executeRollback === true || safe.modifyRuntimeConfig === true ||
@@ -138,10 +143,16 @@
   }
 
   function buildGlobalShoppingProviderGovernanceReleaseViewModel(input) {
+    if (window[BUILD_GUARD_KEY] === true) {
+      return sanitizeGlobalShoppingProviderGovernanceReleaseViewModel({ status:"needs_review" });
+    }
+    window[BUILD_GUARD_KEY] = true;
     try {
       return sanitizeGlobalShoppingProviderGovernanceReleaseViewModel(input || {});
     } catch (_) {
       return sanitizeGlobalShoppingProviderGovernanceReleaseViewModel({ status:"failed_safe" });
+    } finally {
+      window[BUILD_GUARD_KEY] = false;
     }
   }
 

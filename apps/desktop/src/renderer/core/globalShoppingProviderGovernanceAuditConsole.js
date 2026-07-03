@@ -1,8 +1,9 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_AUDIT_CONSOLE_VERSION = "4.0.6";
+  const GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_AUDIT_CONSOLE_VERSION = "4.0.7";
   const CONSOLE_NAME = "global_shopping_provider_governance_audit_console_v1";
+  const BUILD_GUARD_KEY = "__weishanGlobalShoppingProviderGovernanceAuditConsoleBuilding";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function obj(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
@@ -23,6 +24,61 @@
     if (present(safe[key])) return obj(safe[key]);
     const api = window[apiName] || {};
     return typeof api[methodName] === "function" ? obj(api[methodName](safe)) : {};
+  }
+  function buildSafetySentinelInput(input) {
+    const safe = obj(input);
+    return {
+      fileWrite:safe.fileWrite === true,
+      download:safe.download === true,
+      exportRealFile:safe.exportRealFile === true,
+      uploadEvidence:safe.uploadEvidence === true,
+      sendEmail:safe.sendEmail === true,
+      openExternalDocument:safe.openExternalDocument === true,
+      persistRawUserText:safe.persistRawUserText === true,
+      persistRawProviderRequest:safe.persistRawProviderRequest === true,
+      persistRawProviderResponse:safe.persistRawProviderResponse === true,
+      includeSecret:safe.includeSecret === true,
+      startRealProvider:safe.startRealProvider === true,
+      enableProvider:safe.enableProvider === true,
+      modifyRuntimeConfig:safe.modifyRuntimeConfig === true,
+      safety:safe.safety
+    };
+  }
+  function buildOperatorConsoleInput(input, safetySentinelSummary) {
+    const safe = obj(input);
+    return {
+      safetyRegressionSummary:obj(safetySentinelSummary),
+      auditReviewSummary:safe.auditReviewSummary,
+      humanReviewChecklistSummary:safe.humanReviewChecklistSummary,
+      finalSafeHandoffPacketSummary:safe.finalSafeHandoffPacketSummary,
+      handoffPacketPolicyDecision:safe.handoffPacketPolicyDecision,
+      eventLedgerSummary:safe.eventLedgerSummary,
+      recentEvents:safe.recentEvents,
+      events:safe.events,
+      blockedActions:safe.blockedActions,
+      actionQueueSummary:safe.actionQueueSummary,
+      actionQueue:safe.actionQueue,
+      workflowStateSummary:safe.workflowStateSummary,
+      currentStage:safe.currentStage,
+      workflowId:safe.workflowId,
+      selectedCandidate:safe.selectedCandidate,
+      selectedCandidateSummary:safe.selectedCandidateSummary,
+      topCandidates:safe.topCandidates,
+      dryRunTopCandidates:safe.dryRunTopCandidates,
+      sessionSummary:safe.sessionSummary,
+      freezeGateSummary:safe.freezeGateSummary,
+      evidenceFreezePackSummary:safe.evidenceFreezePackSummary,
+      rcCandidateReviewSummary:safe.rcCandidateReviewSummary,
+      rcEvidenceReviewSummary:safe.rcEvidenceReviewSummary,
+      rcRegressionAuditSummary:safe.rcRegressionAuditSummary,
+      releaseRiskLedgerSummary:safe.releaseRiskLedgerSummary,
+      rcCopyFinalizationSummary:safe.rcCopyFinalizationSummary,
+      safetyDisclosureReviewSummary:safe.safetyDisclosureReviewSummary,
+      globalShoppingProductGoalSummary:safe.globalShoppingProductGoalSummary,
+      jumpToPlatformBoundarySummary:safe.jumpToPlatformBoundarySummary,
+      safeToStartRcReview:safe.safeToStartRcReview === true,
+      safeToProceedWithJumpToPlatformMvp:safe.safeToProceedWithJumpToPlatformMvp === true
+    };
   }
   function row(rowId, label, value, status) {
     return {
@@ -109,8 +165,12 @@
     const providerKillSwitchDrillSummary = resolveSummary(safe, "providerKillSwitchDrillSummary", "WeishanGlobalShoppingProviderKillSwitchDrill", "buildGlobalShoppingProviderKillSwitchDrill");
     const productionBlockerMatrixSummary = resolveSummary(safe, "productionBlockerMatrixSummary", "WeishanGlobalShoppingProductionBlockerMatrix", "buildGlobalShoppingProductionBlockerMatrix");
     const providerSandboxPilotControlRoomSummary = resolveSummary(safe, "providerSandboxPilotControlRoomSummary", "WeishanGlobalShoppingProviderSandboxPilotControlRoom", "buildGlobalShoppingProviderSandboxPilotControlRoom");
-    const safetySentinelSummary = resolveSummary(safe, "safetySentinelSummary", "WeishanFlightWorkflowSafetyRegressionSentinel", "buildFlightWorkflowSafetyRegressionReport");
-    const operatorConsoleSummary = resolveSummary(safe, "operatorConsoleSummary", "WeishanFlightWorkflowOperatorConsole", "buildFlightWorkflowOperatorConsole");
+    const safetySentinelSummary = present(safe.safetySentinelSummary)
+      ? obj(safe.safetySentinelSummary)
+      : obj((window.WeishanFlightWorkflowSafetyRegressionSentinel || {}).buildFlightWorkflowSafetyRegressionReport && (window.WeishanFlightWorkflowSafetyRegressionSentinel || {}).buildFlightWorkflowSafetyRegressionReport(buildSafetySentinelInput(safe)));
+    const operatorConsoleSummary = present(safe.operatorConsoleSummary)
+      ? obj(safe.operatorConsoleSummary)
+      : obj((window.WeishanFlightWorkflowOperatorConsole || {}).buildFlightWorkflowOperatorConsole && (window.WeishanFlightWorkflowOperatorConsole || {}).buildFlightWorkflowOperatorConsole(buildOperatorConsoleInput(safe, safetySentinelSummary)));
 
     return clone([
       section("provider_pilot_governance_view_model", "Provider Pilot Governance View Model", sectionStatus(providerPilotGovernanceViewModelSummary), "commerce_ops", summaryLabel(providerPilotGovernanceViewModelSummary, "治理视图仍需复核"), "只读展示治理视图，不启动 provider。"),
@@ -264,10 +324,16 @@
   }
 
   function buildGlobalShoppingProviderGovernanceAuditConsole(input) {
+    if (window[BUILD_GUARD_KEY] === true) {
+      return sanitizeGlobalShoppingProviderGovernanceAuditConsole({ status:"needs_review" });
+    }
+    window[BUILD_GUARD_KEY] = true;
     try {
       return sanitizeGlobalShoppingProviderGovernanceAuditConsole(input || {});
     } catch (_) {
       return sanitizeGlobalShoppingProviderGovernanceAuditConsole({ status:"failed_safe" });
+    } finally {
+      window[BUILD_GUARD_KEY] = false;
     }
   }
 

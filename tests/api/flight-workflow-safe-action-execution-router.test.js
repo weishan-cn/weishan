@@ -8,7 +8,7 @@ function storage() { const data = {}; return { getItem:(key) => Object.prototype
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowActionPolicyGuard.js", "apps/desktop/src/renderer/core/flightWorkflowEventLedger.js", "apps/desktop/src/renderer/core/flightWorkflowSafeActionExecutionRouter.js"]);
   const api = windowRef.WeishanFlightWorkflowSafeActionExecutionRouter;
-  assert.equal(api.FLIGHT_WORKFLOW_SAFE_ACTION_EXECUTION_ROUTER_VERSION, "4.0.6");
+  assert.equal(api.FLIGHT_WORKFLOW_SAFE_ACTION_EXECUTION_ROUTER_VERSION, "4.0.7");
   const store = storage();
   const local = api.routeFlightWorkflowSafeAction({ actionId:"run_read_only_quotes", actionLabel:"运行只读报价" }, { storageLike:store, rawText:"secret token abc" });
   assert.equal(local.status, "executed_local");

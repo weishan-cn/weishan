@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.0.6";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.0.7";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -257,6 +257,10 @@
       const finalOfflineBetaAuditSummary = obj(safe.finalOfflineBetaAuditSummary);
       const publicBetaAcceptanceBoardSummary = obj(safe.publicBetaAcceptanceBoardSummary);
       const publicBetaOperatorViewModelSummary = obj(safe.publicBetaOperatorViewModelSummary);
+      const publicBetaTrialReadinessPackSummary = obj(safe.publicBetaTrialReadinessPackSummary);
+      const finalManualAcceptanceConsoleSummary = obj(safe.finalManualAcceptanceConsoleSummary);
+      const publicBetaFeedbackPlaceholderSummary = obj(safe.publicBetaFeedbackPlaceholderSummary);
+      const publicBetaFinalManualViewModelSummary = obj(safe.publicBetaFinalManualViewModelSummary);
       const providerAdapterRegistrySummary = obj(safe.providerAdapterRegistrySummary);
       const dryRunProviderResponseNormalizerSummary = obj(safe.dryRunProviderResponseNormalizerSummary);
       const sandboxProviderRunbookSummary = obj(safe.sandboxProviderRunbookSummary);
@@ -695,9 +699,18 @@
       if (safeSearchIntentMatrixSummary.status || publicBetaOperatorViewModelSummary.status) badges.push(badge("public_beta_safe_search_intent_matrix", "Safe Search Intent Matrix 只允许只读搜索计划", "info"));
       if (publicBetaUserBoundaryPanelSummary.status || publicBetaOperatorViewModelSummary.status) badges.push(badge("public_beta_user_boundary_panel", "不保存账号、证件或支付信息 / 用户需在对应平台自行完成下单", "info"));
       if (categoryResultSimulatorSummary.status || readOnlyComparisonBoardSummary.status || resultTrustBadgePanelSummary.status) badges.push(badge("public_beta_manual_comparison_review", "Category Result Simulator / Read-Only Comparison Board / Result Trust Badge", "info"));
+      if (publicBetaTrialReadinessPackSummary.status) badges.push(badge("public_beta_trial_readiness_pack_ready", labelOf(publicBetaTrialReadinessPackSummary, "Public Beta Trial Readiness Pack 已准备"), publicBetaTrialReadinessPackSummary.status === "blocked" ? "blocked" : (publicBetaTrialReadinessPackSummary.status === "ready" ? "info" : "warning")));
+      if (finalManualAcceptanceConsoleSummary.status) badges.push(badge("final_manual_acceptance_console_ready", labelOf(finalManualAcceptanceConsoleSummary, "Final Manual Acceptance Console 已准备"), finalManualAcceptanceConsoleSummary.status === "blocked" ? "blocked" : (finalManualAcceptanceConsoleSummary.status === "ready" ? "info" : "warning")));
+      if (publicBetaFeedbackPlaceholderSummary.status) badges.push(badge("public_beta_feedback_placeholder_ready", labelOf(publicBetaFeedbackPlaceholderSummary, "Feedback Placeholder 已准备"), publicBetaFeedbackPlaceholderSummary.status === "blocked" ? "blocked" : (publicBetaFeedbackPlaceholderSummary.status === "ready" ? "info" : "warning")));
+      if (publicBetaFinalManualViewModelSummary.status) badges.push(badge("public_beta_final_manual_view_model_ready", labelOf(publicBetaFinalManualViewModelSummary, "Public Beta Final Manual View Model 已准备"), publicBetaFinalManualViewModelSummary.status === "blocked" ? "blocked" : (publicBetaFinalManualViewModelSummary.status === "ready" ? "info" : "warning")));
       if (publicBetaOperatorConsoleSummary.status) badges.push(badge("public_beta_operator_console_provider_zero", "Provider-Zero 状态通过 / 候选价证据通过 / 费用归一化通过 / 官方价锚点通过", "info"));
       if (finalOfflineBetaAuditSummary.status || publicBetaAcceptanceBoardSummary.status) badges.push(badge("public_beta_final_offline_beta_audit", "安全文案通过 / 最终离线审计通过", "info"));
+      if (publicBetaTrialReadinessPackSummary.status || finalManualAcceptanceConsoleSummary.status || publicBetaFeedbackPlaceholderSummary.status) badges.push(badge("public_beta_trial_manual_review_pack", "Public Beta Trial Readiness Pack / Final Manual Acceptance Console / Feedback Placeholder", "info"));
+      if (publicBetaTrialReadinessPackSummary.status || publicBetaFinalManualViewModelSummary.status) badges.push(badge("public_beta_trial_scope_locked", "试用范围：只读候选价、费用归一化、官方价锚点", "info"));
+      if (publicBetaTrialReadinessPackSummary.status || publicBetaFinalManualViewModelSummary.status) badges.push(badge("public_beta_trial_locked_capabilities", "锁定能力：provider、联网、付款、下单、出票", "warning"));
+      if (publicBetaFeedbackPlaceholderSummary.status || publicBetaFinalManualViewModelSummary.status) badges.push(badge("public_beta_feedback_placeholder_boundary", "反馈入口暂不发送、不上传、不保存用户原文", "warning"));
       if ((publicBetaOperatorViewModelSummary.status && publicBetaOperatorViewModelSummary.status !== "blocked") || safe.safeToProceedWithManualPublicBetaAcceptanceReview === true) badges.push(badge("public_beta_manual_acceptance_review_required", "仍需人工复核后再决定是否进入下一阶段", "warning"));
+      if ((publicBetaFinalManualViewModelSummary.status && publicBetaFinalManualViewModelSummary.status !== "blocked") || safe.safeToProceedWithManualTrialReview === true) badges.push(badge("public_beta_trial_final_manual_review_required", "不自动通过 / 不自动发布 / 不保存反馈内容", "warning"));
       if (releaseCandidateConfidenceBoardSummary.status || publicBetaFinalViewModelSummary.status) badges.push(badge("public_beta_rc_locked_capabilities", "Provider-Zero 已锁定 / 未联网 / 未读取密钥 / 未生成 endpoint", "info"));
       if (releaseCandidateConfidenceBoardSummary.status || publicBetaFinalViewModelSummary.status) badges.push(badge("public_beta_rc_user_boundary", "未打开外部平台 / 未启用付款 / 未创建订单 / 未出票", "info"));
       if ((publicBetaFinalViewModelSummary.status && publicBetaFinalViewModelSummary.status !== "blocked") || safe.safeToProceedWithManualPublicBetaReview === true) badges.push(badge("public_beta_manual_review_required", "下一步仍需人工复核", "warning"));

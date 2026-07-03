@@ -1,8 +1,9 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_ADAPTER_SECURITY_REGRESSION_GUARD_VERSION = "4.0.6";
+  const GLOBAL_SHOPPING_ADAPTER_SECURITY_REGRESSION_GUARD_VERSION = "4.0.7";
   const GUARD_NAME = "global_shopping_adapter_security_regression_guard_v1";
+  const BUILD_GUARD_KEY = "__weishanGlobalShoppingAdapterSecurityRegressionGuardBuilding";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function obj(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
@@ -199,10 +200,16 @@
   }
 
   function buildGlobalShoppingAdapterSecurityRegressionGuard(input) {
+    if (window[BUILD_GUARD_KEY] === true) {
+      return evaluateGlobalShoppingAdapterSecurityRegressionGuard({ status:"needs_review" });
+    }
+    window[BUILD_GUARD_KEY] = true;
     try {
       return evaluateGlobalShoppingAdapterSecurityRegressionGuard(input || {});
     } catch (_) {
       return evaluateGlobalShoppingAdapterSecurityRegressionGuard({ status:"failed_safe" });
+    } finally {
+      window[BUILD_GUARD_KEY] = false;
     }
   }
 

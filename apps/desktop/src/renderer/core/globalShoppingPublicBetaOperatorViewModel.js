@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_OPERATOR_VIEW_MODEL_VERSION = "4.0.6";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_OPERATOR_VIEW_MODEL_VERSION = "4.0.7";
   const VIEW_MODEL_NAME = "global_shopping_public_beta_operator_view_model_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -50,6 +50,18 @@
     const summary = resolveSummary(input, "readOnlyComparisonBoardSummary", "WeishanGlobalShoppingReadOnlyComparisonBoard", "buildGlobalShoppingReadOnlyComparisonBoard");
     return toArray(summary.rows).length ? clone(summary.rows) : [row("read_only_comparison_board_missing", "Read-Only Comparison Board", "Read-Only Comparison Board 仍需复核", "warning")];
   }
+  function buildGlobalShoppingTrialReadinessRowsForView(input) {
+    const summary = resolveSummary(input, "publicBetaTrialReadinessPackSummary", "WeishanGlobalShoppingPublicBetaTrialReadinessPack", "buildGlobalShoppingPublicBetaTrialReadinessPack");
+    return toArray(summary.rows).length ? clone(summary.rows) : [row("public_beta_trial_readiness_pack_missing", "Public Beta Trial Readiness Pack", "Public Beta Trial Readiness Pack 仍需复核", "warning")];
+  }
+  function buildGlobalShoppingManualAcceptanceRowsForView(input) {
+    const summary = resolveSummary(input, "finalManualAcceptanceConsoleSummary", "WeishanGlobalShoppingFinalManualAcceptanceConsole", "buildGlobalShoppingFinalManualAcceptanceConsole");
+    return toArray(summary.rows).length ? clone(summary.rows) : [row("final_manual_acceptance_console_missing", "Final Manual Acceptance Console", "Final Manual Acceptance Console 仍需复核", "warning")];
+  }
+  function buildGlobalShoppingFeedbackPlaceholderRowsForView(input) {
+    const summary = resolveSummary(input, "publicBetaFeedbackPlaceholderSummary", "WeishanGlobalShoppingPublicBetaFeedbackPlaceholder", "buildGlobalShoppingPublicBetaFeedbackPlaceholder");
+    return toArray(summary.rows).length ? clone(summary.rows) : [row("public_beta_feedback_placeholder_missing", "Feedback Placeholder", "Feedback Placeholder 仍需复核", "warning")];
+  }
 
   function buildGlobalShoppingPublicBetaOperatorCards(input) {
     const safe = obj(input);
@@ -63,6 +75,10 @@
     const categoryResultSimulatorSummary = resolveSummary(safe, "categoryResultSimulatorSummary", "WeishanGlobalShoppingCategoryResultSimulator", "buildGlobalShoppingCategoryResultSimulator");
     const readOnlyComparisonBoardSummary = resolveSummary(safe, "readOnlyComparisonBoardSummary", "WeishanGlobalShoppingReadOnlyComparisonBoard", "buildGlobalShoppingReadOnlyComparisonBoard");
     const resultTrustBadgePanelSummary = resolveSummary(safe, "resultTrustBadgePanelSummary", "WeishanGlobalShoppingResultTrustBadgePanel", "buildGlobalShoppingResultTrustBadgePanel");
+    const publicBetaTrialReadinessPackSummary = resolveSummary(safe, "publicBetaTrialReadinessPackSummary", "WeishanGlobalShoppingPublicBetaTrialReadinessPack", "buildGlobalShoppingPublicBetaTrialReadinessPack");
+    const finalManualAcceptanceConsoleSummary = resolveSummary(safe, "finalManualAcceptanceConsoleSummary", "WeishanGlobalShoppingFinalManualAcceptanceConsole", "buildGlobalShoppingFinalManualAcceptanceConsole");
+    const publicBetaFeedbackPlaceholderSummary = resolveSummary(safe, "publicBetaFeedbackPlaceholderSummary", "WeishanGlobalShoppingPublicBetaFeedbackPlaceholder", "buildGlobalShoppingPublicBetaFeedbackPlaceholder");
+    const publicBetaFinalManualViewModelSummary = resolveSummary(safe, "publicBetaFinalManualViewModelSummary", "WeishanGlobalShoppingPublicBetaFinalManualViewModel", "buildGlobalShoppingPublicBetaFinalManualViewModel");
     return clone([
       card("operator_console", "Public Beta Operator Console", labelOf(consoleSummary, "Public Beta Operator Console 仍需复核")),
       card("category_expansion_shell", "Category Expansion Shell", labelOf(shellSummary, "Category Expansion Shell 仍需复核")),
@@ -72,6 +88,10 @@
       card("category_result_simulator", "Category Result Simulator", labelOf(categoryResultSimulatorSummary, "Category Result Simulator 仍需复核")),
       card("read_only_comparison_board", "Read-Only Comparison Board", labelOf(readOnlyComparisonBoardSummary, "Read-Only Comparison Board 仍需复核")),
       card("result_trust_badge_panel", "Result Trust Badge", labelOf(resultTrustBadgePanelSummary, "Result Trust Badge 仍需复核")),
+      card("public_beta_trial_readiness_pack", "Public Beta Trial Readiness Pack", labelOf(publicBetaTrialReadinessPackSummary, "Public Beta Trial Readiness Pack 仍需复核")),
+      card("final_manual_acceptance_console", "Final Manual Acceptance Console", labelOf(finalManualAcceptanceConsoleSummary, "Final Manual Acceptance Console 仍需复核")),
+      card("public_beta_feedback_placeholder", "Feedback Placeholder", labelOf(publicBetaFeedbackPlaceholderSummary, "Feedback Placeholder 仍需复核")),
+      card("public_beta_final_manual_view_model", "Public Beta Final Manual View Model", labelOf(publicBetaFinalManualViewModelSummary, "Public Beta Final Manual View Model 仍需复核")),
       card("final_offline_beta_audit", "Final Offline Beta Audit", labelOf(auditSummary, "Final Offline Beta Audit 仍需复核")),
       card("public_beta_acceptance_board", "Public Beta Acceptance Board", labelOf(boardSummary, "Public Beta Acceptance Board 仍需复核")),
       card("manual_review_required", "Manual Review Required", "仍需人工复核后再决定是否进入下一阶段")
@@ -109,6 +129,10 @@
     const categoryResultSimulatorSummary = resolveSummary(safe, "categoryResultSimulatorSummary", "WeishanGlobalShoppingCategoryResultSimulator", "buildGlobalShoppingCategoryResultSimulator");
     const readOnlyComparisonBoardSummary = resolveSummary(safe, "readOnlyComparisonBoardSummary", "WeishanGlobalShoppingReadOnlyComparisonBoard", "buildGlobalShoppingReadOnlyComparisonBoard");
     const resultTrustBadgePanelSummary = resolveSummary(safe, "resultTrustBadgePanelSummary", "WeishanGlobalShoppingResultTrustBadgePanel", "buildGlobalShoppingResultTrustBadgePanel");
+    const publicBetaTrialReadinessPackSummary = resolveSummary(safe, "publicBetaTrialReadinessPackSummary", "WeishanGlobalShoppingPublicBetaTrialReadinessPack", "buildGlobalShoppingPublicBetaTrialReadinessPack");
+    const finalManualAcceptanceConsoleSummary = resolveSummary(safe, "finalManualAcceptanceConsoleSummary", "WeishanGlobalShoppingFinalManualAcceptanceConsole", "buildGlobalShoppingFinalManualAcceptanceConsole");
+    const publicBetaFeedbackPlaceholderSummary = resolveSummary(safe, "publicBetaFeedbackPlaceholderSummary", "WeishanGlobalShoppingPublicBetaFeedbackPlaceholder", "buildGlobalShoppingPublicBetaFeedbackPlaceholder");
+    const publicBetaFinalManualViewModelSummary = resolveSummary(safe, "publicBetaFinalManualViewModelSummary", "WeishanGlobalShoppingPublicBetaFinalManualViewModel", "buildGlobalShoppingPublicBetaFinalManualViewModel");
     const finalOfflineBetaAuditSummary = resolveSummary(safe, "finalOfflineBetaAuditSummary", "WeishanGlobalShoppingFinalOfflineBetaAudit", "buildGlobalShoppingFinalOfflineBetaAudit");
     const publicBetaAcceptanceBoardSummary = resolveSummary(safe, "publicBetaAcceptanceBoardSummary", "WeishanGlobalShoppingPublicBetaAcceptanceBoard", "buildGlobalShoppingPublicBetaAcceptanceBoard");
     const statuses = [
@@ -120,6 +144,10 @@
       safeStatus(categoryResultSimulatorSummary.status),
       safeStatus(readOnlyComparisonBoardSummary.status),
       safeStatus(resultTrustBadgePanelSummary.status),
+      safeStatus(publicBetaTrialReadinessPackSummary.status),
+      safeStatus(finalManualAcceptanceConsoleSummary.status),
+      safeStatus(publicBetaFeedbackPlaceholderSummary.status),
+      safeStatus(publicBetaFinalManualViewModelSummary.status),
       safeStatus(finalOfflineBetaAuditSummary.status),
       safeStatus(publicBetaAcceptanceBoardSummary.status)
     ];
@@ -133,6 +161,10 @@
       !present(categoryResultSimulatorSummary) ||
       !present(readOnlyComparisonBoardSummary) ||
       !present(resultTrustBadgePanelSummary) ||
+      !present(publicBetaTrialReadinessPackSummary) ||
+      !present(finalManualAcceptanceConsoleSummary) ||
+      !present(publicBetaFeedbackPlaceholderSummary) ||
+      !present(publicBetaFinalManualViewModelSummary) ||
       !present(finalOfflineBetaAuditSummary) ||
       !present(publicBetaAcceptanceBoardSummary) ||
       statuses.indexOf("needs_review") >= 0;
@@ -152,6 +184,10 @@
         categoryResultSimulatorSummary,
         readOnlyComparisonBoardSummary,
         resultTrustBadgePanelSummary,
+        publicBetaTrialReadinessPackSummary,
+        finalManualAcceptanceConsoleSummary,
+        publicBetaFeedbackPlaceholderSummary,
+        publicBetaFinalManualViewModelSummary,
         finalOfflineBetaAuditSummary,
         publicBetaAcceptanceBoardSummary
       }),
@@ -159,6 +195,9 @@
       operatorConsoleRows:buildGlobalShoppingOperatorConsoleRowsForView({ publicBetaOperatorConsoleSummary }),
       categoryExpansionRows:buildGlobalShoppingCategoryExpansionRowsForView({ categoryExpansionShellSummary }),
       comparisonBoardRows:buildGlobalShoppingComparisonRowsForView({ readOnlyComparisonBoardSummary }),
+      trialReadinessRows:buildGlobalShoppingTrialReadinessRowsForView({ publicBetaTrialReadinessPackSummary }),
+      manualAcceptanceRows:buildGlobalShoppingManualAcceptanceRowsForView({ finalManualAcceptanceConsoleSummary }),
+      feedbackPlaceholderRows:buildGlobalShoppingFeedbackPlaceholderRowsForView({ publicBetaFeedbackPlaceholderSummary }),
       finalAuditRows:buildGlobalShoppingFinalAuditRowsForView({ finalOfflineBetaAuditSummary }),
       acceptanceBoardRows:buildGlobalShoppingAcceptanceBoardRowsForView({ publicBetaAcceptanceBoardSummary }),
       publicBetaOperatorConsoleSummary,
@@ -169,6 +208,10 @@
       categoryResultSimulatorSummary,
       readOnlyComparisonBoardSummary,
       resultTrustBadgePanelSummary,
+      publicBetaTrialReadinessPackSummary,
+      finalManualAcceptanceConsoleSummary,
+      publicBetaFeedbackPlaceholderSummary,
+      publicBetaFinalManualViewModelSummary,
       finalOfflineBetaAuditSummary,
       publicBetaAcceptanceBoardSummary,
       userFacingSummary:{
@@ -177,6 +220,7 @@
         caveat:"仍需人工复核后再决定是否进入下一阶段。"
       },
       safeToProceedWithManualPublicBetaAcceptanceReview:status === "ready",
+      safeToProceedWithManualTrialReview:status === "ready",
       externalUrl:null,
       platformUrl:null,
       providerUrl:null,
@@ -209,6 +253,9 @@
     buildGlobalShoppingOperatorConsoleRowsForView,
     buildGlobalShoppingCategoryExpansionRowsForView,
     buildGlobalShoppingComparisonRowsForView,
+    buildGlobalShoppingTrialReadinessRowsForView,
+    buildGlobalShoppingManualAcceptanceRowsForView,
+    buildGlobalShoppingFeedbackPlaceholderRowsForView,
     buildGlobalShoppingFinalAuditRowsForView,
     buildGlobalShoppingAcceptanceBoardRowsForView,
     buildGlobalShoppingPublicBetaOperatorViewModelAuditDraft,

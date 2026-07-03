@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRcEvidenceReviewChecklist.js"]);
   const api = windowRef.WeishanFlightWorkflowRcEvidenceReviewChecklist;
-  assert.equal(api.FLIGHT_WORKFLOW_RC_EVIDENCE_REVIEW_CHECKLIST_VERSION, "4.0.6");
+  assert.equal(api.FLIGHT_WORKFLOW_RC_EVIDENCE_REVIEW_CHECKLIST_VERSION, "4.0.7");
   const ready = api.buildFlightWorkflowRcEvidenceReviewChecklist({
     freezeGateSummary:{ status:"ready_to_freeze", freezeDecision:{ safeToFreeze:true }, blockedReasons:["none"], redacted:true },
     evidenceFreezePackSummary:{ status:"ready", rows:[{ rowId:"e1", label:"证据", value:"ready", status:"pass", redacted:true }], redacted:true },

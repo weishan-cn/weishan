@@ -41,7 +41,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderGovernanceClosureViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderGovernanceClosureViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_CLOSURE_VIEW_MODEL_VERSION, "4.0.6");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_CLOSURE_VIEW_MODEL_VERSION, "4.0.7");
   const ready = api.buildGlobalShoppingProviderGovernanceClosureViewModel({
     offlineProviderGovernanceClosureBoardSummary:readySummary("Offline Provider Governance Closure Board", "Offline Provider Governance Closure Board 已准备"),
     noActivationComplianceSealSummary:readySummary("No-Activation Compliance Seal", "No-Activation Compliance Seal 已准备"),

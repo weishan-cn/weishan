@@ -1,8 +1,9 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SANDBOX_PROVIDER_RELEASE_FREEZE_GATE_VERSION = "4.0.6";
+  const GLOBAL_SHOPPING_SANDBOX_PROVIDER_RELEASE_FREEZE_GATE_VERSION = "4.0.7";
   const GATE_NAME = "global_shopping_sandbox_provider_release_freeze_gate_v1";
+  const BUILD_GUARD_KEY = "__weishanGlobalShoppingSandboxProviderReleaseFreezeGateBuilding";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function obj(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
@@ -23,6 +24,10 @@
     if (present(safe[key])) return obj(safe[key]);
     const api = window[apiName] || {};
     return typeof api[methodName] === "function" ? obj(api[methodName](safe)) : {};
+  }
+  function directSummary(input, key) {
+    const safe = obj(input);
+    return present(safe[key]) ? obj(safe[key]) : {};
   }
   function gate(gateId, label, status, severity, ownerRole, summary, caveat) {
     return {
@@ -79,8 +84,8 @@
 
   function buildGlobalShoppingSandboxProviderReleaseFreezeGates(input) {
     const safe = obj(input);
-    const governanceAuditConsoleSummary = resolveSummary(safe, "governanceAuditConsoleSummary", "WeishanGlobalShoppingProviderGovernanceAuditConsole", "buildGlobalShoppingProviderGovernanceAuditConsole");
-    const humanPilotReadinessLedgerSummary = resolveSummary(safe, "humanPilotReadinessLedgerSummary", "WeishanGlobalShoppingHumanPilotReadinessLedger", "buildGlobalShoppingHumanPilotReadinessLedger");
+    const governanceAuditConsoleSummary = directSummary(safe, "governanceAuditConsoleSummary");
+    const humanPilotReadinessLedgerSummary = directSummary(safe, "humanPilotReadinessLedgerSummary");
     const productionBlockerMatrixSummary = resolveSummary(safe, "productionBlockerMatrixSummary", "WeishanGlobalShoppingProductionBlockerMatrix", "buildGlobalShoppingProductionBlockerMatrix");
     const providerKillSwitchDrillSummary = resolveSummary(safe, "providerKillSwitchDrillSummary", "WeishanGlobalShoppingProviderKillSwitchDrill", "buildGlobalShoppingProviderKillSwitchDrill");
     const complianceEvidencePackSummary = resolveSummary(safe, "complianceEvidencePackSummary", "WeishanGlobalShoppingComplianceEvidencePack", "buildGlobalShoppingComplianceEvidencePack");
@@ -246,10 +251,16 @@
   }
 
   function buildGlobalShoppingSandboxProviderReleaseFreezeGate(input) {
+    if (window[BUILD_GUARD_KEY] === true) {
+      return sanitizeGlobalShoppingSandboxProviderReleaseFreezeGate({ status:"needs_review" });
+    }
+    window[BUILD_GUARD_KEY] = true;
     try {
       return sanitizeGlobalShoppingSandboxProviderReleaseFreezeGate(input || {});
     } catch (_) {
       return sanitizeGlobalShoppingSandboxProviderReleaseFreezeGate({ status:"failed_safe" });
+    } finally {
+      window[BUILD_GUARD_KEY] = false;
     }
   }
 
