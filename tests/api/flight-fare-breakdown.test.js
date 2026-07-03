@@ -16,7 +16,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightFareBreakdown.js"]);
   const api = windowRef.WeishanFlightFareBreakdown;
-  assert.equal(api.FLIGHT_FARE_BREAKDOWN_VERSION, "4.1.4");
+  assert.equal(api.FLIGHT_FARE_BREAKDOWN_VERSION, "4.1.5");
 
   const fare = api.normalizeFlightFareBreakdown({
     currency:"CNY",

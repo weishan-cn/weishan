@@ -42,7 +42,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaFinalViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaFinalViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_VIEW_MODEL_VERSION, "4.1.4");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_VIEW_MODEL_VERSION, "4.1.5");
   const ready = api.buildGlobalShoppingPublicBetaFinalViewModel({
     publicBetaFinalGateSummary:readySummary("Public Beta Final Gate", "Public Beta Final Gate 已准备"),
     releaseCandidateConfidenceBoardSummary:readySummary("RC Confidence Board", "RC Confidence Board 已准备")

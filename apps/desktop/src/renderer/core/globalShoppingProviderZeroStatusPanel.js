@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_ZERO_STATUS_PANEL_VERSION = "4.1.4";
+  const GLOBAL_SHOPPING_PROVIDER_ZERO_STATUS_PANEL_VERSION = "4.1.5";
   const PANEL_NAME = "global_shopping_provider_zero_status_panel_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

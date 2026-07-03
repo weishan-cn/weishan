@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_SAFE_NEXT_STEP_GUIDANCE_VERSION = "4.1.4";
+  const GLOBAL_PROCUREMENT_SAFE_NEXT_STEP_GUIDANCE_VERSION = "4.1.5";
 
   function unique(list){
     return Array.from(new Set((Array.isArray(list) ? list : []).filter(Boolean)));

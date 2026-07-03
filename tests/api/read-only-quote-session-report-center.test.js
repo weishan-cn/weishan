@@ -108,13 +108,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.1.4");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.1.5");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "4.1.4");
+  assert.equal(ready.appVersion, "4.1.5");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -294,25 +294,25 @@ function main() {
   assert.equal(publicBetaManualQaReady.userFacingSummary.safeToProceedWithManualQaReview, true);
   const qaOperationsReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
-    publicBetaTrialEvidenceLedgerSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Trial Evidence Ledger", resultLabel:"Public Beta Trial Evidence Ledger 已准备", redacted:true }, redacted:true },
-    publicBetaQaDecisionMatrixSummary:{ status:"ready", userFacingSummary:{ title:"QA Decision Matrix", resultLabel:"QA Decision Matrix 已准备", redacted:true }, redacted:true },
-    offlineIssueTriageBoardSummary:{ status:"ready", userFacingSummary:{ title:"Offline Issue Triage Board", resultLabel:"Offline Issue Triage Board 已准备", redacted:true }, redacted:true },
-    publicBetaQaOperationsViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta QA Operations View Model", resultLabel:"Public Beta Trial Evidence Ledger / QA Decision Matrix / Offline Issue Triage Board 已准备", redacted:true }, safeToProceedWithManualQaOperationsReview:true, redacted:true },
-    publicBetaTrialEvidenceLedgerStatus:"ready",
-    publicBetaQaDecisionMatrixStatus:"ready",
-    offlineIssueTriageBoardStatus:"ready",
-    publicBetaQaOperationsViewModelStatus:"ready",
-    safeToProceedWithManualQaOperationsReview:true
+    publicBetaQaFreezeGateSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta QA Freeze Gate", resultLabel:"Public Beta QA Freeze Gate 已准备", redacted:true }, redacted:true },
+    manualTrialSummaryBoardSummary:{ status:"ready", userFacingSummary:{ title:"Manual Trial Summary Board", resultLabel:"Manual Trial Summary Board 已准备", redacted:true }, redacted:true },
+    offlineReadinessReviewPanelSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Offline Readiness Review Panel", resultLabel:"Offline Readiness Review Panel 进入人工复核", redacted:true }, redacted:true },
+    publicBetaFreezeReviewViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Freeze Review View Model", resultLabel:"Public Beta QA Freeze Gate / Manual Trial Summary Board / Offline Readiness Review Panel 已准备", redacted:true }, safeToProceedWithManualFreezeReview:true, redacted:true },
+    publicBetaQaFreezeGateStatus:"ready",
+    manualTrialSummaryBoardStatus:"ready",
+    offlineReadinessReviewPanelStatus:"manual_review_required",
+    publicBetaFreezeReviewViewModelStatus:"ready",
+    safeToProceedWithManualFreezeReview:true
   });
-  assert.equal(qaOperationsReady.safetyReport.publicBetaTrialEvidenceLedgerSummary.userFacingSummary.title, "Public Beta Trial Evidence Ledger");
-  assert.equal(qaOperationsReady.safetyReport.publicBetaQaDecisionMatrixSummary.userFacingSummary.title, "QA Decision Matrix");
-  assert.equal(qaOperationsReady.safetyReport.offlineIssueTriageBoardSummary.userFacingSummary.title, "Offline Issue Triage Board");
-  assert.equal(qaOperationsReady.safetyReport.publicBetaQaOperationsViewModelSummary.userFacingSummary.resultLabel, "Public Beta Trial Evidence Ledger / QA Decision Matrix / Offline Issue Triage Board 已准备");
-  assert.equal(qaOperationsReady.safetyReport.publicBetaTrialEvidenceLedgerStatus, "ready");
-  assert.equal(qaOperationsReady.safetyReport.publicBetaQaDecisionMatrixStatus, "ready");
-  assert.equal(qaOperationsReady.safetyReport.offlineIssueTriageBoardStatus, "ready");
-  assert.equal(qaOperationsReady.safetyReport.publicBetaQaOperationsViewModelStatus, "ready");
-  assert.equal(qaOperationsReady.userFacingSummary.safeToProceedWithManualQaOperationsReview, true);
+  assert.equal(qaOperationsReady.safetyReport.publicBetaQaFreezeGateSummary.title, "Public Beta QA Freeze Gate");
+  assert.equal(qaOperationsReady.safetyReport.manualTrialSummaryBoardSummary.title, "Manual Trial Summary Board");
+  assert.equal(qaOperationsReady.safetyReport.offlineReadinessReviewPanelSummary.title, "Offline Readiness Review Panel");
+  assert.equal(qaOperationsReady.safetyReport.publicBetaFreezeReviewViewModelSummary.line, "Public Beta QA Freeze Gate / Manual Trial Summary Board / Offline Readiness Review Panel 已准备");
+  assert.equal(qaOperationsReady.safetyReport.publicBetaQaFreezeGateStatus, "ready");
+  assert.equal(qaOperationsReady.safetyReport.manualTrialSummaryBoardStatus, "ready");
+  assert.equal(qaOperationsReady.safetyReport.offlineReadinessReviewPanelStatus, "manual_review_required");
+  assert.equal(qaOperationsReady.safetyReport.publicBetaFreezeReviewViewModelStatus, "ready");
+  assert.equal(qaOperationsReady.userFacingSummary.safeToProceedWithManualFreezeReview, true);
   const sandboxMilestoneReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     providerSandboxReadinessWorkbenchSummary:{ status:"ready", userFacingSummary:{ title:"Provider Sandbox Readiness Workbench", resultLabel:"Sandbox Readiness Workbench 已准备", redacted:true }, redacted:true },

@@ -75,7 +75,7 @@ function main() {
     sandboxHandoffViewModel:handoff
   });
   const api = windowRef.WeishanGlobalShoppingNormalizedPriceCandidateBoard;
-  assert.equal(api.GLOBAL_SHOPPING_NORMALIZED_PRICE_CANDIDATE_BOARD_VERSION, "4.1.4");
+  assert.equal(api.GLOBAL_SHOPPING_NORMALIZED_PRICE_CANDIDATE_BOARD_VERSION, "4.1.5");
   const board = api.buildGlobalShoppingNormalizedPriceCandidateBoard({
     readOnlyProviderSandboxConnectorSummary:connector,
     fixtureReplayConsoleSummary:replay,
@@ -84,7 +84,7 @@ function main() {
     coveredLowestCandidateBoardSummary:covered,
     priceCandidateDisplaySummary:{ status:"ready", title:"全球购价格候选展示", caveat:"当前仅展示只读 fixture/sandbox 归一化候选", redacted:true }
   });
-  assert.equal(board.appVersion, "4.1.4");
+  assert.equal(board.appVersion, "4.1.5");
   assert.equal(board.status, "ready");
   assert.equal(board.cards.find((item) => item.cardId === "provider_connector").label, "Provider Connector");
   assert.equal(board.cards.find((item) => item.cardId === "fixture_replay").label, "Fixture 回放");

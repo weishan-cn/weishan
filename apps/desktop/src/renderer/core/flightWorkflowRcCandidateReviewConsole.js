@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RC_CANDIDATE_REVIEW_CONSOLE_VERSION = "4.1.4";
+  const FLIGHT_WORKFLOW_RC_CANDIDATE_REVIEW_CONSOLE_VERSION = "4.1.5";
   const CONSOLE_NAME = "flight_workflow_rc_candidate_review_console_v1";
   const CAVEAT = "该控制台只用于只读 RC 候选复核，不代表真实账号、客服工单、交易请求或出票能力。";
 

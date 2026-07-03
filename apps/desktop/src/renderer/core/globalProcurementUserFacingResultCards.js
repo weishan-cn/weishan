@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_USER_FACING_RESULT_CARDS_VERSION = "4.1.4";
+  const GLOBAL_PROCUREMENT_USER_FACING_RESULT_CARDS_VERSION = "4.1.5";
 
   function text(value){
     return String(value || "").trim();

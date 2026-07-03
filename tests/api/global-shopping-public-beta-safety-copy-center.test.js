@@ -37,7 +37,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaSafetyCopyCenter.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaSafetyCopyCenter;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_SAFETY_COPY_CENTER_VERSION, "4.1.4");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_SAFETY_COPY_CENTER_VERSION, "4.1.5");
   const ready = api.buildGlobalShoppingPublicBetaSafetyCopyCenter({
     globalShoppingReadOnlyPublicBetaShellSummary:readySummary("Global Shopping Read-Only Public Beta Shell", "Global Shopping Read-Only Public Beta Shell 已准备"),
     providerZeroRuntimeLockSummary:readySummary("Provider-Zero Runtime Lock", "Provider-Zero Runtime Lock 已准备"),

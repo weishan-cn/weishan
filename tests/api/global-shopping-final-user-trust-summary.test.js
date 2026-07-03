@@ -38,7 +38,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingFinalUserTrustSummary.js"]);
   const api = windowRef.WeishanGlobalShoppingFinalUserTrustSummary;
-  assert.equal(api.GLOBAL_SHOPPING_FINAL_USER_TRUST_SUMMARY_VERSION, "4.1.4");
+  assert.equal(api.GLOBAL_SHOPPING_FINAL_USER_TRUST_SUMMARY_VERSION, "4.1.5");
   const ready = api.buildGlobalShoppingFinalUserTrustSummary({
     summaryMode:"offline_mock",
     offlineDistributionReadinessCenterSummary:readySummary("Offline Distribution Readiness Center", "Offline Distribution Readiness Center 已准备"),

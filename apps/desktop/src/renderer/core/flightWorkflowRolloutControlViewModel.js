@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_ROLLOUT_CONTROL_VIEW_MODEL_VERSION = "4.1.4";
+  const FLIGHT_WORKFLOW_ROLLOUT_CONTROL_VIEW_MODEL_VERSION = "4.1.5";
   const VIEW_MODEL_NAME = "flight_workflow_rollout_control_view_model_v1";
   const CAVEAT = "该页面只管理只读试点流程，不保存真实身份、不发送真实邀请、不提供交易能力。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|真实姓名|手机号|邮箱/ig;

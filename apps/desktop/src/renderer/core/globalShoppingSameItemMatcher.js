@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SAME_ITEM_MATCHER_VERSION = "4.1.4";
+  const GLOBAL_SHOPPING_SAME_ITEM_MATCHER_VERSION = "4.1.5";
   const MATCHER_NAME = "global_shopping_same_item_matcher_v1";
   const CAVEAT = "当前只处理只读 fixture 候选，不代表真实平台库存、最终价、锁价或可下单能力。";
   const ITEM_TYPES = ["flight", "hotel", "product", "local_service", "unknown"];

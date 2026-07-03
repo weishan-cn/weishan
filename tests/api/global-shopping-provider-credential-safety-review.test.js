@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderCredentialSafetyReview.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderCredentialSafetyReview;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_CREDENTIAL_SAFETY_REVIEW_VERSION, "4.1.4");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_CREDENTIAL_SAFETY_REVIEW_VERSION, "4.1.5");
   const ready = api.buildGlobalShoppingProviderCredentialSafetyReview({ providerStatus:"fixture", fixtureCredentialsOnly:true, sandboxOnly:true });
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "Provider 凭据安全复核");

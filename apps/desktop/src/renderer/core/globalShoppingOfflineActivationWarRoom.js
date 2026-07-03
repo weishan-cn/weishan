@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_ACTIVATION_WAR_ROOM_VERSION = "4.1.4";
+  const GLOBAL_SHOPPING_OFFLINE_ACTIVATION_WAR_ROOM_VERSION = "4.1.5";
   const ROOM_NAME = "global_shopping_offline_activation_war_room_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
