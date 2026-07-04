@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_SAFETY_DELTA_BOARD_VERSION = "4.2.3";
+  const GLOBAL_SHOPPING_OFFLINE_SAFETY_DELTA_BOARD_VERSION = "4.2.4";
   const BOARD_NAME = "global_shopping_offline_safety_delta_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, safety_delta_board_only:true };
   const UNCHANGED_BOUNDARIES = ["provider", "network", "key", "endpoint", "external_open", "payment", "order", "ticketing", "release", "push", "launch"];

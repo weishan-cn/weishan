@@ -27,7 +27,7 @@ function main() {
     providerResponseContract:{ status:"ready" }
   });
   const api = windowRef.WeishanGlobalShoppingFixtureReplayConsole;
-  assert.equal(api.GLOBAL_SHOPPING_FIXTURE_REPLAY_CONSOLE_VERSION, "4.2.3");
+  assert.equal(api.GLOBAL_SHOPPING_FIXTURE_REPLAY_CONSOLE_VERSION, "4.2.4");
 
   const ready = api.buildGlobalShoppingFixtureReplayConsole({
     connectorSummary:connector,
@@ -40,7 +40,7 @@ function main() {
       partnerFixturePrices:[{ title:"Partner Fixture", basePrice:899 }]
     }
   });
-  assert.equal(ready.appVersion, "4.2.3");
+  assert.equal(ready.appVersion, "4.2.4");
   assert.equal(ready.status, "ready");
   assert.equal(ready.replaySession.canCallNetwork, false);
   assert.equal(ready.replaySummary.officialSourceCount, 1);

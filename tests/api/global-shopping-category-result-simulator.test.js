@@ -15,7 +15,7 @@ function load(file) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingCategoryResultSimulator.js");
-  assert.equal(api.GLOBAL_SHOPPING_CATEGORY_RESULT_SIMULATOR_VERSION, "4.2.3");
+  assert.equal(api.GLOBAL_SHOPPING_CATEGORY_RESULT_SIMULATOR_VERSION, "4.2.4");
   const ready = api.buildGlobalShoppingCategoryResultSimulator({
     simulatorMode:"category_result_simulator_only",
     flight:{ categoryLabel:"Flight 候选结果", sourceLabel:"flight mock source" },
@@ -23,7 +23,7 @@ function main() {
     product:{ categoryLabel:"Product 候选结果", sourceLabel:"product mock source" }
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.2.3");
+  assert.equal(ready.appVersion, "4.2.4");
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(ready.externalUrl, null);
   assert.equal(ready.bookingUrl, null);

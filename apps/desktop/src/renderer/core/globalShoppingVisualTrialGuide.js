@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_VISUAL_TRIAL_GUIDE_VERSION = "4.2.3";
+  const GLOBAL_SHOPPING_VISUAL_TRIAL_GUIDE_VERSION = "4.2.4";
   const GUIDE_NAME = "global_shopping_visual_trial_guide_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, visual_trial_guide_only:true };
 

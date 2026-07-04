@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.2.3";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.2.4";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -169,6 +169,10 @@
       const manualFeedbackReviewQueueMockSummary = obj(safe.manualFeedbackReviewQueueMockSummary);
       const offlineIssueTriageBoardSummary = obj(safe.offlineIssueTriageBoardSummary);
       const publicBetaReadinessReviewViewModelSummary = obj(safe.publicBetaReadinessReviewViewModelSummary);
+      const publicBetaManualAcceptanceChecklistSummary = obj(safe.publicBetaManualAcceptanceChecklistSummary);
+      const offlineUserScenarioPackSummary = obj(safe.offlineUserScenarioPackSummary);
+      const noDataRetentionGuardSummary = obj(safe.noDataRetentionGuardSummary);
+      const publicBetaAcceptanceReviewViewModelSummary = obj(safe.publicBetaAcceptanceReviewViewModelSummary);
       if (publicBetaCandidateLockSummary.status === "manual_review_required") badges.push(badge("public_beta_candidate_lock_manual", "候选锁定需人工复核", "warning"));
       if (publicBetaCandidateLockSummary.status === "needs_review") badges.push(badge("public_beta_candidate_lock_review", "候选锁定仍需复核", "warning"));
       if (publicBetaCandidateLockSummary.status === "blocked") badges.push(badge("public_beta_candidate_lock_blocked", "候选锁定已阻断", "blocked"));
@@ -217,12 +221,30 @@
       if (publicBetaReadinessReviewViewModelSummary.status === "ready") badges.push(badge("public_beta_readiness_review_view_model_ready", "Public Beta Readiness Review ViewModel 已准备", "info"));
       if (publicBetaReadinessReviewViewModelSummary.status === "needs_review") badges.push(badge("public_beta_readiness_review_view_model_review", "Public Beta Readiness Review ViewModel 仍需复核", "warning"));
       if (publicBetaReadinessReviewViewModelSummary.status === "blocked") badges.push(badge("public_beta_readiness_review_view_model_blocked", "Public Beta Readiness Review ViewModel 已阻断", "blocked"));
+      if (publicBetaManualAcceptanceChecklistSummary.status === "manual_review_required") badges.push(badge("public_beta_manual_acceptance_checklist_manual", "Public Beta Manual Acceptance Checklist 需人工复核", "warning"));
+      if (publicBetaManualAcceptanceChecklistSummary.status === "needs_review") badges.push(badge("public_beta_manual_acceptance_checklist_review", "Public Beta Manual Acceptance Checklist 仍需复核", "warning"));
+      if (publicBetaManualAcceptanceChecklistSummary.status === "blocked") badges.push(badge("public_beta_manual_acceptance_checklist_blocked", "Public Beta Manual Acceptance Checklist 已阻断", "blocked"));
+      if (offlineUserScenarioPackSummary.status === "manual_review_required") badges.push(badge("offline_user_scenario_pack_manual", "Offline User Scenario Pack 需人工复核", "warning"));
+      if (offlineUserScenarioPackSummary.status === "needs_review") badges.push(badge("offline_user_scenario_pack_review", "Offline User Scenario Pack 仍需复核", "warning"));
+      if (offlineUserScenarioPackSummary.status === "blocked") badges.push(badge("offline_user_scenario_pack_blocked", "Offline User Scenario Pack 已阻断", "blocked"));
+      if (noDataRetentionGuardSummary.status === "manual_review_required") badges.push(badge("no_data_retention_guard_manual", "No-Data-Retention Guard 需人工复核", "warning"));
+      if (noDataRetentionGuardSummary.status === "needs_review") badges.push(badge("no_data_retention_guard_review", "No-Data-Retention Guard 仍需复核", "warning"));
+      if (noDataRetentionGuardSummary.status === "blocked") badges.push(badge("no_data_retention_guard_blocked", "No-Data-Retention Guard 已阻断", "blocked"));
+      if (publicBetaAcceptanceReviewViewModelSummary.status === "ready") badges.push(badge("public_beta_acceptance_review_view_model_ready", "Public Beta Acceptance Review ViewModel 已准备", "info"));
+      if (publicBetaAcceptanceReviewViewModelSummary.status === "needs_review") badges.push(badge("public_beta_acceptance_review_view_model_review", "Public Beta Acceptance Review ViewModel 仍需复核", "warning"));
+      if (publicBetaAcceptanceReviewViewModelSummary.status === "blocked") badges.push(badge("public_beta_acceptance_review_view_model_blocked", "Public Beta Acceptance Review ViewModel 已阻断", "blocked"));
       if (present(publicBetaReadinessSnapshotSummary) || present(manualFeedbackReviewQueueMockSummary) || present(offlineIssueTriageBoardSummary)) {
         badges.push(badge("public_beta_readiness_review_rows", "Readiness Snapshot / Feedback Review Queue / Issue Triage", "warning"));
         badges.push(badge("public_beta_readiness_review_snapshot", "准备快照仅为只读展示，不生成文件", "warning"));
         badges.push(badge("public_beta_readiness_review_queue", "反馈复核队列仅为 Mock，不保存、不上传、不创建 issue/task", "warning"));
         badges.push(badge("public_beta_readiness_review_triage", "问题分级仅为离线展示，不创建真实任务", "warning"));
         badges.push(badge("public_beta_readiness_review_manual", "provider、联网、外部打开、付款、下单、出票、release、push、launch、反馈提交、上传、issue/task 创建仍保持关闭", "warning"));
+      }
+      if (present(publicBetaManualAcceptanceChecklistSummary) || present(offlineUserScenarioPackSummary) || present(noDataRetentionGuardSummary)) {
+        badges.push(badge("public_beta_acceptance_manual_review_rows", "Manual Acceptance / Offline Scenarios / No Data Retention", "warning"));
+        badges.push(badge("public_beta_acceptance_manual_review_checklist", "验收清单仅为只读展示，不保存验收记录", "warning"));
+        badges.push(badge("public_beta_acceptance_manual_review_scenarios", "离线场景包不收集真实输入", "warning"));
+        badges.push(badge("public_beta_acceptance_manual_review_retention", "不保存反馈、用户原文、场景输入或验收记录", "warning"));
       }
       const rcCandidateReview = obj(safe.rcCandidateReviewSummary);
       const rcEvidenceReview = obj(safe.rcEvidenceReviewSummary);

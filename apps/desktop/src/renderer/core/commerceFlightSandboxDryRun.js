@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SANDBOX_DRY_RUN_VERSION = "4.2.3";
+  const SANDBOX_DRY_RUN_VERSION = "4.2.4";
   const PHASE = "flight_sandbox_dry_run_shell";
   const DEFAULT_DRY_RUN_STATUS = "shell_only";
 

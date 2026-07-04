@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_ISSUE_TRIAGE_BOARD_VERSION = "4.2.3";
+  const GLOBAL_SHOPPING_OFFLINE_ISSUE_TRIAGE_BOARD_VERSION = "4.2.4";
   const BOARD_NAME = "global_shopping_offline_issue_triage_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, issue_triage_board_only:true };
   const SEVERITY_BUCKETS = ["critical", "high", "medium", "low", "info", "blocked"];

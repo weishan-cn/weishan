@@ -31,14 +31,14 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderSandboxDryRunViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderSandboxDryRunViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_DRY_RUN_VIEW_MODEL_VERSION, "4.2.3");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_DRY_RUN_VIEW_MODEL_VERSION, "4.2.4");
 
   const ready = api.buildGlobalShoppingProviderSandboxDryRunViewModel({
     offlineSandboxTraceInspectorSummary:buildReadySummary("ready", "离线 Sandbox Trace 检查器", "离线 Trace 检查已准备"),
     mockProviderResultNormalizerSummary:buildReadySummary("ready", "Mock Provider 结果归一化器", "Mock 结果归一化已准备"),
     manualActivationDryRunChecklistSummary:buildReadySummary("ready", "人工激活 Dry-run 检查清单", "激活 Dry-run 检查清单已准备")
   });
-  assert.equal(ready.appVersion, "4.2.3");
+  assert.equal(ready.appVersion, "4.2.4");
   assert.equal(ready.status, "ready");
   assert.equal(ready.title, "Provider Sandbox 离线 Dry-run");
   assert.equal(ready.cards.length, 4);

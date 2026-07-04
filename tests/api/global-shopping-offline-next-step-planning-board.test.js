@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineNextStepPlanningBoard.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineNextStepPlanningBoard;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_NEXT_STEP_PLANNING_BOARD_VERSION, "4.2.3");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_NEXT_STEP_PLANNING_BOARD_VERSION, "4.2.4");
 
   const ready = api.buildGlobalShoppingOfflineNextStepPlanningBoard({
     publicBetaClosureEvidenceArchiveSummary:summary("Public Beta Closure Evidence Archive", "manual_review_required"),

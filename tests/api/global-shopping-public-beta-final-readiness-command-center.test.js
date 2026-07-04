@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaFinalReadinessCommandCenter.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaFinalReadinessCommandCenter;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_READINESS_COMMAND_CENTER_VERSION, "4.2.3");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_READINESS_COMMAND_CENTER_VERSION, "4.2.4");
 
   const ready = api.buildGlobalShoppingPublicBetaFinalReadinessCommandCenter({
     publicBetaClosureEvidenceArchiveSummary:summary("Public Beta Closure Evidence Archive", "manual_review_required", { archiveStatus:"manual_review_required" }),

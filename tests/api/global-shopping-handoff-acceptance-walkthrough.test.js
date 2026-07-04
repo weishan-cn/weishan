@@ -16,7 +16,7 @@ function load(file) {
 function main() {
   const windowRef = load("apps/desktop/src/renderer/core/globalShoppingHandoffAcceptanceWalkthrough.js");
   const api = windowRef.WeishanGlobalShoppingHandoffAcceptanceWalkthrough;
-  assert.equal(api.GLOBAL_SHOPPING_HANDOFF_ACCEPTANCE_WALKTHROUGH_VERSION, "4.2.3");
+  assert.equal(api.GLOBAL_SHOPPING_HANDOFF_ACCEPTANCE_WALKTHROUGH_VERSION, "4.2.4");
   const ready = api.buildGlobalShoppingHandoffAcceptanceWalkthrough({
     readOnlyHandoffPacketPreviewSummary:{ status:"ready", userFacingSummary:{ resultLabel:"交接包预览已准备", redacted:true }, redacted:true },
     userActionBoundaryReceiptSummary:{ status:"ready", userFacingSummary:{ resultLabel:"边界回执已准备", redacted:true }, redacted:true },

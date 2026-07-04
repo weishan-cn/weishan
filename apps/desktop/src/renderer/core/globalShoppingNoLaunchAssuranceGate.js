@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_NO_LAUNCH_ASSURANCE_GATE_VERSION = "4.2.3";
+  const GLOBAL_SHOPPING_NO_LAUNCH_ASSURANCE_GATE_VERSION = "4.2.4";
   const GATE_NAME = "global_shopping_no_launch_assurance_gate_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, no_launch_assurance_only:true };
   const BLOCKED_TEXT_RE = /ready_to_publish|production_ready|auto_release|auto_launch|auto_publish/i;

@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v4.2.3 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
+  test("v4.2.4 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9652,7 +9652,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v401-render-smoke", "true");
       const card = {
-        version:"4.2.3",
+        version:"4.2.4",
         visible:true,
         globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, rows:[{ rowId:"public_beta", label:"Global Shopping Read-Only Public Beta Shell", value:"Global Shopping Read-Only Public Beta Shell 已准备", status:"pass", redacted:true }], redacted:true },
         globalShoppingReadOnlyCandidateEvidenceUnifierSummary:{ status:"ready", userFacingSummary:{ title:"候选价证据", resultLabel:"候选价证据已准备", redacted:true }, rows:[{ rowId:"candidate_evidence", label:"候选价证据", value:"候选价证据已准备", status:"pass", redacted:true }], redacted:true },
@@ -9750,10 +9750,18 @@ test.describe.serial("commerce agent workbench", () => {
         manualFeedbackReviewQueueMockSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Manual Feedback Review Queue Mock", resultLabel:"Manual Feedback Review Queue Mock 需人工复核", redacted:true }, rows:[{ rowId:"manual_feedback_review_queue_mock", label:"Manual Feedback Review Queue Mock", value:"Manual Feedback Review Queue Mock 需人工复核", status:"warning", redacted:true }], redacted:true },
         offlineIssueTriageBoardSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Offline Issue Triage Board", resultLabel:"Offline Issue Triage Board 需人工复核", redacted:true }, rows:[{ rowId:"offline_issue_triage_board", label:"Offline Issue Triage Board", value:"Offline Issue Triage Board 需人工复核", status:"warning", redacted:true }], redacted:true },
         publicBetaReadinessReviewViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Readiness Review ViewModel", resultLabel:"Public Beta Readiness Snapshot / Manual Feedback Review Queue Mock / Offline Issue Triage Board 已准备", redacted:true }, safeToProceedWithManualReadinessReview:true, redacted:true },
+        publicBetaManualAcceptanceChecklistSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Public Beta Manual Acceptance Checklist", resultLabel:"Public Beta Manual Acceptance Checklist 需人工复核", redacted:true }, rows:[{ rowId:"public_beta_manual_acceptance_checklist", label:"Public Beta Manual Acceptance Checklist", value:"Public Beta Manual Acceptance Checklist 需人工复核", status:"warning", redacted:true }], redacted:true },
+        offlineUserScenarioPackSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Offline User Scenario Pack", resultLabel:"Offline User Scenario Pack 需人工复核", redacted:true }, rows:[{ rowId:"offline_user_scenario_pack", label:"Offline User Scenario Pack", value:"Offline User Scenario Pack 需人工复核", status:"warning", redacted:true }], redacted:true },
+        noDataRetentionGuardSummary:{ status:"manual_review_required", userFacingSummary:{ title:"No-Data-Retention Guard", resultLabel:"No-Data-Retention Guard 需人工复核", redacted:true }, rows:[{ rowId:"no_data_retention_guard", label:"No-Data-Retention Guard", value:"No-Data-Retention Guard 需人工复核", status:"warning", redacted:true }], redacted:true },
+        publicBetaAcceptanceReviewViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Acceptance Review ViewModel", resultLabel:"Public Beta Manual Acceptance Checklist / Offline User Scenario Pack / No-Data-Retention Guard 已准备", redacted:true }, safeToProceedWithManualAcceptanceReview:true, redacted:true },
         publicBetaReadinessSnapshotStatus:"manual_review_required",
         manualFeedbackReviewQueueStatus:"manual_review_required",
         offlineIssueTriageStatus:"manual_review_required",
         publicBetaReadinessReviewViewModelStatus:"ready",
+        publicBetaManualAcceptanceChecklistStatus:"manual_review_required",
+        offlineUserScenarioPackStatus:"manual_review_required",
+        noDataRetentionStatus:"manual_review_required",
+        publicBetaAcceptanceReviewViewModelStatus:"ready",
         publicBetaFreezeEvidenceStatus:"ready",
         manualTrialIssueReviewStatus:"ready",
         offlineAcceptanceSnapshotStatus:"needs_review",
@@ -9786,6 +9794,7 @@ test.describe.serial("commerce agent workbench", () => {
         safeToProceedWithManualQaReview:true,
         safeToProceedWithManualTrialOperationsReview:true,
         safeToProceedWithManualReadinessReview:true,
+        safeToProceedWithManualAcceptanceReview:true,
         safeToProceedWithManualFreezeReview:true,
         safeToProceedWithManualAcceptanceSnapshotReview:false,
         safeToProceedWithManualClosureReview:true
@@ -9823,6 +9832,12 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("User Trust Launch Board");
     expect(v400.text).toContain("Public Beta Safety Copy Center");
     expect(v400.text).toContain("Public Beta User Journey");
+    expect(v400.text).toContain("Public Beta Manual Acceptance Checklist");
+    expect(v400.text).toContain("Offline User Scenario Pack");
+    expect(v400.text).toContain("No-Data-Retention Guard");
+    expect(v400.text).toContain("离线验收清单只用于人工复核，不保存验收记录");
+    expect(v400.text).toContain("离线场景包仅为样例，不收集真实输入");
+    expect(v400.text).toContain("无数据留存保护门确认不保存反馈、用户原文、场景输入或验收记录");
     expect(v400.text).toContain("Safe Search Intent Matrix");
     expect(v400.text).toContain("User Boundary Panel");
     expect(v400.text).toContain("Category Result Simulator");

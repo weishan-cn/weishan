@@ -17,7 +17,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingExternalPlatformExitRampPreview.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingExternalPlatformExitRampPreview;
-  assert.equal(api.GLOBAL_SHOPPING_EXTERNAL_PLATFORM_EXIT_RAMP_PREVIEW_VERSION, "4.2.3");
+  assert.equal(api.GLOBAL_SHOPPING_EXTERNAL_PLATFORM_EXIT_RAMP_PREVIEW_VERSION, "4.2.4");
   const ready = api.buildGlobalShoppingExternalPlatformExitRampPreview({
     userFacingManualReviewFlowSummary:{ status:"ready", userFacingSummary:{ resultLabel:"用户手动复核流程已准备", redacted:true } },
     platformVerificationProgressTrackerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"平台核对进度已准备", redacted:true } },
@@ -28,7 +28,7 @@ function main() {
     finalUserSafetyChecklistSummary:{ status:"ready", userFacingSummary:{ resultLabel:"最终安全清单已准备", redacted:true } },
     platformVisitPreparationViewModelSummary:{ status:"ready", title:"平台访问准备与最终安全清单", userFacingSummary:{ resultLabel:"平台访问准备已完成", redacted:true } }
   });
-  assert.equal(ready.appVersion, "4.2.3");
+  assert.equal(ready.appVersion, "4.2.4");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "外部平台退出坡道已准备");
   assert.equal(ready.rows[0].label, "外部平台退出坡道预览");

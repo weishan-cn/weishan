@@ -33,7 +33,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaManualQaReportCenter.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaManualQaReportCenter;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_MANUAL_QA_REPORT_CENTER_VERSION, "4.2.3");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_MANUAL_QA_REPORT_CENTER_VERSION, "4.2.4");
 
   const ready = api.buildGlobalShoppingPublicBetaManualQaReportCenter({
     publicBetaStabilityAuditSummary:summary("Public Beta Stability Audit"),
@@ -48,7 +48,7 @@ function main() {
     knownWarnings:["既有 secret scan WARN 仅作为已知警告展示"]
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.2.3");
+  assert.equal(ready.appVersion, "4.2.4");
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(ready.externalUrl, null);
   assert.equal(ready.bookingUrl, null);

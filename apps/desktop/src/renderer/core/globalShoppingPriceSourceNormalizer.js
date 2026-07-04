@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PRICE_SOURCE_NORMALIZER_VERSION = "4.2.3";
+  const GLOBAL_SHOPPING_PRICE_SOURCE_NORMALIZER_VERSION = "4.2.4";
   const NORMALIZER_NAME = "global_shopping_price_source_normalizer_v1";
   const SOURCE_TYPES = ["official", "authorized", "aggregator", "user_submitted", "fixture"];
   const FEE_FIELDS = ["taxAmount", "shippingFee", "platformFee", "serviceFee", "paymentFee", "baggageFee"];

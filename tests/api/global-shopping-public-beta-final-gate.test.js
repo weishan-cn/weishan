@@ -37,7 +37,7 @@ function readySummary(title, resultLabel) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingPublicBetaFinalGate.js");
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_GATE_VERSION, "4.2.3");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_GATE_VERSION, "4.2.4");
   const ready = api.buildGlobalShoppingPublicBetaFinalGate({
     globalShoppingReadOnlyPublicBetaShellSummary:readySummary("Global Shopping Read-Only Public Beta Shell", "Global Shopping Read-Only Public Beta Shell 已准备"),
     providerZeroRuntimeLockSummary:readySummary("Provider-Zero Runtime Lock", "Provider-Zero Runtime Lock 已准备"),

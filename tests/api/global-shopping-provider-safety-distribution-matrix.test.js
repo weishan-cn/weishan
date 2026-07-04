@@ -38,7 +38,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderSafetyDistributionMatrix.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderSafetyDistributionMatrix;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SAFETY_DISTRIBUTION_MATRIX_VERSION, "4.2.3");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SAFETY_DISTRIBUTION_MATRIX_VERSION, "4.2.4");
   const ready = api.buildGlobalShoppingProviderSafetyDistributionMatrix({
     matrixMode:"offline_mock",
     offlineDistributionReadinessCenterSummary:readySummary("Offline Distribution Readiness Center", "Offline Distribution Readiness Center 已准备"),

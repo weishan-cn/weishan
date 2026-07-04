@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineLaunchBlockerMatrix.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineLaunchBlockerMatrix;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_LAUNCH_BLOCKER_MATRIX_VERSION, "4.2.3");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_LAUNCH_BLOCKER_MATRIX_VERSION, "4.2.4");
 
   const matrix = api.buildGlobalShoppingOfflineLaunchBlockerMatrix({
     publicBetaFinalReadinessCommandCenterSummary:summary("Public Beta Final Readiness Command Center", "manual_review_required", { finalReadinessStatus:"manual_review_required" }),

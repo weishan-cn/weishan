@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_FEEDBACK_REVIEW_BOARD_VERSION = "4.2.3";
+  const GLOBAL_SHOPPING_OFFLINE_FEEDBACK_REVIEW_BOARD_VERSION = "4.2.4";
   const BOARD_NAME = "global_shopping_offline_feedback_review_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, offline_feedback_review_only:true };
   const SECRET_VALUE_RE = /(?:token|secret|api[_ -]?key|password)\s*[:=]\s*[\w-]+/i;
