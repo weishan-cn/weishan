@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.1.8";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.1.9";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -138,6 +138,20 @@
       if (offlineNextStepPlanningBoardSummary.status === "manual_review_required" || publicBetaNextStepViewModelSummary.status === "ready") badges.push(badge("offline_next_step_ready_for_review", "下一步规划待人工决定", "info"));
       if (offlineNextStepPlanningBoardSummary.status === "needs_review" || publicBetaNextStepViewModelSummary.status === "needs_review") badges.push(badge("offline_next_step_needs_review", "下一步规划仍需复核", "warning"));
       if (offlineNextStepPlanningBoardSummary.status === "blocked" || publicBetaNextStepViewModelSummary.status === "blocked") badges.push(badge("offline_next_step_blocked", "下一步规划已阻断", "blocked"));
+      const publicBetaFinalReadinessCommandCenterSummary = obj(safe.publicBetaFinalReadinessCommandCenterSummary);
+      const offlineLaunchBlockerMatrixSummary = obj(safe.offlineLaunchBlockerMatrixSummary);
+      const manualNextPhaseDossierSummary = obj(safe.manualNextPhaseDossierSummary);
+      const publicBetaFinalReadinessViewModelSummary = obj(safe.publicBetaFinalReadinessViewModelSummary);
+      if (publicBetaFinalReadinessCommandCenterSummary.status === "manual_review_required") badges.push(badge("public_beta_final_readiness_manual", "最终准备需人工复核", "warning"));
+      if (publicBetaFinalReadinessCommandCenterSummary.status === "needs_review") badges.push(badge("public_beta_final_readiness_review", "最终准备仍需复核", "warning"));
+      if (publicBetaFinalReadinessCommandCenterSummary.status === "blocked") badges.push(badge("public_beta_final_readiness_blocked", "最终准备已阻断", "blocked"));
+      if (offlineLaunchBlockerMatrixSummary.status === "blocked") badges.push(badge("offline_launch_blockers_locked", "发布阻断矩阵已锁定", "info"));
+      if (manualNextPhaseDossierSummary.status === "manual_review_required") badges.push(badge("manual_next_phase_manual", "下一阶段资料需人工复核", "warning"));
+      if (manualNextPhaseDossierSummary.status === "needs_review") badges.push(badge("manual_next_phase_review", "下一阶段资料仍需复核", "warning"));
+      if (manualNextPhaseDossierSummary.status === "blocked") badges.push(badge("manual_next_phase_blocked", "下一阶段资料已阻断", "blocked"));
+      if (publicBetaFinalReadinessViewModelSummary.status === "ready") badges.push(badge("public_beta_final_readiness_view_ready", "最终准备视图可人工复核", "info"));
+      if (publicBetaFinalReadinessViewModelSummary.status === "needs_review") badges.push(badge("public_beta_final_readiness_view_review", "最终准备视图仍需复核", "warning"));
+      if (publicBetaFinalReadinessViewModelSummary.status === "blocked") badges.push(badge("public_beta_final_readiness_view_blocked", "最终准备视图已阻断", "blocked"));
       const rcCandidateReview = obj(safe.rcCandidateReviewSummary);
       const rcEvidenceReview = obj(safe.rcEvidenceReviewSummary);
       const rcRegressionAudit = obj(safe.rcRegressionAuditSummary);

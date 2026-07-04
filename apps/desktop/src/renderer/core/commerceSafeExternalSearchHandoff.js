@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SAFE_EXTERNAL_SEARCH_HANDOFF_VERSION = "4.1.8";
+  const SAFE_EXTERNAL_SEARCH_HANDOFF_VERSION = "4.1.9";
   const TRUSTED_HOSTS = ["www.google.com", "google.com", "www.bing.com", "bing.com", "duckduckgo.com", "www.trip.com", "trip.com"];
 
   function clone(value) {

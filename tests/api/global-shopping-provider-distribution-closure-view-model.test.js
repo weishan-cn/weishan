@@ -39,7 +39,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderDistributionClosureViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderDistributionClosureViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_DISTRIBUTION_CLOSURE_VIEW_MODEL_VERSION, "4.1.8");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_DISTRIBUTION_CLOSURE_VIEW_MODEL_VERSION, "4.1.9");
   const ready = api.buildGlobalShoppingProviderDistributionClosureViewModel({
     providerDistributionFreezeConsoleSummary:readySummary("Provider Distribution Freeze Console", "Provider Distribution Freeze Console 已准备"),
     userFacingSafetyReceiptSummary:readySummary("User-Facing Safety Receipt", "User-Facing Safety Receipt 已准备"),

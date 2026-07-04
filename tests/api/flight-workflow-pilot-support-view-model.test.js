@@ -6,7 +6,7 @@ const ROOT = path.resolve(__dirname, "../..");
 function load(files) { const window = {}; window.window = window; const context = vm.createContext({ window, console }); for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
 function main() {
   const api = load(["apps/desktop/src/renderer/core/flightWorkflowPilotSupportViewModel.js"]).WeishanFlightWorkflowPilotSupportViewModel;
-  assert.equal(api.FLIGHT_WORKFLOW_PILOT_SUPPORT_VIEW_MODEL_VERSION, "4.1.8");
+  assert.equal(api.FLIGHT_WORKFLOW_PILOT_SUPPORT_VIEW_MODEL_VERSION, "4.1.9");
   const vm = api.buildFlightWorkflowPilotSupportViewModel({ issueIntakeSummary:{ status:"ready", issueCategory:"candidate_unclear", issueSummary:{ categoryLabel:"看不懂候选证据" } }, supportFallbackSummary:{ status:"ready", recommendation:{ label:"建议重新查看候选证据" } } });
   assert.equal(vm.title, "只读试点问题反馈");
   assert.ok(vm.cards.find((card) => card.cardId === "issue"));

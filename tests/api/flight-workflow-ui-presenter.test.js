@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowUiPresenter.js"]);
   const api = windowRef.WeishanFlightWorkflowUiPresenter;
-  assert.equal(api.FLIGHT_WORKFLOW_UI_PRESENTER_VERSION, "4.1.8");
+  assert.equal(api.FLIGHT_WORKFLOW_UI_PRESENTER_VERSION, "4.1.9");
   const presenter = api.buildFlightWorkflowUiPresenter({ workflowStateSummary:{ status:"needs_clarification", clarificationQuestions:["从哪里出发？", "到哪里？"] } });
   assert.equal(presenter.title, "机票请求工作流");
   assert.equal(presenter.currentStepLabel, "补充缺失信息");

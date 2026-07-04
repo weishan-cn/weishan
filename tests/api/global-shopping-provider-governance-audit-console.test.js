@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderGovernanceAuditConsole.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderGovernanceAuditConsole;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_AUDIT_CONSOLE_VERSION, "4.1.8");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_AUDIT_CONSOLE_VERSION, "4.1.9");
 
   const ready = api.buildGlobalShoppingProviderGovernanceAuditConsole({
     providerPilotGovernanceViewModelSummary:{ status:"ready", title:"Provider Pilot 治理与合规证据", redacted:true },

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_ADAPTER_REGISTRY_VERSION = "4.1.8";
+  const GLOBAL_SHOPPING_PROVIDER_ADAPTER_REGISTRY_VERSION = "4.1.9";
   const REGISTRY_NAME = "global_shopping_provider_adapter_registry_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

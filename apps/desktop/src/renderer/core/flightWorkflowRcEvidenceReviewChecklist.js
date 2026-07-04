@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RC_EVIDENCE_REVIEW_CHECKLIST_VERSION = "4.1.8";
+  const FLIGHT_WORKFLOW_RC_EVIDENCE_REVIEW_CHECKLIST_VERSION = "4.1.9";
   const CHECKLIST_NAME = "flight_workflow_rc_evidence_review_checklist_v1";
   const CAVEAT = "该清单只复核只读证据，不生成真实导出文件，不代表真实交易或出票能力。";
 

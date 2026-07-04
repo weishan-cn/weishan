@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.1.8");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.1.9");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -259,11 +259,19 @@ function main() {
     manualTrialExitCriteriaSummary:{ status:"manual_review_required", exitCriteriaStatus:"manual_review_required", userFacingSummary:{ resultLabel:"Manual Trial Exit Criteria 需人工复核", redacted:true } },
     offlineNextStepPlanningBoardSummary:{ status:"manual_review_required", planningStatus:"manual_review_required", userFacingSummary:{ resultLabel:"Offline Next-Step Planning Board 需人工复核", redacted:true } },
     publicBetaNextStepViewModelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Beta Closure Evidence Archive / Manual Trial Exit Criteria / Offline Next-Step Planning Board 已准备", redacted:true } },
+    publicBetaFinalReadinessCommandCenterSummary:{ status:"manual_review_required", userFacingSummary:{ resultLabel:"Public Beta Final Readiness Command Center 需人工复核", redacted:true } },
+    offlineLaunchBlockerMatrixSummary:{ status:"blocked", userFacingSummary:{ resultLabel:"Offline Launch Blocker Matrix 已保持阻断", redacted:true } },
+    manualNextPhaseDossierSummary:{ status:"manual_review_required", userFacingSummary:{ resultLabel:"Manual Next-Phase Dossier 需人工复核", redacted:true } },
+    publicBetaFinalReadinessViewModelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Beta Final Readiness ViewModel 已准备", redacted:true } },
     safeToProceedWithManualNextStepReview:true
   }).badges.map((item) => item.label);
   assert.ok(closureArchiveLabels.includes("闭环证据需人工复核"));
   assert.ok(closureArchiveLabels.includes("退出标准需人工复核"));
   assert.ok(closureArchiveLabels.includes("下一步规划待人工决定"));
+  assert.ok(closureArchiveLabels.includes("最终准备需人工复核"));
+  assert.ok(closureArchiveLabels.includes("发布阻断矩阵已锁定"));
+  assert.ok(closureArchiveLabels.includes("下一阶段资料需人工复核"));
+  assert.ok(closureArchiveLabels.includes("最终准备视图可人工复核"));
   const offlineLaunchLabels = api.buildFlightWorkflowRiskBadges({
     offlineLaunchDecisionSimulatorSummary:{ status:"ready", userFacingSummary:{ resultLabel:"离线发布决策模拟器已准备", redacted:true } },
     sandboxActivationReceiptLedgerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox 激活回执台账已准备", redacted:true } },

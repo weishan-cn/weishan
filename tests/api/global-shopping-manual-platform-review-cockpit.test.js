@@ -16,7 +16,7 @@ function load(file) {
 function main() {
   const windowRef = load("apps/desktop/src/renderer/core/globalShoppingManualPlatformReviewCockpit.js");
   const api = windowRef.WeishanGlobalShoppingManualPlatformReviewCockpit;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_PLATFORM_REVIEW_COCKPIT_VERSION, "4.1.8");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_PLATFORM_REVIEW_COCKPIT_VERSION, "4.1.9");
   const ready = api.buildGlobalShoppingManualPlatformReviewCockpit({
     handoffPacketViewModelSummary:{ status:"ready", title:"只读交接包与安全预检", redacted:true },
     platformHandoffSimulationViewModelSummary:{ status:"ready", title:"只读平台交接模拟", redacted:true },

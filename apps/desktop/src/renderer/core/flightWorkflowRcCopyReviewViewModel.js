@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RC_COPY_REVIEW_VIEW_MODEL_VERSION = "4.1.8";
+  const FLIGHT_WORKFLOW_RC_COPY_REVIEW_VIEW_MODEL_VERSION = "4.1.9";
   const VIEW_MODEL_NAME = "flight_workflow_rc_copy_review_view_model_v1";
   const CAVEAT = "该页面只用于只读 RC 文案定稿与安全披露复核，不保存真实身份、不发送真实邀请、不提供交易能力。";
 

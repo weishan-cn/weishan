@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION = "4.1.8";
+  const PROVIDER_RESULT_SOURCE_LABEL_GATE_VERSION = "4.1.9";
   const REQUIRED_FIELDS = ["providerId", "providerName", "providerCategory", "sourceType", "sourceUrlHost", "sourceHostDisplayName", "providerRegion", "updatedAt", "resultObservedAt", "readonlyEvidence", "evidenceType", "sourceTrustState", "redacted"];
   const ALLOWED_SOURCE_TYPES = ["sandbox_provider", "user_bound_api", "weishan_readonly_provider", "manual_reviewed_source", "no_provider", "blocked_unknown_source"];
   const PASSABLE_SOURCE_TYPES = ["sandbox_provider", "no_provider"];

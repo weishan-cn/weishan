@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SANDBOX_PROVIDER_RUN_MATRIX_VERSION = "4.1.8";
+  const SANDBOX_PROVIDER_RUN_MATRIX_VERSION = "4.1.9";
   const MATRIX_NAME = "sandbox_provider_run_matrix_v1";
   const RUN_MODE = "read_only_sandbox";
 

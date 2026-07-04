@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderGovernanceReleaseViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderGovernanceReleaseViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_RELEASE_VIEW_MODEL_VERSION, "4.1.8");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_RELEASE_VIEW_MODEL_VERSION, "4.1.9");
 
   const ready = api.buildGlobalShoppingProviderGovernanceReleaseViewModel({
     governanceAuditConsoleSummary:{ status:"ready", userFacingSummary:{ resultLabel:"治理审计控制台已准备", redacted:true }, rows:[{ rowId:"audit", label:"治理审计", value:"治理审计控制台已准备", status:"pass", redacted:true }], redacted:true },

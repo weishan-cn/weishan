@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_USER_SAFE_PUBLIC_CLAIM_VERIFIER_VERSION = "4.1.8";
+  const GLOBAL_SHOPPING_USER_SAFE_PUBLIC_CLAIM_VERIFIER_VERSION = "4.1.9";
   const VERIFIER_NAME = "global_shopping_user_safe_public_claim_verifier_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

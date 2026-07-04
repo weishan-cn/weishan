@@ -26,7 +26,7 @@ function summary(title, status) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaQaOperationsViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaQaOperationsViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_QA_OPERATIONS_VIEW_MODEL_VERSION, "4.1.8");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_QA_OPERATIONS_VIEW_MODEL_VERSION, "4.1.9");
 
   const ready = api.buildGlobalShoppingPublicBetaQaOperationsViewModel({
     publicBetaTrialEvidenceLedgerSummary:summary("Public Beta Trial Evidence Ledger"),

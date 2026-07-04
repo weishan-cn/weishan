@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_HANDOFF_ACCEPTANCE_WALKTHROUGH_VERSION = "4.1.8";
+  const GLOBAL_SHOPPING_HANDOFF_ACCEPTANCE_WALKTHROUGH_VERSION = "4.1.9";
   const WALKTHROUGH_NAME = "global_shopping_handoff_acceptance_walkthrough_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

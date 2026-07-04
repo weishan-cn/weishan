@@ -15,12 +15,12 @@ function load(file) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingPublicBetaUserBoundaryPanel.js");
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_USER_BOUNDARY_PANEL_VERSION, "4.1.8");
-  const ready = api.buildGlobalShoppingPublicBetaUserBoundaryPanel({ appVersion:"4.1.8", panelMode:"user_boundary_only" });
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_USER_BOUNDARY_PANEL_VERSION, "4.1.9");
+  const ready = api.buildGlobalShoppingPublicBetaUserBoundaryPanel({ appVersion:"4.1.9", panelMode:"user_boundary_only" });
   assert.equal(ready.status, "ready");
   assert.equal(ready.rows.some((item) => item.value === "不保存账号、证件或支付信息"), true);
   assert.equal(ready.rows.some((item) => item.value === "用户需在对应平台自行完成下单"), true);
-  assert.equal(api.buildGlobalShoppingPublicBetaUserBoundaryPanel({ appVersion:"4.1.8", panelMode:"user_boundary_only", openExternal:true }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingPublicBetaUserBoundaryPanel({ appVersion:"4.1.9", panelMode:"user_boundary_only", openExternal:true }).status, "blocked");
   console.log("GLOBAL_SHOPPING_PUBLIC_BETA_USER_BOUNDARY_PANEL PASS");
 }
 

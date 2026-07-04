@@ -15,7 +15,7 @@ function load(file) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingFinalManualAcceptanceConsole.js");
-  assert.equal(api.GLOBAL_SHOPPING_FINAL_MANUAL_ACCEPTANCE_CONSOLE_VERSION, "4.1.8");
+  assert.equal(api.GLOBAL_SHOPPING_FINAL_MANUAL_ACCEPTANCE_CONSOLE_VERSION, "4.1.9");
   const ready = api.buildGlobalShoppingFinalManualAcceptanceConsole({
     consoleMode:"final_manual_acceptance_only",
     providerZeroLocked:true,
@@ -24,7 +24,7 @@ function main() {
     nextStageDecision:"manual_review_required"
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.1.8");
+  assert.equal(ready.appVersion, "4.1.9");
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(ready.nextStageDecision, "manual_review_required");
   assert.equal(ready.externalUrl, null);

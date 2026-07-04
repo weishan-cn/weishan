@@ -8,7 +8,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function memoryStorage() { const data = new Map(); return { getItem:(name) => data.has(name) ? data.get(name) : null, setItem:(name, value) => data.set(name, String(value)), removeItem:(name) => data.delete(name) }; }
 function assertSafe(state) {
   assert.equal(state.stateName, "read_only_quote_refresh_state_v1");
-  assert.equal(state.appVersion, "4.1.8");
+  assert.equal(state.appVersion, "4.1.9");
   assert.equal(state.showableAsRealPrice, false);
   assert.equal(state.canReplaceMainResultCard, false);
   assert.equal(state.bookingUrl, null);
@@ -25,7 +25,7 @@ function assertSafe(state) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteRefreshStateStore.js"]);
   const api = windowRef.WeishanReadOnlyQuoteRefreshStateStore;
-  assert.equal(api.READ_ONLY_QUOTE_REFRESH_STATE_STORE_VERSION, "4.1.8");
+  assert.equal(api.READ_ONLY_QUOTE_REFRESH_STATE_STORE_VERSION, "4.1.9");
   assert.equal(api.STORAGE_KEY, "weishan.readOnlyQuoteRefreshState.v1");
 
   const unsafe = api.sanitizeReadOnlyQuoteRefreshState({

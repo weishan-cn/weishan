@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v4.1.8 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
+  test("v4.1.9 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9652,7 +9652,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v401-render-smoke", "true");
       const card = {
-        version:"4.1.8",
+        version:"4.1.9",
         visible:true,
         globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, rows:[{ rowId:"public_beta", label:"Global Shopping Read-Only Public Beta Shell", value:"Global Shopping Read-Only Public Beta Shell 已准备", status:"pass", redacted:true }], redacted:true },
         globalShoppingReadOnlyCandidateEvidenceUnifierSummary:{ status:"ready", userFacingSummary:{ title:"候选价证据", resultLabel:"候选价证据已准备", redacted:true }, rows:[{ rowId:"candidate_evidence", label:"候选价证据", value:"候选价证据已准备", status:"pass", redacted:true }], redacted:true },
@@ -9883,12 +9883,21 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("Public Beta Closure Evidence Archive");
     expect(v400.text).toContain("Manual Trial Exit Criteria");
     expect(v400.text).toContain("Offline Next-Step Planning Board");
+    expect(v400.text).toContain("Public Beta Final Readiness Command Center");
+    expect(v400.text).toContain("Offline Launch Blocker Matrix");
+    expect(v400.text).toContain("Manual Next-Phase Dossier");
     expect(v400.text).toContain("Closure Evidence");
     expect(v400.text).toContain("Exit Criteria");
     expect(v400.text).toContain("Next-Step Planning");
+    expect(v400.text).toContain("Final Readiness");
+    expect(v400.text).toContain("Launch Blockers");
+    expect(v400.text).toContain("Next-Phase Dossier");
     expect(v400.text).toContain("闭环证据仅为只读归档视图，不写文件");
     expect(v400.text).toContain("退出标准不自动通过，不创建 release");
     expect(v400.text).toContain("下一步只能继续测试、优化文案、扩展离线场景、人工复核或阻断");
+    expect(v400.text).toContain("当前仍是只读 Public Beta 候选");
+    expect(v400.text).toContain("发布、provider、联网、付款、下单、出票全部保持阻断");
+    expect(v400.text).toContain("不创建 release、不 push、不启用交易");
     expect(v400.text).toContain("Visual Acceptance");
     expect(v400.text).toContain("Scenario Coverage");
     expect(v400.text).toContain("Transaction Boundary");

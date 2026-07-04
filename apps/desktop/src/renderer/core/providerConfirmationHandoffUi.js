@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CONFIRMATION_HANDOFF_UI_VERSION = "4.1.8";
+  const PROVIDER_CONFIRMATION_HANDOFF_UI_VERSION = "4.1.9";
   const PHASE = "provider_confirmation_handoff_ui_stub";
 
   function clone(value) {

@@ -16,7 +16,7 @@ function load(file) {
 function main() {
   const windowRef = load("apps/desktop/src/renderer/core/globalShoppingPlatformRealityCheckBoard.js");
   const api = windowRef.WeishanGlobalShoppingPlatformRealityCheckBoard;
-  assert.equal(api.GLOBAL_SHOPPING_PLATFORM_REALITY_CHECK_BOARD_VERSION, "4.1.8");
+  assert.equal(api.GLOBAL_SHOPPING_PLATFORM_REALITY_CHECK_BOARD_VERSION, "4.1.9");
   const ready = api.buildGlobalShoppingPlatformRealityCheckBoard({
     platformPreflightSafetyGateSummary:{ status:"clear", userFacingSummary:{ resultLabel:"安全预检未触发阻断", redacted:true }, redacted:true },
     userActionBoundaryReceiptSummary:{ status:"ready", userFacingSummary:{ resultLabel:"边界回执已准备", redacted:true }, redacted:true },

@@ -19,7 +19,7 @@ function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/realFlightPriceIntegrityGuard.js"]);
   const api = windowRef.WeishanRealFlightPriceIntegrityGuard;
 
-  assert.equal(api.REAL_FLIGHT_PRICE_INTEGRITY_GUARD_VERSION, "4.1.8");
+  assert.equal(api.REAL_FLIGHT_PRICE_INTEGRITY_GUARD_VERSION, "4.1.9");
 
   const complete = api.evaluateRealFlightPriceIntegrity({
     providerId: "real_flight_fixture",
@@ -126,7 +126,7 @@ function main() {
 
   const audit = api.buildRealFlightPriceIntegrityAuditDraft(complete);
   assert.equal(audit.eventType, "REAL_FLIGHT_PRICE_INTEGRITY_GUARD_DRAFT");
-  assert.equal(audit.appVersion, "4.1.8");
+  assert.equal(audit.appVersion, "4.1.9");
   assert.equal(audit.bookingUrlDisplayedCount, 0);
   assert.equal(audit.paymentAttemptCount, 0);
   assert.equal(audit.orderAttemptCount, 0);
