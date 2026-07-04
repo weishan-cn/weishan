@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.1.9";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.2.0";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -152,6 +152,22 @@
       if (publicBetaFinalReadinessViewModelSummary.status === "ready") badges.push(badge("public_beta_final_readiness_view_ready", "最终准备视图可人工复核", "info"));
       if (publicBetaFinalReadinessViewModelSummary.status === "needs_review") badges.push(badge("public_beta_final_readiness_view_review", "最终准备视图仍需复核", "warning"));
       if (publicBetaFinalReadinessViewModelSummary.status === "blocked") badges.push(badge("public_beta_final_readiness_view_blocked", "最终准备视图已阻断", "blocked"));
+      const publicBetaCandidateLockSummary = obj(safe.publicBetaCandidateLockSummary);
+      const finalTrialHandoffConsoleSummary = obj(safe.finalTrialHandoffConsoleSummary);
+      const noProviderProductionBoundarySummary = obj(safe.noProviderProductionBoundarySummary);
+      const publicBetaCandidateViewModelSummary = obj(safe.publicBetaCandidateViewModelSummary);
+      if (publicBetaCandidateLockSummary.status === "manual_review_required") badges.push(badge("public_beta_candidate_lock_manual", "候选锁定需人工复核", "warning"));
+      if (publicBetaCandidateLockSummary.status === "needs_review") badges.push(badge("public_beta_candidate_lock_review", "候选锁定仍需复核", "warning"));
+      if (publicBetaCandidateLockSummary.status === "blocked") badges.push(badge("public_beta_candidate_lock_blocked", "候选锁定已阻断", "blocked"));
+      if (finalTrialHandoffConsoleSummary.status === "manual_review_required") badges.push(badge("final_trial_handoff_manual", "最终试用交接需人工复核", "warning"));
+      if (finalTrialHandoffConsoleSummary.status === "needs_review") badges.push(badge("final_trial_handoff_review", "最终试用交接仍需复核", "warning"));
+      if (finalTrialHandoffConsoleSummary.status === "blocked") badges.push(badge("final_trial_handoff_blocked", "最终试用交接已阻断", "blocked"));
+      if (noProviderProductionBoundarySummary.status === "manual_review_required") badges.push(badge("no_provider_production_boundary_manual", "生产边界需人工复核", "warning"));
+      if (noProviderProductionBoundarySummary.status === "needs_review") badges.push(badge("no_provider_production_boundary_review", "生产边界仍需复核", "warning"));
+      if (noProviderProductionBoundarySummary.status === "blocked") badges.push(badge("no_provider_production_boundary_blocked", "生产边界已阻断", "blocked"));
+      if (publicBetaCandidateViewModelSummary.status === "ready") badges.push(badge("public_beta_candidate_view_ready", "候选视图可人工复核", "info"));
+      if (publicBetaCandidateViewModelSummary.status === "needs_review") badges.push(badge("public_beta_candidate_view_review", "候选视图仍需复核", "warning"));
+      if (publicBetaCandidateViewModelSummary.status === "blocked") badges.push(badge("public_beta_candidate_view_blocked", "候选视图已阻断", "blocked"));
       const rcCandidateReview = obj(safe.rcCandidateReviewSummary);
       const rcEvidenceReview = obj(safe.rcEvidenceReviewSummary);
       const rcRegressionAudit = obj(safe.rcRegressionAuditSummary);

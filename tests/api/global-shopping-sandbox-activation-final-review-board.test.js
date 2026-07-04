@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingSandboxActivationFinalReviewBoard.js"]);
   const api = windowRef.WeishanGlobalShoppingSandboxActivationFinalReviewBoard;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_ACTIVATION_FINAL_REVIEW_BOARD_VERSION, "4.1.9");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_ACTIVATION_FINAL_REVIEW_BOARD_VERSION, "4.2.0");
 
   const ready = api.buildGlobalShoppingSandboxActivationFinalReviewBoard({
     offlineProviderLaunchControlTowerSummary:readySummary("Offline Provider Launch Control Tower", "离线 Launch 控制塔已准备"),

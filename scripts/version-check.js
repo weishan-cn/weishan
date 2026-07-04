@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
-const PREVIOUS_STABLE_VERSION = "4.1.9";
+const PREVIOUS_STABLE_VERSION = "4.2.0";
 const STRICT_VERSION_CHECKS = new Set([
   "root package-lock version",
   "root package-lock packages[\"\"].version",
@@ -2456,6 +2456,10 @@ function runVersionCheck() {
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping offline launch blocker matrix version", "apps/desktop/src/renderer/core/globalShoppingOfflineLaunchBlockerMatrix.js", "GLOBAL_SHOPPING_OFFLINE_LAUNCH_BLOCKER_MATRIX_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping manual next phase dossier version", "apps/desktop/src/renderer/core/globalShoppingManualNextPhaseDossier.js", "GLOBAL_SHOPPING_MANUAL_NEXT_PHASE_DOSSIER_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta final readiness view model version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaFinalReadinessViewModel.js", "GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_READINESS_VIEW_MODEL_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta candidate lock version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaCandidateLock.js", "GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_LOCK_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping final trial handoff console version", "apps/desktop/src/renderer/core/globalShoppingFinalTrialHandoffConsole.js", "GLOBAL_SHOPPING_FINAL_TRIAL_HANDOFF_CONSOLE_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping no-provider production boundary version", "apps/desktop/src/renderer/core/globalShoppingNoProviderProductionBoundary.js", "GLOBAL_SHOPPING_NO_PROVIDER_PRODUCTION_BOUNDARY_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta candidate view model version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaCandidateViewModel.js", "GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_VIEW_MODEL_VERSION");
   }
 
   results.forEach((item) => {

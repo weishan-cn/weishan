@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_STABILITY_AUDIT_VERSION = "4.1.9";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_STABILITY_AUDIT_VERSION = "4.2.0";
   const AUDIT_NAME = "global_shopping_public_beta_stability_audit_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, stability_audit_only:true };
   const BLOCKED_TEXT_RE = /production_ready|auto_launch|auto_publish|ready_to_publish/i;

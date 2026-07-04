@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingNoLaunchAssuranceGate.js"]);
   const api = windowRef.WeishanGlobalShoppingNoLaunchAssuranceGate;
-  assert.equal(api.GLOBAL_SHOPPING_NO_LAUNCH_ASSURANCE_GATE_VERSION, "4.1.9");
+  assert.equal(api.GLOBAL_SHOPPING_NO_LAUNCH_ASSURANCE_GATE_VERSION, "4.2.0");
 
   const ready = api.buildGlobalShoppingNoLaunchAssuranceGate({
     publicBetaAcceptanceReviewConsoleSummary:summary("Public Beta Acceptance Review Console", "manual_review_required"),

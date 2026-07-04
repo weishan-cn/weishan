@@ -15,7 +15,7 @@ function load(file) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingFeeNormalizationView.js");
-  assert.equal(api.GLOBAL_SHOPPING_FEE_NORMALIZATION_VIEW_VERSION, "4.1.9");
+  assert.equal(api.GLOBAL_SHOPPING_FEE_NORMALIZATION_VIEW_VERSION, "4.2.0");
   const ready = api.buildGlobalShoppingFeeNormalizationView({
     currency:"CNY",
     normalizedPrice:1288,

@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowScenarioFixtureBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowScenarioFixtureBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_SCENARIO_FIXTURE_BUILDER_VERSION, "4.1.9");
+  assert.equal(api.FLIGHT_WORKFLOW_SCENARIO_FIXTURE_BUILDER_VERSION, "4.2.0");
   const complete = api.buildCompleteFlightScenarioFixture();
   assert.equal(complete.scenarioId, "complete_flight_request");
   assert.equal(complete.bookingUrl, null);

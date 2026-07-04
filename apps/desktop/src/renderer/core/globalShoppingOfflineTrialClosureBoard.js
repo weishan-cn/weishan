@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_TRIAL_CLOSURE_BOARD_VERSION = "4.1.9";
+  const GLOBAL_SHOPPING_OFFLINE_TRIAL_CLOSURE_BOARD_VERSION = "4.2.0";
   const BOARD_NAME = "global_shopping_offline_trial_closure_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, offline_trial_closure_only:true };
   const SECRET_NAME_RE = /(^|[^a-z])(token|secret|api[_ -]?key|password)([^a-z]|$)/i;

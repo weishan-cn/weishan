@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PRICE_INTEGRITY_TAXES_FEES_GATE_V1_VERSION = "4.1.9";
+  const PRICE_INTEGRITY_TAXES_FEES_GATE_V1_VERSION = "4.2.0";
   const REQUIRED_FIELDS = [
     "providerId",
     "providerName",

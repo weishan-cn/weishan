@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SANDBOX_PROVIDER_RESPONSE_IMPORT_STATE_STORE_VERSION = "4.1.9";
+  const SANDBOX_PROVIDER_RESPONSE_IMPORT_STATE_STORE_VERSION = "4.2.0";
   const STATE_NAME = "sandbox_provider_response_import_state_v1";
   const STORAGE_KEY = "weishan.sandboxProviderResponseImportState.v1";
   const FORBIDDEN_NAME_RE = /(token|key|secret|password|session|auth|credential|rawProviderResponse|rawResponse|rawPayload|identity|passport|bank|card)/i;

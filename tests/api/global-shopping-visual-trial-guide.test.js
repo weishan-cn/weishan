@@ -18,13 +18,13 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingVisualTrialGuide.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingVisualTrialGuide;
-  assert.equal(api.GLOBAL_SHOPPING_VISUAL_TRIAL_GUIDE_VERSION, "4.1.9");
+  assert.equal(api.GLOBAL_SHOPPING_VISUAL_TRIAL_GUIDE_VERSION, "4.2.0");
   const ready = api.buildGlobalShoppingVisualTrialGuide({
     restrictedCategoryBlock:true,
     noTransactionButtons:false
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.1.9");
+  assert.equal(ready.appVersion, "4.2.0");
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(ready.externalUrl, null);
   assert.equal(ready.orderUrl, null);

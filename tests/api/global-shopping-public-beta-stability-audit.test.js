@@ -33,7 +33,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaStabilityAudit.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaStabilityAudit;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_STABILITY_AUDIT_VERSION, "4.1.9");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_STABILITY_AUDIT_VERSION, "4.2.0");
 
   const ready = api.buildGlobalShoppingPublicBetaStabilityAudit({
     publicBetaRcConsoleSummary:summary("Public Beta RC Console"),
@@ -48,7 +48,7 @@ function main() {
     knownWarnings:["既有 secret scan WARN 仅作为已知警告展示"]
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.1.9");
+  assert.equal(ready.appVersion, "4.2.0");
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(ready.externalUrl, null);
   assert.equal(ready.bookingUrl, null);

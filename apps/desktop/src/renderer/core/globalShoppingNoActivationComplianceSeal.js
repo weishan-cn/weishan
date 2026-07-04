@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_NO_ACTIVATION_COMPLIANCE_SEAL_VERSION = "4.1.9";
+  const GLOBAL_SHOPPING_NO_ACTIVATION_COMPLIANCE_SEAL_VERSION = "4.2.0";
   const SEAL_NAME = "global_shopping_no_activation_compliance_seal_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

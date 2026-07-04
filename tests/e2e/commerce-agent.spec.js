@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v4.1.9 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
+  test("v4.2.0 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9652,7 +9652,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v401-render-smoke", "true");
       const card = {
-        version:"4.1.9",
+        version:"4.2.0",
         visible:true,
         globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, rows:[{ rowId:"public_beta", label:"Global Shopping Read-Only Public Beta Shell", value:"Global Shopping Read-Only Public Beta Shell 已准备", status:"pass", redacted:true }], redacted:true },
         globalShoppingReadOnlyCandidateEvidenceUnifierSummary:{ status:"ready", userFacingSummary:{ title:"候选价证据", resultLabel:"候选价证据已准备", redacted:true }, rows:[{ rowId:"candidate_evidence", label:"候选价证据", value:"候选价证据已准备", status:"pass", redacted:true }], redacted:true },
@@ -9898,6 +9898,16 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("当前仍是只读 Public Beta 候选");
     expect(v400.text).toContain("发布、provider、联网、付款、下单、出票全部保持阻断");
     expect(v400.text).toContain("不创建 release、不 push、不启用交易");
+    expect(v400.text).toContain("Public Beta Candidate Lock");
+    expect(v400.text).toContain("Final Trial Handoff Console");
+    expect(v400.text).toContain("No-Provider Production Boundary");
+    expect(v400.text).toContain("Candidate Scope");
+    expect(v400.text).toContain("Trial Handoff");
+    expect(v400.text).toContain("Production Boundary");
+    expect(v400.text).toContain("当前锁定的是只读 Public Beta 候选范围，不修改配置");
+    expect(v400.text).toContain("最终试用交接仅为只读摘要，不生成文件");
+    expect(v400.text).toContain("当前不是 production provider 版本");
+    expect(v400.text).toContain("provider、联网、外部打开、付款、下单、出票、release、push 全部保持关闭");
     expect(v400.text).toContain("Visual Acceptance");
     expect(v400.text).toContain("Scenario Coverage");
     expect(v400.text).toContain("Transaction Boundary");
