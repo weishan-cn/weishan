@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_PILOT_SNAPSHOT_VIEW_MODEL_VERSION = "4.2.1";
+  const FLIGHT_WORKFLOW_PILOT_SNAPSHOT_VIEW_MODEL_VERSION = "4.2.2";
   const VIEW_MODEL_NAME = "flight_workflow_pilot_snapshot_view_model_v1";
   const CAVEAT = "该快照只用于只读试点管理，不代表真实票价、库存、客服工单或出票能力。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText/ig;

@@ -18,7 +18,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingMockProviderIncidentDrill.js"]);
   const api = windowRef.WeishanGlobalShoppingMockProviderIncidentDrill;
-  assert.equal(api.GLOBAL_SHOPPING_MOCK_PROVIDER_INCIDENT_DRILL_VERSION, "4.2.1");
+  assert.equal(api.GLOBAL_SHOPPING_MOCK_PROVIDER_INCIDENT_DRILL_VERSION, "4.2.2");
 
   const ready = api.buildGlobalShoppingMockProviderIncidentDrill({
     providerSandboxPilotControlRoomSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox Pilot 控制室已准备", redacted:true } },

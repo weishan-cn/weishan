@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_RELEASE_CANDIDATE_CONFIDENCE_BOARD_VERSION = "4.2.1";
+  const GLOBAL_SHOPPING_RELEASE_CANDIDATE_CONFIDENCE_BOARD_VERSION = "4.2.2";
   const BOARD_NAME = "global_shopping_release_candidate_confidence_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, rc_confidence_only:true };
 

@@ -16,7 +16,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowReadOnlyLaunchCandidateFreezeGate.js"]);
   const api = windowRef.WeishanFlightWorkflowReadOnlyLaunchCandidateFreezeGate;
-  assert.equal(api.FLIGHT_WORKFLOW_READ_ONLY_LAUNCH_CANDIDATE_FREEZE_GATE_VERSION, "4.2.1");
+  assert.equal(api.FLIGHT_WORKFLOW_READ_ONLY_LAUNCH_CANDIDATE_FREEZE_GATE_VERSION, "4.2.2");
   const gate = api.buildFlightWorkflowReadOnlyLaunchCandidateFreezeGate({
     pilotExitCriteriaSummary:{ status:"met", exitHealth:{ readyForLaunchCandidate:true } },
     launchCandidateReadinessSummary:{ status:"ready", launchCandidateReadiness:{ safeForReadOnlyLaunchCandidate:true } },

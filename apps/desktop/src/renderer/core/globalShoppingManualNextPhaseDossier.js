@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MANUAL_NEXT_PHASE_DOSSIER_VERSION = "4.2.1";
+  const GLOBAL_SHOPPING_MANUAL_NEXT_PHASE_DOSSIER_VERSION = "4.2.2";
   const DOSSIER_NAME = "global_shopping_manual_next_phase_dossier_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, manual_next_phase_dossier_only:true };
   const ALLOWED_OPTIONS = ["continue_testing", "improve_copy", "expand_offline_scenarios", "manual_review_required", "blocked"];

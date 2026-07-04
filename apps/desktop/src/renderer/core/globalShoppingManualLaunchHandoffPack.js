@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MANUAL_LAUNCH_HANDOFF_PACK_VERSION = "4.2.1";
+  const GLOBAL_SHOPPING_MANUAL_LAUNCH_HANDOFF_PACK_VERSION = "4.2.2";
   const PACK_NAME = "global_shopping_manual_launch_handoff_pack_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, manual_handoff_only:true };
   const BLOCKED_TEXT_RE = /production_ready|auto_launch|auto_publish|ready_to_publish/i;

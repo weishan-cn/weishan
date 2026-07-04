@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaFinalReadinessViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaFinalReadinessViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_READINESS_VIEW_MODEL_VERSION, "4.2.1");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_READINESS_VIEW_MODEL_VERSION, "4.2.2");
 
   const ready = api.buildGlobalShoppingPublicBetaFinalReadinessViewModel({
     publicBetaFinalReadinessCommandCenterSummary:summary("Public Beta Final Readiness Command Center", "manual_review_required", { finalReadinessStatus:"manual_review_required" }),

@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaCandidateLock.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaCandidateLock;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_LOCK_VERSION, "4.2.1");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_LOCK_VERSION, "4.2.2");
 
   const good = api.buildGlobalShoppingPublicBetaCandidateLock({
     publicBetaFinalReadinessCommandCenterSummary:summary("Public Beta Final Readiness Command Center", "manual_review_required", { finalReadinessStatus:"manual_review_required" }),
@@ -36,7 +36,7 @@ function main() {
     noLaunchAssuranceGateSummary:summary("No-Launch Assurance Gate", "ready"),
     knownWarnings:["既有 secret scan WARN 仅作为已知警告展示"]
   });
-  assert.equal(good.appVersion, "4.2.1");
+  assert.equal(good.appVersion, "4.2.2");
   assert.equal(good.candidateLockStatus, "manual_review_required");
   assert.equal(good.manualReviewRequired, true);
   assert.equal(good.lockedCapabilities.includes("provider"), true);

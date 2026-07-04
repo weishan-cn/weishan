@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_SCENARIO_CHECKLIST_VERSION = "4.2.1";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_SCENARIO_CHECKLIST_VERSION = "4.2.2";
   const CHECKLIST_NAME = "global_shopping_public_beta_trial_scenario_checklist_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, trial_scenario_checklist_only:true };
 

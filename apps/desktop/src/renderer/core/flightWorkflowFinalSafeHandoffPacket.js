@@ -1,6 +1,6 @@
 ;(function () {
   "use strict";
-  const FLIGHT_WORKFLOW_FINAL_SAFE_HANDOFF_PACKET_VERSION = "4.2.1";
+  const FLIGHT_WORKFLOW_FINAL_SAFE_HANDOFF_PACKET_VERSION = "4.2.2";
   const PACKET_NAME = "flight_workflow_final_safe_handoff_packet_v1";
   const FORBIDDEN_NAME_RE = /(rawText|rawUserText|rawInput|rawProviderResponse|rawResponse|rawPayload|token|apiKey|secret|password|auth|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card|idNumber|passportNumber)/i;
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;

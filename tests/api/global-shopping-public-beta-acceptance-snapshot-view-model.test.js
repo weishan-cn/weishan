@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaAcceptanceSnapshotViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaAcceptanceSnapshotViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_SNAPSHOT_VIEW_MODEL_VERSION, "4.2.1");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_SNAPSHOT_VIEW_MODEL_VERSION, "4.2.2");
 
   const ready = api.buildGlobalShoppingPublicBetaAcceptanceSnapshotViewModel({
     publicBetaFreezeEvidenceSummary:summary("Public Beta Freeze Evidence Summary"),

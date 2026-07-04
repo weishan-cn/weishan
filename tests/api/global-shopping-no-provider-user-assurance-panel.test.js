@@ -39,7 +39,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingNoProviderUserAssurancePanel.js"]);
   const api = windowRef.WeishanGlobalShoppingNoProviderUserAssurancePanel;
-  assert.equal(api.GLOBAL_SHOPPING_NO_PROVIDER_USER_ASSURANCE_PANEL_VERSION, "4.2.1");
+  assert.equal(api.GLOBAL_SHOPPING_NO_PROVIDER_USER_ASSURANCE_PANEL_VERSION, "4.2.2");
   const ready = api.buildGlobalShoppingNoProviderUserAssurancePanel({
     publicReleaseEvidenceConsoleSummary:readySummary("Public Release Evidence Console", "Public Release Evidence Console 已准备"),
     finalNoProviderBoundaryReceiptSummary:readySummary("Final No-Provider Boundary Receipt", "Final No-Provider Boundary Receipt 已准备"),

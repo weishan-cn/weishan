@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.2.1";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.2.2";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -160,6 +160,10 @@
       const trialOperatorNotesPanelSummary = obj(safe.trialOperatorNotesPanelSummary);
       const offlineSafetyDeltaBoardSummary = obj(safe.offlineSafetyDeltaBoardSummary);
       const publicBetaCandidateReviewViewModelSummary = obj(safe.publicBetaCandidateReviewViewModelSummary);
+      const publicBetaCandidateQaFreezeSummary = obj(safe.publicBetaCandidateQaFreezeSummary);
+      const trialFeedbackIntakeMockSummary = obj(safe.trialFeedbackIntakeMockSummary);
+      const offlineRegressionEvidenceBoardSummary = obj(safe.offlineRegressionEvidenceBoardSummary);
+      const publicBetaQaFreezeViewModelSummary = obj(safe.publicBetaQaFreezeViewModelSummary);
       if (publicBetaCandidateLockSummary.status === "manual_review_required") badges.push(badge("public_beta_candidate_lock_manual", "候选锁定需人工复核", "warning"));
       if (publicBetaCandidateLockSummary.status === "needs_review") badges.push(badge("public_beta_candidate_lock_review", "候选锁定仍需复核", "warning"));
       if (publicBetaCandidateLockSummary.status === "blocked") badges.push(badge("public_beta_candidate_lock_blocked", "候选锁定已阻断", "blocked"));
@@ -184,6 +188,18 @@
       if (publicBetaCandidateReviewViewModelSummary.status === "ready") badges.push(badge("public_beta_candidate_review_view_model_ready", "候选证据视图可人工复核", "info"));
       if (publicBetaCandidateReviewViewModelSummary.status === "needs_review") badges.push(badge("public_beta_candidate_review_view_model_review", "候选证据视图仍需复核", "warning"));
       if (publicBetaCandidateReviewViewModelSummary.status === "blocked") badges.push(badge("public_beta_candidate_review_view_model_blocked", "候选证据视图已阻断", "blocked"));
+      if (publicBetaCandidateQaFreezeSummary.status === "manual_review_required") badges.push(badge("public_beta_candidate_qa_freeze_manual", "QA 冻结需人工复核", "warning"));
+      if (publicBetaCandidateQaFreezeSummary.status === "needs_review") badges.push(badge("public_beta_candidate_qa_freeze_review", "QA 冻结仍需复核", "warning"));
+      if (publicBetaCandidateQaFreezeSummary.status === "blocked") badges.push(badge("public_beta_candidate_qa_freeze_blocked", "QA 冻结已阻断", "blocked"));
+      if (trialFeedbackIntakeMockSummary.status === "manual_review_required") badges.push(badge("trial_feedback_intake_mock_manual", "反馈入口需人工复核", "warning"));
+      if (trialFeedbackIntakeMockSummary.status === "needs_review") badges.push(badge("trial_feedback_intake_mock_review", "反馈入口仍需复核", "warning"));
+      if (trialFeedbackIntakeMockSummary.status === "blocked") badges.push(badge("trial_feedback_intake_mock_blocked", "反馈入口已阻断", "blocked"));
+      if (offlineRegressionEvidenceBoardSummary.status === "manual_review_required") badges.push(badge("offline_regression_evidence_board_manual", "回归证据需人工复核", "warning"));
+      if (offlineRegressionEvidenceBoardSummary.status === "needs_review") badges.push(badge("offline_regression_evidence_board_review", "回归证据仍需复核", "warning"));
+      if (offlineRegressionEvidenceBoardSummary.status === "blocked") badges.push(badge("offline_regression_evidence_board_blocked", "回归证据已阻断", "blocked"));
+      if (publicBetaQaFreezeViewModelSummary.status === "ready") badges.push(badge("public_beta_qa_freeze_view_model_ready", "QA 冻结视图可人工复核", "info"));
+      if (publicBetaQaFreezeViewModelSummary.status === "needs_review") badges.push(badge("public_beta_qa_freeze_view_model_review", "QA 冻结视图仍需复核", "warning"));
+      if (publicBetaQaFreezeViewModelSummary.status === "blocked") badges.push(badge("public_beta_qa_freeze_view_model_blocked", "QA 冻结视图已阻断", "blocked"));
       const rcCandidateReview = obj(safe.rcCandidateReviewSummary);
       const rcEvidenceReview = obj(safe.rcEvidenceReviewSummary);
       const rcRegressionAudit = obj(safe.rcRegressionAuditSummary);

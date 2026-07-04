@@ -26,7 +26,7 @@ function summary(title, status) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaQaFreezeGate.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaQaFreezeGate;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_QA_FREEZE_GATE_VERSION, "4.2.1");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_QA_FREEZE_GATE_VERSION, "4.2.2");
 
   const ready = api.buildGlobalShoppingPublicBetaQaFreezeGate({
     publicBetaTrialEvidenceLedgerSummary:summary("Public Beta Trial Evidence Ledger"),

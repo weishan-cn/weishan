@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingManualTrialExitCriteria.js"]);
   const api = windowRef.WeishanGlobalShoppingManualTrialExitCriteria;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_TRIAL_EXIT_CRITERIA_VERSION, "4.2.1");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_TRIAL_EXIT_CRITERIA_VERSION, "4.2.2");
 
   const ready = api.buildGlobalShoppingManualTrialExitCriteria({
     publicBetaClosureEvidenceArchiveSummary:summary("Public Beta Closure Evidence Archive", "manual_review_required"),

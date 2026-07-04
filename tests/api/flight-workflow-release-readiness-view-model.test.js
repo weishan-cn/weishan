@@ -11,8 +11,8 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowReleaseReadinessViewModel.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowReleaseReadinessViewModel;
-  assert.equal(api.FLIGHT_WORKFLOW_RELEASE_READINESS_VIEW_MODEL_VERSION, "4.2.1");
-  const dashboard = { status:"ready", releaseVersion:"4.2.1", safeForUserFacingBeta:true, readiness:{ status:"ready", matrixBlocked:false, warningCount:0, operatorReady:true, redacted:true }, cards:[], checklistRows:[{ label:"安全矩阵", passed:true, value:"通过", redacted:true }], forbiddenCapabilities:["付款", "下单", "出票", "证件银行卡上传"], userFacingSummary:{ resultLabel:"可以进入只读 Beta 验收", redacted:true }, redacted:true };
+  assert.equal(api.FLIGHT_WORKFLOW_RELEASE_READINESS_VIEW_MODEL_VERSION, "4.2.2");
+  const dashboard = { status:"ready", releaseVersion:"4.2.2", safeForUserFacingBeta:true, readiness:{ status:"ready", matrixBlocked:false, warningCount:0, operatorReady:true, redacted:true }, cards:[], checklistRows:[{ label:"安全矩阵", passed:true, value:"通过", redacted:true }], forbiddenCapabilities:["付款", "下单", "出票", "证件银行卡上传"], userFacingSummary:{ resultLabel:"可以进入只读 Beta 验收", redacted:true }, redacted:true };
   const vm = api.buildFlightWorkflowReleaseReadinessViewModel({ releaseReadinessSummary:dashboard });
   assert.equal(vm.title, "机票工作流发布就绪总览");
   assert.ok(vm.statusCards.some((card) => card.cardId === "release_status"));

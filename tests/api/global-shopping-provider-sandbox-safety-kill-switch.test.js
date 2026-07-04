@@ -16,10 +16,10 @@ function load(file) {
 function main() {
   const windowRef = load("apps/desktop/src/renderer/core/globalShoppingProviderSandboxSafetyKillSwitch.js");
   const api = windowRef.WeishanGlobalShoppingProviderSandboxSafetyKillSwitch;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_SAFETY_KILL_SWITCH_VERSION, "4.2.1");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_SAFETY_KILL_SWITCH_VERSION, "4.2.2");
 
   const clear = api.buildGlobalShoppingProviderSandboxSafetyKillSwitch({});
-  assert.equal(clear.appVersion, "4.2.1");
+  assert.equal(clear.appVersion, "4.2.2");
   assert.equal(clear.status, "clear");
   assert.equal(clear.userFacingSummary.title, "Provider Sandbox 安全熔断器");
   assert.equal(clear.rows.length, 9);

@@ -28,7 +28,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaRcConsole.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaRcConsole;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_RC_CONSOLE_VERSION, "4.2.1");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_RC_CONSOLE_VERSION, "4.2.2");
 
   const ready = api.buildGlobalShoppingPublicBetaRcConsole({
     publicBetaOnboardingViewModelSummary:summary("Public Beta Onboarding View Model"),
@@ -37,7 +37,7 @@ function main() {
     noTransactionRegressionGuardSummary:summary("No-Transaction Regression Guard"),
     finalManualAcceptanceConsoleSummary:summary("Final Manual Acceptance Console")
   });
-  assert.equal(ready.appVersion, "4.2.1");
+  assert.equal(ready.appVersion, "4.2.2");
   assert.equal(ready.rcStatus, "manual_review_required");
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(ready.externalUrl, null);

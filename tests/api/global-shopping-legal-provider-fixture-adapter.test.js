@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingLegalProviderFixtureAdapter.js"]);
   const api = windowRef.WeishanGlobalShoppingLegalProviderFixtureAdapter;
-  assert.equal(api.GLOBAL_SHOPPING_LEGAL_PROVIDER_FIXTURE_ADAPTER_VERSION, "4.2.1");
+  assert.equal(api.GLOBAL_SHOPPING_LEGAL_PROVIDER_FIXTURE_ADAPTER_VERSION, "4.2.2");
   const ready = api.buildGlobalShoppingLegalProviderFixtureAdapter({ providerId:"provider_1", providerName:"Fixture Provider", providerType:"official", providerRegion:"CN", providerLegalStatus:"allowed", providerStatus:"fixture", itemType:"flight", officialFixturePrice:{ title:"SHA-CTU", basePrice:900, taxAmount:120, currency:"CNY" } });
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "合法 Provider Fixture 适配器");

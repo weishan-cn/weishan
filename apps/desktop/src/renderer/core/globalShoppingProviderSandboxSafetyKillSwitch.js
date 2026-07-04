@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_SANDBOX_SAFETY_KILL_SWITCH_VERSION = "4.2.1";
+  const GLOBAL_SHOPPING_PROVIDER_SANDBOX_SAFETY_KILL_SWITCH_VERSION = "4.2.2";
   const KILL_SWITCH_NAME = "global_shopping_provider_sandbox_safety_kill_switch_v1";
   const FORBIDDEN_COPY_RE = /全网最低|最低价保证|已锁价|可出票|一键下单|一键出票|直接下单|立即购买|真实最终价/i;
   const SECRET_VALUE_RE = /(?:sk|pk|live|prod)_[A-Za-z0-9_-]+|api[_-]?key\s*[:=]\s*["'][^"']+["']|token\s*[:=]\s*["'][^"']+["']|secret\s*[:=]\s*["'][^"']+["']/i;

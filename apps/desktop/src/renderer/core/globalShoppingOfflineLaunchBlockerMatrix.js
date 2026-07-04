@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_LAUNCH_BLOCKER_MATRIX_VERSION = "4.2.1";
+  const GLOBAL_SHOPPING_OFFLINE_LAUNCH_BLOCKER_MATRIX_VERSION = "4.2.2";
   const MATRIX_NAME = "global_shopping_offline_launch_blocker_matrix_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, offline_launch_blocker_matrix_only:true };
   const BLOCKED_TEXT_RE = /launch|release|tag|push|enable_provider|enable_payment|enable_order|ready_to_publish|production_ready|auto_release|auto_launch|auto_publish/i;

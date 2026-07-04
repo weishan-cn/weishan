@@ -105,6 +105,10 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingTrialOperatorNotesPanel.js",
     "apps/desktop/src/renderer/core/globalShoppingOfflineSafetyDeltaBoard.js",
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaCandidateReviewViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingPublicBetaCandidateQaFreeze.js",
+    "apps/desktop/src/renderer/core/globalShoppingTrialFeedbackIntakeMock.js",
+    "apps/desktop/src/renderer/core/globalShoppingOfflineRegressionEvidenceBoard.js",
+    "apps/desktop/src/renderer/core/globalShoppingPublicBetaQaFreezeViewModel.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteSessionReportCenter.js",
     "apps/desktop/src/renderer/core/flightWorkflowReadOnlyUserConsentFlow.js",
     "apps/desktop/src/renderer/core/flightWorkflowPublicPilotOnboardingGuard.js",
@@ -112,13 +116,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.2.1");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.2.2");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "4.2.1");
+  assert.equal(ready.appVersion, "4.2.2");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -408,6 +412,27 @@ function main() {
   assert.equal(closureArchiveReady.userFacingSummary.safeToProceedWithManualNextStepReview, true);
   assert.equal(closureArchiveReady.userFacingSummary.safeToProceedWithManualCandidateReview, true);
   assert.equal(closureArchiveReady.userFacingSummary.safeToProceedWithManualCandidateEvidenceReview, true);
+  const qaFreezeReady = api.buildReadOnlyQuoteSessionReportCenter({
+    sessionSummary:summary,
+    publicBetaCandidateQaFreezeSummary:{ status:"manual_review_required", qaFreezeStatus:"manual_review_required", userFacingSummary:{ title:"Public Beta Candidate QA Freeze", resultLabel:"Public Beta Candidate QA Freeze 需人工复核", redacted:true }, redacted:true },
+    trialFeedbackIntakeMockSummary:{ status:"manual_review_required", intakeStatus:"manual_review_required", userFacingSummary:{ title:"Trial Feedback Intake Mock", resultLabel:"Trial Feedback Intake Mock 需人工复核", redacted:true }, redacted:true },
+    offlineRegressionEvidenceBoardSummary:{ status:"manual_review_required", regressionEvidenceStatus:"manual_review_required", userFacingSummary:{ title:"Offline Regression Evidence Board", resultLabel:"Offline Regression Evidence Board 需人工复核", redacted:true }, redacted:true },
+    publicBetaQaFreezeViewModelSummary:{ status:"ready", title:"Public Beta QA Freeze ViewModel", userFacingSummary:{ title:"Public Beta QA Freeze ViewModel", resultLabel:"Public Beta Candidate QA Freeze / Trial Feedback Intake Mock / Offline Regression Evidence Board 已准备", redacted:true }, safeToProceedWithManualQaFreezeReview:true, redacted:true },
+    publicBetaCandidateQaFreezeStatus:"manual_review_required",
+    trialFeedbackIntakeStatus:"manual_review_required",
+    offlineRegressionEvidenceStatus:"manual_review_required",
+    publicBetaQaFreezeViewModelStatus:"ready",
+    safeToProceedWithManualQaFreezeReview:true
+  });
+  assert.equal(qaFreezeReady.userFacingSummary.publicBetaCandidateQaFreezeSummary.title, "Public Beta Candidate QA Freeze");
+  assert.equal(qaFreezeReady.userFacingSummary.trialFeedbackIntakeMockSummary.title, "Trial Feedback Intake Mock");
+  assert.equal(qaFreezeReady.userFacingSummary.offlineRegressionEvidenceBoardSummary.title, "Offline Regression Evidence Board");
+  assert.equal(qaFreezeReady.userFacingSummary.publicBetaQaFreezeViewModelSummary.title, "Public Beta QA Freeze ViewModel");
+  assert.equal(qaFreezeReady.userFacingSummary.publicBetaCandidateQaFreezeStatus, "manual_review_required");
+  assert.equal(qaFreezeReady.userFacingSummary.trialFeedbackIntakeStatus, "manual_review_required");
+  assert.equal(qaFreezeReady.userFacingSummary.offlineRegressionEvidenceStatus, "manual_review_required");
+  assert.equal(qaFreezeReady.userFacingSummary.publicBetaQaFreezeViewModelStatus, "ready");
+  assert.equal(qaFreezeReady.userFacingSummary.safeToProceedWithManualQaFreezeReview, true);
   const sandboxMilestoneReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     providerSandboxReadinessWorkbenchSummary:{ status:"ready", userFacingSummary:{ title:"Provider Sandbox Readiness Workbench", resultLabel:"Sandbox Readiness Workbench 已准备", redacted:true }, redacted:true },

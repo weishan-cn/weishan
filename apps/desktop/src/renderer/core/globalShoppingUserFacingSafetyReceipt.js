@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_USER_FACING_SAFETY_RECEIPT_VERSION = "4.2.1";
+  const GLOBAL_SHOPPING_USER_FACING_SAFETY_RECEIPT_VERSION = "4.2.2";
   const RECEIPT_NAME = "global_shopping_user_facing_safety_receipt_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

@@ -17,9 +17,9 @@ function main() {
   const prefill = windowRef.WeishanGlobalShoppingSearchParameterPrefillGate.buildGlobalShoppingSearchParameterPrefillGate({ itemType:"flight", origin:"SHA", destination:"CTU", departureDate:"2026-07-15", passengerCount:1 });
   const sandbox = windowRef.WeishanGlobalShoppingSandboxDeepLinkCandidate.buildGlobalShoppingSandboxDeepLinkCandidate({ sourceName:"Sandbox Platform", sourceType:"major_platform", allowedDomain:"sandbox.platform.invalid", itemType:"flight", searchParameterPrefillSummary:prefill, partnerLinkPolicySummary:partner, platformAvailabilitySummary:availability });
   const api = windowRef.WeishanGlobalShoppingSandboxHandoffViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_HANDOFF_VIEW_MODEL_VERSION, "4.2.1");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_HANDOFF_VIEW_MODEL_VERSION, "4.2.2");
   const ready = api.buildGlobalShoppingSandboxHandoffViewModel({ sandboxDeepLinkCandidateSummary:sandbox, platformAvailabilitySummary:availability, partnerLinkPolicySummary:partner });
-  assert.equal(ready.appVersion, "4.2.1");
+  assert.equal(ready.appVersion, "4.2.2");
   assert.equal(ready.status, "ready");
   assert.equal(ready.title, "Sandbox 跳转候选与平台可用性");
   assert.equal(ready.cards[0].label, "Sandbox 跳转候选");

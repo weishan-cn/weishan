@@ -84,7 +84,7 @@ function main() {
   assert.equal(paymentDecision.decisionReason, "forbidden capability requested");
 
   const consoleState = consoleApi.buildProviderConnectionReadinessConsole();
-  assert.equal(consoleState.consoleVersion, "4.2.1");
+  assert.equal(consoleState.consoleVersion, "4.2.2");
   assert.equal(consoleState.status, "readiness console only");
   assert.equal(consoleState.mode, "offline planning only");
   assert.equal(consoleState.realProvider, "disabled");

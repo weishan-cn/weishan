@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v4.2.1 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
+  test("v4.2.2 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9652,7 +9652,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v401-render-smoke", "true");
       const card = {
-        version:"4.2.1",
+        version:"4.2.2",
         visible:true,
         globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, rows:[{ rowId:"public_beta", label:"Global Shopping Read-Only Public Beta Shell", value:"Global Shopping Read-Only Public Beta Shell 已准备", status:"pass", redacted:true }], redacted:true },
         globalShoppingReadOnlyCandidateEvidenceUnifierSummary:{ status:"ready", userFacingSummary:{ title:"候选价证据", resultLabel:"候选价证据已准备", redacted:true }, rows:[{ rowId:"candidate_evidence", label:"候选价证据", value:"候选价证据已准备", status:"pass", redacted:true }], redacted:true },
@@ -9918,6 +9918,16 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("运营备注不保存、不上传、不创建任务");
     expect(v400.text).toContain("安全边界未扩大");
     expect(v400.text).toContain("provider、联网、外部打开、付款、下单、出票、release、push、launch 仍保持关闭");
+    expect(v400.text).toContain("Public Beta Candidate QA Freeze");
+    expect(v400.text).toContain("Trial Feedback Intake Mock");
+    expect(v400.text).toContain("Offline Regression Evidence Board");
+    expect(v400.text).toContain("QA Freeze");
+    expect(v400.text).toContain("Feedback Intake");
+    expect(v400.text).toContain("Regression Evidence");
+    expect(v400.text).toContain("QA 冻结仅为只读范围，不修改配置");
+    expect(v400.text).toContain("反馈入口仅为 Mock，不保存、不上传、不创建任务");
+    expect(v400.text).toContain("回归证据仅为只读展示，不生成文件");
+    expect(v400.text).toContain("provider、联网、外部打开、付款、下单、出票、release、push、launch、反馈提交、上传、issue/task 创建仍保持关闭");
     expect(v400.text).toContain("Visual Acceptance");
     expect(v400.text).toContain("Scenario Coverage");
     expect(v400.text).toContain("Transaction Boundary");
