@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_CLOSURE_EVIDENCE_LEDGER_VERSION = "4.1.7";
+  const GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_CLOSURE_EVIDENCE_LEDGER_VERSION = "4.1.8";
   const LEDGER_NAME = "global_shopping_provider_governance_closure_evidence_ledger_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

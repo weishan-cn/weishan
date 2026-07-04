@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_SAFE_FEEDBACK_DRAFT_PANEL_VERSION = "4.1.7";
+  const GLOBAL_SHOPPING_SAFE_FEEDBACK_DRAFT_PANEL_VERSION = "4.1.8";
   const PANEL_NAME = "global_shopping_safe_feedback_draft_panel_v1";
   const ALLOWED_MODES = { disabled:true, draft_only:true, readonly:true, offline_mock:true };
 

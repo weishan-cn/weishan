@@ -39,7 +39,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderReadOnlyPublicReleaseCenter.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderReadOnlyPublicReleaseCenter;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_READ_ONLY_PUBLIC_RELEASE_CENTER_VERSION, "4.1.7");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_READ_ONLY_PUBLIC_RELEASE_CENTER_VERSION, "4.1.8");
   const ready = api.buildGlobalShoppingProviderReadOnlyPublicReleaseCenter({
     providerPublicTrustClosureCenterSummary:readySummary("Provider Public Trust Closure Center", "Provider Public Trust Closure Center 已准备"),
     offlineReleaseMemorySnapshotSummary:readySummary("Offline Release Memory Snapshot", "Offline Release Memory Snapshot 已准备"),
@@ -48,7 +48,7 @@ function main() {
     providerTrustClosureViewModelSummary:readySummary("Provider Trust Closure Review", "Provider Trust Closure Review 已准备")
   });
   assert.equal(ready.centerName, "global_shopping_provider_read_only_public_release_center_v1");
-  assert.equal(ready.appVersion, "4.1.7");
+  assert.equal(ready.appVersion, "4.1.8");
   assert.equal(ready.status, "ready");
   assert.equal(ready.releaseMode, "public_release_review_only");
   assert.equal(ready.releaseSummary.readyForPublicReview, true);

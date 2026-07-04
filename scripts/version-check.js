@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
-const PREVIOUS_STABLE_VERSION = "4.1.3";
+const PREVIOUS_STABLE_VERSION = "4.1.8";
 const STRICT_VERSION_CHECKS = new Set([
   "root package-lock version",
   "root package-lock packages[\"\"].version",
@@ -46,6 +46,10 @@ const STRICT_VERSION_CHECKS = new Set([
   "apps/desktop global shopping read only provider adapter SDK skeleton version",
   "apps/desktop global shopping manual activation command center version",
   "apps/desktop global shopping provider sandbox milestone view model version",
+  "apps/desktop global shopping public beta closure evidence archive version",
+  "apps/desktop global shopping manual trial exit criteria version",
+  "apps/desktop global shopping offline next step planning board version",
+  "apps/desktop global shopping public beta next step view model version",
   "apps/desktop global shopping offline provider adapter contract kit version",
   "apps/desktop global shopping mock sandbox QA matrix version",
   "apps/desktop global shopping human activation runbook center version",
@@ -2444,6 +2448,10 @@ function runVersionCheck() {
     checkManualVerificationGroupVersion(results, rootPackage.version);
     checkTaskHistorySummaryFormatterVersion(results, rootPackage.version);
     checkCleanResultSurfaceV4Version(results, rootPackage.version);
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta closure evidence archive version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaClosureEvidenceArchive.js", "GLOBAL_SHOPPING_PUBLIC_BETA_CLOSURE_EVIDENCE_ARCHIVE_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping manual trial exit criteria version", "apps/desktop/src/renderer/core/globalShoppingManualTrialExitCriteria.js", "GLOBAL_SHOPPING_MANUAL_TRIAL_EXIT_CRITERIA_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping offline next step planning board version", "apps/desktop/src/renderer/core/globalShoppingOfflineNextStepPlanningBoard.js", "GLOBAL_SHOPPING_OFFLINE_NEXT_STEP_PLANNING_BOARD_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta next step view model version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaNextStepViewModel.js", "GLOBAL_SHOPPING_PUBLIC_BETA_NEXT_STEP_VIEW_MODEL_VERSION");
   }
 
   results.forEach((item) => {

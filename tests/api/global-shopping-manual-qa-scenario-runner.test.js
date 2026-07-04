@@ -16,7 +16,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingManualQaScenarioRunner.js"]);
   const api = windowRef.WeishanGlobalShoppingManualQaScenarioRunner;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_QA_SCENARIO_RUNNER_VERSION, "4.1.7");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_QA_SCENARIO_RUNNER_VERSION, "4.1.8");
 
   const ready = api.buildGlobalShoppingManualQaScenarioRunner({});
   assert.equal(ready.status, "ready");

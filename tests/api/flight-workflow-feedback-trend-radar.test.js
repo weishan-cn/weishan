@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function f(usability="good", clarity="good", safetyCopyUnderstood=true, status="ready") { return { status, usabilityRating:usability, clarityRating:clarity, safetyCopyUnderstood, redacted:true }; }
 function main() {
   const api = load(["apps/desktop/src/renderer/core/flightWorkflowFeedbackTrendRadar.js"]).WeishanFlightWorkflowFeedbackTrendRadar;
-  assert.equal(api.FLIGHT_WORKFLOW_FEEDBACK_TREND_RADAR_VERSION, "4.1.7");
+  assert.equal(api.FLIGHT_WORKFLOW_FEEDBACK_TREND_RADAR_VERSION, "4.1.8");
   assert.equal(api.buildFlightWorkflowFeedbackTrendRadar({ feedback:[f()] }).status, "insufficient_data");
   const positive = api.buildFlightWorkflowFeedbackTrendRadar({ feedback:[f(), f(), f("ok"), f("good", "ok")] });
   assert.equal(positive.status, "ready");

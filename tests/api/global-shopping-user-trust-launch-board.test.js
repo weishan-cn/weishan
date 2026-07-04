@@ -37,7 +37,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingUserTrustLaunchBoard.js"]);
   const api = windowRef.WeishanGlobalShoppingUserTrustLaunchBoard;
-  assert.equal(api.GLOBAL_SHOPPING_USER_TRUST_LAUNCH_BOARD_VERSION, "4.1.7");
+  assert.equal(api.GLOBAL_SHOPPING_USER_TRUST_LAUNCH_BOARD_VERSION, "4.1.8");
   const ready = api.buildGlobalShoppingUserTrustLaunchBoard({
     globalShoppingReadOnlyPublicBetaShellSummary:readySummary("Global Shopping Read-Only Public Beta Shell", "Global Shopping Read-Only Public Beta Shell 已准备"),
     providerZeroRuntimeLockSummary:readySummary("Provider-Zero Runtime Lock", "Provider-Zero Runtime Lock 已准备"),

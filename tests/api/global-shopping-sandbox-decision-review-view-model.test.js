@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingSandboxDecisionReviewViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingSandboxDecisionReviewViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_DECISION_REVIEW_VIEW_MODEL_VERSION, "4.1.7");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_DECISION_REVIEW_VIEW_MODEL_VERSION, "4.1.8");
 
   const ready = api.buildGlobalShoppingSandboxDecisionReviewViewModel({
     sandboxCandidateComparisonWorkbench:{
@@ -41,7 +41,7 @@ function main() {
     }
   });
 
-  assert.equal(ready.appVersion, "4.1.7");
+  assert.equal(ready.appVersion, "4.1.8");
   assert.equal(ready.status, "ready");
   assert.equal(ready.title, "Sandbox 候选决策复核");
   assert.equal(ready.cards.length, 4);

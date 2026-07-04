@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineTrialClosureBoard.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineTrialClosureBoard;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_TRIAL_CLOSURE_BOARD_VERSION, "4.1.7");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_TRIAL_CLOSURE_BOARD_VERSION, "4.1.8");
 
   const ready = api.buildGlobalShoppingOfflineTrialClosureBoard({
     publicBetaAcceptanceReviewConsoleSummary:summary("Public Beta Acceptance Review Console", "manual_review_required"),

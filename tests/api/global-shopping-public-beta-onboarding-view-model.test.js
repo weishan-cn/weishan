@@ -25,14 +25,14 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaOnboardingViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaOnboardingViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_ONBOARDING_VIEW_MODEL_VERSION, "4.1.7");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_ONBOARDING_VIEW_MODEL_VERSION, "4.1.8");
   const ready = api.buildGlobalShoppingPublicBetaOnboardingViewModel({
     publicBetaUserOnboardingShellSummary:summary("Public Beta User Onboarding"),
     visualTrialGuideSummary:summary("Visual Trial Guide"),
     safeFeedbackDraftPanelSummary:summary("Safe Feedback Draft")
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.1.7");
+  assert.equal(ready.appVersion, "4.1.8");
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(ready.externalUrl, null);
   assert.equal(ready.paymentUrl, null);

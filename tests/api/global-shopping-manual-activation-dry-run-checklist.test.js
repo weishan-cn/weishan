@@ -28,7 +28,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingManualActivationDryRunChecklist.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingManualActivationDryRunChecklist;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_ACTIVATION_DRY_RUN_CHECKLIST_VERSION, "4.1.7");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_ACTIVATION_DRY_RUN_CHECKLIST_VERSION, "4.1.8");
 
   const ready = api.buildGlobalShoppingManualActivationDryRunChecklist({
     readOnlySandboxActivationReadinessCenterSummary:readySummary("只读 Sandbox 激活准备中心", "Sandbox 激活准备中心已准备"),

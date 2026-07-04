@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteCandidateComparisonExplainer.js"]);
   const api = windowRef.WeishanReadOnlyQuoteCandidateComparisonExplainer;
-  assert.equal(api.READ_ONLY_QUOTE_CANDIDATE_COMPARISON_EXPLAINER_VERSION, "4.1.7");
+  assert.equal(api.READ_ONLY_QUOTE_CANDIDATE_COMPARISON_EXPLAINER_VERSION, "4.1.8");
   const empty = api.buildReadOnlyQuoteCandidateComparison([]);
   assert.equal(empty.status, "empty");
   const failed = api.buildReadOnlyQuoteCandidateComparison(null);
@@ -17,7 +17,7 @@ function main() {
     { rank:2, providerName:"B", totalPrice:950, baseFare:800, taxesAndFees:120, providerFees:30, safeProviderHandoffReady:false },
     { rank:3, providerName:"C", totalPrice:990, baseFare:830, taxesAndFees:120, providerFees:40, safeProviderHandoffReady:false }
   ]);
-  assert.equal(comparison.appVersion, "4.1.7");
+  assert.equal(comparison.appVersion, "4.1.8");
   assert.equal(comparison.table.length, 3);
   assert.ok(comparison.table[0].pros.length > 0);
   assert.ok(comparison.table[1].cautions.length > 0);

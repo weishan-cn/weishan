@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaClosureReviewViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaClosureReviewViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_CLOSURE_REVIEW_VIEW_MODEL_VERSION, "4.1.7");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_CLOSURE_REVIEW_VIEW_MODEL_VERSION, "4.1.8");
 
   const ready = api.buildGlobalShoppingPublicBetaClosureReviewViewModel({
     publicBetaAcceptanceReviewConsoleSummary:summary("Public Beta Acceptance Review Console", "manual_review_required"),

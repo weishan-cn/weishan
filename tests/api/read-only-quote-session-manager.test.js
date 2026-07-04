@@ -7,10 +7,10 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteSessionManager.js"]);
   const api = windowRef.WeishanReadOnlyQuoteSessionManager;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_MANAGER_VERSION, "4.1.7");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_MANAGER_VERSION, "4.1.8");
   let session = api.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15", directOnly:true, sortIntent:"低价优先" });
   assert.equal(session.sessionName, "read_only_quote_session_v1");
-  assert.equal(session.appVersion, "4.1.7");
+  assert.equal(session.appVersion, "4.1.8");
   assert.equal(session.sessionId, "deterministic-read-only-quote-session-v2.5.0");
   assert.equal(session.status, "open");
   session = api.updateReadOnlyQuoteSession(session, { type:"DRY_RUN_COMPLETED", runId:"run-1", result:{ runId:"run-1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"Provider A", totalPrice:930, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"Provider A", token:"secret" } } });

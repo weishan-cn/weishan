@@ -108,13 +108,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.1.7");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.1.8");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "4.1.7");
+  assert.equal(ready.appVersion, "4.1.8");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -331,6 +331,27 @@ function main() {
   assert.equal(acceptanceSnapshotReady.safetyReport.publicBetaClosureReviewViewModelStatus, "ready");
   assert.equal(acceptanceSnapshotReady.userFacingSummary.safeToProceedWithManualAcceptanceSnapshotReview, false);
   assert.equal(acceptanceSnapshotReady.userFacingSummary.safeToProceedWithManualClosureReview, true);
+  const closureArchiveReady = api.buildReadOnlyQuoteSessionReportCenter({
+    sessionSummary:summary,
+    publicBetaClosureEvidenceArchiveSummary:{ status:"manual_review_required", archiveStatus:"manual_review_required", userFacingSummary:{ title:"Public Beta Closure Evidence Archive", resultLabel:"Public Beta Closure Evidence Archive 需人工复核", redacted:true }, redacted:true },
+    manualTrialExitCriteriaSummary:{ status:"manual_review_required", exitCriteriaStatus:"manual_review_required", userFacingSummary:{ title:"Manual Trial Exit Criteria", resultLabel:"Manual Trial Exit Criteria 需人工复核", redacted:true }, redacted:true },
+    offlineNextStepPlanningBoardSummary:{ status:"manual_review_required", planningStatus:"manual_review_required", userFacingSummary:{ title:"Offline Next-Step Planning Board", resultLabel:"Offline Next-Step Planning Board 需人工复核", redacted:true }, redacted:true },
+    publicBetaNextStepViewModelSummary:{ status:"ready", title:"Public Beta Next-Step ViewModel", userFacingSummary:{ title:"Public Beta Next-Step ViewModel", resultLabel:"Public Beta Closure Evidence Archive / Manual Trial Exit Criteria / Offline Next-Step Planning Board 已准备", redacted:true }, safeToProceedWithManualNextStepReview:true, redacted:true },
+    publicBetaClosureEvidenceArchiveStatus:"manual_review_required",
+    manualTrialExitCriteriaStatus:"manual_review_required",
+    offlineNextStepPlanningStatus:"manual_review_required",
+    publicBetaNextStepViewModelStatus:"ready",
+    safeToProceedWithManualNextStepReview:true
+  });
+  assert.equal(closureArchiveReady.safetyReport.publicBetaClosureEvidenceArchiveSummary.title, "Public Beta Closure Evidence Archive");
+  assert.equal(closureArchiveReady.safetyReport.manualTrialExitCriteriaSummary.title, "Manual Trial Exit Criteria");
+  assert.equal(closureArchiveReady.safetyReport.offlineNextStepPlanningBoardSummary.title, "Offline Next-Step Planning Board");
+  assert.equal(closureArchiveReady.safetyReport.publicBetaNextStepViewModelSummary.title, "Public Beta Next-Step ViewModel");
+  assert.equal(closureArchiveReady.safetyReport.publicBetaClosureEvidenceArchiveStatus, "manual_review_required");
+  assert.equal(closureArchiveReady.safetyReport.manualTrialExitCriteriaStatus, "manual_review_required");
+  assert.equal(closureArchiveReady.safetyReport.offlineNextStepPlanningStatus, "manual_review_required");
+  assert.equal(closureArchiveReady.safetyReport.publicBetaNextStepViewModelStatus, "ready");
+  assert.equal(closureArchiveReady.userFacingSummary.safeToProceedWithManualNextStepReview, true);
   const sandboxMilestoneReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     providerSandboxReadinessWorkbenchSummary:{ status:"ready", userFacingSummary:{ title:"Provider Sandbox Readiness Workbench", resultLabel:"Sandbox Readiness Workbench 已准备", redacted:true }, redacted:true },

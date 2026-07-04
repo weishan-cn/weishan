@@ -26,7 +26,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderSandboxMilestoneViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderSandboxMilestoneViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_MILESTONE_VIEW_MODEL_VERSION, "4.1.7");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_SANDBOX_MILESTONE_VIEW_MODEL_VERSION, "4.1.8");
 
   const ready = api.buildGlobalShoppingProviderSandboxMilestoneViewModel({
     providerSandboxReadinessWorkbenchSummary:readySummary("Provider Sandbox Readiness Workbench", "Sandbox Readiness Workbench 已准备"),

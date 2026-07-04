@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_REVIEW_CONSOLE_VERSION = "4.1.7";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_REVIEW_CONSOLE_VERSION = "4.1.8";
   const CONSOLE_NAME = "global_shopping_public_beta_acceptance_review_console_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, acceptance_review_console_only:true };
   const ALLOWED_ACTIONS = ["continue_testing", "manual_review_required", "blocked"];

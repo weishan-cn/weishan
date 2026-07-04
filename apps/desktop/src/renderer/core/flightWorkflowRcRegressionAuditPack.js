@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RC_REGRESSION_AUDIT_PACK_VERSION = "4.1.7";
+  const FLIGHT_WORKFLOW_RC_REGRESSION_AUDIT_PACK_VERSION = "4.1.8";
   const PACK_NAME = "flight_workflow_rc_regression_audit_pack_v1";
   const CAVEAT = "该审计包只用于只读 RC 候选回归判断，不代表真实账号、客服工单、交易请求或出票能力。";
 

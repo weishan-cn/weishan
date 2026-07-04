@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_READ_ONLY_CANDIDATE_EVIDENCE_UNIFIER_VERSION = "4.1.7";
+  const GLOBAL_SHOPPING_READ_ONLY_CANDIDATE_EVIDENCE_UNIFIER_VERSION = "4.1.8";
   const VIEW_NAME = "global_shopping_read_only_candidate_evidence_unifier_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, candidate_evidence_only:true };
   const TRUST_LEVELS = { high:true, medium:true, low:true, needs_review:true };

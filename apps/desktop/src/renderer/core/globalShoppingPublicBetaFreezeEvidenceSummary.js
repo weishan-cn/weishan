@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_FREEZE_EVIDENCE_SUMMARY_VERSION = "4.1.7";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_FREEZE_EVIDENCE_SUMMARY_VERSION = "4.1.8";
   const SUMMARY_NAME = "global_shopping_public_beta_freeze_evidence_summary_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, freeze_evidence_summary_only:true };
   const SECRET_VALUE_RE = /(?:token|secret|api[_ -]?key|password)\s*[:=]\s*[\w-]+/i;

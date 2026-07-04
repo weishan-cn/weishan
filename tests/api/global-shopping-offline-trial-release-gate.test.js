@@ -18,11 +18,11 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingOfflineTrialReleaseGate.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingOfflineTrialReleaseGate;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_TRIAL_RELEASE_GATE_VERSION, "4.1.7");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_TRIAL_RELEASE_GATE_VERSION, "4.1.8");
 
   const ready = api.buildGlobalShoppingOfflineTrialReleaseGate({});
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.1.7");
+  assert.equal(ready.appVersion, "4.1.8");
   assert.equal(ready.noReleaseMutation, true);
   assert.equal(ready.noPush, true);
   assert.equal(ready.noProvider, true);

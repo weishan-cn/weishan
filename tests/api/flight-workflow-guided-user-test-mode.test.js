@@ -10,7 +10,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowGuidedUserTestMode.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowGuidedUserTestMode;
-  assert.equal(api.FLIGHT_WORKFLOW_GUIDED_USER_TEST_MODE_VERSION, "4.1.7");
+  assert.equal(api.FLIGHT_WORKFLOW_GUIDED_USER_TEST_MODE_VERSION, "4.1.8");
   const initial = api.buildFlightWorkflowGuidedUserTestMode();
   assert.equal(initial.status, "not_started");
   const started = api.startFlightWorkflowGuidedUserTest();

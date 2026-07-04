@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.1.7";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.1.8";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -126,6 +126,18 @@
       if (evidenceFreezePackSummary.status === "ready") badges.push(badge("evidence_freeze_pack_ready", "证据冻结包已就绪", "info"));
       if (evidenceFreezePackSummary.status === "needs_review") badges.push(badge("evidence_freeze_pack_review", "证据冻结仍需复核", "warning"));
       if (evidenceFreezePackSummary.status === "blocked") badges.push(badge("evidence_freeze_pack_blocked", "证据冻结包已阻断", "blocked"));
+      const publicBetaClosureEvidenceArchiveSummary = obj(safe.publicBetaClosureEvidenceArchiveSummary);
+      const manualTrialExitCriteriaSummary = obj(safe.manualTrialExitCriteriaSummary);
+      const offlineNextStepPlanningBoardSummary = obj(safe.offlineNextStepPlanningBoardSummary);
+      const publicBetaNextStepViewModelSummary = obj(safe.publicBetaNextStepViewModelSummary);
+      if (publicBetaClosureEvidenceArchiveSummary.status === "manual_review_required") badges.push(badge("public_beta_closure_archive_manual", "闭环证据需人工复核", "warning"));
+      if (publicBetaClosureEvidenceArchiveSummary.status === "needs_review") badges.push(badge("public_beta_closure_archive_review", "闭环证据仍需复核", "warning"));
+      if (publicBetaClosureEvidenceArchiveSummary.status === "blocked") badges.push(badge("public_beta_closure_archive_blocked", "闭环证据已阻断", "blocked"));
+      if (manualTrialExitCriteriaSummary.status === "manual_review_required") badges.push(badge("manual_trial_exit_manual", "退出标准需人工复核", "warning"));
+      if (manualTrialExitCriteriaSummary.status === "blocked") badges.push(badge("manual_trial_exit_blocked", "退出标准已阻断", "blocked"));
+      if (offlineNextStepPlanningBoardSummary.status === "manual_review_required" || publicBetaNextStepViewModelSummary.status === "ready") badges.push(badge("offline_next_step_ready_for_review", "下一步规划待人工决定", "info"));
+      if (offlineNextStepPlanningBoardSummary.status === "needs_review" || publicBetaNextStepViewModelSummary.status === "needs_review") badges.push(badge("offline_next_step_needs_review", "下一步规划仍需复核", "warning"));
+      if (offlineNextStepPlanningBoardSummary.status === "blocked" || publicBetaNextStepViewModelSummary.status === "blocked") badges.push(badge("offline_next_step_blocked", "下一步规划已阻断", "blocked"));
       const rcCandidateReview = obj(safe.rcCandidateReviewSummary);
       const rcEvidenceReview = obj(safe.rcEvidenceReviewSummary);
       const rcRegressionAudit = obj(safe.rcRegressionAuditSummary);
