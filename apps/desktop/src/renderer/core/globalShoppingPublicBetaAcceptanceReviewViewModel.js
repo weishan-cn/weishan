@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_REVIEW_VIEW_MODEL_VERSION = "4.2.4";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_REVIEW_VIEW_MODEL_VERSION = "4.2.5";
   const VIEW_MODEL_NAME = "global_shopping_public_beta_acceptance_review_view_model_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -48,7 +48,7 @@
       card("no_data_retention_guard", "No-Data-Retention Guard", text(obj(noDataRetentionGuard.userFacingSummary).resultLabel || "No-Data-Retention Guard 仍需复核")),
       card("manual_acceptance", "Manual Acceptance", "人工验收清单仅为只读展示，不保存验收记录"),
       card("offline_scenarios", "Offline Scenarios", "离线用户场景包仅为样例，不收集真实输入"),
-      card("no_data_retention", "No Data Retention", "无数据留存保护门确认不保存反馈、用户原文、场景输入或验收记录"),
+      card("no_data_retention", "No Data Retention", "无数据留存保护门确认不保存反馈、用户原文、场景输入、验收记录或证据文件"),
       card("manual_review_required", "Manual Review Required", "provider、联网、外部打开、付款、下单、出票、release、push、launch、反馈提交、上传、issue/task 创建仍保持关闭")
     ]);
   }
@@ -59,7 +59,7 @@
       row("public_beta_acceptance_review_view_model", "Public Beta Acceptance Review ViewModel", safe.status === "ready" ? "Public Beta Acceptance Review ViewModel 已准备" : (safe.status === "blocked" ? "Public Beta Acceptance Review ViewModel 已阻断" : "Public Beta Acceptance Review ViewModel 仍需复核"), safe.status === "ready" ? "pass" : (safe.status === "blocked" ? "blocked" : "warning")),
       row("manual_acceptance", "Manual Acceptance", "人工验收清单仅为只读展示，不保存验收记录", "warning"),
       row("offline_scenarios", "Offline Scenarios", "离线用户场景包仅为样例，不收集真实输入", "warning"),
-      row("no_data_retention", "No Data Retention", "无数据留存保护门确认不保存反馈、用户原文、场景输入或验收记录", "warning"),
+      row("no_data_retention", "No Data Retention", "无数据留存保护门确认不保存反馈、用户原文、场景输入、验收记录或证据文件", "warning"),
       row("manual_review_required", "Manual Review Required", "provider、联网、外部打开、付款、下单、出票、release、push、launch、反馈提交、上传、issue/task 创建仍保持关闭", "warning")
     ]);
   }

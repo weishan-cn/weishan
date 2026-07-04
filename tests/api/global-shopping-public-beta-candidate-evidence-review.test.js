@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaCandidateEvidenceReview.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaCandidateEvidenceReview;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_EVIDENCE_REVIEW_VERSION, "4.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_EVIDENCE_REVIEW_VERSION, "4.2.5");
 
   const review = api.buildGlobalShoppingPublicBetaCandidateEvidenceReview({
     publicBetaCandidateLockSummary:summary("Public Beta Candidate Lock", "manual_review_required", { candidateLockStatus:"manual_review_required" }),

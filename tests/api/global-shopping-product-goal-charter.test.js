@@ -7,9 +7,9 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProductGoalCharter.js"]);
   const api = windowRef.WeishanGlobalShoppingProductGoalCharter;
-  assert.equal(api.GLOBAL_SHOPPING_PRODUCT_GOAL_CHARTER_VERSION, "4.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_PRODUCT_GOAL_CHARTER_VERSION, "4.2.5");
   const aligned = api.buildGlobalShoppingProductGoalCharter();
-  assert.equal(aligned.appVersion, "4.2.4");
+  assert.equal(aligned.appVersion, "4.2.5");
   assert.equal(aligned.status, "aligned");
   assert.equal(aligned.productGoals.findTrustedCandidatePrices, true);
   assert.equal(aligned.productGoals.showOfficialPriceAnchor, true);

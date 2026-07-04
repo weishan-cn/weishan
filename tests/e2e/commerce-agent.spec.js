@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v4.2.4 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
+  test("v4.2.5 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9652,7 +9652,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v401-render-smoke", "true");
       const card = {
-        version:"4.2.4",
+        version:"4.2.5",
         visible:true,
         globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, rows:[{ rowId:"public_beta", label:"Global Shopping Read-Only Public Beta Shell", value:"Global Shopping Read-Only Public Beta Shell 已准备", status:"pass", redacted:true }], redacted:true },
         globalShoppingReadOnlyCandidateEvidenceUnifierSummary:{ status:"ready", userFacingSummary:{ title:"候选价证据", resultLabel:"候选价证据已准备", redacted:true }, rows:[{ rowId:"candidate_evidence", label:"候选价证据", value:"候选价证据已准备", status:"pass", redacted:true }], redacted:true },
@@ -9754,6 +9754,10 @@ test.describe.serial("commerce agent workbench", () => {
         offlineUserScenarioPackSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Offline User Scenario Pack", resultLabel:"Offline User Scenario Pack 需人工复核", redacted:true }, rows:[{ rowId:"offline_user_scenario_pack", label:"Offline User Scenario Pack", value:"Offline User Scenario Pack 需人工复核", status:"warning", redacted:true }], redacted:true },
         noDataRetentionGuardSummary:{ status:"manual_review_required", userFacingSummary:{ title:"No-Data-Retention Guard", resultLabel:"No-Data-Retention Guard 需人工复核", redacted:true }, rows:[{ rowId:"no_data_retention_guard", label:"No-Data-Retention Guard", value:"No-Data-Retention Guard 需人工复核", status:"warning", redacted:true }], redacted:true },
         publicBetaAcceptanceReviewViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Acceptance Review ViewModel", resultLabel:"Public Beta Manual Acceptance Checklist / Offline User Scenario Pack / No-Data-Retention Guard 已准备", redacted:true }, safeToProceedWithManualAcceptanceReview:true, redacted:true },
+        publicBetaOfflineAcceptanceEvidenceCenterSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Public Beta Offline Acceptance Evidence Center", resultLabel:"Public Beta Offline Acceptance Evidence Center 需人工复核", redacted:true }, rows:[{ rowId:"public_beta_offline_acceptance_evidence_center", label:"Public Beta Offline Acceptance Evidence Center", value:"Public Beta Offline Acceptance Evidence Center 需人工复核", status:"warning", redacted:true }], redacted:true },
+        manualScenarioReviewBoardSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Manual Scenario Review Board", resultLabel:"Manual Scenario Review Board 需人工复核", redacted:true }, rows:[{ rowId:"manual_scenario_review_board", label:"Manual Scenario Review Board", value:"Manual Scenario Review Board 需人工复核", status:"warning", redacted:true }], redacted:true },
+        zeroPersistenceRegressionGateSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Zero-Persistence Regression Gate", resultLabel:"Zero-Persistence Regression Gate 需人工复核", redacted:true }, rows:[{ rowId:"zero_persistence_regression_gate", label:"Zero-Persistence Regression Gate", value:"Zero-Persistence Regression Gate 需人工复核", status:"warning", redacted:true }], redacted:true },
+        publicBetaOfflineAcceptanceViewModelSummary:{ status:"needs_review", userFacingSummary:{ title:"Public Beta Offline Acceptance ViewModel", resultLabel:"Public Beta Offline Acceptance ViewModel 仍需复核", redacted:true }, safeToProceedWithManualOfflineAcceptanceReview:false, redacted:true },
         publicBetaReadinessSnapshotStatus:"manual_review_required",
         manualFeedbackReviewQueueStatus:"manual_review_required",
         offlineIssueTriageStatus:"manual_review_required",
@@ -9762,6 +9766,10 @@ test.describe.serial("commerce agent workbench", () => {
         offlineUserScenarioPackStatus:"manual_review_required",
         noDataRetentionStatus:"manual_review_required",
         publicBetaAcceptanceReviewViewModelStatus:"ready",
+        publicBetaOfflineAcceptanceEvidenceCenterStatus:"manual_review_required",
+        manualScenarioReviewStatus:"manual_review_required",
+        zeroPersistenceStatus:"manual_review_required",
+        publicBetaOfflineAcceptanceViewModelStatus:"needs_review",
         publicBetaFreezeEvidenceStatus:"ready",
         manualTrialIssueReviewStatus:"ready",
         offlineAcceptanceSnapshotStatus:"needs_review",
@@ -9795,6 +9803,7 @@ test.describe.serial("commerce agent workbench", () => {
         safeToProceedWithManualTrialOperationsReview:true,
         safeToProceedWithManualReadinessReview:true,
         safeToProceedWithManualAcceptanceReview:true,
+        safeToProceedWithManualOfflineAcceptanceReview:false,
         safeToProceedWithManualFreezeReview:true,
         safeToProceedWithManualAcceptanceSnapshotReview:false,
         safeToProceedWithManualClosureReview:true
@@ -9835,9 +9844,16 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("Public Beta Manual Acceptance Checklist");
     expect(v400.text).toContain("Offline User Scenario Pack");
     expect(v400.text).toContain("No-Data-Retention Guard");
+    expect(v400.text).toContain("Public Beta Offline Acceptance Evidence Center");
+    expect(v400.text).toContain("Manual Scenario Review Board");
+    expect(v400.text).toContain("Zero-Persistence Regression Gate");
     expect(v400.text).toContain("离线验收清单只用于人工复核，不保存验收记录");
     expect(v400.text).toContain("离线场景包仅为样例，不收集真实输入");
-    expect(v400.text).toContain("无数据留存保护门确认不保存反馈、用户原文、场景输入或验收记录");
+    expect(v400.text).toContain("无数据留存保护门确认不保存反馈、用户原文、场景输入、验收记录或证据文件");
+    expect(v400.text).toContain("离线验收证据中心仅为只读展示，不生成证据文件");
+    expect(v400.text).toContain("人工场景复核板仅为样例复核，不保存场景输入或复核结果");
+    expect(v400.text).toContain("零持久化回归门确认不保存反馈、用户原文、场景输入、验收记录或证据文件");
+    expect(v400.text).toContain("safeToProceedWithManualOfflineAcceptanceReview:false");
     expect(v400.text).toContain("Safe Search Intent Matrix");
     expect(v400.text).toContain("User Boundary Panel");
     expect(v400.text).toContain("Category Result Simulator");

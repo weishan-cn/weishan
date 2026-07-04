@@ -1,12 +1,12 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_USER_SCENARIO_PACK_VERSION = "4.2.4";
+  const GLOBAL_SHOPPING_OFFLINE_USER_SCENARIO_PACK_VERSION = "4.2.5";
   const PACK_NAME = "global_shopping_offline_user_scenario_pack_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, offline_user_scenario_pack_only:true };
-  const SCENARIO_CATEGORIES = ["flight_price_compare", "hotel_price_compare", "product_price_compare", "fee_breakdown", "risk_badge_review", "feedback_review_mock", "issue_triage_mock", "no_provider_boundary"];
-  const REDACTION_RULES = ["phone", "email", "passport", "idCard", "bankCard", "address", "platformToken", "orderNumber", "rawMessage", "freeText"];
-  const BLOCKED_SCENARIO_ACTIONS = ["persist_scenario_input", "submit_feedback", "upload_feedback", "create_issue", "create_task", "send_email", "open_external"];
+  const SCENARIO_CATEGORIES = ["flight_price_compare", "hotel_price_compare", "product_price_compare", "fee_breakdown", "risk_badge_review", "feedback_review_mock", "issue_triage_mock", "no_provider_boundary", "no_data_retention", "manual_acceptance"];
+  const REDACTION_RULES = ["phone", "email", "passport", "idCard", "bankCard", "address", "platformToken", "orderNumber", "rawMessage", "freeText", "providerPayload"];
+  const BLOCKED_SCENARIO_ACTIONS = ["persist_scenario_input", "persist_scenario_review", "submit_feedback", "upload_feedback", "create_issue", "create_task", "send_email", "open_external"];
   const SECRET_NAME_RE = /(^|[^a-z])(token|secret|api[_ -]?key|password)([^a-z]|$)/i;
   const BLOCKED_TEXT_RE = /persist_scenario_input|submit_feedback|upload_feedback|create_issue|create_task|open_external|production_ready|ready_to_publish|auto_publish|auto_launch|enable_provider|enable_payment|enable_order/i;
 
@@ -42,6 +42,7 @@
     const safe = obj(input);
     const blocked = [];
     if (safe.scenarioInputPersistence === true || safe.persistScenarioInput === true || safe.savedScenarioInput === true) blocked.push("scenario input persistence");
+    if (safe.scenarioReviewPersistence === true || safe.persistScenarioReview === true) blocked.push("scenario review persistence");
     if (safe.rawUserTextPersistence === true || safe.savedRawUserText === true) blocked.push("raw user text persistence");
     if (safe.upload === true || safe.uploadEnabled === true) blocked.push("upload");
     if (safe.mail === true || safe.sendMail === true || safe.email === true) blocked.push("mail");
@@ -114,6 +115,7 @@
       scenarioRedactionRules:REDACTION_RULES.slice(),
       manualReviewRequired:true,
       scenarioInputPersistence:false,
+      scenarioReviewPersistence:false,
       rawUserTextPersistence:false,
       blockedReasons:blocked,
       publicBetaManualAcceptanceChecklistSummary:publicBetaManualAcceptanceChecklistSummary,
@@ -190,6 +192,7 @@
     safe.issueCreateEnabled = false;
     safe.taskCreateEnabled = false;
     safe.scenarioInputPersistence = false;
+    safe.scenarioReviewPersistence = false;
     safe.rawUserTextPersistence = false;
     return safe;
   }

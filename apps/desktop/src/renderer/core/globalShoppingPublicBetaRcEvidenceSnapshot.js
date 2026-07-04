@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_RC_EVIDENCE_SNAPSHOT_VERSION = "4.2.4";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_RC_EVIDENCE_SNAPSHOT_VERSION = "4.2.5";
   const SNAPSHOT_NAME = "global_shopping_public_beta_rc_evidence_snapshot_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, rc_evidence_snapshot_only:true };
   const BLOCKED_TEXT_RE = /production_ready|auto_launch|auto_publish|ready_to_publish/i;

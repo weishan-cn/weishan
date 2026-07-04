@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_GATE_VERSION = "4.2.4";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_GATE_VERSION = "4.2.5";
   const GATE_NAME = "global_shopping_public_beta_final_gate_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, final_gate_only:true };
   const FORBIDDEN_CLAIM_RE = /全网最低|最低价保证|已锁价|真实最终价|官方背书|平台授权|已接入 provider|可调用 provider|已发布|已 push|Release 已创建/i;

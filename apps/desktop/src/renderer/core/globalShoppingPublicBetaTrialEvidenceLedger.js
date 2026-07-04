@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_EVIDENCE_LEDGER_VERSION = "4.2.4";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_EVIDENCE_LEDGER_VERSION = "4.2.5";
   const LEDGER_NAME = "global_shopping_public_beta_trial_evidence_ledger_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, trial_evidence_ledger_only:true };
   const BLOCKED_TEXT_RE = /production_ready|auto_launch|auto_publish|ready_to_publish/i;

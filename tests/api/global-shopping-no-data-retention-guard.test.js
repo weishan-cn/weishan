@@ -25,7 +25,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingNoDataRetentionGuard.js"]);
   const api = windowRef.WeishanGlobalShoppingNoDataRetentionGuard;
-  assert.equal(api.GLOBAL_SHOPPING_NO_DATA_RETENTION_GUARD_VERSION, "4.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_NO_DATA_RETENTION_GUARD_VERSION, "4.2.5");
 
   const review = api.buildGlobalShoppingNoDataRetentionGuard({
     publicBetaManualAcceptanceChecklistSummary:summary("Public Beta Manual Acceptance Checklist"),
@@ -37,8 +37,11 @@ function main() {
   assert.equal(review.noDataRetentionStatus, "manual_review_required");
   assert.equal(review.rawUserTextPersistence, false);
   assert.equal(review.acceptanceRecordPersistence, false);
+  assert.equal(review.evidenceFilePersistence, false);
+  assert.equal(review.scenarioReviewPersistence, false);
   assert.equal(review.noRetentionFlags.providerResponsePersistence, false);
   assert.equal(review.redactionRules.includes("providerPayload"), true);
+  assert.equal(review.redactionRules.includes("paymentPayload"), true);
 
   const needsReview = api.buildGlobalShoppingNoDataRetentionGuard({
     publicBetaManualAcceptanceChecklistSummary:summary("Public Beta Manual Acceptance Checklist", "needs_review")
@@ -51,10 +54,14 @@ function main() {
     trialFeedbackIntakeMockSummary:summary("Trial Feedback Intake Mock"),
     manualFeedbackReviewQueueMockSummary:summary("Manual Feedback Review Queue Mock"),
     noTransactionRegressionGuardSummary:summary("No-Transaction Regression Guard", "ready"),
-    persistProviderResponse:true
+    persistProviderResponse:true,
+    persistEvidenceFile:true,
+    persistScenarioReview:true
   });
   assert.equal(blocked.noDataRetentionStatus, "blocked");
   assert.equal(blocked.blockedReasons.includes("provider response persistence"), true);
+  assert.equal(blocked.blockedReasons.includes("evidence file persistence"), true);
+  assert.equal(blocked.blockedReasons.includes("scenario review persistence"), true);
   console.log("GLOBAL_SHOPPING_NO_DATA_RETENTION_GUARD PASS");
 }
 

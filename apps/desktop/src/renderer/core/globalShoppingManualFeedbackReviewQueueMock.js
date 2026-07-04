@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MANUAL_FEEDBACK_REVIEW_QUEUE_MOCK_VERSION = "4.2.4";
+  const GLOBAL_SHOPPING_MANUAL_FEEDBACK_REVIEW_QUEUE_MOCK_VERSION = "4.2.5";
   const QUEUE_NAME = "global_shopping_manual_feedback_review_queue_mock_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, manual_feedback_review_queue_mock_only:true };
   const REDACTION_RULES = ["phone", "email", "passport", "idCard", "bankCard", "address", "platformToken", "orderNumber", "rawMessage"];

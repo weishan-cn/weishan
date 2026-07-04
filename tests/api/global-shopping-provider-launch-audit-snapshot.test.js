@@ -19,7 +19,7 @@ function readySummary(title, resultLabel) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingProviderLaunchAuditSnapshot.js").WeishanGlobalShoppingProviderLaunchAuditSnapshot;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_LAUNCH_AUDIT_SNAPSHOT_VERSION, "4.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_LAUNCH_AUDIT_SNAPSHOT_VERSION, "4.2.5");
   const ready = api.buildGlobalShoppingProviderLaunchAuditSnapshot({
     offlineProviderLaunchControlTowerSummary:readySummary("Offline Provider Launch Control Tower", "离线 Launch 控制塔已准备"),
     adapterPolicyEngineSummary:readySummary("Adapter Policy Engine", "Adapter 策略引擎已准备"),

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.2.4";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.2.5";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -245,6 +245,29 @@
         badges.push(badge("public_beta_acceptance_manual_review_checklist", "验收清单仅为只读展示，不保存验收记录", "warning"));
         badges.push(badge("public_beta_acceptance_manual_review_scenarios", "离线场景包不收集真实输入", "warning"));
         badges.push(badge("public_beta_acceptance_manual_review_retention", "不保存反馈、用户原文、场景输入或验收记录", "warning"));
+      }
+      const publicBetaOfflineAcceptanceEvidenceCenterSummary = obj(safe.publicBetaOfflineAcceptanceEvidenceCenterSummary);
+      const manualScenarioReviewBoardSummary = obj(safe.manualScenarioReviewBoardSummary);
+      const zeroPersistenceRegressionGateSummary = obj(safe.zeroPersistenceRegressionGateSummary);
+      const publicBetaOfflineAcceptanceViewModelSummary = obj(safe.publicBetaOfflineAcceptanceViewModelSummary);
+      if (publicBetaOfflineAcceptanceEvidenceCenterSummary.status === "manual_review_required") badges.push(badge("public_beta_offline_acceptance_evidence_manual", "离线验收证据需人工复核", "warning"));
+      if (publicBetaOfflineAcceptanceEvidenceCenterSummary.status === "needs_review") badges.push(badge("public_beta_offline_acceptance_evidence_review", "离线验收证据仍需复核", "warning"));
+      if (publicBetaOfflineAcceptanceEvidenceCenterSummary.status === "blocked") badges.push(badge("public_beta_offline_acceptance_evidence_blocked", "离线验收证据已阻断", "blocked"));
+      if (manualScenarioReviewBoardSummary.status === "manual_review_required") badges.push(badge("manual_scenario_review_manual", "人工场景复核需人工复核", "warning"));
+      if (manualScenarioReviewBoardSummary.status === "needs_review") badges.push(badge("manual_scenario_review_review", "人工场景复核仍需复核", "warning"));
+      if (manualScenarioReviewBoardSummary.status === "blocked") badges.push(badge("manual_scenario_review_blocked", "人工场景复核已阻断", "blocked"));
+      if (zeroPersistenceRegressionGateSummary.status === "manual_review_required") badges.push(badge("zero_persistence_regression_manual", "零持久化回归需人工复核", "warning"));
+      if (zeroPersistenceRegressionGateSummary.status === "needs_review") badges.push(badge("zero_persistence_regression_review", "零持久化回归仍需复核", "warning"));
+      if (zeroPersistenceRegressionGateSummary.status === "blocked") badges.push(badge("zero_persistence_regression_blocked", "零持久化回归已阻断", "blocked"));
+      if (publicBetaOfflineAcceptanceViewModelSummary.status === "ready") badges.push(badge("public_beta_offline_acceptance_view_ready", "离线验收视图可人工复核", "info"));
+      if (publicBetaOfflineAcceptanceViewModelSummary.status === "needs_review") badges.push(badge("public_beta_offline_acceptance_view_review", "离线验收视图仍需复核", "warning"));
+      if (publicBetaOfflineAcceptanceViewModelSummary.status === "blocked") badges.push(badge("public_beta_offline_acceptance_view_blocked", "离线验收视图已阻断", "blocked"));
+      if (present(publicBetaOfflineAcceptanceEvidenceCenterSummary) || present(manualScenarioReviewBoardSummary) || present(zeroPersistenceRegressionGateSummary)) {
+        badges.push(badge("public_beta_offline_acceptance_rows", "Offline Acceptance Evidence / Scenario Review / Zero Persistence", "warning"));
+        badges.push(badge("public_beta_offline_acceptance_evidence_copy", "离线验收证据中心仅为只读展示，不生成证据文件", "warning"));
+        badges.push(badge("public_beta_offline_acceptance_scenario_copy", "人工场景复核板仅为样例复核，不保存场景输入或复核结果", "warning"));
+        badges.push(badge("public_beta_offline_acceptance_zero_persistence_copy", "零持久化回归门确认不保存反馈、用户原文、场景输入、验收记录或证据文件", "warning"));
+        badges.push(badge("public_beta_offline_acceptance_manual", "provider、联网、外部打开、付款、下单、出票、release、push、launch、反馈提交、上传、issue/task 创建仍保持关闭", "warning"));
       }
       const rcCandidateReview = obj(safe.rcCandidateReviewSummary);
       const rcEvidenceReview = obj(safe.rcEvidenceReviewSummary);

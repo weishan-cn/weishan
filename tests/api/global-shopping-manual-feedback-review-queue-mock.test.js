@@ -24,7 +24,7 @@ function summary(title, status) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingManualFeedbackReviewQueueMock.js"]);
   const api = windowRef.WeishanGlobalShoppingManualFeedbackReviewQueueMock;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_FEEDBACK_REVIEW_QUEUE_MOCK_VERSION, "4.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_FEEDBACK_REVIEW_QUEUE_MOCK_VERSION, "4.2.5");
 
   const ready = api.buildGlobalShoppingManualFeedbackReviewQueueMock({
     publicBetaReadinessSnapshotSummary:summary("Public Beta Readiness Snapshot"),

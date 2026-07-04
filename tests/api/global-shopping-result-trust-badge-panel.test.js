@@ -15,7 +15,7 @@ function load(file) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingResultTrustBadgePanel.js");
-  assert.equal(api.GLOBAL_SHOPPING_RESULT_TRUST_BADGE_PANEL_VERSION, "4.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_RESULT_TRUST_BADGE_PANEL_VERSION, "4.2.5");
   const ready = api.buildGlobalShoppingResultTrustBadgePanel({
     panelMode:"result_trust_badge_only",
     sourceAvailable:true,
@@ -26,7 +26,7 @@ function main() {
     manualReviewRequired:true
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.2.4");
+  assert.equal(ready.appVersion, "4.2.5");
   assert.equal(ready.providerZero, true);
   assert.equal(ready.readOnly, true);
   assert.equal(ready.manualReviewRequired, true);

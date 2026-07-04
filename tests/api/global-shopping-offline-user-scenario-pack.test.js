@@ -25,7 +25,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineUserScenarioPack.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineUserScenarioPack;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_USER_SCENARIO_PACK_VERSION, "4.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_USER_SCENARIO_PACK_VERSION, "4.2.5");
 
   const review = api.buildGlobalShoppingOfflineUserScenarioPack({
     publicBetaManualAcceptanceChecklistSummary:summary("Public Beta Manual Acceptance Checklist"),
@@ -37,6 +37,9 @@ function main() {
   assert.equal(review.scenarioInputPersistence, false);
   assert.equal(review.rawUserTextPersistence, false);
   assert.equal(review.scenarioCategories.includes("feedback_review_mock"), true);
+  assert.equal(review.scenarioCategories.includes("no_data_retention"), true);
+  assert.equal(review.scenarioCategories.includes("manual_acceptance"), true);
+  assert.equal(review.scenarioReviewPersistence, false);
   assert.equal(review.feedbackSubmitEnabled, false);
 
   const needsReview = api.buildGlobalShoppingOfflineUserScenarioPack({
@@ -49,10 +52,12 @@ function main() {
     publicBetaReadinessSnapshotSummary:summary("Public Beta Readiness Snapshot"),
     manualFeedbackReviewQueueMockSummary:summary("Manual Feedback Review Queue Mock"),
     offlineIssueTriageBoardSummary:summary("Offline Issue Triage Board"),
-    persistScenarioInput:true
+    persistScenarioInput:true,
+    persistScenarioReview:true
   });
   assert.equal(blocked.scenarioPackStatus, "blocked");
   assert.equal(blocked.blockedReasons.includes("scenario input persistence"), true);
+  assert.equal(blocked.blockedReasons.includes("scenario review persistence"), true);
   console.log("GLOBAL_SHOPPING_OFFLINE_USER_SCENARIO_PACK PASS");
 }
 

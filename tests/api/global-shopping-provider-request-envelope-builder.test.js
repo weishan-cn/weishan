@@ -16,7 +16,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderRequestEnvelopeBuilder.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderRequestEnvelopeBuilder;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_REQUEST_ENVELOPE_BUILDER_VERSION, "4.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_REQUEST_ENVELOPE_BUILDER_VERSION, "4.2.5");
 
   const ready = api.buildGlobalShoppingProviderRequestEnvelopeBuilder({
     providerId:"provider_1",
@@ -33,7 +33,7 @@ function main() {
     currency:"CNY",
     locale:"zh-CN"
   });
-  assert.equal(ready.appVersion, "4.2.4");
+  assert.equal(ready.appVersion, "4.2.5");
   assert.equal(ready.status, "ready");
   assert.equal(ready.requestEnvelope.canSendRequestNow, false);
   assert.equal(ready.requestEnvelope.canAttachRealApiKey, false);

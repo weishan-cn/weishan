@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_SAFETY_COPY_CENTER_VERSION = "4.2.4";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_SAFETY_COPY_CENTER_VERSION = "4.2.5";
   const CENTER_NAME = "global_shopping_public_beta_safety_copy_center_v1";
   const ALLOWED_COPY = [
     "当前仍为只读候选证据",

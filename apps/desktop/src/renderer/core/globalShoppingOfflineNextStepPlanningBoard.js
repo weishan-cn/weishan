@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_NEXT_STEP_PLANNING_BOARD_VERSION = "4.2.4";
+  const GLOBAL_SHOPPING_OFFLINE_NEXT_STEP_PLANNING_BOARD_VERSION = "4.2.5";
   const BOARD_NAME = "global_shopping_offline_next_step_planning_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, next_step_planning_only:true };
   const ALLOWED_OPTIONS = ["continue_testing", "improve_copy", "expand_offline_scenarios", "manual_review_required", "blocked"];

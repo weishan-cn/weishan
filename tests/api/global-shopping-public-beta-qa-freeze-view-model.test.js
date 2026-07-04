@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaQaFreezeViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaQaFreezeViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_QA_FREEZE_VIEW_MODEL_VERSION, "4.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_QA_FREEZE_VIEW_MODEL_VERSION, "4.2.5");
 
   const ready = api.buildGlobalShoppingPublicBetaQaFreezeViewModel({
     publicBetaCandidateQaFreezeSummary:summary("Public Beta Candidate QA Freeze", "manual_review_required", { qaFreezeStatus:"manual_review_required" }),

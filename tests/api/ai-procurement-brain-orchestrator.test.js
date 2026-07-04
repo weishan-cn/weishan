@@ -19,7 +19,7 @@ function main() {
     "apps/desktop/src/renderer/core/aiProcurementBrainOrchestrator.js"
   ]);
   const api = windowRef.WeishanAiProcurementBrainOrchestrator;
-  assert.equal(api.AI_PROCUREMENT_BRAIN_ORCHESTRATOR_VERSION, "4.2.4");
+  assert.equal(api.AI_PROCUREMENT_BRAIN_ORCHESTRATOR_VERSION, "4.2.5");
   const clearFlight = api.orchestrateAiProcurementBrain({ rawUserInput:"7月15日上海到成都最便宜的直达机票", userAiApiState:{ aiApiTokenConfigured:false }, networkPolicy:{ enabled:true } });
   assert.equal(clearFlight.intentStatus, "ready");
   assert.equal(clearFlight.procurementCategory, "flight");

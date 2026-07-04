@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const PROVIDER_CONNECTION_READINESS_DECISION_ENGINE_VERSION = "4.2.4";
+  const PROVIDER_CONNECTION_READINESS_DECISION_ENGINE_VERSION = "4.2.5";
 
   function text(value) {
     return String(value || "").trim();

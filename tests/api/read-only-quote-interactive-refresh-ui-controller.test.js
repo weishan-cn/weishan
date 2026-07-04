@@ -8,7 +8,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function memoryStorage() { const data = new Map(); return { getItem:(name) => data.has(name) ? data.get(name) : null, setItem:(name, value) => data.set(name, String(value)), removeItem:(name) => data.delete(name) }; }
 function assertSafe(state) {
   assert.equal(state.controllerName, "read_only_quote_interactive_refresh_ui_controller_v1");
-  assert.equal(state.appVersion, "4.2.4");
+  assert.equal(state.appVersion, "4.2.5");
   assert.equal(state.safety.bookingUrl, null);
   assert.equal(state.safety.checkoutUrl, null);
   assert.equal(state.safety.paymentUrl, null);
@@ -48,7 +48,7 @@ function main() {
   ]);
   const api = windowRef.WeishanReadOnlyQuoteInteractiveRefreshUiController;
   const storeApi = windowRef.WeishanReadOnlyQuoteRefreshStateStore;
-  assert.equal(api.READ_ONLY_QUOTE_INTERACTIVE_REFRESH_UI_CONTROLLER_VERSION, "4.2.4");
+  assert.equal(api.READ_ONLY_QUOTE_INTERACTIVE_REFRESH_UI_CONTROLLER_VERSION, "4.2.5");
 
   const initial = api.buildReadOnlyQuoteInteractiveRefreshUiState();
   assert.equal(initial.status, "idle");

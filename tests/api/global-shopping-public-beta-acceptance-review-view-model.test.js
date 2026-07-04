@@ -25,7 +25,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaAcceptanceReviewViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaAcceptanceReviewViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_REVIEW_VIEW_MODEL_VERSION, "4.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_REVIEW_VIEW_MODEL_VERSION, "4.2.5");
 
   const ready = api.buildGlobalShoppingPublicBetaAcceptanceReviewViewModel({
     publicBetaManualAcceptanceChecklistSummary:summary("Public Beta Manual Acceptance Checklist", "manual_review_required"),
@@ -37,6 +37,7 @@ function main() {
   assert.equal(ready.cards.some((item) => item.label === "Manual Acceptance"), true);
   assert.equal(ready.noDataRetentionRows[0].label, "No-Data-Retention Guard");
   assert.equal(ready.feedbackSubmitEnabled, false);
+  assert.equal(ready.userFacingSummary.caveat.includes("反馈提交"), true);
 
   const needsReview = api.buildGlobalShoppingPublicBetaAcceptanceReviewViewModel({
     publicBetaManualAcceptanceChecklistSummary:summary("Public Beta Manual Acceptance Checklist", "needs_review")

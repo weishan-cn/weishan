@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_LOCK_VERSION = "4.2.4";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_LOCK_VERSION = "4.2.5";
   const LOCK_NAME = "global_shopping_public_beta_candidate_lock_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, candidate_lock_only:true };
   const ALLOWED_NEXT_ACTIONS = ["continue_testing", "improve_copy", "expand_offline_scenarios", "manual_review_required", "blocked"];

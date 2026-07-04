@@ -1,11 +1,11 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_NO_DATA_RETENTION_GUARD_VERSION = "4.2.4";
+  const GLOBAL_SHOPPING_NO_DATA_RETENTION_GUARD_VERSION = "4.2.5";
   const GUARD_NAME = "global_shopping_no_data_retention_guard_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, no_data_retention_guard_only:true };
-  const REDACTION_RULES = ["phone", "email", "passport", "idCard", "bankCard", "address", "platformToken", "orderNumber", "rawMessage", "freeText", "providerPayload"];
-  const BLOCKED_RETENTION_ACTIONS = ["persist_raw_user_text", "persist_feedback", "persist_scenario_input", "persist_acceptance_record", "persist_provider_response", "persist_order", "persist_payment", "export_file", "upload_file", "send_email"];
+  const REDACTION_RULES = ["phone", "email", "passport", "idCard", "bankCard", "address", "platformToken", "orderNumber", "rawMessage", "freeText", "providerPayload", "paymentPayload"];
+  const BLOCKED_RETENTION_ACTIONS = ["persist_raw_user_text", "persist_feedback", "persist_scenario_input", "persist_scenario_review", "persist_acceptance_record", "persist_evidence_file", "persist_provider_response", "persist_order", "persist_payment", "persist_token", "export_file", "upload_file", "send_email"];
   const SECRET_NAME_RE = /(^|[^a-z])(token|secret|api[_ -]?key|password)([^a-z]|$)/i;
   const BLOCKED_TEXT_RE = /persist_raw_user_text|persist_feedback|persist_scenario_input|persist_acceptance_record|persist_provider_response|persist_order|persist_payment|export_file|upload_file|send_email|production_ready|ready_to_publish|auto_publish|auto_launch|enable_provider|enable_payment|enable_order/i;
 
@@ -43,7 +43,9 @@
     if (safe.rawUserTextPersistence === true || safe.persistRawUserText === true) blocked.push("raw user text persistence");
     if (safe.feedbackPersistence === true || safe.persistFeedback === true) blocked.push("feedback persistence");
     if (safe.scenarioInputPersistence === true || safe.persistScenarioInput === true) blocked.push("scenario input persistence");
+    if (safe.scenarioReviewPersistence === true || safe.persistScenarioReview === true) blocked.push("scenario review persistence");
     if (safe.acceptanceRecordPersistence === true || safe.persistAcceptanceRecord === true) blocked.push("acceptance record persistence");
+    if (safe.evidenceFilePersistence === true || safe.persistEvidenceFile === true) blocked.push("evidence file persistence");
     if (safe.providerResponsePersistence === true || safe.persistProviderResponse === true || safe.rawProviderPersistence === true || safe.rawResponsePersistence === true) blocked.push("provider response persistence");
     if (safe.orderPersistence === true || safe.persistOrder === true) blocked.push("order persistence");
     if (safe.paymentPersistence === true || safe.persistPayment === true) blocked.push("payment persistence");
@@ -130,7 +132,7 @@
       blockedRetentionActions:BLOCKED_RETENTION_ACTIONS.slice(),
       regressionRows:[
         row("no_data_retention_guard", "No-Data-Retention Guard", noDataRetentionStatus === "blocked" ? "No-Data-Retention Guard 已阻断" : (noDataRetentionStatus === "needs_review" ? "No-Data-Retention Guard 仍需复核" : "No-Data-Retention Guard 需人工复核"), noDataRetentionStatus === "blocked" ? "blocked" : "warning"),
-        row("no_data_retention", "No Data Retention", "无数据留存保护门确认不保存反馈、用户原文、场景输入或验收记录", "warning"),
+        row("no_data_retention", "No Data Retention", "无数据留存保护门确认不保存反馈、用户原文、场景输入、验收记录或证据文件", "warning"),
         row("redaction_rules", "Redaction Rules", REDACTION_RULES.join(" / "), "warning"),
         row("manual_review_required", "Manual Review Required", "provider、联网、外部打开、付款、下单、出票、release、push、launch、反馈提交、上传、issue/task 创建仍保持关闭", "warning")
       ],
@@ -164,6 +166,8 @@
       rawUserTextPersistence:false,
       acceptanceRecordPersistence:false,
       scenarioInputPersistence:false,
+      evidenceFilePersistence:false,
+      scenarioReviewPersistence:false,
       redacted:true
     });
   }
@@ -178,7 +182,9 @@
       rule("raw_user_text_persistence_disabled", "rawUserTextPersistence 必须 false", safe.rawUserTextPersistence === false),
       rule("feedback_persistence_disabled", "feedbackPersistence 必须 false", safe.noRetentionFlags.feedbackPersistence === false),
       rule("scenario_input_persistence_disabled", "scenarioInputPersistence 必须 false", safe.scenarioInputPersistence === false),
+      rule("scenario_review_persistence_disabled", "scenarioReviewPersistence 必须 false", safe.scenarioReviewPersistence === false),
       rule("acceptance_record_persistence_disabled", "acceptanceRecordPersistence 必须 false", safe.acceptanceRecordPersistence === false),
+      rule("evidence_file_persistence_disabled", "evidenceFilePersistence 必须 false", safe.evidenceFilePersistence === false),
       rule("provider_response_persistence_disabled", "providerResponsePersistence 必须 false", safe.noRetentionFlags.providerResponsePersistence === false),
       rule("token_persistence_disabled", "tokenPersistence 必须 false", safe.noRetentionFlags.tokenPersistence === false)
     ]);
@@ -218,6 +224,8 @@
     safe.rawUserTextPersistence = false;
     safe.acceptanceRecordPersistence = false;
     safe.scenarioInputPersistence = false;
+    safe.evidenceFilePersistence = false;
+    safe.scenarioReviewPersistence = false;
     safe.noRetentionFlags = buildFlags();
     return safe;
   }

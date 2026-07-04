@@ -25,7 +25,7 @@ function summary(title, status) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaReadinessReviewViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaReadinessReviewViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_READINESS_REVIEW_VIEW_MODEL_VERSION, "4.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_READINESS_REVIEW_VIEW_MODEL_VERSION, "4.2.5");
 
   const ready = api.buildGlobalShoppingPublicBetaReadinessReviewViewModel({
     publicBetaReadinessSnapshotSummary:summary("Public Beta Readiness Snapshot"),

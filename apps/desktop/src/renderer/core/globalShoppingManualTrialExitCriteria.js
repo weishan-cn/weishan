@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MANUAL_TRIAL_EXIT_CRITERIA_VERSION = "4.2.4";
+  const GLOBAL_SHOPPING_MANUAL_TRIAL_EXIT_CRITERIA_VERSION = "4.2.5";
   const CRITERIA_NAME = "global_shopping_manual_trial_exit_criteria_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, manual_exit_criteria_only:true };
   const BLOCKED_TEXT_RE = /production_ready|auto_launch|auto_publish|ready_to_publish|enable_provider|enable_payment|enable_order/i;

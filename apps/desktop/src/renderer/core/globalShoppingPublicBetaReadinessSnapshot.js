@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_READINESS_SNAPSHOT_VERSION = "4.2.4";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_READINESS_SNAPSHOT_VERSION = "4.2.5";
   const SNAPSHOT_NAME = "global_shopping_public_beta_readiness_snapshot_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, public_beta_readiness_snapshot_only:true };
   const SNAPSHOT_SCOPE = ["provider", "network", "external_open", "payment", "order", "ticketing", "release", "push", "launch", "feedback_submit", "upload", "issue_create", "task_create"];

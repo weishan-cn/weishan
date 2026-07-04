@@ -25,7 +25,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaManualAcceptanceChecklist.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaManualAcceptanceChecklist;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_MANUAL_ACCEPTANCE_CHECKLIST_VERSION, "4.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_MANUAL_ACCEPTANCE_CHECKLIST_VERSION, "4.2.5");
 
   const review = api.buildGlobalShoppingPublicBetaManualAcceptanceChecklist({
     publicBetaReadinessSnapshotSummary:summary("Public Beta Readiness Snapshot"),
@@ -37,6 +37,7 @@ function main() {
   assert.equal(review.acceptanceChecklistStatus, "manual_review_required");
   assert.equal(review.manualReviewRequired, true);
   assert.equal(review.acceptanceRecordPersistence, false);
+  assert.equal(review.blockedActions.includes("persist_evidence_file"), true);
   assert.equal(review.manualAcceptanceRows.some((item) => item.label === "Known Warnings" && item.value.includes("既有 secret scan WARN 仅作为已知警告展示")), true);
   assert.equal(review.externalUrl, null);
   assert.equal(review.issueCreateEnabled, false);
@@ -52,10 +53,12 @@ function main() {
     offlineIssueTriageBoardSummary:summary("Offline Issue Triage Board"),
     publicBetaReadinessReviewViewModelSummary:summary("Public Beta Readiness Review ViewModel", "ready"),
     publicBetaCandidateQaFreezeSummary:summary("Public Beta Candidate QA Freeze"),
-    persistAcceptanceRecord:true
+    persistAcceptanceRecord:true,
+    persistEvidenceFile:true
   });
   assert.equal(blocked.acceptanceChecklistStatus, "blocked");
   assert.equal(blocked.blockedCapabilities.includes("acceptance record persistence"), true);
+  assert.equal(blocked.blockedCapabilities.includes("evidence file persistence"), true);
   console.log("GLOBAL_SHOPPING_PUBLIC_BETA_MANUAL_ACCEPTANCE_CHECKLIST PASS");
 }
 

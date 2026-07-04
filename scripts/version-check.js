@@ -2476,6 +2476,10 @@ function runVersionCheck() {
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping offline user scenario pack version", "apps/desktop/src/renderer/core/globalShoppingOfflineUserScenarioPack.js", "GLOBAL_SHOPPING_OFFLINE_USER_SCENARIO_PACK_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping no data retention guard version", "apps/desktop/src/renderer/core/globalShoppingNoDataRetentionGuard.js", "GLOBAL_SHOPPING_NO_DATA_RETENTION_GUARD_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta acceptance review view model version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaAcceptanceReviewViewModel.js", "GLOBAL_SHOPPING_PUBLIC_BETA_ACCEPTANCE_REVIEW_VIEW_MODEL_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta offline acceptance evidence center version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaOfflineAcceptanceEvidenceCenter.js", "GLOBAL_SHOPPING_PUBLIC_BETA_OFFLINE_ACCEPTANCE_EVIDENCE_CENTER_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping manual scenario review board version", "apps/desktop/src/renderer/core/globalShoppingManualScenarioReviewBoard.js", "GLOBAL_SHOPPING_MANUAL_SCENARIO_REVIEW_BOARD_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping zero persistence regression gate version", "apps/desktop/src/renderer/core/globalShoppingZeroPersistenceRegressionGate.js", "GLOBAL_SHOPPING_ZERO_PERSISTENCE_REGRESSION_GATE_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta offline acceptance view model version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaOfflineAcceptanceViewModel.js", "GLOBAL_SHOPPING_PUBLIC_BETA_OFFLINE_ACCEPTANCE_VIEW_MODEL_VERSION");
   }
 
   results.forEach((item) => {

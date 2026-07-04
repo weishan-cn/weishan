@@ -1,12 +1,12 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_MANUAL_ACCEPTANCE_CHECKLIST_VERSION = "4.2.4";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_MANUAL_ACCEPTANCE_CHECKLIST_VERSION = "4.2.5";
   const CHECKLIST_NAME = "global_shopping_public_beta_manual_acceptance_checklist_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, manual_acceptance_checklist_only:true };
-  const CHECKLIST_SCOPE = ["provider", "network", "external_open", "payment", "order", "ticketing", "release", "push", "launch", "feedback_submit", "upload", "issue_create", "task_create", "data_retention"];
+  const CHECKLIST_SCOPE = ["provider", "network", "external_open", "payment", "order", "ticketing", "release", "push", "launch", "feedback_submit", "upload", "issue_create", "task_create", "data_retention", "evidence_file"];
   const REQUIRED_MANUAL_CHECKS = ["copy_review", "safety_boundary_review", "no_provider_review", "no_payment_review", "no_order_review", "no_feedback_persistence_review", "no_raw_user_text_review", "no_external_open_review"];
-  const BLOCKED_ACTIONS = ["enable_provider", "enable_payment", "enable_order", "auto_publish", "auto_launch", "ready_to_publish", "production_ready", "submit_feedback", "upload_feedback", "create_issue", "create_task", "persist_acceptance_record"];
+  const BLOCKED_ACTIONS = ["enable_provider", "enable_payment", "enable_order", "auto_publish", "auto_launch", "ready_to_publish", "production_ready", "submit_feedback", "upload_feedback", "create_issue", "create_task", "persist_acceptance_record", "persist_evidence_file"];
   const SECRET_NAME_RE = /(^|[^a-z])(token|secret|api[_ -]?key|password)([^a-z]|$)/i;
   const BLOCKED_TEXT_RE = /persist_acceptance_record|boundaryExpanded|safetyBoundaryRelaxed|production_ready|ready_to_publish|auto_publish|auto_launch|enable_provider|enable_payment|enable_order|submit_feedback|upload_feedback|create_issue|create_task/i;
 
@@ -42,6 +42,7 @@
     const safe = obj(input);
     const blocked = [];
     if (safe.acceptanceRecordPersistence === true || safe.persistAcceptanceRecord === true || safe.acceptanceRecordSaved === true) blocked.push("acceptance record persistence");
+    if (safe.evidenceFilePersistence === true || safe.persistEvidenceFile === true) blocked.push("evidence file persistence");
     if (safe.fileWrite === true || safe.writeFile === true) blocked.push("file write");
     if (safe.export === true || safe.exportEnabled === true) blocked.push("export");
     if (safe.download === true || safe.downloadEnabled === true) blocked.push("download");

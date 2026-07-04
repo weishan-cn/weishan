@@ -15,10 +15,10 @@ function load(file) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingPublicBetaTrialScenarioChecklist.js");
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_SCENARIO_CHECKLIST_VERSION, "4.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_SCENARIO_CHECKLIST_VERSION, "4.2.5");
   const ready = api.buildGlobalShoppingPublicBetaTrialScenarioChecklist({});
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.2.4");
+  assert.equal(ready.appVersion, "4.2.5");
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(Array.isArray(ready.scenarios), true);
   assert.equal(ready.scenarios.length, 4);

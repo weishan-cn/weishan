@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_RC_CONSOLE_VERSION = "4.2.4";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_RC_CONSOLE_VERSION = "4.2.5";
   const CONSOLE_NAME = "global_shopping_public_beta_rc_console_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, rc_console_only:true };
   const BLOCKED_STATUS_RE = /ready_to_publish|production_ready|auto_release/i;

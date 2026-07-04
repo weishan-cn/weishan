@@ -39,7 +39,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineLaunchReadinessFinalizer.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineLaunchReadinessFinalizer;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_LAUNCH_READINESS_FINALIZER_VERSION, "4.2.4");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_LAUNCH_READINESS_FINALIZER_VERSION, "4.2.5");
   const ready = api.buildGlobalShoppingOfflineLaunchReadinessFinalizer({
     publicReleaseEvidenceConsoleSummary:readySummary("Public Release Evidence Console", "Public Release Evidence Console 已准备"),
     noProviderUserAssurancePanelSummary:readySummary("No-Provider User Assurance Panel", "No-Provider User Assurance Panel 已准备"),
