@@ -11,7 +11,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowRcRegressionViewModel.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowRcRegressionViewModel;
-  assert.equal(api.FLIGHT_WORKFLOW_RC_REGRESSION_VIEW_MODEL_VERSION, "4.2.5");
+  assert.equal(api.FLIGHT_WORKFLOW_RC_REGRESSION_VIEW_MODEL_VERSION, "4.2.6");
   const model = api.buildFlightWorkflowRcRegressionViewModel({
     rcRegressionAuditSummary:{ status:"passed", userFacingSummary:{ resultLabel:"RC 回归审计通过", redacted:true }, regressionRows:[{ rowId:"regression", label:"回归审计", value:"RC 回归审计通过", status:"pass", redacted:true }], redacted:true },
     releaseRiskLedgerSummary:{ status:"clear", userFacingSummary:{ resultLabel:"暂无阻断风险", redacted:true }, rows:[{ rowId:"release_risk", label:"发布风险", value:"暂无阻断风险", status:"pass", redacted:true }], redacted:true }

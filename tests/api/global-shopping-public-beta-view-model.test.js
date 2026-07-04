@@ -47,7 +47,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_VIEW_MODEL_VERSION, "4.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_VIEW_MODEL_VERSION, "4.2.6");
   const ready = api.buildGlobalShoppingPublicBetaViewModel({
     globalShoppingReadOnlyPublicBetaShellSummary:readySummary("Global Shopping Read-Only Public Beta Shell", "Global Shopping Read-Only Public Beta Shell 已准备"),
     providerZeroRuntimeLockSummary:readySummary("Provider-Zero Runtime Lock", "Provider-Zero Runtime Lock 已准备"),

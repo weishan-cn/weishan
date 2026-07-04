@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingSandboxActivationReceiptLedger.js"]);
   const api = windowRef.WeishanGlobalShoppingSandboxActivationReceiptLedger;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_ACTIVATION_RECEIPT_LEDGER_VERSION, "4.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_ACTIVATION_RECEIPT_LEDGER_VERSION, "4.2.6");
 
   const ready = api.buildGlobalShoppingSandboxActivationReceiptLedger({
     offlineLaunchDecisionSimulatorSummary:readySummary("Offline Launch Decision Simulator", "离线发布决策模拟器已准备"),

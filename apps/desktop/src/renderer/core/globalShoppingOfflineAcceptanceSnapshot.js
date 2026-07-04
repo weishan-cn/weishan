@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_ACCEPTANCE_SNAPSHOT_VERSION = "4.2.5";
+  const GLOBAL_SHOPPING_OFFLINE_ACCEPTANCE_SNAPSHOT_VERSION = "4.2.6";
   const SNAPSHOT_NAME = "global_shopping_offline_acceptance_snapshot_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, offline_acceptance_snapshot_only:true };
   const BLOCKED_TEXT_RE = /production_ready|auto_launch|auto_publish|ready_to_publish/i;

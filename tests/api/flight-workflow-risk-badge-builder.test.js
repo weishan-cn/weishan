@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.2.5");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.2.6");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -270,6 +270,22 @@ function main() {
   assert.ok(offlineAcceptanceLabels.includes("人工场景复核板仅为样例复核，不保存场景输入或复核结果"));
   assert.ok(offlineAcceptanceLabels.includes("零持久化回归门确认不保存反馈、用户原文、场景输入、验收记录或证据文件"));
   assert.ok(offlineAcceptanceLabels.includes("provider、联网、外部打开、付款、下单、出票、release、push、launch、反馈提交、上传、issue/task 创建仍保持关闭"));
+  const finalAcceptanceLabels = api.buildFlightWorkflowRiskBadges({
+    publicBetaFinalAcceptanceLockSummary:{ status:"manual_review_required", userFacingSummary:{ resultLabel:"Public Beta Final Acceptance Lock 需人工复核", redacted:true } },
+    offlineReleaseCandidateAuditSummary:{ status:"manual_review_required", userFacingSummary:{ resultLabel:"Offline Release Candidate Audit 需人工复核", redacted:true } },
+    zeroActionSafetyConsoleSummary:{ status:"manual_review_required", userFacingSummary:{ resultLabel:"Zero-Action Safety Console 需人工复核", redacted:true } },
+    publicBetaFinalAcceptanceViewModelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Beta Final Acceptance ViewModel 已准备", redacted:true } },
+    safeToProceedWithManualFinalAcceptanceReview:false
+  }).badges.map((item) => item.label);
+  assert.ok(finalAcceptanceLabels.includes("最终人工验收锁定需人工复核"));
+  assert.ok(finalAcceptanceLabels.includes("离线 RC 审计需人工复核"));
+  assert.ok(finalAcceptanceLabels.includes("零动作安全控制台需人工复核"));
+  assert.ok(finalAcceptanceLabels.includes("最终人工验收视图可人工复核"));
+  assert.ok(finalAcceptanceLabels.includes("Final Acceptance / Release Candidate Audit / Zero Action Safety"));
+  assert.ok(finalAcceptanceLabels.includes("最终人工验收锁定仅为只读展示，不保存验收记录"));
+  assert.ok(finalAcceptanceLabels.includes("离线 RC 审计不创建 release、不生成审计文件"));
+  assert.ok(finalAcceptanceLabels.includes("零动作安全控制台确认没有任何真实动作执行入口"));
+  assert.ok(finalAcceptanceLabels.includes("provider、联网、外部打开、付款、下单、出票、release、push、launch、反馈提交、上传、issue/task 创建仍保持关闭"));
   const closureArchiveLabels = api.buildFlightWorkflowRiskBadges({
     publicBetaClosureEvidenceArchiveSummary:{ status:"manual_review_required", archiveStatus:"manual_review_required", userFacingSummary:{ resultLabel:"Public Beta Closure Evidence Archive 需人工复核", redacted:true } },
     manualTrialExitCriteriaSummary:{ status:"manual_review_required", exitCriteriaStatus:"manual_review_required", userFacingSummary:{ resultLabel:"Manual Trial Exit Criteria 需人工复核", redacted:true } },

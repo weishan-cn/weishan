@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingNoProviderProductionBoundary.js"]);
   const api = windowRef.WeishanGlobalShoppingNoProviderProductionBoundary;
-  assert.equal(api.GLOBAL_SHOPPING_NO_PROVIDER_PRODUCTION_BOUNDARY_VERSION, "4.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_NO_PROVIDER_PRODUCTION_BOUNDARY_VERSION, "4.2.6");
 
   const good = api.buildGlobalShoppingNoProviderProductionBoundary({
     publicBetaCandidateLockSummary:summary("Public Beta Candidate Lock", "manual_review_required", { candidateLockStatus:"manual_review_required" }),

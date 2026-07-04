@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingOfflineSandboxTraceInspector.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingOfflineSandboxTraceInspector;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_SANDBOX_TRACE_INSPECTOR_VERSION, "4.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_SANDBOX_TRACE_INSPECTOR_VERSION, "4.2.6");
 
   const ready = api.buildGlobalShoppingOfflineSandboxTraceInspector({
     offlineMockSandboxSessionRunnerSummary:{ status:"ready", userFacingSummary:{ resultLabel:"离线 Mock 会话已准备", redacted:true }, redacted:true },

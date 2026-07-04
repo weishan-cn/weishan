@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.2.5";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.2.6";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -268,6 +268,29 @@
         badges.push(badge("public_beta_offline_acceptance_scenario_copy", "人工场景复核板仅为样例复核，不保存场景输入或复核结果", "warning"));
         badges.push(badge("public_beta_offline_acceptance_zero_persistence_copy", "零持久化回归门确认不保存反馈、用户原文、场景输入、验收记录或证据文件", "warning"));
         badges.push(badge("public_beta_offline_acceptance_manual", "provider、联网、外部打开、付款、下单、出票、release、push、launch、反馈提交、上传、issue/task 创建仍保持关闭", "warning"));
+      }
+      const publicBetaFinalAcceptanceLockSummary = obj(safe.publicBetaFinalAcceptanceLockSummary);
+      const offlineReleaseCandidateAuditSummary = obj(safe.offlineReleaseCandidateAuditSummary);
+      const zeroActionSafetyConsoleSummary = obj(safe.zeroActionSafetyConsoleSummary);
+      const publicBetaFinalAcceptanceViewModelSummary = obj(safe.publicBetaFinalAcceptanceViewModelSummary);
+      if (publicBetaFinalAcceptanceLockSummary.status === "manual_review_required") badges.push(badge("public_beta_final_acceptance_lock_manual", "最终人工验收锁定需人工复核", "warning"));
+      if (publicBetaFinalAcceptanceLockSummary.status === "needs_review") badges.push(badge("public_beta_final_acceptance_lock_review", "最终人工验收锁定仍需复核", "warning"));
+      if (publicBetaFinalAcceptanceLockSummary.status === "blocked") badges.push(badge("public_beta_final_acceptance_lock_blocked", "最终人工验收锁定已阻断", "blocked"));
+      if (offlineReleaseCandidateAuditSummary.status === "manual_review_required") badges.push(badge("offline_release_candidate_audit_manual", "离线 RC 审计需人工复核", "warning"));
+      if (offlineReleaseCandidateAuditSummary.status === "needs_review") badges.push(badge("offline_release_candidate_audit_review", "离线 RC 审计仍需复核", "warning"));
+      if (offlineReleaseCandidateAuditSummary.status === "blocked") badges.push(badge("offline_release_candidate_audit_blocked", "离线 RC 审计已阻断", "blocked"));
+      if (zeroActionSafetyConsoleSummary.status === "manual_review_required") badges.push(badge("zero_action_safety_console_manual", "零动作安全控制台需人工复核", "warning"));
+      if (zeroActionSafetyConsoleSummary.status === "needs_review") badges.push(badge("zero_action_safety_console_review", "零动作安全控制台仍需复核", "warning"));
+      if (zeroActionSafetyConsoleSummary.status === "blocked") badges.push(badge("zero_action_safety_console_blocked", "零动作安全控制台已阻断", "blocked"));
+      if (publicBetaFinalAcceptanceViewModelSummary.status === "ready") badges.push(badge("public_beta_final_acceptance_view_ready", "最终人工验收视图可人工复核", "info"));
+      if (publicBetaFinalAcceptanceViewModelSummary.status === "needs_review") badges.push(badge("public_beta_final_acceptance_view_review", "最终人工验收视图仍需复核", "warning"));
+      if (publicBetaFinalAcceptanceViewModelSummary.status === "blocked") badges.push(badge("public_beta_final_acceptance_view_blocked", "最终人工验收视图已阻断", "blocked"));
+      if (present(publicBetaFinalAcceptanceLockSummary) || present(offlineReleaseCandidateAuditSummary) || present(zeroActionSafetyConsoleSummary)) {
+        badges.push(badge("public_beta_final_acceptance_rows", "Final Acceptance / Release Candidate Audit / Zero Action Safety", "warning"));
+        badges.push(badge("public_beta_final_acceptance_lock_copy", "最终人工验收锁定仅为只读展示，不保存验收记录", "warning"));
+        badges.push(badge("offline_release_candidate_audit_copy", "离线 RC 审计不创建 release、不生成审计文件", "warning"));
+        badges.push(badge("zero_action_safety_console_copy", "零动作安全控制台确认没有任何真实动作执行入口", "warning"));
+        badges.push(badge("public_beta_final_acceptance_manual", "provider、联网、外部打开、付款、下单、出票、release、push、launch、反馈提交、上传、issue/task 创建仍保持关闭", "warning"));
       }
       const rcCandidateReview = obj(safe.rcCandidateReviewSummary);
       const rcEvidenceReview = obj(safe.rcEvidenceReviewSummary);

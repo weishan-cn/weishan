@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_QA_DECISION_MATRIX_VERSION = "4.2.5";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_QA_DECISION_MATRIX_VERSION = "4.2.6";
   const MATRIX_NAME = "global_shopping_public_beta_qa_decision_matrix_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, qa_decision_matrix_only:true };
   const FORBIDDEN_DECISIONS = ["production_ready", "auto_launch", "auto_publish", "ready_to_publish", "enable_provider", "enable_payment", "enable_order"];

@@ -6,7 +6,7 @@ const ROOT = path.resolve(__dirname, "../..");
 function load(file) { const window = {}; window.window = window; const context = vm.createContext({ window, console }); vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }); return window; }
 function main() {
   const api = load("apps/desktop/src/renderer/core/flightWorkflowCohortHealthDashboard.js").WeishanFlightWorkflowCohortHealthDashboard;
-  assert.equal(api.FLIGHT_WORKFLOW_COHORT_HEALTH_DASHBOARD_VERSION, "4.2.5");
+  assert.equal(api.FLIGHT_WORKFLOW_COHORT_HEALTH_DASHBOARD_VERSION, "4.2.6");
   assert.equal(api.buildFlightWorkflowCohortHealthDashboard({}).status, "in_progress");
   assert.equal(api.buildFlightWorkflowCohortHealthDashboard({ testerSlotCount:5, consentCompletionRatio:0.5, feedbackCompletionRatio:1, issueResolutionRatio:1 }).status, "in_progress");
   assert.equal(api.buildFlightWorkflowCohortHealthDashboard({ testerSlotCount:5, consentCompletionRatio:1, feedbackCompletionRatio:0.4, issueResolutionRatio:1 }).status, "in_progress");

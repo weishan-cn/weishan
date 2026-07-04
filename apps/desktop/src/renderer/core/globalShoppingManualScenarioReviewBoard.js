@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MANUAL_SCENARIO_REVIEW_BOARD_VERSION = "4.2.5";
+  const GLOBAL_SHOPPING_MANUAL_SCENARIO_REVIEW_BOARD_VERSION = "4.2.6";
   const BOARD_NAME = "global_shopping_manual_scenario_review_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, manual_scenario_review_board_only:true };
   const SCENARIO_COVERAGE = ["flight_price_compare", "hotel_price_compare", "product_price_compare", "fee_breakdown", "risk_badge_review", "feedback_review_mock", "issue_triage_mock", "no_provider_boundary", "no_data_retention", "manual_acceptance"];

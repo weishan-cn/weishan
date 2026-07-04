@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_EVIDENCE_REVIEW_VERSION = "4.2.5";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_EVIDENCE_REVIEW_VERSION = "4.2.6";
   const REVIEW_NAME = "global_shopping_public_beta_candidate_evidence_review_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, candidate_evidence_review_only:true };
   const LOCKED_CAPABILITIES = ["provider", "network", "external_open", "payment", "order", "ticketing", "release", "push", "launch"];

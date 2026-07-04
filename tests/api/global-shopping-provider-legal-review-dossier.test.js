@@ -23,7 +23,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderLegalReviewDossier.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderLegalReviewDossier;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_LEGAL_REVIEW_DOSSIER_VERSION, "4.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_LEGAL_REVIEW_DOSSIER_VERSION, "4.2.6");
   const ready = api.buildGlobalShoppingProviderLegalReviewDossier({
     providerContractSelectionBoardSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Provider 合同/授权选择板已准备", redacted:true } },
     readOnlySandboxProviderIntegrationBlueprintSummary:{ status:"ready", userFacingSummary:{ resultLabel:"接入蓝图已准备", redacted:true } },

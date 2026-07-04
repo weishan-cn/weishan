@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_JUMP_TO_PLATFORM_HANDOFF_PREVIEW_VERSION = "4.2.5";
+  const GLOBAL_SHOPPING_JUMP_TO_PLATFORM_HANDOFF_PREVIEW_VERSION = "4.2.6";
   const PREVIEW_NAME = "global_shopping_jump_to_platform_handoff_preview_v1";
   const FORBIDDEN_COPY_RE = /全网最低|最低价保证|已锁价|真实最终价|立即购买|直接下单|一键下单|一键出票/i;
 

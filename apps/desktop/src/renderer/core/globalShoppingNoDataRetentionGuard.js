@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_NO_DATA_RETENTION_GUARD_VERSION = "4.2.5";
+  const GLOBAL_SHOPPING_NO_DATA_RETENTION_GUARD_VERSION = "4.2.6";
   const GUARD_NAME = "global_shopping_no_data_retention_guard_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, no_data_retention_guard_only:true };
   const REDACTION_RULES = ["phone", "email", "passport", "idCard", "bankCard", "address", "platformToken", "orderNumber", "rawMessage", "freeText", "providerPayload", "paymentPayload"];

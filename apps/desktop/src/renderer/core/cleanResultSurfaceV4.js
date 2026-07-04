@@ -1,5 +1,5 @@
 (function(){
-  const CLEAN_RESULT_SURFACE_V4_VERSION = "4.2.5";
+  const CLEAN_RESULT_SURFACE_V4_VERSION = "4.2.6";
   function clone(value){ return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function buildCleanResultSurfaceV4(input){
     const safe = input && typeof input === "object" ? input : {};

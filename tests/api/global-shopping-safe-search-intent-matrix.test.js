@@ -15,13 +15,13 @@ function load(file) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingSafeSearchIntentMatrix.js");
-  assert.equal(api.GLOBAL_SHOPPING_SAFE_SEARCH_INTENT_MATRIX_VERSION, "4.2.5");
-  const ready = api.buildGlobalShoppingSafeSearchIntentMatrix({ appVersion:"4.2.5", matrixMode:"safe_intent_matrix_only", category:"flight" });
+  assert.equal(api.GLOBAL_SHOPPING_SAFE_SEARCH_INTENT_MATRIX_VERSION, "4.2.6");
+  const ready = api.buildGlobalShoppingSafeSearchIntentMatrix({ appVersion:"4.2.6", matrixMode:"safe_intent_matrix_only", category:"flight" });
   assert.equal(ready.status, "ready");
   assert.equal(ready.searchIntentAllowed, true);
   assert.equal(ready.providerZeroLocked, true);
-  assert.equal(api.buildGlobalShoppingSafeSearchIntentMatrix({ appVersion:"4.2.5", matrixMode:"safe_intent_matrix_only", category:"restricted" }).status, "blocked");
-  assert.equal(api.buildGlobalShoppingSafeSearchIntentMatrix({ appVersion:"4.2.5", matrixMode:"safe_intent_matrix_only", category:"unsupported" }).status, "needs_review");
+  assert.equal(api.buildGlobalShoppingSafeSearchIntentMatrix({ appVersion:"4.2.6", matrixMode:"safe_intent_matrix_only", category:"restricted" }).status, "blocked");
+  assert.equal(api.buildGlobalShoppingSafeSearchIntentMatrix({ appVersion:"4.2.6", matrixMode:"safe_intent_matrix_only", category:"unsupported" }).status, "needs_review");
   console.log("GLOBAL_SHOPPING_SAFE_SEARCH_INTENT_MATRIX PASS");
 }
 

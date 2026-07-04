@@ -39,7 +39,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderTrustClosureViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderTrustClosureViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_TRUST_CLOSURE_VIEW_MODEL_VERSION, "4.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_TRUST_CLOSURE_VIEW_MODEL_VERSION, "4.2.6");
   const ready = api.buildGlobalShoppingProviderTrustClosureViewModel({
     providerPublicTrustClosureCenterSummary:readySummary("Provider Public Trust Closure Center", "Provider Public Trust Closure Center 已准备"),
     offlineReleaseMemorySnapshotSummary:readySummary("Offline Release Memory Snapshot", "Offline Release Memory Snapshot 已准备"),
@@ -47,7 +47,7 @@ function main() {
     userVisibleSafetyBoundaryExplainerSummary:readySummary("User-Visible Safety Boundary Explainer", "User-Visible Safety Boundary Explainer 已准备")
   });
   assert.equal(ready.viewModelName, "global_shopping_provider_trust_closure_view_model_v1");
-  assert.equal(ready.appVersion, "4.2.5");
+  assert.equal(ready.appVersion, "4.2.6");
   assert.equal(ready.status, "ready");
   assert.equal(ready.title, "Provider Trust Closure Review");
   assert.equal(ready.cards.length, 5);

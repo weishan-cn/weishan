@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_ZERO_PERSISTENCE_REGRESSION_GATE_VERSION = "4.2.5";
+  const GLOBAL_SHOPPING_ZERO_PERSISTENCE_REGRESSION_GATE_VERSION = "4.2.6";
   const GATE_NAME = "global_shopping_zero_persistence_regression_gate_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, zero_persistence_regression_gate_only:true };
   const REDACTION_RULES = ["phone", "email", "passport", "idCard", "bankCard", "address", "platformToken", "orderNumber", "rawMessage", "freeText", "providerPayload", "paymentPayload"];
@@ -168,7 +168,7 @@
       userFacingSummary:{
         title:"Zero-Persistence Regression Gate",
         resultLabel:zeroPersistenceStatus === "blocked" ? "Zero-Persistence Regression Gate 已阻断" : (zeroPersistenceStatus === "needs_review" ? "Zero-Persistence Regression Gate 仍需复核" : "Zero-Persistence Regression Gate 需人工复核"),
-        caveat:"专门确认 v4.2.5 没有保存任何真实用户数据、反馈、场景输入、验收记录、证据文件、provider 响应、订单、支付、token。"
+        caveat:"专门确认 v4.2.6 没有保存任何真实用户数据、反馈、场景输入、验收记录、证据文件、provider 响应、订单、支付、token。"
       },
       redacted:true
     });

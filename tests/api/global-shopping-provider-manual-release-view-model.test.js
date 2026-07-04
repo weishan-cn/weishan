@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderManualReleaseViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderManualReleaseViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_MANUAL_RELEASE_VIEW_MODEL_VERSION, "4.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_MANUAL_RELEASE_VIEW_MODEL_VERSION, "4.2.6");
 
   const ready = api.buildGlobalShoppingProviderManualReleaseViewModel({
     manualGovernanceReleaseDecisionRoomSummary:{ status:"ready", userFacingSummary:{ resultLabel:"人工发布决策室已准备", redacted:true }, rows:[{ rowId:"decision", label:"人工发布决策", value:"人工发布决策室已准备", status:"pass", redacted:true }], redacted:true },

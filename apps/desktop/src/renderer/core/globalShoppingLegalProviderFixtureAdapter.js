@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_LEGAL_PROVIDER_FIXTURE_ADAPTER_VERSION = "4.2.5";
+  const GLOBAL_SHOPPING_LEGAL_PROVIDER_FIXTURE_ADAPTER_VERSION = "4.2.6";
   const ADAPTER_NAME = "global_shopping_legal_provider_fixture_adapter_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

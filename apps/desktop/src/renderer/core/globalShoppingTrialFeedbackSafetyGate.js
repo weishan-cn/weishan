@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_TRIAL_FEEDBACK_SAFETY_GATE_VERSION = "4.2.5";
+  const GLOBAL_SHOPPING_TRIAL_FEEDBACK_SAFETY_GATE_VERSION = "4.2.6";
   const GATE_NAME = "global_shopping_trial_feedback_safety_gate_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, feedback_safety_gate_only:true };
   const SECRET_VALUE_RE = /(?:token|secret|api[_ -]?key|password)\s*[:=]\s*[\w-]+/i;

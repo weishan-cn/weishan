@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_REGRESSION_EVIDENCE_BOARD_VERSION = "4.2.5";
+  const GLOBAL_SHOPPING_OFFLINE_REGRESSION_EVIDENCE_BOARD_VERSION = "4.2.6";
   const BOARD_NAME = "global_shopping_offline_regression_evidence_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, regression_evidence_board_only:true };
   const UNCHANGED_BOUNDARIES = ["provider", "network", "key", "endpoint", "external_open", "payment", "order", "ticketing", "release", "push", "launch", "feedback_submit", "upload", "issue_create", "task_create"];

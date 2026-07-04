@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_CONTRACT_REPLAY_HARNESS_VERSION = "4.2.5";
+  const GLOBAL_SHOPPING_PROVIDER_CONTRACT_REPLAY_HARNESS_VERSION = "4.2.6";
   const HARNESS_NAME = "global_shopping_provider_contract_replay_harness_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

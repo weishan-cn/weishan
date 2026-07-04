@@ -25,7 +25,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingZeroPersistenceRegressionGate.js"]);
   const api = windowRef.WeishanGlobalShoppingZeroPersistenceRegressionGate;
-  assert.equal(api.GLOBAL_SHOPPING_ZERO_PERSISTENCE_REGRESSION_GATE_VERSION, "4.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_ZERO_PERSISTENCE_REGRESSION_GATE_VERSION, "4.2.6");
 
   const review = api.buildGlobalShoppingZeroPersistenceRegressionGate({
     publicBetaOfflineAcceptanceEvidenceCenterSummary:summary("Public Beta Offline Acceptance Evidence Center"),

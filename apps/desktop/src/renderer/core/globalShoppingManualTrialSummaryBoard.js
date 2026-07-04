@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MANUAL_TRIAL_SUMMARY_BOARD_VERSION = "4.2.5";
+  const GLOBAL_SHOPPING_MANUAL_TRIAL_SUMMARY_BOARD_VERSION = "4.2.6";
   const BOARD_NAME = "global_shopping_manual_trial_summary_board_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, manual_trial_summary_only:true };
   const REQUIRED_SCENARIOS = ["flight", "hotel", "product", "restricted", "feedback", "no_transaction", "no_provider"];

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_FINAL_TRIAL_HANDOFF_CONSOLE_VERSION = "4.2.5";
+  const GLOBAL_SHOPPING_FINAL_TRIAL_HANDOFF_CONSOLE_VERSION = "4.2.6";
   const CONSOLE_NAME = "global_shopping_final_trial_handoff_console_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, final_trial_handoff_only:true };
   const ALLOWED_NEXT_ACTIONS = ["continue_testing", "improve_copy", "expand_offline_scenarios", "manual_review_required", "blocked"];

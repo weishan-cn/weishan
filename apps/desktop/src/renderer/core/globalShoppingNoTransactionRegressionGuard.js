@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_NO_TRANSACTION_REGRESSION_GUARD_VERSION = "4.2.5";
+  const GLOBAL_SHOPPING_NO_TRANSACTION_REGRESSION_GUARD_VERSION = "4.2.6";
   const GUARD_NAME = "global_shopping_no_transaction_regression_guard_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, no_transaction_regression_guard_only:true };
 

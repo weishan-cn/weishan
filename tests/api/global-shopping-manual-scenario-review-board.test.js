@@ -25,7 +25,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingManualScenarioReviewBoard.js"]);
   const api = windowRef.WeishanGlobalShoppingManualScenarioReviewBoard;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_SCENARIO_REVIEW_BOARD_VERSION, "4.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_SCENARIO_REVIEW_BOARD_VERSION, "4.2.6");
 
   const review = api.buildGlobalShoppingManualScenarioReviewBoard({
     publicBetaOfflineAcceptanceEvidenceCenterSummary:summary("Public Beta Offline Acceptance Evidence Center"),

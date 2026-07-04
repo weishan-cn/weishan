@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v4.2.5 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
+  test("v4.2.6 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9652,7 +9652,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v401-render-smoke", "true");
       const card = {
-        version:"4.2.5",
+        version:"4.2.6",
         visible:true,
         globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, rows:[{ rowId:"public_beta", label:"Global Shopping Read-Only Public Beta Shell", value:"Global Shopping Read-Only Public Beta Shell 已准备", status:"pass", redacted:true }], redacted:true },
         globalShoppingReadOnlyCandidateEvidenceUnifierSummary:{ status:"ready", userFacingSummary:{ title:"候选价证据", resultLabel:"候选价证据已准备", redacted:true }, rows:[{ rowId:"candidate_evidence", label:"候选价证据", value:"候选价证据已准备", status:"pass", redacted:true }], redacted:true },
@@ -9758,6 +9758,10 @@ test.describe.serial("commerce agent workbench", () => {
         manualScenarioReviewBoardSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Manual Scenario Review Board", resultLabel:"Manual Scenario Review Board 需人工复核", redacted:true }, rows:[{ rowId:"manual_scenario_review_board", label:"Manual Scenario Review Board", value:"Manual Scenario Review Board 需人工复核", status:"warning", redacted:true }], redacted:true },
         zeroPersistenceRegressionGateSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Zero-Persistence Regression Gate", resultLabel:"Zero-Persistence Regression Gate 需人工复核", redacted:true }, rows:[{ rowId:"zero_persistence_regression_gate", label:"Zero-Persistence Regression Gate", value:"Zero-Persistence Regression Gate 需人工复核", status:"warning", redacted:true }], redacted:true },
         publicBetaOfflineAcceptanceViewModelSummary:{ status:"needs_review", userFacingSummary:{ title:"Public Beta Offline Acceptance ViewModel", resultLabel:"Public Beta Offline Acceptance ViewModel 仍需复核", redacted:true }, safeToProceedWithManualOfflineAcceptanceReview:false, redacted:true },
+        publicBetaFinalAcceptanceLockSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Public Beta Final Acceptance Lock", resultLabel:"Public Beta Final Acceptance Lock 需人工复核", redacted:true }, rows:[{ rowId:"public_beta_final_acceptance_lock", label:"Public Beta Final Acceptance Lock", value:"Public Beta Final Acceptance Lock 需人工复核", status:"warning", redacted:true }], redacted:true },
+        offlineReleaseCandidateAuditSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Offline Release Candidate Audit", resultLabel:"Offline Release Candidate Audit 需人工复核", redacted:true }, rows:[{ rowId:"offline_release_candidate_audit", label:"Offline Release Candidate Audit", value:"Offline Release Candidate Audit 需人工复核", status:"warning", redacted:true }], redacted:true },
+        zeroActionSafetyConsoleSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Zero-Action Safety Console", resultLabel:"Zero-Action Safety Console 需人工复核", redacted:true }, rows:[{ rowId:"zero_action_safety_console", label:"Zero-Action Safety Console", value:"Zero-Action Safety Console 需人工复核", status:"warning", redacted:true }], redacted:true },
+        publicBetaFinalAcceptanceViewModelSummary:{ status:"needs_review", userFacingSummary:{ title:"Public Beta Final Acceptance ViewModel", resultLabel:"Public Beta Final Acceptance ViewModel 仍需复核", redacted:true }, safeToProceedWithManualFinalAcceptanceReview:false, redacted:true },
         publicBetaReadinessSnapshotStatus:"manual_review_required",
         manualFeedbackReviewQueueStatus:"manual_review_required",
         offlineIssueTriageStatus:"manual_review_required",
@@ -9770,6 +9774,10 @@ test.describe.serial("commerce agent workbench", () => {
         manualScenarioReviewStatus:"manual_review_required",
         zeroPersistenceStatus:"manual_review_required",
         publicBetaOfflineAcceptanceViewModelStatus:"needs_review",
+        publicBetaFinalAcceptanceLockStatus:"manual_review_required",
+        offlineReleaseCandidateAuditStatus:"manual_review_required",
+        zeroActionSafetyStatus:"manual_review_required",
+        publicBetaFinalAcceptanceViewModelStatus:"needs_review",
         publicBetaFreezeEvidenceStatus:"ready",
         manualTrialIssueReviewStatus:"ready",
         offlineAcceptanceSnapshotStatus:"needs_review",
@@ -9804,6 +9812,7 @@ test.describe.serial("commerce agent workbench", () => {
         safeToProceedWithManualReadinessReview:true,
         safeToProceedWithManualAcceptanceReview:true,
         safeToProceedWithManualOfflineAcceptanceReview:false,
+        safeToProceedWithManualFinalAcceptanceReview:false,
         safeToProceedWithManualFreezeReview:true,
         safeToProceedWithManualAcceptanceSnapshotReview:false,
         safeToProceedWithManualClosureReview:true
@@ -9854,6 +9863,13 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("人工场景复核板仅为样例复核，不保存场景输入或复核结果");
     expect(v400.text).toContain("零持久化回归门确认不保存反馈、用户原文、场景输入、验收记录或证据文件");
     expect(v400.text).toContain("safeToProceedWithManualOfflineAcceptanceReview:false");
+    expect(v400.text).toContain("Public Beta Final Acceptance Lock");
+    expect(v400.text).toContain("Offline Release Candidate Audit");
+    expect(v400.text).toContain("Zero-Action Safety Console");
+    expect(v400.text).toContain("最终人工验收锁定仅为只读展示，不保存验收记录");
+    expect(v400.text).toContain("离线 RC 审计不创建 release、不生成审计文件");
+    expect(v400.text).toContain("零动作安全控制台确认没有任何真实动作执行入口");
+    expect(v400.text).toContain("safeToProceedWithManualFinalAcceptanceReview:false");
     expect(v400.text).toContain("Safe Search Intent Matrix");
     expect(v400.text).toContain("User Boundary Panel");
     expect(v400.text).toContain("Category Result Simulator");

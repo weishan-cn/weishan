@@ -25,7 +25,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineUserScenarioPack.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineUserScenarioPack;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_USER_SCENARIO_PACK_VERSION, "4.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_USER_SCENARIO_PACK_VERSION, "4.2.6");
 
   const review = api.buildGlobalShoppingOfflineUserScenarioPack({
     publicBetaManualAcceptanceChecklistSummary:summary("Public Beta Manual Acceptance Checklist"),

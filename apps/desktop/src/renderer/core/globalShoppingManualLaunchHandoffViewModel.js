@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MANUAL_LAUNCH_HANDOFF_VIEW_MODEL_VERSION = "4.2.5";
+  const GLOBAL_SHOPPING_MANUAL_LAUNCH_HANDOFF_VIEW_MODEL_VERSION = "4.2.6";
   const VIEW_MODEL_NAME = "global_shopping_manual_launch_handoff_view_model_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

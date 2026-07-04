@@ -25,7 +25,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaManualAcceptanceChecklist.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaManualAcceptanceChecklist;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_MANUAL_ACCEPTANCE_CHECKLIST_VERSION, "4.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_MANUAL_ACCEPTANCE_CHECKLIST_VERSION, "4.2.6");
 
   const review = api.buildGlobalShoppingPublicBetaManualAcceptanceChecklist({
     publicBetaReadinessSnapshotSummary:summary("Public Beta Readiness Snapshot"),

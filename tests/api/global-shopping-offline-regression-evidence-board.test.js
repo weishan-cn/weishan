@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineRegressionEvidenceBoard.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineRegressionEvidenceBoard;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_REGRESSION_EVIDENCE_BOARD_VERSION, "4.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_REGRESSION_EVIDENCE_BOARD_VERSION, "4.2.6");
 
   const board = api.buildGlobalShoppingOfflineRegressionEvidenceBoard({
     publicBetaCandidateQaFreezeSummary:summary("Public Beta Candidate QA Freeze", "manual_review_required", { qaFreezeStatus:"manual_review_required" }),

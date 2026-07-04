@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const MULTI_PROVIDER_SANDBOX_ADAPTER_REGISTRY_VERSION = "4.2.5";
+  const MULTI_PROVIDER_SANDBOX_ADAPTER_REGISTRY_VERSION = "4.2.6";
   const REGISTRY_NAME = "multi_provider_sandbox_adapter_registry_v1";
 
   function clone(value) {

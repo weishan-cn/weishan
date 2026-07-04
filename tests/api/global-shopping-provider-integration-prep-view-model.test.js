@@ -23,7 +23,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderIntegrationPrepViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderIntegrationPrepViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_INTEGRATION_PREP_VIEW_MODEL_VERSION, "4.2.5");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_INTEGRATION_PREP_VIEW_MODEL_VERSION, "4.2.6");
   const ready = api.buildGlobalShoppingProviderIntegrationPrepViewModel({
     providerLegalReviewDossierSummary:{ status:"ready", userFacingSummary:{ resultLabel:"法务审查档案已准备", redacted:true }, rows:[{ rowId:"legal", label:"法务审查", value:"已准备", status:"pass", redacted:true }] },
     credentialVaultInterfaceStubSummary:{ status:"ready", userFacingSummary:{ resultLabel:"凭证接口桩已准备", redacted:true }, rows:[{ rowId:"vault", label:"凭证接口桩", value:"已准备", status:"pass", redacted:true }] },
