@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const SINGLE_FLIGHT_PROVIDER_SANDBOX_CONNECTOR_VERSION = "4.2.2";
+  const SINGLE_FLIGHT_PROVIDER_SANDBOX_CONNECTOR_VERSION = "4.2.3";
   const CONNECTOR_NAME = "single_flight_provider_sandbox_connector_v1";
   const FALLBACK_PROVIDER_IDS = ["google_flights_search", "trip_com_ctrip_search"];
 

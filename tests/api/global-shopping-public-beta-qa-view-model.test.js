@@ -25,14 +25,14 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaQaViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaQaViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_QA_VIEW_MODEL_VERSION, "4.2.2");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_QA_VIEW_MODEL_VERSION, "4.2.3");
   const ready = api.buildGlobalShoppingPublicBetaQaViewModel({
     publicBetaVisualQaConsoleSummary:summary("Public Beta Visual QA Console"),
     publicBetaTrialScenarioChecklistSummary:summary("Trial Scenario Checklist"),
     noTransactionRegressionGuardSummary:summary("No-Transaction Regression Guard")
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.2.2");
+  assert.equal(ready.appVersion, "4.2.3");
   assert.equal(ready.safeToProceedWithManualVisualQaReview, true);
   assert.equal(ready.externalUrl, null);
   assert.equal(ready.orderUrl, null);

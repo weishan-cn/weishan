@@ -23,7 +23,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderContractReplayHarness.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderContractReplayHarness;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_CONTRACT_REPLAY_HARNESS_VERSION, "4.2.2");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_CONTRACT_REPLAY_HARNESS_VERSION, "4.2.3");
 
   const ready = api.buildGlobalShoppingProviderContractReplayHarness({
     mockProviderAdapterRegistryRuntimeSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Mock Adapter 注册运行时已准备", redacted:true } },

@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingTrialOperatorNotesPanel.js"]);
   const api = windowRef.WeishanGlobalShoppingTrialOperatorNotesPanel;
-  assert.equal(api.GLOBAL_SHOPPING_TRIAL_OPERATOR_NOTES_PANEL_VERSION, "4.2.2");
+  assert.equal(api.GLOBAL_SHOPPING_TRIAL_OPERATOR_NOTES_PANEL_VERSION, "4.2.3");
 
   const panel = api.buildGlobalShoppingTrialOperatorNotesPanel({
     publicBetaCandidateEvidenceReviewSummary:summary("Public Beta Candidate Evidence Review", "manual_review_required", { evidenceReviewStatus:"manual_review_required" }),

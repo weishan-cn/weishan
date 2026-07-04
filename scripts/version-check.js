@@ -2468,6 +2468,10 @@ function runVersionCheck() {
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping trial feedback intake mock version", "apps/desktop/src/renderer/core/globalShoppingTrialFeedbackIntakeMock.js", "GLOBAL_SHOPPING_TRIAL_FEEDBACK_INTAKE_MOCK_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping offline regression evidence board version", "apps/desktop/src/renderer/core/globalShoppingOfflineRegressionEvidenceBoard.js", "GLOBAL_SHOPPING_OFFLINE_REGRESSION_EVIDENCE_BOARD_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta qa freeze view model version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaQaFreezeViewModel.js", "GLOBAL_SHOPPING_PUBLIC_BETA_QA_FREEZE_VIEW_MODEL_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta readiness snapshot version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaReadinessSnapshot.js", "GLOBAL_SHOPPING_PUBLIC_BETA_READINESS_SNAPSHOT_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping manual feedback review queue mock version", "apps/desktop/src/renderer/core/globalShoppingManualFeedbackReviewQueueMock.js", "GLOBAL_SHOPPING_MANUAL_FEEDBACK_REVIEW_QUEUE_MOCK_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping offline issue triage board version", "apps/desktop/src/renderer/core/globalShoppingOfflineIssueTriageBoard.js", "GLOBAL_SHOPPING_OFFLINE_ISSUE_TRIAGE_BOARD_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta readiness review view model version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaReadinessReviewViewModel.js", "GLOBAL_SHOPPING_PUBLIC_BETA_READINESS_REVIEW_VIEW_MODEL_VERSION");
   }
 
   results.forEach((item) => {

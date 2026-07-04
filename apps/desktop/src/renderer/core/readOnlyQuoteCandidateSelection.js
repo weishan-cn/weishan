@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_CANDIDATE_SELECTION_VERSION = "4.2.2";
+  const READ_ONLY_QUOTE_CANDIDATE_SELECTION_VERSION = "4.2.3";
   const SELECTION_NAME = "read_only_quote_candidate_selection_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

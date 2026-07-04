@@ -19,13 +19,13 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingManualLaunchHandoffPack.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingManualLaunchHandoffPack;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_LAUNCH_HANDOFF_PACK_VERSION, "4.2.2");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_LAUNCH_HANDOFF_PACK_VERSION, "4.2.3");
 
   const ready = api.buildGlobalShoppingManualLaunchHandoffPack({
     publicBetaStabilityAuditSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Stability Audit", resultLabel:"Public Beta Stability Audit 已准备", redacted:true }, redacted:true }
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.2.2");
+  assert.equal(ready.appVersion, "4.2.3");
   assert.equal(ready.manualReviewRequired, true);
   assert.deepEqual(ready.nextDecisionOptions, ["manual_review_required", "continue_testing"]);
   assert.equal(ready.externalUrl, null);

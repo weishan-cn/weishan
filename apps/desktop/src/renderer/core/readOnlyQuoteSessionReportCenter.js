@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "4.2.2";
+  const READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION = "4.2.3";
   const REPORT_CENTER_NAME = "read_only_quote_session_report_center_v1";
   const FORBIDDEN_NAME_RE = /(rawProviderResponse|rawResponse|rawPayload|token|key|secret|password|auth|bookingUrl|checkoutUrl|paymentUrl|orderUrl|identity|passport|bank|card)/i;
   const FORBIDDEN_TEXT_RE = /全网最低|最低价保证|已锁价|可以出票|可直接出票|真实最终价|立即购买/i;
@@ -943,7 +943,10 @@
       publicBetaTrialOperationsViewModelSummary: workflow.publicBetaTrialOperationsViewModelSummary || safe.publicBetaTrialOperationsViewModelSummary || null,
       publicBetaTrialEvidenceLedgerSummary: workflow.publicBetaTrialEvidenceLedgerSummary || safe.publicBetaTrialEvidenceLedgerSummary || null,
       publicBetaQaDecisionMatrixSummary: workflow.publicBetaQaDecisionMatrixSummary || safe.publicBetaQaDecisionMatrixSummary || null,
+      publicBetaReadinessSnapshotSummary: workflow.publicBetaReadinessSnapshotSummary || safe.publicBetaReadinessSnapshotSummary ? { title:"Public Beta Readiness Snapshot", line:workflow.publicBetaReadinessSnapshotSummary && workflow.publicBetaReadinessSnapshotSummary.userFacingSummary && workflow.publicBetaReadinessSnapshotSummary.userFacingSummary.resultLabel || safe.publicBetaReadinessSnapshotSummary && safe.publicBetaReadinessSnapshotSummary.userFacingSummary && safe.publicBetaReadinessSnapshotSummary.userFacingSummary.resultLabel || "Public Beta Readiness Snapshot 仍需复核", redacted:true } : null,
+      manualFeedbackReviewQueueMockSummary: workflow.manualFeedbackReviewQueueMockSummary || safe.manualFeedbackReviewQueueMockSummary ? { title:"Manual Feedback Review Queue Mock", line:workflow.manualFeedbackReviewQueueMockSummary && workflow.manualFeedbackReviewQueueMockSummary.userFacingSummary && workflow.manualFeedbackReviewQueueMockSummary.userFacingSummary.resultLabel || safe.manualFeedbackReviewQueueMockSummary && safe.manualFeedbackReviewQueueMockSummary.userFacingSummary && safe.manualFeedbackReviewQueueMockSummary.userFacingSummary.resultLabel || "Manual Feedback Review Queue Mock 仍需复核", redacted:true } : null,
       offlineIssueTriageBoardSummary: workflow.offlineIssueTriageBoardSummary || safe.offlineIssueTriageBoardSummary || null,
+      publicBetaReadinessReviewViewModelSummary: workflow.publicBetaReadinessReviewViewModelSummary || safe.publicBetaReadinessReviewViewModelSummary ? { title:"Public Beta Readiness Review ViewModel", line:workflow.publicBetaReadinessReviewViewModelSummary && workflow.publicBetaReadinessReviewViewModelSummary.userFacingSummary && workflow.publicBetaReadinessReviewViewModelSummary.userFacingSummary.resultLabel || safe.publicBetaReadinessReviewViewModelSummary && safe.publicBetaReadinessReviewViewModelSummary.userFacingSummary && safe.publicBetaReadinessReviewViewModelSummary.userFacingSummary.resultLabel || "Public Beta Readiness Review ViewModel 仍需复核", redacted:true } : null,
       publicBetaQaOperationsViewModelSummary: workflow.publicBetaQaOperationsViewModelSummary || safe.publicBetaQaOperationsViewModelSummary || null,
       publicBetaQaFreezeGateSummary: workflow.publicBetaQaFreezeGateSummary || safe.publicBetaQaFreezeGateSummary ? { title:"Public Beta QA Freeze Gate", line:workflow.publicBetaQaFreezeGateSummary && workflow.publicBetaQaFreezeGateSummary.userFacingSummary && workflow.publicBetaQaFreezeGateSummary.userFacingSummary.resultLabel || safe.publicBetaQaFreezeGateSummary && safe.publicBetaQaFreezeGateSummary.userFacingSummary && safe.publicBetaQaFreezeGateSummary.userFacingSummary.resultLabel || "Public Beta QA Freeze Gate 仍需复核", redacted:true } : null,
       manualTrialSummaryBoardSummary: workflow.manualTrialSummaryBoardSummary || safe.manualTrialSummaryBoardSummary ? { title:"Manual Trial Summary Board", line:workflow.manualTrialSummaryBoardSummary && workflow.manualTrialSummaryBoardSummary.userFacingSummary && workflow.manualTrialSummaryBoardSummary.userFacingSummary.resultLabel || safe.manualTrialSummaryBoardSummary && safe.manualTrialSummaryBoardSummary.userFacingSummary && safe.manualTrialSummaryBoardSummary.userFacingSummary.resultLabel || "Manual Trial Summary Board 仍需复核", redacted:true } : null,
@@ -1017,7 +1020,10 @@
       publicBetaTrialOperationsViewModelStatus: workflow.publicBetaTrialOperationsViewModelStatus || safe.publicBetaTrialOperationsViewModelStatus || "",
       publicBetaTrialEvidenceLedgerStatus: workflow.publicBetaTrialEvidenceLedgerStatus || safe.publicBetaTrialEvidenceLedgerStatus || "",
       publicBetaQaDecisionMatrixStatus: workflow.publicBetaQaDecisionMatrixStatus || safe.publicBetaQaDecisionMatrixStatus || "",
+      publicBetaReadinessSnapshotStatus: workflow.publicBetaReadinessSnapshotStatus || safe.publicBetaReadinessSnapshotStatus || "",
+      manualFeedbackReviewQueueStatus: workflow.manualFeedbackReviewQueueStatus || safe.manualFeedbackReviewQueueStatus || "",
       offlineIssueTriageBoardStatus: workflow.offlineIssueTriageBoardStatus || safe.offlineIssueTriageBoardStatus || "",
+      publicBetaReadinessReviewViewModelStatus: workflow.publicBetaReadinessReviewViewModelStatus || safe.publicBetaReadinessReviewViewModelStatus || "",
       publicBetaQaOperationsViewModelStatus: workflow.publicBetaQaOperationsViewModelStatus || safe.publicBetaQaOperationsViewModelStatus || "",
       publicBetaQaFreezeGateStatus: workflow.publicBetaQaFreezeGateStatus || safe.publicBetaQaFreezeGateStatus || "",
       manualTrialSummaryBoardStatus: workflow.manualTrialSummaryBoardStatus || safe.manualTrialSummaryBoardStatus || "",
@@ -1054,6 +1060,7 @@
       safeToProceedWithManualRcReview: workflow.safeToProceedWithManualRcReview === true || safe.safeToProceedWithManualRcReview === true,
       safeToProceedWithManualLaunchHandoffReview: workflow.safeToProceedWithManualLaunchHandoffReview === true || safe.safeToProceedWithManualLaunchHandoffReview === true,
       safeToProceedWithManualQaReview: workflow.safeToProceedWithManualQaReview === true || safe.safeToProceedWithManualQaReview === true,
+      safeToProceedWithManualReadinessReview: workflow.safeToProceedWithManualReadinessReview === true || safe.safeToProceedWithManualReadinessReview === true,
       safeToProceedWithManualTrialOperationsReview: workflow.safeToProceedWithManualTrialOperationsReview === true || safe.safeToProceedWithManualTrialOperationsReview === true,
       safeToProceedWithManualQaOperationsReview: workflow.safeToProceedWithManualQaOperationsReview === true || safe.safeToProceedWithManualQaOperationsReview === true,
       safeToProceedWithManualFreezeReview: workflow.safeToProceedWithManualFreezeReview === true || safe.safeToProceedWithManualFreezeReview === true,
@@ -1604,7 +1611,10 @@
       publicBetaTrialOperationsViewModelSummary: workflow.publicBetaTrialOperationsViewModelSummary || safe.publicBetaTrialOperationsViewModelSummary || null,
       publicBetaTrialEvidenceLedgerSummary: workflow.publicBetaTrialEvidenceLedgerSummary || safe.publicBetaTrialEvidenceLedgerSummary || null,
       publicBetaQaDecisionMatrixSummary: workflow.publicBetaQaDecisionMatrixSummary || safe.publicBetaQaDecisionMatrixSummary || null,
-      offlineIssueTriageBoardSummary: workflow.offlineIssueTriageBoardSummary || safe.offlineIssueTriageBoardSummary || null,
+      publicBetaReadinessSnapshotSummary: workflow.publicBetaReadinessSnapshotSummary || safe.publicBetaReadinessSnapshotSummary ? { title:"Public Beta Readiness Snapshot", line:workflow.publicBetaReadinessSnapshotSummary && workflow.publicBetaReadinessSnapshotSummary.userFacingSummary && workflow.publicBetaReadinessSnapshotSummary.userFacingSummary.resultLabel || safe.publicBetaReadinessSnapshotSummary && safe.publicBetaReadinessSnapshotSummary.userFacingSummary && safe.publicBetaReadinessSnapshotSummary.userFacingSummary.resultLabel || "Public Beta Readiness Snapshot 仍需复核", redacted:true } : null,
+      manualFeedbackReviewQueueMockSummary: workflow.manualFeedbackReviewQueueMockSummary || safe.manualFeedbackReviewQueueMockSummary ? { title:"Manual Feedback Review Queue Mock", line:workflow.manualFeedbackReviewQueueMockSummary && workflow.manualFeedbackReviewQueueMockSummary.userFacingSummary && workflow.manualFeedbackReviewQueueMockSummary.userFacingSummary.resultLabel || safe.manualFeedbackReviewQueueMockSummary && safe.manualFeedbackReviewQueueMockSummary.userFacingSummary && safe.manualFeedbackReviewQueueMockSummary.userFacingSummary.resultLabel || "Manual Feedback Review Queue Mock 仍需复核", redacted:true } : null,
+      offlineIssueTriageBoardSummary: workflow.offlineIssueTriageBoardSummary || safe.offlineIssueTriageBoardSummary ? { title:"Offline Issue Triage Board", line:workflow.offlineIssueTriageBoardSummary && workflow.offlineIssueTriageBoardSummary.userFacingSummary && workflow.offlineIssueTriageBoardSummary.userFacingSummary.resultLabel || safe.offlineIssueTriageBoardSummary && safe.offlineIssueTriageBoardSummary.userFacingSummary && safe.offlineIssueTriageBoardSummary.userFacingSummary.resultLabel || "Offline Issue Triage Board 仍需复核", redacted:true } : null,
+      publicBetaReadinessReviewViewModelSummary: workflow.publicBetaReadinessReviewViewModelSummary || safe.publicBetaReadinessReviewViewModelSummary ? { title:"Public Beta Readiness Review ViewModel", line:workflow.publicBetaReadinessReviewViewModelSummary && workflow.publicBetaReadinessReviewViewModelSummary.userFacingSummary && workflow.publicBetaReadinessReviewViewModelSummary.userFacingSummary.resultLabel || safe.publicBetaReadinessReviewViewModelSummary && safe.publicBetaReadinessReviewViewModelSummary.userFacingSummary && safe.publicBetaReadinessReviewViewModelSummary.userFacingSummary.resultLabel || "Public Beta Readiness Review ViewModel 仍需复核", redacted:true } : null,
       publicBetaQaOperationsViewModelSummary: workflow.publicBetaQaOperationsViewModelSummary || safe.publicBetaQaOperationsViewModelSummary || null,
       publicBetaQaFreezeGateSummary: workflow.publicBetaQaFreezeGateSummary || safe.publicBetaQaFreezeGateSummary ? { title:"Public Beta QA Freeze Gate", line:workflow.publicBetaQaFreezeGateSummary && workflow.publicBetaQaFreezeGateSummary.userFacingSummary && workflow.publicBetaQaFreezeGateSummary.userFacingSummary.resultLabel || safe.publicBetaQaFreezeGateSummary && safe.publicBetaQaFreezeGateSummary.userFacingSummary && safe.publicBetaQaFreezeGateSummary.userFacingSummary.resultLabel || "Public Beta QA Freeze Gate 仍需复核", redacted:true } : null,
       manualTrialSummaryBoardSummary: workflow.manualTrialSummaryBoardSummary || safe.manualTrialSummaryBoardSummary ? { title:"Manual Trial Summary Board", line:workflow.manualTrialSummaryBoardSummary && workflow.manualTrialSummaryBoardSummary.userFacingSummary && workflow.manualTrialSummaryBoardSummary.userFacingSummary.resultLabel || safe.manualTrialSummaryBoardSummary && safe.manualTrialSummaryBoardSummary.userFacingSummary && safe.manualTrialSummaryBoardSummary.userFacingSummary.resultLabel || "Manual Trial Summary Board 仍需复核", redacted:true } : null,
@@ -1644,7 +1654,10 @@
       publicBetaTrialOperationsViewModelStatus: workflow.publicBetaTrialOperationsViewModelStatus || safe.publicBetaTrialOperationsViewModelStatus || "",
       publicBetaTrialEvidenceLedgerStatus: workflow.publicBetaTrialEvidenceLedgerStatus || safe.publicBetaTrialEvidenceLedgerStatus || "",
       publicBetaQaDecisionMatrixStatus: workflow.publicBetaQaDecisionMatrixStatus || safe.publicBetaQaDecisionMatrixStatus || "",
+      publicBetaReadinessSnapshotStatus: workflow.publicBetaReadinessSnapshotStatus || safe.publicBetaReadinessSnapshotStatus || "",
+      manualFeedbackReviewQueueStatus: workflow.manualFeedbackReviewQueueStatus || safe.manualFeedbackReviewQueueStatus || "",
       offlineIssueTriageBoardStatus: workflow.offlineIssueTriageBoardStatus || safe.offlineIssueTriageBoardStatus || "",
+      publicBetaReadinessReviewViewModelStatus: workflow.publicBetaReadinessReviewViewModelStatus || safe.publicBetaReadinessReviewViewModelStatus || "",
       publicBetaQaOperationsViewModelStatus: workflow.publicBetaQaOperationsViewModelStatus || safe.publicBetaQaOperationsViewModelStatus || "",
       publicBetaQaFreezeGateStatus: workflow.publicBetaQaFreezeGateStatus || safe.publicBetaQaFreezeGateStatus || "",
       manualTrialSummaryBoardStatus: workflow.manualTrialSummaryBoardStatus || safe.manualTrialSummaryBoardStatus || "",
@@ -1685,6 +1698,7 @@
       safeToProceedWithManualRcReview: workflow.safeToProceedWithManualRcReview === true || safe.safeToProceedWithManualRcReview === true,
       safeToProceedWithManualLaunchHandoffReview: workflow.safeToProceedWithManualLaunchHandoffReview === true || safe.safeToProceedWithManualLaunchHandoffReview === true,
       safeToProceedWithManualQaReview: workflow.safeToProceedWithManualQaReview === true || safe.safeToProceedWithManualQaReview === true,
+      safeToProceedWithManualReadinessReview: workflow.safeToProceedWithManualReadinessReview === true || safe.safeToProceedWithManualReadinessReview === true,
       safeToProceedWithManualTrialOperationsReview: workflow.safeToProceedWithManualTrialOperationsReview === true || safe.safeToProceedWithManualTrialOperationsReview === true,
       safeToProceedWithManualQaOperationsReview: workflow.safeToProceedWithManualQaOperationsReview === true || safe.safeToProceedWithManualQaOperationsReview === true,
       safeToProceedWithManualFreezeReview: workflow.safeToProceedWithManualFreezeReview === true || safe.safeToProceedWithManualFreezeReview === true,

@@ -19,7 +19,7 @@ function readySummary(title, resultLabel) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingFinalOfflineLaunchReviewConsole.js").WeishanGlobalShoppingFinalOfflineLaunchReviewConsole;
-  assert.equal(api.GLOBAL_SHOPPING_FINAL_OFFLINE_LAUNCH_REVIEW_CONSOLE_VERSION, "4.2.2");
+  assert.equal(api.GLOBAL_SHOPPING_FINAL_OFFLINE_LAUNCH_REVIEW_CONSOLE_VERSION, "4.2.3");
   const ready = api.buildGlobalShoppingFinalOfflineLaunchReviewConsole({
     providerLaunchAuditSnapshotSummary:readySummary("Provider Launch Audit Snapshot", "Provider Launch Audit Snapshot 已准备"),
     offlinePolicyReplayCenterSummary:readySummary("Offline Policy Replay Center", "Offline Policy Replay Center 已准备"),

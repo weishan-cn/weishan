@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_FIRST_SANDBOX_PROVIDER_CONNECTOR_VERSION = "4.2.2";
+  const GLOBAL_SHOPPING_FIRST_SANDBOX_PROVIDER_CONNECTOR_VERSION = "4.2.3";
   const CONNECTOR_NAME = "global_shopping_first_sandbox_provider_connector_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

@@ -39,7 +39,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingProviderDistributionReadinessViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingProviderDistributionReadinessViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_DISTRIBUTION_READINESS_VIEW_MODEL_VERSION, "4.2.2");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_DISTRIBUTION_READINESS_VIEW_MODEL_VERSION, "4.2.3");
   const ready = api.buildGlobalShoppingProviderDistributionReadinessViewModel({
     offlineDistributionReadinessCenterSummary:readySummary("Offline Distribution Readiness Center", "Offline Distribution Readiness Center 已准备"),
     noActivationEnforcementLedgerSummary:readySummary("No-Activation Enforcement Ledger", "No-Activation Enforcement Ledger 已准备"),

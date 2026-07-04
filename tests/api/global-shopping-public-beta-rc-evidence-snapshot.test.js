@@ -33,7 +33,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaRcEvidenceSnapshot.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaRcEvidenceSnapshot;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_RC_EVIDENCE_SNAPSHOT_VERSION, "4.2.2");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_RC_EVIDENCE_SNAPSHOT_VERSION, "4.2.3");
 
   const ready = api.buildGlobalShoppingPublicBetaRcEvidenceSnapshot({
     publicBetaManualQaReportCenterSummary:summary("Public Beta Manual QA Report Center"),

@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowRiskBadgeBuilder.js"]);
   const api = windowRef.WeishanFlightWorkflowRiskBadgeBuilder;
-  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.2.2");
+  assert.equal(api.FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION, "4.2.3");
   const model = api.buildFlightWorkflowRiskBadges({ auditReview:{ auditHealth:{ overall:"warning", hasBlockedActions:true, hasConfirmationRequiredActions:true, hasSensitiveInputBlocked:true } }, safeSessionExportPreview:{ status:"ready" }, feedbackReviewSummary:{ status:"ready" }, acceptanceSessionSummary:{ status:"completed" }, betaCohortSummary:{ status:"ready", cohortHealth:{ safeToExpandBeta:true } }, feedbackTrendSummary:{ status:"ready", recommendation:{ recommendationId:"expand_read_only_beta" }, trends:{ overallTrend:"positive" } }, betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true } }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistName:"flight_workflow_read_only_public_pilot_checklist_v1" }, pilotReadinessSummary:{ status:"ready", viewModelName:"flight_workflow_pilot_readiness_view_model_v1" } });
   assert.equal(model.builderName, "flight_workflow_risk_badge_builder_v1");
   const labels = model.badges.map((item) => item.label);
@@ -759,6 +759,20 @@ function main() {
   assert.ok(decisionReviewLabels.includes("交接演练不打开平台"));
   assert.ok(decisionReviewLabels.includes("参数预览不包含身份或支付信息"));
   assert.ok(decisionReviewLabels.includes("决策复核不代表下单能力"));
+  const readinessReviewLabels = api.buildFlightWorkflowRiskBadges({
+    publicBetaReadinessSnapshotSummary:{ status:"manual_review_required", userFacingSummary:{ resultLabel:"Public Beta Readiness Snapshot 需人工复核", redacted:true } },
+    manualFeedbackReviewQueueMockSummary:{ status:"manual_review_required", userFacingSummary:{ resultLabel:"Manual Feedback Review Queue Mock 需人工复核", redacted:true } },
+    offlineIssueTriageBoardSummary:{ status:"manual_review_required", userFacingSummary:{ resultLabel:"Offline Issue Triage Board 需人工复核", redacted:true } },
+    publicBetaReadinessReviewViewModelSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Public Beta Readiness Review ViewModel 已准备", redacted:true } }
+  }).badges.map((item) => item.label);
+  assert.ok(readinessReviewLabels.includes("Public Beta Readiness Snapshot 需人工复核"));
+  assert.ok(readinessReviewLabels.includes("Manual Feedback Review Queue Mock 需人工复核"));
+  assert.ok(readinessReviewLabels.includes("Offline Issue Triage Board 需人工复核"));
+  assert.ok(readinessReviewLabels.includes("Public Beta Readiness Review ViewModel 已准备"));
+  assert.ok(readinessReviewLabels.includes("Readiness Snapshot / Feedback Review Queue / Issue Triage"));
+  assert.ok(readinessReviewLabels.includes("准备快照仅为只读展示，不生成文件"));
+  assert.ok(readinessReviewLabels.includes("反馈复核队列仅为 Mock，不保存、不上传、不创建 issue/task"));
+  assert.ok(readinessReviewLabels.includes("问题分级仅为离线展示，不创建真实任务"));
   console.log("FLIGHT_WORKFLOW_RISK_BADGE_BUILDER PASS");
 }
 main();

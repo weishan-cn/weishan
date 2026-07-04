@@ -15,7 +15,7 @@ function load(file) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingOfficialAnchorComparisonView.js");
-  assert.equal(api.GLOBAL_SHOPPING_OFFICIAL_ANCHOR_COMPARISON_VIEW_VERSION, "4.2.2");
+  assert.equal(api.GLOBAL_SHOPPING_OFFICIAL_ANCHOR_COMPARISON_VIEW_VERSION, "4.2.3");
   const ready = api.buildGlobalShoppingOfficialAnchorComparisonView({
     officialAnchorLabel:"官方价锚点",
     officialAnchorPrice:1399,

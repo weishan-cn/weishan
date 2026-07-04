@@ -1,6 +1,6 @@
 ;(function () {
   "use strict";
-  const FLIGHT_WORKFLOW_HANDOFF_PACKET_POLICY_GUARD_VERSION = "4.2.2";
+  const FLIGHT_WORKFLOW_HANDOFF_PACKET_POLICY_GUARD_VERSION = "4.2.3";
   const GUARD_NAME = "flight_workflow_handoff_packet_policy_guard_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

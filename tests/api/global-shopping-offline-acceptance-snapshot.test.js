@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineAcceptanceSnapshot.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineAcceptanceSnapshot;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_ACCEPTANCE_SNAPSHOT_VERSION, "4.2.2");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_ACCEPTANCE_SNAPSHOT_VERSION, "4.2.3");
 
   const ready = api.buildGlobalShoppingOfflineAcceptanceSnapshot({
     publicBetaFreezeEvidenceSummary:summary("Public Beta Freeze Evidence Summary"),

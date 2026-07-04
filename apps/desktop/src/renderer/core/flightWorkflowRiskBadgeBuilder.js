@@ -1,12 +1,13 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.2.2";
+  const FLIGHT_WORKFLOW_RISK_BADGE_BUILDER_VERSION = "4.2.3";
   const BUILDER_NAME = "flight_workflow_risk_badge_builder_v1";
   const FORBIDDEN_TEXT_RE = /https?:\/\/\S+|token|apiKey|secret|password|身份证|护照|银行卡|credential|passport|cardNumber/ig;
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value == null ? "" : value).trim(); }
   function obj(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
+  function present(value) { return Object.keys(obj(value)).length > 0; }
   function safeText(value) { return text(value).replace(FORBIDDEN_TEXT_RE, "redacted"); }
   function labelOf(summary, fallback) { const safe = obj(summary); return safeText(safe.userFacingSummary && safe.userFacingSummary.resultLabel || safe.title || fallback || "仍需复核"); }
   function safety() { return { bookingUrl:null, payment:false, order:false, ticketing:false, identityUpload:false, secretStored:false, redacted:true }; }
@@ -164,6 +165,10 @@
       const trialFeedbackIntakeMockSummary = obj(safe.trialFeedbackIntakeMockSummary);
       const offlineRegressionEvidenceBoardSummary = obj(safe.offlineRegressionEvidenceBoardSummary);
       const publicBetaQaFreezeViewModelSummary = obj(safe.publicBetaQaFreezeViewModelSummary);
+      const publicBetaReadinessSnapshotSummary = obj(safe.publicBetaReadinessSnapshotSummary);
+      const manualFeedbackReviewQueueMockSummary = obj(safe.manualFeedbackReviewQueueMockSummary);
+      const offlineIssueTriageBoardSummary = obj(safe.offlineIssueTriageBoardSummary);
+      const publicBetaReadinessReviewViewModelSummary = obj(safe.publicBetaReadinessReviewViewModelSummary);
       if (publicBetaCandidateLockSummary.status === "manual_review_required") badges.push(badge("public_beta_candidate_lock_manual", "候选锁定需人工复核", "warning"));
       if (publicBetaCandidateLockSummary.status === "needs_review") badges.push(badge("public_beta_candidate_lock_review", "候选锁定仍需复核", "warning"));
       if (publicBetaCandidateLockSummary.status === "blocked") badges.push(badge("public_beta_candidate_lock_blocked", "候选锁定已阻断", "blocked"));
@@ -200,6 +205,25 @@
       if (publicBetaQaFreezeViewModelSummary.status === "ready") badges.push(badge("public_beta_qa_freeze_view_model_ready", "QA 冻结视图可人工复核", "info"));
       if (publicBetaQaFreezeViewModelSummary.status === "needs_review") badges.push(badge("public_beta_qa_freeze_view_model_review", "QA 冻结视图仍需复核", "warning"));
       if (publicBetaQaFreezeViewModelSummary.status === "blocked") badges.push(badge("public_beta_qa_freeze_view_model_blocked", "QA 冻结视图已阻断", "blocked"));
+      if (publicBetaReadinessSnapshotSummary.status === "manual_review_required") badges.push(badge("public_beta_readiness_snapshot_manual", "Public Beta Readiness Snapshot 需人工复核", "warning"));
+      if (publicBetaReadinessSnapshotSummary.status === "needs_review") badges.push(badge("public_beta_readiness_snapshot_review", "Public Beta Readiness Snapshot 仍需复核", "warning"));
+      if (publicBetaReadinessSnapshotSummary.status === "blocked") badges.push(badge("public_beta_readiness_snapshot_blocked", "Public Beta Readiness Snapshot 已阻断", "blocked"));
+      if (manualFeedbackReviewQueueMockSummary.status === "manual_review_required") badges.push(badge("manual_feedback_review_queue_mock_manual", "Manual Feedback Review Queue Mock 需人工复核", "warning"));
+      if (manualFeedbackReviewQueueMockSummary.status === "needs_review") badges.push(badge("manual_feedback_review_queue_mock_review", "Manual Feedback Review Queue Mock 仍需复核", "warning"));
+      if (manualFeedbackReviewQueueMockSummary.status === "blocked") badges.push(badge("manual_feedback_review_queue_mock_blocked", "Manual Feedback Review Queue Mock 已阻断", "blocked"));
+      if (offlineIssueTriageBoardSummary.status === "manual_review_required") badges.push(badge("offline_issue_triage_board_manual", "Offline Issue Triage Board 需人工复核", "warning"));
+      if (offlineIssueTriageBoardSummary.status === "needs_review") badges.push(badge("offline_issue_triage_board_review", "Offline Issue Triage Board 仍需复核", "warning"));
+      if (offlineIssueTriageBoardSummary.status === "blocked") badges.push(badge("offline_issue_triage_board_blocked", "Offline Issue Triage Board 已阻断", "blocked"));
+      if (publicBetaReadinessReviewViewModelSummary.status === "ready") badges.push(badge("public_beta_readiness_review_view_model_ready", "Public Beta Readiness Review ViewModel 已准备", "info"));
+      if (publicBetaReadinessReviewViewModelSummary.status === "needs_review") badges.push(badge("public_beta_readiness_review_view_model_review", "Public Beta Readiness Review ViewModel 仍需复核", "warning"));
+      if (publicBetaReadinessReviewViewModelSummary.status === "blocked") badges.push(badge("public_beta_readiness_review_view_model_blocked", "Public Beta Readiness Review ViewModel 已阻断", "blocked"));
+      if (present(publicBetaReadinessSnapshotSummary) || present(manualFeedbackReviewQueueMockSummary) || present(offlineIssueTriageBoardSummary)) {
+        badges.push(badge("public_beta_readiness_review_rows", "Readiness Snapshot / Feedback Review Queue / Issue Triage", "warning"));
+        badges.push(badge("public_beta_readiness_review_snapshot", "准备快照仅为只读展示，不生成文件", "warning"));
+        badges.push(badge("public_beta_readiness_review_queue", "反馈复核队列仅为 Mock，不保存、不上传、不创建 issue/task", "warning"));
+        badges.push(badge("public_beta_readiness_review_triage", "问题分级仅为离线展示，不创建真实任务", "warning"));
+        badges.push(badge("public_beta_readiness_review_manual", "provider、联网、外部打开、付款、下单、出票、release、push、launch、反馈提交、上传、issue/task 创建仍保持关闭", "warning"));
+      }
       const rcCandidateReview = obj(safe.rcCandidateReviewSummary);
       const rcEvidenceReview = obj(safe.rcEvidenceReviewSummary);
       const rcRegressionAudit = obj(safe.rcRegressionAuditSummary);

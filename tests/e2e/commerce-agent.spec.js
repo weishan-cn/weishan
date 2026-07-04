@@ -9606,7 +9606,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v4.2.2 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
+  test("v4.2.3 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9652,7 +9652,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v401-render-smoke", "true");
       const card = {
-        version:"4.2.2",
+        version:"4.2.3",
         visible:true,
         globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, rows:[{ rowId:"public_beta", label:"Global Shopping Read-Only Public Beta Shell", value:"Global Shopping Read-Only Public Beta Shell 已准备", status:"pass", redacted:true }], redacted:true },
         globalShoppingReadOnlyCandidateEvidenceUnifierSummary:{ status:"ready", userFacingSummary:{ title:"候选价证据", resultLabel:"候选价证据已准备", redacted:true }, rows:[{ rowId:"candidate_evidence", label:"候选价证据", value:"候选价证据已准备", status:"pass", redacted:true }], redacted:true },
@@ -9746,6 +9746,14 @@ test.describe.serial("commerce agent workbench", () => {
         manualQaScenarioRunnerStatus:"ready",
         offlineFeedbackReviewBoardStatus:"ready",
         publicBetaTrialOperationsViewModelStatus:"ready",
+        publicBetaReadinessSnapshotSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Public Beta Readiness Snapshot", resultLabel:"Public Beta Readiness Snapshot 需人工复核", redacted:true }, rows:[{ rowId:"public_beta_readiness_snapshot", label:"Public Beta Readiness Snapshot", value:"Public Beta Readiness Snapshot 需人工复核", status:"warning", redacted:true }], redacted:true },
+        manualFeedbackReviewQueueMockSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Manual Feedback Review Queue Mock", resultLabel:"Manual Feedback Review Queue Mock 需人工复核", redacted:true }, rows:[{ rowId:"manual_feedback_review_queue_mock", label:"Manual Feedback Review Queue Mock", value:"Manual Feedback Review Queue Mock 需人工复核", status:"warning", redacted:true }], redacted:true },
+        offlineIssueTriageBoardSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Offline Issue Triage Board", resultLabel:"Offline Issue Triage Board 需人工复核", redacted:true }, rows:[{ rowId:"offline_issue_triage_board", label:"Offline Issue Triage Board", value:"Offline Issue Triage Board 需人工复核", status:"warning", redacted:true }], redacted:true },
+        publicBetaReadinessReviewViewModelSummary:{ status:"ready", userFacingSummary:{ title:"Public Beta Readiness Review ViewModel", resultLabel:"Public Beta Readiness Snapshot / Manual Feedback Review Queue Mock / Offline Issue Triage Board 已准备", redacted:true }, safeToProceedWithManualReadinessReview:true, redacted:true },
+        publicBetaReadinessSnapshotStatus:"manual_review_required",
+        manualFeedbackReviewQueueStatus:"manual_review_required",
+        offlineIssueTriageStatus:"manual_review_required",
+        publicBetaReadinessReviewViewModelStatus:"ready",
         publicBetaFreezeEvidenceStatus:"ready",
         manualTrialIssueReviewStatus:"ready",
         offlineAcceptanceSnapshotStatus:"needs_review",
@@ -9777,6 +9785,7 @@ test.describe.serial("commerce agent workbench", () => {
         safeToProceedWithManualLaunchHandoffReview:true,
         safeToProceedWithManualQaReview:true,
         safeToProceedWithManualTrialOperationsReview:true,
+        safeToProceedWithManualReadinessReview:true,
         safeToProceedWithManualFreezeReview:true,
         safeToProceedWithManualAcceptanceSnapshotReview:false,
         safeToProceedWithManualClosureReview:true
@@ -9857,6 +9866,16 @@ test.describe.serial("commerce agent workbench", () => {
     expect(v400.text).toContain("Public Beta Trial Operations Console");
     expect(v400.text).toContain("Manual QA Scenario Runner");
     expect(v400.text).toContain("Offline Feedback Review Board");
+    expect(v400.text).toContain("Public Beta Readiness Snapshot");
+    expect(v400.text).toContain("Manual Feedback Review Queue Mock");
+    expect(v400.text).toContain("Offline Issue Triage Board");
+    expect(v400.text).toContain("Readiness Snapshot");
+    expect(v400.text).toContain("Feedback Review Queue");
+    expect(v400.text).toContain("Issue Triage");
+    expect(v400.text).toContain("准备快照仅为只读展示，不生成文件");
+    expect(v400.text).toContain("反馈复核队列仅为 Mock，不保存、不上传、不创建 issue/task");
+    expect(v400.text).toContain("问题分级仅为离线展示，不创建真实任务");
+    expect(v400.text).toContain("safeToProceedWithManualReadinessReview:true");
     expect(v400.text).toContain("Public Beta Freeze Evidence Summary");
     expect(v400.text).toContain("Manual Trial Issue Review Board");
     expect(v400.text).toContain("Offline Acceptance Snapshot");

@@ -16,7 +16,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPriceCandidateDisplayBoard.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPriceCandidateDisplayBoard;
-  assert.equal(api.GLOBAL_SHOPPING_PRICE_CANDIDATE_DISPLAY_BOARD_VERSION, "4.2.2");
+  assert.equal(api.GLOBAL_SHOPPING_PRICE_CANDIDATE_DISPLAY_BOARD_VERSION, "4.2.3");
   const board = api.buildGlobalShoppingPriceCandidateDisplayBoard({
     providerCoverageDashboardSummary:windowRef.WeishanGlobalShoppingProviderCoverageDashboard.buildGlobalShoppingProviderCoverageDashboard({
       adapterRegistrySummary:{ adapters:[{ providerType:"official", itemType:"flight", region:"CN", redacted:true }] }
@@ -25,7 +25,7 @@ function main() {
       sources:[{ sourceId:"official_1", sourceName:"Official Fixture", sourceType:"official", basePrice:920, currency:"CNY", lastCheckedAt:"redacted_now", redacted:true }]
     })
   });
-  assert.equal(board.appVersion, "4.2.2");
+  assert.equal(board.appVersion, "4.2.3");
   assert.equal(board.status, "ready");
   assert.equal(board.title, "全球购价格候选展示");
   assert.equal(board.cards.find((item) => item.cardId === "official_price").label, "官方参考价");

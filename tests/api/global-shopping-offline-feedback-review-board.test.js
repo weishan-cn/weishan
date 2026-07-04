@@ -26,7 +26,7 @@ function summary(title, status) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineFeedbackReviewBoard.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineFeedbackReviewBoard;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_FEEDBACK_REVIEW_BOARD_VERSION, "4.2.2");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_FEEDBACK_REVIEW_BOARD_VERSION, "4.2.3");
 
   const ready = api.buildGlobalShoppingOfflineFeedbackReviewBoard({
     trialFeedbackSafetyGateSummary:summary("Trial Feedback Safety Gate"),

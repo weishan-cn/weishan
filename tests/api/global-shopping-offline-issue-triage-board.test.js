@@ -15,10 +15,8 @@ function load(files) {
 
 function summary(title, status) {
   return {
-    status:status || "ready",
-    title,
-    userFacingSummary:{ title, resultLabel:title + (status === "blocked" ? " 已阻断" : " 已准备"), redacted:true },
-    rows:[{ rowId:title, label:title, value:title + (status === "blocked" ? " 已阻断" : " 已准备"), status:status === "blocked" ? "blocked" : "pass", redacted:true }],
+    status:status || "manual_review_required",
+    userFacingSummary:{ title, resultLabel:title + (status === "blocked" ? " 已阻断" : " 需人工复核"), redacted:true },
     redacted:true
   };
 }
@@ -26,31 +24,41 @@ function summary(title, status) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineIssueTriageBoard.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineIssueTriageBoard;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_ISSUE_TRIAGE_BOARD_VERSION, "4.2.2");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_ISSUE_TRIAGE_BOARD_VERSION, "4.2.3");
 
   const ready = api.buildGlobalShoppingOfflineIssueTriageBoard({
-    publicBetaTrialEvidenceLedgerSummary:summary("Public Beta Trial Evidence Ledger"),
-    publicBetaQaDecisionMatrixSummary:summary("QA Decision Matrix"),
-    offlineFeedbackReviewBoardSummary:summary("Offline Feedback Review Board"),
-    trialFeedbackSafetyGateSummary:summary("Trial Feedback Safety Gate")
+    publicBetaReadinessSnapshotSummary:summary("Public Beta Readiness Snapshot"),
+    manualFeedbackReviewQueueMockSummary:summary("Manual Feedback Review Queue Mock"),
+    offlineRegressionEvidenceBoardSummary:summary("Offline Regression Evidence Board"),
+    noTransactionRegressionGuardSummary:summary("No-Transaction Regression Guard", "ready"),
+    noProviderProductionBoundarySummary:summary("No-Provider Production Boundary")
   });
-  assert.equal(ready.status, "ready");
-  assert.equal(ready.rows.some((item) => item.label === "Manual Review Items"), true);
-  assert.equal(ready.sections.some((item) => item.label === "Locked Capabilities"), true);
+  assert.equal(ready.status, "manual_review_required");
+  assert.equal(ready.rows.some((item) => item.label === "Offline Issue Triage Board"), true);
+  assert.equal(ready.rules.some((item) => item.label.includes("severityBuckets")), true);
+  assert.deepEqual(Array.from(ready.severityBuckets), ["critical", "high", "medium", "low", "info", "blocked"]);
+  assert.equal(ready.issueCreateEnabled, false);
+  assert.equal(ready.taskCreateEnabled, false);
+  assert.equal(ready.uploadEnabled, false);
+  assert.equal(ready.feedbackSubmitEnabled, false);
 
   const needsReview = api.buildGlobalShoppingOfflineIssueTriageBoard({
-    publicBetaTrialEvidenceLedgerSummary:summary("Public Beta Trial Evidence Ledger")
+    publicBetaReadinessSnapshotSummary:summary("Public Beta Readiness Snapshot")
   });
   assert.equal(needsReview.status, "needs_review");
 
   const blocked = api.buildGlobalShoppingOfflineIssueTriageBoard({
-    publicBetaTrialEvidenceLedgerSummary:summary("Public Beta Trial Evidence Ledger"),
-    publicBetaQaDecisionMatrixSummary:summary("QA Decision Matrix"),
-    offlineFeedbackReviewBoardSummary:summary("Offline Feedback Review Board"),
-    trialFeedbackSafetyGateSummary:summary("Trial Feedback Safety Gate"),
-    issueCreated:true
+    publicBetaReadinessSnapshotSummary:summary("Public Beta Readiness Snapshot"),
+    manualFeedbackReviewQueueMockSummary:summary("Manual Feedback Review Queue Mock"),
+    offlineRegressionEvidenceBoardSummary:summary("Offline Regression Evidence Board"),
+    noTransactionRegressionGuardSummary:summary("No-Transaction Regression Guard", "ready"),
+    noProviderProductionBoundarySummary:summary("No-Provider Production Boundary"),
+    createIssue:true
   });
   assert.equal(blocked.status, "blocked");
+  assert.equal(blocked.bookingUrl, null);
+  assert.equal(blocked.paymentUrl, null);
+  assert.equal(blocked.orderUrl, null);
   console.log("GLOBAL_SHOPPING_OFFLINE_ISSUE_TRIAGE_BOARD PASS");
 }
 

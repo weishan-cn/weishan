@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_VERSION = "4.2.2";
+  const FLIGHT_WORKFLOW_READ_ONLY_PILOT_ROLLOUT_CONTROL_CENTER_VERSION = "4.2.3";
   const CENTER_NAME = "flight_workflow_read_only_pilot_rollout_control_center_v1";
   const CAVEAT = "该控制中心只管理只读试点流程，不代表真实账号、客服工单、交易请求或出票能力。";
   const SENSITIVE_RE = /https?:\/\/\S+|(?:token|apiKey|key|secret|password|credential|cardNumber)\s*[:=]?\s*\S+|身份证|护照|银行卡|passport|raw feedback|rawUserText|真实姓名|手机号|邮箱/ig;

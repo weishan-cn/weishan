@@ -109,6 +109,10 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingTrialFeedbackIntakeMock.js",
     "apps/desktop/src/renderer/core/globalShoppingOfflineRegressionEvidenceBoard.js",
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaQaFreezeViewModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingPublicBetaReadinessSnapshot.js",
+    "apps/desktop/src/renderer/core/globalShoppingManualFeedbackReviewQueueMock.js",
+    "apps/desktop/src/renderer/core/globalShoppingOfflineIssueTriageBoard.js",
+    "apps/desktop/src/renderer/core/globalShoppingPublicBetaReadinessReviewViewModel.js",
     "apps/desktop/src/renderer/core/readOnlyQuoteSessionReportCenter.js",
     "apps/desktop/src/renderer/core/flightWorkflowReadOnlyUserConsentFlow.js",
     "apps/desktop/src/renderer/core/flightWorkflowPublicPilotOnboardingGuard.js",
@@ -116,13 +120,13 @@ function main() {
   ]);
   const manager = windowRef.WeishanReadOnlyQuoteSessionManager;
   const api = windowRef.WeishanReadOnlyQuoteSessionReportCenter;
-  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.2.2");
+  assert.equal(api.READ_ONLY_QUOTE_SESSION_REPORT_CENTER_VERSION, "4.2.3");
   const empty = api.buildReadOnlyQuoteSessionReportCenter({});
   assert.equal(empty.status, "empty");
   const session = manager.updateReadOnlyQuoteSession(manager.createReadOnlyQuoteSession({ route:"上海 → 成都", departureDate:"2026-07-15" }), { type:"DRY_RUN_COMPLETED", result:{ runId:"r1", dryRunTopCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980, bookingUrl:"https://blocked.example" }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980, token:"abc" } } });
   const summary = manager.buildReadOnlyQuoteSessionSummary(session);
   const ready = api.buildReadOnlyQuoteSessionReportCenter({ workflowStateSummary:{ status:"evidence_ready" }, clarificationSummary:{ status:"complete" }, workflowStepList:[{ label:"生成候选证据", status:"completed" }], missingFields:[], clarificationQuestions:[], workflowUserMessage:"候选证据已生成，平台最终为准。", sessionSummary:summary, topCandidates:[{ quoteId:"q1", providerName:"A", totalPrice:980 }], selectedCandidate:{ quoteId:"q1", providerName:"A", totalPrice:980 }, runHistorySummary:{ totalRunCount:1 }, quoteDeltaSummary:{ status:"not_enough_history" }, replaySummary:{ status:"unavailable" } });
-  assert.equal(ready.appVersion, "4.2.2");
+  assert.equal(ready.appVersion, "4.2.3");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.title, "候选报价证据摘要");
   assert.ok(ready.userFacingSummary.labels.includes("只读候选价"));
@@ -232,6 +236,26 @@ function main() {
   assert.equal(trialOperationsReady.safetyReport.offlineFeedbackReviewBoardSummary.userFacingSummary.title, "Offline Feedback Review Board");
   assert.equal(trialOperationsReady.safetyReport.publicBetaTrialOperationsViewModelStatus, "ready");
   assert.equal(trialOperationsReady.userFacingSummary.safeToProceedWithManualTrialOperationsReview, true);
+  const readinessReviewReady = api.buildReadOnlyQuoteSessionReportCenter({
+    sessionSummary:summary,
+    publicBetaReadinessSnapshotSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Public Beta Readiness Snapshot", resultLabel:"Public Beta Readiness Snapshot 需人工复核", redacted:true }, redacted:true },
+    manualFeedbackReviewQueueMockSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Manual Feedback Review Queue Mock", resultLabel:"Manual Feedback Review Queue Mock 需人工复核", redacted:true }, redacted:true },
+    offlineIssueTriageBoardSummary:{ status:"manual_review_required", userFacingSummary:{ title:"Offline Issue Triage Board", resultLabel:"Offline Issue Triage Board 需人工复核", redacted:true }, redacted:true },
+    publicBetaReadinessReviewViewModelSummary:{ status:"ready", title:"Public Beta Readiness Snapshot", userFacingSummary:{ title:"Public Beta Readiness Review ViewModel", resultLabel:"Public Beta Readiness Snapshot / Manual Feedback Review Queue Mock / Offline Issue Triage Board 已准备", redacted:true }, safeToProceedWithManualReadinessReview:true, redacted:true },
+    publicBetaReadinessSnapshotStatus:"manual_review_required",
+    manualFeedbackReviewQueueStatus:"manual_review_required",
+    offlineIssueTriageBoardStatus:"manual_review_required",
+    publicBetaReadinessReviewViewModelStatus:"ready",
+    safeToProceedWithManualReadinessReview:true
+  });
+  assert.equal(readinessReviewReady.safetyReport.publicBetaReadinessSnapshotSummary.title, "Public Beta Readiness Snapshot");
+  assert.equal(readinessReviewReady.safetyReport.manualFeedbackReviewQueueMockSummary.title, "Manual Feedback Review Queue Mock");
+  assert.equal(readinessReviewReady.safetyReport.offlineIssueTriageBoardSummary.title, "Offline Issue Triage Board");
+  assert.equal(readinessReviewReady.safetyReport.publicBetaReadinessReviewViewModelSummary.title, "Public Beta Readiness Review ViewModel");
+  assert.equal(readinessReviewReady.safetyReport.publicBetaReadinessSnapshotStatus, "manual_review_required");
+  assert.equal(readinessReviewReady.safetyReport.manualFeedbackReviewQueueStatus, "manual_review_required");
+  assert.equal(readinessReviewReady.safetyReport.publicBetaReadinessReviewViewModelStatus, "ready");
+  assert.equal(readinessReviewReady.userFacingSummary.safeToProceedWithManualReadinessReview, true);
   const publicBetaComparisonReady = api.buildReadOnlyQuoteSessionReportCenter({
     sessionSummary:summary,
     categoryResultSimulatorSummary:{ status:"ready", userFacingSummary:{ title:"Category Result Simulator", resultLabel:"Category Result Simulator 已准备", redacted:true }, redacted:true },

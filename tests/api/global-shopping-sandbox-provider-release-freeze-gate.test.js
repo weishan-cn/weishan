@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingSandboxProviderReleaseFreezeGate.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingSandboxProviderReleaseFreezeGate;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PROVIDER_RELEASE_FREEZE_GATE_VERSION, "4.2.2");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_PROVIDER_RELEASE_FREEZE_GATE_VERSION, "4.2.3");
 
   const ready = api.buildGlobalShoppingSandboxProviderReleaseFreezeGate({
     governanceAuditConsoleSummary:{ status:"ready", userFacingSummary:{ resultLabel:"治理审计控制台已准备", redacted:true }, redacted:true },

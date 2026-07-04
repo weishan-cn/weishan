@@ -47,11 +47,11 @@ function main() {
     "apps/desktop/src/renderer/core/readOnlyQuoteRefreshController.js"
   ]);
   const api = windowRef.WeishanReadOnlyQuoteRefreshController;
-  assert.equal(api.READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION, "4.2.2");
+  assert.equal(api.READ_ONLY_QUOTE_REFRESH_CONTROLLER_VERSION, "4.2.3");
 
   const request = api.buildReadOnlyQuoteRefreshRequest({ origin:"上海", destination:"成都", departureDate:"2026-07-15" });
   assert.equal(request.controllerName, "read_only_quote_refresh_controller_v1");
-  assert.equal(request.appVersion, "4.2.2");
+  assert.equal(request.appVersion, "4.2.3");
   assert.equal(request.autoRun, false);
   assert.equal(request.autoOpen, false);
   assert.equal(request.bookingUrl, null);
