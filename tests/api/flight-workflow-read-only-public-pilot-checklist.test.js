@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function readyInput(extra = {}) { return Object.assign({ betaExpansionGateSummary:{ status:"approved", decision:{ safeToExpandReadOnlyBeta:true }, redacted:true }, safetyCopyReady:true, scenarioMatrixReady:true, userReviewReady:true, forbiddenCapabilitiesVisible:true, supportFallbackReady:true }, extra); }
 function main() {
   const api = load(["apps/desktop/src/renderer/core/flightWorkflowReadOnlyPublicPilotChecklist.js"]).WeishanFlightWorkflowReadOnlyPublicPilotChecklist;
-  assert.equal(api.FLIGHT_WORKFLOW_READ_ONLY_PUBLIC_PILOT_CHECKLIST_VERSION, "4.2.0");
+  assert.equal(api.FLIGHT_WORKFLOW_READ_ONLY_PUBLIC_PILOT_CHECKLIST_VERSION, "4.2.1");
   const ready = api.buildFlightWorkflowReadOnlyPublicPilotChecklist(readyInput());
   assert.equal(ready.status, "ready");
   assert.equal(ready.readiness.safeForSmallPublicPilot, true);

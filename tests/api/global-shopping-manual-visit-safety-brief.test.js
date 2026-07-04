@@ -7,9 +7,9 @@ function load(file) { const window = {}; window.window = window; const context =
 function main() {
   const windowRef = load("apps/desktop/src/renderer/core/globalShoppingManualVisitSafetyBrief.js");
   const api = windowRef.WeishanGlobalShoppingManualVisitSafetyBrief;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_VISIT_SAFETY_BRIEF_VERSION, "4.2.0");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_VISIT_SAFETY_BRIEF_VERSION, "4.2.1");
   const ready = api.buildGlobalShoppingManualVisitSafetyBrief({});
-  assert.equal(ready.appVersion, "4.2.0");
+  assert.equal(ready.appVersion, "4.2.1");
   assert.equal(ready.status, "ready");
   assert.equal(ready.userFacingSummary.resultLabel, "手动访问安全简报已准备");
   assert.equal(api.buildGlobalShoppingManualVisitSafetyBrief({ statesNoGeneratedLink:false }).status, "needs_review");

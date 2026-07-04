@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineProviderLaunchControlTower.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineProviderLaunchControlTower;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_PROVIDER_LAUNCH_CONTROL_TOWER_VERSION, "4.2.0");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_PROVIDER_LAUNCH_CONTROL_TOWER_VERSION, "4.2.1");
 
   const ready = api.buildGlobalShoppingOfflineProviderLaunchControlTower({
     offlineLaunchDecisionSimulatorSummary:readySummary("Offline Launch Decision Simulator", "离线发布决策模拟器已准备"),
@@ -32,7 +32,7 @@ function main() {
     providerOfflineLaunchViewModelSummary:{ status:"ready", title:"Provider 离线 Launch 决策与安全守卫", userFacingSummary:{ title:"Provider 离线 Launch 决策与安全守卫", resultLabel:"离线 Launch 视图已准备", redacted:true }, rows:[{ rowId:"view", label:"Launch View", value:"离线 Launch 视图已准备", status:"pass", redacted:true }], redacted:true }
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.2.0");
+  assert.equal(ready.appVersion, "4.2.1");
   assert.equal(ready.controlBoundary.canCreateRelease, false);
   assert.equal(ready.controlSummary.humanLaunchControlReviewRequired, true);
   assert.equal(JSON.stringify(ready).includes("token"), false);

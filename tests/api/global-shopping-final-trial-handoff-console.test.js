@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingFinalTrialHandoffConsole.js"]);
   const api = windowRef.WeishanGlobalShoppingFinalTrialHandoffConsole;
-  assert.equal(api.GLOBAL_SHOPPING_FINAL_TRIAL_HANDOFF_CONSOLE_VERSION, "4.2.0");
+  assert.equal(api.GLOBAL_SHOPPING_FINAL_TRIAL_HANDOFF_CONSOLE_VERSION, "4.2.1");
 
   const good = api.buildGlobalShoppingFinalTrialHandoffConsole({
     publicBetaCandidateLockSummary:summary("Public Beta Candidate Lock", "manual_review_required", { candidateLockStatus:"manual_review_required" }),

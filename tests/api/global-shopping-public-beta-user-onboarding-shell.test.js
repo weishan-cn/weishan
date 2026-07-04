@@ -27,7 +27,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingPublicBetaUserOnboardingShell.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaUserOnboardingShell;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_USER_ONBOARDING_SHELL_VERSION, "4.2.0");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_USER_ONBOARDING_SHELL_VERSION, "4.2.1");
   const ready = api.buildGlobalShoppingPublicBetaUserOnboardingShell({
     publicBetaVisualQaConsoleSummary:summary("Public Beta Visual QA Console"),
     publicBetaTrialScenarioChecklistSummary:summary("Trial Scenario Checklist"),
@@ -36,7 +36,7 @@ function main() {
     publicBetaTrialReadinessPackSummary:summary("Public Beta Trial Readiness Pack")
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.2.0");
+  assert.equal(ready.appVersion, "4.2.1");
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(ready.externalUrl, null);
   assert.equal(ready.bookingUrl, null);

@@ -24,7 +24,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingManualProviderActivationHandoffPacket.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingManualProviderActivationHandoffPacket;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_PROVIDER_ACTIVATION_HANDOFF_PACKET_VERSION, "4.2.0");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_PROVIDER_ACTIVATION_HANDOFF_PACKET_VERSION, "4.2.1");
 
   const ready = api.buildGlobalShoppingManualProviderActivationHandoffPacket({
     readOnlySandboxActivationReadinessCenterSummary:readySummary("Sandbox 激活准备中心已准备"),

@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
-const PREVIOUS_STABLE_VERSION = "4.2.0";
+const PREVIOUS_STABLE_VERSION = "4.2.1";
 const STRICT_VERSION_CHECKS = new Set([
   "root package-lock version",
   "root package-lock packages[\"\"].version",
@@ -2460,6 +2460,10 @@ function runVersionCheck() {
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping final trial handoff console version", "apps/desktop/src/renderer/core/globalShoppingFinalTrialHandoffConsole.js", "GLOBAL_SHOPPING_FINAL_TRIAL_HANDOFF_CONSOLE_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping no-provider production boundary version", "apps/desktop/src/renderer/core/globalShoppingNoProviderProductionBoundary.js", "GLOBAL_SHOPPING_NO_PROVIDER_PRODUCTION_BOUNDARY_VERSION");
     checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta candidate view model version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaCandidateViewModel.js", "GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_VIEW_MODEL_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta candidate evidence review version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaCandidateEvidenceReview.js", "GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_EVIDENCE_REVIEW_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping trial operator notes panel version", "apps/desktop/src/renderer/core/globalShoppingTrialOperatorNotesPanel.js", "GLOBAL_SHOPPING_TRIAL_OPERATOR_NOTES_PANEL_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping offline safety delta board version", "apps/desktop/src/renderer/core/globalShoppingOfflineSafetyDeltaBoard.js", "GLOBAL_SHOPPING_OFFLINE_SAFETY_DELTA_BOARD_VERSION");
+    checkConstVersion(results, rootPackage.version, "apps/desktop global shopping public beta candidate review view model version", "apps/desktop/src/renderer/core/globalShoppingPublicBetaCandidateReviewViewModel.js", "GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_REVIEW_VIEW_MODEL_VERSION");
   }
 
   results.forEach((item) => {

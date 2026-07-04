@@ -20,7 +20,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingMockProviderResultNormalizer.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingMockProviderResultNormalizer;
-  assert.equal(api.GLOBAL_SHOPPING_MOCK_PROVIDER_RESULT_NORMALIZER_VERSION, "4.2.0");
+  assert.equal(api.GLOBAL_SHOPPING_MOCK_PROVIDER_RESULT_NORMALIZER_VERSION, "4.2.1");
 
   const ready = api.buildGlobalShoppingMockProviderResultNormalizer({
     offlineSandboxTraceInspectorSummary:{ status:"ready", userFacingSummary:{ resultLabel:"离线 Trace 检查已准备", redacted:true }, redacted:true },

@@ -26,7 +26,7 @@ function summary(title, status) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineIssueTriageBoard.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineIssueTriageBoard;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_ISSUE_TRIAGE_BOARD_VERSION, "4.2.0");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_ISSUE_TRIAGE_BOARD_VERSION, "4.2.1");
 
   const ready = api.buildGlobalShoppingOfflineIssueTriageBoard({
     publicBetaTrialEvidenceLedgerSummary:summary("Public Beta Trial Evidence Ledger"),

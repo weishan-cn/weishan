@@ -23,7 +23,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderLaunchReadinessViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderLaunchReadinessViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_LAUNCH_READINESS_VIEW_MODEL_VERSION, "4.2.0");
+  assert.equal(api.GLOBAL_SHOPPING_PROVIDER_LAUNCH_READINESS_VIEW_MODEL_VERSION, "4.2.1");
 
   const ready = api.buildGlobalShoppingProviderLaunchReadinessViewModel({
     mockProviderAdapterRegistryRuntimeSummary:{ status:"ready", userFacingSummary:{ resultLabel:"Mock Adapter 注册运行时已准备", redacted:true }, rows:[{ rowId:"mock_registry", label:"Mock Adapter 注册", value:"只允许 mock / fixture / dry_run / contract_only", status:"pass", redacted:true }] },

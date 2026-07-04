@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingHumanReleaseEvidenceTimeline.js"]);
   const api = windowRef.WeishanGlobalShoppingHumanReleaseEvidenceTimeline;
-  assert.equal(api.GLOBAL_SHOPPING_HUMAN_RELEASE_EVIDENCE_TIMELINE_VERSION, "4.2.0");
+  assert.equal(api.GLOBAL_SHOPPING_HUMAN_RELEASE_EVIDENCE_TIMELINE_VERSION, "4.2.1");
 
   const ready = api.buildGlobalShoppingHumanReleaseEvidenceTimeline({
     offlineProviderLaunchControlTowerSummary:readySummary("Offline Provider Launch Control Tower", "离线 Launch 控制塔已准备"),

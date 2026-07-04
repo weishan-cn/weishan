@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_READINESS_PACK_VERSION = "4.2.0";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_TRIAL_READINESS_PACK_VERSION = "4.2.1";
   const PACK_NAME = "global_shopping_public_beta_trial_readiness_pack_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, trial_readiness_pack_only:true };
   const BLOCKED_TEXT_RE = /provider|network|endpoint|payment|order|ticketing|release|tag|push|export|download|upload|mail|openExternal|window\.open|token|key|secret/i;

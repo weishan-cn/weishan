@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaFreezeEvidenceSummary.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaFreezeEvidenceSummary;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FREEZE_EVIDENCE_SUMMARY_VERSION, "4.2.0");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FREEZE_EVIDENCE_SUMMARY_VERSION, "4.2.1");
 
   const ready = api.buildGlobalShoppingPublicBetaFreezeEvidenceSummary({
     publicBetaQaFreezeGateSummary:summary("Public Beta QA Freeze Gate"),

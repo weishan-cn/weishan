@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_FIXTURE_VIEW_MODEL_VERSION = "4.2.0";
+  const GLOBAL_SHOPPING_PROVIDER_FIXTURE_VIEW_MODEL_VERSION = "4.2.1";
   const VIEW_MODEL_NAME = "global_shopping_provider_fixture_view_model_v1";
   const CAVEAT = "当前只展示合法 Provider fixture、凭据安全复核与 sandbox 价格 feed 状态，不连接真实 production provider，不代表真实价格或交易能力。";
 

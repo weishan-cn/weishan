@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_HUMAN_PILOT_READINESS_LEDGER_VERSION = "4.2.0";
+  const GLOBAL_SHOPPING_HUMAN_PILOT_READINESS_LEDGER_VERSION = "4.2.1";
   const LEDGER_NAME = "global_shopping_human_pilot_readiness_ledger_v1";
   const BUILD_GUARD_KEY = "__weishanGlobalShoppingHumanPilotReadinessLedgerBuilding";
 

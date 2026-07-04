@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingSandboxReplayViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingSandboxReplayViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_REPLAY_VIEW_MODEL_VERSION, "4.2.0");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_REPLAY_VIEW_MODEL_VERSION, "4.2.1");
   const ready = api.buildGlobalShoppingSandboxReplayViewModel({
     sandboxSessionReplayCenter:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox 会话回放已准备" }, rows:[{ rowId:"r1", label:"会话", value:"ok", status:"pass" }] },
     providerEvidenceTrace:{ status:"ready", userFacingSummary:{ resultLabel:"Provider 证据链已准备" }, rows:[{ rowId:"e1", label:"证据", value:"ok", status:"pass" }] },
