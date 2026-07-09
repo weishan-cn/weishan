@@ -25,7 +25,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingNoDataRetentionGuard.js"]);
   const api = windowRef.WeishanGlobalShoppingNoDataRetentionGuard;
-  assert.equal(api.GLOBAL_SHOPPING_NO_DATA_RETENTION_GUARD_VERSION, "4.2.6");
+  assert.equal(api.GLOBAL_SHOPPING_NO_DATA_RETENTION_GUARD_VERSION, "4.2.7");
 
   const review = api.buildGlobalShoppingNoDataRetentionGuard({
     publicBetaManualAcceptanceChecklistSummary:summary("Public Beta Manual Acceptance Checklist"),

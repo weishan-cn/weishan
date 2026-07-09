@@ -12,13 +12,13 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingExternalPlatformExitViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingExternalPlatformExitViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_EXTERNAL_PLATFORM_EXIT_VIEW_MODEL_VERSION, "4.2.6");
+  assert.equal(api.GLOBAL_SHOPPING_EXTERNAL_PLATFORM_EXIT_VIEW_MODEL_VERSION, "4.2.7");
   const ready = api.buildGlobalShoppingExternalPlatformExitViewModel({
     externalPlatformExitRampPreviewSummary:{ status:"ready", userFacingSummary:{ resultLabel:"外部平台退出坡道已准备", redacted:true } },
     manualVisitSafetyBriefSummary:{ status:"ready", userFacingSummary:{ resultLabel:"手动访问安全简报已准备", redacted:true } },
     readOnlySessionClosurePackSummary:{ status:"ready", userFacingSummary:{ resultLabel:"只读会话关闭包已准备", redacted:true } }
   });
-  assert.equal(ready.appVersion, "4.2.6");
+  assert.equal(ready.appVersion, "4.2.7");
   assert.equal(ready.status, "ready");
   assert.equal(ready.title, "外部平台手动访问前最终说明");
   assert.equal(api.buildGlobalShoppingExternalPlatformExitViewModel({}).status, "needs_review");

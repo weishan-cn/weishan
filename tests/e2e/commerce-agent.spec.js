@@ -8690,6 +8690,25 @@ test.describe.serial("commerce agent workbench", () => {
         }
       }
     }
+
+    await resetCommerceTasks(page);
+    await gotoRoute(page, "commerce");
+    await page.evaluate(() => {
+      const host = document.getElementById("pageHost");
+      if (host && window.CommerceAgentPage && typeof window.CommerceAgentPage.mount === "function") {
+        window.CommerceAgentPage.mount(host);
+      }
+    });
+    await expect(page.locator("#commerceInput")).toBeVisible({ timeout:15000 });
+    await expect(page.locator(".commerce-page")).toContainText("全球采购");
+    await page.locator("#commerceInput").fill(runId + "-V427-PRODUCT 帮我找 iPhone 16 Pro 价格");
+    await page.locator("#commerceGenerate").click();
+    const detail = page.locator(".commerce-detail").last();
+    await expect(detail).toContainText("去平台查看", { timeout:15000 });
+    await expect(detail.locator('[data-commerce-readonly-search-results="true"] .commerce-booking-link')).toHaveCount(3);
+    await expect(detail).toContainText("查看更多候选");
+    await expect(detail).toContainText("最终价格与规则以平台页面为准");
+    await expect(detail.getByRole("button", { name:/^(付款|下单|提交订单|上传身份证|上传护照|上传银行卡)$/ })).toHaveCount(0);
   });
 
   test("v2.1.68 read-only quote refresh button updates local evidence only @commerce-smoke", async () => {
@@ -9606,7 +9625,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(await latestOpenExternalUrl(page)).toBe("");
   });
 
-  test("v4.2.6 public beta acceptance snapshot stays local and bounded @commerce-smoke", async () => {
+  test("v4.2.7 public beta acceptance snapshot and readonly search loop stay local and bounded @commerce-smoke", async () => {
     await resetCommerceTasks(page);
     await installOpenExternalMock(page);
     await page.waitForFunction(() => !!(
@@ -9652,7 +9671,7 @@ test.describe.serial("commerce agent workbench", () => {
       const host = document.createElement("section");
       host.setAttribute("data-commerce-v401-render-smoke", "true");
       const card = {
-        version:"4.2.6",
+        version:"4.2.7",
         visible:true,
         globalShoppingReadOnlyPublicBetaShellSummary:{ status:"ready", userFacingSummary:{ title:"Global Shopping Read-Only Public Beta Shell", resultLabel:"Global Shopping Read-Only Public Beta Shell 已准备", redacted:true }, rows:[{ rowId:"public_beta", label:"Global Shopping Read-Only Public Beta Shell", value:"Global Shopping Read-Only Public Beta Shell 已准备", status:"pass", redacted:true }], redacted:true },
         globalShoppingReadOnlyCandidateEvidenceUnifierSummary:{ status:"ready", userFacingSummary:{ title:"候选价证据", resultLabel:"候选价证据已准备", redacted:true }, rows:[{ rowId:"candidate_evidence", label:"候选价证据", value:"候选价证据已准备", status:"pass", redacted:true }], redacted:true },

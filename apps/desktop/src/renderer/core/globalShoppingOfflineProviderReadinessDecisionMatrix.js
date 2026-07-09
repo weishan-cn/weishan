@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_PROVIDER_READINESS_DECISION_MATRIX_VERSION = "4.2.6";
+  const GLOBAL_SHOPPING_OFFLINE_PROVIDER_READINESS_DECISION_MATRIX_VERSION = "4.2.7";
   const MATRIX_NAME = "global_shopping_offline_provider_readiness_decision_matrix_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

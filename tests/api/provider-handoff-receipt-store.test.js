@@ -8,7 +8,7 @@ function load(file){ const window = {}; window.window = window; vm.runInContext(
 const api = load("apps/desktop/src/renderer/core/providerHandoffReceiptStore.js").WeishanProviderHandoffReceiptStore;
 const store = memory();
 const saved = api.saveProviderHandoffReceipt({ status:"confirmed", providerName:"Trip", safeProviderHandoffUrl:"https://trip.example/path?token=abc", selectedCandidate:{ quoteId:"q1", rank:1, totalPrice:100, currency:"CNY" }, userConfirmed:true }, store);
-assert.equal(saved.appVersion, "4.2.6");
+assert.equal(saved.appVersion, "4.2.7");
 assert.equal(saved.safety.rawUrlStored, false);
 assert.equal(saved.safety.secretStored, false);
 assert.equal(saved.safety.bookingUrl, null);
@@ -21,6 +21,6 @@ api.clearProviderHandoffReceipt(store);
 assert.equal(api.loadProviderHandoffReceipt(store), null);
 store.setItem(api.STORAGE_KEY, "not json");
 assert.equal(api.loadProviderHandoffReceipt(store), null);
-store.setItem(api.STORAGE_KEY, JSON.stringify({ receiptName:"wrong", appVersion:"4.2.6" }));
+store.setItem(api.STORAGE_KEY, JSON.stringify({ receiptName:"wrong", appVersion:"4.2.7" }));
 assert.equal(api.loadProviderHandoffReceipt(store), null);
 console.log("PROVIDER_HANDOFF_RECEIPT_STORE PASS");

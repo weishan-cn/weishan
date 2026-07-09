@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_ADAPTER_LAUNCH_BOUNDARY_VERIFIER_VERSION = "4.2.6";
+  const GLOBAL_SHOPPING_ADAPTER_LAUNCH_BOUNDARY_VERIFIER_VERSION = "4.2.7";
   const VERIFIER_NAME = "global_shopping_adapter_launch_boundary_verifier_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

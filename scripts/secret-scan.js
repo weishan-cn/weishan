@@ -15,6 +15,29 @@ const RULES = [
   { name:"private-key-block", severity:"fail", pattern:/BEGIN (?:RSA )?PRIVATE KEY/g }
 ];
 
+const APPROVED_SENTINELS = [
+  {
+    file:"apps/desktop/src/renderer/core/commerceAgent.js",
+    rule:"api-key-assignment",
+    pattern:/\bapiKey\s*:\s*["']disabled["']/
+  },
+  {
+    file:"apps/desktop/src/renderer/core/commerceFlightSandboxProviderMatrix.js",
+    rule:"api-key-assignment",
+    pattern:/\bapiKey\s*:\s*["']disabled["']/
+  },
+  {
+    file:"apps/desktop/src/renderer/core/flightWorkflowScenarioFixtureBuilder.js",
+    rule:"token-assignment",
+    pattern:/\btoken\s*:\s*["']sk-live-blocked["']/
+  },
+  {
+    file:"apps/desktop/src/renderer/core/flightWorkflowScenarioFixtureBuilder.js",
+    rule:"api-key-assignment",
+    pattern:/\bapiKey\s*:\s*["']pk_live_blocked["']/
+  }
+];
+
 function shouldSkipPath(fullPath) {
   const rel = relative(root, fullPath);
   return rel.split(/[\\/]/).some((part) => SKIP_DIRS.has(part));
@@ -36,6 +59,10 @@ function isLikelyRedaction(line) {
   return /\[redacted\]|redacted|placeholder|example|dummy|mock|脱敏|示例/i.test(line);
 }
 
+function isApprovedSentinel(file, ruleName, line) {
+  return APPROVED_SENTINELS.some((sentinel) => sentinel.file === file && sentinel.rule === ruleName && sentinel.pattern.test(line));
+}
+
 function maskSnippet(line) {
   const text = String(line || "").trim().slice(0, 220);
   return text
@@ -50,6 +77,7 @@ function scanLine(line, file, lineNumber) {
   RULES.forEach((rule) => {
     rule.pattern.lastIndex = 0;
     if (!rule.pattern.test(line)) return;
+    if (isApprovedSentinel(file, rule.name, line)) return;
     const redactionLine = isLikelyRedaction(line);
     const severity = redactionLine && rule.severity === "fail" ? "warn" : rule.severity;
     if (redactionLine && rule.severity === "warn") return;

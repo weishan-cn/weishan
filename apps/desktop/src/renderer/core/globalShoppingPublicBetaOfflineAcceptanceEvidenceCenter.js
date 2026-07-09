@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_OFFLINE_ACCEPTANCE_EVIDENCE_CENTER_VERSION = "4.2.6";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_OFFLINE_ACCEPTANCE_EVIDENCE_CENTER_VERSION = "4.2.7";
   const CENTER_NAME = "global_shopping_public_beta_offline_acceptance_evidence_center_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, offline_acceptance_evidence_center_only:true };
   const EVIDENCE_SCOPE = ["provider", "network", "external_open", "payment", "order", "ticketing", "release", "push", "launch", "feedback_submit", "upload", "issue_create", "task_create", "data_retention", "evidence_file"];

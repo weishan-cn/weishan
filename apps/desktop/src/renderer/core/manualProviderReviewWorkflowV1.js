@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const MANUAL_PROVIDER_REVIEW_WORKFLOW_V1_VERSION = "4.2.6";
+  const MANUAL_PROVIDER_REVIEW_WORKFLOW_V1_VERSION = "4.2.7";
   const REVIEW_STATES = [
     "not_started",
     "docs_pending",

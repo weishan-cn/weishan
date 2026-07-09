@@ -24,7 +24,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingOfflineMockSandboxSessionRunner.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingOfflineMockSandboxSessionRunner;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_MOCK_SANDBOX_SESSION_RUNNER_VERSION, "4.2.6");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_MOCK_SANDBOX_SESSION_RUNNER_VERSION, "4.2.7");
 
   const ready = api.buildGlobalShoppingOfflineMockSandboxSessionRunner({
     readOnlySandboxActivationReadinessCenterSummary:readySummary("Sandbox 激活准备中心已准备"),

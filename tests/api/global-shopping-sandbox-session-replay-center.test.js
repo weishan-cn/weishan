@@ -18,7 +18,7 @@ function load(files) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingSandboxSessionReplayCenter.js"]);
   const api = windowRef.WeishanGlobalShoppingSandboxSessionReplayCenter;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_SESSION_REPLAY_CENTER_VERSION, "4.2.6");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_SESSION_REPLAY_CENTER_VERSION, "4.2.7");
   const ready = api.buildGlobalShoppingSandboxSessionReplayCenter({
     sandboxPriceCandidateSession:{ status:"ready", userFacingSummary:{ resultLabel:"Sandbox 价格候选会话已准备", redacted:true }, redacted:true },
     sandboxPriceCandidateResultBoard:{ status:"ready", title:"Sandbox 价格候选结果", caveat:"当前仅展示只读 sandbox 候选结果。", redacted:true },

@@ -26,7 +26,7 @@ function category(id) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingCategoryExpansionShell.js");
-  assert.equal(api.GLOBAL_SHOPPING_CATEGORY_EXPANSION_SHELL_VERSION, "4.2.6");
+  assert.equal(api.GLOBAL_SHOPPING_CATEGORY_EXPANSION_SHELL_VERSION, "4.2.7");
   const ready = api.buildGlobalShoppingCategoryExpansionShell({
     flight:category("flight"),
     hotel:category("hotel"),

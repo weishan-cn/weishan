@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_ACCEPTANCE_LOCK_VERSION = "4.2.6";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_ACCEPTANCE_LOCK_VERSION = "4.2.7";
   const LOCK_NAME = "global_shopping_public_beta_final_acceptance_lock_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, final_acceptance_lock_only:true };
   const LOCKED_ACCEPTANCE_SCOPE = ["provider", "network", "external_open", "payment", "order", "ticketing", "release", "push", "launch", "feedback_submit", "upload", "issue_create", "task_create", "data_retention", "evidence_file", "rc_audit"];

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "4.2.6";
+  const READ_ONLY_PRICE_CANDIDATE_CARD_VIEW_MODEL_VERSION = "4.2.7";
   const PHASE = "read_only_price_candidate_card_view_model_v1";
 
   function clone(value) {
@@ -1718,7 +1718,7 @@
     const globalShoppingPublicBetaViewModelStatus = text(globalShoppingPublicBetaViewModelSummary && globalShoppingPublicBetaViewModelSummary.status || "");
     const globalShoppingCategoryResultSimulatorApi = getGlobalShoppingCategoryResultSimulatorApi();
     const categoryResultSimulatorSummary = safe.categoryResultSimulatorSummary && typeof safe.categoryResultSimulatorSummary === "object" ? safe.categoryResultSimulatorSummary : (typeof globalShoppingCategoryResultSimulatorApi.buildGlobalShoppingCategoryResultSimulator === "function" ? globalShoppingCategoryResultSimulatorApi.buildGlobalShoppingCategoryResultSimulator({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       simulatorMode:"category_result_simulator_only",
       flight:{ categoryLabel:"Flight 候选结果", sourceLabel:"flight mock source", candidateLabel:"flight readonly candidate", normalizedPriceLabel:"待补充", evidenceLabel:"只读候选证据", riskLabel:"需要人工复核" },
       hotel:{ categoryLabel:"Hotel 候选结果", sourceLabel:"hotel mock source", candidateLabel:"hotel readonly candidate", normalizedPriceLabel:"待补充", evidenceLabel:"只读候选证据", riskLabel:"需要人工复核" },
@@ -1727,7 +1727,7 @@
     const categoryResultSimulatorStatus = text(categoryResultSimulatorSummary && categoryResultSimulatorSummary.status || "");
     const globalShoppingReadOnlyComparisonBoardApi = getGlobalShoppingReadOnlyComparisonBoardApi();
     const readOnlyComparisonBoardSummary = safe.readOnlyComparisonBoardSummary && typeof safe.readOnlyComparisonBoardSummary === "object" ? safe.readOnlyComparisonBoardSummary : (typeof globalShoppingReadOnlyComparisonBoardApi.buildGlobalShoppingReadOnlyComparisonBoard === "function" ? globalShoppingReadOnlyComparisonBoardApi.buildGlobalShoppingReadOnlyComparisonBoard({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       boardMode:"read_only_comparison_only",
       globalShoppingReadOnlyCandidateEvidenceUnifierSummary:globalShoppingReadOnlyCandidateEvidenceUnifierSummary,
       globalShoppingFeeNormalizationViewSummary:globalShoppingFeeNormalizationViewSummary,
@@ -1737,7 +1737,7 @@
     const readOnlyComparisonBoardStatus = text(readOnlyComparisonBoardSummary && readOnlyComparisonBoardSummary.status || "");
     const globalShoppingResultTrustBadgePanelApi = getGlobalShoppingResultTrustBadgePanelApi();
     const resultTrustBadgePanelSummary = safe.resultTrustBadgePanelSummary && typeof safe.resultTrustBadgePanelSummary === "object" ? safe.resultTrustBadgePanelSummary : (typeof globalShoppingResultTrustBadgePanelApi.buildGlobalShoppingResultTrustBadgePanel === "function" ? globalShoppingResultTrustBadgePanelApi.buildGlobalShoppingResultTrustBadgePanel({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       panelMode:"result_trust_badge_only",
       sourceAvailable:globalShoppingReadOnlyCandidateEvidenceUnifierStatus === "ready",
       officialAnchorCompared:globalShoppingOfficialAnchorComparisonViewStatus === "ready",
@@ -1749,7 +1749,7 @@
     const resultTrustBadgePanelStatus = text(resultTrustBadgePanelSummary && resultTrustBadgePanelSummary.status || "");
     const globalShoppingPublicBetaUserJourneyShellApi = getGlobalShoppingPublicBetaUserJourneyShellApi();
     const publicBetaUserJourneyShellSummary = safe.publicBetaUserJourneyShellSummary && typeof safe.publicBetaUserJourneyShellSummary === "object" ? safe.publicBetaUserJourneyShellSummary : (typeof globalShoppingPublicBetaUserJourneyShellApi.buildGlobalShoppingPublicBetaUserJourneyShell === "function" ? globalShoppingPublicBetaUserJourneyShellApi.buildGlobalShoppingPublicBetaUserJourneyShell({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       shellMode:"user_journey_only",
       userIntent:"全球购只读候选价整理",
       normalizedCategory:"flight",
@@ -1769,47 +1769,47 @@
     const publicBetaUserJourneyShellStatus = text(publicBetaUserJourneyShellSummary && publicBetaUserJourneyShellSummary.status || "");
     const globalShoppingSafeSearchIntentMatrixApi = getGlobalShoppingSafeSearchIntentMatrixApi();
     const safeSearchIntentMatrixSummary = safe.safeSearchIntentMatrixSummary && typeof safe.safeSearchIntentMatrixSummary === "object" ? safe.safeSearchIntentMatrixSummary : (typeof globalShoppingSafeSearchIntentMatrixApi.buildGlobalShoppingSafeSearchIntentMatrix === "function" ? globalShoppingSafeSearchIntentMatrixApi.buildGlobalShoppingSafeSearchIntentMatrix({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       matrixMode:"safe_intent_matrix_only",
       category:"flight"
     }) : null);
     const safeSearchIntentMatrixStatus = text(safeSearchIntentMatrixSummary && safeSearchIntentMatrixSummary.status || "");
     const globalShoppingPublicBetaUserBoundaryPanelApi = getGlobalShoppingPublicBetaUserBoundaryPanelApi();
     const publicBetaUserBoundaryPanelSummary = safe.publicBetaUserBoundaryPanelSummary && typeof safe.publicBetaUserBoundaryPanelSummary === "object" ? safe.publicBetaUserBoundaryPanelSummary : (typeof globalShoppingPublicBetaUserBoundaryPanelApi.buildGlobalShoppingPublicBetaUserBoundaryPanel === "function" ? globalShoppingPublicBetaUserBoundaryPanelApi.buildGlobalShoppingPublicBetaUserBoundaryPanel({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       panelMode:"user_boundary_only"
     }) : null);
     const publicBetaUserBoundaryPanelStatus = text(publicBetaUserBoundaryPanelSummary && publicBetaUserBoundaryPanelSummary.status || "");
-    const publicBetaFinalGateSummary = safe.publicBetaFinalGateSummary && typeof safe.publicBetaFinalGateSummary === "object" ? safe.publicBetaFinalGateSummary : (typeof globalShoppingPublicBetaFinalGateApi.buildGlobalShoppingPublicBetaFinalGate === "function" ? globalShoppingPublicBetaFinalGateApi.buildGlobalShoppingPublicBetaFinalGate({ appVersion:"4.2.6", gateMode:"final_gate_only", globalShoppingReadOnlyPublicBetaShellSummary:globalShoppingReadOnlyPublicBetaShellSummary, providerZeroRuntimeLockSummary:providerZeroRuntimeLockSummary, globalShoppingReadOnlyCandidateEvidenceUnifierSummary:globalShoppingReadOnlyCandidateEvidenceUnifierSummary, globalShoppingFeeNormalizationViewSummary:globalShoppingFeeNormalizationViewSummary, globalShoppingOfficialAnchorComparisonViewSummary:globalShoppingOfficialAnchorComparisonViewSummary, publicBetaSafetyCopyCenterSummary:publicBetaSafetyCopyCenterSummary }) : null);
+    const publicBetaFinalGateSummary = safe.publicBetaFinalGateSummary && typeof safe.publicBetaFinalGateSummary === "object" ? safe.publicBetaFinalGateSummary : (typeof globalShoppingPublicBetaFinalGateApi.buildGlobalShoppingPublicBetaFinalGate === "function" ? globalShoppingPublicBetaFinalGateApi.buildGlobalShoppingPublicBetaFinalGate({ appVersion:"4.2.7", gateMode:"final_gate_only", globalShoppingReadOnlyPublicBetaShellSummary:globalShoppingReadOnlyPublicBetaShellSummary, providerZeroRuntimeLockSummary:providerZeroRuntimeLockSummary, globalShoppingReadOnlyCandidateEvidenceUnifierSummary:globalShoppingReadOnlyCandidateEvidenceUnifierSummary, globalShoppingFeeNormalizationViewSummary:globalShoppingFeeNormalizationViewSummary, globalShoppingOfficialAnchorComparisonViewSummary:globalShoppingOfficialAnchorComparisonViewSummary, publicBetaSafetyCopyCenterSummary:publicBetaSafetyCopyCenterSummary }) : null);
     const publicBetaFinalGateStatus = text(publicBetaFinalGateSummary && publicBetaFinalGateSummary.status || "");
-    const releaseCandidateConfidenceBoardSummary = safe.releaseCandidateConfidenceBoardSummary && typeof safe.releaseCandidateConfidenceBoardSummary === "object" ? safe.releaseCandidateConfidenceBoardSummary : (typeof globalShoppingReleaseCandidateConfidenceBoardApi.buildGlobalShoppingReleaseCandidateConfidenceBoard === "function" ? globalShoppingReleaseCandidateConfidenceBoardApi.buildGlobalShoppingReleaseCandidateConfidenceBoard({ appVersion:"4.2.6", boardMode:"rc_confidence_only", providerZeroLocked:providerZeroRuntimeLockStatus === "ready", noNetwork:true, noKey:true, noEndpoint:true, noExternalOpen:true, noPayment:true, noOrder:true, noTicketing:true, noRawPersistence:true, safetyCopyClean:publicBetaSafetyCopyCenterStatus === "ready", candidateEvidenceReady:globalShoppingReadOnlyCandidateEvidenceUnifierStatus === "ready", feeNormalizationReady:globalShoppingFeeNormalizationViewStatus === "ready", officialAnchorReady:globalShoppingOfficialAnchorComparisonViewStatus === "ready", userBoundaryClear:globalShoppingPublicBetaViewModelStatus === "ready", manualReviewRequired:true }) : null);
+    const releaseCandidateConfidenceBoardSummary = safe.releaseCandidateConfidenceBoardSummary && typeof safe.releaseCandidateConfidenceBoardSummary === "object" ? safe.releaseCandidateConfidenceBoardSummary : (typeof globalShoppingReleaseCandidateConfidenceBoardApi.buildGlobalShoppingReleaseCandidateConfidenceBoard === "function" ? globalShoppingReleaseCandidateConfidenceBoardApi.buildGlobalShoppingReleaseCandidateConfidenceBoard({ appVersion:"4.2.7", boardMode:"rc_confidence_only", providerZeroLocked:providerZeroRuntimeLockStatus === "ready", noNetwork:true, noKey:true, noEndpoint:true, noExternalOpen:true, noPayment:true, noOrder:true, noTicketing:true, noRawPersistence:true, safetyCopyClean:publicBetaSafetyCopyCenterStatus === "ready", candidateEvidenceReady:globalShoppingReadOnlyCandidateEvidenceUnifierStatus === "ready", feeNormalizationReady:globalShoppingFeeNormalizationViewStatus === "ready", officialAnchorReady:globalShoppingOfficialAnchorComparisonViewStatus === "ready", userBoundaryClear:globalShoppingPublicBetaViewModelStatus === "ready", manualReviewRequired:true }) : null);
     const releaseCandidateConfidenceBoardStatus = text(releaseCandidateConfidenceBoardSummary && releaseCandidateConfidenceBoardSummary.status || "");
     const publicBetaFinalViewModelSummary = safe.publicBetaFinalViewModelSummary && typeof safe.publicBetaFinalViewModelSummary === "object" ? safe.publicBetaFinalViewModelSummary : (typeof globalShoppingPublicBetaFinalViewModelApi.buildGlobalShoppingPublicBetaFinalViewModel === "function" ? globalShoppingPublicBetaFinalViewModelApi.buildGlobalShoppingPublicBetaFinalViewModel({ publicBetaFinalGateSummary:publicBetaFinalGateSummary, releaseCandidateConfidenceBoardSummary:releaseCandidateConfidenceBoardSummary }) : null);
     const publicBetaFinalViewModelStatus = text(publicBetaFinalViewModelSummary && publicBetaFinalViewModelSummary.status || "");
     const safeToProceedWithHumanPublicBetaReview = globalShoppingPublicBetaViewModelStatus === "ready";
     const safeToProceedWithManualPublicBetaReview = publicBetaFinalViewModelStatus === "ready";
-    const publicBetaOperatorConsoleSummary = safe.publicBetaOperatorConsoleSummary && typeof safe.publicBetaOperatorConsoleSummary === "object" ? safe.publicBetaOperatorConsoleSummary : (typeof globalShoppingPublicBetaOperatorConsoleApi.buildGlobalShoppingPublicBetaOperatorConsole === "function" ? globalShoppingPublicBetaOperatorConsoleApi.buildGlobalShoppingPublicBetaOperatorConsole({ appVersion:"4.2.6", consoleMode:"operator_console_only", publicBetaFinalGateSummary:publicBetaFinalGateSummary, releaseCandidateConfidenceBoardSummary:releaseCandidateConfidenceBoardSummary, providerZeroRuntimeLockSummary:providerZeroRuntimeLockSummary, globalShoppingReadOnlyCandidateEvidenceUnifierSummary:globalShoppingReadOnlyCandidateEvidenceUnifierSummary, globalShoppingFeeNormalizationViewSummary:globalShoppingFeeNormalizationViewSummary, globalShoppingOfficialAnchorComparisonViewSummary:globalShoppingOfficialAnchorComparisonViewSummary, publicBetaUserJourneyShellSummary:publicBetaUserJourneyShellSummary, safeSearchIntentMatrixSummary:safeSearchIntentMatrixSummary, publicBetaUserBoundaryPanelSummary:publicBetaUserBoundaryPanelSummary, categoryResultSimulatorSummary:categoryResultSimulatorSummary, readOnlyComparisonBoardSummary:readOnlyComparisonBoardSummary, resultTrustBadgePanelSummary:resultTrustBadgePanelSummary, manualReviewRequired:true }) : null);
+    const publicBetaOperatorConsoleSummary = safe.publicBetaOperatorConsoleSummary && typeof safe.publicBetaOperatorConsoleSummary === "object" ? safe.publicBetaOperatorConsoleSummary : (typeof globalShoppingPublicBetaOperatorConsoleApi.buildGlobalShoppingPublicBetaOperatorConsole === "function" ? globalShoppingPublicBetaOperatorConsoleApi.buildGlobalShoppingPublicBetaOperatorConsole({ appVersion:"4.2.7", consoleMode:"operator_console_only", publicBetaFinalGateSummary:publicBetaFinalGateSummary, releaseCandidateConfidenceBoardSummary:releaseCandidateConfidenceBoardSummary, providerZeroRuntimeLockSummary:providerZeroRuntimeLockSummary, globalShoppingReadOnlyCandidateEvidenceUnifierSummary:globalShoppingReadOnlyCandidateEvidenceUnifierSummary, globalShoppingFeeNormalizationViewSummary:globalShoppingFeeNormalizationViewSummary, globalShoppingOfficialAnchorComparisonViewSummary:globalShoppingOfficialAnchorComparisonViewSummary, publicBetaUserJourneyShellSummary:publicBetaUserJourneyShellSummary, safeSearchIntentMatrixSummary:safeSearchIntentMatrixSummary, publicBetaUserBoundaryPanelSummary:publicBetaUserBoundaryPanelSummary, categoryResultSimulatorSummary:categoryResultSimulatorSummary, readOnlyComparisonBoardSummary:readOnlyComparisonBoardSummary, resultTrustBadgePanelSummary:resultTrustBadgePanelSummary, manualReviewRequired:true }) : null);
     const publicBetaOperatorConsoleStatus = text(publicBetaOperatorConsoleSummary && publicBetaOperatorConsoleSummary.status || "");
     const safeToProceedWithManualComparisonReview = publicBetaOperatorConsoleSummary && publicBetaOperatorConsoleSummary.safeToProceedWithManualComparisonReview === true;
-    const categoryExpansionShellSummary = safe.categoryExpansionShellSummary && typeof safe.categoryExpansionShellSummary === "object" ? safe.categoryExpansionShellSummary : (typeof globalShoppingCategoryExpansionShellApi.buildGlobalShoppingCategoryExpansionShell === "function" ? globalShoppingCategoryExpansionShellApi.buildGlobalShoppingCategoryExpansionShell({ appVersion:"4.2.6", shellMode:"category_expansion_only", safeSearchIntentMatrixSummary:safeSearchIntentMatrixSummary, publicBetaUserBoundaryPanelSummary:publicBetaUserBoundaryPanelSummary, categoryResultSimulatorSummary:categoryResultSimulatorSummary, flight:{ readonlySearchIntent:"flight readonly search", candidateEvidence:"flight candidate evidence", feeNormalization:"flight fee normalization", officialAnchor:"flight official anchor", riskNotes:["manual review only"], userBoundary:"Manual Review Required" }, hotel:{ readonlySearchIntent:"hotel readonly search", candidateEvidence:"hotel candidate evidence", feeNormalization:"hotel fee normalization", officialAnchor:"hotel official anchor", riskNotes:["manual review only"], userBoundary:"Manual Review Required" }, product:{ readonlySearchIntent:"product readonly search", candidateEvidence:"product candidate evidence", feeNormalization:"product fee normalization", officialAnchor:"product official anchor", riskNotes:["manual review only"], userBoundary:"Manual Review Required" } }) : null);
+    const categoryExpansionShellSummary = safe.categoryExpansionShellSummary && typeof safe.categoryExpansionShellSummary === "object" ? safe.categoryExpansionShellSummary : (typeof globalShoppingCategoryExpansionShellApi.buildGlobalShoppingCategoryExpansionShell === "function" ? globalShoppingCategoryExpansionShellApi.buildGlobalShoppingCategoryExpansionShell({ appVersion:"4.2.7", shellMode:"category_expansion_only", safeSearchIntentMatrixSummary:safeSearchIntentMatrixSummary, publicBetaUserBoundaryPanelSummary:publicBetaUserBoundaryPanelSummary, categoryResultSimulatorSummary:categoryResultSimulatorSummary, flight:{ readonlySearchIntent:"flight readonly search", candidateEvidence:"flight candidate evidence", feeNormalization:"flight fee normalization", officialAnchor:"flight official anchor", riskNotes:["manual review only"], userBoundary:"Manual Review Required" }, hotel:{ readonlySearchIntent:"hotel readonly search", candidateEvidence:"hotel candidate evidence", feeNormalization:"hotel fee normalization", officialAnchor:"hotel official anchor", riskNotes:["manual review only"], userBoundary:"Manual Review Required" }, product:{ readonlySearchIntent:"product readonly search", candidateEvidence:"product candidate evidence", feeNormalization:"product fee normalization", officialAnchor:"product official anchor", riskNotes:["manual review only"], userBoundary:"Manual Review Required" } }) : null);
     const categoryExpansionShellStatus = text(categoryExpansionShellSummary && categoryExpansionShellSummary.status || "");
-    const finalOfflineBetaAuditSummary = safe.finalOfflineBetaAuditSummary && typeof safe.finalOfflineBetaAuditSummary === "object" ? safe.finalOfflineBetaAuditSummary : (typeof globalShoppingFinalOfflineBetaAuditApi.buildGlobalShoppingFinalOfflineBetaAudit === "function" ? globalShoppingFinalOfflineBetaAuditApi.buildGlobalShoppingFinalOfflineBetaAudit({ appVersion:"4.2.6", auditMode:"final_offline_beta_audit_only", publicBetaOperatorConsoleSummary:publicBetaOperatorConsoleSummary, categoryExpansionShellSummary:categoryExpansionShellSummary, publicBetaUserJourneyShellSummary:publicBetaUserJourneyShellSummary, safeSearchIntentMatrixSummary:safeSearchIntentMatrixSummary, publicBetaUserBoundaryPanelSummary:publicBetaUserBoundaryPanelSummary, categoryResultSimulatorSummary:categoryResultSimulatorSummary, readOnlyComparisonBoardSummary:readOnlyComparisonBoardSummary, resultTrustBadgePanelSummary:resultTrustBadgePanelSummary, publicBetaFinalGateSummary:publicBetaFinalGateSummary, releaseCandidateConfidenceBoardSummary:releaseCandidateConfidenceBoardSummary, publicBetaSafetyCopyCenterSummary:publicBetaSafetyCopyCenterSummary, noProvider:true, noNetwork:true, noKey:true, noEndpoint:true, noExternalOpen:true, noPayment:true, noOrder:true, noTicketing:true, noRawPersistence:true, noReleaseMutation:true, userCopySafe:true, manualReviewRequired:true }) : null);
+    const finalOfflineBetaAuditSummary = safe.finalOfflineBetaAuditSummary && typeof safe.finalOfflineBetaAuditSummary === "object" ? safe.finalOfflineBetaAuditSummary : (typeof globalShoppingFinalOfflineBetaAuditApi.buildGlobalShoppingFinalOfflineBetaAudit === "function" ? globalShoppingFinalOfflineBetaAuditApi.buildGlobalShoppingFinalOfflineBetaAudit({ appVersion:"4.2.7", auditMode:"final_offline_beta_audit_only", publicBetaOperatorConsoleSummary:publicBetaOperatorConsoleSummary, categoryExpansionShellSummary:categoryExpansionShellSummary, publicBetaUserJourneyShellSummary:publicBetaUserJourneyShellSummary, safeSearchIntentMatrixSummary:safeSearchIntentMatrixSummary, publicBetaUserBoundaryPanelSummary:publicBetaUserBoundaryPanelSummary, categoryResultSimulatorSummary:categoryResultSimulatorSummary, readOnlyComparisonBoardSummary:readOnlyComparisonBoardSummary, resultTrustBadgePanelSummary:resultTrustBadgePanelSummary, publicBetaFinalGateSummary:publicBetaFinalGateSummary, releaseCandidateConfidenceBoardSummary:releaseCandidateConfidenceBoardSummary, publicBetaSafetyCopyCenterSummary:publicBetaSafetyCopyCenterSummary, noProvider:true, noNetwork:true, noKey:true, noEndpoint:true, noExternalOpen:true, noPayment:true, noOrder:true, noTicketing:true, noRawPersistence:true, noReleaseMutation:true, userCopySafe:true, manualReviewRequired:true }) : null);
     const finalOfflineBetaAuditStatus = text(finalOfflineBetaAuditSummary && finalOfflineBetaAuditSummary.status || "");
     const publicBetaTrialReadinessPackApi = window.WeishanGlobalShoppingPublicBetaTrialReadinessPack || {};
-    const publicBetaTrialReadinessPackSummary = safe.publicBetaTrialReadinessPackSummary && typeof safe.publicBetaTrialReadinessPackSummary === "object" ? safe.publicBetaTrialReadinessPackSummary : (typeof publicBetaTrialReadinessPackApi.buildGlobalShoppingPublicBetaTrialReadinessPack === "function" ? publicBetaTrialReadinessPackApi.buildGlobalShoppingPublicBetaTrialReadinessPack({ appVersion:"4.2.6", packMode:"trial_readiness_pack_only", publicBetaUserJourneyShellSummary:publicBetaUserJourneyShellSummary, categoryResultSimulatorSummary:categoryResultSimulatorSummary, readOnlyComparisonBoardSummary:readOnlyComparisonBoardSummary, resultTrustBadgePanelSummary:resultTrustBadgePanelSummary, publicBetaOperatorConsoleSummary:publicBetaOperatorConsoleSummary, finalOfflineBetaAuditSummary:finalOfflineBetaAuditSummary, manualReviewRequired:true }) : null);
+    const publicBetaTrialReadinessPackSummary = safe.publicBetaTrialReadinessPackSummary && typeof safe.publicBetaTrialReadinessPackSummary === "object" ? safe.publicBetaTrialReadinessPackSummary : (typeof publicBetaTrialReadinessPackApi.buildGlobalShoppingPublicBetaTrialReadinessPack === "function" ? publicBetaTrialReadinessPackApi.buildGlobalShoppingPublicBetaTrialReadinessPack({ appVersion:"4.2.7", packMode:"trial_readiness_pack_only", publicBetaUserJourneyShellSummary:publicBetaUserJourneyShellSummary, categoryResultSimulatorSummary:categoryResultSimulatorSummary, readOnlyComparisonBoardSummary:readOnlyComparisonBoardSummary, resultTrustBadgePanelSummary:resultTrustBadgePanelSummary, publicBetaOperatorConsoleSummary:publicBetaOperatorConsoleSummary, finalOfflineBetaAuditSummary:finalOfflineBetaAuditSummary, manualReviewRequired:true }) : null);
     const publicBetaTrialReadinessPackStatus = text(publicBetaTrialReadinessPackSummary && publicBetaTrialReadinessPackSummary.status || "");
     const finalManualAcceptanceConsoleApi = window.WeishanGlobalShoppingFinalManualAcceptanceConsole || {};
-    const finalManualAcceptanceConsoleSummary = safe.finalManualAcceptanceConsoleSummary && typeof safe.finalManualAcceptanceConsoleSummary === "object" ? safe.finalManualAcceptanceConsoleSummary : (typeof finalManualAcceptanceConsoleApi.buildGlobalShoppingFinalManualAcceptanceConsole === "function" ? finalManualAcceptanceConsoleApi.buildGlobalShoppingFinalManualAcceptanceConsole({ appVersion:"4.2.6", consoleMode:"final_manual_acceptance_only", providerZeroLocked:providerZeroRuntimeLockStatus === "ready", readOnly:true, manualReviewRequired:true, nextStageDecision:"manual_review_required" }) : null);
+    const finalManualAcceptanceConsoleSummary = safe.finalManualAcceptanceConsoleSummary && typeof safe.finalManualAcceptanceConsoleSummary === "object" ? safe.finalManualAcceptanceConsoleSummary : (typeof finalManualAcceptanceConsoleApi.buildGlobalShoppingFinalManualAcceptanceConsole === "function" ? finalManualAcceptanceConsoleApi.buildGlobalShoppingFinalManualAcceptanceConsole({ appVersion:"4.2.7", consoleMode:"final_manual_acceptance_only", providerZeroLocked:providerZeroRuntimeLockStatus === "ready", readOnly:true, manualReviewRequired:true, nextStageDecision:"manual_review_required" }) : null);
     const finalManualAcceptanceConsoleStatus = text(finalManualAcceptanceConsoleSummary && finalManualAcceptanceConsoleSummary.status || "");
     const publicBetaFeedbackPlaceholderApi = window.WeishanGlobalShoppingPublicBetaFeedbackPlaceholder || {};
-    const publicBetaFeedbackPlaceholderSummary = safe.publicBetaFeedbackPlaceholderSummary && typeof safe.publicBetaFeedbackPlaceholderSummary === "object" ? safe.publicBetaFeedbackPlaceholderSummary : (typeof publicBetaFeedbackPlaceholderApi.buildGlobalShoppingPublicBetaFeedbackPlaceholder === "function" ? publicBetaFeedbackPlaceholderApi.buildGlobalShoppingPublicBetaFeedbackPlaceholder({ appVersion:"4.2.6", placeholderMode:"feedback_placeholder_only" }) : null);
+    const publicBetaFeedbackPlaceholderSummary = safe.publicBetaFeedbackPlaceholderSummary && typeof safe.publicBetaFeedbackPlaceholderSummary === "object" ? safe.publicBetaFeedbackPlaceholderSummary : (typeof publicBetaFeedbackPlaceholderApi.buildGlobalShoppingPublicBetaFeedbackPlaceholder === "function" ? publicBetaFeedbackPlaceholderApi.buildGlobalShoppingPublicBetaFeedbackPlaceholder({ appVersion:"4.2.7", placeholderMode:"feedback_placeholder_only" }) : null);
     const publicBetaFeedbackPlaceholderStatus = text(publicBetaFeedbackPlaceholderSummary && publicBetaFeedbackPlaceholderSummary.status || "");
     const publicBetaFinalManualViewModelApi = window.WeishanGlobalShoppingPublicBetaFinalManualViewModel || {};
     const publicBetaFinalManualViewModelSummary = safe.publicBetaFinalManualViewModelSummary && typeof safe.publicBetaFinalManualViewModelSummary === "object" ? safe.publicBetaFinalManualViewModelSummary : (typeof publicBetaFinalManualViewModelApi.buildGlobalShoppingPublicBetaFinalManualViewModel === "function" ? publicBetaFinalManualViewModelApi.buildGlobalShoppingPublicBetaFinalManualViewModel({ publicBetaTrialReadinessPackSummary:publicBetaTrialReadinessPackSummary, finalManualAcceptanceConsoleSummary:finalManualAcceptanceConsoleSummary, publicBetaFeedbackPlaceholderSummary:publicBetaFeedbackPlaceholderSummary }) : null);
     const publicBetaFinalManualViewModelStatus = text(publicBetaFinalManualViewModelSummary && publicBetaFinalManualViewModelSummary.status || "");
     const publicBetaVisualQaConsoleApi = window.WeishanGlobalShoppingPublicBetaVisualQaConsole || {};
     const publicBetaVisualQaConsoleSummary = safe.publicBetaVisualQaConsoleSummary && typeof safe.publicBetaVisualQaConsoleSummary === "object" ? safe.publicBetaVisualQaConsoleSummary : (typeof publicBetaVisualQaConsoleApi.buildGlobalShoppingPublicBetaVisualQaConsole === "function" ? publicBetaVisualQaConsoleApi.buildGlobalShoppingPublicBetaVisualQaConsole({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       consoleMode:"visual_qa_console_only",
       publicBetaTrialReadinessPackSummary:publicBetaTrialReadinessPackSummary,
       finalManualAcceptanceConsoleSummary:finalManualAcceptanceConsoleSummary,
@@ -1830,14 +1830,14 @@
     const publicBetaVisualQaConsoleStatus = text(publicBetaVisualQaConsoleSummary && publicBetaVisualQaConsoleSummary.status || "");
     const publicBetaTrialScenarioChecklistApi = window.WeishanGlobalShoppingPublicBetaTrialScenarioChecklist || {};
     const publicBetaTrialScenarioChecklistSummary = safe.publicBetaTrialScenarioChecklistSummary && typeof safe.publicBetaTrialScenarioChecklistSummary === "object" ? safe.publicBetaTrialScenarioChecklistSummary : (typeof publicBetaTrialScenarioChecklistApi.buildGlobalShoppingPublicBetaTrialScenarioChecklist === "function" ? publicBetaTrialScenarioChecklistApi.buildGlobalShoppingPublicBetaTrialScenarioChecklist({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       checklistMode:"trial_scenario_checklist_only",
       manualReviewRequired:true
     }) : null);
     const publicBetaTrialScenarioChecklistStatus = text(publicBetaTrialScenarioChecklistSummary && publicBetaTrialScenarioChecklistSummary.status || "");
     const noTransactionRegressionGuardApi = window.WeishanGlobalShoppingNoTransactionRegressionGuard || {};
     const noTransactionRegressionGuardSummary = safe.noTransactionRegressionGuardSummary && typeof safe.noTransactionRegressionGuardSummary === "object" ? safe.noTransactionRegressionGuardSummary : (typeof noTransactionRegressionGuardApi.buildGlobalShoppingNoTransactionRegressionGuard === "function" ? noTransactionRegressionGuardApi.buildGlobalShoppingNoTransactionRegressionGuard({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       guardMode:"no_transaction_regression_guard_only",
       publicBetaVisualQaConsoleSummary:publicBetaVisualQaConsoleSummary,
       publicBetaTrialScenarioChecklistSummary:publicBetaTrialScenarioChecklistSummary,
@@ -1870,7 +1870,7 @@
     const publicBetaQaViewModelStatus = text(publicBetaQaViewModelSummary && publicBetaQaViewModelSummary.status || "");
     const publicBetaUserOnboardingShellApi = window.WeishanGlobalShoppingPublicBetaUserOnboardingShell || {};
     const publicBetaUserOnboardingShellSummary = safe.publicBetaUserOnboardingShellSummary && typeof safe.publicBetaUserOnboardingShellSummary === "object" ? safe.publicBetaUserOnboardingShellSummary : (typeof publicBetaUserOnboardingShellApi.buildGlobalShoppingPublicBetaUserOnboardingShell === "function" ? publicBetaUserOnboardingShellApi.buildGlobalShoppingPublicBetaUserOnboardingShell({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       shellMode:"onboarding_shell_only",
       publicBetaVisualQaConsoleSummary:publicBetaVisualQaConsoleSummary,
       publicBetaTrialScenarioChecklistSummary:publicBetaTrialScenarioChecklistSummary,
@@ -1882,7 +1882,7 @@
     const publicBetaUserOnboardingShellStatus = text(publicBetaUserOnboardingShellSummary && publicBetaUserOnboardingShellSummary.status || "");
     const visualTrialGuideApi = window.WeishanGlobalShoppingVisualTrialGuide || {};
     const visualTrialGuideSummary = safe.visualTrialGuideSummary && typeof safe.visualTrialGuideSummary === "object" ? safe.visualTrialGuideSummary : (typeof visualTrialGuideApi.buildGlobalShoppingVisualTrialGuide === "function" ? visualTrialGuideApi.buildGlobalShoppingVisualTrialGuide({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       guideMode:"visual_trial_guide_only",
       flightReadonlyJourney:true,
       hotelReadonlyJourney:true,
@@ -1895,7 +1895,7 @@
     const visualTrialGuideStatus = text(visualTrialGuideSummary && visualTrialGuideSummary.status || "");
     const safeFeedbackDraftPanelApi = window.WeishanGlobalShoppingSafeFeedbackDraftPanel || {};
     const safeFeedbackDraftPanelSummary = safe.safeFeedbackDraftPanelSummary && typeof safe.safeFeedbackDraftPanelSummary === "object" ? safe.safeFeedbackDraftPanelSummary : (typeof safeFeedbackDraftPanelApi.buildGlobalShoppingSafeFeedbackDraftPanel === "function" ? safeFeedbackDraftPanelApi.buildGlobalShoppingSafeFeedbackDraftPanel({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       feedbackMode:"draft_only",
       manualReviewRequired:true
     }) : null);
@@ -1909,7 +1909,7 @@
     const publicBetaOnboardingViewModelStatus = text(publicBetaOnboardingViewModelSummary && publicBetaOnboardingViewModelSummary.status || "");
     const publicBetaRcConsoleApi = window.WeishanGlobalShoppingPublicBetaRcConsole || {};
     const publicBetaRcConsoleSummary = safe.publicBetaRcConsoleSummary && typeof safe.publicBetaRcConsoleSummary === "object" ? safe.publicBetaRcConsoleSummary : (typeof publicBetaRcConsoleApi.buildGlobalShoppingPublicBetaRcConsole === "function" ? publicBetaRcConsoleApi.buildGlobalShoppingPublicBetaRcConsole({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       rcMode:"rc_console_only",
       publicBetaOnboardingViewModelSummary:publicBetaOnboardingViewModelSummary,
       publicBetaVisualQaConsoleSummary:publicBetaVisualQaConsoleSummary,
@@ -1921,7 +1921,7 @@
     const publicBetaRcConsoleStatus = text(publicBetaRcConsoleSummary && (publicBetaRcConsoleSummary.rcStatus || publicBetaRcConsoleSummary.status) || "");
     const offlineTrialReleaseGateApi = window.WeishanGlobalShoppingOfflineTrialReleaseGate || {};
     const offlineTrialReleaseGateSummary = safe.offlineTrialReleaseGateSummary && typeof safe.offlineTrialReleaseGateSummary === "object" ? safe.offlineTrialReleaseGateSummary : (typeof offlineTrialReleaseGateApi.buildGlobalShoppingOfflineTrialReleaseGate === "function" ? offlineTrialReleaseGateApi.buildGlobalShoppingOfflineTrialReleaseGate({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       gateMode:"offline_trial_gate_only",
       manualReviewRequired:true,
       release:false,
@@ -1952,7 +1952,7 @@
     const publicBetaRcViewModelStatus = text(publicBetaRcViewModelSummary && publicBetaRcViewModelSummary.status || "");
     const publicBetaStabilityAuditApi = window.WeishanGlobalShoppingPublicBetaStabilityAudit || {};
     const publicBetaStabilityAuditSummary = safe.publicBetaStabilityAuditSummary && typeof safe.publicBetaStabilityAuditSummary === "object" ? safe.publicBetaStabilityAuditSummary : (typeof publicBetaStabilityAuditApi.buildGlobalShoppingPublicBetaStabilityAudit === "function" ? publicBetaStabilityAuditApi.buildGlobalShoppingPublicBetaStabilityAudit({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       auditMode:"stability_audit_only",
       publicBetaRcConsoleSummary:publicBetaRcConsoleSummary,
       offlineTrialReleaseGateSummary:offlineTrialReleaseGateSummary,
@@ -1969,7 +1969,7 @@
     const publicBetaStabilityAuditStatus = text(publicBetaStabilityAuditSummary && publicBetaStabilityAuditSummary.status || "");
     const manualLaunchHandoffPackApi = window.WeishanGlobalShoppingManualLaunchHandoffPack || {};
     const manualLaunchHandoffPackSummary = safe.manualLaunchHandoffPackSummary && typeof safe.manualLaunchHandoffPackSummary === "object" ? safe.manualLaunchHandoffPackSummary : (typeof manualLaunchHandoffPackApi.buildGlobalShoppingManualLaunchHandoffPack === "function" ? manualLaunchHandoffPackApi.buildGlobalShoppingManualLaunchHandoffPack({
-      appVersion:"4.2.6",
+      appVersion:"4.2.7",
       packMode:"manual_handoff_only",
       publicBetaStabilityAuditSummary:publicBetaStabilityAuditSummary,
       manualReviewRequired:true
@@ -2163,7 +2163,7 @@
       manualReviewRequired:true
     }) : null);
     const manualTrialIssueReviewStatus = text(manualTrialIssueReviewBoardSummary && (manualTrialIssueReviewBoardSummary.status || manualTrialIssueReviewBoardSummary.issueReviewStatus) || "");
-    const publicBetaAcceptanceBoardSummary = safe.publicBetaAcceptanceBoardSummary && typeof safe.publicBetaAcceptanceBoardSummary === "object" ? safe.publicBetaAcceptanceBoardSummary : (typeof globalShoppingPublicBetaAcceptanceBoardApi.buildGlobalShoppingPublicBetaAcceptanceBoard === "function" ? globalShoppingPublicBetaAcceptanceBoardApi.buildGlobalShoppingPublicBetaAcceptanceBoard({ appVersion:"4.2.6", boardMode:"acceptance_board_only", providerZeroLocked:providerZeroRuntimeLockStatus === "ready", candidateEvidenceReady:globalShoppingReadOnlyCandidateEvidenceUnifierStatus === "ready", feeNormalizationReady:globalShoppingFeeNormalizationViewStatus === "ready", officialAnchorReady:globalShoppingOfficialAnchorComparisonViewStatus === "ready", safetyCopyClean:publicBetaSafetyCopyCenterStatus === "ready", categoryShellReady:categoryExpansionShellStatus === "ready", userJourneyReady:publicBetaUserJourneyShellStatus === "ready", safeIntentReady:safeSearchIntentMatrixStatus === "ready", userBoundaryReady:publicBetaUserBoundaryPanelStatus === "ready", categoryResultReady:categoryResultSimulatorStatus === "ready", comparisonBoardReady:readOnlyComparisonBoardStatus === "ready", trustBadgeReady:resultTrustBadgePanelStatus === "ready", trialReadinessPackReady:publicBetaTrialReadinessPackStatus === "ready", manualAcceptanceConsoleReady:finalManualAcceptanceConsoleStatus === "ready", feedbackPlaceholderReady:publicBetaFeedbackPlaceholderStatus === "ready", finalManualViewModelReady:publicBetaFinalManualViewModelStatus === "ready", finalAuditReady:finalOfflineBetaAuditStatus === "ready", noPayment:true, noOrder:true, noTicketing:true, noExternalOpen:true, manualReviewRequired:true }) : null);
+    const publicBetaAcceptanceBoardSummary = safe.publicBetaAcceptanceBoardSummary && typeof safe.publicBetaAcceptanceBoardSummary === "object" ? safe.publicBetaAcceptanceBoardSummary : (typeof globalShoppingPublicBetaAcceptanceBoardApi.buildGlobalShoppingPublicBetaAcceptanceBoard === "function" ? globalShoppingPublicBetaAcceptanceBoardApi.buildGlobalShoppingPublicBetaAcceptanceBoard({ appVersion:"4.2.7", boardMode:"acceptance_board_only", providerZeroLocked:providerZeroRuntimeLockStatus === "ready", candidateEvidenceReady:globalShoppingReadOnlyCandidateEvidenceUnifierStatus === "ready", feeNormalizationReady:globalShoppingFeeNormalizationViewStatus === "ready", officialAnchorReady:globalShoppingOfficialAnchorComparisonViewStatus === "ready", safetyCopyClean:publicBetaSafetyCopyCenterStatus === "ready", categoryShellReady:categoryExpansionShellStatus === "ready", userJourneyReady:publicBetaUserJourneyShellStatus === "ready", safeIntentReady:safeSearchIntentMatrixStatus === "ready", userBoundaryReady:publicBetaUserBoundaryPanelStatus === "ready", categoryResultReady:categoryResultSimulatorStatus === "ready", comparisonBoardReady:readOnlyComparisonBoardStatus === "ready", trustBadgeReady:resultTrustBadgePanelStatus === "ready", trialReadinessPackReady:publicBetaTrialReadinessPackStatus === "ready", manualAcceptanceConsoleReady:finalManualAcceptanceConsoleStatus === "ready", feedbackPlaceholderReady:publicBetaFeedbackPlaceholderStatus === "ready", finalManualViewModelReady:publicBetaFinalManualViewModelStatus === "ready", finalAuditReady:finalOfflineBetaAuditStatus === "ready", noPayment:true, noOrder:true, noTicketing:true, noExternalOpen:true, manualReviewRequired:true }) : null);
     const publicBetaAcceptanceBoardStatus = text(publicBetaAcceptanceBoardSummary && publicBetaAcceptanceBoardSummary.status || "");
     const offlineAcceptanceSnapshotApi = window.WeishanGlobalShoppingOfflineAcceptanceSnapshot || {};
     const offlineAcceptanceSnapshotSummary = safe.offlineAcceptanceSnapshotSummary && typeof safe.offlineAcceptanceSnapshotSummary === "object" ? safe.offlineAcceptanceSnapshotSummary : (typeof offlineAcceptanceSnapshotApi.buildGlobalShoppingOfflineAcceptanceSnapshot === "function" ? offlineAcceptanceSnapshotApi.buildGlobalShoppingOfflineAcceptanceSnapshot({

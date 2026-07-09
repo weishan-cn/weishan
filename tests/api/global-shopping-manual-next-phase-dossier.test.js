@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingManualNextPhaseDossier.js"]);
   const api = windowRef.WeishanGlobalShoppingManualNextPhaseDossier;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_NEXT_PHASE_DOSSIER_VERSION, "4.2.6");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_NEXT_PHASE_DOSSIER_VERSION, "4.2.7");
 
   const needsReview = api.buildGlobalShoppingManualNextPhaseDossier({
     publicBetaFinalReadinessCommandCenterSummary:summary("Public Beta Final Readiness Command Center", "manual_review_required", { finalReadinessStatus:"manual_review_required" }),

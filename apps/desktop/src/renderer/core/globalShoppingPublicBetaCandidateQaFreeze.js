@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_QA_FREEZE_VERSION = "4.2.6";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_QA_FREEZE_VERSION = "4.2.7";
   const FREEZE_NAME = "global_shopping_public_beta_candidate_qa_freeze_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, candidate_qa_freeze_only:true };
   const FROZEN_SCOPE = ["provider", "network", "external_open", "payment", "order", "ticketing", "release", "push", "launch", "feedback_submit", "upload", "issue_create", "task_create"];

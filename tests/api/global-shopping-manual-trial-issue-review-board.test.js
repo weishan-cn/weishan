@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingManualTrialIssueReviewBoard.js"]);
   const api = windowRef.WeishanGlobalShoppingManualTrialIssueReviewBoard;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_TRIAL_ISSUE_REVIEW_BOARD_VERSION, "4.2.6");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_TRIAL_ISSUE_REVIEW_BOARD_VERSION, "4.2.7");
 
   const ready = api.buildGlobalShoppingManualTrialIssueReviewBoard({
     offlineIssueTriageBoardSummary:summary("Offline Issue Triage Board"),

@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const READ_ONLY_QUOTE_CANDIDATE_RANKING_VERSION = "4.2.6";
+  const READ_ONLY_QUOTE_CANDIDATE_RANKING_VERSION = "4.2.7";
   const RANKING_NAME = "read_only_quote_candidate_ranking_v1";
   const CLAIM = "当前导入样本中的低价候选";
   const RANKING_EXPLANATION = "仅按导入样本中的只读候选证据排序，平台最终为准。";

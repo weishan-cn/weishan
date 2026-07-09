@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_MANUAL_QA_SCENARIO_RUNNER_VERSION = "4.2.6";
+  const GLOBAL_SHOPPING_MANUAL_QA_SCENARIO_RUNNER_VERSION = "4.2.7";
   const RUNNER_NAME = "global_shopping_manual_qa_scenario_runner_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, manual_qa_scenario_runner_only:true };
   const REQUIRED_SCENARIOS = [

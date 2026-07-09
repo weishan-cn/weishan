@@ -52,7 +52,7 @@ function assertNoUnsafe(model) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/readOnlyQuoteCandidateSelection.js"]);
   const api = windowRef.WeishanReadOnlyQuoteCandidateSelection;
-  assert.equal(api.READ_ONLY_QUOTE_CANDIDATE_SELECTION_VERSION, "4.2.6");
+  assert.equal(api.READ_ONLY_QUOTE_CANDIDATE_SELECTION_VERSION, "4.2.7");
 
   const selected = api.selectReadOnlyQuoteCandidate(ranking("https://www.google.com/travel/flights"), "q1");
   assert.equal(selected.selected, true);

@@ -40,7 +40,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingOfflineProviderGovernanceClosureBoard.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingOfflineProviderGovernanceClosureBoard;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_PROVIDER_GOVERNANCE_CLOSURE_BOARD_VERSION, "4.2.6");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_PROVIDER_GOVERNANCE_CLOSURE_BOARD_VERSION, "4.2.7");
   const ready = api.buildGlobalShoppingOfflineProviderGovernanceClosureBoard({
     boardMode:"offline_mock",
     providerFinalSafetySealSummary:readySummary("Provider Final Safety Seal", "Provider Final Safety Seal 已准备"),

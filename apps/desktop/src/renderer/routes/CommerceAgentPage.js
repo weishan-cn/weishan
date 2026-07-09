@@ -18,6 +18,38 @@
   }
 
   function ensureSearchLoaded(host){
+    if (!window.WeishanGlobalShoppingReadOnlySearchResultModel && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingReadOnlySearchResultModel"]')) {
+      const model = document.createElement("script");
+      model.src = "./renderer/core/globalShoppingReadOnlySearchResultModel.js?v=4.2.7";
+      model.dataset.weishanDynamic = "WeishanGlobalShoppingReadOnlySearchResultModel";
+      model.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(model);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingPlatformCandidateFactory && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingPlatformCandidateFactory"]')) {
+      const factory = document.createElement("script");
+      factory.src = "./renderer/core/globalShoppingPlatformCandidateFactory.js?v=4.2.7";
+      factory.dataset.weishanDynamic = "WeishanGlobalShoppingPlatformCandidateFactory";
+      factory.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(factory);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingReadOnlySearchResultRanker && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingReadOnlySearchResultRanker"]')) {
+      const ranker = document.createElement("script");
+      ranker.src = "./renderer/core/globalShoppingReadOnlySearchResultRanker.js?v=4.2.7";
+      ranker.dataset.weishanDynamic = "WeishanGlobalShoppingReadOnlySearchResultRanker";
+      ranker.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(ranker);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingReadOnlySearchResultPresenter && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingReadOnlySearchResultPresenter"]')) {
+      const presenter = document.createElement("script");
+      presenter.src = "./renderer/core/globalShoppingReadOnlySearchResultPresenter.js?v=4.2.7";
+      presenter.dataset.weishanDynamic = "WeishanGlobalShoppingReadOnlySearchResultPresenter";
+      presenter.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(presenter);
+      return;
+    }
     if (!window.WeishanCommerceProviderAdapter && !document.querySelector('script[data-weishan-dynamic="WeishanCommerceProviderAdapter"]')) {
       const adapter = document.createElement("script");
       adapter.src = "./renderer/core/commerceProviderAdapter.js?v=2.0.32";
@@ -7184,6 +7216,8 @@
     const approvalInfo = health && health.approvalHealth || task.approvalHealth || {};
     const category = detail.categoryLabel || task.categoryLabel || task.category || "全球采购";
     const blocked = task.status === "blocked";
+    const readOnlySearchResults = readOnlySearchResultsHtml(task);
+    const hasReadOnlySearchResults = !!readOnlySearchResults;
     const simpleFlightResultMode = commerceIsSimpleFlightTask(task);
     const analysisProcessBody = !blocked ? [
       commerceLocalIntentPanelHtml(task),
@@ -7249,11 +7283,11 @@
     const resultSummaryPanel = commerceResultSummaryPanelHtml(task);
     const oneScreenResultMode = false;
     const detailSafetyDetails = !blocked ? disclosure("查看安全边界", `
-      <p class="commerce-safety-lead">当前只是整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</p>
+      <p class="commerce-safety-lead">当前只生成只读候选结果和平台入口，不收款、不代下单、不保存账号密码或证件信息。</p>
       <ul class="commerce-safety-list">
-        <li>当前不会访问真实平台</li>
-        <li>当前不会返回价格</li>
-        <li>当前不会跳转购买或预订</li>
+        <li>当前不会自动访问真实平台或自动提交表单</li>
+        <li>没有真实价格时不会伪造最低价</li>
+        <li>用户可以手动点击去平台查看实时价格</li>
         <li>当前不会付款或下单</li>
         <li>不会保存身份证、护照、银行卡或长期保存用户答案</li>
       </ul>`, "commerce-safety-disclosure") : "";
@@ -7268,12 +7302,12 @@
         ${section("搜索范围", chips(detail.searchScope), "commerce-section-tight")}
         ${section("比较维度", chips(detail.comparisonDimensions), "commerce-section-tight")}
         ${section("决策规则", `<p>${esc(detail.decisionRule)}</p>`)}
-        ${section("候选方案", candidatesHtml(task), "commerce-section-wide")}
+        ${section("候选方案", hasReadOnlySearchResults ? readOnlySearchResults : candidatesHtml(task), "commerce-section-wide")}
         ${section("推荐结果", recommendationHtml(task), "commerce-section-wide")}
         ${section("推荐输出格式", `<p class="commerce-muted">后续真实搜索后会生成：</p>${chips(detail.recommendationTemplate && detail.recommendationTemplate.fields)}`)}
         ${section("候选方案字段模板", `<p class="commerce-muted">仅展示字段结构，不填真实价格，不伪造实时库存或可用性。</p>${chips(detail.candidateSchema)}`)}
-        ${section("执行边界", `<div class="commerce-risk">当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单。</div>`)}
-        ${section("下一步建议", list(["补充预算、时间、地区限制。", "后续接入真实搜索插件后填入候选方案。", "下单或付款前必须再次确认。"]))}
+        ${section("执行边界", `<div class="commerce-risk">当前只做 AI/本地规则辅助搜索、分析、比价、推荐和跳转；不收款、不代下单、不保存账号密码。</div>`)}
+        ${section("下一步建议", list(["先查看 2-3 条推荐入口。", "如需更多候选，可展开查看更多候选。", "最终下单或付款前请在外部平台再次确认价格与规则。"]))}
       </div>`;
     return `<div class="commerce-detail" data-commerce-detail="${esc(task.taskId)}">
       <div class="commerce-detail-head">
@@ -7299,11 +7333,12 @@
     const isModelPricing = task && task.category === "aiModelPricing";
     const isFlight = task && task.category === "flight";
     const isProduct = task && task.category === "ecommerce";
+    const hasReadOnlyResults = !!(task && task.readOnlySearchResultSummary && task.readOnlySearchResultSummary.candidateCount > 0);
     const locationInfo = searchApi() && searchApi().locationHealthForCommerce ? searchApi().locationHealthForCommerce() : {};
     const complianceRequired = task && task.searchStatus === "local_law_compliance_required";
     const localLawPanelRequired = !isModelPricing && task && task.complianceHealth && task.complianceHealth.canSearchProvider === false;
     const destinationRequired = !complianceRequired && isProduct && (task && (task.searchStatus === "shipping_destination_required" || task.searchStatus === "location_required") || locationInfo.hasShippingDestination !== true);
-    const disabled = !hasProvider || missingFields.length > 0 || destinationRequired || complianceRequired;
+    const disabled = hasReadOnlyResults ? true : (!hasProvider || missingFields.length > 0 || destinationRequired || complianceRequired);
     const isCruise = task && task.category === "cruise";
     const isPrivateJet = task && task.category === "privateJet";
     const normalized = task && task.normalizedFields || {};
@@ -7320,7 +7355,7 @@
     const sandboxInfo = health.dryRunHealth || health.sandboxHealth || {};
     const globalReadiness = sandboxInfo.globalReadiness || {};
     const reasonWhenDisabled = providerRow.reasonWhenDisabled || "";
-    const searchStateLabel = hasProvider ? "已就绪" : "未配置";
+    const searchStateLabel = hasReadOnlyResults ? "只读候选已生成" : (hasProvider ? "已就绪" : "未配置");
     const failedMessage = task && task.searchStatus === "failed" ? task.searchErrorMessage || (isModelPricing ? "当前模型结果源不可用，无法返回结果。" : "搜索失败，无法返回结果。") : "";
     const buttonLabel = isModelPricing ? "搜索模型结果" : missingFields.length ? "开始搜索" : hasProvider ? "开始搜索" : "暂不可搜索";
     const providerSafetyBody = !isModelPricing ? [
@@ -7338,16 +7373,16 @@
         <span>为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。实际价格、库存、税费和关税仍以外部平台和海关结算为准。</span>
         <button class="cmd-btn gray commerce-open-location-settings" type="button">去设置收货目的地</button>
       </div>` : "",
-      !hasProvider ? `<div class="commerce-warning commerce-provider-missing">
+      !hasProvider && !hasReadOnlyResults ? `<div class="commerce-warning commerce-provider-missing">
         <b>当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</b>
         <span>详细技术状态请展开“查看技术细节”。</span>
       </div>` : ""
     ].filter(Boolean).join("") : "";
     const providerSafetyDisclosure = providerSafetyBody ? disclosure("查看安全边界", providerSafetyBody, "commerce-safety-disclosure") : "";
     return `<div class="commerce-search-panel">
-      <p><b>当前状态：</b>${isModelPricing ? (hasProvider ? "模型结果可用。" : "模型结果不可用。") : hasProvider ? "可以生成候选方案。" : isFlight ? "暂未接入真实机票搜索能力，无法返回实时价格。" : isProduct ? "暂未接入真实商品搜索能力，无法返回实时价格。" : "搜索能力未配置，无法返回实时价格。"}</p>
+      <p><b>当前状态：</b>${hasReadOnlyResults ? "已生成只读候选结果，可去平台查看实时价格。" : (isModelPricing ? (hasProvider ? "模型结果可用。" : "模型结果不可用。") : hasProvider ? "可以生成候选方案。" : isFlight ? "暂未接入真实机票搜索能力，无法返回实时价格。" : isProduct ? "暂未接入真实商品搜索能力，无法返回实时价格。" : "搜索能力未配置，无法返回实时价格。")}</p>
       ${providerSafetyDisclosure}
-      ${isFlight && !hasProvider ? `<div class="commerce-warning commerce-flight-provider-missing">
+      ${isFlight && !hasProvider && !hasReadOnlyResults ? `<div class="commerce-warning commerce-flight-provider-missing">
         <b>已识别为机票搜索计划。</b>
         <span>出发地：${esc(flightOrigin)} · 目的地：${esc(flightDestination)} · 日期：${esc(flightDate)}</span>
         <span>暂未接入真实机票搜索能力，当前无法返回实时价格。</span>
@@ -7360,8 +7395,8 @@
       ${isPrivateJet ? `<p class="commerce-warning">公务机属于高价值定制服务，价格通常需要询价确认。当前仅生成搜索和询价计划，不自动提交询价、不付款、不签约。</p>` : ""}
       ${failedMessage ? `<p class="commerce-warning">${esc(failedMessage)}</p>` : ""}
       ${missingFields.length ? `<p class="commerce-warning">请补充${esc(missingFields.join("、"))}，否则不搜索价格。</p>` : ""}
-      <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${esc(destinationRequired ? "需要设置收货目的地" : disabled && !missingFields.length && !isModelPricing ? "搜索适配器未配置" : buttonLabel)}</button>
-      <p class="commerce-muted">价格只来自已配置搜索能力返回数据；未配置时不会显示假价格。</p>
+      <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${esc(hasReadOnlyResults ? "当前为只读模式" : (destinationRequired ? "需要设置收货目的地" : disabled && !missingFields.length && !isModelPricing ? "搜索适配器未配置" : buttonLabel))}</button>
+      <p class="commerce-muted">${esc(hasReadOnlyResults ? "当前使用本地规则/AI 理解生成只读平台候选；最终价格以平台页面为准。" : "价格只来自已配置搜索能力返回数据；未配置时不会显示假价格。")}</p>
     </div>`;
   }
 
@@ -7506,6 +7541,36 @@
     </div>`;
   }
 
+  function readOnlySearchResultsHtml(task){
+    const summary = task && task.readOnlySearchResultSummary || {};
+    const topResults = Array.isArray(task && task.readOnlySearchTopResults) ? task.readOnlySearchTopResults.slice(0, 3) : [];
+    const remaining = Array.isArray(task && task.readOnlySearchRemainingResults) ? task.readOnlySearchRemainingResults : [];
+    if (!topResults.length) return "";
+    const resultCard = (item) => `<article class="commerce-candidate-card commerce-readonly-search-card">
+      <div class="commerce-candidate-head">
+        <div>
+          <b>${esc(item.title || "只读候选结果")}</b>
+          <span>${esc(item.platformName || "")}${item.isOfficial ? " · 官网/官方入口" : ""}${item.trustLevel ? " · " + esc(item.trustLevel === "high" ? "高可信度" : (item.trustLevel === "medium" ? "中等可信度" : "需要复核")) : ""}</span>
+        </div>
+        <strong>${esc(item.priceLabel || "价格以平台页面为准")}</strong>
+      </div>
+      <p class="commerce-muted">费用说明：${esc(item.feeNote || "价格与费用以平台页面为准")}</p>
+      <p class="commerce-muted">推荐理由：${esc(item.recommendationReason || "")}</p>
+      <p class="commerce-warning">${esc(item.riskNote || "Weishan 不收款、不代下单、不保存账号密码，最终价格以平台页面为准。")}</p>
+      ${item.targetUrl ? `<button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}">去平台查看</button>` : `<p class="commerce-warning">目标平台链接缺失，暂不可跳转。</p>`}
+    </article>`;
+    return `<div class="commerce-candidates commerce-readonly-search-results" data-commerce-readonly-search-results="true">
+      <p class="commerce-muted">${esc(summary && summary.rankingSummary || "默认只展示 2-3 条优先查看结果；没有真实价格时不会伪造最低价。")}</p>
+      ${topResults.map(resultCard).join("")}
+      <details class="commerce-disclosure commerce-platform-template-disclosure">
+        <summary>查看更多候选</summary>
+        <div class="commerce-disclosure-template" data-commerce-disclosure-html="${esc(encodeURIComponent(`<div class="commerce-candidates">${remaining.map(resultCard).join("") || "<p>暂无更多候选。</p>"}</div>`))}" hidden></div>
+        <div class="commerce-disclosure-body" hidden></div>
+      </details>
+      <div class="commerce-risk">Weishan 不收款、不代下单、不保存账号密码，最终价格与规则以平台页面为准。</div>
+    </div>`;
+  }
+
   function loadTasks(){
     const api = agent();
     return api && api.getCommerceTasks ? api.getCommerceTasks() : [];
@@ -7529,19 +7594,19 @@
       <div class="commerce-hero">
         <div>
           <h1>全球采购</h1>
-          <p>搜索、比价、推荐、执行前确认</p>
+          <p>只读搜索、比价、推荐与平台跳转</p>
         </div>
         <button class="cmd-btn gray" id="commerceBackHome" type="button">返回首页总调度</button>
       </div>
 
       <div class="commerce-safety">
-        当前不会访问真实平台、不会返回价格、不会跳转购买或预订、不会付款或下单。
+        Weishan 只做 AI 辅助搜索、分析、比价、推荐和跳转；不收款、不代下单、不保存账号密码，最终价格以平台页面为准。
       </div>
 
       <div class="commerce-toolbar">
-        <textarea id="commerceInput" class="cmd-input commerce-input" placeholder="例如：帮我比较 OpenRouter 和其他 AI 模型平台价格">${esc(draftText)}</textarea>
+        <textarea id="commerceInput" class="cmd-input commerce-input" placeholder="例如：帮我找 iPhone 价格 / 帮我找成都到上海最便宜机票 / 帮我找东京酒店">${esc(draftText)}</textarea>
         <div class="cmd-actions">
-          <button class="cmd-btn primary" id="commerceGenerate" type="button">生成采购计划</button>
+          <button class="cmd-btn primary" id="commerceGenerate" type="button">生成只读搜索建议</button>
           <button class="cmd-btn gray" id="commerceClearAll" type="button">清理全部计划</button>
         </div>
       </div>

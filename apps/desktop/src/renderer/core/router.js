@@ -3,7 +3,7 @@
   const pages = {
     home:"HomePage", projects:"ProjectsPage", memory:"MemoryPage", history:"HistoryPage", mail:"MailPage", crawler:"CrawlerPage",
     builder:"BuilderPage", storage:"StoragePage", team:"TeamPage", seats:"SeatsPage", reports:"ReportsPage", audit:"AuditPage",
-    settings:"SettingsPage", security:"SecurityPage"
+    settings:"SettingsPage", security:"SecurityPage", commerce:"CommerceAgentPage"
   };
   function setRoute(id){ current = pages[id] ? id : "home"; refresh(); }
   function refresh(){

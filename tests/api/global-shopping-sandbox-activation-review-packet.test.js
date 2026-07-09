@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingSandboxActivationReviewPacket.js"]);
   const api = windowRef.WeishanGlobalShoppingSandboxActivationReviewPacket;
-  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_ACTIVATION_REVIEW_PACKET_VERSION, "4.2.6");
+  assert.equal(api.GLOBAL_SHOPPING_SANDBOX_ACTIVATION_REVIEW_PACKET_VERSION, "4.2.7");
 
   const ready = api.buildGlobalShoppingSandboxActivationReviewPacket({
     providerOfflineReleaseGateSummary:readySummary("Provider Offline Release Gate", "离线发布闸门已准备"),

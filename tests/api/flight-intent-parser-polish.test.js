@@ -32,7 +32,7 @@ function assertClean(api, input, expected) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightIntentParser.js"]);
   const api = windowRef.WeishanFlightIntentParser;
-  assert.equal(api.FLIGHT_INTENT_PARSER_VERSION, "4.2.6");
+  assert.equal(api.FLIGHT_INTENT_PARSER_VERSION, "4.2.7");
 
   assertClean(api, "购买7月15日上海到成都最便宜的直达机票", { departureDate:"7月15日", directOnly:true, sortPreference:"low_price" });
   assertClean(api, "帮我买7月15日上海到成都直飞机票", { departureDate:"7月15日", directOnly:true });
