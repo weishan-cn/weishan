@@ -17,10 +17,502 @@
     return window.WeishanCommerceSearch || null;
   }
 
+  function readOnlySearchReady(){
+    return !!(
+      window.WeishanGlobalShoppingPlatformCandidateFactory
+      && typeof window.WeishanGlobalShoppingPlatformCandidateFactory.buildGlobalShoppingPlatformCandidates === "function"
+      && window.WeishanGlobalShoppingIntelligenceOrchestrator
+      && typeof window.WeishanGlobalShoppingIntelligenceOrchestrator.buildGlobalShoppingIntelligenceOrchestration === "function"
+      && window.WeishanGlobalShoppingReadOnlySearchResultPresenter
+      && typeof window.WeishanGlobalShoppingReadOnlySearchResultPresenter.buildGlobalShoppingReadOnlySearchResultPresentation === "function"
+    );
+  }
+
   function ensureSearchLoaded(host){
+    if (!window.WeishanGlobalShoppingDataSourceModel && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingDataSourceModel"]')) {
+      const dataSource = document.createElement("script");
+      dataSource.src = "./renderer/core/globalShoppingDataSourceModel.js?v=4.2.8";
+      dataSource.dataset.weishanDynamic = "WeishanGlobalShoppingDataSourceModel";
+      dataSource.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(dataSource);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingDataFreshnessEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingDataFreshnessEngine"]')) {
+      const freshness = document.createElement("script");
+      freshness.src = "./renderer/core/globalShoppingDataFreshnessEngine.js?v=4.2.8";
+      freshness.dataset.weishanDynamic = "WeishanGlobalShoppingDataFreshnessEngine";
+      freshness.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(freshness);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingDataQualityEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingDataQualityEngine"]')) {
+      const quality = document.createElement("script");
+      quality.src = "./renderer/core/globalShoppingDataQualityEngine.js?v=4.2.8";
+      quality.dataset.weishanDynamic = "WeishanGlobalShoppingDataQualityEngine";
+      quality.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(quality);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingDataProvenance && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingDataProvenance"]')) {
+      const provenance = document.createElement("script");
+      provenance.src = "./renderer/core/globalShoppingDataProvenance.js?v=4.2.8";
+      provenance.dataset.weishanDynamic = "WeishanGlobalShoppingDataProvenance";
+      provenance.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(provenance);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingRecommendationAudit && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRecommendationAudit"]')) {
+      const audit = document.createElement("script");
+      audit.src = "./renderer/core/globalShoppingRecommendationAudit.js?v=4.2.8";
+      audit.dataset.weishanDynamic = "WeishanGlobalShoppingRecommendationAudit";
+      audit.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(audit);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderIntelligenceRegistry && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderIntelligenceRegistry"]')) {
+      const intelligenceRegistry = document.createElement("script");
+      intelligenceRegistry.src = "./renderer/core/globalShoppingProviderIntelligenceRegistry.js?v=4.2.8";
+      intelligenceRegistry.dataset.weishanDynamic = "WeishanGlobalShoppingProviderIntelligenceRegistry";
+      intelligenceRegistry.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(intelligenceRegistry);
+    }
+    if (!window.WeishanGlobalShoppingProviderCoverageEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderCoverageEngine"]')) {
+      const coverageEngine = document.createElement("script");
+      coverageEngine.src = "./renderer/core/globalShoppingProviderCoverageEngine.js?v=4.2.8";
+      coverageEngine.dataset.weishanDynamic = "WeishanGlobalShoppingProviderCoverageEngine";
+      coverageEngine.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(coverageEngine);
+    }
+    if (!window.WeishanGlobalShoppingCategoryIntelligenceModel && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingCategoryIntelligenceModel"]')) {
+      const categoryIntelligence = document.createElement("script");
+      categoryIntelligence.src = "./renderer/core/globalShoppingCategoryIntelligenceModel.js?v=4.2.8";
+      categoryIntelligence.dataset.weishanDynamic = "WeishanGlobalShoppingCategoryIntelligenceModel";
+      categoryIntelligence.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(categoryIntelligence);
+    }
+    if (!window.WeishanGlobalShoppingProviderCompetitionEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderCompetitionEngine"]')) {
+      const competitionEngine = document.createElement("script");
+      competitionEngine.src = "./renderer/core/globalShoppingProviderCompetitionEngine.js?v=4.2.8";
+      competitionEngine.dataset.weishanDynamic = "WeishanGlobalShoppingProviderCompetitionEngine";
+      competitionEngine.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(competitionEngine);
+    }
+    if (!window.WeishanGlobalShoppingProviderHealthEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderHealthEngine"]')) {
+      const healthEngine = document.createElement("script");
+      healthEngine.src = "./renderer/core/globalShoppingProviderHealthEngine.js?v=4.2.8";
+      healthEngine.dataset.weishanDynamic = "WeishanGlobalShoppingProviderHealthEngine";
+      healthEngine.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(healthEngine);
+    }
+    if (!window.WeishanGlobalShoppingProviderPolicyEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderPolicyEngine"]')) {
+      const policyEngine = document.createElement("script");
+      policyEngine.src = "./renderer/core/globalShoppingProviderPolicyEngine.js?v=4.2.8";
+      policyEngine.dataset.weishanDynamic = "WeishanGlobalShoppingProviderPolicyEngine";
+      policyEngine.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(policyEngine);
+    }
+    if (!window.WeishanGlobalShoppingMarketCategoryMatrix && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingMarketCategoryMatrix"]')) {
+      const marketCategoryMatrix = document.createElement("script");
+      marketCategoryMatrix.src = "./renderer/core/globalShoppingMarketCategoryMatrix.js?v=4.2.8";
+      marketCategoryMatrix.dataset.weishanDynamic = "WeishanGlobalShoppingMarketCategoryMatrix";
+      marketCategoryMatrix.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(marketCategoryMatrix);
+    }
+    if (!window.WeishanGlobalShoppingRegionIntelligenceEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRegionIntelligenceEngine"]')) {
+      const region = document.createElement("script");
+      region.src = "./renderer/core/globalShoppingRegionIntelligenceEngine.js?v=4.2.8";
+      region.dataset.weishanDynamic = "WeishanGlobalShoppingRegionIntelligenceEngine";
+      region.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(region);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingMarketProfileRegistry && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingMarketProfileRegistry"]')) {
+      const market = document.createElement("script");
+      market.src = "./renderer/core/globalShoppingMarketProfileRegistry.js?v=4.2.8";
+      market.dataset.weishanDynamic = "WeishanGlobalShoppingMarketProfileRegistry";
+      market.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(market);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderOnboardingRegistry && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderOnboardingRegistry"]')) {
+      const onboarding = document.createElement("script");
+      onboarding.src = "./renderer/core/globalShoppingProviderOnboardingRegistry.js?v=4.2.8";
+      onboarding.dataset.weishanDynamic = "WeishanGlobalShoppingProviderOnboardingRegistry";
+      onboarding.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(onboarding);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingOfficialDomainVerifier && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingOfficialDomainVerifier"]')) {
+      const verifier = document.createElement("script");
+      verifier.src = "./renderer/core/globalShoppingOfficialDomainVerifier.js?v=4.2.8";
+      verifier.dataset.weishanDynamic = "WeishanGlobalShoppingOfficialDomainVerifier";
+      verifier.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(verifier);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingRegionalProviderSelector && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRegionalProviderSelector"]')) {
+      const selector = document.createElement("script");
+      selector.src = "./renderer/core/globalShoppingRegionalProviderSelector.js?v=4.2.8";
+      selector.dataset.weishanDynamic = "WeishanGlobalShoppingRegionalProviderSelector";
+      selector.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(selector);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingMarketExpansionPlanner && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingMarketExpansionPlanner"]')) {
+      const planner = document.createElement("script");
+      planner.src = "./renderer/core/globalShoppingMarketExpansionPlanner.js?v=4.2.8";
+      planner.dataset.weishanDynamic = "WeishanGlobalShoppingMarketExpansionPlanner";
+      planner.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(planner);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingContextEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingContextEngine"]')) {
+      const context = document.createElement("script");
+      context.src = "./renderer/core/globalShoppingContextEngine.js?v=4.2.8";
+      context.dataset.weishanDynamic = "WeishanGlobalShoppingContextEngine";
+      context.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(context);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderRegistry && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderRegistry"]')) {
+      const registry = document.createElement("script");
+      registry.src = "./renderer/core/globalShoppingProviderRegistry.js?v=4.2.8";
+      registry.dataset.weishanDynamic = "WeishanGlobalShoppingProviderRegistry";
+      registry.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(registry);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderCapabilityModel && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderCapabilityModel"]')) {
+      const capability = document.createElement("script");
+      capability.src = "./renderer/core/globalShoppingProviderCapabilityModel.js?v=4.2.8";
+      capability.dataset.weishanDynamic = "WeishanGlobalShoppingProviderCapabilityModel";
+      capability.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(capability);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingAdapterCapabilityResolver && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingAdapterCapabilityResolver"]')) {
+      const resolver = document.createElement("script");
+      resolver.src = "./renderer/core/globalShoppingAdapterCapabilityResolver.js?v=4.2.8";
+      resolver.dataset.weishanDynamic = "WeishanGlobalShoppingAdapterCapabilityResolver";
+      resolver.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(resolver);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderRankingEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderRankingEngine"]')) {
+      const ranking = document.createElement("script");
+      ranking.src = "./renderer/core/globalShoppingProviderRankingEngine.js?v=4.2.8";
+      ranking.dataset.weishanDynamic = "WeishanGlobalShoppingProviderRankingEngine";
+      ranking.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(ranking);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderRouter && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderRouter"]')) {
+      const router = document.createElement("script");
+      router.src = "./renderer/core/globalShoppingProviderRouter.js?v=4.2.8";
+      router.dataset.weishanDynamic = "WeishanGlobalShoppingProviderRouter";
+      router.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(router);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingRealPriceResultModel && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRealPriceResultModel"]')) {
+      const realPrice = document.createElement("script");
+      realPrice.src = "./renderer/core/globalShoppingRealPriceResultModel.js?v=4.2.8";
+      realPrice.dataset.weishanDynamic = "WeishanGlobalShoppingRealPriceResultModel";
+      realPrice.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(realPrice);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingTaxRuleRegistry && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingTaxRuleRegistry"]')) {
+      const taxRules = document.createElement("script");
+      taxRules.src = "./renderer/core/globalShoppingTaxRuleRegistry.js?v=4.2.8";
+      taxRules.dataset.weishanDynamic = "WeishanGlobalShoppingTaxRuleRegistry";
+      taxRules.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(taxRules);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingLandedCostEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingLandedCostEngine"]')) {
+      const landedCost = document.createElement("script");
+      landedCost.src = "./renderer/core/globalShoppingLandedCostEngine.js?v=4.2.8";
+      landedCost.dataset.weishanDynamic = "WeishanGlobalShoppingLandedCostEngine";
+      landedCost.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(landedCost);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderTrustRegistry && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderTrustRegistry"]')) {
+      const trust = document.createElement("script");
+      trust.src = "./renderer/core/globalShoppingProviderTrustRegistry.js?v=4.2.8";
+      trust.dataset.weishanDynamic = "WeishanGlobalShoppingProviderTrustRegistry";
+      trust.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(trust);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingRecommendationReasonEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRecommendationReasonEngine"]')) {
+      const reason = document.createElement("script");
+      reason.src = "./renderer/core/globalShoppingRecommendationReasonEngine.js?v=4.2.8";
+      reason.dataset.weishanDynamic = "WeishanGlobalShoppingRecommendationReasonEngine";
+      reason.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(reason);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingUserPreferenceModel && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingUserPreferenceModel"]')) {
+      const preference = document.createElement("script");
+      preference.src = "./renderer/core/globalShoppingUserPreferenceModel.js?v=4.2.8";
+      preference.dataset.weishanDynamic = "WeishanGlobalShoppingUserPreferenceModel";
+      preference.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(preference);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingConfidenceEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingConfidenceEngine"]')) {
+      const confidence = document.createElement("script");
+      confidence.src = "./renderer/core/globalShoppingConfidenceEngine.js?v=4.2.8";
+      confidence.dataset.weishanDynamic = "WeishanGlobalShoppingConfidenceEngine";
+      confidence.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(confidence);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingComparisonMatrix && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingComparisonMatrix"]')) {
+      const matrix = document.createElement("script");
+      matrix.src = "./renderer/core/globalShoppingComparisonMatrix.js?v=4.2.8";
+      matrix.dataset.weishanDynamic = "WeishanGlobalShoppingComparisonMatrix";
+      matrix.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(matrix);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderAdapterContract && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderAdapterContract"]')) {
+      const contract = document.createElement("script");
+      contract.src = "./renderer/core/globalShoppingProviderAdapterContract.js?v=4.2.8";
+      contract.dataset.weishanDynamic = "WeishanGlobalShoppingProviderAdapterContract";
+      contract.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(contract);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingSandboxAdapterRegistry && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingSandboxAdapterRegistry"]')) {
+      const sandboxRegistry = document.createElement("script");
+      sandboxRegistry.src = "./renderer/core/globalShoppingSandboxAdapterRegistry.js?v=4.2.8";
+      sandboxRegistry.dataset.weishanDynamic = "WeishanGlobalShoppingSandboxAdapterRegistry";
+      sandboxRegistry.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(sandboxRegistry);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingAmazonSandboxAdapter && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingAmazonSandboxAdapter"]')) {
+      const amazonSandbox = document.createElement("script");
+      amazonSandbox.src = "./renderer/core/globalShoppingAmazonSandboxAdapter.js?v=4.2.8";
+      amazonSandbox.dataset.weishanDynamic = "WeishanGlobalShoppingAmazonSandboxAdapter";
+      amazonSandbox.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(amazonSandbox);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingRakutenSandboxAdapter && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRakutenSandboxAdapter"]')) {
+      const rakutenSandbox = document.createElement("script");
+      rakutenSandbox.src = "./renderer/core/globalShoppingRakutenSandboxAdapter.js?v=4.2.8";
+      rakutenSandbox.dataset.weishanDynamic = "WeishanGlobalShoppingRakutenSandboxAdapter";
+      rakutenSandbox.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(rakutenSandbox);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingBookingSandboxAdapter && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingBookingSandboxAdapter"]')) {
+      const bookingSandbox = document.createElement("script");
+      bookingSandbox.src = "./renderer/core/globalShoppingBookingSandboxAdapter.js?v=4.2.8";
+      bookingSandbox.dataset.weishanDynamic = "WeishanGlobalShoppingBookingSandboxAdapter";
+      bookingSandbox.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(bookingSandbox);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingSandboxProviderAdapter && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingSandboxProviderAdapter"]')) {
+      const sandboxAdapter = document.createElement("script");
+      sandboxAdapter.src = "./renderer/core/globalShoppingSandboxProviderAdapter.js?v=4.2.8";
+      sandboxAdapter.dataset.weishanDynamic = "WeishanGlobalShoppingSandboxProviderAdapter";
+      sandboxAdapter.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(sandboxAdapter);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderHealthSimulator && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderHealthSimulator"]')) {
+      const healthSimulator = document.createElement("script");
+      healthSimulator.src = "./renderer/core/globalShoppingProviderHealthSimulator.js?v=4.2.8";
+      healthSimulator.dataset.weishanDynamic = "WeishanGlobalShoppingProviderHealthSimulator";
+      healthSimulator.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(healthSimulator);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderIntegrationManifest && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderIntegrationManifest"]')) {
+      const manifest = document.createElement("script");
+      manifest.src = "./renderer/core/globalShoppingProviderIntegrationManifest.js?v=4.2.8";
+      manifest.dataset.weishanDynamic = "WeishanGlobalShoppingProviderIntegrationManifest";
+      manifest.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(manifest);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderResponseNormalizer && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderResponseNormalizer"]')) {
+      const normalizer = document.createElement("script");
+      normalizer.src = "./renderer/core/globalShoppingProviderResponseNormalizer.js?v=4.2.8";
+      normalizer.dataset.weishanDynamic = "WeishanGlobalShoppingProviderResponseNormalizer";
+      normalizer.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(normalizer);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingPriceFreshnessModel && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingPriceFreshnessModel"]')) {
+      const priceFreshness = document.createElement("script");
+      priceFreshness.src = "./renderer/core/globalShoppingPriceFreshnessModel.js?v=4.2.8";
+      priceFreshness.dataset.weishanDynamic = "WeishanGlobalShoppingPriceFreshnessModel";
+      priceFreshness.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(priceFreshness);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingAvailabilityFreshnessModel && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingAvailabilityFreshnessModel"]')) {
+      const availabilityFreshness = document.createElement("script");
+      availabilityFreshness.src = "./renderer/core/globalShoppingAvailabilityFreshnessModel.js?v=4.2.8";
+      availabilityFreshness.dataset.weishanDynamic = "WeishanGlobalShoppingAvailabilityFreshnessModel";
+      availabilityFreshness.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(availabilityFreshness);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderFallbackEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderFallbackEngine"]')) {
+      const fallbackEngine = document.createElement("script");
+      fallbackEngine.src = "./renderer/core/globalShoppingProviderFallbackEngine.js?v=4.2.8";
+      fallbackEngine.dataset.weishanDynamic = "WeishanGlobalShoppingProviderFallbackEngine";
+      fallbackEngine.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(fallbackEngine);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderPermissionModel && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderPermissionModel"]')) {
+      const permissionModel = document.createElement("script");
+      permissionModel.src = "./renderer/core/globalShoppingProviderPermissionModel.js?v=4.2.8";
+      permissionModel.dataset.weishanDynamic = "WeishanGlobalShoppingProviderPermissionModel";
+      permissionModel.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(permissionModel);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderConfigurationSchema && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderConfigurationSchema"]')) {
+      const configurationSchema = document.createElement("script");
+      configurationSchema.src = "./renderer/core/globalShoppingProviderConfigurationSchema.js?v=4.2.8";
+      configurationSchema.dataset.weishanDynamic = "WeishanGlobalShoppingProviderConfigurationSchema";
+      configurationSchema.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(configurationSchema);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderFeatureFlag && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderFeatureFlag"]')) {
+      const featureFlag = document.createElement("script");
+      featureFlag.src = "./renderer/core/globalShoppingProviderFeatureFlag.js?v=4.2.8";
+      featureFlag.dataset.weishanDynamic = "WeishanGlobalShoppingProviderFeatureFlag";
+      featureFlag.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(featureFlag);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderVersionRegistry && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderVersionRegistry"]')) {
+      const versionRegistry = document.createElement("script");
+      versionRegistry.src = "./renderer/core/globalShoppingProviderVersionRegistry.js?v=4.2.8";
+      versionRegistry.dataset.weishanDynamic = "WeishanGlobalShoppingProviderVersionRegistry";
+      versionRegistry.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(versionRegistry);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderProductionReadiness && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderProductionReadiness"]')) {
+      const productionReadiness = document.createElement("script");
+      productionReadiness.src = "./renderer/core/globalShoppingProviderProductionReadiness.js?v=4.2.8";
+      productionReadiness.dataset.weishanDynamic = "WeishanGlobalShoppingProviderProductionReadiness";
+      productionReadiness.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(productionReadiness);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderRequestPolicy && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderRequestPolicy"]')) {
+      const requestPolicy = document.createElement("script");
+      requestPolicy.src = "./renderer/core/globalShoppingProviderRequestPolicy.js?v=4.2.8";
+      requestPolicy.dataset.weishanDynamic = "WeishanGlobalShoppingProviderRequestPolicy";
+      requestPolicy.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(requestPolicy);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderResponseSafetyFilter && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderResponseSafetyFilter"]')) {
+      const responseFilter = document.createElement("script");
+      responseFilter.src = "./renderer/core/globalShoppingProviderResponseSafetyFilter.js?v=4.2.8";
+      responseFilter.dataset.weishanDynamic = "WeishanGlobalShoppingProviderResponseSafetyFilter";
+      responseFilter.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(responseFilter);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderErrorNormalizer && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderErrorNormalizer"]')) {
+      const errorNormalizer = document.createElement("script");
+      errorNormalizer.src = "./renderer/core/globalShoppingProviderErrorNormalizer.js?v=4.2.8";
+      errorNormalizer.dataset.weishanDynamic = "WeishanGlobalShoppingProviderErrorNormalizer";
+      errorNormalizer.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(errorNormalizer);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderRateLimitModel && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderRateLimitModel"]')) {
+      const rateLimitModel = document.createElement("script");
+      rateLimitModel.src = "./renderer/core/globalShoppingProviderRateLimitModel.js?v=4.2.8";
+      rateLimitModel.dataset.weishanDynamic = "WeishanGlobalShoppingProviderRateLimitModel";
+      rateLimitModel.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(rateLimitModel);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderCachePolicy && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderCachePolicy"]')) {
+      const cachePolicy = document.createElement("script");
+      cachePolicy.src = "./renderer/core/globalShoppingProviderCachePolicy.js?v=4.2.8";
+      cachePolicy.dataset.weishanDynamic = "WeishanGlobalShoppingProviderCachePolicy";
+      cachePolicy.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(cachePolicy);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingProviderGateway && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderGateway"]')) {
+      const providerGateway = document.createElement("script");
+      providerGateway.src = "./renderer/core/globalShoppingProviderGateway.js?v=4.2.8";
+      providerGateway.dataset.weishanDynamic = "WeishanGlobalShoppingProviderGateway";
+      providerGateway.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(providerGateway);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingDecisionEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingDecisionEngine"]')) {
+      const decision = document.createElement("script");
+      decision.src = "./renderer/core/globalShoppingDecisionEngine.js?v=4.2.8";
+      decision.dataset.weishanDynamic = "WeishanGlobalShoppingDecisionEngine";
+      decision.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(decision);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingIntentClassifier && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingIntentClassifier"]')) {
+      const intentClassifier = document.createElement("script");
+      intentClassifier.src = "./renderer/core/globalShoppingIntentClassifier.js?v=4.2.8";
+      intentClassifier.dataset.weishanDynamic = "WeishanGlobalShoppingIntentClassifier";
+      intentClassifier.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(intentClassifier);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingEntityExtractor && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingEntityExtractor"]')) {
+      const entityExtractor = document.createElement("script");
+      entityExtractor.src = "./renderer/core/globalShoppingEntityExtractor.js?v=4.2.8";
+      entityExtractor.dataset.weishanDynamic = "WeishanGlobalShoppingEntityExtractor";
+      entityExtractor.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(entityExtractor);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingWorkflowStateModel && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingWorkflowStateModel"]')) {
+      const workflowStateModel = document.createElement("script");
+      workflowStateModel.src = "./renderer/core/globalShoppingWorkflowStateModel.js?v=4.2.8";
+      workflowStateModel.dataset.weishanDynamic = "WeishanGlobalShoppingWorkflowStateModel";
+      workflowStateModel.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(workflowStateModel);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingMultiProviderComparisonEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingMultiProviderComparisonEngine"]')) {
+      const multiComparisonEngine = document.createElement("script");
+      multiComparisonEngine.src = "./renderer/core/globalShoppingMultiProviderComparisonEngine.js?v=4.2.8";
+      multiComparisonEngine.dataset.weishanDynamic = "WeishanGlobalShoppingMultiProviderComparisonEngine";
+      multiComparisonEngine.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(multiComparisonEngine);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingIntelligenceOrchestrator && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingIntelligenceOrchestrator"]')) {
+      const intelligenceOrchestrator = document.createElement("script");
+      intelligenceOrchestrator.src = "./renderer/core/globalShoppingIntelligenceOrchestrator.js?v=4.2.8";
+      intelligenceOrchestrator.dataset.weishanDynamic = "WeishanGlobalShoppingIntelligenceOrchestrator";
+      intelligenceOrchestrator.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(intelligenceOrchestrator);
+      return;
+    }
     if (!window.WeishanGlobalShoppingReadOnlySearchResultModel && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingReadOnlySearchResultModel"]')) {
       const model = document.createElement("script");
-      model.src = "./renderer/core/globalShoppingReadOnlySearchResultModel.js?v=4.2.7";
+      model.src = "./renderer/core/globalShoppingReadOnlySearchResultModel.js?v=4.2.8";
       model.dataset.weishanDynamic = "WeishanGlobalShoppingReadOnlySearchResultModel";
       model.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(model);
@@ -28,7 +520,7 @@
     }
     if (!window.WeishanGlobalShoppingPlatformCandidateFactory && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingPlatformCandidateFactory"]')) {
       const factory = document.createElement("script");
-      factory.src = "./renderer/core/globalShoppingPlatformCandidateFactory.js?v=4.2.7";
+      factory.src = "./renderer/core/globalShoppingPlatformCandidateFactory.js?v=4.2.8";
       factory.dataset.weishanDynamic = "WeishanGlobalShoppingPlatformCandidateFactory";
       factory.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(factory);
@@ -36,7 +528,7 @@
     }
     if (!window.WeishanGlobalShoppingReadOnlySearchResultRanker && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingReadOnlySearchResultRanker"]')) {
       const ranker = document.createElement("script");
-      ranker.src = "./renderer/core/globalShoppingReadOnlySearchResultRanker.js?v=4.2.7";
+      ranker.src = "./renderer/core/globalShoppingReadOnlySearchResultRanker.js?v=4.2.8";
       ranker.dataset.weishanDynamic = "WeishanGlobalShoppingReadOnlySearchResultRanker";
       ranker.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(ranker);
@@ -44,7 +536,7 @@
     }
     if (!window.WeishanGlobalShoppingReadOnlySearchResultPresenter && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingReadOnlySearchResultPresenter"]')) {
       const presenter = document.createElement("script");
-      presenter.src = "./renderer/core/globalShoppingReadOnlySearchResultPresenter.js?v=4.2.7";
+      presenter.src = "./renderer/core/globalShoppingReadOnlySearchResultPresenter.js?v=4.2.8";
       presenter.dataset.weishanDynamic = "WeishanGlobalShoppingReadOnlySearchResultPresenter";
       presenter.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(presenter);
@@ -280,6 +772,23 @@
     if (Number.isNaN(d.getTime())) return "";
     const pad = (n) => String(n).padStart(2, "0");
     return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+
+  function sourceTypeLabel(value){
+    const type = String(value || "").trim();
+    if (type === "sandbox") return "Sandbox";
+    if (type === "official") return "官方";
+    if (type === "aggregator") return "聚合";
+    if (type === "major_platform") return "平台";
+    return "预计";
+  }
+
+  function freshnessLabel(value){
+    const level = String(value || "").trim();
+    if (level === "fresh") return "fresh";
+    if (level === "recent") return "recent";
+    if (level === "stale") return "stale";
+    return "unknown";
   }
 
   function list(items, className){
@@ -7546,6 +8055,57 @@
     const topResults = Array.isArray(task && task.readOnlySearchTopResults) ? task.readOnlySearchTopResults.slice(0, 3) : [];
     const remaining = Array.isArray(task && task.readOnlySearchRemainingResults) ? task.readOnlySearchRemainingResults : [];
     if (!topResults.length) return "";
+    const decision = task && task.decisionResult || summary.decisionResult || {};
+    const orchestration = task && task.orchestration || summary.orchestration || {};
+    const workflowState = task && task.workflowState || summary.workflowState || orchestration.workflowState || {};
+    const intentClassification = task && task.intentClassification || summary.intentClassification || orchestration.intentClassification || {};
+    const entityExtraction = task && task.entityExtraction || summary.entityExtraction || orchestration.entityExtraction || {};
+    const gatewayDecision = summary.gatewayDecision || orchestration.gatewayDecision || {};
+    const recommendation = decision.recommendation || null;
+    const alternatives = Array.isArray(decision.alternatives) ? decision.alternatives : [];
+    const warnings = Array.isArray(decision.warnings) ? decision.warnings : [];
+    const confidence = decision.confidence && decision.confidence.confidence ? decision.confidence.confidence : "low";
+    const costSummary = decision.costSummary || null;
+    const providerSimulationSummary = decision.providerSimulationSummary || summary.providerSimulationSummary || null;
+    const providerOperationalSummary = decision.providerOperationalSummary || summary.providerOperationalSummary || null;
+    const confidenceLabel = confidence === "high" ? "高" : (confidence === "medium" ? "中" : "低");
+    const recommendationSource = recommendation ? sourceTypeLabel(recommendation.sourceType) : "预计";
+    const recommendationUpdatedAt = recommendation ? timeLabel((recommendation.priceFreshness || {}).fetchedAt || (recommendation.availabilityFreshness || {}).checkedAt || "") : "";
+    const recommendationFreshness = recommendation ? freshnessLabel((recommendation.priceFreshness || {}).freshnessLevel || "") : "unknown";
+    const regionContext = summary && summary.architectureSummary ? summary.architectureSummary.shoppingContext && summary.architectureSummary.shoppingContext.regionContext : null;
+    const recommendationCard = recommendation ? `<article class="commerce-candidate-card commerce-readonly-search-card">
+      <div class="commerce-candidate-head">
+        <div>
+          <b>最终决策建议：${esc(recommendation.platformName || "当前候选")}</b>
+          <span>${esc(recommendation.title || "")}</span>
+        </div>
+        <strong>可信度 ${esc(confidenceLabel)}</strong>
+      </div>
+      <p class="commerce-muted">预计到手价：${esc((costSummary && costSummary.landedCostLabel) || "预计到手价")} · ${esc((costSummary && costSummary.priceLabel) || "价格以平台页面为准")}</p>
+      <p class="commerce-muted">数据来源：${esc(recommendationSource)} · 更新时间：${esc(recommendationUpdatedAt || "unknown")} · 价格时效：${esc(recommendationFreshness)}</p>
+      ${recommendation.dataSource ? `<p class="commerce-muted">数据状态：${esc(recommendation.dataSource.sourceStatus || "planned")} · 数据可信等级：${esc((recommendation.dataQuality || {}).qualityLevel || "low")}</p>` : ""}
+      ${recommendation.providerIntelligence ? `<p class="commerce-muted">平台覆盖：${esc(String((recommendation.providerIntelligence.coverageScore || (recommendation.providerCoverage || {}).coverageScore || 0)))} 分 · 市场匹配：${esc((recommendation.coverageExplanation || "").replace(/^平台覆盖：.*?；市场匹配：/, "") || (task.marketMatched ? "已匹配" : "需复核"))}</p>` : ""}
+      ${recommendation.competitionSummary ? `<p class="commerce-muted">平台对比：${esc((recommendation.competitionSummary.advantages || []).join(" / ") || "当前候选较稳妥")}</p>` : ""}
+      ${recommendation.providerHealth ? `<p class="commerce-muted">平台健康：${esc(recommendation.providerHealth.healthStatus || "unknown")}</p>` : ""}
+      ${providerSimulationSummary ? `<p class="commerce-muted">数据环境：${esc(providerSimulationSummary.environment || "sandbox")} · 模拟接入平台：${esc(String(providerSimulationSummary.available || 0))}/${esc(String(providerSimulationSummary.providerCount || 0))}${providerSimulationSummary.fallbackUsed ? " · 已触发回退预案" : ""}</p>` : ""}
+      ${providerOperationalSummary ? `<p class="commerce-muted">平台状态：${esc(providerOperationalSummary.label || providerOperationalSummary.status || "未知")}</p>` : ""}
+      ${providerOperationalSummary ? `<p class="commerce-muted">接入阶段：${esc(providerOperationalSummary.stageLabel || (providerOperationalSummary.readinessLevel === "sandbox" ? "测试环境" : "生产准备中"))}</p>` : ""}
+      ${providerOperationalSummary && providerOperationalSummary.adapterVersion ? `<p class="commerce-muted">版本：${esc(providerOperationalSummary.adapterVersion)}</p>` : ""}
+      ${decision.regionalExplanation ? `<p class="commerce-muted">地区依据：${esc(decision.regionalExplanation)}</p>` : ""}
+      ${decision.coverageExplanation ? `<p class="commerce-muted">覆盖说明：${esc(decision.coverageExplanation)}</p>` : ""}
+      ${workflowState.currentStage ? `<p class="commerce-muted">任务阶段：${esc(workflowState.currentStage)}</p>` : ""}
+      ${intentClassification.intentType ? `<p class="commerce-muted">需求识别：${esc(intentClassification.intentType)} · 置信度：${esc(String(intentClassification.confidence || ""))}</p>` : ""}
+      ${entityExtraction.entities ? `<p class="commerce-muted">解析实体：${esc([entityExtraction.entities.brand, entityExtraction.entities.model, entityExtraction.entities.city, entityExtraction.entities.destination, entityExtraction.entities.date].filter(Boolean).join(" / ") || "暂无")}</p>` : ""}
+      ${gatewayDecision.gatewayStatus ? `<p class="commerce-warning">Provider Gateway：${esc(gatewayDecision.gatewayStatus)} / ${esc(gatewayDecision.reason || "sandbox_only")}。当前仍为 sandbox 只读通道，不连接真实 Provider。</p>` : ""}
+      ${regionContext ? `<p class="commerce-muted">地区来源：${esc(regionContext.country || "")} / ${esc(regionContext.language || "")} / ${esc((regionContext.source || {}).country || "unknown")}</p>` : ""}
+      <p class="commerce-muted">税费等级：${esc(recommendation.taxConfidence || "unknown")}</p>
+      <p class="commerce-muted">决策依据：${esc((summary.recommendationReason && summary.recommendationReason.decisionSummary) || (task.recommendation && task.recommendation.reason) || "")}</p>
+      ${decision.auditReference ? `<p class="commerce-muted">审计引用：${esc(decision.auditReference)}</p>` : ""}
+      ${alternatives.length ? `<p class="commerce-muted">备选：${esc(alternatives.map((item) => item.platformName).join(" / "))}</p>` : ""}
+      ${recommendation.fallbackInfo && recommendation.fallbackInfo.usedFallback ? `<p class="commerce-muted">回退预案：${esc(recommendation.fallbackInfo.fallbackProviderName || "无更多候选")}</p>` : ""}
+      ${warnings.length ? `<p class="commerce-warning">${esc(warnings.join(" "))}</p>` : ""}
+      ${recommendation.targetUrl ? `<button class="cmd-btn gray commerce-decision-link" type="button" data-url="${esc(recommendation.targetUrl)}">去平台查看</button>` : ""}
+    </article>` : "";
     const resultCard = (item) => `<article class="commerce-candidate-card commerce-readonly-search-card">
       <div class="commerce-candidate-head">
         <div>
@@ -7555,12 +8115,27 @@
         <strong>${esc(item.priceLabel || "价格以平台页面为准")}</strong>
       </div>
       <p class="commerce-muted">费用说明：${esc(item.feeNote || "价格与费用以平台页面为准")}</p>
-      <p class="commerce-muted">推荐理由：${esc(item.recommendationReason || "")}</p>
+      <p class="commerce-muted">数据来源：${esc(sourceTypeLabel(item.sourceType))} · 更新时间：${esc(timeLabel(item.updatedAt || ((item.priceFreshness || {}).fetchedAt) || ((item.availabilityFreshness || {}).checkedAt) || "") || "unknown")} · 价格时效：${esc(freshnessLabel((item.priceFreshness || {}).freshnessLevel || ""))}</p>
+      ${item.dataSource ? `<p class="commerce-muted">数据状态：${esc(item.dataSource.sourceStatus || "planned")} · 数据质量：${esc((item.dataQuality || {}).qualityLevel || "low")}</p>` : ""}
+      ${item.providerCoverage ? `<p class="commerce-muted">平台覆盖：${esc(String(item.providerCoverage.coverageScore || 0))} 分 · 市场匹配：${esc(item.marketMatched ? "已匹配" : "需复核")}</p>` : ""}
+      ${item.providerHealth ? `<p class="commerce-muted">平台健康：${esc(item.providerHealth.healthStatus || "unknown")}</p>` : ""}
+      ${providerSimulationSummary ? `<p class="commerce-muted">数据环境：${esc(providerSimulationSummary.environment || "sandbox")} · 平台状态：${esc((providerOperationalSummary && (providerOperationalSummary.label || providerOperationalSummary.status)) || "Sandbox")}</p>` : ""}
+      ${providerOperationalSummary ? `<p class="commerce-muted">接入阶段：${esc(providerOperationalSummary.stageLabel || "测试环境")}</p>` : ""}
+      ${providerOperationalSummary && providerOperationalSummary.adapterVersion ? `<p class="commerce-muted">版本：${esc(providerOperationalSummary.adapterVersion)}</p>` : ""}
+      ${item.regionReason ? `<p class="commerce-muted">地区依据：${esc(item.regionReason)}</p>` : ""}
+      ${item.officialDomainStatus ? `<p class="commerce-muted">官方域名验证：${esc(item.officialDomainStatus.trustLevel || "unknown")}</p>` : ""}
+      ${workflowState.currentStage ? `<p class="commerce-muted">任务阶段：${esc(workflowState.currentStage)}</p>` : ""}
+      ${item.sourceType === "sandbox" ? `<p class="commerce-warning">当前数据来源为 sandbox，只读模拟接入已通过 Gateway 安全边界；价格为模拟数据，最终价格请以官方平台为准。</p>` : ""}
+      <p class="commerce-muted">税费等级：${esc(((item.taxSummary || {}).taxConfidence) || (((item.landedCostResult || {}).taxConfidence) || "unknown"))}</p>
+      <p class="commerce-muted">可用性：${esc(((item.availabilityFreshness || {}).availabilityStatus) || "unknown")} · 时效：${esc(freshnessLabel((item.availabilityFreshness || {}).freshnessLevel || ""))}</p>
+      <p class="commerce-muted">推荐理由：${esc(((item.recommendationReasonDetail || {}).summary) || item.recommendationReason || "")}</p>
+      ${item.fallbackInfo && item.fallbackInfo.availableFallback ? `<p class="commerce-muted">回退候选：${esc(item.fallbackInfo.fallbackProviderName || "已准备更多平台")}</p>` : ""}
       <p class="commerce-warning">${esc(item.riskNote || "Weishan 不收款、不代下单、不保存账号密码，最终价格以平台页面为准。")}</p>
       ${item.targetUrl ? `<button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}">去平台查看</button>` : `<p class="commerce-warning">目标平台链接缺失，暂不可跳转。</p>`}
     </article>`;
     return `<div class="commerce-candidates commerce-readonly-search-results" data-commerce-readonly-search-results="true">
       <p class="commerce-muted">${esc(summary && summary.rankingSummary || "默认只展示 2-3 条优先查看结果；没有真实价格时不会伪造最低价。")}</p>
+      ${recommendationCard}
       ${topResults.map(resultCard).join("")}
       <details class="commerce-disclosure commerce-platform-template-disclosure">
         <summary>查看更多候选</summary>
@@ -7633,7 +8208,6 @@
         if (currentHost) render(currentHost);
       });
     }
-    const api = agent();
     const input = host.querySelector("#commerceInput");
     if (input) input.addEventListener("input", () => { draftText = input.value; });
     const back = host.querySelector("#commerceBackHome");
@@ -7648,13 +8222,78 @@
     });
     const generate = host.querySelector("#commerceGenerate");
     if (generate) generate.addEventListener("click", () => {
-      if (!api || !api.createCommerceTask || !api.addCommerceTask) return;
       const text = input && input.value.trim() || "生成全球采购计划";
-      const task = api.addCommerceTask(api.createCommerceTask(text));
-      selectedTaskId = task.taskId;
-      pendingSafeExternalSearchConfirmation = null;
-      record("commerceAgent.taskCreated", task, "已在全球采购工作台生成本地 mock-safe 采购计划。");
-      render(host);
+      const resolveAgent = () => {
+        const current = agent();
+        return current && current.createCommerceTask && current.addCommerceTask ? current : null;
+      };
+      const buildTask = () => {
+        const current = resolveAgent();
+        return current ? current.createCommerceTask(text) : null;
+      };
+      const renderTask = (task) => {
+        if (!task || !task.taskId) return false;
+        selectedTaskId = task.taskId;
+        pendingSafeExternalSearchConfirmation = null;
+        try {
+          record("commerceAgent.taskCreated", task, "已在全球采购工作台生成本地 mock-safe 采购计划。");
+        } catch (_) {}
+        render(host);
+        return true;
+      };
+      const refreshTaskWithReadOnlyResults = (taskId) => {
+        const current = resolveAgent();
+        if (!current || typeof current.updateCommerceTask !== "function") return false;
+        const rebuilt = buildTask();
+        if (!rebuilt) return false;
+        const patch = Object.assign({}, rebuilt);
+        delete patch.taskId;
+        delete patch.createdAt;
+        delete patch.updatedAt;
+        current.updateCommerceTask(taskId, patch);
+        render(host);
+        return true;
+      };
+      const createTaskWhenAgentReady = (attempt) => {
+        const current = resolveAgent();
+        if (current) {
+          const task = current.addCommerceTask(buildTask());
+          generate.disabled = false;
+          renderTask(task);
+          if (task && (!Array.isArray(task.readOnlySearchTopResults) || task.readOnlySearchTopResults.length === 0)) {
+            waitForReadOnlySearch(task.taskId, 0);
+          }
+          return;
+        }
+        if (attempt >= 60) {
+          generate.disabled = false;
+          return;
+        }
+        ensureSearchLoaded(host);
+        window.setTimeout(() => createTaskWhenAgentReady(attempt + 1), 100);
+      };
+      const waitForReadOnlySearch = (taskId, attempt) => {
+        if (readOnlySearchReady() && refreshTaskWithReadOnlyResults(taskId)) {
+          generate.disabled = false;
+          return;
+        }
+        const current = resolveAgent();
+        const task = current && current.getCommerceTaskById ? current.getCommerceTaskById(taskId) : null;
+        if (task && Array.isArray(task.readOnlySearchTopResults) && task.readOnlySearchTopResults.length > 0) {
+          generate.disabled = false;
+          render(host);
+          return;
+        }
+        if (attempt >= 60) {
+          generate.disabled = false;
+          render(host);
+          return;
+        }
+        ensureSearchLoaded(host);
+        window.setTimeout(() => waitForReadOnlySearch(taskId, attempt + 1), 100);
+      };
+      generate.disabled = true;
+      createTaskWhenAgentReady(0);
     });
     let commerceActionChipFocusAssistTimer = 0;
     function applyCommerceActionChipFocusAssist(text){
@@ -9276,7 +9915,7 @@
         render(host);
       });
     });
-    host.querySelectorAll(".commerce-booking-link").forEach((link) => {
+    host.querySelectorAll(".commerce-booking-link, .commerce-decision-link").forEach((link) => {
       link.addEventListener("click", () => {
         const url = link.getAttribute("data-url") || link.getAttribute("href") || "";
         const taskId = selected && selected.taskId || "";

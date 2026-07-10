@@ -117,6 +117,22 @@ async function gotoRoute(page, route) {
         if (window.Topbar && typeof window.Topbar.refresh === "function") window.Topbar.refresh();
       } catch (_) {}
     });
+    await page.waitForFunction(() => {
+      try {
+        return !!(
+          window.WeishanCommerceAgent
+          && typeof window.WeishanCommerceAgent.createCommerceTask === "function"
+          && typeof window.WeishanCommerceAgent.addCommerceTask === "function"
+          && window.CommerceAgentPage
+          && typeof window.CommerceAgentPage.mount === "function"
+          && document.querySelector(".commerce-page.commerce-workbench")
+          && document.querySelector("#commerceInput")
+          && document.querySelector("#commerceGenerate")
+        );
+      } catch (_) {
+        return false;
+      }
+    }, { timeout: 15000 });
     return;
   }
   await page.waitForFunction((targetRoute) => {

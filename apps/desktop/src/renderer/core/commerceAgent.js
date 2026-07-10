@@ -2359,6 +2359,7 @@
     }) : [];
     const presentation = typeof presenterApi.buildGlobalShoppingReadOnlySearchResultPresentation === "function" ? presenterApi.buildGlobalShoppingReadOnlySearchResultPresentation({
       category:searchCategory,
+      inputSummary:input,
       candidates:allCandidates
     }) : {
       topResults:[],
@@ -2373,6 +2374,16 @@
       readOnlySearchTopResults:topResults,
       readOnlySearchRemainingResults:Array.isArray(presentation.remainingResults) ? presentation.remainingResults : [],
       readOnlySearchResultSummary:presentation,
+      shoppingContextSummary:topResults[0] && topResults[0].shoppingContext ? topResults[0].shoppingContext : null,
+      providerRanking:topResults[0] && topResults[0].providerRanking ? topResults[0].providerRanking : null,
+      taxSummary:topResults[0] && topResults[0].taxSummary ? topResults[0].taxSummary : null,
+      recommendationReason:topResults[0] && topResults[0].recommendationReasonDetail ? topResults[0].recommendationReasonDetail : null,
+      orchestration:presentation.orchestration || null,
+      intentClassification:presentation.intentClassification || null,
+      entityExtraction:presentation.entityExtraction || null,
+      workflowState:presentation.workflowState || null,
+      decisionResult:presentation.decisionResult || null,
+      comparisonMatrix:presentation.comparisonMatrix || null,
       recommendation:presentation.recommendation || null,
       candidates:[]
     };
@@ -2516,6 +2527,8 @@
       readOnlySearchTopResults:readOnlySearchSummary.readOnlySearchTopResults,
       readOnlySearchRemainingResults:readOnlySearchSummary.readOnlySearchRemainingResults,
       readOnlySearchResultSummary:readOnlySearchSummary.readOnlySearchResultSummary,
+      decisionResult:readOnlySearchSummary.decisionResult,
+      comparisonMatrix:readOnlySearchSummary.comparisonMatrix,
       externalDeepLinkSafetySummary:readOnlySearchGates.externalDeepLinkSafetySummary,
       searchParameterPrefillSummary:readOnlySearchGates.searchParameterPrefillSummary,
       platformAvailabilitySummary:readOnlySearchGates.platformAvailabilitySummary,
@@ -2634,6 +2647,12 @@
       readOnlySearchTopResults:Array.isArray(base.readOnlySearchTopResults) ? base.readOnlySearchTopResults : readOnlySearchSummary.readOnlySearchTopResults,
       readOnlySearchRemainingResults:Array.isArray(base.readOnlySearchRemainingResults) ? base.readOnlySearchRemainingResults : readOnlySearchSummary.readOnlySearchRemainingResults,
       readOnlySearchResultSummary:base.readOnlySearchResultSummary && typeof base.readOnlySearchResultSummary === "object" ? base.readOnlySearchResultSummary : readOnlySearchSummary.readOnlySearchResultSummary,
+      orchestration:base.orchestration && typeof base.orchestration === "object" ? base.orchestration : readOnlySearchSummary.orchestration,
+      intentClassification:base.intentClassification && typeof base.intentClassification === "object" ? base.intentClassification : readOnlySearchSummary.intentClassification,
+      entityExtraction:base.entityExtraction && typeof base.entityExtraction === "object" ? base.entityExtraction : readOnlySearchSummary.entityExtraction,
+      workflowState:base.workflowState && typeof base.workflowState === "object" ? base.workflowState : readOnlySearchSummary.workflowState,
+      decisionResult:base.decisionResult && typeof base.decisionResult === "object" ? base.decisionResult : readOnlySearchSummary.decisionResult,
+      comparisonMatrix:base.comparisonMatrix && typeof base.comparisonMatrix === "object" ? base.comparisonMatrix : readOnlySearchSummary.comparisonMatrix,
       externalDeepLinkSafetySummary:base.externalDeepLinkSafetySummary && typeof base.externalDeepLinkSafetySummary === "object" ? base.externalDeepLinkSafetySummary : readOnlySearchGates.externalDeepLinkSafetySummary,
       searchParameterPrefillSummary:base.searchParameterPrefillSummary && typeof base.searchParameterPrefillSummary === "object" ? base.searchParameterPrefillSummary : readOnlySearchGates.searchParameterPrefillSummary,
       platformAvailabilitySummary:base.platformAvailabilitySummary && typeof base.platformAvailabilitySummary === "object" ? base.platformAvailabilitySummary : readOnlySearchGates.platformAvailabilitySummary,

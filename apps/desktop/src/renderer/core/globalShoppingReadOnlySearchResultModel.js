@@ -1,10 +1,10 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_READ_ONLY_SEARCH_RESULT_MODEL_VERSION = "4.2.7";
+  const GLOBAL_SHOPPING_READ_ONLY_SEARCH_RESULT_MODEL_VERSION = "4.2.8";
   const MODEL_NAME = "global_shopping_read_only_search_result_model_v1";
   const CATEGORY_MAP = { ecommerce:"product", product:"product", flight:"flight", hotel:"hotel" };
-  const SOURCE_TYPES = { official:true, major_platform:true, aggregator:true };
+  const SOURCE_TYPES = { official:true, major_platform:true, aggregator:true, sandbox:true };
   const TRUST_LEVELS = { high:true, medium:true, review:true };
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -67,6 +67,36 @@
       category:category,
       sourceType:normalizeSourceType(safe.sourceType),
       trustLevel:normalizeTrustLevel(safe.trustLevel),
+      shoppingContext:safe.shoppingContext && typeof safe.shoppingContext === "object" ? clone(safe.shoppingContext) : null,
+      providerSummary:safe.providerSummary && typeof safe.providerSummary === "object" ? clone(safe.providerSummary) : null,
+      providerRanking:safe.providerRanking && typeof safe.providerRanking === "object" ? clone(safe.providerRanking) : null,
+      realPriceResult:safe.realPriceResult && typeof safe.realPriceResult === "object" ? clone(safe.realPriceResult) : null,
+      landedCostResult:safe.landedCostResult && typeof safe.landedCostResult === "object" ? clone(safe.landedCostResult) : null,
+      taxSummary:safe.taxSummary && typeof safe.taxSummary === "object" ? clone(safe.taxSummary) : null,
+      trustVerification:safe.trustVerification && typeof safe.trustVerification === "object" ? clone(safe.trustVerification) : null,
+      recommendationReasonDetail:safe.recommendationReasonDetail && typeof safe.recommendationReasonDetail === "object" ? clone(safe.recommendationReasonDetail) : null,
+      regionContext:safe.regionContext && typeof safe.regionContext === "object" ? clone(safe.regionContext) : null,
+      marketMatched:safe.marketMatched === true,
+      regionReason:text(safe.regionReason || ""),
+      officialDomainStatus:safe.officialDomainStatus && typeof safe.officialDomainStatus === "object" ? clone(safe.officialDomainStatus) : null,
+      dataSource:safe.dataSource && typeof safe.dataSource === "object" ? clone(safe.dataSource) : null,
+      dataFreshness:safe.dataFreshness && typeof safe.dataFreshness === "object" ? clone(safe.dataFreshness) : null,
+      dataQuality:safe.dataQuality && typeof safe.dataQuality === "object" ? clone(safe.dataQuality) : null,
+      dataProvenance:safe.dataProvenance && typeof safe.dataProvenance === "object" ? clone(safe.dataProvenance) : null,
+      providerIntelligence:safe.providerIntelligence && typeof safe.providerIntelligence === "object" ? clone(safe.providerIntelligence) : null,
+      providerCoverage:safe.providerCoverage && typeof safe.providerCoverage === "object" ? clone(safe.providerCoverage) : null,
+      providerHealth:safe.providerHealth && typeof safe.providerHealth === "object" ? clone(safe.providerHealth) : null,
+      providerCompetition:safe.providerCompetition && typeof safe.providerCompetition === "object" ? clone(safe.providerCompetition) : null,
+      providerPolicyDecision:safe.providerPolicyDecision && typeof safe.providerPolicyDecision === "object" ? clone(safe.providerPolicyDecision) : null,
+      marketCategoryMatrix:safe.marketCategoryMatrix && typeof safe.marketCategoryMatrix === "object" ? clone(safe.marketCategoryMatrix) : null,
+      categoryIntelligence:safe.categoryIntelligence && typeof safe.categoryIntelligence === "object" ? clone(safe.categoryIntelligence) : null,
+      adapterStatus:safe.adapterStatus && typeof safe.adapterStatus === "object" ? clone(safe.adapterStatus) : null,
+      adapterCapability:safe.adapterCapability && typeof safe.adapterCapability === "object" ? clone(safe.adapterCapability) : null,
+      priceFreshness:safe.priceFreshness && typeof safe.priceFreshness === "object" ? clone(safe.priceFreshness) : null,
+      availabilityFreshness:safe.availabilityFreshness && typeof safe.availabilityFreshness === "object" ? clone(safe.availabilityFreshness) : null,
+      fallbackInfo:safe.fallbackInfo && typeof safe.fallbackInfo === "object" ? clone(safe.fallbackInfo) : null,
+      updatedAt:text(safe.updatedAt || ""),
+      sourceRank:Number.isFinite(Number(safe.sourceRank)) ? Number(safe.sourceRank) : null,
       providerResponseStored:false,
       rawUserTextStored:false,
       tokenStored:false,

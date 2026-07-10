@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_READ_ONLY_SEARCH_RESULT_RANKER_VERSION = "4.2.7";
+  const GLOBAL_SHOPPING_READ_ONLY_SEARCH_RESULT_RANKER_VERSION = "4.2.8";
   const RANKER_NAME = "global_shopping_read_only_search_result_ranker_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
@@ -16,6 +16,9 @@
     total += /官网|官方/.test(text(safe.platformName)) ? 8 : 0;
     total += /实时价格/.test(text(safe.priceLabel)) ? 5 : 2;
     total += /税费|运费|规则|取消/.test(text(safe.feeNote)) ? 4 : 0;
+    total += safe.providerSummary && safe.providerSummary.routeConfidence === "high" ? 10 : (safe.providerSummary && safe.providerSummary.routeConfidence === "medium" ? 5 : 0);
+    total += safe.trustVerification && safe.trustVerification.status === "ready" ? 12 : (safe.trustVerification && safe.trustVerification.status === "needs_review" ? 3 : -20);
+    total += safe.landedCostResult && safe.landedCostResult.confidence === "confirmed" ? 6 : (safe.landedCostResult && safe.landedCostResult.confidence === "estimated" ? 4 : 1);
     return total;
   }
   function buildGlobalShoppingReadOnlySearchResultRanking(input) {
