@@ -8,7 +8,7 @@
   const VERSION_REGISTRY = {
     amazon_us:{ adapterVersion:"4.2.8-sandbox", contractVersion:"4.2.8", compatibility:"sandbox_only", status:"testing" },
     amazon_japan:{ adapterVersion:"4.2.8-sandbox", contractVersion:"4.2.8", compatibility:"sandbox_only", status:"testing" },
-    rakuten_japan:{ adapterVersion:"4.2.8-sandbox", contractVersion:"4.2.8", compatibility:"sandbox_only", status:"testing" },
+    rakuten_japan:{ adapterVersion:"4.2.8-rakuten-prep", contractVersion:"4.2.8-rakuten-contract", compatibility:"sandbox_with_real_contract_prep", status:"testing" },
     booking:{ adapterVersion:"4.2.8-sandbox", contractVersion:"4.2.8", compatibility:"sandbox_only", status:"testing" }
   };
 

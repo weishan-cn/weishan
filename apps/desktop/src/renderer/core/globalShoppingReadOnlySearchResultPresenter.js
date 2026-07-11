@@ -86,6 +86,7 @@
       dataSource:topOne ? clone(topOne.dataSource || null) : null,
       dataFreshness:topOne ? clone(topOne.dataFreshness || null) : null,
       dataQuality:topOne ? clone(topOne.dataQuality || null) : null,
+      realDataValidation:topOne ? clone(topOne.realDataValidation || null) : null,
       dataProvenance:topOne ? clone(topOne.dataProvenance || null) : null,
       orchestration:orchestration,
       intentClassification:clone(orchestration.intentClassification || null),
@@ -108,7 +109,7 @@
           ? "数据环境：" + text(decision.providerSimulationSummary.environment) + "；模拟接入平台：" + text(String(decision.providerSimulationSummary.available || 0)) + "/" + text(String(decision.providerSimulationSummary.providerCount || 0))
           : "数据环境：sandbox",
         dataGovernanceLabel:topOne
-          ? "数据来源：" + text(obj(topOne.dataSource).sourceType || "unknown") + "；数据质量：" + text(obj(topOne.dataQuality).qualityLevel || "low") + "；最终价格仍以平台页面为准。"
+          ? "数据来源：" + text(obj(topOne.dataSource).sourceType || "unknown") + "；验证状态：" + text(obj(topOne.realDataValidation).validationStatus || "unknown") + "；数据质量：" + text(obj(topOne.dataQuality).qualityLevel || "low") + "；最终价格仍以平台页面为准。"
           : "当前没有可展示的数据治理摘要。",
         providerIntelligenceLabel:topOne
           ? "平台覆盖：" + String(Number(obj(topOne.providerCoverage).coverageScore || 0)) + " 分；市场匹配：" + (topOne.marketMatched === true ? "已匹配" : "需复核") + "；推荐原因：" + text((topOne.recommendationReasonDetail || {}).summary || topOne.recommendationReason || "")

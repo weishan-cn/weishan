@@ -18,8 +18,19 @@
     "getDataTimestamp"
   ];
 
+  function realProviderLayerApi() {
+    return window.WeishanGlobalShoppingRakutenRealProviderAdapterContractLayer || {};
+  }
+  function rakutenRealAdapterApi() {
+    return window.WeishanGlobalShoppingRakutenRealProviderAdapter || {};
+  }
+
   function clone(value) {
     return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;
+  }
+
+  function obj(value) {
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
   }
 
   function text(value) {
@@ -64,10 +75,23 @@
 
   function buildGlobalShoppingProviderAdapterContract(input) {
     const safe = input && typeof input === "object" ? input : {};
+    const providerId = text(safe.providerId || "");
+    const realProviderPreparation = providerId === "rakuten_japan" && typeof realProviderLayerApi().buildGlobalShoppingRakutenRealProviderAdapterContractLayer === "function"
+      ? realProviderLayerApi().buildGlobalShoppingRakutenRealProviderAdapterContractLayer({ providerId:providerId, operation:"searchProducts" })
+      : {
+        providerId:providerId,
+        status:"sandbox_only",
+        stage:"sandbox_only",
+        networkExecutionEnabled:false,
+        transactionEnabled:false,
+        credentialStorageAllowed:false,
+        blockers:[],
+        warnings:[]
+      };
     const contract = {
       contractName:CONTRACT_NAME,
       appVersion:GLOBAL_SHOPPING_PROVIDER_ADAPTER_CONTRACT_VERSION,
-      providerId:text(safe.providerId || ""),
+      providerId:providerId,
       searchProducts:plannedMethod("searchProducts"),
       searchFlights:plannedMethod("searchFlights"),
       searchHotels:plannedMethod("searchHotels"),
@@ -81,6 +105,7 @@
       validateSource:plannedMethod("validateSource"),
       getDataTimestamp:plannedMethod("getDataTimestamp"),
       methods:METHOD_NAMES.slice(),
+      realProviderPreparation:clone(realProviderPreparation),
       redacted:true
     };
     return clone(contract);
@@ -171,6 +196,55 @@
       valid:errors.length === 0,
       errors:errors,
       checkedMethods:requiredMethods,
+      providerPreparationStatus:text(obj(buildGlobalShoppingProviderAdapterContract({ providerId:providerId })).realProviderPreparation.status || ""),
+      redacted:true
+    });
+  }
+
+  async function validateRealProviderAdapterContractAsync(input) {
+    const safe = input && typeof input === "object" ? input : {};
+    const adapter = safe.adapter && typeof safe.adapter === "object" ? safe.adapter : null;
+    const providerId = text(safe.providerId || (adapter && adapter.providerId) || "");
+    const operation = text(safe.operation || "searchProducts");
+    const payload = safe.payload && typeof safe.payload === "object" ? safe.payload : { keyword:"rakuten" };
+    const errors = [];
+    const requiredMethods = [operation, "getPrice", "getAvailability", "getOfficialUrl", "healthCheck"];
+    const contract = buildGlobalShoppingProviderAdapterContract({ providerId:providerId });
+    if (providerId !== "rakuten_japan") errors.push("real_provider_not_supported");
+    if (text(obj(contract.realProviderPreparation).status || "") !== "documented") errors.push("real_provider_preparation_missing");
+    if (!adapter) errors.push("adapter_missing");
+    requiredMethods.forEach(function (name) {
+      if (!adapter || typeof adapter[name] !== "function") errors.push(name + "_missing");
+    });
+    if (errors.length) {
+      return clone({
+        contractName:CONTRACT_NAME,
+        appVersion:GLOBAL_SHOPPING_PROVIDER_ADAPTER_CONTRACT_VERSION,
+        providerId:providerId,
+        valid:false,
+        mode:"real_provider_readonly",
+        errors:errors,
+        checkedMethods:requiredMethods,
+        providerPreparationStatus:text(obj(contract.realProviderPreparation).status || ""),
+        redacted:true
+      });
+    }
+    const productResult = await adapter[operation](payload);
+    const healthResult = await adapter.healthCheck(payload);
+    if (text(obj(productResult).sourceType || "") !== "rakuten_api") errors.push(operation + "_sourceType_invalid");
+    if (productResult && obj(productResult).error && /runtime_credentials_missing|real_provider_readonly_not_approved/.test(text(obj(productResult.error).message || ""))) {
+      errors.push(operation + "_runtime_not_ready");
+    }
+    if (healthResult && text(obj(healthResult).sourceType || "") !== "rakuten_api") errors.push("healthCheck_sourceType_invalid");
+    return clone({
+      contractName:CONTRACT_NAME,
+      appVersion:GLOBAL_SHOPPING_PROVIDER_ADAPTER_CONTRACT_VERSION,
+      providerId:providerId,
+      valid:errors.length === 0,
+      mode:"real_provider_readonly",
+      errors:errors,
+      checkedMethods:requiredMethods,
+      providerPreparationStatus:text(obj(contract.realProviderPreparation).status || ""),
       redacted:true
     });
   }
@@ -181,6 +255,7 @@
     METHOD_NAMES,
     buildGlobalShoppingProviderAdapterContract,
     createGlobalShoppingProviderAdapter,
-    validateAdapterContract
+    validateAdapterContract,
+    validateRealProviderAdapterContractAsync
   };
 })();

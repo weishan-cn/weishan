@@ -61,13 +61,13 @@
     PERMISSIONS.forEach(function (permission) {
       byPermission[permission] = disabledPermission(permission);
     });
-    if (mode === "read_only_sandbox") {
+    if (mode === "read_only_sandbox" || mode === "real_provider_readonly") {
       ["search", "price_read", "availability_read", "shipping_read", "tax_read", "metadata_read"].forEach(function (permission) {
         byPermission[permission] = {
           permission:permission,
-          status:"read_only_allowed",
+          status:mode === "real_provider_readonly" ? "real_provider_read_only_allowed" : "read_only_allowed",
           allowed:true,
-          reason:"sandbox_read_only"
+          reason:mode === "real_provider_readonly" ? "real_provider_read_only" : "sandbox_read_only"
         };
       });
     }

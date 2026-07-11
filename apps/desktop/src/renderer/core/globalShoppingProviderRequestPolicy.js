@@ -26,6 +26,7 @@
     const permissionModel = obj(safe.permissionModel);
     const dataPolicy = obj(safe.dataPolicy);
     const regionContext = obj(safe.regionContext);
+    const allowReadOnlyRealProvider = safe.allowReadOnlyRealProvider === true;
     const requestedPermission = text(permissionModel.requiredPermission || "");
     const permissionEntry = toArray(permissionModel.permissions).find(function (item) {
       return text(item.permission || "") === requestedPermission;
@@ -53,20 +54,23 @@
       }
     }
 
-    if (dataPolicy.noNetwork === false) {
+    if (dataPolicy.noNetwork === false && allowReadOnlyRealProvider !== true) {
       allowed = false;
       reason = "network_policy_blocked";
     }
-    if (dataPolicy.noRealProvider === false) {
+    if (dataPolicy.noRealProvider === false && allowReadOnlyRealProvider !== true) {
       allowed = false;
       reason = "real_provider_blocked";
     }
-    if (dataPolicy.noCredentialRead === false) {
+    if (dataPolicy.noCredentialRead === false && allowReadOnlyRealProvider !== true) {
       allowed = false;
       reason = "credential_policy_blocked";
     }
     if (dataPolicy.noRawPersistence === false) {
       warnings.push("raw_persistence_requires_review");
+    }
+    if (allowReadOnlyRealProvider === true) {
+      warnings.push("real_provider_readonly_runtime_enabled");
     }
 
     return clone({

@@ -28,6 +28,7 @@
     const version = obj(safe.version);
     const compliance = obj(safe.compliance);
     const adapterStatus = obj(safe.adapterStatus);
+    const realProviderPreparation = obj(safe.realProviderPreparation);
     const warnings = [];
     const blockers = [];
 
@@ -48,6 +49,11 @@
       adapterStatus.status ||
       (adapterStatus.available === true ? "ready" : "")
     );
+    const providerPreparationState = text(
+      realProviderPreparation.status ||
+      realProviderPreparation.stage ||
+      ""
+    );
 
     if (configuration.valid !== true) blockers.push(text(configuration.invalidReason || "configuration_invalid"));
     if (configuration.containsSensitiveFields === true) blockers.push("sensitive_field_detected");
@@ -56,6 +62,9 @@
     if (compliance.allowed === false) blockers.push(text(compliance.reason || "compliance_blocked"));
     if (safe.permissionAllowed === false) blockers.push("permission_denied");
     if (safe.transactionAllowed === true) blockers.push("transaction_permission_forbidden");
+    if (providerPreparationState === "blocked") blockers.push("real_provider_preparation_blocked");
+    if (realProviderPreparation.transactionEnabled === true) blockers.push("real_provider_transaction_forbidden");
+    if (realProviderPreparation.credentialStorageAllowed === true) blockers.push("real_provider_credential_storage_forbidden");
 
     if (versionState === "testing") warnings.push("provider_testing_only");
     if (configurationState === "sandbox") warnings.push("sandbox_configuration");
@@ -64,6 +73,8 @@
       warnings.push("sandbox_adapter_only");
     }
     if (text(version.compatibility || "") === "sandbox_only") warnings.push("sandbox_compatibility_only");
+    if (providerPreparationState === "documented") warnings.push("real_provider_preparation_documented");
+    if (providerPreparationState === "real_provider_preparation") warnings.push("real_provider_preparation_in_progress");
 
     let readinessLevel = "unknown";
     if (blockers.length) {
@@ -96,6 +107,7 @@
       featureFlagState:featureFlagState || "unknown",
       versionState:versionState || "unknown",
       adapterStatus:adapterStage || "unknown",
+      providerPreparationState:providerPreparationState || "unknown",
       ready:readinessLevel === "ready",
       readinessLevel:READINESS_LEVELS.indexOf(readinessLevel) >= 0 ? readinessLevel : "unknown",
       blockers:blockers,

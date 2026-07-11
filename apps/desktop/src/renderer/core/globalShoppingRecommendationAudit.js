@@ -41,12 +41,15 @@
       providerVersionState:text(safe.providerVersionState || ""),
       featureFlagState:text(safe.featureFlagState || ""),
       productionReadinessState:text(safe.productionReadinessState || ""),
+      providerPreparationState:text(safe.providerPreparationState || ""),
+      providerPreparationTrace:obj(safe.providerPreparationTrace),
       providerVersion:text(safe.providerVersion || ""),
       rankingFactors:rankingFactors,
       confidence:text(safe.confidence || "low"),
       warnings:warnings,
       dataQuality:obj(safe.dataQuality),
       dataSource:obj(safe.dataSource),
+      realDataValidation:obj(safe.realDataValidation),
       redacted:true
     });
   }

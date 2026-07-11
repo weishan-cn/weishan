@@ -40,6 +40,7 @@ function main() {
     configuration:{ providerId:"apple_official", valid:true, status:"ready", adapterVersion:"4.2.8-ready", contractVersion:"4.2.8" },
     featureFlag:{ enabled:true, flagState:"enabled" },
     version:{ providerId:"apple_official", adapterVersion:"4.2.8-ready", contractVersion:"4.2.8", compatibility:"contract_compatible", status:"active" },
+    realProviderPreparation:{ status:"sandbox_only", transactionEnabled:false, credentialStorageAllowed:false },
     permissionAllowed:true,
     transactionAllowed:false,
     compliance:{ allowed:true, reason:"allowed" },
@@ -50,9 +51,21 @@ function main() {
     configuration:{ providerId:"booking", valid:false, status:"draft", invalidReason:"sensitive_field_detected", containsSensitiveFields:true },
     featureFlag:{ enabled:false, flagState:"disabled", reason:"provider_disabled" },
     version:{ providerId:"booking", status:"deprecated" },
+    realProviderPreparation:{ status:"documented", transactionEnabled:true, credentialStorageAllowed:false },
     permissionAllowed:false,
     transactionAllowed:true,
     compliance:{ allowed:false, reason:"compliance_blocked" },
+    adapterStatus:{ stage:"sandbox", status:"testing" }
+  });
+  const sandbox = readinessApi.buildGlobalShoppingProviderProductionReadiness({
+    providerId:"rakuten_japan",
+    configuration:{ providerId:"rakuten_japan", valid:true, status:"sandbox", adapterVersion:"4.2.8-rakuten-prep", contractVersion:"4.2.8-rakuten-contract" },
+    featureFlag:{ enabled:true, flagState:"sandbox_enabled" },
+    version:{ providerId:"rakuten_japan", adapterVersion:"4.2.8-rakuten-prep", contractVersion:"4.2.8-rakuten-contract", compatibility:"sandbox_with_real_contract_prep", status:"testing" },
+    realProviderPreparation:{ status:"documented", transactionEnabled:false, credentialStorageAllowed:false },
+    permissionAllowed:true,
+    transactionAllowed:false,
+    compliance:{ allowed:true, reason:"allowed" },
     adapterStatus:{ stage:"sandbox", status:"testing" }
   });
   const result = api.buildGlobalShoppingProviderGatewayResult({
@@ -67,6 +80,10 @@ function main() {
   assert.equal(blocked.readinessLevel, "blocked");
   assert.ok(blocked.blockers.includes("sensitive_field_detected"));
   assert.ok(blocked.blockers.includes("transaction_permission_forbidden"));
+  assert.ok(blocked.blockers.includes("real_provider_transaction_forbidden"));
+  assert.equal(sandbox.readinessLevel, "sandbox");
+  assert.equal(sandbox.providerPreparationState, "documented");
+  assert.ok(sandbox.warnings.includes("real_provider_preparation_documented"));
   assert.equal(result.status, "sandbox");
   assert.equal(result.metadata.configurationCheck.status, "sandbox");
   assert.equal(result.metadata.featureFlagCheck.flagState, "sandbox_enabled");

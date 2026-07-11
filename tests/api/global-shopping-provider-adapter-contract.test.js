@@ -5,18 +5,29 @@ const vm = require("node:vm");
 
 const ROOT = path.resolve(__dirname, "../..");
 
-function load(file) {
+function load(files) {
   const window = {};
   window.window = window;
   const context = vm.createContext({ window, console });
-  vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file });
+  for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file });
   return window;
 }
 
 function main() {
-  const windowRef = load("apps/desktop/src/renderer/core/globalShoppingProviderAdapterContract.js");
+  const windowRef = load([
+    "apps/desktop/src/renderer/core/globalShoppingRakutenAuthAbstraction.js",
+    "apps/desktop/src/renderer/core/globalShoppingRakutenRequestSchema.js",
+    "apps/desktop/src/renderer/core/globalShoppingRakutenResponseSchema.js",
+    "apps/desktop/src/renderer/core/globalShoppingRakutenFieldMapping.js",
+    "apps/desktop/src/renderer/core/globalShoppingRakutenRateLimitModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingRakutenErrorMapping.js",
+    "apps/desktop/src/renderer/core/globalShoppingRakutenAuditTrace.js",
+    "apps/desktop/src/renderer/core/globalShoppingRakutenRealProviderAdapterContractLayer.js",
+    "apps/desktop/src/renderer/core/globalShoppingProviderAdapterContract.js"
+  ]);
   const api = windowRef.WeishanGlobalShoppingProviderAdapterContract;
   const result = api.buildGlobalShoppingProviderAdapterContract({ providerId:"amazon_japan" });
+  const rakuten = api.buildGlobalShoppingProviderAdapterContract({ providerId:"rakuten_japan" });
   const adapter = api.createGlobalShoppingProviderAdapter({ providerId:"amazon_japan" });
 
   assert.equal(api.GLOBAL_SHOPPING_PROVIDER_ADAPTER_CONTRACT_VERSION, "4.2.8");
@@ -32,6 +43,8 @@ function main() {
   assert.equal(result.getPrice.permissionCheck.requiredPermission, "price_read");
   assert.equal(result.getPrice.requestContext.networkEnabled, false);
   assert.equal(Array.isArray(result.methods), true);
+  assert.equal(rakuten.realProviderPreparation.status, "documented");
+  assert.equal(rakuten.realProviderPreparation.transactionEnabled, false);
   assert.equal(adapter.searchHotels().status, "planned");
   assert.equal(adapter.syncMetadata().status, "planned");
   console.log("GLOBAL_SHOPPING_PROVIDER_ADAPTER_CONTRACT PASS");

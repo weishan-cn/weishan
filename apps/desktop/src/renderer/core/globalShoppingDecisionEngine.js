@@ -35,6 +35,9 @@
   function auditApi() {
     return window.WeishanGlobalShoppingRecommendationAudit || {};
   }
+  function validationApi() {
+    return window.WeishanGlobalShoppingRealDataValidationEngine || {};
+  }
   function intelligenceApi() {
     return window.WeishanGlobalShoppingProviderIntelligenceRegistry || {};
   }
@@ -85,6 +88,12 @@
   function buildAudit(input) {
     if (typeof auditApi().buildGlobalShoppingRecommendationAudit === "function") {
       return auditApi().buildGlobalShoppingRecommendationAudit(input);
+    }
+    return null;
+  }
+  function buildRealDataValidation(input) {
+    if (typeof validationApi().buildGlobalShoppingRealDataValidation === "function") {
+      return validationApi().buildGlobalShoppingRealDataValidation(input);
     }
     return null;
   }
@@ -221,6 +230,20 @@
     const taxSummary = obj(recommendation && recommendation.taxSummary);
     const dataQuality = obj(recommendation && recommendation.dataQuality);
     const dataSource = obj(recommendation && recommendation.dataSource);
+    const realDataValidation = obj(recommendation && recommendation.realDataValidation) || obj(recommendation ? buildRealDataValidation({
+      providerId:text(obj(obj(recommendation).providerSummary).providerId || recommendation.providerId || ""),
+      title:text(recommendation.title || ""),
+      price:recommendation.price,
+      currency:text(recommendation.currency || ""),
+      availability:text(recommendation.availability || ""),
+      officialUrl:text(recommendation.officialUrl || recommendation.targetUrl || ""),
+      dataFreshness:recommendation.dataFreshness || recommendation.priceFreshness,
+      officialDomainStatus:recommendation.officialDomainStatus || recommendation.trustVerification,
+      responseProvenance:recommendation.responseProvenance,
+      dataQuality:dataQuality,
+      sourceType:text(recommendation.sourceType || ""),
+      expectedCurrency:text(obj(recommendation.shoppingContext).currency || "")
+    }) : null);
     const providerIntelligence = obj(recommendation && recommendation.providerIntelligence) || obj(buildProviderIntelligence({
       providerId:text(obj(recommendation && recommendation.providerSummary).providerId || ""),
       provider:{
@@ -298,9 +321,10 @@
       providerVersion:text(obj(obj(recommendation.providerVersionCheck)).adapterVersion || ""),
       rankingFactors:toArray(obj(recommendation.providerRanking).rankingReason),
       confidence:confidence.confidence,
-      warnings:warningList(recommendation, confidence, userPreference),
+      warnings:warningList(recommendation, confidence, userPreference).concat(toArray(realDataValidation.warnings || [])),
       dataQuality:dataQuality,
-      dataSource:dataSource
+      dataSource:dataSource,
+      realDataValidation:realDataValidation
     }) : null;
     const providerSimulationSummary = buildProviderSimulationSummary(candidates, recommendation);
     const providerOperationalSummary = buildProviderOperationalSummary(recommendation, providerSimulationSummary);
@@ -326,6 +350,7 @@
         policyDecision:clone(policyDecision),
         dataQuality:clone(dataQuality),
         dataSource:clone(dataSource),
+        realDataValidation:clone(realDataValidation),
         auditReference:auditReference,
         adapterStatus:clone(recommendation.adapterStatus || null),
         priceFreshness:clone(recommendation.priceFreshness || null),
@@ -362,9 +387,10 @@
       productionReadiness:clone(productionReadiness),
       policyDecision:clone(policyDecision),
       confidence:confidence,
-      warnings:recommendation ? warningList(recommendation, confidence, userPreference).concat(toArray(dataQuality.warnings || [])) : ["当前没有可用推荐结果。"],
+      warnings:recommendation ? warningList(recommendation, confidence, userPreference).concat(toArray(dataQuality.warnings || [])).concat(toArray(realDataValidation.warnings || [])) : ["当前没有可用推荐结果。"],
       dataQuality:clone(dataQuality),
       dataSource:clone(dataSource),
+      realDataValidation:clone(realDataValidation),
       auditReference:auditReference,
       recommendationAudit:audit,
       comparisonMatrix:comparisonMatrix,

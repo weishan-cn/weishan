@@ -21,6 +21,14 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderConfigurationSchema.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderFeatureFlag.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderVersionRegistry.js",
+    "apps/desktop/src/renderer/core/globalShoppingRakutenAuthAbstraction.js",
+    "apps/desktop/src/renderer/core/globalShoppingRakutenRequestSchema.js",
+    "apps/desktop/src/renderer/core/globalShoppingRakutenResponseSchema.js",
+    "apps/desktop/src/renderer/core/globalShoppingRakutenFieldMapping.js",
+    "apps/desktop/src/renderer/core/globalShoppingRakutenRateLimitModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingRakutenErrorMapping.js",
+    "apps/desktop/src/renderer/core/globalShoppingRakutenAuditTrace.js",
+    "apps/desktop/src/renderer/core/globalShoppingRakutenRealProviderAdapterContractLayer.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderProductionReadiness.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderAdapterContract.js",
     "apps/desktop/src/renderer/core/globalShoppingSandboxAdapterRegistry.js",
@@ -49,8 +57,19 @@ function main() {
   assert.equal(result.metadata.featureFlagCheck.flagState, "sandbox_enabled");
   assert.equal(result.metadata.versionCheck.status, "testing");
   assert.equal(result.metadata.productionReadiness.readinessLevel, "sandbox");
+  assert.equal(result.metadata.realProviderPreparation.status, "sandbox_only");
   assert.equal(result.audit.permissionResult.allowed, true);
   assert.equal(result.result.status, "sandbox");
+
+  const rakuten = api.buildGlobalShoppingProviderGatewayResult({
+    providerId:"rakuten_japan",
+    operation:"searchProducts",
+    payload:{ query:"Nintendo Switch" },
+    regionContext:{ country:"JP" }
+  });
+  assert.equal(rakuten.metadata.realProviderPreparation.status, "documented");
+  assert.equal(rakuten.metadata.productionReadiness.providerPreparationState, "documented");
+  assert.equal(rakuten.audit.realProviderPreparation.status, "documented");
   console.log("GLOBAL_SHOPPING_PROVIDER_GATEWAY PASS");
 }
 

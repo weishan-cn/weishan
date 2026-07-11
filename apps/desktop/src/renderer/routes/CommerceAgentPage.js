@@ -53,6 +53,14 @@
       document.head.appendChild(quality);
       return;
     }
+    if (!window.WeishanGlobalShoppingRealDataValidationEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRealDataValidationEngine"]')) {
+      const validation = document.createElement("script");
+      validation.src = "./renderer/core/globalShoppingRealDataValidationEngine.js?v=4.2.8";
+      validation.dataset.weishanDynamic = "WeishanGlobalShoppingRealDataValidationEngine";
+      validation.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(validation);
+      return;
+    }
     if (!window.WeishanGlobalShoppingDataProvenance && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingDataProvenance"]')) {
       const provenance = document.createElement("script");
       provenance.src = "./renderer/core/globalShoppingDataProvenance.js?v=4.2.8";
@@ -404,6 +412,78 @@
       versionRegistry.dataset.weishanDynamic = "WeishanGlobalShoppingProviderVersionRegistry";
       versionRegistry.onload = () => ensureSearchLoaded(host);
       document.head.appendChild(versionRegistry);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingRakutenAuthAbstraction && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRakutenAuthAbstraction"]')) {
+      const rakutenAuth = document.createElement("script");
+      rakutenAuth.src = "./renderer/core/globalShoppingRakutenAuthAbstraction.js?v=4.2.8";
+      rakutenAuth.dataset.weishanDynamic = "WeishanGlobalShoppingRakutenAuthAbstraction";
+      rakutenAuth.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(rakutenAuth);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingRakutenRequestSchema && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRakutenRequestSchema"]')) {
+      const rakutenRequest = document.createElement("script");
+      rakutenRequest.src = "./renderer/core/globalShoppingRakutenRequestSchema.js?v=4.2.8";
+      rakutenRequest.dataset.weishanDynamic = "WeishanGlobalShoppingRakutenRequestSchema";
+      rakutenRequest.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(rakutenRequest);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingRakutenResponseSchema && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRakutenResponseSchema"]')) {
+      const rakutenResponse = document.createElement("script");
+      rakutenResponse.src = "./renderer/core/globalShoppingRakutenResponseSchema.js?v=4.2.8";
+      rakutenResponse.dataset.weishanDynamic = "WeishanGlobalShoppingRakutenResponseSchema";
+      rakutenResponse.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(rakutenResponse);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingRakutenFieldMapping && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRakutenFieldMapping"]')) {
+      const rakutenFieldMapping = document.createElement("script");
+      rakutenFieldMapping.src = "./renderer/core/globalShoppingRakutenFieldMapping.js?v=4.2.8";
+      rakutenFieldMapping.dataset.weishanDynamic = "WeishanGlobalShoppingRakutenFieldMapping";
+      rakutenFieldMapping.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(rakutenFieldMapping);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingRakutenRateLimitModel && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRakutenRateLimitModel"]')) {
+      const rakutenRateLimit = document.createElement("script");
+      rakutenRateLimit.src = "./renderer/core/globalShoppingRakutenRateLimitModel.js?v=4.2.8";
+      rakutenRateLimit.dataset.weishanDynamic = "WeishanGlobalShoppingRakutenRateLimitModel";
+      rakutenRateLimit.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(rakutenRateLimit);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingRakutenErrorMapping && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRakutenErrorMapping"]')) {
+      const rakutenErrorMapping = document.createElement("script");
+      rakutenErrorMapping.src = "./renderer/core/globalShoppingRakutenErrorMapping.js?v=4.2.8";
+      rakutenErrorMapping.dataset.weishanDynamic = "WeishanGlobalShoppingRakutenErrorMapping";
+      rakutenErrorMapping.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(rakutenErrorMapping);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingRakutenAuditTrace && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRakutenAuditTrace"]')) {
+      const rakutenAuditTrace = document.createElement("script");
+      rakutenAuditTrace.src = "./renderer/core/globalShoppingRakutenAuditTrace.js?v=4.2.8";
+      rakutenAuditTrace.dataset.weishanDynamic = "WeishanGlobalShoppingRakutenAuditTrace";
+      rakutenAuditTrace.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(rakutenAuditTrace);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingRakutenRealProviderAdapterContractLayer && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRakutenRealProviderAdapterContractLayer"]')) {
+      const rakutenRealContract = document.createElement("script");
+      rakutenRealContract.src = "./renderer/core/globalShoppingRakutenRealProviderAdapterContractLayer.js?v=4.2.8";
+      rakutenRealContract.dataset.weishanDynamic = "WeishanGlobalShoppingRakutenRealProviderAdapterContractLayer";
+      rakutenRealContract.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(rakutenRealContract);
+      return;
+    }
+    if (!window.WeishanGlobalShoppingRakutenRealProviderAdapter && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRakutenRealProviderAdapter"]')) {
+      const rakutenRealAdapter = document.createElement("script");
+      rakutenRealAdapter.src = "./renderer/core/globalShoppingRakutenRealProviderAdapter.js?v=4.2.8";
+      rakutenRealAdapter.dataset.weishanDynamic = "WeishanGlobalShoppingRakutenRealProviderAdapter";
+      rakutenRealAdapter.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(rakutenRealAdapter);
       return;
     }
     if (!window.WeishanGlobalShoppingProviderProductionReadiness && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderProductionReadiness"]')) {
@@ -777,6 +857,7 @@
   function sourceTypeLabel(value){
     const type = String(value || "").trim();
     if (type === "sandbox") return "Sandbox";
+    if (type === "rakuten_api") return "Rakuten API";
     if (type === "official") return "官方";
     if (type === "aggregator") return "聚合";
     if (type === "major_platform") return "平台";
@@ -8072,6 +8153,7 @@
     const recommendationSource = recommendation ? sourceTypeLabel(recommendation.sourceType) : "预计";
     const recommendationUpdatedAt = recommendation ? timeLabel((recommendation.priceFreshness || {}).fetchedAt || (recommendation.availabilityFreshness || {}).checkedAt || "") : "";
     const recommendationFreshness = recommendation ? freshnessLabel((recommendation.priceFreshness || {}).freshnessLevel || "") : "unknown";
+    const recommendationValidation = recommendation && recommendation.realDataValidation || null;
     const regionContext = summary && summary.architectureSummary ? summary.architectureSummary.shoppingContext && summary.architectureSummary.shoppingContext.regionContext : null;
     const recommendationCard = recommendation ? `<article class="commerce-candidate-card commerce-readonly-search-card">
       <div class="commerce-candidate-head">
@@ -8084,6 +8166,7 @@
       <p class="commerce-muted">预计到手价：${esc((costSummary && costSummary.landedCostLabel) || "预计到手价")} · ${esc((costSummary && costSummary.priceLabel) || "价格以平台页面为准")}</p>
       <p class="commerce-muted">数据来源：${esc(recommendationSource)} · 更新时间：${esc(recommendationUpdatedAt || "unknown")} · 价格时效：${esc(recommendationFreshness)}</p>
       ${recommendation.dataSource ? `<p class="commerce-muted">数据状态：${esc(recommendation.dataSource.sourceStatus || "planned")} · 数据可信等级：${esc((recommendation.dataQuality || {}).qualityLevel || "low")}</p>` : ""}
+      ${recommendationValidation ? `<p class="commerce-muted">验证状态：${esc(recommendationValidation.validationStatus || "unknown")} · 验证可信等级：${esc(recommendationValidation.confidence || "low")}</p>` : ""}
       ${recommendation.providerIntelligence ? `<p class="commerce-muted">平台覆盖：${esc(String((recommendation.providerIntelligence.coverageScore || (recommendation.providerCoverage || {}).coverageScore || 0)))} 分 · 市场匹配：${esc((recommendation.coverageExplanation || "").replace(/^平台覆盖：.*?；市场匹配：/, "") || (task.marketMatched ? "已匹配" : "需复核"))}</p>` : ""}
       ${recommendation.competitionSummary ? `<p class="commerce-muted">平台对比：${esc((recommendation.competitionSummary.advantages || []).join(" / ") || "当前候选较稳妥")}</p>` : ""}
       ${recommendation.providerHealth ? `<p class="commerce-muted">平台健康：${esc(recommendation.providerHealth.healthStatus || "unknown")}</p>` : ""}
@@ -8117,6 +8200,7 @@
       <p class="commerce-muted">费用说明：${esc(item.feeNote || "价格与费用以平台页面为准")}</p>
       <p class="commerce-muted">数据来源：${esc(sourceTypeLabel(item.sourceType))} · 更新时间：${esc(timeLabel(item.updatedAt || ((item.priceFreshness || {}).fetchedAt) || ((item.availabilityFreshness || {}).checkedAt) || "") || "unknown")} · 价格时效：${esc(freshnessLabel((item.priceFreshness || {}).freshnessLevel || ""))}</p>
       ${item.dataSource ? `<p class="commerce-muted">数据状态：${esc(item.dataSource.sourceStatus || "planned")} · 数据质量：${esc((item.dataQuality || {}).qualityLevel || "low")}</p>` : ""}
+      ${item.realDataValidation ? `<p class="commerce-muted">验证状态：${esc(item.realDataValidation.validationStatus || "unknown")} · 验证可信等级：${esc(item.realDataValidation.confidence || "low")}</p>` : ""}
       ${item.providerCoverage ? `<p class="commerce-muted">平台覆盖：${esc(String(item.providerCoverage.coverageScore || 0))} 分 · 市场匹配：${esc(item.marketMatched ? "已匹配" : "需复核")}</p>` : ""}
       ${item.providerHealth ? `<p class="commerce-muted">平台健康：${esc(item.providerHealth.healthStatus || "unknown")}</p>` : ""}
       ${providerSimulationSummary ? `<p class="commerce-muted">数据环境：${esc(providerSimulationSummary.environment || "sandbox")} · 平台状态：${esc((providerOperationalSummary && (providerOperationalSummary.label || providerOperationalSummary.status)) || "Sandbox")}</p>` : ""}
