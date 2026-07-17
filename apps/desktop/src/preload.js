@@ -62,3 +62,8 @@ contextBridge.exposeInMainWorld("weishanSecureApiKeyStorage", {
   getProviderKeyStatus: (providerId) => ipcRenderer.invoke("secure-api-key:get-status", { providerId:String(providerId || "") }),
   runSecureStorageSelfTest: () => ipcRenderer.invoke("secure-api-key:self-test")
 });
+
+contextBridge.exposeInMainWorld("weishanGlobalShopping", {
+  rakutenReadonlySearch: (payload) => ipcRenderer.invoke("global-shopping:rakuten-readonly-search", payload || {}),
+  getRakutenReadonlyStatus: () => ipcRenderer.invoke("global-shopping:rakuten-readonly-status")
+});

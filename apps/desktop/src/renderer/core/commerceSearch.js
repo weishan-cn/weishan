@@ -105,6 +105,22 @@
     return window.WeishanCommerceLocalIntentRouter || null;
   }
 
+  function providerGatewayApi(){
+    return window.WeishanGlobalShoppingProviderGateway || null;
+  }
+
+  function realProviderExecutionGateApi(){
+    return window.WeishanGlobalShoppingRealProviderExecutionGate || null;
+  }
+
+  function platformCandidateFactoryApi(){
+    return window.WeishanGlobalShoppingPlatformCandidateFactory || null;
+  }
+
+  function readOnlySearchPresenterApi(){
+    return window.WeishanGlobalShoppingReadOnlySearchResultPresenter || null;
+  }
+
   function getCommerceLocalIntentRoute(input){
     const api = localIntentRouterApi();
     if (api && api.routeCommerceIntentLocally) return api.routeCommerceIntentLocally(input || "");
@@ -2609,6 +2625,212 @@
     }
   }
 
+  function toLegacyReadOnlyCandidate(item){
+    const safe = item && typeof item === "object" ? item : {};
+    return {
+      candidateId:sanitizeText(safe.id || safe.platformName || safe.title || "readonly_candidate", 80),
+      title:sanitizeText(safe.title || "只读候选结果", 120),
+      provider:sanitizeText(safe.platformName || "Rakuten", 80),
+      sourceName:sanitizeText(safe.platformName || "Rakuten", 80),
+      url:sanitizeText(safe.targetUrl || safe.officialUrl || "", 240),
+      bookingUrl:null,
+      urlType:"external_search",
+      price:Number.isFinite(Number(safe.price)) ? Number(safe.price) : null,
+      totalPrice:Number.isFinite(Number(safe.price)) ? Number(safe.price) : null,
+      currency:sanitizeText(safe.currency || "JPY", 12),
+      priceLabel:sanitizeText(safe.priceLabel || "价格以平台页面为准", 120),
+      recommendationReason:sanitizeText(safe.recommendationReason || "按平台可信度、搜索相关性和只读边界进行推荐", 180),
+      conditions:sanitizeText(safe.feeNote || "", 180),
+      riskSummary:sanitizeText(safe.riskNote || "", 180),
+      hiddenFeeNote:sanitizeText(safe.feeNote || "", 180),
+      extras:[
+        safe.isOfficial ? "官网/官方入口" : "",
+        safe.trustLevel === "high" ? "高可信度" : (safe.trustLevel === "medium" ? "中等可信度" : "需要复核"),
+        safe.realDataValidation && safe.realDataValidation.validationStatus ? "验证：" + safe.realDataValidation.validationStatus : ""
+      ].filter(Boolean),
+      realExecution:false
+    };
+  }
+
+  function buildRealProviderReadonlyStatus(input){
+    const safe = input && typeof input === "object" ? input : {};
+    const mode = sanitizeText(safe.executionMode || safe.mode || "", 40);
+    const readinessLevel = sanitizeText(safe.readinessLevel || "", 40);
+    let label = "未知";
+    let stageLabel = "状态未知";
+    let userMessage = sanitizeText(safe.userMessage || "", 160);
+    if (mode === "real_provider_readonly") {
+      label = "已连接";
+      stageLabel = "测试环境";
+      userMessage = userMessage || "Rakuten 实时查询已连接，当前通过主进程只读代理返回官方 API 结果。";
+    } else if (mode === "external_link_only" && safe.connected === true) {
+      label = "暂时不可用";
+      stageLabel = "生产准备中";
+      userMessage = userMessage || "Rakuten 实时查询暂时不可用，已安全降级到只读候选入口。";
+    } else if (mode === "external_link_only") {
+      label = "未连接";
+      stageLabel = "测试环境";
+      userMessage = userMessage || "Rakuten 实时查询尚未连接，当前仅展示只读候选入口。";
+    } else if (mode === "sandbox") {
+      label = "暂时不可用";
+      stageLabel = "测试环境";
+      userMessage = userMessage || "Rakuten 实时查询当前处于只读降级模式。";
+    } else if (mode === "blocked" || readinessLevel === "blocked") {
+      label = "配置无效";
+      stageLabel = "状态未知";
+      userMessage = userMessage || "Rakuten 实时查询配置未通过安全校验。";
+    }
+    return {
+      providerId:"rakuten_japan",
+      connected:safe.connected === true,
+      executionMode:mode || "external_link_only",
+      readinessLevel:readinessLevel || "unknown",
+      label:label,
+      stageLabel:stageLabel,
+      adapterVersion:sanitizeText(safe.adapterVersion || "4.2.8-rakuten-main-readonly", 80),
+      userMessage:userMessage,
+      redacted:true
+    };
+  }
+
+  function buildReadOnlyPresentation(request, candidates){
+    const presenter = readOnlySearchPresenterApi();
+    const candidateList = Array.isArray(candidates) ? candidates : [];
+    if (!presenter || typeof presenter.buildGlobalShoppingReadOnlySearchResultPresentation !== "function") {
+      return {
+        topResults:candidateList.slice(0, 3),
+        remainingResults:candidateList.slice(3),
+        candidateCount:candidateList.length,
+        recommendation:null,
+        decisionResult:null
+      };
+    }
+    return presenter.buildGlobalShoppingReadOnlySearchResultPresentation({
+      category:"product",
+      inputSummary:request.query,
+      candidates:candidateList
+    });
+  }
+
+  function buildReadOnlySearchSuccess(request, providerName, candidates, status) {
+    const presentation = buildReadOnlyPresentation(request, candidates);
+    const topResults = Array.isArray(presentation.topResults) ? presentation.topResults : [];
+    const remainingResults = Array.isArray(presentation.remainingResults) ? presentation.remainingResults : [];
+    const decisionResult = presentation.decisionResult || null;
+    const recommendation = presentation.recommendation || createRecommendationFromCandidates(topResults.map(toLegacyReadOnlyCandidate));
+    const topLegacy = topResults.map(toLegacyReadOnlyCandidate);
+    const first = topResults[0] || {};
+    return {
+      ok:topResults.length > 0,
+      code:topResults.length > 0 ? "" : "COMMERCE_NO_RESULTS",
+      message:topResults.length > 0 ? "" : "暂无可展示的 Rakuten 只读候选结果。",
+      providerName:providerName,
+      request:request,
+      searchStatus:topResults.length > 0 ? "completed" : "no_results",
+      canShowPrice:topResults.some((item) => Number.isFinite(Number(item.price))),
+      canShowBookingButton:topResults.some((item) => !!String(item.targetUrl || "")),
+      canShowCheckoutButton:false,
+      candidates:topLegacy,
+      recommendation:recommendation,
+      readOnlySearchTopResults:topResults,
+      readOnlySearchRemainingResults:remainingResults,
+      readOnlySearchResultSummary:presentation,
+      decisionResult:decisionResult,
+      orchestration:presentation.orchestration || null,
+      intentClassification:presentation.intentClassification || null,
+      entityExtraction:presentation.entityExtraction || null,
+      workflowState:presentation.workflowState || null,
+      comparisonMatrix:presentation.comparisonMatrix || null,
+      realProviderReadonlyStatus:status,
+      searchResultSummary:{
+        candidateCount:topResults.length,
+        source:"rakuten_main_process_readonly",
+        mode:status.executionMode || "external_link_only",
+        lowestPrice:first.price || "",
+        currency:first.currency || ""
+      }
+    };
+  }
+
+  function buildReadOnlyFallbackSearchResult(request, status){
+    const factory = platformCandidateFactoryApi();
+    const candidates = factory && typeof factory.buildGlobalShoppingPlatformCandidates === "function"
+      ? factory.buildGlobalShoppingPlatformCandidates({
+        category:"product",
+        inputSummary:request.query,
+        normalizedFields:{
+          keyword:request.query,
+          destinationCountry:request.destination || request.destinationCountry || "",
+          currency:request.currency
+        }
+      })
+      : [];
+    const fallbackStatus = Object.assign({}, status, {
+      executionMode:status.executionMode || "external_link_only",
+      userMessage:status.userMessage || "Rakuten 实时查询当前不可用，已降级为官方入口与平台候选。"
+    });
+    return buildReadOnlySearchSuccess(request, "Rakuten", candidates, fallbackStatus);
+  }
+
+  async function searchRakutenReadonlyProductCandidates(request){
+    const gateApi = realProviderExecutionGateApi();
+    const gateway = providerGatewayApi();
+    if (!gateApi || typeof gateApi.buildGlobalShoppingRealProviderExecutionGate !== "function" || !gateway || typeof gateway.buildGlobalShoppingProviderGatewayResultAsync !== "function") {
+      return null;
+    }
+    const gate = await gateApi.buildGlobalShoppingRealProviderExecutionGate({
+      providerId:"rakuten_japan",
+      category:"product",
+      region:request.destination || request.destinationCountry || "JP",
+      destinationCountry:request.destination || request.destinationCountry || "JP",
+      explicitUserAction:true,
+      userEnabled:true,
+      endpointHost:"openapi.rakuten.co.jp"
+    });
+    const status = buildRealProviderReadonlyStatus({
+      connected:gate.connected,
+      executionMode:gate.mode,
+      readinessLevel:gate.productionReadiness && gate.productionReadiness.readinessLevel || gate.status && gate.status.readinessLevel || "",
+      userMessage:gate.blockers && gate.blockers.length ? "Rakuten 实时查询未满足只读执行条件，已安全降级。" : ""
+    });
+    if (gate.mode !== "real_provider_readonly") {
+      return buildReadOnlyFallbackSearchResult(request, status);
+    }
+    const gatewayResult = await gateway.buildGlobalShoppingProviderGatewayResultAsync({
+      providerId:"rakuten_japan",
+      operation:"searchProducts",
+      executionMode:"real_provider_readonly",
+      category:"product",
+      payload:{
+        keyword:request.query,
+        query:request.query,
+        page:1,
+        hits:3,
+        sort:"standard",
+        destinationCountry:request.destination || request.destinationCountry || "JP",
+        currency:"JPY",
+        category:"product"
+      },
+      regionContext:{ country:request.destination || request.destinationCountry || "JP" }
+    });
+    if (gatewayResult && gatewayResult.status === "real_provider_readonly") {
+      const normalizedResults = gatewayResult.result && Array.isArray(gatewayResult.result.normalizedResults)
+        ? gatewayResult.result.normalizedResults
+        : [];
+      const readyStatus = Object.assign({}, status, {
+        executionMode:"real_provider_readonly",
+        label:"已连接",
+        stageLabel:"测试环境",
+        userMessage:"Rakuten 实时查询已连接，当前显示官方 API 只读结果。"
+      });
+      return buildReadOnlySearchSuccess(request, "Rakuten", normalizedResults, readyStatus);
+    }
+    return buildReadOnlyFallbackSearchResult(request, Object.assign({}, status, {
+      label:"暂时不可用",
+      userMessage:"Rakuten 实时查询暂时不可用，已回退到只读候选入口。"
+    }));
+  }
+
   async function searchCommerceCandidates(task){
     const settings = getCommerceSearchSettings();
     const request = createCommerceSearchRequest(task);
@@ -2634,6 +2856,34 @@
     }
     if (isProductSearchRequest(request) && locationHealth().hasShippingDestination !== true) {
       return shippingDestinationRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox);
+    }
+    if (isProductSearchRequest(request) && !(request.missingFields && request.missingFields.length)) {
+      const readonlyResult = await searchRakutenReadonlyProductCandidates(request);
+      if (readonlyResult) {
+        return Object.assign({
+          providerHealth:providerHealth.providerHealth,
+          configHealth:configFields(providerConfig),
+          connectorHealth,
+          onboardingHealth,
+          approvalHealth,
+          connectorStubHealth,
+          providerStubProfileHealth,
+          providerSecretHealth,
+          providerSandboxDryRunHealth,
+          connectorGateHealth,
+          providerIntegrationReadiness,
+          providerIntegrationReadinessStatus:providerIntegrationReadiness.readinessStatus,
+          providerIntegrationSummaryMode:providerIntegrationReadiness.summaryMode,
+          canProceedToProviderIntegration:false,
+          providerIntegrationRunbook,
+          providerIntegrationRunbookStatus:providerIntegrationRunbook.runbookStatus || "manual_approval_required",
+          providerIntegrationRunbookMode:providerIntegrationRunbook.runbookMode || "pre_real_provider_connection",
+          canApproveProviderIntegration:false,
+          canProceedAfterManualApproval:false,
+          sandboxHealth:sandbox,
+          dryRunHealth:providerSandboxDryRunHealth
+        }, readonlyResult);
+      }
     }
     if (isProductSearchRequest(request) && !getProductProviderReadiness(providerConfig).ready) {
       return productProviderBlockedResult(request, providerHealth, providerConfig, connectorHealth, sandbox);

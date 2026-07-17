@@ -173,6 +173,7 @@
 
   function buildProviderSimulationSummary(candidates, recommendation) {
     const list = toArray(candidates);
+    const hasRealReadonly = text(obj(recommendation).sourceType || "") === "rakuten_official_api";
     return {
       providerCount:list.length,
       available:list.filter(function (item) {
@@ -180,7 +181,7 @@
         return !/^(disabled|timeout)$/.test(healthStatus);
       }).length,
       fallbackUsed:Boolean(obj(recommendation && recommendation.fallbackInfo).usedFallback),
-      environment:"sandbox",
+      environment:hasRealReadonly ? "real_provider_readonly" : "sandbox",
       redacted:true
     };
   }
@@ -209,8 +210,8 @@
       adapterVersion:text(obj(obj(recommendation).providerVersionCheck).adapterVersion || ""),
       readinessLevel:environment === "sandbox" ? "sandbox" : "ready",
       featureFlagState:text(obj(obj(recommendation).featureFlagCheck).flagState || obj(obj(recommendation).featureFlagCheck).effectiveState || "unknown"),
-      label:environment === "sandbox" ? "模拟接入" : "准备状态",
-      stageLabel:environment === "sandbox" ? "测试环境" : "生产准备中",
+      label:environment === "sandbox" ? "模拟接入" : "已连接",
+      stageLabel:environment === "sandbox" ? "测试环境" : "测试环境",
       redacted:true
     };
   }

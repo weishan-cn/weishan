@@ -50,6 +50,7 @@ async function main() {
     "apps/desktop/src/renderer/core/globalShoppingRakutenRealProviderAdapterContractLayer.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderProductionReadiness.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderPermissionModel.js",
+    "apps/desktop/src/renderer/core/globalShoppingRealProviderExecutionGate.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderRequestPolicy.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderResponseSafetyFilter.js",
     "apps/desktop/src/renderer/core/globalShoppingProviderErrorNormalizer.js",
@@ -65,6 +66,37 @@ async function main() {
 
   let fetchCalls = 0;
   const windowRef = load(files);
+  windowRef.weishanGlobalShopping = {
+    async getRakutenReadonlyStatus() {
+      return {
+        connected:true,
+        executionMode:"real_provider_readonly",
+        readinessLevel:"sandbox",
+        providerId:"rakuten_japan",
+        adapterVersion:"4.2.8-rakuten-main-readonly"
+      };
+    },
+    async rakutenReadonlySearch() {
+      return {
+        status:"ready",
+        sourceType:"rakuten_official_api",
+        fetchedAt:new Date().toISOString(),
+        results:[
+          {
+            providerId:"rakuten_japan",
+            title:"Nintendo Switch Lite",
+            price:21980,
+            currency:"JPY",
+            availability:"available",
+            officialUrl:"https://item.rakuten.co.jp/example/switch-lite/",
+            sourceType:"rakuten_official_api",
+            timestamp:new Date().toISOString(),
+            confidence:"official_api_readonly"
+          }
+        ]
+      };
+    }
+  };
   const api = windowRef.WeishanGlobalShoppingRakutenRealProviderAdapter;
   const adapter = api.createGlobalShoppingRakutenRealProviderAdapter({
     runtime:{
@@ -261,9 +293,10 @@ async function main() {
     }
   });
   assert.equal(gatewayResult.status, "real_provider_readonly");
-  assert.equal(gatewayResult.result.sourceType, "rakuten_api");
+  assert.equal(gatewayResult.result.sourceType, "rakuten_official_api");
   assert.equal(gatewayResult.metadata.gatewayMode, "real_provider_readonly");
   assert.equal(gatewayResult.metadata.productionReadiness.readinessLevel, "sandbox");
+  assert.equal(gatewayResult.metadata.requestEnvironment, "main_process_only");
   assert.equal(gatewayResult.result.normalizedResults.length, 1);
 
   console.log("GLOBAL_SHOPPING_RAKUTEN_REAL_PROVIDER_ADAPTER PASS");

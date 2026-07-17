@@ -2051,7 +2051,7 @@
     if (/门票|演唱会|展览|票务|ticket/i.test(raw)) return "ticketing";
     if (/预约|保洁|维修|咨询|service/i.test(raw)) return "serviceBooking";
     if (/域名|domain/i.test(raw)) return "domain";
-    if (/MacBook|iPhone|华为|苹果|电脑|手机|商品|电商|买|购买|采购|purchase|shopping/i.test(raw)) return "ecommerce";
+    if (/MacBook|iPhone|华为|苹果|电脑|手机|商品|电商|买|购买|采购|purchase|shopping|Sony|索尼|Samsung|三星|Fujifilm|富士|Canon|佳能|PlayStation|耳机|headphone|camera|相机|WH-\d+[A-Z0-9-]*|WF-\d+[A-Z0-9-]*|X-T\d+|EOS-R\d+|SM-S\d+[A-Z]?|A\d{4}/i.test(raw)) return "ecommerce";
     return "generalProcurement";
   }
 
@@ -2600,6 +2600,7 @@
       globalProcurementEvidenceSafetySummary,
       searchStatus:String(base.searchStatus || "no_provider"),
       searchProviderName:String(base.searchProviderName || ""),
+      realProviderReadonlyStatus:base.realProviderReadonlyStatus && typeof base.realProviderReadonlyStatus === "object" ? base.realProviderReadonlyStatus : null,
       providerHealth:Array.isArray(base.providerHealth) ? base.providerHealth : [],
       complianceHealth:base.complianceHealth && typeof base.complianceHealth === "object" ? base.complianceHealth : {},
       flightLowestOffersContract:category === "flight" ? createFlightLowestOffersContract(base.flightLowestOffersContract) : null,

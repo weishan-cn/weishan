@@ -542,6 +542,14 @@
       document.head.appendChild(providerGateway);
       return;
     }
+    if (!window.WeishanGlobalShoppingRealProviderExecutionGate && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingRealProviderExecutionGate"]')) {
+      const executionGate = document.createElement("script");
+      executionGate.src = "./renderer/core/globalShoppingRealProviderExecutionGate.js?v=4.2.8";
+      executionGate.dataset.weishanDynamic = "WeishanGlobalShoppingRealProviderExecutionGate";
+      executionGate.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(executionGate);
+      return;
+    }
     if (!window.WeishanGlobalShoppingDecisionEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingDecisionEngine"]')) {
       const decision = document.createElement("script");
       decision.src = "./renderer/core/globalShoppingDecisionEngine.js?v=4.2.8";
@@ -854,10 +862,185 @@
     return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes());
   }
 
+  function safeLocalStorage(){
+    try { return window.localStorage || null; } catch (_) { return null; }
+  }
+
+  function safeJsonRead(key, fallback){
+    const storage = safeLocalStorage();
+    if (!storage) return fallback;
+    try {
+      const raw = storage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  function safeJsonWrite(key, value){
+    const storage = safeLocalStorage();
+    if (!storage) return false;
+    try {
+      storage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function aiWorkspaceSummary(){
+    const api = window.WeishanAPI;
+    if (!api || typeof api.connectorSummary !== "function") {
+      return { state:"not_configured", label:"AI 未配置", provider:"", model:"" };
+    }
+    try {
+      const summary = api.connectorSummary() || {};
+      return {
+        state:String(summary.state || "not_configured"),
+        label:String(summary.label || "AI 未配置"),
+        provider:String(summary.provider || ""),
+        model:String(summary.model || "")
+      };
+    } catch (_) {
+      return { state:"not_configured", label:"AI 未配置", provider:"", model:"" };
+    }
+  }
+
+  function providerStatusCache(){
+    const cache = window.__WEISHAN_GLOBAL_SHOPPING_PROVIDER_STATUS__;
+    return cache && typeof cache === "object" ? cache : null;
+  }
+
+  function providerWorkspaceSummary(){
+    const cache = providerStatusCache() || {};
+    const state = String(cache.state || cache.status || "not_connected");
+    if (state === "connected" || state === "ready") return { state:"connected", label:"Provider 已连接", detail:"Rakuten Readonly 已就绪" };
+    if (state === "invalid") return { state:"invalid", label:"Provider 配置无效", detail:"请检查只读凭证与配置" };
+    if (state === "unavailable") return { state:"unavailable", label:"Provider 暂时不可用", detail:"当前回退到离线 / Sandbox 模式" };
+    return { state:"not_connected", label:"Provider 未连接", detail:"当前回退到离线 / Sandbox 模式" };
+  }
+
+  function workspaceModeState(){
+    const provider = providerWorkspaceSummary();
+    if (provider.state === "connected") return "real_readonly";
+    const cache = providerStatusCache() || {};
+    if (String(cache.sandboxAvailable || "") === "true" || cache.mode === "sandbox") return "sandbox";
+    return "offline";
+  }
+
+  function workspaceStructuredRecordFromTask(task){
+    const card = globalProcurementUserFacingCard(task);
+    if (!card || !card.planFields) return null;
+    const fields = card.planFields || {};
+    const item = {
+      key:String(task && task.taskId || Date.now()),
+      category:String(card.category || ""),
+      title:String(card.title || "Global Shopping Workspace"),
+      productName:String(fields.productName || ""),
+      brand:String(fields.productBrand || ""),
+      model:String(fields.productModel || ""),
+      budgetLabel:String(fields.budgetLabel || ""),
+      destinationCountry:String(fields.destinationCountry || ""),
+      comparisonMarkets:Array.isArray(fields.comparisonMarkets) ? fields.comparisonMarkets.filter(Boolean).slice(0, 6) : [],
+      updatedAt:new Date().toISOString()
+    };
+    if (!item.productName && !item.model && !item.destinationCountry && !item.budgetLabel) return null;
+    return item;
+  }
+
+  function workspaceRecentSearches(){
+    const items = safeJsonRead("weishan:globalShoppingRecentSearches:v1", []);
+    if (!Array.isArray(items)) return [];
+    return items.filter((item) => !workspaceHistoryLooksLikeTestRecord(item));
+  }
+
+  function workspaceHistoryLooksLikeTestRecord(record){
+    const textBlob = [
+      record && record.title,
+      record && record.productName,
+      record && record.brand,
+      record && record.model,
+      record && record.key
+    ].filter(Boolean).join(" ");
+    return /\bE2E\b|@commerce-smoke|\bTEST\b|V\d{4,}/i.test(textBlob);
+  }
+
+  function saveWorkspaceRecentSearch(task){
+    const record = workspaceStructuredRecordFromTask(task);
+    if (!record) return;
+    const next = workspaceRecentSearches().filter((item) => item && item.key !== record.key && item.model !== record.model);
+    next.unshift(record);
+    safeJsonWrite("weishan:globalShoppingRecentSearches:v1", next.slice(0, 20));
+  }
+
+  function workspaceWishlist(){
+    const items = safeJsonRead("weishan:globalShoppingWishlist:v1", []);
+    return Array.isArray(items) ? items : [];
+  }
+
+  function wishlistContainsTask(task){
+    const record = workspaceStructuredRecordFromTask(task);
+    if (!record) return false;
+    return workspaceWishlist().some((item) => item && item.model === record.model && item.destinationCountry === record.destinationCountry);
+  }
+
+  function toggleWorkspaceWishlist(task){
+    const record = workspaceStructuredRecordFromTask(task);
+    if (!record) return false;
+    const current = workspaceWishlist();
+    const exists = current.some((item) => item && item.model === record.model && item.destinationCountry === record.destinationCountry);
+    const next = exists
+      ? current.filter((item) => !(item && item.model === record.model && item.destinationCountry === record.destinationCountry))
+      : [record].concat(current).slice(0, 20);
+    safeJsonWrite("weishan:globalShoppingWishlist:v1", next);
+    return !exists;
+  }
+
+  function workspaceDraftFromRecord(record){
+    const safe = record && typeof record === "object" ? record : {};
+    const parts = [];
+    if (safe.productName) parts.push("搜索 " + safe.productName);
+    else if (safe.model) parts.push("搜索 " + safe.model);
+    if (safe.destinationCountry) parts.push("收货到 " + safe.destinationCountry);
+    if (safe.budgetLabel) parts.push("预算 " + safe.budgetLabel);
+    if (Array.isArray(safe.comparisonMarkets) && safe.comparisonMarkets.length) {
+      parts.push("比较 " + safe.comparisonMarkets.join(" 和 ") + " 平台价格");
+    }
+    return parts.join("，");
+  }
+
+  function productWorkspaceEnabled(task){
+    const card = globalProcurementUserFacingCard(task);
+    const productName = String(card && card.planFields && card.planFields.productName || "").trim();
+    return !!(card && card.category === "product" && (!commerceShouldShowClarification(task) || productName));
+  }
+
+  function marketFlag(value){
+    const raw = String(value || "").trim();
+    if (raw === "Japan" || raw === "JP") return "🇯🇵";
+    if (raw === "United States" || raw === "US") return "🇺🇸";
+    if (raw === "China" || raw === "CN") return "🇨🇳";
+    if (raw === "Hong Kong" || raw === "HK") return "🇭🇰";
+    if (raw === "United Kingdom" || raw === "GB") return "🇬🇧";
+    if (raw === "South Korea" || raw === "KR") return "🇰🇷";
+    return "🌍";
+  }
+
+  function groupPlatformCardsByCountry(items){
+    return (Array.isArray(items) ? items : []).reduce((acc, item) => {
+      const key = String(item && item.country || "Global");
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(item);
+      return acc;
+    }, {});
+  }
+
   function sourceTypeLabel(value){
     const type = String(value || "").trim();
     if (type === "sandbox") return "Sandbox";
     if (type === "rakuten_api") return "Rakuten API";
+    if (type === "rakuten_official_api") return "Rakuten 官方 API";
+    if (type === "external_link_only") return "外部平台入口";
     if (type === "official") return "官方";
     if (type === "aggregator") return "聚合";
     if (type === "major_platform") return "平台";
@@ -902,7 +1085,7 @@
   }
 
   function technicalDetailsDisclosure(body, className){
-    return body ? disclosure("查看技术细节", body, className || "commerce-technical-disclosure") : "";
+    return body ? disclosure("查看技术详情", body, className || "commerce-technical-disclosure") : "";
   }
 
   function hydrateDisclosureSections(root){
@@ -2683,7 +2866,7 @@
       <h5>history label rules</h5>
       ${list(rules.historyLabelRules || [])}
     </section>`;
-    return disclosure("查看全球采购用户结果卡片规则", body, "commerce-global-procurement-user-facing-result-cards-disclosure");
+    return disclosure("Developer Details", body, "commerce-global-procurement-user-facing-result-cards-disclosure");
   }
 
   function globalProcurementUserFacingCopyButtons(card){
@@ -2699,9 +2882,8 @@
       return `<section class="commerce-result-summary-checklist-card">
         <h6>${esc(subCard.title || "分项计划")}</h6>
         ${(subCard.identifiedConditions || []).length ? `<div><b>已整理条件</b>${list(subCard.identifiedConditions || [])}</div>` : ""}
-        ${(subCard.missingInfo || []).length ? `<div><b>仍待人工确认</b>${list(subCard.missingInfo || [])}</div>` : ""}
-        ${(subCard.nextStepLines || []).length ? `<div><b>人工下一步</b>${list(subCard.nextStepLines || [])}</div>` : ""}
-        ${(subCard.disabledLines || []).length ? `<div><b>当前未开放</b>${list(subCard.disabledLines || [])}</div>` : ""}
+        ${(subCard.missingInfo || []).length ? `<div><b>仍需确认</b>${list(subCard.missingInfo || [])}</div>` : ""}
+        ${(subCard.nextStepLines || []).length ? `<div><b>下一步</b>${list(subCard.nextStepLines || [])}</div>` : ""}
       </section>`;
     }).join("")}</div>`;
   }
@@ -2709,22 +2891,386 @@
   function globalProcurementPlanHtml(task){
     const card = globalProcurementUserFacingCard(task);
     if (!card) return "";
-    return `<section class="commerce-one-screen-card commerce-global-procurement-plan" aria-label="全球采购计划">
-      <p class="commerce-global-procurement-plan-super-title"><b>全球采购计划</b></p>
-      <p class="commerce-global-procurement-plan-title"><b>${esc(card.title || "全球采购计划")}</b></p>
-      ${card.quickSummary ? `<p>摘要：${esc(card.quickSummary)}</p>` : ""}
-      <p>当前状态：${esc(card.currentStatusLine || "当前只整理条件，不访问真实平台。")}</p>
-      <p>类别：${esc(card.categoryLabel || "全球采购")}</p>
-      ${(card.identifiedConditions || []).length ? `<h5>已整理条件</h5>${list(card.identifiedConditions || [])}` : ""}
-      ${(card.missingInfo || []).length ? `<h5>仍待人工确认</h5>${list(card.missingInfo || [])}` : ""}
-      ${globalProcurementUserFacingSubCardsHtml(card)}
-      ${globalProcurementDecisionWorkspaceSummaryHtml(task)}
-      ${(card.disabledLines || []).length ? `<h5>当前未开放</h5>${list(card.disabledLines || [])}` : ""}
-      ${(card.nextStepLines || []).length ? `<h5>人工下一步</h5>${list(card.nextStepLines || [])}` : ""}
+    const planFields = card.planFields || {};
+    const emptyPriceSummary = card.emptyPriceSummary || {};
+    const trustSummary = card.trustSummary || {};
+    const planRows = [
+      planFields.productName ? ["商品", planFields.productName] : null,
+      planFields.productBrand ? ["品牌", planFields.productBrand] : null,
+      planFields.productModel ? ["型号", planFields.productModel] : null,
+      planFields.budgetLabel ? ["预算", planFields.budgetLabel] : null,
+      planFields.destinationCountry ? ["收货", planFields.destinationCountry] : null,
+      Array.isArray(planFields.comparisonMarkets) && planFields.comparisonMarkets.length ? ["比较市场", planFields.comparisonMarkets.join(" / ")] : null,
+      Array.isArray(planFields.compareFocus) && planFields.compareFocus.length ? ["比较重点", planFields.compareFocus.join(" / ")] : null,
+      card.currentStatusLine ? ["当前状态", card.currentStatusLine] : null
+    ].filter(Boolean);
+    const developerBody = `
       ${providerConnectionReadinessConsoleDisclosure(task)}
       ${globalProcurementOtherSafetyRulesDisclosure(task)}
-      <p>redacted: true</p>
+      ${globalProcurementDecisionWorkspaceDisclosure(task)}
+      ${globalProcurementUserFacingResultCardsRulesDisclosure()}
+    `;
+    return `<section class="commerce-one-screen-card commerce-global-procurement-plan" aria-label="全球采购计划">
+      <p class="commerce-global-procurement-plan-super-title"><b>采购计划</b></p>
+      <p class="commerce-global-procurement-plan-title"><b>${esc(card.title || "全球采购计划")}</b></p>
+      ${card.quickSummary ? `<p class="commerce-muted">${esc(card.quickSummary)}</p>` : ""}
+      ${planRows.length ? `<dl class="commerce-facts">${planRows.map((item) => `<div><dt>${esc(item[0])}</dt><dd>${esc(item[1])}</dd></div>`).join("")}</dl>` : ""}
+      ${emptyPriceSummary.title ? `<section class="commerce-result-summary-checklist-card">
+        <h5>${esc(emptyPriceSummary.title)}</h5>
+        <p>${esc(emptyPriceSummary.body || "")}</p>
+        ${(emptyPriceSummary.future || []).length ? `<p class="commerce-muted">连接官方只读 Provider 后，将自动展示：</p>${list(emptyPriceSummary.future || [])}` : ""}
+        ${emptyPriceSummary.reasonTitle ? disclosure(emptyPriceSummary.reasonTitle, `<p>${esc(emptyPriceSummary.reasonBody || "")}</p>`, "commerce-global-procurement-price-explanation-disclosure") : ""}
+      </section>` : ""}
+      ${trustSummary.level ? `<section class="commerce-result-summary-checklist-card">
+        <h5>当前可信等级</h5>
+        <p><b>${esc(trustSummary.level)}</b></p>
+        <p>${esc(trustSummary.reason || "")}</p>
+        <p class="commerce-muted">${esc(trustSummary.note || "")}</p>
+      </section>` : ""}
+      ${(card.missingInfo || []).length ? `<section class="commerce-result-summary-checklist-card"><h5>仍需确认</h5>${list(card.missingInfo || [])}</section>` : ""}
+      ${globalProcurementUserFacingSubCardsHtml(card)}
+      ${(card.nextStepLines || []).length ? `<section class="commerce-result-summary-checklist-card"><h5>下一步</h5>${list(card.nextStepLines || [])}</section>` : ""}
+      ${developerBody.trim() ? disclosure("查看技术详情", developerBody, "commerce-technical-disclosure") : ""}
     </section>`;
+  }
+
+  function workspaceProductCardHtml(card){
+    const product = card && card.productCard || {};
+    const planFields = card && card.planFields || {};
+    const productName = planFields.productName || [product.brand, product.model].filter(Boolean).join(" ") || product.category || "商品";
+    const markets = Array.isArray(planFields.comparisonMarkets) ? planFields.comparisonMarkets.filter(Boolean) : [];
+    const visual = workspaceProductVisual(product);
+    const compareLine = markets.map((item) => `${marketFlag(item)} ${item}`).join(" · ");
+    return `<section class="commerce-workspace-card commerce-workspace-product-card" data-commerce-workspace-product-card="true">
+      <div class="commerce-workspace-product-hero">
+        <div class="commerce-workspace-card-head commerce-workspace-card-head-hero">
+          <div class="commerce-workspace-product-head">
+            <div class="commerce-workspace-visual" aria-hidden="true">${visual}</div>
+            <div class="commerce-workspace-product-copy">
+              ${product.brand ? `<p class="commerce-workspace-brand-eyebrow">${esc(product.brand)}</p>` : ""}
+              <h2 class="commerce-workspace-product-title">${esc(product.model || productName)}</h2>
+              <p class="commerce-workspace-product-subtitle">${esc(product.subtitle || "全球采购")}</p>
+            </div>
+          </div>
+          ${product.status ? `<span class="commerce-workspace-status-pill" aria-label="当前状态">${esc(product.status)}</span>` : ""}
+        </div>
+        <dl class="commerce-workspace-hero-grid">
+          ${product.budget ? `<div><dt>预算</dt><dd>${esc(product.budget)}</dd></div>` : ""}
+          ${product.destination ? `<div><dt>收货地</dt><dd>${esc(product.destination)}</dd></div>` : ""}
+          ${markets.length ? `<div><dt>比较市场</dt><dd>${esc(compareLine)}</dd></div>` : ""}
+          <div><dt>下一步</dt><dd>接入可信价格后自动比较</dd></div>
+        </dl>
+        <div class="commerce-workspace-primary-actions">
+          <button class="cmd-btn primary" type="button" data-commerce-workspace-next-action="connect_trusted_source">开始比较</button>
+          <button class="cmd-btn gray" type="button" data-commerce-workspace-next-action="view_plan">查看采购计划</button>
+        </div>
+      </div>
+    </section>`;
+  }
+
+  function workspaceProductVisual(product){
+    const descriptor = String((product && product.subtitle) || (product && product.category) || "").toLowerCase();
+    if (/耳机|headphone/.test(descriptor)) {
+      return `<svg class="commerce-workspace-visual-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13a8 8 0 1 1 16 0"/><path d="M6 13v4a2 2 0 0 0 2 2h1v-6H8a2 2 0 0 0-2 2Z"/><path d="M18 13v4a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2Z"/></svg>`;
+    }
+    if (/相机|camera/.test(descriptor)) {
+      return `<svg class="commerce-workspace-visual-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="3.5"/></svg>`;
+    }
+    if (/手机|iphone|galaxy|pixel/.test(descriptor)) {
+      return `<svg class="commerce-workspace-visual-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.2"/><path d="M10 5h4"/><path d="M11 18.5h2"/></svg>`;
+    }
+    if (/电脑|macbook|laptop/.test(descriptor)) {
+      return `<svg class="commerce-workspace-visual-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="10" rx="1.8"/><path d="M3 18h18"/></svg>`;
+    }
+    return `<svg class="commerce-workspace-visual-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 12H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>`;
+  }
+
+  function workspacePlatformCardsHtml(card){
+    const items = Array.isArray(card && card.platformCards) ? card.platformCards : [];
+    if (!items.length) return "";
+    const grouped = groupPlatformCardsByCountry(items);
+    const initials = (name) => String(name || "").split(/\s+/).map((part) => part.slice(0, 1).toUpperCase()).join("").slice(0, 3) || "GS";
+    const displayValue = (value, fallback) => {
+      const raw = String(value || "").trim();
+      if (!raw) return fallback;
+      if (raw === "Waiting for Readonly Provider") return fallback;
+      if (raw === "Waiting for Trusted Provider") return fallback;
+      if (raw === "等待数据") return fallback;
+      return raw;
+    };
+    return `<section class="commerce-workspace-platforms-section" data-commerce-workspace-platforms="true">
+      <div class="commerce-workspace-card-head commerce-workspace-platforms-head">
+        <div>
+          <h3>平台比较</h3>
+          <p>按市场预留可信平台位，接入后自动填充价格与到手成本。</p>
+        </div>
+      </div>
+      ${Object.keys(grouped).map((country) => `<section class="commerce-workspace-market-group">
+        <div class="commerce-workspace-market-group-head">
+          <strong>${marketFlag(country)} ${esc(country)}</strong>
+        </div>
+        <div class="commerce-workspace-platform-grid">
+          ${grouped[country].map((item) => `<article class="commerce-workspace-platform-card">
+            <div class="commerce-workspace-platform-head">
+              <span class="commerce-workspace-platform-logo">${esc(initials(item.platformName))}</span>
+              <div>
+                <strong>${esc(item.platformName || "Platform")}</strong>
+              </div>
+            </div>
+            <dl class="commerce-workspace-platform-meta">
+              <div><dt>价格</dt><dd>${esc(displayValue(item.price, "—"))}</dd></div>
+              <div><dt>预计到手</dt><dd>${esc(displayValue(item.landedCost, "—"))}</dd></div>
+            </dl>
+            <div class="commerce-workspace-platform-footer">
+              <span class="commerce-workspace-status-pill is-muted">等待数据</span>
+            </div>
+          </article>`).join("")}
+        </div>
+      </section>`).join("")}
+    </section>`;
+  }
+
+  function workspaceRecommendationHtml(card){
+    const fields = card && card.planFields || {};
+    const checks = [
+      fields.productName ? "商品已识别" : "商品信息待补充",
+      fields.destinationCountry ? "收货地已识别" : "收货地待补充",
+      Array.isArray(fields.comparisonMarkets) && fields.comparisonMarkets.length ? "比较市场已建立" : "比较市场待补充"
+    ];
+    return `<section class="commerce-workspace-card" data-commerce-workspace-recommendation="true">
+      <div class="commerce-workspace-card-head">
+        <div><h3>AI 采购建议</h3></div>
+      </div>
+      <div class="commerce-workspace-recommendation">
+        <p class="commerce-workspace-summary-lead">采购需求已整理</p>
+        <div class="commerce-workspace-analysis-grid">
+          ${checks.map((item) => `<div class="commerce-workspace-analysis-item"><span aria-hidden="true">✓</span><strong>${esc(item)}</strong></div>`).join("")}
+        </div>
+        <div class="commerce-workspace-next-compact">
+          <p class="commerce-workspace-next-line">下一步</p>
+          <p class="commerce-workspace-next-line commerce-workspace-next-line-strong">等待可信价格数据</p>
+        </div>
+      </div>
+    </section>`;
+  }
+
+  function workspaceCostSummaryHtml(card){
+    const cost = card && card.costSummary || {};
+    const rows = Array.isArray(cost.rows) ? cost.rows : [];
+    return `<section class="commerce-workspace-card" data-commerce-workspace-cost-summary="true">
+      <div class="commerce-workspace-card-head">
+        <div>
+          <h3>${esc(cost.title || "预计到手成本")}</h3>
+        </div>
+      </div>
+      <div class="commerce-workspace-cost-table-wrap">
+        <table class="commerce-workspace-cost-table">
+          <tbody>${rows.map((row) => `<tr><th scope="row">${esc(String(row[0] || "").replace("进口税 / 消费税", "税费").replace("平台或支付费用", "平台费用"))}</th><td>${esc(String(row[1] || "—").replace("Waiting for Trusted Provider", "—").replace("等待数据", "—"))}</td></tr>`).join("")}</tbody>
+        </table>
+      </div>
+      <p class="commerce-workspace-cost-status"><span class="commerce-workspace-status-pill is-muted">等待可信价格源</span></p>
+      ${card && card.emptyPriceSummary && card.emptyPriceSummary.reasonTitle ? disclosure(card.emptyPriceSummary.reasonTitle, `<p>${esc(card.emptyPriceSummary.reasonBody || "")}</p>`, "commerce-global-procurement-price-explanation-disclosure") : ""}
+    </section>`;
+  }
+
+  function workspacePlanSideHtml(task, card){
+    const fields = card && card.planFields || {};
+    const marketLines = Array.isArray(fields.comparisonMarkets) ? fields.comparisonMarkets.filter(Boolean) : [];
+    return `<section class="commerce-workspace-card" data-commerce-workspace-plan="true">
+      <div class="commerce-workspace-card-head">
+        <div>
+          <h3>当前采购计划</h3>
+        </div>
+      </div>
+      <div class="commerce-workspace-plan-summary">
+        ${fields.productName ? `<h4 class="commerce-workspace-plan-title">${esc(fields.productName)}</h4>` : ""}
+        ${fields.budgetLabel ? `<p class="commerce-workspace-plan-line">${esc(fields.budgetLabel)}</p>` : ""}
+        ${fields.destinationCountry ? `<p class="commerce-workspace-plan-line">${esc(fields.destinationCountry)}</p>` : ""}
+        ${marketLines.length ? `<p class="commerce-workspace-plan-line">${marketLines.map((item) => `${marketFlag(item)} ${esc(item)}`).join(" · ")}</p>` : ""}
+        <p class="commerce-workspace-plan-status"><span class="commerce-workspace-status-pill">等待可信价格源</span></p>
+      </div>
+    </section>`;
+  }
+
+  function workspaceShoppingRecordsHtml(task){
+    const recentItems = workspaceRecentSearches();
+    const wishlistItems = workspaceWishlist();
+    const historyItems = workspaceRecentSearches().slice(0, 5);
+    const renderRecordItem = (item, label) => {
+      const title = item.productName || item.model || item.title || label;
+      const subtitle = [item.budgetLabel, item.destinationCountry].filter(Boolean).join(" · ") || "本地保存的结构化条件";
+      return `<article class="commerce-workspace-side-item"><strong>${esc(title)}</strong><p>${esc(subtitle)}</p></article>`;
+    };
+    return `<section class="commerce-workspace-card" data-commerce-workspace-records="true">
+      <div class="commerce-workspace-card-head commerce-workspace-card-head-records">
+        <div>
+          <h3>购物记录</h3>
+        </div>
+        <div class="commerce-workspace-record-actions">
+          <button class="cmd-btn ghost commerce-workspace-inline-action" type="button" data-commerce-workspace-export="${esc(task && task.taskId || "")}">导出结果</button>
+          <button class="cmd-btn ghost commerce-workspace-inline-action" type="button" data-commerce-workspace-wishlist-toggle="${esc(task && task.taskId || "")}">${wishlistContainsTask(task) ? "已收藏" : "收藏商品"}</button>
+        </div>
+      </div>
+      <div class="commerce-workspace-record-tabs" role="tablist" aria-label="购物记录切换">
+        <button class="commerce-workspace-record-tab is-active" type="button" role="tab" aria-selected="true" data-commerce-workspace-record-tab="recent">最近搜索</button>
+        <button class="commerce-workspace-record-tab" type="button" role="tab" aria-selected="false" data-commerce-workspace-record-tab="wishlist">收藏商品</button>
+        <button class="commerce-workspace-record-tab" type="button" role="tab" aria-selected="false" data-commerce-workspace-record-tab="history">采购历史</button>
+      </div>
+      <div class="commerce-workspace-record-panels">
+        <section class="commerce-workspace-record-panel is-active" role="tabpanel" data-commerce-workspace-record-panel="recent">
+          ${recentItems.length ? `<div class="commerce-workspace-side-list">${recentItems.slice(0, 3).map((item) => `<button class="commerce-workspace-side-item commerce-workspace-side-button" type="button" data-commerce-recent-search-draft="${esc(workspaceDraftFromRecord(item))}"><strong>${esc(item.productName || item.model || item.title || "最近搜索")}</strong><p>${esc([item.budgetLabel, item.destinationCountry].filter(Boolean).join(" · ") || "本地保存的结构化条件")}</p></button>`).join("")}</div>` : `<p class="commerce-muted">最近搜索会保留结构化条件，不保存凭证或原始返回。</p>`}
+        </section>
+        <section class="commerce-workspace-record-panel" role="tabpanel" hidden data-commerce-workspace-record-panel="wishlist">
+          ${wishlistItems.length ? `<div class="commerce-workspace-side-list">${wishlistItems.slice(0, 3).map((item) => renderRecordItem(item, "收藏项")).join("")}</div>` : `<p class="commerce-muted">暂无收藏</p>`}
+        </section>
+        <section class="commerce-workspace-record-panel" role="tabpanel" hidden data-commerce-workspace-record-panel="history">
+          ${historyItems.length ? `<div class="commerce-workspace-side-list">${historyItems.slice(0, 3).map((item) => renderRecordItem(item, "采购记录")).join("")}</div>` : `<p class="commerce-muted">暂无采购历史</p>`}
+        </section>
+      </div>
+      <p class="commerce-result-summary-copy-feedback" data-commerce-workspace-export-feedback aria-live="polite"></p>
+    </section>`;
+  }
+
+  function workspaceExecutionLogHtml(card){
+    const timeline = card && card.shoppingTimeline || {};
+    const steps = Array.isArray(timeline.steps) ? timeline.steps : [];
+    const body = steps.length
+      ? `<ol class="commerce-workspace-step-list">${steps.map((step) => `<li class="commerce-workspace-step is-${esc(step.status || "waiting")}"><span class="commerce-workspace-step-dot" aria-hidden="true"></span><span>${esc(step.label || "处理步骤")}</span></li>`).join("")}</ol>`
+      : `<p class="commerce-muted">暂无执行记录</p>`;
+    return disclosure("执行日志", body, "commerce-workspace-execution-log");
+  }
+
+  function workspaceOptionalSuggestionsHtml(card){
+    const items = Array.isArray(card && card.missingInfo) ? card.missingInfo : [];
+    if (!items.length) return "";
+    return `<section class="commerce-workspace-optional-block" data-commerce-workspace-optional-suggestions="true">
+      <div>
+        <h4>建议补充（可选）</h4>
+        <p class="commerce-muted">这些信息可以跳过，后续也可以再补充。</p>
+      </div>
+      <div class="commerce-workspace-chip-row">
+        ${items.map((item) => `<span class="commerce-workspace-chip">${esc(item)}</span>`).join("")}
+      </div>
+    </section>`;
+  }
+
+  function workspaceMoreHtml(task, card){
+    return `<details class="commerce-disclosure commerce-workspace-more-disclosure" data-commerce-workspace-more-disclosure="true">
+      <summary>更多信息</summary>
+      <div class="commerce-disclosure-body">
+        ${workspaceOptionalSuggestionsHtml(card)}
+        ${workspaceExecutionLogHtml(card)}
+        ${workspaceTechnicalDetailsHtml(task)}
+      </div>
+    </details>`;
+  }
+
+  function workspaceOverviewHtml(task, card){
+    const fields = card && card.planFields || {};
+    const ai = aiWorkspaceSummary();
+    const provider = providerWorkspaceSummary();
+    const mode = workspaceModeState();
+    const modeLabel = mode === "real_readonly" ? "Real Readonly" : (mode === "sandbox" ? "Sandbox" : "离线模式");
+    return `<section class="commerce-workspace-toolbar" data-commerce-workspace-overview="true">
+      <div class="commerce-workspace-toolbar-copy">
+        <span class="commerce-workspace-eyebrow">Global Shopping Workspace</span>
+        <h3>已识别你的采购条件</h3>
+        <p>${esc([fields.productName, fields.budgetLabel, fields.destinationCountry].filter(Boolean).join(" · ") || "继续输入商品、预算和收货地，Weishan 会帮你整理采购条件。")}</p>
+      </div>
+      <div class="commerce-workspace-toolbar-status">
+        <article class="commerce-workspace-toolbar-pill"><span>AI 状态</span><strong>${esc(ai.label || "AI 未配置")}</strong></article>
+        <article class="commerce-workspace-toolbar-pill"><span>Provider 状态</span><strong>${esc(provider.label || "Provider 未连接")}</strong></article>
+        <article class="commerce-workspace-toolbar-pill"><span>模式</span><strong>${esc(modeLabel)}</strong></article>
+      </div>
+    </section>`;
+  }
+
+  function workspaceTechnicalDetailsHtml(task){
+    const developerBody = `
+      ${providerConnectionReadinessConsoleDisclosure(task)}
+      ${globalProcurementOtherSafetyRulesDisclosure(task)}
+      ${globalProcurementDecisionWorkspaceDisclosure(task)}
+      ${globalProcurementUserFacingResultCardsRulesDisclosure()}
+    `;
+    return developerBody.trim() ? disclosure("技术详情", developerBody, "commerce-technical-disclosure") : "";
+  }
+
+  function globalShoppingWorkspaceHtml(task){
+    const card = globalProcurementUserFacingCard(task);
+    if (!card) return "";
+    return `<section class="commerce-global-shopping-workspace" data-commerce-global-shopping-workspace="true">
+      <div class="commerce-global-shopping-main">
+        ${workspaceProductCardHtml(card)}
+        ${workspacePlatformCardsHtml(card)}
+        <div class="commerce-global-shopping-lower-grid">
+          ${workspaceCostSummaryHtml(card)}
+          ${workspaceRecommendationHtml(card)}
+        </div>
+        ${workspaceMoreHtml(task, card)}
+      </div>
+      <aside class="commerce-global-shopping-side">
+        ${workspacePlanSideHtml(task, card)}
+        ${workspaceShoppingRecordsHtml(task)}
+      </aside>
+    </section>`;
+  }
+
+  function bindGlobalShoppingWorkspace(host, task, options){
+    if (!host || !task) return;
+    const opts = options && typeof options === "object" ? options : {};
+    host.querySelectorAll("[data-commerce-workspace-export]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const feedback = host.querySelector("[data-commerce-workspace-export-feedback]");
+        copyText(JSON.stringify(workspaceStructuredRecordFromTask(task) || {}, null, 2)).then((copied) => {
+          if (feedback) feedback.textContent = copied ? "采购计划已复制" : "复制失败，请稍后重试";
+        });
+      });
+    });
+    host.querySelectorAll("[data-commerce-workspace-wishlist-toggle]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const current = agent();
+        const taskId = button.getAttribute("data-commerce-workspace-wishlist-toggle") || "";
+        const latest = current && typeof current.getCommerceTaskById === "function" ? current.getCommerceTaskById(taskId) : task;
+        if (!latest) return;
+        toggleWorkspaceWishlist(latest);
+        if (typeof opts.onChange === "function") opts.onChange();
+      });
+    });
+    host.querySelectorAll("[data-commerce-recent-search-draft]").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (typeof opts.onRecentSearch === "function") opts.onRecentSearch(button.getAttribute("data-commerce-recent-search-draft") || "");
+      });
+    });
+    host.querySelectorAll("[data-commerce-workspace-next-action]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const action = button.getAttribute("data-commerce-workspace-next-action") || "";
+        const selector = action === "view_plan" ? '[data-commerce-workspace-plan="true"]'
+          : action === "view_official_store" ? '[data-commerce-workspace-platforms="true"]'
+          : action === "continue_manual_compare" ? '[data-commerce-workspace-more-disclosure="true"]'
+          : '[data-commerce-workspace-platforms="true"]';
+        const target = host.querySelector(selector);
+        if (!target) return;
+        if (target.tagName === "DETAILS") target.open = true;
+        if (typeof target.scrollIntoView === "function") target.scrollIntoView({ behavior:"smooth", block:"start" });
+      });
+    });
+    host.querySelectorAll("[data-commerce-workspace-record-tab]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const tab = button.getAttribute("data-commerce-workspace-record-tab") || "recent";
+        host.querySelectorAll("[data-commerce-workspace-record-tab]").forEach((node) => {
+          const active = node.getAttribute("data-commerce-workspace-record-tab") === tab;
+          node.classList.toggle("is-active", active);
+          node.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        host.querySelectorAll("[data-commerce-workspace-record-panel]").forEach((panel) => {
+          const active = panel.getAttribute("data-commerce-workspace-record-panel") === tab;
+          panel.classList.toggle("is-active", active);
+          if (active) panel.removeAttribute("hidden");
+          else panel.setAttribute("hidden", "hidden");
+        });
+      });
+    });
+    hydrateDisclosureSections(host);
   }
 
   function globalProcurementDecisionWorkspaceDisclosure(task){
@@ -3475,6 +4021,11 @@
 
   function commerceOneScreenResultPanelHtml(task){
     const card = globalProcurementUserFacingCard(task);
+    if (productWorkspaceEnabled(task) && card) {
+      return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-global-shopping-workspace-panel" aria-label="Global Shopping Workspace">
+        ${globalShoppingWorkspaceHtml(task)}
+      </section>`;
+    }
     const globalPlanHtml = globalProcurementPlanHtml(task);
     const globalMissingInfoHtml = globalProcurementMissingInfoChecklistDisclosure(task);
     const globalGuidanceHtml = globalProcurementSafeNextStepGuidanceDisclosure(task);
@@ -7871,7 +8422,10 @@
       </div>`;
     }
     const resultSummaryPanel = commerceResultSummaryPanelHtml(task);
-    const oneScreenResultMode = false;
+    const oneScreenResultMode = productWorkspaceEnabled(task);
+    if (oneScreenResultMode) {
+      return `<div class="commerce-detail commerce-detail-product-workspace" data-commerce-detail="${esc(task.taskId)}">${resultSummaryPanel}</div>`;
+    }
     const detailSafetyDetails = !blocked ? disclosure("查看安全边界", `
       <p class="commerce-safety-lead">当前只生成只读候选结果和平台入口，不收款、不代下单、不保存账号密码或证件信息。</p>
       <ul class="commerce-safety-list">
@@ -8149,6 +8703,7 @@
     const costSummary = decision.costSummary || null;
     const providerSimulationSummary = decision.providerSimulationSummary || summary.providerSimulationSummary || null;
     const providerOperationalSummary = decision.providerOperationalSummary || summary.providerOperationalSummary || null;
+    const realProviderReadonlyStatus = task && task.realProviderReadonlyStatus || null;
     const confidenceLabel = confidence === "high" ? "高" : (confidence === "medium" ? "中" : "低");
     const recommendationSource = recommendation ? sourceTypeLabel(recommendation.sourceType) : "预计";
     const recommendationUpdatedAt = recommendation ? timeLabel((recommendation.priceFreshness || {}).fetchedAt || (recommendation.availabilityFreshness || {}).checkedAt || "") : "";
@@ -8165,13 +8720,11 @@
       </div>
       <p class="commerce-muted">预计到手价：${esc((costSummary && costSummary.landedCostLabel) || "预计到手价")} · ${esc((costSummary && costSummary.priceLabel) || "价格以平台页面为准")}</p>
       <p class="commerce-muted">数据来源：${esc(recommendationSource)} · 更新时间：${esc(recommendationUpdatedAt || "unknown")} · 价格时效：${esc(recommendationFreshness)}</p>
-      ${recommendation.dataSource ? `<p class="commerce-muted">数据状态：${esc(recommendation.dataSource.sourceStatus || "planned")} · 数据可信等级：${esc((recommendation.dataQuality || {}).qualityLevel || "low")}</p>` : ""}
-      ${recommendationValidation ? `<p class="commerce-muted">验证状态：${esc(recommendationValidation.validationStatus || "unknown")} · 验证可信等级：${esc(recommendationValidation.confidence || "low")}</p>` : ""}
+      ${recommendation.dataSource ? `<p class="commerce-muted">当前可信等级：${esc((recommendation.dataQuality || {}).qualityLevel === "high" ? "高" : (recommendationValidation && recommendationValidation.confidence === "medium") ? "中" : "离线采购模式")}</p>` : ""}
+      ${recommendationValidation ? `<p class="commerce-muted">验证状态：${esc(recommendationValidation.validationStatus === "passed" ? "已通过安全校验" : recommendationValidation.validationStatus || "待确认")} · 可信等级：${esc(recommendationValidation.confidence || "low")}</p>` : ""}
       ${recommendation.providerIntelligence ? `<p class="commerce-muted">平台覆盖：${esc(String((recommendation.providerIntelligence.coverageScore || (recommendation.providerCoverage || {}).coverageScore || 0)))} 分 · 市场匹配：${esc((recommendation.coverageExplanation || "").replace(/^平台覆盖：.*?；市场匹配：/, "") || (task.marketMatched ? "已匹配" : "需复核"))}</p>` : ""}
-      ${recommendation.competitionSummary ? `<p class="commerce-muted">平台对比：${esc((recommendation.competitionSummary.advantages || []).join(" / ") || "当前候选较稳妥")}</p>` : ""}
-      ${recommendation.providerHealth ? `<p class="commerce-muted">平台健康：${esc(recommendation.providerHealth.healthStatus || "unknown")}</p>` : ""}
-      ${providerSimulationSummary ? `<p class="commerce-muted">数据环境：${esc(providerSimulationSummary.environment || "sandbox")} · 模拟接入平台：${esc(String(providerSimulationSummary.available || 0))}/${esc(String(providerSimulationSummary.providerCount || 0))}${providerSimulationSummary.fallbackUsed ? " · 已触发回退预案" : ""}</p>` : ""}
-      ${providerOperationalSummary ? `<p class="commerce-muted">平台状态：${esc(providerOperationalSummary.label || providerOperationalSummary.status || "未知")}</p>` : ""}
+      ${recommendation.competitionSummary ? `<p class="commerce-muted">推荐原因：${esc((recommendation.competitionSummary.advantages || []).join(" / ") || "当前候选较稳妥")}</p>` : ""}
+      ${providerSimulationSummary ? `<p class="commerce-muted">当前环境：${esc(providerSimulationSummary.environment === "sandbox" ? "Sandbox 只读模式" : (providerSimulationSummary.environment || "离线模式"))}${providerSimulationSummary.fallbackUsed ? " · 已触发安全降级" : ""}</p>` : ""}
       ${providerOperationalSummary ? `<p class="commerce-muted">接入阶段：${esc(providerOperationalSummary.stageLabel || (providerOperationalSummary.readinessLevel === "sandbox" ? "测试环境" : "生产准备中"))}</p>` : ""}
       ${providerOperationalSummary && providerOperationalSummary.adapterVersion ? `<p class="commerce-muted">版本：${esc(providerOperationalSummary.adapterVersion)}</p>` : ""}
       ${decision.regionalExplanation ? `<p class="commerce-muted">地区依据：${esc(decision.regionalExplanation)}</p>` : ""}
@@ -8179,7 +8732,7 @@
       ${workflowState.currentStage ? `<p class="commerce-muted">任务阶段：${esc(workflowState.currentStage)}</p>` : ""}
       ${intentClassification.intentType ? `<p class="commerce-muted">需求识别：${esc(intentClassification.intentType)} · 置信度：${esc(String(intentClassification.confidence || ""))}</p>` : ""}
       ${entityExtraction.entities ? `<p class="commerce-muted">解析实体：${esc([entityExtraction.entities.brand, entityExtraction.entities.model, entityExtraction.entities.city, entityExtraction.entities.destination, entityExtraction.entities.date].filter(Boolean).join(" / ") || "暂无")}</p>` : ""}
-      ${gatewayDecision.gatewayStatus ? `<p class="commerce-warning">Provider Gateway：${esc(gatewayDecision.gatewayStatus)} / ${esc(gatewayDecision.reason || "sandbox_only")}。当前仍为 sandbox 只读通道，不连接真实 Provider。</p>` : ""}
+      ${gatewayDecision.gatewayStatus ? `<p class="commerce-warning">当前仍为只读模式。尚未连接可信实时价格源，不会生成虚假价格。</p>` : ""}
       ${regionContext ? `<p class="commerce-muted">地区来源：${esc(regionContext.country || "")} / ${esc(regionContext.language || "")} / ${esc((regionContext.source || {}).country || "unknown")}</p>` : ""}
       <p class="commerce-muted">税费等级：${esc(recommendation.taxConfidence || "unknown")}</p>
       <p class="commerce-muted">决策依据：${esc((summary.recommendationReason && summary.recommendationReason.decisionSummary) || (task.recommendation && task.recommendation.reason) || "")}</p>
@@ -8199,17 +8752,16 @@
       </div>
       <p class="commerce-muted">费用说明：${esc(item.feeNote || "价格与费用以平台页面为准")}</p>
       <p class="commerce-muted">数据来源：${esc(sourceTypeLabel(item.sourceType))} · 更新时间：${esc(timeLabel(item.updatedAt || ((item.priceFreshness || {}).fetchedAt) || ((item.availabilityFreshness || {}).checkedAt) || "") || "unknown")} · 价格时效：${esc(freshnessLabel((item.priceFreshness || {}).freshnessLevel || ""))}</p>
-      ${item.dataSource ? `<p class="commerce-muted">数据状态：${esc(item.dataSource.sourceStatus || "planned")} · 数据质量：${esc((item.dataQuality || {}).qualityLevel || "low")}</p>` : ""}
-      ${item.realDataValidation ? `<p class="commerce-muted">验证状态：${esc(item.realDataValidation.validationStatus || "unknown")} · 验证可信等级：${esc(item.realDataValidation.confidence || "low")}</p>` : ""}
+      ${item.dataSource ? `<p class="commerce-muted">当前可信等级：${esc((item.dataQuality || {}).qualityLevel === "high" ? "高" : "离线采购模式")}</p>` : ""}
+      ${item.realDataValidation ? `<p class="commerce-muted">验证状态：${esc(item.realDataValidation.validationStatus === "passed" ? "已通过安全校验" : item.realDataValidation.validationStatus || "待确认")} · 可信等级：${esc(item.realDataValidation.confidence || "low")}</p>` : ""}
       ${item.providerCoverage ? `<p class="commerce-muted">平台覆盖：${esc(String(item.providerCoverage.coverageScore || 0))} 分 · 市场匹配：${esc(item.marketMatched ? "已匹配" : "需复核")}</p>` : ""}
-      ${item.providerHealth ? `<p class="commerce-muted">平台健康：${esc(item.providerHealth.healthStatus || "unknown")}</p>` : ""}
-      ${providerSimulationSummary ? `<p class="commerce-muted">数据环境：${esc(providerSimulationSummary.environment || "sandbox")} · 平台状态：${esc((providerOperationalSummary && (providerOperationalSummary.label || providerOperationalSummary.status)) || "Sandbox")}</p>` : ""}
+      ${providerSimulationSummary ? `<p class="commerce-muted">当前环境：${esc(providerSimulationSummary.environment === "sandbox" ? "Sandbox 只读模式" : (providerSimulationSummary.environment || "离线模式"))}</p>` : ""}
       ${providerOperationalSummary ? `<p class="commerce-muted">接入阶段：${esc(providerOperationalSummary.stageLabel || "测试环境")}</p>` : ""}
       ${providerOperationalSummary && providerOperationalSummary.adapterVersion ? `<p class="commerce-muted">版本：${esc(providerOperationalSummary.adapterVersion)}</p>` : ""}
       ${item.regionReason ? `<p class="commerce-muted">地区依据：${esc(item.regionReason)}</p>` : ""}
       ${item.officialDomainStatus ? `<p class="commerce-muted">官方域名验证：${esc(item.officialDomainStatus.trustLevel || "unknown")}</p>` : ""}
       ${workflowState.currentStage ? `<p class="commerce-muted">任务阶段：${esc(workflowState.currentStage)}</p>` : ""}
-      ${item.sourceType === "sandbox" ? `<p class="commerce-warning">当前数据来源为 sandbox，只读模拟接入已通过 Gateway 安全边界；价格为模拟数据，最终价格请以官方平台为准。</p>` : ""}
+      ${item.sourceType === "sandbox" ? `<p class="commerce-warning">当前仍是离线采购模式 / Sandbox 只读模式。最终价格请以官方平台为准。</p>` : ""}
       <p class="commerce-muted">税费等级：${esc(((item.taxSummary || {}).taxConfidence) || (((item.landedCostResult || {}).taxConfidence) || "unknown"))}</p>
       <p class="commerce-muted">可用性：${esc(((item.availabilityFreshness || {}).availabilityStatus) || "unknown")} · 时效：${esc(freshnessLabel((item.availabilityFreshness || {}).freshnessLevel || ""))}</p>
       <p class="commerce-muted">推荐理由：${esc(((item.recommendationReasonDetail || {}).summary) || item.recommendationReason || "")}</p>
@@ -8217,8 +8769,22 @@
       <p class="commerce-warning">${esc(item.riskNote || "Weishan 不收款、不代下单、不保存账号密码，最终价格以平台页面为准。")}</p>
       ${item.targetUrl ? `<button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}">去平台查看</button>` : `<p class="commerce-warning">目标平台链接缺失，暂不可跳转。</p>`}
     </article>`;
+    const realtimeStatusCard = realProviderReadonlyStatus ? `<article class="commerce-candidate-card commerce-readonly-search-card">
+      <div class="commerce-candidate-head">
+        <div>
+          <b>Rakuten 实时查询</b>
+          <span>${esc(realProviderReadonlyStatus.label || "未知")}</span>
+        </div>
+        <strong>${esc(realProviderReadonlyStatus.executionMode || "external_link_only")}</strong>
+      </div>
+      <p class="commerce-muted">接入阶段：${esc(realProviderReadonlyStatus.stageLabel || "状态未知")}</p>
+      <p class="commerce-muted">版本：${esc(realProviderReadonlyStatus.adapterVersion || "4.2.8-rakuten-main-readonly")}</p>
+      <p class="commerce-warning">${esc(realProviderReadonlyStatus.userMessage || "Rakuten 实时查询状态未知。")}</p>
+      <p class="commerce-muted">最终价格以 Rakuten 页面与结算页为准。Weishan 不收款、不代下单、不保存平台账号密码。</p>
+    </article>` : "";
     return `<div class="commerce-candidates commerce-readonly-search-results" data-commerce-readonly-search-results="true">
       <p class="commerce-muted">${esc(summary && summary.rankingSummary || "默认只展示 2-3 条优先查看结果；没有真实价格时不会伪造最低价。")}</p>
+      ${realtimeStatusCard}
       ${recommendationCard}
       ${topResults.map(resultCard).join("")}
       <details class="commerce-disclosure commerce-platform-template-disclosure">
@@ -8238,6 +8804,9 @@
   function render(host){
     ensureSearchLoaded(host);
     const tasks = loadTasks();
+    const aiSummary = aiWorkspaceSummary();
+    const providerSummary = providerWorkspaceSummary();
+    const modeState = workspaceModeState();
     try {
       const requestedTaskId = window.sessionStorage && window.sessionStorage.getItem("weishan:commerceAgent:selectedTask:v1");
       if (requestedTaskId && tasks.some((task) => task.taskId === requestedTaskId)) {
@@ -8249,35 +8818,65 @@
       selectedTaskId = tasks[0] && tasks[0].taskId || "";
     }
     const selected = tasks.find((task) => task.taskId === selectedTaskId) || null;
-    host.innerHTML = `<section class="commerce-page commerce-workbench">
+    const productWorkspaceMode = !!(selected && productWorkspaceEnabled(selected));
+    host.innerHTML = `<section class="commerce-page commerce-workbench ${productWorkspaceMode ? "commerce-page-product-workspace" : ""}">
       <div class="commerce-hero">
         <div>
-          <h1>全球采购</h1>
-          <p>只读搜索、比价、推荐与平台跳转</p>
+          <h1>${productWorkspaceMode ? "全球购物工作台" : "全球采购"}</h1>
+          <p>${productWorkspaceMode ? "全球购物 · 商品比较与到手成本" : "Global Shopping Workspace · 只读搜索、比价、推荐与平台跳转"}</p>
         </div>
         <button class="cmd-btn gray" id="commerceBackHome" type="button">返回首页总调度</button>
       </div>
 
-      <div class="commerce-safety">
+      ${productWorkspaceMode ? "" : `<div class="commerce-safety">
         Weishan 只做 AI 辅助搜索、分析、比价、推荐和跳转；不收款、不代下单、不保存账号密码，最终价格以平台页面为准。
-      </div>
+      </div>`}
 
-      <div class="commerce-toolbar">
-        <textarea id="commerceInput" class="cmd-input commerce-input" placeholder="例如：帮我找 iPhone 价格 / 帮我找成都到上海最便宜机票 / 帮我找东京酒店">${esc(draftText)}</textarea>
+      <div class="commerce-toolbar commerce-toolbar-workspace">
+        <div class="commerce-toolbar-input">
+          <label class="commerce-toolbar-label" for="commerceInput">搜索需求</label>
+          <textarea id="commerceInput" class="cmd-input commerce-input" placeholder="例如：帮我找 iPhone 价格 / 帮我找成都到上海最便宜机票 / 帮我找东京酒店">${esc(draftText)}</textarea>
+        </div>
+        <div class="commerce-toolbar-status" aria-label="采购状态">
+          <div class="commerce-toolbar-status-card">
+            <span class="commerce-toolbar-status-label">AI 状态</span>
+            <strong>${esc(aiSummary.label)}</strong>
+          </div>
+          ${productWorkspaceMode ? `<div class="commerce-toolbar-status-card">
+            <span class="commerce-toolbar-status-label">价格数据</span>
+            <strong>等待可信来源</strong>
+          </div>
+          <div class="commerce-toolbar-status-card">
+            <span class="commerce-toolbar-status-label">采购模式</span>
+            <strong>安全比较</strong>
+          </div>` : `<div class="commerce-toolbar-status-card">
+            <span class="commerce-toolbar-status-label">Provider 状态</span>
+            <strong>${esc(providerSummary.label)}</strong>
+            <small>${esc(providerSummary.detail)}</small>
+          </div>
+          <div class="commerce-toolbar-status-card">
+            <span class="commerce-toolbar-status-label">模式</span>
+            <div class="commerce-mode-switch">
+              <span class="commerce-mode-pill ${modeState === "offline" ? "is-active" : ""}">Offline</span>
+              <span class="commerce-mode-pill ${modeState === "sandbox" ? "is-active" : ""}">Sandbox</span>
+              <span class="commerce-mode-pill ${modeState === "real_readonly" ? "is-active" : ""}">Real Readonly</span>
+            </div>
+          </div>`}
+        </div>
         <div class="cmd-actions">
           <button class="cmd-btn primary" id="commerceGenerate" type="button">生成只读搜索建议</button>
           <button class="cmd-btn gray" id="commerceClearAll" type="button">清理全部计划</button>
         </div>
       </div>
 
-      <div class="commerce-layout">
-        <aside class="commerce-task-list" aria-label="采购任务列表">
+      <div class="commerce-layout ${productWorkspaceMode ? "commerce-layout-product-workspace" : ""}">
+        ${productWorkspaceMode ? "" : `<aside class="commerce-task-list" aria-label="采购任务列表">
           <div class="commerce-list-head">
             <h2>采购任务列表</h2>
             <span>${tasks.length} 项</span>
           </div>
           ${taskCards(tasks)}
-        </aside>
+        </aside>`}
         ${detailHtml(selected)}
       </div>
     </section>`;
@@ -8285,6 +8884,22 @@
   }
 
   function bind(host, tasks, selected){
+    const globalShoppingBridge = window.weishanGlobalShopping;
+    if (globalShoppingBridge && typeof globalShoppingBridge.getRakutenReadonlyStatus === "function") {
+      globalShoppingBridge.getRakutenReadonlyStatus().then((status) => {
+        const next = status && typeof status === "object" ? status : { state:"not_connected" };
+        const previous = providerStatusCache();
+        const changed = JSON.stringify(previous || {}) !== JSON.stringify(next);
+        window.__WEISHAN_GLOBAL_SHOPPING_PROVIDER_STATUS__ = next;
+        if (changed && host.isConnected) render(host);
+      }).catch(() => {
+        const next = { state:"unavailable" };
+        const previous = providerStatusCache();
+        const changed = JSON.stringify(previous || {}) !== JSON.stringify(next);
+        window.__WEISHAN_GLOBAL_SHOPPING_PROVIDER_STATUS__ = next;
+        if (changed && host.isConnected) render(host);
+      });
+    }
     if (!window.__WEISHAN_LIMITED_BETA_PREFERENCE_RENDER_BOUND_COMMERCE__) {
       window.__WEISHAN_LIMITED_BETA_PREFERENCE_RENDER_BOUND_COMMERCE__ = true;
       window.addEventListener("weishan:limited-beta-preference-updated", () => {
@@ -8294,6 +8909,16 @@
     }
     const input = host.querySelector("#commerceInput");
     if (input) input.addEventListener("input", () => { draftText = input.value; });
+    host.querySelectorAll("[data-commerce-workspace-export]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const current = selectedTaskId && agent() && agent().getCommerceTaskById ? agent().getCommerceTaskById(selectedTaskId) : selected;
+        const record = workspaceStructuredRecordFromTask(current);
+        const feedback = host.querySelector("[data-commerce-workspace-export-feedback]");
+        copyText(JSON.stringify(record || {}, null, 2)).then((copied) => {
+          if (feedback) feedback.textContent = copied ? "采购计划已复制" : "复制失败，请稍后重试";
+        });
+      });
+    });
     const back = host.querySelector("#commerceBackHome");
     if (back) back.addEventListener("click", () => window.WeishanRouter && window.WeishanRouter.setRoute("home"));
     const emptyBack = host.querySelector("#commerceEmptyBackHome");
@@ -8318,6 +8943,7 @@
       const renderTask = (task) => {
         if (!task || !task.taskId) return false;
         selectedTaskId = task.taskId;
+        saveWorkspaceRecentSearch(task);
         pendingSafeExternalSearchConfirmation = null;
         try {
           record("commerceAgent.taskCreated", task, "已在全球采购工作台生成本地 mock-safe 采购计划。");
@@ -8378,6 +9004,83 @@
       };
       generate.disabled = true;
       createTaskWhenAgentReady(0);
+    });
+    host.querySelectorAll("[data-commerce-workspace-wishlist-toggle]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const taskId = button.getAttribute("data-commerce-workspace-wishlist-toggle") || "";
+        const current = agent();
+        const task = current && typeof current.getCommerceTaskById === "function" ? current.getCommerceTaskById(taskId) : null;
+        if (!task) return;
+        toggleWorkspaceWishlist(task);
+        render(host);
+      });
+    });
+    host.querySelectorAll("[data-commerce-recent-search-draft]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const safeValue = button.getAttribute("data-commerce-recent-search-draft") || "";
+        draftText = safeValue;
+        if (input) {
+          input.value = safeValue;
+          input.focus();
+        }
+      });
+    });
+    host.querySelectorAll("[data-commerce-workspace-next-action]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const action = button.getAttribute("data-commerce-workspace-next-action") || "";
+        if (action === "view_plan") {
+          const panel = host.querySelector('[data-commerce-workspace-plan="true"]');
+          if (panel && typeof panel.scrollIntoView === "function") panel.scrollIntoView({ behavior:"smooth", block:"start" });
+          return;
+        }
+        if (action === "view_technical") {
+          const technical = host.querySelector('details.commerce-technical-disclosure');
+          if (technical) {
+            technical.open = true;
+            if (typeof technical.scrollIntoView === "function") technical.scrollIntoView({ behavior:"smooth", block:"start" });
+          }
+          return;
+        }
+        if (action === "connect_trusted_source") {
+          const technical = host.querySelector('details.commerce-technical-disclosure');
+          if (technical) {
+            technical.open = true;
+            if (typeof technical.scrollIntoView === "function") technical.scrollIntoView({ behavior:"smooth", block:"start" });
+          }
+          return;
+        }
+        if (action === "view_official_store") {
+          const panel = host.querySelector('[data-commerce-workspace-platforms="true"]');
+          if (panel && typeof panel.scrollIntoView === "function") panel.scrollIntoView({ behavior:"smooth", block:"start" });
+          return;
+        }
+        if (action === "continue_manual_compare") {
+          const more = host.querySelector('[data-commerce-workspace-more-disclosure="true"]');
+          if (more) {
+            more.open = true;
+            if (typeof more.scrollIntoView === "function") more.scrollIntoView({ behavior:"smooth", block:"start" });
+          }
+          return;
+        }
+        if (action === "view_more") {
+          const more = host.querySelector('[data-commerce-workspace-more-disclosure="true"]');
+          if (more) {
+            more.open = true;
+            if (typeof more.scrollIntoView === "function") more.scrollIntoView({ behavior:"smooth", block:"start" });
+          }
+          return;
+        }
+        const currentTask = selectedTaskId && agent() && agent().getCommerceTaskById ? agent().getCommerceTaskById(selectedTaskId) : null;
+        const record = currentTask && workspaceStructuredRecordFromTask(currentTask);
+        const nextDraft = workspaceDraftFromRecord(record || {});
+        if (nextDraft) {
+          draftText = nextDraft;
+          if (input) {
+            input.value = nextDraft;
+            input.focus();
+          }
+        }
+      });
     });
     let commerceActionChipFocusAssistTimer = 0;
     function applyCommerceActionChipFocusAssist(text){
@@ -9932,6 +10635,7 @@
             searchStatus:status,
             missingFields:result.request && result.request.missingFields || target.missingFields || [],
             searchProviderName:result.providerName || (isModelPricing ? "OpenRouter" : ""),
+            realProviderReadonlyStatus:result.realProviderReadonlyStatus || target.realProviderReadonlyStatus || null,
             providerHealth:result.providerHealth || target.providerHealth || [],
             configHealth:result.configHealth || target.configHealth || {},
             connectorHealth:result.connectorHealth || target.connectorHealth || {},
@@ -9945,6 +10649,15 @@
             canShowBookingButton:result.canShowBookingButton === true,
             canShowCheckoutButton:result.canShowCheckoutButton === true,
             searchErrorMessage:result.message || "",
+            readOnlySearchTopResults:Array.isArray(result.readOnlySearchTopResults) ? result.readOnlySearchTopResults : target.readOnlySearchTopResults || [],
+            readOnlySearchRemainingResults:Array.isArray(result.readOnlySearchRemainingResults) ? result.readOnlySearchRemainingResults : target.readOnlySearchRemainingResults || [],
+            readOnlySearchResultSummary:result.readOnlySearchResultSummary || target.readOnlySearchResultSummary || null,
+            decisionResult:result.decisionResult || target.decisionResult || null,
+            orchestration:result.orchestration || target.orchestration || null,
+            intentClassification:result.intentClassification || target.intentClassification || null,
+            entityExtraction:result.entityExtraction || target.entityExtraction || null,
+            workflowState:result.workflowState || target.workflowState || null,
+            comparisonMatrix:result.comparisonMatrix || target.comparisonMatrix || null,
             searchResultSummary:{ candidateCount:0 },
             updatedAt:new Date().toISOString()
           });
@@ -9963,6 +10676,7 @@
           status:"recommended",
           searchStatus:"completed",
           searchProviderName:result.providerName || "",
+          realProviderReadonlyStatus:result.realProviderReadonlyStatus || target.realProviderReadonlyStatus || null,
           providerHealth:result.providerHealth || target.providerHealth || [],
           configHealth:result.configHealth || target.configHealth || {},
           connectorHealth:result.connectorHealth || target.connectorHealth || {},
@@ -9974,6 +10688,16 @@
           canShowCheckoutButton:result.canShowCheckoutButton === true,
           candidates:sorted,
           recommendation,
+          readOnlySearchTopResults:Array.isArray(result.readOnlySearchTopResults) ? result.readOnlySearchTopResults : target.readOnlySearchTopResults || [],
+          readOnlySearchRemainingResults:Array.isArray(result.readOnlySearchRemainingResults) ? result.readOnlySearchRemainingResults : target.readOnlySearchRemainingResults || [],
+          readOnlySearchResultSummary:result.readOnlySearchResultSummary || target.readOnlySearchResultSummary || null,
+          decisionResult:result.decisionResult || target.decisionResult || null,
+          orchestration:result.orchestration || target.orchestration || null,
+          intentClassification:result.intentClassification || target.intentClassification || null,
+          entityExtraction:result.entityExtraction || target.entityExtraction || null,
+          workflowState:result.workflowState || target.workflowState || null,
+          comparisonMatrix:result.comparisonMatrix || target.comparisonMatrix || null,
+          searchErrorMessage:"",
           searchResultSummary:{
             candidateCount:sorted.length,
             lowestPrice:first.totalPrice || first.price || "",
@@ -10030,5 +10754,10 @@
     }
   }
 
-  window.CommerceAgentPage = { mount:render };
+  window.CommerceAgentPage = {
+    mount:render,
+    isGlobalShoppingTask:productWorkspaceEnabled,
+    renderGlobalShoppingWorkspace:globalShoppingWorkspaceHtml,
+    bindGlobalShoppingWorkspace
+  };
 })();

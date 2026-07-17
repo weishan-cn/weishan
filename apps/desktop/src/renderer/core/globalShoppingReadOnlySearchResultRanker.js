@@ -12,6 +12,7 @@
     let total = 0;
     total += safe.isOfficial === true ? 25 : 0;
     total += safe.trustLevel === "high" ? 20 : (safe.trustLevel === "medium" ? 12 : 6);
+    total += safe.sourceType === "rakuten_official_api" ? 18 : 0;
     total += safe.sourceType === "official" ? 14 : (safe.sourceType === "major_platform" ? 10 : 4);
     total += /官网|官方/.test(text(safe.platformName)) ? 8 : 0;
     total += /实时价格/.test(text(safe.priceLabel)) ? 5 : 2;

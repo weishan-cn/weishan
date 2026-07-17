@@ -5,6 +5,10 @@ const runId = "E2EDISPATCH-" + new Date().toISOString().replace(/[-:TZ.]/g, "").
 
 async function submitHomeCommand(page, text) {
   await gotoRoute(page, "home");
+  const compactExpand = page.locator("#compactComposerExpandBtn");
+  if (await compactExpand.count()) {
+    await compactExpand.click();
+  }
   await expect(page.locator("#commandInput")).toBeVisible();
   await page.locator("#commandInput").fill(text);
   await page.locator("#runBtn").click();
@@ -157,22 +161,21 @@ test.describe.serial("dispatch router", () => {
   });
 
   test("commerce purchase demand routes to commerce agent instead of chat", async () => {
-    const command = runId + " 帮我买一台性价比高的 MacBook，美国和日本比较，收货到中国";
+    const command = "帮我买一台性价比高的 MacBook，美国和日本比较，收货到中国";
     await submitHomeCommand(page, command);
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("MacBook");
-    await expect(page.locator("#commerceViewPlanBtn")).toBeVisible();
-    await expect(currentTaskLogs(page)).not.toContainText("commerceAgent.plan");
-    await expect(currentTaskLogs(page)).not.toContainText("realExecution=false");
-    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
-    await expectHistory(page, runId, /commerceAgent\.taskCreated|全球采购|MacBook/);
+    const workspace = page.locator('[data-commerce-home-summary] [data-commerce-global-shopping-workspace="true"]');
+    await expect(workspace).toBeVisible();
+    await expect(workspace).toContainText("MacBook");
+    await expect(workspace).toContainText("平台比较");
+    await expect(workspace.locator("details.commerce-workspace-execution-log")).not.toHaveAttribute("open", "");
+    await expect(workspace.locator("details.commerce-technical-disclosure")).not.toHaveAttribute("open", "");
+    await expect(page.locator(".home-v205-side")).toHaveCount(0);
+    await expect(page.locator("#cmdConsole .cmd-log-list")).toHaveCount(0);
+    await expectHistory(page, "MacBook", /commerceAgent\.taskCreated|全球采购|MacBook/);
 
-    await submitHomeCommand(page, runId + " 买华为1手机，中国购买，收货到成都");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("华为1手机");
-    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
+    await submitHomeCommand(page, "买华为1手机，中国购买，收货到成都");
+    await expect(page.locator('[data-commerce-home-summary] [data-commerce-global-shopping-workspace="true"]')).toContainText("手机");
+    await expect(page.locator("#cmdConsole .cmd-log-list")).toHaveCount(0);
   });
 
   test("flight booking intent routes to commerce agent before chat", async () => {

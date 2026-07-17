@@ -25,10 +25,38 @@
 
   function parseProduct(raw){
     const value = text(raw);
-    const productName = (value.match(/iPhone\s*\d+\s*Pro|iPhone\s*\d+|MacBook\s*(?:Air|Pro)?|电脑|相机|手机/i) || [""])[0];
-    const region = /美国|日本|中国|香港|韩国|欧洲|英国/.test(value);
-    const receiving = /收货|寄到|到中国|到成都|到上海/.test(value);
-    return { productName, region, receiving };
+    const classifier = window.WeishanGlobalShoppingIntentClassifier;
+    const extractor = window.WeishanGlobalShoppingEntityExtractor;
+    if (classifier && extractor
+      && typeof classifier.buildGlobalShoppingIntentClassification === "function"
+      && typeof extractor.buildGlobalShoppingEntityExtraction === "function") {
+      const intent = classifier.buildGlobalShoppingIntentClassification({ rawUserInput:value, text:value, query:value });
+      const extraction = extractor.buildGlobalShoppingEntityExtraction({ rawUserInput:value, text:value, query:value, intentClassification:intent });
+      const entities = extraction && extraction.entities || {};
+      return {
+        productName:text(entities.model || entities.product || entities.brand),
+        region:Array.isArray(entities.comparisonMarkets) ? entities.comparisonMarkets.length > 0 : /美国|日本|中国|香港|韩国|欧洲|英国|US|JP|CN|KR|EU|GB/i.test(value),
+        receiving:!!text(entities.destinationCountry) || /收货|寄到|送到|发往|运到|到美国|到日本|到中国|到成都|到上海/i.test(value),
+        budget:entities.budget != null,
+        brand:text(entities.brand),
+        model:text(entities.model),
+        destinationCountry:text(entities.destinationCountry),
+        comparisonMarkets:Array.isArray(entities.comparisonMarkets) ? entities.comparisonMarkets.slice() : []
+      };
+    }
+    const productName = (value.match(/iPhone\s*\d+\s*Pro|iPhone\s*\d+|MacBook\s*(?:Air|Pro)?|WH-\d+[A-Z0-9-]*|WF-\d+[A-Z0-9-]*|X-T\d+|EOS-R\d+|SM-S\d+[A-Z]?|A\d{4}|PlayStation-?\d+|电脑|相机|手机|耳机/i) || [""])[0];
+    const region = /美国|日本|中国|香港|韩国|欧洲|英国|US|JP|CN|KR|EU|GB/i.test(value);
+    const receiving = /收货|寄到|送到|发往|运到|到美国|到日本|到中国|到成都|到上海/i.test(value);
+    return {
+      productName:text(productName).replace(/[，。,.!?)]+$/g, ""),
+      region,
+      receiving,
+      budget:/预算\s*\d+|\d+\s*(美元|美金|usd|USD|元|人民币|日元|円|jpy|JPY)/.test(value),
+      brand:"",
+      model:"",
+      destinationCountry:"",
+      comparisonMarkets:[]
+    };
   }
 
   function missingForCategory(category, raw){
@@ -39,7 +67,11 @@
     }
     if (category === "product") {
       const fields = parseProduct(value);
-      return [!fields.productName && "型号", !fields.region && "购买地区", !fields.receiving && "收货地"].filter(Boolean);
+      return [
+        !fields.productName && "型号",
+        !fields.region && "购买地区",
+        !fields.receiving && "收货地"
+      ].filter(Boolean);
     }
     if (category === "hotel") return [!/成都|上海|东京|北京|广州|深圳/.test(value) && "城市 / 地点", !/\d{1,2}\s*月\s*\d{1,2}\s*日|入住/.test(value) && "入住日期", !/离店|\d+\s*晚/.test(value) && "离店日期或入住晚数"].filter(Boolean);
     if (category === "local_service") return [!/成都|上海|附近|本地/.test(value) && "地点", !/搬家|维修|保洁|服务/.test(value) && "服务类型"].filter(Boolean);

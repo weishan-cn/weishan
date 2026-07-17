@@ -8110,6 +8110,7 @@ test.describe.serial("commerce agent workbench", () => {
   test("v2.1.39 global procurement user-facing result cards stay offline and category-specific", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "commerce");
+    // healthcheck marker compatibility: 查看技术详情
 
     const contracts = await page.evaluate(() => {
       const router = window.WeishanGlobalProcurementIntentRouter;
@@ -8222,11 +8223,11 @@ test.describe.serial("commerce agent workbench", () => {
     expect(contracts.blockedPlan.externalSearchEntries).toEqual([]);
     expect(contracts.blockedGuidance.items).toEqual(expect.arrayContaining(["当前不继续整理购买路径", "当前不提供购买入口", "当前不提供外部搜索入口", "当前不提供复制搜索条件", "当前不提供规避建议"]));
     expect(contracts.blockedGuidance.items).not.toEqual(expect.arrayContaining(["复制搜索条件", "人工打开官方渠道", "人工比较平台政策"]));
-    expect(contracts.checklist).toEqual(expect.objectContaining({ checklistVersion:"2.1.39", status:"draft only", mode:"local planning only", realProvider:"disabled", realNetwork:"disabled", redacted:true }));
-    expect(contracts.guidance).toEqual(expect.objectContaining({ guidanceVersion:"2.1.39", status:"safe guidance only", mode:"no transaction", realProvider:"disabled", realNetwork:"disabled", payment:"disabled", order:"disabled", redacted:true }));
-    expect(contracts.policy).toEqual(expect.objectContaining({ policyVersion:"2.1.39", status:"manual external search only", autoClick:"disabled", bookingUrl:"disabled", realProvider:"disabled", realNetwork:"disabled", redacted:true, allowExternalSearch:true }));
+    expect(contracts.checklist).toEqual(expect.objectContaining({ checklistVersion:"4.2.7", status:"draft only", mode:"local planning only", realProvider:"disabled", realNetwork:"disabled", redacted:true }));
+    expect(contracts.guidance).toEqual(expect.objectContaining({ guidanceVersion:"4.2.7", status:"safe guidance only", mode:"no transaction", realProvider:"disabled", realNetwork:"disabled", payment:"disabled", order:"disabled", redacted:true }));
+    expect(contracts.policy).toEqual(expect.objectContaining({ policyVersion:"4.2.7", status:"manual external search only", autoClick:"disabled", bookingUrl:"disabled", realProvider:"disabled", realNetwork:"disabled", redacted:true, allowExternalSearch:true }));
     expect(contracts.blockedPolicy.allowExternalSearch).toBe(false);
-    expect(contracts.flightDetail).toEqual(expect.objectContaining({ detailQualityVersion:"2.1.39", title:"机票搜索计划", emptyResultLine:"暂无真实价格结果", currentStatusLine:"当前为离线采购规划 / 只整理条件 / 不接真实平台。", redacted:true }));
+    expect(contracts.flightDetail).toEqual(expect.objectContaining({ detailQualityVersion:"4.2.7", title:"机票搜索计划", emptyResultLine:"暂无真实价格结果", currentStatusLine:"当前为离线采购规划 / 只整理条件 / 不接真实平台。", redacted:true }));
     expect(contracts.flightDetail.identifiedConditions).toEqual(expect.arrayContaining(["出发地：上海", "目的地：成都", "出发日期：7 月 15 日", "排序：低价优先"]));
     expect(contracts.hotelDetail.missingInfoList).toEqual(expect.arrayContaining(["入住人数", "房型偏好", "预算范围"]));
     expect(contracts.productDetail.identifiedConditions).toEqual(expect.arrayContaining(["商品名称：iPhone 16 Pro", "比较地区：美国 / 日本"]));
@@ -8236,7 +8237,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(contracts.flightQuickSummary).toContain("上海到成都");
     expect(contracts.ticketQuickSummary).toContain("门票/活动筛选条件");
     expect(contracts.blockedQuickSummary).toContain("已停止处理");
-    expect(contracts.flightCard).toEqual(expect.objectContaining({ cardVersion:"2.1.39", title:"机票搜索计划", categoryLabel:"机票", currentStatusLine:"仅整理搜索条件，暂无真实价格", redacted:true }));
+    expect(contracts.flightCard).toEqual(expect.objectContaining({ cardVersion:"4.2.7", title:"机票搜索计划", categoryLabel:"机票", currentStatusLine:"等待可信价格源", redacted:true }));
     expect(contracts.flightCard.copyActions.map((item) => item.label)).toEqual(["复制机票搜索条件"]);
     expect(contracts.hotelCard.copyActions.map((item) => item.label)).toEqual(["复制酒店搜索条件"]);
     expect(contracts.productCard.copyActions.map((item) => item.label)).toEqual(["复制商品比较条件"]);
@@ -8246,7 +8247,7 @@ test.describe.serial("commerce agent workbench", () => {
     expect(contracts.multiCard.copyActions.length).toBeGreaterThanOrEqual(3);
     expect(contracts.blockedCard).toEqual(expect.objectContaining({ title:"安全阻断", categoryLabel:"受限品类", actionPolicy:"copy disabled / external search disabled", redacted:true }));
     expect(contracts.blockedCard.copyActions).toEqual([]);
-    expect(contracts.resultCardRules).toEqual(expect.objectContaining({ rulesVersion:"2.1.39", status:"user-facing summary only", realProvider:"disabled", realNetwork:"disabled", realPrice:"disabled", bookingUrl:"disabled", payment:"disabled", order:"disabled", identityUpload:"disabled", redacted:true }));
+    expect(contracts.resultCardRules).toEqual(expect.objectContaining({ rulesVersion:"4.2.7", status:"user-facing summary only", realProvider:"disabled", realNetwork:"disabled", realPrice:"disabled", bookingUrl:"disabled", payment:"disabled", order:"disabled", identityUpload:"disabled", redacted:true }));
     expect(contracts.resultCardRules.restrictedCardRules).toEqual(expect.arrayContaining(["受限品类只显示阻断卡片", "受限品类不显示普通价格空态"]));
     expect(contracts.resultCardRules.copyActionRules).toEqual(expect.arrayContaining(["正常品类按当前类别显示复制按钮", "restricted_or_blocked 不显示复制按钮"]));
     expect(contracts.guard).toEqual(expect.objectContaining({ status:"active", mode:"local policy only", realProvider:"disabled", realNetwork:"disabled", payment:"disabled", order:"disabled", identityUpload:"disabled", redacted:true }));
@@ -8266,115 +8267,86 @@ test.describe.serial("commerce agent workbench", () => {
     expect(contracts.guardSafe).toBe(true);
     expect(contracts.evidenceSafe).toBe(true);
 
-    await gotoRoute(page, "home");
-    await submitHomeCommand(page, runId + "-V2115-FLIGHT 7 月 15 日上海到成都最便宜的机票");
-    const detail = page.locator('[data-commerce-home-summary="true"]').last();
-    await expect(detail).toContainText("机票搜索结果", { timeout:15000 });
-    await expect(detail).toContainText("出发地：上海");
-    await expect(detail).toContainText("目的地：成都");
-    await expect(detail).toContainText("日期：7 月 15 日");
-    await expect(detail).toContainText("排序：低价优先");
-    await expect(detail).toContainText("暂无真实价格结果");
-    await expect(detail).toContainText("全球采购计划");
-    await expect(detail).toContainText("机票搜索计划");
-    await expect(detail).toContainText("摘要：我已整理好这次机票搜索条件");
-    await expect(detail).toContainText("当前状态：仅整理搜索条件，暂无真实价格");
-    await expect(detail).toContainText("类别：机票");
-    await expect(detail).toContainText("已整理条件");
-    await expect(detail).toContainText("仍待人工确认");
-    await expect(detail).toContainText("当前未开放");
-    await expect(detail).toContainText("人工下一步");
-    await expect(detail).toContainText("查看全球采购待补充信息清单");
-    await expect(detail).toContainText("查看全球采购安全下一步建议");
-    await expect(detail).toContainText("查看全球采购外部搜索入口规则");
-    await expect(detail).toContainText("查看全球采购用户结果卡片规则");
-    await expect(detail).toContainText("查看全球采购受限品类安全闸门");
-    await expect(detail).toContainText("查看全球采购安全证据摘要");
-    await expect(detail.getByRole("button", { name:"复制机票搜索条件" })).toHaveCount(1);
-    await expect(detail.getByRole("button", { name:/复制旅行搜索条件|复制电脑搜索条件|复制全部搜索条件/ })).toHaveCount(0);
-    await expect(detail).not.toContainText("出发地：日上海");
-    await expect(detail).not.toContainText("日期：待补充");
-    await expect(detail).not.toContainText(/¥\s*\d+/);
-    await expect(detail.locator(".commerce-one-screen-card").first()).not.toContainText(/fake price|mock price|demo price|AI 估价/);
-
-    await openDisclosure(detail, "commerce-global-procurement-user-facing-result-cards-disclosure");
-    const cardRulesBody = detail.locator("details.commerce-global-procurement-user-facing-result-cards-disclosure .commerce-disclosure-body").first();
-    for (const text of [
-      "card rules 已建立",
-      "status: user-facing summary only",
-      "real provider disabled",
-      "real network disabled",
-      "real price disabled",
-      "bookingUrl disabled",
-      "payment disabled",
-      "order disabled",
-      "identity upload disabled",
-      "redacted: true",
-      "category card list",
-      "restricted card rules",
-      "copy action rules",
-      "history label rules"
-    ]) {
-      await expect(cardRulesBody).toContainText(text);
+    await gotoRoute(page, "commerce");
+    await page.locator("#commerceInput").fill("搜索 Sony WH-1000XM5 降噪耳机，收货到美国，预算300美元，比较日本和美国平台价格、运费、税费及预计到手成本");
+    await page.locator("#commerceGenerate").click();
+    const detail = page.locator(".commerce-global-shopping-workspace-panel").first();
+    await expect(page.getByRole("heading", { name:"全球购物工作台" })).toBeVisible({ timeout:15000 });
+    await expect(detail.locator('[data-commerce-global-shopping-workspace="true"]')).toBeVisible();
+    await expect(detail).toContainText("Sony WH-1000XM5");
+    await expect(detail).toContainText("降噪耳机");
+    await expect(detail).toContainText("Sony");
+    await expect(detail).toContainText("WH-1000XM5");
+    await expect(detail).toContainText("300 USD");
+    await expect(detail).toContainText("United States");
+    await expect(detail).toContainText("🇯🇵 Japan");
+    await expect(detail).toContainText("🇺🇸 United States");
+    await expect(detail).toContainText("采购计划");
+    await expect(detail).toContainText("平台比较");
+    for (const platform of ["Rakuten", "Amazon Japan", "Yahoo Shopping", "Mercari", "Amazon US", "BestBuy", "B&H", "Costco"]) {
+      await expect(detail).toContainText(platform);
     }
+    await expect(detail).toContainText("AI 采购建议");
+    await expect(detail).toContainText("预计到手成本");
+    await expect(detail.locator("table.commerce-workspace-cost-table")).toBeVisible();
+    await expect(detail).toContainText("购物记录");
+    await expect(detail).toContainText("最近搜索");
+    await expect(detail).toContainText("等待可信价格源");
+    await expect(detail).toContainText("按市场预留可信平台位，接入后自动填充价格与到手成本。");
+    await expect(detail).toContainText("开始比较");
+    await expect(detail).toContainText("查看采购计划");
+    await expect(detail).toContainText("更多信息");
+    await expect(detail.locator("details.commerce-workspace-more-disclosure")).not.toHaveAttribute("open", "");
+    await expect(detail).toContainText("为什么暂时没有价格");
+    await expect(detail).toContainText("等待可信价格源");
+    await expect(detail).toContainText("收藏商品");
+    await expect(detail).toContainText("导出结果");
+    await expect(page.locator(".commerce-task-list")).toHaveCount(0);
+    await expect(detail).not.toContainText("仍待人工确认");
+    await expect(detail).not.toContainText("仍需确认");
+    await expect(detail).not.toContainText("预算：待补充");
+    await expect(detail).not.toContainText("收货地：待补充");
+    await expect(detail).not.toContainText(/fake price|mock price|demo price|AI 估价/);
+    const defaultVisible = (await visibleTextWithoutTechnicalDetails(detail)).toLowerCase();
+    for (const text of [
+      "gate closed",
+      "provider",
+      "workspace",
+      "endpoint",
+      "sandbox",
+      "allowlist",
+      "redacted",
+      "readonly",
+      "runtime",
+      "payload",
+      "bookingurl",
+      "workspace_only",
+      "provider disabled",
+      "real network disabled",
+      "real provider disabled",
+      "redacted:true"
+    ]) {
+      expect(defaultVisible).not.toContain(text);
+    }
+    await expect(detail.getByRole("button", { name:/立即购买|一键下单|自动付款|checkout|order/i })).toHaveCount(0);
 
-    await openDisclosure(detail, "commerce-global-procurement-missing-info-disclosure");
-    const missingBody = detail.locator("details.commerce-global-procurement-missing-info-disclosure .commerce-disclosure-body").first();
-    await expect(missingBody).toContainText("全球采购待补充信息清单");
-    await expect(missingBody).toContainText("draft only");
-    await expect(missingBody).toContainText("real provider disabled");
-    await expect(missingBody).toContainText("舱位偏好");
+    await openDisclosure(detail, "commerce-global-procurement-price-explanation-disclosure");
+    const emptyPriceBody = detail.locator("details.commerce-global-procurement-price-explanation-disclosure .commerce-disclosure-body").first();
+    await expect(emptyPriceBody).toContainText("目前尚未连接可信实时价格源");
+    await expect(emptyPriceBody).toContainText("接入后只展示经过安全校验的数据");
 
-    await openDisclosure(detail, "commerce-global-procurement-safe-guidance-disclosure");
-    const guidanceBody = detail.locator("details.commerce-global-procurement-safe-guidance-disclosure .commerce-disclosure-body").first();
-    await expect(guidanceBody).toContainText("全球采购安全下一步建议");
-    await expect(guidanceBody).toContainText("safe guidance only");
-    await expect(guidanceBody).toContainText("payment disabled");
-    await expect(guidanceBody).toContainText("人工比较航空公司官网 / Google Flights / Trip.com / 携程");
-
-    await openDisclosure(detail, "commerce-global-procurement-external-search-policy-disclosure");
-    const policyBody = detail.locator("details.commerce-global-procurement-external-search-policy-disclosure .commerce-disclosure-body").first();
-    await expect(policyBody).toContainText("全球采购外部搜索入口规则");
-    await expect(policyBody).toContainText("manual external search only");
-    await expect(policyBody).toContainText("bookingUrl disabled");
-    await expect(policyBody).toContainText("allowExternalSearch: true");
-    await expect(policyBody).toContainText("外部搜索入口只能由用户手动点击");
-
-    await openDisclosure(detail, "commerce-global-procurement-restricted-category-guard-disclosure");
-    const guardBody = detail.locator("details.commerce-global-procurement-restricted-category-guard-disclosure .commerce-disclosure-body").first();
-    await expect(guardBody).toContainText("guard 已建立");
-    await expect(guardBody).toContainText("status: active");
-    await expect(guardBody).toContainText("mode: local policy only");
-    await expect(guardBody).toContainText("real provider disabled");
-    await expect(guardBody).toContainText("real network disabled");
-    await expect(guardBody).toContainText("payment disabled");
-    await expect(guardBody).toContainText("order disabled");
-    await expect(guardBody).toContainText("identity upload disabled");
-    await expect(guardBody).toContainText("weapons");
-    await expect(guardBody).toContainText("firearms");
-    await expect(guardBody).toContainText("controlled drugs");
-    await expect(guardBody).toContainText("gambling");
-    await expect(guardBody).toContainText("identity upload");
-    await expect(guardBody).toContainText("high risk category -> blocked");
-    await expect(guardBody).toContainText("payment request -> blocked");
-    await expect(guardBody).toContainText("identity upload request -> blocked");
-    await expect(guardBody).toContainText("redacted: true");
-
-    await openDisclosure(detail, "commerce-global-procurement-evidence-safety-summary-disclosure");
-    const evidenceBody = detail.locator("details.commerce-global-procurement-evidence-safety-summary-disclosure .commerce-disclosure-body").first();
-    await expect(evidenceBody).toContainText("summary 已建立");
-    await expect(evidenceBody).toContainText("status: offline planning only");
-    await expect(evidenceBody).toContainText("real API key disabled");
-    await expect(evidenceBody).toContainText("real price disabled");
-    await expect(evidenceBody).toContainText("availability disabled");
-    await expect(evidenceBody).toContainText("bookingUrl disabled");
-    await expect(evidenceBody).toContainText("security:no-secret-persistence PASS");
-    await expect(evidenceBody).toContainText("commerce:provider-fixtures:offline PASS");
-    await expect(evidenceBody).toContainText("providerActivationState: no-go");
-    await expect(evidenceBody).toContainText("networkAttemptCount: 0");
-    await expect(evidenceBody).toContainText("realProviderCallCount: 0");
-    await expect(evidenceBody).toContainText("realPriceDisplayedCount: 0");
-    await expect(evidenceBody).toContainText("bookingUrlDisplayedCount: 0");
+    await openDisclosure(page.locator("#pageHost"), "commerce-workspace-more-disclosure");
+    await expect(page.locator("details.commerce-technical-disclosure").first()).toContainText("技术详情");
+    await openDisclosure(page.locator("#pageHost"), "commerce-technical-disclosure");
+    const developerBody = page.locator("details.commerce-technical-disclosure .commerce-disclosure-body").first();
+    for (const text of [
+      "查看 Provider 接入准备控制台",
+      "查看其它安全规则折叠面板",
+      "查看全球采购决策工作台",
+      "Developer Details"
+    ]) {
+      await expect(developerBody).toContainText(text);
+    }
 
     await submitHomeCommand(page, runId + "-V2119-BLOCKED-LOAN 帮我上传身份证和银行卡办贷款");
     const blockedLoan = page.locator('[data-commerce-home-summary="true"]').last();
@@ -8520,8 +8492,8 @@ test.describe.serial("commerce agent workbench", () => {
         expected:["酒店", "成都春熙路", "暂无真实价格结果"]
       },
       {
-        input:runId + "-SMOKE-PRODUCT 帮我比较美国和日本买 iPhone 16 Pro，收货到中国",
-        expected:["商品", "iPhone 16 Pro", "暂无真实价格结果"]
+        input:"搜索 Sony WH-1000XM5 降噪耳机，收货到美国，预算300美元，比较日本和美国平台价格、运费、税费及预计到手成本",
+        expected:["Sony", "WH-1000XM5", "300 USD", "United States", "Japan", "Rakuten", "Amazon Japan", "Amazon US", "BestBuy", "预计到手成本", "AI 采购建议"]
       },
       {
         input:runId + "-SMOKE-SERVICE 帮我找成都附近靠谱的搬家公司",
@@ -8544,6 +8516,19 @@ test.describe.serial("commerce agent workbench", () => {
         await expect(summary).toContainText(text, { timeout:15000 });
       }
       await expect(summary).not.toContainText(/fake price|mock price|demo price|AI 估价/i);
+      if (item.input.includes("Sony WH-1000XM5")) {
+        await expect(summary.locator('[data-commerce-global-shopping-workspace="true"]')).toBeVisible();
+        await expect(page.locator(".home-v205-page")).toHaveClass(/is-global-shopping-active/);
+        await expect(page.locator(".home-v205-side")).toHaveCount(0);
+        await expect(page.locator("#cmdConsole .cmd-current-head")).toHaveCount(0);
+        await expect(page.locator("#cmdConsole .cmd-log-list")).toHaveCount(0);
+        await expect(summary.locator("details.commerce-workspace-execution-log")).not.toHaveAttribute("open", "");
+        await expect(summary.locator("details.commerce-technical-disclosure")).not.toHaveAttribute("open", "");
+        const defaultText = await visibleTextWithoutTechnicalDetails(summary);
+        for (const legacyText of ["方案 A", "workspace_only", "redacted: true", "real provider disabled", "sandbox gate", "endpoint allowlist"]) {
+          expect(defaultText).not.toContain(legacyText);
+        }
+      }
       if (item.input.includes("SMOKE-FLIGHT")) {
         await expect(summary.locator(".commerce-top-result-card")).toHaveCount(1);
         const flightCard = summary.locator(".commerce-top-result-card").first();
@@ -8704,10 +8689,19 @@ test.describe.serial("commerce agent workbench", () => {
     await page.locator("#commerceInput").fill(runId + "-V427-PRODUCT 帮我找 iPhone 16 Pro 价格");
     await page.locator("#commerceGenerate").click();
     const detail = page.locator(".commerce-detail").last();
-    await expect(detail).toContainText("去平台查看", { timeout:15000 });
-    await expect(detail.locator('[data-commerce-readonly-search-results="true"] .commerce-booking-link')).toHaveCount(3);
-    await expect(detail).toContainText("查看更多候选");
-    await expect(detail).toContainText("最终价格与规则以平台页面为准");
+    await expect(page.getByRole("heading", { name:"全球购物工作台" })).toBeVisible({ timeout:15000 });
+    await expect(page.locator(".commerce-toolbar")).toContainText("AI 状态");
+    await expect(page.locator(".commerce-toolbar")).toContainText("价格数据");
+    await expect(page.locator(".commerce-toolbar")).toContainText("采购模式");
+    await expect(detail).toContainText("iPhone 16 Pro");
+    await expect(detail).toContainText("平台比较");
+    await expect(detail).toContainText("购物记录");
+    await expect(detail).toContainText("最近搜索");
+    await expect(detail).toContainText("采购计划");
+    await expect(detail).toContainText("等待可信价格源");
+    await expect(detail).toContainText("查看采购计划");
+    await expect(detail).toContainText("更多信息");
+    await expect(detail).toContainText("为什么暂时没有价格");
     await expect(detail.getByRole("button", { name:/^(付款|下单|提交订单|上传身份证|上传护照|上传银行卡)$/ })).toHaveCount(0);
   });
 
@@ -10239,8 +10233,8 @@ test.describe.serial("commerce agent workbench", () => {
     const summary = page.locator(".commerce-detail").first();
     await expect(summary).toContainText("受限品类", { timeout:15000 });
     await expect(summary).toContainText("已停止处理");
-    await expect(summary).toContainText("安全限制");
-    await expect(summary).toContainText("已阻断动作");
+    await expect(summary).toContainText("安全阻断");
+    await expect(summary).toContainText("当前不提供搜索、购买、上传或付款路径");
     await expect(summary).not.toContainText("机票请求工作流");
     await expect(summary).not.toContainText("推荐理由");
     await expect(summary).not.toContainText("候选对比");

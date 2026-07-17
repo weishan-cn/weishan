@@ -36,6 +36,7 @@
   function productionReadinessApi() { return window.WeishanGlobalShoppingProviderProductionReadiness || {}; }
   function rakutenPreparationApi() { return window.WeishanGlobalShoppingRakutenRealProviderAdapterContractLayer || {}; }
   function rakutenRealAdapterApi() { return window.WeishanGlobalShoppingRakutenRealProviderAdapter || {}; }
+  function realProviderExecutionGateApi() { return window.WeishanGlobalShoppingRealProviderExecutionGate || {}; }
 
   function findProvider(providerId) {
     const api = registryApi();
@@ -173,6 +174,39 @@
       return rakutenRealAdapterApi().createGlobalShoppingRakutenRealProviderAdapter(safe);
     }
     return null;
+  }
+
+  async function buildRakutenReadonlyBridgeResult(input) {
+    const safe = obj(input);
+    const bridge = window.weishanGlobalShopping;
+    if (!bridge || typeof bridge.rakutenReadonlySearch !== "function") {
+      return {
+        ok:false,
+        result:null,
+        error:buildError({ code:0, message:"rakuten_readonly_bridge_unavailable" })
+      };
+    }
+    const payload = obj(safe.payload);
+    const response = await bridge.rakutenReadonlySearch({
+      keyword:text(payload.keyword || payload.query || ""),
+      page:payload.page,
+      hits:payload.hits,
+      sort:text(payload.sort || ""),
+      destinationCountry:text(payload.destinationCountry || obj(safe.regionContext).country || ""),
+      currency:text(payload.currency || "")
+    });
+    const safeResponse = obj(response);
+    if (text(safeResponse.status || "") !== "ready") {
+      return {
+        ok:false,
+        result:safeResponse,
+        error:buildError({
+          code:0,
+          message:text(obj(safeResponse.error).category || "rakuten_readonly_degraded")
+        })
+      };
+    }
+    return { ok:true, result:safeResponse, error:null };
   }
 
   function gatewayTraceStep(step, details) {
@@ -678,6 +712,150 @@
       });
     }
     try {
+      if (providerId === "rakuten_japan") {
+        const executionGate = typeof realProviderExecutionGateApi().buildGlobalShoppingRealProviderExecutionGate === "function"
+          ? await realProviderExecutionGateApi().buildGlobalShoppingRealProviderExecutionGate({
+            providerId:providerId,
+            category:payloadCategory || "product",
+            region:region,
+            destinationCountry:region,
+            explicitUserAction:true,
+            userEnabled:true,
+            endpointHost:"openapi.rakuten.co.jp"
+          })
+          : { mode:"blocked", blockers:["real_provider_execution_gate_unavailable"] };
+        gatewayTrace.push(gatewayTraceStep("execution_gate", executionGate));
+        if (text(executionGate.mode || "") !== "real_provider_readonly") {
+          return clone({
+            status:"failed_safe",
+            result:null,
+            metadata:{
+              providerId:providerId,
+              operation:operation,
+              sourceType:"external_link_only",
+              gatewayMode:text(executionGate.mode || "blocked"),
+              gatewayTrace:gatewayTrace,
+              realProviderPreparation:realProviderPreparation,
+              executionGate:executionGate
+            },
+            audit:gatewayAudit({
+              providerId:providerId,
+              operation:operation,
+              providerStatus:text(provider.status || "unknown"),
+              permissionResult:permissionResult,
+              policyResult:policyResult,
+              warnings:toArray(executionGate.blockers || []),
+              gatewayTrace:gatewayTrace,
+              configurationCheck:configurationCheck,
+              featureFlagCheck:featureFlagCheck,
+              versionCheck:versionCheck,
+              productionReadiness:productionReadiness,
+              realProviderPreparation:realProviderPreparation,
+              contractValidation:null,
+              healthSimulation:null
+            }),
+            error:buildError({ code:0, message:text(executionGate.mode || "blocked") }),
+            redacted:true
+          });
+        }
+        const bridgeResult = await buildRakutenReadonlyBridgeResult({
+          payload:safe.payload,
+          regionContext:safe.regionContext
+        });
+        gatewayTrace.push(gatewayTraceStep("main_process_readonly_bridge", {
+          ok:bridgeResult.ok === true,
+          status:text(obj(bridgeResult.result).status || ""),
+          sourceType:text(obj(bridgeResult.result).sourceType || "")
+        }));
+        if (bridgeResult.ok !== true) {
+          return clone({
+            status:"failed_safe",
+            result:null,
+            metadata:{
+              providerId:providerId,
+              operation:operation,
+              sourceType:text(obj(bridgeResult.result).sourceType || "external_link_only"),
+              gatewayMode:"real_provider_readonly",
+              gatewayTrace:gatewayTrace,
+              realProviderPreparation:realProviderPreparation,
+              executionGate:executionGate
+            },
+            audit:gatewayAudit({
+              providerId:providerId,
+              operation:operation,
+              providerStatus:text(provider.status || "unknown"),
+              permissionResult:permissionResult,
+              policyResult:policyResult,
+              warnings:[text(obj(obj(bridgeResult.result).error).category || obj(bridgeResult.error).category || "bridge_failed")],
+              gatewayTrace:gatewayTrace,
+              configurationCheck:configurationCheck,
+              featureFlagCheck:featureFlagCheck,
+              versionCheck:versionCheck,
+              productionReadiness:productionReadiness,
+              realProviderPreparation:realProviderPreparation,
+              contractValidation:null,
+              healthSimulation:null
+            }),
+            error:bridgeResult.error,
+            redacted:true
+          });
+        }
+        const bridged = obj(bridgeResult.result);
+        const safety = buildFilter({
+          providerId:providerId,
+          sourceType:"rakuten_official_api",
+          confidence:"official_api_readonly",
+          timestamp:text(bridged.fetchedAt || ""),
+          normalizedResults:toArray(bridged.results)
+        });
+        gatewayTrace.push(gatewayTraceStep("safety_filter", { safe:safety.safe, filteredFields:safety.filteredFields }));
+        return clone({
+          status:"real_provider_readonly",
+          result:{
+            providerId:providerId,
+            status:"real_provider_readonly",
+            sourceType:"rakuten_official_api",
+            confidence:"official_api_readonly",
+            timestamp:text(bridged.fetchedAt || ""),
+            normalizedResults:toArray(obj(safety.filteredResult).normalizedResults),
+            rawStatus:text(bridged.status || "ready"),
+            redacted:true
+          },
+          metadata:{
+            providerId:providerId,
+            operation:operation,
+            sourceType:"rakuten_official_api",
+            gatewayMode:"real_provider_readonly",
+            filteredFields:safety.filteredFields,
+            gatewayTrace:gatewayTrace,
+            configurationCheck:configurationCheck,
+            featureFlagCheck:featureFlagCheck,
+            versionCheck:versionCheck,
+            productionReadiness:productionReadiness,
+            realProviderPreparation:realProviderPreparation,
+            contractValidation:{ valid:true, checkedMethods:["main_process_readonly_proxy"], errors:[] },
+            requestEnvironment:"main_process_only"
+          },
+          audit:gatewayAudit({
+            providerId:providerId,
+            operation:operation,
+            providerStatus:text(provider.status || "testing"),
+            permissionResult:permissionResult,
+            policyResult:policyResult,
+            warnings:toArray(policyResult.warnings).concat(toArray(safety.warnings)),
+            gatewayTrace:gatewayTrace,
+            configurationCheck:configurationCheck,
+            featureFlagCheck:featureFlagCheck,
+            versionCheck:versionCheck,
+            productionReadiness:productionReadiness,
+            realProviderPreparation:realProviderPreparation,
+            contractValidation:{ valid:true, checkedMethods:["main_process_readonly_proxy"], errors:[] },
+            healthSimulation:null
+          }),
+          error:null,
+          redacted:true
+        });
+      }
       const adapter = createRealAdapter({
         provider:provider,
         providerId:providerId,

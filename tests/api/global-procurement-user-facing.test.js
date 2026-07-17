@@ -17,6 +17,8 @@ function loadRendererCore(files) {
 }
 
 const windowRef = loadRendererCore([
+  "apps/desktop/src/renderer/core/globalShoppingIntentClassifier.js",
+  "apps/desktop/src/renderer/core/globalShoppingEntityExtractor.js",
   "apps/desktop/src/renderer/core/globalProcurementIntentRouter.js",
   "apps/desktop/src/renderer/core/globalProcurementMissingInfoChecklist.js",
   "apps/desktop/src/renderer/core/globalProcurementSafeNextStepGuidance.js",
@@ -75,6 +77,33 @@ function main() {
   assert.equal(product.card.title, "商品比较计划");
   assert.equal(product.card.copyActions.map((item) => item.label).join(","), "复制商品比较条件");
   assert.equal(product.detail.identifiedConditions.includes("比较地区：美国 / 日本"), true);
+
+  const sony = buildCard("搜索 Sony WH-1000XM5 降噪耳机，收货到美国，预算300美元，比较日本和美国平台价格");
+  assert.deepEqual(Array.from(sony.card.missingInfo), ["颜色", "容量", "版本", "购买偏好"]);
+  assert.equal(sony.card.planFields.productName, "Sony WH-1000XM5");
+  assert.equal(sony.card.planFields.productBrand, "Sony");
+  assert.equal(sony.card.planFields.productModel, "WH-1000XM5");
+  assert.equal(sony.card.planFields.budgetLabel, "300 USD");
+  assert.equal(sony.card.planFields.destinationCountry, "United States");
+  assert.deepEqual(Array.from(sony.card.planFields.comparisonMarkets), ["Japan", "United States"]);
+  assert.match(sony.card.emptyPriceSummary.title, /暂未连接可信实时价格源/);
+  assert.match(sony.card.trustSummary.level, /离线采购模式/);
+  assert.equal(sony.card.productCard.brand, "Sony");
+  assert.equal(sony.card.productCard.model, "WH-1000XM5");
+  assert.equal(sony.card.productCard.subtitle, "降噪耳机");
+  assert.equal(sony.card.productCard.budget, "300 USD");
+  assert.equal(sony.card.productCard.destination, "United States");
+  assert.equal(sony.card.platformCards.length >= 6, true);
+  assert.equal(sony.card.platformCards[0].price, "—");
+  assert.equal(sony.card.platformCards[0].confidence, "离线采购模式");
+  assert.equal(sony.card.recommendationPanel.estimate, "等待可信价格源");
+  assert.equal(sony.card.recommendationPanel.title, "AI 采购建议");
+  assert.equal(sony.card.shoppingTimeline.steps.map((item) => item.label).includes("已识别商品"), true);
+  assert.equal(sony.card.costSummary.rows[0][1], "等待数据");
+  assert.deepEqual(
+    Array.from(sony.card.emptyPriceSummary.future),
+    ["官方价格", "库存", "运费", "税费", "预计到手成本", "优惠券", "历史价格", "AI 推荐", "全部经过安全校验。"]
+  );
 
   const service = buildCard("帮我找成都搬家公司");
   assert.equal(service.intent.category, "local_service");

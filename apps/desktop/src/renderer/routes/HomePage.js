@@ -5,6 +5,7 @@
   let stagedAttachments = [];
   let expandedDesktopTasks = {};
   let pendingSafeExternalSearchConfirmation = null;
+  let globalShoppingComposerExpanded = false;
 
   function esc(s){
     return String(s || "").replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; });
@@ -1232,6 +1233,13 @@
           <b>${window.I18n.format ? window.I18n.format("homeConsoleBanner", { version:appVersion() }) : "$ weishan v" + appVersion() + " command-center"}</b>
           <span>${t("homeConsoleEmpty")}</span>
         </div>`;
+    }
+
+    const latestCommerceTask = isCommerceTask(latest) ? storedCommerceTask(latest) : null;
+    const workspaceApi = window.CommerceAgentPage;
+    if (latestCommerceTask && workspaceApi && typeof workspaceApi.isGlobalShoppingTask === "function"
+      && workspaceApi.isGlobalShoppingTask(latestCommerceTask)) {
+      return commercePlanActions(latest);
     }
 
     return `
@@ -2653,6 +2661,14 @@
   }
 
   function commerceOneScreenResultPanelHtml(task, options){
+    const workspaceApi = window.CommerceAgentPage;
+    if (workspaceApi && typeof workspaceApi.isGlobalShoppingTask === "function"
+      && workspaceApi.isGlobalShoppingTask(task)
+      && typeof workspaceApi.renderGlobalShoppingWorkspace === "function") {
+      return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-global-shopping-workspace-panel" aria-label="Global Shopping Workspace">
+        ${workspaceApi.renderGlobalShoppingWorkspace(task)}
+      </section>`;
+    }
     const opts = options && typeof options === "object" ? options : {};
     const searchText = summary(task && (task.inputSummary || task.text || task.title || ""), 180);
     const complexTravelComputer = String(task && task.globalProcurementIntent && task.globalProcurementIntent.category || "") === "multi_category_plan"
@@ -6795,6 +6811,15 @@
     const conditionSummary = [routeCondition, dateCondition].filter(Boolean).join("，");
     const isFlightPlan = stored.category === "flight";
     const isProductPlan = stored.category === "ecommerce" || stored.category === "product";
+    const workspaceApi = window.CommerceAgentPage;
+    if (!blocked && isProductPlan && workspaceApi
+      && typeof workspaceApi.isGlobalShoppingTask === "function"
+      && workspaceApi.isGlobalShoppingTask(resultSummaryTask)
+      && typeof workspaceApi.renderGlobalShoppingWorkspace === "function") {
+      return `<div class="commerce-home-card commerce-home-global-shopping" data-commerce-home-summary="true">
+        ${workspaceApi.renderGlobalShoppingWorkspace(resultSummaryTask)}
+      </div>`;
+    }
     const commerceApi = window.WeishanCommerceAgent || null;
     const cardTitle = commerceApi && commerceApi.createCommerceDisplayTitle ? commerceApi.createCommerceDisplayTitle(stored, candidates.length > 0) : blocked ? "全球采购计划已阻断" : candidates.length ? type + "搜索已完成" : type + "搜索已生成";
     const providerReason = Array.isArray(stored.providerHealth) && stored.providerHealth[0] && stored.providerHealth[0].reasonWhenDisabled || "";
@@ -7121,9 +7146,19 @@
     const snap = window.CommandApi.snapshot();
     syncDesktopAssistantTasksFromSnapshot(snap);
     syncHomeTopbarSoon(snap);
+    const currentTask = selectedHistoryTask(snap)
+      || (snap.queue || []).find((task) => task && (task.status === "queued" || task.status === "running" || task.status === "done" || task.status === "failed"))
+      || (snap.history || [])[0]
+      || null;
+    const currentCommerceTask = currentTask && isCommerceTask(currentTask) ? storedCommerceTask(currentTask) : null;
+    const workspaceApi = window.CommerceAgentPage;
+    const globalShoppingActive = !!(currentCommerceTask && workspaceApi
+      && typeof workspaceApi.isGlobalShoppingTask === "function"
+      && workspaceApi.isGlobalShoppingTask(currentCommerceTask));
+    const compactGlobalShoppingComposer = globalShoppingActive && !globalShoppingComposerExpanded && !commandInputDraft.trim() && !stagedAttachments.length;
 
     host.innerHTML = `
-      <section class="home-v205-page">
+      <section class="home-v205-page ${globalShoppingActive ? "is-global-shopping-active" : ""}">
         <div class="home-v205-main">
           <div class="cmd-card cmd-console-card">
             <div class="cmd-console" id="cmdConsole">
@@ -7132,23 +7167,34 @@
           </div>
 
           <div class="cmd-card cmd-input-card">
-            <div class="cmd-card-title small-title">
-              <h3>${t("homeInputTitle")}</h3>
-            </div>
-            ${desktopAssistantStrip()}
-            ${attachmentPanel()}
-            ${selectedHistoryTask(snap) ? `<p class="cmd-history-meta" data-history-execution-hint="true">当前正在查看历史详情；输入新指令并执行时会创建新任务，并返回最新结果。</p>` : ""}
-            <textarea id="commandInput" class="cmd-input" placeholder="${t("homePlaceholder")}">${esc(commandInputDraft)}</textarea>
-            <div class="cmd-actions">
-              <button class="cmd-btn gray" id="uploadBtn">${t("uploadAttachment")}</button>
-              <button class="cmd-btn primary" id="runBtn">${t("startRun")}</button>
-              <button class="cmd-btn danger" id="clearFinishedBtn">${t("clearDone")}</button>
-              <button class="cmd-btn gray" id="recordBtn">${t("recordAudio")}</button>
-            </div>
+            ${compactGlobalShoppingComposer ? `
+              <div class="cmd-compact-composer" data-global-shopping-compact-composer="true">
+                <button class="cmd-compact-trigger" id="compactComposerExpandBtn" type="button" aria-expanded="false" aria-controls="commandInput">继续补充采购需求…</button>
+                <div class="cmd-compact-actions">
+                  <button class="cmd-btn ghost compact-icon-btn" id="uploadBtn" type="button" aria-label="${t("uploadAttachment")}">附件</button>
+                  <button class="cmd-btn primary compact-send-btn" id="compactRunBtn" type="button">发送</button>
+                  <button class="cmd-btn ghost compact-icon-btn" id="recordBtn" type="button" aria-label="${t("recordAudio")}">语音</button>
+                </div>
+              </div>
+            ` : `
+              <div class="cmd-card-title small-title">
+                <h3>${t("homeInputTitle")}</h3>
+              </div>
+              ${desktopAssistantStrip()}
+              ${attachmentPanel()}
+              ${selectedHistoryTask(snap) ? `<p class="cmd-history-meta" data-history-execution-hint="true">当前正在查看历史详情；输入新指令并执行时会创建新任务，并返回最新结果。</p>` : ""}
+              <textarea id="commandInput" class="cmd-input" placeholder="${t("homePlaceholder")}">${esc(commandInputDraft)}</textarea>
+              <div class="cmd-actions">
+                <button class="cmd-btn gray" id="uploadBtn">${t("uploadAttachment")}</button>
+                <button class="cmd-btn primary" id="runBtn">${t("startRun")}</button>
+                <button class="cmd-btn danger" id="clearFinishedBtn">${t("clearDone")}</button>
+                <button class="cmd-btn gray" id="recordBtn">${t("recordAudio")}</button>
+              </div>
+            `}
           </div>
         </div>
 
-        <aside class="home-v205-side">
+        ${globalShoppingActive ? "" : `<aside class="home-v205-side">
           ${modulePanel()}
           <div class="cmd-side-card">
             <h3>${t("queueTitle")}</h3>
@@ -7158,16 +7204,32 @@
             <h3>${t("dispatchHistory")}</h3>
             <div id="cmdHistory">${historyPanel(snap)}</div>
           </div>
-        </aside>
+        </aside>`}
       </section>
     `;
 
     bind(host);
+    if (globalShoppingActive && typeof workspaceApi.bindGlobalShoppingWorkspace === "function") {
+      workspaceApi.bindGlobalShoppingWorkspace(host, currentCommerceTask, {
+        onChange:function(){ render(host); },
+        onRecentSearch:function(value){
+          commandInputDraft = value;
+          globalShoppingComposerExpanded = true;
+          render(host);
+          const input = host.querySelector("#commandInput");
+          if (input) {
+            input.value = value;
+            input.focus();
+          }
+        }
+      });
+    }
   }
 
   function bind(host){
     const input = host.querySelector("#commandInput");
-    const runBtn = host.querySelector("#runBtn");
+    const runBtn = host.querySelector("#runBtn") || host.querySelector("#compactRunBtn");
+    const compactExpandBtn = host.querySelector("#compactComposerExpandBtn");
 
     if (!window.__WEISHAN_LIMITED_BETA_PREFERENCE_RENDER_BOUND_HOME__) {
       window.__WEISHAN_LIMITED_BETA_PREFERENCE_RENDER_BOUND_HOME__ = true;
@@ -7203,7 +7265,8 @@
     }
 
     function submit(){
-      let text = input.value.trim();
+      const inputValue = input ? input.value : commandInputDraft;
+      let text = String(inputValue || "").trim();
       if (!text && stagedAttachments.length) text = t("processAttachment") + stagedAttachments.map((file) => file.name).join(", ");
       if (!text && !stagedAttachments.length) return;
       const attachments = stagedAttachments.slice();
@@ -7212,13 +7275,20 @@
       pendingSafeExternalSearchConfirmation = null;
       window.CommandApi.enqueue(text, { attachments });
       commandInputDraft = "";
-      input.value = "";
+      globalShoppingComposerExpanded = false;
       stagedAttachments = [];
-      input.focus();
       render(host);
+      const nextInput = host.querySelector("#commandInput");
+      if (nextInput) nextInput.focus();
     }
 
-    runBtn.addEventListener("click", submit);
+    if (runBtn) runBtn.addEventListener("click", submit);
+    if (compactExpandBtn) compactExpandBtn.addEventListener("click", function(){
+      globalShoppingComposerExpanded = true;
+      render(host);
+      const nextInput = host.querySelector("#commandInput");
+      if (nextInput) nextInput.focus();
+    });
 
     const desktopEnable = host.querySelector("#desktopAssistantEnable");
     if (desktopEnable) desktopEnable.addEventListener("click", function(){
@@ -7517,15 +7587,17 @@
       });
     });
 
-    input.addEventListener("keydown", function(ev){
-      if (ev.key === "Enter" && !ev.shiftKey) {
-        ev.preventDefault();
-        submit();
-      }
-    });
-    input.addEventListener("input", function(){
-      commandInputDraft = input.value;
-    });
+    if (input) {
+      input.addEventListener("keydown", function(ev){
+        if (ev.key === "Enter" && !ev.shiftKey) {
+          ev.preventDefault();
+          submit();
+        }
+      });
+      input.addEventListener("input", function(){
+        commandInputDraft = input.value;
+      });
+    }
 
     let commerceActionChipFocusAssistTimer = 0;
     function applyCommerceActionChipFocusAssist(text){

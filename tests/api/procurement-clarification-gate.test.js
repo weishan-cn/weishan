@@ -13,7 +13,11 @@ function load(files) {
 }
 
 function main() {
-  const windowRef = load(["apps/desktop/src/renderer/core/procurementClarificationGate.js"]);
+  const windowRef = load([
+    "apps/desktop/src/renderer/core/globalShoppingIntentClassifier.js",
+    "apps/desktop/src/renderer/core/globalShoppingEntityExtractor.js",
+    "apps/desktop/src/renderer/core/procurementClarificationGate.js"
+  ]);
   const api = windowRef.WeishanProcurementClarificationGate;
   assert.equal(api.PROCUREMENT_CLARIFICATION_GATE_VERSION, "4.2.7");
   const vagueFlight = api.evaluateProcurementClarificationGate({ rawUserInput:"帮我买机票" });
@@ -28,6 +32,9 @@ function main() {
   assert.equal(clearFlight.clarificationDecision, "not_needed");
   const clearProduct = api.evaluateProcurementClarificationGate({ rawUserInput:"iPhone 16 Pro，美国和日本比较，收货到中国" });
   assert.equal(clearProduct.clarificationDecision, "not_needed");
+  const sonyProduct = api.evaluateProcurementClarificationGate({ rawUserInput:"搜索 Sony WH-1000XM5 降噪耳机，收货到美国，预算300美元，比较日本和美国平台价格。" });
+  assert.equal(sonyProduct.clarificationDecision, "not_needed");
+  assert.deepEqual(Array.from(sonyProduct.missingFields), []);
   assert.ok(vagueFlight.suggestedQuickReplies.length <= 3);
   assert.equal(vagueFlight.fakeResultPrevented, true);
   const audit = api.buildProcurementClarificationGateAuditDraft({ rawUserInput:"帮我买机票" });

@@ -6,6 +6,7 @@ const { spawn } = require("child_process");
 const { registerSecureStorageHandlers } = require("./main/secureStorage");
 const { registerSecureApiKeyStorageHandlers } = require("./main/secureApiKeyStorage");
 const { registerLimitedBetaPreferenceHandlers } = require("./main/limitedBetaPreferenceStore");
+const { registerGlobalShoppingRakutenReadonlyHandlers } = require("./main/globalShoppingRakutenReadonlyService");
 
 const APP_NAME = "weishan";
 const APP_ID = "ai.weishan.desktop";
@@ -497,6 +498,7 @@ function registerIpcHandlers() {
   registerSecureStorageHandlers(ipcMain);
   registerSecureApiKeyStorageHandlers(ipcMain);
   registerLimitedBetaPreferenceHandlers(ipcMain, { app });
+  registerGlobalShoppingRakutenReadonlyHandlers(ipcMain, {});
 }
 
 function createWindow() {
