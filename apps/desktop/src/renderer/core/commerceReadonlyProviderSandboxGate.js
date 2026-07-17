@@ -1,5 +1,5 @@
 (function(){
-  const READONLY_PROVIDER_SANDBOX_GATE_VERSION = "4.2.7";
+  const READONLY_PROVIDER_SANDBOX_GATE_VERSION = "4.2.8";
 
   const readonlyScope = [
     "search_inventory",

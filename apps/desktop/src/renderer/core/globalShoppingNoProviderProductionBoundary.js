@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_NO_PROVIDER_PRODUCTION_BOUNDARY_VERSION = "4.2.7";
+  const GLOBAL_SHOPPING_NO_PROVIDER_PRODUCTION_BOUNDARY_VERSION = "4.2.8";
   const BOUNDARY_NAME = "global_shopping_no_provider_production_boundary_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, no_provider_production_boundary_only:true };
   const BLOCKED_TEXT_RE = /production_ready|auto_release|auto_launch|auto_publish|ready_to_publish|enable_provider|enable_payment|enable_order/i;

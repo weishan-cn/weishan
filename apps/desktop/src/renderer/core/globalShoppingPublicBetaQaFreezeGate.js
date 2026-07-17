@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_QA_FREEZE_GATE_VERSION = "4.2.7";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_QA_FREEZE_GATE_VERSION = "4.2.8";
   const GATE_NAME = "global_shopping_public_beta_qa_freeze_gate_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, qa_freeze_gate_only:true };
   const ALLOWED_NEXT_ACTIONS = ["continue_testing", "manual_review_required", "blocked"];

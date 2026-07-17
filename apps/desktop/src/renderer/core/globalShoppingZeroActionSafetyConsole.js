@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_ZERO_ACTION_SAFETY_CONSOLE_VERSION = "4.2.7";
+  const GLOBAL_SHOPPING_ZERO_ACTION_SAFETY_CONSOLE_VERSION = "4.2.8";
   const CONSOLE_NAME = "global_shopping_zero_action_safety_console_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, zero_action_safety_console_only:true };
   const DISABLED_ACTIONS = ["provider_call", "network_call", "open_external", "payment", "order", "ticketing", "feedback_submit", "upload", "issue_create", "task_create", "release_create", "release_publish", "push", "export_file", "send_email", "persist_data"];

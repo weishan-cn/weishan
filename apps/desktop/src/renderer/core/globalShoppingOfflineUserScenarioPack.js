@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFLINE_USER_SCENARIO_PACK_VERSION = "4.2.7";
+  const GLOBAL_SHOPPING_OFFLINE_USER_SCENARIO_PACK_VERSION = "4.2.8";
   const PACK_NAME = "global_shopping_offline_user_scenario_pack_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, offline_user_scenario_pack_only:true };
   const SCENARIO_CATEGORIES = ["flight_price_compare", "hotel_price_compare", "product_price_compare", "fee_breakdown", "risk_badge_review", "feedback_review_mock", "issue_triage_mock", "no_provider_boundary", "no_data_retention", "manual_acceptance"];

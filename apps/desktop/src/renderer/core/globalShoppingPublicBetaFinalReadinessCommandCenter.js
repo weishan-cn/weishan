@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_READINESS_COMMAND_CENTER_VERSION = "4.2.7";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_READINESS_COMMAND_CENTER_VERSION = "4.2.8";
   const CENTER_NAME = "global_shopping_public_beta_final_readiness_command_center_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, final_readiness_command_center_only:true };
   const ALLOWED_NEXT_ACTIONS = ["continue_testing", "improve_copy", "expand_offline_scenarios", "manual_review_required", "blocked"];

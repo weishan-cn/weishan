@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PARTNER_LINK_POLICY_VERSION = "4.2.7";
+  const GLOBAL_SHOPPING_PARTNER_LINK_POLICY_VERSION = "4.2.8";
   const POLICY_NAME = "global_shopping_partner_link_policy_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

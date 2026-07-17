@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const FLIGHT_WORKFLOW_RESUME_COACH_VERSION = "4.2.7";
+  const FLIGHT_WORKFLOW_RESUME_COACH_VERSION = "4.2.8";
   const COACH_NAME = "flight_workflow_resume_coach_v1";
   const FORBIDDEN_ACTIONS = ["付款", "下单", "出票", "上传证件", "上传银行卡", "输入登录凭据"];
 

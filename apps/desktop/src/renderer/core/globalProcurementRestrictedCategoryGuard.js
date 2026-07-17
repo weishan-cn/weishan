@@ -1,5 +1,5 @@
 (function(){
-  const GLOBAL_PROCUREMENT_RESTRICTED_CATEGORY_GUARD_VERSION = "4.2.7";
+  const GLOBAL_PROCUREMENT_RESTRICTED_CATEGORY_GUARD_VERSION = "4.2.8";
 
   const restrictedCategories = [
     "weapons",

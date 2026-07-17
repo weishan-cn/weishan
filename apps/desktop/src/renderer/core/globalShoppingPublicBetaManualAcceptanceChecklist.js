@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PUBLIC_BETA_MANUAL_ACCEPTANCE_CHECKLIST_VERSION = "4.2.7";
+  const GLOBAL_SHOPPING_PUBLIC_BETA_MANUAL_ACCEPTANCE_CHECKLIST_VERSION = "4.2.8";
   const CHECKLIST_NAME = "global_shopping_public_beta_manual_acceptance_checklist_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, manual_acceptance_checklist_only:true };
   const CHECKLIST_SCOPE = ["provider", "network", "external_open", "payment", "order", "ticketing", "release", "push", "launch", "feedback_submit", "upload", "issue_create", "task_create", "data_retention", "evidence_file"];

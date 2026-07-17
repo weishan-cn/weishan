@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_TRIAL_FEEDBACK_INTAKE_MOCK_VERSION = "4.2.7";
+  const GLOBAL_SHOPPING_TRIAL_FEEDBACK_INTAKE_MOCK_VERSION = "4.2.8";
   const MOCK_NAME = "global_shopping_trial_feedback_intake_mock_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, feedback_intake_mock_only:true };
   const REDACTION_RULES = ["phone", "email", "passport", "idCard", "bankCard", "address", "platformToken", "orderNumber", "rawMessage"];

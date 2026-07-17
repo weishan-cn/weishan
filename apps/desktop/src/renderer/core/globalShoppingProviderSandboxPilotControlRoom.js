@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_PROVIDER_SANDBOX_PILOT_CONTROL_ROOM_VERSION = "4.2.7";
+  const GLOBAL_SHOPPING_PROVIDER_SANDBOX_PILOT_CONTROL_ROOM_VERSION = "4.2.8";
   const ROOM_NAME = "global_shopping_provider_sandbox_pilot_control_room_v1";
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }

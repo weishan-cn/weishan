@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_ZERO_PERSISTENCE_REGRESSION_GATE_VERSION = "4.2.7";
+  const GLOBAL_SHOPPING_ZERO_PERSISTENCE_REGRESSION_GATE_VERSION = "4.2.8";
   const GATE_NAME = "global_shopping_zero_persistence_regression_gate_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, zero_persistence_regression_gate_only:true };
   const REDACTION_RULES = ["phone", "email", "passport", "idCard", "bankCard", "address", "platformToken", "orderNumber", "rawMessage", "freeText", "providerPayload", "paymentPayload"];

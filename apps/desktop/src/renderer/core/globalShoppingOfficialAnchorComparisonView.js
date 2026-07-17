@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const GLOBAL_SHOPPING_OFFICIAL_ANCHOR_COMPARISON_VIEW_VERSION = "4.2.7";
+  const GLOBAL_SHOPPING_OFFICIAL_ANCHOR_COMPARISON_VIEW_VERSION = "4.2.8";
   const VIEW_NAME = "global_shopping_official_anchor_comparison_view_v1";
   const ALLOWED_MODES = { disabled:true, readonly:true, offline_mock:true, official_anchor_only:true };
   const BLOCKED_COPY_RE = /官方可订|官方保证|官方背书|平台授权|guaranteed|authorized/i;
