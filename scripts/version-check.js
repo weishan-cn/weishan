@@ -5,6 +5,7 @@ const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
 const PREVIOUS_STABLE_VERSION = "4.2.1";
+const INDEPENDENT_STORAGE_SCHEMA_VERSION = "4.2.7";
 const STRICT_VERSION_CHECKS = new Set([
   "root package-lock version",
   "root package-lock packages[\"\"].version",
@@ -1141,7 +1142,10 @@ function checkLimitedBetaPreferencePersistenceVersion(results, expectedVersion) 
       return;
     }
     const match = gate.match(regex);
-    addCheck(results, name, expectedVersion, match && match[1], "package.json must match " + gatePath);
+    const targetVersion = name === "apps/desktop limited beta preference store version"
+      ? INDEPENDENT_STORAGE_SCHEMA_VERSION
+      : expectedVersion;
+    addCheck(results, name, targetVersion, match && match[1], "version expectation must match " + gatePath);
   });
 }
 
@@ -1510,7 +1514,7 @@ function checkSecureApiKeyStorageMainVersion(results, expectedVersion) {
     return;
   }
   const match = file.match(/SECURE_API_KEY_STORAGE_VERSION\s*=\s*["']([^"']+)["']/);
-  addCheck(results, "apps/desktop secure API key storage main version", expectedVersion, match && match[1], "package.json must match apps/desktop/src/main/secureApiKeyStorage.js SECURE_API_KEY_STORAGE_VERSION");
+  addCheck(results, "apps/desktop secure API key storage main version", INDEPENDENT_STORAGE_SCHEMA_VERSION, match && match[1], "secure storage schema version must match apps/desktop/src/main/secureApiKeyStorage.js SECURE_API_KEY_STORAGE_VERSION");
 }
 
 function checkSecureApiKeyStorageConsoleVersion(results, expectedVersion) {
