@@ -1384,16 +1384,18 @@
         let streamedAnswer = "";
         let flushTimer = 0;
         let flushStartedAt = 0;
+        let terminalStreamMatchesAnswer = false;
         const flushStream = (force) => {
           if (flushTimer) {
             clearTimeout(flushTimer);
             flushTimer = 0;
           }
-          if (!streamedAnswer) return;
+          if (!streamedAnswer) return false;
           if (!flushStartedAt) flushStartedAt = perfStart(meta, "renderer.stream.ui.flush.start", { outputChars:streamedAnswer.length });
           active = patchTask(active.id, (t) => putAnswerLog(t, streamedAnswer, !force));
           perfEnd(meta, "renderer.stream.ui.flush.done", flushStartedAt, { outputChars:streamedAnswer.length });
           flushStartedAt = 0;
+          return force === true;
         };
         const scheduleFlush = () => {
           if (flushTimer) return;
@@ -1404,14 +1406,16 @@
             streamedAnswer += String(delta || "");
             scheduleFlush();
           });
-          flushStream(true);
+          terminalStreamMatchesAnswer = flushStream(true) && streamedAnswer === String(answer || "");
           perfEnd(meta, "renderer.ai.call.done", aiStartedAt, { inputChars:String(active.text || "").length, outputChars:String(answer || "").length });
         } catch (err) {
           if (flushTimer) clearTimeout(flushTimer);
           perfError(meta, "renderer.ai.call.error", aiStartedAt, err, { inputChars:String(active.text || "").length });
           throw err;
         }
-        active = patchTask(active.id, (t) => putAnswerLog(t, answer, false));
+        if (!terminalStreamMatchesAnswer) {
+          active = patchTask(active.id, (t) => putAnswerLog(t, answer, false));
+        }
       }
 
       active = patchTask(active.id, (t) => {
