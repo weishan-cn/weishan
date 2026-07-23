@@ -2,7 +2,6 @@
   const groups = [
     { id:"core", labelKey:"core" },
     { id:"execution", labelKey:"execution" },
-    { id:"plugins", labelKey:"plugins", dynamic:true },
     { id:"cloud", labelKey:"cloud", collapsible:true, stateKey:"settings.cloudEnterpriseExpanded", defaultExpanded:false },
     { id:"system", labelKey:"system" }
   ];
@@ -15,6 +14,7 @@
     { id:"crawler", icon:"☷", groupId:"execution", page:"CrawlerPage" },
     { id:"builder", icon:"⚒", groupId:"execution", page:"BuilderPage" },
     { id:"commerce", icon:"◇", groupId:"execution", page:"CommerceAgentPage" },
+    { id:"plugins", icon:"▦", groupId:"execution", page:"PluginsPage" },
     { id:"storage", icon:"◫", groupId:"cloud", page:"StoragePage" },
     { id:"team", icon:"👥", groupId:"cloud", page:"TeamPage", paid:true },
     { id:"seats", icon:"▥", groupId:"cloud", page:"SeatsPage", paid:true },

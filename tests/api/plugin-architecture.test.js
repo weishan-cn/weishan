@@ -22,7 +22,7 @@ function enabledVideoPlugin() {
     version:"1.0.0",
     enabled:true,
     status:"available",
-    capabilities:["video.generate"],
+    capabilities:["video.generate", "image.edit", "automation.run"],
     entryPoint:{ type:"route", routeId:"plugin.video" },
     permissions:{ network:true, filesystem:false, camera:false, microphone:false, clipboard:false, externalUrl:false }
   };
@@ -47,8 +47,12 @@ function main() {
   assert.equal(video.pluginId, "video-generation");
   assert.equal(video.entryPoint.routeId, "plugin.video");
   assert.equal(video.enabled, false);
+  assert.equal(registry.getPluginCenterEntries().length, 1);
+  assert.equal(registry.getPluginCenterEntries()[0].name, "视频制作");
   assert.deepEqual(Array.from(video.permissions.network === false ? [false] : []), [false]);
   assert.equal(registry.getEnabledSidebarEntries().length, 0);
+  assert.equal(windowRef.WeishanModules.get("plugins").groupId, "execution");
+  assert.equal(windowRef.WeishanModules.getGroup("plugins"), null);
   assert.equal(registry.validatePlugin(enabledVideoPlugin()).valid, true);
   assert.equal(registry.validatePlugin(Object.assign(enabledVideoPlugin(), { entryPoint:{ type:"route", routeId:"home" } })).valid, false);
   assert.equal(registry.validatePlugin(Object.assign(enabledVideoPlugin(), { entryPoint:{ type:"url", routeId:"https://example.invalid" } })).valid, false);
@@ -59,8 +63,10 @@ function main() {
   assert.equal(registry.pageForRoute("plugin.video"), "");
 
   assertDecision(capabilityGate.evaluate(video, "video.generate"), { allowed:false, reason:"plugin_disabled" });
-  assertDecision(capabilityGate.evaluate(enabledVideoPlugin(), "unknown.capability"), { allowed:false, reason:"unknown_capability" });
+  assertDecision(capabilityGate.evaluate(enabledVideoPlugin(), "image.generate"), { allowed:false, reason:"capability_not_declared" });
+  assertDecision(capabilityGate.evaluate(enabledVideoPlugin(), "Unknown?capability"), { allowed:false, reason:"unknown_capability" });
   assertDecision(capabilityGate.evaluate(enabledVideoPlugin(), "video.generate"), { allowed:true, reason:"declared_capability_only", runtimeGranted:false });
+  assertDecision(capabilityGate.evaluate(enabledVideoPlugin(), "image.edit"), { allowed:true, reason:"declared_capability_only", runtimeGranted:false });
   assertDecision(permissionGate.evaluate(video, "network"), { allowed:false, declared:false, reason:"plugin_disabled" });
   assertDecision(permissionGate.evaluate(enabledVideoPlugin(), "unknownPermission"), { allowed:false, declared:false, reason:"unknown_permission" });
   assertDecision(permissionGate.evaluate(enabledVideoPlugin(), "filesystem"), { allowed:false, declared:false, reason:"permission_not_declared" });

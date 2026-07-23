@@ -18,36 +18,28 @@
   }
   function appVersion(){ return window.WeishanConfig && window.WeishanConfig.version || "2.0.38"; }
   function modules(){ return window.WeishanModules || { groups:[], modulesForGroup(){ return []; }, get(){ return null; } }; }
-  function pluginEntries(){
-    const registry = window.WeishanPluginRegistry;
-    return registry && typeof registry.getEnabledSidebarEntries === "function" ? registry.getEnabledSidebarEntries() : [];
-  }
   function ensureCloudRouteVisible(){
     const current = window.WeishanRouter && window.WeishanRouter.current && window.WeishanRouter.current();
     const item = modules().get(current);
     if (item && item.groupId === "cloud" && !isCloudExpanded()) window.WeishanStore.write(CLOUD_KEY, true);
   }
-  function navItem(item, isPlugin){
+  function navItem(item){
     const permissions = window.WeishanPermissions;
-    const locked = !isPlugin && item.paid && permissions && typeof permissions.canUse === "function" && !permissions.canUse(item.id);
-    const id = isPlugin ? item.entryPoint.routeId : item.id;
-    const label = isPlugin ? item.name : t(item.labelKey || item.id);
+    const locked = item.paid && permissions && typeof permissions.canUse === "function" && !permissions.canUse(item.id);
+    const id = item.id;
+    const label = t(item.labelKey || item.id);
     const active = window.WeishanRouter.current() === id;
     return `<button type="button" class="nav-item ${active ? "active" : ""}" data-route="${esc(id)}" title="${esc(label)}"><span class="nav-icon">${esc(item.icon)}</span><span class="nav-label">${esc(label)}</span>${item.pill ? `<b class="pill">${esc(item.pill)}</b>` : ""}${locked ? `<b class="paid">${esc(t("paidOnly"))}</b>` : ""}</button>`;
   }
   function groupMarkup(group){
     const groupModules = modules().modulesForGroup(group.id);
-    if (group.dynamic) {
-      const entries = pluginEntries();
-      return entries.length ? `<section class="nav-group nav-group-plugins" data-nav-group="plugins"><div class="nav-section">${esc(t(group.labelKey))}</div>${entries.map((item) => navItem(item, true)).join("")}</section>` : "";
-    }
     if (group.id === "cloud") {
       const expanded = isCloudExpanded();
       const controls = "cloudEnterpriseNav";
-      const items = expanded ? groupModules.map((item) => navItem(item, false)).join("") : "";
+      const items = expanded ? groupModules.map((item) => navItem(item)).join("") : "";
       return `<section class="nav-group nav-group-cloud ${expanded ? "is-expanded" : "is-collapsed"}" data-nav-group="cloud"><button type="button" class="nav-section nav-section-toggle" id="cloudEnterpriseToggle" aria-expanded="${expanded ? "true" : "false"}" aria-controls="${controls}"><span>${esc(t(group.labelKey))}</span><span class="nav-section-indicator" aria-hidden="true">${expanded ? "⌄" : "›"}</span></button><div id="${controls}" class="nav-group-items" ${expanded ? "" : "hidden"}>${items}</div></section>`;
     }
-    return groupModules.length ? `<section class="nav-group" data-nav-group="${esc(group.id)}"><div class="nav-section">${esc(t(group.labelKey))}</div>${groupModules.map((item) => navItem(item, false)).join("")}</section>` : "";
+    return groupModules.length ? `<section class="nav-group" data-nav-group="${esc(group.id)}"><div class="nav-section">${esc(t(group.labelKey))}</div>${groupModules.map((item) => navItem(item)).join("")}</section>` : "";
   }
   function html(){
     ensureCloudRouteVisible();
