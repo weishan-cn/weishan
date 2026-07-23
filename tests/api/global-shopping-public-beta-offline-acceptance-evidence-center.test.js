@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaOfflineAcceptanceEvidenceCenter.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaOfflineAcceptanceEvidenceCenter;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_OFFLINE_ACCEPTANCE_EVIDENCE_CENTER_VERSION, "4.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_OFFLINE_ACCEPTANCE_EVIDENCE_CENTER_VERSION, "4.2.8");
 
   const review = api.buildGlobalShoppingPublicBetaOfflineAcceptanceEvidenceCenter({
     publicBetaManualAcceptanceChecklistSummary:summary("Public Beta Manual Acceptance Checklist"),

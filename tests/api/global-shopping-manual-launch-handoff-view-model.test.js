@@ -30,14 +30,14 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingManualLaunchHandoffViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingManualLaunchHandoffViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_MANUAL_LAUNCH_HANDOFF_VIEW_MODEL_VERSION, "4.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_MANUAL_LAUNCH_HANDOFF_VIEW_MODEL_VERSION, "4.2.8");
 
   const ready = api.buildGlobalShoppingManualLaunchHandoffViewModel({
     publicBetaStabilityAuditSummary:summary("Public Beta Stability Audit", "ready"),
     manualLaunchHandoffPackSummary:summary("Manual Launch Handoff Pack", "ready")
   });
   assert.equal(ready.status, "ready");
-  assert.equal(ready.appVersion, "4.2.7");
+  assert.equal(ready.appVersion, "4.2.8");
   assert.equal(ready.safeToProceedWithManualLaunchHandoffReview, true);
   assert.equal(ready.manualReviewRequired, true);
   assert.equal(ready.externalUrl, null);

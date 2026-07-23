@@ -29,7 +29,7 @@ function main() {
     "apps/desktop/src/renderer/core/flightWorkflowReleaseReadinessDashboard.js"
   ]);
   const api = windowRef.WeishanFlightWorkflowReleaseReadinessDashboard;
-  assert.equal(api.FLIGHT_WORKFLOW_RELEASE_READINESS_DASHBOARD_VERSION, "4.2.7");
+  assert.equal(api.FLIGHT_WORKFLOW_RELEASE_READINESS_DASHBOARD_VERSION, "4.2.8");
   const ready = api.buildFlightWorkflowReleaseReadinessDashboard(readyInput());
   assert.equal(ready.status, "ready");
   assert.equal(ready.safeForUserFacingBeta, true);

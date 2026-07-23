@@ -25,7 +25,7 @@ function main() {
       { platformName:"淘宝", isOfficial:false, sourceType:"major_platform", trustLevel:"medium", priceLabel:"价格以平台页面为准", feeNote:"店铺差异较大" }
     ]
   });
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_SEARCH_RESULT_RANKER_VERSION, "4.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_SEARCH_RESULT_RANKER_VERSION, "4.2.8");
   assert.equal(ranking.topResults.length, 3);
   assert.equal(ranking.topResults[0].platformName, "Apple 官方");
   assert.match(ranking.rankingSummary, /2-3/);

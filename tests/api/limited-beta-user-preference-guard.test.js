@@ -31,9 +31,14 @@ function pref(overrides) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/limitedBetaPreferencePersistence.js", "apps/desktop/src/renderer/core/limitedBetaUserPreferenceGuard.js"]);
   const api = windowRef.WeishanLimitedBetaUserPreferenceGuard;
-  assert.equal(api.LIMITED_BETA_USER_PREFERENCE_GUARD_VERSION, "4.2.7");
+  const persistence = windowRef.WeishanLimitedBetaPreferencePersistence;
+  assert.equal(api.LIMITED_BETA_USER_PREFERENCE_GUARD_VERSION, "4.2.8");
+  assert.equal(persistence.LIMITED_BETA_PREFERENCE_PERSISTENCE_VERSION, "4.2.8");
+  assert.equal(persistence.LIMITED_BETA_PREFERENCE_SCHEMA_VERSION, "4.2.7");
+  assert.equal(api.LIMITED_BETA_PREFERENCE_SCHEMA_VERSION, "4.2.7");
 
   assert.equal(api.evaluateLimitedBetaUserPreferenceGuard({ persistedPreference:pref(), currentRequestCategory:"flight", providerId:"flight_provider", userConfirmationState:"confirmed" }).preferenceDecision, "allow");
+  assert.equal(api.evaluateLimitedBetaUserPreferenceGuard({ persistedPreference:pref({ schemaVersion:"999.0.0" }), currentRequestCategory:"flight", providerId:"flight_provider", userConfirmationState:"confirmed" }).preferenceDecision, "blocked");
   assert.equal(api.evaluateLimitedBetaUserPreferenceGuard({ persistedPreference:pref({ globalLimitedBetaEnabled:false, killSwitchState:"disabled" }), currentRequestCategory:"flight", providerId:"flight_provider", userConfirmationState:"confirmed" }).preferenceDecision, "withheld");
   assert.equal(api.evaluateLimitedBetaUserPreferenceGuard({ persistedPreference:pref({ restoreConfirmationPending:true }), currentRequestCategory:"flight", providerId:"flight_provider", userConfirmationState:"missing" }).preferenceDecision, "confirmation_required");
   assert.equal(api.evaluateLimitedBetaUserPreferenceGuard({ persistedPreference:pref({ restoreConfirmationPending:true }), currentRequestCategory:"flight", providerId:"flight_provider", userConfirmationState:"confirmed" }).preferenceDecision, "allow");

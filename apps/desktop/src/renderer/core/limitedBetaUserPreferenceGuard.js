@@ -2,13 +2,20 @@
   "use strict";
 
   const LIMITED_BETA_USER_PREFERENCE_GUARD_VERSION = "4.2.8";
+  const LIMITED_BETA_PREFERENCE_SCHEMA_VERSION = "4.2.7";
   const counters = { restoreAttemptCount:0, restoreConfirmedCount:0, restoreBlockedCount:0, unsafePreferenceBlockedCount:0 };
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function text(value) { return String(value === undefined || value === null ? "" : value).trim(); }
+  function preferenceSchemaVersion() {
+    const persistence = window.WeishanLimitedBetaPreferencePersistence;
+    return persistence && typeof persistence.LIMITED_BETA_PREFERENCE_SCHEMA_VERSION === "string"
+      ? persistence.LIMITED_BETA_PREFERENCE_SCHEMA_VERSION
+      : LIMITED_BETA_PREFERENCE_SCHEMA_VERSION;
+  }
   function preferenceFrom(input) {
     const persistence = window.WeishanLimitedBetaPreferencePersistence;
     const raw = input && input.persistedPreference || (persistence && persistence.getCurrentPreferenceSync ? persistence.getCurrentPreferenceSync() : null);
-    if (!raw || raw.schemaVersion !== LIMITED_BETA_USER_PREFERENCE_GUARD_VERSION) return { malformed:true, preference:raw || null };
+    if (!raw || raw.schemaVersion !== preferenceSchemaVersion()) return { malformed:true, preference:raw || null };
     return { malformed:false, preference:raw };
   }
   function evaluateLimitedBetaUserPreferenceGuard(input) {
@@ -109,14 +116,15 @@
     });
   }
   function assertLimitedBetaUserPreferenceGuardSafe() {
-    const product = evaluateLimitedBetaUserPreferenceGuard({ persistedPreference:{ schemaVersion:LIMITED_BETA_USER_PREFERENCE_GUARD_VERSION, globalLimitedBetaEnabled:true, killSwitchState:"enabled", rollbackState:"not_needed", categoryOverrides:{ flight:true, product:true }, paymentDisabled:true, orderDisabled:true, bookingUrlDisabled:true, identityUploadDisabled:true }, currentRequestCategory:"product", providerId:"product_provider", userConfirmationState:"confirmed" });
+    const product = evaluateLimitedBetaUserPreferenceGuard({ persistedPreference:{ schemaVersion:preferenceSchemaVersion(), globalLimitedBetaEnabled:true, killSwitchState:"enabled", rollbackState:"not_needed", categoryOverrides:{ flight:true, product:true }, paymentDisabled:true, orderDisabled:true, bookingUrlDisabled:true, identityUploadDisabled:true }, currentRequestCategory:"product", providerId:"product_provider", userConfirmationState:"confirmed" });
     if (product.preferenceDecision === "allow") throw new Error("product beta must stay blocked");
-    const restore = evaluateLimitedBetaUserPreferenceGuard({ persistedPreference:{ schemaVersion:LIMITED_BETA_USER_PREFERENCE_GUARD_VERSION, globalLimitedBetaEnabled:true, killSwitchState:"enabled", rollbackState:"not_needed", restoreConfirmationPending:true, categoryOverrides:{ flight:true, product:false, hotel:false, local_service:false, ticket_or_activity:false, restricted_or_blocked:false }, paymentDisabled:true, orderDisabled:true, bookingUrlDisabled:true, identityUploadDisabled:true }, currentRequestCategory:"flight", providerId:"flight_provider", userConfirmationState:"missing" });
+    const restore = evaluateLimitedBetaUserPreferenceGuard({ persistedPreference:{ schemaVersion:preferenceSchemaVersion(), globalLimitedBetaEnabled:true, killSwitchState:"enabled", rollbackState:"not_needed", restoreConfirmationPending:true, categoryOverrides:{ flight:true, product:false, hotel:false, local_service:false, ticket_or_activity:false, restricted_or_blocked:false }, paymentDisabled:true, orderDisabled:true, bookingUrlDisabled:true, identityUploadDisabled:true }, currentRequestCategory:"flight", providerId:"flight_provider", userConfirmationState:"missing" });
     if (restore.preferenceDecision !== "confirmation_required") throw new Error("restore must require confirmation");
     return true;
   }
   window.WeishanLimitedBetaUserPreferenceGuard = {
     LIMITED_BETA_USER_PREFERENCE_GUARD_VERSION,
+    LIMITED_BETA_PREFERENCE_SCHEMA_VERSION,
     evaluateLimitedBetaUserPreferenceGuard,
     getLimitedBetaUserPreferenceGuardAuditDraft,
     buildLimitedBetaUserPreferenceGuardDraft,

@@ -7,7 +7,7 @@ function load(files) { const window = {}; window.window = window; const context 
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/flightWorkflowBetaExpansionGate.js", "apps/desktop/src/renderer/core/flightWorkflowReadOnlyPublicPilotChecklist.js", "apps/desktop/src/renderer/core/flightWorkflowPilotReadinessViewModel.js"]);
   const api = windowRef.WeishanFlightWorkflowPilotReadinessViewModel;
-  assert.equal(api.FLIGHT_WORKFLOW_PILOT_READINESS_VIEW_MODEL_VERSION, "4.2.7");
+  assert.equal(api.FLIGHT_WORKFLOW_PILOT_READINESS_VIEW_MODEL_VERSION, "4.2.8");
   const vm = api.buildFlightWorkflowPilotReadinessViewModel({ betaExpansionGateSummary:{ status:"approved", decision:{ label:"可以小范围扩大只读测试", safeToExpandReadOnlyBeta:true }, userFacingSummary:{ resultLabel:"可以小范围扩大只读测试" }, unmetCriteria:[], riskNotes:[], redacted:true }, publicPilotChecklistSummary:{ status:"ready", readiness:{ safeForSmallPublicPilot:true }, checklistItems:[{ itemId:"read_only_scope", label:"只读范围说明", status:"checked", message:"ok" }], blockedItems:[], userFacingSummary:{ resultLabel:"可以进入小范围只读试点" }, redacted:true } });
   assert.equal(vm.title, "只读公开试点准备状态");
   assert.equal(vm.status, "ready");

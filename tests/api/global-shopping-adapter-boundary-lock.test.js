@@ -22,7 +22,7 @@ function readySummary(title, resultLabel) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingAdapterBoundaryLock.js"]);
   const api = windowRef.WeishanGlobalShoppingAdapterBoundaryLock;
-  assert.equal(api.GLOBAL_SHOPPING_ADAPTER_BOUNDARY_LOCK_VERSION, "4.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_ADAPTER_BOUNDARY_LOCK_VERSION, "4.2.8");
 
   const ready = api.buildGlobalShoppingAdapterBoundaryLock({
     offlineProviderAdapterContractKitSummary:readySummary("Offline Provider Adapter Contract Kit", "离线 Adapter 合同套件已准备"),

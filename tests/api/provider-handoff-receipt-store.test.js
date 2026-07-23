@@ -8,7 +8,7 @@ function load(file){ const window = {}; window.window = window; vm.runInContext(
 const api = load("apps/desktop/src/renderer/core/providerHandoffReceiptStore.js").WeishanProviderHandoffReceiptStore;
 const store = memory();
 const saved = api.saveProviderHandoffReceipt({ status:"confirmed", providerName:"Trip", safeProviderHandoffUrl:"https://trip.example/path?token=abc", selectedCandidate:{ quoteId:"q1", rank:1, totalPrice:100, currency:"CNY" }, userConfirmed:true }, store);
-assert.equal(saved.appVersion, "4.2.7");
+assert.equal(saved.appVersion, "4.2.8");
 assert.equal(saved.safety.rawUrlStored, false);
 assert.equal(saved.safety.secretStored, false);
 assert.equal(saved.safety.bookingUrl, null);

@@ -15,7 +15,7 @@ function load(file) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingPublicBetaFeedbackPlaceholder.js");
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FEEDBACK_PLACEHOLDER_VERSION, "4.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FEEDBACK_PLACEHOLDER_VERSION, "4.2.8");
   const ready = api.buildGlobalShoppingPublicBetaFeedbackPlaceholder({
     placeholderMode:"feedback_placeholder_only"
   });

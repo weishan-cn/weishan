@@ -15,7 +15,7 @@ function load(file) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingPublicBetaUserJourneyShell.js");
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_USER_JOURNEY_SHELL_VERSION, "4.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_USER_JOURNEY_SHELL_VERSION, "4.2.8");
   const ready = api.buildGlobalShoppingPublicBetaUserJourneyShell({
     appVersion:"4.2.7",
     shellMode:"user_journey_only",

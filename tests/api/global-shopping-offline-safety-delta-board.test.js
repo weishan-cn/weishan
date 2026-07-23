@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingOfflineSafetyDeltaBoard.js"]);
   const api = windowRef.WeishanGlobalShoppingOfflineSafetyDeltaBoard;
-  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_SAFETY_DELTA_BOARD_VERSION, "4.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_OFFLINE_SAFETY_DELTA_BOARD_VERSION, "4.2.8");
 
   const board = api.buildGlobalShoppingOfflineSafetyDeltaBoard({
     publicBetaCandidateEvidenceReviewSummary:summary("Public Beta Candidate Evidence Review", "manual_review_required", { evidenceReviewStatus:"manual_review_required" }),

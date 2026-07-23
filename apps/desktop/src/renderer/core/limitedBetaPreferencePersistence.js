@@ -2,6 +2,7 @@
   "use strict";
 
   const LIMITED_BETA_PREFERENCE_PERSISTENCE_VERSION = "4.2.8";
+  const LIMITED_BETA_PREFERENCE_SCHEMA_VERSION = "4.2.7";
   const STORE_FILE = "limited-beta-preferences.v1.json";
   const counters = {
     restoreAttemptCount:0,
@@ -24,7 +25,7 @@
   function now() { return new Date().toISOString(); }
   function defaultPreference(action, reason) {
     return {
-      schemaVersion:LIMITED_BETA_PREFERENCE_PERSISTENCE_VERSION,
+      schemaVersion:LIMITED_BETA_PREFERENCE_SCHEMA_VERSION,
       preferenceVersion:1,
       globalLimitedBetaEnabled:true,
       categoryOverrides:{ flight:true, product:false, hotel:false, local_service:false, ticket_or_activity:false, restricted_or_blocked:false },
@@ -48,7 +49,7 @@
   }
   function sanitize(input) {
     const raw = input && typeof input === "object" ? clone(input.preference || input) : null;
-    const invalid = !raw || raw.schemaVersion !== LIMITED_BETA_PREFERENCE_PERSISTENCE_VERSION;
+    const invalid = !raw || raw.schemaVersion !== LIMITED_BETA_PREFERENCE_SCHEMA_VERSION;
     if (invalid) {
       counters.unsafePreferenceBlockedCount += raw ? 1 : 0;
       safeFallback = true;
@@ -74,7 +75,7 @@
     surfaces.provider_console = enabled;
     surfaces.sandbox_console = enabled;
     return {
-      schemaVersion:LIMITED_BETA_PREFERENCE_PERSISTENCE_VERSION,
+      schemaVersion:LIMITED_BETA_PREFERENCE_SCHEMA_VERSION,
       preferenceVersion:1,
       globalLimitedBetaEnabled:enabled,
       categoryOverrides:categories,
@@ -177,7 +178,7 @@
     return {
       version:LIMITED_BETA_PREFERENCE_PERSISTENCE_VERSION,
       status:"local preference persistence active",
-      schemaVersion:LIMITED_BETA_PREFERENCE_PERSISTENCE_VERSION,
+      schemaVersion:LIMITED_BETA_PREFERENCE_SCHEMA_VERSION,
       storage:"app userData local file",
       fileName:STORE_FILE,
       localStorage:"forbidden",
@@ -250,6 +251,7 @@
   }
   window.WeishanLimitedBetaPreferencePersistence = {
     LIMITED_BETA_PREFERENCE_PERSISTENCE_VERSION,
+    LIMITED_BETA_PREFERENCE_SCHEMA_VERSION,
     getCurrentPreferenceSync:function(){ return clone(currentPreference); },
     applyEnvelope,
     loadPersistedPreference,

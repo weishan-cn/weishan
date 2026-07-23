@@ -1128,6 +1128,7 @@ function checkLimitedBetaKillSwitchVersion(results, expectedVersion) {
 function checkLimitedBetaPreferencePersistenceVersion(results, expectedVersion) {
   const paths = [
     ["apps/desktop limited beta preference persistence version", "apps/desktop/src/renderer/core/limitedBetaPreferencePersistence.js", /LIMITED_BETA_PREFERENCE_PERSISTENCE_VERSION\s*=\s*["']([^"']+)["']/],
+    ["apps/desktop limited beta preference persistence schema version", "apps/desktop/src/renderer/core/limitedBetaPreferencePersistence.js", /LIMITED_BETA_PREFERENCE_SCHEMA_VERSION\s*=\s*["']([^"']+)["']/],
     ["apps/desktop limited beta user preference guard version", "apps/desktop/src/renderer/core/limitedBetaUserPreferenceGuard.js", /LIMITED_BETA_USER_PREFERENCE_GUARD_VERSION\s*=\s*["']([^"']+)["']/],
     ["apps/desktop limited beta preference store version", "apps/desktop/src/main/limitedBetaPreferenceStore.js", /LIMITED_BETA_PREFERENCE_STORE_VERSION\s*=\s*["']([^"']+)["']/]
   ];
@@ -1142,7 +1143,7 @@ function checkLimitedBetaPreferencePersistenceVersion(results, expectedVersion) 
       return;
     }
     const match = gate.match(regex);
-    const targetVersion = name === "apps/desktop limited beta preference store version"
+    const targetVersion = name === "apps/desktop limited beta preference persistence schema version" || name === "apps/desktop limited beta preference store version"
       ? INDEPENDENT_STORAGE_SCHEMA_VERSION
       : expectedVersion;
     addCheck(results, name, targetVersion, match && match[1], "version expectation must match " + gatePath);

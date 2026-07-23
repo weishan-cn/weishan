@@ -25,7 +25,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingZeroActionSafetyConsole.js"]);
   const api = windowRef.WeishanGlobalShoppingZeroActionSafetyConsole;
-  assert.equal(api.GLOBAL_SHOPPING_ZERO_ACTION_SAFETY_CONSOLE_VERSION, "4.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_ZERO_ACTION_SAFETY_CONSOLE_VERSION, "4.2.8");
 
   const review = api.buildGlobalShoppingZeroActionSafetyConsole({
     publicBetaFinalAcceptanceLockSummary:summary("Public Beta Final Acceptance Lock"),

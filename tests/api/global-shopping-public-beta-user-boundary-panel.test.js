@@ -15,7 +15,7 @@ function load(file) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingPublicBetaUserBoundaryPanel.js");
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_USER_BOUNDARY_PANEL_VERSION, "4.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_USER_BOUNDARY_PANEL_VERSION, "4.2.8");
   const ready = api.buildGlobalShoppingPublicBetaUserBoundaryPanel({ appVersion:"4.2.7", panelMode:"user_boundary_only" });
   assert.equal(ready.status, "ready");
   assert.equal(ready.rows.some((item) => item.value === "不保存账号、证件或支付信息"), true);

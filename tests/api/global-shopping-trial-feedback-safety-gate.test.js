@@ -32,7 +32,7 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingTrialFeedbackSafetyGate.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingTrialFeedbackSafetyGate;
-  assert.equal(api.GLOBAL_SHOPPING_TRIAL_FEEDBACK_SAFETY_GATE_VERSION, "4.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_TRIAL_FEEDBACK_SAFETY_GATE_VERSION, "4.2.8");
 
   const ready = api.buildGlobalShoppingTrialFeedbackSafetyGate({
     safeFeedbackDraftPanelSummary:summary("Safe Feedback Draft"),

@@ -15,7 +15,7 @@ function load(file) {
 
 function main() {
   const api = load("apps/desktop/src/renderer/core/globalShoppingSafeSearchIntentMatrix.js");
-  assert.equal(api.GLOBAL_SHOPPING_SAFE_SEARCH_INTENT_MATRIX_VERSION, "4.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_SAFE_SEARCH_INTENT_MATRIX_VERSION, "4.2.8");
   const ready = api.buildGlobalShoppingSafeSearchIntentMatrix({ appVersion:"4.2.7", matrixMode:"safe_intent_matrix_only", category:"flight" });
   assert.equal(ready.status, "ready");
   assert.equal(ready.searchIntentAllowed, true);

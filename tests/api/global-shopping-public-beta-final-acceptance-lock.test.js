@@ -25,7 +25,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaFinalAcceptanceLock.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaFinalAcceptanceLock;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_ACCEPTANCE_LOCK_VERSION, "4.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_FINAL_ACCEPTANCE_LOCK_VERSION, "4.2.8");
 
   const review = api.buildGlobalShoppingPublicBetaFinalAcceptanceLock({
     publicBetaOfflineAcceptanceEvidenceCenterSummary:summary("Public Beta Offline Acceptance Evidence Center"),

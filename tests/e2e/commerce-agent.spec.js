@@ -8532,9 +8532,9 @@ test.describe.serial("commerce agent workbench", () => {
       if (item.input.includes("SMOKE-FLIGHT")) {
         await expect(summary.locator(".commerce-top-result-card")).toHaveCount(1);
         const flightCard = summary.locator(".commerce-top-result-card").first();
-        await expect(flightCard).toContainText("只读候选价，不代表真实最低价");
-        await expect(flightCard).toContainText("票面价 ¥860｜税费 ¥110｜附加费 ¥40");
-        await expect(flightCard).toContainText("燃油/机建费：以平台页面为准");
+        await expect(flightCard).toContainText("暂无生产真实最低价");
+        await expect(flightCard).toContainText("无真实价格");
+        await expect(flightCard).toContainText("不可下单");
         await expect(flightCard).toContainText("以平台页面为准");
         await expect(flightCard).toContainText("不会付款或下单");
         await expect(flightCard).not.toContainText("autoOpen: false");
@@ -8548,13 +8548,13 @@ test.describe.serial("commerce agent workbench", () => {
         await expect(fareDetails).toHaveJSProperty("open", false);
         await fareDetails.locator("> summary").click();
         await fareDetails.evaluate((el) => { if (!el.open) el.open = true; el.setAttribute("open", ""); });
-        await expect(fareDetails).toContainText("票面价：¥860");
+        await expect(fareDetails).toContainText("票面价：未单独提供 / 以平台页面为准");
         await expect(fareDetails).toContainText("燃油附加费：未单独提供 / 以平台页面为准");
         await expect(fareDetails).toContainText("机场建设费 / 民航发展基金：未单独提供 / 以平台页面为准");
         await expect(fareDetails).toContainText("平台服务费：未单独提供 / 以平台页面为准");
-        await expect(fareDetails).toContainText("税费：¥110");
-        await expect(fareDetails).toContainText("其它附加费：¥40");
-        await expect(fareDetails).toContainText("最终应付总价：¥1010");
+        await expect(fareDetails).toContainText("税费：未单独提供 / 以平台页面为准");
+        await expect(fareDetails).toContainText("其它附加费：未单独提供 / 以平台页面为准");
+        await expect(fareDetails).toContainText("最终应付总价：价格暂不展示");
         await fareDetails.evaluate((el) => { el.open = false; el.removeAttribute("open"); });
         const userSurfaceText = await visibleTextWithoutTechnicalDetails(summary);
         expect((userSurfaceText.match(/最终应付总价：¥1010/g) || []).length).toBe(0);
@@ -8649,7 +8649,7 @@ test.describe.serial("commerce agent workbench", () => {
 
         await openDisclosure(debugBody, "commerce-top-result-cards-builder-disclosure");
         const topCardsBody = debugBody.locator("details.commerce-top-result-cards-builder-disclosure .commerce-disclosure-body").first();
-        for (const text of ["Top Result Cards Builder", "top result cards builder: active", "maxCardCount: 3", "cheapestClaimCount: 0", "limitedBetaCheapestClaimBlockedCount: 1", "incompleteFareExcludedCount: 1", "totalPayableSortUsed: false", "fakeResultBlockedCount: 0", "bookingUrlDisplayedCount: 0", "paymentActionDisplayedCount: 0", "orderActionDisplayedCount: 0", "identityUploadDisplayedCount: 0", "FLIGHT_FARE_BREAKDOWN_DRAFT", "CHEAPEST_TRUTH_GUARD_DRAFT", "FARE_CARD_UX_CLEANUP_DRAFT", "TOP_RESULT_CARDS_BUILDER_DRAFT", "redacted: true"]) await expect(topCardsBody).toContainText(text);
+        for (const text of ["Top Result Cards Builder", "top result cards builder: active", "maxCardCount: 3", "cheapestClaimCount: 0", "limitedBetaCheapestClaimBlockedCount: 0", "incompleteFareExcludedCount: 1", "totalPayableSortUsed: false", "fakeResultBlockedCount: 0", "bookingUrlDisplayedCount: 0", "paymentActionDisplayedCount: 0", "orderActionDisplayedCount: 0", "identityUploadDisplayedCount: 0", "FLIGHT_FARE_BREAKDOWN_DRAFT", "CHEAPEST_TRUTH_GUARD_DRAFT", "FARE_CARD_UX_CLEANUP_DRAFT", "TOP_RESULT_CARDS_BUILDER_DRAFT", "redacted: true"]) await expect(topCardsBody).toContainText(text);
 
         await openDisclosure(debugBody, "commerce-provider-handoff-ui-disclosure");
         const handoffBody = debugBody.locator("details.commerce-provider-handoff-ui-disclosure .commerce-disclosure-body").first();

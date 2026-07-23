@@ -26,7 +26,7 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaNextStepViewModel.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaNextStepViewModel;
-  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_NEXT_STEP_VIEW_MODEL_VERSION, "4.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_NEXT_STEP_VIEW_MODEL_VERSION, "4.2.8");
 
   const ready = api.buildGlobalShoppingPublicBetaNextStepViewModel({
     publicBetaClosureEvidenceArchiveSummary:summary("Public Beta Closure Evidence Archive", "manual_review_required"),

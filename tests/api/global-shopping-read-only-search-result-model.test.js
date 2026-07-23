@@ -24,8 +24,8 @@ function main() {
     sourceType:"major_platform",
     trustLevel:"high"
   });
-  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_SEARCH_RESULT_MODEL_VERSION, "4.2.7");
-  assert.equal(item.appVersion, "4.2.7");
+  assert.equal(api.GLOBAL_SHOPPING_READ_ONLY_SEARCH_RESULT_MODEL_VERSION, "4.2.8");
+  assert.equal(item.appVersion, "4.2.8");
   assert.equal(item.category, "product");
   assert.equal(item.readOnlyCandidate, true);
   assert.equal(item.notOrder, true);
