@@ -6,6 +6,9 @@
   let expandedDesktopTasks = {};
   let pendingSafeExternalSearchConfirmation = null;
   let globalShoppingComposerExpanded = false;
+  let homeTopbarSyncFrame = 0;
+  let homeTopbarPendingSnapshot = null;
+  const homePerformanceStats = { renderShellCount:0, refreshCommandPanelsCount:0 };
 
   function esc(s){
     return String(s || "").replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; });
@@ -7118,8 +7121,8 @@
     const subtitle = topbar.querySelector("p");
     const actions = topbar.querySelector(".top-actions");
     const lang = topbar.querySelector("#langSelect");
-    if (title) title.textContent = "首页总调度";
-    if (subtitle) subtitle.textContent = "本地优先 · 模块隔离 · A/B 模式";
+    if (title && title.textContent !== "首页总调度") title.textContent = "首页总调度";
+    if (subtitle && subtitle.textContent !== "本地优先 · 模块隔离 · A/B 模式") subtitle.textContent = "本地优先 · 模块隔离 · A/B 模式";
     if (!actions || !lang) return;
     let status = actions.querySelector("#homeAiStatus");
     if (!status) {
@@ -7134,17 +7137,24 @@
     const state = String(summary.state || (summary.connected ? "connected" : "not_configured"));
     const label = String(summary.label || (state === "connected" ? "AI 已连接" : state === "saved_untested" ? "AI 未测试" : state === "testing" ? "AI 测试中" : state === "failed" ? "AI 连接失败" : "AI 未配置"));
     const cls = state === "connected" ? "is-connected" : (state === "saved_untested" || state === "testing" ? "is-pending" : "is-disconnected");
+    if (status.dataset.aiState === state && status.textContent === label && status.className === "home-ai-status " + cls) return;
     status.className = "home-ai-status " + cls;
     status.dataset.aiState = state;
     status.textContent = label;
   }
 
   function syncHomeTopbarSoon(snapshot){
-    syncHomeTopbar(snapshot);
-    if (typeof requestAnimationFrame === "function") {
-      requestAnimationFrame(function(){ syncHomeTopbar(snapshot); });
-    }
-    setTimeout(function(){ syncHomeTopbar(snapshot); }, 30);
+    homeTopbarPendingSnapshot = snapshot || null;
+    if (homeTopbarSyncFrame) return;
+    const schedule = typeof requestAnimationFrame === "function"
+      ? requestAnimationFrame
+      : function(callback){ return setTimeout(callback, 0); };
+    homeTopbarSyncFrame = schedule(function(){
+      homeTopbarSyncFrame = 0;
+      const pending = homeTopbarPendingSnapshot;
+      homeTopbarPendingSnapshot = null;
+      if (homeRouteActive()) syncHomeTopbar(pending);
+    });
   }
 
   function homeRouteActive(){
@@ -7173,6 +7183,7 @@
     window.__WEISHAN_HOME_AI_STATUS_FOCUS_HANDLER__ = null;
     window.__WEISHAN_HOME_AI_STATUS_VISIBILITY_HANDLER__ = null;
     window.__WEISHAN_HOME_AI_STATUS_ROUTE_HANDLER__ = null;
+    homeTopbarPendingSnapshot = null;
   }
 
   function bindHomeAiStatusRuntimeHooks(){
@@ -7196,19 +7207,31 @@
     window.addEventListener("weishan:route-changed", window.__WEISHAN_HOME_AI_STATUS_ROUTE_HANDLER__);
   }
 
-  function render(host){
-    const snap = window.CommandApi.snapshot();
-    syncDesktopAssistantTasksFromSnapshot(snap);
-    syncHomeTopbarSoon(snap);
-    const currentTask = selectedHistoryTask(snap)
+  function currentTaskForSnapshot(snap){
+    return selectedHistoryTask(snap)
       || (snap.queue || []).find((task) => task && (task.status === "queued" || task.status === "running" || task.status === "done" || task.status === "failed"))
       || (snap.history || [])[0]
       || null;
+  }
+
+  function isGlobalShoppingActiveForSnapshot(snap){
+    const currentTask = currentTaskForSnapshot(snap);
     const currentCommerceTask = currentTask && isCommerceTask(currentTask) ? storedCommerceTask(currentTask) : null;
     const workspaceApi = window.CommerceAgentPage;
-    const globalShoppingActive = !!(currentCommerceTask && workspaceApi
+    return !!(currentCommerceTask && workspaceApi
       && typeof workspaceApi.isGlobalShoppingTask === "function"
       && workspaceApi.isGlobalShoppingTask(currentCommerceTask));
+  }
+
+  function renderShell(host){
+    homePerformanceStats.renderShellCount += 1;
+    const snap = window.CommandApi.snapshot();
+    syncDesktopAssistantTasksFromSnapshot(snap);
+    syncHomeTopbarSoon(snap);
+    const currentTask = currentTaskForSnapshot(snap);
+    const currentCommerceTask = currentTask && isCommerceTask(currentTask) ? storedCommerceTask(currentTask) : null;
+    const workspaceApi = window.CommerceAgentPage;
+    const globalShoppingActive = isGlobalShoppingActiveForSnapshot(snap);
     const compactGlobalShoppingComposer = globalShoppingActive && !globalShoppingComposerExpanded && !commandInputDraft.trim() && !stagedAttachments.length;
 
     host.innerHTML = `
@@ -7278,6 +7301,47 @@
         }
       });
     }
+  }
+
+  function refreshPanel(panel, html){
+    if (panel && panel.innerHTML !== html) panel.innerHTML = html;
+  }
+
+  function refreshCommandPanels(host){
+    homePerformanceStats.refreshCommandPanelsCount += 1;
+    const snap = window.CommandApi.snapshot();
+    syncDesktopAssistantTasksFromSnapshot(snap);
+    syncHomeTopbarSoon(snap);
+    const shell = host.querySelector(".home-v205-page");
+    const globalShoppingActive = isGlobalShoppingActiveForSnapshot(snap);
+    if (!shell || shell.classList.contains("is-global-shopping-active") !== globalShoppingActive) {
+      renderShell(host);
+      return { fullRender:true, refreshedPanels:0 };
+    }
+
+    const consolePanel = host.querySelector("#cmdConsole");
+    refreshPanel(consolePanel, mainLogs(snap));
+    if (consolePanel) hydrateDisclosureSections(consolePanel);
+
+    let refreshedPanels = consolePanel ? 1 : 0;
+    if (!globalShoppingActive) {
+      const queuePanelNode = host.querySelector("#cmdQueue");
+      const historyPanelNode = host.querySelector("#cmdHistory");
+      const queueHtml = queuePanel(snap);
+      const historyHtml = historyPanel(snap);
+      refreshPanel(queuePanelNode, queueHtml);
+      refreshPanel(historyPanelNode, historyHtml);
+      refreshedPanels += queuePanelNode ? 1 : 0;
+      refreshedPanels += historyPanelNode ? 1 : 0;
+    }
+    return { fullRender:false, refreshedPanels };
+  }
+
+  function render(host){ renderShell(host); }
+
+  function resetHomePerformanceStats(){
+    homePerformanceStats.renderShellCount = 0;
+    homePerformanceStats.refreshCommandPanelsCount = 0;
   }
 
   function bind(host){
@@ -7871,7 +7935,7 @@
       window.addEventListener("weishan:command", function(){
         const current = document.querySelector("#pageHost");
         if (current && window.WeishanRouter && window.WeishanRouter.current && window.WeishanRouter.current() === "home") {
-          try { render(current); } catch (_) {}
+          try { refreshCommandPanels(current); } catch (_) {}
         }
       });
     }
@@ -7885,8 +7949,13 @@
     mount,
     unmount,
     __syncHomeTopbarForTest:syncHomeTopbar,
+    __syncHomeTopbarSoonForTest:syncHomeTopbarSoon,
     __refreshHomeAiStatusForTest:refreshHomeAiStatus,
     __bindHomeAiStatusRuntimeHooksForTest:bindHomeAiStatusRuntimeHooks,
-    __clearHomeAiStatusRuntimeHooksForTest:clearHomeAiStatusRuntimeHooks
+    __clearHomeAiStatusRuntimeHooksForTest:clearHomeAiStatusRuntimeHooks,
+    __renderShellForTest:renderShell,
+    __refreshCommandPanelsForTest:refreshCommandPanels,
+    __getPerformanceStatsForTest:function(){ return Object.assign({}, homePerformanceStats); },
+    __resetPerformanceStatsForTest:resetHomePerformanceStats
   };
 })();

@@ -66,7 +66,15 @@ function loadApi(window) {
 
 function createTopbarDocument() {
   const listeners = {};
-  const status = { id:"homeAiStatus", className:"home-ai-status", textContent:"", dataset:{} };
+  let statusText = "";
+  const status = {
+    id:"homeAiStatus",
+    className:"home-ai-status",
+    dataset:{},
+    textWriteCount:0,
+    get textContent() { return statusText; },
+    set textContent(value) { statusText = String(value); this.textWriteCount += 1; }
+  };
   const actions = {
     querySelector(selector) {
       if (selector === "#homeAiStatus") return status;
@@ -108,12 +116,12 @@ function createTopbarDocument() {
   };
 }
 
-function loadHomePage(window, document) {
+function loadHomePage(window, document, requestAnimationFrameImpl) {
   const context = vm.createContext({
     window,
     document,
     console,
-    requestAnimationFrame:(fn) => fn(),
+    requestAnimationFrame:requestAnimationFrameImpl || ((fn) => fn()),
     setTimeout:(fn) => fn(),
     clearTimeout
   });
@@ -297,6 +305,19 @@ async function main() {
   assert.equal((window.__events.focus || []).length, 0);
   assert.equal((window.__events["weishan:route-changed"] || []).length, 0);
   assert.equal((document.__events.visibilitychange || []).length, 0);
+
+  const queuedFrames = [];
+  const coalescedHomePage = loadHomePage(window, document, (callback) => {
+    queuedFrames.push(callback);
+    return queuedFrames.length;
+  });
+  const writesBeforeCoalescedSync = status.textWriteCount;
+  coalescedHomePage.__syncHomeTopbarSoonForTest({ brain:"AI 已连接" });
+  coalescedHomePage.__syncHomeTopbarSoonForTest({ brain:"AI 已连接" });
+  coalescedHomePage.__syncHomeTopbarSoonForTest({ brain:"AI 已连接" });
+  assert.equal(queuedFrames.length, 1);
+  queuedFrames.shift()();
+  assert.equal(status.textWriteCount, writesBeforeCoalescedSync);
 
   const summaryPayload = api.connectorSummary();
   assert.equal(typeof summaryPayload.connector.hasApiKey, "boolean");
