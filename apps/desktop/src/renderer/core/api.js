@@ -1,5 +1,6 @@
 (function(){
   const apiBase = (window.weishan && window.weishan.apiBase) || "http://127.0.0.1:8787";
+  const connectorStatusSubscribers = new Set();
   function perfApi(){ return window.WeishanPerf || null; }
   function isPerfEnabled(){
     const perf = perfApi();
@@ -65,12 +66,125 @@
     const hasApiKey = Boolean(raw.hasApiKey);
     return scrubConnector(raw, hasApiKey);
   }
+  function exportedConnectorOverride(){
+    return window.WeishanAPI && typeof window.WeishanAPI.connector === "function" && window.WeishanAPI.connector !== connector
+      ? window.WeishanAPI.connector
+      : null;
+  }
+  function currentConnectorForSummary(){
+    const override = exportedConnectorOverride();
+    if (!override) return connector();
+    try {
+      const next = override() || {};
+      return scrubConnector(next, Boolean(next.hasApiKey));
+    } catch (_) {
+      return connector();
+    }
+  }
+  function exportedConnectorStatusOverride(){
+    return window.WeishanAPI && typeof window.WeishanAPI.connectorStatus === "function" && window.WeishanAPI.connectorStatus !== connectorStatus
+      ? window.WeishanAPI.connectorStatus
+      : null;
+  }
+  function connectorRuntimeState(){
+    const state = window.__WEISHAN_AI_CONNECTOR_RUNTIME_STATE__;
+    return state && typeof state === "object" ? state : null;
+  }
+  function activeConnectorRuntimeState(){
+    const runtime = connectorRuntimeState();
+    const accountId = String(account().accountId || "");
+    if (!runtime || String(runtime.accountId || "") !== accountId) return "";
+    return String(runtime.state || "");
+  }
+  function connectorSummaryPayload(detail){
+    return Object.assign({}, connectorSummary(), detail || {});
+  }
+  function notifyConnectorStatusSubscribers(payload){
+    connectorStatusSubscribers.forEach((listener) => {
+      try { listener(payload); } catch (_) {}
+    });
+  }
+  function subscribeConnectorStatus(listener){
+    if (typeof listener !== "function") return function(){};
+    connectorStatusSubscribers.add(listener);
+    try { listener(connectorSummaryPayload()); } catch (_) {}
+    return function unsubscribeConnectorStatus(){
+      connectorStatusSubscribers.delete(listener);
+    };
+  }
+  function setConnectorRuntimeState(state, options){
+    const nextState = String(state || "").trim();
+    const accountId = String(account().accountId || "");
+    const shouldEmit = !(options && options.emit === false);
+    if (!nextState) {
+      delete window.__WEISHAN_AI_CONNECTOR_RUNTIME_STATE__;
+      if (shouldEmit) emitConnectorStatusChanged({ source:"setConnectorRuntimeState", runtimeState:"" });
+      return;
+    }
+    window.__WEISHAN_AI_CONNECTOR_RUNTIME_STATE__ = {
+      state:nextState,
+      accountId,
+      updatedAt:window.WeishanStore && window.WeishanStore.now ? window.WeishanStore.now() : new Date().toISOString()
+    };
+    if (shouldEmit) emitConnectorStatusChanged({ source:"setConnectorRuntimeState", runtimeState:nextState });
+  }
+  function normalizeConnectorSummaryState(status){
+    const runtimeState = activeConnectorRuntimeState();
+    if (runtimeState === "testing") return "testing";
+    if (status === "success") return "connected";
+    if (status === "failed") return "failed";
+    if (status === "saved") return "saved_untested";
+    return "not_configured";
+  }
+  function connectorSummaryLabel(state, provider, model){
+    if (state === "connected") return "AI 已连接" + (provider ? " · " + provider + (model ? " / " + model : "") : "");
+    if (state === "testing") return "AI 测试中";
+    if (state === "failed") return "AI 连接失败";
+    if (state === "saved_untested") return "AI 未测试";
+    return "AI 未配置";
+  }
   function connectorStatus(c = connector()){
+    if (arguments.length === 0) {
+      const override = exportedConnectorStatusOverride();
+      if (override) {
+        try {
+          return String(override() || "empty");
+        } catch (_) {}
+      }
+      c = currentConnectorForSummary();
+    }
     if (!account().loggedIn) return "locked";
     if (!c.baseUrl && !c.hasApiKey && !c.chatModel) return "empty";
     if (c.testStatus === "success") return "success";
     if (c.testStatus === "failed") return "failed";
     return "saved";
+  }
+  function connectorSummary(c = connector()){
+    const implicit = arguments.length === 0;
+    if (implicit) c = currentConnectorForSummary();
+    const status = implicit ? connectorStatus() : connectorStatus(c);
+    const provider = c.providerType || c.provider || "model_gateway";
+    const model = c.chatModel || "";
+    const state = normalizeConnectorSummaryState(status);
+    return {
+      connected:state === "connected",
+      state,
+      status,
+      rawStatus:status,
+      provider,
+      model,
+      label:connectorSummaryLabel(state, provider, model),
+      connector:scrubConnector(c, c.hasApiKey)
+    };
+  }
+  function emitConnectorStatusChanged(detail){
+    const payload = connectorSummaryPayload(detail);
+    try {
+      window.dispatchEvent(new CustomEvent("weishan:ai-connector-status-changed", {
+        detail:payload
+      }));
+    } catch (_) {}
+    notifyConnectorStatusSubscribers(payload);
   }
   function secureBridge(){
     if (window.SecureStorageApi) return window.SecureStorageApi;
@@ -143,6 +257,7 @@
       if (raw.keyStorageMode !== "secure") {
         const nextSecure = Object.assign(scrubConnector(raw, true), { keyStorageMode:"secure" });
         window.WeishanStore.write(key, nextSecure);
+        emitConnectorStatusChanged({ source:"syncApiKeyPresence" });
         return { ok:true, changed:true, connector:nextSecure };
       }
       return { ok:true, changed:false, connector:connector() };
@@ -150,6 +265,7 @@
 
     const next = Object.assign(scrubConnector(raw, false), { keyStorageMode:"none" });
     window.WeishanStore.write(key, next);
+    emitConnectorStatusChanged({ source:"syncApiKeyPresence" });
     return { ok:true, changed:true, connector:next };
   }
   async function saveConnector(config){
@@ -186,6 +302,8 @@
     }
     const next = Object.assign(scrubConnector(Object.assign(current, config || {}), hasApiKey), { keyStorageMode, savedAt:window.WeishanStore.now(), testStatus:"saved", testMessage:"", testDetail:"", testedAt:"" });
     window.WeishanStore.write(key, next);
+    setConnectorRuntimeState("", { emit:false });
+    emitConnectorStatusChanged({ source:"saveConnector" });
     return Object.assign({}, next, {
       ok:true,
       configSaved:true,
@@ -207,13 +325,25 @@
       detectedProtocol:res.detectedProtocol || "",
       providerType:res.providerType || config && config.providerType || current.providerType || "custom"
     });
-    return window.WeishanStore.write(key, next);
+    const saved = window.WeishanStore.write(key, next);
+    setConnectorRuntimeState("", { emit:false });
+    emitConnectorStatusChanged({ source:"saveTest" });
+    return saved;
+  }
+  function saveRuntimeFailure(config){
+    if (config && account().loggedIn) return saveTest(config, { ok:false, message:"AI 调用失败" });
+    setConnectorRuntimeState("", { emit:false });
+    emitConnectorStatusChanged({ source:"saveRuntimeFailure" });
+    return blankConnector();
   }
   async function clearConnector(){
     const key = connectorKey();
     if (!key) return blankConnector();
     await secureDeleteApiKey();
-    return window.WeishanStore.write(key, blankConnector());
+    const cleared = window.WeishanStore.write(key, blankConnector());
+    setConnectorRuntimeState("", { emit:false });
+    emitConnectorStatusChanged({ source:"clearConnector" });
+    return cleared;
   }
   async function connectorForRequest(input, meta){
     await syncApiKeyPresence();
@@ -227,7 +357,14 @@
   async function testConnector(input){
     if (!account().loggedIn) return { ok:false, message:"请先登录后再配置 AI。" };
     const meta = perfMeta("api.aiTest", input && input.__perf);
-    const cfg = await connectorForRequest(input || {}, meta);
+    let cfg = null;
+    setConnectorRuntimeState("testing");
+    try {
+      cfg = await connectorForRequest(input || {}, meta);
+    } catch (err) {
+      saveRuntimeFailure(cfg);
+      throw err;
+    }
     const startedAt = perfStart(meta, "renderer.ipc.invoke.start", { messageCount:1, inputChars:4, hasKey:!!cfg.apiKey });
     let res;
     try {
@@ -235,6 +372,7 @@
       perfEnd(meta, "renderer.ipc.invoke.done", startedAt, { status:res && res.ok ? 200 : 0, messageCount:1, inputChars:4, outputChars:String(res && (res.message || res.error) || "").length, hasKey:!!cfg.apiKey });
     } catch (err) {
       perfError(meta, "renderer.ipc.invoke.error", startedAt, err, { messageCount:1, inputChars:4, hasKey:!!cfg.apiKey });
+      saveRuntimeFailure(cfg);
       throw err;
     }
     saveTest(cfg, res);
@@ -257,9 +395,11 @@
       perfEnd(meta, "renderer.ipc.invoke.done", startedAt, { status:res && res.ok ? 200 : 0, messageCount, inputChars, outputChars:String(res && res.content || "").length, hasKey:!!cfg.apiKey });
     } catch (err) {
       perfError(meta, "renderer.ipc.invoke.error", startedAt, err, { messageCount, inputChars, hasKey:!!cfg.apiKey });
+      saveRuntimeFailure(cfg);
       throw err;
     }
     if (res.ok) saveTest(cfg, { ok:true, message:"AI 调用成功", detectedProtocol:res.detectedProtocol });
+    else saveRuntimeFailure(cfg);
     return res;
   }
   async function chatStream(messages, options){
@@ -306,11 +446,13 @@
       perfEnd(meta, "renderer.stream.invoke.done", startedAt, { status:res && res.ok ? 200 : 0, messageCount, inputChars, outputChars:res && res.content ? String(res.content).length : outputChars, chunkCount, hasKey:!!cfg.apiKey });
     } catch (err) {
       perfError(meta, "renderer.stream.invoke.error", startedAt, err, { messageCount, inputChars, outputChars, chunkCount, hasKey:!!cfg.apiKey });
+      saveRuntimeFailure(cfg);
       throw err;
     }
     if (res && res.ok) saveTest(cfg, { ok:true, message:"AI 调用成功", detectedProtocol:res.detectedProtocol });
+    else saveRuntimeFailure(cfg);
     return res;
   }
   async function health(){ const r = await fetch(apiBase + "/health"); return r.json(); }
-  window.WeishanAPI = { apiBase, connector, connectorKey, connectorStatus, saveConnector, saveTest, clearConnector, connectorForRequest, migrateLegacyApiKey, syncApiKeyPresence, chat, chatStream, testConnector, health };
+  window.WeishanAPI = { apiBase, connector, connectorKey, connectorStatus, connectorSummary, saveConnector, saveTest, clearConnector, connectorForRequest, migrateLegacyApiKey, syncApiKeyPresence, subscribeConnectorStatus, setConnectorRuntimeState, chat, chatStream, testConnector, health };
 })();

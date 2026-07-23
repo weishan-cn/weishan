@@ -125,17 +125,22 @@ test.describe.serial("dispatch router", () => {
     await expect(currentTaskLogs(page)).not.toContainText("desktopAssistant.plan");
     await expect(currentTaskLogs(page)).not.toContainText("桌面操作计划");
     await expectHistory(page, runId, /chat\.answered|OpenRouter|aion-labs\/aion-1\.0-mini|高铁/);
+
+    const localTimeCommand = runId + " 今天星期几？";
+    await submitHomeCommand(page, localTimeCommand);
+    await expect(currentTaskLogs(page)).toContainText("本地时间模块");
+    await expectHistory(page, localTimeCommand, /今天是星期/);
   });
 
   test("general chat unavailable state lists local capabilities without awkward mock answers", async () => {
     await setMockSettingsAi(page, false);
     const command = runId + " weishan 能做什么？";
     await submitHomeCommand(page, command);
-    await expect(page.getByText(/AI 未接通/).first()).toBeVisible();
+    await expect(page.getByText(/AI 未配置/).first()).toBeVisible();
     await expect(page.getByText(/AI 网关未接通|文档草稿|PPT 大纲|Codex 指令|邮件接管|抓取中心|软件工厂/).first()).toBeVisible();
     await expect(currentTaskLogs(page)).not.toContainText("# 本地回答");
     await expect(page.getByText(/来自首页调度中心的邮件任务|来自首页调度中心的抓取任务|来自首页调度中心的软件工厂任务/)).toHaveCount(0);
-    await expectHistory(page, runId, /chat\.unavailable|AI 网关未接通|文档草稿/);
+    await expectHistory(page, runId, /chat\.unavailable|AI 未配置|文档草稿/);
   });
 
   test("document dispatch creates a local document draft record", async () => {

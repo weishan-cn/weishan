@@ -7128,10 +7128,15 @@
       status.className = "home-ai-status";
       actions.insertBefore(status, lang);
     }
-    const label = String(snapshot && snapshot.brain || "");
-    const connected = /^AI 已连接/.test(label);
-    status.className = "home-ai-status " + (connected ? "is-connected" : "is-disconnected");
-    status.textContent = connected ? label : "AI 未连接";
+    const summary = window.WeishanAPI && typeof window.WeishanAPI.connectorSummary === "function"
+      ? window.WeishanAPI.connectorSummary()
+      : { state:/^AI 已连接/.test(String(snapshot && snapshot.brain || "")) ? "connected" : "not_configured", label:String(snapshot && snapshot.brain || "") || "AI 未配置" };
+    const state = String(summary.state || (summary.connected ? "connected" : "not_configured"));
+    const label = String(summary.label || (state === "connected" ? "AI 已连接" : state === "saved_untested" ? "AI 未测试" : state === "testing" ? "AI 测试中" : state === "failed" ? "AI 连接失败" : "AI 未配置"));
+    const cls = state === "connected" ? "is-connected" : (state === "saved_untested" || state === "testing" ? "is-pending" : "is-disconnected");
+    status.className = "home-ai-status " + cls;
+    status.dataset.aiState = state;
+    status.textContent = label;
   }
 
   function syncHomeTopbarSoon(snapshot){
@@ -7140,6 +7145,55 @@
       requestAnimationFrame(function(){ syncHomeTopbar(snapshot); });
     }
     setTimeout(function(){ syncHomeTopbar(snapshot); }, 30);
+  }
+
+  function homeRouteActive(){
+    return !!(window.WeishanRouter && window.WeishanRouter.current && window.WeishanRouter.current() === "home");
+  }
+
+  function refreshHomeAiStatus(){
+    if (!homeRouteActive()) return;
+    syncHomeTopbarSoon(window.CommandApi && window.CommandApi.snapshot ? window.CommandApi.snapshot() : null);
+  }
+
+  function clearHomeAiStatusRuntimeHooks(){
+    if (typeof window.__WEISHAN_HOME_AI_STATUS_UNSUBSCRIBE__ === "function") {
+      try { window.__WEISHAN_HOME_AI_STATUS_UNSUBSCRIBE__(); } catch (_) {}
+    }
+    if (window.__WEISHAN_HOME_AI_STATUS_FOCUS_HANDLER__) {
+      window.removeEventListener("focus", window.__WEISHAN_HOME_AI_STATUS_FOCUS_HANDLER__);
+    }
+    if (window.__WEISHAN_HOME_AI_STATUS_VISIBILITY_HANDLER__) {
+      document.removeEventListener("visibilitychange", window.__WEISHAN_HOME_AI_STATUS_VISIBILITY_HANDLER__);
+    }
+    if (window.__WEISHAN_HOME_AI_STATUS_ROUTE_HANDLER__) {
+      window.removeEventListener("weishan:route-changed", window.__WEISHAN_HOME_AI_STATUS_ROUTE_HANDLER__);
+    }
+    window.__WEISHAN_HOME_AI_STATUS_UNSUBSCRIBE__ = null;
+    window.__WEISHAN_HOME_AI_STATUS_FOCUS_HANDLER__ = null;
+    window.__WEISHAN_HOME_AI_STATUS_VISIBILITY_HANDLER__ = null;
+    window.__WEISHAN_HOME_AI_STATUS_ROUTE_HANDLER__ = null;
+  }
+
+  function bindHomeAiStatusRuntimeHooks(){
+    clearHomeAiStatusRuntimeHooks();
+    if (window.WeishanAPI && typeof window.WeishanAPI.subscribeConnectorStatus === "function") {
+      window.__WEISHAN_HOME_AI_STATUS_UNSUBSCRIBE__ = window.WeishanAPI.subscribeConnectorStatus(function(){
+        refreshHomeAiStatus();
+      });
+    }
+    window.__WEISHAN_HOME_AI_STATUS_FOCUS_HANDLER__ = function(){
+      refreshHomeAiStatus();
+    };
+    window.__WEISHAN_HOME_AI_STATUS_VISIBILITY_HANDLER__ = function(){
+      if (document.visibilityState === "visible") refreshHomeAiStatus();
+    };
+    window.__WEISHAN_HOME_AI_STATUS_ROUTE_HANDLER__ = function(){
+      refreshHomeAiStatus();
+    };
+    window.addEventListener("focus", window.__WEISHAN_HOME_AI_STATUS_FOCUS_HANDLER__);
+    document.addEventListener("visibilitychange", window.__WEISHAN_HOME_AI_STATUS_VISIBILITY_HANDLER__);
+    window.addEventListener("weishan:route-changed", window.__WEISHAN_HOME_AI_STATUS_ROUTE_HANDLER__);
   }
 
   function render(host){
@@ -7808,7 +7862,10 @@
   }
 
   function mount(host){
+    clearHomeAiStatusRuntimeHooks();
     render(host);
+    bindHomeAiStatusRuntimeHooks();
+    setTimeout(function(){ refreshHomeAiStatus(); }, 0);
     if (!window.__WEISHAN_HOME_V205_BOUND__) {
       window.__WEISHAN_HOME_V205_BOUND__ = true;
       window.addEventListener("weishan:command", function(){
@@ -7820,5 +7877,16 @@
     }
   }
 
-  window.HomePage = { mount };
+  function unmount(){
+    clearHomeAiStatusRuntimeHooks();
+  }
+
+  window.HomePage = {
+    mount,
+    unmount,
+    __syncHomeTopbarForTest:syncHomeTopbar,
+    __refreshHomeAiStatusForTest:refreshHomeAiStatus,
+    __bindHomeAiStatusRuntimeHooksForTest:bindHomeAiStatusRuntimeHooks,
+    __clearHomeAiStatusRuntimeHooksForTest:clearHomeAiStatusRuntimeHooks
+  };
 })();

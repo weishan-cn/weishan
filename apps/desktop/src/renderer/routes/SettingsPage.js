@@ -151,11 +151,14 @@
   }
 
   function statusView(c){
-    const s = window.WeishanAPI.connectorStatus(c);
-    if (s === "locked") return { cls:"connector-locked", title:t("loginRequired"), text:t("aiKeyPrivate") };
-    if (s === "success") return { cls:"connector-success", title:t("aiServiceConnected"), text:(c.testMessage || detectedText(c, "", true)) + (c.testedAt ? " · " + c.testedAt : ""), detail:c.testDetail || "" };
-    if (s === "failed") return { cls:"connector-failed", title:t("testFailed"), text:c.testMessage || t("testFailedHint"), detail:c.testDetail || "" };
-    if (s === "saved") return { cls:"connector-saved", title:t("savedUntested"), text:t("savedUntestedHint") };
+    const summary = window.WeishanAPI.connectorSummary ? window.WeishanAPI.connectorSummary(c) : null;
+    const rawStatus = summary ? summary.rawStatus || summary.status : window.WeishanAPI.connectorStatus(c);
+    const state = summary ? summary.state : (rawStatus === "success" ? "connected" : rawStatus === "failed" ? "failed" : rawStatus === "saved" ? "saved_untested" : "not_configured");
+    if (rawStatus === "locked") return { cls:"connector-locked", title:t("loginRequired"), text:t("aiKeyPrivate") };
+    if (state === "connected") return { cls:"connector-success", title:t("aiServiceConnected"), text:(c.testMessage || detectedText(c, "", true)) + (c.testedAt ? " · " + c.testedAt : ""), detail:c.testDetail || "" };
+    if (state === "testing") return { cls:"connector-saved", title:t("testing"), text:t("aiFetchingModels") };
+    if (state === "failed") return { cls:"connector-failed", title:t("testFailed"), text:c.testMessage || t("testFailedHint"), detail:c.testDetail || "" };
+    if (state === "saved_untested") return { cls:"connector-saved", title:t("savedUntested"), text:t("savedUntestedHint") };
     return { cls:"connector-empty", title:t("aiNotConfigured"), text:t("aiNotConfiguredHint") };
   }
 
@@ -886,6 +889,62 @@
     if (provider) provider.textContent = detectedText(c, c.testDetail || c.testMessage || "", false);
   }
 
+  function clearSettingsConnectorStatusRuntimeHook(){
+    if (typeof window.__WEISHAN_SETTINGS_CONNECTOR_STATUS_UNSUBSCRIBE__ === "function") {
+      try { window.__WEISHAN_SETTINGS_CONNECTOR_STATUS_UNSUBSCRIBE__(); } catch (_) {}
+    }
+    window.__WEISHAN_SETTINGS_CONNECTOR_STATUS_UNSUBSCRIBE__ = null;
+  }
+
+  function refreshSettingsConnectorStatus(host){
+    if (!host || !window.WeishanAPI || typeof window.WeishanAPI.connector !== "function") return;
+    renderStatus(host, window.WeishanAPI.connector());
+  }
+
+  function bindSettingsConnectorStatusRuntimeHooks(host){
+    clearSettingsConnectorStatusRuntimeHook();
+    if (window.WeishanAPI && typeof window.WeishanAPI.subscribeConnectorStatus === "function") {
+      window.__WEISHAN_SETTINGS_CONNECTOR_STATUS_UNSUBSCRIBE__ = window.WeishanAPI.subscribeConnectorStatus(function(){
+        refreshSettingsConnectorStatus(host);
+      });
+    }
+  }
+
+  async function runConnectorTest(host, input){
+    let requestInput = null;
+    try {
+      if (!input.baseUrl || !input.chatModel) {
+        const classified = classifyTestResult(input, { ok:false, message:"" });
+        renderStatus(host, writeClassifiedTest(input, classified));
+        return;
+      }
+
+      requestInput = await window.WeishanAPI.connectorForRequest(input);
+      if (!requestInput.apiKey) {
+        const classified = classifyTestResult(Object.assign({}, input, { hasApiKey:false, hasRequestApiKey:false }), { ok:false, message:"" });
+        renderStatus(host, writeClassifiedTest(input, classified));
+        return;
+      }
+
+      const res = await window.weishan.ai.testConnector(requestInput);
+      const classified = classifyTestResult(requestInput, res);
+      let savedKey = null;
+      if (classified.ok && input.apiKey) {
+        savedKey = await window.WeishanAPI.saveConnector(input);
+      }
+      renderStatus(host, writeClassifiedTest(Object.assign({}, requestInput, { hasApiKey:savedKey ? savedKey.hasApiKey : requestInput.hasApiKey }), classified));
+      if (classified.ok && savedKey && savedKey.secureSessionOnly) {
+        renderTransientStatus(host, "connector-success", t("aiServiceConnected"), t("aiSecureSessionOnly"), "");
+      } else if (classified.ok && savedKey && savedKey.secureUnavailable) {
+        renderTransientStatus(host, "connector-success", t("aiServiceConnected"), t("aiSecureTestOnly"), "");
+      }
+    } catch (err) {
+      const classified = classifyTestResult(requestInput || input, { ok:false, message:err && err.message || String(err || "") });
+      renderStatus(host, writeClassifiedTest(requestInput || input, classified));
+      throw err;
+    }
+  }
+
   function mount(host){
     const acc = window.AccountApi.current();
     host.innerHTML = `
@@ -1121,40 +1180,17 @@
       const btn = host.querySelector("#testConnector");
       btn.disabled = true;
       btn.textContent = t("testing");
+      if (window.WeishanAPI && typeof window.WeishanAPI.setConnectorRuntimeState === "function") {
+        window.WeishanAPI.setConnectorRuntimeState("testing");
+      }
 
       const input = readConnector(host);
-      if (!input.baseUrl || !input.chatModel) {
-        const classified = classifyTestResult(input, { ok:false, message:"" });
-        renderStatus(host, writeClassifiedTest(input, classified));
+      try {
+        await runConnectorTest(host, input);
+      } finally {
         btn.disabled = false;
         btn.textContent = t("testConnection");
-        return;
       }
-
-      const requestInput = await window.WeishanAPI.connectorForRequest(input);
-      if (!requestInput.apiKey) {
-        const classified = classifyTestResult(Object.assign({}, input, { hasApiKey:false, hasRequestApiKey:false }), { ok:false, message:"" });
-        renderStatus(host, writeClassifiedTest(input, classified));
-        btn.disabled = false;
-        btn.textContent = t("testConnection");
-        return;
-      }
-
-      const res = await window.weishan.ai.testConnector(requestInput);
-      const classified = classifyTestResult(requestInput, res);
-      let savedKey = null;
-      if (classified.ok && input.apiKey) {
-        savedKey = await window.WeishanAPI.saveConnector(input);
-      }
-      renderStatus(host, writeClassifiedTest(Object.assign({}, requestInput, { hasApiKey:savedKey ? savedKey.hasApiKey : requestInput.hasApiKey }), classified));
-      if (classified.ok && savedKey && savedKey.secureSessionOnly) {
-        renderTransientStatus(host, "connector-success", t("aiServiceConnected"), t("aiSecureSessionOnly"), "");
-      } else if (classified.ok && savedKey && savedKey.secureUnavailable) {
-        renderTransientStatus(host, "connector-success", t("aiServiceConnected"), t("aiSecureTestOnly"), "");
-      }
-
-      btn.disabled = false;
-      btn.textContent = t("testConnection");
     });
 
     host.querySelector("#autoModelBtn").addEventListener("click", async function(){
@@ -1226,7 +1262,19 @@
       if (testBtn) testBtn.disabled = false;
       btn.textContent = t("autoSelectModel");
     });
+
+    bindSettingsConnectorStatusRuntimeHooks(host);
   }
 
-  window.SettingsPage = { mount };
+  function unmount(){
+    clearSettingsConnectorStatusRuntimeHook();
+  }
+
+  window.SettingsPage = {
+    mount,
+    unmount,
+    __bindSettingsConnectorStatusRuntimeHooksForTest:bindSettingsConnectorStatusRuntimeHooks,
+    __clearSettingsConnectorStatusRuntimeHookForTest:clearSettingsConnectorStatusRuntimeHook,
+    __runConnectorTestForTest:runConnectorTest
+  };
 })();

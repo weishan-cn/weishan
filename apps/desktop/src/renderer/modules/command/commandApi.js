@@ -653,17 +653,20 @@
   function settingsAiStatus(){
     const api = window.WeishanAPI || null;
     if (!api || typeof api.connector !== "function") {
-      return { connected:false, provider:"", model:"", label:"AI 未接通", connector:null };
+      return { connected:false, state:"not_configured", provider:"", model:"", label:"AI 未配置", connector:null };
     }
+    if (typeof api.connectorSummary === "function") return api.connectorSummary();
     const connector = api.connector() || {};
     const status = typeof api.connectorStatus === "function" ? api.connectorStatus(connector) : "";
     const provider = connector.providerType || connector.provider || "model_gateway";
     const model = connector.chatModel || "";
+    const state = status === "success" ? "connected" : status === "failed" ? "failed" : status === "saved" ? "saved_untested" : "not_configured";
     return {
-      connected:status === "success",
+      connected:state === "connected",
+      state,
       provider,
       model,
-      label:status === "success" ? "AI 已连接 · " + provider + (model ? " / " + model : "") : "AI 未接通",
+      label:state === "connected" ? "AI 已连接 · " + provider + (model ? " / " + model : "") : state === "saved_untested" ? "AI 未测试" : state === "failed" ? "AI 连接失败" : "AI 未配置",
       connector
     };
   }
