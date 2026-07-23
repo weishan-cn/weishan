@@ -1,22 +1,22 @@
 (function(){
   let current = "home";
   let mounted = "";
-  const pages = {
-    home:"HomePage", projects:"ProjectsPage", memory:"MemoryPage", history:"HistoryPage", mail:"MailPage", crawler:"CrawlerPage",
-    builder:"BuilderPage", storage:"StoragePage", team:"TeamPage", seats:"SeatsPage", reports:"ReportsPage", audit:"AuditPage",
-    settings:"SettingsPage", security:"SecurityPage", commerce:"CommerceAgentPage"
-  };
-  function setRoute(id){ current = pages[id] ? id : "home"; refresh(); }
+  function pageFor(id){
+    const corePage = window.WeishanModules && typeof window.WeishanModules.pageFor === "function" ? window.WeishanModules.pageFor(id) : "";
+    if (corePage) return corePage;
+    return window.WeishanPluginRegistry && typeof window.WeishanPluginRegistry.pageForRoute === "function" ? window.WeishanPluginRegistry.pageForRoute(id) : "";
+  }
+  function setRoute(id){ current = pageFor(id) ? id : "home"; refresh(); }
   function refresh(){
     const host = document.getElementById("pageHost");
     if (!host) return;
-    const previous = mounted && window[pages[mounted]];
+    const previous = mounted && window[pageFor(mounted)];
     if (previous && typeof previous.unmount === "function") {
       try { previous.unmount(host); } catch (_) {}
     }
     host.innerHTML = "";
     mounted = current;
-    const page = window[pages[current]];
+    const page = window[pageFor(current)];
     if (page && page.mount) page.mount(host);
     if (window.Sidebar) window.Sidebar.refresh();
     if (window.Topbar) window.Topbar.refresh();

@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld("weishan", {
   productName: "weishan",
   apiBase: process.env.WEISHAN_API_BASE || "http://127.0.0.1:8787",
   openExternal: (url) => shell.openExternal(url),
+  openWeishanOfficialWebsite: () => ipcRenderer.invoke("weishan:open-official-website"),
   chooseFiles: () => ipcRenderer.invoke("weishan:choose-files"),
   desktopAssistantOpenApp: (appId) => ipcRenderer.invoke("desktopAssistant:openWhitelistedApp", String(appId || "")),
   secure: {

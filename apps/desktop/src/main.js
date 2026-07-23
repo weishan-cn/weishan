@@ -10,6 +10,7 @@ const { registerGlobalShoppingRakutenReadonlyHandlers } = require("./main/global
 
 const APP_NAME = "weishan";
 const APP_ID = "ai.weishan.desktop";
+const WEISHAN_OFFICIAL_WEBSITE_URL = "https://weishan.ai/";
 
 process.title = APP_NAME;
 app.setName(APP_NAME);
@@ -495,6 +496,7 @@ function registerIpcHandlers() {
     return { ok: true, files: r.filePaths.map((p) => ({ path: p, name: path.basename(p), size: fs.statSync(p).size })) };
   });
   ipcMain.handle("weishan:open-external", async (_event, url) => shell.openExternal(String(url || "")));
+  ipcMain.handle("weishan:open-official-website", async () => shell.openExternal(WEISHAN_OFFICIAL_WEBSITE_URL));
   registerSecureStorageHandlers(ipcMain);
   registerSecureApiKeyStorageHandlers(ipcMain);
   registerLimitedBetaPreferenceHandlers(ipcMain, { app });

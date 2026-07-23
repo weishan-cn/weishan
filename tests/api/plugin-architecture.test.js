@@ -1,0 +1,71 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+
+const ROOT = path.resolve(__dirname, "../..");
+
+function load(files) {
+  const window = {};
+  window.window = window;
+  const context = vm.createContext({ window, console });
+  for (const file of files) vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file });
+  return window;
+}
+
+function enabledVideoPlugin() {
+  return {
+    pluginId:"local-video",
+    name:"Local Video",
+    description:"Static declaration only",
+    icon:"▹",
+    version:"1.0.0",
+    enabled:true,
+    status:"available",
+    capabilities:["video.generate"],
+    entryPoint:{ type:"route", routeId:"plugin.video" },
+    permissions:{ network:true, filesystem:false, camera:false, microphone:false, clipboard:false, externalUrl:false }
+  };
+}
+
+function assertDecision(actual, expected) {
+  for (const [key, value] of Object.entries(expected)) assert.equal(actual[key], value);
+}
+
+function main() {
+  const windowRef = load([
+    "apps/desktop/src/renderer/core/moduleRegistry.js",
+    "apps/desktop/src/renderer/core/pluginRegistry.js",
+    "apps/desktop/src/renderer/core/pluginCapabilityGate.js",
+    "apps/desktop/src/renderer/core/pluginPermissionGate.js"
+  ]);
+  const registry = windowRef.WeishanPluginRegistry;
+  const capabilityGate = windowRef.WeishanPluginCapabilityGate;
+  const permissionGate = windowRef.WeishanPluginPermissionGate;
+  const video = registry.getDeclaredPlugins()[0];
+
+  assert.equal(video.pluginId, "video-generation");
+  assert.equal(video.entryPoint.routeId, "plugin.video");
+  assert.equal(video.enabled, false);
+  assert.deepEqual(Array.from(video.permissions.network === false ? [false] : []), [false]);
+  assert.equal(registry.getEnabledSidebarEntries().length, 0);
+  assert.equal(registry.validatePlugin(enabledVideoPlugin()).valid, true);
+  assert.equal(registry.validatePlugin(Object.assign(enabledVideoPlugin(), { entryPoint:{ type:"route", routeId:"home" } })).valid, false);
+  assert.equal(registry.validatePlugin(Object.assign(enabledVideoPlugin(), { entryPoint:{ type:"url", routeId:"https://example.invalid" } })).valid, false);
+  assert.equal(registry.validatePlugin(Object.assign(enabledVideoPlugin(), { name:"<img src=x>" })).valid, false);
+  assert.equal(registry.validateDeclarations([enabledVideoPlugin(), enabledVideoPlugin()])[1].reason, "duplicate_plugin_id_or_route");
+  assert.equal(registry.getEnabledSidebarEntries([enabledVideoPlugin()]).length, 1);
+  assert.equal(registry.workspaceForRoute("plugin.video"), "VideoPluginWorkspace");
+  assert.equal(registry.pageForRoute("plugin.video"), "");
+
+  assertDecision(capabilityGate.evaluate(video, "video.generate"), { allowed:false, reason:"plugin_disabled" });
+  assertDecision(capabilityGate.evaluate(enabledVideoPlugin(), "unknown.capability"), { allowed:false, reason:"unknown_capability" });
+  assertDecision(capabilityGate.evaluate(enabledVideoPlugin(), "video.generate"), { allowed:true, reason:"declared_capability_only", runtimeGranted:false });
+  assertDecision(permissionGate.evaluate(video, "network"), { allowed:false, declared:false, reason:"plugin_disabled" });
+  assertDecision(permissionGate.evaluate(enabledVideoPlugin(), "unknownPermission"), { allowed:false, declared:false, reason:"unknown_permission" });
+  assertDecision(permissionGate.evaluate(enabledVideoPlugin(), "filesystem"), { allowed:false, declared:false, reason:"permission_not_declared" });
+  assertDecision(permissionGate.evaluate(enabledVideoPlugin(), "network"), { allowed:false, declared:true, reason:"runtime_permission_not_granted" });
+  console.log("PLUGIN_ARCHITECTURE PASS");
+}
+
+main();

@@ -977,6 +977,11 @@
             <p>free/pro → A；team/enterprise/institution → B。</p>
           </div>
         </div>
+        <div class="ws-card" id="officialWebsitePanel">
+          <h2>${t("aboutWeishan")}</h2>
+          <p class="ws-muted">${t("officialWebsiteDescription")}</p>
+          <button type="button" id="openWeishanOfficialWebsite" class="ws-btn gray">${t("visitWeishanOfficialWebsite")}</button>
+        </div>
         ${commerceLocationPanel()}
         ${desktopAssistantPanel()}
         ${cloudEnterprisePanel()}
@@ -1117,6 +1122,17 @@
     const authBtn = host.querySelector("#authBtn");
     if (authBtn) authBtn.addEventListener("click", function(){
       alert(t("authenticatorReserved"));
+    });
+
+    const officialWebsiteButton = host.querySelector("#openWeishanOfficialWebsite");
+    if (officialWebsiteButton) officialWebsiteButton.addEventListener("click", async function(){
+      if (!window.weishan || typeof window.weishan.openWeishanOfficialWebsite !== "function") return;
+      officialWebsiteButton.disabled = true;
+      try {
+        await window.weishan.openWeishanOfficialWebsite();
+      } finally {
+        officialWebsiteButton.disabled = false;
+      }
     });
 
     mountDesktopAssistantPanel(host);
