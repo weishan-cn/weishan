@@ -12,6 +12,13 @@
       enabled:false,
       status:"disabled",
       capabilities:["video.generate"],
+      presentation:{
+        tagline:"用一句话生成和编辑视频",
+        userStatus:"coming_soon",
+        runtimeNotice:"视频生成服务尚未接入",
+        simplePromptPlaceholder:"帮我做一个 15 秒的咖啡广告，电影感，适合抖音",
+        supportedMaterialTypes:["image", "video", "audio"]
+      },
       entryPoint:{ type:"route", routeId:"plugin.video" },
       permissions:{ network:false, filesystem:false, camera:false, microphone:false, clipboard:false, externalUrl:false }
     }
@@ -23,6 +30,16 @@
   function validText(value, pattern){ return pattern.test(text(value)); }
   function validCapability(value){ return CAPABILITY_PATTERN.test(text(value)); }
   function workspaceForRoute(routeId){ return WORKSPACE_BY_ROUTE[text(routeId)] || ""; }
+  function presentationFor(plugin){
+    const presentation = plugin && plugin.presentation && typeof plugin.presentation === "object" && !Array.isArray(plugin.presentation) ? plugin.presentation : {};
+    return {
+      tagline:text(presentation.tagline),
+      userStatus:text(presentation.userStatus),
+      runtimeNotice:text(presentation.runtimeNotice),
+      simplePromptPlaceholder:text(presentation.simplePromptPlaceholder),
+      supportedMaterialTypes:Array.isArray(presentation.supportedMaterialTypes) ? presentation.supportedMaterialTypes.map(text).filter(Boolean) : []
+    };
+  }
   function validatePlugin(candidate, routeIds){
     const plugin = candidate && typeof candidate === "object" && !Array.isArray(candidate) ? candidate : {};
     const permissions = plugin.permissions && typeof plugin.permissions === "object" && !Array.isArray(plugin.permissions) ? plugin.permissions : {};
@@ -74,5 +91,5 @@
     return getEnabledSidebarEntries().some((plugin) => plugin.entryPoint.routeId === safeRouteId) ? workspaceForRoute(safeRouteId) : "";
   }
 
-  window.WeishanPluginRegistry = { CAPABILITY_PATTERN, ALLOWED_PERMISSIONS, WORKSPACE_BY_ROUTE, getDeclaredPlugins, getPluginCenterEntries, validatePlugin, validateDeclarations, getEnabledSidebarEntries, workspaceForRoute, pageForRoute };
+  window.WeishanPluginRegistry = { CAPABILITY_PATTERN, ALLOWED_PERMISSIONS, WORKSPACE_BY_ROUTE, getDeclaredPlugins, getPluginCenterEntries, presentationFor, validatePlugin, validateDeclarations, getEnabledSidebarEntries, workspaceForRoute, pageForRoute };
 })();

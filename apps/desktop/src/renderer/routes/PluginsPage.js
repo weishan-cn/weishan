@@ -5,17 +5,22 @@
     const registry = window.WeishanPluginRegistry;
     return registry && typeof registry.getPluginCenterEntries === "function" ? registry.getPluginCenterEntries() : [];
   }
+  function presentation(plugin){
+    const registry = window.WeishanPluginRegistry;
+    return registry && typeof registry.presentationFor === "function" ? registry.presentationFor(plugin) : {};
+  }
   function statusKey(plugin){
+    if (presentation(plugin).userStatus === "coming_soon") return "pluginStatusComingSoon";
     if (plugin.enabled !== true) return "pluginStatusDisabled";
     return plugin.status === "available" ? "pluginStatusEnabled" : "pluginStatusUnavailable";
   }
   function card(plugin){
     const enabled = plugin.enabled === true && plugin.status === "available";
-    const capabilities = Array.isArray(plugin.capabilities) ? plugin.capabilities : [];
+    const display = presentation(plugin);
     return `<article class="plugin-center-card" data-plugin-id="${esc(plugin.pluginId)}" data-plugin-enabled="${enabled ? "true" : "false"}">
-      <div class="plugin-center-card-head"><span class="plugin-center-icon" aria-hidden="true">${esc(plugin.icon)}</span><div><h3>${esc(plugin.name)}</h3><p>${esc(plugin.description)}</p></div><span class="plugin-center-status ${enabled ? "is-enabled" : "is-disabled"}">${esc(t(statusKey(plugin)))}</span></div>
-      <dl class="plugin-center-meta"><div><dt>${esc(t("pluginVersion"))}</dt><dd>${esc(plugin.version)}</dd></div><div><dt>${esc(t("pluginCapabilities"))}</dt><dd>${esc(capabilities.join(" · "))}</dd></div></dl>
-      ${enabled ? `<button type="button" class="ws-btn plugin-workspace-open" data-plugin-route="${esc(plugin.entryPoint.routeId)}">${esc(t("openPluginWorkspace"))}</button>` : `<p class="plugin-center-note">${esc(t("pluginNotEnabledNote"))}</p>`}
+      <div class="plugin-center-card-head"><span class="plugin-center-icon" aria-hidden="true">${esc(plugin.icon)}</span><div><h3>${esc(plugin.name)}</h3><p>${esc(display.tagline || plugin.description)}</p></div><span class="plugin-center-status ${enabled ? "is-enabled" : "is-disabled"}">${esc(t(statusKey(plugin)))}</span></div>
+      <p class="plugin-center-note">${esc(display.runtimeNotice || t("pluginNotEnabledNote"))}</p>
+      ${enabled ? `<button type="button" class="ws-btn plugin-workspace-open" data-plugin-route="${esc(plugin.entryPoint.routeId)}">${esc(t("openPluginWorkspace"))}</button>` : `<details class="plugin-center-details" data-plugin-details><summary>${esc(t("pluginViewDetails"))}</summary><p>${esc(t("pluginComingSoonDetails"))}</p></details>`}
     </article>`;
   }
   function mount(host){

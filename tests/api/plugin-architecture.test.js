@@ -49,6 +49,13 @@ function main() {
   assert.equal(video.enabled, false);
   assert.equal(registry.getPluginCenterEntries().length, 1);
   assert.equal(registry.getPluginCenterEntries()[0].name, "视频制作");
+  const presentation = registry.presentationFor(video);
+  assert.equal(presentation.tagline, "用一句话生成和编辑视频");
+  assert.equal(presentation.userStatus, "coming_soon");
+  assert.equal(presentation.runtimeNotice, "视频生成服务尚未接入");
+  assert.equal(presentation.simplePromptPlaceholder, "帮我做一个 15 秒的咖啡广告，电影感，适合抖音");
+  assert.deepEqual(Array.from(presentation.supportedMaterialTypes), ["image", "video", "audio"]);
+  assert.equal(presentation.tagline.includes("video.generate"), false);
   assert.deepEqual(Array.from(video.permissions.network === false ? [false] : []), [false]);
   assert.equal(registry.getEnabledSidebarEntries().length, 0);
   assert.equal(windowRef.WeishanModules.get("plugins").groupId, "execution");
@@ -70,6 +77,7 @@ function main() {
   assertDecision(permissionGate.evaluate(video, "network"), { allowed:false, declared:false, reason:"plugin_disabled" });
   assertDecision(permissionGate.evaluate(enabledVideoPlugin(), "unknownPermission"), { allowed:false, declared:false, reason:"unknown_permission" });
   assertDecision(permissionGate.evaluate(enabledVideoPlugin(), "filesystem"), { allowed:false, declared:false, reason:"permission_not_declared" });
+  assertDecision(permissionGate.evaluate(enabledVideoPlugin(), "externalUrl"), { allowed:false, declared:false, reason:"permission_not_declared" });
   assertDecision(permissionGate.evaluate(enabledVideoPlugin(), "network"), { allowed:false, declared:true, reason:"runtime_permission_not_granted" });
   console.log("PLUGIN_ARCHITECTURE PASS");
 }
