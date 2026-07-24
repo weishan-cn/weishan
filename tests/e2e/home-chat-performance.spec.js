@@ -69,9 +69,9 @@ test.describe.serial("home chat performance", () => {
     expect(result.focused).toBe(true);
     expect(result.inputValue).toBe(runId + " draft remains editable");
     expect(result.consoleText).toContain("final streamed answer");
-    expect(result.consoleText).toContain("执行失败");
+    expect(result.consoleText).toContain("处理时遇到问题");
     expect(result.historyText).toContain(runId + " streaming response");
-    expect(result.historyText).toContain("failed");
+    expect(result.historyText).toContain("暂时没有完成，请稍后再试");
   });
 
   test("matching terminal stream answer persists the non-done answer state once", async () => {

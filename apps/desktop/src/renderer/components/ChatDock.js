@@ -10,7 +10,7 @@
   }
 
   function html() {
-    return `<aside class="chat-dock"><button class="chat-collapse-tab" id="chatCollapse" type="button">›</button><div class="chat-head"><div><div class="chat-title">${window.I18n.t("chat.title")}</div><div class="chat-subtitle">${window.I18n.t("chat.subtitle")}</div></div><button class="chat-clear" id="chatClear" type="button">${window.I18n.t("chat.clear")}</button></div><div class="chat-context">${window.I18n.t("chat.route")}: <b id="chatRouteName"></b></div><div class="chat-log" id="chatLog"></div><div class="chat-input-row"><textarea id="chatInput" class="chat-input" placeholder="${window.I18n.t("chat.placeholder")}"></textarea><button id="chatSend" class="chat-send" type="button">${window.I18n.t("chat.send")}</button></div></aside>`;
+    return `<aside class="chat-dock"><button class="chat-collapse-tab" id="chatCollapse" type="button">›</button><div class="chat-head"><div><div class="chat-title">${window.I18n.t("chat.title")}</div><div class="chat-subtitle">${window.I18n.t("chat.subtitle")}</div></div><button class="chat-clear" id="chatClear" type="button">${window.I18n.t("chat.clear")}</button></div><div class="chat-context">当前页面：<b id="chatRouteName"></b></div><div class="chat-log" id="chatLog"></div><div class="chat-input-row"><textarea id="chatInput" class="chat-input" placeholder="告诉 Weishan 你想做什么"></textarea><button id="chatSend" class="chat-send" type="button">开始</button></div></aside>`;
   }
 
   function setCollapsed(shell, collapsed) {
@@ -46,12 +46,12 @@
     try {
       const out = await window.CommandApi.execute(text);
       const r = out.results && out.results[0];
-      append("assistant", r ? `${r.summary}\n${r.detail}` : "OK");
+      append("assistant", r ? `${r.summary}\n${r.detail}` : "已完成。");
     } catch (err) {
-      append("assistant", "执行失败 / Failed:\n" + (err && err.message ? err.message : String(err)));
+      append("assistant", "失败，请重试。");
     } finally {
       sendBtn.disabled = false;
-      sendBtn.textContent = window.I18n.t("chat.send");
+      sendBtn.textContent = "开始";
     }
   }
 

@@ -69,7 +69,7 @@ test.describe.serial("sidebar plugin architecture", () => {
     await expect(page.locator("[data-video-simple-mode]")).toBeVisible();
     await expect(page.locator("#videoPrompt")).toHaveAttribute("placeholder", "帮我做一个 15 秒的咖啡广告，电影感，适合抖音");
     await expect(page.locator(".video-plugin-generate")).toBeDisabled();
-    await expect(page.locator(".video-plugin-runtime-note")).toContainText("视频生成服务尚未接入");
+    await expect(page.locator(".video-plugin-runtime-note")).toContainText("视频功能即将上线");
     await expect(page.locator("[data-video-advanced]")).not.toHaveAttribute("open", "");
     await expect(page.locator('[data-advanced-group="technical"]')).toBeHidden();
     await page.locator("[data-video-advanced] summary").click();

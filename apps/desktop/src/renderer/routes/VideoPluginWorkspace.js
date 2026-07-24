@@ -21,7 +21,7 @@
           <section data-advanced-group="creation"><h3>${t("videoAdvancedCreation")}</h3><div>${["videoDuration", "videoAspectRatio", "videoResolution", "videoStyle", "videoShots", "videoQuality", "videoCount"].map((key) => `<button type="button" disabled>${t(key)}</button>`).join("")}</div></section>
           <section data-advanced-group="reference"><h3>${t("videoAdvancedReference")}</h3><div>${["videoReferenceImage", "videoReferenceVideo", "videoCharacterConsistency"].map((key) => `<button type="button" disabled>${t(key)}</button>`).join("")}</div></section>
           <section data-advanced-group="audio"><h3>${t("videoAdvancedAudio")}</h3><div>${["videoSubtitles", "videoVoiceover", "videoBackgroundMusic", "videoLanguage"].map((key) => `<button type="button" disabled>${t(key)}</button>`).join("")}</div></section>
-          <section data-advanced-group="technical"><h3>${t("videoAdvancedTechnical")}</h3><div>${["videoModel", "videoProvider", "videoSeed", "videoFps", "videoCodec", "videoBitrate"].map((key) => `<button type="button" disabled>${t(key)}</button>`).join("")}</div></section>
+          <section data-advanced-group="technical"><h3>${t("videoAdvancedTechnical")}</h3><div>${["videoModel", "videoSeed", "videoFps", "videoCodec", "videoBitrate"].map((key) => `<button type="button" disabled>${t(key)}</button>`).join("")}</div></section>
         </div>
       </details>
     </section>`;

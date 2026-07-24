@@ -2,23 +2,23 @@
   const zh = {
     home:"首页", projects:"项目管理", memory:"记忆大脑", history:"历史记录", mail:"邮件接管", crawler:"抓取中心",
     builder:"软件工厂", commerce:"全球采购", storage:"存储与云", team:"团队协作", seats:"团队与席位", reports:"报告中心", audit:"审计日志",
-    settings:"设置中心", security:"安全与隐私", core:"核心", execution:"执行", plugins:"插件", cloud:"云与企业", system:"系统", expanded:"已展开", collapsed:"已折叠", aboutWeishan:"关于 Weishan", visitWeishanOfficialWebsite:"访问 Weishan 官网", officialWebsiteDescription:"在系统默认浏览器中打开 weishan.ai。", pluginCenter:"插件中心", pluginCenterDescription:"打开官方内置工具，用一句话开始创作。", pluginCenterEmpty:"暂未发现可展示的官方插件。", pluginStatusEnabled:"准备就绪", pluginStatusDisabled:"未启用", pluginStatusUnavailable:"暂未接入", pluginStatusComingSoon:"即将推出", openPluginWorkspace:"进入工作区", pluginNotEnabledNote:"当前插件尚未启用，独立工作区继续受安全 Guard 保护。", pluginViewDetails:"查看详情", pluginComingSoonDetails:"视频生成、素材处理和导出将在完成独立安全审计后接入。", videoPluginWorkspace:"视频制作", videoPluginSubtitle:"用一句话制作你的视频", videoSimpleMode:"简单模式", videoSimpleModeHint:"描述你想制作的视频，其余复杂设置会在需要时再展开。", videoPromptLabel:"描述你想制作的视频", videoPromptPlaceholder:"帮我做一个 15 秒的咖啡广告，电影感，适合抖音", videoMaterialsLabel:"添加素材（可选）", videoMaterialsHint:"未来可添加图片、视频或音频作为创作参考。", videoMaterialImage:"图片", videoMaterialVideo:"视频", videoMaterialAudio:"音频", videoAddMaterials:"添加素材", videoGenerate:"生成视频", videoRuntimeUnavailable:"视频生成服务尚未接入", videoPreviewTitle:"视频预览", videoPreviewUnavailable:"生成服务接入后，预览会显示在这里。", videoAdvancedSettings:"高级设置", videoAdvancedNotice:"高级控制会在视频生成服务接入后开放。当前仅展示能力 Blueprint。", videoAdvancedCreation:"创作", videoAdvancedReference:"参考", videoAdvancedAudio:"音频", videoAdvancedTechnical:"高级", videoDuration:"时长", videoAspectRatio:"画幅", videoResolution:"分辨率", videoStyle:"风格", videoShots:"镜头", videoQuality:"质量", videoCount:"生成数量", videoReferenceImage:"参考图片", videoReferenceVideo:"参考视频", videoCharacterConsistency:"人物一致性", videoSubtitles:"字幕", videoVoiceover:"配音", videoBackgroundMusic:"背景音乐", videoLanguage:"语言", videoModel:"模型", videoProvider:"Provider", videoSeed:"Seed", videoFps:"FPS", videoCodec:"Codec", videoBitrate:"Bitrate", pluginRuntimeUnavailable:"插件运行时尚未启用。此入口不会加载远程代码，也不会获得系统权限。",
+    settings:"设置中心", security:"安全与隐私", core:"核心", execution:"执行", plugins:"插件", cloud:"云与企业", system:"系统", expanded:"已展开", collapsed:"已折叠", aboutWeishan:"关于 Weishan", visitWeishanOfficialWebsite:"访问 Weishan 官网", officialWebsiteDescription:"在系统默认浏览器中打开 weishan.ai。", pluginCenter:"创作工具", pluginCenterDescription:"打开工具，用一句话开始创作。", pluginCenterEmpty:"暂未发现可展示的创作工具。", pluginStatusEnabled:"准备就绪", pluginStatusDisabled:"未启用", pluginStatusUnavailable:"暂未接入", pluginStatusComingSoon:"即将推出", openPluginWorkspace:"开始创作", pluginNotEnabledNote:"该功能即将推出。", pluginViewDetails:"查看详情", pluginComingSoonDetails:"视频生成、素材处理和导出将在准备好后上线。", videoPluginWorkspace:"视频制作", videoPluginSubtitle:"一句话生成视频", videoSimpleMode:"开始创作", videoSimpleModeHint:"描述你想制作的视频，其余设置会在需要时再展开。", videoPromptLabel:"描述你想制作的视频", videoPromptPlaceholder:"帮我做一个 15 秒的咖啡广告，电影感，适合抖音", videoMaterialsLabel:"添加素材（可选）", videoMaterialsHint:"图片、视频和音频都可以作为创作参考。", videoMaterialImage:"图片", videoMaterialVideo:"视频", videoMaterialAudio:"音频", videoAddMaterials:"添加素材", videoGenerate:"生成视频", videoRuntimeUnavailable:"视频功能即将上线。你可以先准备创作方案。", videoPreviewTitle:"视频预览", videoPreviewUnavailable:"生成后，视频会显示在这里。", videoAdvancedSettings:"高级设置", videoAdvancedNotice:"更多创作控制会在视频功能上线后开放。", videoAdvancedCreation:"创作", videoAdvancedReference:"参考", videoAdvancedAudio:"音频", videoAdvancedTechnical:"高级", videoDuration:"时长", videoAspectRatio:"画幅", videoResolution:"分辨率", videoStyle:"风格", videoShots:"镜头", videoQuality:"质量", videoCount:"生成数量", videoReferenceImage:"参考图片", videoReferenceVideo:"参考视频", videoCharacterConsistency:"人物一致性", videoSubtitles:"字幕", videoVoiceover:"配音", videoBackgroundMusic:"背景音乐", videoLanguage:"语言", videoModel:"生成方式", videoProvider:"服务来源", videoSeed:"Seed", videoFps:"FPS", videoCodec:"Codec", videoBitrate:"Bitrate", pluginRuntimeUnavailable:"该功能尚未开启。",
     topbarSubtitle:"本地优先 · 模块隔离 · A/B 模式预留", settingsButton:"设置", loginRegister:"登录 / 注册", logout:"退出", mailButton:"邮件接管",
     collapseSidebar:"折叠侧边栏", expandSidebar:"展开侧边栏", paidOnly:"付费后启用", localFirstMode:"本地优先模式",
     lockedTitle:"需要升级计划", lockedMessage:"当前模块属于付费能力。升级后可启用此模块。",
     statusQueued:"等待中", statusRunning:"执行中", statusDone:"已完成", statusFailed:"失败",
-    homeConsoleBanner:"$ weishan v{version} command-center", homeConsoleEmpty:"等待指令。时间、日期、星期、简单计算由本地模块处理；复杂问题才调用 AI 大脑。",
+    homeConsoleBanner:"Weishan 已准备好", homeConsoleEmpty:"告诉 Weishan 你想做什么，结果会显示在这里。",
     homeNoDisplayableAi:"AI 已返回，但没有可展示内容。",
     homeEmptyQueue:"暂无排队任务。", homeEmptyHistory:"暂无记录。", homeModulesTitle:"可调度模块", homeModulesList:"项目 / 记忆 / 历史 / 邮件 / 抓取 / 软件",
     homeBoundaryTitle:"边界原则", homeBoundaryText:"首页只调用模块 API，不直接改其它页面 DOM。优化首页不影响其它目录。",
-    homeTitle:"首页总调度", homeSubtitle:"本地优先 · 排队执行 · GPT / 用户自选大脑", homeInputTitle:"下达指令",
-    homeInputHint:"发送后立即清空，任务进入队列。", homePlaceholder:"输入完整指令，例如：今天星期几？ / 记住 weishan 要模块隔离 / 帮我写一份计划",
-    uploadAttachment:"上传附件", startRun:"开始执行", clearDone:"清理已完成", recordAudio:"录音", queueTitle:"确认队列", dispatchHistory:"任务分发记录",
+    homeTitle:"首页", homeSubtitle:"把想做的事告诉 Weishan", homeInputTitle:"告诉 Weishan 你想做什么",
+    homeInputHint:"开始后，Weishan 会在这里告诉你进展。", homePlaceholder:"例如：帮我制作一个视频 / 帮我写一份合同 / 帮我买一台 MacBook / 帮我分析这份文件 / 帮我规划旅行",
+    uploadAttachment:"添加文件", startRun:"开始", clearDone:"清理已完成", recordAudio:"录音", queueTitle:"正在处理", dispatchHistory:"最近结果",
     historyBack:"返回摘要", historyDetail:"任务详情", historyOpenDetail:"查看全文", historyDoubleClickBack:"双击正文区域返回摘要。",
     attachmentReserved:"附件入口已预留。", recordReserved:"录音入口已预留，后续接语音输入模块。", processAttachment:"处理附件：",
     projectsDesc:"创建、编辑项目，分配任务，查看进度和截止日期。", projectNamePlaceholder:"项目名称", createProject:"创建项目", projectStatus:"状态", projectProgress:"进度", noProjects:"暂无项目。", newProject:"新项目",
     memoryDesc:"保存和调用重要信息，支持标签和搜索。", memoryTextPlaceholder:"写入要保存的记忆", memoryTagsPlaceholder:"标签，用逗号分隔", saveMemory:"保存记忆", noMemory:"暂无记忆。",
-    historyDesc:"执行任务日志、指令历史，支持回溯。", historySearchPlaceholder:"按关键字搜索", noHistory:"暂无历史。",
+    historyDesc:"查看你之前的需求和结果。", historySearchPlaceholder:"搜索你的需求或结果", noHistory:"还没有结果。",
     crawlerDesc:"网页抓取、资料整理和导入项目。不会默认上传客户数据。", crawlerPlaceholder:"网址或抓取目标", createCrawler:"创建抓取任务", noCrawler:"暂无抓取任务。",
     softwareDesc:"写软件、修 bug、验证修复。自动修复和 bug 上传必须确认。", softwarePlaceholder:"描述要写的软件、模块或 bug", createPlan:"生成计划", reportBug:"记录 bug", planFallback:"计划", noSoftware:"暂无软件计划。", bugDraftSaved:"bug 已作为本地草稿记录。上传前必须再次确认。",
     storageDesc:"免费用户默认本地存储；付费用户自动开通云空间。未使用云服务时提醒数据只在本地。", storageUsed:"已用", storageLocal:"本地", month:"月", simulateOpen:"本地模拟开通",
@@ -81,18 +81,18 @@
     collapseSidebar:"Collapse sidebar", expandSidebar:"Expand sidebar", paidOnly:"Paid", localFirstMode:"Local-first mode",
     lockedTitle:"Upgrade required", lockedMessage:"This module is available on paid plans. Upgrade to enable it.",
     statusQueued:"Queued", statusRunning:"Running", statusDone:"Done", statusFailed:"Failed",
-    homeConsoleBanner:"$ weishan v{version} command-center", homeConsoleEmpty:"Waiting for a command. Time, dates, weekdays, and simple math stay local; complex questions use the AI brain.",
+    homeConsoleBanner:"Weishan is ready", homeConsoleEmpty:"Tell Weishan what you want to do. Your results will appear here.",
     homeNoDisplayableAi:"AI returned a response, but there is no displayable content.",
     homeEmptyQueue:"No queued tasks.", homeEmptyHistory:"No records yet.", homeModulesTitle:"Dispatchable Modules", homeModulesList:"Projects / Memory / History / Mail / Crawler / Software",
     homeBoundaryTitle:"Boundary Rule", homeBoundaryText:"Home calls module APIs only and does not edit other page DOM directly. Home optimization stays isolated from other modules.",
-    homeTitle:"Command Center", homeSubtitle:"Local first · queued execution · GPT / user-selected brain", homeInputTitle:"Send Command",
-    homeInputHint:"The input clears after sending and the task enters the queue.", homePlaceholder:"Type a full command, for example: what day is it today? / remember that weishan keeps modules isolated / help me write a plan",
-    uploadAttachment:"Upload File", startRun:"Run", clearDone:"Clear Done", recordAudio:"Record", queueTitle:"Confirmation Queue", dispatchHistory:"Dispatch History",
+    homeTitle:"Home", homeSubtitle:"Tell Weishan what you want to do", homeInputTitle:"Tell Weishan what you want to do",
+    homeInputHint:"Once you start, Weishan will show progress here.", homePlaceholder:"For example: make a video / write a contract / help me buy a MacBook / analyze this file / plan a trip",
+    uploadAttachment:"Add file", startRun:"Start", clearDone:"Clear completed", recordAudio:"Record", queueTitle:"In progress", dispatchHistory:"Recent results",
     historyBack:"Back", historyDetail:"Task Detail", historyOpenDetail:"Read Full", historyDoubleClickBack:"Double-click the body area to return to the summary list.",
     attachmentReserved:"Attachment entry is reserved.", recordReserved:"Recording entry is reserved for the voice input module.", processAttachment:"Process attachment: ",
     projectsDesc:"Create and edit projects, assign tasks, and review progress and deadlines.", projectNamePlaceholder:"Project name", createProject:"Create Project", projectStatus:"Status", projectProgress:"Progress", noProjects:"No projects yet.", newProject:"New Project",
     memoryDesc:"Save and recall important information with tags and search.", memoryTextPlaceholder:"Write a memory to save", memoryTagsPlaceholder:"Tags, separated by commas", saveMemory:"Save Memory", noMemory:"No memories yet.",
-    historyDesc:"Task logs and command history for review.", historySearchPlaceholder:"Search by keyword", noHistory:"No history yet.",
+    historyDesc:"Review your previous requests and results.", historySearchPlaceholder:"Search requests or results", noHistory:"No results yet.",
     crawlerDesc:"Crawl web pages, organize materials, and import them into projects. Customer data is not uploaded by default.", crawlerPlaceholder:"URL or crawl target", createCrawler:"Create Crawl Task", noCrawler:"No crawl tasks yet.",
     softwareDesc:"Build software, fix bugs, and verify repairs. Auto-fixes and bug uploads require confirmation.", softwarePlaceholder:"Describe the software, module, or bug", createPlan:"Generate Plan", reportBug:"Log Bug", planFallback:"Plan", noSoftware:"No software plans yet.", bugDraftSaved:"The bug was saved as a local draft. Upload requires another confirmation.",
     storageDesc:"Free users use local storage by default; paid users can enable cloud space. When cloud is off, data remains local.", storageUsed:"Used", storageLocal:"local", month:"mo", simulateOpen:"Simulate Locally",
@@ -147,6 +147,27 @@
     autoSelectModel:"Auto select model", aiFetchingModels:"Fetching model list...", aiTestingModel:"Testing model: {model}", aiSelectedModel:"Selected available model: {model}",
     aiNoModelFound:"No available model found. Check credits, permissions, or provider routing limits.", aiModelsUnavailable:"Unable to fetch model list. Please enter a model manually."
   };
+
+  Object.assign(zh, {
+    plugins:"创作工具",
+    topbarSubtitle:"把想做的事告诉 Weishan",
+    statusQueued:"正在理解……",
+    statusRunning:"正在处理……",
+    statusDone:"已完成",
+    statusFailed:"失败，请重试",
+    homeModulesTitle:"可用工具",
+    homeModulesList:"项目、记忆、历史、邮件、抓取、软件制作"
+  });
+  Object.assign(en, {
+    plugins:"Creative tools",
+    topbarSubtitle:"Tell Weishan what you want to do",
+    statusQueued:"Understanding…",
+    statusRunning:"Working…",
+    statusDone:"Completed",
+    statusFailed:"Failed. Try again.",
+    homeModulesTitle:"Available tools",
+    homeModulesList:"Projects, Memory, History, Mail, Capture, Software"
+  });
 
   function getLang(){ return window.WeishanStore.read("settings.lang", "zh"); }
   function setLang(lang){
