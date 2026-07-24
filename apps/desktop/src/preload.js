@@ -1,4 +1,5 @@
 const { contextBridge, ipcRenderer, shell } = require("electron");
+const { IPC_CHANNELS } = require("./shared/videoProviderIpcContract");
 
 contextBridge.exposeInMainWorld("weishan", {
   version: "2.0.15",
@@ -41,6 +42,15 @@ contextBridge.exposeInMainWorld("weishan", {
         ipcRenderer.removeListener("weishan:ai-chat-stream:event", listener);
       });
     }
+  },
+  videoRuntime: {
+    createTask: (input) => ipcRenderer.invoke(IPC_CHANNELS.createTask, input || {}),
+    queryTask: (input) => ipcRenderer.invoke(IPC_CHANNELS.queryTask, input || {}),
+    cancelTask: (input) => ipcRenderer.invoke(IPC_CHANNELS.cancelTask, input || {}),
+    listTasks: (input) => ipcRenderer.invoke(IPC_CHANNELS.listTasks, input || {}),
+    downloadArtifacts: (input) => ipcRenderer.invoke(IPC_CHANNELS.downloadArtifacts, input || {}),
+    getCapabilities: (input) => ipcRenderer.invoke(IPC_CHANNELS.getCapabilities, input || {}),
+    getStatus: (input) => ipcRenderer.invoke(IPC_CHANNELS.getStatus, input || {})
   }
 });
 

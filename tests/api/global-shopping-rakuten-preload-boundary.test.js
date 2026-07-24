@@ -4,6 +4,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const ROOT = path.resolve(__dirname, "../..");
+const videoProviderIpcContract = require(path.join(ROOT, "apps/desktop/src/shared/videoProviderIpcContract.js"));
 
 function main() {
   const exposed = {};
@@ -30,6 +31,7 @@ function main() {
   const context = vm.createContext({
     require(name) {
       if (name === "electron") return electron;
+      if (name === "./shared/videoProviderIpcContract") return videoProviderIpcContract;
       throw new Error("unexpected require: " + name);
     },
     process:{ env:{} },

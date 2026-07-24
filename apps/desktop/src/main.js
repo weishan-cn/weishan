@@ -7,6 +7,8 @@ const { registerSecureStorageHandlers } = require("./main/secureStorage");
 const { registerSecureApiKeyStorageHandlers } = require("./main/secureApiKeyStorage");
 const { registerLimitedBetaPreferenceHandlers } = require("./main/limitedBetaPreferenceStore");
 const { registerGlobalShoppingRakutenReadonlyHandlers } = require("./main/globalShoppingRakutenReadonlyService");
+const { createVideoProviderGateway } = require("./main/videoProviderGateway");
+const { registerVideoProviderIpcHandlers } = require("./main/videoProviderIpc");
 
 const APP_NAME = "weishan";
 const APP_ID = "ai.weishan.desktop";
@@ -501,6 +503,10 @@ function registerIpcHandlers() {
   registerSecureApiKeyStorageHandlers(ipcMain);
   registerLimitedBetaPreferenceHandlers(ipcMain, { app });
   registerGlobalShoppingRakutenReadonlyHandlers(ipcMain, {});
+  registerVideoProviderIpcHandlers(ipcMain, {
+    gateway:createVideoProviderGateway({ enabled:false }),
+    validateSender:(event) => !!(event && event.sender && typeof event.sender.getURL === "function" && event.sender.getURL().startsWith("file:"))
+  });
 }
 
 function createWindow() {

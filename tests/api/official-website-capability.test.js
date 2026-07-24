@@ -4,6 +4,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const ROOT = path.resolve(__dirname, "../..");
+const videoProviderIpcContract = require(path.join(ROOT, "apps/desktop/src/shared/videoProviderIpcContract.js"));
 
 async function main() {
   const source = fs.readFileSync(path.join(ROOT, "apps/desktop/src/preload.js"), "utf8");
@@ -20,7 +21,7 @@ async function main() {
     shell:{ openExternal() {} }
   };
   vm.runInContext(source, vm.createContext({
-    require(name) { if (name === "electron") return electron; throw new Error("unexpected require: " + name); },
+    require(name) { if (name === "electron") return electron; if (name === "./shared/videoProviderIpcContract") return videoProviderIpcContract; throw new Error("unexpected require: " + name); },
     process:{ env:{} }, console
   }), { filename:"preload.js" });
 
