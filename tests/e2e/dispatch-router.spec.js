@@ -1,5 +1,6 @@
 const { test, expect } = require("@playwright/test");
 const { launchWeishan, gotoRoute, cleanupE2EData } = require("./helpers");
+const productLanguage = require("./dispatch-product-language");
 
 const runId = "E2EDISPATCH-" + new Date().toISOString().replace(/[-:TZ.]/g, "").slice(0, 14);
 
@@ -128,7 +129,8 @@ test.describe.serial("dispatch router", () => {
 
     const localTimeCommand = runId + " 今天星期几？";
     await submitHomeCommand(page, localTimeCommand);
-    await expect(currentTaskLogs(page)).toContainText("本地时间模块");
+    await expect(currentTaskLogs(page)).toContainText(productLanguage.localTimeAnswer);
+    await expect(currentTaskLogs(page)).not.toContainText(productLanguage.hiddenInternalTerms[0]);
     await expectHistory(page, localTimeCommand, /今天是星期/);
   });
 
@@ -279,7 +281,7 @@ test.describe.serial("dispatch router", () => {
     await page.locator("#uploadBtn").click();
     await expect(page.locator("[data-attachment-stage]")).toBeVisible();
     await expect(page.locator("[data-attachment-stage]")).toContainText(filename);
-    await expect(page.locator("[data-attachment-stage]")).toContainText(/不会自动执行|不会上传云|不会读取完整文件内容/);
+    await expect(page.locator("[data-attachment-stage]")).toContainText(productLanguage.attachmentSafety);
     await expect(page.locator("#cmdQueue")).not.toContainText(filename);
     await expect(page.locator("#cmdHistory")).not.toContainText(filename);
     await page.locator("#commandInput").fill(runId + " 继续输入文字说明");
@@ -294,11 +296,12 @@ test.describe.serial("dispatch router", () => {
     await expect(page.locator("[data-attachment-stage]")).toContainText(filename);
     await page.locator("#commandInput").fill(runId + " 帮我分析这个附件");
     await page.locator("#runBtn").click();
-    await expect(currentTaskLogs(page)).toContainText("已挂载附件 metadata");
-    await expect(currentTaskLogs(page)).toContainText(filename);
-    await expect(currentTaskLogs(page)).toContainText(/未读取完整内容|未上传云/);
+    await expect(currentTaskLogs(page)).toContainText(productLanguage.processing);
+    await expect(currentTaskLogs(page)).not.toContainText(productLanguage.hiddenInternalTerms[1]);
+    await expect(currentTaskLogs(page)).not.toContainText(productLanguage.hiddenInternalTerms[2]);
+    await expect(currentTaskLogs(page)).not.toContainText(productLanguage.hiddenInternalTerms[3]);
     await expect(page.locator("[data-attachment-stage]")).toHaveCount(0);
-    await expectHistory(page, runId, /attachmentCount|attachmentNames|analysis-fixture|chat\.unavailable|chat\.answered/);
+    await expectHistory(page, runId, /帮我分析这个附件|AI 未配置|高铁/);
   });
 
   test("dispatch bridge can be cancelled without executing module work", async () => {
