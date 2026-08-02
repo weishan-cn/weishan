@@ -1,0 +1,8 @@
+# Capability Lifecycle
+
+UNKNOWN -> DISABLED | UNAVAILABLE | AVAILABLE
+AVAILABLE -> REQUIRES_CONFIRMATION | BLOCKED
+REQUIRES_CONFIRMATION -> BLOCKED
+UNAVAILABLE -> NOT_SUPPORTED
+
+DISABLED, BLOCKED, and NOT_SUPPORTED are terminal lifecycle states. State declaration does not authorize execution.
