@@ -1,0 +1,1 @@
+;(function(){"use strict";function listDecisionStarters(){return Object.freeze({success:true,starters:Object.freeze(["Compare several product choices","Plan a trip","Understand different option risks"]),purchaseInducement:false,concreteProductRecommended:false});}window.WeishanGlobalDecisionStarterExperience=Object.freeze({listDecisionStarters});})();

@@ -1,0 +1,1 @@
+;(function(){"use strict";function createEmotionPrinciple(){return Object.freeze({success:true,principle:Object.freeze({feelings:Object.freeze(["CALM","REASSURED","TRUSTED"]),anxietyDesignEnabled:false,urgencyPressureEnabled:false,emotionAnalysisEnabled:false})});}window.WeishanGlobalDecisionEmotion=Object.freeze({createEmotionPrinciple});})();

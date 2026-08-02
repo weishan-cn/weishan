@@ -1,0 +1,4 @@
+;(function () { "use strict";
+  function createFlow(input, confirmed) { const guard=window.WeishanGlobalCommerceInputGuard, checked=guard&&guard.guardAndCloneCommerceInput(input); if(!checked||!checked.success||!checked.value)return Object.freeze({status:"EXPERIENCE_REJECTED",reasons:Object.freeze(["PROPOSAL_REQUIRED"])}); const proposal=checked.value; if(proposal.requiresConfirmation!==true)return Object.freeze({status:"EXPERIENCE_REJECTED",reasons:Object.freeze(["PROPOSAL_REQUIRED"])}); return Object.freeze({status:confirmed===true?"EXPERIENCE_READY":"EXPERIENCE_AWAITING_WORKSPACE_CONFIRMATION",stages:Object.freeze(confirmed?["QUESTION","OPTIONS","EVIDENCE","RISKS","TRADEOFFS","RECOMMENDATION","USER_DECISION","SAVE_OR_EXIT"]:["QUESTION","WORKSPACE_CONFIRMATION"]),workspaceCreated:false}); }
+  window.WeishanGlobalDecisionExperienceOrchestrator=Object.freeze({createFlow});
+})();

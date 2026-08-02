@@ -1,0 +1,1 @@
+;(function(){"use strict";function createState(stage,question){return Object.freeze({currentStage:stage,primaryQuestion:question,availableActions:Object.freeze(["CONTINUE","EXIT"]),canGoBack:true,canExit:true,willPersist:false,nextExpectedStage:null,warnings:Object.freeze([])})}window.WeishanGlobalDecisionExperienceState=Object.freeze({createState});})();

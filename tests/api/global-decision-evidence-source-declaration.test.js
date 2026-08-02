@@ -1,0 +1,10 @@
+const assert = require("node:assert/strict"), fs = require("node:fs"), path = require("node:path"), vm = require("node:vm");
+const root = path.join(__dirname, "../../apps/desktop/src/renderer/core"), windowRef = {}; windowRef.window = windowRef;
+const context = vm.createContext({ window:windowRef, Set, Number, Object, Array, String, Boolean, RegExp, Math });
+["globalCommerceInputGuard.js", "globalDecisionEvidenceConfidence.js", "globalDecisionEvidence.js", "globalDecisionEvidenceClassifier.js"].forEach((file) => vm.runInContext(fs.readFileSync(path.join(root, file), "utf8"), context));
+const evidence = windowRef.WeishanGlobalDecisionEvidence.createDecisionEvidence({ type:"SOURCE_DECLARATION", source:"EXTERNAL_SOURCE_DECLARATION", statement:"Provider declares an authorized relationship.", limitations:["Not verified by Weishan."], userProvided:false, completeness:true });
+assert.equal(evidence.success, true); assert.equal(evidence.evidence.type, "SOURCE_DECLARATION"); assert.equal(evidence.evidence.confidence, "MEDIUM");
+const classified = windowRef.WeishanGlobalDecisionEvidenceClassifier.classifyDecisionEvidence({ facts:[], userInputs:[], assumptions:[], analysisBasis:[], limitations:[], sourceDeclarations:["Provider declares an authorized relationship."] });
+assert.equal(classified.success, true); assert.equal(classified.evidence[0].type, "SOURCE_DECLARATION"); assert.equal(classified.evidence[0].source, "EXTERNAL_SOURCE_DECLARATION");
+assert.equal(windowRef.WeishanGlobalDecisionEvidence.createDecisionEvidence({ type:"FACT", source:"EXTERNAL_SOURCE_DECLARATION", statement:"blocked", limitations:[], userProvided:false, completeness:true }).success, false);
+console.log("GLOBAL_DECISION_EVIDENCE_SOURCE_DECLARATION PASS");
