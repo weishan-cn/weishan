@@ -1,0 +1,9 @@
+(function(){
+  const Matrix=window.WeishanVideoProviderComplianceMatrix,Badge=window.WeishanVideoProviderCertificationBadge;
+  let sequence=0;
+  function freeze(value){if(!value||typeof value!=="object"||Object.isFrozen(value))return value;Object.keys(value).forEach((key)=>freeze(value[key]));return Object.freeze(value);}
+  function summary(matrix){const rows=Object.keys(matrix).map((key)=>matrix[key]),counts={passed:0,failed:0,skipped:0,total:rows.length};rows.forEach((row)=>{if(row.status==="passed")counts.passed+=1;if(row.status==="failed")counts.failed+=1;if(row.status==="skipped")counts.skipped+=1;});return counts;}
+  function reportManifest(manifest){return{manifestVersion:manifest.manifestVersion,adapterId:manifest.adapterId,displayName:manifest.displayName,adapterVersion:manifest.adapterVersion,contractVersion:manifest.contractVersion,executionMode:manifest.executionMode,capabilities:manifest.capabilities};}
+  function createVideoProviderCertificationReport(input){const source=input&&typeof input==="object"?input:{},matrix=Matrix.createVideoProviderComplianceMatrix(source.matrix),counts=summary(matrix),status=source.overallStatus==="certified"&&counts.failed===0?"certified":"rejected",manifest=reportManifest(source.manifest||{});sequence+=1;return freeze({reportVersion:"1",certificationId:"video-provider-certification-"+String(sequence).padStart(6,"0"),manifest,profile:source.profile==="strict"?"strict":"standard",overallStatus:status,matrix,capabilityCompatibility:source.capabilityCompatibility&&typeof source.capabilityCompatibility==="object"?source.capabilityCompatibility:{},summary:counts,badge:Badge.createVideoProviderCertificationBadge(status,source.profile,manifest.contractVersion),revision:1});}
+  window.WeishanVideoProviderCertificationReport={createVideoProviderCertificationReport};
+})();
