@@ -1,0 +1,11 @@
+(function () {
+  "use strict";
+
+  const Shared=window.WeishanCommerceShadowContractValidation,AuthorityTypes=window.WeishanPriceAuthorityTypes,AuthorityValidation=window.WeishanPriceAuthorityValidation,Types=window.WeishanPriceNormalizationTypes;
+  function fail(code){Shared.fail(code);}function text(value){return Shared.text(value);}function exact(value,keys){return Shared.exact(value,keys);}function enumValue(values,value){return values.indexOf(value)>=0;}
+  function authority(input){const value=Shared.safeClone(input);return AuthorityValidation.authority(value);}
+  function dependencies(input){if(!input||typeof input.clock!=="function"||typeof input.idGenerator!=="function")fail("invalid_price_normalization_dependencies");return input;}
+  function normalizedPrice(input){const value=Shared.safeClone(input),keys=Types.INTERFACES.normalizedPrice.required;if(!exact(value,keys)||value.schemaVersion!==Types.CONTRACT_VERSION||!text(value.normalizationId)||!text(value.authorityId)||!enumValue(Types.ENUMS.DOMAIN,value.domain)||!text(value.currency)||!enumValue(Types.ENUMS.AMOUNT_STATE,value.amountState)||!enumValue(Types.ENUMS.FIELD_STATE,value.taxState)||!enumValue(Types.ENUMS.FIELD_STATE,value.feeState)||!enumValue(Types.ENUMS.FIELD_STATE,value.shippingState)||!enumValue(Types.ENUMS.FIELD_STATE,value.baggageState)||!Array.isArray(value.knownComponents)||!Array.isArray(value.unknownComponents)||!Array.isArray(value.estimatedComponents)||!enumValue(Types.ENUMS.AUTHORITY_LEVEL,value.authorityLevel)||!enumValue(AuthorityTypes.ENUMS.CONFIDENCE,value.confidence)||!enumValue(Types.ENUMS.FRESHNESS_STATE,value.freshnessState)||!Array.isArray(value.limitations)||!Array.isArray(value.warnings)||!enumValue(Types.ENUMS.COMPARISON_READINESS,value.comparisonReadiness)||!text(value.createdAt)||value.executed!==false||value.productionAffected!==false)fail("invalid_normalized_price");return Shared.freeze(value);}
+  function compatibility(version){return Shared.compatibility(version,Types.CONTRACT_VERSION);}
+  window.WeishanPriceNormalizationValidation=Object.freeze({fail,text,exact,authority,dependencies,normalizedPrice,compatibility,freeze:Shared.freeze,safeClone:Shared.safeClone});
+})();

@@ -1,0 +1,1 @@
+(function(){"use strict";const V=window.WeishanScenarioValidation,C=window.WeishanScenarioLibraryCore;window.WeishanScenarioMatrixPackage=Object.freeze({PACKAGE:V.freeze({executionGate:"CLOSED",authorizesExecution:false,executed:false,productionAffected:false,providerAccess:false,networkAccess:false}),createScenario:C.create});})();
