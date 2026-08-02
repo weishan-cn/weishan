@@ -1,0 +1,22 @@
+[
+  {
+    "name": "__WEISHAN_TEST_OPEN_EXTERNAL__",
+    "sources": [
+      "apps/desktop/src/renderer/core/commerceSafeExternalSearchHandoff.js",
+      "apps/desktop/src/renderer/core/safeProviderDeepLinkHandoffGate.js"
+    ],
+    "classification": "UNUSED_OR_UNRESOLVED",
+    "riskLevel": "MEDIUM",
+    "traceable": true
+  },
+  {
+    "name": "WeishanDispatchPayload",
+    "sources": [
+      "apps/desktop/src/renderer/core/dispatchRouter.js",
+      "apps/desktop/src/renderer/core/dispatchRouter.js"
+    ],
+    "classification": "UNUSED_OR_UNRESOLVED",
+    "riskLevel": "MEDIUM",
+    "traceable": true
+  }
+]
