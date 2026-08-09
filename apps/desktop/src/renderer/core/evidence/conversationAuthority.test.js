@@ -51,4 +51,3 @@ for(let index=0;index<10;index++)test("deterministic "+index,()=>{
 tests.forEach(([,fn])=>fn());
 if(tests.length<140)throw new Error("insufficient tests");
 console.log("CONVERSATION_AUTHORITY_TESTS PASS "+tests.length);
-

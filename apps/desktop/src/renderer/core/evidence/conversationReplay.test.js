@@ -58,4 +58,3 @@ for(let index=0;index<10;index++)test("deterministic "+index,()=>{ const first=J
 tests.forEach(([,fn])=>fn());
 if(tests.length<180)throw new Error("insufficient tests");
 console.log("CONVERSATION_REPLAY_TESTS PASS "+tests.length);
-
