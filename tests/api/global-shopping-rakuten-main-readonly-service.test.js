@@ -22,6 +22,7 @@ async function main() {
       RAKUTEN_ACCESS_KEY:"runtime-access-key"
     },
     now:() => "2026-07-11T00:00:00.000Z",
+    providerApproval:"APPROVED_FOR_READONLY_TEST",
     retryLimit:1,
     fetchImpl:async (url) => {
       attempts += 1;
@@ -106,8 +107,8 @@ async function main() {
     currency:"JPY"
   });
   assert.equal(degraded.status, "degraded");
-  assert.equal(degraded.error.category, "credential_unavailable");
-  assert.equal(missingCredentialService.manualLiveCheckStatus(), "REAL_PROVIDER_LIVE_CHECK SKIPPED_NO_CREDENTIAL");
+  assert.equal(degraded.error.category, "not_approved");
+  assert.equal(missingCredentialService.manualLiveCheckStatus(), "REAL_PROVIDER_LIVE_CHECK BLOCKED_PROVIDER_NOT_APPROVED");
 
   let retryCalls = 0;
   const rateLimitService = createGlobalShoppingRakutenReadonlyService({
@@ -116,6 +117,7 @@ async function main() {
       RAKUTEN_ACCESS_KEY:"runtime-access-key"
     },
     retryLimit:1,
+    providerApproval:"APPROVED_FOR_READONLY_TEST",
     fetchImpl:async () => {
       retryCalls += 1;
       return createResponse(429, { message:"rate limited" });

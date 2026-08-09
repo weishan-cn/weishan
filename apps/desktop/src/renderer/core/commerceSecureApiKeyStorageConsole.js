@@ -7,7 +7,6 @@
     { providerId:"flight_provider_key", label:"机票 Provider Key" },
     { providerId:"flight_provider_sandbox_key", label:"机票 Provider Sandbox/Test Key" },
     { providerId:"hotel_provider_key", label:"酒店 Provider Key" },
-    { providerId:"product_provider_key", label:"商品 Provider Key" },
     { providerId:"local_service_provider_key", label:"本地服务 Provider Key" },
     { providerId:"ticket_activity_provider_key", label:"门票 / 活动 Provider Key" }
   ];

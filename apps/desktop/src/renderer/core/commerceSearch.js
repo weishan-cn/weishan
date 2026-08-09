@@ -2654,12 +2654,17 @@
 
   function buildRealProviderReadonlyStatus(input){
     const safe = input && typeof input === "object" ? input : {};
+    const providerStatus = sanitizeText(safe.providerStatus || "", 40);
     const mode = sanitizeText(safe.executionMode || safe.mode || "", 40);
     const readinessLevel = sanitizeText(safe.readinessLevel || "", 40);
     let label = "未知";
     let stageLabel = "状态未知";
     let userMessage = sanitizeText(safe.userMessage || "", 160);
-    if (mode === "real_provider_readonly") {
+    if (providerStatus === "NOT_APPROVED") {
+      label = "暂不可用";
+      stageLabel = "等待 Provider 批准";
+      userMessage = "实时商品数据暂不可用。";
+    } else if (mode === "real_provider_readonly") {
       label = "已连接";
       stageLabel = "测试环境";
       userMessage = userMessage || "Rakuten 实时查询已连接，当前通过主进程只读代理返回官方 API 结果。";
@@ -2682,6 +2687,7 @@
     }
     return {
       providerId:"rakuten_japan",
+      providerStatus:providerStatus || "UNAVAILABLE",
       connected:safe.connected === true,
       executionMode:mode || "external_link_only",
       readinessLevel:readinessLevel || "unknown",
@@ -2773,6 +2779,13 @@
   }
 
   async function searchRakutenReadonlyProductCandidates(request){
+    const unavailableStatus = buildRealProviderReadonlyStatus({
+      providerStatus:"NOT_APPROVED",
+      executionMode:"external_link_only"
+    });
+    return buildReadOnlyFallbackSearchResult(request, unavailableStatus);
+
+    /* Provider commercial approval is required before this dormant integration path can run. */
     const gateApi = realProviderExecutionGateApi();
     const gateway = providerGatewayApi();
     if (!gateApi || typeof gateApi.buildGlobalShoppingRealProviderExecutionGate !== "function" || !gateway || typeof gateway.buildGlobalShoppingProviderGatewayResultAsync !== "function") {

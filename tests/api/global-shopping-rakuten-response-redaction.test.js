@@ -16,6 +16,7 @@ function createResponse(status, payload) {
 
 async function main() {
   const service = createGlobalShoppingRakutenReadonlyService({
+    providerApproval:"APPROVED_FOR_READONLY_TEST",
     env:{
       RAKUTEN_APPLICATION_ID:"runtime-app-id",
       RAKUTEN_ACCESS_KEY:"runtime-access-key"

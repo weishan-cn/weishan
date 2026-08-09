@@ -10,6 +10,11 @@ const PROVIDER_ID = "rakuten_japan";
 const ALLOWED_SORT_VALUES = Object.freeze(["standard", "+itemPrice", "-itemPrice", "+updateTimestamp", "-updateTimestamp"]);
 const LIVE_STATUS_SKIPPED = "REAL_PROVIDER_LIVE_CHECK SKIPPED_NO_CREDENTIAL";
 const LIVE_STATUS_BLOCKED = "REAL_PROVIDER_LIVE_CHECK BLOCKED_PROVIDER_CONFIGURATION";
+const LIVE_STATUS_NOT_APPROVED = "REAL_PROVIDER_LIVE_CHECK BLOCKED_PROVIDER_NOT_APPROVED";
+
+function providerCommerciallyApproved(options) {
+  return options && options.providerApproval === "APPROVED_FOR_READONLY_TEST";
+}
 
 function clone(value) {
   return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;
@@ -323,14 +328,16 @@ function buildStatusResult(shared, options = {}) {
     permissionCheck,
     credentialAvailable
   );
-  const executionMode = credentialAvailable && permissionCheck.allowed === true && productionReadiness.readinessLevel !== "blocked"
+  const approved = providerCommerciallyApproved(options);
+  const executionMode = approved && credentialAvailable && permissionCheck.allowed === true && productionReadiness.readinessLevel !== "blocked"
     ? "real_provider_readonly"
     : "external_link_only";
   return {
-    connected:credentialAvailable,
+    connected:approved && credentialAvailable,
     readinessLevel:credentialAvailable ? productionReadiness.readinessLevel : "sandbox",
     executionMode,
     providerId:provider.providerId,
+    providerStatus:approved ? (credentialAvailable ? "AVAILABLE" : "NOT_CONFIGURED") : "NOT_APPROVED",
     configurationCheck,
     featureFlagCheck,
     versionCheck,
@@ -678,7 +685,12 @@ function createGlobalShoppingRakutenReadonlyService(options = {}) {
       });
     }
 
-    const status = buildStatusResult(shared, { provider, env });
+    const status = buildStatusResult(shared, { provider, env, providerApproval:options.providerApproval });
+    if (status.providerStatus === "NOT_APPROVED") {
+      return buildDegradedResult("external_link_only", "not_approved", "实时商品数据暂不可用。", {
+        providerStatus:"NOT_APPROVED"
+      });
+    }
     if (status.permissionCheck.allowed !== true) {
       return buildDegradedResult("external_link_only", "permission_denied", "Rakuten 实时查询当前不可用。", {
         permissionCheck:status.permissionCheck
@@ -807,11 +819,9 @@ function createGlobalShoppingRakutenReadonlyService(options = {}) {
           redacted:true
         };
       }
-      const status = buildStatusResult(shared, { provider, env });
+      const status = buildStatusResult(shared, { provider, env, providerApproval:options.providerApproval });
       return {
-        connected:status.connected,
-        readinessLevel:status.readinessLevel,
-        executionMode:status.executionMode,
+        providerStatus:status.providerStatus,
         providerId:status.providerId,
         redacted:true
       };
@@ -821,6 +831,7 @@ function createGlobalShoppingRakutenReadonlyService(options = {}) {
       const shared = getSharedApis();
       if (!shared) return LIVE_STATUS_BLOCKED;
       const credentials = resolveCredentials({ env });
+      if (!providerCommerciallyApproved(options)) return LIVE_STATUS_NOT_APPROVED;
       if (!credentials.applicationId || !credentials.accessKey) return LIVE_STATUS_SKIPPED;
       const requestSchema = shared.requestSchema.buildGlobalShoppingRakutenRequestSchema({
         providerId:PROVIDER_ID,
@@ -846,6 +857,7 @@ module.exports = {
   GLOBAL_SHOPPING_RAKUTEN_READONLY_SERVICE_VERSION,
   ALLOWED_SORT_VALUES,
   LIVE_STATUS_BLOCKED,
+  LIVE_STATUS_NOT_APPROVED,
   LIVE_STATUS_SKIPPED,
   createGlobalShoppingRakutenReadonlyService,
   registerGlobalShoppingRakutenReadonlyHandlers

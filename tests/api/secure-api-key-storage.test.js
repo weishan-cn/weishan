@@ -83,7 +83,8 @@ function main() {
   const listed = service.listProviderKeys();
   assert.equal(listed.ok, true);
   assert.equal(listed.metadataOnly, true);
-  assert.equal(listed.slots.length, 6);
+  assert.equal(listed.slots.length, 5);
+  assert.equal(listed.slots.some((slot) => slot.providerId === "product_provider_key"), false);
   assert.equal(listed.slots.some((slot) => slot.providerId === "flight_provider_sandbox_key"), true);
   assert.equal(listed.auditDraft.plaintextPersistedCount, 0);
   assert.equal(listed.auditDraft.plaintextDisplayedCount, 0);
@@ -115,6 +116,11 @@ function main() {
   assert.equal(restricted.ok, false);
   assert.equal(restricted.error, "PROVIDER_NOT_ALLOWED");
   assertMetadataOnly(restricted);
+
+  const commerceCredential = service.saveProviderKey("product_provider_key");
+  assert.equal(commerceCredential.ok, false);
+  assert.equal(commerceCredential.error, "PROVIDER_NOT_ALLOWED");
+  assertMetadataOnly(commerceCredential);
 
   const fakeRealLooking = "sk-" + "real-looking-key-1234567890";
   const realLooking = service.saveProviderKey("flight_provider_key", fakeRealLooking);

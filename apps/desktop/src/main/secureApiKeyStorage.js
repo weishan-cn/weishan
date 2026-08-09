@@ -22,7 +22,6 @@ const PROVIDER_SLOTS = Object.freeze([
   { providerId:"flight_provider_key", label:"机票 Provider Key" },
   { providerId:"flight_provider_sandbox_key", label:"机票 Provider Sandbox/Test Key" },
   { providerId:"hotel_provider_key", label:"酒店 Provider Key" },
-  { providerId:"product_provider_key", label:"商品 Provider Key" },
   { providerId:"local_service_provider_key", label:"本地服务 Provider Key" },
   { providerId:"ticket_activity_provider_key", label:"门票 / 活动 Provider Key" }
 ]);
@@ -63,6 +62,7 @@ function defaultUserDataPath(appRef) {
 
 function cleanProviderId(providerId) {
   const value = String(providerId || "").trim();
+  if (value === "product_provider_key") return "";
   if (!value || !/^[a-z0-9_:-]{2,80}$/i.test(value)) return "";
   if (value === "restricted_provider") return "";
   return PROVIDER_SLOTS.some((slot) => slot.providerId === value) ? value : "";
