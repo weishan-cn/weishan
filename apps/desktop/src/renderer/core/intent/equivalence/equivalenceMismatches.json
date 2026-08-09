@@ -1,0 +1,3122 @@
+[
+  {
+    "caseId": "eq-001",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-002",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-003",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-004",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-005",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-006",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-007",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-008",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-009",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-010",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-011",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-012",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-013",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-014",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-015",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-016",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-017",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-018",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-019",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-020",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-021",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-022",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-023",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-024",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-025",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-026",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-027",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-028",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-029",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-030",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-031",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-032",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-033",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-034",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-035",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-036",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-037",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-038",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-039",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-040",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-041",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-042",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-043",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-044",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-045",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-046",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-047",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-048",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-049",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-050",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-051",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-052",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-053",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-054",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-055",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-056",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-057",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-058",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-059",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-060",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-061",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-062",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-063",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-064",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-065",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-066",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-067",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-068",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-069",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-070",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-071",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-072",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-073",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-074",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-075",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-076",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-077",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-078",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-079",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-080",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-081",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-082",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-083",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-084",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-085",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-086",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-087",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-088",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-089",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-090",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-091",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-092",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-093",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-094",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-095",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-096",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-097",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-098",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-099",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-100",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-101",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-102",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-103",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-104",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-105",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-106",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-107",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-108",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-109",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-110",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-111",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-112",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-113",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-114",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-115",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-116",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-117",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-118",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-119",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-120",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-121",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-122",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-123",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-124",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-125",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-126",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-127",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-128",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-129",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-130",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-131",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-132",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-133",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-134",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-135",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-136",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-137",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-138",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-139",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-140",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-141",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-142",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-143",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-144",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-145",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-146",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-147",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-148",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-149",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-150",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-151",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-152",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-153",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-154",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-155",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-156",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-157",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-158",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-159",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-160",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-161",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-162",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-163",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-164",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-165",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-166",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-167",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-168",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-169",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-170",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-171",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-172",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-173",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-174",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-175",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-176",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-177",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-178",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-179",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-180",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-181",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-182",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-183",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-184",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-185",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-186",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-187",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-188",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-189",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-190",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-191",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-192",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-193",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-194",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-195",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-196",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-197",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-198",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-199",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-200",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-201",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-202",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-203",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-204",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-205",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-206",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-207",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-208",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-209",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-210",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-211",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-212",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-213",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-214",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-215",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-216",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-217",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-218",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-219",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-220",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-221",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-222",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-223",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-224",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-225",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-226",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-227",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-228",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-229",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-230",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-231",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-232",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-233",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-234",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-235",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-236",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-237",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-238",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-239",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-240",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-241",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-242",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-243",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-244",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-245",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-246",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-247",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-248",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-249",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-250",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-251",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-252",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-253",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-254",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-255",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-256",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-257",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-258",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-259",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  },
+  {
+    "caseId": "eq-260",
+    "dimension": "BASELINE",
+    "differenceCodes": [
+      "AUTHORITATIVE_NOT_COMPARABLE"
+    ],
+    "severity": "INFO",
+    "safeSummary": "No safe authoritative classification baseline is exposed for this synthetic case.",
+    "authoritativeNormalizedOutcome": null,
+    "shadowNormalizedOutcome": null,
+    "recommendation": "Do not use this case for migration authorization until a separately approved read-only baseline is available."
+  }
+]

@@ -1,0 +1,3702 @@
+[
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-001",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-002",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-003",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-004",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-005",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-006",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-007",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-008",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-009",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-010",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-011",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-012",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-013",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-014",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-015",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-016",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-017",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-018",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-019",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-020",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-021",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-022",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-023",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-024",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-025",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-026",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-027",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-028",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-029",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-030",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-031",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-032",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-033",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-034",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-035",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-036",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-037",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-038",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-039",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-040",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-041",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-042",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-043",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-044",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-045",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-046",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-047",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-048",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-049",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-050",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-051",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-052",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-053",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-054",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-055",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-056",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-057",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-058",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-059",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-060",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-061",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-062",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-063",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-064",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-065",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-066",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-067",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-068",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-069",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-070",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-071",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-071",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "ساعدني في مقارنة هذا (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-072",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-072",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "कृपया इसकी तुलना करें (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-073",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-073",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "Compare option A and B",
+      "primaryIntent": "DECISION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-074",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-074",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "請幫我分析這個問題 (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-075",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-075",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "这两套方案选哪个",
+      "primaryIntent": "DECISION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-076",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-076",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "Ayúdame a comparar esto (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-077",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-077",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "Ajude-me a comparar isto (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-078",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-078",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "Aidez-moi à comparer ceci (DECISION)",
+      "primaryIntent": "DECISION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-079",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-079",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "Hilf mir, dies zu vergleichen (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-080",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-080",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "これを比較してください (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-081",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-081",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "이것을 비교해 주세요 (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-082",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-082",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "Помогите сравнить это (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-083",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-083",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "ساعدني في مقارنة هذا (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-084",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-084",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "कृपया इसकी तुलना करें (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-085",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-085",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "Compare option A and B",
+      "primaryIntent": "DECISION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-086",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-086",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "請幫我分析這個問題 (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-087",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-087",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "这两套方案选哪个",
+      "primaryIntent": "DECISION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-088",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-088",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "Ayúdame a comparar esto (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-089",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-089",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "Ajude-me a comparar isto (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-090",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-090",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "Aidez-moi à comparer ceci (DECISION)",
+      "primaryIntent": "DECISION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-091",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-091",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "Hilf mir, dies zu vergleichen (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-092",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-092",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "これを比較してください (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-093",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-093",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "이것을 비교해 주세요 (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-094",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-094",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "Помогите сравнить это (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-095",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-095",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "ساعدني في مقارنة هذا (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-096",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-096",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "कृपया इसकी तुलना करें (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-097",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-097",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "Compare option A and B",
+      "primaryIntent": "DECISION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-098",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-098",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "請幫我分析這個問題 (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-099",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-099",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "这两套方案选哪个",
+      "primaryIntent": "DECISION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-100",
+    "baselineSource": "DECISION_INTENT",
+    "sourceClassification": "PURE_CALLABLE",
+    "normalizedAuthoritativeOutcome": {
+      "schemaVersion": "1.0",
+      "caseId": "eq-100",
+      "sourceSystem": "DECISION_ENTRY",
+      "rawInput": "Ayúdame a comparar esto (DECISION)",
+      "primaryIntent": "QUESTION",
+      "secondaryIntents": [],
+      "destination": "DECISION_WORKSPACE",
+      "requiresUserConfirmation": false,
+      "confirmationReasons": [],
+      "clarification": {
+        "status": "UNREPRESENTED",
+        "questions": []
+      },
+      "capabilityAvailability": {
+        "status": "NOT_APPLICABLE"
+      },
+      "routeProposal": "existing globalDecisionIntent helper",
+      "executionProposed": false,
+      "persistenceProposed": false,
+      "externalEffectProposed": false,
+      "evidence": [
+        "globalDecisionIntent.understandDecisionIntent"
+      ],
+      "limitations": [
+        "Decision-only pure helper; no route replay."
+      ],
+      "createdAt": "1970-01-01T00:00:00.000Z"
+    },
+    "safeEvidenceReference": "globalDecisionIntent.understandDecisionIntent",
+    "limitations": [
+      "Decision-only pure helper; no route replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-101",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-102",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-103",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-104",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-105",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-106",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-107",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-108",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-109",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-110",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-111",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-112",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-113",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-114",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-115",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-116",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-117",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-118",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-119",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-120",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-121",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-122",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-123",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-124",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-125",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-126",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-127",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-128",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-129",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-130",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-131",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-132",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-133",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-134",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-135",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-136",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-137",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-138",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-139",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-140",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-141",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-142",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-143",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-144",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-145",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-146",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-147",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-148",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-149",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-150",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-151",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-152",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-153",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-154",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-155",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-156",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-157",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-158",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-159",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-160",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-161",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-162",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-163",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-164",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-165",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-166",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-167",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-168",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-169",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-170",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-171",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-172",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-173",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-174",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-175",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-176",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-177",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-178",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-179",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-180",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-181",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-182",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-183",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-184",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-185",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-186",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-187",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-188",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-189",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-190",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-191",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-192",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-193",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-194",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-195",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-196",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-197",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-198",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-199",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-200",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-201",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-202",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-203",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-204",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-205",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-206",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-207",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-208",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-209",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-210",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-211",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-212",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-213",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-214",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-215",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-216",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-217",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-218",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-219",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-220",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-221",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-222",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-223",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-224",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-225",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-226",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-227",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-228",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-229",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-230",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-231",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-232",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-233",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-234",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-235",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-236",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-237",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-238",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-239",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-240",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-241",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-242",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-243",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-244",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-245",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-246",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-247",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-248",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-249",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-250",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-251",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-252",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-253",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-254",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-255",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-256",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-257",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-258",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-259",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  },
+  {
+    "snapshotSchemaVersion": "1.0",
+    "caseId": "eq-260",
+    "baselineSource": "NOT_COMPARABLE",
+    "sourceClassification": "MIXED_WITH_EXECUTION",
+    "normalizedAuthoritativeOutcome": null,
+    "safeEvidenceReference": "no_safe_replay",
+    "limitations": [
+      "No safe existing classifier replay."
+    ]
+  }
+]

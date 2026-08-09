@@ -1,0 +1,1 @@
+(function(){window.WeishanAuthoritativeBaseline=Object.freeze({classifySource:window.WeishanBaselineSourceRegistry.classifySource,replayDecision:window.WeishanBaselineReplayHarness.replayDecision,generateBaselineSnapshot:window.WeishanBaselineSnapshot.generateBaselineSnapshot});})();
