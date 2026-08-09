@@ -1,0 +1,1 @@
+(function(){const V=window.WeishanIntentValidation;function copy(v){return V.json(v,true)}function freeze(v){return V.freeze(v)}function fail(c){return V.fail(c)}window.WeishanUnifiedRuntimeValidation=Object.freeze({copy,freeze,fail});})();
