@@ -513,17 +513,17 @@
   function cloudEnterprisePanel(){
     return `
       <div class="ws-card" id="cloudEnterpriseSettings">
-        <h2>云服务与企业空间</h2>
-        <p class="ws-muted">当前存储模式：<b id="cloudStorageMode">本地存储</b> / weishan 云存储 / 自有云</p>
+        <h2>${t("settingsCloudTitle")}</h2>
+        <p class="ws-muted">${t("settingsStorageMode")}：<b id="cloudStorageMode">${t("settingsLocalStorage")}</b> / weishan 云存储 / 自有云</p>
         <p class="danger-text">${LOCAL_STORAGE_WARNING}</p>
         <p class="ws-muted">Metadata provider / Storage provider 当前为 local mock。PocketBase 和 S3-compatible 仅作为可替换 provider skeleton，不是默认供应商。</p>
         <div class="ws-row">
-          <button class="ws-btn" id="loadCloudPlans">读取企业套餐</button>
-          <button class="ws-btn green" id="loadCloudStatus">读取企业空间状态</button>
-          <button class="ws-btn gray" id="allocateCloudStorage">分配企业云空间 mock</button>
+          <button class="ws-btn" id="loadCloudPlans">${t("settingsReadPlans")}</button>
+          <button class="ws-btn green" id="loadCloudStatus">${t("settingsReadCloudStatus")}</button>
+          <button class="ws-btn gray" id="allocateCloudStorage">${t("settingsAllocateCloud")}</button>
         </div>
-        <div class="ws-item" id="cloudPlanList">企业套餐待读取。</div>
-        <div class="ws-item" id="cloudStatusBox">企业空间状态待读取。</div>
+        <div class="ws-item" id="cloudPlanList">${t("settingsPlansPending")}</div>
+        <div class="ws-item" id="cloudStatusBox">${t("settingsCloudStatusPending")}</div>
         <div class="ws-row">
           <input class="ws-input" id="cloudInviteEmail" placeholder="成员邮箱，例如 e2e-cloud@example.com">
           <select class="ws-input" id="cloudInviteRole">
@@ -531,9 +531,9 @@
             <option value="admin">Admin</option>
             <option value="viewer">Viewer</option>
           </select>
-          <button class="ws-btn" id="cloudInviteMember">邀请成员 mock</button>
+          <button class="ws-btn" id="cloudInviteMember">${t("settingsInviteMember")}</button>
         </div>
-        <div class="ws-item" id="cloudInviteResult">成员邀请结果待执行。</div>
+        <div class="ws-item" id="cloudInviteResult">${t("settingsInvitePending")}</div>
         <p class="ws-muted">扩容入口预留：云空间不够时未来可单独购买扩容包，本轮不接真实付款。</p>
       </div>`;
   }
@@ -601,29 +601,29 @@
     return `
       <div class="ws-card commerce-location-settings" id="commerceLocationSettingsPanel">
         <div class="settings-title-row">
-          <h2>位置与收货目的地</h2>
-          <span class="connector-pill ${mode === "off" ? "connector-empty" : "connector-saved"}">${mode === "off" ? "关闭" : "待系统授权"}</span>
+          <h2>${t("settingsLocationTitle")}</h2>
+          <span class="connector-pill ${mode === "off" ? "connector-empty" : "connector-saved"}">${mode === "off" ? t("settingsLocationOff") : t("settingsLocationWaiting")}</span>
         </div>
         <p class="ws-muted">为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。weishan 仅将位置信息用于价格、运费、税费、关税和合规区域计算，不会保存原始位置。</p>
         <p class="ws-muted">最低到手价需要根据收货目的地计算运费、税费、关税和当地合规要求。</p>
         <div class="desktop-permission-grid commerce-destination-fields">
-          <label>国家/地区<input class="ws-input" id="commerceDestinationCountry" value="${esc(destination.country || "")}" placeholder="国家/地区"></label>
-          <label>州/省/城市<input class="ws-input" id="commerceDestinationRegion" value="${esc(destination.region || destination.city || "")}" placeholder="州/省/城市"></label>
-          <label>邮编/邮政编码<input class="ws-input" id="commerceDestinationPostalCode" value="${esc(destination.postalCode || "")}" placeholder="邮编/邮政编码"></label>
+          <label>${t("settingsCountryRegion")}<input class="ws-input" id="commerceDestinationCountry" value="${esc(destination.country || "")}" placeholder="${t("settingsCountryRegion")}"></label>
+          <label>${t("settingsStateCity")}<input class="ws-input" id="commerceDestinationRegion" value="${esc(destination.region || destination.city || "")}" placeholder="${t("settingsStateCity")}"></label>
+          <label>${t("settingsPostalCode")}<input class="ws-input" id="commerceDestinationPostalCode" value="${esc(destination.postalCode || "")}" placeholder="${t("settingsPostalCode")}"></label>
         </div>
         <div class="desktop-permission-grid commerce-location-options">
-          <label><input type="radio" name="commerceLocationMode" value="always"${mode === "always" ? " checked" : ""}> 永远允许</label>
-          <label><input type="radio" name="commerceLocationMode" value="while_using_app"${mode === "while_using_app" ? " checked" : ""}> 使用 App 时允许</label>
-          <label><input type="radio" name="commerceLocationMode" value="off"${mode === "off" ? " checked" : ""}> 关闭</label>
+          <label><input type="radio" name="commerceLocationMode" value="always"${mode === "always" ? " checked" : ""}> ${t("settingsAlwaysAllow")}</label>
+          <label><input type="radio" name="commerceLocationMode" value="while_using_app"${mode === "while_using_app" ? " checked" : ""}> ${t("settingsAllowWhileUsing")}</label>
+          <label><input type="radio" name="commerceLocationMode" value="off"${mode === "off" ? " checked" : ""}> ${t("settingsLocationOff")}</label>
         </div>
         <p class="ws-muted">定位服务偏好用于请求系统位置权限，不代表系统已经授权。系统授权成功前不会显示已定位，也不会把 hasPreciseLocation 设为 true。</p>
         <dl class="commerce-facts">
-          <div><dt>收货目的地</dt><dd>${destinationStatus}</dd></div>
-          <div><dt>国家/地区</dt><dd>${esc(destination.country || "未设置")}</dd></div>
-          <div><dt>州/省/城市</dt><dd>${esc(destination.region || destination.city || "未设置")}</dd></div>
-          <div><dt>邮编/邮政编码</dt><dd>${esc(destination.postalCode || "未设置")}</dd></div>
+          <div><dt>${t("settingsDestination")}</dt><dd>${destinationStatus}</dd></div>
+          <div><dt>国家/地区</dt><dd>${esc(destination.country || t("settingsNotSet"))}</dd></div>
+          <div><dt>州/省/城市</dt><dd>${esc(destination.region || destination.city || t("settingsNotSet"))}</dd></div>
+          <div><dt>邮编/邮政编码</dt><dd>${esc(destination.postalCode || t("settingsNotSet"))}</dd></div>
           <div><dt>定位状态</dt><dd>${esc(policy.locationPermissionStatus || "not_requested")}</dd></div>
-          <div><dt>精确最低到手价</dt><dd>${policy.canCalculateAccurateLandedCost ? "可计算" : "不可用"}</dd></div>
+          <div><dt>${t("settingsAccuratePrice")}</dt><dd>${policy.canCalculateAccurateLandedCost ? t("settingsAvailable") : t("settingsUnavailable")}</dd></div>
           <div><dt>原始坐标保存</dt><dd>false</dd></div>
           <div><dt>第三方共享</dt><dd>false</dd></div>
           <div><dt>广告 / 追踪</dt><dd>false</dd></div>
@@ -1012,19 +1012,19 @@
 
     function accountButtonFeedbackLabel(action, state){
       if (state === "processing") {
-        if (action === "register") return "正在注册...";
-        if (action === "login") return "正在登录...";
-        return "正在准备说明...";
+        if (action === "register") return t("settingsRegistering");
+        if (action === "login") return t("settingsLoggingIn");
+        return t("settingsPreparingRecovery");
       }
       if (state === "success") {
-        if (action === "register") return "注册完成";
-        if (action === "login") return "登录完成";
-        return "本地说明已显示";
+        if (action === "register") return t("settingsRegisterComplete");
+        if (action === "login") return t("settingsLoginComplete");
+        return t("settingsRecoveryShown");
       }
       if (state === "error") {
-        if (action === "register") return "注册受阻";
-        if (action === "login") return "登录受阻";
-        return "说明受阻";
+        if (action === "register") return t("settingsRegisterBlocked");
+        if (action === "login") return t("settingsLoginBlocked");
+        return t("settingsRecoveryBlocked");
       }
       return accountButtonIdleLabel(action);
     }
@@ -1056,7 +1056,7 @@
       if (btn && btn.getAttribute("data-feedback-state") === "processing") return;
       resetOtherAccountButtons(action);
       setAccountButtonState(action, "processing");
-      status(action === "recover" ? "正在准备本地找回密码说明..." : "正在处理本地账号操作...");
+      status(action === "recover" ? t("settingsPreparingRecoveryStatus") : t("settingsProcessingAccount"));
       window.setTimeout(function(){
         const r = worker();
         if (!r.ok) {
@@ -1065,7 +1065,7 @@
           return;
         }
         setAccountButtonState(action, "success");
-        status(r.message || "本地账号操作已完成。");
+        status(r.message || t("settingsAccountComplete"));
         if (action === "register" || action === "login") {
           window.setTimeout(function(){ window.WeishanRouter.refresh(); }, 120);
         }

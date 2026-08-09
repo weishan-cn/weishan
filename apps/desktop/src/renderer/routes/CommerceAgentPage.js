@@ -3170,7 +3170,7 @@
     const ai = aiWorkspaceSummary();
     const provider = providerWorkspaceSummary();
     const mode = workspaceModeState();
-    const modeLabel = mode === "real_readonly" ? "Real Readonly" : (mode === "sandbox" ? "Sandbox" : "离线模式");
+    const modeLabel = mode === "real_readonly" ? "Real Readonly" : (mode === "sandbox" ? "Sandbox" : t("commerceOffline"));
     return `<section class="commerce-workspace-toolbar" data-commerce-workspace-overview="true">
       <div class="commerce-workspace-toolbar-copy">
         <span class="commerce-workspace-eyebrow">Global Shopping Workspace</span>
@@ -3178,9 +3178,9 @@
         <p>${esc([fields.productName, fields.budgetLabel, fields.destinationCountry].filter(Boolean).join(" · ") || "继续输入商品、预算和收货地，Weishan 会帮你整理采购条件。")}</p>
       </div>
       <div class="commerce-workspace-toolbar-status">
-        <article class="commerce-workspace-toolbar-pill"><span>AI 状态</span><strong>${esc(ai.label || "AI 未配置")}</strong></article>
-        <article class="commerce-workspace-toolbar-pill"><span>Provider 状态</span><strong>${esc(provider.label || "Provider 未连接")}</strong></article>
-        <article class="commerce-workspace-toolbar-pill"><span>模式</span><strong>${esc(modeLabel)}</strong></article>
+        <article class="commerce-workspace-toolbar-pill"><span>${t("commerceAiStatus")}</span><strong>${esc(ai.label || t("commerceAiNotConfigured"))}</strong></article>
+        <article class="commerce-workspace-toolbar-pill"><span>${t("commerceProviderStatus")}</span><strong>${esc(provider.label || t("commerceProviderNotConnected"))}</strong></article>
+        <article class="commerce-workspace-toolbar-pill"><span>${t("commerceMode")}</span><strong>${esc(modeLabel)}</strong></article>
       </div>
     </section>`;
   }
@@ -3222,7 +3222,7 @@
       button.addEventListener("click", () => {
         const feedback = host.querySelector("[data-commerce-workspace-export-feedback]");
         copyText(JSON.stringify(workspaceStructuredRecordFromTask(task) || {}, null, 2)).then((copied) => {
-          if (feedback) feedback.textContent = copied ? "采购计划已复制" : "复制失败，请稍后重试";
+          if (feedback) feedback.textContent = copied ? t("commerceCopied") : t("commerceCopyFailed");
         });
       });
     });
@@ -8822,40 +8822,42 @@
     host.innerHTML = `<section class="commerce-page commerce-workbench ${productWorkspaceMode ? "commerce-page-product-workspace" : ""}">
       <div class="commerce-hero">
         <div>
-          <h1>${productWorkspaceMode ? "全球购物工作台" : "全球采购"}</h1>
-          <p>${productWorkspaceMode ? "全球购物 · 商品比较与到手成本" : "Global Shopping Workspace · 只读搜索、比价、推荐与平台跳转"}</p>
+          <h1>${productWorkspaceMode ? t("commerceWorkspaceTitle") : t("commerceTitle")}</h1>
+          <p>${productWorkspaceMode ? t("commerceWorkspaceSubtitle") : t("commerceSubtitle")}</p>
         </div>
-        <button class="cmd-btn gray" id="commerceBackHome" type="button">返回首页总调度</button>
+        <button class="cmd-btn gray" id="commerceBackHome" type="button">${t("commerceBackHome")}</button>
       </div>
 
       ${productWorkspaceMode ? "" : `<div class="commerce-safety">
-        Weishan 只做 AI 辅助搜索、分析、比价、推荐和跳转；不收款、不代下单、不保存账号密码，最终价格以平台页面为准。
+        ${t("commerceSafety")}
       </div>`}
+
+      <div data-global-discovery-host="true"></div>
 
       <div class="commerce-toolbar commerce-toolbar-workspace">
         <div class="commerce-toolbar-input">
-          <label class="commerce-toolbar-label" for="commerceInput">搜索需求</label>
-          <textarea id="commerceInput" class="cmd-input commerce-input" placeholder="例如：帮我找 iPhone 价格 / 帮我找成都到上海最便宜机票 / 帮我找东京酒店">${esc(draftText)}</textarea>
+          <label class="commerce-toolbar-label" for="commerceInput">${t("commerceSearchLabel")}</label>
+          <textarea id="commerceInput" class="cmd-input commerce-input" placeholder="${t("commerceSearchPlaceholder")}">${esc(draftText)}</textarea>
         </div>
-        <div class="commerce-toolbar-status" aria-label="采购状态">
+        <div class="commerce-toolbar-status" aria-label="${t("commerceStatus")}">
           <div class="commerce-toolbar-status-card">
-            <span class="commerce-toolbar-status-label">AI 状态</span>
+            <span class="commerce-toolbar-status-label">${t("commerceAiStatus")}</span>
             <strong>${esc(aiSummary.label)}</strong>
           </div>
           ${productWorkspaceMode ? `<div class="commerce-toolbar-status-card">
-            <span class="commerce-toolbar-status-label">价格数据</span>
-            <strong>等待可信来源</strong>
+            <span class="commerce-toolbar-status-label">${t("commercePriceData")}</span>
+            <strong>${t("commerceWaitingTrustedSource")}</strong>
           </div>
           <div class="commerce-toolbar-status-card">
-            <span class="commerce-toolbar-status-label">采购模式</span>
-            <strong>安全比较</strong>
+            <span class="commerce-toolbar-status-label">${t("commerceProcurementMode")}</span>
+            <strong>${t("commerceSafeComparison")}</strong>
           </div>` : `<div class="commerce-toolbar-status-card">
-            <span class="commerce-toolbar-status-label">Provider 状态</span>
+            <span class="commerce-toolbar-status-label">${t("commerceProviderStatus")}</span>
             <strong>${esc(providerSummary.label)}</strong>
             <small>${esc(providerSummary.detail)}</small>
           </div>
           <div class="commerce-toolbar-status-card">
-            <span class="commerce-toolbar-status-label">模式</span>
+            <span class="commerce-toolbar-status-label">${t("commerceMode")}</span>
             <div class="commerce-mode-switch">
               <span class="commerce-mode-pill ${modeState === "offline" ? "is-active" : ""}">Offline</span>
               <span class="commerce-mode-pill ${modeState === "sandbox" ? "is-active" : ""}">Sandbox</span>
@@ -8864,16 +8866,16 @@
           </div>`}
         </div>
         <div class="cmd-actions">
-          <button class="cmd-btn primary" id="commerceGenerate" type="button">生成只读搜索建议</button>
-          <button class="cmd-btn gray" id="commerceClearAll" type="button">清理全部计划</button>
+          <button class="cmd-btn primary" id="commerceGenerate" type="button">${t("commerceGenerate")}</button>
+          <button class="cmd-btn gray" id="commerceClearAll" type="button">${t("commerceClearAll")}</button>
         </div>
       </div>
 
       <div class="commerce-layout ${productWorkspaceMode ? "commerce-layout-product-workspace" : ""}">
-        ${productWorkspaceMode ? "" : `<aside class="commerce-task-list" aria-label="采购任务列表">
+        ${productWorkspaceMode ? "" : `<aside class="commerce-task-list" aria-label="${t("commerceTaskList")}">
           <div class="commerce-list-head">
-            <h2>采购任务列表</h2>
-            <span>${tasks.length} 项</span>
+            <h2>${t("commerceTaskList")}</h2>
+            <span>${window.I18n.format("commerceItems", { count:tasks.length })}</span>
           </div>
           ${taskCards(tasks)}
         </aside>`}
@@ -8881,6 +8883,10 @@
       </div>
     </section>`;
     bind(host, tasks, selected);
+    const discoveryWorkspace = window.WeishanGlobalDiscoveryWorkspace;
+    if (discoveryWorkspace && typeof discoveryWorkspace.mountGlobalDiscoveryWorkspace === "function") {
+      discoveryWorkspace.mountGlobalDiscoveryWorkspace(host);
+    }
   }
 
   function bind(host, tasks, selected){
@@ -8915,7 +8921,7 @@
         const record = workspaceStructuredRecordFromTask(current);
         const feedback = host.querySelector("[data-commerce-workspace-export-feedback]");
         copyText(JSON.stringify(record || {}, null, 2)).then((copied) => {
-          if (feedback) feedback.textContent = copied ? "采购计划已复制" : "复制失败，请稍后重试";
+          if (feedback) feedback.textContent = copied ? t("commerceCopied") : t("commerceCopyFailed");
         });
       });
     });
@@ -8931,7 +8937,7 @@
     });
     const generate = host.querySelector("#commerceGenerate");
     if (generate) generate.addEventListener("click", () => {
-      const text = input && input.value.trim() || "生成全球采购计划";
+      const text = input && input.value.trim() || t("commerceDefaultRequest");
       const resolveAgent = () => {
         const current = agent();
         return current && current.createCommerceTask && current.addCommerceTask ? current : null;

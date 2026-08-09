@@ -209,11 +209,11 @@
   function displayLogText(log){
     const text = String(log && log.text || "");
     if (log && (log.type === "answer" || log.type === "ai")) return cleanAiDisplay(text);
-    if (/收到指令|任务已创建|queued/i.test(text)) return "理解你的需求……";
-    if (/开始执行|路由判断|准备调用 AI|调用 AI|dispatch|module|action|command\.execute|chat\.answer/i.test(text)) return "正在处理……";
-    if (/生成视频|视频方案/i.test(text)) return "正在准备视频方案……";
-    if (/完成|done/i.test(text)) return "完成。";
-    if (log && log.type === "error") return "处理时遇到问题，请稍后再试。";
+    if (/收到指令|任务已创建|queued/i.test(text)) return t("homeTaskQueued");
+    if (/开始执行|路由判断|准备调用 AI|调用 AI|dispatch|module|action|command\.execute|chat\.answer/i.test(text)) return t("homeTaskRunning");
+    if (/生成视频|视频方案/i.test(text)) return t("homeTaskVideoPreparing");
+    if (/完成|done/i.test(text)) return t("homeTaskDone");
+    if (log && log.type === "error") return t("homeTaskFailed");
     if (/桌面操作计划|desktopAssistant\.plan/.test(text)) {
       const risk = /高风险|riskLevel[:：]?\s*high/i.test(text) ? "高风险" : /中风险|riskLevel[:：]?\s*medium/i.test(text) ? "中风险" : "低风险";
       const status = /高风险|blocked|已阻断/i.test(text) ? "已阻断" : /queued|planned|waiting|等待/i.test(text) ? "等待确认" : "已生成计划";
@@ -297,11 +297,11 @@
 
   function taskTitle(task){
     if (!task) return "";
-    if (task.status === "queued") return "理解你的需求……";
-    if (task.status === "running") return /视频|广告|宣传片/.test(String(task.text || "")) ? "正在准备视频方案……" : "正在处理……";
-    if (task.status === "done") return "完成。";
-    if (task.status === "failed") return "暂时没有完成，请稍后再试。";
-    return "正在处理……";
+    if (task.status === "queued") return t("homeTaskQueued");
+    if (task.status === "running") return /视频|广告|宣传片/.test(String(task.text || "")) ? t("homeTaskVideoPreparing") : t("homeTaskRunning");
+    if (task.status === "done") return t("homeTaskDone");
+    if (task.status === "failed") return t("homeTaskNotCompleted");
+    return t("homeTaskRunning");
   }
 
   function statusCls(task){
@@ -1171,7 +1171,7 @@
     const resolved = storedCommerceTask(task);
     if (resolved) return commerceHistorySummary(resolved);
     const answer = summary(displayAnswer(task), 260);
-    return answer || "暂无结构化计划；显示当前任务摘要。";
+    return answer || t("homeTaskNoPlan");
   }
 
   function taskHistoryLogDetail(task){
@@ -7128,7 +7128,7 @@
           <p>${esc(historySummary)}${esc(historyResult)}</p>
           ${formatted && formatted.fullPromptHidden ? '<small>完整指令已隐藏</small>' : ''}
         </div>
-        <small>${selected ? "查看中" : esc(t("historyOpenDetail"))}</small>
+        <small>${selected ? t("homeHistoryViewing") : esc(t("historyOpenDetail"))}</small>
       </button>`;
     }).join("");
     return restoreHeader + list;
@@ -7278,23 +7278,15 @@
                 </div>
               </div>
             ` : `
-              <div class="cmd-card-title small-title">
-                <h3>${t("homeInputTitle")}</h3>
-              </div>
               ${desktopAssistantStrip()}
               ${attachmentPanel()}
               ${selectedHistoryTask(snap) ? `<p class="cmd-history-meta" data-history-execution-hint="true">当前正在查看历史详情；输入新指令并执行时会创建新任务，并返回最新结果。</p>` : ""}
               <textarea id="commandInput" class="cmd-input" placeholder="${t("homePlaceholder")}">${esc(commandInputDraft)}</textarea>
-              <div class="cmd-video-suggestion" data-video-suggestion hidden>
-                <b>检测到这是视频创作。</b>
-                <span>视频功能即将上线，你可以先查看视频制作。</span>
-                <div><button type="button" class="cmd-btn gray" data-video-creation-center>去制作视频</button><button type="button" class="cmd-btn ghost" data-video-creation-continue>继续在这里</button></div>
-              </div>
               <div class="cmd-actions">
                 <button class="cmd-btn gray" id="uploadBtn">${t("uploadAttachment")}</button>
-                <button class="cmd-btn primary" id="runBtn">${t("startRun")}</button>
-                <button class="cmd-btn danger" id="clearFinishedBtn">${t("clearDone")}</button>
+                <button class="cmd-btn gray" id="openPluginsBtn">${t("plugins")}</button>
                 <button class="cmd-btn gray" id="recordBtn">${t("recordAudio")}</button>
+                <button class="cmd-btn primary" id="runBtn">${t("startRun")}</button>
               </div>
             `}
           </div>
@@ -7367,10 +7359,6 @@
   }
 
   function render(host){ renderShell(host); }
-
-  function isVideoCreationRequest(value){
-    return /制作.{0,8}视频|做.{0,8}视频|生成.{0,8}(视频|广告|宣传片)|视频|广告片|宣传片/i.test(String(value || ""));
-  }
 
   function resetHomePerformanceStats(){
     homePerformanceStats.renderShellCount = 0;
@@ -7747,22 +7735,12 @@
       });
       input.addEventListener("input", function(){
         commandInputDraft = input.value;
-        const suggestion = host.querySelector("[data-video-suggestion]");
-        if (suggestion) suggestion.hidden = !isVideoCreationRequest(commandInputDraft);
       });
-      const suggestion = host.querySelector("[data-video-suggestion]");
-      if (suggestion) suggestion.hidden = !isVideoCreationRequest(input.value);
     }
 
-    const videoCenterButton = host.querySelector("[data-video-creation-center]");
-    if (videoCenterButton) videoCenterButton.addEventListener("click", function(){
+    const openPluginsBtn = host.querySelector("#openPluginsBtn");
+    if (openPluginsBtn) openPluginsBtn.addEventListener("click", function(){
       if (window.WeishanRouter && typeof window.WeishanRouter.setRoute === "function") window.WeishanRouter.setRoute("plugins");
-    });
-    const videoContinueButton = host.querySelector("[data-video-creation-continue]");
-    if (videoContinueButton) videoContinueButton.addEventListener("click", function(){
-      const suggestion = host.querySelector("[data-video-suggestion]");
-      if (suggestion) suggestion.hidden = true;
-      if (input) input.focus();
     });
 
     let commerceActionChipFocusAssistTimer = 0;
@@ -7917,7 +7895,7 @@
     host.addEventListener("click", commerceDelegatedClickHandler);
 
     const clearFinishedBtn = host.querySelector("#clearFinishedBtn");
-    clearFinishedBtn.addEventListener("click", function(){
+    if (clearFinishedBtn) clearFinishedBtn.addEventListener("click", function(){
       commandInputDraft = input.value;
       window.CommandApi.clearFinished();
       render(host);

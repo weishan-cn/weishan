@@ -19,25 +19,37 @@ test.describe.serial("zero-learning user language", () => {
 
   test("Home keeps internal command language out of the default result surface", async () => {
     await gotoRoute(page, "home");
-    await expect(page.locator("#commandInput")).toHaveAttribute("placeholder", /帮我制作一个视频/);
+    const layout = await page.locator(".home-v205-main").evaluate((node) => {
+      const children = Array.from(node.children);
+      const consoleCard = node.querySelector(".cmd-console-card");
+      const composer = node.querySelector("#commandInput")?.closest(".cmd-input-card");
+      const consoleBox = consoleCard.getBoundingClientRect();
+      const composerBox = composer.getBoundingClientRect();
+      return {
+        childCount:children.length,
+        gridRows:getComputedStyle(node).gridTemplateRows,
+        order:[children.indexOf(consoleCard), children.indexOf(composer)],
+        consoleIsPrimary:consoleBox.height > composerBox.height
+      };
+    });
+    expect(layout.childCount).toBe(2);
+    expect(layout.gridRows.trim().split(/\s+/)).toHaveLength(2);
+    expect(layout.order).toEqual([0, 1]);
+    expect(layout.consoleIsPrimary).toBe(true);
+    await expect(page.locator(".home-v205-main textarea")).toHaveCount(1);
+    await expect(page.locator("#commandInput")).toHaveAttribute("placeholder", "请输入你的问题……");
+    await expect(page.locator("#decisionUnifiedQuestion, #decisionUnifiedStart")).toHaveCount(0);
     await expect(page.locator("#runBtn")).toHaveText("开始");
-
-    await page.evaluate((id) => {
-      window.WeishanStore.write("command.queue.v205", [{
-        id:id + "-task", text:"帮我写一份合同", status:"running", route:"ai.chat", module:"chat",
-        logs:[{ time:"2026-07-24T00:00:00.000Z", type:"info", text:"command.execute -> dispatch module action" }]
-      }]);
-      window.dispatchEvent(new CustomEvent("weishan:command"));
-    }, runId);
-
+    await expect(page.locator("#openPluginsBtn")).toHaveText("插件");
+    await expect(page.locator("#clearFinishedBtn")).toHaveCount(0);
     const consoleText = await page.locator("#cmdConsole").innerText();
-    expect(consoleText).toContain("正在处理……");
     expect(consoleText).not.toMatch(/command\.execute|chat\.answer|dispatch|module|action/i);
 
     const input = page.locator("#commandInput");
     await input.fill("帮我做一个视频");
-    await expect(page.locator("[data-video-suggestion]")).toBeVisible();
-    await expect(page.locator("[data-video-suggestion]")).toContainText("检测到这是视频创作");
+    await expect(page.locator("[data-video-suggestion]")).toHaveCount(0);
+    await page.locator("#openPluginsBtn").click();
+    await expect(page.locator(".plugin-center-page")).toBeVisible();
   });
 
   test("ChatDock uses plain language and keeps failures technical-detail free", async () => {
@@ -80,12 +92,54 @@ test.describe.serial("zero-learning user language", () => {
     });
   });
 
-  test("Topbar presents local-first mode without A/B mode language", async () => {
+  test("Topbar uses one account menu and system-first language selection", async () => {
     await gotoRoute(page, "home");
     const topbar = page.locator(".topbar");
     await expect(topbar).toBeVisible();
-    await expect(topbar).toContainText("本地优先模式");
-    expect(await topbar.innerText()).not.toMatch(/A\/B Mode|AB Mode|A \/ B Mode/i);
+    await expect(topbar.locator("#aiConnectionStatus")).toContainText(/AI 已连接|AI Connected/);
+    await expect(topbar.locator("#workspaceBtn")).toBeVisible();
+    await expect(topbar.locator("#workspaceBtn")).toHaveAttribute("title", "Workspace");
+    await expect(topbar.locator("#settingsBtn, #logoutBtn, #mailBtn")).toHaveCount(0);
+    await expect(topbar.locator("#langSelect option").first()).toContainText(/Follow System|跟随系统|跟隨系統/);
+    await expect(topbar.locator("#langSelect option[value='zh']")).toContainText("中文（简体）");
+    await expect(topbar.locator("#langSelect option[value='zh-Hant']")).toContainText("繁體中文");
+    await expect(topbar.locator("#langSelect option")).toHaveCount(4);
+    await expect(topbar.locator("#langSelect option[value='es'], #langSelect option[value='ja']")).toHaveCount(0);
+    await expect(topbar.locator("#langSelect option[value='en']")).toContainText("English");
+
+    await topbar.locator("#userMenuBtn").click();
+    await expect(topbar.locator("#userMenu")).toBeVisible();
+    await expect(topbar.locator("[data-user-menu-action='profile']")).toBeDisabled();
+    await expect.poll(() => topbar.locator("[data-user-menu-action]").evaluateAll((items) => items.map((item) => item.getAttribute("data-user-menu-action")).join(","))).toBe("profile,workspace,settings,mail,logout");
+
+    await topbar.locator("#langSelect").selectOption("en");
+    await expect.poll(() => page.evaluate(() => window.I18n.getLanguagePreference().mode + ":" + window.I18n.getLang())).toBe("manual:en");
+    await topbar.locator("#langSelect").selectOption("zh-Hant");
+    await expect.poll(() => page.evaluate(() => window.I18n.getLanguagePreference().mode + ":" + window.I18n.getLang())).toBe("manual:zh-Hant");
+    await expect.poll(() => page.evaluate(() => window.I18n.t("settings"))).toBe("設定中心");
+    await page.evaluate(() => Object.defineProperty(window.navigator, "language", { value:"zh-TW", configurable:true }));
+    await topbar.locator("#langSelect").selectOption("system");
+    await expect.poll(() => page.evaluate(() => window.I18n.getLanguagePreference().mode + ":" + window.I18n.systemLanguage())).toBe("system:zh-Hant");
+    await topbar.locator("#langSelect").selectOption("zh");
+    await expect.poll(() => page.evaluate(() => window.I18n.getLanguagePreference().mode + ":" + window.I18n.getLang())).toBe("manual:zh");
+
+    expect(await topbar.innerText()).not.toMatch(/openrouter|deepseek|A\/B Mode|AB Mode|A \/ B Mode/i);
+  });
+
+  test("supported languages refresh current UI chrome without rewriting user content", async () => {
+    await gotoRoute(page, "home");
+    await page.locator("#commandInput").fill("User-authored input remains unchanged");
+    await page.locator(".topbar #langSelect").selectOption("en");
+    await expect(page.locator("#runBtn")).toHaveText("Start");
+    await expect(page.locator("#commandInput")).toHaveValue("User-authored input remains unchanged");
+    await gotoRoute(page, "settings");
+    await expect(page.locator(".ws-page > .ws-card h2").first()).toHaveText("Settings");
+    await gotoRoute(page, "plugins");
+    await expect(page.locator(".plugin-center-hero h2")).toHaveText("Plugins");
+    await gotoRoute(page, "home");
+    await page.locator(".topbar #langSelect").selectOption("zh-Hant");
+    await expect(page.locator("#runBtn")).toHaveText("開始");
+    await page.locator(".topbar #langSelect").selectOption("zh");
   });
 
   test("History keeps developer fields closed and saves a user-named result", async () => {
@@ -141,7 +195,11 @@ test.describe.serial("zero-learning user language", () => {
 
     await gotoRoute(page, "plugins");
     const toolsText = await page.locator(".plugin-center-page").innerText();
-    expect(toolsText).toContain("创作工具");
+    expect(toolsText).toContain("插件");
+    expect(toolsText).toContain("插件市场");
+    expect(toolsText).toContain("已安装插件");
+    expect(toolsText).toContain("视频制作");
+    expect(toolsText).toContain("图片创作");
     expect(toolsText).not.toMatch(/Provider|Runtime|Capability|Permission|Plugin ID|Route ID/i);
 
     await page.evaluate(() => {
