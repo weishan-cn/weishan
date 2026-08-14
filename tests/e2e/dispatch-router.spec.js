@@ -116,7 +116,14 @@ test.describe.serial("dispatch router", () => {
   test("traffic advice uses connected settings AI instead of refusing as realtime", async () => {
     await setMockSettingsAi(page, true);
     await gotoRoute(page, "home");
-    await expect(page.getByText(/AI 已连接 · OpenRouter \/ aion-labs\/aion-1\.0-mini/).first()).toBeVisible();
+    const connectedSummary = await page.evaluate(() => window.WeishanAPI.connectorSummary());
+    expect(connectedSummary).toMatchObject({
+      state:"connected",
+      provider:"OpenRouter",
+      model:"aion-labs/aion-1.0-mini"
+    });
+    await expect(page.locator("#aiConnectionStatus")).toHaveAttribute("data-ai-state", "connected");
+    await expect(page.locator("#aiConnectionStatus")).toContainText("AI 已连接");
     const command = runId + " 成都到上海怎么最经济？";
     await submitHomeCommand(page, command);
     await expect(page.getByText(/高铁|飞机|实时票价以实际查询为准/).first()).toBeVisible();

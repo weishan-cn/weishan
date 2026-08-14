@@ -68,7 +68,7 @@ function createTopbarDocument() {
   const listeners = {};
   let statusText = "";
   const status = {
-    id:"homeAiStatus",
+    id:"aiConnectionStatus",
     className:"home-ai-status",
     dataset:{},
     textWriteCount:0,
@@ -77,7 +77,7 @@ function createTopbarDocument() {
   };
   const actions = {
     querySelector(selector) {
-      if (selector === "#homeAiStatus") return status;
+      if (selector === "#aiConnectionStatus") return status;
       if (selector === "#langSelect") return { id:"langSelect" };
       return null;
     },

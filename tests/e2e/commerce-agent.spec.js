@@ -8690,9 +8690,10 @@ test.describe.serial("commerce agent workbench", () => {
     await page.locator("#commerceGenerate").click();
     const detail = page.locator(".commerce-detail").last();
     await expect(page.getByRole("heading", { name:"全球购物工作台" })).toBeVisible({ timeout:15000 });
-    await expect(page.locator(".commerce-toolbar")).toContainText("AI 状态");
-    await expect(page.locator(".commerce-toolbar")).toContainText("价格数据");
-    await expect(page.locator(".commerce-toolbar")).toContainText("采购模式");
+    const workspaceToolbar = page.locator(".commerce-toolbar-workspace");
+    await expect(workspaceToolbar).toContainText("AI 状态");
+    await expect(workspaceToolbar).toContainText("价格数据");
+    await expect(workspaceToolbar).toContainText("采购模式");
     await expect(detail).toContainText("iPhone 16 Pro");
     await expect(detail).toContainText("平台比较");
     await expect(detail).toContainText("购物记录");
@@ -8905,7 +8906,6 @@ test.describe.serial("commerce agent workbench", () => {
       "redacted: true",
       "机票 Provider Key",
       "酒店 Provider Key",
-      "商品 Provider Key",
       "本地服务 Provider Key",
       "门票 / 活动 Provider Key",
       "机票 Provider Sandbox/Test Key",
@@ -8925,6 +8925,9 @@ test.describe.serial("commerce agent workbench", () => {
       await expect(body).toContainText(value);
     }
 
+    await expect(body).not.toContainText("商品 Provider Key");
+    await expect(body.locator('[data-secure-api-key-slot="product_provider_key"]')).toHaveCount(0);
+    await expect(body.locator('[data-secure-api-key-provider-id="product_provider_key"]')).toHaveCount(0);
     await expect(body).not.toContainText(/WEISHAN_TEST_CREDENTIAL_PLACEHOLDER|WEISHAN_LOCAL_STORAGE_SELF_TEST_VALUE|sk-|pk-|live_|prod_/i);
     await expect(summary.getByRole("textbox", { name:/API key|endpoint/i })).toHaveCount(0);
     await expect(summary.getByRole("button", { name:/测试连接|连接 endpoint|预订|付款|下单|提交订单/ })).toHaveCount(0);

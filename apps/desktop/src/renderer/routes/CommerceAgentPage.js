@@ -9,6 +9,10 @@
     return String(s || "").replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; });
   }
 
+  function t(key){
+    return window.I18n.t(key);
+  }
+
   function agent(){
     return window.WeishanCommerceAgent || null;
   }

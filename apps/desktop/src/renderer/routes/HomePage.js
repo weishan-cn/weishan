@@ -7148,7 +7148,7 @@
     if (title && title.textContent !== "首页总调度") title.textContent = "首页总调度";
     if (subtitle && subtitle.textContent !== "本地优先 · 模块隔离 · A/B 模式") subtitle.textContent = "本地优先 · 模块隔离 · A/B 模式";
     if (!actions || !lang) return;
-    let status = actions.querySelector("#homeAiStatus");
+    let status = actions.querySelector("#homeAiStatus") || actions.querySelector("#aiConnectionStatus");
     if (!status) {
       status = document.createElement("span");
       status.id = "homeAiStatus";

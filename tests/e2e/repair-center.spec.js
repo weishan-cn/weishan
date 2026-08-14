@@ -47,14 +47,27 @@ test.describe.serial("repair center", () => {
       const artifact = repair.createRepairReportArtifact(latest, "markdown");
       return {
         filename:artifact && artifact.filename,
-        historyTypes:window.HistoryApi.list().slice(0, 10).map((item) => item.type)
+        repairId:latest.repairId,
+        historyTypes:window.HistoryApi.list()
+          .filter((item) => item && item.payload && item.payload.taskId === latest.repairId)
+          .map((item) => item.type)
       };
     });
 
     expect(exported && exported.filename).toMatch(/repair.*\.md$/);
+    expect(exported && exported.historyTypes).toEqual([
+      "repair.reportExported",
+      "repair.verified",
+      "repair.suggested",
+      "repair.bugDetected"
+    ]);
 
     await gotoRoute(page, "history");
-    await page.locator("#historySearch").fill("repair");
-    await expect(page.getByText(/repair\.bugDetected|repair\.verified|repair\.reportExported/).first()).toBeVisible();
+    await page.locator("#historySearch").fill(exported.repairId);
+    await expect(page.locator("#historyList [data-history-index]")).toHaveCount(4);
+    const visibleSummaries = page.locator("#historyList > [data-history-index] > .history-line > p");
+    await expect(visibleSummaries.filter({ hasText:"已生成本地修护报告。" })).toBeVisible();
+    await expect(visibleSummaries.filter({ hasText:"已记录修护验证结果。" })).toBeVisible();
+    await expect(visibleSummaries.filter({ hasText:"已生成本地修护记录。" })).toBeVisible();
   });
 });
