@@ -46,6 +46,7 @@ function cleanKey(key) {
   const value = String(key || "").trim();
   if (!value || value.length > 240) return "";
   if (!/^[a-z0-9._:-]+$/i.test(value)) return "";
+  if (/(?:provider|commerce).*(?:credential|secret|token|api[-_.:]?key)|(?:credential|secret|token|api[-_.:]?key).*provider/i.test(value)) return "";
   return value;
 }
 

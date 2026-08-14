@@ -67,11 +67,16 @@ contextBridge.exposeInMainWorld("weishanLimitedBetaPreference", {
 
 contextBridge.exposeInMainWorld("weishanSecureApiKeyStorage", {
   listProviderKeys: () => ipcRenderer.invoke("secure-api-key:list"),
-  saveProviderKey: (providerId, credential) => ipcRenderer.invoke("secure-api-key:save", { providerId:String(providerId || ""), credential:String(credential || "") }),
-  deleteProviderKey: (providerId) => ipcRenderer.invoke("secure-api-key:delete", { providerId:String(providerId || "") }),
-  rotateProviderKey: (providerId) => ipcRenderer.invoke("secure-api-key:rotate", { providerId:String(providerId || "") }),
   getProviderKeyStatus: (providerId) => ipcRenderer.invoke("secure-api-key:get-status", { providerId:String(providerId || "") }),
   runSecureStorageSelfTest: () => ipcRenderer.invoke("secure-api-key:self-test")
+});
+
+contextBridge.exposeInMainWorld("weishanProviderCredentialStore", {
+  status: () => ipcRenderer.invoke("provider-credential:status"),
+  listMetadata: (filter) => ipcRenderer.invoke("provider-credential:list-metadata", {
+    provider:String(filter && filter.provider || ""),
+    environment:String(filter && filter.environment || "")
+  })
 });
 
 contextBridge.exposeInMainWorld("weishanGlobalShopping", {

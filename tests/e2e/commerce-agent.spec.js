@@ -8890,7 +8890,7 @@ test.describe.serial("commerce agent workbench", () => {
 
     for (const value of [
       "安全 API Key 存储控制台",
-      "请勿输入真实 API Key。本版本仅用于本机安全存储能力验证。",
+      "Provider 凭据只能通过主进程原生安全录入区写入；Renderer 不接收 secret。",
       "status: secure local storage only",
       "mode: no provider connection",
       "real provider disabled",
@@ -8930,10 +8930,12 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(body.locator('[data-secure-api-key-provider-id="product_provider_key"]')).toHaveCount(0);
     await expect(body).not.toContainText(/WEISHAN_TEST_CREDENTIAL_PLACEHOLDER|WEISHAN_LOCAL_STORAGE_SELF_TEST_VALUE|sk-|pk-|live_|prod_/i);
     await expect(summary.getByRole("textbox", { name:/API key|endpoint/i })).toHaveCount(0);
+    await expect(body.locator('input[type="password"]')).toHaveCount(0);
+    await expect(body.getByRole("button", { name:/保存测试占位 Key|轮换测试占位 Key|删除 Key/ })).toHaveCount(0);
     await expect(summary.getByRole("button", { name:/测试连接|连接 endpoint|预订|付款|下单|提交订单/ })).toHaveCount(0);
   });
 
-  test("v2.1.39 secure API key storage test actions never reveal plaintext @commerce-ui-regression", async () => {
+  test("v2.1.39 secure API key storage exposes self-test and metadata only @commerce-ui-regression", async () => {
     await resetCommerceTasks(page);
     await gotoRoute(page, "home");
 
@@ -8944,22 +8946,12 @@ test.describe.serial("commerce agent workbench", () => {
     const debugBody = summary.locator("details.commerce-simple-flight-advanced-debug-disclosure .commerce-disclosure-body").first();
     await openDisclosure(debugBody, "commerce-secure-api-key-storage-console-disclosure");
     const body = debugBody.locator("details.commerce-secure-api-key-storage-console-disclosure .commerce-disclosure-body").first();
-    const firstSlot = body.locator('[data-secure-api-key-slot="flight_provider_key"]').first();
 
     await body.getByRole("button", { name:"运行安全存储自检" }).click();
     await expect(body.locator("[data-secure-api-key-storage-feedback]")).toContainText(/安全存储自检通过|self-test PASS|storage unavailable/, { timeout:15000 });
-
-    await firstSlot.getByRole("button", { name:"保存测试占位 Key" }).click();
-    await expect(firstSlot.locator("[data-secure-api-key-slot-status]")).toContainText(/status: saved|status: storage_unavailable/, { timeout:15000 });
-    const fingerprintBefore = await firstSlot.locator("[data-secure-api-key-slot-fingerprint]").innerText();
-
-    if (/status: saved/.test(await firstSlot.locator("[data-secure-api-key-slot-status]").innerText())) {
-      await firstSlot.getByRole("button", { name:"轮换测试占位 Key" }).click();
-      await expect(firstSlot.locator("[data-secure-api-key-slot-fingerprint]")).not.toHaveText(fingerprintBefore, { timeout:15000 });
-    }
-
-    await firstSlot.getByRole("button", { name:"删除 Key" }).click();
-    await expect(firstSlot.locator("[data-secure-api-key-slot-status]")).toContainText("status: empty", { timeout:15000 });
+    await expect(body).toContainText("secret operations: main process only");
+    await expect(body.locator('input[type="password"]')).toHaveCount(0);
+    await expect(body.getByRole("button", { name:/保存测试占位 Key|轮换测试占位 Key|删除 Key/ })).toHaveCount(0);
     await expect(body).not.toContainText(/WEISHAN_TEST_CREDENTIAL_PLACEHOLDER|WEISHAN_LOCAL_STORAGE_SELF_TEST_VALUE|sk-|pk-|live_|prod_/i);
     await expect(body).not.toContainText(/真实价格|bookingUrl:\s*https?:|paymentUrl|checkoutUrl|orderUrl/);
   });

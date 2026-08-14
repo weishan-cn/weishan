@@ -5,6 +5,7 @@ const fs = require("fs");
 const { spawn } = require("child_process");
 const { registerSecureStorageHandlers } = require("./main/secureStorage");
 const { registerSecureApiKeyStorageHandlers } = require("./main/secureApiKeyStorage");
+const { createMacOSSecureEntry } = require("./main/providerCredentialSecureEntry");
 const { registerLimitedBetaPreferenceHandlers } = require("./main/limitedBetaPreferenceStore");
 const { registerGlobalShoppingRakutenReadonlyHandlers } = require("./main/globalShoppingRakutenReadonlyService");
 const { createVideoProviderGateway } = require("./main/videoProviderGateway");
@@ -463,6 +464,7 @@ async function aiChatStream(event, payload) {
 }
 
 let ipcHandlersRegistered = false;
+let providerCredentialStoreService = null;
 function registerIpcHandlers() {
   if (ipcHandlersRegistered) return;
   ipcHandlersRegistered = true;
@@ -500,7 +502,9 @@ function registerIpcHandlers() {
   ipcMain.handle("weishan:open-external", async (_event, url) => shell.openExternal(String(url || "")));
   ipcMain.handle("weishan:open-official-website", async () => shell.openExternal(WEISHAN_OFFICIAL_WEBSITE_URL));
   registerSecureStorageHandlers(ipcMain);
-  registerSecureApiKeyStorageHandlers(ipcMain);
+  providerCredentialStoreService = registerSecureApiKeyStorageHandlers(ipcMain, {
+    secureEntry:createMacOSSecureEntry()
+  });
   registerLimitedBetaPreferenceHandlers(ipcMain, { app });
   registerGlobalShoppingRakutenReadonlyHandlers(ipcMain, {});
   registerVideoProviderIpcHandlers(ipcMain, {
@@ -513,7 +517,26 @@ function createWindow() {
   applyAppIdentity();
 
   Menu.setApplicationMenu(Menu.buildFromTemplate([
-    { label: APP_NAME, submenu: [{ role: "about", label: "关于 weishan" }, { type: "separator" }, { role: "quit", label: "退出 weishan" }] },
+    { label: APP_NAME, submenu: [
+      { role: "about", label: "关于 weishan" },
+      { type: "separator" },
+      {
+        label:"Provider Credential Store…",
+        click:async () => {
+          if (!providerCredentialStoreService) return;
+          const result = await providerCredentialStoreService.beginProviderCredentialSecureEntry().catch(() => ({ ok:false, error:"SECURE_ENTRY_FAILED" }));
+          await dialog.showMessageBox({
+            type:result && result.ok ? "info" : "warning",
+            title:"Weishan Provider Credential Store",
+            message:result && result.ok ? "STORE_SUCCESS" : "STORE_NOT_COMPLETED",
+            detail:result && result.ok ? "Credential metadata was stored securely. Secret values were not returned to the UI." : String(result && result.error || "SECURE_ENTRY_FAILED"),
+            buttons:["OK"]
+          });
+        }
+      },
+      { type: "separator" },
+      { role: "quit", label: "退出 weishan" }
+    ] },
     { label: "File", submenu: [{ role: "close" }] },
     { label: "Edit", submenu: editMenu() },
     { label: "View", submenu: [{ role: "reload" }, { role: "toggleDevTools" }, { role: "togglefullscreen" }] },

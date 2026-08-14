@@ -3421,7 +3421,7 @@
         plaintextExport:"disabled",
         providerKeySlots:[],
         auditDraft:{ eventType:"SECURE_API_KEY_STORAGE_IMPLEMENTATION_DRAFT", storageProvider:"electron_safeStorage", storageAvailable:true, plaintextPersistedCount:0, plaintextDisplayedCount:0, plaintextExportedCount:0, plaintextLoggedCount:0, localStorageSecretCount:0, sessionStorageSecretCount:0, realApiKeyInputCount:0, realProviderCallCount:0, networkAttemptCount:0, realEndpointConnectCount:0, realPriceDisplayedCount:0, bookingUrlDisplayedCount:0, paymentAttemptCount:0, orderAttemptCount:0, identityUploadAttemptCount:0, redacted:true },
-        display:{ title:"安全 API Key 存储控制台", warning:"请勿输入真实 API Key。本版本仅用于本机安全存储能力验证。" },
+        display:{ title:"Provider Credential Store", warning:"Provider 凭据只能通过主进程原生安全录入区写入；Renderer 不接收 secret。" },
         redacted:true
       };
     if (api && typeof api.assertSecureApiKeyStorageConsoleSafe === "function") api.assertSecureApiKeyStorageConsoleSafe(state);
@@ -3440,15 +3440,11 @@
       <p>expiresAt: ${esc(slot.expiresAt || "")}</p>
       <p>storage: encrypted local only</p>
       <p data-secure-api-key-slot-decision>final decision: ${esc(slot.finalDecision || "storage-missing")}</p>
-      <div class="commerce-one-screen-actions">
-        <button class="cmd-btn gray" type="button" data-secure-api-key-storage-action="save" data-secure-api-key-provider-id="${esc(slot.providerId || "")}">保存测试占位 Key</button>
-        <button class="cmd-btn gray" type="button" data-secure-api-key-storage-action="rotate" data-secure-api-key-provider-id="${esc(slot.providerId || "")}">轮换测试占位 Key</button>
-        <button class="cmd-btn gray" type="button" data-secure-api-key-storage-action="delete" data-secure-api-key-provider-id="${esc(slot.providerId || "")}">删除 Key</button>
-      </div>
+      <p>secret operations: main process only</p>
     </section>`).join("");
     const body = `<section class="commerce-secure-api-key-storage-console" data-secure-api-key-storage-console aria-label="安全 API Key 存储控制台">
       <h4>${esc(display.title || "安全 API Key 存储控制台")}</h4>
-      <p>${esc(display.warning || "请勿输入真实 API Key。本版本仅用于本机安全存储能力验证。")}</p>
+      <p>${esc(display.warning || "Provider 凭据只能通过主进程原生安全录入区写入；Renderer 不接收 secret。")}</p>
       <p>status: ${esc(state.status || "secure local storage only")}</p>
       <p>mode: ${esc(state.mode || "no provider connection")}</p>
       <p>real provider disabled</p>
@@ -6877,17 +6873,14 @@
       + '<p>production endpoint disabled</p>'
       + '<p>production key disabled</p>'
       + '<p>redacted: true</p>'
-      + '<p>仅允许输入 provider sandbox/test key</p>'
-      + '<p>不要输入生产 key</p>'
+      + '<p>Renderer credential input disabled</p>'
+      + '<p>Provider secret 仅可通过主进程原生安全录入区写入</p>'
       + '<p>不会连接生产 endpoint</p>'
       + '<p>不会把 dry-run 结果展示到普通全球采购结果页</p>'
       + '<p>不会返回真实价格</p>'
       + '<p>不会生成 bookingUrl</p>'
       + '<p>不会付款或下单</p>'
-      + '<label class="commerce-field-label">Sandbox/Test Key<input type="password" data-secure-api-key-sandbox-input="true" placeholder="仅限 provider sandbox/test key；不要填写生产 API key" autocomplete="off" /></label>'
       + '<div class="commerce-inline-actions" aria-label="Provider 沙箱测试 Key 操作">'
-      + '<button class="cmd-btn gray" type="button" data-secure-api-key-storage-action="save" data-secure-api-key-provider-id="flight_provider_sandbox_key">保存沙箱测试 Key</button>'
-      + '<button class="cmd-btn gray" type="button" data-secure-api-key-storage-action="delete" data-secure-api-key-provider-id="flight_provider_sandbox_key">删除沙箱测试 Key</button>'
       + '<button class="cmd-btn gray" type="button" data-provider-sandbox-dry-run-action="simulated-check">运行沙箱 Dry Run Gate 检查</button>'
       + '<button class="cmd-btn gray" type="button">查看 Dry Run 审计</button>'
       + '</div>'

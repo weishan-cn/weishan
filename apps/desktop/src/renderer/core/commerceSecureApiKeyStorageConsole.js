@@ -84,7 +84,7 @@
       auditDraft:raw.auditDraft || buildAuditDraft(storageAvailable),
       display:{
         title:"安全 API Key 存储控制台",
-        warning:"请勿输入真实 API Key。本版本仅用于本机安全存储能力验证。",
+        warning:"Provider 凭据只能通过主进程原生安全录入区写入；Renderer 不接收 secret。",
         statusLine:"status: secure local storage only",
         modeLine:"mode: no provider connection",
         realProviderLine:"real provider disabled",
@@ -140,7 +140,6 @@
     const root = button && button.closest("[data-secure-api-key-storage-console]");
     if (!root) return;
     const action = button.getAttribute("data-secure-api-key-storage-action") || "";
-    const providerId = button.getAttribute("data-secure-api-key-provider-id") || "flight_provider_key";
     const bridge = window.weishanSecureApiKeyStorage;
     if (!bridge) {
       feedback(root, "安全存储桥接不可用 · storage unavailable · redacted: true");
@@ -148,15 +147,7 @@
     }
     try {
       let result = null;
-      if (action === "save" && typeof bridge.saveProviderKey === "function") {
-        const input = root.querySelector("[data-secure-api-key-sandbox-input]");
-        const credential = input ? input.value : "";
-        result = await bridge.saveProviderKey(providerId, credential);
-        if (input) input.value = "";
-      }
-      else if (action === "rotate" && typeof bridge.rotateProviderKey === "function") result = await bridge.rotateProviderKey(providerId);
-      else if (action === "delete" && typeof bridge.deleteProviderKey === "function") result = await bridge.deleteProviderKey(providerId);
-      else if (action === "self-test" && typeof bridge.runSecureStorageSelfTest === "function") result = await bridge.runSecureStorageSelfTest();
+      if (action === "self-test" && typeof bridge.runSecureStorageSelfTest === "function") result = await bridge.runSecureStorageSelfTest();
       else result = { ok:false, error:"UNSUPPORTED_ACTION", redacted:true };
 
       if (result && result.metadata) updateSlot(root, result.metadata);

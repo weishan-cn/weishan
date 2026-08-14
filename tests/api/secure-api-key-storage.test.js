@@ -5,11 +5,16 @@ const path = require("node:path");
 
 const {
   createSecureApiKeyStorageService,
+  registerSecureApiKeyStorageHandlers,
   SECURE_API_KEY_STORAGE_VERSION,
+  PROVIDER_CREDENTIAL_STORE_VERSION,
   STORE_FILE,
   DEFAULT_TEST_CREDENTIAL,
   DEFAULT_SELF_TEST_CREDENTIAL
 } = require("../../apps/desktop/src/main/secureApiKeyStorage");
+const {
+  createMacOSSecureEntry
+} = require("../../apps/desktop/src/main/providerCredentialSecureEntry");
 
 function createFakeSafeStorage() {
   return {
@@ -47,8 +52,15 @@ function assertMetadataOnly(value) {
   assert.equal(/sk-real-looking-key/.test(serialized), false);
 }
 
-function main() {
+async function credentialMatches(service, descriptor, credentialType, expected) {
+  return service.mainProcess.withCredentialBundle(descriptor, [credentialType], async (credentials) => ({
+    matches:credentials[credentialType] === expected
+  }));
+}
+
+async function main() {
   assert.equal(SECURE_API_KEY_STORAGE_VERSION, "4.2.7");
+  assert.equal(PROVIDER_CREDENTIAL_STORE_VERSION, "1.0.0");
 
   const { service, safeStorage, storePath } = makeService();
   const initial = service.getProviderKeyStatus("flight_provider_key");
@@ -163,7 +175,252 @@ function main() {
   assert.equal(unavailableSelfTest.redacted, true);
   assertMetadataOnly(unavailableSelfTest);
 
-  console.log("SECURE_API_KEY_STORAGE_CORE PASS");
+  safeStorage.available = true;
+  const descriptor = { provider:"ebay", environment:"sandbox", application:"Weishan Global Commerce" };
+  const productionDescriptor = { provider:"ebay", environment:"production", application:"Weishan Global Commerce" };
+  const otherProviderDescriptor = { provider:"ticketmaster", environment:"sandbox", application:"Weishan Global Commerce" };
+  const otherApplicationDescriptor = { provider:"ebay", environment:"sandbox", application:"Weishan Travel" };
+  const firstBundle = {
+    client_id:"WEISHAN_PROVIDER_STORE_TEST_CLIENT_A",
+    client_secret:"WEISHAN_PROVIDER_STORE_TEST_SECRET_A"
+  };
+  const rotatedBundle = {
+    client_id:"WEISHAN_PROVIDER_STORE_TEST_CLIENT_B",
+    client_secret:"WEISHAN_PROVIDER_STORE_TEST_SECRET_B"
+  };
+  const auditEvents = [];
+  const isolatedStorageDir = fs.mkdtempSync(path.join(os.tmpdir(), "weishan-provider-credential-store-"));
+  const isolated = createSecureApiKeyStorageService({
+    storageDir:isolatedStorageDir,
+    safeStorage:createFakeSafeStorage(),
+    audit:(event) => auditEvents.push(event)
+  });
+
+  const providerStatus = isolated.providerCredentialStoreStatus();
+  assert.equal(providerStatus.ok, true);
+  assert.equal(providerStatus.status, "ready");
+  assert.equal(providerStatus.rendererSecretAccess, false);
+  assert.equal(providerStatus.ipcSecretRead, false);
+  assert.equal(providerStatus.ipcSecretWrite, false);
+  assert.equal(providerStatus.executionGate, "CLOSED");
+  assert.equal(providerStatus.authorizesExecution, false);
+  assert.equal(providerStatus.productionTraffic, false);
+  assert.equal(Object.prototype.hasOwnProperty.call(isolated.mainProcess, "getCredentialForMainProcess"), false);
+
+  const stored = isolated.mainProcess.putCredentialBundle(descriptor, firstBundle, "secure_entry_zone");
+  assert.equal(stored.ok, true);
+  assert.equal(stored.secretCount, 2);
+  assert.equal(stored.metadata.every((item) => item.redacted && item.secretAvailable), true);
+  assert.equal(JSON.stringify(stored).includes(firstBundle.client_secret), false);
+  assert.equal(JSON.stringify(stored).includes(firstBundle.client_id), false);
+
+  const providerDiskText = fs.readFileSync(isolated.storagePath(), "utf8");
+  assert.equal(providerDiskText.includes(firstBundle.client_id), false);
+  assert.equal(providerDiskText.includes(firstBundle.client_secret), false);
+  assert.equal(providerDiskText.includes('"credential"'), false);
+  assert.equal(fs.statSync(isolated.storagePath()).mode & 0o777, 0o600);
+  assert.deepEqual(fs.readdirSync(isolatedStorageDir).filter((name) => /\.(?:tmp|lock)$/.test(name)), []);
+
+  const sandboxSecret = await credentialMatches(isolated, descriptor, "client_secret", firstBundle.client_secret);
+  assert.deepEqual(sandboxSecret, { ok:true, value:{ matches:true }, redacted:true });
+  const missingProduction = await credentialMatches(isolated, productionDescriptor, "client_secret", "unused");
+  assert.equal(missingProduction.ok, false);
+  assert.equal(missingProduction.error, "CREDENTIAL_MISSING");
+  const missingOtherProvider = await credentialMatches(isolated, otherProviderDescriptor, "client_secret", "unused");
+  assert.equal(missingOtherProvider.ok, false);
+  assert.equal(missingOtherProvider.error, "CREDENTIAL_MISSING");
+  const missingOtherApplication = await credentialMatches(isolated, otherApplicationDescriptor, "client_secret", "unused");
+  assert.equal(missingOtherApplication.ok, false);
+  assert.equal(missingOtherApplication.error, "CREDENTIAL_MISSING");
+  assert.equal((await credentialMatches(isolated, descriptor, "client_id", firstBundle.client_id)).value.matches, true);
+  assert.equal(isolated.mainProcess.putCredentialBundle(otherApplicationDescriptor, { client_secret:"WEISHAN_OTHER_APP_SECRET" }, "secure_entry_zone").ok, true);
+  assert.equal((await credentialMatches(isolated, otherApplicationDescriptor, "client_secret", "WEISHAN_OTHER_APP_SECRET")).value.matches, true);
+  assert.equal((await credentialMatches(isolated, descriptor, "client_secret", firstBundle.client_secret)).value.matches, true);
+  assert.equal(isolated.mainProcess.putCredentialBundle(otherProviderDescriptor, { client_secret:"WEISHAN_OTHER_PROVIDER_SECRET" }, "secure_entry_zone").ok, true);
+  assert.equal((await credentialMatches(isolated, otherProviderDescriptor, "client_secret", "WEISHAN_OTHER_PROVIDER_SECRET")).value.matches, true);
+
+  const runtimeUse = await isolated.mainProcess.withCredentialBundle(descriptor, ["client_id", "client_secret"], async (credentials) => ({
+    authenticated:credentials.client_id === firstBundle.client_id && credentials.client_secret === firstBundle.client_secret,
+    secretReturned:false
+  }));
+  assert.deepEqual(runtimeUse, { ok:true, value:{ authenticated:true, secretReturned:false }, redacted:true });
+  const blockedRuntimeLeak = await isolated.mainProcess.withCredentialBundle(descriptor, ["client_secret"], async (credentials) => ({ leaked:credentials.client_secret }));
+  assert.equal(blockedRuntimeLeak.ok, false);
+  assert.equal(blockedRuntimeLeak.error, "RUNTIME_RESULT_SECRET_LEAK_BLOCKED");
+  const blockedBufferLeak = await isolated.mainProcess.withCredentialBundle(descriptor, ["client_secret"], async (credentials) => Buffer.from(credentials.client_secret));
+  assert.equal(blockedBufferLeak.ok, false);
+  assert.equal(blockedBufferLeak.error, "RUNTIME_RESULT_SECRET_LEAK_BLOCKED");
+  const blockedAccessorResult = await isolated.mainProcess.withCredentialBundle(descriptor, ["client_secret"], async () => Object.defineProperty({}, "value", { get() { return "hidden"; } }));
+  assert.equal(blockedAccessorResult.ok, false);
+  assert.equal(blockedAccessorResult.error, "RUNTIME_RESULT_SECRET_LEAK_BLOCKED");
+  const blockedFunctionResult = await isolated.mainProcess.withCredentialBundle(descriptor, ["client_secret"], async (credentials) => () => credentials.client_secret);
+  assert.equal(blockedFunctionResult.ok, false);
+  assert.equal(blockedFunctionResult.error, "RUNTIME_RESULT_SECRET_LEAK_BLOCKED");
+  const blockedSymbolResult = await isolated.mainProcess.withCredentialBundle(descriptor, ["client_secret"], async (credentials) => Symbol(credentials.client_secret));
+  assert.equal(blockedSymbolResult.ok, false);
+  assert.equal(blockedSymbolResult.error, "RUNTIME_RESULT_SECRET_LEAK_BLOCKED");
+  const blockedCircularLeak = await isolated.mainProcess.withCredentialBundle(descriptor, ["client_secret"], async (credentials) => {
+    const result = { nested:{ secret:credentials.client_secret } };
+    result.self = result;
+    return result;
+  });
+  assert.equal(blockedCircularLeak.ok, false);
+  assert.equal(blockedCircularLeak.error, "RUNTIME_RESULT_SECRET_LEAK_BLOCKED");
+  const sanitizedThrownError = await isolated.mainProcess.withCredentialBundle(descriptor, ["client_secret"], async (credentials) => {
+    throw new Error("failure " + credentials.client_secret, { cause:credentials.client_secret });
+  });
+  assert.equal(sanitizedThrownError.ok, false);
+  assert.equal(sanitizedThrownError.error, "RUNTIME_CALLBACK_FAILED");
+  assert.equal(JSON.stringify(sanitizedThrownError).includes(firstBundle.client_secret), false);
+  const partialMissing = await isolated.mainProcess.withCredentialBundle(descriptor, ["client_id", "refresh_token"], async () => ({ unreachable:true }));
+  assert.equal(partialMissing.ok, false);
+  assert.equal(partialMissing.error, "CREDENTIAL_MISSING");
+
+  const replaced = isolated.mainProcess.putCredentialBundle(descriptor, rotatedBundle, "secure_entry_zone");
+  assert.equal(replaced.ok, true);
+  assert.equal(replaced.action, "replace");
+  assert.equal(replaced.metadata.every((item) => item.rotationVersion === 2), true);
+  assert.equal((await credentialMatches(isolated, descriptor, "client_secret", rotatedBundle.client_secret)).value.matches, true);
+  const rotatedDiskText = fs.readFileSync(isolated.storagePath(), "utf8");
+  assert.equal(rotatedDiskText.includes(firstBundle.client_secret), false);
+  assert.equal(rotatedDiskText.includes(rotatedBundle.client_secret), false);
+  assert.equal(fs.statSync(isolated.storagePath()).mode & 0o777, 0o600);
+  assert.deepEqual(fs.readdirSync(isolatedStorageDir).filter((name) => /\.(?:tmp|lock)$/.test(name)), []);
+
+  const conflictStore = JSON.parse(fs.readFileSync(isolated.storagePath(), "utf8"));
+  fs.writeFileSync(isolated.storagePath() + ".lock", "", { mode:0o600 });
+  const busyWrite = isolated.mainProcess.putCredentialBundle(descriptor, { client_secret:"WEISHAN_PROVIDER_STORE_TEST_SECRET_BUSY" }, "secure_entry_zone");
+  assert.equal(busyWrite.ok, false);
+  assert.equal(busyWrite.error, "CREDENTIAL_STORE_BUSY");
+  assert.equal(JSON.parse(fs.readFileSync(isolated.storagePath(), "utf8")).storageRevision, conflictStore.storageRevision);
+  fs.unlinkSync(isolated.storagePath() + ".lock");
+
+  const atomicDir = fs.mkdtempSync(path.join(os.tmpdir(), "weishan-provider-credential-atomic-"));
+  const atomicBaseline = createSecureApiKeyStorageService({ storageDir:atomicDir, safeStorage:createFakeSafeStorage() });
+  assert.equal(atomicBaseline.mainProcess.putCredentialBundle(descriptor, firstBundle, "secure_entry_zone").ok, true);
+  const failingFs = Object.create(fs);
+  failingFs.renameSync = () => { throw Object.assign(new Error("disk full"), { code:"ENOSPC" }); };
+  const atomicFailure = createSecureApiKeyStorageService({ storageDir:atomicDir, safeStorage:createFakeSafeStorage(), fs:failingFs });
+  const failedRotation = atomicFailure.mainProcess.putCredentialBundle(descriptor, rotatedBundle, "secure_entry_zone");
+  assert.equal(failedRotation.ok, false);
+  assert.equal(failedRotation.error, "CREDENTIAL_STORE_WRITE_FAILED");
+  assert.equal((await credentialMatches(atomicBaseline, descriptor, "client_secret", firstBundle.client_secret)).value.matches, true);
+  assert.deepEqual(fs.readdirSync(atomicDir).filter((name) => /\.(?:tmp|lock)$/.test(name)), []);
+
+  const metadataList = isolated.listProviderCredentialMetadata({ provider:"ebay", environment:"sandbox", application:"Weishan Global Commerce" });
+  assert.equal(metadataList.ok, true);
+  assert.equal(metadataList.metadataOnly, true);
+  assert.equal(metadataList.records.length, 2);
+  assert.equal(JSON.stringify(metadataList).includes("encryptedBlob"), false);
+  assert.equal(JSON.stringify(metadataList).includes(rotatedBundle.client_secret), false);
+
+  const revoked = isolated.mainProcess.markCredentialBundleRevoked(descriptor);
+  assert.equal(revoked.ok, true);
+  assert.equal(revoked.revokedCount, 2);
+  const revokedRead = await credentialMatches(isolated, descriptor, "client_secret", "unused");
+  assert.equal(revokedRead.ok, false);
+  assert.equal(revokedRead.error, "CREDENTIAL_REVOKED");
+  const revokedDisk = JSON.parse(fs.readFileSync(isolated.storagePath(), "utf8"));
+  const revokedRecords = Object.values(revokedDisk.providerCredentialRecords).filter((record) => record.provider === descriptor.provider && record.environment === descriptor.environment && record.application === descriptor.application);
+  assert.equal(revokedRecords.every((record) => record.encryptedBlob === ""), true);
+
+  const deletedBundle = isolated.mainProcess.deleteCredentialBundle(descriptor);
+  assert.equal(deletedBundle.ok, true);
+  assert.equal(deletedBundle.deletedCount, 2);
+  const remainingEbayMetadata = isolated.listProviderCredentialMetadata({ provider:"ebay" }).records;
+  assert.equal(remainingEbayMetadata.length, 1);
+  assert.equal(remainingEbayMetadata[0].application, "Weishan Travel");
+
+  const corruptedDir = fs.mkdtempSync(path.join(os.tmpdir(), "weishan-provider-credential-corrupted-"));
+  const corrupted = createSecureApiKeyStorageService({ storageDir:corruptedDir, safeStorage:createFakeSafeStorage() });
+  fs.writeFileSync(corrupted.storagePath(), "{not-json", { mode:0o600 });
+  const corruptedBefore = fs.readFileSync(corrupted.storagePath(), "utf8");
+  assert.equal(corrupted.providerCredentialStoreStatus().status, "corrupted");
+  assert.equal(corrupted.listProviderCredentialMetadata({}).error, "CREDENTIAL_STORE_CORRUPTED");
+  assert.equal((await credentialMatches(corrupted, descriptor, "client_secret", "unused")).error, "CREDENTIAL_STORE_CORRUPTED");
+  assert.equal(corrupted.mainProcess.putCredentialBundle(descriptor, firstBundle, "secure_entry_zone").error, "CREDENTIAL_STORE_CORRUPTED");
+  assert.equal(fs.readFileSync(corrupted.storagePath(), "utf8"), corruptedBefore);
+
+  const invalidPayloadDir = fs.mkdtempSync(path.join(os.tmpdir(), "weishan-provider-credential-invalid-payload-"));
+  const invalidPayload = createSecureApiKeyStorageService({ storageDir:invalidPayloadDir, safeStorage:createFakeSafeStorage() });
+  assert.equal(invalidPayload.mainProcess.putCredentialBundle(descriptor, firstBundle, "secure_entry_zone").ok, true);
+  const invalidPayloadStore = JSON.parse(fs.readFileSync(invalidPayload.storagePath(), "utf8"));
+  const invalidPayloadRecord = Object.values(invalidPayloadStore.providerCredentialRecords).find((record) => record.credentialType === "client_secret");
+  invalidPayloadRecord.encryptedBlob = "bm90LWVuY3J5cHRlZA==";
+  fs.writeFileSync(invalidPayload.storagePath(), JSON.stringify(invalidPayloadStore), { mode:0o600 });
+  const invalidPayloadRead = await credentialMatches(invalidPayload, descriptor, "client_secret", "unused");
+  assert.equal(invalidPayloadRead.ok, false);
+  assert.equal(invalidPayloadRead.error, "DECRYPT_FAILED");
+
+  const getterBundle = {};
+  Object.defineProperty(getterBundle, "client_secret", { enumerable:true, get() { throw new Error("must not execute"); } });
+  const rejectedGetterBundle = isolated.mainProcess.putCredentialBundle(descriptor, getterBundle, "secure_entry_zone");
+  assert.equal(rejectedGetterBundle.ok, false);
+  assert.equal(rejectedGetterBundle.error, "INVALID_CREDENTIAL_BUNDLE");
+
+  assert.equal(auditEvents.length > 0, true);
+  assert.equal(auditEvents.every((event) => event.redacted === true), true);
+  assert.equal(JSON.stringify(auditEvents).includes(firstBundle.client_secret), false);
+  assert.equal(JSON.stringify(auditEvents).includes(rotatedBundle.client_secret), false);
+
+  const untrusted = isolated.mainProcess.putCredentialBundle(descriptor, firstBundle, "renderer");
+  assert.equal(untrusted.ok, false);
+  assert.equal(untrusted.error, "UNTRUSTED_CREDENTIAL_SOURCE");
+
+  const promptValues = ["ebay", "sandbox", "Weishan Global Commerce", "client_id,client_secret", "WEISHAN_SECURE_ENTRY_CLIENT", "WEISHAN_SECURE_ENTRY_SECRET"];
+  const secureEntry = createMacOSSecureEntry({
+    platform:"darwin",
+    execFile:(_file, args, _options, callback) => {
+      assert.equal(args.some((arg) => /WEISHAN_SECURE_ENTRY_(?:CLIENT|SECRET)/.test(String(arg))), false);
+      callback(null, promptValues.shift() + "\n", "");
+    }
+  });
+  const collected = await secureEntry.collectCredentialBundle();
+  assert.equal(collected.ok, true);
+  assert.deepEqual(collected.descriptor, descriptor);
+  assert.equal(collected.credentials.client_id, "WEISHAN_SECURE_ENTRY_CLIENT");
+  assert.equal(collected.credentials.client_secret, "WEISHAN_SECURE_ENTRY_SECRET");
+
+  const ipcChannels = [];
+  registerSecureApiKeyStorageHandlers({ handle:(channel) => ipcChannels.push(channel) }, {
+    storageDir:fs.mkdtempSync(path.join(os.tmpdir(), "weishan-provider-credential-ipc-")),
+    safeStorage:createFakeSafeStorage()
+  });
+  assert.deepEqual(ipcChannels.sort(), [
+    "provider-credential:list-metadata",
+    "provider-credential:status",
+    "secure-api-key:get-status",
+    "secure-api-key:list",
+    "secure-api-key:self-test"
+  ]);
+  assert.equal(ipcChannels.some((channel) => /(?:put|get-secret|save|rotate|delete|secure-entry)/.test(channel)), false);
+
+  const preloadSource = fs.readFileSync(path.join(__dirname, "../../apps/desktop/src/preload.js"), "utf8");
+  assert.equal(preloadSource.includes("provider-credential:status"), true);
+  assert.equal(preloadSource.includes("provider-credential:list-metadata"), true);
+  assert.equal(preloadSource.includes("provider-credential:begin-secure-entry"), false);
+  assert.equal(preloadSource.includes("secure-api-key:save"), false);
+  assert.equal(preloadSource.includes("secure-api-key:rotate"), false);
+  assert.equal(preloadSource.includes("secure-api-key:delete"), false);
+
+  const rendererSources = [
+    "../../apps/desktop/src/renderer/routes/HomePage.js",
+    "../../apps/desktop/src/renderer/routes/CommerceAgentPage.js",
+    "../../apps/desktop/src/renderer/core/commerceSecureApiKeyStorageConsole.js"
+  ].map((file) => fs.readFileSync(path.join(__dirname, file), "utf8")).join("\n");
+  assert.equal(rendererSources.includes("data-secure-api-key-sandbox-input"), false);
+  assert.equal(rendererSources.includes("bridge.saveProviderKey"), false);
+  assert.equal(rendererSources.includes("bridge.rotateProviderKey"), false);
+  assert.equal(rendererSources.includes("bridge.deleteProviderKey"), false);
+
+  const genericSecureStorageSource = fs.readFileSync(path.join(__dirname, "../../apps/desktop/src/main/secureStorage.js"), "utf8");
+  assert.equal(genericSecureStorageSource.includes("provider|commerce"), true);
+  assert.equal(genericSecureStorageSource.includes("credential|secret|token"), true);
+
+  console.log("SECURE_API_KEY_STORAGE_CORE PASS providerCredentialScenarios=40 assertions=168");
 }
 
-main();
+main().catch((error) => {
+  console.error(error && error.name || "Error");
+  process.exit(1);
+});
