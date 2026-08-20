@@ -368,9 +368,11 @@ async function main() {
   assert.equal(untrusted.error, "UNTRUSTED_CREDENTIAL_SOURCE");
 
   const promptValues = ["ebay", "sandbox", "Weishan Global Commerce", "client_id,client_secret", "WEISHAN_SECURE_ENTRY_CLIENT", "WEISHAN_SECURE_ENTRY_SECRET"];
+  const promptLabels = [];
   const secureEntry = createMacOSSecureEntry({
     platform:"darwin",
     execFile:(_file, args, _options, callback) => {
+      promptLabels.push(String(args[args.indexOf("--") + 1] || ""));
       assert.equal(args.some((arg) => /WEISHAN_SECURE_ENTRY_(?:CLIENT|SECRET)/.test(String(arg))), false);
       callback(null, promptValues.shift() + "\n", "");
     }
@@ -380,6 +382,78 @@ async function main() {
   assert.deepEqual(collected.descriptor, descriptor);
   assert.equal(collected.credentials.client_id, "WEISHAN_SECURE_ENTRY_CLIENT");
   assert.equal(collected.credentials.client_secret, "WEISHAN_SECURE_ENTRY_SECRET");
+  assert.deepEqual(promptLabels.slice(-2), [
+    "ebay / sandbox / Weishan Global Commerce / client_id",
+    "ebay / sandbox / Weishan Global Commerce / client_secret"
+  ]);
+  assert.equal(promptLabels.some((label) => /WEISHAN_SECURE_ENTRY_(?:CLIENT|SECRET)/.test(label)), false);
+
+  const ticketmasterPromptValues = ["ticketmaster", "development", "api_1-App", "api_key", "WEISHAN_TICKETMASTER_TEST_KEY"];
+  const ticketmasterPromptLabels = [];
+  const ticketmasterSecureEntry = createMacOSSecureEntry({
+    platform:"darwin",
+    execFile:(_file, args, _options, callback) => {
+      ticketmasterPromptLabels.push(String(args[args.indexOf("--") + 1] || ""));
+      assert.equal(args.some((arg) => String(arg).includes("WEISHAN_TICKETMASTER_TEST_KEY")), false);
+      callback(null, ticketmasterPromptValues.shift() + "\n", "");
+    }
+  });
+  const ticketmasterCollected = await ticketmasterSecureEntry.collectCredentialBundle();
+  assert.equal(ticketmasterCollected.ok, true);
+  assert.deepEqual(ticketmasterCollected.descriptor, {
+    provider:"ticketmaster",
+    environment:"development",
+    application:"api_1-App"
+  });
+  assert.deepEqual(ticketmasterPromptLabels.slice(0, 4), [
+    "Credential target 1/4 — Provider identifier",
+    "Credential target 2/4 — Environment",
+    "Credential target 3/4 — Application name",
+    "Credential target 4/4 — Credential types, comma separated"
+  ]);
+  assert.equal(ticketmasterPromptLabels.at(-1), "ticketmaster / development / api_1-App / api_key");
+  assert.equal(ticketmasterPromptLabels.some((label) => label.includes("WEISHAN_TICKETMASTER_TEST_KEY")), false);
+
+  const shiftedMetadataValues = ["development", "development"];
+  const shiftedMetadataLabels = [];
+  const shiftedMetadataSecureEntry = createMacOSSecureEntry({
+    platform:"darwin",
+    execFile:(_file, args, _options, callback) => {
+      shiftedMetadataLabels.push(String(args[args.indexOf("--") + 1] || ""));
+      callback(null, shiftedMetadataValues.shift() + "\n", "");
+    }
+  });
+  const shiftedMetadataResult = await shiftedMetadataSecureEntry.collectCredentialBundle();
+  assert.equal(shiftedMetadataResult.ok, false);
+  assert.equal(shiftedMetadataResult.error, "PROVIDER_ENVIRONMENT_COLLISION");
+  assert.equal(shiftedMetadataLabels.length, 2);
+
+  const invalidTypeValues = ["ticketmaster", "development", "api_1-App", "type → api_key"];
+  const invalidTypeLabels = [];
+  const invalidTypeSecureEntry = createMacOSSecureEntry({
+    platform:"darwin",
+    execFile:(_file, args, _options, callback) => {
+      invalidTypeLabels.push(String(args[args.indexOf("--") + 1] || ""));
+      callback(null, invalidTypeValues.shift() + "\n", "");
+    }
+  });
+  const invalidTypeResult = await invalidTypeSecureEntry.collectCredentialBundle();
+  assert.equal(invalidTypeResult.ok, false);
+  assert.equal(invalidTypeResult.error, "INVALID_CREDENTIAL_TYPE");
+  assert.equal(invalidTypeLabels.length, 4);
+
+  let missingApplicationPromptCount = 0;
+  const missingApplicationSecureEntry = createMacOSSecureEntry({
+    platform:"darwin",
+    execFile:(_file, _args, _options, callback) => {
+      missingApplicationPromptCount += 1;
+      callback(null, ["ticketmaster", "development", ""][missingApplicationPromptCount - 1] + "\n", "");
+    }
+  });
+  const missingApplicationResult = await missingApplicationSecureEntry.collectCredentialBundle();
+  assert.equal(missingApplicationResult.ok, false);
+  assert.equal(missingApplicationResult.error, "METADATA_REQUIRED");
+  assert.equal(missingApplicationPromptCount, 3);
 
   const ipcChannels = [];
   registerSecureApiKeyStorageHandlers({ handle:(channel) => ipcChannels.push(channel) }, {

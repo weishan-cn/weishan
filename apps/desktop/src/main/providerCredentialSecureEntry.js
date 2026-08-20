@@ -2,6 +2,7 @@ const { execFile } = require("child_process");
 
 const PROVIDER_CREDENTIAL_SECURE_ENTRY_VERSION = "1.0.0";
 const CANCELLED_MARKER = "__WEISHAN_SECURE_ENTRY_CANCELLED__";
+const METADATA_IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
 const VISIBLE_PROMPT_SCRIPT = [
   "on run argv",
@@ -73,20 +74,30 @@ function createMacOSSecureEntry(options = {}) {
   }
 
   async function collectCredentialBundle(defaults = {}) {
-    const provider = await promptMetadata("Provider identifier", defaults.provider || "ebay");
+    const provider = await promptMetadata("Credential target 1/4 — Provider identifier", defaults.provider || "ebay");
     if (!provider.ok) return provider;
-    const environment = await promptMetadata("Environment", defaults.environment || "sandbox");
+    if (!METADATA_IDENTIFIER_PATTERN.test(provider.value)) return redactedFailure("INVALID_PROVIDER_IDENTIFIER");
+    const environment = await promptMetadata("Credential target 2/4 — Environment", defaults.environment || "sandbox");
     if (!environment.ok) return environment;
-    const application = await promptMetadata("Application name", defaults.application || "Weishan Global Commerce");
+    if (!METADATA_IDENTIFIER_PATTERN.test(environment.value)) return redactedFailure("INVALID_ENVIRONMENT_IDENTIFIER");
+    if (provider.value.toLowerCase() === environment.value.toLowerCase()) return redactedFailure("PROVIDER_ENVIRONMENT_COLLISION");
+    const application = await promptMetadata("Credential target 3/4 — Application name", defaults.application || "Weishan Global Commerce");
     if (!application.ok) return application;
-    const typesResult = await promptMetadata("Credential types, comma separated", (defaults.credentialTypes || ["client_id", "client_secret"]).join(","));
+    const typesResult = await promptMetadata("Credential target 4/4 — Credential types, comma separated", (defaults.credentialTypes || ["client_id", "client_secret"]).join(","));
     if (!typesResult.ok) return typesResult;
     const credentialTypes = typesResult.value.split(",").map((value) => value.trim()).filter(Boolean);
     if (!credentialTypes.length) return redactedFailure("CREDENTIAL_TYPES_REQUIRED");
+    if (credentialTypes.some((credentialType) => !METADATA_IDENTIFIER_PATTERN.test(credentialType))) return redactedFailure("INVALID_CREDENTIAL_TYPE");
+
+    const descriptor = Object.freeze({
+      provider:provider.value,
+      environment:environment.value,
+      application:application.value
+    });
 
     const credentials = {};
     for (const credentialType of credentialTypes) {
-      const captured = await promptSecret(`${provider.value} / ${environment.value} / ${credentialType}`);
+      const captured = await promptSecret(`${descriptor.provider} / ${descriptor.environment} / ${descriptor.application} / ${credentialType}`);
       if (!captured.ok) {
         Object.keys(credentials).forEach((key) => { credentials[key] = ""; });
         return captured;
@@ -96,7 +107,7 @@ function createMacOSSecureEntry(options = {}) {
 
     return {
       ok:true,
-      descriptor:{ provider:provider.value, environment:environment.value, application:application.value },
+      descriptor,
       credentials,
       entryZone:"macos_native_hidden_input",
       redacted:true
