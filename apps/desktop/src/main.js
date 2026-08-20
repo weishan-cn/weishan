@@ -5,9 +5,10 @@ const fs = require("fs");
 const { spawn } = require("child_process");
 const { registerSecureStorageHandlers } = require("./main/secureStorage");
 const { registerSecureApiKeyStorageHandlers } = require("./main/secureApiKeyStorage");
-const { createMacOSSecureEntry } = require("./main/providerCredentialSecureEntry");
+const { createMacOSSecureEntry, lockedCredentialTargetFromEnvironment } = require("./main/providerCredentialSecureEntry");
 const { registerLimitedBetaPreferenceHandlers } = require("./main/limitedBetaPreferenceStore");
 const { registerGlobalShoppingRakutenReadonlyHandlers } = require("./main/globalShoppingRakutenReadonlyService");
+const { createEbaySandboxReadonlyValidator } = require("./main/ebaySandboxReadonlyValidator");
 const { createVideoProviderGateway } = require("./main/videoProviderGateway");
 const { registerVideoProviderIpcHandlers } = require("./main/videoProviderIpc");
 
@@ -465,6 +466,8 @@ async function aiChatStream(event, payload) {
 
 let ipcHandlersRegistered = false;
 let providerCredentialStoreService = null;
+let ebaySandboxReadonlyValidator = null;
+let ebaySandboxValidationStarted = false;
 function registerIpcHandlers() {
   if (ipcHandlersRegistered) return;
   ipcHandlersRegistered = true;
@@ -505,6 +508,9 @@ function registerIpcHandlers() {
   providerCredentialStoreService = registerSecureApiKeyStorageHandlers(ipcMain, {
     secureEntry:createMacOSSecureEntry()
   });
+  ebaySandboxReadonlyValidator = createEbaySandboxReadonlyValidator({
+    credentialStore:providerCredentialStoreService
+  });
   registerLimitedBetaPreferenceHandlers(ipcMain, { app });
   registerGlobalShoppingRakutenReadonlyHandlers(ipcMain, {});
   registerVideoProviderIpcHandlers(ipcMain, {
@@ -524,7 +530,8 @@ function createWindow() {
         label:"Provider Credential Store…",
         click:async () => {
           if (!providerCredentialStoreService) return;
-          const result = await providerCredentialStoreService.beginProviderCredentialSecureEntry().catch(() => ({ ok:false, error:"SECURE_ENTRY_FAILED" }));
+          const lockedTarget = lockedCredentialTargetFromEnvironment(process.env);
+          const result = await providerCredentialStoreService.beginProviderCredentialSecureEntry(lockedTarget || undefined).catch(() => ({ ok:false, error:"SECURE_ENTRY_FAILED" }));
           await dialog.showMessageBox({
             type:result && result.ok ? "info" : "warning",
             title:"Weishan Provider Credential Store",
@@ -544,6 +551,32 @@ function createWindow() {
   ]));
 
   registerIpcHandlers();
+
+  if (process.env.WEISHAN_EBAY_SANDBOX_VALIDATE === "1" && ebaySandboxReadonlyValidator && !ebaySandboxValidationStarted) {
+    ebaySandboxValidationStarted = true;
+    setImmediate(async () => {
+      const result = await ebaySandboxReadonlyValidator.validate({
+        clientId:process.env.WEISHAN_EBAY_SANDBOX_CLIENT_ID,
+        query:"drone"
+      });
+      const summary = {
+        ok:result && result.ok === true,
+        classification:result && result.classification || "SANDBOX_TEST_DATA",
+        oauth:result && result.oauth || "FAIL",
+        browse:result && result.browse || "FAIL",
+        sandboxItemReturned:result && result.sandboxItemReturned === true,
+        priceCurrencyReturned:result && result.priceCurrencyReturned === true,
+        officialUrlReturned:result && result.officialUrlReturned === true,
+        requestCount:Number(result && result.requestCount || 0),
+        error:result && result.error || null,
+        executionGate:"CLOSED",
+        authorizesExecution:false,
+        productionTraffic:false,
+        redacted:true
+      };
+      console.info("[ebay-sandbox-readonly-validator] " + JSON.stringify(summary));
+    });
+  }
 
   const win = new BrowserWindow({
     width: 1440,

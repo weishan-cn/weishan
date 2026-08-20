@@ -13,7 +13,9 @@ const {
   DEFAULT_SELF_TEST_CREDENTIAL
 } = require("../../apps/desktop/src/main/secureApiKeyStorage");
 const {
-  createMacOSSecureEntry
+  createMacOSSecureEntry,
+  lockedCredentialTargetFromEnvironment,
+  normalizeLockedCredentialTarget
 } = require("../../apps/desktop/src/main/providerCredentialSecureEntry");
 
 function createFakeSafeStorage() {
@@ -387,6 +389,46 @@ async function main() {
     "ebay / sandbox / Weishan Global Commerce / client_secret"
   ]);
   assert.equal(promptLabels.some((label) => /WEISHAN_SECURE_ENTRY_(?:CLIENT|SECRET)/.test(label)), false);
+
+  const lockedTarget = {
+    lockedMetadata:true,
+    provider:"EBAY",
+    environment:"SANDBOX",
+    application:"Weishan Global Commerce",
+    credentialTypes:["CLIENT_SECRET"]
+  };
+  const normalizedLockedTarget = normalizeLockedCredentialTarget(lockedTarget);
+  assert.equal(normalizedLockedTarget.ok, true);
+  assert.deepEqual(normalizedLockedTarget.descriptor, descriptor);
+  assert.deepEqual(Array.from(normalizedLockedTarget.credentialTypes), ["client_secret"]);
+  assert.equal(Object.isFrozen(normalizedLockedTarget.descriptor), true);
+  assert.equal(Object.isFrozen(normalizedLockedTarget.credentialTypes), true);
+
+  const lockedPromptLabels = [];
+  const lockedSecureEntry = createMacOSSecureEntry({
+    platform:"darwin",
+    execFile:(_file, args, _options, callback) => {
+      lockedPromptLabels.push(String(args[args.indexOf("--") + 1] || ""));
+      callback(null, "__WEISHAN_SECURE_ENTRY_CANCELLED__\n", "");
+    }
+  });
+  const lockedCancelled = await lockedSecureEntry.collectCredentialBundle(lockedTarget);
+  assert.equal(lockedCancelled.ok, false);
+  assert.equal(lockedCancelled.error, "SECURE_ENTRY_CANCELLED");
+  assert.deepEqual(lockedPromptLabels, ["ebay / sandbox / Weishan Global Commerce / client_secret"]);
+  assert.equal(lockedPromptLabels.some((label) => /Credential target [1-4]\/4/.test(label)), false);
+
+  const lockedFromEnvironment = lockedCredentialTargetFromEnvironment({
+    WEISHAN_PROVIDER_CREDENTIAL_ENTRY_MODE:"locked",
+    WEISHAN_PROVIDER_CREDENTIAL_PROVIDER:"EBAY",
+    WEISHAN_PROVIDER_CREDENTIAL_ENVIRONMENT:"SANDBOX",
+    WEISHAN_PROVIDER_CREDENTIAL_APPLICATION:"Weishan Global Commerce",
+    WEISHAN_PROVIDER_CREDENTIAL_TYPES:"CLIENT_SECRET"
+  });
+  assert.deepEqual(lockedFromEnvironment, lockedTarget);
+  assert.equal(lockedCredentialTargetFromEnvironment({}), null);
+  assert.equal(normalizeLockedCredentialTarget({ ...lockedTarget, application:"application" }).error, "INVALID_APPLICATION_IDENTIFIER");
+  assert.equal(normalizeLockedCredentialTarget({ ...lockedTarget, credentialTypes:["credentialType"] }).error, "INVALID_CREDENTIAL_TYPE");
 
   const ticketmasterPromptValues = ["ticketmaster", "development", "api_1-App", "api_key", "WEISHAN_TICKETMASTER_TEST_KEY"];
   const ticketmasterPromptLabels = [];
