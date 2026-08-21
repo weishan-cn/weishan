@@ -5,6 +5,7 @@ const CANCELLED_MARKER = "__WEISHAN_SECURE_ENTRY_CANCELLED__";
 const METADATA_IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 const LOCKED_ENTRY_MODE = "locked";
 const PLACEHOLDER_METADATA = new Set(["application", "credentialtype"]);
+const SECURE_ENTRY_OPERATIONS = new Set(["create", "replace", "rotate"]);
 
 const VISIBLE_PROMPT_SCRIPT = [
   "on run argv",
@@ -41,6 +42,7 @@ function normalizeLockedCredentialTarget(defaults = {}) {
   const application = String(defaults.application || "").trim();
   const rawTypes = Array.isArray(defaults.credentialTypes) ? defaults.credentialTypes : [];
   const credentialTypes = rawTypes.map((value) => String(value || "").trim().toLowerCase()).filter(Boolean);
+  const operation = String(defaults.operation || "create").trim().toLowerCase();
 
   if (!METADATA_IDENTIFIER_PATTERN.test(provider)) return redactedFailure("INVALID_PROVIDER_IDENTIFIER");
   if (!METADATA_IDENTIFIER_PATTERN.test(environment)) return redactedFailure("INVALID_ENVIRONMENT_IDENTIFIER");
@@ -49,6 +51,7 @@ function normalizeLockedCredentialTarget(defaults = {}) {
     return redactedFailure("INVALID_APPLICATION_IDENTIFIER");
   }
   if (!credentialTypes.length) return redactedFailure("CREDENTIAL_TYPES_REQUIRED");
+  if (!SECURE_ENTRY_OPERATIONS.has(operation)) return redactedFailure("INVALID_SECURE_ENTRY_OPERATION");
   if (credentialTypes.some((credentialType) => !METADATA_IDENTIFIER_PATTERN.test(credentialType)
     || PLACEHOLDER_METADATA.has(credentialType.toLowerCase()))) {
     return redactedFailure("INVALID_CREDENTIAL_TYPE");
@@ -59,6 +62,7 @@ function normalizeLockedCredentialTarget(defaults = {}) {
     ok:true,
     descriptor:Object.freeze({ provider, environment, application }),
     credentialTypes:Object.freeze(credentialTypes.slice()),
+    operation,
     lockedMetadata:true,
     redacted:true
   };
@@ -71,6 +75,7 @@ function lockedCredentialTargetFromEnvironment(environment = {}) {
     provider:environment.WEISHAN_PROVIDER_CREDENTIAL_PROVIDER,
     environment:environment.WEISHAN_PROVIDER_CREDENTIAL_ENVIRONMENT,
     application:environment.WEISHAN_PROVIDER_CREDENTIAL_APPLICATION,
+    operation:environment.WEISHAN_PROVIDER_CREDENTIAL_OPERATION || "create",
     credentialTypes:String(environment.WEISHAN_PROVIDER_CREDENTIAL_TYPES || "")
       .split(",")
       .map((value) => value.trim())
@@ -121,12 +126,15 @@ function createMacOSSecureEntry(options = {}) {
   async function collectCredentialBundle(defaults = {}) {
     let descriptor;
     let credentialTypes;
+    let operation = String(defaults.operation || "create").trim().toLowerCase();
     if (defaults.lockedMetadata === true) {
       const normalized = normalizeLockedCredentialTarget(defaults);
       if (!normalized.ok) return normalized;
       descriptor = normalized.descriptor;
       credentialTypes = normalized.credentialTypes;
+      operation = normalized.operation;
     } else {
+      if (!SECURE_ENTRY_OPERATIONS.has(operation)) return redactedFailure("INVALID_SECURE_ENTRY_OPERATION");
       const provider = await promptMetadata("Credential target 1/4 — Provider identifier", defaults.provider || "ebay");
       if (!provider.ok) return provider;
       if (!METADATA_IDENTIFIER_PATTERN.test(provider.value)) return redactedFailure("INVALID_PROVIDER_IDENTIFIER");
@@ -161,6 +169,7 @@ function createMacOSSecureEntry(options = {}) {
     return {
       ok:true,
       descriptor,
+      operation,
       credentials,
       entryZone:"macos_native_hidden_input",
       redacted:true

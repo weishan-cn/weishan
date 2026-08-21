@@ -208,13 +208,71 @@ async function main() {
   assert.equal(providerStatus.authorizesExecution, false);
   assert.equal(providerStatus.productionTraffic, false);
   assert.equal(Object.prototype.hasOwnProperty.call(isolated.mainProcess, "getCredentialForMainProcess"), false);
+  assert.equal(typeof isolated.mainProcess.ingestProviderCredential, "function");
 
-  const stored = isolated.mainProcess.putCredentialBundle(descriptor, firstBundle, "secure_entry_zone");
+  const stored = isolated.mainProcess.ingestProviderCredential({
+    operation:"create",
+    source:"secure_entry_zone",
+    descriptor,
+    credentialType:"client_secret",
+    secret:firstBundle.client_secret
+  });
   assert.equal(stored.ok, true);
-  assert.equal(stored.secretCount, 2);
-  assert.equal(stored.metadata.every((item) => item.redacted && item.secretAvailable), true);
+  assert.equal(stored.operation, "SECURE_PROVIDER_CREDENTIAL_INGEST");
+  assert.equal(stored.action, "create");
+  assert.equal(stored.metadata.redacted, true);
+  assert.equal(stored.metadata.secretAvailable, true);
+  assert.equal(stored.secretReturned, false);
+  assert.equal(stored.metadataOnly, true);
   assert.equal(JSON.stringify(stored).includes(firstBundle.client_secret), false);
   assert.equal(JSON.stringify(stored).includes(firstBundle.client_id), false);
+  assert.equal(isolated.mainProcess.ingestProviderCredential({
+    operation:"create",
+    source:"secure_entry_zone",
+    descriptor,
+    credentialType:"client_secret",
+    secret:"WEISHAN_DUPLICATE_SECRET"
+  }).error, "CREDENTIAL_ALREADY_EXISTS");
+  assert.equal(isolated.mainProcess.ingestProviderCredential({
+    operation:"replace",
+    source:"secure_entry_zone",
+    descriptor,
+    credentialType:"client_id",
+    secret:firstBundle.client_id
+  }).error, "CREDENTIAL_MISSING_FOR_REPLACE");
+  const clientIdCreate = isolated.mainProcess.ingestProviderCredential({
+    operation:"create",
+    source:"secure_entry_zone",
+    descriptor,
+    credentialType:"client_id",
+    secret:firstBundle.client_id
+  });
+  assert.equal(clientIdCreate.ok, true);
+  assert.equal(JSON.stringify(clientIdCreate).includes(firstBundle.client_id), false);
+  const poisonedRequest = {};
+  Object.defineProperty(poisonedRequest, "operation", { enumerable:true, get() { throw new Error("must not execute"); } });
+  assert.equal(isolated.mainProcess.ingestProviderCredential(poisonedRequest).error, "INVALID_INGEST_REQUEST");
+  assert.equal(isolated.mainProcess.ingestProviderCredential({
+    operation:"create",
+    source:"secure_entry_zone",
+    descriptor:{ provider:"sk-real-looking-provider-token", environment:"sandbox", application:"Weishan Global Commerce" },
+    credentialType:"client_secret",
+    secret:"WEISHAN_METADATA_REJECTED_SECRET"
+  }).error, "INVALID_CREDENTIAL_DESCRIPTOR");
+  assert.equal(isolated.mainProcess.ingestProviderCredential({
+    operation:"create",
+    source:"secure_entry_zone",
+    descriptor:{ provider:"hotelbeds", environment:"sandbox", application:"sk-real-looking-application-token" },
+    credentialType:"client_secret",
+    secret:"WEISHAN_METADATA_REJECTED_SECRET"
+  }).error, "INVALID_CREDENTIAL_DESCRIPTOR");
+  assert.equal(isolated.mainProcess.ingestProviderCredential({
+    operation:"create",
+    source:"renderer",
+    descriptor:{ provider:"hotelbeds", environment:"sandbox", application:"Weishan" },
+    credentialType:"client_secret",
+    secret:"WEISHAN_RENDERER_REJECTED_SECRET"
+  }).error, "UNTRUSTED_CREDENTIAL_SOURCE");
 
   const providerDiskText = fs.readFileSync(isolated.storagePath(), "utf8");
   assert.equal(providerDiskText.includes(firstBundle.client_id), false);
@@ -278,11 +336,26 @@ async function main() {
   assert.equal(partialMissing.ok, false);
   assert.equal(partialMissing.error, "CREDENTIAL_MISSING");
 
-  const replaced = isolated.mainProcess.putCredentialBundle(descriptor, rotatedBundle, "secure_entry_zone");
+  const replaced = isolated.mainProcess.ingestProviderCredential({
+    operation:"rotate",
+    source:"secure_entry_zone",
+    descriptor,
+    credentialType:"client_secret",
+    secret:rotatedBundle.client_secret
+  });
   assert.equal(replaced.ok, true);
-  assert.equal(replaced.action, "replace");
-  assert.equal(replaced.metadata.every((item) => item.rotationVersion === 2), true);
+  assert.equal(replaced.action, "rotate");
+  assert.equal(replaced.metadata.rotationVersion, 2);
+  const replacedClientId = isolated.mainProcess.ingestProviderCredential({
+    operation:"replace",
+    source:"secure_entry_zone",
+    descriptor,
+    credentialType:"client_id",
+    secret:rotatedBundle.client_id
+  });
+  assert.equal(replacedClientId.ok, true);
   assert.equal((await credentialMatches(isolated, descriptor, "client_secret", rotatedBundle.client_secret)).value.matches, true);
+  assert.equal((await credentialMatches(isolated, descriptor, "client_id", rotatedBundle.client_id)).value.matches, true);
   const rotatedDiskText = fs.readFileSync(isolated.storagePath(), "utf8");
   assert.equal(rotatedDiskText.includes(firstBundle.client_secret), false);
   assert.equal(rotatedDiskText.includes(rotatedBundle.client_secret), false);
@@ -395,6 +468,7 @@ async function main() {
     provider:"EBAY",
     environment:"SANDBOX",
     application:"Weishan Global Commerce",
+    operation:"create",
     credentialTypes:["CLIENT_SECRET"]
   };
   const normalizedLockedTarget = normalizeLockedCredentialTarget(lockedTarget);
@@ -427,8 +501,56 @@ async function main() {
   });
   assert.deepEqual(lockedFromEnvironment, lockedTarget);
   assert.equal(lockedCredentialTargetFromEnvironment({}), null);
+  assert.equal(normalizeLockedCredentialTarget({ ...lockedTarget, operation:"overwrite" }).error, "INVALID_SECURE_ENTRY_OPERATION");
   assert.equal(normalizeLockedCredentialTarget({ ...lockedTarget, application:"application" }).error, "INVALID_APPLICATION_IDENTIFIER");
   assert.equal(normalizeLockedCredentialTarget({ ...lockedTarget, credentialTypes:["credentialType"] }).error, "INVALID_CREDENTIAL_TYPE");
+
+  const beginEntryStorageDir = fs.mkdtempSync(path.join(os.tmpdir(), "weishan-provider-credential-begin-entry-"));
+  const beginEntryService = createSecureApiKeyStorageService({
+    storageDir:beginEntryStorageDir,
+    safeStorage:createFakeSafeStorage(),
+    secureEntry:{
+      async collectCredentialBundle() {
+        return {
+          ok:true,
+          descriptor:{ provider:"hotelbeds", environment:"sandbox", application:"Weishan" },
+          operation:"create",
+          credentials:{ api_secret:"WEISHAN_HOTELBEDS_TEST_SECRET" },
+          redacted:true
+        };
+      }
+    }
+  });
+  const beginEntryStored = await beginEntryService.beginProviderCredentialSecureEntry();
+  assert.equal(beginEntryStored.ok, true);
+  assert.equal(beginEntryStored.operation, "SECURE_PROVIDER_CREDENTIAL_INGEST");
+  assert.equal(beginEntryStored.action, "create");
+  assert.equal(beginEntryStored.secretCount, 1);
+  assert.equal(JSON.stringify(beginEntryStored).includes("WEISHAN_HOTELBEDS_TEST_SECRET"), false);
+  assert.equal((await credentialMatches(beginEntryService, { provider:"hotelbeds", environment:"sandbox", application:"Weishan" }, "api_secret", "WEISHAN_HOTELBEDS_TEST_SECRET")).value.matches, true);
+  const beginEntryDuplicate = await beginEntryService.beginProviderCredentialSecureEntry();
+  assert.equal(beginEntryDuplicate.ok, false);
+  assert.equal(beginEntryDuplicate.error, "CREDENTIAL_ALREADY_EXISTS");
+  const beginEntryReplace = createSecureApiKeyStorageService({
+    storageDir:beginEntryStorageDir,
+    safeStorage:createFakeSafeStorage(),
+    secureEntry:{
+      async collectCredentialBundle() {
+        return {
+          ok:true,
+          descriptor:{ provider:"hotelbeds", environment:"sandbox", application:"Weishan" },
+          operation:"rotate",
+          credentials:{ api_secret:"WEISHAN_HOTELBEDS_TEST_SECRET_ROTATED" },
+          redacted:true
+        };
+      }
+    }
+  });
+  const beginEntryRotated = await beginEntryReplace.beginProviderCredentialSecureEntry();
+  assert.equal(beginEntryRotated.ok, true);
+  assert.equal(beginEntryRotated.action, "rotate");
+  assert.equal((await credentialMatches(beginEntryReplace, { provider:"hotelbeds", environment:"sandbox", application:"Weishan" }, "api_secret", "WEISHAN_HOTELBEDS_TEST_SECRET_ROTATED")).value.matches, true);
+  assert.equal(fs.readFileSync(beginEntryReplace.storagePath(), "utf8").includes("WEISHAN_HOTELBEDS_TEST_SECRET_ROTATED"), false);
 
   const ticketmasterPromptValues = ["ticketmaster", "development", "api_1-App", "api_key", "WEISHAN_TICKETMASTER_TEST_KEY"];
   const ticketmasterPromptLabels = [];
@@ -533,7 +655,7 @@ async function main() {
   assert.equal(genericSecureStorageSource.includes("provider|commerce"), true);
   assert.equal(genericSecureStorageSource.includes("credential|secret|token"), true);
 
-  console.log("SECURE_API_KEY_STORAGE_CORE PASS providerCredentialScenarios=40 assertions=168");
+  console.log("SECURE_API_KEY_STORAGE_CORE PASS providerCredentialIngestion=provider_neutral");
 }
 
 main().catch((error) => {

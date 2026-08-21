@@ -20,6 +20,17 @@ const DEFAULT_SANDBOX_TEST_CREDENTIAL = SANDBOX_TEST_CREDENTIAL_PREFIX + "000000
 const PROVIDER_CREDENTIAL_STORE_VERSION = "1.0.0";
 const PROVIDER_CREDENTIAL_ENVIRONMENTS = Object.freeze(["sandbox", "development", "staging", "production"]);
 const PROVIDER_CREDENTIAL_SOURCES = Object.freeze(["secure_entry_zone", "main_process_runtime"]);
+const PROVIDER_CREDENTIAL_INGEST_OPERATIONS = Object.freeze(["create", "replace", "rotate"]);
+const RESERVED_METADATA_VALUES = new Set([
+  "__proto__",
+  "constructor",
+  "prototype",
+  "application",
+  "credentialtype",
+  "credential_type",
+  "provider",
+  "environment"
+]);
 
 const PROVIDER_SLOTS = Object.freeze([
   { providerId:"flight_provider_key", label:"机票 Provider Key" },
@@ -83,6 +94,11 @@ function isRealLookingCredential(value) {
   return /(?:^|[^A-Z0-9_])(sk-|pk-|api_|live_|prod_|bearer|token|secret|OPENAI_API_KEY|STRIPE_SECRET_KEY)/i.test(text);
 }
 
+function isSecretShapedMetadata(value) {
+  const text = String(value || "");
+  return /(?:^|[^A-Z0-9_])(?:sk-|pk-|api_|live_|prod_|bearer|token|secret|password|authorization|cookie|session|oauth|refresh[_-]?token|access[_-]?token|client[_-]?secret|cert[_-]?id|OPENAI_API_KEY|STRIPE_SECRET_KEY)(?:[^A-Z0-9_]|$)/i.test(text);
+}
+
 function hashCredential(value) {
   return crypto.createHash("sha256").update(String(value || ""), "utf8").digest("hex");
 }
@@ -107,11 +123,15 @@ function cleanCredentialDescriptor(raw) {
   const application = String(raw && raw.application || "").trim();
   if (!provider || !PROVIDER_CREDENTIAL_ENVIRONMENTS.includes(environment)) return null;
   if (application.length < 2 || application.length > 120 || /[\u0000-\u001f\u007f]/.test(application)) return null;
+  if (RESERVED_METADATA_VALUES.has(provider) || RESERVED_METADATA_VALUES.has(environment) || RESERVED_METADATA_VALUES.has(application.toLowerCase())) return null;
+  if (isSecretShapedMetadata(provider) || isSecretShapedMetadata(environment) || isSecretShapedMetadata(application)) return null;
   return { provider, environment, application };
 }
 
 function cleanCredentialType(value) {
-  return cleanCredentialSegment(value, 2, 64);
+  const credentialType = cleanCredentialSegment(value, 2, 64);
+  if (!credentialType || RESERVED_METADATA_VALUES.has(credentialType) || /^(?:sk|pk|api|live|prod)[_-][a-z0-9_-]{8,}$/i.test(String(value || ""))) return "";
+  return credentialType;
 }
 
 function providerCredentialRecordId(descriptor, credentialType) {
@@ -542,6 +562,58 @@ function createSecureApiKeyStorageService(options = {}) {
     };
   }
 
+  function isPlainSafeObject(value) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) return false;
+    return Object.values(Object.getOwnPropertyDescriptors(value)).every((property) => Object.prototype.hasOwnProperty.call(property, "value"));
+  }
+
+  function ingestProviderCredential(rawRequest) {
+    if (!isPlainSafeObject(rawRequest)) return { ok:false, error:"INVALID_INGEST_REQUEST", redacted:true };
+    const operation = String(rawRequest.operation || "").trim().toLowerCase();
+    const source = String(rawRequest.source || "").trim();
+    const descriptor = cleanCredentialDescriptor(rawRequest.descriptor);
+    const credentialType = cleanCredentialType(rawRequest.credentialType);
+    const secret = typeof rawRequest.secret === "string" ? rawRequest.secret : "";
+    if (!PROVIDER_CREDENTIAL_INGEST_OPERATIONS.includes(operation)) return { ok:false, error:"INVALID_INGEST_OPERATION", redacted:true };
+    if (!PROVIDER_CREDENTIAL_SOURCES.includes(source)) return { ok:false, error:"UNTRUSTED_CREDENTIAL_SOURCE", redacted:true };
+    if (!descriptor || !credentialType) return { ok:false, error:"INVALID_CREDENTIAL_DESCRIPTOR", redacted:true };
+    if (!secret || secret.length > 8192) return { ok:false, error:"INVALID_CREDENTIAL_SECRET", redacted:true };
+    const found = findProviderCredentialRecord(descriptor, credentialType);
+    if (found.storageError) {
+      emitAudit("ingest", descriptor, false, found.storageError);
+      return storeFailure({ code:found.storageError });
+    }
+    const activeRecord = found.record && found.record.status !== "revoked" && found.record.revoked !== true;
+    if (operation === "create" && activeRecord) {
+      emitAudit("ingest", descriptor, false, "CREDENTIAL_ALREADY_EXISTS");
+      return { ok:false, error:"CREDENTIAL_ALREADY_EXISTS", redacted:true };
+    }
+    if ((operation === "replace" || operation === "rotate") && !activeRecord) {
+      emitAudit("ingest", descriptor, false, "CREDENTIAL_MISSING_FOR_REPLACE");
+      return { ok:false, error:"CREDENTIAL_MISSING_FOR_REPLACE", redacted:true };
+    }
+    const credentials = {};
+    credentials[credentialType] = secret;
+    try {
+      const result = putCredentialBundle(descriptor, credentials, source);
+      if (!result.ok) return result;
+      return {
+        ok:true,
+        operation:"SECURE_PROVIDER_CREDENTIAL_INGEST",
+        action:operation,
+        metadata:Array.isArray(result.metadata) ? result.metadata[0] : null,
+        secretAvailable:!!(Array.isArray(result.metadata) && result.metadata[0] && result.metadata[0].secretAvailable),
+        secretReturned:false,
+        metadataOnly:true,
+        redacted:true
+      };
+    } finally {
+      credentials[credentialType] = "";
+    }
+  }
+
   function findProviderCredentialRecord(rawDescriptor, rawCredentialType) {
     const descriptor = cleanCredentialDescriptor(rawDescriptor);
     const credentialType = cleanCredentialType(rawCredentialType);
@@ -705,7 +777,41 @@ function createSecureApiKeyStorageService(options = {}) {
     const collected = await secureEntry.collectCredentialBundle(defaults || {});
     if (!collected || collected.ok !== true) return { ok:false, error:collected && collected.error || "SECURE_ENTRY_FAILED", redacted:true };
     try {
-      return putCredentialBundle(collected.descriptor, collected.credentials, "secure_entry_zone");
+      const operation = String(collected.operation || "create").trim().toLowerCase();
+      const credentialTypes = Object.keys(collected.credentials || {});
+      const descriptor = cleanCredentialDescriptor(collected.descriptor);
+      if (!descriptor || !PROVIDER_CREDENTIAL_INGEST_OPERATIONS.includes(operation) || !credentialTypes.length) {
+        return { ok:false, error:"INVALID_INGEST_REQUEST", redacted:true };
+      }
+      for (const credentialType of credentialTypes) {
+        const found = findProviderCredentialRecord(descriptor, credentialType);
+        if (found.storageError) return storeFailure({ code:found.storageError });
+        const activeRecord = found.record && found.record.status !== "revoked" && found.record.revoked !== true;
+        if (operation === "create" && activeRecord) return { ok:false, error:"CREDENTIAL_ALREADY_EXISTS", redacted:true };
+        if ((operation === "replace" || operation === "rotate") && !activeRecord) return { ok:false, error:"CREDENTIAL_MISSING_FOR_REPLACE", redacted:true };
+      }
+      const metadata = [];
+      for (const credentialType of credentialTypes) {
+        const result = ingestProviderCredential({
+          operation,
+          source:"secure_entry_zone",
+          descriptor,
+          credentialType,
+          secret:collected.credentials[credentialType]
+        });
+        if (!result.ok) return result;
+        metadata.push(result.metadata);
+      }
+      return {
+        ok:true,
+        operation:"SECURE_PROVIDER_CREDENTIAL_INGEST",
+        action:operation,
+        metadata,
+        secretCount:metadata.length,
+        secretReturned:false,
+        metadataOnly:true,
+        redacted:true
+      };
     } finally {
       Object.keys(collected.credentials || {}).forEach((key) => { collected.credentials[key] = ""; });
     }
@@ -726,6 +832,7 @@ function createSecureApiKeyStorageService(options = {}) {
     listProviderCredentialMetadata,
     beginProviderCredentialSecureEntry,
     mainProcess:{
+      ingestProviderCredential,
       putCredentialBundle,
       withCredentialBundle,
       deleteCredentialBundle,
