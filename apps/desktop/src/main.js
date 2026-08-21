@@ -6,6 +6,7 @@ const { spawn } = require("child_process");
 const { registerSecureStorageHandlers } = require("./main/secureStorage");
 const { registerSecureApiKeyStorageHandlers } = require("./main/secureApiKeyStorage");
 const { createMacOSSecureEntry, lockedCredentialTargetFromEnvironment } = require("./main/providerCredentialSecureEntry");
+const { createProviderCredentialStoreMenuAction } = require("./main/providerCredentialStoreMenuAction");
 const { registerLimitedBetaPreferenceHandlers } = require("./main/limitedBetaPreferenceStore");
 const { registerGlobalShoppingRakutenReadonlyHandlers } = require("./main/globalShoppingRakutenReadonlyService");
 const { createEbaySandboxReadonlyValidator } = require("./main/ebaySandboxReadonlyValidator");
@@ -506,7 +507,9 @@ function registerIpcHandlers() {
   ipcMain.handle("weishan:open-official-website", async () => shell.openExternal(WEISHAN_OFFICIAL_WEBSITE_URL));
   registerSecureStorageHandlers(ipcMain);
   providerCredentialStoreService = registerSecureApiKeyStorageHandlers(ipcMain, {
-    secureEntry:createMacOSSecureEntry()
+    secureEntry:createMacOSSecureEntry({
+      hostApplicationName:app.isPackaged ? APP_NAME : "Electron"
+    })
   });
   ebaySandboxReadonlyValidator = createEbaySandboxReadonlyValidator({
     credentialStore:providerCredentialStoreService
@@ -521,6 +524,12 @@ function registerIpcHandlers() {
 
 function createWindow() {
   applyAppIdentity();
+  registerIpcHandlers();
+  const openProviderCredentialStoreFromMenu = createProviderCredentialStoreMenuAction({
+    getService:() => providerCredentialStoreService,
+    getEnvironment:() => process.env,
+    lockedCredentialTargetFromEnvironment
+  });
 
   Menu.setApplicationMenu(Menu.buildFromTemplate([
     { label: APP_NAME, submenu: [
@@ -529,9 +538,7 @@ function createWindow() {
       {
         label:"Provider Credential Store…",
         click:async () => {
-          if (!providerCredentialStoreService) return;
-          const lockedTarget = lockedCredentialTargetFromEnvironment(process.env);
-          const result = await providerCredentialStoreService.beginProviderCredentialSecureEntry(lockedTarget || undefined).catch(() => ({ ok:false, error:"SECURE_ENTRY_FAILED" }));
+          const result = await openProviderCredentialStoreFromMenu();
           await dialog.showMessageBox({
             type:result && result.ok ? "info" : "warning",
             title:"Weishan Provider Credential Store",
@@ -549,8 +556,6 @@ function createWindow() {
     { label: "View", submenu: [{ role: "reload" }, { role: "toggleDevTools" }, { role: "togglefullscreen" }] },
     { label: "Window", submenu: [{ role: "minimize" }, { role: "zoom" }] }
   ]));
-
-  registerIpcHandlers();
 
   if (process.env.WEISHAN_EBAY_SANDBOX_VALIDATE === "1" && ebaySandboxReadonlyValidator && !ebaySandboxValidationStarted) {
     ebaySandboxValidationStarted = true;

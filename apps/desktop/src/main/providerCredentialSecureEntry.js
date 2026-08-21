@@ -11,8 +11,16 @@ const VISIBLE_PROMPT_SCRIPT = [
   "on run argv",
   "set promptText to item 1 of argv",
   "set defaultText to item 2 of argv",
+  "set hostAppName to item 3 of argv",
   "try",
+  "if hostAppName is not \"\" then",
+  "tell application hostAppName",
+  "activate",
   "set response to display dialog promptText default answer defaultText buttons {\"Cancel\", \"Continue\"} default button \"Continue\" cancel button \"Cancel\" with title \"Weishan Provider Credential Store\"",
+  "end tell",
+  "else",
+  "set response to display dialog promptText default answer defaultText buttons {\"Cancel\", \"Continue\"} default button \"Continue\" cancel button \"Cancel\" with title \"Weishan Provider Credential Store\"",
+  "end if",
   "return text returned of response",
   "on error number -128",
   `return "${CANCELLED_MARKER}"`,
@@ -23,8 +31,16 @@ const VISIBLE_PROMPT_SCRIPT = [
 const SECRET_PROMPT_SCRIPT = [
   "on run argv",
   "set promptText to item 1 of argv",
+  "set hostAppName to item 2 of argv",
   "try",
+  "if hostAppName is not \"\" then",
+  "tell application hostAppName",
+  "activate",
   "set response to display dialog promptText default answer \"\" with hidden answer buttons {\"Cancel\", \"Store Securely\"} default button \"Store Securely\" cancel button \"Cancel\" with title \"Weishan Secret Entry Zone\"",
+  "end tell",
+  "else",
+  "set response to display dialog promptText default answer \"\" with hidden answer buttons {\"Cancel\", \"Store Securely\"} default button \"Store Securely\" cancel button \"Cancel\" with title \"Weishan Secret Entry Zone\"",
+  "end if",
   "return text returned of response",
   "on error number -128",
   `return "${CANCELLED_MARKER}"`,
@@ -86,6 +102,7 @@ function lockedCredentialTargetFromEnvironment(environment = {}) {
 function createMacOSSecureEntry(options = {}) {
   const execFileRef = options.execFile || execFile;
   const platform = options.platform || process.platform;
+  const hostApplicationName = String(options.hostApplicationName || "").trim();
 
   function runPrompt(script, args) {
     if (platform !== "darwin") return Promise.resolve(redactedFailure("SECURE_ENTRY_UNAVAILABLE"));
@@ -110,14 +127,14 @@ function createMacOSSecureEntry(options = {}) {
   }
 
   async function promptMetadata(label, defaultValue) {
-    const result = await runPrompt(VISIBLE_PROMPT_SCRIPT, [label, defaultValue]);
+    const result = await runPrompt(VISIBLE_PROMPT_SCRIPT, [label, defaultValue, hostApplicationName]);
     if (!result.ok) return result;
     const value = String(result.value || "").trim();
     return value ? { ok:true, value, redacted:true } : redactedFailure("METADATA_REQUIRED");
   }
 
   async function promptSecret(label) {
-    const result = await runPrompt(SECRET_PROMPT_SCRIPT, [label]);
+    const result = await runPrompt(SECRET_PROMPT_SCRIPT, [label, hostApplicationName]);
     if (!result.ok) return result;
     const value = String(result.value || "");
     return value ? { ok:true, value, redacted:true } : redactedFailure("SECRET_REQUIRED");

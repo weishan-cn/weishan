@@ -17,6 +17,9 @@ const {
   lockedCredentialTargetFromEnvironment,
   normalizeLockedCredentialTarget
 } = require("../../apps/desktop/src/main/providerCredentialSecureEntry");
+const {
+  createProviderCredentialStoreMenuAction
+} = require("../../apps/desktop/src/main/providerCredentialStoreMenuAction");
 
 function createFakeSafeStorage() {
   return {
@@ -209,6 +212,82 @@ async function main() {
   assert.equal(providerStatus.productionTraffic, false);
   assert.equal(Object.prototype.hasOwnProperty.call(isolated.mainProcess, "getCredentialForMainProcess"), false);
   assert.equal(typeof isolated.mainProcess.ingestProviderCredential, "function");
+
+  const unavailableMenuAction = createProviderCredentialStoreMenuAction({
+    getService:() => null,
+    lockedCredentialTargetFromEnvironment
+  });
+  const unavailableMenuResult = await unavailableMenuAction();
+  assert.equal(unavailableMenuResult.ok, false);
+  assert.equal(unavailableMenuResult.error, "SECURE_ENTRY_SERVICE_UNAVAILABLE");
+  assertMetadataOnly(unavailableMenuResult);
+
+  const menuCalls = [];
+  const lockedMenuAction = createProviderCredentialStoreMenuAction({
+    getService:() => ({
+      beginProviderCredentialSecureEntry(defaults) {
+        menuCalls.push(defaults);
+        return Promise.resolve({
+          ok:true,
+          operation:"SECURE_PROVIDER_CREDENTIAL_INGEST",
+          action:"create",
+          metadata:[{
+            provider:"hotelbeds",
+            environment:"evaluation",
+            application:"Weishan",
+            credentialType:"api_secret",
+            status:"active",
+            redacted:true
+          }],
+          secretCount:1,
+          redacted:true
+        });
+      }
+    }),
+    getEnvironment:() => ({
+      WEISHAN_PROVIDER_CREDENTIAL_ENTRY_MODE:"locked",
+      WEISHAN_PROVIDER_CREDENTIAL_PROVIDER:"hotelbeds",
+      WEISHAN_PROVIDER_CREDENTIAL_ENVIRONMENT:"evaluation",
+      WEISHAN_PROVIDER_CREDENTIAL_APPLICATION:"Weishan",
+      WEISHAN_PROVIDER_CREDENTIAL_TYPES:"api_secret",
+      WEISHAN_PROVIDER_CREDENTIAL_OPERATION:"create"
+    }),
+    lockedCredentialTargetFromEnvironment
+  });
+  const lockedMenuResult = await lockedMenuAction();
+  assert.equal(lockedMenuResult.ok, true);
+  assert.equal(lockedMenuResult.operation, "SECURE_PROVIDER_CREDENTIAL_INGEST");
+  assert.equal(lockedMenuResult.secretCount, 1);
+  assert.deepEqual(menuCalls, [{
+    lockedMetadata:true,
+    provider:"hotelbeds",
+    environment:"evaluation",
+    application:"Weishan",
+    operation:"create",
+    credentialTypes:["api_secret"]
+  }]);
+  assertMetadataOnly(lockedMenuResult);
+
+  const invalidMenuAction = createProviderCredentialStoreMenuAction({
+    getService:() => ({
+      beginProviderCredentialSecureEntry(defaults) {
+        menuCalls.push(defaults);
+        return Promise.resolve({ ok:false, error:"INVALID_APPLICATION_IDENTIFIER", redacted:true });
+      }
+    }),
+    getEnvironment:() => ({
+      WEISHAN_PROVIDER_CREDENTIAL_ENTRY_MODE:"locked",
+      WEISHAN_PROVIDER_CREDENTIAL_PROVIDER:"hotelbeds",
+      WEISHAN_PROVIDER_CREDENTIAL_ENVIRONMENT:"evaluation",
+      WEISHAN_PROVIDER_CREDENTIAL_APPLICATION:"application",
+      WEISHAN_PROVIDER_CREDENTIAL_TYPES:"api_secret"
+    }),
+    lockedCredentialTargetFromEnvironment
+  });
+  const invalidMenuResult = await invalidMenuAction();
+  assert.equal(invalidMenuResult.ok, false);
+  assert.equal(invalidMenuResult.error, "INVALID_APPLICATION_IDENTIFIER");
+  assertMetadataOnly(invalidMenuResult);
 
   const stored = isolated.mainProcess.ingestProviderCredential({
     operation:"create",
@@ -481,8 +560,11 @@ async function main() {
   const lockedPromptLabels = [];
   const lockedSecureEntry = createMacOSSecureEntry({
     platform:"darwin",
+    hostApplicationName:"Electron",
     execFile:(_file, args, _options, callback) => {
+      assert.equal(String(args[1] || "").includes("tell application hostAppName"), true);
       lockedPromptLabels.push(String(args[args.indexOf("--") + 1] || ""));
+      assert.equal(args.slice(args.indexOf("--") + 1).includes("Electron"), true);
       callback(null, "__WEISHAN_SECURE_ENTRY_CANCELLED__\n", "");
     }
   });
@@ -513,7 +595,7 @@ async function main() {
       async collectCredentialBundle() {
         return {
           ok:true,
-          descriptor:{ provider:"hotelbeds", environment:"sandbox", application:"Weishan" },
+          descriptor:{ provider:"hotelbeds", environment:"evaluation", application:"Weishan" },
           operation:"create",
           credentials:{ api_secret:"WEISHAN_HOTELBEDS_TEST_SECRET" },
           redacted:true
@@ -527,7 +609,7 @@ async function main() {
   assert.equal(beginEntryStored.action, "create");
   assert.equal(beginEntryStored.secretCount, 1);
   assert.equal(JSON.stringify(beginEntryStored).includes("WEISHAN_HOTELBEDS_TEST_SECRET"), false);
-  assert.equal((await credentialMatches(beginEntryService, { provider:"hotelbeds", environment:"sandbox", application:"Weishan" }, "api_secret", "WEISHAN_HOTELBEDS_TEST_SECRET")).value.matches, true);
+  assert.equal((await credentialMatches(beginEntryService, { provider:"hotelbeds", environment:"evaluation", application:"Weishan" }, "api_secret", "WEISHAN_HOTELBEDS_TEST_SECRET")).value.matches, true);
   const beginEntryDuplicate = await beginEntryService.beginProviderCredentialSecureEntry();
   assert.equal(beginEntryDuplicate.ok, false);
   assert.equal(beginEntryDuplicate.error, "CREDENTIAL_ALREADY_EXISTS");
@@ -538,7 +620,7 @@ async function main() {
       async collectCredentialBundle() {
         return {
           ok:true,
-          descriptor:{ provider:"hotelbeds", environment:"sandbox", application:"Weishan" },
+          descriptor:{ provider:"hotelbeds", environment:"evaluation", application:"Weishan" },
           operation:"rotate",
           credentials:{ api_secret:"WEISHAN_HOTELBEDS_TEST_SECRET_ROTATED" },
           redacted:true
@@ -549,7 +631,7 @@ async function main() {
   const beginEntryRotated = await beginEntryReplace.beginProviderCredentialSecureEntry();
   assert.equal(beginEntryRotated.ok, true);
   assert.equal(beginEntryRotated.action, "rotate");
-  assert.equal((await credentialMatches(beginEntryReplace, { provider:"hotelbeds", environment:"sandbox", application:"Weishan" }, "api_secret", "WEISHAN_HOTELBEDS_TEST_SECRET_ROTATED")).value.matches, true);
+  assert.equal((await credentialMatches(beginEntryReplace, { provider:"hotelbeds", environment:"evaluation", application:"Weishan" }, "api_secret", "WEISHAN_HOTELBEDS_TEST_SECRET_ROTATED")).value.matches, true);
   assert.equal(fs.readFileSync(beginEntryReplace.storagePath(), "utf8").includes("WEISHAN_HOTELBEDS_TEST_SECRET_ROTATED"), false);
 
   const ticketmasterPromptValues = ["ticketmaster", "development", "api_1-App", "api_key", "WEISHAN_TICKETMASTER_TEST_KEY"];
