@@ -212,6 +212,53 @@ async function main() {
   assert.equal(providerStatus.productionTraffic, false);
   assert.equal(Object.prototype.hasOwnProperty.call(isolated.mainProcess, "getCredentialForMainProcess"), false);
   assert.equal(typeof isolated.mainProcess.ingestProviderCredential, "function");
+  assert.equal(typeof isolated.mainProcess.bindProviderCredentialIdentifier, "function");
+  assert.equal(typeof isolated.mainProcess.getProviderCredentialIdentifierForMainProcess, "function");
+
+  const hotelbedsIdentifierDescriptor = { provider:"hotelbeds", environment:"evaluation", application:"Weishan" };
+  const hotelbedsApiKey = "0123456789abcdef0123456789abcdef";
+  const boundHotelbedsApiKey = isolated.mainProcess.bindProviderCredentialIdentifier({
+    source:"main_process_runtime",
+    descriptor:hotelbedsIdentifierDescriptor,
+    identifierType:"api_key",
+    value:hotelbedsApiKey
+  });
+  assert.equal(boundHotelbedsApiKey.ok, true);
+  assert.equal(boundHotelbedsApiKey.operation, "PROVIDER_CREDENTIAL_IDENTIFIER_BIND");
+  assert.equal(boundHotelbedsApiKey.metadata.provider, "hotelbeds");
+  assert.equal(boundHotelbedsApiKey.metadata.environment, "evaluation");
+  assert.equal(boundHotelbedsApiKey.metadata.application, "Weishan");
+  assert.equal(boundHotelbedsApiKey.metadata.identifierType, "api_key");
+  assert.equal(boundHotelbedsApiKey.metadata.secret, false);
+  assert.equal(boundHotelbedsApiKey.metadata.valueAvailable, true);
+  assert.equal(boundHotelbedsApiKey.metadata.valueLast4, "cdef");
+  assert.equal(boundHotelbedsApiKey.valueReturned, false);
+  assert.equal(JSON.stringify(boundHotelbedsApiKey).includes(hotelbedsApiKey), false);
+  const listedHotelbedsIdentifier = isolated.listProviderCredentialIdentifierMetadata(hotelbedsIdentifierDescriptor);
+  assert.equal(listedHotelbedsIdentifier.ok, true);
+  assert.equal(listedHotelbedsIdentifier.records.length, 1);
+  assert.equal(listedHotelbedsIdentifier.records[0].identifierType, "api_key");
+  assert.equal(JSON.stringify(listedHotelbedsIdentifier).includes(hotelbedsApiKey), false);
+  const fetchedHotelbedsIdentifier = isolated.mainProcess.getProviderCredentialIdentifierForMainProcess(hotelbedsIdentifierDescriptor, "api_key");
+  assert.equal(fetchedHotelbedsIdentifier.ok, true);
+  assert.equal(fetchedHotelbedsIdentifier.value, hotelbedsApiKey);
+  assert.equal(fetchedHotelbedsIdentifier.metadata.secret, false);
+  const blockedSecretLikeIdentifier = isolated.mainProcess.bindProviderCredentialIdentifier({
+    source:"main_process_runtime",
+    descriptor:hotelbedsIdentifierDescriptor,
+    identifierType:"api_key",
+    value:"sk-should-not-be-bound-as-identifier"
+  });
+  assert.equal(blockedSecretLikeIdentifier.ok, false);
+  assert.equal(blockedSecretLikeIdentifier.error, "INVALID_IDENTIFIER_VALUE");
+  const blockedUntrustedIdentifier = isolated.mainProcess.bindProviderCredentialIdentifier({
+    source:"renderer",
+    descriptor:hotelbedsIdentifierDescriptor,
+    identifierType:"api_key",
+    value:"0123456789abcdef0123456789abcdef"
+  });
+  assert.equal(blockedUntrustedIdentifier.ok, false);
+  assert.equal(blockedUntrustedIdentifier.error, "UNTRUSTED_IDENTIFIER_SOURCE");
 
   const unavailableMenuAction = createProviderCredentialStoreMenuAction({
     getService:() => null,
@@ -707,6 +754,7 @@ async function main() {
     safeStorage:createFakeSafeStorage()
   });
   assert.deepEqual(ipcChannels.sort(), [
+    "provider-credential:list-identifier-metadata",
     "provider-credential:list-metadata",
     "provider-credential:status",
     "secure-api-key:get-status",

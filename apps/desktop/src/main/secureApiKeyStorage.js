@@ -21,6 +21,7 @@ const PROVIDER_CREDENTIAL_STORE_VERSION = "1.0.0";
 const PROVIDER_CREDENTIAL_ENVIRONMENTS = Object.freeze(["sandbox", "development", "evaluation", "staging", "production"]);
 const PROVIDER_CREDENTIAL_SOURCES = Object.freeze(["secure_entry_zone", "main_process_runtime"]);
 const PROVIDER_CREDENTIAL_INGEST_OPERATIONS = Object.freeze(["create", "replace", "rotate"]);
+const PROVIDER_CREDENTIAL_IDENTIFIER_SOURCES = Object.freeze(["main_process_runtime"]);
 const RESERVED_METADATA_VALUES = new Set([
   "__proto__",
   "constructor",
@@ -140,6 +141,12 @@ function providerCredentialRecordId(descriptor, credentialType) {
     .digest("hex");
 }
 
+function providerCredentialIdentifierRecordId(descriptor, identifierType) {
+  return crypto.createHash("sha256")
+    .update(JSON.stringify([descriptor.provider, descriptor.environment, descriptor.application, identifierType, "identifier"]), "utf8")
+    .digest("hex");
+}
+
 function providerCredentialMetadata(record) {
   if (!record || typeof record !== "object") return null;
   return {
@@ -156,6 +163,26 @@ function providerCredentialMetadata(record) {
     rotationVersion:Number(record.rotationVersion || 0),
     storageProvider:String(record.encryptionProvider || ""),
     secretAvailable:record.status === "stored" && record.revoked !== true,
+    redacted:true
+  };
+}
+
+function providerCredentialIdentifierMetadata(record) {
+  if (!record || typeof record !== "object") return null;
+  return {
+    provider:String(record.provider || ""),
+    environment:String(record.environment || ""),
+    application:String(record.application || ""),
+    identifierType:String(record.identifierType || ""),
+    status:String(record.status || "missing"),
+    createdAt:String(record.createdAt || ""),
+    updatedAt:String(record.updatedAt || ""),
+    valueFingerprint:String(record.valueFingerprint || ""),
+    valueLast4:String(record.valueLast4 || ""),
+    valueAvailable:record.status === "bound",
+    storageProvider:String(record.storageProvider || "local_provider_config"),
+    secret:false,
+    metadataOnly:true,
     redacted:true
   };
 }
@@ -240,14 +267,15 @@ function createSecureApiKeyStorageService(options = {}) {
   function readStore() {
     const file = storagePath();
     try {
-      if (!fsRef.existsSync(file)) return { storageVersion:SECURE_API_KEY_STORAGE_VERSION, storageRevision:0, records:{}, providerCredentialRecords:{} };
+      if (!fsRef.existsSync(file)) return { storageVersion:SECURE_API_KEY_STORAGE_VERSION, storageRevision:0, records:{}, providerCredentialRecords:{}, providerCredentialIdentifiers:{} };
       const parsed = JSON.parse(fsRef.readFileSync(file, "utf8"));
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)
         || (parsed.records !== undefined && (!parsed.records || typeof parsed.records !== "object" || Array.isArray(parsed.records)))
-        || (parsed.providerCredentialRecords !== undefined && (!parsed.providerCredentialRecords || typeof parsed.providerCredentialRecords !== "object" || Array.isArray(parsed.providerCredentialRecords)))) {
+        || (parsed.providerCredentialRecords !== undefined && (!parsed.providerCredentialRecords || typeof parsed.providerCredentialRecords !== "object" || Array.isArray(parsed.providerCredentialRecords)))
+        || (parsed.providerCredentialIdentifiers !== undefined && (!parsed.providerCredentialIdentifiers || typeof parsed.providerCredentialIdentifiers !== "object" || Array.isArray(parsed.providerCredentialIdentifiers)))) {
         return { storageError:"CREDENTIAL_STORE_CORRUPTED" };
       }
-      return Object.assign({ storageVersion:SECURE_API_KEY_STORAGE_VERSION, storageRevision:0, records:{}, providerCredentialRecords:{} }, parsed);
+      return Object.assign({ storageVersion:SECURE_API_KEY_STORAGE_VERSION, storageRevision:0, records:{}, providerCredentialRecords:{}, providerCredentialIdentifiers:{} }, parsed);
     } catch (_) {
       return { storageError:"CREDENTIAL_STORE_CORRUPTED" };
     }
@@ -565,8 +593,106 @@ function createSecureApiKeyStorageService(options = {}) {
   function isPlainSafeObject(value) {
     if (!value || typeof value !== "object" || Array.isArray(value)) return false;
     const prototype = Object.getPrototypeOf(value);
-    if (prototype !== Object.prototype && prototype !== null) return false;
+    if (prototype !== Object.prototype && prototype !== null && Object.prototype.toString.call(value) !== "[object Object]") return false;
     return Object.values(Object.getOwnPropertyDescriptors(value)).every((property) => Object.prototype.hasOwnProperty.call(property, "value"));
+  }
+
+  function bindProviderCredentialIdentifier(rawRequest) {
+    if (!isPlainSafeObject(rawRequest)) return { ok:false, error:"INVALID_IDENTIFIER_REQUEST", redacted:true };
+    const source = String(rawRequest.source || "").trim();
+    const descriptor = cleanCredentialDescriptor(rawRequest.descriptor);
+    const identifierType = cleanCredentialType(rawRequest.identifierType);
+    const value = typeof rawRequest.value === "string" ? rawRequest.value.trim() : "";
+    if (!PROVIDER_CREDENTIAL_IDENTIFIER_SOURCES.includes(source)) return { ok:false, error:"UNTRUSTED_IDENTIFIER_SOURCE", redacted:true };
+    if (!descriptor || !identifierType) return { ok:false, error:"INVALID_IDENTIFIER_DESCRIPTOR", redacted:true };
+    if (!value || value.length > 512 || /[\u0000-\u001f\u007f]/.test(value) || isSecretShapedMetadata(value) || isRealLookingCredential(value)) {
+      emitAudit("identifier_bind", descriptor, false, "INVALID_IDENTIFIER_VALUE");
+      return { ok:false, error:"INVALID_IDENTIFIER_VALUE", redacted:true };
+    }
+    const store = readStore();
+    if (store.storageError) {
+      emitAudit("identifier_bind", descriptor, false, store.storageError);
+      return storeFailure({ code:store.storageError });
+    }
+    store.providerCredentialIdentifiers = Object.assign({}, store.providerCredentialIdentifiers || {});
+    const timestamp = nowIso();
+    const recordId = providerCredentialIdentifierRecordId(descriptor, identifierType);
+    const existing = store.providerCredentialIdentifiers[recordId];
+    const record = {
+      provider:descriptor.provider,
+      environment:descriptor.environment,
+      application:descriptor.application,
+      identifierType,
+      value,
+      valueFingerprint:fingerprintFor(value),
+      valueLast4:last4(value),
+      status:"bound",
+      createdAt:existing && existing.createdAt || timestamp,
+      updatedAt:timestamp,
+      storageVersion:PROVIDER_CREDENTIAL_STORE_VERSION,
+      storageProvider:"local_provider_config",
+      secret:false,
+      redacted:true
+    };
+    store.providerCredentialIdentifiers[recordId] = record;
+    store.providerCredentialStoreVersion = PROVIDER_CREDENTIAL_STORE_VERSION;
+    store.updatedAt = timestamp;
+    try { writeStore(store); } catch (error) {
+      const failure = storeFailure(error);
+      emitAudit("identifier_bind", descriptor, false, failure.error);
+      return failure;
+    }
+    emitAudit("identifier_bind", descriptor, true, "");
+    return {
+      ok:true,
+      operation:"PROVIDER_CREDENTIAL_IDENTIFIER_BIND",
+      metadata:providerCredentialIdentifierMetadata(record),
+      valueReturned:false,
+      metadataOnly:true,
+      redacted:true
+    };
+  }
+
+  function findProviderCredentialIdentifierRecord(rawDescriptor, rawIdentifierType) {
+    const descriptor = cleanCredentialDescriptor(rawDescriptor);
+    const identifierType = cleanCredentialType(rawIdentifierType);
+    if (!descriptor || !identifierType) return { descriptor, identifierType, record:null };
+    const store = readStore();
+    const recordId = providerCredentialIdentifierRecordId(descriptor, identifierType);
+    return { descriptor, identifierType, record:store.providerCredentialIdentifiers && store.providerCredentialIdentifiers[recordId] || null, storageError:store.storageError || "" };
+  }
+
+  function getProviderCredentialIdentifierForMainProcess(rawDescriptor, rawIdentifierType) {
+    const found = findProviderCredentialIdentifierRecord(rawDescriptor, rawIdentifierType);
+    if (!found.descriptor || !found.identifierType) return { ok:false, error:"INVALID_IDENTIFIER_DESCRIPTOR", redacted:true };
+    if (found.storageError) {
+      emitAudit("identifier_get", found.descriptor, false, found.storageError);
+      return storeFailure({ code:found.storageError });
+    }
+    if (!found.record || found.record.status !== "bound") {
+      emitAudit("identifier_get", found.descriptor, false, "IDENTIFIER_MISSING");
+      return { ok:false, error:"IDENTIFIER_MISSING", redacted:true };
+    }
+    emitAudit("identifier_get", found.descriptor, true, "");
+    return { ok:true, value:String(found.record.value || ""), metadata:providerCredentialIdentifierMetadata(found.record), redacted:true };
+  }
+
+  function listProviderCredentialIdentifierMetadata(filter) {
+    const raw = filter && typeof filter === "object" ? filter : {};
+    const provider = raw.provider ? cleanCredentialSegment(raw.provider, 2, 64) : "";
+    const environment = raw.environment ? cleanCredentialSegment(raw.environment, 2, 24) : "";
+    const application = raw.application ? String(raw.application).trim() : "";
+    const identifierType = raw.identifierType ? cleanCredentialType(raw.identifierType) : "";
+    const store = readStore();
+    if (store.storageError) return Object.assign(storeFailure({ code:store.storageError }), { records:[], metadataOnly:true });
+    const records = Object.values(store.providerCredentialIdentifiers || {})
+      .filter((record) => (!provider || record.provider === provider)
+        && (!environment || record.environment === environment)
+        && (!application || record.application === application)
+        && (!identifierType || record.identifierType === identifierType))
+      .map(providerCredentialIdentifierMetadata)
+      .sort((a, b) => [a.provider, a.environment, a.application, a.identifierType].join("|").localeCompare([b.provider, b.environment, b.application, b.identifierType].join("|")));
+    return { ok:true, records, metadataOnly:true, redacted:true };
   }
 
   function ingestProviderCredential(rawRequest) {
@@ -830,11 +956,14 @@ function createSecureApiKeyStorageService(options = {}) {
     runSecureStorageSelfTest,
     providerCredentialStoreStatus,
     listProviderCredentialMetadata,
+    listProviderCredentialIdentifierMetadata,
     beginProviderCredentialSecureEntry,
     mainProcess:{
       ingestProviderCredential,
       putCredentialBundle,
       withCredentialBundle,
+      bindProviderCredentialIdentifier,
+      getProviderCredentialIdentifierForMainProcess,
       deleteCredentialBundle,
       markCredentialBundleRevoked
     },
@@ -856,6 +985,7 @@ function registerSecureApiKeyStorageHandlers(ipcMain, options) {
   ipcMain.handle("secure-api-key:self-test", async () => service.runSecureStorageSelfTest());
   ipcMain.handle("provider-credential:status", async () => service.providerCredentialStoreStatus());
   ipcMain.handle("provider-credential:list-metadata", async (_event, payload) => service.listProviderCredentialMetadata(payload));
+  ipcMain.handle("provider-credential:list-identifier-metadata", async (_event, payload) => service.listProviderCredentialIdentifierMetadata(payload));
   return service;
 }
 
