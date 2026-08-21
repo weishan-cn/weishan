@@ -49,6 +49,7 @@ function runCore() {
   runStep("API tests", "npm", ["run", "test:api"]);
   runStep("Multi-network product feed foundation", "node", ["tests/api/global-commerce-multi-network-product-feed-foundation.test.js"]);
   runStep("Global flight shopping evidence foundation", "node", ["tests/api/global-flight-shopping-evidence-foundation.test.js"]);
+  runStep("Provider OAuth callback foundation", "node", ["tests/api/provider-oauth-callback-foundation.test.js"]);
   runStep("Commerce core tests", "npm", ["run", "test:commerce-core"]);
   runStep("Project check", "npm", ["run", "check"]);
   runStep("Git diff check", "git", ["diff", "--check"]);
