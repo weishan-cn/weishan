@@ -13,16 +13,16 @@
   const SOURCE_MATRIX = Object.freeze([
     {
       SOURCE:"Amadeus Self-Service",
-      CURRENT_2026_ACCESS:"SELF_SERVICE_AVAILABLE; free test environment and quota; production is separate",
-      FARE_CAPABILITY:"Flight Offers Search returns provider-priced offers; Flight Offers Price can reprice a selected offer without creating an order",
-      DATA_REALISM:"TEST_SUBSET_REAL_DATA_LIMITED; production is real-time/full data after approval/quota",
+      CURRENT_2026_ACCESS:"SELF_SERVICE_DECOMMISSIONED_ON_2026_07_17; current portal is Enterprise API Portal only",
+      FARE_CAPABILITY:"historical Self-Service Flight Offers Search schema remains useful for offline normalization, but new self-service account/app creation is not currently available",
+      DATA_REALISM:"OFFLINE_SCHEMA_ONLY_UNTIL_ENTERPRISE_OR_ALTERNATIVE_ACCESS; no new self-service test validation path",
       IDENTITY:"route/date/passengers/cabin plus itineraries, segments, carrier, flight number and offer id",
       PRICE_DETAIL:"grandTotal/currency plus base/fees/taxes/traveler pricing where returned",
       FRESHNESS:"offer observed/retrieved time and optional last ticketing/expiry fields; no freshness is inferred from cache",
       HANDOFF:"EXACT_SEARCH_RECONSTRUCTION in Weishan beta; booking/order APIs remain disabled",
-      ACCESS_FRICTION:"LOW; account/app credentials required but no booking, payment, card, KYC, or enterprise sales needed for test",
-      BLOCKER:"AMADEUS_ACCOUNT_APP_CREDENTIAL_APPROVAL_REQUIRED",
-      RECOMMENDATION:"BEST_FLIGHT_SOURCE"
+      ACCESS_FRICTION:"HIGH; Enterprise contact/access path required after Self-Service decommissioning",
+      BLOCKER:"AMADEUS_SELF_SERVICE_DECOMMISSIONED",
+      RECOMMENDATION:"DEFER_SELF_SERVICE_USE_ENTERPRISE_OR_ALTERNATIVE_FLIGHT_SOURCE"
     },
     {
       SOURCE:"Duffel",
@@ -209,28 +209,29 @@
       moduleName:MODULE_NAME,
       version:VERSION,
       status:"READY",
-      selectedSource:"Amadeus Self-Service",
+      selectedSource:null,
+      selectedSourceBlocked:true,
       sources:clone(SOURCE_MATRIX)
     }, boundary()));
   }
   function selectBestFlightSource() {
     return deepFreeze(Object.assign({
-      BEST_FLIGHT_SOURCE:"Amadeus Self-Service",
+      BEST_FLIGHT_SOURCE:null,
       WHY:[
-        "lowest current access friction among serious flight fare candidates",
-        "official self-service test environment/free quota supports read-only Flight Offers Search before booking/order work",
-        "Flight Offers Search schema carries enough route, segment, passenger, cabin, total price, currency and availability evidence for the existing truth foundation",
-        "Duffel is easier for engineering but official test mode is not realistic for schedules/prices; Skyscanner/Travelport/Sabre are higher-value later but gated by partner or enterprise provisioning"
+        "current official Amadeus Developers portal states that the Self-Service portal was decommissioned on 2026-07-17",
+        "new Self-Service account/app/test credential creation is therefore not a legitimate executable path",
+        "the historical Flight Offers Search schema remains useful as an offline normalization target only",
+        "next flight work should choose between Duffel for low-friction engineering tests and Skyscanner/Travelport/Sabre/Amadeus Enterprise for live fare access"
       ],
-      CURRENT_ACCESS_STATE:"OFFLINE_ADAPTER_READY_ACCOUNT_NOT_CREATED",
+      CURRENT_ACCESS_STATE:"AMADEUS_SELF_SERVICE_DECOMMISSIONED",
       ACCOUNT_CREATED:false,
       CREDENTIALS_AVAILABLE:false,
       CONTROLLED_REQUESTS:0,
       AUTH_VALIDATED:false,
       REAL_FARE_VALIDATED:false,
-      EXACT_HANDOFF:"EXACT_SEARCH_RECONSTRUCTION",
-      FLIGHT_REAL_PRICE_COVERAGE:"OFFLINE_SCHEMA_READY_TEST_ENVIRONMENT_NEXT",
-      FLIGHT_BETA_STATE:"READY_FOR_AMADEUS_SELF_SERVICE_ACCOUNT_APP_CREDENTIAL_PASS"
+      EXACT_HANDOFF:"NOT_VALIDATED",
+      FLIGHT_REAL_PRICE_COVERAGE:"OFFLINE_SCHEMA_ONLY",
+      FLIGHT_BETA_STATE:"AMADEUS_SELF_SERVICE_BLOCKED_ENTERPRISE_OR_ALTERNATIVE_SOURCE_REQUIRED"
     }, boundary()));
   }
   function normalizeFlightOffer(input, options) {

@@ -75,20 +75,25 @@ function main() {
   assert.equal(matrix.status, "READY");
   assert.equal(matrix.executionGate, "CLOSED");
   assert.equal(matrix.productionTraffic, false);
-  assert.equal(matrix.sources.find(function (source) { return source.SOURCE === "Amadeus Self-Service"; }).RECOMMENDATION, "BEST_FLIGHT_SOURCE");
+  assert.equal(matrix.selectedSource, null);
+  assert.equal(matrix.selectedSourceBlocked, true);
+  assert.equal(matrix.sources.find(function (source) { return source.SOURCE === "Amadeus Self-Service"; }).BLOCKER, "AMADEUS_SELF_SERVICE_DECOMMISSIONED");
+  assert.equal(matrix.sources.find(function (source) { return source.SOURCE === "Amadeus Self-Service"; }).RECOMMENDATION, "DEFER_SELF_SERVICE_USE_ENTERPRISE_OR_ALTERNATIVE_FLIGHT_SOURCE");
   assert.equal(matrix.sources.find(function (source) { return source.SOURCE === "Duffel"; }).DATA_REALISM.includes("NOT_REALISTIC"), true);
   assert.equal(matrix.sources.find(function (source) { return source.SOURCE === "Skyscanner Live Prices"; }).BLOCKER, "PARTNER_APPROVAL_REQUIRED");
   assert.equal(matrix.sources.find(function (source) { return source.SOURCE === "Travelport TripServices"; }).ACCESS_FRICTION.includes("HIGH"), true);
   assert.equal(matrix.sources.find(function (source) { return source.SOURCE === "Sabre"; }).BLOCKER, "SABRE_PROVISIONING_REQUIRED");
 
   const selection = api.selectBestFlightSource();
-  assert.equal(selection.BEST_FLIGHT_SOURCE, "Amadeus Self-Service");
+  assert.equal(selection.BEST_FLIGHT_SOURCE, null);
+  assert.equal(selection.CURRENT_ACCESS_STATE, "AMADEUS_SELF_SERVICE_DECOMMISSIONED");
   assert.equal(selection.ACCOUNT_CREATED, false);
   assert.equal(selection.CREDENTIALS_AVAILABLE, false);
   assert.equal(selection.CONTROLLED_REQUESTS, 0);
   assert.equal(selection.AUTH_VALIDATED, false);
   assert.equal(selection.REAL_FARE_VALIDATED, false);
-  assert.equal(selection.EXACT_HANDOFF, "EXACT_SEARCH_RECONSTRUCTION");
+  assert.equal(selection.EXACT_HANDOFF, "NOT_VALIDATED");
+  assert.equal(selection.FLIGHT_REAL_PRICE_COVERAGE, "OFFLINE_SCHEMA_ONLY");
   assert.equal(selection.executionGate, "CLOSED");
 
   const schema = api.officialSchemaSummary();
