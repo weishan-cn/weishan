@@ -56,6 +56,7 @@ function runCore() {
   runStep("Global flight shopping evidence foundation", "node", ["tests/api/global-flight-shopping-evidence-foundation.test.js"]);
   runStep("Global travel price truth foundation", "node", ["tests/api/global-travel-price-truth-foundation.test.js"]);
   runStep("Global travel real source acquisition sweep", "node", ["tests/api/global-travel-real-source-acquisition-sweep.test.js"]);
+  runStep("Amadeus self-service flight source adapter", "node", ["tests/api/amadeus-self-service-flight-source-adapter.test.js"]);
   runStep("Hotelbeds evaluation readonly validator", "node", ["tests/api/hotelbeds-evaluation-readonly-validator.test.js"]);
   runStep("Provider OAuth callback foundation", "node", ["tests/api/provider-oauth-callback-foundation.test.js"]);
   runStep("Commerce core tests", "npm", ["run", "test:commerce-core"]);
