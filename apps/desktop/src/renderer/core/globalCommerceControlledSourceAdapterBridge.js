@@ -49,6 +49,8 @@
         controlledReadStatus:"CONTROLLED_READONLY_IMPLEMENTED",
         adapterImplementationStatus:"IMPLEMENTED",
         maximumEvidenceAuthority:"PROVIDER_PRICE_OBSERVATION",
+        priceAuthority:"AUTHORITATIVE",
+        freshnessPolicy:{ basis:"observedAt", maxCurrentAgeSeconds:86400, maxRecentAgeSeconds:604800 },
         allowedHandoffHosts:["www.cheapshark.com"],
         limitations:[
           "Game/platform/edition semantics must remain scoped to CheapShark game identity.",
@@ -72,6 +74,8 @@
         controlledReadStatus:"CONTROLLED_READONLY_IMPLEMENTED",
         adapterImplementationStatus:"IMPLEMENTED",
         maximumEvidenceAuthority:"PROVIDER_SPECIFIC_PRICE_OBSERVATION",
+        priceAuthority:"INDICATIVE",
+        freshnessPolicy:{ basis:"observedAt", maxCurrentAgeSeconds:3600, maxRecentAgeSeconds:86400 },
         allowedHandoffHosts:["dailydose.tech"],
         limitations:["Provider-specific observations are not same-provider or cross-provider comparison authority."]
       },
@@ -91,6 +95,8 @@
         controlledReadStatus:"OFFLINE_EVIDENCE_FOUNDATION",
         adapterImplementationStatus:"IMPLEMENTED_LIMITED",
         maximumEvidenceAuthority:"INDICATIVE_PRICE_OBSERVATION",
+        priceAuthority:"INDICATIVE",
+        freshnessPolicy:{ basis:"observedAt", maxCurrentAgeSeconds:3600, maxRecentAgeSeconds:86400 },
         allowedHandoffHosts:[],
         limitations:["Open public evidence cannot self-upgrade into current merchant authoritative price."]
       },
@@ -110,6 +116,8 @@
         controlledReadStatus:"OFFLINE_FOUNDATION_ONLY",
         adapterImplementationStatus:"FOUNDATION_READY",
         maximumEvidenceAuthority:"ADAPTER_CONTRACT_LIMITED",
+        priceAuthority:"UNKNOWN",
+        freshnessPolicy:{ basis:"observedAt", maxCurrentAgeSeconds:null, maxRecentAgeSeconds:null },
         allowedHandoffHosts:[],
         limitations:["Specific network permissions and hosts must be declared by a reviewed adapter contract."]
       }
@@ -209,12 +217,23 @@
       price:price,
       currency:currency,
       priceConditions:array(offer.priceConditions),
+      priceConditionStatus:"UNCONDITIONAL",
+      market:text(offer.market || "US"),
+      shipping:0,
+      tax:0,
+      fees:0,
+      landedTotal:price,
       availability:text(offer.availabilityStatus) === "OFFER_OBSERVED" ? "IN_STOCK" : "UNKNOWN",
       availabilityAuthority:text(offer.availabilityStatus) === "OFFER_OBSERVED",
       sourceStatus:text(offer.sourceStatus || "OK").toUpperCase(),
       handoffType:"PROVIDER_REDIRECT",
       handoffUrl:text(offer.handoffUrl),
       allowedHandoffHosts:source.allowedHandoffHosts.slice(),
+      sourcePolicy:{
+        priceAuthority:source.priceAuthority,
+        freshnessPolicy:clone(source.freshnessPolicy),
+        allowedHandoffHosts:source.allowedHandoffHosts.slice()
+      },
       affiliateEligible:false,
       commissionEligible:false,
       commercialMetadata:clone(obj(offer.commercialMetadata)),
@@ -260,7 +279,8 @@
       query:safe.query,
       productIdentity:safe.productIdentity,
       requestedVariant:safe.requestedVariant,
-      offers:normalized.normalizedOffers
+      offers:normalized.normalizedOffers,
+      now:safe.now
     });
     return deepFreeze(Object.assign({
       bridgeName:BRIDGE_NAME,

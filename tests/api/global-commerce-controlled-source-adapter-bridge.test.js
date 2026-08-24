@@ -8,6 +8,7 @@ const vm = require("node:vm");
 const ROOT = path.resolve(__dirname, "../..");
 const FILES = [
   "apps/desktop/src/renderer/core/globalCommerceProductIdentityMatcher.js",
+  "apps/desktop/src/renderer/core/globalCommercePriceEvidenceQuality.js",
   "apps/desktop/src/renderer/core/globalCommerceProductTruthPipeline.js",
   "apps/desktop/src/renderer/core/globalCommerceControlledSourceAdapterBridge.js"
 ];
@@ -47,6 +48,7 @@ function flow(offers, overrides) {
     query:"The Witcher 3: Wild Hunt standard new",
     productIdentity:{ canonicalProductId:"steam:292030" },
     requestedVariant:{ platform:"steam", edition:"standard", condition:"new" },
+    now:"2026-08-24T00:10:00.000Z",
     offers:offers
   }, overrides || {}));
 }

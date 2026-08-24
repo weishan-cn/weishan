@@ -8,6 +8,7 @@ const vm = require("node:vm");
 const ROOT = path.resolve(__dirname, "../..");
 const FILES = [
   "apps/desktop/src/renderer/core/globalCommerceProductIdentityMatcher.js",
+  "apps/desktop/src/renderer/core/globalCommercePriceEvidenceQuality.js",
   "apps/desktop/src/renderer/core/globalCommerceProductTruthPipeline.js"
 ];
 
@@ -32,6 +33,12 @@ function offer(overrides) {
     price:100,
     currency:"USD",
     priceConditions:[],
+    priceConditionStatus:"UNCONDITIONAL",
+    market:"US",
+    shipping:0,
+    tax:0,
+    fees:0,
+    landedTotal:100,
     availability:"IN_STOCK",
     availabilityAuthority:true,
     handoffType:"DIRECT_PRODUCT",
@@ -41,7 +48,12 @@ function offer(overrides) {
     commissionEligible:false,
     commercialMetadata:{ commission:0 },
     observedAt:"2026-08-24T01:00:00.000Z",
-    providerUpdatedAt:"2026-08-24T00:55:00.000Z"
+    fetchedAt:"2026-08-24T01:00:05.000Z",
+    providerUpdatedAt:"2026-08-24T00:55:00.000Z",
+    sourcePolicy:{
+      priceAuthority:"AUTHORITATIVE",
+      freshnessPolicy:{ basis:"observedAt", maxCurrentAgeSeconds:3600, maxRecentAgeSeconds:86400 }
+    }
   }, overrides || {});
 }
 
@@ -51,6 +63,7 @@ function evaluate(offers, overrides) {
     query:"Weishan Test Camera black 128GB",
     productIdentity:{ canonicalProductId:"camera-128" },
     requestedVariant:{ color:"black", storage:"128gb", condition:"new" },
+    now:"2026-08-24T01:10:00.000Z",
     offers:offers
   }, overrides || {}));
 }
@@ -107,6 +120,7 @@ function main() {
     offer({ offerId:"exact-link", price:99 })
   ]);
   assert.equal(exactHandoff.recommendation.offerId, "exact-link");
+  assert.equal(exactHandoff.recommendation.reason, "LOWEST_CURRENT_VERIFIED_PRICE_WITH_EXACT_HANDOFF");
   assert.equal(reasonSet(exactHandoff, "search-link").has("EXACT_HANDOFF_REQUIRED_FOR_RECOMMENDATION"), true);
   assert.equal(exactHandoff.matrix.EXACT_HANDOFF, true);
 

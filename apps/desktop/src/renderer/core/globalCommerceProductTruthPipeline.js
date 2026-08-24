@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const VERSION = "4.2.9";
+  const VERSION = "4.2.10";
   const PIPELINE_NAME = "global_commerce_product_truth_pipeline_v1";
   const BLOCKED_PATH_PATTERN = /(checkout|payment|order|cart|book|booking|ticket|identity|kyc)/i;
   const CREDENTIAL_PARAMS = /(api[_-]?key|apikey|token|access[_-]?token|refresh[_-]?token|secret|client[_-]?secret|authorization|password)=/i;
@@ -15,7 +15,10 @@
   const CONDITIONAL_PRICE_CONDITIONS = Object.freeze([
     "COUPON", "MEMBERSHIP", "NEW_USER", "APP_ONLY", "LOGIN_ONLY", "SUBSCRIPTION",
     "GROUP_BUY", "TRADE_IN", "FINANCING", "BUNDLE", "LOYALTY", "REGION_SPECIFIC",
-    "QUANTITY", "SHIPPING_EXCLUSIVE", "TAX_EXCLUSIVE"
+    "QUANTITY", "SHIPPING_EXCLUSIVE", "TAX_EXCLUSIVE", "COUPON_REQUIRED",
+    "MEMBERSHIP_REQUIRED", "TRADE_IN_REQUIRED", "SUBSCRIPTION_REQUIRED",
+    "PAYMENT_METHOD_REQUIRED", "INSTALLMENT", "STARTING_AT", "PRICE_RANGE",
+    "UNKNOWN_CONDITION"
   ]);
 
   function deepFreeze(value) {
@@ -158,6 +161,52 @@
     return Array.from(new Set(output)).sort();
   }
 
+  function fallbackEvidenceQuality(item, conditions, conditionalPrice) {
+    const reasons = [];
+    if (!text(item.observedAt)) reasons.push("UNKNOWN_TIMESTAMP");
+    if (conditionalPrice) reasons.push("CONDITIONAL_PRICE");
+    return deepFreeze({
+      outcome:reasons.length ? "UNKNOWN" : "VERIFIED_WITH_LIMITATIONS",
+      priceValidity:typeof item.price === "number" && Number.isFinite(item.price) && item.price >= 0 ? "VALID" : "INVALID",
+      sourceAuthority:"UNKNOWN",
+      priceFreshness:text(item.observedAt) ? "UNKNOWN" : "UNKNOWN",
+      priceCondition:conditionalPrice ? "CONDITIONAL" : (conditions && conditions.length ? "CONDITIONAL" : "UNCONDITIONAL"),
+      marketContext:text(item.market || item.marketContext) || "UNKNOWN",
+      availabilityConfidence:item.availabilityAuthority === true ? "AUTHORITATIVE" : "UNKNOWN",
+      handoffQuality:"UNKNOWN",
+      eligibleForCurrentVerifiedPrice:false,
+      recommendationTrace:reasons[0] || "FRESHNESS_POLICY_REQUIRED",
+      reasons:reasons.length ? reasons : ["FRESHNESS_POLICY_REQUIRED"]
+    });
+  }
+
+  function evidenceQuality(item, request, price, currency, conditions, conditionalPrice, quality) {
+    const api = window.WeishanGlobalCommercePriceEvidenceQuality || {};
+    if (typeof api.classifyPriceEvidenceQuality !== "function") return fallbackEvidenceQuality(item, conditions, conditionalPrice);
+    return api.classifyPriceEvidenceQuality({
+      price:price,
+      currency:currency,
+      observedAt:item.observedAt,
+      fetchedAt:item.fetchedAt || item.retrievedAt,
+      sourceUpdatedAt:item.sourceUpdatedAt || item.providerUpdatedAt,
+      cacheStoredAt:item.cacheStoredAt,
+      now:item.now || request.now,
+      priceConditions:conditions || [],
+      priceConditionStatus:item.priceConditionStatus || (conditionalPrice ? "CONDITIONAL" : "UNCONDITIONAL"),
+      priceType:item.priceType,
+      priceBasis:item.priceBasis,
+      priceHigh:item.priceHigh,
+      shipping:item.shipping,
+      tax:item.tax,
+      fees:item.fees,
+      landedTotal:item.landedTotal,
+      market:item.market || item.marketContext,
+      availabilityAuthority:item.availabilityAuthority,
+      handoffQuality:quality,
+      sourcePolicy:item.sourcePolicy
+    });
+  }
+
   function handoffQuality(handoffType) {
     const normalized = text(handoffType || "NONE").toUpperCase();
     if (EXACT_HANDOFF_TYPES.indexOf(normalized) >= 0) return "EXACT_HANDOFF";
@@ -206,7 +255,8 @@
 
     const conditions = normalizePriceConditions(item.priceConditions);
     if (!conditions) reasons.push("PRICE_CONDITION_INVALID");
-    const conditionalPrice = (conditions && conditions.length > 0) || text(item.priceConditionStatus).toUpperCase() === "CONDITIONAL" || item.conditionalPrice === true;
+    const conditionalPrice = (conditions && conditions.length > 0) || text(item.priceConditionStatus).toUpperCase() === "CONDITIONAL" || item.conditionalPrice === true ||
+      ["STARTING_AT", "PRICE_RANGE", "INSTALLMENT", "TRADE_IN", "MEMBER_PRICE", "COUPON_PRICE", "SUBSCRIPTION_PRICE", "PAYMENT_METHOD_PRICE"].indexOf(text(item.priceType || item.priceBasis).toUpperCase()) >= 0;
     if (conditionalPrice) reasons.push("CONDITIONAL_PRICE_NOT_UNCONDITIONAL_WINNER");
 
     const hosts = allowedHosts(item.allowedHandoffHosts || item.sourcePolicy && item.sourcePolicy.allowedHandoffHosts);
@@ -214,6 +264,17 @@
     if (!handoff.ok) reasons.push(handoff.reason);
     const quality = handoff.ok ? handoffQuality(item.handoffType) : "NO_EXACT_HANDOFF";
     if (quality !== "EXACT_HANDOFF") reasons.push("EXACT_HANDOFF_REQUIRED_FOR_RECOMMENDATION");
+    const priceQuality = evidenceQuality(item, request, price, currency, conditions, conditionalPrice, quality);
+    if (!priceQuality.eligibleForCurrentVerifiedPrice) {
+      reasons.push("CURRENT_VERIFIED_PRICE_REQUIRED");
+      (priceQuality.reasons || []).forEach(function (reason) {
+        if (reason === "STALE_EVIDENCE") reasons.push("STALE_PRICE_EVIDENCE");
+        if (reason === "UNKNOWN_TIMESTAMP" || reason === "FRESHNESS_POLICY_REQUIRED") reasons.push("PRICE_FRESHNESS_UNKNOWN");
+        if (reason === "FUTURE_TIMESTAMP" || reason === "INVALID_TIME") reasons.push("PRICE_TIMESTAMP_INVALID");
+        if (reason === "INDICATIVE_SOURCE") reasons.push("INDICATIVE_PRICE_EVIDENCE");
+        if (reason === "LANDED_TOTAL_UNKNOWN") reasons.push("LANDED_TOTAL_UNKNOWN");
+      });
+    }
 
     const availability = text(item.availability || "UNKNOWN").toUpperCase() || "UNKNOWN";
     const availabilityAuthority = item.availabilityAuthority === true;
@@ -240,6 +301,11 @@
       currency:currency,
       priceConditions:conditions || [],
       conditionalPrice:conditionalPrice,
+      priceEvidenceQuality:priceQuality,
+      priceQualityOutcome:priceQuality.outcome,
+      priceFreshness:priceQuality.priceFreshness,
+      priceAuthority:priceQuality.sourceAuthority,
+      currentVerifiedPriceEligible:priceQuality.eligibleForCurrentVerifiedPrice,
       availability:availability,
       availabilityAuthority:availabilityAuthority,
       handoffUrl:handoff.ok ? handoff.url : null,
@@ -250,7 +316,9 @@
       commissionEligible:item.commissionEligible === true,
       commercialMetadata:item.commercialMetadata && typeof item.commercialMetadata === "object" && !Array.isArray(item.commercialMetadata) ? clone(item.commercialMetadata) : {},
       observedAt:text(item.observedAt) || null,
+      fetchedAt:text(item.fetchedAt || item.retrievedAt) || null,
       providerUpdatedAt:item.providerUpdatedAt === null ? null : text(item.providerUpdatedAt) || null,
+      cacheStoredAt:text(item.cacheStoredAt) || null,
       eligibleForRecommendation:eligible,
       eligibleForComparison:eligible,
       quarantineReasons:Array.from(new Set(reasons)).sort()
@@ -261,7 +329,7 @@
     const seen = new Map();
     const duplicates = [];
     offers.forEach(function (offer) {
-      const key = [offer.provider, offer.merchant, offer.identityKey, offer.variantKey, offer.price, offer.currency, canonicalHandoffKey(offer.handoffUrl)].join("::");
+      const key = [offer.provider, offer.merchant, offer.identityKey, offer.variantKey, offer.price, offer.currency, offer.observedAt, canonicalHandoffKey(offer.handoffUrl)].join("::");
       if (seen.has(key)) {
         duplicates.push(Object.assign({}, offer, { duplicateOf:seen.get(key).offerId }));
       } else {
@@ -290,7 +358,8 @@
     const request = {
       query:text(safe.query),
       productIdentity:identity(safe.productIdentity),
-      requestedVariant:variant(safe.requestedVariant)
+      requestedVariant:variant(safe.requestedVariant),
+      now:text(safe.now)
     };
     const sourceOffers = Array.isArray(safe.offers) ? safe.offers : [];
     const classified = sourceOffers.map(function (offer) { return classifyOffer(offer, request); });
@@ -299,8 +368,9 @@
     const deduped = dedupeOffers(eligible);
     const uniqueEligible = deduped.unique;
     const currencies = Array.from(new Set(uniqueEligible.map(function (offer) { return offer.currency; })));
-    const recommendation = currencies.length === 1 ? recommendationFrom(uniqueEligible) : null;
-    const status = recommendation ? "READY" : (currencies.length > 1 ? "CURRENCY_NORMALIZATION_REQUIRED" : "NO_RECOMMENDABLE_OFFER");
+    const markets = Array.from(new Set(uniqueEligible.map(function (offer) { return offer.priceEvidenceQuality.marketContext; }).filter(function (market) { return market && market !== "UNKNOWN"; })));
+    const recommendation = currencies.length === 1 && markets.length <= 1 ? recommendationFrom(uniqueEligible) : null;
+    const status = recommendation ? "READY" : (currencies.length > 1 ? "CURRENCY_NORMALIZATION_REQUIRED" : (markets.length > 1 ? "MARKET_CONTEXT_NORMALIZATION_REQUIRED" : "NO_RECOMMENDABLE_OFFER"));
 
     return deepFreeze({
       pipelineName:PIPELINE_NAME,
@@ -322,7 +392,10 @@
         currency:recommendation.currency,
         handoffUrl:recommendation.handoffUrl,
         handoffQuality:recommendation.handoffQuality,
-        reason:"LOWEST_UNCONDITIONAL_OBSERVED_PRICE_WITH_EXACT_HANDOFF",
+        reason:"LOWEST_CURRENT_VERIFIED_PRICE_WITH_EXACT_HANDOFF",
+        priceFreshness:recommendation.priceFreshness,
+        priceAuthority:recommendation.priceAuthority,
+        priceQualityOutcome:recommendation.priceQualityOutcome,
         userDecisionRequired:true,
         commissionUsedForRanking:false
       } : null,
@@ -332,7 +405,11 @@
         EXACT_IDENTITY:uniqueEligible.every(function (offer) { return offer.matchState === "EXACT_MATCH"; }),
         VARIANT_MATCHING:classified.every(function (offer) { return offer.quarantineReasons.indexOf("VARIANT_MISMATCH") < 0; }) || quarantined.some(function (offer) { return offer.quarantineReasons.indexOf("VARIANT_MISMATCH") >= 0; }),
         PRICE_EVIDENCE:classified.every(function (offer) { return offer.price !== null || offer.quarantineReasons.indexOf("PRICE_INVALID_OR_UNKNOWN") >= 0; }),
+        PRICE_FRESHNESS:classified.every(function (offer) { return !!offer.priceFreshness; }),
+        CURRENT_VERIFIED_PRICE:uniqueEligible.every(function (offer) { return offer.currentVerifiedPriceEligible === true; }),
+        CONDITIONAL_PRICE_SAFETY:quarantined.every(function (offer) { return offer.conditionalPrice === false || offer.quarantineReasons.indexOf("CONDITIONAL_PRICE_NOT_UNCONDITIONAL_WINNER") >= 0; }),
         CURRENCY_SAFETY:currencies.length <= 1,
+        MARKET_CONTEXT_SAFETY:markets.length <= 1,
         AVAILABILITY_TRUTH:classified.every(function (offer) { return offer.availabilityAuthority === true || offer.quarantineReasons.indexOf("AVAILABILITY_NOT_AUTHORITATIVE") >= 0; }),
         OFFER_DEDUP:true,
         USER_BENEFIT_RANKING:recommendation ? recommendation.price === Math.min.apply(null, uniqueEligible.map(function (offer) { return offer.price; })) : false,

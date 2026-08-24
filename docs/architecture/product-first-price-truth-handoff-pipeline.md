@@ -51,6 +51,25 @@ Cross-currency observations are not naively ranked. If comparable evidence spans
 
 Retrieval time does not become provider freshness. Availability is trusted only when the evidence includes an explicit availability authority.
 
+Price truth is evaluated as independent evidence dimensions, not a magic confidence score:
+
+- amount/currency validity,
+- product and variant identity,
+- source authority,
+- price freshness,
+- price condition,
+- market context,
+- availability confidence,
+- handoff quality.
+
+Freshness keeps separate timestamps separate. `observedAt` is when the price evidence was observed where source semantics support it. `fetchedAt` is only when Weishan retrieved the evidence. `providerUpdatedAt`/`sourceUpdatedAt` may strengthen freshness only through trusted source policy. `cacheStoredAt` never transforms an old observed price into a current price. Missing or invalid timestamps are conservative, not `now`.
+
+Trusted internal source policy defines whether evidence can be `CURRENT`, `RECENT`, or `STALE`; raw source payload flags such as `fresh` or `verified` cannot self-upgrade evidence. A stale authoritative price remains stale, and a recent indicative source remains indicative.
+
+Only `VERIFIED_CURRENT` evidence may compete for `LOWEST_CURRENT_VERIFIED_PRICE_WITH_EXACT_HANDOFF`. `VERIFIED_WITH_LIMITATIONS`, `INDICATIVE`, `STALE`, `CONDITIONAL`, `UNKNOWN`, and `UNUSABLE` evidence may remain useful context or discovery evidence, but it must not contaminate the verified current winner.
+
+Conditional price forms include coupon, membership, trade-in, subscription, payment-method, installment, starting-at, and price-range evidence. `From $99`, `$99-$129`, `$30/month`, and `$0 with trade-in` are not unconditional exact product prices. Shipping, tax, fees, and landed totals remain separate; if landed total is unknown, Weishan must not claim total purchase cost.
+
 ## Product Identity and Variant Rules
 
 Title-only similarity is not enough for recommendation. The pipeline requires product identity and rejects mismatched variants before price ranking. Strong identifiers such as ISBN, GTIN, UPC/EAN, manufacturer part number, and exact model code dominate title similarity when valid. A near-identical title cannot override an explicit model, platform, edition, capacity, condition, bundle, or region conflict.
