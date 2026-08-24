@@ -13,5 +13,6 @@ Plugin-first and capability architecture baselines:
 Product-first evidence and provider foundations:
 
 - `architecture/product-first-price-truth-handoff-pipeline.md`
+- `architecture/controlled-source-product-truth-adapter-bridge.md`
 - `architecture/multi-network-product-feed-foundation.md`
 - `architecture/global-flight-shopping-evidence-foundation.md`

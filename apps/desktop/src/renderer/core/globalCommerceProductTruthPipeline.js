@@ -94,7 +94,7 @@
   function variant(value) {
     const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
     const output = {};
-    ["size", "color", "storage", "configuration", "region", "condition"].forEach(function (key) {
+    ["size", "color", "storage", "configuration", "region", "condition", "platform", "edition"].forEach(function (key) {
       const normalized = text(source[key]).toLowerCase();
       if (normalized) output[key] = normalized;
     });
@@ -135,6 +135,19 @@
     if (quality === "EXACT_HANDOFF") return 0;
     if (quality === "EVIDENCE_HANDOFF") return 1;
     return 2;
+  }
+
+  function canonicalHandoffKey(value) {
+    try {
+      const url = new URL(text(value));
+      [
+        "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
+        "fbclid", "gclid", "msclkid", "irclickid", "click_id", "clickid"
+      ].forEach(function (key) { url.searchParams.delete(key); });
+      return url.toString();
+    } catch (_) {
+      return text(value);
+    }
   }
 
   function classifyOffer(offer, request) {
@@ -206,7 +219,7 @@
     const seen = new Map();
     const duplicates = [];
     offers.forEach(function (offer) {
-      const key = [offer.provider, offer.merchant, offer.identityKey, offer.variantKey, offer.price, offer.currency, offer.handoffUrl].join("::");
+      const key = [offer.provider, offer.merchant, offer.identityKey, offer.variantKey, offer.price, offer.currency, canonicalHandoffKey(offer.handoffUrl)].join("::");
       if (seen.has(key)) {
         duplicates.push(Object.assign({}, offer, { duplicateOf:seen.get(key).offerId }));
       } else {
