@@ -52,6 +52,7 @@ function runCore() {
   runStep("Price freshness and evidence quality", "node", ["tests/api/global-commerce-price-freshness-evidence-quality.test.js"]);
   runStep("Product truth and exact handoff pipeline", "node", ["tests/api/global-commerce-product-truth-pipeline.test.js"]);
   runStep("Controlled source adapter product truth bridge", "node", ["tests/api/global-commerce-controlled-source-adapter-bridge.test.js"]);
+  runStep("Real-price coverage sweep", "node", ["tests/api/global-commerce-real-price-coverage-sweep.test.js"]);
   runStep("Global flight shopping evidence foundation", "node", ["tests/api/global-flight-shopping-evidence-foundation.test.js"]);
   runStep("Provider OAuth callback foundation", "node", ["tests/api/provider-oauth-callback-foundation.test.js"]);
   runStep("Commerce core tests", "npm", ["run", "test:commerce-core"]);

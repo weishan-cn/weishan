@@ -3,7 +3,7 @@
 
   const VERSION = "4.2.10";
   const PIPELINE_NAME = "global_commerce_product_truth_pipeline_v1";
-  const BLOCKED_PATH_PATTERN = /(checkout|payment|order|cart|book|booking|ticket|identity|kyc)/i;
+  const BLOCKED_PATH_PATTERN = /(checkout|payment|order|cart|booking|identity|kyc)/i;
   const CREDENTIAL_PARAMS = /(api[_-]?key|apikey|token|access[_-]?token|refresh[_-]?token|secret|client[_-]?secret|authorization|password)=/i;
   const EXACT_HANDOFF_TYPES = Object.freeze([
     "OFFICIAL_MERCHANT_PRODUCT",
@@ -331,7 +331,13 @@
     offers.forEach(function (offer) {
       const key = [offer.provider, offer.merchant, offer.identityKey, offer.variantKey, offer.price, offer.currency, offer.observedAt, canonicalHandoffKey(offer.handoffUrl)].join("::");
       if (seen.has(key)) {
-        duplicates.push(Object.assign({}, offer, { duplicateOf:seen.get(key).offerId }));
+        const existing = seen.get(key);
+        if (offer.offerId.localeCompare(existing.offerId) < 0) {
+          duplicates.push(Object.assign({}, existing, { duplicateOf:offer.offerId }));
+          seen.set(key, offer);
+        } else {
+          duplicates.push(Object.assign({}, offer, { duplicateOf:existing.offerId }));
+        }
       } else {
         seen.set(key, offer);
       }
