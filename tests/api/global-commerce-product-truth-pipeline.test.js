@@ -6,13 +6,18 @@ const path = require("node:path");
 const vm = require("node:vm");
 
 const ROOT = path.resolve(__dirname, "../..");
-const FILE = "apps/desktop/src/renderer/core/globalCommerceProductTruthPipeline.js";
+const FILES = [
+  "apps/desktop/src/renderer/core/globalCommerceProductIdentityMatcher.js",
+  "apps/desktop/src/renderer/core/globalCommerceProductTruthPipeline.js"
+];
 
 function load() {
   const window = {};
   window.window = window;
   const context = vm.createContext({ window, URL, console });
-  vm.runInContext(fs.readFileSync(path.join(ROOT, FILE), "utf8"), context, { filename:FILE });
+  FILES.forEach(function (file) {
+    vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file });
+  });
   return window.WeishanGlobalCommerceProductTruthPipeline;
 }
 
@@ -128,6 +133,33 @@ function main() {
   assert.equal(duplicate.eligibleOfferCount, 1);
   assert.equal(duplicate.duplicateOfferCount, 1);
   assert.equal(duplicate.matrix.OFFER_DEDUP, true);
+
+  const wrongCapacityCheaper = evaluate([
+    offer({ offerId:"wrong-capacity-cheaper", variants:{ color:"black", storage:"256gb", condition:"new" }, price:80 }),
+    offer({ offerId:"correct-capacity", variants:{ color:"black", storage:"128gb", condition:"new" }, price:100 })
+  ]);
+  assert.equal(wrongCapacityCheaper.recommendation.offerId, "correct-capacity");
+  assert.equal(reasonSet(wrongCapacityCheaper, "wrong-capacity-cheaper").has("VARIANT_MISMATCH"), true);
+
+  const titleOnlyAttack = evaluate([
+    offer({
+      offerId:"title-attack",
+      productName:"Weishan Test Camera black 128GB",
+      productIdentity:{ brand:"Weishan", model:"CAM-999", title:"Weishan Test Camera black 128GB" },
+      variants:{ color:"black", storage:"128gb", condition:"new" },
+      price:20
+    }),
+    offer({
+      offerId:"correct-model",
+      productIdentity:{ brand:"Weishan", model:"CAM-128", title:"Weishan Test Camera black 128GB" },
+      variants:{ color:"black", storage:"128gb", condition:"new" },
+      price:100
+    })
+  ], {
+    productIdentity:{ brand:"Weishan", model:"CAM-128", title:"Weishan Test Camera black 128GB" }
+  });
+  assert.equal(titleOnlyAttack.recommendation.offerId, "correct-model");
+  assert.equal(reasonSet(titleOnlyAttack, "title-attack").has("PRODUCT_IDENTITY_MISMATCH"), true);
 
   const json = JSON.stringify(duplicate);
   assert.equal(/secret|token|password|authorization/i.test(json), false);

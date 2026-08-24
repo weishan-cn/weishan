@@ -1,7 +1,7 @@
 ;(function () {
   "use strict";
 
-  const VERSION = "4.2.8";
+  const VERSION = "4.2.9";
   const PIPELINE_NAME = "global_commerce_product_truth_pipeline_v1";
   const BLOCKED_PATH_PATTERN = /(checkout|payment|order|cart|book|booking|ticket|identity|kyc)/i;
   const CREDENTIAL_PARAMS = /(api[_-]?key|apikey|token|access[_-]?token|refresh[_-]?token|secret|client[_-]?secret|authorization|password)=/i;
@@ -69,7 +69,7 @@
 
   function identity(value) {
     const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
-    const keys = ["canonicalProductId", "gtin", "ean", "upc", "isbn", "mpn", "manufacturer", "providerProductId", "sku"];
+    const keys = ["canonicalProductId", "gtin", "ean", "upc", "isbn", "mpn", "manufacturerPartNumber", "manufacturer", "brand", "model", "family", "providerProductId", "sku", "title"];
     const output = {};
     keys.forEach(function (key) {
       const normalized = text(source[key]);
@@ -85,7 +85,10 @@
     if (safe.ean) return "ean:" + safe.ean;
     if (safe.upc) return "upc:" + safe.upc;
     if (safe.isbn) return "isbn:" + safe.isbn;
-    if (safe.manufacturer && safe.mpn) return "mfr-mpn:" + safe.manufacturer + ":" + safe.mpn;
+    const mpn = safe.manufacturerPartNumber || safe.mpn;
+    if (safe.manufacturer && mpn) return "mfr-mpn:" + safe.manufacturer + ":" + mpn;
+    if (safe.brand && safe.model) return "brand-model:" + safe.brand + ":" + safe.model;
+    if (safe.manufacturer && safe.model) return "mfr-model:" + safe.manufacturer + ":" + safe.model;
     if (safe.providerProductId) return "provider:" + safe.providerProductId;
     if (safe.sku) return "sku:" + safe.sku;
     return "";
@@ -94,8 +97,10 @@
   function variant(value) {
     const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
     const output = {};
-    ["size", "color", "storage", "configuration", "region", "condition", "platform", "edition"].forEach(function (key) {
-      const normalized = text(source[key]).toLowerCase();
+    ["size", "color", "storage", "capacity", "memory", "configuration", "region", "condition", "platform", "edition", "generation", "bundleState", "subscriptionState"].forEach(function (key) {
+      let normalized = text(source[key]).toLowerCase();
+      if ((key === "storage" || key === "capacity" || key === "memory") && /^1\s*tb$/i.test(normalized)) normalized = "1024gb";
+      if (key === "condition" && /^open[\s-]?box$/i.test(normalized)) normalized = "open_box";
       if (normalized) output[key] = normalized;
     });
     return output;
@@ -114,6 +119,35 @@
       if (!offer[key] || offer[key] !== request[key]) return false;
     }
     return true;
+  }
+
+  function fallbackIdentityMatch(request, item, productIdentity) {
+    const offerIdentityKey = identityKey(productIdentity);
+    const requestedIdentityKey = identityKey(request.productIdentity);
+    const conflicts = [];
+    if (requestedIdentityKey && offerIdentityKey !== requestedIdentityKey) conflicts.push("PRODUCT_IDENTITY_CONFLICT");
+    if (!variantMatches(request.requestedVariant, item.variants)) conflicts.push("VARIANT_CONFLICT");
+    return deepFreeze({
+      matchState:conflicts.length ? "MISMATCH" : "EXACT_MATCH",
+      relationship:conflicts.length ? "MISMATCH" : "SAME_VARIANT",
+      exactIdentity:conflicts.length === 0,
+      eligibleForExactPriceComparison:conflicts.length === 0,
+      conflicts:conflicts,
+      missingEvidence:[],
+      evidence:conflicts.length ? [] : ["LEGACY_IDENTITY_KEY_MATCH"],
+      explanation:conflicts[0] || "LEGACY_IDENTITY_KEY_MATCH"
+    });
+  }
+
+  function identityMatch(request, item, productIdentity) {
+    const matcher = window.WeishanGlobalCommerceProductIdentityMatcher || {};
+    if (typeof matcher.classifyIdentityMatch !== "function") return fallbackIdentityMatch(request, item, productIdentity);
+    return matcher.classifyIdentityMatch({
+      requestedIdentity:request.productIdentity,
+      requestedVariant:request.requestedVariant,
+      candidateIdentity:productIdentity,
+      candidateVariant:item.variants
+    });
   }
 
   function normalizePriceConditions(value) {
@@ -157,8 +191,13 @@
     const offerIdentityKey = identityKey(productIdentity);
     const requestedIdentityKey = identityKey(request.productIdentity);
     if (!offerIdentityKey) reasons.push("PRODUCT_IDENTITY_REQUIRED");
-    if (requestedIdentityKey && offerIdentityKey !== requestedIdentityKey) reasons.push("PRODUCT_IDENTITY_MISMATCH");
-    if (!variantMatches(request.requestedVariant, item.variants)) reasons.push("VARIANT_MISMATCH");
+    const match = identityMatch(request, item, productIdentity);
+    if (requestedIdentityKey && match.matchState === "MISMATCH") reasons.push("PRODUCT_IDENTITY_MISMATCH");
+    if (match.conflicts && match.conflicts.some(function (reason) { return /(STORAGE|CAPACITY|MEMORY|CONFIGURATION|PLATFORM|EDITION|GENERATION|CONDITION|BUNDLE|SUBSCRIPTION|REGION|COLOR|SIZE)_CONFLICT/.test(reason); })) {
+      reasons.push("VARIANT_MISMATCH");
+    }
+    if (match.matchState === "POSSIBLE_MATCH" || match.matchState === "UNKNOWN") reasons.push("PRODUCT_IDENTITY_NOT_CONFIRMED");
+    if (match.matchState === "HIGH_CONFIDENCE_MATCH" && match.missingEvidence && match.missingEvidence.length) reasons.push("VARIANT_EVIDENCE_INCOMPLETE");
 
     const price = typeof item.price === "number" && Number.isFinite(item.price) && item.price >= 0 ? item.price : null;
     if (price === null) reasons.push("PRICE_INVALID_OR_UNKNOWN");
@@ -194,6 +233,9 @@
       identityKey:offerIdentityKey,
       variants:variant(item.variants),
       variantKey:variantKey(item.variants),
+      identityMatch:match,
+      matchState:match.matchState,
+      matchExplanation:match.explanation,
       price:price,
       currency:currency,
       priceConditions:conditions || [],
@@ -287,6 +329,7 @@
       matrix:{
         PRICE_TRUTH:quarantined.every(function (offer) { return offer.quarantineReasons.indexOf("PRICE_INVALID_OR_UNKNOWN") < 0; }) || quarantined.some(function (offer) { return offer.quarantineReasons.indexOf("PRICE_INVALID_OR_UNKNOWN") >= 0; }),
         PRODUCT_IDENTITY:classified.every(function (offer) { return !!offer.identityKey || offer.quarantineReasons.indexOf("PRODUCT_IDENTITY_REQUIRED") >= 0; }),
+        EXACT_IDENTITY:uniqueEligible.every(function (offer) { return offer.matchState === "EXACT_MATCH"; }),
         VARIANT_MATCHING:classified.every(function (offer) { return offer.quarantineReasons.indexOf("VARIANT_MISMATCH") < 0; }) || quarantined.some(function (offer) { return offer.quarantineReasons.indexOf("VARIANT_MISMATCH") >= 0; }),
         PRICE_EVIDENCE:classified.every(function (offer) { return offer.price !== null || offer.quarantineReasons.indexOf("PRICE_INVALID_OR_UNKNOWN") >= 0; }),
         CURRENCY_SAFETY:currencies.length <= 1,

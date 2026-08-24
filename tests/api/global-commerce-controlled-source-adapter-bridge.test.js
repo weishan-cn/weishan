@@ -7,6 +7,7 @@ const vm = require("node:vm");
 
 const ROOT = path.resolve(__dirname, "../..");
 const FILES = [
+  "apps/desktop/src/renderer/core/globalCommerceProductIdentityMatcher.js",
   "apps/desktop/src/renderer/core/globalCommerceProductTruthPipeline.js",
   "apps/desktop/src/renderer/core/globalCommerceControlledSourceAdapterBridge.js"
 ];

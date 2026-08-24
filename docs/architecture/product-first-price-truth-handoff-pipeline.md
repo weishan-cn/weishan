@@ -53,9 +53,23 @@ Retrieval time does not become provider freshness. Availability is trusted only 
 
 ## Product Identity and Variant Rules
 
-Title-only similarity is not enough for recommendation. The pipeline requires product identity and rejects mismatched variants such as color, storage, size, region, configuration, or condition when those dimensions are part of the user request.
+Title-only similarity is not enough for recommendation. The pipeline requires product identity and rejects mismatched variants before price ranking. Strong identifiers such as ISBN, GTIN, UPC/EAN, manufacturer part number, and exact model code dominate title similarity when valid. A near-identical title cannot override an explicit model, platform, edition, capacity, condition, bundle, or region conflict.
 
-Wrong variants may still be evidence, but they are quarantined from the recommendation set.
+The identity matcher classifies candidates as:
+
+- `EXACT_MATCH`
+- `HIGH_CONFIDENCE_MATCH`
+- `POSSIBLE_MATCH`
+- `MISMATCH`
+- `UNKNOWN`
+
+Only candidates with sufficient identity and variant evidence may enter exact price comparison. `POSSIBLE_MATCH`, `UNKNOWN`, and `MISMATCH` candidates may remain useful discovery/evidence, but they are quarantined from the recommendation set.
+
+Variant conflicts are material when they change the user outcome: storage/capacity, memory/configuration, platform, edition, generation, condition, bundle state, subscription state, and region. Color and size are enforced when requested or otherwise material. Missing evidence is not fabricated into a conflict, but it also does not become an exact match.
+
+Attribute normalization is conservative. Case, whitespace, safe punctuation, known condition labels, and exact capacity equivalents such as `1024GB == 1TB` are normalized. Memory and storage remain distinct. Model codes are not over-normalized into fuzzy guesses.
+
+Adapter-provided exact-match claims are treated as evidence only. The core identity validator decides whether a candidate is exact, possible, or mismatched, preserving provenance and fail-closed comparison eligibility.
 
 ## Exact Handoff Rules
 
