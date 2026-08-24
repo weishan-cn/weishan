@@ -82,6 +82,57 @@ function hotel(overrides) {
     handoffUrl:"https://hotel.example.invalid/stay/abc"
   }, overrides || {});
 }
+function cruisePolicy(overrides) {
+  return Object.assign({
+    provider:"fixture_cruise",
+    sourceType:"CRUISE_AGGREGATOR",
+    priceAuthority:"AUTHORITATIVE",
+    allowedHandoffHosts:["cruise.example.invalid"],
+    maxAgeSeconds:1800
+  }, overrides || {});
+}
+function cruise(overrides) {
+  return Object.assign({
+    sourcePolicy:cruisePolicy(),
+    cruiseLine:"Weishan Cruise Line",
+    ship:"WS Voyager",
+    shipId:"ship-100",
+    sailingId:"sailing-2026-09-10",
+    itineraryId:"itinerary-west-med-7",
+    departurePort:"BCN",
+    returnPort:"BCN",
+    portsOfCall:["MRS", "CIV", "NAP"],
+    destinationRegion:"Western Mediterranean",
+    departureDate:"2026-09-10",
+    returnDate:"2026-09-17",
+    durationNights:7,
+    durationDays:8,
+    market:"US",
+    occupancy:{ adults:2, children:0, infants:0, cabins:1 },
+    cabinCategory:"BALCONY",
+    cabinSubcategory:"Premium Balcony",
+    cabinAssignment:"SPECIFIC_CABIN",
+    fareBasis:"Standard refundable",
+    baseFare:900,
+    portTaxes:80,
+    governmentFees:40,
+    portFees:30,
+    mandatoryFees:20,
+    gratuities:30,
+    totalPrice:1100,
+    price:1100,
+    currency:"USD",
+    priceBasis:"TOTAL_BOOKING",
+    costCompleteness:"KNOWN_TOTAL",
+    taxFeeBasis:"INCLUDED",
+    availability:"SPECIFIC_RATE_AVAILABLE",
+    promotion:"NONE",
+    observedAt:"2026-08-01T10:00:00.000Z",
+    evaluatedAt:"2026-08-01T10:05:00.000Z",
+    handoffQuality:"EXACT_SAILING_CABIN_HANDOFF",
+    handoffUrl:"https://cruise.example.invalid/sailing/abc/cabin/balcony"
+  }, overrides || {});
+}
 function assertReason(result, reason) {
   assert.equal(result.success, true);
   assert.equal(result.comparable, false);
@@ -191,9 +242,67 @@ function main() {
   assert.equal(api.normalizeHotelOffer(hotel({ checkoutUrl:"https://hotel.example.invalid/checkout" })).error.code, "HOTEL_TRANSACTION_FIELDS_REJECTED");
   assert.equal(api.normalizeHotelOffer(hotel({ sourcePolicy:hotelPolicy({ provider:"hotelbeds_eval", sourceType:"EVALUATION", priceAuthority:"AUTHORIZED_SANDBOX" }) })).evidence.dataClass, "SANDBOX_TEST_DATA");
 
+  const liveCruise = api.normalizeCruiseOffer(cruise());
+  assert.equal(liveCruise.success, true);
+  assert.equal(liveCruise.evidence.travelType, "CRUISE");
+  assert.equal(liveCruise.evidence.cruiseLine, "Weishan Cruise Line");
+  assert.equal(liveCruise.evidence.ship, "WS Voyager");
+  assert.equal(liveCruise.evidence.sailingId, "sailing-2026-09-10");
+  assert.equal(liveCruise.evidence.departurePort, "BCN");
+  assert.equal(liveCruise.evidence.returnPort, "BCN");
+  assert.equal(liveCruise.evidence.durationNights, 7);
+  assert.equal(liveCruise.evidence.occupancy.guests, 2);
+  assert.equal(liveCruise.evidence.cabinCategory, "BALCONY");
+  assert.equal(liveCruise.evidence.priceBasis, "TOTAL_BOOKING");
+  assert.equal(liveCruise.evidence.costCompleteness, "KNOWN_TOTAL");
+  assert.equal(liveCruise.evidence.availability, "SPECIFIC_RATE_AVAILABLE");
+  assert.equal(liveCruise.evidence.handoffQuality, "EXACT_SAILING_CABIN_HANDOFF");
+  assert.equal(liveCruise.evidence.comparableAsCurrentPrice, true);
+  assert.equal(liveCruise.evidence.rendererSecretAccess, false);
+  assert.equal(liveCruise.BOOKING, false);
+  assert.equal(liveCruise.PAYMENT, false);
+
+  const cheaperCruise = api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"fixture_cruise_two" }), price:1050, totalPrice:1050, handoffUrl:"https://cruise.example.invalid/sailing/abc/cabin/balcony2" }));
+  comparison = api.compareCruiseOffers([liveCruise, cheaperCruise]);
+  assert.equal(comparison.comparable, true);
+  assert.equal(comparison.selectedProvider, "fixture_cruise_two");
+  assert.equal(comparison.selectedAmount, 1050);
+
+  const tieCruise = api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"aaa_cruise" }), handoffUrl:"https://cruise.example.invalid/sailing/aaa" }));
+  assert.equal(api.compareCruiseOffers([liveCruise, tieCruise]).selectedProvider, api.compareCruiseOffers([tieCruise, liveCruise]).selectedProvider);
+
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"wrong_date" }), sailingId:"sailing-2026-09-17", departureDate:"2026-09-17", returnDate:"2026-09-24", price:500, totalPrice:500 }))]), "CRUISE_IDENTITY_MISMATCH");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"wrong_port" }), departurePort:"ROM", returnPort:"ROM", price:500, totalPrice:500 }))]), "CRUISE_IDENTITY_MISMATCH");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"wrong_duration" }), itineraryId:"itinerary-west-med-14", returnDate:"2026-09-24", durationNights:14, durationDays:15, price:500, totalPrice:500 }))]), "CRUISE_IDENTITY_MISMATCH");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"interior" }), cabinCategory:"INTERIOR", cabinSubcategory:"Interior Guarantee", price:500, totalPrice:500 }))]), "CRUISE_CABIN_CONTEXT_MISMATCH");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"solo" }), occupancy:{ adults:1, children:0, infants:0, cabins:1 }, price:500, totalPrice:500 }))]), "CRUISE_CABIN_CONTEXT_MISMATCH");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"pp_double" }), priceBasis:"PER_PERSON_DOUBLE_OCCUPANCY", price:499, totalPrice:null }))]), "CRUISE_PRICE_BASIS_MISMATCH");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"per_cabin" }), priceBasis:"PER_CABIN", price:950, totalPrice:950 }))]), "CRUISE_PRICE_BASIS_MISMATCH");
+  assert.equal(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"total_booking" }), priceBasis:"TOTAL_BOOKING", price:950, totalPrice:950, handoffUrl:"https://cruise.example.invalid/sailing/total" }))]).comparable, true);
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"starting_from" }), priceBasis:"STARTING_FROM", price:399, totalPrice:null }))]), "CRUISE_PRICE_BASIS_MISMATCH");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"range" }), priceBasis:"PRICE_RANGE", price:399, priceHigh:1499, totalPrice:null }))]), "CRUISE_PRICE_BASIS_MISMATCH");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"deposit" }), priceBasis:"DEPOSIT_ONLY", price:250, totalPrice:null }))]), "CRUISE_PRICE_BASIS_MISMATCH");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"installment" }), priceBasis:"INSTALLMENT", price:99, totalPrice:null }))]), "CRUISE_PRICE_BASIS_MISMATCH");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"port_tax_excluded" }), costCompleteness:"PARTIAL_TOTAL", taxFeeBasis:"EXCLUDED", portTaxes:null, price:800, totalPrice:null }))]), "CRUISE_TOTAL_COST_INCOMPLETE");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"fees_excluded" }), costCompleteness:"PARTIAL_TOTAL", mandatoryFees:null, price:800, totalPrice:null }))]), "CRUISE_TOTAL_COST_INCOMPLETE");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"gratuity_excluded" }), costCompleteness:"PARTIAL_TOTAL", gratuities:null, price:800, totalPrice:null }))]), "CRUISE_TOTAL_COST_INCOMPLETE");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"member" }), promotion:"MEMBER_RATE", price:500, totalPrice:500 }))]), "CRUISE_PROMOTION_CONDITIONAL");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"resident" }), promotion:"RESIDENT_RATE", price:500, totalPrice:500 }))]), "CRUISE_PROMOTION_CONDITIONAL");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"third_guest" }), promotion:"THIRD_GUEST_DISCOUNT", price:500, totalPrice:500 }))]), "CRUISE_PROMOTION_CONDITIONAL");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"kids_free" }), promotion:"KIDS_FREE", price:500, totalPrice:500 }))]), "CRUISE_PROMOTION_CONDITIONAL");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"stale" }), observedAt:"2026-08-01T00:00:00.000Z", price:500, totalPrice:500 }))]), "STALE_OR_INVALID_FRESHNESS");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"eur" }), currency:"EUR", price:500, totalPrice:500 }))]), "CROSS_CURRENCY_NOT_COMPARABLE");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"sold_out" }), availability:"SOLD_OUT", price:500, totalPrice:500 }))]), "AVAILABILITY_NOT_AUTHORITATIVE");
+  assertReason(api.compareCruiseOffers([liveCruise, api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"home" }), handoffQuality:"GENERIC_CRUISE_HOME", handoffUrl:"https://cruise.example.invalid/", price:500, totalPrice:500 }))]), "CRUISE_HANDOFF_NOT_EXACT");
+  assert.equal(api.normalizeCruiseOffer(cruise({ handoffUrl:"https://evil.example.invalid/sailing" })).error.code, "CRUISE_PRICE_TRUTH_INVALID");
+  assert.equal(api.normalizeCruiseOffer(cruise({ paymentUrl:"https://cruise.example.invalid/pay" })).error.code, "CRUISE_TRANSACTION_FIELDS_REJECTED");
+  assert.equal(api.normalizeCruiseOffer(cruise({ sourcePolicy:cruisePolicy({ provider:"eval_cruise", sourceType:"EVALUATION", priceAuthority:"AUTHORIZED_SANDBOX" }) })).evidence.dataClass, "SANDBOX_TEST_DATA");
+
   assert.equal(api.compareFlightOffers([liveFlight, liveHotel]).success, false);
+  assert.equal(api.compareCruiseOffers([liveCruise, liveFlight]).success, false);
   assert.equal(Object.isFrozen(liveFlight.evidence.search), true);
   assert.equal(Object.isFrozen(liveHotel.evidence.occupancy), true);
+  assert.equal(Object.isFrozen(liveCruise.evidence.occupancy), true);
 
   console.log("GLOBAL_TRAVEL_PRICE_TRUTH_FOUNDATION_TEST_PASS");
 }

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The travel price foundation protects Weishan from treating superficially similar travel prices as interchangeable. Flights and hotels are price evidence only when the exact context is preserved; otherwise the result must be quarantined as partial, conditional, stale, sandbox, or non-comparable.
+The travel price foundation protects Weishan from treating superficially similar travel prices as interchangeable. Flights, hotels, and cruises are price evidence only when the exact domain context is preserved; otherwise the result must be quarantined as partial, conditional, stale, sandbox, or non-comparable.
 
 This layer is offline and deterministic. It introduces no Provider network transport, no credentials, no browser automation, no checkout, no booking, no ticketing, no payment, and no production traffic.
 
@@ -67,14 +67,58 @@ Hotel handoff quality is explicit:
 
 Property/search handoffs are preserved as user navigation value, but generic or mismatched handoffs cannot support a “lowest price” claim.
 
+## Cruise price truth
+
+Cruise comparison requires the same:
+
+- cruise line, ship, sailing, itinerary, departure port, return port, destination region
+- departure date, return date, duration nights/days
+- occupancy, guest counts, cabin count
+- cabin category, source-specific subcategory, cabin assignment, and fare basis
+- mandatory cost completeness, promotion state, availability, freshness, source authority, and handoff quality
+
+Supported cruise cabin categories are:
+
+- `INTERIOR`
+- `OCEANVIEW`
+- `BALCONY`
+- `SUITE`
+- `UNKNOWN`
+
+Supported cruise price bases are:
+
+- `PER_PERSON`
+- `PER_PERSON_DOUBLE_OCCUPANCY`
+- `PER_CABIN`
+- `TOTAL_BOOKING`
+- `STARTING_FROM`
+- `PRICE_RANGE`
+- `DEPOSIT_ONLY`
+- `INSTALLMENT`
+- `UNKNOWN_BASIS`
+
+Only `TOTAL_BOOKING` with current authoritative evidence, known total cost, included mandatory taxes/fees, specific-rate availability, no conditional promotion, and exact sailing/cabin handoff can be eligible for current-price comparison.
+
+Cruise handoff quality is explicit:
+
+- `EXACT_SAILING_CABIN_HANDOFF`
+- `EXACT_SAILING_HANDOFF`
+- `EXACT_ITINERARY_HANDOFF`
+- `SAILING_SEARCH_HANDOFF`
+- `CRUISE_LINE_SEARCH_HANDOFF`
+- `GENERIC_CRUISE_HOME`
+- `NO_HANDOFF`
+
+Same ship is not same cruise. Same route is not same sailing. Same sailing is not same cabin/rate context.
+
 ## Non-comparable quarantine
 
 The foundation fails closed for:
 
-- wrong travel date, passenger count, trip type, cabin, segment set, hotel dates, occupancy, room, or property
+- wrong travel date, passenger count, trip type, cabin, segment set, hotel dates, occupancy, room, property, cruise sailing, cruise duration, embarkation port, or cruise cabin
 - cross-currency prices
 - stale or invalid timestamps
-- from-price, per-person, per-night, per-room, member, conditional, or unknown-basis prices
+- from-price, starting-from, range, deposit, installment, per-person, per-night, per-room, member, conditional, promotional, or unknown-basis prices
 - tax/fee excluded or partial totals
 - unknown availability
 - sandbox/evaluation-only source authority
@@ -85,9 +129,21 @@ Cheapest selection is deterministic only after all compatibility gates pass.
 
 ## Current provider posture
 
-This foundation can model up to a small number of future flight and hotel sources without activating any of them. It is suitable for offline fixtures, authorized sandbox/evaluation shapes, and future controlled adapters after separate approval.
+This foundation can model a small number of future flight, hotel, and cruise sources without activating any of them. It is suitable for offline fixtures, authorized sandbox/evaluation shapes, and future controlled adapters after separate approval.
 
 Hotelbeds remains credential-storage/evaluation state only while API terms are deferred; this foundation does not call Hotelbeds APIs.
+
+## Sanitized source capability matrix
+
+| Domain | Source class | Price capability | Identity | Freshness | Availability | Handoff | Currently usable |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Flights | Existing flight shopping evidence foundation | Offline fixture / future authorized source shape | Strong itinerary identity | Timestamped | Explicit availability authority | Exact itinerary/search classes | Offline foundation only |
+| Flights | Skyscanner / Travelport / Sabre / Duffel / Amadeus known research | Commercial or approval dependent | Provider-dependent | Provider-dependent | Provider-dependent | Provider-dependent | Not activated |
+| Hotels | Hotelbeds evaluation state | Evaluation/schema only while terms deferred | Property/stay-capable | Provider-dependent | Provider-dependent | Provider-dependent | No API calls |
+| Hotels | OTA/direct hotel research | Research only | Provider-dependent | Provider-dependent | Provider-dependent | Search/property handoff likely | Not activated |
+| Cruises | Cruise line direct or cruise aggregator | Unproven / commercial likely | Sailing/cabin required | Provider-dependent | Sailing/cabin/rate required | Exact sailing/cabin required | Offline foundation only |
+
+This table is not a coverage claim. It documents safe modeling capability and known blockers without credentials, account identifiers, commercial state, or traffic claims.
 
 ## Governance
 

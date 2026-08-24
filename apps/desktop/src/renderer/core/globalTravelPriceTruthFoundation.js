@@ -4,14 +4,20 @@
   const VERSION = "4.3.1";
   const FLIGHT_PRICE_BASIS = Object.freeze(["TOTAL_ITINERARY", "PER_PASSENGER", "FROM_PRICE", "UNKNOWN_BASIS"]);
   const HOTEL_PRICE_BASIS = Object.freeze(["PER_NIGHT", "TOTAL_STAY", "PER_ROOM", "PER_PERSON", "UNKNOWN_BASIS"]);
+  const CRUISE_PRICE_BASIS = Object.freeze(["PER_PERSON", "PER_PERSON_DOUBLE_OCCUPANCY", "PER_CABIN", "TOTAL_BOOKING", "STARTING_FROM", "PRICE_RANGE", "DEPOSIT_ONLY", "INSTALLMENT", "UNKNOWN_BASIS"]);
   const FLIGHT_HANDOFF_QUALITY = Object.freeze(["EXACT_ITINERARY_HANDOFF", "EXACT_SEARCH_RECONSTRUCTION", "ROUTE_SEARCH_HANDOFF", "GENERIC_PROVIDER_PAGE", "NO_HANDOFF"]);
   const HOTEL_HANDOFF_QUALITY = Object.freeze(["EXACT_STAY_HANDOFF", "EXACT_PROPERTY_HANDOFF", "PROPERTY_SEARCH_HANDOFF", "OTA_SEARCH_HANDOFF", "GENERIC_OTA_HOME", "NO_HANDOFF"]);
+  const CRUISE_HANDOFF_QUALITY = Object.freeze(["EXACT_SAILING_CABIN_HANDOFF", "EXACT_SAILING_HANDOFF", "EXACT_ITINERARY_HANDOFF", "SAILING_SEARCH_HANDOFF", "CRUISE_LINE_SEARCH_HANDOFF", "GENERIC_CRUISE_HOME", "NO_HANDOFF"]);
   const PRICE_AUTHORITIES = Object.freeze(["AUTHORITATIVE", "AUTHORIZED_SANDBOX", "INDICATIVE", "UNKNOWN"]);
   const AVAILABILITY_STATES = Object.freeze(["AVAILABLE", "LIMITED", "UNKNOWN", "UNAVAILABLE"]);
+  const CRUISE_AVAILABILITY_STATES = Object.freeze(["SAILING_AVAILABLE", "CABIN_CATEGORY_AVAILABLE", "SPECIFIC_RATE_AVAILABLE", "UNKNOWN", "SOLD_OUT", "WAITLISTED"]);
   const REFUNDABILITY_STATES = Object.freeze(["REFUNDABLE", "PARTIALLY_REFUNDABLE", "NON_REFUNDABLE", "UNKNOWN"]);
   const PAYMENT_TIMING = Object.freeze(["PAY_NOW", "PAY_LATER", "UNKNOWN"]);
   const TAX_FEE_BASIS = Object.freeze(["INCLUDED", "EXCLUDED", "PARTIAL", "UNKNOWN"]);
-  const SOURCE_TYPES = Object.freeze(["GDS", "NDC", "METASEARCH", "OTA", "AIRLINE_DIRECT", "HOTEL_DIRECT", "HOTEL_AGGREGATOR", "SANDBOX", "EVALUATION", "OFFLINE_FIXTURE"]);
+  const COST_COMPLETENESS = Object.freeze(["KNOWN_TOTAL", "PARTIAL_TOTAL", "BASE_ONLY", "UNKNOWN_TOTAL"]);
+  const CRUISE_CABIN_CATEGORIES = Object.freeze(["INTERIOR", "OCEANVIEW", "BALCONY", "SUITE", "UNKNOWN"]);
+  const CRUISE_PROMOTIONS = Object.freeze(["NONE", "MEMBER_RATE", "LOYALTY_RATE", "RESIDENT_RATE", "MILITARY_RATE", "SENIOR_RATE", "KIDS_FREE", "THIRD_GUEST_DISCOUNT", "FLASH_SALE", "COUPON_REQUIRED", "PACKAGE_RATE", "UNKNOWN_PROMOTION"]);
+  const SOURCE_TYPES = Object.freeze(["GDS", "NDC", "METASEARCH", "OTA", "AIRLINE_DIRECT", "HOTEL_DIRECT", "HOTEL_AGGREGATOR", "CRUISE_LINE_DIRECT", "CRUISE_AGGREGATOR", "SANDBOX", "EVALUATION", "OFFLINE_FIXTURE"]);
   const FORBIDDEN_TRANSACTION_KEYS = Object.freeze(["booking", "bookingurl", "checkout", "checkouturl", "order", "orderid", "payment", "paymenturl", "pnr", "ticket", "ticketing", "reservation"]);
 
   function deepFreeze(value) {
@@ -358,23 +364,198 @@
     }, boundary()));
   }
 
+  function portCode(value) {
+    const result = upper(value);
+    return /^[A-Z0-9]{3,8}$/.test(result) ? result : null;
+  }
+  function normalizePorts(value) {
+    if (!Array.isArray(value)) return [];
+    const ports = value.map(function (item) { return portCode(item); }).filter(Boolean);
+    return Array.from(new Set(ports));
+  }
+  function cruiseIdentity(input) {
+    return JSON.stringify({
+      cruiseLine:input.cruiseLine.toLowerCase(),
+      shipId:input.shipId || "UNKNOWN",
+      ship:input.ship.toLowerCase(),
+      sailingId:input.sailingId || "UNKNOWN",
+      itineraryId:input.itineraryId || "UNKNOWN",
+      departurePort:input.departurePort,
+      returnPort:input.returnPort,
+      portsOfCall:input.portsOfCall,
+      destinationRegion:input.destinationRegion.toLowerCase(),
+      departureDate:input.departureDate,
+      returnDate:input.returnDate,
+      durationNights:input.durationNights,
+      market:input.market.toUpperCase()
+    });
+  }
+  function cruiseCabinIdentity(input) {
+    return JSON.stringify({
+      sailing:input.identityKey,
+      cabinCategory:input.cabinCategory,
+      cabinSubcategory:input.cabinSubcategory.toLowerCase(),
+      cabinAssignment:input.cabinAssignment,
+      occupancy:input.occupancy,
+      fareBasis:input.fareBasis.toLowerCase()
+    });
+  }
+  function normalizeCruiseOffer(input) {
+    const source = clonePlain(input);
+    if (!source || containsTransactionFields(source)) return failure("CRUISE_TRANSACTION_FIELDS_REJECTED", "CRUISE_PRICE_TRUTH");
+    const policy = sourcePolicy(source.sourcePolicy || {});
+    const departureDate = calendarDate(source.departureDate);
+    const returnDate = calendarDate(source.returnDate);
+    const durationNights = integer(source.durationNights, 1, 365);
+    const durationDays = integer(source.durationDays || (durationNights === null ? null : durationNights + 1), 2, 366);
+    const occupancy = source.occupancy || {};
+    const adults = integer(occupancy.adults, 1, 9);
+    const children = integer(occupancy.children || 0, 0, 9);
+    const infants = integer(occupancy.infants || 0, 0, 9);
+    const cabins = integer(occupancy.cabins || 1, 1, 9);
+    const guests = adults === null || children === null || infants === null ? null : adults + children + infants;
+    const normalized = {
+      cruiseLine:identifier(source.cruiseLine, 160),
+      ship:identifier(source.ship, 160),
+      shipId:source.shipId == null || text(source.shipId) === "" ? null : identifier(source.shipId, 160),
+      sailingId:source.sailingId == null || text(source.sailingId) === "" ? null : identifier(source.sailingId, 160),
+      itineraryId:source.itineraryId == null || text(source.itineraryId) === "" ? null : identifier(source.itineraryId, 160),
+      departurePort:portCode(source.departurePort),
+      returnPort:portCode(source.returnPort || source.arrivalPort),
+      portsOfCall:normalizePorts(source.portsOfCall),
+      destinationRegion:identifier(source.destinationRegion, 160),
+      departureDate:departureDate,
+      returnDate:returnDate,
+      durationNights:durationNights,
+      durationDays:durationDays,
+      market:identifier(source.market || "UNKNOWN", 80),
+      occupancy:{ adults:adults, children:children, infants:infants, guests:guests, cabins:cabins },
+      cabinCategory:enumValue(source.cabinCategory, CRUISE_CABIN_CATEGORIES),
+      cabinSubcategory:identifier(source.cabinSubcategory || "UNKNOWN", 160),
+      cabinAssignment:enumValue(source.cabinAssignment || "UNKNOWN", ["SPECIFIC_CABIN", "GUARANTEE", "ASSIGNED_LATER", "UNKNOWN"]),
+      fareBasis:identifier(source.fareBasis || "UNKNOWN", 160)
+    };
+    const priceBasis = enumValue(source.priceBasis, CRUISE_PRICE_BASIS);
+    const price = amount(source.price);
+    const priceHigh = source.priceHigh == null ? null : amount(source.priceHigh);
+    const baseFare = source.baseFare == null ? null : amount(source.baseFare);
+    const portTaxes = source.portTaxes == null ? null : amount(source.portTaxes);
+    const governmentFees = source.governmentFees == null ? null : amount(source.governmentFees);
+    const portFees = source.portFees == null ? null : amount(source.portFees);
+    const mandatoryFees = source.mandatoryFees == null ? null : amount(source.mandatoryFees);
+    const serviceCharges = source.serviceCharges == null ? null : amount(source.serviceCharges);
+    const gratuities = source.gratuities == null ? null : amount(source.gratuities);
+    const fuelSurcharge = source.fuelSurcharge == null ? null : amount(source.fuelSurcharge);
+    const totalPrice = source.totalPrice == null ? null : amount(source.totalPrice);
+    const isoCurrency = currency(source.currency);
+    const costCompleteness = enumValue(source.costCompleteness, COST_COMPLETENESS);
+    const taxFeeBasis = enumValue(source.taxFeeBasis, TAX_FEE_BASIS);
+    const availability = enumValue(source.availability, CRUISE_AVAILABILITY_STATES);
+    const promotion = enumValue(source.promotion || "NONE", CRUISE_PROMOTIONS);
+    const handoffQuality = enumValue(source.handoffQuality, CRUISE_HANDOFF_QUALITY);
+    const handoffUrl = handoffQuality && handoffQuality !== "NO_HANDOFF" && policy ? allowedUrl(source.handoffUrl, policy.allowedHandoffHosts) : null;
+    const fresh = policy ? freshness(source.observedAt, source.evaluatedAt, policy.maxAgeSeconds) : { state:"INVALID", ageSeconds:null };
+    const dateDurationConsistent = departureDate && returnDate && durationNights !== null &&
+      Math.round((Date.parse(returnDate + "T00:00:00.000Z") - Date.parse(departureDate + "T00:00:00.000Z")) / 86400000) === durationNights;
+    if (!policy || !normalized.cruiseLine || !normalized.ship || !normalized.departurePort || !normalized.returnPort || !normalized.destinationRegion ||
+      !normalized.departureDate || !normalized.returnDate || !dateDurationConsistent || !normalized.market || normalized.occupancy.guests === null ||
+      normalized.occupancy.guests < 1 || normalized.occupancy.infants > normalized.occupancy.adults || !normalized.cabinCategory || !normalized.cabinSubcategory ||
+      !normalized.cabinAssignment || !normalized.fareBasis || !priceBasis || price === null || (priceBasis === "PRICE_RANGE" && priceHigh === null) ||
+      !isoCurrency || !costCompleteness || !taxFeeBasis || !availability || !promotion || !handoffQuality ||
+      (handoffQuality !== "NO_HANDOFF" && !handoffUrl) || fresh.state === "INVALID") return failure("CRUISE_PRICE_TRUTH_INVALID", "CRUISE_PRICE_TRUTH");
+    const identityKey = cruiseIdentity(normalized);
+    const cabinKey = cruiseCabinIdentity(Object.assign({}, normalized, { identityKey:identityKey }));
+    const conditionalPromotion = promotion !== "NONE";
+    const exactComparable = priceBasis === "TOTAL_BOOKING" &&
+      policy.priceAuthority === "AUTHORITATIVE" &&
+      fresh.state === "CURRENT" &&
+      availability === "SPECIFIC_RATE_AVAILABLE" &&
+      costCompleteness === "KNOWN_TOTAL" &&
+      taxFeeBasis === "INCLUDED" &&
+      !conditionalPromotion &&
+      (handoffQuality === "EXACT_SAILING_CABIN_HANDOFF" || handoffQuality === "EXACT_SAILING_HANDOFF");
+    return deepFreeze(Object.assign({
+      success:true,
+      evidence:{
+        travelType:"CRUISE",
+        provider:policy.provider,
+        sourceType:policy.sourceType,
+        priceAuthority:policy.priceAuthority,
+        cruiseLine:normalized.cruiseLine,
+        ship:normalized.ship,
+        shipId:normalized.shipId,
+        sailingId:normalized.sailingId,
+        itineraryId:normalized.itineraryId,
+        departurePort:normalized.departurePort,
+        returnPort:normalized.returnPort,
+        portsOfCall:normalized.portsOfCall,
+        destinationRegion:normalized.destinationRegion,
+        departureDate:normalized.departureDate,
+        returnDate:normalized.returnDate,
+        durationNights:normalized.durationNights,
+        durationDays:normalized.durationDays,
+        market:normalized.market,
+        occupancy:normalized.occupancy,
+        cabinCategory:normalized.cabinCategory,
+        cabinSubcategory:normalized.cabinSubcategory,
+        cabinAssignment:normalized.cabinAssignment,
+        fareBasis:normalized.fareBasis,
+        identityKey:identityKey,
+        cabinIdentityKey:cabinKey,
+        price:price,
+        priceHigh:priceHigh,
+        baseFare:baseFare,
+        portTaxes:portTaxes,
+        governmentFees:governmentFees,
+        portFees:portFees,
+        mandatoryFees:mandatoryFees,
+        serviceCharges:serviceCharges,
+        gratuities:gratuities,
+        fuelSurcharge:fuelSurcharge,
+        totalPrice:totalPrice,
+        currency:isoCurrency,
+        priceBasis:priceBasis,
+        costCompleteness:costCompleteness,
+        taxFeeBasis:taxFeeBasis,
+        availability:availability,
+        promotion:promotion,
+        conditionalPromotion:conditionalPromotion,
+        observedAt:instant(source.observedAt),
+        evaluatedAt:instant(source.evaluatedAt),
+        freshness:fresh.state,
+        freshnessAgeSeconds:fresh.ageSeconds,
+        handoffQuality:handoffQuality,
+        handoffUrl:handoffUrl,
+        comparableAsCurrentPrice:exactComparable,
+        dataClass:policy.priceAuthority === "AUTHORIZED_SANDBOX" ? "SANDBOX_TEST_DATA" : "TRAVEL_PRICE_EVIDENCE",
+        rendererSecretAccess:false,
+        rawProviderResponsePersisted:false
+      }
+    }, boundary()));
+  }
+
   function comparableFailureReasons(evidence, type) {
     const reasons = [];
     if (new Set(evidence.map(function (item) { return item.identityKey; })).size > 1) reasons.push(type + "_IDENTITY_MISMATCH");
+    if (type === "CRUISE" && new Set(evidence.map(function (item) { return item.cabinIdentityKey; })).size > 1) reasons.push("CRUISE_CABIN_CONTEXT_MISMATCH");
     if (new Set(evidence.map(function (item) { return item.currency; })).size > 1) reasons.push("CROSS_CURRENCY_NOT_COMPARABLE");
     evidence.forEach(function (item) {
       if (!item.comparableAsCurrentPrice) {
         if (item.freshness !== "CURRENT") reasons.push("STALE_OR_INVALID_FRESHNESS");
-        if (item.availability !== "AVAILABLE") reasons.push("AVAILABILITY_NOT_AUTHORITATIVE");
+        if (type === "CRUISE" ? item.availability !== "SPECIFIC_RATE_AVAILABLE" : item.availability !== "AVAILABLE") reasons.push("AVAILABILITY_NOT_AUTHORITATIVE");
         if (item.priceAuthority !== "AUTHORITATIVE") reasons.push("SOURCE_AUTHORITY_NOT_LIVE");
         if (type === "FLIGHT" && item.priceBasis !== "TOTAL_ITINERARY") reasons.push("FLIGHT_PRICE_BASIS_MISMATCH");
         if (type === "HOTEL" && item.priceBasis !== "TOTAL_STAY") reasons.push("HOTEL_PRICE_BASIS_MISMATCH");
+        if (type === "CRUISE" && item.priceBasis !== "TOTAL_BOOKING") reasons.push("CRUISE_PRICE_BASIS_MISMATCH");
         if (item.taxFeeBasis !== "INCLUDED") reasons.push("TAX_FEE_BASIS_MISMATCH");
         if (type === "FLIGHT" && (item.fareFamily === "UNKNOWN" || item.refundability === "UNKNOWN" || item.baggage === "UNKNOWN")) reasons.push("FLIGHT_FARE_CONDITIONS_INCOMPLETE");
         if (type === "HOTEL" && item.refundability !== "REFUNDABLE") reasons.push("HOTEL_REFUNDABILITY_MISMATCH");
         if (type === "HOTEL" && item.paymentTiming === "UNKNOWN") reasons.push("HOTEL_PAYMENT_TIMING_UNKNOWN");
+        if (type === "CRUISE" && item.costCompleteness !== "KNOWN_TOTAL") reasons.push("CRUISE_TOTAL_COST_INCOMPLETE");
+        if (type === "CRUISE" && item.conditionalPromotion) reasons.push("CRUISE_PROMOTION_CONDITIONAL");
         if (type === "FLIGHT" && ["EXACT_ITINERARY_HANDOFF", "EXACT_SEARCH_RECONSTRUCTION"].indexOf(item.handoffQuality) < 0) reasons.push("FLIGHT_HANDOFF_NOT_EXACT");
         if (type === "HOTEL" && ["EXACT_STAY_HANDOFF", "EXACT_PROPERTY_HANDOFF"].indexOf(item.handoffQuality) < 0) reasons.push("HOTEL_HANDOFF_NOT_EXACT");
+        if (type === "CRUISE" && ["EXACT_SAILING_CABIN_HANDOFF", "EXACT_SAILING_HANDOFF"].indexOf(item.handoffQuality) < 0) reasons.push("CRUISE_HANDOFF_NOT_EXACT");
       }
     });
     return Array.from(new Set(reasons)).sort();
@@ -383,7 +564,7 @@
     if (!Array.isArray(records) || records.length < 2 || records.some(function (record) { return !record || record.success !== true || !record.evidence || record.evidence.travelType !== type; })) return failure(type + "_COMPARISON_INPUT_INVALID", type + "_PRICE_TRUTH");
     const evidence = records.map(function (record) { return record.evidence; });
     const reasons = comparableFailureReasons(evidence, type);
-    const priceKey = type === "FLIGHT" ? "price" : "totalPrice";
+    const priceKey = type === "FLIGHT" || type === "CRUISE" ? "price" : "totalPrice";
     if (reasons.length) return deepFreeze(Object.assign({ success:true, comparable:false, reasons:reasons, selectedEvidenceId:null, observations:evidence }, boundary()));
     const sorted = evidence.slice().sort(function (a, b) {
       return a[priceKey] - b[priceKey] || a.provider.localeCompare(b.provider) || a.handoffUrl.localeCompare(b.handoffUrl);
@@ -404,17 +585,25 @@
     VERSION,
     FLIGHT_PRICE_BASIS,
     HOTEL_PRICE_BASIS,
+    CRUISE_PRICE_BASIS,
     FLIGHT_HANDOFF_QUALITY,
     HOTEL_HANDOFF_QUALITY,
+    CRUISE_HANDOFF_QUALITY,
     PRICE_AUTHORITIES,
     AVAILABILITY_STATES,
+    CRUISE_AVAILABILITY_STATES,
     REFUNDABILITY_STATES,
     PAYMENT_TIMING,
     TAX_FEE_BASIS,
+    COST_COMPLETENESS,
+    CRUISE_CABIN_CATEGORIES,
+    CRUISE_PROMOTIONS,
     SOURCE_TYPES,
     normalizeFlightOffer,
     normalizeHotelOffer,
+    normalizeCruiseOffer,
     compareFlightOffers:function (records) { return compareEvidence(records, "FLIGHT"); },
-    compareHotelOffers:function (records) { return compareEvidence(records, "HOTEL"); }
+    compareHotelOffers:function (records) { return compareEvidence(records, "HOTEL"); },
+    compareCruiseOffers:function (records) { return compareEvidence(records, "CRUISE"); }
   });
 })();
