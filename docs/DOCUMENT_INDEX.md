@@ -9,3 +9,9 @@ Plugin-first and capability architecture baselines:
 - `OPENAI_CODEX_INTEGRATION_RESEARCH.md`
 - `SOFTWARE_FACTORY_REPOSITIONING.md`
 - `PRE_LAUNCH_WEBSITE_OPTIMIZATION_BACKLOG.md`
+
+Product-first evidence and provider foundations:
+
+- `architecture/product-first-price-truth-handoff-pipeline.md`
+- `architecture/multi-network-product-feed-foundation.md`
+- `architecture/global-flight-shopping-evidence-foundation.md`
