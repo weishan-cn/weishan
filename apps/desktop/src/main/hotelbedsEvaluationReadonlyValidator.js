@@ -4,7 +4,8 @@ const crypto = require("node:crypto");
 
 const HOTELBEDS_EVALUATION_READONLY_VALIDATOR_VERSION = "1.0.0";
 const HOTELBEDS_EVALUATION_CLASSIFICATION = "SANDBOX_TEST_DATA";
-const HOTELBEDS_EVALUATION_AVAILABILITY_ENDPOINT = "https://api.test.hotelbeds.com/hotel-api/1.0/hotels";
+const HOTELBEDS_EVALUATION_AVAILABILITY_ENDPOINT = "https://api-mtls.test.hotelbeds.com/hotel-api/1.0/hotels";
+const HOTELBEDS_AVAILABILITY_REQUIRES_MTLS = true;
 const HOTELBEDS_CREDENTIAL_DESCRIPTOR = Object.freeze({
   provider:"hotelbeds",
   environment:"evaluation",
@@ -227,6 +228,7 @@ function createHotelbedsEvaluationReadonlyValidator(options = {}) {
   const maximumBytes = positiveInteger(options.maximumBytes, 1024 * 1024, 1024, 2 * 1024 * 1024);
   const nowSeconds = typeof options.nowSeconds === "function" ? options.nowSeconds : () => Math.floor(Date.now() / 1000);
   const nowIso = typeof options.nowIso === "function" ? options.nowIso : () => new Date().toISOString();
+  const mtlsTransportReady = options.mtlsTransportReady === true;
 
   async function validate(input = {}) {
     if (!credentialStore || !credentialStore.mainProcess || typeof credentialStore.mainProcess.withCredentialBundle !== "function") {
@@ -240,6 +242,9 @@ function createHotelbedsEvaluationReadonlyValidator(options = {}) {
     if (!identifier || identifier.ok !== true) return safeFailure("credential", identifier && identifier.error || "API_KEY_IDENTIFIER_MISSING", 0, 0);
     const apiKey = cleanApiKey(identifier.value);
     if (!apiKey) return safeFailure("credential", "INVALID_API_KEY_IDENTIFIER", 0, 0);
+    if (HOTELBEDS_AVAILABILITY_REQUIRES_MTLS && !mtlsTransportReady) {
+      return safeFailure("environment", "MTLS_CERTIFICATE_REQUIRED_FOR_AVAILABILITY", 0, 0);
+    }
     const request = input.request && typeof input.request === "object" ? input.request : createDefaultAvailabilityRequest();
 
     const runtimeResult = await credentialStore.mainProcess.withCredentialBundle(
@@ -275,7 +280,7 @@ function createHotelbedsEvaluationReadonlyValidator(options = {}) {
             cancellationReturned:normalized.cancellationReturned,
             evidence:normalized.evidence,
             requestCount,
-            endpoint:"api.test.hotelbeds.com/hotel-api/1.0/hotels",
+            endpoint:"api-mtls.test.hotelbeds.com/hotel-api/1.0/hotels",
             signaturePersisted:false,
             rawResponsePersisted:false,
             executionGate:"CLOSED",
@@ -314,6 +319,7 @@ module.exports = {
   HOTELBEDS_EVALUATION_READONLY_VALIDATOR_VERSION,
   HOTELBEDS_EVALUATION_CLASSIFICATION,
   HOTELBEDS_EVALUATION_AVAILABILITY_ENDPOINT,
+  HOTELBEDS_AVAILABILITY_REQUIRES_MTLS,
   HOTELBEDS_CREDENTIAL_DESCRIPTOR,
   createDefaultAvailabilityRequest,
   createHotelbedsEvaluationReadonlyValidator

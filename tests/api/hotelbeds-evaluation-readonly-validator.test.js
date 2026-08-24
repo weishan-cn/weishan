@@ -7,6 +7,7 @@ const ROOT = path.resolve(__dirname, "../..");
 const {
   HOTELBEDS_EVALUATION_CLASSIFICATION,
   HOTELBEDS_EVALUATION_AVAILABILITY_ENDPOINT,
+  HOTELBEDS_AVAILABILITY_REQUIRES_MTLS,
   HOTELBEDS_CREDENTIAL_DESCRIPTOR,
   createHotelbedsEvaluationReadonlyValidator
 } = require(path.join(ROOT, "apps/desktop/src/main/hotelbedsEvaluationReadonlyValidator.js"));
@@ -71,9 +72,29 @@ function hotelbedsResponse() {
 }
 
 async function main() {
+  assert.equal(HOTELBEDS_AVAILABILITY_REQUIRES_MTLS, true);
+  assert.equal(HOTELBEDS_EVALUATION_AVAILABILITY_ENDPOINT, "https://api-mtls.test.hotelbeds.com/hotel-api/1.0/hotels");
+
+  let blockedFetchCalled = false;
+  const missingMtls = await createHotelbedsEvaluationReadonlyValidator({
+    credentialStore:credentialStore(),
+    fetchImpl:async () => {
+      blockedFetchCalled = true;
+      return response(500, {});
+    }
+  }).validate();
+  assert.equal(missingMtls.ok, false);
+  assert.equal(missingMtls.error.stage, "environment");
+  assert.equal(missingMtls.error.code, "MTLS_CERTIFICATE_REQUIRED_FOR_AVAILABILITY");
+  assert.equal(missingMtls.requestCount, 0);
+  assert.equal(blockedFetchCalled, false);
+  assert.equal(JSON.stringify(missingMtls).includes(TEST_API_SECRET), false);
+  assert.equal(JSON.stringify(missingMtls).includes(TEST_API_KEY), false);
+
   const requests = [];
   const validator = createHotelbedsEvaluationReadonlyValidator({
     credentialStore:credentialStore(),
+    mtlsTransportReady:true,
     nowSeconds:() => 1790000000,
     nowIso:() => "2026-08-24T10:05:00.000Z",
     fetchImpl:async (url, init) => {
@@ -141,6 +162,7 @@ async function main() {
 
   const httpFailure = await createHotelbedsEvaluationReadonlyValidator({
     credentialStore:credentialStore(),
+    mtlsTransportReady:true,
     fetchImpl:async () => response(403, { error:TEST_API_SECRET })
   }).validate();
   assert.equal(httpFailure.ok, false);
@@ -153,6 +175,7 @@ async function main() {
   assert.equal(moduleSource.includes("hotel-api/1.0/bookings"), false);
   assert.equal(moduleSource.includes("hotel-api/1.0/checkrates"), false);
   assert.equal(moduleSource.includes("ipcMain"), false);
+  assert.equal(moduleSource.includes("api.test.hotelbeds.com/hotel-api/1.0/hotels\""), false);
 
   console.log("HOTELBEDS_EVALUATION_READONLY_VALIDATOR PASS requests=1 classification=SANDBOX_TEST_DATA");
 }
