@@ -236,6 +236,7 @@ function createSecureApiKeyStorageService(options = {}) {
   const storageProvider = "electron_safeStorage";
   const audit = typeof options.audit === "function" ? options.audit : () => {};
   const secureEntry = options.secureEntry || null;
+  const identifierEntry = options.identifierEntry || null;
 
   function emitAudit(operation, descriptor, ok, errorClass) {
     try {
@@ -505,6 +506,7 @@ function createSecureApiKeyStorageService(options = {}) {
       ipcSecretRead:false,
       ipcSecretWrite:false,
       secureEntryAvailable:!!(secureEntry && typeof secureEntry.collectCredentialBundle === "function"),
+      identifierEntryAvailable:!!(identifierEntry && typeof identifierEntry.collectIdentifierBinding === "function"),
       executionGate:"CLOSED",
       authorizesExecution:false,
       productionTraffic:false,
@@ -943,6 +945,31 @@ function createSecureApiKeyStorageService(options = {}) {
     }
   }
 
+  async function beginProviderCredentialIdentifierEntry(defaults) {
+    if (!identifierEntry || typeof identifierEntry.collectIdentifierBinding !== "function") return { ok:false, error:"IDENTIFIER_ENTRY_UNAVAILABLE", redacted:true };
+    const collected = await identifierEntry.collectIdentifierBinding(defaults || {});
+    if (!collected || collected.ok !== true) return { ok:false, error:collected && collected.error || "IDENTIFIER_ENTRY_FAILED", redacted:true };
+    try {
+      const result = bindProviderCredentialIdentifier({
+        source:"main_process_runtime",
+        descriptor:collected.descriptor,
+        identifierType:collected.identifierType,
+        value:collected.value
+      });
+      if (!result.ok) return result;
+      return {
+        ok:true,
+        operation:"PROVIDER_CREDENTIAL_IDENTIFIER_BIND",
+        metadata:result.metadata,
+        valueReturned:false,
+        metadataOnly:true,
+        redacted:true
+      };
+    } finally {
+      collected.value = "";
+    }
+  }
+
   return {
     version:SECURE_API_KEY_STORAGE_VERSION,
     storeFile,
@@ -958,6 +985,7 @@ function createSecureApiKeyStorageService(options = {}) {
     listProviderCredentialMetadata,
     listProviderCredentialIdentifierMetadata,
     beginProviderCredentialSecureEntry,
+    beginProviderCredentialIdentifierEntry,
     mainProcess:{
       ingestProviderCredential,
       putCredentialBundle,

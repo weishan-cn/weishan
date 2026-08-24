@@ -20,6 +20,14 @@ const {
 const {
   createProviderCredentialStoreMenuAction
 } = require("../../apps/desktop/src/main/providerCredentialStoreMenuAction");
+const {
+  createMacOSIdentifierEntry,
+  lockedIdentifierTargetFromEnvironment,
+  normalizeLockedIdentifierTarget
+} = require("../../apps/desktop/src/main/providerCredentialIdentifierEntry");
+const {
+  createProviderCredentialIdentifierMenuAction
+} = require("../../apps/desktop/src/main/providerCredentialIdentifierMenuAction");
 
 function createFakeSafeStorage() {
   return {
@@ -207,6 +215,7 @@ async function main() {
   assert.equal(providerStatus.rendererSecretAccess, false);
   assert.equal(providerStatus.ipcSecretRead, false);
   assert.equal(providerStatus.ipcSecretWrite, false);
+  assert.equal(providerStatus.identifierEntryAvailable, false);
   assert.equal(providerStatus.executionGate, "CLOSED");
   assert.equal(providerStatus.authorizesExecution, false);
   assert.equal(providerStatus.productionTraffic, false);
@@ -335,6 +344,60 @@ async function main() {
   assert.equal(invalidMenuResult.ok, false);
   assert.equal(invalidMenuResult.error, "INVALID_APPLICATION_IDENTIFIER");
   assertMetadataOnly(invalidMenuResult);
+
+  const unavailableIdentifierMenuAction = createProviderCredentialIdentifierMenuAction({
+    getService:() => null,
+    lockedIdentifierTargetFromEnvironment
+  });
+  const unavailableIdentifierMenuResult = await unavailableIdentifierMenuAction();
+  assert.equal(unavailableIdentifierMenuResult.ok, false);
+  assert.equal(unavailableIdentifierMenuResult.error, "IDENTIFIER_ENTRY_SERVICE_UNAVAILABLE");
+  assertMetadataOnly(unavailableIdentifierMenuResult);
+
+  const identifierMenuCalls = [];
+  const lockedIdentifierMenuAction = createProviderCredentialIdentifierMenuAction({
+    getService:() => ({
+      beginProviderCredentialIdentifierEntry(defaults) {
+        identifierMenuCalls.push(defaults);
+        return Promise.resolve({
+          ok:true,
+          operation:"PROVIDER_CREDENTIAL_IDENTIFIER_BIND",
+          metadata:{
+            provider:"hotelbeds",
+            environment:"evaluation",
+            application:"Weishan",
+            identifierType:"api_key",
+            status:"bound",
+            secret:false,
+            valueAvailable:true,
+            redacted:true
+          },
+          valueReturned:false,
+          redacted:true
+        });
+      }
+    }),
+    getEnvironment:() => ({
+      WEISHAN_PROVIDER_IDENTIFIER_ENTRY_MODE:"locked",
+      WEISHAN_PROVIDER_IDENTIFIER_PROVIDER:"hotelbeds",
+      WEISHAN_PROVIDER_IDENTIFIER_ENVIRONMENT:"evaluation",
+      WEISHAN_PROVIDER_IDENTIFIER_APPLICATION:"Weishan",
+      WEISHAN_PROVIDER_IDENTIFIER_TYPE:"api_key"
+    }),
+    lockedIdentifierTargetFromEnvironment
+  });
+  const lockedIdentifierMenuResult = await lockedIdentifierMenuAction();
+  assert.equal(lockedIdentifierMenuResult.ok, true);
+  assert.equal(lockedIdentifierMenuResult.operation, "PROVIDER_CREDENTIAL_IDENTIFIER_BIND");
+  assert.equal(lockedIdentifierMenuResult.valueReturned, false);
+  assert.deepEqual(identifierMenuCalls, [{
+    lockedMetadata:true,
+    provider:"hotelbeds",
+    environment:"evaluation",
+    application:"Weishan",
+    identifierType:"api_key"
+  }]);
+  assertMetadataOnly(lockedIdentifierMenuResult);
 
   const stored = isolated.mainProcess.ingestProviderCredential({
     operation:"create",
@@ -680,6 +743,77 @@ async function main() {
   assert.equal(beginEntryRotated.action, "rotate");
   assert.equal((await credentialMatches(beginEntryReplace, { provider:"hotelbeds", environment:"evaluation", application:"Weishan" }, "api_secret", "WEISHAN_HOTELBEDS_TEST_SECRET_ROTATED")).value.matches, true);
   assert.equal(fs.readFileSync(beginEntryReplace.storagePath(), "utf8").includes("WEISHAN_HOTELBEDS_TEST_SECRET_ROTATED"), false);
+
+  const identifierPromptLabels = [];
+  const identifierEntry = createMacOSIdentifierEntry({
+    platform:"darwin",
+    execFile:(_file, args, _options, callback) => {
+      identifierPromptLabels.push(String(args[args.indexOf("--") + 1] || ""));
+      assert.equal(args.some((arg) => String(arg).includes(hotelbedsApiKey)), false);
+      callback(null, hotelbedsApiKey + "\n", "");
+    }
+  });
+  const identifierCollected = await identifierEntry.collectIdentifierBinding({
+    lockedMetadata:true,
+    provider:"hotelbeds",
+    environment:"evaluation",
+    application:"Weishan",
+    identifierType:"api_key"
+  });
+  assert.equal(identifierCollected.ok, true);
+  assert.deepEqual(identifierCollected.descriptor, hotelbedsIdentifierDescriptor);
+  assert.equal(identifierCollected.identifierType, "api_key");
+  assert.equal(identifierCollected.value, hotelbedsApiKey);
+  assert.deepEqual(identifierPromptLabels, ["hotelbeds / evaluation / Weishan / api_key"]);
+  assert.equal(identifierPromptLabels.some((label) => label.includes(hotelbedsApiKey)), false);
+
+  const lockedIdentifierTarget = lockedIdentifierTargetFromEnvironment({
+    WEISHAN_PROVIDER_IDENTIFIER_ENTRY_MODE:"locked",
+    WEISHAN_PROVIDER_IDENTIFIER_PROVIDER:"HOTELBEDS",
+    WEISHAN_PROVIDER_IDENTIFIER_ENVIRONMENT:"EVALUATION",
+    WEISHAN_PROVIDER_IDENTIFIER_APPLICATION:"Weishan",
+    WEISHAN_PROVIDER_IDENTIFIER_TYPE:"API_KEY"
+  });
+  assert.deepEqual(lockedIdentifierTarget, {
+    lockedMetadata:true,
+    provider:"HOTELBEDS",
+    environment:"EVALUATION",
+    application:"Weishan",
+    identifierType:"API_KEY"
+  });
+  assert.equal(lockedIdentifierTargetFromEnvironment({}), null);
+  assert.equal(normalizeLockedIdentifierTarget(lockedIdentifierTarget).identifierType, "api_key");
+  assert.equal(normalizeLockedIdentifierTarget({ ...lockedIdentifierTarget, application:"application" }).error, "INVALID_APPLICATION_IDENTIFIER");
+  assert.equal(normalizeLockedIdentifierTarget({ ...lockedIdentifierTarget, identifierType:"credentialType" }).error, "INVALID_IDENTIFIER_TYPE");
+
+  const beginIdentifierStorageDir = fs.mkdtempSync(path.join(os.tmpdir(), "weishan-provider-identifier-begin-entry-"));
+  const beginIdentifierService = createSecureApiKeyStorageService({
+    storageDir:beginIdentifierStorageDir,
+    safeStorage:createFakeSafeStorage(),
+    identifierEntry:{
+      async collectIdentifierBinding() {
+        return {
+          ok:true,
+          descriptor:hotelbedsIdentifierDescriptor,
+          identifierType:"api_key",
+          value:hotelbedsApiKey,
+          redacted:true
+        };
+      }
+    }
+  });
+  assert.equal(beginIdentifierService.providerCredentialStoreStatus().identifierEntryAvailable, true);
+  const beginIdentifierBound = await beginIdentifierService.beginProviderCredentialIdentifierEntry();
+  assert.equal(beginIdentifierBound.ok, true);
+  assert.equal(beginIdentifierBound.operation, "PROVIDER_CREDENTIAL_IDENTIFIER_BIND");
+  assert.equal(beginIdentifierBound.metadata.provider, "hotelbeds");
+  assert.equal(beginIdentifierBound.metadata.identifierType, "api_key");
+  assert.equal(beginIdentifierBound.metadata.secret, false);
+  assert.equal(beginIdentifierBound.metadata.valueAvailable, true);
+  assert.equal(beginIdentifierBound.valueReturned, false);
+  assert.equal(JSON.stringify(beginIdentifierBound).includes(hotelbedsApiKey), false);
+  assert.equal(beginIdentifierService.mainProcess.getProviderCredentialIdentifierForMainProcess(hotelbedsIdentifierDescriptor, "api_key").value, hotelbedsApiKey);
+  assert.equal(fs.readFileSync(beginIdentifierService.storagePath(), "utf8").includes(hotelbedsApiKey), true);
 
   const ticketmasterPromptValues = ["ticketmaster", "development", "api_1-App", "api_key", "WEISHAN_TICKETMASTER_TEST_KEY"];
   const ticketmasterPromptLabels = [];

@@ -7,9 +7,12 @@ const { registerSecureStorageHandlers } = require("./main/secureStorage");
 const { registerSecureApiKeyStorageHandlers } = require("./main/secureApiKeyStorage");
 const { createMacOSSecureEntry, lockedCredentialTargetFromEnvironment } = require("./main/providerCredentialSecureEntry");
 const { createProviderCredentialStoreMenuAction } = require("./main/providerCredentialStoreMenuAction");
+const { createMacOSIdentifierEntry, lockedIdentifierTargetFromEnvironment } = require("./main/providerCredentialIdentifierEntry");
+const { createProviderCredentialIdentifierMenuAction } = require("./main/providerCredentialIdentifierMenuAction");
 const { registerLimitedBetaPreferenceHandlers } = require("./main/limitedBetaPreferenceStore");
 const { registerGlobalShoppingRakutenReadonlyHandlers } = require("./main/globalShoppingRakutenReadonlyService");
 const { createEbaySandboxReadonlyValidator } = require("./main/ebaySandboxReadonlyValidator");
+const { createHotelbedsEvaluationReadonlyValidator } = require("./main/hotelbedsEvaluationReadonlyValidator");
 const { createVideoProviderGateway } = require("./main/videoProviderGateway");
 const { registerVideoProviderIpcHandlers } = require("./main/videoProviderIpc");
 
@@ -469,6 +472,9 @@ let ipcHandlersRegistered = false;
 let providerCredentialStoreService = null;
 let ebaySandboxReadonlyValidator = null;
 let ebaySandboxValidationStarted = false;
+let hotelbedsEvaluationReadonlyValidator = null;
+let hotelbedsEvaluationValidationStarted = false;
+let providerCredentialIdentifierEntryStarted = false;
 function registerIpcHandlers() {
   if (ipcHandlersRegistered) return;
   ipcHandlersRegistered = true;
@@ -509,9 +515,15 @@ function registerIpcHandlers() {
   providerCredentialStoreService = registerSecureApiKeyStorageHandlers(ipcMain, {
     secureEntry:createMacOSSecureEntry({
       hostApplicationName:app.isPackaged ? APP_NAME : "Electron"
+    }),
+    identifierEntry:createMacOSIdentifierEntry({
+      hostApplicationName:app.isPackaged ? APP_NAME : "Electron"
     })
   });
   ebaySandboxReadonlyValidator = createEbaySandboxReadonlyValidator({
+    credentialStore:providerCredentialStoreService
+  });
+  hotelbedsEvaluationReadonlyValidator = createHotelbedsEvaluationReadonlyValidator({
     credentialStore:providerCredentialStoreService
   });
   registerLimitedBetaPreferenceHandlers(ipcMain, { app });
@@ -530,6 +542,11 @@ function createWindow() {
     getEnvironment:() => process.env,
     lockedCredentialTargetFromEnvironment
   });
+  const openProviderCredentialIdentifierFromMenu = createProviderCredentialIdentifierMenuAction({
+    getService:() => providerCredentialStoreService,
+    getEnvironment:() => process.env,
+    lockedIdentifierTargetFromEnvironment
+  });
 
   Menu.setApplicationMenu(Menu.buildFromTemplate([
     { label: APP_NAME, submenu: [
@@ -544,6 +561,19 @@ function createWindow() {
             title:"Weishan Provider Credential Store",
             message:result && result.ok ? "STORE_SUCCESS" : "STORE_NOT_COMPLETED",
             detail:result && result.ok ? "Credential metadata was stored securely. Secret values were not returned to the UI." : String(result && result.error || "SECURE_ENTRY_FAILED"),
+            buttons:["OK"]
+          });
+        }
+      },
+      {
+        label:"Provider Credential Identifier…",
+        click:async () => {
+          const result = await openProviderCredentialIdentifierFromMenu();
+          await dialog.showMessageBox({
+            type:result && result.ok ? "info" : "warning",
+            title:"Weishan Provider Credential Identifier",
+            message:result && result.ok ? "IDENTIFIER_BIND_SUCCESS" : "IDENTIFIER_BIND_NOT_COMPLETED",
+            detail:result && result.ok ? "Credential identifier metadata was bound. Identifier values were not returned to the UI." : String(result && result.error || "IDENTIFIER_ENTRY_FAILED"),
             buttons:["OK"]
           });
         }
@@ -580,6 +610,58 @@ function createWindow() {
         redacted:true
       };
       console.info("[ebay-sandbox-readonly-validator] " + JSON.stringify(summary));
+    });
+  }
+
+  if (process.env.WEISHAN_HOTELBEDS_EVALUATION_VALIDATE === "1" && hotelbedsEvaluationReadonlyValidator && !hotelbedsEvaluationValidationStarted) {
+    hotelbedsEvaluationValidationStarted = true;
+    setImmediate(async () => {
+      const result = await hotelbedsEvaluationReadonlyValidator.validate();
+      const summary = {
+        ok:result && result.ok === true,
+        classification:result && result.classification || "SANDBOX_TEST_DATA",
+        availability:result && result.availability || "FAIL",
+        hotelReturned:result && result.hotelReturned === true,
+        rateReturned:result && result.rateReturned === true,
+        priceCurrencyReturned:result && result.priceCurrencyReturned === true,
+        cancellationReturned:result && result.cancellationReturned === true,
+        requestCount:Number(result && result.requestCount || 0),
+        error:result && result.error || null,
+        executionGate:"CLOSED",
+        authorizesExecution:false,
+        productionTraffic:false,
+        booking:false,
+        payment:false,
+        redacted:true
+      };
+      console.info("[hotelbeds-evaluation-readonly-validator] " + JSON.stringify(summary));
+    });
+  }
+
+  if (process.env.WEISHAN_PROVIDER_IDENTIFIER_ENTRY_AUTO_OPEN === "1" && !providerCredentialIdentifierEntryStarted) {
+    providerCredentialIdentifierEntryStarted = true;
+    setImmediate(async () => {
+      const result = await openProviderCredentialIdentifierFromMenu();
+      const summary = {
+        ok:result && result.ok === true,
+        operation:result && result.operation || "PROVIDER_CREDENTIAL_IDENTIFIER_BIND",
+        provider:result && result.metadata && result.metadata.provider || "",
+        environment:result && result.metadata && result.metadata.environment || "",
+        application:result && result.metadata && result.metadata.application || "",
+        identifierType:result && result.metadata && result.metadata.identifierType || "",
+        valueAvailable:result && result.metadata && result.metadata.valueAvailable === true,
+        valueReturned:false,
+        error:result && result.ok ? null : result && result.error || "IDENTIFIER_ENTRY_FAILED",
+        redacted:true
+      };
+      console.info("[provider-credential-identifier-entry] " + JSON.stringify(summary));
+      await dialog.showMessageBox({
+        type:result && result.ok ? "info" : "warning",
+        title:"Weishan Provider Credential Identifier",
+        message:result && result.ok ? "IDENTIFIER_BIND_SUCCESS" : "IDENTIFIER_BIND_NOT_COMPLETED",
+        detail:result && result.ok ? "Credential identifier metadata was bound. Identifier values were not returned to the UI." : String(result && result.error || "IDENTIFIER_ENTRY_FAILED"),
+        buttons:["OK"]
+      });
     });
   }
 
