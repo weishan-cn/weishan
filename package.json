@@ -34,6 +34,7 @@
     "test:e2e:smoke": "playwright test tests/e2e/smoke.spec.js",
     "smoke": "npm run smoke --prefix apps/server",
     "build:mac": "npm run build:mac --prefix apps/desktop",
+    "package:mac:local": "node scripts/package-mac-local.js",
     "build:win": "npm run build:win --prefix apps/desktop",
     "test": "npm run test:api",
     "test:full": "npm run test:api && npm run test:e2e:smoke"

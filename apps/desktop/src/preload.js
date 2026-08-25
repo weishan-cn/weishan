@@ -1,9 +1,10 @@
 const { contextBridge, ipcRenderer, shell } = require("electron");
 const { IPC_CHANNELS } = require("./shared/videoProviderIpcContract");
+const desktopPackage = require("../package.json");
 
 contextBridge.exposeInMainWorld("weishan", {
-  version: "2.0.15",
-  productName: "weishan",
+  version: desktopPackage.version,
+  productName: desktopPackage.productName || "Weishan",
   apiBase: process.env.WEISHAN_API_BASE || "http://127.0.0.1:8787",
   openExternal: (url) => shell.openExternal(url),
   openWeishanOfficialWebsite: () => ipcRenderer.invoke("weishan:open-official-website"),

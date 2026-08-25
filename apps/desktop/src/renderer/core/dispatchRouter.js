@@ -912,7 +912,7 @@
       "# Codex 精确指令",
       "",
       "工作目录：",
-      "cd ~/Downloads/weishan-clean-release",
+      "cd <your-weishan-project>",
       "",
       "修改目标：",
       goal,
