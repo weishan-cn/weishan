@@ -7,6 +7,7 @@
     "authorization", "cookie", "endpoint", "providerresponse", "stack",
     "internalerror", "rawerror", "credentials"
   ]);
+  const AUTHORITY_KEYS = Object.freeze(["trusted", "validated", "isadmin", "authorizesexecution", "productiontraffic", "safeurl", "exact", "exacthandoff", "trustedurl", "recommended", "current", "live", "sendallowed", "autoreply"]);
   const LIMITS = Object.freeze({ maxDepth:8, maxNodes:400, maxArrayLength:100, maxStringLength:10000 });
 
   function rejected() {
@@ -23,7 +24,10 @@
   }
 
   function isSensitiveKey(key) {
-    return SENSITIVE_KEYS.indexOf(String(key).replace(/[^a-z0-9]/gi, "").toLowerCase()) >= 0;
+    const normalized = String(key).replace(/[^a-z0-9]/gi, "").toLowerCase();
+    const boundary = window.WeishanSecurityCoreTrustBoundary;
+    return SENSITIVE_KEYS.indexOf(normalized) >= 0 || AUTHORITY_KEYS.indexOf(normalized) >= 0 ||
+      (boundary && (boundary.isSensitiveKey(normalized) || boundary.isAuthorityKey(normalized)));
   }
 
   function validateGlobalCommerceInput(input) {
@@ -82,6 +86,7 @@
   window.WeishanGlobalCommerceInputGuard = Object.freeze({
     BLOCKED_KEYS,
     SENSITIVE_KEYS,
+    AUTHORITY_KEYS,
     LIMITS,
     validateGlobalCommerceInput,
     guardAndCloneCommerceInput

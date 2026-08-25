@@ -17,6 +17,10 @@
   function array(value) { return Array.isArray(value) ? value.slice() : []; }
 
   function sanitizeText(value, options) {
+    const boundary = window.WeishanSecurityCoreTrustBoundary;
+    if (boundary && typeof boundary.sanitizeHtmlToText === "function") {
+      return boundary.sanitizeHtmlToText(value, { maxLength:4000, mode:obj(options).mode || "default" });
+    }
     const mode = obj(options).mode || "default";
     let output = text(value)
       .replace(/<script[\s\S]*?<\/script>/gi, " ")
@@ -54,13 +58,17 @@
     const safe = obj(attachment);
     const filename = text(safe.filename || safe.name || "unnamed");
     const ext = extension(filename);
+    const pathTraversal = /(?:^|[\\/])\.\.(?:[\\/]|$)|^~[\\/]|^[A-Za-z]:[\\/]|^\//.test(filename) || /%2e%2e|%2f|%5c/i.test(filename);
+    const doubleExtension = filename.toLowerCase().split(".").length > 2 && HIGH_RISK_ATTACHMENT_EXTENSIONS.includes(ext);
     return clone({
       attachmentId:text(safe.attachmentId || safe.id || filename),
       filename,
       contentType:text(safe.contentType || safe.mimeType || "application/octet-stream"),
       sizeBytes:Number.isFinite(Number(safe.sizeBytes || safe.size)) ? Number(safe.sizeBytes || safe.size) : null,
       extension:ext,
-      highRisk:HIGH_RISK_ATTACHMENT_EXTENSIONS.includes(ext),
+      highRisk:HIGH_RISK_ATTACHMENT_EXTENSIONS.includes(ext) || pathTraversal || doubleExtension,
+      pathTraversal,
+      doubleExtension,
       bodyLoaded:false,
       executableOpened:false
     });
