@@ -916,8 +916,10 @@ async function main() {
   assert.equal(rendererSources.includes("bridge.deleteProviderKey"), false);
 
   const genericSecureStorageSource = fs.readFileSync(path.join(__dirname, "../../apps/desktop/src/main/secureStorage.js"), "utf8");
-  assert.equal(genericSecureStorageSource.includes("provider|commerce"), true);
-  assert.equal(genericSecureStorageSource.includes("credential|secret|token"), true);
+  assert.equal(genericSecureStorageSource.includes("classifySecureKey"), true);
+  assert.equal(genericSecureStorageSource.includes("USER_MANAGED_AI_CONNECTOR_SECRET"), true);
+  assert.equal(genericSecureStorageSource.includes("MAIL_CREDENTIAL"), true);
+  assert.equal(genericSecureStorageSource.includes("RAW_READBACK_BLOCKED"), true);
 
   console.log("SECURE_API_KEY_STORAGE_CORE PASS providerCredentialIngestion=provider_neutral");
 }

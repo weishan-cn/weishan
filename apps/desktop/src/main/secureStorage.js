@@ -4,6 +4,12 @@ const path = require("path");
 
 const STORE_FILE = "secure-storage.json";
 const sessionSecrets = new Map();
+const SECURE_STORAGE_VERSION = "4.2.8";
+
+const CREDENTIAL_CLASSES = Object.freeze({
+  USER_MANAGED_AI_CONNECTOR_SECRET: "USER_MANAGED_AI_CONNECTOR_SECRET",
+  MAIL_CREDENTIAL: "MAIL_CREDENTIAL"
+});
 
 function perfNow() {
   return Date.now();
@@ -46,8 +52,39 @@ function cleanKey(key) {
   const value = String(key || "").trim();
   if (!value || value.length > 240) return "";
   if (!/^[a-z0-9._:-]+$/i.test(value)) return "";
-  if (/(?:provider|commerce).*(?:credential|secret|token|api[-_.:]?key)|(?:credential|secret|token|api[-_.:]?key).*provider/i.test(value)) return "";
+  if (/(?:^|[._:-])(?:__proto__|constructor|prototype)(?:$|[._:-])/i.test(value)) return "";
   return value;
+}
+
+function classifySecureKey(key) {
+  const safeKey = cleanKey(key);
+  if (!safeKey) return null;
+  if (/^ai\.provider\.[a-z0-9._:-]{1,120}\.apiKey$/i.test(safeKey)) {
+    return {
+      key: safeKey,
+      credentialClass: CREDENTIAL_CLASSES.USER_MANAGED_AI_CONNECTOR_SECRET,
+      rawReadbackAllowed: true,
+      rendererReadbackLegacyGap: true
+    };
+  }
+  if (/^mail\.account\.[a-z0-9._:-]{1,180}\.authorizationCode$/i.test(safeKey)) {
+    return {
+      key: safeKey,
+      credentialClass: CREDENTIAL_CLASSES.MAIL_CREDENTIAL,
+      rawReadbackAllowed: false,
+      rendererReadbackLegacyGap: false
+    };
+  }
+  return null;
+}
+
+function safeMetadataForKey(policy, extra) {
+  return Object.assign({
+    credentialClass: policy && policy.credentialClass || "",
+    rawReadbackAllowed: !!(policy && policy.rawReadbackAllowed),
+    metadataOnly: true,
+    redacted: true
+  }, extra || {});
 }
 
 function storePath() {
@@ -83,79 +120,84 @@ function secureStatus() {
   const available = encryptionAvailable();
   return {
     ok: true,
+    version: SECURE_STORAGE_VERSION,
     available,
     encryptedAtRest: available,
-    sessionOnly: !available,
-    backend: available ? "electron.safeStorage" : "memory-session"
+    sessionOnly: false,
+    plaintextFallback: false,
+    allowedCredentialClasses: Object.values(CREDENTIAL_CLASSES),
+    backend: available ? "electron.safeStorage" : "unavailable"
   };
 }
 
 function secureSet(key, value) {
-  const safeKey = cleanKey(key);
-  if (!safeKey) return { ok: false, error: "INVALID_KEY" };
+  const policy = classifySecureKey(key);
+  if (!policy) return { ok: false, error: "INVALID_KEY", redacted: true };
 
   const secret = String(value || "");
-  if (!secret) return secureDelete(safeKey);
+  if (!secret) return secureDelete(policy.key);
 
   if (!encryptionAvailable()) {
-    sessionSecrets.set(safeKey, secret);
-    return { ok: true, saved: true, encryptedAtRest: false, sessionOnly: true };
+    return { ok: false, saved: false, error: "STORAGE_UNAVAILABLE", encryptedAtRest: false, sessionOnly: false, plaintextFallback: false, redacted: true };
   }
 
   try {
     const store = readStore();
     const encrypted = safeStorage.encryptString(secret).toString("base64");
-    store[safeKey] = {
+    store[policy.key] = {
       v: 1,
+      credentialClass: policy.credentialClass,
       encrypted,
       updatedAt: new Date().toISOString()
     };
     writeStore(store);
-    sessionSecrets.delete(safeKey);
-    return { ok: true, saved: true, encryptedAtRest: true, sessionOnly: false };
+    sessionSecrets.delete(policy.key);
+    return Object.assign({ ok: true, saved: true, encryptedAtRest: true, sessionOnly: false, plaintextFallback: false }, safeMetadataForKey(policy));
   } catch (_) {
-    return { ok: false, error: "SECURE_WRITE_FAILED" };
+    return { ok: false, error: "SECURE_WRITE_FAILED", redacted: true };
   }
 }
 
 function secureGet(key) {
-  const safeKey = cleanKey(key);
-  if (!safeKey) return { ok: false, error: "INVALID_KEY" };
+  const policy = classifySecureKey(key);
+  if (!policy) return { ok: false, error: "INVALID_KEY", redacted: true };
+  if (!policy.rawReadbackAllowed) {
+    return Object.assign({
+      ok: false,
+      exists: false,
+      value: "",
+      error: "RAW_READBACK_BLOCKED"
+    }, safeMetadataForKey(policy));
+  }
 
   if (!encryptionAvailable()) {
-    return {
-      ok: true,
-      exists: sessionSecrets.has(safeKey),
-      value: sessionSecrets.get(safeKey) || "",
-      encryptedAtRest: false,
-      sessionOnly: true
-    };
+    return { ok: false, exists: false, value: "", error: "STORAGE_UNAVAILABLE", encryptedAtRest: false, sessionOnly: false, plaintextFallback: false, redacted: true };
   }
 
   try {
-    const item = readStore()[safeKey];
-    if (!item || !item.encrypted) return { ok: true, exists: false, value: "", encryptedAtRest: true, sessionOnly: false };
+    const item = readStore()[policy.key];
+    if (!item || !item.encrypted) return Object.assign({ ok: true, exists: false, value: "", encryptedAtRest: true, sessionOnly: false, plaintextFallback: false }, safeMetadataForKey(policy));
     const value = safeStorage.decryptString(Buffer.from(String(item.encrypted), "base64"));
-    return { ok: true, exists: true, value, encryptedAtRest: true, sessionOnly: false };
+    return Object.assign({ ok: true, exists: true, value, encryptedAtRest: true, sessionOnly: false, plaintextFallback: false }, safeMetadataForKey(policy));
   } catch (_) {
-    return { ok: false, error: "SECURE_READ_FAILED" };
+    return { ok: false, error: "SECURE_READ_FAILED", redacted: true };
   }
 }
 
 function secureDelete(key) {
-  const safeKey = cleanKey(key);
-  if (!safeKey) return { ok: false, error: "INVALID_KEY" };
+  const policy = classifySecureKey(key);
+  if (!policy) return { ok: false, error: "INVALID_KEY", redacted: true };
 
-  sessionSecrets.delete(safeKey);
-  if (!encryptionAvailable()) return { ok: true, deleted: true, encryptedAtRest: false, sessionOnly: true };
+  sessionSecrets.delete(policy.key);
+  if (!encryptionAvailable()) return { ok: false, error: "STORAGE_UNAVAILABLE", encryptedAtRest: false, sessionOnly: false, plaintextFallback: false, redacted: true };
 
   try {
     const store = readStore();
-    delete store[safeKey];
+    delete store[policy.key];
     writeStore(store);
-    return { ok: true, deleted: true, encryptedAtRest: true, sessionOnly: false };
+    return Object.assign({ ok: true, deleted: true, encryptedAtRest: true, sessionOnly: false, plaintextFallback: false }, safeMetadataForKey(policy));
   } catch (_) {
-    return { ok: false, error: "SECURE_DELETE_FAILED" };
+    return { ok: false, error: "SECURE_DELETE_FAILED", redacted: true };
   }
 }
 
@@ -177,5 +219,10 @@ module.exports = {
   secureSet,
   secureGet,
   secureDelete,
-  secureStatus
+  secureStatus,
+  _testOnly: {
+    classifySecureKey,
+    cleanKey,
+    CREDENTIAL_CLASSES
+  }
 };
