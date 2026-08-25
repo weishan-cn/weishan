@@ -58,6 +58,7 @@ function runCore() {
   runStep("Home unified desktop effectiveness", "node", ["tests/api/home-unified-desktop-effectiveness.test.js"]);
   runStep("Global flight shopping evidence foundation", "node", ["tests/api/global-flight-shopping-evidence-foundation.test.js"]);
   runStep("Global travel price truth foundation", "node", ["tests/api/global-travel-price-truth-foundation.test.js"]);
+  runStep("Global travel decision quality effectiveness", "node", ["tests/api/global-travel-decision-quality-effectiveness.test.js"]);
   runStep("Public Beta email operations control plane", "node", ["tests/api/email-ops-control-plane.test.js"]);
   runStep("Public Beta email operations module effectiveness", "node", ["tests/api/email-ops-module-effectiveness.test.js"]);
   runStep("Public Beta email operations real mailbox adapter", "node", ["tests/api/email-ops-real-mailbox-adapter.test.js"]);

@@ -564,7 +564,7 @@
     if (!Array.isArray(records) || records.length < 2 || records.some(function (record) { return !record || record.success !== true || !record.evidence || record.evidence.travelType !== type; })) return failure(type + "_COMPARISON_INPUT_INVALID", type + "_PRICE_TRUTH");
     const evidence = records.map(function (record) { return record.evidence; });
     const reasons = comparableFailureReasons(evidence, type);
-    const priceKey = type === "FLIGHT" || type === "CRUISE" ? "price" : "totalPrice";
+    const priceKey = type === "FLIGHT" ? "price" : "totalPrice";
     if (reasons.length) return deepFreeze(Object.assign({ success:true, comparable:false, reasons:reasons, selectedEvidenceId:null, observations:evidence }, boundary()));
     const sorted = evidence.slice().sort(function (a, b) {
       return a[priceKey] - b[priceKey] || a.provider.localeCompare(b.provider) || a.handoffUrl.localeCompare(b.handoffUrl);
