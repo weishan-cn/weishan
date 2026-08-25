@@ -201,6 +201,7 @@ function assertBoundary(model) {
     domain:"shopping",
     query:"x",
     results:[
+      { productName:"Empty string trap", amount:"", currency:"USD", priceBasis:"ITEM_PRICE", priceState:"CURRENT_PRICE", availability:"available", handoff:{ url:"https://merchant.example/p", quality:"EXACT_PRODUCT_HANDOFF" } },
       { productName:"Zero trap", amount:NaN, currency:"USD", priceBasis:"ITEM_PRICE", priceState:"CURRENT_PRICE", handoff:{ url:"https://merchant.example/p", quality:"EXACT_PRODUCT_HANDOFF" } },
       { productName:"Infinity trap", amount:Infinity, currency:"USD", priceBasis:"ITEM_PRICE", priceState:"CURRENT_PRICE", handoff:{ url:"https://merchant.example/p", quality:"EXACT_PRODUCT_HANDOFF" } },
       { productName:"Negative trap", amount:-10, currency:"USD", priceBasis:"ITEM_PRICE", priceState:"CURRENT_PRICE", handoff:{ url:"https://merchant.example/p", quality:"EXACT_PRODUCT_HANDOFF" } },
@@ -211,9 +212,145 @@ function assertBoundary(model) {
 }
 
 {
+  const model = api.buildUnifiedDesktopFlowViewModel({
+    domain:"shopping",
+    query:"test price leak",
+    results:[{
+      productName:"Sandbox should stay sandbox",
+      amount:1,
+      currency:"USD",
+      priceBasis:"ITEM_PRICE",
+      priceState:"CURRENT_PRICE",
+      evidenceType:"SANDBOX_TEST_DATA",
+      availability:"available",
+      handoff:{ url:"https://merchant.example/p", quality:"EXACT_PRODUCT_HANDOFF" }
+    }]
+  });
+  assert.equal(model.results[0].price.publicState, "TEST_DATA");
+  assert.equal(model.results[0].price.testData, true);
+  assert.equal(model.results[0].comparable, false);
+  assert.match(model.results[0].price.display, /not live/);
+}
+
+{
+  const model = api.buildUnifiedDesktopFlowViewModel({
+    domain:"shopping",
+    query:"stale and sold out",
+    results:[
+      {
+        productName:"Stale cheap offer",
+        amount:10,
+        currency:"USD",
+        priceBasis:"ITEM_PRICE",
+        priceState:"CURRENT_PRICE",
+        freshness:"STALE",
+        availability:"available",
+        handoff:{ url:"https://merchant.example/p", quality:"EXACT_PRODUCT_HANDOFF" }
+      },
+      {
+        productName:"Sold out cheap offer",
+        amount:11,
+        currency:"USD",
+        priceBasis:"ITEM_PRICE",
+        priceState:"CURRENT_PRICE",
+        availability:"SOLD_OUT",
+        handoff:{ url:"https://merchant.example/p", quality:"EXACT_PRODUCT_HANDOFF" }
+      },
+      {
+        productName:"Unknown availability cheap offer",
+        amount:12,
+        currency:"USD",
+        priceBasis:"ITEM_PRICE",
+        priceState:"CURRENT_PRICE",
+        availability:"UNKNOWN",
+        handoff:{ url:"https://merchant.example/p", quality:"EXACT_PRODUCT_HANDOFF" }
+      }
+    ]
+  });
+  assert.equal(model.results[0].price.publicState, "STALE_PRICE");
+  assert.equal(model.results[0].comparable, false);
+  assert.equal(model.results[1].availability.comparable, false);
+  assert.equal(model.results[1].comparable, false);
+  assert.equal(model.results[2].availability.comparable, false);
+  assert.equal(model.results[2].comparable, false);
+}
+
+{
+  const rejected = [
+    ["https://legit.example@evil.example/product", "URL_USERINFO_BLOCKED"],
+    ["https://127.0.0.1/product", "UNSAFE_HOST"],
+    ["https://10.0.0.4/product", "UNSAFE_HOST"],
+    ["https://192.168.1.2/product", "UNSAFE_HOST"],
+    ["https://[::1]/product", "UNSAFE_HOST"],
+    ["https://merchant.example/purchase", "TRANSACTION_PATH_BLOCKED"],
+    ["https://merchant.example/product?checkout=true", "TRANSACTION_PATH_BLOCKED"],
+    ["https://merchant.example/product?next=%2Fcheckout%2Fnow", "TRANSACTION_PATH_BLOCKED"]
+  ];
+  rejected.forEach(([url, reason]) => {
+    const handoff = api.safeHandoff({ url, quality:"EXACT_PRODUCT_HANDOFF" }, "SHOPPING");
+    assert.equal(handoff.safe, false, url);
+    assert.equal(handoff.reason, reason, url);
+  });
+
+  const safeBookInfo = api.safeHandoff({ url:"https://merchant.example/books/booking-info", quality:"GENERIC_SEARCH" }, "SHOPPING");
+  assert.equal(safeBookInfo.safe, true);
+  assert.equal(safeBookInfo.cta, "Open search");
+}
+
+{
+  const html = api.renderUnifiedDesktopFlowHtml(api.buildUnifiedDesktopFlowViewModel({
+    domain:"hotel",
+    query:"<img src=x onerror=alert(1)>",
+    results:[{
+      propertyName:"<script>alert(1)</script> & Spa",
+      amount:300,
+      currency:"USD",
+      priceBasis:"TOTAL_STAY",
+      priceState:"CURRENT_PRICE",
+      availability:"available",
+      handoff:{ url:"https://hotel.example/property", quality:"EXACT_STAY_HANDOFF" }
+    }]
+  }));
+  assert.equal(/<script|<img|onerror/i.test(html), false);
+  assert.match(html, /&amp; Spa/);
+}
+
+{
+  const hotelHtml = api.renderUnifiedDesktopFlowHtml(api.buildUnifiedDesktopFlowViewModel({
+    domain:"hotel",
+    query:"Tokyo hotel",
+    results:[{
+      propertyName:"Condition Hotel",
+      roomName:"Standard Queen",
+      refundability:"non-refundable",
+      taxesAndFees:"taxes included, resort fee unknown",
+      amount:120,
+      currency:"USD",
+      priceBasis:"PER_NIGHT",
+      priceState:"CURRENT_PRICE",
+      availability:"available",
+      handoff:{ url:"https://hotel.example/property", quality:"EXACT_STAY_HANDOFF" }
+    }]
+  }));
+  assert.match(hotelHtml, /Material conditions/);
+  assert.match(hotelHtml, /Standard Queen/);
+  assert.match(hotelHtml, /non-refundable/);
+  assert.match(hotelHtml, /resort fee unknown/);
+
+  const emptyHtml = api.renderUnifiedDesktopFlowHtml(api.buildUnifiedDesktopFlowViewModel({
+    domain:"cruise",
+    query:"unknown sailing",
+    failures:[{ message:"HTTP 401 Authorization Bearer abc /Users/boge/private path" }]
+  }));
+  assert.match(emptyHtml, /No comparable result yet|Some sources could not answer safely/);
+  assert.match(emptyHtml, /Weishan will not invent a price/);
+  assertNoInternalLeak(emptyHtml);
+}
+
+{
   const html = api.renderUnifiedDesktopFlowHtml(api.buildUnifiedDesktopFlowViewModel({
     query:"MacBook Pro",
-    results:[{ productName:"MacBook Pro", amount:1999, currency:"USD", priceBasis:"ITEM_PRICE", priceState:"CURRENT_PRICE", handoff:{ url:"https://merchant.example/macbook", quality:"EXACT_PRODUCT_HANDOFF" } }]
+    results:[{ productName:"MacBook Pro", amount:1999, currency:"USD", priceBasis:"ITEM_PRICE", priceState:"CURRENT_PRICE", availability:"available", handoff:{ url:"https://merchant.example/macbook", quality:"EXACT_PRODUCT_HANDOFF" } }]
   }));
   assert.match(html, /One Weishan/);
   assert.match(html, /tabindex="0"/);

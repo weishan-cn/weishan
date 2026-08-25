@@ -39,13 +39,13 @@
     /client_secret/i,
     /API\s*key/i,
     /Authorization/i,
-    /Bearer\s+/i,
-    /\/Users\//i,
+    /Bearer\s+\S*/i,
+    /\/Users\/\S*/i,
     /apps\/desktop/i,
     /stack trace/i
   ];
 
-  const TRANSACTION_PATH = /\/(?:book|booking|checkout|payment|pay|order|reservation|reserve|ticket)(?:\/|$|[?#])/i;
+  const TRANSACTION_SEGMENTS = Object.freeze(["book", "booking", "checkout", "payment", "pay", "order", "purchase", "reservation", "reserve", "ticket"]);
 
   function deepFreeze(value) {
     if (!value || typeof value !== "object" || Object.isFrozen(value)) return value;
@@ -70,9 +70,29 @@
   }
 
   function finite(value) {
-    if (value == null) return null;
+    if (value == null || (typeof value === "string" && value.trim() === "")) return null;
     const n = Number(value);
     return Number.isFinite(n) ? n : null;
+  }
+
+  function evidenceStates(source) {
+    const p = source || {};
+    return [p.priceState, p.evidenceType, p.sourceAuthority, p.status, p.freshness, p.environment]
+      .map(upper)
+      .filter(Boolean);
+  }
+
+  function includesState(states, pattern) {
+    return states.some(function (state) { return pattern.test(state); });
+  }
+
+  function availabilityState(item) {
+    const raw = upper(item && (item.availability || item.availabilityState || item.stockStatus || item.inventoryStatus));
+    if (!raw) return { available:false, status:"UNKNOWN_AVAILABILITY", comparable:false };
+    if (/OUT_OF_STOCK|SOLD_OUT|UNAVAILABLE|NOT_AVAILABLE|NO_AVAILABILITY/.test(raw)) return { available:false, status:raw, comparable:false };
+    if (/UNKNOWN|CHECK_PROVIDER|LIMITED_UNKNOWN/.test(raw)) return { available:false, status:raw, comparable:false };
+    if (/AVAILABLE|IN_STOCK|ON_SALE/.test(raw)) return { available:true, status:raw, comparable:true };
+    return { available:false, status:raw, comparable:false };
   }
 
   function boundary() {
@@ -151,12 +171,13 @@
 
   function priceState(domain, source) {
     const p = source || {};
-    const rawState = upper(p.priceState || p.evidenceType || p.sourceAuthority || p.status);
+    const states = evidenceStates(p);
     const basis = upper(p.priceBasis || p.basis || p.priceBasisType || "UNKNOWN_BASIS");
     const label = amountLabel(p.amount, p.currency);
-    const isTest = rawState === "SANDBOX_TEST_DATA" || rawState === "EVALUATION_DATA" || rawState === "TEST_ENVIRONMENT_DATA" || p.testData === true;
-    const isIndicative = rawState === "INDICATIVE" || rawState === "PRICE_INDICATIVE" || rawState === "FROM_PRICE" || basis === "FROM_PRICE" || basis === "STARTING_FROM" || basis === "PRICE_RANGE";
-    const unavailable = !label || rawState === "PRICE_UNAVAILABLE" || rawState === "NO_PRICE";
+    const isTest = p.testData === true || includesState(states, /SANDBOX_TEST_DATA|EVALUATION_DATA|TEST_ENVIRONMENT_DATA|SANDBOX|TEST_ENVIRONMENT/);
+    const isStale = includesState(states, /STALE|EXPIRED/);
+    const isIndicative = includesState(states, /INDICATIVE|PRICE_INDICATIVE|FROM_PRICE|STARTING_FROM|PRICE_RANGE/) || basis === "FROM_PRICE" || basis === "STARTING_FROM" || basis === "PRICE_RANGE";
+    const unavailable = !label || includesState(states, /PRICE_UNAVAILABLE|NO_PRICE|MISSING_PRICE/);
     let publicState = "PRICE_UNAVAILABLE";
     let display = "Price unavailable";
     if (isTest && label) {
@@ -165,6 +186,9 @@
     } else if (isTest) {
       publicState = "TEST_DATA";
       display = "Test data — no live price";
+    } else if (isStale && label) {
+      publicState = "STALE_PRICE";
+      display = `${label} · Stale — verify on provider`;
     } else if (isIndicative && label) {
       publicState = "INDICATIVE_PRICE";
       display = `From ${label} · Indicative`;
@@ -180,11 +204,40 @@
       basisLabel:basisLabel(domain, basis),
       comparable:publicState === "CURRENT_PRICE" && basis.indexOf("UNKNOWN") < 0,
       testData:isTest,
+      stale:isStale,
       indicative:isIndicative,
       unavailable:publicState === "PRICE_UNAVAILABLE",
       sourceCurrencyPreserved:true,
       fxConverted:false
     };
+  }
+
+  function hostnameIsUnsafe(hostname) {
+    const host = text(hostname).toLowerCase().replace(/^\[|\]$/g, "");
+    if (!host || host === "localhost" || host.endsWith(".localhost")) return true;
+    if (host === "::1" || host.startsWith("fe80:") || host.startsWith("fc") || host.startsWith("fd")) return true;
+    const ipv4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+    if (!ipv4) return false;
+    const parts = ipv4.slice(1).map(Number);
+    if (parts.some(function (part) { return part < 0 || part > 255; })) return true;
+    if (parts[0] === 10 || parts[0] === 127 || parts[0] === 0) return true;
+    if (parts[0] === 169 && parts[1] === 254) return true;
+    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
+    if (parts[0] === 192 && parts[1] === 168) return true;
+    return false;
+  }
+
+  function hasTransactionIntent(url) {
+    const segments = url.pathname.split("/").map(function (segment) {
+      try { return decodeURIComponent(segment).toLowerCase(); } catch (error) { return segment.toLowerCase(); }
+    }).filter(Boolean);
+    if (segments.some(function (segment) { return TRANSACTION_SEGMENTS.includes(segment); })) return true;
+    const params = Array.from(url.searchParams.entries());
+    if (params.some(function (entry) { return TRANSACTION_SEGMENTS.includes(text(entry[0]).toLowerCase()); })) return true;
+    const decodedSearch = (() => {
+      try { return decodeURIComponent(url.search || ""); } catch (error) { return url.search || ""; }
+    })().toLowerCase();
+    return /\/(?:book|booking|checkout|payment|pay|order|purchase|reservation|reserve|ticket)(?:\/|$|[?#])/.test(decodedSearch);
   }
 
   function safeHandoff(input, domain) {
@@ -193,9 +246,10 @@
     if (!raw) return { safe:false, cta:"No safe external link", url:null, exactness:"NO_HANDOFF", autoOpen:false, reason:"NO_URL" };
     try {
       const url = new URL(raw);
+      if (url.username || url.password) return { safe:false, cta:"No safe external link", url:null, exactness:"NO_HANDOFF", autoOpen:false, reason:"URL_USERINFO_BLOCKED" };
       if (url.protocol !== "https:") return { safe:false, cta:"No safe external link", url:null, exactness:"NO_HANDOFF", autoOpen:false, reason:"UNSAFE_PROTOCOL" };
-      if (/^(\d+\.){3}\d+$/.test(url.hostname) || url.hostname === "localhost") return { safe:false, cta:"No safe external link", url:null, exactness:"NO_HANDOFF", autoOpen:false, reason:"UNSAFE_HOST" };
-      if (TRANSACTION_PATH.test(url.pathname)) return { safe:false, cta:"No safe external link", url:null, exactness:"NO_HANDOFF", autoOpen:false, reason:"TRANSACTION_PATH_BLOCKED" };
+      if (hostnameIsUnsafe(url.hostname)) return { safe:false, cta:"No safe external link", url:null, exactness:"NO_HANDOFF", autoOpen:false, reason:"UNSAFE_HOST" };
+      if (hasTransactionIntent(url)) return { safe:false, cta:"No safe external link", url:null, exactness:"NO_HANDOFF", autoOpen:false, reason:"TRANSACTION_PATH_BLOCKED" };
       if (/GENERIC|HOME|SEARCH/.test(quality)) return { safe:true, cta:"Open search", url:raw, host:url.hostname, exactness:"SEARCH_HANDOFF", autoOpen:false, reason:null };
       if (domain === DOMAINS.SHOPPING) return { safe:true, cta:/OFFER/.test(quality) ? "View offer" : "View product", url:raw, host:url.hostname, exactness:quality || "EXACT_PRODUCT_HANDOFF", autoOpen:false, reason:null };
       if (domain === DOMAINS.FLIGHT) return { safe:true, cta:"View flight", url:raw, host:url.hostname, exactness:quality || "EXACT_ITINERARY_HANDOFF", autoOpen:false, reason:null };
@@ -238,13 +292,15 @@
   function resultShell(domain, item, query) {
     const price = priceState(domain, item && (item.price || item.priceEvidence || item));
     const handoff = safeHandoff(item && (item.handoff || item), domain);
-    const comparable = item && item.contextMatches === false ? false : price.comparable;
+    const availability = availabilityState(item);
+    const comparable = item && item.contextMatches === false ? false : price.comparable && availability.comparable;
     return {
       domain,
       domainLabel:DOMAIN_LABELS[domain],
       identity:identityFor(domain, item, query),
       secondaryContext:contextFor(domain, item),
       price,
+      availability,
       conditions:conditionsFor(domain, item),
       handoff,
       comparable,
@@ -331,21 +387,30 @@
   function renderUnifiedDesktopFlowHtml(model) {
     const m = model || buildUnifiedDesktopFlowViewModel({});
     const results = (m.results || []).map(function (item, index) {
+      const conditions = (item.conditions || []).map(function (condition) {
+        return `<li><span>${escapeHtml(condition.label)}</span><strong>${escapeHtml(condition.value)}</strong></li>`;
+      }).join("");
       return `<article class="commerce-one-screen-card weishan-unified-result-shell" tabindex="0" aria-label="${escapeHtml(item.domainLabel)} result">
         <h4>${escapeHtml(item.identity)}</h4>
         <p>${escapeHtml(item.secondaryContext)}</p>
         <p><strong>${escapeHtml(item.price.display)}</strong> · ${escapeHtml(item.price.basisLabel)}</p>
+        <ul class="commerce-mini-list" aria-label="Material conditions">${conditions}</ul>
         <p>${escapeHtml(item.recommendationReason)}</p>
         <button type="button" class="cmd-btn gray" data-unified-handoff="${index}"${item.handoff.safe ? "" : " disabled"}>${escapeHtml(item.handoff.cta)}</button>
       </article>`;
     }).join("");
+    const failures = (m.sourceFailures || []).map(function (failure) {
+      return `<li>${escapeHtml(failure.publicMessage || "One source could not answer.")}</li>`;
+    }).join("");
+    const emptyState = m.noResults ? `<div class="commerce-empty-state" role="status">No comparable result yet. Refine the request or try again; Weishan will not invent a price.</div>` : "";
+    const failureState = failures ? `<div class="commerce-empty-state" role="status"><p>Some sources could not answer safely. Weishan will not invent a price.</p><ul>${failures}</ul></div>` : "";
     return `<section class="commerce-result-summary-panel weishan-unified-desktop-flow" aria-label="Unified Weishan flow" data-unified-desktop-flow="true">
       <div class="commerce-result-summary-head">
         <div class="commerce-result-summary-headline"><span>One Weishan</span><strong>${escapeHtml(m.domainLabel)} · ${escapeHtml(m.understoodSummary)}</strong></div>
         <p>${escapeHtml(m.highLevelFlow.join(" → "))}</p>
       </div>
       <p>Ask once. Weishan understands the domain, compares only compatible evidence, and hands you off safely.</p>
-      <div class="commerce-one-screen-body">${results}</div>
+      <div class="commerce-one-screen-body">${results || emptyState}${failureState}</div>
       <p>Weishan does not check out, book, reserve, issue tickets, place orders, or take payment.</p>
     </section>`;
   }
