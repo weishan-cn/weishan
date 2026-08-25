@@ -666,7 +666,7 @@
       state,
       provider,
       model,
-      label:state === "connected" ? "AI 已连接 · " + provider + (model ? " / " + model : "") : state === "saved_untested" ? "AI 未测试" : state === "failed" ? "AI 连接失败" : "AI 未配置",
+      label:state === "connected" ? "AI 已连接" : state === "saved_untested" ? "AI 未测试" : state === "failed" ? "AI 连接失败" : "AI 未配置",
       connector
     };
   }

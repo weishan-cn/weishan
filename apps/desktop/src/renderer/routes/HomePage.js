@@ -7139,7 +7139,7 @@
     const actions = topbar.querySelector(".top-actions");
     const lang = topbar.querySelector("#langSelect");
     if (title && title.textContent !== "首页总调度") title.textContent = "首页总调度";
-    if (subtitle && subtitle.textContent !== "本地优先 · 模块隔离 · A/B 模式") subtitle.textContent = "本地优先 · 模块隔离 · A/B 模式";
+    if (subtitle && subtitle.textContent !== "本地优先 · 模块隔离 · 安全协作") subtitle.textContent = "本地优先 · 模块隔离 · 安全协作";
     if (!actions || !lang) return;
     let status = actions.querySelector("#homeAiStatus") || actions.querySelector("#aiConnectionStatus");
     if (!status) {
@@ -7150,7 +7150,7 @@
     }
     const summary = window.WeishanAPI && typeof window.WeishanAPI.connectorSummary === "function"
       ? window.WeishanAPI.connectorSummary()
-      : { state:/^AI 已连接/.test(String(snapshot && snapshot.brain || "")) ? "connected" : "not_configured", label:String(snapshot && snapshot.brain || "") || "AI 未配置" };
+      : { state:/^AI 已连接/.test(String(snapshot && snapshot.brain || "")) ? "connected" : "not_configured", label:/^AI 已连接/.test(String(snapshot && snapshot.brain || "")) ? "AI 已连接" : "AI 未配置" };
     const state = String(summary.state || (summary.connected ? "connected" : "not_configured"));
     const label = String(summary.label || (state === "connected" ? "AI 已连接" : state === "saved_untested" ? "AI 未测试" : state === "testing" ? "AI 测试中" : state === "failed" ? "AI 连接失败" : "AI 未配置"));
     const cls = state === "connected" ? "is-connected" : (state === "saved_untested" || state === "testing" ? "is-pending" : "is-disconnected");

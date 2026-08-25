@@ -65,6 +65,14 @@
       document.head.appendChild(validation);
       return;
     }
+    if (!window.WeishanTravelZeroLearningUxViewModel && !document.querySelector('script[data-weishan-dynamic="WeishanTravelZeroLearningUxViewModel"]')) {
+      const travelUx = document.createElement("script");
+      travelUx.src = "./renderer/core/travelZeroLearningUxViewModel.js?v=4.3.5";
+      travelUx.dataset.weishanDynamic = "WeishanTravelZeroLearningUxViewModel";
+      travelUx.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(travelUx);
+      return;
+    }
     if (!window.WeishanGlobalShoppingDataProvenance && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingDataProvenance"]')) {
       const provenance = document.createElement("script");
       provenance.src = "./renderer/core/globalShoppingDataProvenance.js?v=4.2.8";
@@ -7987,6 +7995,54 @@
     return '<section class="commerce-flight-evidence-workflow" data-commerce-flight-evidence-workflow="true"><h4>机票请求工作流</h4><p>当前工作流阶段：' + esc(workflow.workflowStageLabel || presenter.currentStepLabel || "选择候选") + '</p><p>下一步：' + esc(workflow.nextStepLabel || presenter.nextStepLabel || "确认前往平台") + '</p><p>可继续操作：' + esc(resumeLabels.join(" / ") || String(workflow.canResumeWorkflow === true)) + '</p><p>用户确认状态：' + esc(confirmationLabels.join(" / ") || "已选择候选") + '</p><p>已选择候选</p><p>已确认安全提示</p><p>已记录平台核对结果</p><p>识别机票需求</p><p>路线：' + esc(workflow.routeSummary || presenter.routeSummary || "") + '</p><p>' + esc(workflow.tripSummary || presenter.tripSummary || "") + '</p><ul>' + steps.map(function(step){ return '<li>' + esc(step.label || "") + ' · ' + esc(step.statusLabel || step.status || "") + '</li>'; }).join('') + '</ul><p>生成候选证据</p><p>生成 Top 3 候选</p><p>推荐理由</p><p>候选对比</p><p>候选价置信标签</p><p>下一步安全建议</p><p>平台最终为准</p>' + actionQueueHtml(false) + timelineHtml() + auditReviewHtml() + safeExportPreviewHtml() + humanReviewChecklistHtml() + finalSafeHandoffPacketHtml() + operatorConsoleHtml() + releaseReadinessHtml() + betaAcceptanceHtml() + betaAcceptanceReviewHtml() + betaCohortReviewBoardHtml() + pilotReadinessHtml() + pilotSupportHtml() + rolloutControlHtml() + riskBadgeHtml() + '<p>唯珊只提供只读候选证据，不付款、不下单、不出票</p><button type="button" class="cmd-btn gray" data-commerce-flight-workflow-recover="true">恢复上次机票工作流</button><p>bookingUrl: null</p><p>payment: false</p><p>order: false</p></section>';
   }
 
+  function commerceTravelZeroLearningUxPanelHtml(task, safeProviderHandoffUrl){
+    const api = window.WeishanTravelZeroLearningUxViewModel;
+    const fields = commerceSimpleFlightFields(task);
+    const handoffUrl = String(safeProviderHandoffUrl || "").trim();
+    if (api && typeof api.buildTravelZeroLearningUxViewModel === "function" && typeof api.renderTravelZeroLearningUxHtml === "function") {
+      const model = api.buildTravelZeroLearningUxViewModel({
+        domain:"flight",
+        search:{
+          origin:fields.origin,
+          destination:fields.destination,
+          departureDate:fields.date,
+          returnDate:fields.returnDate || "",
+          cabin:fields.cabin || ""
+        },
+        deterministicFixturesOnly:true,
+        results:[{
+          airline:"Travel result",
+          flightNumber:"",
+          origin:fields.origin,
+          destination:fields.destination,
+          departureTime:fields.dateDisplay || fields.date,
+          cabin:fields.cabin || "",
+          availability:"availability must be confirmed on the external site",
+          price:{ priceState:"PRICE_UNAVAILABLE", priceBasis:"TOTAL_ITINERARY" },
+          handoff:{ url:handoffUrl, quality:handoffUrl ? "EXACT_SEARCH_RECONSTRUCTION" : "NO_HANDOFF" }
+        }]
+      });
+      return api.renderTravelZeroLearningUxHtml(model);
+    }
+    return `<section class="commerce-result-summary-panel weishan-travel-zero-learning-ux" aria-label="Flight zero-learning travel results" data-travel-zero-learning-ux="true">
+      <div class="commerce-result-summary-head">
+        <div class="commerce-result-summary-headline"><span>Flight</span><strong>${esc(fields.origin)} → ${esc(fields.destination)} · ${esc(fields.dateDisplay || fields.date || "date to choose")}</strong></div>
+        <p>Price unavailable · total itinerary basis. Weishan did not invent a price.</p>
+      </div>
+      <div class="commerce-one-screen-body">
+        <article class="commerce-one-screen-card weishan-travel-zero-learning-card" tabindex="0" aria-label="Flight search handoff">
+          <h4>${esc(fields.origin)} → ${esc(fields.destination)}</h4>
+          <p>${esc(fields.dateDisplay || fields.date || "Departure date to choose")} · ${esc(fields.cabin || "cabin not specified")}</p>
+          <p><strong>Price unavailable</strong> · total itinerary</p>
+          <p>taxes and fees may change on the external site · freshness unknown</p>
+          <p>availability must be confirmed on the external site</p>
+          <button type="button" class="cmd-btn gray" disabled>No safe external link</button>
+        </article>
+      </div>
+      <p>Weishan compares and hands off only. It does not book, reserve, issue tickets, take payment, or place orders.</p>
+    </section>`;
+  }
+
   function commerceSimpleFlightResultPanelHtml(task){
     const fields = commerceSimpleFlightFields(task);
     const copyTexts = commerceSimpleFlightCopyTexts(task);
@@ -8002,6 +8058,7 @@
     const resultCardRulesHtml = globalProcurementUserFacingResultCardsRulesDisclosure();
     const guardedPriceCardHtml = commerceGuardedFlightPriceCardHtml(task);
     const flightWorkflowHtml = commerceFlightWorkflowPanelHtml(task);
+    const zeroLearningTravelHtml = commerceTravelZeroLearningUxPanelHtml(task, safeProviderHandoffUrl);
     const workflowNeedsClarification = flightWorkflowHtml.indexOf("需要补充信息") >= 0;
     if (workflowNeedsClarification) return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-simple-flight-result" aria-label="机票搜索结果" data-commerce-task-id="${esc(task && task.taskId || task && task.id || "")}"><div class="commerce-result-summary-head"><div class="commerce-result-summary-headline"><span>机票请求工作流</span><strong>需要补充信息</strong></div></div><div class="commerce-one-screen-body"><section class="commerce-one-screen-card">${flightWorkflowHtml}</section></div>${commerceSafetyAndDebugDetailsDisclosure(task, [])}<p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p></section>`;
     return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-simple-flight-result" aria-label="机票搜索结果" data-commerce-task-id="${esc(task && task.taskId || task && task.id || "")}">
@@ -8021,6 +8078,7 @@
           <p>日期：${esc(fields.dateDisplay || fields.date)}</p>
           <p>直达偏好：${esc(fields.directPreference || "直达优先")}</p>
           <p>排序：${esc(fields.goal)}</p>
+          ${zeroLearningTravelHtml}
           ${flightWorkflowHtml}
           ${commerceCleanResultSurfaceHtml(task, { guardedPriceCardHtml })}
           <section class="commerce-manual-platform-check" data-commerce-manual-platform-check="true"><h5>记录平台核对结果</h5><p>Platform Check Evidence</p><label>observedTotalPrice <input data-commerce-manual-platform-check-total="true" aria-label="observedTotalPrice" value="1010"></label><label>currency <input data-commerce-manual-platform-check-currency="true" aria-label="currency" value="CNY"></label><label>userNote <textarea data-commerce-manual-platform-check-note="true" aria-label="userNote"></textarea></label><button type="button" class="cmd-btn gray" data-commerce-manual-platform-check-save="true">记录平台核对结果</button><div data-commerce-manual-platform-check-output="true"><p>平台核对结果已记录</p><p>平台核对汇总</p><p>候选价置信标签</p><p>高一致 / 有差异 / 需重新核对 / 不可确认</p><p>下一步安全建议</p><p>平台核对差异</p><p>平台最终为准</p><p>唯珊不会付款、不会下单、不会上传证件或银行卡</p><p>secretStored: false</p></div></section>

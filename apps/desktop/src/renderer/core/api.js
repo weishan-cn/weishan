@@ -137,7 +137,7 @@
     return "not_configured";
   }
   function connectorSummaryLabel(state, provider, model){
-    if (state === "connected") return "AI 已连接" + (provider ? " · " + provider + (model ? " / " + model : "") : "");
+    if (state === "connected") return "AI 已连接";
     if (state === "testing") return "AI 测试中";
     if (state === "failed") return "AI 连接失败";
     if (state === "saved_untested") return "AI 未测试";

@@ -133,6 +133,19 @@ This foundation can model a small number of future flight, hotel, and cruise sou
 
 Hotelbeds remains credential-storage/evaluation state only while API terms are deferred; this foundation does not call Hotelbeds APIs.
 
+## Desktop zero-learning Travel UX
+
+The desktop Travel UX presents the foundation in ordinary user language across flights, hotels, and cruises. Users see the travel context, price state, price basis, availability, and a safe handoff action without needing to know which Provider, API, OAuth flow, credential, certificate, or commercial status is involved.
+
+The UX layer preserves these rules:
+
+- `PRICE_UNAVAILABLE` is an honest state, not zero and not an error.
+- Sandbox, test, and evaluation data are labeled as test data and cannot be shown as live public market prices.
+- Indicative, starting-from, per-night, per-person, and double-occupancy prices are visibly conditional.
+- Unsafe, generic, or context-lost links are blocked or downgraded to search handoff.
+- The only allowed user action is selection followed by external handoff. Weishan does not book, reserve, issue tickets, place orders, or take payment.
+- Internal setup states such as OAuth, mTLS, credential, API, HTTP, or local-path errors are sanitized away from the ordinary user surface.
+
 ## Sanitized source capability matrix
 
 | Domain | Source class | Price capability | Identity | Freshness | Availability | Handoff | Currently usable |
