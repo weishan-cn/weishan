@@ -60,6 +60,7 @@ function runCore() {
   runStep("Unified shopping and travel desktop flow", "node", ["tests/api/unified-desktop-flow-view-model.test.js"]);
   runStep("Home unified desktop effectiveness", "node", ["tests/api/home-unified-desktop-effectiveness.test.js"]);
   runStep("Search module effectiveness", "node", ["tests/api/search-module-effectiveness.test.js"]);
+  runStep("Handoff module effectiveness", "node", ["tests/api/handoff-module-effectiveness.test.js"]);
   runStep("Global flight shopping evidence foundation", "node", ["tests/api/global-flight-shopping-evidence-foundation.test.js"]);
   runStep("Global travel price truth foundation", "node", ["tests/api/global-travel-price-truth-foundation.test.js"]);
   runStep("Global travel decision quality effectiveness", "node", ["tests/api/global-travel-decision-quality-effectiveness.test.js"]);

@@ -8792,9 +8792,13 @@
   }
 
   function isSafeExternalProviderUrl(url){
+    const truthEngine = window.WeishanGlobalHandoffTruthEngine;
+    if (truthEngine && typeof truthEngine.validateDestinationUrl === "function") {
+      return truthEngine.validateDestinationUrl(url, {}).allowed === true;
+    }
     try {
       const parsed = new URL(String(url || "").trim());
-      return parsed.protocol === "https:" || parsed.protocol === "http:";
+      return parsed.protocol === "https:";
     } catch (_) {
       return false;
     }
@@ -10872,11 +10876,10 @@
           resultStatus:"bookingLinkViewed",
           outputSummary:"用户查看 https provider URL；weishan 不下单、不付款、不提交订单。"
         }));
-        if (url && window.WeishanAPI && typeof window.WeishanAPI.openExternal === "function") {
-          window.WeishanAPI.openExternal(url);
-          return;
+        const gateApi = window.WeishanSafeProviderDeepLinkHandoffGate;
+        if (url && gateApi && typeof gateApi.openTrustedProviderHandoffUrl === "function") {
+          gateApi.openTrustedProviderHandoffUrl(url, { userConfirmed:true });
         }
-        if (url && window.weishan && typeof window.weishan.openExternal === "function") window.weishan.openExternal(url);
       });
     });
     hydrateDisclosureSections(host);

@@ -59,6 +59,11 @@
 
   function sanitizeSafeProviderHandoffUrl(url) {
     const value = text(url);
+    const truthEngine = window.WeishanGlobalHandoffTruthEngine;
+    if (truthEngine && typeof truthEngine.validateDestinationUrl === "function") {
+      const checked = truthEngine.validateDestinationUrl(value, { expectedHosts: TRUSTED_HOSTS });
+      return checked.allowed ? value : "";
+    }
     if (!value) return "";
     if (!/^https:\/\//i.test(value)) return "";
     const host = hostFromUrl(value);
@@ -79,7 +84,26 @@
   function evaluateSafeProviderHandoffUrl(candidateInput) {
     const candidate = candidateInput && typeof candidateInput === "object" ? candidateInput : {};
     const safeUrl = buildDefaultSafeProviderHandoffUrl(candidate);
-    const normalizedUrl = sanitizeSafeProviderHandoffUrl(safeUrl);
+    const truthEngine = window.WeishanGlobalHandoffTruthEngine;
+    const truth = truthEngine && typeof truthEngine.buildHandoff === "function"
+      ? truthEngine.buildHandoff({
+        domain: candidate.providerType === "flight_search" ? "flight" : (candidate.domain || "generic"),
+        destinationUrl: safeUrl,
+        expectedHosts: TRUSTED_HOSTS,
+        result: candidate,
+        destinationContext: candidate.destinationContext || {
+          origin: candidate.origin,
+          destination: candidate.destination,
+          departureDate: candidate.departureDate,
+          searchReconstruction: candidate.searchOnly === true
+        },
+        resultSetId: candidate.resultSetId,
+        activeResultSetId: candidate.activeResultSetId,
+        selectedResultId: candidate.selectedResultId,
+        currentResultId: candidate.currentResultId
+      })
+      : null;
+    const normalizedUrl = truth ? truth.destinationUrl || "" : sanitizeSafeProviderHandoffUrl(safeUrl);
     const host = hostFromUrl(normalizedUrl || safeUrl);
     const blockedReasons = [];
     const restrictedCategory = candidate.restrictedCategory === true || candidate.category === "restricted_provider" || candidate.category === "restricted_or_blocked";
@@ -99,8 +123,13 @@
       if (safeUrl) blockedReasons.push("malformed encoded url blocked");
     }
     if (restrictedCategory) blockedReasons.push("restricted category blocked");
+    if (truth && Array.isArray(truth.blockedReasons)) {
+      truth.blockedReasons.forEach((reason) => {
+        if (blockedReasons.indexOf(reason) < 0) blockedReasons.push(reason);
+      });
+    }
 
-    const allowed = blockedReasons.length === 0 && safeSearchOnly && !!normalizedUrl;
+    const allowed = blockedReasons.length === 0 && safeSearchOnly && !!normalizedUrl && (!truth || truth.safe === true);
     const decision = allowed ? "safe_provider_handoff_ready" : "blocked";
 
     return clone({
@@ -127,6 +156,10 @@
       trustedHosts: TRUSTED_HOSTS.slice(),
       blockedReasons: blockedReasons,
       openExternalRequested: false,
+      exactness: truth && truth.exactness || (allowed ? "SEARCH_RECONSTRUCTION" : "NONE"),
+      userVisibleExactness: truth && truth.userVisibleExactness || (allowed ? "Confirm on provider" : "Blocked"),
+      requiresExplicitUserAction: true,
+      highRiskMetrics: truth && truth.highRiskMetrics || { autoOpenCount:0, bookingActionCount:0, paymentActionCount:0, orderActionCount:0, ticketingActionCount:0 },
       redacted: true,
       audit: {
         eventType: "SAFE_PROVIDER_HANDOFF_URL_GATE_DRAFT",
