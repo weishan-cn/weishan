@@ -298,6 +298,14 @@
       document.head.appendChild(confidence);
       return;
     }
+    if (!window.WeishanGlobalCompareTruthEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalCompareTruthEngine"]')) {
+      const compareTruth = document.createElement("script");
+      compareTruth.src = "./renderer/core/globalCompareTruthEngine.js?v=4.2.8";
+      compareTruth.dataset.weishanDynamic = "WeishanGlobalCompareTruthEngine";
+      compareTruth.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(compareTruth);
+      return;
+    }
     if (!window.WeishanGlobalShoppingComparisonMatrix && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingComparisonMatrix"]')) {
       const matrix = document.createElement("script");
       matrix.src = "./renderer/core/globalShoppingComparisonMatrix.js?v=4.2.8";

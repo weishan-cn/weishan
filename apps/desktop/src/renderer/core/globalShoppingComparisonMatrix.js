@@ -16,6 +16,21 @@
     return String(value == null ? "" : value).trim();
   }
 
+  function compareTruthApi() {
+    return window.WeishanGlobalCompareTruthEngine || {};
+  }
+
+  function buildTruthSet(category, candidates) {
+    return typeof compareTruthApi().buildCompareSet === "function"
+      ? compareTruthApi().buildCompareSet({ domain:category, candidates:candidates })
+      : null;
+  }
+
+  function naturalUnknown(value, fallback) {
+    const result = text(value);
+    return result || fallback || "Not provided";
+  }
+
   function buildRow(category, item, index) {
     const safe = item && typeof item === "object" ? item : {};
     const landed = safe.landedCostResult && typeof safe.landedCostResult === "object" ? safe.landedCostResult : {};
@@ -55,10 +70,56 @@
     });
   }
 
+  function buildTruthRow(category, truthRow, index) {
+    const safe = truthRow && truthRow.candidate && typeof truthRow.candidate === "object" ? truthRow.candidate : {};
+    const base = buildRow(category, safe, index);
+    const amount = truthRow && truthRow.amount != null ? String(truthRow.amount) : "";
+    const currency = text(truthRow && truthRow.currency || "");
+    const priceLabel = amount && currency ? amount + " " + currency : naturalUnknown(base.price || base.ticketPrice || base.roomPrice, "Price not provided");
+    const common = Object.assign(base, {
+      rank:index + 1,
+      provider:text((truthRow && truthRow.provider) || base.provider || ""),
+      compareState:text(truthRow && truthRow.compareState || "UNKNOWN"),
+      priceBasis:text(truthRow && truthRow.priceBasis || ""),
+      availability:text(truthRow && truthRow.availability || ""),
+      freshness:text(truthRow && truthRow.freshness || ""),
+      materialDifferences:Array.isArray(truthRow && truthRow.userReasons) ? truthRow.userReasons.slice() : []
+    });
+    if (category === "flight") return Object.assign(common, { ticketPrice:priceLabel });
+    if (category === "hotel") return Object.assign(common, { roomPrice:priceLabel });
+    return Object.assign(common, { price:priceLabel });
+  }
+
   function buildGlobalShoppingComparisonMatrix(input) {
     const safe = input && typeof input === "object" ? input : {};
     const category = text(safe.category || "product");
-    const rows = toArray(safe.candidates).slice(0, 5).map(function (item, index) {
+    const candidates = toArray(safe.candidates);
+    const truthSet = buildTruthSet(category, candidates);
+    if (truthSet) {
+      const rows = toArray(truthSet.rows).map(function (item, index) {
+        return buildTruthRow(category, item, index);
+      });
+      return clone({
+        matrixName:MATRIX_NAME,
+        appVersion:GLOBAL_SHOPPING_COMPARISON_MATRIX_VERSION,
+        category:category,
+        compareStatus:truthSet.status,
+        rows:rows,
+        rowCount:rows.length,
+        rejectedRows:toArray(truthSet.rejected),
+        scanReduction:{
+          rawItems:truthSet.rawItems,
+          validComparable:truthSet.validComparable,
+          partial:truthSet.partial,
+          notComparable:truthSet.notComparable,
+          primaryItemsUserScans:truthSet.primaryItemsUserScans
+        },
+        userCopy:truthSet.userCopy,
+        compareTruth:truthSet,
+        redacted:true
+      });
+    }
+    const rows = candidates.slice(0, 5).map(function (item, index) {
       return buildRow(category, item, index);
     });
     return clone({

@@ -57,7 +57,9 @@
       candidates:safe.candidates
     });
     const rows = toArray(matrix.rows);
-    const winner = rows[0] || null;
+    const truthStatus = text(matrix.compareStatus || "");
+    const hasTruth = !!truthStatus;
+    const winner = !hasTruth || truthStatus === "COMPARABLE" ? (rows[0] || null) : null;
     return clone({
       engineName:ENGINE_NAME,
       appVersion:GLOBAL_SHOPPING_MULTI_PROVIDER_COMPARISON_ENGINE_VERSION,
@@ -67,6 +69,8 @@
         priceLabel:priceAdvantage(winner),
         trust:text(winner.trust || winner.providerTrust || "")
       } : null,
+      comparisonState:truthStatus || "LEGACY_UNVERIFIED_COMPARISON",
+      primaryComparableCount:matrix.scanReduction ? matrix.scanReduction.validComparable : rows.length,
       alternatives:rows.slice(1, 3).map(function (row) {
         return {
           provider:text(row.provider || ""),
