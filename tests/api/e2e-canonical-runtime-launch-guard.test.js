@@ -1,4 +1,5 @@
 const assert = require("assert");
+const os = require("os");
 const path = require("path");
 
 const {
@@ -40,6 +41,15 @@ function run() {
   assert.strictEqual(electronDescriptor.buildType, "SOURCE_DEV_ELECTRON");
   assert.strictEqual(electronDescriptor.launchRoot, "REPO_APPS_DESKTOP");
   assert.strictEqual(electronDescriptor.executableSource, "APPS_DESKTOP_NODE_MODULES_ELECTRON");
+  assert.strictEqual(electronDescriptor.userDataIsolation, "DEFAULT_PROFILE");
+
+  const isolatedDescriptor = assertCanonicalE2ERuntime({
+    mode: "electron",
+    executablePath: electronExecutable,
+    args: [".", "--user-data-dir=" + path.join(os.tmpdir(), "weishan-e2e-user-data-fixture")],
+    cwd: desktopDir
+  });
+  assert.strictEqual(isolatedDescriptor.userDataIsolation, "TEMP_E2E_PROFILE");
 
   const browserDescriptor = assertCanonicalE2ERuntime({
     mode: "browser",
@@ -73,7 +83,14 @@ function run() {
     executablePath: electronExecutable,
     args: [".."],
     cwd: desktopDir
-  }), /args must be/);
+  }), /first arg must be/);
+
+  assertViolation(() => assertCanonicalE2ERuntime({
+    mode: "electron",
+    executablePath: electronExecutable,
+    args: [".", "--user-data-dir=/Applications/weishan.app"],
+    cwd: desktopDir
+  }), /E2E userData must be an isolated temp profile/);
 
   assertViolation(() => assertCanonicalE2ERuntime({
     mode: "browser",

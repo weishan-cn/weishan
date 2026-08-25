@@ -1,6 +1,7 @@
 const { _electron: electron } = require("@playwright/test");
-const { existsSync } = require("fs");
+const { existsSync, mkdtempSync, rmSync } = require("fs");
 const { createRequire } = require("module");
+const os = require("os");
 const path = require("path");
 
 const repoRoot = path.resolve(__dirname, "../..");
@@ -30,13 +31,22 @@ function assertCanonicalE2ERuntime(candidate) {
     const executablePath = normalizePathForGuard(candidate.executablePath);
     const electronPackage = path.join(desktopDir, "node_modules/electron");
     const args = Array.isArray(candidate.args) ? candidate.args : [];
-    const joinedArgs = args.join(" ");
+    const userDataArg = args.find((arg) => /^--user-data-dir=/.test(String(arg || "")));
+    const unsupportedArgs = args.filter((arg, index) => index > 0 && !/^--user-data-dir=/.test(String(arg || "")));
+    const userDataDir = userDataArg ? normalizePathForGuard(userDataArg.replace(/^--user-data-dir=/, "")) : "";
+    const e2eUserDataRoot = path.join(os.tmpdir(), "weishan-e2e-user-data-");
 
     if (cwd !== desktopDir) {
       throw new Error(`E2E_CANONICAL_RUNTIME_VIOLATION: cwd must be apps/desktop, got ${cwd}`);
     }
-    if (joinedArgs !== ".") {
-      throw new Error(`E2E_CANONICAL_RUNTIME_VIOLATION: args must be ".", got ${joinedArgs || "<empty>"}`);
+    if (args[0] !== ".") {
+      throw new Error(`E2E_CANONICAL_RUNTIME_VIOLATION: first arg must be ".", got ${args[0] || "<empty>"}`);
+    }
+    if (unsupportedArgs.length) {
+      throw new Error(`E2E_CANONICAL_RUNTIME_VIOLATION: unsupported args ${unsupportedArgs.join(" ")}`);
+    }
+    if (userDataDir && !userDataDir.startsWith(e2eUserDataRoot)) {
+      throw new Error("E2E_CANONICAL_RUNTIME_VIOLATION: E2E userData must be an isolated temp profile");
     }
     if (!isPathInside(executablePath, electronPackage)) {
       throw new Error("E2E_CANONICAL_RUNTIME_VIOLATION: Electron executable must resolve from apps/desktop/node_modules/electron");
@@ -54,7 +64,8 @@ function assertCanonicalE2ERuntime(candidate) {
       mode: "electron",
       buildType: "SOURCE_DEV_ELECTRON",
       launchRoot: "REPO_APPS_DESKTOP",
-      executableSource: "APPS_DESKTOP_NODE_MODULES_ELECTRON"
+      executableSource: "APPS_DESKTOP_NODE_MODULES_ELECTRON",
+      userDataIsolation: userDataDir ? "TEMP_E2E_PROFILE" : "DEFAULT_PROFILE"
     };
   }
 
@@ -84,7 +95,7 @@ function getCanonicalE2ERuntimeDescriptor() {
   if (existsSync(electronPackage)) {
     const desktopRequire = createRequire(path.join(desktopDir, "package.json"));
     const executablePath = desktopRequire("electron");
-    const args = ["."];
+    const args = [".", "--user-data-dir=" + path.join(os.tmpdir(), "weishan-e2e-user-data-descriptor")];
     return assertCanonicalE2ERuntime({
       mode: "electron",
       executablePath,
@@ -103,17 +114,36 @@ async function launchWeishan(browser) {
   if (existsSync(electronPackage)) {
     const desktopRequire = createRequire(path.join(desktopDir, "package.json"));
     const executablePath = desktopRequire("electron");
-    const args = ["."];
+    const e2eUserDataDir = mkdtempSync(path.join(os.tmpdir(), "weishan-e2e-user-data-"));
+    const args = [".", "--user-data-dir=" + e2eUserDataDir];
     const runtimeIdentity = assertCanonicalE2ERuntime({
       mode: "electron",
       executablePath,
       args,
       cwd: desktopDir
     });
-    const app = await electron.launch({ executablePath, args, cwd: desktopDir });
-    const page = await app.firstWindow();
-    await page.waitForLoadState("domcontentloaded");
-    return { page, close: () => app.close(), mode: "electron", electronApp: app, runtimeIdentity };
+    let app;
+    try {
+      app = await electron.launch({ executablePath, args, cwd: desktopDir });
+      const page = await Promise.race([
+        app.firstWindow(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("E2E_RUNTIME_WINDOW_TIMEOUT: canonical source Electron launched but no first window appeared within 15000ms")), 15000))
+      ]);
+      await page.waitForLoadState("domcontentloaded");
+      return {
+        page,
+        close: async () => {
+          try { await app.close(); } finally { rmSync(e2eUserDataDir, { recursive:true, force:true }); }
+        },
+        mode: "electron",
+        electronApp: app,
+        runtimeIdentity
+      };
+    } catch (error) {
+      try { if (app) await app.close(); } catch (_) {}
+      try { rmSync(e2eUserDataDir, { recursive:true, force:true }); } catch (_) {}
+      throw error;
+    }
   }
   const runtimeIdentity = assertCanonicalE2ERuntime({
     mode: "browser",
