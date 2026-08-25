@@ -578,6 +578,14 @@
       document.head.appendChild(executionGate);
       return;
     }
+    if (!window.WeishanGlobalRecommendTruthEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalRecommendTruthEngine"]')) {
+      const recommendTruth = document.createElement("script");
+      recommendTruth.src = "./renderer/core/globalRecommendTruthEngine.js?v=4.2.8";
+      recommendTruth.dataset.weishanDynamic = "WeishanGlobalRecommendTruthEngine";
+      recommendTruth.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(recommendTruth);
+      return;
+    }
     if (!window.WeishanGlobalShoppingDecisionEngine && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingDecisionEngine"]')) {
       const decision = document.createElement("script");
       decision.src = "./renderer/core/globalShoppingDecisionEngine.js?v=4.2.8";

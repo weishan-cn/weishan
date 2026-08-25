@@ -27,6 +27,9 @@
   function comparisonApi() {
     return window.WeishanGlobalShoppingComparisonMatrix || {};
   }
+  function recommendApi() {
+    return window.WeishanGlobalRecommendTruthEngine || {};
+  }
 
   function userPreferenceApi() {
     return window.WeishanGlobalShoppingUserPreferenceModel || {};
@@ -156,6 +159,24 @@
     }
     return list[0];
   }
+  function buildTruthRecommendation(input, category, candidates, userPreference) {
+    if (typeof recommendApi().buildRecommendation !== "function") return null;
+    return recommendApi().buildRecommendation({
+      domain:"shopping",
+      category:category,
+      candidates:candidates,
+      userPreference:userPreference,
+      userQuery:text(input && (input.userQuery || input.query || input.preferenceText || ""))
+    });
+  }
+  function isSelectableTruthRecommendation(truth) {
+    const state = text(obj(truth).state || "");
+    return state === "RECOMMENDED" || state === "SINGLE_VALID_RESULT";
+  }
+  function chooseCandidateFromTruth(truth) {
+    const selected = obj(obj(truth).selected);
+    return Object.keys(selected).length ? selected : null;
+  }
 
   function warningList(candidate, confidence, preference) {
     const warnings = [];
@@ -221,7 +242,10 @@
     const category = text(safe.category || "product");
     const candidates = toArray(safe.candidates);
     const userPreference = buildPreference(safe.userPreference);
-    const recommendation = chooseCandidate(candidates, userPreference);
+    const truthRecommendation = buildTruthRecommendation(safe, category, candidates, userPreference);
+    const recommendation = truthRecommendation
+      ? (isSelectableTruthRecommendation(truthRecommendation) ? chooseCandidateFromTruth(truthRecommendation) : null)
+      : chooseCandidate(candidates, userPreference);
     const alternatives = candidates.filter(function (item) {
       return recommendation ? item !== recommendation : true;
     }).slice(0, 2);
@@ -359,6 +383,8 @@
         fallbackInfo:clone(recommendation.fallbackInfo || null),
         sourceType:text(recommendation.sourceType || "")
       } : null,
+      recommendationState:text(obj(truthRecommendation).state || (recommendation ? "RECOMMENDED" : "NO_VALID_CANDIDATE")),
+      recommendationTruth:clone(truthRecommendation),
       alternatives:alternatives.map(function (item) {
         return {
           platformName:text(item.platformName || ""),
