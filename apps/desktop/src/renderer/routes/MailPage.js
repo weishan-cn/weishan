@@ -1043,6 +1043,19 @@
     return patterns.some((pattern) => pattern.test(text));
   }
   function classifyMailMessage(m){
+    if (window.WeishanMailTakeoverUserIntelligence && window.WeishanMailTakeoverUserIntelligence.analyzeMailbox) {
+      const result = window.WeishanMailTakeoverUserIntelligence.analyzeMailbox([m], { userEmails:[(window.MailApi.activeAccount() || {}).email || ""] });
+      const insight = result.messages[0] || {};
+      return {
+        important:insight.attentionState === "IMPORTANT" || insight.attentionState === "URGENT",
+        tasks:(insight.actionItems || []).some((item) => item.owner === "USER_ACTION"),
+        memory:["BILL", "ORDER", "TRAVEL", "SECURITY"].includes(insight.kind),
+        waiting:result.threads.some((thread) => thread.replyState === "WAITING_ON_THEM" || thread.replyState === "NEEDS_REPLY"),
+        needsReply:result.threads.some((thread) => thread.replyState === "NEEDS_REPLY"),
+        lowPriority:insight.attentionState === "LOW_PRIORITY",
+        kind:insight.kind || "UPDATE"
+      };
+    }
     const text = haystack(m);
     const flags = mFlags(m);
     const flagged = !!(m.flagged || m.starred || m.important || flags.includes("\\flagged") || flags.includes("flagged") || flags.includes("important"));
@@ -1075,6 +1088,11 @@
   }
   function messagesForTab(account, tab){
     const msgs = account && account.connected ? (account.messages || []) : [];
+    if (tab === "today" && window.WeishanMailTakeoverUserIntelligence) {
+      const analysis = window.WeishanMailTakeoverUserIntelligence.analyzeMailbox(msgs, { userEmails:[(account && account.email) || ""] });
+      const ids = new Set([].concat(analysis.today.needsYourAttention || [], analysis.today.importantUpdates || []).map((item) => item.messageId));
+      return msgs.filter((msg) => ids.has(String(msg.messageId || msg.id || msg.uid || `${msg.subject || msg.title || ""}:${msg.receivedAt || msg.date || ""}`)));
+    }
     if (tab === "important") return msgs.filter(isImportant);
     if (tab === "drafts") return [];
     if (tab === "tasks") return msgs.filter(isTask);
@@ -1083,6 +1101,7 @@
     return msgs;
   }
   function emptyTextForTab(tab){
+    if (tab === "today") return t("mailWorkspaceTodayEmpty");
     if (tab === "important") return t("mailImportantEmpty");
     if (tab === "drafts") return t("mailDraftsUnavailable");
     if (tab === "tasks") return t("mailTasksEmpty");
@@ -1265,6 +1284,7 @@
 
   function workspaceTabs(){
     return [
+      ["today", "mailWorkspaceToday", "mailWorkspaceTodayEmpty"],
       ["inbox", "mailWorkspaceInbox", "mailWorkspaceInboxEmpty"],
       ["important", "mailWorkspaceImportant", "mailWorkspaceImportantEmpty"],
       ["drafts", "mailWorkspaceDrafts", "mailWorkspaceDraftsEmpty"],
@@ -1276,6 +1296,23 @@
 
   function workspaceBody(account){
     const tab = workspaceTabs().find((x) => x[0] === activeWorkspaceTab) || workspaceTabs()[0];
+    if (activeWorkspaceTab === "today" && account && account.connected && window.WeishanMailTakeoverUserIntelligence) {
+      const analysis = window.WeishanMailTakeoverUserIntelligence.analyzeMailbox(account.messages || [], { userEmails:[(account && account.email) || ""] });
+      const today = analysis.today || {};
+      const needs = (today.needsYourAttention || []).slice(0, 3);
+      const waiting = (today.waiting || []).slice(0, 3);
+      const updates = (today.importantUpdates || []).slice(0, 3);
+      const low = today.lowPrioritySummary || { count:0 };
+      return `
+      <div class="mail-workspace-state" data-mail-takeover-today>
+        <b>${t("mailTakeoverTodayTitle")} · ${esc((needs.length + waiting.length + updates.length) || 0)}</b>
+        <p>${t("mailTakeoverTodayDesc")}</p>
+        ${needs.length ? `<p><b>${t("mailTakeoverNeedsYou")}：</b>${needs.map((item) => esc(item.subject)).join(" · ")}</p>` : ""}
+        ${waiting.length ? `<p><b>${t("mailTakeoverWaiting")}：</b>${waiting.map((item) => esc(item.summary.context)).join(" · ")}</p>` : ""}
+        ${updates.length ? `<p><b>${t("mailTakeoverImportantUpdates")}：</b>${updates.map((item) => esc(item.subject)).join(" · ")}</p>` : ""}
+        ${low.count ? `<p><b>${window.I18n.format("mailTakeoverLowPriority", { count:low.count })}</b></p>` : ""}
+      </div>`;
+    }
     const count = messagesForTab(account, activeWorkspaceTab).length;
     return `
       <div class="mail-workspace-state">
