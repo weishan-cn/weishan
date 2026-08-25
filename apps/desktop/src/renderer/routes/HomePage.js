@@ -7131,6 +7131,35 @@
     return "";
   }
 
+  function unifiedDesktopFlowHomePanel(){
+    const api = window.WeishanUnifiedDesktopFlowViewModel;
+    const examples = [
+      "iPhone 17 Pro 512GB cheapest",
+      "成都到东京9月10日两个人经济舱",
+      "上海9月15到18日两个人酒店",
+      "10月香港出发7晚邮轮阳台房"
+    ];
+    const model = api && typeof api.buildUnifiedDesktopFlowViewModel === "function"
+      ? api.buildUnifiedDesktopFlowViewModel({ query:commandInputDraft || "Ask for a product, flight, hotel, or cruise", deterministicFixturesOnly:true })
+      : null;
+    const flow = model && Array.isArray(model.highLevelFlow) ? model.highLevelFlow.join(" → ") : "Ask → Understand → Search → Compare → Recommend → Handoff";
+    const chip = model && model.domainChip && model.domain !== "UNKNOWN" ? `<strong>${esc(model.domainChip)}</strong>` : "<strong>One request box</strong>";
+    return `<section class="commerce-home-card weishan-unified-desktop-flow-home" data-unified-desktop-flow-home="true" aria-label="One Weishan unified request flow">
+      <div class="commerce-home-card-main">
+        <div>
+          <b>One Weishan</b>
+          <p>Ask for products, flights, hotels, or cruises in the same box. Weishan routes internally; you do not need to choose a Provider, API, or network.</p>
+        </div>
+        ${chip}
+      </div>
+      <p class="cmd-history-meta">${esc(flow)}</p>
+      <div class="commerce-subplan-draft-chips">
+        ${examples.map((example) => `<button class="commerce-subplan-draft-chip" type="button" data-commerce-action-chip="${esc(example)}">${esc(example)}</button>`).join("")}
+      </div>
+      <p class="cmd-history-meta">Prices stay honest: current, indicative, test-only, or unavailable. Weishan never checks out, books, orders, tickets, or takes payment.</p>
+    </section>`;
+  }
+
   function syncHomeTopbar(snapshot){
     const topbar = document.querySelector(".topbar");
     if (!topbar) return;
@@ -7286,6 +7315,7 @@
         </div>
 
         ${globalShoppingActive ? "" : `<aside class="home-v205-side">
+          ${unifiedDesktopFlowHomePanel()}
           ${modulePanel()}
           <div class="cmd-side-card">
             <h3>${t("queueTitle")}</h3>

@@ -10,6 +10,18 @@ The product path is:
 
 Weishan does not perform checkout, payment, order execution, booking execution, ticket issuance, account automation, or fulfillment. The user decides and completes any purchase on the authorized destination platform.
 
+## Unified Desktop Flow
+
+The desktop product surface treats shopping and travel as one Weishan interaction pattern:
+
+`ASK → UNDERSTAND → SEARCH → COMPARE → RECOMMEND → HANDOFF`
+
+The first user entry can accept a product, flight, hotel, or cruise request without asking the user to choose a Provider, API, network, or adapter. Domain routing remains normalized and local-first; the unified layer consumes the existing shopping and travel truth contracts rather than replacing them.
+
+Shared user-facing states are limited to meanings that are genuinely common: current price, indicative or starting-from price, price unavailable, test/evaluation data, source unavailable, and safe external handoff. Domain semantics remain separate where comparison rules differ.
+
+The unified desktop flow must not hide current coverage maturity. Shopping has stronger controlled real-price coverage in selected categories, while flight remains test/live-source-blocked, hotel remains provider-pending, and cruise is currently handoff-only. The UI should make these states honest rather than symmetrical.
+
 ## Frozen Product Invariants
 
 - `PRICE_TRUTH > RESULT_QUANTITY`

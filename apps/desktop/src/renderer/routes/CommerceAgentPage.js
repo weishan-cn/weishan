@@ -73,6 +73,14 @@
       document.head.appendChild(travelUx);
       return;
     }
+    if (!window.WeishanUnifiedDesktopFlowViewModel && !document.querySelector('script[data-weishan-dynamic="WeishanUnifiedDesktopFlowViewModel"]')) {
+      const unifiedFlow = document.createElement("script");
+      unifiedFlow.src = "./renderer/core/unifiedDesktopFlowViewModel.js?v=4.3.6";
+      unifiedFlow.dataset.weishanDynamic = "WeishanUnifiedDesktopFlowViewModel";
+      unifiedFlow.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(unifiedFlow);
+      return;
+    }
     if (!window.WeishanGlobalShoppingDataProvenance && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingDataProvenance"]')) {
       const provenance = document.createElement("script");
       provenance.src = "./renderer/core/globalShoppingDataProvenance.js?v=4.2.8";
@@ -4027,10 +4035,53 @@
     </section>`;
   }
 
+  function commerceUnifiedDesktopFlowPanelHtml(task, options){
+    const api = window.WeishanUnifiedDesktopFlowViewModel;
+    if (!api || typeof api.buildUnifiedDesktopFlowViewModel !== "function" || typeof api.renderUnifiedDesktopFlowHtml !== "function") return "";
+    const opts = options && typeof options === "object" ? options : {};
+    const raw = String(task && (task.inputSummary || task.rawInput || task.title || task.text) || "");
+    const category = String(task && (task.category || task.commerceCategory || task.intentCategory) || "");
+    const isFlight = category === "flight" || commerceIsSimpleFlightTask(task);
+    const fields = isFlight ? commerceSimpleFlightFields(task) : {};
+    const safeProviderHandoffUrl = String(opts.safeProviderHandoffUrl || "").trim();
+    const result = isFlight ? {
+      origin:fields.origin,
+      destination:fields.destination,
+      departureDate:fields.dateDisplay || fields.date,
+      cabin:fields.cabin || "",
+      stops:fields.directOnly ? "direct preferred" : "to compare",
+      priceState:"PRICE_UNAVAILABLE",
+      priceBasis:"TOTAL_ITINERARY",
+      handoff:{ url:safeProviderHandoffUrl, quality:safeProviderHandoffUrl ? "EXACT_SEARCH_RECONSTRUCTION" : "NO_HANDOFF" }
+    } : {
+      productName:raw || "Shopping request",
+      variant:"variant must match",
+      condition:"condition must match",
+      availability:"availability must be confirmed on the external site",
+      priceState:"PRICE_UNAVAILABLE",
+      priceBasis:"ITEM_PRICE",
+      handoff:{ url:"", quality:"NO_HANDOFF" }
+    };
+    const model = api.buildUnifiedDesktopFlowViewModel({
+      query:raw,
+      domain:isFlight ? "flight" : category || "shopping",
+      constraints:isFlight ? {
+        origin:fields.origin,
+        destination:fields.destination,
+        departureDate:fields.dateDisplay || fields.date,
+        cabin:fields.cabin || ""
+      } : {},
+      deterministicFixturesOnly:true,
+      results:[result]
+    });
+    return api.renderUnifiedDesktopFlowHtml(model);
+  }
+
   function commerceOneScreenResultPanelHtml(task){
     const card = globalProcurementUserFacingCard(task);
     if (productWorkspaceEnabled(task) && card) {
       return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-global-shopping-workspace-panel" aria-label="Global Shopping Workspace">
+        ${commerceUnifiedDesktopFlowPanelHtml(task)}
         ${globalShoppingWorkspaceHtml(task)}
       </section>`;
     }
@@ -4043,6 +4094,7 @@
     const providerConnectionReadinessHtml = providerConnectionReadinessConsoleDisclosure(task);
     const secureApiKeyStorageHtml = commerceSecureApiKeyStorageConsoleDisclosure(task);
     const resultCardRulesHtml = globalProcurementUserFacingResultCardsRulesDisclosure();
+    const unifiedFlowHtml = commerceUnifiedDesktopFlowPanelHtml(task);
     return `<section class="commerce-result-summary-panel commerce-one-screen-result" aria-label="最终结果">
       <div class="commerce-result-summary-head">
         <div class="commerce-result-summary-headline">
@@ -4052,6 +4104,7 @@
         <p>普通用户默认只看这一屏结果；暂无真实价格结果时，只展示搜索条件和必要安全提示。</p>
       </div>
       <div class="commerce-one-screen-body">
+        ${unifiedFlowHtml}
         <section class="commerce-one-screen-card">
           <h4>暂无真实价格结果</h4>
           <p>当前尚未接入真实只读价格源，不能展示价格。</p>
@@ -8059,6 +8112,7 @@
     const guardedPriceCardHtml = commerceGuardedFlightPriceCardHtml(task);
     const flightWorkflowHtml = commerceFlightWorkflowPanelHtml(task);
     const zeroLearningTravelHtml = commerceTravelZeroLearningUxPanelHtml(task, safeProviderHandoffUrl);
+    const unifiedFlowHtml = commerceUnifiedDesktopFlowPanelHtml(task, { safeProviderHandoffUrl });
     const workflowNeedsClarification = flightWorkflowHtml.indexOf("需要补充信息") >= 0;
     if (workflowNeedsClarification) return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-simple-flight-result" aria-label="机票搜索结果" data-commerce-task-id="${esc(task && task.taskId || task && task.id || "")}"><div class="commerce-result-summary-head"><div class="commerce-result-summary-headline"><span>机票请求工作流</span><strong>需要补充信息</strong></div></div><div class="commerce-one-screen-body"><section class="commerce-one-screen-card">${flightWorkflowHtml}</section></div>${commerceSafetyAndDebugDetailsDisclosure(task, [])}<p class="commerce-result-summary-copy-feedback" data-commerce-copy-feedback data-commerce-platform-template-feedback aria-live="polite"></p></section>`;
     return `<section class="commerce-result-summary-panel commerce-one-screen-result commerce-simple-flight-result" aria-label="机票搜索结果" data-commerce-task-id="${esc(task && task.taskId || task && task.id || "")}">
@@ -8078,6 +8132,7 @@
           <p>日期：${esc(fields.dateDisplay || fields.date)}</p>
           <p>直达偏好：${esc(fields.directPreference || "直达优先")}</p>
           <p>排序：${esc(fields.goal)}</p>
+          ${unifiedFlowHtml}
           ${zeroLearningTravelHtml}
           ${flightWorkflowHtml}
           ${commerceCleanResultSurfaceHtml(task, { guardedPriceCardHtml })}
