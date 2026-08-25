@@ -17,7 +17,7 @@
     if (category === "USER_QUESTION" || category === "PROVIDER_REPLY") communicationPolicy = "DRAFT_ONLY";
     if (["BILLING_FINANCIAL", "KYC_IDENTITY", "SECURITY_REPORT"].includes(category)) communicationPolicy = "HUMAN_APPROVAL_REQUIRED";
     if (["LEGAL_CONTRACT", "SECURITY_OTP", "SECURITY_NOTIFICATION"].includes(category)) communicationPolicy = "NEVER_AUTO_SEND";
-    if (safe.senderSpoofingSuspected === true || safe.promptInjectionDetected === true) communicationPolicy = "HUMAN_APPROVAL_REQUIRED";
+    if (safe.senderSpoofingSuspected === true || safe.promptInjectionDetected === true || Number(safe.unsafeLinkCount || 0) > 0) communicationPolicy = "HUMAN_APPROVAL_REQUIRED";
 
     return clone({
       communicationPolicy,

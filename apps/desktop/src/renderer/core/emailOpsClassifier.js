@@ -51,8 +51,9 @@
     const providerId = detectProvider(safe);
     const hasHighRiskAttachment = (safe.attachments || []).some(function (item) { return item.highRisk === true; });
     const hasLink = (safe.links || []).length > 0;
+    const hasUnsafeLink = (safe.links || []).some(function (item) { return item.unsafe === true; });
     const commandInjection = /ignore (all )?(previous|system|policy)|run (this )?command|open terminal|send (the )?(api|client|private|password|secret|token)/i.test(body);
-    const isOtp = /\b(otp|one[- ]time|verification code|验证码|安全码|code)\b/i.test(body) && /\b\d{4,8}\b/.test(body);
+    const isOtp = /\b(otp|one[- ]time|verification code|验证码|安全码|code)\b/i.test(body) && (/\b\d{4,8}\b/.test(body) || /\[(otp-)?redacted\]/i.test(body));
     const isPasswordReset = /password reset|reset your password|forgot password|重置密码/i.test(body);
     const isLegal = /agreement|terms|contract|legal|arbitration|服务协议|合同|条款/i.test(body);
     const isPayment = /payment|payout|bank|wire|swift|iban|routing|payoneer|invoice|billing|refund|银行卡|银行|付款|收款|发票/i.test(body);
@@ -72,8 +73,8 @@
     else if (isPayment) category = "BILLING_FINANCIAL";
     else if (isKyc) category = "KYC_IDENTITY";
     else if (isSecurity) category = "SECURITY_REPORT";
-    else if (providerId) category = "PROVIDER_REPLY";
     else if (isMarketing) category = "MARKETING";
+    else if (providerId) category = "PROVIDER_REPLY";
     else if (isThankYou) category = "SPAM_NOISE";
     else if (isBug) category = "USER_BUG_REPORT";
     else if (isFeedback) category = "USER_FEEDBACK";
@@ -82,6 +83,7 @@
     const riskFlags = [];
     if (commandInjection) riskFlags.push("PROMPT_INJECTION_ATTEMPT");
     if (hasLink) riskFlags.push("LINKS_NOT_AUTO_OPENED");
+    if (hasUnsafeLink) riskFlags.push("UNSAFE_LINK_REVIEW");
     if (hasHighRiskAttachment) riskFlags.push("HIGH_RISK_ATTACHMENT_NOT_OPENED");
     if (spoofing) riskFlags.push("SENDER_SPOOFING_REVIEW");
     if (category === "SECURITY_OTP") riskFlags.push("OTP_EPHEMERAL_DO_NOT_PERSIST");
@@ -97,6 +99,7 @@
       riskFlags,
       promptInjectionDetected:commandInjection,
       linkCount:(safe.links || []).length,
+      unsafeLinkCount:(safe.links || []).filter(function (item) { return item.unsafe === true; }).length,
       highRiskAttachmentCount:(safe.attachments || []).filter(function (item) { return item.highRisk === true; }).length,
       senderSpoofingSuspected:spoofing,
       reason:`${category}:${confidence}`,

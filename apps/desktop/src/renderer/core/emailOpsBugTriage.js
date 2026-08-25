@@ -30,12 +30,21 @@
   }
 
   function signatureFor(message) {
-    const haystack = lower(`${obj(message).subject || ""} ${obj(message).sanitizedBody || ""}`)
+    const raw = lower(`${obj(message).subject || ""} ${obj(message).sanitizedBody || ""}`);
+    const domain = domainFor(message);
+    const symptomTags = [];
+    if (/wrong total|total.*wrong|tax|fee|taxes|fees|总价|费用/.test(raw)) symptomTags.push("wrong-total-tax-fee");
+    if (/wrong price|price.*wrong|价格不对/.test(raw) && !symptomTags.includes("wrong-total-tax-fee")) symptomTags.push("wrong-price");
+    if (/handoff|wrong provider|wrong merchant|跳转错误/.test(raw)) symptomTags.push("wrong-handoff");
+    if (/crash|cannot open|startup|无法启动|崩溃/.test(raw)) symptomTags.push("crash-startup");
+    if (/security|secret|credential|漏洞|泄露/.test(raw)) symptomTags.push("security");
+    if (symptomTags.length > 0) return `${domain}:${symptomTags.sort().join("|")}`;
+
+    const haystack = raw
       .replace(/\b\d{4,}\b/g, "n")
       .replace(/https?:\/\/\S+/g, "url")
       .replace(/[^a-z0-9\u4e00-\u9fff]+/g, " ")
       .trim();
-    const domain = domainFor(message);
     const tokens = haystack.split(/\s+/).filter(function (token) {
       return token.length > 2 && !["the", "and", "with", "from", "please", "thanks"].includes(token);
     }).slice(0, 10).join(" ");

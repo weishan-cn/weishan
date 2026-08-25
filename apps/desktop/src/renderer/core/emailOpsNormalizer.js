@@ -5,7 +5,7 @@
   const MODULE_NAME = "email_ops_normalizer_v1";
   const HIGH_RISK_ATTACHMENT_EXTENSIONS = Object.freeze(["app", "bat", "cmd", "com", "dmg", "exe", "js", "jse", "msi", "pkg", "ps1", "scr", "sh", "vbs", "wsf", "zip", "rar", "7z", "docm", "xlsm", "pptm"]);
   const SECRET_PATTERNS = [
-    /\b(?:otp|verification code|验证码|code)\s*[:：]?\s*[0-9]{4,8}\b/gi,
+    /\b(?:otp|one[- ]time(?: password| code)?|verification code|验证码|安全码|code)\b\s*(?:is|为|是|[:：=])?\s*[0-9]{4,8}\b/gi,
     /\b(?:password|passwd|pwd)\s*[:=：]\s*\S+/gi,
     /\b(?:api[_ -]?key|token|secret|client[_ -]?secret|authorization|bearer)\s*[:=：]\s*\S+/gi,
     /-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g
@@ -66,13 +66,57 @@
     });
   }
 
+  function isPrivateHost(host) {
+    return /^(localhost|127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/i.test(host);
+  }
+
   function extractLinks(value) {
-    const matches = text(value).match(/https?:\/\/[^\s<>"')]+/gi) || [];
-    return matches.slice(0, 20).map(function (url) {
-      let host = "";
-      try { host = new URL(url).hostname.toLowerCase(); } catch (_) {}
-      return { url, host, opened:false, requiresPolicyReview:true };
+    const htmlHrefMatches = [];
+    text(value).replace(/\bhref\s*=\s*["']?([^"'\s>]+)/gi, function (_, href) {
+      htmlHrefMatches.push(href);
+      return "";
     });
+    const inlineMatches = text(value).match(/(?:https?:\/\/|javascript:|data:)[^\s<>"')]+/gi) || [];
+    const matches = htmlHrefMatches.concat(inlineMatches);
+    const seen = {};
+    return matches.filter(function (url) {
+      const key = text(url);
+      if (!key || seen[key]) return false;
+      seen[key] = true;
+      return true;
+    }).slice(0, 20).map(function (url) {
+      let host = "";
+      let protocol = "";
+      let hasUserInfo = false;
+      let encodedRedirect = false;
+      try {
+        const parsed = new URL(url);
+        host = parsed.hostname.toLowerCase();
+        protocol = parsed.protocol.replace(":", "").toLowerCase();
+        hasUserInfo = Boolean(parsed.username || parsed.password);
+        encodedRedirect = /(^|[?&])(url|u|redirect|redirect_uri|target|next)=https?%3a%2f%2f/i.test(parsed.search);
+      } catch (_) {
+        protocol = lowerScheme(url);
+      }
+      const unsafe = protocol === "javascript" || protocol === "data" || hasUserInfo || encodedRedirect || isPrivateHost(host);
+      return {
+        url,
+        host,
+        scheme:protocol || "",
+        opened:false,
+        requiresPolicyReview:true,
+        unsafe,
+        privateHost:isPrivateHost(host),
+        hasUserInfo,
+        encodedRedirect,
+        risk:unsafe ? "HIGH" : "REVIEW"
+      };
+    });
+  }
+
+  function lowerScheme(value) {
+    const match = text(value).match(/^([a-z0-9+.-]+):/i);
+    return match ? match[1].toLowerCase() : "";
   }
 
   function normalizeMailMessage(input) {
