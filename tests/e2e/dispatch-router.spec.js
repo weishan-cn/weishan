@@ -255,6 +255,26 @@ test.describe.serial("dispatch router", () => {
     await expectHistory(page, runId, /mail\.executed|dispatch\.executed|dispatch\.confirmed|mail\.extractTodos/);
   });
 
+  test("mail evidence words route to Mail instead of shopping or travel", async () => {
+    const command = runId + " 找上个月苹果电脑发票";
+    await submitHomeCommand(page, command);
+    await expect(page.getByText(/来自首页调度中心的邮件任务/).first()).toBeVisible();
+    await expect(page.getByText(/不会自动读取邮箱|realExecution=false/).first()).toBeVisible();
+    await expect(page.locator("#mailDispatchConfirm")).toBeVisible();
+    await expect(page.locator("[data-commerce-home-summary]")).toHaveCount(0);
+    await expectHistory(page, runId, /mail\.open|dispatch\.pending|苹果电脑发票/);
+  });
+
+  test("ambiguous travel fragment asks for clarification instead of routing confidently", async () => {
+    const command = runId + " 东京酒店";
+    await submitHomeCommand(page, command);
+    await expect(page.getByText(/需要你确认一下方向/).first()).toBeVisible();
+    await expect(page.getByText(/搜索价格|在邮件里找已有凭证|没有读取邮箱、没有搜索 provider/).first()).toBeVisible();
+    await expect(page.locator("[data-commerce-home-summary]")).toHaveCount(0);
+    await expect(currentTaskLogs(page)).not.toContainText("commerceAgent.taskCreated");
+    await expectHistory(page, runId, /需要你确认一下方向|coordination/);
+  });
+
   test("crawler dispatch confirms and runs local mock execution without fetching", async () => {
     const command = runId + " 抓取 https://example.com 并整理成摘要";
     await submitHomeCommand(page, command);

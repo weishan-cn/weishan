@@ -170,6 +170,10 @@
     return window.WeishanCommerceSubPlanDraftConfirmation || null;
   }
 
+  function homeUnifiedIntentRouterApi(){
+    return window.WeishanHomeUnifiedIntentRouter || null;
+  }
+
   function applyComplexCommerceLocalIntent(commercePlan, route){
     if (!commercePlan || !route || route.aiFallbackRequired !== true) return commercePlan;
     const protectedCategories = new Set(["cruise", "privateJet", "train", "domain", "aiModelPricing"]);
@@ -445,6 +449,19 @@
     const raw = String(text || "");
     const modules = detectModules(raw);
     const uniqueModules = Array.from(new Set(modules));
+    const homeUnifiedRouter = homeUnifiedIntentRouterApi();
+    const homeUnifiedIntentDecision = homeUnifiedRouter && typeof homeUnifiedRouter.classifyHomeIntent === "function" ? homeUnifiedRouter.classifyHomeIntent(raw) : null;
+
+    if (isDesktopAssistantCommand(raw) && /删除|发送邮件|上传|付款|支付|提交表单|输入密码|delete|send\s+email|upload|pay|submit|password/i.test(raw) && !/邮件接管|抓取中心|软件工厂/i.test(raw)) {
+      return {
+        module:DISPATCH_MODULES.desktopAssistant,
+        action:DISPATCH_ACTIONS.desktopAssistantPaused,
+        routeMode:"console",
+        modules:[DISPATCH_MODULES.desktopAssistant],
+        targetRoute:"home",
+        confidence:"risk_guard"
+      };
+    }
 
     if (uniqueModules.includes("codex") && /给\s*Codex|Codex.*(指令|修复|开发|测试)/i.test(raw)) {
       return {
@@ -454,6 +471,42 @@
         modules:[DISPATCH_MODULES.codex],
         targetRoute:"home",
         confidence:"rule"
+      };
+    }
+
+    if (homeUnifiedIntentDecision && homeUnifiedIntentDecision.destination === "MAIL") {
+      return {
+        module:DISPATCH_MODULES.mail,
+        action:mailAction(raw),
+        routeMode:"module",
+        modules:[DISPATCH_MODULES.mail],
+        targetRoute:"mail",
+        confidence:"rule",
+        homeUnifiedIntentDecision
+      };
+    }
+
+    if (homeUnifiedIntentDecision && homeUnifiedIntentDecision.destination === "MIXED") {
+      return {
+        module:DISPATCH_MODULES.coordination,
+        action:DISPATCH_ACTIONS.coordinationPlan,
+        routeMode:"console",
+        modules:[DISPATCH_MODULES.commerceAgent, DISPATCH_MODULES.mail],
+        confidence:"safe_clarification",
+        targetRoute:"home",
+        homeUnifiedIntentDecision
+      };
+    }
+
+    if (homeUnifiedIntentDecision && homeUnifiedIntentDecision.destination === "CLARIFY") {
+      return {
+        module:DISPATCH_MODULES.coordination,
+        action:DISPATCH_ACTIONS.coordinationPlan,
+        routeMode:"console",
+        modules:[DISPATCH_MODULES.commerceAgent, DISPATCH_MODULES.mail],
+        confidence:"safe_clarification",
+        targetRoute:"home",
+        homeUnifiedIntentDecision
       };
     }
 
@@ -567,6 +620,15 @@
       plan.commerceLocalIntentRoute = commerceLocalIntentRoute;
       plan.category = commercePlan && commercePlan.category || "";
       plan.riskLevel = commercePlan && commercePlan.riskLevel || "medium";
+    }
+    if (intent.homeUnifiedIntentDecision) {
+      plan.homeUnifiedIntentDecision = intent.homeUnifiedIntentDecision;
+      if (intent.homeUnifiedIntentDecision.destination === "CLARIFY" || intent.homeUnifiedIntentDecision.destination === "MIXED") {
+        plan.executionMode = "home_unified_safe_clarification";
+        plan.realExecution = false;
+        plan.requiresUserConfirmation = true;
+        plan.mockSafeExecutionAllowed = false;
+      }
     }
     if (intent.module === DISPATCH_MODULES.model) {
       plan.selectedModelId = intent.selectedModelId || inferModelId(cleanInput);
@@ -966,6 +1028,29 @@
     ].join("\n");
   }
 
+  function buildHomeUnifiedClarificationPlan(text, decision){
+    const safeDecision = decision || {};
+    const destination = safeDecision.destination || "CLARIFY";
+    const mixed = destination === "MIXED";
+    const reason = mixed
+      ? "我看到这句话里同时包含“价格/预订/比较”和“邮件/发票/确认记录”两类目标。"
+      : "我还不能确定你是想搜索价格，还是想在邮件里找已有凭证。";
+    return [
+      "# 需要你确认一下方向",
+      "",
+      reason,
+      "",
+      "你可以这样继续：",
+      "",
+      "- 如果要找价格或可选方案：直接说“搜索/比较/预订 + 目标”。",
+      "- 如果要找邮箱里的发票、订单、确认邮件或待回复：直接说“在邮件里找 + 目标”。",
+      "- 如果两件事都要做：请拆成两句，我会先处理第一件。",
+      "",
+      "当前没有读取邮箱、没有搜索 provider、没有下单、没有付款。",
+      "realExecution=false"
+    ].join("\n");
+  }
+
   function buildSoftwareFactoryPlan(text){
     const clean = summarizeDispatchText(text, 180);
     return [
@@ -1095,6 +1180,9 @@
     if (plan.module === "model") return buildModelStatus();
     if (plan.module === "desktopAssistant") return buildDesktopAssistantPlan(plan, text);
     if (plan.module === "commerceAgent") return buildCommerceAgentPlan(plan, text);
+    if (plan.homeUnifiedIntentDecision && (plan.homeUnifiedIntentDecision.destination === "CLARIFY" || plan.homeUnifiedIntentDecision.destination === "MIXED")) {
+      return buildHomeUnifiedClarificationPlan(text, plan.homeUnifiedIntentDecision);
+    }
     if (plan.module === "coordination") return buildCoordinationPlan(text, plan.modules);
     if (plan.module === "softwareFactory" || plan.module === "mail" || plan.module === "crawler") return buildModuleDispatchPlan(plan, text);
     return "AI 网关未接通，无法可靠回答。你仍可使用本地调度：文档草稿、PPT 大纲、Codex 指令、邮件接管、抓取中心、软件工厂和 coordination step queue。";
