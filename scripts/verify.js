@@ -60,6 +60,7 @@ function runCore() {
   runStep("Duffel test flight source adapter", "node", ["tests/api/duffel-test-flight-source-adapter.test.js"]);
   runStep("Travel exact handoff semantics", "node", ["tests/api/travel-exact-handoff-semantics.test.js"]);
   runStep("Traveltek cruise connect adapter", "node", ["tests/api/traveltek-cruise-connect-adapter.test.js"]);
+  runStep("Cunard public cruise handoff adapter", "node", ["tests/api/cunard-public-cruise-handoff-adapter.test.js"]);
   runStep("Hotelbeds evaluation readonly validator", "node", ["tests/api/hotelbeds-evaluation-readonly-validator.test.js"]);
   runStep("Provider OAuth callback foundation", "node", ["tests/api/provider-oauth-callback-foundation.test.js"]);
   runStep("Commerce core tests", "npm", ["run", "test:commerce-core"]);
