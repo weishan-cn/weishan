@@ -71,14 +71,25 @@ async function main() {
   const aiSet = api.secureSet(aiKey, syntheticAiSecret);
   assert.equal(aiSet.ok, true);
   assert.equal(aiSet.credentialClass, "USER_MANAGED_AI_CONNECTOR_SECRET");
-  assert.equal(aiSet.rawReadbackAllowed, true);
+  assert.equal(aiSet.rawReadbackAllowed, false);
   assert.equal(aiSet.plaintextFallback, false);
 
   const aiGet = api.secureGet(aiKey);
-  assert.equal(aiGet.ok, true);
-  assert.equal(aiGet.exists, true);
-  assert.equal(aiGet.value, syntheticAiSecret);
+  assert.equal(aiGet.ok, false);
+  assert.equal(aiGet.exists, false);
+  assert.equal(aiGet.value, "");
+  assert.equal(aiGet.error, "RAW_READBACK_BLOCKED");
   assert.equal(aiGet.credentialClass, "USER_MANAGED_AI_CONNECTOR_SECRET");
+
+  const aiInternalGet = api.secureGet(aiKey, { allowInternalRawReadback:true });
+  assert.equal(aiInternalGet.ok, true);
+  assert.equal(aiInternalGet.exists, true);
+  assert.equal(aiInternalGet.value, syntheticAiSecret);
+
+  const aiStatus = api.secureKeyStatus(aiKey);
+  assert.equal(aiStatus.ok, true);
+  assert.equal(aiStatus.exists, true);
+  assert.equal(Object.prototype.hasOwnProperty.call(aiStatus, "value"), false);
 
   const storeAfterAi = serialized(readStore(storageDir));
   assert.equal(storeAfterAi.includes(syntheticAiSecret), false);
@@ -120,7 +131,7 @@ async function main() {
   const beforeDelete = Object.keys(readStore(storageDir));
   const deleted = api.secureDelete(aiKey);
   assert.equal(deleted.ok, true);
-  assert.equal(api.secureGet(aiKey).exists, false);
+  assert.equal(api.secureKeyStatus(aiKey).exists, false);
   const afterDelete = Object.keys(readStore(storageDir));
   assert.equal(beforeDelete.includes(mailKey), true);
   assert.equal(afterDelete.includes(mailKey), true);
@@ -135,19 +146,36 @@ async function main() {
   const unavailable = loadSecureStorageWithElectronMock({ encryptionAvailable:false }).api;
   assert.equal(unavailable.secureStatus().plaintextFallback, false);
   assert.equal(unavailable.secureSet("ai.provider.user-2.apiKey", syntheticAiSecret).error, "STORAGE_UNAVAILABLE");
-  assert.equal(unavailable.secureGet("ai.provider.user-2.apiKey").error, "STORAGE_UNAVAILABLE");
+  assert.equal(unavailable.secureGet("ai.provider.user-2.apiKey").error, "RAW_READBACK_BLOCKED");
+  assert.equal(unavailable.secureKeyStatus("ai.provider.user-2.apiKey").error, "STORAGE_UNAVAILABLE");
   assert.equal(unavailable.secureDelete("ai.provider.user-2.apiKey").error, "STORAGE_UNAVAILABLE");
 
   const channels = [];
   api.registerSecureStorageHandlers({ handle:(channel) => channels.push(channel) });
   assert.deepEqual(channels.sort(), [
     "weishan:secure-delete",
-    "weishan:secure-get",
     "weishan:secure-set",
     "weishan:secure-status"
   ]);
 
-  console.log("CREDENTIAL_MODULE_EFFECTIVENESS PASS rawProviderReadback=0 mailReadback=0 aiConnectorLegacyReadback=1 blockedNamespaces=" + blockedKeys.length + " namespaceValidations=1000");
+  const root = path.join(__dirname, "../..");
+  const preloadSource = fs.readFileSync(path.join(root, "apps/desktop/src/preload.js"), "utf8");
+  const rendererApiSource = fs.readFileSync(path.join(root, "apps/desktop/src/renderer/core/api.js"), "utf8");
+  const settingsSource = fs.readFileSync(path.join(root, "apps/desktop/src/renderer/routes/SettingsPage.js"), "utf8");
+  const mainSource = fs.readFileSync(path.join(root, "apps/desktop/src/main.js"), "utf8");
+
+  assert.equal(preloadSource.includes("weishan:secure-get"), false);
+  assert.equal(/secure\s*:\s*\{[\s\S]{0,800}\bget\s*:/.test(preloadSource), false);
+  assert.equal(rendererApiSource.includes("secure.get"), false);
+  assert.equal(settingsSource.includes("Authorization:\"Bearer \" + input.apiKey"), false);
+  assert.equal(settingsSource.includes("weishan.ai.listModels"), true);
+  assert.equal(mainSource.includes("weishan:ai-models"), true);
+  assert.equal(mainSource.includes("RAW_AI_SECRET_PAYLOAD_BLOCKED"), true);
+  assert.equal(mainSource.includes("AI_CONNECTOR_ENDPOINT_NOT_ALLOWED"), true);
+  assert.equal(mainSource.includes("allowInternalRawReadback:true"), true);
+  assert.equal(/safePayload\.connector\s*&&\s*safePayload\.connector\.apiKey/.test(mainSource), false);
+
+  console.log("CREDENTIAL_MODULE_EFFECTIVENESS PASS rawProviderReadback=0 mailReadback=0 aiConnectorRawReadback=0 blockedNamespaces=" + blockedKeys.length + " namespaceValidations=1000");
 }
 
 main().catch((error) => {

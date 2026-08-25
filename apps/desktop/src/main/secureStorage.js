@@ -63,8 +63,8 @@ function classifySecureKey(key) {
     return {
       key: safeKey,
       credentialClass: CREDENTIAL_CLASSES.USER_MANAGED_AI_CONNECTOR_SECRET,
-      rawReadbackAllowed: true,
-      rendererReadbackLegacyGap: true
+      rawReadbackAllowed: false,
+      rendererReadbackLegacyGap: false
     };
   }
   if (/^mail\.account\.[a-z0-9._:-]{1,180}\.authorizationCode$/i.test(safeKey)) {
@@ -130,6 +130,34 @@ function secureStatus() {
   };
 }
 
+function secureKeyStatus(key) {
+  const policy = classifySecureKey(key);
+  if (!policy) return { ok: false, exists:false, error: "INVALID_KEY", redacted: true };
+  if (!encryptionAvailable()) {
+    return Object.assign({
+      ok:false,
+      exists:false,
+      error:"STORAGE_UNAVAILABLE",
+      encryptedAtRest:false,
+      sessionOnly:false,
+      plaintextFallback:false
+    }, safeMetadataForKey(policy));
+  }
+
+  try {
+    const item = readStore()[policy.key];
+    return Object.assign({
+      ok:true,
+      exists:!!(item && item.encrypted),
+      encryptedAtRest:true,
+      sessionOnly:false,
+      plaintextFallback:false
+    }, safeMetadataForKey(policy));
+  } catch (_) {
+    return { ok:false, exists:false, error:"SECURE_STATUS_FAILED", redacted:true };
+  }
+}
+
 function secureSet(key, value) {
   const policy = classifySecureKey(key);
   if (!policy) return { ok: false, error: "INVALID_KEY", redacted: true };
@@ -158,10 +186,11 @@ function secureSet(key, value) {
   }
 }
 
-function secureGet(key) {
+function secureGet(key, options) {
   const policy = classifySecureKey(key);
   if (!policy) return { ok: false, error: "INVALID_KEY", redacted: true };
-  if (!policy.rawReadbackAllowed) {
+  const internalRawReadback = options && options.allowInternalRawReadback === true;
+  if (!policy.rawReadbackAllowed && !internalRawReadback) {
     return Object.assign({
       ok: false,
       exists: false,
@@ -203,15 +232,11 @@ function secureDelete(key) {
 
 function registerSecureStorageHandlers(ipcMain) {
   ipcMain.handle("weishan:secure-set", async (_event, payload) => secureSet(payload && payload.key, payload && payload.value));
-  ipcMain.handle("weishan:secure-get", async (_event, payload) => {
-    const meta = perfMeta(payload, "api.secureStorage");
-    const startedAt = perfStart(meta, "main.secureStorage.getKey.start");
-    const result = secureGet(payload && payload.key);
-    perfEnd(meta, "main.secureStorage.getKey.done", startedAt, { hasKey:!!(result && result.ok && result.exists && result.value) });
-    return result;
-  });
   ipcMain.handle("weishan:secure-delete", async (_event, payload) => secureDelete(payload && payload.key));
-  ipcMain.handle("weishan:secure-status", async () => secureStatus());
+  ipcMain.handle("weishan:secure-status", async (_event, payload) => {
+    const key = payload && payload.key;
+    return key ? secureKeyStatus(key) : secureStatus();
+  });
 }
 
 module.exports = {
@@ -220,6 +245,7 @@ module.exports = {
   secureGet,
   secureDelete,
   secureStatus,
+  secureKeyStatus,
   _testOnly: {
     classifySecureKey,
     cleanKey,

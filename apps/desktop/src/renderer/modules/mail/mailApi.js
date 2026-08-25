@@ -210,15 +210,7 @@
   }
 
   async function loadAuthorizationCode(email){
-    const secure = secureBridge();
-    const key = secretKey(email);
-    if (!secure || !key || typeof secure.get !== "function") return "";
-    try {
-      const res = await secure.get(key);
-      return res && res.ok && res.exists ? String(res.value || "") : "";
-    } catch (_) {
-      return "";
-    }
+    return "";
   }
 
   async function deleteAuthorizationCode(email){

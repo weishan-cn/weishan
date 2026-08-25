@@ -7,6 +7,7 @@ const ROOT = path.resolve(__dirname, "../..");
 
 function createWindow() {
   const store = new Map();
+  const secureStore = new Map();
   const listeners = {};
   const window = {
     window:null,
@@ -45,11 +46,30 @@ function createWindow() {
     },
     weishan:{
       secure:{
-        get:async function() { return { ok:true, exists:true, value:"unit-test-key" }; }
+        set:async function(key, value) {
+          secureStore.set(String(key || ""), String(value || ""));
+          return { ok:true, saved:true, encryptedAtRest:true, sessionOnly:false, plaintextFallback:false };
+        },
+        status:async function(key) {
+          if (!key) return { ok:true, available:true, encryptedAtRest:true, sessionOnly:false, plaintextFallback:false };
+          return { ok:true, exists:secureStore.has(String(key || "")), encryptedAtRest:true, sessionOnly:false, plaintextFallback:false };
+        },
+        delete:async function(key) {
+          secureStore.delete(String(key || ""));
+          return { ok:true, deleted:true, encryptedAtRest:true, sessionOnly:false, plaintextFallback:false };
+        }
       },
       ai:{
-        testConnector:async function() { return { ok:true, message:"ok" }; },
-        chat:async function() { return { ok:true, content:"ok" }; }
+        testConnector:async function(connector) {
+          assert.equal(Object.prototype.hasOwnProperty.call(connector || {}, "apiKey"), false);
+          assert.equal(connector && connector.hasRequestApiKey, true);
+          return { ok:true, message:"ok" };
+        },
+        chat:async function(payload) {
+          assert.equal(Object.prototype.hasOwnProperty.call(payload && payload.connector || {}, "apiKey"), false);
+          assert.equal(payload && payload.connector && payload.connector.hasRequestApiKey, true);
+          return { ok:true, content:"ok" };
+        }
       }
     }
   };

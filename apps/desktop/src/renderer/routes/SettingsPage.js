@@ -96,19 +96,10 @@
   }
 
   async function fetchModels(input){
-    const base = normalizeModelsBaseUrl(input.baseUrl);
-    if (!base) throw new Error(t("aiBaseUrlMissing"));
-    const res = await fetch(base + "/models", {
-      method:"GET",
-      headers:{ Authorization:"Bearer " + input.apiKey }
-    });
-    const text = await res.text();
-    let data = null;
-    try { data = JSON.parse(text); } catch (_) {}
-    if (!res.ok) throw new Error(sanitizeDetail((data && (data.error && data.error.message || data.message)) || text || ("HTTP " + res.status), input));
-    const raw = Array.isArray(data) ? data : (Array.isArray(data && data.data) ? data.data : (Array.isArray(data && data.models) ? data.models : []));
-    const ids = raw.map((item) => typeof item === "string" ? item : item && (item.id || item.name || item.model)).filter(Boolean);
-    return Array.from(new Set(ids.map(String)));
+    if (!window.weishan || !window.weishan.ai || typeof window.weishan.ai.listModels !== "function") throw new Error(t("aiModelsUnavailable"));
+    const res = await window.weishan.ai.listModels(input);
+    if (!res || !res.ok) throw new Error(sanitizeDetail(res && (res.error || res.message) || t("aiModelsUnavailable"), input));
+    return Array.isArray(res.models) ? res.models.map(String) : [];
   }
 
   function modelScore(model, providerType){
@@ -920,7 +911,7 @@
       }
 
       requestInput = await window.WeishanAPI.connectorForRequest(input);
-      if (!requestInput.apiKey) {
+      if (!requestInput.hasRequestApiKey) {
         const classified = classifyTestResult(Object.assign({}, input, { hasApiKey:false, hasRequestApiKey:false }), { ok:false, message:"" });
         renderStatus(host, writeClassifiedTest(input, classified));
         return;
@@ -1227,7 +1218,7 @@
 
       try {
         const resolvedInput = await window.WeishanAPI.connectorForRequest(input);
-        if (!resolvedInput.apiKey) {
+        if (!resolvedInput.hasRequestApiKey) {
           renderTransientStatus(host, "connector-failed", t("testFailed"), t("aiKeyMissing"), "");
           btn.disabled = false;
           if (testBtn) testBtn.disabled = false;

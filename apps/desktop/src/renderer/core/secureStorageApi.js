@@ -19,12 +19,12 @@
     return window.weishan && window.weishan.secure ? window.weishan.secure : null;
   }
 
-  async function status() {
+  async function status(key) {
     const secure = bridge();
     if (!secure || typeof secure.status !== "function") {
       return { ok:false, available:false, encryptedAtRest:false, sessionOnly:true, error:"SECURE_BRIDGE_UNAVAILABLE" };
     }
-    return secure.status();
+    return secure.status(key);
   }
 
   async function set(key, value) {
@@ -34,9 +34,7 @@
   }
 
   async function get(key) {
-    const secure = bridge();
-    if (!secure || typeof secure.get !== "function") return { ok:false, exists:false, value:"", error:"SECURE_BRIDGE_UNAVAILABLE" };
-    return secure.get(key);
+    return { ok:false, exists:false, value:"", error:"RAW_READBACK_BLOCKED", redacted:true };
   }
 
   async function remove(key) {

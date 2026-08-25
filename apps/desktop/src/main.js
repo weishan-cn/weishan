@@ -3,7 +3,7 @@ const path = require("path");
 const { pathToFileURL } = require("url");
 const fs = require("fs");
 const { spawn } = require("child_process");
-const { registerSecureStorageHandlers } = require("./main/secureStorage");
+const { registerSecureStorageHandlers, secureGet } = require("./main/secureStorage");
 const { registerSecureApiKeyStorageHandlers } = require("./main/secureApiKeyStorage");
 const { createMacOSSecureEntry, lockedCredentialTargetFromEnvironment } = require("./main/providerCredentialSecureEntry");
 const { createProviderCredentialStoreMenuAction } = require("./main/providerCredentialStoreMenuAction");
@@ -227,6 +227,83 @@ function headers(apiKey) {
   return h;
 }
 
+const AI_CONNECTOR_ENDPOINTS = Object.freeze({
+  openrouter:[/^openrouter\.ai$/i, /^api\.openrouter\.ai$/i],
+  openai:[/^api\.openai\.com$/i],
+  deepseek:[/^api\.deepseek\.com$/i],
+  dashscope:[/^dashscope\.aliyuncs\.com$/i],
+  zhipu:[/(^|\.)bigmodel\.cn$/i],
+  moonshot:[/^api\.moonshot\.cn$/i],
+  doubao:[/(^|\.)volcengineapi\.com$/i, /(^|\.)volces\.com$/i]
+});
+
+function safeConnectorPart(value) {
+  return String(value || "").trim().toLowerCase().replace(/[^a-z0-9._:-]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function sanitizeAiProviderText(value, secret) {
+  let out = redactPerf(value);
+  const raw = String(secret || "");
+  if (raw) out = out.split(raw).join("[redacted]");
+  return out
+    .replace(/bearer\s+[A-Za-z0-9._~+/=-]+/gi, "Bearer [redacted]")
+    .replace(/authorization\s*[:=]\s*[^\s,;]+/gi, "authorization=[redacted]")
+    .slice(0, 400);
+}
+
+function validateAiConnectorConfig(config) {
+  const safeConfig = config && typeof config === "object" && !Array.isArray(config) ? config : {};
+  const forbiddenTruth = ["trusted", "authorized", "production", "readSecret", "exportSecret"];
+  for (const key of forbiddenTruth) {
+    if (Object.prototype.hasOwnProperty.call(safeConfig, key)) return { ok:false, error:"UNAUTHORIZED_CONNECTOR_FIELD" };
+  }
+  if (Object.prototype.hasOwnProperty.call(safeConfig, "apiKey")) return { ok:false, error:"RAW_AI_SECRET_PAYLOAD_BLOCKED" };
+  if (safeConfig.headers || safeConfig.header || safeConfig.Authorization || safeConfig.authorization || safeConfig.url || safeConfig.method) {
+    return { ok:false, error:"UNAUTHORIZED_CONNECTOR_TRANSPORT_FIELD" };
+  }
+
+  const baseUrl = normalizeBaseUrl(safeConfig.baseUrl);
+  if (!baseUrl) return { ok:false, error:"AI_BASE_URL_MISSING" };
+  let parsed;
+  try {
+    parsed = new URL(baseUrl);
+  } catch (_) {
+    return { ok:false, error:"AI_BASE_URL_INVALID" };
+  }
+  if (parsed.protocol !== "https:") return { ok:false, error:"AI_CONNECTOR_HTTPS_REQUIRED" };
+  if (parsed.username || parsed.password) return { ok:false, error:"AI_CONNECTOR_USERINFO_BLOCKED" };
+  const host = parsed.hostname;
+  if (/^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[0-1])\.|0\.0\.0\.0)$/i.test(host) || host === "::1") {
+    return { ok:false, error:"AI_CONNECTOR_PRIVATE_HOST_BLOCKED" };
+  }
+
+  const providerType = safeConnectorPart(safeConfig.providerType || "");
+  const allowed = AI_CONNECTOR_ENDPOINTS[providerType];
+  if (!allowed || !allowed.some((pattern) => pattern.test(host))) return { ok:false, error:"AI_CONNECTOR_ENDPOINT_NOT_ALLOWED" };
+
+  const model = String(safeConfig.chatModel || "").trim();
+  if (!model) return { ok:false, error:"AI_MODEL_MISSING" };
+  if (model.length > 180 || /[?#\\]/.test(model) || /https?:\/\//i.test(model)) return { ok:false, error:"AI_MODEL_INVALID" };
+
+  const ref = safeConfig.credentialRef && typeof safeConfig.credentialRef === "object" && !Array.isArray(safeConfig.credentialRef) ? safeConfig.credentialRef : {};
+  if (ref.credentialClass !== "USER_MANAGED_AI_CONNECTOR_SECRET") return { ok:false, error:"AI_CREDENTIAL_REF_INVALID" };
+  const accountId = safeConnectorPart(ref.accountId || "");
+  if (!accountId || accountId.length > 120) return { ok:false, error:"AI_CREDENTIAL_REF_INVALID" };
+  const credentialKey = "ai.provider." + accountId + ".apiKey";
+
+  return { ok:true, config:Object.assign({}, safeConfig, { baseUrl, providerType, chatModel:model, credentialKey }) };
+}
+
+function resolveAiConnectorConfig(config) {
+  const validated = validateAiConnectorConfig(config);
+  if (!validated.ok) return Object.assign({ ok:false }, validated);
+  const credential = secureGet(validated.config.credentialKey, { allowInternalRawReadback:true });
+  if (!credential || !credential.ok || !credential.exists || !credential.value) {
+    return { ok:false, error:credential && credential.error || "AI_CREDENTIAL_MISSING" };
+  }
+  return { ok:true, config:validated.config, apiKey:String(credential.value || "") };
+}
+
 async function parseBody(res, meta) {
   const status = res && res.status;
   const readStartedAt = perfStart(meta, "main.response.bodyRead.start", { status });
@@ -268,12 +345,11 @@ function sendStreamEvent(event, streamId, payload) {
 
 async function aiTest(config) {
   const meta = perfMeta(config, "api.aiTest");
-  const baseUrl = normalizeBaseUrl(config.baseUrl);
-  const apiKey = String(config.apiKey || "").trim();
-  const model = String(config.chatModel || "").trim();
-  if (!baseUrl) return { ok: false, message: "接口地址不能为空。" };
-  if (!apiKey) return { ok: false, message: "AI Key 不能为空。" };
-  if (!model) return { ok: false, message: "模型名不能为空。" };
+  const resolved = resolveAiConnectorConfig(config || {});
+  if (!resolved.ok) return { ok:false, message:resolved.error || "AI 连接配置不可用。" };
+  const baseUrl = resolved.config.baseUrl;
+  const apiKey = resolved.apiKey;
+  const model = resolved.config.chatModel;
   try {
     const requestStartedAt = perfStart(meta, "main.provider.request.start", { messageCount:1, inputChars:4, hasKey:!!apiKey });
     let res;
@@ -302,23 +378,22 @@ async function aiTest(config) {
       perfEnd(meta, "main.response.parse.error", parseStartedAt, Object.assign({ status:res.status }, safeError(err)));
       throw err;
     }
-    if (!res.ok) return { ok: false, message: "测试失败：" + bodyError(body, "HTTP " + res.status) };
+    if (!res.ok) return { ok: false, message: "测试失败：" + sanitizeAiProviderText(bodyError(body, "HTTP " + res.status), apiKey) };
     return { ok: true, message: "测试成功", detectedProtocol: "chat-completions-compatible" };
   } catch (err) {
-    return { ok: false, message: "连接失败：" + (err.message || String(err)) };
+    return { ok: false, message: "连接失败：" + sanitizeAiProviderText(err.message || String(err), apiKey) };
   }
 }
 
 async function aiChat(payload) {
   const meta = perfMeta(payload, "api.aiChat");
-  const config = payload.connector || {};
-  const baseUrl = normalizeBaseUrl(config.baseUrl);
-  const apiKey = String(config.apiKey || "").trim();
-  const model = String(config.chatModel || "").trim();
+  const resolved = resolveAiConnectorConfig(payload && payload.connector || {});
+  const config = resolved.config || {};
+  const baseUrl = config.baseUrl || "";
+  const apiKey = resolved.apiKey || "";
+  const model = config.chatModel || "";
   const messages = Array.isArray(payload.messages) ? payload.messages : [];
-  if (!baseUrl) return { ok: false, error: "接口地址未配置。" };
-  if (!apiKey) return { ok: false, error: "AI Key 未配置。" };
-  if (!model) return { ok: false, error: "模型名未配置。" };
+  if (!resolved.ok) return { ok:false, error:resolved.error || "AI Key 未配置。" };
   const messageCount = messages.length;
   const inputChars = countMessageChars(messages);
   try {
@@ -342,7 +417,7 @@ async function aiChat(payload) {
       body = await parseBody(res, meta);
       if (!res.ok) {
         perfEnd(meta, "main.response.parse.done", parseStartedAt, { status:res.status, bodyChars:String(body && body.text || "").length });
-        return { ok: false, error: bodyError(body, "HTTP " + res.status) };
+        return { ok: false, error: sanitizeAiProviderText(bodyError(body, "HTTP " + res.status), apiKey) };
       }
       const extractStartedAt = perfStart(meta, "main.response.extract.start");
       try {
@@ -361,21 +436,20 @@ async function aiChat(payload) {
     }
     return { ok: true, content, detectedProtocol: "chat-completions-compatible" };
   } catch (err) {
-    return { ok: false, error: err.message || String(err) };
+    return { ok: false, error: sanitizeAiProviderText(err.message || String(err), apiKey) };
   }
 }
 
 async function aiChatStream(event, payload) {
   const meta = perfMeta(payload, "api.aiChatStream");
   const streamId = String(payload && payload.streamId || "").slice(0, 120);
-  const config = payload.connector || {};
-  const baseUrl = normalizeBaseUrl(config.baseUrl);
-  const apiKey = String(config.apiKey || "").trim();
-  const model = String(config.chatModel || "").trim();
+  const resolved = resolveAiConnectorConfig(payload && payload.connector || {});
+  const config = resolved.config || {};
+  const baseUrl = config.baseUrl || "";
+  const apiKey = resolved.apiKey || "";
+  const model = config.chatModel || "";
   const messages = Array.isArray(payload.messages) ? payload.messages : [];
-  if (!baseUrl) return { ok: false, error: "接口地址未配置。" };
-  if (!apiKey) return { ok: false, error: "AI Key 未配置。" };
-  if (!model) return { ok: false, error: "模型名未配置。" };
+  if (!resolved.ok) return { ok:false, error:resolved.error || "AI Key 未配置。" };
 
   const messageCount = messages.length;
   const inputChars = countMessageChars(messages);
@@ -390,15 +464,16 @@ async function aiChatStream(event, payload) {
     perfEnd(meta, "main.provider.stream.headers.done", streamStartedAt, { status:res.status, messageCount, inputChars, hasKey:!!apiKey });
   } catch (err) {
     perfEnd(meta, "main.provider.stream.error", streamStartedAt, Object.assign({ messageCount, inputChars, hasKey:!!apiKey }, safeError(err)));
-    sendStreamEvent(event, streamId, { type:"error", error:safeError(err) });
-    throw err;
+    const sanitized = new Error(sanitizeAiProviderText(err.message || String(err), apiKey));
+    sendStreamEvent(event, streamId, { type:"error", error:safeError(sanitized) });
+    throw sanitized;
   }
 
   if (!res.ok) {
     const parseStartedAt = perfStart(meta, "main.response.parse.start", { status:res.status });
     const body = await parseBody(res, meta);
     perfEnd(meta, "main.response.parse.done", parseStartedAt, { status:res.status, bodyChars:String(body && body.text || "").length });
-    const error = bodyError(body, "HTTP " + res.status);
+    const error = sanitizeAiProviderText(bodyError(body, "HTTP " + res.status), apiKey);
     sendStreamEvent(event, streamId, { type:"error", error:safeError(new Error(error)) });
     return { ok: false, error };
   }
@@ -464,8 +539,30 @@ async function aiChatStream(event, payload) {
     return { ok: true, content:outputText, detectedProtocol:"chat-completions-compatible", chunkCount };
   } catch (err) {
     perfEnd(meta, "main.provider.stream.error", streamStartedAt, Object.assign({ status:res.status, chunkCount, outputChars:outputText.length }, safeError(err)));
-    sendStreamEvent(event, streamId, { type:"error", error:safeError(err) });
-    throw err;
+    const sanitized = new Error(sanitizeAiProviderText(err.message || String(err), apiKey));
+    sendStreamEvent(event, streamId, { type:"error", error:safeError(sanitized) });
+    throw sanitized;
+  }
+}
+
+async function aiModels(config) {
+  const meta = perfMeta(config, "api.aiModels");
+  const resolved = resolveAiConnectorConfig(config || {});
+  if (!resolved.ok) return { ok:false, error:resolved.error || "AI Key 未配置。" };
+  const baseUrl = resolved.config.baseUrl;
+  const apiKey = resolved.apiKey;
+  try {
+    const res = await fetch(baseUrl + "/models", {
+      method:"GET",
+      headers:headers(apiKey)
+    });
+    const body = await parseBody(res, meta);
+    if (!res.ok) return { ok:false, error:sanitizeAiProviderText(bodyError(body, "HTTP " + res.status), apiKey) };
+    const raw = Array.isArray(body.json) ? body.json : (Array.isArray(body.json && body.json.data) ? body.json.data : (Array.isArray(body.json && body.json.models) ? body.json.models : []));
+    const models = raw.map((item) => typeof item === "string" ? item : item && (item.id || item.name || item.model)).filter(Boolean).map(String);
+    return { ok:true, models:Array.from(new Set(models)).slice(0, 200) };
+  } catch (err) {
+    return { ok:false, error:sanitizeAiProviderText(err.message || String(err), apiKey) };
   }
 }
 
@@ -482,25 +579,29 @@ function registerIpcHandlers() {
 
   ipcMain.handle("weishan:ai-test", async (_event, config) => {
     const meta = perfMeta(config || {}, "api.aiTest");
-    return withPerf(meta, "main.handler", () => aiTest(config || {}), { messageCount:1, inputChars:4, hasKey:!!(config && config.apiKey) });
+    return withPerf(meta, "main.handler", () => aiTest(config || {}), { messageCount:1, inputChars:4, hasKey:!!(config && config.hasRequestApiKey) });
+  });
+  ipcMain.handle("weishan:ai-models", async (_event, config) => {
+    const meta = perfMeta(config || {}, "api.aiModels");
+    return withPerf(meta, "main.handler", () => aiModels(config || {}), { messageCount:0, inputChars:0, hasKey:!!(config && config.hasRequestApiKey) });
   });
   ipcMain.handle("weishan:ai-chat", async (_event, payload) => {
     const safePayload = payload || {};
     const meta = perfMeta(safePayload, "api.aiChat");
     const messages = Array.isArray(safePayload.messages) ? safePayload.messages : [];
-    return withPerf(meta, "main.handler", () => aiChat(safePayload), { hasPerf:meta.enabled === true, messageCount:messages.length, inputChars:countMessageChars(messages), hasKey:!!(safePayload.connector && safePayload.connector.apiKey) });
+    return withPerf(meta, "main.handler", () => aiChat(safePayload), { hasPerf:meta.enabled === true, messageCount:messages.length, inputChars:countMessageChars(messages), hasKey:!!(safePayload.connector && safePayload.connector.hasRequestApiKey) });
   });
   ipcMain.handle("weishan:ai-chat-stream", async (event, payload) => {
     const safePayload = payload || {};
     const meta = perfMeta(safePayload, "home.taskDispatch");
     const messages = Array.isArray(safePayload.messages) ? safePayload.messages : [];
-    const handlerStartedAt = perfStart(meta, "main.stream.handler.start", { hasPerf:meta.enabled === true, messageCount:messages.length, inputChars:countMessageChars(messages), hasKey:!!(safePayload.connector && safePayload.connector.apiKey) });
+    const handlerStartedAt = perfStart(meta, "main.stream.handler.start", { hasPerf:meta.enabled === true, messageCount:messages.length, inputChars:countMessageChars(messages), hasKey:!!(safePayload.connector && safePayload.connector.hasRequestApiKey) });
     try {
       const result = await aiChatStream(event, safePayload);
-      perfEnd(meta, "main.stream.handler.done", handlerStartedAt, { chunkCount:result && result.chunkCount || 0, outputChars:String(result && result.content || "").length, messageCount:messages.length, inputChars:countMessageChars(messages), hasKey:!!(safePayload.connector && safePayload.connector.apiKey) });
+      perfEnd(meta, "main.stream.handler.done", handlerStartedAt, { chunkCount:result && result.chunkCount || 0, outputChars:String(result && result.content || "").length, messageCount:messages.length, inputChars:countMessageChars(messages), hasKey:!!(safePayload.connector && safePayload.connector.hasRequestApiKey) });
       return result;
     } catch (err) {
-      perfEnd(meta, "main.stream.handler.error", handlerStartedAt, Object.assign({ messageCount:messages.length, inputChars:countMessageChars(messages), hasKey:!!(safePayload.connector && safePayload.connector.apiKey) }, safeError(err)));
+      perfEnd(meta, "main.stream.handler.error", handlerStartedAt, Object.assign({ messageCount:messages.length, inputChars:countMessageChars(messages), hasKey:!!(safePayload.connector && safePayload.connector.hasRequestApiKey) }, safeError(err)));
       throw err;
     }
   });

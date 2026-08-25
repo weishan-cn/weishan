@@ -197,29 +197,28 @@
     if (!secure || typeof secure.set !== "function") return { ok:false, error:"SECURE_STORAGE_UNAVAILABLE" };
     return secure.set(key, value);
   }
-  async function secureStatus(meta){
+  async function secureStatus(key){
     const secure = secureBridge();
     if (!secure || typeof secure.status !== "function") return { ok:false, available:false, encryptedAtRest:false, sessionOnly:false };
-    return secure.status();
+    return secure.status(key);
   }
-  async function secureReadApiKey(meta){
-    const secure = secureBridge();
+  async function secureApiKeyStatus(meta){
     const key = apiKeySecureKey();
-    if (!key || !secure || typeof secure.get !== "function") return { ok:false, exists:false, value:"", error:"SECURE_STORAGE_UNAVAILABLE" };
-    const startedAt = perfStart(meta, "renderer.secureStorage.getKey.start");
+    if (!key) return { ok:false, exists:false, error:"SECURE_KEY_UNAVAILABLE" };
+    const startedAt = perfStart(meta, "renderer.secureStorage.keyStatus.start");
     try {
-      const res = await secure.get(key, meta && meta.enabled ? meta : undefined);
-      const normalized = Object.assign({ ok:false, exists:false, value:"" }, res || {});
-      perfEnd(meta, "renderer.secureStorage.getKey.done", startedAt, { hasKey:!!(normalized.ok && normalized.exists && normalized.value) });
+      const res = await secureStatus(key);
+      const normalized = Object.assign({ ok:false, exists:false }, res || {});
+      perfEnd(meta, "renderer.secureStorage.keyStatus.done", startedAt, { hasKey:!!(normalized.ok && normalized.exists) });
       return normalized;
     } catch (err) {
-      perfError(meta, "renderer.secureStorage.getKey.error", startedAt, err, { hasKey:false });
+      perfError(meta, "renderer.secureStorage.keyStatus.error", startedAt, err, { hasKey:false });
       throw err;
     }
   }
-  async function secureGetApiKey(meta){
-    const res = await secureReadApiKey(meta);
-    return res && res.ok && res.exists ? String(res.value || "") : "";
+  function connectorCredentialRef(){
+    const a = account();
+    return a.loggedIn && a.accountId ? { credentialClass:"USER_MANAGED_AI_CONNECTOR_SECRET", accountId:String(a.accountId || "") } : null;
   }
   async function secureDeleteApiKey(){
     const secure = secureBridge();
@@ -251,8 +250,8 @@
     const raw = rawConnector();
     if (!raw.hasApiKey) return { ok:true, changed:false, connector:connector() };
 
-    const stored = await secureReadApiKey();
-    const hasSecureKey = !!(stored && stored.ok && stored.exists && stored.value && stored.encryptedAtRest && !stored.sessionOnly);
+    const stored = await secureApiKeyStatus();
+    const hasSecureKey = !!(stored && stored.ok && stored.exists && stored.encryptedAtRest && !stored.sessionOnly);
     if (hasSecureKey) {
       if (raw.keyStorageMode !== "secure") {
         const nextSecure = Object.assign(scrubConnector(raw, true), { keyStorageMode:"secure" });
@@ -289,13 +288,13 @@
       keyStorageMode = persistent ? "secure" : (sessionOnly ? "session" : "none");
       keyUnavailable = !saved || !saved.ok;
     } else if (current.hasApiKey) {
-      const stored = await secureReadApiKey();
-      hasApiKey = !!(stored && stored.ok && stored.exists && stored.value && stored.encryptedAtRest && !stored.sessionOnly);
+      const stored = await secureApiKeyStatus();
+      hasApiKey = !!(stored && stored.ok && stored.exists && stored.encryptedAtRest && !stored.sessionOnly);
       keyStorageMode = hasApiKey ? "secure" : "none";
       keySaved = hasApiKey;
     } else {
-      const stored = await secureReadApiKey();
-      if (stored && stored.ok && stored.exists && stored.value && stored.sessionOnly) {
+      const stored = await secureApiKeyStatus();
+      if (stored && stored.ok && stored.exists && stored.sessionOnly) {
         keyStorageMode = "session";
         keySaved = true;
       }
@@ -346,12 +345,15 @@
     return cleared;
   }
   async function connectorForRequest(input, meta){
+    if (input && String(input.apiKey || "").trim()) {
+      await saveConnector(input);
+    }
     await syncApiKeyPresence();
     const current = connector();
     const cfg = Object.assign({}, current, input || {});
-    const typedKey = String(input && input.apiKey || "").trim();
-    cfg.apiKey = typedKey || await secureGetApiKey(meta);
-    cfg.hasRequestApiKey = Boolean(cfg.apiKey);
+    delete cfg.apiKey;
+    cfg.credentialRef = connectorCredentialRef();
+    cfg.hasRequestApiKey = Boolean(cfg.hasApiKey && cfg.credentialRef);
     return cfg;
   }
   async function testConnector(input){
@@ -365,13 +367,13 @@
       saveRuntimeFailure(cfg);
       throw err;
     }
-    const startedAt = perfStart(meta, "renderer.ipc.invoke.start", { messageCount:1, inputChars:4, hasKey:!!cfg.apiKey });
+    const startedAt = perfStart(meta, "renderer.ipc.invoke.start", { messageCount:1, inputChars:4, hasKey:!!cfg.hasRequestApiKey });
     let res;
     try {
       res = await window.weishan.ai.testConnector(Object.assign({}, cfg, { __perf:meta.enabled ? meta : undefined }));
-      perfEnd(meta, "renderer.ipc.invoke.done", startedAt, { status:res && res.ok ? 200 : 0, messageCount:1, inputChars:4, outputChars:String(res && (res.message || res.error) || "").length, hasKey:!!cfg.apiKey });
+      perfEnd(meta, "renderer.ipc.invoke.done", startedAt, { status:res && res.ok ? 200 : 0, messageCount:1, inputChars:4, outputChars:String(res && (res.message || res.error) || "").length, hasKey:!!cfg.hasRequestApiKey });
     } catch (err) {
-      perfError(meta, "renderer.ipc.invoke.error", startedAt, err, { messageCount:1, inputChars:4, hasKey:!!cfg.apiKey });
+      perfError(meta, "renderer.ipc.invoke.error", startedAt, err, { messageCount:1, inputChars:4, hasKey:!!cfg.hasRequestApiKey });
       saveRuntimeFailure(cfg);
       throw err;
     }
@@ -383,18 +385,18 @@
     const meta = perfMeta("api.aiChat", options && options.__perf);
     const cfg = await connectorForRequest({}, meta);
     if (!cfg.baseUrl) return { ok:false, error:"接口地址未配置。" };
-    if (!cfg.apiKey) return { ok:false, error:"AI Key 未配置。" };
+    if (!cfg.hasRequestApiKey) return { ok:false, error:"AI Key 未配置。" };
     if (!cfg.chatModel) return { ok:false, error:"模型名未配置。" };
     const messageCount = Array.isArray(messages) ? messages.length : 0;
     const inputChars = countMessageChars(messages);
     perfMark(meta, "renderer.api.chat.beforeInvoke", { messageCount, inputChars });
-    const startedAt = perfStart(meta, "renderer.ipc.invoke.start", { messageCount, inputChars, hasKey:!!cfg.apiKey });
+    const startedAt = perfStart(meta, "renderer.ipc.invoke.start", { messageCount, inputChars, hasKey:!!cfg.hasRequestApiKey });
     let res;
     try {
       res = await window.weishan.ai.chat({ connector:cfg, messages, __perf:meta.enabled ? meta : undefined });
-      perfEnd(meta, "renderer.ipc.invoke.done", startedAt, { status:res && res.ok ? 200 : 0, messageCount, inputChars, outputChars:String(res && res.content || "").length, hasKey:!!cfg.apiKey });
+      perfEnd(meta, "renderer.ipc.invoke.done", startedAt, { status:res && res.ok ? 200 : 0, messageCount, inputChars, outputChars:String(res && res.content || "").length, hasKey:!!cfg.hasRequestApiKey });
     } catch (err) {
-      perfError(meta, "renderer.ipc.invoke.error", startedAt, err, { messageCount, inputChars, hasKey:!!cfg.apiKey });
+      perfError(meta, "renderer.ipc.invoke.error", startedAt, err, { messageCount, inputChars, hasKey:!!cfg.hasRequestApiKey });
       saveRuntimeFailure(cfg);
       throw err;
     }
@@ -410,7 +412,7 @@
     const meta = perfMeta("api.aiChatStream", options && options.__perf);
     const cfg = await connectorForRequest({}, meta);
     if (!cfg.baseUrl) return { ok:false, error:"接口地址未配置。" };
-    if (!cfg.apiKey) return { ok:false, error:"AI Key 未配置。" };
+    if (!cfg.hasRequestApiKey) return { ok:false, error:"AI Key 未配置。" };
     if (!cfg.chatModel) return { ok:false, error:"模型名未配置。" };
     const messageCount = Array.isArray(messages) ? messages.length : 0;
     const inputChars = countMessageChars(messages);
@@ -418,7 +420,7 @@
     let chunkCount = 0;
     let outputChars = 0;
     let sawFirstChunk = false;
-    const startedAt = perfStart(meta, "renderer.stream.invoke.start", { messageCount, inputChars, hasKey:!!cfg.apiKey });
+    const startedAt = perfStart(meta, "renderer.stream.invoke.start", { messageCount, inputChars, hasKey:!!cfg.hasRequestApiKey });
     let res;
     try {
       res = await window.weishan.ai.chatStream({
@@ -443,9 +445,9 @@
           options.onError(event.error || {});
         }
       });
-      perfEnd(meta, "renderer.stream.invoke.done", startedAt, { status:res && res.ok ? 200 : 0, messageCount, inputChars, outputChars:res && res.content ? String(res.content).length : outputChars, chunkCount, hasKey:!!cfg.apiKey });
+      perfEnd(meta, "renderer.stream.invoke.done", startedAt, { status:res && res.ok ? 200 : 0, messageCount, inputChars, outputChars:res && res.content ? String(res.content).length : outputChars, chunkCount, hasKey:!!cfg.hasRequestApiKey });
     } catch (err) {
-      perfError(meta, "renderer.stream.invoke.error", startedAt, err, { messageCount, inputChars, outputChars, chunkCount, hasKey:!!cfg.apiKey });
+      perfError(meta, "renderer.stream.invoke.error", startedAt, err, { messageCount, inputChars, outputChars, chunkCount, hasKey:!!cfg.hasRequestApiKey });
       saveRuntimeFailure(cfg);
       throw err;
     }

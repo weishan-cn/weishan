@@ -21,21 +21,20 @@ contextBridge.exposeInMainWorld("weishan", {
       if (!safeKey) return Promise.resolve({ ok: false, error: "INVALID_KEY" });
       return ipcRenderer.invoke("weishan:secure-set", { key: safeKey, value: String(value || "") });
     },
-    get: (key, perfMeta) => {
-      const safeKey = String(key || "").trim();
-      if (!safeKey) return Promise.resolve({ ok: false, error: "INVALID_KEY" });
-      return ipcRenderer.invoke("weishan:secure-get", { key: safeKey, __perf:perfMeta && perfMeta.enabled ? perfMeta : undefined });
-    },
     delete: (key) => {
       const safeKey = String(key || "").trim();
       if (!safeKey) return Promise.resolve({ ok: false, error: "INVALID_KEY" });
       return ipcRenderer.invoke("weishan:secure-delete", { key: safeKey });
     },
-    status: () => ipcRenderer.invoke("weishan:secure-status")
+    status: (key) => {
+      const safeKey = String(key || "").trim();
+      return ipcRenderer.invoke("weishan:secure-status", safeKey ? { key:safeKey } : {});
+    }
   },
   ai: {
     testConnector: (connector) => ipcRenderer.invoke("weishan:ai-test", connector || {}),
     chat: (payload) => ipcRenderer.invoke("weishan:ai-chat", payload || {}),
+    listModels: (connector) => ipcRenderer.invoke("weishan:ai-models", connector || {}),
     chatStream: (payload, onEvent) => {
       const request = payload || {};
       const streamId = String(request.streamId || "");
