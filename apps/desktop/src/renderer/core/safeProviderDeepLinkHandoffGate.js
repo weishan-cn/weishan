@@ -7,6 +7,7 @@
   const SHORT_URL_HOSTS = ["bit.ly", "t.co", "tinyurl.com", "goo.gl", "ow.ly", "is.gd", "buff.ly", "cutt.ly", "short.link"];
   const CREDENTIAL_PARAMS = /(api[_-]?key|apikey|token|access[_-]?token|refresh[_-]?token|secret|client[_-]?secret|authorization|password)=/i;
   const BLOCKED_PATH_PATTERN = /(checkout|payment|order|identity|book)/i;
+  const BLOCKED_QUERY_PATTERN = /(?:^|[?&#])(redirect|return|returnUrl|next|target|url|continue|checkout|payment|order|booking)=/i;
 
   function clone(value) {
     return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value;
@@ -27,6 +28,14 @@
   function pathFromUrl(url) {
     try {
       return new URL(text(url)).pathname.toLowerCase();
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function queryFromUrl(url) {
+    try {
+      return new URL(text(url)).search.toLowerCase();
     } catch (_) {
       return "";
     }
@@ -57,6 +66,13 @@
     if (SHORT_URL_HOSTS.includes(host)) return "";
     if (hasCredentialParams(value)) return "";
     if (BLOCKED_PATH_PATTERN.test(pathFromUrl(value))) return "";
+    if (BLOCKED_QUERY_PATTERN.test(queryFromUrl(value))) return "";
+    try {
+      const decoded = decodeURIComponent(value);
+      if (BLOCKED_PATH_PATTERN.test(decoded) || BLOCKED_QUERY_PATTERN.test(decoded)) return "";
+    } catch (_) {
+      return "";
+    }
     return value;
   }
 
@@ -75,6 +91,13 @@
     if (host && !isTrustedHost(host)) blockedReasons.push("unknown host blocked");
     if (hasCredentialParams(safeUrl) || hasCredentialParams(JSON.stringify(candidate))) blockedReasons.push("credential params blocked");
     if (BLOCKED_PATH_PATTERN.test(pathFromUrl(safeUrl))) blockedReasons.push("transaction path blocked");
+    if (BLOCKED_QUERY_PATTERN.test(queryFromUrl(safeUrl))) blockedReasons.push("redirect or transaction query blocked");
+    try {
+      const decodedSafeUrl = decodeURIComponent(safeUrl);
+      if (safeUrl && (BLOCKED_PATH_PATTERN.test(decodedSafeUrl) || BLOCKED_QUERY_PATTERN.test(decodedSafeUrl))) blockedReasons.push("encoded transaction redirect blocked");
+    } catch (_) {
+      if (safeUrl) blockedReasons.push("malformed encoded url blocked");
+    }
     if (restrictedCategory) blockedReasons.push("restricted category blocked");
 
     const allowed = blockedReasons.length === 0 && safeSearchOnly && !!normalizedUrl;

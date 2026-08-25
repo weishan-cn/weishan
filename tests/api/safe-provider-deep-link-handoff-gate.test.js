@@ -69,6 +69,38 @@ async function main() {
   assert.equal(missingUrlBlocked.safeProviderHandoffUrl, null);
   assert.equal(missingUrlBlocked.blockedReasons.includes("missing safe provider handoff url"), true);
 
+  const dangerousUrls = [
+    "javascript:alert(1)",
+    "file:///etc/passwd",
+    "data:text/html,hello",
+    "https://localhost/travel/flights",
+    "https://127.0.0.1/travel/flights",
+    "https://www.google.com/travel/flights?redirect=https%3A%2F%2Fevil.example%2Fcheckout",
+    "https://www.google.com/travel/flights?returnUrl=https%3A%2F%2Fwww.google.com%2Fpayment",
+    "https://www.google.com/travel/flights?checkout=true",
+    "https://www.google.com/travel/flights?url=https%3A%2F%2Fmerchant.example%2Forder%2F123"
+  ];
+  dangerousUrls.forEach((url) => {
+    const blockedUrl = api.evaluateSafeProviderDeepLinkHandoff({
+      providerId: "google_flights_search",
+      providerName: "Google Flights",
+      searchOnly: true,
+      safeProviderHandoffUrl: url
+    });
+    assert.equal(blockedUrl.status, "blocked", url);
+    assert.equal(blockedUrl.safeProviderHandoffUrl, null, url);
+    assert.equal(blockedUrl.autoOpen, false, url);
+  });
+
+  const legitimateSearch = api.evaluateSafeProviderDeepLinkHandoff({
+    providerId: "google_flights_search",
+    providerName: "Google Flights",
+    searchOnly: true,
+    safeProviderHandoffUrl: "https://www.google.com/travel/flights?q=CTU%20Tokyo"
+  });
+  assert.equal(legitimateSearch.status, "confirmation_required");
+  assert.equal(legitimateSearch.safeProviderHandoffUrl, "https://www.google.com/travel/flights?q=CTU%20Tokyo");
+
   const audit = api.getSafeProviderDeepLinkHandoffGateAuditDraft({ providerId: "google_flights_search", searchOnly: true, url: "https://www.google.com/travel/flights" });
   assert.equal(audit.eventType, "SAFE_PROVIDER_HANDOFF_URL_GATE_DRAFT");
   assert.equal(audit.userConfirmationRequired, true);
