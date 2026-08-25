@@ -7,10 +7,12 @@ const IPC_CHANNELS = Object.freeze({
 });
 const MAX = Object.freeze({ requestId:80, taskId:80, title:160, prompt:4000, negativePrompt:2000, images:8, imageFields:8, metadataDepth:4, metadataKeys:32, string:512, artifactTypes:8, listLimit:50 });
 const SENSITIVE = /token|accessToken|refreshToken|apiKey|secret|password|authorization|cookie|endpoint|baseUrl|oauth|credential|privateKey|clientSecret|session|bearer|header|headers/i;
+const AUTHORITY = /^(authorizesExecution|executionGate|productionTraffic|productionAffected|trusted|validated|safe|exact|current|recommended|canOpenExternalNow|providerAccess|networkAccess|payment|order|booking|ticketing)$/i;
 const BLOCKED_KEYS = new Set(["__proto__", "prototype", "constructor"]);
 const ARTIFACT_TYPES = new Set(["video", "cover", "subtitle", "project", "storyboard", "prompt", "log"]);
 const IMAGE_SOURCE_TYPES = new Set(["local-placeholder", "uploaded-reference", "project-asset"]);
 const STATUS_FILTERS = new Set(["CREATED", "PREPARING", "QUEUED", "GENERATING", "POST_PROCESSING", "COMPLETED", "FAILED", "CANCELLED"]);
+const CREATE_TASK_KEYS = new Set(["requestId", "title", "prompt", "negativePrompt", "images", "duration", "resolution", "fps", "seed", "style", "camera", "motion", "metadata"]);
 
 function text(value, max){ return typeof value === "string" ? value.trim().slice(0, max || MAX.string) : ""; }
 function plain(value){ return !!value && Object.getPrototypeOf(value) === Object.prototype; }
@@ -22,7 +24,7 @@ function safeClone(value, depth, seen){
   if (Array.isArray(value)) return value.slice(0, MAX.images).map((item) => safeClone(item, depth + 1, seen)).filter((item) => item !== undefined);
   const output = {};
   Object.keys(value).slice(0, MAX.metadataKeys).forEach((key) => {
-    if (BLOCKED_KEYS.has(key) || SENSITIVE.test(key)) return;
+    if (BLOCKED_KEYS.has(key) || SENSITIVE.test(key) || AUTHORITY.test(key)) return;
     const item = safeClone(value[key], depth + 1, seen);
     if (item !== undefined) output[key] = item;
   });
@@ -49,7 +51,7 @@ function imageDescriptor(value){
 function base(input){ if (!plain(input) || !requestId(input.requestId)) return null; return { requestId:requestId(input.requestId) }; }
 function createTaskRequest(input){
   const result = base(input); if (!result) return invalid("INVALID_REQUEST", "requestId");
-  if (Object.keys(input).some((key) => BLOCKED_KEYS.has(key) || SENSITIVE.test(key))) return invalid("INVALID_REQUEST", "payload");
+  if (Object.keys(input).some((key) => BLOCKED_KEYS.has(key) || SENSITIVE.test(key) || AUTHORITY.test(key) || !CREATE_TASK_KEYS.has(key))) return invalid("INVALID_REQUEST", "payload");
   const images = Array.isArray(input.images) ? input.images : [];
   if (images.length > MAX.images) return invalid("LIMIT_EXCEEDED", "images");
   const safeImages = images.map(imageDescriptor); if (safeImages.some((image) => !image)) return invalid("INVALID_REQUEST", "images");

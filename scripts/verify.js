@@ -48,6 +48,7 @@ function runCore() {
   runStep("E2E canonical runtime launch guard", "node", ["tests/api/e2e-canonical-runtime-launch-guard.test.js"]);
   runStep("Healthcheck", "npm", ["run", "healthcheck"]);
   runStep("Security core trust boundary effectiveness", "node", ["tests/api/security-core-trust-boundary-effectiveness.test.js"]);
+  runStep("IPC core effectiveness", "node", ["tests/api/ipc-core-effectiveness.test.js"]);
   runStep("API tests", "npm", ["run", "test:api"]);
   runStep("Multi-network product feed foundation", "node", ["tests/api/global-commerce-multi-network-product-feed-foundation.test.js"]);
   runStep("Product identity and variant matching", "node", ["tests/api/global-commerce-product-identity.test.js"]);

@@ -1,29 +1,17 @@
 const { contextBridge, ipcRenderer } = require("electron");
 const { IPC_CHANNELS } = require("./shared/videoProviderIpcContract");
+const { validateExternalOpenUrl, externalOpenBlocked } = require("./shared/ipcTrustBoundary");
 const desktopPackage = require("../package.json");
 
 function isSafeExplicitExternalUrl(value) {
-  try {
-    const parsed = new URL(String(value || "").trim());
-    const host = String(parsed.hostname || "").toLowerCase();
-    if (parsed.protocol !== "https:") return false;
-    if (parsed.username || parsed.password) return false;
-    if (!host || host === "localhost" || /^127\./.test(host) || /^10\./.test(host) || /^192\.168\./.test(host) || /^172\.(1[6-9]|2\d|3[0-1])\./.test(host)) return false;
-    if (/\/(?:checkout|payment|pay|order|purchase|book|booking|reserve|reservation|ticket)(?:\/|$)/i.test(parsed.pathname)) return false;
-    for (const key of parsed.searchParams.keys()) {
-      if (/(api[_-]?key|apikey|token|access[_-]?token|refresh[_-]?token|secret|client[_-]?secret|authorization|password|session|signature)/i.test(key)) return false;
-    }
-    return true;
-  } catch (_) {
-    return false;
-  }
+  return validateExternalOpenUrl(value).ok === true;
 }
 
 contextBridge.exposeInMainWorld("weishan", {
   version: desktopPackage.version,
   productName: desktopPackage.productName || "Weishan",
   apiBase: process.env.WEISHAN_API_BASE || "http://127.0.0.1:8787",
-  openExternal: (url) => isSafeExplicitExternalUrl(url) ? ipcRenderer.invoke("weishan:open-external", String(url || "").trim()) : Promise.resolve({ ok:false, error:"UNSAFE_EXTERNAL_URL_BLOCKED" }),
+  openExternal: (url) => isSafeExplicitExternalUrl(url) ? ipcRenderer.invoke("weishan:open-external", String(url || "").trim()) : Promise.resolve(externalOpenBlocked("UNSAFE_EXTERNAL_URL_BLOCKED")),
   openWeishanOfficialWebsite: () => ipcRenderer.invoke("weishan:open-official-website"),
   chooseFiles: () => ipcRenderer.invoke("weishan:choose-files"),
   desktopAssistantOpenApp: (appId) => ipcRenderer.invoke("desktopAssistant:openWhitelistedApp", String(appId || "")),

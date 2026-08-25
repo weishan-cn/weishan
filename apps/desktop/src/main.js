@@ -15,6 +15,7 @@ const { createEbaySandboxReadonlyValidator } = require("./main/ebaySandboxReadon
 const { createHotelbedsEvaluationReadonlyValidator } = require("./main/hotelbedsEvaluationReadonlyValidator");
 const { createVideoProviderGateway } = require("./main/videoProviderGateway");
 const { registerVideoProviderIpcHandlers } = require("./main/videoProviderIpc");
+const { openValidatedExternal } = require("./shared/ipcTrustBoundary");
 
 const APP_NAME = "weishan";
 const APP_ID = "ai.weishan.desktop";
@@ -509,7 +510,7 @@ function registerIpcHandlers() {
     if (r.canceled) return { ok: false, files: [] };
     return { ok: true, files: r.filePaths.map((p) => ({ path: p, name: path.basename(p), size: fs.statSync(p).size })) };
   });
-  ipcMain.handle("weishan:open-external", async (_event, url) => shell.openExternal(String(url || "")));
+  ipcMain.handle("weishan:open-external", async (_event, url) => openValidatedExternal(shell, url));
   ipcMain.handle("weishan:open-official-website", async () => shell.openExternal(WEISHAN_OFFICIAL_WEBSITE_URL));
   registerSecureStorageHandlers(ipcMain);
   providerCredentialStoreService = registerSecureApiKeyStorageHandlers(ipcMain, {
