@@ -58,6 +58,7 @@ function runCore() {
   runStep("Global travel price truth foundation", "node", ["tests/api/global-travel-price-truth-foundation.test.js"]);
   runStep("Public Beta email operations control plane", "node", ["tests/api/email-ops-control-plane.test.js"]);
   runStep("Public Beta email operations module effectiveness", "node", ["tests/api/email-ops-module-effectiveness.test.js"]);
+  runStep("Public Beta email operations real mailbox adapter", "node", ["tests/api/email-ops-real-mailbox-adapter.test.js"]);
   runStep("Global travel real source acquisition sweep", "node", ["tests/api/global-travel-real-source-acquisition-sweep.test.js"]);
   runStep("Amadeus self-service flight source adapter", "node", ["tests/api/amadeus-self-service-flight-source-adapter.test.js"]);
   runStep("Duffel test flight source adapter", "node", ["tests/api/duffel-test-flight-source-adapter.test.js"]);

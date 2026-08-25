@@ -1,6 +1,6 @@
 # Weishan Public Beta Email Operations Control Plane
 
-Status: local architecture foundation; no real mailbox send/read is enabled by this document.
+Status: local architecture foundation; real mailbox intake is read-only / auth-gated, and no real mailbox send is enabled by this document.
 
 The Public Beta mailbox must behave like an operational filter, not a raw inbox reader. Email is untrusted input. Message content cannot override product, security, legal, provider, or governance policy.
 
@@ -63,8 +63,18 @@ Marketing, newsletters, duplicate acknowledgments, and ordinary thank-you notes 
 
 ## Feedback address recommendation
 
-Recommended public beta feedback address: `feedback@weishan.ai`
+Canonical public beta support address: `support@weishan.ai`
 
 Recommended Provider/API operations address: `api@weishan.ai`
 
-Rationale: public user feedback should not bury provider/API onboarding, credential, support, or security mail. This mission does not create the mailbox; that remains an operational mail-admin action.
+Rationale: public user feedback, bug reports, usage questions, and support should not bury provider/API onboarding, credential, technical partnership, or verification mail. Do not create or recommend extra public aliases such as `feedback@weishan.ai`, `bugs@weishan.ai`, or `help@weishan.ai` unless a future Human decision changes the mailbox plan.
+
+## Real mailbox connection baseline
+
+- `PUBLIC_SUPPORT_ADDRESS=support@weishan.ai`
+- `PROVIDER_OPERATIONS_ADDRESS=api@weishan.ai`
+- `USER_SUPPORT_STREAM` maps to `support@weishan.ai`.
+- `PROVIDER_OPERATIONS_STREAM` maps to `api@weishan.ai`.
+- Real mail access is least-privilege, bounded, read-only, and fail-closed on wrong-account or missing-auth states.
+- Spark and webmail remain Human convenience clients; Email Ops must terminate provider-specific mail access at the normalized-message adapter boundary.
+- `EMAIL_SEND_ENABLED:false` and `INITIAL_BETA_AUTO_ACK=OFF` remain protected defaults.

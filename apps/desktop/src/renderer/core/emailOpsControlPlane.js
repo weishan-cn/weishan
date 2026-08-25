@@ -129,9 +129,14 @@
 
   function buildFeedbackAddressRecommendation() {
     return clone({
-      RECOMMENDED_PUBLIC_FEEDBACK_ADDRESS:"feedback@weishan.ai",
+      PUBLIC_SUPPORT_ADDRESS:"support@weishan.ai",
+      PROVIDER_OPERATIONS_ADDRESS:"api@weishan.ai",
+      RECOMMENDED_PUBLIC_FEEDBACK_ADDRESS:"support@weishan.ai",
       RECOMMENDED_PROVIDER_OPERATIONS_ADDRESS:"api@weishan.ai",
-      RATIONALE:"Keep public beta feedback separate from Provider/API operations; do not create the mailbox until mail-admin authorization exists.",
+      EXTRA_PUBLIC_FEEDBACK_ADDRESS_CREATED:false,
+      INITIAL_BETA_AUTO_ACK:"OFF",
+      EMAIL_SEND_ENABLED:false,
+      RATIONALE:"Use support@weishan.ai for Public Beta user support while keeping api@weishan.ai for Provider/API operations; do not create feedback@, bugs@, or help@ aliases.",
       mailboxCreated:false,
       redacted:true
     });

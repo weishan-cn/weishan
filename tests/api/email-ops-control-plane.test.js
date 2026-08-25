@@ -187,8 +187,13 @@ assert.equal(control.VERSION, "4.2.8");
 
 {
   const recommendation = control.buildFeedbackAddressRecommendation();
-  assert.equal(recommendation.RECOMMENDED_PUBLIC_FEEDBACK_ADDRESS, "feedback@weishan.ai");
+  assert.equal(recommendation.PUBLIC_SUPPORT_ADDRESS, "support@weishan.ai");
+  assert.equal(recommendation.PROVIDER_OPERATIONS_ADDRESS, "api@weishan.ai");
+  assert.equal(recommendation.RECOMMENDED_PUBLIC_FEEDBACK_ADDRESS, "support@weishan.ai");
   assert.equal(recommendation.RECOMMENDED_PROVIDER_OPERATIONS_ADDRESS, "api@weishan.ai");
+  assert.equal(recommendation.EXTRA_PUBLIC_FEEDBACK_ADDRESS_CREATED, false);
+  assert.equal(recommendation.INITIAL_BETA_AUTO_ACK, "OFF");
+  assert.equal(recommendation.EMAIL_SEND_ENABLED, false);
   assert.equal(recommendation.mailboxCreated, false);
 }
 

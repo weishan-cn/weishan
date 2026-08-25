@@ -28,7 +28,7 @@ This checklist is the authoritative Public Beta hardening gate for the desktop a
 | Signing | Current macOS signing is local ad-hoc only; notarized Developer ID signing remains a separate release step. |
 | Permissions | Desktop permissions must not weaken sandbox, credential, IPC, or provider boundaries. |
 | Performance | Public Beta flows should stay responsive under local fixture/test data and degrade gracefully on unavailable providers. |
-| Email operations | Feedback intake control plane must preserve `EMAIL_SEND_ENABLED:false`, route P0/P1/security/provider replies to Human Queue, and protect OTP/secret content. |
+| Email operations | Support intake baseline uses `support@weishan.ai`; Provider/API operations remain `api@weishan.ai`; the control plane must preserve `EMAIL_SEND_ENABLED:false`, route P0/P1/security/provider replies to Human Queue, and protect OTP/secret content. |
 
 ## Product-truth coverage labels
 
@@ -39,14 +39,16 @@ This checklist is the authoritative Public Beta hardening gate for the desktop a
 
 ## Feedback / issue intake
 
-The feedback mailbox and public bug-reporting workflow are intentionally staged behind the Email Operations Control Plane. Before a wider Public Beta package is distributed, complete or explicitly defer:
+The public support mailbox and bug-reporting workflow are intentionally staged behind the Email Operations Control Plane. The canonical public address is `support@weishan.ai`; do not create `feedback@weishan.ai`, `bugs@weishan.ai`, or `help@weishan.ai` as a workaround for classification. Before a wider Public Beta package is distributed, complete or explicitly defer:
 
-- actual mailbox/alias creation or routing;
-- real mail-provider adapter authorization;
+- actual mailbox routing for `support@weishan.ai`;
+- real mail-provider adapter authorization / read-only validation status;
 - secret-safe feedback sanitization in production flow;
 - crash / diagnostic redaction;
 - human triage workflow;
 - privacy and retention copy.
+
+If real mailbox automation is unavailable but the Human can operate the support inbox manually, the email feedback gate may pass with a manual fallback for a smaller beta.
 
 ## Release decision rule
 
