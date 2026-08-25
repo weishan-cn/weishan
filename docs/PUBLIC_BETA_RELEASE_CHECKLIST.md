@@ -28,6 +28,7 @@ This checklist is the authoritative Public Beta hardening gate for the desktop a
 | Signing | Current macOS signing is local ad-hoc only; notarized Developer ID signing remains a separate release step. |
 | Permissions | Desktop permissions must not weaken sandbox, credential, IPC, or provider boundaries. |
 | Performance | Public Beta flows should stay responsive under local fixture/test data and degrade gracefully on unavailable providers. |
+| Email operations | Feedback intake control plane must preserve `EMAIL_SEND_ENABLED:false`, route P0/P1/security/provider replies to Human Queue, and protect OTP/secret content. |
 
 ## Product-truth coverage labels
 
@@ -38,10 +39,11 @@ This checklist is the authoritative Public Beta hardening gate for the desktop a
 
 ## Feedback / issue intake
 
-The feedback mailbox and public bug-reporting workflow are intentionally not implemented in this checklist. Before a wider Public Beta package is distributed, run a separate approved mission for:
+The feedback mailbox and public bug-reporting workflow are intentionally staged behind the Email Operations Control Plane. Before a wider Public Beta package is distributed, complete or explicitly defer:
 
-- minimal user-visible issue intake;
-- secret-safe feedback sanitization;
+- actual mailbox/alias creation or routing;
+- real mail-provider adapter authorization;
+- secret-safe feedback sanitization in production flow;
 - crash / diagnostic redaction;
 - human triage workflow;
 - privacy and retention copy.

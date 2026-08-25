@@ -56,6 +56,7 @@ function runCore() {
   runStep("Unified shopping and travel desktop flow", "node", ["tests/api/unified-desktop-flow-view-model.test.js"]);
   runStep("Global flight shopping evidence foundation", "node", ["tests/api/global-flight-shopping-evidence-foundation.test.js"]);
   runStep("Global travel price truth foundation", "node", ["tests/api/global-travel-price-truth-foundation.test.js"]);
+  runStep("Public Beta email operations control plane", "node", ["tests/api/email-ops-control-plane.test.js"]);
   runStep("Global travel real source acquisition sweep", "node", ["tests/api/global-travel-real-source-acquisition-sweep.test.js"]);
   runStep("Amadeus self-service flight source adapter", "node", ["tests/api/amadeus-self-service-flight-source-adapter.test.js"]);
   runStep("Duffel test flight source adapter", "node", ["tests/api/duffel-test-flight-source-adapter.test.js"]);
