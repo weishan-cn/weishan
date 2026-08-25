@@ -38,13 +38,13 @@ function test(name, fn) { tests.push([name, fn]); }
 
 test("routing corpus is strict and has no wrong confident dispatch", () => {
   const report = homeRouter.evaluateRoutingCorpus();
-  assert.equal(report.metrics.TOTAL_ROUTING_CASES, 14);
-  assert.equal(report.metrics.CLEAR_CASES, 10);
-  assert.equal(report.metrics.CLEAR_CORRECT, 10);
-  assert.equal(report.metrics.AMBIGUOUS_CASES, 2);
-  assert.equal(report.metrics.AMBIGUOUS_SAFE, 2);
-  assert.equal(report.metrics.MIXED_INTENT_CASES, 2);
-  assert.equal(report.metrics.MIXED_INTENT_SAFELY_HANDLED, 2);
+  assert.equal(report.metrics.TOTAL_ROUTING_CASES, 25);
+  assert.equal(report.metrics.CLEAR_CASES, 18);
+  assert.equal(report.metrics.CLEAR_CORRECT, 18);
+  assert.equal(report.metrics.AMBIGUOUS_CASES, 4);
+  assert.equal(report.metrics.AMBIGUOUS_SAFE, 4);
+  assert.equal(report.metrics.MIXED_INTENT_CASES, 3);
+  assert.equal(report.metrics.MIXED_INTENT_SAFELY_HANDLED, 3);
   assert.equal(report.metrics.WRONG_CONFIDENT, 0);
   assert.equal(report.metrics.PASS, true);
 });
@@ -57,9 +57,12 @@ test("mail evidence beats shopping and travel object words", () => {
 
 test("clear shopping and travel remain commerce", () => {
   assert.equal(homeRouter.classifyHomeIntent("帮我买一台性价比高的 MacBook").destination, "COMMERCE");
+  assert.equal(homeRouter.classifyHomeIntent("MacBook Air M4 16+512 哪里便宜").searchScope.domain, "SHOPPING");
   assert.equal(homeRouter.classifyHomeIntent("查 7 月 15 日成都到北京机票").destination, "COMMERCE");
+  assert.equal(homeRouter.classifyHomeIntent("成都到东京下周两个人经济舱").searchScope.domain, "FLIGHT");
   assert.equal(homeRouter.classifyHomeIntent("7 月 15 日上海到成都最便宜的机票").destination, "COMMERCE");
   assert.equal(homeRouter.classifyHomeIntent("比较东京酒店价格").destination, "COMMERCE");
+  assert.equal(homeRouter.classifyHomeIntent("10月香港出发阳台房邮轮价格").searchScope.domain, "CRUISE");
 });
 
 test("ambiguous and mixed intents are handled safely", () => {
