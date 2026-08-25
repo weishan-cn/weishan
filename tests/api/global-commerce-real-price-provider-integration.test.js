@@ -195,6 +195,20 @@ async function main() {
   assert.equal(uniqueComparison.recommendation.lowestObservedOfferId, "deal/gog");
   assert.equal(uniqueComparison.recommendation.status, "USER_SELECTION_REQUIRED");
 
+  const landedOffers = json(offers.offers.slice(0, 2));
+  landedOffers[0].price = 34.99;
+  landedOffers[0].landedTotal = 54.99;
+  landedOffers[1].price = 39.99;
+  landedOffers[1].landedTotal = 39.99;
+  const landedComparison = comparisonApi.compareSameProductOffers({ offers:landedOffers });
+  assert.equal(landedComparison.status, "COMPARABLE");
+  assert.equal(landedComparison.comparisonBasis, "KNOWN_LANDED_TOTAL");
+  assert.equal(landedComparison.rankedOffers[0].offerId, landedOffers[1].offerId);
+  assert.equal(landedComparison.recommendation.reason, "LOWEST_KNOWN_LANDED_TOTAL_WITHIN_COMPARABLE_SET");
+
+  const unknownShippingComparison = comparisonApi.compareSameProductOffers({ offers:[landedOffers[0], Object.assign({}, landedOffers[1], { landedTotal:null })] });
+  assert.equal(unknownShippingComparison.code, "LANDED_COST_INCOMPLETE");
+
   const completeTransport = fixtureTransport();
   const completeAdapter = cheapSharkApi.createCheapSharkAdapter({
     runtime:Object.assign({}, runtime, { fetchImpl:completeTransport.fetchImpl })

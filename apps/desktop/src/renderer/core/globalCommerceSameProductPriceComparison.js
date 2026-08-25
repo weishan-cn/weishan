@@ -26,6 +26,10 @@
     }
   }
 
+  function moneyOrNull(value) {
+    return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+  }
+
   function comparisonPolicy(providerId, scope) {
     const registry = window.WeishanGlobalCommerceProviderRoleRegistry || {};
     return typeof registry.getComparisonPolicy === "function"
@@ -69,6 +73,7 @@
       if (!text(item.offerId)) invalid.push("offerId_missing_" + index);
       if (!text(item.merchant)) invalid.push("merchant_missing_" + index);
       if (typeof price !== "number" || !Number.isFinite(price) || price < 0) invalid.push("price_invalid_" + index);
+      if (item.landedTotal != null && moneyOrNull(item.landedTotal) === null) invalid.push("landedTotal_invalid_" + index);
       if (!/^[A-Z]{3}$/.test(text(item.currency))) invalid.push("currency_invalid_" + index);
       if (!validHttpsUrl(item.handoffUrl)) invalid.push("handoffUrl_invalid_" + index);
       if (!Number.isFinite(Date.parse(text(item.observedAt)))) invalid.push("observedAt_invalid_" + index);
@@ -93,8 +98,15 @@
     }
 
     const offers = clone(sourceOffers);
+    const knownLandedCount = offers.filter(function (offer) { return moneyOrNull(offer.landedTotal) !== null; }).length;
+    if (knownLandedCount > 0 && knownLandedCount !== offers.length) {
+      return failure("LANDED_COST_INCOMPLETE", ["Known landed totals cannot be ranked against unknown shipping/tax/fee totals."]);
+    }
+    const comparisonBasis = knownLandedCount === offers.length ? "KNOWN_LANDED_TOTAL" : "ITEM_PRICE_ONLY";
 
     offers.sort(function (left, right) {
+      const basisDelta = (comparisonBasis === "KNOWN_LANDED_TOTAL" ? Number(left.landedTotal) - Number(right.landedTotal) : Number(left.price) - Number(right.price));
+      if (basisDelta) return basisDelta;
       const priceDelta = Number(left.price) - Number(right.price);
       if (priceDelta) return priceDelta;
       const leftMerchant = text(left.merchant);
@@ -106,17 +118,22 @@
       return leftOfferId < rightOfferId ? -1 : (leftOfferId > rightOfferId ? 1 : 0);
     });
 
-    const minimum = Number(offers[0].price);
-    const minimumOffers = offers.filter(function (offer) { return Number(offer.price) === minimum; });
+    const minimum = comparisonBasis === "KNOWN_LANDED_TOTAL" ? Number(offers[0].landedTotal) : Number(offers[0].price);
+    const minimumOffers = offers.filter(function (offer) {
+      return (comparisonBasis === "KNOWN_LANDED_TOTAL" ? Number(offer.landedTotal) : Number(offer.price)) === minimum;
+    });
     let rank = 0;
     let previousPrice = null;
     const rankedOffers = offers.map(function (offer, index) {
       const price = Number(offer.price);
-      if (previousPrice === null || price !== previousPrice) rank = index + 1;
-      previousPrice = price;
+      const rankingValue = comparisonBasis === "KNOWN_LANDED_TOTAL" ? Number(offer.landedTotal) : price;
+      if (previousPrice === null || rankingValue !== previousPrice) rank = index + 1;
+      previousPrice = rankingValue;
       return Object.assign({}, offer, {
         priceRank:rank,
-        comparisonLabel:price === minimum
+        comparisonBasis:comparisonBasis,
+        comparisonValue:rankingValue,
+        comparisonLabel:rankingValue === minimum
           ? (minimumOffers.length > 1 ? "SAME_LOWEST_OBSERVED_PRICE" : "LOWEST_OBSERVED_PRICE")
           : "HIGHER_OBSERVED_PRICE"
       });
@@ -129,18 +146,21 @@
       code:null,
       canonicalProductIdentity:rankedOffers[0].canonicalProductIdentity,
       currency:rankedOffers[0].currency,
+      comparisonBasis:comparisonBasis,
       rankedOffers:rankedOffers,
       recommendation:{
         status:"USER_SELECTION_REQUIRED",
         reason:minimumOffers.length > 1
-          ? "SAME_OBSERVED_PRICE_AMONG_COMPARABLE_OFFERS"
-          : "LOWEST_OBSERVED_PRICE_WITHIN_COMPARABLE_SET",
+          ? (comparisonBasis === "KNOWN_LANDED_TOTAL" ? "SAME_KNOWN_LANDED_TOTAL_AMONG_COMPARABLE_OFFERS" : "SAME_OBSERVED_PRICE_AMONG_COMPARABLE_OFFERS")
+          : (comparisonBasis === "KNOWN_LANDED_TOTAL" ? "LOWEST_KNOWN_LANDED_TOTAL_WITHIN_COMPARABLE_SET" : "LOWEST_OBSERVED_PRICE_WITHIN_COMPARABLE_SET"),
         lowestObservedOfferId:minimumOffers.length === 1 ? minimumOffers[0].offerId : null,
         equivalentLowestObservedOfferIds:minimumOffers.map(function (offer) { return offer.offerId; })
       },
       limitations:[
         "Observed provider prices are not guaranteed checkout prices.",
-        "Tax, fees, availability, and final price remain subject to the destination merchant."
+        comparisonBasis === "KNOWN_LANDED_TOTAL"
+          ? "Ranking used known landed totals supplied by the controlled source."
+          : "Tax, fees, availability, and final price remain subject to the destination merchant."
       ],
       userDecisionRequired:true,
       executionGate:"CLOSED",

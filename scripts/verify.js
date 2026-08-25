@@ -51,6 +51,7 @@ function runCore() {
   runStep("Product identity and variant matching", "node", ["tests/api/global-commerce-product-identity.test.js"]);
   runStep("Price freshness and evidence quality", "node", ["tests/api/global-commerce-price-freshness-evidence-quality.test.js"]);
   runStep("Product truth and exact handoff pipeline", "node", ["tests/api/global-commerce-product-truth-pipeline.test.js"]);
+  runStep("Global shopping decision quality effectiveness", "node", ["tests/api/global-shopping-decision-quality-effectiveness.test.js"]);
   runStep("Controlled source adapter product truth bridge", "node", ["tests/api/global-commerce-controlled-source-adapter-bridge.test.js"]);
   runStep("Real-price coverage sweep", "node", ["tests/api/global-commerce-real-price-coverage-sweep.test.js"]);
   runStep("Unified shopping and travel desktop flow", "node", ["tests/api/unified-desktop-flow-view-model.test.js"]);

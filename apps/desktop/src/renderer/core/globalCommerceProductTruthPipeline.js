@@ -40,6 +40,10 @@
     return /^[A-Z]{3}$/.test(result) ? result : null;
   }
 
+  function moneyOrNull(value) {
+    return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+  }
+
   function normalizedHost(value) {
     const result = text(value).toLowerCase();
     return /^(?=.{1,253}$)(?!-)[a-z0-9-]+(?:\.[a-z0-9-]+)+$/.test(result) ? result : null;
@@ -242,14 +246,15 @@
     if (!offerIdentityKey) reasons.push("PRODUCT_IDENTITY_REQUIRED");
     const match = identityMatch(request, item, productIdentity);
     if (requestedIdentityKey && match.matchState === "MISMATCH") reasons.push("PRODUCT_IDENTITY_MISMATCH");
-    if (match.conflicts && match.conflicts.some(function (reason) { return /(STORAGE|CAPACITY|MEMORY|CONFIGURATION|PLATFORM|EDITION|GENERATION|CONDITION|BUNDLE|SUBSCRIPTION|REGION|COLOR|SIZE)_CONFLICT/.test(reason); })) {
+    if (match.conflicts && match.conflicts.some(function (reason) { return /(STORAGE|CAPACITY|MEMORY|CONFIGURATION|PLATFORM|EDITION|GENERATION|CONDITION|BUNDLE|BUNDLESTATE|SUBSCRIPTION|SUBSCRIPTIONSTATE|REGION|COLOR|SIZE)_CONFLICT/.test(reason); })) {
       reasons.push("VARIANT_MISMATCH");
     }
     if (match.matchState === "POSSIBLE_MATCH" || match.matchState === "UNKNOWN") reasons.push("PRODUCT_IDENTITY_NOT_CONFIRMED");
     if (match.matchState === "HIGH_CONFIDENCE_MATCH" && match.missingEvidence && match.missingEvidence.length) reasons.push("VARIANT_EVIDENCE_INCOMPLETE");
 
-    const price = typeof item.price === "number" && Number.isFinite(item.price) && item.price >= 0 ? item.price : null;
+    const price = moneyOrNull(item.price);
     if (price === null) reasons.push("PRICE_INVALID_OR_UNKNOWN");
+    const landedTotal = moneyOrNull(item.landedTotal);
     const currency = normalizedCurrency(item.currency);
     if (!currency) reasons.push("CURRENCY_REQUIRED");
 
@@ -298,6 +303,8 @@
       matchState:match.matchState,
       matchExplanation:match.explanation,
       price:price,
+      landedTotal:landedTotal,
+      priceComparisonBasis:landedTotal === null ? "ITEM_PRICE_ONLY" : "KNOWN_LANDED_TOTAL",
       currency:currency,
       priceConditions:conditions || [],
       conditionalPrice:conditionalPrice,
@@ -350,6 +357,10 @@
     const currencies = Array.from(new Set(offers.map(function (offer) { return offer.currency; })));
     if (currencies.length !== 1) return null;
     const ranked = offers.slice().sort(function (left, right) {
+      const leftBasis = left.landedTotal === null ? left.price : left.landedTotal;
+      const rightBasis = right.landedTotal === null ? right.price : right.landedTotal;
+      const basisDelta = leftBasis - rightBasis;
+      if (basisDelta) return basisDelta;
       const priceDelta = left.price - right.price;
       if (priceDelta) return priceDelta;
       const handoffDelta = handoffScore(left.handoffQuality) - handoffScore(right.handoffQuality);
@@ -395,10 +406,12 @@
         provider:recommendation.provider,
         merchant:recommendation.merchant,
         price:recommendation.price,
+        landedTotal:recommendation.landedTotal,
+        priceComparisonBasis:recommendation.priceComparisonBasis,
         currency:recommendation.currency,
         handoffUrl:recommendation.handoffUrl,
         handoffQuality:recommendation.handoffQuality,
-        reason:"LOWEST_CURRENT_VERIFIED_PRICE_WITH_EXACT_HANDOFF",
+        reason:recommendation.landedTotal === null ? "LOWEST_CURRENT_VERIFIED_ITEM_PRICE_WITH_EXACT_HANDOFF" : "LOWEST_CURRENT_VERIFIED_LANDED_TOTAL_WITH_EXACT_HANDOFF",
         priceFreshness:recommendation.priceFreshness,
         priceAuthority:recommendation.priceAuthority,
         priceQualityOutcome:recommendation.priceQualityOutcome,
@@ -418,7 +431,9 @@
         MARKET_CONTEXT_SAFETY:markets.length <= 1,
         AVAILABILITY_TRUTH:classified.every(function (offer) { return offer.availabilityAuthority === true || offer.quarantineReasons.indexOf("AVAILABILITY_NOT_AUTHORITATIVE") >= 0; }),
         OFFER_DEDUP:true,
-        USER_BENEFIT_RANKING:recommendation ? recommendation.price === Math.min.apply(null, uniqueEligible.map(function (offer) { return offer.price; })) : false,
+        USER_BENEFIT_RANKING:recommendation ? (recommendation.landedTotal === null
+          ? recommendation.price === Math.min.apply(null, uniqueEligible.map(function (offer) { return offer.price; }))
+          : recommendation.landedTotal === Math.min.apply(null, uniqueEligible.map(function (offer) { return offer.landedTotal; }))) : false,
         COMMISSION_ISOLATION:true,
         EXACT_HANDOFF:recommendation ? recommendation.handoffQuality === "EXACT_HANDOFF" : false,
         UNSAFE_HANDOFF_REJECTION:classified.every(function (offer) { return offer.handoffUrl || offer.quarantineReasons.some(function (reason) { return /^HANDOFF_/.test(reason) || reason === "EXACT_HANDOFF_REQUIRED_FOR_RECOMMENDATION"; }); }),

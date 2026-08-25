@@ -120,9 +120,18 @@ function main() {
     offer({ offerId:"exact-link", price:99 })
   ]);
   assert.equal(exactHandoff.recommendation.offerId, "exact-link");
-  assert.equal(exactHandoff.recommendation.reason, "LOWEST_CURRENT_VERIFIED_PRICE_WITH_EXACT_HANDOFF");
+  assert.equal(exactHandoff.recommendation.reason, "LOWEST_CURRENT_VERIFIED_LANDED_TOTAL_WITH_EXACT_HANDOFF");
   assert.equal(reasonSet(exactHandoff, "search-link").has("EXACT_HANDOFF_REQUIRED_FOR_RECOMMENDATION"), true);
   assert.equal(exactHandoff.matrix.EXACT_HANDOFF, true);
+
+  const landedCostBeatsLowItemPrice = evaluate([
+    offer({ offerId:"low-item-high-shipping", price:900, shipping:200, tax:0, fees:0, landedTotal:1100 }),
+    offer({ offerId:"higher-item-free-shipping", price:1050, shipping:0, tax:0, fees:0, landedTotal:1050 })
+  ]);
+  assert.equal(landedCostBeatsLowItemPrice.recommendation.offerId, "higher-item-free-shipping");
+  assert.equal(landedCostBeatsLowItemPrice.recommendation.landedTotal, 1050);
+  assert.equal(landedCostBeatsLowItemPrice.recommendation.priceComparisonBasis, "KNOWN_LANDED_TOTAL");
+  assert.equal(landedCostBeatsLowItemPrice.matrix.USER_BENEFIT_RANKING, true);
 
   const unsafeHandoff = evaluate([
     offer({ offerId:"checkout-path", price:60, handoffUrl:"https://merchant-a.example/checkout/camera" }),
