@@ -61,6 +61,7 @@ function runCore() {
   runStep("Public Beta email operations real mailbox adapter", "node", ["tests/api/email-ops-real-mailbox-adapter.test.js"]);
   runStep("Mail Takeover user intelligence", "node", ["tests/api/mail-takeover-user-intelligence.test.js"]);
   runStep("Mail Takeover UX effectiveness", "node", ["tests/api/mail-takeover-ux-effectiveness.test.js"]);
+  runStep("Mail Takeover adversarial trust", "node", ["tests/api/mail-takeover-adversarial-trust.test.js"]);
   runStep("Global travel real source acquisition sweep", "node", ["tests/api/global-travel-real-source-acquisition-sweep.test.js"]);
   runStep("Amadeus self-service flight source adapter", "node", ["tests/api/amadeus-self-service-flight-source-adapter.test.js"]);
   runStep("Duffel test flight source adapter", "node", ["tests/api/duffel-test-flight-source-adapter.test.js"]);

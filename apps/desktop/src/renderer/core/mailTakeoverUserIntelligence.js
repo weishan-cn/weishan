@@ -104,6 +104,37 @@
     return patterns.some(function (pattern) { return pattern.test(hay); });
   }
 
+  function currentIntentText(message) {
+    const subject = text(message && message.subject);
+    const lines = text(message && message.bodyText).split(/\r?\n/);
+    const current = [];
+    for (let i = 0; i < lines.length; i += 1) {
+      let line = text(lines[i]);
+      line = line.split(/-+\s*forwarded message\s*-+/i)[0];
+      line = line.split(/\s(?:from|sent|to|subject):\s+\S+@/i)[0];
+      if (/^>|^on .+wrote:$/i.test(line)) break;
+      if (/^-+\s*forwarded message\s*-+$/i.test(line)) break;
+      if (/^(from|sent|to|subject):\s+/i.test(line) && i > 0) break;
+      if (/if you received this email in error|confidentiality notice|unsubscribe/i.test(line)) continue;
+      current.push(line);
+    }
+    return `${subject} ${current.join(" ")}`;
+  }
+
+  function isMarketingNoise(message, hay) {
+    return message.bulk === true
+      || (message.automated === true && /newsletter|unsubscribe|promotion|sale|deal|webinar|shop now|final hours|last chance|ready for summer/i.test(hay))
+      || /newsletter|unsubscribe|promotion|urgent sale|last chance|final hours|action required to save|breaking news|shop now|ready for summer|deal of the day|促销|优惠|退订/i.test(hay);
+  }
+
+  function isOptionalOrConditional(hay) {
+    return /\bif you want\b|\bif you would like\b|\byou can\s+(?:download|view|use|click|ignore|skip|choose|find)\b|\boptional\b|\bno action required\b|如需|如果你想|可以下载|可选择/i.test(hay);
+  }
+
+  function isCourtesyOnly(hay) {
+    return /^(re:\s*)?(thanks|thank you|got it|sounds good|谢谢|感谢|收到|好的)[.!。\s]*$/i.test(text(hay));
+  }
+
   function classifyKind(message) {
     const hay = lower(`${message.subject} ${message.bodyText}`);
     const kind = {
@@ -168,10 +199,13 @@
   }
 
   function extractActions(message, now) {
-    const hay = lower(`${message.subject} ${message.bodyText}`);
+    const currentText = currentIntentText(message);
+    const hay = lower(currentText);
     const actions = [];
     const deadline = extractDeadline(message, now);
     if (/ignore previous|open terminal|run command|send all my mail|send .*secret|api secret|password|delete all email|archive all/i.test(hay)) return [];
+    if (isMarketingNoise(message, hay)) return [];
+    if (isCourtesyOnly(hay) || isOptionalOrConditional(hay)) return [];
     function add(type, owner, title) {
       actions.push({
         type,
@@ -183,12 +217,12 @@
         redacted:true
       });
     }
-    if (message.automated && /newsletter|unsubscribe|promotion|sale|webinar/i.test(hay)) return [];
-    if (/please reply|could you|can you|would you|请回复|请确认|能否|是否可以|\?/.test(hay) && !message.automated) add("REPLY", "USER_ACTION", "Reply to the direct question or request.");
-    if (/approve|approval|review|sign|submit|upload|send (?:the )?(file|document)|确认|审核|签署|提交|上传|发送/.test(hay)) add("COMPLETE_REQUEST", "USER_ACTION", "Complete the requested review, confirmation, or document action.");
-    if (/pay|payment due|amount due|invoice due|缴费|付款|账单到期|应付/.test(hay)) add("BILL_PAYMENT_REVIEW", "USER_ACTION", "Review the bill or invoice before any payment.");
-    if (/flight.*change|schedule change|cancelled|canceled|航班.*(变更|取消)|改签/.test(hay)) add("TRAVEL_CHANGE_REVIEW", "USER_ACTION", "Review the travel change and decide whether to respond.");
-    if (/waiting for|awaiting|pending response from|we will get back|我们会回复|等待对方/.test(hay)) add("WAIT_FOR_OTHER_PARTY", "OTHER_PARTY_ACTION", "Wait for the other party's response.");
+    const requestOwner = message.sentByUser ? "OTHER_PARTY_ACTION" : "USER_ACTION";
+    if (/please reply|could you|can you|would you|请回复|请确认|能否|是否可以|\?/.test(hay) && !message.automated) add("REPLY", requestOwner, "Reply to the direct question or request.");
+    if (/approve|approval|review|sign|submit|upload|send (?:the )?(file|document)|确认|审核|签署|提交|上传|发送/.test(hay)) add("COMPLETE_REQUEST", requestOwner, "Complete the requested review, confirmation, or document action.");
+    if (!message.sentByUser && /pay|payment due|amount due|invoice due|缴费|付款|账单到期|应付/.test(hay)) add("BILL_PAYMENT_REVIEW", "USER_ACTION", "Review the bill or invoice before any payment.");
+    if (!message.sentByUser && /flight.*change|schedule change|cancelled|canceled|航班.*(变更|取消)|改签/.test(hay)) add("TRAVEL_CHANGE_REVIEW", "USER_ACTION", "Review the travel change and decide whether to respond.");
+    if (/waiting for|awaiting|pending response from|we will get back|i'?ll send|i will send|我们会回复|我会发送|等待对方/.test(hay)) add("WAIT_FOR_OTHER_PARTY", "OTHER_PARTY_ACTION", "Wait for the other party's response.");
     return actions.slice(0, 4);
   }
 
@@ -211,8 +245,8 @@
       else urgency += 1;
       reasons.push("explicit_deadline");
     }
-    if (!message.automated && /please reply|could you|can you|请回复|请确认|\?/.test(hay)) { importance += 2; reasons.push("direct_request"); }
-    if (message.bulk || /newsletter|unsubscribe|promotion|sale|last chance|urgent sale|促销|优惠|退订/.test(hay)) {
+    if (!message.sentByUser && !message.automated && /please reply|could you|can you|请回复|请确认|\?/.test(lower(currentIntentText(message))) && !isMarketingNoise(message, hay) && !isOptionalOrConditional(hay)) { importance += 2; reasons.push("direct_request"); }
+    if (isMarketingNoise(message, hay)) {
       importance -= 3;
       urgency = Math.max(0, urgency - 3);
       reasons.push("bulk_or_marketing_noise");
@@ -259,7 +293,7 @@
       const latest = meaningful[meaningful.length - 1] || group.messages[group.messages.length - 1];
       const latestActions = latest ? extractActions(latest, now) : [];
       let replyState = "NO_ACTION";
-      if (latest && latest.sentByUser && meaningful.length > 1) replyState = "WAITING_ON_THEM";
+      if (latest && latest.sentByUser && meaningful.length > 1 && latestActions.some(function (item) { return item.owner === "OTHER_PARTY_ACTION"; })) replyState = "WAITING_ON_THEM";
       else if (latest && !latest.sentByUser && latestActions.some(function (item) { return item.type === "REPLY"; })) replyState = "NEEDS_REPLY";
       else if (latest && !latest.sentByUser && latestActions.some(function (item) { return item.owner === "USER_ACTION"; })) replyState = "ACTION_REQUIRED_NO_REPLY";
       else if (!latest) replyState = "UNCLEAR";
@@ -343,7 +377,10 @@
     const wantsInvoice = /invoice|receipt|发票|收据/.test(q);
     const wantsTravel = /flight|hotel|travel|booking|航班|酒店|旅行|预订/.test(q);
     const wantsOrder = /order|tracking|shipment|订单|物流/.test(q);
-    const wantsWaiting = /waiting|等我回复|需要我回复|谁.*等/.test(q);
+    const wantsNeedsReply = /等我回复|需要我回复|谁.*等我|who.*waiting.*me|need.*my reply/i.test(q);
+    const wantsWaitingOnThem = /没回复我|未回复我|还没回|等对方|waiting on them|who.*hasn'?t replied|not replied to me/i.test(q);
+    const wantsSubscription = /subscription|renewal|订阅|续费/.test(q);
+    const wantsPriceChange = /price|increase|涨价|价格|变贵/.test(q);
     const asksForNonexistent = /不存在|没有的|not exist|nonexistent|火星/.test(q);
     const results = analysis.messages.map(function (message) {
       let score = 0;
@@ -352,7 +389,9 @@
       if (wantsInvoice && (message.kind === "BILL" || /invoice|receipt|发票|收据/.test(hay))) score += 8;
       if (wantsTravel && message.kind === "TRAVEL") score += 8;
       if (wantsOrder && message.kind === "ORDER") score += 8;
-      if (wantsWaiting && analysis.threads.some(function (thread) { return thread.latestMessageId === message.messageId && thread.replyState === "NEEDS_REPLY"; })) score += 8;
+      if (wantsNeedsReply && analysis.threads.some(function (thread) { return thread.latestMessageId === message.messageId && thread.replyState === "NEEDS_REPLY"; })) score += 8;
+      if (wantsWaitingOnThem && analysis.threads.some(function (thread) { return thread.latestMessageId === message.messageId && thread.replyState === "WAITING_ON_THEM"; })) score += 8;
+      if (wantsSubscription && wantsPriceChange && (message.kind === "SUBSCRIPTION" || /subscription|renewal|price increase|涨价|续费|订阅/.test(hay))) score += 8;
       if (monthMatch && /2026-03|mar|march|3月/.test(lower(message.receivedAt + " " + message.subject + " " + message.bodyText))) score += 6;
       if (message.attentionState === "URGENT" || message.attentionState === "IMPORTANT") score += 1;
       if (asksForNonexistent && !qWords.some(function (word) { return word.length > 1 && hay.includes(word); })) score = 0;
