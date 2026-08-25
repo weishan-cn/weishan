@@ -6,22 +6,124 @@ const path = require("path");
 const repoRoot = path.resolve(__dirname, "../..");
 const desktopDir = path.join(repoRoot, "apps/desktop");
 const indexFile = path.join(desktopDir, "src/index.html");
+const desktopPackage = require(path.join(desktopDir, "package.json"));
+
+function normalizePathForGuard(value) {
+  return path.resolve(String(value || ""));
+}
+
+function hasPathSegment(filePath, segment) {
+  const normalized = normalizePathForGuard(filePath);
+  return normalized.split(path.sep).includes(segment);
+}
+
+function isPathInside(childPath, parentPath) {
+  const child = normalizePathForGuard(childPath);
+  const parent = normalizePathForGuard(parentPath);
+  return child === parent || child.startsWith(parent + path.sep);
+}
+
+function assertCanonicalE2ERuntime(candidate) {
+  const mode = candidate && candidate.mode;
+  if (mode === "electron") {
+    const cwd = normalizePathForGuard(candidate.cwd);
+    const executablePath = normalizePathForGuard(candidate.executablePath);
+    const electronPackage = path.join(desktopDir, "node_modules/electron");
+    const args = Array.isArray(candidate.args) ? candidate.args : [];
+    const joinedArgs = args.join(" ");
+
+    if (cwd !== desktopDir) {
+      throw new Error(`E2E_CANONICAL_RUNTIME_VIOLATION: cwd must be apps/desktop, got ${cwd}`);
+    }
+    if (joinedArgs !== ".") {
+      throw new Error(`E2E_CANONICAL_RUNTIME_VIOLATION: args must be ".", got ${joinedArgs || "<empty>"}`);
+    }
+    if (!isPathInside(executablePath, electronPackage)) {
+      throw new Error("E2E_CANONICAL_RUNTIME_VIOLATION: Electron executable must resolve from apps/desktop/node_modules/electron");
+    }
+    if (/\/[Ww]eishan\.app\/Contents\/MacOS\/[Ww]eishan(?:$|\/)/.test(executablePath)) {
+      throw new Error("E2E_CANONICAL_RUNTIME_VIOLATION: packaged Weishan.app executable is not an E2E runtime");
+    }
+    if (isPathInside(executablePath, path.join(repoRoot, "apps/desktop/dist")) || hasPathSegment(executablePath, "weishan-package-prep")) {
+      throw new Error("E2E_CANONICAL_RUNTIME_VIOLATION: packaged dist/tmp build is not an E2E runtime");
+    }
+
+    return {
+      product: "weishan",
+      version: desktopPackage.version,
+      mode: "electron",
+      buildType: "SOURCE_DEV_ELECTRON",
+      launchRoot: "REPO_APPS_DESKTOP",
+      executableSource: "APPS_DESKTOP_NODE_MODULES_ELECTRON"
+    };
+  }
+
+  if (mode === "browser") {
+    const rendererFile = normalizePathForGuard(candidate.rendererFile);
+    if (rendererFile !== indexFile) {
+      throw new Error("E2E_CANONICAL_RUNTIME_VIOLATION: browser fallback must load apps/desktop/src/index.html");
+    }
+    if (isPathInside(rendererFile, path.join(repoRoot, "apps/desktop/dist")) || hasPathSegment(rendererFile, "weishan-package-prep")) {
+      throw new Error("E2E_CANONICAL_RUNTIME_VIOLATION: packaged renderer build is not an E2E fallback runtime");
+    }
+    return {
+      product: "weishan",
+      version: desktopPackage.version,
+      mode: "browser",
+      buildType: "SOURCE_FILE_RENDERER_FALLBACK",
+      launchRoot: "REPO_APPS_DESKTOP_SRC",
+      executableSource: "PLAYWRIGHT_BROWSER_FILE_URL"
+    };
+  }
+
+  throw new Error(`E2E_CANONICAL_RUNTIME_VIOLATION: unsupported runtime mode ${mode || "<missing>"}`);
+}
+
+function getCanonicalE2ERuntimeDescriptor() {
+  const electronPackage = path.join(desktopDir, "node_modules/electron");
+  if (existsSync(electronPackage)) {
+    const desktopRequire = createRequire(path.join(desktopDir, "package.json"));
+    const executablePath = desktopRequire("electron");
+    const args = ["."];
+    return assertCanonicalE2ERuntime({
+      mode: "electron",
+      executablePath,
+      args,
+      cwd: desktopDir
+    });
+  }
+  return assertCanonicalE2ERuntime({
+    mode: "browser",
+    rendererFile: indexFile
+  });
+}
 
 async function launchWeishan(browser) {
   const electronPackage = path.join(desktopDir, "node_modules/electron");
   if (existsSync(electronPackage)) {
     const desktopRequire = createRequire(path.join(desktopDir, "package.json"));
     const executablePath = desktopRequire("electron");
-    const app = await electron.launch({ executablePath, args: ["."], cwd: desktopDir });
+    const args = ["."];
+    const runtimeIdentity = assertCanonicalE2ERuntime({
+      mode: "electron",
+      executablePath,
+      args,
+      cwd: desktopDir
+    });
+    const app = await electron.launch({ executablePath, args, cwd: desktopDir });
     const page = await app.firstWindow();
     await page.waitForLoadState("domcontentloaded");
-    return { page, close: () => app.close(), mode: "electron" };
+    return { page, close: () => app.close(), mode: "electron", electronApp: app, runtimeIdentity };
   }
+  const runtimeIdentity = assertCanonicalE2ERuntime({
+    mode: "browser",
+    rendererFile: indexFile
+  });
   const context = await browser.newContext({ acceptDownloads: false });
   const page = await context.newPage();
   await page.goto("file://" + indexFile);
   await page.waitForLoadState("domcontentloaded");
-  return { page, close: () => context.close(), mode: "browser" };
+  return { page, close: () => context.close(), mode: "browser", runtimeIdentity };
 }
 
 async function withWeishan(browser, fn) {
@@ -197,6 +299,11 @@ async function cleanupE2EData(page, runId) {
 }
 
 module.exports = {
+  repoRoot,
+  desktopDir,
+  indexFile,
+  assertCanonicalE2ERuntime,
+  getCanonicalE2ERuntimeDescriptor,
   launchWeishan,
   withWeishan,
   gotoRoute,

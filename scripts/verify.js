@@ -45,6 +45,7 @@ function runCore() {
   runStep("Global commerce standard", "npm", ["run", "standard:commerce"]);
   runStep("Secret scan", "npm", ["run", "secrets:scan"]);
   runStep("Version check", "npm", ["run", "version:check"]);
+  runStep("E2E canonical runtime launch guard", "node", ["tests/api/e2e-canonical-runtime-launch-guard.test.js"]);
   runStep("Healthcheck", "npm", ["run", "healthcheck"]);
   runStep("API tests", "npm", ["run", "test:api"]);
   runStep("Multi-network product feed foundation", "node", ["tests/api/global-commerce-multi-network-product-feed-foundation.test.js"]);
@@ -82,6 +83,7 @@ function runCore() {
 
 function runE2e() {
   try {
+    runStep("E2E runtime identity", "npx", ["playwright", "test", "tests/e2e/runtime-identity.spec.js", "--workers=1"]);
     runStep("E2E smoke", "npm", ["run", "test:e2e:smoke"]);
     runStep("E2E local workflows", "npm", ["run", "test:e2e:local"]);
     runStep("E2E security audit", "npm", ["run", "test:e2e:security"]);
