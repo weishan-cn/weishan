@@ -1,6 +1,7 @@
 (function(){
   let selectedIndex = 0;
-  let activeWorkspaceTab = "inbox";
+  let activeWorkspaceTab = "today";
+  let mailTakeoverAnalysisCache = { key:"", analysis:null, viewModel:null };
   const visibleImageKeys = new Set();
   let replyDraftState = { key:"", loading:false, error:"", subject:"", body:"" };
   let taskExtractState = { key:"", loading:false, error:"", body:"" };
@@ -1036,6 +1037,47 @@
     }
   }
   function mFlags(m){ return Array.isArray(m.flags) ? m.flags.map((x) => String(x).toLowerCase()) : []; }
+  function messageStableId(m){
+    return String(m && (m.messageId || m.id || m.uid) || `${m && (m.subject || m.title) || ""}:${m && (m.receivedAt || m.date) || ""}`);
+  }
+  function accountAnalysis(account){
+    const msgs = account && account.connected ? (account.messages || []) : [];
+    if (!window.WeishanMailTakeoverUserIntelligence || !window.WeishanMailTakeoverUserIntelligence.analyzeMailbox) return null;
+    const last = msgs[msgs.length - 1] || {};
+    const key = `${account && account.email || ""}|${msgs.length}|${messageStableId(last)}|${last.receivedAt || last.date || ""}`;
+    if (mailTakeoverAnalysisCache.key === key && mailTakeoverAnalysisCache.analysis) return mailTakeoverAnalysisCache.analysis;
+    const analysis = window.WeishanMailTakeoverUserIntelligence.analyzeMailbox(msgs, { userEmails:[(account && account.email) || ""] });
+    mailTakeoverAnalysisCache = { key, analysis, viewModel:null };
+    return analysis;
+  }
+  function accountViewModel(account){
+    const msgs = account && account.connected ? (account.messages || []) : [];
+    if (!window.WeishanMailTakeoverUserIntelligence || !window.WeishanMailTakeoverUserIntelligence.buildZeroLearningViewModel) return null;
+    accountAnalysis(account);
+    if (mailTakeoverAnalysisCache.viewModel) return mailTakeoverAnalysisCache.viewModel;
+    mailTakeoverAnalysisCache.viewModel = window.WeishanMailTakeoverUserIntelligence.buildZeroLearningViewModel(msgs, { userEmails:[(account && account.email) || ""] });
+    return mailTakeoverAnalysisCache.viewModel;
+  }
+  function insightById(account){
+    const analysis = accountAnalysis(account);
+    const out = {};
+    (analysis && analysis.messages || []).forEach((item) => { out[item.messageId] = item; });
+    return out;
+  }
+  function takeoverReason(item){
+    if (!item || !window.WeishanMailTakeoverUserIntelligence || !window.WeishanMailTakeoverUserIntelligence.explainAttention) return "";
+    const reason = window.WeishanMailTakeoverUserIntelligence.explainAttention(item);
+    if (reason.severity === "urgent") return t("mailTakeoverReasonUrgent");
+    if (reason.severity === "needs_reply") return t("mailTakeoverReasonReply");
+    if (reason.severity === "action") return t("mailTakeoverReasonAction");
+    if (reason.severity === "deadline" || reason.severity === "overdue") return item.deadline && item.deadline.date ? window.I18n.format("mailTakeoverReasonDeadline", { date:item.deadline.date }) : t("mailTakeoverReasonAction");
+    if (item.kind === "BILL") return t("mailTakeoverReasonBill");
+    if (item.kind === "ORDER") return t("mailTakeoverReasonOrder");
+    if (item.kind === "TRAVEL") return t("mailTakeoverReasonTravel");
+    if (item.kind === "SECURITY") return t("mailTakeoverReasonSecurity");
+    if (reason.severity === "low") return t("mailTakeoverReasonLow");
+    return reason.shortReason || "";
+  }
   function haystack(m){
     return [m.subject, m.from, m.to, m.preview, m.bodyText, m.text, m.body, m.sender].map((x) => String(x || "")).join(" ").toLowerCase();
   }
@@ -1089,15 +1131,35 @@
   function messagesForTab(account, tab){
     const msgs = account && account.connected ? (account.messages || []) : [];
     if (tab === "today" && window.WeishanMailTakeoverUserIntelligence) {
-      const analysis = window.WeishanMailTakeoverUserIntelligence.analyzeMailbox(msgs, { userEmails:[(account && account.email) || ""] });
-      const ids = new Set([].concat(analysis.today.needsYourAttention || [], analysis.today.importantUpdates || []).map((item) => item.messageId));
-      return msgs.filter((msg) => ids.has(String(msg.messageId || msg.id || msg.uid || `${msg.subject || msg.title || ""}:${msg.receivedAt || msg.date || ""}`)));
+      const model = accountViewModel(account);
+      const ids = new Set([].concat(model && model.firstScreen && model.firstScreen.needsAttention || [], model && model.firstScreen && model.firstScreen.importantUpdates || []).map((item) => item.messageId));
+      return msgs.filter((msg) => ids.has(messageStableId(msg)));
     }
-    if (tab === "important") return msgs.filter(isImportant);
+    if (tab === "important") {
+      const analysis = accountAnalysis(account);
+      if (analysis) {
+        const ids = new Set((analysis.today.importantUpdates || []).concat(analysis.today.billsDeadlines || [], analysis.today.travel || []).map((item) => item.messageId));
+        return msgs.filter((msg) => ids.has(messageStableId(msg)));
+      }
+      return msgs.filter(isImportant);
+    }
     if (tab === "drafts") return [];
-    if (tab === "tasks") return msgs.filter(isTask);
-    if (tab === "memory") return msgs.filter(isMemory);
-    if (tab === "waiting") return msgs.filter(isWaiting);
+    if (tab === "tasks") {
+      const analysis = accountAnalysis(account);
+      if (analysis) {
+        const ids = new Set((analysis.messages || []).filter((item) => (item.actionItems || []).some((action) => action.owner === "USER_ACTION")).map((item) => item.messageId));
+        return msgs.filter((msg) => ids.has(messageStableId(msg)));
+      }
+      return msgs.filter(isTask);
+    }
+    if (tab === "waiting") {
+      const analysis = accountAnalysis(account);
+      if (analysis) {
+        const ids = new Set((analysis.threads || []).filter((thread) => thread.replyState === "WAITING_ON_THEM").map((thread) => thread.latestMessageId));
+        return msgs.filter((msg) => ids.has(messageStableId(msg)));
+      }
+      return msgs.filter(isWaiting);
+    }
     return msgs;
   }
   function emptyTextForTab(tab){
@@ -1138,6 +1200,7 @@
     if (a.status === "failed") return `<div class="mail-error-box"><b>${t("mailConnectFailed")}</b><p>${esc(a.message || t("mailConnectFailedText"))}</p></div>`;
     if (!a.connected) return `<div class="mail-empty">${t("mailNotConnected")}</div>`;
     const msgs = messages || [];
+    const insights = insightById(a);
     if (!msgs.length) return `<div class="mail-empty">${t("mailNoMessages")}</div>`;
     return `
       <div class="mail-summary">
@@ -1151,6 +1214,7 @@
           <button class="mail-message-item ${selectedIndex === i ? "is-active" : ""}" data-index="${i}">
             <b>${esc(mTitle(m))}</b>
             <span>${esc(mFrom(m))}</span>
+            ${insights[messageStableId(m)] ? `<span class="mail-takeover-reason">${esc(takeoverReason(insights[messageStableId(m)]))}</span>` : ""}
             <small>${esc(date(mDate(m)))}</small>
             ${hasFullBody(m) ? "" : `<small>${t("mailBodyPreviewOnly")}</small>`}
           </button>
@@ -1289,7 +1353,6 @@
       ["important", "mailWorkspaceImportant", "mailWorkspaceImportantEmpty"],
       ["drafts", "mailWorkspaceDrafts", "mailWorkspaceDraftsEmpty"],
       ["tasks", "mailWorkspaceTasks", "mailWorkspaceTasksEmpty"],
-      ["memory", "mailWorkspaceMemory", "mailWorkspaceMemoryEmpty"],
       ["waiting", "mailWorkspaceWaiting", "mailWorkspaceWaitingEmpty"]
     ];
   }
@@ -1297,20 +1360,21 @@
   function workspaceBody(account){
     const tab = workspaceTabs().find((x) => x[0] === activeWorkspaceTab) || workspaceTabs()[0];
     if (activeWorkspaceTab === "today" && account && account.connected && window.WeishanMailTakeoverUserIntelligence) {
-      const analysis = window.WeishanMailTakeoverUserIntelligence.analyzeMailbox(account.messages || [], { userEmails:[(account && account.email) || ""] });
-      const today = analysis.today || {};
-      const needs = (today.needsYourAttention || []).slice(0, 3);
+      const model = accountViewModel(account);
+      const today = model && model.firstScreen || {};
+      const needs = (today.needsAttention || []).slice(0, 3);
       const waiting = (today.waiting || []).slice(0, 3);
       const updates = (today.importantUpdates || []).slice(0, 3);
-      const low = today.lowPrioritySummary || { count:0 };
+      const lowCount = today.lowPriorityHiddenCount || 0;
       return `
       <div class="mail-workspace-state" data-mail-takeover-today>
-        <b>${t("mailTakeoverTodayTitle")} · ${esc((needs.length + waiting.length + updates.length) || 0)}</b>
+        <b>${t("mailTakeoverTodayTitle")} · ${esc(today.primaryItemsUserMustScan || 0)}</b>
         <p>${t("mailTakeoverTodayDesc")}</p>
-        ${needs.length ? `<p><b>${t("mailTakeoverNeedsYou")}：</b>${needs.map((item) => esc(item.subject)).join(" · ")}</p>` : ""}
-        ${waiting.length ? `<p><b>${t("mailTakeoverWaiting")}：</b>${waiting.map((item) => esc(item.summary.context)).join(" · ")}</p>` : ""}
-        ${updates.length ? `<p><b>${t("mailTakeoverImportantUpdates")}：</b>${updates.map((item) => esc(item.subject)).join(" · ")}</p>` : ""}
-        ${low.count ? `<p><b>${window.I18n.format("mailTakeoverLowPriority", { count:low.count })}</b></p>` : ""}
+        ${needs.length ? `<p><b>${t("mailTakeoverNeedsYou")}：</b>${needs.map((item) => esc(`${item.subject} — ${item.why}`)).join(" · ")}</p>` : ""}
+        ${waiting.length ? `<p><b>${t("mailTakeoverWaiting")}：</b>${waiting.map((item) => esc(item.subject)).join(" · ")}</p>` : ""}
+        ${updates.length ? `<p><b>${t("mailTakeoverImportantUpdates")}：</b>${updates.map((item) => esc(`${item.subject} — ${item.why}`)).join(" · ")}</p>` : ""}
+        ${lowCount ? `<p><b>${window.I18n.format("mailTakeoverLowPriority", { count:lowCount })}</b></p>` : ""}
+        <p>${window.I18n.format("mailTakeoverScanReduction", { count:today.scanReduction || 0 })}</p>
       </div>`;
     }
     const count = messagesForTab(account, activeWorkspaceTab).length;

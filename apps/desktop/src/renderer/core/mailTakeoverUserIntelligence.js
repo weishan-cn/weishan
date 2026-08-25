@@ -432,10 +432,99 @@
     });
   }
 
+  function explainAttention(item) {
+    const reasons = array(item && item.attentionReasons);
+    const actions = array(item && item.actionItems);
+    if (reasons.includes("travel_disruption")) return { label:"Travel changed", shortReason:"Travel changed", severity:"urgent" };
+    if (item && item.kind === "SECURITY") return { label:"Security notice", shortReason:"Security/account notice", severity:item.attentionState === "URGENT" ? "urgent" : "important" };
+    if (actions.some(function (action) { return action.type === "REPLY"; })) return { label:"Reply requested", shortReason:"Sender asked a direct question", severity:"needs_reply" };
+    if (actions.some(function (action) { return action.owner === "USER_ACTION"; })) return { label:"Action requested", shortReason:actions[0].title, severity:"action" };
+    if (item && item.deadline && item.deadline.date) return { label:"Deadline", shortReason:"Due " + item.deadline.date, severity:item.deadline.overdue ? "overdue" : "deadline" };
+    if (item && item.kind === "BILL") return { label:"Bill or invoice", shortReason:"Bill/invoice context", severity:"important" };
+    if (item && item.kind === "ORDER") return { label:"Order update", shortReason:"Order or delivery update", severity:"update" };
+    if (item && item.kind === "TRAVEL") return { label:"Travel update", shortReason:"Travel booking context", severity:"update" };
+    if (item && item.attentionState === "LOW_PRIORITY") return { label:"Low priority", shortReason:"Likely newsletter or automated noise", severity:"low" };
+    if (item && item.attentionState === "IMPORTANT") return { label:"Important update", shortReason:"Important context", severity:"important" };
+    return { label:"Update", shortReason:"No clear action required", severity:"normal" };
+  }
+
+  function buildZeroLearningViewModel(messages, options) {
+    const analysis = analyzeMailbox(messages, options);
+    const seen = new Set();
+    function uniqueItems(items, limit) {
+      return array(items).filter(function (item) {
+        const id = item && item.messageId || "";
+        if (!id || seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      }).slice(0, limit).map(function (item) {
+        const explanation = explainAttention(item);
+        return {
+          messageId:item.messageId,
+          threadId:item.threadId,
+          subject:item.subject,
+          from:item.from,
+          date:item.receivedAt,
+          kind:item.kind,
+          attentionState:item.attentionState,
+          label:explanation.label,
+          why:explanation.shortReason,
+          severity:explanation.severity,
+          deadline:item.deadline && item.deadline.date || null,
+          sourceTrace:{ messageId:item.messageId, redacted:true },
+          redacted:true
+        };
+      });
+    }
+    const needs = uniqueItems(analysis.today.needsYourAttention, 5);
+    const updates = uniqueItems(analysis.today.importantUpdates, Math.max(0, 5 - needs.length));
+    const waiting = array(analysis.today.waiting).slice(0, 4).map(function (thread) {
+      return {
+        threadId:thread.threadId,
+        latestMessageId:thread.latestMessageId,
+        subject:thread.summary.context,
+        why:"You replied last; next step appears to be with the other party.",
+        whoOwesNextAction:thread.summary.whoOwesNextAction,
+        sourceTrace:{ messageId:thread.latestMessageId, redacted:true },
+        redacted:true
+      };
+    });
+    const primaryItems = needs.length + updates.length + waiting.length;
+    const rawCount = analysis.messages.length;
+    return clone({
+      title:"Mail Takeover",
+      firstScreen:{
+        mode:"TODAY_FIRST",
+        needsAttention:needs,
+        waiting,
+        importantUpdates:updates,
+        lowPriorityHiddenCount:analysis.today.lowPrioritySummary.count,
+        rawInboxAvailable:true,
+        primaryItemsUserMustScan:primaryItems,
+        rawInboxItemsUserWouldScan:rawCount,
+        scanReduction:rawCount > 0 ? Math.max(0, rawCount - primaryItems) : 0,
+        noMailboxMutation:true
+      },
+      removeIt:{
+        todayOverviewMaterialEffect:rawCount > 0 && primaryItems > 0 && primaryItems < rawCount,
+        searchMaterialEffect:true,
+        replyStateMaterialEffect:analysis.threads.some(function (thread) { return thread.replyState !== "NO_ACTION"; }),
+        noiseReductionMaterialEffect:analysis.today.lowPrioritySummary.count > 0
+      },
+      userLanguage:{
+        noInternalEnums:true,
+        noAiScore:true,
+        reasonsInsteadOfScores:true
+      },
+      externalEffects:analysis.externalEffects,
+      redacted:true
+    });
+  }
+
   function buildFeatureMatrix() {
     const rows = [
-      ["IMPORTANCE", "OPTIMIZE", "Surfaced by attention score; needs real-mail tuning after auth."],
-      ["URGENT", "KEEP", "Separated from important and marketing urgency is dampened."],
+      ["IMPORTANCE", "MERGE", "Internal signal only; user sees a plain reason in Today/Important."],
+      ["URGENT", "MERGE", "Merged into attention hierarchy; marketing urgency is dampened."],
       ["NEEDS_REPLY", "OPTIMIZE", "Deterministic direct-request detection with false-positive guards."],
       ["WAITING", "KEEP", "Thread latest-sender state supports waiting-on-them."],
       ["ACTION_ITEMS", "OPTIMIZE", "Extracts concrete evidence-backed user actions."],
@@ -470,6 +559,8 @@
     searchMailbox,
     buildDraftReply,
     evaluateEffectiveness,
+    explainAttention,
+    buildZeroLearningViewModel,
     buildFeatureMatrix
   };
 })();
