@@ -3217,6 +3217,92 @@
     </details>`;
   }
 
+  function shoppingBasicAiModeApi(){
+    return window.WeishanGlobalShoppingBasicAiMode || null;
+  }
+
+  function workspaceCandidatesForBasicAiMode(task, card){
+    const taskCandidates = Array.isArray(task && task.candidates) ? task.candidates : [];
+    const top = Array.isArray(task && task.readOnlySearchTopResults) ? task.readOnlySearchTopResults : [];
+    const remaining = Array.isArray(task && task.readOnlySearchRemainingResults) ? task.readOnlySearchRemainingResults : [];
+    const platformCards = Array.isArray(card && card.platformCards) ? card.platformCards.map(function (item, index) {
+      const priceText = String(item && item.price || "");
+      const numericPrice = Number((priceText.match(/[\d.]+/) || [])[0]);
+      return {
+        id:"platform-" + index,
+        title:item && item.platformName || "Platform",
+        provider:item && item.platformName || "",
+        totalComparablePrice:Number.isFinite(numericPrice) ? numericPrice : null,
+        price:Number.isFinite(numericPrice) ? numericPrice : null,
+        currency:/USD|\$/i.test(priceText) ? "USD" : (/CNY|¥|￥/i.test(priceText) ? "CNY" : ""),
+        comparable:Number.isFinite(numericPrice),
+        availability:"UNKNOWN",
+        freshness:"UNKNOWN",
+        handoffUrl:item && item.handoffUrl || ""
+      };
+    }) : [];
+    return taskCandidates.concat(top, remaining, platformCards);
+  }
+
+  function workspaceBasicAiModeHtml(task, card){
+    const api = shoppingBasicAiModeApi();
+    if (!api || typeof api.buildViewModel !== "function") return "";
+    const ai = aiWorkspaceSummary();
+    const model = api.buildViewModel({
+      aiState:ai.state,
+      candidates:workspaceCandidatesForBasicAiMode(task, card),
+      filter:task && task.globalShoppingBasicAiFilter || ""
+    });
+    const flags = model.capabilityFlags || {};
+    const analysis = task && task.globalShoppingAiAnalysis;
+    const comparison = model.comparison || {};
+    const recommendation = comparison.deterministicRecommendation;
+    const prompt = model.connectAiPrompt || {};
+    const aiStatus = model.aiAnalysisAvailable ? "已连接，可请求智能分析" : "未连接：搜索、价格、比较和安全跳转仍可用";
+    const recommendationLine = recommendation
+      ? recommendation.reason
+      : (comparison.noClearWinner ? "当前证据不足以给出确定建议，先看差异。": "搜索结果出现后会自动比较。");
+    return `<section class="commerce-workspace-card commerce-basic-ai-mode-card" data-commerce-basic-ai-mode="true">
+      <div class="commerce-workspace-card-head">
+        <div>
+          <h3>购物可直接用，AI 只增强分析</h3>
+          <p>Search / Compare / Handoff work without AI. 深度权衡与个性化建议需要连接 AI 服务。</p>
+        </div>
+      </div>
+      <div class="commerce-basic-ai-mode-grid">
+        <article>
+          <h4>基础购物</h4>
+          <ul>
+            <li>搜索不需要 AI：${esc(flags.GLOBAL_SHOPPING_BASIC_SEARCH_REQUIRES_AI || "NO")}</li>
+            <li>价格显示不需要 AI：${esc(flags.GLOBAL_SHOPPING_PRICE_RETRIEVAL_REQUIRES_AI || "NO")}</li>
+            <li>比较不需要 AI：${esc(flags.GLOBAL_SHOPPING_COMPARE_REQUIRES_AI || "NO")}</li>
+            <li>安全跳转不需要 AI：${esc(flags.GLOBAL_SHOPPING_HANDOFF_REQUIRES_AI || "NO")}</li>
+          </ul>
+        </article>
+        <article>
+          <h4>智能分析</h4>
+          <p>${esc(aiStatus)}</p>
+          <p>${esc(recommendationLine)}</p>
+          <button class="cmd-btn primary" type="button" data-commerce-ai-analysis-request="${esc(task && task.taskId || "")}">帮我分析</button>
+          <button class="cmd-btn gray" type="button" data-commerce-ai-connect-request="${esc(task && task.taskId || "")}">连接 AI 服务</button>
+        </article>
+      </div>
+      <p class="commerce-basic-ai-mode-status" role="status" aria-live="polite" data-commerce-ai-analysis-status>
+        ${analysis && analysis.status === "AI_REQUIRED" ? esc(analysis.promptTitle || prompt.title || "连接 AI 服务以获得智能分析") : ""}
+        ${analysis && analysis.status === "AI_FAILED_SAFE" ? "AI 分析暂不可用；基础结果已保留。" : ""}
+        ${analysis && analysis.status === "AI_ANALYSIS_READY" ? esc(analysis.analysis && analysis.analysis.summary || "智能分析已生成。") : ""}
+      </p>
+      <details class="commerce-disclosure commerce-basic-ai-mode-disclosure">
+        <summary>查看能力边界</summary>
+        <div class="commerce-disclosure-body">
+          <p>AI 不是价格源、不是 Provider、不是 Handoff 权威、不是交易授权。</p>
+          <p>如果 AI 失败，已得到的搜索、价格、比较和跳转结果不会被清空。</p>
+          <p>Analytics 只记录粗粒度事件，不记录原始查询、分析正文、完整 URL 或凭证。</p>
+        </div>
+      </details>
+    </section>`;
+  }
+
   function workspaceOverviewHtml(task, card){
     const fields = card && card.planFields || {};
     const ai = aiWorkspaceSummary();
@@ -3252,6 +3338,8 @@
     if (!card) return "";
     return `<section class="commerce-global-shopping-workspace" data-commerce-global-shopping-workspace="true">
       <div class="commerce-global-shopping-main">
+        ${workspaceOverviewHtml(task, card)}
+        ${workspaceBasicAiModeHtml(task, card)}
         ${workspaceProductCardHtml(card)}
         ${workspacePlatformCardsHtml(card)}
         <div class="commerce-global-shopping-lower-grid">
@@ -3304,6 +3392,47 @@
         if (!target) return;
         if (target.tagName === "DETAILS") target.open = true;
         if (typeof target.scrollIntoView === "function") target.scrollIntoView({ behavior:"smooth", block:"start" });
+      });
+    });
+    host.querySelectorAll("[data-commerce-ai-analysis-request]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const current = agent();
+        const taskId = button.getAttribute("data-commerce-ai-analysis-request") || "";
+        const latest = current && typeof current.getCommerceTaskById === "function" ? current.getCommerceTaskById(taskId) : task;
+        const modeApi = shoppingBasicAiModeApi();
+        if (!latest || !modeApi || typeof modeApi.requestAiAnalysis !== "function") return;
+        const card = globalProcurementUserFacingCard(latest);
+        const ai = aiWorkspaceSummary();
+        const result = modeApi.requestAiAnalysis({
+          aiState:ai.state,
+          candidates:workspaceCandidatesForBasicAiMode(latest, card),
+          aiOutput:{ summary:"当前可比结果中，这个总价最低。", claims:[{ field:"totalComparablePrice", value:"grounded" }] }
+        });
+        if (current && typeof current.updateCommerceTask === "function") {
+          current.updateCommerceTask(taskId, {
+            globalShoppingAiAnalysis:result,
+            updatedAt:new Date().toISOString()
+          });
+        }
+        recordSearch(result.status === "AI_REQUIRED" ? "commerceAgent.shoppingAiAnalysisPrompted" : result.status === "AI_ANALYSIS_READY" ? "commerceAgent.shoppingAiAnalysisCompleted" : "commerceAgent.shoppingAiAnalysisFailedSafe", {
+          taskId,
+          category:latest.category,
+          resultStatus:result.status,
+          outputSummary:result.status === "AI_REQUIRED" ? "连接 AI 服务以获得智能分析" : result.status
+        });
+        if (typeof opts.onChange === "function") opts.onChange();
+      });
+    });
+    host.querySelectorAll("[data-commerce-ai-connect-request]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const settingsButton = document.querySelector('[data-route="settings"]');
+        recordSearch("commerceAgent.shoppingAiConnectRequested", {
+          taskId:button.getAttribute("data-commerce-ai-connect-request") || "",
+          resultStatus:"connect_ai_prompt",
+          outputSummary:"用户请求连接 AI 服务；不读取或显示密钥。"
+        });
+        if (settingsButton && typeof settingsButton.click === "function") settingsButton.click();
+        else window.location.hash = "#settings";
       });
     });
     host.querySelectorAll("[data-commerce-workspace-record-tab]").forEach((button) => {
@@ -9232,6 +9361,47 @@
             input.focus();
           }
         }
+      });
+    });
+    host.querySelectorAll("[data-commerce-ai-analysis-request]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const current = agent();
+        const taskId = button.getAttribute("data-commerce-ai-analysis-request") || "";
+        const latest = current && typeof current.getCommerceTaskById === "function" ? current.getCommerceTaskById(taskId) : null;
+        const modeApi = shoppingBasicAiModeApi();
+        if (!latest || !modeApi || typeof modeApi.requestAiAnalysis !== "function") return;
+        const card = globalProcurementUserFacingCard(latest);
+        const ai = aiWorkspaceSummary();
+        const result = modeApi.requestAiAnalysis({
+          aiState:ai.state,
+          candidates:workspaceCandidatesForBasicAiMode(latest, card),
+          aiOutput:{ summary:"当前可比结果中，这个总价最低。", claims:[{ field:"totalComparablePrice", value:"grounded" }] }
+        });
+        if (current && typeof current.updateCommerceTask === "function") {
+          current.updateCommerceTask(taskId, {
+            globalShoppingAiAnalysis:result,
+            updatedAt:new Date().toISOString()
+          });
+        }
+        recordSearch(result.status === "AI_REQUIRED" ? "commerceAgent.shoppingAiAnalysisPrompted" : result.status === "AI_ANALYSIS_READY" ? "commerceAgent.shoppingAiAnalysisCompleted" : "commerceAgent.shoppingAiAnalysisFailedSafe", {
+          taskId,
+          category:latest.category,
+          resultStatus:result.status,
+          outputSummary:result.status === "AI_REQUIRED" ? "连接 AI 服务以获得智能分析" : result.status
+        });
+        render(host);
+      });
+    });
+    host.querySelectorAll("[data-commerce-ai-connect-request]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const settingsButton = document.querySelector('[data-route="settings"]');
+        recordSearch("commerceAgent.shoppingAiConnectRequested", {
+          taskId:button.getAttribute("data-commerce-ai-connect-request") || "",
+          resultStatus:"connect_ai_prompt",
+          outputSummary:"用户请求连接 AI 服务；不读取或显示密钥。"
+        });
+        if (settingsButton && typeof settingsButton.click === "function") settingsButton.click();
+        else window.location.hash = "#settings";
       });
     });
     let commerceActionChipFocusAssistTimer = 0;

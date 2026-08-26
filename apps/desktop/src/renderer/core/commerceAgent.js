@@ -2660,6 +2660,7 @@
       partnerLinkPolicySummary:base.partnerLinkPolicySummary && typeof base.partnerLinkPolicySummary === "object" ? base.partnerLinkPolicySummary : readOnlySearchGates.partnerLinkPolicySummary,
       candidates:Array.isArray(base.candidates) && base.candidates.length ? base.candidates : readOnlySearchSummary.candidates,
       recommendation:base.recommendation || readOnlySearchSummary.recommendation || null,
+      globalShoppingAiAnalysis:base.globalShoppingAiAnalysis && typeof base.globalShoppingAiAnalysis === "object" ? base.globalShoppingAiAnalysis : null,
       searchErrorMessage:sanitizeCommerceInput(base.searchErrorMessage || ""),
       searchResultSummary:base.searchResultSummary || (readOnlySearchSummary.readOnlySearchResultSummary ? {
         candidateCount:readOnlySearchSummary.readOnlySearchResultSummary.candidateCount || 0,
