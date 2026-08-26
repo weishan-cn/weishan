@@ -9,16 +9,16 @@ async function resetCloudNavigation(page) {
     window.sessionStorage.removeItem(key);
     window.WeishanRouter.setRoute("home");
   });
-  await expect(page.locator("#cloudEnterpriseToggle")).toHaveAttribute("aria-expanded", "false");
-  await expect(page.locator("#cloudEnterpriseNav")).toBeHidden();
+  await expect(page.locator("#cloudEnterpriseToggle")).toHaveCount(0);
+  await expect(page.locator("#cloudEnterpriseNav")).toHaveCount(0);
 }
 
 test.describe.serial("sidebar plugin architecture", () => {
   let app;
   let page;
 
-  test.beforeAll(async ({ browser }) => {
-    app = await launchWeishan(browser);
+  test.beforeAll(async () => {
+    app = await launchWeishan(null);
     page = app.page;
   });
 
@@ -30,23 +30,23 @@ test.describe.serial("sidebar plugin architecture", () => {
     await resetCloudNavigation(page);
   });
 
-  test("cloud navigation defaults to collapsed and is keyboard accessible", async () => {
+  test("deferred cloud navigation is removed while plugin navigation remains reachable", async () => {
     await expect(page.locator('.nav-item[data-route="storage"]')).toHaveCount(0);
     await expect(page.locator('[data-nav-group="execution"] .nav-item[data-route="plugins"]')).toBeVisible();
     await expect(page.locator('[data-nav-group="core"] .nav-item[data-route="plugins"]')).toHaveCount(0);
     await expect(page.locator('[data-nav-group="cloud"] .nav-item[data-route="plugins"]')).toHaveCount(0);
-    await page.locator("#cloudEnterpriseToggle").press("Enter");
-    await expect(page.locator("#cloudEnterpriseToggle")).toHaveAttribute("aria-expanded", "true");
-    await expect(page.locator('.nav-item[data-route="storage"]')).toBeVisible();
-    await page.locator("#cloudEnterpriseToggle").press("Space");
-    await expect(page.locator("#cloudEnterpriseToggle")).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator('[data-nav-group="cloud"]')).toHaveCount(0);
   });
 
-  test("cloud routes remain directly reachable and reveal their active group", async () => {
+  test("deferred cloud routes fall back safely while audit remains a system tool", async () => {
+    await page.evaluate(() => window.WeishanRouter.setRoute("storage"));
+    await expect(page.locator(".home-v205-page")).toBeVisible();
+    const route = await page.evaluate(() => window.WeishanRouter.current());
+    expect(route).toBe("home");
+    await expect(page.locator("#cloudEnterpriseToggle")).toHaveCount(0);
     await gotoRoute(page, "audit");
     await expect(page.locator("#auditSearch")).toBeVisible();
-    await expect(page.locator("#cloudEnterpriseToggle")).toHaveAttribute("aria-expanded", "true");
-    await expect(page.locator('.nav-item[data-route="audit"]')).toBeVisible();
+    await expect(page.locator('[data-nav-group="system"] .nav-item[data-route="audit"]')).toBeVisible();
   });
 
   test("plugin center is always reachable while disabled workspaces remain guarded", async () => {

@@ -2,7 +2,7 @@
   const groups = [
     { id:"core", labelKey:"core" },
     { id:"execution", labelKey:"execution" },
-    { id:"cloud", labelKey:"cloud", collapsible:true, stateKey:"settings.cloudEnterpriseExpanded", defaultExpanded:false },
+    { id:"cloud", labelKey:"cloud", collapsible:true, stateKey:"settings.cloudEnterpriseExpanded", defaultExpanded:false, hideWhenNoVisibleModules:true },
     { id:"system", labelKey:"system" }
   ];
   const modules = [
@@ -15,11 +15,11 @@
     { id:"builder", icon:"⚒", groupId:"execution", page:"BuilderPage" },
     { id:"commerce", icon:"◇", groupId:"execution", page:"CommerceAgentPage" },
     { id:"plugins", icon:"▦", groupId:"execution", page:"PluginsPage" },
-    { id:"storage", icon:"◫", groupId:"cloud", page:"StoragePage" },
-    { id:"team", icon:"👥", groupId:"cloud", page:"TeamPage", paid:true },
-    { id:"seats", icon:"▥", groupId:"cloud", page:"SeatsPage", paid:true },
-    { id:"reports", icon:"▤", groupId:"cloud", page:"ReportsPage", paid:true },
-    { id:"audit", icon:"☑", groupId:"cloud", page:"AuditPage", paid:true },
+    { id:"storage", icon:"◫", groupId:"cloud", page:"StoragePage", visibleInNavigation:false, routeEnabled:false, deferredNavigation:true },
+    { id:"team", icon:"👥", groupId:"cloud", page:"TeamPage", paid:true, visibleInNavigation:false, routeEnabled:false, deferredNavigation:true },
+    { id:"seats", icon:"▥", groupId:"cloud", page:"SeatsPage", paid:true, visibleInNavigation:false, routeEnabled:false, deferredNavigation:true },
+    { id:"reports", icon:"▤", groupId:"cloud", page:"ReportsPage", paid:true, visibleInNavigation:false, routeEnabled:false, deferredNavigation:true },
+    { id:"audit", icon:"☑", groupId:"system", page:"AuditPage" },
     { id:"settings", icon:"⚙", groupId:"system", page:"SettingsPage" },
     { id:"security", icon:"🛡", groupId:"system", page:"SecurityPage" }
   ];
@@ -31,10 +31,21 @@
   }
   function get(id){ return modules.find((item) => item.id === id) || null; }
   function getGroup(id){ return groups.find((item) => item.id === id) || null; }
-  function modulesForGroup(groupId){ return modules.filter((item) => item.groupId === groupId); }
-  function coreRouteIds(){ return modules.map((item) => item.id); }
-  function hasRoute(id){ return !!get(id); }
-  function pageFor(id){ const item = get(id); return item ? item.page : ""; }
+  function isModuleVisible(item){ return !!item && item.visibleInNavigation !== false; }
+  function isRouteEnabled(item){ return !!item && item.routeEnabled !== false; }
+  function modulesForGroup(groupId, options){
+    const includeHidden = options && options.includeHidden === true;
+    return modules.filter((item) => item.groupId === groupId && (includeHidden || isModuleVisible(item)));
+  }
+  function isGroupVisible(groupId){
+    const group = getGroup(groupId);
+    if (!group) return false;
+    if (group.hideWhenNoVisibleModules) return modulesForGroup(groupId).length > 0;
+    return true;
+  }
+  function coreRouteIds(){ return modules.filter(isRouteEnabled).map((item) => item.id); }
+  function hasRoute(id){ return isRouteEnabled(get(id)); }
+  function pageFor(id){ const item = get(id); return isRouteEnabled(item) ? item.page : ""; }
   function route(id){
     const base = get(id) || modules[0];
     const translate = window.I18n && typeof window.I18n.t === "function" ? window.I18n.t : (key) => key;
@@ -48,5 +59,5 @@
   }
 
   assertRegistry();
-  window.WeishanModules = { groups, modules, get, getGroup, modulesForGroup, coreRouteIds, hasRoute, pageFor, route };
+  window.WeishanModules = { groups, modules, get, getGroup, modulesForGroup, isGroupVisible, coreRouteIds, hasRoute, pageFor, route };
 })();

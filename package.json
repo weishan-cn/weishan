@@ -30,7 +30,7 @@
     "test:e2e:dispatch": "playwright test tests/e2e/dispatch-router.spec.js",
     "test:e2e:local": "playwright test tests/e2e/local-workflows.spec.js",
     "test:e2e:repair": "playwright test tests/e2e/repair-center.spec.js",
-    "test:e2e:security": "playwright test tests/e2e/security-audit.spec.js",
+    "test:e2e:security": "npx playwright test tests/e2e/security-audit.spec.js --workers=1 --trace=off",
     "test:e2e:smoke": "playwright test tests/e2e/smoke.spec.js",
     "smoke": "npm run smoke --prefix apps/server",
     "build:mac": "npm run build:mac --prefix apps/desktop",

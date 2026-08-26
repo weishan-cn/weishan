@@ -30,6 +30,10 @@ function runStep(label, command, args) {
   }
 }
 
+function settleGuiLaunch(label) {
+  runStep(label, process.execPath, ["-e", "setTimeout(() => {}, 5000)"]);
+}
+
 function cleanupPlaywrightArtifacts() {
   for (const dirname of ["playwright-report", "test-results"]) {
     const target = path.join(ROOT, dirname);
@@ -93,9 +97,13 @@ function runCore() {
 function runE2e() {
   try {
     runStep("E2E runtime identity", "npx", ["playwright", "test", "tests/e2e/runtime-identity.spec.js", "--workers=1"]);
+    runStep("E2E desktop branding and navigation", "npx", ["playwright", "test", "tests/e2e/desktop-branding-nav.spec.js", "--workers=1"]);
     runStep("E2E smoke", "npm", ["run", "test:e2e:smoke"]);
+    settleGuiLaunch("E2E GUI launch settle before local workflows");
     runStep("E2E local workflows", "npm", ["run", "test:e2e:local"]);
+    settleGuiLaunch("E2E GUI launch settle before security audit");
     runStep("E2E security audit", "npm", ["run", "test:e2e:security"]);
+    settleGuiLaunch("E2E GUI launch settle before repair center");
     runStep("E2E repair center", "npm", ["run", "test:e2e:repair"]);
     runStep("E2E dispatch router", "npm", ["run", "test:e2e:dispatch"]);
     runStep("E2E commerce agent", "npm", ["run", "test:e2e:commerce-agent"]);
