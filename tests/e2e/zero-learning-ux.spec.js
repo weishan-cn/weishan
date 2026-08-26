@@ -37,13 +37,19 @@ test.describe.serial("zero-learning user language", () => {
     expect(layout.order).toEqual([0, 1]);
     expect(layout.consoleIsPrimary).toBe(true);
     await expect(page.locator(".home-v205-main textarea")).toHaveCount(1);
-    await expect(page.locator("#commandInput")).toHaveAttribute("placeholder", "请输入你的问题……");
+    await expect(page.locator("#commandInput")).toHaveAttribute("placeholder", "例如：比较 MacBook Air M4 16+512 的购买选择，或查成都到东京下周两人经济舱");
     await expect(page.locator("#decisionUnifiedQuestion, #decisionUnifiedStart")).toHaveCount(0);
     await expect(page.locator("#runBtn")).toHaveText("开始");
     await expect(page.locator("#openPluginsBtn")).toHaveText("插件");
     await expect(page.locator("#clearFinishedBtn")).toHaveCount(0);
     const consoleText = await page.locator("#cmdConsole").innerText();
     expect(consoleText).not.toMatch(/command\.execute|chat\.answer|dispatch|module|action/i);
+    const homeText = await page.locator(".home-v205-page").innerText();
+    expect(homeText).toContain("从一个问题开始");
+    expect(homeText).toContain("提出目标");
+    expect(homeText).toContain("不替你下单、订票或付款");
+    expect(homeText).toContain("邮箱也不会在你连接前被读取");
+    expect(homeText).not.toMatch(/\bProvider\b|\bAPI\b|\bnetwork\b|routes internally/i);
 
     const input = page.locator("#commandInput");
     await input.fill("帮我做一个视频");

@@ -7134,21 +7134,21 @@
   function unifiedDesktopFlowHomePanel(){
     const api = window.WeishanUnifiedDesktopFlowViewModel;
     const examples = [
-      "iPhone 17 Pro 512GB cheapest",
-      "成都到东京9月10日两个人经济舱",
-      "上海9月15到18日两个人酒店",
-      "10月香港出发7晚邮轮阳台房"
+      "比较 MacBook Air M4 16+512 的购买选择",
+      "查成都到东京下周两人经济舱",
+      "东京 9 月 10 日住 3 晚酒店，要说明价格是否完整",
+      "在邮件里找上个月的电脑发票"
     ];
     const model = api && typeof api.buildUnifiedDesktopFlowViewModel === "function"
       ? api.buildUnifiedDesktopFlowViewModel({ query:commandInputDraft || "Ask for a product, flight, hotel, or cruise", deterministicFixturesOnly:true })
       : null;
-    const flow = model && Array.isArray(model.highLevelFlow) ? model.highLevelFlow.join(" → ") : "Ask → Understand → Search → Compare → Recommend → Handoff";
-    const chip = model && model.domainChip && model.domain !== "UNKNOWN" ? `<strong>${esc(model.domainChip)}</strong>` : "<strong>One request box</strong>";
+    const flow = "提出目标 → 查看选项 → 理解差异 → 你决定是否去官方页面继续";
+    const chip = model && model.domainChip && model.domain !== "UNKNOWN" ? `<strong>${esc(model.domainChip)}</strong>` : "<strong>一个输入框开始</strong>";
     return `<section class="commerce-home-card weishan-unified-desktop-flow-home" data-unified-desktop-flow-home="true" aria-label="One Weishan unified request flow">
       <div class="commerce-home-card-main">
         <div>
-          <b>One Weishan</b>
-          <p>Ask for products, flights, hotels, or cruises in the same box. Weishan routes internally; you do not need to choose a Provider, API, or network.</p>
+          <b>从一个问题开始</b>
+          <p>告诉 Weishan 你想找、比较或理解什么。Weishan 会整理选项、说明依据，并在你选择后带你去对应的官方页面继续。</p>
         </div>
         ${chip}
       </div>
@@ -7156,7 +7156,7 @@
       <div class="commerce-subplan-draft-chips">
         ${examples.map((example) => `<button class="commerce-subplan-draft-chip" type="button" data-commerce-action-chip="${esc(example)}">${esc(example)}</button>`).join("")}
       </div>
-      <p class="cmd-history-meta">Prices stay honest: current, indicative, test-only, or unavailable. Weishan never checks out, books, orders, tickets, or takes payment.</p>
+      <p class="cmd-history-meta">价格会明确说明是当前可用、仅供参考、测试数据或暂不可用。Weishan 不替你下单、订票或付款；邮箱也不会在你连接前被读取。</p>
     </section>`;
   }
 
