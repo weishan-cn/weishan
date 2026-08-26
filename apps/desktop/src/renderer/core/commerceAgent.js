@@ -2535,6 +2535,7 @@
       partnerLinkPolicySummary:readOnlySearchGates.partnerLinkPolicySummary,
       candidates:readOnlySearchSummary.candidates,
       recommendation:readOnlySearchSummary.recommendation,
+      travelAiAnalysis:null,
       searchErrorMessage:"",
       searchResultSummary:readOnlySearchSummary.readOnlySearchResultSummary ? {
         candidateCount:readOnlySearchSummary.readOnlySearchResultSummary.candidateCount || 0,
@@ -2661,6 +2662,7 @@
       candidates:Array.isArray(base.candidates) && base.candidates.length ? base.candidates : readOnlySearchSummary.candidates,
       recommendation:base.recommendation || readOnlySearchSummary.recommendation || null,
       globalShoppingAiAnalysis:base.globalShoppingAiAnalysis && typeof base.globalShoppingAiAnalysis === "object" ? base.globalShoppingAiAnalysis : null,
+      travelAiAnalysis:base.travelAiAnalysis && typeof base.travelAiAnalysis === "object" ? base.travelAiAnalysis : null,
       searchErrorMessage:sanitizeCommerceInput(base.searchErrorMessage || ""),
       searchResultSummary:base.searchResultSummary || (readOnlySearchSummary.readOnlySearchResultSummary ? {
         candidateCount:readOnlySearchSummary.readOnlySearchResultSummary.candidateCount || 0,

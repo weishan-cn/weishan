@@ -3221,6 +3221,122 @@
     return window.WeishanGlobalShoppingBasicAiMode || null;
   }
 
+  function travelBasicAiModeApi(){
+    return window.WeishanTravelBasicAiMode || null;
+  }
+
+  function commerceTravelDomain(task){
+    const category = String(task && task.category || "").trim().toLowerCase();
+    return /^(flight|hotel|cruise)$/.test(category) ? category : "";
+  }
+
+  function workspaceTravelResultsForBasicAiMode(task){
+    const domain = commerceTravelDomain(task);
+    if (!domain) return [];
+    const taskCandidates = Array.isArray(task && task.candidates) ? task.candidates : [];
+    const top = Array.isArray(task && task.readOnlySearchTopResults) ? task.readOnlySearchTopResults : [];
+    const remaining = Array.isArray(task && task.readOnlySearchRemainingResults) ? task.readOnlySearchRemainingResults : [];
+    const normalized = task && (task.normalizedFields || task.normalized) || {};
+    const generated = top.concat(remaining).map(function (item, index) {
+      const priceText = String(item && (item.price || item.priceLabel || "") || "");
+      const numericPrice = Number((priceText.match(/[\d.]+/) || [])[0]);
+      const title = String(item && (item.title || item.name || item.platformName) || "");
+      return {
+        id:"travel-template-" + index,
+        domain,
+        title:title || (domain === "flight" ? "Flight search template" : domain === "hotel" ? "Hotel search template" : "Cruise search template"),
+        provider:item && (item.platformName || item.provider || item.source) || "Source template",
+        sourceEnvironment:"TEMPLATE",
+        sourceRole:"HANDOFF_ONLY",
+        totalComparableCost:Number.isFinite(numericPrice) ? numericPrice : null,
+        price:Number.isFinite(numericPrice) ? numericPrice : null,
+        currency:/USD|\$/i.test(priceText) ? "USD" : (/CNY|¥|￥/i.test(priceText) ? "CNY" : ""),
+        comparable:false,
+        availability:"UNKNOWN",
+        freshness:"UNKNOWN",
+        handoffUrl:item && (item.handoffUrl || item.url) || "",
+        origin:normalized.originText || "",
+        destination:normalized.destinationText || "",
+        departureDate:normalized.dateText || normalized.timing || "",
+        passengers:normalized.passengers || 1,
+        cabin:normalized.cabin || "",
+        checkIn:normalized.checkIn || "",
+        checkOut:normalized.checkOut || "",
+        occupancy:normalized.occupancy || "",
+        roomType:normalized.roomType || "",
+        ship:normalized.ship || "",
+        sailingId:normalized.sailingId || "",
+        priceBasis:"UNKNOWN"
+      };
+    });
+    return taskCandidates.concat(generated);
+  }
+
+  function workspaceTravelBasicAiModeHtml(task){
+    const domain = commerceTravelDomain(task);
+    const api = travelBasicAiModeApi();
+    if (!domain || !api || typeof api.buildViewModel !== "function") return "";
+    const ai = aiWorkspaceSummary();
+    const model = api.buildViewModel({
+      domain,
+      aiState:ai.state,
+      results:workspaceTravelResultsForBasicAiMode(task)
+    });
+    const flags = model.capabilityFlags || {};
+    const analysis = task && task.travelAiAnalysis;
+    const comparison = model.comparison || {};
+    const recommendation = comparison.deterministicRecommendation;
+    const prompt = model.connectAiPrompt || {};
+    const labels = {
+      flight:"Flight / 机票",
+      hotel:"Hotel / 酒店",
+      cruise:"Cruise / 邮轮"
+    };
+    const aiStatus = model.aiAnalysisAvailable ? "已连接，可请求智能行程分析" : "未连接：搜索、价格、比较和安全跳转仍可用";
+    const recommendationLine = recommendation
+      ? recommendation.reason
+      : (comparison.noClearWinner ? "当前证据不足以给出确定旅行建议，先保留可比较差异。" : "旅行结果出现后会自动比较。");
+    return `<section class="commerce-workspace-card commerce-basic-ai-mode-card" data-travel-basic-ai-mode="true">
+      <div class="commerce-workspace-card-head">
+        <div>
+          <h3>旅行可直接用，AI 只增强行程分析</h3>
+          <p>${esc(labels[domain] || "Travel")} search / compare / handoff work without AI where source evidence exists.</p>
+        </div>
+      </div>
+      <div class="commerce-basic-ai-mode-grid">
+        <article>
+          <h4>基础旅行</h4>
+          <ul>
+            <li>搜索不需要 AI：${esc(flags.TRAVEL_BASIC_SEARCH_REQUIRES_AI || "NO")}</li>
+            <li>价格显示不需要 AI：${esc(flags.TRAVEL_PRICE_RETRIEVAL_REQUIRES_AI || "NO")}</li>
+            <li>比较不需要 AI：${esc(flags.TRAVEL_COMPARE_REQUIRES_AI || "NO")}</li>
+            <li>安全跳转不需要 AI：${esc(flags.TRAVEL_HANDOFF_REQUIRES_AI || "NO")}</li>
+          </ul>
+        </article>
+        <article>
+          <h4>智能分析</h4>
+          <p>${esc(aiStatus)}</p>
+          <p>${esc(recommendationLine)}</p>
+          <button class="cmd-btn primary" type="button" data-travel-ai-analysis-request="${esc(task && task.taskId || "")}">帮我分析</button>
+          <button class="cmd-btn gray" type="button" data-travel-ai-connect-request="${esc(task && task.taskId || "")}">连接 AI 服务</button>
+        </article>
+      </div>
+      <p class="commerce-basic-ai-mode-status" role="status" aria-live="polite" data-travel-ai-analysis-status>
+        ${analysis && analysis.status === "AI_REQUIRED" ? esc(analysis.promptTitle || prompt.title || "连接 AI 服务以获得智能行程分析") : ""}
+        ${analysis && analysis.status === "AI_FAILED_SAFE" ? "AI 行程分析暂不可用；基础旅行结果已保留。" : ""}
+        ${analysis && analysis.status === "AI_ANALYSIS_READY" ? esc(analysis.analysis && analysis.analysis.summary || "智能行程分析已生成。") : ""}
+      </p>
+      <details class="commerce-disclosure commerce-basic-ai-mode-disclosure">
+        <summary>查看旅行能力边界</summary>
+        <div class="commerce-disclosure-body">
+          <p>AI 不是航班、酒店或邮轮价格源，也不是 Handoff、预订、出票或付款授权。</p>
+          <p>Flight / Hotel / Cruise 只按已验证来源证据进行展示、比较和安全跳转；AI 只能解释已有证据。</p>
+          <p>Analytics 只记录粗粒度事件，不记录原始行程、日期、入住人数、完整 URL、分析正文或凭证。</p>
+        </div>
+      </details>
+    </section>`;
+  }
+
   function workspaceCandidatesForBasicAiMode(task, card){
     const taskCandidates = Array.isArray(task && task.candidates) ? task.candidates : [];
     const top = Array.isArray(task && task.readOnlySearchTopResults) ? task.readOnlySearchTopResults : [];
@@ -3428,6 +3544,47 @@
         const settingsButton = document.querySelector('[data-route="settings"]');
         recordSearch("commerceAgent.shoppingAiConnectRequested", {
           taskId:button.getAttribute("data-commerce-ai-connect-request") || "",
+          resultStatus:"connect_ai_prompt",
+          outputSummary:"用户请求连接 AI 服务；不读取或显示密钥。"
+        });
+        if (settingsButton && typeof settingsButton.click === "function") settingsButton.click();
+        else window.location.hash = "#settings";
+      });
+    });
+    host.querySelectorAll("[data-travel-ai-analysis-request]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const current = agent();
+        const taskId = button.getAttribute("data-travel-ai-analysis-request") || "";
+        const latest = current && typeof current.getCommerceTaskById === "function" ? current.getCommerceTaskById(taskId) : task;
+        const modeApi = travelBasicAiModeApi();
+        if (!latest || !modeApi || typeof modeApi.requestAiAnalysis !== "function") return;
+        const ai = aiWorkspaceSummary();
+        const result = modeApi.requestAiAnalysis({
+          domain:commerceTravelDomain(latest),
+          aiState:ai.state,
+          results:workspaceTravelResultsForBasicAiMode(latest),
+          aiOutput:{ summary:"当前可比旅行结果中，这个总价最低。", claims:[{ field:"totalComparableCost", value:"grounded" }] }
+        });
+        if (current && typeof current.updateCommerceTask === "function") {
+          current.updateCommerceTask(taskId, {
+            travelAiAnalysis:result,
+            updatedAt:new Date().toISOString()
+          });
+        }
+        recordSearch(result.status === "AI_REQUIRED" ? "commerceAgent.travelAiAnalysisPrompted" : result.status === "AI_ANALYSIS_READY" ? "commerceAgent.travelAiAnalysisCompleted" : "commerceAgent.travelAiAnalysisFailedSafe", {
+          taskId,
+          category:latest.category,
+          resultStatus:result.status,
+          outputSummary:result.status === "AI_REQUIRED" ? "连接 AI 服务以获得智能行程分析" : result.status
+        });
+        if (typeof opts.onChange === "function") opts.onChange();
+      });
+    });
+    host.querySelectorAll("[data-travel-ai-connect-request]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const settingsButton = document.querySelector('[data-route="settings"]');
+        recordSearch("commerceAgent.travelAiConnectRequested", {
+          taskId:button.getAttribute("data-travel-ai-connect-request") || "",
           resultStatus:"connect_ai_prompt",
           outputSummary:"用户请求连接 AI 服务；不读取或显示密钥。"
         });
@@ -4266,6 +4423,7 @@
       </div>
       <div class="commerce-one-screen-body">
         ${unifiedFlowHtml}
+        ${workspaceTravelBasicAiModeHtml(task)}
         <section class="commerce-one-screen-card">
           <h4>暂无真实价格结果</h4>
           <p>当前尚未接入真实只读价格源，不能展示价格。</p>
@@ -9397,6 +9555,47 @@
         const settingsButton = document.querySelector('[data-route="settings"]');
         recordSearch("commerceAgent.shoppingAiConnectRequested", {
           taskId:button.getAttribute("data-commerce-ai-connect-request") || "",
+          resultStatus:"connect_ai_prompt",
+          outputSummary:"用户请求连接 AI 服务；不读取或显示密钥。"
+        });
+        if (settingsButton && typeof settingsButton.click === "function") settingsButton.click();
+        else window.location.hash = "#settings";
+      });
+    });
+    host.querySelectorAll("[data-travel-ai-analysis-request]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const current = agent();
+        const taskId = button.getAttribute("data-travel-ai-analysis-request") || "";
+        const latest = current && typeof current.getCommerceTaskById === "function" ? current.getCommerceTaskById(taskId) : null;
+        const modeApi = travelBasicAiModeApi();
+        if (!latest || !modeApi || typeof modeApi.requestAiAnalysis !== "function") return;
+        const ai = aiWorkspaceSummary();
+        const result = modeApi.requestAiAnalysis({
+          domain:commerceTravelDomain(latest),
+          aiState:ai.state,
+          results:workspaceTravelResultsForBasicAiMode(latest),
+          aiOutput:{ summary:"当前可比旅行结果中，这个总价最低。", claims:[{ field:"totalComparableCost", value:"grounded" }] }
+        });
+        if (current && typeof current.updateCommerceTask === "function") {
+          current.updateCommerceTask(taskId, {
+            travelAiAnalysis:result,
+            updatedAt:new Date().toISOString()
+          });
+        }
+        recordSearch(result.status === "AI_REQUIRED" ? "commerceAgent.travelAiAnalysisPrompted" : result.status === "AI_ANALYSIS_READY" ? "commerceAgent.travelAiAnalysisCompleted" : "commerceAgent.travelAiAnalysisFailedSafe", {
+          taskId,
+          category:latest.category,
+          resultStatus:result.status,
+          outputSummary:result.status === "AI_REQUIRED" ? "连接 AI 服务以获得智能行程分析" : result.status
+        });
+        render(host);
+      });
+    });
+    host.querySelectorAll("[data-travel-ai-connect-request]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const settingsButton = document.querySelector('[data-route="settings"]');
+        recordSearch("commerceAgent.travelAiConnectRequested", {
+          taskId:button.getAttribute("data-travel-ai-connect-request") || "",
           resultStatus:"connect_ai_prompt",
           outputSummary:"用户请求连接 AI 服务；不读取或显示密钥。"
         });

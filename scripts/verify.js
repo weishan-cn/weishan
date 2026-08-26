@@ -74,6 +74,7 @@ function runCore() {
   runStep("Recommend module effectiveness", "node", ["tests/api/recommend-module-effectiveness.test.js"]);
   runStep("Global shopping decision quality effectiveness", "node", ["tests/api/global-shopping-decision-quality-effectiveness.test.js"]);
   runStep("Global shopping basic AI mode effectiveness", "node", ["tests/api/global-shopping-basic-ai-mode-effectiveness.test.js"]);
+  runStep("Travel basic AI mode effectiveness", "node", ["tests/api/travel-basic-ai-mode-effectiveness.test.js"]);
   runStep("Controlled source adapter product truth bridge", "node", ["tests/api/global-commerce-controlled-source-adapter-bridge.test.js"]);
   runStep("Real-price coverage sweep", "node", ["tests/api/global-commerce-real-price-coverage-sweep.test.js"]);
   runStep("Unified shopping and travel desktop flow", "node", ["tests/api/unified-desktop-flow-view-model.test.js"]);
@@ -121,6 +122,7 @@ function runE2e() {
     runStep("E2E dispatch router", "npm", ["run", "test:e2e:dispatch"]);
     runStep("E2E commerce agent", "npm", ["run", "test:e2e:commerce-agent"]);
     runStep("E2E Global Shopping Basic AI mode", "npx", ["playwright", "test", "tests/e2e/global-shopping-basic-ai-mode.spec.js", "--workers=1"]);
+    runStep("E2E Travel Basic AI mode", "npx", ["playwright", "test", "tests/e2e/travel-basic-ai-mode.spec.js", "--workers=1"]);
     runStep("E2E desktop assistant", "npm", ["run", "test:e2e:desktop-assistant"]);
     runStep("E2E cloud settings", "npm", ["run", "test:e2e:cloud"]);
     runStep("E2E settings user control", "npx", ["playwright", "test", "tests/e2e/settings-user-control.spec.js", "--workers=1"]);
