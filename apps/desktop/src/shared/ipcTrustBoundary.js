@@ -4,6 +4,7 @@ const IPC_TRUST_BOUNDARY_VERSION = "4.2.8";
 
 const MAX_EXTERNAL_URL_LENGTH = 2048;
 const MAX_ERROR_MESSAGE_LENGTH = 180;
+const SUPPORT_MAILTO_ADDRESS = "support@weishan.ai";
 
 const SECRET_QUERY_RE = /(api[_-]?key|apikey|token|access[_-]?token|refresh[_-]?token|secret|client[_-]?secret|authorization|password|session|signature)/i;
 const TRANSACTION_PATH_RE = /\/(?:checkout|payment|pay|order|purchase|book|booking|reserve|reservation|ticket)(?:\/|$)/i;
@@ -29,6 +30,20 @@ function validateExternalOpenUrl(value) {
   }
   const protocol = String(parsed.protocol || "").toLowerCase();
   const host = String(parsed.hostname || "").toLowerCase();
+  if (protocol === "mailto:") {
+    const recipient = String(parsed.pathname || "").toLowerCase();
+    if (recipient !== SUPPORT_MAILTO_ADDRESS) return { ok:false, code:"MAILTO_RECIPIENT_BLOCKED" };
+    if (parsed.searchParams.has("cc") || parsed.searchParams.has("bcc") || parsed.searchParams.has("to")) return { ok:false, code:"MAILTO_HEADER_BLOCKED" };
+    const subject = text(parsed.searchParams.get("subject") || "", 160);
+    const body = text(parsed.searchParams.get("body") || "", 1800);
+    if (/[\r\n]|bcc:|cc:|to:|subject:/i.test(subject)) return { ok:false, code:"MAILTO_HEADER_BLOCKED" };
+    if (/bcc:|cc:|to:/i.test(body)) return { ok:false, code:"MAILTO_HEADER_BLOCKED" };
+    if (SECRET_QUERY_RE.test(subject) || SECRET_QUERY_RE.test(body)) return { ok:false, code:"MAILTO_SECRET_BLOCKED" };
+    const clean = new URLSearchParams();
+    if (subject) clean.set("subject", subject);
+    if (body) clean.set("body", body);
+    return { ok:true, url:"mailto:" + SUPPORT_MAILTO_ADDRESS + (clean.toString() ? "?" + clean.toString() : "") };
+  }
   if (protocol !== "https:") return { ok:false, code:"EXTERNAL_URL_PROTOCOL_BLOCKED" };
   if (parsed.username || parsed.password) return { ok:false, code:"EXTERNAL_URL_USERINFO_BLOCKED" };
   if (!host || PRIVATE_HOST_RE.test(host) || IPV6_LOCAL_RE.test(host)) return { ok:false, code:"EXTERNAL_URL_PRIVATE_HOST_BLOCKED" };

@@ -640,6 +640,133 @@
     });
   }
 
+  function helpFeedbackApi(){
+    return window.WeishanInAppHelpFeedbackSupport || null;
+  }
+
+  function helpFeedbackPanel(){
+    const api = helpFeedbackApi();
+    const model = api && api.buildHelpFeedbackViewModel ? api.buildHelpFeedbackViewModel({
+      appVersion:window.weishan && window.weishan.version || "",
+      platformClass:"desktop",
+      locale:window.I18n && window.I18n.lang || "",
+      moduleId:"settings",
+      safeErrorClass:"none",
+      buildType:"SOURCE_DEV"
+    }) : null;
+    const topics = model && model.helpTopics || [];
+    const categories = model && model.categories || [
+      { id:"general", zh:"使用问题", en:"Get Help" },
+      { id:"bug", zh:"报告问题", en:"Report a Problem" },
+      { id:"feature", zh:"功能建议", en:"Suggest a Feature" },
+      { id:"other", zh:"其他", en:"Other" }
+    ];
+    return `
+      <div class="ws-card help-feedback-support" id="helpFeedbackSupportPanel" data-help-feedback-support="true">
+        <div class="settings-title-row">
+          <h2>帮助与反馈 / Help & Feedback</h2>
+          <span class="connector-pill connector-saved">support@weishan.ai</span>
+        </div>
+        <p class="ws-muted">先尝试页面内恢复提示；仍无法解决时，可以联系 Weishan 支持。Provider/API 合作邮箱不会作为普通用户支持入口显示。</p>
+        <div class="help-feedback-layout">
+          <section class="settings-control-group" aria-labelledby="helpTopicsTitle">
+            <h3 id="helpTopicsTitle">快速帮助 / Quick help</h3>
+            <div class="help-topic-list">
+              ${topics.map(function(topic){
+                return `<details class="help-topic"><summary>${esc(topic.titleZh)} / ${esc(topic.titleEn)}</summary><p>${esc(topic.bodyZh)}</p><p>${esc(topic.bodyEn)}</p></details>`;
+              }).join("")}
+            </div>
+          </section>
+          <section class="settings-control-group" aria-labelledby="feedbackComposerTitle">
+            <h3 id="feedbackComposerTitle">联系支持 / Contact support</h3>
+            <label for="supportCategory">类型 / Category</label>
+            <select class="ws-input" id="supportCategory">
+              ${categories.map(function(category){ return `<option value="${esc(category.id)}">${esc(category.zh)} / ${esc(category.en)}</option>`; }).join("")}
+            </select>
+            <label for="supportFeedbackText">发生了什么？/ What happened?</label>
+            <textarea class="ws-input help-feedback-textarea" id="supportFeedbackText" maxlength="5000" rows="5" aria-describedby="supportFeedbackHelp"></textarea>
+            <p class="ws-muted" id="supportFeedbackHelp">你输入的内容只会进入即将打开的邮件草稿；不会进入匿名分析，也不会被当作命令执行。</p>
+            <label for="supportContactEmail">可选联系邮箱 / Optional contact email</label>
+            <input class="ws-input" id="supportContactEmail" inputmode="email" placeholder="you@example.com">
+            <label class="settings-switch" for="supportDiagnosticsToggle">
+              <input type="checkbox" id="supportDiagnosticsToggle" role="switch" aria-describedby="supportDiagnosticsHelp">
+              <span>包含基本诊断信息 / Include basic diagnostic information</span>
+            </label>
+            <p class="ws-muted" id="supportDiagnosticsHelp">${esc(model && model.diagnosticDisclosureZh || "只包含版本、平台、语言、当前模块、安全错误类别和构建类型。")} ${esc(model && model.diagnosticDisclosureEn || "Only version, platform, language, current module, safe error class, and build type are included.")}</p>
+            <div class="help-feedback-diagnostics-preview" id="supportDiagnosticsPreview" aria-live="polite">当前不会附加诊断信息。/ Diagnostics are currently off.</div>
+            <div class="ws-row">
+              <button type="button" class="ws-btn" id="openSupportDraft">打开邮件草稿 / Open mail draft</button>
+              <button type="button" class="ws-btn gray" id="clearSupportDraft">清空 / Clear</button>
+            </div>
+            <p class="ws-muted" id="supportHandoffStatus" role="status" aria-live="polite">打开邮件应用不等于已经发送；请在邮件应用中自行确认发送。</p>
+          </section>
+        </div>
+      </div>`;
+  }
+
+  function mountHelpFeedbackPanel(host){
+    const panel = host.querySelector("#helpFeedbackSupportPanel");
+    const api = helpFeedbackApi();
+    if (!panel || !api) return;
+    const category = panel.querySelector("#supportCategory");
+    const feedback = panel.querySelector("#supportFeedbackText");
+    const contact = panel.querySelector("#supportContactEmail");
+    const diagnostics = panel.querySelector("#supportDiagnosticsToggle");
+    const preview = panel.querySelector("#supportDiagnosticsPreview");
+    const status = panel.querySelector("#supportHandoffStatus");
+    const openButton = panel.querySelector("#openSupportDraft");
+    const clearButton = panel.querySelector("#clearSupportDraft");
+
+    function diagnosticSource(){
+      return {
+        appVersion:window.weishan && window.weishan.version || "",
+        platformClass:"desktop",
+        locale:window.I18n && window.I18n.lang || "",
+        moduleId:"settings",
+        safeErrorClass:"none",
+        buildType:"SOURCE_DEV"
+      };
+    }
+    function refreshPreview(){
+      if (!preview) return;
+      const result = api.safeDiagnostics(diagnosticSource(), { include:diagnostics && diagnostics.checked });
+      if (!result.included) {
+        preview.textContent = "当前不会附加诊断信息。/ Diagnostics are currently off.";
+        return;
+      }
+      preview.textContent = "将包含基础诊断：appVersion, platformClass, locale, moduleId, safeErrorClass, buildType。不会包含搜索原文、邮件内容、凭据、完整 URL、日志或截图。";
+    }
+    if (diagnostics) diagnostics.addEventListener("change", refreshPreview);
+    if (clearButton) clearButton.addEventListener("click", function(){
+      if (feedback) feedback.value = "";
+      if (contact) contact.value = "";
+      if (status) status.textContent = "已清空本地输入；没有发送任何邮件。/ Cleared locally. No email was sent.";
+      refreshPreview();
+    });
+    if (openButton) openButton.addEventListener("click", async function(){
+      const draft = api.buildSupportMailto({
+        category:category && category.value || "general",
+        feedbackText:feedback && feedback.value || "",
+        contactEmail:contact && contact.value || "",
+        includeDiagnostics:diagnostics && diagnostics.checked,
+        diagnostics:diagnosticSource()
+      });
+      if (!draft.ok) {
+        if (status) status.textContent = "内容太长，无法安全打开邮件草稿；请缩短后再试。/ The draft is too long to open safely.";
+        return;
+      }
+      openButton.disabled = true;
+      try {
+        const opener = window.weishan && typeof window.weishan.openExternal === "function" ? window.weishan.openExternal : null;
+        const result = opener ? await opener(draft.url) : { ok:false };
+        if (status) status.textContent = result && result.ok ? "已打开邮件应用草稿；Weishan 没有发送邮件。/ Your mail app draft was opened. Weishan did not send it." : "未能打开邮件应用；请手动发送到 support@weishan.ai。/ Could not open the mail app. Please email support@weishan.ai manually.";
+      } finally {
+        openButton.disabled = false;
+      }
+    });
+    refreshPreview();
+  }
+
   function commerceLocationApi(){
     return window.WeishanCommerceLocationPolicy || null;
   }
@@ -1041,6 +1168,7 @@
         </div>
 
         ${settingsUserControlPanel()}
+        ${helpFeedbackPanel()}
         <div class="ws-card" id="officialWebsitePanel">
           <h2>${t("aboutWeishan")}</h2>
           <p class="ws-muted">${t("officialWebsiteDescription")}</p>
@@ -1201,6 +1329,7 @@
     mountDesktopAssistantPanel(host);
     mountCommerceLocationPanel(host);
     mountSettingsUserControlPanel(host);
+    mountHelpFeedbackPanel(host);
     try {
       if (window.sessionStorage && window.sessionStorage.getItem("weishan:settings:focus") === "commerceLocation") {
         window.sessionStorage.removeItem("weishan:settings:focus");

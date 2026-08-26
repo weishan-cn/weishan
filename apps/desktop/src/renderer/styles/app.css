@@ -5441,3 +5441,54 @@
     border-color:CanvasText;
   }
 }
+/* v4.3.6 in-app help / feedback / support */
+.help-feedback-support{
+  display:grid;
+  gap:14px;
+}
+.help-feedback-layout{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.help-topic-list{
+  display:grid;
+  gap:8px;
+}
+.help-topic{
+  border:1px solid #e2e8f0;
+  border-radius:12px;
+  background:#fff;
+  padding:10px 12px;
+}
+.help-topic summary{
+  min-height:32px;
+  cursor:pointer;
+  font-weight:800;
+}
+.help-topic p{
+  margin:8px 0 0;
+}
+.help-feedback-textarea{
+  min-height:120px;
+  resize:vertical;
+}
+.help-feedback-diagnostics-preview{
+  border:1px dashed #cbd5e1;
+  border-radius:12px;
+  background:#fff;
+  padding:10px 12px;
+  color:#475569;
+}
+@media (max-width:760px){
+  .help-feedback-layout{
+    grid-template-columns:1fr;
+  }
+}
+@media (forced-colors: active){
+  .help-topic,
+  .help-feedback-diagnostics-preview{
+    forced-color-adjust:auto;
+    border-color:CanvasText;
+  }
+}

@@ -74,10 +74,17 @@ async function main() {
   const safeOpen = await ipcBoundary.openValidatedExternal(fakeShell, "https://provider.example/product/sku-1?variant=blue");
   assert.equal(safeOpen.ok, true);
   assert.equal(safe.length, 1);
+  const safeSupportMailto = await ipcBoundary.openValidatedExternal(fakeShell, "mailto:support@weishan.ai?subject=Weishan%20Support&body=User%20draft%20only");
+  assert.equal(safeSupportMailto.ok, true);
+  assert.equal(safe.length, 2);
 
   const externalAttackCorpus = [
     "http://provider.example/item",
     "javascript:alert(1)",
+    "mailto:api@weishan.ai?subject=Support",
+    "mailto:support@weishan.ai?subject=Weishan%0ABcc:%20attacker@example.test",
+    "mailto:support@weishan.ai?bcc=attacker@example.test&subject=Weishan",
+    "mailto:support@weishan.ai?subject=Weishan&body=api_key:secret",
     "data:text/html,<script>alert(1)</script>",
     "file:///etc/passwd",
     "https://localhost/item",
