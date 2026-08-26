@@ -452,7 +452,7 @@
     const homeUnifiedRouter = homeUnifiedIntentRouterApi();
     const homeUnifiedIntentDecision = homeUnifiedRouter && typeof homeUnifiedRouter.classifyHomeIntent === "function" ? homeUnifiedRouter.classifyHomeIntent(raw) : null;
 
-    if (isDesktopAssistantCommand(raw) && /删除|发送邮件|上传|付款|支付|提交表单|输入密码|delete|send\s+email|upload|pay|submit|password/i.test(raw) && !/邮件接管|抓取中心|软件工厂/i.test(raw)) {
+    if (isDesktopAssistantCommand(raw) && /删除|发送邮件|上传|付款|支付|提交表单|输入密码|delete|send\s+email|upload|pay|submit|password/i.test(raw) && !/智能邮件|邮件接管|抓取中心|软件工厂/i.test(raw)) {
       return {
         module:DISPATCH_MODULES.desktopAssistant,
         action:DISPATCH_ACTIONS.desktopAssistantPaused,
@@ -535,7 +535,7 @@
       };
     }
 
-    if (isDesktopAssistantCommand(raw) && !/邮件接管|抓取中心|软件工厂/i.test(raw)) {
+    if (isDesktopAssistantCommand(raw) && !/智能邮件|邮件接管|抓取中心|软件工厂/i.test(raw)) {
       return {
         module:DISPATCH_MODULES.desktopAssistant,
         action:DISPATCH_ACTIONS.desktopAssistantPaused,
@@ -653,7 +653,7 @@
 
   function actionLabel(action){
     const map = {
-      "mail.open":"打开邮件接管",
+      "mail.open":"打开智能邮件",
       "mail.summarize":"总结邮件",
       "mail.draftReply":"生成回复草稿",
       "mail.extractTodos":"提取邮件待办",
@@ -699,7 +699,7 @@
     if (plan.module === "mail") {
       return {
         url:"",
-        taskTitle:"邮件接管任务",
+        taskTitle:"智能邮件任务",
         taskDescription:summary,
         draftRequirement:"",
         suggestedAction:actionLabel(plan.action)
@@ -1073,7 +1073,7 @@
 
   function buildModuleDispatchPlan(plan, text){
     if (plan.module === "mail") {
-      return "已识别为邮件接管任务，可从邮件接管模块继续执行：总结、回复、待办或翻译。本轮首页不直接调用 Mail AI。";
+      return "已识别为智能邮件任务，可从智能邮件继续执行：总结、回复、待办或翻译。本轮首页不直接调用 AI。";
     }
     if (plan.module === "crawler") {
       return [
@@ -1185,7 +1185,7 @@
     }
     if (plan.module === "coordination") return buildCoordinationPlan(text, plan.modules);
     if (plan.module === "softwareFactory" || plan.module === "mail" || plan.module === "crawler") return buildModuleDispatchPlan(plan, text);
-    return "AI 网关未接通，无法可靠回答。你仍可使用本地调度：文档草稿、PPT 大纲、Codex 指令、邮件接管、抓取中心、软件工厂和 coordination step queue。";
+    return "AI 网关未接通，无法可靠回答。你仍可使用本地调度：文档草稿、PPT 大纲、Codex 指令、智能邮件、抓取中心、软件工厂和 coordination step queue。";
   }
 
   function timestamp(){

@@ -34,6 +34,15 @@
     if (window.SecureStorageApi) return window.SecureStorageApi;
     return window.weishan && window.weishan.secure ? window.weishan.secure : null;
   }
+  function smartMailCore(){
+    return window.WeishanSmartMailAuthAiGating || null;
+  }
+  function rememberSmartMailConnection(account, override){
+    const core = smartMailCore();
+    if (core && typeof core.rememberConnection === "function") {
+      try { core.rememberConnection(account || {}, override || {}); } catch (_) {}
+    }
+  }
 
   function providerFor(email){
     const e = norm(email);
@@ -221,6 +230,13 @@
     try { return await secure.delete(key); } catch (_) { return { ok:false }; }
   }
 
+  function connectionState(account){
+    const core = smartMailCore();
+    if (core && typeof core.currentMailState === "function") return core.currentMailState(account || activeAccount());
+    const safe = account || activeAccount();
+    return safe && safe.connected ? "CONNECTED" : "NOT_CONNECTED";
+  }
+
   async function resolvePasswordForAccount(account){
     if (!account || !account.email) return "";
     const sessionValue = sessionAuthorizationCodes.get(norm(account.email)) || "";
@@ -291,10 +307,13 @@
         lastReadAt:now()
       }));
       upsertAccount(account);
+      rememberSmartMailConnection(account, { mailState:"CONNECTED", consentGiven:true, firstUseCompleted:true });
       return { ok:true, status:"connected", message:account.message, account, raw:data, secureUnavailable:secretUnavailable };
     } catch (err) {
       const msg = readableError(err);
-      updateAccount(p.email, { connected:false, status:"failed", message:msg });
+      const authInvalid = /认证失败|authorization|auth|credential|password|授权码|App Password|Invalid credentials/i.test(msg);
+      updateAccount(p.email, { connected:false, status:"failed", message:msg, authInvalid });
+      rememberSmartMailConnection({ email:p.email, connected:false, status:"failed", message:msg, authInvalid }, { mailState:authInvalid ? "AUTH_INVALID" : "CONNECTION_ERROR" });
       return { ok:false, status:"failed", message:msg, error:String(err && err.message || err) };
     }
   }
@@ -377,7 +396,7 @@
   window.MailApi = {
     API_BASE, state, saveState, providerFor, upsertAccount,
     updateAccount, removeAccount, activeAccount, health, connect, syncMore, loadBody,
-    secureStatus, saveAuthorizationCode, loadAuthorizationCode, deleteAuthorizationCode,
+    secureStatus, saveAuthorizationCode, loadAuthorizationCode, deleteAuthorizationCode, connectionState,
     getMailAuthorizationCodeForRequest, bodyHtml
   };
 })();

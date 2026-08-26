@@ -246,8 +246,8 @@ test.describe.serial("dispatch router", () => {
   test("mail dispatch confirms and runs local mock execution without reading mailbox", async () => {
     const command = runId + " 帮我总结最近的重要邮件并提取待办";
     await submitHomeCommand(page, command);
-    await expect(page.getByText(/来自首页调度中心的邮件任务/).first()).toBeVisible();
-    await expect(page.getByText(/邮件接管任务|提取邮件待办|不会自动读取邮箱/).first()).toBeVisible();
+    await expect(page.getByText(/来自首页调度中心的智能邮件任务/).first()).toBeVisible();
+    await expect(page.getByText(/智能邮件任务|提取邮件待办|不会自动读取邮箱/).first()).toBeVisible();
     await expect(page.locator("#mailDispatchConfirm")).toBeVisible();
     await page.locator("#mailDispatchConfirm").click();
     await expect(page.getByText(/状态：executed|executed/).first()).toBeVisible();
@@ -258,7 +258,7 @@ test.describe.serial("dispatch router", () => {
   test("mail evidence words route to Mail instead of shopping or travel", async () => {
     const command = runId + " 找上个月苹果电脑发票";
     await submitHomeCommand(page, command);
-    await expect(page.getByText(/来自首页调度中心的邮件任务/).first()).toBeVisible();
+    await expect(page.getByText(/来自首页调度中心的智能邮件任务/).first()).toBeVisible();
     await expect(page.getByText(/不会自动读取邮箱|realExecution=false/).first()).toBeVisible();
     await expect(page.locator("#mailDispatchConfirm")).toBeVisible();
     await expect(page.locator("[data-commerce-home-summary]")).toHaveCount(0);

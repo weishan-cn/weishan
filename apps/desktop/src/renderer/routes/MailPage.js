@@ -29,7 +29,7 @@
     const status = payload.status || "pending";
     const canAct = status === "pending" || status === "prefilled";
     const result = payload.outputSummary ? `<p class="mail-muted"><b>本地模拟邮件任务结果：</b>${esc(payload.outputSummary)}</p>` : "";
-    return `<div class="mail-card" data-dispatch-prefill="mail"><h2>来自首页调度中心的邮件任务</h2><p class="mail-muted">${esc(prefill.taskTitle || "邮件接管任务")}</p><p><b>${esc(prefill.suggestedAction || payload.action || "")}</b></p><p class="mail-muted">${esc(prefill.taskDescription || payload.inputSummary || "")}</p><p class="mail-muted">状态：<b data-dispatch-status>${esc(status)}</b> · realExecution=false</p>${result}<p class="mail-muted">不会自动读取邮箱、生成回复、发送邮件或调用 Mail AI；用户确认后只生成本地模拟邮件任务结果。</p><div class="mail-button-row"><button class="mail-primary" id="mailDispatchConfirm" ${canAct ? "" : "disabled"}>确认执行</button><button class="mail-gray" id="mailDispatchCancel" ${canAct ? "" : "disabled"}>取消任务</button></div></div>`;
+    return `<div class="mail-card" data-dispatch-prefill="mail"><h2>来自首页调度中心的智能邮件任务</h2><p class="mail-muted">${esc(prefill.taskTitle || "智能邮件任务")}</p><p><b>${esc(prefill.suggestedAction || payload.action || "")}</b></p><p class="mail-muted">${esc(prefill.taskDescription || payload.inputSummary || "")}</p><p class="mail-muted">状态：<b data-dispatch-status>${esc(status)}</b> · realExecution=false</p>${result}<p class="mail-muted">不会自动读取邮箱、生成回复、发送邮件或调用 AI；用户确认后只生成本地模拟智能邮件任务结果。</p><div class="mail-button-row"><button class="mail-primary" id="mailDispatchConfirm" ${canAct ? "" : "disabled"}>确认执行</button><button class="mail-gray" id="mailDispatchCancel" ${canAct ? "" : "disabled"}>取消任务</button></div></div>`;
   }
   function confirmDispatch(payload){
     const router = window.WeishanDispatchRouter;
@@ -52,11 +52,11 @@
   }
   function mailDispatchResult(payload){
     const action = payload && payload.action || "";
-    if (action === "mail.summarize") return "本地模拟邮件摘要任务已创建。未读取真实邮箱，未调用 Mail AI。";
-    if (action === "mail.extractTodos") return "本地模拟待办提取任务已创建。未读取真实邮箱，未调用 Mail AI。";
+    if (action === "mail.summarize") return "本地模拟邮件摘要任务已创建。未读取真实邮箱，未调用 AI。";
+    if (action === "mail.extractTodos") return "本地模拟待办提取任务已创建。未读取真实邮箱，未调用 AI。";
     if (action === "mail.draftReply") return "本地模拟回复草稿任务已创建。未生成真实回复，未发送邮件。";
-    if (action === "mail.translate") return "本地模拟翻译任务已创建。未读取邮件正文，未调用 Mail AI。";
-    return "已确认进入邮件接管模块。未读取真实邮箱，realExecution=false。";
+    if (action === "mail.translate") return "本地模拟翻译任务已创建。未读取邮件正文，未调用 AI。";
+    return "已确认进入智能邮件。未读取真实邮箱，realExecution=false。";
   }
   function mailDispatchHistoryPayload(payload, extra){
     const detail = extra || {};
@@ -89,7 +89,7 @@
       status:"confirmed",
       executionMode:"mail_confirm_requested",
       realExecution:false,
-      outputSummary:"用户已在邮件接管模块确认邮件调度任务。"
+      outputSummary:"用户已在智能邮件中确认邮件调度任务。"
     });
     recordMailDispatch("mail.executed", confirmed, {
       status:"executed",
@@ -146,6 +146,38 @@
   function date(s){ try { return s ? new Date(s).toLocaleString() : ""; } catch (_) { return String(s || ""); } }
   function cls(st){ return st === "connected" ? "mail-ok" : st === "failed" ? "mail-bad" : st === "connecting" ? "mail-pending" : "mail-idle"; }
   function stText(a){ return !a ? t("mailStatusDisconnected") : a.status === "connected" ? t("mailStatusSuccess") : a.status === "failed" ? t("mailStatusFailed") : a.status === "connecting" ? t("mailStatusConnecting") : t("mailStatusDisconnected"); }
+  function smartMailCore(){ return window.WeishanSmartMailAuthAiGating || null; }
+  function smartMailState(account){
+    const core = smartMailCore();
+    return core && core.currentMailState ? core.currentMailState(account) : (account && account.connected ? "CONNECTED" : "NOT_CONNECTED");
+  }
+  function smartAiState(){
+    const core = smartMailCore();
+    return core && core.currentAiState ? core.currentAiState() : "NOT_CONFIGURED";
+  }
+  function smartMailSurface(account){
+    const core = smartMailCore();
+    if (!core || !core.connectionSurface) return null;
+    return core.connectionSurface({ mailState:smartMailState(account), aiState:smartAiState() });
+  }
+  function isMailAiConnected(){ return smartAiState() === "CONNECTED"; }
+  function aiUnavailablePromptHtml(){
+    const core = smartMailCore();
+    const prompt = core && core.connectAiPrompt ? core.connectAiPrompt() : { zhTitle:t("mailConnectAiTitle"), zhMessage:t("mailConnectAiDesc") };
+    return `<div class="mail-ai-gate" role="status"><b>${esc(t("mailConnectAiTitle") || prompt.zhTitle)}</b><p>${esc(t("mailConnectAiDesc") || prompt.zhMessage)}</p><button type="button" class="mail-ai-action-btn is-soft" data-open-ai-settings>${t("mailConnectAiButton")}</button></div>`;
+  }
+  function aiButtonAttrs(loading){
+    return loading ? "disabled" : "";
+  }
+  function requireAiForMail(reader){
+    if (isMailAiConnected()) return true;
+    if (reader) {
+      reader.querySelectorAll(".mail-ai-gate").forEach((node) => node.remove());
+      const actions = reader.querySelector(".mail-reply-actions");
+      if (actions) actions.insertAdjacentHTML("afterend", aiUnavailablePromptHtml());
+    }
+    return false;
+  }
 
   function mTitle(m){ return m.subject || m.title || t("mailUntitled"); }
   function mFrom(m){ return typeof m.from === "string" ? m.from : (m.from && m.from.text) || m.sender || ""; }
@@ -1264,17 +1296,18 @@
         <small>${esc(date(mDate(m)))}</small>
       </div>
       <div class="mail-reply-actions">
-        <button type="button" class="mail-ai-action-btn" data-generate-reply-draft="${esc(replyKey)}" ${draftActive.loading ? "disabled" : ""}>${draftActive.loading ? t("mailReplyGenerating") : t("mailGenerateReplyDraft")}</button>
-        <button type="button" class="mail-ai-action-btn" data-extract-mail-tasks="${esc(replyKey)}" ${taskActive.loading ? "disabled" : ""}>${taskActive.loading ? t("mailTaskExtracting") : t("mailExtractTasks")}</button>
-        <button type="button" class="mail-ai-action-btn" data-summarize-mail="${esc(replyKey)}" ${summaryActive.loading ? "disabled" : ""}>${summaryActive.loading ? t("mailSummarizing") : t("mailSummarizeEmail")}</button>
+        <button type="button" class="mail-ai-action-btn" data-generate-reply-draft="${esc(replyKey)}" ${aiButtonAttrs(draftActive.loading)}>${draftActive.loading ? t("mailReplyGenerating") : t("mailGenerateReplyDraft")}</button>
+        <button type="button" class="mail-ai-action-btn" data-extract-mail-tasks="${esc(replyKey)}" ${aiButtonAttrs(taskActive.loading)}>${taskActive.loading ? t("mailTaskExtracting") : t("mailExtractTasks")}</button>
+        <button type="button" class="mail-ai-action-btn" data-summarize-mail="${esc(replyKey)}" ${aiButtonAttrs(summaryActive.loading)}>${summaryActive.loading ? t("mailSummarizing") : t("mailSummarizeEmail")}</button>
         <button type="button" class="mail-ai-action-btn is-muted" data-clear-ai-results="${esc(replyKey)}">${t("mailClearAiResults")}</button>
         <div class="mail-translate-menu-wrap">
-          <button type="button" class="mail-ai-action-btn" data-translate-menu="${esc(replyKey)}" ${translationActive.loading ? "disabled" : ""}>${translationActive.loading ? esc(translatingLabel) : t("mailTranslateEmail") + " ▾"}</button>
+          <button type="button" class="mail-ai-action-btn" data-translate-menu="${esc(replyKey)}" ${aiButtonAttrs(translationActive.loading)}>${translationActive.loading ? esc(translatingLabel) : t("mailTranslateEmail") + " ▾"}</button>
           ${translationOpen ? `<div class="mail-translate-menu">
             ${TRANSLATION_LANGUAGES.map((lang) => `<button type="button" data-translate-mail="${esc(replyKey)}" data-lang-code="${esc(lang.code)}">${esc(lang.label)}</button>`).join("")}
           </div>` : ""}
         </div>
       </div>
+      ${isMailAiConnected() ? "" : aiUnavailablePromptHtml()}
       ${summaryActive.error ? `<div class="mail-error-box mail-reply-error">${esc(summaryActive.error)}</div>` : ""}
       ${summaryActive.body ? `
         <div class="mail-summary-result">
@@ -1386,9 +1419,11 @@
   }
 
   function workspaceHtml(account){
+    const surface = smartMailSurface(account);
     return `
       <h2>${t("mailWorkspaceTitle")}</h2>
       <p>${t("mailWorkspaceDesc")}</p>
+      ${surface ? `<div class="mail-smart-state" role="status"><b>${esc(window.I18n.getLang && window.I18n.getLang() === "en" ? surface.enTitle : surface.zhTitle)}</b><p>${esc(window.I18n.getLang && window.I18n.getLang() === "en" ? surface.enMessage : surface.zhMessage)}</p></div>` : ""}
       <div class="mail-workspace-grid">
         ${workspaceTabs().map((tab) => `
           <button class="mail-workspace-tab ${activeWorkspaceTab === tab[0] ? "is-active" : ""}" data-workspace-tab="${tab[0]}" type="button">${t(tab[1])}<span>${messagesForTab(account, tab[0]).length}</span></button>
@@ -1607,6 +1642,7 @@
         const meta = createMailPerf("mail.draftReply");
         const clickStartedAt = perfStart(meta, "renderer.action.start");
         ev.preventDefault();
+        if (!requireAiForMail(reader)) return;
         const account = window.MailApi.activeAccount();
         const filtered = messagesForTab(account, activeWorkspaceTab);
         const message = filtered[selectedIndex] || filtered[0];
@@ -1672,6 +1708,7 @@
         const meta = createMailPerf("mail.extractTodos");
         const clickStartedAt = perfStart(meta, "renderer.action.start");
         ev.preventDefault();
+        if (!requireAiForMail(reader)) return;
         const account = window.MailApi.activeAccount();
         const filtered = messagesForTab(account, activeWorkspaceTab);
         const message = filtered[selectedIndex] || filtered[0];
@@ -1693,6 +1730,7 @@
         const meta = createMailPerf("mail.summarize");
         const clickStartedAt = perfStart(meta, "renderer.action.start");
         ev.preventDefault();
+        if (!requireAiForMail(reader)) return;
         const account = window.MailApi.activeAccount();
         const filtered = messagesForTab(account, activeWorkspaceTab);
         const message = filtered[selectedIndex] || filtered[0];
@@ -1712,6 +1750,7 @@
       const translateMenu = ev.target && ev.target.closest ? ev.target.closest("[data-translate-menu]") : null;
       if (translateMenu) {
         ev.preventDefault();
+        if (!requireAiForMail(reader)) return;
         const key = translateMenu.getAttribute("data-translate-menu") || "";
         translationMenuKey = translationMenuKey === key ? "" : key;
         const account = window.MailApi.activeAccount();
@@ -1723,6 +1762,7 @@
         const meta = createMailPerf("mail.translate");
         const clickStartedAt = perfStart(meta, "renderer.action.start");
         ev.preventDefault();
+        if (!requireAiForMail(reader)) return;
         const account = window.MailApi.activeAccount();
         const filtered = messagesForTab(account, activeWorkspaceTab);
         const message = filtered[selectedIndex] || filtered[0];
@@ -1827,6 +1867,11 @@
         const url = link.getAttribute("data-mail-url") || "";
         if (url && window.weishan && typeof window.weishan.openExternal === "function") window.weishan.openExternal(url);
       }
+      const openAiSettings = ev.target && ev.target.closest ? ev.target.closest("[data-open-ai-settings]") : null;
+      if (openAiSettings) {
+        ev.preventDefault();
+        if (window.WeishanRouter && typeof window.WeishanRouter.setRoute === "function") window.WeishanRouter.setRoute("settings");
+      }
     });
     if (reader) reader.addEventListener("error", (ev) => {
       const target = ev.target;
@@ -1841,8 +1886,12 @@
       const a = window.MailApi.activeAccount();
       if (!a) return;
       if (!confirm(t("mailRemoveConfirm"))) return;
-      if (a.hasAuthorizationCode) await window.MailApi.deleteAuthorizationCode(a.email);
-      window.MailApi.removeAccount(a.email);
+      if (window.WeishanSmartMailAuthAiGating && typeof window.WeishanSmartMailAuthAiGating.disconnectMailbox === "function") {
+        await window.WeishanSmartMailAuthAiGating.disconnectMailbox(a);
+      } else {
+        if (a.hasAuthorizationCode) await window.MailApi.deleteAuthorizationCode(a.email);
+        window.MailApi.removeAccount(a.email);
+      }
       selectedIndex = 0;
       rerender();
     });

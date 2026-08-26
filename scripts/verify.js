@@ -88,6 +88,7 @@ function runCore() {
   runStep("Mail Takeover user intelligence", "node", ["tests/api/mail-takeover-user-intelligence.test.js"]);
   runStep("Mail Takeover UX effectiveness", "node", ["tests/api/mail-takeover-ux-effectiveness.test.js"]);
   runStep("Mail Takeover adversarial trust", "node", ["tests/api/mail-takeover-adversarial-trust.test.js"]);
+  runStep("Smart Mail authorization and AI gating effectiveness", "node", ["tests/api/smart-mail-auth-ai-gating-effectiveness.test.js"]);
   runStep("Global travel real source acquisition sweep", "node", ["tests/api/global-travel-real-source-acquisition-sweep.test.js"]);
   runStep("Amadeus self-service flight source adapter", "node", ["tests/api/amadeus-self-service-flight-source-adapter.test.js"]);
   runStep("Duffel test flight source adapter", "node", ["tests/api/duffel-test-flight-source-adapter.test.js"]);
@@ -119,6 +120,7 @@ function runE2e() {
     runStep("E2E desktop assistant", "npm", ["run", "test:e2e:desktop-assistant"]);
     runStep("E2E cloud settings", "npm", ["run", "test:e2e:cloud"]);
     runStep("E2E settings user control", "npx", ["playwright", "test", "tests/e2e/settings-user-control.spec.js", "--workers=1"]);
+    runStep("E2E Smart Mail authorization and AI gating", "npx", ["playwright", "test", "tests/e2e/smart-mail-auth-ai-gating.spec.js", "--workers=1"]);
   } finally {
     cleanupPlaywrightArtifacts();
   }
