@@ -33,7 +33,7 @@
     const id = item.id;
     const label = t(item.labelKey || item.id);
     const active = window.WeishanRouter.current() === id;
-    return `<button type="button" class="nav-item ${active ? "active" : ""}" data-route="${esc(id)}" title="${esc(label)}"><span class="nav-icon">${esc(item.icon)}</span><span class="nav-label">${esc(label)}</span>${item.pill ? `<b class="pill">${esc(item.pill)}</b>` : ""}${locked ? `<b class="paid">${esc(t("paidOnly"))}</b>` : ""}</button>`;
+    return `<button type="button" class="nav-item ${active ? "active" : ""}" data-route="${esc(id)}" title="${esc(label)}" aria-label="${esc(label)}"${active ? ' aria-current="page"' : ""}><span class="nav-icon" aria-hidden="true">${esc(item.icon)}</span><span class="nav-label">${esc(label)}</span>${item.pill ? `<b class="pill">${esc(item.pill)}</b>` : ""}${locked ? `<b class="paid">${esc(t("paidOnly"))}</b>` : ""}</button>`;
   }
   function groupMarkup(group){
     if (!isGroupVisible(group)) return "";
