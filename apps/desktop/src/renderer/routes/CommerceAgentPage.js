@@ -554,6 +554,14 @@
       document.head.appendChild(rateLimitModel);
       return;
     }
+    if (!window.WeishanProviderFailureRetryResilience && !document.querySelector('script[data-weishan-dynamic="WeishanProviderFailureRetryResilience"]')) {
+      const resilience = document.createElement("script");
+      resilience.src = "./renderer/core/providerFailureRetryResilience.js?v=4.2.8";
+      resilience.dataset.weishanDynamic = "WeishanProviderFailureRetryResilience";
+      resilience.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(resilience);
+      return;
+    }
     if (!window.WeishanGlobalShoppingProviderCachePolicy && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderCachePolicy"]')) {
       const cachePolicy = document.createElement("script");
       cachePolicy.src = "./renderer/core/globalShoppingProviderCachePolicy.js?v=4.2.8";

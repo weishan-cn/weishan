@@ -57,6 +57,7 @@ function runCore() {
   runStep("AI connector main-side credential", "node", ["tests/api/ai-connector-main-side-credential.test.js"]);
   runStep("Provider/source management effectiveness", "node", ["tests/api/provider-source-management-effectiveness.test.js"]);
   runStep("Provider adapter normalization effectiveness", "node", ["tests/api/provider-adapter-normalization-effectiveness.test.js"]);
+  runStep("Provider failure retry resilience effectiveness", "node", ["tests/api/provider-failure-retry-resilience-effectiveness.test.js"]);
   runStep("API tests", "npm", ["run", "test:api"]);
   runStep("Multi-network product feed foundation", "node", ["tests/api/global-commerce-multi-network-product-feed-foundation.test.js"]);
   runStep("Product identity and variant matching", "node", ["tests/api/global-commerce-product-identity.test.js"]);
