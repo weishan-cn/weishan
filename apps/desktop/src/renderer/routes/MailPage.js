@@ -1074,20 +1074,22 @@
   }
   function accountAnalysis(account){
     const msgs = account && account.connected ? (account.messages || []) : [];
-    if (!window.WeishanMailTakeoverUserIntelligence || !window.WeishanMailTakeoverUserIntelligence.analyzeMailbox) return null;
+    const intelligence = window.WeishanSmartMailIntelligenceQuality || window.WeishanMailTakeoverUserIntelligence;
+    if (!intelligence || !intelligence.analyzeMailbox) return null;
     const last = msgs[msgs.length - 1] || {};
     const key = `${account && account.email || ""}|${msgs.length}|${messageStableId(last)}|${last.receivedAt || last.date || ""}`;
     if (mailTakeoverAnalysisCache.key === key && mailTakeoverAnalysisCache.analysis) return mailTakeoverAnalysisCache.analysis;
-    const analysis = window.WeishanMailTakeoverUserIntelligence.analyzeMailbox(msgs, { userEmails:[(account && account.email) || ""] });
+    const analysis = intelligence.analyzeMailbox(msgs, { userEmails:[(account && account.email) || ""] });
     mailTakeoverAnalysisCache = { key, analysis, viewModel:null };
     return analysis;
   }
   function accountViewModel(account){
     const msgs = account && account.connected ? (account.messages || []) : [];
-    if (!window.WeishanMailTakeoverUserIntelligence || !window.WeishanMailTakeoverUserIntelligence.buildZeroLearningViewModel) return null;
+    const intelligence = window.WeishanSmartMailIntelligenceQuality || window.WeishanMailTakeoverUserIntelligence;
+    if (!intelligence || !intelligence.buildZeroLearningViewModel) return null;
     accountAnalysis(account);
     if (mailTakeoverAnalysisCache.viewModel) return mailTakeoverAnalysisCache.viewModel;
-    mailTakeoverAnalysisCache.viewModel = window.WeishanMailTakeoverUserIntelligence.buildZeroLearningViewModel(msgs, { userEmails:[(account && account.email) || ""] });
+    mailTakeoverAnalysisCache.viewModel = intelligence.buildZeroLearningViewModel(msgs, { userEmails:[(account && account.email) || ""] });
     return mailTakeoverAnalysisCache.viewModel;
   }
   function insightById(account){
@@ -1117,8 +1119,9 @@
     return patterns.some((pattern) => pattern.test(text));
   }
   function classifyMailMessage(m){
-    if (window.WeishanMailTakeoverUserIntelligence && window.WeishanMailTakeoverUserIntelligence.analyzeMailbox) {
-      const result = window.WeishanMailTakeoverUserIntelligence.analyzeMailbox([m], { userEmails:[(window.MailApi.activeAccount() || {}).email || ""] });
+    const intelligence = window.WeishanSmartMailIntelligenceQuality || window.WeishanMailTakeoverUserIntelligence;
+    if (intelligence && intelligence.analyzeMailbox) {
+      const result = intelligence.analyzeMailbox([m], { userEmails:[(window.MailApi.activeAccount() || {}).email || ""] });
       const insight = result.messages[0] || {};
       return {
         important:insight.attentionState === "IMPORTANT" || insight.attentionState === "URGENT",

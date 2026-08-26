@@ -89,6 +89,7 @@ function runCore() {
   runStep("Mail Takeover UX effectiveness", "node", ["tests/api/mail-takeover-ux-effectiveness.test.js"]);
   runStep("Mail Takeover adversarial trust", "node", ["tests/api/mail-takeover-adversarial-trust.test.js"]);
   runStep("Smart Mail authorization and AI gating effectiveness", "node", ["tests/api/smart-mail-auth-ai-gating-effectiveness.test.js"]);
+  runStep("Smart Mail intelligence quality effectiveness", "node", ["tests/api/smart-mail-intelligence-quality-effectiveness.test.js"]);
   runStep("Global travel real source acquisition sweep", "node", ["tests/api/global-travel-real-source-acquisition-sweep.test.js"]);
   runStep("Amadeus self-service flight source adapter", "node", ["tests/api/amadeus-self-service-flight-source-adapter.test.js"]);
   runStep("Duffel test flight source adapter", "node", ["tests/api/duffel-test-flight-source-adapter.test.js"]);
