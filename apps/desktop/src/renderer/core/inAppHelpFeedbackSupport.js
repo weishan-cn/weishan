@@ -60,6 +60,12 @@
   });
   const SECRET_RE = /(api[_ -]?key|token|secret|password|authorization|bearer|oauth|private[_ -]?key|otp|cookie|credential|client[_ -]?secret|验证码|密码|密钥)\s*[:：=]\s*\S+/i;
   const FORBIDDEN_DIAGNOSTIC_RE = /(query|search|mail|subject|body|sender|recipient|thread|draft|summary|translation|attachment|url|stack|trace|http|analytics|history|ip|mac|serial|fingerprint|cookie|authorization|token|secret|password|credential|api[_-]?key|otp|private[_-]?key)/i;
+  const FEEDBACK_SECRET_RE = /\b(api[_ -]?key|apiKey|access[_ -]?token|refresh[_ -]?token|token|secret|password|authorization|bearer|oauth|private[_ -]?key|otp|cookie|credential|client[_ -]?secret|clientSecret|验证码|密码|密钥)\s*[:：=]\s*[^\s,;&]+/gi;
+  const FEEDBACK_AUTHORITY_RE = /\b(executionGate|authorizesExecution|productionTraffic|productionAffected|emailSendEnabled|EMAIL_SEND_ENABLED|trusted|validated|exact|current|live|recommended|providerReady|admin|deleteAll|archiveAll|sendAll|purchase|booking|payment|order|ticketing)\s*[:：=]\s*[^\s,;&]+/gi;
+  const FEEDBACK_BEARER_RE = /\bBearer\s+[A-Za-z0-9._~+\/=-]+/gi;
+  const FEEDBACK_PRIVATE_KEY_RE = /-----BEGIN[\s\S]{0,80}?PRIVATE KEY-----[\s\S]*?-----END[\s\S]{0,80}?PRIVATE KEY-----/gi;
+  const FEEDBACK_SCRIPT_BLOCK_RE = /<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi;
+  const FEEDBACK_HTML_RE = /<[^>\r\n]{1,200}>/g;
   const PROTOTYPE_KEYS = Object.freeze(["__proto__", "constructor", "prototype"]);
 
   function text(value, max){
@@ -128,12 +134,22 @@
   }
   function sanitizeFeedbackText(value){
     const raw = text(value, MAX_FEEDBACK_LENGTH + 1);
+    const redactions = [];
+    const sanitized = raw
+      .replace(FEEDBACK_SCRIPT_BLOCK_RE, () => { redactions.push("active_html"); return "[redacted-html]"; })
+      .replace(FEEDBACK_PRIVATE_KEY_RE, () => { redactions.push("private_key"); return "[redacted-private-key]"; })
+      .replace(FEEDBACK_BEARER_RE, () => { redactions.push("bearer_token"); return "[redacted-secret]"; })
+      .replace(FEEDBACK_SECRET_RE, (match, key) => { redactions.push(String(key || "secret").toLowerCase()); return String(key || "secret") + "=[redacted]"; })
+      .replace(FEEDBACK_AUTHORITY_RE, (match, key) => { redactions.push("authority:" + String(key || "field")); return "[redacted-authority]"; })
+      .replace(FEEDBACK_HTML_RE, () => { redactions.push("html"); return "[redacted-html]"; });
     return {
-      value:raw.slice(0, MAX_FEEDBACK_LENGTH),
+      value:sanitized.slice(0, MAX_FEEDBACK_LENGTH),
       tooLong:raw.length > MAX_FEEDBACK_LENGTH,
       empty:raw.trim().length === 0,
       treatedAsPlainText:true,
-      authorityGranted:false
+      authorityGranted:false,
+      redacted:redactions.length > 0,
+      redactionCount:redactions.length
     };
   }
   function buildSupportBody(input){

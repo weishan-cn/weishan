@@ -66,6 +66,7 @@ assert.equal(/rawQuery|mailBody|fullUrl|stack|deviceFingerprint|internalEnum/i.t
 const offDiagnostics = api.safeDiagnostics(diagnosticAttack, { include:false });
 assert.equal(offDiagnostics.included, false);
 assert.equal(JSON.stringify(offDiagnostics.diagnostics), "{}");
+const decodeMailto = (value) => decodeURIComponent(String(value).replace(/\+/g, " "));
 
 const draft = api.buildSupportMailto({
   category:"bug",
@@ -82,7 +83,25 @@ assert.equal(draft.deliveryConfirmedByApp, false);
 assert.equal(draft.falseSentState, 0);
 assert(draft.url.startsWith("mailto:support@weishan.ai?"));
 assert.equal(/api@weishan\.ai/.test(draft.url), false);
-assert.equal(/Private subject|Find my invoice|sk-test|Bearer|PRIVATE KEY|fullUrl|stack/i.test(decodeURIComponent(draft.url)), false);
+const decodedDraft = decodeMailto(draft.url);
+assert.equal(/Private subject|Find my invoice|sk-test|Bearer|PRIVATE KEY|fullUrl|stack/i.test(decodedDraft), false);
+assert.equal(/<script>|alert\(1\)|executionGate=OPEN|deleteAll=true/i.test(decodedDraft), false);
+assert.match(decodedDraft, /The app did not recover after retry/);
+assert.equal(/executionGate|deleteAll/i.test(decodedDraft), false);
+assert.match(decodedDraft, /\[redacted-authority\]/);
+assert.match(decodedDraft, /\[redacted-html\]/);
+
+const secretFeedbackDraft = api.buildSupportMailto({
+  category:"bug",
+  feedbackText:"token=abc123 apiKey=key123 Authorization: Bearer raw-secret password: hunter2 oauth=abc private_key=-----BEGIN PRIVATE KEY-----abc-----END PRIVATE KEY-----",
+  includeDiagnostics:false
+});
+const decodedSecretFeedback = decodeMailto(secretFeedbackDraft.url);
+assert.equal(/abc123|key123|raw-secret|hunter2|BEGIN PRIVATE KEY|END PRIVATE KEY/i.test(decodedSecretFeedback), false);
+assert.match(decodedSecretFeedback, /token=\[redacted\]/);
+assert.match(decodedSecretFeedback, /apiKey=\[redacted\]/);
+assert.match(decodedSecretFeedback, /Authorization=\[redacted\]/);
+assert.match(decodedSecretFeedback, /password=\[redacted\]/);
 assert.equal(api.analyticsEvent("feedback_started", "bug").feedbackText, null);
 assert.equal(api.analyticsEvent("feedback_started", "bug").contactEmail, null);
 assert.equal(api.analyticsEvent("unknown_event", "bug"), null);

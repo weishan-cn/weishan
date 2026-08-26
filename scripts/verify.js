@@ -123,6 +123,7 @@ function runE2e() {
     runStep("E2E commerce agent", "npm", ["run", "test:e2e:commerce-agent"]);
     runStep("E2E Global Shopping Basic AI mode", "npx", ["playwright", "test", "tests/e2e/global-shopping-basic-ai-mode.spec.js", "--workers=1"]);
     runStep("E2E Travel Basic AI mode", "npx", ["playwright", "test", "tests/e2e/travel-basic-ai-mode.spec.js", "--workers=1"]);
+    runStep("E2E Public Beta user journey", "npx", ["playwright", "test", "tests/e2e/public-beta-user-journey.spec.js", "--workers=1"]);
     runStep("E2E desktop assistant", "npm", ["run", "test:e2e:desktop-assistant"]);
     runStep("E2E cloud settings", "npm", ["run", "test:e2e:cloud"]);
     runStep("E2E settings user control", "npx", ["playwright", "test", "tests/e2e/settings-user-control.spec.js", "--workers=1"]);
