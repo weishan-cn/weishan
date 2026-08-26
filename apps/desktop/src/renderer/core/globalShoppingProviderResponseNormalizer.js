@@ -32,6 +32,12 @@
     }
   }
 
+  function sourceType(value) {
+    const normalized = text(value).toLowerCase();
+    if (["sandbox", "fixture", "test", "development", "evaluation", "public"].includes(normalized)) return normalized;
+    return "unknown";
+  }
+
   function normalizeItem(input, fallback) {
     const item = obj(input);
     const defaults = obj(fallback);
@@ -43,7 +49,7 @@
       currency:text(item.currency || defaults.currency || ""),
       availability:text(item.availability || item.availabilityStatus || defaults.availability || "unknown"),
       officialUrl:safeUrl(item.officialUrl || defaults.officialUrl || ""),
-      sourceType:text(item.sourceType || defaults.sourceType || "sandbox"),
+      sourceType:sourceType(item.sourceType || defaults.sourceType || ""),
       timestamp:text(item.timestamp || defaults.timestamp || ""),
       confidence:text(item.confidence || defaults.confidence || "mock")
     };
@@ -59,7 +65,7 @@
       currency:text(safe.currency || response.currency || ""),
       availability:text(response.availability || "unknown"),
       officialUrl:text(safe.officialUrl || response.officialUrl || ""),
-      sourceType:text(response.sourceType || "sandbox"),
+      sourceType:sourceType(response.sourceType || safe.sourceType || ""),
       timestamp:text(response.timestamp || ""),
       confidence:text(response.dataConfidence || "mock")
     };
@@ -70,7 +76,7 @@
       normalizerName:NORMALIZER_NAME,
       appVersion:GLOBAL_SHOPPING_PROVIDER_RESPONSE_NORMALIZER_VERSION,
       providerId:fallback.providerId,
-      sourceType:fallback.sourceType || "sandbox",
+      sourceType:fallback.sourceType || "unknown",
       normalizedResults:items.length ? items : [normalizeItem(response, fallback)],
       redacted:true
     });

@@ -234,12 +234,12 @@
       currency: text(currency).toUpperCase(),
       baseFare: baseFare,
       taxesAndFees: taxesAndFees,
-      providerFees: providerFees == null ? 0 : providerFees,
+      providerFees: providerFees,
       totalPrice: totalPrice,
       priceUpdatedAt: priceUpdatedAt,
-      freshnessMinutes: freshnessMinutes == null ? 0 : freshnessMinutes,
+      freshnessMinutes: freshnessMinutes,
       freshnessStatus: freshnessStatus(freshnessMinutes),
-      taxFeeIntegrityStatus: baseFare != null && taxesAndFees != null && totalPrice != null && Math.abs(totalPrice - (baseFare + taxesAndFees + (providerFees == null ? 0 : providerFees))) < 0.0001 ? "complete" : "incomplete",
+      taxFeeIntegrityStatus: baseFare != null && taxesAndFees != null && providerFees != null && totalPrice != null && Math.abs(totalPrice - (baseFare + taxesAndFees + providerFees)) < 0.0001 ? "complete" : "incomplete",
       handoffType: "registry_gate_required",
       safeProviderHandoffReady: handoff.ready === true,
       safeProviderHandoffUrl: handoff.ready === true ? handoff.url : null,
@@ -278,7 +278,7 @@
     if (!text(quote.departureDate)) reasons.push("date required");
     const baseFare = number(quote.baseFare);
     const taxesAndFees = number(quote.taxesAndFees);
-    const providerFees = quote.providerFees == null ? 0 : number(quote.providerFees);
+    const providerFees = number(quote.providerFees);
     const totalPrice = number(quote.totalPrice);
     if (baseFare == null || taxesAndFees == null || providerFees == null || totalPrice == null || Math.abs(totalPrice - (baseFare + taxesAndFees + providerFees)) > 0.0001) reasons.push("total mismatch");
     if (hasSensitiveText(JSON.stringify(quote))) reasons.push("sensitive credential-like field detected");

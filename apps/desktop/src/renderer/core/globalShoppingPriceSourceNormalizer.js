@@ -16,14 +16,26 @@
       .replace(/https?:\/\/\S+|token|apiKey|key|secret|password|credential|bookingUrl|checkoutUrl|paymentUrl|orderUrl|身份证|护照|银行卡|passport|cardNumber/ig, "redacted")
       .trim();
   }
-  function numberOrZero(value) {
+  function numberOrNull(value) {
+    if (!(typeof value === "number" || typeof value === "string")) return null;
+    if (typeof value === "string" && !value.trim()) return null;
     const num = Number(value);
-    return Number.isFinite(num) ? num : 0;
+    return value !== undefined && value !== null && value !== "" && Number.isFinite(num) && num >= 0 ? num : null;
   }
   function hasNumber(value) {
+    if (!(typeof value === "number" || typeof value === "string")) return false;
+    if (typeof value === "string" && !value.trim()) return false;
     return value !== undefined && value !== null && value !== "" && Number.isFinite(Number(value));
   }
-  function bool(value, defaultValue) { return value === undefined ? defaultValue : value === true; }
+  function hasNonNegativeNumber(value) {
+    return hasNumber(value) && Number(value) >= 0;
+  }
+  function currency(value) {
+    const normalized = text(value).toUpperCase();
+    if (normalized === "RMB") return "";
+    return /^[A-Z]{3}$/.test(normalized) ? normalized : "";
+  }
+  function bool(value) { return value === true ? true : (value === false ? false : null); }
   function geo(value) {
     const safe = obj(value);
     return { lat:hasNumber(safe.lat) ? Number(safe.lat) : null, lng:hasNumber(safe.lng) ? Number(safe.lng) : null, redacted:true };
@@ -63,7 +75,7 @@
   function completenessFor(source, hasBase, hasCurrency, hasTimestamp) {
     const explicit = text(source.priceCompleteness || "");
     if (/^(complete|partial|unknown|needs_review)$/.test(explicit)) return explicit;
-    const allFeesProvided = FEE_FIELDS.every(function (field) { return hasNumber(source[field]); }) && hasNumber(source.couponDiscount);
+    const allFeesProvided = FEE_FIELDS.every(function (field) { return hasNonNegativeNumber(source[field]); }) && hasNonNegativeNumber(source.couponDiscount);
     if (hasBase && hasCurrency && hasTimestamp && allFeesProvided) return "complete";
     if (hasBase || hasCurrency) return "partial";
     return "needs_review";
@@ -80,10 +92,12 @@
   function normalizeGlobalShoppingPriceSource(input) {
     const source = obj(input);
     const sourceType = SOURCE_TYPES.indexOf(text(source.sourceType)) >= 0 ? text(source.sourceType) : "unknown";
-    const baseProvided = hasNumber(source.basePrice);
-    const currencyProvided = Boolean(text(source.currency));
+    const baseProvided = hasNonNegativeNumber(source.basePrice);
+    const isoCurrency = currency(source.currency);
+    const currencyProvided = Boolean(isoCurrency);
     const timestampProvided = Boolean(text(source.lastCheckedAt));
-    const normalizedTotal = numberOrZero(source.basePrice) + FEE_FIELDS.reduce(function (sum, field) { return sum + numberOrZero(source[field]); }, 0) - numberOrZero(source.couponDiscount);
+    const allPriceComponentsProvided = baseProvided && FEE_FIELDS.every(function (field) { return hasNonNegativeNumber(source[field]); }) && hasNonNegativeNumber(source.couponDiscount);
+    const normalizedTotal = allPriceComponentsProvided ? Number(source.basePrice) + FEE_FIELDS.reduce(function (sum, field) { return sum + Number(source[field]); }, 0) - Number(source.couponDiscount) : null;
     const completeness = completenessFor(source, baseProvided, currencyProvided, timestampProvided);
     const normalized = {
       candidateId:text(source.candidateId || source.id || "candidate_fixture_1"),
@@ -97,23 +111,23 @@
       itemType:/^(flight|hotel|product|local_service|unknown)$/.test(text(source.itemType)) ? text(source.itemType) : "unknown",
       title:text(source.title || "只读候选价"),
       basePrice:baseProvided ? Number(source.basePrice) : null,
-      taxAmount:numberOrZero(source.taxAmount),
-      shippingFee:numberOrZero(source.shippingFee),
-      platformFee:numberOrZero(source.platformFee),
-      serviceFee:numberOrZero(source.serviceFee),
-      paymentFee:numberOrZero(source.paymentFee),
-      baggageFee:numberOrZero(source.baggageFee),
-      couponDiscount:numberOrZero(source.couponDiscount),
-      normalizedTotal:baseProvided ? normalizedTotal : null,
-      currency:currencyProvided ? text(source.currency) : "",
-      exchangeRate:hasNumber(source.exchangeRate) ? Number(source.exchangeRate) : 1,
-      priceIncludesTax:bool(source.priceIncludesTax, false),
-      priceIncludesShipping:bool(source.priceIncludesShipping, false),
-      priceIncludesServiceFee:bool(source.priceIncludesServiceFee, false),
+      taxAmount:numberOrNull(source.taxAmount),
+      shippingFee:numberOrNull(source.shippingFee),
+      platformFee:numberOrNull(source.platformFee),
+      serviceFee:numberOrNull(source.serviceFee),
+      paymentFee:numberOrNull(source.paymentFee),
+      baggageFee:numberOrNull(source.baggageFee),
+      couponDiscount:numberOrNull(source.couponDiscount),
+      normalizedTotal:normalizedTotal,
+      currency:isoCurrency,
+      exchangeRate:hasNumber(source.exchangeRate) && Number(source.exchangeRate) > 0 ? Number(source.exchangeRate) : null,
+      priceIncludesTax:bool(source.priceIncludesTax),
+      priceIncludesShipping:bool(source.priceIncludesShipping),
+      priceIncludesServiceFee:bool(source.priceIncludesServiceFee),
       priceCompleteness:completeness,
       lastCheckedAt:text(source.lastCheckedAt || ""),
       confidence:/^(high|medium|low|needs_review)$/.test(text(source.confidence)) ? text(source.confidence) : (completeness === "complete" ? "high" : "needs_review"),
-      breakfastIncluded:bool(source.breakfastIncluded, false),
+      breakfastIncluded:bool(source.breakfastIncluded),
       geo:geo(source.geo),
       caveat:text(source.caveat || CAVEAT),
       bookingUrl:null,
