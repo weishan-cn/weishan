@@ -51,6 +51,7 @@ function runCore() {
   runStep("IPC core effectiveness", "node", ["tests/api/ipc-core-effectiveness.test.js"]);
   runStep("Credential module effectiveness", "node", ["tests/api/credential-module-effectiveness.test.js"]);
   runStep("AI connector main-side credential", "node", ["tests/api/ai-connector-main-side-credential.test.js"]);
+  runStep("Provider/source management effectiveness", "node", ["tests/api/provider-source-management-effectiveness.test.js"]);
   runStep("API tests", "npm", ["run", "test:api"]);
   runStep("Multi-network product feed foundation", "node", ["tests/api/global-commerce-multi-network-product-feed-foundation.test.js"]);
   runStep("Product identity and variant matching", "node", ["tests/api/global-commerce-product-identity.test.js"]);
