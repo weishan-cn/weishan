@@ -63,6 +63,7 @@ function runCore() {
   runStep("Accessibility keyboard display effectiveness", "node", ["tests/api/accessibility-keyboard-display-effectiveness.test.js"]);
   runStep("Error empty recovery UX effectiveness", "node", ["tests/api/error-empty-recovery-ux-effectiveness.test.js"]);
   runStep("Onboarding first-run zero-learning effectiveness", "node", ["tests/api/onboarding-first-run-zero-learning-effectiveness.test.js"]);
+  runStep("Anonymous product analytics effectiveness", "node", ["tests/api/anonymous-product-analytics-effectiveness.test.js"]);
   runStep("API tests", "npm", ["run", "test:api"]);
   runStep("Multi-network product feed foundation", "node", ["tests/api/global-commerce-multi-network-product-feed-foundation.test.js"]);
   runStep("Product identity and variant matching", "node", ["tests/api/global-commerce-product-identity.test.js"]);
