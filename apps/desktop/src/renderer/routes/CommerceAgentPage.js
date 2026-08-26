@@ -562,6 +562,14 @@
       document.head.appendChild(resilience);
       return;
     }
+    if (!window.WeishanStateCachePersistenceGuard && !document.querySelector('script[data-weishan-dynamic="WeishanStateCachePersistenceGuard"]')) {
+      const stateGuard = document.createElement("script");
+      stateGuard.src = "./renderer/core/stateCachePersistenceGuard.js?v=4.2.8";
+      stateGuard.dataset.weishanDynamic = "WeishanStateCachePersistenceGuard";
+      stateGuard.onload = () => ensureSearchLoaded(host);
+      document.head.appendChild(stateGuard);
+      return;
+    }
     if (!window.WeishanGlobalShoppingProviderCachePolicy && !document.querySelector('script[data-weishan-dynamic="WeishanGlobalShoppingProviderCachePolicy"]')) {
       const cachePolicy = document.createElement("script");
       cachePolicy.src = "./renderer/core/globalShoppingProviderCachePolicy.js?v=4.2.8";
