@@ -5390,3 +5390,46 @@
     border-color:CanvasText;
   }
 }
+/* v4.3.3 settings / preferences / user-control */
+.settings-user-control{
+  display:grid;
+  gap:14px;
+}
+.settings-control-group{
+  display:grid;
+  gap:10px;
+  padding:14px;
+  border:1px solid #e2e8f0;
+  border-radius:16px;
+  background:#f8fafc;
+}
+.settings-control-group h3{
+  margin:0;
+}
+.settings-switch{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:44px;
+  font-weight:800;
+}
+.settings-switch input[role="switch"]{
+  width:44px;
+  height:24px;
+  accent-color:#2563eb;
+}
+.settings-switch span{
+  overflow-wrap:anywhere;
+}
+@media (max-width:520px){
+  .settings-switch{
+    align-items:flex-start;
+  }
+}
+@media (forced-colors: active){
+  .settings-control-group,
+  .settings-switch input[role="switch"]{
+    forced-color-adjust:auto;
+    border-color:CanvasText;
+  }
+}

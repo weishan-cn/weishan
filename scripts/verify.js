@@ -64,6 +64,7 @@ function runCore() {
   runStep("Error empty recovery UX effectiveness", "node", ["tests/api/error-empty-recovery-ux-effectiveness.test.js"]);
   runStep("Onboarding first-run zero-learning effectiveness", "node", ["tests/api/onboarding-first-run-zero-learning-effectiveness.test.js"]);
   runStep("Anonymous product analytics effectiveness", "node", ["tests/api/anonymous-product-analytics-effectiveness.test.js"]);
+  runStep("Settings preferences user control effectiveness", "node", ["tests/api/settings-preferences-user-control-effectiveness.test.js"]);
   runStep("API tests", "npm", ["run", "test:api"]);
   runStep("Multi-network product feed foundation", "node", ["tests/api/global-commerce-multi-network-product-feed-foundation.test.js"]);
   runStep("Product identity and variant matching", "node", ["tests/api/global-commerce-product-identity.test.js"]);
@@ -117,6 +118,7 @@ function runE2e() {
     runStep("E2E commerce agent", "npm", ["run", "test:e2e:commerce-agent"]);
     runStep("E2E desktop assistant", "npm", ["run", "test:e2e:desktop-assistant"]);
     runStep("E2E cloud settings", "npm", ["run", "test:e2e:cloud"]);
+    runStep("E2E settings user control", "npx", ["playwright", "test", "tests/e2e/settings-user-control.spec.js", "--workers=1"]);
   } finally {
     cleanupPlaywrightArtifacts();
   }

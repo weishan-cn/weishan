@@ -555,6 +555,91 @@
     return value ? " checked" : "";
   }
 
+  function settingsUserControlApi(){
+    return window.WeishanSettingsUserControl || null;
+  }
+
+  function settingsUserControlPanel(){
+    const api = settingsUserControlApi();
+    const settings = api && api.getSettings ? api.getSettings() : { analyticsEnabled:false, appearance:"system" };
+    const analyticsState = settings.analyticsEnabled ? "已开启 / On" : "已关闭 / Off";
+    return `
+      <div class="ws-card settings-user-control" id="settingsUserControlPanel" data-settings-user-control="true">
+        <div class="settings-title-row">
+          <h2>偏好与隐私 / Preferences & Privacy</h2>
+          <span class="connector-pill ${settings.analyticsEnabled ? "connector-saved" : "connector-empty"}" id="analyticsPreferenceState">${esc(analyticsState)}</span>
+        </div>
+        <p class="ws-muted">这里仅放普通用户可理解、可撤回的本地偏好。不会显示 Provider 内部状态、执行闸门、生产环境开关或原始密钥。</p>
+        <section class="settings-control-group" aria-labelledby="analyticsPreferenceTitle">
+          <h3 id="analyticsPreferenceTitle">匿名产品改进 / Anonymous product improvement</h3>
+          <label class="settings-switch" for="anonymousAnalyticsToggle">
+            <input type="checkbox" id="anonymousAnalyticsToggle" role="switch" aria-describedby="anonymousAnalyticsHelp"${checked(settings.analyticsEnabled)}>
+            <span>帮助改进 Weishan，分享匿名使用数据。</span>
+          </label>
+          <p class="ws-muted" id="anonymousAnalyticsHelp">Help improve Weishan by sharing anonymous usage data. It does not collect query text, Mail content, credentials, full URLs, account identity, IP addresses, or device fingerprints. 不收集搜索原文、邮件内容、凭据、完整 URL、账号身份、IP 或设备指纹。</p>
+          <div class="ws-row">
+            <button type="button" class="ws-btn gray" id="resetAnonymousAnalytics">重置匿名分析身份 / Reset anonymous analytics</button>
+          </div>
+          <p class="ws-muted" id="analyticsPreferenceResult" role="status" aria-live="polite">核心功能无需开启此项。</p>
+        </section>
+        <section class="settings-control-group" aria-labelledby="displayPreferenceTitle">
+          <h3 id="displayPreferenceTitle">显示 / Display</h3>
+          <label for="appearancePreference">外观 / Appearance</label>
+          <select class="ws-input" id="appearancePreference" aria-describedby="appearancePreferenceHelp">
+            <option value="system"${settings.appearance === "system" ? " selected" : ""}>跟随系统 / System</option>
+            <option value="light"${settings.appearance === "light" ? " selected" : ""}>浅色 / Light</option>
+            <option value="dark"${settings.appearance === "dark" ? " selected" : ""}>深色 / Dark</option>
+          </select>
+          <p class="ws-muted" id="appearancePreferenceHelp">保存为本地偏好；不会重启应用或清空当前工作。</p>
+        </section>
+      </div>`;
+  }
+
+  function mountSettingsUserControlPanel(host){
+    const panel = host.querySelector("#settingsUserControlPanel");
+    const api = settingsUserControlApi();
+    if (!panel || !api || !api.saveSettings) return;
+    const toggle = panel.querySelector("#anonymousAnalyticsToggle");
+    const state = panel.querySelector("#analyticsPreferenceState");
+    const result = panel.querySelector("#analyticsPreferenceResult");
+    const reset = panel.querySelector("#resetAnonymousAnalytics");
+    const appearance = panel.querySelector("#appearancePreference");
+
+    function setResult(text){ if (result) result.textContent = text; }
+    function setState(enabled){
+      if (!state) return;
+      state.textContent = enabled ? "已开启 / On" : "已关闭 / Off";
+      state.className = "connector-pill " + (enabled ? "connector-saved" : "connector-empty");
+    }
+
+    if (toggle) toggle.addEventListener("change", function(){
+      const saved = api.setAnalyticsEnabled(toggle.checked);
+      if (!saved.ok) {
+        toggle.checked = api.isAnalyticsEnabled();
+        setResult("未保存：偏好值无效或本地存储不可用。");
+        return;
+      }
+      setState(saved.settings.analyticsEnabled);
+      setResult(saved.settings.analyticsEnabled ? "匿名使用数据已开启。仅允许本地、匿名、allowlisted 事件。" : "匿名使用数据已关闭；待发送队列已清空，核心功能不受影响。");
+    });
+
+    if (reset) reset.addEventListener("click", function(){
+      const resetResult = api.resetAnalytics();
+      setResult(resetResult.ok ? "匿名分析身份和本地分析队列已重置；凭据、邮件设置和其他偏好未删除。" : "重置未完成：本地存储不可用。");
+      setState(api.isAnalyticsEnabled());
+    });
+
+    if (appearance) appearance.addEventListener("change", function(){
+      const saved = api.saveSettings({ appearance:appearance.value });
+      if (!saved.ok) {
+        appearance.value = api.getSettings().appearance;
+        setResult("未保存：外观偏好值无效。");
+        return;
+      }
+      setResult("外观偏好已保存；当前版本不会因此重启应用。");
+    });
+  }
+
   function commerceLocationApi(){
     return window.WeishanCommerceLocationPolicy || null;
   }
@@ -955,19 +1040,7 @@
           ${aiPanel(acc)}
         </div>
 
-        <div class="ws-grid-2">
-          <div class="ws-card">
-            <h2>${t("cloudReserved")}</h2>
-            <p>${t("baseUrl")}：${esc(window.WeishanConfig.backend.metadataBaseUrl || window.WeishanConfig.backend.pocketbaseBaseUrl || "local metadata mock")}</p>
-            <p>${t("collections")}：${esc(window.WeishanConfig.backend.collections.join(" / "))}</p>
-            <p class="danger-text">${t("secretsWarning")}</p>
-          </div>
-          <div class="ws-card">
-            <h2>${t("billingPermissions")}</h2>
-            <p>${t("billingDesc")}</p>
-            <p>free/pro → A；team/enterprise/institution → B。</p>
-          </div>
-        </div>
+        ${settingsUserControlPanel()}
         <div class="ws-card" id="officialWebsitePanel">
           <h2>${t("aboutWeishan")}</h2>
           <p class="ws-muted">${t("officialWebsiteDescription")}</p>
@@ -975,7 +1048,6 @@
         </div>
         ${commerceLocationPanel()}
         ${desktopAssistantPanel()}
-        ${cloudEnterprisePanel()}
       </section>`;
 
     function accountInput(){
@@ -1128,7 +1200,7 @@
 
     mountDesktopAssistantPanel(host);
     mountCommerceLocationPanel(host);
-    mountCloudPanel(host);
+    mountSettingsUserControlPanel(host);
     try {
       if (window.sessionStorage && window.sessionStorage.getItem("weishan:settings:focus") === "commerceLocation") {
         window.sessionStorage.removeItem("weishan:settings:focus");
