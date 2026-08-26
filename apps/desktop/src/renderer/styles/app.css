@@ -5324,3 +5324,69 @@
     forced-color-adjust:auto;
   }
 }
+/* v4.3.0 error / empty state / recovery UX */
+.ws-recovery-state{
+  display:grid;
+  gap:10px;
+  max-width:760px;
+  margin:12px 0;
+  padding:16px;
+  border:1px solid #cbd5e1;
+  border-radius:16px;
+  background:#f8fafc;
+  color:#0f172a;
+  overflow-wrap:anywhere;
+}
+.ws-recovery-state h2,
+.ws-recovery-state p{
+  margin:0;
+}
+.ws-recovery-state__still{
+  color:#475569;
+}
+.ws-recovery-state--error,
+.ws-recovery-state--blocked{
+  border-color:#fecaca;
+  background:#fff7ed;
+}
+.ws-recovery-state--warning{
+  border-color:#fde68a;
+  background:#fffbeb;
+}
+.ws-recovery-state--setup{
+  border-color:#bfdbfe;
+  background:#eff6ff;
+}
+.ws-recovery-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.ws-recovery-action{
+  min-width:44px;
+  min-height:44px;
+  border:1px solid #2563eb;
+  border-radius:10px;
+  background:#2563eb;
+  color:#fff;
+  padding:8px 12px;
+  font-weight:800;
+}
+@media (max-width:520px){
+  .ws-recovery-state{
+    padding:14px;
+  }
+  .ws-recovery-actions{
+    display:grid;
+  }
+  .ws-recovery-action{
+    width:100%;
+  }
+}
+@media (forced-colors: active){
+  .ws-recovery-state,
+  .ws-recovery-action{
+    forced-color-adjust:auto;
+    border-color:CanvasText;
+  }
+}

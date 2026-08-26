@@ -61,6 +61,7 @@ function runCore() {
   runStep("State cache persistence effectiveness", "node", ["tests/api/state-cache-persistence-effectiveness.test.js"]);
   runStep("Performance resource memory effectiveness", "node", ["tests/api/performance-resource-memory-effectiveness.test.js"]);
   runStep("Accessibility keyboard display effectiveness", "node", ["tests/api/accessibility-keyboard-display-effectiveness.test.js"]);
+  runStep("Error empty recovery UX effectiveness", "node", ["tests/api/error-empty-recovery-ux-effectiveness.test.js"]);
   runStep("API tests", "npm", ["run", "test:api"]);
   runStep("Multi-network product feed foundation", "node", ["tests/api/global-commerce-multi-network-product-feed-foundation.test.js"]);
   runStep("Product identity and variant matching", "node", ["tests/api/global-commerce-product-identity.test.js"]);
