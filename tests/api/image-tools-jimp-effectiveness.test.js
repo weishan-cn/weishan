@@ -84,6 +84,34 @@ async function main() {
   assert.equal(contract.validateRequest({ requestId:"image_tools_bad_resize", bytes:png, transform:{ resize:{ width:0, height:20 } } }).error, "INVALID_RESIZE");
   assert.equal(contract.validateRequest({ requestId:"image_tools_bad_crop", bytes:png, transform:{ crop:{ x:60, y:0, width:10, height:10 } } }).error, "INVALID_CROP");
   assert.equal(contract.validateRequest({ requestId:"image_tools_bad_format", bytes:png, transform:{ outputMime:"image/webp" } }).error, "UNSUPPORTED_OUTPUT_FORMAT");
+  assert.equal(contract.validateRequest({ requestId:"image_tools_unknown_op", bytes:png, transform:{ blur:5 } }).error, "UNKNOWN_IMAGE_OPERATION");
+  assert.equal(contract.validateRequest({ requestId:"image_tools_path_inject", bytes:png, transform:{}, outputPath:"/tmp/unsafe.png" }).error, "INVALID_REQUEST");
+  assert.equal(contract.validateRequest({ requestId:"image_tools_url_inject", bytes:png, transform:{}, url:"https://attacker.invalid/image" }).error, "INVALID_REQUEST");
+  assert.equal(contract.validateRequest({ requestId:"image_tools_nested_unknown", bytes:png, transform:{ resize:{ width:20, height:20, constructor:{} } } }).error, "INVALID_RESIZE");
+  const pollutedTransform = JSON.parse('{"__proto__":{"polluted":true}}');
+  assert.equal(contract.validateRequest({ requestId:"image_tools_proto_guard", bytes:png, transform:pollutedTransform }).error, "UNKNOWN_IMAGE_OPERATION");
+  assert.equal({}.polluted, undefined);
+  assert.equal(contract.validateRequest({ requestId:"image_tools_oversized", bytes:Buffer.alloc(contract.IMAGE_TOOLS_LIMITS.maxFileBytes + 1), transform:{} }).error, "IMAGE_TOO_LARGE");
+  assert.equal(contract.validateRequest({ requestId:"image_tools_svg_reject", bytes:Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"></svg>'), transform:{} }).error, "UNSUPPORTED_OR_MALFORMED_IMAGE");
+  assert.equal(contract.validateRequest({ requestId:"image_tools_gif_reject", bytes:Buffer.from("GIF89a"), transform:{} }).error, "UNSUPPORTED_OR_MALFORMED_IMAGE");
+  assert.equal(contract.validateExportRequest({ requestId:"image_tools_mime_confuse", bytes:jpeg, mime:"image/png", suggestedName:"wrong.png" }).error, "INVALID_EXPORT_IMAGE");
+  assert.equal(contract.validateExportRequest({ requestId:"image_tools_output_large", bytes:Buffer.alloc(contract.IMAGE_TOOLS_LIMITS.maxOutputBytes + 1), mime:"image/png", suggestedName:"large.png" }).error, "INVALID_EXPORT_IMAGE");
+  ["../../escape.png", "..\\escape.png", "/absolute/path.png", "C:\\Windows\\file.png", "https://host/file.png", "nul\u0000name.png"].forEach((name, index) => {
+    const parsedName = contract.validateExportRequest({ requestId:"image_tools_name_" + index, bytes:png, mime:"image/png", suggestedName:name });
+    assert.equal(parsedName.ok, true);
+    assert.equal(/[\\/\u0000-\u001f]/.test(parsedName.value.suggestedName), false);
+    assert.equal(parsedName.value.suggestedName.endsWith(".png"), true);
+  });
+
+  const truncatedPng = Buffer.alloc(24);
+  Buffer.from("89504e470d0a1a0a", "hex").copy(truncatedPng, 0);
+  Buffer.from("IHDR", "ascii").copy(truncatedPng, 12);
+  truncatedPng.writeUInt32BE(8, 16);
+  truncatedPng.writeUInt32BE(8, 20);
+  const invalidDecodedExport = await runtime.validateExport({ requestId:"image_tools_export_decode", bytes:truncatedPng, mime:"image/png", suggestedName:"bad.png" });
+  assert.equal(invalidDecodedExport.error, "INVALID_EXPORT_IMAGE");
+  const validDecodedExport = await runtime.validateExport({ requestId:"image_tools_export_valid", bytes:png, mime:"image/png", suggestedName:"good.png" });
+  assert.equal(validDecodedExport.ok, true);
 
   class WaitingWorker extends EventEmitter {
     terminate(){ this.terminated = true; return Promise.resolve(0); }
@@ -93,6 +121,37 @@ async function main() {
   assert.deepEqual(cancellable.cancel("image_tools_cancel_1"), { ok:true, cancelled:true });
   assert.equal((await pending).error, "CANCELLED");
   cancellable.dispose();
+
+  let timeoutCallback = null;
+  const timeoutRuntime = createImageToolsProcessingRuntime({
+    WorkerClass:WaitingWorker,
+    setTimeoutFn:(callback)=>{ timeoutCallback=callback; return 1; },
+    clearTimeoutFn:()=>{}
+  });
+  const timedOut = timeoutRuntime.process({ requestId:"image_tools_timeout_1", bytes:png, transform:{} });
+  await new Promise((resolve) => setImmediate(resolve));
+  timeoutCallback();
+  assert.equal((await timedOut).error, "PROCESSING_TIMEOUT");
+  timeoutRuntime.dispose();
+
+  const workers = [];
+  class CountingWorker extends EventEmitter {
+    constructor(){ super(); workers.push(this); }
+    terminate(){ this.terminated = true; return Promise.resolve(0); }
+  }
+  const boundedRuntime = createImageToolsProcessingRuntime({ WorkerClass:CountingWorker });
+  const firstRapid = boundedRuntime.process({ requestId:"image_tools_rapid_1", bytes:png, transform:{} });
+  await new Promise((resolve) => setImmediate(resolve));
+  const secondRapid = boundedRuntime.process({ requestId:"image_tools_rapid_2", bytes:png, transform:{} });
+  const thirdRapid = boundedRuntime.process({ requestId:"image_tools_rapid_3", bytes:png, transform:{} });
+  assert.equal((await firstRapid).error, "CANCELLED");
+  assert.equal((await secondRapid).error, "CANCELLED");
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(workers.length, 2);
+  assert.equal(workers.filter((worker) => !worker.terminated).length, 1);
+  assert.equal(boundedRuntime.cancel("image_tools_rapid_3").cancelled, true);
+  assert.equal((await thirdRapid).error, "CANCELLED");
+  boundedRuntime.dispose();
 
   const workspace = fs.readFileSync(path.join(ROOT, "apps/desktop/src/renderer/routes/ImageToolsWorkspace.js"), "utf8");
   const preload = fs.readFileSync(path.join(ROOT, "apps/desktop/src/preload.js"), "utf8");
@@ -121,10 +180,13 @@ async function main() {
   const fakeIpcMain = { handle:(channel,handler)=>handlers.set(channel,handler), removeHandler:(channel)=>handlers.delete(channel) };
   const exportTemp = fs.mkdtempSync(path.join(os.tmpdir(), "weishan-image-export-"));
   const exportPath = path.join(exportTemp, "chosen.png");
-  const fakeRuntime = { process:async()=>({ ok:true }), cancel:()=>({ ok:true,cancelled:true }), dispose:()=>{} };
+  const fakeRuntime = { process:async()=>({ ok:true }), validateExport:async()=>({ ok:true }), cancel:()=>({ ok:true,cancelled:true }), dispose:()=>{} };
   registerImageToolsIpcHandlers(fakeIpcMain, { runtime:fakeRuntime, showSaveDialog:async()=>({ canceled:false, filePath:exportPath }) });
-  const trustedEvent = { sender:{ getURL:()=>"file:///app/index.html" }, senderFrame:{ url:"file:///app/index.html" } };
-  const remoteFrameEvent = { sender:{ getURL:()=>"file:///app/index.html" }, senderFrame:{ url:"https://attacker.invalid/" } };
+  const rendererUrl = require("node:url").pathToFileURL(path.join(ROOT, "apps/desktop/src/index.html")).href;
+  const mainFrame = { url:rendererUrl };
+  const sender = { getURL:()=>rendererUrl, mainFrame };
+  const trustedEvent = { sender, senderFrame:mainFrame };
+  const remoteFrameEvent = { sender, senderFrame:{ url:"https://attacker.invalid/" } };
   assert.equal(trustedFileSender(trustedEvent), true);
   assert.equal(trustedFileSender(remoteFrameEvent), false);
   assert.equal((await handlers.get(IMAGE_TOOLS_CHANNELS.process)(remoteFrameEvent, {})).error, "INVALID_CALLER");

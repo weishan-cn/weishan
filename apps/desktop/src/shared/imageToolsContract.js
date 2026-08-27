@@ -17,10 +17,26 @@ const IMAGE_TOOLS_CHANNELS = Object.freeze({
   export:"image-tools:export"
 });
 
+const REQUEST_KEYS = Object.freeze(["requestId", "bytes", "transform"]);
+const TRANSFORM_KEYS = Object.freeze(["outputMime", "resize", "crop", "rotation", "flipHorizontal", "flipVertical", "jpegQuality"]);
+const RESIZE_KEYS = Object.freeze(["width", "height"]);
+const CROP_KEYS = Object.freeze(["x", "y", "width", "height"]);
+const EXPORT_KEYS = Object.freeze(["requestId", "bytes", "mime", "suggestedName"]);
+
 function plainObject(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const proto = Object.getPrototypeOf(value);
   return proto === Object.prototype || proto === null;
+}
+
+function hasOnlyKeys(value, allowedKeys) {
+  if (!plainObject(value)) return false;
+  const allowed = new Set(allowedKeys);
+  return Object.keys(value).every((key) => allowed.has(key));
+}
+
+function validRequestId(value) {
+  return typeof value === "string" && /^[A-Za-z0-9_-]{8,80}$/.test(value);
 }
 
 function safeBytes(value) {
@@ -74,9 +90,8 @@ function validateDimensions(width, height) {
 }
 
 function validateRequest(payload) {
-  if (!plainObject(payload)) return { ok:false, error:"INVALID_REQUEST" };
-  const requestId = String(payload.requestId || "");
-  if (!/^[A-Za-z0-9_-]{8,80}$/.test(requestId)) return { ok:false, error:"INVALID_REQUEST" };
+  if (!hasOnlyKeys(payload, REQUEST_KEYS) || !validRequestId(payload.requestId)) return { ok:false, error:"INVALID_REQUEST" };
+  const requestId = payload.requestId;
   const bytes = safeBytes(payload.bytes);
   if (!bytes || bytes.length === 0) return { ok:false, error:"EMPTY_IMAGE" };
   if (bytes.length > IMAGE_TOOLS_LIMITS.maxFileBytes) return { ok:false, error:"IMAGE_TOO_LARGE" };
@@ -85,12 +100,13 @@ function validateRequest(payload) {
   if (!INPUT_MIME_TYPES.includes(source.mime)) return { ok:false, error:"UNSUPPORTED_FORMAT" };
   if (!validateDimensions(source.width, source.height)) return { ok:false, error:"IMAGE_DIMENSIONS_TOO_LARGE" };
 
-  const raw = plainObject(payload.transform) ? payload.transform : {};
+  const raw = payload.transform == null ? {} : payload.transform;
+  if (!hasOnlyKeys(raw, TRANSFORM_KEYS)) return { ok:false, error:"UNKNOWN_IMAGE_OPERATION" };
   const outputMime = String(raw.outputMime || source.mime);
   if (!OUTPUT_MIME_TYPES.includes(outputMime)) return { ok:false, error:"UNSUPPORTED_OUTPUT_FORMAT" };
   let resize = null;
   if (raw.resize != null) {
-    if (!plainObject(raw.resize)) return { ok:false, error:"INVALID_RESIZE" };
+    if (!hasOnlyKeys(raw.resize, RESIZE_KEYS)) return { ok:false, error:"INVALID_RESIZE" };
     const width = safeInteger(raw.resize.width, 1, IMAGE_TOOLS_LIMITS.maxDimension);
     const height = safeInteger(raw.resize.height, 1, IMAGE_TOOLS_LIMITS.maxDimension);
     if (!width || !height || !validateDimensions(width, height)) return { ok:false, error:"INVALID_RESIZE" };
@@ -100,7 +116,7 @@ function validateRequest(payload) {
   const resizedHeight = resize ? resize.height : source.height;
   let crop = null;
   if (raw.crop != null) {
-    if (!plainObject(raw.crop)) return { ok:false, error:"INVALID_CROP" };
+    if (!hasOnlyKeys(raw.crop, CROP_KEYS)) return { ok:false, error:"INVALID_CROP" };
     const x = safeInteger(raw.crop.x, 0, resizedWidth - 1);
     const y = safeInteger(raw.crop.y, 0, resizedHeight - 1);
     const width = safeInteger(raw.crop.width, 1, resizedWidth);
@@ -126,9 +142,8 @@ function validateRequest(payload) {
 }
 
 function validateExportRequest(payload) {
-  if (!plainObject(payload)) return { ok:false, error:"INVALID_EXPORT_REQUEST" };
-  const requestId = String(payload.requestId || "");
-  if (!/^[A-Za-z0-9_-]{8,80}$/.test(requestId)) return { ok:false, error:"INVALID_EXPORT_REQUEST" };
+  if (!hasOnlyKeys(payload, EXPORT_KEYS) || !validRequestId(payload.requestId)) return { ok:false, error:"INVALID_EXPORT_REQUEST" };
+  const requestId = payload.requestId;
   const bytes = safeBytes(payload.bytes);
   if (!bytes || bytes.length === 0 || bytes.length > IMAGE_TOOLS_LIMITS.maxOutputBytes) return { ok:false, error:"INVALID_EXPORT_IMAGE" };
   const image = probeImage(bytes);
@@ -138,6 +153,11 @@ function validateExportRequest(payload) {
   const baseName = rawName.replace(/[^A-Za-z0-9._ -]+/g, "_").trim().slice(0, 80) || "image-weishan";
   const extension = mime === "image/jpeg" ? "jpg" : "png";
   return { ok:true, value:{ requestId, bytes, mime, suggestedName:baseName + "." + extension, extension } };
+}
+
+function validateCancelRequest(payload) {
+  if (!hasOnlyKeys(payload, ["requestId"]) || !validRequestId(payload.requestId)) return { ok:false, error:"INVALID_CANCEL_REQUEST" };
+  return { ok:true, value:{ requestId:payload.requestId } };
 }
 
 function publicPolicy() {
@@ -165,5 +185,6 @@ module.exports = {
   validateDimensions,
   validateRequest,
   validateExportRequest,
+  validateCancelRequest,
   publicPolicy
 };

@@ -2,7 +2,7 @@
 
 const { parentPort, workerData } = require("worker_threads");
 const { Jimp } = require("jimp");
-const { IMAGE_TOOLS_LIMITS, validateRequest, validateDimensions } = require("../shared/imageToolsContract");
+const { IMAGE_TOOLS_LIMITS, validateRequest, validateExportRequest, validateDimensions } = require("../shared/imageToolsContract");
 
 function safeFailure(code) {
   return { ok:false, error:String(code || "PROCESSING_FAILED") };
@@ -40,7 +40,29 @@ async function processImage(payload) {
   }
 }
 
-processImage(workerData).then((result) => {
+async function validateExportImage(payload) {
+  const parsed = validateExportRequest(payload);
+  if (!parsed.ok) return safeFailure(parsed.error);
+  try {
+    const image = await Jimp.read(parsed.value.bytes);
+    if (!validateDimensions(image.bitmap.width, image.bitmap.height)) return safeFailure("INVALID_EXPORT_IMAGE");
+    return {
+      ok:true,
+      requestId:parsed.value.requestId,
+      mime:parsed.value.mime,
+      width:image.bitmap.width,
+      height:image.bitmap.height
+    };
+  } catch (_) {
+    return safeFailure("INVALID_EXPORT_IMAGE");
+  }
+}
+
+const task = workerData && workerData.mode === "validate-export"
+  ? validateExportImage(workerData.payload)
+  : processImage(workerData && workerData.payload ? workerData.payload : workerData);
+
+task.then((result) => {
   if (result && result.ok && result.bytes) parentPort.postMessage(result, [result.bytes.buffer]);
   else parentPort.postMessage(result);
 }).catch(() => parentPort.postMessage(safeFailure("PROCESSING_FAILED")));
