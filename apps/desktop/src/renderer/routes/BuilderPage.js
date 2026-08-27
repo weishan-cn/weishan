@@ -464,7 +464,7 @@
   function mount(host){
     const dispatchPayload = pendingDispatch();
     const prefill = dispatchPayload && dispatchPayload.prefill || {};
-    host.innerHTML=`<section class="ws-page">${dispatchNoticeHtml(dispatchPayload)}<div class="ws-card"><h2>${t("builder")}</h2><p class="ws-muted">${t("softwareDesc")}</p><label>${esc(label("软件类型", "Software type"))}</label><select id="softwareType" class="ws-select"><option>Web 应用</option><option>桌面工具</option><option>自动化脚本</option><option>文档模板</option><option>暂不确定</option></select><textarea id="softwareGoal" class="ws-textarea" placeholder="${t("softwarePlaceholder")}">${esc(prefill.draftRequirement || prefill.taskDescription || "")}</textarea><div class="ws-row"><button id="createPlan" class="ws-btn">${esc(label("生成软件方案", "Generate software plan"))}</button><button id="reportBug" class="ws-btn gray">${t("reportBug")}</button></div></div><div id="softwareResult"></div><div class="card-list" id="softwarePlans">${renderPlans()}</div></section>`;
+    host.innerHTML=`<section class="ws-page">${dispatchNoticeHtml(dispatchPayload)}<div class="ws-card"><h2>${t("builder")}</h2><p class="ws-muted">${t("softwareDesc")}</p><label>${esc(label("软件类型", "Software type"))}</label><select id="softwareType" class="ws-select"><option>Web 应用</option><option>桌面工具</option><option>自动化脚本</option><option>文档模板</option><option>暂不确定</option></select><textarea id="softwareGoal" class="ws-textarea" placeholder="${t("softwarePlaceholder")}">${esc(prefill.draftRequirement || prefill.taskDescription || "")}</textarea><div class="ws-row"><button id="createPlan" class="ws-btn">${esc(label("生成软件方案", "Generate software plan"))}</button><button id="reportBug" class="ws-btn gray">${t("reportBug")}</button></div></div><div id="softwareResult" role="status" aria-live="polite"></div><div class="card-list" id="softwarePlans">${renderPlans()}</div></section>`;
     const builderDispatchConfirm = document.getElementById("builderDispatchConfirm");
     if (builderDispatchConfirm && dispatchPayload) builderDispatchConfirm.addEventListener("click", () => {
       const result = executeDispatchSoftwareFactory(dispatchPayload);
@@ -480,7 +480,7 @@
     });
     document.getElementById("reportBug").addEventListener("click",()=>{
       window.SoftwareApi.reportBug({ description:document.getElementById("softwareGoal").value });
-      alert(t("bugDraftSaved"));
+      updateResult("saved", t("bugDraftSaved"));
     });
   }
   window.BuilderPage = { mount };

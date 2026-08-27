@@ -135,6 +135,7 @@ function runE2e() {
     runStep("E2E Smart Mail authorization and AI gating", "npx", ["playwright", "test", "tests/e2e/smart-mail-auth-ai-gating.spec.js", "--workers=1"]);
     runStep("E2E Plugin marketplace discovery", "npx", ["playwright", "test", "tests/e2e/plugin-marketplace-discovery.spec.js", "--workers=1"]);
     runStep("E2E local Image Tools", "npx", ["playwright", "test", "tests/e2e/image-tools.spec.js", "--workers=1"]);
+    runStep("E2E global UI interaction liveness", "npx", ["playwright", "test", "tests/e2e/ui-interaction-liveness.spec.js", "--workers=1"]);
   } finally {
     cleanupPlaywrightArtifacts();
   }
