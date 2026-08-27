@@ -50,6 +50,14 @@ function main() {
   assert.equal(video.connectionState, "DISABLED");
   assert.equal(video.authRequirement, "UNKNOWN");
   assert.equal(video.costClass, "UNKNOWN");
+  assert.equal(registry.DEFAULT_MARKET_POLICY.freeOnly, true);
+  assert.equal(registry.DEFAULT_MARKET_POLICY.openSourceOnly, true);
+  assert.equal(registry.DEFAULT_MARKET_POLICY.reviewedOnly, true);
+  assert.equal(registry.DEFAULT_MARKET_POLICY.actuallyUsableOnly, true);
+  assert.equal(registry.DEFAULT_MARKET_POLICY.maxRecommended, 2);
+  assert.equal(registry.DEFAULT_MARKET_POLICY.publicRating, false);
+  assert.equal(registry.licenseFor(video).spdx, "MIT");
+  assert.equal(registry.licenseFor(video).openSource, true);
   assert.deepEqual(Array.from(video.operationClasses), ["READ"]);
   assert.equal(video.entryPoint.routeId, "plugin.video");
   assert.equal(video.enabled, false);
@@ -96,7 +104,10 @@ function main() {
   assert.equal(registry.workspaceForRoute("plugin.video"), "VideoPluginWorkspace");
   assert.equal(registry.pageForRoute("plugin.video"), "");
   assert.equal(registry.privateQualitySignal(video).eligible, false);
+  assert.equal(registry.privateQualitySignal(video).defaultMarketEligible, false);
   assert.equal(registry.marketplaceModel().entries.length, 1);
+  assert.equal(registry.marketplaceModel().entries[0].defaultMarketEligible, false);
+  assert.equal(registry.marketplaceModel().defaultMarket.length, 0);
   assert.deepEqual(Array.from(registry.marketplaceModel().categories), ["ai", "audio", "image", "video"]);
   assert.equal(registry.marketplaceModel().recommended.length, 0);
 

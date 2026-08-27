@@ -10,6 +10,14 @@
   const RESERVED_NAMESPACES = ["openai.", "weishan."];
   const SENSITIVE_METADATA_PATTERN = /(secret|token|password|authorization|cookie|credential|api[_-]?key|client[_-]?secret)/i;
   const PUBLIC_RANKING_METADATA_PATTERN = /(^|[_-])(score|rating|stars|rank|ranking|downloads|installs|popularity|recommended|recommendation|quality)([_-]|$)/i;
+  const DEFAULT_MARKET_POLICY = {
+    freeOnly:true,
+    openSourceOnly:true,
+    reviewedOnly:true,
+    actuallyUsableOnly:true,
+    maxRecommended:2,
+    publicRating:false
+  };
   const WORKSPACE_BY_ROUTE = { "plugin.video":"VideoPluginWorkspace" };
   const declaredPlugins = [
     {
@@ -29,6 +37,19 @@
       costClass:"UNKNOWN",
       operationClasses:["READ"],
       requestedPermissions:[],
+      license:{
+        name:"MIT License",
+        spdx:"MIT",
+        licenseFile:"LICENSE",
+        sourceReference:"Weishan repository",
+        openSource:true,
+        commercialUseAllowed:true,
+        modificationAllowed:true,
+        redistributionAllowed:true,
+        noticeRequired:true,
+        sourceDisclosureObligation:false,
+        reviewed:true
+      },
       presentation:{
         tagline:"用一句话生成和编辑视频",
         userStatus:"coming_soon",
@@ -77,6 +98,22 @@
       categories:Array.isArray(presentation.categories) ? presentation.categories.map(text).filter(Boolean) : []
     };
   }
+  function licenseFor(plugin){
+    const license = plugin && plugin.license && typeof plugin.license === "object" && !Array.isArray(plugin.license) ? plugin.license : {};
+    return {
+      name:text(license.name),
+      spdx:text(license.spdx),
+      licenseFile:text(license.licenseFile),
+      sourceReference:text(license.sourceReference),
+      openSource:license.openSource === true,
+      commercialUseAllowed:license.commercialUseAllowed === true,
+      modificationAllowed:license.modificationAllowed === true,
+      redistributionAllowed:license.redistributionAllowed === true,
+      noticeRequired:license.noticeRequired === true,
+      sourceDisclosureObligation:license.sourceDisclosureObligation === true,
+      reviewed:license.reviewed === true
+    };
+  }
   function hasPublicRankingMetadata(value){
     if (Array.isArray(value)) return value.some(hasPublicRankingMetadata);
     if (!isPlainObject(value)) return false;
@@ -100,6 +137,7 @@
     const costClass = text(plugin.costClass || "UNKNOWN");
     const operationClasses = plugin.operationClasses === undefined ? ["READ"] : plugin.operationClasses;
     const requestedPermissions = plugin.requestedPermissions === undefined ? Object.keys(permissions).filter((name) => permissions[name] === true) : plugin.requestedPermissions;
+    const license = licenseFor(plugin);
     if (hasUnsafeDescriptor(plugin) || hasUnsafeDescriptor(permissions) || hasUnsafeDescriptor(entryPoint) || hasSensitiveMetadata(plugin)) {
       return { valid:false, reason:"unsafe_plugin_metadata", plugin:{} };
     }
@@ -127,6 +165,7 @@
       validEnum(costClass, COST_CLASSES) &&
       arrayOfEnums(operationClasses, OPERATION_CLASSES) &&
       Array.isArray(requestedPermissions) && requestedPermissions.every((name) => ALLOWED_PERMISSIONS.includes(text(name))) &&
+      (plugin.license === undefined || (license.name && license.spdx && license.licenseFile && license.sourceReference)) &&
       !(plugin.grantedPermissions && plugin.grantedPermissions.length);
     if (!valid) return { valid:false, reason:"invalid_plugin_declaration", plugin:clone(plugin) };
     const normalized = clone(plugin);
@@ -138,6 +177,7 @@
     normalized.operationClasses = operationClasses.map(text);
     normalized.requestedPermissions = requestedPermissions.map(text);
     normalized.grantedPermissions = [];
+    normalized.license = license;
     normalized.ready = normalized.enabled === true && normalized.status === "available" && normalized.connectionState === "READY";
     return { valid:true, reason:"valid", plugin:normalized };
   }
@@ -177,21 +217,31 @@
   function privateQualitySignal(plugin, context){
     const p = isPlainObject(plugin) ? plugin : {};
     const display = presentationFor(p);
+    const license = licenseFor(p);
     const ready = p.ready === true || (p.enabled === true && p.status === "available" && p.connectionState === "READY");
     const trusted = ["OPENAI_OFFICIAL", "WEISHAN_OFFICIAL", "VERIFIED_THIRD_PARTY"].includes(text(p.trustClass));
     const readSafe = Array.isArray(p.operationClasses) && p.operationClasses.includes("READ") && !p.operationClasses.some((op) => ["DESTRUCTIVE", "TRANSACTIONAL", "PRODUCTION", "LEGAL_ACCEPTANCE", "KYC", "PAYMENT"].includes(text(op)));
     const permissionLight = Array.isArray(p.requestedPermissions) ? p.requestedPermissions.length <= 1 : true;
+    const free = text(p.costClass) === "FREE";
+    const noAccount = ["NONE", ""].includes(text(p.authRequirement));
+    const openSourceReviewed = license.openSource && license.reviewed && license.commercialUseAllowed && license.modificationAllowed && license.redistributionAllowed;
     const discoverable = !["DEPRECATED", "FAILED", "DISABLED"].includes(text(p.connectionState)) || display.userStatus === "coming_soon";
-    const eligible = ready && trusted && readSafe && permissionLight && !hasSensitiveMetadata(p);
+    const defaultMarketEligible = ready && trusted && readSafe && permissionLight && free && noAccount && openSourceReviewed && !hasSensitiveMetadata(p);
+    const eligible = defaultMarketEligible;
     const reasons = [];
     if (trusted) reasons.push("trusted_source");
     if (readSafe) reasons.push("read_first");
     if (permissionLight) reasons.push("low_permission");
+    if (free) reasons.push("free");
+    if (openSourceReviewed) reasons.push("open_source_reviewed");
+    if (noAccount) reasons.push("no_account_required");
     if (!ready && discoverable) reasons.push("not_ready_truthfully_labeled");
     return {
       pluginId:text(p.pluginId),
       eligible,
+      defaultMarketEligible,
       discoverable,
+      privateClass:eligible ? "PRIMARY_RECOMMENDATION" : (discoverable ? "WATCH" : "BLOCKED"),
       privateTier:eligible ? "WEISHAN_RECOMMENDED" : "NOT_RECOMMENDED",
       reasonClasses:reasons,
       internalWeight:eligible ? (trusted ? 20 : 10) + (readSafe ? 8 : 0) + (permissionLight ? 4 : 0) : 0,
@@ -218,6 +268,8 @@
       tagline:display.tagline
     });
     p.marketplaceState = p.ready ? "READY" : (display.userStatus === "coming_soon" ? "COMING_SOON" : text(p.connectionState || "UNAVAILABLE"));
+    p.defaultMarketEligible = signal.defaultMarketEligible === true;
+    p.license = licenseFor(p);
     return p;
   }
   function marketplaceModel(declarations, context){
@@ -228,10 +280,13 @@
       .map((plugin) => ({ plugin, signal:privateQualitySignal(plugin, context) }))
       .filter((item) => item.signal.eligible)
       .sort((a, b) => b.signal.internalWeight - a.signal.internalWeight || text(a.plugin.name).localeCompare(text(b.plugin.name)))
+      .slice(0, DEFAULT_MARKET_POLICY.maxRecommended)
       .map((item) => item.plugin.pluginId));
     const categories = Array.from(new Set(entries.flatMap(categoryKeysFor))).sort();
     return {
+      policy:clone(DEFAULT_MARKET_POLICY),
       entries:clone(entries),
+      defaultMarket:clone(entries.filter((plugin) => plugin.defaultMarketEligible === true)),
       recommended:clone(entries.filter((plugin) => recommendedIds.has(plugin.pluginId))),
       installed:clone(entries.filter((plugin) => plugin.enabled === true || ["READY", "CONNECTED", "INSTALLED"].includes(text(plugin.connectionState)))),
       categories
@@ -246,5 +301,5 @@
     return getEnabledSidebarEntries().some((plugin) => plugin.entryPoint.routeId === safeRouteId) ? workspaceForRoute(safeRouteId) : "";
   }
 
-  window.WeishanPluginRegistry = { CAPABILITY_PATTERN, ALLOWED_PERMISSIONS, CAPABILITY_TYPES, TRUST_CLASSES, CONNECTION_STATES, AUTH_REQUIREMENTS, COST_CLASSES, OPERATION_CLASSES, RESERVED_NAMESPACES, WORKSPACE_BY_ROUTE, getDeclaredPlugins, getPluginCenterEntries, presentationFor, privateQualitySignal, marketplaceModel, validatePlugin, validatePluginWithPolicy, validateDeclarations, getEnabledSidebarEntries, workspaceForRoute, pageForRoute };
+  window.WeishanPluginRegistry = { CAPABILITY_PATTERN, ALLOWED_PERMISSIONS, CAPABILITY_TYPES, TRUST_CLASSES, CONNECTION_STATES, AUTH_REQUIREMENTS, COST_CLASSES, OPERATION_CLASSES, RESERVED_NAMESPACES, DEFAULT_MARKET_POLICY, WORKSPACE_BY_ROUTE, getDeclaredPlugins, getPluginCenterEntries, presentationFor, licenseFor, privateQualitySignal, marketplaceModel, validatePlugin, validatePluginWithPolicy, validateDeclarations, getEnabledSidebarEntries, workspaceForRoute, pageForRoute };
 })();

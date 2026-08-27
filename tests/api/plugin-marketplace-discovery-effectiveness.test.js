@@ -36,6 +36,19 @@ function candidate(extra) {
     costClass:"FREE",
     operationClasses:["READ"],
     requestedPermissions:[],
+    license:{
+      name:"MIT License",
+      spdx:"MIT",
+      licenseFile:"LICENSE",
+      sourceReference:"Test fixture",
+      openSource:true,
+      commercialUseAllowed:true,
+      modificationAllowed:true,
+      redistributionAllowed:true,
+      noticeRequired:true,
+      sourceDisclosureObligation:false,
+      reviewed:true
+    },
     presentation:{
       tagline:"Read-only product research",
       categories:["commerce"]
@@ -47,11 +60,25 @@ function candidate(extra) {
 
 function main() {
   const registry = loadRegistry();
+  Object.assign(registry.WORKSPACE_BY_ROUTE, {
+    "plugin.alpha":"VideoPluginWorkspace",
+    "plugin.beta":"VideoPluginWorkspace",
+    "plugin.zulu":"VideoPluginWorkspace",
+    "plugin.paid":"VideoPluginWorkspace",
+    "plugin.closed":"VideoPluginWorkspace",
+    "plugin.unreviewed":"VideoPluginWorkspace",
+    "plugin.unavailable":"VideoPluginWorkspace"
+  });
   const trusted = candidate();
   const model = registry.marketplaceModel([trusted], { domain:"commerce" });
+  assert.equal(model.policy.freeOnly, true);
+  assert.equal(model.policy.openSourceOnly, true);
+  assert.equal(model.policy.maxRecommended, 2);
   assert.equal(model.entries.length, 1);
+  assert.equal(model.defaultMarket.length, 1);
   assert.equal(model.recommended.length, 1);
   assert.equal(model.recommended[0].pluginId, "local-product-research");
+  assert.equal(model.recommended[0].defaultMarketEligible, true);
   assert.deepEqual(Array.from(model.categories), ["commerce"]);
   assert.equal(model.recommended[0].score, undefined);
   assert.equal(model.recommended[0].rating, undefined);
@@ -80,7 +107,35 @@ function main() {
   assert.equal(registry.privateQualitySignal(transactional).eligible, false);
   assert.equal(registry.marketplaceModel([transactional]).recommended.length, 0);
 
+  const threeEligible = registry.marketplaceModel([
+    candidate({ pluginId:"zulu-reader", name:"Zulu Reader", entryPoint:{ type:"route", routeId:"plugin.zulu" } }),
+    candidate({ pluginId:"alpha-reader", name:"Alpha Reader", entryPoint:{ type:"route", routeId:"plugin.alpha" } }),
+    candidate({ pluginId:"beta-reader", name:"Beta Reader", entryPoint:{ type:"route", routeId:"plugin.beta" } })
+  ]);
+  assert.equal(threeEligible.defaultMarket.length, 3);
+  assert.equal(threeEligible.recommended.length, 2);
+  assert.deepEqual(Array.from(threeEligible.recommended.map((plugin) => plugin.pluginId)), ["alpha-reader", "beta-reader"]);
+
+  const paid = candidate({ pluginId:"paid-reader", costClass:"PAID_PROVIDER", entryPoint:{ type:"route", routeId:"plugin.paid" } });
+  const closed = candidate({
+    pluginId:"closed-reader",
+    entryPoint:{ type:"route", routeId:"plugin.closed" },
+    license:Object.assign({}, trusted.license, { openSource:false })
+  });
+  const unreviewed = candidate({
+    pluginId:"unreviewed-reader",
+    entryPoint:{ type:"route", routeId:"plugin.unreviewed" },
+    license:Object.assign({}, trusted.license, { reviewed:false })
+  });
+  const unavailable = candidate({ pluginId:"unavailable-reader", connectionState:"UNAVAILABLE", entryPoint:{ type:"route", routeId:"plugin.unavailable" } });
+  const strictDefault = registry.marketplaceModel([paid, closed, unreviewed, unavailable]);
+  assert.equal(strictDefault.entries.length, 4);
+  assert.equal(strictDefault.defaultMarket.length, 0);
+  assert.equal(strictDefault.recommended.length, 0);
+
   assert.equal(registry.marketplaceModel().entries[0].marketplaceState, "COMING_SOON");
+  assert.equal(registry.marketplaceModel().entries[0].defaultMarketEligible, false);
+  assert.equal(registry.marketplaceModel().defaultMarket.length, 0);
   assert.equal(registry.marketplaceModel().recommended.length, 0);
 
   console.log("PLUGIN_MARKETPLACE_DISCOVERY_EFFECTIVENESS PASS");

@@ -38,12 +38,16 @@
     const display = presentation(plugin);
     const categories = Array.isArray(display.categories) ? display.categories : [];
     const reasons = Array.isArray(display.marketplaceReasons) ? display.marketplaceReasons : [];
+    const license = plugin.license || {};
+    const licenseLine = license.name && license.sourceReference ? `${license.name} · ${license.sourceReference}` : t("pluginLicenseUnknown");
+    const permissionLine = Array.isArray(plugin.requestedPermissions) && plugin.requestedPermissions.length ? plugin.requestedPermissions.join(", ") : t("pluginNoExtraPermissions");
     return `<article class="plugin-center-card" data-plugin-id="${esc(plugin.pluginId)}" data-plugin-enabled="${enabled ? "true" : "false"}">
       <div class="plugin-center-card-head"><span class="plugin-center-icon" aria-hidden="true">${esc(plugin.icon)}</span><div><h3>${esc(plugin.name)}</h3><p>${esc(display.tagline || plugin.description)}</p></div><span class="plugin-center-status ${enabled ? "is-enabled" : "is-disabled"}">${esc(t(statusKey(plugin)))}</span></div>
       ${categories.length ? `<div class="plugin-card-categories">${categories.map((category) => `<span>${esc(categoryLabel(category))}</span>`).join("")}</div>` : ""}
       ${reasons.length ? `<p class="plugin-center-fit">${esc(t("pluginWhyShown"))}</p>` : ""}
       <p class="plugin-center-note">${esc(display.runtimeNotice || t("pluginNotEnabledNote"))}</p>
-      ${enabled ? `<button type="button" class="ws-btn plugin-workspace-open" data-plugin-route="${esc(plugin.entryPoint.routeId)}">${esc(t("openPluginWorkspace"))}</button>` : `<details class="plugin-center-details" data-plugin-details><summary>${esc(t("pluginViewDetails"))}</summary><p>${esc(t("pluginComingSoonDetails"))}</p></details>`}
+      <details class="plugin-center-details" data-plugin-details><summary>${esc(t("pluginViewDetails"))}</summary><p>${esc(t("pluginComingSoonDetails"))}</p><dl><div><dt>${esc(t("pluginDetailLicense"))}</dt><dd>${esc(licenseLine)}</dd></div><div><dt>${esc(t("pluginDetailPermissions"))}</dt><dd>${esc(permissionLine)}</dd></div><div><dt>${esc(t("pluginDetailAvailability"))}</dt><dd>${esc(t(statusKey(plugin)))}</dd></div></dl></details>
+      ${enabled ? `<button type="button" class="ws-btn plugin-workspace-open" data-plugin-route="${esc(plugin.entryPoint.routeId)}">${esc(t("openPluginWorkspace"))}</button>` : ""}
     </article>`;
   }
   function listSection(titleKey, plugins, emptyKey, attrs){
@@ -61,7 +65,7 @@
   function mount(host){
     const model = marketplace();
     const plugins = model.entries || entries();
-    host.innerHTML = `<section class="ws-page plugin-center-page"><header class="ws-card plugin-center-hero"><h2>${esc(t("pluginCenter"))}</h2><p class="ws-muted">${esc(t("pluginCenterDescription"))}</p></header>${discovery(model)}${listSection("recommendedPlugins", model.recommended || [], "pluginRecommendedEmpty", "data-plugin-section=\"recommended\"")}${listSection("pluginAvailablePlugins", plugins, "pluginCenterEmpty", "data-plugin-section=\"available\"")}${listSection("installedPlugins", model.installed || [], "pluginInstalledEmpty", "data-plugin-section=\"installed\"")}</section>`;
+    host.innerHTML = `<section class="ws-page plugin-center-page"><header class="ws-card plugin-center-hero"><h2>${esc(t("pluginCenter"))}</h2><p class="ws-muted">${esc(t("pluginCenterDescription"))}</p></header>${discovery(model)}${listSection("recommendedPlugins", model.recommended || [], "pluginRecommendedEmpty", "data-plugin-section=\"recommended\"")}${listSection("pluginAllPlugins", plugins, "pluginCenterEmpty", "data-plugin-section=\"available\"")}${listSection("installedPlugins", model.installed || [], "pluginInstalledEmpty", "data-plugin-section=\"installed\"")}</section>`;
     function applyFilter(){
       const query = (host.querySelector("#pluginSearch").value || "").trim().toLowerCase();
       const cards = Array.from(host.querySelectorAll(".plugin-center-card"));
