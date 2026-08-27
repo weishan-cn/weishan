@@ -9,10 +9,12 @@
     "build:mac": "electron-builder --mac && node ../../scripts/sign-mac-app.js",
     "build:win": "electron-builder --win"
   },
-  "dependencies": {},
+  "dependencies": {
+    "jimp": "1.6.1"
+  },
   "devDependencies": {
-    "electron-builder": "^25.1.8",
-    "electron": "^34.0.0"
+    "electron": "^34.0.0",
+    "electron-builder": "^25.1.8"
   },
   "build": {
     "appId": "ai.weishan.desktop",

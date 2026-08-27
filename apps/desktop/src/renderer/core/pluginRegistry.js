@@ -18,8 +18,53 @@
     maxRecommended:2,
     publicRating:false
   };
-  const WORKSPACE_BY_ROUTE = { "plugin.video":"VideoPluginWorkspace" };
+  const WORKSPACE_BY_ROUTE = { "plugin.image-tools":"ImageToolsWorkspace", "plugin.video":"VideoPluginWorkspace" };
   const declaredPlugins = [
+    {
+      pluginId:"image-tools",
+      name:"Image Tools",
+      description:"Local image resize, crop, rotate, flip, preview, and export.",
+      icon:"▧",
+      version:"1.0.0",
+      enabled:true,
+      status:"available",
+      capabilities:["image.edit-local"],
+      capabilityType:"UTILITY_PLUGIN",
+      trustClass:"WEISHAN_OFFICIAL",
+      availability:"READY",
+      connectionState:"READY",
+      authRequirement:"NONE",
+      costClass:"FREE",
+      operationClasses:["READ", "WRITE_LOCAL"],
+      requestedPermissions:["filesystem"],
+      license:{
+        name:"MIT License",
+        spdx:"MIT",
+        licenseFile:"src/THIRD_PARTY_NOTICES.md",
+        sourceReference:"github.com/jimp-dev/jimp",
+        openSource:true,
+        commercialUseAllowed:true,
+        modificationAllowed:true,
+        redistributionAllowed:true,
+        noticeRequired:true,
+        sourceDisclosureObligation:false,
+        reviewed:true
+      },
+      presentation:{
+        nameKey:"imageToolsName",
+        taglineKey:"imageToolsMarketplaceTagline",
+        detailsKey:"imageToolsMarketplaceDetails",
+        tagline:"Local image editing with no account required.",
+        userStatus:"ready",
+        runtimeNotice:"Local processing · no account · no network required",
+        runtimeNoticeKey:"imageToolsMarketplaceNotice",
+        simplePromptPlaceholder:"",
+        supportedMaterialTypes:["image"],
+        categories:["image", "utility"]
+      },
+      entryPoint:{ type:"route", routeId:"plugin.image-tools" },
+      permissions:{ network:false, filesystem:true, camera:false, microphone:false, clipboard:false, externalUrl:false }
+    },
     {
       pluginId:"video-generation",
       name:"视频制作",
@@ -91,8 +136,12 @@
     const presentation = plugin && plugin.presentation && typeof plugin.presentation === "object" && !Array.isArray(plugin.presentation) ? plugin.presentation : {};
     return {
       tagline:text(presentation.tagline),
+      nameKey:text(presentation.nameKey),
+      taglineKey:text(presentation.taglineKey),
+      detailsKey:text(presentation.detailsKey),
       userStatus:text(presentation.userStatus),
       runtimeNotice:text(presentation.runtimeNotice),
+      runtimeNoticeKey:text(presentation.runtimeNoticeKey),
       simplePromptPlaceholder:text(presentation.simplePromptPlaceholder),
       supportedMaterialTypes:Array.isArray(presentation.supportedMaterialTypes) ? presentation.supportedMaterialTypes.map(text).filter(Boolean) : [],
       categories:Array.isArray(presentation.categories) ? presentation.categories.map(text).filter(Boolean) : []
@@ -265,7 +314,11 @@
       marketplaceReasons:signal.reasonClasses.filter((reason) => reason !== "not_ready_truthfully_labeled"),
       userStatus:display.userStatus,
       runtimeNotice:display.runtimeNotice,
-      tagline:display.tagline
+      runtimeNoticeKey:display.runtimeNoticeKey,
+      tagline:display.tagline,
+      taglineKey:display.taglineKey,
+      nameKey:display.nameKey,
+      detailsKey:display.detailsKey
     });
     p.marketplaceState = p.ready ? "READY" : (display.userStatus === "coming_soon" ? "COMING_SOON" : text(p.connectionState || "UNAVAILABLE"));
     p.defaultMarketEligible = signal.defaultMarketEligible === true;

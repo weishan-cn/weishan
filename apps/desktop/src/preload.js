@@ -1,6 +1,7 @@
 const { contextBridge, ipcRenderer } = require("electron");
 const { IPC_CHANNELS } = require("./shared/videoProviderIpcContract");
 const { validateExternalOpenUrl, externalOpenBlocked } = require("./shared/ipcTrustBoundary");
+const { IMAGE_TOOLS_CHANNELS, publicPolicy: imageToolsPublicPolicy } = require("./shared/imageToolsContract");
 const desktopPackage = require("../package.json");
 
 function isSafeExplicitExternalUrl(value) {
@@ -56,6 +57,12 @@ contextBridge.exposeInMainWorld("weishan", {
     downloadArtifacts: (input) => ipcRenderer.invoke(IPC_CHANNELS.downloadArtifacts, input || {}),
     getCapabilities: (input) => ipcRenderer.invoke(IPC_CHANNELS.getCapabilities, input || {}),
     getStatus: (input) => ipcRenderer.invoke(IPC_CHANNELS.getStatus, input || {})
+  },
+  imageTools: {
+    getPolicy: () => imageToolsPublicPolicy(),
+    process: (input) => ipcRenderer.invoke(IMAGE_TOOLS_CHANNELS.process, input || {}),
+    cancel: (requestId) => ipcRenderer.invoke(IMAGE_TOOLS_CHANNELS.cancel, { requestId:String(requestId || "") }),
+    export: (input) => ipcRenderer.invoke(IMAGE_TOOLS_CHANNELS.export, input || {})
   }
 });
 

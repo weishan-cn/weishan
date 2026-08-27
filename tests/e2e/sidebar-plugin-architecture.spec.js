@@ -54,7 +54,8 @@ test.describe.serial("sidebar plugin architecture", () => {
     await page.locator('[data-nav-group="execution"] .nav-item[data-route="plugins"]').click();
     await expect(page.locator(".plugin-center-page")).toBeVisible();
     await expect(page.locator("#pluginSearch")).toBeVisible();
-    await expect(page.locator('[data-plugin-section="recommended"]')).toContainText("暂无可推荐插件");
+    await expect(page.locator('[data-plugin-section="recommended"] [data-plugin-id="image-tools"]')).toBeVisible();
+    await expect(page.locator('[data-plugin-section="recommended"] [data-plugin-id="video-generation"]')).toHaveCount(0);
     await expect(page.locator('[data-plugin-category="video"]')).toBeVisible();
     const videoCard = page.locator('[data-plugin-id="video-generation"]');
     await expect(videoCard).toContainText("视频制作");
@@ -72,6 +73,18 @@ test.describe.serial("sidebar plugin architecture", () => {
     await page.evaluate(() => window.WeishanRouter.setRoute("plugin.video"));
     await expect(page.locator("#videoPluginWorkspace")).toHaveCount(0);
     await expect(page.locator(".home-v205-page")).toBeVisible();
+  });
+
+  test("ready Image Tools opens through the guarded plugin route", async () => {
+    await gotoRoute(page, "plugins");
+    const imageCard = page.locator('[data-plugin-section="available"] [data-plugin-id="image-tools"]');
+    await expect(imageCard).toContainText("图片工具");
+    await expect(imageCard).toContainText("本地完成常用图片处理");
+    await expect(imageCard).toHaveAttribute("data-plugin-enabled", "true");
+    await imageCard.locator("[data-plugin-route]").click();
+    await expect(page.locator("#imageToolsWorkspace")).toBeVisible();
+    await expect(page.locator("[data-image-tools-choose]")).toBeVisible();
+    await expect(page.locator('.nav-item[data-route="plugin.image-tools"]')).toHaveCount(0);
   });
 
   test("enabled plugin workspace route remains registry guarded without a sidebar shortcut", async () => {

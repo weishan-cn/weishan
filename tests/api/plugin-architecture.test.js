@@ -42,7 +42,19 @@ function main() {
   const registry = windowRef.WeishanPluginRegistry;
   const capabilityGate = windowRef.WeishanPluginCapabilityGate;
   const permissionGate = windowRef.WeishanPluginPermissionGate;
-  const video = registry.getDeclaredPlugins()[0];
+  const declarations = registry.getDeclaredPlugins();
+  const video = declarations.find((plugin) => plugin.pluginId === "video-generation");
+  const imageTools = declarations.find((plugin) => plugin.pluginId === "image-tools");
+
+  assert.ok(imageTools);
+  assert.equal(imageTools.name, "Image Tools");
+  assert.equal(imageTools.enabled, true);
+  assert.equal(imageTools.connectionState, "READY");
+  assert.equal(imageTools.authRequirement, "NONE");
+  assert.equal(imageTools.costClass, "FREE");
+  assert.equal(imageTools.permissions.network, false);
+  assert.equal(imageTools.permissions.filesystem, true);
+  assert.equal(imageTools.entryPoint.routeId, "plugin.image-tools");
 
   assert.equal(video.pluginId, "video-generation");
   assert.equal(video.capabilityType, "WORKFLOW_PLUGIN");
@@ -61,10 +73,10 @@ function main() {
   assert.deepEqual(Array.from(video.operationClasses), ["READ"]);
   assert.equal(video.entryPoint.routeId, "plugin.video");
   assert.equal(video.enabled, false);
-  assert.equal(registry.getPluginCenterEntries().length, 1);
-  assert.equal(registry.getPluginCenterEntries()[0].name, "视频制作");
-  assert.equal(registry.getPluginCenterEntries()[0].trustClass, "WEISHAN_OFFICIAL");
-  assert.equal(registry.getPluginCenterEntries()[0].ready, false);
+  assert.equal(registry.getPluginCenterEntries().length, 2);
+  assert.equal(registry.getPluginCenterEntries().find((plugin) => plugin.pluginId === "video-generation").name, "视频制作");
+  assert.equal(registry.getPluginCenterEntries().find((plugin) => plugin.pluginId === "video-generation").trustClass, "WEISHAN_OFFICIAL");
+  assert.equal(registry.getPluginCenterEntries().find((plugin) => plugin.pluginId === "video-generation").ready, false);
   const presentation = registry.presentationFor(video);
   assert.equal(presentation.tagline, "用一句话生成和编辑视频");
   assert.equal(presentation.userStatus, "coming_soon");
@@ -74,7 +86,8 @@ function main() {
   assert.deepEqual(Array.from(presentation.categories), ["video", "image", "audio", "ai"]);
   assert.equal(presentation.tagline.includes("video.generate"), false);
   assert.deepEqual(Array.from(video.permissions.network === false ? [false] : []), [false]);
-  assert.equal(registry.getEnabledSidebarEntries().length, 0);
+  assert.equal(registry.getEnabledSidebarEntries().length, 1);
+  assert.equal(registry.getEnabledSidebarEntries()[0].pluginId, "image-tools");
   assert.equal(windowRef.WeishanModules.get("plugins").groupId, "execution");
   assert.equal(windowRef.WeishanModules.getGroup("plugins"), null);
   assert.equal(registry.validatePlugin(enabledVideoPlugin()).valid, true);
@@ -102,14 +115,18 @@ function main() {
   assert.equal(registry.validateDeclarations([enabledVideoPlugin(), enabledVideoPlugin()])[1].reason, "duplicate_plugin_id_or_route");
   assert.equal(registry.getEnabledSidebarEntries([enabledVideoPlugin()]).length, 1);
   assert.equal(registry.workspaceForRoute("plugin.video"), "VideoPluginWorkspace");
+  assert.equal(registry.workspaceForRoute("plugin.image-tools"), "ImageToolsWorkspace");
   assert.equal(registry.pageForRoute("plugin.video"), "");
+  assert.equal(registry.pageForRoute("plugin.image-tools"), "ImageToolsWorkspace");
   assert.equal(registry.privateQualitySignal(video).eligible, false);
   assert.equal(registry.privateQualitySignal(video).defaultMarketEligible, false);
-  assert.equal(registry.marketplaceModel().entries.length, 1);
-  assert.equal(registry.marketplaceModel().entries[0].defaultMarketEligible, false);
-  assert.equal(registry.marketplaceModel().defaultMarket.length, 0);
+  assert.equal(registry.marketplaceModel().entries.length, 2);
+  assert.equal(registry.marketplaceModel().entries.find((plugin) => plugin.pluginId === "video-generation").defaultMarketEligible, false);
+  assert.equal(registry.marketplaceModel().defaultMarket.length, 1);
+  assert.equal(registry.marketplaceModel().defaultMarket[0].pluginId, "image-tools");
   assert.deepEqual(Array.from(registry.marketplaceModel().categories), ["ai", "audio", "image", "video"]);
-  assert.equal(registry.marketplaceModel().recommended.length, 0);
+  assert.equal(registry.marketplaceModel().recommended.length, 1);
+  assert.equal(registry.marketplaceModel().recommended[0].pluginId, "image-tools");
 
   assertDecision(capabilityGate.evaluate(video, "video.generate"), { allowed:false, reason:"plugin_disabled" });
   assertDecision(capabilityGate.evaluate(enabledVideoPlugin(), "image.generate"), { allowed:false, reason:"capability_not_declared" });

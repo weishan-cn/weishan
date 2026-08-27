@@ -133,10 +133,14 @@ function main() {
   assert.equal(strictDefault.defaultMarket.length, 0);
   assert.equal(strictDefault.recommended.length, 0);
 
-  assert.equal(registry.marketplaceModel().entries[0].marketplaceState, "COMING_SOON");
-  assert.equal(registry.marketplaceModel().entries[0].defaultMarketEligible, false);
-  assert.equal(registry.marketplaceModel().defaultMarket.length, 0);
-  assert.equal(registry.marketplaceModel().recommended.length, 0);
+  const builtIn = registry.marketplaceModel();
+  assert.equal(builtIn.entries.find((plugin) => plugin.pluginId === "video-generation").marketplaceState, "COMING_SOON");
+  assert.equal(builtIn.entries.find((plugin) => plugin.pluginId === "video-generation").defaultMarketEligible, false);
+  assert.equal(builtIn.defaultMarket.length, 1);
+  assert.equal(builtIn.defaultMarket[0].pluginId, "image-tools");
+  assert.equal(builtIn.recommended.length, 1);
+  assert.equal(builtIn.recommended[0].pluginId, "image-tools");
+  assert.equal(builtIn.recommended.some((plugin) => plugin.pluginId === "video-generation"), false);
 
   console.log("PLUGIN_MARKETPLACE_DISCOVERY_EFFECTIVENESS PASS");
 }

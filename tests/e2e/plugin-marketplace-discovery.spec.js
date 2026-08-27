@@ -18,8 +18,10 @@ test.describe.serial("plugin marketplace discovery", () => {
     await gotoRoute(page, "plugins");
     await expect(page.locator(".plugin-center-page")).toBeVisible();
     await expect(page.locator("#pluginSearch")).toBeVisible();
-    await expect(page.locator('[data-plugin-section="recommended"] [data-plugin-id]')).toHaveCount(0);
-    await expect(page.locator('[data-plugin-section="recommended"]')).toContainText("暂无可推荐插件");
+    await expect(page.locator('[data-plugin-section="recommended"] [data-plugin-id]')).toHaveCount(1);
+    await expect(page.locator('[data-plugin-section="recommended"] [data-plugin-id="image-tools"]')).toBeVisible();
+    await expect(page.locator('[data-plugin-section="recommended"] [data-plugin-id="video-generation"]')).toHaveCount(0);
+    await expect(page.locator('[data-plugin-section="available"] [data-plugin-id="image-tools"]')).toBeVisible();
     await expect(page.locator('[data-plugin-section="available"] [data-plugin-id="video-generation"]')).toBeVisible();
     await expect(page.locator('[data-plugin-section="available"]')).toContainText("全部插件");
     await expect(page.locator('[data-plugin-category="video"]')).toBeVisible();
@@ -40,6 +42,12 @@ test.describe.serial("plugin marketplace discovery", () => {
     await expect(details).toContainText("Weishan repository");
     await expect(details).toContainText("权限");
     await expect(details).toContainText("无需额外权限");
+
+    const imageDetails = page.locator('[data-plugin-section="available"] [data-plugin-id="image-tools"] [data-plugin-details]');
+    await imageDetails.locator("summary").click();
+    await expect(imageDetails).toContainText("Jimp");
+    await expect(imageDetails).toContainText("MIT License");
+    await expect(imageDetails).toContainText("github.com/jimp-dev/jimp");
   });
 
   test("private recommendation model cannot be forged by plugin metadata", async () => {

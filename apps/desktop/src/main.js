@@ -15,6 +15,7 @@ const { createEbaySandboxReadonlyValidator } = require("./main/ebaySandboxReadon
 const { createHotelbedsEvaluationReadonlyValidator } = require("./main/hotelbedsEvaluationReadonlyValidator");
 const { createVideoProviderGateway } = require("./main/videoProviderGateway");
 const { registerVideoProviderIpcHandlers } = require("./main/videoProviderIpc");
+const { registerImageToolsIpcHandlers } = require("./main/imageToolsIpc");
 const { openValidatedExternal } = require("./shared/ipcTrustBoundary");
 
 const APP_NAME = "weishan";
@@ -633,6 +634,9 @@ function registerIpcHandlers() {
   registerVideoProviderIpcHandlers(ipcMain, {
     gateway:createVideoProviderGateway({ enabled:false }),
     validateSender:(event) => !!(event && event.sender && typeof event.sender.getURL === "function" && event.sender.getURL().startsWith("file:"))
+  });
+  registerImageToolsIpcHandlers(ipcMain, {
+    showSaveDialog:(options) => dialog.showSaveDialog(options)
   });
 }
 

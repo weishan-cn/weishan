@@ -41,12 +41,16 @@
     const license = plugin.license || {};
     const licenseLine = license.name && license.sourceReference ? `${license.name} · ${license.sourceReference}` : t("pluginLicenseUnknown");
     const permissionLine = Array.isArray(plugin.requestedPermissions) && plugin.requestedPermissions.length ? plugin.requestedPermissions.join(", ") : t("pluginNoExtraPermissions");
+    const displayName = display.nameKey ? t(display.nameKey) : plugin.name;
+    const tagline = display.taglineKey ? t(display.taglineKey) : (display.tagline || plugin.description);
+    const runtimeNotice = display.runtimeNoticeKey ? t(display.runtimeNoticeKey) : (display.runtimeNotice || t("pluginNotEnabledNote"));
+    const details = display.detailsKey ? t(display.detailsKey) : t("pluginComingSoonDetails");
     return `<article class="plugin-center-card" data-plugin-id="${esc(plugin.pluginId)}" data-plugin-enabled="${enabled ? "true" : "false"}">
-      <div class="plugin-center-card-head"><span class="plugin-center-icon" aria-hidden="true">${esc(plugin.icon)}</span><div><h3>${esc(plugin.name)}</h3><p>${esc(display.tagline || plugin.description)}</p></div><span class="plugin-center-status ${enabled ? "is-enabled" : "is-disabled"}">${esc(t(statusKey(plugin)))}</span></div>
+      <div class="plugin-center-card-head"><span class="plugin-center-icon" aria-hidden="true">${esc(plugin.icon)}</span><div><h3>${esc(displayName)}</h3><p>${esc(tagline)}</p></div><span class="plugin-center-status ${enabled ? "is-enabled" : "is-disabled"}">${esc(t(statusKey(plugin)))}</span></div>
       ${categories.length ? `<div class="plugin-card-categories">${categories.map((category) => `<span>${esc(categoryLabel(category))}</span>`).join("")}</div>` : ""}
       ${reasons.length ? `<p class="plugin-center-fit">${esc(t("pluginWhyShown"))}</p>` : ""}
-      <p class="plugin-center-note">${esc(display.runtimeNotice || t("pluginNotEnabledNote"))}</p>
-      <details class="plugin-center-details" data-plugin-details><summary>${esc(t("pluginViewDetails"))}</summary><p>${esc(t("pluginComingSoonDetails"))}</p><dl><div><dt>${esc(t("pluginDetailLicense"))}</dt><dd>${esc(licenseLine)}</dd></div><div><dt>${esc(t("pluginDetailPermissions"))}</dt><dd>${esc(permissionLine)}</dd></div><div><dt>${esc(t("pluginDetailAvailability"))}</dt><dd>${esc(t(statusKey(plugin)))}</dd></div></dl></details>
+      <p class="plugin-center-note">${esc(runtimeNotice)}</p>
+      <details class="plugin-center-details" data-plugin-details><summary>${esc(t("pluginViewDetails"))}</summary><p>${esc(details)}</p><dl><div><dt>${esc(t("pluginDetailLicense"))}</dt><dd>${esc(licenseLine)}</dd></div><div><dt>${esc(t("pluginDetailPermissions"))}</dt><dd>${esc(permissionLine)}</dd></div><div><dt>${esc(t("pluginDetailAvailability"))}</dt><dd>${esc(t(statusKey(plugin)))}</dd></div></dl></details>
       ${enabled ? `<button type="button" class="ws-btn plugin-workspace-open" data-plugin-route="${esc(plugin.entryPoint.routeId)}">${esc(t("openPluginWorkspace"))}</button>` : ""}
     </article>`;
   }

@@ -8,6 +8,7 @@ const vm = require("node:vm");
 const ROOT = path.resolve(__dirname, "../..");
 const ipcBoundary = require(path.join(ROOT, "apps/desktop/src/shared/ipcTrustBoundary.js"));
 const videoContract = require(path.join(ROOT, "apps/desktop/src/shared/videoProviderIpcContract.js"));
+const imageToolsContract = require(path.join(ROOT, "apps/desktop/src/shared/imageToolsContract.js"));
 
 function loadPreload() {
   const exposed = {};
@@ -39,6 +40,7 @@ function loadPreload() {
       if (name === "electron") return electron;
       if (name === "./shared/videoProviderIpcContract") return videoContract;
       if (name === "./shared/ipcTrustBoundary") return ipcBoundary;
+      if (name === "./shared/imageToolsContract") return imageToolsContract;
       if (name === "../package.json") return { version:"0.0.0-test", productName:"Weishan" };
       throw new Error("unexpected preload require: " + name);
     },
@@ -127,6 +129,13 @@ async function main() {
   assert.equal(invoked.some((item) => item.channel === "weishan:open-external"), false);
   await exposed.weishan.openExternal("https://provider.example/catalog/item");
   assert.equal(invoked.pop().channel, "weishan:open-external");
+  assert.equal(exposed.weishan.imageTools.getPolicy().processingModel, "WORKER_THREAD");
+  await exposed.weishan.imageTools.process({ requestId:"image_tools_ipc_core" });
+  assert.equal(invoked.pop().channel, imageToolsContract.IMAGE_TOOLS_CHANNELS.process);
+  await exposed.weishan.imageTools.cancel("image_tools_ipc_core");
+  assert.equal(invoked.pop().channel, imageToolsContract.IMAGE_TOOLS_CHANNELS.cancel);
+  await exposed.weishan.imageTools.export({ requestId:"image_tools_export_core" });
+  assert.equal(invoked.pop().channel, imageToolsContract.IMAGE_TOOLS_CHANNELS.export);
 
   const unknownChannelNames = ["", "__proto__", "constructor", "../secret", "weishan:secure-get", "x".repeat(512), "视频:通道"];
   for (const channel of unknownChannelNames) {
@@ -182,11 +191,11 @@ async function main() {
   assert.equal(preloadSource.includes("contextBridge.exposeInMainWorld(\"weishan\", ipcRenderer"), false);
 
   const exposedMethodCount = Object.values(exposed).reduce((sum, api) => sum + flattenMethods(api).length, 0);
-  assert.equal(exposedMethodCount, 33);
+  assert.equal(exposedMethodCount, 37);
 
   const serialized = JSON.stringify({ exposed:Object.keys(exposed), blockedPreloadOpen });
   assert.equal(/Bearer |client_secret|private_key|apiKeyValue|passwordValue/i.test(serialized), false);
-  console.log("IPC_CORE_EFFECTIVENESS PASS channels=29 exposedMethods=" + exposedMethodCount + " externalAttacks=" + externalAttackCorpus.length + " validationCases=1000");
+  console.log("IPC_CORE_EFFECTIVENESS PASS channels=32 exposedMethods=" + exposedMethodCount + " externalAttacks=" + externalAttackCorpus.length + " validationCases=1000");
 }
 
 main().catch((error) => {
