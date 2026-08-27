@@ -14,6 +14,7 @@
   let replyOpenNoticeTimer = null;
   let collapsedAiCards = { summary:false, reply:false, tasks:false, translation:false };
   let aiClearVersion = 0;
+  let mailAuthExpanded = false;
 
   function esc(s){
     return String(s || "").replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]; });
@@ -1441,6 +1442,7 @@
     const filtered = messagesForTab(active, activeWorkspaceTab);
     const dispatchPayload = pendingDispatch();
     if (selectedIndex >= filtered.length) selectedIndex = 0;
+    const showMailAuthForm = mailAuthExpanded || (!!active && active.status === "failed");
 
     host.innerHTML = `
       <section class="mail-v204-page">
@@ -1453,22 +1455,26 @@
           <div class="mail-card">
             <h2>${t("mailConnectTitle")}</h2>
             <p class="mail-muted">${t("mailConnectDesc")}</p>
-            <input class="mail-input" id="mailEmail" placeholder="${t("mailEmailPlaceholder")}">
-            <input class="mail-input" id="mailPassword" type="password" placeholder="${t("mailPasswordPlaceholder")}">
-            <div class="mail-secret-options">
-              <label><input type="radio" name="mailSecretMode" value="save" checked> <span>${t("mailSaveAuthorizationCode")}</span></label>
-              <label><input type="radio" name="mailSecretMode" value="once"> <span>${t("mailUseOnce")}</span></label>
-              <p>${t("mailSecureStorageHelp")}</p>
-              <p class="mail-secure-warning is-hidden" id="mailSecureWarning">${t("mailSecureUnavailable")}</p>
-            </div>
-            <button class="mail-link" id="mailAdvancedToggle">${t("mailAdvanced")}</button>
-            <div class="mail-advanced is-collapsed" id="mailAdvanced">
-              <input class="mail-input" id="mailHost" placeholder="${t("mailHostPlaceholder")}">
-              <input class="mail-input" id="mailPort" placeholder="${t("mailPortPlaceholder")}">
-            </div>
-            <div class="mail-button-row">
-              <button class="mail-primary" id="mailConnectBtn">${t("mailConnectButton")}</button>
-              <button class="mail-gray" id="mailHealthBtn">${t("mailHealthButton")}</button>
+            <p class="mail-muted">${t("mailAuthZeroLearningHint")}</p>
+            <button class="mail-primary ${showMailAuthForm ? "is-hidden" : ""}" id="mailAuthorizeBtn" type="button">${t("mailAuthorizePrimary")}</button>
+            <div class="mail-connect-form ${showMailAuthForm ? "" : "is-collapsed"}" id="mailConnectForm" aria-hidden="${showMailAuthForm ? "false" : "true"}">
+              <input class="mail-input" id="mailEmail" placeholder="${t("mailEmailPlaceholder")}">
+              <input class="mail-input" id="mailPassword" type="password" placeholder="${t("mailPasswordPlaceholder")}">
+              <button class="mail-link" id="mailAdvancedToggle" type="button">${t("mailAdvanced")}</button>
+              <div class="mail-advanced is-collapsed" id="mailAdvanced">
+                <div class="mail-secret-options">
+                  <label><input type="radio" name="mailSecretMode" value="save" checked> <span>${t("mailSaveAuthorizationCode")}</span></label>
+                  <label><input type="radio" name="mailSecretMode" value="once"> <span>${t("mailUseOnce")}</span></label>
+                  <p>${t("mailSecureStorageHelp")}</p>
+                  <p class="mail-secure-warning is-hidden" id="mailSecureWarning">${t("mailSecureUnavailable")}</p>
+                </div>
+                <input class="mail-input" id="mailHost" placeholder="${t("mailHostPlaceholder")}">
+                <input class="mail-input" id="mailPort" placeholder="${t("mailPortPlaceholder")}">
+              </div>
+              <div class="mail-button-row">
+                <button class="mail-primary" id="mailConnectBtn" type="button">${t("mailConnectButton")}</button>
+                <button class="mail-gray" id="mailHealthBtn" type="button">${t("mailHealthButton")}</button>
+              </div>
             </div>
             <div class="mail-connect-status" id="mailStatus">${t("mailWaiting")}</div>
           </div>
@@ -1528,6 +1534,15 @@
       }
     }).catch(() => {});
 
+    const mailAuthorizeBtn = host.querySelector("#mailAuthorizeBtn");
+    if (mailAuthorizeBtn) mailAuthorizeBtn.addEventListener("click", () => {
+      mailAuthExpanded = true;
+      rerender();
+      setTimeout(() => {
+        const emailInput = host.querySelector("#mailEmail");
+        if (emailInput) emailInput.focus();
+      }, 0);
+    });
     host.querySelector("#mailAdvancedToggle").addEventListener("click", () => host.querySelector("#mailAdvanced").classList.toggle("is-collapsed"));
 
     Array.from(host.querySelectorAll("[data-workspace-tab]")).forEach((btn) => {
@@ -1559,6 +1574,7 @@
       setStatus(statusText, res.ok ? "mail-ok" : "mail-bad");
       btn.disabled = false;
       btn.textContent = t("mailConnectButton");
+      mailAuthExpanded = !res.ok;
       setTimeout(rerender, res.ok ? 450 : 900);
     });
 

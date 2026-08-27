@@ -21,7 +21,14 @@ test.describe.serial("smart mail authorization and AI gating", () => {
     await expect(page.getByText("连接邮箱后开始使用智能邮件")).toBeVisible();
     await expect(page.getByText("邮件接管")).toHaveCount(0);
     await expect(page.getByText("Mail Takeover")).toHaveCount(0);
-    await expect(page.locator("#mailConnectBtn")).toBeVisible();
+    await expect(page.locator("#mailAuthorizeBtn")).toBeVisible();
+    await expect(page.locator("#mailEmail")).toBeHidden();
+    await expect(page.locator("#mailPassword")).toBeHidden();
+    await expect(page.locator("#mailAdvanced")).toBeHidden();
+    await page.locator("#mailAuthorizeBtn").click();
+    await expect(page.locator("#mailEmail")).toBeVisible();
+    await expect(page.locator("#mailPassword")).toBeVisible();
+    await expect(page.locator("#mailAdvanced")).toBeHidden();
     await page.locator("#mailConnectBtn").focus();
     await expect(page.locator("#mailConnectBtn")).toBeFocused();
   });

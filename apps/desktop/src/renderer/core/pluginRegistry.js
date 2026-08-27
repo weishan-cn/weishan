@@ -9,6 +9,7 @@
   const OPERATION_CLASSES = ["READ", "WRITE_LOCAL", "WRITE_EXTERNAL", "DESTRUCTIVE", "TRANSACTIONAL", "PRODUCTION", "EXTERNAL_COMMUNICATION", "LEGAL_ACCEPTANCE", "KYC", "PAYMENT"];
   const RESERVED_NAMESPACES = ["openai.", "weishan."];
   const SENSITIVE_METADATA_PATTERN = /(secret|token|password|authorization|cookie|credential|api[_-]?key|client[_-]?secret)/i;
+  const PUBLIC_RANKING_METADATA_PATTERN = /(^|[_-])(score|rating|stars|rank|ranking|downloads|installs|popularity|recommended|recommendation|quality)([_-]|$)/i;
   const WORKSPACE_BY_ROUTE = { "plugin.video":"VideoPluginWorkspace" };
   const declaredPlugins = [
     {
@@ -33,7 +34,8 @@
         userStatus:"coming_soon",
         runtimeNotice:"视频生成服务尚未接入",
         simplePromptPlaceholder:"帮我做一个 15 秒的咖啡广告，电影感，适合抖音",
-        supportedMaterialTypes:["image", "video", "audio"]
+        supportedMaterialTypes:["image", "video", "audio"],
+        categories:["video", "image", "audio", "ai"]
       },
       entryPoint:{ type:"route", routeId:"plugin.video" },
       permissions:{ network:false, filesystem:false, camera:false, microphone:false, clipboard:false, externalUrl:false }
@@ -71,8 +73,14 @@
       userStatus:text(presentation.userStatus),
       runtimeNotice:text(presentation.runtimeNotice),
       simplePromptPlaceholder:text(presentation.simplePromptPlaceholder),
-      supportedMaterialTypes:Array.isArray(presentation.supportedMaterialTypes) ? presentation.supportedMaterialTypes.map(text).filter(Boolean) : []
+      supportedMaterialTypes:Array.isArray(presentation.supportedMaterialTypes) ? presentation.supportedMaterialTypes.map(text).filter(Boolean) : [],
+      categories:Array.isArray(presentation.categories) ? presentation.categories.map(text).filter(Boolean) : []
     };
+  }
+  function hasPublicRankingMetadata(value){
+    if (Array.isArray(value)) return value.some(hasPublicRankingMetadata);
+    if (!isPlainObject(value)) return false;
+    return Object.keys(value).some((key) => PUBLIC_RANKING_METADATA_PATTERN.test(key) || hasPublicRankingMetadata(value[key]));
   }
   function validatePlugin(candidate, routeIds){
     return validatePluginWithPolicy(candidate, routeIds, { trustedRegistration:false });
@@ -152,6 +160,83 @@
     const source = declarations === undefined ? declaredPlugins : declarations;
     return validateDeclarations(source, { trustedRegistration:declarations === undefined }).filter((result) => result.valid).map((result) => clone(result.plugin));
   }
+  function categoryKeysFor(plugin){
+    const display = presentationFor(plugin);
+    const values = new Set([].concat(display.categories, display.supportedMaterialTypes, Array.isArray(plugin.capabilities) ? plugin.capabilities.map((capability) => text(capability).split(".")[0]) : []));
+    const mapped = [];
+    if (values.has("video")) mapped.push("video");
+    if (values.has("image")) mapped.push("image");
+    if (values.has("audio")) mapped.push("audio");
+    if (values.has("document") || values.has("office")) mapped.push("office");
+    if (values.has("ai") || values.has("automation")) mapped.push("ai");
+    if (values.has("developer")) mapped.push("developer");
+    if (values.has("commerce") || values.has("shopping")) mapped.push("commerce");
+    if (values.has("travel")) mapped.push("travel");
+    return mapped.length ? mapped : ["utility"];
+  }
+  function privateQualitySignal(plugin, context){
+    const p = isPlainObject(plugin) ? plugin : {};
+    const display = presentationFor(p);
+    const ready = p.ready === true || (p.enabled === true && p.status === "available" && p.connectionState === "READY");
+    const trusted = ["OPENAI_OFFICIAL", "WEISHAN_OFFICIAL", "VERIFIED_THIRD_PARTY"].includes(text(p.trustClass));
+    const readSafe = Array.isArray(p.operationClasses) && p.operationClasses.includes("READ") && !p.operationClasses.some((op) => ["DESTRUCTIVE", "TRANSACTIONAL", "PRODUCTION", "LEGAL_ACCEPTANCE", "KYC", "PAYMENT"].includes(text(op)));
+    const permissionLight = Array.isArray(p.requestedPermissions) ? p.requestedPermissions.length <= 1 : true;
+    const discoverable = !["DEPRECATED", "FAILED", "DISABLED"].includes(text(p.connectionState)) || display.userStatus === "coming_soon";
+    const eligible = ready && trusted && readSafe && permissionLight && !hasSensitiveMetadata(p);
+    const reasons = [];
+    if (trusted) reasons.push("trusted_source");
+    if (readSafe) reasons.push("read_first");
+    if (permissionLight) reasons.push("low_permission");
+    if (!ready && discoverable) reasons.push("not_ready_truthfully_labeled");
+    return {
+      pluginId:text(p.pluginId),
+      eligible,
+      discoverable,
+      privateTier:eligible ? "WEISHAN_RECOMMENDED" : "NOT_RECOMMENDED",
+      reasonClasses:reasons,
+      internalWeight:eligible ? (trusted ? 20 : 10) + (readSafe ? 8 : 0) + (permissionLight ? 4 : 0) : 0,
+      contextDomain:text(context && context.domain)
+    };
+  }
+  function publicMarketplaceEntry(plugin, context){
+    const p = clone(plugin);
+    const display = presentationFor(p);
+    const signal = privateQualitySignal(p, context);
+    delete p.score;
+    delete p.rating;
+    delete p.stars;
+    delete p.rank;
+    delete p.downloads;
+    delete p.popularity;
+    delete p.weishanRecommended;
+    delete p.qualityTier;
+    p.presentation = Object.assign({}, p.presentation || {}, {
+      categories:categoryKeysFor(p),
+      marketplaceReasons:signal.reasonClasses.filter((reason) => reason !== "not_ready_truthfully_labeled"),
+      userStatus:display.userStatus,
+      runtimeNotice:display.runtimeNotice,
+      tagline:display.tagline
+    });
+    p.marketplaceState = p.ready ? "READY" : (display.userStatus === "coming_soon" ? "COMING_SOON" : text(p.connectionState || "UNAVAILABLE"));
+    return p;
+  }
+  function marketplaceModel(declarations, context){
+    const source = declarations === undefined ? declaredPlugins : declarations;
+    const validated = validateDeclarations(source, { trustedRegistration:declarations === undefined });
+    const entries = validated.filter((result) => result.valid && !hasPublicRankingMetadata(result.plugin)).map((result) => publicMarketplaceEntry(result.plugin, context));
+    const recommendedIds = new Set(entries
+      .map((plugin) => ({ plugin, signal:privateQualitySignal(plugin, context) }))
+      .filter((item) => item.signal.eligible)
+      .sort((a, b) => b.signal.internalWeight - a.signal.internalWeight || text(a.plugin.name).localeCompare(text(b.plugin.name)))
+      .map((item) => item.plugin.pluginId));
+    const categories = Array.from(new Set(entries.flatMap(categoryKeysFor))).sort();
+    return {
+      entries:clone(entries),
+      recommended:clone(entries.filter((plugin) => recommendedIds.has(plugin.pluginId))),
+      installed:clone(entries.filter((plugin) => plugin.enabled === true || ["READY", "CONNECTED", "INSTALLED"].includes(text(plugin.connectionState)))),
+      categories
+    };
+  }
   function getEnabledSidebarEntries(declarations){
     const source = declarations === undefined ? declaredPlugins : declarations;
     return validateDeclarations(source, { trustedRegistration:declarations === undefined }).filter((result) => result.valid && result.plugin.enabled === true && result.plugin.entryPoint.type === "route").map((result) => clone(result.plugin));
@@ -161,5 +246,5 @@
     return getEnabledSidebarEntries().some((plugin) => plugin.entryPoint.routeId === safeRouteId) ? workspaceForRoute(safeRouteId) : "";
   }
 
-  window.WeishanPluginRegistry = { CAPABILITY_PATTERN, ALLOWED_PERMISSIONS, CAPABILITY_TYPES, TRUST_CLASSES, CONNECTION_STATES, AUTH_REQUIREMENTS, COST_CLASSES, OPERATION_CLASSES, RESERVED_NAMESPACES, WORKSPACE_BY_ROUTE, getDeclaredPlugins, getPluginCenterEntries, presentationFor, validatePlugin, validatePluginWithPolicy, validateDeclarations, getEnabledSidebarEntries, workspaceForRoute, pageForRoute };
+  window.WeishanPluginRegistry = { CAPABILITY_PATTERN, ALLOWED_PERMISSIONS, CAPABILITY_TYPES, TRUST_CLASSES, CONNECTION_STATES, AUTH_REQUIREMENTS, COST_CLASSES, OPERATION_CLASSES, RESERVED_NAMESPACES, WORKSPACE_BY_ROUTE, getDeclaredPlugins, getPluginCenterEntries, presentationFor, privateQualitySignal, marketplaceModel, validatePlugin, validatePluginWithPolicy, validateDeclarations, getEnabledSidebarEntries, workspaceForRoute, pageForRoute };
 })();

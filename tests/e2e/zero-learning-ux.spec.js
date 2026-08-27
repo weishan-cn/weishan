@@ -34,7 +34,7 @@ test.describe.serial("zero-learning user language", () => {
     });
     expect(layout.childCount).toBe(2);
     expect(layout.gridRows.trim().split(/\s+/)).toHaveLength(2);
-    expect(layout.order).toEqual([0, 1]);
+    expect(layout.order).toEqual([1, 0]);
     expect(layout.consoleIsPrimary).toBe(true);
     await expect(page.locator(".home-v205-main textarea")).toHaveCount(1);
     await expect(page.locator("#commandInput")).toHaveAttribute("placeholder", "例如：比较 MacBook Air M4 16+512 的购买选择，或查成都到东京下周两人经济舱");

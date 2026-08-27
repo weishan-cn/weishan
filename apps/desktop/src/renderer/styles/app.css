@@ -91,6 +91,9 @@
 .mail-secret-options p{margin:0;color:#64748b;font-size:12px;line-height:1.45}
 .mail-secret-options .mail-secure-warning{color:#b91c1c;font-weight:900}
 .mail-secret-options .is-hidden{display:none}
+.mail-connect-form{display:grid;gap:10px;margin-top:12px}
+.mail-connect-form.is-collapsed{display:none}
+.mail-primary.is-hidden{display:none}
 .mail-ok{background:#ecfdf5!important;color:#047857!important;border-color:#bbf7d0!important}
 .mail-bad{background:#fef2f2!important;color:#b91c1c!important;border-color:#fecaca!important}
 .mail-pending{background:#eff6ff!important;color:#1d4ed8!important;border-color:#bfdbfe!important}
@@ -5313,7 +5316,7 @@
   font-weight: 700;
 }
 
-.plugin-discovery{display:grid;gap:14px;padding:0 2px}.plugin-discovery-sections,.plugin-discovery-categories{display:flex;flex-wrap:wrap;gap:8px}.plugin-discovery-sections span{font-size:13px;font-weight:800;color:#334155}.plugin-discovery-sections span:first-child{color:#155eef}.plugin-discovery h3,.plugin-center-list>h3{margin:0 0 9px;font-size:15px;color:#0f172a}.plugin-discovery-categories span{padding:6px 9px;border:1px solid #dbe4ef;border-radius:7px;background:#f8fafc;color:#475569;font-size:13px;font-weight:750}.plugin-center-list{display:grid;gap:10px}
+.plugin-discovery{display:grid;gap:14px;padding:0 2px}.plugin-discovery-sections,.plugin-discovery-categories,.plugin-card-categories{display:flex;flex-wrap:wrap;gap:8px}.plugin-discovery-sections span{font-size:13px;font-weight:800;color:#334155}.plugin-discovery-sections span:first-child{color:#155eef}.plugin-discovery h3,.plugin-center-list>h3{margin:0 0 9px;font-size:15px;color:#0f172a}.plugin-discovery-categories span,.plugin-discovery-categories button,.plugin-card-categories span{padding:6px 9px;border:1px solid #dbe4ef;border-radius:7px;background:#f8fafc;color:#475569;font:inherit;font-size:13px;font-weight:750}.plugin-discovery-categories button{cursor:pointer}.plugin-discovery-categories button:focus-visible,.plugin-search-input:focus{outline:2px solid rgba(21,94,239,.22);border-color:#155eef}.plugin-search-label{font-size:13px;font-weight:900;color:#334155}.plugin-search-input{width:min(520px,100%);border:1px solid #cbd5e1;border-radius:10px;padding:10px 12px;font:inherit}.plugin-center-list{display:grid;gap:10px}.plugin-center-fit{margin:0;color:#155eef;font-size:13px;font-weight:850}.plugin-center-card.is-filtered-out{display:none}.plugin-empty-state{padding:14px}
 /* v4.2.9 accessibility / keyboard / display resilience */
 .ws-skip-link{
   position:absolute;

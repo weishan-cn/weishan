@@ -63,6 +63,7 @@ function main() {
   assert.equal(presentation.runtimeNotice, "视频生成服务尚未接入");
   assert.equal(presentation.simplePromptPlaceholder, "帮我做一个 15 秒的咖啡广告，电影感，适合抖音");
   assert.deepEqual(Array.from(presentation.supportedMaterialTypes), ["image", "video", "audio"]);
+  assert.deepEqual(Array.from(presentation.categories), ["video", "image", "audio", "ai"]);
   assert.equal(presentation.tagline.includes("video.generate"), false);
   assert.deepEqual(Array.from(video.permissions.network === false ? [false] : []), [false]);
   assert.equal(registry.getEnabledSidebarEntries().length, 0);
@@ -94,6 +95,10 @@ function main() {
   assert.equal(registry.getEnabledSidebarEntries([enabledVideoPlugin()]).length, 1);
   assert.equal(registry.workspaceForRoute("plugin.video"), "VideoPluginWorkspace");
   assert.equal(registry.pageForRoute("plugin.video"), "");
+  assert.equal(registry.privateQualitySignal(video).eligible, false);
+  assert.equal(registry.marketplaceModel().entries.length, 1);
+  assert.deepEqual(Array.from(registry.marketplaceModel().categories), ["ai", "audio", "image", "video"]);
+  assert.equal(registry.marketplaceModel().recommended.length, 0);
 
   assertDecision(capabilityGate.evaluate(video, "video.generate"), { allowed:false, reason:"plugin_disabled" });
   assertDecision(capabilityGate.evaluate(enabledVideoPlugin(), "image.generate"), { allowed:false, reason:"capability_not_declared" });

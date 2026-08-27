@@ -53,6 +53,9 @@ test.describe.serial("sidebar plugin architecture", () => {
     await gotoRoute(page, "home");
     await page.locator('[data-nav-group="execution"] .nav-item[data-route="plugins"]').click();
     await expect(page.locator(".plugin-center-page")).toBeVisible();
+    await expect(page.locator("#pluginSearch")).toBeVisible();
+    await expect(page.locator('[data-plugin-section="recommended"]')).toContainText("暂无可推荐插件");
+    await expect(page.locator('[data-plugin-category="video"]')).toBeVisible();
     const videoCard = page.locator('[data-plugin-id="video-generation"]');
     await expect(videoCard).toContainText("视频制作");
     await expect(videoCard).toContainText("用一句话生成和编辑视频");
@@ -61,8 +64,11 @@ test.describe.serial("sidebar plugin architecture", () => {
     await expect(videoCard).not.toContainText("video.generate");
     await expect(videoCard).not.toContainText("plugin.video");
     await expect(videoCard).not.toContainText("版本");
+    await expect(videoCard).not.toContainText(/score|rating|rank|排名|评分|星级/i);
     await expect(videoCard).toHaveAttribute("data-plugin-enabled", "false");
     await expect(videoCard.locator("details")).not.toHaveAttribute("open", "");
+    await page.locator("#pluginSearch").fill("nothing-matches-this-plugin");
+    await expect(page.locator("[data-plugin-filter-empty]").first()).toContainText("没有找到匹配插件");
     await page.evaluate(() => window.WeishanRouter.setRoute("plugin.video"));
     await expect(page.locator("#videoPluginWorkspace")).toHaveCount(0);
     await expect(page.locator(".home-v205-page")).toBeVisible();

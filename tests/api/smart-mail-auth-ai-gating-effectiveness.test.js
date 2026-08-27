@@ -138,8 +138,14 @@ api.disconnectMailbox({ email:"user@example.test", connected:true }).then((resul
   assert.match(i18nSource, /mail:"Smart Mail"/);
   assert.match(i18nSource, /mailWorkspaceTitle:"智能邮件"/);
   assert.match(i18nSource, /mailWorkspaceTitle:"Smart Mail"/);
+  assert.match(i18nSource, /mailAuthorizePrimary:"授权邮箱"/);
+  assert.match(i18nSource, /mailAuthorizePrimary:"Authorize mailbox"/);
   assert.doesNotMatch(i18nSource, /mailWorkspaceTitle:"邮件接管"|mailWorkspaceTitle:"Mail Takeover"|mailButton:"邮件接管"|mailButton:"Mail Takeover"/);
   assert.doesNotMatch(mailPageSource, /邮件接管模块|Mail AI/);
+  assert.match(mailPageSource, /id="mailAuthorizeBtn"/);
+  assert.match(mailPageSource, /id="mailConnectForm"/);
+  assert.match(mailPageSource, /showMailAuthForm \? "" : "is-collapsed"/);
+  assert.match(mailPageSource, /mailAuthExpanded = !res\.ok/);
   assert.match(mailPageSource, /data-open-ai-settings/);
   assert.match(mailPageSource, /disconnectMailbox/);
   assert.doesNotMatch(dispatchSource, /"mail\.open":"打开邮件接管"|taskTitle:"邮件接管任务"/);
