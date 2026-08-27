@@ -7938,7 +7938,7 @@
           render(host);
         }
       } else {
-        alert(t("attachmentReserved"));
+        if (window.WeishanUserNotice) window.WeishanUserNotice.show(host, t("attachmentReserved"));
       }
     });
 
@@ -7952,7 +7952,7 @@
 
     const recordBtn = host.querySelector("#recordBtn");
     recordBtn.addEventListener("click", function(){
-      alert(t("recordReserved"));
+      if (window.WeishanUserNotice) window.WeishanUserNotice.show(host, t("recordReserved"));
     });
 
     const commerceViewPlanBtn = host.querySelector("#commerceViewPlanBtn");

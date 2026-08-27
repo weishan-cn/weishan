@@ -3,11 +3,13 @@
   const MAX_AI_TEXT = 12000;
   const MAX_ARTIFACT_TEXT = 60000;
   const MAX_PREVIEW_TEXT = 1600;
+  let captureTaskActive = false;
 
   function esc(s){ return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
   function t(key){ return window.I18n.t(key); }
   function isEn(){ return window.I18n && window.I18n.getLang && window.I18n.getLang() === "en"; }
   function label(zh, en){ return isEn() ? en : zh; }
+  function policy(){ return window.WeishanCaptureCenterPolicy || null; }
   function pendingDispatch(){
     const router = window.WeishanDispatchRouter;
     return router && typeof router.readPendingPayload === "function" ? router.readPendingPayload("crawler") : null;
@@ -17,7 +19,8 @@
     const prefill = payload.prefill || {};
     const status = payload.status || "pending";
     const canAct = status === "pending" || status === "prefilled";
-    return `<div class="ws-card" data-dispatch-prefill="crawler"><h3>${esc(label("来自首页调度中心的抓取任务", "Crawl task from Home dispatch center"))}</h3><p class="ws-muted">${esc(prefill.taskDescription || payload.inputSummary || "")}</p><p><b>${esc(prefill.suggestedAction || payload.action || "")}</b></p><p class="ws-muted">${esc(label("URL", "URL"))}：${esc(prefill.url || "")}</p><p class="ws-muted">${esc(label("状态", "Status"))}：<b data-dispatch-status>${esc(status)}</b> · realExecution=false</p><p class="ws-muted">${esc(label("用户确认后才继续。示例 / mock URL 只生成本地模拟抓取结果；真实 URL 仍需在抓取中心手动继续确认。", "User confirmation is required. Example/mock URLs only create a local mock crawler result; real URLs still require manual confirmation in Crawler."))}</p><div class="ws-row"><button id="crawlerDispatchConfirm" class="ws-btn" ${canAct ? "" : "disabled"}>${esc(label("确认抓取", "Confirm crawl"))}</button><button id="crawlerDispatchCancel" class="ws-btn gray" ${canAct ? "" : "disabled"}>${esc(label("取消任务", "Cancel task"))}</button></div></div>`;
+    const displayStatus = policy() ? policy().statusLabel(status, isEn() ? "en" : "zh") : status;
+    return `<div class="ws-card" data-dispatch-prefill="crawler"><h3>${esc(label("来自首页调度中心的抓取任务", "Crawl task from Home dispatch center"))}</h3><p class="ws-muted">${esc(prefill.taskDescription || payload.inputSummary || "")}</p><p><b>${esc(prefill.suggestedAction || payload.action || "")}</b></p><p class="ws-muted">${esc(label("URL", "URL"))}：${esc(prefill.url || "")}</p><p class="ws-muted">${esc(label("状态", "Status"))}：<b data-dispatch-status>${esc(displayStatus)}</b></p><p class="ws-muted">${esc(label("用户确认后才继续。示例网址只生成本地模拟结果，不会访问外部网站。", "User confirmation is required. Example URLs create a local simulated result without accessing an external website."))}</p><div class="ws-row"><button id="crawlerDispatchConfirm" class="ws-btn" ${canAct ? "" : "disabled"}>${esc(label("确认抓取", "Confirm crawl"))}</button><button id="crawlerDispatchCancel" class="ws-btn gray" ${canAct ? "" : "disabled"}>${esc(label("取消任务", "Cancel task"))}</button></div></div>`;
   }
   function confirmDispatch(payload){
     const router = window.WeishanDispatchRouter;
@@ -77,7 +80,7 @@
         "本地模拟抓取结果。",
         "该结果由首页调度确认桥生成，用于验证 CrawlerPage 用户确认后的安全执行路径。",
         "没有访问外网，也没有读取真实网页正文。",
-        "realExecution=false"
+        "未访问外部网站。"
       ].join("\n")
     };
   }
@@ -104,7 +107,7 @@
       const page = buildMockCrawlerPage(rawUrl);
       let task = createTask(page.url);
       task = transition(task, "running", { title:summarize(page.title, 80), inputSummary:summarize(page.url, 240), meta:{ sourceUrl:page.url, mockSafeExecution:true } });
-      const outputSummary = label("已生成本地模拟抓取结果。未访问外网，realExecution=false。", "Local mock crawler result generated. No external network access. realExecution=false.");
+      const outputSummary = label("本地模拟结果 · 未访问外部网站", "Local simulated result · No external website was accessed");
       task = transition(task, "done", { title:summarize(page.title, 80), outputSummary:summarize(outputSummary, 240), meta:{ sourceUrl:page.url, mockSafeExecution:true, realExecution:false } });
       const finalJob = Object.assign({}, task, { sourceUrl:page.url, pageTitle:page.title });
       upsertJob(finalJob);
@@ -160,11 +163,20 @@
       return raw ? "[invalid url]" : "";
     }
   }
-  function readJobs(){ return window.WeishanStore.read(JOB_KEY, []); }
-  function writeJobs(items){ window.WeishanStore.write(JOB_KEY, (items || []).slice(0, 100)); }
+  function readJobs(){
+    const items = window.WeishanStore.read(JOB_KEY, []);
+    const safeItems = Array.isArray(items) ? items : [];
+    return policy() ? policy().compactResults(safeItems) : safeItems.slice(0, 20);
+  }
+  function writeJobs(items){
+    const p = policy();
+    const limit = p ? p.MAX_VISIBLE_RESULTS : 20;
+    window.WeishanStore.write(JOB_KEY, (Array.isArray(items) ? items : []).slice(0, limit));
+  }
   function upsertJob(job){
-    const items = readJobs().filter(x => x && x.taskId !== job.taskId);
-    writeJobs([job].concat(items));
+    const p = policy();
+    const items = p ? p.mergeResult(readJobs(), job) : [job].concat(readJobs().filter(x => x && x.taskId !== job.taskId)).slice(0, 20);
+    writeJobs(items);
   }
   function transition(task, status, extra){
     const tp = taskProtocol();
@@ -204,8 +216,10 @@
     return summarize(err && err.message ? err.message : String(err || ""), 240) || label("未知错误", "Unknown error");
   }
   function validateUrl(input){
+    const maxLength = policy() ? policy().MAX_TARGET_LENGTH : 2048;
     const raw = String(input || "").trim();
     if (!raw) throw new Error(label("请输入 URL。", "Please enter a URL."));
+    if (raw.length > maxLength) throw new Error(label("网址过长，请缩短后重试。", "The URL is too long. Shorten it and try again."));
     let parsed;
     try { parsed = new URL(raw); } catch (_) { throw new Error(label("URL 格式无效。", "Invalid URL format.")); }
     if (parsed.protocol !== "http:" && parsed.protocol !== "https:") throw new Error(label("只支持 http:// 或 https:// URL。", "Only http:// or https:// URLs are supported."));
@@ -334,8 +348,36 @@
     }
   }
   function renderJobs(){
+    const list = document.getElementById("crawlerJobs");
+    if (!list) return;
     const jobs = readJobs();
-    return jobs.map(j=>`<div class="ws-card"><b>${esc(j.title || j.sourceUrl || j.url || j.goal)}</b><p>${esc(j.status || "")}${j.pageTitle ? " · " + esc(j.pageTitle) : ""}</p>${j.outputSummary ? `<p class="ws-muted">${esc(j.outputSummary)}</p>` : ""}</div>`).join("") || `<div class='ws-card'>${t("noCrawler")}</div>`;
+    list.replaceChildren();
+    if (!jobs.length) {
+      const empty = document.createElement("div");
+      empty.className = "ws-card";
+      empty.textContent = t("noCrawler");
+      list.appendChild(empty);
+      return;
+    }
+    const p = policy();
+    jobs.forEach((job) => {
+      const card = document.createElement("div");
+      card.className = "ws-card";
+      card.setAttribute("data-capture-result", "");
+      const title = document.createElement("b");
+      title.textContent = String(job.title || job.pageTitle || job.sourceUrl || job.url || job.goal || label("抓取结果", "Capture result"));
+      const state = document.createElement("p");
+      state.className = "capture-result-status";
+      state.textContent = p ? p.statusLabel(job.status, isEn() ? "en" : "zh") : String(job.status || "");
+      card.append(title, state);
+      if (job.outputSummary) {
+        const note = document.createElement("p");
+        note.className = "ws-muted";
+        note.textContent = p ? p.sanitizeUserCopy(job.outputSummary) : String(job.outputSummary || "");
+        if (note.textContent && note.textContent !== state.textContent) card.appendChild(note);
+      }
+      list.appendChild(card);
+    });
   }
   function preview(text){
     const value = String(text || "");
@@ -352,53 +394,57 @@
     try {
       const parsed = validateUrl(rawUrl);
       page.url = parsed.href;
-      task = transition(task, "running", { title:summarize(parsed.hostname, 80), inputSummary:summarize(parsed.href, 240), meta:{ sourceUrl:parsed.href } });
+      if (!isMockSafeCrawlerUrl(parsed.href)) throw new Error(label("当前仅支持本地模拟网址，不会访问外部网站。", "Only local simulated targets are available; external websites are not accessed."));
+      task = transition(task, "running", { title:summarize(parsed.hostname, 80), inputSummary:summarize(parsed.href, 240), meta:{ sourceUrl:parsed.href, mockSafeExecution:true } });
       upsertJob(Object.assign({}, task, { sourceUrl:parsed.href }));
-      updateResult("running", label("正在抓取网页正文...", "Fetching page text..."));
-      const response = await fetch(parsed.href, { credentials:"omit", referrerPolicy:"no-referrer" });
-      if (!response.ok) throw new Error("HTTP " + response.status);
-      const html = await response.text();
-      const extracted = extractText(html, parsed.href);
-      page.title = extracted.title;
-      page.text = extracted.text;
-      updateResult("running", label("正文已提取，正在生成摘要...", "Text extracted. Generating summary..."), page);
-      const ai = await summarizeWithAi(page);
-      const outputSummary = ai.ok ? ai.summary : ai.summary + (ai.error ? "\n" + label("摘要提示：", "Summary note: ") + ai.error : "");
-      task = transition(task, "done", { title:summarize(page.title || parsed.hostname, 80), outputSummary:summarize(outputSummary, 240), meta:{ sourceUrl:parsed.href, textChars:page.text.length } });
-      task = addArtifact(task, page, outputSummary);
+      updateResult(label("处理中", "In progress"), label("正在生成本地模拟结果...", "Generating a local simulated result..."));
+      const localPage = buildMockCrawlerPage(parsed.href);
+      page.title = localPage.title;
+      page.text = localPage.text;
+      const outputSummary = label("本地模拟结果 · 未访问外部网站", "Local simulated result · No external website was accessed");
+      task = transition(task, "done", { title:summarize(page.title || parsed.hostname, 80), outputSummary, meta:{ sourceUrl:parsed.href, mockSafeExecution:true, realExecution:false } });
       const finalJob = Object.assign({}, task, { sourceUrl:parsed.href, pageTitle:page.title });
       upsertJob(finalJob);
       recordHistory(finalJob, page);
-      updateResult("done", label("抓取完成，已写入历史记录并生成可下载产物。", "Crawl complete. History and downloadable artifact were created."), page, outputSummary);
+      updateResult(label("本地模拟结果", "Local simulated result"), label("未访问外部网站。", "No external website was accessed."), page, outputSummary);
     } catch (err) {
       const msg = safeError(err);
       task = transition(task, "failed", { outputSummary:summarize("抓取失败：" + msg, 240), error:{ name:err && err.name || "Error", message:msg } });
       upsertJob(Object.assign({}, task, { sourceUrl:page.url || safeUrlInputSummary(rawUrl) }));
       recordHistory(task, page);
-      updateResult("failed", msg);
+      updateResult(label("处理失败", "Failed"), msg);
     }
-    const list = document.getElementById("crawlerJobs");
-    if (list) list.innerHTML = renderJobs();
+    renderJobs();
   }
   function mount(host){
     const dispatchPayload = pendingDispatch();
     const prefill = dispatchPayload && dispatchPayload.prefill || {};
-    host.innerHTML=`<section class="ws-page">${dispatchNoticeHtml(dispatchPayload)}<div class="ws-card"><h2>${t("crawler")}</h2><p class="ws-muted">${t("crawlerDesc")}</p><div class="ws-row"><input id="crawlUrl" class="ws-input" placeholder="${t("crawlerPlaceholder")}" value="${esc(prefill.url || "")}"><button id="createCrawl" class="ws-btn">${t("createCrawler")}</button></div></div><div id="crawlerResult"></div><div class="card-list" id="crawlerJobs">${renderJobs()}</div></section>`;
+    const maxLength = policy() ? policy().MAX_TARGET_LENGTH : 2048;
+    host.innerHTML=`<section class="ws-page">${dispatchNoticeHtml(dispatchPayload)}<div class="ws-card"><h2>${t("crawler")}</h2><p class="ws-muted">${t("crawlerDesc")}</p><div class="ws-row"><input id="crawlUrl" class="ws-input" maxlength="${maxLength}" placeholder="${t("crawlerPlaceholder")}" value="${esc(prefill.url || "")}"><button id="createCrawl" class="ws-btn">${t("createCrawler")}</button></div></div><div id="crawlerResult" role="status" aria-live="polite" aria-atomic="true"></div><div class="card-list" id="crawlerJobs"></div></section>`;
+    renderJobs();
     const crawlerDispatchConfirm = document.getElementById("crawlerDispatchConfirm");
     if (crawlerDispatchConfirm && dispatchPayload) crawlerDispatchConfirm.addEventListener("click", async () => {
+      if (captureTaskActive) return;
+      captureTaskActive = true;
       crawlerDispatchConfirm.disabled = true;
-      const result = await executeDispatchCrawler(dispatchPayload);
-      mount(host);
-      updateResult(result.status || "confirmed", result.message || "", result.page, result.summary);
+      try {
+        const result = await executeDispatchCrawler(dispatchPayload);
+        mount(host);
+        updateResult(policy() ? policy().statusLabel(result.status, isEn() ? "en" : "zh") : result.status, result.message || "", result.page, result.summary);
+      } finally {
+        captureTaskActive = false;
+      }
     });
     const crawlerDispatchCancel = document.getElementById("crawlerDispatchCancel");
     if (crawlerDispatchCancel && dispatchPayload) crawlerDispatchCancel.addEventListener("click", () => { cancelDispatch(dispatchPayload); mount(host); });
     document.getElementById("createCrawl").addEventListener("click", async ()=>{
       const btn = document.getElementById("createCrawl");
       const input = document.getElementById("crawlUrl");
+      if (captureTaskActive) return;
+      captureTaskActive = true;
       btn.disabled = true;
-      try { await runCrawler(input.value); } finally { btn.disabled = false; }
+      try { await runCrawler(input.value); } finally { captureTaskActive = false; if (btn.isConnected) btn.disabled = false; }
     });
   }
-  window.CrawlerPage = { mount };
+  window.CrawlerPage = { mount, policy:policy() };
 })();

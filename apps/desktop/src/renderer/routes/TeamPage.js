@@ -247,8 +247,8 @@
     if(sec && sec.bindModuleCopyAudit) sec.bindModuleCopyAudit(host, "team");
     document.getElementById("inviteBtn").addEventListener("click",()=>{
       const r=window.TeamApi.invite(document.getElementById("inviteEmail").value);
-      if(!r.ok) alert(r.error);
-      window.WeishanRouter.refresh();
+      if(!r.ok && window.WeishanUserNotice) window.WeishanUserNotice.show(host, r.error, { error:true });
+      else window.WeishanRouter.refresh();
     });
     document.getElementById("sendCollabInvite").addEventListener("click", createCollaborationInvite);
     host.addEventListener("click", (ev) => {

@@ -282,8 +282,8 @@ test.describe.serial("dispatch router", () => {
     await expect(page.locator("#crawlUrl")).toHaveValue("https://example.com");
     await expect(page.getByText(/确认抓取|realExecution=false|用户确认/).first()).toBeVisible();
     await page.locator("#crawlerDispatchConfirm").click();
-    await expect(page.getByText(/状态：executed|executed/).first()).toBeVisible();
-    await expect(page.getByText(/本地模拟抓取结果|realExecution=false|未访问外网/).first()).toBeVisible();
+    await expect(page.getByText(/状态：本地模拟结果|Local simulated result/).first()).toBeVisible();
+    await expect(page.getByText(/本地模拟结果|未访问外部网站|No external website was accessed/).first()).toBeVisible();
     await expectHistory(page, runId, /crawler\.executed|dispatch\.executed|dispatch\.confirmed|https:\/\/example\.com/);
   });
 

@@ -179,7 +179,7 @@
     }
   }
   function alertMessage(text){
-    if (typeof window.alert === "function") window.alert(text);
+    if (window.WeishanUserNotice) window.WeishanUserNotice.show(document.getElementById("pageHost"), text, { error:true });
   }
   function confirmMessage(text){
     if (typeof window.confirm !== "function") return false;

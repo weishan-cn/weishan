@@ -96,6 +96,8 @@ function runCore() {
   runStep("Image Tools Jimp effectiveness", "node", ["tests/api/image-tools-jimp-effectiveness.test.js"]);
   runStep("Image Tools IPC security", "node", ["tests/api/image-tools-ipc-security.test.js"]);
   runStep("In-app Help Feedback Support effectiveness", "node", ["tests/api/in-app-help-feedback-support-effectiveness.test.js"]);
+  runStep("Capture Center policy effectiveness", "node", ["tests/api/capture-center-policy-effectiveness.test.js"]);
+  runStep("Desktop blocking dialog safety", "node", ["tests/api/desktop-blocking-dialog-safety.test.js"]);
   runStep("Global travel real source acquisition sweep", "node", ["tests/api/global-travel-real-source-acquisition-sweep.test.js"]);
   runStep("Amadeus self-service flight source adapter", "node", ["tests/api/amadeus-self-service-flight-source-adapter.test.js"]);
   runStep("Duffel test flight source adapter", "node", ["tests/api/duffel-test-flight-source-adapter.test.js"]);
@@ -136,6 +138,7 @@ function runE2e() {
     runStep("E2E Plugin marketplace discovery", "npx", ["playwright", "test", "tests/e2e/plugin-marketplace-discovery.spec.js", "--workers=1"]);
     runStep("E2E local Image Tools", "npx", ["playwright", "test", "tests/e2e/image-tools.spec.js", "--workers=1"]);
     runStep("E2E global UI interaction liveness", "npx", ["playwright", "test", "tests/e2e/ui-interaction-liveness.spec.js", "--workers=1"]);
+    runStep("E2E Capture Center liveness", "npx", ["playwright", "test", "tests/e2e/capture-center-liveness.spec.js", "--workers=1"]);
   } finally {
     cleanupPlaywrightArtifacts();
   }

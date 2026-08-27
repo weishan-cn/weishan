@@ -1312,7 +1312,7 @@
 
     const authBtn = host.querySelector("#authBtn");
     if (authBtn) authBtn.addEventListener("click", function(){
-      alert(t("authenticatorReserved"));
+      if (window.WeishanUserNotice) window.WeishanUserNotice.show(host, t("authenticatorReserved"));
     });
 
     const officialWebsiteButton = host.querySelector("#openWeishanOfficialWebsite");
