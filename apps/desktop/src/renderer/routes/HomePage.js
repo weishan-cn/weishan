@@ -7283,12 +7283,6 @@
     host.innerHTML = `
       <section class="home-v205-page ${globalShoppingActive ? "is-global-shopping-active" : ""}">
         <div class="home-v205-main">
-          <div class="cmd-card cmd-console-card">
-            <div class="cmd-console" id="cmdConsole">
-              ${mainLogs(snap)}
-            </div>
-          </div>
-
           <div class="cmd-card cmd-input-card">
             ${compactGlobalShoppingComposer ? `
               <div class="cmd-compact-composer" data-global-shopping-compact-composer="true">
@@ -7311,6 +7305,12 @@
                 <button class="cmd-btn primary" id="runBtn">${t("startRun")}</button>
               </div>
             `}
+          </div>
+
+          <div class="cmd-card cmd-console-card">
+            <div class="cmd-console" id="cmdConsole">
+              ${mainLogs(snap)}
+            </div>
           </div>
         </div>
 

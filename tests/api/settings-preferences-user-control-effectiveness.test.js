@@ -74,7 +74,7 @@ function main() {
   assert.match(index, /settingsPreferencesUserControl\.js\?v=4\.3\.3/);
   assert.match(page, /anonymousAnalyticsToggle/);
   assert.match(page, /帮助改进 Weishan，分享匿名使用数据/);
-  assert.match(page, /Help improve Weishan by sharing anonymous usage data/);
+  assert.match(page, /Help improve Weishan with anonymous usage signals/);
   assert.doesNotMatch(page, /\$\{cloudEnterprisePanel\(\)\}/);
   assert.doesNotMatch(page, /\$\{t\("cloudReserved"\)\}/);
   assert.doesNotMatch(page, /\$\{t\("billingPermissions"\)\}/);

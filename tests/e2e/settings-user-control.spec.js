@@ -19,7 +19,7 @@ test.describe.serial("settings preferences user control", () => {
     await expect(page.locator("#settingsUserControlPanel")).toBeVisible();
     await expect(page.locator("#anonymousAnalyticsToggle")).toBeVisible();
     await expect(page.locator("#anonymousAnalyticsHelp")).toContainText("不收集搜索原文");
-    await expect(page.locator("#anonymousAnalyticsHelp")).toContainText(/credential/i);
+    await expect(page.locator("#anonymousAnalyticsHelp")).toContainText(/saved keys/i);
     await expect(page.locator("#cloudEnterpriseSettings")).toHaveCount(0);
     await expect(page.getByText("Cloud Services and Enterprise Space")).toHaveCount(0);
     await expect(page.getByText("Billing & Permissions")).toHaveCount(0);

@@ -24,6 +24,17 @@ test.describe.serial("public beta end-to-end user journey", () => {
     await expect(page.locator(".home-v205-page")).toBeVisible();
     await expect(page.locator("#commandInput")).toBeVisible();
     await expect(page.locator("#runBtn")).toBeVisible();
+    const homeOrder = await page.evaluate(() => {
+      const inputCard = document.querySelector("#commandInput")?.closest(".cmd-input-card");
+      const consoleCard = document.querySelector("#cmdConsole")?.closest(".cmd-console-card");
+      return {
+        inputBeforeConsole:!!(inputCard && consoleCard && inputCard.compareDocumentPosition(consoleCard) & Node.DOCUMENT_POSITION_FOLLOWING),
+        inputTop:inputCard ? Math.round(inputCard.getBoundingClientRect().top) : 0,
+        consoleTop:consoleCard ? Math.round(consoleCard.getBoundingClientRect().top) : 0
+      };
+    });
+    expect(homeOrder.inputBeforeConsole).toBe(true);
+    expect(homeOrder.inputTop).toBeLessThan(homeOrder.consoleTop);
     await expect.poll(() => page.title()).toBe("Weishan");
 
     const homeText = await page.locator(".home-v205-page").innerText();
@@ -43,6 +54,11 @@ test.describe.serial("public beta end-to-end user journey", () => {
     await expect(page.locator("#anonymousAnalyticsToggle")).toBeVisible();
     await expect(page.locator("#helpFeedbackSupportPanel")).toContainText("support@weishan.ai");
     await expect(page.locator("#helpFeedbackSupportPanel")).not.toContainText("api@weishan.ai");
+    const ordinarySettingsText = await page.evaluate(() => [
+      document.querySelector("#settingsUserControlPanel")?.innerText || "",
+      document.querySelector("#helpFeedbackSupportPanel")?.innerText || ""
+    ].join("\n"));
+    expect(ordinarySettingsText).not.toMatch(/\bProvider\b|executionGate|credential store|IPC|productionTraffic/i);
   });
 
   test("Shopping, Travel, and Smart Mail basic journeys survive without AI and AI failure", async () => {

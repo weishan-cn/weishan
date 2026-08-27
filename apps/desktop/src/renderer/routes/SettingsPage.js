@@ -569,14 +569,14 @@
           <h2>偏好与隐私 / Preferences & Privacy</h2>
           <span class="connector-pill ${settings.analyticsEnabled ? "connector-saved" : "connector-empty"}" id="analyticsPreferenceState">${esc(analyticsState)}</span>
         </div>
-        <p class="ws-muted">这里仅放普通用户可理解、可撤回的本地偏好。不会显示 Provider 内部状态、执行闸门、生产环境开关或原始密钥。</p>
+        <p class="ws-muted">这里放可理解、可撤回的本地偏好。复杂连接与内部安全状态会留在后台，不打扰日常使用。</p>
         <section class="settings-control-group" aria-labelledby="analyticsPreferenceTitle">
           <h3 id="analyticsPreferenceTitle">匿名产品改进 / Anonymous product improvement</h3>
           <label class="settings-switch" for="anonymousAnalyticsToggle">
             <input type="checkbox" id="anonymousAnalyticsToggle" role="switch" aria-describedby="anonymousAnalyticsHelp"${checked(settings.analyticsEnabled)}>
             <span>帮助改进 Weishan，分享匿名使用数据。</span>
           </label>
-          <p class="ws-muted" id="anonymousAnalyticsHelp">Help improve Weishan by sharing anonymous usage data. It does not collect query text, Mail content, credentials, full URLs, account identity, IP addresses, or device fingerprints. 不收集搜索原文、邮件内容、凭据、完整 URL、账号身份、IP 或设备指纹。</p>
+          <p class="ws-muted" id="anonymousAnalyticsHelp">Help improve Weishan with anonymous usage signals. It does not collect query text, Mail content, saved keys, full URLs, account identity, IP addresses, or device fingerprints. 不收集搜索原文、邮件内容、已保存密钥、完整 URL、账号身份、IP 或设备指纹。</p>
           <div class="ws-row">
             <button type="button" class="ws-btn gray" id="resetAnonymousAnalytics">重置匿名分析身份 / Reset anonymous analytics</button>
           </div>
@@ -667,7 +667,7 @@
           <h2>帮助与反馈 / Help & Feedback</h2>
           <span class="connector-pill connector-saved">support@weishan.ai</span>
         </div>
-        <p class="ws-muted">先尝试页面内恢复提示；仍无法解决时，可以联系 Weishan 支持。Provider/API 合作邮箱不会作为普通用户支持入口显示。</p>
+        <p class="ws-muted">先尝试页面内恢复提示；仍无法解决时，可以打开一封由你确认发送的支持邮件。内部合作邮箱不会作为普通用户支持入口显示。</p>
         <div class="help-feedback-layout">
           <section class="settings-control-group" aria-labelledby="helpTopicsTitle">
             <h3 id="helpTopicsTitle">快速帮助 / Quick help</h3>

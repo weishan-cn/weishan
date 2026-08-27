@@ -28,7 +28,7 @@ test.describe.serial("in-app help feedback support", () => {
     await expect(page.getByText("Connect AI service").first()).toBeVisible();
     await expect(page.locator("#supportDiagnosticsHelp")).toContainText("不包含搜索原文");
     await expect(page.locator("#supportDiagnosticsHelp")).toContainText(/Mail content/i);
-    await expect(page.locator("#supportDiagnosticsHelp")).toContainText(/credentials/i);
+    await expect(page.locator("#supportDiagnosticsHelp")).toContainText(/saved keys/i);
 
     await page.locator("#supportCategory").selectOption("bug");
     await page.locator("#supportFeedbackText").fill("The retry button did not recover. <script>alert(1)</script> executionGate=OPEN");
