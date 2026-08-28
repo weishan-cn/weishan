@@ -26,9 +26,26 @@ function main() {
   const visitApi = windowRef.WeishanGlobalShoppingPlatformVisitPreparationViewModel;
   const pipelineApi = windowRef.WeishanGlobalShoppingPricePipelineOrchestrator;
 
+  let missingSummaryFallbackCalls = 0;
+  for (const [apiName, methodName] of [
+    ["WeishanGlobalShoppingUserManualReviewViewModel", "buildGlobalShoppingUserManualReviewViewModel"],
+    ["WeishanGlobalShoppingUserFacingManualReviewFlow", "buildGlobalShoppingUserFacingManualReviewFlow"],
+    ["WeishanGlobalShoppingPlatformVerificationProgressTracker", "buildGlobalShoppingPlatformVerificationProgressTracker"],
+    ["WeishanGlobalShoppingSafeNextActionPanel", "buildGlobalShoppingSafeNextActionPanel"],
+    ["WeishanGlobalShoppingPlatformRealityCheckBoard", "buildGlobalShoppingPlatformRealityCheckBoard"],
+    ["WeishanGlobalShoppingManualPlatformReviewCockpit", "buildGlobalShoppingManualPlatformReviewCockpit"]
+  ]) {
+    windowRef[apiName] = {
+      [methodName]() {
+        missingSummaryFallbackCalls += 1;
+        return { status:"ready" };
+      }
+    };
+  }
   const missingCenterInputs = centerApi.buildGlobalShoppingManualPlatformVisitPreparationCenter({});
   assert.equal(missingCenterInputs.status, "needs_review");
   assert.equal(missingCenterInputs.preparationSections.length, 6);
+  assert.equal(missingSummaryFallbackCalls, 0);
 
   const originalCenterApi = windowRef.WeishanGlobalShoppingManualPlatformVisitPreparationCenter;
   let activeDepth = 0;
@@ -54,6 +71,22 @@ function main() {
   windowRef.WeishanGlobalShoppingManualPlatformVisitPreparationCenter = originalCenterApi;
   assert.equal(maxActiveDepth, 1);
   assert.equal(boundedCycle.status, "needs_review");
+
+  let independentCandidateCalls = 0;
+  windowRef.WeishanGlobalShoppingManualPlatformVisitPreparationCenter = {
+    buildGlobalShoppingManualPlatformVisitPreparationCenter() {
+      independentCandidateCalls += 1;
+      return { status:"ready", userFacingSummary:{ resultLabel:"ready" } };
+    }
+  };
+  const independentCandidateInput = {
+    externalPlatformBoundaryBriefSummary:{ status:"ready" },
+    finalUserSafetyChecklistSummary:{ status:"ready" }
+  };
+  assert.equal(visitApi.buildGlobalShoppingPlatformVisitPreparationViewModel(independentCandidateInput).status, "ready");
+  assert.equal(visitApi.buildGlobalShoppingPlatformVisitPreparationViewModel(independentCandidateInput).status, "ready");
+  assert.equal(independentCandidateCalls, 10);
+  windowRef.WeishanGlobalShoppingManualPlatformVisitPreparationCenter = originalCenterApi;
 
   let dryRunBuildCalls = 0;
   windowRef.WeishanGlobalShoppingProviderSandboxDryRunViewModel = {

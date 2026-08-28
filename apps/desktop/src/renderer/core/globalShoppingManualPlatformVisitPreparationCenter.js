@@ -59,21 +59,14 @@
       redacted:true
     }, obj(overrides));
   }
-  function resolveSummary(input, key, apiName, methodName, buildInput) {
-    const safe = obj(input);
-    if (Object.keys(obj(safe[key])).length) return obj(safe[key]);
-    const api = window[apiName] || {};
-    return typeof api[methodName] === "function" ? api[methodName](buildInput || safe) : {};
-  }
-
   function evaluateGlobalShoppingManualPlatformVisitPreparationCenter(input) {
     const safe = obj(input);
-    const userManualReviewViewModelSummary = resolveSummary(safe, "userManualReviewViewModelSummary", "WeishanGlobalShoppingUserManualReviewViewModel", "buildGlobalShoppingUserManualReviewViewModel", safe);
-    const userFacingManualReviewFlowSummary = resolveSummary(safe, "userFacingManualReviewFlowSummary", "WeishanGlobalShoppingUserFacingManualReviewFlow", "buildGlobalShoppingUserFacingManualReviewFlow", safe);
-    const platformVerificationProgressTrackerSummary = resolveSummary(safe, "platformVerificationProgressTrackerSummary", "WeishanGlobalShoppingPlatformVerificationProgressTracker", "buildGlobalShoppingPlatformVerificationProgressTracker", safe);
-    const safeNextActionPanelSummary = resolveSummary(safe, "safeNextActionPanelSummary", "WeishanGlobalShoppingSafeNextActionPanel", "buildGlobalShoppingSafeNextActionPanel", safe);
-    const platformRealityCheckBoardSummary = resolveSummary(safe, "platformRealityCheckBoardSummary", "WeishanGlobalShoppingPlatformRealityCheckBoard", "buildGlobalShoppingPlatformRealityCheckBoard", safe);
-    const manualPlatformReviewCockpitSummary = resolveSummary(safe, "manualPlatformReviewCockpitSummary", "WeishanGlobalShoppingManualPlatformReviewCockpit", "buildGlobalShoppingManualPlatformReviewCockpit", safe);
+    const userManualReviewViewModelSummary = obj(safe.userManualReviewViewModelSummary);
+    const userFacingManualReviewFlowSummary = obj(safe.userFacingManualReviewFlowSummary);
+    const platformVerificationProgressTrackerSummary = obj(safe.platformVerificationProgressTrackerSummary);
+    const safeNextActionPanelSummary = obj(safe.safeNextActionPanelSummary);
+    const platformRealityCheckBoardSummary = obj(safe.platformRealityCheckBoardSummary);
+    const manualPlatformReviewCockpitSummary = obj(safe.manualPlatformReviewCockpitSummary);
 
     const missingUserManualReviewViewModel = !Object.keys(obj(safe.userManualReviewViewModelSummary)).length || !Object.keys(userManualReviewViewModelSummary).length;
     const missingManualReviewFlow = !Object.keys(obj(safe.userFacingManualReviewFlowSummary)).length || !Object.keys(userFacingManualReviewFlowSummary).length;
