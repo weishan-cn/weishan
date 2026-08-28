@@ -75,11 +75,11 @@
     const platformRealityCheckBoardSummary = resolveSummary(safe, "platformRealityCheckBoardSummary", "WeishanGlobalShoppingPlatformRealityCheckBoard", "buildGlobalShoppingPlatformRealityCheckBoard", safe);
     const manualPlatformReviewCockpitSummary = resolveSummary(safe, "manualPlatformReviewCockpitSummary", "WeishanGlobalShoppingManualPlatformReviewCockpit", "buildGlobalShoppingManualPlatformReviewCockpit", safe);
 
-    const missingUserManualReviewViewModel = !Object.keys(userManualReviewViewModelSummary).length;
-    const missingManualReviewFlow = !Object.keys(userFacingManualReviewFlowSummary).length;
-    const missingProgressTracker = !Object.keys(platformVerificationProgressTrackerSummary).length;
-    const missingSafeNextActionPanel = !Object.keys(safeNextActionPanelSummary).length;
-    const missingRealityCheckBoard = !Object.keys(platformRealityCheckBoardSummary).length;
+    const missingUserManualReviewViewModel = !Object.keys(obj(safe.userManualReviewViewModelSummary)).length || !Object.keys(userManualReviewViewModelSummary).length;
+    const missingManualReviewFlow = !Object.keys(obj(safe.userFacingManualReviewFlowSummary)).length || !Object.keys(userFacingManualReviewFlowSummary).length;
+    const missingProgressTracker = !Object.keys(obj(safe.platformVerificationProgressTrackerSummary)).length || !Object.keys(platformVerificationProgressTrackerSummary).length;
+    const missingSafeNextActionPanel = !Object.keys(obj(safe.safeNextActionPanelSummary)).length || !Object.keys(safeNextActionPanelSummary).length;
+    const missingRealityCheckBoard = !Object.keys(obj(safe.platformRealityCheckBoardSummary)).length || !Object.keys(platformRealityCheckBoardSummary).length;
 
     const blocked = safe.openExternal === true || safe.windowOpen === true ||
       safe.bookingUrl || safe.checkoutUrl || safe.paymentUrl || safe.orderUrl ||
@@ -104,7 +104,8 @@
       platformVerificationProgressTrackerSummary,
       safeNextActionPanelSummary,
       platformRealityCheckBoardSummary,
-      manualPlatformReviewCockpitSummary
+      manualPlatformReviewCockpitSummary,
+      preparationSummary:{ building:true }
     }));
 
     return clone({

@@ -3,6 +3,7 @@
 
   const GLOBAL_SHOPPING_PLATFORM_VISIT_PREPARATION_VIEW_MODEL_VERSION = "4.2.8";
   const VIEW_MODEL_NAME = "global_shopping_platform_visit_preparation_view_model_v1";
+  const activeSummaryFallbacks = new Set();
 
   function clone(value) { return value && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value; }
   function obj(value) { return value && typeof value === "object" && !Array.isArray(value) ? value : {}; }
@@ -18,7 +19,15 @@
     const safe = obj(input);
     if (Object.keys(obj(safe[key])).length) return obj(safe[key]);
     const api = window[apiName] || {};
-    return typeof api[methodName] === "function" ? api[methodName](buildInput || safe) : {};
+    if (typeof api[methodName] !== "function") return {};
+    const fallbackKey = apiName + "." + methodName;
+    if (activeSummaryFallbacks.has(fallbackKey)) return {};
+    activeSummaryFallbacks.add(fallbackKey);
+    try {
+      return api[methodName](buildInput || safe);
+    } finally {
+      activeSummaryFallbacks.delete(fallbackKey);
+    }
   }
   function row(rowId, label, value, status) {
     return {

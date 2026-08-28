@@ -44,8 +44,38 @@ function main() {
   assert.equal(api.buildGlobalShoppingPlatformVisitPreparationViewModel({}).status, "needs_review");
   assert.equal(api.buildGlobalShoppingPlatformVisitPreparationViewModel({ manualPlatformVisitPreparationCenterSummary:{ status:"blocked" } }).status, "blocked");
   assert.equal(api.buildGlobalShoppingPlatformVisitPreparationViewModel({ networkEnabled:true }).status, "blocked");
-  assert.equal(JSON.stringify(ready).includes("bookingUrl"), false);
+  assert.equal(ready.safety.bookingUrl, null);
   assert.equal(JSON.stringify(ready).includes("token"), false);
+
+  const originalPreparationCenter = windowRef.WeishanGlobalShoppingManualPlatformVisitPreparationCenter;
+  let reentrantFallbackCalls = 0;
+  let reentrantFallbackDepth = 0;
+  let maxReentrantFallbackDepth = 0;
+  windowRef.WeishanGlobalShoppingManualPlatformVisitPreparationCenter = {
+    buildGlobalShoppingManualPlatformVisitPreparationCenter() {
+      reentrantFallbackCalls += 1;
+      reentrantFallbackDepth += 1;
+      maxReentrantFallbackDepth = Math.max(maxReentrantFallbackDepth, reentrantFallbackDepth);
+      try {
+        return api.buildGlobalShoppingPlatformVisitPreparationViewModel({
+          externalPlatformBoundaryBriefSummary:{ status:"ready" },
+          finalUserSafetyChecklistSummary:{ status:"ready" }
+        });
+      } finally {
+        reentrantFallbackDepth -= 1;
+      }
+    }
+  };
+  const boundedReentrantResult = api.buildGlobalShoppingPlatformVisitPreparationViewModel({
+    externalPlatformBoundaryBriefSummary:{ status:"ready" },
+    finalUserSafetyChecklistSummary:{ status:"ready" }
+  });
+  windowRef.WeishanGlobalShoppingManualPlatformVisitPreparationCenter = originalPreparationCenter;
+  assert.equal(reentrantFallbackCalls, 5);
+  assert.equal(maxReentrantFallbackDepth, 1);
+  assert.equal(boundedReentrantResult.status, "needs_review");
+  assert.equal(boundedReentrantResult.safety.bookingUrl, null);
+  assert.equal(JSON.stringify(boundedReentrantResult).includes("token"), false);
 }
 
 main();

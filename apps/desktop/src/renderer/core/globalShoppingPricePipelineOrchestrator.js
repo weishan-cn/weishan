@@ -184,11 +184,16 @@
       providerCallAuditLedgerSummary:providerCallAuditLedgerSummary,
       providerSandboxSafetyKillSwitchSummary:providerSandboxSafetyKillSwitchSummary
     });
-    const providerSandboxDryRunViewModelSummary = resolveSummary(safe, "providerSandboxDryRunViewModelSummary", "WeishanGlobalShoppingProviderSandboxDryRunViewModel", "buildGlobalShoppingProviderSandboxDryRunViewModel", {
-      providerSandboxDryRunHarnessSummary:providerSandboxDryRunHarnessSummary,
-      firstReadOnlyProviderAdapterShellSummary:firstReadOnlyProviderAdapterShellSummary,
-      providerSandboxSafetyKillSwitchSummary:providerSandboxSafetyKillSwitchSummary
-    });
+    const hasProviderSandboxDryRunViewModelInputs = hasSummaryInput(safe, "offlineSandboxTraceInspectorSummary") &&
+      hasSummaryInput(safe, "mockProviderResultNormalizerSummary") &&
+      hasSummaryInput(safe, "manualActivationDryRunChecklistSummary");
+    const providerSandboxDryRunViewModelSummary = hasSummaryInput(safe, "providerSandboxDryRunViewModelSummary")
+      ? obj(safe.providerSandboxDryRunViewModelSummary)
+      : (hasProviderSandboxDryRunViewModelInputs ? resolveSummary(safe, "providerSandboxDryRunViewModelSummary", "WeishanGlobalShoppingProviderSandboxDryRunViewModel", "buildGlobalShoppingProviderSandboxDryRunViewModel", {
+        offlineSandboxTraceInspectorSummary:obj(safe.offlineSandboxTraceInspectorSummary),
+        mockProviderResultNormalizerSummary:obj(safe.mockProviderResultNormalizerSummary),
+        manualActivationDryRunChecklistSummary:obj(safe.manualActivationDryRunChecklistSummary)
+      }) : {});
     const sandboxHandoffViewModelSummary = resolveSummary(safe, "sandboxHandoffViewModel", "WeishanGlobalShoppingSandboxHandoffViewModel", "buildGlobalShoppingSandboxHandoffViewModel", safe);
     const effectiveProviderAdapterRegistrySummary = Object.keys(providerAdapterRegistrySummary).length ? providerAdapterRegistrySummary : (statusOf(firstSandboxProviderConnectorSummary) === "ready" ? {
       status:"ready",
