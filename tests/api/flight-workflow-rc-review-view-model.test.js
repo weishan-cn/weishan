@@ -25,6 +25,35 @@ function main() {
   const audit = api.buildFlightWorkflowRcReviewViewModelAuditDraft({ token:"abc" });
   assert.equal(audit.eventType, "FLIGHT_WORKFLOW_RC_REVIEW_VIEW_MODEL_AUDIT_DRAFT");
   assert.equal(JSON.stringify(audit).includes("abc"), false);
+
+  const calls = { review:0, checklist:0, regression:0, releaseRisk:0 };
+  windowRef.WeishanFlightWorkflowRcCandidateReviewConsole = {
+    buildFlightWorkflowRcCandidateReviewConsole:function () {
+      calls.review += 1;
+      return { status:"ready_for_review", safeToStartRcReview:true, rows:[], userFacingSummary:{ resultLabel:"ready" } };
+    }
+  };
+  windowRef.WeishanFlightWorkflowRcEvidenceReviewChecklist = {
+    buildFlightWorkflowRcEvidenceReviewChecklist:function () {
+      calls.checklist += 1;
+      return { status:"complete", rows:[], userFacingSummary:{ resultLabel:"complete" } };
+    }
+  };
+  windowRef.WeishanFlightWorkflowRcRegressionAuditPack = {
+    buildFlightWorkflowRcRegressionAuditPack:function () {
+      calls.regression += 1;
+      return { status:"passed", auditHealth:{}, userFacingSummary:{ resultLabel:"passed" } };
+    }
+  };
+  windowRef.WeishanFlightWorkflowReadOnlyReleaseRiskLedger = {
+    buildFlightWorkflowReadOnlyReleaseRiskLedger:function () {
+      calls.releaseRisk += 1;
+      return { status:"clear", riskSummary:{ safeToContinueReleaseCandidate:true }, userFacingSummary:{ resultLabel:"clear" } };
+    }
+  };
+  const fallbackModel = api.buildFlightWorkflowRcReviewViewModel({});
+  assert.equal(fallbackModel.status, "ready_for_review");
+  assert.deepEqual(calls, { review:1, checklist:1, regression:1, releaseRisk:1 }, "each fallback summary must be built once per RC view-model build");
   console.log("FLIGHT_WORKFLOW_RC_REVIEW_VIEW_MODEL PASS");
 }
 main();

@@ -108,6 +108,8 @@ function runCore() {
   runStep("Cunard public cruise handoff adapter", "node", ["tests/api/cunard-public-cruise-handoff-adapter.test.js"]);
   runStep("Hotelbeds evaluation readonly validator", "node", ["tests/api/hotelbeds-evaluation-readonly-validator.test.js"]);
   runStep("Provider OAuth callback foundation", "node", ["tests/api/provider-oauth-callback-foundation.test.js"]);
+  runStep("Flight workflow RC review fallback bounds", "node", ["tests/api/flight-workflow-rc-review-view-model.test.js"]);
+  runStep("Second live freeze root-cause regression", "node", ["tests/api/second-live-freeze-root-cause.test.js"]);
   runStep("Commerce core tests", "npm", ["run", "test:commerce-core"]);
   runStep("Project check", "npm", ["run", "check"]);
   runStep("Git diff check", "git", ["diff", "--check"]);

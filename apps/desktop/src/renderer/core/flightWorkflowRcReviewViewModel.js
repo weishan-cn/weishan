@@ -100,6 +100,12 @@
       const checklist = checklistOf(input || {});
       const regressionAudit = regressionAuditOf(input || {});
       const releaseRisk = releaseRiskOf(input || {});
+      const resolvedInput = Object.assign({}, input || {}, {
+        rcCandidateReviewSummary:review,
+        rcEvidenceReviewSummary:checklist,
+        rcRegressionAuditSummary:regressionAudit,
+        releaseRiskLedgerSummary:releaseRisk
+      });
       const status = review.status === "blocked" || checklist.status === "blocked"
         ? "blocked"
         : review.status === "ready_for_review" && checklist.status === "complete"
@@ -110,9 +116,9 @@
       return sanitizeFlightWorkflowRcReviewViewModel({
         status:status,
         title:"只读 RC 候选复核",
-        cards:buildFlightWorkflowRcReviewCards(input || {}),
-        reviewRows:buildFlightWorkflowRcReviewRows(input || {}),
-        evidenceRows:buildFlightWorkflowRcEvidenceRowsForView(input || {}),
+        cards:buildFlightWorkflowRcReviewCards(resolvedInput),
+        reviewRows:buildFlightWorkflowRcReviewRows(resolvedInput),
+        evidenceRows:buildFlightWorkflowRcEvidenceRowsForView(resolvedInput),
         riskRows:[
           row("safety", "安全红线", review.status === "blocked" || checklist.status === "blocked" ? "RC 复核已阻断" : "复核不代表交易能力", review.status === "blocked" || checklist.status === "blocked" ? "blocked" : "pass"),
           row("regression_audit", "回归审计", obj(regressionAudit.userFacingSummary).resultLabel || regressionAudit.status || "仍需复核", regressionAudit.status === "passed" ? "pass" : (regressionAudit.status === "blocked" ? "blocked" : "warning")),
