@@ -372,7 +372,10 @@
 
   function buildReadOnlyPriceCandidateCardViewModel(input) {
     const rawInput = input && typeof input === "object" ? input : {};
-    let globalShoppingCompositionBoundaryActive = false;
+    // The card is a presentation boundary. Missing composed summaries must fail
+    // closed from the first property read; enabling this later lets earlier
+    // compatibility fallbacks expand the same synchronous builder graph.
+    let globalShoppingCompositionBoundaryActive = true;
     const unresolvedShoppingSummary = Object.freeze({
       status:"needs_review",
       manualReviewRequired:true,
@@ -808,7 +811,6 @@
     // Global Shopping summaries are composed before reaching the card. Missing
     // or malformed summaries fail closed here instead of expanding the entire
     // fallback graph from a presentation boundary.
-    globalShoppingCompositionBoundaryActive = true;
     const globalShoppingProductGoalSummary = safe.globalShoppingProductGoalSummary && typeof safe.globalShoppingProductGoalSummary === "object" ? safe.globalShoppingProductGoalSummary : (typeof globalShoppingProductGoalCharterApi.buildGlobalShoppingProductGoalCharter === "function" ? globalShoppingProductGoalCharterApi.buildGlobalShoppingProductGoalCharter({ workflowMeta:workflowMeta }) : null);
     const jumpToPlatformBoundarySummary = safe.jumpToPlatformBoundarySummary && typeof safe.jumpToPlatformBoundarySummary === "object" ? safe.jumpToPlatformBoundarySummary : (typeof globalShoppingJumpBoundaryApi.buildGlobalShoppingJumpToPlatformBoundary === "function" ? globalShoppingJumpBoundaryApi.buildGlobalShoppingJumpToPlatformBoundary({ workflowMeta:workflowMeta }) : null);
     const legalProviderFixtureSummary = safe.legalProviderFixtureSummary && typeof safe.legalProviderFixtureSummary === "object" ? safe.legalProviderFixtureSummary : (typeof globalShoppingLegalProviderFixtureAdapterApi.buildGlobalShoppingLegalProviderFixtureAdapter === "function" ? globalShoppingLegalProviderFixtureAdapterApi.buildGlobalShoppingLegalProviderFixtureAdapter({ providerId:"global_fixture_provider", providerName:"Global Shopping Fixture Sandbox", providerType:"aggregator", providerRegion:"global", providerLegalStatus:"allowed", providerStatus:"fixture", itemType:"flight", fixturePrices:[{ sourceId:"official_fixture_1", sourceName:"Official Fixture", sourceType:"official", sourceTrustLevel:"high", title:"SHA-CTU Official Fixture", basePrice:920, taxAmount:120, currency:"CNY", lastCheckedAt:"fixture-only" }, { sourceId:"partner_fixture_1", sourceName:"Partner Fixture", sourceType:"partner", sourceTrustLevel:"medium", title:"SHA-CTU Partner Fixture", basePrice:899, taxAmount:120, currency:"CNY", lastCheckedAt:"fixture-only" }] }) : null);
