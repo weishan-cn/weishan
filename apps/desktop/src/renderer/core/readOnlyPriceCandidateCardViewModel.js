@@ -381,10 +381,18 @@
       manualReviewRequired:true,
       redacted:true
     });
+    const cardLocalFallbackSummaries = new Set([
+      "readOnlyConsentSummary",
+      "pilotOnboardingSummary",
+      "rolloutControlSummary",
+      "cohortHealthSummary",
+      "sessionSummary",
+      "sandboxDryRunSummary"
+    ]);
     const safe = new Proxy(rawInput, {
       get:function (target, property) {
         const value = target[property];
-        if (globalShoppingCompositionBoundaryActive && typeof property === "string" && property.endsWith("Summary") && property !== "selectedSourceSummary" && value == null) {
+        if (globalShoppingCompositionBoundaryActive && typeof property === "string" && property.endsWith("Summary") && property !== "selectedSourceSummary" && !cardLocalFallbackSummaries.has(property) && value == null) {
           return unresolvedShoppingSummary;
         }
         return value;
