@@ -28,13 +28,13 @@ test.describe.serial("public beta end-to-end user journey", () => {
       const inputCard = document.querySelector("#commandInput")?.closest(".cmd-input-card");
       const consoleCard = document.querySelector("#cmdConsole")?.closest(".cmd-console-card");
       return {
-        inputBeforeConsole:!!(inputCard && consoleCard && inputCard.compareDocumentPosition(consoleCard) & Node.DOCUMENT_POSITION_FOLLOWING),
+        consoleBeforeInput:!!(inputCard && consoleCard && consoleCard.compareDocumentPosition(inputCard) & Node.DOCUMENT_POSITION_FOLLOWING),
         inputTop:inputCard ? Math.round(inputCard.getBoundingClientRect().top) : 0,
-        consoleTop:consoleCard ? Math.round(consoleCard.getBoundingClientRect().top) : 0
+        consoleBottom:consoleCard ? Math.round(consoleCard.getBoundingClientRect().bottom) : 0
       };
     });
-    expect(homeOrder.inputBeforeConsole).toBe(true);
-    expect(homeOrder.inputTop).toBeLessThan(homeOrder.consoleTop);
+    expect(homeOrder.consoleBeforeInput).toBe(true);
+    expect(homeOrder.consoleBottom).toBeLessThanOrEqual(homeOrder.inputTop);
     await expect.poll(() => page.title()).toBe("Weishan");
 
     const homeText = await page.locator(".home-v205-page").innerText();

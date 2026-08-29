@@ -8770,9 +8770,9 @@
     const api = agent();
     const search = searchApi();
     if (!task) {
-      return `<div class="commerce-detail commerce-detail-empty">
-        <h2>计划详情</h2>
-        <p>选择左侧采购计划后，这里会显示需求理解、搜索范围、比较维度、推荐规则和执行边界。</p>
+      return `<div class="commerce-detail commerce-detail-empty" data-commerce-empty-state="true">
+        <h2>搜索商品或描述你想买什么</h2>
+        <p>Basic Mode 不依赖 AI。输入商品、型号、预算或收货地后即可开始整理和比较可信来源。</p>
       </div>`;
     }
     const detail = api && api.createCommercePlanDetail ? api.createCommercePlanDetail(task) : {};
@@ -9234,9 +9234,34 @@
     return api && api.getCommerceTasks ? api.getCommerceTasks() : [];
   }
 
+  function safeLoadTasks(){
+    try {
+      return { tasks:loadTasks(), stateUnavailable:false };
+    } catch (_) {
+      return { tasks:[], stateUnavailable:true };
+    }
+  }
+
+  function commerceStateUnavailableHtml(){
+    return `<div class="commerce-detail commerce-detail-empty" data-commerce-empty-state="true" data-commerce-state-unavailable="true">
+      <h2>从新的搜索开始</h2>
+      <p>已有内容暂时无法显示。你仍可在上方搜索商品或描述想买什么；Basic Mode 不依赖 AI。</p>
+    </div>`;
+  }
+
+  function safeDetailHtml(task, stateUnavailable){
+    if (stateUnavailable) return commerceStateUnavailableHtml();
+    try {
+      return detailHtml(task);
+    } catch (_) {
+      return commerceStateUnavailableHtml();
+    }
+  }
+
   function render(host){
     ensureSearchLoaded(host);
-    const tasks = loadTasks();
+    const taskState = safeLoadTasks();
+    const tasks = taskState.tasks;
     const aiSummary = aiWorkspaceSummary();
     const providerSummary = providerWorkspaceSummary();
     const modeState = workspaceModeState();
@@ -9312,7 +9337,7 @@
           </div>
           ${taskCards(tasks)}
         </aside>`}
-        ${detailHtml(selected)}
+        ${safeDetailHtml(selected, taskState.stateUnavailable)}
       </div>
     </section>`;
     bind(host, tasks, selected);

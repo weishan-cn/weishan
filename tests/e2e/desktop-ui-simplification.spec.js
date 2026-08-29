@@ -14,7 +14,7 @@ test.describe.serial("desktop UI simplification and function preservation", () =
     if (app) await app.close();
   });
 
-  test("Home keeps one dominant composer before secondary status/history", async () => {
+  test("Home keeps one dominant bottom composer after status/history", async () => {
     await gotoRoute(page, "home");
     await expect(page.locator("#commandInput")).toBeVisible();
     await expect(page.locator("#runBtn")).toBeVisible();
@@ -31,16 +31,16 @@ test.describe.serial("desktop UI simplification and function preservation", () =
         });
       const text = document.querySelector(".home-v205-page")?.innerText || "";
       return {
-        composerBeforeConsole:!!(composer && consoleCard && composer.compareDocumentPosition(consoleCard) & Node.DOCUMENT_POSITION_FOLLOWING),
+        consoleBeforeComposer:!!(composer && consoleCard && consoleCard.compareDocumentPosition(composer) & Node.DOCUMENT_POSITION_FOLLOWING),
         composerTop:composer ? composer.getBoundingClientRect().top : 0,
-        consoleTop:consoleCard ? consoleCard.getBoundingClientRect().top : 0,
+        consoleBottom:consoleCard ? consoleCard.getBoundingClientRect().bottom : 0,
         primaryButtonCount:primaryButtons.length,
         text
       };
     });
 
-    expect(metrics.composerBeforeConsole).toBe(true);
-    expect(metrics.composerTop).toBeLessThan(metrics.consoleTop);
+    expect(metrics.consoleBeforeComposer).toBe(true);
+    expect(metrics.consoleBottom).toBeLessThanOrEqual(metrics.composerTop);
     expect(metrics.primaryButtonCount).toBe(1);
     expect(metrics.text).not.toMatch(/\bProvider\b|\bIPC\b|credential store|executionGate|productionTraffic|Cloud|Enterprise|Billing|Team/i);
   });

@@ -38,6 +38,44 @@
   function loadCommerceAgentPage(){
     return loadScriptOnce("CommerceAgentPage", "./renderer/routes/CommerceAgentPage.js?v=2.1.2");
   }
+  function commerceRouteFallbackHtml(state){
+    const loading = state === "loading";
+    return `<section class="commerce-page commerce-workbench commerce-route-fallback" data-commerce-route-fallback="${loading ? "loading" : "unavailable"}">
+      <div class="commerce-hero">
+        <div>
+          <h1>全球采购</h1>
+          <p>搜索商品、比较可信来源，并在确认后前往平台查看。</p>
+        </div>
+        <button class="cmd-btn gray" id="commerceFallbackBackHome" type="button">返回首页总调度</button>
+      </div>
+      <div class="commerce-toolbar commerce-toolbar-workspace">
+        <div class="commerce-toolbar-input">
+          <label class="commerce-toolbar-label" for="commerceFallbackInput">搜索需求</label>
+          <textarea id="commerceFallbackInput" class="cmd-input commerce-input" placeholder="搜索商品或描述你想买什么"></textarea>
+        </div>
+        <div class="cmd-actions">
+          <button class="cmd-btn primary" id="commerceFallbackRetry" type="button">${loading ? "正在准备…" : "重新加载"}</button>
+        </div>
+      </div>
+      <div class="commerce-layout">
+        <div class="commerce-detail commerce-detail-empty" data-commerce-empty-state="true">
+          <h2>${loading ? "正在准备全球采购" : "全球采购暂时未能完整加载"}</h2>
+          <p>${loading ? "你可以先输入想找的商品；Basic Mode 不依赖 AI。" : "你的需求尚未提交。请重新加载，或返回首页后再试。"}</p>
+        </div>
+      </div>
+    </section>`;
+  }
+  function renderCommerceRouteFallback(host, state, retry){
+    if (!host) return;
+    host.innerHTML = commerceRouteFallbackHtml(state);
+    const back = host.querySelector("#commerceFallbackBackHome");
+    if (back) back.addEventListener("click", () => window.WeishanRouter && window.WeishanRouter.setRoute("home"));
+    const retryButton = host.querySelector("#commerceFallbackRetry");
+    if (retryButton) {
+      retryButton.disabled = state === "loading";
+      if (!retryButton.disabled && typeof retry === "function") retryButton.addEventListener("click", retry);
+    }
+  }
   function installCommerceRoute(){
     if (!window.WeishanRouter || window.WeishanRouter.__commerceRouteInstalled) return;
     const originalSetRoute = window.WeishanRouter.setRoute;
@@ -46,16 +84,38 @@
     let commerceActive = false;
     function mountCommerce(){
       const host = document.getElementById("pageHost");
-      if (!host) return;
-      host.innerHTML = "";
-      if (window.CommerceAgentPage && window.CommerceAgentPage.mount) window.CommerceAgentPage.mount(host);
+      if (!host || !commerceActive) return;
+      const pendingInput = host.querySelector("#commerceFallbackInput");
+      const pendingDraft = pendingInput ? pendingInput.value : "";
+      if (!window.CommerceAgentPage || typeof window.CommerceAgentPage.mount !== "function") {
+        renderCommerceRouteFallback(host, "unavailable", () => window.WeishanRouter.refresh());
+        return;
+      }
+      try {
+        window.CommerceAgentPage.mount(host);
+        const commerceInput = host.querySelector("#commerceInput");
+        if (commerceInput && pendingDraft) {
+          commerceInput.value = pendingDraft;
+          commerceInput.dispatchEvent(new Event("input", { bubbles:true }));
+        }
+      } catch (_) {
+        renderCommerceRouteFallback(host, "unavailable", () => window.WeishanRouter.refresh());
+      }
       if (window.Sidebar) window.Sidebar.refresh();
       if (window.Topbar) window.Topbar.refresh();
+    }
+    function loadAndMountCommerce(){
+      const host = document.getElementById("pageHost");
+      if (host) renderCommerceRouteFallback(host, "loading");
+      return loadCommerceAgent().then(loadCommerceAgentPage).then(mountCommerce).catch(() => {
+        const currentHost = document.getElementById("pageHost");
+        if (commerceActive && currentHost) renderCommerceRouteFallback(currentHost, "unavailable", loadAndMountCommerce);
+      });
     }
     window.WeishanRouter.setRoute = function(id){
       if (id === "commerce") {
         commerceActive = true;
-        loadCommerceAgent().then(loadCommerceAgentPage).then(mountCommerce);
+        loadAndMountCommerce();
         return;
       }
       commerceActive = false;
@@ -63,7 +123,7 @@
     };
     window.WeishanRouter.refresh = function(){
       if (commerceActive) {
-        loadCommerceAgent().then(loadCommerceAgentPage).then(mountCommerce);
+        loadAndMountCommerce();
         return;
       }
       return originalRefresh.call(window.WeishanRouter);
