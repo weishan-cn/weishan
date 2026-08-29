@@ -45,10 +45,10 @@
 
   function defaultDisplay() {
     return {
-      summaryTitle: "机票搜索结果",
-      currentStatusLine: "暂无真实价格结果",
-      priceStateLine: "当前尚未接入真实只读机票价格源，不能展示价格。",
-      futureLine: "接入可信价格源后，将只显示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。"
+      summaryTitle: "搜索条件已准备 · 机票搜索结果待验证",
+      currentStatusLine: "暂未获取到可验证的实时报价（暂无真实价格结果）",
+      priceStateLine: "当前没有已授权的实时只读价格源，因此不显示价格。",
+      futureLine: "你可以前往平台确认；接入获批来源后，这里只显示有来源、时间和完整性标记的可验证报价。"
     };
   }
 
@@ -88,10 +88,10 @@
       };
     }
     return {
-      summaryTitle: safe.display.summaryTitle || "机票搜索结果",
-      currentStatusLine: safe.display.currentStatusLine || "暂无真实价格结果",
-      priceStateLine: safe.display.priceStateLine || "当前尚未接入真实只读机票价格源，不能展示价格。",
-      futureLine: safe.display.futureLine || "接入可信价格源后，将只显示通过安全检查的真实价格结果。最终价格、库存、税费、运费、行李、退改签，以跳转后的平台页面为准。"
+      summaryTitle:"搜索条件已准备 · 机票搜索结果待验证",
+      currentStatusLine:"暂未获取到可验证的实时报价（暂无真实价格结果）",
+      priceStateLine:"当前没有已授权的实时只读价格源，因此不显示价格。",
+      futureLine:"你可以前往平台确认；接入获批来源后，这里只显示有来源、时间和完整性标记的可验证报价。"
     };
   }
 

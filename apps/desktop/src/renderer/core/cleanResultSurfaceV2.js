@@ -51,7 +51,7 @@
     else if (mode === "needs_clarification") statusMessage = "请补充关键信息";
     else if (hasReal) statusMessage = "已找到 " + cardsResult.cardCount + " 条可信只读价格结果";
     else if (hasLimitedBeta) statusMessage = "暂无生产真实最低价；以下为只读候选价，仅用于展示流程验证，不代表真实最低价。";
-    else statusMessage = "暂无真实价格结果；你可以复制搜索条件，前往官方平台手动核对。";
+    else statusMessage = "暂未获取到可验证的实时报价（暂无真实价格结果）；你可以前往平台确认。";
     const hints = dedupeUserFacingSafetyHints([statusMessage, "weishan 只做搜索和比较，不收款、不下单。最终价格、库存、税费、行李和退改签以平台页面为准。"]);
     const safetyHint = hints.find((item) => /^weishan 只做搜索和比较/.test(item)) || "weishan 只做搜索和比较，不收款、不下单。最终价格、库存、税费、行李和退改签以平台页面为准。";
     const audit = buildCleanResultSurfaceV2AuditDraft({ surfaceMode:mode, resultCardCount:cardsResult.cardCount, duplicateNoPriceMessageCount:hasLimitedBeta ? 0 : 1, userFacingSafetyHintCount:1, destinationModifierLeakCount:0, duplicateSafetyHintCount:0, internalDebugLabelVisibleCount:0, handoffAreaGrouped:true });

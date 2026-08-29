@@ -4462,22 +4462,24 @@
   function commerceSimpleFlightFields(task){
     const normalized = task && (task.normalizedFields || task.normalized) || {};
     const raw = String(task && (task.inputSummary || task.rawInput || task.title || task.text) || "");
+    const truthNormalizer = window.WeishanFlightIntentNormalizer;
+    const truthIntent = truthNormalizer && typeof truthNormalizer.normalizeFlightIntent === "function" ? truthNormalizer.normalizeFlightIntent(raw) : null;
     const parser = window.WeishanFlightIntentParser;
     const parsed = parser && typeof parser.parseFlightIntent === "function" ? parser.parseFlightIntent(raw) : null;
     const normalizer = window.WeishanProcurementSortIntentNormalizer;
     const normalizedIntent = normalizer && typeof normalizer.normalizeProcurementSortIntent === "function" ? normalizer.normalizeProcurementSortIntent({
       rawUserInput:raw,
-      origin:normalized.originText || parsed && parsed.origin,
-      destination:normalized.destinationText || parsed && parsed.destination,
-      date:normalized.dateText || normalized.timing || parsed && parsed.departureDate,
+      origin:truthIntent && truthIntent.route && truthIntent.route.originCity || normalized.originText || parsed && parsed.origin,
+      destination:truthIntent && truthIntent.route && truthIntent.route.destinationCity || normalized.destinationText || parsed && parsed.destination,
+      date:truthIntent && truthIntent.departureDate || normalized.dateText || normalized.timing || parsed && parsed.departureDate,
       directOnly:normalized.directOnly === true || parsed && parsed.directOnly === true,
       sortPreference:normalized.sortPreference,
       sortLabel:normalized.sortPreferenceLabel || normalized.goal
     }) : null;
-    const origin = String(normalizedIntent && normalizedIntent.origin || normalized.originText || parsed && parsed.origin || "").trim();
-    const destination = String(normalizedIntent && normalizedIntent.destination || normalized.destinationText || parsed && parsed.destination || "").trim();
-    const date = String(normalizedIntent && normalizedIntent.departureDate || normalized.dateText || normalized.timing || parsed && parsed.departureDate || "").trim().replace(/\s+/g, "");
-    const dateDisplay = String(normalizedIntent && normalizedIntent.dateDisplay || date.replace(/^(\d{1,2})月(\d{1,2})日$/, "$1 月 $2 日"));
+    const origin = String(truthIntent && truthIntent.route && truthIntent.route.originCity || normalizedIntent && normalizedIntent.origin || normalized.originText || parsed && parsed.origin || "").trim();
+    const destination = String(truthIntent && truthIntent.route && truthIntent.route.destinationCity || normalizedIntent && normalizedIntent.destination || normalized.destinationText || parsed && parsed.destination || "").trim();
+    const date = String(truthIntent && truthIntent.departureDate || normalizedIntent && normalizedIntent.departureDate || normalized.dateText || normalized.timing || parsed && parsed.departureDate || "").trim().replace(/\s+/g, "");
+    const dateDisplay = String(truthIntent && truthIntent.dateDisplay || normalizedIntent && normalizedIntent.dateDisplay || date.replace(/^(\d{1,2})月(\d{1,2})日$/, "$1 月 $2 日"));
     const directOnly = normalizedIntent && normalizedIntent.directOnly === true || normalized.directOnly === true || parsed && parsed.directOnly === true || /直达|直飞|不转机|不要中转|只看直飞/.test(raw);
     const sortPreference = normalizedIntent && normalizedIntent.sortPreference || (normalized.sortPreference === "low_price" || parsed && parsed.sortPreference === "low_price" || /最便宜|低价|便宜|最低价|价格最低/.test(raw) || /低价优先/.test(String(normalized.constraints || "")) ? "low_price" : "safe_trusted");
     const sortLabel = normalizedIntent && normalizedIntent.sortLabel || (sortPreference === "low_price" ? "低价优先" : "安全与可信来源优先");
@@ -8440,11 +8442,13 @@
           <span>真实结果优先</span>
           <strong>${esc(flightLowestOffers.summaryTitle || "机票搜索结果")}</strong>
         </div>
-        <p>最多 3 条结果卡，后台安全详情默认隐藏。</p>
+        <p>只显示可验证报价；Sandbox / Fixture 不会显示为实时价格。</p>
       </div>
       <div class="commerce-one-screen-body">
         <section class="commerce-one-screen-card">
           <h4>${esc(flightLowestOffers.summaryTitle || "机票搜索结果")}</h4>
+          <p class="commerce-result-surface-status">${esc(flightLowestOffers.currentStatusLine || "暂未获取到可验证的实时报价")}</p>
+          <p>${esc(flightLowestOffers.priceStateLine || "当前没有已授权的实时只读价格源，因此不显示价格。")}</p>
           <p>出发地：${esc(fields.origin)}</p>
           <p>目的地：${esc(fields.destination)}</p>
           <p>出发日期：${esc(fields.date)}</p>
@@ -8455,7 +8459,7 @@
           ${zeroLearningTravelHtml}
           ${flightWorkflowHtml}
           ${commerceCleanResultSurfaceHtml(task, { guardedPriceCardHtml })}
-          <section class="commerce-manual-platform-check" data-commerce-manual-platform-check="true"><h5>记录平台核对结果</h5><p>Platform Check Evidence</p><label>observedTotalPrice <input data-commerce-manual-platform-check-total="true" aria-label="observedTotalPrice" value="1010"></label><label>currency <input data-commerce-manual-platform-check-currency="true" aria-label="currency" value="CNY"></label><label>userNote <textarea data-commerce-manual-platform-check-note="true" aria-label="userNote"></textarea></label><button type="button" class="cmd-btn gray" data-commerce-manual-platform-check-save="true">记录平台核对结果</button><div data-commerce-manual-platform-check-output="true"><p>平台核对结果已记录</p><p>平台核对汇总</p><p>候选价置信标签</p><p>高一致 / 有差异 / 需重新核对 / 不可确认</p><p>下一步安全建议</p><p>平台核对差异</p><p>平台最终为准</p><p>唯珊不会付款、不会下单、不会上传证件或银行卡</p><p>secretStored: false</p></div></section>
+          <section class="commerce-manual-platform-check" data-commerce-manual-platform-check="true"><h5>记录平台核对结果</h5><p>仅记录你亲自在平台看到的价格；空白字段不会生成价格。</p><label>实际总价 <input data-commerce-manual-platform-check-total="true" aria-label="observedTotalPrice" inputmode="decimal" placeholder="例如 1010" value=""></label><label>币种 <input data-commerce-manual-platform-check-currency="true" aria-label="currency" placeholder="例如 CNY" value=""></label><label>备注 <textarea data-commerce-manual-platform-check-note="true" aria-label="userNote"></textarea></label><button type="button" class="cmd-btn gray" data-commerce-manual-platform-check-save="true">记录平台核对结果</button><div data-commerce-manual-platform-check-output="true"><p>平台核对结果已记录</p><p>平台核对汇总</p><p>候选价置信标签</p><p>高一致 / 有差异 / 需重新核对 / 不可确认</p><p>下一步安全建议</p><p>平台核对差异</p><p>平台最终为准</p><p>唯珊不会付款、不会下单、不会上传证件或银行卡</p><p>secretStored: false</p></div></section>
         </section>
       </div>
       <div class="commerce-one-screen-actions commerce-manual-verification-actions" aria-label="手动核对入口">

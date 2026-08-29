@@ -2752,22 +2752,24 @@
   function commerceSimpleFlightFields(task){
     const normalized = task && (task.normalizedFields || task.normalized) || {};
     const raw = String(task && (task.inputSummary || task.rawInput || task.title || task.text) || "");
+    const truthNormalizer = window.WeishanFlightIntentNormalizer;
+    const truthIntent = truthNormalizer && typeof truthNormalizer.normalizeFlightIntent === "function" ? truthNormalizer.normalizeFlightIntent(raw) : null;
     const parser = window.WeishanFlightIntentParser;
     const parsed = parser && typeof parser.parseFlightIntent === "function" ? parser.parseFlightIntent(raw) : null;
     const normalizer = window.WeishanProcurementSortIntentNormalizer;
     const normalizedIntent = normalizer && typeof normalizer.normalizeProcurementSortIntent === "function" ? normalizer.normalizeProcurementSortIntent({
       rawUserInput:raw,
-      origin:normalized.originText || parsed && parsed.origin,
-      destination:normalized.destinationText || parsed && parsed.destination,
-      date:normalized.dateText || normalized.timing || parsed && parsed.departureDate,
+      origin:truthIntent && truthIntent.route && truthIntent.route.originCity || normalized.originText || parsed && parsed.origin,
+      destination:truthIntent && truthIntent.route && truthIntent.route.destinationCity || normalized.destinationText || parsed && parsed.destination,
+      date:truthIntent && truthIntent.departureDate || normalized.dateText || normalized.timing || parsed && parsed.departureDate,
       directOnly:normalized.directOnly === true || parsed && parsed.directOnly === true,
       sortPreference:normalized.sortPreference,
       sortLabel:normalized.sortPreferenceLabel || normalized.goal
     }) : null;
-    const origin = String(normalizedIntent && normalizedIntent.origin || normalized.originText || parsed && parsed.origin || "").trim();
-    const destination = String(normalizedIntent && normalizedIntent.destination || normalized.destinationText || parsed && parsed.destination || "").trim();
-    const date = String(normalizedIntent && normalizedIntent.departureDate || normalized.dateText || normalized.timing || parsed && parsed.departureDate || "").trim().replace(/\s+/g, "");
-    const dateDisplay = String(normalizedIntent && normalizedIntent.dateDisplay || date.replace(/^(\d{1,2})月(\d{1,2})日$/, "$1 月 $2 日"));
+    const origin = String(truthIntent && truthIntent.route && truthIntent.route.originCity || normalizedIntent && normalizedIntent.origin || normalized.originText || parsed && parsed.origin || "").trim();
+    const destination = String(truthIntent && truthIntent.route && truthIntent.route.destinationCity || normalizedIntent && normalizedIntent.destination || normalized.destinationText || parsed && parsed.destination || "").trim();
+    const date = String(truthIntent && truthIntent.departureDate || normalizedIntent && normalizedIntent.departureDate || normalized.dateText || normalized.timing || parsed && parsed.departureDate || "").trim().replace(/\s+/g, "");
+    const dateDisplay = String(truthIntent && truthIntent.dateDisplay || normalizedIntent && normalizedIntent.dateDisplay || date.replace(/^(\d{1,2})月(\d{1,2})日$/, "$1 月 $2 日"));
     const directOnly = normalizedIntent && normalizedIntent.directOnly === true || normalized.directOnly === true || parsed && parsed.directOnly === true || /直达|直飞|不转机|不要中转|只看直飞/.test(raw);
     const sortPreference = normalizedIntent && normalizedIntent.sortPreference || (normalized.sortPreference === "low_price" || parsed && parsed.sortPreference === "low_price" || /最便宜|低价|便宜|最低价|价格最低/.test(raw) || /低价优先/.test(String(normalized.constraints || "")) ? "low_price" : "safe_trusted");
     const sortLabel = normalizedIntent && normalizedIntent.sortLabel || (sortPreference === "low_price" ? "低价优先" : "安全与可信来源优先");
@@ -2788,7 +2790,8 @@
   function commerceIsSimpleFlightTask(task){
     const raw = String(task && (task.inputSummary || task.rawInput || task.title || task.text) || "");
     const fields = commerceSimpleFlightFields(task);
-    return !!(task && task.category === "flight" && fields.origin && fields.destination && /\d{1,2}\s*月\s*\d{1,2}\s*日/.test(fields.date) && !/(酒店|住宿|电脑|商品|剪视频|内存|硬盘|采购计划)/.test(raw));
+    const dateReady = /\d{1,2}\s*月\s*\d{1,2}\s*日/.test(fields.date) || /^\d{4}-\d{2}-\d{2}$/.test(fields.date);
+    return !!(task && task.category === "flight" && fields.origin && fields.destination && dateReady && !/(酒店|住宿|电脑|商品|剪视频|内存|硬盘|采购计划)/.test(raw));
   }
 
   function commerceSimpleFlightEnglishCity(value){
@@ -6485,11 +6488,13 @@
           <span>真实结果优先</span>
           <strong>${esc(flightLowestOffers.summaryTitle || "机票搜索结果")}</strong>
         </div>
-        <p>最多 3 条结果卡，后台安全详情默认隐藏。</p>
+        <p>只显示可验证报价；Sandbox / Fixture 不会显示为实时价格。</p>
       </div>
       <div class="commerce-one-screen-body">
         <section class="commerce-one-screen-card">
           <h4>${esc(flightLowestOffers.summaryTitle || "机票搜索结果")}</h4>
+          <p class="commerce-result-surface-status">${esc(flightLowestOffers.currentStatusLine || "暂未获取到可验证的实时报价")}</p>
+          <p>${esc(flightLowestOffers.priceStateLine || "当前没有已授权的实时只读价格源，因此不显示价格。")}</p>
           <p>出发地：${esc(fields.origin)}</p>
           <p>目的地：${esc(fields.destination)}</p>
           <p>出发日期：${esc(fields.date)}</p>
