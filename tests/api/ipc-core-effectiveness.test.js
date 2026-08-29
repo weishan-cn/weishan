@@ -191,11 +191,11 @@ async function main() {
   assert.equal(preloadSource.includes("contextBridge.exposeInMainWorld(\"weishan\", ipcRenderer"), false);
 
   const exposedMethodCount = Object.values(exposed).reduce((sum, api) => sum + flattenMethods(api).length, 0);
-  assert.equal(exposedMethodCount, 37);
+  assert.equal(exposedMethodCount, 39);
 
   const serialized = JSON.stringify({ exposed:Object.keys(exposed), blockedPreloadOpen });
   assert.equal(/Bearer |client_secret|private_key|apiKeyValue|passwordValue/i.test(serialized), false);
-  console.log("IPC_CORE_EFFECTIVENESS PASS channels=32 exposedMethods=" + exposedMethodCount + " externalAttacks=" + externalAttackCorpus.length + " validationCases=1000");
+  console.log("IPC_CORE_EFFECTIVENESS PASS channels=34 exposedMethods=" + exposedMethodCount + " externalAttacks=" + externalAttackCorpus.length + " validationCases=1000");
 }
 
 main().catch((error) => {

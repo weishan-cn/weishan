@@ -884,7 +884,7 @@
     }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
-    script.src = "./renderer/core/commerceSearch.js?v=2.0.48";
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.50-prijsprofeet";
     script.dataset.weishanDynamic = "WeishanCommerceSearch";
     script.onload = () => render(host);
     document.head.appendChild(script);
@@ -1092,6 +1092,7 @@
     if (type === "sandbox") return "Sandbox";
     if (type === "rakuten_api") return "Rakuten API";
     if (type === "rakuten_official_api") return "Rakuten 官方 API";
+    if (type === "prijsprofeet_public_api") return "PrijsProfeet 公开只读 API";
     if (type === "external_link_only") return "外部平台入口";
     if (type === "official") return "官方";
     if (type === "aggregator") return "聚合";
@@ -3452,9 +3453,16 @@
   function globalShoppingWorkspaceHtml(task){
     const card = globalProcurementUserFacingCard(task);
     if (!card) return "";
+    const search = searchApi();
+    const settings = search && search.getCommerceSearchSettings ? search.getCommerceSearchSettings() : {};
+    const health = search && search.getCommerceProviderHealth ? search.getCommerceProviderHealth(task.category, settings) : null;
+    const hasConfiguredProvider = !!(health && health.hasProvider || search && search.hasCommerceSearchProvider && search.hasCommerceSearchProvider(settings));
+    const currentPriceResults = hasCurrentPublicPriceResults(task) ? readOnlySearchResultsHtml(task) : "";
     return `<section class="commerce-global-shopping-workspace" data-commerce-global-shopping-workspace="true">
       <div class="commerce-global-shopping-main">
         ${workspaceOverviewHtml(task, card)}
+        ${searchStatusHtml(task, settings, hasConfiguredProvider)}
+        ${currentPriceResults}
         ${workspaceBasicAiModeHtml(task, card)}
         ${workspaceProductCardHtml(card)}
         ${workspacePlatformCardsHtml(card)}
@@ -8911,11 +8919,18 @@
     const isFlight = task && task.category === "flight";
     const isProduct = task && task.category === "ecommerce";
     const hasReadOnlyResults = !!(task && task.readOnlySearchResultSummary && task.readOnlySearchResultSummary.candidateCount > 0);
+    const hasCurrentPriceResults = hasCurrentPublicPriceResults(task);
+    const publicReadonlyAvailable = !!(isProduct
+      && window.weishanGlobalShopping
+      && typeof window.weishanGlobalShopping.prijsProfeetReadonlySearch === "function"
+      && window.WeishanPrijsProfeetReadonlyAdapter
+      && typeof window.WeishanPrijsProfeetReadonlyAdapter.normalizeResult === "function");
+    const effectiveHasProvider = hasProvider || publicReadonlyAvailable;
     const locationInfo = searchApi() && searchApi().locationHealthForCommerce ? searchApi().locationHealthForCommerce() : {};
     const complianceRequired = task && task.searchStatus === "local_law_compliance_required";
     const localLawPanelRequired = !isModelPricing && task && task.complianceHealth && task.complianceHealth.canSearchProvider === false;
     const destinationRequired = !complianceRequired && isProduct && (task && (task.searchStatus === "shipping_destination_required" || task.searchStatus === "location_required") || locationInfo.hasShippingDestination !== true);
-    const disabled = hasReadOnlyResults ? true : (!hasProvider || missingFields.length > 0 || destinationRequired || complianceRequired);
+    const disabled = !effectiveHasProvider || missingFields.length > 0 || destinationRequired || complianceRequired;
     const isCruise = task && task.category === "cruise";
     const isPrivateJet = task && task.category === "privateJet";
     const normalized = task && task.normalizedFields || {};
@@ -8932,9 +8947,9 @@
     const sandboxInfo = health.dryRunHealth || health.sandboxHealth || {};
     const globalReadiness = sandboxInfo.globalReadiness || {};
     const reasonWhenDisabled = providerRow.reasonWhenDisabled || "";
-    const searchStateLabel = hasReadOnlyResults ? "只读候选已生成" : (hasProvider ? "已就绪" : "未配置");
+    const searchStateLabel = hasCurrentPriceResults ? "当前价格已获取，可由用户手动刷新" : (effectiveHasProvider ? "公开只读价格源已就绪" : hasReadOnlyResults ? "平台候选已生成" : "未配置");
     const failedMessage = task && task.searchStatus === "failed" ? task.searchErrorMessage || (isModelPricing ? "当前模型结果源不可用，无法返回结果。" : "搜索失败，无法返回结果。") : "";
-    const buttonLabel = isModelPricing ? "搜索模型结果" : missingFields.length ? "开始搜索" : hasProvider ? "开始搜索" : "暂不可搜索";
+    const buttonLabel = isModelPricing ? "搜索模型结果" : missingFields.length ? "开始搜索" : hasCurrentPriceResults ? "刷新当前价格" : effectiveHasProvider ? "搜索当前价格" : "暂不可搜索";
     const providerSafetyBody = !isModelPricing ? [
       localLawPanelRequired ? localLawCompliancePanelHtml(task) : "",
       destinationRequired ? `<div class="commerce-warning commerce-location-required">
@@ -8950,14 +8965,14 @@
         <span>为了精准计算最低到手价并遵守当地法律，请设置收货目的地，并可选择开启定位服务。实际价格、库存、税费和关税仍以外部平台和海关结算为准。</span>
         <button class="cmd-btn gray commerce-open-location-settings" type="button">去设置收货目的地</button>
       </div>` : "",
-      !hasProvider && !hasReadOnlyResults ? `<div class="commerce-warning commerce-provider-missing">
+      !effectiveHasProvider && !hasReadOnlyResults ? `<div class="commerce-warning commerce-provider-missing">
         <b>当前只是帮你整理搜索条件，不会访问真实平台，不会返回价格，不会跳转购买或预订，不会付款或下单。</b>
         <span>详细技术状态请展开“查看技术细节”。</span>
       </div>` : ""
     ].filter(Boolean).join("") : "";
     const providerSafetyDisclosure = providerSafetyBody ? disclosure("查看安全边界", providerSafetyBody, "commerce-safety-disclosure") : "";
     return `<div class="commerce-search-panel">
-      <p><b>当前状态：</b>${hasReadOnlyResults ? "已生成只读候选结果，可去平台查看实时价格。" : (isModelPricing ? (hasProvider ? "模型结果可用。" : "模型结果不可用。") : hasProvider ? "可以生成候选方案。" : isFlight ? "暂未接入真实机票搜索能力，无法返回实时价格。" : isProduct ? "暂未接入真实商品搜索能力，无法返回实时价格。" : "搜索能力未配置，无法返回实时价格。")}</p>
+      <p><b>当前状态：</b>${hasCurrentPriceResults ? "已获取当前公开只读价格；价格、库存与适用条件以零售商页面为准。" : (isModelPricing ? (hasProvider ? "模型结果可用。" : "模型结果不可用。") : publicReadonlyAvailable ? "可以由用户主动查询公开只读商品价格。" : hasReadOnlyResults ? "已生成平台候选，但尚无当前价格。" : hasProvider ? "可以生成候选方案。" : isFlight ? "暂未接入真实机票搜索能力，无法返回实时价格。" : isProduct ? "暂未接入真实商品搜索能力，无法返回实时价格。" : "搜索能力未配置，无法返回实时价格。")}</p>
       ${providerSafetyDisclosure}
       ${isFlight && !hasProvider && !hasReadOnlyResults ? `<div class="commerce-warning commerce-flight-provider-missing">
         <b>已识别为机票搜索计划。</b>
@@ -8972,9 +8987,18 @@
       ${isPrivateJet ? `<p class="commerce-warning">公务机属于高价值定制服务，价格通常需要询价确认。当前仅生成搜索和询价计划，不自动提交询价、不付款、不签约。</p>` : ""}
       ${failedMessage ? `<p class="commerce-warning">${esc(failedMessage)}</p>` : ""}
       ${missingFields.length ? `<p class="commerce-warning">请补充${esc(missingFields.join("、"))}，否则不搜索价格。</p>` : ""}
-      <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${esc(hasReadOnlyResults ? "当前为只读模式" : (destinationRequired ? "需要设置收货目的地" : disabled && !missingFields.length && !isModelPricing ? "搜索适配器未配置" : buttonLabel))}</button>
-      <p class="commerce-muted">${esc(hasReadOnlyResults ? "当前使用本地规则/AI 理解生成只读平台候选；最终价格以平台页面为准。" : "价格只来自已配置搜索能力返回数据；未配置时不会显示假价格。")}</p>
+      <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${esc(destinationRequired ? "需要设置收货目的地" : disabled && !missingFields.length && !isModelPricing ? "搜索适配器未配置" : buttonLabel)}</button>
+      <p class="commerce-muted">${esc(hasCurrentPriceResults ? "刷新只在你点击后执行；不会在打开页面、切换路由或空闲时联网。" : publicReadonlyAvailable ? "价格仅来自公开只读来源；单一且费用不完整的价格不会被标记为最低价。" : hasReadOnlyResults ? "当前使用本地规则/AI 理解生成平台候选；最终价格以平台页面为准。" : "价格只来自已配置搜索能力返回数据；未配置时不会显示假价格。")}</p>
     </div>`;
+  }
+
+  function hasCurrentPublicPriceResults(task){
+    const results = Array.isArray(task && task.readOnlySearchTopResults) ? task.readOnlySearchTopResults : [];
+    return results.some((item) => item
+      && item.truthEvidence
+      && item.truthEvidence.evidenceTruthClass === "REAL_PROVIDER_PRICE"
+      && item.truthEvidence.displayAsLiveCurrentPrice === true
+      && item.sourceType === "prijsprofeet_public_api");
   }
 
   function searchRequestHtml(request){
@@ -9189,6 +9213,9 @@
       </div>
       <p class="commerce-muted">费用说明：${esc(item.feeNote || "价格与费用以平台页面为准")}</p>
       <p class="commerce-muted">数据来源：${esc(sourceTypeLabel(item.sourceType))} · 更新时间：${esc(timeLabel(item.updatedAt || ((item.priceFreshness || {}).fetchedAt) || ((item.availabilityFreshness || {}).checkedAt) || "") || "unknown")} · 价格时效：${esc(freshnessLabel((item.priceFreshness || {}).freshnessLevel || ""))}</p>
+      ${item.sourceAttributionName && item.sourceAttributionUrl ? `<p class="commerce-muted">数据提供：${esc(item.sourceAttributionName)} · <button class="cmd-btn gray commerce-source-attribution-link" type="button" data-url="${esc(item.sourceAttributionUrl)}">查看数据来源</button></p>` : ""}
+      ${item.retrievedAt ? `<p class="commerce-muted">本次检索：${esc(timeLabel(item.retrievedAt) || "unknown")}${item.providerUpdatedAt ? " · 来源抓取：" + esc(timeLabel(item.providerUpdatedAt) || "unknown") : ""}</p>` : ""}
+      ${item.validFrom && item.validUntil ? `<p class="commerce-muted">价格有效期：${esc(item.validFrom)} → ${esc(item.validUntil)}</p>` : ""}
       ${item.dataSource ? `<p class="commerce-muted">当前可信等级：${esc((item.dataQuality || {}).qualityLevel === "high" ? "高" : "离线采购模式")}</p>` : ""}
       ${item.realDataValidation ? `<p class="commerce-muted">验证状态：${esc(item.realDataValidation.validationStatus === "passed" ? "已通过安全校验" : item.realDataValidation.validationStatus || "待确认")} · 可信等级：${esc(item.realDataValidation.confidence || "low")}</p>` : ""}
       ${item.providerCoverage ? `<p class="commerce-muted">平台覆盖：${esc(String(item.providerCoverage.coverageScore || 0))} 分 · 市场匹配：${esc(item.marketMatched ? "已匹配" : "需复核")}</p>` : ""}
@@ -9204,20 +9231,20 @@
       <p class="commerce-muted">推荐理由：${esc(((item.recommendationReasonDetail || {}).summary) || item.recommendationReason || "")}</p>
       ${item.fallbackInfo && item.fallbackInfo.availableFallback ? `<p class="commerce-muted">回退候选：${esc(item.fallbackInfo.fallbackProviderName || "已准备更多平台")}</p>` : ""}
       <p class="commerce-warning">${esc(item.riskNote || "Weishan 不收款、不代下单、不保存账号密码，最终价格以平台页面为准。")}</p>
-      ${item.targetUrl ? `<button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}">去平台查看</button>` : `<p class="commerce-warning">目标平台链接缺失，暂不可跳转。</p>`}
+      ${item.targetUrl ? `<button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}">去零售商核验</button>` : `<p class="commerce-warning">目标平台链接缺失，暂不可跳转。</p>`}
     </article>`;
     const realtimeStatusCard = realProviderReadonlyStatus ? `<article class="commerce-candidate-card commerce-readonly-search-card">
       <div class="commerce-candidate-head">
         <div>
-          <b>Rakuten 实时查询</b>
+          <b>${esc(realProviderReadonlyStatus.providerName || "Rakuten")} 实时查询</b>
           <span>${esc(realProviderReadonlyStatus.label || "未知")}</span>
         </div>
         <strong>${esc(realProviderReadonlyStatus.executionMode || "external_link_only")}</strong>
       </div>
       <p class="commerce-muted">接入阶段：${esc(realProviderReadonlyStatus.stageLabel || "状态未知")}</p>
       <p class="commerce-muted">版本：${esc(realProviderReadonlyStatus.adapterVersion || "4.2.8-rakuten-main-readonly")}</p>
-      <p class="commerce-warning">${esc(realProviderReadonlyStatus.userMessage || "Rakuten 实时查询状态未知。")}</p>
-      <p class="commerce-muted">最终价格以 Rakuten 页面与结算页为准。Weishan 不收款、不代下单、不保存平台账号密码。</p>
+      <p class="commerce-warning">${esc(realProviderReadonlyStatus.userMessage || "实时查询状态未知。")}</p>
+      <p class="commerce-muted">最终价格以零售商页面为准。Weishan 不收款、不代下单、不保存平台账号密码。</p>
     </article>` : "";
     return `<div class="commerce-candidates commerce-readonly-search-results" data-commerce-readonly-search-results="true">
       <p class="commerce-muted">${esc(summary && summary.rankingSummary || "默认只展示 2-3 条优先查看结果；没有真实价格时不会伪造最低价。")}</p>
@@ -11179,6 +11206,10 @@
           resultStatus:"requested"
         }));
         const result = await search.searchCommerceCandidates(target);
+        if (result && result.code === "COMMERCE_STALE_RESULT_IGNORED") {
+          button.disabled = false;
+          return;
+        }
         if (!result.ok) {
           const status = result.code === "COMMERCE_MISSING_FIELDS" ? "missingFields" : result.code === "COMMERCE_LOCAL_LAW_COMPLIANCE_REQUIRED" ? "local_law_compliance_required" : result.code === "COMMERCE_SHIPPING_DESTINATION_REQUIRED" || result.code === "COMMERCE_LOCATION_REQUIRED" ? "shipping_destination_required" : result.code === "COMMERCE_NO_PROVIDER" || result.code === "COMMERCE_PROVIDER_NOT_CONFIGURED" || result.code === "COMMERCE_PROVIDER_CONFIG_NOT_READY" ? "no_provider" : result.code === "COMMERCE_NO_RESULTS" ? "no_results" : "failed";
           const updated = api.updateCommerceTask(taskId, {
@@ -11273,7 +11304,7 @@
         render(host);
       });
     });
-    host.querySelectorAll(".commerce-booking-link, .commerce-decision-link").forEach((link) => {
+    host.querySelectorAll(".commerce-booking-link, .commerce-decision-link, .commerce-source-attribution-link").forEach((link) => {
       link.addEventListener("click", () => {
         const url = link.getAttribute("data-url") || link.getAttribute("href") || "";
         const taskId = selected && selected.taskId || "";

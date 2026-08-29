@@ -11,6 +11,7 @@ const { createMacOSIdentifierEntry, lockedIdentifierTargetFromEnvironment } = re
 const { createProviderCredentialIdentifierMenuAction } = require("./main/providerCredentialIdentifierMenuAction");
 const { registerLimitedBetaPreferenceHandlers } = require("./main/limitedBetaPreferenceStore");
 const { registerGlobalShoppingRakutenReadonlyHandlers } = require("./main/globalShoppingRakutenReadonlyService");
+const { registerPrijsProfeetReadonlyHandlers } = require("./main/prijsProfeetReadonlyService");
 const { createEbaySandboxReadonlyValidator } = require("./main/ebaySandboxReadonlyValidator");
 const { createHotelbedsEvaluationReadonlyValidator } = require("./main/hotelbedsEvaluationReadonlyValidator");
 const { createVideoProviderGateway } = require("./main/videoProviderGateway");
@@ -631,6 +632,7 @@ function registerIpcHandlers() {
   });
   registerLimitedBetaPreferenceHandlers(ipcMain, { app });
   registerGlobalShoppingRakutenReadonlyHandlers(ipcMain, {});
+  registerPrijsProfeetReadonlyHandlers(ipcMain, {});
   registerVideoProviderIpcHandlers(ipcMain, {
     gateway:createVideoProviderGateway({ enabled:false }),
     validateSender:(event) => !!(event && event.sender && typeof event.sender.getURL === "function" && event.sender.getURL().startsWith("file:"))

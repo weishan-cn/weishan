@@ -2,6 +2,7 @@
   const COMMERCE_SEARCH_SETTINGS_KEY = "weishan:commerceSearch:settings:v1";
   const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
   const CHEAPEST_REDIRECT_MODE = "cheapest_redirect";
+  const prijsProfeetSearchGenerations = new Map();
 
   function nowIso(){
     return new Date().toISOString();
@@ -119,6 +120,10 @@
 
   function readOnlySearchPresenterApi(){
     return window.WeishanGlobalShoppingReadOnlySearchResultPresenter || null;
+  }
+
+  function prijsProfeetReadonlyAdapterApi(){
+    return window.WeishanPrijsProfeetReadonlyAdapter || null;
   }
 
   function getCommerceLocalIntentRoute(input){
@@ -2630,14 +2635,14 @@
     return {
       candidateId:sanitizeText(safe.id || safe.platformName || safe.title || "readonly_candidate", 80),
       title:sanitizeText(safe.title || "只读候选结果", 120),
-      provider:sanitizeText(safe.platformName || "Rakuten", 80),
-      sourceName:sanitizeText(safe.platformName || "Rakuten", 80),
+      provider:sanitizeText(safe.platformName || safe.sourceName || "只读来源", 80),
+      sourceName:sanitizeText(safe.sourceName || safe.platformName || "只读来源", 80),
       url:sanitizeText(safe.targetUrl || safe.officialUrl || "", 240),
       bookingUrl:null,
       urlType:"external_search",
       price:Number.isFinite(Number(safe.price)) ? Number(safe.price) : null,
       totalPrice:Number.isFinite(Number(safe.price)) ? Number(safe.price) : null,
-      currency:sanitizeText(safe.currency || "JPY", 12),
+      currency:sanitizeText(safe.currency || "", 12),
       priceLabel:sanitizeText(safe.priceLabel || "价格以平台页面为准", 120),
       recommendationReason:sanitizeText(safe.recommendationReason || "按平台可信度、搜索相关性和只读边界进行推荐", 180),
       conditions:sanitizeText(safe.feeNote || "", 180),
@@ -2718,18 +2723,30 @@
     });
   }
 
-  function buildReadOnlySearchSuccess(request, providerName, candidates, status) {
-    const presentation = buildReadOnlyPresentation(request, candidates);
+  function buildReadOnlySearchSuccess(request, providerName, candidates, status, options) {
+    const settings = options && typeof options === "object" ? options : {};
+    const basePresentation = buildReadOnlyPresentation(request, candidates);
+    const presentation = settings.singleEvidenceOnly === true ? Object.assign({}, basePresentation, {
+      rankingSummary:"当前只展示一条通过价格真实性校验的证据；费用条件不完整，不能据此判断最低价。",
+      recommendation:null,
+      decisionResult:null,
+      comparisonMatrix:null
+    }) : basePresentation;
     const topResults = Array.isArray(presentation.topResults) ? presentation.topResults : [];
     const remainingResults = Array.isArray(presentation.remainingResults) ? presentation.remainingResults : [];
     const decisionResult = presentation.decisionResult || null;
-    const recommendation = presentation.recommendation || createRecommendationFromCandidates(topResults.map(toLegacyReadOnlyCandidate));
     const topLegacy = topResults.map(toLegacyReadOnlyCandidate);
+    const recommendation = settings.singleEvidenceOnly === true ? {
+      title:"当前价格证据",
+      reason:"仅发现一条当前有效的公开只读价格；配送、税费与其他条件未知，不能判定为最低价或完整到手价。",
+      riskSummary:"请在零售商页面核验最终价格、库存与适用条件。",
+      targetUrl:""
+    } : presentation.recommendation || createRecommendationFromCandidates(topLegacy);
     const first = topResults[0] || {};
     return {
       ok:topResults.length > 0,
       code:topResults.length > 0 ? "" : "COMMERCE_NO_RESULTS",
-      message:topResults.length > 0 ? "" : "暂无可展示的 Rakuten 只读候选结果。",
+      message:topResults.length > 0 ? "" : sanitizeText(settings.noResultsMessage || "暂无可展示的只读候选结果。", 180),
       providerName:providerName,
       request:request,
       searchStatus:topResults.length > 0 ? "completed" : "no_results",
@@ -2750,12 +2767,72 @@
       realProviderReadonlyStatus:status,
       searchResultSummary:{
         candidateCount:topResults.length,
-        source:"rakuten_main_process_readonly",
+        source:sanitizeText(settings.source || "rakuten_main_process_readonly", 80),
         mode:status.executionMode || "external_link_only",
         lowestPrice:first.price || "",
         currency:first.currency || ""
       }
     };
+  }
+
+  async function searchPrijsProfeetReadonlyProductCandidates(request){
+    const bridge = window.weishanGlobalShopping;
+    const adapter = prijsProfeetReadonlyAdapterApi();
+    if (!bridge || typeof bridge.prijsProfeetReadonlySearch !== "function" || !adapter || typeof adapter.normalizeResult !== "function") return null;
+    const taskKey = sanitizeText(request.taskId || request.query || "product", 120);
+    const nextGeneration = Number(prijsProfeetSearchGenerations.get(taskKey) || 0) + 1;
+    prijsProfeetSearchGenerations.set(taskKey, nextGeneration);
+    const requestId = taskKey + ":" + String(nextGeneration);
+    let raw;
+    try {
+      raw = await bridge.prijsProfeetReadonlySearch({ query:request.query, requestId, limit:1 });
+    } catch (_) {
+      raw = { ok:false, code:"SOURCE_UNAVAILABLE", requestId, results:[] };
+    }
+    if (Number(prijsProfeetSearchGenerations.get(taskKey) || 0) !== nextGeneration || sanitizeText(raw && raw.requestId || "", 120) !== requestId) {
+      return {
+        ok:false,
+        code:"COMMERCE_STALE_RESULT_IGNORED",
+        message:"较早的价格查询结果已忽略。",
+        providerName:"PrijsProfeet",
+        request,
+        candidates:[]
+      };
+    }
+    const normalized = adapter.normalizeResult(raw, { evaluatedAt:nowIso() });
+    if (!normalized || normalized.ok !== true) {
+      return {
+        ok:false,
+        code:"COMMERCE_PROVIDER_UNAVAILABLE",
+        message:"PrijsProfeet 当前价格查询暂时不可用，请稍后重试。",
+        providerName:"PrijsProfeet",
+        request,
+        candidates:[],
+        canShowPrice:false,
+        canShowBookingButton:false,
+        canShowCheckoutButton:false,
+        realProviderReadonlyStatus:normalized && normalized.status || adapter.status({ ok:false })
+      };
+    }
+    if (!normalized.candidates.length) {
+      return {
+        ok:false,
+        code:"COMMERCE_NO_RESULTS",
+        message:"没有找到当前有效、身份与币种完整且带官方零售商链接的价格。",
+        providerName:"PrijsProfeet",
+        request,
+        candidates:[],
+        canShowPrice:false,
+        canShowBookingButton:false,
+        canShowCheckoutButton:false,
+        realProviderReadonlyStatus:normalized.status
+      };
+    }
+    return buildReadOnlySearchSuccess(request, "PrijsProfeet", normalized.candidates, normalized.status, {
+      source:"prijsprofeet_main_process_public_readonly",
+      singleEvidenceOnly:true,
+      noResultsMessage:"没有找到当前有效、身份与币种完整且带官方零售商链接的价格。"
+    });
   }
 
   function buildReadOnlyFallbackSearchResult(request, status){
@@ -2871,7 +2948,8 @@
       return shippingDestinationRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox);
     }
     if (isProductSearchRequest(request) && !(request.missingFields && request.missingFields.length)) {
-      const readonlyResult = await searchRakutenReadonlyProductCandidates(request);
+      const readonlyResult = await searchPrijsProfeetReadonlyProductCandidates(request)
+        || await searchRakutenReadonlyProductCandidates(request);
       if (readonlyResult) {
         return Object.assign({
           providerHealth:providerHealth.providerHealth,
