@@ -26,6 +26,18 @@ function main() {
   const api = windowRef.WeishanGlobalShoppingOfflineIssueTriageBoard;
   assert.equal(api.GLOBAL_SHOPPING_OFFLINE_ISSUE_TRIAGE_BOARD_VERSION, "4.2.8");
 
+  let fallbackCalls = 0;
+  windowRef.WeishanGlobalShoppingPublicBetaReadinessSnapshot = {
+    buildGlobalShoppingPublicBetaReadinessSnapshot() {
+      fallbackCalls += 1;
+      return summary("unexpected fallback");
+    }
+  };
+  const missingSummaries = api.buildGlobalShoppingOfflineIssueTriageBoard({});
+  assert.equal(missingSummaries.status, "needs_review");
+  assert.equal(fallbackCalls, 0);
+  assert.deepEqual(Object.keys(missingSummaries.publicBetaReadinessSnapshotSummary || {}), []);
+
   const ready = api.buildGlobalShoppingOfflineIssueTriageBoard({
     publicBetaReadinessSnapshotSummary:summary("Public Beta Readiness Snapshot"),
     manualFeedbackReviewQueueMockSummary:summary("Manual Feedback Review Queue Mock"),

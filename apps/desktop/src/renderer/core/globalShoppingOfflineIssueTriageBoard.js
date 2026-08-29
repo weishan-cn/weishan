@@ -31,12 +31,6 @@
     const normalized = text(value);
     return normalized && normalized !== "null";
   }
-  function resolveSummary(input, key, apiName, methodName) {
-    const safe = obj(input);
-    if (present(safe[key])) return obj(safe[key]);
-    const api = window[apiName] || {};
-    return typeof api[methodName] === "function" ? obj(api[methodName](safe)) : {};
-  }
   function blockedReasons(input) {
     const safe = obj(input);
     const blocked = [];
@@ -73,11 +67,14 @@
 
   function evaluateGlobalShoppingOfflineIssueTriageBoard(input) {
     const safe = obj(input);
-    const publicBetaReadinessSnapshotSummary = resolveSummary(safe, "publicBetaReadinessSnapshotSummary", "WeishanGlobalShoppingPublicBetaReadinessSnapshot", "buildGlobalShoppingPublicBetaReadinessSnapshot");
-    const manualFeedbackReviewQueueMockSummary = resolveSummary(safe, "manualFeedbackReviewQueueMockSummary", "WeishanGlobalShoppingManualFeedbackReviewQueueMock", "buildGlobalShoppingManualFeedbackReviewQueueMock");
-    const offlineRegressionEvidenceBoardSummary = resolveSummary(safe, "offlineRegressionEvidenceBoardSummary", "WeishanGlobalShoppingOfflineRegressionEvidenceBoard", "buildGlobalShoppingOfflineRegressionEvidenceBoard");
-    const noTransactionRegressionGuardSummary = resolveSummary(safe, "noTransactionRegressionGuardSummary", "WeishanGlobalShoppingNoTransactionRegressionGuard", "buildGlobalShoppingNoTransactionRegressionGuard");
-    const noProviderProductionBoundarySummary = resolveSummary(safe, "noProviderProductionBoundarySummary", "WeishanGlobalShoppingNoProviderProductionBoundary", "buildGlobalShoppingNoProviderProductionBoundary");
+    // Offline triage consumes one immutable, already-resolved evidence snapshot.
+    // Missing inputs fail closed instead of rebuilding readiness, feedback,
+    // regression, transaction, or provider sibling graphs.
+    const publicBetaReadinessSnapshotSummary = obj(safe.publicBetaReadinessSnapshotSummary);
+    const manualFeedbackReviewQueueMockSummary = obj(safe.manualFeedbackReviewQueueMockSummary);
+    const offlineRegressionEvidenceBoardSummary = obj(safe.offlineRegressionEvidenceBoardSummary);
+    const noTransactionRegressionGuardSummary = obj(safe.noTransactionRegressionGuardSummary);
+    const noProviderProductionBoundarySummary = obj(safe.noProviderProductionBoundarySummary);
     const summaries = [
       publicBetaReadinessSnapshotSummary,
       manualFeedbackReviewQueueMockSummary,
