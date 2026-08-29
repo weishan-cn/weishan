@@ -31,6 +31,7 @@
     { category:"restricted_financial_products", pattern:/高风险金融|restricted financial|loan shark/i },
     { category:"regionally_restricted_goods_or_services", pattern:/地区限制|当地限制|regionally restricted|restricted goods/i }
   ];
+  const APPROVED_READONLY_SOURCE_POLICY = "prijsprofeet_public_api";
 
   function cleanText(value, max){
     return String(value || "").replace(/\s+/g, " ").trim().slice(0, max || 160);
@@ -163,6 +164,39 @@
     const risk = classifyComplianceRisk(query, category);
     const missingBasis = locationBasis.locationBasisStatus === "missing";
     const regulated = risk.riskStatus === "regulated_category_detected";
+    const approvedReadonlyGeneralProduct = nextSettings.approvedReadonlySourcePolicy === APPROVED_READONLY_SOURCE_POLICY
+      && category === "product"
+      && !missingBasis
+      && !regulated;
+    if (approvedReadonlyGeneralProduct) {
+      return {
+        complianceVersion:COMPLIANCE_VERSION,
+        phase:PHASE,
+        category,
+        query,
+        complianceStatus:"limited_readonly_general_product",
+        searchStatus:"ready",
+        canSearchProvider:true,
+        canDisplayPrice:true,
+        canShowRedirectButton:true,
+        canCheckout:false,
+        canPay:false,
+        canStoreIdentity:false,
+        canShowPrice:true,
+        canShowBookingButton:true,
+        canShowCheckoutButton:false,
+        strictestRuleWins:true,
+        unknownLegalityBlocks:true,
+        noLegalAdvice:true,
+        reason:"approved_public_readonly_general_product_with_destination",
+        message:"已确认收货目的地，可进行普通商品公开只读价格查询；最终价格、库存和适用规则以零售商页面为准。",
+        risk,
+        locationBasis,
+        privacy:policy.privacy,
+        safety:policy.safety,
+        approvedReadonlySourcePolicy:APPROVED_READONLY_SOURCE_POLICY
+      };
+    }
     const complianceStatus = regulated ? "compliance_review_required" : missingBasis ? "compliance_required" : "not_verified";
     const reason = regulated ? "regulated_category_legality_not_verified" : missingBasis ? "local_law_compliance_not_verified" : "local_law_compliance_not_verified";
     return {
@@ -202,6 +236,7 @@
   }
 
   window.WeishanCommerceLocalLawCompliance = {
+    APPROVED_READONLY_SOURCE_POLICY,
     getLocalLawCompliancePolicy,
     classifyComplianceRisk,
     getComplianceLocationBasis,

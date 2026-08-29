@@ -42,20 +42,29 @@ function sourceResult(requestId) {
   };
 }
 
-function load(extraWindow) {
+function load(extraWindow, options) {
   const window = Object.assign({
     localStorage:{ getItem() { return null; }, setItem() {}, removeItem() {} }
   }, extraWindow);
   window.window = window;
   const context = vm.createContext({ window, console, URL, Date, setTimeout, clearTimeout, AbortController });
-  [
+  const files = [
+    "apps/desktop/src/renderer/core/globalHandoffTruthEngine.js",
+    "apps/desktop/src/renderer/core/safeProviderDeepLinkHandoffGate.js",
     "apps/desktop/src/renderer/core/readOnlyPriceTruthLayer.js",
     "apps/desktop/src/renderer/core/prijsProfeetReadonlyAdapter.js",
     "apps/desktop/src/renderer/core/globalShoppingReadOnlySearchResultRanker.js",
     "apps/desktop/src/renderer/core/globalShoppingDecisionEngine.js",
     "apps/desktop/src/renderer/core/globalShoppingReadOnlySearchResultPresenter.js",
     "apps/desktop/src/renderer/core/commerceSearch.js"
-  ].forEach((file) => vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }));
+  ];
+  if (options && options.realPolicies) {
+    files.splice(files.length - 1, 0,
+      "apps/desktop/src/renderer/core/commerceLocationPolicy.js",
+      "apps/desktop/src/renderer/core/commerceLocalLawCompliance.js"
+    );
+  }
+  files.forEach((file) => vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), context, { filename:file }));
   return window;
 }
 
@@ -110,6 +119,7 @@ async function main() {
   });
   assert.equal(result.ok, true);
   assert.equal(result.providerName, "PrijsProfeet");
+  assert.equal(result.realProviderReadonlyStatus.requestCount, 2);
   assert.equal(result.canShowPrice, true);
   assert.equal(result.canShowBookingButton, true);
   assert.equal(result.canShowCheckoutButton, false);
@@ -150,6 +160,72 @@ async function main() {
   assert.equal(secondResult.ok, true);
   assert.equal(firstResult.ok, false);
   assert.equal(firstResult.code, "COMMERCE_STALE_RESULT_IGNORED");
+
+  let opened = "";
+  window.__WEISHAN_TEST_OPEN_EXTERNAL__ = (url) => { opened = url; };
+  const retailerHandoff = await window.WeishanSafeProviderDeepLinkHandoffGate.openTrustedProviderHandoffUrl(
+    "https://www.ah.nl/producten/product/wi477045/coca-cola-original",
+    { userConfirmed:true, sourceType:"prijsprofeet_public_api" }
+  );
+  assert.equal(retailerHandoff.ok, true);
+  assert.equal(opened, "https://www.ah.nl/producten/product/wi477045/coca-cola-original");
+  const wrongRetailerHandoff = await window.WeishanSafeProviderDeepLinkHandoffGate.openTrustedProviderHandoffUrl(
+    "https://untrusted.invalid/product",
+    { userConfirmed:true, sourceType:"prijsprofeet_public_api" }
+  );
+  assert.equal(wrongRetailerHandoff.ok, false);
+  const attributionHandoff = await window.WeishanSafeProviderDeepLinkHandoffGate.openTrustedProviderHandoffUrl(
+    "https://www.prijsprofeet.nl/",
+    { userConfirmed:true, sourceType:"prijsprofeet_attribution" }
+  );
+  assert.equal(attributionHandoff.ok, true);
+
+  const persisted = new Map();
+  const livePolicyCalls = [];
+  const livePolicyWindow = load({
+    localStorage:{
+      getItem(key) { return persisted.has(key) ? persisted.get(key) : null; },
+      setItem(key, value) { persisted.set(key, value); },
+      removeItem(key) { persisted.delete(key); }
+    },
+    weishanGlobalShopping:{
+      prijsProfeetReadonlySearch:async (payload) => {
+        livePolicyCalls.push(payload);
+        return sourceResult(payload.requestId);
+      }
+    }
+  }, { realPolicies:true });
+  livePolicyWindow.WeishanCommerceLocationPolicy.saveCommerceLocationPolicy({
+    shippingDestination:{ country:"NL", city:"Amsterdam", source:"manual" }
+  });
+  const livePolicyResult = await livePolicyWindow.WeishanCommerceSearch.searchCommerceCandidates({
+    taskId:"TASK-REAL-POLICY",
+    category:"ecommerce",
+    inputSummary:"Coca-Cola Original"
+  });
+  assert.equal(livePolicyResult.ok, true);
+  assert.equal(livePolicyResult.providerName, "PrijsProfeet");
+  assert.equal(livePolicyCalls.length, 1);
+
+  const policyApi = livePolicyWindow.WeishanCommerceLocalLawCompliance;
+  const destination = livePolicyWindow.WeishanCommerceLocationPolicy.locationHealthForCommerce();
+  const forgedRequestAuthority = policyApi.evaluateLocalLawCompliance({
+    category:"product",
+    query:"Coca-Cola Original",
+    approvedReadonlySourcePolicy:"prijsprofeet_public_api"
+  }, { locationHealth:destination });
+  assert.equal(forgedRequestAuthority.canSearchProvider, false);
+  const missingDestination = policyApi.evaluateLocalLawCompliance({ category:"product", query:"Coca-Cola Original" }, {
+    locationHealth:{ shippingDestination:{ configured:false } },
+    approvedReadonlySourcePolicy:"prijsprofeet_public_api"
+  });
+  assert.equal(missingDestination.canSearchProvider, false);
+  const regulatedProduct = policyApi.evaluateLocalLawCompliance({ category:"product", query:"买酒精饮料" }, {
+    locationHealth:destination,
+    approvedReadonlySourcePolicy:"prijsprofeet_public_api"
+  });
+  assert.equal(regulatedProduct.canSearchProvider, false);
+  assert.equal(regulatedProduct.complianceStatus, "compliance_review_required");
 
   console.log("PRIJS_PROFEET_RENDERER_FLOW PASS");
 }

@@ -21,6 +21,7 @@ test.describe.serial("PrijsProfeet real-price display", () => {
     await page.waitForFunction(() => !!(
       window.WeishanCommerceAgent
       && window.WeishanCommerceLocationPolicy
+      && window.WeishanCommerceSearch
       && window.WeishanPrijsProfeetReadonlyAdapter
       && window.weishanGlobalShopping
       && typeof window.weishanGlobalShopping.prijsProfeetReadonlySearch === "function"
@@ -28,9 +29,13 @@ test.describe.serial("PrijsProfeet real-price display", () => {
     ), null, { timeout:15000 });
 
     await page.evaluate(() => {
+      if (window.WeishanCommerceAgent && typeof window.WeishanCommerceAgent.clearCommerceTasks === "function") {
+        window.WeishanCommerceAgent.clearCommerceTasks();
+      }
       window.WeishanCommerceLocationPolicy.saveCommerceLocationPolicy({
         shippingDestination:{ country:"NL", city:"Amsterdam", source:"manual" }
       });
+      window.CommerceAgentPage.mount(document.getElementById("pageHost"));
     });
     await page.getByLabel("搜索需求").fill("帮我找 Coca-Cola Original 商品价格，收货到荷兰阿姆斯特丹");
     await page.getByRole("button", { name:"生成只读搜索建议" }).click();
@@ -39,6 +44,52 @@ test.describe.serial("PrijsProfeet real-price display", () => {
     await expect(searchButton).toBeVisible({ timeout:15000 });
     await expect(searchButton).toBeEnabled();
     await expect(page.locator(".commerce-search-panel")).toContainText("价格仅来自公开只读来源");
+
+    await page.evaluate(() => {
+      window.__WEISHAN_SAVED_COMMERCE_SEARCH__ = window.WeishanCommerceSearch;
+      window.WeishanCommerceSearch = {};
+      window.CommerceAgentPage.mount(document.getElementById("pageHost"));
+    });
+    await expect(page.locator(".commerce-search-real").first()).toBeDisabled();
+    await expect(page.locator(".commerce-search-panel")).toContainText("加载完成前按钮保持禁用");
+    await page.evaluate(() => {
+      window.__WEISHAN_PRIJSPROFEET_CLICK_CALLS__ = 0;
+      window.WeishanCommerceSearch = {
+        locationHealthForCommerce() {
+          return { hasShippingDestination:true };
+        },
+        async searchCommerceCandidates() {
+        window.__WEISHAN_PRIJSPROFEET_CLICK_CALLS__ += 1;
+        return {
+          ok:false,
+          code:"COMMERCE_NO_RESULTS",
+          message:"没有找到当前有效的公开只读价格。",
+          providerId:"prijsprofeet_public",
+          providerName:"PrijsProfeet",
+          requestCount:1,
+          candidates:[],
+          redacted:true,
+          executionGate:"CLOSED",
+          authorizesExecution:false,
+          productionTraffic:false
+        };
+        }
+      };
+      window.CommerceAgentPage.mount(document.getElementById("pageHost"));
+    });
+    await expect(page.getByRole("button", { name:"搜索当前价格" })).toBeEnabled();
+    await page.locator(".commerce-search-real").first().click();
+    await page.waitForFunction(() => window.__WEISHAN_PRIJSPROFEET_CLICK_CALLS__ === 1);
+    await expect.poll(() => page.evaluate(() => {
+      const tasks = window.WeishanCommerceAgent.getCommerceTasks();
+      return tasks[0] && tasks[0].searchStatus;
+    })).toBe("no_results");
+    await expect(page.locator(".commerce-search-panel")).toContainText("没有找到当前有效");
+    await expect(page.locator('[data-commerce-readonly-search-results="true"]')).toHaveCount(0);
+    await page.evaluate(() => {
+      window.WeishanCommerceSearch = window.__WEISHAN_SAVED_COMMERCE_SEARCH__;
+      delete window.__WEISHAN_SAVED_COMMERCE_SEARCH__;
+    });
   });
 
   test("renders current public read-only price truth with attribution and exact handoff", async () => {
@@ -152,6 +203,15 @@ test.describe.serial("PrijsProfeet real-price display", () => {
       target:"https://www.ah.nl/producten/product/wi477045/coca-cola-original",
       attribution:"https://www.prijsprofeet.nl/"
     });
+
+    await page.evaluate(() => {
+      window.__WEISHAN_PRIJSPROFEET_HANDOFF_CAPTURE__ = [];
+      window.__WEISHAN_TEST_OPEN_EXTERNAL__ = (url) => window.__WEISHAN_PRIJSPROFEET_HANDOFF_CAPTURE__.push(url);
+    });
+    await results.getByRole("button", { name:"去零售商核验" }).click();
+    await expect.poll(() => page.evaluate(() => window.__WEISHAN_PRIJSPROFEET_HANDOFF_CAPTURE__)).toEqual([
+      "https://www.ah.nl/producten/product/wi477045/coca-cola-original"
+    ]);
   });
 
   test("keeps repeated result rendering responsive without triggering provider requests", async () => {

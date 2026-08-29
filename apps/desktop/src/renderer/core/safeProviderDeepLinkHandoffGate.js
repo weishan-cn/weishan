@@ -4,6 +4,10 @@
   const SAFE_PROVIDER_DEEP_LINK_HANDOFF_GATE_VERSION = "4.2.8";
   const PHASE = "safe_provider_handoff_url_gate_v1";
   const TRUSTED_HOSTS = ["google.com", "trip.com", "ctrip.com", "skyscanner.com", "kayak.com", "expedia.com", "booking.com"];
+  const SOURCE_TRUSTED_HOSTS = Object.freeze({
+    prijsprofeet_public_api:["ah.nl", "aldi.nl", "dekamarkt.nl", "dirk.nl", "ekoplaza.nl", "hoogvliet.com", "hoogvliet.nl", "jumbo.com", "lidl.nl", "plus.nl", "vomar.nl"],
+    prijsprofeet_attribution:["prijsprofeet.nl"]
+  });
   const SHORT_URL_HOSTS = ["bit.ly", "t.co", "tinyurl.com", "goo.gl", "ow.ly", "is.gd", "buff.ly", "cutt.ly", "short.link"];
   const CREDENTIAL_PARAMS = /(api[_-]?key|apikey|token|access[_-]?token|refresh[_-]?token|secret|client[_-]?secret|authorization|password)=/i;
   const BLOCKED_PATH_PATTERN = /(checkout|payment|order|identity|book)/i;
@@ -45,8 +49,8 @@
     return CREDENTIAL_PARAMS.test(text(value));
   }
 
-  function isTrustedHost(host) {
-    return TRUSTED_HOSTS.some((trusted) => host === trusted || host.endsWith(`.${trusted}`));
+  function isTrustedHost(host, trustedHosts) {
+    return (Array.isArray(trustedHosts) ? trustedHosts : TRUSTED_HOSTS).some((trusted) => host === trusted || host.endsWith(`.${trusted}`));
   }
 
   function buildDefaultSafeProviderHandoffUrl(candidate) {
@@ -57,17 +61,19 @@
     return "";
   }
 
-  function sanitizeSafeProviderHandoffUrl(url) {
+  function sanitizeSafeProviderHandoffUrl(url, options) {
     const value = text(url);
+    const sourceType = text(options && options.sourceType);
+    const trustedHosts = SOURCE_TRUSTED_HOSTS[sourceType] || TRUSTED_HOSTS;
     const truthEngine = window.WeishanGlobalHandoffTruthEngine;
     if (truthEngine && typeof truthEngine.validateDestinationUrl === "function") {
-      const checked = truthEngine.validateDestinationUrl(value, { expectedHosts: TRUSTED_HOSTS });
+      const checked = truthEngine.validateDestinationUrl(value, { expectedHosts: trustedHosts });
       return checked.allowed ? value : "";
     }
     if (!value) return "";
     if (!/^https:\/\//i.test(value)) return "";
     const host = hostFromUrl(value);
-    if (!host || !isTrustedHost(host)) return "";
+    if (!host || !isTrustedHost(host, trustedHosts)) return "";
     if (SHORT_URL_HOSTS.includes(host)) return "";
     if (hasCredentialParams(value)) return "";
     if (BLOCKED_PATH_PATTERN.test(pathFromUrl(value))) return "";
@@ -218,7 +224,8 @@
   }
 
   function openTrustedProviderHandoffUrl(url, options) {
-    const safeUrl = sanitizeSafeProviderHandoffUrl(url);
+    const sourceType = text(options && options.sourceType);
+    const safeUrl = sanitizeSafeProviderHandoffUrl(url, { sourceType });
     const userConfirmed = options && typeof options === "object" && options.userConfirmed === true;
     if (!userConfirmed) {
       return Promise.resolve({
@@ -260,6 +267,7 @@
     SAFE_PROVIDER_DEEP_LINK_HANDOFF_GATE_VERSION,
     PHASE,
     TRUSTED_HOSTS,
+    SOURCE_TRUSTED_HOSTS,
     buildSafeProviderHandoffUrlGate,
     sanitizeSafeProviderHandoffUrl,
     evaluateSafeProviderHandoffUrl,

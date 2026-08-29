@@ -8925,7 +8925,10 @@
       && typeof window.weishanGlobalShopping.prijsProfeetReadonlySearch === "function"
       && window.WeishanPrijsProfeetReadonlyAdapter
       && typeof window.WeishanPrijsProfeetReadonlyAdapter.normalizeResult === "function");
-    const effectiveHasProvider = hasProvider || publicReadonlyAvailable;
+    const publicReadonlySearchReady = !!(publicReadonlyAvailable
+      && searchApi()
+      && typeof searchApi().searchCommerceCandidates === "function");
+    const effectiveHasProvider = hasProvider || publicReadonlySearchReady;
     const locationInfo = searchApi() && searchApi().locationHealthForCommerce ? searchApi().locationHealthForCommerce() : {};
     const complianceRequired = task && task.searchStatus === "local_law_compliance_required";
     const localLawPanelRequired = !isModelPricing && task && task.complianceHealth && task.complianceHealth.canSearchProvider === false;
@@ -8949,6 +8952,9 @@
     const reasonWhenDisabled = providerRow.reasonWhenDisabled || "";
     const searchStateLabel = hasCurrentPriceResults ? "当前价格已获取，可由用户手动刷新" : (effectiveHasProvider ? "公开只读价格源已就绪" : hasReadOnlyResults ? "平台候选已生成" : "未配置");
     const failedMessage = task && task.searchStatus === "failed" ? task.searchErrorMessage || (isModelPricing ? "当前模型结果源不可用，无法返回结果。" : "搜索失败，无法返回结果。") : "";
+    const noResultsMessage = task && task.searchStatus === "no_results"
+      ? task.searchErrorMessage || "没有找到当前有效的公开只读价格；你可以调整商品名称后重试。"
+      : "";
     const buttonLabel = isModelPricing ? "搜索模型结果" : missingFields.length ? "开始搜索" : hasCurrentPriceResults ? "刷新当前价格" : effectiveHasProvider ? "搜索当前价格" : "暂不可搜索";
     const providerSafetyBody = !isModelPricing ? [
       localLawPanelRequired ? localLawCompliancePanelHtml(task) : "",
@@ -8972,7 +8978,7 @@
     ].filter(Boolean).join("") : "";
     const providerSafetyDisclosure = providerSafetyBody ? disclosure("查看安全边界", providerSafetyBody, "commerce-safety-disclosure") : "";
     return `<div class="commerce-search-panel">
-      <p><b>当前状态：</b>${hasCurrentPriceResults ? "已获取当前公开只读价格；价格、库存与适用条件以零售商页面为准。" : (isModelPricing ? (hasProvider ? "模型结果可用。" : "模型结果不可用。") : publicReadonlyAvailable ? "可以由用户主动查询公开只读商品价格。" : hasReadOnlyResults ? "已生成平台候选，但尚无当前价格。" : hasProvider ? "可以生成候选方案。" : isFlight ? "暂未接入真实机票搜索能力，无法返回实时价格。" : isProduct ? "暂未接入真实商品搜索能力，无法返回实时价格。" : "搜索能力未配置，无法返回实时价格。")}</p>
+      <p><b>当前状态：</b>${hasCurrentPriceResults ? "已获取当前公开只读价格；价格、库存与适用条件以零售商页面为准。" : noResultsMessage ? "本次搜索没有找到当前有效价格。" : (isModelPricing ? (hasProvider ? "模型结果可用。" : "模型结果不可用。") : publicReadonlySearchReady ? "可以由用户主动查询公开只读商品价格。" : publicReadonlyAvailable ? "公开只读搜索能力正在加载，请稍候。" : hasReadOnlyResults ? "已生成平台候选，但尚无当前价格。" : hasProvider ? "可以生成候选方案。" : isFlight ? "暂未接入真实机票搜索能力，无法返回实时价格。" : isProduct ? "暂未接入真实商品搜索能力，无法返回实时价格。" : "搜索能力未配置，无法返回实时价格。")}</p>
       ${providerSafetyDisclosure}
       ${isFlight && !hasProvider && !hasReadOnlyResults ? `<div class="commerce-warning commerce-flight-provider-missing">
         <b>已识别为机票搜索计划。</b>
@@ -8986,9 +8992,10 @@
       ${isCruise ? `<p class="commerce-warning">邮轮价格受航线、舱型、日期和人数影响较大。当前未接入真实搜索源时不显示价格。</p>` : ""}
       ${isPrivateJet ? `<p class="commerce-warning">公务机属于高价值定制服务，价格通常需要询价确认。当前仅生成搜索和询价计划，不自动提交询价、不付款、不签约。</p>` : ""}
       ${failedMessage ? `<p class="commerce-warning">${esc(failedMessage)}</p>` : ""}
+      ${noResultsMessage ? `<p class="commerce-muted" role="status">${esc(noResultsMessage)}</p>` : ""}
       ${missingFields.length ? `<p class="commerce-warning">请补充${esc(missingFields.join("、"))}，否则不搜索价格。</p>` : ""}
       <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${esc(destinationRequired ? "需要设置收货目的地" : disabled && !missingFields.length && !isModelPricing ? "搜索适配器未配置" : buttonLabel)}</button>
-      <p class="commerce-muted">${esc(hasCurrentPriceResults ? "刷新只在你点击后执行；不会在打开页面、切换路由或空闲时联网。" : publicReadonlyAvailable ? "价格仅来自公开只读来源；单一且费用不完整的价格不会被标记为最低价。" : hasReadOnlyResults ? "当前使用本地规则/AI 理解生成平台候选；最终价格以平台页面为准。" : "价格只来自已配置搜索能力返回数据；未配置时不会显示假价格。")}</p>
+      <p class="commerce-muted">${esc(hasCurrentPriceResults ? "刷新只在你点击后执行；不会在打开页面、切换路由或空闲时联网。" : publicReadonlySearchReady ? "价格仅来自公开只读来源；单一且费用不完整的价格不会被标记为最低价。" : publicReadonlyAvailable ? "加载完成前按钮保持禁用，避免无响应点击。" : hasReadOnlyResults ? "当前使用本地规则/AI 理解生成平台候选；最终价格以平台页面为准。" : "价格只来自已配置搜索能力返回数据；未配置时不会显示假价格。")}</p>
     </div>`;
   }
 
@@ -9213,7 +9220,7 @@
       </div>
       <p class="commerce-muted">费用说明：${esc(item.feeNote || "价格与费用以平台页面为准")}</p>
       <p class="commerce-muted">数据来源：${esc(sourceTypeLabel(item.sourceType))} · 更新时间：${esc(timeLabel(item.updatedAt || ((item.priceFreshness || {}).fetchedAt) || ((item.availabilityFreshness || {}).checkedAt) || "") || "unknown")} · 价格时效：${esc(freshnessLabel((item.priceFreshness || {}).freshnessLevel || ""))}</p>
-      ${item.sourceAttributionName && item.sourceAttributionUrl ? `<p class="commerce-muted">数据提供：${esc(item.sourceAttributionName)} · <button class="cmd-btn gray commerce-source-attribution-link" type="button" data-url="${esc(item.sourceAttributionUrl)}">查看数据来源</button></p>` : ""}
+      ${item.sourceAttributionName && item.sourceAttributionUrl ? `<p class="commerce-muted">数据提供：${esc(item.sourceAttributionName)} · <button class="cmd-btn gray commerce-source-attribution-link" type="button" data-url="${esc(item.sourceAttributionUrl)}" data-handoff-source="${item.sourceType === "prijsprofeet_public_api" ? "prijsprofeet_attribution" : ""}">查看数据来源</button></p>` : ""}
       ${item.retrievedAt ? `<p class="commerce-muted">本次检索：${esc(timeLabel(item.retrievedAt) || "unknown")}${item.providerUpdatedAt ? " · 来源抓取：" + esc(timeLabel(item.providerUpdatedAt) || "unknown") : ""}</p>` : ""}
       ${item.validFrom && item.validUntil ? `<p class="commerce-muted">价格有效期：${esc(item.validFrom)} → ${esc(item.validUntil)}</p>` : ""}
       ${item.dataSource ? `<p class="commerce-muted">当前可信等级：${esc((item.dataQuality || {}).qualityLevel === "high" ? "高" : "离线采购模式")}</p>` : ""}
@@ -9231,7 +9238,7 @@
       <p class="commerce-muted">推荐理由：${esc(((item.recommendationReasonDetail || {}).summary) || item.recommendationReason || "")}</p>
       ${item.fallbackInfo && item.fallbackInfo.availableFallback ? `<p class="commerce-muted">回退候选：${esc(item.fallbackInfo.fallbackProviderName || "已准备更多平台")}</p>` : ""}
       <p class="commerce-warning">${esc(item.riskNote || "Weishan 不收款、不代下单、不保存账号密码，最终价格以平台页面为准。")}</p>
-      ${item.targetUrl ? `<button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}">去零售商核验</button>` : `<p class="commerce-warning">目标平台链接缺失，暂不可跳转。</p>`}
+      ${item.targetUrl ? `<button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}" data-handoff-source="${item.sourceType === "prijsprofeet_public_api" ? "prijsprofeet_public_api" : ""}">去零售商核验</button>` : `<p class="commerce-warning">目标平台链接缺失，暂不可跳转。</p>`}
     </article>`;
     const realtimeStatusCard = realProviderReadonlyStatus ? `<article class="commerce-candidate-card commerce-readonly-search-card">
       <div class="commerce-candidate-head">
@@ -9379,6 +9386,7 @@
   }
 
   function bind(host, tasks, selected){
+    const api = agent();
     const globalShoppingBridge = window.weishanGlobalShopping;
     if (globalShoppingBridge && typeof globalShoppingBridge.getRakutenReadonlyStatus === "function") {
       globalShoppingBridge.getRakutenReadonlyStatus().then((status) => {
@@ -11323,7 +11331,10 @@
         }));
         const gateApi = window.WeishanSafeProviderDeepLinkHandoffGate;
         if (url && gateApi && typeof gateApi.openTrustedProviderHandoffUrl === "function") {
-          gateApi.openTrustedProviderHandoffUrl(url, { userConfirmed:true });
+          gateApi.openTrustedProviderHandoffUrl(url, {
+            userConfirmed:true,
+            sourceType:link.getAttribute("data-handoff-source") || ""
+          });
         }
       });
     });

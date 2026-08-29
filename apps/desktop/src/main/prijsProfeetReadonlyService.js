@@ -1,5 +1,8 @@
 "use strict";
 
+const path = require("node:path");
+const { fileURLToPath } = require("node:url");
+
 const PRIJS_PROFEET_READONLY_SERVICE_VERSION = "1.0.0";
 const PROVIDER_ID = "prijsprofeet_public";
 const PROVIDER_NAME = "PrijsProfeet";
@@ -13,7 +16,9 @@ const DEFAULT_MAX_RESPONSE_BYTES = 512 * 1024;
 const DEFAULT_CACHE_TTL_MS = 60 * 1000;
 const MAX_CACHE_ENTRIES = 32;
 const MAX_PROVIDER_REQUESTS_PER_MINUTE = 8;
+const MAX_CONCURRENT_PROVIDER_REQUESTS = 4;
 const ALLOWED_PAYLOAD_KEYS = new Set(["query", "requestId", "limit"]);
+const TRUSTED_RENDERER_PATH = path.resolve(__dirname, "../index.html");
 const SECRET_KEY_RE = /(secret|token|password|authorization|api[_-]?key|private[_-]?key|cookie|credential)/i;
 const RETAILER_HOSTS = Object.freeze({
   albert_heijn:["ah.nl"],
@@ -30,6 +35,12 @@ const RETAILER_HOSTS = Object.freeze({
 
 function obj(value) {
   return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function plainRecord(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null ? value : null;
 }
 
 function text(value, max = 240) {
@@ -63,9 +74,12 @@ function clampInteger(value, fallback, min, max) {
 }
 
 function sanitizePayload(payload) {
-  const safe = obj(payload);
+  const safe = plainRecord(payload);
+  if (!safe) return { valid:false, payload:{ query:"", requestId:"", limit:1 } };
   const unexpectedKeys = Object.keys(safe).filter((key) => !ALLOWED_PAYLOAD_KEYS.has(key));
-  const fieldTypesValid = typeof safe.query === "string"
+  const fieldTypesValid = Object.prototype.hasOwnProperty.call(safe, "query")
+    && Object.prototype.hasOwnProperty.call(safe, "requestId")
+    && typeof safe.query === "string"
     && typeof safe.requestId === "string"
     && (safe.limit === undefined || typeof safe.limit === "number");
   const query = text(safe.query, 120).replace(/\s+/g, " ");
@@ -147,9 +161,35 @@ async function readJson(fetchImpl, url, options) {
       redirect:"error",
       signal:controller ? controller.signal : undefined
     });
-    const body = typeof response.text === "function" ? await response.text() : "";
-    if (Buffer.byteLength(String(body || ""), "utf8") > maxBytes) throw Object.assign(new Error("response_too_large"), { safeCode:"SOURCE_RESPONSE_TOO_LARGE" });
     if (!response.ok) throw Object.assign(new Error("http_failure"), { safeCode:"SOURCE_HTTP_ERROR" });
+    const contentLength = response.headers && typeof response.headers.get === "function"
+      ? Number(response.headers.get("content-length"))
+      : NaN;
+    if (Number.isFinite(contentLength) && contentLength > maxBytes) {
+      throw Object.assign(new Error("response_too_large"), { safeCode:"SOURCE_RESPONSE_TOO_LARGE" });
+    }
+    if (!response.body || typeof response.body.getReader !== "function") {
+      throw Object.assign(new Error("response_stream_required"), { safeCode:"SOURCE_RESPONSE_INVALID" });
+    }
+    const reader = response.body.getReader();
+    const chunks = [];
+    let totalBytes = 0;
+    try {
+      while (true) {
+        const part = await reader.read();
+        if (part.done) break;
+        const chunk = Buffer.from(part.value || []);
+        totalBytes += chunk.byteLength;
+        if (totalBytes > maxBytes) {
+          if (typeof reader.cancel === "function") await reader.cancel();
+          throw Object.assign(new Error("response_too_large"), { safeCode:"SOURCE_RESPONSE_TOO_LARGE" });
+        }
+        chunks.push(chunk);
+      }
+    } finally {
+      if (typeof reader.releaseLock === "function") reader.releaseLock();
+    }
+    const body = Buffer.concat(chunks, totalBytes).toString("utf8");
     try {
       return body ? JSON.parse(body) : {};
     } catch (_) {
@@ -214,6 +254,7 @@ function createPrijsProfeetReadonlyService(options = {}) {
   const inFlight = new Map();
   const cache = new Map();
   const requestTimestamps = [];
+  let activeProviderRequests = 0;
   const cacheTtlMs = clampInteger(options.cacheTtlMs, DEFAULT_CACHE_TTL_MS, 1000, 5 * 60 * 1000);
 
   function currentIso() {
@@ -232,6 +273,21 @@ function createPrijsProfeetReadonlyService(options = {}) {
     if (requestTimestamps.length >= MAX_PROVIDER_REQUESTS_PER_MINUTE) return false;
     requestTimestamps.push(atMs);
     return true;
+  }
+
+  async function requestProviderJson(url, atMs) {
+    if (activeProviderRequests >= MAX_CONCURRENT_PROVIDER_REQUESTS) {
+      throw Object.assign(new Error("concurrency_limited"), { safeCode:"SOURCE_CONCURRENCY_LIMITED" });
+    }
+    if (!consumeProviderRequestBudget(atMs)) {
+      throw Object.assign(new Error("rate_limited"), { safeCode:"SOURCE_RATE_LIMITED" });
+    }
+    activeProviderRequests += 1;
+    try {
+      return await readJson(fetchImpl, url, options);
+    } finally {
+      activeProviderRequests -= 1;
+    }
   }
 
   async function execute(payload) {
@@ -257,8 +313,7 @@ function createPrijsProfeetReadonlyService(options = {}) {
       try {
         const fetchedAt = observedAt;
         const today = fetchedAt.slice(0, 10);
-        if (!consumeProviderRequestBudget(observedAtMs)) return Object.assign(safeError("SOURCE_RATE_LIMITED"), { requestId:sanitized.payload.requestId });
-        const searchPayload = await readJson(fetchImpl, buildSearchUrl(sanitized.payload.query), options);
+        const searchPayload = await requestProviderJson(buildSearchUrl(sanitized.payload.query), observedAtMs);
         const selected = selectSearchCandidate(searchPayload, today);
         if (!selected) {
           return {
@@ -279,8 +334,7 @@ function createPrijsProfeetReadonlyService(options = {}) {
             productionTraffic:false
           };
         }
-        if (!consumeProviderRequestBudget(Date.parse(currentIso()))) return Object.assign(safeError("SOURCE_RATE_LIMITED"), { requestId:sanitized.payload.requestId, requestCount:1 });
-        const detailPayload = await readJson(fetchImpl, buildDetailUrl(text(selected.product_id, 160)), options);
+        const detailPayload = await requestProviderJson(buildDetailUrl(text(selected.product_id, 160)), Date.parse(currentIso()));
         const normalized = normalizeDetail(detailPayload, selected, fetchedAt, today);
         if (!normalized) return Object.assign(safeError("SOURCE_RESPONSE_INVALID"), { requestId:sanitized.payload.requestId, requestCount:2 });
         return {
@@ -328,7 +382,7 @@ function createPrijsProfeetReadonlyService(options = {}) {
       sourceType:"PUBLIC_READ_ONLY",
       sourceAttributionUrl:SOURCE_ATTRIBUTION_URL,
       cachePolicy:{ scope:"memory_only", ttlMs:cacheTtlMs, maxEntries:MAX_CACHE_ENTRIES, persistent:false },
-      throttlePolicy:{ windowMs:60000, maxProviderRequests:MAX_PROVIDER_REQUESTS_PER_MINUTE, retryCount:0 },
+      throttlePolicy:{ windowMs:60000, maxProviderRequests:MAX_PROVIDER_REQUESTS_PER_MINUTE, maxConcurrentRequests:MAX_CONCURRENT_PROVIDER_REQUESTS, retryCount:0 },
       redacted:true,
       executionGate:"CLOSED",
       authorizesExecution:false,
@@ -337,10 +391,32 @@ function createPrijsProfeetReadonlyService(options = {}) {
   };
 }
 
+function trustedPrijsProfeetSender(event) {
+  try {
+    const sender = event && event.sender;
+    const frame = event && event.senderFrame;
+    if (!sender || !frame || typeof sender.getURL !== "function" || sender.mainFrame !== frame) return false;
+    const senderUrl = new URL(sender.getURL());
+    const frameUrl = new URL(String(frame.url || ""));
+    return senderUrl.protocol === "file:" && frameUrl.protocol === "file:"
+      && path.resolve(fileURLToPath(senderUrl)) === TRUSTED_RENDERER_PATH
+      && path.resolve(fileURLToPath(frameUrl)) === TRUSTED_RENDERER_PATH;
+  } catch (_) {
+    return false;
+  }
+}
+
 function registerPrijsProfeetReadonlyHandlers(ipcMain, options = {}) {
   const service = options.service || createPrijsProfeetReadonlyService(options);
-  ipcMain.handle("global-shopping:prijsprofeet-readonly-search", async (_event, payload) => service.search(payload || {}));
-  ipcMain.handle("global-shopping:prijsprofeet-readonly-status", async () => service.getStatus());
+  const validateSender = typeof options.validateSender === "function" ? options.validateSender : trustedPrijsProfeetSender;
+  ipcMain.handle("global-shopping:prijsprofeet-readonly-search", async (event, payload) => {
+    if (!validateSender(event)) return safeError("SOURCE_CALLER_INVALID");
+    return service.search(payload || {});
+  });
+  ipcMain.handle("global-shopping:prijsprofeet-readonly-status", async (event) => {
+    if (!validateSender(event)) return safeError("SOURCE_CALLER_INVALID");
+    return service.getStatus();
+  });
   return service;
 }
 
@@ -350,6 +426,8 @@ module.exports = {
   PROVIDER_ID,
   PROVIDER_NAME,
   SOURCE_ATTRIBUTION_URL,
+  MAX_CONCURRENT_PROVIDER_REQUESTS,
   createPrijsProfeetReadonlyService,
-  registerPrijsProfeetReadonlyHandlers
+  registerPrijsProfeetReadonlyHandlers,
+  trustedPrijsProfeetSender
 };

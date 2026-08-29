@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
+const { pathToFileURL } = require("node:url");
 
 const ROOT = path.resolve(__dirname, "../..");
 const {
@@ -10,10 +11,21 @@ const {
 } = require(path.join(ROOT, "apps/desktop/src/main/prijsProfeetReadonlyService.js"));
 
 function response(payload, status = 200) {
+  const bytes = Buffer.from(typeof payload === "string" ? payload : JSON.stringify(payload));
+  let delivered = false;
   return {
     ok:status >= 200 && status < 300,
     status,
-    text:async () => typeof payload === "string" ? payload : JSON.stringify(payload)
+    headers:{ get:(name) => String(name).toLowerCase() === "content-length" ? String(bytes.byteLength) : null },
+    body:{
+      getReader(){
+        return {
+          read:async () => delivered ? { done:true } : (delivered = true, { done:false, value:bytes }),
+          cancel:async () => { delivered = true; },
+          releaseLock(){}
+        };
+      }
+    }
   };
 }
 
@@ -120,7 +132,9 @@ async function testInputAndResponseFailuresFailClosed() {
     { query:"cola", requestId:"x", authorization:"Bearer test" },
     { query:{ value:"cola" }, requestId:"x" },
     { query:"cola", requestId:{ value:"x" } },
-    { query:"cola", requestId:"" }
+    { query:"cola", requestId:"" },
+    Object.assign(Object.create({ inherited:true }), { query:"cola", requestId:"prototype" }),
+    JSON.parse('{"query":"cola","requestId":"prototype-key","__proto__":{"trusted":true}}')
   ]) {
     const result = await inputService.search(payload);
     assert.equal(result.ok, false);
@@ -163,10 +177,29 @@ async function testInputAndResponseFailuresFailClosed() {
   assert.equal(malformed.ok, false);
   assert.equal(malformed.code, "SOURCE_RESPONSE_INVALID");
 
-  const tooLargeService = createPrijsProfeetReadonlyService({ maxResponseBytes:4096, fetchImpl:async () => response("x".repeat(5000)) });
+  let oversizedReads = 0;
+  let oversizedCancelled = false;
+  const tooLargeService = createPrijsProfeetReadonlyService({
+    maxResponseBytes:4096,
+    fetchImpl:async () => ({
+      ok:true,
+      headers:{ get:() => null },
+      body:{ getReader:() => ({
+        read:async () => {
+          oversizedReads += 1;
+          if (oversizedReads <= 3) return { done:false, value:Buffer.alloc(2500, 120) };
+          return { done:true };
+        },
+        cancel:async () => { oversizedCancelled = true; },
+        releaseLock(){}
+      }) }
+    })
+  });
   const tooLarge = await tooLargeService.search({ query:"cola", requestId:"large" });
   assert.equal(tooLarge.ok, false);
   assert.equal(tooLarge.code, "SOURCE_RESPONSE_TOO_LARGE");
+  assert.equal(oversizedReads, 2);
+  assert.equal(oversizedCancelled, true);
 
   const networkService = createPrijsProfeetReadonlyService({ fetchImpl:async () => { throw new Error("network down"); } });
   const networkFailure = await networkService.search({ query:"cola", requestId:"network" });
@@ -215,7 +248,19 @@ async function testTimeoutDedupeAndIpcBoundary() {
     "global-shopping:prijsprofeet-readonly-search",
     "global-shopping:prijsprofeet-readonly-status"
   ]);
-  const status = await handlers["global-shopping:prijsprofeet-readonly-status"]();
+  const rendererUrl = pathToFileURL(path.join(ROOT, "apps/desktop/src/index.html")).href;
+  const mainFrame = { url:rendererUrl };
+  const sender = { getURL:() => rendererUrl, mainFrame };
+  const trustedEvent = { sender, senderFrame:mainFrame };
+  const remoteEvent = { sender, senderFrame:{ url:"https://untrusted.invalid/frame" } };
+  const subframeEvent = { sender, senderFrame:{ url:rendererUrl } };
+  const otherMainFrame = { url:pathToFileURL(path.join(ROOT, "apps/desktop/src/other.html")).href };
+  const otherLocalEvent = { sender:{ getURL:() => otherMainFrame.url, mainFrame:otherMainFrame }, senderFrame:otherMainFrame };
+  for (const event of [remoteEvent, subframeEvent, otherLocalEvent, {}]) {
+    assert.equal((await handlers["global-shopping:prijsprofeet-readonly-search"](event, { query:"cola", requestId:"blocked" })).code, "SOURCE_CALLER_INVALID");
+    assert.equal((await handlers["global-shopping:prijsprofeet-readonly-status"](event)).code, "SOURCE_CALLER_INVALID");
+  }
+  const status = await handlers["global-shopping:prijsprofeet-readonly-status"](trustedEvent);
   assert.equal(status.executionMode, "public_readonly");
   assert.equal(status.connected, false);
   assert.equal(status.configured, true);
@@ -223,7 +268,7 @@ async function testTimeoutDedupeAndIpcBoundary() {
   assert.equal(status.providerStatus, "CONFIGURED");
   assert.equal(status.authorizesExecution, false);
   assert.deepEqual(status.cachePolicy, { scope:"memory_only", ttlMs:60000, maxEntries:32, persistent:false });
-  assert.deepEqual(status.throttlePolicy, { windowMs:60000, maxProviderRequests:8, retryCount:0 });
+  assert.deepEqual(status.throttlePolicy, { windowMs:60000, maxProviderRequests:8, maxConcurrentRequests:4, retryCount:0 });
 
   let limitedCalls = 0;
   const limitedService = createPrijsProfeetReadonlyService({
@@ -238,6 +283,19 @@ async function testTimeoutDedupeAndIpcBoundary() {
   assert.equal(limited.ok, false);
   assert.equal(limited.code, "SOURCE_RATE_LIMITED");
   assert.equal(limitedCalls, 8);
+
+  const releases = [];
+  const concurrentService = createPrijsProfeetReadonlyService({
+    now:() => "2026-08-29T02:00:00.000Z",
+    fetchImpl:async () => new Promise((resolve) => releases.push(() => resolve(response({ results:[] }))))
+  });
+  const concurrent = Array.from({ length:4 }, (_, index) => concurrentService.search({ query:"parallel-" + index, requestId:"parallel-" + index }));
+  await new Promise((resolve) => setImmediate(resolve));
+  const concurrencyLimited = await concurrentService.search({ query:"parallel-4", requestId:"parallel-4" });
+  assert.equal(concurrencyLimited.ok, false);
+  assert.equal(concurrencyLimited.code, "SOURCE_CONCURRENCY_LIMITED");
+  releases.forEach((release) => release());
+  await Promise.all(concurrent);
 }
 
 async function main() {

@@ -2800,6 +2800,9 @@
       };
     }
     const normalized = adapter.normalizeResult(raw, { evaluatedAt:nowIso() });
+    const normalizedStatus = normalized && normalized.status
+      ? Object.assign({}, normalized.status, { requestCount:Number(normalized.requestCount || 0) })
+      : adapter.status({ ok:false });
     if (!normalized || normalized.ok !== true) {
       return {
         ok:false,
@@ -2811,7 +2814,7 @@
         canShowPrice:false,
         canShowBookingButton:false,
         canShowCheckoutButton:false,
-        realProviderReadonlyStatus:normalized && normalized.status || adapter.status({ ok:false })
+        realProviderReadonlyStatus:normalizedStatus
       };
     }
     if (!normalized.candidates.length) {
@@ -2825,10 +2828,10 @@
         canShowPrice:false,
         canShowBookingButton:false,
         canShowCheckoutButton:false,
-        realProviderReadonlyStatus:normalized.status
+        realProviderReadonlyStatus:normalizedStatus
       };
     }
-    return buildReadOnlySearchSuccess(request, "PrijsProfeet", normalized.candidates, normalized.status, {
+    return buildReadOnlySearchSuccess(request, "PrijsProfeet", normalized.candidates, normalizedStatus, {
       source:"prijsprofeet_main_process_public_readonly",
       singleEvidenceOnly:true,
       noResultsMessage:"没有找到当前有效、身份与币种完整且带官方零售商链接的价格。"
@@ -2940,7 +2943,15 @@
     const providerIntegrationReadiness = providerIntegrationReadinessFields(providerConfig && providerConfig.providerIntegrationReadiness || providerHealth && providerHealth.providerIntegrationReadiness || getProviderIntegrationReadiness(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId, { connectorGateHealth }));
     const providerIntegrationRunbook = providerConfig && providerConfig.providerIntegrationRunbook || providerHealth && providerHealth.providerIntegrationRunbook || getProviderIntegrationRunbook(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId, { providerIntegrationReadiness, connectorGateHealth });
     const sandbox = getCommerceProviderSandbox(request.category, settings);
-    const complianceHealth = !isAiModelPricingTask(request) ? evaluateLocalLawCompliance(request, { locationHealth:locationHealth() }) : null;
+    const prijsProfeetReadonlyReady = isProductSearchRequest(request)
+      && !!(window.weishanGlobalShopping
+        && typeof window.weishanGlobalShopping.prijsProfeetReadonlySearch === "function"
+        && prijsProfeetReadonlyAdapterApi()
+        && typeof prijsProfeetReadonlyAdapterApi().normalizeResult === "function");
+    const complianceHealth = !isAiModelPricingTask(request) ? evaluateLocalLawCompliance(request, {
+      locationHealth:locationHealth(),
+      approvedReadonlySourcePolicy:prijsProfeetReadonlyReady ? "prijsprofeet_public_api" : ""
+    }) : null;
     if (complianceHealth && complianceHealth.canSearchProvider !== true) {
       return localLawComplianceRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, complianceHealth);
     }
