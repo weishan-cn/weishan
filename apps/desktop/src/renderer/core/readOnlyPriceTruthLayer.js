@@ -5,9 +5,10 @@
   const MODULE_NAME = "read_only_price_truth_layer_v1";
   const PRICE_COMPLETENESS = Object.freeze(["TOTAL_CONFIRMED", "PARTIAL_PRICE", "BASE_ONLY", "UNKNOWN_COMPONENTS"]);
   const EVIDENCE_TRUTH_CLASSES = Object.freeze(["REAL_PROVIDER_PRICE", "SANDBOX_TEST_DATA", "FIXTURE_TEST_DATA", "INDICATIVE_PRICE", "NO_VERIFIED_PRICE"]);
-  const SOURCE_TYPES = Object.freeze(["PROVIDER_PRODUCTION_READ_ONLY", "PROVIDER_PRODUCTION_TRANSACTIONAL", "PROVIDER_TEST_API", "PUBLIC_WEB_RESULT", "MANUAL_HANDOFF", "SANDBOX", "MOCK", "FIXTURE"]);
+  const SOURCE_TYPES = Object.freeze(["PROVIDER_PRODUCTION_READ_ONLY", "PROVIDER_PRODUCTION_TRANSACTIONAL", "PROVIDER_TEST_API", "PUBLIC_READ_ONLY", "AFFILIATE_FEED", "PUBLIC_WEB_RESULT", "MANUAL_HANDOFF", "SANDBOX", "MOCK", "FIXTURE"]);
   const DOMAINS = Object.freeze(["FLIGHT", "HOTEL", "PRODUCT"]);
   const AVAILABILITY = Object.freeze(["AVAILABLE", "LIMITED", "UNAVAILABLE", "UNKNOWN"]);
+  const PRICE_BASIS = Object.freeze(["ITEM_TOTAL", "TOTAL_STAY", "PER_NIGHT", "TOTAL_ITINERARY", "UNKNOWN"]);
   const SECRET_KEY_RE = /(secret|token|password|authorization|api[_-]?key|private[_-]?key|cookie)/i;
 
   function text(value) { return String(value == null ? "" : value).trim(); }
@@ -88,6 +89,56 @@
     return Array.from(new Set(codes)).sort();
   }
 
+  function nonNegativeInteger(value) {
+    const parsed = Number(value);
+    return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : null;
+  }
+
+  function buildProductContext(raw) {
+    const itemId = identifier(raw.itemId || raw.productId, 160);
+    const productName = identifier(raw.productName || raw.title, 240);
+    const variant = identifier(raw.variant, 160);
+    const condition = enumValue(raw.condition, ["NEW", "USED", "REFURBISHED", "UNKNOWN"], "UNKNOWN");
+    if (!itemId && !productName) return { success:false, code:"PRODUCT_IDENTITY_INVALID" };
+    return {
+      success:true,
+      itemId:itemId,
+      productName:productName,
+      variant:variant,
+      condition:condition,
+      identityKey:[itemId || productName, variant || "UNKNOWN_VARIANT", condition].join("|")
+    };
+  }
+
+  function buildHotelContext(raw) {
+    const propertyId = identifier(raw.propertyId, 160);
+    const propertyName = identifier(raw.propertyName || raw.hotelName, 240);
+    const checkIn = calendarDate(raw.checkIn);
+    const checkOut = calendarDate(raw.checkOut);
+    const rooms = nonNegativeInteger(raw.rooms);
+    const adults = nonNegativeInteger(raw.adults);
+    const children = nonNegativeInteger(raw.children == null ? 0 : raw.children);
+    const roomType = identifier(raw.roomType, 160);
+    const ratePlan = identifier(raw.ratePlan, 160);
+    const nights = checkIn && checkOut ? Math.round((Date.parse(checkOut + "T00:00:00.000Z") - Date.parse(checkIn + "T00:00:00.000Z")) / 86400000) : 0;
+    if ((!propertyId && !propertyName) || !checkIn || !checkOut || nights < 1) return { success:false, code:"HOTEL_CONTEXT_INVALID" };
+    if (!rooms || !adults || children === null) return { success:false, code:"HOTEL_OCCUPANCY_INVALID" };
+    return {
+      success:true,
+      propertyId:propertyId,
+      propertyName:propertyName,
+      checkIn:checkIn,
+      checkOut:checkOut,
+      nights:nights,
+      rooms:rooms,
+      adults:adults,
+      children:children,
+      roomType:roomType,
+      ratePlan:ratePlan,
+      identityKey:[propertyId || propertyName, checkIn, checkOut, rooms, adults, children, roomType || "UNKNOWN_ROOM", ratePlan || "UNKNOWN_RATE"].join("|")
+    };
+  }
+
   function normalizePriceEvidence(input, options) {
     const raw = input && typeof input === "object" ? input : {};
     const opts = options && typeof options === "object" ? options : {};
@@ -102,9 +153,10 @@
     const ageSeconds = retrievedAt && evaluatedAt ? Math.round((Date.parse(evaluatedAt) - Date.parse(retrievedAt)) / 1000) : null;
     const evidenceFreshness = ageSeconds === null || ageSeconds < 0 ? "UNKNOWN" : (ageSeconds <= maxAgeSeconds ? "CURRENT" : "STALE");
     const totalPrice = finiteAmount(raw.totalPrice);
-    const baseFare = finiteAmount(raw.baseFare);
+    const basePrice = finiteAmount(raw.basePrice !== undefined ? raw.basePrice : raw.baseFare);
     const taxes = finiteAmount(raw.taxes);
     const fees = finiteAmount(raw.fees);
+    const shipping = finiteAmount(raw.shipping);
     const priceCompleteness = enumValue(raw.priceCompleteness, PRICE_COMPLETENESS, "UNKNOWN_COMPONENTS");
     const isoCurrency = currency(raw.currency);
     const availabilityStatus = enumValue(raw.availabilityStatus, AVAILABILITY, "UNKNOWN");
@@ -112,21 +164,36 @@
     const sourceName = identifier(raw.sourceName, 160);
     const handoff = safeHttpsUrl(raw.deepLink || raw.manualHandoff);
     const testSource = ["PROVIDER_TEST_API", "SANDBOX", "MOCK", "FIXTURE"].indexOf(sourceType) >= 0;
-    const realTruthAllowed = truthClass === "REAL_PROVIDER_PRICE" && !testSource && sourceType === "PROVIDER_PRODUCTION_READ_ONLY";
+    const realTruthAllowed = truthClass === "REAL_PROVIDER_PRICE" && !testSource && ["PROVIDER_PRODUCTION_READ_ONLY", "PUBLIC_READ_ONLY"].indexOf(sourceType) >= 0;
     const originAirports = normalizeAirportSet(raw.originAirports || raw.origin);
     const destinationAirports = normalizeAirportSet(raw.destinationAirports || raw.destination);
     const departureDate = calendarDate(raw.departureDate);
+    const priceBasis = enumValue(raw.priceBasis, PRICE_BASIS, domain === "FLIGHT" ? "TOTAL_ITINERARY" : "UNKNOWN");
+    const productContext = domain === "PRODUCT" ? buildProductContext(raw) : null;
+    const hotelContext = domain === "HOTEL" ? buildHotelContext(raw) : null;
 
     if (!domain || !sourceType || !sourceId || !sourceName) return result({ success:false, code:"SOURCE_METADATA_INVALID" });
     if (truthClass === "REAL_PROVIDER_PRICE" && !realTruthAllowed) return result({ success:false, code:"REAL_PRICE_SOURCE_CLASS_INVALID" });
     if (domain === "FLIGHT" && (!originAirports.length || !destinationAirports.length || !departureDate)) return result({ success:false, code:"FLIGHT_CONTEXT_INVALID" });
+    if (productContext && productContext.success !== true) return result({ success:false, code:productContext.code });
+    if (hotelContext && hotelContext.success !== true) return result({ success:false, code:hotelContext.code });
+    if (domain === "PRODUCT" && priceBasis !== "ITEM_TOTAL") return result({ success:false, code:"PRODUCT_PRICE_BASIS_INVALID" });
+    if (domain === "HOTEL" && ["TOTAL_STAY", "PER_NIGHT"].indexOf(priceBasis) < 0) return result({ success:false, code:"HOTEL_PRICE_BASIS_INVALID" });
+    if (domain === "FLIGHT" && priceBasis !== "TOTAL_ITINERARY") return result({ success:false, code:"FLIGHT_PRICE_BASIS_INVALID" });
     if (totalPrice !== null && (!isoCurrency || !retrievedAt)) return result({ success:false, code:"NUMERIC_PRICE_EVIDENCE_INCOMPLETE" });
     if (priceCompleteness === "TOTAL_CONFIRMED" && totalPrice === null) return result({ success:false, code:"CONFIRMED_TOTAL_MISSING" });
 
-    const identityParts = domain === "FLIGHT"
+    const identityKey = domain === "FLIGHT"
       ? [originAirports.join(","), destinationAirports.join(","), departureDate, text(raw.departureTime), text(raw.arrivalTime), upper(raw.carrier), upper(raw.flightNumber), upper(raw.cabin)]
-      : [identifier(raw.itemId || raw.propertyId, 160) || "", calendarDate(raw.checkIn) || "", calendarDate(raw.checkOut) || "", identifier(raw.variant || raw.roomType, 160) || ""];
-    const comparable = realTruthAllowed && evidenceFreshness === "CURRENT" && availabilityStatus === "AVAILABLE" && totalPrice !== null && isoCurrency && priceCompleteness === "TOTAL_CONFIRMED";
+        .join("|")
+      : (domain === "PRODUCT" ? productContext.identityKey : hotelContext.identityKey);
+    const comparisonContextKey = domain === "FLIGHT"
+      ? [originAirports.join(","), destinationAirports.join(","), departureDate, upper(raw.cabin)].join("|")
+      : (domain === "PRODUCT"
+        ? productContext.identityKey
+        : [hotelContext.checkIn, hotelContext.checkOut, hotelContext.rooms, hotelContext.adults, hotelContext.children].join("|"));
+    const basisComparable = domain === "HOTEL" ? priceBasis === "TOTAL_STAY" : true;
+    const comparable = realTruthAllowed && evidenceFreshness === "CURRENT" && availabilityStatus === "AVAILABLE" && totalPrice !== null && isoCurrency && priceCompleteness === "TOTAL_CONFIRMED" && basisComparable;
 
     return result({
       success:true,
@@ -137,12 +204,29 @@
         sourceType:sourceType,
         retrievedAt:retrievedAt,
         currency:isoCurrency,
-        baseFare:baseFare,
+        basePrice:basePrice,
+        baseFare:basePrice,
         taxes:taxes,
         fees:fees,
+        shipping:shipping,
         totalPrice:totalPrice,
         priceCompleteness:priceCompleteness,
+        priceBasis:priceBasis,
         availabilityStatus:availabilityStatus,
+        itemId:productContext && productContext.itemId || null,
+        productName:productContext && productContext.productName || null,
+        variant:productContext && productContext.variant || null,
+        condition:productContext && productContext.condition || null,
+        propertyId:hotelContext && hotelContext.propertyId || null,
+        propertyName:hotelContext && hotelContext.propertyName || null,
+        checkIn:hotelContext && hotelContext.checkIn || null,
+        checkOut:hotelContext && hotelContext.checkOut || null,
+        nights:hotelContext && hotelContext.nights || null,
+        rooms:hotelContext && hotelContext.rooms || null,
+        adults:hotelContext && hotelContext.adults || null,
+        children:hotelContext && hotelContext.children !== undefined ? hotelContext.children : null,
+        roomType:hotelContext && hotelContext.roomType || null,
+        ratePlan:hotelContext && hotelContext.ratePlan || null,
         origin:identifier(raw.originName || raw.origin, 160),
         destination:identifier(raw.destinationName || raw.destination, 160),
         originAirports:originAirports,
@@ -159,7 +243,8 @@
         evidenceFreshness:evidenceFreshness,
         freshnessAgeSeconds:ageSeconds,
         evidenceTruthClass:truthClass,
-        identityKey:identityParts.join("|"),
+        identityKey:identityKey,
+        comparisonContextKey:comparisonContextKey,
         comparableAsVerifiedTotal:Boolean(comparable),
         displayAsLiveCurrentPrice:Boolean(realTruthAllowed && evidenceFreshness === "CURRENT" && totalPrice !== null),
         rawProviderResponsePersisted:false,
@@ -178,6 +263,7 @@
     const deduplicated = Array.from(byIdentitySource.values());
     const comparable = deduplicated.filter(function (evidence) { return evidence.comparableAsVerifiedTotal; });
     const currencies = Array.from(new Set(comparable.map(function (evidence) { return evidence.currency; })));
+    const comparisonContexts = Array.from(new Set(comparable.map(function (evidence) { return evidence.comparisonContextKey; })));
     const identities = Array.from(new Set(comparable.map(function (evidence) { return evidence.identityKey; })));
     const conflicts = [];
     identities.forEach(function (identity) {
@@ -186,6 +272,7 @@
       if (prices.length > 1) conflicts.push({ identityKey:identity, observations:same });
     });
     if (!comparable.length) return result({ success:true, comparable:false, reason:"NO_COMPARABLE_VERIFIED_TOTAL", winner:null, observations:deduplicated, conflicts:conflicts });
+    if (comparisonContexts.length !== 1) return result({ success:true, comparable:false, reason:"MATERIAL_SEARCH_CONTEXT_MISMATCH", winner:null, observations:deduplicated, comparisonContexts:comparisonContexts, conflicts:conflicts });
     if (currencies.length !== 1) return result({ success:true, comparable:false, reason:"CROSS_CURRENCY_CONVERSION_UNAVAILABLE", winner:null, observations:deduplicated, currencyGroups:currencies, conflicts:conflicts });
     const ranked = comparable.slice().sort(function (a, b) { return a.totalPrice - b.totalPrice || a.sourceName.localeCompare(b.sourceName); });
     return result({ success:true, comparable:true, reason:null, winner:ranked[0], observations:deduplicated, ranked:ranked, conflicts:conflicts });
@@ -256,6 +343,18 @@
         retrievedAt:evidence.retrievedAt,
         freshness:evidence.evidenceFreshness,
         priceCompleteness:evidence.priceCompleteness,
+        priceBasis:evidence.priceBasis,
+        domain:evidence.domain,
+        productName:evidence.productName,
+        variant:evidence.variant,
+        condition:evidence.condition,
+        propertyName:evidence.propertyName,
+        checkIn:evidence.checkIn,
+        checkOut:evidence.checkOut,
+        nights:evidence.nights,
+        occupancy:evidence.domain === "HOTEL" ? { rooms:evidence.rooms, adults:evidence.adults, children:evidence.children } : null,
+        roomType:evidence.roomType,
+        ratePlan:evidence.ratePlan,
         carrier:evidence.carrier,
         flightNumber:evidence.flightNumber,
         route:[evidence.origin, evidence.destination].filter(Boolean).join(" → "),
@@ -263,16 +362,20 @@
         arrivalTime:evidence.arrivalTime,
         taxesKnown:evidence.taxes !== null,
         feesKnown:evidence.fees !== null,
+        shippingKnown:evidence.shipping !== null,
         handoffUrl:evidence.deepLink,
         actionLabel:"去平台确认"
       });
     });
     const loading = raw.status === "LOADING";
     const sourceFailed = raw.status === "SOURCE_UNAVAILABLE";
+    const domain = enumValue(raw.domain || (cards[0] && cards[0].domain), DOMAINS, "PRODUCT");
+    const pendingLabel = domain === "HOTEL" ? "酒店搜索结果待验证" : (domain === "FLIGHT" ? "机票搜索结果待验证" : "商品搜索结果待验证");
     return result({
       success:true,
       status:loading ? "LOADING" : (cards.length ? "VERIFIED_RESULTS" : (sourceFailed ? "SOURCE_UNAVAILABLE" : "NO_VERIFIED_RESULTS")),
-      title:loading ? "正在查找当前价格…" : (cards.length ? "已找到 " + cards.length + " 个可验证报价" : "搜索条件已准备 · 机票搜索结果待验证"),
+      domain:domain,
+      title:loading ? "正在查找当前价格…" : (cards.length ? "已找到 " + cards.length + " 个可验证报价" : "搜索条件已准备 · " + pendingLabel),
       message:loading ? "正在向已授权的只读价格源查询。" : (cards.length ? "价格可能变化，以平台最终页面为准。" : (sourceFailed ? "价格来源暂时不可用，请稍后再试或前往平台确认。" : "暂未获取到可验证的实时报价（暂无真实价格结果）")),
       cards:cards,
       verifiedCount:cards.length,
@@ -319,6 +422,7 @@
     SOURCE_TYPES,
     DOMAINS,
     AVAILABILITY,
+    PRICE_BASIS,
     normalizePriceEvidence,
     comparePriceEvidence,
     buildFlightSearchIntent,

@@ -84,6 +84,7 @@ function runCore() {
   runStep("Global flight shopping evidence foundation", "node", ["tests/api/global-flight-shopping-evidence-foundation.test.js"]);
   runStep("Global travel price truth foundation", "node", ["tests/api/global-travel-price-truth-foundation.test.js"]);
   runStep("Read-only price truth layer", "node", ["tests/api/read-only-price-truth-layer.test.js"]);
+  runStep("Three-vertical price truth program", "node", ["tests/api/three-vertical-price-truth-program.test.js"]);
   runStep("Global travel decision quality effectiveness", "node", ["tests/api/global-travel-decision-quality-effectiveness.test.js"]);
   runStep("Public Beta email operations control plane", "node", ["tests/api/email-ops-control-plane.test.js"]);
   runStep("Public Beta email operations module effectiveness", "node", ["tests/api/email-ops-module-effectiveness.test.js"]);
