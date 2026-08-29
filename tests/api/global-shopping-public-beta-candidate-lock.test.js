@@ -26,7 +26,17 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaCandidateLock.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaCandidateLock;
+  let upstreamFallbackCalls = 0;
+  windowRef.WeishanGlobalShoppingPublicBetaFinalReadinessCommandCenter = { buildGlobalShoppingPublicBetaFinalReadinessCommandCenter:function () { upstreamFallbackCalls += 1; return summary("Public Beta Final Readiness Command Center", "manual_review_required"); } };
+  windowRef.WeishanGlobalShoppingOfflineLaunchBlockerMatrix = { buildGlobalShoppingOfflineLaunchBlockerMatrix:function () { upstreamFallbackCalls += 1; return summary("Offline Launch Blocker Matrix", "manual_review_required"); } };
+  windowRef.WeishanGlobalShoppingManualNextPhaseDossier = { buildGlobalShoppingManualNextPhaseDossier:function () { upstreamFallbackCalls += 1; return summary("Manual Next-Phase Dossier", "manual_review_required"); } };
+  windowRef.WeishanGlobalShoppingPublicBetaFinalReadinessViewModel = { buildGlobalShoppingPublicBetaFinalReadinessViewModel:function () { upstreamFallbackCalls += 1; return summary("Public Beta Final Readiness ViewModel", "ready"); } };
+  windowRef.WeishanGlobalShoppingNoLaunchAssuranceGate = { buildGlobalShoppingNoLaunchAssuranceGate:function () { upstreamFallbackCalls += 1; return summary("No-Launch Assurance Gate", "ready"); } };
   assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_LOCK_VERSION, "4.2.8");
+
+  const missingUpstream = api.buildGlobalShoppingPublicBetaCandidateLock({});
+  assert.equal(missingUpstream.candidateLockStatus, "needs_review");
+  assert.equal(upstreamFallbackCalls, 0);
 
   const good = api.buildGlobalShoppingPublicBetaCandidateLock({
     publicBetaFinalReadinessCommandCenterSummary:summary("Public Beta Final Readiness Command Center", "manual_review_required", { finalReadinessStatus:"manual_review_required" }),

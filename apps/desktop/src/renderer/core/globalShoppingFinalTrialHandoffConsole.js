@@ -36,11 +36,9 @@
     const normalized = text(value);
     return normalized && normalized !== "null";
   }
-  function resolveSummary(input, key, apiName, methodName) {
+  function directSummary(input, key) {
     const safe = obj(input);
-    if (present(safe[key])) return obj(safe[key]);
-    const api = window[apiName] || {};
-    return typeof api[methodName] === "function" ? obj(api[methodName](safe)) : {};
+    return present(safe[key]) ? obj(safe[key]) : {};
   }
   function blockedReasons(input) {
     const safe = obj(input);
@@ -76,11 +74,13 @@
 
   function evaluateGlobalShoppingFinalTrialHandoffConsole(input) {
     const safe = obj(input);
-    const publicBetaCandidateLockSummary = resolveSummary(safe, "publicBetaCandidateLockSummary", "WeishanGlobalShoppingPublicBetaCandidateLock", "buildGlobalShoppingPublicBetaCandidateLock");
-    const manualNextPhaseDossierSummary = resolveSummary(safe, "manualNextPhaseDossierSummary", "WeishanGlobalShoppingManualNextPhaseDossier", "buildGlobalShoppingManualNextPhaseDossier");
-    const manualLaunchHandoffPackSummary = resolveSummary(safe, "manualLaunchHandoffPackSummary", "WeishanGlobalShoppingManualLaunchHandoffPack", "buildGlobalShoppingManualLaunchHandoffPack");
-    const publicBetaStabilityAuditSummary = resolveSummary(safe, "publicBetaStabilityAuditSummary", "WeishanGlobalShoppingPublicBetaStabilityAudit", "buildGlobalShoppingPublicBetaStabilityAudit");
-    const publicBetaClosureEvidenceArchiveSummary = resolveSummary(safe, "publicBetaClosureEvidenceArchiveSummary", "WeishanGlobalShoppingPublicBetaClosureEvidenceArchive", "buildGlobalShoppingPublicBetaClosureEvidenceArchive");
+    // Candidate Lock is the parent of this handoff console in the Public Beta
+    // graph. Rebuilding it from here creates a deterministic summary cycle.
+    const publicBetaCandidateLockSummary = directSummary(safe, "publicBetaCandidateLockSummary");
+    const manualNextPhaseDossierSummary = directSummary(safe, "manualNextPhaseDossierSummary");
+    const manualLaunchHandoffPackSummary = directSummary(safe, "manualLaunchHandoffPackSummary");
+    const publicBetaStabilityAuditSummary = directSummary(safe, "publicBetaStabilityAuditSummary");
+    const publicBetaClosureEvidenceArchiveSummary = directSummary(safe, "publicBetaClosureEvidenceArchiveSummary");
     const summaries = [
       publicBetaCandidateLockSummary,
       manualNextPhaseDossierSummary,

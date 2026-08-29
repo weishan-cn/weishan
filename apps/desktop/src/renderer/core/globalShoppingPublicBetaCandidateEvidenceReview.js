@@ -36,11 +36,9 @@
     const normalized = text(value);
     return normalized && normalized !== "null";
   }
-  function resolveSummary(input, key, apiName, methodName) {
+  function directSummary(input, key) {
     const safe = obj(input);
-    if (present(safe[key])) return obj(safe[key]);
-    const api = window[apiName] || {};
-    return typeof api[methodName] === "function" ? obj(api[methodName](safe)) : {};
+    return present(safe[key]) ? obj(safe[key]) : {};
   }
   function blockedReasons(input) {
     const safe = obj(input);
@@ -78,11 +76,13 @@
 
   function evaluateGlobalShoppingPublicBetaCandidateEvidenceReview(input) {
     const safe = obj(input);
-    const publicBetaCandidateLockSummary = resolveSummary(safe, "publicBetaCandidateLockSummary", "WeishanGlobalShoppingPublicBetaCandidateLock", "buildGlobalShoppingPublicBetaCandidateLock");
-    const finalTrialHandoffConsoleSummary = resolveSummary(safe, "finalTrialHandoffConsoleSummary", "WeishanGlobalShoppingFinalTrialHandoffConsole", "buildGlobalShoppingFinalTrialHandoffConsole");
-    const noProviderProductionBoundarySummary = resolveSummary(safe, "noProviderProductionBoundarySummary", "WeishanGlobalShoppingNoProviderProductionBoundary", "buildGlobalShoppingNoProviderProductionBoundary");
-    const publicBetaCandidateViewModelSummary = resolveSummary(safe, "publicBetaCandidateViewModelSummary", "WeishanGlobalShoppingPublicBetaCandidateViewModel", "buildGlobalShoppingPublicBetaCandidateViewModel");
-    const publicBetaFinalReadinessCommandCenterSummary = resolveSummary(safe, "publicBetaFinalReadinessCommandCenterSummary", "WeishanGlobalShoppingPublicBetaFinalReadinessCommandCenter", "buildGlobalShoppingPublicBetaFinalReadinessCommandCenter");
+    // Candidate Lock is upstream of this review. Rebuilding it here closes a
+    // CandidateLock -> EvidenceReview -> CandidateLock fallback cycle.
+    const publicBetaCandidateLockSummary = directSummary(safe, "publicBetaCandidateLockSummary");
+    const finalTrialHandoffConsoleSummary = directSummary(safe, "finalTrialHandoffConsoleSummary");
+    const noProviderProductionBoundarySummary = directSummary(safe, "noProviderProductionBoundarySummary");
+    const publicBetaCandidateViewModelSummary = directSummary(safe, "publicBetaCandidateViewModelSummary");
+    const publicBetaFinalReadinessCommandCenterSummary = directSummary(safe, "publicBetaFinalReadinessCommandCenterSummary");
     const summaries = [
       publicBetaCandidateLockSummary,
       finalTrialHandoffConsoleSummary,

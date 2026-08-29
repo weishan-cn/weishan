@@ -38,11 +38,9 @@
     const normalized = text(value);
     return normalized && normalized !== "null";
   }
-  function resolveSummary(input, key, apiName, methodName) {
+  function directSummary(input, key) {
     const safe = obj(input);
-    if (present(safe[key])) return obj(safe[key]);
-    const api = window[apiName] || {};
-    return typeof api[methodName] === "function" ? obj(api[methodName](safe)) : {};
+    return present(safe[key]) ? obj(safe[key]) : {};
   }
   function blockedReasons(input) {
     const safe = obj(input);
@@ -80,11 +78,13 @@
 
   function evaluateGlobalShoppingPublicBetaCandidateLock(input) {
     const safe = obj(input);
-    const publicBetaFinalReadinessCommandCenterSummary = resolveSummary(safe, "publicBetaFinalReadinessCommandCenterSummary", "WeishanGlobalShoppingPublicBetaFinalReadinessCommandCenter", "buildGlobalShoppingPublicBetaFinalReadinessCommandCenter");
-    const offlineLaunchBlockerMatrixSummary = resolveSummary(safe, "offlineLaunchBlockerMatrixSummary", "WeishanGlobalShoppingOfflineLaunchBlockerMatrix", "buildGlobalShoppingOfflineLaunchBlockerMatrix");
-    const manualNextPhaseDossierSummary = resolveSummary(safe, "manualNextPhaseDossierSummary", "WeishanGlobalShoppingManualNextPhaseDossier", "buildGlobalShoppingManualNextPhaseDossier");
-    const publicBetaFinalReadinessViewModelSummary = resolveSummary(safe, "publicBetaFinalReadinessViewModelSummary", "WeishanGlobalShoppingPublicBetaFinalReadinessViewModel", "buildGlobalShoppingPublicBetaFinalReadinessViewModel");
-    const noLaunchAssuranceGateSummary = resolveSummary(safe, "noLaunchAssuranceGateSummary", "WeishanGlobalShoppingNoLaunchAssuranceGate", "buildGlobalShoppingNoLaunchAssuranceGate");
+    // Candidate Lock is a terminal decision summary. Its upstream readiness
+    // evidence must be composed once and supplied explicitly.
+    const publicBetaFinalReadinessCommandCenterSummary = directSummary(safe, "publicBetaFinalReadinessCommandCenterSummary");
+    const offlineLaunchBlockerMatrixSummary = directSummary(safe, "offlineLaunchBlockerMatrixSummary");
+    const manualNextPhaseDossierSummary = directSummary(safe, "manualNextPhaseDossierSummary");
+    const publicBetaFinalReadinessViewModelSummary = directSummary(safe, "publicBetaFinalReadinessViewModelSummary");
+    const noLaunchAssuranceGateSummary = directSummary(safe, "noLaunchAssuranceGateSummary");
     const summaries = [
       publicBetaFinalReadinessCommandCenterSummary,
       offlineLaunchBlockerMatrixSummary,

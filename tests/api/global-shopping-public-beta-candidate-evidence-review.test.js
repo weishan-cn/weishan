@@ -26,7 +26,22 @@ function summary(title, status, extra) {
 function main() {
   const windowRef = load(["apps/desktop/src/renderer/core/globalShoppingPublicBetaCandidateEvidenceReview.js"]);
   const api = windowRef.WeishanGlobalShoppingPublicBetaCandidateEvidenceReview;
+  let upstreamFallbackCalls = 0;
+  windowRef.WeishanGlobalShoppingPublicBetaCandidateLock = {
+    buildGlobalShoppingPublicBetaCandidateLock:function () {
+      upstreamFallbackCalls += 1;
+      return summary("Public Beta Candidate Lock", "manual_review_required", { candidateLockStatus:"manual_review_required" });
+    }
+  };
+  windowRef.WeishanGlobalShoppingFinalTrialHandoffConsole = { buildGlobalShoppingFinalTrialHandoffConsole:function () { upstreamFallbackCalls += 1; return summary("Final Trial Handoff Console", "manual_review_required"); } };
+  windowRef.WeishanGlobalShoppingNoProviderProductionBoundary = { buildGlobalShoppingNoProviderProductionBoundary:function () { upstreamFallbackCalls += 1; return summary("No-Provider Production Boundary", "manual_review_required"); } };
+  windowRef.WeishanGlobalShoppingPublicBetaCandidateViewModel = { buildGlobalShoppingPublicBetaCandidateViewModel:function () { upstreamFallbackCalls += 1; return summary("Public Beta Candidate ViewModel", "ready"); } };
+  windowRef.WeishanGlobalShoppingPublicBetaFinalReadinessCommandCenter = { buildGlobalShoppingPublicBetaFinalReadinessCommandCenter:function () { upstreamFallbackCalls += 1; return summary("Public Beta Final Readiness Command Center", "manual_review_required"); } };
   assert.equal(api.GLOBAL_SHOPPING_PUBLIC_BETA_CANDIDATE_EVIDENCE_REVIEW_VERSION, "4.2.8");
+
+  const missingCandidateLock = api.buildGlobalShoppingPublicBetaCandidateEvidenceReview({});
+  assert.equal(missingCandidateLock.evidenceReviewStatus, "needs_review");
+  assert.equal(upstreamFallbackCalls, 0);
 
   const review = api.buildGlobalShoppingPublicBetaCandidateEvidenceReview({
     publicBetaCandidateLockSummary:summary("Public Beta Candidate Lock", "manual_review_required", { candidateLockStatus:"manual_review_required" }),
