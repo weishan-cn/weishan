@@ -884,7 +884,7 @@
     }
     if (window.WeishanCommerceSearch || document.querySelector('script[data-weishan-dynamic="WeishanCommerceSearch"]')) return;
     const script = document.createElement("script");
-    script.src = "./renderer/core/commerceSearch.js?v=2.0.50-prijsprofeet";
+    script.src = "./renderer/core/commerceSearch.js?v=2.0.50-tienda-centro";
     script.dataset.weishanDynamic = "WeishanCommerceSearch";
     script.onload = () => render(host);
     document.head.appendChild(script);
@@ -1093,6 +1093,7 @@
     if (type === "rakuten_api") return "Rakuten API";
     if (type === "rakuten_official_api") return "Rakuten 官方 API";
     if (type === "prijsprofeet_public_api") return "PrijsProfeet 公开只读 API";
+    if (type === "tienda_centro_public_api") return "Tienda Centro 商户公开 API";
     if (type === "external_link_only") return "外部平台入口";
     if (type === "official") return "官方";
     if (type === "aggregator") return "聚合";
@@ -9005,7 +9006,7 @@
       && item.truthEvidence
       && item.truthEvidence.evidenceTruthClass === "REAL_PROVIDER_PRICE"
       && item.truthEvidence.displayAsLiveCurrentPrice === true
-      && item.sourceType === "prijsprofeet_public_api");
+      && ["prijsprofeet_public_api", "tienda_centro_public_api"].includes(item.sourceType));
   }
 
   function searchRequestHtml(request){
@@ -9220,8 +9221,9 @@
       </div>
       <p class="commerce-muted">费用说明：${esc(item.feeNote || "价格与费用以平台页面为准")}</p>
       <p class="commerce-muted">数据来源：${esc(sourceTypeLabel(item.sourceType))} · 更新时间：${esc(timeLabel(item.updatedAt || ((item.priceFreshness || {}).fetchedAt) || ((item.availabilityFreshness || {}).checkedAt) || "") || "unknown")} · 价格时效：${esc(freshnessLabel((item.priceFreshness || {}).freshnessLevel || ""))}</p>
-      ${item.sourceAttributionName && item.sourceAttributionUrl ? `<p class="commerce-muted">数据提供：${esc(item.sourceAttributionName)} · <button class="cmd-btn gray commerce-source-attribution-link" type="button" data-url="${esc(item.sourceAttributionUrl)}" data-handoff-source="${item.sourceType === "prijsprofeet_public_api" ? "prijsprofeet_attribution" : ""}">查看数据来源</button></p>` : ""}
+      ${item.sourceAttributionName && item.sourceAttributionUrl ? `<p class="commerce-muted">数据提供：${esc(item.sourceAttributionName)} · <button class="cmd-btn gray commerce-source-attribution-link" type="button" data-url="${esc(item.sourceAttributionUrl)}" data-handoff-source="${item.sourceType === "prijsprofeet_public_api" ? "prijsprofeet_attribution" : (item.sourceType === "tienda_centro_public_api" ? "tienda_centro_public_api" : "")}">查看数据来源</button></p>` : ""}
       ${item.retrievedAt ? `<p class="commerce-muted">本次检索：${esc(timeLabel(item.retrievedAt) || "unknown")}${item.providerUpdatedAt ? " · 来源抓取：" + esc(timeLabel(item.providerUpdatedAt) || "unknown") : ""}</p>` : ""}
+      ${item.onSale === true && item.regularPrice && item.salePrice ? `<p class="commerce-muted">商户促销价：${esc(item.currency + " " + Number(item.salePrice).toFixed(Number.isSafeInteger(item.currencyMinorUnit) ? item.currencyMinorUnit : 2))} · 常规价：${esc(item.currency + " " + Number(item.regularPrice).toFixed(Number.isSafeInteger(item.currencyMinorUnit) ? item.currencyMinorUnit : 2))}</p>` : ""}
       ${item.validFrom && item.validUntil ? `<p class="commerce-muted">价格有效期：${esc(item.validFrom)} → ${esc(item.validUntil)}</p>` : ""}
       ${item.dataSource ? `<p class="commerce-muted">当前可信等级：${esc((item.dataQuality || {}).qualityLevel === "high" ? "高" : "离线采购模式")}</p>` : ""}
       ${item.realDataValidation ? `<p class="commerce-muted">验证状态：${esc(item.realDataValidation.validationStatus === "passed" ? "已通过安全校验" : item.realDataValidation.validationStatus || "待确认")} · 可信等级：${esc(item.realDataValidation.confidence || "low")}</p>` : ""}
@@ -9238,7 +9240,7 @@
       <p class="commerce-muted">推荐理由：${esc(((item.recommendationReasonDetail || {}).summary) || item.recommendationReason || "")}</p>
       ${item.fallbackInfo && item.fallbackInfo.availableFallback ? `<p class="commerce-muted">回退候选：${esc(item.fallbackInfo.fallbackProviderName || "已准备更多平台")}</p>` : ""}
       <p class="commerce-warning">${esc(item.riskNote || "Weishan 不收款、不代下单、不保存账号密码，最终价格以平台页面为准。")}</p>
-      ${item.targetUrl ? `<button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}" data-handoff-source="${item.sourceType === "prijsprofeet_public_api" ? "prijsprofeet_public_api" : ""}">去零售商核验</button>` : `<p class="commerce-warning">目标平台链接缺失，暂不可跳转。</p>`}
+      ${item.targetUrl ? `<button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}" data-handoff-source="${item.sourceType === "prijsprofeet_public_api" ? "prijsprofeet_public_api" : (item.sourceType === "tienda_centro_public_api" ? "tienda_centro_public_api" : "")}">去零售商核验</button>` : `<p class="commerce-warning">目标平台链接缺失，暂不可跳转。</p>`}
     </article>`;
     const realtimeStatusCard = realProviderReadonlyStatus ? `<article class="commerce-candidate-card commerce-readonly-search-card">
       <div class="commerce-candidate-head">

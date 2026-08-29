@@ -32,6 +32,10 @@
     { category:"regionally_restricted_goods_or_services", pattern:/地区限制|当地限制|regionally restricted|restricted goods/i }
   ];
   const APPROVED_READONLY_SOURCE_POLICY = "prijsprofeet_public_api";
+  const APPROVED_READONLY_SOURCE_POLICIES = Object.freeze([
+    APPROVED_READONLY_SOURCE_POLICY,
+    "tienda_centro_public_api"
+  ]);
 
   function cleanText(value, max){
     return String(value || "").replace(/\s+/g, " ").trim().slice(0, max || 160);
@@ -164,7 +168,8 @@
     const risk = classifyComplianceRisk(query, category);
     const missingBasis = locationBasis.locationBasisStatus === "missing";
     const regulated = risk.riskStatus === "regulated_category_detected";
-    const approvedReadonlyGeneralProduct = nextSettings.approvedReadonlySourcePolicy === APPROVED_READONLY_SOURCE_POLICY
+    const approvedReadonlySourcePolicy = cleanText(nextSettings.approvedReadonlySourcePolicy || "", 80);
+    const approvedReadonlyGeneralProduct = APPROVED_READONLY_SOURCE_POLICIES.includes(approvedReadonlySourcePolicy)
       && category === "product"
       && !missingBasis
       && !regulated;
@@ -194,7 +199,7 @@
         locationBasis,
         privacy:policy.privacy,
         safety:policy.safety,
-        approvedReadonlySourcePolicy:APPROVED_READONLY_SOURCE_POLICY
+        approvedReadonlySourcePolicy
       };
     }
     const complianceStatus = regulated ? "compliance_review_required" : missingBasis ? "compliance_required" : "not_verified";
@@ -237,6 +242,7 @@
 
   window.WeishanCommerceLocalLawCompliance = {
     APPROVED_READONLY_SOURCE_POLICY,
+    APPROVED_READONLY_SOURCE_POLICIES,
     getLocalLawCompliancePolicy,
     classifyComplianceRisk,
     getComplianceLocationBasis,

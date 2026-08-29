@@ -49,6 +49,8 @@ function main() {
   assert.equal(typeof exposed.weishanGlobalShopping.getRakutenReadonlyStatus, "function");
   assert.equal(typeof exposed.weishanGlobalShopping.prijsProfeetReadonlySearch, "function");
   assert.equal(typeof exposed.weishanGlobalShopping.getPrijsProfeetReadonlyStatus, "function");
+  assert.equal(typeof exposed.weishanGlobalShopping.tiendaCentroReadonlySearch, "function");
+  assert.equal(typeof exposed.weishanGlobalShopping.getTiendaCentroReadonlyStatus, "function");
   assert.equal("ipcRenderer" in exposed.weishanGlobalShopping, false);
   assert.equal("getProviderKeyValue" in exposed.weishanGlobalShopping, false);
 
@@ -56,13 +58,18 @@ function main() {
   exposed.weishanGlobalShopping.getRakutenReadonlyStatus();
   exposed.weishanGlobalShopping.prijsProfeetReadonlySearch({ query:"Coca Cola", requestId:"request-1", limit:1 });
   exposed.weishanGlobalShopping.getPrijsProfeetReadonlyStatus();
+  exposed.weishanGlobalShopping.tiendaCentroReadonlySearch({ query:"IPHONE 17 256 GB NUEVO", requestId:"request-2", limit:1 });
+  exposed.weishanGlobalShopping.getTiendaCentroReadonlyStatus();
   assert.deepEqual(invoked.map((item) => item.channel), [
     "global-shopping:rakuten-readonly-search",
     "global-shopping:rakuten-readonly-status",
     "global-shopping:prijsprofeet-readonly-search",
-    "global-shopping:prijsprofeet-readonly-status"
+    "global-shopping:prijsprofeet-readonly-status",
+    "global-shopping:tienda-centro-readonly-search",
+    "global-shopping:tienda-centro-readonly-status"
   ]);
   assert.deepEqual(invoked[2].payload, { query:"Coca Cola", requestId:"request-1", limit:1 });
+  assert.deepEqual(invoked[4].payload, { query:"IPHONE 17 256 GB NUEVO", requestId:"request-2", limit:1 });
 
   console.log("GLOBAL_SHOPPING_RAKUTEN_PRELOAD_BOUNDARY PASS");
 }

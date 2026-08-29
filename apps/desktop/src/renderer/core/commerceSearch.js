@@ -3,6 +3,7 @@
   const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
   const CHEAPEST_REDIRECT_MODE = "cheapest_redirect";
   const prijsProfeetSearchGenerations = new Map();
+  const tiendaCentroSearchGenerations = new Map();
 
   function nowIso(){
     return new Date().toISOString();
@@ -124,6 +125,10 @@
 
   function prijsProfeetReadonlyAdapterApi(){
     return window.WeishanPrijsProfeetReadonlyAdapter || null;
+  }
+
+  function tiendaCentroReadonlyAdapterApi(){
+    return window.WeishanTiendaCentroReadonlyAdapter || null;
   }
 
   function getCommerceLocalIntentRoute(input){
@@ -2838,6 +2843,75 @@
     });
   }
 
+  function isArgentinaDestination(locationState){
+    const health = locationState && typeof locationState === "object" ? locationState : {};
+    const destination = health.shippingDestination && typeof health.shippingDestination === "object" ? health.shippingDestination : {};
+    return /^(?:AR|ARG|Argentina|阿根廷)$/i.test(String(destination.country || "").trim());
+  }
+
+  async function searchTiendaCentroReadonlyProductCandidates(request){
+    const bridge = window.weishanGlobalShopping;
+    const adapter = tiendaCentroReadonlyAdapterApi();
+    if (!bridge || typeof bridge.tiendaCentroReadonlySearch !== "function" || !adapter || typeof adapter.normalizeResult !== "function") return null;
+    const taskKey = sanitizeText(request.taskId || request.query || "product", 120);
+    const nextGeneration = Number(tiendaCentroSearchGenerations.get(taskKey) || 0) + 1;
+    tiendaCentroSearchGenerations.set(taskKey, nextGeneration);
+    const requestId = taskKey + ":" + String(nextGeneration);
+    let raw;
+    try {
+      raw = await bridge.tiendaCentroReadonlySearch({ query:request.query, requestId, limit:1 });
+    } catch (_) {
+      raw = { ok:false, code:"SOURCE_UNAVAILABLE", requestId, results:[] };
+    }
+    if (Number(tiendaCentroSearchGenerations.get(taskKey) || 0) !== nextGeneration || sanitizeText(raw && raw.requestId || "", 120) !== requestId) {
+      return {
+        ok:false,
+        code:"COMMERCE_STALE_RESULT_IGNORED",
+        message:"较早的价格查询结果已忽略。",
+        providerName:"Tienda Centro",
+        request,
+        candidates:[]
+      };
+    }
+    const normalized = adapter.normalizeResult(raw, { evaluatedAt:nowIso() });
+    const normalizedStatus = normalized && normalized.status
+      ? Object.assign({}, normalized.status, { requestCount:Number(normalized.requestCount || 0) })
+      : adapter.status({ ok:false });
+    if (!normalized || normalized.ok !== true) {
+      return {
+        ok:false,
+        code:"COMMERCE_PROVIDER_UNAVAILABLE",
+        message:"Tienda Centro 当前价格查询暂时不可用，请稍后重试。",
+        providerName:"Tienda Centro",
+        request,
+        candidates:[],
+        canShowPrice:false,
+        canShowBookingButton:false,
+        canShowCheckoutButton:false,
+        realProviderReadonlyStatus:normalizedStatus
+      };
+    }
+    if (!normalized.candidates.length) {
+      return {
+        ok:false,
+        code:"COMMERCE_NO_RESULTS",
+        message:"没有找到与所查询型号和规格精确匹配、且带商户商品页的当前价格。",
+        providerName:"Tienda Centro",
+        request,
+        candidates:[],
+        canShowPrice:false,
+        canShowBookingButton:false,
+        canShowCheckoutButton:false,
+        realProviderReadonlyStatus:normalizedStatus
+      };
+    }
+    return buildReadOnlySearchSuccess(request, "Tienda Centro", normalized.candidates, normalizedStatus, {
+      source:"tienda_centro_main_process_public_readonly",
+      singleEvidenceOnly:true,
+      noResultsMessage:"没有找到与所查询型号和规格精确匹配、且带商户商品页的当前价格。"
+    });
+  }
+
   function buildReadOnlyFallbackSearchResult(request, status){
     const factory = platformCandidateFactoryApi();
     const candidates = factory && typeof factory.buildGlobalShoppingPlatformCandidates === "function"
@@ -2943,23 +3017,35 @@
     const providerIntegrationReadiness = providerIntegrationReadinessFields(providerConfig && providerConfig.providerIntegrationReadiness || providerHealth && providerHealth.providerIntegrationReadiness || getProviderIntegrationReadiness(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId, { connectorGateHealth }));
     const providerIntegrationRunbook = providerConfig && providerConfig.providerIntegrationRunbook || providerHealth && providerHealth.providerIntegrationRunbook || getProviderIntegrationRunbook(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId, { providerIntegrationReadiness, connectorGateHealth });
     const sandbox = getCommerceProviderSandbox(request.category, settings);
+    const currentLocationHealth = locationHealth();
+    const tiendaCentroDestination = isProductSearchRequest(request) && isArgentinaDestination(currentLocationHealth);
     const prijsProfeetReadonlyReady = isProductSearchRequest(request)
       && !!(window.weishanGlobalShopping
         && typeof window.weishanGlobalShopping.prijsProfeetReadonlySearch === "function"
         && prijsProfeetReadonlyAdapterApi()
         && typeof prijsProfeetReadonlyAdapterApi().normalizeResult === "function");
+    const tiendaCentroReadonlyReady = isProductSearchRequest(request)
+      && !!(window.weishanGlobalShopping
+        && typeof window.weishanGlobalShopping.tiendaCentroReadonlySearch === "function"
+        && tiendaCentroReadonlyAdapterApi()
+        && typeof tiendaCentroReadonlyAdapterApi().normalizeResult === "function");
+    const approvedReadonlySourcePolicy = tiendaCentroDestination
+      ? (tiendaCentroReadonlyReady ? "tienda_centro_public_api" : "")
+      : (prijsProfeetReadonlyReady ? "prijsprofeet_public_api" : "");
     const complianceHealth = !isAiModelPricingTask(request) ? evaluateLocalLawCompliance(request, {
-      locationHealth:locationHealth(),
-      approvedReadonlySourcePolicy:prijsProfeetReadonlyReady ? "prijsprofeet_public_api" : ""
+      locationHealth:currentLocationHealth,
+      approvedReadonlySourcePolicy
     }) : null;
     if (complianceHealth && complianceHealth.canSearchProvider !== true) {
       return localLawComplianceRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, complianceHealth);
     }
-    if (isProductSearchRequest(request) && locationHealth().hasShippingDestination !== true) {
+    if (isProductSearchRequest(request) && currentLocationHealth.hasShippingDestination !== true) {
       return shippingDestinationRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox);
     }
     if (isProductSearchRequest(request) && !(request.missingFields && request.missingFields.length)) {
-      const readonlyResult = await searchPrijsProfeetReadonlyProductCandidates(request)
+      const readonlyResult = (tiendaCentroDestination
+        ? await searchTiendaCentroReadonlyProductCandidates(request)
+        : await searchPrijsProfeetReadonlyProductCandidates(request))
         || await searchRakutenReadonlyProductCandidates(request);
       if (readonlyResult) {
         return Object.assign({

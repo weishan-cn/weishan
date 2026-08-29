@@ -6,8 +6,10 @@
   const TRUSTED_HOSTS = ["google.com", "trip.com", "ctrip.com", "skyscanner.com", "kayak.com", "expedia.com", "booking.com"];
   const SOURCE_TRUSTED_HOSTS = Object.freeze({
     prijsprofeet_public_api:["ah.nl", "aldi.nl", "dekamarkt.nl", "dirk.nl", "ekoplaza.nl", "hoogvliet.com", "hoogvliet.nl", "jumbo.com", "lidl.nl", "plus.nl", "vomar.nl"],
-    prijsprofeet_attribution:["prijsprofeet.nl"]
+    prijsprofeet_attribution:["prijsprofeet.nl"],
+    tienda_centro_public_api:["tiendacentro.com"]
   });
+  const SOURCE_EXACT_HOSTS = Object.freeze({ tienda_centro_public_api:true });
   const SHORT_URL_HOSTS = ["bit.ly", "t.co", "tinyurl.com", "goo.gl", "ow.ly", "is.gd", "buff.ly", "cutt.ly", "short.link"];
   const CREDENTIAL_PARAMS = /(api[_-]?key|apikey|token|access[_-]?token|refresh[_-]?token|secret|client[_-]?secret|authorization|password)=/i;
   const BLOCKED_PATH_PATTERN = /(checkout|payment|order|identity|book)/i;
@@ -49,8 +51,8 @@
     return CREDENTIAL_PARAMS.test(text(value));
   }
 
-  function isTrustedHost(host, trustedHosts) {
-    return (Array.isArray(trustedHosts) ? trustedHosts : TRUSTED_HOSTS).some((trusted) => host === trusted || host.endsWith(`.${trusted}`));
+  function isTrustedHost(host, trustedHosts, exactOnly) {
+    return (Array.isArray(trustedHosts) ? trustedHosts : TRUSTED_HOSTS).some((trusted) => host === trusted || (!exactOnly && host.endsWith(`.${trusted}`)));
   }
 
   function buildDefaultSafeProviderHandoffUrl(candidate) {
@@ -65,15 +67,16 @@
     const value = text(url);
     const sourceType = text(options && options.sourceType);
     const trustedHosts = SOURCE_TRUSTED_HOSTS[sourceType] || TRUSTED_HOSTS;
+    const exactOnly = SOURCE_EXACT_HOSTS[sourceType] === true;
     const truthEngine = window.WeishanGlobalHandoffTruthEngine;
     if (truthEngine && typeof truthEngine.validateDestinationUrl === "function") {
       const checked = truthEngine.validateDestinationUrl(value, { expectedHosts: trustedHosts });
-      return checked.allowed ? value : "";
+      if (!checked.allowed) return "";
     }
     if (!value) return "";
     if (!/^https:\/\//i.test(value)) return "";
     const host = hostFromUrl(value);
-    if (!host || !isTrustedHost(host, trustedHosts)) return "";
+    if (!host || !isTrustedHost(host, trustedHosts, exactOnly)) return "";
     if (SHORT_URL_HOSTS.includes(host)) return "";
     if (hasCredentialParams(value)) return "";
     if (BLOCKED_PATH_PATTERN.test(pathFromUrl(value))) return "";
@@ -268,6 +271,7 @@
     PHASE,
     TRUSTED_HOSTS,
     SOURCE_TRUSTED_HOSTS,
+    SOURCE_EXACT_HOSTS,
     buildSafeProviderHandoffUrlGate,
     sanitizeSafeProviderHandoffUrl,
     evaluateSafeProviderHandoffUrl,

@@ -191,7 +191,7 @@ async function main() {
   assert.equal(preloadSource.includes("contextBridge.exposeInMainWorld(\"weishan\", ipcRenderer"), false);
 
   const exposedMethodCount = Object.values(exposed).reduce((sum, api) => sum + flattenMethods(api).length, 0);
-  assert.equal(exposedMethodCount, 39);
+  assert.equal(exposedMethodCount, 41);
 
   const serialized = JSON.stringify({ exposed:Object.keys(exposed), blockedPreloadOpen });
   assert.equal(/Bearer |client_secret|private_key|apiKeyValue|passwordValue/i.test(serialized), false);

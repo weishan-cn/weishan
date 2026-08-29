@@ -80,6 +80,8 @@ function runCore() {
   runStep("Real-price coverage sweep", "node", ["tests/api/global-commerce-real-price-coverage-sweep.test.js"]);
   runStep("PrijsProfeet public read-only integration", "node", ["tests/api/prijsprofeet-readonly-integration.test.js"]);
   runStep("PrijsProfeet renderer price-truth flow", "node", ["tests/api/prijsprofeet-renderer-flow.test.js"]);
+  runStep("Tienda Centro merchant public read-only integration", "node", ["tests/api/tienda-centro-readonly-integration.test.js"]);
+  runStep("Tienda Centro renderer price-truth flow", "node", ["tests/api/tienda-centro-renderer-flow.test.js"]);
   runStep("Unified shopping and travel desktop flow", "node", ["tests/api/unified-desktop-flow-view-model.test.js"]);
   runStep("Home unified desktop effectiveness", "node", ["tests/api/home-unified-desktop-effectiveness.test.js"]);
   runStep("Search module effectiveness", "node", ["tests/api/search-module-effectiveness.test.js"]);
@@ -139,6 +141,7 @@ function runE2e() {
     runStep("E2E Travel Basic AI mode", "npx", ["playwright", "test", "tests/e2e/travel-basic-ai-mode.spec.js", "--workers=1"]);
     runStep("E2E read-only price truth layer", "npx", ["playwright", "test", "tests/e2e/read-only-price-truth-layer.spec.js", "--workers=1"]);
     runStep("E2E PrijsProfeet real-price display", "npx", ["playwright", "test", "tests/e2e/prijsprofeet-real-price-display.spec.js", "--workers=1"]);
+    runStep("E2E Tienda Centro merchant real-price display", "npx", ["playwright", "test", "tests/e2e/tienda-centro-real-price-display.spec.js", "--workers=1"]);
     runStep("E2E Public Beta user journey", "npx", ["playwright", "test", "tests/e2e/public-beta-user-journey.spec.js", "--workers=1"]);
     runStep("E2E Desktop UI simplification", "npx", ["playwright", "test", "tests/e2e/desktop-ui-simplification.spec.js", "--workers=1"]);
     runStep("E2E desktop assistant", "npm", ["run", "test:e2e:desktop-assistant"]);
