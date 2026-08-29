@@ -20,7 +20,16 @@ function main() {
     "apps/desktop/src/renderer/core/globalShoppingProviderGovernanceReleaseViewModel.js"
   ]);
   const api = windowRef.WeishanGlobalShoppingProviderGovernanceReleaseViewModel;
+  let fallbackCalls = 0;
+  windowRef.WeishanGlobalShoppingHumanPilotReadinessLedger = { buildGlobalShoppingHumanPilotReadinessLedger:function () { fallbackCalls += 1; return { status:"ready", rows:[] }; } };
+  windowRef.WeishanGlobalShoppingSandboxProviderReleaseFreezeGate = { buildGlobalShoppingSandboxProviderReleaseFreezeGate:function () { fallbackCalls += 1; return { status:"ready", rows:[] }; } };
   assert.equal(api.GLOBAL_SHOPPING_PROVIDER_GOVERNANCE_RELEASE_VIEW_MODEL_VERSION, "4.2.8");
+
+  const missing = api.buildGlobalShoppingProviderGovernanceReleaseViewModel({});
+  assert.equal(missing.status, "needs_review");
+  assert.equal(missing.humanPilotLedgerRows[0].status, "warning");
+  assert.equal(missing.releaseFreezeRows[0].status, "warning");
+  assert.equal(fallbackCalls, 0);
 
   const ready = api.buildGlobalShoppingProviderGovernanceReleaseViewModel({
     governanceAuditConsoleSummary:{ status:"ready", userFacingSummary:{ resultLabel:"治理审计控制台已准备", redacted:true }, rows:[{ rowId:"audit", label:"治理审计", value:"治理审计控制台已准备", status:"pass", redacted:true }], redacted:true },

@@ -14,12 +14,6 @@
       .trim();
   }
   function present(value) { return Object.keys(obj(value)).length > 0; }
-  function resolveSummary(input, key, apiName, methodName) {
-    const safe = obj(input);
-    if (present(safe[key])) return obj(safe[key]);
-    const api = window[apiName] || {};
-    return typeof api[methodName] === "function" ? obj(api[methodName](safe)) : {};
-  }
   function directSummary(input, key) {
     const safe = obj(input);
     return present(safe[key]) ? obj(safe[key]) : {};
@@ -50,12 +44,12 @@
   }
 
   function buildGlobalShoppingHumanPilotReadinessRowsForView(input) {
-    const ledger = resolveSummary(input, "humanPilotReadinessLedgerSummary", "WeishanGlobalShoppingHumanPilotReadinessLedger", "buildGlobalShoppingHumanPilotReadinessLedger");
+    const ledger = directSummary(input, "humanPilotReadinessLedgerSummary");
     return toArray(ledger.rows).length ? clone(ledger.rows) : clone([row("human_pilot_ledger_missing", "Human Pilot 台账", "Human Pilot 准备仍需复核", "warning")]);
   }
 
   function buildGlobalShoppingReleaseFreezeRowsForView(input) {
-    const gate = resolveSummary(input, "releaseFreezeGateSummary", "WeishanGlobalShoppingSandboxProviderReleaseFreezeGate", "buildGlobalShoppingSandboxProviderReleaseFreezeGate");
+    const gate = directSummary(input, "releaseFreezeGateSummary");
     return toArray(gate.rows).length ? clone(gate.rows) : clone([row("release_freeze_missing", "Release Freeze", "Release Freeze 仍需复核", "warning")]);
   }
 
