@@ -19,10 +19,10 @@ test("launches the canonical source dev runtime, not a packaged duplicate", asyn
       title: process && process.title
     }));
     expect(mainRuntime.isPackaged).toBe(false);
-    expect(mainRuntime.appName).toBe("weishan");
+    expect(mainRuntime.appName).toBe("Weishan");
     expect(mainRuntime.userData).toContain("weishan");
     if (mainRuntime.title) {
-      expect(mainRuntime.title).toBe("weishan");
+      expect(mainRuntime.title).toBe("Weishan");
     }
 
     await gotoRoute(app.page, "home");

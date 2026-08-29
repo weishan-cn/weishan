@@ -19,7 +19,7 @@ const { registerVideoProviderIpcHandlers } = require("./main/videoProviderIpc");
 const { registerImageToolsIpcHandlers } = require("./main/imageToolsIpc");
 const { openValidatedExternal } = require("./shared/ipcTrustBoundary");
 
-const APP_NAME = "weishan";
+const APP_NAME = "Weishan";
 const APP_ID = "ai.weishan.desktop";
 const WEISHAN_OFFICIAL_WEBSITE_URL = "https://weishan.ai/";
 
@@ -183,7 +183,7 @@ async function openWhitelistedDesktopApp(appId) {
 
 function iconPath() {
   const candidates = [
-    path.join(__dirname, "assets/ws-logo.png"),
+    path.join(__dirname, "assets/weishan-icon-rounded.png"),
     path.join(__dirname, "assets/WS-logo.icns")
   ];
   return candidates.find((p) => fs.existsSync(p)) || candidates[0];
@@ -658,7 +658,7 @@ function createWindow() {
 
   Menu.setApplicationMenu(Menu.buildFromTemplate([
     { label: APP_NAME, submenu: [
-      { role: "about", label: "关于 weishan" },
+      { role: "about", label: "关于 Weishan" },
       { type: "separator" },
       {
         label:"Provider Credential Store…",
@@ -687,7 +687,7 @@ function createWindow() {
         }
       },
       { type: "separator" },
-      { role: "quit", label: "退出 weishan" }
+      { role: "quit", label: "退出 Weishan" }
     ] },
     { label: "File", submenu: [{ role: "close" }] },
     { label: "Edit", submenu: editMenu() },

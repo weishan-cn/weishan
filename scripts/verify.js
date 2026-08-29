@@ -50,6 +50,7 @@ function runCore() {
   runStep("Secret scan", "npm", ["run", "secrets:scan"]);
   runStep("Version check", "npm", ["run", "version:check"]);
   runStep("E2E canonical runtime launch guard", "node", ["tests/api/e2e-canonical-runtime-launch-guard.test.js"]);
+  runStep("Desktop runtime branding logo", "node", ["tests/api/desktop-runtime-branding-logo.test.js"]);
   runStep("Healthcheck", "npm", ["run", "healthcheck"]);
   runStep("Security core trust boundary effectiveness", "node", ["tests/api/security-core-trust-boundary-effectiveness.test.js"]);
   runStep("IPC core effectiveness", "node", ["tests/api/ipc-core-effectiveness.test.js"]);
