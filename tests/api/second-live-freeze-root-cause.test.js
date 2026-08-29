@@ -6,7 +6,7 @@ const vm = require("node:vm");
 const ROOT = path.resolve(__dirname, "../..");
 
 function loadReadOnlyCardWithFlightReviewStubs() {
-  const calls = { review:0, regression:0, releaseRisk:0 };
+  const calls = { review:0, regression:0, releaseRisk:0, pricePipeline:0, confirmationChecklist:0, candidateLock:0 };
   let reviewInput = null;
   const windowRef = {
     WeishanFlightWorkflowRcCandidateReviewConsole:{
@@ -37,6 +37,24 @@ function loadReadOnlyCardWithFlightReviewStubs() {
         calls.releaseRisk += 1;
         return { status:"clear", riskSummary:{ safeToContinueReleaseCandidate:true }, userFacingSummary:{ resultLabel:"clear" } };
       }
+    },
+    WeishanGlobalShoppingPricePipelineOrchestrator:{
+      buildGlobalShoppingPricePipelineOrchestrator:function () {
+        calls.pricePipeline += 1;
+        return { status:"ready" };
+      }
+    },
+    WeishanGlobalShoppingUserConfirmationChecklist:{
+      buildGlobalShoppingUserConfirmationChecklist:function () {
+        calls.confirmationChecklist += 1;
+        return { status:"ready" };
+      }
+    },
+    WeishanGlobalShoppingPublicBetaCandidateLock:{
+      buildGlobalShoppingPublicBetaCandidateLock:function () {
+        calls.candidateLock += 1;
+        return { status:"ready" };
+      }
     }
   };
   windowRef.window = windowRef;
@@ -51,13 +69,26 @@ function loadReadOnlyCardWithFlightReviewStubs() {
 
 function main() {
   const harness = loadReadOnlyCardWithFlightReviewStubs();
-  harness.api.buildReadOnlyPriceCandidateCardViewModel({});
+  const missingSummaryCard = harness.api.buildReadOnlyPriceCandidateCardViewModel({});
 
-  assert.deepEqual(harness.calls, { review:1, regression:1, releaseRisk:1 });
+  assert.deepEqual(harness.calls, { review:1, regression:1, releaseRisk:1, pricePipeline:0, confirmationChecklist:0, candidateLock:0 });
+  assert.equal(missingSummaryCard.pricePipelineOrchestratorSummary.status, "needs_review");
+  assert.equal(missingSummaryCard.userConfirmationChecklistSummary.status, "needs_review");
+  assert.equal(missingSummaryCard.publicBetaCandidateLockSummary.status, "needs_review");
   assert.equal(harness.reviewInput().rcRegressionAuditSummary.status, "passed");
   assert.equal(harness.reviewInput().releaseRiskLedgerSummary.status, "clear");
   assert.equal(harness.reviewInput().rcRegressionAuditSummary.auditHealth.status, "passed");
   assert.equal(harness.reviewInput().releaseRiskLedgerSummary.riskSummary.safeToContinueReleaseCandidate, true);
+
+  const completeSummaryCard = harness.api.buildReadOnlyPriceCandidateCardViewModel({
+    pricePipelineOrchestratorSummary:{ status:"ready", marker:"pipeline" },
+    userConfirmationChecklistSummary:{ status:"ready", marker:"checklist" },
+    publicBetaCandidateLockSummary:{ status:"ready", marker:"candidate-lock" }
+  });
+  assert.equal(completeSummaryCard.pricePipelineOrchestratorSummary.marker, "pipeline");
+  assert.equal(completeSummaryCard.userConfirmationChecklistSummary.marker, "checklist");
+  assert.equal(completeSummaryCard.publicBetaCandidateLockSummary.marker, "candidate-lock");
+  assert.deepEqual(harness.calls, { review:2, regression:2, releaseRisk:2, pricePipeline:0, confirmationChecklist:0, candidateLock:0 });
 
   console.log("SECOND_LIVE_FREEZE_ROOT_CAUSE PASS");
 }
