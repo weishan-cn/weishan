@@ -48,8 +48,8 @@ async function main() {
   const sourceMeta = pngMetadata(sourceLogo);
   const iconMeta = pngMetadata(appIcon);
   const sourceRatio = sourceMeta.width / sourceMeta.height;
-  const renderedWidth = 1024;
-  const renderedHeight = 447;
+  const renderedWidth = 896;
+  const renderedHeight = 391;
   const renderedRatio = renderedWidth / renderedHeight;
   const ratioErrorPercent = Math.abs(renderedRatio - sourceRatio) / sourceRatio * 100;
 
@@ -67,7 +67,8 @@ async function main() {
   const contentRatioErrorPercent = Math.abs(iconContentRatio - sourceContentRatio) / sourceContentRatio * 100;
 
   assert.ok(contentRatioErrorPercent <= 0.5, "visible logo content must preserve its original aspect ratio");
-  assert.ok(iconBounds.minY >= 288 && iconBounds.maxY <= 734, "visible logo content must remain inside the centered contain-fit region");
+  assert.ok(iconBounds.minX >= 64 && iconBounds.maxX <= 959, "visible logo content must keep horizontal Dock safe-area padding");
+  assert.ok(iconBounds.minY >= 316 && iconBounds.maxY <= 706, "visible logo content must remain inside the centered contain-fit region");
   for (const [x, y] of [[0, 0], [1023, 0], [0, 1023], [1023, 1023]]) {
     assert.equal(intToRGBA(iconImage.getPixelColor(x, y)).a, 0, "square icon padding must remain transparent");
   }
