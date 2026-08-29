@@ -23,8 +23,11 @@ jobs:
           node-version: "20"
           cache: "npm"
 
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm ci
+
+      - name: Install desktop runtime dependencies
+        run: npm ci --prefix apps/desktop --omit=dev
 
       - name: Verify
         run: npm run verify
