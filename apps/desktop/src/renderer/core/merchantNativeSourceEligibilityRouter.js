@@ -1,5 +1,5 @@
 (function(){
-  const ROUTER_VERSION = "1.2.0";
+  const ROUTER_VERSION = "1.3.0";
   const SOURCE_IDS = Object.freeze({
     prijsprofeet:"prijsprofeet_public_api",
     tiendaCentro:"tienda_centro_public_api",
@@ -33,7 +33,7 @@
     if (!value) return "unknown";
     if (/\b(?:iphone|smartphone|cellphone|mobile phone|celular|telefono)\b|手机|智能手机/.test(value)) return "consumer_electronics";
     if (/\b(?:armchair|chair|coffee table|table|commode|furniture|stolik|fotel|krzeslo|krzesło|komoda)\b|扶手椅|椅子|咖啡桌|茶几|家具|斗柜/.test(value)) return "furniture";
-    if (/\b(?:cola|soda|soft drink|grocery|milk|coffee|tea|bread|snack|egg|eggs|ham|rice|noodle|sauce|soap|shampoo|toothpaste)\b|食品|饮料|汽水|可乐|牛奶|咖啡|茶|鸡蛋|火腿|大米|米饭|面条|酱油|肥皂|洗发水|牙膏/.test(value)) return "grocery";
+    if (/\b(?:cola|soda|soft drink|grocery|milk|coffee|tea|bread|snack|snacks|chip|chips|crisp|crisps|egg|eggs|ham|rice|noodle|sauce|soap|shampoo|toothpaste)\b|食品|零食|薯片|饮料|汽水|可乐|牛奶|咖啡|茶|鸡蛋|火腿|大米|米饭|面条|酱油|肥皂|洗发水|牙膏/.test(value)) return "grocery";
     return "general_product";
   }
 

@@ -1247,12 +1247,10 @@
   }
 
   function mainLogs(snapshot){
-    const tasks = snapshot.queue || [];
-    const active = activeTasks(tasks);
     const selected = selectedHistoryTask(snapshot);
     if (selected) return taskHistoryDetailView(selected);
 
-    const latest = active[0] || tasks.find((x) => x.status === "done" || x.status === "failed") || (snapshot.history || [])[0];
+    const latest = currentTaskForSnapshot(snapshot);
 
     if (!latest) {
       return `
@@ -7273,9 +7271,20 @@
   }
 
   function currentTaskForSnapshot(snap){
+    function latestTask(tasks, predicate){
+      return (Array.isArray(tasks) ? tasks : []).reduce(function(latest, task, index){
+        if (!task || predicate && !predicate(task)) return latest;
+        const rawTime = task.createdAt || task.finishedAt || task.updatedAt || "";
+        const parsedTime = Date.parse(rawTime);
+        const score = Number.isFinite(parsedTime) ? parsedTime : index;
+        return !latest || score >= latest.score ? { task, score } : latest;
+      }, null);
+    }
+    const latestVisibleTask = latestTask([].concat(snap.queue || [], snap.history || []), function(task){
+      return task.status === "queued" || task.status === "running" || task.status === "done" || task.status === "failed";
+    });
     return selectedHistoryTask(snap)
-      || (snap.queue || []).find((task) => task && (task.status === "queued" || task.status === "running" || task.status === "done" || task.status === "failed"))
-      || (snap.history || [])[0]
+      || latestVisibleTask && latestVisibleTask.task
       || null;
   }
 

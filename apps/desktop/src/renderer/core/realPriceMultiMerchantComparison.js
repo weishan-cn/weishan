@@ -21,6 +21,10 @@
     const evidence = safe.truthEvidence && typeof safe.truthEvidence === "object" ? safe.truthEvidence : {};
     return key([safe.brand, evidence.productName || safe.title, evidence.variant || safe.variant, safe.condition || evidence.condition || "NEW"].filter(Boolean).join(" | "));
   }
+  function authoritativeIdentity(item){
+    const raw = text(item && (item.canonicalProductIdentity || item.ean || item.gtin), 300).toLowerCase();
+    return /^(?:ean|gtin|upc|isbn|barcode)\s*:/.test(raw) || /^\d{8,14}$/.test(raw);
+  }
   function merchant(item){
     return key(item && (item.merchantId || item.retailer || item.merchant || item.platformName));
   }
@@ -42,7 +46,7 @@
     if (!handoffUrl || !productIdentity || !merchantIdentity || !targetMarket) return null;
     if (String(safe.availability || evidence.availabilityStatus || "").toUpperCase() === "OUT_OF_STOCK") return null;
     return Object.freeze({
-      offer:safe, price, currency, retrievedAt, handoffUrl, productIdentity, merchantIdentity, targetMarket,
+      offer:safe, price, currency, retrievedAt, handoffUrl, productIdentity, productIdentityAuthoritative:authoritativeIdentity(safe), merchantIdentity, targetMarket,
       condition:key(safe.condition || evidence.condition || "NEW"),
       quantity:key(safe.quantity || evidence.variant || safe.variant || "")
     });
@@ -59,7 +63,13 @@
     });
     const groups = new Map();
     Array.from(deduped.values()).forEach(function(offer){
-      const groupKey = [offer.targetMarket, offer.productIdentity, offer.condition, offer.quantity, offer.currency].join("|");
+      // productIdentity already includes the variant for derived identities, while
+      // authoritative identifiers such as EAN identify the exact sellable item.
+      // Keeping a second free-text quantity key here split the same EAN when two
+      // retailers formatted an equivalent quantity differently (for example
+      // "150 g" versus "150g").
+      const quantityKey = offer.productIdentityAuthoritative ? "" : offer.quantity;
+      const groupKey = [offer.targetMarket, offer.productIdentity, offer.condition, quantityKey, offer.currency].join("|");
       if (!groups.has(groupKey)) groups.set(groupKey, []);
       groups.get(groupKey).push(offer);
     });
@@ -76,6 +86,9 @@
       });
     });
     const ready = comparisonGroups.filter(function(group){ return group.status === "READY"; });
+    const firstReady = ready[0] || null;
+    const firstReadyPrices = firstReady ? firstReady.offers.map(function(offer){ return offer.price; }) : [];
+    const firstReadyIsTie = firstReadyPrices.length > 1 && firstReadyPrices.every(function(price){ return price === firstReadyPrices[0]; });
     const maxCount = comparisonGroups.reduce(function(max, group){ return Math.max(max, group.comparableVerifiedOfferCount); }, 0);
     return Object.freeze({
       version:VERSION,
@@ -83,10 +96,10 @@
       comparisonGroupCount:comparisonGroups.length,
       comparableVerifiedOfferCountMax:maxCount,
       groups:Object.freeze(comparisonGroups),
-      lowerVerifiedOffer:ready.length ? ready[0].lowerVerifiedOffer : null,
-      lowerVerifiedOfferLabel:ready.length ? ready[0].lowerVerifiedOfferLabel : "",
+      lowerVerifiedOffer:firstReady ? firstReady.lowerVerifiedOffer : null,
+      lowerVerifiedOfferLabel:firstReady ? firstReady.lowerVerifiedOfferLabel : "",
       userFacingSummary:ready.length
-        ? "已找到至少 2 个独立商户的可比较验证报价。"
+        ? (firstReadyIsTie ? "已找到至少 2 个独立商户的可比较验证报价；当前最低报价并列。" : "已找到至少 2 个独立商户的可比较验证报价。")
         : (deduped.size ? "仅找到 1 个已验证报价，暂不足以比较。" : "当前没有找到可验证的实时报价。"),
       globalCheapestClaim:false,
       executionGate:"CLOSED",

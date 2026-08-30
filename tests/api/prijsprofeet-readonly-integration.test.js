@@ -146,6 +146,35 @@ async function testHappyPathAndTruthLayer() {
   const multiNormalized = adapter.normalizeResult(multiResult, { evaluatedAt:"2026-08-29T02:00:01.000Z" });
   assert.deepEqual(multiNormalized.candidates.map((item) => item.merchantId).sort(), ["albert_heijn", "plus"]);
   assert.equal(new Set(multiNormalized.candidates.map((item) => item.canonicalProductIdentity)).size, 1);
+
+  const exactEanSearch = searchPayload();
+  exactEanSearch.results = [
+    Object.assign({}, exactEanSearch.results[0], { ean:"1111111111111", name:"Similar name 40 g" }),
+    Object.assign({}, exactEanSearch.results[0], { ean:"8710398160027", product_id:"ah_exact", name:"Exact product 150 g" }),
+    Object.assign({}, exactEanSearch.results[0], { ean:"8710398160027", product_id:"plus_exact", retailer:"plus", name:"Exact product 150 g", product_url:"https://www.plus.nl/product/exact-product-150-g" })
+  ];
+  const exactEanService = createPrijsProfeetReadonlyService({
+    now:() => "2026-08-29T02:00:00.000Z",
+    fetchImpl:async (url) => {
+      if (url.includes("/search?")) return response(exactEanSearch);
+      if (url.includes("plus_exact")) return response(detailPayload({ product_id:"plus_exact", retailer:"plus", product_url:"https://www.plus.nl/product/exact-product-150-g", ean:"8710398160027", name:"Exact product 150 g", price:1.8 }));
+      return response(detailPayload({ product_id:"ah_exact", ean:"8710398160027", name:"Exact product 150 g", price:2 }));
+    }
+  });
+  const exactEanResult = await exactEanService.search({ query:"Exact product 150 g", requestId:"request-exact-ean", limit:3 });
+  assert.equal(exactEanResult.results.length, 2);
+  assert.deepEqual(exactEanResult.results.map((item) => item.retailer).sort(), ["albert_heijn", "plus"]);
+  assert.equal(new Set(exactEanResult.results.map((item) => item.ean)).size, 1);
+
+  const mismatchedDetailService = createPrijsProfeetReadonlyService({
+    now:() => "2026-08-29T02:00:00.000Z",
+    fetchImpl:async (url) => url.includes("/search?")
+      ? response(exactEanSearch)
+      : response(detailPayload({ product_id:url.includes("plus_exact") ? "plus_exact" : "ah_exact", retailer:url.includes("plus_exact") ? "plus" : "albert_heijn", product_url:url.includes("plus_exact") ? "https://www.plus.nl/product/exact-product-150-g" : "https://www.ah.nl/producten/product/wi477045/coca-cola-original", ean:"9999999999999" }))
+  });
+  const mismatchedDetail = await mismatchedDetailService.search({ query:"Exact product 150 g", requestId:"request-ean-mismatch", limit:3 });
+  assert.equal(mismatchedDetail.ok, false);
+  assert.equal(mismatchedDetail.code, "SOURCE_RESPONSE_INVALID");
 }
 
 async function testInputAndResponseFailuresFailClosed() {

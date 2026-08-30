@@ -102,13 +102,31 @@ function selectSearchCandidates(payload, today, limit) {
   const safe = obj(payload);
   const results = Array.isArray(safe.results) ? safe.results.slice(0, 10) : [];
   const seen = new Set();
-  return results.filter((item) => {
+  const eligible = results.filter((item) => {
     const productId = text(obj(item).product_id, 160);
     const retailer = text(obj(item).retailer, 40).toLowerCase();
     const url = safeRetailerUrl(obj(item).product_url, retailer);
     const dedupeKey = [retailer, productId, url].join("|");
     if (!productId || !isCurrentActivePromotion(item, today) || !url || seen.has(dedupeKey)) return false;
     seen.add(dedupeKey);
+    return true;
+  });
+  const byEan = new Map();
+  eligible.forEach((item) => {
+    const ean = text(obj(item).ean, 14);
+    if (!/^\d{8,14}$/.test(ean)) return;
+    if (!byEan.has(ean)) byEan.set(ean, []);
+    byEan.get(ean).push(item);
+  });
+  const exactCrossRetailer = Array.from(byEan.values()).find((items) => {
+    return new Set(items.map((item) => text(obj(item).retailer, 40).toLowerCase())).size >= 2;
+  });
+  const selectedPool = exactCrossRetailer || eligible;
+  const selectedRetailers = new Set();
+  return selectedPool.filter((item) => {
+    const retailer = text(obj(item).retailer, 40).toLowerCase();
+    if (selectedRetailers.has(retailer)) return false;
+    selectedRetailers.add(retailer);
     return true;
   }).slice(0, Math.min(Number(limit) || 1, 2));
 }
@@ -118,11 +136,14 @@ function normalizeDetail(detail, selected, fetchedAt, today) {
   const selectedSafe = obj(selected);
   const productId = text(safe.product_id, 160);
   const retailer = text(safe.retailer, 40).toLowerCase();
+  const selectedEan = text(selectedSafe.ean, 14);
+  const detailEan = text(safe.ean, 14);
   const officialUrl = safeRetailerUrl(safe.product_url, retailer);
   const price = finitePositive(safe.price);
   const currency = text(safe.currency, 3).toUpperCase();
   const extractedAt = isoInstant(safe.extracted_at);
   if (!productId || productId !== text(selectedSafe.product_id, 160)) return null;
+  if (selectedEan && (!detailEan || detailEan !== selectedEan)) return null;
   if (!text(safe.name, 240) || !price || currency !== "EUR" || !officialUrl || !extractedAt) return null;
   if (!isCurrentActivePromotion(safe, today)) return null;
   return {
