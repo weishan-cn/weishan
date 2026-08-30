@@ -129,7 +129,7 @@ async function testHappyPathAndTruthLayer() {
 async function testExactIdentityAndFailClosedResponses() {
   assert.equal(exactProductIdentityMatch("IPHONE 17 256 GB", "CELULAR IPHONE 17 256 GB NUEVO"), true);
   assert.equal(exactProductIdentityMatch("IPHONE 17 256 GB", "CELULAR IPHONE 16 256 GB NUEVO"), false);
-  assert.equal(exactProductIdentityMatch("IPHONE", "CELULAR IPHONE 17 256 GB NUEVO"), false);
+  assert.equal(exactProductIdentityMatch("IPHONE", "CELULAR IPHONE 17 256 GB NUEVO"), true);
 
   const unused = async () => { throw new Error("must not fetch"); };
   const inputService = createTiendaCentroReadonlyService({ fetchImpl:unused });

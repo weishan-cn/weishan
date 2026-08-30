@@ -57,7 +57,7 @@
     if (safe.ok !== true) {
       return { ok:false, code:text(safe.code, 80) || "PRICE_SOURCE_UNAVAILABLE", candidates:[], status:status({ ok:false }) };
     }
-    const candidates = (Array.isArray(safe.results) ? safe.results.slice(0, 1) : []).map(function (item) {
+    const candidates = (Array.isArray(safe.results) ? safe.results.slice(0, 3) : []).map(function (item) {
       const evidenceResult = truth.normalizePriceEvidence({
         domain:"PRODUCT",
         sourceId:PROVIDER_ID,

@@ -34,7 +34,7 @@ function isoInstant(value) {
 
 function sanitizeReadonlySearchPayload(payload) {
   const safe = plainRecord(payload);
-  if (!safe) return { valid:false, payload:{ query:"", requestId:"", limit:1 } };
+  if (!safe) return { valid:false, payload:{ query:"", requestId:"", limit:3 } };
   const unexpectedKeys = Object.keys(safe).filter((key) => !ALLOWED_PAYLOAD_KEYS.has(key));
   const fieldTypesValid = Object.prototype.hasOwnProperty.call(safe, "query")
     && Object.prototype.hasOwnProperty.call(safe, "requestId")
@@ -46,7 +46,7 @@ function sanitizeReadonlySearchPayload(payload) {
   const invalidQuery = !query || /https?:\/\//i.test(query) || /[<>]/.test(query) || /(?:script|javascript:)/i.test(query);
   return {
     valid:unexpectedKeys.length === 0 && fieldTypesValid && !invalidQuery && Boolean(requestId),
-    payload:{ query, requestId, limit:clampInteger(safe.limit, 1, 1, 1) }
+    payload:{ query, requestId, limit:clampInteger(safe.limit, 3, 1, 3) }
   };
 }
 

@@ -54,7 +54,7 @@ function exactProductIdentityMatch(query, title) {
   if (!normalizedQuery || !normalizedTitle) return false;
   if (normalizedQuery === normalizedTitle) return true;
   const tokens = Array.from(new Set(identityTokens(query)));
-  if (tokens.length < 2) return false;
+  if (!tokens.length) return false;
   const titleTokens = new Set(identityTokens(title));
   return tokens.every((token) => titleTokens.has(token));
 }
@@ -141,13 +141,9 @@ function normalizeProduct(item, query, retrievedAt) {
   };
 }
 
-function selectExactProduct(payload, query, retrievedAt) {
+function selectExactProducts(payload, query, retrievedAt, limit) {
   const results = Array.isArray(payload) ? payload.slice(0, 3) : [];
-  for (const item of results) {
-    const normalized = normalizeProduct(item, query, retrievedAt);
-    if (normalized) return normalized;
-  }
-  return null;
+  return results.map((item) => normalizeProduct(item, query, retrievedAt)).filter(Boolean).slice(0, limit);
 }
 
 const TIENDA_CENTRO_STATIC_DEFINITION = Object.freeze({
@@ -176,12 +172,12 @@ const TIENDA_CENTRO_STATIC_DEFINITION = Object.freeze({
   cacheKey:(payload) => normalizeIdentity(payload.query),
   async executeSource({ payload, fetchedAt, requestJson }) {
     const searchPayload = await requestJson(buildSearchUrl(payload.query));
-    const selected = selectExactProduct(searchPayload, payload.query, fetchedAt);
+    const selected = selectExactProducts(searchPayload, payload.query, fetchedAt, payload.limit);
     return {
-      status:selected ? "ready" : "no_results",
-      code:selected ? "" : "SOURCE_NO_EXACT_RESULTS",
+      status:selected.length ? "ready" : "no_results",
+      code:selected.length ? "" : "SOURCE_NO_EXACT_RESULTS",
       requestCount:1,
-      results:selected ? [selected] : []
+      results:selected
     };
   },
   statusExtras:Object.freeze({ coverageRegion:"Argentina" })

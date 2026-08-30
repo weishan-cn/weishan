@@ -84,6 +84,7 @@ function runCore() {
   runStep("Tienda Centro renderer price-truth flow", "node", ["tests/api/tienda-centro-renderer-flow.test.js"]);
   runStep("Meblostan merchant public read-only integration", "node", ["tests/api/meblostan-readonly-integration.test.js"]);
   runStep("Meblostan renderer price-truth flow", "node", ["tests/api/meblostan-renderer-flow.test.js"]);
+  runStep("Merchant-native searchable catalog capability", "node", ["tests/api/merchant-native-searchable-catalog-expansion.test.js"]);
   runStep("Merchant-native static read-only registry", "node", ["tests/api/merchant-native-readonly-registry.test.js"]);
   runStep("Merchant-native source and query isolation", "node", ["tests/api/merchant-native-source-isolation.test.js"]);
   runStep("Real-price source auto-routing", "node", ["tests/api/real-price-source-auto-routing.test.js"]);
