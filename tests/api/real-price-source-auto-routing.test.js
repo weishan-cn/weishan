@@ -56,7 +56,7 @@ async function main() {
 
   assert.deepEqual(Array.from(route("IPHONE 17", "United Kingdom").eligibleSourceIds), []);
   assert.deepEqual(Array.from(route("IPHONE 17", "Argentina").eligibleSourceIds), ["tienda_centro_public_api"]);
-  assert.deepEqual(Array.from(route("Coca-Cola Original", "Netherlands").eligibleSourceIds), ["prijsprofeet_public_api"]);
+  assert.deepEqual(Array.from(route("Coca-Cola Original", "Netherlands").eligibleSourceIds), ["prijsprofeet_public_api", "cc_asian_market_public_api", "dutchshopper_public_api"]);
   assert.deepEqual(Array.from(route("Coca-Cola Original", "United Kingdom").eligibleSourceIds), []);
   assert.deepEqual(Array.from(route("Jesionowy stolik kawowy", "Poland").eligibleSourceIds), ["meblostan_public_api"]);
   assert.deepEqual(Array.from(route("IPHONE 17", "Poland").eligibleSourceIds), []);
@@ -90,7 +90,7 @@ async function main() {
   assert.deepEqual(Array.from(argentinaRoute.eligibleSourceIds), ["tienda_centro_public_api"]);
   const netherlandsWindow = loadSearch("Netherlands", { merchantNativeReadonlySearch:async () => ({ ok:false, requestId:"x", results:[] }) });
   const netherlandsRoute = netherlandsWindow.WeishanCommerceSearch.routeMerchantNativeSource({ inputSummary:"Coca-Cola Original" });
-  assert.deepEqual(Array.from(netherlandsRoute.eligibleSourceIds), ["prijsprofeet_public_api"]);
+  assert.deepEqual(Array.from(netherlandsRoute.eligibleSourceIds), ["prijsprofeet_public_api", "cc_asian_market_public_api", "dutchshopper_public_api"]);
 
   const pageSource = fs.readFileSync(path.join(ROOT, "apps/desktop/src/renderer/routes/CommerceAgentPage.js"), "utf8");
   assert.doesNotMatch(pageSource, />搜索适配器未配置</);

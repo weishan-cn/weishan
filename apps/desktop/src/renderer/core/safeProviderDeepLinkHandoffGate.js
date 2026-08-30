@@ -8,9 +8,11 @@
     prijsprofeet_public_api:["ah.nl", "aldi.nl", "dekamarkt.nl", "dirk.nl", "ekoplaza.nl", "hoogvliet.com", "hoogvliet.nl", "jumbo.com", "lidl.nl", "plus.nl", "vomar.nl"],
     prijsprofeet_attribution:["prijsprofeet.nl"],
     tienda_centro_public_api:["tiendacentro.com"],
-    meblostan_public_api:["meblostan.pl"]
+    meblostan_public_api:["meblostan.pl"],
+    cc_asian_market_public_api:["ccasianmarket.nl"],
+    dutchshopper_public_api:["dutchshopper.com"]
   });
-  const SOURCE_EXACT_HOSTS = Object.freeze({ tienda_centro_public_api:true, meblostan_public_api:true });
+  const SOURCE_EXACT_HOSTS = Object.freeze({ tienda_centro_public_api:true, meblostan_public_api:true, cc_asian_market_public_api:true, dutchshopper_public_api:true });
   const SHORT_URL_HOSTS = ["bit.ly", "t.co", "tinyurl.com", "goo.gl", "ow.ly", "is.gd", "buff.ly", "cutt.ly", "short.link"];
   const CREDENTIAL_PARAMS = /(api[_-]?key|apikey|token|access[_-]?token|refresh[_-]?token|secret|client[_-]?secret|authorization|password)=/i;
   const BLOCKED_PATH_PATTERN = /(checkout|payment|order|identity|book)/i;

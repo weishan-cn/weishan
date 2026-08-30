@@ -5,9 +5,12 @@
   const PRIJS_PROFEET_SOURCE_ID = "prijsprofeet_public_api";
   const TIENDA_CENTRO_SOURCE_ID = "tienda_centro_public_api";
   const MEBLOSTAN_SOURCE_ID = "meblostan_public_api";
+  const CC_ASIAN_MARKET_SOURCE_ID = "cc_asian_market_public_api";
+  const DUTCHSHOPPER_SOURCE_ID = "dutchshopper_public_api";
   const prijsProfeetSearchGenerations = new Map();
   const tiendaCentroSearchGenerations = new Map();
   const meblostanSearchGenerations = new Map();
+  const netherlandsRetailSearchGenerations = new Map();
 
   function nowIso(){
     return new Date().toISOString();
@@ -137,6 +140,10 @@
 
   function meblostanReadonlyAdapterApi(){
     return window.WeishanMeblostanReadonlyAdapter || null;
+  }
+
+  function netherlandsRetailReadonlyAdapterApi(){
+    return window.WeishanNetherlandsRetailReadonlyAdapter || null;
   }
 
   function merchantNativeSourceRouterApi(){
@@ -3041,10 +3048,34 @@
     });
   }
 
+  async function searchNetherlandsRetailReadonlyProductCandidates(request, sourceId){
+    const bridge = window.weishanGlobalShopping;
+    const adapter = netherlandsRetailReadonlyAdapterApi();
+    const meta = adapter && adapter.SOURCES && adapter.SOURCES[sourceId];
+    if (!bridge || typeof bridge.merchantNativeReadonlySearch !== "function" || !meta || typeof adapter.normalizeResult !== "function") return null;
+    const taskKey = sourceId + ":" + sanitizeText(request.taskId || request.query || "product", 120);
+    const nextGeneration = Number(netherlandsRetailSearchGenerations.get(taskKey) || 0) + 1;
+    netherlandsRetailSearchGenerations.set(taskKey, nextGeneration);
+    const requestId = taskKey + ":" + String(nextGeneration);
+    let raw;
+    try {
+      raw = await bridge.merchantNativeReadonlySearch(sourceId, { query:merchantNativeSourceQuery(request, sourceId), requestId, limit:3 });
+    } catch (_) { raw = { ok:false, code:"SOURCE_UNAVAILABLE", requestId, results:[] }; }
+    if (Number(netherlandsRetailSearchGenerations.get(taskKey) || 0) !== nextGeneration || sanitizeText(raw && raw.requestId || "", 120) !== requestId) {
+      return { ok:false, code:"COMMERCE_STALE_RESULT_IGNORED", message:"较早的价格查询结果已忽略。", providerName:meta.providerName, request, candidates:[] };
+    }
+    const normalized = adapter.normalizeResult(raw, { sourceId, evaluatedAt:nowIso() });
+    const normalizedStatus = normalized && normalized.status ? Object.assign({}, normalized.status, { requestCount:Number(normalized.requestCount || 0) }) : adapter.status({ ok:false }, sourceId);
+    if (!normalized || normalized.ok !== true) return { ok:false, code:"COMMERCE_PROVIDER_UNAVAILABLE", message:meta.providerName + " 当前价格查询暂时不可用。", providerName:meta.providerName, request, candidates:[], realProviderReadonlyStatus:normalizedStatus };
+    if (!normalized.candidates.length) return { ok:false, code:"COMMERCE_NO_RESULTS", message:"该商户没有找到完全匹配的当前商品报价。", providerName:meta.providerName, request, candidates:[], realProviderReadonlyStatus:normalizedStatus };
+    return buildReadOnlySearchSuccess(request, meta.providerName, normalized.candidates, normalizedStatus, { source:sourceId + "_main_process_public_readonly", singleEvidenceOnly:true, noResultsMessage:"该商户没有找到完全匹配的当前商品报价。" });
+  }
+
   function readonlySourceSearcher(sourceId){
     if (sourceId === PRIJS_PROFEET_SOURCE_ID) return searchPrijsProfeetReadonlyProductCandidates;
     if (sourceId === TIENDA_CENTRO_SOURCE_ID) return searchTiendaCentroReadonlyProductCandidates;
     if (sourceId === MEBLOSTAN_SOURCE_ID) return searchMeblostanReadonlyProductCandidates;
+    if (sourceId === CC_ASIAN_MARKET_SOURCE_ID || sourceId === DUTCHSHOPPER_SOURCE_ID) return function(request){ return searchNetherlandsRetailReadonlyProductCandidates(request, sourceId); };
     return null;
   }
 
@@ -3197,10 +3228,15 @@
         && typeof window.weishanGlobalShopping.merchantNativeReadonlySearch === "function"
         && meblostanReadonlyAdapterApi()
         && typeof meblostanReadonlyAdapterApi().normalizeResult === "function");
+    const netherlandsRetailReadonlyReady = isProductSearchRequest(request)
+      && !!(window.weishanGlobalShopping && typeof window.weishanGlobalShopping.merchantNativeReadonlySearch === "function"
+        && netherlandsRetailReadonlyAdapterApi() && typeof netherlandsRetailReadonlyAdapterApi().normalizeResult === "function");
     const readonlyReady = Object.freeze({
       [PRIJS_PROFEET_SOURCE_ID]:prijsProfeetReadonlyReady,
       [TIENDA_CENTRO_SOURCE_ID]:tiendaCentroReadonlyReady,
       [MEBLOSTAN_SOURCE_ID]:meblostanReadonlyReady
+      ,[CC_ASIAN_MARKET_SOURCE_ID]:netherlandsRetailReadonlyReady
+      ,[DUTCHSHOPPER_SOURCE_ID]:netherlandsRetailReadonlyReady
     });
     const selectedReadonlySources = (sourceRoute.eligibleSourceIds || []).filter((sourceId) => readonlyReady[sourceId] === true).slice(0, 3);
     const selectedReadonlySource = selectedReadonlySources[0] || "";

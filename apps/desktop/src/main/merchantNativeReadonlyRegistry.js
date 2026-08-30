@@ -8,6 +8,7 @@ const {
 const { createPrijsProfeetReadonlyService } = require("./prijsProfeetReadonlyService");
 const { createTiendaCentroReadonlyService } = require("./tiendaCentroReadonlyService");
 const { createMeblostanReadonlyService } = require("./meblostanReadonlyService");
+const { createCAndCAsianMarketReadonlyService, createDutchshopperReadonlyService } = require("./netherlandsRetailReadonlyServices");
 
 const MERCHANT_NATIVE_READONLY_REGISTRY_VERSION = "1.0.0";
 const SEARCH_CHANNEL = "global-shopping:merchant-native-readonly-search";
@@ -33,6 +34,14 @@ const STATIC_SOURCE_DEFINITIONS = Object.freeze({
     family:"furniture_home_furnishings",
     enabled:true,
     createService:createMeblostanReadonlyService
+  }),
+  cc_asian_market_public_api:Object.freeze({
+    sourceId:"cc_asian_market_public_api", family:"narrow_grocery", enabled:true,
+    createService:createCAndCAsianMarketReadonlyService
+  }),
+  dutchshopper_public_api:Object.freeze({
+    sourceId:"dutchshopper_public_api", family:"broad_consumer_retail", enabled:true,
+    createService:createDutchshopperReadonlyService
   })
 });
 

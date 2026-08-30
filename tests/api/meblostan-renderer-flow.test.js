@@ -70,7 +70,7 @@ async function main() {
   const nl = window.WeishanCommerceSearch.routeMerchantNativeSource({ inputSummary:"荷兰可口可乐" }, { hasShippingDestination:true, shippingDestination:{ country:"Netherlands", source:"explicit_query" } });
   const ar = window.WeishanCommerceSearch.routeMerchantNativeSource({ inputSummary:"阿根廷 iPhone 17pro" }, { hasShippingDestination:true, shippingDestination:{ country:"Argentina", source:"explicit_query" } });
   const uk = window.WeishanCommerceSearch.routeMerchantNativeSource({ inputSummary:"英国 iPhone 17pro" }, { hasShippingDestination:true, shippingDestination:{ country:"United Kingdom", source:"explicit_query" } });
-  assert.deepEqual(Array.from(nl.eligibleSourceIds), ["prijsprofeet_public_api"]);
+  assert.deepEqual(Array.from(nl.eligibleSourceIds), ["prijsprofeet_public_api", "cc_asian_market_public_api", "dutchshopper_public_api"]);
   assert.deepEqual(Array.from(ar.eligibleSourceIds), ["tienda_centro_public_api"]);
   assert.deepEqual(Array.from(uk.eligibleSourceIds), []);
 

@@ -91,6 +91,7 @@ function runCore() {
   runStep("Home Global Shopping real-price dispatch", "node", ["tests/api/home-global-shopping-dispatch-real-price.test.js"]);
   runStep("Universal product shopping dispatch", "node", ["tests/api/universal-product-shopping-dispatch.test.js"]);
   runStep("Real-price multi-merchant comparison", "node", ["tests/api/real-price-multi-merchant-comparison.test.js"]);
+  runStep("Netherlands second-source comparison", "node", ["tests/api/netherlands-second-source-live-comparison.test.js"]);
   runStep("Unified shopping and travel desktop flow", "node", ["tests/api/unified-desktop-flow-view-model.test.js"]);
   runStep("Home unified desktop effectiveness", "node", ["tests/api/home-unified-desktop-effectiveness.test.js"]);
   runStep("Search module effectiveness", "node", ["tests/api/search-module-effectiveness.test.js"]);

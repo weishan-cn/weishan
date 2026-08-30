@@ -3,7 +3,9 @@
   const SOURCE_IDS = Object.freeze({
     prijsprofeet:"prijsprofeet_public_api",
     tiendaCentro:"tienda_centro_public_api",
-    meblostan:"meblostan_public_api"
+    meblostan:"meblostan_public_api",
+    ccAsianMarket:"cc_asian_market_public_api",
+    dutchshopper:"dutchshopper_public_api"
   });
 
   function text(value){
@@ -34,7 +36,7 @@
     const family = productFamily(safe.query || safe.inputSummary);
     const eligibleSourceIds = [];
     if (destinationMarket === "AR" && family !== "unknown") eligibleSourceIds.push(SOURCE_IDS.tiendaCentro);
-    if (destinationMarket === "NL" && family === "grocery") eligibleSourceIds.push(SOURCE_IDS.prijsprofeet);
+    if (destinationMarket === "NL" && family === "grocery") eligibleSourceIds.push(SOURCE_IDS.prijsprofeet, SOURCE_IDS.ccAsianMarket, SOURCE_IDS.dutchshopper);
     if (destinationMarket === "PL" && family === "furniture") eligibleSourceIds.push(SOURCE_IDS.meblostan);
     return Object.freeze({
       routerVersion:ROUTER_VERSION,

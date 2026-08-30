@@ -35,7 +35,9 @@
   const APPROVED_READONLY_SOURCE_POLICIES = Object.freeze([
     APPROVED_READONLY_SOURCE_POLICY,
     "tienda_centro_public_api",
-    "meblostan_public_api"
+    "meblostan_public_api",
+    "cc_asian_market_public_api",
+    "dutchshopper_public_api"
   ]);
 
   function cleanText(value, max){
