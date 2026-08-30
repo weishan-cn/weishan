@@ -110,11 +110,11 @@ async function main() {
   const tiendaCalls = [];
   const prijsCalls = [];
   const bridge = {
-    tiendaCentroReadonlySearch:async (payload) => {
-      tiendaCalls.push(payload);
-      return sourceResult(payload.requestId);
-    },
-    prijsProfeetReadonlySearch:async (payload) => {
+    merchantNativeReadonlySearch:async (sourceId, payload) => {
+      if (sourceId === "tienda_centro_public_api") {
+        tiendaCalls.push(payload);
+        return sourceResult(payload.requestId);
+      }
       prijsCalls.push(payload);
       throw new Error("Argentina must not use the Dutch grocery source");
     }
@@ -151,7 +151,8 @@ async function main() {
   let releaseFirst;
   const firstWait = new Promise((resolve) => { releaseFirst = resolve; });
   let count = 0;
-  window.weishanGlobalShopping.tiendaCentroReadonlySearch = async (payload) => {
+  window.weishanGlobalShopping.merchantNativeReadonlySearch = async (sourceId, payload) => {
+    assert.equal(sourceId, "tienda_centro_public_api");
     count += 1;
     if (count === 1) {
       firstPayload = payload;
@@ -200,7 +201,8 @@ async function main() {
       removeItem(key) { persisted.delete(key); }
     },
     weishanGlobalShopping:{
-      tiendaCentroReadonlySearch:async (payload) => {
+      merchantNativeReadonlySearch:async (sourceId, payload) => {
+        assert.equal(sourceId, "tienda_centro_public_api");
         livePolicyCalls.push(payload);
         return sourceResult(payload.requestId);
       }

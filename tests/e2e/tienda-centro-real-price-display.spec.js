@@ -23,7 +23,7 @@ test.describe.serial("Tienda Centro merchant-native real-price display", () => {
       && window.WeishanTiendaCentroReadonlyAdapter
       && window.WeishanReadOnlyPriceTruthLayer
       && window.weishanGlobalShopping
-      && typeof window.weishanGlobalShopping.tiendaCentroReadonlySearch === "function"
+      && typeof window.weishanGlobalShopping.merchantNativeReadonlySearch === "function"
       && window.CommerceAgentPage
     ), null, { timeout:15000 });
 
@@ -159,11 +159,11 @@ test.describe.serial("Tienda Centro merchant-native real-price display", () => {
   test("does not request the merchant on route entry or repeated card render", async () => {
     const state = await page.evaluate(() => {
       let requests = 0;
-      const original = window.weishanGlobalShopping.tiendaCentroReadonlySearch;
-      window.weishanGlobalShopping.tiendaCentroReadonlySearch = async () => { requests += 1; return { ok:true, status:"no_results", results:[] }; };
+      const original = window.weishanGlobalShopping.merchantNativeReadonlySearch;
+      window.weishanGlobalShopping.merchantNativeReadonlySearch = async () => { requests += 1; return { ok:true, status:"no_results", results:[] }; };
       const host = document.getElementById("pageHost");
       for (let index = 0; index < 30; index += 1) window.CommerceAgentPage.mount(host);
-      window.weishanGlobalShopping.tiendaCentroReadonlySearch = original;
+      window.weishanGlobalShopping.merchantNativeReadonlySearch = original;
       return {
         requests,
         cards:document.querySelectorAll('[data-commerce-readonly-search-results="true"]').length,

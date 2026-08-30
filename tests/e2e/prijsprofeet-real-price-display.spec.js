@@ -24,7 +24,7 @@ test.describe.serial("PrijsProfeet real-price display", () => {
       && window.WeishanCommerceSearch
       && window.WeishanPrijsProfeetReadonlyAdapter
       && window.weishanGlobalShopping
-      && typeof window.weishanGlobalShopping.prijsProfeetReadonlySearch === "function"
+      && typeof window.weishanGlobalShopping.merchantNativeReadonlySearch === "function"
       && window.CommerceAgentPage
     ), null, { timeout:15000 });
 

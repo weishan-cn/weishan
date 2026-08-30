@@ -94,8 +94,11 @@ contextBridge.exposeInMainWorld("weishanProviderCredentialStore", {
 contextBridge.exposeInMainWorld("weishanGlobalShopping", {
   rakutenReadonlySearch: (payload) => ipcRenderer.invoke("global-shopping:rakuten-readonly-search", payload || {}),
   getRakutenReadonlyStatus: () => ipcRenderer.invoke("global-shopping:rakuten-readonly-status"),
-  prijsProfeetReadonlySearch: (payload) => ipcRenderer.invoke("global-shopping:prijsprofeet-readonly-search", payload || {}),
-  getPrijsProfeetReadonlyStatus: () => ipcRenderer.invoke("global-shopping:prijsprofeet-readonly-status"),
-  tiendaCentroReadonlySearch: (payload) => ipcRenderer.invoke("global-shopping:tienda-centro-readonly-search", payload || {}),
-  getTiendaCentroReadonlyStatus: () => ipcRenderer.invoke("global-shopping:tienda-centro-readonly-status")
+  merchantNativeReadonlySearch: (sourceId, payload) => ipcRenderer.invoke("global-shopping:merchant-native-readonly-search", {
+    sourceId:String(sourceId || ""),
+    request:payload || {}
+  }),
+  getMerchantNativeReadonlyStatus: (sourceId) => ipcRenderer.invoke("global-shopping:merchant-native-readonly-status", {
+    sourceId:String(sourceId || "")
+  })
 });

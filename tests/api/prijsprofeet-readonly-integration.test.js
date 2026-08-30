@@ -7,8 +7,13 @@ const { pathToFileURL } = require("node:url");
 const ROOT = path.resolve(__dirname, "../..");
 const {
   createPrijsProfeetReadonlyService,
-  registerPrijsProfeetReadonlyHandlers
+  SOURCE_ID
 } = require(path.join(ROOT, "apps/desktop/src/main/prijsProfeetReadonlyService.js"));
+const {
+  SEARCH_CHANNEL,
+  STATUS_CHANNEL,
+  registerMerchantNativeReadonlyHandlers
+} = require(path.join(ROOT, "apps/desktop/src/main/merchantNativeReadonlyRegistry.js"));
 
 function response(payload, status = 200) {
   const bytes = Buffer.from(typeof payload === "string" ? payload : JSON.stringify(payload));
@@ -243,11 +248,10 @@ async function testTimeoutDedupeAndIpcBoundary() {
   assert.equal(cachedResult.cacheStatus, "memory_hit");
 
   const handlers = {};
-  registerPrijsProfeetReadonlyHandlers({ handle(channel, handler) { handlers[channel] = handler; } }, { service:dedupeService });
-  assert.deepEqual(Object.keys(handlers).sort(), [
-    "global-shopping:prijsprofeet-readonly-search",
-    "global-shopping:prijsprofeet-readonly-status"
-  ]);
+  registerMerchantNativeReadonlyHandlers({ handle(channel, handler) { handlers[channel] = handler; } }, {
+    services:{ [SOURCE_ID]:dedupeService }
+  });
+  assert.deepEqual(Object.keys(handlers).sort(), [SEARCH_CHANNEL, STATUS_CHANNEL].sort());
   const rendererUrl = pathToFileURL(path.join(ROOT, "apps/desktop/src/index.html")).href;
   const mainFrame = { url:rendererUrl };
   const sender = { getURL:() => rendererUrl, mainFrame };
@@ -257,10 +261,10 @@ async function testTimeoutDedupeAndIpcBoundary() {
   const otherMainFrame = { url:pathToFileURL(path.join(ROOT, "apps/desktop/src/other.html")).href };
   const otherLocalEvent = { sender:{ getURL:() => otherMainFrame.url, mainFrame:otherMainFrame }, senderFrame:otherMainFrame };
   for (const event of [remoteEvent, subframeEvent, otherLocalEvent, {}]) {
-    assert.equal((await handlers["global-shopping:prijsprofeet-readonly-search"](event, { query:"cola", requestId:"blocked" })).code, "SOURCE_CALLER_INVALID");
-    assert.equal((await handlers["global-shopping:prijsprofeet-readonly-status"](event)).code, "SOURCE_CALLER_INVALID");
+    assert.equal((await handlers[SEARCH_CHANNEL](event, { sourceId:SOURCE_ID, request:{ query:"cola", requestId:"blocked" } })).code, "SOURCE_CALLER_INVALID");
+    assert.equal((await handlers[STATUS_CHANNEL](event, { sourceId:SOURCE_ID })).code, "SOURCE_CALLER_INVALID");
   }
-  const status = await handlers["global-shopping:prijsprofeet-readonly-status"](trustedEvent);
+  const status = await handlers[STATUS_CHANNEL](trustedEvent, { sourceId:SOURCE_ID });
   assert.equal(status.executionMode, "public_readonly");
   assert.equal(status.connected, false);
   assert.equal(status.configured, true);

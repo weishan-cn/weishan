@@ -82,6 +82,8 @@ function runCore() {
   runStep("PrijsProfeet renderer price-truth flow", "node", ["tests/api/prijsprofeet-renderer-flow.test.js"]);
   runStep("Tienda Centro merchant public read-only integration", "node", ["tests/api/tienda-centro-readonly-integration.test.js"]);
   runStep("Tienda Centro renderer price-truth flow", "node", ["tests/api/tienda-centro-renderer-flow.test.js"]);
+  runStep("Merchant-native static read-only registry", "node", ["tests/api/merchant-native-readonly-registry.test.js"]);
+  runStep("Merchant-native source and query isolation", "node", ["tests/api/merchant-native-source-isolation.test.js"]);
   runStep("Unified shopping and travel desktop flow", "node", ["tests/api/unified-desktop-flow-view-model.test.js"]);
   runStep("Home unified desktop effectiveness", "node", ["tests/api/home-unified-desktop-effectiveness.test.js"]);
   runStep("Search module effectiveness", "node", ["tests/api/search-module-effectiveness.test.js"]);

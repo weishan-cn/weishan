@@ -8923,7 +8923,7 @@
     const hasCurrentPriceResults = hasCurrentPublicPriceResults(task);
     const publicReadonlyAvailable = !!(isProduct
       && window.weishanGlobalShopping
-      && typeof window.weishanGlobalShopping.prijsProfeetReadonlySearch === "function"
+      && typeof window.weishanGlobalShopping.merchantNativeReadonlySearch === "function"
       && window.WeishanPrijsProfeetReadonlyAdapter
       && typeof window.WeishanPrijsProfeetReadonlyAdapter.normalizeResult === "function");
     const publicReadonlySearchReady = !!(publicReadonlyAvailable

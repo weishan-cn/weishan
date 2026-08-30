@@ -2,6 +2,8 @@
   const COMMERCE_SEARCH_SETTINGS_KEY = "weishan:commerceSearch:settings:v1";
   const OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
   const CHEAPEST_REDIRECT_MODE = "cheapest_redirect";
+  const PRIJS_PROFEET_SOURCE_ID = "prijsprofeet_public_api";
+  const TIENDA_CENTRO_SOURCE_ID = "tienda_centro_public_api";
   const prijsProfeetSearchGenerations = new Map();
   const tiendaCentroSearchGenerations = new Map();
 
@@ -2783,14 +2785,14 @@
   async function searchPrijsProfeetReadonlyProductCandidates(request){
     const bridge = window.weishanGlobalShopping;
     const adapter = prijsProfeetReadonlyAdapterApi();
-    if (!bridge || typeof bridge.prijsProfeetReadonlySearch !== "function" || !adapter || typeof adapter.normalizeResult !== "function") return null;
+    if (!bridge || typeof bridge.merchantNativeReadonlySearch !== "function" || !adapter || typeof adapter.normalizeResult !== "function") return null;
     const taskKey = sanitizeText(request.taskId || request.query || "product", 120);
     const nextGeneration = Number(prijsProfeetSearchGenerations.get(taskKey) || 0) + 1;
     prijsProfeetSearchGenerations.set(taskKey, nextGeneration);
     const requestId = taskKey + ":" + String(nextGeneration);
     let raw;
     try {
-      raw = await bridge.prijsProfeetReadonlySearch({ query:request.query, requestId, limit:1 });
+      raw = await bridge.merchantNativeReadonlySearch(PRIJS_PROFEET_SOURCE_ID, { query:request.query, requestId, limit:1 });
     } catch (_) {
       raw = { ok:false, code:"SOURCE_UNAVAILABLE", requestId, results:[] };
     }
@@ -2852,14 +2854,14 @@
   async function searchTiendaCentroReadonlyProductCandidates(request){
     const bridge = window.weishanGlobalShopping;
     const adapter = tiendaCentroReadonlyAdapterApi();
-    if (!bridge || typeof bridge.tiendaCentroReadonlySearch !== "function" || !adapter || typeof adapter.normalizeResult !== "function") return null;
+    if (!bridge || typeof bridge.merchantNativeReadonlySearch !== "function" || !adapter || typeof adapter.normalizeResult !== "function") return null;
     const taskKey = sanitizeText(request.taskId || request.query || "product", 120);
     const nextGeneration = Number(tiendaCentroSearchGenerations.get(taskKey) || 0) + 1;
     tiendaCentroSearchGenerations.set(taskKey, nextGeneration);
     const requestId = taskKey + ":" + String(nextGeneration);
     let raw;
     try {
-      raw = await bridge.tiendaCentroReadonlySearch({ query:request.query, requestId, limit:1 });
+      raw = await bridge.merchantNativeReadonlySearch(TIENDA_CENTRO_SOURCE_ID, { query:request.query, requestId, limit:1 });
     } catch (_) {
       raw = { ok:false, code:"SOURCE_UNAVAILABLE", requestId, results:[] };
     }
@@ -3021,12 +3023,12 @@
     const tiendaCentroDestination = isProductSearchRequest(request) && isArgentinaDestination(currentLocationHealth);
     const prijsProfeetReadonlyReady = isProductSearchRequest(request)
       && !!(window.weishanGlobalShopping
-        && typeof window.weishanGlobalShopping.prijsProfeetReadonlySearch === "function"
+        && typeof window.weishanGlobalShopping.merchantNativeReadonlySearch === "function"
         && prijsProfeetReadonlyAdapterApi()
         && typeof prijsProfeetReadonlyAdapterApi().normalizeResult === "function");
     const tiendaCentroReadonlyReady = isProductSearchRequest(request)
       && !!(window.weishanGlobalShopping
-        && typeof window.weishanGlobalShopping.tiendaCentroReadonlySearch === "function"
+        && typeof window.weishanGlobalShopping.merchantNativeReadonlySearch === "function"
         && tiendaCentroReadonlyAdapterApi()
         && typeof tiendaCentroReadonlyAdapterApi().normalizeResult === "function");
     const approvedReadonlySourcePolicy = tiendaCentroDestination

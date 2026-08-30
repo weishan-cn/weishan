@@ -106,7 +106,8 @@ function safePolicyWindow(bridge) {
 async function main() {
   const calls = [];
   const bridge = {
-    prijsProfeetReadonlySearch:async (payload) => {
+    merchantNativeReadonlySearch:async (sourceId, payload) => {
+      assert.equal(sourceId, "prijsprofeet_public_api");
       calls.push(payload);
       return sourceResult(payload.requestId);
     }
@@ -143,7 +144,8 @@ async function main() {
   let releaseFirst;
   const firstWait = new Promise((resolve) => { releaseFirst = resolve; });
   let count = 0;
-  window.weishanGlobalShopping.prijsProfeetReadonlySearch = async (payload) => {
+  window.weishanGlobalShopping.merchantNativeReadonlySearch = async (sourceId, payload) => {
+    assert.equal(sourceId, "prijsprofeet_public_api");
     count += 1;
     if (count === 1) {
       firstPayload = payload;
@@ -189,7 +191,8 @@ async function main() {
       removeItem(key) { persisted.delete(key); }
     },
     weishanGlobalShopping:{
-      prijsProfeetReadonlySearch:async (payload) => {
+      merchantNativeReadonlySearch:async (sourceId, payload) => {
+        assert.equal(sourceId, "prijsprofeet_public_api");
         livePolicyCalls.push(payload);
         return sourceResult(payload.requestId);
       }

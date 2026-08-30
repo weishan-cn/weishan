@@ -13,8 +13,13 @@ const {
   MAX_PROVIDER_REQUESTS_PER_MINUTE,
   exactProductIdentityMatch,
   createTiendaCentroReadonlyService,
-  registerTiendaCentroReadonlyHandlers
+  SOURCE_ID
 } = require(path.join(ROOT, "apps/desktop/src/main/tiendaCentroReadonlyService.js"));
+const {
+  SEARCH_CHANNEL,
+  STATUS_CHANNEL,
+  registerMerchantNativeReadonlyHandlers
+} = require(path.join(ROOT, "apps/desktop/src/main/merchantNativeReadonlyRegistry.js"));
 
 function response(payload, status = 200) {
   const bytes = Buffer.from(typeof payload === "string" ? payload : JSON.stringify(payload));
@@ -232,18 +237,17 @@ async function testBoundsDedupeAndIpcBoundary() {
   assert.equal(cached.cacheStatus, "memory_hit");
 
   const handlers = {};
-  registerTiendaCentroReadonlyHandlers({ handle(channel, handler) { handlers[channel] = handler; } }, { service:dedupeService });
-  assert.deepEqual(Object.keys(handlers).sort(), [
-    "global-shopping:tienda-centro-readonly-search",
-    "global-shopping:tienda-centro-readonly-status"
-  ]);
+  registerMerchantNativeReadonlyHandlers({ handle(channel, handler) { handlers[channel] = handler; } }, {
+    services:{ [SOURCE_ID]:dedupeService }
+  });
+  assert.deepEqual(Object.keys(handlers).sort(), [SEARCH_CHANNEL, STATUS_CHANNEL].sort());
   const rendererUrl = pathToFileURL(path.join(ROOT, "apps/desktop/src/index.html")).href;
   const mainFrame = { url:rendererUrl };
   const sender = { getURL:() => rendererUrl, mainFrame };
   const trustedEvent = { sender, senderFrame:mainFrame };
   const remoteEvent = { sender, senderFrame:{ url:"https://untrusted.invalid/frame" } };
-  assert.equal((await handlers["global-shopping:tienda-centro-readonly-search"](remoteEvent, { query:"IPHONE 17", requestId:"blocked" })).code, "SOURCE_CALLER_INVALID");
-  const status = await handlers["global-shopping:tienda-centro-readonly-status"](trustedEvent);
+  assert.equal((await handlers[SEARCH_CHANNEL](remoteEvent, { sourceId:SOURCE_ID, request:{ query:"IPHONE 17", requestId:"blocked" } })).code, "SOURCE_CALLER_INVALID");
+  const status = await handlers[STATUS_CHANNEL](trustedEvent, { sourceId:SOURCE_ID });
   assert.equal(status.allowedMethods.join(","), "GET");
   assert.equal(status.responsePolicy.maxBytes, DEFAULT_MAX_RESPONSE_BYTES);
   assert.equal(status.responsePolicy.timeoutMs, DEFAULT_TIMEOUT_MS);
