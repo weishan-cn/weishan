@@ -588,7 +588,7 @@
       ticketing:"全球多源 provider 候选池：准备中，尚未接入；" + onboardingText + " 当前比较范围：票务平台、活动官网、区域票务平台；示例候选类型：Ticketmaster / 大麦 / Eventbrite / 活动官网 等；当前不会访问任何真实票务平台；当前不会返回票价；当前不会跳转购票页面。",
       serviceBooking:"全球多源 provider 候选池：准备中，尚未接入；" + onboardingText + " 当前比较范围：本地服务预约平台、服务商官网、区域服务平台；当前不会访问任何真实服务平台；当前不会返回预约价格；当前不会跳转预约页面。"
     };
-    const providerMissingText = poolSummaryByCategory[savedPlan.category] || providerReason || "搜索适配器未配置，配置状态未配置真实搜索源，无法返回真实价格。";
+    const providerMissingText = poolSummaryByCategory[savedPlan.category] || providerReason || "暂未接入该市场或品类的实时价格来源。";
     const displayTitle = api.createCommerceDisplayTitle ? api.createCommerceDisplayTitle(savedPlan, false) : blocked ? "全球采购计划已阻断" : "全球采购计划已生成";
     const answer = [
       displayTitle,

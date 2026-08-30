@@ -56,6 +56,7 @@ function load(extraWindow, options) {
     "apps/desktop/src/renderer/core/readOnlyPriceTruthLayer.js",
     "apps/desktop/src/renderer/core/prijsProfeetReadonlyAdapter.js",
     "apps/desktop/src/renderer/core/tiendaCentroReadonlyAdapter.js",
+    "apps/desktop/src/renderer/core/merchantNativeSourceEligibilityRouter.js",
     "apps/desktop/src/renderer/core/globalShoppingReadOnlySearchResultRanker.js",
     "apps/desktop/src/renderer/core/globalShoppingDecisionEngine.js",
     "apps/desktop/src/renderer/core/globalShoppingReadOnlySearchResultPresenter.js",

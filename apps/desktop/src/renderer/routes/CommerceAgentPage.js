@@ -8921,14 +8921,19 @@
     const isProduct = task && task.category === "ecommerce";
     const hasReadOnlyResults = !!(task && task.readOnlySearchResultSummary && task.readOnlySearchResultSummary.candidateCount > 0);
     const hasCurrentPriceResults = hasCurrentPublicPriceResults(task);
+    const sourceRoute = isProduct && searchApi() && typeof searchApi().routeMerchantNativeSource === "function"
+      ? searchApi().routeMerchantNativeSource(task, searchApi().locationHealthForCommerce ? searchApi().locationHealthForCommerce() : {})
+      : null;
+    const selectedSource = sourceRoute && sourceRoute.eligibleSourceIds && sourceRoute.eligibleSourceIds[0] || "";
     const publicReadonlyAvailable = !!(isProduct
       && window.weishanGlobalShopping
       && typeof window.weishanGlobalShopping.merchantNativeReadonlySearch === "function"
-      && window.WeishanPrijsProfeetReadonlyAdapter
-      && typeof window.WeishanPrijsProfeetReadonlyAdapter.normalizeResult === "function");
-    const publicReadonlySearchReady = !!(publicReadonlyAvailable
-      && searchApi()
-      && typeof searchApi().searchCommerceCandidates === "function");
+      && (selectedSource === "prijsprofeet_public_api"
+        ? window.WeishanPrijsProfeetReadonlyAdapter && typeof window.WeishanPrijsProfeetReadonlyAdapter.normalizeResult === "function"
+        : selectedSource === "tienda_centro_public_api"
+          ? window.WeishanTiendaCentroReadonlyAdapter && typeof window.WeishanTiendaCentroReadonlyAdapter.normalizeResult === "function"
+          : true));
+    const publicReadonlySearchReady = !!(isProduct && searchApi() && typeof searchApi().searchCommerceCandidates === "function" && (publicReadonlyAvailable || !selectedSource));
     const effectiveHasProvider = hasProvider || publicReadonlySearchReady;
     const locationInfo = searchApi() && searchApi().locationHealthForCommerce ? searchApi().locationHealthForCommerce() : {};
     const complianceRequired = task && task.searchStatus === "local_law_compliance_required";
@@ -8995,7 +9000,7 @@
       ${failedMessage ? `<p class="commerce-warning">${esc(failedMessage)}</p>` : ""}
       ${noResultsMessage ? `<p class="commerce-muted" role="status">${esc(noResultsMessage)}</p>` : ""}
       ${missingFields.length ? `<p class="commerce-warning">请补充${esc(missingFields.join("、"))}，否则不搜索价格。</p>` : ""}
-      <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${esc(destinationRequired ? "需要设置收货目的地" : disabled && !missingFields.length && !isModelPricing ? "搜索适配器未配置" : buttonLabel)}</button>
+      <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${esc(destinationRequired ? "需要设置收货目的地" : disabled && !missingFields.length && !isModelPricing ? "当前市场暂无实时价格来源" : buttonLabel)}</button>
       <p class="commerce-muted">${esc(hasCurrentPriceResults ? "刷新只在你点击后执行；不会在打开页面、切换路由或空闲时联网。" : publicReadonlySearchReady ? "价格仅来自公开只读来源；单一且费用不完整的价格不会被标记为最低价。" : publicReadonlyAvailable ? "加载完成前按钮保持禁用，避免无响应点击。" : hasReadOnlyResults ? "当前使用本地规则/AI 理解生成平台候选；最终价格以平台页面为准。" : "价格只来自已配置搜索能力返回数据；未配置时不会显示假价格。")}</p>
     </div>`;
   }
@@ -9088,7 +9093,7 @@
     const candidates = (Array.isArray(task && task.candidates) ? task.candidates : []).slice(0, 3);
     if (!candidates.length) {
       const status = String(task && task.searchStatus || "");
-      const noResultText = status === "noResults" || status === "no_results" ? "provider 未返回可展示结果。" : "搜索适配器未配置或尚未执行真实搜索。";
+      const noResultText = status === "noResults" || status === "no_results" ? "本次搜索没有找到当前有效价格。" : "尚未执行当前价格搜索。";
       return `<p class="commerce-muted">${esc(noResultText)}不显示任何价格，不显示购买、预订或付款按钮。</p>`;
     }
     const isModelPricing = task && task.category === "aiModelPricing";
@@ -11221,7 +11226,7 @@
           return;
         }
         if (!result.ok) {
-          const status = result.code === "COMMERCE_MISSING_FIELDS" ? "missingFields" : result.code === "COMMERCE_LOCAL_LAW_COMPLIANCE_REQUIRED" ? "local_law_compliance_required" : result.code === "COMMERCE_SHIPPING_DESTINATION_REQUIRED" || result.code === "COMMERCE_LOCATION_REQUIRED" ? "shipping_destination_required" : result.code === "COMMERCE_NO_PROVIDER" || result.code === "COMMERCE_PROVIDER_NOT_CONFIGURED" || result.code === "COMMERCE_PROVIDER_CONFIG_NOT_READY" ? "no_provider" : result.code === "COMMERCE_NO_RESULTS" ? "no_results" : "failed";
+          const status = result.code === "COMMERCE_MISSING_FIELDS" ? "missingFields" : result.code === "COMMERCE_LOCAL_LAW_COMPLIANCE_REQUIRED" ? "local_law_compliance_required" : result.code === "COMMERCE_SHIPPING_DESTINATION_REQUIRED" || result.code === "COMMERCE_LOCATION_REQUIRED" ? "shipping_destination_required" : result.code === "COMMERCE_NO_PROVIDER" || result.code === "COMMERCE_PROVIDER_NOT_CONFIGURED" || result.code === "COMMERCE_PROVIDER_CONFIG_NOT_READY" ? "no_provider" : result.code === "COMMERCE_NO_RESULTS" || result.code === "COMMERCE_NO_LOCAL_REAL_PRICE_SOURCE" ? "no_results" : "failed";
           const updated = api.updateCommerceTask(taskId, {
             searchStatus:status,
             missingFields:result.request && result.request.missingFields || target.missingFields || [],

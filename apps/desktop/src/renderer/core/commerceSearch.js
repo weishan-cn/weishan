@@ -133,6 +133,24 @@
     return window.WeishanTiendaCentroReadonlyAdapter || null;
   }
 
+  function merchantNativeSourceRouterApi(){
+    return window.WeishanMerchantNativeSourceEligibilityRouter || null;
+  }
+
+  function routeMerchantNativeSource(request, locationState){
+    const router = merchantNativeSourceRouterApi();
+    const health = locationState && typeof locationState === "object" ? locationState : locationHealth();
+    const destination = health.shippingDestination && typeof health.shippingDestination === "object" ? health.shippingDestination : {};
+    if (!router || typeof router.routeEligibleMerchantNativeSources !== "function") {
+      return { routerAvailable:false, eligibleSourceIds:[], localSourceAvailable:false, destinationMarket:"", destinationMarketSource:"unknown", maxEligibleSourcesQueriedPerSearch:0 };
+    }
+    return Object.assign({ routerAvailable:true }, router.routeEligibleMerchantNativeSources({
+      query:request && (request.query || request.inputSummary),
+      destinationMarket:destination.country,
+      destinationMarketSource:destination.source || "unknown"
+    }));
+  }
+
   function getCommerceLocalIntentRoute(input){
     const api = localIntentRouterApi();
     if (api && api.routeCommerceIntentLocally) return api.routeCommerceIntentLocally(input || "");
@@ -2845,10 +2863,28 @@
     });
   }
 
-  function isArgentinaDestination(locationState){
-    const health = locationState && typeof locationState === "object" ? locationState : {};
-    const destination = health.shippingDestination && typeof health.shippingDestination === "object" ? health.shippingDestination : {};
-    return /^(?:AR|ARG|Argentina|阿根廷)$/i.test(String(destination.country || "").trim());
+  function buildNoEligibleLocalSourceResult(request, route){
+    const destination = sanitizeText(route && route.destinationMarket || request.destination || request.destinationCountry || "当前市场", 40);
+    return {
+      ok:false,
+      code:"COMMERCE_NO_LOCAL_REAL_PRICE_SOURCE",
+      message:"暂未接入该市场的实时价格来源。",
+      reason:"no_eligible_local_real_price_source",
+      request,
+      searchStatus:"no_results",
+      providerName:"",
+      sourceRouting:route || null,
+      destinationMarket:destination,
+      canOfferOtherMarketReference:route && route.otherMarketReferenceAvailable === true,
+      otherMarketReferenceMessage:route && route.otherMarketReferenceAvailable === true ? "可查看其他市场的参考价格；参考价格不代表本地供货、配送或最低价。" : "",
+      canShowPrice:false,
+      canShowBookingButton:false,
+      canShowCheckoutButton:false,
+      candidates:[],
+      readOnlySearchTopResults:[],
+      readOnlySearchRemainingResults:[],
+      searchResultSummary:{ candidateCount:0, source:"eligible_source_router", destinationMarket:destination }
+    };
   }
 
   async function searchTiendaCentroReadonlyProductCandidates(request){
@@ -3020,7 +3056,7 @@
     const providerIntegrationRunbook = providerConfig && providerConfig.providerIntegrationRunbook || providerHealth && providerHealth.providerIntegrationRunbook || getProviderIntegrationRunbook(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId, { providerIntegrationReadiness, connectorGateHealth });
     const sandbox = getCommerceProviderSandbox(request.category, settings);
     const currentLocationHealth = locationHealth();
-    const tiendaCentroDestination = isProductSearchRequest(request) && isArgentinaDestination(currentLocationHealth);
+    const sourceRoute = routeMerchantNativeSource(request, currentLocationHealth);
     const prijsProfeetReadonlyReady = isProductSearchRequest(request)
       && !!(window.weishanGlobalShopping
         && typeof window.weishanGlobalShopping.merchantNativeReadonlySearch === "function"
@@ -3031,9 +3067,22 @@
         && typeof window.weishanGlobalShopping.merchantNativeReadonlySearch === "function"
         && tiendaCentroReadonlyAdapterApi()
         && typeof tiendaCentroReadonlyAdapterApi().normalizeResult === "function");
-    const approvedReadonlySourcePolicy = tiendaCentroDestination
-      ? (tiendaCentroReadonlyReady ? "tienda_centro_public_api" : "")
-      : (prijsProfeetReadonlyReady ? "prijsprofeet_public_api" : "");
+    const selectedReadonlySource = sourceRoute.eligibleSourceIds && sourceRoute.eligibleSourceIds[0] || "";
+    const selectedReadonlySourceReady = selectedReadonlySource === TIENDA_CENTRO_SOURCE_ID
+      ? tiendaCentroReadonlyReady
+      : selectedReadonlySource === PRIJS_PROFEET_SOURCE_ID ? prijsProfeetReadonlyReady : false;
+    const approvedReadonlySourcePolicy = selectedReadonlySourceReady ? selectedReadonlySource : "";
+    if (isProductSearchRequest(request) && currentLocationHealth.hasShippingDestination !== true) {
+      return shippingDestinationRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox);
+    }
+    if (isProductSearchRequest(request) && sourceRoute.routerAvailable === true && !(request.missingFields && request.missingFields.length) && !selectedReadonlySource) {
+      return Object.assign(buildNoEligibleLocalSourceResult(request, sourceRoute), {
+        providerHealth:providerHealth.providerHealth,
+        configHealth:configFields(providerConfig),
+        connectorHealth,
+        locationHealth:currentLocationHealth
+      });
+    }
     const complianceHealth = !isAiModelPricingTask(request) ? evaluateLocalLawCompliance(request, {
       locationHealth:currentLocationHealth,
       approvedReadonlySourcePolicy
@@ -3041,13 +3090,10 @@
     if (complianceHealth && complianceHealth.canSearchProvider !== true) {
       return localLawComplianceRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, complianceHealth);
     }
-    if (isProductSearchRequest(request) && currentLocationHealth.hasShippingDestination !== true) {
-      return shippingDestinationRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox);
-    }
     if (isProductSearchRequest(request) && !(request.missingFields && request.missingFields.length)) {
-      const readonlyResult = (tiendaCentroDestination
+      const readonlyResult = (selectedReadonlySource === TIENDA_CENTRO_SOURCE_ID
         ? await searchTiendaCentroReadonlyProductCandidates(request)
-        : await searchPrijsProfeetReadonlyProductCandidates(request))
+        : selectedReadonlySource === PRIJS_PROFEET_SOURCE_ID ? await searchPrijsProfeetReadonlyProductCandidates(request) : null)
         || await searchRakutenReadonlyProductCandidates(request);
       if (readonlyResult) {
         return Object.assign({
@@ -3249,7 +3295,7 @@
     return {
       ok:false,
       code:"COMMERCE_NO_PROVIDER",
-      message:providerHealth.reasonWhenDisabled || "搜索适配器未配置，无法返回真实价格。",
+      message:providerHealth.reasonWhenDisabled || "暂未接入该市场或品类的实时价格来源。",
       reason:"provider_config_not_ready",
       request,
       searchStatus:"no_provider",
@@ -3325,6 +3371,7 @@
     normalizeOpenRouterModel,
     normalizeOpenRouterModelsResponse,
     createCommerceSearchHistoryPayload,
-    searchCommerceCandidates
+    searchCommerceCandidates,
+    routeMerchantNativeSource
   };
 })();

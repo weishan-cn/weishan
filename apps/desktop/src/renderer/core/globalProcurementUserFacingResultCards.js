@@ -121,8 +121,18 @@
         push("Costco", "United States", false);
       }
       if (!cards.length) {
-        push("Official Store", destination || "Global", true);
-        push("Major Marketplace", destination || "Global", false);
+        cards.push({
+          platformName:"当前市场实时价格源",
+          country:destination || "当前市场",
+          officialVerified:false,
+          price:"—",
+          availability:"暂未接入",
+          tax:"不适用",
+          shipping:"不适用",
+          landedCost:"—",
+          updatedAt:"—",
+          confidence:"未连接"
+        });
       }
       return cards;
     }
