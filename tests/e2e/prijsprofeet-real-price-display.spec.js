@@ -133,7 +133,7 @@ test.describe.serial("PrijsProfeet real-price display", () => {
       const normalized = window.WeishanPrijsProfeetReadonlyAdapter.normalizeResult(source, { evaluatedAt:retrievedAt });
       if (!normalized.ok || normalized.candidates.length !== 1) throw new Error("fixture normalization failed");
       const api = window.WeishanCommerceAgent;
-      const task = api.createCommerceTask(id + " Coca-Cola Original 当前价格");
+      const task = api.createCommerceTask("Coca-Cola Original 商品价格，收货到荷兰");
       task.taskId = id + "-task";
       task.category = "ecommerce";
       task.status = "recommended";
@@ -170,14 +170,15 @@ test.describe.serial("PrijsProfeet real-price display", () => {
       return task.taskId;
     }, runId);
 
-    const results = page.locator('[data-commerce-readonly-search-results="true"]');
+    const results = page.locator('[data-commerce-global-shopping-workspace="true"]');
     await expect(results).toBeVisible({ timeout:15000 });
+    await expect(results).toContainText("平台比较");
+    await expect(results).toContainText("预计到手成本");
+    await expect(results).toContainText("AI 采购建议");
     await expect(results).toContainText("Coca-Cola Original");
     await expect(results).toContainText("EUR 0.57");
-    await expect(results).toContainText("PrijsProfeet 公开只读 API");
-    await expect(results).toContainText("数据提供：PrijsProfeet");
-    await expect(results).toContainText("价格有效期：2026-08-24 → 2026-08-30");
-    await expect(results).toContainText("配送、税费与其他条件未知");
+    await expect(results).toContainText("PrijsProfeet");
+    await expect(results).toContainText("费用不完整时不计算虚假到手总价");
     await expect(results.getByRole("button", { name:"查看数据来源" })).toBeVisible();
     await expect(results.getByRole("button", { name:"去零售商核验" })).toBeVisible();
     await expect(results).not.toContainText(/已锁价|最终总价|最终决策建议|已下单|已付款|可结算|已确认最低价|最低价已验证/);

@@ -2988,7 +2988,16 @@
     </section>`;
   }
 
-  function workspaceProductCardHtml(card){
+  function currentRealPriceItems(task){
+    const items = Array.isArray(task && task.readOnlySearchTopResults) ? task.readOnlySearchTopResults : [];
+    return items.filter((item) => item
+      && item.truthEvidence
+      && item.truthEvidence.evidenceTruthClass === "REAL_PROVIDER_PRICE"
+      && item.truthEvidence.displayAsLiveCurrentPrice === true
+      && ["prijsprofeet_public_api", "tienda_centro_public_api"].includes(item.sourceType));
+  }
+
+  function workspaceProductCardHtml(card, task){
     const product = card && card.productCard || {};
     const planFields = card && card.planFields || {};
     const productName = planFields.productName || [product.brand, product.model].filter(Boolean).join(" ") || product.category || "商品";
@@ -3012,7 +3021,7 @@
           ${product.budget ? `<div><dt>预算</dt><dd>${esc(product.budget)}</dd></div>` : ""}
           ${product.destination ? `<div><dt>收货地</dt><dd>${esc(product.destination)}</dd></div>` : ""}
           ${markets.length ? `<div><dt>比较市场</dt><dd>${esc(compareLine)}</dd></div>` : ""}
-          <div><dt>下一步</dt><dd>接入可信价格后自动比较</dd></div>
+          <div><dt>下一步</dt><dd>${currentRealPriceItems(task).length ? "查看当前价格并前往零售商核验" : "等待当前市场实时价格来源"}</dd></div>
         </dl>
         <div class="commerce-workspace-primary-actions">
           <button class="cmd-btn primary" type="button" data-commerce-workspace-next-action="connect_trusted_source">开始比较</button>
@@ -3039,8 +3048,30 @@
     return `<svg class="commerce-workspace-visual-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 12H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>`;
   }
 
-  function workspacePlatformCardsHtml(card){
-    const items = Array.isArray(card && card.platformCards) ? card.platformCards : [];
+  function workspacePlatformCardsHtml(card, task){
+    const realItems = currentRealPriceItems(task);
+    const items = realItems.length ? realItems.map((item) => ({
+      platformName:item.platformName || item.sourceAttributionName || (item.sourceType === "tienda_centro_public_api" ? "Tienda Centro" : "PrijsProfeet"),
+      title:item.title || "",
+      country:item.destinationCountry || item.market || (card && card.planFields && card.planFields.destinationCountry) || "当前市场",
+      price:item.priceLabel || (item.currency && item.price !== undefined ? item.currency + " " + item.price : "—"),
+      landedCost:item.landedCostCompleteness === "complete" && item.totalLandedCost !== undefined ? item.currency + " " + item.totalLandedCost : "待平台确认",
+      availability:((item.availabilityFreshness || {}).availabilityStatus) || "unknown",
+      updatedAt:item.retrievedAt || item.updatedAt || ((item.priceFreshness || {}).fetchedAt) || "",
+      targetUrl:item.targetUrl || "",
+      sourceAttributionUrl:item.sourceAttributionUrl || "",
+      sourceType:item.sourceType,
+      onSale:item.onSale === true,
+      regularPrice:item.regularPrice,
+      salePrice:item.salePrice,
+      currency:item.currency
+    })) : [{
+      platformName:"当前市场实时价格源",
+      country:(card && card.planFields && card.planFields.destinationCountry) || "当前市场",
+      price:"—",
+      landedCost:"—",
+      availability:"暂未接入"
+    }];
     if (!items.length) return "";
     const grouped = groupPlatformCardsByCountry(items);
     const initials = (name) => String(name || "").split(/\s+/).map((part) => part.slice(0, 1).toUpperCase()).join("").slice(0, 3) || "GS";
@@ -3056,7 +3087,7 @@
       <div class="commerce-workspace-card-head commerce-workspace-platforms-head">
         <div>
           <h3>平台比较</h3>
-          <p>按市场预留可信平台位，接入后自动填充价格与到手成本。</p>
+          <p>${realItems.length ? "仅显示本次查询返回的已验证实时价格来源。" : "暂未接入该市场的实时价格来源。"}</p>
         </div>
       </div>
       ${Object.keys(grouped).map((country) => `<section class="commerce-workspace-market-group">
@@ -3069,14 +3100,20 @@
               <span class="commerce-workspace-platform-logo">${esc(initials(item.platformName))}</span>
               <div>
                 <strong>${esc(item.platformName || "Platform")}</strong>
+                ${item.title ? `<p class="commerce-muted">${esc(item.title)}</p>` : ""}
               </div>
             </div>
             <dl class="commerce-workspace-platform-meta">
               <div><dt>价格</dt><dd>${esc(displayValue(item.price, "—"))}</dd></div>
               <div><dt>预计到手</dt><dd>${esc(displayValue(item.landedCost, "—"))}</dd></div>
             </dl>
+            ${item.onSale && item.regularPrice !== undefined && item.salePrice !== undefined ? `<p class="commerce-muted">促销价：${esc(item.currency + " " + item.salePrice)} · 常规价：${esc(item.currency + " " + item.regularPrice)}</p>` : ""}
+            ${item.updatedAt ? `<p class="commerce-muted">检索时间：${esc(timeLabel(item.updatedAt) || "unknown")}</p>` : ""}
+            <p class="commerce-muted">可用性：${esc(item.availability || "unknown")}</p>
             <div class="commerce-workspace-platform-footer">
-              <span class="commerce-workspace-status-pill is-muted">等待数据</span>
+              <span class="commerce-workspace-status-pill ${realItems.length ? "" : "is-muted"}">${realItems.length ? "当前价格" : "暂未接入"}</span>
+              ${item.sourceAttributionUrl ? `<button class="cmd-btn gray commerce-source-attribution-link" type="button" data-url="${esc(item.sourceAttributionUrl)}" data-handoff-source="${esc(item.sourceType || "")}">查看数据来源</button>` : ""}
+              ${item.targetUrl ? `<button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}" data-handoff-source="${esc(item.sourceType || "")}">去零售商核验</button>` : ""}
             </div>
           </article>`).join("")}
         </div>
@@ -3084,8 +3121,9 @@
     </section>`;
   }
 
-  function workspaceRecommendationHtml(card){
+  function workspaceRecommendationHtml(card, task){
     const fields = card && card.planFields || {};
+    const realItems = currentRealPriceItems(task);
     const checks = [
       fields.productName ? "商品已识别" : "商品信息待补充",
       fields.destinationCountry ? "收货地已识别" : "收货地待补充",
@@ -3096,21 +3134,30 @@
         <div><h3>AI 采购建议</h3></div>
       </div>
       <div class="commerce-workspace-recommendation">
-        <p class="commerce-workspace-summary-lead">采购需求已整理</p>
+        <p class="commerce-workspace-summary-lead">${realItems.length ? "已找到当前市场的可验证价格" : "采购需求已整理"}</p>
         <div class="commerce-workspace-analysis-grid">
           ${checks.map((item) => `<div class="commerce-workspace-analysis-item"><span aria-hidden="true">✓</span><strong>${esc(item)}</strong></div>`).join("")}
         </div>
         <div class="commerce-workspace-next-compact">
           <p class="commerce-workspace-next-line">下一步</p>
-          <p class="commerce-workspace-next-line commerce-workspace-next-line-strong">等待可信价格数据</p>
+          <p class="commerce-workspace-next-line commerce-workspace-next-line-strong">${realItems.length ? "可比较当前证据；价格、库存与最终费用以零售商页面为准" : "当前市场暂未接入实时价格源，不生成价格"}</p>
         </div>
       </div>
     </section>`;
   }
 
-  function workspaceCostSummaryHtml(card){
+  function workspaceCostSummaryHtml(card, task){
     const cost = card && card.costSummary || {};
-    const rows = Array.isArray(cost.rows) ? cost.rows : [];
+    const realItem = currentRealPriceItems(task)[0] || null;
+    const breakdown = realItem && realItem.landedCostBreakdown || {};
+    const costPart = (part) => feePartText(part, realItem && realItem.currency).replace("待确认", "待平台确认");
+    const rows = realItem ? [
+      ["商品价格", realItem.priceLabel || moneyText(realItem.price, realItem.currency, "—")],
+      ["运费", costPart(breakdown.shippingFee)],
+      ["税费", costPart(breakdown.taxFee)],
+      ["平台费用", costPart(breakdown.platformFee)],
+      ["预计总成本", realItem.landedCostCompleteness === "complete" ? moneyText(realItem.totalLandedCost, realItem.currency, "待平台确认") : "待平台确认"]
+    ] : (Array.isArray(cost.rows) ? cost.rows : []);
     return `<section class="commerce-workspace-card" data-commerce-workspace-cost-summary="true">
       <div class="commerce-workspace-card-head">
         <div>
@@ -3122,7 +3169,7 @@
           <tbody>${rows.map((row) => `<tr><th scope="row">${esc(String(row[0] || "").replace("进口税 / 消费税", "税费").replace("平台或支付费用", "平台费用"))}</th><td>${esc(String(row[1] || "—").replace("Waiting for Trusted Provider", "—").replace("等待数据", "—"))}</td></tr>`).join("")}</tbody>
         </table>
       </div>
-      <p class="commerce-workspace-cost-status"><span class="commerce-workspace-status-pill is-muted">等待可信价格源</span></p>
+      <p class="commerce-workspace-cost-status"><span class="commerce-workspace-status-pill is-muted">${realItem ? "费用不完整时不计算虚假到手总价" : "当前市场暂无实时价格来源"}</span></p>
       ${card && card.emptyPriceSummary && card.emptyPriceSummary.reasonTitle ? disclosure(card.emptyPriceSummary.reasonTitle, `<p>${esc(card.emptyPriceSummary.reasonBody || "")}</p>`, "commerce-global-procurement-price-explanation-disclosure") : ""}
     </section>`;
   }
@@ -3458,18 +3505,16 @@
     const settings = search && search.getCommerceSearchSettings ? search.getCommerceSearchSettings() : {};
     const health = search && search.getCommerceProviderHealth ? search.getCommerceProviderHealth(task.category, settings) : null;
     const hasConfiguredProvider = !!(health && health.hasProvider || search && search.hasCommerceSearchProvider && search.hasCommerceSearchProvider(settings));
-    const currentPriceResults = hasCurrentPublicPriceResults(task) ? readOnlySearchResultsHtml(task) : "";
     return `<section class="commerce-global-shopping-workspace" data-commerce-global-shopping-workspace="true">
       <div class="commerce-global-shopping-main">
         ${workspaceOverviewHtml(task, card)}
         ${searchStatusHtml(task, settings, hasConfiguredProvider)}
-        ${currentPriceResults}
         ${workspaceBasicAiModeHtml(task, card)}
-        ${workspaceProductCardHtml(card)}
-        ${workspacePlatformCardsHtml(card)}
+        ${workspaceProductCardHtml(card, task)}
+        ${workspacePlatformCardsHtml(card, task)}
         <div class="commerce-global-shopping-lower-grid">
-          ${workspaceCostSummaryHtml(card)}
-          ${workspaceRecommendationHtml(card)}
+          ${workspaceCostSummaryHtml(card, task)}
+          ${workspaceRecommendationHtml(card, task)}
         </div>
         ${workspaceMoreHtml(task, card)}
       </div>

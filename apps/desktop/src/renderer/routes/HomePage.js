@@ -6758,7 +6758,14 @@
 
   function commerceResultSummaryHomePanel(completionWorkspace, task, options){
     if (!task) return "";
-    const body = commerceShouldShowClarification(task)
+    const workspaceApi = window.CommerceAgentPage;
+    const preferredShoppingWorkspaceAvailable = !!(workspaceApi
+      && typeof workspaceApi.isGlobalShoppingTask === "function"
+      && workspaceApi.isGlobalShoppingTask(task)
+      && typeof workspaceApi.renderGlobalShoppingWorkspace === "function");
+    const body = preferredShoppingWorkspaceAvailable
+      ? commerceOneScreenResultPanelHtml(task, options)
+      : commerceShouldShowClarification(task)
       ? commerceClarificationResultPanelHtml(task)
       : commerceIsSimpleFlightTask(task)
         ? commerceSimpleFlightResultPanelHtml(task)
@@ -6772,7 +6779,14 @@
 
   function commerceHistoryResultSummaryHomePanel(completionWorkspace, task){
     if (!task) return "";
-    const body = commerceShouldShowClarification(task)
+    const workspaceApi = window.CommerceAgentPage;
+    const preferredShoppingWorkspaceAvailable = !!(workspaceApi
+      && typeof workspaceApi.isGlobalShoppingTask === "function"
+      && workspaceApi.isGlobalShoppingTask(task)
+      && typeof workspaceApi.renderGlobalShoppingWorkspace === "function");
+    const body = preferredShoppingWorkspaceAvailable
+      ? commerceOneScreenResultPanelHtml(task, { historyMode:true })
+      : commerceShouldShowClarification(task)
       ? commerceClarificationResultPanelHtml(task)
       : commerceIsSimpleFlightTask(task)
         ? commerceSimpleFlightResultPanelHtml(task)

@@ -211,7 +211,7 @@
 
   function hasEnoughSearchSpecificity(raw, s, domain){
     if (domain === SEARCH_DOMAINS.MAIL) return s.strongMail > 0 || s.mailContext > 0 || (s.mailEvidence > 0 && s.actionIntent > 0);
-    if (domain === SEARCH_DOMAINS.SHOPPING) return s.hasAction || s.shoppingVariant > 0 || /\b\d+\s*(?:GB|TB)\b/i.test(raw);
+    if (domain === SEARCH_DOMAINS.SHOPPING) return s.hasAction || s.shoppingVariant > 0 || /\b\d+\s*(?:GB|TB)\b/i.test(raw) || /\biPhone\s*\d+\b/i.test(raw);
     if (domain === SEARCH_DOMAINS.FLIGHT) return s.hasAction || (s.routeHint > 0 && s.dateOrTravelContext > 0) || /经济舱|商务舱|直飞|两个人|adults?|cabin/i.test(raw);
     if (domain === SEARCH_DOMAINS.HOTEL) return s.hasAction || (s.hotelObject > 0 && s.dateOrTravelContext > 0) || /住\d*晚|一间房|两个人|room|night/i.test(raw);
     if (domain === SEARCH_DOMAINS.CRUISE) return s.hasAction || /阳台房|内舱房|海景房|\d+\s*晚|出发|balcony|cabin/i.test(raw);

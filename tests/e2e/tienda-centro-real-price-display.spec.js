@@ -98,17 +98,18 @@ test.describe.serial("Tienda Centro merchant-native real-price display", () => {
       return task.taskId;
     }, runId);
 
-    const results = page.locator('[data-commerce-readonly-search-results="true"]');
+    const results = page.locator('[data-commerce-global-shopping-workspace="true"]');
     await expect(results).toBeVisible({ timeout:15000 });
-    await expect(results.locator(".commerce-readonly-search-card")).toHaveCount(2);
+    await expect(results.locator(".commerce-workspace-platform-card")).toHaveCount(1);
+    await expect(results).toContainText("平台比较");
+    await expect(results).toContainText("预计到手成本");
+    await expect(results).toContainText("AI 采购建议");
     await expect(results).toContainText("CELULAR IPHONE 17 256 GB NUEVO");
     await expect(results).toContainText("ARS 1564200");
-    await expect(results).toContainText("Tienda Centro 商户公开 API");
-    await expect(results).toContainText("数据提供：Tienda Centro");
-    await expect(results).toContainText("本次检索：");
-    await expect(results).toContainText("价格时效：fresh");
-    await expect(results).toContainText("商户促销价：ARS 1564200 · 常规价：ARS 2450000");
-    await expect(results).toContainText("配送、税费与其他费用未知");
+    await expect(results).toContainText("Tienda Centro");
+    await expect(results).toContainText("检索时间：");
+    await expect(results).toContainText("促销价：ARS 1564200 · 常规价：ARS 2450000");
+    await expect(results).toContainText("费用不完整时不计算虚假到手总价");
     await expect(results).toContainText("可用性：unknown");
     await expect(results.getByRole("button", { name:"查看数据来源" })).toBeVisible();
     await expect(results.getByRole("button", { name:"去零售商核验" })).toBeVisible();
@@ -166,7 +167,7 @@ test.describe.serial("Tienda Centro merchant-native real-price display", () => {
       window.weishanGlobalShopping.merchantNativeReadonlySearch = original;
       return {
         requests,
-        cards:document.querySelectorAll('[data-commerce-readonly-search-results="true"]').length,
+        cards:document.querySelectorAll('[data-commerce-global-shopping-workspace="true"]').length,
         busy:document.querySelectorAll('[aria-busy="true"]').length,
         handoffs:document.querySelectorAll(".commerce-booking-link").length
       };

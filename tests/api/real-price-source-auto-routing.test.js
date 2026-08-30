@@ -96,6 +96,18 @@ async function main() {
   const cardsSource = fs.readFileSync(path.join(ROOT, "apps/desktop/src/renderer/core/globalProcurementUserFacingResultCards.js"), "utf8");
   assert.doesNotMatch(cardsSource, /push\("Official Store"/);
   assert.doesNotMatch(cardsSource, /push\("Major Marketplace"/);
+  assert.match(pageSource, /function currentRealPriceItems\(task\)/);
+  assert.match(pageSource, /evidenceTruthClass === "REAL_PROVIDER_PRICE"/);
+  assert.match(pageSource, /仅显示本次查询返回的已验证实时价格来源/);
+  assert.match(pageSource, /费用不完整时不计算虚假到手总价/);
+  assert.doesNotMatch(pageSource, /const currentPriceResults = hasCurrentPublicPriceResults/);
+  const homeSource = fs.readFileSync(path.join(ROOT, "apps/desktop/src/renderer/routes/HomePage.js"), "utf8");
+  assert.match(homeSource, /preferredShoppingWorkspaceAvailable/);
+  assert.match(homeSource, /preferredShoppingWorkspaceAvailable\s*\? commerceOneScreenResultPanelHtml/);
+  const dispatchSource = fs.readFileSync(path.join(ROOT, "apps/desktop/src/renderer/core/dispatchRouter.js"), "utf8");
+  assert.match(dispatchSource, /const directProductLookup =/);
+  const homeIntentSource = fs.readFileSync(path.join(ROOT, "apps/desktop/src/renderer/core/homeUnifiedIntentRouter.js"), "utf8");
+  assert.match(homeIntentSource, /iPhone\\s\*\\d\+/);
 
   console.log("real-price source auto-routing tests passed");
 }

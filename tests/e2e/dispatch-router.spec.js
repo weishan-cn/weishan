@@ -192,6 +192,25 @@ test.describe.serial("dispatch router", () => {
     await expect(page.locator("#cmdConsole .cmd-log-list")).toHaveCount(0);
   });
 
+  test("recognized product keeps the preferred shopping workspace when the current market has no live source", async () => {
+    await page.evaluate(() => {
+      window.WeishanCommerceLocationPolicy.saveCommerceLocationPolicy({
+        shippingDestination:{ country:"United Kingdom", city:"London", source:"manual" }
+      });
+    });
+    await submitHomeCommand(page, "IPHONE 17");
+    const workspace = page.locator('[data-commerce-home-summary] [data-commerce-global-shopping-workspace="true"]');
+    await expect(workspace).toBeVisible();
+    await expect(workspace).toContainText("IPHONE 17");
+    await expect(workspace).toContainText("平台比较");
+    await expect(workspace).toContainText("预计到手成本");
+    await expect(workspace).toContainText("AI 采购建议");
+    await expect(workspace).toContainText("暂未接入该市场的实时价格来源");
+    await expect(workspace).not.toContainText("AI 大脑采购编排");
+    await expect(workspace).not.toContainText(/Official Store|Major Marketplace/);
+    await expect(workspace).not.toContainText(/ARS|EUR/);
+  });
+
   test("flight booking intent routes to commerce agent before chat", async () => {
     const command = runId + " 帮我预定 7 月 15 日成都到北京机票";
     await submitHomeCommand(page, command);
