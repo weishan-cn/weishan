@@ -62,7 +62,7 @@ async function main() {
   assert.deepEqual(Array.from(route("IPHONE 17", "Poland").eligibleSourceIds), []);
   assert.deepEqual(Array.from(route("unknown product", "unknown market").eligibleSourceIds), []);
   assert.equal(route("IPHONE 17", "Argentina").productFamily, "consumer_electronics");
-  assert.equal(route("IPHONE 17", "Argentina").maxEligibleSourcesQueriedPerSearch, 1);
+  assert.equal(route("IPHONE 17", "Argentina").maxEligibleSourcesQueriedPerSearch, 4);
   assert.equal(route("IPHONE 17", "United Kingdom").otherMarketReferenceAvailable, true);
   assert.equal(route("IPHONE 17", "United Kingdom").silentDestinationOverride, false);
 

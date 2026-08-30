@@ -1,5 +1,5 @@
 (function(){
-  const ROUTER_VERSION = "1.0.0";
+  const ROUTER_VERSION = "1.1.0";
   const SOURCE_IDS = Object.freeze({
     prijsprofeet:"prijsprofeet_public_api",
     tiendaCentro:"tienda_centro_public_api",
@@ -42,7 +42,7 @@
       destinationMarketSource:text(safe.destinationMarketSource || "unknown") || "unknown",
       productFamily:family,
       eligibleSourceIds:Object.freeze(eligibleSourceIds),
-      maxEligibleSourcesQueriedPerSearch:1,
+      maxEligibleSourcesQueriedPerSearch:4,
       otherMarketReferenceAvailable:destinationMarket === "GB" && family === "consumer_electronics",
       localSourceAvailable:eligibleSourceIds.length > 0,
       silentDestinationOverride:false,

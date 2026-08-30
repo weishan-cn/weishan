@@ -125,6 +125,27 @@ async function testHappyPathAndTruthLayer() {
   assert.equal(normalized.candidates[0].truthEvidence.comparableAsVerifiedTotal, false);
   assert.equal(normalized.candidates[0].sourceAttributionUrl, "https://www.prijsprofeet.nl/");
   assert.equal(normalized.candidates[0].targetUrl, "https://www.ah.nl/producten/product/wi477045/coca-cola-original");
+
+  const multiSearch = searchPayload();
+  multiSearch.results.push(Object.assign({}, multiSearch.results[0], {
+    product_id:"plus_123_2026-08-24",
+    retailer:"plus",
+    product_url:"https://www.plus.nl/product/coca-cola-original-123"
+  }));
+  const multi = createPrijsProfeetReadonlyService({
+    now:() => "2026-08-29T02:00:00.000Z",
+    fetchImpl:async (url) => {
+      if (url.includes("/search?")) return response(multiSearch);
+      if (url.includes("plus_123")) return response(detailPayload({ product_id:"plus_123_2026-08-24", retailer:"plus", product_url:"https://www.plus.nl/product/coca-cola-original-123", price:0.55 }));
+      return response(detailPayload());
+    }
+  });
+  const multiResult = await multi.search({ query:"Coca Cola", requestId:"request-multi", limit:3 });
+  assert.equal(multiResult.requestCount, 3);
+  assert.equal(multiResult.results.length, 2);
+  const multiNormalized = adapter.normalizeResult(multiResult, { evaluatedAt:"2026-08-29T02:00:01.000Z" });
+  assert.deepEqual(multiNormalized.candidates.map((item) => item.merchantId).sort(), ["albert_heijn", "plus"]);
+  assert.equal(new Set(multiNormalized.candidates.map((item) => item.canonicalProductIdentity)).size, 1);
 }
 
 async function testInputAndResponseFailuresFailClosed() {

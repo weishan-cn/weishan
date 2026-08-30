@@ -3051,6 +3051,12 @@
 
   function workspacePlatformCardsHtml(card, task){
     const realItems = currentRealPriceItems(task);
+    const comparisonApi = window.WeishanRealPriceMultiMerchantComparison || {};
+    const comparison = typeof comparisonApi.compareOffers === "function" ? comparisonApi.compareOffers({
+      market:(card && card.planFields && card.planFields.destinationCountry) || "",
+      offers:realItems
+    }) : { status:realItems.length ? "INSUFFICIENT_OFFERS" : "NO_VERIFIED_OFFERS", userFacingSummary:realItems.length ? "仅找到 1 个已验证报价，暂不足以比较。" : "当前没有找到可验证的实时报价。", lowerVerifiedOffer:null };
+    const lowerTarget = comparison.lowerVerifiedOffer && comparison.lowerVerifiedOffer.offer && comparison.lowerVerifiedOffer.offer.targetUrl || "";
     const items = realItems.length ? realItems.map((item) => ({
       platformName:item.platformName || item.sourceAttributionName || (item.sourceType === "tienda_centro_public_api" ? "Tienda Centro" : (item.sourceType === "meblostan_public_api" ? "Meblostan" : "PrijsProfeet")),
       title:item.title || "",
@@ -3065,7 +3071,8 @@
       onSale:item.onSale === true,
       regularPrice:item.regularPrice,
       salePrice:item.salePrice,
-      currency:item.currency
+      currency:item.currency,
+      lowerVerifiedOffer:Boolean(lowerTarget && item.targetUrl === lowerTarget)
     })) : [{
       platformName:"当前市场实时价格源",
       country:(card && card.planFields && card.planFields.destinationCountry) || "当前市场",
@@ -3088,7 +3095,7 @@
       <div class="commerce-workspace-card-head commerce-workspace-platforms-head">
         <div>
           <h3>平台比较</h3>
-          <p>${realItems.length ? "仅显示本次查询返回的已验证实时价格来源。" : "暂未接入该市场的实时价格来源。"}</p>
+          <p>${esc(comparison.userFacingSummary || (realItems.length ? "仅显示本次查询返回的已验证实时价格来源。" : "暂未接入该市场的实时价格来源。"))}</p>
         </div>
       </div>
       ${Object.keys(grouped).map((country) => `<section class="commerce-workspace-market-group">
@@ -3112,7 +3119,7 @@
             ${item.updatedAt ? `<p class="commerce-muted">检索时间：${esc(timeLabel(item.updatedAt) || "unknown")}</p>` : ""}
             <p class="commerce-muted">可用性：${esc(item.availability || "unknown")}</p>
             <div class="commerce-workspace-platform-footer">
-              <span class="commerce-workspace-status-pill ${realItems.length ? "" : "is-muted"}">${realItems.length ? "当前价格" : "暂未接入"}</span>
+              <span class="commerce-workspace-status-pill ${realItems.length ? "" : "is-muted"}">${item.lowerVerifiedOffer ? "当前已验证报价中较低" : (realItems.length ? "当前价格" : "暂未接入")}</span>
               ${item.sourceAttributionUrl ? `<button class="cmd-btn gray commerce-source-attribution-link" type="button" data-url="${esc(item.sourceAttributionUrl)}" data-handoff-source="${esc(item.sourceType || "")}">查看数据来源</button>` : ""}
               ${item.targetUrl ? `<button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}" data-handoff-source="${esc(item.sourceType || "")}">去零售商核验</button>` : ""}
             </div>

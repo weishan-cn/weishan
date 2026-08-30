@@ -98,14 +98,19 @@ function buildDetailUrl(productId) {
   return new URL(DETAIL_PATH_PREFIX + encodeURIComponent(productId), API_ORIGIN).toString();
 }
 
-function selectSearchCandidate(payload, today) {
+function selectSearchCandidates(payload, today, limit) {
   const safe = obj(payload);
   const results = Array.isArray(safe.results) ? safe.results.slice(0, 10) : [];
-  return results.find((item) => {
+  const seen = new Set();
+  return results.filter((item) => {
     const productId = text(obj(item).product_id, 160);
     const retailer = text(obj(item).retailer, 40).toLowerCase();
-    return Boolean(productId && isCurrentActivePromotion(item, today) && safeRetailerUrl(obj(item).product_url, retailer));
-  }) || null;
+    const url = safeRetailerUrl(obj(item).product_url, retailer);
+    const dedupeKey = [retailer, productId, url].join("|");
+    if (!productId || !isCurrentActivePromotion(item, today) || !url || seen.has(dedupeKey)) return false;
+    seen.add(dedupeKey);
+    return true;
+  }).slice(0, Math.min(Number(limit) || 1, 2));
 }
 
 function normalizeDetail(detail, selected, fetchedAt, today) {
@@ -170,12 +175,14 @@ const PRIJS_PROFEET_STATIC_DEFINITION = Object.freeze({
   async executeSource({ payload, fetchedAt, requestJson }) {
     const today = fetchedAt.slice(0, 10);
     const searchPayload = await requestJson(buildSearchUrl(payload.query));
-    const selected = selectSearchCandidate(searchPayload, today);
-    if (!selected) return { status:"no_results", code:"SOURCE_NO_CURRENT_RESULTS", requestCount:1, results:[] };
-    const detailPayload = await requestJson(buildDetailUrl(text(selected.product_id, 160)));
-    const normalized = normalizeDetail(detailPayload, selected, fetchedAt, today);
-    if (!normalized) throw Object.assign(new Error("invalid_source_response"), { safeCode:"SOURCE_RESPONSE_INVALID" });
-    return { status:"ready", code:"", requestCount:2, results:[normalized] };
+    const selected = selectSearchCandidates(searchPayload, today, payload.limit);
+    if (!selected.length) return { status:"no_results", code:"SOURCE_NO_CURRENT_RESULTS", requestCount:1, results:[] };
+    const normalized = (await Promise.all(selected.map(async (candidate) => {
+      const detailPayload = await requestJson(buildDetailUrl(text(candidate.product_id, 160)));
+      return normalizeDetail(detailPayload, candidate, fetchedAt, today);
+    }))).filter(Boolean);
+    if (!normalized.length) throw Object.assign(new Error("invalid_source_response"), { safeCode:"SOURCE_RESPONSE_INVALID" });
+    return { status:"ready", code:"", requestCount:1 + selected.length, results:normalized };
   }
 });
 

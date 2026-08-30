@@ -3041,6 +3041,40 @@
     });
   }
 
+  function readonlySourceSearcher(sourceId){
+    if (sourceId === PRIJS_PROFEET_SOURCE_ID) return searchPrijsProfeetReadonlyProductCandidates;
+    if (sourceId === TIENDA_CENTRO_SOURCE_ID) return searchTiendaCentroReadonlyProductCandidates;
+    if (sourceId === MEBLOSTAN_SOURCE_ID) return searchMeblostanReadonlyProductCandidates;
+    return null;
+  }
+
+  function combineReadonlySourceResults(request, route, results){
+    const safeResults = (Array.isArray(results) ? results : []).filter(Boolean);
+    const successful = safeResults.filter((result) => Array.isArray(result.readOnlySearchTopResults) && result.readOnlySearchTopResults.length);
+    if (!successful.length) return safeResults[0] || buildNoEligibleLocalSourceResult(request, route);
+    if (successful.length === 1) return successful[0];
+    const offers = successful.flatMap((result) => result.readOnlySearchTopResults || []).slice(0, 12);
+    const remaining = successful.flatMap((result) => result.readOnlySearchRemainingResults || []);
+    const first = successful[0];
+    return Object.assign({}, first, {
+      providerName:successful.map((result) => result.providerName).filter(Boolean).join(" + "),
+      candidates:successful.flatMap((result) => result.candidates || []),
+      readOnlySearchTopResults:offers,
+      readOnlySearchRemainingResults:remaining,
+      readOnlySearchResultSummary:Object.assign({}, first.readOnlySearchResultSummary || {}, {
+        topResults:offers,
+        remainingResults:remaining,
+        candidateCount:offers.length + remaining.length,
+        rankingSummary:"仅在同市场、同币种、同商品身份且来自独立商户的已验证报价之间比较。"
+      }),
+      searchResultSummary:Object.assign({}, first.searchResultSummary || {}, {
+        candidateCount:offers.length,
+        source:"controlled_multi_source_readonly",
+        eligibleSourceCount:successful.length
+      })
+    });
+  }
+
   function buildReadOnlyFallbackSearchResult(request, status){
     const factory = platformCandidateFactoryApi();
     const candidates = factory && typeof factory.buildGlobalShoppingPlatformCandidates === "function"
@@ -3163,13 +3197,14 @@
         && typeof window.weishanGlobalShopping.merchantNativeReadonlySearch === "function"
         && meblostanReadonlyAdapterApi()
         && typeof meblostanReadonlyAdapterApi().normalizeResult === "function");
-    const selectedReadonlySource = sourceRoute.eligibleSourceIds && sourceRoute.eligibleSourceIds[0] || "";
-    const selectedReadonlySourceReady = selectedReadonlySource === TIENDA_CENTRO_SOURCE_ID
-      ? tiendaCentroReadonlyReady
-      : selectedReadonlySource === MEBLOSTAN_SOURCE_ID
-        ? meblostanReadonlyReady
-      : selectedReadonlySource === PRIJS_PROFEET_SOURCE_ID ? prijsProfeetReadonlyReady : false;
-    const approvedReadonlySourcePolicy = selectedReadonlySourceReady ? selectedReadonlySource : "";
+    const readonlyReady = Object.freeze({
+      [PRIJS_PROFEET_SOURCE_ID]:prijsProfeetReadonlyReady,
+      [TIENDA_CENTRO_SOURCE_ID]:tiendaCentroReadonlyReady,
+      [MEBLOSTAN_SOURCE_ID]:meblostanReadonlyReady
+    });
+    const selectedReadonlySources = (sourceRoute.eligibleSourceIds || []).filter((sourceId) => readonlyReady[sourceId] === true).slice(0, 3);
+    const selectedReadonlySource = selectedReadonlySources[0] || "";
+    const approvedReadonlySourcePolicy = selectedReadonlySource;
     if (isProductSearchRequest(request) && currentLocationHealth.hasShippingDestination !== true) {
       return shippingDestinationRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox);
     }
@@ -3189,11 +3224,10 @@
       return localLawComplianceRequiredResult(request, providerHealth, providerConfig, connectorHealth, sandbox, complianceHealth);
     }
     if (isProductSearchRequest(request) && !(request.missingFields && request.missingFields.length)) {
-      const readonlyResult = (selectedReadonlySource === TIENDA_CENTRO_SOURCE_ID
-        ? await searchTiendaCentroReadonlyProductCandidates(request)
-        : selectedReadonlySource === MEBLOSTAN_SOURCE_ID
-          ? await searchMeblostanReadonlyProductCandidates(request)
-        : selectedReadonlySource === PRIJS_PROFEET_SOURCE_ID ? await searchPrijsProfeetReadonlyProductCandidates(request) : null)
+      const sourceResults = selectedReadonlySources.length
+        ? await Promise.all(selectedReadonlySources.map((sourceId) => readonlySourceSearcher(sourceId)(request)))
+        : [];
+      const readonlyResult = (sourceResults.length ? combineReadonlySourceResults(request, sourceRoute, sourceResults) : null)
         || await searchRakutenReadonlyProductCandidates(request);
       if (readonlyResult) {
         return Object.assign({
