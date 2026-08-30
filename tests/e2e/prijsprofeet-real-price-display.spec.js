@@ -172,15 +172,15 @@ test.describe.serial("PrijsProfeet real-price display", () => {
 
     const results = page.locator('[data-commerce-global-shopping-workspace="true"]');
     await expect(results).toBeVisible({ timeout:15000 });
-    await expect(results).toContainText(/当前已验证报价|商户报价比较/);
+    await expect(results).toContainText("当前找到 1 个可验证报价");
     await expect(results).toContainText("预计到手成本");
-    await expect(results).toContainText("AI 采购建议");
+    await expect(results).toContainText("唯珊建议");
     await expect(results).toContainText("Coca-Cola Original");
     await expect(results).toContainText("EUR 0.57");
     await expect(results).toContainText("PrijsProfeet");
-    await expect(results).toContainText("费用不完整时不计算虚假到手总价");
-    await expect(results.getByRole("button", { name:"查看数据来源" })).toBeVisible();
-    await expect(results.getByRole("button", { name:"去零售商核验" })).toBeVisible();
+    await expect(results).toContainText("费用不完整时不显示确认总价");
+    await expect(results.getByRole("button", { name:"查看价格来源" })).toBeVisible();
+    await expect(results.getByRole("button", { name:"去 Albert Heijn 查看" })).toBeVisible();
     await expect(results).not.toContainText(/已锁价|最终总价|最终决策建议|已下单|已付款|可结算|已确认最低价|最低价已验证/);
     await expect(results.getByRole("button", { name:/付款|下单|结算|预订/ })).toHaveCount(0);
 
@@ -209,7 +209,7 @@ test.describe.serial("PrijsProfeet real-price display", () => {
       window.__WEISHAN_PRIJSPROFEET_HANDOFF_CAPTURE__ = [];
       window.__WEISHAN_TEST_OPEN_EXTERNAL__ = (url) => window.__WEISHAN_PRIJSPROFEET_HANDOFF_CAPTURE__.push(url);
     });
-    await results.getByRole("button", { name:"去零售商核验" }).click();
+    await results.getByRole("button", { name:"去 Albert Heijn 查看" }).click();
     await expect.poll(() => page.evaluate(() => window.__WEISHAN_PRIJSPROFEET_HANDOFF_CAPTURE__)).toEqual([
       "https://www.ah.nl/producten/product/wi477045/coca-cola-original"
     ]);

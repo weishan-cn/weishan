@@ -153,6 +153,7 @@ function runE2e() {
     runStep("E2E read-only price truth layer", "npx", ["playwright", "test", "tests/e2e/read-only-price-truth-layer.spec.js", "--workers=1"]);
     runStep("E2E PrijsProfeet real-price display", "npx", ["playwright", "test", "tests/e2e/prijsprofeet-real-price-display.spec.js", "--workers=1"]);
     runStep("E2E Tienda Centro merchant real-price display", "npx", ["playwright", "test", "tests/e2e/tienda-centro-real-price-display.spec.js", "--workers=1"]);
+    runStep("E2E Global Shopping comparison UI", "npx", ["playwright", "test", "tests/e2e/global-shopping-ui-optimization.spec.js", "--workers=1"]);
     runStep("E2E Meblostan real-price Home flow", "npx", ["playwright", "test", "tests/e2e/meblostan-real-price-display.spec.js", "--workers=1"]);
     runStep("E2E Public Beta user journey", "npx", ["playwright", "test", "tests/e2e/public-beta-user-journey.spec.js", "--workers=1"]);
     runStep("E2E Desktop UI simplification", "npx", ["playwright", "test", "tests/e2e/desktop-ui-simplification.spec.js", "--workers=1"]);

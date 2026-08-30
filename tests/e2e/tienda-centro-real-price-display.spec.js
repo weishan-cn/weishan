@@ -101,18 +101,18 @@ test.describe.serial("Tienda Centro merchant-native real-price display", () => {
     const results = page.locator('[data-commerce-global-shopping-workspace="true"]');
     await expect(results).toBeVisible({ timeout:15000 });
     await expect(results.locator(".commerce-workspace-platform-card")).toHaveCount(1);
-    await expect(results).toContainText(/当前已验证报价|商户报价比较/);
+    await expect(results).toContainText("当前找到 1 个可验证报价");
     await expect(results).toContainText("预计到手成本");
-    await expect(results).toContainText("AI 采购建议");
+    await expect(results).toContainText("唯珊建议");
     await expect(results).toContainText("CELULAR IPHONE 17 256 GB NUEVO");
     await expect(results).toContainText("ARS 1564200");
     await expect(results).toContainText("Tienda Centro");
-    await expect(results).toContainText("检索时间：");
+    await expect(results).toContainText(/刚刚查询|分钟前查询|查询时间：/);
     await expect(results).toContainText("促销价：ARS 1564200 · 常规价：ARS 2450000");
-    await expect(results).toContainText("费用不完整时不计算虚假到手总价");
-    await expect(results).toContainText("可用性：unknown");
-    await expect(results.getByRole("button", { name:"查看数据来源" })).toBeVisible();
-    await expect(results.getByRole("button", { name:"去零售商核验" })).toBeVisible();
+    await expect(results).toContainText("费用不完整时不显示确认总价");
+    await expect(results).toContainText(/可用性\s*未知/);
+    await expect(results.getByRole("button", { name:"查看价格来源" })).toBeVisible();
+    await expect(results.getByRole("button", { name:"去 Tienda Centro 查看" })).toBeVisible();
     await expect(results).not.toContainText(/已锁价|最终总价|已下单|已付款|可结算|已确认最低价|最低价已验证/);
     await expect(results.getByRole("button", { name:/付款|下单|结算|预订/ })).toHaveCount(0);
 
@@ -151,7 +151,7 @@ test.describe.serial("Tienda Centro merchant-native real-price display", () => {
       window.__WEISHAN_TIENDA_CENTRO_HANDOFF_CAPTURE__ = [];
       window.__WEISHAN_TEST_OPEN_EXTERNAL__ = (url) => window.__WEISHAN_TIENDA_CENTRO_HANDOFF_CAPTURE__.push(url);
     });
-    await results.getByRole("button", { name:"去零售商核验" }).click();
+    await results.getByRole("button", { name:"去 Tienda Centro 查看" }).click();
     await expect.poll(() => page.evaluate(() => window.__WEISHAN_TIENDA_CENTRO_HANDOFF_CAPTURE__)).toEqual([
       "https://tiendacentro.com/celulares/celular-iphone-17-256-gb-nuevo/"
     ]);
@@ -203,8 +203,8 @@ test.describe.serial("Tienda Centro merchant-native real-price display", () => {
       const cards = merchants.map((merchant) => {
         const card = template.cloneNode(true);
         card.querySelector(".commerce-workspace-platform-head strong").textContent = merchant.platformName;
-        card.querySelector(".commerce-workspace-platform-head .commerce-muted").textContent = merchant.title;
-        card.querySelector(".commerce-workspace-platform-meta dd").textContent = merchant.priceLabel;
+        card.querySelector(".commerce-workspace-offer-title").textContent = merchant.title;
+        card.querySelector(".commerce-workspace-platform-price").textContent = merchant.priceLabel;
         return card;
       });
       grid.replaceChildren(...cards);
@@ -214,7 +214,9 @@ test.describe.serial("Tienda Centro merchant-native real-price display", () => {
     await expect(workspace.locator(".commerce-workspace-platform-card")).toHaveCount(3);
     for (const viewport of [
       { width:1440, height:900 },
+      { width:1200, height:900 },
       { width:900, height:900 },
+      { width:768, height:900 },
       { width:560, height:900 },
       { width:1720, height:1000 }
     ]) {

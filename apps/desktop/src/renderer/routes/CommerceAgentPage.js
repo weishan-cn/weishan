@@ -13,6 +13,11 @@
     return window.I18n.t(key);
   }
 
+  function shoppingText(zh, en){
+    const lang = window.I18n && typeof window.I18n.getLang === "function" ? window.I18n.getLang() : "zh-CN";
+    return /^en/i.test(String(lang || "")) ? en : zh;
+  }
+
   function agent(){
     return window.WeishanCommerceAgent || null;
   }
@@ -2990,7 +2995,9 @@
   }
 
   function currentRealPriceItems(task){
-    const items = Array.isArray(task && task.readOnlySearchTopResults) ? task.readOnlySearchTopResults : [];
+    const top = Array.isArray(task && task.readOnlySearchTopResults) ? task.readOnlySearchTopResults : [];
+    const remaining = Array.isArray(task && task.readOnlySearchRemainingResults) ? task.readOnlySearchRemainingResults : [];
+    const items = top.concat(remaining);
     return items.filter((item) => item
       && item.truthEvidence
       && item.truthEvidence.evidenceTruthClass === "REAL_PROVIDER_PRICE"
@@ -3000,35 +3007,83 @@
       && /^https:\/\//i.test(String(item.targetUrl || item.officialUrl || "")));
   }
 
-  function workspaceProductCardHtml(card, task){
+  function workspaceOfferPresentation(task, hasConfiguredProvider){
+    const card = globalProcurementUserFacingCard(task) || {};
+    const planFields = card.planFields || {};
+    const markets = Array.isArray(planFields.comparisonMarkets) ? planFields.comparisonMarkets.filter(Boolean) : [];
+    const comparisonMarkets = markets;
+    const market = planFields.destinationCountry || (comparisonMarkets.length === 1 ? comparisonMarkets[0] : "");
+    const realItems = currentRealPriceItems(task);
+    const comparisonApi = window.WeishanRealPriceMultiMerchantComparison || {};
+    const comparison = typeof comparisonApi.compareOffers === "function" ? comparisonApi.compareOffers({
+      market,
+      offers:realItems
+    }) : { status:realItems.length ? "INSUFFICIENT_OFFERS" : "NO_VERIFIED_OFFERS", groups:[], comparableVerifiedOfferCountMax:realItems.length ? 1 : 0, userFacingSummary:realItems.length ? "仅找到 1 个已验证报价，暂不足以比较。" : "当前没有找到可验证的实时报价。", lowerVerifiedOffer:null };
+    const groups = Array.isArray(comparison.groups) ? comparison.groups : [];
+    const primaryGroup = groups.find((group) => group && group.status === "READY") || groups[0] || null;
+    const primaryItems = primaryGroup && Array.isArray(primaryGroup.offers)
+      ? primaryGroup.offers.map((entry) => entry && entry.offer).filter(Boolean)
+      : realItems.slice(0, 1);
+    const primarySet = new Set(primaryItems);
+    const relatedItems = groups.reduce((items, group) => items.concat(Array.isArray(group && group.offers) ? group.offers.map((entry) => entry && entry.offer).filter(Boolean) : []), []).filter((item) => !primarySet.has(item));
+    const merchantCount = primaryGroup && Number.isFinite(Number(primaryGroup.comparableVerifiedOfferCount))
+      ? Number(primaryGroup.comparableVerifiedOfferCount)
+      : (realItems.length ? 1 : 0);
+    const tie = comparison.status === "READY" && /并列|tied/i.test(String(comparison.userFacingSummary || ""));
+    const resultStatus = comparison.status === "READY"
+      ? (tie ? shoppingText("当前已验证最低报价并列", "Current verified lowest offers are tied") : shoppingText("已找到可比较的验证报价", "Comparable verified offers found"))
+      : comparison.status === "INSUFFICIENT_OFFERS"
+        ? shoppingText("当前仅找到 1 个可验证报价", "Only one verified offer found")
+        : hasConfiguredProvider
+          ? shoppingText("当前没有找到可验证实时报价", "No verified current offer found")
+          : shoppingText("当前市场暂未接入可用的实时价格来源", "No usable live price source is connected for this market");
+    return Object.freeze({
+      comparison,
+      primaryGroup,
+      primaryItems:Object.freeze(primaryItems.slice()),
+      relatedItems:Object.freeze(relatedItems.slice()),
+      merchantCount,
+      market,
+      markets:Object.freeze(markets.slice()),
+      tie,
+      resultStatus,
+      hasConfiguredProvider:hasConfiguredProvider === true
+    });
+  }
+
+  function workspaceProductCardHtml(card, task, offerPresentation){
     const product = card && card.productCard || {};
     const planFields = card && card.planFields || {};
     const productName = planFields.productName || [product.brand, product.model].filter(Boolean).join(" ") || product.category || "商品";
     const markets = Array.isArray(planFields.comparisonMarkets) ? planFields.comparisonMarkets.filter(Boolean) : [];
     const visual = workspaceProductVisual(product);
     const compareLine = markets.map((item) => `${marketFlag(item)} ${item}`).join(" · ");
-    return `<section class="commerce-workspace-card commerce-workspace-product-card" data-commerce-workspace-product-card="true">
+    const presentation = offerPresentation || workspaceOfferPresentation(task, false);
+    const originalQuery = String(task && task.inputSummary || "").trim();
+    const hasOffers = presentation.primaryItems.length > 0;
+    return `<section class="commerce-workspace-card commerce-workspace-product-card" data-commerce-workspace-product-card="true" aria-labelledby="commerce-shopping-product-title">
       <div class="commerce-workspace-product-hero">
         <div class="commerce-workspace-card-head commerce-workspace-card-head-hero">
           <div class="commerce-workspace-product-head">
             <div class="commerce-workspace-visual" aria-hidden="true">${visual}</div>
             <div class="commerce-workspace-product-copy">
               ${product.brand ? `<p class="commerce-workspace-brand-eyebrow">${esc(product.brand)}</p>` : ""}
-              <h2 class="commerce-workspace-product-title">${esc(product.model || productName)}</h2>
-              <p class="commerce-workspace-product-subtitle">${esc(product.subtitle || "全球采购")}</p>
+              <h2 class="commerce-workspace-product-title" id="commerce-shopping-product-title">${esc(product.model || productName)}</h2>
+              <p class="commerce-workspace-product-subtitle">${esc(product.subtitle || shoppingText("全球购物", "Global Shopping"))}</p>
             </div>
           </div>
-          ${product.status ? `<span class="commerce-workspace-status-pill" aria-label="当前状态">${esc(product.status)}</span>` : ""}
+          <span class="commerce-workspace-status-pill ${hasOffers ? "is-verified" : "is-muted"}" aria-label="${esc(shoppingText("当前结果状态", "Current result status"))}">${esc(presentation.resultStatus)}</span>
         </div>
+        ${originalQuery ? `<p class="commerce-workspace-original-query"><span>${esc(shoppingText("你的搜索", "Your search"))}</span><strong>${esc(originalQuery)}</strong></p>` : ""}
         <dl class="commerce-workspace-hero-grid">
           ${product.budget ? `<div><dt>预算</dt><dd>${esc(product.budget)}</dd></div>` : ""}
           ${product.destination ? `<div><dt>收货地</dt><dd>${esc(product.destination)}</dd></div>` : ""}
           ${markets.length ? `<div><dt>比较市场</dt><dd>${esc(compareLine)}</dd></div>` : ""}
-          <div><dt>下一步</dt><dd>${currentRealPriceItems(task).length ? "查看当前价格并前往零售商核验" : "等待当前市场实时价格来源"}</dd></div>
+          <div><dt>${esc(shoppingText("当前结果", "Current result"))}</dt><dd>${esc(presentation.merchantCount ? shoppingText(`${presentation.merchantCount} 个可验证商户报价`, `${presentation.merchantCount} verified merchant offer${presentation.merchantCount === 1 ? "" : "s"}`) : presentation.resultStatus)}</dd></div>
         </dl>
         <div class="commerce-workspace-primary-actions">
-          <button class="cmd-btn primary" type="button" data-commerce-workspace-next-action="connect_trusted_source">开始比较</button>
-          <button class="cmd-btn gray" type="button" data-commerce-workspace-next-action="view_plan">查看采购计划</button>
+          <button class="cmd-btn primary" type="button" data-commerce-workspace-next-action="${hasOffers ? "view_official_store" : "refine_query"}">${esc(hasOffers ? shoppingText("查看商户报价", "View merchant offers") : shoppingText("修改搜索", "Edit search"))}</button>
+          <button class="cmd-btn gray" type="button" data-commerce-workspace-next-action="view_plan">${esc(shoppingText("查看采购计划", "View shopping plan"))}</button>
         </div>
       </div>
     </section>`;
@@ -3051,41 +3106,69 @@
     return `<svg class="commerce-workspace-visual-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 12H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>`;
   }
 
-  function workspacePlatformCardsHtml(card, task){
-    const realItems = currentRealPriceItems(task);
-    const planFields = card && card.planFields || {};
-    const comparisonMarkets = Array.isArray(planFields.comparisonMarkets) ? planFields.comparisonMarkets.filter(Boolean) : [];
-    const comparisonMarket = planFields.destinationCountry || (comparisonMarkets.length === 1 ? comparisonMarkets[0] : "");
-    const comparisonApi = window.WeishanRealPriceMultiMerchantComparison || {};
-    const comparison = typeof comparisonApi.compareOffers === "function" ? comparisonApi.compareOffers({
-      market:comparisonMarket,
-      offers:realItems
-    }) : { status:realItems.length ? "INSUFFICIENT_OFFERS" : "NO_VERIFIED_OFFERS", userFacingSummary:realItems.length ? "仅找到 1 个已验证报价，暂不足以比较。" : "当前没有找到可验证的实时报价。", lowerVerifiedOffer:null };
-    const lowerTarget = comparison.lowerVerifiedOffer && comparison.lowerVerifiedOffer.offer && comparison.lowerVerifiedOffer.offer.targetUrl || "";
-    const items = realItems.length ? realItems.map((item) => ({
-      platformName:item.platformName || item.sourceAttributionName || (item.sourceType === "tienda_centro_public_api" ? "Tienda Centro" : (item.sourceType === "meblostan_public_api" ? "Meblostan" : "PrijsProfeet")),
-      title:item.title || "",
-      country:item.destinationCountry || item.market || comparisonMarket || "当前市场",
-      price:item.priceLabel || (item.currency && item.price !== undefined ? item.currency + " " + item.price : "—"),
-      landedCost:item.landedCostCompleteness === "complete" && item.totalLandedCost !== undefined ? item.currency + " " + item.totalLandedCost : "待平台确认",
-      availability:((item.availabilityFreshness || {}).availabilityStatus) || "unknown",
-      updatedAt:item.retrievedAt || item.updatedAt || ((item.priceFreshness || {}).fetchedAt) || "",
-      targetUrl:item.targetUrl || "",
-      sourceAttributionUrl:item.sourceAttributionUrl || "",
-      sourceType:item.sourceType,
-      onSale:item.onSale === true,
-      regularPrice:item.regularPrice,
-      salePrice:item.salePrice,
-      currency:item.currency,
-      lowerVerifiedOffer:Boolean(lowerTarget && item.targetUrl === lowerTarget)
-    })) : [{
-      platformName:"当前市场实时价格源",
-      country:comparisonMarket || "当前市场",
-      price:"—",
-      landedCost:"—",
-      availability:"暂未接入"
-    }];
-    if (!items.length) return "";
+  function workspaceMerchantAndSource(item){
+    const source = String(item && item.sourceAttributionName || "").trim();
+    let merchant = String(item && (item.merchantName || item.merchant || item.seller || item.platformName) || "").trim();
+    if (source && merchant.toLowerCase().endsWith((" via " + source).toLowerCase())) merchant = merchant.slice(0, -(source.length + 5)).trim();
+    return {
+      merchant:merchant || shoppingText("商户", "Merchant"),
+      source:source && source.toLowerCase() !== merchant.toLowerCase() ? source : ""
+    };
+  }
+
+  function workspaceAvailabilityText(value){
+    const normalized = String(value || "").trim().toUpperCase();
+    if (/^(AVAILABLE|IN_STOCK)$/.test(normalized)) return shoppingText("有货", "Available");
+    if (/^(UNAVAILABLE|OUT_OF_STOCK)$/.test(normalized)) return shoppingText("暂不可用", "Unavailable");
+    return shoppingText("未知", "Unknown");
+  }
+
+  function workspaceFreshnessText(value){
+    const timestamp = Date.parse(String(value || ""));
+    if (!Number.isFinite(timestamp)) return "";
+    const ageMinutes = Math.max(0, Math.floor((Date.now() - timestamp) / 60000));
+    if (ageMinutes <= 1) return shoppingText("检索时间：刚刚查询", "Retrieved: just now");
+    if (ageMinutes < 60) return shoppingText(`检索时间：${ageMinutes} 分钟前查询`, `Retrieved: ${ageMinutes} minutes ago`);
+    return shoppingText(`检索时间：${timeLabel(value) || "未知"}`, `Retrieved: ${timeLabel(value) || "Unknown"}`);
+  }
+
+  function workspacePlatformCardsHtml(card, task, offerPresentation){
+    const presentation = offerPresentation || workspaceOfferPresentation(task, false);
+    const comparison = presentation.comparison || {};
+    const comparisonHeading = comparison.status === "READY" ? "商户报价比较" : "当前已验证报价";
+    const lowerOffer = comparison.lowerVerifiedOffer && comparison.lowerVerifiedOffer.offer || null;
+    const items = presentation.primaryItems.map((item) => {
+      const identity = workspaceMerchantAndSource(item);
+      return {
+        merchantName:identity.merchant,
+        sourceName:identity.source,
+        title:item.title || "",
+        country:item.destinationCountry || item.market || presentation.market || shoppingText("当前市场", "Current market"),
+        price:item.priceLabel || (item.currency && item.price !== undefined ? item.currency + " " + item.price : "—"),
+        landedCost:item.landedCostCompleteness === "complete" && item.totalLandedCost !== undefined ? item.currency + " " + item.totalLandedCost : shoppingText("未知", "Unknown"),
+        availability:workspaceAvailabilityText(((item.availabilityFreshness || {}).availabilityStatus) || item.availability),
+        updatedAt:item.retrievedAt || item.updatedAt || ((item.priceFreshness || {}).fetchedAt) || "",
+        targetUrl:item.targetUrl || "",
+        sourceAttributionUrl:item.sourceAttributionUrl || "",
+        sourceType:item.sourceType,
+        onSale:item.onSale === true,
+        regularPrice:item.regularPrice,
+        salePrice:item.salePrice,
+        currency:item.currency,
+        lowerVerifiedOffer:Boolean(lowerOffer && item === lowerOffer),
+        tiedLowest:presentation.tie
+      };
+    });
+    if (!items.length) {
+      return `<section class="commerce-workspace-platforms-section" data-commerce-workspace-platforms="true">
+        <p class="commerce-shopping-comparison-kicker">${esc(shoppingText(comparisonHeading, "Current verified offers"))}</p>
+        <div class="commerce-shopping-empty-state" data-commerce-shopping-empty-state="${presentation.hasConfiguredProvider ? "zero-offer" : "no-source"}" role="status">
+          <div class="commerce-shopping-empty-icon" aria-hidden="true">⌕</div>
+          <div><h3>${esc(presentation.resultStatus)}</h3><p>${esc(presentation.hasConfiguredProvider ? shoppingText("当前没有找到可验证的实时报价。可以修改商品描述或市场后重新查询。不会显示示例价格。", "No verified live offers were found. Edit the product or market and search again. No sample prices are shown.") : shoppingText("当前没有找到可验证的实时报价。可以修改市场或稍后再试；唯珊不会用估算价格代替实时报价。", "No verified live offers were found. Try another market or return later; Weishan will not substitute estimated prices for live offers."))}</p></div>
+          <button class="cmd-btn gray" type="button" data-commerce-workspace-next-action="refine_query">${esc(shoppingText("修改搜索", "Edit search"))}</button>
+        </div>
+      </section>`;
+    }
     const grouped = groupPlatformCardsByCountry(items);
     const initials = (name) => String(name || "").split(/\s+/).map((part) => part.slice(0, 1).toUpperCase()).join("").slice(0, 3) || "GS";
     const displayValue = (value, fallback) => {
@@ -3097,36 +3180,41 @@
       return raw;
     };
     return `<section class="commerce-workspace-platforms-section" data-commerce-workspace-platforms="true">
-      <div class="commerce-workspace-card-head commerce-workspace-platforms-head">
+      <div class="commerce-shopping-comparison-summary ${comparison.status === "READY" ? "is-ready" : "is-single"}" role="status" aria-live="polite">
         <div>
-          <h3>${comparison.status === "READY" ? "商户报价比较" : "当前已验证报价"}</h3>
-          <p>${esc(comparison.userFacingSummary || (realItems.length ? "仅显示本次查询返回的已验证实时价格来源。" : "暂未接入该市场的实时价格来源。"))}</p>
+          <p class="commerce-shopping-comparison-kicker">${esc(shoppingText(comparisonHeading, comparison.status === "READY" ? "Merchant offer comparison" : "Current verified offer"))}</p>
+          <h3>${esc(presentation.merchantCount === 1 ? shoppingText("当前找到 1 个可验证报价", "1 verified offer found") : shoppingText(`找到 ${presentation.merchantCount} 个可验证商户报价`, `${presentation.merchantCount} verified merchant offers found`))}</h3>
+          <p>${esc(comparison.status === "READY" ? (presentation.tie ? shoppingText("当前已验证最低报价并列", "Current verified lowest offers are tied") : shoppingText("这些报价属于同款商品，可直接比较。", "These offers are for the same product and are directly comparable.")) : shoppingText("仅显示本次查询返回的已验证实时价格来源；暂不足以进行商户间价格比较。", "Only verified live price sources returned by this search are shown; there are not enough merchants for a price comparison."))}</p>
         </div>
+        <span class="commerce-workspace-status-pill ${presentation.tie ? "is-tied" : ""}">${esc(presentation.resultStatus)}</span>
       </div>
       ${Object.keys(grouped).map((country) => `<section class="commerce-workspace-market-group">
         <div class="commerce-workspace-market-group-head">
           <strong>${marketFlag(country)} ${esc(country)}</strong>
+          <span>${esc(shoppingText("价格以商户页面当前显示为准", "Current merchant page price applies"))}</span>
         </div>
-        <div class="commerce-workspace-platform-grid">
-          ${grouped[country].map((item) => `<article class="commerce-workspace-platform-card">
+        <div class="commerce-workspace-platform-grid" data-offer-count="${esc(String(grouped[country].length))}">
+          ${grouped[country].map((item) => `<article class="commerce-workspace-platform-card ${item.lowerVerifiedOffer ? "is-lower" : ""} ${item.tiedLowest ? "is-tied" : ""}">
             <div class="commerce-workspace-platform-head">
-              <span class="commerce-workspace-platform-logo">${esc(initials(item.platformName))}</span>
+              <span class="commerce-workspace-platform-logo" aria-hidden="true">${esc(initials(item.merchantName))}</span>
               <div>
-                <strong>${esc(item.platformName || "Platform")}</strong>
-                ${item.title ? `<p class="commerce-muted">${esc(item.title)}</p>` : ""}
+                <strong>${esc(item.merchantName || shoppingText("商户", "Merchant"))}</strong>
+                ${item.sourceName ? `<p class="commerce-shopping-source-attribution">${esc(shoppingText("价格来源：", "Price source: "))}${esc(item.sourceName)}</p>` : ""}
               </div>
             </div>
+            <p class="commerce-workspace-platform-price" aria-label="${esc(shoppingText("当前商品价格", "Current product price"))}">${esc(displayValue(item.price, "—"))}</p>
+            ${item.title ? `<p class="commerce-workspace-offer-title">${esc(item.title)}</p>` : ""}
             <dl class="commerce-workspace-platform-meta">
-              <div><dt>价格</dt><dd>${esc(displayValue(item.price, "—"))}</dd></div>
-              <div><dt>预计到手</dt><dd>${esc(displayValue(item.landedCost, "—"))}</dd></div>
+              <div><dt>${esc(shoppingText("预计到手", "Estimated landed cost"))}</dt><dd>${esc(displayValue(item.landedCost, shoppingText("未知", "Unknown")))}</dd></div>
+              <div><dt>${esc(shoppingText("可用性", "Availability"))}</dt><dd>${esc(item.availability)}</dd></div>
             </dl>
-            ${item.onSale && item.regularPrice !== undefined && item.salePrice !== undefined ? `<p class="commerce-muted">促销价：${esc(item.currency + " " + item.salePrice)} · 常规价：${esc(item.currency + " " + item.regularPrice)}</p>` : ""}
-            ${item.updatedAt ? `<p class="commerce-muted">检索时间：${esc(timeLabel(item.updatedAt) || "unknown")}</p>` : ""}
-            <p class="commerce-muted">可用性：${esc(item.availability || "unknown")}</p>
+            ${item.onSale && item.regularPrice !== undefined && item.salePrice !== undefined ? `<p class="commerce-shopping-sale-note">${esc(shoppingText("促销价", "Sale"))}：${esc(item.currency + " " + item.salePrice)} · ${esc(shoppingText("常规价", "Regular"))}：${esc(item.currency + " " + item.regularPrice)}</p>` : ""}
+            ${item.updatedAt ? `<p class="commerce-shopping-freshness">${esc(workspaceFreshnessText(item.updatedAt))}</p>` : ""}
             <div class="commerce-workspace-platform-footer">
-              <span class="commerce-workspace-status-pill ${realItems.length ? "" : "is-muted"}">${item.lowerVerifiedOffer ? "当前已验证报价中较低" : (realItems.length ? "当前价格" : "暂未接入")}</span>
-              ${item.sourceAttributionUrl ? `<button class="cmd-btn gray commerce-source-attribution-link" type="button" data-url="${esc(item.sourceAttributionUrl)}" data-handoff-source="${esc(item.sourceType || "")}">查看数据来源</button>` : ""}
-              ${item.targetUrl ? `<button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}" data-handoff-source="${esc(item.sourceType || "")}">去零售商核验</button>` : ""}
+              ${item.lowerVerifiedOffer ? `<span class="commerce-workspace-status-pill is-lower">${esc(shoppingText("当前已验证报价中较低", "Lower among current verified offers"))}</span>` : ""}
+              ${item.tiedLowest ? `<span class="commerce-workspace-status-pill is-tied">${esc(shoppingText("并列最低", "Tied lowest"))}</span>` : ""}
+              ${item.targetUrl ? `<button class="cmd-btn primary commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}" data-handoff-source="${esc(item.sourceType || "")}">${esc(shoppingText(`去 ${item.merchantName} 查看`, `View at ${item.merchantName}`))}</button>` : ""}
+              ${item.sourceAttributionUrl ? `<button class="cmd-btn ghost commerce-source-attribution-link" type="button" data-url="${esc(item.sourceAttributionUrl)}" data-handoff-source="${esc(item.sourceType || "")}">${esc(shoppingText("查看价格来源", "View price source"))}</button>` : ""}
             </div>
           </article>`).join("")}
         </div>
@@ -3134,42 +3222,69 @@
     </section>`;
   }
 
-  function workspaceRecommendationHtml(card, task){
+  function workspaceRelatedProductsHtml(offerPresentation){
+    const presentation = offerPresentation || {};
+    const items = Array.isArray(presentation.relatedItems) ? presentation.relatedItems : [];
+    if (!items.length) return "";
+    return `<section class="commerce-workspace-card commerce-shopping-related" data-commerce-shopping-related="true">
+      <div class="commerce-workspace-card-head"><div><h3>${esc(shoppingText("相关商品与其他规格", "Related products and other variants"))}</h3><p>${esc(shoppingText("这些结果与上方同款报价不属于同一可比组。", "These results are not part of the same comparable group shown above."))}</p></div></div>
+      <div class="commerce-shopping-related-grid">${items.map((item) => {
+        const identity = workspaceMerchantAndSource(item);
+        const price = item.priceLabel || (item.currency && item.price !== undefined ? item.currency + " " + item.price : "—");
+        return `<article class="commerce-shopping-related-card"><div><strong>${esc(item.title || shoppingText("相关商品", "Related product"))}</strong><p>${esc(identity.merchant)}${identity.source ? ` · ${esc(shoppingText("来源：", "Source: "))}${esc(identity.source)}` : ""}</p></div><span>${esc(price)}</span>${item.targetUrl ? `<button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}" data-handoff-source="${esc(item.sourceType || "")}">${esc(shoppingText("查看商品", "View product"))}</button>` : ""}</article>`;
+      }).join("")}</div>
+    </section>`;
+  }
+
+  function workspaceRecommendationHtml(card, task, offerPresentation){
     const fields = card && card.planFields || {};
-    const realItems = currentRealPriceItems(task);
+    const presentation = offerPresentation || workspaceOfferPresentation(task, false);
+    const comparison = presentation.comparison || {};
+    const lower = comparison.lowerVerifiedOffer && comparison.lowerVerifiedOffer.offer || null;
+    const lowerIdentity = lower ? workspaceMerchantAndSource(lower) : null;
     const checks = [
       fields.productName ? "商品已识别" : "商品信息待补充",
       fields.destinationCountry ? "收货地已识别" : "收货地待补充",
       Array.isArray(fields.comparisonMarkets) && fields.comparisonMarkets.length ? "比较市场已建立" : "比较市场待补充"
     ];
+    const recommendation = comparison.status === "READY"
+      ? lowerIdentity
+        ? shoppingText(`可先查看 ${lowerIdentity.merchant}：它是当前已验证报价中较低的一项。`, `Consider ${lowerIdentity.merchant} first: it is lower among the current verified offers.`)
+        : presentation.tie
+          ? shoppingText("当前可比较报价并列；没有其他已验证差异时，唯珊不指定单一商户。", "The comparable offers are currently tied; without another verified difference, Weishan does not pick one merchant.")
+          : shoppingText("当前报价可直接比较，但现有证据没有形成唯一较低报价。", "The offers are comparable, but current evidence does not identify one uniquely lower offer.")
+      : comparison.status === "INSUFFICIENT_OFFERS"
+        ? shoppingText("当前只有一个可验证报价，无法判断它是否比其他商户更低。", "Only one verified offer is available, so it cannot be judged lower than other merchants.")
+        : shoppingText("当前没有足够的实时报价，唯珊不会生成购物推荐。", "There are not enough live offers, so Weishan will not fabricate a shopping recommendation.");
     return `<section class="commerce-workspace-card" data-commerce-workspace-recommendation="true">
       <div class="commerce-workspace-card-head">
-        <div><h3>AI 采购建议</h3></div>
+        <div><p class="commerce-shopping-comparison-kicker">${esc(shoppingText("唯珊建议", "Weishan guidance"))}</p><h3>${esc(shoppingText("AI 采购建议", "AI shopping guidance"))}</h3></div>
       </div>
       <div class="commerce-workspace-recommendation">
-        <p class="commerce-workspace-summary-lead">${realItems.length ? "已找到当前市场的可验证价格" : "采购需求已整理"}</p>
+        <p class="commerce-workspace-summary-lead">${esc(recommendation)}</p>
         <div class="commerce-workspace-analysis-grid">
           ${checks.map((item) => `<div class="commerce-workspace-analysis-item"><span aria-hidden="true">✓</span><strong>${esc(item)}</strong></div>`).join("")}
         </div>
         <div class="commerce-workspace-next-compact">
-          <p class="commerce-workspace-next-line">下一步</p>
-          <p class="commerce-workspace-next-line commerce-workspace-next-line-strong">${realItems.length ? "可比较当前证据；价格、库存与最终费用以零售商页面为准" : "当前市场暂未接入实时价格源，不生成价格"}</p>
+          <p class="commerce-workspace-next-line">${esc(shoppingText("确认边界", "What the merchant confirms"))}</p>
+          <p class="commerce-workspace-next-line commerce-workspace-next-line-strong">${esc(presentation.primaryItems.length ? shoppingText("最终价格、库存与费用以商户页面为准。", "Final price, availability, and fees are confirmed on the merchant page.") : shoppingText("修改搜索不会触发下单或付款。", "Editing the search does not place an order or make a payment."))}</p>
         </div>
       </div>
     </section>`;
   }
 
-  function workspaceCostSummaryHtml(card, task){
+  function workspaceCostSummaryHtml(card, task, offerPresentation){
     const cost = card && card.costSummary || {};
-    const realItem = currentRealPriceItems(task)[0] || null;
+    const presentation = offerPresentation || workspaceOfferPresentation(task, false);
+    const realItem = presentation.primaryItems[0] || null;
     const breakdown = realItem && realItem.landedCostBreakdown || {};
-    const costPart = (part) => feePartText(part, realItem && realItem.currency).replace("待确认", "待平台确认");
+    const costPart = (part) => feePartText(part, realItem && realItem.currency).replace("待确认", shoppingText("未知", "Unknown"));
     const rows = realItem ? [
       ["商品价格", realItem.priceLabel || moneyText(realItem.price, realItem.currency, "—")],
       ["运费", costPart(breakdown.shippingFee)],
       ["税费", costPart(breakdown.taxFee)],
-      ["平台费用", costPart(breakdown.platformFee)],
-      ["预计总成本", realItem.landedCostCompleteness === "complete" ? moneyText(realItem.totalLandedCost, realItem.currency, "待平台确认") : "待平台确认"]
+      ["其他费用", costPart(breakdown.platformFee)],
+      ["预计到手成本", realItem.landedCostCompleteness === "complete" ? moneyText(realItem.totalLandedCost, realItem.currency, shoppingText("未知", "Unknown")) : shoppingText("未知", "Unknown")]
     ] : (Array.isArray(cost.rows) ? cost.rows : []);
     return `<section class="commerce-workspace-card" data-commerce-workspace-cost-summary="true">
       <div class="commerce-workspace-card-head">
@@ -3182,7 +3297,7 @@
           <tbody>${rows.map((row) => `<tr><th scope="row">${esc(String(row[0] || "").replace("进口税 / 消费税", "税费").replace("平台或支付费用", "平台费用"))}</th><td>${esc(String(row[1] || "—").replace("Waiting for Trusted Provider", "—").replace("等待数据", "—"))}</td></tr>`).join("")}</tbody>
         </table>
       </div>
-      <p class="commerce-workspace-cost-status"><span class="commerce-workspace-status-pill is-muted">${realItem ? "费用不完整时不计算虚假到手总价" : "当前市场暂无实时价格来源"}</span></p>
+      <p class="commerce-workspace-cost-status"><span class="commerce-workspace-status-pill is-muted">${esc(realItem ? shoppingText("费用不完整时不显示确认总价。费用不完整时不计算虚假到手总价", "No confirmed landed total is shown while costs are incomplete. No false landed total is calculated.") : shoppingText("暂无可计算的实时报价", "No live offer is available for cost calculation"))}</span></p>
       ${card && card.emptyPriceSummary && card.emptyPriceSummary.reasonTitle ? disclosure(card.emptyPriceSummary.reasonTitle, `<p>${esc(card.emptyPriceSummary.reasonBody || "")}</p>`, "commerce-global-procurement-price-explanation-disclosure") : ""}
     </section>`;
   }
@@ -3517,18 +3632,24 @@
     const search = searchApi();
     const settings = search && search.getCommerceSearchSettings ? search.getCommerceSearchSettings() : {};
     const health = search && search.getCommerceProviderHealth ? search.getCommerceProviderHealth(task.category, settings) : null;
-    const hasConfiguredProvider = !!(health && health.hasProvider || search && search.hasCommerceSearchProvider && search.hasCommerceSearchProvider(settings));
+    const hasConfiguredProvider = !!(
+      health && health.hasProvider
+      || search && search.hasCommerceSearchProvider && search.hasCommerceSearchProvider(settings)
+      || task && String(task.searchProviderName || "").trim()
+      || task && /^(?:no_results|completed|partial)$/.test(String(task.searchStatus || ""))
+    );
+    const offerPresentation = workspaceOfferPresentation(task, hasConfiguredProvider);
     return `<section class="commerce-global-shopping-workspace" data-commerce-global-shopping-workspace="true">
       <div class="commerce-global-shopping-main">
-        ${workspaceOverviewHtml(task, card)}
+        ${workspaceProductCardHtml(card, task, offerPresentation)}
+        ${workspacePlatformCardsHtml(card, task, offerPresentation)}
+        <div class="commerce-global-shopping-lower-grid">
+          ${workspaceRecommendationHtml(card, task, offerPresentation)}
+          ${workspaceCostSummaryHtml(card, task, offerPresentation)}
+        </div>
+        ${workspaceRelatedProductsHtml(offerPresentation)}
         ${searchStatusHtml(task, settings, hasConfiguredProvider)}
         ${workspaceBasicAiModeHtml(task, card)}
-        ${workspaceProductCardHtml(card, task)}
-        ${workspacePlatformCardsHtml(card, task)}
-        <div class="commerce-global-shopping-lower-grid">
-          ${workspaceCostSummaryHtml(card, task)}
-          ${workspaceRecommendationHtml(card, task)}
-        </div>
         ${workspaceMoreHtml(task, card)}
       </div>
       <aside class="commerce-global-shopping-side">
@@ -3567,6 +3688,10 @@
     host.querySelectorAll("[data-commerce-workspace-next-action]").forEach((button) => {
       button.addEventListener("click", () => {
         const action = button.getAttribute("data-commerce-workspace-next-action") || "";
+        if (action === "refine_query") {
+          if (typeof opts.onRecentSearch === "function") opts.onRecentSearch(String(task.inputSummary || ""));
+          return;
+        }
         const selector = action === "view_plan" ? '[data-commerce-workspace-plan="true"]'
           : action === "view_official_store" ? '[data-commerce-workspace-platforms="true"]'
           : action === "continue_manual_compare" ? '[data-commerce-workspace-more-disclosure="true"]'
@@ -9615,6 +9740,14 @@
     host.querySelectorAll("[data-commerce-workspace-next-action]").forEach((button) => {
       button.addEventListener("click", () => {
         const action = button.getAttribute("data-commerce-workspace-next-action") || "";
+        if (action === "refine_query") {
+          draftText = String(task && task.inputSummary || "");
+          if (input) {
+            input.value = draftText;
+            input.focus();
+          }
+          return;
+        }
         if (action === "view_plan") {
           const panel = host.querySelector('[data-commerce-workspace-plan="true"]');
           if (panel && typeof panel.scrollIntoView === "function") panel.scrollIntoView({ behavior:"smooth", block:"start" });

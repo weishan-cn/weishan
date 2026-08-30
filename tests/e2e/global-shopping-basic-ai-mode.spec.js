@@ -98,7 +98,8 @@ test.describe.serial("global shopping basic and AI enhanced mode", () => {
     await basicCard.getByRole("button", { name:"帮我分析" }).click();
     await expect(basicCard.locator('[data-commerce-ai-analysis-status]')).toContainText("连接 AI 服务以获得智能分析");
     await expect(page.locator(".commerce-workspace-product-card").first()).toBeVisible();
-    await expect(page.locator(".commerce-workspace-platform-card").first()).toBeVisible();
+    await expect(page.locator(".commerce-workspace-platform-card")).toHaveCount(0);
+    await expect(page.locator("[data-commerce-shopping-empty-state]")).toBeVisible();
 
     const result = await page.evaluate((id) => {
       const api = window.WeishanCommerceAgent;

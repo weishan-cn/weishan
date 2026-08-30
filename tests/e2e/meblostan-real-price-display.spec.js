@@ -53,11 +53,11 @@ test("Home routes a Polish furniture request to Meblostan and shows truthful pri
     await expect(workspace).toContainText("促销价：PLN 1575 · 常规价：PLN 1750");
     await expect(workspace).toContainText("费用不完整时不计算虚假到手总价");
     await expect(workspace).not.toContainText(/已锁价|最终总价|已下单|已付款|已确认最低价/);
-    await expect(workspace.getByRole("button", { name:"去零售商核验" })).toBeVisible();
+    await expect(workspace.getByRole("button", { name:"去 Meblostan 查看" })).toBeVisible();
 
     expect(requestAudit).toHaveLength(1);
 
-    await workspace.getByRole("button", { name:"去零售商核验" }).click();
+    await workspace.getByRole("button", { name:"去 Meblostan 查看" }).click();
     await expect.poll(() => page.evaluate(() => window.__WEISHAN_MEBLOSTAN_OPENED__)).toBe("https://meblostan.pl/sklep/jesionowy-stolik-kawowy/");
   } finally {
     await cleanupE2EData(page, runId);
