@@ -1,7 +1,7 @@
 (function(){
   "use strict";
 
-  const VERSION = "1.1.0";
+  const VERSION = "1.2.0";
 
   const DESTINATIONS = Object.freeze({
     MAIL:"MAIL",
@@ -170,6 +170,22 @@
     /\b(today|tomorrow|next week|next month|depart|departure|return|adults?|people|travellers?)\b/i
   ];
 
+  const MARKET_TOKEN = /(?:英国|阿根廷|荷兰|波兰|美国|日本|中国|德国|法国|西班牙|意大利|加拿大|澳大利亚|\b(?:United Kingdom|UK|Argentina|Netherlands|Poland|Polska|United States|USA|Japan|China|Germany|France|Spain|Italy|Canada|Australia)\b)/gi;
+  const STRUCTURAL_NON_SHOPPING = /CEO|首都|人口|天气|气候|历史|文化|政治|总统|国王|GDP|通货膨胀|汇率|新闻|旅游攻略|签证|怎么走|在哪里|是什么|为什么|解释|谁是|何时|什么时候|\b(?:who|what|why|when|history|weather|capital|population|inflation|exchange rate|news|visa)\b/i;
+
+  function hasMarketProductStructure(raw, signals){
+    if (!signals || signals.marketContext <= 0 || signals.hasMail || signals.projectContext > 0 || signals.travelObject > 0) return false;
+    if (signals.generalFactualQuestion > 0 || STRUCTURAL_NON_SHOPPING.test(raw)) return false;
+    const residual = raw
+      .replace(MARKET_TOKEN, " ")
+      .replace(/帮我|请|查找|搜索|比较|比价|购买|买|当前|实时|真实|价格|商品|产品/g, " ")
+      .replace(/\b(?:please|help|find|search|compare|buy|current|real|price|product)\b/gi, " ")
+      .replace(/[，。！？,.!?;；:：()（）]/g, " ")
+      .replace(/\s+/g, " ").trim();
+    if (!residual || residual.length > 80) return false;
+    return /[\p{L}\p{N}]/u.test(residual);
+  }
+
   function signalCounts(input){
     const raw = normalizeSearchQuery(input);
     const mailContext = countSignals(raw, MAIL_CONTEXT);
@@ -190,12 +206,18 @@
     const routeHint = countSignals(raw, ROUTE_HINT);
     const dateOrTravelContext = countSignals(raw, DATE_OR_TRAVEL_CONTEXT);
     const travelObject = flightObject + hotelObject + cruiseObject + routeHint;
-    const commerceObject = shoppingObject + travelObject;
+    const structuralShopping = hasMarketProductStructure(raw, {
+      marketContext, mailContext, mailEvidence, strongMail, projectContext,
+      travelObject, generalFactualQuestion,
+      hasMail:mailContext > 0 || mailEvidence > 0 || strongMail > 0
+    }) ? 1 : 0;
+    const commerceObject = shoppingObject + structuralShopping + travelObject;
     return freeze({
       mailContext,
       mailEvidence,
       shoppingObject,
       shoppingVariant,
+      structuralShopping,
       marketContext,
       knownProductIdentity,
       projectContext,
@@ -222,14 +244,14 @@
       { domain:SEARCH_DOMAINS.FLIGHT, score:s.flightObject * 3 + s.routeHint * 2 + (s.dateOrTravelContext > 0 && s.routeHint > 0 ? 2 : 0) },
       { domain:SEARCH_DOMAINS.HOTEL, score:s.hotelObject * 3 + (s.dateOrTravelContext > 0 && s.hotelObject > 0 ? 1 : 0) },
       { domain:SEARCH_DOMAINS.CRUISE, score:s.cruiseObject * 4 },
-      { domain:SEARCH_DOMAINS.SHOPPING, score:s.shoppingObject * 3 + s.shoppingVariant }
+      { domain:SEARCH_DOMAINS.SHOPPING, score:s.shoppingObject * 3 + s.structuralShopping * 3 + s.shoppingVariant }
     ].sort(function(a, b){ return b.score - a.score; });
     return scores[0].score > 0 ? scores[0].domain : SEARCH_DOMAINS.UNKNOWN;
   }
 
   function searchDomainParts(s){
     const domains = [];
-    if (s.shoppingObject > 0) domains.push(SEARCH_DOMAINS.SHOPPING);
+    if (s.shoppingObject > 0 || s.structuralShopping > 0) domains.push(SEARCH_DOMAINS.SHOPPING);
     if (s.flightObject > 0 || s.routeHint > 0) domains.push(SEARCH_DOMAINS.FLIGHT);
     if (s.hotelObject > 0) domains.push(SEARCH_DOMAINS.HOTEL);
     if (s.cruiseObject > 0) domains.push(SEARCH_DOMAINS.CRUISE);
@@ -239,7 +261,7 @@
 
   function hasEnoughSearchSpecificity(raw, s, domain){
     if (domain === SEARCH_DOMAINS.MAIL) return s.strongMail > 0 || s.mailContext > 0 || (s.mailEvidence > 0 && s.actionIntent > 0);
-    if (domain === SEARCH_DOMAINS.SHOPPING) return s.hasAction || s.shoppingVariant > 0 || (s.marketContext > 0 && s.knownProductIdentity > 0) || /\b\d+\s*(?:GB|TB)\b/i.test(raw) || /\biPhone\s*\d+\s*(?:Pro|Max|Plus)?\b/i.test(raw);
+    if (domain === SEARCH_DOMAINS.SHOPPING) return s.hasAction || s.structuralShopping > 0 || s.shoppingVariant > 0 || (s.marketContext > 0 && s.knownProductIdentity > 0) || /\b\d+\s*(?:GB|TB)\b/i.test(raw) || /\biPhone\s*\d+\s*(?:Pro|Max|Plus)?\b/i.test(raw);
     if (domain === SEARCH_DOMAINS.FLIGHT) return s.hasAction || (s.routeHint > 0 && s.dateOrTravelContext > 0) || /经济舱|商务舱|直飞|两个人|adults?|cabin/i.test(raw);
     if (domain === SEARCH_DOMAINS.HOTEL) return s.hasAction || (s.hotelObject > 0 && s.dateOrTravelContext > 0) || /住\d*晚|一间房|两个人|room|night/i.test(raw);
     if (domain === SEARCH_DOMAINS.CRUISE) return s.hasAction || /阳台房|内舱房|海景房|\d+\s*晚|出发|balcony|cabin/i.test(raw);
