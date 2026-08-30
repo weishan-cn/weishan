@@ -388,9 +388,14 @@
     const flightSearchIntent = /(?:查|查一下|查询|看一下|找).{0,20}(?:机票|飞机票|航空票|航班)|(\d{4}[-/]\d{1,2}[-/]\d{1,2}|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天]).{0,20}[\u4e00-\u9fa5A-Za-z]{2,24}\s*(?:飞往|飞|到|去)\s*[\u4e00-\u9fa5A-Za-z]{2,24}/i.test(raw);
     const directOrderRisk = /直接下单|下单并付款|提交订单|自动付款|付款|支付|提交.*询价表|提交.*询价|上传.*(?:护照|身份证)|(?:护照|身份证).*(?:预订|预定|订|上传)/i.test(raw);
     const regulatedCommerceRisk = /大麻|cannabis|marijuana|THC|枪|枪支|firearm|gun|weapon|ammunition|处方药|controlled medication|prescription drug|成人服务|adult service|赌博|gambling|casino|烟草|电子烟|tobacco|nicotine|vape|酒精|酒类|alcohol|危险品|hazardous|地区限制|restricted goods/i.test(raw);
-    const marketName = "(?:英国|阿根廷|荷兰|波兰|美国|日本|中国|United\\s+Kingdom|UK|Argentina|Netherlands|Poland|Polska|United\\s+States|USA|Japan|China)";
-    const productName = "(?:(?:celular\\s+)?iphone\\s*\\d+\\s*(?:pro|max|plus)?|可口可乐|coca[-\\s]?cola(?:\\s+original)?|白蜡木咖啡桌|咖啡桌|茶几|扶手椅|椅子|coffee\\s+table|armchair|chair|macbook\\s+(?:air|pro)(?:\\s+m\\d+)?|sony\\s+wh-[a-z0-9-]+)";
-    const directProductLookup = new RegExp("^\\s*(?:" + marketName + "\\s*)?" + productName + "(?:\\s*" + marketName + ")?(?:\\s*(?:商品)?(?:价格|多少钱))?\\s*$", "i").test(raw);
+    const marketName = /(?:英国|阿根廷|荷兰|波兰|美国|日本|中国|United\s+Kingdom|\bUK\b|Argentina|Netherlands|Poland|Polska|United\s+States|\bUSA\b|Japan|China)/i;
+    const broadProcurement = /采购计划|采购方案|招标|供应商征集|企业服务|咨询方案|项目外包|批量询价|request\s+for\s+proposal|\bRFP\b/i.test(raw);
+    const informationalQuestion = /附件|attached\s+file|检查.*(?:首页|界面|输入区|页面|布局)|首都|人口|天气|历史|文化|总统|总理|领导人|是谁|在哪里|是什么|能做什么|可以做什么|为什么|如何|怎么(?!买|购买|找|搜索|比价)|怎样(?!买|购买|找|搜索|比价)|介绍|旅游攻略|汇率|时区|capital|population|weather|history|culture|president|prime\s+minister|who\s+is|where\s+is|what\s+is|why\b|how\b/i.test(raw);
+    const marketResidual = raw
+      .replace(new RegExp(marketName.source, "gi"), " ")
+      .replace(/(?:请|帮我|麻烦|我要|我想|想要|需要|买|购买|找|搜索|查找|比较|比价|商品|价格|多少钱|purchase|shopping|retail|price|compare|search)/gi, " ")
+      .replace(/[^\p{L}\p{N}]+/gu, "");
+    const directProductLookup = !broadProcurement && !informationalQuestion && marketName.test(raw) && marketResidual.length >= 2;
     return regulatedCommerceRisk || directOrderRisk || flightSearchIntent || objectWithPurchase || directProductLookup || (purchaseIntent && commerceObject) || assistedSearchPurchase || /全球采购|采购代理|自动采购|比价|平台比较|价格比较/i.test(raw);
   }
 
@@ -466,6 +471,19 @@
       };
     }
 
+    // Explicit local-app control wording must reach the paused desktop
+    // assistant safety response before generic catalog recognition.
+    if (isDesktopAssistantCommand(raw) && !/智能邮件|邮件接管|抓取中心|软件工厂/i.test(raw)) {
+      return {
+        module:DISPATCH_MODULES.desktopAssistant,
+        action:DISPATCH_ACTIONS.desktopAssistantPaused,
+        routeMode:"console",
+        modules:[DISPATCH_MODULES.desktopAssistant],
+        targetRoute:"home",
+        confidence:"rule"
+      };
+    }
+
     if (uniqueModules.includes("codex") && /给\s*Codex|Codex.*(指令|修复|开发|测试)/i.test(raw)) {
       return {
         module:DISPATCH_MODULES.codex,
@@ -475,6 +493,36 @@
         targetRoute:"home",
         confidence:"rule"
       };
+    }
+
+    // Explicit model controls are product settings, not catalog-shaped product
+    // searches (for example, "GPT-compatible" contains a SKU-like token).
+    if (modelKeyword(raw) && !/(VPN|付款|支付|地区|网络).*(怎么|如何|是不是|为什么|解决)|(?:怎么|如何|是不是|为什么|解决).*(VPN|付款|支付|地区|网络)/i.test(raw)) {
+      return {
+        module:DISPATCH_MODULES.model,
+        action:modelAction(raw),
+        routeMode:"console",
+        modules:[DISPATCH_MODULES.model],
+        targetRoute:"home",
+        confidence:"rule",
+        selectedModelId:inferModelId(raw)
+      };
+    }
+
+    // A named local tool is stronger intent evidence than a SKU-shaped token
+    // elsewhere in the command. This keeps generic catalog recognition from
+    // stealing document, slide, crawler, or software-factory commands.
+    if (uniqueModules.length === 1 && uniqueModules[0] === "ppt") {
+      return { module:DISPATCH_MODULES.ppt, action:DISPATCH_ACTIONS.pptGenerateOutline, routeMode:"console", modules:[DISPATCH_MODULES.ppt], targetRoute:"home", confidence:"rule" };
+    }
+    if (uniqueModules.length === 1 && uniqueModules[0] === "document") {
+      return { module:DISPATCH_MODULES.document, action:DISPATCH_ACTIONS.documentGenerateDraft, routeMode:"console", modules:[DISPATCH_MODULES.document], targetRoute:"home", confidence:"rule" };
+    }
+    if (uniqueModules.length === 1 && uniqueModules[0] === "crawler") {
+      return { module:DISPATCH_MODULES.crawler, action:extractUrl(raw) ? DISPATCH_ACTIONS.crawlerWebFetch : DISPATCH_ACTIONS.crawlerOpen, routeMode:"module", modules:[DISPATCH_MODULES.crawler], targetRoute:"crawler", confidence:"rule" };
+    }
+    if (uniqueModules.length === 1 && uniqueModules[0] === "softwareFactory") {
+      return { module:DISPATCH_MODULES.softwareFactory, action:DISPATCH_ACTIONS.softwareFactoryGeneratePlan, routeMode:"module", modules:[DISPATCH_MODULES.softwareFactory], targetRoute:"builder", confidence:"rule" };
     }
 
     if (homeUnifiedIntentDecision && homeUnifiedIntentDecision.destination === "MAIL") {
@@ -562,29 +610,6 @@
         targetRoute:"commerce",
         confidence:"rule",
         commerceLocalIntentRoute
-      };
-    }
-
-    if (isDesktopAssistantCommand(raw) && !/智能邮件|邮件接管|抓取中心|软件工厂/i.test(raw)) {
-      return {
-        module:DISPATCH_MODULES.desktopAssistant,
-        action:DISPATCH_ACTIONS.desktopAssistantPaused,
-        routeMode:"console",
-        modules:[DISPATCH_MODULES.desktopAssistant],
-        targetRoute:"home",
-        confidence:"rule"
-      };
-    }
-
-    if (modelKeyword(raw) && !/(VPN|付款|支付|地区|网络).*(怎么|如何|是不是|为什么|解决)|(?:怎么|如何|是不是|为什么|解决).*(VPN|付款|支付|地区|网络)/i.test(raw)) {
-      return {
-        module:DISPATCH_MODULES.model,
-        action:modelAction(raw),
-        routeMode:"console",
-        modules:[DISPATCH_MODULES.model],
-        targetRoute:"home",
-        confidence:"rule",
-        selectedModelId:inferModelId(raw)
       };
     }
 

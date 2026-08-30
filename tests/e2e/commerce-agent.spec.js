@@ -8282,7 +8282,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail).toContainText("🇯🇵 Japan");
     await expect(detail).toContainText("🇺🇸 United States");
     await expect(detail).toContainText("采购计划");
-    await expect(detail).toContainText("平台比较");
+    await expect(detail).toContainText(/当前已验证报价|商户报价比较/);
     for (const platform of ["Rakuten", "Amazon Japan", "Yahoo Shopping", "Mercari", "Amazon US", "BestBuy", "B&H", "Costco"]) {
       await expect(detail).toContainText(platform);
     }
@@ -8696,7 +8696,7 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(workspaceToolbar).toContainText("价格数据");
     await expect(workspaceToolbar).toContainText("采购模式");
     await expect(detail).toContainText("iPhone 16 Pro");
-    await expect(detail).toContainText("平台比较");
+    await expect(detail).toContainText(/当前已验证报价|商户报价比较/);
     await expect(detail).toContainText("购物记录");
     await expect(detail).toContainText("最近搜索");
     await expect(detail).toContainText("采购计划");

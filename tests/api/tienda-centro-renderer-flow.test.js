@@ -139,7 +139,7 @@ async function main() {
   assert.equal(result.readOnlySearchTopResults[0].truthEvidence.comparableAsVerifiedTotal, false);
   assert.equal(result.readOnlySearchTopResults[0].truthEvidence.availabilityStatus, "UNKNOWN");
   assert.equal(result.readOnlySearchTopResults[0].targetUrl, "https://tiendacentro.com/celulares/celular-iphone-17-256-gb-nuevo/");
-  assert.equal(tiendaCalls[0].query, "iPhone 17 256 GB");
+  assert.equal(tiendaCalls[0].query, "IPHONE 17 256 GB");
   assert.equal(result.decisionResult, null);
   assert.match(result.recommendation.reason, /不能判定为最低价或完整到手价/);
   assert.deepEqual(Object.keys(tiendaCalls[0]).sort(), ["limit", "query", "requestId"]);

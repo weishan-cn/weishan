@@ -219,7 +219,7 @@ async function main() {
   });
   assert.equal(homeResult.ok, true);
   assert.equal(livePolicyCalls.length, 2);
-  assert.equal(livePolicyCalls[1].query, "Coca-Cola");
+  assert.equal(livePolicyCalls[1].query, "可口可乐");
   assert.equal(homeResult.readOnlySearchTopResults[0].truthEvidence.displayAsLiveCurrentPrice, true);
   assert.equal(homeResult.readOnlySearchTopResults[0].currency, "EUR");
 

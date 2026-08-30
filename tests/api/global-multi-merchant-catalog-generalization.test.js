@@ -1,0 +1,40 @@
+"use strict";
+const assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path"),vm=require("node:vm");
+const ROOT=path.resolve(__dirname,"../..");
+const {createCAndCAsianMarketReadonlyService,createDutchshopperReadonlyService}=require(path.join(ROOT,"apps/desktop/src/main/netherlandsRetailReadonlyServices.js"));
+function response(payload){const bytes=Buffer.from(JSON.stringify(payload));let delivered=false;return{ok:true,status:200,headers:{get:n=>String(n).toLowerCase()==="content-length"?String(bytes.byteLength):null},body:{getReader(){return{read:async()=>delivered?{done:true}:(delivered=true,{done:false,value:bytes}),cancel:async()=>{delivered=true},releaseLock(){}}}}}}
+function load(files){const context={console,URL,Date,window:{}};context.globalThis=context;vm.createContext(context);files.forEach(file=>vm.runInContext(fs.readFileSync(path.join(ROOT,"apps/desktop/src/renderer/core",file),"utf8"),context));return context.window}
+(async function(){
+  const now=Date.now();
+  const ccCatalog=[[101,"Jasmine Rice 1kg",499],[102,"Green Tea 500ml",229],[103,"Soy Sauce 500ml",349],[104,"Shampoo 400ml",599],[105,"Toothpaste 120g",299]];
+  const cc=createCAndCAsianMarketReadonlyService({now:()=>now,fetchImpl:async url=>{const query=new URL(url).searchParams.get("search").toLowerCase();const row=ccCatalog.find(item=>item[1].toLowerCase()===query);return response(row?[{id:row[0],name:row[1],permalink:"https://ccasianmarket.nl/product/"+row[1].toLowerCase().replace(/[^a-z0-9]+/g,"-")+"/",is_in_stock:true,prices:{price:String(row[2]),currency_code:"EUR",currency_minor_unit:2}}]:[])}});
+  for(const row of ccCatalog){const result=await cc.search({query:row[1],requestId:"cc-"+row[0],limit:3});assert.equal(result.ok,true);assert.equal(result.results.length,1);assert.equal(result.results[0].title,row[1])}
+  const dsCatalog=[[201,"Chocolate Biscuits",325],[202,"Laundry Detergent",825],[203,"Hand Soap",275],[204,"Ground Coffee",650],[205,"Baby Wipes",450]];
+  let clock=now;const ds=createDutchshopperReadonlyService({now:()=>new Date(clock).toISOString(),fetchImpl:async url=>{const parsed=new URL(url);if(parsed.pathname==="/search/suggest.json"){const title=parsed.searchParams.get("q"),row=dsCatalog.find(item=>item[1]===title);return response({resources:{results:{products:row?[{title:row[1],url:"/products/"+row[1].toLowerCase().replace(/[^a-z0-9]+/g,"-")}]:[]}}})}const row=dsCatalog.find(item=>parsed.pathname.includes(item[1].toLowerCase().replace(/[^a-z0-9]+/g,"-")));return response(row?{id:row[0],title:row[1],available:true,variants:[{price:row[2],available:true}]}:{})}});
+  for(const row of dsCatalog){const result=await ds.search({query:row[1],requestId:"ds-"+row[0],limit:3});assert.equal(result.ok,true);assert.equal(result.results.length,1);assert.equal(result.results[0].title,row[1]);clock+=61000}
+  const window=load(["merchantNativeSourceEligibilityRouter.js","realPriceMultiMerchantComparison.js"]),route=window.WeishanMerchantNativeSourceEligibilityRouter;
+  assert.equal(route.isRegisteredSourceId("cc_asian_market_public_api"),true);
+  assert.equal(route.isRegisteredSourceId("unknown_injected_source"),false);
+  assert.deepEqual(Array.from(route.routeEligibleMerchantNativeSources({destinationMarket:"NL",query:"洗发水"}).eligibleSourceIds),["prijsprofeet_public_api","cc_asian_market_public_api","dutchshopper_public_api"]);
+  assert.deepEqual(Array.from(route.routeEligibleMerchantNativeSources({destinationMarket:"NL",query:"wireless keyboard"}).eligibleSourceIds),["dutchshopper_public_api"]);
+  assert.deepEqual(Array.from(route.routeEligibleMerchantNativeSources({destinationMarket:"AR",query:"never seen catalog product"}).eligibleSourceIds),["tienda_centro_public_api"]);
+  assert.deepEqual(Array.from(route.routeEligibleMerchantNativeSources({destinationMarket:"PL",query:"扶手椅"}).eligibleSourceIds),["meblostan_public_api"]);
+  const agentWindow=load(["commerceAgent.js"]),category=agentWindow.WeishanCommerceAgent.getCommerceCategory;
+  [
+    "荷兰 大米","荷兰 鸡蛋","荷兰 火腿","荷兰 酱油","荷兰 洗发水","Netherlands wireless keyboard","Netherlands organic cereal","Netherlands running shoes",
+    "阿根廷 yerba mate","Argentina wireless mouse","Argentina notebook stand","Argentina baby wipes","Poland bookshelf","波兰 床头柜","Polska lampka biurkowa",
+    "UK SKU-ABC-2048","Japan 500ml green tea","美国 2kg dog food","中国 120g toothpaste","比较 4K monitor 价格","找 USB-C hub","搜索 winter jacket"
+  ].forEach(query=>{assert.equal(category(query),"ecommerce",query);assert.equal(agentWindow.WeishanCommerceAgent.classifyCommerceIntent(query).isCommerceIntent,true,query)});
+  [
+    "荷兰酒店 2027-04-10 入住","阿根廷到波兰的机票","中国建设银行企业服务咨询方案","全球供应商征集采购计划","软件项目外包",
+    "RFP for enterprise consulting","成都到上海怎么最经济？","weishan 能做什么？","帮我分析这个附件","波兰火车票","日本演唱会门票","英国域名注册","预约荷兰保洁服务"
+  ].forEach(query=>assert.notEqual(category(query),"ecommerce",query));
+  const intentWindow=load(["globalProcurementIntentRouter.js"]),intent=intentWindow.WeishanGlobalProcurementIntentRouter.routeGlobalProcurementIntent;
+  ["荷兰 大米","Argentina notebook stand","Polska lampka biurkowa"].forEach(query=>{const routed=intent(query);assert.equal(routed.category,"product",query);assert.ok(routed.productName,query)});
+  ["全球供应商征集采购计划","RFP for enterprise consulting"].forEach(query=>assert.notEqual(intent(query).category,"product",query));
+  const offer=(merchant,market,price,identity,suffix)=>({merchantName:merchant,platformName:merchant,market,canonicalProductIdentity:identity,condition:"NEW",price,currency:market==="PL"?"PLN":market==="AR"?"ARS":"EUR",retrievedAt:new Date(now).toISOString(),targetUrl:"https://example.com/product/"+suffix,truthEvidence:{evidenceTruthClass:"REAL_PROVIDER_PRICE",displayAsLiveCurrentPrice:true,currency:market==="PL"?"PLN":market==="AR"?"ARS":"EUR",retrievedAt:new Date(now).toISOString(),deepLink:"https://example.com/product/"+suffix}}),comparator=window.WeishanRealPriceMultiMerchantComparison;
+  ["NL","AR","PL"].forEach(market=>{const offers=[offer("Merchant B",market,20,"generic product",market+"-b"),offer("Merchant A",market,10,"generic product",market+"-a")],forward=comparator.compareOffers({market,offers}),reverse=comparator.compareOffers({market,offers:offers.slice().reverse()});assert.equal(forward.status,"READY");assert.equal(forward.lowerVerifiedOffer.offer.merchantName,"Merchant A");assert.equal(reverse.lowerVerifiedOffer.offer.merchantName,"Merchant A")});
+  const plusOnly=comparator.compareOffers({market:"NL",offers:[offer("PLUS","NL",1,"coca cola original taste","plus-a"),offer("PLUS","NL",1,"coca cola original taste gekoeld","plus-b")]});assert.equal(plusOnly.status,"INSUFFICIENT_OFFERS");assert.equal(plusOnly.comparableVerifiedOfferCountMax,1);
+  const page=fs.readFileSync(path.join(ROOT,"apps/desktop/src/renderer/routes/CommerceAgentPage.js"),"utf8"),dispatch=fs.readFileSync(path.join(ROOT,"apps/desktop/src/renderer/core/dispatchRouter.js"),"utf8");assert.match(page,/evidenceTruthClass === "REAL_PROVIDER_PRICE"/);assert.doesNotMatch(page,/\["prijsprofeet_public_api", "tienda_centro_public_api", "meblostan_public_api"\]\.includes\(item\.sourceType\)/);assert.match(page,/isRegisteredSourceId\(item\.sourceType\)/);assert.match(page,/comparison\.status === "READY" \? "商户报价比较" : "当前已验证报价"/);assert.match(page,/comparisonMarkets\.length === 1 \? comparisonMarkets\[0\]/);assert.doesNotMatch(dispatch,/const productName =/);
+  console.log("Global multi-merchant catalog generalization: PASS");
+})().catch(error=>{console.error(error);process.exitCode=1});

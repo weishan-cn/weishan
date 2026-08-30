@@ -2995,7 +2995,9 @@
       && item.truthEvidence
       && item.truthEvidence.evidenceTruthClass === "REAL_PROVIDER_PRICE"
       && item.truthEvidence.displayAsLiveCurrentPrice === true
-      && ["prijsprofeet_public_api", "tienda_centro_public_api", "meblostan_public_api"].includes(item.sourceType));
+      && window.WeishanMerchantNativeSourceEligibilityRouter
+      && window.WeishanMerchantNativeSourceEligibilityRouter.isRegisteredSourceId(item.sourceType)
+      && /^https:\/\//i.test(String(item.targetUrl || item.officialUrl || "")));
   }
 
   function workspaceProductCardHtml(card, task){
@@ -3051,16 +3053,19 @@
 
   function workspacePlatformCardsHtml(card, task){
     const realItems = currentRealPriceItems(task);
+    const planFields = card && card.planFields || {};
+    const comparisonMarkets = Array.isArray(planFields.comparisonMarkets) ? planFields.comparisonMarkets.filter(Boolean) : [];
+    const comparisonMarket = planFields.destinationCountry || (comparisonMarkets.length === 1 ? comparisonMarkets[0] : "");
     const comparisonApi = window.WeishanRealPriceMultiMerchantComparison || {};
     const comparison = typeof comparisonApi.compareOffers === "function" ? comparisonApi.compareOffers({
-      market:(card && card.planFields && card.planFields.destinationCountry) || "",
+      market:comparisonMarket,
       offers:realItems
     }) : { status:realItems.length ? "INSUFFICIENT_OFFERS" : "NO_VERIFIED_OFFERS", userFacingSummary:realItems.length ? "仅找到 1 个已验证报价，暂不足以比较。" : "当前没有找到可验证的实时报价。", lowerVerifiedOffer:null };
     const lowerTarget = comparison.lowerVerifiedOffer && comparison.lowerVerifiedOffer.offer && comparison.lowerVerifiedOffer.offer.targetUrl || "";
     const items = realItems.length ? realItems.map((item) => ({
       platformName:item.platformName || item.sourceAttributionName || (item.sourceType === "tienda_centro_public_api" ? "Tienda Centro" : (item.sourceType === "meblostan_public_api" ? "Meblostan" : "PrijsProfeet")),
       title:item.title || "",
-      country:item.destinationCountry || item.market || (card && card.planFields && card.planFields.destinationCountry) || "当前市场",
+      country:item.destinationCountry || item.market || comparisonMarket || "当前市场",
       price:item.priceLabel || (item.currency && item.price !== undefined ? item.currency + " " + item.price : "—"),
       landedCost:item.landedCostCompleteness === "complete" && item.totalLandedCost !== undefined ? item.currency + " " + item.totalLandedCost : "待平台确认",
       availability:((item.availabilityFreshness || {}).availabilityStatus) || "unknown",
@@ -3075,7 +3080,7 @@
       lowerVerifiedOffer:Boolean(lowerTarget && item.targetUrl === lowerTarget)
     })) : [{
       platformName:"当前市场实时价格源",
-      country:(card && card.planFields && card.planFields.destinationCountry) || "当前市场",
+      country:comparisonMarket || "当前市场",
       price:"—",
       landedCost:"—",
       availability:"暂未接入"
@@ -3094,7 +3099,7 @@
     return `<section class="commerce-workspace-platforms-section" data-commerce-workspace-platforms="true">
       <div class="commerce-workspace-card-head commerce-workspace-platforms-head">
         <div>
-          <h3>平台比较</h3>
+          <h3>${comparison.status === "READY" ? "商户报价比较" : "当前已验证报价"}</h3>
           <p>${esc(comparison.userFacingSummary || (realItems.length ? "仅显示本次查询返回的已验证实时价格来源。" : "暂未接入该市场的实时价格来源。"))}</p>
         </div>
       </div>
@@ -7765,13 +7770,15 @@
   function commerceAiBrainDecisionForTask(task){
     const api = window.WeishanAiProcurementBrainOrchestrator;
     const raw = commerceTaskRawInput(task);
-    const category = task && task.globalProcurementIntent && task.globalProcurementIntent.category || task && task.category || "";
+    const taskCategory = task && task.category || "";
+    const globalCategory = task && task.globalProcurementIntent && task.globalProcurementIntent.category || "";
+    const category = taskCategory === "ecommerce" ? "product" : globalCategory || taskCategory;
     const restricted = category === "restricted_or_blocked" || task && task.status === "blocked";
     if (api && typeof api.orchestrateAiProcurementBrain === "function") {
       return api.orchestrateAiProcurementBrain({
         rawUserInput:raw,
         userLocale:"zh-CN",
-        currentCategoryHint:category === "ecommerce" ? "product" : category,
+        currentCategoryHint:category,
         userAiApiState:{ aiApiTokenConfigured:false, metadataOnly:true, redacted:true },
         providerReadinessState:{ productionProviderReady:false, limitedBetaFlightReady:true, redacted:true },
         limitedBetaPreferenceState:{ metadataOnly:true, redacted:true },
@@ -7795,7 +7802,13 @@
   }
 
   function commerceShouldShowClarification(task){
-    return commerceAiBrainDecisionForTask(task).intentStatus === "needs_clarification";
+    const brain = commerceAiBrainDecisionForTask(task);
+    const brainMissing = Array.isArray(brain.missingFields) ? brain.missingFields : [];
+    const taskMissing = task && Array.isArray(task.missingFields) ? task.missingFields : [];
+    if (brain.procurementCategory === "product") {
+      return brainMissing.includes("型号") || taskMissing.includes("型号");
+    }
+    return brain.intentStatus === "needs_clarification" || taskMissing.length > 0;
   }
 
   function commerceTopResultCardsForTask(task, opts){
@@ -8827,6 +8840,7 @@
   function commerceResultSummaryPanelHtml(task){
     if (commerceIsSimpleFlightTask(task)) return commerceSimpleFlightResultPanelHtml(task);
     if (commerceIsRestrictedProcurementTask(task)) return commerceRestrictedProcurementResultPanelHtml(task);
+    if (task && task.category === "ecommerce" && commerceShouldShowClarification(task)) return commerceClarificationResultPanelHtml(task);
     if (commerceIsTicketActivityTask(task)) return commerceTicketActivityResultPanelHtml(task);
     if (!task) return "";
     return commerceOneScreenResultPanelHtml(task);
@@ -9060,7 +9074,7 @@
       ${isPrivateJet ? `<p class="commerce-warning">公务机属于高价值定制服务，价格通常需要询价确认。当前仅生成搜索和询价计划，不自动提交询价、不付款、不签约。</p>` : ""}
       ${failedMessage ? `<p class="commerce-warning">${esc(failedMessage)}</p>` : ""}
       ${noResultsMessage ? `<p class="commerce-muted" role="status">${esc(noResultsMessage)}</p>` : ""}
-      ${missingFields.length ? `<p class="commerce-warning">请补充${esc(missingFields.join("、"))}，否则不搜索价格。</p>` : ""}
+      ${missingFields.length ? `<p class="commerce-warning">请补充关键信息：${esc(missingFields.join("、"))}，否则不搜索价格。</p>` : ""}
       <button class="cmd-btn primary commerce-search-real" type="button" data-task-id="${esc(task.taskId)}" ${disabled ? "disabled" : ""}>${esc(destinationRequired ? "需要设置收货目的地" : disabled && !missingFields.length && !isModelPricing ? "当前市场暂无实时价格来源" : buttonLabel)}</button>
       <p class="commerce-muted">${esc(hasCurrentPriceResults ? "刷新只在你点击后执行；不会在打开页面、切换路由或空闲时联网。" : publicReadonlySearchReady ? "价格仅来自公开只读来源；单一且费用不完整的价格不会被标记为最低价。" : publicReadonlyAvailable ? "加载完成前按钮保持禁用，避免无响应点击。" : hasReadOnlyResults ? "当前使用本地规则/AI 理解生成平台候选；最终价格以平台页面为准。" : "价格只来自已配置搜索能力返回数据；未配置时不会显示假价格。")}</p>
     </div>`;
@@ -9072,7 +9086,9 @@
       && item.truthEvidence
       && item.truthEvidence.evidenceTruthClass === "REAL_PROVIDER_PRICE"
       && item.truthEvidence.displayAsLiveCurrentPrice === true
-      && ["prijsprofeet_public_api", "tienda_centro_public_api", "meblostan_public_api"].includes(item.sourceType));
+      && window.WeishanMerchantNativeSourceEligibilityRouter
+      && window.WeishanMerchantNativeSourceEligibilityRouter.isRegisteredSourceId(item.sourceType)
+      && /^https:\/\//i.test(String(item.targetUrl || item.officialUrl || "")));
   }
 
   function searchRequestHtml(request){
@@ -9287,7 +9303,7 @@
       </div>
       <p class="commerce-muted">费用说明：${esc(item.feeNote || "价格与费用以平台页面为准")}</p>
       <p class="commerce-muted">数据来源：${esc(sourceTypeLabel(item.sourceType))} · 更新时间：${esc(timeLabel(item.updatedAt || ((item.priceFreshness || {}).fetchedAt) || ((item.availabilityFreshness || {}).checkedAt) || "") || "unknown")} · 价格时效：${esc(freshnessLabel((item.priceFreshness || {}).freshnessLevel || ""))}</p>
-      ${item.sourceAttributionName && item.sourceAttributionUrl ? `<p class="commerce-muted">数据提供：${esc(item.sourceAttributionName)} · <button class="cmd-btn gray commerce-source-attribution-link" type="button" data-url="${esc(item.sourceAttributionUrl)}" data-handoff-source="${item.sourceType === "prijsprofeet_public_api" ? "prijsprofeet_attribution" : (["tienda_centro_public_api", "meblostan_public_api"].includes(item.sourceType) ? item.sourceType : "")}">查看数据来源</button></p>` : ""}
+      ${item.sourceAttributionName && item.sourceAttributionUrl ? `<p class="commerce-muted">数据提供：${esc(item.sourceAttributionName)} · <button class="cmd-btn gray commerce-source-attribution-link" type="button" data-url="${esc(item.sourceAttributionUrl)}" data-handoff-source="${esc(item.sourceType === "prijsprofeet_public_api" ? "prijsprofeet_attribution" : (item.sourceType || ""))}">查看数据来源</button></p>` : ""}
       ${item.retrievedAt ? `<p class="commerce-muted">本次检索：${esc(timeLabel(item.retrievedAt) || "unknown")}${item.providerUpdatedAt ? " · 来源抓取：" + esc(timeLabel(item.providerUpdatedAt) || "unknown") : ""}</p>` : ""}
       ${item.onSale === true && item.regularPrice && item.salePrice ? `<p class="commerce-muted">商户促销价：${esc(item.currency + " " + Number(item.salePrice).toFixed(Number.isSafeInteger(item.currencyMinorUnit) ? item.currencyMinorUnit : 2))} · 常规价：${esc(item.currency + " " + Number(item.regularPrice).toFixed(Number.isSafeInteger(item.currencyMinorUnit) ? item.currencyMinorUnit : 2))}</p>` : ""}
       ${item.validFrom && item.validUntil ? `<p class="commerce-muted">价格有效期：${esc(item.validFrom)} → ${esc(item.validUntil)}</p>` : ""}
@@ -9306,7 +9322,7 @@
       <p class="commerce-muted">推荐理由：${esc(((item.recommendationReasonDetail || {}).summary) || item.recommendationReason || "")}</p>
       ${item.fallbackInfo && item.fallbackInfo.availableFallback ? `<p class="commerce-muted">回退候选：${esc(item.fallbackInfo.fallbackProviderName || "已准备更多平台")}</p>` : ""}
       <p class="commerce-warning">${esc(item.riskNote || "Weishan 不收款、不代下单、不保存账号密码，最终价格以平台页面为准。")}</p>
-      ${item.targetUrl ? `<button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}" data-handoff-source="${["prijsprofeet_public_api", "tienda_centro_public_api", "meblostan_public_api"].includes(item.sourceType) ? item.sourceType : ""}">去零售商核验</button>` : `<p class="commerce-warning">目标平台链接缺失，暂不可跳转。</p>`}
+      ${item.targetUrl ? `<button class="cmd-btn gray commerce-booking-link" type="button" data-url="${esc(item.targetUrl)}" data-handoff-source="${esc(item.sourceType || "")}">去零售商核验</button>` : `<p class="commerce-warning">目标平台链接缺失，暂不可跳转。</p>`}
     </article>`;
     const realtimeStatusCard = realProviderReadonlyStatus ? `<article class="commerce-candidate-card commerce-readonly-search-card">
       <div class="commerce-candidate-head">

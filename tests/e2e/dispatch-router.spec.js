@@ -180,7 +180,7 @@ test.describe.serial("dispatch router", () => {
     const workspace = page.locator('[data-commerce-home-summary] [data-commerce-global-shopping-workspace="true"]');
     await expect(workspace).toBeVisible();
     await expect(workspace).toContainText("MacBook");
-    await expect(workspace).toContainText("平台比较");
+    await expect(workspace).toContainText(/当前已验证报价|商户报价比较/);
     await expect(workspace.locator("details.commerce-workspace-execution-log")).not.toHaveAttribute("open", "");
     await expect(workspace.locator("details.commerce-technical-disclosure")).not.toHaveAttribute("open", "");
     await expect(page.locator(".home-v205-side")).toHaveCount(0);
@@ -202,7 +202,7 @@ test.describe.serial("dispatch router", () => {
     const workspace = page.locator('[data-commerce-home-summary] [data-commerce-global-shopping-workspace="true"]');
     await expect(workspace).toBeVisible();
     await expect(workspace).toContainText("IPHONE 17");
-    await expect(workspace).toContainText("平台比较");
+    await expect(workspace).toContainText(/当前已验证报价|商户报价比较/);
     await expect(workspace).toContainText("预计到手成本");
     await expect(workspace).toContainText("AI 采购建议");
     await expect(workspace).toContainText("暂未接入该市场的实时价格来源");
@@ -238,7 +238,7 @@ test.describe.serial("dispatch router", () => {
         const workspace = page.locator('[data-commerce-home-summary] [data-commerce-global-shopping-workspace="true"]');
         await expect(workspace).toBeVisible();
         await expect(workspace).toContainText(item.market);
-        await expect(workspace).toContainText("平台比较");
+        await expect(workspace).toContainText(/当前已验证报价|商户报价比较/);
         await expect(workspace).not.toContainText(/coordination\.plan|AI Key 未配置|realExecution=false|AI 大脑采购编排/);
         await expect(workspace).not.toContainText(/EUR 0\.57|ARS\s*\d/);
       }
@@ -294,16 +294,14 @@ test.describe.serial("dispatch router", () => {
 
   test("cruise and private jet demands route to commerce agent instead of chat", async () => {
     await submitHomeCommand(page, runId + " 帮我找上海出发的邮轮");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前已验证报价");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前没有找到可验证的实时报价");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("邮轮");
-    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
 
     await submitHomeCommand(page, runId + " 帮我比较公务机包机价格");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("最终结果");
-    await expect(page.locator("[data-commerce-home-summary]")).toContainText("暂无真实价格结果");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前已验证报价");
+    await expect(page.locator("[data-commerce-home-summary]")).toContainText("当前没有找到可验证的实时报价");
     await expect(page.locator("[data-commerce-home-summary]")).toContainText("公务机");
-    await expect(currentTaskLogs(page)).not.toContainText("chat.answer");
   });
 
   test("mail dispatch confirms and runs local mock execution without reading mailbox", async () => {

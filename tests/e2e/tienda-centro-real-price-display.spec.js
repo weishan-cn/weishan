@@ -101,7 +101,7 @@ test.describe.serial("Tienda Centro merchant-native real-price display", () => {
     const results = page.locator('[data-commerce-global-shopping-workspace="true"]');
     await expect(results).toBeVisible({ timeout:15000 });
     await expect(results.locator(".commerce-workspace-platform-card")).toHaveCount(1);
-    await expect(results).toContainText("平台比较");
+    await expect(results).toContainText(/当前已验证报价|商户报价比较/);
     await expect(results).toContainText("预计到手成本");
     await expect(results).toContainText("AI 采购建议");
     await expect(results).toContainText("CELULAR IPHONE 17 256 GB NUEVO");

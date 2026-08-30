@@ -2051,7 +2051,17 @@
     if (/门票|演唱会|展览|票务|ticket/i.test(raw)) return "ticketing";
     if (/预约|保洁|维修|咨询|service/i.test(raw)) return "serviceBooking";
     if (/域名|domain/i.test(raw)) return "domain";
-    if (/MacBook|iPhone|华为|苹果|电脑|手机|商品|电商|买|购买|采购|purchase|shopping|Sony|索尼|Samsung|三星|Fujifilm|富士|Canon|佳能|PlayStation|耳机|headphone|camera|相机|可口可乐|Coca[-\s]?Cola|白蜡木咖啡桌|咖啡桌|茶几|扶手椅|椅子|家具|coffee\s+table|armchair|chair|WH-\d+[A-Z0-9-]*|WF-\d+[A-Z0-9-]*|X-T\d+|EOS-R\d+|SM-S\d+[A-Z]?|A\d{4}/i.test(raw)) return "ecommerce";
+    const broadProcurement = /采购计划|采购方案|招标|供应商征集|企业服务|咨询方案|项目外包|批量询价|request\s+for\s+proposal|\bRFP\b/i.test(raw);
+    const informationalQuestion = /附件|attached\s+file|检查.*(?:首页|界面|输入区|页面|布局)|首都|人口|天气|历史|文化|总统|总理|领导人|是谁|在哪里|是什么|能做什么|可以做什么|为什么|如何|怎么(?!买|购买|找|搜索|比价)|怎样(?!买|购买|找|搜索|比价)|介绍|旅游攻略|汇率|时区|capital|population|weather|history|culture|president|prime\s+minister|who\s+is|where\s+is|what\s+is|why\b|how\b/i.test(raw);
+    const explicitMarket = /(?:英国|阿根廷|荷兰|波兰|美国|日本|中国|United\s+Kingdom|\bUK\b|Argentina|Netherlands|Poland|Polska|United\s+States|\bUSA\b|Japan|China)/i.test(raw);
+    const shoppingSignal = /商品|电商|零售|价格|多少钱|买|购买|比价|找|搜索|查找|purchase|shopping|retail|price|compare|search/i.test(raw);
+    const catalogShape = /(?:\b[A-Z0-9][A-Z0-9._-]{2,}\b|\d+(?:\.\d+)?\s*(?:g|kg|ml|l|oz|lb|cm|mm|inch|英寸|克|千克|毫升|升|片|包|盒|瓶|罐)\b)/i.test(raw);
+    const concreteMarketQuery = explicitMarket && raw
+      .replace(/(?:英国|阿根廷|荷兰|波兰|美国|日本|中国|United\s+Kingdom|\bUK\b|Argentina|Netherlands|Poland|Polska|United\s+States|\bUSA\b|Japan|China)/gi, " ")
+      .replace(/(?:请|帮我|麻烦|我要|我想|想要|需要|买|购买|找|搜索|查找|比较|比价|商品|价格|多少钱|purchase|shopping|retail|price|compare|search)/gi, " ")
+      .replace(/[^\p{L}\p{N}]+/gu, "")
+      .length >= 2;
+    if (!broadProcurement && !informationalQuestion && (shoppingSignal || catalogShape || concreteMarketQuery)) return "ecommerce";
     return "generalProcurement";
   }
 
@@ -2098,7 +2108,7 @@
     );
     const directOrderRisk = /直接下单|下单并付款|提交订单|自动付款|付款|支付|提交.*询价表|提交.*询价|上传.*(?:护照|身份证)|(?:护照|身份证).*(?:预订|预定|订|上传)/i.test(raw);
     const categoryWords = /酒店|住宿|机票|飞机票|航空票|火车票|高铁票|航班|电商|商品|SaaS|AI 模型|模型平台|API|门票|票务|服务预约|域名|MacBook|ChatGPT API|采购渠道|邮轮|游轮|cruise|公务机|私人飞机|包机|private jet|charter flight/i;
-    const isCommerceIntent = directOrderRisk || flightSearchIntent || objectWithPurchase || ((purchaseWords.test(raw) || assistedSearchPurchase) && (categoryWords.test(raw) || category !== "generalProcurement" || /全球采购|采购代理|自动采购|比价|平台比较|价格比较/i.test(raw)));
+    const isCommerceIntent = category === "ecommerce" || directOrderRisk || flightSearchIntent || objectWithPurchase || ((purchaseWords.test(raw) || assistedSearchPurchase) && (categoryWords.test(raw) || category !== "generalProcurement" || /全球采购|采购代理|自动采购|比价|平台比较|价格比较/i.test(raw)));
     return {
       isCommerceIntent,
       module:"commerceAgent",
@@ -2215,6 +2225,11 @@
     const raw = String(text || "");
     if (/^(flight|train|hotel)$/.test(category) && !/(\d{4}\s*[-/]\s*\d{1,2}\s*[-/]\s*\d{1,2}|\d{1,2}\s*月\s*\d{1,2}\s*日|今天|明天|后天|下周|周[一二三四五六日天])/.test(raw)) {
       return [category === "hotel" ? "入住日期" : "出行日期"];
+    }
+    if (category === "ecommerce" && /\biPhone\b/i.test(raw) && !/\biPhone\s*\d+/i.test(raw)) {
+      const missing = ["型号"];
+      if (!/(?:英国|阿根廷|荷兰|波兰|美国|日本|中国|United\s+Kingdom|\bUK\b|Argentina|Netherlands|Poland|Polska|United\s+States|\bUSA\b|Japan|China)/i.test(raw)) missing.push("购买地区", "收货地");
+      return missing;
     }
     return [];
   }
@@ -2576,6 +2591,7 @@
     const normalizedTaskFields = base.normalizedFields || normalizedFields(input, category, globalProcurementIntent, String(base.status || (globalProcurementIntent.category === "restricted_or_blocked" ? "blocked" : taskStatusFromText(input))));
     const readOnlySearchSummary = createGlobalShoppingReadOnlySearchSummary(input, category, normalizedTaskFields, String(base.status || "") === "blocked");
     const readOnlySearchGates = createGlobalShoppingReadOnlyTaskGates(readOnlySearchSummary);
+    const derivedMissingFields = missingFieldsForTask(input, category);
     const createdAt = base.createdAt || nowIso();
     return {
       schemaVersion:base.schemaVersion || "weishan.commerceAgent.task.v1",
@@ -2593,7 +2609,7 @@
       executionBoundary:Array.isArray(base.executionBoundary) ? base.executionBoundary : createCommerceExecutionBoundary(),
       riskNotice:Array.isArray(base.riskNotice) ? base.riskNotice : createCommerceRiskNotice(),
       riskLevel:String(base.riskLevel || (globalProcurementIntent.category === "restricted_or_blocked" || base.status === "blocked" ? "high" : "medium")),
-      missingFields:Array.isArray(base.missingFields) ? base.missingFields : missingFieldsForTask(input, category),
+      missingFields:Array.isArray(base.missingFields) && base.missingFields.length ? base.missingFields : derivedMissingFields,
       globalProcurementIntent,
       globalProcurementPlan,
       globalProcurementMissingInfoChecklist,

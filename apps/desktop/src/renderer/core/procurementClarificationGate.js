@@ -33,8 +33,9 @@
       const intent = classifier.buildGlobalShoppingIntentClassification({ rawUserInput:value, text:value, query:value });
       const extraction = extractor.buildGlobalShoppingEntityExtraction({ rawUserInput:value, text:value, query:value, intentClassification:intent });
       const entities = extraction && extraction.entities || {};
+      const extractedProductName = text(entities.model || entities.productName || entities.product || entities.brand);
       return {
-        productName:text(entities.model || entities.product || entities.brand),
+        productName:/^iphone$/i.test(extractedProductName) ? "" : extractedProductName,
         region:Array.isArray(entities.comparisonMarkets) ? entities.comparisonMarkets.length > 0 : /美国|日本|中国|香港|韩国|欧洲|英国|US|JP|CN|KR|EU|GB/i.test(value),
         receiving:!!text(entities.destinationCountry) || /收货|寄到|送到|发往|运到|到美国|到日本|到中国|到成都|到上海/i.test(value),
         budget:entities.budget != null,

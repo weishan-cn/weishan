@@ -46,6 +46,29 @@
     return value;
   }
 
+  function looksLikeCatalogProduct(text){
+    const raw = String(text || "");
+    const broadProcurement = /采购计划|采购方案|招标|供应商征集|企业服务|咨询方案|项目外包|批量询价|request\s+for\s+proposal|\bRFP\b/i.test(raw);
+    const informationalQuestion = /附件|attached\s+file|检查.*(?:首页|界面|输入区|页面|布局)|首都|人口|天气|历史|文化|总统|总理|领导人|是谁|在哪里|是什么|能做什么|可以做什么|为什么|如何|怎么(?!买|购买|找|搜索|比价)|怎样(?!买|购买|找|搜索|比价)|介绍|旅游攻略|汇率|时区|capital|population|weather|history|culture|president|prime\s+minister|who\s+is|where\s+is|what\s+is|why\b|how\b/i.test(raw);
+    if (broadProcurement || informationalQuestion) return false;
+    const market = /(?:英国|阿根廷|荷兰|波兰|美国|日本|中国|United\s+Kingdom|\bUK\b|Argentina|Netherlands|Poland|Polska|United\s+States|\bUSA\b|Japan|China)/i;
+    const shoppingSignal = /商品|电商|零售|价格|多少钱|买|购买|比价|找|搜索|查找|purchase|shopping|retail|price|compare|search/i.test(raw);
+    const catalogShape = /(?:\b[A-Z0-9][A-Z0-9._-]{2,}\b|\d+(?:\.\d+)?\s*(?:g|kg|ml|l|oz|lb|cm|mm|inch|英寸|克|千克|毫升|升|片|包|盒|瓶|罐)\b)/i.test(raw);
+    const residual = raw
+      .replace(new RegExp(market.source, "gi"), " ")
+      .replace(/(?:请|帮我|麻烦|我要|我想|想要|需要|买|购买|找|搜索|查找|比较|比价|商品|价格|多少钱|purchase|shopping|retail|price|compare|search)/gi, " ")
+      .replace(/[^\p{L}\p{N}]+/gu, "");
+    return shoppingSignal || catalogShape || (market.test(raw) && residual.length >= 2);
+  }
+
+  function productQueryFor(text){
+    const market = /(?:英国|阿根廷|荷兰|波兰|美国|日本|中国|United\s+Kingdom|\bUK\b|Argentina|Netherlands|Poland|Polska|United\s+States|\bUSA\b|Japan|China)/i;
+    return sanitize(String(text || "")
+      .replace(new RegExp(market.source, "gi"), " ")
+      .replace(/^(?:请|帮我|麻烦|我要|我想|想要|需要|买|购买|找|搜索|查找|比较|比价)\s*/i, " ")
+      .replace(/(?:商品|价格|多少钱)\s*$/i, " "));
+  }
+
   function routeForText(text){
     const raw = String(text || "");
     const clean = sanitize(raw);
@@ -55,9 +78,9 @@
     }
     const hasFlight = /机票|航班|飞机票|上海到成都|飞往|飞|flight/i.test(raw);
     const hasHotel = /酒店|住宿|民宿|住一晚|住两晚|住三晚|入住|附近住|订房|找房间|找酒店|hotel/i.test(raw);
-    const hasProduct = /iPhone|MacBook|电脑|手机|商品|耳机|相机|显示器|键盘|可口可乐|Coca[-\s]?Cola|咖啡桌|茶几|扶手椅|椅子|家具|coffee\s+table|armchair|chair|电商|product|Sony|索尼|Samsung|三星|Fujifilm|富士|Canon|佳能|PlayStation|WH-\d+[A-Z0-9-]*|WF-\d+[A-Z0-9-]*|X-T\d+|EOS-R\d+|SM-S\d+[A-Z]?|A\d{4}|headphone|camera/i.test(raw);
     const hasService = /搬家公司|保洁|维修|服务|local service/i.test(raw);
     const hasTicket = /门票|迪士尼|演唱会|ticket|activity/i.test(raw);
+    const hasProduct = !hasFlight && !hasHotel && !hasService && !hasTicket && looksLikeCatalogProduct(raw);
     const flags = [hasFlight, hasHotel, hasProduct, hasService, hasTicket].filter(Boolean).length;
     if (flags > 1 || /行程|规划|包括|多品类|采购计划/.test(raw)) return "multi_category_plan";
     if (hasFlight) return "flight";
@@ -74,7 +97,7 @@
     if (category === "restricted_or_blocked") return ["restricted_or_blocked"];
     if (/机票|航班|飞机票|飞往|飞|flight/i.test(raw)) list.push("flight");
     if (/酒店|住宿|民宿|住一晚|住两晚|住三晚|入住|附近住|订房|找房间|找酒店|hotel/i.test(raw)) list.push("hotel");
-    if (/iPhone|MacBook|电脑|手机|商品|耳机|相机|显示器|键盘|可口可乐|Coca[-\s]?Cola|咖啡桌|茶几|扶手椅|椅子|家具|coffee\s+table|armchair|chair|电商|product|Sony|索尼|Samsung|三星|Fujifilm|富士|Canon|佳能|PlayStation|WH-\d+[A-Z0-9-]*|WF-\d+[A-Z0-9-]*|X-T\d+|EOS-R\d+|SM-S\d+[A-Z]?|A\d{4}|headphone|camera/i.test(raw)) list.push("product");
+    if (category === "product") list.push("product");
     if (/搬家公司|保洁|维修|服务|local service/i.test(raw)) list.push("local_service");
     if (/门票|迪士尼|演唱会|ticket|activity/i.test(raw)) list.push("ticket_or_activity");
     if (category === "multi_category_plan" && list.length === 0) return ["flight", "hotel", "local_service", "ticket_or_activity"];
@@ -116,6 +139,11 @@
     if (category === "flight" && !route.origin) missingInfoList.push("出发地");
     if (category === "flight" && !route.destination) missingInfoList.push("目的地");
     if ((category === "flight" || category === "hotel") && !date) missingInfoList.push(category === "hotel" ? "日期范围" : "日期");
+    if (category === "product") {
+      const explicitMarket = /(?:英国|阿根廷|荷兰|波兰|美国|日本|中国|United\s+Kingdom|\bUK\b|Argentina|Netherlands|Poland|Polska|United\s+States|\bUSA\b|Japan|China)/i.test(clean);
+      if (/\biPhone\b/i.test(clean) && !/\biPhone\s*\d+/i.test(clean)) missingInfoList.push("型号");
+      if (!explicitMarket && !text(entities.destinationCountry)) missingInfoList.push("购买地区", "收货地");
+    }
     const blockedReason = restricted ? restricted.reason : "";
     return {
       routerVersion:GLOBAL_PROCUREMENT_INTENT_ROUTER_VERSION,
@@ -129,7 +157,7 @@
       date,
       dateRange:date,
       location:firstMatch(clean, /(?:附近|在|位于)([\u4e00-\u9fa5A-Za-z0-9\s]{2,30})/) || route.destination,
-      productName:text(entities.model || entities.product || entities.productName || entities.brand || firstMatch(clean, /(iPhone\s*\d+(?:\s*(?:Pro|Plus|Mini|Max))?|MacBook|可口可乐|Coca[-\s]?Cola|白蜡木咖啡桌|咖啡桌|茶几|扶手椅|椅子|coffee\s+table|armchair|WH-\d+[A-Z0-9-]*|WF-\d+[A-Z0-9-]*|X-T\d+|EOS-R\d+|SM-S\d+[A-Z]?|A\d{4}|电脑|手机|耳机|相机|[\u4e00-\u9fa5A-Za-z0-9\s]+商品)/i)),
+      productName:text(entities.model || entities.product || entities.productName || entities.brand || (category === "product" ? productQueryFor(clean) : "")),
       brand:text(entities.brand),
       model:text(entities.model),
       budget:Number.isFinite(Number(entities.budget)) ? Number(entities.budget) : null,

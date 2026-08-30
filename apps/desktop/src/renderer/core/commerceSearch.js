@@ -2131,25 +2131,28 @@
     };
   }
 
-  function merchantNativeSourceQuery(request, sourceId){
+  function merchantNativeSourceQuery(request){
     const raw = sanitizeText(request && (request.query || request.inputSummary) || "", 240);
     if (!raw) return "";
     let query = raw
       .replace(/英国|阿根廷|荷兰|波兰|\b(?:United Kingdom|UK|Argentina|Netherlands|Nederland|Poland|Polska)\b/gi, " ")
       .replace(/(?:帮我|请|查找|搜索|比较|购买|买|当前|实时|真实|价格|商品)/g, " ")
       .replace(/\b(?:please|help|find|search|compare|buy|current|real|price|product)\b/gi, " ")
+      .replace(/\b(?:celular|telefono|smartphone|nuevo|nueva|new)\b/gi, " ")
       .replace(/\s+/g, " ").trim();
     const genericTerms = [
-      [/可口可乐/gi, "Coca-Cola"], [/无糖|零度/gi, "Zero"], [/原味|经典/gi, "Original"],
-      [/草坪种子|草籽/gi, "grass seed"], [/肥料/gi, "fertiliser"]
+      [/白蜡木/gi, " Jesionowy "], [/咖啡桌|茶几/gi, " stolik kawowy "], [/扶手椅/gi, " fotel "], [/椅子/gi, " krzesło "],
+      [/草坪种子|草籽/gi, "grass seed"], [/肥料/gi, "fertiliser"],
+      [/大米|米饭/gi, "rice"], [/鸡蛋/gi, "eggs"], [/火腿/gi, "ham"], [/酱油/gi, "soy sauce"],
+      [/咖啡/gi, "coffee"], [/茶/gi, "tea"], [/牛奶/gi, "milk"], [/饮料/gi, "drink"],
+      [/面条|方便面/gi, "noodles"], [/饼干/gi, "biscuits"], [/洗发水/gi, "shampoo"], [/牙膏/gi, "toothpaste"],
+      [/洗衣液|洗衣粉/gi, "detergent"], [/肥皂|洗手液/gi, "soap"], [/婴儿湿巾/gi, "baby wipes"]
     ];
-    if (sourceId === MEBLOSTAN_SOURCE_ID) genericTerms.push([/白蜡木/gi, " Jesionowy "], [/咖啡桌|茶几/gi, " stolik kawowy "], [/扶手椅/gi, " fotel "], [/椅子/gi, " krzesło "]);
     genericTerms.forEach(function (entry) { query = query.replace(entry[0], entry[1]); });
-    const appleModel = query.match(/\b(?:celular\s+)?(iphone)\s*(\d{1,2})\s*(pro(?:\s*max)?|plus|max|mini)?/i);
-    if (appleModel) {
-      const storage = query.match(/\b(\d+)\s*(gb|tb)\b/i);
-      query = ["iPhone", appleModel[2], sanitizeText(appleModel[3] || "", 20), storage && storage[1], storage && storage[2].toUpperCase()].filter(Boolean).join(" ");
-    }
+    query = query
+      .replace(/\b([A-Za-z][A-Za-z-]*)(\d{1,4})([A-Za-z]+)?\b/g, function(_, name, number, suffix){ return [name, number, suffix || ""].filter(Boolean).join(" "); })
+      .replace(/\b(\d{1,4})([A-Za-z]+)\b/g, "$1 $2")
+      .replace(/\b(\d+)\s*(gb|tb)\b/gi, function(_, amount, unit){ return amount + " " + unit.toUpperCase(); });
     return sanitizeText(query.replace(/\s+/g, " ").trim(), 120);
   }
 
