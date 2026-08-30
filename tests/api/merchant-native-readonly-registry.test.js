@@ -53,11 +53,13 @@ function tiendaProduct() {
 
 async function main() {
   assert.deepEqual(Object.keys(STATIC_SOURCE_DEFINITIONS).sort(), [
+    "meblostan_public_api",
     "prijsprofeet_public_api",
     "tienda_centro_public_api"
   ]);
   assert.equal(Object.values(STATIC_SOURCE_DEFINITIONS).filter((item) => item.family === "broad_consumer_retail" && item.enabled).length, 1);
   assert.equal(STATIC_SOURCE_DEFINITIONS.tienda_centro_public_api.enabled, true);
+  assert.equal(STATIC_SOURCE_DEFINITIONS.meblostan_public_api.family, "furniture_home_furnishings");
   assert.equal("synthetic_test_merchant" in STATIC_SOURCE_DEFINITIONS, false);
 
   let tiendaCalls = 0;
@@ -72,7 +74,7 @@ async function main() {
     }
   });
   const registry = createMerchantNativeReadonlyRegistry({ services:{ tienda_centro_public_api:tiendaService } });
-  assert.deepEqual(registry.enabledSourceIds.slice().sort(), ["prijsprofeet_public_api", "tienda_centro_public_api"]);
+  assert.deepEqual(registry.enabledSourceIds.slice().sort(), ["meblostan_public_api", "prijsprofeet_public_api", "tienda_centro_public_api"]);
 
   const valid = await registry.search({
     sourceId:"tienda_centro_public_api",

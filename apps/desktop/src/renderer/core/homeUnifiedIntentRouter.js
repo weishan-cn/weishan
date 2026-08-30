@@ -104,19 +104,20 @@
     /\b(invoice|receipt|billing|bill|order confirmation|booking confirmation|reservation confirmation|itinerary|e-?ticket|refund notice)\b/i
   ];
   const SHOPPING_OBJECT = [
-    /商品|产品|电商|MacBook|iPhone|iPad|华为|小米|三星|PS5|Switch|手机|电脑|笔记本|耳机|相机|家电|显卡|键盘|可口可乐|价格|比价|最便宜|性价比|采购|购买|买/i,
+    /商品|产品|电商|MacBook|iPhone|iPad|华为|小米|三星|PS5|Switch|手机|电脑|笔记本|耳机|相机|家电|显卡|键盘|可口可乐|咖啡桌|茶几|扶手椅|椅子|家具|价格|比价|最便宜|性价比|采购|购买|买/i,
     /\b(product|shopping|price|compare|buy|purchase|retailer|deal|laptop|phone|camera|macbook|iphone|ipad|ps5|nintendo|console|coca[-\s]?cola)\b/i
   ];
   const MARKET_CONTEXT = [
-    /英国|阿根廷|荷兰|美国|日本|中国|德国|法国|西班牙|意大利|加拿大|澳大利亚/i,
-    /\b(?:United Kingdom|UK|Argentina|Netherlands|United States|USA|Japan|China|Germany|France|Spain|Italy|Canada|Australia)\b/i
+    /英国|阿根廷|荷兰|波兰|美国|日本|中国|德国|法国|西班牙|意大利|加拿大|澳大利亚/i,
+    /\b(?:United Kingdom|UK|Argentina|Netherlands|Poland|Polska|United States|USA|Japan|China|Germany|France|Spain|Italy|Canada|Australia)\b/i
   ];
   const KNOWN_PRODUCT_IDENTITY = [
     /\biPhone\s*\d+\s*(?:Pro|Max|Plus)?\b/i,
     /\biPhone\s*\d+(?:Pro|Max|Plus)\b/i,
     /\bMacBook\s+(?:Air|Pro)(?:\s+M\d+)?\b/i,
     /\bSony\s+WH-[A-Z0-9-]+\b/i,
-    /可口可乐|\bCoca[-\s]?Cola\b/i
+    /可口可乐|\bCoca[-\s]?Cola\b/i,
+    /白蜡木咖啡桌|咖啡桌|茶几|扶手椅|椅子|\b(?:coffee table|armchair|chair)\b/i
   ];
   const PROJECT_CONTEXT = [
     /在项目里|项目中|项目文件|设计文件|工程文件|代码仓库/i,

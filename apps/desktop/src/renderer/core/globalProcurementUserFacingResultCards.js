@@ -332,7 +332,7 @@
   function buildFields(intent, detail){
     const safeIntent = intent && typeof intent === "object" ? intent : {};
     const raw = text(safeIntent.searchQueryDraft);
-    const regionMatches = raw.match(/美国|日本|中国|香港|英国|阿根廷|荷兰|欧洲|韩国/g) || [];
+    const regionMatches = raw.match(/美国|日本|中国|香港|英国|阿根廷|荷兰|波兰|欧洲|韩国/g) || [];
     const budgetMatch = raw.match(/预算\s*(\d+(?:\.\d+)?)\s*(美元|美金|USD|usd|日元|円|JPY|jpy|人民币|元)?/);
     const budgetAmount = budgetMatch && budgetMatch[1] ? budgetMatch[1] : "";
     const budgetCurrency = budgetMatch && budgetMatch[2] ? budgetMatch[2] : "";
@@ -343,6 +343,7 @@
       GB:"United Kingdom",
       AR:"Argentina",
       NL:"Netherlands",
+      PL:"Poland",
       KR:"South Korea",
       HK:"Hong Kong"
     };
@@ -390,6 +391,7 @@
     if (/相机|camera|EOS|X-T\d/i.test(value)) return "相机";
     if (/手机|iPhone|Galaxy|Pixel|SM-[A-Z0-9-]+/i.test(value)) return "手机";
     if (/电脑|笔记本|MacBook|ThinkPad|ROG/i.test(value)) return "电脑";
+    if (/咖啡桌|茶几|扶手椅|椅子|家具|coffee\s+table|armchair|chair/i.test(value)) return "家具";
     if (/酒店|hotel/i.test(value)) return "酒店";
     if (/机票|flight/i.test(value)) return "机票";
     return "全球采购";

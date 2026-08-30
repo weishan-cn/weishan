@@ -4,8 +4,10 @@
   const CHEAPEST_REDIRECT_MODE = "cheapest_redirect";
   const PRIJS_PROFEET_SOURCE_ID = "prijsprofeet_public_api";
   const TIENDA_CENTRO_SOURCE_ID = "tienda_centro_public_api";
+  const MEBLOSTAN_SOURCE_ID = "meblostan_public_api";
   const prijsProfeetSearchGenerations = new Map();
   const tiendaCentroSearchGenerations = new Map();
+  const meblostanSearchGenerations = new Map();
 
   function nowIso(){
     return new Date().toISOString();
@@ -133,6 +135,10 @@
     return window.WeishanTiendaCentroReadonlyAdapter || null;
   }
 
+  function meblostanReadonlyAdapterApi(){
+    return window.WeishanMeblostanReadonlyAdapter || null;
+  }
+
   function merchantNativeSourceRouterApi(){
     return window.WeishanMerchantNativeSourceEligibilityRouter || null;
   }
@@ -144,6 +150,7 @@
       { pattern:/英国|\b(?:United Kingdom|UK)\b/i, country:"United Kingdom" },
       { pattern:/阿根廷|\bArgentina\b/i, country:"Argentina" },
       { pattern:/荷兰|\b(?:Netherlands|Nederland)\b/i, country:"Netherlands" },
+      { pattern:/波兰|\b(?:Poland|Polska)\b/i, country:"Poland" },
       { pattern:/美国|\b(?:United States|USA)\b/i, country:"United States" },
       { pattern:/日本|\bJapan\b/i, country:"Japan" },
       { pattern:/中国|\bChina\b/i, country:"China" }
@@ -2134,6 +2141,12 @@
       }
       if (/可口可乐|coca[-\s]?cola/i.test(raw)) return "Coca-Cola";
     }
+    if (sourceId === MEBLOSTAN_SOURCE_ID) {
+      if (/白蜡木(?:咖啡桌|茶几)|ash\s+coffee\s+table|jesionowy\s+stolik\s+kawowy/i.test(raw)) return "Jesionowy stolik kawowy";
+      if (/咖啡桌|茶几|coffee\s+table|stolik\s+kawowy/i.test(raw)) return "stolik kawowy";
+      if (/扶手椅|armchair|fotel/i.test(raw)) return "fotel";
+      if (/椅子|chair|krzes(?:lo|ło)/i.test(raw)) return "krzesło";
+    }
     return raw;
   }
 
@@ -2998,6 +3011,40 @@
     });
   }
 
+  async function searchMeblostanReadonlyProductCandidates(request){
+    const bridge = window.weishanGlobalShopping;
+    const adapter = meblostanReadonlyAdapterApi();
+    if (!bridge || typeof bridge.merchantNativeReadonlySearch !== "function" || !adapter || typeof adapter.normalizeResult !== "function") return null;
+    const taskKey = sanitizeText(request.taskId || request.query || "product", 120);
+    const nextGeneration = Number(meblostanSearchGenerations.get(taskKey) || 0) + 1;
+    meblostanSearchGenerations.set(taskKey, nextGeneration);
+    const requestId = taskKey + ":" + String(nextGeneration);
+    let raw;
+    try {
+      raw = await bridge.merchantNativeReadonlySearch(MEBLOSTAN_SOURCE_ID, { query:merchantNativeSourceQuery(request, MEBLOSTAN_SOURCE_ID), requestId, limit:1 });
+    } catch (_) {
+      raw = { ok:false, code:"SOURCE_UNAVAILABLE", requestId, results:[] };
+    }
+    if (Number(meblostanSearchGenerations.get(taskKey) || 0) !== nextGeneration || sanitizeText(raw && raw.requestId || "", 120) !== requestId) {
+      return { ok:false, code:"COMMERCE_STALE_RESULT_IGNORED", message:"较早的价格查询结果已忽略。", providerName:"Meblostan", request, candidates:[] };
+    }
+    const normalized = adapter.normalizeResult(raw, { evaluatedAt:nowIso() });
+    const normalizedStatus = normalized && normalized.status
+      ? Object.assign({}, normalized.status, { requestCount:Number(normalized.requestCount || 0) })
+      : adapter.status({ ok:false });
+    if (!normalized || normalized.ok !== true) {
+      return { ok:false, code:"COMMERCE_PROVIDER_UNAVAILABLE", message:"Meblostan 当前价格查询暂时不可用，请稍后重试。", providerName:"Meblostan", request, candidates:[], canShowPrice:false, canShowBookingButton:false, canShowCheckoutButton:false, realProviderReadonlyStatus:normalizedStatus };
+    }
+    if (!normalized.candidates.length) {
+      return { ok:false, code:"COMMERCE_NO_RESULTS", message:"没有找到与所查询家具精确匹配、且带商户商品页的当前价格。", providerName:"Meblostan", request, candidates:[], canShowPrice:false, canShowBookingButton:false, canShowCheckoutButton:false, realProviderReadonlyStatus:normalizedStatus };
+    }
+    return buildReadOnlySearchSuccess(request, "Meblostan", normalized.candidates, normalizedStatus, {
+      source:"meblostan_main_process_public_readonly",
+      singleEvidenceOnly:true,
+      noResultsMessage:"没有找到与所查询家具精确匹配、且带商户商品页的当前价格。"
+    });
+  }
+
   function buildReadOnlyFallbackSearchResult(request, status){
     const factory = platformCandidateFactoryApi();
     const candidates = factory && typeof factory.buildGlobalShoppingPlatformCandidates === "function"
@@ -3115,9 +3162,16 @@
         && typeof window.weishanGlobalShopping.merchantNativeReadonlySearch === "function"
         && tiendaCentroReadonlyAdapterApi()
         && typeof tiendaCentroReadonlyAdapterApi().normalizeResult === "function");
+    const meblostanReadonlyReady = isProductSearchRequest(request)
+      && !!(window.weishanGlobalShopping
+        && typeof window.weishanGlobalShopping.merchantNativeReadonlySearch === "function"
+        && meblostanReadonlyAdapterApi()
+        && typeof meblostanReadonlyAdapterApi().normalizeResult === "function");
     const selectedReadonlySource = sourceRoute.eligibleSourceIds && sourceRoute.eligibleSourceIds[0] || "";
     const selectedReadonlySourceReady = selectedReadonlySource === TIENDA_CENTRO_SOURCE_ID
       ? tiendaCentroReadonlyReady
+      : selectedReadonlySource === MEBLOSTAN_SOURCE_ID
+        ? meblostanReadonlyReady
       : selectedReadonlySource === PRIJS_PROFEET_SOURCE_ID ? prijsProfeetReadonlyReady : false;
     const approvedReadonlySourcePolicy = selectedReadonlySourceReady ? selectedReadonlySource : "";
     if (isProductSearchRequest(request) && currentLocationHealth.hasShippingDestination !== true) {
@@ -3141,6 +3195,8 @@
     if (isProductSearchRequest(request) && !(request.missingFields && request.missingFields.length)) {
       const readonlyResult = (selectedReadonlySource === TIENDA_CENTRO_SOURCE_ID
         ? await searchTiendaCentroReadonlyProductCandidates(request)
+        : selectedReadonlySource === MEBLOSTAN_SOURCE_ID
+          ? await searchMeblostanReadonlyProductCandidates(request)
         : selectedReadonlySource === PRIJS_PROFEET_SOURCE_ID ? await searchPrijsProfeetReadonlyProductCandidates(request) : null)
         || await searchRakutenReadonlyProductCandidates(request);
       if (readonlyResult) {

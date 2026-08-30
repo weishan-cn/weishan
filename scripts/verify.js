@@ -82,6 +82,8 @@ function runCore() {
   runStep("PrijsProfeet renderer price-truth flow", "node", ["tests/api/prijsprofeet-renderer-flow.test.js"]);
   runStep("Tienda Centro merchant public read-only integration", "node", ["tests/api/tienda-centro-readonly-integration.test.js"]);
   runStep("Tienda Centro renderer price-truth flow", "node", ["tests/api/tienda-centro-renderer-flow.test.js"]);
+  runStep("Meblostan merchant public read-only integration", "node", ["tests/api/meblostan-readonly-integration.test.js"]);
+  runStep("Meblostan renderer price-truth flow", "node", ["tests/api/meblostan-renderer-flow.test.js"]);
   runStep("Merchant-native static read-only registry", "node", ["tests/api/merchant-native-readonly-registry.test.js"]);
   runStep("Merchant-native source and query isolation", "node", ["tests/api/merchant-native-source-isolation.test.js"]);
   runStep("Real-price source auto-routing", "node", ["tests/api/real-price-source-auto-routing.test.js"]);
@@ -146,6 +148,7 @@ function runE2e() {
     runStep("E2E read-only price truth layer", "npx", ["playwright", "test", "tests/e2e/read-only-price-truth-layer.spec.js", "--workers=1"]);
     runStep("E2E PrijsProfeet real-price display", "npx", ["playwright", "test", "tests/e2e/prijsprofeet-real-price-display.spec.js", "--workers=1"]);
     runStep("E2E Tienda Centro merchant real-price display", "npx", ["playwright", "test", "tests/e2e/tienda-centro-real-price-display.spec.js", "--workers=1"]);
+    runStep("E2E Meblostan real-price Home flow", "npx", ["playwright", "test", "tests/e2e/meblostan-real-price-display.spec.js", "--workers=1"]);
     runStep("E2E Public Beta user journey", "npx", ["playwright", "test", "tests/e2e/public-beta-user-journey.spec.js", "--workers=1"]);
     runStep("E2E Desktop UI simplification", "npx", ["playwright", "test", "tests/e2e/desktop-ui-simplification.spec.js", "--workers=1"]);
     runStep("E2E desktop assistant", "npm", ["run", "test:e2e:desktop-assistant"]);

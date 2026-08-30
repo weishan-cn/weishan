@@ -99,9 +99,12 @@ assert.deepEqual(Array.from(search.routeMerchantNativeSource({ inputSummary:"荷
 assert.deepEqual(Array.from(search.routeMerchantNativeSource({ query:"Coca-Cola", inputSummary:"荷兰可口可乐" }).eligibleSourceIds), ["prijsprofeet_public_api"]);
 assert.equal(search.routeMerchantNativeSource({ inputSummary:"英国 iPhone 17pro" }).destinationMarket, "GB");
 assert.deepEqual(Array.from(search.routeMerchantNativeSource({ inputSummary:"英国 iPhone 17pro" }).eligibleSourceIds), []);
+assert.equal(search.routeMerchantNativeSource({ inputSummary:"波兰白蜡木咖啡桌" }).destinationMarket, "PL");
+assert.deepEqual(Array.from(search.routeMerchantNativeSource({ inputSummary:"波兰白蜡木咖啡桌" }).eligibleSourceIds), ["meblostan_public_api"]);
 assert.equal(search.merchantNativeSourceQuery({ query:"荷兰可口可乐" }, "prijsprofeet_public_api"), "Coca-Cola");
 assert.equal(search.merchantNativeSourceQuery({ query:"荷兰可口可乐 Zero" }, "prijsprofeet_public_api"), "Coca-Cola Zero");
 assert.equal(search.merchantNativeSourceQuery({ query:"阿根廷 iPhone 17pro" }, "tienda_centro_public_api"), "iPhone 17 pro");
 assert.equal(search.merchantNativeSourceQuery({ query:"阿根廷 iPhone 17 Pro 512GB" }, "tienda_centro_public_api"), "iPhone 17 Pro 512 GB");
+assert.equal(search.merchantNativeSourceQuery({ query:"波兰白蜡木咖啡桌" }, "meblostan_public_api"), "Jesionowy stolik kawowy");
 
 console.log("HOME_GLOBAL_SHOPPING_DISPATCH_REAL_PRICE PASS cases=4 coordination=0 aiGateway=0");

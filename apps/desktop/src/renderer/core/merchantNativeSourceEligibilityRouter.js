@@ -2,7 +2,8 @@
   const ROUTER_VERSION = "1.0.0";
   const SOURCE_IDS = Object.freeze({
     prijsprofeet:"prijsprofeet_public_api",
-    tiendaCentro:"tienda_centro_public_api"
+    tiendaCentro:"tienda_centro_public_api",
+    meblostan:"meblostan_public_api"
   });
 
   function text(value){
@@ -14,6 +15,7 @@
     if (/^(ar|arg|argentina|阿根廷)$/.test(raw)) return "AR";
     if (/^(nl|nld|netherlands|the netherlands|nederland|荷兰)$/.test(raw)) return "NL";
     if (/^(gb|gbr|uk|united kingdom|great britain|英国)$/.test(raw)) return "GB";
+    if (/^(pl|pol|poland|polska|波兰)$/.test(raw)) return "PL";
     return raw ? raw.toUpperCase() : "";
   }
 
@@ -21,6 +23,7 @@
     const value = text(query).toLowerCase();
     if (!value) return "unknown";
     if (/\b(?:iphone|smartphone|cellphone|mobile phone|celular|telefono)\b|手机|智能手机/.test(value)) return "consumer_electronics";
+    if (/\b(?:armchair|chair|coffee table|table|commode|furniture|stolik|fotel|krzeslo|krzesło|komoda)\b|扶手椅|椅子|咖啡桌|茶几|家具|斗柜/.test(value)) return "furniture";
     if (/\b(?:coca[- ]?cola|cola|soda|soft drink|grocery|milk|coffee|tea|bread|snack)\b|可口可乐|食品|饮料|牛奶|咖啡|茶/.test(value)) return "grocery";
     return "general_product";
   }
@@ -32,6 +35,7 @@
     const eligibleSourceIds = [];
     if (destinationMarket === "AR" && family !== "unknown") eligibleSourceIds.push(SOURCE_IDS.tiendaCentro);
     if (destinationMarket === "NL" && family === "grocery") eligibleSourceIds.push(SOURCE_IDS.prijsprofeet);
+    if (destinationMarket === "PL" && family === "furniture") eligibleSourceIds.push(SOURCE_IDS.meblostan);
     return Object.freeze({
       routerVersion:ROUTER_VERSION,
       destinationMarket,

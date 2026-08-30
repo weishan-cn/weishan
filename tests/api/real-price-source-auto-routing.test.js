@@ -58,6 +58,8 @@ async function main() {
   assert.deepEqual(Array.from(route("IPHONE 17", "Argentina").eligibleSourceIds), ["tienda_centro_public_api"]);
   assert.deepEqual(Array.from(route("Coca-Cola Original", "Netherlands").eligibleSourceIds), ["prijsprofeet_public_api"]);
   assert.deepEqual(Array.from(route("Coca-Cola Original", "United Kingdom").eligibleSourceIds), []);
+  assert.deepEqual(Array.from(route("Jesionowy stolik kawowy", "Poland").eligibleSourceIds), ["meblostan_public_api"]);
+  assert.deepEqual(Array.from(route("IPHONE 17", "Poland").eligibleSourceIds), []);
   assert.deepEqual(Array.from(route("unknown product", "unknown market").eligibleSourceIds), []);
   assert.equal(route("IPHONE 17", "Argentina").productFamily, "consumer_electronics");
   assert.equal(route("IPHONE 17", "Argentina").maxEligibleSourcesQueriedPerSearch, 1);

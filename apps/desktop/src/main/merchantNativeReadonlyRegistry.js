@@ -7,6 +7,7 @@ const {
 } = require("./merchantNativeReadonlyServiceCore");
 const { createPrijsProfeetReadonlyService } = require("./prijsProfeetReadonlyService");
 const { createTiendaCentroReadonlyService } = require("./tiendaCentroReadonlyService");
+const { createMeblostanReadonlyService } = require("./meblostanReadonlyService");
 
 const MERCHANT_NATIVE_READONLY_REGISTRY_VERSION = "1.0.0";
 const SEARCH_CHANNEL = "global-shopping:merchant-native-readonly-search";
@@ -26,6 +27,12 @@ const STATIC_SOURCE_DEFINITIONS = Object.freeze({
     family:"broad_consumer_retail",
     enabled:true,
     createService:createTiendaCentroReadonlyService
+  }),
+  meblostan_public_api:Object.freeze({
+    sourceId:"meblostan_public_api",
+    family:"furniture_home_furnishings",
+    enabled:true,
+    createService:createMeblostanReadonlyService
   })
 });
 
