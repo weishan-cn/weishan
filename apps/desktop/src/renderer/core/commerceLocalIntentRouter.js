@@ -105,7 +105,7 @@
     {
       category:"product",
       confidence:"high",
-      patterns:[/买|购买|想买|帮我买|买一个|买台|买部|手机|电脑|笔记本|平板|耳机|相机|手表|家电|衣服|鞋|包|化妆品|护肤品|药品以外的普通商品|MacBook|iPhone/i]
+      patterns:[/买|购买|想买|帮我买|买一个|买台|买部|手机|电脑|笔记本|平板|耳机|相机|手表|家电|衣服|鞋|包|化妆品|护肤品|药品以外的普通商品|MacBook|iPhone|可口可乐|Coca[-\s]?Cola/i]
     },
     {
       category:"general_commerce",
@@ -132,7 +132,7 @@
     }).filter(Boolean);
     const hasSpecificNonProduct = matches.some((item) => item.category !== "product" && item.category !== "general_commerce");
     const hasProduct = matches.some((item) => item.category === "product");
-    const hasSpecificProductObject = /手机|电脑|笔记本|平板|耳机|相机|手表|家电|衣服|鞋|包|化妆品|护肤品|药品以外的普通商品|MacBook|iPhone|华为|苹果/i.test(normalized);
+    const hasSpecificProductObject = /手机|电脑|笔记本|平板|耳机|相机|手表|家电|衣服|鞋|包|化妆品|护肤品|药品以外的普通商品|MacBook|iPhone|华为|苹果|可口可乐|Coca[-\s]?Cola/i.test(normalized);
     if (hasSpecificNonProduct && hasProduct && !hasSpecificProductObject) {
       return matches.filter((item) => item.category !== "product");
     }

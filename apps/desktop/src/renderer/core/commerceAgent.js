@@ -2051,7 +2051,7 @@
     if (/门票|演唱会|展览|票务|ticket/i.test(raw)) return "ticketing";
     if (/预约|保洁|维修|咨询|service/i.test(raw)) return "serviceBooking";
     if (/域名|domain/i.test(raw)) return "domain";
-    if (/MacBook|iPhone|华为|苹果|电脑|手机|商品|电商|买|购买|采购|purchase|shopping|Sony|索尼|Samsung|三星|Fujifilm|富士|Canon|佳能|PlayStation|耳机|headphone|camera|相机|WH-\d+[A-Z0-9-]*|WF-\d+[A-Z0-9-]*|X-T\d+|EOS-R\d+|SM-S\d+[A-Z]?|A\d{4}/i.test(raw)) return "ecommerce";
+    if (/MacBook|iPhone|华为|苹果|电脑|手机|商品|电商|买|购买|采购|purchase|shopping|Sony|索尼|Samsung|三星|Fujifilm|富士|Canon|佳能|PlayStation|耳机|headphone|camera|相机|可口可乐|Coca[-\s]?Cola|WH-\d+[A-Z0-9-]*|WF-\d+[A-Z0-9-]*|X-T\d+|EOS-R\d+|SM-S\d+[A-Z]?|A\d{4}/i.test(raw)) return "ecommerce";
     return "generalProcurement";
   }
 
@@ -2176,13 +2176,18 @@
 
   function extractProductQuery(text){
     const raw = sanitizeCommerceInput(text).replace(/^E2E[A-Z]+-\d+\s*/i, "");
-    return raw
+    const product = raw
+      .replace(/(?:英国|阿根廷|荷兰|美国|日本|中国|United Kingdom|UK|Argentina|Netherlands|United States|USA|Japan|China)/gi, " ")
       .replace(/^(请|帮我|麻烦|我要|我想|想要|需要)\s*/g, "")
       .replace(/^(买|购买|找|搜索|查找|比较|比价)\s*/g, "")
       .replace(/(最便宜|低价|性价比高|性价比最高|一个|一台|一部|的|商品|电商|价格|多少钱|帮我|请)/g, "")
       .replace(/\s+/g, " ")
       .trim()
       .slice(0, 60);
+    if (/可口可乐|coca[-\s]?cola/i.test(product)) return "Coca-Cola";
+    return product.replace(/\biPhone\s*(\d+)\s*(Pro|Max|Plus)?\b/ig, function(_, model, suffix){
+      return "iPhone " + model + (suffix ? " " + suffix[0].toUpperCase() + suffix.slice(1).toLowerCase() : "");
+    });
   }
 
   function normalizedFields(text, category, globalProcurementIntent, status){

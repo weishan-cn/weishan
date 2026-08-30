@@ -211,6 +211,33 @@ test.describe.serial("dispatch router", () => {
     await expect(workspace).not.toContainText(/ARS|EUR/);
   });
 
+  test("four exact human country plus product inputs reach preferred shopping without AI", async () => {
+    await page.evaluate(() => {
+      if (window.WeishanCommerceAgent && typeof window.WeishanCommerceAgent.clearCommerceTasks === "function") window.WeishanCommerceAgent.clearCommerceTasks();
+    });
+
+    const cases = [
+      { input:"英国 iPhone 17pro", market:"United Kingdom", price:null },
+      { input:"阿根廷 iPhone 17pro", market:"Argentina", price:null },
+      { input:"阿根廷可口可乐", market:"Argentina", price:null },
+      { input:"荷兰可口可乐", market:"Netherlands", price:null }
+    ];
+    for (const item of cases) {
+      await submitHomeCommand(page, item.input);
+      const workspace = page.locator('[data-commerce-home-summary] [data-commerce-global-shopping-workspace="true"]');
+      await expect(workspace).toBeVisible();
+      await expect(workspace).toContainText(item.market);
+      await expect(workspace).toContainText("平台比较");
+      await expect(workspace).not.toContainText(/coordination\.plan|AI Key 未配置|realExecution=false|AI 大脑采购编排/);
+      await expect(workspace).not.toContainText(/EUR 0\.57|ARS\s*\d/);
+    }
+
+    const evidence = await page.evaluate(() => ({
+      tasks:window.WeishanCommerceAgent.getCommerceTasks().slice(0, 4).map((task) => ({ input:task.inputSummary, category:task.category }))
+    }));
+    expect(evidence.tasks.every((task) => task.category === "ecommerce")).toBe(true);
+  });
+
   test("flight booking intent routes to commerce agent before chat", async () => {
     const command = runId + " 帮我预定 7 月 15 日成都到北京机票";
     await submitHomeCommand(page, command);

@@ -85,6 +85,7 @@ function runCore() {
   runStep("Merchant-native static read-only registry", "node", ["tests/api/merchant-native-readonly-registry.test.js"]);
   runStep("Merchant-native source and query isolation", "node", ["tests/api/merchant-native-source-isolation.test.js"]);
   runStep("Real-price source auto-routing", "node", ["tests/api/real-price-source-auto-routing.test.js"]);
+  runStep("Home Global Shopping real-price dispatch", "node", ["tests/api/home-global-shopping-dispatch-real-price.test.js"]);
   runStep("Unified shopping and travel desktop flow", "node", ["tests/api/unified-desktop-flow-view-model.test.js"]);
   runStep("Home unified desktop effectiveness", "node", ["tests/api/home-unified-desktop-effectiveness.test.js"]);
   runStep("Search module effectiveness", "node", ["tests/api/search-module-effectiveness.test.js"]);

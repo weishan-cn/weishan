@@ -22,6 +22,8 @@
     "法国":"FR",
     "德国":"DE",
     "英国":"GB",
+    "阿根廷":"AR",
+    "荷兰":"NL",
     "欧盟":"EU",
     "US":"US",
     "USA":"US",
@@ -32,6 +34,11 @@
     "FR":"FR",
     "DE":"DE",
     "GB":"GB",
+    "AR":"AR",
+    "NL":"NL",
+    "ARGENTINA":"AR",
+    "NETHERLANDS":"NL",
+    "UNITED KINGDOM":"GB",
     "EU":"EU"
   };
 
@@ -74,7 +81,7 @@
     if (/^\d+(?:\.\d+)?$/.test(token)) return false;
     if (/RUN|VAGUE|PRODUCT|FLIGHT|HOTEL|SMOKE|TEST|CASE/i.test(token) && (token.match(/-/g) || []).length >= 2) return false;
     if (/^(美元|美金|日元|人民币|欧元|英镑|耳机|降噪耳机|商品|平台|价格|预算)$/i.test(token)) return false;
-    if (/^iPhone\s+\d+(?:\s+(?:Pro|Plus|Mini|Max))?$/i.test(token)) return true;
+    if (/^iPhone\s*\d+(?:\s*(?:Pro|Plus|Mini|Max))?$/i.test(token)) return true;
     if (/^PlayStation-?\d+(?:\s*Pro)?$/i.test(token)) return true;
     if ((token.match(/-/g) || []).length > 2) return false;
     if (/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)+$/.test(token) && /[A-Za-z]/.test(token) && /\d/.test(token)) return true;
@@ -92,7 +99,7 @@
     const candidates = [];
     const brandMatch = brandPattern ? safe.match(brandPattern) : null;
     if (brandMatch && brandMatch[1]) candidates.push(brandMatch[1]);
-    const multiWord = safe.match(/\b(iPhone\s+\d+(?:\s+(?:Pro|Plus|Mini|Max))?|PlayStation-?\d+(?:\s*Pro)?|MacBook\s+Pro|Nintendo\s+Switch)\b/i);
+    const multiWord = safe.match(/\b(iPhone\s*\d+(?:\s*(?:Pro|Plus|Mini|Max))?|PlayStation-?\d+(?:\s*Pro)?|MacBook\s+Pro|Nintendo\s+Switch)\b/i);
     if (multiWord && multiWord[1]) candidates.push(multiWord[1]);
     const tokenMatches = safe.match(/\b[A-Za-z0-9]+(?:-[A-Za-z0-9]+)+\b|\b[A-Za-z]{1,8}\d[A-Za-z0-9-]{1,16}\b|\b[A-Z]\d{3,6}[A-Z0-9]{0,4}\b/g) || [];
     candidates.push.apply(candidates, tokenMatches);
@@ -116,7 +123,7 @@
 
   function extractDestinationCountry(query) {
     const safe = text(query);
-    const match = safe.match(/(?:收货到|寄到|送到|发往|运到|到达|寄往)\s*(美国|日本|中国|韩国|新加坡|法国|德国|英国|欧盟|US|USA|JP|CN|KR|SG|FR|DE|GB|EU)/i);
+    const match = safe.match(/(?:收货到|寄到|送到|发往|运到|到达|寄往)\s*(美国|日本|中国|韩国|新加坡|法国|德国|英国|阿根廷|荷兰|欧盟|United Kingdom|Argentina|Netherlands|US|USA|JP|CN|KR|SG|FR|DE|GB|AR|NL|EU)/i);
     return normalizeCountryCode(match && (match[1] || match[0]));
   }
 
@@ -130,7 +137,7 @@
         if (code) markets.push(code);
       });
     }
-    const directMatches = safe.match(/\b(?:US|USA|JP|CN|KR|SG|FR|DE|GB|EU)\b|美国|日本|中国|韩国|新加坡|法国|德国|英国|欧盟/g) || [];
+    const directMatches = safe.match(/\b(?:United Kingdom|Argentina|Netherlands|US|USA|JP|CN|KR|SG|FR|DE|GB|AR|NL|EU)\b|美国|日本|中国|韩国|新加坡|法国|德国|英国|阿根廷|荷兰|欧盟/gi) || [];
     directMatches.forEach(function (part) {
       const code = normalizeCountryCode(part);
       if (code) markets.push(code);
@@ -142,7 +149,7 @@
     if (/(酒店|住宿|hotel|room|入住|民宿)/i.test(query)) return "hotel";
     if (/(机票|航班|flight|机酒|出发|返程|票价)/i.test(query)) return "flight";
     if (/(套餐|travel package|自由行|度假包|行程套餐)/i.test(query)) return "travel-package";
-    if (/(商品|价格|比价|iPhone|MacBook|switch|耳机|官网|电商)/i.test(query)) return "product";
+    if (/(商品|价格|比价|iPhone|MacBook|switch|耳机|可口可乐|Coca[-\s]?Cola|官网|电商)/i.test(query)) return "product";
     return "unknown";
   }
 
@@ -159,8 +166,8 @@
     const safe = text(query);
     const brandMatch = safe.match(BRAND_PATTERN);
     const brand = brandMatch ? brandMatch[1] : "";
-    const productMatch = safe.match(/\b(iPhone\s*16\s*Pro|MacBook\s*Pro|Nintendo\s*Switch)\b/i);
-    if (productMatch) entities.product = productMatch[1];
+    const productMatch = safe.match(/(iPhone\s*\d+(?:\s*(?:Pro|Plus|Mini|Max))?|MacBook\s*Pro|Nintendo\s*Switch|可口可乐|Coca[-\s]?Cola)/i);
+    if (productMatch) entities.product = /可口可乐|coca/i.test(productMatch[1]) ? "Coca-Cola" : productMatch[1];
     if (brand) entities.brand = brand;
     const model = extractModel(safe, brand);
     if (model) entities.model = model;

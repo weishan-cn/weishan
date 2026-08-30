@@ -388,7 +388,9 @@
     const flightSearchIntent = /(?:查|查一下|查询|看一下|找).{0,20}(?:机票|飞机票|航空票|航班)|(\d{4}[-/]\d{1,2}[-/]\d{1,2}|今天|明天|后天|下周[一二三四五六日天]?|周[一二三四五六日天]).{0,20}[\u4e00-\u9fa5A-Za-z]{2,24}\s*(?:飞往|飞|到|去)\s*[\u4e00-\u9fa5A-Za-z]{2,24}/i.test(raw);
     const directOrderRisk = /直接下单|下单并付款|提交订单|自动付款|付款|支付|提交.*询价表|提交.*询价|上传.*(?:护照|身份证)|(?:护照|身份证).*(?:预订|预定|订|上传)/i.test(raw);
     const regulatedCommerceRisk = /大麻|cannabis|marijuana|THC|枪|枪支|firearm|gun|weapon|ammunition|处方药|controlled medication|prescription drug|成人服务|adult service|赌博|gambling|casino|烟草|电子烟|tobacco|nicotine|vape|酒精|酒类|alcohol|危险品|hazardous|地区限制|restricted goods/i.test(raw);
-    const directProductLookup = /^\s*(?:(?:celular\s+)?iphone\s*\d+(?:\s+(?:\d+\s*(?:gb|g)|pro|max|plus|nuevo))*|coca[-\s]?cola(?:\s+original)?)(?:\s+(?:商品)?价格)?\s*$/i.test(raw);
+    const marketName = "(?:英国|阿根廷|荷兰|美国|日本|中国|United\\s+Kingdom|UK|Argentina|Netherlands|United\\s+States|USA|Japan|China)";
+    const productName = "(?:(?:celular\\s+)?iphone\\s*\\d+\\s*(?:pro|max|plus)?|可口可乐|coca[-\\s]?cola(?:\\s+original)?|macbook\\s+(?:air|pro)(?:\\s+m\\d+)?|sony\\s+wh-[a-z0-9-]+)";
+    const directProductLookup = new RegExp("^\\s*(?:" + marketName + "\\s*)?" + productName + "(?:\\s*" + marketName + ")?(?:\\s*(?:商品)?(?:价格|多少钱))?\\s*$", "i").test(raw);
     return regulatedCommerceRisk || directOrderRisk || flightSearchIntent || objectWithPurchase || directProductLookup || (purchaseIntent && commerceObject) || assistedSearchPurchase || /全球采购|采购代理|自动采购|比价|平台比较|价格比较/i.test(raw);
   }
 
@@ -507,6 +509,33 @@
         modules:[DISPATCH_MODULES.commerceAgent, DISPATCH_MODULES.mail],
         confidence:"safe_clarification",
         targetRoute:"home",
+        homeUnifiedIntentDecision
+      };
+    }
+
+    if (homeUnifiedIntentDecision && homeUnifiedIntentDecision.destination === "COMMERCE") {
+      const localIntentRouter = commerceLocalIntentRouterApi();
+      const commerceLocalIntentRoute = localIntentRouter && localIntentRouter.routeCommerceIntentLocally ? localIntentRouter.routeCommerceIntentLocally(raw) : null;
+      return {
+        module:DISPATCH_MODULES.commerceAgent,
+        action:DISPATCH_ACTIONS.commerceAgentPlan,
+        routeMode:"console",
+        modules:[DISPATCH_MODULES.commerceAgent],
+        targetRoute:"commerce",
+        confidence:homeUnifiedIntentDecision.confidence || "rule",
+        commerceLocalIntentRoute,
+        homeUnifiedIntentDecision
+      };
+    }
+
+    if (homeUnifiedIntentDecision && homeUnifiedIntentDecision.destination === "CHAT" && Array.isArray(homeUnifiedIntentDecision.reasons) && homeUnifiedIntentDecision.reasons.some((reason) => reason === "explicit_project_context" || reason === "general_factual_question_not_shopping")) {
+      return {
+        module:DISPATCH_MODULES.chat,
+        action:DISPATCH_ACTIONS.chatAnswer,
+        routeMode:"console",
+        modules:[DISPATCH_MODULES.chat],
+        targetRoute:"home",
+        confidence:homeUnifiedIntentDecision.confidence || "rule",
         homeUnifiedIntentDecision
       };
     }

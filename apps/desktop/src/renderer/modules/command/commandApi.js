@@ -1330,7 +1330,41 @@
         } else if (plan.module === "commerceAgent") {
           const commerceResult = commerceAgentAnswer(active.text, plan);
           answer = commerceResult.answer;
-          const commercePlan = commerceResult.commercePlan;
+          let commercePlan = commerceResult.commercePlan;
+          const readonlySearch = commerceSearch();
+          const commerceApi = commerceAgent();
+          if (commercePlan && commercePlan.category === "ecommerce" && readonlySearch && typeof readonlySearch.searchCommerceCandidates === "function" && commerceApi && typeof commerceApi.updateCommerceTask === "function") {
+            const searchResult = await readonlySearch.searchCommerceCandidates(commercePlan);
+            const searchPatch = searchResult && searchResult.ok ? {
+              status:"recommended",
+              searchStatus:"completed",
+              searchProviderName:searchResult.providerName || "",
+              canShowPrice:searchResult.canShowPrice === true,
+              canShowBookingButton:searchResult.canShowBookingButton === true,
+              canShowCheckoutButton:false,
+              candidates:Array.isArray(searchResult.candidates) ? searchResult.candidates : [],
+              recommendation:searchResult.recommendation || null,
+              readOnlySearchTopResults:Array.isArray(searchResult.readOnlySearchTopResults) ? searchResult.readOnlySearchTopResults : [],
+              readOnlySearchRemainingResults:Array.isArray(searchResult.readOnlySearchRemainingResults) ? searchResult.readOnlySearchRemainingResults : [],
+              readOnlySearchResultSummary:searchResult.readOnlySearchResultSummary || null,
+              realProviderReadonlyStatus:searchResult.realProviderReadonlyStatus || null,
+              sourceRouting:searchResult.sourceRouting || null,
+              locationHealth:searchResult.locationHealth || commercePlan.locationHealth || {},
+              searchErrorMessage:""
+            } : {
+              searchStatus:searchResult && (searchResult.code === "COMMERCE_NO_RESULTS" || searchResult.code === "COMMERCE_NO_LOCAL_REAL_PRICE_SOURCE") ? "no_results" : "failed",
+              canShowPrice:false,
+              canShowBookingButton:false,
+              canShowCheckoutButton:false,
+              readOnlySearchTopResults:[],
+              readOnlySearchRemainingResults:[],
+              readOnlySearchResultSummary:searchResult && searchResult.readOnlySearchResultSummary || null,
+              sourceRouting:searchResult && searchResult.sourceRouting || null,
+              locationHealth:searchResult && searchResult.locationHealth || commercePlan.locationHealth || {},
+              searchErrorMessage:searchResult && searchResult.message || ""
+            };
+            commercePlan = commerceApi.updateCommerceTask(commercePlan.taskId, searchPatch) || commercePlan;
+          }
           recordCommerceAgentHistory("commerceAgent.taskCreated", commercePlan, {
             inputSummary:taskSummary(active.text, 240),
             outputSummary:"已写入全球采购任务列表；未搜索、未下单、未付款、未提交订单。",

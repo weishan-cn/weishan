@@ -55,7 +55,7 @@
     }
     const hasFlight = /机票|航班|飞机票|上海到成都|飞往|飞|flight/i.test(raw);
     const hasHotel = /酒店|住宿|民宿|住一晚|住两晚|住三晚|入住|附近住|订房|找房间|找酒店|hotel/i.test(raw);
-    const hasProduct = /iPhone|MacBook|电脑|手机|商品|耳机|相机|显示器|键盘|电商|product|Sony|索尼|Samsung|三星|Fujifilm|富士|Canon|佳能|PlayStation|WH-\d+[A-Z0-9-]*|WF-\d+[A-Z0-9-]*|X-T\d+|EOS-R\d+|SM-S\d+[A-Z]?|A\d{4}|headphone|camera/i.test(raw);
+    const hasProduct = /iPhone|MacBook|电脑|手机|商品|耳机|相机|显示器|键盘|可口可乐|Coca[-\s]?Cola|电商|product|Sony|索尼|Samsung|三星|Fujifilm|富士|Canon|佳能|PlayStation|WH-\d+[A-Z0-9-]*|WF-\d+[A-Z0-9-]*|X-T\d+|EOS-R\d+|SM-S\d+[A-Z]?|A\d{4}|headphone|camera/i.test(raw);
     const hasService = /搬家公司|保洁|维修|服务|local service/i.test(raw);
     const hasTicket = /门票|迪士尼|演唱会|ticket|activity/i.test(raw);
     const flags = [hasFlight, hasHotel, hasProduct, hasService, hasTicket].filter(Boolean).length;
@@ -74,7 +74,7 @@
     if (category === "restricted_or_blocked") return ["restricted_or_blocked"];
     if (/机票|航班|飞机票|飞往|飞|flight/i.test(raw)) list.push("flight");
     if (/酒店|住宿|民宿|住一晚|住两晚|住三晚|入住|附近住|订房|找房间|找酒店|hotel/i.test(raw)) list.push("hotel");
-    if (/iPhone|MacBook|电脑|手机|商品|耳机|相机|显示器|键盘|电商|product|Sony|索尼|Samsung|三星|Fujifilm|富士|Canon|佳能|PlayStation|WH-\d+[A-Z0-9-]*|WF-\d+[A-Z0-9-]*|X-T\d+|EOS-R\d+|SM-S\d+[A-Z]?|A\d{4}|headphone|camera/i.test(raw)) list.push("product");
+    if (/iPhone|MacBook|电脑|手机|商品|耳机|相机|显示器|键盘|可口可乐|Coca[-\s]?Cola|电商|product|Sony|索尼|Samsung|三星|Fujifilm|富士|Canon|佳能|PlayStation|WH-\d+[A-Z0-9-]*|WF-\d+[A-Z0-9-]*|X-T\d+|EOS-R\d+|SM-S\d+[A-Z]?|A\d{4}|headphone|camera/i.test(raw)) list.push("product");
     if (/搬家公司|保洁|维修|服务|local service/i.test(raw)) list.push("local_service");
     if (/门票|迪士尼|演唱会|ticket|activity/i.test(raw)) list.push("ticket_or_activity");
     if (category === "multi_category_plan" && list.length === 0) return ["flight", "hotel", "local_service", "ticket_or_activity"];
@@ -129,7 +129,7 @@
       date,
       dateRange:date,
       location:firstMatch(clean, /(?:附近|在|位于)([\u4e00-\u9fa5A-Za-z0-9\s]{2,30})/) || route.destination,
-      productName:text(entities.model || entities.product || entities.brand || firstMatch(clean, /(iPhone\s*\d+\s*Pro|MacBook|WH-\d+[A-Z0-9-]*|WF-\d+[A-Z0-9-]*|X-T\d+|EOS-R\d+|SM-S\d+[A-Z]?|A\d{4}|电脑|手机|耳机|相机|[\u4e00-\u9fa5A-Za-z0-9\s]+商品)/i)),
+      productName:text(entities.model || entities.product || entities.productName || entities.brand || firstMatch(clean, /(iPhone\s*\d+(?:\s*(?:Pro|Plus|Mini|Max))?|MacBook|可口可乐|Coca[-\s]?Cola|WH-\d+[A-Z0-9-]*|WF-\d+[A-Z0-9-]*|X-T\d+|EOS-R\d+|SM-S\d+[A-Z]?|A\d{4}|电脑|手机|耳机|相机|[\u4e00-\u9fa5A-Za-z0-9\s]+商品)/i)),
       brand:text(entities.brand),
       model:text(entities.model),
       budget:Number.isFinite(Number(entities.budget)) ? Number(entities.budget) : null,

@@ -104,8 +104,27 @@
     /\b(invoice|receipt|billing|bill|order confirmation|booking confirmation|reservation confirmation|itinerary|e-?ticket|refund notice)\b/i
   ];
   const SHOPPING_OBJECT = [
-    /商品|产品|电商|MacBook|iPhone|iPad|华为|小米|三星|PS5|Switch|手机|电脑|笔记本|耳机|相机|家电|显卡|键盘|价格|比价|最便宜|性价比|采购|购买|买/i,
-    /\b(product|shopping|price|compare|buy|purchase|retailer|deal|laptop|phone|camera|macbook|iphone|ipad|ps5|nintendo|console)\b/i
+    /商品|产品|电商|MacBook|iPhone|iPad|华为|小米|三星|PS5|Switch|手机|电脑|笔记本|耳机|相机|家电|显卡|键盘|可口可乐|价格|比价|最便宜|性价比|采购|购买|买/i,
+    /\b(product|shopping|price|compare|buy|purchase|retailer|deal|laptop|phone|camera|macbook|iphone|ipad|ps5|nintendo|console|coca[-\s]?cola)\b/i
+  ];
+  const MARKET_CONTEXT = [
+    /英国|阿根廷|荷兰|美国|日本|中国|德国|法国|西班牙|意大利|加拿大|澳大利亚/i,
+    /\b(?:United Kingdom|UK|Argentina|Netherlands|United States|USA|Japan|China|Germany|France|Spain|Italy|Canada|Australia)\b/i
+  ];
+  const KNOWN_PRODUCT_IDENTITY = [
+    /\biPhone\s*\d+\s*(?:Pro|Max|Plus)?\b/i,
+    /\biPhone\s*\d+(?:Pro|Max|Plus)\b/i,
+    /\bMacBook\s+(?:Air|Pro)(?:\s+M\d+)?\b/i,
+    /\bSony\s+WH-[A-Z0-9-]+\b/i,
+    /可口可乐|\bCoca[-\s]?Cola\b/i
+  ];
+  const PROJECT_CONTEXT = [
+    /在项目里|项目中|项目文件|设计文件|工程文件|代码仓库/i,
+    /\b(?:in (?:the |my )?project|project files?|design files?|repository)\b/i
+  ];
+  const GENERAL_FACTUAL_QUESTION = [
+    /什么时候发布|何时发布|支持哪些|是什么|为什么|怎么用|历史|功能/i,
+    /\b(?:when (?:was|is)|what is|why|how does|features?|history|support(?:s|ed)?)\b/i
   ];
   const SHOPPING_VARIANT = [
     /\b(?:M[1-9]|Pro|Air|Max|Ultra|Slim)\b/i,
@@ -156,6 +175,10 @@
     const mailEvidence = countSignals(raw, MAIL_EVIDENCE);
     const shoppingObject = countSignals(raw, SHOPPING_OBJECT);
     const shoppingVariant = countSignals(raw, SHOPPING_VARIANT);
+    const marketContext = countSignals(raw, MARKET_CONTEXT);
+    const knownProductIdentity = countSignals(raw, KNOWN_PRODUCT_IDENTITY);
+    const projectContext = countSignals(raw, PROJECT_CONTEXT);
+    const generalFactualQuestion = countSignals(raw, GENERAL_FACTUAL_QUESTION);
     const flightObject = countSignals(raw, FLIGHT_OBJECT);
     const hotelObject = countSignals(raw, HOTEL_OBJECT);
     const cruiseObject = countSignals(raw, CRUISE_OBJECT);
@@ -172,6 +195,10 @@
       mailEvidence,
       shoppingObject,
       shoppingVariant,
+      marketContext,
+      knownProductIdentity,
+      projectContext,
+      generalFactualQuestion,
       flightObject,
       hotelObject,
       cruiseObject,
@@ -211,7 +238,7 @@
 
   function hasEnoughSearchSpecificity(raw, s, domain){
     if (domain === SEARCH_DOMAINS.MAIL) return s.strongMail > 0 || s.mailContext > 0 || (s.mailEvidence > 0 && s.actionIntent > 0);
-    if (domain === SEARCH_DOMAINS.SHOPPING) return s.hasAction || s.shoppingVariant > 0 || /\b\d+\s*(?:GB|TB)\b/i.test(raw) || /\biPhone\s*\d+\b/i.test(raw);
+    if (domain === SEARCH_DOMAINS.SHOPPING) return s.hasAction || s.shoppingVariant > 0 || (s.marketContext > 0 && s.knownProductIdentity > 0) || /\b\d+\s*(?:GB|TB)\b/i.test(raw) || /\biPhone\s*\d+\s*(?:Pro|Max|Plus)?\b/i.test(raw);
     if (domain === SEARCH_DOMAINS.FLIGHT) return s.hasAction || (s.routeHint > 0 && s.dateOrTravelContext > 0) || /经济舱|商务舱|直飞|两个人|adults?|cabin/i.test(raw);
     if (domain === SEARCH_DOMAINS.HOTEL) return s.hasAction || (s.hotelObject > 0 && s.dateOrTravelContext > 0) || /住\d*晚|一间房|两个人|room|night/i.test(raw);
     if (domain === SEARCH_DOMAINS.CRUISE) return s.hasAction || /阳台房|内舱房|海景房|\d+\s*晚|出发|balcony|cabin/i.test(raw);
@@ -251,6 +278,11 @@
       decisionType = "CLARIFY";
       confidence = "safe";
       reasons.push("bare_object_requires_scope");
+    } else if (s.projectContext > 0) {
+      destination = DESTINATIONS.CHAT;
+      confidence = "high";
+      safeToRouteConfidently = true;
+      reasons.push("explicit_project_context");
     } else if (s.strongMail > 0) {
       domain = SEARCH_DOMAINS.MAIL;
       destination = DESTINATIONS.MAIL;
@@ -288,6 +320,12 @@
       confidence = "high";
       safeToRouteConfidently = true;
       reasons.push("explicit_mail_context");
+    } else if (s.hasCommerceOrTravel && s.generalFactualQuestion > 0 && s.actionIntent === 0 && s.marketContext === 0) {
+      domain = strongestCommerceDomain(s);
+      destination = DESTINATIONS.CHAT;
+      confidence = "high";
+      safeToRouteConfidently = true;
+      reasons.push("general_factual_question_not_shopping");
     } else if (s.hasCommerceOrTravel && s.adviceIntent > 0 && s.actionIntent === 0) {
       domain = strongestCommerceDomain(s);
       destination = DESTINATIONS.CHAT;

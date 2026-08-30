@@ -137,9 +137,37 @@
     return window.WeishanMerchantNativeSourceEligibilityRouter || null;
   }
 
+  function explicitQueryMarket(request){
+    const safeRequest = request && typeof request === "object" ? request : {};
+    const raw = [safeRequest.query, safeRequest.inputSummary].filter(Boolean).join(" ");
+    const markets = [
+      { pattern:/英国|\b(?:United Kingdom|UK)\b/i, country:"United Kingdom" },
+      { pattern:/阿根廷|\bArgentina\b/i, country:"Argentina" },
+      { pattern:/荷兰|\b(?:Netherlands|Nederland)\b/i, country:"Netherlands" },
+      { pattern:/美国|\b(?:United States|USA)\b/i, country:"United States" },
+      { pattern:/日本|\bJapan\b/i, country:"Japan" },
+      { pattern:/中国|\bChina\b/i, country:"China" }
+    ].filter(function(item){ return item.pattern.test(raw); });
+    return markets.length === 1 ? { country:markets[0].country, source:"explicit_query" } : null;
+  }
+
+  function locationHealthForRequest(request, locationState){
+    const health = locationState && typeof locationState === "object" ? locationState : locationHealth();
+    const explicit = explicitQueryMarket(request);
+    if (!explicit) return health;
+    return Object.assign({}, health, {
+      hasShippingDestination:true,
+      shippingDestination:Object.assign({}, health.shippingDestination || {}, {
+        country:explicit.country,
+        source:explicit.source,
+        configured:true
+      })
+    });
+  }
+
   function routeMerchantNativeSource(request, locationState){
     const router = merchantNativeSourceRouterApi();
-    const health = locationState && typeof locationState === "object" ? locationState : locationHealth();
+    const health = locationHealthForRequest(request, locationState);
     const destination = health.shippingDestination && typeof health.shippingDestination === "object" ? health.shippingDestination : {};
     if (!router || typeof router.routeEligibleMerchantNativeSources !== "function") {
       return { routerAvailable:false, eligibleSourceIds:[], localSourceAvailable:false, destinationMarket:"", destinationMarketSource:"unknown", maxEligibleSourcesQueriedPerSearch:0 };
@@ -3055,7 +3083,7 @@
     const providerIntegrationReadiness = providerIntegrationReadinessFields(providerConfig && providerConfig.providerIntegrationReadiness || providerHealth && providerHealth.providerIntegrationReadiness || getProviderIntegrationReadiness(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId, { connectorGateHealth }));
     const providerIntegrationRunbook = providerConfig && providerConfig.providerIntegrationRunbook || providerHealth && providerHealth.providerIntegrationRunbook || getProviderIntegrationRunbook(providerStubProfileHealth && providerStubProfileHealth.providerId || providerConfig && providerConfig.providerId, { providerIntegrationReadiness, connectorGateHealth });
     const sandbox = getCommerceProviderSandbox(request.category, settings);
-    const currentLocationHealth = locationHealth();
+    const currentLocationHealth = locationHealthForRequest(request, locationHealth());
     const sourceRoute = routeMerchantNativeSource(request, currentLocationHealth);
     const prijsProfeetReadonlyReady = isProductSearchRequest(request)
       && !!(window.weishanGlobalShopping
@@ -3116,6 +3144,8 @@
           providerIntegrationRunbookMode:providerIntegrationRunbook.runbookMode || "pre_real_provider_connection",
           canApproveProviderIntegration:false,
           canProceedAfterManualApproval:false,
+          sourceRouting:sourceRoute,
+          locationHealth:currentLocationHealth,
           sandboxHealth:sandbox,
           dryRunHealth:providerSandboxDryRunHealth
         }, readonlyResult);

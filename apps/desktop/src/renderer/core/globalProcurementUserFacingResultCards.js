@@ -332,7 +332,7 @@
   function buildFields(intent, detail){
     const safeIntent = intent && typeof intent === "object" ? intent : {};
     const raw = text(safeIntent.searchQueryDraft);
-    const regionMatches = raw.match(/美国|日本|中国|香港|英国|欧洲|韩国/g) || [];
+    const regionMatches = raw.match(/美国|日本|中国|香港|英国|阿根廷|荷兰|欧洲|韩国/g) || [];
     const budgetMatch = raw.match(/预算\s*(\d+(?:\.\d+)?)\s*(美元|美金|USD|usd|日元|円|JPY|jpy|人民币|元)?/);
     const budgetAmount = budgetMatch && budgetMatch[1] ? budgetMatch[1] : "";
     const budgetCurrency = budgetMatch && budgetMatch[2] ? budgetMatch[2] : "";
@@ -341,6 +341,8 @@
       JP:"Japan",
       CN:"China",
       GB:"United Kingdom",
+      AR:"Argentina",
+      NL:"Netherlands",
       KR:"South Korea",
       HK:"Hong Kong"
     };
