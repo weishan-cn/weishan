@@ -139,6 +139,7 @@ async function main() {
   assert.equal(result.readOnlySearchTopResults[0].truthEvidence.comparableAsVerifiedTotal, false);
   assert.equal(result.readOnlySearchTopResults[0].truthEvidence.availabilityStatus, "UNKNOWN");
   assert.equal(result.readOnlySearchTopResults[0].targetUrl, "https://tiendacentro.com/celulares/celular-iphone-17-256-gb-nuevo/");
+  assert.equal(tiendaCalls[0].query, "iPhone 17 256 GB");
   assert.equal(result.decisionResult, null);
   assert.match(result.recommendation.reason, /不能判定为最低价或完整到手价/);
   assert.deepEqual(Object.keys(tiendaCalls[0]).sort(), ["limit", "query", "requestId"]);
@@ -220,6 +221,17 @@ async function main() {
   assert.equal(livePolicyResult.ok, true);
   assert.equal(livePolicyResult.providerName, "Tienda Centro");
   assert.equal(livePolicyCalls.length, 1);
+
+  const homeResult = await livePolicyWindow.WeishanCommerceSearch.searchCommerceCandidates({
+    taskId:"TASK-HOME-AR-IPHONE",
+    category:"ecommerce",
+    inputSummary:"阿根廷 iPhone 17pro"
+  });
+  assert.equal(homeResult.ok, true);
+  assert.equal(livePolicyCalls.length, 2);
+  assert.equal(livePolicyCalls[1].query, "iPhone 17 pro");
+  assert.equal(homeResult.readOnlySearchTopResults[0].truthEvidence.displayAsLiveCurrentPrice, true);
+  assert.equal(homeResult.readOnlySearchTopResults[0].currency, "ARS");
 
   const policyApi = livePolicyWindow.WeishanCommerceLocalLawCompliance;
   const destination = livePolicyWindow.WeishanCommerceLocationPolicy.locationHealthForCommerce();

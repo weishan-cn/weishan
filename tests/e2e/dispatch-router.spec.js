@@ -214,6 +214,16 @@ test.describe.serial("dispatch router", () => {
   test("four exact human country plus product inputs reach preferred shopping without AI", async () => {
     await page.evaluate(() => {
       if (window.WeishanCommerceAgent && typeof window.WeishanCommerceAgent.clearCommerceTasks === "function") window.WeishanCommerceAgent.clearCommerceTasks();
+      window.__WEISHAN_TEST_ORIGINAL_COMMERCE_SEARCH__ = window.WeishanCommerceSearch.searchCommerceCandidates;
+      window.WeishanCommerceSearch.searchCommerceCandidates = async (task) => ({
+        ok:false,
+        code:"COMMERCE_NO_LOCAL_REAL_PRICE_SOURCE",
+        message:"暂未接入该市场的实时价格来源。",
+        request:{ query:task.inputSummary, missingFields:[] },
+        candidates:[],
+        readOnlySearchTopResults:[],
+        readOnlySearchRemainingResults:[]
+      });
     });
 
     const cases = [
@@ -222,14 +232,21 @@ test.describe.serial("dispatch router", () => {
       { input:"阿根廷可口可乐", market:"Argentina", price:null },
       { input:"荷兰可口可乐", market:"Netherlands", price:null }
     ];
-    for (const item of cases) {
-      await submitHomeCommand(page, item.input);
-      const workspace = page.locator('[data-commerce-home-summary] [data-commerce-global-shopping-workspace="true"]');
-      await expect(workspace).toBeVisible();
-      await expect(workspace).toContainText(item.market);
-      await expect(workspace).toContainText("平台比较");
-      await expect(workspace).not.toContainText(/coordination\.plan|AI Key 未配置|realExecution=false|AI 大脑采购编排/);
-      await expect(workspace).not.toContainText(/EUR 0\.57|ARS\s*\d/);
+    try {
+      for (const item of cases) {
+        await submitHomeCommand(page, item.input);
+        const workspace = page.locator('[data-commerce-home-summary] [data-commerce-global-shopping-workspace="true"]');
+        await expect(workspace).toBeVisible();
+        await expect(workspace).toContainText(item.market);
+        await expect(workspace).toContainText("平台比较");
+        await expect(workspace).not.toContainText(/coordination\.plan|AI Key 未配置|realExecution=false|AI 大脑采购编排/);
+        await expect(workspace).not.toContainText(/EUR 0\.57|ARS\s*\d/);
+      }
+    } finally {
+      await page.evaluate(() => {
+        window.WeishanCommerceSearch.searchCommerceCandidates = window.__WEISHAN_TEST_ORIGINAL_COMMERCE_SEARCH__;
+        delete window.__WEISHAN_TEST_ORIGINAL_COMMERCE_SEARCH__;
+      });
     }
 
     const evidence = await page.evaluate(() => ({

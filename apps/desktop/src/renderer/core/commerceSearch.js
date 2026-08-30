@@ -2117,6 +2117,26 @@
     };
   }
 
+  function merchantNativeSourceQuery(request, sourceId){
+    const raw = sanitizeText(request && (request.query || request.inputSummary) || "", 240);
+    if (!raw) return "";
+    if (sourceId === PRIJS_PROFEET_SOURCE_ID && /可口可乐|coca[-\s]?cola/i.test(raw)) {
+      if (/无糖|零度|zero/i.test(raw)) return "Coca-Cola Zero";
+      if (/original|原味|经典/i.test(raw)) return "Coca-Cola Original";
+      return "Coca-Cola";
+    }
+    if (sourceId === TIENDA_CENTRO_SOURCE_ID) {
+      const iphone = raw.match(/iphone\s*(\d{1,2})\s*(pro(?:\s*max)?|plus)?/i);
+      if (iphone) {
+        const model = ["iPhone", iphone[1], sanitizeText(iphone[2] || "", 20)].filter(Boolean).join(" ");
+        const storage = raw.match(/\b(128|256|512)\s*(gb)\b|\b(1|2)\s*(tb)\b/i);
+        return storage ? model + " " + (storage[1] || storage[3]) + " " + (storage[2] || storage[4]).toUpperCase() : model;
+      }
+      if (/可口可乐|coca[-\s]?cola/i.test(raw)) return "Coca-Cola";
+    }
+    return raw;
+  }
+
   function validateBookingUrl(url){
     try {
       const raw = String(url || "").trim();
@@ -2838,7 +2858,7 @@
     const requestId = taskKey + ":" + String(nextGeneration);
     let raw;
     try {
-      raw = await bridge.merchantNativeReadonlySearch(PRIJS_PROFEET_SOURCE_ID, { query:request.query, requestId, limit:1 });
+      raw = await bridge.merchantNativeReadonlySearch(PRIJS_PROFEET_SOURCE_ID, { query:merchantNativeSourceQuery(request, PRIJS_PROFEET_SOURCE_ID), requestId, limit:1 });
     } catch (_) {
       raw = { ok:false, code:"SOURCE_UNAVAILABLE", requestId, results:[] };
     }
@@ -2925,7 +2945,7 @@
     const requestId = taskKey + ":" + String(nextGeneration);
     let raw;
     try {
-      raw = await bridge.merchantNativeReadonlySearch(TIENDA_CENTRO_SOURCE_ID, { query:request.query, requestId, limit:1 });
+      raw = await bridge.merchantNativeReadonlySearch(TIENDA_CENTRO_SOURCE_ID, { query:merchantNativeSourceQuery(request, TIENDA_CENTRO_SOURCE_ID), requestId, limit:1 });
     } catch (_) {
       raw = { ok:false, code:"SOURCE_UNAVAILABLE", requestId, results:[] };
     }
@@ -3385,6 +3405,7 @@
     getProductProviderReadiness,
     getProductProviderProfile,
     createCommerceSearchRequest,
+    merchantNativeSourceQuery,
     CHEAPEST_REDIRECT_MODE,
     isDisplayableProviderResult,
     isDisplayableLandedCostResult,

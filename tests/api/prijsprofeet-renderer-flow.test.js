@@ -131,6 +131,7 @@ async function main() {
   assert.equal(result.readOnlySearchTopResults[0].truthEvidence.evidenceTruthClass, "REAL_PROVIDER_PRICE");
   assert.equal(result.readOnlySearchTopResults[0].truthEvidence.comparableAsVerifiedTotal, false);
   assert.equal(result.readOnlySearchTopResults[0].targetUrl, "https://www.ah.nl/producten/product/wi477045/coca-cola-original");
+  assert.equal(calls[0].query, "Coca-Cola Original");
   assert.equal(result.decisionResult, null);
   assert.equal(result.readOnlySearchResultSummary.decisionResult, null);
   assert.match(result.recommendation.reason, /不能判定为最低价或完整到手价/);
@@ -210,6 +211,17 @@ async function main() {
   assert.equal(livePolicyResult.ok, true);
   assert.equal(livePolicyResult.providerName, "PrijsProfeet");
   assert.equal(livePolicyCalls.length, 1);
+
+  const homeResult = await livePolicyWindow.WeishanCommerceSearch.searchCommerceCandidates({
+    taskId:"TASK-HOME-NL-COKE",
+    category:"ecommerce",
+    inputSummary:"荷兰可口可乐"
+  });
+  assert.equal(homeResult.ok, true);
+  assert.equal(livePolicyCalls.length, 2);
+  assert.equal(livePolicyCalls[1].query, "Coca-Cola");
+  assert.equal(homeResult.readOnlySearchTopResults[0].truthEvidence.displayAsLiveCurrentPrice, true);
+  assert.equal(homeResult.readOnlySearchTopResults[0].currency, "EUR");
 
   const policyApi = livePolicyWindow.WeishanCommerceLocalLawCompliance;
   const destination = livePolicyWindow.WeishanCommerceLocationPolicy.locationHealthForCommerce();
