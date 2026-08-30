@@ -177,4 +177,83 @@ test.describe.serial("Tienda Centro merchant-native real-price display", () => {
     expect(state.busy).toBe(0);
     expect(state.handoffs).toBeGreaterThan(0);
   });
+
+  test("keeps Tienda Centro, Meblostan, and PrijsProfeet price cards inside responsive bounds", async () => {
+    await page.evaluate(() => {
+      window.CommerceAgentPage.mount(document.getElementById("pageHost"));
+      const grid = document.querySelector(".commerce-workspace-platform-grid");
+      const template = grid.querySelector(".commerce-workspace-platform-card");
+      const merchants = [
+        {
+          platformName:"Tienda Centro",
+          title:"CELULAR IPHONE 17 256 GB NUEVO — precio público verificado con descripción internacional especialmente larga",
+          priceLabel:"ARS 1564200"
+        },
+        {
+          platformName:"Meblostan",
+          title:"Jesionowy stolik kawowy z bardzo długim wielojęzycznym opisem produktu do mieszkania",
+          priceLabel:"PLN 1575"
+        },
+        {
+          platformName:"PrijsProfeet",
+          title:"Coca-Cola Original aanbieding met een lange Nederlandstalige productomschrijving van 250 milliliter",
+          priceLabel:"EUR 0.57"
+        }
+      ];
+      const cards = merchants.map((merchant) => {
+        const card = template.cloneNode(true);
+        card.querySelector(".commerce-workspace-platform-head strong").textContent = merchant.platformName;
+        card.querySelector(".commerce-workspace-platform-head .commerce-muted").textContent = merchant.title;
+        card.querySelector(".commerce-workspace-platform-meta dd").textContent = merchant.priceLabel;
+        return card;
+      });
+      grid.replaceChildren(...cards);
+    });
+
+    const workspace = page.locator('[data-commerce-global-shopping-workspace="true"]');
+    await expect(workspace.locator(".commerce-workspace-platform-card")).toHaveCount(3);
+    for (const viewport of [
+      { width:1440, height:900 },
+      { width:900, height:900 },
+      { width:560, height:900 },
+      { width:1720, height:1000 }
+    ]) {
+      await page.setViewportSize(viewport);
+      const layout = await workspace.evaluate((root) => {
+        const tolerance = 1;
+        const cards = Array.from(root.querySelectorAll(".commerce-workspace-platform-card"));
+        return {
+          documentOverflow:document.documentElement.scrollWidth > document.documentElement.clientWidth + tolerance,
+          cards:cards.map((card) => {
+            const cardBox = card.getBoundingClientRect();
+            const footer = card.querySelector(".commerce-workspace-platform-footer");
+            const buttons = Array.from(card.querySelectorAll(".commerce-workspace-platform-footer .cmd-btn"));
+            return {
+              cardOverflow:card.scrollWidth > card.clientWidth + tolerance,
+              footerOverflow:footer.scrollWidth > footer.clientWidth + tolerance,
+              buttons:buttons.map((button) => {
+                const box = button.getBoundingClientRect();
+                return {
+                  inside:box.left >= cardBox.left - tolerance && box.right <= cardBox.right + tolerance,
+                  width:box.width,
+                  height:box.height
+                };
+              })
+            };
+          })
+        };
+      });
+      expect(layout.documentOverflow).toBe(false);
+      for (const card of layout.cards) {
+        expect(card.cardOverflow).toBe(false);
+        expect(card.footerOverflow).toBe(false);
+        expect(card.buttons).toHaveLength(2);
+        for (const button of card.buttons) {
+          expect(button.inside).toBe(true);
+          expect(button.width).toBeGreaterThanOrEqual(44);
+          expect(button.height).toBeGreaterThanOrEqual(32);
+        }
+      }
+    }
+  });
 });
