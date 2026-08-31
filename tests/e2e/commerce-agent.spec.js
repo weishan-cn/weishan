@@ -8291,14 +8291,14 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail.locator("table.commerce-workspace-cost-table")).toBeVisible();
     await expect(detail).toContainText("购物记录");
     await expect(detail).toContainText("最近搜索");
-    await expect(detail).toContainText("等待可信价格源");
+    await expect(detail).toContainText("当前市场暂未接入可用的实时价格来源");
+    await expect(detail).not.toContainText("等待可信价格源");
     await expect(detail).toContainText("按市场预留可信平台位，接入后自动填充价格与到手成本。");
     await expect(detail).toContainText("开始比较");
     await expect(detail).toContainText("查看采购计划");
     await expect(detail).toContainText("更多信息");
     await expect(detail.locator("details.commerce-workspace-more-disclosure")).not.toHaveAttribute("open", "");
     await expect(detail).toContainText("为什么暂时没有价格");
-    await expect(detail).toContainText("等待可信价格源");
     await expect(detail).toContainText("收藏商品");
     await expect(detail).toContainText("导出结果");
     await expect(page.locator(".commerce-task-list")).toHaveCount(0);
@@ -8700,7 +8700,8 @@ test.describe.serial("commerce agent workbench", () => {
     await expect(detail).toContainText("购物记录");
     await expect(detail).toContainText("最近搜索");
     await expect(detail).toContainText("采购计划");
-    await expect(detail).toContainText("等待可信价格源");
+    await expect(detail).toContainText("当前市场暂未接入可用的实时价格来源");
+    await expect(detail).not.toContainText("等待可信价格源");
     await expect(detail).toContainText("查看采购计划");
     await expect(detail).toContainText("更多信息");
     await expect(detail).toContainText("为什么暂时没有价格");

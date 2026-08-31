@@ -118,9 +118,12 @@ test.describe.serial("Global Shopping zero-learning comparison UI", () => {
 
     const workspace = page.locator('[data-commerce-global-shopping-workspace="true"]');
     await expect(workspace).toBeVisible();
+    await expect(workspace.locator("#commerce-shopping-product-title")).toHaveText("Lays Sensations Thai Sweet Chilli 150g");
+    await expect(workspace.locator("#commerce-shopping-product-title")).not.toContainText("chips");
     await expect(workspace.locator(".commerce-workspace-original-query")).toContainText("荷兰 chips Lays Sensations Thai Sweet Chilli 150g");
     await expect(workspace.locator(".commerce-shopping-comparison-summary")).toContainText("找到 2 个可验证商户报价");
     await expect(workspace.locator(".commerce-shopping-comparison-summary")).toContainText("当前已验证最低报价并列");
+    await expect(workspace.getByText("当前已验证最低报价并列", { exact:true })).toHaveCount(1);
     await expect(workspace.locator(".commerce-workspace-platform-card")).toHaveCount(2);
     await expect(workspace.locator(".commerce-workspace-platform-head strong")).toHaveText(["Albert Heijn", "PLUS"]);
     await expect(workspace.locator(".commerce-workspace-platform-price")).toHaveText(["EUR 2.00", "EUR 2.00"]);
@@ -131,6 +134,19 @@ test.describe.serial("Global Shopping zero-learning comparison UI", () => {
     await expect(workspace).toContainText("运费未知");
     await expect(workspace).toContainText("税费未知");
     await expect(workspace).toContainText("其他费用未知");
+    const more = workspace.locator('[data-commerce-workspace-more-disclosure="true"]');
+    await expect(more).not.toHaveAttribute("open", "");
+    await expect(more.locator('[data-commerce-basic-ai-mode="true"]')).not.toBeVisible();
+    await expect(workspace.getByText("Search / Compare / Handoff work without AI.", { exact:false })).toHaveCount(0);
+    await expect(workspace.getByText(/搜索不需要 AI：|价格显示不需要 AI：|比较不需要 AI：|安全跳转不需要 AI：/)).toHaveCount(0);
+    await expect(workspace.locator('[data-commerce-workspace-refresh="true"]')).toContainText("价格可能变化，可随时刷新");
+    await expect(workspace.locator('[data-commerce-workspace-refresh="true"] .commerce-search-real')).toHaveText("刷新当前价格");
+    const plan = workspace.locator('[data-commerce-workspace-plan="true"]');
+    await expect(plan).toContainText("本次搜索");
+    await expect(plan).toContainText("2 个已验证商户报价");
+    await expect(plan).not.toContainText("Lays Sensations Thai Sweet Chilli 150g");
+    await expect(plan.locator(".commerce-workspace-status-pill")).toHaveCount(0);
+    await expect(workspace.locator('[data-commerce-workspace-records="true"]')).toContainText("购物记录");
     await expect(workspace).not.toContainText(/全网最低|市场最低|已锁价|Buy now|立即购买/);
   });
 

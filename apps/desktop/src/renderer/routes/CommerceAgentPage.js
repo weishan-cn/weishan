@@ -1153,8 +1153,8 @@
     Array.from(scope.querySelectorAll("details.commerce-disclosure")).forEach((details) => {
       if (details.dataset.weishanDisclosureHydrated === "true") return;
       details.dataset.weishanDisclosureHydrated = "true";
-      const body = details.querySelector(".commerce-disclosure-body");
-      const template = details.querySelector(".commerce-disclosure-template");
+      const body = Array.from(details.children).find((child) => child.classList && child.classList.contains("commerce-disclosure-body"));
+      const template = Array.from(details.children).find((child) => child.classList && child.classList.contains("commerce-disclosure-template"));
       const sync = () => {
         if (!body) return;
         if (details.open) {
@@ -3061,25 +3061,26 @@
     const presentation = offerPresentation || workspaceOfferPresentation(task, false);
     const originalQuery = String(task && task.inputSummary || "").trim();
     const hasOffers = presentation.primaryItems.length > 0;
+    const acceptedOfferTitle = String(presentation.primaryItems[0] && presentation.primaryItems[0].title || "").trim();
+    const displayProductName = acceptedOfferTitle || product.model || productName;
+    const showBrandEyebrow = product.brand && !String(displayProductName).toLowerCase().startsWith(String(product.brand).toLowerCase());
     return `<section class="commerce-workspace-card commerce-workspace-product-card" data-commerce-workspace-product-card="true" aria-labelledby="commerce-shopping-product-title">
       <div class="commerce-workspace-product-hero">
         <div class="commerce-workspace-card-head commerce-workspace-card-head-hero">
           <div class="commerce-workspace-product-head">
             <div class="commerce-workspace-visual" aria-hidden="true">${visual}</div>
             <div class="commerce-workspace-product-copy">
-              ${product.brand ? `<p class="commerce-workspace-brand-eyebrow">${esc(product.brand)}</p>` : ""}
-              <h2 class="commerce-workspace-product-title" id="commerce-shopping-product-title">${esc(product.model || productName)}</h2>
+              ${showBrandEyebrow ? `<p class="commerce-workspace-brand-eyebrow">${esc(product.brand)}</p>` : ""}
+              <h2 class="commerce-workspace-product-title" id="commerce-shopping-product-title">${esc(displayProductName)}</h2>
               <p class="commerce-workspace-product-subtitle">${esc(product.subtitle || shoppingText("全球购物", "Global Shopping"))}</p>
             </div>
           </div>
-          <span class="commerce-workspace-status-pill ${hasOffers ? "is-verified" : "is-muted"}" aria-label="${esc(shoppingText("当前结果状态", "Current result status"))}">${esc(presentation.resultStatus)}</span>
         </div>
         ${originalQuery ? `<p class="commerce-workspace-original-query"><span>${esc(shoppingText("你的搜索", "Your search"))}</span><strong>${esc(originalQuery)}</strong></p>` : ""}
         <dl class="commerce-workspace-hero-grid">
           ${product.budget ? `<div><dt>预算</dt><dd>${esc(product.budget)}</dd></div>` : ""}
           ${product.destination ? `<div><dt>收货地</dt><dd>${esc(product.destination)}</dd></div>` : ""}
           ${markets.length ? `<div><dt>比较市场</dt><dd>${esc(compareLine)}</dd></div>` : ""}
-          <div><dt>${esc(shoppingText("当前结果", "Current result"))}</dt><dd>${esc(presentation.merchantCount ? shoppingText(`${presentation.merchantCount} 个可验证商户报价`, `${presentation.merchantCount} verified merchant offer${presentation.merchantCount === 1 ? "" : "s"}`) : presentation.resultStatus)}</dd></div>
         </dl>
         <div class="commerce-workspace-primary-actions">
           <button class="cmd-btn primary" type="button" data-commerce-workspace-next-action="${hasOffers ? "view_official_store" : "refine_query"}">${esc(hasOffers ? shoppingText("查看商户报价", "View merchant offers") : shoppingText("修改搜索", "Edit search"))}</button>
@@ -3186,7 +3187,6 @@
           <h3>${esc(presentation.merchantCount === 1 ? shoppingText("当前找到 1 个可验证报价", "1 verified offer found") : shoppingText(`找到 ${presentation.merchantCount} 个可验证商户报价`, `${presentation.merchantCount} verified merchant offers found`))}</h3>
           <p>${esc(comparison.status === "READY" ? (presentation.tie ? shoppingText("当前已验证最低报价并列", "Current verified lowest offers are tied") : shoppingText("这些报价属于同款商品，可直接比较。", "These offers are for the same product and are directly comparable.")) : shoppingText("仅显示本次查询返回的已验证实时价格来源；暂不足以进行商户间价格比较。", "Only verified live price sources returned by this search are shown; there are not enough merchants for a price comparison."))}</p>
         </div>
-        <span class="commerce-workspace-status-pill ${presentation.tie ? "is-tied" : ""}">${esc(presentation.resultStatus)}</span>
       </div>
       ${Object.keys(grouped).map((country) => `<section class="commerce-workspace-market-group">
         <div class="commerce-workspace-market-group-head">
@@ -3302,21 +3302,19 @@
     </section>`;
   }
 
-  function workspacePlanSideHtml(task, card){
+  function workspacePlanSideHtml(task, card, offerPresentation){
     const fields = card && card.planFields || {};
     const marketLines = Array.isArray(fields.comparisonMarkets) ? fields.comparisonMarkets.filter(Boolean) : [];
-    return `<section class="commerce-workspace-card" data-commerce-workspace-plan="true">
+    const presentation = offerPresentation || workspaceOfferPresentation(task, false);
+    return `<section class="commerce-workspace-card commerce-workspace-plan-compact" data-commerce-workspace-plan="true">
       <div class="commerce-workspace-card-head">
         <div>
-          <h3>当前采购计划</h3>
+          <h3>${esc(shoppingText("本次搜索", "This search"))}</h3>
         </div>
       </div>
       <div class="commerce-workspace-plan-summary">
-        ${fields.productName ? `<h4 class="commerce-workspace-plan-title">${esc(fields.productName)}</h4>` : ""}
-        ${fields.budgetLabel ? `<p class="commerce-workspace-plan-line">${esc(fields.budgetLabel)}</p>` : ""}
-        ${fields.destinationCountry ? `<p class="commerce-workspace-plan-line">${esc(fields.destinationCountry)}</p>` : ""}
         ${marketLines.length ? `<p class="commerce-workspace-plan-line">${marketLines.map((item) => `${marketFlag(item)} ${esc(item)}`).join(" · ")}</p>` : ""}
-        <p class="commerce-workspace-plan-status"><span class="commerce-workspace-status-pill">等待可信价格源</span></p>
+        <p class="commerce-workspace-plan-line">${esc(presentation.merchantCount ? shoppingText(`${presentation.merchantCount} 个已验证商户报价`, `${presentation.merchantCount} verified merchant offer${presentation.merchantCount === 1 ? "" : "s"}`) : presentation.resultStatus)}</p>
       </div>
     </section>`;
   }
@@ -3386,7 +3384,8 @@
   function workspaceMoreHtml(task, card){
     return `<details class="commerce-disclosure commerce-workspace-more-disclosure" data-commerce-workspace-more-disclosure="true">
       <summary>更多信息</summary>
-      <div class="commerce-disclosure-body">
+      <div class="commerce-disclosure-body" hidden>
+        ${workspaceBasicAiModeHtml(task, card)}
         ${workspaceOptionalSuggestionsHtml(card)}
         ${workspaceExecutionLogHtml(card)}
         ${workspaceTechnicalDetailsHtml(task)}
@@ -3539,60 +3538,46 @@
 
   function workspaceBasicAiModeHtml(task, card){
     const api = shoppingBasicAiModeApi();
-    if (!api || typeof api.buildViewModel !== "function") return "";
     const ai = aiWorkspaceSummary();
-    const model = api.buildViewModel({
+    const model = api && typeof api.buildViewModel === "function" ? api.buildViewModel({
       aiState:ai.state,
       candidates:workspaceCandidatesForBasicAiMode(task, card),
       filter:task && task.globalShoppingBasicAiFilter || ""
-    });
-    const flags = model.capabilityFlags || {};
+    }) : { aiAnalysisAvailable:false, comparison:{}, connectAiPrompt:{} };
     const analysis = task && task.globalShoppingAiAnalysis;
     const comparison = model.comparison || {};
     const recommendation = comparison.deterministicRecommendation;
     const prompt = model.connectAiPrompt || {};
-    const aiStatus = model.aiAnalysisAvailable ? "已连接，可请求智能分析" : "未连接：搜索、价格、比较和安全跳转仍可用";
+    const aiStatus = model.aiAnalysisAvailable ? "AI 服务已连接，可按需生成补充分析。" : "AI 分析尚未连接，不影响当前价格、比较与商户跳转。";
     const recommendationLine = recommendation
       ? recommendation.reason
       : (comparison.noClearWinner ? "当前证据不足以给出确定建议，先看差异。": "搜索结果出现后会自动比较。");
-    return `<section class="commerce-workspace-card commerce-basic-ai-mode-card" data-commerce-basic-ai-mode="true">
+    return `<section class="commerce-workspace-secondary-detail commerce-basic-ai-mode-card" data-commerce-basic-ai-mode="true">
       <div class="commerce-workspace-card-head">
         <div>
-          <h3>购物可直接用，AI 只增强分析</h3>
-          <p>Search / Compare / Handoff work without AI. 深度权衡与个性化建议需要连接 AI 服务。</p>
+          <h4>${esc(shoppingText("可选智能分析", "Optional AI analysis"))}</h4>
+          <p>${esc(aiStatus)}</p>
         </div>
       </div>
-      <div class="commerce-basic-ai-mode-grid">
-        <article>
-          <h4>基础购物</h4>
-          <ul>
-            <li>搜索不需要 AI：${esc(flags.GLOBAL_SHOPPING_BASIC_SEARCH_REQUIRES_AI || "NO")}</li>
-            <li>价格显示不需要 AI：${esc(flags.GLOBAL_SHOPPING_PRICE_RETRIEVAL_REQUIRES_AI || "NO")}</li>
-            <li>比较不需要 AI：${esc(flags.GLOBAL_SHOPPING_COMPARE_REQUIRES_AI || "NO")}</li>
-            <li>安全跳转不需要 AI：${esc(flags.GLOBAL_SHOPPING_HANDOFF_REQUIRES_AI || "NO")}</li>
-          </ul>
-        </article>
-        <article>
-          <h4>智能分析</h4>
-          <p>${esc(aiStatus)}</p>
-          <p>${esc(recommendationLine)}</p>
-          <button class="cmd-btn primary" type="button" data-commerce-ai-analysis-request="${esc(task && task.taskId || "")}">帮我分析</button>
-          <button class="cmd-btn gray" type="button" data-commerce-ai-connect-request="${esc(task && task.taskId || "")}">连接 AI 服务</button>
-        </article>
+      <p class="commerce-basic-ai-mode-recommendation">${esc(recommendationLine)}</p>
+      <div class="commerce-basic-ai-mode-actions">
+        <button class="cmd-btn gray" type="button" data-commerce-ai-analysis-request="${esc(task && task.taskId || "")}">帮我分析</button>
+        ${model.aiAnalysisAvailable ? "" : `<button class="cmd-btn ghost" type="button" data-commerce-ai-connect-request="${esc(task && task.taskId || "")}">连接 AI 服务</button>`}
       </div>
       <p class="commerce-basic-ai-mode-status" role="status" aria-live="polite" data-commerce-ai-analysis-status>
         ${analysis && analysis.status === "AI_REQUIRED" ? esc(analysis.promptTitle || prompt.title || "连接 AI 服务以获得智能分析") : ""}
         ${analysis && analysis.status === "AI_FAILED_SAFE" ? "AI 分析暂不可用；基础结果已保留。" : ""}
         ${analysis && analysis.status === "AI_ANALYSIS_READY" ? esc(analysis.analysis && analysis.analysis.summary || "智能分析已生成。") : ""}
       </p>
-      <details class="commerce-disclosure commerce-basic-ai-mode-disclosure">
-        <summary>查看能力边界</summary>
-        <div class="commerce-disclosure-body">
-          <p>AI 不是价格源、不是 Provider、不是 Handoff 权威、不是交易授权。</p>
-          <p>如果 AI 失败，已得到的搜索、价格、比较和跳转结果不会被清空。</p>
-          <p>Analytics 只记录粗粒度事件，不记录原始查询、分析正文、完整 URL 或凭证。</p>
-        </div>
-      </details>
+    </section>`;
+  }
+
+  function workspaceRefreshHtml(task, settings, hasConfiguredProvider, offerPresentation){
+    const presentation = offerPresentation || workspaceOfferPresentation(task, hasConfiguredProvider);
+    if (!presentation.primaryItems.length) return searchStatusHtml(task, settings, hasConfiguredProvider);
+    return `<section class="commerce-workspace-refresh" data-commerce-workspace-refresh="true">
+      <p>${esc(shoppingText("价格可能变化，可随时刷新。", "Prices may change. Refresh whenever you need."))}</p>
+      <button class="cmd-btn gray commerce-search-real" type="button" data-task-id="${esc(task && task.taskId || "")}">${esc(shoppingText("刷新当前价格", "Refresh current prices"))}</button>
     </section>`;
   }
 
@@ -3648,12 +3633,11 @@
           ${workspaceCostSummaryHtml(card, task, offerPresentation)}
         </div>
         ${workspaceRelatedProductsHtml(offerPresentation)}
-        ${searchStatusHtml(task, settings, hasConfiguredProvider)}
-        ${workspaceBasicAiModeHtml(task, card)}
+        ${workspaceRefreshHtml(task, settings, hasConfiguredProvider, offerPresentation)}
         ${workspaceMoreHtml(task, card)}
       </div>
       <aside class="commerce-global-shopping-side">
-        ${workspacePlanSideHtml(task, card)}
+        ${workspacePlanSideHtml(task, card, offerPresentation)}
         ${workspaceShoppingRecordsHtml(task)}
       </aside>
     </section>`;

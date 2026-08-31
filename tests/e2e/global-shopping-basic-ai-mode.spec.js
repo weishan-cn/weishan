@@ -76,14 +76,17 @@ test.describe.serial("global shopping basic and AI enhanced mode", () => {
       if (host && window.CommerceAgentPage && typeof window.CommerceAgentPage.mount === "function") window.CommerceAgentPage.mount(host);
     });
 
-    const basicCard = page.locator('[data-commerce-basic-ai-mode="true"]').first();
+    const more = page.locator('[data-commerce-workspace-more-disclosure="true"]').first();
+    const basicCard = more.locator('[data-commerce-basic-ai-mode="true"]');
+    await expect(more).not.toHaveAttribute("open", "");
+    await expect(basicCard).not.toBeVisible();
+    await expect(page.getByText("购物可直接用，AI 只增强分析", { exact:true })).toHaveCount(0);
+    await expect(page.getByText("Search / Compare / Handoff work without AI.", { exact:false })).toHaveCount(0);
+    await expect(page.getByText(/搜索不需要 AI：|价格显示不需要 AI：|比较不需要 AI：|安全跳转不需要 AI：/)).toHaveCount(0);
+    await more.locator(":scope > summary").click();
     await expect(basicCard).toBeVisible({ timeout:15000 });
-    await expect(basicCard).toContainText("购物可直接用，AI 只增强分析");
-    await expect(basicCard).toContainText("搜索不需要 AI：NO");
-    await expect(basicCard).toContainText("价格显示不需要 AI：NO");
-    await expect(basicCard).toContainText("比较不需要 AI：NO");
-    await expect(basicCard).toContainText("安全跳转不需要 AI：NO");
-    await expect(basicCard).toContainText("未连接：搜索、价格、比较和安全跳转仍可用");
+    await expect(basicCard).toContainText("可选智能分析");
+    await expect(basicCard).toContainText("AI 分析尚未连接，不影响当前价格、比较与商户跳转");
     const basicComparison = await page.evaluate((id) => {
       const api = window.WeishanCommerceAgent;
       const task = api.getCommerceTaskById(id);
@@ -96,7 +99,11 @@ test.describe.serial("global shopping basic and AI enhanced mode", () => {
     await basicCard.getByRole("button", { name:"帮我分析" }).focus();
     await expect(basicCard.getByRole("button", { name:"帮我分析" })).toBeFocused();
     await basicCard.getByRole("button", { name:"帮我分析" }).click();
-    await expect(basicCard.locator('[data-commerce-ai-analysis-status]')).toContainText("连接 AI 服务以获得智能分析");
+    const requestedAnalysisStatus = await page.evaluate((id) => {
+      const task = window.WeishanCommerceAgent.getCommerceTaskById(id);
+      return task && task.globalShoppingAiAnalysis && task.globalShoppingAiAnalysis.status || "";
+    }, taskId);
+    expect(["AI_REQUIRED", "AI_ANALYSIS_READY"]).toContain(requestedAnalysisStatus);
     await expect(page.locator(".commerce-workspace-product-card").first()).toBeVisible();
     await expect(page.locator(".commerce-workspace-platform-card")).toHaveCount(0);
     await expect(page.locator("[data-commerce-shopping-empty-state]")).toBeVisible();
