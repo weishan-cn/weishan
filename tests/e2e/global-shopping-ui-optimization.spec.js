@@ -26,7 +26,11 @@ test.describe.serial("Global Shopping zero-learning comparison UI", () => {
   async function mountState(state) {
     return page.evaluate(({ id, state }) => {
       const now = new Date().toISOString();
-      const makeOffer = (merchant, price, ean, suffix, title) => ({
+      const makeOffer = (merchant, price, ean, suffix, title, options) => {
+        const meta = options || {};
+        const variant = meta.variant || (ean === "8710398160027" ? "150 g" : "200 g");
+        const landedCostBreakdown = meta.landedCostBreakdown || { shippingFee:{ certainty:"unknown" }, taxFee:{ certainty:"unknown" }, platformFee:{ certainty:"unknown" } };
+        return ({
         id:id + "-" + suffix,
         canonicalProductIdentity:"ean:" + ean,
         ean,
@@ -42,7 +46,7 @@ test.describe.serial("Global Shopping zero-learning comparison UI", () => {
         priceLabel:"EUR " + price.toFixed(2),
         currency:"EUR",
         condition:"NEW",
-        quantity:ean === "8710398160027" ? "150 g" : "200 g",
+        quantity:variant,
         market:"NL",
         destinationCountry:"Netherlands",
         targetUrl:merchant === "PLUS" ? "https://www.plus.nl/product/lays-sensations-thai-sweet-chilli-150-g" : "https://www.ah.nl/producten/product/lays-sensations-thai-sweet-chilli",
@@ -50,22 +54,24 @@ test.describe.serial("Global Shopping zero-learning comparison UI", () => {
         updatedAt:now,
         availability:"available",
         availabilityFreshness:{ availabilityStatus:"AVAILABLE" },
-        landedCostCompleteness:"partial",
-        landedCostBreakdown:{ shippingFee:{ certainty:"unknown" }, taxFee:{ certainty:"unknown" }, platformFee:{ certainty:"unknown" } },
+        landedCostCompleteness:meta.landedCostCompleteness || "partial",
+        totalLandedCost:meta.totalLandedCost,
+        landedCostBreakdown,
         truthEvidence:{
           evidenceTruthClass:"REAL_PROVIDER_PRICE",
           displayAsLiveCurrentPrice:true,
           currency:"EUR",
           retrievedAt:now,
           productName:title,
-          variant:ean === "8710398160027" ? "150 g" : "200 g",
+          variant,
           condition:"NEW",
           availabilityStatus:"AVAILABLE"
         }
-      });
+        });
+      };
       const offers = state.offers || [];
-      const top = offers.map((row, index) => makeOffer(row.merchant, row.price, row.ean || "8710398160027", "offer-" + index, row.title || "Lays Sensations Thai Sweet Chilli 150g"));
-      const related = (state.related || []).map((row, index) => makeOffer(row.merchant, row.price, row.ean, "related-" + index, row.title));
+      const top = offers.map((row, index) => makeOffer(row.merchant, row.price, row.ean || "8710398160027", "offer-" + index, row.title || "Lays Sensations Thai Sweet Chilli", row));
+      const related = (state.related || []).map((row, index) => makeOffer(row.merchant, row.price, row.ean, "related-" + index, row.title, row));
       const api = window.WeishanCommerceAgent;
       window.__WEISHAN_SHOPPING_UI_ORIGINAL_BRAIN__ = window.__WEISHAN_SHOPPING_UI_ORIGINAL_BRAIN__ || window.WeishanAiProcurementBrainOrchestrator;
       window.WeishanAiProcurementBrainOrchestrator = {
@@ -86,9 +92,9 @@ test.describe.serial("Global Shopping zero-learning comparison UI", () => {
       task.globalProcurementIntent = {
         category:"product",
         searchQueryDraft:state.query || "荷兰 chips Lays Sensations Thai Sweet Chilli 150g",
-        brand:"Lays",
-        model:"Sensations Thai Sweet Chilli 150g",
-        productName:"Lays Sensations Thai Sweet Chilli 150g",
+        brand:state.brand || "Lays",
+        model:state.model || "Sensations Thai Sweet Chilli 150g",
+        productName:state.productName || "Lays Sensations Thai Sweet Chilli 150g",
         destinationCountry:"NL",
         comparisonMarkets:["NL"]
       };
@@ -121,8 +127,10 @@ test.describe.serial("Global Shopping zero-learning comparison UI", () => {
     await expect(workspace.locator("#commerce-shopping-product-title")).toHaveText("Lays Sensations Thai Sweet Chilli 150g");
     await expect(workspace.locator("#commerce-shopping-product-title")).not.toContainText("chips");
     await expect(workspace.locator(".commerce-workspace-original-query")).toContainText("荷兰 chips Lays Sensations Thai Sweet Chilli 150g");
-    await expect(workspace.locator(".commerce-shopping-comparison-summary")).toContainText("找到 2 个可验证商户报价");
+    await expect(workspace.locator(".commerce-shopping-comparison-summary")).toContainText("2 个可验证商户报价");
     await expect(workspace.locator(".commerce-shopping-comparison-summary")).toContainText("当前已验证最低报价并列");
+    await expect(workspace.locator(".commerce-shopping-comparison-summary")).not.toContainText("商户报价比较");
+    await expect(workspace.locator(".commerce-shopping-comparison-summary h3")).toHaveCount(0);
     await expect(workspace.getByText("当前已验证最低报价并列", { exact:true })).toHaveCount(1);
     await expect(workspace.locator(".commerce-workspace-platform-card")).toHaveCount(2);
     await expect(workspace.locator(".commerce-workspace-platform-head strong")).toHaveText(["Albert Heijn", "PLUS"]);
@@ -131,9 +139,17 @@ test.describe.serial("Global Shopping zero-learning comparison UI", () => {
     await expect(workspace.locator('[data-commerce-shopping-related="true"]')).toContainText("相关商品与其他规格");
     await expect(workspace.locator('[data-commerce-shopping-related="true"]')).toContainText("200g");
     await expect(workspace.locator('[data-commerce-shopping-related="true"] .commerce-workspace-platform-card')).toHaveCount(0);
-    await expect(workspace).toContainText("运费未知");
-    await expect(workspace).toContainText("税费未知");
-    await expect(workspace).toContainText("其他费用未知");
+    const recommendation = workspace.locator('[data-commerce-workspace-recommendation="true"]');
+    await expect(recommendation.getByRole("heading", { name:"唯珊建议" })).toBeVisible();
+    await expect(recommendation).toContainText("两家当前已验证报价相同，暂不指定单一商户");
+    await expect(recommendation).toContainText("下单前请比较库存、配送和最终费用");
+    await expect(recommendation).not.toContainText(/AI 采购建议|商品已识别|收货地待补充|比较市场已建立|确认边界/);
+    const cost = workspace.locator('[data-commerce-workspace-cost-summary="true"]');
+    await expect(cost.locator("tbody tr")).toHaveCount(3);
+    await expect(cost).toContainText("运费 / 税费 / 其他费用");
+    await expect(cost).toContainText("待商户确认");
+    await expect(cost).toContainText("预计到手成本暂无法计算");
+    await expect(cost).not.toContainText(/运费未知|税费未知|其他费用未知/);
     const more = workspace.locator('[data-commerce-workspace-more-disclosure="true"]');
     await expect(more).not.toHaveAttribute("open", "");
     await expect(more.locator('[data-commerce-basic-ai-mode="true"]')).not.toBeVisible();
@@ -156,6 +172,8 @@ test.describe.serial("Global Shopping zero-learning comparison UI", () => {
     await expect(workspace.locator(".commerce-workspace-status-pill.is-lower")).toHaveCount(1);
     await expect(workspace.locator(".commerce-workspace-status-pill.is-lower")).toContainText("当前已验证报价中较低");
     await expect(workspace.locator('[data-commerce-workspace-recommendation="true"]')).toContainText("PLUS");
+    await expect(workspace.locator('[data-commerce-workspace-recommendation="true"]')).toContainText("当前已验证报价中较低");
+    await expect(workspace.locator('[data-commerce-workspace-recommendation="true"]')).not.toContainText(/全网最低|市场最低/);
 
     await mountState({ name:"single", sourceAvailable:true, offers:[{ merchant:"PLUS", price:2 }] });
     workspace = page.locator('[data-commerce-global-shopping-workspace="true"]');
@@ -167,6 +185,7 @@ test.describe.serial("Global Shopping zero-learning comparison UI", () => {
     workspace = page.locator('[data-commerce-global-shopping-workspace="true"]');
     await expect(workspace.locator('[data-commerce-shopping-empty-state="zero-offer"]')).toContainText("当前没有找到可验证实时报价");
     await expect(workspace.locator(".commerce-workspace-platform-card")).toHaveCount(0);
+    await expect(workspace.locator('[data-commerce-workspace-recommendation="true"]')).toContainText("暂不提供购买建议");
 
     await mountState({ name:"no-source", sourceAvailable:false, searchStatus:"idle", offers:[] });
     workspace = page.locator('[data-commerce-global-shopping-workspace="true"]');
@@ -182,6 +201,48 @@ test.describe.serial("Global Shopping zero-learning comparison UI", () => {
       window.I18n.setLang("zh");
       window.CommerceAgentPage.mount(document.getElementById("pageHost"));
     });
+  });
+
+  test("preserves canonical material specifications and only compacts costs when every additional component is unknown", async () => {
+    for (const product of [
+      { name:"beverage", productName:"Sparkling Water 330ml", brand:"Spring", model:"Sparkling Water 330ml", title:"Sparkling Water", variant:"330 ml" },
+      { name:"phone", productName:"iPhone 16 Pro 256GB", brand:"Apple", model:"iPhone 16 Pro 256GB", title:"iPhone 16 Pro", variant:"256 GB" },
+      { name:"furniture", productName:"Modular Oak Dining Table 200 x 90 cm", brand:"", model:"Modular Oak Dining Table 200 x 90 cm", title:"Modular Oak Dining Table", variant:"200 x 90 cm" }
+    ]) {
+      await mountState({ name:product.name, sourceAvailable:true, productName:product.productName, brand:product.brand, model:product.model, offers:[{ merchant:"Verified Merchant", price:20, title:product.title, variant:product.variant }] });
+      await expect(page.locator("#commerce-shopping-product-title")).toContainText(product.variant.replace(/\s+(g|ml|gb|tb)$/i, "$1"));
+    }
+
+    await mountState({
+      name:"partial-costs",
+      sourceAvailable:true,
+      offers:[{
+        merchant:"Verified Merchant",
+        price:20,
+        landedCostBreakdown:{ shippingFee:{ certainty:"confirmed", amount:3, currency:"EUR" }, taxFee:{ certainty:"unknown" }, platformFee:{ certainty:"unknown" } }
+      }]
+    });
+    let cost = page.locator('[data-commerce-workspace-cost-summary="true"]');
+    await expect(cost.locator("tbody tr")).toHaveCount(5);
+    await expect(cost).toContainText("运费EUR 3");
+    await expect(cost).toContainText("税费待确认");
+    await expect(cost).toContainText("其他费用待确认");
+
+    await mountState({
+      name:"complete-costs",
+      sourceAvailable:true,
+      offers:[{
+        merchant:"Verified Merchant",
+        price:20,
+        landedCostCompleteness:"complete",
+        totalLandedCost:25,
+        landedCostBreakdown:{ shippingFee:{ certainty:"confirmed", amount:3, currency:"EUR" }, taxFee:{ certainty:"confirmed", amount:2, currency:"EUR" }, platformFee:{ certainty:"confirmed", amount:0, currency:"EUR" } }
+      }]
+    });
+    cost = page.locator('[data-commerce-workspace-cost-summary="true"]');
+    await expect(cost.locator("tbody tr")).toHaveCount(5);
+    await expect(cost).toContainText("预计到手成本EUR 25");
+    await expect(cost).not.toContainText("暂无法计算");
   });
 
   test("keeps one through four offers, long copy, and large prices inside every required width without render-time requests", async () => {

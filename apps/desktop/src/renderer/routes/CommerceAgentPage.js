@@ -3061,8 +3061,15 @@
     const presentation = offerPresentation || workspaceOfferPresentation(task, false);
     const originalQuery = String(task && task.inputSummary || "").trim();
     const hasOffers = presentation.primaryItems.length > 0;
-    const acceptedOfferTitle = String(presentation.primaryItems[0] && presentation.primaryItems[0].title || "").trim();
-    const displayProductName = acceptedOfferTitle || product.model || productName;
+    const acceptedOffer = presentation.primaryItems[0] || null;
+    const acceptedOfferTitle = String(acceptedOffer && acceptedOffer.title || "").trim();
+    const acceptedVariant = String(acceptedOffer && ((acceptedOffer.truthEvidence || {}).variant || acceptedOffer.variant || acceptedOffer.quantity) || "").trim();
+    const compactVariant = acceptedVariant.replace(/\b(\d+(?:[.,]\d+)?)\s+(g|kg|ml|cl|l|gb|tb)\b/gi, "$1$2");
+    const acceptedTitleKey = acceptedOfferTitle.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+    const variantKey = compactVariant.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+    const displayProductName = acceptedOfferTitle
+      ? `${acceptedOfferTitle}${variantKey && !acceptedTitleKey.includes(variantKey) ? ` ${compactVariant}` : ""}`
+      : product.model || productName;
     const showBrandEyebrow = product.brand && !String(displayProductName).toLowerCase().startsWith(String(product.brand).toLowerCase());
     return `<section class="commerce-workspace-card commerce-workspace-product-card" data-commerce-workspace-product-card="true" aria-labelledby="commerce-shopping-product-title">
       <div class="commerce-workspace-product-hero">
@@ -3180,13 +3187,15 @@
       if (raw === "等待数据") return fallback;
       return raw;
     };
+    const comparisonCountLine = presentation.merchantCount === 1
+      ? shoppingText("当前找到 1 个可验证报价", "1 verified offer found")
+      : shoppingText(`${presentation.merchantCount} 个可验证商户报价`, `${presentation.merchantCount} verified merchant offers`);
+    const comparisonConclusion = comparison.status === "READY"
+      ? (presentation.tie ? shoppingText("当前已验证最低报价并列", "Current verified lowest offers are tied") : shoppingText("这些报价属于同款商品，可直接比较。", "These offers are for the same product and are directly comparable."))
+      : shoppingText("仅显示本次查询返回的已验证实时价格来源；暂不足以进行商户间价格比较。", "Only verified live price sources returned by this search are shown; there is not enough evidence for a merchant comparison.");
     return `<section class="commerce-workspace-platforms-section" data-commerce-workspace-platforms="true">
       <div class="commerce-shopping-comparison-summary ${comparison.status === "READY" ? "is-ready" : "is-single"}" role="status" aria-live="polite">
-        <div>
-          <p class="commerce-shopping-comparison-kicker">${esc(shoppingText(comparisonHeading, comparison.status === "READY" ? "Merchant offer comparison" : "Current verified offer"))}</p>
-          <h3>${esc(presentation.merchantCount === 1 ? shoppingText("当前找到 1 个可验证报价", "1 verified offer found") : shoppingText(`找到 ${presentation.merchantCount} 个可验证商户报价`, `${presentation.merchantCount} verified merchant offers found`))}</h3>
-          <p>${esc(comparison.status === "READY" ? (presentation.tie ? shoppingText("当前已验证最低报价并列", "Current verified lowest offers are tied") : shoppingText("这些报价属于同款商品，可直接比较。", "These offers are for the same product and are directly comparable.")) : shoppingText("仅显示本次查询返回的已验证实时价格来源；暂不足以进行商户间价格比较。", "Only verified live price sources returned by this search are shown; there are not enough merchants for a price comparison."))}</p>
-        </div>
+        <p class="commerce-shopping-comparison-line"><strong>${esc(comparisonCountLine)}</strong><span aria-hidden="true">·</span><span>${esc(comparisonConclusion)}</span></p>
       </div>
       ${Object.keys(grouped).map((country) => `<section class="commerce-workspace-market-group">
         <div class="commerce-workspace-market-group-head">
@@ -3237,38 +3246,29 @@
   }
 
   function workspaceRecommendationHtml(card, task, offerPresentation){
-    const fields = card && card.planFields || {};
     const presentation = offerPresentation || workspaceOfferPresentation(task, false);
     const comparison = presentation.comparison || {};
     const lower = comparison.lowerVerifiedOffer && comparison.lowerVerifiedOffer.offer || null;
     const lowerIdentity = lower ? workspaceMerchantAndSource(lower) : null;
-    const checks = [
-      fields.productName ? "商品已识别" : "商品信息待补充",
-      fields.destinationCountry ? "收货地已识别" : "收货地待补充",
-      Array.isArray(fields.comparisonMarkets) && fields.comparisonMarkets.length ? "比较市场已建立" : "比较市场待补充"
-    ];
     const recommendation = comparison.status === "READY"
       ? lowerIdentity
-        ? shoppingText(`可先查看 ${lowerIdentity.merchant}：它是当前已验证报价中较低的一项。`, `Consider ${lowerIdentity.merchant} first: it is lower among the current verified offers.`)
+        ? shoppingText(`${lowerIdentity.merchant} 是当前已验证报价中较低的一项。`, `${lowerIdentity.merchant} is lower among the current verified offers.`)
         : presentation.tie
-          ? shoppingText("当前可比较报价并列；没有其他已验证差异时，唯珊不指定单一商户。", "The comparable offers are currently tied; without another verified difference, Weishan does not pick one merchant.")
+          ? shoppingText("两家当前已验证报价相同，暂不指定单一商户。", "The current verified offers are tied, so no single merchant is preferred.")
           : shoppingText("当前报价可直接比较，但现有证据没有形成唯一较低报价。", "The offers are comparable, but current evidence does not identify one uniquely lower offer.")
       : comparison.status === "INSUFFICIENT_OFFERS"
         ? shoppingText("当前只有一个可验证报价，无法判断它是否比其他商户更低。", "Only one verified offer is available, so it cannot be judged lower than other merchants.")
-        : shoppingText("当前没有足够的实时报价，唯珊不会生成购物推荐。", "There are not enough live offers, so Weishan will not fabricate a shopping recommendation.");
+        : shoppingText("当前没有可验证的实时报价，暂不提供购买建议。", "There are no verified live offers, so no purchase recommendation is provided.");
+    const nextStep = presentation.primaryItems.length
+      ? shoppingText("下单前请比较库存、配送和最终费用；以商户页面为准。", "Before ordering, compare availability, delivery, and final fees on the merchant page.")
+      : shoppingText("可以修改商品描述或市场后重新查询。", "Edit the product description or market and search again.");
     return `<section class="commerce-workspace-card" data-commerce-workspace-recommendation="true">
       <div class="commerce-workspace-card-head">
-        <div><p class="commerce-shopping-comparison-kicker">${esc(shoppingText("唯珊建议", "Weishan guidance"))}</p><h3>${esc(shoppingText("AI 采购建议", "AI shopping guidance"))}</h3></div>
+        <div><h3>${esc(shoppingText("唯珊建议", "Weishan guidance"))}</h3></div>
       </div>
       <div class="commerce-workspace-recommendation">
         <p class="commerce-workspace-summary-lead">${esc(recommendation)}</p>
-        <div class="commerce-workspace-analysis-grid">
-          ${checks.map((item) => `<div class="commerce-workspace-analysis-item"><span aria-hidden="true">✓</span><strong>${esc(item)}</strong></div>`).join("")}
-        </div>
-        <div class="commerce-workspace-next-compact">
-          <p class="commerce-workspace-next-line">${esc(shoppingText("确认边界", "What the merchant confirms"))}</p>
-          <p class="commerce-workspace-next-line commerce-workspace-next-line-strong">${esc(presentation.primaryItems.length ? shoppingText("最终价格、库存与费用以商户页面为准。", "Final price, availability, and fees are confirmed on the merchant page.") : shoppingText("修改搜索不会触发下单或付款。", "Editing the search does not place an order or make a payment."))}</p>
-        </div>
+        <p class="commerce-workspace-recommendation-next">${esc(nextStep)}</p>
       </div>
     </section>`;
   }
@@ -3278,14 +3278,21 @@
     const presentation = offerPresentation || workspaceOfferPresentation(task, false);
     const realItem = presentation.primaryItems[0] || null;
     const breakdown = realItem && realItem.landedCostBreakdown || {};
-    const costPart = (part) => feePartText(part, realItem && realItem.currency).replace("待确认", shoppingText("未知", "Unknown"));
-    const rows = realItem ? [
-      ["商品价格", realItem.priceLabel || moneyText(realItem.price, realItem.currency, "—")],
-      ["运费", costPart(breakdown.shippingFee)],
-      ["税费", costPart(breakdown.taxFee)],
-      ["其他费用", costPart(breakdown.platformFee)],
-      ["预计到手成本", realItem.landedCostCompleteness === "complete" ? moneyText(realItem.totalLandedCost, realItem.currency, shoppingText("未知", "Unknown")) : shoppingText("未知", "Unknown")]
-    ] : (Array.isArray(cost.rows) ? cost.rows : []);
+    const costPart = (part) => ({
+      unknown:!part || String(part.certainty || "unknown") === "unknown" || part.amount === null || part.amount === undefined || part.amount === "",
+      value:feePartText(part, realItem && realItem.currency)
+    });
+    const shipping = costPart(breakdown.shippingFee);
+    const tax = costPart(breakdown.taxFee);
+    const fees = costPart(breakdown.platformFee);
+    const allAdditionalCostsUnknown = shipping.unknown && tax.unknown && fees.unknown;
+    const productPriceRow = ["商品价格", realItem && (realItem.priceLabel || moneyText(realItem.price, realItem.currency, "—"))];
+    const totalRow = ["预计到手成本", realItem && realItem.landedCostCompleteness === "complete" ? moneyText(realItem.totalLandedCost, realItem.currency, shoppingText("暂无法计算", "Cannot calculate yet")) : shoppingText("暂无法计算", "Cannot calculate yet")];
+    const rows = realItem
+      ? allAdditionalCostsUnknown
+        ? [productPriceRow, [shoppingText("运费 / 税费 / 其他费用", "Shipping / tax / other fees"), shoppingText("待商户确认", "Confirm with merchant")], totalRow]
+        : [productPriceRow, ["运费", shipping.value], ["税费", tax.value], ["其他费用", fees.value], totalRow]
+      : (Array.isArray(cost.rows) ? cost.rows : []);
     return `<section class="commerce-workspace-card" data-commerce-workspace-cost-summary="true">
       <div class="commerce-workspace-card-head">
         <div>

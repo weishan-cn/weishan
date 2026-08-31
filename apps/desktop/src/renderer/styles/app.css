@@ -2168,32 +2168,37 @@
   gap:12px;
 }
 .commerce-shopping-comparison-summary{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:16px;
-  padding:16px 18px;
-  border:1px solid var(--gs-border);
-  border-radius:14px;
-  background:linear-gradient(135deg,#fff,#f8fafc);
+  padding:2px 2px 0;
 }
 .commerce-shopping-comparison-summary.is-ready{
-  border-color:rgba(37,99,235,.24);
-  box-shadow:0 8px 22px rgba(37,99,235,.06);
+  color:var(--gs-text);
 }
-.commerce-shopping-comparison-summary h3,
 .commerce-shopping-empty-state h3{
   margin:2px 0 4px;
   color:var(--gs-text);
   font-size:18px;
   line-height:26px;
 }
-.commerce-shopping-comparison-summary p,
 .commerce-shopping-empty-state p{
   margin:0;
   color:var(--gs-text-secondary);
   font-size:13px;
   line-height:20px;
+}
+.commerce-shopping-comparison-line{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:7px;
+  margin:0;
+  color:var(--gs-text-secondary);
+  font-size:13px;
+  line-height:20px;
+}
+.commerce-shopping-comparison-line strong{
+  color:var(--gs-text);
+  font-size:15px;
+  font-weight:700;
 }
 .commerce-shopping-comparison-kicker{
   color:var(--gs-primary)!important;
@@ -2510,7 +2515,7 @@
 }
 .commerce-workspace-recommendation{
   display:grid;
-  gap:7px;
+  gap:6px;
   align-self:start;
 }
 .commerce-workspace-summary-lead{
@@ -2536,6 +2541,12 @@
 .commerce-workspace-analysis-item span{
   color:var(--gs-success);
   font-weight:700;
+}
+.commerce-workspace-recommendation-next{
+  margin:0;
+  color:var(--gs-text-secondary);
+  font-size:13px;
+  line-height:19px;
 }
 .commerce-workspace-next-compact{
   display:grid;

@@ -204,7 +204,7 @@ test.describe.serial("dispatch router", () => {
     await expect(workspace).toContainText("IPHONE 17");
     await expect(workspace).toContainText(/当前已验证报价|商户报价比较/);
     await expect(workspace).toContainText("预计到手成本");
-    await expect(workspace).toContainText("AI 采购建议");
+    await expect(workspace).toContainText("唯珊建议");
     await expect(workspace).toContainText("暂未接入该市场的实时价格来源");
     await expect(workspace).not.toContainText("AI 大脑采购编排");
     await expect(workspace).not.toContainText(/Official Store|Major Marketplace/);

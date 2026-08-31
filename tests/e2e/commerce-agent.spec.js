@@ -8286,7 +8286,7 @@ test.describe.serial("commerce agent workbench", () => {
     for (const platform of ["Rakuten", "Amazon Japan", "Yahoo Shopping", "Mercari", "Amazon US", "BestBuy", "B&H", "Costco"]) {
       await expect(detail).toContainText(platform);
     }
-    await expect(detail).toContainText("AI 采购建议");
+    await expect(detail).toContainText("唯珊建议");
     await expect(detail).toContainText("预计到手成本");
     await expect(detail.locator("table.commerce-workspace-cost-table")).toBeVisible();
     await expect(detail).toContainText("购物记录");
@@ -8493,7 +8493,7 @@ test.describe.serial("commerce agent workbench", () => {
       },
       {
         input:"搜索 Sony WH-1000XM5 降噪耳机，收货到美国，预算300美元，比较日本和美国平台价格、运费、税费及预计到手成本",
-        expected:["Sony", "WH-1000XM5", "300 USD", "United States", "Japan", "当前市场暂无实时价格来源", "预计到手成本", "AI 采购建议"]
+        expected:["Sony", "WH-1000XM5", "300 USD", "United States", "Japan", "当前市场暂无实时价格来源", "预计到手成本", "唯珊建议"]
       },
       {
         input:runId + "-SMOKE-SERVICE 帮我找成都附近靠谱的搬家公司",
