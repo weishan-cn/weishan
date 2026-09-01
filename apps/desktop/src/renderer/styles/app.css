@@ -11,6 +11,36 @@
   display:grid;
   gap:4px;
 }
+
+/* Consumer / Advanced experience boundary */
+.advanced-mode-indicator{
+  margin:-8px 4px 0;
+  border:1px solid #93c5fd;
+  border-radius:999px;
+  padding:6px 10px;
+  color:#1d4ed8;
+  background:#eff6ff;
+  font-size:12px;
+  font-weight:850;
+  text-align:center;
+}
+.experience-mode-settings .settings-title-row{align-items:flex-start}
+.experience-mode-settings .settings-title-row>div{min-width:0}
+.experience-mode-settings .settings-title-row h2{margin-bottom:6px}
+.advanced-settings-boundary,.advanced-security-boundary{display:grid;gap:16px}
+.advanced-settings-intro{border-color:#bfdbfe;background:#f8fbff}
+.privacy-overview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+.privacy-overview-grid section{border:1px solid #e2e8f0;border-radius:12px;padding:14px;background:#f8fafc}
+.privacy-overview-grid h3{margin:0 0 8px;font-size:15px}
+.privacy-overview-grid p{margin:0;color:#475569;line-height:1.55}
+.shell.sidebar-collapsed .advanced-mode-indicator{display:none}
+@media(max-width:760px){
+  .experience-mode-settings .settings-title-row{display:grid}
+  .privacy-overview-grid{grid-template-columns:1fr}
+  .topbar{height:auto;min-height:76px;padding:12px 16px;align-items:flex-start}
+  .top-actions{max-width:55%}
+  .language-context{display:none}
+}
 .local-login-warning b{
   font-size:15px;
   font-weight:950;

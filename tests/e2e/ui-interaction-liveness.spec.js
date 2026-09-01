@@ -7,6 +7,7 @@ test("Software Factory local bug draft never blocks global navigation with a nat
   const app = await launchWeishan(null);
   let blockingDialog = null;
   try {
+    await app.page.evaluate(() => window.WeishanExperienceMode.setAdvanced(true));
     app.page.once("dialog", async (dialog) => {
       blockingDialog = { type:dialog.type(), message:dialog.message() };
       await dialog.dismiss();
@@ -80,6 +81,7 @@ test("global interaction remains live after realistic rapid route and Software F
   async function clickRoute(route){
     const button = app.page.locator(`.nav-item[data-route="${route}"]`).first();
     await expect(button).toBeVisible();
+    await button.scrollIntoViewIfNeeded();
     const hit = await button.evaluate((target) => {
       const rect = target.getBoundingClientRect();
       const x = rect.left + rect.width / 2;
@@ -119,6 +121,7 @@ test("global interaction remains live after realistic rapid route and Software F
 
   try {
     expect(app.runtimeIdentity.buildType).toBe("SOURCE_DEV_ELECTRON");
+    await app.page.evaluate(() => window.WeishanExperienceMode.setAdvanced(true));
     await app.page.emulateMedia({ reducedMotion:"reduce" });
     await app.page.evaluate(() => {
       window.__uiLongTasks = [];

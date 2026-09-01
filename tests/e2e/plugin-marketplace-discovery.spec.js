@@ -23,7 +23,7 @@ test.describe.serial("plugin marketplace discovery", () => {
     await expect(page.locator('[data-plugin-section="recommended"] [data-plugin-id="video-generation"]')).toHaveCount(0);
     await expect(page.locator('[data-plugin-section="available"] [data-plugin-id="image-tools"]')).toBeVisible();
     await expect(page.locator('[data-plugin-section="available"] [data-plugin-id="video-generation"]')).toBeVisible();
-    await expect(page.locator('[data-plugin-section="available"]')).toContainText("全部插件");
+    await expect(page.locator('[data-plugin-section="available"]')).toContainText("全部工具");
     await expect(page.locator('[data-plugin-category="video"]')).toBeVisible();
     await expect(page.locator('[data-plugin-category="image"]')).toBeVisible();
     await expect(page.locator('[data-plugin-category="audio"]')).toBeVisible();
@@ -32,7 +32,7 @@ test.describe.serial("plugin marketplace discovery", () => {
     await page.locator("#pluginSearch").fill("图片");
     await expect(page.locator('[data-plugin-section="available"] [data-plugin-id="video-generation"]')).toBeVisible();
     await page.locator("#pluginSearch").fill("definitely-not-a-real-plugin");
-    await expect(page.locator("[data-plugin-filter-empty]").first()).toContainText("没有找到匹配插件");
+    await expect(page.locator("[data-plugin-filter-empty]").first()).toContainText("没有找到匹配工具");
 
     await page.locator("#pluginSearch").fill("");
     const details = page.locator('[data-plugin-id="video-generation"] [data-plugin-details]');

@@ -151,6 +151,11 @@
     window.Topbar.mount(shell);
     window.WeishanRouter.setRoute("home");
     window.addEventListener("weishan:lang", () => window.WeishanRouter.refresh());
+    window.addEventListener("weishan:experience-mode", () => {
+      const current = window.WeishanRouter.current();
+      if (window.WeishanModules && !window.WeishanModules.hasRoute(current)) window.WeishanRouter.setRoute("home");
+      else window.WeishanRouter.refresh();
+    });
   }
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
 })();

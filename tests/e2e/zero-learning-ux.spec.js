@@ -34,13 +34,13 @@ test.describe.serial("zero-learning user language", () => {
     });
     expect(layout.childCount).toBe(2);
     expect(layout.gridRows.trim().split(/\s+/)).toHaveLength(2);
-    expect(layout.order).toEqual([1, 0]);
+    expect(layout.order).toEqual([0, 1]);
     expect(layout.consoleIsPrimary).toBe(true);
     await expect(page.locator(".home-v205-main textarea")).toHaveCount(1);
     await expect(page.locator("#commandInput")).toHaveAttribute("placeholder", "例如：比较 MacBook Air M4 16+512 的购买选择，或查成都到东京下周两人经济舱");
     await expect(page.locator("#decisionUnifiedQuestion, #decisionUnifiedStart")).toHaveCount(0);
     await expect(page.locator("#runBtn")).toHaveText("开始");
-    await expect(page.locator("#openPluginsBtn")).toHaveText("插件");
+    await expect(page.locator("#openPluginsBtn")).toHaveText("工具");
     await expect(page.locator("#clearFinishedBtn")).toHaveCount(0);
     const consoleText = await page.locator("#cmdConsole").innerText();
     expect(consoleText).not.toMatch(/command\.execute|chat\.answer|dispatch|module|action/i);
@@ -102,9 +102,8 @@ test.describe.serial("zero-learning user language", () => {
     await gotoRoute(page, "home");
     const topbar = page.locator(".topbar");
     await expect(topbar).toBeVisible();
-    await expect(topbar.locator("#aiConnectionStatus")).toContainText(/AI 已连接|AI Connected/);
-    await expect(topbar.locator("#workspaceBtn")).toBeVisible();
-    await expect(topbar.locator("#workspaceBtn")).toHaveAttribute("title", "Workspace");
+    await expect(topbar.locator("#aiConnectionStatus, #workspaceBtn")).toHaveCount(0);
+    await expect(topbar.locator("#userMenuBtn")).toBeVisible();
     await expect(topbar.locator("#settingsBtn, #logoutBtn, #mailBtn")).toHaveCount(0);
     await expect(topbar.locator("#langSelect option").first()).toContainText(/Follow System|跟随系统|跟隨系統/);
     await expect(topbar.locator("#langSelect option[value='zh']")).toContainText("中文（简体）");
@@ -141,7 +140,7 @@ test.describe.serial("zero-learning user language", () => {
     await gotoRoute(page, "settings");
     await expect(page.locator(".ws-page > .ws-card h2").first()).toHaveText("Settings");
     await gotoRoute(page, "plugins");
-    await expect(page.locator(".plugin-center-hero h2")).toHaveText("Plugins");
+    await expect(page.locator(".plugin-center-hero h2")).toHaveText("Tools");
     await gotoRoute(page, "home");
     await page.locator(".topbar #langSelect").selectOption("zh-Hant");
     await expect(page.locator("#runBtn")).toHaveText("開始");
@@ -201,9 +200,9 @@ test.describe.serial("zero-learning user language", () => {
 
     await gotoRoute(page, "plugins");
     const toolsText = await page.locator(".plugin-center-page").innerText();
-    expect(toolsText).toContain("插件");
-    expect(toolsText).toContain("插件市场");
-    expect(toolsText).toContain("已安装插件");
+    expect(toolsText).toContain("工具");
+    expect(toolsText).toContain("工具市场");
+    expect(toolsText).toContain("已安装工具");
     expect(toolsText).toContain("视频制作");
     expect(toolsText).toContain("图片创作");
     expect(toolsText).not.toMatch(/Provider|Runtime|Capability|Permission|Plugin ID|Route ID/i);

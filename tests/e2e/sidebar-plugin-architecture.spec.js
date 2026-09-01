@@ -28,6 +28,7 @@ test.describe.serial("sidebar plugin architecture", () => {
 
   test.beforeEach(async () => {
     await resetCloudNavigation(page);
+    await page.evaluate(() => window.WeishanExperienceMode.setAdvanced(false));
   });
 
   test("deferred cloud navigation is removed while plugin navigation remains reachable", async () => {
@@ -38,15 +39,18 @@ test.describe.serial("sidebar plugin architecture", () => {
     await expect(page.locator('[data-nav-group="cloud"]')).toHaveCount(0);
   });
 
-  test("deferred cloud routes fall back safely while audit remains a system tool", async () => {
+  test("deferred and advanced routes fail closed until advanced mode is enabled", async () => {
     await page.evaluate(() => window.WeishanRouter.setRoute("storage"));
     await expect(page.locator(".home-v205-page")).toBeVisible();
     const route = await page.evaluate(() => window.WeishanRouter.current());
     expect(route).toBe("home");
     await expect(page.locator("#cloudEnterpriseToggle")).toHaveCount(0);
+    await page.evaluate(() => window.WeishanRouter.setRoute("audit"));
+    await expect(page.locator(".home-v205-page")).toBeVisible();
+    await page.evaluate(() => window.WeishanExperienceMode.setAdvanced(true));
     await gotoRoute(page, "audit");
     await expect(page.locator("#auditSearch")).toBeVisible();
-    await expect(page.locator('[data-nav-group="system"] .nav-item[data-route="audit"]')).toBeVisible();
+    await expect(page.locator('[data-nav-group="advanced"] .nav-item[data-route="audit"]')).toBeVisible();
   });
 
   test("plugin center is always reachable while disabled workspaces remain guarded", async () => {
@@ -69,7 +73,7 @@ test.describe.serial("sidebar plugin architecture", () => {
     await expect(videoCard).toHaveAttribute("data-plugin-enabled", "false");
     await expect(videoCard.locator("details")).not.toHaveAttribute("open", "");
     await page.locator("#pluginSearch").fill("nothing-matches-this-plugin");
-    await expect(page.locator("[data-plugin-filter-empty]").first()).toContainText("没有找到匹配插件");
+    await expect(page.locator("[data-plugin-filter-empty]").first()).toContainText("没有找到匹配工具");
     await page.evaluate(() => window.WeishanRouter.setRoute("plugin.video"));
     await expect(page.locator("#videoPluginWorkspace")).toHaveCount(0);
     await expect(page.locator(".home-v205-page")).toBeVisible();

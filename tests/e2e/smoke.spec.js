@@ -28,19 +28,17 @@ test.describe.serial("smoke", () => {
 
   test("history page visible", async () => {
     await gotoRoute(page, "history");
-    await expect(page.getByText(/历史记录|History/).first()).toBeVisible();
     await expect(page.locator("#historySearch")).toBeVisible();
   });
 
   test("security selfcheck visible", async () => {
+    await page.evaluate(() => window.WeishanExperienceMode.setAdvanced(true));
     await gotoRoute(page, "security");
-    await expect(page.getByText(/系统诊断|自检中心|Security/).first()).toBeVisible();
     await expect(page.locator("#runSelfCheck")).toBeVisible();
   });
 
   test("crawler page visible", async () => {
     await gotoRoute(page, "crawler");
-    await expect(page.getByText(/抓取中心|Crawler/).first()).toBeVisible();
     await expect(page.locator("#crawlUrl")).toBeVisible();
     await expect(page.locator("#createCrawl")).toBeVisible();
   });

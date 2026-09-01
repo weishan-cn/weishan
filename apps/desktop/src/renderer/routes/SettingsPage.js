@@ -645,6 +645,7 @@
   }
 
   function helpFeedbackPanel(){
+    const advanced = advancedModeEnabled();
     const api = helpFeedbackApi();
     const model = api && api.buildHelpFeedbackViewModel ? api.buildHelpFeedbackViewModel({
       appVersion:window.weishan && window.weishan.version || "",
@@ -688,12 +689,12 @@
             <p class="ws-muted" id="supportFeedbackHelp">你输入的内容只会进入即将打开的邮件草稿；不会进入匿名分析，也不会被当作命令执行。</p>
             <label for="supportContactEmail">可选联系邮箱 / Optional contact email</label>
             <input class="ws-input" id="supportContactEmail" inputmode="email" placeholder="you@example.com">
-            <label class="settings-switch" for="supportDiagnosticsToggle">
+            ${advanced ? `<label class="settings-switch" for="supportDiagnosticsToggle">
               <input type="checkbox" id="supportDiagnosticsToggle" role="switch" aria-describedby="supportDiagnosticsHelp">
               <span>包含基本诊断信息 / Include basic diagnostic information</span>
             </label>
             <p class="ws-muted" id="supportDiagnosticsHelp">${esc(model && model.diagnosticDisclosureZh || "只包含版本、平台、语言、当前模块、安全错误类别和构建类型。")} ${esc(model && model.diagnosticDisclosureEn || "Only version, platform, language, current module, safe error class, and build type are included.")}</p>
-            <div class="help-feedback-diagnostics-preview" id="supportDiagnosticsPreview" aria-live="polite">当前不会附加诊断信息。/ Diagnostics are currently off.</div>
+            <div class="help-feedback-diagnostics-preview" id="supportDiagnosticsPreview" aria-live="polite">当前不会附加诊断信息。/ Diagnostics are currently off.</div>` : ""}
             <div class="ws-row">
               <button type="button" class="ws-btn" id="openSupportDraft">打开邮件草稿 / Open mail draft</button>
               <button type="button" class="ws-btn gray" id="clearSupportDraft">清空 / Clear</button>
@@ -1099,6 +1100,32 @@
     window.__WEISHAN_SETTINGS_CONNECTOR_STATUS_UNSUBSCRIBE__ = null;
   }
 
+  function advancedModeEnabled(){
+    return !!(window.WeishanExperienceMode && window.WeishanExperienceMode.isAdvanced());
+  }
+
+  function experienceModePanel(){
+    const advanced = advancedModeEnabled();
+    return `<div class="ws-card experience-mode-settings" data-settings-section="experience">
+      <div class="settings-title-row">
+        <div><h2>${t("advancedModeTitle")}</h2><p class="ws-muted">${t("advancedModeDescription")}</p></div>
+        <span class="connector-pill ${advanced ? "connector-saved" : "connector-empty"}">${t(advanced ? "advancedModeOn" : "advancedModeOff")}</span>
+      </div>
+      <label class="settings-switch" for="experienceModeToggle">
+        <input id="experienceModeToggle" type="checkbox" role="switch"${advanced ? " checked" : ""}>
+        <span>${t(advanced ? "advancedModeDisable" : "advancedModeEnable")}</span>
+      </label>
+    </div>`;
+  }
+
+  function mountExperienceModePanel(host){
+    const toggle = host.querySelector("#experienceModeToggle");
+    if (!toggle || !window.WeishanExperienceMode) return;
+    toggle.addEventListener("change", function(){
+      window.WeishanExperienceMode.setAdvanced(toggle.checked);
+    });
+  }
+
   function refreshSettingsConnectorStatus(host){
     if (!host || !window.WeishanAPI || typeof window.WeishanAPI.connector !== "function") return;
     renderStatus(host, window.WeishanAPI.connector());
@@ -1150,21 +1177,24 @@
 
   function mount(host){
     const acc = window.AccountApi.current();
+    const advanced = advancedModeEnabled();
     host.innerHTML = `
-      <section class="ws-page">
+      <section class="ws-page settings-experience-${advanced ? "advanced" : "standard"}" data-experience-mode="${advanced ? "advanced" : "standard"}">
         <div class="ws-card">
           <h2>${t("settings")}</h2>
-          <p class="ws-muted">${t("settingsDesc")}</p>
+          <p class="ws-muted">${t("standardSettingsIntro")}</p>
         </div>
 
+        ${experienceModePanel()}
+
         <div class="ws-grid-2">
-          <div class="ws-card">
+          <div class="ws-card" data-settings-section="account">
             <h2>${t("account")}</h2>
             ${accountPanel(acc)}
-            ${settingsAuthLocalSecurityEvidencePanel()}
-            ${settingsNoSecretPersistenceGuardPanel()}
+            ${advanced ? settingsAuthLocalSecurityEvidencePanel() : ""}
+            ${advanced ? settingsNoSecretPersistenceGuardPanel() : ""}
           </div>
-          ${aiPanel(acc)}
+          ${advanced ? `<div data-settings-section="credentials" data-advanced-only="true">${aiPanel(acc)}</div>` : ""}
         </div>
 
         ${settingsUserControlPanel()}
@@ -1175,7 +1205,7 @@
           <button type="button" id="openWeishanOfficialWebsite" class="ws-btn gray">${t("visitWeishanOfficialWebsite")}</button>
         </div>
         ${commerceLocationPanel()}
-        ${desktopAssistantPanel()}
+        ${advanced ? `<div class="advanced-settings-boundary" data-settings-section="developer-diagnostics" data-advanced-only="true"><div class="ws-card advanced-settings-intro"><h2>${t("advancedSettingsTitle")}</h2><p class="ws-muted">${t("advancedSettingsDescription")}</p></div>${desktopAssistantPanel()}</div>` : ""}
       </section>`;
 
     function accountInput(){
@@ -1330,6 +1360,7 @@
     mountCommerceLocationPanel(host);
     mountSettingsUserControlPanel(host);
     mountHelpFeedbackPanel(host);
+    mountExperienceModePanel(host);
     try {
       if (window.sessionStorage && window.sessionStorage.getItem("weishan:settings:focus") === "commerceLocation") {
         window.sessionStorage.removeItem("weishan:settings:focus");
@@ -1338,7 +1369,7 @@
       }
     } catch (_) {}
 
-    if (!acc.loggedIn) return;
+    if (!acc.loggedIn || !advanced) return;
 
     host.querySelector("#advancedToggle").addEventListener("click", function(){
       host.querySelector("#advancedConnector").classList.toggle("is-collapsed");

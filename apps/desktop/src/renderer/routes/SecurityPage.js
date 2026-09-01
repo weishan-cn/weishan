@@ -425,13 +425,29 @@
       refreshRepairCenter();
     });
   }
+  function advancedModeEnabled(){
+    return !!(window.WeishanExperienceMode && window.WeishanExperienceMode.isAdvanced());
+  }
+  function privacyOverview(){
+    return `<div class="ws-card privacy-overview" data-security-section="consumer-privacy">
+      <h2>${t("privacyOverviewTitle")}</h2>
+      <p class="ws-muted">${t("privacyOverviewDescription")}</p>
+      <div class="privacy-overview-grid">
+        <section><h3>${t("privacyLocalTitle")}</h3><p>${t("privacyLocalText")}</p></section>
+        <section><h3>${t("privacyServiceTitle")}</h3><p>${t("privacyServiceText")}</p></section>
+        <section><h3>${t("privacyControlTitle")}</h3><p>${t("privacyControlText")}</p></section>
+      </div>
+    </div>`;
+  }
   function mount(host){
+    const advanced = advancedModeEnabled();
     host.innerHTML=`<section class="ws-page">
       <div class="ws-card">
         <h2>${t("security")}</h2>
-        <p class="ws-muted">${t("securityDesc")}</p>
+        <p class="ws-muted">${t("privacyOverviewDescription")}</p>
       </div>
-      <div class="ws-card">
+      ${privacyOverview()}
+      ${advanced ? `<div class="advanced-security-boundary" data-security-section="diagnostics" data-advanced-only="true"><div class="ws-card advanced-settings-intro"><h2>${t("advancedSettingsTitle")}</h2><p class="ws-muted">${t("advancedSettingsDescription")}</p></div><div class="ws-card">
         <h3>系统诊断 / 自检中心</h3>
         <p class="ws-muted">一键运行本地检查，生成 Markdown 自检报告，并写入历史记录。</p>
         <div class="ws-row">
@@ -442,8 +458,9 @@
       </div>
       <div id="selfCheckResult">${renderDiagnostics(lastDiagnostics)}</div>
       <div id="repairCenterHost">${renderRepairCenter()}</div>
-      <div class="card-list">${renderSecurityChecks()}</div>
+      <div class="card-list">${renderSecurityChecks()}</div></div>` : ""}
     </section>`;
+    if (!advanced) return;
     document.getElementById("runSelfCheck").addEventListener("click", async () => {
       document.getElementById("selfCheckResult").innerHTML = `<div class="ws-card"><p class="ws-muted">正在运行自检...</p></div>`;
       const data = await createDiagnosticsRun();

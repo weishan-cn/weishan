@@ -7185,20 +7185,27 @@
     const actions = topbar.querySelector(".top-actions");
     const lang = topbar.querySelector("#langSelect");
     if (title && title.textContent !== "首页总调度") title.textContent = "首页总调度";
-    if (subtitle && subtitle.textContent !== "本地优先 · 模块隔离 · 安全协作") subtitle.textContent = "本地优先 · 模块隔离 · 安全协作";
+    const consumerSubtitle = window.I18n && window.I18n.t ? window.I18n.t("topbarSubtitleConsumer") : "你的工作、服务与设置";
+    if (subtitle && subtitle.textContent !== consumerSubtitle) subtitle.textContent = consumerSubtitle;
     if (!actions || !lang) return;
+    const summary = window.WeishanAPI && typeof window.WeishanAPI.connectorSummary === "function"
+      ? window.WeishanAPI.connectorSummary()
+      : { state:/^AI 已连接/.test(String(snapshot && snapshot.brain || "")) ? "connected" : "not_configured", label:/^AI 已连接/.test(String(snapshot && snapshot.brain || "")) ? "AI 已连接" : "AI 未配置" };
+    const state = String(summary.state || (summary.connected ? "connected" : "not_configured"));
+    const label = String(summary.label || (state === "connected" ? "AI 已连接" : state === "saved_untested" ? "AI 未测试" : state === "testing" ? "AI 测试中" : state === "failed" ? "AI 连接失败" : "AI 未配置"));
     let status = actions.querySelector("#homeAiStatus") || actions.querySelector("#aiConnectionStatus");
+    const actionable = state === "failed" || state === "testing";
+    if (!actionable) {
+      if (status) status.hidden = true;
+      return;
+    }
     if (!status) {
       status = document.createElement("span");
       status.id = "homeAiStatus";
       status.className = "home-ai-status";
       actions.insertBefore(status, lang);
     }
-    const summary = window.WeishanAPI && typeof window.WeishanAPI.connectorSummary === "function"
-      ? window.WeishanAPI.connectorSummary()
-      : { state:/^AI 已连接/.test(String(snapshot && snapshot.brain || "")) ? "connected" : "not_configured", label:/^AI 已连接/.test(String(snapshot && snapshot.brain || "")) ? "AI 已连接" : "AI 未配置" };
-    const state = String(summary.state || (summary.connected ? "connected" : "not_configured"));
-    const label = String(summary.label || (state === "connected" ? "AI 已连接" : state === "saved_untested" ? "AI 未测试" : state === "testing" ? "AI 测试中" : state === "failed" ? "AI 连接失败" : "AI 未配置"));
+    status.hidden = false;
     const cls = state === "connected" ? "is-connected" : (state === "saved_untested" || state === "testing" ? "is-pending" : "is-disconnected");
     if (status.dataset.aiState === state && status.textContent === label && status.className === "home-ai-status " + cls) return;
     status.className = "home-ai-status " + cls;
@@ -7322,9 +7329,7 @@
               <div class="cmd-compact-composer" data-global-shopping-compact-composer="true">
                 <button class="cmd-compact-trigger" id="compactComposerExpandBtn" type="button" aria-expanded="false" aria-controls="commandInput">继续补充采购需求…</button>
                 <div class="cmd-compact-actions">
-                  <button class="cmd-btn ghost compact-icon-btn" id="uploadBtn" type="button" aria-label="${t("uploadAttachment")}">附件</button>
                   <button class="cmd-btn primary compact-send-btn" id="compactRunBtn" type="button">发送</button>
-                  <button class="cmd-btn ghost compact-icon-btn" id="recordBtn" type="button" aria-label="${t("recordAudio")}">语音</button>
                 </div>
               </div>
             ` : `
@@ -7333,9 +7338,7 @@
               ${selectedHistoryTask(snap) ? `<p class="cmd-history-meta" data-history-execution-hint="true">当前正在查看历史详情；输入新指令并执行时会创建新任务，并返回最新结果。</p>` : ""}
               <textarea id="commandInput" class="cmd-input" placeholder="${t("homePlaceholder")}">${esc(commandInputDraft)}</textarea>
               <div class="cmd-actions">
-                <button class="cmd-btn gray" id="uploadBtn">${t("uploadAttachment")}</button>
                 <button class="cmd-btn gray" id="openPluginsBtn">${t("plugins")}</button>
-                <button class="cmd-btn gray" id="recordBtn">${t("recordAudio")}</button>
                 <button class="cmd-btn primary" id="runBtn">${t("startRun")}</button>
               </div>
             `}
@@ -7953,7 +7956,7 @@
     });
 
     const uploadBtn = host.querySelector("#uploadBtn");
-    uploadBtn.addEventListener("click", async function(){
+    if (uploadBtn) uploadBtn.addEventListener("click", async function(){
       const chooseFiles = typeof window.__WEISHAN_TEST_CHOOSE_FILES__ === "function"
         ? window.__WEISHAN_TEST_CHOOSE_FILES__
         : window.weishan && typeof window.weishan.chooseFiles === "function"
@@ -7979,7 +7982,7 @@
     });
 
     const recordBtn = host.querySelector("#recordBtn");
-    recordBtn.addEventListener("click", function(){
+    if (recordBtn) recordBtn.addEventListener("click", function(){
       if (window.WeishanUserNotice) window.WeishanUserNotice.show(host, t("recordReserved"));
     });
 

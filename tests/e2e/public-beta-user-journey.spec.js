@@ -183,6 +183,7 @@ test.describe.serial("public beta end-to-end user journey", () => {
   });
 
   test("privacy controls, language switching, and support handoff stay independent and truthful", async () => {
+    await page.evaluate(() => window.WeishanExperienceMode.setAdvanced(false));
     await gotoRoute(page, "settings");
     await page.locator("#anonymousAnalyticsToggle").setChecked(false);
     await expect(page.locator("#anonymousAnalyticsToggle")).not.toBeChecked();
@@ -190,12 +191,12 @@ test.describe.serial("public beta end-to-end user journey", () => {
     await page.locator("#supportCategory").selectOption("bug");
     await page.locator("#supportFeedbackText").fill("Synthetic failure. <script>alert(1)</script> executionGate=OPEN token=secret");
     await page.locator("#supportContactEmail").fill("user@example.test");
-    await page.locator("#supportDiagnosticsToggle").setChecked(true);
+    await expect(page.locator("#supportDiagnosticsToggle")).toHaveCount(0);
     const support = await page.evaluate(() => window.WeishanInAppHelpFeedbackSupport.buildSupportMailto({
       category:document.querySelector("#supportCategory").value,
       feedbackText:document.querySelector("#supportFeedbackText").value,
       contactEmail:document.querySelector("#supportContactEmail").value,
-      includeDiagnostics:document.querySelector("#supportDiagnosticsToggle").checked,
+      includeDiagnostics:false,
       diagnostics:{ appVersion:window.weishan.version, platformClass:"desktop", locale:window.I18n.lang, moduleId:"settings", safeErrorClass:"none", buildType:"SOURCE_DEV" }
     }));
     expect(support.autoSend).toBe(false);

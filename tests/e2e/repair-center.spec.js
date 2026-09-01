@@ -30,6 +30,7 @@ test.describe.serial("repair center", () => {
   });
 
   test("creates verifies and records a local repair report", async () => {
+    await page.evaluate(() => window.WeishanExperienceMode.setAdvanced(true));
     await gotoRoute(page, "security");
     await expect(page.getByText("修护中心").first()).toBeVisible();
     await expect(page.locator("#createRepairTest")).toBeVisible();

@@ -96,6 +96,7 @@ test("local audit remains available while deferred enterprise collaboration stay
     const copyRecorded = await waitForHistoryCount(page, "audit.copy", before);
     if (!copyRecorded) await recordSafeCopyAuditMarker(page);
 
+    await page.evaluate(() => window.WeishanExperienceMode.setAdvanced(true));
     await searchAudit(page, "audit.copy");
     await expect(page.getByText("audit.copy").first()).toBeVisible();
 

@@ -23,7 +23,7 @@ test("source startup shows Weishan branding and hides deferred cloud enterprise 
     await expect(app.page.getByText("团队协作")).toHaveCount(0);
     await expect(app.page.getByText("团队与席位")).toHaveCount(0);
     await expect(app.page.getByText("报告中心")).toHaveCount(0);
-    await expect(app.page.locator('[data-nav-group="system"] .nav-item[data-route="audit"]')).toBeVisible();
+    await expect(app.page.locator('.nav-item[data-route="audit"]')).toHaveCount(0);
     await expect(app.page.locator(".paid")).toHaveCount(0);
 
     await app.page.evaluate(() => window.I18n.setLang("en"));
@@ -32,7 +32,7 @@ test("source startup shows Weishan branding and hides deferred cloud enterprise 
     await expect(app.page.getByText("Team")).toHaveCount(0);
     await expect(app.page.getByText("Seats")).toHaveCount(0);
     await expect(app.page.getByText("Reports")).toHaveCount(0);
-    await expect(app.page.locator('[data-nav-group="system"] .nav-item[data-route="audit"]')).toBeVisible();
+    await expect(app.page.locator('.nav-item[data-route="audit"]')).toHaveCount(0);
 
     await app.page.evaluate(() => window.WeishanRouter.setRoute("storage"));
     await expect(app.page.locator(".home-v205-page")).toBeVisible();

@@ -22,7 +22,7 @@ test.describe.serial("deferred cloud settings navigation", () => {
     await expect(page.locator('.nav-item[data-route="team"]')).toHaveCount(0);
     await expect(page.locator('.nav-item[data-route="seats"]')).toHaveCount(0);
     await expect(page.locator('.nav-item[data-route="reports"]')).toHaveCount(0);
-    await expect(page.locator('[data-nav-group="system"] .nav-item[data-route="audit"]')).toBeVisible();
+    await expect(page.locator('.nav-item[data-route="audit"]')).toHaveCount(0);
     await expect(page.locator(".paid")).toHaveCount(0);
 
     await page.evaluate(() => window.WeishanRouter.setRoute("storage"));

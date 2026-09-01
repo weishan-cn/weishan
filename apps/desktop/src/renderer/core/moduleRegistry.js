@@ -1,27 +1,28 @@
 (function(){
   const groups = [
-    { id:"core", labelKey:"core" },
-    { id:"execution", labelKey:"execution" },
+    { id:"core", labelKey:"work" },
+    { id:"execution", labelKey:"services" },
+    { id:"advanced", labelKey:"advanced" },
     { id:"cloud", labelKey:"cloud", collapsible:true, stateKey:"settings.cloudEnterpriseExpanded", defaultExpanded:false, hideWhenNoVisibleModules:true },
     { id:"system", labelKey:"system" }
   ];
   const modules = [
-    { id:"home", icon:"⌂", groupId:"core", page:"HomePage" },
-    { id:"projects", icon:"▣", groupId:"core", page:"ProjectsPage" },
-    { id:"memory", icon:"◎", groupId:"core", page:"MemoryPage", pill:"AI" },
-    { id:"history", icon:"◷", groupId:"core", page:"HistoryPage" },
-    { id:"mail", icon:"✉", groupId:"execution", page:"MailPage" },
-    { id:"crawler", icon:"☷", groupId:"execution", page:"CrawlerPage" },
-    { id:"builder", icon:"⚒", groupId:"execution", page:"BuilderPage" },
-    { id:"commerce", icon:"◇", groupId:"execution", page:"CommerceAgentPage" },
-    { id:"plugins", icon:"▦", groupId:"execution", page:"PluginsPage" },
+    { id:"home", icon:"⌂", groupId:"core", page:"HomePage", experience:"standard" },
+    { id:"projects", icon:"▣", groupId:"core", page:"ProjectsPage", experience:"standard" },
+    { id:"memory", icon:"◎", groupId:"core", page:"MemoryPage", experience:"standard" },
+    { id:"history", icon:"◷", groupId:"core", page:"HistoryPage", experience:"standard" },
+    { id:"mail", icon:"✉", groupId:"execution", page:"MailPage", experience:"standard" },
+    { id:"commerce", icon:"◇", groupId:"execution", page:"CommerceAgentPage", experience:"standard" },
+    { id:"plugins", icon:"▦", groupId:"execution", page:"PluginsPage", experience:"standard" },
+    { id:"crawler", icon:"☷", groupId:"advanced", page:"CrawlerPage", experience:"advanced" },
+    { id:"builder", icon:"⚒", groupId:"advanced", page:"BuilderPage", experience:"advanced" },
     { id:"storage", icon:"◫", groupId:"cloud", page:"StoragePage", visibleInNavigation:false, routeEnabled:false, deferredNavigation:true },
     { id:"team", icon:"👥", groupId:"cloud", page:"TeamPage", paid:true, visibleInNavigation:false, routeEnabled:false, deferredNavigation:true },
     { id:"seats", icon:"▥", groupId:"cloud", page:"SeatsPage", paid:true, visibleInNavigation:false, routeEnabled:false, deferredNavigation:true },
     { id:"reports", icon:"▤", groupId:"cloud", page:"ReportsPage", paid:true, visibleInNavigation:false, routeEnabled:false, deferredNavigation:true },
-    { id:"audit", icon:"☑", groupId:"system", page:"AuditPage" },
-    { id:"settings", icon:"⚙", groupId:"system", page:"SettingsPage" },
-    { id:"security", icon:"🛡", groupId:"system", page:"SecurityPage" }
+    { id:"audit", icon:"☑", groupId:"advanced", page:"AuditPage", experience:"advanced" },
+    { id:"settings", icon:"⚙", groupId:"system", page:"SettingsPage", experience:"standard" },
+    { id:"security", icon:"🛡", groupId:"system", page:"SecurityPage", experience:"standard" }
   ];
 
   function unique(list, key){ return new Set(list.map((item) => item[key])).size === list.length; }
@@ -31,8 +32,9 @@
   }
   function get(id){ return modules.find((item) => item.id === id) || null; }
   function getGroup(id){ return groups.find((item) => item.id === id) || null; }
-  function isModuleVisible(item){ return !!item && item.visibleInNavigation !== false; }
-  function isRouteEnabled(item){ return !!item && item.routeEnabled !== false; }
+  function experience(){ return window.WeishanExperienceMode || { allows:(item) => !!item && item.routeEnabled !== false }; }
+  function isModuleVisible(item){ return !!item && item.visibleInNavigation !== false && experience().allows(item); }
+  function isRouteEnabled(item){ return !!item && item.routeEnabled !== false && experience().allows(item); }
   function modulesForGroup(groupId, options){
     const includeHidden = options && options.includeHidden === true;
     return modules.filter((item) => item.groupId === groupId && (includeHidden || isModuleVisible(item)));
@@ -43,7 +45,7 @@
     if (group.hideWhenNoVisibleModules) return modulesForGroup(groupId).length > 0;
     return true;
   }
-  function coreRouteIds(){ return modules.filter(isRouteEnabled).map((item) => item.id); }
+  function coreRouteIds(){ return modules.filter((item) => item.routeEnabled !== false).map((item) => item.id); }
   function hasRoute(id){ return isRouteEnabled(get(id)); }
   function pageFor(id){ const item = get(id); return isRouteEnabled(item) ? item.page : ""; }
   function route(id){
@@ -59,5 +61,5 @@
   }
 
   assertRegistry();
-  window.WeishanModules = { groups, modules, get, getGroup, modulesForGroup, isGroupVisible, coreRouteIds, hasRoute, pageFor, route };
+  window.WeishanModules = { groups, modules, get, getGroup, modulesForGroup, isGroupVisible, isModuleVisible, isRouteEnabled, coreRouteIds, hasRoute, pageFor, route };
 })();

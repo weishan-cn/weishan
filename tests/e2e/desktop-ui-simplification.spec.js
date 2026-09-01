@@ -46,11 +46,12 @@ test.describe.serial("desktop UI simplification and function preservation", () =
   });
 
   test("Settings and Help stay calm while preserving privacy and support controls", async () => {
+    await page.evaluate(() => window.WeishanExperienceMode.setAdvanced(false));
     await gotoRoute(page, "settings");
     await expect(page.locator("#anonymousAnalyticsToggle")).toBeVisible();
     await expect(page.locator("#helpFeedbackSupportPanel")).toBeVisible();
     await expect(page.locator("#openSupportDraft")).toBeVisible();
-    await expect(page.locator("#supportDiagnosticsToggle")).toBeVisible();
+    await expect(page.locator("#supportDiagnosticsToggle")).toHaveCount(0);
 
     const ordinarySettingsText = await page.evaluate(() => [
       document.querySelector("#settingsUserControlPanel")?.innerText || "",

@@ -15,6 +15,7 @@ test.describe.serial("in-app help feedback support", () => {
   });
 
   test("settings exposes one privacy-safe Help & Feedback flow without sending mail", async () => {
+    await page.evaluate(() => window.WeishanExperienceMode.setAdvanced(false));
     await gotoRoute(page, "settings");
     await expect(page.locator("#helpFeedbackSupportPanel")).toBeVisible();
     await expect(page.getByRole("heading", { name:/帮助与反馈|Help & Feedback/ })).toBeVisible();
@@ -26,6 +27,9 @@ test.describe.serial("in-app help feedback support", () => {
 
     await expect(page.getByText("智能邮件").first()).toBeVisible();
     await expect(page.getByText("Connect AI service").first()).toBeVisible();
+    await expect(page.locator("#supportDiagnosticsToggle")).toHaveCount(0);
+    await page.evaluate(() => window.WeishanExperienceMode.setAdvanced(true));
+    await gotoRoute(page, "settings");
     await expect(page.locator("#supportDiagnosticsHelp")).toContainText("不包含搜索原文");
     await expect(page.locator("#supportDiagnosticsHelp")).toContainText(/Mail content/i);
     await expect(page.locator("#supportDiagnosticsHelp")).toContainText(/saved keys/i);

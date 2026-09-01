@@ -210,6 +210,52 @@
     commerceTitle:"全球購物", commerceWorkspaceTitle:"全球購物工作台", commerceWorkspaceSubtitle:"全球購物 · 商品比較與到手成本", commerceSubtitle:"Global Shopping Workspace · 唯讀搜尋、比價、建議與平台跳轉", commerceBackHome:"返回首頁總調度", commerceSafety:"Weishan 只提供 AI 輔助搜尋、分析、比價、建議與跳轉；不收款、不代下單、不儲存帳戶密碼，最終價格以平台頁面為準。", commerceSearchLabel:"搜尋需求", commerceSearchPlaceholder:"例如：幫我找 iPhone 價格 / 幫我找成都到上海最便宜機票 / 幫我找東京飯店", commerceStatus:"採購狀態", commerceAiStatus:"AI 狀態", commercePriceData:"價格資料", commerceWaitingTrustedSource:"等待可信來源", commerceMode:"模式", commerceProcurementMode:"採購模式", commerceSafeComparison:"安全比較", commerceProviderStatus:"Provider 狀態", commerceGenerate:"產生唯讀搜尋建議", commerceClearAll:"清理全部計畫", commerceTaskList:"採購任務列表", commerceItems:"{count} 項", commerceDefaultRequest:"產生全球採購計畫", commerceCopied:"採購計畫已複製", commerceCopyFailed:"複製失敗，請稍後再試。", commerceAiNotConfigured:"AI 未設定", commerceProviderNotConnected:"Provider 未連線", commerceOffline:"離線模式"
   });
 
+  Object.assign(zh, {
+    projects:"任务与工作", memory:"已保存信息", history:"最近记录", crawler:"网页采集",
+    plugins:"工具", pluginCenter:"工具", pluginCenterDescription:"使用已经准备好的本地工具完成具体任务。", pluginMarketplace:"工具市场", installedPlugins:"已安装工具", recommendedPlugins:"Weishan 推荐工具", pluginCategories:"工具分类", morePlugins:"更多工具", pluginSearchLabel:"搜索工具", pluginAvailablePlugins:"可用工具", pluginAllPlugins:"全部工具", pluginNoSearchResults:"没有找到匹配工具。",
+    work:"工作", services:"服务与工具", advanced:"高级", system:"设置",
+    topbarSubtitleConsumer:"你的工作、服务与设置",
+    advancedMode:"高级模式", advancedModeOn:"高级模式已开启", advancedModeOff:"标准体验",
+    advancedModeTitle:"高级模式", advancedModeDescription:"高级模式显示开发、诊断和实验性控制。开启或关闭不会执行任务或连接外部服务。",
+    advancedModeEnable:"显示高级功能", advancedModeDisable:"返回标准体验", mainNavigation:"主导航",
+    standardSettingsIntro:"管理账号、偏好、位置、隐私与帮助。",
+    advancedSettingsTitle:"开发与诊断", advancedSettingsDescription:"以下连接、凭据与自动化控制仅在高级模式显示。",
+    privacyOverviewTitle:"你的数据与隐私", privacyOverviewDescription:"Weishan 默认优先在本机处理和保存数据。只有你明确连接 AI、邮箱或其他服务时，所需内容才会发送到对应服务。",
+    privacyLocalTitle:"保存在本机", privacyLocalText:"项目、已保存信息、历史和偏好默认保存在这台设备。",
+    privacyServiceTitle:"连接服务时", privacyServiceText:"只发送完成当前功能所必需的数据；密码和安全凭据不会显示在普通页面。",
+    privacyControlTitle:"你可以控制", privacyControlText:"你可以断开服务、关闭匿名产品改进，并在对应页面删除本地内容。"
+  });
+  Object.assign(en, {
+    projects:"Tasks & Work", memory:"Saved Information", history:"Recent Activity", crawler:"Web Capture",
+    plugins:"Tools", pluginCenter:"Tools", pluginCenterDescription:"Use ready local tools to complete specific tasks.", pluginMarketplace:"Tool marketplace", installedPlugins:"Installed tools", recommendedPlugins:"Weishan recommendations", pluginCategories:"Tool categories", morePlugins:"More tools", pluginSearchLabel:"Search tools", pluginAvailablePlugins:"Available tools", pluginAllPlugins:"All tools", pluginNoSearchResults:"No matching tools found.",
+    work:"Work", services:"Services & Tools", advanced:"Advanced", system:"Settings",
+    topbarSubtitleConsumer:"Your work, services, and settings",
+    advancedMode:"Advanced mode", advancedModeOn:"Advanced mode on", advancedModeOff:"Standard experience",
+    advancedModeTitle:"Advanced mode", advancedModeDescription:"Advanced mode shows developer, diagnostic, and experimental controls. Toggling it does not run tasks or connect external services.",
+    advancedModeEnable:"Show advanced features", advancedModeDisable:"Return to standard experience", mainNavigation:"Main navigation",
+    standardSettingsIntro:"Manage your account, preferences, location, privacy, and help.",
+    advancedSettingsTitle:"Developer & diagnostics", advancedSettingsDescription:"The connection, credential, and automation controls below appear only in Advanced mode.",
+    privacyOverviewTitle:"Your data and privacy", privacyOverviewDescription:"Weishan prioritizes processing and storing data on this device. Required content is sent to AI, mail, or other services only after you explicitly connect them.",
+    privacyLocalTitle:"Stored on this device", privacyLocalText:"Tasks, saved information, history, and preferences stay on this device by default.",
+    privacyServiceTitle:"When services are connected", privacyServiceText:"Only data needed for the current feature is sent. Passwords and secure credentials are not shown on ordinary pages.",
+    privacyControlTitle:"Your controls", privacyControlText:"You can disconnect services, disable anonymous product improvement, and delete local content from its corresponding page."
+  });
+  Object.assign(zhHant, {
+    projects:"任務與工作", memory:"已儲存資訊", history:"最近記錄", crawler:"網頁擷取",
+    plugins:"工具", pluginCenter:"工具", pluginCenterDescription:"使用已準備好的本機工具完成具體任務。", pluginMarketplace:"工具市場", installedPlugins:"已安裝工具", recommendedPlugins:"Weishan 推薦工具", pluginCategories:"工具分類", morePlugins:"更多工具", pluginSearchLabel:"搜尋工具", pluginAvailablePlugins:"可用工具", pluginAllPlugins:"全部工具", pluginNoSearchResults:"沒有找到相符工具。",
+    work:"工作", services:"服務與工具", advanced:"進階", system:"設定",
+    topbarSubtitleConsumer:"你的工作、服務與設定",
+    advancedMode:"進階模式", advancedModeOn:"進階模式已開啟", advancedModeOff:"標準體驗",
+    advancedModeTitle:"進階模式", advancedModeDescription:"進階模式顯示開發、診斷和實驗性控制。開啟或關閉不會執行任務或連接外部服務。",
+    advancedModeEnable:"顯示進階功能", advancedModeDisable:"返回標準體驗", mainNavigation:"主導覽",
+    standardSettingsIntro:"管理帳戶、偏好、位置、隱私與說明。",
+    advancedSettingsTitle:"開發與診斷", advancedSettingsDescription:"以下連接、憑據與自動化控制只會在進階模式顯示。",
+    privacyOverviewTitle:"你的資料與隱私", privacyOverviewDescription:"Weishan 預設優先在本機處理和儲存資料。只有你明確連接 AI、郵箱或其他服務時，所需內容才會傳送到對應服務。",
+    privacyLocalTitle:"儲存在本機", privacyLocalText:"任務、已儲存資訊、歷史和偏好預設保存在這台裝置。",
+    privacyServiceTitle:"連接服務時", privacyServiceText:"只傳送完成目前功能所必需的資料；密碼和安全憑據不會顯示在普通頁面。",
+    privacyControlTitle:"你可以控制", privacyControlText:"你可以中斷服務、關閉匿名產品改進，並在對應頁面刪除本機內容。"
+  });
+
   Object.assign(zh, { settingsCloudTitle:"云服务与企业空间", settingsStorageMode:"当前存储模式", settingsLocalStorage:"本地存储", settingsReadPlans:"读取企业套餐", settingsReadCloudStatus:"读取企业空间状态", settingsAllocateCloud:"分配企业云空间 mock", settingsPlansPending:"企业套餐待读取。", settingsCloudStatusPending:"企业空间状态待读取。", settingsInviteMember:"邀请成员 mock", settingsInvitePending:"成员邀请结果待执行。", settingsLocationTitle:"位置与收货目的地", settingsLocationOff:"关闭", settingsLocationWaiting:"待系统授权", settingsDestination:"收货目的地", settingsCountryRegion:"国家/地区", settingsStateCity:"州/省/城市", settingsPostalCode:"邮编/邮政编码", settingsAlwaysAllow:"永远允许", settingsAllowWhileUsing:"使用 App 时允许", settingsNotSet:"未设置", settingsAccuratePrice:"精确最低到手价", settingsAvailable:"可计算", settingsUnavailable:"不可用" });
   Object.assign(en, { settingsCloudTitle:"Cloud Services and Enterprise Space", settingsStorageMode:"Current storage mode", settingsLocalStorage:"Local storage", settingsReadPlans:"Load enterprise plans", settingsReadCloudStatus:"Load enterprise space status", settingsAllocateCloud:"Allocate mock enterprise storage", settingsPlansPending:"Enterprise plans have not been loaded.", settingsCloudStatusPending:"Enterprise space status has not been loaded.", settingsInviteMember:"Invite member (mock)", settingsInvitePending:"Member invitation is pending.", settingsLocationTitle:"Location and Delivery Destination", settingsLocationOff:"Off", settingsLocationWaiting:"Awaiting system permission", settingsDestination:"Delivery destination", settingsCountryRegion:"Country/region", settingsStateCity:"State/province/city", settingsPostalCode:"Postal code", settingsAlwaysAllow:"Always allow", settingsAllowWhileUsing:"Allow while using the app", settingsNotSet:"Not set", settingsAccuratePrice:"Accurate total price", settingsAvailable:"Available", settingsUnavailable:"Unavailable" });
   Object.assign(zhHant, { settingsCloudTitle:"雲端服務與企業空間", settingsStorageMode:"目前儲存模式", settingsLocalStorage:"本機儲存", settingsReadPlans:"讀取企業方案", settingsReadCloudStatus:"讀取企業空間狀態", settingsAllocateCloud:"分配模擬企業雲端空間", settingsPlansPending:"企業方案尚未讀取。", settingsCloudStatusPending:"企業空間狀態尚未讀取。", settingsInviteMember:"邀請成員（模擬）", settingsInvitePending:"成員邀請結果待執行。", settingsLocationTitle:"位置與收貨目的地", settingsLocationOff:"關閉", settingsLocationWaiting:"等待系統授權", settingsDestination:"收貨目的地", settingsCountryRegion:"國家／地區", settingsStateCity:"州／省／城市", settingsPostalCode:"郵遞區號", settingsAlwaysAllow:"永遠允許", settingsAllowWhileUsing:"使用 App 時允許", settingsNotSet:"未設定", settingsAccuratePrice:"精確到手價", settingsAvailable:"可計算", settingsUnavailable:"無法使用" });

@@ -132,6 +132,7 @@ test("repeated local Capture Center tasks keep the whole desktop responsive", as
 
   try {
     expect(app.runtimeIdentity.buildType).toBe("SOURCE_DEV_ELECTRON");
+    await page.evaluate(() => window.WeishanExperienceMode.setAdvanced(true));
     await instrument();
     await gotoRoute(page, "crawler");
 

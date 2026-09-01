@@ -19,7 +19,7 @@
   }
   function html(){
     const text = labels();
-    return `<header class="topbar"><div><h1>${title()}</h1><p>${window.I18n.t("topbarSubtitle")}</p></div><div class="top-actions">${languageMarkup()}<span class="small green" id="aiConnectionStatus" title="AI connection status" aria-label="${text.ai}">${text.ai}</span><button class="small" id="workspaceBtn" title="Workspace">${text.workspace}</button><div class="user-menu"><button class="small" id="userMenuBtn" type="button" title="${text.userMenu}" aria-label="${text.userMenu}" aria-expanded="false" aria-controls="userMenu">${accountLabel()}</button><div class="user-menu-popover" id="userMenu" role="menu" hidden><button type="button" role="menuitem" data-user-menu-action="profile" disabled aria-disabled="true">${text.profile}</button><button type="button" role="menuitem" data-user-menu-action="workspace">${text.workspace}</button><button type="button" role="menuitem" data-user-menu-action="settings">${text.settings}</button><button type="button" role="menuitem" data-user-menu-action="mail">${text.mail}</button><span class="user-menu-divider" role="separator"></span><button type="button" role="menuitem" data-user-menu-action="logout">${text.logout}</button></div></div></div></header>`;
+    return `<header class="topbar"><div><h1>${title()}</h1><p>${window.I18n.t("topbarSubtitleConsumer")}</p></div><div class="top-actions">${languageMarkup()}<div class="user-menu"><button class="small" id="userMenuBtn" type="button" title="${text.userMenu}" aria-label="${text.userMenu}" aria-expanded="false" aria-controls="userMenu">${accountLabel()}</button><div class="user-menu-popover" id="userMenu" role="menu" hidden><button type="button" role="menuitem" data-user-menu-action="profile" disabled aria-disabled="true">${text.profile}</button><button type="button" role="menuitem" data-user-menu-action="workspace">${text.workspace}</button><button type="button" role="menuitem" data-user-menu-action="settings">${text.settings}</button><button type="button" role="menuitem" data-user-menu-action="mail">${text.mail}</button><span class="user-menu-divider" role="separator"></span><button type="button" role="menuitem" data-user-menu-action="logout">${text.logout}</button></div></div></div></header>`;
   }
   function bind(){
     const lang = document.getElementById("langSelect");
@@ -36,7 +36,6 @@
       menu.hidden = !open;
       menuButton.setAttribute("aria-expanded", open ? "true" : "false");
     });
-    document.getElementById("workspaceBtn").addEventListener("click", function(){ window.WeishanRouter.setRoute("projects"); });
     menu.addEventListener("click", function(event){
       const action = event.target && event.target.getAttribute("data-user-menu-action");
       if (!action) return;

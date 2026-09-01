@@ -52,7 +52,8 @@
     const collapsed = isCollapsed();
     const toggleLabel = t(collapsed ? "expandSidebar" : "collapseSidebar");
     const groups = modules().groups || [];
-    return `<aside class="sidebar"><div class="brand"><div class="brand-logo"><img src="assets/ws-logo.png" alt="Weishan logo"></div><div class="brand-name">Weishan</div><button type="button" class="sidebar-toggle" id="sidebarToggle" title="${esc(toggleLabel)}" aria-label="${esc(toggleLabel)}" aria-expanded="${collapsed ? "false" : "true"}">${collapsed ? "›" : "‹"}</button></div><nav>${groups.map(groupMarkup).join("")}</nav><div class="sidebar-foot"><div>Weishan v${esc(appVersion())}</div><div class="local-dot">● ${esc(t("localFirstMode"))}</div></div></aside>`;
+    const advanced = window.WeishanExperienceMode && window.WeishanExperienceMode.isAdvanced();
+    return `<aside class="sidebar"><div class="brand"><div class="brand-logo"><img src="assets/ws-logo.png" alt="Weishan logo"></div><div class="brand-name">Weishan</div><button type="button" class="sidebar-toggle" id="sidebarToggle" title="${esc(toggleLabel)}" aria-label="${esc(toggleLabel)}" aria-expanded="${collapsed ? "false" : "true"}">${collapsed ? "›" : "‹"}</button></div>${advanced ? `<div class="advanced-mode-indicator">${esc(t("advancedModeOn"))}</div>` : ""}<nav aria-label="${esc(t("mainNavigation"))}">${groups.map(groupMarkup).join("")}</nav><div class="sidebar-foot"><div>Weishan v${esc(appVersion())}</div><div class="local-dot">● ${esc(t("localFirstMode"))}</div></div></aside>`;
   }
   function bind(root){
     const toggle = root.querySelector("#sidebarToggle");

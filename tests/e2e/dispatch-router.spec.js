@@ -122,8 +122,7 @@ test.describe.serial("dispatch router", () => {
       provider:"OpenRouter",
       model:"aion-labs/aion-1.0-mini"
     });
-    await expect(page.locator("#aiConnectionStatus")).toHaveAttribute("data-ai-state", "connected");
-    await expect(page.locator("#aiConnectionStatus")).toContainText("AI 已连接");
+    await expect(page.locator("#aiConnectionStatus")).toHaveCount(0);
     const command = runId + " 成都到上海怎么最经济？";
     await submitHomeCommand(page, command);
     await expect(page.getByText(/高铁|飞机|实时票价以实际查询为准/).first()).toBeVisible();
@@ -337,6 +336,7 @@ test.describe.serial("dispatch router", () => {
   });
 
   test("crawler dispatch confirms and runs local mock execution without fetching", async () => {
+    await page.evaluate(() => window.WeishanExperienceMode.setAdvanced(true));
     const command = runId + " 抓取 https://example.com 并整理成摘要";
     await submitHomeCommand(page, command);
     await expect(page.getByText(/来自首页调度中心的抓取任务/).first()).toBeVisible();
@@ -362,34 +362,22 @@ test.describe.serial("dispatch router", () => {
     await expectHistory(page, runId, /softwareFactory\.executed|dispatch\.executed|dispatch\.confirmed|企业记账 app/);
   });
 
-  test("home upload stages attachment metadata before command without auto execution", async () => {
-    const filename = runId + "-attachment-fixture.txt";
+  test("unfinished home attachment action stays hidden while text input remains usable", async () => {
     await gotoRoute(page, "home");
-    await mockChooseFiles(page, { name:filename, type:"text/plain", size:128 });
-    await page.locator("#uploadBtn").click();
-    await expect(page.locator("[data-attachment-stage]")).toBeVisible();
-    await expect(page.locator("[data-attachment-stage]")).toContainText(filename);
-    await expect(page.locator("[data-attachment-stage]")).toContainText(productLanguage.attachmentSafety);
-    await expect(page.locator("#cmdQueue")).not.toContainText(filename);
-    await expect(page.locator("#cmdHistory")).not.toContainText(filename);
+    await expect(page.locator("#uploadBtn")).toHaveCount(0);
+    await expect(page.locator("#recordBtn")).toHaveCount(0);
+    await expect(page.locator("[data-attachment-stage]")).toHaveCount(0);
     await page.locator("#commandInput").fill(runId + " 继续输入文字说明");
     await expect(page.locator("#commandInput")).toHaveValue(/继续输入文字说明/);
   });
 
-  test("home command executes after attachment plus text with metadata only", async () => {
-    const filename = runId + "-analysis-fixture.txt";
+  test("home command continues to execute without exposing unfinished attachment controls", async () => {
     await gotoRoute(page, "home");
-    await mockChooseFiles(page, { name:filename, type:"text/plain", size:256 });
-    await page.locator("#uploadBtn").click();
-    await expect(page.locator("[data-attachment-stage]")).toContainText(filename);
-    await page.locator("#commandInput").fill(runId + " 帮我分析这个附件");
+    await expect(page.locator("#uploadBtn")).toHaveCount(0);
+    await page.locator("#commandInput").fill(runId + " 帮我总结一段说明");
     await page.locator("#runBtn").click();
-    await expect(currentTaskLogs(page)).toContainText(productLanguage.processing);
-    await expect(currentTaskLogs(page)).not.toContainText(productLanguage.hiddenInternalTerms[1]);
-    await expect(currentTaskLogs(page)).not.toContainText(productLanguage.hiddenInternalTerms[2]);
-    await expect(currentTaskLogs(page)).not.toContainText(productLanguage.hiddenInternalTerms[3]);
     await expect(page.locator("[data-attachment-stage]")).toHaveCount(0);
-    await expectHistory(page, runId, /帮我分析这个附件|AI 未配置|高铁/);
+    await expectHistory(page, runId, /帮我总结一段说明|AI 未配置|高铁/);
   });
 
   test("dispatch bridge can be cancelled without executing module work", async () => {

@@ -92,6 +92,7 @@ function createTopbarDocument() {
     className:"home-ai-status",
     dataset:{},
     textWriteCount:0,
+    hidden:false,
     get textContent() { return statusText; },
     set textContent(value) { statusText = String(value); this.textWriteCount += 1; }
   };
@@ -248,8 +249,7 @@ async function main() {
   const homePage = loadHomePage(window, document);
   homePage.__bindHomeAiStatusRuntimeHooksForTest();
   homePage.__syncHomeTopbarForTest({ brain:"AI 未配置" });
-  assert.equal(status.dataset.aiState, "connected");
-  assert.match(status.textContent, /^AI 已连接/);
+  assert.equal(status.hidden, true, "healthy AI state should not persist in the standard header");
 
   store.set(api.connectorKey(), {
     providerType:"openrouter",
@@ -259,18 +259,18 @@ async function main() {
     testStatus:"saved"
   });
   homePage.__syncHomeTopbarForTest({ brain:"AI 未配置" });
-  assert.equal(status.dataset.aiState, "saved_untested");
-  assert.equal(status.textContent, "AI 未测试");
+  assert.equal(status.hidden, true, "non-actionable saved state should remain hidden");
 
   api.saveTest({}, { ok:false, message:"network failed" });
   homePage.__refreshHomeAiStatusForTest();
   assert.equal(status.dataset.aiState, "failed");
   assert.equal(status.textContent, "AI 连接失败");
+  assert.equal(status.hidden, false);
 
   window.weishan.ai.chat = async function() { return { ok:true, content:"ok" }; };
   const chatSuccess = await api.chat([{ role:"user", content:"hello" }]);
   assert.equal(chatSuccess.ok, true);
-  assert.equal(status.dataset.aiState, "connected");
+  assert.equal(status.hidden, true);
   window.weishan.ai.chat = async function() { return { ok:false, error:"network failed" }; };
   const chatFailure = await api.chat([{ role:"user", content:"hello" }]);
   assert.equal(chatFailure.ok, false);
@@ -310,8 +310,7 @@ async function main() {
     testStatus:"success"
   });
   window.dispatchEvent(new window.CustomEvent("weishan:route-changed", { detail:{ route:"home" } }));
-  assert.equal(status.dataset.aiState, "connected");
-  assert.match(status.textContent, /^AI 已连接/);
+  assert.equal(status.hidden, true);
 
   homePage.__bindHomeAiStatusRuntimeHooksForTest();
   const focusListeners = window.__events.focus || [];
