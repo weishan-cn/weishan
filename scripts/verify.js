@@ -112,6 +112,7 @@ function runCore() {
   runStep("Smart Mail authorization and AI gating effectiveness", "node", ["tests/api/smart-mail-auth-ai-gating-effectiveness.test.js"]);
   runStep("Smart Mail intelligence quality effectiveness", "node", ["tests/api/smart-mail-intelligence-quality-effectiveness.test.js"]);
   runStep("Plugin marketplace discovery effectiveness", "node", ["tests/api/plugin-marketplace-discovery-effectiveness.test.js"]);
+  runStep("Plugin Runtime V2 foundation", "node", ["tests/api/plugin-runtime-v2-foundation.test.js"]);
   runStep("Image Tools Jimp effectiveness", "node", ["tests/api/image-tools-jimp-effectiveness.test.js"]);
   runStep("Image Tools IPC security", "node", ["tests/api/image-tools-ipc-security.test.js"]);
   runStep("In-app Help Feedback Support effectiveness", "node", ["tests/api/in-app-help-feedback-support-effectiveness.test.js"]);

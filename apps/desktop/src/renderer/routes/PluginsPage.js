@@ -1,109 +1,108 @@
 (function(){
   function t(key){ return window.I18n && typeof window.I18n.t === "function" ? window.I18n.t(key) : key; }
   function esc(value){ return String(value == null ? "" : value).replace(/[&<>\"]/g, (char) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" })[char]); }
-  function entries(){
+  function advanced(){ return !!(window.WeishanExperienceMode && window.WeishanExperienceMode.isAdvanced()); }
+  function legacyModel(){
     const registry = window.WeishanPluginRegistry;
-    return registry && typeof registry.getPluginCenterEntries === "function" ? registry.getPluginCenterEntries() : [];
+    return registry && typeof registry.marketplaceModel === "function" ? registry.marketplaceModel() : { entries:[] };
   }
-  function presentation(plugin){
+  function v2(){ return window.WeishanPluginRuntimeV2Catalog || {}; }
+  function runtime(){ return v2().runtime || null; }
+  function localeValue(value){
+    const lang = window.I18n && typeof window.I18n.getLang === "function" ? window.I18n.getLang() : "zh";
+    if (!value || typeof value !== "object") return "";
+    return value[lang] || value[lang === "zh-Hant" ? "zh" : lang] || value.en || value.zh || "";
+  }
+  function permissionLabel(permission){
+    const scopes = Array.isArray(permission.scopes) ? permission.scopes.join(", ") : "";
+    return `${permission.permissionId}${scopes ? ` · ${scopes}` : ""}`;
+  }
+  function sizeLabel(bytes){
+    const value = Number(bytes) || 0;
+    if (!value) return t("pluginIncludedInApp");
+    if (value < 1024 * 1024) return `${Math.max(1, Math.round(value / 1024))} KB`;
+    return `${Math.round(value / 1024 / 1024)} MB`;
+  }
+  function statusFor(manifest, installation){
+    if (manifest.availability !== "READY") return t("pluginStatusFoundationOnly");
+    if (!installation) return t("pluginStatusNotInstalled");
+    if (installation.state === "ENABLED") return t("pluginStatusEnabled");
+    if (installation.state === "PERMISSION_BLOCKED") return t("pluginStatusPermissionBlocked");
+    return t("pluginStatusDisabled");
+  }
+  function permissionList(manifest){
+    if (!manifest.permissions.length) return `<p class="plugin-permission-empty">${esc(t("pluginNoExtraPermissions"))}</p>`;
+    return `<ul class="plugin-permission-list">${manifest.permissions.map((permission) => `<li><strong>${esc(permissionLabel(permission))}</strong><span>${esc(permission.description)}</span></li>`).join("")}</ul>`;
+  }
+  function v2Card(manifest){
+    const activeRuntime = runtime();
+    const installation = activeRuntime && activeRuntime.installation(manifest.pluginId);
+    const isReady = manifest.availability === "READY";
+    const isEnabled = installation && installation.state === "ENABLED";
+    const name = localeValue(manifest.localizedName) || manifest.name;
+    const description = localeValue(manifest.localizedDescription) || manifest.description;
+    const largeWarning = manifest.largePack ? `<p class="plugin-large-warning">${esc(t("pluginLargePackWarning"))} · ${esc(manifest.additionalRuntimeSize)}</p>` : "";
+    const requirements = manifest.externalServiceRequirement !== "NONE" ? `<p class="plugin-external-requirement">${esc(t("pluginExternalServiceRequired"))}</p>` : "";
+    let actions = "";
+    if (isReady && !installation) actions = `<button type="button" class="ws-btn" data-v2-install="${esc(manifest.pluginId)}">${esc(t("pluginInstall"))}</button>`;
+    if (isReady && installation) {
+      actions = `<div class="plugin-lifecycle-actions">
+        ${isEnabled ? `<button type="button" class="ws-btn gray" data-v2-disable="${esc(manifest.pluginId)}">${esc(t("pluginDisable"))}</button>` : `<button type="button" class="ws-btn" data-v2-enable="${esc(manifest.pluginId)}">${esc(t("pluginEnable"))}</button>`}
+        ${isEnabled && manifest.entrypoint.target === "plugin.image-tools" ? `<button type="button" class="ws-btn" data-plugin-route="plugin.image-tools">${esc(t("openPluginWorkspace"))}</button>` : ""}
+        <label class="plugin-retention-choice"><span>${esc(t("pluginUninstallChoice"))}</span><select data-retention-for="${esc(manifest.pluginId)}"><option value="retain">${esc(t("pluginRemoveOnly"))}</option><option value="delete">${esc(t("pluginRemoveWithData"))}</option></select></label>
+        <button type="button" class="ws-btn danger" data-v2-uninstall="${esc(manifest.pluginId)}">${esc(t("pluginUninstall"))}</button>
+      </div>`;
+    }
+    return `<article class="plugin-center-card plugin-v2-card" data-plugin-id="${esc(manifest.pluginId)}" data-plugin-enabled="${isEnabled ? "true" : "false"}" data-plugin-v2="true">
+      <div class="plugin-center-card-head"><span class="plugin-center-icon" aria-hidden="true">${manifest.pluginId.includes("image") ? "▧" : "◇"}</span><div><h3>${esc(name)}</h3><p>${esc(description)}</p></div><span class="plugin-center-status ${isEnabled ? "is-enabled" : "is-disabled"}">${esc(statusFor(manifest, installation))}</span></div>
+      <div class="plugin-card-categories">${manifest.categories.map((category) => `<span>${esc(category)}</span>`).join("")}</div>${largeWarning}${requirements}
+      <details class="plugin-center-details" data-plugin-details><summary>${esc(t("pluginViewDetails"))}</summary>
+        <dl class="plugin-v2-meta"><div><dt>${esc(t("pluginDetailPublisher"))}</dt><dd>${esc(manifest.publisher.name)} · ${esc(manifest.publisher.trustClass)}</dd></div><div><dt>${esc(t("pluginDetailDownloadSize"))}</dt><dd>${esc(sizeLabel(manifest.downloadSize))}</dd></div><div><dt>${esc(t("pluginDetailInstallSize"))}</dt><dd>${esc(sizeLabel(manifest.installSize))}</dd></div><div><dt>${esc(t("pluginDetailOnlineDependency"))}</dt><dd>${esc(manifest.onlineDependency)}</dd></div></dl>
+        <h4>${esc(t("pluginDetailPermissions"))}</h4>${permissionList(manifest)}
+        ${advanced() ? `<div class="plugin-advanced-details" data-plugin-advanced-details><code>${esc(manifest.pluginId)}</code><span>Runtime ${esc(manifest.runtimeVersion)}</span><span>${esc(manifest.entrypoint.mode)}</span><span>${esc(manifest.capabilities.map((item) => item.capabilityId).join(", "))}</span></div>` : ""}
+      </details>${actions}</article>`;
+  }
+  function legacyCard(plugin){
     const registry = window.WeishanPluginRegistry;
-    return registry && typeof registry.presentationFor === "function" ? registry.presentationFor(plugin) : {};
-  }
-  function marketplace(){
-    const registry = window.WeishanPluginRegistry;
-    if (registry && typeof registry.marketplaceModel === "function") return registry.marketplaceModel();
-    const list = entries();
-    return { entries:list, recommended:[], installed:list.filter((plugin) => plugin.enabled === true), categories:[] };
-  }
-  function statusKey(plugin){
-    if (presentation(plugin).userStatus === "coming_soon") return "pluginStatusComingSoon";
-    if (plugin.enabled !== true) return "pluginStatusDisabled";
-    return plugin.status === "available" ? "pluginStatusEnabled" : "pluginStatusUnavailable";
-  }
-  function categoryLabel(category){
-    const map = {
-      video:"pluginCategoryVideo",
-      image:"pluginCategoryImage",
-      audio:"pluginCategoryAudio",
-      office:"pluginCategoryOffice",
-      ai:"pluginCategoryAi",
-      developer:"pluginCategoryDeveloper",
-      commerce:"pluginCategoryCommerce",
-      travel:"pluginCategoryTravel"
-    };
-    return t(map[category] || "pluginCategoryUtility");
-  }
-  function card(plugin){
-    const enabled = plugin.enabled === true && plugin.status === "available";
-    const display = presentation(plugin);
-    const categories = Array.isArray(display.categories) ? display.categories : [];
-    const reasons = Array.isArray(display.marketplaceReasons) ? display.marketplaceReasons : [];
-    const license = plugin.license || {};
-    const licenseLine = license.name && license.sourceReference ? `${license.name} · ${license.sourceReference}` : t("pluginLicenseUnknown");
-    const permissionLine = Array.isArray(plugin.requestedPermissions) && plugin.requestedPermissions.length ? plugin.requestedPermissions.join(", ") : t("pluginNoExtraPermissions");
+    const display = registry && registry.presentationFor ? registry.presentationFor(plugin) : {};
     const displayName = display.nameKey ? t(display.nameKey) : plugin.name;
     const tagline = display.taglineKey ? t(display.taglineKey) : (display.tagline || plugin.description);
-    const runtimeNotice = display.runtimeNoticeKey ? t(display.runtimeNoticeKey) : (display.runtimeNotice || t("pluginNotEnabledNote"));
-    const details = display.detailsKey ? t(display.detailsKey) : t("pluginComingSoonDetails");
-    return `<article class="plugin-center-card" data-plugin-id="${esc(plugin.pluginId)}" data-plugin-enabled="${enabled ? "true" : "false"}">
-      <div class="plugin-center-card-head"><span class="plugin-center-icon" aria-hidden="true">${esc(plugin.icon)}</span><div><h3>${esc(displayName)}</h3><p>${esc(tagline)}</p></div><span class="plugin-center-status ${enabled ? "is-enabled" : "is-disabled"}">${esc(t(statusKey(plugin)))}</span></div>
-      ${categories.length ? `<div class="plugin-card-categories">${categories.map((category) => `<span>${esc(categoryLabel(category))}</span>`).join("")}</div>` : ""}
-      ${reasons.length ? `<p class="plugin-center-fit">${esc(t("pluginWhyShown"))}</p>` : ""}
-      <p class="plugin-center-note">${esc(runtimeNotice)}</p>
-      <details class="plugin-center-details" data-plugin-details><summary>${esc(t("pluginViewDetails"))}</summary><p>${esc(details)}</p><dl><div><dt>${esc(t("pluginDetailLicense"))}</dt><dd>${esc(licenseLine)}</dd></div><div><dt>${esc(t("pluginDetailPermissions"))}</dt><dd>${esc(permissionLine)}</dd></div><div><dt>${esc(t("pluginDetailAvailability"))}</dt><dd>${esc(t(statusKey(plugin)))}</dd></div></dl></details>
-      ${enabled ? `<button type="button" class="ws-btn plugin-workspace-open" data-plugin-route="${esc(plugin.entryPoint.routeId)}">${esc(t("openPluginWorkspace"))}</button>` : ""}
-    </article>`;
+    return `<article class="plugin-center-card" data-plugin-id="${esc(plugin.pluginId)}" data-plugin-enabled="false"><div class="plugin-center-card-head"><span class="plugin-center-icon" aria-hidden="true">${esc(plugin.icon)}</span><div><h3>${esc(displayName)}</h3><p>${esc(tagline)}</p></div><span class="plugin-center-status is-disabled">${esc(t(display.userStatus === "coming_soon" ? "pluginStatusComingSoon" : "pluginStatusUnavailable"))}</span></div><p class="plugin-center-note">${esc(display.runtimeNotice || t("pluginNotEnabledNote"))}</p><details class="plugin-center-details" data-plugin-details><summary>${esc(t("pluginViewDetails"))}</summary><p>${esc(t("pluginComingSoonDetails"))}</p></details></article>`;
   }
-  function listSection(titleKey, plugins, emptyKey, attrs){
-    return `<section class="plugin-center-list" ${attrs || ""}><h3>${esc(t(titleKey))}</h3><section class="plugin-center-grid">${plugins.map(card).join("") || `<div class="ws-card plugin-empty-state"><p class="ws-muted">${esc(t(emptyKey || "pluginCenterEmpty"))}</p></div>`}</section></section>`;
-  }
-  function discovery(model){
-    const categories = Array.isArray(model.categories) ? model.categories : [];
-    return `<section class="plugin-discovery" aria-label="${esc(t("pluginMarketplace"))}">
-      <label class="plugin-search-label" for="pluginSearch">${esc(t("pluginSearchLabel"))}</label>
-      <input id="pluginSearch" class="plugin-search-input" type="search" placeholder="${esc(t("pluginSearchPlaceholder"))}" autocomplete="off">
-      <div class="plugin-discovery-sections"><span>${esc(t("pluginMarketplace"))}</span><span>${esc(t("installedPlugins"))}</span><span>${esc(t("recommendedPlugins"))}</span></div>
-      <div><h3>${esc(t("pluginCategories"))}</h3><div class="plugin-discovery-categories">${categories.map((category) => `<button type="button" data-plugin-category="${esc(category)}">${esc(categoryLabel(category))}</button>`).join("") || `<span>${esc(t("pluginNoCategories"))}</span>`}</div></div>
-    </section>`;
-  }
+  function section(title, cards, attr, empty){ return `<section class="plugin-center-list" ${attr}><h3>${esc(title)}</h3><section class="plugin-center-grid">${cards.join("") || `<div class="ws-card plugin-empty-state"><p class="ws-muted">${esc(empty)}</p></div>`}</section></section>`; }
   function mount(host){
-    const model = marketplace();
-    const plugins = model.entries || entries();
-    host.innerHTML = `<section class="ws-page plugin-center-page"><header class="ws-card plugin-center-hero"><h2>${esc(t("pluginCenter"))}</h2><p class="ws-muted">${esc(t("pluginCenterDescription"))}</p></header>${discovery(model)}${listSection("recommendedPlugins", model.recommended || [], "pluginRecommendedEmpty", "data-plugin-section=\"recommended\"")}${listSection("pluginAllPlugins", plugins, "pluginCenterEmpty", "data-plugin-section=\"available\"")}${listSection("installedPlugins", model.installed || [], "pluginInstalledEmpty", "data-plugin-section=\"installed\"")}</section>`;
-    function applyFilter(){
-      const query = (host.querySelector("#pluginSearch").value || "").trim().toLowerCase();
-      const cards = Array.from(host.querySelectorAll(".plugin-center-card"));
-      cards.forEach((item) => {
-        const text = item.textContent.toLowerCase();
-        item.classList.toggle("is-filtered-out", !!query && !text.includes(query));
-      });
-      Array.from(host.querySelectorAll("[data-plugin-section]")).forEach((section) => {
-        const visibleCards = Array.from(section.querySelectorAll(".plugin-center-card")).filter((item) => !item.classList.contains("is-filtered-out"));
-        let empty = section.querySelector("[data-plugin-filter-empty]");
-        if (!visibleCards.length && query) {
-          if (!empty) {
-            empty = document.createElement("div");
-            empty.className = "ws-card plugin-empty-state";
-            empty.setAttribute("data-plugin-filter-empty", "true");
-            empty.innerHTML = `<p class="ws-muted">${esc(t("pluginNoSearchResults"))}</p>`;
-            section.querySelector(".plugin-center-grid").appendChild(empty);
-          }
-        } else if (empty) {
-          empty.remove();
-        }
-      });
-    }
+    const catalogApi = v2();
+    const manifests = typeof catalogApi.catalog === "function" ? catalogApi.catalog() : [];
+    const activeRuntime = runtime();
+    const installed = manifests.filter((manifest) => activeRuntime && activeRuntime.installation(manifest.pluginId));
+    const available = manifests.filter((manifest) => manifest.availability === "READY" && !(activeRuntime && activeRuntime.installation(manifest.pluginId)));
+    const previews = advanced() ? manifests.filter((manifest) => manifest.developerPreviewOnly && manifest.availability !== "READY") : [];
+    const legacy = legacyModel().entries.filter((plugin) => plugin.pluginId !== "image-tools");
+    host.innerHTML = `<section class="ws-page plugin-center-page" data-runtime-version="2"><header class="ws-card plugin-center-hero"><h2>${esc(t("pluginCenter"))}</h2><p class="ws-muted">${esc(t("pluginCenterDescriptionV2"))}</p></header>
+      <section class="plugin-discovery" aria-label="${esc(t("pluginMarketplace"))}"><label class="plugin-search-label" for="pluginSearch">${esc(t("pluginSearchLabel"))}</label><input id="pluginSearch" class="plugin-search-input" type="search" placeholder="${esc(t("pluginSearchPlaceholder"))}" autocomplete="off"><div class="plugin-discovery-sections"><span>${esc(t("installedPlugins"))}</span><span>${esc(t("pluginAddCapabilities"))}</span>${advanced() ? `<span>${esc(t("pluginDeveloperPreview"))}</span>` : ""}</div></section>
+      ${section(t("installedPlugins"), installed.map(v2Card), 'data-plugin-section="installed"', t("pluginInstalledEmpty"))}
+      ${section(t("pluginAddCapabilities"), available.map(v2Card).concat(legacy.map(legacyCard)), 'data-plugin-section="available"', t("pluginCenterEmpty"))}
+      ${advanced() ? section(t("pluginDeveloperPreview"), previews.map(v2Card), 'data-plugin-section="developer-preview"', t("pluginCenterEmpty")) : ""}
+      <div class="plugin-action-status" role="status" aria-live="polite" data-plugin-action-status></div></section>`;
+    function remount(message){ mount(host); const status = host.querySelector("[data-plugin-action-status]"); if (status && message) status.textContent = message; }
     const search = host.querySelector("#pluginSearch");
-    if (search) search.addEventListener("input", applyFilter);
-    host.querySelectorAll("[data-plugin-category]").forEach((button) => button.addEventListener("click", () => {
-      const searchInput = host.querySelector("#pluginSearch");
-      searchInput.value = button.textContent.trim();
-      searchInput.focus();
-      applyFilter();
+    if (search) search.addEventListener("input", () => { const query = search.value.trim().toLowerCase(); host.querySelectorAll(".plugin-center-card").forEach((card) => card.classList.toggle("is-filtered-out", !!query && !card.textContent.toLowerCase().includes(query))); });
+    host.querySelectorAll("[data-v2-install]").forEach((button) => button.addEventListener("click", () => {
+      const manifest = activeRuntime.manifest(button.dataset.v2Install);
+      const grants = manifest.permissions.filter((permission) => permission.required).flatMap((permission) => permission.scopes.map((scope) => `${permission.permissionId}:${scope}`));
+      const result = activeRuntime.install(manifest.pluginId, { grants });
+      if (result.ok) activeRuntime.enable(manifest.pluginId);
+      remount(result.ok ? t("pluginInstalledSuccess") : t("pluginActionBlocked"));
     }));
-    host.querySelectorAll("[data-plugin-route]").forEach((button) => button.addEventListener("click", () => {
-      if (window.WeishanRouter && typeof window.WeishanRouter.setRoute === "function") window.WeishanRouter.setRoute(button.dataset.pluginRoute);
+    host.querySelectorAll("[data-v2-enable]").forEach((button) => button.addEventListener("click", () => { const result = activeRuntime.enable(button.dataset.v2Enable); remount(result.ok ? t("pluginEnabledSuccess") : t("pluginActionBlocked")); }));
+    host.querySelectorAll("[data-v2-disable]").forEach((button) => button.addEventListener("click", () => { const result = activeRuntime.disable(button.dataset.v2Disable); remount(result.ok ? t("pluginDisabledSuccess") : t("pluginActionBlocked")); }));
+    host.querySelectorAll("[data-v2-uninstall]").forEach((button) => button.addEventListener("click", () => {
+      const id = button.dataset.v2Uninstall;
+      const choice = host.querySelector(`[data-retention-for="${CSS.escape(id)}"]`);
+      const result = activeRuntime.uninstall(id, { retainData:!choice || choice.value !== "delete" });
+      remount(result.ok ? t("pluginUninstalledSuccess") : t("pluginActionBlocked"));
     }));
+    host.querySelectorAll("[data-plugin-route]").forEach((button) => button.addEventListener("click", () => { if (window.WeishanRouter) window.WeishanRouter.setRoute(button.dataset.pluginRoute); }));
   }
   window.PluginsPage = { mount };
 })();

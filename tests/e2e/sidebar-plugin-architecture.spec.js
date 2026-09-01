@@ -58,9 +58,8 @@ test.describe.serial("sidebar plugin architecture", () => {
     await page.locator('[data-nav-group="execution"] .nav-item[data-route="plugins"]').click();
     await expect(page.locator(".plugin-center-page")).toBeVisible();
     await expect(page.locator("#pluginSearch")).toBeVisible();
-    await expect(page.locator('[data-plugin-section="recommended"] [data-plugin-id="image-tools"]')).toBeVisible();
-    await expect(page.locator('[data-plugin-section="recommended"] [data-plugin-id="video-generation"]')).toHaveCount(0);
-    await expect(page.locator('[data-plugin-category="video"]')).toBeVisible();
+    await expect(page.locator('[data-plugin-section="installed"] [data-plugin-id="weishan.tools.image"]')).toBeVisible();
+    await expect(page.locator('[data-plugin-section="developer-preview"]')).toHaveCount(0);
     const videoCard = page.locator('[data-plugin-id="video-generation"]');
     await expect(videoCard).toContainText("视频制作");
     await expect(videoCard).toContainText("用一句话生成和编辑视频");
@@ -73,7 +72,7 @@ test.describe.serial("sidebar plugin architecture", () => {
     await expect(videoCard).toHaveAttribute("data-plugin-enabled", "false");
     await expect(videoCard.locator("details")).not.toHaveAttribute("open", "");
     await page.locator("#pluginSearch").fill("nothing-matches-this-plugin");
-    await expect(page.locator("[data-plugin-filter-empty]").first()).toContainText("没有找到匹配工具");
+    await expect(page.locator(".plugin-center-card:visible")).toHaveCount(0);
     await page.evaluate(() => window.WeishanRouter.setRoute("plugin.video"));
     await expect(page.locator("#videoPluginWorkspace")).toHaveCount(0);
     await expect(page.locator(".home-v205-page")).toBeVisible();
@@ -81,9 +80,9 @@ test.describe.serial("sidebar plugin architecture", () => {
 
   test("ready Image Tools opens through the guarded plugin route", async () => {
     await gotoRoute(page, "plugins");
-    const imageCard = page.locator('[data-plugin-section="available"] [data-plugin-id="image-tools"]');
+    const imageCard = page.locator('[data-plugin-section="installed"] [data-plugin-id="weishan.tools.image"]');
     await expect(imageCard).toContainText("图片工具");
-    await expect(imageCard).toContainText("本地完成常用图片处理");
+    await expect(imageCard).toContainText("在本地调整尺寸");
     await expect(imageCard).toHaveAttribute("data-plugin-enabled", "true");
     await imageCard.locator("[data-plugin-route]").click();
     await expect(page.locator("#imageToolsWorkspace")).toBeVisible();

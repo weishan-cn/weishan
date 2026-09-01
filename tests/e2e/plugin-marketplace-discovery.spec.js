@@ -17,37 +17,32 @@ test.describe.serial("plugin marketplace discovery", () => {
   test("marketplace is searchable, categorical, and hides public ranking signals", async () => {
     await gotoRoute(page, "plugins");
     await expect(page.locator(".plugin-center-page")).toBeVisible();
+    await expect(page.locator(".plugin-center-page")).toHaveAttribute("data-runtime-version", "2");
     await expect(page.locator("#pluginSearch")).toBeVisible();
-    await expect(page.locator('[data-plugin-section="recommended"] [data-plugin-id]')).toHaveCount(1);
-    await expect(page.locator('[data-plugin-section="recommended"] [data-plugin-id="image-tools"]')).toBeVisible();
-    await expect(page.locator('[data-plugin-section="recommended"] [data-plugin-id="video-generation"]')).toHaveCount(0);
-    await expect(page.locator('[data-plugin-section="available"] [data-plugin-id="image-tools"]')).toBeVisible();
+    await expect(page.locator('[data-plugin-section="installed"] [data-plugin-id="weishan.tools.image"]')).toBeVisible();
     await expect(page.locator('[data-plugin-section="available"] [data-plugin-id="video-generation"]')).toBeVisible();
-    await expect(page.locator('[data-plugin-section="available"]')).toContainText("全部工具");
-    await expect(page.locator('[data-plugin-category="video"]')).toBeVisible();
-    await expect(page.locator('[data-plugin-category="image"]')).toBeVisible();
-    await expect(page.locator('[data-plugin-category="audio"]')).toBeVisible();
+    await expect(page.locator('[data-plugin-section="installed"]')).toContainText("已安装工具");
+    await expect(page.locator('[data-plugin-section="available"]')).toContainText("添加能力");
+    await expect(page.locator('[data-plugin-section="developer-preview"]')).toHaveCount(0);
     await expect(page.locator("body")).not.toContainText(/score|rating|stars|rank|#1|Top 1|评分|星级|排名|下载量/i);
 
-    await page.locator("#pluginSearch").fill("图片");
-    await expect(page.locator('[data-plugin-section="available"] [data-plugin-id="video-generation"]')).toBeVisible();
+    await page.locator("#pluginSearch").fill("图片工具");
+    await expect(page.locator('[data-plugin-section="installed"] [data-plugin-id="weishan.tools.image"]')).toBeVisible();
+    await expect(page.locator('[data-plugin-section="available"] [data-plugin-id="video-generation"]')).toBeHidden();
     await page.locator("#pluginSearch").fill("definitely-not-a-real-plugin");
-    await expect(page.locator("[data-plugin-filter-empty]").first()).toContainText("没有找到匹配工具");
+    await expect(page.locator(".plugin-center-card:visible")).toHaveCount(0);
 
     await page.locator("#pluginSearch").fill("");
     const details = page.locator('[data-plugin-id="video-generation"] [data-plugin-details]');
     await details.locator("summary").click();
-    await expect(details).toContainText("许可证");
-    await expect(details).toContainText("MIT License");
-    await expect(details).toContainText("Weishan repository");
-    await expect(details).toContainText("权限");
-    await expect(details).toContainText("无需额外权限");
+    await expect(details).toContainText("视频生成、素材处理和导出将在准备好后上线");
 
-    const imageDetails = page.locator('[data-plugin-section="available"] [data-plugin-id="image-tools"] [data-plugin-details]');
+    const imageDetails = page.locator('[data-plugin-section="installed"] [data-plugin-id="weishan.tools.image"] [data-plugin-details]');
     await imageDetails.locator("summary").click();
-    await expect(imageDetails).toContainText("Jimp");
-    await expect(imageDetails).toContainText("MIT License");
-    await expect(imageDetails).toContainText("github.com/jimp-dev/jimp");
+    await expect(imageDetails).toContainText("Weishan");
+    await expect(imageDetails).toContainText("filesystem.read");
+    await expect(imageDetails).toContainText("selected-files");
+    await expect(imageDetails).toContainText("LOCAL");
   });
 
   test("private recommendation model cannot be forged by plugin metadata", async () => {

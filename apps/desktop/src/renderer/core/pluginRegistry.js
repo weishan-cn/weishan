@@ -347,7 +347,14 @@
   }
   function getEnabledSidebarEntries(declarations){
     const source = declarations === undefined ? declaredPlugins : declarations;
-    return validateDeclarations(source, { trustedRegistration:declarations === undefined }).filter((result) => result.valid && result.plugin.enabled === true && result.plugin.entryPoint.type === "route").map((result) => clone(result.plugin));
+    return validateDeclarations(source, { trustedRegistration:declarations === undefined }).filter((result) => {
+      if (!result.valid || result.plugin.enabled !== true || result.plugin.entryPoint.type !== "route") return false;
+      if (result.plugin.pluginId !== "image-tools") return true;
+      const runtime = window.WeishanPluginRuntimeV2Catalog && window.WeishanPluginRuntimeV2Catalog.runtime;
+      if (!runtime || typeof runtime.installation !== "function") return true;
+      const installation = runtime.installation("weishan.tools.image");
+      return !!installation && installation.state === "ENABLED";
+    }).map((result) => clone(result.plugin));
   }
   function pageForRoute(routeId){
     const safeRouteId = text(routeId);

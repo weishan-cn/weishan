@@ -1,5 +1,15 @@
 # Documentation Index
 
+## Plugin/Capability Runtime V2
+
+- [Runtime V2 architecture](architecture/WEISHAN_PLUGIN_CAPABILITY_RUNTIME_V2.md)
+- [Capability Contract V1](architecture/WEISHAN_CAPABILITY_CONTRACT_V1.md)
+- [Runtime V2 migration plan](architecture/WEISHAN_PLUGIN_RUNTIME_V2_MIGRATION_PLAN.md)
+- [Plugin Marketplace V1](product/WEISHAN_PLUGIN_MARKETPLACE_V1.md)
+- [Software Development / Codex pack plan](product/CODEX_CAPABILITY_PACK_PLAN.md)
+- [OpenClaw Automation pack plan](product/OPENCLAW_CAPABILITY_PACK_PLAN.md)
+- [Hermes Agent pack plan](product/HERMES_CAPABILITY_PACK_PLAN.md)
+
 Constitution, governance, design system, release governance, developer guide, architecture map, repository map.
 
 Plugin-first and capability architecture baselines:
