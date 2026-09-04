@@ -39,8 +39,10 @@
     const installation = activeRuntime && activeRuntime.installation(manifest.pluginId);
     const isReady = manifest.availability === "READY";
     const isEnabled = installation && installation.state === "ENABLED";
-    const name = localeValue(manifest.localizedName) || manifest.name;
+    const name = localeValue(manifest.consumerOutcome) || localeValue(manifest.localizedName) || manifest.name;
+    const packName = localeValue(manifest.localizedName) || manifest.name;
     const description = localeValue(manifest.localizedDescription) || manifest.description;
+    const examples = localeValue(manifest.examples) || [];
     const largeWarning = manifest.largePack ? `<p class="plugin-large-warning">${esc(t("pluginLargePackWarning"))} · ${esc(manifest.additionalRuntimeSize)}</p>` : "";
     const requirements = manifest.externalServiceRequirement !== "NONE" ? `<p class="plugin-external-requirement">${esc(t("pluginExternalServiceRequired"))}</p>` : "";
     let actions = "";
@@ -53,13 +55,14 @@
         <button type="button" class="ws-btn danger" data-v2-uninstall="${esc(manifest.pluginId)}">${esc(t("pluginUninstall"))}</button>
       </div>`;
     }
-    return `<article class="plugin-center-card plugin-v2-card" data-plugin-id="${esc(manifest.pluginId)}" data-plugin-enabled="${isEnabled ? "true" : "false"}" data-plugin-v2="true">
-      <div class="plugin-center-card-head"><span class="plugin-center-icon" aria-hidden="true">${manifest.pluginId.includes("image") ? "▧" : "◇"}</span><div><h3>${esc(name)}</h3><p>${esc(description)}</p></div><span class="plugin-center-status ${isEnabled ? "is-enabled" : "is-disabled"}">${esc(statusFor(manifest, installation))}</span></div>
+    return `<article class="plugin-center-card plugin-v2-card" data-plugin-id="${esc(manifest.pluginId)}" data-plugin-enabled="${isEnabled ? "true" : "false"}" data-plugin-v2="true" data-marketplace-priority="${esc(manifest.marketplacePriority || 99)}">
+      <div class="plugin-center-card-head"><span class="plugin-center-icon" aria-hidden="true">${manifest.pluginId.includes("image") ? "▧" : "◇"}</span><div><h3>${esc(name)}</h3><p class="plugin-pack-name">${esc(packName)}</p><p>${esc(description)}</p></div><span class="plugin-center-status ${isEnabled ? "is-enabled" : "is-disabled"}">${esc(statusFor(manifest, installation))}</span></div>
       <div class="plugin-card-categories">${manifest.categories.map((category) => `<span>${esc(category)}</span>`).join("")}</div>${largeWarning}${requirements}
       <details class="plugin-center-details" data-plugin-details><summary>${esc(t("pluginViewDetails"))}</summary>
+        ${Array.isArray(examples) && examples.length ? `<h4>${esc(t("pluginExampleTasks"))}</h4><ul class="plugin-example-list">${examples.map((example) => `<li>${esc(example)}</li>`).join("")}</ul>` : ""}
         <dl class="plugin-v2-meta"><div><dt>${esc(t("pluginDetailPublisher"))}</dt><dd>${esc(manifest.publisher.name)} · ${esc(manifest.publisher.trustClass)}</dd></div><div><dt>${esc(t("pluginDetailDownloadSize"))}</dt><dd>${esc(sizeLabel(manifest.downloadSize))}</dd></div><div><dt>${esc(t("pluginDetailInstallSize"))}</dt><dd>${esc(sizeLabel(manifest.installSize))}</dd></div><div><dt>${esc(t("pluginDetailOnlineDependency"))}</dt><dd>${esc(manifest.onlineDependency)}</dd></div></dl>
         <h4>${esc(t("pluginDetailPermissions"))}</h4>${permissionList(manifest)}
-        ${advanced() ? `<div class="plugin-advanced-details" data-plugin-advanced-details><code>${esc(manifest.pluginId)}</code><span>Runtime ${esc(manifest.runtimeVersion)}</span><span>${esc(manifest.entrypoint.mode)}</span><span>${esc(manifest.capabilities.map((item) => item.capabilityId).join(", "))}</span></div>` : ""}
+        ${advanced() ? `<div class="plugin-advanced-details" data-plugin-advanced-details><code>${esc(manifest.pluginId)}</code>${manifest.implementationProvider ? `<span>${esc(t("pluginImplementationProvider"))}: ${esc(manifest.implementationProvider)}</span>` : ""}<span>Runtime ${esc(manifest.runtimeVersion)}</span><span>${esc(manifest.entrypoint.mode)}</span><span>${esc(manifest.capabilities.map((item) => item.capabilityId).join(", "))}</span></div>` : ""}
       </details>${actions}</article>`;
   }
   function legacyCard(plugin){
@@ -74,14 +77,15 @@
     const catalogApi = v2();
     const manifests = typeof catalogApi.catalog === "function" ? catalogApi.catalog() : [];
     const activeRuntime = runtime();
-    const installed = manifests.filter((manifest) => activeRuntime && activeRuntime.installation(manifest.pluginId));
-    const available = manifests.filter((manifest) => manifest.availability === "READY" && !(activeRuntime && activeRuntime.installation(manifest.pluginId)));
-    const previews = advanced() ? manifests.filter((manifest) => manifest.developerPreviewOnly && manifest.availability !== "READY") : [];
-    const legacy = legacyModel().entries.filter((plugin) => plugin.pluginId !== "image-tools");
+    const byPriority = (a, b) => Number(a.marketplacePriority || 99) - Number(b.marketplacePriority || 99) || a.name.localeCompare(b.name);
+    const installed = manifests.filter((manifest) => activeRuntime && activeRuntime.installation(manifest.pluginId)).sort(byPriority);
+    const available = manifests.filter((manifest) => manifest.userVisible !== false && !(activeRuntime && activeRuntime.installation(manifest.pluginId))).sort(byPriority);
+    const previews = advanced() ? manifests.filter((manifest) => manifest.developerPreviewOnly && manifest.availability !== "READY").sort(byPriority) : [];
+    const legacy = legacyModel().entries.filter((plugin) => !["image-tools", "video-generation"].includes(plugin.pluginId));
     host.innerHTML = `<section class="ws-page plugin-center-page" data-runtime-version="2"><header class="ws-card plugin-center-hero"><h2>${esc(t("pluginCenter"))}</h2><p class="ws-muted">${esc(t("pluginCenterDescriptionV2"))}</p></header>
       <section class="plugin-discovery" aria-label="${esc(t("pluginMarketplace"))}"><label class="plugin-search-label" for="pluginSearch">${esc(t("pluginSearchLabel"))}</label><input id="pluginSearch" class="plugin-search-input" type="search" placeholder="${esc(t("pluginSearchPlaceholder"))}" autocomplete="off"><div class="plugin-discovery-sections"><span>${esc(t("installedPlugins"))}</span><span>${esc(t("pluginAddCapabilities"))}</span>${advanced() ? `<span>${esc(t("pluginDeveloperPreview"))}</span>` : ""}</div></section>
       ${section(t("installedPlugins"), installed.map(v2Card), 'data-plugin-section="installed"', t("pluginInstalledEmpty"))}
-      ${section(t("pluginAddCapabilities"), available.map(v2Card).concat(legacy.map(legacyCard)), 'data-plugin-section="available"', t("pluginCenterEmpty"))}
+      ${section(t("pluginPopularCapabilities"), available.map(v2Card).concat(legacy.map(legacyCard)), 'data-plugin-section="available"', t("pluginCenterEmpty"))}
       ${advanced() ? section(t("pluginDeveloperPreview"), previews.map(v2Card), 'data-plugin-section="developer-preview"', t("pluginCenterEmpty")) : ""}
       <div class="plugin-action-status" role="status" aria-live="polite" data-plugin-action-status></div></section>`;
     function remount(message){ mount(host); const status = host.querySelector("[data-plugin-action-status]"); if (status && message) status.textContent = message; }

@@ -113,6 +113,7 @@ function runCore() {
   runStep("Smart Mail intelligence quality effectiveness", "node", ["tests/api/smart-mail-intelligence-quality-effectiveness.test.js"]);
   runStep("Plugin marketplace discovery effectiveness", "node", ["tests/api/plugin-marketplace-discovery-effectiveness.test.js"]);
   runStep("Plugin Runtime V2 foundation", "node", ["tests/api/plugin-runtime-v2-foundation.test.js"]);
+  runStep("Plugin marketplace consumer flagship direction", "node", ["tests/api/plugin-marketplace-consumer-flagship-direction.test.js"]);
   runStep("Image Tools Jimp effectiveness", "node", ["tests/api/image-tools-jimp-effectiveness.test.js"]);
   runStep("Image Tools IPC security", "node", ["tests/api/image-tools-ipc-security.test.js"]);
   runStep("In-app Help Feedback Support effectiveness", "node", ["tests/api/in-app-help-feedback-support-effectiveness.test.js"]);
@@ -165,6 +166,7 @@ function runE2e() {
     runStep("E2E in-app Help Feedback Support", "npx", ["playwright", "test", "tests/e2e/help-feedback-support.spec.js", "--workers=1"]);
     runStep("E2E Smart Mail authorization and AI gating", "npx", ["playwright", "test", "tests/e2e/smart-mail-auth-ai-gating.spec.js", "--workers=1"]);
     runStep("E2E Plugin marketplace discovery", "npx", ["playwright", "test", "tests/e2e/plugin-marketplace-discovery.spec.js", "--workers=1"]);
+    runStep("E2E consumer capability marketplace", "npx", ["playwright", "test", "tests/e2e/plugin-marketplace-consumer-flagship.spec.js", "--workers=1"]);
     runStep("E2E local Image Tools", "npx", ["playwright", "test", "tests/e2e/image-tools.spec.js", "--workers=1"]);
     runStep("E2E global UI interaction liveness", "npx", ["playwright", "test", "tests/e2e/ui-interaction-liveness.spec.js", "--workers=1"]);
     runStep("E2E Capture Center liveness", "npx", ["playwright", "test", "tests/e2e/capture-center-liveness.spec.js", "--workers=1"]);

@@ -1,14 +1,18 @@
 (function(){
   const INTENT_RULES = Object.freeze([
+    { capabilityId:"video.script", terms:["short video", "douyin video", "tiktok video", "youtube shorts", "短视频", "抖音视频", "视频脚本"] },
+    { capabilityId:"video.storyboard", terms:["short video", "douyin video", "tiktok video", "youtube shorts", "短视频", "抖音视频", "视频分镜"] },
+    { capabilityId:"video.edit", terms:["short video", "douyin video", "tiktok video", "youtube shorts", "短视频", "抖音视频", "剪辑视频"] },
+    { capabilityId:"video.export", terms:["short video", "douyin video", "tiktok video", "youtube shorts", "短视频", "抖音视频", "导出视频"] },
     { capabilityId:"browser.capture", terms:["capture website", "网页截图", "网页抓取", "截取网页"] },
     { capabilityId:"browser.navigate", terms:["open website", "navigate website", "打开网页", "访问网站"] },
-    { capabilityId:"web.extract", terms:["extract website", "整理网站", "提取网页", "全部产品"] },
+    { capabilityId:"web.extract", terms:["extract website", "整理网站", "提取网页", "全部产品", "网站的商品", "网页商品"] },
     { capabilityId:"spreadsheet.write", terms:["export spreadsheet", "write spreadsheet", "整理成 excel", "写入表格", "导出表格"] },
     { capabilityId:"document.pdf.extract", terms:["extract pdf", "read pdf", "读取 pdf", "提取 pdf"] },
     { capabilityId:"image.transform", terms:["resize image", "crop image", "edit image", "调整图片", "裁剪图片", "编辑图片"] },
     { capabilityId:"software.repo.inspect", terms:["inspect repository", "check project", "检查项目", "查看代码库"] },
     { capabilityId:"software.test", terms:["run tests", "fix test", "运行测试", "测试失败"] },
-    { capabilityId:"software.modify", terms:["modify project", "change code", "改一下这个项目", "修改代码", "修复代码"] },
+    { capabilityId:"software.modify", terms:["modify project", "change code", "改一下这个项目", "修改代码", "修复代码", "修这个项目"] },
     { capabilityId:"agent.plan", terms:["plan task", "制定计划", "规划任务"] }
   ]);
   function text(value){ return String(value == null ? "" : value).trim().toLowerCase(); }
@@ -38,7 +42,8 @@
       if (enabled.length) return { capabilityId, status:"READY", candidates:enabled.map((candidate) => candidate.manifest.pluginId), selectedPluginId:enabled[0].manifest.pluginId, additionalPermissionReview:false };
       const eligible = ranked.filter((candidate) => candidate.manifest.availability === "READY" && ["BUILTIN_TRUST_ANCHOR", "VERIFIED"].includes(candidate.manifest.signature && candidate.manifest.signature.status));
       if (eligible.length) return { capabilityId, status:"INSTALL_RECOMMENDED", candidates:eligible.map((candidate) => candidate.manifest.pluginId), selectedPluginId:"", additionalPermissionReview:true, message:`Weishan needs ${capabilityId} capability to continue.` };
-      return { capabilityId, status:"CAPABILITY_NOT_AVAILABLE", candidates:ranked.map((candidate) => candidate.manifest.pluginId), selectedPluginId:"", additionalPermissionReview:false, message:`Weishan needs ${capabilityId} capability, but no install-ready tool is available.` };
+      if (ranked.length) return { capabilityId, status:"INSTALL_RECOMMENDATION_NOT_READY", candidates:ranked.map((candidate) => candidate.manifest.pluginId), selectedPluginId:"", additionalPermissionReview:false, message:`Weishan needs ${capabilityId} capability. A matching tool is planned but is not install-ready.` };
+      return { capabilityId, status:"CAPABILITY_NOT_AVAILABLE", candidates:[], selectedPluginId:"", additionalPermissionReview:false, message:`Weishan needs ${capabilityId} capability, but no matching tool is available.` };
     });
     return { intent:String(intent == null ? "" : intent), capabilities, steps, authority:"WEISHAN_BRAIN", commissionInfluence:false };
   }

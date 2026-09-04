@@ -109,7 +109,7 @@ test("global interaction remains live after realistic rapid route and Software F
   }
 
   async function openImageTools(){
-    const button = app.page.locator('article[data-plugin-id="image-tools"] [data-plugin-route="plugin.image-tools"]').first();
+    const button = app.page.locator('article[data-plugin-id="weishan.tools.image"] [data-plugin-route="plugin.image-tools"]').first();
     await expect(button).toBeVisible();
     await button.click({ timeout:5000 });
     await app.page.waitForFunction(() => window.WeishanRouter && window.WeishanRouter.current() === "plugin.image-tools");
@@ -188,7 +188,7 @@ test("global interaction remains live after realistic rapid route and Software F
     await app.page.setViewportSize({ width:1000, height:720 });
     await clickRoute("home");
     await clickRoute("plugins");
-    await expect(app.page.locator('article[data-plugin-id="image-tools"]').first()).toBeVisible();
+    await expect(app.page.locator('article[data-plugin-id="weishan.tools.image"]').first()).toBeVisible();
     await clickRoute("builder");
     await expect(app.page.locator("#softwareType")).toBeEnabled();
     await expect(app.page.locator("#softwareGoal")).toBeEditable();

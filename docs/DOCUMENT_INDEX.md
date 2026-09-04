@@ -6,6 +6,8 @@
 - [Capability Contract V1](architecture/WEISHAN_CAPABILITY_CONTRACT_V1.md)
 - [Runtime V2 migration plan](architecture/WEISHAN_PLUGIN_RUNTIME_V2_MIGRATION_PLAN.md)
 - [Plugin Marketplace V1](product/WEISHAN_PLUGIN_MARKETPLACE_V1.md)
+- [Marketplace flagship capability strategy](product/WEISHAN_MARKETPLACE_FLAGSHIP_CAPABILITY_STRATEGY.md)
+- [Video Studio capability pack plan](product/WEISHAN_VIDEO_STUDIO_CAPABILITY_PACK_PLAN.md)
 - [Software Development / Codex pack plan](product/CODEX_CAPABILITY_PACK_PLAN.md)
 - [OpenClaw Automation pack plan](product/OPENCLAW_CAPABILITY_PACK_PLAN.md)
 - [Hermes Agent pack plan](product/HERMES_CAPABILITY_PACK_PLAN.md)

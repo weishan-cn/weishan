@@ -102,7 +102,7 @@ async function main() {
   assert.equal(multiple.candidates("document.text.read").length, 2);
   const missing = brain.discoverForIntent("把这些数据整理成 Excel", imageRuntime);
   assert.deepEqual(Array.from(missing.capabilities), ["spreadsheet.write"]);
-  assert.equal(missing.steps[0].status, "CAPABILITY_NOT_AVAILABLE");
+  assert.equal(missing.steps[0].status, "INSTALL_RECOMMENDATION_NOT_READY");
   const imageDiscovery = brain.discoverForIntent("帮我裁剪图片", imageRuntime);
   assert.equal(imageDiscovery.steps[0].status, "READY");
   assert.equal(imageDiscovery.authority, "WEISHAN_BRAIN");

@@ -15,12 +15,13 @@ test.describe.serial("local Image Tools", () => {
 
   test.afterAll(async () => { if (app) await app.close(); });
 
-  test("recommended plugin completes the no-AI local edit and export flow", async () => {
+  test("installed Image Tools completes the no-AI local edit and export flow", async () => {
     await page.evaluate(() => { window.I18n.setLang("zh"); window.WeishanRouter.setRoute("plugins"); });
-    await expect(page.locator('[data-plugin-section="recommended"] [data-plugin-id="image-tools"]')).toBeVisible();
-    await expect(page.locator('[data-plugin-section="recommended"] [data-plugin-id]')).toHaveCount(1);
-    await expect(page.locator('[data-plugin-section="recommended"] [data-plugin-id="video-generation"]')).toHaveCount(0);
-    await page.locator('[data-plugin-section="recommended"] [data-plugin-id="image-tools"] [data-plugin-route]').click();
+    const imageTools = page.locator('[data-plugin-section="installed"] [data-plugin-id="weishan.tools.image"]');
+    await expect(imageTools).toBeVisible();
+    await expect(imageTools).toHaveAttribute("data-plugin-enabled", "true");
+    await expect(page.locator('[data-plugin-section="available"] [data-plugin-id="video-generation"]')).toHaveCount(0);
+    await imageTools.locator("[data-plugin-route]").click();
     await expect(page.locator("#imageToolsWorkspace")).toBeVisible();
     await page.evaluate(() => {
       const actual = window.weishan.imageTools;
